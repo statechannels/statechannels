@@ -89,48 +89,4 @@ contract ChannelManager {
 
   }
 
-
-  // -------------------------------------------
-  // here be dragons
-
-  // public functions to work around the fact that the abi doesn't support structs
-
-  function initiateChallenge(
-    // fund allocation
-    uint _allocationNonce,
-    uint _aBalance,
-    uint _bBalance,
-    bytes[] _channelIds, // because we can't have a mapping in the function signature
-    uint[] _channelBalances,
-    bytes _allocationASignature,
-    bytes _allocationBSignature,
-    // state
-    address _channelType,
-    uint _channelNumber,
-    uint _stateNonce,
-    uint _fundsRequired,
-
-    bytes _contents,
-
-    bytes _stateASignature,
-    bytes _stateBSignature
-    ) public {
-      FundAllocation memory allocation = FundAllocation(
-        _allocationNonce,
-        _aBalance,
-        _bBalance,
-        _channelIds,
-        _channelBalances,
-        _allocationASignature,
-        _allocationBSignature
-      );
-      Channel memory channel = Channel(
-        keccak256(_channelType, _channelNumber),
-        _channelType,
-        _channelNumber
-      );
-      State memory state = State(channel, _stateNonce, _fundsRequired, _contents, _stateASignature, _stateBSignature);
-
-      _initiateChallenge(allocation, state);
-   }
 }
