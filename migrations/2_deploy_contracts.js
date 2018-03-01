@@ -1,7 +1,7 @@
-var ChannelManager = artifacts.require("./ChannelManager.sol");
+var RockPaperScissors = artifacts.require("./RockPaperScissors.sol");
 
 module.exports = function(deployer) {
-  deployer.deploy(ChannelManager);
+  deployer.deploy(RockPaperScissors);
   // deployer.link(ConvertLib, MetaCoin);
   // deployer.deploy(MetaCoin);
 };

@@ -26,7 +26,7 @@ contract SimpleAdjudicator {
     bytes gameState;
   }
 
-  function forceMove(channel, agreedState, yourSig, nextState, mySig) {
+  /* function forceMove(channel, agreedState, yourSig, nextState, mySig) public {
 
   }
 
@@ -43,6 +43,6 @@ contract SimpleAdjudicator {
 
   function withdrawAfterSecondDeposit() {
 
-  }
+  } */
 
 }
