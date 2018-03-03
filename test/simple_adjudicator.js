@@ -2,14 +2,33 @@
 import assertRevert from './helpers/assertRevert';
 
 var SimpleAdjudicator = artifacts.require("./SimpleAdjudicator.sol");
+var StartFinishGame = artifacts.require("./StartFinishGame.sol");
 
 contract('SimpleAdjudicator', (accounts) => {
+  let simpleAdj, sfGame;
+  before(async () => {
+    simpleAdj = await SimpleAdjudicator.deployed();
+    sfGame = await StartFinishGame.deployed();
+  });
 
+  it("testGameStateExtraction", async () => {
+    let gameState = packStartFinish(0, 4, 6);
+    let state = packState(2, "0xdeadbeef", gameState);
 
+    let returnedGameState = await simpleAdj.testGameStateExtraction.call(state);
 
+    assert.equal(returnedGameState, gameState);
+  });
 
+  it("testDelegation", async () => {
+    let gameState = packStartFinish(0, 4, 6);
+    let state = packState(2, "0xdeadbeef", gameState);
+
+    let [aBal, bBal] = await simpleAdj.testDelegation.call(sfGame.address, state);
+    
+    assert.equal(aBal, 4);
+  });
 });
-
 
 function packChannel(channelType, participantA, participantB, channelNonce) {
   return (
@@ -21,18 +40,28 @@ function packChannel(channelType, participantA, participantB, channelNonce) {
   );
 }
 
-
-function pack(stateType, aBal, bBal, stake, aPreCommit, bPlay, aPlay, aSalt) {
+function packStartFinish(stateType, aBal, bBal) {
   return (
     "0x" +
     toHex32(stateType) +
     toHex32(aBal) +
-    toHex32(bBal) +
-    toHex32(stake) +
-    padBytes32(aPreCommit).substr(2, 66) +
-    toHex32(bPlay) +
-    toHex32(aPlay) +
-    toHex32(aSalt)
+    toHex32(bBal)
+  );
+}
+
+function packState(nonce, lastMover, gameState) {
+  return(
+    "0x" +
+    toHex32(nonce) +
+    padBytes32(lastMover).substr(2, 66) +
+    gameState.substr(2, gameState.length)
+  )
+}
+
+function packGS(aBal) {
+  return (
+    "0x" +
+    toHex32(aBal)
   );
 }
 
