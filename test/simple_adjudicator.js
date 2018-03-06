@@ -1,92 +1,58 @@
-
+import { pack as packIG } from '../src/incrementation_game';
+import {
+  calculateChannelId,
+  hash,
+  ecsign,
+  packChannel,
+  packState,
+  packGS
+} from '../src/simple_adjudicator';
 import assertRevert from './helpers/assertRevert';
 
 var SimpleAdjudicator = artifacts.require("./SimpleAdjudicator.sol");
-var StartFinishGame = artifacts.require("./StartFinishGame.sol");
+var IncrementationGame = artifacts.require("./IncrementationGame.sol");
 
 contract('SimpleAdjudicator', (accounts) => {
-  let simpleAdj, sfGame;
+  let simpleAdj, incGame;
   before(async () => {
     simpleAdj = await SimpleAdjudicator.deployed();
-    sfGame = await StartFinishGame.deployed();
+    incGame = await IncrementationGame.deployed();
   });
 
-  it("testGameStateExtraction", async () => {
-    let gameState = packStartFinish(0, 4, 6);
-    let state = packState(2, "0xdeadbeef", gameState);
+  // testing ForceMove
+  it("allows a valid force move", async () => {
+    let state1 = packIG(0, 4, 6, 1);
+    let state2 = packIG(0, 4, 6, 2);
+    let state3 = packIG(1, 4, 6, 3);
 
-    let returnedGameState = await simpleAdj.testGameStateExtraction.call(state);
+    let challenger = accounts[0];
+    let challengee = accounts[1];
 
-    assert.equal(returnedGameState, gameState);
+    let channelId = calculateChannelId(incGame.address, challenger, challengee, 1);
+
+    let agreedState = packState(channelId, 1, challengee, state1);
+    let challengersState = packState(channelId, 2, challenger, state2);
+
+    let [r0, s0, v0] = ecsign(hash(agreedState), challengee);
+    let [r1, s1, v1] = ecsign(hash(agreedState), challenger);
+    let [r2, s2, v2] = ecsign(hash(challengersState), challenger);
+
+    simpleAdj.forceMove(
+      incGame.address, challenger, challengee, 1, // channel
+      agreedState, challengersState, // states
+      [v0, v1, v2], [r0, r1, r2], [s0, s1, s2] // sigs
+    );
+    // how can I check on the state of the contract?
+
+    // testing respondWithMove
+    let responseState = packState(channelId, 3, challenger, state3);
+    let [r3, s3, v3] = ecsign(hash(responseState), challengee);
+
+    // simpleAdj.respondWithMove(responseState, v3, r3, s3);
+    //todo: check this did somethign
+
+
+
   });
 
-  it("testDelegation", async () => {
-    let gameState = packStartFinish(0, 4, 6);
-    let state = packState(2, "0xdeadbeef", gameState);
-
-    let [aBal, bBal] = await simpleAdj.testDelegation.call(sfGame.address, state);
-    
-    assert.equal(aBal, 4);
-  });
 });
-
-function packChannel(channelType, participantA, participantB, channelNonce) {
-  return (
-    "0x" +
-    padBytes32(channelType) +
-    padBytes32(participantA) +
-    padBytes32(participantB) +
-    toHex32(channelNonce)
-  );
-}
-
-function packStartFinish(stateType, aBal, bBal) {
-  return (
-    "0x" +
-    toHex32(stateType) +
-    toHex32(aBal) +
-    toHex32(bBal)
-  );
-}
-
-function packState(nonce, lastMover, gameState) {
-  return(
-    "0x" +
-    toHex32(nonce) +
-    padBytes32(lastMover).substr(2, 66) +
-    gameState.substr(2, gameState.length)
-  )
-}
-
-function packGS(aBal) {
-  return (
-    "0x" +
-    toHex32(aBal)
-  );
-}
-
-function hashCommitment(play, salt) {
-  let paddedPlay = toHex32(play);
-  let paddedSalt = toHex32(salt);
-  return web3.sha3(paddedPlay + paddedSalt, {encoding: 'hex'}); // concat and hash
-}
-
-function toHex32(num) {
-  return toPaddedHexString(num, 64);
-}
-
-function padBytes32(data){
-  let l = 66-data.length
-  let x = data.substr(2, data.length)
-
-  for(var i=0; i<l; i++) {
-    x = 0 + x
-  }
-  return '0x' + x
-}
-
-// https://stackoverflow.com/a/42203200
-function toPaddedHexString(num, len) {
-    let str = num.toString(16);
-    return "0".repeat(len - str.length) + str;
-}
