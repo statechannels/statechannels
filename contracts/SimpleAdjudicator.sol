@@ -108,10 +108,15 @@ contract SimpleAdjudicator {
   }
 
   function withdrawFunds() public {
+    // we need there to be a challenge
+    require(currentChallenge.readyAt != 0);
+
     // check that the timeout has expired
     require(currentChallenge.readyAt <= now);
 
     // send the funds
+    
+
 
 
   }
