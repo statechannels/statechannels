@@ -12,7 +12,7 @@ contract SimpleAdjudicator {
   bytes32 fundedChannelId;
 
   Challenge currentChallenge;
-  uint challengeLength = 1 days;
+  uint challengeDuration = 1 days;
 
   struct State {
     bytes32 channelId;
@@ -79,11 +79,12 @@ contract SimpleAdjudicator {
     require(ForcedMoveGame(_channelType).validTransition(agreedState.gameState, currentChallenge.challengersState.gameState));
     //todo: we probably need to pass through the mover - or at least if it's A or B, and the stateNonce
 
+    currentChallenge.readyAt = uint32(now + challengeDuration);
     // figure out the resolution immediately
     (currentChallenge.aBal, currentChallenge.bBal) = ForcedMoveGame(_channelType).resolve(currentChallenge.challengersState.gameState);
   }
 
-  function respondWithMove(bytes _nextState, uint8 v, bytes32 r, bytes32 s) {
+  function respondWithMove(bytes _nextState, uint8 v, bytes32 r, bytes32 s) public {
     // check that there is a current challenge
     require(currentChallenge.readyAt != 0);
     // and that we're within the timeout
