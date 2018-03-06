@@ -48,7 +48,7 @@ contract('SimpleAdjudicator', (accounts) => {
     let responseState = packState(channelId, 3, challenger, state3);
     let [r3, s3, v3] = ecsign(hash(responseState), challengee);
 
-    // simpleAdj.respondWithMove(responseState, v3, r3, s3);
+    simpleAdj.respondWithMove(responseState, v3, r3, s3);
     //todo: check this did somethign
 
 
