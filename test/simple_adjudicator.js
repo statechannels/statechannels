@@ -38,7 +38,7 @@ contract('SimpleAdjudicator', (accounts) => {
     let [r2, s2, v2] = ecsign(hash(challengersState), challenger);
 
     simpleAdj.forceMove(
-      incGame.address, challenger, challengee, 1, // channel
+      incGame.address, [challenger, challengee], 0, 1, // channel
       agreedState, challengersState, // states
       [v0, v1, v2], [r0, r1, r2], [s0, s1, s2] // sigs
     );

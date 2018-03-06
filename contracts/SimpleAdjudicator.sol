@@ -24,18 +24,17 @@ contract SimpleAdjudicator {
   struct Challenge {
     bytes32 channelId;
     address channelType;
-    address challenger;
-    address challengee;
+    address[2] participants;
+    uint8 challengerIndex;
     State challengersState;
-    uint256 aBal;
-    uint256 bBal;
+    uint256[2] balances;
     uint32 readyAt;
   }
 
   function forceMove(
     address _channelType,
-    address _participantA,
-    address _participantB,
+    address[2] _participants,
+    uint8 _challengerIndex,
     uint _channelNonce,
     bytes _agreedState,
     bytes _challengersState,
@@ -46,28 +45,30 @@ contract SimpleAdjudicator {
     // need currentChallenge to be empty
     State memory agreedState = unpack(_agreedState);
     currentChallenge.challengersState = unpack(_challengersState);
+    currentChallenge.participants = _participants;
+    currentChallenge.challengerIndex = _challengerIndex;
 
-    // who is challenging? the person who made the challengers Move
-    currentChallenge.challenger = currentChallenge.challengersState.lastMover;
-
-    if (currentChallenge.challenger == _participantA) {
-      currentChallenge.challengee = _participantB;
-    } else if (currentChallenge.challenger == _participantB) {
-      currentChallenge.challengee = _participantA;
+    uint8 challengeeIndex;
+    if (_challengerIndex == 0) {
+      challengeeIndex = 1;
+    } else if (_challengerIndex == 1) {
+      challengeeIndex = 0;
     } else {
       revert();
     }
 
+    // challenger should have made challengers move
+    require(_participants[_challengerIndex] == currentChallenge.challengersState.lastMover);
     // agreedState must be double-signed
-    require(currentChallenge.challengee == recoverSigner(_agreedState, v[0], r[0], s[0]));
-    require(currentChallenge.challenger == recoverSigner(_agreedState, v[1], r[1], s[1]));
+    require(_participants[challengeeIndex] == recoverSigner(_agreedState, v[0], r[0], s[0]));
+    require(_participants[_challengerIndex] == recoverSigner(_agreedState, v[1], r[1], s[1]));
 
     // challengersState must be signed by challenger
-    require(currentChallenge.challenger == recoverSigner(_challengersState, v[2], r[2], s[2]));
+    require(_participants[_challengerIndex] == recoverSigner(_challengersState, v[2], r[2], s[2]));
 
     // both states must match the game
     currentChallenge.channelType = _channelType;
-    currentChallenge.channelId = keccak256(_channelType, _participantA, _participantB, _channelNonce);
+    currentChallenge.channelId = keccak256(_channelType, _participants[0], _participants[1], _channelNonce);
     require(currentChallenge.channelId == agreedState.channelId);
     require(currentChallenge.channelId == currentChallenge.challengersState.channelId);
 
@@ -81,7 +82,7 @@ contract SimpleAdjudicator {
 
     currentChallenge.readyAt = uint32(now + challengeDuration);
     // figure out the resolution immediately
-    (currentChallenge.aBal, currentChallenge.bBal) = ForcedMoveGame(_channelType).resolve(currentChallenge.challengersState.gameState);
+    (currentChallenge.balances[0], currentChallenge.balances[1]) = ForcedMoveGame(_channelType).resolve(currentChallenge.challengersState.gameState);
   }
 
   function respondWithMove(bytes _nextState, uint8 v, bytes32 r, bytes32 s) public {
@@ -89,6 +90,13 @@ contract SimpleAdjudicator {
     require(currentChallenge.readyAt != 0);
     // and that we're within the timeout
     require(currentChallenge.readyAt > now);
+
+    uint8 challengeeIndex;
+    if (currentChallenge.challengerIndex == 0) {
+      challengeeIndex = 1;
+    } else {
+      challengeeIndex = 0;
+    }
 
     State memory nextState = unpack(_nextState);
     // check that the channelId matches
@@ -98,13 +106,14 @@ contract SimpleAdjudicator {
     require(currentChallenge.challengersState.stateNonce + 1 == nextState.stateNonce);
 
     // check that the challengee's signature matches
-    require(currentChallenge.challengee == recoverSigner(_nextState, v, r, s));
+    require(currentChallenge.participants[challengeeIndex] == recoverSigner(_nextState, v, r, s));
 
     // must be valid transition
     require(ForcedMoveGame(currentChallenge.channelType).validTransition(currentChallenge.challengersState.gameState, nextState.gameState));
 
-    // cancel challenge
-    currentChallenge = Challenge(0, 0, 0, 0, State(0, 0, 0, ""), 0, 0, 0);
+    // Cancel challenge.
+    // TODO: zero out everything(?)
+    currentChallenge.readyAt = 0;
   }
 
   function withdrawFunds() public {
@@ -115,7 +124,7 @@ contract SimpleAdjudicator {
     require(currentChallenge.readyAt <= now);
 
     // send the funds
-    
+
 
 
 
