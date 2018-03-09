@@ -43,6 +43,7 @@ contract('SimpleAdjudicator', (accounts) => {
       [v0, v1, v2], [r0, r1, r2], [s0, s1, s2] // sigs
     );
     // how can I check on the state of the contract?
+    console.log(simpleAdj.currentChallenge);
 
     // testing respondWithMove
     let responseState = packState(channelId, 3, challenger, state3);
@@ -50,7 +51,6 @@ contract('SimpleAdjudicator', (accounts) => {
 
     simpleAdj.respondWithMove(responseState, v3, r3, s3);
     //todo: check this did somethign
-
 
 
   });
