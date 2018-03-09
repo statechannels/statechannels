@@ -116,6 +116,11 @@ contract SimpleAdjudicator {
     currentChallenge.readyAt = 0;
   }
 
+
+  function refuteChallenge(bytes _refutationState, uint8[] v, bytes32[] r, bytes32[] s) {
+
+  }
+
   function withdrawFunds() public {
     // we need there to be a challenge
     require(currentChallenge.readyAt != 0);
@@ -124,9 +129,8 @@ contract SimpleAdjudicator {
     require(currentChallenge.readyAt <= now);
 
     // send the funds
-
-
-
+    currentChallenge.participants[0].transfer(currentChallenge.balances[0]);
+    currentChallenge.participants[1].transfer(currentChallenge.balances[1]);
 
   }
 
