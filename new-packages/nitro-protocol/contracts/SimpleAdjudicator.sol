@@ -4,6 +4,7 @@ pragma solidity ^0.4.18;
 interface ForcedMoveGame {
     function validTransition(bytes oldState, bytes newState) public pure returns (bool);
     function resolve(bytes) public returns (uint, uint);
+    function isFinal(bytes) public returns (bool);
 }
 
 contract SimpleAdjudicator {
@@ -119,6 +120,7 @@ contract SimpleAdjudicator {
 
   function refuteChallenge(bytes _refutationState, uint8[] v, bytes32[] r, bytes32[] s) {
 
+
   }
 
   function withdrawFunds() public {
@@ -128,11 +130,31 @@ contract SimpleAdjudicator {
     // check that the timeout has expired
     require(currentChallenge.readyAt <= now);
 
+    // check that the funds are less than the balance
+    // (not strictly necessary when only supporting one game like this SimpleAdjudicator does)
+    /* require(currentChallenge.balances[0] + currentChallenge.balances[1] <= this.balance); */
+
     // send the funds
     currentChallenge.participants[0].transfer(currentChallenge.balances[0]);
     currentChallenge.participants[1].transfer(currentChallenge.balances[1]);
+  }
+
+  function instantWithdrawal(
+    bytes _agreedFinalState,
+    uint8[] v,
+    bytes32[] r,
+    bytes32[] s
+  ) public {
+    State memory agreedFinalState = unpack(_agreedFinalState);
+
+    require(ForcedMoveGame(agreedFinalState.channelType).isFinal());
+
+    // agreedState must be double-signed
+    require(_participants[challengeeIndex] == recoverSigner(_agreedState, v[0], r[0], s[0]));
+    require(_participants[challengeeIndex] == recoverSigner(_agreedState, v[0], r[0], s[0]));
 
   }
+
 
   /*
   // special functions
