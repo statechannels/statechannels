@@ -1,4 +1,4 @@
-import { pack } from '../src/incrementation_game';
+import { pack as packState } from '../src/incrementation_game';
 import assertRevert from './helpers/assertRevert';
 
 var IG = artifacts.require("./IncrementationGame.sol");
@@ -8,13 +8,25 @@ const FINAL = 1;
 
 contract('IncrementationGame', (accounts) => {
   let game;
-  const start = pack(START, 5, 4, 3);
-  const firstMove = pack(START, 5, 4, 4);
-  const allowedFinal = pack(FINAL, 5, 4, 4);
-  const disallowedFinal = pack(FINAL, 5, 4, 2);
+  let start;
+  let firstMove;
+  let allowedFinal;
+  let disallowedFinal;
 
   before(async () => {
     game = await IG.deployed();
+
+    let pack = (stateNonce, stateType, aBal, bBal, points) => {
+      return packState(
+        game.address, 0, accounts[0], accounts[1],
+        stateNonce, stateType, aBal, bBal, points
+      );
+    };
+
+    start = pack(0, START, 5, 4, 3);
+    firstMove = pack(1, START, 5, 4, 4);
+    allowedFinal = pack(1, FINAL, 5, 4, 4);
+    disallowedFinal = pack(1, FINAL, 5, 4, 2);
   });
 
   // Transition fuction tests
