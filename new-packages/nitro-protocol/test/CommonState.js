@@ -56,6 +56,12 @@ contract('commonStateLib', (accounts) => {
     assert.equal(mover, PARTICIPANTS[1]);
   });
 
+  it("identifies the indexOfMover based on the state nonce", async () => {
+    let index = await commonStateLib.indexOfMover.call(state);
+    // our state nonce is 15, which is odd, so it should be participant 1
+    assert.equal(index, 1);
+  });
+
   it("can calculate the channelId", async () => {
     let chainId = await commonStateLib.channelId.call(state);
     let localId = channelId(CHANNEL_TYPE, CHANNEL_NONCE, PARTICIPANTS);

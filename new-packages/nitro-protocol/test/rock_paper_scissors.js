@@ -1,8 +1,8 @@
 
 import assertRevert from './helpers/assertRevert';
-import { pack, hashCommitment } from '../src/rock_paper_scissors'
+import { pack as packState, hashCommitment } from '../src/rock_paper_scissors'
 
-var RPS = artifacts.require("./RockPaperScissors.sol");
+var RPS = artifacts.require("./RockPaperScissorsGame.sol");
 // enum names aren't supported in ABI, so have to use integers for time being
 const START = 0;
 const PROPOSED = 1;
@@ -16,17 +16,35 @@ const SCISSORS = 2;
 
 contract('RockPaperScissors', (accounts) => {
   let rpsGame;
-  const start = pack(START, 5, 4, 0, "0x00", 0, 0, 0);
-  const allowedFinal = pack(FINAL, 5, 4, 0, "0x00", 0, 0, 0);
   const salt = 0xdeadbeef; // some random bytes32 value
   const preCommit = hashCommitment(ROCK, salt);
-  const propose = pack(PROPOSED, 4, 3, 1, preCommit, 0, 0, 0);
-  const accept = pack(ACCEPTED, 4, 3, 1, preCommit, PAPER, 0, 0);
-  const reveal = pack(REVEAL, 4, 3, 1, preCommit, PAPER, ROCK, salt);
-  const newStart = pack(START, 4, 5, 0, "0x00", 0, 0, 0);
+  let start;
+  let allowedFinal;
+  let disallowedFinal;
+  let propose;
+  let accept;
+  let reveal;
+  let newStart;
+
 
   before(async () => {
     rpsGame = await RPS.deployed();
+
+    let pack = (stateNonce, stateType, aBal, bBal, stake, commit, aPlay, bPlay, salt) => {
+      return packState(
+        rpsGame.address, 0, accounts[0], accounts[1],
+        stateNonce, stateType, aBal, bBal,
+        stake, commit, aPlay, bPlay, salt
+      );
+    };
+
+    start = pack(0, START, 5, 4, 0, "0x00", 0, 0, 0);
+    allowedFinal = pack(1, FINAL, 5, 4, 0, "0x00", 0, 0, 0);
+    disallowedFinal = pack(1, FINAL, 3, 6, 0, "0x00", 0, 0, 0); // totals don't match
+    propose = pack(1, PROPOSED, 4, 3, 1, preCommit, 0, 0, 0);
+    accept = pack(2, ACCEPTED, 4, 3, 1, preCommit, PAPER, 0, 0);
+    reveal = pack(3, REVEAL, 4, 3, 1, preCommit, PAPER, ROCK, salt);
+    newStart = pack(4, START, 4, 5, 0, "0x00", 0, 0, 0);
   });
 
   // Transition fuction tests
@@ -43,7 +61,6 @@ contract('RockPaperScissors', (accounts) => {
   });
 
   it("doesn't allow START -> FINAL if totals don't match", async () => {
-    let disallowedFinal = pack(FINAL, 3, 6, 0, "0x00", 0, 0, 0); // totals don't match
     await assertRevert(rpsGame.validTransition.call(start, disallowedFinal));
   });
 
