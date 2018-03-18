@@ -1,7 +1,22 @@
 import { toHex32, padBytes32 } from './utils';
+import { pack as packCommon } from './CommonState';
 
-export function pack(stateType, aBal, bBal, stake, aPreCommit, bPlay, aPlay, aSalt) {
-  return (
+export function pack(
+  channelType,
+  channelNonce,
+  participantA,
+  participantB,
+  stateNonce,
+  stateType,
+  aBal,
+  bBal,
+  stake,
+  aPreCommit,
+  bPlay,
+  aPlay,
+  aSalt
+) {
+  let gameState =  (
     "0x" +
     toHex32(stateType) +
     toHex32(aBal) +
@@ -12,6 +27,8 @@ export function pack(stateType, aBal, bBal, stake, aPreCommit, bPlay, aPlay, aSa
     toHex32(aPlay) +
     toHex32(aSalt)
   );
+
+  return packCommon(channelType, channelNonce, stateNonce, participantA, participantB, gameState);
 }
 
 export function hashCommitment(play, salt) {

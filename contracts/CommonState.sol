@@ -66,6 +66,10 @@ library CommonState {
     return participants(_state)[stateNonce(_state) % numberOfParticipants(_state)];
   }
 
+  function indexOfMover(bytes _state) public pure returns (uint) {
+    return stateNonce(_state) % numberOfParticipants(_state);
+  }
+
   function requireSignature(bytes _state, uint8 _v, bytes32 _r, bytes32 _s) public pure {
     require(mover(_state) == recoverSigner(_state, _v, _r, _s));
   }
