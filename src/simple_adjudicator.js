@@ -17,7 +17,7 @@ export function packState(channelId, stateNonce, lastMover, gameState) {
     padBytes32(channelId).substr(2, 66) +
     toHex32(stateNonce) +
     padBytes32(lastMover).substr(2, 66) +
-    gameState.substr(2, gameState.length)
+    gameState.substr(2)
   )
 }
 

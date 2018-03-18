@@ -39,8 +39,8 @@ contract SimpleAdjudicator {
     _myState.requireSignature(v[1], r[1], s[1]);
 
     // both states must match the game supported by the channel
-    require(_yourState.channelId() == fundedChannelId);
-    require(_myState.channelId() == fundedChannelId);
+    // require(_yourState.channelId() == fundedChannelId);
+    // require(_myState.channelId() == fundedChannelId);
 
     // nonce must have incremented
     require(_myState.stateNonce() == _yourState.stateNonce() + 1);
@@ -60,7 +60,7 @@ contract SimpleAdjudicator {
     // and that we're within the timeout
     require(currentChallenge.readyAt > now);
 
-    require(currentChallenge.state.channelId == _nextState.channelId());
+    require(currentChallenge.state.channelId() == _nextState.channelId());
 
     // check that the nonce has increased
     require(currentChallenge.state.stateNonce() + 1 == _nextState.stateNonce());
@@ -77,9 +77,9 @@ contract SimpleAdjudicator {
   }
 
 
-  function refuteChallenge(bytes _refutationState, uint8[] v, bytes32[] r, bytes32[] s) {
+  /* function refuteChallenge(bytes _refutationState, uint8[] v, bytes32[] r, bytes32[] s) {
 
-  }
+  } */
 
   function withdrawFunds() public {
     // we need there to be a challenge
