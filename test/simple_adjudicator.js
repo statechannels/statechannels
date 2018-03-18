@@ -1,4 +1,4 @@
-import { pack as packIGState } from '../src/Counting_game';
+import { pack as packIGState } from '../src/CountingGame';
 import { ecSignState, channelId } from '../src/CommonState';
 import assertRevert from './helpers/assertRevert';
 import { default as increaseTime, duration } from './helpers/increaseTime';

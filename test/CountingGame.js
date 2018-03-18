@@ -1,4 +1,4 @@
-import { pack as packState } from '../src/Counting_game';
+import { pack as packState } from '../src/CountingGame';
 import assertRevert from './helpers/assertRevert';
 
 var IG = artifacts.require("./CountingGame.sol");
