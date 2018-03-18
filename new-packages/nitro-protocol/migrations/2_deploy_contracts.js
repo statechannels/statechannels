@@ -8,7 +8,7 @@ var CommonState = artifacts.require("./CommonState.sol");
 module.exports = function(deployer) {
   deployer.deploy(CommonState);
   deployer.link(CommonState, SimpleAdjudicator);
-  deployer.deploy(SimpleAdjudicator);
+  // deployer.deploy(SimpleAdjudicator);
 
   deployer.link(CommonState, IncrementationState);
   deployer.deploy(IncrementationState);

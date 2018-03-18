@@ -1,5 +1,5 @@
 import { pack as packIGState } from '../src/incrementation_game';
-import { ecSignState } from '../src/CommonState';
+import { ecSignState, channelId } from '../src/CommonState';
 import {
   calculateChannelId,
   hash,
@@ -19,8 +19,10 @@ const FINAL = 1;
 contract('SimpleAdjudicator', (accounts) => {
   let simpleAdj, incGame, packIG;
   before(async () => {
-    simpleAdj = await SimpleAdjudicator.deployed();
     incGame = await IncrementationGame.deployed();
+
+    let id = channelId(incGame.address, 0, [accounts[0], accounts[1]]);
+    simpleAdj = await SimpleAdjudicator.new(id);
 
     packIG = (stateNonce, stateType, aBal, bBal, points) => {
       return packIGState(
@@ -41,6 +43,7 @@ contract('SimpleAdjudicator', (accounts) => {
 
     let [r0, s0, v0] = ecSignState(agreedState, challengee);
     let [r1, s1, v1] = ecSignState(challengeState, challenger);
+
 
     simpleAdj.forceMove(agreedState, challengeState, [v0, v1], [r0, r1], [s0, s1] );
     // how can I check on the state of the contract?
