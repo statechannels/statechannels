@@ -29,7 +29,7 @@ contract SimpleAdjudicator {
   }
 
   // allow funds to be sent to the contract
-  function () payable {
+  function () public payable {
   }
 
   function forceMove(
@@ -84,10 +84,50 @@ contract SimpleAdjudicator {
     currentChallenge.readyAt = 0;
   }
 
+  function respondWithAlternativeMove(bytes _alternativeState, bytes _nextState, uint8[] v, bytes32[] r, bytes32[] s) public {
+    // check that there is a current challenge
+    require(currentChallenge.readyAt != 0);
+    // and that we're within the timeout
+    require(currentChallenge.readyAt > now);
 
-  /* function refuteChallenge(bytes _refutationState, uint8[] v, bytes32[] r, bytes32[] s) {
+    require(currentChallenge.state.channelId() == _nextState.channelId());
 
-  } */
+    // checking the alternative state:
+    // .. it must have the same nonce as the challenge state
+    require(currentChallenge.state.stateNonce() == _alternativeState.stateNonce());
+    // .. it must be signed (by the challenger)
+    _alternativeState.requireSignature(v[0], r[0], s[0]);
+
+    // checking the nextState:
+    // .. the nonce must have increased by 1
+    require(currentChallenge.state.stateNonce() + 1 == _nextState.stateNonce());
+    // .. it must be a valid transition of the gamestate (from the alternative state)
+    require(ForcedMoveGame(_nextState.channelType()).validTransition(_alternativeState, _nextState));
+    // .. it must be signed (my the challengee)
+    _nextState.requireSignature(v[1], r[1], s[1]);
+
+    // Cancel challenge.
+    // TODO: zero out everything(?)
+    currentChallenge.readyAt = 0;
+  }
+
+  function refuteChallenge(bytes _refutationState, uint8 v, bytes32 r, bytes32 s) {
+    // check that there is a current challenge
+    require(currentChallenge.readyAt != 0);
+    // and that we're within the timeout
+    require(currentChallenge.readyAt > now);
+
+    require(currentChallenge.state.channelId() == _refutationState.channelId());
+
+    // the refutationState must have a higher nonce
+    require(_refutationState.stateNonce() > currentChallenge.state.stateNonce());
+    // ... with the same mover
+    require(_refutationState.mover() == currentChallenge.state.mover());
+    // ... and be signed (by that mover)
+    _refutationState.requireSignature(v, r, s);
+
+    currentChallenge.readyAt = 0;
+  }
 
   function withdrawFunds() public {
     // we need there to be a challenge
@@ -98,7 +138,6 @@ contract SimpleAdjudicator {
 
     // check that the funds are less than the balance
     // (not strictly necessary when only supporting one game like this SimpleAdjudicator does)
-    /* require(currentChallenge.balances[0] + currentChallenge.balances[1] <= this.balance); */
 
     address[] memory participants;
     //TODO (participants[0], participants[1]) = currentChallenge.state.participants();
