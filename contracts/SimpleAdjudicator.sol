@@ -12,7 +12,7 @@ contract SimpleAdjudicator {
   // SimpleAdjudicator can support exactly one forced move game channel
   using CommonState for bytes;
 
-  bytes32 fundedChannelId;
+  bytes32 public fundedChannelId;
 
   Challenge currentChallenge;
   uint challengeDuration = 1 days;
@@ -22,6 +22,14 @@ contract SimpleAdjudicator {
     bytes state;
     uint256[2] resolvedBalances;
     uint32 readyAt;
+  }
+
+  function SimpleAdjudicator(bytes32 _fundedChannelId) public payable {
+    fundedChannelId = _fundedChannelId;
+  }
+
+  // allow funds to be sent to the contract
+  function () payable {
   }
 
   function forceMove(
@@ -39,8 +47,8 @@ contract SimpleAdjudicator {
     _myState.requireSignature(v[1], r[1], s[1]);
 
     // both states must match the game supported by the channel
-    // require(_yourState.channelId() == fundedChannelId);
-    // require(_myState.channelId() == fundedChannelId);
+    require(_yourState.channelId() == fundedChannelId);
+    require(_myState.channelId() == fundedChannelId);
 
     // nonce must have incremented
     require(_myState.stateNonce() == _yourState.stateNonce() + 1);
