@@ -1,6 +1,6 @@
 
 import assertRevert from './helpers/assertRevert';
-import { pack as packState, hashCommitment } from '../src/rock_paper_scissors'
+import { pack as packState, hashCommitment } from '../src/RockPaperScissors'
 
 var RPS = artifacts.require("./RockPaperScissorsGame.sol");
 // enum names aren't supported in ABI, so have to use integers for time being
