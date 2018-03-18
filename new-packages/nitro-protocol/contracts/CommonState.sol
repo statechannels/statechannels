@@ -52,9 +52,14 @@ library CommonState {
     return extractedParticipants;
   }
 
-  //function calculateId(address _type, uint256 _nonce, address[] _participants) returns (bytes32) {
-   // return keccak256(_type, _nonce, _participants);
-  //}
+  function participant(bytes _state, uint _index) public pure returns (address _participant) {
+    uint256 n = numberOfParticipants(_state);
+    require(_index < n);
+
+    assembly {
+      _participant := mload(add(_state, add(160, mul(32, _index))))
+    }
+  }
 
   function channelId(bytes _state) public pure returns (bytes32) {
     /* return keccak256(channelType(_state), channelNonce(_state), participants(_state)); */

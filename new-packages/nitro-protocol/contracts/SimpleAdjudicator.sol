@@ -136,14 +136,8 @@ contract SimpleAdjudicator {
     // check that the timeout has expired
     require(currentChallenge.readyAt <= now);
 
-    // check that the funds are less than the balance
-    // (not strictly necessary when only supporting one game like this SimpleAdjudicator does)
-
-    address[] memory participants;
-    //TODO (participants[0], participants[1]) = currentChallenge.state.participants();
-    // send the funds
-    participants[0].transfer(currentChallenge.resolvedBalances[0]);
-    participants[1].transfer(currentChallenge.resolvedBalances[1]);
+    currentChallenge.state.participant(0).transfer(min(currentChallenge.resolvedBalances[0], this.balance));
+    currentChallenge.state.participant(1).transfer(min(currentChallenge.resolvedBalances[1], this.balance));
   }
 
   function instantWithdrawal(
@@ -159,22 +153,11 @@ contract SimpleAdjudicator {
     uint[] memory balances;
     (balances[0], balances[1]) = ForcedMoveGame(_state.channelType()).resolve(_state);
 
-    address[] memory participants;
-    //TODO (participants[0], participants[1]) = _state.participants();
-    // send the funds
-    participants[0].transfer(balances[0]);
-    participants[1].transfer(balances[1]);
-
+    _state.participant(0).transfer(min(balances[0], this.balance));
+    _state.participant(1).transfer(min(balances[1], this.balance));
   }
 
-
-  /*
-  // special functions
-  function withdrawAfterFirstDeposit() {
+  function min(uint256 a, uint256 b) private pure returns (uint256) {
+    return a < b ? a : b;
   }
-
-  function withdrawAfterSecondDeposit() {
-
-  } */
-
 }

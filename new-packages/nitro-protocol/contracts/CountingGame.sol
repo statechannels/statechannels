@@ -1,18 +1,18 @@
 pragma solidity ^0.4.18;
 
 import './CommonState.sol';
-import './IncrementationState.sol';
+import './CountingState.sol';
 
-contract IncrementationGame {
+contract CountingGame {
   using CommonState for bytes;
-  using IncrementationState for bytes;
+  using CountingState for bytes;
 
   // The following transitions are allowed:
   //
   // Start -> Final
   //
   function validTransition(bytes _old, bytes _new) public pure returns (bool) {
-    if (_old.stateType() == IncrementationState.StateType.Start) {
+    if (_old.stateType() == CountingState.StateType.Start) {
       // regardless of whether we move to a Start or Final state, we must have:
       // 1. balances remain the same
       // 2. points must increase

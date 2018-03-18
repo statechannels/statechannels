@@ -1,8 +1,8 @@
 var RockPaperScissorsGame = artifacts.require("./RockPaperScissorsGame.sol");
 var RockPaperScissorsState = artifacts.require("./RockPaperScissorsState.sol");
 var SimpleAdjudicator = artifacts.require("./SimpleAdjudicator.sol");
-var IncrementationState = artifacts.require("./IncrementationState.sol");
-var IncrementationGame = artifacts.require("./IncrementationGame.sol");
+var CountingState = artifacts.require("./CountingState.sol");
+var CountingGame = artifacts.require("./CountingGame.sol");
 var CommonState = artifacts.require("./CommonState.sol");
 
 module.exports = function(deployer) {
@@ -10,11 +10,11 @@ module.exports = function(deployer) {
   deployer.link(CommonState, SimpleAdjudicator);
   // deployer.deploy(SimpleAdjudicator);
 
-  deployer.link(CommonState, IncrementationState);
-  deployer.deploy(IncrementationState);
-  deployer.link(IncrementationState, IncrementationGame);
-  deployer.link(CommonState, IncrementationGame);
-  deployer.deploy(IncrementationGame);
+  deployer.link(CommonState, CountingState);
+  deployer.deploy(CountingState);
+  deployer.link(CountingState, CountingGame);
+  deployer.link(CommonState, CountingGame);
+  deployer.deploy(CountingGame);
 
   deployer.link(CommonState, RockPaperScissorsState);
   deployer.deploy(RockPaperScissorsState);
