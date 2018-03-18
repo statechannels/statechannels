@@ -1,12 +1,12 @@
-import { pack as packState } from '../src/incrementation_game';
+import { pack as packState } from '../src/Counting_game';
 import assertRevert from './helpers/assertRevert';
 
-var IG = artifacts.require("./IncrementationGame.sol");
+var IG = artifacts.require("./CountingGame.sol");
 // enum names aren't supported in ABI, so have to use integers for time being
 const START = 0;
 const FINAL = 1;
 
-contract('IncrementationGame', (accounts) => {
+contract('CountingGame', (accounts) => {
   let game;
   let start;
   let firstMove;

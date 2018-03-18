@@ -2,10 +2,10 @@ pragma solidity ^0.4.18;
 
 import './CommonState.sol';
 
-library IncrementationState {
+library CountingState {
   enum StateType { Start, Final }
 
-  // IncrementationGame State Fields
+  // CountingGame State Fields
   // (relative to gamestate offset)
   // ==============================
   // [  0 -  31] enum stateType
