@@ -1,14 +1,11 @@
 var RockPaperScissorsGame = artifacts.require("./RockPaperScissorsGame.sol");
 var RockPaperScissorsState = artifacts.require("./RockPaperScissorsState.sol");
-var StartFinishGame = artifacts.require("./StartFinishGame.sol");
 // var SimpleAdjudicator = artifacts.require("./SimpleAdjudicator.sol");
 var IncrementationState = artifacts.require("./IncrementationState.sol");
 var IncrementationGame = artifacts.require("./IncrementationGame.sol");
 var CommonState = artifacts.require("./CommonState.sol");
 
 module.exports = function(deployer) {
-  // deployer.deploy(RockPaperScissors);
-  deployer.deploy(StartFinishGame);
   // deployer.deploy(SimpleAdjudicator);
   deployer.deploy(CommonState);
 
@@ -24,5 +21,4 @@ module.exports = function(deployer) {
   deployer.link(CommonState, RockPaperScissorsGame);
   deployer.deploy(RockPaperScissorsGame);
 
-  // deployer.deploy(MetaCoin);
 };
