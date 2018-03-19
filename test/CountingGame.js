@@ -16,10 +16,10 @@ contract('CountingGame', (accounts) => {
   before(async () => {
     game = await IG.deployed();
 
-    let pack = (stateNonce, stateType, aBal, bBal, points) => {
+    let pack = (stateNonce, stateType, aBal, bBal, count) => {
       return packState(
         game.address, 0, accounts[0], accounts[1],
-        stateNonce, stateType, aBal, bBal, points
+        stateNonce, stateType, aBal, bBal, count
       );
     };
 
@@ -32,7 +32,7 @@ contract('CountingGame', (accounts) => {
   // Transition fuction tests
   // ========================
 
-  it("allows a move where the points increment", async () => {
+  it("allows a move where the count increment", async () => {
     var output = await game.validTransition.call(start, firstMove);
     assert.equal(output, true);
   });

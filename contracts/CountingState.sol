@@ -11,7 +11,7 @@ library CountingState {
   // [  0 -  31] enum stateType
   // [ 32 -  63] uint256 aBal
   // [ 64 -  95] uint256 bBal
-  // [ 96 - 127] uint256 points
+  // [ 96 - 127] uint256 count
 
   function stateType(bytes _state) public pure returns (StateType _stateType) {
     uint offset = CommonState.gameStateOffset(_state);
@@ -34,10 +34,10 @@ library CountingState {
     }
   }
 
-  function points(bytes _state) public pure returns (uint256 _points) {
+  function count(bytes _state) public pure returns (uint256 _count) {
     uint offset = CommonState.gameStateOffset(_state) + 96;
     assembly {
-      _points := mload(add(_state, offset))
+      _count := mload(add(_state, offset))
     }
   }
 }

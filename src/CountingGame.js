@@ -10,14 +10,14 @@ export function pack(
   stateType,
   aBal,
   bBal,
-  points
+  count
 ) {
   let gameState = (
     "0x" +
     toHex32(stateType) +
     toHex32(aBal) +
     toHex32(bBal) +
-    toHex32(points)
+    toHex32(count)
   );
 
   return packCommon(channelType, channelNonce, stateNonce, participantA, participantB, gameState);

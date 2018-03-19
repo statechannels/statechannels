@@ -15,10 +15,10 @@ contract CountingGame {
     if (_old.stateType() == CountingState.StateType.Start) {
       // regardless of whether we move to a Start or Final state, we must have:
       // 1. balances remain the same
-      // 2. points must increase
+      // 2. count must increase
       require(_new.aBal() == _old.aBal());
       require(_new.bBal() == _old.bBal());
-      require(_new.points() == _old.points() + 1);
+      require(_new.count() == _old.count() + 1);
 
       return true;
     }
