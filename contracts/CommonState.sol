@@ -61,7 +61,7 @@ library CommonState {
     }
   }
 
-  function channelId(bytes _state) public pure returns (bytes32) {
+  function channelId(bytes /*_state*/) public pure returns (bytes32) {
     /* return keccak256(channelType(_state), channelNonce(_state), participants(_state)); */
     // TODO: fix this!!
     return 0xaaa;
@@ -80,7 +80,6 @@ library CommonState {
   }
 
   function requireFullySigned(bytes _state, uint8[] _v, bytes32[] _r, bytes32[] _s) public pure {
-    address currentParticipant;
     uint256 n = numberOfParticipants(_state);
     address[] memory p = participants(_state);
 

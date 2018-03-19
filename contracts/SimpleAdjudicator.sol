@@ -111,7 +111,7 @@ contract SimpleAdjudicator {
     currentChallenge.readyAt = 0;
   }
 
-  function refuteChallenge(bytes _refutationState, uint8 v, bytes32 r, bytes32 s) {
+  function refuteChallenge(bytes _refutationState, uint8 v, bytes32 r, bytes32 s) public {
     // check that there is a current challenge
     require(currentChallenge.readyAt != 0);
     // and that we're within the timeout
