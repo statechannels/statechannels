@@ -84,7 +84,8 @@ contract RockPaperScissorsGame {
     }
   }
 
-  function winnings(RockPaperScissorsState.Play firstPlay, RockPaperScissorsState.Play secondPlay, uint256 stake) private pure returns (uint256, uint256) {
+  function winnings(RockPaperScissorsState.Play firstPlay, RockPaperScissorsState.Play secondPlay, uint256 stake)
+  private pure returns (uint256, uint256) {
       if (firstPlay == secondPlay) { // no-one won
         return (stake, stake);
       } else if ((firstPlay == RockPaperScissorsState.Play.Rock && secondPlay == RockPaperScissorsState.Play.Scissors) ||
