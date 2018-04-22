@@ -64,10 +64,10 @@ contract('SimpleAdjudicator', (accounts) => {
     // refute
     let [r2, s2, v2] = ecSignState(refutationState, challenger);
 
-    await simpleAdj.refuteChallenge(refutationState, v2, r2, s2);
+    await simpleAdj.refute(refutationState, v2, r2, s2);
   });
 
-  it("forceMove -> respondWithAlternativeMove", async () => {
+  it("forceMove -> alternativeRespondWithMove", async () => {
     let agreedState = packIG(0, START, 4, 6, 1);
     let challengeState = packIG(1, START, 4, 6, 2);
     let alternativeState = packIG(1, START, 5, 5, 2);
@@ -84,7 +84,7 @@ contract('SimpleAdjudicator', (accounts) => {
     let [r2, s2, v2] = ecSignState(alternativeState, challenger);
     let [r3, s3, v3] = ecSignState(responseState, challengee);
 
-    await simpleAdj.respondWithAlternativeMove(alternativeState, responseState, [v2, v3], [r2, r3], [s2, s3]);
+    await simpleAdj.alternativeRespondWithMove(alternativeState, responseState, [v2, v3], [r2, r3], [s2, s3]);
   });
 
   it("forceMove -> timeout -> withdrawFunds", async () => {
