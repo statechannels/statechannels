@@ -3,9 +3,9 @@ pragma solidity ^0.4.18;
 import './CommonState.sol';
 
 interface ForcedMoveGame {
-    function validTransition(bytes oldState, bytes newState) public pure returns (bool);
-    function resolve(bytes) public returns (uint, uint);
-    function isFinal(bytes) public returns (bool);
+    function validTransition(bytes oldState, bytes newState) external pure returns (bool);
+    function resolve(bytes) external returns (uint, uint);
+    function isFinal(bytes) external returns (bool);
 }
 
 contract SimpleAdjudicator {
@@ -148,13 +148,14 @@ contract SimpleAdjudicator {
     return a < b ? a : b;
   }
 
-  modifier onlyWhenCurrentChallengeInactive() { require(currentChallenge.expirationTime == 0; _; }
+  modifier onlyWhenCurrentChallengeInactive() { require(currentChallenge.expirationTime == 0); _; }
   modifier onlyWhenCurrentChallengeActive() {
     // check that there is a current challenge
     require(currentChallenge.expirationTime != 0);
 
     // and that we're within the timeout
     require(currentChallenge.expirationTime > now);
+    _;
   }
   modifier cancelCurrentChallenge() {
     _;
