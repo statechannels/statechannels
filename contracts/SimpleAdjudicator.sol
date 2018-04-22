@@ -62,6 +62,21 @@ contract SimpleAdjudicator {
     (currentChallenge.resolvedBalances[0], currentChallenge.resolvedBalances[1]) = ForcedMoveGame(_yourState.channelType()).resolve(_myState);
   }
 
+  function refute(bytes _refutationState, uint8 v, bytes32 r, bytes32 s)
+    public
+    onlyWhenCurrentChallengeActive
+    cancelCurrentChallenge
+  {
+    require(currentChallenge.state.channelId() == _refutationState.channelId());
+
+    // the refutationState must have a higher nonce
+    require(_refutationState.stateNonce() > currentChallenge.state.stateNonce());
+    // ... with the same mover
+    require(_refutationState.mover() == currentChallenge.state.mover());
+    // ... and be signed (by that mover)
+    _refutationState.requireSignature(v, r, s);
+  }
+
   function respondWithMove(bytes _nextState, uint8 v, bytes32 r, bytes32 s)
     public
     onlyWhenCurrentChallengeActive
@@ -79,7 +94,7 @@ contract SimpleAdjudicator {
     require(ForcedMoveGame(_nextState.channelType()).validTransition(currentChallenge.state, _nextState));
   }
 
-  function respondWithAlternativeMove(
+  function alternativeRespondWithMove(
   bytes _alternativeState,
   bytes _nextState,
   uint8[] v,
@@ -107,19 +122,12 @@ contract SimpleAdjudicator {
     _nextState.requireSignature(v[1], r[1], s[1]);
   }
 
-  function refuteChallenge(bytes _refutationState, uint8 v, bytes32 r, bytes32 s)
+  function conclude(
+  )
     public
-    onlyWhenCurrentChallengeActive
-    cancelCurrentChallenge
+    onlyWhenCurrentChallengeInactive // right?
   {
-    require(currentChallenge.state.channelId() == _refutationState.channelId());
-
-    // the refutationState must have a higher nonce
-    require(_refutationState.stateNonce() > currentChallenge.state.stateNonce());
-    // ... with the same mover
-    require(_refutationState.mover() == currentChallenge.state.mover());
-    // ... and be signed (by that mover)
-    _refutationState.requireSignature(v, r, s);
+    // TODO: Implementation
   }
 
   function withdrawFunds() public onlyWhenCurrentChallengeActive {
