@@ -123,8 +123,8 @@ contract SimpleAdjudicator {
   }
 
   function withdrawFunds() public onlyWhenCurrentChallengeActive {
-    currentChallenge.state.participant(0).transfer(min(currentChallenge.resolvedBalances[0], this.balance));
-    currentChallenge.state.participant(1).transfer(min(currentChallenge.resolvedBalances[1], this.balance));
+    currentChallenge.state.participant(0).transfer(min(currentChallenge.resolvedBalances[0], address(this).balance));
+    currentChallenge.state.participant(1).transfer(min(currentChallenge.resolvedBalances[1], address(this).balance));
   }
 
   function instantWithdrawal(
@@ -140,8 +140,8 @@ contract SimpleAdjudicator {
     uint[] memory balances;
     (balances[0], balances[1]) = ForcedMoveGame(_state.channelType()).resolve(_state);
 
-    _state.participant(0).transfer(min(balances[0], this.balance));
-    _state.participant(1).transfer(min(balances[1], this.balance));
+    _state.participant(0).transfer(min(balances[0], address(this).balance));
+    _state.participant(1).transfer(min(balances[1], address(this).balance));
   }
 
   function min(uint256 a, uint256 b) private pure returns (uint256) {
