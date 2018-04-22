@@ -3,9 +3,9 @@ pragma solidity ^0.4.18;
 import './CommonState.sol';
 
 interface ForcedMoveGame {
-    function validTransition(bytes oldState, bytes newState) external pure returns (bool);
-    function resolve(bytes) external returns (uint, uint);
-    function isFinal(bytes) external returns (bool);
+  function validTransition(bytes oldState, bytes newState) external pure returns (bool);
+  function resolve(bytes) external returns (uint, uint);
+  function isFinal(bytes) external returns (bool);
 }
 
 contract SimpleAdjudicator {
