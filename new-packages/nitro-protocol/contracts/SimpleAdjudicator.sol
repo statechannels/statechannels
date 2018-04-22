@@ -21,7 +21,7 @@ contract SimpleAdjudicator {
     bytes32 channelId;
     bytes state;
     uint256[2] resolvedBalances;
-    uint32 readyAt;
+    uint32 expirationTime;
   }
 
   function SimpleAdjudicator(bytes32 _fundedChannelId) public payable {
@@ -40,7 +40,7 @@ contract SimpleAdjudicator {
     bytes32[] s
   ) public {
     // need currentChallenge to be empty
-    require(currentChallenge.readyAt == 0);
+    require(currentChallenge.expirationTime == 0);
 
     // states must be signed by the appropriate participant
     _yourState.requireSignature(v[0], r[0], s[0]);
@@ -57,16 +57,16 @@ contract SimpleAdjudicator {
     require(ForcedMoveGame(_yourState.channelType()).validTransition(_yourState, _myState));
 
     currentChallenge.state = _myState;
-    currentChallenge.readyAt = uint32(now + challengeDuration);
+    currentChallenge.expirationTime = uint32(now + challengeDuration);
     // figure out the resolution immediately
     (currentChallenge.resolvedBalances[0], currentChallenge.resolvedBalances[1]) = ForcedMoveGame(_yourState.channelType()).resolve(_myState);
   }
 
   function respondWithMove(bytes _nextState, uint8 v, bytes32 r, bytes32 s) public {
     // check that there is a current challenge
-    require(currentChallenge.readyAt != 0);
+    require(currentChallenge.expirationTime != 0);
     // and that we're within the timeout
-    require(currentChallenge.readyAt > now);
+    require(currentChallenge.expirationTime > now);
 
     require(currentChallenge.state.channelId() == _nextState.channelId());
 
@@ -81,14 +81,14 @@ contract SimpleAdjudicator {
 
     // Cancel challenge.
     // TODO: zero out everything(?)
-    currentChallenge.readyAt = 0;
+    currentChallenge.expirationTime = 0;
   }
 
   function respondWithAlternativeMove(bytes _alternativeState, bytes _nextState, uint8[] v, bytes32[] r, bytes32[] s) public {
     // check that there is a current challenge
-    require(currentChallenge.readyAt != 0);
+    require(currentChallenge.expirationTime != 0);
     // and that we're within the timeout
-    require(currentChallenge.readyAt > now);
+    require(currentChallenge.expirationTime > now);
 
     require(currentChallenge.state.channelId() == _nextState.channelId());
 
@@ -108,14 +108,14 @@ contract SimpleAdjudicator {
 
     // Cancel challenge.
     // TODO: zero out everything(?)
-    currentChallenge.readyAt = 0;
+    currentChallenge.expirationTime = 0;
   }
 
   function refuteChallenge(bytes _refutationState, uint8 v, bytes32 r, bytes32 s) public {
     // check that there is a current challenge
-    require(currentChallenge.readyAt != 0);
+    require(currentChallenge.expirationTime != 0);
     // and that we're within the timeout
-    require(currentChallenge.readyAt > now);
+    require(currentChallenge.expirationTime > now);
 
     require(currentChallenge.state.channelId() == _refutationState.channelId());
 
@@ -126,15 +126,15 @@ contract SimpleAdjudicator {
     // ... and be signed (by that mover)
     _refutationState.requireSignature(v, r, s);
 
-    currentChallenge.readyAt = 0;
+    currentChallenge.expirationTime = 0;
   }
 
   function withdrawFunds() public {
     // we need there to be a challenge
-    require(currentChallenge.readyAt != 0);
+    require(currentChallenge.expirationTime != 0);
 
     // check that the timeout has expired
-    require(currentChallenge.readyAt <= now);
+    require(currentChallenge.expirationTime <= now);
 
     currentChallenge.state.participant(0).transfer(min(currentChallenge.resolvedBalances[0], this.balance));
     currentChallenge.state.participant(1).transfer(min(currentChallenge.resolvedBalances[1], this.balance));
