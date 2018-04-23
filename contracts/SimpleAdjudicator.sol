@@ -14,15 +14,15 @@ contract SimpleAdjudicator {
 
   bytes32 public fundedChannelId;
 
-  Challenge currentChallenge;
-  uint challengeDuration = 1 days;
-
   struct Challenge {
     bytes32 channelId;
     bytes state;
     uint256[2] resolvedBalances;
     uint32 expirationTime;
   }
+
+  Challenge currentChallenge;
+  uint challengeDuration = 1 days;
 
   function SimpleAdjudicator(bytes32 _fundedChannelId) public payable {
     fundedChannelId = _fundedChannelId;
@@ -130,7 +130,7 @@ contract SimpleAdjudicator {
     // TODO: Implementation
   }
 
-  function withdrawFunds() public onlyWhenCurrentChallengeActive {
+  function withdrawFunds() public onlyWhenCurrentChallengeExpired {
     currentChallenge.state.participant(0).transfer(min(currentChallenge.resolvedBalances[0], address(this).balance));
     currentChallenge.state.participant(1).transfer(min(currentChallenge.resolvedBalances[1], address(this).balance));
   }
@@ -157,6 +157,7 @@ contract SimpleAdjudicator {
   }
 
   modifier onlyWhenCurrentChallengeInactive() { require(currentChallenge.expirationTime == 0); _; }
+  modifier onlyWhenCurrentChallengeExpired() { require(currentChallenge.expirationTime <= now); _; }
   modifier onlyWhenCurrentChallengeActive() {
     // check that there is a current challenge
     require(currentChallenge.expirationTime != 0);
