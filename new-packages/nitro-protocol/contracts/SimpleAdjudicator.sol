@@ -1,12 +1,7 @@
 pragma solidity ^0.4.23;
 
 import './CommonState.sol';
-
-interface ForcedMoveGame {
-  function validTransition(bytes oldState, bytes newState) external pure returns (bool);
-  function resolve(bytes) external returns (uint, uint);
-  function isFinal(bytes) external returns (bool);
-}
+import './ForcedMoveGame.sol';
 
 contract SimpleAdjudicator {
   // SimpleAdjudicator can support exactly one forced move game channel
