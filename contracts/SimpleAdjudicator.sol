@@ -34,7 +34,7 @@ contract SimpleAdjudicator {
     bytes32[] r,
     bytes32[] s
   )
-    public
+    external
     onlyWhenCurrentChallengeInactive
   {
     // states must be signed by the appropriate participant
@@ -58,7 +58,7 @@ contract SimpleAdjudicator {
   }
 
   function refute(bytes _refutationState, uint8 v, bytes32 r, bytes32 s)
-    public
+    external
     onlyWhenCurrentChallengeActive
     cancelCurrentChallengeAfter
   {
@@ -73,7 +73,7 @@ contract SimpleAdjudicator {
   }
 
   function respondWithMove(bytes _nextState, uint8 v, bytes32 r, bytes32 s)
-    public
+    external
     onlyWhenCurrentChallengeActive
     cancelCurrentChallengeAfter
   {
@@ -96,7 +96,7 @@ contract SimpleAdjudicator {
   bytes32[] r,
   bytes32[] s
   )
-    public
+    external
     onlyWhenCurrentChallengeActive
     cancelCurrentChallengeAfter
   {
@@ -119,7 +119,7 @@ contract SimpleAdjudicator {
 
   function conclude(
   )
-    public
+    external
     onlyWhenCurrentChallengeInactive // right?
   {
     // TODO: Implementation
