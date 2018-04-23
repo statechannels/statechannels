@@ -1,4 +1,4 @@
-pragma solidity ^0.4.18;
+pragma solidity ^0.4.23;
 
 import './CommonState.sol';
 
@@ -24,7 +24,7 @@ contract SimpleAdjudicator {
   Challenge currentChallenge;
   uint challengeDuration = 1 days;
 
-  function SimpleAdjudicator(bytes32 _fundedChannelId) public payable {
+  constructor(bytes32 _fundedChannelId) public payable {
     fundedChannelId = _fundedChannelId;
   }
 
