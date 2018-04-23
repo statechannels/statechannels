@@ -60,7 +60,7 @@ contract SimpleAdjudicator {
   function refute(bytes _refutationState, uint8 v, bytes32 r, bytes32 s)
     public
     onlyWhenCurrentChallengeActive
-    cancelCurrentChallenge
+    cancelCurrentChallengeAfter
   {
     require(currentChallenge.state.channelId() == _refutationState.channelId());
 
@@ -75,7 +75,7 @@ contract SimpleAdjudicator {
   function respondWithMove(bytes _nextState, uint8 v, bytes32 r, bytes32 s)
     public
     onlyWhenCurrentChallengeActive
-    cancelCurrentChallenge
+    cancelCurrentChallengeAfter
   {
     require(currentChallenge.state.channelId() == _nextState.channelId());
 
@@ -98,7 +98,7 @@ contract SimpleAdjudicator {
   )
     public
     onlyWhenCurrentChallengeActive
-    cancelCurrentChallenge
+    cancelCurrentChallengeAfter
   {
     require(currentChallenge.state.channelId() == _nextState.channelId());
 
@@ -161,7 +161,7 @@ contract SimpleAdjudicator {
     require(currentChallenge.expirationTime > now);
     _;
   }
-  modifier cancelCurrentChallenge() {
+  modifier cancelCurrentChallengeAfter() {
     _;
 
     // Cancel challenge.
