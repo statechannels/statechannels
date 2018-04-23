@@ -14,7 +14,7 @@ contract RockPaperScissorsGame {
   // RoundProposed -> RoundAccepted
   // RoundAccepted -> Reveal
   // Reveal -> Start
-  // Start -> Final
+  // Start -> Concluded
   //
   function validTransition(bytes _old, bytes _new) public pure returns (bool) {
     if (_old.stateType() == RockPaperScissorsState.StateType.Start) {
@@ -27,7 +27,7 @@ contract RockPaperScissorsGame {
 
         // we should maybe require that aPreCommit isn't empty, but then it will only hurt a later if it is
         return true;
-      } else if (_new.stateType() == RockPaperScissorsState.StateType.Final) {
+      } else if (_new.stateType() == RockPaperScissorsState.StateType.Concluded) {
         require(_new.aBal() == _old.aBal());
         require(_new.bBal() == _old.bBal());
         return true;
@@ -79,7 +79,7 @@ contract RockPaperScissorsGame {
     if (_state.stateType() == RockPaperScissorsState.StateType.Start) {
       aBal = _state.aBal();
       bBal = _state.bBal();
-    } else if (_state.stateType() == RockPaperScissorsState.StateType.Final) {
+    } else if (_state.stateType() == RockPaperScissorsState.StateType.Concluded) {
       aBal = _state.aBal();
       bBal = _state.bBal();
     } else if (_state.stateType() == RockPaperScissorsState.StateType.RoundProposed) {

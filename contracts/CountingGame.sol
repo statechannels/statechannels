@@ -9,11 +9,11 @@ contract CountingGame {
 
   // The following transitions are allowed:
   //
-  // Start -> Final
+  // Start -> Concluded
   //
   function validTransition(bytes _old, bytes _new) public pure returns (bool) {
     if (_old.stateType() == CountingState.StateType.Start) {
-      // regardless of whether we move to a Start or Final state, we must have:
+      // regardless of whether we move to a Start or Concluded state, we must have:
       // 1. balances remain the same
       // 2. count must increase
       require(_new.aBal() == _old.aBal());

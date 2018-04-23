@@ -7,7 +7,7 @@ var SimpleAdjudicator = artifacts.require("./SimpleAdjudicator.sol");
 var CountingGame = artifacts.require("./CountingGame.sol");
 
 const START = 0;
-const FINAL = 1;
+const CONCLUDED = 1;
 
 contract('SimpleAdjudicator', (accounts) => {
   let simpleAdj, incGame, packIG;
@@ -28,7 +28,7 @@ contract('SimpleAdjudicator', (accounts) => {
   it("forceMove -> respondWithMove", async () => {
     let agreedState = packIG(0, START, 4, 6, 1);
     let challengeState = packIG(1, START, 4, 6, 2);
-    let responseState = packIG(2, FINAL, 4, 6, 3);
+    let responseState = packIG(2, CONCLUDED, 4, 6, 3);
 
     let challenger = accounts[1];
     let challengee = accounts[0];
@@ -49,7 +49,7 @@ contract('SimpleAdjudicator', (accounts) => {
   it("forceMove -> refute", async () => {
     let agreedState = packIG(0, START, 4, 6, 1);
     let challengeState = packIG(1, START, 4, 6, 2);
-    let refutationState = packIG(3, FINAL, 4, 6, 3);
+    let refutationState = packIG(3, CONCLUDED, 4, 6, 3);
 
     let challenger = accounts[1];
     let challengee = accounts[0];
@@ -71,7 +71,7 @@ contract('SimpleAdjudicator', (accounts) => {
     let agreedState = packIG(0, START, 4, 6, 1);
     let challengeState = packIG(1, START, 4, 6, 2);
     let alternativeState = packIG(1, START, 5, 5, 2);
-    let responseState = packIG(2, FINAL, 5, 5, 3);
+    let responseState = packIG(2, CONCLUDED, 5, 5, 3);
 
     let challenger = accounts[1];
     let challengee = accounts[0];
