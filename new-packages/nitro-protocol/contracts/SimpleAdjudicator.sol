@@ -136,7 +136,7 @@ contract SimpleAdjudicator {
     bytes32[] r,
     bytes32[] s
   ) public {
-    require(ForcedMoveGame(_state.channelType()).isFinal(_state));
+    require(ForcedMoveGame(_state.channelType()).isConcluded(_state));
 
     // agreedState must be double-signed
     _state.requireFullySigned(v, r, s);

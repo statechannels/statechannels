@@ -3,7 +3,7 @@ pragma solidity ^0.4.18;
 import './CommonState.sol';
 
 library CountingState {
-  enum StateType { Start, Final }
+  enum StateType { Start, Concluded }
 
   // CountingGame State Fields
   // (relative to gamestate offset)

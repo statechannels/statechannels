@@ -4,14 +4,14 @@ import assertRevert from './helpers/assertRevert';
 var IG = artifacts.require("./CountingGame.sol");
 // enum names aren't supported in ABI, so have to use integers for time being
 const START = 0;
-const FINAL = 1;
+const CONCLUDED = 1;
 
 contract('CountingGame', (accounts) => {
   let game;
   let start;
   let firstMove;
-  let allowedFinal;
-  let disallowedFinal;
+  let allowedConcluded;
+  let disallowedConcluded;
 
   before(async () => {
     game = await IG.deployed();
@@ -25,8 +25,8 @@ contract('CountingGame', (accounts) => {
 
     start = pack(0, START, 5, 4, 3);
     firstMove = pack(1, START, 5, 4, 4);
-    allowedFinal = pack(1, FINAL, 5, 4, 4);
-    disallowedFinal = pack(1, FINAL, 5, 4, 2);
+    allowedConcluded = pack(1, CONCLUDED, 5, 4, 4);
+    disallowedConcluded = pack(1, CONCLUDED, 5, 4, 2);
   });
 
   // Transition fuction tests
@@ -37,13 +37,13 @@ contract('CountingGame', (accounts) => {
     assert.equal(output, true);
   });
 
-  it("allows START -> FINAL if totals match", async () => {
-    var output = await game.validTransition.call(start, allowedFinal);
+  it("allows START -> CONCLUDED if totals match", async () => {
+    var output = await game.validTransition.call(start, allowedConcluded);
     assert.equal(output, true);
   });
 
-  it("doesn't allow START -> FINAL if totals don't match", async () => {
-    await assertRevert(game.validTransition.call(start, disallowedFinal));
+  it("doesn't allow START -> CONCLUDED if totals don't match", async () => {
+    await assertRevert(game.validTransition.call(start, disallowedConcluded));
   });
 
   // Resolution function tests
@@ -55,8 +55,8 @@ contract('CountingGame', (accounts) => {
     assert.equal(bBal, 4);
   });
 
-  it("resolves the FINAL correctly", async () => {
-    let [aBal, bBal] = await game.resolve.call(allowedFinal);
+  it("resolves the CONCLUDED correctly", async () => {
+    let [aBal, bBal] = await game.resolve.call(allowedConcluded);
     assert.equal(aBal, 5);
     assert.equal(bBal, 4);
   });
