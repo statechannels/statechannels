@@ -25,6 +25,6 @@
     "babel-polyfill": "^6.23.0",
     "babel-preset-env": "^1.6.1",
     "babel-register": "^6.23.0",
-    "eth-gas-reporter": "^0.1.1"
+    "eth-gas-reporter": "^0.1.2"
   }
 }
