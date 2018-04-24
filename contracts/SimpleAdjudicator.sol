@@ -118,10 +118,34 @@ contract SimpleAdjudicator {
   }
 
   function conclude(
+    bytes _yourState,
+    bytes _myState,
+    uint8[] v,
+    bytes32[] r,
+    bytes32[] s
   )
     external
   {
-    // TODO: Implementation
+    // all states must be Concluded
+    // require(ForcedMoveGame(_yourState.channelType()).isConcluded(_yourState));
+    // require(ForcedMoveGame(_myState.channelType()).isConcluded(_myState));
+
+    // states must be signed by the appropriate participant
+    // _yourState.requireSignature(v[0], r[0], s[0]);
+    // _myState.requireSignature(v[1], r[1], s[1]);
+
+    // both states must match the game supported by the channel
+    // require(_yourState.channelId() == fundedChannelId);
+    // require(_myState.channelId() == fundedChannelId);
+
+    // nonce must have incremented
+    // require(_myState.stateNonce() == _yourState.stateNonce() + 1);
+
+    // must be a valid transition
+    // require(ForcedMoveGame(_yourState.channelType()).validTransition(_yourState, _myState));
+
+    // TODO: Implement side effects
+    // require(false, "Implementation required");
   }
 
   function withdrawFunds() public onlyWhenCurrentChallengeExpired {
