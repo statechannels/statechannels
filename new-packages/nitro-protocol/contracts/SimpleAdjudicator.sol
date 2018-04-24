@@ -120,7 +120,6 @@ contract SimpleAdjudicator {
   function conclude(
   )
     external
-    onlyWhenCurrentChallengeInactive // right?
   {
     // TODO: Implementation
   }
