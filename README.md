@@ -2,6 +2,16 @@
 
 An MVP Force-Move Games implementation. **Not production ready.**
 
+## Install
+### Test Node
+1. Download and install [ganache](http://truffleframework.com/ganache/)
+
+### Force Move Framework
+1. $ git clone git@github.com:magmo/minimal-viable-force-move-games.git
+2. $ cd minimal-viable-force-move-games
+3. $ npm install
+4. $ truffle test test/SimpleAdjudicator.js
+
 ## Development
 
 Commands:
