@@ -21,6 +21,11 @@ contract CountingGame {
       require(_new.count() == _old.count() + 1);
 
       return true;
+    } else if (_old.stateType() == CountingState.StateType.Concluded) {
+      require(_new.aBal() == _old.aBal());
+      require(_new.bBal() == _old.bBal());
+
+      return true;
     }
 
     revert();
@@ -31,4 +36,9 @@ contract CountingGame {
     aBal = _state.aBal();
     bBal = _state.bBal();
   }
+
+  function isConcluded(bytes _state) pure public returns(bool) {
+    return true;
+  }
+
 }
