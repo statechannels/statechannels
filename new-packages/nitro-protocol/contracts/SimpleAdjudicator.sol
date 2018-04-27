@@ -183,7 +183,13 @@ contract SimpleAdjudicator {
   }
 
   modifier onlyWhenCurrentChallengeInactive() { require(currentChallenge.expirationTime == 0); _; }
-  modifier onlyWhenCurrentChallengeExpired() { require(currentChallenge.expirationTime <= now); _; }
+  modifier onlyWhenCurrentChallengeExpired() {
+    // check that there is a current challenge
+    require(currentChallenge.expirationTime != 0);
+
+    require(currentChallenge.expirationTime <= now);
+    _;
+  }
   modifier onlyWhenCurrentChallengeActive() {
     // check that there is a current challenge
     require(currentChallenge.expirationTime != 0);
