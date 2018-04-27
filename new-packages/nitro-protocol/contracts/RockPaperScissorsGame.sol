@@ -97,7 +97,7 @@ contract RockPaperScissorsGame {
   }
 
   function isConcluded(bytes _state) pure public returns(bool) {
-    return _state.stateType() == RockPaperScissorsState.StateType.Concluded
+    return _state.stateType() == RockPaperScissorsState.StateType.Concluded;
   }
 
   // transition validations

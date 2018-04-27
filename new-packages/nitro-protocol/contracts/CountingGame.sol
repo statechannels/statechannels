@@ -38,7 +38,6 @@ contract CountingGame {
   }
 
   function isConcluded(bytes _state) pure public returns(bool) {
-    return true;
+    return _state.stateType() == CountingState.StateType.Concluded;
   }
-
 }
