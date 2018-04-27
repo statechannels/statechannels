@@ -109,18 +109,18 @@ contract('SimpleAdjudicator', (accounts) => {
   });
 
   it("conclude", async () => {
-    let myBal = 6;
     let yourBal = 6;
+    let myBal = 6;
     let count = 1;
-    let myState = packIG(0, CONCLUDED, myBal, yourBal, count);
-    let yourState = packIG(1, CONCLUDED, myBal, yourBal, count+1);
+    let yourState = packIG(0, CONCLUDED, myBal, yourBal, count+1);
+    let myState = packIG(1, CONCLUDED, myBal, yourBal, count);
 
-    let me = accounts[1];
     let you = accounts[0];
+    let me = accounts[1];
 
-    let [r0, s0, v0] = ecSignState(myState, me);
-    let [r1, s1, v1] = ecSignState(yourState, you);
+    let [r0, s0, v0] = ecSignState(yourState, you);
+    let [r1, s1, v1] = ecSignState(myState, me);
 
-    await simpleAdj.conclude(myState, yourState, [v0, v1], [r0, r1], [s0, s1] );
+    await simpleAdj.conclude(yourState, myState, [v0, v1], [r0, r1], [s0, s1] );
   });
 });
