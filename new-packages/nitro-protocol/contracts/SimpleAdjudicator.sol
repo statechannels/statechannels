@@ -148,7 +148,11 @@ contract SimpleAdjudicator {
     // require(false, "Implementation required");
   }
 
-  function withdrawFunds() public onlyWhenCurrentChallengeExpired {
+  function withdraw()
+    public
+    onlyWhenCurrentChallengeExpired
+    cancelCurrentChallengeAfter // prevent multiple withdrawals
+  {
     currentChallenge.state.participant(0).transfer(
       min(currentChallenge.resolvedBalances[0], address(this).balance)
     );
