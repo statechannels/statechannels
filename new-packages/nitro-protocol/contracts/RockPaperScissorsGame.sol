@@ -22,8 +22,8 @@ contract RockPaperScissorsGame {
         validateStartToRoundProposed(_old, _new);
 
         return true;
-      } else if (_new.stateType() == RockPaperScissorsState.StateType.Final) {
-        validateStartToFinal(_old, _new);
+      } else if (_new.stateType() == RockPaperScissorsState.StateType.Concluded) {
+        validateStartToConcluded(_old, _new);
 
         return true;
       }
@@ -96,6 +96,10 @@ contract RockPaperScissorsGame {
       }
   }
 
+  function isConcluded(bytes _state) pure public returns(bool) {
+    return _state.stateType() == RockPaperScissorsState.StateType.Concluded
+  }
+
   // transition validations
   function validateStartToRoundProposed(bytes _old, bytes _new) private pure {
     require(_new.stake() > 0);
@@ -107,7 +111,7 @@ contract RockPaperScissorsGame {
     // we should maybe require that aPreCommit isn't empty, but then it will only hurt a later if it is
   }
 
-  function validateStartToFinal(bytes _old, bytes _new) private pure {
+  function validateStartToConcluded(bytes _old, bytes _new) private pure {
     require(_new.aBal() == _old.aBal());
     require(_new.bBal() == _old.bBal());
   }
