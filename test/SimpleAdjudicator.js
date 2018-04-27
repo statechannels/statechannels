@@ -87,7 +87,7 @@ contract('SimpleAdjudicator', (accounts) => {
     await simpleAdj.alternativeRespondWithMove(alternativeState, responseState, [v2, v3], [r2, r3], [s2, s3]);
   });
 
-  it("forceMove -> timeout -> withdrawFunds", async () => {
+  it("forceMove -> timeout -> withdraw", async () => {
     // fund the contract
     await simpleAdj.send(web3.toWei(10, "ether"));
 
@@ -104,8 +104,7 @@ contract('SimpleAdjudicator', (accounts) => {
 
     await increaseTime(duration.days(2));
 
-    // TODO: make this work
-    await simpleAdj.withdrawFunds();
+    await simpleAdj.withdraw();
   });
 
   it("conclude", async () => {
