@@ -91,8 +91,10 @@ contract('SimpleAdjudicator', (accounts) => {
     // fund the contract
     await simpleAdj.send(web3.toWei(10, "ether"));
 
-    let agreedState = packIG(0, START, 4, 6, 1);
-    let challengeState = packIG(1, START, 4, 6, 2);
+    let challengerBal = web3.toWei(4, "ether");
+    let challengeeBal = web3.toWei(6, "ether");
+    let agreedState = packIG(0, START, challengeeBal, challengerBal, 1);
+    let challengeState = packIG(1, START, challengeeBal, challengerBal, 2);
 
     let challenger = accounts[1];
     let challengee = accounts[0];
@@ -104,7 +106,22 @@ contract('SimpleAdjudicator', (accounts) => {
 
     await increaseTime(duration.days(2));
 
+    console.log("before");
+    console.log(web3.eth.getBalance(simpleAdj.address));
+    console.log(web3.eth.getBalance(challenger));
+    console.log(web3.eth.getBalance(challengee));
+
     await simpleAdj.withdraw();
+
+    console.log("after");
+    console.log(web3.eth.getBalance(simpleAdj.address));
+    console.log(web3.eth.getBalance(challenger));
+    console.log(web3.eth.getBalance(challengee));
+
+    //TODO: Make these assertions pass
+    assert.equal(web3.eth.getBalance(simpleAdj.address), 0, "Contract wasn't emptied");
+    assert.equal(web3.eth.getBalance(challenger), challengerBal, "Resolved balances incorrect.");
+    assert.equal(web3.eth.getBalance(challengee), challengeeBal, "Resolved balances incorrect.");
   });
 
   it("conclude", async () => {
