@@ -60,7 +60,6 @@ contract SimpleAdjudicator {
   function refute(bytes _refutationState, uint8 v, bytes32 r, bytes32 s)
     external
     onlyWhenCurrentChallengeActive
-    cancelCurrentChallengeAfter
   {
     require(currentChallenge.state.channelId() == _refutationState.channelId());
 
@@ -70,12 +69,13 @@ contract SimpleAdjudicator {
     require(_refutationState.mover() == currentChallenge.state.mover());
     // ... and be signed (by that mover)
     _refutationState.requireSignature(v, r, s);
+
+    cancelCurrentChallenge();
   }
 
   function respondWithMove(bytes _nextState, uint8 v, bytes32 r, bytes32 s)
     external
     onlyWhenCurrentChallengeActive
-    cancelCurrentChallengeAfter
   {
     require(currentChallenge.state.channelId() == _nextState.channelId());
 
@@ -87,6 +87,8 @@ contract SimpleAdjudicator {
 
     // must be valid transition
     require(ForcedMoveGame(_nextState.channelType()).validTransition(currentChallenge.state, _nextState));
+
+    cancelCurrentChallenge();
   }
 
   function alternativeRespondWithMove(
@@ -98,7 +100,6 @@ contract SimpleAdjudicator {
   )
     external
     onlyWhenCurrentChallengeActive
-    cancelCurrentChallengeAfter
   {
     require(currentChallenge.state.channelId() == _nextState.channelId());
 
@@ -115,6 +116,8 @@ contract SimpleAdjudicator {
     require(ForcedMoveGame(_nextState.channelType()).validTransition(_alternativeState, _nextState));
     // .. it must be signed (my the challengee)
     _nextState.requireSignature(v[1], r[1], s[1]);
+
+    cancelCurrentChallenge();
   }
 
   function conclude(
@@ -151,7 +154,6 @@ contract SimpleAdjudicator {
   function withdraw()
     public
     onlyWhenCurrentChallengeExpired
-    cancelCurrentChallengeAfter // prevent multiple withdrawals
   {
     currentChallenge.state.participant(0).transfer(
       min(currentChallenge.resolvedBalances[0], address(this).balance)
@@ -159,6 +161,8 @@ contract SimpleAdjudicator {
     currentChallenge.state.participant(1).transfer(
       min(currentChallenge.resolvedBalances[1], address(this).balance)
     );
+
+    cancelCurrentChallenge(); // prevent multiple withdrawals
   }
 
   function instantWithdrawal(
@@ -182,6 +186,12 @@ contract SimpleAdjudicator {
     return a < b ? a : b;
   }
 
+  function cancelCurrentChallenge() {
+    // Cancel challenge.
+    // TODO: zero out everything(?)
+    currentChallenge.expirationTime = 0;
+  }
+
   modifier onlyWhenCurrentChallengeInactive() { require(currentChallenge.expirationTime == 0); _; }
   modifier onlyWhenCurrentChallengeExpired() {
     // check that there is a current challenge
@@ -197,12 +207,5 @@ contract SimpleAdjudicator {
     // and that we're within the timeout
     require(currentChallenge.expirationTime > now);
     _;
-  }
-  modifier cancelCurrentChallengeAfter() {
-    _;
-
-    // Cancel challenge.
-    // TODO: zero out everything(?)
-    currentChallenge.expirationTime = 0;
   }
 }
