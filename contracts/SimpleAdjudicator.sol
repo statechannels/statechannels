@@ -35,7 +35,7 @@ contract SimpleAdjudicator {
     bytes32[] s
   )
     external
-    onlyWhenCurrentChallengeInactive
+    onlyWhenCurrentChallengeNotPresent
   {
     // states must be signed by the appropriate participant
     _yourState.requireSignature(v[0], r[0], s[0]);
@@ -51,11 +51,39 @@ contract SimpleAdjudicator {
     // must be a valid transition
     require(ForceMoveGame(_yourState.channelType()).validTransition(_yourState, _myState));
 
-    currentChallenge.state = _myState;
-    currentChallenge.expirationTime = uint32(now + challengeDuration);
-    // figure out the resolution immediately
-    (currentChallenge.resolvedBalances[0], currentChallenge.resolvedBalances[1]) = ForceMoveGame(_yourState.channelType()).resolve(_myState);
+    createChallenge(uint32(now + challengeDuration), _myState);
   }
+
+  function conclude(
+    bytes _yourState,
+    bytes _myState,
+    uint8[] v,
+    bytes32[] r,
+    bytes32[] s
+  )
+    external
+  {
+    // all states must be Concluded
+    require(ForceMoveGame(_yourState.channelType()).isConcluded(_yourState));
+    require(ForceMoveGame(_myState.channelType()).isConcluded(_myState));
+
+    // states must be signed by the appropriate participant
+    _yourState.requireSignature(v[0], r[0], s[0]);
+    _myState.requireSignature(v[1], r[1], s[1]);
+
+    // both states must match the game supported by the channel
+    require(_yourState.channelId() == fundedChannelId);
+    require(_myState.channelId() == fundedChannelId);
+
+    // nonce must have incremented
+    require(_myState.stateNonce() == _yourState.stateNonce() + 1);
+
+    // must be a valid transition
+    require(ForceMoveGame(_yourState.channelType()).validTransition(_yourState, _myState));
+
+    createChallenge(uint32(now), _myState);
+  }
+
 
   function refute(bytes _refutationState, uint8 v, bytes32 r, bytes32 s)
     external
@@ -120,35 +148,15 @@ contract SimpleAdjudicator {
     cancelCurrentChallenge();
   }
 
-  function conclude(
-    bytes _yourState,
-    bytes _myState,
-    uint8[] v,
-    bytes32[] r,
-    bytes32[] s
-  )
-    external
-  {
-    // all states must be Concluded
-    require(ForceMoveGame(_yourState.channelType()).isConcluded(_yourState));
-    require(ForceMoveGame(_myState.channelType()).isConcluded(_myState));
+  event Time(uint32 time);
+  function createChallenge(uint32 expirationTime, bytes _state) {
+    currentChallenge.state = _state;
+    currentChallenge.expirationTime = expirationTime;
 
-    // states must be signed by the appropriate participant
-    _yourState.requireSignature(v[0], r[0], s[0]);
-    _myState.requireSignature(v[1], r[1], s[1]);
+    emit Time(expirationTime);
+    emit Time(uint32(now));
 
-    // both states must match the game supported by the channel
-    require(_yourState.channelId() == fundedChannelId);
-    require(_myState.channelId() == fundedChannelId);
-
-    // nonce must have incremented
-    require(_myState.stateNonce() == _yourState.stateNonce() + 1);
-
-    // must be a valid transition
-    require(ForceMoveGame(_yourState.channelType()).validTransition(_yourState, _myState));
-
-    // TODO: Implement side effects
-    // require(false, "Implementation required");
+    (currentChallenge.resolvedBalances[0], currentChallenge.resolvedBalances[1]) = ForceMoveGame(_state.channelType()).resolve(_state);
   }
 
   function withdraw()
@@ -191,25 +199,32 @@ contract SimpleAdjudicator {
     currentChallenge.expirationTime = 0;
   }
 
-  // For testing...
   function currentChallengePresent() public view returns (bool) {
-    return currentChallenge.expirationTime != 0;
+    return currentChallenge.expirationTime > 0;
   }
 
-  modifier onlyWhenCurrentChallengeInactive() { require(currentChallenge.expirationTime == 0); _; }
-  modifier onlyWhenCurrentChallengeExpired() {
-    // check that there is a current challenge
-    require(currentChallenge.expirationTime != 0);
+  function activeChallengePresent() public view returns (bool) {
+    return (currentChallenge.expirationTime > now);
+  }
 
-    require(currentChallenge.expirationTime <= now);
+  function expiredChallengePresent() public view returns (bool) {
+    return currentChallengePresent() && !activeChallengePresent();
+  }
+
+  // Modifiers
+  modifier onlyWhenCurrentChallengeNotPresent() {
+   require(!currentChallengePresent());
+   _;
+  }
+
+  modifier onlyWhenCurrentChallengeExpired() {
+    require(expiredChallengePresent());
+
     _;
   }
-  modifier onlyWhenCurrentChallengeActive() {
-    // check that there is a current challenge
-    require(currentChallenge.expirationTime != 0);
 
-    // and that we're within the timeout
-    require(currentChallenge.expirationTime > now);
+  modifier onlyWhenCurrentChallengeActive() {
+    require(activeChallengePresent());
     _;
   }
 }
