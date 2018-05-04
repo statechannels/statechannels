@@ -1,10 +1,10 @@
 pragma solidity ^0.4.23;
 
 import './CommonState.sol';
-import './ForcedMoveGame.sol';
+import './ForceMoveGame.sol';
 
 contract SimpleAdjudicator {
-  // SimpleAdjudicator can support exactly one forced move game channel
+  // SimpleAdjudicator can support exactly one force move game channel
   using CommonState for bytes;
 
   bytes32 public fundedChannelId;
@@ -49,12 +49,12 @@ contract SimpleAdjudicator {
     require(_myState.stateNonce() == _yourState.stateNonce() + 1);
 
     // must be a valid transition
-    require(ForcedMoveGame(_yourState.channelType()).validTransition(_yourState, _myState));
+    require(ForceMoveGame(_yourState.channelType()).validTransition(_yourState, _myState));
 
     currentChallenge.state = _myState;
     currentChallenge.expirationTime = uint32(now + challengeDuration);
     // figure out the resolution immediately
-    (currentChallenge.resolvedBalances[0], currentChallenge.resolvedBalances[1]) = ForcedMoveGame(_yourState.channelType()).resolve(_myState);
+    (currentChallenge.resolvedBalances[0], currentChallenge.resolvedBalances[1]) = ForceMoveGame(_yourState.channelType()).resolve(_myState);
   }
 
   function refute(bytes _refutationState, uint8 v, bytes32 r, bytes32 s)
@@ -86,7 +86,7 @@ contract SimpleAdjudicator {
     _nextState.requireSignature(v, r, s);
 
     // must be valid transition
-    require(ForcedMoveGame(_nextState.channelType()).validTransition(currentChallenge.state, _nextState));
+    require(ForceMoveGame(_nextState.channelType()).validTransition(currentChallenge.state, _nextState));
 
     cancelCurrentChallenge();
   }
@@ -113,7 +113,7 @@ contract SimpleAdjudicator {
     // .. the nonce must have increased by 1
     require(currentChallenge.state.stateNonce() + 1 == _nextState.stateNonce());
     // .. it must be a valid transition of the gamestate (from the alternative state)
-    require(ForcedMoveGame(_nextState.channelType()).validTransition(_alternativeState, _nextState));
+    require(ForceMoveGame(_nextState.channelType()).validTransition(_alternativeState, _nextState));
     // .. it must be signed (my the challengee)
     _nextState.requireSignature(v[1], r[1], s[1]);
 
@@ -130,8 +130,8 @@ contract SimpleAdjudicator {
     external
   {
     // all states must be Concluded
-    require(ForcedMoveGame(_yourState.channelType()).isConcluded(_yourState));
-    require(ForcedMoveGame(_myState.channelType()).isConcluded(_myState));
+    require(ForceMoveGame(_yourState.channelType()).isConcluded(_yourState));
+    require(ForceMoveGame(_myState.channelType()).isConcluded(_myState));
 
     // states must be signed by the appropriate participant
     _yourState.requireSignature(v[0], r[0], s[0]);
@@ -145,7 +145,7 @@ contract SimpleAdjudicator {
     require(_myState.stateNonce() == _yourState.stateNonce() + 1);
 
     // must be a valid transition
-    require(ForcedMoveGame(_yourState.channelType()).validTransition(_yourState, _myState));
+    require(ForceMoveGame(_yourState.channelType()).validTransition(_yourState, _myState));
 
     // TODO: Implement side effects
     // require(false, "Implementation required");
@@ -171,12 +171,12 @@ contract SimpleAdjudicator {
     bytes32[] r,
     bytes32[] s
   ) public {
-    require(ForcedMoveGame(_state.channelType()).isConcluded(_state));
+    require(ForceMoveGame(_state.channelType()).isConcluded(_state));
 
     // agreedState must be double-signed
     _state.requireFullySigned(v, r, s);
     uint[] memory balances;
-    (balances[0], balances[1]) = ForcedMoveGame(_state.channelType()).resolve(_state);
+    (balances[0], balances[1]) = ForceMoveGame(_state.channelType()).resolve(_state);
 
     _state.participant(0).transfer(min(balances[0], address(this).balance));
     _state.participant(1).transfer(min(balances[1], address(this).balance));
