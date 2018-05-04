@@ -85,12 +85,16 @@ contract('SimpleAdjudicator', (accounts) => {
     let [r0, s0, v0] = ecSignState(agreedState, challengee);
     let [r1, s1, v1] = ecSignState(challengeState, challenger);
 
+    assert.equal(await simpleAdj.currentChallengePresent(), false, "challenge exists at start of game");
+
     await simpleAdj.forceMove(agreedState, challengeState, [v0, v1], [r0, r1], [s0, s1] );
+    assert.equal(await simpleAdj.currentChallengePresent(), true, "challenge not created");
 
     let [r2, s2, v2] = ecSignState(alternativeState, challenger);
     let [r3, s3, v3] = ecSignState(responseState, challengee);
 
     await simpleAdj.alternativeRespondWithMove(alternativeState, responseState, [v2, v3], [r2, r3], [s2, s3]);
+    assert.equal(await simpleAdj.currentChallengePresent(), false, "challenge not cancelled");
   });
 
   it("forceMove -> timeout -> withdraw", async () => {
