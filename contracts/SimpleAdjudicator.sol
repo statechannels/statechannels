@@ -186,7 +186,7 @@ contract SimpleAdjudicator {
     return a < b ? a : b;
   }
 
-  function cancelCurrentChallenge() {
+  function cancelCurrentChallenge() private{
     // Cancel challenge.
     // TODO: zero out everything(?)
     currentChallenge.expirationTime = 0;
