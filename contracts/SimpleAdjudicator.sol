@@ -192,6 +192,11 @@ contract SimpleAdjudicator {
     currentChallenge.expirationTime = 0;
   }
 
+  // For testing...
+  function currentChallengePresent() public view returns (bool) {
+    return currentChallenge.expirationTime != 0;
+  }
+
   modifier onlyWhenCurrentChallengeInactive() { require(currentChallenge.expirationTime == 0); _; }
   modifier onlyWhenCurrentChallengeExpired() {
     // check that there is a current challenge
