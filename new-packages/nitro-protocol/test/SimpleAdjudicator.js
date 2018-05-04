@@ -61,14 +61,16 @@ contract('SimpleAdjudicator', (accounts) => {
     let [r0, s0, v0] = ecSignState(agreedState, challengee);
     let [r1, s1, v1] = ecSignState(challengeState, challenger);
 
+    assert.equal(await simpleAdj.currentChallengePresent(), false, "challenge exists at start of game");
+
     await simpleAdj.forceMove(agreedState, challengeState, [v0, v1], [r0, r1], [s0, s1] );
-    // how can I check on the state of the contract?
-    // console.log(simpleAdj.currentChallenge);
+    assert.equal(await simpleAdj.currentChallengePresent(), true, "challenge wasn't created");
 
     // refute
     let [r2, s2, v2] = ecSignState(refutationState, challenger);
 
     await simpleAdj.refute(refutationState, v2, r2, s2);
+    assert.equal(await simpleAdj.currentChallengePresent(), false, "challenge wasn't canceled");
   });
 
   it("forceMove -> alternativeRespondWithMove", async () => {
