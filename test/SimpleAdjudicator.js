@@ -175,6 +175,13 @@ contract('SimpleAdjudicator', (accounts) => {
     let [r0, s0, v0] = ecSignState(yourState, you);
     let [r1, s1, v1] = ecSignState(myState, me);
 
+    assert.equal(await simpleAdj.currentChallengePresent(), false, "current challenge exists at start of game");
+    assert.equal(await simpleAdj.expiredChallengePresent(), false, "expired challenge exists at start of game");
+
     await simpleAdj.conclude(yourState, myState, [v0, v1], [r0, r1], [s0, s1] );
+
+    assert.equal(await simpleAdj.currentChallengePresent(), true, "conclude didn't create current challenge");
+    assert.equal(await simpleAdj.expiredChallengePresent(), true, "conclude did not create expired challenge");
+    assert.equal(await simpleAdj.activeChallengePresent(), false, "conclude created active challenge");
   });
 });
