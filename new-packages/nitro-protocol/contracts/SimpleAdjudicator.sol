@@ -81,9 +81,9 @@ contract SimpleAdjudicator {
     // must be a valid transition
     require(ForceMoveGame(_yourState.channelType()).validTransition(_yourState, _myState));
 
+    // Create an expired challenge, (possibly) overwriting any existing challenge
     createChallenge(uint32(now), _myState);
   }
-
 
   function refute(bytes _refutationState, uint8 v, bytes32 r, bytes32 s)
     external
