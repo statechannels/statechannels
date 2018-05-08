@@ -36,3 +36,14 @@ export function hashCommitment(play, salt) {
   let paddedSalt = toHex32(salt);
   return web3.sha3(paddedPlay + paddedSalt, {encoding: 'hex'}); // concat and hash
 }
+
+// enum names aren't supported in ABI, so have to use integers for time being
+export const START = 0;
+export const ROUNDPROPOSED = 1;
+export const ROUNDACCEPTED = 2;
+export const REVEAL = 3;
+export const CONCLUDED = 4;
+
+export const ROCK = 0;
+export const PAPER = 1;
+export const SCISSORS = 2;
