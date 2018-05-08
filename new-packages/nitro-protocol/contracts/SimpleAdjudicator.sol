@@ -148,13 +148,9 @@ contract SimpleAdjudicator {
     cancelCurrentChallenge();
   }
 
-  event Time(uint32 time);
-  function createChallenge(uint32 expirationTime, bytes _state) {
+  function createChallenge(uint32 expirationTime, bytes _state) private {
     currentChallenge.state = _state;
     currentChallenge.expirationTime = expirationTime;
-
-    emit Time(expirationTime);
-    emit Time(uint32(now));
 
     (currentChallenge.resolvedBalances[0], currentChallenge.resolvedBalances[1]) = ForceMoveGame(_state.channelType()).resolve(_state);
   }
