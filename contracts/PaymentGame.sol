@@ -10,15 +10,15 @@ contract PaymentGame {
   // The following transitions are allowed:
   //
   // Transacting -> Transacting
-  // Transacting -> Final
+  // Transacting -> Concluded
   //
   function validTransition(bytes _old, bytes _new) public pure returns (bool) {
-    // can't move on from a final state
+    // can't move on from a concluded state
     require(_old.stateType() == PaymentState.StateType.Transacting);
 
     // otherwise, the rules are the same for both transitions:
 
-    // conserve final balance
+    // conserve concluded balance
     require(_old.aBal() + _old.bBal() == _new.aBal() + _new.bBal());
 
     // can't take someone else's funds by moving

@@ -3,7 +3,7 @@ pragma solidity ^0.4.18;
 import './CommonState.sol';
 
 library RockPaperScissorsState {
-  enum StateType { Start, RoundProposed, RoundAccepted, Reveal, Final }
+  enum StateType { Start, RoundProposed, RoundAccepted, Reveal, Concluded }
   enum Play { Rock, Paper, Scissors }
 
   // RockPaperScissors State Fields

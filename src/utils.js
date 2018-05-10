@@ -3,13 +3,13 @@ export function toHex32(num) {
 }
 
 export function padBytes32(data){
-  let l = 66-data.length
-  let x = data.substr(2, data.length)
+  let l = 66-data.length;
+  let x = data.substr(2, data.length);
 
   for(var i=0; i<l; i++) {
-    x = 0 + x
+    x = 0 + x;
   }
-  return '0x' + x
+  return '0x' + x;
 }
 
 // https://stackoverflow.com/a/42203200

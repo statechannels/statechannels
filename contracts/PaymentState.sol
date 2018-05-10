@@ -3,7 +3,7 @@ pragma solidity ^0.4.18;
 import './CommonState.sol';
 
 library PaymentState {
-  enum StateType { Transacting, Final }
+  enum StateType { Transacting, Concluded }
 
   // PaymentGame State Fields
   // (relative to gamestate offset)
