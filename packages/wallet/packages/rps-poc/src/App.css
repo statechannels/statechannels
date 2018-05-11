@@ -1,4 +1,20 @@
-.App-intro {
-  margin-left: 20px;
-  margin-right: 20px;
+h1 {
+	font-size: 60px;
+}
+
+.font {
+	font-family: 'Montserrat', sans-serif;
+}
+
+h3 {
+	font-weight: bold;
+	color: black;
+}
+
+a {
+  text-decoration-line: none;
+}
+
+a :hover {
+	color: #3b00a5;
 }
