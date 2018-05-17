@@ -23,7 +23,9 @@ export default function HomePage() {
 					</div>
 				</div>
 				<div style={{ width: '50%', display: 'inline-block' }}>
-					<div style={{ width: '100%', height: 350, backgroundColor: 'red' }} />
+					<div style={{ width: '100%', height: 350, backgroundColor: 'antiquewhite' }}>
+						*** gif or video of game goes here **
+					</div>
 				</div>
 			</div>
 			<div style={{ textAlign: 'center', paddingTop: 40 }}>
