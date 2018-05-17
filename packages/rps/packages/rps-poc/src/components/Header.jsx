@@ -1,6 +1,7 @@
 import React from "react";
+import { Link } from 'react-router-dom';
 
-import '../App.css';
+import { ROUTE_PATHS } from '../constants';
 
 export default function Header() {
 	return (
@@ -14,17 +15,17 @@ export default function Header() {
 			}}
 		>
 			<div style={{ position: 'absolute', left: 20 }}>
-				<a href="/">
+				<Link to="/">
 					<h3>RPS</h3>
-				</a>
+				</Link>
 			</div>
 			<div style={{ position: 'absolute', right: 20, top: 0 }}>
-				<a style={{ display: 'inline-block', marginRight: 16 }} href="/">
+				<Link style={{ display: 'inline-block', marginRight: 16 }} to="/">
 					<h3>Home</h3>
-				</a>
-				<a style={{ display: 'inline-block' }} href="/about">
+				</Link>
+				<Link style={{ display: 'inline-block' }} to={`/${ROUTE_PATHS.ABOUT}`}>
 					<h3>About</h3>
-				</a>
+				</Link>
 			</div>
 		</div>
 	);
