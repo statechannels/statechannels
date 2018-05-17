@@ -1,3 +1,5 @@
+@value brandColor: #518453;
+
 h1 {
 	font-size: 60px;
 }
@@ -8,13 +10,31 @@ h1 {
 
 h3 {
 	font-weight: bold;
-	color: black;
 }
 
 a {
-  text-decoration-line: none;
+	text-decoration-line: none;
+	color: black;
 }
 
-a :hover {
-	color: #3b00a5;
+a:hover {
+	color: brandColor;
+	text-decoration-line: underline;
+}
+
+.button {
+	border-radius: 3px;
+	padding: 3px 16px 4px;
+	background-color: #fff;
+	border-color: #999;
+	border-style: solid;
+	border-width: 1px;
+	font-size: 24px;
+	color: #000;
+	text-transform: uppercase;
+	font-weight: bold;
+}
+
+.button:hover {
+	text-decoration-line: underline;
 }
