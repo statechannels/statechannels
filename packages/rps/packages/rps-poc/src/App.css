@@ -5,7 +5,7 @@ h1 {
 }
 
 .font {
-	font-family: 'Montserrat', sans-serif;
+	font-family: 'Cabin', sans-serif;
 }
 
 h3 {
@@ -31,10 +31,16 @@ a:hover {
 	border-width: 1px;
 	font-size: 24px;
 	color: #000;
-	text-transform: uppercase;
 	font-weight: bold;
+	transition: background-color 0.5s ease;
+	box-shadow: 0px 0px 1px;
 }
 
 .button:hover {
 	text-decoration-line: underline;
+	background-color: brandColor;
+}
+
+a.button:hover {
+	color: white;
 }
