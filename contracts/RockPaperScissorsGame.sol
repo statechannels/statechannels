@@ -4,7 +4,6 @@ import './CommonState.sol';
 import './RockPaperScissorsState.sol';
 
 contract RockPaperScissorsGame {
-  using CommonState for bytes;
   using RockPaperScissorsState for bytes;
 
   // The following transitions are allowed:
@@ -17,34 +16,34 @@ contract RockPaperScissorsGame {
   // Start -> Concluded
   //
   function validTransition(bytes _old, bytes _new) public pure returns (bool) {
-    if (_old.stateType() == RockPaperScissorsState.StateType.Start) {
-      if (_new.stateType() == RockPaperScissorsState.StateType.RoundProposed) {
+    if (_old.positionType() == RockPaperScissorsState.PositionType.Start) {
+      if (_new.positionType() == RockPaperScissorsState.PositionType.RoundProposed) {
         validateStartToRoundProposed(_old, _new);
 
         return true;
-      } else if (_new.stateType() == RockPaperScissorsState.StateType.Concluded) {
+      } else if (_new.positionType() == RockPaperScissorsState.PositionType.Concluded) {
         validateStartToConcluded(_old, _new);
 
         return true;
       }
-    } else if (_old.stateType() == RockPaperScissorsState.StateType.RoundProposed) {
-      if (_new.stateType() == RockPaperScissorsState.StateType.Start) { // game rejected
+    } else if (_old.positionType() == RockPaperScissorsState.PositionType.RoundProposed) {
+      if (_new.positionType() == RockPaperScissorsState.PositionType.Start) { // game rejected
         validateRoundProposedToRejected(_old, _new);
 
         return true;
-      } else if (_new.stateType() == RockPaperScissorsState.StateType.RoundAccepted) {
+      } else if (_new.positionType() == RockPaperScissorsState.PositionType.RoundAccepted) {
         validateRoundProposedToRoundAccepted(_old, _new);
 
         return true;
       }
-    } else if (_old.stateType() == RockPaperScissorsState.StateType.RoundAccepted) {
-      if (_new.stateType() == RockPaperScissorsState.StateType.Reveal) {
+    } else if (_old.positionType() == RockPaperScissorsState.PositionType.RoundAccepted) {
+      if (_new.positionType() == RockPaperScissorsState.PositionType.Reveal) {
         validateRoundAcceptedToReveal(_old, _new);
 
         return true;
       }
-    } else if (_old.stateType() == RockPaperScissorsState.StateType.Reveal) {
-      if (_new.stateType() == RockPaperScissorsState.StateType.Start) {
+    } else if (_old.positionType() == RockPaperScissorsState.PositionType.Reveal) {
+      if (_new.positionType() == RockPaperScissorsState.PositionType.Start) {
         validateRevealToStart(_old, _new);
 
         return true;
@@ -57,21 +56,21 @@ contract RockPaperScissorsGame {
   // in this case the resolution function is pure, but it doesn't have to be in general
   function resolve(bytes _state) public pure returns (uint aBal, uint bBal) {
 
-    if (_state.stateType() == RockPaperScissorsState.StateType.Start) {
+    if (_state.positionType() == RockPaperScissorsState.PositionType.Start) {
       aBal = _state.aBal();
       bBal = _state.bBal();
-    } else if (_state.stateType() == RockPaperScissorsState.StateType.Concluded) {
+    } else if (_state.positionType() == RockPaperScissorsState.PositionType.Concluded) {
       aBal = _state.aBal();
       bBal = _state.bBal();
-    } else if (_state.stateType() == RockPaperScissorsState.StateType.RoundProposed) {
+    } else if (_state.positionType() == RockPaperScissorsState.PositionType.RoundProposed) {
       aBal = _state.aBal() + _state.stake();
       bBal = _state.bBal() + _state.stake();
-    } else if (_state.stateType() == RockPaperScissorsState.StateType.RoundAccepted) {
+    } else if (_state.positionType() == RockPaperScissorsState.PositionType.RoundAccepted) {
       // if we're stuck here, assume a doesn't want to move
       // TODO: how do we know it's a's move ...
       aBal = _state.aBal();
       bBal = _state.bBal() + 2 * _state.stake();
-    } else if (_state.stateType() == RockPaperScissorsState.StateType.Reveal) {
+    } else if (_state.positionType() == RockPaperScissorsState.PositionType.Reveal) {
       // in this state we need to know who won
       uint256 aWinnings;
       uint256 bWinnings;
@@ -97,7 +96,7 @@ contract RockPaperScissorsGame {
   }
 
   function isConcluded(bytes _state) pure public returns(bool) {
-    return _state.stateType() == RockPaperScissorsState.StateType.Concluded;
+    return _state.positionType() == RockPaperScissorsState.PositionType.Concluded;
   }
 
   // transition validations

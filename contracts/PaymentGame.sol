@@ -14,7 +14,7 @@ contract PaymentGame {
   //
   function validTransition(bytes _old, bytes _new) public pure returns (bool) {
     // can't move on from a concluded state
-    require(_old.stateType() == PaymentState.StateType.Transacting);
+    require(_old.positionType() == PaymentState.PositionType.Transacting);
 
     // otherwise, the rules are the same for both transitions:
 

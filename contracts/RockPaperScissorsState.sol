@@ -3,13 +3,13 @@ pragma solidity ^0.4.18;
 import './CommonState.sol';
 
 library RockPaperScissorsState {
-  enum StateType { Start, RoundProposed, RoundAccepted, Reveal, Concluded }
+  enum PositionType { Start, RoundProposed, RoundAccepted, Reveal, Concluded }
   enum Play { Rock, Paper, Scissors }
 
   // RockPaperScissors State Fields
   // (relative to gamestate offset)
   // ==============================
-  // [  0 -  31] enum stateType
+  // [  0 -  31] enum eType
   // [ 32 -  63] uint256 aBal
   // [ 64 -  95] uint256 bBal
   // [ 96 - 127] uint256 stake
@@ -18,10 +18,10 @@ library RockPaperScissorsState {
   // [192 - 223] enum aPlay
   // [224 - 255] bytes32 salt
 
-  function stateType(bytes _state) public pure returns (StateType _stateType) {
+  function positionType(bytes _state) public pure returns (PositionType _positionType) {
     uint offset = CommonState.gameStateOffset(_state);
     assembly {
-      _stateType := mload(add(_state, offset))
+      _positionType := mload(add(_state, offset))
     }
   }
 

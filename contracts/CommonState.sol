@@ -1,6 +1,8 @@
 pragma solidity ^0.4.18;
 
 library CommonState {
+  enum StateType { Start, RoundProposed, RoundAccepted, Reveal, Concluded }
+  
   // Common State Fields
   // ===================
   // [  0 -  31] (bytestring meta info)

@@ -3,20 +3,20 @@ pragma solidity ^0.4.18;
 import './CommonState.sol';
 
 library CountingState {
-  enum StateType { Start, Concluded }
+  enum PositionType { Start, Concluded }
 
   // CountingGame State Fields
   // (relative to gamestate offset)
   // ==============================
-  // [  0 -  31] enum stateType
+  // [  0 -  31] enum positionType
   // [ 32 -  63] uint256 aBal
   // [ 64 -  95] uint256 bBal
   // [ 96 - 127] uint256 count
 
-  function stateType(bytes _state) public pure returns (StateType _stateType) {
+  function positionType(bytes _state) public pure returns (PositionType _positionType) {
     uint offset = CommonState.gameStateOffset(_state);
     assembly {
-      _stateType := mload(add(_state, offset))
+      _positionType := mload(add(_state, offset))
     }
   }
 
