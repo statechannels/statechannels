@@ -1,16 +1,17 @@
 pragma solidity ^0.4.18;
 
 library CommonState {
-  enum StateType { Start, RoundProposed, RoundAccepted, Reveal, Concluded }
-  
+  enum StateType { Propose, Accept, Game, Conclude }
+
   // Common State Fields
   // ===================
   // [  0 -  31] (bytestring meta info)
   // [ 32 -  63] address channelType
   // [ 64 -  95] uint256 channelNonce
-  // [ 96 - 127] uint256 stateNonce
-  // [128 - 159] uint256 numberOfParticipants
-  // [160 -   ?] address[] participants
+  // [ 96 -  127] uint256 stateType
+  // [128 - 159] uint256 stateNonce
+  // [160 - 191] uint256 numberOfParticipants
+  // [191 -   ?] address[] participants
   // [  ? -   ?] bytes gameState
 
   function channelType(bytes _state) public pure returns (address _channelType) {
@@ -25,15 +26,21 @@ library CommonState {
     }
   }
 
+  function stateType(bytes _state) public pure returns (StateType _stateType) {
+    assembly {
+      _stateType := mload(add(_state, 96))
+    }
+  }
+
   function stateNonce(bytes _state) public pure returns (uint _stateNonce) {
     assembly {
-      _stateNonce := mload(add(_state, 96))
+      _stateNonce := mload(add(_state, 128))
     }
   }
 
   function numberOfParticipants(bytes _state) public pure returns (uint _numberOfParticipants) {
     assembly {
-      _numberOfParticipants := mload(add(_state, 128))
+      _numberOfParticipants := mload(add(_state, 160))
     }
 
     require(_numberOfParticipants == 2); // for now
@@ -46,7 +53,7 @@ library CommonState {
 
     for(uint i = 0; i < n; i++) {
       assembly {
-        currentParticipant := mload(add(_state, add(160, mul(32, i))))
+        currentParticipant := mload(add(_state, add(192, mul(32, i))))
       }
 
       extractedParticipants[i] = currentParticipant;
@@ -59,7 +66,7 @@ library CommonState {
     require(_index < n);
 
     assembly {
-      _participant := mload(add(_state, add(160, mul(32, _index))))
+      _participant := mload(add(_state, add(192, mul(32, _index))))
     }
   }
 
@@ -91,7 +98,7 @@ library CommonState {
   }
 
   function gameStateOffset(bytes _state) public pure returns (uint) {
-    return 160 + 32 * numberOfParticipants(_state);
+    return 192 + 32 * numberOfParticipants(_state);
   }
 
   // utilities

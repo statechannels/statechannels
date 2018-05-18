@@ -8,10 +8,12 @@ export function pack(
   participantB,
   gameState
 ) {
+  let stateType = 0; // for time being
   return (
     "0x" +
     padBytes32(channelType).substr(2, 66) +
     toHex32(channelNonce) +
+    toHex32(stateType) +
     toHex32(stateNonce) +
     toHex32(2) +
     padBytes32(participantA).substr(2, 66) +
