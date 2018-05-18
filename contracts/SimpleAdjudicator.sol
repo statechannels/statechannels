@@ -49,7 +49,7 @@ contract SimpleAdjudicator {
     require(_myState.stateNonce() == _yourState.stateNonce() + 1);
 
     // must be a valid transition
-    require(ForceMoveGame(_yourState.channelType()).validTransition(_yourState, _myState));
+    require(validTransition(_yourState, _myState));
 
     createChallenge(uint32(now + challengeDuration), _myState);
   }
@@ -79,7 +79,7 @@ contract SimpleAdjudicator {
     require(_myState.stateNonce() == _yourState.stateNonce() + 1);
 
     // must be a valid transition
-    require(ForceMoveGame(_yourState.channelType()).validTransition(_yourState, _myState));
+    require(validTransition(_yourState, _myState));
 
     // Create an expired challenge, (possibly) overwriting any existing challenge
     createChallenge(uint32(now), _myState);
@@ -114,7 +114,7 @@ contract SimpleAdjudicator {
     _nextState.requireSignature(v, r, s);
 
     // must be valid transition
-    require(ForceMoveGame(_nextState.channelType()).validTransition(currentChallenge.state, _nextState));
+    require(validTransition(currentChallenge.state, _nextState));
 
     cancelCurrentChallenge();
   }
@@ -141,7 +141,7 @@ contract SimpleAdjudicator {
     // .. the nonce must have increased by 1
     require(currentChallenge.state.stateNonce() + 1 == _nextState.stateNonce());
     // .. it must be a valid transition of the gamestate (from the alternative state)
-    require(ForceMoveGame(_nextState.channelType()).validTransition(_alternativeState, _nextState));
+    require(validTransition(_alternativeState, _nextState));
     // .. it must be signed (my the challengee)
     _nextState.requireSignature(v[1], r[1], s[1]);
 
@@ -184,6 +184,11 @@ contract SimpleAdjudicator {
 
     _state.participant(0).transfer(min(balances[0], address(this).balance));
     _state.participant(1).transfer(min(balances[1], address(this).balance));
+  }
+
+  function validTransition(bytes _fromState, bytes _toState) public pure returns (bool) {
+    require(_fromState.channelType() == _toState.channelType());
+    return ForceMoveGame(_fromState.channelType()).validTransition(_fromState, _toState);
   }
 
   function min(uint256 a, uint256 b) private pure returns (uint256) {
