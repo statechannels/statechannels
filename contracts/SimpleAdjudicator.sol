@@ -187,6 +187,16 @@ contract SimpleAdjudicator {
   }
 
   function validTransition(bytes _fromState, bytes _toState) public pure returns (bool) {
+    if (_fromState.stateType() == CommonState.StateType.Propose) {
+
+    } else if (_fromState.stateType() == CommonState.StateType.Accept) {
+
+    } else if (_fromState.stateType() == CommonState.StateType.Game) {
+
+    } else if (_fromState.stateType() == CommonState.StateType.Conclude) {
+
+    }
+
     require(_fromState.channelType() == _toState.channelType());
     return ForceMoveGame(_fromState.channelType()).validTransition(_fromState, _toState);
   }
