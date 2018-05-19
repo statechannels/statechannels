@@ -46,7 +46,26 @@ class State {
       this.position.substr(2)
     )
   }
+
+  sign(account) {
+    const digest = web3.sha3(this.toHex(), {encoding: 'hex'}).substr(2);
+    const sig = web3.eth.sign(account, digest).slice(2);
+    const r = `0x${sig.slice(0, 64)}`;
+    const s = `0x${sig.slice(64, 128)}`;
+    const v = web3.toDecimal(sig.slice(128, 130)) + 27;
+
+    return [ r, s, v ];
+  }
 }
+
+State.StateTypes = {
+  PROPOSE: 0,
+  ACCEPT: 1,
+  GAME: 2,
+  CONCLUDE: 3,
+}
+
+export { Channel, State };
 
 export function pack(
   channelType,
