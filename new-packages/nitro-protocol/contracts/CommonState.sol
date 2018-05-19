@@ -73,10 +73,8 @@ library CommonState {
     }
   }
 
-  function channelId(bytes /*_state*/) public pure returns (bytes32) {
-    /* return keccak256(channelType(_state), channelNonce(_state), participants(_state)); */
-    // TODO: fix this!!
-    return 0xaaa;
+  function channelId(bytes _state) public pure returns (bytes32) {
+    return keccak256(channelType(_state), channelNonce(_state), participants(_state));
   }
 
   function mover(bytes _state) public pure returns (address) {

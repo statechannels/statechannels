@@ -1,4 +1,5 @@
 import { toHex32, padBytes32 } from './utils';
+import { soliditySha3 } from 'web3-utils';
 
 class Channel {
   constructor(channelType, channelNonce, participants) {
@@ -9,6 +10,14 @@ class Channel {
 
   numberOfParticipants() {
     return this.participants.length;
+  }
+
+  id() {
+    return soliditySha3(
+      { type: 'address', value: this.channelType },
+      { type: 'uint256', value: this.channelNonce },
+      { type: 'address[]', value: this.participants },
+    );
   }
 
   toHex() {
@@ -49,8 +58,8 @@ export function pack(
 }
 
 export function channelId(channelType, channelNonce, participants) {
-  // TODO: fix this!!
-  return padBytes32("0xaaa");
+  let channel = new Channel(channelType, channelNonce, participants);
+  return channel.id();
 }
 
 export function ecSignState(state, account) {
