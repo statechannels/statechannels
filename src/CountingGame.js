@@ -6,7 +6,7 @@ export function pack(
   channelNonce,
   participantA,
   participantB,
-  stateNonce,
+  turnNum,
   stateType,
   aBal,
   bBal,
@@ -20,5 +20,5 @@ export function pack(
     toHex32(count).substr(2)
   );
 
-  return packCommon(channelType, channelNonce, stateNonce, participantA, participantB, gameState);
+  return packCommon(channelType, channelNonce, turnNum, participantA, participantB, gameState);
 }

@@ -35,9 +35,9 @@ contract('commonStateLib', (accounts) => {
     assert.equal(channelNonce, CHANNEL_NONCE);
   });
 
-  it("extracts the stateNonce", async () => {
-    let stateNonce = await commonStateLib.stateNonce.call(state);
-    assert.equal(stateNonce, STATE_NONCE);
+  it("extracts the turnNum", async () => {
+    let turnNum = await commonStateLib.turnNum.call(state);
+    assert.equal(turnNum, STATE_NONCE);
   });
 
   it("extracts the number of participants", async () => {

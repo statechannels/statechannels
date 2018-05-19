@@ -12,7 +12,7 @@ library CommonState {
   // [128 - x-1] address[] participants
   // ----------- where x = 128 + 32 * numberOfParticipants
   // x + [ 0 - 31] uint256 stateType
-  // x + [32 - 63] uint256 stateNonce
+  // x + [32 - 63] uint256 turnNum
   // x + [64 -  ?] bytes gameState
 
   function channelType(bytes _state) public pure returns (address _channelType) {
@@ -66,10 +66,10 @@ library CommonState {
     }
   }
 
-  function stateNonce(bytes _state) public pure returns (uint _stateNonce) {
+  function turnNum(bytes _state) public pure returns (uint _turnNum) {
     uint256 offset = 32 + numberOfParticipants(_state) * 32 + 128;
     assembly {
-      _stateNonce := mload(add(_state, offset))
+      _turnNum := mload(add(_state, offset))
     }
   }
 
@@ -78,11 +78,11 @@ library CommonState {
   }
 
   function mover(bytes _state) public pure returns (address) {
-    return participants(_state)[stateNonce(_state) % numberOfParticipants(_state)];
+    return participants(_state)[turnNum(_state) % numberOfParticipants(_state)];
   }
 
   function indexOfMover(bytes _state) public pure returns (uint) {
-    return stateNonce(_state) % numberOfParticipants(_state);
+    return turnNum(_state) % numberOfParticipants(_state);
   }
 
   function requireSignature(bytes _state, uint8 _v, bytes32 _r, bytes32 _s) public pure {

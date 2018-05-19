@@ -46,7 +46,7 @@ contract SimpleAdjudicator {
     require(_myState.channelId() == fundedChannelId);
 
     // nonce must have incremented
-    require(_myState.stateNonce() == _yourState.stateNonce() + 1);
+    require(_myState.turnNum() == _yourState.turnNum() + 1);
 
     // must be a valid transition
     require(validTransition(_yourState, _myState));
@@ -76,7 +76,7 @@ contract SimpleAdjudicator {
     require(_myState.channelId() == fundedChannelId);
 
     // nonce must have incremented
-    require(_myState.stateNonce() == _yourState.stateNonce() + 1);
+    require(_myState.turnNum() == _yourState.turnNum() + 1);
 
     // must be a valid transition
     require(validTransition(_yourState, _myState));
@@ -92,7 +92,7 @@ contract SimpleAdjudicator {
     require(currentChallenge.state.channelId() == _refutationState.channelId());
 
     // the refutationState must have a higher nonce
-    require(_refutationState.stateNonce() > currentChallenge.state.stateNonce());
+    require(_refutationState.turnNum() > currentChallenge.state.turnNum());
     // ... with the same mover
     require(_refutationState.mover() == currentChallenge.state.mover());
     // ... and be signed (by that mover)
@@ -108,7 +108,7 @@ contract SimpleAdjudicator {
     require(currentChallenge.state.channelId() == _nextState.channelId());
 
     // check that the nonce has increased
-    require(currentChallenge.state.stateNonce() + 1 == _nextState.stateNonce());
+    require(currentChallenge.state.turnNum() + 1 == _nextState.turnNum());
 
     // check that the challengee's signature matches
     _nextState.requireSignature(v, r, s);
@@ -133,13 +133,13 @@ contract SimpleAdjudicator {
 
     // checking the alternative state:
     // .. it must have the same nonce as the challenge state
-    require(currentChallenge.state.stateNonce() == _alternativeState.stateNonce());
+    require(currentChallenge.state.turnNum() == _alternativeState.turnNum());
     // .. it must be signed (by the challenger)
     _alternativeState.requireSignature(v[0], r[0], s[0]);
 
     // checking the nextState:
     // .. the nonce must have increased by 1
-    require(currentChallenge.state.stateNonce() + 1 == _nextState.stateNonce());
+    require(currentChallenge.state.turnNum() + 1 == _nextState.turnNum());
     // .. it must be a valid transition of the gamestate (from the alternative state)
     require(validTransition(_alternativeState, _nextState));
     // .. it must be signed (my the challengee)
