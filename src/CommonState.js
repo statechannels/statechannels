@@ -1,5 +1,35 @@
 import { toHex32, padBytes32 } from './utils';
 
+class Channel {
+  constructor(channelType, channelNonce, participants) {
+    this.channelType = channelType;
+    this.channelNonce = channelNonce;
+    this.participants = participants;
+  }
+
+  numberOfParticipants() {
+    return this.participants.length;
+  }
+
+  toHex() {
+    return (
+      padBytes32(this.channelType) +
+      toHex32(this.channelNonce).substr(2) +
+      toHex32(this.numberOfParticipants()).substr(2) +
+      this.participants.map(x => padBytes32(x).substr(2)).join("")
+    )
+  }
+}
+
+class State {
+  constructor(channel, stateType, turnNum, position) {
+    this.channel = channel;
+    this.stateType = stateType;
+    this.turnNum = turnNum;
+    this.position = position;
+  }
+}
+
 export function pack(
   channelType,
   channelNonce,
@@ -8,28 +38,17 @@ export function pack(
   participantB,
   gameState
 ) {
+  let channel = new Channel(channelType, channelNonce, [participantA, participantB]);
   let stateType = 0; // for time being
   return (
-    "0x" +
-    padBytes32(channelType).substr(2, 66) +
-    toHex32(channelNonce) +
-    toHex32(stateType) +
-    toHex32(stateNonce) +
-    toHex32(2) +
-    padBytes32(participantA).substr(2, 66) +
-    padBytes32(participantB).substr(2, 66) +
+    channel.toHex() +
+    toHex32(stateType).substr(2) +
+    toHex32(stateNonce).substr(2) +
     gameState.substr(2)
   );
 }
 
 export function channelId(channelType, channelNonce, participants) {
-  let string = (
-    channelType.slice(2) +
-    toHex32(channelNonce) +
-    participants
-  );
-
-  // return web3.sha3(string, {encoding: 'hex'});
   // TODO: fix this!!
   return padBytes32("0xaaa");
 }

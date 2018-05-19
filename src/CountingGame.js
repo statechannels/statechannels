@@ -14,10 +14,10 @@ export function pack(
 ) {
   let gameState = (
     "0x" +
-    toHex32(stateType) +
-    toHex32(aBal) +
-    toHex32(bBal) +
-    toHex32(count)
+    toHex32(stateType).substr(2) +
+    toHex32(aBal).substr(2) +
+    toHex32(bBal).substr(2) +
+    toHex32(count).substr(2)
   );
 
   return packCommon(channelType, channelNonce, stateNonce, participantA, participantB, gameState);

@@ -8,11 +8,12 @@ library CommonState {
   // [  0 -  31] (bytestring meta info)
   // [ 32 -  63] address channelType
   // [ 64 -  95] uint256 channelNonce
-  // [ 96 -  127] uint256 stateType
-  // [128 - 159] uint256 stateNonce
-  // [160 - 191] uint256 numberOfParticipants
-  // [191 -   ?] address[] participants
-  // [  ? -   ?] bytes gameState
+  // [ 96 - 127] uint256 numberOfParticipants
+  // [128 - x-1] address[] participants
+  // ----------- where x = 128 + 32 * numberOfParticipants
+  // x + [ 0 - 31] uint256 stateType
+  // x + [32 - 63] uint256 stateNonce
+  // x + [64 -  ?] bytes gameState
 
   function channelType(bytes _state) public pure returns (address _channelType) {
     assembly {
@@ -26,21 +27,9 @@ library CommonState {
     }
   }
 
-  function stateType(bytes _state) public pure returns (StateType _stateType) {
-    assembly {
-      _stateType := mload(add(_state, 96))
-    }
-  }
-
-  function stateNonce(bytes _state) public pure returns (uint _stateNonce) {
-    assembly {
-      _stateNonce := mload(add(_state, 128))
-    }
-  }
-
   function numberOfParticipants(bytes _state) public pure returns (uint _numberOfParticipants) {
     assembly {
-      _numberOfParticipants := mload(add(_state, 160))
+      _numberOfParticipants := mload(add(_state, 96))
     }
 
     require(_numberOfParticipants == 2); // for now
@@ -53,7 +42,7 @@ library CommonState {
 
     for(uint i = 0; i < n; i++) {
       assembly {
-        currentParticipant := mload(add(_state, add(192, mul(32, i))))
+        currentParticipant := mload(add(_state, add(128, mul(32, i))))
       }
 
       extractedParticipants[i] = currentParticipant;
@@ -66,7 +55,21 @@ library CommonState {
     require(_index < n);
 
     assembly {
-      _participant := mload(add(_state, add(192, mul(32, _index))))
+      _participant := mload(add(_state, add(128, mul(32, _index))))
+    }
+  }
+
+  function stateType(bytes _state) public pure returns (StateType _stateType) {
+    uint256 offset = numberOfParticipants(_state) * 32 + 128;
+    assembly {
+      _stateType := mload(add(_state, offset))
+    }
+  }
+
+  function stateNonce(bytes _state) public pure returns (uint _stateNonce) {
+    uint256 offset = 32 + numberOfParticipants(_state) * 32 + 128;
+    assembly {
+      _stateNonce := mload(add(_state, offset))
     }
   }
 

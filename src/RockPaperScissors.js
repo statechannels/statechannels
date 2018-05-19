@@ -18,22 +18,22 @@ export function pack(
 ) {
   let gameState =  (
     "0x" +
-    toHex32(stateType) +
-    toHex32(aBal) +
-    toHex32(bBal) +
-    toHex32(stake) +
+    toHex32(stateType).substr(2) +
+    toHex32(aBal).substr(2) +
+    toHex32(bBal).substr(2) +
+    toHex32(stake).substr(2) +
     padBytes32(aPreCommit).substr(2, 66) +
-    toHex32(bPlay) +
-    toHex32(aPlay) +
-    toHex32(aSalt)
+    toHex32(bPlay).substr(2) +
+    toHex32(aPlay).substr(2) +
+    toHex32(aSalt).substr(2)
   );
 
   return packCommon(channelType, channelNonce, stateNonce, participantA, participantB, gameState);
 }
 
 export function hashCommitment(play, salt) {
-  let paddedPlay = toHex32(play);
-  let paddedSalt = toHex32(salt);
+  let paddedPlay = toHex32(play).substr(2);
+  let paddedSalt = toHex32(salt).substr(2);
   return web3.sha3(paddedPlay + paddedSalt, {encoding: 'hex'}); // concat and hash
 }
 
