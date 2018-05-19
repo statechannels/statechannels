@@ -16,10 +16,10 @@ contract('CountingGame', (accounts) => {
   before(async () => {
     game = await IG.deployed();
 
-    let pack = (stateNonce, stateType, aBal, bBal, count) => {
+    let pack = (turnNum, stateType, aBal, bBal, count) => {
       return packState(
         game.address, 0, accounts[0], accounts[1],
-        stateNonce, stateType, aBal, bBal, count
+        turnNum, stateType, aBal, bBal, count
       );
     };
 

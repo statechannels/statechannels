@@ -21,10 +21,10 @@ contract('RockPaperScissors', (accounts) => {
   before(async () => {
     rpsGame = await RPS.deployed();
 
-    let pack = (stateNonce, stateType, aBal, bBal, stake, commit, aPlay, bPlay, salt) => {
+    let pack = (turnNum, stateType, aBal, bBal, stake, commit, aPlay, bPlay, salt) => {
       return packState(
         rpsGame.address, 0, accounts[0], accounts[1],
-        stateNonce, stateType, aBal, bBal,
+        turnNum, stateType, aBal, bBal,
         stake, commit, aPlay, bPlay, salt
       );
     };

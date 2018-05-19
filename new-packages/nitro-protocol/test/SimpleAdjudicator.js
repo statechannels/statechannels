@@ -21,10 +21,10 @@ contract('SimpleAdjudicator', (accounts) => {
     let id = channelId(incGame.address, 0, [accounts[A_IDX], accounts[B_IDX]]);
     simpleAdj = await SimpleAdjudicator.new(id);
 
-    packIG = (stateNonce, stateType, aBal, bBal, count) => {
+    packIG = (turnNum, stateType, aBal, bBal, count) => {
       return packIGState(
         incGame.address, 0, accounts[A_IDX], accounts[B_IDX],
-        stateNonce, stateType, aBal, bBal, count
+        turnNum, stateType, aBal, bBal, count
       );
     };
   });

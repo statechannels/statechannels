@@ -51,14 +51,14 @@ class State {
 export function pack(
   channelType,
   channelNonce,
-  stateNonce,
+  turnNum,
   participantA,
   participantB,
   gameState
 ) {
   let channel = new Channel(channelType, channelNonce, [participantA, participantB]);
   let stateType = 0; // for time being
-  let state = new State(channel, stateType, stateNonce, gameState);
+  let state = new State(channel, stateType, turnNum, gameState);
   return state.toHex();
 }
 
