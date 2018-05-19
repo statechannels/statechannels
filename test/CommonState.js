@@ -24,7 +24,7 @@ contract('commonStateLib', (accounts) => {
       GAME_STATE
     );
   });
-
+  
   it("extracts the channelType", async () => {
     let channelType = await commonStateLib.channelType.call(state);
     assert.equal(channelType, CHANNEL_TYPE);
