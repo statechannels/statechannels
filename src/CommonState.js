@@ -37,6 +37,15 @@ class State {
     this.turnNum = turnNum;
     this.position = position;
   }
+
+  toHex() {
+    return (
+      this.channel.toHex() +
+      toHex32(this.stateType).substr(2) +
+      toHex32(this.turnNum).substr(2) +
+      this.position.substr(2)
+    )
+  }
 }
 
 export function pack(
@@ -49,12 +58,8 @@ export function pack(
 ) {
   let channel = new Channel(channelType, channelNonce, [participantA, participantB]);
   let stateType = 0; // for time being
-  return (
-    channel.toHex() +
-    toHex32(stateType).substr(2) +
-    toHex32(stateNonce).substr(2) +
-    gameState.substr(2)
-  );
+  let state = new State(channel, stateType, stateNonce, gameState);
+  return state.toHex();
 }
 
 export function channelId(channelType, channelNonce, participants) {
