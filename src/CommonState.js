@@ -8,11 +8,11 @@ class Channel {
     this.participants = participants;
   }
 
-  numberOfParticipants() {
+  get numberOfParticipants() {
     return this.participants.length;
   }
 
-  id() {
+  get id() {
     return soliditySha3(
       { type: 'address', value: this.channelType },
       { type: 'uint256', value: this.channelNonce },
@@ -24,7 +24,7 @@ class Channel {
     return (
       padBytes32(this.channelType) +
       toHex32(this.channelNonce).substr(2) +
-      toHex32(this.numberOfParticipants()).substr(2) +
+      toHex32(this.numberOfParticipants).substr(2) +
       this.participants.map(x => padBytes32(x).substr(2)).join("")
     )
   }
@@ -83,7 +83,7 @@ export function pack(
 
 export function channelId(channelType, channelNonce, participants) {
   let channel = new Channel(channelType, channelNonce, participants);
-  return channel.id();
+  return channel.id;
 }
 
 export function ecSignState(state, account) {

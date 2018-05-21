@@ -25,7 +25,6 @@ class Position {
       toHex32(this.aSalt).substr(2)
     )
   }
-
 }
 
 Position.PositionTypes = {
