@@ -9,9 +9,9 @@ contract('commonStateLib', (accounts) => {
   const TURN_NUM = 15;
   const CHANNEL_TYPE = accounts[0]; // just get a valid address
   const PARTICIPANTS = [accounts[1], accounts[2]];
-  const GAME_STATE = "0xdeadbeef";
+  const POSITION = "0xdeadbeef"; // arbitrary data
   const channel = new Channel(CHANNEL_TYPE, CHANNEL_NONCE, PARTICIPANTS);
-  const state = new State(channel, State.StateTypes.GAME, TURN_NUM, GAME_STATE);
+  const state = new State(channel, State.StateTypes.GAME, TURN_NUM, POSITION);
   const statePacket = state.toHex();
 
   before(async () => {

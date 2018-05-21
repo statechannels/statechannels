@@ -1,33 +1,57 @@
 import { toHex32, padBytes32 } from './utils';
 import { pack as packCommon } from './CommonState';
 
+class Position {
+  constructor(positionType, aBal, bBal, stake, preCommit, bPlay, aPlay, aSalt) {
+    this.positionType = positionType;
+    this.aBal = aBal;
+    this.bBal = bBal;
+    this.stake = stake;
+    this.preCommit = preCommit;
+    this.aPlay = aPlay;
+    this.bPlay = bPlay;
+    this.aSalt = aSalt;
+  }
+
+  toHex() {
+    return (
+      toHex32(this.positionType) +
+      toHex32(this.aBal).substr(2) +
+      toHex32(this.bBal).substr(2) +
+      toHex32(this.stake).substr(2) +
+      padBytes32(this.preCommit).substr(2) +
+      toHex32(this.bPlay).substr(2) +
+      toHex32(this.aPlay).substr(2) +
+      toHex32(this.aSalt).substr(2)
+    )
+  }
+
+}
+
+Position.PositionTypes = {
+  RESTING: 0,
+  ROUNDPROPOSED: 1,
+  ROUNDACCEPTED: 2,
+  REVEAL: 3,
+}
+
 export function pack(
   channelType,
   channelNonce,
   participantA,
   participantB,
   turnNum,
-  stateType,
+  positionType,
   aBal,
   bBal,
   stake,
-  aPreCommit,
+  preCommit,
   bPlay,
   aPlay,
   aSalt
 ) {
-  let gameState =  (
-    "0x" +
-    toHex32(stateType).substr(2) +
-    toHex32(aBal).substr(2) +
-    toHex32(bBal).substr(2) +
-    toHex32(stake).substr(2) +
-    padBytes32(aPreCommit).substr(2, 66) +
-    toHex32(bPlay).substr(2) +
-    toHex32(aPlay).substr(2) +
-    toHex32(aSalt).substr(2)
-  );
-
+  let pos = new Position(positionType, aBal, bBal, stake, preCommit, bPlay, aPlay, aSalt);
+  let gameState = pos.toHex();
   return packCommon(channelType, channelNonce, turnNum, participantA, participantB, gameState);
 }
 
