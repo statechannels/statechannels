@@ -57,7 +57,7 @@ contract('commonStateLib', (accounts) => {
 
   it("can calculate the channelId", async () => {
     let chainId = await commonStateLib.channelId.call(statePacket);
-    let localId = channel.id();
+    let localId = channel.id;
 
     assert.equal(chainId, localId);
   });
