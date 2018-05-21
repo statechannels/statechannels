@@ -1,5 +1,6 @@
 import assertRevert from './helpers/assertRevert';
 import { pack as packState, hashCommitment} from '../src/RockPaperScissors';
+import { Resting, RoundProposed, RoundAccepted, Reveal} from '../src/RockPaperScissors';
 
 import {START, ROUNDPROPOSED, ROUNDACCEPTED, REVEAL, CONCLUDED} from '../src/RockPaperScissors.js';
 import {ROCK, PAPER, SCISSORS} from '../src/RockPaperScissors.js';
@@ -32,7 +33,6 @@ contract('RockPaperScissors', (accounts) => {
     start = pack(0, START, 5, 4, 0, "0x00", 0, 0, 0);
     allowedConcluded = pack(1, CONCLUDED, 5, 4, 0, "0x00", 0, 0, 0);
     disallowedConcluded = pack(1, CONCLUDED, 3, 6, 0, "0x00", 0, 0, 0); // totals don't match
-
 
     propose = pack(1, ROUNDPROPOSED, 4, 3, 1, preCommit, 0, 0, 0);
     accept = pack(2, ROUNDACCEPTED, 4, 3, 1, preCommit, PAPER, 0, 0);
@@ -106,4 +106,10 @@ contract('RockPaperScissors', (accounts) => {
     assert.equal(aBal, 4);
     assert.equal(bBal, 5);
   });
+
+  // Serializing / Deserializing
+  // ===========================
+
+
+
 });
