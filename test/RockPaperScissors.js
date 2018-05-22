@@ -5,19 +5,21 @@ import { Resting, RoundProposed, RoundAccepted, Reveal} from '../src/RockPaperSc
 import {START, ROUNDPROPOSED, ROUNDACCEPTED, REVEAL, CONCLUDED} from '../src/RockPaperScissors.js';
 import {ROCK, PAPER, SCISSORS} from '../src/RockPaperScissors.js';
 
+import { Position as RpsPosition} from '../src/RockPaperScissors';
+import { Channel, State } from '../src/CommonState';
+
 var RPS = artifacts.require("./RockPaperScissorsGame.sol");
 
 contract('RockPaperScissors', (accounts) => {
   let rpsGame;
-  const salt = 0xdeadbeef; // some random bytes32 value
-  const preCommit = hashCommitment(ROCK, salt);
-  let start;
+  const salt = "0xaaa"; // some random bytes32 value
   let allowedConcluded;
   let disallowedConcluded;
-  let propose;
-  let accept;
-  let reveal;
-  let newStart;
+  let initialState;
+  let proposeState;
+  let acceptState;
+  let revealState;
+  let finalRestingState;
 
   before(async () => {
     rpsGame = await RPS.deployed();
@@ -30,45 +32,46 @@ contract('RockPaperScissors', (accounts) => {
       );
     };
 
-    start = pack(0, START, 5, 4, 0, "0x00", 0, 0, 0);
-    allowedConcluded = pack(1, CONCLUDED, 5, 4, 0, "0x00", 0, 0, 0);
-    disallowedConcluded = pack(1, CONCLUDED, 3, 6, 0, "0x00", 0, 0, 0); // totals don't match
+    let channel = new Channel(rpsGame.address, 0, [accounts[0], accounts[1]]);
+    let initialPosition = RpsPosition.initialPosition(5, 4);
 
-    propose = pack(1, ROUNDPROPOSED, 4, 3, 1, preCommit, 0, 0, 0);
-    accept = pack(2, ROUNDACCEPTED, 4, 3, 1, preCommit, PAPER, 0, 0);
-    reveal = pack(3, REVEAL, 4, 3, 1, preCommit, PAPER, ROCK, salt);
-    newStart = pack(4, START, 4, 5, 0, "0x00", 0, 0, 0);
+    initialState = new State(channel, State.StateTypes.GAME, 0, initialPosition);
+    proposeState = initialState.next(initialState.position.propose(1, RpsPosition.Plays.PAPER, salt));
+    acceptState = proposeState.next(proposeState.position.accept(RpsPosition.Plays.SCISSORS));
+    revealState = acceptState.next(acceptState.position.reveal(RpsPosition.Plays.PAPER, salt));
+    finalRestingState = revealState.next(revealState.position.confirm());
   });
 
   // Transition fuction tests
   // ========================
 
   it("allows START -> ROUNDPROPOSED", async () => {
-    var output = await rpsGame.validTransition.call(start, propose);
+    var output = await rpsGame.validTransition.call(initialState.toHex(), proposeState.toHex());
     assert.equal(output, true);
   });
 
-  it("allows START -> CONCLUDED if totals match", async () => {
-    var output = await rpsGame.validTransition.call(start, allowedConcluded);
-    assert.equal(output, true);
-  });
-
-  it("doesn't allow START -> CONCLUDED if totals don't match", async () => {
-    await assertRevert(rpsGame.validTransition.call(start, disallowedConcluded));
-  });
+  // TODO: add this back in once concluded states are in
+  // it("allows START -> CONCLUDED if totals match", async () => {
+  //   var output = await rpsGame.validTransition.call(initialState.toHex(), allowedConcluded);
+  //   assert.equal(output, true);
+  // });
+  //
+  // it("doesn't allow START -> CONCLUDED if totals don't match", async () => {
+  //   await assertRevert(rpsGame.validTransition.call(start, disallowedConcluded));
+  // });
 
   it("allows ROUNDPROPOSED -> ROUNDACCEPTED", async () => {
-    var output = await rpsGame.validTransition.call(propose, accept);
+    var output = await rpsGame.validTransition.call(proposeState.toHex(), acceptState.toHex());
     assert.equal(output, true);
   });
 
   it("allows ROUNDACCEPTED -> REVEAL", async () => {
-    var output = await rpsGame.validTransition.call(accept, reveal);
+    var output = await rpsGame.validTransition(acceptState.toHex(), revealState.toHex());
     assert.equal(output, true);
   });
 
   it("allows REVEAL -> (updated) START", async () => {
-    var output = await rpsGame.validTransition.call(reveal, newStart);
+    var output = await rpsGame.validTransition.call(revealState.toHex(), finalRestingState.toHex());
     assert.equal(output, true);
   });
 
@@ -76,40 +79,38 @@ contract('RockPaperScissors', (accounts) => {
   // =========================
 
   it("resolves the START correctly", async () => {
-    let [aBal, bBal] = await rpsGame.resolve.call(start);
+    let [aBal, bBal] = await rpsGame.resolve.call(initialState.toHex());
     assert.equal(aBal, 5);
     assert.equal(bBal, 4);
   });
 
-  it("resolves the CONCLUDED correctly", async () => {
-    let [aBal, bBal] = await rpsGame.resolve.call(allowedConcluded);
-    assert.equal(aBal, 5);
-    assert.equal(bBal, 4);
-  });
+  // TODO: add back when concluded states are in
+  // it("resolves the CONCLUDED correctly", async () => {
+  //   skip();
+  //   let [aBal, bBal] = await rpsGame.resolve.call(allowedConcluded);
+  //   assert.equal(aBal, 5);
+  //   assert.equal(bBal, 4);
+  // });
 
   it("resolves the ROUNDPROPOSED correctly", async () => {
-    let [aBal, bBal] = await rpsGame.resolve.call(propose);
+    let [aBal, bBal] = await rpsGame.resolve.call(proposeState.toHex());
     assert.equal(aBal, 5);
     assert.equal(bBal, 4);
   });
 
   it("resolves the ROUNDACCEPTED correctly", async () => {
     // in this state it is assumed that a isn't revealing because b won
-    let [aBal, bBal] = await rpsGame.resolve.call(accept);
+    let [aBal, bBal] = await rpsGame.resolve.call(acceptState.toHex());
     assert.equal(aBal, 4);
     assert.equal(bBal, 5);
   });
 
   it("resolves the REVEAL correctly", async () => {
     // in the reveal state we can see that B did win
-    let [aBal, bBal] = await rpsGame.resolve.call(reveal);
+    let [aBal, bBal] = await rpsGame.resolve.call(revealState.toHex());
     assert.equal(aBal, 4);
     assert.equal(bBal, 5);
   });
-
-  // Serializing / Deserializing
-  // ===========================
-
 
 
 });

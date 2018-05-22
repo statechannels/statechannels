@@ -1,5 +1,6 @@
 import { toHex32, padBytes32 } from './utils';
 import { pack as packCommon } from './CommonState';
+import { soliditySha3 } from 'web3-utils';
 
 class Position {
   constructor(positionType, aBal, bBal, stake, preCommit, bPlay, aPlay, salt) {
@@ -8,8 +9,8 @@ class Position {
     this.bBal = bBal;
     this.stake = stake;
     this.preCommit = padBytes32(preCommit);
-    this.aPlay = aPlay;
     this.bPlay = bPlay;
+    this.aPlay = aPlay;
     this.salt = padBytes32(salt);
   }
 
@@ -44,9 +45,10 @@ class Position {
   }
 
   static hashCommitment(play, salt) {
-    let paddedPlay = toHex32(play).substr(2);
-    let paddedSalt = toHex32(salt).substr(2);
-    return web3.sha3(paddedPlay + paddedSalt, {encoding: 'hex'}); // concat and hash
+    return soliditySha3(
+      { type: 'uint256', value: play },
+      { type: 'bytes32', value: padBytes32(salt) },
+    );
   }
 
   propose(stake, aPlay, salt) {
@@ -123,14 +125,18 @@ export function pack(
   salt
 ) {
   let pos = new Position(positionType, aBal, bBal, stake, preCommit, bPlay, aPlay, salt);
-  let gameState = pos.toHex();
-  return packCommon(channelType, channelNonce, turnNum, participantA, participantB, gameState);
+  return packCommon(channelType, channelNonce, turnNum, participantA, participantB, pos);
 }
 
 export function hashCommitment(play, salt) {
-  let paddedPlay = toHex32(play).substr(2);
-  let paddedSalt = toHex32(salt).substr(2);
-  return web3.sha3(paddedPlay + paddedSalt, {encoding: 'hex'}); // concat and hash
+  return soliditySha3(
+    { type: 'uint256', value: play },
+    { type: 'bytes32', value: salt },
+  );
+
+  // let paddedPlay = toHex32(play).substr(2);
+  // let paddedSalt = toHex32(salt).substr(2);
+  // return web3.sha3(paddedPlay + paddedSalt, {encoding: 'hex'}); // concat and hash
 }
 
 // enum names aren't supported in ABI, so have to use integers for time being
