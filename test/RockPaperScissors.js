@@ -1,9 +1,4 @@
 import assertRevert from './helpers/assertRevert';
-import { pack as packState, hashCommitment} from '../src/RockPaperScissors';
-import { Resting, RoundProposed, RoundAccepted, Reveal} from '../src/RockPaperScissors';
-
-import {START, ROUNDPROPOSED, ROUNDACCEPTED, REVEAL, CONCLUDED} from '../src/RockPaperScissors.js';
-import {ROCK, PAPER, SCISSORS} from '../src/RockPaperScissors.js';
 
 import { Position as RpsPosition} from '../src/RockPaperScissors';
 import { Channel, State } from '../src/CommonState';
@@ -23,14 +18,6 @@ contract('RockPaperScissors', (accounts) => {
 
   before(async () => {
     rpsGame = await RPS.deployed();
-
-    let pack = (turnNum, stateType, aBal, bBal, stake, commit, aPlay, bPlay, salt) => {
-      return packState(
-        rpsGame.address, 0, accounts[0], accounts[1],
-        turnNum, stateType, aBal, bBal,
-        stake, commit, aPlay, bPlay, salt
-      );
-    };
 
     let channel = new Channel(rpsGame.address, 0, [accounts[0], accounts[1]]);
     let initialPosition = RpsPosition.initialPosition(5, 4);
