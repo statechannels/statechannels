@@ -43,7 +43,7 @@ class State {
       this.channel.toHex() +
       toHex32(this.stateType).substr(2) +
       toHex32(this.turnNum).substr(2) +
-      this.position.substr(2)
+      this.position.toHex().substr(2)
     )
   }
 
@@ -55,6 +55,10 @@ class State {
     const v = web3.toDecimal(sig.slice(128, 130)) + 27;
 
     return [ r, s, v ];
+  }
+
+  next(newPosition) {
+    return new State(this.channel, this.stateType, this.turnNum + 1, newPosition);
   }
 }
 
