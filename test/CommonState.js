@@ -85,9 +85,9 @@ contract('commonStateLib', (accounts) => {
   it("calculates the offset for the gameState", async() => {
     let offset = await commonStateLib.gameStateOffset.call(statePacket);
 
-    // should be 192 + 2 * 32 = 256
+    // should be 128 + 2 * 32 + 96 = 288
     // TODO find better way to test this
-    assert.equal(offset, 256);
+    assert.equal(offset, 288);
   });
 
 });
