@@ -12,21 +12,14 @@ contract CountingGame {
   // Start -> Concluded
   //
   function validTransition(bytes _old, bytes _new) public pure returns (bool) {
-    if (_old.positionType() == CountingState.PositionType.Start) {
-      // regardless of whether we move to a Start or Concluded state, we must have:
-      // 1. balances remain the same
-      // 2. count must increase
-      require(_new.aBal() == _old.aBal());
-      require(_new.bBal() == _old.bBal());
-      require(_new.count() == _old.count() + 1);
+    // regardless of whether we move to a Start or Concluded state, we must have:
+    // 1. balances remain the same
+    // 2. count must increase
+    require(_new.aBal() == _old.aBal());
+    require(_new.bBal() == _old.bBal());
+    require(_new.count() == _old.count() + 1);
 
-      return true;
-    } else if (_old.positionType() == CountingState.PositionType.Concluded) {
-      require(_new.aBal() == _old.aBal());
-      require(_new.bBal() == _old.bBal());
-
-      return true;
-    }
+    return true;
 
     revert();
   }
@@ -37,7 +30,8 @@ contract CountingGame {
     bBal = _state.bBal();
   }
 
+  // TODO: remove
   function isConcluded(bytes _state) pure public returns(bool) {
-    return _state.positionType() == CountingState.PositionType.Concluded;
+    return false;
   }
 }
