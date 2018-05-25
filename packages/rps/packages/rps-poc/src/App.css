@@ -23,21 +23,32 @@ a:hover {
 }
 
 .button {
-	border-radius: 3px;
+	border-radius: 2px;
 	padding: 3px 16px 4px;
 	background-color: #fff;
-	border-color: #999;
+	border-color: #666;
 	border-style: solid;
 	border-width: 1px;
 	font-size: 24px;
 	color: #000;
-	font-weight: bold;
 	transition: background-color 0.5s ease;
 	box-shadow: 0px 0px 1px;
 }
 
+table, td {
+   border: 1px solid black;
+}
+
+td, th {
+  padding: 16px;
+}
+
+table {
+  border-collapse: collapse;
+}
+
 .button:hover {
-	text-decoration-line: underline;
+	text-decoration-line: none;
 	background-color: brandColor;
 }
 
