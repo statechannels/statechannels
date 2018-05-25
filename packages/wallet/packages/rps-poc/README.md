@@ -20,4 +20,4 @@ Please use the sublime package *JsPrettier* for formatting. All of the defaults 
 ```
 
 ### Current state:
-![screenshot](https://user-images.githubusercontent.com/12832034/39908910-2bd24c40-54a5-11e8-94ea-557dfba99a8f.png "screenshot")
+![screenshot](https://user-images.githubusercontent.com/12832034/40526428-44e37118-5f9b-11e8-8e63-c5fbaf9cae59.png "screenshot")
