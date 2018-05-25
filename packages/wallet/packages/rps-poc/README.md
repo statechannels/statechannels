@@ -12,7 +12,7 @@
 
 #### Project style
 
-Please use the sublime package *JsPrettier* for formatting. All of the defaults should make sense, but please change the following:
+Please use the sublime package *JsPrettier* for formatting. All of the defaults should make sense except for the following:
 ```
   "printWidth": 100,
   "singleQuote": true,
