@@ -46,10 +46,10 @@ contract SimpleAdjudicator {
     require(_myState.channelId() == fundedChannelId);
 
     // nonce must have incremented
-    require(_myState.stateNonce() == _yourState.stateNonce() + 1);
+    require(_myState.turnNum() == _yourState.turnNum() + 1);
 
     // must be a valid transition
-    require(ForceMoveGame(_yourState.channelType()).validTransition(_yourState, _myState));
+    require(validTransition(_yourState, _myState));
 
     createChallenge(uint32(now + challengeDuration), _myState);
   }
@@ -76,10 +76,10 @@ contract SimpleAdjudicator {
     require(_myState.channelId() == fundedChannelId);
 
     // nonce must have incremented
-    require(_myState.stateNonce() == _yourState.stateNonce() + 1);
+    require(_myState.turnNum() == _yourState.turnNum() + 1);
 
     // must be a valid transition
-    require(ForceMoveGame(_yourState.channelType()).validTransition(_yourState, _myState));
+    require(validTransition(_yourState, _myState));
 
     // Create an expired challenge, (possibly) overwriting any existing challenge
     createChallenge(uint32(now), _myState);
@@ -92,7 +92,7 @@ contract SimpleAdjudicator {
     require(currentChallenge.state.channelId() == _refutationState.channelId());
 
     // the refutationState must have a higher nonce
-    require(_refutationState.stateNonce() > currentChallenge.state.stateNonce());
+    require(_refutationState.turnNum() > currentChallenge.state.turnNum());
     // ... with the same mover
     require(_refutationState.mover() == currentChallenge.state.mover());
     // ... and be signed (by that mover)
@@ -108,13 +108,13 @@ contract SimpleAdjudicator {
     require(currentChallenge.state.channelId() == _nextState.channelId());
 
     // check that the nonce has increased
-    require(currentChallenge.state.stateNonce() + 1 == _nextState.stateNonce());
+    require(currentChallenge.state.turnNum() + 1 == _nextState.turnNum());
 
     // check that the challengee's signature matches
     _nextState.requireSignature(v, r, s);
 
     // must be valid transition
-    require(ForceMoveGame(_nextState.channelType()).validTransition(currentChallenge.state, _nextState));
+    require(validTransition(currentChallenge.state, _nextState));
 
     cancelCurrentChallenge();
   }
@@ -133,15 +133,15 @@ contract SimpleAdjudicator {
 
     // checking the alternative state:
     // .. it must have the same nonce as the challenge state
-    require(currentChallenge.state.stateNonce() == _alternativeState.stateNonce());
+    require(currentChallenge.state.turnNum() == _alternativeState.turnNum());
     // .. it must be signed (by the challenger)
     _alternativeState.requireSignature(v[0], r[0], s[0]);
 
     // checking the nextState:
     // .. the nonce must have increased by 1
-    require(currentChallenge.state.stateNonce() + 1 == _nextState.stateNonce());
+    require(currentChallenge.state.turnNum() + 1 == _nextState.turnNum());
     // .. it must be a valid transition of the gamestate (from the alternative state)
-    require(ForceMoveGame(_nextState.channelType()).validTransition(_alternativeState, _nextState));
+    require(validTransition(_alternativeState, _nextState));
     // .. it must be signed (my the challengee)
     _nextState.requireSignature(v[1], r[1], s[1]);
 
@@ -184,6 +184,21 @@ contract SimpleAdjudicator {
 
     _state.participant(0).transfer(min(balances[0], address(this).balance));
     _state.participant(1).transfer(min(balances[1], address(this).balance));
+  }
+
+  function validTransition(bytes _fromState, bytes _toState) public pure returns (bool) {
+    if (_fromState.stateType() == CommonState.StateType.Propose) {
+
+    } else if (_fromState.stateType() == CommonState.StateType.Accept) {
+
+    } else if (_fromState.stateType() == CommonState.StateType.Game) {
+
+    } else if (_fromState.stateType() == CommonState.StateType.Conclude) {
+
+    }
+
+    require(_fromState.channelType() == _toState.channelType());
+    return ForceMoveGame(_fromState.channelType()).validTransition(_fromState, _toState);
   }
 
   function min(uint256 a, uint256 b) private pure returns (uint256) {
