@@ -102,7 +102,7 @@ library CommonState {
         address[] memory p = participants(_state);
 
         for(uint i = 0; i < n; i++) {
-          require(p[i] == recoverSigner(_state, _v[i], _r[i], _s[i]));
+            require(p[i] == recoverSigner(_state, _v[i], _r[i], _s[i]));
         }
     }
 
