@@ -20,8 +20,6 @@ contract CountingGame {
     require(_new.count() == _old.count() + 1);
 
     return true;
-
-    revert();
   }
 
   // in this case the resolution function is pure, but it doesn't have to be in general

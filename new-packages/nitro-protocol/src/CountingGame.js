@@ -35,18 +35,3 @@ class Position {
 }
 
 export { Position };
-
-export function pack(
-  channelType,
-  channelNonce,
-  participantA,
-  participantB,
-  turnNum,
-  positionType,
-  aBal,
-  bBal,
-  count
-) {
-  let gamePosition = new Position(positionType, aBal, bBal, count);
-  return packCommon(channelType, channelNonce, turnNum, participantA, participantB, gamePosition);
-}
