@@ -24,26 +24,23 @@ contract SimpleAdjudicator {
     function forceMove (
         bytes _yourState,
         bytes _myState,
-        uint8[] v,
-        bytes32[] r,
-        bytes32[] s
+        uint8[] _v,
+        bytes32[] _r,
+        bytes32[] _s
       )
         external
         onlyWhenCurrentChallengeNotPresent
       {
-        // states must be signed by the appropriate participant
-        _yourState.requireSignature(v[0], r[0], s[0]);
-        _myState.requireSignature(v[1], r[1], s[1]);
-
-        // both states must match the game supported by the channel
+        // channelId must match the game supported by the channel
         require(_yourState.channelId() == fundedChannelId);
-        require(_myState.channelId() == fundedChannelId);
 
-        // nonce must have incremented
-        require(_myState.turnNum() == _yourState.turnNum() + 1);
+        // passing _v, _r, _s directly to validForceMove gives a "Stack too deep" error
+        uint8[] memory v = _v;
+        bytes32[] memory r = _r;
+        bytes32[] memory s = _s;
 
-        // must be a valid transition
-        require(validTransition(_yourState, _myState));
+        // must be a valid force move
+        require(Framework.validForceMove(_yourState, _myState, v, r, s));
 
         createChallenge(uint32(now + challengeDuration), _myState);
     }
@@ -51,29 +48,22 @@ contract SimpleAdjudicator {
     function conclude(
         bytes _yourState,
         bytes _myState,
-        uint8[] v,
-        bytes32[] r,
-        bytes32[] s
+        uint8[] _v,
+        bytes32[] _r,
+        bytes32[] _s
     )
       external
     {
-        // all states must be Concluded
-        require(ForceMoveGame(_yourState.channelType()).isConcluded(_yourState));
-        require(ForceMoveGame(_myState.channelType()).isConcluded(_myState));
-
-        // states must be signed by the appropriate participant
-        _yourState.requireSignature(v[0], r[0], s[0]);
-        _myState.requireSignature(v[1], r[1], s[1]);
-
-        // both states must match the game supported by the channel
+        // channelId must match the game supported by the channel
         require(_yourState.channelId() == fundedChannelId);
-        require(_myState.channelId() == fundedChannelId);
 
-        // nonce must have incremented
-        require(_myState.turnNum() == _yourState.turnNum() + 1);
+        // passing _v, _r, _s directly to validConclusionProof gives a "Stack too deep" error
+        uint8[] memory v = _v;
+        bytes32[] memory r = _r;
+        bytes32[] memory s = _s;
 
-        // must be a valid transition
-        require(validTransition(_yourState, _myState));
+        // must be a valid conclusion proof according to framework rules
+        require(Framework.validConclusionProof(_yourState, _myState, v, r, s));
 
         // Create an expired challenge, (possibly) overwriting any existing challenge
         createChallenge(uint32(now), _myState);
@@ -83,14 +73,11 @@ contract SimpleAdjudicator {
       external
       onlyWhenCurrentChallengeActive
     {
-        require(currentChallenge.state.channelId() == _refutationState.channelId());
+        // channelId must match the game supported by the channel
+        require(fundedChannelId == _refutationState.channelId());
 
-        // the refutationState must have a higher nonce
-        require(_refutationState.turnNum() > currentChallenge.state.turnNum());
-        // ... with the same mover
-        require(_refutationState.mover() == currentChallenge.state.mover());
-        // ... and be signed (by that mover)
-        _refutationState.requireSignature(v, r, s);
+        // must be a valid refute according to framework rules
+        require(Framework.validRefute(currentChallenge.state, _refutationState, v, r, s));
 
         cancelCurrentChallenge();
     }
@@ -99,16 +86,8 @@ contract SimpleAdjudicator {
       external
       onlyWhenCurrentChallengeActive
     {
-        require(currentChallenge.state.channelId() == _nextState.channelId());
-
-        // check that the nonce has increased
-        require(currentChallenge.state.turnNum() + 1 == _nextState.turnNum());
-
-        // check that the challengee's signature matches
-        _nextState.requireSignature(v, r, s);
-
-        // must be valid transition
-        require(validTransition(currentChallenge.state, _nextState));
+        // must be valid respond with move according to the framework rules
+        require(Framework.validRespondWithMove(currentChallenge.state, _nextState, v, r, s));
 
         cancelCurrentChallenge();
     }
@@ -116,28 +95,20 @@ contract SimpleAdjudicator {
     function alternativeRespondWithMove(
         bytes _alternativeState,
         bytes _nextState,
-        uint8[] v,
-        bytes32[] r,
-        bytes32[] s
+        uint8[] _v,
+        bytes32[] _r,
+        bytes32[] _s
     )
       external
       onlyWhenCurrentChallengeActive
     {
-        require(currentChallenge.state.channelId() == _nextState.channelId());
+        // passing _v, _r, _s directly to validAlternativeRespondWithMove gives a "Stack too deep" error
+        uint8[] memory v = _v;
+        bytes32[] memory r = _r;
+        bytes32[] memory s = _s;
 
-        // checking the alternative state:
-        // .. it must have the same nonce as the challenge state
-        require(currentChallenge.state.turnNum() == _alternativeState.turnNum());
-        // .. it must be signed (by the challenger)
-        _alternativeState.requireSignature(v[0], r[0], s[0]);
-
-        // checking the nextState:
-        // .. the nonce must have increased by 1
-        require(currentChallenge.state.turnNum() + 1 == _nextState.turnNum());
-        // .. it must be a valid transition of the gamestate (from the alternative state)
-        require(validTransition(_alternativeState, _nextState));
-        // .. it must be signed (my the challengee)
-        _nextState.requireSignature(v[1], r[1], s[1]);
+        // must be valid alternative respond with move according to the framework rules
+        require(Framework.validAlternativeRespondWithMove(currentChallenge.state, _alternativeState, _nextState, v, r, s));
 
         cancelCurrentChallenge();
     }
