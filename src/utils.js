@@ -1,5 +1,5 @@
 export function toHex32(num) {
-  return toPaddedHexString(num, 64);
+  return "0x" + toPaddedHexString(num, 64);
 }
 
 export function padBytes32(data){

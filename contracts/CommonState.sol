@@ -1,15 +1,20 @@
 pragma solidity ^0.4.18;
 
 library CommonState {
+  enum StateType { Propose, Accept, Game, Conclude }
+
   // Common State Fields
   // ===================
   // [  0 -  31] (bytestring meta info)
   // [ 32 -  63] address channelType
   // [ 64 -  95] uint256 channelNonce
-  // [ 96 - 127] uint256 stateNonce
-  // [128 - 159] uint256 numberOfParticipants
-  // [160 -   ?] address[] participants
-  // [  ? -   ?] bytes gameState
+  // [ 96 - 127] uint256 numberOfParticipants
+  // [128 - x-1] address[] participants
+  // ----------- where x = 128 + 32 * numberOfParticipants
+  // x + [ 0 - 31] uint256 stateType
+  // x + [32 - 63] uint256 turnNum
+  // x + [64 - 95] uint256 stateCount // only relevant for Propose and Accept states
+  // x + [96 -  ?] bytes gameState
 
   function channelType(bytes _state) public pure returns (address _channelType) {
     assembly {
@@ -23,15 +28,9 @@ library CommonState {
     }
   }
 
-  function stateNonce(bytes _state) public pure returns (uint _stateNonce) {
-    assembly {
-      _stateNonce := mload(add(_state, 96))
-    }
-  }
-
   function numberOfParticipants(bytes _state) public pure returns (uint _numberOfParticipants) {
     assembly {
-      _numberOfParticipants := mload(add(_state, 128))
+      _numberOfParticipants := mload(add(_state, 96))
     }
 
     require(_numberOfParticipants == 2); // for now
@@ -44,7 +43,7 @@ library CommonState {
 
     for(uint i = 0; i < n; i++) {
       assembly {
-        currentParticipant := mload(add(_state, add(160, mul(32, i))))
+        currentParticipant := mload(add(_state, add(128, mul(32, i))))
       }
 
       extractedParticipants[i] = currentParticipant;
@@ -57,22 +56,41 @@ library CommonState {
     require(_index < n);
 
     assembly {
-      _participant := mload(add(_state, add(160, mul(32, _index))))
+      _participant := mload(add(_state, add(128, mul(32, _index))))
     }
   }
 
-  function channelId(bytes /*_state*/) public pure returns (bytes32) {
-    /* return keccak256(channelType(_state), channelNonce(_state), participants(_state)); */
-    // TODO: fix this!!
-    return 0xaaa;
+  function stateType(bytes _state) public pure returns (StateType _stateType) {
+    uint256 offset = numberOfParticipants(_state) * 32 + 128;
+    assembly {
+      _stateType := mload(add(_state, offset))
+    }
+  }
+
+  function turnNum(bytes _state) public pure returns (uint _turnNum) {
+    uint256 offset = 32 + numberOfParticipants(_state) * 32 + 128;
+    assembly {
+      _turnNum := mload(add(_state, offset))
+    }
+  }
+
+  function stateCount(bytes _state) public pure returns (uint _stateCount) {
+    uint256 offset = 64 + numberOfParticipants(_state) * 32 + 128;
+    assembly {
+      _stateCount := mload(add(_state, offset))
+    }
+  }
+
+  function channelId(bytes _state) public pure returns (bytes32) {
+    return keccak256(channelType(_state), channelNonce(_state), participants(_state));
   }
 
   function mover(bytes _state) public pure returns (address) {
-    return participants(_state)[stateNonce(_state) % numberOfParticipants(_state)];
+    return participants(_state)[turnNum(_state) % numberOfParticipants(_state)];
   }
 
   function indexOfMover(bytes _state) public pure returns (uint) {
-    return stateNonce(_state) % numberOfParticipants(_state);
+    return turnNum(_state) % numberOfParticipants(_state);
   }
 
   function requireSignature(bytes _state, uint8 _v, bytes32 _r, bytes32 _s) public pure {
@@ -89,7 +107,7 @@ library CommonState {
   }
 
   function gameStateOffset(bytes _state) public pure returns (uint) {
-    return 160 + 32 * numberOfParticipants(_state);
+    return 96 + 32 * numberOfParticipants(_state) + 128;
   }
 
   // utilities
