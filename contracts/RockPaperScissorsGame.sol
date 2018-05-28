@@ -1,7 +1,7 @@
 pragma solidity ^0.4.18;
 
-import './CommonState.sol';
-import './RockPaperScissorsState.sol';
+import "./CommonState.sol";
+import "./RockPaperScissorsState.sol";
 
 contract RockPaperScissorsGame {
     using RockPaperScissorsState for bytes;
