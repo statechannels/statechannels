@@ -98,11 +98,13 @@ Position.PositionTypes = {
   ROUNDACCEPTED: 2,
   REVEAL: 3,
 }
+Object.freeze(Position.PositionTypes);
 
 Position.Plays = {
   ROCK: 0,
   PAPER: 1,
   SCISSORS: 2,
 }
+Object.freeze(Position.Plays);
 
 export { Position };

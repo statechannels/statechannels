@@ -71,6 +71,8 @@ State.StateTypes = {
   CONCLUDE: 3,
 }
 
+Object.freeze(State.StateTypes);
+
 export { Channel, State };
 
 export function pack(
