@@ -107,59 +107,78 @@ library Framework {
         require(_toState.turnNum() == _fromState.turnNum() + 1);
 
         if (_fromState.stateType() == CommonState.StateType.Propose) {
-            if (_fromState.stateCount() == _fromState.numberOfParticipants()) {
-                // if we're in the final Propose state there are two options:
-                // 1. Propose -> Accept transition
-                // 2. Propose -> Conclude transition
-                if (_toState.stateType() == CommonState.StateType.Accept) {
-                    require(_toState.stateCount() == 0); // reset the stateCount
-                    /* require(_toState.position() == _fromState.position()); */
-                    /* require(_toState.balances() == _fromState.balances(); */
-                } else {
-                    require(_toState.stateType() == CommonState.StateType.Conclude);
-                    /* require(_toState.balances() == _fromState.balances(); */
-                }
-            } else {
-                // Propose -> Propose transition
-                require(_toState.stateType() == CommonState.StateType.Propose);
-                /* require(_toState.position() == _fromState.position()); */
-                require(_toState.stateCount() == _fromState.stateCount() + 1);
-                /* require(_toState.balances() == _fromState.balances(); */
-            }
+            return validTransitionFromPropose(_fromState, _toState);
         } else if (_fromState.stateType() == CommonState.StateType.Accept) {
-            if (_fromState.stateCount() == _fromState.numberOfParticipants()) {
-                // Accept -> Game transition is the only option
-                require(_toState.stateType() == CommonState.StateType.Game);
-                /* require(_toState.position() == _fromState.position()); */
-                /* ForceMoveGame(_fromState.channelType()).validStart(_fromState.balances(), _toState); */
-            } else {
-                // Two possibilities:
-                // 1. Accept -> Accept transition
-                // 2. Accept -> Conclude transition
-                if (_toState.stateType() == CommonState.StateType.Accept) {
-                    // Accept -> Accept
-                    /* require(_toState.position() == _fromState.position()); */
-                    require(_toState.stateCount() == _fromState.stateCount() + 1);
-                    /* require(_toState.balances() == _fromState.balances(); */
-                } else {
-                    // Accept -> Conclude
-                    require(_toState.stateType() == CommonState.StateType.Conclude);
-                    /* require(_toState.balances() == _fromState.balances(); */
-                }
-            }
+            return validTransitionFromAccept(_fromState, _toState);
         } else if (_fromState.stateType() == CommonState.StateType.Game) {
-            if (_toState.stateType() == CommonState.StateType.Game) {
-                require(ForceMoveGame(_fromState.channelType()).validTransition(_fromState, _toState));
-            } else {
-                require(_toState.stateType() == CommonState.StateType.Conclude);
-                /* require(ForceMoveGame(_fromState.channelType()).validConclusion(_fromState, _toState.balances())); */
-            }
+            return validTransitionFromGame(_fromState, _toState);
         } else if (_fromState.stateType() == CommonState.StateType.Conclude) {
-            require(_toState.stateType() == CommonState.StateType.Conclude);
-            /* require(_toState.balances() == _fromState.balances()); */
+            return validTransitionFromConclude(_fromState, _toState);
         }
 
         return true;
     }
 
+    function validTransitionFromPropose(bytes _fromState, bytes _toState) public pure returns (bool) {
+        if (_fromState.stateCount() == _fromState.numberOfParticipants()) {
+            // if we're in the final Propose state there are two options:
+            // 1. Propose -> Accept transition
+            // 2. Propose -> Conclude transition
+            if (_toState.stateType() == CommonState.StateType.Accept) {
+                require(_toState.stateCount() == 0); // reset the stateCount
+                /* require(_toState.position() == _fromState.position()); */
+                /* require(_toState.balances() == _fromState.balances(); */
+            } else {
+                require(_toState.stateType() == CommonState.StateType.Conclude);
+                /* require(_toState.balances() == _fromState.balances(); */
+            }
+        } else {
+            // Propose -> Propose transition
+            require(_toState.stateType() == CommonState.StateType.Propose);
+            /* require(_toState.position() == _fromState.position()); */
+            require(_toState.stateCount() == _fromState.stateCount() + 1);
+            /* require(_toState.balances() == _fromState.balances(); */
+        }
+        return true;
+    }
+
+    function validTransitionFromAccept(bytes _fromState, bytes _toState) public pure returns (bool) {
+        if (_fromState.stateCount() == _fromState.numberOfParticipants()) {
+            // Accept -> Game transition is the only option
+            require(_toState.stateType() == CommonState.StateType.Game);
+            /* require(_toState.position() == _fromState.position()); */
+            /* ForceMoveGame(_fromState.channelType()).validStart(_fromState.balances(), _toState); */
+        } else {
+            // Two possibilities:
+            // 1. Accept -> Accept transition
+            // 2. Accept -> Conclude transition
+            if (_toState.stateType() == CommonState.StateType.Accept) {
+                // Accept -> Accept
+                /* require(_toState.position() == _fromState.position()); */
+                require(_toState.stateCount() == _fromState.stateCount() + 1);
+                /* require(_toState.balances() == _fromState.balances(); */
+            } else {
+                // Accept -> Conclude
+                require(_toState.stateType() == CommonState.StateType.Conclude);
+                /* require(_toState.balances() == _fromState.balances(); */
+            }
+        }
+        return true;
+    }
+
+    function validTransitionFromGame(bytes _fromState, bytes _toState) public pure returns (bool) {
+        if (_toState.stateType() == CommonState.StateType.Game) {
+            require(ForceMoveGame(_fromState.channelType()).validTransition(_fromState, _toState));
+        } else {
+            require(_toState.stateType() == CommonState.StateType.Conclude);
+            /* require(ForceMoveGame(_fromState.channelType()).validConclusion(_fromState, _toState.balances())); */
+        }
+        return true;
+    }
+
+    function validTransitionFromConclude(bytes _fromState, bytes _toState) public pure returns (bool) {
+        require(_toState.stateType() == CommonState.StateType.Conclude);
+        /* require(_toState.balances() == _fromState.balances()); */
+        return true;
+    }
 }
