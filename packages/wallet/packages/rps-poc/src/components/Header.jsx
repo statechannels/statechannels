@@ -12,6 +12,7 @@ export default function Header() {
         borderBottomStyle: 'solid',
         borderBottomWidth: 1,
         borderBottomColor: '#bbb',
+        backgroundColor: '#fff0f5',
       }}
     >
       <div style={{ position: 'absolute', left: 20 }}>

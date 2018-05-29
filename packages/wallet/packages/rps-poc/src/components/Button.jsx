@@ -1,11 +1,9 @@
 import React from 'react';
 
-import { Link } from 'react-router-dom';
-
-export default function Button({ children, href }) {
+export default function Button({ children, onClick }) {
   return (
-    <Link className="button" to={href}>
+    <a onClick={onClick} className="button">
       {children}
-    </Link>
+    </a>
   );
 }

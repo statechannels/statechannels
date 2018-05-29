@@ -1,6 +1,6 @@
 import React from 'react';
 
-import Button from './Button';
+import ButtonLink from './ButtonLink';
 import { ROUTE_PATHS } from '../constants';
 
 export default function HomePage() {
@@ -29,7 +29,7 @@ export default function HomePage() {
         </div>
       </div>
       <div style={{ textAlign: 'center', paddingTop: 40 }}>
-        <Button href={ROUTE_PATHS.HOW_IT_WORKS}>Begin</Button>
+        <ButtonLink href={ROUTE_PATHS.HOW_IT_WORKS}>Begin</ButtonLink>
       </div>
     </div>
   );

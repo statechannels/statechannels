@@ -4,6 +4,11 @@ export const BRAND_COLOR = brandColor;
 
 export const ROUTE_PATHS = {
   HOW_IT_WORKS: 'how',
-  OPPONENT_SELECTION: 'match',
+  PLAY: 'play',
   ABOUT: 'about',
+};
+
+// TODO: use key mirror
+export const GAME_STAGES = {
+  SELECT_CHALLENGE: 0,
 };
