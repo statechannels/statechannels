@@ -74,36 +74,3 @@ State.StateTypes = {
 Object.freeze(State.StateTypes);
 
 export { Channel, State };
-
-export function pack(
-  channelType,
-  channelNonce,
-  turnNum,
-  participantA,
-  participantB,
-  gameState
-) {
-  let channel = new Channel(channelType, channelNonce, [participantA, participantB]);
-  let stateType = 0; // for time being
-  let state = new State(channel, stateType, turnNum, gameState);
-  return state.toHex();
-}
-
-export function channelId(channelType, channelNonce, participants) {
-  let channel = new Channel(channelType, channelNonce, participants);
-  return channel.id;
-}
-
-export function ecSignState(state, account) {
-  let digest = hash(state);
-  const sig = web3.eth.sign(account, digest).slice(2);
-  const r = `0x${sig.slice(0, 64)}`;
-  const s = `0x${sig.slice(64, 128)}`;
-  const v = web3.toDecimal(sig.slice(128, 130)) + 27;
-
-  return [ r, s, v ];
-}
-
-export function hash(bytes) {
-  return web3.sha3(bytes, {encoding: 'hex'}).slice(2);
-}
