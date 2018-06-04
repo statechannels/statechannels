@@ -4,10 +4,16 @@ var SimpleAdjudicator = artifacts.require("./SimpleAdjudicator.sol");
 var CountingState = artifacts.require("./CountingState.sol");
 var CountingGame = artifacts.require("./CountingGame.sol");
 var CommonState = artifacts.require("./CommonState.sol");
+var Framework = artifacts.require("./Framework.sol");
 
 module.exports = function(deployer) {
   deployer.deploy(CommonState);
+
+  deployer.link(CommonState, Framework);
+  deployer.deploy(Framework);
+
   deployer.link(CommonState, SimpleAdjudicator);
+  deployer.link(Framework, SimpleAdjudicator);
   // deployer.deploy(SimpleAdjudicator);
 
   deployer.link(CommonState, CountingState);
