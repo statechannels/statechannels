@@ -31,11 +31,11 @@ class Channel {
 }
 
 class State {
-  constructor(channel, stateType, turnNum, position, stateCount) {
+  constructor({channel, stateType, turnNum, resolution, stateCount}) {
     this.channel = channel;
     this.stateType = stateType;
     this.turnNum = turnNum;
-    this.position = position;
+    this.resolution = resolution;
     this.stateCount = stateCount || 0;
   }
 
@@ -45,7 +45,7 @@ class State {
       toHex32(this.stateType).substr(2) +
       toHex32(this.turnNum).substr(2) +
       toHex32(this.stateCount).substr(2) +
-      this.position.toHex().substr(2)
+      this.resolution.map(x => toHex32(x).substr(2)).join("")
     )
   }
 
