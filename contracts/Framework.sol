@@ -121,7 +121,7 @@ library Framework {
 
     function validTransitionFromPropose(bytes _fromState, bytes _toState) public pure returns (bool) {
         if (_fromState.stateCount() == _fromState.numberOfParticipants()) {
-            // if we're in the final Propose state there are two options:
+            // there are two options from the final Propose state
             // 1. Propose -> Accept transition
             // 2. Propose -> Conclude transition
             if (_toState.stateType() == CommonState.StateType.Accept) {
