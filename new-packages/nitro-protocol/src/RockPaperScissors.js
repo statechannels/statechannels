@@ -1,12 +1,10 @@
 import { toHex32, padBytes32 } from './utils';
-import { pack as packCommon } from './CommonState';
+import { State } from './CommonState';
 import { soliditySha3 } from 'web3-utils';
 
 class Position {
-  constructor(positionType, aBal, bBal, stake, preCommit, bPlay, aPlay, salt) {
+  constructor(positionType, stake, preCommit, bPlay, aPlay, salt) {
     this.positionType = positionType;
-    this.aBal = aBal;
-    this.bBal = bBal;
     this.stake = stake;
     this.preCommit = padBytes32(preCommit);
     this.bPlay = bPlay;
@@ -17,8 +15,6 @@ class Position {
   toHex() {
     return (
       toHex32(this.positionType) +
-      toHex32(this.aBal).substr(2) +
-      toHex32(this.bBal).substr(2) +
       toHex32(this.stake).substr(2) +
       padBytes32(this.preCommit).substr(2) +
       toHex32(this.bPlay).substr(2) +
@@ -30,8 +26,6 @@ class Position {
   static fromHex(hexString) {
     return new Position(
       parseInt(`0x${hexString.substr(2, 64)}`), // positionType
-      parseInt(`0x${hexString.substr(66, 64)}`), // aBal
-      parseInt(`0x${hexString.substr(130, 64)}`), // bBal
       parseInt(`0x${hexString.substr(194, 64)}`), // stake
       `0x${hexString.substr(258, 64)}`, // preCommit
       parseInt(`0x${hexString.substr(322, 64)}`), // bPlay
@@ -100,11 +94,119 @@ Position.PositionTypes = {
 }
 Object.freeze(Position.PositionTypes);
 
-Position.Plays = {
+class RpsGame {
+  static restingState({ channnel, resolution, turnNum }) {
+    return new RestState(...arguments);
+  }
+  static proposeState({ channel, resolution, turnNum, stake, aPlay, salt }) {
+    return new ProposeState(...arguments);
+  }
+  static acceptState({ channel, resolution, turnNum, stake, preCommit, bPlay }) {
+    return new AcceptState(...arguments);
+  }
+  static revealState({ channel, resolution, turnNum, stake, aPlay, bPlay, salt}) {
+    return new RevealState(...arguments);
+  }
+}
+
+RpsGame.Plays = {
   ROCK: 0,
   PAPER: 1,
   SCISSORS: 2,
 }
 Object.freeze(Position.Plays);
 
-export { Position };
+export { Position, RpsGame };
+
+class RpsBaseState extends State {
+  constructor({ channel, stateType, stateCount, resolution, turnNum, preCommit, stake, aPlay, bPlay, salt }) {
+    super({ channel, stateCount, resolution, turnNum });
+    this.preCommit = preCommit;
+    this.aPlay = aPlay;
+    this.bPlay = bPlay;
+    this.salt = salt;
+    this.stake = stake;
+  }
+
+  isPreReveal() { return true; }
+
+  static hashCommitment(play, salt) {
+    return soliditySha3(
+      { type: 'uint256', value: play },
+      { type: 'bytes32', value: padBytes32(salt) },
+    );
+  }
+
+  toHex() {
+    return (
+      super.toHex() +
+      toHex32(this.positionType).substr(2) +
+      toHex32(this.stake || 0).substr(2) +
+      padBytes32(this.preCommit || "0x0").substr(2) +
+      toHex32(this.bPlay || 0).substr(2) +
+      toHex32(this.isPreReveal() ? 0 : this.aPlay || 0).substr(2) +
+      padBytes32(this.isPreReveal() ? "0x0" : this.salt || "0x0").substr(2)
+    );
+  }
+
+}
+
+// needs to store/copy game-specific attributes, but needs to behave like a framework state
+class InitializationState extends RpsBaseState {
+  constructor({ channel, stateCount, resolution, turnNum }) {
+    super(...arguments);
+    this.stateType = State.StateTypes.PROPOSE;
+    this.positionType = Position.PositionTypes.RESTING;
+  }
+}
+
+class FundConfirmationState extends RpsBaseState {
+  constructor({ channel, stateCount, resolution, turnNum }) {
+    super(...arguments);
+    this.stateType = State.StateTypes.ACCEPT;
+    this.positionType = Position.PositionTypes.RESTING;
+  }
+}
+
+class ProposeState extends RpsBaseState {
+  constructor({ channel, resolution, turnNum, stake, aPlay, salt }) {
+    super(...arguments);
+    this.stateType = State.StateTypes.GAME;
+    this.positionType = Position.PositionTypes.ROUNDPROPOSED;
+    this.preCommit = this.constructor.hashCommitment(aPlay, salt);
+  }
+}
+
+class AcceptState extends RpsBaseState {
+  constructor({ channel, resolution, turnNum, stake, preCommit, bPlay }) {
+    super(...arguments);
+    this.stateType = State.StateTypes.GAME;
+    this.positionType = Position.PositionTypes.ROUNDACCEPTED;
+  }
+}
+
+class RevealState extends RpsBaseState {
+  constructor({ channel, resolution, turnNum, stake, aPlay, bPlay, salt}) {
+    super(...arguments);
+    this.stateType = State.StateTypes.GAME;
+    this.positionType = Position.PositionTypes.REVEAL;
+  }
+  isPreReveal() { return false };
+}
+
+class RestState extends RpsBaseState {
+  constructor({ channnel, resolution, turnNum }) {
+    super(...arguments);
+    this.stateType = State.StateTypes.GAME;
+    this.positionType = Position.PositionTypes.RESTING;
+  }
+  isPreReveal() { return false };
+}
+
+class ConclusionState extends RpsBaseState {
+  constructor({ channel, resolution, turnNum }) {
+    super(...arguments);
+    this.stateType = State.StateTypes.CONCLUDE;
+    this.positionType = Position.PositionTypes.RESTING;
+  }
+}

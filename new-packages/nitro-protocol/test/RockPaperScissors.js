@@ -1,40 +1,50 @@
 import assertRevert from './helpers/assertRevert';
 
 import { Position as RpsPosition} from '../src/RockPaperScissors';
+import { RpsGame } from '../src/RockPaperScissors';
 import { Channel, State } from '../src/CommonState';
 
 var RPS = artifacts.require("./RockPaperScissorsGame.sol");
 
 contract('RockPaperScissors', (accounts) => {
-  let rpsGame;
+  let rpsContract;
   const salt = "0xaaa"; // some random bytes32 value
-  let allowedConcluded;
-  let disallowedConcluded;
+  const aPlay = RpsGame.Plays.ROCK;
+  const bPlay = RpsGame.Plays.SCISSORS;
+  const stake = 2;
+  const initBals = [5, 4];
+  const aAhead = [7, 2];
+  const bAhead = [3, 6]
   let initialState;
   let proposeState;
   let acceptState;
   let revealState;
-  let finalRestingState;
+  let restState;
 
   before(async () => {
-    rpsGame = await RPS.deployed();
+    rpsContract = await RPS.deployed();
 
-    let channel = new Channel(rpsGame.address, 0, [accounts[0], accounts[1]]);
-    let initialPosition = RpsPosition.initialPosition(5, 4);
+    let channel = new Channel(rpsContract.address, 0, [accounts[0], accounts[1]]);
 
-    initialState = new State(channel, State.StateTypes.GAME, 0, initialPosition);
-    proposeState = initialState.next(initialState.position.propose(1, RpsPosition.Plays.PAPER, salt));
-    acceptState = proposeState.next(proposeState.position.accept(RpsPosition.Plays.SCISSORS));
-    revealState = acceptState.next(acceptState.position.reveal(RpsPosition.Plays.PAPER, salt));
-    finalRestingState = revealState.next(revealState.position.confirm());
+    initialState = RpsGame.restingState({ channel, turnNum: 0, resolution: initBals });
+    proposeState = RpsGame.proposeState({ channel, turnNum: 1, resolution: initBals, stake, aPlay, salt});
+    let preCommit = proposeState.preCommit;
+    acceptState = RpsGame.acceptState({ channel, turnNum: 2, stake, preCommit, bPlay, resolution: bAhead });
+    revealState = RpsGame.revealState({ channel, turnNum: 3, stake, aPlay, bPlay, salt, resolution: aAhead });
+    restState = RpsGame.restingState({ channel, turnNum: 4, resolution: aAhead });
   });
+
+
+  const validTransition = async (state1, state2) => { 
+    return await rpsContract.validTransition(state1.toHex(), state2.toHex());
+  };
+
 
   // Transition fuction tests
   // ========================
 
   it("allows START -> ROUNDPROPOSED", async () => {
-    var output = await rpsGame.validTransition.call(initialState.toHex(), proposeState.toHex());
-    assert.equal(output, true);
+    assert(await validTransition(initialState, proposeState));
   });
 
   // TODO: add this back in once concluded states are in
@@ -48,25 +58,22 @@ contract('RockPaperScissors', (accounts) => {
   // });
 
   it("allows ROUNDPROPOSED -> ROUNDACCEPTED", async () => {
-    var output = await rpsGame.validTransition.call(proposeState.toHex(), acceptState.toHex());
-    assert.equal(output, true);
+    assert(await validTransition(proposeState, acceptState));
   });
 
   it("allows ROUNDACCEPTED -> REVEAL", async () => {
-    var output = await rpsGame.validTransition(acceptState.toHex(), revealState.toHex());
-    assert.equal(output, true);
+    assert(await validTransition(acceptState, revealState));
   });
 
   it("allows REVEAL -> (updated) START", async () => {
-    var output = await rpsGame.validTransition.call(revealState.toHex(), finalRestingState.toHex());
-    assert.equal(output, true);
+    assert(await validTransition(revealState, restState));
   });
 
   // Resolution function tests
   // =========================
 
   it("resolves the START correctly", async () => {
-    let [aBal, bBal] = await rpsGame.resolve.call(initialState.toHex());
+    let [aBal, bBal] = await rpsContract.resolve.call(initialState.toHex());
     assert.equal(aBal, 5);
     assert.equal(bBal, 4);
   });
@@ -80,24 +87,23 @@ contract('RockPaperScissors', (accounts) => {
   // });
 
   it("resolves the ROUNDPROPOSED correctly", async () => {
-    let [aBal, bBal] = await rpsGame.resolve.call(proposeState.toHex());
+    let [aBal, bBal] = await rpsContract.resolve.call(proposeState.toHex());
     assert.equal(aBal, 5);
     assert.equal(bBal, 4);
   });
 
   it("resolves the ROUNDACCEPTED correctly", async () => {
     // in this state it is assumed that a isn't revealing because b won
-    let [aBal, bBal] = await rpsGame.resolve.call(acceptState.toHex());
-    assert.equal(aBal, 4);
-    assert.equal(bBal, 5);
+    let [aBal, bBal] = await rpsContract.resolve.call(acceptState.toHex());
+    assert.equal(aBal, 3);
+    assert.equal(bBal, 6);
   });
 
   it("resolves the REVEAL correctly", async () => {
     // in the reveal state we can see that B did win
-    let [aBal, bBal] = await rpsGame.resolve.call(revealState.toHex());
-    assert.equal(aBal, 4);
-    assert.equal(bBal, 5);
+    let [aBal, bBal] = await rpsContract.resolve.call(revealState.toHex());
+    assert.equal(aBal, 7);
+    assert.equal(bBal, 2);
   });
-
 
 });

@@ -55,31 +55,8 @@ contract RockPaperScissorsGame {
 
     // in this case the resolution function is pure, but it doesn't have to be in general
     function resolve(bytes _state) public pure returns (uint aBal, uint bBal) {
-        if (_state.positionType() == RockPaperScissorsState.PositionType.Start) {
-            aBal = _state.aBal();
-            bBal = _state.bBal();
-        } else if (_state.positionType() == RockPaperScissorsState.PositionType.Concluded) {
-            aBal = _state.aBal();
-            bBal = _state.bBal();
-        } else if (_state.positionType() == RockPaperScissorsState.PositionType.RoundProposed) {
-            aBal = _state.aBal() + _state.stake();
-            bBal = _state.bBal() + _state.stake();
-        } else if (_state.positionType() == RockPaperScissorsState.PositionType.RoundAccepted) {
-            // if we're stuck here, assume a doesn't want to move
-            // TODO: how do we know it's a's move ...
-            aBal = _state.aBal();
-            bBal = _state.bBal() + 2 * _state.stake();
-        } else if (_state.positionType() == RockPaperScissorsState.PositionType.Reveal) {
-            // in this state we need to know who won
-            uint256 aWinnings;
-            uint256 bWinnings;
-            (aWinnings, bWinnings) = winnings(_state.aPlay(), _state.bPlay(), _state.stake());
-
-            aBal = _state.aBal() + aWinnings;
-            bBal = _state.bBal() + bWinnings;
-        } else {
-            revert();
-        }
+        aBal = _state.aResolution();
+        bBal = _state.bResolution();
     }
 
     function winnings(RockPaperScissorsState.Play firstPlay, RockPaperScissorsState.Play secondPlay, uint256 stake)
@@ -101,48 +78,53 @@ contract RockPaperScissorsGame {
     // transition validations
     function validateStartToRoundProposed(bytes _old, bytes _new) private pure {
         require(_new.stake() > 0);
-        require(_old.aBal() >= _new.stake()); // avoid integer overflow attacks
-        require(_old.bBal() >= _new.stake()); // avoid integer overflow attacks
-        require(_new.aBal() + _new.stake() == _old.aBal()); // stake removed from aBal
-        require(_new.bBal() + _new.stake() == _old.bBal()); // stake removed from bBal
+        require(_old.aResolution() >= _new.stake()); // avoid integer overflow attacks
+        require(_old.bResolution() >= _new.stake()); // avoid integer overflow attacks
+        require(_new.aResolution() == _old.aResolution()); // resolution unchanged
+        require(_new.bResolution() == _old.bResolution()); // resolution unchanged
 
         // we should maybe require that aPreCommit isn't empty, but then it will only hurt a later if it is
     }
 
     function validateStartToConcluded(bytes _old, bytes _new) private pure {
-        require(_new.aBal() == _old.aBal());
-        require(_new.bBal() == _old.bBal());
+        require(_new.aResolution() == _old.aResolution());
+        require(_new.bResolution() == _old.bResolution());
     }
 
     function validateRoundProposedToRejected(bytes _old, bytes _new) private pure {
-        require(_new.aBal() == _old.stake() + _old.aBal()); // stake returned from aBal
-        require(_new.bBal() == _old.stake() + _old.bBal()); // stake returned from bBal
+        require(_new.aResolution() == _old.aResolution()); // resolution unchanged
+        require(_new.bResolution() == _old.bResolution()); // resolution unchanged
     }
 
     function validateRoundProposedToRoundAccepted(bytes _old, bytes _new) private pure {
-        require(_new.aBal() == _old.aBal());
-        require(_new.bBal() == _old.bBal());
+        // a will have to reveal, so remove the stake beforehand
+        require(_new.aResolution() == _old.aResolution() - _old.stake());
+        require(_new.bResolution() == _old.bResolution() + _old.stake());
         require(_new.stake() == _old.stake());
         require(_new.preCommit() == _old.preCommit());
     }
 
     function validateRoundAcceptedToReveal(bytes _old, bytes _new) private pure {
-        require(_new.aBal() == _old.aBal());
-        require(_new.bBal() == _old.bBal());
+        uint256 aWinnings;
+        uint256 bWinnings;
+
         require(_new.stake() == _old.stake());
         require(_new.bPlay() == _old.bPlay());
 
+        // check hash matches
         // need to convert Play -> uint256 to get hash to work
         bytes32 hashed = keccak256(uint256(_new.aPlay()), _new.salt());
         require(hashed == _old.preCommit());
+
+        // calculate winnings
+        (aWinnings, bWinnings) = winnings(_old.aPlay(), _old.bPlay(), _old.stake());
+
+        require(_new.aResolution() == _old.aResolution() + aWinnings);
+        require(_new.bResolution() == _old.bResolution() - 2 * _old.stake() + bWinnings);
     }
 
     function validateRevealToStart(bytes _old, bytes _new) private pure {
-        uint256 aWinnings;
-        uint256 bWinnings;
-        (aWinnings, bWinnings) = winnings(_old.aPlay(), _old.bPlay(), _old.stake());
-
-        assert(_new.aBal() == _old.aBal() + aWinnings);
-        assert(_new.bBal() == _old.bBal() + bWinnings);
+        assert(_new.aResolution() == _old.aResolution());
+        assert(_new.bResolution() == _old.bResolution());
     }
 }

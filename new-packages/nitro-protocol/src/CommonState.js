@@ -58,10 +58,6 @@ class State {
 
     return [ r, s, v ];
   }
-
-  next(newPosition) {
-    return new State(this.channel, this.stateType, this.turnNum + 1, newPosition);
-  }
 }
 
 State.StateTypes = {
