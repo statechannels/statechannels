@@ -136,7 +136,7 @@ library Framework {
             // Propose -> Propose transition
             require(_toState.stateType() == CommonState.StateType.Propose);
             /* require(_toState.position() == _fromState.position()); */
-            require(_toState.stateCount() == _fromState.stateCount() + 1);
+            // require(_toState.stateCount() == _fromState.stateCount() + 1);
             /* require(_toState.balances() == _fromState.balances(); */
         }
         return true;

@@ -1,40 +1,6 @@
 import { toHex32, padBytes32 } from './utils';
 import { State } from './CommonState';
 
-
-class Position {
-  constructor(aBal, bBal, count) {
-    this.aBal = aBal;
-    this.bBal = bBal;
-    this.count = count;
-  }
-
-  toHex() {
-    return (
-      "0x" +
-      toHex32(this.aBal).substr(2) +
-      toHex32(this.bBal).substr(2) +
-      toHex32(this.count).substr(2)
-    )
-  }
-
-  static fromHex(hexString) {
-    return new Position(
-      parseInt(`0x${hexString.substr(66, 64)}`), // aBal
-      parseInt(`0x${hexString.substr(130, 64)}`), // bBal
-      parseInt(`0x${hexString.substr(194, 64)}`), // count
-    )
-  }
-
-  static initialPosition(aBal, bBal) {
-    return new Position(aBal, bBal, 0);
-  }
-
-  next() {
-    return new Position(this.aBal, this.bBal, this.count + 1);
-  }
-}
-
 class CountingGame {
   static proposeState(opts) { return new ProposeState(opts); }
   static acceptState(opts) { return new AcceptState(opts); }
@@ -43,13 +9,13 @@ class CountingGame {
 }
 
 class CountingBaseState extends State {
-  constructor({ channel, turnNum, stateCounter, resolution, gameCounter }) {
-    super({ channel, turnNum, stateCounter, resolution });
+  constructor({ channel, turnNum, stateCount, resolution, gameCounter }) {
+    super({ channel, turnNum, stateCount, resolution });
     this.gameCounter = gameCounter;
     this.initialize();
   }
 
-  initialize() {};
+  initialize() {}
 
   toHex() {
     return super.toHex() + toHex32(this.gameCounter).substr(2);
@@ -72,4 +38,4 @@ class ConcludeState extends CountingBaseState {
   initialize() { this.stateType = State.StateTypes.CONCLUDE; }
 }
 
-export { Position, CountingGame };
+export { CountingGame };

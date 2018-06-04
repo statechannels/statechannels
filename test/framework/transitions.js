@@ -51,8 +51,8 @@ contract('Framework', (accounts) => {
     // describe("propose -> propose", () => {
         let propose0, propose1;
         beforeEach(() => {
-          propose0 = CountingGame.proposeState({...defaults, turnNum: 0, stateCounter: 0 });
-          propose1 = CountingGame.proposeState({...defaults, turnNum: 1, stateCounter: 1 });
+          propose0 = CountingGame.proposeState({...defaults, turnNum: 0, stateCount: 0 });
+          propose1 = CountingGame.proposeState({...defaults, turnNum: 1, stateCount: 1 });
         });
 
         it("allows a valid transition", async () => {
