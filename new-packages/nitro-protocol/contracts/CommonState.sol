@@ -14,7 +14,9 @@ library CommonState {
     // x + [ 0 - 31] uint256 stateType
     // x + [32 - 63] uint256 turnNum
     // x + [64 - 95] uint256 stateCount // only relevant for Propose and Accept states
-    // x + [96 -  ?] bytes gameState
+    // x + [96 - y-1] uint256[] resolution
+    // ----------- where y = 224 + 64 * numberOfParticipants
+    // y + [0 -  ?] bytes gameState
 
     function channelType(bytes _state) public pure returns (address _channelType) {
         assembly {
@@ -81,6 +83,21 @@ library CommonState {
         }
     }
 
+    function resolution(bytes _state) public pure returns (uint256[] ) {
+        uint256 currentResolutionValue;
+        uint256 n = numberOfParticipants(_state);
+        uint256[] memory extractedResolution = new uint256[](n);
+
+        for(uint i = 0; i < n; i++) {
+            assembly {
+                currentResolutionValue := mload(add(_state, add(224, mul(32, add(i, n)))))
+            }
+
+            extractedResolution[i] = currentResolutionValue;
+        }
+        return extractedResolution;
+    }
+
     function channelId(bytes _state) public pure returns (bytes32) {
         return keccak256(channelType(_state), channelNonce(_state), participants(_state));
     }
@@ -107,7 +124,7 @@ library CommonState {
     }
 
     function gameStateOffset(bytes _state) public pure returns (uint) {
-        return 96 + 32 * numberOfParticipants(_state) + 128;
+        return 224 + 64 * numberOfParticipants(_state);
     }
 
     // utilities
