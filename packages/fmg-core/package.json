@@ -1,0 +1,31 @@
+{
+  "name": "channels-as-state-machines",
+  "version": "1.0.0",
+  "description": "MVP Force Move Game State Channels",
+  "main": "truffle-config.js",
+  "directories": {
+    "doc": "docs",
+    "test": "test"
+  },
+  "scripts": {
+    "test": "truffle test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/counterfactual/state-machine-channels.git"
+  },
+  "author": "Tom Close",
+  "license": "MIT",
+  "dependencies": {
+    "npm": "^5.7.1",
+    "sha3": "^1.2.2",
+    "web3-utils": "^1.0.0-beta.30"
+  },
+  "devDependencies": {
+    "babel-plugin-transform-object-rest-spread": "^6.26.0",
+    "babel-polyfill": "^6.23.0",
+    "babel-preset-env": "^1.6.1",
+    "babel-register": "^6.23.0",
+    "truffle-core": "^4.1.11"
+  }
+}
