@@ -7,18 +7,9 @@ contract PaymentGame {
     using CommonState for bytes;
     using PaymentState for bytes;
 
-    // The following transitions are allowed:
-    //
-    // Transacting -> Transacting
-    // Transacting -> Concluded
-    //
     function validTransition(bytes _old, bytes _new) public pure returns (bool) {
-        // can't move on from a concluded state
-        require(_old.positionType() == PaymentState.PositionType.Transacting);
 
-        // otherwise, the rules are the same for both transitions:
-
-        // conserve concluded balance
+        // conserve total balance
         require(_old.aBal() + _old.bBal() == _new.aBal() + _new.bBal());
 
         // can't take someone else's funds by moving
