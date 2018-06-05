@@ -1,4 +1,4 @@
-pragma solidity ^0.4.18;
+pragma solidity ^0.4.24;
 
 library CommonState {
     enum StateType { Propose, Accept, Game, Conclude }
@@ -99,7 +99,9 @@ library CommonState {
     }
 
     function channelId(bytes _state) public pure returns (bytes32) {
-        return keccak256(channelType(_state), channelNonce(_state), participants(_state));
+        return keccak256(
+            abi.encodePacked(channelType(_state), channelNonce(_state), participants(_state))
+        );
     }
 
     function mover(bytes _state) public pure returns (address) {
@@ -127,6 +129,37 @@ library CommonState {
         return 224 + 64 * numberOfParticipants(_state);
     }
 
+
+    function gameAttributesEqual(bytes _state, bytes _otherState) public pure returns (bool) {
+        require(_state.length == _otherState.length, "States must be the same length to have equal game attributes");
+        require(_state.length % 32 == 0);
+
+        uint256 gameOffset = gameStateOffset(_state);
+        // need to add 32 because _state.length doesn't include the meta info
+        uint256 attributesLength = _state.length + 32 - gameOffset;
+
+        bytes32 chunk;
+        bytes32 otherChunk;
+        uint256 offset;
+
+        // we require that _state.length is a multiple of 32, so this is ok
+        for(uint i = 0; i < attributesLength; i += 32) {
+            assembly {
+                offset := add(gameOffset, i)
+                chunk := mload(add(_state, offset))
+                otherChunk := mload(add(_otherState, offset))
+            }
+            require(chunk == otherChunk);
+        }
+
+        return true;
+    }
+
+    function resolutionsEqual(bytes _state, bytes _otherState) public pure returns (bool) {
+        require(keccak256(abi.encodePacked(resolution(_state))) == keccak256(abi.encodePacked(resolution(_otherState))));
+        return true;
+    }
+
     // utilities
     // =========
 
@@ -134,7 +167,7 @@ library CommonState {
         bytes memory prefix = "\x19Ethereum Signed Message:\n32";
         bytes32 h = keccak256(_d);
 
-        bytes32 prefixedHash = keccak256(prefix, h);
+        bytes32 prefixedHash = keccak256(abi.encodePacked(prefix, h));
 
         address a = ecrecover(prefixedHash, _v, _r, _s);
 

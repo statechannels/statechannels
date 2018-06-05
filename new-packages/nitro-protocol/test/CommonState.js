@@ -1,6 +1,6 @@
 import { Channel, State } from '../src/CommonState';
 import assertRevert from './helpers/assertRevert';
-import PositionStub from './helpers/positionStub';
+import { CountingGame } from '../src/CountingGame';
 
 var CommonState = artifacts.require("./CommonState.sol");
 
@@ -96,5 +96,13 @@ contract('commonStateLib', (accounts) => {
     // TODO find better way to test this
     assert.equal(offset, 352);
   });
+
+  it("can test if the gameAttributes are equal", async() => {
+    let state1 = CountingGame.proposeState({channel, resolution, turnNum, gameCounter: 0 });
+    let state2 = CountingGame.proposeState({channel, resolution, turnNum, gameCounter: 1 });
+
+    await assertRevert(commonStateLib.gameAttributesEqual.call(state1.toHex(), state2.toHex()));
+  });
+
 
 });
