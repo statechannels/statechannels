@@ -71,10 +71,6 @@ contract RockPaperScissorsGame {
         }
     }
 
-    function isConcluded(bytes _state) pure public returns(bool) {
-        return _state.positionType() == RockPaperScissorsState.PositionType.Concluded;
-    }
-
     // transition validations
     function validateStartToRoundProposed(bytes _old, bytes _new) private pure {
         require(_new.stake() > 0);
