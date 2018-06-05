@@ -143,6 +143,8 @@ library CommonState {
         uint256 offset;
 
         // we require that _state.length is a multiple of 32, so this is ok
+        // this is nasty - there's probably a better way of checking equality
+        // todo: fix this
         for(uint i = 0; i < attributesLength; i += 32) {
             assembly {
                 offset := add(gameOffset, i)

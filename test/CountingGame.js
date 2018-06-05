@@ -27,7 +27,6 @@ contract('CountingGame', (accounts) => {
       turnNum: 7,
       gameCounter: 2
     });
-
   });
 
   // Transition fuction tests
