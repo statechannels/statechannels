@@ -113,7 +113,7 @@ contract RockPaperScissorsGame {
 
         // check hash matches
         // need to convert Play -> uint256 to get hash to work
-        bytes32 hashed = keccak256(uint256(_new.aPlay()), _new.salt());
+        bytes32 hashed = keccak256(abi.encodePacked(uint256(_new.aPlay()), _new.salt()));
         require(hashed == _old.preCommit());
 
         // calculate winnings
