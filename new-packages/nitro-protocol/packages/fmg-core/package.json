@@ -23,7 +23,6 @@
     "babel-polyfill": "^6.23.0",
     "babel-preset-env": "^1.6.1",
     "babel-register": "^6.23.0",
-    "fmg-counting-game": "^0.0.1",
     "truffle-core": "^4.1.11"
   }
 }

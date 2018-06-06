@@ -1,10 +1,12 @@
 import assertRevert from '../helpers/assertRevert';
 
-import { CountingGame } from 'fmg-counting-game';
+import { CountingGame } from '../test-game/src/counting-game';
 import { Channel, State } from '../..';
 
+var CommonState = artifacts.require("./CommonState.sol");
 var Framework = artifacts.require("./Framework.sol");
-var CountingGameContract = artifacts.require("fmg-counting-game/contracts/CountingGame.sol");
+var CountingStateContract = artifacts.require("../test-game/contracts/CountingState.sol");
+var CountingGameContract = artifacts.require("../test-game/contracts/CountingGame.sol");
 
 contract('Framework', (accounts) => {
     let channel, otherChannel, defaults, framework;
@@ -16,7 +18,11 @@ contract('Framework', (accounts) => {
     before(async () => {
         framework = await Framework.deployed();
 
-        let gameContract = await CountingGameContract.deployed();
+        CountingStateContract.link(CommonState);
+        let stateContract = await CountingStateContract.new();
+        CountingGameContract.link("CountingState", stateContract.address);
+        let gameContract = await CountingGameContract.new();
+
         channel = new Channel(gameContract.address, 0, [accounts[0], accounts[1]]);
         otherChannel = new Channel(gameContract.address, 1, [accounts[0], accounts[1]]);
 

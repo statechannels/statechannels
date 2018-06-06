@@ -1,4 +1,4 @@
-import { State, toHex32, padBytes32 } from 'fmg-core';
+import { State, toHex32, padBytes32 } from '../../..';
 
 class CountingGame {
   static proposeState(opts) { return new ProposeState(opts); }
