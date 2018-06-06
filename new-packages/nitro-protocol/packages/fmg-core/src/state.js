@@ -28,6 +28,14 @@ class State {
 
     return [ r, s, v ];
   }
+
+  get numberOfParticipants() {
+    return this.channel.numberOfParticipants;
+  }
+
+  get mover() {
+    return this.channel.participants[this.turnNum % this.numberOfParticipants];
+  }
 }
 
 State.StateTypes = {
