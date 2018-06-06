@@ -116,19 +116,18 @@ contract SimpleAdjudicator {
     function createChallenge(uint32 expirationTime, bytes _state) private {
         currentChallenge.state = _state;
         currentChallenge.expirationTime = expirationTime;
-
-        (currentChallenge.resolvedBalances[0], currentChallenge.resolvedBalances[1]) = ForceMoveGame(_state.channelType()).resolve(_state);
     }
 
     function withdraw()
       public
       onlyWhenCurrentChallengeExpired
     {
+        uint256[] memory resolvedBalances = State.resolution(currentChallenge.state);
         currentChallenge.state.participant(0).transfer(
-          min(currentChallenge.resolvedBalances[0], address(this).balance)
+          min(resolvedBalances[0], address(this).balance)
         );
         currentChallenge.state.participant(1).transfer(
-          min(currentChallenge.resolvedBalances[1], address(this).balance)
+          min(resolvedBalances[1], address(this).balance)
         );
 
         cancelCurrentChallenge(); // prevent multiple withdrawals
