@@ -3,7 +3,7 @@ import assertRevert from '../../helpers/assert-revert';
 
 import { Channel, State } from '../../..';
 
-var CommonState = artifacts.require("./CommonState.sol");
+var StateLib = artifacts.require("./State.sol");
 var CountingStateContract = artifacts.require("./CountingState.sol");
 var CountingGameContract = artifacts.require("./CountingGame.sol");
 // enum names aren't supported in ABI, so have to use integers for time being
@@ -14,7 +14,7 @@ contract('CountingGame', (accounts) => {
   let game, state0, state1, stateBalChange;
 
   before(async () => {
-    CountingStateContract.link(CommonState);
+    CountingStateContract.link(StateLib);
     let stateContract = await CountingStateContract.new();
     CountingGameContract.link("CountingState", stateContract.address);
     game = await CountingGameContract.new();

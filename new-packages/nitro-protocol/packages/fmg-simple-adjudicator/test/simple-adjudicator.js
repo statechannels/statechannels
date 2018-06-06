@@ -2,7 +2,7 @@ import { Channel, State, assertRevert, increaseTime, duration } from 'fmg-core';
 import { CountingGame } from 'fmg-core/test/test-game/src/counting-game';
 
 var SimpleAdjudicator = artifacts.require("./SimpleAdjudicator.sol");
-var CommonState = artifacts.require("fmg-core/contracts/CommonState.sol");
+var StateLib = artifacts.require("fmg-core/contracts/State.sol");
 var CountingStateContract = artifacts.require("fmg-core/test/test-game/contracts/CountingState.sol");
 var CountingGameContract = artifacts.require("fmg-core/test/test-game/contracts/CountingGame.sol");
 
@@ -19,7 +19,7 @@ contract('SimpleAdjudicator', (accounts) => {
   let simpleAdj, countingGame;
   let state0, state1, state2, state3, state1alt, state2alt;
   before(async () => {
-    CountingStateContract.link(CommonState);
+    CountingStateContract.link(StateLib);
     let stateContract = await CountingStateContract.new();
     CountingGameContract.link("CountingState", stateContract.address);
     let countingGameContract = await CountingGameContract.new();

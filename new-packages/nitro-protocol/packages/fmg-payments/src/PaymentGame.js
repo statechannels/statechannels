@@ -1,5 +1,5 @@
 import { toHex32, padBytes32 } from './utils';
-import { State } from './CommonState';
+import { State } from './state';
 
 class PaymentGame {
   static proposeState({ channel, resolution, turnNum, stateCount }) {

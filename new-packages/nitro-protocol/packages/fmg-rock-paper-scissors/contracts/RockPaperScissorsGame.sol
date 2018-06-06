@@ -1,6 +1,6 @@
 pragma solidity ^0.4.18;
 
-import "fmg-core/contracts/CommonState.sol";
+import "fmg-core/contracts/State.sol";
 import "./RockPaperScissorsState.sol";
 
 contract RockPaperScissorsGame {

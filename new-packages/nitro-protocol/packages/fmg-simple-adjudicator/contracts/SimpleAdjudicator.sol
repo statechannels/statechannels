@@ -1,16 +1,16 @@
 pragma solidity ^0.4.23;
 
-import "fmg-core/contracts/CommonState.sol";
-import "fmg-core/contracts/Framework.sol";
+import "fmg-core/contracts/State.sol";
+import "fmg-core/contracts/Rules.sol";
 import "fmg-core/contracts/ForceMoveGame.sol";
 
 contract SimpleAdjudicator {
     // SimpleAdjudicator can support exactly one force move game channel
-    using CommonState for bytes;
+    using State for bytes;
 
     bytes32 public fundedChannelId;
 
-    Framework.Challenge currentChallenge;
+    Rules.Challenge currentChallenge;
     uint challengeDuration = 1 days;
 
     constructor(bytes32 _fundedChannelId) public payable {
@@ -40,7 +40,7 @@ contract SimpleAdjudicator {
         bytes32[] memory s = _s;
 
         // must be a valid force move
-        require(Framework.validForceMove(_yourState, _myState, v, r, s));
+        require(Rules.validForceMove(_yourState, _myState, v, r, s));
 
         createChallenge(uint32(now + challengeDuration), _myState);
     }
@@ -63,7 +63,7 @@ contract SimpleAdjudicator {
         bytes32[] memory s = _s;
 
         // must be a valid conclusion proof according to framework rules
-        require(Framework.validConclusionProof(_yourState, _myState, v, r, s));
+        require(Rules.validConclusionProof(_yourState, _myState, v, r, s));
 
         // Create an expired challenge, (possibly) overwriting any existing challenge
         createChallenge(uint32(now), _myState);
@@ -77,7 +77,7 @@ contract SimpleAdjudicator {
         require(fundedChannelId == _refutationState.channelId());
 
         // must be a valid refute according to framework rules
-        require(Framework.validRefute(currentChallenge.state, _refutationState, v, r, s));
+        require(Rules.validRefute(currentChallenge.state, _refutationState, v, r, s));
 
         cancelCurrentChallenge();
     }
@@ -87,7 +87,7 @@ contract SimpleAdjudicator {
       onlyWhenCurrentChallengeActive
     {
         // must be valid respond with move according to the framework rules
-        require(Framework.validRespondWithMove(currentChallenge.state, _nextState, v, r, s));
+        require(Rules.validRespondWithMove(currentChallenge.state, _nextState, v, r, s));
 
         cancelCurrentChallenge();
     }
@@ -108,7 +108,7 @@ contract SimpleAdjudicator {
         bytes32[] memory s = _s;
 
         // must be valid alternative respond with move according to the framework rules
-        require(Framework.validAlternativeRespondWithMove(currentChallenge.state, _alternativeState, _nextState, v, r, s));
+        require(Rules.validAlternativeRespondWithMove(currentChallenge.state, _alternativeState, _nextState, v, r, s));
 
         cancelCurrentChallenge();
     }
@@ -135,7 +135,7 @@ contract SimpleAdjudicator {
     }
 
     function validTransition(bytes _fromState, bytes _toState) public pure returns(bool) {
-        return Framework.validTransition(_fromState, _toState);
+        return Rules.validTransition(_fromState, _toState);
     }
 
     function min(uint256 a, uint256 b) private pure returns (uint256) {

@@ -1,10 +1,10 @@
 pragma solidity ^0.4.18;
 
-import "./CommonState.sol";
+import "./State.sol";
 import "./PaymentState.sol";
 
 contract PaymentGame {
-    using CommonState for bytes;
+    using State for bytes;
     using PaymentState for bytes;
 
     function validTransition(bytes _old, bytes _new) public pure returns (bool) {
