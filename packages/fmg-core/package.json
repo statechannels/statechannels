@@ -2,7 +2,7 @@
   "name": "fmg-core",
   "version": "0.0.1",
   "description": "Force-move games core",
-  "main": "truffle-config.js",
+  "main": "index.js",
   "directories": {
     "doc": "docs",
     "test": "test"
@@ -23,7 +23,7 @@
     "babel-polyfill": "^6.23.0",
     "babel-preset-env": "^1.6.1",
     "babel-register": "^6.23.0",
-    "truffle-core": "^4.1.11",
-    "fmg-counting-game": "^0.0.1"
+    "fmg-counting-game": "^0.0.1",
+    "truffle-core": "^4.1.11"
   }
 }

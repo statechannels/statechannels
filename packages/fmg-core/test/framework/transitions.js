@@ -1,7 +1,7 @@
 import assertRevert from '../helpers/assertRevert';
 
-import { CountingGame } from 'fmd-counting-game';
-import { Channel, State } from '../../src/CommonState';
+import { CountingGame } from 'fmg-counting-game';
+import { Channel, State } from '../..';
 
 var Framework = artifacts.require("./Framework.sol");
 var CountingGameContract = artifacts.require("fmg-counting-game/contracts/CountingGame.sol");
