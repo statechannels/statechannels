@@ -3,29 +3,29 @@
 // var SimpleAdjudicator = artifacts.require("./SimpleAdjudicator.sol");
 // var CountingState = artifacts.require("./CountingState.sol");
 // var CountingGame = artifacts.require("./CountingGame.sol");
-var CommonState = artifacts.require("./CommonState.sol");
-var Framework = artifacts.require("./Framework.sol");
+var State = artifacts.require("./State.sol");
+var Rules = artifacts.require("./Rules.sol");
 
 module.exports = function(deployer) {
-  deployer.deploy(CommonState);
+  deployer.deploy(State);
 
-  deployer.link(CommonState, Framework);
-  deployer.deploy(Framework);
+  deployer.link(State, Rules);
+  deployer.deploy(Rules);
 
-  // deployer.link(CommonState, SimpleAdjudicator);
-  // deployer.link(Framework, SimpleAdjudicator);
+  // deployer.link(State, SimpleAdjudicator);
+  // deployer.link(Rules, SimpleAdjudicator);
   // deployer.deploy(SimpleAdjudicator);
 
-  // deployer.link(CommonState, CountingState);
+  // deployer.link(State, CountingState);
   // deployer.deploy(CountingState);
   // deployer.link(CountingState, CountingGame);
-  // deployer.link(CommonState, CountingGame);
+  // deployer.link(State, CountingGame);
   // deployer.deploy(CountingGame);
 
-  // deployer.link(CommonState, RockPaperScissorsState);
+  // deployer.link(State, RockPaperScissorsState);
   // deployer.deploy(RockPaperScissorsState);
   // deployer.link(RockPaperScissorsState, RockPaperScissorsGame);
-  // deployer.link(CommonState, RockPaperScissorsGame);
+  // deployer.link(State, RockPaperScissorsGame);
   // deployer.deploy(RockPaperScissorsGame);
 
 };

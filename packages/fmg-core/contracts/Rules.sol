@@ -1,10 +1,10 @@
 pragma solidity ^0.4.23;
 
-import "./CommonState.sol";
+import "./State.sol";
 import "./ForceMoveGame.sol";
 
-library Framework {
-    using CommonState for bytes;
+library Rules {
+    using State for bytes;
 
     struct Challenge {
         bytes32 channelId;
@@ -39,7 +39,7 @@ library Framework {
         _toState.requireSignature(v[1], r[1], s[1]);
 
         // first move must be a concluded state (transition rules will ensure this for the other states)
-        require(_fromState.stateType() == CommonState.StateType.Conclude);
+        require(_fromState.stateType() == State.StateType.Conclude);
         // must be a valid transition
         return validTransition(_fromState, _toState);
     }
@@ -106,13 +106,13 @@ library Framework {
         require(_toState.channelId() == _fromState.channelId());
         require(_toState.turnNum() == _fromState.turnNum() + 1);
 
-        if (_fromState.stateType() == CommonState.StateType.Propose) {
+        if (_fromState.stateType() == State.StateType.Propose) {
             return validTransitionFromPropose(_fromState, _toState);
-        } else if (_fromState.stateType() == CommonState.StateType.Accept) {
+        } else if (_fromState.stateType() == State.StateType.Accept) {
             return validTransitionFromAccept(_fromState, _toState);
-        } else if (_fromState.stateType() == CommonState.StateType.Game) {
+        } else if (_fromState.stateType() == State.StateType.Game) {
             return validTransitionFromGame(_fromState, _toState);
-        } else if (_fromState.stateType() == CommonState.StateType.Conclude) {
+        } else if (_fromState.stateType() == State.StateType.Conclude) {
             return validTransitionFromConclude(_fromState, _toState);
         }
 
@@ -124,20 +124,20 @@ library Framework {
             // there are two options from the final Propose state
             // 1. Propose -> Accept transition
             // 2. Propose -> Conclude transition
-            if (_toState.stateType() == CommonState.StateType.Accept) {
+            if (_toState.stateType() == State.StateType.Accept) {
                 require(_toState.stateCount() == 0); // reset the stateCount
-                require(CommonState.gameAttributesEqual(_fromState, _toState));
-                require(CommonState.resolutionsEqual(_fromState, _toState));
+                require(State.gameAttributesEqual(_fromState, _toState));
+                require(State.resolutionsEqual(_fromState, _toState));
             } else {
-                require(_toState.stateType() == CommonState.StateType.Conclude);
-                require(CommonState.resolutionsEqual(_fromState, _toState));
+                require(_toState.stateType() == State.StateType.Conclude);
+                require(State.resolutionsEqual(_fromState, _toState));
             }
         } else {
             // Propose -> Propose transition
-            require(_toState.stateType() == CommonState.StateType.Propose);
-            require(CommonState.gameAttributesEqual(_fromState, _toState));
+            require(_toState.stateType() == State.StateType.Propose);
+            require(State.gameAttributesEqual(_fromState, _toState));
             require(_toState.stateCount() == _fromState.stateCount() + 1);
-            require(CommonState.resolutionsEqual(_fromState, _toState));
+            require(State.resolutionsEqual(_fromState, _toState));
         }
         return true;
     }
@@ -145,39 +145,39 @@ library Framework {
     function validTransitionFromAccept(bytes _fromState, bytes _toState) public pure returns (bool) {
         if (_fromState.stateCount() == _fromState.numberOfParticipants() - 1) {
             // Accept -> Game transition is the only option
-            require(_toState.stateType() == CommonState.StateType.Game);
+            require(_toState.stateType() == State.StateType.Game);
             require(ForceMoveGame(_fromState.channelType()).validTransition(_fromState, _toState));
         } else {
             // Two possibilities:
             // 1. Accept -> Accept transition
             // 2. Accept -> Conclude transition
-            if (_toState.stateType() == CommonState.StateType.Accept) {
+            if (_toState.stateType() == State.StateType.Accept) {
                 // Accept -> Accept
-                require(CommonState.gameAttributesEqual(_fromState, _toState));
+                require(State.gameAttributesEqual(_fromState, _toState));
                 require(_toState.stateCount() == _fromState.stateCount() + 1);
-                require(CommonState.resolutionsEqual(_fromState, _toState));
+                require(State.resolutionsEqual(_fromState, _toState));
             } else {
                 // Accept -> Conclude
-                require(_toState.stateType() == CommonState.StateType.Conclude);
-                require(CommonState.resolutionsEqual(_fromState, _toState));
+                require(_toState.stateType() == State.StateType.Conclude);
+                require(State.resolutionsEqual(_fromState, _toState));
             }
         }
         return true;
     }
 
     function validTransitionFromGame(bytes _fromState, bytes _toState) public pure returns (bool) {
-        if (_toState.stateType() == CommonState.StateType.Game) {
+        if (_toState.stateType() == State.StateType.Game) {
             require(ForceMoveGame(_fromState.channelType()).validTransition(_fromState, _toState));
         } else {
-            require(_toState.stateType() == CommonState.StateType.Conclude);
-            require(CommonState.resolutionsEqual(_fromState, _toState));
+            require(_toState.stateType() == State.StateType.Conclude);
+            require(State.resolutionsEqual(_fromState, _toState));
         }
         return true;
     }
 
     function validTransitionFromConclude(bytes _fromState, bytes _toState) public pure returns (bool) {
-        require(_toState.stateType() == CommonState.StateType.Conclude);
-        require(CommonState.resolutionsEqual(_fromState, _toState));
+        require(_toState.stateType() == State.StateType.Conclude);
+        require(State.resolutionsEqual(_fromState, _toState));
         return true;
     }
 }

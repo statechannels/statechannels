@@ -1,6 +1,6 @@
 pragma solidity ^0.4.24;
 
-library CommonState {
+library State {
     enum StateType { Propose, Accept, Game, Conclude }
 
     // Common State Fields

@@ -3,12 +3,12 @@ import assertRevert from '../helpers/assert-revert';
 import { CountingGame } from '../test-game/src/counting-game';
 import { Channel, State } from '../..';
 
-var CommonState = artifacts.require("./CommonState.sol");
-var Framework = artifacts.require("./Framework.sol");
+var StateLib = artifacts.require("./State.sol");
+var Rules = artifacts.require("./Rules.sol");
 var CountingStateContract = artifacts.require("../test-game/contracts/CountingState.sol");
 var CountingGameContract = artifacts.require("../test-game/contracts/CountingGame.sol");
 
-contract('Framework', (accounts) => {
+contract('Rules', (accounts) => {
     let channel, otherChannel, defaults, framework;
     const resolution = [12, 13];
     const otherResolution = [10, 15];
@@ -16,9 +16,9 @@ contract('Framework', (accounts) => {
     let fromState, toState;
 
     before(async () => {
-        framework = await Framework.deployed();
+        framework = await Rules.deployed();
 
-        CountingStateContract.link(CommonState);
+        CountingStateContract.link(StateLib);
         let stateContract = await CountingStateContract.new();
         CountingGameContract.link("CountingState", stateContract.address);
         let gameContract = await CountingGameContract.new();

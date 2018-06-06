@@ -1,6 +1,6 @@
 pragma solidity ^0.4.18;
 
-import "./CommonState.sol";
+import "./State.sol";
 
 library PaymentState {
 
@@ -13,10 +13,10 @@ library PaymentState {
     // we need!
 
     function aBal(bytes _state) public pure returns (uint256) {
-        return CommonState.resolution(_state)[0];
+        return State.resolution(_state)[0];
     }
 
     function bBal(bytes _state) public pure returns (uint256 _bBal) {
-        return CommonState.resolution(_state)[1];
+        return State.resolution(_state)[1];
     }
 }

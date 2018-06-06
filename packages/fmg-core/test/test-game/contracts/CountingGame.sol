@@ -1,10 +1,10 @@
 pragma solidity ^0.4.18;
 
-import "../../../contracts/CommonState.sol";
+import "../../../contracts/State.sol";
 import "./CountingState.sol";
 
 contract CountingGame {
-    using CommonState for bytes;
+    using State for bytes;
     using CountingState for bytes;
 
     // The following transitions are allowed:

@@ -1,6 +1,6 @@
 pragma solidity ^0.4.24;
 
-import "../../../contracts/CommonState.sol";
+import "../../../contracts/State.sol";
 
 library CountingState {
     // CountingGame State Fields
@@ -9,7 +9,7 @@ library CountingState {
     // [  0 -  31] uint256 count
 
     function count(bytes _state) public pure returns (uint256 _count) {
-        uint offset = CommonState.gameStateOffset(_state);
+        uint offset = State.gameStateOffset(_state);
         assembly {
             _count := mload(add(_state, offset))
         }
@@ -17,10 +17,10 @@ library CountingState {
 
     // utility functions
     function aBal(bytes _state) public pure returns (uint256) {
-        return CommonState.resolution(_state)[0];
+        return State.resolution(_state)[0];
     }
 
     function bBal(bytes _state) public pure returns (uint256 _bBal) {
-        return CommonState.resolution(_state)[1];
+        return State.resolution(_state)[1];
     }
 }
