@@ -28,8 +28,4 @@ contract CountingGame {
         bBal = _state.bBal();
     }
 
-    // TODO: remove
-    function isConcluded(bytes _state) pure public returns(bool) {
-        return false;
-    }
 }
