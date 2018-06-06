@@ -1,41 +1,37 @@
-import { Position as CountingPosition } from '../src/CountingGame';
+import { CountingGame } from '../src/CountingGame';
 import { Channel, State } from '../src/CommonState';
 
 import assertRevert from './helpers/assertRevert';
 import { default as increaseTime, duration } from './helpers/increaseTime';
 
 var SimpleAdjudicator = artifacts.require("./SimpleAdjudicator.sol");
-var CountingGame = artifacts.require("./CountingGame.sol");
+var CountingGameContract = artifacts.require("./CountingGame.sol");
 
 const START_BALANCE = 100000000000000000000;
 
 const A_IDX = 1;
 const B_IDX = 2;
+const aBal = Number(web3.toWei(6, "ether"));
+const bBal = Number(web3.toWei(4, "ether"));
+const resolution = [aBal, bBal];
+const differentResolution = [bBal, aBal];
 
 contract('SimpleAdjudicator', (accounts) => {
-  let simpleAdj, countingGame, packIG;
+  let simpleAdj, countingGame;
   let state0, state1, state2, state3, state1alt, state2alt;
-  let challengerBal, challengeeBal;
   before(async () => {
-    countingGame = await CountingGame.deployed();
+    let countingGameContract = await CountingGameContract.deployed();
+    let channel = new Channel(countingGameContract.address, 0, [accounts[A_IDX], accounts[B_IDX]]);
 
-    let channel = new Channel(countingGame.address, 0, [accounts[A_IDX], accounts[B_IDX]]);
+    state0 = CountingGame.gameState({channel, resolution, turnNum: 6, gameCounter: 1});
+    state1 = CountingGame.gameState({channel, resolution, turnNum: 7, gameCounter: 2});
+    state2 = CountingGame.gameState({channel, resolution, turnNum: 8, gameCounter: 3});
+    state3 = CountingGame.gameState({channel, resolution, turnNum: 9, gameCounter: 4});
 
-    challengeeBal = Number(web3.toWei(6, "ether"));
-    challengerBal = Number(web3.toWei(4, "ether"));
-    let startPosition = CountingPosition.initialPosition(challengeeBal, challengerBal);
-    state0 = new State(channel, State.StateTypes.GAME, 0, startPosition);
-    state1 = state0.next(state0.position.next());
-    state2 = state1.next(state1.position.next());
-    state3 = state2.next(state2.position.next());
-
-    let pos1alt = new CountingPosition(3, 6, 1);
-
-    state1alt = new State(channel, State.StateTypes.GAME, 1, pos1alt);
-    state2alt = state1alt.next(state1alt.position.next());
+    state1alt = CountingGame.gameState({channel, resolution: differentResolution, turnNum: 7, gameCounter: 2});
+    state2alt = CountingGame.gameState({channel, resolution: differentResolution, turnNum: 8, gameCounter: 3});
 
     simpleAdj = await SimpleAdjudicator.new(channel.id);
-
   });
 
   it("forceMove -> respondWithMove", async () => {
@@ -116,6 +112,9 @@ contract('SimpleAdjudicator', (accounts) => {
 
     let challengee = accounts[A_IDX];
     let challenger = accounts[B_IDX];
+
+    let challengeeBal = aBal;
+    let challengerBal = bBal;
 
     let [r0, s0, v0] = agreedState.sign(challengee);
     let [r1, s1, v1] = challengeState.sign(challenger);

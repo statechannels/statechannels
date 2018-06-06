@@ -1,4 +1,4 @@
-pragma solidity ^0.4.18;
+pragma solidity ^0.4.24;
 
 library CommonState {
     enum StateType { Propose, Accept, Game, Conclude }
@@ -14,7 +14,9 @@ library CommonState {
     // x + [ 0 - 31] uint256 stateType
     // x + [32 - 63] uint256 turnNum
     // x + [64 - 95] uint256 stateCount // only relevant for Propose and Accept states
-    // x + [96 -  ?] bytes gameState
+    // x + [96 - y-1] uint256[] resolution
+    // ----------- where y = 224 + 64 * numberOfParticipants
+    // y + [0 -  ?] bytes gameState
 
     function channelType(bytes _state) public pure returns (address _channelType) {
         assembly {
@@ -81,8 +83,25 @@ library CommonState {
         }
     }
 
+    function resolution(bytes _state) public pure returns (uint256[] ) {
+        uint256 currentResolutionValue;
+        uint256 n = numberOfParticipants(_state);
+        uint256[] memory extractedResolution = new uint256[](n);
+
+        for(uint i = 0; i < n; i++) {
+            assembly {
+                currentResolutionValue := mload(add(_state, add(224, mul(32, add(i, n)))))
+            }
+
+            extractedResolution[i] = currentResolutionValue;
+        }
+        return extractedResolution;
+    }
+
     function channelId(bytes _state) public pure returns (bytes32) {
-        return keccak256(channelType(_state), channelNonce(_state), participants(_state));
+        return keccak256(
+            abi.encodePacked(channelType(_state), channelNonce(_state), participants(_state))
+        );
     }
 
     function mover(bytes _state) public pure returns (address) {
@@ -107,7 +126,40 @@ library CommonState {
     }
 
     function gameStateOffset(bytes _state) public pure returns (uint) {
-        return 96 + 32 * numberOfParticipants(_state) + 128;
+        return 224 + 64 * numberOfParticipants(_state);
+    }
+
+
+    function gameAttributesEqual(bytes _state, bytes _otherState) public pure returns (bool) {
+        require(_state.length == _otherState.length, "States must be the same length to have equal game attributes");
+        require(_state.length % 32 == 0);
+
+        uint256 gameOffset = gameStateOffset(_state);
+        // need to add 32 because _state.length doesn't include the meta info
+        uint256 attributesLength = _state.length + 32 - gameOffset;
+
+        bytes32 chunk;
+        bytes32 otherChunk;
+        uint256 offset;
+
+        // we require that _state.length is a multiple of 32, so this is ok
+        // this is nasty - there's probably a better way of checking equality
+        // todo: fix this
+        for(uint i = 0; i < attributesLength; i += 32) {
+            assembly {
+                offset := add(gameOffset, i)
+                chunk := mload(add(_state, offset))
+                otherChunk := mload(add(_otherState, offset))
+            }
+            require(chunk == otherChunk);
+        }
+
+        return true;
+    }
+
+    function resolutionsEqual(bytes _state, bytes _otherState) public pure returns (bool) {
+        require(keccak256(abi.encodePacked(resolution(_state))) == keccak256(abi.encodePacked(resolution(_otherState))));
+        return true;
     }
 
     // utilities
@@ -117,7 +169,7 @@ library CommonState {
         bytes memory prefix = "\x19Ethereum Signed Message:\n32";
         bytes32 h = keccak256(_d);
 
-        bytes32 prefixedHash = keccak256(prefix, h);
+        bytes32 prefixedHash = keccak256(abi.encodePacked(prefix, h));
 
         address a = ecrecover(prefixedHash, _v, _r, _s);
 

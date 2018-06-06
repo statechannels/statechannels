@@ -1,10 +1,10 @@
-import { pack as packState } from '../src/CountingGame';
+import { CountingGame } from '../src/CountingGame';
 import assertRevert from './helpers/assertRevert';
 
 import { Position as CountingPosition } from '../src/CountingGame';
 import { Channel, State } from '../src/CommonState';
 
-var CountingGame = artifacts.require("./CountingGame.sol");
+var CountingGameContract = artifacts.require("./CountingGame.sol");
 // enum names aren't supported in ABI, so have to use integers for time being
 const START = 0;
 const CONCLUDED = 1;
@@ -13,15 +13,20 @@ contract('CountingGame', (accounts) => {
   let game, state0, state1, stateBalChange;
 
   before(async () => {
-    game = await CountingGame.deployed();
+    game = await CountingGameContract.deployed();
     let channel = new Channel(game.address, 0, [accounts[0], accounts[1]]);
-    let startPosition = CountingPosition.initialPosition(5, 4);
 
-    state0 = new State(channel, State.StateTypes.GAME, 0, startPosition);
-    state1 = state0.next(state0.position.next());
+    let defaults = { channel: channel, resolution: [5, 4] };
 
-    let posBalChange = new CountingPosition(4, 5, 1);
-    stateBalChange = new State(channel, State.StateTypes.GAME, 1, posBalChange);
+    state0 = CountingGame.gameState({...defaults, turnNum: 6, gameCounter: 1});
+    state1 = CountingGame.gameState({...defaults, turnNum: 7, gameCounter: 2});
+
+    stateBalChange = CountingGame.gameState({
+      ...defaults,
+      resolution: [6, 3],
+      turnNum: 7,
+      gameCounter: 2
+    });
   });
 
   // Transition fuction tests
