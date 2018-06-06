@@ -1,7 +1,7 @@
 {
-  "name": "channels-as-state-machines",
-  "version": "1.0.0",
-  "description": "MVP Force Move Game State Channels",
+  "name": "fmg-core",
+  "version": "0.0.1",
+  "description": "Force-move games core",
   "main": "truffle-config.js",
   "directories": {
     "doc": "docs",
@@ -10,10 +10,7 @@
   "scripts": {
     "test": "truffle test"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/counterfactual/state-machine-channels.git"
-  },
+  "repository": "https://github.com/magmo/force-move-games/tree/master/packages/fmg-core",
   "author": "Tom Close",
   "license": "MIT",
   "dependencies": {
