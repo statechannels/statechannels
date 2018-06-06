@@ -1,9 +1,10 @@
-import { CountingGame } from '../src/CountingGame';
-import assertRevert from './helpers/assertRevert';
+import { CountingGame } from '../src/counting-game';
+import assertRevert from '../../helpers/assertRevert';
 
-import { Position as CountingPosition } from '../src/CountingGame';
-import { Channel, State } from '../src/CommonState';
+import { Channel, State } from '../../..';
 
+var CommonState = artifacts.require("./CommonState.sol");
+var CountingStateContract = artifacts.require("./CountingState.sol");
 var CountingGameContract = artifacts.require("./CountingGame.sol");
 // enum names aren't supported in ABI, so have to use integers for time being
 const START = 0;
@@ -13,7 +14,10 @@ contract('CountingGame', (accounts) => {
   let game, state0, state1, stateBalChange;
 
   before(async () => {
-    game = await CountingGameContract.deployed();
+    CountingStateContract.link(CommonState);
+    let stateContract = await CountingStateContract.new();
+    CountingGameContract.link("CountingState", stateContract.address);
+    game = await CountingGameContract.new();
     let channel = new Channel(game.address, 0, [accounts[0], accounts[1]]);
 
     let defaults = { channel: channel, resolution: [5, 4] };

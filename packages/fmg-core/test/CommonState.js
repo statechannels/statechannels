@@ -1,7 +1,7 @@
 import { Channel } from '../src/channel';
 import { State } from '../src/state';
 import assertRevert from './helpers/assertRevert';
-import { CountingGame } from 'fmg-counting-game';
+import { CountingGame } from './test-game/src/counting-game';
 
 var CommonState = artifacts.require("./CommonState.sol");
 
