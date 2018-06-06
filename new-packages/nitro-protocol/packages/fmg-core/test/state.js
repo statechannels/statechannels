@@ -52,13 +52,13 @@ contract('State', (accounts) => {
     assert.equal(resolution[1], result[1]);
   });
 
-  it("identifies the mover based on the state nonce", async () => {
+  it("identifies the mover based on the turnNum", async () => {
     let mover = await stateLib.mover.call(statePacket);
     // our state nonce is 15, which is odd, so it should be participant[1]
     assert.equal(mover, participants[1]);
   });
 
-  it("identifies the indexOfMover based on the state nonce", async () => {
+  it("identifies the indexOfMover based on the turnNum", async () => {
     let index = await stateLib.indexOfMover.call(statePacket);
     // our state nonce is 15, which is odd, so it should be participant 1
     assert.equal(index, 1);
