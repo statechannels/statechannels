@@ -1,9 +1,9 @@
 // From https://github.com/OpenZeppelin/zeppelin-solidity/blob/master/test/helpers/increaseTime.js
 
-import latestTime from './latestTime';
+import latestTime from './latest-time';
 
 // Increases testrpc time by the passed duration in seconds
-export default function increaseTime (duration) {
+export function increaseTime (duration) {
   const id = Date.now();
 
   return new Promise((resolve, reject) => {

@@ -1,5 +1,5 @@
 import { CountingGame } from '../src/counting-game';
-import assertRevert from '../../helpers/assertRevert';
+import assertRevert from '../../helpers/assert-revert';
 
 import { Channel, State } from '../../..';
 

@@ -1,6 +1,5 @@
-import assertRevert from './helpers/assertRevert';
-import { RpsGame } from '../src/RockPaperScissors';
-import { Channel } from '../src/CommonState';
+import { Channel, assertRevert } from 'fmg-core';
+import { RpsGame } from '../src/rock-paper-scissors';
 
 var RpsStateContract = artifacts.require("./RockPaperScissorsState.sol");
 
