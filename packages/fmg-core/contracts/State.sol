@@ -3,7 +3,7 @@ pragma solidity ^0.4.24;
 library State {
     enum StateType { Propose, Accept, Game, Conclude }
 
-    // Common State Fields
+    // State Fields
     // ===================
     // [  0 -  31] (bytestring meta info)
     // [ 32 -  63] address channelType
