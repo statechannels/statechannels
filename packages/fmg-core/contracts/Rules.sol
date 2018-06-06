@@ -9,7 +9,6 @@ library Rules {
     struct Challenge {
         bytes32 channelId;
         bytes state;
-        uint256[2] resolvedBalances;
         uint32 expirationTime;
     }
 
