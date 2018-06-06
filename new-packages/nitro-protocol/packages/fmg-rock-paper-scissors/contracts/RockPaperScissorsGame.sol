@@ -53,12 +53,6 @@ contract RockPaperScissorsGame {
         revert();
     }
 
-    // in this case the resolution function is pure, but it doesn't have to be in general
-    function resolve(bytes _state) public pure returns (uint aBal, uint bBal) {
-        aBal = _state.aResolution();
-        bBal = _state.bResolution();
-    }
-
     function winnings(RockPaperScissorsState.Play firstPlay, RockPaperScissorsState.Play secondPlay, uint256 stake)
     private pure returns (uint256, uint256) {
         if (firstPlay == secondPlay) { // no-one won
