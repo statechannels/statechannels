@@ -40,12 +40,12 @@ export default class OpponentSelectionStep extends React.PureComponent {
           </table>
           <form>
             <h3>Or, create a challenge:</h3>
-            <div style={{ marginTop: 12, fontSize: 24 }}>
-              Name:<input style={{ marginLeft: 12, fontSize: 24 }} type="text" name="name" />
+            <div style={{ marginTop: 12 }}>
+              Name:<input style={{ marginLeft: 12 }} type="text" name="name" />
             </div>
-            <div style={{ marginTop: 12, fontSize: 24 }}>
+            <div style={{ marginTop: 12 }}>
               Wager (in Finney):<input
-                style={{ marginLeft: 12, fontSize: 24 }}
+                style={{ marginLeft: 12 }}
                 type="text"
                 name="wager"
               />

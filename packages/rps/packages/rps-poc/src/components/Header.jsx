@@ -1,18 +1,19 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 
-import { ROUTE_PATHS } from '../constants';
+import { ROUTE_PATHS, BRAND_COLOR } from '../constants';
 
 export default function Header() {
   return (
     <div
       style={{
         width: '100%',
-        height: 58,
+        height: 42,
         borderBottomStyle: 'solid',
         borderBottomWidth: 1,
         borderBottomColor: '#bbb',
-        backgroundColor: '#fff0f5',
+        backgroundColor: BRAND_COLOR,
+        color: '#fff',
       }}
     >
       <div style={{ position: 'absolute', left: 20 }}>

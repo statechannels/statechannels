@@ -10,5 +10,5 @@ export const ROUTE_PATHS = {
 
 // TODO: use key mirror
 export const GAME_STAGES = {
-  SELECT_CHALLENGE: 0,
+  SELECT_CHALLENGER: 0,
 };
