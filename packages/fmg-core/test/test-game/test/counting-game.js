@@ -49,13 +49,4 @@ contract('CountingGame', (accounts) => {
   it("doesn't allow transitions if totals don't match", async () => {
     await assertRevert(game.validTransition.call(state0.toHex(), stateBalChange.toHex()));
   });
-
-  // Resolution function tests
-  // =========================
-
-  it("resolves states correctly", async () => {
-    let [aBal, bBal] = await game.resolve.call(state0.toHex());
-    assert.equal(aBal, 5);
-    assert.equal(bBal, 4);
-  });
 });
