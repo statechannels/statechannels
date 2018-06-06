@@ -2,7 +2,7 @@
   "name": "fmg-counting-game",
   "version": "0.0.1",
   "description": "Counting game",
-  "main": "truffle-config.js",
+  "main": "index.js",
   "directories": {
     "doc": "docs",
     "test": "test"
