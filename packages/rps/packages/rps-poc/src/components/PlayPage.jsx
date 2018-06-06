@@ -36,7 +36,7 @@ export default class PlayPage extends React.PureComponent {
     super(props);
 
     this.state = {
-      stage: GAME_STAGES.SELECT_CHALLENGE,
+      stage: GAME_STAGES.SELECT_CHALLENGER,
     };
 
     this.selectChallenge = this.selectChallenge.bind(this);
@@ -48,16 +48,22 @@ export default class PlayPage extends React.PureComponent {
   }
 
   createChallenge() {
-    console.log('TODO (select): DO SOMETHING HERE');
+    console.log('TODO (create): DO SOMETHING HERE');
   }
 
   render() {
-    return (
-      <OpponentSelectionStep
-        handleSelectChallenge={this.selectChallenge}
-        handleCreateChallenge={this.createChallenge}
-        opponents={opponents}
-      />
-    );
+    const { stage } = this.state;
+
+    if (stage === GAME_STAGES.SELECT_CHALLENGER) {
+      return (
+        <OpponentSelectionStep
+          handleSelectChallenge={this.selectChallenge}
+          handleCreateChallenge={this.createChallenge}
+          opponents={opponents}
+        />
+      );
+    }
+
+    return null;
   }
 }
