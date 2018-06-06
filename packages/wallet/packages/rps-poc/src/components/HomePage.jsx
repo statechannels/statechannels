@@ -7,7 +7,8 @@ export default function HomePage() {
   return (
     <div style={{ maxWidth: '90%', margin: 'auto' }}>
       <div style={{ textAlign: 'center' }}>
-        <h1>Rock, Paper, Scissors</h1>
+        <h1 style={{ marginBottom: 0 }}>Rock, Paper, Scissors</h1>
+        <p><em>A State-Channel Proof-of-Concept Game</em></p>
       </div>
       <div>
         <div style={{ display: 'inline-block', maxWidth: '33%' }}>
