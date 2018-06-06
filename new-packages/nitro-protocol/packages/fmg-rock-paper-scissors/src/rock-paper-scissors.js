@@ -1,5 +1,4 @@
-import { toHex32, padBytes32 } from './utils';
-import { State } from './CommonState';
+import { Channel, State, toHex32, padBytes32 } from 'fmg-core';
 import { soliditySha3 } from 'web3-utils';
 
 class RpsGame {

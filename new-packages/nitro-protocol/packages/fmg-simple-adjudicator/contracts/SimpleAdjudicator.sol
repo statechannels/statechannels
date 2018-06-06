@@ -1,8 +1,8 @@
 pragma solidity ^0.4.23;
 
-import "./CommonState.sol";
-import "./Framework.sol";
-import "./ForceMoveGame.sol";
+import "fmg-core/contracts/CommonState.sol";
+import "fmg-core/contracts/Framework.sol";
+import "fmg-core/contracts/ForceMoveGame.sol";
 
 contract SimpleAdjudicator {
     // SimpleAdjudicator can support exactly one force move game channel

@@ -1,11 +1,10 @@
-import { CountingGame } from '../src/CountingGame';
-import { Channel, State } from '../src/CommonState';
-
-import assertRevert from './helpers/assertRevert';
-import { default as increaseTime, duration } from './helpers/increaseTime';
+import { Channel, State, assertRevert, increaseTime, duration } from 'fmg-core';
+import { CountingGame } from 'fmg-core/test/test-game/src/counting-game';
 
 var SimpleAdjudicator = artifacts.require("./SimpleAdjudicator.sol");
-var CountingGameContract = artifacts.require("./CountingGame.sol");
+var CommonState = artifacts.require("fmg-core/contracts/CommonState.sol");
+var CountingStateContract = artifacts.require("fmg-core/test/test-game/contracts/CountingState.sol");
+var CountingGameContract = artifacts.require("fmg-core/test/test-game/contracts/CountingGame.sol");
 
 const START_BALANCE = 100000000000000000000;
 
@@ -20,7 +19,10 @@ contract('SimpleAdjudicator', (accounts) => {
   let simpleAdj, countingGame;
   let state0, state1, state2, state3, state1alt, state2alt;
   before(async () => {
-    let countingGameContract = await CountingGameContract.deployed();
+    CountingStateContract.link(CommonState);
+    let stateContract = await CountingStateContract.new();
+    CountingGameContract.link("CountingState", stateContract.address);
+    let countingGameContract = await CountingGameContract.new();
     let channel = new Channel(countingGameContract.address, 0, [accounts[A_IDX], accounts[B_IDX]]);
 
     state0 = CountingGame.gameState({channel, resolution, turnNum: 6, gameCounter: 1});

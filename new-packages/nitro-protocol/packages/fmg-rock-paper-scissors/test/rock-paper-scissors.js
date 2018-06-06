@@ -1,8 +1,6 @@
-import assertRevert from './helpers/assertRevert';
+import { Channel, State, assertRevert, increaseTime, duration } from 'fmg-core';
 
-import { Position as RpsPosition} from '../src/RockPaperScissors';
-import { RpsGame } from '../src/RockPaperScissors';
-import { Channel, State } from '../src/CommonState';
+import { RpsGame } from '../src/rock-paper-scissors';
 
 var RPS = artifacts.require("./RockPaperScissorsGame.sol");
 
