@@ -2,7 +2,7 @@ import { State, toHex32, padBytes32 } from '../../..';
 
 class CountingGame {
   static preFundSetupState(opts) { return new PreFundSetupState(opts); }
-  static acceptState(opts) { return new AcceptState(opts); }
+  static PostFundSetupState(opts) { return new PostFundSetupState(opts); }
   static gameState(opts) { return new GameState(opts); }
   static concludeState(opts) { return new ConcludeState(opts); }
 }
@@ -25,8 +25,8 @@ class PreFundSetupState extends CountingBaseState {
   initialize() { this.stateType = State.StateTypes.PREFUNDSETUP; }
 }
 
-class AcceptState extends CountingBaseState {
-  initialize() { this.stateType = State.StateTypes.ACCEPT; }
+class PostFundSetupState extends CountingBaseState {
+  initialize() { this.stateType = State.StateTypes.POSTFUNDSETUP; }
 }
 
 class GameState extends CountingBaseState {

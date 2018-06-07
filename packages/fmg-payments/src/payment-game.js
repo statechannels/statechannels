@@ -4,7 +4,7 @@ class PaymentGame {
   static preFundSetupState({ channel, resolution, turnNum, stateCount }) {
       return new InitializationState(...arguments);
   }
-  static acceptState({ channel, resolution, turnNum, stateCount }) {
+  static PostFundSetupState({ channel, resolution, turnNum, stateCount }) {
       return new FundConfirmationState(...arguments);
   }
   static gameState({ channel, resolution, turnNum }) {
@@ -25,7 +25,7 @@ class InitializationState extends State {
 class FundConfirmationState extends State {
     constructor({ channel, resolution, turnNum, stateCount }) {
         super(...arguments);
-        this.stateType = State.StateTypes.ACCEPT;
+        this.stateType = State.StateTypes.POSTFUNDSETUP;
     }
 }
 
