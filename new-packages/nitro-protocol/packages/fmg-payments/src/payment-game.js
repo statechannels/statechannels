@@ -1,7 +1,7 @@
 import { State, toHex32, padBytes32 } from 'fmg-core';
 
 class PaymentGame {
-  static proposeState({ channel, resolution, turnNum, stateCount }) {
+  static preFundSetupState({ channel, resolution, turnNum, stateCount }) {
       return new InitializationState(...arguments);
   }
   static acceptState({ channel, resolution, turnNum, stateCount }) {
@@ -18,7 +18,7 @@ class PaymentGame {
 class InitializationState extends State {
     constructor({ channel, resolution, turnNum, stateCount }) {
         super(...arguments);
-        this.stateType = State.StateTypes.PROPOSE;
+        this.stateType = State.StateTypes.PREFUNDSETUP;
     }
 }
 

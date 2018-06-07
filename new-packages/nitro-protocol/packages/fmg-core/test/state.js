@@ -99,8 +99,8 @@ contract('State', (accounts) => {
   });
 
   it("can test if the gameAttributes are equal", async() => {
-    let state1 = CountingGame.proposeState({channel, resolution, turnNum, gameCounter: 0 });
-    let state2 = CountingGame.proposeState({channel, resolution, turnNum, gameCounter: 1 });
+    let state1 = CountingGame.preFundSetupState({channel, resolution, turnNum, gameCounter: 0 });
+    let state2 = CountingGame.preFundSetupState({channel, resolution, turnNum, gameCounter: 1 });
 
     await assertRevert(stateLib.gameAttributesEqual.call(state1.toHex(), state2.toHex()));
   });
