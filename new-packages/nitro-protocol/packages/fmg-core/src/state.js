@@ -40,7 +40,7 @@ class State {
 
 State.StateTypes = {
   PREFUNDSETUP: 0,
-  ACCEPT: 1,
+  POSTFUNDSETUP: 1,
   GAME: 2,
   CONCLUDE: 3,
 }

@@ -10,8 +10,8 @@ contract RockPaperScissorsGame {
     //
     // Start -> RoundProposed
     // RoundProposed -> Start // reject game
-    // RoundProposed -> RoundAccepted
-    // RoundAccepted -> Reveal
+    // RoundProposed -> RoundPostFundSetuped
+    // RoundPostFundSetuped -> Reveal
     // Reveal -> Start
     // Start -> Concluded
     //
@@ -31,14 +31,14 @@ contract RockPaperScissorsGame {
                 validateRoundProposedToRejected(_old, _new);
 
                 return true;
-            } else if (_new.positionType() == RockPaperScissorsState.PositionType.RoundAccepted) {
-                validateRoundProposedToRoundAccepted(_old, _new);
+            } else if (_new.positionType() == RockPaperScissorsState.PositionType.RoundPostFundSetuped) {
+                validateRoundProposedToRoundPostFundSetuped(_old, _new);
 
                 return true;
             }
-        } else if (_old.positionType() == RockPaperScissorsState.PositionType.RoundAccepted) {
+        } else if (_old.positionType() == RockPaperScissorsState.PositionType.RoundPostFundSetuped) {
             if (_new.positionType() == RockPaperScissorsState.PositionType.Reveal) {
-                validateRoundAcceptedToReveal(_old, _new);
+                validateRoundPostFundSetupedToReveal(_old, _new);
 
                 return true;
             }
@@ -86,7 +86,7 @@ contract RockPaperScissorsGame {
         require(_new.bResolution() == _old.bResolution()); // resolution unchanged
     }
 
-    function validateRoundProposedToRoundAccepted(bytes _old, bytes _new) private pure {
+    function validateRoundProposedToRoundPostFundSetuped(bytes _old, bytes _new) private pure {
         // a will have to reveal, so remove the stake beforehand
         require(_new.aResolution() == _old.aResolution() - _old.stake());
         require(_new.bResolution() == _old.bResolution() + _old.stake());
@@ -94,7 +94,7 @@ contract RockPaperScissorsGame {
         require(_new.preCommit() == _old.preCommit());
     }
 
-    function validateRoundAcceptedToReveal(bytes _old, bytes _new) private pure {
+    function validateRoundPostFundSetupedToReveal(bytes _old, bytes _new) private pure {
         uint256 aWinnings;
         uint256 bWinnings;
 
