@@ -25,7 +25,7 @@ class InitializationState extends State {
 class FundConfirmationState extends State {
     constructor({ channel, resolution, turnNum, stateCount }) {
         super(...arguments);
-        this.stateType = State.StateTypes.ACCEPT;
+        this.stateType = State.StateTypes.POSTFUNDSETUP;
     }
 }
 
