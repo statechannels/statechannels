@@ -28,18 +28,18 @@ contract('Rules', (accounts) => {
 
         let challengeeBal = Number(web3.toWei(6, "ether"));
         let challengerBal = Number(web3.toWei(4, "ether"));
-        
+
         defaults = { channel, resolution, gameCounter: 0};
     });
 
 
-    const validTransition = async (state1, state2) => { 
+    const validTransition = async (state1, state2) => {
         return await framework.validTransition(state1.toHex(), state2.toHex());
     };
 
     describe("propose -> propose", () => {
         beforeEach(() => {
-            fromState= CountingGame.proposeState({ ...defaults, turnNum: 0, stateCount: 0 });
+            fromState = CountingGame.proposeState({ ...defaults, turnNum: 0, stateCount: 0 });
             toState = CountingGame.proposeState({ ...defaults, turnNum: 1, stateCount: 1 });
         });
 
@@ -278,7 +278,7 @@ contract('Rules', (accounts) => {
         it("allows a valid transition", async() => {
             assert(await validTransition(fromState, toState));
         });
-        
+
         it("rejects a transition where the turnNum doesn't increment", async () => {
             toState.turnNum = fromState.turnNum;
             await assertRevert(validTransition(fromState, toState));
