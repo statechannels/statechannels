@@ -153,7 +153,8 @@ contract('SimpleAdjudicator', (accounts) => {
 
     await simpleAdj.forceMove(agreedState.toHex(), challengeState.toHex(), [v0, v1], [r0, r1], [s0, s1] );
     await increaseTime(duration.days(2));
-    await simpleAdj.withdraw();
+    await simpleAdj.withdraw(challengee);
+    await simpleAdj.withdraw(challenger);
 
     assert.equal(
       web3.eth.getBalance(simpleAdj.address),
@@ -172,27 +173,158 @@ contract('SimpleAdjudicator', (accounts) => {
     );
   });
 
-  // TODO: replace when conclude states are done
-  // it("conclude", async () => {
-  //   let yourBal = 6;
-  //   let myBal = 6;
-  //   let count = 1;
-  //   let yourState = packIG(0, CONCLUDED, myBal, yourBal, count+1);
-  //   let myState = packIG(1, CONCLUDED, myBal, yourBal, count);
-  //
-  //   let you = accounts[A_IDX];
-  //   let me = accounts[B_IDX];
-  //
-  //   let [r0, s0, v0] = ecSignState(yourState, you);
-  //   let [r1, s1, v1] = ecSignState(myState, me);
-  //
-  //   assert.equal(await simpleAdj.currentChallengePresent(), false, "current challenge exists at start of game");
-  //   assert.equal(await simpleAdj.expiredChallengePresent(), false, "expired challenge exists at start of game");
-  //
-  //   await simpleAdj.conclude(yourState, myState, [v0, v1], [r0, r1], [s0, s1] );
-  //
-  //   assert.equal(await simpleAdj.currentChallengePresent(), true, "conclude didn't create current challenge");
-  //   assert.equal(await simpleAdj.expiredChallengePresent(), true, "conclude did not create expired challenge");
-  //   assert.equal(await simpleAdj.activeChallengePresent(), false, "conclude created active challenge");
-  // });
+  it("conclude -> withdraw", async () => {
+    // TODO: extract duplicated setup code.
+
+    let aliceState = state0;
+    let bobState = state1;
+
+    aliceState.stateType = State.StateTypes.CONCLUDE;
+    bobState.stateType = State.StateTypes.CONCLUDE;
+
+    let alice = accounts[A_IDX];
+    let bob = accounts[B_IDX];
+
+    let aliceBal = aBal;
+    let bobBal = bBal;
+
+    let [r0, s0, v0] = aliceState.sign(alice);
+    let [r1, s1, v1] = bobState.sign(bob);
+
+    await web3.eth.sendTransaction({
+      from: alice,
+      to: simpleAdj.address,
+      value: aliceBal,
+      gasPrice: 0
+    })
+
+    await web3.eth.sendTransaction({
+      from: bob,
+      to: simpleAdj.address,
+      value: bobBal,
+      gasPrice: 0
+    })
+
+    assert.equal(
+      web3.eth.getBalance(simpleAdj.address),
+      aliceBal + bobBal,
+      "Funds were not deposited in the SimpleAdjudicator"
+    );
+    assert.equal(
+      Number(web3.eth.getBalance(bob)),
+      START_BALANCE - bobBal,
+      "Funds were not deposited from bob"
+    );
+    assert.equal(
+      Number(web3.eth.getBalance(alice)),
+      START_BALANCE - aliceBal,
+      "Funds were not deposited from alice"
+    );
+
+    await simpleAdj.conclude(aliceState.toHex(), bobState.toHex(), [v0, v1], [r0, r1], [s0, s1] );
+
+    await simpleAdj.withdraw(bob);
+    assert.equal(
+      Number(web3.eth.getBalance(bob)),
+      START_BALANCE,
+      "Bob's balance resolved incorrectly after his withdrawal."
+    );
+
+    assert.equal(
+      Number(web3.eth.getBalance(alice)),
+      START_BALANCE - aliceBal,
+      "Alice's balance resolved incorrectly before her withdrawal."
+    );
+
+    await simpleAdj.withdraw(alice);
+    assert.equal(
+      Number(web3.eth.getBalance(alice)),
+      START_BALANCE,
+      "Alice's balance resolved incorrectly after her withdrawal."
+    );
+
+    assert.equal(
+      web3.eth.getBalance(simpleAdj.address),
+      0,
+      "SimpleAdjudicator wasn't emptied"
+    );
+
+    await simpleAdj.withdraw(bob);
+    assert.equal(
+      Number(web3.eth.getBalance(bob)),
+      START_BALANCE,
+      "Bob withdrew multiple times."
+    );
+  });
+
+  it("allows proper withdrawals in an insufficiently funded game", async () => {
+    // TODO: extract duplicated setup code.
+
+    let aliceState = state0;
+    let bobState = state1;
+
+    aliceState.stateType = State.StateTypes.CONCLUDE;
+    bobState.stateType = State.StateTypes.CONCLUDE;
+
+    let alice = accounts[A_IDX];
+    let bob = accounts[B_IDX];
+
+    let aliceBal = aBal;
+    let bobBal = bBal;
+
+    let [r0, s0, v0] = aliceState.sign(alice);
+    let [r1, s1, v1] = bobState.sign(bob);
+
+    await web3.eth.sendTransaction({
+      from: alice,
+      to: simpleAdj.address,
+      value: 0,
+      gasPrice: 0
+    })
+
+    await web3.eth.sendTransaction({
+      from: bob,
+      to: simpleAdj.address,
+      value: bobBal,
+      gasPrice: 0
+    })
+
+    assert.equal(
+      web3.eth.getBalance(simpleAdj.address),
+      bobBal,
+      "Funds were not deposited in the SimpleAdjudicator"
+    );
+    assert.equal(
+      Number(web3.eth.getBalance(bob)),
+      START_BALANCE - bobBal,
+      "Funds were not deposited from bob"
+    );
+    assert.equal(
+      Number(web3.eth.getBalance(alice)),
+      START_BALANCE,
+      "Funds were deposited from alice"
+    );
+
+    await simpleAdj.conclude(aliceState.toHex(), bobState.toHex(), [v0, v1], [r0, r1], [s0, s1] );
+    await simpleAdj.withdraw(bob);
+
+    assert.equal(
+      Number(web3.eth.getBalance(bob)),
+      START_BALANCE - bobBal,
+      "Bob took alice's money."
+    );
+
+    await simpleAdj.withdraw(alice);
+    assert.equal(
+      Number(web3.eth.getBalance(alice)),
+      START_BALANCE + bobBal,
+      "Alice's balance resolved incorrectly after her withdrawal."
+    );
+
+    assert.equal(
+      web3.eth.getBalance(simpleAdj.address),
+      0,
+      "SimpleAdjudicator wasn't emptied"
+    );
+  });
 });

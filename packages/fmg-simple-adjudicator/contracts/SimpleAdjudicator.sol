@@ -116,21 +116,29 @@ contract SimpleAdjudicator {
     function createChallenge(uint32 expirationTime, bytes _state) private {
         currentChallenge.state = _state;
         currentChallenge.expirationTime = expirationTime;
+
+        uint256 remaining = address(this).balance;
+        uint256[] memory payouts = State.resolution(_state);
+        for(uint i = 0; i < payouts.length; i++) {
+            payouts[i] = min(payouts[i], remaining); // don't pay out more than what we have
+            if (remaining >= payouts[i]) {
+                remaining = remaining - payouts[i];
+            } else {
+                remaining = 0;
+            }
+        }
+
+        currentChallenge.payouts = payouts;
     }
 
-    function withdraw()
+    function withdraw(address participant)
       public
       onlyWhenCurrentChallengeExpired
     {
-        uint256[] memory resolvedBalances = State.resolution(currentChallenge.state);
-        currentChallenge.state.participant(0).transfer(
-          min(resolvedBalances[0], address(this).balance)
-        );
-        currentChallenge.state.participant(1).transfer(
-          min(resolvedBalances[1], address(this).balance)
-        );
-
-        cancelCurrentChallenge(); // prevent multiple withdrawals
+        uint8 idx = participantIdx(participant);
+        uint amount = currentChallenge.payouts[idx];
+        currentChallenge.payouts[idx] = currentChallenge.payouts[idx] - amount;
+        participant.transfer(amount);
     }
 
     function validTransition(bytes _fromState, bytes _toState) public pure returns(bool) {
@@ -158,7 +166,26 @@ contract SimpleAdjudicator {
         return currentChallengePresent() && !activeChallengePresent();
     }
 
+    function participantIdx(address participant)
+      private view
+      onlyWhenCurrentChallengePresent // otherwise, we don't know that we've seen a valid game state yet
+      returns (uint8) {
+        bytes memory endState = currentChallenge.state;
+        address[] memory p = State.participants(endState);
+        for(uint8 i = 0; i < 2; i++) {
+            if (p[i] == participant) {
+                return i;
+            }
+        }
+        revert("Participant not in game.");
+    }
+
     // Modifiers
+    modifier onlyWhenCurrentChallengePresent() {
+        require(currentChallengePresent());
+        _;
+    }
+
     modifier onlyWhenCurrentChallengeNotPresent() {
         require(!currentChallengePresent());
         _;

@@ -10,6 +10,7 @@ library Rules {
         bytes32 channelId;
         bytes state;
         uint32 expirationTime;
+        uint256[] payouts;
     }
 
     function validForceMove(
