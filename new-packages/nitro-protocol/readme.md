@@ -19,6 +19,12 @@ The framework in this respository is currently limited to 2-player games, but th
 due to solidity challenges and time constraints - the framework itself extends naturally to
 n-player games.
 
+### Usage
+
+The framework separates the core behaviour of the protocol from the implementation. We currently
+provide one implementation (the simple adjudicator). You can find more about working with the
+framework using the simple adjudicator in the [readme](./packages/fmg-simple-adjudicator).
+
 ### Packages
 
 This repository is split into packages which ~are~ will be published as independent node modules.
@@ -32,18 +38,30 @@ This repository is split into packages which ~are~ will be published as independ
 
 ### TODO
 
-This project is still a work in progress! Still to do:
+This project is still a work in progress! Still to do in the sort term:
 
-- [ ] Publish packages to npm
+- [x] Publish packages to npm
 - [ ] Release whitepaper
 - [ ] Build out a full example application (including UI)
 - [ ] Optimize contracts for gas consumption
-- [ ] More tests
+- [ ] More tests to demonstrate the simple adjudicator
 - [ ] Audit contracts
+
+In the medium term:
+
+- [ ] Add support for ERC20 tokens
+- [ ] Extend the code to n-party games
+- [ ] Create an adjudicator capable of supporting ledger channels and virtual channels
 
 :rotating_light: **WARNING: This code is not production ready.** :rotating_light:
 
-### Contributing / Development
+### Contributing 
+
+We welcome contributions and feedback from the community! We'll be putting together some more-comprehensive
+contributing guidelines shortly. In the meantime, [issues](https://github.com/magmo/force-move-games/issues)
+and PRs welcome!
+
+### Development
 
 We use [lerna](https://lernajs.io/) to manage the packages inside the repository and 
 [truffle](http://truffleframework.com/) for smart contract development.
