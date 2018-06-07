@@ -26,16 +26,16 @@ class RpsGame {
 RpsGame.Plays = {
   ROCK: 0,
   PAPER: 1,
-  SCISSORS: 2,
-}
+  SCISSORS: 2
+};
 Object.freeze(RpsGame.Plays);
 
 RpsGame.PositionTypes = {
   RESTING: 0,
   ROUNDPROPOSED: 1,
   ROUNDACCEPTED: 2,
-  REVEAL: 3,
-}
+  REVEAL: 3
+};
 Object.freeze(RpsGame.PositionTypes);
 
 export { RpsGame };
@@ -55,7 +55,7 @@ class RpsBaseState extends State {
   static hashCommitment(play, salt) {
     return soliditySha3(
       { type: 'uint256', value: play },
-      { type: 'bytes32', value: padBytes32(salt) },
+      { type: 'bytes32', value: padBytes32(salt) }
     );
   }
 
@@ -70,7 +70,6 @@ class RpsBaseState extends State {
       padBytes32(this.isPreReveal() ? "0x0" : this.salt || "0x0").substr(2)
     );
   }
-
 }
 
 // needs to store/copy game-specific attributes, but needs to behave like a framework state
@@ -113,7 +112,7 @@ class RevealState extends RpsBaseState {
     this.stateType = State.StateTypes.GAME;
     this.positionType = RpsGame.PositionTypes.REVEAL;
   }
-  isPreReveal() { return false };
+  isPreReveal() { return false; };
 }
 
 class RestState extends RpsBaseState {
@@ -122,7 +121,7 @@ class RestState extends RpsBaseState {
     this.stateType = State.StateTypes.GAME;
     this.positionType = RpsGame.PositionTypes.RESTING;
   }
-  isPreReveal() { return false };
+  isPreReveal() { return false; };
 }
 
 class ConclusionState extends RpsBaseState {
