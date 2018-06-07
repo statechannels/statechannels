@@ -1,5 +1,4 @@
-import { toHex32, padBytes32 } from './utils';
-import { State } from './state';
+import { State, toHex32, padBytes32 } from 'fmg-core';
 
 class PaymentGame {
   static proposeState({ channel, resolution, turnNum, stateCount }) {
