@@ -1,6 +1,6 @@
 pragma solidity ^0.4.18;
 
-import "./State.sol";
+import "fmg-core/contracts/State.sol";
 
 library PaymentState {
 
