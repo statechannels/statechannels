@@ -18,7 +18,7 @@ We describe below how a client could control the flow of states that could be ex
 
 ![Alt text](assets/rock-paper-scissors.png?raw=true "Title")
 In each state `aBal` and `bBal` represent Alice and Bob's current balances in the game respectively.
-The dotted lines represent the _resolution_ of the game if it were to conclude from the given state -- that is, what the game rules considers a fair payout to each player.
+The dotted lines in the above figure represent the _resolution_ of the game if it were to conclude from the given state -- that is, what the game rules considers a fair payout to each player.
 
 The states we show in the diagram are slightly simplified.
 In particular, we omit the _framework attributes_ implemented by the core state contract.
@@ -132,3 +132,6 @@ let message4B = StateWalletB.sign(state3B);
 
 Now they are back in the `Start` state, Alice is free to propose another
 round if she wishes.
+
+Either play may communicate their wish to end the game at any point by moving to an `RPS.Conclude` state.
+This is discussed in detail in the (to-be-released) whitepaper.
