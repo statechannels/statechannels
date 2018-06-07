@@ -41,7 +41,7 @@ This project is still a work in progress! Still to do:
 - [ ] More tests
 - [ ] Audit contracts
 
-**WARNING: This code is not production ready.**
+:rotating_light: **WARNING: This code is not production ready.** :rotating_light:
 
 ### Contributing / Development
 
