@@ -1,6 +1,6 @@
 {
   "name": "fmg-rock-paper-scissors",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Rock-paper-scissors as a force-move game",
   "main": "truffle-config.js",
   "directories": {
@@ -14,7 +14,7 @@
   "author": "Tom Close",
   "license": "MIT",
   "dependencies": {
-    "fmg-core": "^0.0.1",
+    "fmg-core": "^0.0.2",
     "npm": "^5.7.1",
     "sha3": "^1.2.2",
     "web3-utils": "^1.0.0-beta.30"
