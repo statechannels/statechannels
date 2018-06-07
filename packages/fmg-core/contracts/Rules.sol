@@ -106,8 +106,8 @@ library Rules {
         require(_toState.channelId() == _fromState.channelId());
         require(_toState.turnNum() == _fromState.turnNum() + 1);
 
-        if (_fromState.stateType() == State.StateType.Propose) {
-            return validTransitionFromPropose(_fromState, _toState);
+        if (_fromState.stateType() == State.StateType.PreFundSetup) {
+            return validTransitionFromPreFundSetup(_fromState, _toState);
         } else if (_fromState.stateType() == State.StateType.Accept) {
             return validTransitionFromAccept(_fromState, _toState);
         } else if (_fromState.stateType() == State.StateType.Game) {
@@ -119,11 +119,11 @@ library Rules {
         return true;
     }
 
-    function validTransitionFromPropose(bytes _fromState, bytes _toState) public pure returns (bool) {
+    function validTransitionFromPreFundSetup(bytes _fromState, bytes _toState) public pure returns (bool) {
         if (_fromState.stateCount() == _fromState.numberOfParticipants() - 1) {
-            // there are two options from the final Propose state
-            // 1. Propose -> Accept transition
-            // 2. Propose -> Conclude transition
+            // there are two options from the final PreFundSetup state
+            // 1. PreFundSetup -> Accept transition
+            // 2. PreFundSetup -> Conclude transition
             if (_toState.stateType() == State.StateType.Accept) {
                 require(_toState.stateCount() == 0); // reset the stateCount
                 require(State.gameAttributesEqual(_fromState, _toState));
@@ -133,8 +133,8 @@ library Rules {
                 require(State.resolutionsEqual(_fromState, _toState));
             }
         } else {
-            // Propose -> Propose transition
-            require(_toState.stateType() == State.StateType.Propose);
+            // PreFundSetup -> PreFundSetup transition
+            require(_toState.stateType() == State.StateType.PreFundSetup);
             require(State.gameAttributesEqual(_fromState, _toState));
             require(_toState.stateCount() == _fromState.stateCount() + 1);
             require(State.resolutionsEqual(_fromState, _toState));
