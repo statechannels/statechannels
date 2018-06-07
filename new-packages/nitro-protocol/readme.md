@@ -21,7 +21,7 @@ n-player games.
 
 ### Packages
 
-This repository is split into packages which -are- will be published as independent node modules.
+This repository is split into packages which ~are~ will be published as independent node modules.
                                                            
 | Package                       |  Description                                  |
 | ----------------------------- |  -------------------------------------------- |
