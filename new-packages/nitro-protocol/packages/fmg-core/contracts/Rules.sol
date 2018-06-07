@@ -106,10 +106,10 @@ library Rules {
         require(_toState.channelId() == _fromState.channelId());
         require(_toState.turnNum() == _fromState.turnNum() + 1);
 
-        if (_fromState.stateType() == State.StateType.PreFundSetup) {
-            return validTransitionFromPreFundSetup(_fromState, _toState);
-        } else if (_fromState.stateType() == State.StateType.PostFundSetup) {
-            return validTransitionFromPostFundSetup(_fromState, _toState);
+        if (_fromState.stateType() == State.StateType.Propose) {
+            return validTransitionFromPropose(_fromState, _toState);
+        } else if (_fromState.stateType() == State.StateType.Accept) {
+            return validTransitionFromAccept(_fromState, _toState);
         } else if (_fromState.stateType() == State.StateType.Game) {
             return validTransitionFromGame(_fromState, _toState);
         } else if (_fromState.stateType() == State.StateType.Conclude) {
@@ -119,12 +119,12 @@ library Rules {
         return true;
     }
 
-    function validTransitionFromPreFundSetup(bytes _fromState, bytes _toState) public pure returns (bool) {
+    function validTransitionFromPropose(bytes _fromState, bytes _toState) public pure returns (bool) {
         if (_fromState.stateCount() == _fromState.numberOfParticipants() - 1) {
-            // there are two options from the final PreFundSetup state
-            // 1. PreFundSetup -> PostFundSetup transition
-            // 2. PreFundSetup -> Conclude transition
-            if (_toState.stateType() == State.StateType.PostFundSetup) {
+            // there are two options from the final Propose state
+            // 1. Propose -> Accept transition
+            // 2. Propose -> Conclude transition
+            if (_toState.stateType() == State.StateType.Accept) {
                 require(_toState.stateCount() == 0); // reset the stateCount
                 require(State.gameAttributesEqual(_fromState, _toState));
                 require(State.resolutionsEqual(_fromState, _toState));
@@ -133,8 +133,8 @@ library Rules {
                 require(State.resolutionsEqual(_fromState, _toState));
             }
         } else {
-            // PreFundSetup -> PreFundSetup transition
-            require(_toState.stateType() == State.StateType.PreFundSetup);
+            // Propose -> Propose transition
+            require(_toState.stateType() == State.StateType.Propose);
             require(State.gameAttributesEqual(_fromState, _toState));
             require(_toState.stateCount() == _fromState.stateCount() + 1);
             require(State.resolutionsEqual(_fromState, _toState));
@@ -142,22 +142,22 @@ library Rules {
         return true;
     }
 
-    function validTransitionFromPostFundSetup(bytes _fromState, bytes _toState) public pure returns (bool) {
+    function validTransitionFromAccept(bytes _fromState, bytes _toState) public pure returns (bool) {
         if (_fromState.stateCount() == _fromState.numberOfParticipants() - 1) {
-            // PostFundSetup -> Game transition is the only option
+            // Accept -> Game transition is the only option
             require(_toState.stateType() == State.StateType.Game);
             require(ForceMoveGame(_fromState.channelType()).validTransition(_fromState, _toState));
         } else {
             // Two possibilities:
-            // 1. PostFundSetup -> PostFundSetup transition
-            // 2. PostFundSetup -> Conclude transition
-            if (_toState.stateType() == State.StateType.PostFundSetup) {
-                // PostFundSetup -> PostFundSetup
+            // 1. Accept -> Accept transition
+            // 2. Accept -> Conclude transition
+            if (_toState.stateType() == State.StateType.Accept) {
+                // Accept -> Accept
                 require(State.gameAttributesEqual(_fromState, _toState));
                 require(_toState.stateCount() == _fromState.stateCount() + 1);
                 require(State.resolutionsEqual(_fromState, _toState));
             } else {
-                // PostFundSetup -> Conclude
+                // Accept -> Conclude
                 require(_toState.stateType() == State.StateType.Conclude);
                 require(State.resolutionsEqual(_fromState, _toState));
             }

@@ -1,7 +1,7 @@
 pragma solidity ^0.4.24;
 
 library State {
-    enum StateType { PreFundSetup, PostFundSetup, Game, Conclude }
+    enum StateType { Propose, Accept, Game, Conclude }
 
     // State Fields
     // ===================
@@ -13,7 +13,7 @@ library State {
     // ----------- where x = 128 + 32 * numberOfParticipants
     // x + [ 0 - 31] uint256 stateType
     // x + [32 - 63] uint256 turnNum
-    // x + [64 - 95] uint256 stateCount // only relevant for PreFundSetup and PostFundSetup states
+    // x + [64 - 95] uint256 stateCount // only relevant for Propose and Accept states
     // x + [96 - y-1] uint256[] resolution
     // ----------- where y = 224 + 64 * numberOfParticipants
     // y + [0 -  ?] bytes gameState
