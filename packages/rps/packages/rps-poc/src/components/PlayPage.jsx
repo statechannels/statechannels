@@ -38,7 +38,7 @@ export default class PlayPage extends React.PureComponent {
     super(props);
 
     this.state = {
-      stage: GAME_STAGES.SELECT_MOVE,
+      stage: GAME_STAGES.SELECT_CHALLENGER,
       selectedMove: null,
     };
 
@@ -73,17 +73,9 @@ export default class PlayPage extends React.PureComponent {
           />
         );
       case GAME_STAGES.SELECT_MOVE:
-        return (
-          <SelectMoveStep
-            handleSelectMove={this.selectMove}
-          />
-        );
+        return <SelectMoveStep handleSelectMove={this.selectMove} />;
       case GAME_STAGES.WAIT_FOR_OPPONENT_MOVE:
-        return (
-          <WaitForOpponentStep
-            moveId={moveId}
-          />
-        );
+        return <WaitForOpponentStep moveId={moveId} />;
       default:
         return null;
     }

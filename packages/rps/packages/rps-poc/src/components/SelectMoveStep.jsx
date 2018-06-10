@@ -16,6 +16,7 @@ export default class SelectMoveStep extends React.PureComponent {
             <a
               onClick={() => handleSelectMove(option.id)}
               style={{ display: 'inline-block', width: '33%' }}
+              key={option.id}
             >
               <div style={{ height: 250, background: 'maroon', margin: 4 }}>
                 <div
