@@ -1,50 +1,41 @@
+import _ from 'lodash';
 import React from 'react';
 
+import fire from '../gateways/firebase'
+import Opponent from '../domain/opponent';
 import OpponentSelectionStep from './OpponentSelectionStep';
 import SelectMoveStep from './SelectMoveStep';
 import WaitForOpponentStep from './WaitForOpponentStep';
 import { GAME_STAGES } from '../constants';
-
-// TODO: Get from Firebase
-const opponents = [
-  {
-    name: 'Joe Bob',
-    wager: '500',
-    time: '12:39pm',
-    id: 0,
-  },
-  {
-    name: 'Sarah Beth',
-    wager: '700',
-    time: '1:28pm',
-    id: 1,
-  },
-  {
-    name: 'Mary Jane',
-    wager: '50',
-    time: '3:33pm',
-    id: 2,
-  },
-  {
-    name: 'James Fickel',
-    wager: '5000',
-    time: '4:01pm',
-    id: 3,
-  },
-];
 
 export default class PlayPage extends React.PureComponent {
   constructor(props) {
     super(props);
 
     this.state = {
-      stage: GAME_STAGES.SELECT_CHALLENGER,
+      opponents: [],
       selectedMove: null,
+      stage: GAME_STAGES.SELECT_CHALLENGER,
     };
 
-    this.selectChallenge = this.selectChallenge.bind(this);
-    this.createChallenge = this.createChallenge.bind(this);
-    this.selectMove = this.selectMove.bind(this);
+    _.bindAll(this, [
+      'createChallenge',
+      'opponentsListener',
+      'postNewChallenge',
+      'selectChallenge',
+      'selectMove',
+    ]);
+  }
+
+  componentWillMount() {
+    this.opponentsListener();
+  }
+
+  // Handlers
+
+  createChallenge(name, wager) {
+    let newOpponent = new Opponent({ name, wager });
+    this.postNewChallenge(newOpponent);
   }
 
   selectChallenge() {
@@ -52,16 +43,26 @@ export default class PlayPage extends React.PureComponent {
     this.setState({ stage: GAME_STAGES.SELECT_MOVE });
   }
 
-  createChallenge() {
-    console.log('TODO (create): DO SOMETHING HERE');
-  }
-
   selectMove(id) {
     this.setState({ stage: GAME_STAGES.WAIT_FOR_OPPONENT_MOVE, moveId: id });
   }
 
+  // Firebase API calls
+
+  opponentsListener() {
+    let opponentsRef = fire.database().ref('opponents').orderByKey();
+    opponentsRef.on('value', snapshot => {
+      let opponents = _.map(snapshot.val(), opponent => opponent);
+      this.setState({ opponents });
+    });
+  }
+
+  postNewChallenge(newOpponent) {
+    fire.database().ref().child('opponents').push(newOpponent)
+  }
+
   render() {
-    const { stage, moveId } = this.state;
+    const { stage, moveId, opponents } = this.state;
 
     switch (stage) {
       case GAME_STAGES.SELECT_CHALLENGER:
