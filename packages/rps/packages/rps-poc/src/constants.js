@@ -1,3 +1,5 @@
+import Enum from 'enum';
+
 import { brandColor } from './App.css';
 
 export const BRAND_COLOR = brandColor;
@@ -8,12 +10,11 @@ export const ROUTE_PATHS = {
   ABOUT: 'about',
 };
 
-// TODO: use key mirror
-export const GAME_STAGES = {
-  SELECT_CHALLENGER: 0,
-  SELECT_MOVE: 1,
-  WAIT_FOR_OPPONENT_MOVE: 2,
-};
+export const GAME_STAGES = new Enum([
+  'SELECT_CHALLENGER',
+  'SELECT_MOVE',
+  'WAIT_FOR_OPPONENT_MOVE',
+]);
 
 export const MOVE_OPTIONS = [
   {
