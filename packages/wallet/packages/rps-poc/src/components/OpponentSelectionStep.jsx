@@ -3,8 +3,17 @@ import React from 'react';
 import Button from './Button';
 
 export default class OpponentSelectionStep extends React.PureComponent {
+  constructor(props) {
+    super(props);
+
+    this.nameInput = React.createRef();
+    this.wagerInput = React.createRef();
+
+    this.onClickCreateChallenge.bind(this);
+  }
+
   render() {
-    const { opponents, handleCreateChallenge, handleSelectChallenge } = this.props;
+    const { opponents, handleSelectChallenge } = this.props;
 
     return (
       <div style={{ maxWidth: '90%', margin: 'auto' }}>
@@ -41,21 +50,39 @@ export default class OpponentSelectionStep extends React.PureComponent {
           <form>
             <h3>Or, create a challenge:</h3>
             <div style={{ marginTop: 12 }}>
-              Name:<input style={{ marginLeft: 12 }} type="text" name="name" />
-            </div>
-            <div style={{ marginTop: 12 }}>
-              Wager (in Finney):<input
+              Name:
+              <input
                 style={{ marginLeft: 12 }}
                 type="text"
-                name="wager"
+                name="name"
+                ref={this.nameInput}
               />
             </div>
             <div style={{ marginTop: 12 }}>
-              <Button onClick={handleCreateChallenge}>Submit</Button>
+              Wager (in Finney):
+              <input
+                style={{ marginLeft: 12 }}
+                type="text"
+                name="wager"
+                ref={this.wagerInput}
+              />
+            </div>
+            <div style={{ marginTop: 12 }}>
+              <Button onClick={this.onClickCreateChallenge.bind(this)}>Submit</Button>
             </div>
           </form>
         </div>
       </div>
     );
+  }
+
+  onClickCreateChallenge() {
+    const name = this.nameInput.current.value;
+    const wager = Number(this.wagerInput.current.value);
+    if (!name || !wager) {
+      return;
+    }
+
+    this.props.handleCreateChallenge(name, wager);
   }
 }
