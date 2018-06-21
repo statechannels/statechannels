@@ -33,7 +33,7 @@ This repository is split into packages which ~are~ will be published as independ
 | ----------------------------- |  -------------------------------------------- |
 | [`fmg-core`](/packages/fmg-core) | Contracts and js libraries for the protocol rules and states |
 | [`fmg-simple-adjudicator`](./packages/fmg-simple-adjudicator) | Implementation of on-chain adjudicator capable of supporting the protocol |
-| [`fmg-rock-paper-scissors`](./packages/rock-paper-scissors) | Example: 2-player game built on the framework |
+| [`fmg-rock-paper-scissors`](./packages/fmg-rock-paper-scissors) | Example: 2-player game built on the framework |
 | [`fmg-payments`](./packages/fmg-payments) | Example: payment channel built on the framework |
 
 ### TODO
