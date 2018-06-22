@@ -2,7 +2,6 @@
   "name": "fmg-simple-adjudicator",
   "version": "0.0.2",
   "description": "Simple adjudicator for force-move games",
-  "main": "truffle-config.js",
   "directories": {
     "doc": "docs",
     "test": "test"

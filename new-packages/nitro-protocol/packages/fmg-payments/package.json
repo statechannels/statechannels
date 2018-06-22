@@ -2,7 +2,6 @@
   "name": "fmg-payments",
   "version": "0.0.2",
   "description": "Force-move game payment channel",
-  "main": "truffle-config.js",
   "directories": {
     "doc": "docs",
     "test": "test"
