@@ -2,7 +2,6 @@
   "name": "fmg-rock-paper-scissors",
   "version": "0.0.2",
   "description": "Rock-paper-scissors as a force-move game",
-  "main": "truffle-config.js",
   "directories": {
     "doc": "docs",
     "test": "test"
