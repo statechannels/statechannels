@@ -15,7 +15,6 @@
   "license": "MIT",
   "dependencies": {
     "fmg-core": "^0.0.2",
-    "npm": "^5.7.1",
     "sha3": "^1.2.2",
     "web3-utils": "^1.0.0-beta.30"
   },
