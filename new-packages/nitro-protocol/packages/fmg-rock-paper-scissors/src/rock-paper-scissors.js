@@ -76,7 +76,7 @@ class RpsBaseState extends State {
 class InitializationState extends RpsBaseState {
   constructor({ channel, stateCount, resolution, turnNum }) {
     super(...arguments);
-    this.stateType = State.StateTypes.PROPOSE;
+    this.stateType = State.StateTypes.PREFUNDSETUP;
     this.positionType = RpsGame.PositionTypes.RESTING;
   }
 }
@@ -84,7 +84,7 @@ class InitializationState extends RpsBaseState {
 class FundConfirmationState extends RpsBaseState {
   constructor({ channel, stateCount, resolution, turnNum }) {
     super(...arguments);
-    this.stateType = State.StateTypes.ACCEPT;
+    this.stateType = State.StateTypes.POSTFUNDSETUP;
     this.positionType = RpsGame.PositionTypes.RESTING;
   }
 }
