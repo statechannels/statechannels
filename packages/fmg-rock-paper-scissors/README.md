@@ -13,7 +13,7 @@ simulate this, where one player commits to a value beforehand and then only
 reveals their choice once the other player's choice is known.
 
 In our implementation, each round of the game will pass through four different
-stages: `Start`, `RoundProposed`, `RoundAccepted`, and `Reveal`.
+stages: `Resting`, `RoundProposed`, `RoundAccepted`, and `Reveal`.
 We describe below how a client could control the flow of states that could be exchanged during a round of rock-paper-scissors played between Alice and Bob.
 
 ![Alt text](assets/rock-paper-scissors.png?raw=true "Title")
@@ -30,7 +30,7 @@ a state `state0A` to Alice as `message0B`.
 ```javascript
 // In Alice's client, Alice holds message0B, which satisfies:
 assert(message0B.signedBy(bobAddress));
-assert(message0B.state.positionType == RPS.Start);
+assert(message0B.state.positionType == RPS.Resting);
 assert(message0B.state.aBal == 5);
 assert(message0B.state.bBal == 4);
 ```
@@ -61,7 +61,7 @@ let message1A = StateWalletA.sign(state1A);
 ```
 
 Bob then decides whether to accept the round or not.
-If he didn't want to accept, he would sign and send back the same `Start` state
+If he didn't want to accept, he would sign and send back the same `Resting` state
 (apart from an increased `turnNum`) as he sent in the beginning.
 If he does want to accept, he signs the `RPS.RoundAccepted` state, providing his
 choice -- in this case `scissors`:
@@ -111,7 +111,7 @@ let message3A = StateWalletA.sign(state3A);
 // Alice ---> message3A ----> Bob
 ```
 
-Bob then completes the round by signing the `Start` state.
+Bob then completes the round by signing the `Resting` state.
 In doing this he updates the totals to reflect the fact that Alice won the last
 round:
 
@@ -120,7 +120,7 @@ round:
 StateWalletB.receive(message3A);
 let move3A = RPS.fromMessage(message3A);
 let gameAttributes = {
-  positionType: RPS.Start,
+  positionType: RPS.Resting,
   aBal: 6,
   bBal: 3,
 };
@@ -130,7 +130,7 @@ let message4B = StateWalletB.sign(state3B);
 // Bob ---> message4B ----> Alice
 ```
 
-Now they are back in the `Start` state, Alice is free to propose another
+Now they are back in the `Resting` state, Alice is free to propose another
 round if she wishes.
 
 Either play may communicate their wish to end the game at any point by moving to an `RPS.Conclude` state.
