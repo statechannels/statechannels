@@ -19,6 +19,7 @@
   },
   "devDependencies": {
     "esm": "^3.0.52",
+    "truffle-assertions": "^0.3.1",
     "truffle-core": "^4.1.11"
   }
 }
