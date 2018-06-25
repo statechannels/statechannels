@@ -113,7 +113,15 @@ contract SimpleAdjudicator {
         cancelCurrentChallenge();
     }
 
+    event ChallengeCreated(
+        bytes32 channelId,
+        bytes state,
+        uint32 expirationTime,
+        uint256[] payouts
+    );
+
     function createChallenge(uint32 expirationTime, bytes _state) private {
+        currentChallenge.channelId = fundedChannelId;
         currentChallenge.state = _state;
         currentChallenge.expirationTime = expirationTime;
 
@@ -129,6 +137,13 @@ contract SimpleAdjudicator {
         }
 
         currentChallenge.payouts = payouts;
+
+        emit ChallengeCreated(
+            currentChallenge.channelId,
+            currentChallenge.state,
+            currentChallenge.expirationTime,
+            currentChallenge.payouts
+        );
     }
 
     function withdraw(address participant)
