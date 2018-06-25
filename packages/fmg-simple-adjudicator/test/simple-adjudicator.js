@@ -84,11 +84,11 @@ contract('SimpleAdjudicator', (accounts) => {
     await simpleAdj.forceMove(
       agreedState.toHex(), challengeState.toHex(), [v0, v1], [r0, r1], [s0, s1]
     );
-    // assert.equal(await simpleAdj.currentChallengePresent(), true);
+    assert.equal(await simpleAdj.currentChallengePresent(), true);
 
     let [r2, s2, v2] = responseState.sign(challengee);
     await simpleAdj.respondWithMove(responseState.toHex(), v2, r2, s2);
-    // assert.equal(await simpleAdj.currentChallengePresent(), false);
+    assert.equal(await simpleAdj.currentChallengePresent(), false);
   });
 
   it("forceMove -> refute", async () => {
