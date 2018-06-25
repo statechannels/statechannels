@@ -69,6 +69,7 @@ contract SimpleAdjudicator {
         createChallenge(uint32(now), _myState);
     }
 
+    event Refuted(bytes refutation);
     function refute(bytes _refutationState, uint8 v, bytes32 r, bytes32 s)
       external
       onlyWhenCurrentChallengeActive
@@ -80,8 +81,10 @@ contract SimpleAdjudicator {
         require(Rules.validRefute(currentChallenge.state, _refutationState, v, r, s));
 
         cancelCurrentChallenge();
+        emit Refuted(_refutationState);
     }
 
+    event RespondedWithMove(bytes response);
     function respondWithMove(bytes _nextState, uint8 v, bytes32 r, bytes32 s)
       external
       onlyWhenCurrentChallengeActive
@@ -90,8 +93,10 @@ contract SimpleAdjudicator {
         require(Rules.validRespondWithMove(currentChallenge.state, _nextState, v, r, s));
 
         cancelCurrentChallenge();
+        emit RespondedWithMove(_nextState);
     }
 
+    event RespondedWithAlternativeMove(bytes alternativeResponse);
     function alternativeRespondWithMove(
         bytes _alternativeState,
         bytes _nextState,
@@ -111,6 +116,7 @@ contract SimpleAdjudicator {
         require(Rules.validAlternativeRespondWithMove(currentChallenge.state, _alternativeState, _nextState, v, r, s));
 
         cancelCurrentChallenge();
+        emit RespondedWithAlternativeMove(_nextState);
     }
 
     event ChallengeCreated(

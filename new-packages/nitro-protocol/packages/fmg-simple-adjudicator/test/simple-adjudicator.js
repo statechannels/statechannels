@@ -87,8 +87,12 @@ contract('SimpleAdjudicator', (accounts) => {
     assert.equal(await simpleAdj.currentChallengePresent(), true);
 
     let [r2, s2, v2] = responseState.sign(challengee);
-    await simpleAdj.respondWithMove(responseState.toHex(), v2, r2, s2);
+    let tx = await simpleAdj.respondWithMove(responseState.toHex(), v2, r2, s2);
+
     assert.equal(await simpleAdj.currentChallengePresent(), false);
+    truffleAssert.eventEmitted(tx, "RespondedWithMove", (event) => {
+      return event.response === responseState.toHex();
+    })
   });
 
   it("forceMove -> refute", async () => {
@@ -110,8 +114,11 @@ contract('SimpleAdjudicator', (accounts) => {
     // refute
     let [r2, s2, v2] = refutationState.sign(challenger);
 
-    await simpleAdj.refute(refutationState.toHex(), v2, r2, s2);
+    let tx = await simpleAdj.refute(refutationState.toHex(), v2, r2, s2);
     assert.equal(await simpleAdj.currentChallengePresent(), false, "challenge wasn't canceled");
+    truffleAssert.eventEmitted(tx, "Refuted", (event) => {
+      return event.refutation === refutationState.toHex();
+    })
   });
 
   it("forceMove -> alternativeRespondWithMove", async () => {
@@ -134,8 +141,16 @@ contract('SimpleAdjudicator', (accounts) => {
     let [r2, s2, v2] = alternativeState.sign(challenger);
     let [r3, s3, v3] = responseState.sign(challengee);
 
-    await simpleAdj.alternativeRespondWithMove(alternativeState.toHex(), responseState.toHex(), [v2, v3], [r2, r3], [s2, s3]);
+    let tx = await simpleAdj.alternativeRespondWithMove(
+      alternativeState.toHex(),
+      responseState.toHex(),
+      [v2, v3], [r2, r3], [s2, s3]
+    );
+
     assert.equal(await simpleAdj.currentChallengePresent(), false, "challenge not cancelled");
+    truffleAssert.eventEmitted(tx, "RespondedWithAlternativeMove", (event) => {
+      return event.alternativeResponse === responseState.toHex();
+    })
   });
 
   describe("withdrawals", () => {
