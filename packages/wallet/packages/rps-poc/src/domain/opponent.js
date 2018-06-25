@@ -5,6 +5,6 @@ export default function Opponent({ name, wager }) {
     id: nanoid(),
     name,
     wager,
-    timestamp: Date.now(),
+    timestamp: (new Date()).toString(),
   }
 }

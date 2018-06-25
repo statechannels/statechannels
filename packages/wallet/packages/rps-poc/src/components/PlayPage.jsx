@@ -6,6 +6,8 @@ import Opponent from '../domain/opponent';
 import OpponentSelectionStep from './OpponentSelectionStep';
 import SelectMoveStep from './SelectMoveStep';
 import WaitForOpponentStep from './WaitForOpponentStep';
+import RevealStep from './RevealStep';
+
 import { GAME_STAGES } from '../constants';
 
 export default class PlayPage extends React.PureComponent {
@@ -14,7 +16,8 @@ export default class PlayPage extends React.PureComponent {
 
     this.state = {
       opponents: [],
-      selectedMove: null,
+      selectedMoveId: null,
+      opponentMoveId: null,
       stage: GAME_STAGES.SELECT_CHALLENGER,
     };
 
@@ -43,8 +46,8 @@ export default class PlayPage extends React.PureComponent {
     this.setState({ stage: GAME_STAGES.SELECT_MOVE });
   }
 
-  selectMove(id) {
-    this.setState({ stage: GAME_STAGES.WAIT_FOR_OPPONENT_MOVE, moveId: id });
+  selectMove(selectedMove) {
+    this.setState({ stage: GAME_STAGES.WAIT_FOR_OPPONENT_MOVE, selectedMoveId: selectedMove });
   }
 
   // Firebase API calls
@@ -62,7 +65,7 @@ export default class PlayPage extends React.PureComponent {
   }
 
   render() {
-    const { stage, moveId, opponents } = this.state;
+    const { stage, selectedMoveId, opponentMoveId, opponents } = this.state;
 
     switch (stage) {
       case GAME_STAGES.SELECT_CHALLENGER:
@@ -76,7 +79,9 @@ export default class PlayPage extends React.PureComponent {
       case GAME_STAGES.SELECT_MOVE:
         return <SelectMoveStep handleSelectMove={this.selectMove} />;
       case GAME_STAGES.WAIT_FOR_OPPONENT_MOVE:
-        return <WaitForOpponentStep moveId={moveId} />;
+        return <WaitForOpponentStep selectedMoveId={selectedMoveId} />;
+      case GAME_STAGES.REVEAL_WINNER:
+        return <RevealStep selectedMoveId={selectedMoveId} opponentMoveId={opponentMoveId} />;
       default:
         return null;
     }
