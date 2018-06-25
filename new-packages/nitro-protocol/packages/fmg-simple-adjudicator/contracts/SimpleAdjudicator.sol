@@ -130,19 +130,7 @@ contract SimpleAdjudicator {
         currentChallenge.channelId = fundedChannelId;
         currentChallenge.state = _state;
         currentChallenge.expirationTime = expirationTime;
-
-        uint256 remaining = address(this).balance;
-        uint256[] memory payouts = State.resolution(_state);
-        for(uint i = 0; i < payouts.length; i++) {
-            payouts[i] = min(payouts[i], remaining); // don't pay out more than what we have
-            if (remaining >= payouts[i]) {
-                remaining = remaining - payouts[i];
-            } else {
-                remaining = 0;
-            }
-        }
-
-        currentChallenge.payouts = payouts;
+        currentChallenge.payouts = State.resolution(_state);
 
         emit ChallengeCreated(
             currentChallenge.channelId,
