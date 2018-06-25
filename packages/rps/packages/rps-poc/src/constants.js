@@ -14,6 +14,7 @@ export const GAME_STAGES = new Enum([
   'SELECT_CHALLENGER',
   'SELECT_MOVE',
   'WAIT_FOR_OPPONENT_MOVE',
+  'REVEAL_WINNER',
 ]);
 
 export const MOVE_OPTIONS = [

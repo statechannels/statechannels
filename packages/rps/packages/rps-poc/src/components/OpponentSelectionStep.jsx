@@ -39,7 +39,7 @@ export default class OpponentSelectionStep extends React.PureComponent {
                 <tr key={opponent.id}>
                   <td>{opponent.name}</td>
                   <td>{opponent.wager}</td>
-                  <td>{opponent.time}</td>
+                  <td>{opponent.timestamp}</td>
                   <td>
                     <Button onClick={handleSelectChallenge}>Challenge</Button>
                   </td>
