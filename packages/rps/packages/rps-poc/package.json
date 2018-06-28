@@ -2,6 +2,8 @@
   "name": "rps",
   "version": "0.1.0",
   "private": true,
+  "main": "index.js",
+  "module": "src/index.js",
   "dependencies": {
     "ajv": "^6.5.1",
     "enum": "^2.5.0",
@@ -12,16 +14,21 @@
     "react-dom": "^16.3.2",
     "react-router": "^4.2.0",
     "react-router-dom": "^4.2.2",
-    "react-scripts": "1.1.4"
+    "react-scripts": "1.1.4",
+    "fmg-core": "^0.0.2",
+    "sha3": "^1.2.2",
+    "web3-utils": "^1.0.0-beta.30"
   },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
-    "test": "react-scripts test --env=jsdom",
+    "test": "react-scripts test --env=jsdom && node -r esm node_modules/.bin/truffle test",
     "eject": "react-scripts eject"
   },
   "devDependencies": {
     "enzyme": "^3.3.0",
-    "enzyme-adapter-react-16": "^1.1.1"
+    "enzyme-adapter-react-16": "^1.1.1",
+    "esm": "^3.0.53",
+    "truffle-core": "^4.1.12"
   }
 }
