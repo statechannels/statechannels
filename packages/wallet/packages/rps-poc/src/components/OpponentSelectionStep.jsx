@@ -51,21 +51,11 @@ export default class OpponentSelectionStep extends React.PureComponent {
             <h3>Or, create a challenge:</h3>
             <div style={{ marginTop: 12 }}>
               Name:
-              <input
-                style={{ marginLeft: 12 }}
-                type="text"
-                name="name"
-                ref={this.nameInput}
-              />
+              <input style={{ marginLeft: 12 }} type="text" name="name" ref={this.nameInput} />
             </div>
             <div style={{ marginTop: 12 }}>
               Wager (in Finney):
-              <input
-                style={{ marginLeft: 12 }}
-                type="text"
-                name="wager"
-                ref={this.wagerInput}
-              />
+              <input style={{ marginLeft: 12 }} type="text" name="wager" ref={this.wagerInput} />
             </div>
             <div style={{ marginTop: 12 }}>
               <Button onClick={this.onClickCreateChallenge.bind(this)}>Submit</Button>
