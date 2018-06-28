@@ -154,7 +154,7 @@ contract('SimpleAdjudicator', (accounts) => {
   });
 
   describe("withdrawals", () => {
-    beforeEach(() => {
+    beforeEach(async () => {
       aliceState = state0;
       bobState = state1;
 
@@ -163,6 +163,8 @@ contract('SimpleAdjudicator', (accounts) => {
 
       aliceBal = aBal;
       bobBal = bBal;
+
+      simpleAdj = await SimpleAdjudicator.new(channel.id);
     });
 
     it("forceMove -> timeout -> withdraw", async () => {
