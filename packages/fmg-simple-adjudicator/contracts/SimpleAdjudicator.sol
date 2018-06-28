@@ -6,12 +6,14 @@ import "fmg-core/contracts/ForceMoveGame.sol";
 
 contract SimpleAdjudicator {
     // SimpleAdjudicator can support exactly one force move game channel
+    // between exactly two players.
     using State for bytes;
 
     bytes32 public fundedChannelId;
 
     Rules.Challenge currentChallenge;
     uint challengeDuration = 1 days;
+    uint[2] withdrawnAmount;
 
     constructor(bytes32 _fundedChannelId) public payable {
         fundedChannelId = _fundedChannelId;
@@ -145,9 +147,20 @@ contract SimpleAdjudicator {
       onlyWhenCurrentChallengeExpired
     {
         uint8 idx = participantIdx(participant);
-        uint amount = currentChallenge.payouts[idx];
-        currentChallenge.payouts[idx] = currentChallenge.payouts[idx] - amount;
+        uint owedToA = currentChallenge.payouts[0] - withdrawnAmount[0];
+        uint aPending = min(address(this).balance, owedToA);
+        uint owedToB = currentChallenge.payouts[1] - withdrawnAmount[1];
+        uint bPending = min(address(this).balance - aPending, owedToB);
+
+        uint amount;
+        if (idx == 0) {
+            amount = aPending;
+        } else if (idx == 1) {
+            amount = bPending;
+        }
+
         participant.transfer(amount);
+        withdrawnAmount[idx] = withdrawnAmount[idx] + amount;
     }
 
     function validTransition(bytes _fromState, bytes _toState) public pure returns(bool) {
