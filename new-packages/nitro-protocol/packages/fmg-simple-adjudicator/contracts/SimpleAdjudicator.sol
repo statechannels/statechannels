@@ -149,13 +149,13 @@ contract SimpleAdjudicator {
         uint8 idx = participantIdx(participant);
         uint owedToA = currentChallenge.payouts[0] - withdrawnAmount[0];
         uint aPending = min(address(this).balance, owedToA);
-        uint owedToB = currentChallenge.payouts[1] - withdrawnAmount[1];
-        uint bPending = min(address(this).balance - aPending, owedToB);
 
         uint amount;
         if (idx == 0) {
             amount = aPending;
         } else if (idx == 1) {
+            uint owedToB = currentChallenge.payouts[1] - withdrawnAmount[1];
+            uint bPending = min(address(this).balance - aPending, owedToB);
             amount = bPending;
         }
 
