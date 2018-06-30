@@ -55,6 +55,7 @@ contract SimpleAdjudicator {
         bytes32[] _s
     )
       external
+      onlyWhenGameOngoing
     {
         // channelId must match the game supported by the channel
         require(_yourState.channelId() == fundedChannelId);
@@ -144,7 +145,7 @@ contract SimpleAdjudicator {
 
     function withdraw(address participant)
       public
-      onlyWhenCurrentChallengeExpired
+      onlyWhenGameTerminated
     {
         uint8 idx = participantIdx(participant);
         uint owedToA = currentChallenge.payouts[0] - withdrawnAmount[0];
@@ -213,8 +214,13 @@ contract SimpleAdjudicator {
         _;
     }
 
-    modifier onlyWhenCurrentChallengeExpired() {
+    modifier onlyWhenGameTerminated() {
         require(expiredChallengePresent());
+        _;
+    }
+
+    modifier onlyWhenGameOngoing() {
+        require(!expiredChallengePresent());
         _;
     }
 

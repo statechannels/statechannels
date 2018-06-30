@@ -153,6 +153,25 @@ contract('SimpleAdjudicator', (accounts) => {
     })
   });
 
+  it("can only be concluded once", async () => {
+    aliceState = state0;
+    bobState = state1;
+
+    alice = accounts[A_IDX];
+    bob = accounts[B_IDX];
+
+    aliceState.stateType = State.StateTypes.CONCLUDE;
+    bobState.stateType = State.StateTypes.CONCLUDE;
+
+    [r0, s0, v0] = aliceState.sign(alice);
+    [r1, s1, v1] = bobState.sign(bob);
+
+    await simpleAdj.conclude(aliceState.toHex(), bobState.toHex(), [v0, v1], [r0, r1], [s0, s1] );
+    assertRevert(
+      simpleAdj.conclude(aliceState.toHex(), bobState.toHex(), [v0, v1], [r0, r1], [s0, s1])
+    );
+  });
+
   describe("withdrawals", () => {
     beforeEach(async () => {
       aliceState = state0;
