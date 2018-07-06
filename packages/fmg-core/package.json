@@ -9,7 +9,7 @@
     "test": "test"
   },
   "scripts": {
-    "test": "node -r esm ./node_modules/.bin/truffle test"
+    "test": "node -r esm ./node_modules/.bin/truffle test built/test/**/*"
   },
   "repository": "https://github.com/magmo/force-move-games/tree/master/packages/fmg-core",
   "author": "Tom Close",
