@@ -41,7 +41,12 @@ export default class OpponentSelectionStep extends React.PureComponent {
                   <td>{opponent.wager}</td>
                   <td>{opponent.timestamp}</td>
                   <td>
-                    <Button onClick={handleSelectChallenge}>Challenge</Button>
+                    <Button
+                      onClick={() =>
+                        handleSelectChallenge({ opponentId: opponent.id, stake: opponent.wager })}
+                    >
+                      Challenge
+                    </Button>
                   </td>
                 </tr>
               ))}

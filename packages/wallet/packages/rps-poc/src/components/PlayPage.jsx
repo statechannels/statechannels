@@ -3,36 +3,61 @@ import React from 'react';
 
 import fire from '../gateways/firebase';
 import Opponent from '../domain/opponent';
-import OpponentSelectionStep from './OpponentSelectionStep';
-import SelectMoveStep from './SelectMoveStep';
-import WaitForOpponentStep from './WaitForOpponentStep';
-import RevealStep from './RevealStep';
+
+// Views
+import ConcludeStep from './ConcludeStep';
 import ConfirmWagerStep from './ConfirmWagerStep';
 import GameCancelledStep from './GameCancelledStep';
+import OpponentSelectionStep from './OpponentSelectionStep';
+import RevealStep from './RevealStep';
+import SelectPlayStep from './SelectPlayStep';
+import SendingMessageStep from './SendingMessageStep';
+import WaitingStep from './WaitingStep';
 
-import { GAME_STAGES } from '../constants';
+import GameEngine from '../game-engine/GameEngine';
+
+import { AC_VIEWS, GE_COMMANDS, GE_TO_AC_MAPPING } from '../constants';
+
+function postNewChallenge(newOpponent) {
+  fire
+    .database()
+    .ref()
+    .child('opponents')
+    .push(newOpponent);
+}
 
 export default class PlayPage extends React.PureComponent {
   constructor(props) {
     super(props);
 
+    this.ge = new GameEngine();
+
     this.state = {
+      // any frontend only state goes here...
       opponents: [],
-      selectedMoveId: null,
-      opponentMoveId: null,
-      stage: GAME_STAGES.SELECT_CHALLENGER,
+      stage: GE_TO_AC_MAPPING[this.ge.init().updateObj.stage],
     };
 
     _.bindAll(this, [
       'createChallenge',
       'opponentsListener',
-      'postNewChallenge',
       'selectChallenge',
-      'selectMove',
+      'selectPlay',
       'confirmWager',
       'cancelGame',
       'returnToStart',
+      'handleGameEngineMessage',
+
+      // command handlers
+      'sendPreFundMessage',
+      'sendPostFundMessage',
     ]);
+
+    this.commandMapping = {
+      [GE_COMMANDS.SEND_PRE_FUND_MESSAGE]: this.sendPreFundMessage,
+      [GE_COMMANDS.SEND_POST_FUND_MESSAGE]: this.sendPostFundMessage,
+      // TODO: fill in commands with corresponding functions
+    };
   }
 
   componentWillMount() {
@@ -43,31 +68,75 @@ export default class PlayPage extends React.PureComponent {
 
   createChallenge(name, wager) {
     let newOpponent = new Opponent({ name, wager });
-    this.postNewChallenge(newOpponent);
+    postNewChallenge(newOpponent);
   }
 
-  selectChallenge() {
-    console.log('TODO (select): DO SOMETHING HERE');
-    this.setState({ stage: GAME_STAGES.SELECT_MOVE });
+  selectChallenge({ stake, opponentId }) {
+    const gameEngineMessage = this.ge.selectChallenge({ stake, opponentId });
+    this.handleGameEngineMessage(gameEngineMessage);
   }
 
-  selectMove(selectedMove) {
-    this.setState({ stage: GAME_STAGES.WAIT_FOR_OPPONENT_MOVE, selectedMoveId: selectedMove });
+  sendPreFundMessage() {
+    // TODO: Send pre-fund proposal message
+    console.log('sending pre-fund proposal message');
+
+    const gameEngineMessage = this.ge.preFundProposalSent();
+    // This is just to add a delay so that we can see the various states
+    setTimeout(() => this.handleGameEngineMessage(gameEngineMessage), 1500);
+  }
+
+  sendPostFundMessage() {
+    // TODO: Send post-fund proposal message
+    console.log('sending post-fund message');
+
+    const gameEngineMessage = this.ge.preFundProposalSent();
+    this.handleGameEngineMessage(gameEngineMessage);
+  }
+
+  handleReturnToOpponentSelection() {
+    const gameEngineMessage = this.ge.returnToOpponentSelection();
+    this.handleGameEngineMessage(gameEngineMessage);
+  }
+
+  selectPlay(selectedPlay) {
+    // TODO: Convert to new game engine method
+    this.setState({ stage: AC_VIEWS.WAITING_FOR_PLAYER, selectedPlayId: selectedPlay });
   }
 
   confirmWager() {
     // TODO: Send message to player A
-    this.setState({ stage: GAME_STAGES.WAIT_FOR_PLAYER });
+    // TODO: Convert to new game engine method
+    this.setState({ stage: AC_VIEWS.WAIT_FOR_PLAYER });
   }
 
   cancelGame() {
     // TODO: Send message to opponent
-    this.setState({ stage: GAME_STAGES.GAME_CANCELLED_BY_YOU });
+    // TODO: Convert to new game engine method
+    this.setState({ stage: AC_VIEWS.GAME_CANCELLED_BY_YOU });
   }
 
   returnToStart() {
     // TODO: Send message to opponent
-    this.setState({ stage: GAME_STAGES.SELECT_CHALLENGER });
+    // TODO: Convert to new game engine method
+    this.setState({ stage: AC_VIEWS.SELECT_CHALLENGER });
+  }
+
+  handleGameEngineMessage(gameEngineMessage) {
+    if (!gameEngineMessage) {
+      console.error('gameEngineMessage from Game Engine passed as null');
+      return;
+    }
+
+    if (gameEngineMessage.updateObj) {
+      this.setState(gameEngineMessage.updateObj);
+    }
+
+    if (gameEngineMessage.command) {
+      if (!this.commandMapping[gameEngineMessage.command]) {
+        console.error('command from Game Engine not found in mapping');
+      }
+      this.commandMapping[gameEngineMessage.command]();
+    }
   }
 
   // Firebase API calls
@@ -83,20 +152,13 @@ export default class PlayPage extends React.PureComponent {
     });
   }
 
-  postNewChallenge(newOpponent) {
-    fire
-      .database()
-      .ref()
-      .child('opponents')
-      .push(newOpponent);
-  }
-
   render() {
-    const { stage, selectedMoveId, opponentMoveId, opponents } = this.state;
+    const { stage, selectedPlayId, opponentPlayId, opponents } = this.state;
 
-    // TODO: order these as done in constants.js
-    switch (stage) {
-      case GAME_STAGES.SELECT_CHALLENGER:
+    const stageView = GE_TO_AC_MAPPING[stage];
+
+    switch (stageView) {
+      case AC_VIEWS.SELECT_CHALLENGER:
         return (
           <OpponentSelectionStep
             handleSelectChallenge={this.selectChallenge}
@@ -104,15 +166,7 @@ export default class PlayPage extends React.PureComponent {
             opponents={opponents}
           />
         );
-      case GAME_STAGES.SELECT_MOVE:
-        return <SelectMoveStep handleSelectMove={this.selectMove} />;
-      case GAME_STAGES.SELECT_MOVE_AFTER_OPPONENT:
-        return <SelectMoveStep handleSelectMove={this.selectMove} />;
-      case GAME_STAGES.WAITING_FOR_PLAYER:
-        return <WaitForOpponentStep selectedMoveId={selectedMoveId} />;
-      case GAME_STAGES.REVEAL_WINNER_WITH_PROMPT:
-        return <RevealStep selectedMoveId={selectedMoveId} opponentMoveId={opponentMoveId} />;
-      case GAME_STAGES.CONFIRM_WAGER:
+      case AC_VIEWS.CONFIRM_WAGER:
         return (
           <ConfirmWagerStep
             wager={300}
@@ -120,9 +174,28 @@ export default class PlayPage extends React.PureComponent {
             handleConfirm={this.confirmWager}
           />
         );
-      case GAME_STAGES.GAME_CANCELLED_BY_YOU:
+      case AC_VIEWS.SELECT_PLAY:
+        return <SelectPlayStep handleSelectPlay={this.selectPlay} />;
+      case AC_VIEWS.SELECT_PLAY_AFTER_OPPONENT:
+        return <SelectPlayStep afterOpponent handleSelectPlay={this.selectPlay} />;
+      case AC_VIEWS.REVEAL_WINNER_WITH_PROMPT:
+        return <RevealStep selectedPlayId={selectedPlayId} opponentPlayId={opponentPlayId} />;
+      case AC_VIEWS.CONCLUDE_GAME:
+        return (
+          <ConcludeStep
+            handleReturnToOpponentSelection={this.handleReturnToOpponentSelection}
+            winnings={50}
+          />
+        );
+      case AC_VIEWS.WAITING_FOR_PLAYER:
+        return <WaitingStep selectedPlayId={selectedPlayId} />;
+      case AC_VIEWS.WAITING_FOR_CHAIN:
+        return <WaitingStep forChain selectedPlayId={selectedPlayId} />;
+      case AC_VIEWS.SENDING_MESSAGE:
+        return <SendingMessageStep />;
+      case AC_VIEWS.GAME_CANCELLED_BY_YOU:
         return <GameCancelledStep cancelledBySelf returnToStart={this.returnToStart} />;
-      case GAME_STAGES.GAME_CANCELLED_BY_OPPONENT:
+      case AC_VIEWS.GAME_CANCELLED_BY_OPPONENT:
         return <GameCancelledStep returnToStart={this.returnToStart} />;
       default:
         console.log('The following state does not have an associated step component: ', stage);

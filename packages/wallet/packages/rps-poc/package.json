@@ -8,6 +8,7 @@
     "ajv": "^6.5.1",
     "enum": "^2.5.0",
     "firebase": "^5.0.4",
+    "fmg-core": "^0.0.2",
     "key-mirror": "^1.0.1",
     "nanoid": "^1.0.3",
     "react": "^16.3.2",
@@ -15,7 +16,7 @@
     "react-router": "^4.2.0",
     "react-router-dom": "^4.2.2",
     "react-scripts": "1.1.4",
-    "fmg-core": "^0.0.2",
+    "react-test-renderer": "^16.4.1",
     "sha3": "^1.2.2",
     "web3-utils": "^1.0.0-beta.30"
   },

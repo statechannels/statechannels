@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { MOVE_OPTIONS } from '../constants';
+import { PLAY_OPTIONS } from '../constants';
 
 export default class RevealStep extends React.PureComponent {
   render() {
@@ -12,10 +12,10 @@ export default class RevealStep extends React.PureComponent {
           <h1>The result:</h1>
         </div>
         <div style={{ width: '100%' }}>
-          You chose {MOVE_OPTIONS.find(option => option.id === selectedMoveId).name}
+          You chose {PLAY_OPTIONS.find(option => option.id === selectedMoveId).name}
         </div>
         <div style={{ width: '100%' }}>
-          Your opponent chose {MOVE_OPTIONS.find(option => option.id === opponentMoveId).name}
+          Your opponent chose {PLAY_OPTIONS.find(option => option.id === opponentMoveId).name}
         </div>
       </div>
     );
