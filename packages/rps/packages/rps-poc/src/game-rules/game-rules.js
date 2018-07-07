@@ -1,6 +1,8 @@
 import { Channel, State, toHex32, padBytes32 } from 'fmg-core';
 import { soliditySha3 } from 'web3-utils';
 
+import Enum from 'enum';
+
 class RpsGame {
   static restingState({ channnel, resolution, turnNum, stake }) {
     return new RestState(...arguments);
@@ -23,20 +25,9 @@ class RpsGame {
   }
 }
 
-RpsGame.Plays = {
-  ROCK: 0,
-  PAPER: 1,
-  SCISSORS: 2
-};
-Object.freeze(RpsGame.Plays);
+RpsGame.Plays = new Enum(['NONE', 'ROCK', 'PAPER', 'SCISSORS', 'NONE']);
 
-RpsGame.PositionTypes = {
-  RESTING: 0,
-  ROUNDPROPOSED: 1,
-  ROUNDACCEPTED: 2,
-  REVEAL: 3
-};
-Object.freeze(RpsGame.PositionTypes);
+RpsGame.PositionTypes = new Enum(['NONE', 'RESTING', 'ROUNDPROPOSED', 'ROUNDACCEPTED', 'REVEAL', 'NONE'])
 
 export { RpsGame };
 
@@ -44,8 +35,8 @@ class RpsBaseState extends State {
   constructor({ channel, stateType, stateCount, resolution, turnNum, preCommit, stake, aPlay, bPlay, salt }) {
     super({ channel, stateCount, resolution, turnNum });
     this.preCommit = preCommit;
-    this.aPlay = aPlay;
-    this.bPlay = bPlay;
+    this.aPlay = aPlay || RpsGame.Plays.NONE;
+    this.bPlay = bPlay || RpsGame.Plays.NONE;
     this.salt = salt;
     this.stake = stake;
   }
@@ -54,7 +45,7 @@ class RpsBaseState extends State {
 
   static hashCommitment(play, salt) {
     return soliditySha3(
-      { type: 'uint256', value: play },
+      { type: 'uint256', value: play.value },
       { type: 'bytes32', value: padBytes32(salt) }
     );
   }
@@ -62,11 +53,11 @@ class RpsBaseState extends State {
   toHex() {
     return (
       super.toHex() +
-      toHex32(this.positionType).substr(2) +
+      toHex32(this.positionType.value).substr(2) +
       toHex32(this.stake || 0).substr(2) +
       padBytes32(this.preCommit || "0x0").substr(2) +
-      toHex32(this.bPlay || 0).substr(2) +
-      toHex32(this.isPreReveal() ? 0 : this.aPlay || 0).substr(2) +
+      toHex32(this.bPlay.value).substr(2) +
+      toHex32(this.isPreReveal() ? 0 : this.aPlay.value).substr(2) +
       padBytes32(this.isPreReveal() ? "0x0" : this.salt || "0x0").substr(2)
     );
   }
