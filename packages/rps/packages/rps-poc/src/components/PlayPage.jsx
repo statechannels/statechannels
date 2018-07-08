@@ -32,10 +32,12 @@ export default class PlayPage extends React.PureComponent {
 
     this.ge = new GameEngine();
 
+    const { updateObj } = this.ge.init();
+
     this.state = {
-      // any frontend only state goes here...
+      // non-GameEngine state goes here
       opponents: [],
-      stage: GE_TO_AC_MAPPING[this.ge.init().updateObj.stage],
+      stage: updateObj.stage,
     };
 
     _.bindAll(this, [
