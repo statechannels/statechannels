@@ -8,7 +8,9 @@ class RpsGame {
     return new RestState(...arguments);
   }
   static proposeState({ channel, resolution, turnNum, stake, aPlay, salt }) {
-    return new ProposeState(...arguments);
+    let preCommit = ProposeState.hashCommitment(aPlay, salt)
+    var args = [].slice.call(arguments);
+    return new ProposeState(...args.slice(0,4).concat([preCommit]));
   }
   static acceptState({ channel, resolution, turnNum, stake, preCommit, bPlay }) {
     return new AcceptState(...arguments);
@@ -16,22 +18,15 @@ class RpsGame {
   static revealState({ channel, resolution, turnNum, stake, aPlay, bPlay, salt}) {
     return new RevealState(...arguments);
   }
-
-  // Returns 2 if playerA won, 1 if a draw, 0 if playerB won
-  static aWinningsMultiplier(aPlay, bPlay) {
-    const diff = aPlay - bPlay;
-    // if diff == 1 (mod 3) => a won, 0 (mod 3) => draw, -1 (mod 3) => b won
-    return (diff + 4) % 3;
-  }
 }
 
-RpsGame.Plays = new Enum(['NONE', 'ROCK', 'PAPER', 'SCISSORS', 'NONE']);
+RpsGame.Plays = new Enum(['NONE', 'ROCK', 'PAPER', 'SCISSORS']);
 
 RpsGame.PositionTypes = new Enum(['NONE', 'RESTING', 'ROUNDPROPOSED', 'ROUNDACCEPTED', 'REVEAL', 'NONE'])
 
 export { RpsGame };
 
-class RpsBaseState extends State {
+class RpsState extends State {
   constructor({ channel, stateType, stateCount, resolution, turnNum, preCommit, stake, aPlay, bPlay, salt }) {
     super({ channel, stateCount, resolution, turnNum });
     this.preCommit = preCommit;
@@ -41,7 +36,7 @@ class RpsBaseState extends State {
     this.stake = stake;
   }
 
-  isPreReveal() { return true; }
+  _isPreReveal() { return true; }
 
   static hashCommitment(play, salt) {
     return soliditySha3(
@@ -57,14 +52,109 @@ class RpsBaseState extends State {
       toHex32(this.stake || 0).substr(2) +
       padBytes32(this.preCommit || "0x0").substr(2) +
       toHex32(this.bPlay.value).substr(2) +
-      toHex32(this.isPreReveal() ? 0 : this.aPlay.value).substr(2) +
-      padBytes32(this.isPreReveal() ? "0x0" : this.salt || "0x0").substr(2)
+      toHex32(this._isPreReveal() ? 0 : this.aPlay.value).substr(2) +
+      padBytes32(this._isPreReveal() ? "0x0" : this.salt || "0x0").substr(2)
     );
+  }
+
+  static fromHex(state) {
+    state = state.substr(2);
+
+    // Universal deserialization
+    // TODO: This should be in the fmg-core package
+    let channelType = extractBytes(state);
+    state = state.substr(64);
+
+    let channelNonce = extractBytes32(state);
+    state = state.substr(64);
+
+    let numberOfParticipants = extractBytes32(state);
+    state = state.substr(64);
+
+    let participants = [];
+
+    for (let i = 0; i < numberOfParticipants; i++ ) {
+      let participant = extractBytes(state);
+      participants.push(participant);
+      state = state.substr(64);
+    }
+    let channel = new Channel(channelType, channelNonce, participants);
+
+    let stateType = extractBytes32(state);
+    state = state.substr(64);
+
+    let turnNum = extractBytes32(state);
+    state = state.substr(64);
+
+    let stateCount = extractBytes32(state);
+    state = state.substr(64);
+
+    let resolution = []
+    for (let i = 0; i < numberOfParticipants; i++ ) {
+      resolution.push(extractBytes32(state));
+      state = state.substr(64);
+    }
+
+    if (stateType === 0) { // PreFundSetup
+      return new InitializationState({channel, stateCount, resolution, turnNum});
+    } else if (stateType === 1) { // PostFundSetup
+      return new FundConfirmationState({channel, stateCount, resolution, turnNum})
+    } else if (stateType === 3) { // Conclude
+      return new ConclusionState({channel, resolution, turnNum})
+    }
+
+    // Game state
+    let positionType = extractBytes32(state);
+    positionType = RpsGame.PositionTypes.get(parseInt(positionType))
+    state = state.substr(64);
+
+    let stake = extractBytes32(state);
+    state = state.substr(64);
+
+    let preCommit = extractBytes(state);
+    state = state.substr(64);
+
+    let bPlay = extractBytes32(state);
+    bPlay = RpsGame.Plays.get(bPlay) || RpsGame.Plays.NONE;
+    state = state.substr(64);
+
+    let aPlay = extractBytes32(state);
+    aPlay = RpsGame.Plays.get(aPlay) || RpsGame.Plays.NONE;
+    state = state.substr(64);
+
+    // TODO: This should probably be extractBytes32
+    let salt = extractBytes(state);
+    state = state.substr(64);
+
+    if (positionType.is('RESTING')) {
+      state = new RestState({channel, stateCount, resolution, turnNum, stake});
+    }
+    else if (positionType.is('ROUNDPROPOSED')) {
+      state = new ProposeState({channel, resolution, turnNum, stake, aPlay, salt});
+    }
+    else if (positionType.is('ROUNDACCEPTED')) {
+      state = new AcceptState({channel, resolution, turnNum, stake, preCommit, bPlay});
+    }
+    else if (positionType.is('REVEAL')) {
+      state = new RevealState({channel, resolution, turnNum, stake, aPlay, bPlay, salt})
+    }
+
+    return state
   }
 }
 
+function extractBytes32(s) {
+  return parseInt('0x' + s.substr(0, 64));
+}
+
+function extractBytes(s) {
+  return '0x' + s.substr(0, 64).replace(/^0+/, '');
+}
+
+export { RpsState };
+
 // needs to store/copy game-specific attributes, but needs to behave like a framework state
-class InitializationState extends RpsBaseState {
+class InitializationState extends RpsState {
   constructor({ channel, stateCount, resolution, turnNum }) {
     super(...arguments);
     this.stateType = State.StateTypes.PREFUNDSETUP;
@@ -72,7 +162,7 @@ class InitializationState extends RpsBaseState {
   }
 }
 
-class FundConfirmationState extends RpsBaseState {
+class FundConfirmationState extends RpsState {
   constructor({ channel, stateCount, resolution, turnNum }) {
     super(...arguments);
     this.stateType = State.StateTypes.POSTFUNDSETUP;
@@ -80,16 +170,15 @@ class FundConfirmationState extends RpsBaseState {
   }
 }
 
-class ProposeState extends RpsBaseState {
-  constructor({ channel, resolution, turnNum, stake, aPlay, salt }) {
+class ProposeState extends RpsState {
+  constructor({ channel, resolution, turnNum, stake, preCommit }) {
     super(...arguments);
     this.stateType = State.StateTypes.GAME;
     this.positionType = RpsGame.PositionTypes.ROUNDPROPOSED;
-    this.preCommit = this.constructor.hashCommitment(aPlay, salt);
   }
 }
 
-class AcceptState extends RpsBaseState {
+class AcceptState extends RpsState {
   constructor({ channel, resolution, turnNum, stake, preCommit, bPlay }) {
     super(...arguments);
     this.stateType = State.StateTypes.GAME;
@@ -97,25 +186,26 @@ class AcceptState extends RpsBaseState {
   }
 }
 
-class RevealState extends RpsBaseState {
+class RevealState extends RpsState {
   constructor({ channel, resolution, turnNum, stake, aPlay, bPlay, salt}) {
     super(...arguments);
     this.stateType = State.StateTypes.GAME;
     this.positionType = RpsGame.PositionTypes.REVEAL;
   }
-  isPreReveal() { return false; };
+  _isPreReveal() { return false; };
 }
 
-class RestState extends RpsBaseState {
-  constructor({ channnel, resolution, turnNum }) {
+class RestState extends RpsState {
+  constructor({ channnel, resolution, turnNum, stake }) {
     super(...arguments);
     this.stateType = State.StateTypes.GAME;
     this.positionType = RpsGame.PositionTypes.RESTING;
+    this.stake = stake;
   }
-  isPreReveal() { return false; };
+  _isPreReveal() { return false; };
 }
 
-class ConclusionState extends RpsBaseState {
+class ConclusionState extends RpsState {
   constructor({ channel, resolution, turnNum }) {
     super(...arguments);
     this.stateType = State.StateTypes.CONCLUDE;
