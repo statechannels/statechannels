@@ -6,6 +6,7 @@ export class Signature {
     }
 
     toHex() {
+        // TODO: These need to be padded to allow for deserialization
         return '0x' + this.v + this.r + this.s;
     }
 }
