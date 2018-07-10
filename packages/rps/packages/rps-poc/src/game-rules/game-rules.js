@@ -7,7 +7,7 @@ class RpsGame {
   static initializationState({ channel, resolution, turnNum, stake }) {
     return new InitializationState(...arguments);
   };
-  static fundConfirmationState({ channel, stateCount, resolution, turnNum }) {
+  static fundConfirmationState({ channel, stateCount, resolution, turnNum, stake }) {
     return new FundConfirmationState(...arguments);
   };
   static restingState({ channnel, resolution, turnNum, stake }) {
@@ -101,14 +101,6 @@ class RpsState extends State {
       state = state.substr(64);
     }
 
-    if (stateType === 0) { // PreFundSetup
-      return new InitializationState({ channel, stateCount, resolution, turnNum });
-    } else if (stateType === 1) { // PostFundSetup
-      return new FundConfirmationState({channel, stateCount, resolution, turnNum})
-    } else if (stateType === 3) { // Conclude
-      return new ConclusionState({channel, resolution, turnNum})
-    }
-
     // Game state
     let positionType = extractBytes32(state);
     positionType = RpsGame.PositionTypes.get(parseInt(positionType))
@@ -131,6 +123,14 @@ class RpsState extends State {
     // TODO: This should probably be extractBytes32
     let salt = extractBytes(state);
     state = state.substr(64);
+
+    if (stateType === 0) { // PreFundSetup
+      return new InitializationState({ channel, stateCount, resolution, turnNum, stake });
+    } else if (stateType === 1) { // PostFundSetup
+      return new FundConfirmationState({ channel, stateCount, resolution, turnNum, stake })
+    } else if (stateType === 3) { // Conclude
+      return new ConclusionState({channel, resolution, turnNum})
+    }
 
     if (positionType.is('RESTING')) {
       state = new RestState({channel, stateCount, resolution, turnNum, stake});
