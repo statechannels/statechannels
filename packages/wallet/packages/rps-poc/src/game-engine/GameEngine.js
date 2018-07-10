@@ -13,10 +13,8 @@ export default class GameEngine {
     };
   }
 
-  setupGame({ myAddr, opponentAddr, stake, initialBals }) {
-    this.state.stage = GE_STAGES.READY_TO_SEND_PREFUND;
-    this.state.stake = stake;
-    this.state.opponentId = opponentId;
+  init() {
+    this.state.stage = GE_STAGES.SELECT_CHALLENGER;
 
     const updateObj = {
       stage: this.state.stage,
@@ -24,8 +22,24 @@ export default class GameEngine {
 
     return {
       updateObj,
-      command: GE_COMMANDS.SEND_PRE_FUND_MESSAGE,
     };
+  }
+
+  setupGame({ myAddr, opponentAddr, stake, initialBals }) {
+    let participants = [myAddr, opponentAddr];
+    let channel = new Channel('0x123', '0x456', participants)
+
+    let state = RpsGame.initializationState({ channel, resolution: initialBals, turnNum: 0, stake, participants })
+    let signature = new Signature({v: '0x3', r: '0x1', s: '0x4'})
+    let message = new Message({state, signature})
+
+    console.log(initialBals)
+    return new ApplicationStatesA.ReadyToSendPreFundSetup0({
+      channel,
+      stake,
+      balances: initialBals,
+      signedPreFundSetup0Message: message.toHex()
+    })
   }
 
   preFundProposalSent() {
