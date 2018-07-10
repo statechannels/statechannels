@@ -1,29 +1,38 @@
-import GameEngine from './GameEngine';
+import GameEngine from '../GameEngine';
+import ChannelWallet from '../ChannelWallet';
 
 const stake = 1;
 const addressOfLibrary = 0xccc;
 const initialBals = [5, 4];
 
 it('runthrough', () => {
-    let channelWalletA = new ChannelWallet(); // generates ephemeral keys
-    let channelWalletB = new ChannelWallet(); // generates ephemeral keys
+    let channelWalletA = new ChannelWallet({address: '0x100a'}); // generates ephemeral keys
+    let channelWalletB = new ChannelWallet({address: '0x100b'}); // generates ephemeral keys
 
-    let addressOfA = channelWalletA.address();
-    let addressOfB = channelWalletB.address();
+    let addressOfA = channelWalletA.address;
+    let addressOfB = channelWalletB.address;
+    let participants = [addressOfA, addressOfB];
 
     let gameEngineA = new GameEngine({ addressOfLibrary, channelWalletA });
     let gameEngineB = new GameEngine({ addressOfLibrary, channelWalletB });
 
     // In A's application
-    let readyToSendPreFundSetup0 = gameEngineA.setupGame({ addressOfB, stake, initialBals });
-    expect(readyToSendPreFundSetup0.name).toEqual("ReadyToSendPreFundSetup0")
+    let readyToSendPreFundSetup0 = gameEngineA.setupGame({
+        myAddr: addressOfA,
+        opponentAddr: addressOfB,
+        stake,
+        initialBals,
+    });
+
+    expect(readyToSendPreFundSetup0.constructor.name).toEqual("ReadyToSendPreFundSetup0")
     let message0 = readyToSendPreFundSetup0.message;
-    let waitForPreFundSetup1 = gameEngineA.messageSent();
-    expect(waitForPreFundSetup1.name).toEqual("WaitForPreFundSetup1");
+    let waitForPreFundSetup1 = gameEngineA.preFundProposalSent();
+    expect(waitForPreFundSetup1.constructor.name).toEqual("WaitForPreFundSetup1");
 
     // In B's application
-    let readyToSendPreFundSetup1 = gameEngineB.initFromMessage(message0);
-    expect(readyToSendPreFundSetup1.appState).toEqual(READY_TO_SEND_PRE_FUND_SETUP_1);
+    let initBals;
+    let readyToSendPreFundSetup1 = gameEngineB.prefundProposalReceived(message0);
+    expect(readyToSendPreFundSetup1.constructor.name).toEqual("ReadyToSendPreFundSetup1");
     expect(readyToSendPreFundSetup1.initialBals).toEqual(initBals);
     expect(readyToSendPreFundSetup1.stake).toEqual(stake);
     let message1 = readyToSendPreFundSetup1.message;
@@ -41,15 +50,15 @@ it('runthrough', () => {
     let deploymentEvent = { }; // TODO
 
     // In A's application
-    let waitForFunding = gameEngineA.receiveEvent(deploymentEvent);
-    expect(waitForFunding.appState).toEqual(WAIT_FOR_FUNDING);
+    let waitForFunding0 = gameEngineA.receiveEvent(deploymentEvent);
+    expect(waitForFunding0.appState).toEqual(WAIT_FOR_FUNDING);
     
     // In B's application
     let readyToFund = gameEngineB.receiveEvent(deploymentEvent);
     expect(readyToFund.appState).toEqual(READY_TO_FUND);
     expect(readyToFund.transaction).not.toBeNull();
-    let waitForFunding = gameEngineB.transactionSent();
-    expect(waitForFunding.appState).toEqual(WAIT_FOR_FUNDING);
+    let waitForFunding1 = gameEngineB.transactionSent();
+    expect(waitForFunding1.appState).toEqual(WAIT_FOR_FUNDING);
 
     // From the blockchain
     let fundingEvent = { }; // TODO
@@ -68,13 +77,13 @@ it('runthrough', () => {
     let waitForPropose = gameEngineB.messageSent();
 
     // In A's application
-    let readyToChoosePlay = gameEngineA.receiveMessage(message3);
+    let readyToChoosePlay0 = gameEngineA.receiveMessage(message3);
     let readyToSendPropose = gameEngineA.choosePlay("rock");
     let message4 = readyToSendPropose.message;
     let waitForAccept = gameEngineA.messageSent();
 
     // In B's application
-    let readyToChoosePlay = gameEngineB.receiveMessage(message4);
+    let readyToChoosePlay1 = gameEngineB.receiveMessage(message4);
     let readyToSendAccept = gameEngineB.choosePlay("scissors");
     let message5 = readyToSendAccept.message;
     let waitForReveal = readyToSendAccept.messageSent();
