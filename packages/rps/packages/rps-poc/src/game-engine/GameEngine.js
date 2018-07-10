@@ -1,4 +1,10 @@
 import { GE_STAGES, GE_COMMANDS } from '../constants';
+import * as ApplicationStatesA from './application-states/ApplicationStatesPlayerA';
+import * as ApplicationStatesB from './application-states/ApplicationStatesPlayerB';
+import { Message } from './message';
+import { RpsGame, RpsState } from '../game-rules/game-rules';
+import { Channel } from 'fmg-core';
+import { Signature } from './Signature';
 
 export default class GameEngine {
   constructor(gameLibraryAddress, channelWallet) {
@@ -33,7 +39,6 @@ export default class GameEngine {
     let signature = new Signature({v: '0x3', r: '0x1', s: '0x4'})
     let message = new Message({state, signature})
 
-    console.log(initialBals)
     return new ApplicationStatesA.ReadyToSendPreFundSetup0({
       channel,
       stake,
@@ -43,15 +48,25 @@ export default class GameEngine {
   }
 
   preFundProposalSent() {
-    this.state.stage = GE_STAGES.PREFUND_SENT;
+    return new ApplicationStatesA.WaitForPreFundSetup1({
+      channel: this.state.channel,
+      stake: this.state.stake,
+      balances: this.state.balances,
+      signedPreFundSetup0Message: 'TODO: replace me'
+    })
+  }
 
-    const updateObj = {
-      stage: this.state.stage,
-    };
+  prefundProposalReceived(proposal) {
+    let channel = proposal.channel;
+    let stake = proposal.stake;
+    let balances = proposal.balances;
 
-    return {
-      updateObj,
-    };
+    return new ApplicationStatesB.ReadyToSendPreFundSetup1({
+      channel,
+      stake,
+      balances,
+      signedPreFundSetup1Message: 'TODO: replace me'
+    })
   }
 
   returnToOpponentSelection() {
