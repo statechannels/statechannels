@@ -4,6 +4,12 @@ import { soliditySha3 } from 'web3-utils';
 import Enum from 'enum';
 
 class RpsGame {
+  static initializationState({ channel, resolution, turnNum, stake }) {
+    return new InitializationState(...arguments);
+  };
+  static fundConfirmationState({ channel, stateCount, resolution, turnNum }) {
+    return new FundConfirmationState(...arguments);
+  };
   static restingState({ channnel, resolution, turnNum, stake }) {
     return new RestState(...arguments);
   }
@@ -96,7 +102,7 @@ class RpsState extends State {
     }
 
     if (stateType === 0) { // PreFundSetup
-      return new InitializationState({channel, stateCount, resolution, turnNum});
+      return new InitializationState({ channel, stateCount, resolution, turnNum });
     } else if (stateType === 1) { // PostFundSetup
       return new FundConfirmationState({channel, stateCount, resolution, turnNum})
     } else if (stateType === 3) { // Conclude
