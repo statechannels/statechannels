@@ -1,18 +1,35 @@
 ## Rock Paper Scissors: A Force-Move Games POC
 
+### Setup
+
+#### Install yarn
+`brew install yarn`
+
 ### Developement Info
 
 #### To run a dev server:
 
-`npm run start`
+`yarn start`
 
 #### To build:
 
-`npm run build`
+`yarn run build`
 
 #### To run tests:
 
-`npm test`
+`yarn run test`
+
+#### To update dependencies:
+
+`yarn install`
+
+#### To add a dependency:
+
+`yarn add [package-name]` - installs the latest version of the package
+
+#### To update the version of a dependency:
+
+`yarn upgrade [package-name@version-number]`
 
 #### Project style
 
