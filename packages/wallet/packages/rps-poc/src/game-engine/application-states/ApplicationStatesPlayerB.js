@@ -25,6 +25,10 @@ class BasePlayerB {
     get opponentBalance() {
         return this._balances[0];
     }
+
+    get type() {
+        return this.constructor.name;
+    }
 }
 
 class ReadyToSendPreFundSetup1 extends BasePlayerB {
