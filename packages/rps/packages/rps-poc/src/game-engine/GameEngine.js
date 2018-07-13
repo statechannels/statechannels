@@ -37,7 +37,6 @@ export default class GameEngine {
 
     let state = RpsGame.initializationState({ channel, resolution: initialBals, turnNum: 0, stake, participants })
     let message = this.channelWallet.sign(state.toHex())
-    //  new Message({state, signature})
 
     this.appState = new ApplicationStatesA.ReadyToSendPreFundSetup0({
       channel,
@@ -49,22 +48,19 @@ export default class GameEngine {
     return this.appState;
   }
 
-  prefundProposalReceived(proposal) {
-    proposal = RpsState.fromHex(proposal);
+  prefundProposalReceived(hexMessage) {
+    let message = new Message({ hexMessage })
+    let proposal = RpsState.fromHex(message.state);
+
     let channel = proposal.channel;
     let stake = proposal.stake;
     let balances = proposal.balances;
-    let signature = 'foo';
-    let message = new Message({
-      state: proposal,
-      signature
-    })
 
     this.appState = new ApplicationStatesB.ReadyToSendPreFundSetup1({
       channel,
       stake,
       balances,
-      signedPreFundSetup1Message: proposal.message
+      signedPreFundSetup1Message: message
     })
 
     return this.appState;
@@ -85,7 +81,6 @@ export default class GameEngine {
         deploymentTransaction: 'TODO: replace me'
       })
     } else if (stateType === ApplicationStatesB.ReadyToSendPreFundSetup1) {
-      console.log('deploy B')
       this.appState = new ApplicationStatesB.WaitForAToDeploy({
         ...this.appState.commonAttributes
       })
@@ -94,11 +89,47 @@ export default class GameEngine {
     return this.appState;
   }
 
-  messageReceived(message) {
+  receiveMessage(message) {
     let stateType = this.appState.constructor;
     let opponentState = RpsState.fromHex(message.state)
     if (stateType === ApplicationStatesA.WaitForPreFundSetup1) {
+      this.appState = new ApplicationStatesA.ReadyToDeploy({
+        ...this.appState.commonAttributes,
+        deploymentTransaction: 'TODO'
+      })
     }
+
+    return this.appState;
+  }
+
+  transactionSent() {
+    let stateType = this.appState.constructor;
+    if (stateType == ApplicationStatesA.ReadyToDeploy) {
+      this.appState = new ApplicationStatesA.WaitForBlockchainDeploy({
+        ...this.appState.commonAttributes
+      })
+    }
+
+    return this.appState;
+  }
+
+  receiveEvent(event) {
+    let stateType = this.appState.constructor;
+
+    if (stateType == ApplicationStatesA.WaitForBlockchainDeploy) {
+      this.appState = new ApplicationStatesA.WaitForBToDeposit({
+        ...this.appState.commonAttributes,
+        adjudicator: event.adjudicator
+      })
+    } else if (stateType == ApplicationStatesB.WaitForBlockchainDeploy) {
+      this.appState = new ApplicationStatesB.ReadyToDeposit({
+        ...this.appState.commonAttributes,
+        adjudicator: event.adjudicator,
+        depositTransaction: transaction
+      })
+    }
+
+    return this.appState;
   }
 
   returnToOpponentSelection() {
