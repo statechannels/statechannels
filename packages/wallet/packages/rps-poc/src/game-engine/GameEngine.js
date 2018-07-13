@@ -1,7 +1,9 @@
 import { GE_STAGES, GE_COMMANDS } from '../constants';
 
 export default class GameEngine {
-  constructor(props) {
+  constructor(gameLibraryAddress, channelWallet) {
+    this.gameLibraryAddress = gameLibraryAddress;
+    this.channelWallet = channelWallet;
     this.state = {
       selectedPlayId: null,
       opponentMoveId: null,
@@ -11,19 +13,7 @@ export default class GameEngine {
     };
   }
 
-  init() {
-    this.state.stage = GE_STAGES.SELECT_CHALLENGER;
-
-    const updateObj = {
-      stage: this.state.stage,
-    };
-
-    return {
-      updateObj,
-    };
-  }
-
-  selectChallenge({ stake, opponentId }) {
+  setupGame({ myAddr, opponentAddr, stake, initialBals }) {
     this.state.stage = GE_STAGES.READY_TO_SEND_PREFUND;
     this.state.stake = stake;
     this.state.opponentId = opponentId;
