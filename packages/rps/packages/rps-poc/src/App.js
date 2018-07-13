@@ -5,7 +5,7 @@ import './App.css';
 import Header from './components/Header';
 import HomePage from './components/HomePage';
 import HowItWorksPage from './components/HowItWorksPage';
-import PlayPage from './components/PlayPage';
+import GameContainer from './containers/GameContainer';
 import AboutPage from './components/AboutPage';
 import { ROUTE_PATHS } from './constants';
 
@@ -19,7 +19,7 @@ class App extends React.Component {
           </header>
           <Route exact path="/" component={HomePage} />
           <Route path={`/${ROUTE_PATHS.HOW_IT_WORKS}`} component={HowItWorksPage} />
-          <Route path={`/${ROUTE_PATHS.PLAY}`} component={PlayPage} />
+          <Route path={`/${ROUTE_PATHS.PLAY}`} component={GameContainer} />
           <Route path={`/${ROUTE_PATHS.ABOUT}`} component={AboutPage} />
         </div>
       </BrowserRouter>
