@@ -29,6 +29,14 @@ class BasePlayerB {
     get type() {
         return this.constructor.name;
     }
+
+    get commonAttributes() {
+        return {
+            channel: this._channel,
+            balances: this._balances,
+            stake: this.stake
+        }
+    }
 }
 
 class ReadyToSendPreFundSetup1 extends BasePlayerB {
