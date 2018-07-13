@@ -4,10 +4,10 @@ import * as ApplicationStatesB from './application-states/ApplicationStatesPlaye
 import { Message } from './message';
 import { RpsGame, RpsState } from '../game-rules/game-rules';
 import { Channel } from 'fmg-core';
-import { Signature } from './Signature';
+import { State } from '../../../minimal_viable_force_move_games/packages/fmg-core/src';
 
 export default class GameEngine {
-  constructor(gameLibraryAddress, channelWallet) {
+  constructor({ gameLibraryAddress, channelWallet }) {
     this.gameLibraryAddress = gameLibraryAddress;
     this.channelWallet = channelWallet;
     this.state = {
@@ -36,41 +36,73 @@ export default class GameEngine {
     let channel = new Channel('0x123', '0x456', participants)
 
     let state = RpsGame.initializationState({ channel, resolution: initialBals, turnNum: 0, stake, participants })
-    let signature = new Signature({v: '0x3', r: '0x1', s: '0x4'})
-    let message = new Message({state, signature})
+    let message = this.channelWallet.sign(state.toHex())
+    //  new Message({state, signature})
 
-    return new ApplicationStatesA.ReadyToSendPreFundSetup0({
+    this.appState = new ApplicationStatesA.ReadyToSendPreFundSetup0({
       channel,
       stake,
       balances: initialBals,
       signedPreFundSetup0Message: message.toHex()
     })
-  }
 
-  preFundProposalSent() {
-    return new ApplicationStatesA.WaitForPreFundSetup1({
-      channel: this.state.channel,
-      stake: this.state.stake,
-      balances: this.state.balances,
-      signedPreFundSetup0Message: 'TODO: replace me'
-    })
+    return this.appState;
   }
 
   prefundProposalReceived(proposal) {
+    proposal = RpsState.fromHex(proposal);
     let channel = proposal.channel;
     let stake = proposal.stake;
     let balances = proposal.balances;
+    let signature = 'foo';
+    let message = new Message({
+      state: proposal,
+      signature
+    })
 
-    return new ApplicationStatesB.ReadyToSendPreFundSetup1({
+    this.appState = new ApplicationStatesB.ReadyToSendPreFundSetup1({
       channel,
       stake,
       balances,
-      signedPreFundSetup1Message: 'TODO: replace me'
+      signedPreFundSetup1Message: proposal.message
     })
+
+    return this.appState;
+  }
+
+  messageSent() {
+    let stateType = this.appState.constructor;
+    if (stateType === ApplicationStatesA.ReadyToSendPreFundSetup0) {
+      this.appState = new ApplicationStatesA.WaitForPreFundSetup1({
+        ...this.appState.commonAttributes,
+        signedPreFundSetup0Message: this.appState.message
+      })
+    } else if (stateType === ApplicationStatesB.ReadyToSendPreFundSetup1) {
+      this.appState = new ApplicationStatesB.WaitForAToDeploy(this.appState.commonAttributes)
+    } else if (stateType === ApplicationStatesA.WaitForPreFundSetup1) {
+      this.appState = new ApplicationStatesA.ReadyToDeploy({
+        ...this.appState.commonAttributes,
+        deploymentTransaction: 'TODO: replace me'
+      })
+    } else if (stateType === ApplicationStatesB.ReadyToSendPreFundSetup1) {
+      console.log('deploy B')
+      this.appState = new ApplicationStatesB.WaitForAToDeploy({
+        ...this.appState.commonAttributes
+      })
+    }
+
+    return this.appState;
+  }
+
+  messageReceived(message) {
+    let stateType = this.appState.constructor;
+    let opponentState = RpsState.fromHex(message.state)
+    if (stateType === ApplicationStatesA.WaitForPreFundSetup1) {
+    }
   }
 
   returnToOpponentSelection() {
-    this.state.stage = GE_STAGES.SELECT_CHALLENGER;
+    this.appState.stage = GE_STAGES.SELECT_CHALLENGER;
 
     const updateObj = {
       stage: this.state.stage,
