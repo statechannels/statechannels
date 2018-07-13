@@ -5,6 +5,7 @@ export class Message {
     }
 
     toHex() {
-        return '0x' + this.state.toHex().substr(2) + this.signature.toHex().substr(2);
+        return '0x' + this.state.substr(2) + this.signature.substr(2);
+    }
     }
 }
