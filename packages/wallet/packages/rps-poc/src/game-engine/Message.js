@@ -1,5 +1,11 @@
 export class Message {
-    constructor({state, signature}) {
+    constructor({ state, signature, hexMessage }) {
+        if (hexMessage) {
+            hexMessage = hexMessage.substr(2)
+            state = '0x' + hexMessage.substr(0, hexMessage.length - 130);
+            signature = '0x' + hexMessage.substr(length - 130);
+        }
+
         this.state = state;
         this.signature = signature;
     }
