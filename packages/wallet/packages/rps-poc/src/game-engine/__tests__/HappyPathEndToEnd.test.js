@@ -49,29 +49,35 @@ it('runthrough', async () => {
 
     expect(gameEngineB.appState).toEqual(waitForDeployAdjudicatorB);
 
-})
-
-it.skip('the rest', () => {
     // In A's application
-    let readyToDeployAdjudicator = gameEngineA.messageReceived(message1);
-    expect(readyToDeployAdjudicator.appState).toEqual(READY_TO_DEPLOY_ADJUDICATOR);
+    let readyToDeployAdjudicator = gameEngineA.receiveMessage(message1);
+    expect(gameEngineA.appState).toEqual(readyToDeployAdjudicator);
     expect(readyToDeployAdjudicator.transaction).not.toBeNull();
+
     let waitForDeployAdjudicatorA = gameEngineA.transactionSent();
-    expect(waitForDeployAdjudicatorA.appState).toEqual(WAIT_FOR_DEPLOY_ADJUDICATOR);
+    expect(gameEngineA.appState).toEqual(waitForDeployAdjudicatorA);
 
     // From the blockchain
-    let deploymentEvent = { }; // TODO
+
+    let adjudicator = '0x2718';
+    let deploymentEvent = { adjudicator: adjudicator }; // TODO
 
     // In A's application
     let waitForFunding0 = gameEngineA.receiveEvent(deploymentEvent);
-    expect(waitForFunding0.appState).toEqual(WAIT_FOR_FUNDING);
-    
+    expect(gameEngineA.appState).toEqual(waitForFunding0);
+    expect(waitForFunding0.adjudicator).toEqual(adjudicator)
+
     // In B's application
     let readyToFund = gameEngineB.receiveEvent(deploymentEvent);
-    expect(readyToFund.appState).toEqual(READY_TO_FUND);
+    expect(gameEngineB.appState).toEqual(readyToFund);
+
+})
+it.skip('the rest', () => {
+
     expect(readyToFund.transaction).not.toBeNull();
     let waitForFunding1 = gameEngineB.transactionSent();
     expect(waitForFunding1.appState).toEqual(WAIT_FOR_FUNDING);
+
 
     // From the blockchain
     let fundingEvent = { }; // TODO
