@@ -1,1 +1,3 @@
-export default (state, _action) => { return state; }
+export default (state, _action) => state;
+
+export const getApplicationState = (_state) => { };
