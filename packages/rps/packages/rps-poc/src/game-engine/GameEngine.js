@@ -69,7 +69,7 @@ export default class GameEngine {
 
   messageSent({ oldState }) {
     let newState;
-    let stateType = oldState.constructor;
+    let stateType = oldState.type();
     if (stateType === ApplicationStatesA.ReadyToSendPreFundSetup0) {
       newState = new ApplicationStatesA.WaitForPreFundSetup1({
         ...oldState.commonAttributes,
@@ -106,7 +106,7 @@ export default class GameEngine {
 
   receiveMessage({ oldState, message }) {
     let newState;
-    let stateType = oldState.constructor;
+    let stateType = oldState.type();
     let opponentState = RpsState.fromHex(message.state)
     if (stateType === ApplicationStatesA.WaitForPreFundSetup1) {
       newState = new ApplicationStatesA.ReadyToDeploy({
@@ -127,7 +127,7 @@ export default class GameEngine {
   }
 
   transactionSent({ oldState }) {
-    let stateType = oldState.constructor;
+    let stateType = oldState.type();
     let newState;
     if (stateType === ApplicationStatesA.ReadyToDeploy) {
       newState = new ApplicationStatesA.WaitForBlockchainDeploy({
@@ -145,7 +145,7 @@ export default class GameEngine {
 
   receiveEvent({ oldState, event }) {
     let newState;
-    let stateType = oldState.constructor;
+    let stateType = oldState.type();
 
     if (stateType == ApplicationStatesA.WaitForBlockchainDeploy) {
       newState = new ApplicationStatesA.WaitForBToDeposit({
