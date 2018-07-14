@@ -11,7 +11,7 @@ const stake = 1;
 const addressOfLibrary = 0xccc;
 const initialBals = [5, 4];
 
-it('runthrough', async () => {
+it('runthrough', () => {
     let channelWalletA = new ChannelWallet(); // generates ephemeral keys
     let channelWalletB = new ChannelWallet(); // generates ephemeral keys
 
@@ -26,7 +26,7 @@ it('runthrough', async () => {
     let gameEngineB = new GameEngine({ addressOfLibrary, channelWallet: channelWalletB, applicationController: applicationControllerB });
 
     // In A's application
-    let readyToSendPreFundSetup0 = await gameEngineA.setupGame({
+    let readyToSendPreFundSetup0 = gameEngineA.setupGame({
         myAddr: addressOfA,
         opponentAddr: addressOfB,
         stake,
