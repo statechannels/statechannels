@@ -34,148 +34,147 @@ export default class GameEngine {
 
   setupGame({ myAddr, opponentAddr, stake, initialBals }) {
     let participants = [myAddr, opponentAddr];
-    let channel = new Channel('0x123', '0x456', participants)
+    let channel = new Channel('0x123', 456, participants)
 
     let state = RpsGame.initializationState({ channel, resolution: initialBals, turnNum: 0, stake, participants })
     let message = this.channelWallet.sign(state.toHex())
 
-    this.appState = new ApplicationStatesA.ReadyToSendPreFundSetup0({
+    let appState = new ApplicationStatesA.ReadyToSendPreFundSetup0({
       channel,
       stake,
       balances: initialBals,
       signedPreFundSetup0Message: message.toHex()
     })
 
-    return this.appState;
+    return appState;
   }
 
-  prefundProposalReceived(hexMessage) {
+  prefundProposalReceived({ hexMessage }) {
     let message = new Message({ hexMessage })
     let proposal = RpsState.fromHex(message.state);
 
     let channel = proposal.channel;
     let stake = proposal.stake;
-    let balances = proposal.balances;
+    let balances = proposal.resolution;
 
-    this.appState = new ApplicationStatesB.ReadyToSendPreFundSetup1({
-      channel,
+    let appState = new ApplicationStatesB.ReadyToSendPreFundSetup1({
+      channel: channel,
+      balances: balances,
       stake,
-      balances,
       signedPreFundSetup1Message: message
     })
 
-    return this.appState;
+    return appState;
   }
 
-  messageSent() {
-    let stateType = this.appState.constructor;
+  messageSent({ oldState }) {
+    let newState;
+    let stateType = oldState.constructor;
     if (stateType === ApplicationStatesA.ReadyToSendPreFundSetup0) {
-      this.appState = new ApplicationStatesA.WaitForPreFundSetup1({
-        ...this.appState.commonAttributes,
-        signedPreFundSetup0Message: this.appState.message
+      newState = new ApplicationStatesA.WaitForPreFundSetup1({
+        ...oldState.commonAttributes,
+        signedPreFundSetup0Message: oldState.message
       })
     } else if (stateType === ApplicationStatesB.ReadyToSendPreFundSetup1) {
-      this.appState = new ApplicationStatesB.WaitForAToDeploy(this.appState.commonAttributes)
-    // } else if (stateType === ApplicationStatesA.WaitForPreFundSetup1) {
-    //   this.appState = new ApplicationStatesA.ReadyToDeploy({
-    //     ...this.appState.commonAttributes,
-    //     deploymentTransaction: this.applicationController.deployGame()
-    //   })
-    } else if (stateType === ApplicationStatesB.ReadyToSendPreFundSetup1) {
-      this.appState = new ApplicationStatesB.WaitForAToDeploy({
-        ...this.appState.commonAttributes
+      newState = new ApplicationStatesB.WaitForAToDeploy({
+        ...oldState.commonAttributes
       })
     } else if (stateType === ApplicationStatesA.ReadyToSendPostFundSetup0) {
-      this.appState = new ApplicationStatesA.WaitForPostFundSetup1({
-        ...this.appState.commonAttributes,
-        adjudicator: this.appState.adjudicator,
-        signedPostFundSetup0Message: this.appState.message
+      newState = new ApplicationStatesA.WaitForPostFundSetup1({
+        ...oldState.commonAttributes,
+        adjudicator: oldState.adjudicator,
+        signedPostFundSetup0Message: oldState.message
       })
     } else if (stateType === ApplicationStatesB.ReadyToSendPostFundSetup1) {
       let postFundSetup1 = RpsGame.fundConfirmationState({
-        channel: this.appState._channel,
+        channel: oldState._channel,
         stateCount: 'count',
-        resolution: this.appState._balances,
+        resolution: oldState._balances,
         turnNum: 'turnNum',
-        stake: this.appState.stake
+        stake: oldState.stake
       })
       let message = this.channelWallet.sign(postFundSetup1.toHex())
-      this.appState = new ApplicationStatesB.WaitForPropose({
-        ...this.appState.commonAttributes,
-        adjudicator: this.appState.adjudicator,
+      newState = new ApplicationStatesB.WaitForPropose({
+        ...oldState.commonAttributes,
+        adjudicator: oldState.adjudicator,
         signedPostFundSetup1Message: message
       })
     }
 
-    return this.appState;
+    return newState;
   }
 
-  receiveMessage(message) {
-    let stateType = this.appState.constructor;
+  receiveMessage({ oldState, message }) {
+    let newState;
+    let stateType = oldState.constructor;
     let opponentState = RpsState.fromHex(message.state)
     if (stateType === ApplicationStatesA.WaitForPreFundSetup1) {
-      this.appState = new ApplicationStatesA.ReadyToDeploy({
-        ...this.appState.commonAttributes,
+      newState = new ApplicationStatesA.ReadyToDeploy({
+        ...oldState.commonAttributes,
         deploymentTransaction: this.applicationController.deployGame()
       })
     } else if (stateType === ApplicationStatesB.WaitForPostFundSetup0) {
-      this.appState = new ApplicationStatesB.ReadyToSendPostFundSetup1({
-        ...this.appState.commonAttributes,
-        adjudicator: this.appState.adjudicator,
+      newState = new ApplicationStatesB.ReadyToSendPostFundSetup1({
+        ...oldState.commonAttributes,
+        adjudicator: oldState.adjudicator,
         signedPostFundSetup1Message: message
       })
+    } else if (stateType === ApplicationStatesB.WaitForPostFundSetup0) {
+      console.log('missingimp')
     }
 
-    return this.appState;
+    return newState;
   }
 
-  transactionSent() {
-    let stateType = this.appState.constructor;
+  transactionSent({ oldState }) {
+    let stateType = oldState.constructor;
+    let newState;
     if (stateType === ApplicationStatesA.ReadyToDeploy) {
-      this.appState = new ApplicationStatesA.WaitForBlockchainDeploy({
-        ...this.appState.commonAttributes
+      newState = new ApplicationStatesA.WaitForBlockchainDeploy({
+        ...oldState.commonAttributes
       })
     } else if (stateType === ApplicationStatesB.ReadyToDeposit) {
-      this.appState = new ApplicationStatesB.WaitForPostFundSetup0({
-        ...this.appState.commonAttributes,
-        adjudicator: this.appState.adjudicator
+      newState = new ApplicationStatesB.WaitForPostFundSetup0({
+        ...oldState.commonAttributes,
+        adjudicator: oldState.adjudicator
       })
     }
 
-    return this.appState;
+    return newState;
   }
 
-  receiveEvent(event) {
-    let stateType = this.appState.constructor;
+  receiveEvent({ oldState, event }) {
+    let newState;
+    let stateType = oldState.constructor;
 
     if (stateType == ApplicationStatesA.WaitForBlockchainDeploy) {
-      this.appState = new ApplicationStatesA.WaitForBToDeposit({
-        ...this.appState.commonAttributes,
+      newState = new ApplicationStatesA.WaitForBToDeposit({
+        ...oldState.commonAttributes,
         adjudicator: event.adjudicator
       })
     } else if (stateType === ApplicationStatesA.WaitForBToDeposit) {
       let postFundSetup = RpsGame.fundConfirmationState({
-        channel: this.appState._channel,
+        channel: oldState._channel,
         stateCount: 'count',
-        resolution: this.appState._balances,
+        resolution: oldState._balances,
         turnNum: 'turnNum',
-        stake: this.appState.stake
+        stake: oldState.stake
       })
       let message = this.channelWallet.sign(postFundSetup.toHex())
-      this.appState = new ApplicationStatesA.ReadyToSendPostFundSetup0({
-        ...this.appState.commonAttributes,
-        adjudicator: this.appState.adjudicator,
+      newState = new ApplicationStatesA.ReadyToSendPostFundSetup0({
+        ...oldState.commonAttributes,
+        adjudicator: oldState.adjudicator,
         signedPostFundSetup0Message: message
       })
     } else if (stateType === ApplicationStatesB.WaitForAToDeploy) {
-      this.appState = new ApplicationStatesB.ReadyToDeposit({
-        ...this.appState.commonAttributes,
+      newState = new ApplicationStatesB.ReadyToDeposit({
+        ...oldState.commonAttributes,
         adjudicator: event.adjudicator,
         depositTransaction: this.applicationController.depositFunds()
       })
     }
 
-    return this.appState;
+    return newState;
   }
 
   returnToOpponentSelection() {
