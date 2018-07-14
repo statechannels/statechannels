@@ -32,35 +32,31 @@ it('runthrough', () => {
         stake,
         initialBals,
     });
-    expect(readyToSendPreFundSetup0).toEqual(gameEngineA.appState);
     expect(readyToSendPreFundSetup0.constructor).toEqual(ApplicationStatesA.ReadyToSendPreFundSetup0)
     let message0 = readyToSendPreFundSetup0.message;
-    let waitForPreFundSetup1 = gameEngineA.messageSent();
-    expect(waitForPreFundSetup1).toEqual(gameEngineA.appState);
+
+    let waitForPreFundSetup1 = gameEngineA.messageSent({oldState: readyToSendPreFundSetup0});
     expect(waitForPreFundSetup1.constructor).toEqual(ApplicationStatesA.WaitForPreFundSetup1);
     expect(waitForPreFundSetup1.message).toEqual(message0);
 
     // In B's application
-    let initBals;
-    let readyToSendPreFundSetup1 = gameEngineB.prefundProposalReceived(message0);
-    expect(gameEngineB.appState).toEqual(readyToSendPreFundSetup1);
+    let readyToSendPreFundSetup1 = gameEngineB.prefundProposalReceived({ hexMessage: message0 });
     expect(readyToSendPreFundSetup1.constructor).toEqual(ApplicationStatesB.ReadyToSendPreFundSetup1);
-    expect(readyToSendPreFundSetup1.initialBals).toEqual(initBals);
+    expect(readyToSendPreFundSetup1._balances).toEqual(initialBals);
+    expect(readyToSendPreFundSetup1._channel).toEqual(waitForPreFundSetup1._channel);
     expect(readyToSendPreFundSetup1.stake).toEqual(stake);
 
     let message1 = readyToSendPreFundSetup1.message;
-    let waitForDeployAdjudicatorB = gameEngineB.messageSent();
-    expect(gameEngineB.appState).toEqual(waitForDeployAdjudicatorB);
+    let waitForDeployAdjudicatorB = gameEngineB.messageSent({oldState: readyToSendPreFundSetup1});
     expect(waitForDeployAdjudicatorB.constructor).toEqual(ApplicationStatesB.WaitForAToDeploy)
+    expect(waitForDeployAdjudicatorB._balances).toEqual(initialBals);
 
     // In A's application
-    let readyToDeployAdjudicator = gameEngineA.receiveMessage(message1);
-    expect(gameEngineA.appState).toEqual(readyToDeployAdjudicator);
+    let readyToDeployAdjudicator = gameEngineA.receiveMessage({ oldState: waitForPreFundSetup1, message: message1 });
     expect(readyToDeployAdjudicator.constructor).toEqual(ApplicationStatesA.ReadyToDeploy)
     expect(readyToDeployAdjudicator.transaction).not.toBeNull();
 
-    let waitForDeployAdjudicatorA = gameEngineA.transactionSent();
-    expect(gameEngineA.appState).toEqual(waitForDeployAdjudicatorA);
+    let waitForDeployAdjudicatorA = gameEngineA.transactionSent({  oldState: readyToDeployAdjudicator });
     expect(waitForDeployAdjudicatorA.constructor).toEqual(ApplicationStatesA.WaitForBlockchainDeploy)
 
     // From the blockchain
@@ -69,48 +65,45 @@ it('runthrough', () => {
     let deploymentEvent = { adjudicator: adjudicator, funds: 1 }; // TODO
 
     // In A's application
-    let waitForFunding0 = gameEngineA.receiveEvent(deploymentEvent);
-    expect(gameEngineA.appState).toEqual(waitForFunding0);
+    let waitForFunding0 = gameEngineA.receiveEvent({ oldState: waitForDeployAdjudicatorA, event: deploymentEvent});
     expect(waitForFunding0.constructor).toEqual(ApplicationStatesA.WaitForBToDeposit)
     expect(waitForFunding0.adjudicator).toEqual(adjudicator)
 
     // In B's application
-    let readyToFund = gameEngineB.receiveEvent(deploymentEvent);
-    expect(gameEngineB.appState).toEqual(readyToFund);
+    let readyToFund = gameEngineB.receiveEvent({ oldState: waitForDeployAdjudicatorB, event: deploymentEvent });
     expect(readyToFund.constructor).toEqual(ApplicationStatesB.ReadyToDeposit);
     expect(readyToFund.adjudicator).toEqual(adjudicator);
     expect(readyToFund.transaction).not.toBeNull();
+    expect(readyToFund._balances).toEqual(initialBals);
 
-    let waitForFunding1 = gameEngineB.transactionSent();
-    expect(gameEngineB.appState).toEqual(waitForFunding1);
+    let waitForFunding1 = gameEngineB.transactionSent({ oldState: readyToFund });
     expect(waitForFunding1.constructor).toEqual(ApplicationStatesB.WaitForPostFundSetup0);
     expect(waitForFunding1.adjudicator).toEqual(adjudicator);
+    expect(waitForFunding1._balances).toEqual(initialBals);
 
     // From the blockchain
     let fundingEvent = { adjudicator: adjudicator, aBalance: 1, bBalance: 2 }; // TODO
 
     // In A's application
-    let readyToSendPostFundSetup0 = gameEngineA.receiveEvent(fundingEvent);
-    expect(gameEngineA.appState).toEqual(readyToSendPostFundSetup0);
+    let readyToSendPostFundSetup0 = gameEngineA.receiveEvent({ oldState: waitForFunding0, event: fundingEvent });
     expect(readyToSendPostFundSetup0.constructor).toEqual(ApplicationStatesA.ReadyToSendPostFundSetup0);
 
     let message2 = readyToSendPostFundSetup0.message;
     expect(message2).not.toBeNull();
-    let waitForPostFundSetup1 = gameEngineA.messageSent();
-    expect(gameEngineA.appState).toEqual(waitForPostFundSetup1);
+    let waitForPostFundSetup1 = gameEngineA.messageSent({oldState: readyToSendPostFundSetup0});
     expect(waitForPostFundSetup1.constructor).toEqual(ApplicationStatesA.WaitForPostFundSetup1);
     expect(waitForPostFundSetup1.adjudicator).toEqual(adjudicator);
 
 
     // In B's application
-    let readyToSendPostFundSetup1 = gameEngineB.receiveMessage(message2);
-    expect(gameEngineB.appState).toEqual(readyToSendPostFundSetup1);
+    let readyToSendPostFundSetup1 = gameEngineB.receiveMessage({oldState: waitForFunding1, message: message2});
     expect(readyToSendPostFundSetup1.constructor).toEqual(ApplicationStatesB.ReadyToSendPostFundSetup1);
+    expect(readyToSendPostFundSetup1._balances).not.toBeNull();
     let message3 = readyToSendPostFundSetup1.message;
     expect(message3).not.toBeNull();
+    expect(readyToSendPostFundSetup1._balances).toEqual(initialBals);
 
-    let waitForPropose = gameEngineB.messageSent();
-    expect(gameEngineB.appState).toEqual(waitForPropose);
+    let waitForPropose = gameEngineB.messageSent({oldState: readyToSendPostFundSetup1});
     expect(waitForPropose.constructor).toEqual(ApplicationStatesB.WaitForPropose);
 
 })
