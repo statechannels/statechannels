@@ -1,4 +1,5 @@
 import GameEngine from '../GameEngine';
+import ApplicationController from '../../application-controller/ApplicationController'
 import ChannelWallet from '../ChannelWallet';
 import * as ApplicationStatesA from '../application-states/ApplicationStatesPlayerA';
 import * as ApplicationStatesB from '../application-states/ApplicationStatesPlayerB';
@@ -18,8 +19,11 @@ it('runthrough', async () => {
     let addressOfB = channelWalletB.address;
     let participants = [addressOfA, addressOfB];
 
-    let gameEngineA = new GameEngine({ addressOfLibrary, channelWallet: channelWalletA });
-    let gameEngineB = new GameEngine({ addressOfLibrary, channelWallet: channelWalletB });
+    let applicationControllerA = new ApplicationController();
+    let applicationControllerB = new ApplicationController();
+
+    let gameEngineA = new GameEngine({ addressOfLibrary, channelWallet: channelWalletA, applicationController: applicationControllerA });
+    let gameEngineB = new GameEngine({ addressOfLibrary, channelWallet: channelWalletB, applicationController: applicationControllerB });
 
     // In A's application
     let readyToSendPreFundSetup0 = await gameEngineA.setupGame({
