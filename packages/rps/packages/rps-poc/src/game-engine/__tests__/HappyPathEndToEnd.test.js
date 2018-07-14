@@ -44,60 +44,77 @@ it('runthrough', async () => {
     let initBals;
     let readyToSendPreFundSetup1 = gameEngineB.prefundProposalReceived(message0);
     expect(gameEngineB.appState).toEqual(readyToSendPreFundSetup1);
-
     expect(readyToSendPreFundSetup1.constructor).toEqual(ApplicationStatesB.ReadyToSendPreFundSetup1);
     expect(readyToSendPreFundSetup1.initialBals).toEqual(initBals);
     expect(readyToSendPreFundSetup1.stake).toEqual(stake);
+
     let message1 = readyToSendPreFundSetup1.message;
     let waitForDeployAdjudicatorB = gameEngineB.messageSent();
-
     expect(gameEngineB.appState).toEqual(waitForDeployAdjudicatorB);
+    expect(waitForDeployAdjudicatorB.constructor).toEqual(ApplicationStatesB.WaitForAToDeploy)
 
     // In A's application
     let readyToDeployAdjudicator = gameEngineA.receiveMessage(message1);
     expect(gameEngineA.appState).toEqual(readyToDeployAdjudicator);
+    expect(readyToDeployAdjudicator.constructor).toEqual(ApplicationStatesA.ReadyToDeploy)
     expect(readyToDeployAdjudicator.transaction).not.toBeNull();
 
     let waitForDeployAdjudicatorA = gameEngineA.transactionSent();
     expect(gameEngineA.appState).toEqual(waitForDeployAdjudicatorA);
+    expect(waitForDeployAdjudicatorA.constructor).toEqual(ApplicationStatesA.WaitForBlockchainDeploy)
 
     // From the blockchain
 
     let adjudicator = '0x2718';
-    let deploymentEvent = { adjudicator: adjudicator }; // TODO
+    let deploymentEvent = { adjudicator: adjudicator, funds: 1 }; // TODO
 
     // In A's application
     let waitForFunding0 = gameEngineA.receiveEvent(deploymentEvent);
     expect(gameEngineA.appState).toEqual(waitForFunding0);
+    expect(waitForFunding0.constructor).toEqual(ApplicationStatesA.WaitForBToDeposit)
     expect(waitForFunding0.adjudicator).toEqual(adjudicator)
 
     // In B's application
     let readyToFund = gameEngineB.receiveEvent(deploymentEvent);
     expect(gameEngineB.appState).toEqual(readyToFund);
-
-})
-it.skip('the rest', () => {
-
+    expect(readyToFund.constructor).toEqual(ApplicationStatesB.ReadyToDeposit);
+    expect(readyToFund.adjudicator).toEqual(adjudicator);
     expect(readyToFund.transaction).not.toBeNull();
-    let waitForFunding1 = gameEngineB.transactionSent();
-    expect(waitForFunding1.appState).toEqual(WAIT_FOR_FUNDING);
 
+    let waitForFunding1 = gameEngineB.transactionSent();
+    expect(gameEngineB.appState).toEqual(waitForFunding1);
+    expect(waitForFunding1.constructor).toEqual(ApplicationStatesB.WaitForPostFundSetup0);
+    expect(waitForFunding1.adjudicator).toEqual(adjudicator);
 
     // From the blockchain
-    let fundingEvent = { }; // TODO
-
-    // In B's application
-    let waitForPostFundSetup0 = gameEngineB.receiveEvent(fundingEvent);
+    let fundingEvent = { adjudicator: adjudicator, aBalance: 1, bBalance: 2 }; // TODO
 
     // In A's application
     let readyToSendPostFundSetup0 = gameEngineA.receiveEvent(fundingEvent);
+    expect(gameEngineA.appState).toEqual(readyToSendPostFundSetup0);
+    expect(readyToSendPostFundSetup0.constructor).toEqual(ApplicationStatesA.ReadyToSendPostFundSetup0);
+
     let message2 = readyToSendPostFundSetup0.message;
+    expect(message2).not.toBeNull();
     let waitForPostFundSetup1 = gameEngineA.messageSent();
+    expect(gameEngineA.appState).toEqual(waitForPostFundSetup1);
+    expect(waitForPostFundSetup1.constructor).toEqual(ApplicationStatesA.WaitForPostFundSetup1);
+    expect(waitForPostFundSetup1.adjudicator).toEqual(adjudicator);
+
 
     // In B's application
     let readyToSendPostFundSetup1 = gameEngineB.receiveMessage(message2);
+    expect(gameEngineB.appState).toEqual(readyToSendPostFundSetup1);
+    expect(readyToSendPostFundSetup1.constructor).toEqual(ApplicationStatesB.ReadyToSendPostFundSetup1);
     let message3 = readyToSendPostFundSetup1.message;
+    expect(message3).not.toBeNull();
+
     let waitForPropose = gameEngineB.messageSent();
+    expect(gameEngineB.appState).toEqual(waitForPropose);
+    expect(waitForPropose.constructor).toEqual(ApplicationStatesB.WaitForPropose);
+
+})
+it.skip('the rest', () => {
 
     // In A's application
     let readyToChoosePlay0 = gameEngineA.receiveMessage(message3);

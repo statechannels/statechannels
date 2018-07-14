@@ -7,9 +7,10 @@ import { Channel } from 'fmg-core';
 import { State } from '../../../minimal_viable_force_move_games/packages/fmg-core/src';
 
 export default class GameEngine {
-  constructor({ gameLibraryAddress, channelWallet }) {
+  constructor({ gameLibraryAddress, channelWallet, applicationController }) {
     this.gameLibraryAddress = gameLibraryAddress;
     this.channelWallet = channelWallet;
+    this.applicationController = applicationController;
     this.state = {
       selectedPlayId: null,
       opponentMoveId: null,
@@ -75,14 +76,34 @@ export default class GameEngine {
       })
     } else if (stateType === ApplicationStatesB.ReadyToSendPreFundSetup1) {
       this.appState = new ApplicationStatesB.WaitForAToDeploy(this.appState.commonAttributes)
-    } else if (stateType === ApplicationStatesA.WaitForPreFundSetup1) {
-      this.appState = new ApplicationStatesA.ReadyToDeploy({
-        ...this.appState.commonAttributes,
-        deploymentTransaction: 'TODO: replace me'
-      })
+    // } else if (stateType === ApplicationStatesA.WaitForPreFundSetup1) {
+    //   this.appState = new ApplicationStatesA.ReadyToDeploy({
+    //     ...this.appState.commonAttributes,
+    //     deploymentTransaction: this.applicationController.deployGame()
+    //   })
     } else if (stateType === ApplicationStatesB.ReadyToSendPreFundSetup1) {
       this.appState = new ApplicationStatesB.WaitForAToDeploy({
         ...this.appState.commonAttributes
+      })
+    } else if (stateType === ApplicationStatesA.ReadyToSendPostFundSetup0) {
+      this.appState = new ApplicationStatesA.WaitForPostFundSetup1({
+        ...this.appState.commonAttributes,
+        adjudicator: this.appState.adjudicator,
+        signedPostFundSetup0Message: this.appState.message
+      })
+    } else if (stateType === ApplicationStatesB.ReadyToSendPostFundSetup1) {
+      let postFundSetup1 = RpsGame.fundConfirmationState({
+        channel: this.appState._channel,
+        stateCount: 'count',
+        resolution: this.appState._balances,
+        turnNum: 'turnNum',
+        stake: this.appState.stake
+      })
+      let message = this.channelWallet.sign(postFundSetup1.toHex())
+      this.appState = new ApplicationStatesB.WaitForPropose({
+        ...this.appState.commonAttributes,
+        adjudicator: this.appState.adjudicator,
+        signedPostFundSetup1Message: message
       })
     }
 
@@ -95,7 +116,13 @@ export default class GameEngine {
     if (stateType === ApplicationStatesA.WaitForPreFundSetup1) {
       this.appState = new ApplicationStatesA.ReadyToDeploy({
         ...this.appState.commonAttributes,
-        deploymentTransaction: 'TODO'
+        deploymentTransaction: this.applicationController.deployGame()
+      })
+    } else if (stateType === ApplicationStatesB.WaitForPostFundSetup0) {
+      this.appState = new ApplicationStatesB.ReadyToSendPostFundSetup1({
+        ...this.appState.commonAttributes,
+        adjudicator: this.appState.adjudicator,
+        signedPostFundSetup1Message: message
       })
     }
 
@@ -104,9 +131,14 @@ export default class GameEngine {
 
   transactionSent() {
     let stateType = this.appState.constructor;
-    if (stateType == ApplicationStatesA.ReadyToDeploy) {
+    if (stateType === ApplicationStatesA.ReadyToDeploy) {
       this.appState = new ApplicationStatesA.WaitForBlockchainDeploy({
         ...this.appState.commonAttributes
+      })
+    } else if (stateType === ApplicationStatesB.ReadyToDeposit) {
+      this.appState = new ApplicationStatesB.WaitForPostFundSetup0({
+        ...this.appState.commonAttributes,
+        adjudicator: this.appState.adjudicator
       })
     }
 
@@ -121,11 +153,25 @@ export default class GameEngine {
         ...this.appState.commonAttributes,
         adjudicator: event.adjudicator
       })
-    } else if (stateType == ApplicationStatesB.WaitForBlockchainDeploy) {
+    } else if (stateType === ApplicationStatesA.WaitForBToDeposit) {
+      let postFundSetup = RpsGame.fundConfirmationState({
+        channel: this.appState._channel,
+        stateCount: 'count',
+        resolution: this.appState._balances,
+        turnNum: 'turnNum',
+        stake: this.appState.stake
+      })
+      let message = this.channelWallet.sign(postFundSetup.toHex())
+      this.appState = new ApplicationStatesA.ReadyToSendPostFundSetup0({
+        ...this.appState.commonAttributes,
+        adjudicator: this.appState.adjudicator,
+        signedPostFundSetup0Message: message
+      })
+    } else if (stateType === ApplicationStatesB.WaitForAToDeploy) {
       this.appState = new ApplicationStatesB.ReadyToDeposit({
         ...this.appState.commonAttributes,
         adjudicator: event.adjudicator,
-        depositTransaction: transaction
+        depositTransaction: this.applicationController.depositFunds()
       })
     }
 
