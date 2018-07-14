@@ -48,7 +48,12 @@ describe("ReadyToSendPreFundSetup0", () => {
     it("has a message", () => {
         expect(appState.message).toEqual(signedPreFundSetup0Message);
     });
+
+    it("has the right type", () => {
+        expect(appState.type).toEqual("ReadyToSendPreFundSetup0");
+    });
 });
+
 describe("WaitForPreFundSetup1", () => {
     let signedPreFundSetup0Message = "blahblah";
     let appState = new AppStates.WaitForPreFundSetup1({ ...coreProps, signedPreFundSetup0Message });
