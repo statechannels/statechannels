@@ -89,8 +89,6 @@ export default class PlayPage extends React.PureComponent {
   }
 
   selectChallenge({ stake, opponentId }) {
-    // const gameEngineMessage = this.ge.selectChallenge({ stake, opponentId });
-    // this.handleGameEngineMessage(gameEngineMessage);
     this.props.handleChooseOpponent('abc', 2);
   }
 

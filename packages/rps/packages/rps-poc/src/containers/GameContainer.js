@@ -8,36 +8,37 @@ import {
   chooseOpponent,
   chooseAPlay,
 } from '../redux/actions';
+import { types as playerAStates } from '../game-engine/application-states/ApplicationStatesPlayerA';
 
 
 class GameContainer extends PureComponent {
   render() {
-    let {
+    const {
       applicationState,
       chooseAPlay,
       chooseOpponent,
     } = this.props;
 
     switch (applicationState && applicationState.type) {
-      case "WaitForPreFundSetup1":
+      case playerAStates.WaitForPreFundSetup1:
         return <WaitingStep message="opponent to accept game" />;
 
-      case "WaitForBlockchainDeploy":
+      case playerAStates.WaitForBlockchainDeploy:
         return <WaitingStep message="confirmation of adjudicator deployment" />;
 
-      case "WaitForBToDeposit":
+      case playerAStates.WaitForBToDeposit:
         return <WaitingStep message="confirmation of opponent's deposit" />;
 
-      case "WaitForPostFundSetup1":
+      case playerAStates.WaitForPostFundSetup1:
         return <WaitingStep message="opponent to confirm deposits" />;
 
-      case "ReadyToChooseAPlay":
+      case playerAStates.ReadyToChooseAPlay:
         return <SelectPlayStep handleSelectPlay={chooseAPlay} />;
 
-      case "WaitForAccept":
+      case playerAStates.WaitForAccept:
         return <WaitingStep message="opponent to choose their move" />;
 
-      case "WaitForResting":
+      case playerAStates.WaitForResting:
         return <WaitingStep message="opponent to accept the outcome" />;
 
       default:
