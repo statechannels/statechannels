@@ -34,7 +34,7 @@ class BasePlayerA {
         return {
             channel: this._channel,
             balances: this._balances,
-            stake: this.stake
+            stake: this.stake,
         }
     }
 }
@@ -43,6 +43,13 @@ class ReadyToSendPreFundSetup0 extends BasePlayerA {
     constructor({ channel, stake, balances, signedPreFundSetup0Message }) {
         super({channel, stake, balances});
         this.message = signedPreFundSetup0Message;
+    }
+
+    toJSON() {
+        return {
+            ...this.commonAttributes,
+            message: this.message,
+        }
     }
 }
 
