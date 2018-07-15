@@ -85,21 +85,13 @@ export default class PlayPage extends React.PureComponent {
   createChallenge(name, wager) {
     let newOpponent = new Opponent({ name, wager });
     postNewChallenge(newOpponent);
+    this.props.handleChooseOpponent('abc', 2);
   }
 
   selectChallenge({ stake, opponentId }) {
-    let channelWalletA = new ChannelWallet();
-    let channelWalletB = new ChannelWallet();
-
-    const gameEngineMessage = this.ge.setupGame({
-      initialBals: [0,0],
-      myAddr: channelWalletA.address,
-      opponentAddr: channelWalletB.address,
-      stake,
-    });
-
-    this.handleGameEngineMessage(gameEngineMessage);
-    this.sendPreFundMessage(gameEngineMessage);
+    // const gameEngineMessage = this.ge.selectChallenge({ stake, opponentId });
+    // this.handleGameEngineMessage(gameEngineMessage);
+    this.props.handleChooseOpponent('abc', 2);
   }
 
   sendPreFundMessage(preFundMessage) {
