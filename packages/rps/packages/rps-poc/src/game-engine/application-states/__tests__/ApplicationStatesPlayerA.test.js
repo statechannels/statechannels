@@ -50,7 +50,7 @@ describe("ReadyToSendPreFundSetup0", () => {
     });
 
     it("has the right type", () => {
-        expect(appState.type).toEqual("ReadyToSendPreFundSetup0");
+        expect(appState.type).toEqual(AppStates.types.ReadyToSendPreFundSetup0);
     });
 });
 
