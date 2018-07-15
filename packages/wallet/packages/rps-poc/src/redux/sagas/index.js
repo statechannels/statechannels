@@ -2,6 +2,7 @@ import { delay } from 'redux-saga';
 import { put, takeEvery, select } from 'redux-saga/effects';
 import { types, messageReceived, eventReceived } from '../actions';
 import { getApplicationState } from '../store';
+import { types as playerAStates } from '../../game-engine/application-states/ApplicationStatesPlayerA';
 
 function* messageSender() {
   let state = yield select();
@@ -19,7 +20,7 @@ function* opponentResponseFaker() {
 
 function* blockchainResponseFaker() {
   let state = yield select();
-  if (state.type === "WaitForBlockchainDeploy" || state.type === "WaitForBToDeposit") {
+  if (state.type === playerAStates.WaitForBlockchainDeploy || state.type === playerAStates.WaitForBToDeposit) {
     yield delay(2000);
     yield put(eventReceived("blah"));
   }

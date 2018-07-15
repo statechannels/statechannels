@@ -1,9 +1,11 @@
-export const types = {
-  CHOOSE_OPPONENT: "CHOOSE_OPPONENT",
-  CHOOSE_A_PLAY: "CHOOSE_A_PLAY",
-  MESSAGE_RECEIVED: "MESSAGE_RECEIVED",
-  EVENT_RECEIVED: "EVENT_RECEIVED",
-};
+import Enum from 'enum';
+
+export const types = new Enum([
+  'CHOOSE_OPPONENT',
+  'CHOOSE_A_PLAY',
+  'MESSAGE_RECEIVED',
+  'EVENT_RECEIVED',
+]);
 
 export const chooseOpponent = (opponentAddress, stake) => ({
   type: types.CHOOSE_OPPONENT,
