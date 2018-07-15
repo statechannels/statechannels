@@ -13,12 +13,12 @@ function* messageSender() {
 }
 
 function* loginSaga() {
-	try {
-		const loginData = yield call(reduxSagaFirebase.auth.signInWithPopup, authProvider);
-		yield put(loginSuccess(loginData));
-	} catch (error) {
-		console.log('User auth failed');
-	}
+  try {
+    const loginData = yield call(reduxSagaFirebase.auth.signInWithPopup, authProvider);
+    yield put(loginSuccess(loginData));
+  } catch (error) {
+    console.log('User auth failed');
+  }
 }
 
 function* opponentResponseFaker() {
