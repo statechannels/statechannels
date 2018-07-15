@@ -19,6 +19,7 @@
     "react-scripts": "1.1.4",
     "react-test-renderer": "^16.4.1",
     "redux": "^4.0.0",
+    "redux-saga-firebase": "^0.14.0",
     "sha3": "^1.2.2",
     "web3": "^1.0.0-beta.34",
     "web3-utils": "^1.0.0-beta.30"
@@ -26,10 +27,11 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
-    "test": "react-scripts test --env=jsdom", 
+    "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject"
   },
   "devDependencies": {
+    "@babel/runtime": "^7.0.0-beta.53",
     "enzyme": "^3.3.0",
     "enzyme-adapter-react-16": "^1.1.1",
     "esm": "^3.0.53",

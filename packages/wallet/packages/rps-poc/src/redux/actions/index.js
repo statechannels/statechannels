@@ -5,7 +5,18 @@ export const types = new Enum([
   'CHOOSE_A_PLAY',
   'MESSAGE_RECEIVED',
   'EVENT_RECEIVED',
+  'LOGIN_USER',
+  'LOGIN_SUCCESS',
 ]);
+
+export const loginUser = () => ({
+  type: types.LOGIN_USER,
+});
+
+export const loginSuccess = (userData) => ({
+  type: types.LOGIN_SUCCESS,
+  user: userData,
+});
 
 export const chooseOpponent = (opponentAddress, stake) => ({
   type: types.CHOOSE_OPPONENT,

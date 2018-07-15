@@ -1,4 +1,5 @@
 import firebase from 'firebase'
+import ReduxSagaFirebase from 'redux-saga-firebase'
 
 const config = {
   apiKey: "AIzaSyDulzMWkORgVPFwtxqQaTwOeNhOisGPtDs",
@@ -10,4 +11,6 @@ const config = {
 };
 
 const fire = firebase.initializeApp(config);
+export const reduxSagaFirebase = new ReduxSagaFirebase(fire);
+export const authProvider = new firebase.auth.GoogleAuthProvider();
 export default fire;
