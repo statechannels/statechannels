@@ -1,9 +1,12 @@
 import React from 'react';
+import { connect } from 'react-redux';
 
+import Button from './Button';
 import ButtonLink from './ButtonLink';
+import { loginUser } from '../redux/actions';
 import { ROUTE_PATHS } from '../constants';
 
-export default function HomePage() {
+export function HomePage(props) {
   return (
     <div style={{ maxWidth: '90%', margin: 'auto' }}>
       <div style={{ textAlign: 'center' }}>
@@ -31,7 +34,18 @@ export default function HomePage() {
       </div>
       <div style={{ textAlign: 'center', paddingTop: 40 }}>
         <ButtonLink href={ROUTE_PATHS.HOW_IT_WORKS}>Begin</ButtonLink>
+        <Button onClick={props.loginUser}>Login</Button>
       </div>
     </div>
   );
 }
+
+
+const mapDispatchToProps = {
+  loginUser,
+}
+
+export default connect(
+  null,
+  mapDispatchToProps,
+)(HomePage)
