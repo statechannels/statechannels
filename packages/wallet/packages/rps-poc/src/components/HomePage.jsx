@@ -1,9 +1,7 @@
 import React from 'react';
-import { connect } from 'react-redux';
 
 import Button from './Button';
 import ButtonLink from './ButtonLink';
-import { loginUser } from '../redux/actions';
 import { ROUTE_PATHS } from '../constants';
 
 export function HomePage(props) {
@@ -40,12 +38,3 @@ export function HomePage(props) {
   );
 }
 
-
-const mapDispatchToProps = {
-  loginUser,
-}
-
-export default connect(
-  null,
-  mapDispatchToProps,
-)(HomePage)
