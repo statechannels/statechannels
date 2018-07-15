@@ -30,7 +30,11 @@ export default class PlayPage extends React.PureComponent {
   constructor(props) {
     super(props);
 
-    this.ge = new GameEngine();
+    let gameLibraryAddress = 0xc;
+    let channelWallet = {};
+    let applicationController = {};
+
+    this.ge = new GameEngine({ gameLibraryAddress, channelWallet, applicationController });
 
     const { updateObj } = this.ge.init();
 
