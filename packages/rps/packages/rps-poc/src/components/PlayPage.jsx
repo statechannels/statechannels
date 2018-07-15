@@ -14,6 +14,7 @@ import SelectPlayStep from './SelectPlayStep';
 import SendingMessageStep from './SendingMessageStep';
 import WaitingStep from './WaitingStep';
 
+import ChannelWallet from '../game-engine/ChannelWallet';
 import GameEngine from '../game-engine/GameEngine';
 
 import { AC_VIEWS, GE_COMMANDS, GE_TO_AC_MAPPING } from '../constants';
@@ -24,6 +25,15 @@ function postNewChallenge(newOpponent) {
     .ref()
     .child('opponents')
     .push(newOpponent);
+}
+
+function postNewMessage(newMessage) {
+  fire
+    .database()
+    .ref()
+    .child('messages')
+    .child(newMessage.channelId)
+    .push(JSON.stringify(newMessage));
 }
 
 export default class PlayPage extends React.PureComponent {
@@ -78,14 +88,22 @@ export default class PlayPage extends React.PureComponent {
   }
 
   selectChallenge({ stake, opponentId }) {
-    const gameEngineMessage = this.ge.selectChallenge({ stake, opponentId });
+    let channelWalletA = new ChannelWallet();
+    let channelWalletB = new ChannelWallet();
+
+    const gameEngineMessage = this.ge.setupGame({
+      initialBals: [0,0],
+      myAddr: channelWalletA.address,
+      opponentAddr: channelWalletB.address,
+      stake,
+    });
+
     this.handleGameEngineMessage(gameEngineMessage);
+    this.sendPreFundMessage(gameEngineMessage);
   }
 
-  sendPreFundMessage() {
-    // TODO: Send pre-fund proposal message
-    console.log('sending pre-fund proposal message');
-
+  sendPreFundMessage(preFundMessage) {
+    postNewMessage(preFundMessage);
     const gameEngineMessage = this.ge.preFundProposalSent();
     // This is just to add a delay so that we can see the various states
     setTimeout(() => this.handleGameEngineMessage(gameEngineMessage), 1500);
@@ -155,6 +173,19 @@ export default class PlayPage extends React.PureComponent {
     opponentsRef.on('value', snapshot => {
       let opponents = _.map(snapshot.val(), opponent => opponent);
       this.setState({ opponents });
+    });
+  }
+
+  messagesListener() {
+    let messagesRef = fire
+      .database()
+      // TODO: limit messages to current channel
+      .ref('messages')
+      .orderByKey();
+
+    messagesRef.on('value', snapshot => {
+      let messages = _.map(snapshot.val(), message => message);
+      this.setState({ messages });
     });
   }
 
