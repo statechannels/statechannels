@@ -1,8 +1,8 @@
 import { RpsGame, RpsState } from './game-rules';
-import { Channel } from 'fmg-core'
+import { Channel, padBytes32 } from 'fmg-core';
 
 test('fromHex', () => {
-    let channel = new Channel('0x1234567', 3141592, ['0x123', '0x456']);
+    let channel = new Channel(padBytes32('1234567'), 3141592, ['0x' + '0'.repeat(17) + '123', '0x' + '0'.repeat(17) + '456']);
     let resolution = [1,2];
     let turnNum = 511;
     let stake = 63;
@@ -14,7 +14,7 @@ test('fromHex', () => {
     expect(s).toEqual(s2)
 
     let aPlay = RpsGame.Plays.ROCK;
-    let salt = '0xabc';
+    let salt = padBytes32('abc');
     s = RpsGame.proposeState({channel, resolution, turnNum, stake, aPlay, salt});
     h = s.toHex();
     s2 = RpsState.fromHex(h)

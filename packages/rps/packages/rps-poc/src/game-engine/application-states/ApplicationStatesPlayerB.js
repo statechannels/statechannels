@@ -1,3 +1,4 @@
+import Enum from 'enum';
 
 class BasePlayerB {
     constructor({ channel, stake, balances }) {
@@ -27,7 +28,7 @@ class BasePlayerB {
     }
 
     get type() {
-        return this.constructor.name;
+        return types[this.constructor.name];
     }
 
     get commonAttributes() {
@@ -127,7 +128,22 @@ class ReadyToSendResting extends BasePlayerB {
     }
 }
 
+const types = {
+ 'ReadyToSendPreFundSetup1': 'ReadyToSendPreFundSetup1',
+ 'WaitForAToDeploy': 'WaitForAToDeploy',
+ 'ReadyToDeposit': 'ReadyToDeposit',
+ 'WaitForBlockchainDeposit': 'WaitForBlockchainDeposit',
+ 'WaitForPostFundSetup0': 'WaitForPostFundSetup0',
+ 'ReadyToSendPostFundSetup1': 'ReadyToSendPostFundSetup1',
+ 'WaitForPropose': 'WaitForPropose',
+ 'ReadyToChooseBPlay': 'ReadyToChooseBPlay',
+ 'ReadyToSendAccept': 'ReadyToSendAccept',
+ 'WaitForReveal': 'WaitForReveal',
+ 'ReadyToSendResting': 'ReadyToSendResting'
+};
+
 export {
+    types,
     ReadyToSendPreFundSetup1,
     WaitForAToDeploy,
     ReadyToDeposit,
