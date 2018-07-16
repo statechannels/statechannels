@@ -38,3 +38,4 @@ export function HomePage(props) {
   );
 }
 
+export default HomePage;
