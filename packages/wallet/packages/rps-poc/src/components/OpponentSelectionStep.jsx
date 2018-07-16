@@ -12,6 +12,17 @@ export default class OpponentSelectionStep extends React.PureComponent {
     this.onClickCreateChallenge.bind(this);
   }
 
+  onClickCreateChallenge() {
+    const { handleCreateChallenge } = this.props;
+    const name = this.nameInput.current.value;
+    const wager = Number(this.wagerInput.current.value);
+    if (!name || !wager) {
+      return;
+    }
+
+    handleCreateChallenge(name, wager);
+  }
+
   render() {
     const { opponents, handleSelectChallenge } = this.props;
 
@@ -43,7 +54,8 @@ export default class OpponentSelectionStep extends React.PureComponent {
                   <td>
                     <Button
                       onClick={() =>
-                        handleSelectChallenge({ opponentId: opponent.id, stake: opponent.wager })}
+                        handleSelectChallenge({ opponentId: opponent.id, stake: opponent.wager })
+                      }
                     >
                       Challenge
                     </Button>
@@ -63,21 +75,11 @@ export default class OpponentSelectionStep extends React.PureComponent {
               <input style={{ marginLeft: 12 }} type="text" name="wager" ref={this.wagerInput} />
             </div>
             <div style={{ marginTop: 12 }}>
-              <Button onClick={this.onClickCreateChallenge.bind(this)}>Submit</Button>
+              <Button onClick={this.onClickCreateChallenge}>Submit</Button>
             </div>
           </form>
         </div>
       </div>
     );
-  }
-
-  onClickCreateChallenge() {
-    const name = this.nameInput.current.value;
-    const wager = Number(this.wagerInput.current.value);
-    if (!name || !wager) {
-      return;
-    }
-
-    this.props.handleCreateChallenge(name, wager);
   }
 }

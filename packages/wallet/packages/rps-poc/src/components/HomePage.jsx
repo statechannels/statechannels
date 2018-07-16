@@ -4,7 +4,7 @@ import Button from './Button';
 import ButtonLink from './ButtonLink';
 import { ROUTE_PATHS } from '../constants';
 
-export function HomePage(props) {
+export default function HomePage({ loginUser }) {
   return (
     <div style={{ maxWidth: '90%', margin: 'auto' }}>
       <div style={{ textAlign: 'center' }}>
@@ -32,7 +32,7 @@ export function HomePage(props) {
       </div>
       <div style={{ textAlign: 'center', paddingTop: 40 }}>
         <ButtonLink href={ROUTE_PATHS.HOW_IT_WORKS}>Begin</ButtonLink>
-        <Button onClick={props.loginUser}>Login</Button>
+        <Button onClick={loginUser}>Login</Button>
       </div>
     </div>
   );
