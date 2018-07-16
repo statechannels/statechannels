@@ -14,7 +14,6 @@ import SelectPlayStep from './SelectPlayStep';
 import SendingMessageStep from './SendingMessageStep';
 import WaitingStep from './WaitingStep';
 
-import ChannelWallet from '../game-engine/ChannelWallet';
 import GameEngine from '../game-engine/GameEngine';
 
 import { AC_VIEWS, GE_COMMANDS, GE_TO_AC_MAPPING } from '../constants';
@@ -40,9 +39,9 @@ export default class PlayPage extends React.PureComponent {
   constructor(props) {
     super(props);
 
-    let gameLibraryAddress = 0xc;
-    let channelWallet = {};
-    let applicationController = {};
+    const gameLibraryAddress = 0xc;
+    const channelWallet = {};
+    const applicationController = {};
 
     this.ge = new GameEngine({ gameLibraryAddress, channelWallet, applicationController });
 
@@ -83,12 +82,13 @@ export default class PlayPage extends React.PureComponent {
   // Handlers
 
   createChallenge(name, wager) {
-    let newOpponent = new Opponent({ name, wager });
+    const newOpponent = new Opponent({ name, wager });
     postNewChallenge(newOpponent);
     this.props.handleChooseOpponent('abc', 2);
   }
 
   selectChallenge({ stake, opponentId }) {
+    // todo: use actual inputs
     this.props.handleChooseOpponent('abc', 2);
   }
 
@@ -156,25 +156,25 @@ export default class PlayPage extends React.PureComponent {
   // Firebase API calls
 
   opponentsListener() {
-    let opponentsRef = fire
+    const opponentsRef = fire
       .database()
       .ref('opponents')
       .orderByKey();
     opponentsRef.on('value', snapshot => {
-      let opponents = _.map(snapshot.val(), opponent => opponent);
+      const opponents = _.map(snapshot.val(), opponent => opponent);
       this.setState({ opponents });
     });
   }
 
   messagesListener() {
-    let messagesRef = fire
+    const messagesRef = fire
       .database()
       // TODO: limit messages to current channel
       .ref('messages')
       .orderByKey();
 
     messagesRef.on('value', snapshot => {
-      let messages = _.map(snapshot.val(), message => message);
+      const messages = _.map(snapshot.val(), message => message);
       this.setState({ messages });
     });
   }
