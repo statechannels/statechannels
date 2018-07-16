@@ -1,13 +1,11 @@
-import Enum from 'enum';
-
-export const types = new Enum([
-  'CHOOSE_OPPONENT',
-  'CHOOSE_A_PLAY',
-  'MESSAGE_RECEIVED',
-  'EVENT_RECEIVED',
-  'LOGIN_USER',
-  'LOGIN_SUCCESS',
-]);
+export const types = {
+  CHOOSE_OPPONENT: "CHOOSE_OPPONENT",
+  CHOOSE_A_PLAY: "CHOOSE_A_PLAY",
+  MESSAGE_RECEIVED: "MESSAGE_RECEIVED",
+  EVENT_RECEIVED: "EVENT_RECEIVED",
+  LOGIN_USER: "LOGIN_USER",
+  LOGIN_SUCCESS: "LOGIN_SUCCESS",
+};
 
 export const loginUser = () => ({
   type: types.LOGIN_USER,
