@@ -1,6 +1,22 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 
 import Button from './Button';
+
+const propTypes = {
+  handleCreateChallenge: PropTypes.func.isRequired,
+  handleSelectChallenge: PropTypes.func.isRequired,
+  opponents: PropTypes.arrayOf(PropTypes.objectOf(PropTypes.shape({
+    id: PropTypes.number.isRequired,
+    name: PropTypes.string.isRequired,
+    wager: PropTypes.string.isRequired,
+    timestamp: PropTypes.string.isRequired,
+  }))),
+};
+
+const defaultProps = {
+  opponents: [],
+};
 
 export default class OpponentSelectionStep extends React.PureComponent {
   constructor(props) {
@@ -83,3 +99,6 @@ export default class OpponentSelectionStep extends React.PureComponent {
     );
   }
 }
+
+OpponentSelectionStep.propTypes = propTypes;
+OpponentSelectionStep.defaultProps = defaultProps;
