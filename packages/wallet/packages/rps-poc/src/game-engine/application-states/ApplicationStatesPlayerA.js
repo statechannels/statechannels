@@ -146,7 +146,7 @@ class WaitForResting extends BasePlayerA {
     }
 }
 
-const types = {
+const types = Object.freeze({
     'ReadyToSendPreFundSetup0': 'ReadyToSendPreFundSetup0',
     'WaitForPreFundSetup1': 'WaitForPreFundSetup1',
     'ReadyToDeploy': 'ReadyToDeploy',
@@ -159,7 +159,7 @@ const types = {
     'WaitForAccept': 'WaitForAccept',
     'ReadyToSendReveal': 'ReadyToSendReveal',
     'WaitForResting': 'WaitForResting',
-};
+});
 
 export {
     types,

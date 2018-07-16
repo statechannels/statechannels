@@ -1,11 +1,11 @@
-export const types = {
+export const types = Object.freeze({
   CHOOSE_OPPONENT: "CHOOSE_OPPONENT",
   CHOOSE_A_PLAY: "CHOOSE_A_PLAY",
   MESSAGE_RECEIVED: "MESSAGE_RECEIVED",
   EVENT_RECEIVED: "EVENT_RECEIVED",
   LOGIN_USER: "LOGIN_USER",
   LOGIN_SUCCESS: "LOGIN_SUCCESS",
-};
+});
 
 export const loginUser = () => ({
   type: types.LOGIN_USER,
