@@ -1,6 +1,6 @@
 {
   "name": "fmg-payments",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Force-move game payment channel",
   "directories": {
     "doc": "docs",
@@ -13,7 +13,7 @@
   "author": "Tom Close",
   "license": "MIT",
   "dependencies": {
-    "fmg-core": "^0.0.2",
+    "fmg-core": "^0.0.3",
     "sha3": "^1.2.2",
     "web3-utils": "^1.0.0-beta.30"
   },
