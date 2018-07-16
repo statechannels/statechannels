@@ -1,5 +1,3 @@
-import Enum from 'enum';
-
 class BasePlayerA {
     constructor({ channel, stake, balances }) {
         this._channel = channel;
@@ -148,20 +146,20 @@ class WaitForResting extends BasePlayerA {
     }
 }
 
-const types = new Enum([
-    'ReadyToSendPreFundSetup0',
-    'WaitForPreFundSetup1',
-    'ReadyToDeploy',
-    'WaitForBlockchainDeploy',
-    'WaitForBToDeposit',
-    'ReadyToSendPostFundSetup0',
-    'WaitForPostFundSetup1',
-    'ReadyToChooseAPlay',
-    'ReadyToSendPropose',
-    'WaitForAccept',
-    'ReadyToSendReveal',
-    'WaitForResting',
-]);
+const types = {
+    'ReadyToSendPreFundSetup0': 'ReadyToSendPreFundSetup0',
+    'WaitForPreFundSetup1': 'WaitForPreFundSetup1',
+    'ReadyToDeploy': 'ReadyToDeploy',
+    'WaitForBlockchainDeploy': 'WaitForBlockchainDeploy',
+    'WaitForBToDeposit': 'WaitForBToDeposit',
+    'ReadyToSendPostFundSetup0': 'ReadyToSendPostFundSetup0',
+    'WaitForPostFundSetup1': 'WaitForPostFundSetup1',
+    'ReadyToChooseAPlay': 'ReadyToChooseAPlay',
+    'ReadyToSendPropose': 'ReadyToSendPropose',
+    'WaitForAccept': 'WaitForAccept',
+    'ReadyToSendReveal': 'ReadyToSendReveal',
+    'WaitForResting': 'WaitForResting',
+};
 
 export {
     types,
