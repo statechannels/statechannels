@@ -74,24 +74,24 @@ export default class GameEngine {
 
   messageSent({ oldState }) {
     let newState;
-    let stateType = oldState.type();
-    if (stateType === ApplicationStatesA.ReadyToSendPreFundSetup0) {
+    let stateType = oldState.type;
+    if (stateType === ApplicationStatesA.types['ReadyToSendPreFundSetup0']) {
       newState = new ApplicationStatesA.WaitForPreFundSetup1({
         ...oldState.commonAttributes,
-        signedPreFundSetup0Message: oldState.message,
-      });
-    } else if (stateType === ApplicationStatesB.ReadyToSendPreFundSetup1) {
+        signedPreFundSetup0Message: oldState.message
+      })
+    } else if (stateType === ApplicationStatesB.types['ReadyToSendPreFundSetup1']) {
       newState = new ApplicationStatesB.WaitForAToDeploy({
-        ...oldState.commonAttributes,
-      });
-    } else if (stateType === ApplicationStatesA.ReadyToSendPostFundSetup0) {
+        ...oldState.commonAttributes
+      })
+    } else if (stateType === ApplicationStatesA.types['ReadyToSendPostFundSetup0']) {
       newState = new ApplicationStatesA.WaitForPostFundSetup1({
         ...oldState.commonAttributes,
         adjudicator: oldState.adjudicator,
-        signedPostFundSetup0Message: oldState.message,
-      });
-    } else if (stateType === ApplicationStatesB.ReadyToSendPostFundSetup1) {
-      const postFundSetup1 = RpsGame.fundConfirmationState({
+        signedPostFundSetup0Message: oldState.message
+      })
+    } else if (stateType === ApplicationStatesB.types['ReadyToSendPostFundSetup1']) {
+      let postFundSetup1 = RpsGame.fundConfirmationState({
         channel: oldState._channel,
         stateCount: 'count',
         resolution: oldState._balances,
@@ -111,21 +111,25 @@ export default class GameEngine {
 
   receiveMessage({ oldState, message }) {
     let newState;
-    let stateType = oldState.type();
-    // TODO: use this
-    // let opponentState = RpsState.fromHex(message.state);
-    if (stateType === ApplicationStatesA.WaitForPreFundSetup1) {
+    let stateType = oldState.type;
+    let opponentState = RpsState.fromHex(message.state)
+    if (stateType === ApplicationStatesA.types['WaitForPreFundSetup1']) {
       newState = new ApplicationStatesA.ReadyToDeploy({
         ...oldState.commonAttributes,
-        deploymentTransaction: 'the gameEngine needs to construct this',
-      });
-    } else if (stateType === ApplicationStatesB.WaitForPostFundSetup0) {
+        deploymentTransaction: "the gameEngine needs to construct this"
+      })
+    } else if (stateType === ApplicationStatesA.types['WaitForPostFundSetup1']) {
+      newState = new ApplicationStatesA.ReadyToChooseAPlay({
+        ...oldState.commonAttributes,
+        adjudicator: oldState.adjudicator
+      })
+    } else if (stateType === ApplicationStatesB.types['WaitForPostFundSetup0']) {
       newState = new ApplicationStatesB.ReadyToSendPostFundSetup1({
         ...oldState.commonAttributes,
         adjudicator: oldState.adjudicator,
         signedPostFundSetup1Message: message,
       });
-    } else if (stateType === ApplicationStatesB.WaitForPostFundSetup0) {
+    } else if (stateType === ApplicationStatesB.types['WaitForPostFundSetup0']) {
       console.log('missingimp');
     }
 
@@ -133,13 +137,13 @@ export default class GameEngine {
   }
 
   transactionSent({ oldState }) {
-    const stateType = oldState.type();
+    let stateType = oldState.type;
     let newState;
-    if (stateType === ApplicationStatesA.ReadyToDeploy) {
+    if (stateType === ApplicationStatesA.types['ReadyToDeploy']) {
       newState = new ApplicationStatesA.WaitForBlockchainDeploy({
-        ...oldState.commonAttributes,
-      });
-    } else if (stateType === ApplicationStatesB.ReadyToDeposit) {
+        ...oldState.commonAttributes
+      })
+    } else if (stateType === ApplicationStatesB.types['ReadyToDeposit']) {
       newState = new ApplicationStatesB.WaitForPostFundSetup0({
         ...oldState.commonAttributes,
         adjudicator: oldState.adjudicator,
@@ -151,15 +155,15 @@ export default class GameEngine {
 
   receiveEvent({ oldState, event }) {
     let newState;
-    const stateType = oldState.type();
+    let stateType = oldState.type;
 
-    if (stateType === ApplicationStatesA.WaitForBlockchainDeploy) {
+    if (stateType == ApplicationStatesA.types['WaitForBlockchainDeploy']) {
       newState = new ApplicationStatesA.WaitForBToDeposit({
         ...oldState.commonAttributes,
-        adjudicator: event.adjudicator,
-      });
-    } else if (stateType === ApplicationStatesA.WaitForBToDeposit) {
-      const postFundSetup = RpsGame.fundConfirmationState({
+        adjudicator: event.adjudicator
+      })
+    } else if (stateType === ApplicationStatesA.types['WaitForBToDeposit']) {
+      let postFundSetup = RpsGame.fundConfirmationState({
         channel: oldState._channel,
         stateCount: 'count',
         resolution: oldState._balances,
@@ -170,9 +174,9 @@ export default class GameEngine {
       newState = new ApplicationStatesA.ReadyToSendPostFundSetup0({
         ...oldState.commonAttributes,
         adjudicator: oldState.adjudicator,
-        signedPostFundSetup0Message: message,
-      });
-    } else if (stateType === ApplicationStatesB.WaitForAToDeploy) {
+        signedPostFundSetup0Message: message
+      })
+    } else if (stateType === ApplicationStatesB.types['WaitForAToDeploy']) {
       newState = new ApplicationStatesB.ReadyToDeposit({
         ...oldState.commonAttributes,
         adjudicator: event.adjudicator,

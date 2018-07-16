@@ -68,60 +68,62 @@ class RpsState extends State {
 
     // Universal deserialization
     // TODO: This should be in the fmg-core package
-    let channelType = extractBytes(state);
+    let channelType = extractBytes(state, 32);
+    channelType = '0x' + channelType.substr(2).replace(/^0*/, '');
     state = state.substr(64);
 
-    let channelNonce = extractBytes32(state);
+    let channelNonce = extractInt({state});
     state = state.substr(64);
 
-    let numberOfParticipants = extractBytes32(state);
+    let numberOfParticipants = extractInt({state});
     state = state.substr(64);
 
     let participants = [];
 
     for (let i = 0; i < numberOfParticipants; i++ ) {
-      let participant = extractBytes(state);
+      let participant = extractBytes(state, 32);
+      participant = '0x' + participant.substr(2+64-40);
       participants.push(participant);
       state = state.substr(64);
     }
     let channel = new Channel(channelType, channelNonce, participants);
 
-    let stateType = extractBytes32(state);
+    let stateType = extractInt({state});
     state = state.substr(64);
 
-    let turnNum = extractBytes32(state);
+    let turnNum = extractInt({state});
     state = state.substr(64);
 
-    let stateCount = extractBytes32(state);
+    let stateCount = extractInt({state});
     state = state.substr(64);
 
     let resolution = []
     for (let i = 0; i < numberOfParticipants; i++ ) {
-      resolution.push(extractBytes32(state));
+      resolution.push(extractInt({state}));
       state = state.substr(64);
     }
 
     // Game state
-    let positionType = extractBytes32(state);
-    positionType = RpsGame.PositionTypes.get(parseInt(positionType))
+    let positionType = extractInt({state});
+    positionType = RpsGame.PositionTypes.get(positionType)
     state = state.substr(64);
 
-    let stake = extractBytes32(state);
+    let stake = extractInt({state});
     state = state.substr(64);
 
-    let preCommit = extractBytes(state);
+    let preCommit = extractBytes(state, 32);
     state = state.substr(64);
 
-    let bPlay = extractBytes32(state);
+    let bPlay = extractInt({state});
     bPlay = RpsGame.Plays.get(bPlay) || RpsGame.Plays.NONE;
     state = state.substr(64);
 
-    let aPlay = extractBytes32(state);
+    let aPlay = extractInt({state});
     aPlay = RpsGame.Plays.get(aPlay) || RpsGame.Plays.NONE;
     state = state.substr(64);
 
     // TODO: This should probably be extractBytes32
-    let salt = extractBytes(state);
+    let salt = extractBytes(state, 32);
     state = state.substr(64);
 
     if (stateType === 0) { // PreFundSetup
@@ -149,12 +151,13 @@ class RpsState extends State {
   }
 }
 
-function extractBytes32(s) {
-  return parseInt('0x' + s.substr(0, 64));
+function extractInt({state, numBytes}) {
+  numBytes = numBytes || 32;
+  return parseInt(extractBytes(state, numBytes));
 }
 
-function extractBytes(s) {
-  return '0x' + s.substr(0, 64).replace(/^0+/, '');
+function extractBytes(s, numBytes) {
+  return '0x' + s.substr(0, numBytes*2);
 }
 
 export { RpsState };
