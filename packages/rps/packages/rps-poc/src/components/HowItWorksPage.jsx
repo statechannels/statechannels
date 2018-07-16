@@ -4,7 +4,7 @@ import ButtonLink from './ButtonLink';
 
 import { ROUTE_PATHS } from '../constants';
 
-export default function HomePage() {
+export default function HowItWorksPage() {
   return (
     <div style={{ maxWidth: '90%', margin: 'auto' }}>
       <div>
