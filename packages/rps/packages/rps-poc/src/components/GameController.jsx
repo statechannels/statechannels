@@ -43,7 +43,7 @@ export default class GameController extends PureComponent {
 }
 
 GameController.propTypes = {
-  applicationState: PropTypes.object.isRequired,
+  applicationState: PropTypes.objectOf(PropTypes.shape({})).isRequired,
   chooseAPlay: PropTypes.func.isRequired,
   chooseOpponent: PropTypes.func.isRequired,
 };
