@@ -4,7 +4,7 @@ import { soliditySha3 } from 'web3-utils';
 import Enum from 'enum';
 
 class RpsGame {
-  static initializationState({ channel, resolution, turnNum, stake }) {
+  static initializationState({ channel, stateCount, resolution, turnNum, stake }) {
     return new InitializationState(...arguments);
   };
   static fundConfirmationState({ channel, stateCount, resolution, turnNum, stake }) {
@@ -190,6 +190,7 @@ export { RpsState };
 // needs to store/copy game-specific attributes, but needs to behave like a framework state
 class InitializationState extends RpsState {
   constructor({ channel, stateCount, resolution, turnNum }) {
+    stateCount = stateCount || 0;
     super(...arguments);
     this.stateType = State.StateTypes.PREFUNDSETUP;
     this.positionType = RpsGame.PositionTypes.RESTING;
