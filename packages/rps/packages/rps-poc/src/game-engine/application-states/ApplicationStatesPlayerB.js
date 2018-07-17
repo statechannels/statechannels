@@ -92,9 +92,10 @@ class WaitForPropose extends BasePlayerB {
 }
 
 class ReadyToChooseBPlay extends BasePlayerB {
-    constructor({ channel, stake, balances, adjudicator }) {
+    constructor({ channel, stake, balances, adjudicator, opponentMessage }) {
         super({ channel, stake, balances });
         this.adjudicator = adjudicator;
+        this.opponentMessage = opponentMessage;
     }
 }
 
