@@ -148,5 +148,7 @@ it('runthrough', () => {
     // In B's application
     let readyToSendResting = gameEngineB.receiveMessage({ oldState: waitForReveal, message: message6 });
     expect(readyToSendResting.type).toEqual(ApplicationStatesB.types['ReadyToSendResting']);
+    expect(readyToSendResting.turnNum).toEqual(7);
+    expect(readyToSendResting._balances).toEqual([6,3]);
 })
 
