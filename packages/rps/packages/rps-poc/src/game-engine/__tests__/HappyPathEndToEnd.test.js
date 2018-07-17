@@ -142,8 +142,11 @@ it('runthrough', () => {
     expect(readyToSendReveal.aPlay.key).toEqual('ROCK');
     expect(readyToSendReveal.bPlay.key).toEqual('SCISSORS');
     expect(readyToSendReveal.salt).toEqual(waitForAccept.salt);
-    expect(readyToSendReveal.result).toEqual('A');
+    expect(readyToSendReveal.result.key).toEqual('A');
+    let message6 = readyToSendReveal.message;
 
-    assert.equal(s1.applicationState, "READY_TO_SEND");
+    // In B's application
+    let readyToSendResting = gameEngineB.receiveMessage({ oldState: waitForReveal, message: message6 });
+    expect(readyToSendResting.type).toEqual(ApplicationStatesB.types['ReadyToSendResting']);
 })
 

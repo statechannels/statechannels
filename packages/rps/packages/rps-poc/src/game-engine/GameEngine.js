@@ -33,7 +33,7 @@ export default class GameEngine {
 
   setupGame({ myAddr, opponentAddr, stake, initialBals }) {
     const participants = [myAddr, opponentAddr];
-    const channel = new Channel('0x123', 456, participants);
+    const channel = new Channel('0x' + '0'.repeat(61) + '123', 456, participants);
 
     const state = RpsGame.initializationState({
       channel,
@@ -130,6 +130,7 @@ export default class GameEngine {
     let newState;
     let stateType = oldState.type;
     let opponentState = RpsState.fromHex(message.state)
+
     if (stateType === ApplicationStatesA.types['WaitForPreFundSetup1']) {
       newState = new ApplicationStatesA.ReadyToDeploy({
         ...oldState.commonAttributes,
@@ -141,16 +142,15 @@ export default class GameEngine {
         adjudicator: oldState.adjudicator
       })
     } else if (stateType === ApplicationStatesA.types['WaitForAccept']) {
-      let opponentGameState = RpsState.fromHex(message.state);
-      let result = RpsGame.winner(oldState.aPlay.value, opponentGameState.bPlay.value)
+      let result = RpsGame.result(oldState.aPlay.key, opponentState.bPlay.key)
 
       let revealGameState = RpsGame.revealState({
         channel: oldState._channel,
         resolution: oldState._balances,
-        turnNum: opponentGameState.turnNum + 1,
-        stake: opponentGameState.stake,
+        turnNum: opponentState.turnNum + 1,
+        stake: opponentState.stake,
         aPlay: oldState.aPlay,
-        bPlay: opponentGameState.bPlay,
+        bPlay: opponentState.bPlay,
         salt: oldState.salt
       });
 
@@ -159,7 +159,7 @@ export default class GameEngine {
       newState = new ApplicationStatesA.ReadyToSendReveal({
         adjudicator: oldState.adjudicator,
         aPlay: oldState.aPlay,
-        bPlay: opponentGameState.bPlay,
+        bPlay: opponentState.bPlay,
         result,
         salt: oldState.salt,
         signedRevealMessage: revealMessage
@@ -175,6 +175,22 @@ export default class GameEngine {
         ...oldState.commonAttributes,
         adjudicator: oldState.adjudicator,
         opponentMessage: message
+      })
+    } else if (stateType === ApplicationStatesB.types['WaitForReveal']) {
+      let response = RpsGame.restingState({
+        channel: opponentState._channel,
+        resolution: opponentState.resolution,
+        turnNum: opponentState.turnNum + 1,
+        stake: opponentState.stake
+      })
+      newState = new ApplicationStatesB.ReadyToSendResting({
+        ...oldState.commonAttributes,
+        adjudicator: oldState.adjudicator,
+        aPlay: opponentState.aPlay,
+        bPlay: oldState.bPlay,
+        result: opponentState.result,
+        salt: opponentState.salt,
+        signedRestingMessage: response
       })
     }
 
