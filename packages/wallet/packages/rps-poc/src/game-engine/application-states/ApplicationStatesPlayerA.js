@@ -96,9 +96,10 @@ class WaitForPostFundSetup1 extends BasePlayerA {
 }
 
 class ReadyToChooseAPlay extends BasePlayerA {
-    constructor({ channel, stake, balances, adjudicator }) {
+    constructor({ channel, stake, balances, adjudicator, opponentMessage }) {
         super({channel, stake, balances});
         this.adjudicator = adjudicator;
+        this.opponentMessage = opponentMessage;
     }
 }
 
