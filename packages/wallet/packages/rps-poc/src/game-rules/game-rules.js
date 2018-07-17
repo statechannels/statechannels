@@ -72,7 +72,6 @@ class RpsState extends State {
     // Universal deserialization
     // TODO: This should be in the fmg-core package
     let channelType = extractBytes(state, 32);
-    channelType = '0x' + channelType.substr(2).replace(/^0*/, '');
     state = state.substr(64);
 
     let channelNonce = extractInt({state});

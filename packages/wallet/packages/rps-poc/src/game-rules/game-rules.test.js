@@ -2,7 +2,7 @@ import { RpsGame, RpsState } from './game-rules';
 import { Channel, padBytes32 } from 'fmg-core';
 
 test('fromHex', () => {
-    let channel = new Channel(padBytes32('1234567'), 3141592, ['0x' + '0'.repeat(17) + '123', '0x' + '0'.repeat(17) + '456']);
+    let channel = new Channel(padBytes32('1234567'), 3141592, ['0x' + '0'.repeat(37) + '123', '0x' + '0'.repeat(37) + '456']);
     let resolution = [1,2];
     let turnNum = 511;
     let stake = 63;
