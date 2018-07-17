@@ -55,12 +55,22 @@ export default class GameEngine {
   }
 
   prefundProposalReceived({ hexMessage }) {
-    const message = new Message({ hexMessage });
-    const proposal = RpsState.fromHex(message.state);
+    let opponentMessage = new Message({ hexMessage });
+    let proposal = RpsState.fromHex(opponentMessage.state);
 
-    const channel = proposal.channel;
-    const stake = proposal.stake;
-    const balances = proposal.resolution;
+    let channel = proposal.channel;
+    let stake = proposal.stake;
+    let balances = proposal.resolution;
+
+    let gameState = RpsGame.initializationState({
+      channel: proposal.channel,
+      resolution: proposal.resolution,
+      turnNum: 1,
+      stake: 1,
+      stateCount: 1
+    })
+
+    let message = this.channelWallet.sign(gameState.toHex());
 
     const appState = new ApplicationStatesB.ReadyToSendPreFundSetup1({
       channel: channel,
@@ -95,7 +105,6 @@ export default class GameEngine {
         salt: oldState.salt,
         signedProposeMessage: oldState.message
       })
-    } else if (stateType === ApplicationStatesA.types['ReadyToSendPropose']) {
     } else if (stateType === ApplicationStatesB.types['ReadyToSendPreFundSetup1']) {
       newState = new ApplicationStatesB.WaitForAToDeploy({
         ...oldState.commonAttributes
@@ -139,14 +148,25 @@ export default class GameEngine {
     } else if (stateType === ApplicationStatesA.types['WaitForPostFundSetup1']) {
       newState = new ApplicationStatesA.ReadyToChooseAPlay({
         ...oldState.commonAttributes,
-        adjudicator: oldState.adjudicator
+        adjudicator: oldState.adjudicator,
+        opponentMessage: message
       })
     } else if (stateType === ApplicationStatesA.types['WaitForAccept']) {
       let result = RpsGame.result(oldState.aPlay.key, opponentState.bPlay.key)
 
+      // The opponent's state assumes that B won
+      let resolution = opponentState.resolution;
+      if (result === RpsGame.Results.TIE) {
+        resolution[0] += opponentState.stake;
+        resolution[1] -= opponentState.stake;
+      } else if (result === RpsGame.Results.A) {
+        resolution[0] += 2 * opponentState.stake;
+        resolution[1] -= 2 * opponentState.stake;
+      }
+
       let revealGameState = RpsGame.revealState({
-        channel: oldState._channel,
-        resolution: oldState._balances,
+        channel: opponentState.channel,
+        resolution,
         turnNum: opponentState.turnNum + 1,
         stake: opponentState.stake,
         aPlay: oldState.aPlay,
@@ -165,10 +185,19 @@ export default class GameEngine {
         signedRevealMessage: revealMessage
       })
     } else if (stateType === ApplicationStatesB.types['WaitForPostFundSetup0']) {
+      let gameState = RpsGame.fundConfirmationState({
+        channel: opponentState.channel,
+        stateCount: 1,
+        resolution: opponentState.resolution,
+        turnNum: 3,
+        stake: opponentState.stake
+      })
+
+      let response = this.channelWallet.sign(gameState.toHex());
       newState = new ApplicationStatesB.ReadyToSendPostFundSetup1({
         ...oldState.commonAttributes,
         adjudicator: oldState.adjudicator,
-        signedPostFundSetup1Message: message,
+        signedPostFundSetup1Message: response,
       });
     } else if (stateType === ApplicationStatesB.types['WaitForPropose']) {
       newState = new ApplicationStatesB.ReadyToChooseBPlay({
@@ -178,7 +207,7 @@ export default class GameEngine {
       })
     } else if (stateType === ApplicationStatesB.types['WaitForReveal']) {
       let response = RpsGame.restingState({
-        channel: opponentState._channel,
+        channel: opponentState.channel,
         resolution: opponentState.resolution,
         turnNum: opponentState.turnNum + 1,
         stake: opponentState.stake
@@ -190,7 +219,8 @@ export default class GameEngine {
         bPlay: oldState.bPlay,
         result: opponentState.result,
         salt: opponentState.salt,
-        signedRestingMessage: response
+        balances: opponentState.resolution,
+        signedRestingMessage: this.channelWallet.sign(response.toHex())
       })
     }
 
@@ -226,11 +256,12 @@ export default class GameEngine {
     } else if (stateType === ApplicationStatesA.types['WaitForBToDeposit']) {
       let postFundSetup = RpsGame.fundConfirmationState({
         channel: oldState._channel,
-        stateCount: 'count',
+        stateCount: 0,
         resolution: oldState._balances,
-        turnNum: 'turnNum',
+        turnNum: 2,
         stake: oldState.stake,
       });
+
       const message = this.channelWallet.sign(postFundSetup.toHex());
       newState = new ApplicationStatesA.ReadyToSendPostFundSetup0({
         ...oldState.commonAttributes,
@@ -250,16 +281,21 @@ export default class GameEngine {
 
   choosePlay({ oldState, move }) {
     let gameState, message, newState;
+    let opponentGameState = RpsState.fromHex(oldState.opponentMessage.state)
 
     if (oldState.type === ApplicationStatesA.types['ReadyToChooseAPlay']) {
       let aPlay = RpsGame.Plays[move];
       let salt = 'salt';
 
+      let resolution = opponentGameState.resolution;
+      resolution[0] -= opponentGameState.stake;
+      resolution[1] += opponentGameState.stake;
+
       gameState = RpsGame.proposeState({
-        channel: oldState._channel,
-        resolution: oldState._balances,
-        turnNum: oldState.turnNum + 1,
-        stake: oldState.stake,
+        channel: opponentGameState.channel,
+        resolution,
+        turnNum: opponentGameState.turnNum + 1,
+        stake: opponentGameState.stake,
         aPlay,
         salt
       });
@@ -276,10 +312,10 @@ export default class GameEngine {
     } else if (oldState.type === ApplicationStatesB.types['ReadyToChooseBPlay']) {
       let bPlay = RpsGame.Plays[move];
       gameState = RpsGame.acceptState({
-        channel: oldState._channel,
-        resolution: oldState._balances,
-        turnNum: oldState.turnNum + 1,
-        stake: oldState.stake,
+        channel: opponentGameState.channel,
+        resolution: opponentGameState.resolution,
+        turnNum: opponentGameState.turnNum + 1,
+        stake: opponentGameState.stake,
         bPlay
       });
 
