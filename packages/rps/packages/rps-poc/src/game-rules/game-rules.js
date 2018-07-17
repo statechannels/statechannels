@@ -25,13 +25,36 @@ class RpsGame {
     return new RevealState(...arguments);
   }
 
-  static winner(aPlay, bPlay) {
+  static result(aPlay, bPlay) {
+    if(aPlay === bPlay) {
+      return this.Results.TIE;
+    } else if (aPlay === 'ROCK') {
+      if (bPlay === 'SCISSORS') {
+        return this.Results.A;
+      } else if (bPlay === 'PAPER') {
+        return this.Results.B;
+      }
+    } else if (aPlay === 'SCISSORS') {
+      if (bPlay === 'PAPER') {
+        return this.Results.A;
+      } else if (bPlay === 'ROCK') {
+        return this.Results.B;
+      }
+    } else if (aPlay === 'PAPER') {
+      if (bPlay === 'ROCK') {
+        return this.Results.A;
+      } else if (bPlay === 'SCISSORS') {
+        return this.Results.B;
+      }
+    }
+
+    throw('Invalid plays')
   }
 }
 
 RpsGame.Plays = new Enum(['NONE', 'ROCK', 'PAPER', 'SCISSORS']);
-
 RpsGame.PositionTypes = new Enum(['NONE', 'RESTING', 'ROUNDPROPOSED', 'ROUNDACCEPTED', 'REVEAL', 'NONE'])
+RpsGame.Results = new Enum(['TIE', 'A', 'B']);
 
 export { RpsGame };
 
