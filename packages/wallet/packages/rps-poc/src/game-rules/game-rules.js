@@ -24,6 +24,9 @@ class RpsGame {
   static revealState({ channel, resolution, turnNum, stake, aPlay, bPlay, salt}) {
     return new RevealState(...arguments);
   }
+
+  static winner(aPlay, bPlay) {
+  }
 }
 
 RpsGame.Plays = new Enum(['NONE', 'ROCK', 'PAPER', 'SCISSORS']);
