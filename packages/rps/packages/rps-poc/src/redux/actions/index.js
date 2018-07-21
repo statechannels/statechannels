@@ -5,6 +5,7 @@ export const types = Object.freeze({
   EVENT_RECEIVED: "EVENT_RECEIVED",
   LOGIN_USER: "LOGIN_USER",
   LOGIN_SUCCESS: "LOGIN_SUCCESS",
+  MESSAGE_SENT: "MESSAGE_SENT",
 });
 
 export const loginUser = () => ({
@@ -29,6 +30,11 @@ export const chooseAPlay = (aPlay) => ({
 
 export const messageReceived = (message) => ({
   type: types.MESSAGE_RECEIVED,
+  message,
+});
+
+export const messageSent = (message) => ({
+  type: types.MESSAGE_SENT,
   message,
 });
 
