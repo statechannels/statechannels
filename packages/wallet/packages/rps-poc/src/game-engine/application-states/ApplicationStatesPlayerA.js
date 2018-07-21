@@ -36,6 +36,10 @@ class BasePlayerA {
             stake: this.stake,
         }
     }
+
+    get alwaysSend() {
+        return false;
+    }
 }
 
 class ReadyToSendPreFundSetup0 extends BasePlayerA {
@@ -50,7 +54,12 @@ class ReadyToSendPreFundSetup0 extends BasePlayerA {
             message: this.message,
         }
     }
+
+    get alwaysSend() {
+        return true;
+    }
 }
+
 
 class WaitForPreFundSetup1 extends BasePlayerA { 
     constructor({ channel, stake, balances, signedPreFundSetup0Message }) {
@@ -85,6 +94,10 @@ class ReadyToSendPostFundSetup0 extends BasePlayerA {
         this.adjudicator = adjudicator;
         this.message = signedPostFundSetup0Message;
     }
+
+    get alwaysSend() {
+        return true;
+    }
 }
 
 class WaitForPostFundSetup1 extends BasePlayerA {
@@ -111,6 +124,10 @@ class ReadyToSendPropose extends BasePlayerA {
         this.adjudicator = adjudicator;
         this.message = signedProposeMessage;
     }
+
+    get alwaysSend() {
+        return true;
+    }
 }
 
 class WaitForAccept extends BasePlayerA {
@@ -132,6 +149,10 @@ class ReadyToSendReveal extends BasePlayerA {
         this.salt = salt;
         this.adjudicator = adjudicator;
         this.message = signedRevealMessage;
+    }
+
+    get alwaysSend() {
+        return true;
     }
 }
 

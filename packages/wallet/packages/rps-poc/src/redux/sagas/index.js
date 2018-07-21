@@ -1,12 +1,14 @@
 import { delay } from 'redux-saga';
 import { types as playerAStates } from '../../game-engine/application-states/ApplicationStatesPlayerA';
-import { call, put, takeEvery, select } from 'redux-saga/effects';
+import { call, put, takeEvery, select, all } from 'redux-saga/effects';
 import { authProvider, reduxSagaFirebase } from '../../gateways/firebase';
-import { types, loginSuccess, messageReceived, eventReceived } from '../actions';
+import { types, loginSuccess, messageReceived, eventReceived, messageSent } from '../actions';
 
 function* messageSender() {
   let state = yield select();
-  if (state.message) {
+  if (state.alwaysSend) {
+    yield delay(2000);  // for dev purposes
+    yield put(messageSent(state.message));
     // todo put the message sending logic here
     yield opponentResponseFaker();
   }
