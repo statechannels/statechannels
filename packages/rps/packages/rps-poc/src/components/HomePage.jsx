@@ -37,5 +37,3 @@ export default function HomePage({ loginUser }) {
     </div>
   );
 }
-
-export default HomePage;
