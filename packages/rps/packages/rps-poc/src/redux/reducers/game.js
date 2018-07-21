@@ -24,11 +24,31 @@ export default function gameReducer(state = {}, action = {}) {
   switch (action.type) {
     case types.CHOOSE_OPPONENT:
       let signedPreFundSetup0Message = "blah";
-      return new playerA.WaitForPreFundSetup1({ ...coreProps, signedPreFundSetup0Message });
+      return new playerA.ReadyToSendPreFundSetup0({ ...coreProps, signedPreFundSetup0Message });
 
     case types.CHOOSE_A_PLAY:
       let signedProposeMessage = "blah";
-      return new playerA.WaitForAccept({ ...coreProps, adjudicator, aPlay, salt, signedProposeMessage });
+      return new playerA.ReadyToSendPropose({ ...coreProps, adjudicator, aPlay, salt, signedProposeMessage });
+
+    case types.MESSAGE_SENT:
+      switch (state.type) {
+        case playerA.types.ReadyToSendPreFundSetup0:
+          let signedPreFundSetup0Message = "blah";
+          return new playerA.WaitForPreFundSetup1({ ...coreProps, signedPreFundSetup0Message });
+        case playerA.types.ReadyToSendPostFundSetup0:
+          let signedPostFundSetup0Message = "blah";
+          return new playerA.WaitForPostFundSetup1({ channel, stake, balances, adjudicator, signedPostFundSetup0Message });
+        case playerA.types.ReadyToSendPropose:
+          let signedProposeMessage = "blah";
+          return new playerA.WaitForAccept({ ...coreProps, adjudicator, aPlay, salt, signedProposeMessage });
+        case playerA.types.ReadyToSendReveal:
+          let signedRevealMessage = "blah";
+          let result = "win";
+          return new playerA.WaitForResting({
+            ...coreProps,
+            adjudicator, aPlay, bPlay, result, salt, signedRevealMessage
+          });
+      }
 
     case types.MESSAGE_RECEIVED:
       switch (state.type) {
@@ -40,7 +60,7 @@ export default function gameReducer(state = {}, action = {}) {
         case playerA.types.WaitForAccept:
           let signedRevealMessage = "blah";
           let result = "win";
-          return new playerA.WaitForResting({
+          return new playerA.ReadyToSendReveal({
             ...coreProps,
             adjudicator, aPlay, bPlay, result, salt, signedRevealMessage
           });
@@ -52,7 +72,7 @@ export default function gameReducer(state = {}, action = {}) {
           return new playerA.WaitForBToDeposit({ channel, stake, balances, adjudicator });
         case playerA.types.WaitForBToDeposit:
           let signedPostFundSetup0Message = "blah";
-          return new playerA.WaitForPostFundSetup1({ channel, stake, balances, adjudicator, signedPostFundSetup0Message });
+          return new playerA.ReadyToSendPostFundSetup0({ channel, stake, balances, adjudicator, signedPostFundSetup0Message });
       }
 
     default:
