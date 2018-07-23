@@ -49,6 +49,7 @@ export default function gameReducer(state = {}, action = {}) {
             adjudicator, aPlay, bPlay, result, salt, signedRevealMessage
           });
       }
+      break;
 
     case types.MESSAGE_RECEIVED:
       switch (state.type) {
@@ -65,6 +66,7 @@ export default function gameReducer(state = {}, action = {}) {
             adjudicator, aPlay, bPlay, result, salt, signedRevealMessage
           });
       }
+      break;
 
     case types.EVENT_RECEIVED:
       switch (state.type) {
@@ -74,6 +76,7 @@ export default function gameReducer(state = {}, action = {}) {
           let signedPostFundSetup0Message = "blah";
           return new playerA.ReadyToSendPostFundSetup0({ ...coreProps, adjudicator, signedPostFundSetup0Message });
       }
+      break;
 
     default:
       return state

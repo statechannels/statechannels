@@ -1,3 +1,9 @@
-import gameReducer from './game';
+import { combineReducers } from 'redux';
 
-export default gameReducer;
+import gameReducer from './game';
+import opponentReducer from './opponents';
+
+export default combineReducers({
+  game: gameReducer,
+  opponents: opponentReducer,
+});

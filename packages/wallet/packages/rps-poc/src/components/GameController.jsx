@@ -1,7 +1,7 @@
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 
-import PlayPage from './PlayPage';
+import OpponentSelectionStep from './OpponentSelectionStep';
 import WaitingStep from './WaitingStep';
 import SelectPlayStep from './SelectPlayStep';
 import { types as playerAStates } from '../game-engine/application-states/ApplicationStatesPlayerA';
@@ -10,8 +10,10 @@ export default class GameController extends PureComponent {
   render() {
     const {
       applicationState,
+      opponents,
       chooseAPlay,
       chooseOpponent,
+      subscribeOpponents,
     } = this.props;
 
     switch (applicationState && applicationState.type) {
@@ -52,7 +54,12 @@ export default class GameController extends PureComponent {
         return <WaitingStep message="opponent to accept the outcome" />;
 
       default:
-        return <PlayPage handleChooseOpponent={chooseOpponent} />;
+        subscribeOpponents();
+        return <OpponentSelectionStep
+          handleSelectChallenge={chooseOpponent}
+          handleCreateChallenge={chooseOpponent}
+          opponents={opponents}
+        />;
     }
   }
 }

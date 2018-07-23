@@ -7,7 +7,7 @@ const propTypes = {
   handleCreateChallenge: PropTypes.func.isRequired,
   handleSelectChallenge: PropTypes.func.isRequired,
   opponents: PropTypes.arrayOf(PropTypes.objectOf(PropTypes.shape({
-    id: PropTypes.number.isRequired,
+    id: PropTypes.string.isRequired,
     name: PropTypes.string.isRequired,
     wager: PropTypes.string.isRequired,
     timestamp: PropTypes.string.isRequired,
