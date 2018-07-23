@@ -1,8 +1,9 @@
 import { delay } from 'redux-saga';
 import { types as playerAStates } from '../../game-engine/application-states/ApplicationStatesPlayerA';
-import { call, put, takeEvery, select, all } from 'redux-saga/effects';
+import { call, put, takeEvery, select, fork } from 'redux-saga/effects';
 import { authProvider, reduxSagaFirebase } from '../../gateways/firebase';
 import { types, loginSuccess, messageReceived, eventReceived, messageSent } from '../actions';
+import opponentSaga from './opponents';
 
 function* messageSender() {
   let state = yield select();
@@ -38,6 +39,7 @@ function* blockchainResponseFaker() {
 }
 
 export default function* rootSaga() {
+  yield fork(opponentSaga);
   yield takeEvery('*', blockchainResponseFaker);
   yield takeEvery('*', messageSender);
   yield takeEvery(types.LOGIN_USER, loginSaga);
