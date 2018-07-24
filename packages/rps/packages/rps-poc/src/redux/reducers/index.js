@@ -1,9 +1,11 @@
 import { combineReducers } from 'redux';
 
-import gameReducer from './game';
-import opponentReducer from './opponents';
+import game from './game';
+import opponents from './opponents';
+import login from './login';
 
 export default combineReducers({
-  game: gameReducer,
-  opponents: opponentReducer,
+  game,
+  opponents,
+  login,
 });
