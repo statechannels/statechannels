@@ -37,7 +37,7 @@ export default function gameReducer(state = {}, action = {}) {
           return new playerA.WaitForPreFundSetup1({ ...coreProps, signedPreFundSetup0Message });
         case playerA.types.ReadyToSendPostFundSetup0:
           let signedPostFundSetup0Message = "blah";
-          return new playerA.WaitForPostFundSetup1({ channel, stake, balances, adjudicator, signedPostFundSetup0Message });
+          return new playerA.WaitForPostFundSetup1({ ...coreProps, adjudicator, signedPostFundSetup0Message });
         case playerA.types.ReadyToSendPropose:
           let signedProposeMessage = "blah";
           return new playerA.WaitForAccept({ ...coreProps, adjudicator, aPlay, salt, signedProposeMessage });
@@ -69,10 +69,10 @@ export default function gameReducer(state = {}, action = {}) {
     case types.EVENT_RECEIVED:
       switch (state.type) {
         case playerA.types.WaitForBlockchainDeploy:
-          return new playerA.WaitForBToDeposit({ channel, stake, balances, adjudicator });
+          return new playerA.WaitForBToDeposit({ ...coreProps, adjudicator });
         case playerA.types.WaitForBToDeposit:
           let signedPostFundSetup0Message = "blah";
-          return new playerA.ReadyToSendPostFundSetup0({ channel, stake, balances, adjudicator, signedPostFundSetup0Message });
+          return new playerA.ReadyToSendPostFundSetup0({ ...coreProps, adjudicator, signedPostFundSetup0Message });
       }
 
     default:
