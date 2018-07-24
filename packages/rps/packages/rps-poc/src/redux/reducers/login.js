@@ -1,4 +1,4 @@
-import { types } from '@actions/login';
+import { types } from '../actions/login';
 
 const initialState = {
   loading: false,
@@ -6,7 +6,7 @@ const initialState = {
   user: null
 };
 
-export default function loginReducer (state = initialState, action = {}) {
+export default function loginReducer(state = initialState, action = {}) {
   switch (action.type) {
     case types.LOGIN.REQUEST:
     case types.LOGOUT.REQUEST:

@@ -17,6 +17,7 @@ const coreProps = { channel, stake, balances };
 const adjudicator = 0xc;
 const aPlay = "rock";
 const bPlay = "scissors";
+
 const salt = "abc123";
 
 // todo: rewrite this to use the gameEngine and return actual data
