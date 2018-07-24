@@ -6,7 +6,7 @@ import { types, loginSuccess, messageReceived, eventReceived, messageSent } from
 
 function* messageSender() {
   let state = yield select();
-  if (state.alwaysSend) {
+  if (state.shouldSendMessage) {
     yield delay(2000);  // for dev purposes
     yield put(messageSent(state.message));
     // todo put the message sending logic here

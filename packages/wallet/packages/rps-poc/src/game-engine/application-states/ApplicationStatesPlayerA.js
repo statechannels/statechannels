@@ -37,7 +37,7 @@ class BasePlayerA {
         }
     }
 
-    get alwaysSend() {
+    get shouldSendMessage() {
         return false;
     }
 }
@@ -55,7 +55,7 @@ class ReadyToSendPreFundSetup0 extends BasePlayerA {
         }
     }
 
-    get alwaysSend() {
+    get shouldSendMessage() {
         return true;
     }
 }
@@ -95,7 +95,7 @@ class ReadyToSendPostFundSetup0 extends BasePlayerA {
         this.message = signedPostFundSetup0Message;
     }
 
-    get alwaysSend() {
+    get shouldSendMessage() {
         return true;
     }
 }
@@ -125,7 +125,7 @@ class ReadyToSendPropose extends BasePlayerA {
         this.message = signedProposeMessage;
     }
 
-    get alwaysSend() {
+    get shouldSendMessage() {
         return true;
     }
 }
@@ -151,7 +151,7 @@ class ReadyToSendReveal extends BasePlayerA {
         this.message = signedRevealMessage;
     }
 
-    get alwaysSend() {
+    get shouldSendMessage() {
         return true;
     }
 }
