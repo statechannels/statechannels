@@ -1,6 +1,6 @@
 import { connect } from 'react-redux';
 
-import { chooseOpponent, chooseAPlay } from '../redux/actions';
+import { chooseOpponent, chooseAPlay } from '../redux/actions/game';
 import { subscribeOpponents } from '../redux/actions/opponents';
 import GameController from '../components/GameController';
 

@@ -3,18 +3,7 @@ export const types = Object.freeze({
   CHOOSE_A_PLAY: "CHOOSE_A_PLAY",
   MESSAGE_RECEIVED: "MESSAGE_RECEIVED",
   EVENT_RECEIVED: "EVENT_RECEIVED",
-  LOGIN_USER: "LOGIN_USER",
-  LOGIN_SUCCESS: "LOGIN_SUCCESS",
   MESSAGE_SENT: "MESSAGE_SENT",
-});
-
-export const loginUser = () => ({
-  type: types.LOGIN_USER,
-});
-
-export const loginSuccess = (userData) => ({
-  type: types.LOGIN_SUCCESS,
-  user: userData,
 });
 
 export const chooseOpponent = (opponentAddress, stake) => ({

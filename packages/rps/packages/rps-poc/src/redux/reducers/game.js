@@ -1,4 +1,4 @@
-import { types } from '../actions';
+import { types } from '../actions/game';
 import { Channel } from 'fmg-core';
 import * as playerA from '../../game-engine/application-states/ApplicationStatesPlayerA';
 
