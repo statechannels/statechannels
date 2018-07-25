@@ -11,6 +11,10 @@ export default class ChannelWallet {
         return this.account.address;
     }
 
+    get privateKey() {
+        return this.account.privateKey;
+    }
+
     sign(state) {
         let signature = this.account.sign(state).signature;
         return new Message({ state, signature });
