@@ -6,10 +6,19 @@ import ButtonLink from './ButtonLink';
 import { ROUTE_PATHS } from '../constants';
 
 const propTypes = {
-  loginUser: PropTypes.func.isRequired,
+  login: PropTypes.func.isRequired,
+  logout: PropTypes.func.isRequired,
+  loggedIn: PropTypes.bool.isRequired,
 };
 
-export default function HomePage({ loginUser }) {
+export default function HomePage({ login, logout, loggedIn }) {
+  let loginButton;
+  if (loggedIn) {
+    loginButton = <Button onClick={logout}>Logout</Button>;
+  } else {
+    loginButton = <Button onClick={login}>Login</Button>;
+  }
+
   return (
     <div style={{ maxWidth: '90%', margin: 'auto' }}>
       <div style={{ textAlign: 'center' }}>
@@ -37,7 +46,7 @@ export default function HomePage({ loginUser }) {
       </div>
       <div style={{ textAlign: 'center', paddingTop: 40 }}>
         <ButtonLink href={ROUTE_PATHS.HOW_IT_WORKS}>Begin</ButtonLink>
-        <Button onClick={loginUser}>Login</Button>
+        {loginButton}
       </div>
     </div>
   );
