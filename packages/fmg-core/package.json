@@ -2,26 +2,27 @@
   "name": "fmg-core",
   "version": "0.0.4",
   "description": "Force-move games core",
-  "main": "index.js",
-  "module": "src/index.js",
+  "main": "built/src/index.js",
   "directories": {
     "doc": "docs",
     "test": "test"
   },
   "scripts": {
-    "test": "node -r esm ./node_modules/.bin/truffle test built/test/**/*"
+    "build": "./bin/build.sh",
+    "test": "npm run build; ./bin/test.sh"
   },
   "repository": "https://github.com/magmo/force-move-games/tree/master/packages/fmg-core",
   "author": "Tom Close",
   "license": "MIT",
   "dependencies": {
-    "esm": "^3.0.52",
+    "@types/mocha": "^5.2.5",
     "sha3": "^1.2.2",
     "web3-utils": "^1.0.0-beta.30"
   },
   "devDependencies": {
     "@types/node": "^10.5.1",
     "@types/web3": "^1.0.0",
-    "truffle-core": "^4.1.11"
+    "truffle-core": "^4.1.11",
+    "typescript": "^2.9.2"
   }
 }
