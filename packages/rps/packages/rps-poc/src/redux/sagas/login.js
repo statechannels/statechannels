@@ -4,20 +4,18 @@ import { call, fork, put, take, takeEvery, select, cancel } from 'redux-saga/eff
 import {
   types,
   loginFailure,
+  loginSuccess,
   logoutFailure,
-  syncUser,
-  syncUserDetails,
+  logoutSuccess,
 } from '../actions/login';
 import { reduxSagaFirebase } from '../../gateways/firebase';
 import { fetchOrCreateWallet, walletWatcherSaga } from './wallet';
-import { getUser } from '../store';
 
 const authProvider = new firebase.auth.GoogleAuthProvider();
 
 function * loginSaga () {
   try {
-    const data = yield call(reduxSagaFirebase.auth.signInWithPopup, authProvider);
-    console.log('login data', data);
+    yield call(reduxSagaFirebase.auth.signInWithPopup, authProvider);
     // successful login will trigger the loginStatusWatcher, which will update the state
   } catch (error) {
     yield put(loginFailure(error));
@@ -34,38 +32,27 @@ function * logoutSaga () {
 }
 
 function * loginStatusWatcherSaga () {
+  // Events on this channel are triggered on login and logout
   const channel = yield call(reduxSagaFirebase.auth.channel);
-  let watchers = {};
+  let walletWatcher = null;
 
   while (true) {
     const { user } = yield take(channel);
-    const currentUser = yield select(getUser);
 
-    if (!user) {
-      yield logoutProcedure(watchers);
-    } else if (!currentUser) {
-      watchers = yield loginProcedure(user);
-    } else if (currentUser.uid != user.uid) {
-      yield logoutProcedure(watchers);
-      watchers = yield loginProcedure(user);
+    // Note: it's hard to refactor by splitting out the login/out procedures below, as any
+    // sub-generator that forks the watcher processes won't return until those processes
+    // themselves have terminated
+    if (user) {
+      // login procedure
+      const wallet = yield fetchOrCreateWallet(user.uid);
+      walletWatcher = yield fork(walletWatcherSaga, wallet);
+      yield put(loginSuccess(user, wallet));
     } else {
-      yield put(syncUser(user));
+      // Logout procedure
+      if (walletWatcher) { yield cancel(walletWatcher) };
+      yield put(logoutSuccess());
     }
   }
-}
-
-function * logoutProcedure({ walletWatcher }) {
-  if (walletWatcher) { yield cancel(walletWatcher) };
-  yield put(syncUserDetails(null, null));
-}
-
-function * loginProcedure(user) {
-  const wallet = yield fetchOrCreateWallet(user.uid);
-
-  yield put(syncUserDetails(user, wallet));
-
-  const walletWatcher = yield fork(walletWatcherSaga, wallet);
-  return { walletWatcher };
 }
 
 export default function * loginRootSaga () {
