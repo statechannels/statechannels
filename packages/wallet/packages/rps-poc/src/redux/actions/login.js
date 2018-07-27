@@ -1,14 +1,14 @@
 export const types = {
   LOGIN: {
     REQUEST: 'LOGIN.REQUEST',
-    FAILURE: 'LOGIN.FAILURE'
+    SUCCESS: 'LOGIN.SUCCESS',
+    FAILURE: 'LOGIN.FAILURE',
   },
   LOGOUT: {
     REQUEST: 'LOGOUT.REQUEST',
-    FAILURE: 'LOGOUT.FAILURE'
+    SUCCESS: 'LOGOUT.SUCCESS',
+    FAILURE: 'LOGOUT.FAILURE',
   },
-  SYNC_USER: 'SYNC_USER',
-  SYNC_USER_DETAILS: 'SYNC_USER_DETAILS',
   SYNC_WALLET: 'SYNC_WALLET',
 };
 
@@ -30,15 +30,14 @@ export const logoutFailure = error => ({
   error,
 });
 
-export const syncUser = user => ({
-  type: types.SYNC_USER,
-  user,
-});
-
-export const syncUserDetails = (user, wallet) => ({
-  type: types.SYNC_USER_DETAILS,
+export const loginSuccess = (user, wallet) => ({
+  type: types.LOGIN.SUCCESS,
   user,
   wallet,
+});
+
+export const logoutSuccess = () => ({
+  type: types.LOGOUT.SUCCESS,
 });
 
 export const syncWallet = (wallet) => ({
