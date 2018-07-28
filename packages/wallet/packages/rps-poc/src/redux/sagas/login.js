@@ -34,22 +34,16 @@ function * logoutSaga () {
 function * loginStatusWatcherSaga () {
   // Events on this channel are triggered on login and logout
   const channel = yield call(reduxSagaFirebase.auth.channel);
-  let walletWatcher = null;
 
   while (true) {
     const { user } = yield take(channel);
 
-    // Note: it's hard to refactor by splitting out the login/out procedures below, as any
-    // sub-generator that forks the watcher processes won't return until those processes
-    // themselves have terminated
     if (user) {
       // login procedure
       const wallet = yield fetchOrCreateWallet(user.uid);
-      walletWatcher = yield fork(walletWatcherSaga, wallet);
       yield put(loginSuccess(user, wallet));
     } else {
       // Logout procedure
-      if (walletWatcher) { yield cancel(walletWatcher) };
       yield put(logoutSuccess());
     }
   }

@@ -23,8 +23,17 @@ const walletTransformer = (data) => ({
   id: data.key,
 });
 
+const walletRef = (uid) => {
+  return firebase.database()
+                 .ref('wallets')
+                 .orderByChild('uid')
+                 .equalTo(uid)
+                 .limitToFirst(1);
+}
+
+
 function* fetchWallet(uid) {
-  const query = firebase.database().ref('wallets').orderByChild('uid').equalTo(uid).limitToFirst(1);
+  const query = walletRef(uid);
 
   // const wallet = yield call(reduxSagaFirebase.database.read, query);
   // ^ doesn't work as it returns an object like {-LIGGQQEI6OlWoveTPsq: {address: ... } }
@@ -48,18 +57,4 @@ function* createWallet(uid) {
   }
 
   return yield call(reduxSagaFirebase.database.create, 'wallets', walletParams);
-}
-
-export function * walletWatcherSaga(wallet) {
-  const channel = yield call(reduxSagaFirebase.database.channel, `wallets/${wallet.id}`);
-
-  while (true) {
-    const { updatedWallet } = yield take(channel);
-    if (updatedWallet) {
-      yield put(syncWallet(updatedWallet));
-    } else { // someone has deleted the wallet remotely
-      const recreatedWallet = yield fetchOrCreateWallet(wallet.uid);
-      yield put(syncWallet(recreatedWallet));
-    }
-  }
 }
