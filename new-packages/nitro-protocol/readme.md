@@ -13,7 +13,7 @@ that are external to the channel's state. For example, as it currently stands, y
 a state channel sports betting game, where bets have to be made by a deadline and the winner
 is determined through an oracle feed.
 
-A full description of the framework and it's capabilities can be found in our whitepaper (coming soon!).
+A full description of the framework and it's capabilities can be found in our [whitepaper](https://magmo.com/force-move-games.pdf).
 
 The framework in this respository is currently limited to 2-player games, but that's mostly
 due to solidity challenges and time constraints - the framework itself extends naturally to
