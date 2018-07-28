@@ -1,5 +1,5 @@
 import firebase from 'firebase';
-import { call, fork, put, take, takeEvery, select, cancel } from 'redux-saga/effects';
+import { call, fork, put, take, takeEvery, cancel } from 'redux-saga/effects';
 
 import {
   types,
@@ -9,7 +9,8 @@ import {
   logoutSuccess,
 } from '../actions/login';
 import { reduxSagaFirebase } from '../../gateways/firebase';
-import { fetchOrCreateWallet, walletWatcherSaga } from './wallet';
+import { fetchOrCreateWallet } from './wallet';
+import { fetchOrCreatePlayer, playerHeartbeatSaga } from './player';
 
 const authProvider = new firebase.auth.GoogleAuthProvider();
 
@@ -34,6 +35,7 @@ function * logoutSaga () {
 function * loginStatusWatcherSaga () {
   // Events on this channel are triggered on login and logout
   const channel = yield call(reduxSagaFirebase.auth.channel);
+  let playerHeartbeatThread;
 
   while (true) {
     const { user } = yield take(channel);
@@ -41,9 +43,14 @@ function * loginStatusWatcherSaga () {
     if (user) {
       // login procedure
       const wallet = yield fetchOrCreateWallet(user.uid);
-      yield put(loginSuccess(user, wallet));
+      const player = yield fetchOrCreatePlayer(wallet.address, user.displayName);
+
+      playerHeartbeatThread = yield fork(playerHeartbeatSaga, wallet.address);
+
+      yield put(loginSuccess(user, wallet, player));
     } else {
       // Logout procedure
+      if (playerHeartbeatThread) { yield cancel(playerHeartbeatThread); }
       yield put(logoutSuccess());
     }
   }
