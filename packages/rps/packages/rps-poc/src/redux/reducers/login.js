@@ -5,6 +5,7 @@ const initialState = {
   loggedIn: false,
   user: null,
   wallet: null,
+  player: null,
 };
 
 export default function loginReducer(state = initialState, action = {}) {
@@ -22,6 +23,7 @@ export default function loginReducer(state = initialState, action = {}) {
         loggedIn: true,
         user: action.user,
         wallet: action.wallet,
+        player: action.player,
       };
     case types.LOGIN.FAILURE:
       return {
@@ -34,11 +36,6 @@ export default function loginReducer(state = initialState, action = {}) {
       return {
         ...state,
         loading: false,
-      };
-    case types.SYNC_WALLET:
-      return {
-        ...state,
-        wallet: action.wallet,
       };
     default:
       return state;
