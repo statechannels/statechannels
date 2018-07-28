@@ -1,0 +1,3 @@
+cd built
+
+truffle test
