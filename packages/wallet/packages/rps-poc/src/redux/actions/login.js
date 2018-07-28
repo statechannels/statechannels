@@ -9,7 +9,6 @@ export const types = {
     SUCCESS: 'LOGOUT.SUCCESS',
     FAILURE: 'LOGOUT.FAILURE',
   },
-  SYNC_WALLET: 'SYNC_WALLET',
 };
 
 export const login = () => ({
@@ -30,18 +29,13 @@ export const logoutFailure = error => ({
   error,
 });
 
-export const loginSuccess = (user, wallet) => ({
+export const loginSuccess = (user, wallet, player) => ({
   type: types.LOGIN.SUCCESS,
   user,
   wallet,
+  player,
 });
 
 export const logoutSuccess = () => ({
   type: types.LOGOUT.SUCCESS,
 });
-
-export const syncWallet = (wallet) => ({
-  type: types.SYNC_WALLET,
-  wallet
-});
-

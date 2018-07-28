@@ -1,6 +1,5 @@
-import { call, put, take } from 'redux-saga/effects';
+import { call } from 'redux-saga/effects';
 
-import { syncWallet } from '../actions/login';
 import { default as firebase, reduxSagaFirebase } from '../../gateways/firebase';
 import ChannelWallet from '../../game-engine/ChannelWallet';
 
