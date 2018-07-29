@@ -1,26 +1,33 @@
 import { delay } from 'redux-saga';
+import {
+  put, takeEvery, select, fork, call,
+} from 'redux-saga/effects';
 import { types as playerAStates } from '../../game-engine/application-states/ApplicationStatesPlayerA';
-import { put, takeEvery, select, fork } from 'redux-saga/effects';
-import { messageReceived, eventReceived, messageSent } from '../actions/game';
+import {
+  types, messageReceived, eventReceived, messageSent,
+} from '../actions/game';
 import opponentSaga from './opponents';
 import loginSaga from './login';
 import { getApplicationState } from '../store';
-
-function* messageSender() {
-  let state = yield select(getApplicationState);
-  if (state.shouldSendMessage) {
-    yield delay(2000);  // for dev purposes
-    yield put(messageSent(state.message));
-    // todo put the message sending logic here
-    yield opponentResponseFaker();
-  }
-}
+import { reduxSagaFirebase } from '../../gateways/firebase';
 
 function* opponentResponseFaker() {
   yield delay(2000);
   yield put(messageReceived("blah"));
 }
 
+function* messageSender() {
+  let state = yield select(getApplicationState);
+  if (state.shouldSendMessage) {
+    yield delay(2000);  // for dev purposes
+    yield put(messageSent(state.message));
+    // push to firebase messages - organized by channel ID
+    yield call(reduxSagaFirebase.create, `messages.${state.channel}`, {
+      message: JSON.stringify(state.message),
+    });
+    yield opponentResponseFaker();
+  }
+}
 
 function* blockchainResponseFaker() {
   let state = yield select(getApplicationState);
@@ -34,5 +41,6 @@ export default function* rootSaga() {
   yield fork(opponentSaga);
   yield fork(loginSaga);
   yield takeEvery('*', blockchainResponseFaker);
-  yield takeEvery('*', messageSender);
+  yield takeEvery(types.MESSAGE_SENT, messageSender);
+  yield takeEvery(types.LOGIN_USER, loginSaga);
 }

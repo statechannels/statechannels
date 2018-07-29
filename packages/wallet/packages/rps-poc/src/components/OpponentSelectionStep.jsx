@@ -1,9 +1,11 @@
+import _ from 'lodash';
 import React from 'react';
 import PropTypes from 'prop-types';
 
 import Button from './Button';
 
 const propTypes = {
+  handleMessageSent: PropTypes.func.isRequired,
   handleCreateChallenge: PropTypes.func.isRequired,
   handleSelectChallenge: PropTypes.func.isRequired,
   opponents: PropTypes.arrayOf(PropTypes.shape({
@@ -25,7 +27,10 @@ export default class OpponentSelectionStep extends React.PureComponent {
     this.nameInput = React.createRef();
     this.wagerInput = React.createRef();
 
-    this.onClickCreateChallenge.bind(this);
+    _.bindAll(this, [
+      'onClickCreateChallenge',
+      'handleSelectChallenge',
+    ]);
   }
 
   onClickCreateChallenge() {
@@ -39,8 +44,13 @@ export default class OpponentSelectionStep extends React.PureComponent {
     handleCreateChallenge(name, wager);
   }
 
+  handleSelectChallenge({ opponentId, stake }) {
+    // todo: implement logic to generate preFundMessage:
+    // this.props.handleMessageSent(preFundMessage)
+  }
+
   render() {
-    const { opponents, handleSelectChallenge } = this.props;
+    const { opponents } = this.props;
 
     return (
       <div style={{ maxWidth: '90%', margin: 'auto' }}>
