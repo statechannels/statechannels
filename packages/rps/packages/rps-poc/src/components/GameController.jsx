@@ -13,6 +13,7 @@ export default class GameController extends PureComponent {
       opponents,
       chooseAPlay,
       chooseOpponent,
+      messageSent,
       subscribeOpponents,
     } = this.props;
 
@@ -55,13 +56,11 @@ export default class GameController extends PureComponent {
 
       default:
         subscribeOpponents();
-        return (
-          <OpponentSelectionStep
-            handleSelectChallenge={chooseOpponent}
-            handleCreateChallenge={chooseOpponent}
-            opponents={opponents}
-          />
-        );
+        return <OpponentSelectionStep
+          handleMessageSent={messageSent}
+          handleCreateChallenge={chooseOpponent}
+          opponents={opponents}
+        />;
     }
   }
 }
