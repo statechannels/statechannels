@@ -1,16 +1,15 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 
 import Button from './Button';
 
-const propTypes = {
-  winnings: PropTypes.string.isRequired,
-  handleReturnToOpponentSelection: PropTypes.func.isRequired,
+interface IProps {
+  handleReturnToOpponentSelection: () => any;
+  winnings: string;
 };
 
-export default class ConcludeStep extends React.PureComponent {
+export default class ConcludeStep extends React.PureComponent<IProps> {
   render() {
-    const { winnings, handleReturnToOpponentSelection } = this.props;
+    const { handleReturnToOpponentSelection, winnings } = this.props;
 
     return (
       <div style={{ maxWidth: '90%', margin: 'auto' }}>
@@ -21,5 +20,3 @@ export default class ConcludeStep extends React.PureComponent {
     );
   }
 }
-
-ConcludeStep.propTypes = propTypes;

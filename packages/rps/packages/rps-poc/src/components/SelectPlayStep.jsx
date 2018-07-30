@@ -32,11 +32,11 @@ export default class SelectPlayStep extends React.PureComponent {
               <div style={{ height: 250, background: 'maroon', margin: 4 }}>
                 <div
                   style={{
-                    width: 'fit-content',
-                    position: 'relative',
                     left: '50%',
+                    position: 'relative',
                     top: '50%',
                     transform: 'translate(-50%, -50%)',
+                    width: 'fit-content',
                   }}
                 >
                   <h1>{option.name}</h1>
