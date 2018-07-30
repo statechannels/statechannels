@@ -12,9 +12,9 @@ export default function HowItWorksPage() {
       <div style={{ width: '100%' }}>
         <div
           style={{
-            width: '50%',
             display: 'inline-block',
             verticalAlign: 'top',
+            width: '50%',
           }}
         >
           <div style={{ paddingRight: 8 }}>
@@ -47,9 +47,9 @@ export default function HowItWorksPage() {
         <div style={{ width: '50%', display: 'inline-block' }}>
           <div
             style={{
-              width: '100%',
-              height: 350,
               backgroundColor: 'antiquewhite',
+              height: 350,
+              width: '100%',
             }}
           >
             *** gif or video of game goes here **

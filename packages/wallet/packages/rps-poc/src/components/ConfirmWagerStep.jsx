@@ -4,14 +4,14 @@ import PropTypes from 'prop-types';
 import Button from './Button';
 
 const propTypes = {
-  wager: PropTypes.string.isRequired,
   handleConfirm: PropTypes.func.isRequired,
   handleReject: PropTypes.func.isRequired,
+  wager: PropTypes.string.isRequired,
 };
 
 export default class ConfirmWagerStep extends React.PureComponent {
   render() {
-    const { wager, handleConfirm, handleReject } = this.props;
+    const { handleConfirm, handleReject, wager } = this.props;
 
     return (
       <div style={{ maxWidth: '90%', margin: 'auto' }}>

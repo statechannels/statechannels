@@ -33,7 +33,7 @@
 
 #### Project style
 
-Please use the sublime package _JsPrettier_ for formatting. All of the defaults should make sense except for the following:
+Please use the Sublime/VS Code package _JsPrettier_ for formatting. Add the following changes to the `prettier` settings:
 
 ```
   "printWidth": 100,

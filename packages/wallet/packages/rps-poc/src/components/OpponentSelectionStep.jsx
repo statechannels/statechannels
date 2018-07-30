@@ -8,12 +8,14 @@ const propTypes = {
   handleMessageSent: PropTypes.func.isRequired,
   handleCreateChallenge: PropTypes.func.isRequired,
   handleSelectChallenge: PropTypes.func.isRequired,
-  opponents: PropTypes.arrayOf(PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    name: PropTypes.string.isRequired,
-    wager: PropTypes.number.isRequired,
-    timestamp: PropTypes.string.isRequired,
-  })),
+  opponents: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.string.isRequired,
+      name: PropTypes.string.isRequired,
+      timestamp: PropTypes.string.isRequired,
+      wager: PropTypes.string.isRequired,
+    }),
+  ),
 };
 
 const defaultProps = {
@@ -60,8 +62,8 @@ export default class OpponentSelectionStep extends React.PureComponent {
         <div
           style={{
             left: '50%',
-            transform: 'translateX(-50%)',
             position: 'absolute',
+            transform: 'translateX(-50%)',
           }}
         >
           <table style={{ textAlign: 'left' }}>

@@ -4,8 +4,8 @@ import PropTypes from 'prop-types';
 import { PLAY_OPTIONS } from '../constants';
 
 const propTypes = {
-  selectedPlayId: PropTypes.number,
   message: PropTypes.string.isRequired,
+  selectedPlayId: PropTypes.number,
 };
 
 const defaultProps = {
@@ -14,7 +14,7 @@ const defaultProps = {
 
 export default class WaitingStep extends React.PureComponent {
   render() {
-    const { selectedPlayId, message } = this.props;
+    const { message, selectedPlayId } = this.props;
 
     return (
       <div style={{ maxWidth: '90%', margin: 'auto' }}>

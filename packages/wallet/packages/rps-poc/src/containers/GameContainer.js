@@ -10,13 +10,13 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = {
-  chooseOpponent,
   chooseAPlay,
   messageSent,
+  chooseOpponent,
   subscribeOpponents,
 };
 
 export default connect(
-  mapStateToProps,
   mapDispatchToProps,
+  mapStateToProps,
 )(GameController);
