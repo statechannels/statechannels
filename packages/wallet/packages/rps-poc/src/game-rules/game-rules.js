@@ -208,7 +208,7 @@ class RpsState extends State {
 
 function extractInt({ state, numBytes }) {
   numBytes = numBytes || 32;
-  return parseInt(extractBytes(state, numBytes), 10);
+  return parseInt(extractBytes(state, numBytes), 16);
 }
 
 function extractBytes(s, numBytes) {
