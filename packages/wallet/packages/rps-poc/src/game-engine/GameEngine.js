@@ -186,6 +186,12 @@ export default class GameEngine {
         salt: oldState.salt,
         signedRevealMessage: revealMessage,
       });
+    } else if (stateType === ApplicationStatesA.types.ReadyToSendReveal) {
+      newState = new ApplicationStatesA.ReadyToChooseAPlay({
+        ...oldState.commonAttributes,
+        adjudicator: oldState.adjudicator,
+        opponentMessage: message,
+      });
     } else if (stateType === ApplicationStatesB.types.WaitForPostFundSetup0) {
       const gameState = RpsGame.fundConfirmationState({
         channel: opponentState.channel,
