@@ -55,11 +55,13 @@ export default class GameController extends PureComponent {
 
       default:
         subscribeOpponents();
-        return <OpponentSelectionStep
-          handleSelectChallenge={chooseOpponent}
-          handleCreateChallenge={chooseOpponent}
-          opponents={opponents}
-        />;
+        return (
+          <OpponentSelectionStep
+            handleSelectChallenge={chooseOpponent}
+            handleCreateChallenge={chooseOpponent}
+            opponents={opponents}
+          />
+        );
     }
   }
 }
@@ -68,4 +70,6 @@ GameController.propTypes = {
   applicationState: PropTypes.objectOf(PropTypes.shape({})).isRequired,
   chooseAPlay: PropTypes.func.isRequired,
   chooseOpponent: PropTypes.func.isRequired,
+  opponents: PropTypes.arrayOf(PropTypes.object).isRequired,
+  subscribeOpponents: PropTypes.func.isRequired,
 };

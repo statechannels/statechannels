@@ -1,8 +1,13 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 
 import { PLAY_OPTIONS } from '../constants';
 
-export default class WaitForOpponent extends React.PureComponent {
+const propTypes = {
+  selectedPlayId: PropTypes.number.isRequired,
+};
+
+export default class WaitForOpponentStep extends React.PureComponent {
   render() {
     const { selectedPlayId } = this.props;
 
@@ -13,10 +18,12 @@ export default class WaitForOpponent extends React.PureComponent {
         </div>
         {selectedPlayId && (
           <div style={{ width: '100%' }}>
-            You've chosen {PLAY_OPTIONS.find(option => option.id === selectedPlayId).name}
+            You&apos;ve chosen {PLAY_OPTIONS.find(option => option.id === selectedPlayId).name}
           </div>
         )}
       </div>
     );
   }
 }
+
+WaitForOpponentStep.propTypes = propTypes;

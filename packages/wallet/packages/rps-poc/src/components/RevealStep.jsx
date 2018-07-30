@@ -1,6 +1,12 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 
 import { PLAY_OPTIONS } from '../constants';
+
+const propTypes = {
+  selectedMoveId: PropTypes.number.isRequired,
+  opponentMoveId: PropTypes.number.isRequired,
+};
 
 export default class RevealStep extends React.PureComponent {
   render() {
@@ -21,3 +27,5 @@ export default class RevealStep extends React.PureComponent {
     );
   }
 }
+
+RevealStep.propTypes = propTypes;

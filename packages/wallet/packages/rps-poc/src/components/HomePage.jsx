@@ -1,8 +1,13 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 
 import Button from './Button';
 import ButtonLink from './ButtonLink';
 import { ROUTE_PATHS } from '../constants';
+
+const propTypes = {
+  loginUser: PropTypes.func.isRequired,
+};
 
 export default function HomePage({ loginUser }) {
   return (
@@ -37,3 +42,5 @@ export default function HomePage({ loginUser }) {
     </div>
   );
 }
+
+HomePage.propTypes = propTypes;

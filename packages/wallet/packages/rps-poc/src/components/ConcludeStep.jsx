@@ -1,8 +1,14 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 
 import Button from './Button';
 
-export default class ConfirmWagerStep extends React.PureComponent {
+const propTypes = {
+  winnings: PropTypes.string.isRequired,
+  handleReturnToOpponentSelection: PropTypes.func.isRequired,
+};
+
+export default class ConcludeStep extends React.PureComponent {
   render() {
     const { winnings, handleReturnToOpponentSelection } = this.props;
 
@@ -15,3 +21,5 @@ export default class ConfirmWagerStep extends React.PureComponent {
     );
   }
 }
+
+ConcludeStep.propTypes = propTypes;
