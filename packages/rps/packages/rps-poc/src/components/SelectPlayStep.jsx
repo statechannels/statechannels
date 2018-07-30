@@ -1,8 +1,14 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 
 import { PLAY_OPTIONS } from '../constants';
 
-export default class SelecPlayStep extends React.PureComponent {
+const propTypes = {
+  afterOpponent: PropTypes.bool.isRequired,
+  handleSelectPlay: PropTypes.func.isRequired,
+};
+
+export default class SelectPlayStep extends React.PureComponent {
   render() {
     const { handleSelectPlay, afterOpponent } = this.props;
 
@@ -17,7 +23,8 @@ export default class SelecPlayStep extends React.PureComponent {
         </div>
         <div style={{ width: '100%' }}>
           {PLAY_OPTIONS.map(option => (
-            <a
+            <button
+              type="button"
               onClick={() => handleSelectPlay(option.id)}
               style={{ display: 'inline-block', width: '33%' }}
               key={option.id}
@@ -35,10 +42,12 @@ export default class SelecPlayStep extends React.PureComponent {
                   <h1>{option.name}</h1>
                 </div>
               </div>
-            </a>
+            </button>
           ))}
         </div>
       </div>
     );
   }
 }
+
+SelectPlayStep.propTypes = propTypes;

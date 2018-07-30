@@ -1,5 +1,11 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import PropTypes from 'prop-types';
+
+const propTypes = {
+  children: PropTypes.node.isRequired,
+  href: PropTypes.string.isRequired,
+};
 
 export default function ButtonLink({ children, href }) {
   return (
@@ -8,3 +14,5 @@ export default function ButtonLink({ children, href }) {
     </Link>
   );
 }
+
+ButtonLink.propTypes = propTypes;

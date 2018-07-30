@@ -1,6 +1,13 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 
 import Button from './Button';
+
+const propTypes = {
+  wager: PropTypes.string.isRequired,
+  handleConfirm: PropTypes.func.isRequired,
+  handleReject: PropTypes.func.isRequired,
+};
 
 export default class ConfirmWagerStep extends React.PureComponent {
   render() {
@@ -20,3 +27,5 @@ export default class ConfirmWagerStep extends React.PureComponent {
     );
   }
 }
+
+ConfirmWagerStep.propTypes = propTypes;
