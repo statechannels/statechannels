@@ -235,4 +235,20 @@ it('runthrough', () => {
   const gameState7 = RpsState.fromHex(message7.state);
   expect(gameState7.turnNum).toEqual(7);
   expect(gameState7.resolution).toEqual(aWinsBals);
+
+  // In A's application
+  const readyToChoosePlay2 = gameEngineA.receiveMessage({
+    message: message7,
+    oldState: readyToSendReveal,
+  });
+  expect(readyToChoosePlay2.type).toEqual(ApplicationStatesA.types.ReadyToChooseAPlay);
+
+  const readyToSendPropose2 = gameEngineA.choosePlay({ oldState: readyToChoosePlay2, move: 'PAPER' });
+  expect(readyToSendPropose2.type).toEqual(ApplicationStatesA.types.ReadyToSendPropose);
+  expect(readyToSendPropose2.aPlay.key).toEqual('PAPER');
+  expect(readyToSendPropose2.message).not.toBeUndefined();
+  expect(readyToSendPropose2.salt).not.toBeUndefined();
+
+  const gameState8 = RpsState.fromHex(readyToSendPropose2.message.state);
+  expect(gameState8.turnNum).toEqual(8);
 });
