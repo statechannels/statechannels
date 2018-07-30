@@ -6,60 +6,86 @@ import Enum from 'enum';
 class RpsGame {
   static initializationState({ channel, stateCount, resolution, turnNum, stake }) {
     return new InitializationState(...arguments);
-  };
+  }
+
   static fundConfirmationState({ channel, stateCount, resolution, turnNum, stake }) {
     return new FundConfirmationState(...arguments);
-  };
+  }
+
   static restingState({ channnel, resolution, turnNum, stake }) {
     return new RestState(...arguments);
   }
+
   static proposeState({ channel, resolution, turnNum, stake, aPlay, salt }) {
-    let preCommit = ProposeState.hashCommitment(aPlay, salt)
+    let preCommit = ProposeState.hashCommitment(aPlay, salt);
     var args = [].slice.call(arguments);
-    return new ProposeState(...args.slice(0,4).concat([preCommit]));
+    return new ProposeState(...args.slice(0, 4).concat([preCommit]));
   }
+
   static acceptState({ channel, resolution, turnNum, stake, preCommit, bPlay }) {
     return new AcceptState(...arguments);
   }
-  static revealState({ channel, resolution, turnNum, stake, aPlay, bPlay, salt}) {
+
+  static revealState({ channel, resolution, turnNum, stake, aPlay, bPlay, salt }) {
     return new RevealState(...arguments);
   }
 
   static result(aPlay, bPlay) {
-    if(aPlay === bPlay) {
+    if (aPlay === bPlay) {
       return this.Results.TIE;
-    } else if (aPlay === 'ROCK') {
+    }
+    if (aPlay === 'ROCK') {
       if (bPlay === 'SCISSORS') {
         return this.Results.A;
-      } else if (bPlay === 'PAPER') {
+      }
+      if (bPlay === 'PAPER') {
         return this.Results.B;
       }
     } else if (aPlay === 'SCISSORS') {
       if (bPlay === 'PAPER') {
         return this.Results.A;
-      } else if (bPlay === 'ROCK') {
+      }
+      if (bPlay === 'ROCK') {
         return this.Results.B;
       }
     } else if (aPlay === 'PAPER') {
       if (bPlay === 'ROCK') {
         return this.Results.A;
-      } else if (bPlay === 'SCISSORS') {
+      }
+      if (bPlay === 'SCISSORS') {
         return this.Results.B;
       }
     }
 
-    throw('Invalid plays')
+    throw 'Invalid plays';
   }
 }
 
 RpsGame.Plays = new Enum(['NONE', 'ROCK', 'PAPER', 'SCISSORS']);
-RpsGame.PositionTypes = new Enum(['NONE', 'RESTING', 'ROUNDPROPOSED', 'ROUNDACCEPTED', 'REVEAL', 'NONE'])
+RpsGame.PositionTypes = new Enum([
+  'NONE',
+  'RESTING',
+  'ROUNDPROPOSED',
+  'ROUNDACCEPTED',
+  'REVEAL',
+  'NONE',
+]);
 RpsGame.Results = new Enum(['TIE', 'A', 'B']);
 
 export { RpsGame };
 
 class RpsState extends State {
-  constructor({ channel, stateType, stateCount, resolution, turnNum, preCommit, stake, aPlay, bPlay, salt }) {
+  constructor({
+    channel,
+    stateCount,
+    resolution,
+    turnNum,
+    preCommit,
+    stake,
+    aPlay,
+    bPlay,
+    salt,
+  }) {
     super({ channel, stateCount, resolution, turnNum });
     this.preCommit = preCommit;
     this.aPlay = aPlay || RpsGame.Plays.NONE;
@@ -68,12 +94,14 @@ class RpsState extends State {
     this.stake = stake;
   }
 
-  _isPreReveal() { return true; }
+  _isPreReveal() {
+    return true;
+  }
 
   static hashCommitment(play, salt) {
     return soliditySha3(
       { type: 'uint256', value: play.value },
-      { type: 'bytes32', value: padBytes32(salt) }
+      { type: 'bytes32', value: padBytes32(salt) },
     );
   }
 
@@ -82,10 +110,10 @@ class RpsState extends State {
       super.toHex() +
       toHex32(this.positionType.value).substr(2) +
       toHex32(this.stake || 0).substr(2) +
-      padBytes32(this.preCommit || "0x0").substr(2) +
+      padBytes32(this.preCommit || '0x0').substr(2) +
       toHex32(this.bPlay.value).substr(2) +
       toHex32(this._isPreReveal() ? 0 : this.aPlay.value).substr(2) +
-      padBytes32(this._isPreReveal() ? "0x0" : this.salt || "0x0").substr(2)
+      padBytes32(this._isPreReveal() ? '0x0' : this.salt || '0x0').substr(2)
     );
   }
 
@@ -97,53 +125,53 @@ class RpsState extends State {
     let channelType = extractBytes(state, 32);
     state = state.substr(64);
 
-    let channelNonce = extractInt({state});
+    let channelNonce = extractInt({ state });
     state = state.substr(64);
 
-    let numberOfParticipants = extractInt({state});
+    let numberOfParticipants = extractInt({ state });
     state = state.substr(64);
 
     let participants = [];
 
-    for (let i = 0; i < numberOfParticipants; i++ ) {
+    for (let i = 0; i < numberOfParticipants; i++) {
       let participant = extractBytes(state, 32);
-      participant = '0x' + participant.substr(2+64-40);
+      participant = '0x' + participant.substr(2 + 64 - 40);
       participants.push(participant);
       state = state.substr(64);
     }
     let channel = new Channel(channelType, channelNonce, participants);
 
-    let stateType = extractInt({state});
+    let stateType = extractInt({ state });
     state = state.substr(64);
 
-    let turnNum = extractInt({state});
+    let turnNum = extractInt({ state });
     state = state.substr(64);
 
-    let stateCount = extractInt({state});
+    let stateCount = extractInt({ state });
     state = state.substr(64);
 
-    let resolution = []
-    for (let i = 0; i < numberOfParticipants; i++ ) {
-      resolution.push(extractInt({state}));
+    let resolution = [];
+    for (let i = 0; i < numberOfParticipants; i++) {
+      resolution.push(extractInt({ state }));
       state = state.substr(64);
     }
 
     // Game state
-    let positionType = extractInt({state});
-    positionType = RpsGame.PositionTypes.get(positionType)
+    let positionType = extractInt({ state });
+    positionType = RpsGame.PositionTypes.get(positionType);
     state = state.substr(64);
 
-    let stake = extractInt({state});
+    let stake = extractInt({ state });
     state = state.substr(64);
 
     let preCommit = extractBytes(state, 32);
     state = state.substr(64);
 
-    let bPlay = extractInt({state});
+    let bPlay = extractInt({ state });
     bPlay = RpsGame.Plays.get(bPlay) || RpsGame.Plays.NONE;
     state = state.substr(64);
 
-    let aPlay = extractInt({state});
+    let aPlay = extractInt({ state });
     aPlay = RpsGame.Plays.get(aPlay) || RpsGame.Plays.NONE;
     state = state.substr(64);
 
@@ -151,38 +179,40 @@ class RpsState extends State {
     let salt = extractBytes(state, 32);
     state = state.substr(64);
 
-    if (stateType === 0) { // PreFundSetup
+    if (stateType === 0) {
+      // PreFundSetup
       return new InitializationState({ channel, stateCount, resolution, turnNum, stake });
-    } else if (stateType === 1) { // PostFundSetup
-      return new FundConfirmationState({ channel, stateCount, resolution, turnNum, stake })
-    } else if (stateType === 3) { // Conclude
-      return new ConclusionState({channel, resolution, turnNum})
+    }
+    if (stateType === 1) {
+      // PostFundSetup
+      return new FundConfirmationState({ channel, stateCount, resolution, turnNum, stake });
+    }
+    if (stateType === 3) {
+      // Conclude
+      return new ConclusionState({ channel, resolution, turnNum });
     }
 
     if (positionType.is('RESTING')) {
-      state = new RestState({channel, stateCount, resolution, turnNum, stake});
-    }
-    else if (positionType.is('ROUNDPROPOSED')) {
-      state = new ProposeState({channel, resolution, turnNum, stake, aPlay, salt});
-    }
-    else if (positionType.is('ROUNDACCEPTED')) {
-      state = new AcceptState({channel, resolution, turnNum, stake, preCommit, bPlay});
-    }
-    else if (positionType.is('REVEAL')) {
-      state = new RevealState({channel, resolution, turnNum, stake, aPlay, bPlay, salt})
+      state = new RestState({ channel, stateCount, resolution, turnNum, stake });
+    } else if (positionType.is('ROUNDPROPOSED')) {
+      state = new ProposeState({ channel, resolution, turnNum, stake, aPlay, salt });
+    } else if (positionType.is('ROUNDACCEPTED')) {
+      state = new AcceptState({ channel, resolution, turnNum, stake, preCommit, bPlay });
+    } else if (positionType.is('REVEAL')) {
+      state = new RevealState({ channel, resolution, turnNum, stake, aPlay, bPlay, salt });
     }
 
-    return state
+    return state;
   }
 }
 
-function extractInt({state, numBytes}) {
+function extractInt({ state, numBytes }) {
   numBytes = numBytes || 32;
-  return parseInt(extractBytes(state, numBytes));
+  return parseInt(extractBytes(state, numBytes), 10);
 }
 
 function extractBytes(s, numBytes) {
-  return '0x' + s.substr(0, numBytes*2);
+  return '0x' + s.substr(0, numBytes * 2);
 }
 
 export { RpsState };
@@ -222,12 +252,14 @@ class AcceptState extends RpsState {
 }
 
 class RevealState extends RpsState {
-  constructor({ channel, resolution, turnNum, stake, aPlay, bPlay, salt}) {
+  constructor({ channel, resolution, turnNum, stake, aPlay, bPlay, salt }) {
     super(...arguments);
     this.stateType = State.StateTypes.GAME;
     this.positionType = RpsGame.PositionTypes.REVEAL;
   }
-  _isPreReveal() { return false; };
+  _isPreReveal() {
+    return false;
+  }
 }
 
 class RestState extends RpsState {
@@ -237,7 +269,9 @@ class RestState extends RpsState {
     this.positionType = RpsGame.PositionTypes.RESTING;
     this.stake = stake;
   }
-  _isPreReveal() { return false; };
+  _isPreReveal() {
+    return false;
+  }
 }
 
 class ConclusionState extends RpsState {

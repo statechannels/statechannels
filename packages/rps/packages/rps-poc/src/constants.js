@@ -5,9 +5,9 @@ import { brandColor } from './App.css';
 export const BRAND_COLOR = brandColor;
 
 export const ROUTE_PATHS = {
+  ABOUT: 'about',
   HOW_IT_WORKS: 'how',
   PLAY: 'play',
-  ABOUT: 'about',
 };
 
 export const AC_VIEWS = new Enum([
@@ -116,15 +116,15 @@ export const GE_COMMANDS = new Enum([
 
 export const PLAY_OPTIONS = [
   {
-    name: 'ROCK',
     id: 0,
+    name: 'ROCK',
   },
   {
-    name: 'PAPER',
     id: 1,
+    name: 'PAPER',
   },
   {
-    name: 'SCISSORS',
     id: 2,
+    name: 'SCISSORS',
   },
 ];

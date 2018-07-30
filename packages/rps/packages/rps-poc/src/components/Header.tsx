@@ -1,19 +1,19 @@
-import React from 'react';
+import * as React from 'react';
 import { Link } from 'react-router-dom';
 
-import { ROUTE_PATHS, BRAND_COLOR } from '../constants';
+import { BRAND_COLOR, ROUTE_PATHS  } from '../constants';
 
 export default function Header() {
   return (
     <div
       style={{
-        width: '100%',
-        height: 42,
+        backgroundColor: BRAND_COLOR,
+        borderBottomColor: '#bbb',
         borderBottomStyle: 'solid',
         borderBottomWidth: 1,
-        borderBottomColor: '#bbb',
-        backgroundColor: BRAND_COLOR,
         color: '#fff',
+        height: 42,
+        width: '100%',
       }}
     >
       <div style={{ position: 'absolute', left: 20 }}>
@@ -23,8 +23,8 @@ export default function Header() {
       </div>
       <div
         style={{
-          position: 'absolute',
           left: '50%',
+          position: 'absolute',
           transform: 'translateX(-50%)',
         }}
       >

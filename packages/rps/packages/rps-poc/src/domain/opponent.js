@@ -4,7 +4,7 @@ export default function Opponent({ name, wager }) {
   return {
     id: nanoid(),
     name,
+    timestamp: new Date().toString(),
     wager,
-    timestamp: (new Date()).toString(),
-  }
+  };
 }

@@ -5,6 +5,12 @@
   "main": "index.js",
   "module": "src/index.js",
   "dependencies": {
+    "@types/node": "^10.5.4",
+    "@types/prop-types": "^15.5.4",
+    "@types/react": "^16.4.7",
+    "@types/react-dom": "^16.0.6",
+    "@types/react-redux": "^6.0.5",
+    "@types/react-router-dom": "^4.3.0",
     "ajv": "^6.5.1",
     "enum": "^2.5.0",
     "eslint-config-airbnb": "^17.0.0",
@@ -14,14 +20,15 @@
     "firebase": "^5.0.4",
     "fmg-core": "^0.0.4",
     "key-mirror": "^1.0.1",
+    "lodash": "^4.17.10",
     "nanoid": "^1.0.3",
     "prop-types": "^15.6.2",
     "react": "^16.3.2",
     "react-dom": "^16.3.2",
     "react-redux": "^5.0.7",
     "react-router": "^4.2.0",
-    "react-router-dom": "^4.2.2",
-    "react-scripts": "1.1.4",
+    "react-router-dom": "^4.3.1",
+    "react-scripts-ts": "^2.16.0",
     "react-test-renderer": "^16.4.1",
     "redux": "^4.0.0",
     "redux-saga": "^0.16.0",
@@ -32,17 +39,20 @@
     "webpack": "^4.16.0"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test --env=jsdom",
-    "eject": "react-scripts eject"
+    "start": "react-scripts-ts start",
+    "build": "react-scripts-ts build",
+    "test": "react-scripts-ts test --env=jsdom",
+    "eject": "react-scripts-ts eject"
   },
   "devDependencies": {
     "@babel/runtime": "^7.0.0-beta.53",
+    "awesome-typescript-loader": "^5.2.0",
     "enzyme": "^3.3.0",
     "enzyme-adapter-react-16": "^1.1.1",
     "eslint": "^4.19.1",
     "esm": "^3.0.53",
-    "truffle-core": "^4.1.12"
+    "source-map-loader": "^0.2.3",
+    "truffle-core": "^4.1.12",
+    "typescript": "^2.9.2"
   }
 }

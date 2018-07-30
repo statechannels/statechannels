@@ -10,10 +10,10 @@ export default class GameController extends PureComponent {
   render() {
     const {
       applicationState,
-      opponents,
       chooseAPlay,
       chooseOpponent,
       messageSent,
+      opponents,
       subscribeOpponents,
     } = this.props;
 
