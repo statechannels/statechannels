@@ -1,7 +1,6 @@
 import React from 'react';
 
 import ButtonLink from './ButtonLink';
-
 import { ROUTE_PATHS } from '../constants';
 
 export default function HowItWorksPage() {
@@ -25,15 +24,23 @@ export default function HowItWorksPage() {
             </div>
             <div>
               <h3>Step 2: Initiate a game</h3>
-              <p>You and your opponent will lock up your funds in a state channel so that games can be played off-chain.</p>
+              <p>
+                You and your opponent will lock up your funds in a state channel so that games can
+                be played off-chain.
+              </p>
             </div>
             <div>
               <h3>Step 3: Play Rock Paper Scissors!</h3>
-              <p>There will be <em>five</em> rounds of Rock Paper Scissors, each one awarding a fifth of the locked-up funds.</p>
+              <p>
+                There will be <em>five</em> rounds of Rock Paper Scissors, each one awarding a fifth
+                of the locked-up funds.
+              </p>
             </div>
             <div>
               <h3>Step 4: Settle up</h3>
-              <p>After finishing all five rounds, you'll settle up and receive your earnings.</p>
+              <p>
+                After finishing all five rounds, you&apos;ll settle up and receive your earnings.
+              </p>
             </div>
           </div>
         </div>

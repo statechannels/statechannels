@@ -6,12 +6,14 @@ import Button from './Button';
 const propTypes = {
   handleCreateChallenge: PropTypes.func.isRequired,
   handleSelectChallenge: PropTypes.func.isRequired,
-  opponents: PropTypes.arrayOf(PropTypes.objectOf(PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    name: PropTypes.string.isRequired,
-    wager: PropTypes.string.isRequired,
-    timestamp: PropTypes.string.isRequired,
-  }))),
+  opponents: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.string.isRequired,
+      name: PropTypes.string.isRequired,
+      wager: PropTypes.string.isRequired,
+      timestamp: PropTypes.string.isRequired,
+    }),
+  ),
 };
 
 const defaultProps = {
@@ -70,7 +72,10 @@ export default class OpponentSelectionStep extends React.PureComponent {
                   <td>
                     <Button
                       onClick={() =>
-                        handleSelectChallenge({ opponentId: opponent.id, stake: opponent.wager })
+                        handleSelectChallenge({
+                          opponentId: opponent.id,
+                          stake: opponent.wager,
+                        })
                       }
                     >
                       Challenge
