@@ -31,9 +31,11 @@ export default class GameEngine {
     };
   }
 
-  setupGame({ myAddr, opponentAddr, stake, initialBals }) {
+  setupGame({
+    myAddr, opponentAddr, stake, initialBals,
+  }) {
     const participants = [myAddr, opponentAddr];
-    const channel = new Channel('0x' + '0'.repeat(61) + '123', 456, participants);
+    const channel = new Channel(`0x${'0'.repeat(61)}123`, 456, participants);
 
     const state = RpsGame.initializationState({
       channel,
