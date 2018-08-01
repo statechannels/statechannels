@@ -1,44 +1,13 @@
-class BasePlayerA {
+import { BaseState, ReadyToSendConclude, WaitForConclude } from './ApplicationStates';
+
+class BasePlayerA extends BaseState {
   constructor({ channel, stake, balances }) {
-    this._balances = balances;
-    this._channel = channel;
-    this.stake = stake;
-  }
-
-  get myAddress() {
-    return this._channel.participants[0];
-  }
-
-  get opponentAddress() {
-    return this._channel.participants[1];
-  }
-
-  get channelId() {
-    return this._channel.channelId;
-  }
-
-  get myBalance() {
-    return this._balances[0];
-  }
-
-  get opponentBalance() {
-    return this._balances[1];
+    super({ channel, stake, balances });
+    this.playerIndex = 0;
   }
 
   get type() {
     return types[this.constructor.name];
-  }
-
-  get commonAttributes() {
-    return {
-      balances: this._balances,
-      channel: this._channel,
-      stake: this.stake,
-    };
-  }
-
-  get shouldSendMessage() {
-    return false;
   }
 }
 
@@ -187,27 +156,29 @@ class WaitForResting extends BasePlayerA {
   }
 }
 
-class ReadyToSendConclude extends BasePlayerA {
+class ReadyToSendConcludeA extends ReadyToSendConclude {
   constructor({
     channel,
     balances,
     adjudicator,
     signedConcludeMessage,
   }) {
-    super({ channel, stake: undefined, balances });
+    super({ channel, balances, playerIndex: 0 });
     this.adjudicator = adjudicator;
     this.message = signedConcludeMessage;
   }
 }
 
-class WaitForConclude extends BasePlayerA {
+class WaitForConcludeA extends WaitForConclude {
   constructor({
     channel,
     balances,
     adjudicator,
     signedConcludeMessage,
   }) {
-    super({ channel, stake: undefined, balances });
+    super({
+      channel, balances, playerIndex: 0, adjudicator, message: signedConcludeMessage,
+    });
     this.adjudicator = adjudicator;
     this.message = signedConcludeMessage; // in case a resend is required
   }
@@ -226,8 +197,8 @@ const types = Object.freeze({
   WaitForAccept: 'WaitForAccept',
   ReadyToSendReveal: 'ReadyToSendReveal',
   WaitForResting: 'WaitForResting',
-  ReadyToSendConclude: 'ReadyToSendConclude',
-  WaitForConclude: 'WaitForConclude',
+  ReadyToSendConcludeA: 'ReadyToSendConcludeA',
+  WaitForConcludeA: 'WaitForConcludeA',
 });
 
 export {
@@ -244,6 +215,6 @@ export {
   WaitForAccept,
   ReadyToSendReveal,
   WaitForResting,
-  ReadyToSendConclude,
-  WaitForConclude,
+  ReadyToSendConcludeA,
+  WaitForConcludeA,
 };
