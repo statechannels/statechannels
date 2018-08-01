@@ -129,18 +129,46 @@ class ReadyToSendResting extends BasePlayerB {
   }
 }
 
+class ReadyToSendConclude extends BasePlayerB {
+  constructor({
+    channel,
+    balances,
+    adjudicator,
+    signedConcludeMessage,
+  }) {
+    super({ channel, stake: undefined, balances });
+    this.adjudicator = adjudicator;
+    this.message = signedConcludeMessage;
+  }
+}
+
+class WaitForConclude extends BasePlayerB {
+  constructor({
+    channel,
+    balances,
+    adjudicator,
+    signedConcludeMessage,
+  }) {
+    super({ channel, stake: undefined, balances });
+    this.adjudicator = adjudicator;
+    this.message = signedConcludeMessage; // in case a resend is required
+  }
+}
+
 const types = {
-  'ReadyToSendPreFundSetup1': 'ReadyToSendPreFundSetup1',
-  'WaitForAToDeploy': 'WaitForAToDeploy',
-  'ReadyToDeposit': 'ReadyToDeposit',
-  'WaitForBlockchainDeposit': 'WaitForBlockchainDeposit',
-  'WaitForPostFundSetup0': 'WaitForPostFundSetup0',
-  'ReadyToSendPostFundSetup1': 'ReadyToSendPostFundSetup1',
-  'WaitForPropose': 'WaitForPropose',
-  'ReadyToChooseBPlay': 'ReadyToChooseBPlay',
-  'ReadyToSendAccept': 'ReadyToSendAccept',
-  'WaitForReveal': 'WaitForReveal',
-  'ReadyToSendResting': 'ReadyToSendResting'
+  ReadyToSendPreFundSetup1: 'ReadyToSendPreFundSetup1',
+  WaitForAToDeploy: 'WaitForAToDeploy',
+  ReadyToDeposit: 'ReadyToDeposit',
+  WaitForBlockchainDeposit: 'WaitForBlockchainDeposit',
+  WaitForPostFundSetup0: 'WaitForPostFundSetup0',
+  ReadyToSendPostFundSetup1: 'ReadyToSendPostFundSetup1',
+  WaitForPropose: 'WaitForPropose',
+  ReadyToChooseBPlay: 'ReadyToChooseBPlay',
+  ReadyToSendAccept: 'ReadyToSendAccept',
+  WaitForReveal: 'WaitForReveal',
+  ReadyToSendResting: 'ReadyToSendResting',
+  ReadyToSendConclude: 'ReadyToSendConclude',
+  WaitForConclude: 'WaitForConclude',
 };
 
 export {
@@ -156,4 +184,6 @@ export {
   ReadyToSendAccept,
   WaitForReveal,
   ReadyToSendResting,
-}
+  ReadyToSendConclude,
+  WaitForConclude,
+};
