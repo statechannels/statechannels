@@ -1,0 +1,68 @@
+import { toHex32, padBytes32 } from 'fmg-core';
+import { soliditySha3 } from 'web3-utils';
+
+export enum Position {
+  Resting,
+  Propose,
+  Accept,
+  Reveal,
+}
+
+export enum Play {
+  Rock,
+  Paper,
+  Scissors
+}
+
+export enum Result {
+  Tie,
+  AWon,
+  BWon,
+}
+
+export function packRestingAttributes(stake: number) {
+  return (
+    toHex32(Position.Resting).substr(2) + 
+    toHex32(stake).substr(2)
+  );
+}
+
+export function packProposeAttributes(stake: number, preCommit: string) {
+  return (
+    toHex32(Position.Propose).substr(2) + 
+    toHex32(stake).substr(2) +
+    padBytes32(preCommit).substr(2)
+  );
+}
+
+export function packAcceptAttributes(stake: number, preCommit: string, bPlay: Play) {
+  return (
+    toHex32(Position.Accept).substr(2) + 
+    toHex32(stake).substr(2) +
+    padBytes32(preCommit).substr(2) +
+    toHex32(bPlay).substr(2)
+  );
+}
+
+export function packRevealAttributes(
+  stake: number, 
+  bPlay: Play,
+  aPlay: Play,
+  salt: string,
+) {
+  return (
+    toHex32(Position.Reveal).substr(2) + 
+    toHex32(stake).substr(2) +
+    padBytes32('0x0').substr(2) + // don't need the preCommit
+    toHex32(bPlay).substr(2) +
+    toHex32(aPlay).substr(2) +
+    padBytes32(salt).substr(2)
+  );
+}
+
+export function hashCommitment(play: Play, salt: string) {
+  return soliditySha3(
+    { type: 'uint256', value: play },
+    { type: 'bytes32', value: padBytes32(salt) },
+  );
+}
