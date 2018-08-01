@@ -12,8 +12,8 @@ import Conclude from './Conclude';
 
 const gameLibrary = '0x0000000000000000000000000000000000000000000000000000000000000111';
 const channelNonce = 15;
-const participantA = '0x000000000000000000000000000000000000000000000000000000000000000a';
-const participantB = '0x000000000000000000000000000000000000000000000000000000000000000b';
+const participantA = '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
+const participantB = '0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb';
 const participants = [participantA, participantB];
 const channel = new Channel(gameLibrary, channelNonce, participants);
 const stateCount = 0;

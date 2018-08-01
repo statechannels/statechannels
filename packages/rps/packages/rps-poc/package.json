@@ -11,6 +11,7 @@
     "@types/react-dom": "^16.0.6",
     "@types/react-redux": "^6.0.5",
     "@types/react-router-dom": "^4.3.0",
+    "@types/web3": "^1.0.2",
     "ajv": "^6.5.1",
     "enum": "^2.5.0",
     "eslint-config-airbnb": "^17.0.0",
