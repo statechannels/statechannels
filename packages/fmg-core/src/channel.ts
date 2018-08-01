@@ -2,6 +2,10 @@ import { toHex32, padBytes32 } from './utils';
 import { soliditySha3 } from 'web3-utils';
 
 class Channel {
+  channelType: string;
+  channelNonce: number;
+  participants: string[];
+
   constructor(channelType, channelNonce, participants) {
     this.channelType = channelType;
     this.channelNonce = channelNonce;

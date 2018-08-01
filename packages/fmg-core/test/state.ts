@@ -14,7 +14,9 @@ contract('State', (accounts) => {
   const resolution = [5, 4];
   const channel = new Channel(channelType, channelNonce, participants);
   const stateType = State.StateTypes.GAME;
-  const state = new State({ channel, stateType, turnNum, resolution });
+  const state = new State({
+    channel, stateType, turnNum, resolution, stateCount: 0
+  });
   const statePacket = state.toHex();
 
   before(async () => {
