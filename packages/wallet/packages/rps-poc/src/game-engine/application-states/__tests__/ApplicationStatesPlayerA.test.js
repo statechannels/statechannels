@@ -18,246 +18,246 @@ const bPlay = "scissors";
 const salt = "abc123";
 
 const itHasSharedFunctionality = (appState) => {
-    it("returns myAddress", () => {
-        expect(appState.myAddress).toEqual(participantA);
-    });
+  it("returns myAddress", () => {
+    expect(appState.myAddress).toEqual(participantA);
+  });
 
-    it("returns opponentAddress", () => {
-        expect(appState.opponentAddress).toEqual(participantB);
-    });
+  it("returns opponentAddress", () => {
+    expect(appState.opponentAddress).toEqual(participantB);
+  });
 
-    it("returns channelId", () => {
-        expect(appState.channelId).toEqual(channel.channelId);
-    });
+  it("returns channelId", () => {
+    expect(appState.channelId).toEqual(channel.channelId);
+  });
 
-    it("returns myBalance", () => {
-        expect(appState.myBalance).toEqual(aBal);
-    });
+  it("returns myBalance", () => {
+    expect(appState.myBalance).toEqual(aBal);
+  });
 
-    it("returns opponentBalance", () => {
-        expect(appState.opponentBalance).toEqual(bBal);
-    });
+  it("returns opponentBalance", () => {
+    expect(appState.opponentBalance).toEqual(bBal);
+  });
 };
 
 describe("ReadyToSendPreFundSetup0", () => {
-    let signedPreFundSetup0Message = "blahblah";
-    let appState = new AppStates.ReadyToSendPreFundSetup0({ ...coreProps, signedPreFundSetup0Message });
+  let signedPreFundSetup0Message = "blahblah";
+  let appState = new AppStates.ReadyToSendPreFundSetup0({ ...coreProps, signedPreFundSetup0Message });
 
-    itHasSharedFunctionality(appState);
+  itHasSharedFunctionality(appState);
 
-    it("has a message", () => {
-        expect(appState.message).toEqual(signedPreFundSetup0Message);
-    });
+  it("has a message", () => {
+    expect(appState.message).toEqual(signedPreFundSetup0Message);
+  });
 
-    it("has the right type", () => {
-        expect(appState.type).toEqual(AppStates.types.ReadyToSendPreFundSetup0);
-    });
+  it("has the right type", () => {
+    expect(appState.type).toEqual(AppStates.types.ReadyToSendPreFundSetup0);
+  });
 });
 
 describe("WaitForPreFundSetup1", () => {
-    let signedPreFundSetup0Message = "blahblah";
-    let appState = new AppStates.WaitForPreFundSetup1({ ...coreProps, signedPreFundSetup0Message });
+  let signedPreFundSetup0Message = "blahblah";
+  let appState = new AppStates.WaitForPreFundSetup1({ ...coreProps, signedPreFundSetup0Message });
 
-    itHasSharedFunctionality(appState);
+  itHasSharedFunctionality(appState);
 
-    it("has a message", () => {
-        expect(appState.message).toEqual(signedPreFundSetup0Message);
-    });
+  it("has a message", () => {
+    expect(appState.message).toEqual(signedPreFundSetup0Message);
+  });
 });
 
 describe("ReadyToDeploy", () => {
-    let deploymentTransaction = { some: "properties to craft a transaction" };
-    let appState = new AppStates.ReadyToDeploy({ ...coreProps, deploymentTransaction });
+  let deploymentTransaction = { some: "properties to craft a transaction" };
+  let appState = new AppStates.ReadyToDeploy({ ...coreProps, deploymentTransaction });
 
-    itHasSharedFunctionality(appState);
+  itHasSharedFunctionality(appState);
 
-    it("has a transaction", () => {
-        expect(appState.transaction).toEqual(deploymentTransaction);
-    });
+  it("has a transaction", () => {
+    expect(appState.transaction).toEqual(deploymentTransaction);
+  });
 });
 
 describe("WaitForBlockchainDeploy", () => {
-    let appState = new AppStates.WaitForBlockchainDeploy({ ...coreProps });
+  let appState = new AppStates.WaitForBlockchainDeploy({ ...coreProps });
 
-    itHasSharedFunctionality(appState);
+  itHasSharedFunctionality(appState);
 });
 
 describe("WaitForBToDeposit", () => {
-    let appState = new AppStates.WaitForBToDeposit({ ...coreProps, adjudicator });
+  let appState = new AppStates.WaitForBToDeposit({ ...coreProps, adjudicator });
 
-    itHasSharedFunctionality(appState);
+  itHasSharedFunctionality(appState);
 
-    it("returns the adjudicator address", () => {
-        expect(appState.adjudicator).toEqual(adjudicator);
-    });
+  it("returns the adjudicator address", () => {
+    expect(appState.adjudicator).toEqual(adjudicator);
+  });
 });
 
 describe("ReadyToSendPostFundSetup0", () => {
-    let signedPostFundSetup0Message = "blahblah";
-    let appState = new AppStates.ReadyToSendPostFundSetup0({ ...coreProps, adjudicator, signedPostFundSetup0Message });
+  let signedPostFundSetup0Message = "blahblah";
+  let appState = new AppStates.ReadyToSendPostFundSetup0({ ...coreProps, adjudicator, signedPostFundSetup0Message });
 
-    itHasSharedFunctionality(appState);
+  itHasSharedFunctionality(appState);
 
-    it("returns the adjudicator address", () => {
-        expect(appState.adjudicator).toEqual(adjudicator);
-    });
+  it("returns the adjudicator address", () => {
+    expect(appState.adjudicator).toEqual(adjudicator);
+  });
 
-    it("has a message", () => {
-        expect(appState.message).toEqual(signedPostFundSetup0Message);
-    });
+  it("has a message", () => {
+    expect(appState.message).toEqual(signedPostFundSetup0Message);
+  });
 });
 
 describe("WaitForPostFundSetup1", () => {
-    let signedPostFundSetup0Message = "blahblah";
-    let appState = new AppStates.WaitForPostFundSetup1({ ...coreProps, adjudicator, signedPostFundSetup0Message });
+  let signedPostFundSetup0Message = "blahblah";
+  let appState = new AppStates.WaitForPostFundSetup1({ ...coreProps, adjudicator, signedPostFundSetup0Message });
 
-    itHasSharedFunctionality(appState);
+  itHasSharedFunctionality(appState);
 
-    it("returns the adjudicator address", () => {
-        expect(appState.adjudicator).toEqual(adjudicator);
-    });
+  it("returns the adjudicator address", () => {
+    expect(appState.adjudicator).toEqual(adjudicator);
+  });
 
-    it("has a message", () => {
-        expect(appState.message).toEqual(signedPostFundSetup0Message);
-    });
+  it("has a message", () => {
+    expect(appState.message).toEqual(signedPostFundSetup0Message);
+  });
 });
 
 describe("ReadyToChooseAPlay", () => {
-    let appState = new AppStates.ReadyToChooseAPlay({ ...coreProps, adjudicator });
+  let appState = new AppStates.ReadyToChooseAPlay({ ...coreProps, adjudicator });
 
-    itHasSharedFunctionality(appState);
+  itHasSharedFunctionality(appState);
 
-    it("returns the adjudicator address", () => {
-        expect(appState.adjudicator).toEqual(adjudicator);
-    });
+  it("returns the adjudicator address", () => {
+    expect(appState.adjudicator).toEqual(adjudicator);
+  });
 });
 
 describe("ReadyToSendPropose", () => {
-    let signedProposeMessage = "some message";
-    let appState = new AppStates.ReadyToSendPropose({
-        ...coreProps,
-        adjudicator,
-        aPlay,
-        salt,
-        signedProposeMessage
-    });
+  let signedProposeMessage = "some message";
+  let appState = new AppStates.ReadyToSendPropose({
+    ...coreProps,
+    adjudicator,
+    aPlay,
+    salt,
+    signedProposeMessage
+  });
 
-    itHasSharedFunctionality(appState);
+  itHasSharedFunctionality(appState);
 
-    it("returns the adjudicator address", () => {
-        expect(appState.adjudicator).toEqual(adjudicator);
-    });
+  it("returns the adjudicator address", () => {
+    expect(appState.adjudicator).toEqual(adjudicator);
+  });
 
-    it("returns aPlay", () => {
-        expect(appState.aPlay).toEqual(aPlay);
-    });
+  it("returns aPlay", () => {
+    expect(appState.aPlay).toEqual(aPlay);
+  });
 
-    it("returns the salt", () => {
-        expect(appState.salt).toEqual(salt);
-    });
+  it("returns the salt", () => {
+    expect(appState.salt).toEqual(salt);
+  });
 
-    it("returns the message", () => {
-        expect(appState.message).toEqual(signedProposeMessage);
-    });
+  it("returns the message", () => {
+    expect(appState.message).toEqual(signedProposeMessage);
+  });
 });
 
 describe("WaitForAccept", () => {
-    let signedProposeMessage = "some message";
-    let appState = new AppStates.WaitForAccept({
-        ...coreProps,
-        adjudicator,
-        aPlay,
-        salt,
-        signedProposeMessage
-    });
+  let signedProposeMessage = "some message";
+  let appState = new AppStates.WaitForAccept({
+    ...coreProps,
+    adjudicator,
+    aPlay,
+    salt,
+    signedProposeMessage
+  });
 
-    itHasSharedFunctionality(appState);
+  itHasSharedFunctionality(appState);
 
-    it("returns the adjudicator address", () => {
-        expect(appState.adjudicator).toEqual(adjudicator);
-    });
+  it("returns the adjudicator address", () => {
+    expect(appState.adjudicator).toEqual(adjudicator);
+  });
 
-    it("returns aPlay", () => {
-        expect(appState.aPlay).toEqual(aPlay);
-    });
+  it("returns aPlay", () => {
+    expect(appState.aPlay).toEqual(aPlay);
+  });
 
-    it("returns the salt", () => {
-        expect(appState.salt).toEqual(salt);
-    });
+  it("returns the salt", () => {
+    expect(appState.salt).toEqual(salt);
+  });
 
-    it("returns the message", () => {
-        expect(appState.message).toEqual(signedProposeMessage);
-    });
+  it("returns the message", () => {
+    expect(appState.message).toEqual(signedProposeMessage);
+  });
 });
 
 describe("ReadyToSendReveal", () => {
-    let signedRevealMessage = "some message";
-    let result = "won";
-    let appState = new AppStates.ReadyToSendReveal({
-        ...coreProps,
-        adjudicator,
-        aPlay,
-        bPlay,
-        result,
-        salt,
-        signedRevealMessage
-    });
+  let signedRevealMessage = "some message";
+  let result = "won";
+  let appState = new AppStates.ReadyToSendReveal({
+    ...coreProps,
+    adjudicator,
+    aPlay,
+    bPlay,
+    result,
+    salt,
+    signedRevealMessage
+  });
 
-    itHasSharedFunctionality(appState);
+  itHasSharedFunctionality(appState);
 
-    it("returns the adjudicator address", () => {
-        expect(appState.adjudicator).toEqual(adjudicator);
-    });
+  it("returns the adjudicator address", () => {
+    expect(appState.adjudicator).toEqual(adjudicator);
+  });
 
-    it("returns aPlay", () => {
-        expect(appState.aPlay).toEqual(aPlay);
-    });
+  it("returns aPlay", () => {
+    expect(appState.aPlay).toEqual(aPlay);
+  });
 
-    it("returns the salt", () => {
-        expect(appState.salt).toEqual(salt);
-    });
+  it("returns the salt", () => {
+    expect(appState.salt).toEqual(salt);
+  });
 
-    it("returns bPlay", () => {
-        expect(appState.bPlay).toEqual(bPlay);
-    });
+  it("returns bPlay", () => {
+    expect(appState.bPlay).toEqual(bPlay);
+  });
 
-    it("returns the message", () => {
-        expect(appState.message).toEqual(signedRevealMessage);
-    });
+  it("returns the message", () => {
+    expect(appState.message).toEqual(signedRevealMessage);
+  });
 });
 
 describe("WaitForResting", () => {
-    let signedRevealMessage = "some message";
-    let result = "won";
-    let appState = new AppStates.WaitForResting({
-        ...coreProps,
-        adjudicator,
-        aPlay,
-        bPlay,
-        result,
-        salt,
-        signedRevealMessage
-    });
+  let signedRevealMessage = "some message";
+  let result = "won";
+  let appState = new AppStates.WaitForResting({
+    ...coreProps,
+    adjudicator,
+    aPlay,
+    bPlay,
+    result,
+    salt,
+    signedRevealMessage
+  });
 
-    itHasSharedFunctionality(appState);
+  itHasSharedFunctionality(appState);
 
-    it("returns the adjudicator address", () => {
-        expect(appState.adjudicator).toEqual(adjudicator);
-    });
+  it("returns the adjudicator address", () => {
+    expect(appState.adjudicator).toEqual(adjudicator);
+  });
 
-    it("returns aPlay", () => {
-        expect(appState.aPlay).toEqual(aPlay);
-    });
+  it("returns aPlay", () => {
+    expect(appState.aPlay).toEqual(aPlay);
+  });
 
-    it("returns the salt", () => {
-        expect(appState.salt).toEqual(salt);
-    });
+  it("returns the salt", () => {
+    expect(appState.salt).toEqual(salt);
+  });
 
-    it("returns bPlay", () => {
-        expect(appState.bPlay).toEqual(bPlay);
-    });
+  it("returns bPlay", () => {
+    expect(appState.bPlay).toEqual(bPlay);
+  });
 
-    it("returns the message", () => {
-        expect(appState.message).toEqual(signedRevealMessage);
-    });
+  it("returns the message", () => {
+    expect(appState.message).toEqual(signedRevealMessage);
+  });
 });
