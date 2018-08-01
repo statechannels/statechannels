@@ -66,3 +66,16 @@ export function hashCommitment(play: Play, salt: string) {
     { type: 'bytes32', value: padBytes32(salt) },
   );
 }
+
+export function calculateResult(aPlay: Play, bPlay: Play) {
+  const x = ((aPlay - bPlay) + 2) % 3;
+  switch(x) {
+    case 0:
+      return Result.AWon;
+    case 1:
+      return Result.BWon;
+    default:
+      return Result.Tie;
+  }
+}
+ 
