@@ -1,42 +1,13 @@
-import Enum from 'enum';
+import { BaseState, ReadyToSendConclude, WaitForConclude } from './ApplicationStates';
 
-class BasePlayerB {
+class BasePlayerB extends BaseState {
   constructor({ channel, stake, balances }) {
-    this._channel = channel;
-    this._balances = balances;
-    this.stake = stake;
-  }
-
-  get myAddress() {
-    return this._channel.participants[1];
-  }
-
-  get opponentAddress() {
-    return this._channel.participants[0];
-  }
-
-  get channelId() {
-    return this._channel.channelId;
-  }
-
-  get myBalance() {
-    return this._balances[1];
-  }
-
-  get opponentBalance() {
-    return this._balances[0];
+    super({ channel, stake, balances });
+    this.playerIndex = 1;
   }
 
   get type() {
     return types[this.constructor.name];
-  }
-
-  get commonAttributes() {
-    return {
-      channel: this._channel,
-      balances: this._balances,
-      stake: this.stake
-    }
   }
 }
 
@@ -118,7 +89,17 @@ class WaitForReveal extends BasePlayerB {
 }
 
 class ReadyToSendResting extends BasePlayerB {
-  constructor({ channel, stake, balances, adjudicator, aPlay, bPlay, result, salt, signedRestingMessage }) {
+  constructor({
+    channel,
+    stake,
+    balances,
+    adjudicator,
+    aPlay,
+    bPlay,
+    result,
+    salt,
+    signedRestingMessage,
+  }) {
     super({ channel, stake, balances });
     this.aPlay = aPlay;
     this.bPlay = bPlay;
@@ -129,29 +110,26 @@ class ReadyToSendResting extends BasePlayerB {
   }
 }
 
-class ReadyToSendConclude extends BasePlayerB {
+class ReadyToSendConcludeB extends ReadyToSendConclude {
   constructor({
-    channel,
-    balances,
-    adjudicator,
-    signedConcludeMessage,
+    channel, balances, adjudicator, signedConcludeMessage,
   }) {
-    super({ channel, stake: undefined, balances });
-    this.adjudicator = adjudicator;
-    this.message = signedConcludeMessage;
+    super({
+      channel, balances, adjudicator, signedConcludeMessage, playerIndex: 1,
+    });
   }
 }
 
-class WaitForConclude extends BasePlayerB {
+class WaitForConcludeB extends ReadyToSendConclude {
   constructor({
     channel,
     balances,
     adjudicator,
     signedConcludeMessage,
   }) {
-    super({ channel, stake: undefined, balances });
-    this.adjudicator = adjudicator;
-    this.message = signedConcludeMessage; // in case a resend is required
+    super({
+      channel, balances, adjudicator, signedConcludeMessage, playerIndex: 1,
+    });
   }
 }
 
@@ -167,8 +145,8 @@ const types = {
   ReadyToSendAccept: 'ReadyToSendAccept',
   WaitForReveal: 'WaitForReveal',
   ReadyToSendResting: 'ReadyToSendResting',
-  ReadyToSendConclude: 'ReadyToSendConclude',
-  WaitForConclude: 'WaitForConclude',
+  ReadyToSendConcludeB: 'ReadyToSendConcludeB',
+  WaitForConcludeB: 'WaitForConcludeB',
 };
 
 export {
@@ -184,6 +162,6 @@ export {
   ReadyToSendAccept,
   WaitForReveal,
   ReadyToSendResting,
-  ReadyToSendConclude,
-  WaitForConclude,
+  ReadyToSendConcludeB,
+  WaitForConcludeB,
 };
