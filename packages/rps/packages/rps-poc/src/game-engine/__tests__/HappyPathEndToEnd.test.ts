@@ -249,4 +249,12 @@ it('runthrough', () => {
 
   const gameState8 = pledgeFromHex(readyToSendPropose2.message.state);
   expect(gameState8.turnNum).toEqual(8);
+
+  // In B's application
+  const readyToSendConclude = gameEngineB.conclude({
+    oldState: readyToSendResting,
+  });
+
+  expect(readyToSendConclude.type).toEqual(ApplicationStatesB.readyToSendConclude);
+  expect(readyToSendConclude.message).not.toBeUndefined();
 });
