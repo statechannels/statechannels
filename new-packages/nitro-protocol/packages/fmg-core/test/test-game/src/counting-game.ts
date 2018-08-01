@@ -1,4 +1,4 @@
-import { State, toHex32, padBytes32 } from '../../..';
+import { State, toHex32, padBytes32 } from '../../../src';
 
 class CountingGame {
   static preFundSetupState(opts) { return new PreFundSetupState(opts); }
@@ -8,8 +8,10 @@ class CountingGame {
 }
 
 class CountingBaseState extends State {
+  gameCounter: number;
+
   constructor({ channel, turnNum, stateCount, resolution, gameCounter }) {
-    super({ channel, turnNum, stateCount, resolution });
+    super({ channel, turnNum, stateCount, resolution, stateType: undefined });
     this.gameCounter = gameCounter;
     this.initialize();
   }

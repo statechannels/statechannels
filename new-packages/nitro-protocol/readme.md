@@ -73,7 +73,7 @@ To get started:
 3. Install truffle: `npm install -g truffle`.
 4. Install [ganache](http://truffleframework.com/ganache/).
 5. Run `lerna bootstrap` anywhere in the project.
-6. Within a package run `truffe test`.
+6. Within a package run `npm test`.
 
 ### License
 

@@ -1,6 +1,12 @@
-import { toHex32, padBytes32 } from './utils';
+import { toHex32 } from './utils';
 
 class State {
+  channel: any;
+  stateType: State.StateTypes
+  turnNum: number;
+  resolution: number[];
+  stateCount: number;
+
   constructor({channel, stateType, turnNum, resolution, stateCount}) {
     this.channel = channel;
     this.stateType = stateType;
@@ -38,13 +44,14 @@ class State {
   }
 }
 
-State.StateTypes = {
-  PREFUNDSETUP: 0,
-  POSTFUNDSETUP: 1,
-  GAME: 2,
-  CONCLUDE: 3,
+module State {
+  export enum StateTypes {
+    PREFUNDSETUP,
+    POSTFUNDSETUP,
+    GAME,
+    CONCLUDE,
+  }
 }
 
-Object.freeze(State.StateTypes);
 
 export { State };
