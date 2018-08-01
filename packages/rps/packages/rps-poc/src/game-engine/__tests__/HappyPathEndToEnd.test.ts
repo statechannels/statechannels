@@ -247,8 +247,8 @@ it('runthrough', () => {
   expect(readyToSendPropose2.message).not.toBeUndefined();
   expect(readyToSendPropose2.salt).not.toBeUndefined();
 
-  const gameState8 = pledgeFromHex(readyToSendPropose2.message.state);
-  expect(gameState8.turnNum).toEqual(8);
+  const gameState8_0 = pledgeFromHex(readyToSendPropose2.message.state);
+  expect(gameState8_0.turnNum).toEqual(8);
 
   // In B's application
   const readyToSendConclude = gameEngineB.conclude({
@@ -257,4 +257,9 @@ it('runthrough', () => {
 
   expect(readyToSendConclude.type).toEqual(ApplicationStatesB.readyToSendConclude);
   expect(readyToSendConclude.message).not.toBeUndefined();
+  const gameState8_1 = RpsState.fromHex(readyToSendConclude.message.state);
+
+  expect(gameState8_1.resolution).toEqual(aWinsBals);
+  expect(gameState8_1.turnNum).toEqual(8);
+  expect(gameState8_1.stateType).toEqual(3);
 });
