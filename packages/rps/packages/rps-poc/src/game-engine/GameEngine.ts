@@ -1,10 +1,12 @@
-import { Channel } from 'fmg-core';
+import { Channel, State } from 'fmg-core';
 
 import { GE_STAGES } from '../constants';
 import * as ApplicationStatesA from './application-states/ApplicationStatesPlayerA';
 import * as ApplicationStatesB from './application-states/ApplicationStatesPlayerB';
-import { Message } from './Message';
+import Message from './Message';
 import { RpsGame, RpsState } from '../game-rules/game-rules';
+import decodePledge from './pledges/decode';
+import PreFundSetup from './pledges/PreFundSetup';
 
 export default class GameEngine {
   constructor({ gameLibraryAddress, channelWallet }) {
@@ -57,22 +59,14 @@ export default class GameEngine {
   }
 
   prefundProposalReceived({ hexMessage }) {
-    const opponentMessage = new Message({ hexMessage });
-    const proposal = RpsState.fromHex(opponentMessage.state);
+    const opponentMessage = Message.fromHex(hexMessage);
+    const opponentPledge = decodePledge(opponentMessage.state) as PreFundSetup;
 
-    const { channel } = proposal;
-    const { stake } = proposal;
-    const balances = proposal.resolution;
+    const { channel, stake, resolution: balances, turnNum, stateCount } = opponentPledge;
 
-    const gameState = RpsGame.initializationState({
-      channel: proposal.channel,
-      resolution: proposal.resolution,
-      turnNum: 1,
-      stake: 1,
-      stateCount: 1,
-    });
+    const nextPledge = new PreFundSetup(channel, turnNum + 1, balances, stateCount + 1, stake);
 
-    const message = this.channelWallet.sign(gameState.toHex());
+    const message = this.channelWallet.sign(nextPledge.toHex());
 
     const appState = new ApplicationStatesB.ReadyToSendPreFundSetup1({
       channel,

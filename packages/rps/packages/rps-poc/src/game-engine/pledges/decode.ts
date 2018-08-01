@@ -35,8 +35,8 @@ function extractChannel(hexString: string) {
     );
   }
 
-  const participantA = extractBytes(hexString, 3 * 32);
-  const participantB = extractBytes(hexString, 4 * 32);
+  const participantA = extractBytes(hexString, 3 * 32 + 12, 20);
+  const participantB = extractBytes(hexString, 4 * 32 + 12, 20);
 
   return new Channel(channelType, channelNonce, [participantA, participantB]);
 }

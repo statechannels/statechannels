@@ -1,6 +1,6 @@
 import GameEngine from '../GameEngine';
 import ChannelWallet from '../ChannelWallet';
-import { Message } from '../Message';
+import Message from '../Message';
 import * as ApplicationStatesA from '../application-states/ApplicationStatesPlayerA';
 import * as ApplicationStatesB from '../application-states/ApplicationStatesPlayerB';
 import { RpsState, RpsGame } from '../../game-rules/game-rules';
@@ -35,7 +35,7 @@ it('runthrough', () => {
     ApplicationStatesA.types.ReadyToSendPreFundSetup0,
   );
   const message0 = readyToSendPreFundSetup0.message;
-  const gameState0 = RpsState.fromHex(new Message({ hexMessage: message0 }).state);
+  const gameState0 = RpsState.fromHex(Message.fromHex(message0).state);
   expect(gameState0.turnNum).toEqual(0);
   expect(gameState0.stateCount).toEqual(0);
   expect(gameState0.resolution).toEqual(initialBals);
