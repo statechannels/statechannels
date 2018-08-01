@@ -334,7 +334,7 @@ export default class GameEngine {
 
     const concludeState = RpsGame.conclusionState({
       ...oldState.commonAttributes,
-      turnNum: oldState.turnNum + 1,
+      turnNum: gameState.turnNum + 1,
       resolution: oldState._balances,
     });
 
