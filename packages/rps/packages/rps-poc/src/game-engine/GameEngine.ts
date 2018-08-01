@@ -153,7 +153,7 @@ export default class GameEngine {
       const result = calculateResult(aPlay, bPlay);
 
       // The opponent's state assumes that B won
-      let newBalances = balances;
+      let newBalances = [...balances];
       if (result === Result.Tie) {
         newBalances[0] += stake;
         newBalances[1] -= stake;
@@ -288,7 +288,7 @@ export default class GameEngine {
       const aPlay = move;
       const salt = 'salt';
 
-      let newBalances = balances;
+      let newBalances = [...balances];
       newBalances[0] -= opponentGameState.stake;
       newBalances[1] += opponentGameState.stake;
 
