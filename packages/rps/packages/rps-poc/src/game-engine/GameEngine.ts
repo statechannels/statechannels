@@ -327,6 +327,34 @@ export default class GameEngine {
     return newState;
   }
 
+  conclude({ oldState }) {
+    const { message } = oldState;
+    const gameState = RpsState.fromHex(message.state);
+    let newState;
+
+    const concludeState = RpsGame.conclusionState({
+      ...oldState.commonAttributes,
+      turnNum: oldState.turnNum + 1,
+      resolution: oldState._balances,
+    });
+
+    const concludeMessage = this.channelWallet.sign(concludeState.toHex());
+    if (gameState.turnNum % 2 === 0) {
+      newState = new ApplicationStatesA.ReadyToSendConcludeA({
+        ...oldState.commonAttributes,
+        adjudicator: oldState.adjudicator,
+        signedConcludeMessage: concludeMessage,
+      });
+    } else if (gameState.turnNum % 2 === 1) {
+      newState = new ApplicationStatesB.ReadyToSendConcludeB({
+        ...oldState.commonAttributes,
+        adjudicator: oldState.adjudicator,
+        signedConcludeMessage: concludeMessage,
+      });
+    }
+    return newState;
+  }
+
   returnToOpponentSelection() {
     this.appState.stage = GE_STAGES.SELECT_CHALLENGER;
 
