@@ -187,6 +187,32 @@ class WaitForResting extends BasePlayerA {
   }
 }
 
+class ReadyToSendConclude extends BasePlayerA {
+  constructor({
+    channel,
+    balances,
+    adjudicator,
+    signedConcludeMessage,
+  }) {
+    super({ channel, stake: undefined, balances });
+    this.adjudicator = adjudicator;
+    this.message = signedConcludeMessage;
+  }
+}
+
+class WaitForConclude extends BasePlayerA {
+  constructor({
+    channel,
+    balances,
+    adjudicator,
+    signedConcludeMessage,
+  }) {
+    super({ channel, stake: undefined, balances });
+    this.adjudicator = adjudicator;
+    this.message = signedConcludeMessage; // in case a resend is required
+  }
+}
+
 const types = Object.freeze({
   ReadyToSendPreFundSetup0: 'ReadyToSendPreFundSetup0',
   WaitForPreFundSetup1: 'WaitForPreFundSetup1',
@@ -200,6 +226,8 @@ const types = Object.freeze({
   WaitForAccept: 'WaitForAccept',
   ReadyToSendReveal: 'ReadyToSendReveal',
   WaitForResting: 'WaitForResting',
+  ReadyToSendConclude: 'ReadyToSendConclude',
+  WaitForConclude: 'WaitForConclude',
 });
 
 export {
@@ -216,4 +244,6 @@ export {
   WaitForAccept,
   ReadyToSendReveal,
   WaitForResting,
+  ReadyToSendConclude,
+  WaitForConclude,
 };
