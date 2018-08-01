@@ -1,3 +1,6 @@
+set -e
+set -o pipefail
+
 rm -rf built
 
 tsc

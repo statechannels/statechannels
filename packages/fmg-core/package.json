@@ -8,7 +8,7 @@
   },
   "scripts": {
     "build": "./bin/build.sh",
-    "test": "npm run build; ./bin/test.sh"
+    "test": "npm run build && ./bin/test.sh"
   },
   "repository": "https://github.com/magmo/force-move-games/tree/master/packages/fmg-core",
   "author": "Tom Close",
