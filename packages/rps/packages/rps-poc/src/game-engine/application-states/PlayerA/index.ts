@@ -1,19 +1,29 @@
-import BaseState from '../ApplicationStates';
-import ReadyToSendConclude from '../ReadyToSendConclude';
-import WaitForConclude from '../WaitForConclude';
+import ReadyToSendPreFundSetupA from './ReadyToSendPreFundSetupA';
+import WaitForPreFundSetupB from './WaitForPreFundSetupB';
+import ReadyToDeploy from './ReadyToDeploy';
+import WaitForBlockchainDeploy from './WaitForBlockchainDeploy';
+import WaitForBToDeposit from './WaitForBToDeposit';
+import ReadyToSendPostFundSetupA from './ReadyToSendPostFundSetupA';
+import WaitForPostFundSetupB from './WaitForPostFundSetupB';
+import ReadyToChooseAPlay from './ReadyToChooseAPlay';
+import ReadyToSendPropose from './ReadyToSendPropose';
+import WaitForAccept from './WaitForAccept';
+import ReadyToSendReveal from './ReadyToSendReveal';
+import WaitForResting from './WaitForResting';
+import ReadyToSendConcludeA from './ReadyToSendConcludeA';
+import WaitForConcludeA from './WaitForConcludeA';
 
 const PLAYER_INDEX = 0;
 export { PLAYER_INDEX };
 
-
 const types = Object.freeze({
-  ReadyToSendPreFundSetup0: 'ReadyToSendPreFundSetup0',
-  WaitForPreFundSetup1: 'WaitForPreFundSetup1',
+  ReadyToSendPreFundSetupA: 'ReadyToSendPreFundSetupA',
+  WaitForPreFundSetupB: 'WaitForPreFundSetupB',
   ReadyToDeploy: 'ReadyToDeploy',
   WaitForBlockchainDeploy: 'WaitForBlockchainDeploy',
   WaitForBToDeposit: 'WaitForBToDeposit',
-  ReadyToSendPostFundSetup0: 'ReadyToSendPostFundSetup0',
-  WaitForPostFundSetup1: 'WaitForPostFundSetup1',
+  ReadyToSendPostFundSetupA: 'ReadyToSendPostFundSetupA',
+  WaitForPostFundSetupB: 'WaitForPostFundSetupB',
   ReadyToChooseAPlay: 'ReadyToChooseAPlay',
   ReadyToSendPropose: 'ReadyToSendPropose',
   WaitForAccept: 'WaitForAccept',
@@ -25,13 +35,13 @@ const types = Object.freeze({
 
 export {
   types,
-  ReadyToSendPreFundSetup0,
-  WaitForPreFundSetup1,
+  ReadyToSendPreFundSetupA,
+  WaitForPreFundSetupB,
   ReadyToDeploy,
   WaitForBlockchainDeploy,
   WaitForBToDeposit,
-  ReadyToSendPostFundSetup0,
-  WaitForPostFundSetup1,
+  ReadyToSendPostFundSetupA,
+  WaitForPostFundSetupB,
   ReadyToChooseAPlay,
   ReadyToSendPropose,
   WaitForAccept,
