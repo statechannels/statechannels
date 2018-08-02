@@ -44,22 +44,22 @@ it('runthrough', () => {
   expect(waitForPreFundSetupB.message).toEqual(message0);
 
   // In B's application
-  const readyToSendPreFundSetup1 = gameEngineB.prefundProposalReceived({ hexMessage: message0 });
-  expect(readyToSendPreFundSetup1.type).toEqual(
-    ApplicationStatesB.types.ReadyToSendPreFundSetup1,
+  const readyToSendPreFundSetupB = gameEngineB.prefundProposalReceived({ hexMessage: message0 });
+  expect(readyToSendPreFundSetupB.type).toEqual(
+    ApplicationStatesB.types.ReadyToSendPreFundSetupB,
   );
-  expect(readyToSendPreFundSetup1.balances).toEqual(initialBals);
-  expect(readyToSendPreFundSetup1.channel).toEqual(waitForPreFundSetupB.channel);
-  expect(readyToSendPreFundSetup1.stake).toEqual(stake);
+  expect(readyToSendPreFundSetupB.balances).toEqual(initialBals);
+  expect(readyToSendPreFundSetupB.channel).toEqual(waitForPreFundSetupB.channel);
+  expect(readyToSendPreFundSetupB.stake).toEqual(stake);
 
-  const message1 = readyToSendPreFundSetup1.message;
+  const message1 = readyToSendPreFundSetupB.message;
   const gameState1 = pledgeFromHex(message1.state);
   expect(gameState1.turnNum).toEqual(1);
   expect(gameState1.stateCount).toEqual(1);
   expect(gameState1.resolution).toEqual(initialBals);
   expect(gameState1.stake).toEqual(1);
 
-  const waitForDeployAdjudicatorB = gameEngineB.messageSent({ oldState: readyToSendPreFundSetup1 });
+  const waitForDeployAdjudicatorB = gameEngineB.messageSent({ oldState: readyToSendPreFundSetupB });
   expect(waitForDeployAdjudicatorB.type).toEqual(ApplicationStatesB.types.WaitForAToDeploy);
   expect(waitForDeployAdjudicatorB.balances).toEqual(initialBals);
 
@@ -84,12 +84,12 @@ it('runthrough', () => {
   const deploymentEvent = { adjudicator, funds: 1 }; // TODO
 
   // In A's application
-  const waitForFunding0 = gameEngineA.receiveEvent({
+  const waitForFundingA = gameEngineA.receiveEvent({
     event: deploymentEvent,
     oldState: waitForDeployAdjudicatorA,
   });
-  expect(waitForFunding0.type).toEqual(ApplicationStatesA.types.WaitForBToDeposit);
-  expect(waitForFunding0.adjudicator).toEqual(adjudicator);
+  expect(waitForFundingA.type).toEqual(ApplicationStatesA.types.WaitForBToDeposit);
+  expect(waitForFundingA.adjudicator).toEqual(adjudicator);
 
   // In B's application
   const readyToFund = gameEngineB.receiveEvent({
@@ -101,10 +101,10 @@ it('runthrough', () => {
   expect(readyToFund.transaction).not.toBeUndefined();
   expect(readyToFund.balances).toEqual(initialBals);
 
-  const waitForFunding1 = gameEngineB.transactionSent({ oldState: readyToFund });
-  expect(waitForFunding1.type).toEqual(ApplicationStatesB.types.WaitForPostFundSetup0);
-  expect(waitForFunding1.adjudicator).toEqual(adjudicator);
-  expect(waitForFunding1.balances).toEqual(initialBals);
+  const waitForFundingB = gameEngineB.transactionSent({ oldState: readyToFund });
+  expect(waitForFundingB.type).toEqual(ApplicationStatesB.types.WaitForPostFundSetupA);
+  expect(waitForFundingB.adjudicator).toEqual(adjudicator);
+  expect(waitForFundingB.balances).toEqual(initialBals);
 
   // From the blockchain
   const fundingEvent = { adjudicator: adjudicator, aBalance: 1, bBalance: 2 }; // TODO
@@ -112,7 +112,7 @@ it('runthrough', () => {
   // In A's application
   const readyToSendPostFundSetupA = gameEngineA.receiveEvent({
     event: fundingEvent,
-    oldState: waitForFunding0,
+    oldState: waitForFundingA,
   });
   expect(readyToSendPostFundSetupA.type).toEqual(
     ApplicationStatesA.types.ReadyToSendPostFundSetupA,
@@ -126,22 +126,22 @@ it('runthrough', () => {
   expect(gameState2.resolution).toEqual(initialBals);
   expect(gameState2.stake).toEqual(1);
 
-  const waitForPostFundSetup1 = gameEngineA.messageSent({ oldState: readyToSendPostFundSetupA });
-  expect(waitForPostFundSetup1.type).toEqual(ApplicationStatesA.types.WaitForPostFundSetupB);
-  expect(waitForPostFundSetup1.adjudicator).toEqual(adjudicator);
+  const waitForPostFundSetupB = gameEngineA.messageSent({ oldState: readyToSendPostFundSetupA });
+  expect(waitForPostFundSetupB.type).toEqual(ApplicationStatesA.types.WaitForPostFundSetupB);
+  expect(waitForPostFundSetupB.adjudicator).toEqual(adjudicator);
 
   // In B's application
-  const readyToSendPostFundSetup1 = gameEngineB.receiveMessage({
+  const readyToSendPostFundSetupB = gameEngineB.receiveMessage({
     message: message2,
-    oldState: waitForFunding1,
+    oldState: waitForFundingB,
   });
-  expect(readyToSendPostFundSetup1.type).toEqual(
-    ApplicationStatesB.types.ReadyToSendPostFundSetup1,
+  expect(readyToSendPostFundSetupB.type).toEqual(
+    ApplicationStatesB.types.ReadyToSendPostFundSetupB,
   );
-  expect(readyToSendPostFundSetup1.balances).not.toBeUndefined();
-  const message3 = readyToSendPostFundSetup1.message;
+  expect(readyToSendPostFundSetupB.balances).not.toBeUndefined();
+  const message3 = readyToSendPostFundSetupB.message;
   expect(message3).not.toBeUndefined();
-  expect(readyToSendPostFundSetup1.balances).toEqual(initialBals);
+  expect(readyToSendPostFundSetupB.balances).toEqual(initialBals);
 
   const gameState3 = pledgeFromHex(message3.state);
   expect(gameState3.turnNum).toEqual(3);
@@ -149,17 +149,17 @@ it('runthrough', () => {
   expect(gameState3.resolution).toEqual(initialBals);
   expect(gameState3.stake).toEqual(1);
 
-  const waitForPropose = gameEngineB.messageSent({ oldState: readyToSendPostFundSetup1 });
+  const waitForPropose = gameEngineB.messageSent({ oldState: readyToSendPostFundSetupB });
   expect(waitForPropose.type).toEqual(ApplicationStatesB.types.WaitForPropose);
 
   // In A's application
-  const readyToChoosePlay0 = gameEngineA.receiveMessage({
+  const readyToChoosePlayA = gameEngineA.receiveMessage({
     message: message3,
-    oldState: waitForPostFundSetup1,
+    oldState: waitForPostFundSetupB,
   });
-  expect(readyToChoosePlay0.type).toEqual(ApplicationStatesA.types.ReadyToChooseAPlay);
+  expect(readyToChoosePlayA.type).toEqual(ApplicationStatesA.types.ReadyToChooseAPlay);
 
-  const readyToSendPropose = gameEngineA.choosePlay(readyToChoosePlay0, Play.Rock);
+  const readyToSendPropose = gameEngineA.choosePlay(readyToChoosePlayA, Play.Rock);
   expect(readyToSendPropose.type).toEqual(ApplicationStatesA.types.ReadyToSendPropose);
   expect(readyToSendPropose.aPlay).toEqual(Play.Rock);
   expect(readyToSendPropose.message).not.toBeUndefined();
@@ -180,14 +180,14 @@ it('runthrough', () => {
   expect(waitForAccept.salt).toEqual(readyToSendPropose.salt);
 
   // In B's application
-  const readyToChoosePlay1 = gameEngineB.receiveMessage({
+  const readyToChoosePlayB = gameEngineB.receiveMessage({
     message: proposal,
     oldState: waitForPropose,
   });
-  expect(readyToChoosePlay1.type).toEqual(ApplicationStatesB.types.ReadyToChooseBPlay);
-  expect(readyToChoosePlay1.opponentMessage).not.toBeUndefined();
+  expect(readyToChoosePlayB.type).toEqual(ApplicationStatesB.types.ReadyToChooseBPlay);
+  expect(readyToChoosePlayB.opponentMessage).not.toBeUndefined();
 
-  const readyToSendAccept = gameEngineB.choosePlay(readyToChoosePlay1, Play.Scissors);
+  const readyToSendAccept = gameEngineB.choosePlay(readyToChoosePlayB, Play.Scissors);
   expect(readyToSendAccept.type).toEqual(ApplicationStatesB.types.ReadyToSendAccept);
   const message5 = readyToSendAccept.message;
   const gameState5 = pledgeFromHex(message5.state);
