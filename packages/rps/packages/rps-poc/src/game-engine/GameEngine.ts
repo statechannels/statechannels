@@ -13,6 +13,8 @@ import Reveal from './pledges/Reveal';
 import Propose from './pledges/Propose';
 import Accept from './pledges/Accept';
 import Resting from './pledges/Resting';
+import Conclude from './pledges/Conclude';
+import { truncateSync } from 'fs';
 
 export default class GameEngine {
   gameLibraryAddress: string;
@@ -329,23 +331,24 @@ export default class GameEngine {
 
   conclude({ oldState }) {
     const { message } = oldState;
-    const gameState = RpsState.fromHex(message.state);
+    const oldPledge = decodePledge(message.state);
     let newState;
 
-    const concludeState = RpsGame.conclusionState({
-      ...oldState.commonAttributes,
-      turnNum: gameState.turnNum + 1,
-      resolution: oldState._balances,
-    });
+    let concludePledge = new Conclude(
+      oldState._channel,
+      oldPledge.turnNum + 1,
+      oldState._balances
+    );
 
-    const concludeMessage = this.channelWallet.sign(concludeState.toHex());
-    if (gameState.turnNum % 2 === 0) {
+    const concludeMessage = this.channelWallet.sign(concludePledge.toHex());
+
+    if (oldPledge.turnNum % 2 === 0) {
       newState = new ApplicationStatesA.ReadyToSendConcludeA({
         ...oldState.commonAttributes,
         adjudicator: oldState.adjudicator,
         signedConcludeMessage: concludeMessage,
       });
-    } else if (gameState.turnNum % 2 === 1) {
+    } else if (oldPledge.turnNum % 2 === 1) {
       newState = new ApplicationStatesB.ReadyToSendConcludeB({
         ...oldState.commonAttributes,
         adjudicator: oldState.adjudicator,
