@@ -44,5 +44,4 @@ export default function* rootSaga() {
   yield fork(messageSaga);
   yield takeEvery('*', blockchainResponseFaker);
   yield takeEvery(types.MESSAGE_SENT, messageSender);
-  yield takeEvery(types.LOGIN_USER, loginSaga);
 }
