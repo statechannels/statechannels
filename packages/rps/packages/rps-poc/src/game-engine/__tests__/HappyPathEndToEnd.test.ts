@@ -1,8 +1,8 @@
 import GameEngine from '../GameEngine';
 import ChannelWallet from '../ChannelWallet';
 import Message from '../Message';
-import * as ApplicationStatesA from '../application-states/ApplicationStatesPlayerA';
-import * as ApplicationStatesB from '../application-states/ApplicationStatesPlayerB';
+import * as ApplicationStatesA from '../application-states/PlayerB/index';
+import * as ApplicationStatesB from '../application-states/PlayerA/index';
 import { Play, Result } from '../pledges';
 import pledgeFromHex from '../pledges/decode';
 

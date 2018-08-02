@@ -1,4 +1,4 @@
-import * as AppStates from '../ApplicationStatesPlayerA';
+import * as AppStates from '../index';
 import { Channel } from 'fmg-core';
 
 const gameLibrary = 0x111;

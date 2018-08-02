@@ -1,5 +1,5 @@
-import * as AppStates from '../ApplicationStatesPlayerB';
 import { Channel } from 'fmg-core';
+import * as AppStates from '../index';
 
 const gameLibrary = 0x111;
 const channelNonce = 15;
