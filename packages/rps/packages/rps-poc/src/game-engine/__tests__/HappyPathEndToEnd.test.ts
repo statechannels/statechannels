@@ -49,7 +49,7 @@ it('runthrough', () => {
     ApplicationStatesB.types.ReadyToSendPreFundSetup1,
   );
   expect(readyToSendPreFundSetup1._balances).toEqual(initialBals);
-  expect(readyToSendPreFundSetup1._channel).toEqual(waitForPreFundSetup1._channel);
+  expect(readyToSendPreFundSetup1.channel).toEqual(waitForPreFundSetup1.channel);
   expect(readyToSendPreFundSetup1.stake).toEqual(stake);
 
   const message1 = readyToSendPreFundSetup1.message;
