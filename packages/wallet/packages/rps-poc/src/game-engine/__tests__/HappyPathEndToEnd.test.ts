@@ -257,7 +257,7 @@ it('runthrough', () => {
 
   expect(readyToSendConclude.type).toEqual(ApplicationStatesB.readyToSendConclude);
   expect(readyToSendConclude.message).not.toBeUndefined();
-  const gameState8_1 = RpsState.fromHex(readyToSendConclude.message.state);
+  const gameState8_1 = pledgeFromHex(readyToSendConclude.message.state);
 
   expect(gameState8_1.resolution).toEqual(aWinsBals);
   expect(gameState8_1.turnNum).toEqual(8);

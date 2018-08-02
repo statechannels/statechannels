@@ -69,4 +69,4 @@ class WaitForConclude extends BaseState {
   }
 }
 
-export { BaseState, ReadyToSendConclude, WaitForConclude }
+export { BaseState, ReadyToSendConclude, WaitForConclude };
