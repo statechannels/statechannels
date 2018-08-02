@@ -6,10 +6,10 @@ export default class BaseState {
   channel: Channel;
   stake: number;
   playerIndex: number;
-  message: Message;
+  message: Message | undefined;
 
   constructor(
-    channel, stake, balances, playerIndex, message=undefined
+    channel, stake, balances, playerIndex, message?: Message
   ) {
     this.balances = balances;
     this.channel = channel;
