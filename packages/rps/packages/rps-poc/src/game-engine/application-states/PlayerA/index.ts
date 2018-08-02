@@ -2,10 +2,11 @@ import BaseState from '../ApplicationStates';
 import ReadyToSendConclude from '../ReadyToSendConclude';
 import WaitForConclude from '../WaitForConclude';
 
+const PLAYER_INDEX = 0;
+
 class BasePlayerA extends BaseState {
-  constructor({ channel, stake, balances }) {
-    super({ channel, stake, balances, playerIndex: undefined });
-    this.playerIndex = 0;
+  constructor(channel, stake, balances, message=undefined) {
+    super(channel, stake, balances, PLAYER_INDEX, message);
   }
 
   get type() {
@@ -16,7 +17,7 @@ class BasePlayerA extends BaseState {
 
 class ReadyToSendPreFundSetup0 extends BasePlayerA {
   constructor({ channel, stake, balances, signedPreFundSetup0Message }) {
-    super({ channel, stake, balances });
+    super(channel, stake, balances);
     this.message = signedPreFundSetup0Message;
   }
 
@@ -34,34 +35,34 @@ class ReadyToSendPreFundSetup0 extends BasePlayerA {
 
 class WaitForPreFundSetup1 extends BasePlayerA {
   constructor({ channel, stake, balances, signedPreFundSetup0Message }) {
-    super({ channel, stake, balances });
+    super(channel, stake, balances);
     this.message = signedPreFundSetup0Message; // in case a resend is required
   }
 }
 
 class ReadyToDeploy extends BasePlayerA {
   constructor({ channel, stake, balances, deploymentTransaction }) {
-    super({ channel, stake, balances });
+    super(channel, stake, balances);
     this.transaction = deploymentTransaction;
   }
 }
 
 class WaitForBlockchainDeploy extends BasePlayerA {
   constructor({ channel, stake, balances }) {
-    super({ channel, stake, balances });
+    super(channel, stake, balances);
   }
 }
 
 class WaitForBToDeposit extends BasePlayerA {
   constructor({ channel, stake, balances, adjudicator }) {
-    super({ channel, stake, balances });
+    super(channel, stake, balances);
     this.adjudicator = adjudicator;
   }
 }
 
 class ReadyToSendPostFundSetup0 extends BasePlayerA {
   constructor({ channel, stake, balances, adjudicator, signedPostFundSetup0Message }) {
-    super({ channel, stake, balances });
+    super(channel, stake, balances);
     this.adjudicator = adjudicator;
     this.message = signedPostFundSetup0Message;
   }
@@ -73,7 +74,7 @@ class ReadyToSendPostFundSetup0 extends BasePlayerA {
 
 class WaitForPostFundSetup1 extends BasePlayerA {
   constructor({ channel, stake, balances, adjudicator, signedPostFundSetup0Message }) {
-    super({ channel, stake, balances });
+    super(channel, stake, balances);
     this.adjudicator = adjudicator;
     this.message = signedPostFundSetup0Message; // in case a resend is required
   }
@@ -81,7 +82,7 @@ class WaitForPostFundSetup1 extends BasePlayerA {
 
 class ReadyToChooseAPlay extends BasePlayerA {
   constructor({ channel, stake, balances, adjudicator, opponentMessage }) {
-    super({ channel, stake, balances });
+    super(channel, stake, balances);
     this.adjudicator = adjudicator;
     this.opponentMessage = opponentMessage;
   }
@@ -89,7 +90,7 @@ class ReadyToChooseAPlay extends BasePlayerA {
 
 class ReadyToSendPropose extends BasePlayerA {
   constructor({ channel, stake, balances, adjudicator, aPlay, salt, signedProposeMessage }) {
-    super({ channel, stake, balances });
+    super(channel, stake, balances);
     this.aPlay = aPlay;
     this.salt = salt;
     this.adjudicator = adjudicator;
@@ -103,7 +104,7 @@ class ReadyToSendPropose extends BasePlayerA {
 
 class WaitForAccept extends BasePlayerA {
   constructor({ channel, stake, balances, adjudicator, aPlay, salt, signedProposeMessage }) {
-    super({ channel, stake, balances });
+    super(channel, stake, balances);
     this.aPlay = aPlay;
     this.salt = salt;
     this.adjudicator = adjudicator;
@@ -123,7 +124,7 @@ class ReadyToSendReveal extends BasePlayerA {
     salt,
     signedRevealMessage,
   }) {
-    super({ channel, stake, balances });
+    super(channel, stake, balances);
     this.aPlay = aPlay;
     this.bPlay = bPlay;
     this.result = result; // win/lose/draw
@@ -149,7 +150,7 @@ class WaitForResting extends BasePlayerA {
     salt,
     signedRevealMessage,
   }) {
-    super({ channel, stake, balances });
+    super(channel, stake, balances);
     this.aPlay = aPlay;
     this.bPlay = bPlay;
     this.result = result; // win/lose/draw
@@ -166,7 +167,7 @@ class ReadyToSendConcludeA extends ReadyToSendConclude {
     adjudicator,
     signedConcludeMessage,
   }) {
-    super({ channel, balances, playerIndex: 0 });
+    super(channel, balances, PLAYER_INDEX);
     this.adjudicator = adjudicator;
     this.message = signedConcludeMessage;
   }
@@ -179,9 +180,9 @@ class WaitForConcludeA extends WaitForConclude {
     adjudicator,
     signedConcludeMessage,
   }) {
-    super({
-      channel, balances, playerIndex: 0, adjudicator, message: signedConcludeMessage,
-    });
+    super(
+      channel, balances, adjudicator, PLAYER_INDEX, signedConcludeMessage,
+ );
     this.adjudicator = adjudicator;
     this.message = signedConcludeMessage; // in case a resend is required
   }
