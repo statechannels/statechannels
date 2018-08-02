@@ -2,6 +2,8 @@
   "name": "fmg-core",
   "version": "0.0.4",
   "description": "Force-move games core",
+  "main": "./built/src/index.js",
+  "types": "./built/src/index.d.ts",
   "directories": {
     "doc": "docs",
     "test": "test"
