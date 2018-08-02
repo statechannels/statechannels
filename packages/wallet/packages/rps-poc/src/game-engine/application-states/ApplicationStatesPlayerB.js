@@ -120,7 +120,7 @@ class ReadyToSendConcludeB extends ReadyToSendConclude {
   }
 }
 
-class WaitForConcludeB extends ReadyToSendConclude {
+class WaitForConcludeB extends WaitForConclude {
   constructor({
     channel,
     balances,
