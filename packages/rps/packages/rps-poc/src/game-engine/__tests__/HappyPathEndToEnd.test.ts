@@ -6,9 +6,6 @@ import * as ApplicationStatesB from '../application-states/ApplicationStatesPlay
 import { Play, Result } from '../pledges';
 import pledgeFromHex from '../pledges/decode';
 
-let Eth = require('web3-eth');
-let eth = new Eth('http://localhost:8545');
-
 const stake = 1;
 const addressOfLibrary = 0xccc;
 const initialBals = [5, 4];
