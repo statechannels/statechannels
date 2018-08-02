@@ -40,14 +40,14 @@ const itHasSharedFunctionality = (appState) => {
   });
 };
 
-describe("ReadyToSendPreFundSetup0", () => {
-  let signedPreFundSetup1Message = "blahblah";
-  let appState = new AppStates.ReadyToSendPreFundSetup1({ ...coreProps, signedPreFundSetup1Message });
+describe("ReadyToSendPreFundSetupB", () => {
+  let signedPreFundSetupBMessage = "blahblah";
+  let appState = new AppStates.ReadyToSendPreFundSetupB({ ...coreProps, signedPreFundSetupBMessage });
 
   itHasSharedFunctionality(appState);
 
   it("has a message", () => {
-    expect(appState.message).toEqual(signedPreFundSetup1Message);
+    expect(appState.message).toEqual(signedPreFundSetupBMessage);
   });
 });
 
@@ -82,8 +82,8 @@ describe("WaitForBlockchainDeposit", () => {
   });
 });
 
-describe("WaitForPostFundSetup0", () => {
-  let appState = new AppStates.WaitForPostFundSetup0({ ...coreProps, adjudicator });
+describe("WaitForPostFundSetupA", () => {
+  let appState = new AppStates.WaitForPostFundSetupA({ ...coreProps, adjudicator });
 
   itHasSharedFunctionality(appState);
 
@@ -92,12 +92,12 @@ describe("WaitForPostFundSetup0", () => {
   });
 });
 
-describe("ReadyToSendPostFundSetup1", () => {
-  let signedPostFundSetup1Message = "some message";
-  let appState = new AppStates.ReadyToSendPostFundSetup1({
+describe("ReadyToSendPostFundSetupB", () => {
+  let signedPostFundSetupBMessage = "some message";
+  let appState = new AppStates.ReadyToSendPostFundSetupB({
     ...coreProps,
     adjudicator,
-    signedPostFundSetup1Message,
+    signedPostFundSetupBMessage,
   });
 
   itHasSharedFunctionality(appState);
@@ -107,16 +107,16 @@ describe("ReadyToSendPostFundSetup1", () => {
   });
 
   it("has a message", () => {
-    expect(appState.message).toEqual(signedPostFundSetup1Message);
+    expect(appState.message).toEqual(signedPostFundSetupBMessage);
   });
 });
 
 describe("WaitForPropose", () => {
-  let signedPostFundSetup1Message = "some message";
+  let signedPostFundSetupBMessage = "some message";
   let appState = new AppStates.WaitForPropose({
     ...coreProps,
     adjudicator,
-    signedPostFundSetup1Message,
+    signedPostFundSetupBMessage,
   });
 
   itHasSharedFunctionality(appState);
@@ -126,7 +126,7 @@ describe("WaitForPropose", () => {
   });
 
   it("has a message", () => {
-    expect(appState.message).toEqual(signedPostFundSetup1Message);
+    expect(appState.message).toEqual(signedPostFundSetupBMessage);
   });
 });
 
