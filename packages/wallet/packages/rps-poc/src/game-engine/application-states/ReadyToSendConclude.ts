@@ -5,14 +5,15 @@ export default class ReadyToSendConclude extends BaseState {
     adjudicator: any;
     message: Message;
   
-    constructor({
+    constructor(
       channel,
       balances,
       adjudicator,
-      signedConcludeMessage,
       playerIndex,
-    }) {
-      super({ channel, balances, playerIndex, stake: undefined });
+      signedConcludeMessage,
+ ) {
+      let stake;
+      super(channel, stake, balances, playerIndex);
       this.adjudicator = adjudicator;
       this.message = signedConcludeMessage;
     }
