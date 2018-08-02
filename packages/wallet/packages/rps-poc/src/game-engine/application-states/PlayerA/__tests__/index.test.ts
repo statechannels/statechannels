@@ -39,29 +39,29 @@ const itHasSharedFunctionality = (appState) => {
   });
 };
 
-describe("ReadyToSendPreFundSetup0", () => {
-  let signedPreFundSetup0Message = "blahblah";
-  let appState = new AppStates.ReadyToSendPreFundSetup0({ ...coreProps, signedPreFundSetup0Message });
+describe("ReadyToSendPreFundSetupA", () => {
+  let signedPreFundSetupAMessage = "blahblah";
+  let appState = new AppStates.ReadyToSendPreFundSetupA({ ...coreProps, signedPreFundSetupAMessage });
 
   itHasSharedFunctionality(appState);
 
   it("has a message", () => {
-    expect(appState.message).toEqual(signedPreFundSetup0Message);
+    expect(appState.message).toEqual(signedPreFundSetupAMessage);
   });
 
   it("has the right type", () => {
-    expect(appState.type).toEqual(AppStates.types.ReadyToSendPreFundSetup0);
+    expect(appState.type).toEqual(AppStates.types.ReadyToSendPreFundSetupA);
   });
 });
 
-describe("WaitForPreFundSetup1", () => {
-  let signedPreFundSetup0Message = "blahblah";
-  let appState = new AppStates.WaitForPreFundSetup1({ ...coreProps, signedPreFundSetup0Message });
+describe("WaitForPreFundSetupB", () => {
+  let signedPreFundSetupAMessage = "blahblah";
+  let appState = new AppStates.WaitForPreFundSetupB({ ...coreProps, signedPreFundSetupAMessage });
 
   itHasSharedFunctionality(appState);
 
   it("has a message", () => {
-    expect(appState.message).toEqual(signedPreFundSetup0Message);
+    expect(appState.message).toEqual(signedPreFundSetupAMessage);
   });
 });
 
@@ -92,9 +92,9 @@ describe("WaitForBToDeposit", () => {
   });
 });
 
-describe("ReadyToSendPostFundSetup0", () => {
-  let signedPostFundSetup0Message = "blahblah";
-  let appState = new AppStates.ReadyToSendPostFundSetup0({ ...coreProps, adjudicator, signedPostFundSetup0Message });
+describe("ReadyToSendPostFundSetupA", () => {
+  let signedPostFundSetupAMessage = "blahblah";
+  let appState = new AppStates.ReadyToSendPostFundSetupA({ ...coreProps, adjudicator, signedPostFundSetupAMessage });
 
   itHasSharedFunctionality(appState);
 
@@ -103,13 +103,13 @@ describe("ReadyToSendPostFundSetup0", () => {
   });
 
   it("has a message", () => {
-    expect(appState.message).toEqual(signedPostFundSetup0Message);
+    expect(appState.message).toEqual(signedPostFundSetupAMessage);
   });
 });
 
-describe("WaitForPostFundSetup1", () => {
-  let signedPostFundSetup0Message = "blahblah";
-  let appState = new AppStates.WaitForPostFundSetup1({ ...coreProps, adjudicator, signedPostFundSetup0Message });
+describe("WaitForPostFundSetupB", () => {
+  let signedPostFundSetupAMessage = "blahblah";
+  let appState = new AppStates.WaitForPostFundSetupB({ ...coreProps, adjudicator, signedPostFundSetupAMessage });
 
   itHasSharedFunctionality(appState);
 
@@ -118,7 +118,7 @@ describe("WaitForPostFundSetup1", () => {
   });
 
   it("has a message", () => {
-    expect(appState.message).toEqual(signedPostFundSetup0Message);
+    expect(appState.message).toEqual(signedPostFundSetupAMessage);
   });
 });
 

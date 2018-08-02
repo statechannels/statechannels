@@ -1,9 +1,9 @@
 import BasePlayerA from './BaseState';
 
 export default class ReadyToSendPreFundSetupA extends BasePlayerA {
-  constructor({ channel, stake, balances, signedPreFundSetup0Message }) {
+  constructor({ channel, stake, balances, signedPreFundSetupAMessage }) {
     super(channel, stake, balances);
-    this.message = signedPreFundSetup0Message;
+    this.message = signedPreFundSetupAMessage;
   }
 
   toJSON() {
