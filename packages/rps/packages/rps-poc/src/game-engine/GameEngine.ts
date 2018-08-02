@@ -1,8 +1,8 @@
 import { Channel } from 'fmg-core';
 
 import { GE_STAGES } from '../constants';
-import * as ApplicationStatesA from './application-states/ApplicationStatesPlayerA';
-import * as ApplicationStatesB from './application-states/ApplicationStatesPlayerB';
+import * as ApplicationStatesA from './application-states/PlayerA/index';
+import * as ApplicationStatesB from './application-states/PlayerB/index';
 import Message from './Message';
 import ChannelWallet from './ChannelWallet';
 import decodePledge from './pledges/decode';
@@ -14,7 +14,6 @@ import Propose from './pledges/Propose';
 import Accept from './pledges/Accept';
 import Resting from './pledges/Resting';
 import Conclude from './pledges/Conclude';
-import { truncateSync } from 'fs';
 
 export default class GameEngine {
   gameLibraryAddress: string;

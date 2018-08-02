@@ -1,12 +1,15 @@
-import { BaseState, ReadyToSendConclude, WaitForConclude } from './ApplicationStates';
+import BaseState from '../ApplicationStates';
+import ReadyToSendConclude from '../ReadyToSendConclude';
+import WaitForConclude from '../WaitForConclude';
 
 class BasePlayerA extends BaseState {
   constructor({ channel, stake, balances }) {
-    super({ channel, stake, balances });
+    super({ channel, stake, balances, playerIndex: undefined });
     this.playerIndex = 0;
   }
 
   get type() {
+    types;
     return types[this.constructor.name];
   }
 }
