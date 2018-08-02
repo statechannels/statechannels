@@ -21,13 +21,13 @@ const salt = 'abc123';
 
 // todo: rewrite this to use the gameEngine and return actual data
 export default function gameReducer(state = {}, action = {}) {
-  let signedPreFundSetup0Message;
+  let signedPreFundSetupAMessage;
   let signedProposeMessage;
 
   switch (action.type) {
     case types.CHOOSE_OPPONENT:
-      signedPreFundSetup0Message = 'blah';
-      return new playerA.ReadyToSendPreFundSetup0({ ...coreProps, signedPreFundSetup0Message });
+      signedPreFundSetupAMessage = 'blah';
+      return new playerA.ReadyToSendPreFundSetupA({ ...coreProps, signedPreFundSetupAMessage });
 
     case types.CHOOSE_A_PLAY:
       signedProposeMessage = 'blah';
@@ -41,15 +41,15 @@ export default function gameReducer(state = {}, action = {}) {
 
     case types.MESSAGE_SENT:
       switch (state.type) {
-        case playerA.types.ReadyToSendPreFundSetup0:
-          signedPreFundSetup0Message = 'blah';
-          return new playerA.WaitForPreFundSetup1({ ...coreProps, signedPreFundSetup0Message });
-        case playerA.types.ReadyToSendPostFundSetup0:
-          const signedPostFundSetup0Message = 'blah';
-          return new playerA.WaitForPostFundSetup1({
+        case playerA.types.ReadyToSendPreFundSetupA:
+          signedPreFundSetupAMessage = 'blah';
+          return new playerA.WaitForPreFundSetupB({ ...coreProps, signedPreFundSetupAMessage });
+        case playerA.types.ReadyToSendPostFundSetupA:
+          const signedPostFundSetupAMessage = 'blah';
+          return new playerA.WaitForPostFundSetupB({
             ...coreProps,
             adjudicator,
-            signedPostFundSetup0Message,
+            signedPostFundSetupAMessage,
           });
         case playerA.types.ReadyToSendPropose:
           signedProposeMessage = 'blah';
@@ -78,10 +78,10 @@ export default function gameReducer(state = {}, action = {}) {
 
     case types.MESSAGE_RECEIVED:
       switch (state.type) {
-        case playerA.types.WaitForPreFundSetup1:
+        case playerA.types.WaitForPreFundSetupB:
           const deploymentTransaction = 'blah';
           return new playerA.WaitForBlockchainDeploy({ ...coreProps, deploymentTransaction });
-        case playerA.types.WaitForPostFundSetup1:
+        case playerA.types.WaitForPostFundSetupB:
           return new playerA.ReadyToChooseAPlay({ ...coreProps, adjudicator });
         case playerA.types.WaitForAccept:
           const signedRevealMessage = 'blah';
@@ -104,11 +104,11 @@ export default function gameReducer(state = {}, action = {}) {
         case playerA.types.WaitForBlockchainDeploy:
           return new playerA.WaitForBToDeposit({ ...coreProps, adjudicator });
         case playerA.types.WaitForBToDeposit:
-          const signedPostFundSetup0Message = 'blah';
-          return new playerA.ReadyToSendPostFundSetup0({
+          const signedPostFundSetupAMessage = 'blah';
+          return new playerA.ReadyToSendPostFundSetupA({
             ...coreProps,
             adjudicator,
-            signedPostFundSetup0Message,
+            signedPostFundSetupAMessage,
           });
         default:
       }

@@ -2,7 +2,7 @@ import { delay } from 'redux-saga';
 import {
   put, takeEvery, select, fork, call,
 } from 'redux-saga/effects';
-import { types as playerAStates } from '../../game-engine/application-states/ApplicationStatesPlayerA';
+import { types as playerAStates } from '../../game-engine/application-states/PlayerA/index';
 import {
   types, messageReceived, eventReceived, messageSent,
 } from '../actions/game';
