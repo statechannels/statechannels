@@ -1,8 +1,8 @@
 import GameEngine from '../GameEngine';
 import ChannelWallet from '../ChannelWallet';
 import Message from '../Message';
-import * as ApplicationStatesA from '../application-states/PlayerB/index';
-import * as ApplicationStatesB from '../application-states/PlayerA/index';
+import * as ApplicationStatesA from '../application-states/PlayerA/index';
+import * as ApplicationStatesB from '../application-states/PlayerB/index';
 import { Play, Result } from '../pledges';
 import pledgeFromHex from '../pledges/decode';
 
@@ -23,33 +23,33 @@ it('runthrough', () => {
   const gameEngineB = new GameEngine(addressOfLibrary, channelWalletB);
 
   // In A's application
-  const readyToSendPreFundSetup0 = gameEngineA.setupGame(
+  const readyToSendPreFundSetupA = gameEngineA.setupGame(
     addressOfA,
     addressOfB,
     stake,
     initialBals,
   );
-  expect(readyToSendPreFundSetup0.type).toEqual(
-    ApplicationStatesA.types.ReadyToSendPreFundSetup0,
+  expect(readyToSendPreFundSetupA.type).toEqual(
+    ApplicationStatesA.types.ReadyToSendPreFundSetupA,
   );
-  const message0 = readyToSendPreFundSetup0.message;
+  const message0 = readyToSendPreFundSetupA.message;
   const gameState0 = pledgeFromHex(Message.fromHex(message0).state);
   expect(gameState0.turnNum).toEqual(0);
   expect(gameState0.stateCount).toEqual(0);
   expect(gameState0.resolution).toEqual(initialBals);
   expect(gameState0.stake).toEqual(1);
 
-  const waitForPreFundSetup1 = gameEngineA.messageSent({ oldState: readyToSendPreFundSetup0 });
-  expect(waitForPreFundSetup1.type).toEqual(ApplicationStatesA.types.WaitForPreFundSetup1);
-  expect(waitForPreFundSetup1.message).toEqual(message0);
+  const waitForPreFundSetupB = gameEngineA.messageSent({ oldState: readyToSendPreFundSetupA });
+  expect(waitForPreFundSetupB.type).toEqual(ApplicationStatesA.types.WaitForPreFundSetupB);
+  expect(waitForPreFundSetupB.message).toEqual(message0);
 
   // In B's application
   const readyToSendPreFundSetup1 = gameEngineB.prefundProposalReceived({ hexMessage: message0 });
   expect(readyToSendPreFundSetup1.type).toEqual(
     ApplicationStatesB.types.ReadyToSendPreFundSetup1,
   );
-  expect(readyToSendPreFundSetup1._balances).toEqual(initialBals);
-  expect(readyToSendPreFundSetup1.channel).toEqual(waitForPreFundSetup1.channel);
+  expect(readyToSendPreFundSetup1.balances).toEqual(initialBals);
+  expect(readyToSendPreFundSetup1.channel).toEqual(waitForPreFundSetupB.channel);
   expect(readyToSendPreFundSetup1.stake).toEqual(stake);
 
   const message1 = readyToSendPreFundSetup1.message;
@@ -61,12 +61,12 @@ it('runthrough', () => {
 
   const waitForDeployAdjudicatorB = gameEngineB.messageSent({ oldState: readyToSendPreFundSetup1 });
   expect(waitForDeployAdjudicatorB.type).toEqual(ApplicationStatesB.types.WaitForAToDeploy);
-  expect(waitForDeployAdjudicatorB._balances).toEqual(initialBals);
+  expect(waitForDeployAdjudicatorB.balances).toEqual(initialBals);
 
   // In A's application
   const readyToDeployAdjudicator = gameEngineA.receiveMessage({
     message: message1,
-    oldState: waitForPreFundSetup1,
+    oldState: waitForPreFundSetupB,
   });
   expect(readyToDeployAdjudicator.type).toEqual(ApplicationStatesA.types.ReadyToDeploy);
   expect(readyToDeployAdjudicator.transaction).not.toBeUndefined();
@@ -99,26 +99,26 @@ it('runthrough', () => {
   expect(readyToFund.type).toEqual(ApplicationStatesB.types.ReadyToDeposit);
   expect(readyToFund.adjudicator).toEqual(adjudicator);
   expect(readyToFund.transaction).not.toBeUndefined();
-  expect(readyToFund._balances).toEqual(initialBals);
+  expect(readyToFund.balances).toEqual(initialBals);
 
   const waitForFunding1 = gameEngineB.transactionSent({ oldState: readyToFund });
   expect(waitForFunding1.type).toEqual(ApplicationStatesB.types.WaitForPostFundSetup0);
   expect(waitForFunding1.adjudicator).toEqual(adjudicator);
-  expect(waitForFunding1._balances).toEqual(initialBals);
+  expect(waitForFunding1.balances).toEqual(initialBals);
 
   // From the blockchain
   const fundingEvent = { adjudicator: adjudicator, aBalance: 1, bBalance: 2 }; // TODO
 
   // In A's application
-  const readyToSendPostFundSetup0 = gameEngineA.receiveEvent({
+  const readyToSendPostFundSetupA = gameEngineA.receiveEvent({
     event: fundingEvent,
     oldState: waitForFunding0,
   });
-  expect(readyToSendPostFundSetup0.type).toEqual(
-    ApplicationStatesA.types.ReadyToSendPostFundSetup0,
+  expect(readyToSendPostFundSetupA.type).toEqual(
+    ApplicationStatesA.types.ReadyToSendPostFundSetupA,
   );
 
-  const message2 = readyToSendPostFundSetup0.message;
+  const message2 = readyToSendPostFundSetupA.message;
   expect(message2).not.toBeUndefined();
   const gameState2 = pledgeFromHex(message2.state);
   expect(gameState2.turnNum).toEqual(2);
@@ -126,8 +126,8 @@ it('runthrough', () => {
   expect(gameState2.resolution).toEqual(initialBals);
   expect(gameState2.stake).toEqual(1);
 
-  const waitForPostFundSetup1 = gameEngineA.messageSent({ oldState: readyToSendPostFundSetup0 });
-  expect(waitForPostFundSetup1.type).toEqual(ApplicationStatesA.types.WaitForPostFundSetup1);
+  const waitForPostFundSetup1 = gameEngineA.messageSent({ oldState: readyToSendPostFundSetupA });
+  expect(waitForPostFundSetup1.type).toEqual(ApplicationStatesA.types.WaitForPostFundSetupB);
   expect(waitForPostFundSetup1.adjudicator).toEqual(adjudicator);
 
   // In B's application
@@ -138,10 +138,10 @@ it('runthrough', () => {
   expect(readyToSendPostFundSetup1.type).toEqual(
     ApplicationStatesB.types.ReadyToSendPostFundSetup1,
   );
-  expect(readyToSendPostFundSetup1._balances).not.toBeUndefined();
+  expect(readyToSendPostFundSetup1.balances).not.toBeUndefined();
   const message3 = readyToSendPostFundSetup1.message;
   expect(message3).not.toBeUndefined();
-  expect(readyToSendPostFundSetup1._balances).toEqual(initialBals);
+  expect(readyToSendPostFundSetup1.balances).toEqual(initialBals);
 
   const gameState3 = pledgeFromHex(message3.state);
   expect(gameState3.turnNum).toEqual(3);
@@ -225,7 +225,7 @@ it('runthrough', () => {
     oldState: waitForReveal,
   });
   expect(readyToSendResting.type).toEqual(ApplicationStatesB.types.ReadyToSendResting);
-  expect(readyToSendResting._balances).toEqual([6, 3]);
+  expect(readyToSendResting.balances).toEqual([6, 3]);
   const message7 = readyToSendResting.message;
   const gameState7 = pledgeFromHex(message7.state);
   expect(gameState7.turnNum).toEqual(7);

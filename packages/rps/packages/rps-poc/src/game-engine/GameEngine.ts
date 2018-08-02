@@ -51,11 +51,11 @@ export default class GameEngine {
     const nextPledge = new PreFundSetup(channel, 0, balances, 0, stake);
     const message = this.channelWallet.sign(nextPledge.toHex());
 
-    const appState = new ApplicationStatesA.ReadyToSendPreFundSetup0({
+    const appState = new ApplicationStatesA.ReadyToSendPreFundSetupA({
       channel,
       stake,
       balances: balances,
-      signedPreFundSetup0Message: message.toHex(),
+      signedPreFundSetupAMessage: message.toHex(),
     });
 
     return appState;
@@ -85,16 +85,16 @@ export default class GameEngine {
     let newState;
     const { channel, balances, type: stateType, turnNum } = oldState;
 
-    if (stateType === ApplicationStatesA.types.ReadyToSendPreFundSetup0) {
-      newState = new ApplicationStatesA.WaitForPreFundSetup1({
+    if (stateType === ApplicationStatesA.types.ReadyToSendPreFundSetupA) {
+      newState = new ApplicationStatesA.WaitForPreFundSetupB({
         ...oldState.commonAttributes,
-        signedPreFundSetup0Message: oldState.message,
+        signedPreFundSetupAMessage: oldState.message,
       });
-    } else if (stateType === ApplicationStatesA.types.ReadyToSendPostFundSetup0) {
-      newState = new ApplicationStatesA.WaitForPostFundSetup1({
+    } else if (stateType === ApplicationStatesA.types.ReadyToSendPostFundSetupA) {
+      newState = new ApplicationStatesA.WaitForPostFundSetupB({
         ...oldState.commonAttributes,
         adjudicator: oldState.adjudicator,
-        signedPostFundSetup0Message: oldState.message,
+        signedPostFundSetupAMessage: oldState.message,
       });
     } else if (stateType === ApplicationStatesA.types.ReadyToSendPropose) {
       newState = new ApplicationStatesA.WaitForAccept({
@@ -136,12 +136,12 @@ export default class GameEngine {
     const { channel, type: stateType } = oldState;
     const { resolution: balances } = opponentState;
 
-    if (stateType === ApplicationStatesA.types.WaitForPreFundSetup1) {
+    if (stateType === ApplicationStatesA.types.WaitForPreFundSetupB) {
       newState = new ApplicationStatesA.ReadyToDeploy({
         ...oldState.commonAttributes,
         deploymentTransaction: 'the gameEngine needs to construct this',
       });
-    } else if (stateType === ApplicationStatesA.types.WaitForPostFundSetup1) {
+    } else if (stateType === ApplicationStatesA.types.WaitForPostFundSetupB) {
       newState = new ApplicationStatesA.ReadyToChooseAPlay({
         ...oldState.commonAttributes,
         adjudicator: oldState.adjudicator,
@@ -262,10 +262,10 @@ export default class GameEngine {
       );
 
       const message = this.channelWallet.sign(postFundSetup.toHex());
-      newState = new ApplicationStatesA.ReadyToSendPostFundSetup0({
+      newState = new ApplicationStatesA.ReadyToSendPostFundSetupA({
         ...oldState.commonAttributes,
         adjudicator: oldState.adjudicator,
-        signedPostFundSetup0Message: message,
+        signedPostFundSetupAMessage: message,
       });
     } else if (stateType === ApplicationStatesB.types.WaitForAToDeploy) {
       newState = new ApplicationStatesB.ReadyToDeposit({
