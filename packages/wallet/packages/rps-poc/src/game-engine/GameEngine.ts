@@ -84,7 +84,7 @@ export default class GameEngine {
 
   messageSent({ oldState }) {
     let newState;
-    const { _channel: channel, _balances: balances, type: stateType, turnNum } = oldState;
+    const { channel, balances, type: stateType, turnNum } = oldState;
 
     if (stateType === ApplicationStatesA.types.ReadyToSendPreFundSetup0) {
       newState = new ApplicationStatesA.WaitForPreFundSetup1({
@@ -134,7 +134,7 @@ export default class GameEngine {
   receiveMessage({ oldState, message }) {
     let newState;
     const opponentState = decodePledge(message.state);
-    const { _channel: channel, type: stateType } = oldState;
+    const { channel, type: stateType } = oldState;
     const { resolution: balances } = opponentState;
 
     if (stateType === ApplicationStatesA.types.WaitForPreFundSetup1) {
@@ -255,9 +255,9 @@ export default class GameEngine {
       });
     } else if (stateType === ApplicationStatesA.types.WaitForBToDeposit) {
       const postFundSetup = new PostFundSetup(
-        oldState._channel,
+        oldState.channel,
         2, // turnNum
-        oldState._balances,
+        oldState.balances,
         0, // stateCount
         oldState.stake
       );
@@ -280,7 +280,6 @@ export default class GameEngine {
   }
 
   choosePlay(oldState, move: Play) {
-    let gameState;
     let message;
     let newState;
     const opponentGameState = decodePledge(oldState.opponentMessage.state);
@@ -335,9 +334,9 @@ export default class GameEngine {
     let newState;
 
     let concludePledge = new Conclude(
-      oldState._channel,
+      oldState.channel,
       oldPledge.turnNum + 1,
-      oldState._balances
+      oldState.balances
     );
 
     const concludeMessage = this.channelWallet.sign(concludePledge.toHex());
