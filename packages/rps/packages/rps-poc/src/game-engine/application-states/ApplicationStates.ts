@@ -1,6 +1,8 @@
 import { Channel } from 'fmg-core';
 import Message from '../Message';
 
+const EMPTY_MESSAGE = new Message('', '');
+
 export default class BaseState {
   balances: number[];
   channel: Channel;
@@ -9,12 +11,13 @@ export default class BaseState {
   message: Message;
 
   constructor(
-    channel, stake, balances, playerIndex, message=undefined
+    channel, stake, balances, playerIndex, message=EMPTY_MESSAGE
   ) {
     this.balances = balances;
     this.channel = channel;
     this.stake = stake;
     this.playerIndex = playerIndex;
+    this.message = message;
   }
 
   get myAddress() {

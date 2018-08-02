@@ -16,6 +16,7 @@ import WaitForConcludeA from './WaitForConcludeA';
 const PLAYER_INDEX = 0;
 export { PLAYER_INDEX };
 
+// TODO: make types an enum?
 const types = Object.freeze({
   ReadyToSendPreFundSetupA: 'ReadyToSendPreFundSetupA',
   WaitForPreFundSetupB: 'WaitForPreFundSetupB',
