@@ -27,7 +27,7 @@ const itHasSharedFunctionality = (appState) => {
   });
 
   it("returns channelId", () => {
-    expect(appState.channelId).toEqual(channel.channelId);
+    expect(appState.channelId).toEqual(channel.id);
   });
 
   it("returns myBalance", () => {
