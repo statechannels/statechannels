@@ -1,9 +1,12 @@
-import BasePlayerB from './BaseState';
+import BasePlayerB from './Base';
 
 export default class ReadyToDeposit extends BasePlayerB {
-  constructor({ channel, stake, balances, adjudicator, depositTransaction }) {
+  adjudicator: string;
+  transaction;
+
+  constructor(channel, stake, balances, adjudicator, transaction) {
     super(channel, stake, balances);
     this.adjudicator = adjudicator; // address of adjudicator
-    this.transaction = depositTransaction;
+    this.transaction = transaction;
   }
 }

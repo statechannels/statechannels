@@ -17,7 +17,7 @@ export default class Reveal extends State {
     aPlay: Play,
     salt: string,
   ) {
-    const stateType = State.StateTypes.GAME;
+    const stateType = State.StateType.Game;
     super({ channel, stateType, turnNum, resolution: balances });
     this.stake = stake;
     this.bPlay = bPlay;

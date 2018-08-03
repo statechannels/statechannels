@@ -1,8 +1,10 @@
-import BasePlayerB from './BaseState';
+import BasePlayerB from './Base';
 
 export default class ReadyToSendPostFundSetupB extends BasePlayerB {
-  constructor({ channel, stake, balances, adjudicator, signedPostFundSetupBMessage }) {
-    super(channel, stake, balances, signedPostFundSetupBMessage);
+  adjudicator: string;
+
+  constructor(channel, stake, balances, adjudicator, message) {
+    super(channel, stake, balances, message);
     this.adjudicator = adjudicator;
   }
 }
