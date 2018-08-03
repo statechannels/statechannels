@@ -1,13 +1,24 @@
 import { toHex32 } from './utils';
+import { Channel } from './channel';
+
+
 
 class State {
   channel: any;
-  stateType: State.StateTypes
+  stateType: State.StateType
   turnNum: number;
   resolution: number[];
   stateCount: number;
 
-  constructor({channel, stateType, turnNum, resolution, stateCount}) {
+  constructor({channel, stateType, turnNum, resolution, stateCount=0}: 
+    {
+      channel: Channel, 
+      stateType: State.StateType,
+      turnNum: number,
+      resolution: number[],
+      stateCount?: number,
+    }
+  ) {
     this.channel = channel;
     this.stateType = stateType;
     this.turnNum = turnNum;
@@ -45,11 +56,11 @@ class State {
 }
 
 module State {
-  export enum StateTypes {
-    PREFUNDSETUP,
-    POSTFUNDSETUP,
-    GAME,
-    CONCLUDE,
+  export enum StateType {
+    PreFundSetup,
+    PostFundSetup,
+    Game,
+    Conclude,
   }
 }
 

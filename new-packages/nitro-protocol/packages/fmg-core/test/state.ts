@@ -13,7 +13,7 @@ contract('State', (accounts) => {
   const participants = [accounts[1], accounts[2]];
   const resolution = [5, 4];
   const channel = new Channel(channelType, channelNonce, participants);
-  const stateType = State.StateTypes.GAME;
+  const stateType = State.StateType.Game;
   const state = new State({
     channel, stateType, turnNum, resolution, stateCount: 0
   });
