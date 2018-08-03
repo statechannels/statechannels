@@ -6,10 +6,10 @@ export default class BaseState {
   stake: number;
   playerIndex: number; // overwritten by subclass
 
-  constructor( channel, stake, balances) {
-    this.balances = balances;
-    this.channel = channel;
-    this.stake = stake;
+  constructor(params: {channel: Channel, stake: number, balances: number[]}) {
+    this.balances = params.balances;
+    this.channel = params.channel;
+    this.stake = params.stake;
   }
 
   get myAddress() {

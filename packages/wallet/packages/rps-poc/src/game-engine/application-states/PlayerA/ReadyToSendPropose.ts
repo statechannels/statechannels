@@ -8,8 +8,8 @@ export default class ReadyToSendPropose extends BasePlayerA {
   adjudicator;
   message: Message;
 
-  constructor(channel, stake, balances, adjudicator, aPlay, salt, message) {
-    super(channel, stake, balances);
+  constructor({ channel, stake, balances, adjudicator, aPlay, salt, message }) {
+    super({ channel, stake, balances });
     this.aPlay = aPlay;
     this.salt = salt;
     this.message = message;
