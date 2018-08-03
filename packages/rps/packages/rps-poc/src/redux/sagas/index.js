@@ -8,6 +8,7 @@ import {
 } from '../actions/game';
 import opponentSaga from './opponents';
 import loginSaga from './login';
+import messageSaga from './messages';
 import { getApplicationState } from '../store';
 import { reduxSagaFirebase } from '../../gateways/firebase';
 
@@ -40,6 +41,7 @@ function* blockchainResponseFaker() {
 export default function* rootSaga() {
   yield fork(opponentSaga);
   yield fork(loginSaga);
+  yield fork(messageSaga);
   yield takeEvery('*', blockchainResponseFaker);
   yield takeEvery(types.MESSAGE_SENT, messageSender);
   yield takeEvery(types.LOGIN_USER, loginSaga);
