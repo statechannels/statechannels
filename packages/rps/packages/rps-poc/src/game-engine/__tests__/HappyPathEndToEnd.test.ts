@@ -6,6 +6,8 @@ import * as ApplicationStatesB from '../application-states/PlayerB/index';
 import { Play, Result } from '../pledges';
 import pledgeFromHex from '../pledges/decode';
 
+import PreFundSetup from '../pledges/PreFundSetup';
+
 const stake = 1;
 const addressOfLibrary = 0xccc;
 const initialBals = [5, 4];
@@ -33,7 +35,7 @@ it('runthrough', () => {
     ApplicationStatesA.types.ReadyToSendPreFundSetupA,
   );
   const message0 = readyToSendPreFundSetupA.message;
-  const gameState0 = pledgeFromHex(Message.fromHex(message0).state);
+  const gameState0 = pledgeFromHex(Message.fromHex(message0).state) as PreFundSetup;
   expect(gameState0.turnNum).toEqual(0);
   expect(gameState0.stateCount).toEqual(0);
   expect(gameState0.resolution).toEqual(initialBals);
@@ -153,13 +155,13 @@ it('runthrough', () => {
   expect(waitForPropose.type).toEqual(ApplicationStatesB.types.WaitForPropose);
 
   // In A's application
-  const readyToChoosePlayA = gameEngineA.receiveMessage({
+  const readyToChooseAPlay = gameEngineA.receiveMessage({
     message: message3,
     oldState: waitForPostFundSetupB,
   });
-  expect(readyToChoosePlayA.type).toEqual(ApplicationStatesA.types.ReadyToChooseAPlay);
+  expect(readyToChooseAPlay.type).toEqual(ApplicationStatesA.types.ReadyToChooseAPlay);
 
-  const readyToSendPropose = gameEngineA.choosePlay(readyToChoosePlayA, Play.Rock);
+  const readyToSendPropose = gameEngineA.choosePlay(readyToChooseAPlay, Play.Rock);
   expect(readyToSendPropose.type).toEqual(ApplicationStatesA.types.ReadyToSendPropose);
   expect(readyToSendPropose.aPlay).toEqual(Play.Rock);
   expect(readyToSendPropose.message).not.toBeUndefined();
@@ -180,14 +182,14 @@ it('runthrough', () => {
   expect(waitForAccept.salt).toEqual(readyToSendPropose.salt);
 
   // In B's application
-  const readyToChoosePlayB = gameEngineB.receiveMessage({
+  const readyToChooseBPlay = gameEngineB.receiveMessage({
     message: proposal,
     oldState: waitForPropose,
   });
-  expect(readyToChoosePlayB.type).toEqual(ApplicationStatesB.types.ReadyToChooseBPlay);
-  expect(readyToChoosePlayB.opponentMessage).not.toBeUndefined();
+  expect(readyToChooseBPlay.type).toEqual(ApplicationStatesB.types.ReadyToChooseBPlay);
+  expect(readyToChooseBPlay.opponentMessage).not.toBeUndefined();
 
-  const readyToSendAccept = gameEngineB.choosePlay(readyToChoosePlayB, Play.Scissors);
+  const readyToSendAccept = gameEngineB.choosePlay(readyToChooseBPlay, Play.Scissors);
   expect(readyToSendAccept.type).toEqual(ApplicationStatesB.types.ReadyToSendAccept);
   const message5 = readyToSendAccept.message;
   const gameState5 = pledgeFromHex(message5.state);
