@@ -51,18 +51,17 @@ export default class GameEngine {
     const nextPledge = new PreFundSetup(channel, 0, balances, 0, stake);
     const message = this.channelWallet.sign(nextPledge.toHex());
 
-    const appState = new ApplicationStatesA.ReadyToSendPreFundSetupA(
+    const appState = new ApplicationStatesA.ReadyToSendPreFundSetupA({
       channel,
       stake,
       balances,
       message,
-    );
+    });
 
     return appState;
   }
 
-  prefundProposalReceived({ hexMessage }) {
-    const opponentMessage = Message.fromHex(hexMessage);
+  prefundProposalReceived(opponentMessage: Message) {
     const opponentPledge = decodePledge(opponentMessage.state) as PreFundSetup;
 
     const { channel, stake, resolution: balances, turnNum, stateCount } = opponentPledge;
@@ -75,7 +74,7 @@ export default class GameEngine {
       channel,
       balances,
       stake,
-      signedPreFundSetupBMessage: message,
+      message,
     });
 
     return appState;
@@ -88,13 +87,13 @@ export default class GameEngine {
     if (stateType === ApplicationStatesA.types.ReadyToSendPreFundSetupA) {
       newState = new ApplicationStatesA.WaitForPreFundSetupB({
         ...oldState.commonAttributes,
-        signedPreFundSetupAMessage: oldState.message,
+        message: oldState.message,
       });
     } else if (stateType === ApplicationStatesA.types.ReadyToSendPostFundSetupA) {
       newState = new ApplicationStatesA.WaitForPostFundSetupB({
         ...oldState.commonAttributes,
         adjudicator: oldState.adjudicator,
-        signedPostFundSetupAMessage: oldState.message,
+        message: oldState.message,
       });
     } else if (stateType === ApplicationStatesA.types.ReadyToSendPropose) {
       newState = new ApplicationStatesA.WaitForAccept({
@@ -102,7 +101,7 @@ export default class GameEngine {
         adjudicator: oldState.adjudicator,
         aPlay: oldState.aPlay,
         salt: oldState.salt,
-        signedProposeMessage: oldState.message,
+        message: oldState.message,
       });
     } else if (stateType === ApplicationStatesB.types.ReadyToSendPreFundSetupB) {
       newState = new ApplicationStatesB.WaitForAToDeploy({
@@ -116,14 +115,14 @@ export default class GameEngine {
       newState = new ApplicationStatesB.WaitForPropose({
         ...oldState.commonAttributes,
         adjudicator: oldState.adjudicator,
-        signedPostFundSetupBMessage: message,
+        message,
       });
     } else if (stateType === ApplicationStatesB.types.ReadyToSendAccept) {
       newState = new ApplicationStatesB.WaitForReveal({
         ...oldState.commonAttributes,
         adjudicator: oldState.adjudicator,
         bPlay: oldState.bPlay,
-        signedAcceptMessage: oldState.message,
+        message: oldState.message,
       });
     }
 
@@ -134,23 +133,22 @@ export default class GameEngine {
     let newState;
     const opponentState = decodePledge(message.state);
     const { channel, type: stateType } = oldState;
-    const { resolution: balances } = opponentState;
+    const { resolution: balances, turnNum } = opponentState;
 
     if (stateType === ApplicationStatesA.types.WaitForPreFundSetupB) {
       newState = new ApplicationStatesA.ReadyToDeploy({
         ...oldState.commonAttributes,
-        deploymentTransaction: 'the gameEngine needs to construct this',
+        transaction: 'the gameEngine needs to construct this',
       });
     } else if (stateType === ApplicationStatesA.types.WaitForPostFundSetupB) {
       newState = new ApplicationStatesA.ReadyToChooseAPlay({
         ...oldState.commonAttributes,
         adjudicator: oldState.adjudicator,
-        opponentMessage: message,
+        turnNum: turnNum,
       });
     } else if (stateType === ApplicationStatesA.types.WaitForAccept) {
       const { aPlay, salt, stake} = oldState;
       const bPlay = opponentState.bPlay;
-      const turnNum = opponentState.turnNum;
       const result = calculateResult(aPlay, bPlay);
 
       // The opponent's state assumes that B won
@@ -176,13 +174,13 @@ export default class GameEngine {
         bPlay,
         result,
         salt,
-        signedRevealMessage: revealMessage,
+        message: revealMessage,
       });
     } else if (stateType === ApplicationStatesA.types.ReadyToSendReveal) {
       newState = new ApplicationStatesA.ReadyToChooseAPlay({
         ...oldState.commonAttributes,
         adjudicator: oldState.adjudicator,
-        opponentMessage: message,
+        turnNum: turnNum,
       });
     } else if (stateType === ApplicationStatesB.types.WaitForPostFundSetupA) {
       const gameState = new PostFundSetup(
@@ -196,13 +194,14 @@ export default class GameEngine {
       newState = new ApplicationStatesB.ReadyToSendPostFundSetupB({
         ...oldState.commonAttributes,
         adjudicator: oldState.adjudicator,
-        signedPostFundSetupBMessage: response,
+        message: response,
       });
     } else if (stateType === ApplicationStatesB.types.WaitForPropose) {
       newState = new ApplicationStatesB.ReadyToChooseBPlay({
         ...oldState.commonAttributes,
         adjudicator: oldState.adjudicator,
-        opponentMessage: message,
+        turnNum: opponentState.turnNum,
+        preCommit: opponentState.preCommit,
       });
     } else if (stateType === ApplicationStatesB.types.WaitForReveal) {
       const response = new Resting(
@@ -219,7 +218,7 @@ export default class GameEngine {
         result: opponentState.result,
         salt: opponentState.salt,
         balances: opponentState.resolution,
-        signedRestingMessage: this.channelWallet.sign(response.toHex()),
+        message: this.channelWallet.sign(response.toHex()),
       });
     }
 
@@ -265,13 +264,13 @@ export default class GameEngine {
       newState = new ApplicationStatesA.ReadyToSendPostFundSetupA({
         ...oldState.commonAttributes,
         adjudicator: oldState.adjudicator,
-        signedPostFundSetupAMessage: message,
+        message,
       });
     } else if (stateType === ApplicationStatesB.types.WaitForAToDeploy) {
       newState = new ApplicationStatesB.ReadyToDeposit({
         ...oldState.commonAttributes,
         adjudicator: event.adjudicator,
-        depositTransaction: 'the gameEngine needs to construct this',
+        transaction: 'the gameEngine needs to construct this',
       });
     }
 
@@ -281,21 +280,16 @@ export default class GameEngine {
   choosePlay(oldState, move: Play) {
     let message;
     let newState;
-    const opponentGameState = decodePledge(oldState.opponentMessage.state);
-    const { resolution: balances, turnNum, stake, channel } = opponentGameState;
+    const { balances, turnNum, stake, channel } = oldState;
 
     if (oldState.type === ApplicationStatesA.types.ReadyToChooseAPlay) {
       const aPlay = move;
       const salt = 'salt';
 
-      let newBalances = [...balances];
-      newBalances[0] -= opponentGameState.stake;
-      newBalances[1] += opponentGameState.stake;
-
       const nextPledge = Propose.createWithPlayAndSalt(
         channel,
         turnNum + 1,
-        newBalances,
+        balances,
         stake,
         aPlay,
         salt
@@ -308,20 +302,27 @@ export default class GameEngine {
         adjudicator: oldState.adjudicator,
         aPlay,
         salt,
-        signedProposeMessage: message,
+        message,
       });
     } else if (oldState.type === ApplicationStatesB.types.ReadyToChooseBPlay) {
       const bPlay = move;
-      const preCommit = opponentGameState.preCommit;
-      const acceptPledge = new Accept(channel, turnNum + 1, balances, stake, preCommit, bPlay);
+      const preCommit = oldState.preCommit;
+
+      let newBalances = [...balances];
+      newBalances[0] -= stake;
+      newBalances[1] += stake;
+
+      const acceptPledge = new Accept(channel, turnNum + 1, newBalances, stake, preCommit, bPlay);
 
       message = this.channelWallet.sign(acceptPledge.toHex());
 
       newState = new ApplicationStatesB.ReadyToSendAccept({
-        ...oldState.commonAttributes,
+        channel,
+        stake,
+        balances: newBalances,
         adjudicator: oldState.adjudicator,
         bPlay,
-        signedAcceptMessage: message,
+        message,
       });
     }
     return newState;
@@ -344,13 +345,13 @@ export default class GameEngine {
       newState = new ApplicationStatesA.ReadyToSendConcludeA({
         ...oldState.commonAttributes,
         adjudicator: oldState.adjudicator,
-        signedConcludeMessage: concludeMessage,
+        message: concludeMessage,
       });
     } else if (oldPledge.turnNum % 2 === 1) {
       newState = new ApplicationStatesB.ReadyToSendConcludeB({
         ...oldState.commonAttributes,
         adjudicator: oldState.adjudicator,
-        signedConcludeMessage: concludeMessage,
+        message: concludeMessage,
       });
     }
     return newState;
