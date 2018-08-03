@@ -1,10 +1,12 @@
 import { Channel } from 'fmg-core';
 import * as AppStates from '..';
+import Message from '../../../Message';
+import { Play, Result } from '../../../pledges';
 
-const gameLibrary = 0x111;
+const gameLibrary = '0xc1912fee45d61c87cc5ea59dae31190fffff232d';
 const channelNonce = 15;
-const participantA = 0xa;
-const participantB = 0xb;
+const participantA = '0xc1912fee45d61c87cc5ea59dae31190fffff232d';
+const participantB = '0xc1912fee45d61c87cc5ea59dae31190fffff232d';
 const participants = [participantA, participantB];
 const channel = new Channel(gameLibrary, channelNonce, participants);
 const stake = 1;
@@ -13,10 +15,11 @@ const bBal = 5
 const balances = [aBal, bBal];
 const coreProps = { channel, stake, balances };
 const adjudicator = 0xc;
-const aPlay = "rock";
-const bPlay = "scissors";
+const aPlay = Play.Rock;
+const bPlay = Play.Scissors;
 const salt = "abc123";
-
+const message = new Message('state', 'signature'); // fake message
+const result = Result.AWon;
 
 const itHasSharedFunctionality = (appState) => {
   it("returns myAddress", () => {
@@ -28,7 +31,7 @@ const itHasSharedFunctionality = (appState) => {
   });
 
   it("returns channelId", () => {
-    expect(appState.channelId).toEqual(channel.channelId);
+    expect(appState.channelId).toEqual(channel.id);
   });
 
   it("returns myBalance", () => {
@@ -41,13 +44,12 @@ const itHasSharedFunctionality = (appState) => {
 };
 
 describe("ReadyToSendPreFundSetupB", () => {
-  let signedPreFundSetupBMessage = "blahblah";
-  let appState = new AppStates.ReadyToSendPreFundSetupB({ ...coreProps, signedPreFundSetupBMessage });
+  let appState = new AppStates.ReadyToSendPreFundSetupB({ ...coreProps, message });
 
   itHasSharedFunctionality(appState);
 
   it("has a message", () => {
-    expect(appState.message).toEqual(signedPreFundSetupBMessage);
+    expect(appState.message).toEqual(message);
   });
 });
 
@@ -58,13 +60,13 @@ describe("WaitForAToDeploy", () => {
 });
 
 describe("ReadyToDeposit", () => {
-  let depositTransaction = { some: "transaction properties" };
-  let appState = new AppStates.ReadyToDeposit({ ...coreProps, adjudicator, depositTransaction });
+  let transaction = { some: "transaction properties" };
+  let appState = new AppStates.ReadyToDeposit({ ...coreProps, adjudicator, transaction });
 
   itHasSharedFunctionality(appState);
 
   it("has a transaction", () => {
-    expect(appState.transaction).toEqual(depositTransaction);
+    expect(appState.transaction).toEqual(transaction);
   });
 
   it("returns the address of the adjudicator", () => {
@@ -93,11 +95,10 @@ describe("WaitForPostFundSetupA", () => {
 });
 
 describe("ReadyToSendPostFundSetupB", () => {
-  let signedPostFundSetupBMessage = "some message";
   let appState = new AppStates.ReadyToSendPostFundSetupB({
     ...coreProps,
     adjudicator,
-    signedPostFundSetupBMessage,
+    message,
   });
 
   itHasSharedFunctionality(appState);
@@ -107,16 +108,15 @@ describe("ReadyToSendPostFundSetupB", () => {
   });
 
   it("has a message", () => {
-    expect(appState.message).toEqual(signedPostFundSetupBMessage);
+    expect(appState.message).toEqual(message);
   });
 });
 
 describe("WaitForPropose", () => {
-  let signedPostFundSetupBMessage = "some message";
   let appState = new AppStates.WaitForPropose({
     ...coreProps,
     adjudicator,
-    signedPostFundSetupBMessage,
+    message,
   });
 
   itHasSharedFunctionality(appState);
@@ -126,7 +126,7 @@ describe("WaitForPropose", () => {
   });
 
   it("has a message", () => {
-    expect(appState.message).toEqual(signedPostFundSetupBMessage);
+    expect(appState.message).toEqual(message);
   });
 });
 
@@ -144,12 +144,11 @@ describe("ReadyToChooseBPlay", () => {
 });
 
 describe("ReadyToSendAccept", () => {
-  let signedAcceptMessage = "some message";
   let appState = new AppStates.ReadyToSendAccept({
     ...coreProps,
     adjudicator,
     bPlay,
-    signedAcceptMessage,
+    message,
   });
 
   itHasSharedFunctionality(appState);
@@ -163,17 +162,16 @@ describe("ReadyToSendAccept", () => {
   });
 
   it("has a message", () => {
-    expect(appState.message).toEqual(signedAcceptMessage);
+    expect(appState.message).toEqual(message);
   });
 });
 
 describe("WaitForReveal", () => {
-  let signedAcceptMessage = "some message";
   let appState = new AppStates.WaitForReveal({
     ...coreProps,
     adjudicator,
     bPlay,
-    signedAcceptMessage,
+    message,
   });
 
   itHasSharedFunctionality(appState);
@@ -187,13 +185,11 @@ describe("WaitForReveal", () => {
   });
 
   it("has a message", () => {
-    expect(appState.message).toEqual(signedAcceptMessage);
+    expect(appState.message).toEqual(message);
   });
 });
 
 describe("ReadyToSendResting", () => {
-  let signedRestingMessage = "some message";
-  let result = "lose";
   let appState = new AppStates.ReadyToSendResting({
     ...coreProps,
     adjudicator,
@@ -201,7 +197,7 @@ describe("ReadyToSendResting", () => {
     aPlay,
     salt,
     result,
-    signedRestingMessage,
+    message,
   });
 
   itHasSharedFunctionality(appState);
@@ -227,6 +223,6 @@ describe("ReadyToSendResting", () => {
   });
 
   it("has a message", () => {
-    expect(appState.message).toEqual(signedRestingMessage);
+    expect(appState.message).toEqual(message);
   });
 });
