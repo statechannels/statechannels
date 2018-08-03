@@ -1,8 +1,8 @@
 import { Channel } from 'fmg-core';
 
 import { GE_STAGES } from '../constants';
-import * as ApplicationStatesA from './application-states/PlayerA/index';
-import * as ApplicationStatesB from './application-states/PlayerB/index';
+import * as ApplicationStatesA from './application-states/PlayerA';
+import * as ApplicationStatesB from './application-states/PlayerB';
 import Message from './Message';
 import ChannelWallet from './ChannelWallet';
 import decodePledge from './pledges/decode';
@@ -51,12 +51,12 @@ export default class GameEngine {
     const nextPledge = new PreFundSetup(channel, 0, balances, 0, stake);
     const message = this.channelWallet.sign(nextPledge.toHex());
 
-    const appState = new ApplicationStatesA.ReadyToSendPreFundSetupA({
+    const appState = new ApplicationStatesA.ReadyToSendPreFundSetupA(
       channel,
       stake,
-      balances: balances,
-      signedPreFundSetupAMessage: message.toHex(),
-    });
+      balances,
+      message,
+    );
 
     return appState;
   }

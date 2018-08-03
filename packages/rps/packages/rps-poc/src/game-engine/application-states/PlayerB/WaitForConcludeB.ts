@@ -1,16 +1,14 @@
-import WaitForConclude from '../WaitForConclude';
+import BasePlayerB from './Base';
+import Message from '../../Message';
 
-import {PLAYER_INDEX} from './index';
+export default class WaitForConcludeB extends BasePlayerB {
+  message: Message;
+  adjudicator: string;
 
-export default class WaitForConcludeB extends WaitForConclude {
-  constructor({
-    channel,
-    balances,
-    adjudicator,
-    signedConcludeMessage,
-  }) {
-    super(
-      channel, balances, adjudicator, PLAYER_INDEX, signedConcludeMessage
- );
+  constructor(channel, balances, adjudicator, message) {
+    const stake = 0;
+    super(channel, balances, stake);
+    this.message = message;
+    this.adjudicator = adjudicator;
   }
 }

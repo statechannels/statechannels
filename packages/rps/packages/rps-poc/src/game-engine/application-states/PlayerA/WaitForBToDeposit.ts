@@ -1,7 +1,9 @@
-import BasePlayerA from './BaseState';
+import BasePlayerA from './Base';
 
 export default class WaitForBToDeposit extends BasePlayerA {
-  constructor({ channel, stake, balances, adjudicator }) {
+  adjudicator: string; // address
+
+  constructor(channel, stake, balances, adjudicator) {
     super(channel, stake, balances);
     this.adjudicator = adjudicator;
   }

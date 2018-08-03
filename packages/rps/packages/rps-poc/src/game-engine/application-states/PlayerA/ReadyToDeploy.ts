@@ -1,8 +1,10 @@
-import BasePlayerA from './BaseState';
+import BasePlayerA from './Base';
 
 export default class ReadyToDeploy extends BasePlayerA {
-  constructor({ channel, stake, balances, deploymentTransaction }) {
+  transaction;
+
+  constructor(channel, stake, balances, transaction) {
     super(channel, stake, balances);
-    this.transaction = deploymentTransaction;
+    this.transaction = transaction;
   }
 }
