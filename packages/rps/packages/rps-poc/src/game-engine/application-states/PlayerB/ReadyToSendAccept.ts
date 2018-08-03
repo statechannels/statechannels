@@ -7,8 +7,8 @@ export default class ReadyToSendAccept extends BasePlayerB {
   adjudicator: string;
   bPlay: Play;
 
-  constructor(channel, stake, balances, adjudicator, bPlay, message) {
-    super(channel, stake, balances);
+  constructor({ channel, stake, balances, adjudicator, bPlay, message }) {
+    super({ channel, stake, balances });
     this.message = message;
     this.adjudicator = adjudicator;
     this.bPlay = bPlay;
