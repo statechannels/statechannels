@@ -1,8 +1,13 @@
-import BasePlayerA from './BaseState';
+import BasePlayerA from './Base';
+import Message from '../../Message';
 
 export default class WaitForPostFundSetupB extends BasePlayerA {
-  constructor({ channel, stake, balances, adjudicator, signedPostFundSetupAMessage }) {
-    super(channel, stake, balances, signedPostFundSetupAMessage);
+  adjudicator: string; // address
+  message: Message;
+
+  constructor(channel, stake, balances, adjudicator, message) {
+    super(channel, stake, balances);
     this.adjudicator = adjudicator;
+    this.message = message;
   }
 }

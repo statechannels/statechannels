@@ -1,12 +1,15 @@
-import ReadyToSendConclude from '../ReadyToSendConclude';
-import { PLAYER_INDEX } from './index';
+import BasePlayerB from './Base';
+import Message from '../../Message';
 
-export default class ReadyToSendConcludeB extends ReadyToSendConclude {
-  constructor({
-    channel, balances, adjudicator, signedConcludeMessage,
-  }) {
-    super(
-      channel, balances, adjudicator, PLAYER_INDEX, signedConcludeMessage
+export default class ReadyToSendConcludeB extends BasePlayerB {
+  message: Message;
+  adjudicator: string;
+
+  constructor(channel, balances, adjudicator, message) {
+    const stake = 0;
+    super(channel, balances, stake);
+    this.message = message;
+    this.adjudicator = adjudicator;
  );
   }
 }

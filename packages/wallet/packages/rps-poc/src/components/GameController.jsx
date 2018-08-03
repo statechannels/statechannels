@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import OpponentSelectionStep from './OpponentSelectionStep';
 import WaitingStep from './WaitingStep';
 import SelectPlayStep from './SelectPlayStep';
-import { types as playerAStates } from '../game-engine/application-states/PlayerA/index';
+import { types as playerAStates } from '../game-engine/application-states/PlayerA';
 
 export default class GameController extends PureComponent {
   render() {

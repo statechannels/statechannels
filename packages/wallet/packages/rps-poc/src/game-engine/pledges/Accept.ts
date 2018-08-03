@@ -14,7 +14,7 @@ export default class Accept extends State {
     preCommit: string,
     bPlay: Play,
   ) {
-    const stateType = State.StateTypes.GAME;
+    const stateType = State.StateType.Game;
     super({ channel, stateType, turnNum, resolution: balances });
     this.stake = stake;
     this.preCommit = preCommit;

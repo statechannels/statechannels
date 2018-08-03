@@ -1,4 +1,4 @@
-import makeEnum from '../lib/make_enum';
+import makeEnum from '../../lib/make_enum';
 
 export const types = makeEnum([
   'SYNC_MESSAGES',

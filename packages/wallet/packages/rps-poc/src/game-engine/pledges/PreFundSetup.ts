@@ -11,7 +11,7 @@ export default class PreFundSetup extends State {
     stateCount: number,
     stake: number,
   ) {
-    const stateType = State.StateTypes.PREFUNDSETUP;
+    const stateType = State.StateType.PreFundSetup;
     super({ channel, stateType, turnNum, stateCount, resolution: balances });
     this.stake = stake;
   }

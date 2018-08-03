@@ -1,8 +1,11 @@
-import BasePlayerA from './BaseState';
+import BasePlayerA from './Base';
+import Message from '../../Message';
 
 export default class WaitForPreFundSetupB extends BasePlayerA {
-  constructor({ channel, stake, balances, signedPreFundSetupAMessage }) {
+  message: Message;
+
+  constructor(channel, stake, balances, message) {
     super(channel, stake, balances);
-    this.message = signedPreFundSetupAMessage; // in case a resend is required
+    this.message = message; // in case a resend is required
   }
 }
