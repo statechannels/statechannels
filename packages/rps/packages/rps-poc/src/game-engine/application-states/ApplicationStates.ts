@@ -27,7 +27,7 @@ export default class BaseState {
   }
 
   get channelId() {
-    return this.channel.channelId;
+    return this.channel.id;
   }
 
   get myBalance() {
