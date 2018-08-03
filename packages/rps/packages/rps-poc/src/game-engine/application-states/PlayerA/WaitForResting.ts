@@ -10,8 +10,8 @@ export default class WaitForResting extends BasePlayerA {
   salt: string;
   adjudicator: string;
 
-  constructor(channel, stake, balances, adjudicator, aPlay, bPlay, result, salt, message) {
-    super(channel, stake, balances);
+  constructor({ channel, stake, balances, adjudicator, aPlay, bPlay, result, salt, message }) {
+    super({ channel, stake, balances });
     this.message = message;
     this.aPlay = aPlay;
     this.bPlay = bPlay;
