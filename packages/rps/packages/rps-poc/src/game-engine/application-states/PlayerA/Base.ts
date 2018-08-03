@@ -1,11 +1,12 @@
 import BaseState from '../Base';
+import { Channel } from 'fmg-core';
 import { types } from '.';
 
 export default class BasePlayerA extends BaseState {
   playerIndex = 0;
 
-  constructor(channel, stake, balances) {
-    super(channel, stake, balances);
+  constructor(params: {channel: Channel, stake: number, balances: number[]}) {
+    super(params);
   }
 
   get type() {

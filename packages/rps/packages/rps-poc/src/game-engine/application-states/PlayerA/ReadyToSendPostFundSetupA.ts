@@ -5,8 +5,8 @@ export default class ReadyToSendPostFundSetupA extends BasePlayerA {
   adjudicator: string; // address
   message: Message;
 
-  constructor(channel, stake, balances, adjudicator, message) {
-    super(channel, stake, balances);
+  constructor({ channel, stake, balances, adjudicator, message }) {
+    super({ channel, stake, balances });
     this.adjudicator = adjudicator;
     this.message = message;
   }
