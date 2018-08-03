@@ -24,19 +24,19 @@ class CountingBaseState extends State {
 }
 
 class PreFundSetupState extends CountingBaseState {
-  initialize() { this.stateType = State.StateTypes.PREFUNDSETUP; }
+  initialize() { this.stateType = State.StateType.PreFundSetup; }
 }
 
 class PostFundSetupState extends CountingBaseState {
-  initialize() { this.stateType = State.StateTypes.POSTFUNDSETUP; }
+  initialize() { this.stateType = State.StateType.PostFundSetup; }
 }
 
 class GameState extends CountingBaseState {
-  initialize() { this.stateType = State.StateTypes.GAME; }
+  initialize() { this.stateType = State.StateType.Game; }
 }
 
 class ConcludeState extends CountingBaseState {
-  initialize() { this.stateType = State.StateTypes.CONCLUDE; }
+  initialize() { this.stateType = State.StateType.Conclude; }
 }
 
 export { CountingGame };
