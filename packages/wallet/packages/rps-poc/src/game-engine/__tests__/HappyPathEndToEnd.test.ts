@@ -4,9 +4,8 @@ import Message from '../Message';
 import * as ApplicationStatesA from '../application-states/PlayerA/index';
 import * as ApplicationStatesB from '../application-states/PlayerB/index';
 import { Play, Result } from '../pledges';
+import * as Pledges from '../pledges';
 import pledgeFromHex from '../pledges/decode';
-
-import PreFundSetup from '../pledges/PreFundSetup';
 
 const stake = 1;
 const addressOfLibrary = 0xccc;
@@ -35,7 +34,7 @@ it('runthrough', () => {
     ApplicationStatesA.types.ReadyToSendPreFundSetupA,
   );
   const message0 = readyToSendPreFundSetupA.message;
-  const gameState0 = pledgeFromHex(Message.fromHex(message0).state) as PreFundSetup;
+  const gameState0 = pledgeFromHex(Message.fromHex(message0).state) as Pledges.PreFundSetup;
   expect(gameState0.turnNum).toEqual(0);
   expect(gameState0.stateCount).toEqual(0);
   expect(gameState0.resolution).toEqual(initialBals);
@@ -54,8 +53,8 @@ it('runthrough', () => {
   expect(readyToSendPreFundSetupB.channel).toEqual(waitForPreFundSetupB.channel);
   expect(readyToSendPreFundSetupB.stake).toEqual(stake);
 
-  const message1 = readyToSendPreFundSetupB.message;
-  const gameState1 = pledgeFromHex(message1.state);
+  const message1 = readyToSendPreFundSetupB.message as Message;
+  const gameState1 = pledgeFromHex(message1.state) as Pledges.PreFundSetup;
   expect(gameState1.turnNum).toEqual(1);
   expect(gameState1.stateCount).toEqual(1);
   expect(gameState1.resolution).toEqual(initialBals);
@@ -122,7 +121,7 @@ it('runthrough', () => {
 
   const message2 = readyToSendPostFundSetupA.message;
   expect(message2).not.toBeUndefined();
-  const gameState2 = pledgeFromHex(message2.state);
+  const gameState2 = pledgeFromHex(message2.state) as Pledges.PostFundSetup;
   expect(gameState2.turnNum).toEqual(2);
   expect(gameState2.stateCount).toEqual(0);
   expect(gameState2.resolution).toEqual(initialBals);
@@ -145,7 +144,7 @@ it('runthrough', () => {
   expect(message3).not.toBeUndefined();
   expect(readyToSendPostFundSetupB.balances).toEqual(initialBals);
 
-  const gameState3 = pledgeFromHex(message3.state);
+  const gameState3 = pledgeFromHex(message3.state) as Pledges.PostFundSetup;
   expect(gameState3.turnNum).toEqual(3);
   expect(gameState3.stateCount).toEqual(1);
   expect(gameState3.resolution).toEqual(initialBals);
@@ -167,13 +166,12 @@ it('runthrough', () => {
   expect(readyToSendPropose.message).not.toBeUndefined();
   expect(readyToSendPropose.salt).not.toBeUndefined();
 
-  const gameState4 = pledgeFromHex(readyToSendPropose.message.state);
+  const gameState4 = pledgeFromHex(readyToSendPropose.message.state) as Pledges.Propose;
   expect(gameState4.turnNum).toEqual(4);
   expect(gameState4.stake).toEqual(1);
   expect(gameState4.resolution).toEqual(bWinsBals);
 
   const waitForAccept = gameEngineA.messageSent({
-    message: readyToSendPropose.message,
     oldState: readyToSendPropose,
   });
   expect(waitForAccept.type).toEqual(ApplicationStatesA.types.WaitForAccept);
@@ -192,7 +190,7 @@ it('runthrough', () => {
   const readyToSendAccept = gameEngineB.choosePlay(readyToChooseBPlay, Play.Scissors);
   expect(readyToSendAccept.type).toEqual(ApplicationStatesB.types.ReadyToSendAccept);
   const message5 = readyToSendAccept.message;
-  const gameState5 = pledgeFromHex(message5.state);
+  const gameState5 = pledgeFromHex(message5.state) as Pledges.Accept;
   expect(gameState5.turnNum).toEqual(5);
   expect(gameState5.stake).toEqual(1);
   expect(gameState5.resolution).toEqual(bWinsBals);
@@ -214,7 +212,7 @@ it('runthrough', () => {
   expect(readyToSendReveal.result).toEqual(Result.AWon);
 
   const message6 = readyToSendReveal.message;
-  const gameState6 = pledgeFromHex(message6.state);
+const gameState6 = pledgeFromHex(message6.state) as Pledges.Reveal;
   expect(gameState6.turnNum).toEqual(6);
   expect(gameState6.stake).toEqual(1);
   expect(gameState6.aPlay).toEqual(Play.Rock);
@@ -254,7 +252,7 @@ it('runthrough', () => {
     oldState: readyToSendResting,
   });
 
-  expect(readyToSendConclude.type).toEqual(ApplicationStatesB.readyToSendConclude);
+  expect(readyToSendConclude instanceof ApplicationStatesB.ReadyToSendConcludeB).toBe(true);
   expect(readyToSendConclude.message).not.toBeUndefined();
   const gameState8_1 = pledgeFromHex(readyToSendConclude.message.state);
 
