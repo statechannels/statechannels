@@ -12,37 +12,32 @@ import ReadyToSendResting from './ReadyToSendResting';
 import ReadyToSendConcludeB from './ReadyToSendConcludeB';
 import WaitForConcludeB from './WaitForConcludeB';
 
-export const PLAYER_INDEX = 1
+export type PlayerBState = (
+  ReadyToSendPreFundSetupB |
+  WaitForAToDeploy |
+  ReadyToDeposit |
+  WaitForBlockchainDeposit |
+  WaitForPostFundSetupA |
+  ReadyToSendPostFundSetupB |
+  WaitForPropose |
+  ReadyToChooseBPlay |
+  ReadyToSendAccept |
+  WaitForReveal |
+  ReadyToSendResting |
+  ReadyToSendConcludeB |
+  WaitForConcludeB 
+);
 
-const types = {
-  ReadyToSendPreFundSetupB: 'ReadyToSendPreFundSetupB',
-  WaitForAToDeploy: 'WaitForAToDeploy',
-  ReadyToDeposit: 'ReadyToDeposit',
-  WaitForBlockchainDeposit: 'WaitForBlockchainDeposit',
-  WaitForPostFundSetupA: 'WaitForPostFundSetupA',
-  ReadyToSendPostFundSetupB: 'ReadyToSendPostFundSetupB',
-  WaitForPropose: 'WaitForPropose',
-  ReadyToChooseBPlay: 'ReadyToChooseBPlay',
-  ReadyToSendAccept: 'ReadyToSendAccept',
-  WaitForReveal: 'WaitForReveal',
-  ReadyToSendResting: 'ReadyToSendResting',
-  ReadyToSendConcludeB: 'ReadyToSendConcludeB',
-  WaitForConcludeB: 'WaitForConcludeB',
-};
-
-export {
-  types,
-  ReadyToSendPreFundSetupB,
-  WaitForAToDeploy,
-  ReadyToDeposit,
-  WaitForBlockchainDeposit,
-  WaitForPostFundSetupA,
-  ReadyToSendPostFundSetupB,
-  WaitForPropose,
-  ReadyToChooseBPlay,
-  ReadyToSendAccept,
-  WaitForReveal,
-  ReadyToSendResting,
-  ReadyToSendConcludeB,
-  WaitForConcludeB,
-};
+export { ReadyToSendPreFundSetupB };
+export { WaitForAToDeploy };
+export { ReadyToDeposit };
+export { WaitForBlockchainDeposit };
+export { WaitForPostFundSetupA };
+export { ReadyToSendPostFundSetupB };
+export { WaitForPropose };
+export { ReadyToChooseBPlay };
+export { ReadyToSendAccept };
+export { WaitForReveal };
+export { ReadyToSendResting };
+export { ReadyToSendConcludeB };
+export { WaitForConcludeB };

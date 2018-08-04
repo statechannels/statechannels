@@ -13,41 +13,34 @@ import WaitForResting from './WaitForResting';
 import ReadyToSendConcludeA from './ReadyToSendConcludeA';
 import WaitForConcludeA from './WaitForConcludeA';
 
-const PLAYER_INDEX = 0;
-export { PLAYER_INDEX };
-
-// TODO: make types an enum?
-const types = Object.freeze({
-  ReadyToSendPreFundSetupA: 'ReadyToSendPreFundSetupA',
-  WaitForPreFundSetupB: 'WaitForPreFundSetupB',
-  ReadyToDeploy: 'ReadyToDeploy',
-  WaitForBlockchainDeploy: 'WaitForBlockchainDeploy',
-  WaitForBToDeposit: 'WaitForBToDeposit',
-  ReadyToSendPostFundSetupA: 'ReadyToSendPostFundSetupA',
-  WaitForPostFundSetupB: 'WaitForPostFundSetupB',
-  ReadyToChooseAPlay: 'ReadyToChooseAPlay',
-  ReadyToSendPropose: 'ReadyToSendPropose',
-  WaitForAccept: 'WaitForAccept',
-  ReadyToSendReveal: 'ReadyToSendReveal',
-  WaitForResting: 'WaitForResting',
-  ReadyToSendConcludeA: 'ReadyToSendConcludeA',
-  WaitForConcludeA: 'WaitForConcludeA',
-});
-
-export {
-  types,
-  ReadyToSendPreFundSetupA,
-  WaitForPreFundSetupB,
-  ReadyToDeploy,
-  WaitForBlockchainDeploy,
-  WaitForBToDeposit,
-  ReadyToSendPostFundSetupA,
-  WaitForPostFundSetupB,
-  ReadyToChooseAPlay,
-  ReadyToSendPropose,
-  WaitForAccept,
-  ReadyToSendReveal,
-  WaitForResting,
-  ReadyToSendConcludeA,
-  WaitForConcludeA,
-};
+export type PlayerAState = (
+  ReadyToSendPreFundSetupA |
+  WaitForPreFundSetupB |
+  ReadyToDeploy |
+  WaitForBlockchainDeploy |
+  WaitForBToDeposit |
+  ReadyToSendPostFundSetupA |
+  WaitForPostFundSetupB |
+  ReadyToChooseAPlay |
+  ReadyToSendPropose |
+  WaitForAccept |
+  ReadyToSendReveal |
+  WaitForResting |
+  ReadyToSendConcludeA |
+  WaitForConcludeA
+);
+  
+export { ReadyToSendPreFundSetupA };
+export { WaitForPreFundSetupB };
+export { ReadyToDeploy };
+export { WaitForBlockchainDeploy };
+export { WaitForBToDeposit };
+export { ReadyToSendPostFundSetupA };
+export { WaitForPostFundSetupB };
+export { ReadyToChooseAPlay };
+export { ReadyToSendPropose };
+export { WaitForAccept };
+export { ReadyToSendReveal };
+export { WaitForResting };
+export { ReadyToSendConcludeA };
+export { WaitForConcludeA };
