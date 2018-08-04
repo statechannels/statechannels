@@ -51,10 +51,6 @@ describe("ReadyToSendPreFundSetupA", () => {
   it("has a message", () => {
     expect(appState.message).toEqual(message);
   });
-
-  it("has the right type", () => {
-    expect(appState.type).toEqual(AppStates.types.ReadyToSendPreFundSetupA);
-  });
 });
 
 describe("WaitForPreFundSetupB", () => {
