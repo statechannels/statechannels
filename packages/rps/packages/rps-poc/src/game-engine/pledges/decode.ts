@@ -17,7 +17,7 @@ const STATE_BYTES = 32 + 32 + 32 + 32 * N_PLAYERS; // stateType, turnNum, stateC
 const GAME_ATTRIBUTE_OFFSET = CHANNEL_BYTES + STATE_BYTES;
 
 function extractInt(hexString: string, byteOffset: number = 0, numBytes: number = 32) {
-  return parseInt(extractBytes(hexString, byteOffset, numBytes));
+  return parseInt(extractBytes(hexString, byteOffset, numBytes), 16);
 }
 
 function extractBytes(hexString: string, byteOffset: number = 0, numBytes: number = 32) {
@@ -29,7 +29,7 @@ function extractChannel(hexString: string) {
   const channelType = extractBytes(hexString);
   const channelNonce = extractInt(hexString, 32);
   const nPlayers = extractInt(hexString, 64);
-  if (nPlayers != N_PLAYERS) {
+  if (nPlayers !== N_PLAYERS) {
     throw new Error(
       `Rock-paper-scissors requires exactly ${N_PLAYERS} players. ${nPlayers} provided.`
     );
@@ -130,8 +130,8 @@ export default function decode(hexString) {
       const stakePre = extractStake(hexString);
       return new PreFundSetup(channel, turnNum, balances, stateCountPre, stakePre);
     case State.StateType.PostFundSetup:
-      let stateCountPost = extractStateCount(hexString);
-      let stakePost = extractStake(hexString);
+      const stateCountPost = extractStateCount(hexString);
+      const stakePost = extractStake(hexString);
       return new PostFundSetup(channel, turnNum, balances, stateCountPost, stakePost);
     case State.StateType.Game:
       return decodeGameState(channel, turnNum, balances, hexString);
