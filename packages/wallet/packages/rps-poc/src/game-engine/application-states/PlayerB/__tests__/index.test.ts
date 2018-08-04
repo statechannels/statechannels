@@ -44,7 +44,7 @@ const itHasSharedFunctionality = (appState) => {
 };
 
 describe("ReadyToSendPreFundSetupB", () => {
-  let appState = new AppStates.ReadyToSendPreFundSetupB({ ...coreProps, message });
+  const appState = new AppStates.ReadyToSendPreFundSetupB({ ...coreProps, message });
 
   itHasSharedFunctionality(appState);
 
@@ -54,14 +54,14 @@ describe("ReadyToSendPreFundSetupB", () => {
 });
 
 describe("WaitForAToDeploy", () => {
-  let appState = new AppStates.WaitForAToDeploy({ ...coreProps });
+  const appState = new AppStates.WaitForAToDeploy({ ...coreProps });
 
   itHasSharedFunctionality(appState);
 });
 
 describe("ReadyToDeposit", () => {
-  let transaction = { some: "transaction properties" };
-  let appState = new AppStates.ReadyToDeposit({ ...coreProps, adjudicator, transaction });
+  const transaction = { some: "transaction properties" };
+  const appState = new AppStates.ReadyToDeposit({ ...coreProps, adjudicator, transaction });
 
   itHasSharedFunctionality(appState);
 
@@ -75,7 +75,7 @@ describe("ReadyToDeposit", () => {
 });
 
 describe("WaitForBlockchainDeposit", () => {
-  let appState = new AppStates.WaitForBlockchainDeposit({ ...coreProps, adjudicator });
+  const appState = new AppStates.WaitForBlockchainDeposit({ ...coreProps, adjudicator });
 
   itHasSharedFunctionality(appState);
 
@@ -85,7 +85,7 @@ describe("WaitForBlockchainDeposit", () => {
 });
 
 describe("WaitForPostFundSetupA", () => {
-  let appState = new AppStates.WaitForPostFundSetupA({ ...coreProps, adjudicator });
+  const appState = new AppStates.WaitForPostFundSetupA({ ...coreProps, adjudicator });
 
   itHasSharedFunctionality(appState);
 
@@ -95,7 +95,7 @@ describe("WaitForPostFundSetupA", () => {
 });
 
 describe("ReadyToSendPostFundSetupB", () => {
-  let appState = new AppStates.ReadyToSendPostFundSetupB({
+  const appState = new AppStates.ReadyToSendPostFundSetupB({
     ...coreProps,
     adjudicator,
     message,
@@ -113,7 +113,7 @@ describe("ReadyToSendPostFundSetupB", () => {
 });
 
 describe("WaitForPropose", () => {
-  let appState = new AppStates.WaitForPropose({
+  const appState = new AppStates.WaitForPropose({
     ...coreProps,
     adjudicator,
     message,
@@ -131,9 +131,11 @@ describe("WaitForPropose", () => {
 });
 
 describe("ReadyToChooseBPlay", () => {
-  let appState = new AppStates.ReadyToChooseBPlay({
+  const appState = new AppStates.ReadyToChooseBPlay({
     ...coreProps,
     adjudicator,
+    turnNum: 4,
+    preCommit: '0xaaa',
   });
 
   itHasSharedFunctionality(appState);
@@ -144,7 +146,7 @@ describe("ReadyToChooseBPlay", () => {
 });
 
 describe("ReadyToSendAccept", () => {
-  let appState = new AppStates.ReadyToSendAccept({
+  const appState = new AppStates.ReadyToSendAccept({
     ...coreProps,
     adjudicator,
     bPlay,
@@ -167,7 +169,7 @@ describe("ReadyToSendAccept", () => {
 });
 
 describe("WaitForReveal", () => {
-  let appState = new AppStates.WaitForReveal({
+  const appState = new AppStates.WaitForReveal({
     ...coreProps,
     adjudicator,
     bPlay,
@@ -190,7 +192,7 @@ describe("WaitForReveal", () => {
 });
 
 describe("ReadyToSendResting", () => {
-  let appState = new AppStates.ReadyToSendResting({
+  const appState = new AppStates.ReadyToSendResting({
     ...coreProps,
     adjudicator,
     bPlay,

@@ -108,7 +108,7 @@ it('runthrough', () => {
   expect(waitForFundingB.balances).toEqual(initialBals);
 
   // From the blockchain
-  const fundingEvent = { adjudicator: adjudicator, aBalance: 1, bBalance: 2 }; // TODO
+  const fundingEvent = { adjudicator, aBalance: 1, bBalance: 2 }; // TODO
 
   // In A's application
   const readyToSendPostFundSetupA = gameEngineA.receiveEvent({
@@ -243,8 +243,8 @@ const gameState6 = pledgeFromHex(message6.state) as Pledges.Reveal;
   expect(readyToSendPropose2.message).not.toBeUndefined();
   expect(readyToSendPropose2.salt).not.toBeUndefined();
 
-  const gameState8_0 = pledgeFromHex(readyToSendPropose2.message.state);
-  expect(gameState8_0.turnNum).toEqual(8);
+  const gameState8v0 = pledgeFromHex(readyToSendPropose2.message.state);
+  expect(gameState8v0.turnNum).toEqual(8);
 
   // In B's application
   const readyToSendConclude = gameEngineB.conclude({
@@ -253,9 +253,9 @@ const gameState6 = pledgeFromHex(message6.state) as Pledges.Reveal;
 
   expect(readyToSendConclude instanceof ApplicationStatesB.ReadyToSendConcludeB).toBe(true);
   expect(readyToSendConclude.message).not.toBeUndefined();
-  const gameState8_1 = pledgeFromHex(readyToSendConclude.message.state);
+  const gameState8v1 = pledgeFromHex(readyToSendConclude.message.state);
 
-  expect(gameState8_1.resolution).toEqual(aWinsBals);
-  expect(gameState8_1.turnNum).toEqual(8);
-  expect(gameState8_1.stateType).toEqual(3);
+  expect(gameState8v1.resolution).toEqual(aWinsBals);
+  expect(gameState8v1.turnNum).toEqual(8);
+  expect(gameState8v1.stateType).toEqual(3);
 });

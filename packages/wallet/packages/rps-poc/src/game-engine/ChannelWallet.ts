@@ -2,7 +2,7 @@ import Message from './Message';
 import Web3 from 'web3';
 
 export default class ChannelWallet {
-  account: Web3.eth.Account;
+  account: any; // todo: figure out how to do types with web3
 
   constructor() {
     const web3 = new Web3('');
@@ -18,7 +18,7 @@ export default class ChannelWallet {
   }
 
   sign(stateString: string) {
-    let signature = this.account.sign(stateString).signature;
+    const signature = this.account.sign(stateString).signature;
     return new Message(stateString, signature);
   }
 }
