@@ -144,7 +144,7 @@ export default class GameEngine {
       newState = new ApplicationStatesA.ReadyToChooseAPlay({
         ...oldState.commonAttributes,
         adjudicator: oldState.adjudicator,
-        turnNum: turnNum,
+        turnNum,
       });
     } else if (stateType === ApplicationStatesA.types.WaitForAccept) {
       const { aPlay, salt, stake} = oldState;
@@ -152,7 +152,7 @@ export default class GameEngine {
       const result = calculateResult(aPlay, bPlay);
 
       // The opponent's state assumes that B won
-      let newBalances = [...balances];
+      const newBalances = [...balances];
       if (result === Result.Tie) {
         newBalances[0] += stake;
         newBalances[1] -= stake;
@@ -180,7 +180,7 @@ export default class GameEngine {
       newState = new ApplicationStatesA.ReadyToChooseAPlay({
         ...oldState.commonAttributes,
         adjudicator: oldState.adjudicator,
-        turnNum: turnNum,
+        turnNum,
       });
     } else if (stateType === ApplicationStatesB.types.WaitForPostFundSetupA) {
       const gameState = new PostFundSetup(
@@ -308,7 +308,7 @@ export default class GameEngine {
       const bPlay = move;
       const preCommit = oldState.preCommit;
 
-      let newBalances = [...balances];
+      const newBalances = [...balances];
       newBalances[0] -= stake;
       newBalances[1] += stake;
 
@@ -333,7 +333,7 @@ export default class GameEngine {
     const oldPledge = decodePledge(message.state);
     let newState;
 
-    let concludePledge = new Conclude(
+    const concludePledge = new Conclude(
       oldState.channel,
       oldPledge.turnNum + 1,
       oldState.balances
