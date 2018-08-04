@@ -8,7 +8,6 @@ import * as Pledges from '../pledges';
 import pledgeFromHex from '../pledges/decode';
 
 const stake = 1;
-const addressOfLibrary = 0xccc;
 const initialBals = [5, 4];
 const bWinsBals = [4, 5];
 const aWinsBals = [6, 3];
@@ -209,7 +208,7 @@ it('runthrough', () => {
   expect(gameState8v0.turnNum).toEqual(8);
 
   // In B's application
-  const readyToSendConclude = gameEngineB.conclude();
+  // const readyToSendConclude = gameEngineB.conclude();
 
 
   // todo: put this back in

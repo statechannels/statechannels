@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import OpponentSelectionStep from './OpponentSelectionStep';
 import WaitingStep from './WaitingStep';
 import SelectPlayStep from './SelectPlayStep';
-import { types as playerAStates } from '../game-engine/application-states/PlayerA';
+import * as playerAStates from '../game-engine/application-states/PlayerA';
 
 export default class GameController extends PureComponent {
   render() {
@@ -18,10 +18,10 @@ export default class GameController extends PureComponent {
     } = this.props;
 
     switch (applicationState && applicationState.type) {
-      case playerAStates.ReadyToSendPreFundSetup0:
+      case playerAStates.ReadyToSendPreFundSetupA:
         return <WaitingStep message="ready to propose game" />;
 
-      case playerAStates.WaitForPreFundSetup1:
+      case playerAStates.WaitForPreFundSetupB:
         return <WaitingStep message="opponent to accept game" />;
 
       case playerAStates.ReadyToDeploy:
@@ -33,10 +33,10 @@ export default class GameController extends PureComponent {
       case playerAStates.WaitForBToDeposit:
         return <WaitingStep message="confirmation of opponent's deposit" />;
 
-      case playerAStates.ReadyToSendPostFundSetup0:
+      case playerAStates.ReadyToSendPostFundSetupA:
         return <WaitingStep message="ready to send deposit confirmation" />;
 
-      case playerAStates.WaitForPostFundSetup1:
+      case playerAStates.WaitForPostFundSetupB:
         return <WaitingStep message="opponent to confirm deposits" />;
 
       case playerAStates.ReadyToChooseAPlay:
