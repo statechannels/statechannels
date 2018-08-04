@@ -41,17 +41,17 @@ export default function gameReducer(state = {}, action = {}) {
 
     case types.MESSAGE_SENT:
       switch (state.type) {
-        case playerA.types.ReadyToSendPreFundSetupA:
+        case playerA.ReadyToSendPreFundSetupA:
           signedPreFundSetupAMessage = 'blah';
           return new playerA.WaitForPreFundSetupB({ ...coreProps, signedPreFundSetupAMessage });
-        case playerA.types.ReadyToSendPostFundSetupA:
+        case playerA.ReadyToSendPostFundSetupA:
           const signedPostFundSetupAMessage = 'blah';
           return new playerA.WaitForPostFundSetupB({
             ...coreProps,
             adjudicator,
             signedPostFundSetupAMessage,
           });
-        case playerA.types.ReadyToSendPropose:
+        case playerA.ReadyToSendPropose:
           signedProposeMessage = 'blah';
           return new playerA.WaitForAccept({
             ...coreProps,
@@ -60,7 +60,7 @@ export default function gameReducer(state = {}, action = {}) {
             salt,
             signedProposeMessage,
           });
-        case playerA.types.ReadyToSendReveal:
+        case playerA.ReadyToSendReveal:
           const signedRevealMessage = 'blah';
           const result = 'win';
           return new playerA.WaitForResting({
@@ -78,12 +78,12 @@ export default function gameReducer(state = {}, action = {}) {
 
     case types.MESSAGE_RECEIVED:
       switch (state.type) {
-        case playerA.types.WaitForPreFundSetupB:
+        case playerA.WaitForPreFundSetupB:
           const deploymentTransaction = 'blah';
           return new playerA.WaitForBlockchainDeploy({ ...coreProps, deploymentTransaction });
-        case playerA.types.WaitForPostFundSetupB:
+        case playerA.WaitForPostFundSetupB:
           return new playerA.ReadyToChooseAPlay({ ...coreProps, adjudicator });
-        case playerA.types.WaitForAccept:
+        case playerA.WaitForAccept:
           const signedRevealMessage = 'blah';
           const result = 'win';
           return new playerA.ReadyToSendReveal({
@@ -101,9 +101,9 @@ export default function gameReducer(state = {}, action = {}) {
 
     case types.EVENT_RECEIVED:
       switch (state.type) {
-        case playerA.types.WaitForBlockchainDeploy:
+        case playerA.WaitForBlockchainDeploy:
           return new playerA.WaitForBToDeposit({ ...coreProps, adjudicator });
-        case playerA.types.WaitForBToDeposit:
+        case playerA.WaitForBToDeposit:
           const signedPostFundSetupAMessage = 'blah';
           return new playerA.ReadyToSendPostFundSetupA({
             ...coreProps,

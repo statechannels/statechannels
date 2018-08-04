@@ -257,9 +257,12 @@ export default class GameEngineB {
     const { channel, resolution: balances } = position;
     const { adjudicator } = this.state;
 
+    const newPosition = new Conclude(channel, position.turnNum + 1, balances);
+    const message = this.channelWallet.sign(newPosition.toHex());
+
     // todo: need a message. Might also need an intermediate state here
     return this.transitionTo(
-      new State.ReadyToSendConcludeA({ channel, balances, adjudicator })
+      new State.ReadyToSendConcludeB({ channel, balances, adjudicator, message })
     )
   }
 }
