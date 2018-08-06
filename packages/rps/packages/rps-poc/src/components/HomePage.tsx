@@ -1,17 +1,16 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 
 import Button from './Button';
 import ButtonLink from './ButtonLink';
 import { ROUTE_PATHS } from '../constants';
 
-const propTypes = {
-  login: PropTypes.func.isRequired,
-  logout: PropTypes.func.isRequired,
-  loggedIn: PropTypes.bool.isRequired,
-};
+interface IProps {
+  login: () => any;
+  logout: () => any;
+  loggedIn: boolean;
+}
 
-export default function HomePage({ login, logout, loggedIn }) {
+const HomePage: React.SFC<IProps> = ({ login, logout, loggedIn }) => {
   let loginButton;
   if (loggedIn) {
     loginButton = <Button onClick={logout}>Logout</Button>;
@@ -23,7 +22,9 @@ export default function HomePage({ login, logout, loggedIn }) {
     <div style={{ maxWidth: '90%', margin: 'auto' }}>
       <div style={{ textAlign: 'center' }}>
         <h1 style={{ marginBottom: 0 }}>Rock, Paper, Scissors</h1>
-        <p><em>A State-Channel Proof-of-Concept Game</em></p>
+        <p>
+          <em>A State-Channel Proof-of-Concept Game</em>
+        </p>
       </div>
       <div>
         <div style={{ display: 'inline-block', maxWidth: '33%' }}>
@@ -50,6 +51,6 @@ export default function HomePage({ login, logout, loggedIn }) {
       </div>
     </div>
   );
-}
+};
 
-HomePage.propTypes = propTypes;
+export default HomePage;
