@@ -1,6 +1,9 @@
 {
     "extends": "airbnb",
     "parser": "typescript-eslint-parser",
+    "plugins": [
+        "typescript"
+    ],
     "rules": {
         "react/jsx-one-expression-per-line": "off",
         "arrow-parens": "off"

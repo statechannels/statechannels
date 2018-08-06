@@ -1,44 +1,44 @@
 import _ from 'lodash';
 import React from 'react';
-import PropTypes from 'prop-types';
 
 import Button from './Button';
 
-const propTypes = {
-  handleMessageSent: PropTypes.func.isRequired,
-  handleCreateChallenge: PropTypes.func.isRequired,
-  handleSelectChallenge: PropTypes.func.isRequired,
-  opponents: PropTypes.arrayOf(
-    PropTypes.shape({
-      id: PropTypes.string.isRequired,
-      name: PropTypes.string.isRequired,
-      timestamp: PropTypes.string.isRequired,
-      wager: PropTypes.string.isRequired,
-    }),
-  ),
-};
+interface IProps {
+  handleMessageSent: (x: any, y: any) => void;
+  handleCreateChallenge: (x: any, y: any) => any;
+  handleSelectChallenge: (x: any) => any;
+  opponents: [
+    {
+      id: string;
+      name: string;
+      timestamp: string;
+      wager: string;
+    }
+  ];
+}
 
 const defaultProps = {
   opponents: [],
 };
 
-export default class OpponentSelectionStep extends React.PureComponent {
+export default class OpponentSelectionStep extends React.PureComponent<IProps> {
+  public static defaultProps: { opponents: any[] };
+  nameInput: React.RefObject<HTMLInputElement>;
+  wagerInput: React.RefObject<HTMLInputElement>;
+
   constructor(props) {
     super(props);
 
     this.nameInput = React.createRef();
     this.wagerInput = React.createRef();
 
-    _.bindAll(this, [
-      'onClickCreateChallenge',
-      'handleSelectChallenge',
-    ]);
+    _.bindAll(this, ['onClickCreateChallenge', 'handleSelectChallenge']);
   }
 
   onClickCreateChallenge() {
     const { handleCreateChallenge } = this.props;
-    const name = this.nameInput.current.value;
-    const wager = Number(this.wagerInput.current.value);
+    const name = _.get(this.nameInput, 'current.value');
+    const wager = Number(_.get(this.wagerInput, 'current.value'));
     if (!name || !wager) {
       return;
     }
@@ -82,7 +82,7 @@ export default class OpponentSelectionStep extends React.PureComponent {
                   <td>
                     <Button
                       onClick={() =>
-                        handleSelectChallenge({
+                        this.handleSelectChallenge({
                           opponentId: opponent.id,
                           stake: opponent.wager,
                         })
@@ -115,5 +115,4 @@ export default class OpponentSelectionStep extends React.PureComponent {
   }
 }
 
-OpponentSelectionStep.propTypes = propTypes;
 OpponentSelectionStep.defaultProps = defaultProps;

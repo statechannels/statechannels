@@ -5,7 +5,7 @@ import Button from './Button';
 interface IProps {
   handleReturnToOpponentSelection: () => any;
   winnings: string;
-};
+}
 
 export default class ConcludeStep extends React.PureComponent<IProps> {
   render() {

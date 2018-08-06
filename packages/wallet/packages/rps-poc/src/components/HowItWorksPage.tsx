@@ -3,7 +3,7 @@ import React from 'react';
 import ButtonLink from './ButtonLink';
 import { ROUTE_PATHS } from '../constants';
 
-export default function HowItWorksPage() {
+const HowItWorksPage: React.SFC = () => {
   return (
     <div style={{ maxWidth: '90%', margin: 'auto' }}>
       <div>
@@ -61,4 +61,6 @@ export default function HowItWorksPage() {
       </div>
     </div>
   );
-}
+};
+
+export default HowItWorksPage;
