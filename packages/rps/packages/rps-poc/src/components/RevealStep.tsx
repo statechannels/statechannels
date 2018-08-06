@@ -3,9 +3,9 @@ import * as React from 'react';
 import { PLAY_OPTIONS } from '../constants';
 
 interface IProps {
-  selectedMoveId: number,
-  opponentMoveId: number,
-};
+  selectedMoveId: number;
+  opponentMoveId: number;
+}
 
 export default class RevealStep extends React.PureComponent<IProps> {
   render() {
@@ -19,12 +19,8 @@ export default class RevealStep extends React.PureComponent<IProps> {
         <div>
           <h1>The result:</h1>
         </div>
-        <div style={{ width: '100%' }}>
-          You chose {yourPlay && yourPlay.name}
-        </div>
-        <div style={{ width: '100%' }}>
-          Your opponent chose {theirPlay && theirPlay.name}
-        </div>
+        <div style={{ width: '100%' }}>You chose {yourPlay && yourPlay.name}</div>
+        <div style={{ width: '100%' }}>Your opponent chose {theirPlay && theirPlay.name}</div>
       </div>
     );
   }
