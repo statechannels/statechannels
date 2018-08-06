@@ -22,10 +22,6 @@ export default class Accept extends State {
   }
 
   toHex() {
-    return super.toHex() + packAcceptAttributes(
-      this.stake,
-      this.preCommit,
-      this.bPlay,
-    );
+    return super.toHex() + packAcceptAttributes(this.stake, this.preCommit, this.bPlay);
   }
 }

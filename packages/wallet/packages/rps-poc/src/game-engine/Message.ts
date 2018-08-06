@@ -1,4 +1,3 @@
-
 export default class Message {
    static fromHex(hexString) {
     const length = hexString.length;
