@@ -6,7 +6,7 @@ import {
   syncOpponents,
 } from '../actions/opponents';
 
-const opponentsTransformer = ({ value }) => Object.keys(value).map(key => ({
+const opponentsTransformer = ({ value: object }) => Object.keys(value).map(key => ({
   ...value[key],
   id: key
 }));
