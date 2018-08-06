@@ -3,7 +3,7 @@ import { call } from 'redux-saga/effects';
 
 import { default as firebase, reduxSagaFirebase } from '../../gateways/firebase';
 
-export function* fetchOrCreatePlayer(address, defaultName="") {
+export function* fetchOrCreatePlayer(address: string | undefined, defaultName="") {
   if (!address) { return null; }
 
   let player = yield fetchPlayer(address);
@@ -17,7 +17,7 @@ export function* fetchOrCreatePlayer(address, defaultName="") {
   return player;
 }
 
-const playerRef = (address) => {
+const playerRef = (address: string) => {
   return firebase.database().ref(`players/${address}`);
 }
 
@@ -27,7 +27,7 @@ function* fetchPlayer(address) {
   return yield call(reduxSagaFirebase.database.read, query);
 }
 
-function* createPlayer(address, defaultName) {
+function* createPlayer(address: string, defaultName: string) {
   const playerParams = {
     name: defaultName,
     address: address,
@@ -37,7 +37,7 @@ function* createPlayer(address, defaultName) {
   return yield call(reduxSagaFirebase.database.update, playerRef(address), playerParams);
 }
 
-function * setLastSeen(address) {
+function * setLastSeen(address: string) {
   const playerParams = {
     lastSeen: new Date().getTime(),
   }
@@ -45,7 +45,7 @@ function * setLastSeen(address) {
   return yield call(reduxSagaFirebase.database.patch, playerRef(address), playerParams);
 }
 
-export function * playerHeartbeatSaga(address) {
+export function * playerHeartbeatSaga(address: string) {
   while(true) {
     yield call(delay, 5000);
     yield setLastSeen(address);
