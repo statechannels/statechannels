@@ -1,14 +1,13 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 
 import Button from './Button';
 
-const propTypes = {
-  cancelledByYou: PropTypes.bool.isRequired,
-  returnToStart: PropTypes.func.isRequired,
-};
+interface IProps {
+  cancelledByYou: boolean;
+  returnToStart: () => any;
+}
 
-export default class ConfirmWagerStep extends React.PureComponent {
+export default class ConfirmWagerStep extends React.PureComponent<IProps> {
   render() {
     const { cancelledByYou, returnToStart } = this.props;
 
@@ -26,5 +25,3 @@ export default class ConfirmWagerStep extends React.PureComponent {
     );
   }
 }
-
-ConfirmWagerStep.propTypes = propTypes;

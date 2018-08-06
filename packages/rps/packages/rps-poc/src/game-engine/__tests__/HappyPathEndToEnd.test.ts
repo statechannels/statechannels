@@ -39,9 +39,7 @@ it('runthrough', () => {
   // In B's application
   const gameEngineB = GameEngine.fromProposal({ message: message0, wallet: channelWalletB });
   const readyToSendPreFundSetupB = gameEngineB.state;
-  expect(readyToSendPreFundSetupB).toBeInstanceOf(
-    ApplicationStatesB.ReadyToSendPreFundSetupB,
-  );
+  expect(readyToSendPreFundSetupB).toBeInstanceOf(ApplicationStatesB.ReadyToSendPreFundSetupB);
   expect(readyToSendPreFundSetupB.balances).toEqual(initialBals);
   expect(readyToSendPreFundSetupB.channel).toEqual(waitForPreFundSetupB.channel);
   expect(readyToSendPreFundSetupB.stake).toEqual(stake);
@@ -63,9 +61,7 @@ it('runthrough', () => {
   expect(readyToDeployAdjudicator.transaction).not.toBeUndefined();
 
   const waitForDeployAdjudicatorA = gameEngineA.transactionSent();
-  expect(waitForDeployAdjudicatorA).toBeInstanceOf(
-    ApplicationStatesA.WaitForBlockchainDeploy,
-  );
+  expect(waitForDeployAdjudicatorA).toBeInstanceOf(ApplicationStatesA.WaitForBlockchainDeploy);
 
   // From the blockchain
 
@@ -94,9 +90,7 @@ it('runthrough', () => {
 
   // In A's application
   const readyToSendPostFundSetupA = gameEngineA.receiveEvent(fundingEvent);
-  expect(readyToSendPostFundSetupA).toBeInstanceOf(
-    ApplicationStatesA.ReadyToSendPostFundSetupA,
-  );
+  expect(readyToSendPostFundSetupA).toBeInstanceOf(ApplicationStatesA.ReadyToSendPostFundSetupA);
 
   const message2 = readyToSendPostFundSetupA.message;
   expect(message2).not.toBeUndefined();
@@ -112,9 +106,7 @@ it('runthrough', () => {
 
   // In B's application
   const readyToSendPostFundSetupB = gameEngineB.receiveMessage(message2);
-  expect(readyToSendPostFundSetupB).toBeInstanceOf(
-    ApplicationStatesB.ReadyToSendPostFundSetupB,
-  );
+  expect(readyToSendPostFundSetupB).toBeInstanceOf(ApplicationStatesB.ReadyToSendPostFundSetupB);
   expect(readyToSendPostFundSetupB.balances).not.toBeUndefined();
   const message3 = readyToSendPostFundSetupB.message;
   expect(message3).not.toBeUndefined();
@@ -209,7 +201,6 @@ it('runthrough', () => {
 
   // In B's application
   // const readyToSendConclude = gameEngineB.conclude();
-
 
   // todo: put this back in
 

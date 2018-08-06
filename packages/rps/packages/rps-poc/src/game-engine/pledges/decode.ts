@@ -31,7 +31,7 @@ function extractChannel(hexString: string) {
   const nPlayers = extractInt(hexString, 64);
   if (nPlayers !== N_PLAYERS) {
     throw new Error(
-      `Rock-paper-scissors requires exactly ${N_PLAYERS} players. ${nPlayers} provided.`
+      `Rock-paper-scissors requires exactly ${N_PLAYERS} players. ${nPlayers} provided.`,
     );
   }
 
@@ -98,7 +98,7 @@ function decodeGameState(channel, turnNum: number, balances: number[], hexString
   const position = extractPosition(hexString);
   const stake = extractStake(hexString);
 
-  switch(position) {
+  switch (position) {
     case Position.Resting:
       return new Resting(channel, turnNum, balances, stake);
     case Position.Propose:
@@ -122,7 +122,7 @@ export default function decode(hexString) {
   const stateType = extractStateType(hexString);
   const balances = extractBalances(hexString);
 
-  switch(stateType) {
+  switch (stateType) {
     case State.StateType.Conclude:
       return new Conclude(channel, turnNum, balances);
     case State.StateType.PreFundSetup:
