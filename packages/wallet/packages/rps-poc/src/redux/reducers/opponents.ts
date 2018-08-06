@@ -1,4 +1,4 @@
-import { OpponentsTypes } from '../actions/opponents';
+import { types } from '../actions/opponents';
 
 const initialState = [];
 
