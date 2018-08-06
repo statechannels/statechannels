@@ -6,7 +6,7 @@ export const types = {
   }
 };
 
-export const syncOpponents = opponents => ({
+export const syncOpponents = (opponents: string[]) => ({
   type: types.OPPONENTS.SYNC,
   opponents
 });
