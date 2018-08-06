@@ -4,7 +4,7 @@ import {
 } from 'redux-saga/effects';
 import * as playerAStates from '../../game-engine/application-states/PlayerA';
 import {
-  types, messageReceived, eventReceived, messageSent,
+  GameTypes, messageReceived, eventReceived, messageSent,
 } from '../actions/game';
 import opponentSaga from './opponents';
 import loginSaga from './login';

@@ -5,7 +5,8 @@ branch of fmg-core. To do this:
 
 1. Download [force-move-games](https://github.com/magmo/force-move-games) repo and checkout the generate-types branch
 2. Inside the `force-move-games` folder: `cd packages/fmg-core && npm run-script build && npm link`
-3. Inside the `rps-poc` folder: `yarn link fmg-core`
+3. Inside the `rps-poc/node_modules/fmg-core` folder: `yarn link`
+4. Inside the `rps-poc` folder: `yarn link fmg-core`
 
 ### Setup
 
