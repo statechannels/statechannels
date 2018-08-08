@@ -17,7 +17,7 @@ function* opponentResponseFaker() {
 }
 
 function* messageSender() {
-  let state = yield select(getApplicationState);
+  const state = yield select(getApplicationState);
   if (state.shouldSendMessage) {
     yield delay(2000);  // for dev purposes
     yield put(GameAction.messageSent(state.message));
@@ -30,7 +30,7 @@ function* messageSender() {
 }
 
 function* blockchainResponseFaker() {
-  let state = yield select(getApplicationState);
+  const state = yield select(getApplicationState);
   if (state.type === playerAStates.WaitForBlockchainDeploy || state.type === playerAStates.WaitForBToDeposit) {
     yield delay(2000);
     yield put(GameAction.eventReceived(new Message('blah', 'sig')));
