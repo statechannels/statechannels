@@ -7,7 +7,7 @@ export interface LoginState {
   user: any,
   wallet: any,
   player?: string,
-}
+};
 
 const initialState: LoginState = {
   loading: false,
