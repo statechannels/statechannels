@@ -11,7 +11,7 @@ export default class PostFundSetup extends State {
     stateCount: number,
     stake: number,
   ) {
-    const stateType = State.StateType.PostFundSetup;
+    const stateType = State.StateTypes.POSTFUNDSETUP;
     super({ channel, stateType, turnNum, stateCount, resolution: balances });
     this.stake = stake;
   }
