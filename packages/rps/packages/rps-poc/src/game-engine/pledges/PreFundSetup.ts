@@ -9,7 +9,7 @@ export default class PreFundSetup extends State {
   resolution: any;
 
   constructor(channel, turnNum: number, balances: number[], stateCount: number, stake: number) {
-    const stateType = State.StateTypes.PREFUNDSETUP;
+    const stateType = State.StateType.PreFundSetup;
     super({ channel, stateType, turnNum, stateCount, resolution: balances });
     this.stake = stake;
   }
