@@ -5,7 +5,7 @@ export default class Resting extends State {
   stake: number;
 
   constructor(channel, turnNum: number, balances: number[], stake: number) {
-    const stateType = State.StateType.Game;
+    const stateType = State.StateTypes.GAME;
     super({ channel, stateType, turnNum, resolution: balances });
     this.stake = stake;
   }
