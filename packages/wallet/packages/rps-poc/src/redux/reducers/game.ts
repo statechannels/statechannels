@@ -23,10 +23,12 @@ const bPlay = 'scissors';
 const salt = 'abc123';
 const message = new Message('blah', 'sig');
 
-type GameState = ApplicationState | undefined;
+export type GameState = ApplicationState | {};
+
+const initialState = {};
 
 // todo: rewrite this to use the gameEngine and return actual data
-export const gameReducer: Reducer<GameState> = (state, action) => {
+export const gameReducer: Reducer<GameState> = (state=initialState, action) => {
 
   switch (action.type) {
     case  GameActionType.CHOOSE_OPPONENT:
