@@ -50,7 +50,7 @@ function* createWallet(uid: string) {
   const newWallet = new ChannelWallet();
 
   const walletParams = {
-    uid: uid,
+    uid,
     privateKey: newWallet.privateKey,
     address: newWallet.address,
   }

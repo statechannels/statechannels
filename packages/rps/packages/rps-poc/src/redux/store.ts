@@ -8,7 +8,7 @@ const sagaMiddleware = createSagaMiddleware();
 
 const enhancers = compose(
   applyMiddleware(sagaMiddleware),
-  (<any>window).devToolsExtension ? (<any>window).devToolsExtension() : f => f,
+  (window as any).devToolsExtension ? (window as any).devToolsExtension() : f => f,
 );
 
 const store = createStore(reducer, enhancers);
