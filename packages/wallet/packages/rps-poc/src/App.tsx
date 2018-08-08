@@ -16,7 +16,7 @@ export default function App() {
         <header>
           <Header />
         </header>
-        <Route exact path="/" component={HomePageContainer} />
+        <Route exact={true} path="/" component={HomePageContainer} />
         <Route path={`/${ROUTE_PATHS.HOW_IT_WORKS}`} component={HowItWorksPage} />
         <Route path={`/${ROUTE_PATHS.PLAY}`} component={GameContainer} />
         <Route path={`/${ROUTE_PATHS.ABOUT}`} component={AboutPage} />
