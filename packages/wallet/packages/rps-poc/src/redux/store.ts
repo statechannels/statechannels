@@ -8,7 +8,7 @@ const sagaMiddleware = createSagaMiddleware();
 
 const enhancers = compose(
   applyMiddleware(sagaMiddleware),
-  window.devToolsExtension ? window.devToolsExtension() : f => f,
+  (<any>window).devToolsExtension ? (<any>window).devToolsExtension() : f => f,
 );
 
 const store = createStore(reducer, enhancers);
@@ -17,6 +17,6 @@ sagaMiddleware.run(rootSaga);
 
 export default store;
 
-export const getApplicationState = (storeObj: object) => storeObj.game;
-export const getWallet = (storeObj: object) => storeObj.wallet;
-export const getUser = (storeObj: object) => storeObj.login.user;
+export const getApplicationState = (storeObj: any) => storeObj.game;
+export const getWallet = (storeObj: any) => storeObj.wallet;
+export const getUser = (storeObj: any) => storeObj.login.user;

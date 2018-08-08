@@ -1,13 +1,7 @@
 import firebase from 'firebase';
 import { call, fork, put, take, takeEvery, cancel } from 'redux-saga/effects';
 
-import {
-  types,
-  loginFailure,
-  loginSuccess,
-  logoutFailure,
-  logoutSuccess,
-} from '../actions/login';
+import { LoginAction, LoginActionType } from '../actions/login';
 import { reduxSagaFirebase } from '../../gateways/firebase';
 import { fetchOrCreateWallet } from './wallet';
 import { fetchOrCreatePlayer, playerHeartbeatSaga } from './player';
@@ -19,7 +13,7 @@ function * loginSaga () {
     yield call(reduxSagaFirebase.auth.signInWithPopup, authProvider);
     // successful login will trigger the loginStatusWatcher, which will update the state
   } catch (error) {
-    yield put(loginFailure(error));
+    yield put(LoginAction.loginFailure(error));
   }
 }
 
@@ -28,7 +22,7 @@ function * logoutSaga () {
     yield call(reduxSagaFirebase.auth.signOut);
     // successful logout will trigger the loginStatusWatcher, which will update the state
   } catch (error) {
-    yield put(logoutFailure(error));
+    yield put(LoginAction.logoutFailure(error));
   }
 }
 
@@ -47,11 +41,11 @@ function * loginStatusWatcherSaga () {
 
       playerHeartbeatThread = yield fork(playerHeartbeatSaga, wallet.address);
 
-      yield put(loginSuccess(user, wallet, player));
+      yield put(LoginAction.loginSuccess(user, wallet, player));
     } else {
       // Logout procedure
       if (playerHeartbeatThread) { yield cancel(playerHeartbeatThread); }
-      yield put(logoutSuccess());
+      yield put(LoginAction.logoutSuccess());
     }
   }
 }
@@ -59,7 +53,7 @@ function * loginStatusWatcherSaga () {
 export default function * loginRootSaga () {
   yield fork(loginStatusWatcherSaga);
   yield [
-    takeEvery(types.LOGIN.REQUEST, loginSaga),
-    takeEvery(types.LOGOUT.REQUEST, logoutSaga)
+    takeEvery(LoginActionType.LOGIN_REQUEST, loginSaga),
+    takeEvery(LoginActionType.LOGOUT_REQUEST, logoutSaga)
   ];
 }

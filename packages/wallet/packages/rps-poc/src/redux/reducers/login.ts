@@ -1,22 +1,31 @@
-import { types } from '../actions/login';
+import { Reducer } from 'redux';
+import { LoginActionType } from '../actions/login';
 
-const initialState = {
+export interface LoginState {
+  loading: boolean,
+  loggedIn: boolean,
+  user: any,
+  wallet: any,
+  player?: string,
+}
+
+const initialState: LoginState = {
   loading: false,
   loggedIn: false,
   user: null,
   wallet: null,
-  player: null,
+  player: undefined,
 };
 
-export default function loginReducer(state = initialState, action = {}) {
+export const loginReducer: Reducer<LoginState> = (state = initialState, action) => {
   switch (action.type) {
-    case types.LOGIN.REQUEST:
-    case types.LOGOUT.REQUEST:
+    case LoginActionType.LOGIN_REQUEST:
+    case LoginActionType.LOGOUT_REQUEST:
       return {
         ...state,
         loading: true,
       };
-    case types.LOGIN.SUCCESS:
+    case LoginActionType.LOGIN_SUCCESS:
       return {
         ...state,
         loading: false,
@@ -25,14 +34,14 @@ export default function loginReducer(state = initialState, action = {}) {
         wallet: action.wallet,
         player: action.player,
       };
-    case types.LOGIN.FAILURE:
+    case LoginActionType.LOGIN_FAILURE:
       return {
         ...state,
         loading: false,
       };
-    case types.LOGOUT.SUCCESS:
+    case LoginActionType.LOGOUT_SUCCESS:
       return initialState;
-    case types.LOGOUT.FAILURE:
+    case LoginActionType.LOGOUT_FAILURE:
       return {
         ...state,
         loading: false,
@@ -41,3 +50,4 @@ export default function loginReducer(state = initialState, action = {}) {
       return state;
   }
 };
+

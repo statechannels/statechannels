@@ -1,6 +1,9 @@
-import { GameTypes } from '../actions/game';
+import { Reducer } from 'redux';
+import { GameActionType } from '../actions/game';
 import { Channel } from 'fmg-core';
 import * as playerA from '../../game-engine/application-states/PlayerA';
+import Message from '../../game-engine/Message';
+import { State as ApplicationState } from '../../game-engine/application-states';
 
 // Fake data for development purposes
 const gameLibrary = 0x111;
@@ -18,50 +21,45 @@ const adjudicator = 0xc;
 const aPlay = 'rock';
 const bPlay = 'scissors';
 const salt = 'abc123';
+const message = new Message('blah', 'sig');
+
+type GameState = ApplicationState | undefined;
 
 // todo: rewrite this to use the gameEngine and return actual data
-export default function gameReducer(state = {}, action = {}) {
-  let signedPreFundSetupAMessage;
-  let signedProposeMessage;
+export const gameReducer: Reducer<GameState> = (state, action) => {
 
   switch (action.type) {
-    case types.CHOOSE_OPPONENT:
-      signedPreFundSetupAMessage = 'blah';
-      return new playerA.ReadyToSendPreFundSetupA({ ...coreProps, signedPreFundSetupAMessage });
+    case  GameActionType.CHOOSE_OPPONENT:
+      return new playerA.ReadyToSendPreFundSetupA({ ...coreProps, message });
 
-    case types.CHOOSE_A_PLAY:
-      signedProposeMessage = 'blah';
+    case  GameActionType.CHOOSE_A_PLAY:
       return new playerA.ReadyToSendPropose({
         ...coreProps,
         adjudicator,
         aPlay,
         salt,
-        signedProposeMessage,
+        message,
       });
 
-    case types.MESSAGE_SENT:
-      switch (state.type) {
+    case  GameActionType.MESSAGE_SENT:
+      switch (state.constructor) {
         case playerA.ReadyToSendPreFundSetupA:
-          signedPreFundSetupAMessage = 'blah';
-          return new playerA.WaitForPreFundSetupB({ ...coreProps, signedPreFundSetupAMessage });
+          return new playerA.WaitForPreFundSetupB({ ...coreProps, message });
         case playerA.ReadyToSendPostFundSetupA:
-          const signedPostFundSetupAMessage = 'blah';
           return new playerA.WaitForPostFundSetupB({
             ...coreProps,
             adjudicator,
-            signedPostFundSetupAMessage,
+            message,
           });
         case playerA.ReadyToSendPropose:
-          signedProposeMessage = 'blah';
           return new playerA.WaitForAccept({
             ...coreProps,
             adjudicator,
             aPlay,
             salt,
-            signedProposeMessage,
+            message,
           });
         case playerA.ReadyToSendReveal:
-          const signedRevealMessage = 'blah';
           const result = 'win';
           return new playerA.WaitForResting({
             ...coreProps,
@@ -70,21 +68,20 @@ export default function gameReducer(state = {}, action = {}) {
             bPlay,
             result,
             salt,
-            signedRevealMessage,
+            message,
           });
         default:
+          return state;
       }
       break;
 
-    case types.MESSAGE_RECEIVED:
-      switch (state.type) {
+    case  GameActionType.MESSAGE_RECEIVED:
+      switch (state.constructor) {
         case playerA.WaitForPreFundSetupB:
-          const deploymentTransaction = 'blah';
-          return new playerA.WaitForBlockchainDeploy({ ...coreProps, deploymentTransaction });
+          return new playerA.WaitForBlockchainDeploy({ ...coreProps });
         case playerA.WaitForPostFundSetupB:
-          return new playerA.ReadyToChooseAPlay({ ...coreProps, adjudicator });
+          return new playerA.ReadyToChooseAPlay({ ...coreProps, adjudicator, turnNum: 3 });
         case playerA.WaitForAccept:
-          const signedRevealMessage = 'blah';
           const result = 'win';
           return new playerA.ReadyToSendReveal({
             ...coreProps,
@@ -93,24 +90,25 @@ export default function gameReducer(state = {}, action = {}) {
             bPlay,
             result,
             salt,
-            signedRevealMessage,
+            message,
           });
         default:
+          return state;
       }
       break;
 
-    case types.EVENT_RECEIVED:
-      switch (state.type) {
+    case  GameActionType.EVENT_RECEIVED:
+      switch (state.constructor) {
         case playerA.WaitForBlockchainDeploy:
           return new playerA.WaitForBToDeposit({ ...coreProps, adjudicator });
         case playerA.WaitForBToDeposit:
-          const signedPostFundSetupAMessage = 'blah';
           return new playerA.ReadyToSendPostFundSetupA({
             ...coreProps,
             adjudicator,
-            signedPostFundSetupAMessage,
+            message,
           });
         default:
+          return state;
       }
       break;
 

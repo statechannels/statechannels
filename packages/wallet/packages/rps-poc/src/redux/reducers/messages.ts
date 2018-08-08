@@ -1,8 +1,8 @@
-import { MessageTypes } from '../actions/messages';
+import { MessageAction, MessageActionType } from '../actions/messages';
 
-export default function messagesReducer (state = [], action = {}) {
+export default function messagesReducer(state = [], action: MessageAction) {
   switch (action.type) {
-    case MessageTypes.SYNC_MESSAGES:
+    case MessageActionType.SYNC_MESSAGES:
       return action.messages;
     default:
       return state
