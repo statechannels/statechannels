@@ -30,7 +30,7 @@ function* fetchPlayer(address) {
 function* createPlayer(address: string, defaultName: string) {
   const playerParams = {
     name: defaultName,
-    address: address,
+    address,
     lastSeen: new Date().getTime(),
   }
 
