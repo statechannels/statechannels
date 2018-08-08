@@ -3,27 +3,26 @@ import {
   put, takeEvery, select, fork, call,
 } from 'redux-saga/effects';
 import * as playerAStates from '../../game-engine/application-states/PlayerA';
-import {
-  GameTypes, messageReceived, eventReceived, messageSent,
-} from '../actions/game';
+import { GameActionType, GameAction } from '../actions/game';
 import opponentSaga from './opponents';
 import loginSaga from './login';
 import messageSaga from './messages';
 import { getApplicationState } from '../store';
 import { reduxSagaFirebase } from '../../gateways/firebase';
+import Message from '../../game-engine/Message';
 
 function* opponentResponseFaker() {
   yield delay(2000);
-  yield put(messageReceived("blah"));
+  yield put(GameAction.messageReceived(new Message('blah', 'sig')));
 }
 
 function* messageSender() {
   let state = yield select(getApplicationState);
   if (state.shouldSendMessage) {
     yield delay(2000);  // for dev purposes
-    yield put(messageSent(state.message));
+    yield put(GameAction.messageSent(state.message));
     // push to firebase messages - organized by channel ID
-    yield call(reduxSagaFirebase.create, `messages.${state.channel}`, {
+    yield call(reduxSagaFirebase.database.create, `messages.${state.channel}`, {
       message: JSON.stringify(state.message),
     });
     yield opponentResponseFaker();
@@ -34,7 +33,7 @@ function* blockchainResponseFaker() {
   let state = yield select(getApplicationState);
   if (state.type === playerAStates.WaitForBlockchainDeploy || state.type === playerAStates.WaitForBToDeposit) {
     yield delay(2000);
-    yield put(eventReceived("blah"));
+    yield put(GameAction.eventReceived(new Message('blah', 'sig')));
   }
 }
 
@@ -43,5 +42,5 @@ export default function* rootSaga() {
   yield fork(loginSaga);
   yield fork(messageSaga);
   yield takeEvery('*', blockchainResponseFaker);
-  yield takeEvery(types.MESSAGE_SENT, messageSender);
+  yield takeEvery(GameActionType.MESSAGE_SENT, messageSender);
 }

@@ -1,43 +1,45 @@
+import { ActionsUnion } from './type-helpers';
+
 import ChannelWallet from '../../game-engine/ChannelWallet';
 
-export const types = {
-  LOGIN: {
-    REQUEST: 'LOGIN.REQUEST',
-    SUCCESS: 'LOGIN.SUCCESS',
-    FAILURE: 'LOGIN.FAILURE',
-  },
-  LOGOUT: {
-    REQUEST: 'LOGOUT.REQUEST',
-    SUCCESS: 'LOGOUT.SUCCESS',
-    FAILURE: 'LOGOUT.FAILURE',
-  },
+export enum LoginActionType {
+  LOGIN_REQUEST = 'LOGIN.REQUEST',
+  LOGIN_SUCCESS = 'LOGIN.SUCCESS',
+  LOGIN_FAILURE = 'LOGIN.FAILURE',
+  LOGOUT_REQUEST = 'LOGOUT.REQUEST',
+  LOGOUT_SUCCESS = 'LOGOUT.SUCCESS',
+  LOGOUT_FAILURE = 'LOGOUT.FAILURE',
 };
 
-export const login = () => ({
-  type: types.LOGIN.REQUEST,
-});
+export const LoginAction = {
+  login: () => ({
+    type: LoginActionType.LOGIN_REQUEST as typeof LoginActionType.LOGIN_REQUEST,
+  }),
 
-export const loginFailure = (error: Error) => ({
-  type: types.LOGIN.FAILURE,
-  error,
-});
+  loginFailure: (error: Error) => ({
+    type: LoginActionType.LOGIN_FAILURE as typeof LoginActionType.LOGIN_FAILURE,
+    error,
+  }),
 
-export const logout = () => ({
-  type: types.LOGOUT.REQUEST,
-});
+  logout: () => ({
+    type: LoginActionType.LOGOUT_REQUEST as typeof LoginActionType.LOGOUT_REQUEST,
+  }),
 
-export const logoutFailure = (error: Error) => ({
-  type: types.LOGOUT.FAILURE,
-  error,
-});
+  logoutFailure: (error: Error) => ({
+    type: LoginActionType.LOGOUT_FAILURE as typeof LoginActionType.LOGOUT_FAILURE,
+    error,
+  }),
 
-export const loginSuccess = (user: object, wallet: ChannelWallet, player: object) => ({
-  type: types.LOGIN.SUCCESS,
-  user,
-  wallet,
-  player,
-});
+  loginSuccess: (user: object, wallet: ChannelWallet, player: object) => ({
+    type: LoginActionType.LOGIN_SUCCESS as typeof LoginActionType.LOGIN_SUCCESS,
+    user,
+    wallet,
+    player,
+  }),
 
-export const logoutSuccess = () => ({
-  type: types.LOGOUT.SUCCESS,
-});
+  logoutSuccess: () => ({
+    type: LoginActionType.LOGOUT_SUCCESS as typeof LoginActionType.LOGOUT_SUCCESS,
+  }),
+};
+
+export type LoginAction = ActionsUnion<typeof LoginAction>;

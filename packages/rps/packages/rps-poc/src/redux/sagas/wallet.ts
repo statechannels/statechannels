@@ -17,7 +17,7 @@ export function* fetchOrCreateWallet(uid: string | undefined) {
   return wallet;
 }
 
-const walletTransformer = (data: object) => ({
+const walletTransformer = (data: any) => ({
   ...data.val(),
   id: data.key,
 });
