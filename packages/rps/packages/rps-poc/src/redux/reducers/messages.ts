@@ -1,9 +1,19 @@
+import { Reducer } from 'redux';
 import { MessageAction, MessageActionType } from '../actions/messages';
+import Message from '../../game-engine/Message';
 
-export default function messagesReducer(state = [], action: MessageAction) {
+export interface MessageState {
+  messages: Message[];
+}
+
+const initialState = {
+  messages: []
+}
+
+export const messagesReducer: Reducer<MessageState> = (state = initialState, action: MessageAction) => {
   switch (action.type) {
     case MessageActionType.SYNC_MESSAGES:
-      return action.messages;
+      return { messages: action.messages };
     default:
       return state
   }
