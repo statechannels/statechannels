@@ -1,8 +1,8 @@
 import Enum from 'enum';
 
-import { brandColor } from './App.css';
+import * as style from './App.css';
 
-export const BRAND_COLOR = brandColor;
+export const BRAND_COLOR = style.brandColor;
 
 export const ROUTE_PATHS = {
   ABOUT: 'about',
