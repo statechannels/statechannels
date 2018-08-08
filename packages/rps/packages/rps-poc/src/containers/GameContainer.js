@@ -1,7 +1,7 @@
 import { connect } from 'react-redux';
 
-import { chooseOpponent, chooseAPlay, messageSent } from '../redux/actions/game';
-import { subscribeOpponents } from '../redux/actions/opponents';
+import { GameAction } from '../redux/actions/game';
+import { OpponentAction } from '../redux/actions/opponents';
 import GameController from '../components/GameController';
 
 const mapStateToProps = state => ({
@@ -10,10 +10,10 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = {
-  chooseAPlay,
-  messageSent,
-  chooseOpponent,
-  subscribeOpponents,
+  chooseAPlay: GameAction.chooseAPlay,
+  messageSent: GameAction.messageSent,
+  chooseOpponent: GameAction.chooseOpponent,
+  subscribeOpponents: OpponentAction.subscribeOpponents,
 };
 
 export default connect(

@@ -1,20 +1,24 @@
-export const types = {
-  OPPONENTS: {
-    SYNC: 'OPPONENTS.SYNC',
-    SUBSCRIBE: 'OPPONENTS.SUBSCRIBE',
-    UNSUBSCRIBE: 'OPPONENTS.UNSUBSCRIBE',
-  }
+import { ActionsUnion } from './type-helpers';
+
+export enum OpponentActionType {
+  SYNC = 'OPPONENTS.SYNC',
+  SUBSCRIBE = 'OPPONENTS.SUBSCRIBE',
+  UNSUBSCRIBE = 'OPPONENTS.UNSUBSCRIBE',
 };
 
-export const syncOpponents = (opponents: string[]) => ({
-  type: types.OPPONENTS.SYNC,
-  opponents
-});
+export const OpponentAction = {
+  syncOpponents: (opponents: string[]) => ({
+    type: OpponentActionType.SYNC as typeof OpponentActionType.SYNC,
+    opponents
+  }),
 
-export const subscribeOpponents = () => ({
-  type: types.OPPONENTS.SUBSCRIBE,
-});
+  subscribeOpponents: () => ({
+    type: OpponentActionType.SUBSCRIBE as typeof OpponentActionType.SUBSCRIBE,
+  }),
 
-export const unsubscribeOpponents = () => ({
-  type: types.OPPONENTS.UNSUBSCRIBE,
-});
+  unsubscribeOpponents: () => ({
+    type: OpponentActionType.UNSUBSCRIBE as typeof OpponentActionType.UNSUBSCRIBE,
+  }),
+}
+
+export type OpponentAction = ActionsUnion<typeof OpponentAction>;

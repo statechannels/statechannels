@@ -1,35 +1,41 @@
+import { ActionsUnion } from './type-helpers';
+
 import Message from '../../game-engine/Message'
 
-export enum GameTypes {
-  CHOOSE_OPPONENT,
-  CHOOSE_A_PLAY,
-  MESSAGE_RECEIVED,
-  EVENT_RECEIVED,
-  MESSAGE_SENT,
+export enum GameActionType {
+  CHOOSE_OPPONENT = 'GAME.CHOOSE_OPPONENT',
+  CHOOSE_A_PLAY = 'GAME.CHOOSE_A_PLAY',
+  MESSAGE_RECEIVED = 'GAME.MESSAGE_RECEIVED',
+  EVENT_RECEIVED = 'GAME.EVENT_RECEIVED',
+  MESSAGE_SENT = 'GAME.MESSAGE_SENT',
 }
 
-export const chooseOpponent = ({ opponentAddress, stake }: { opponentAddress: string, stake: number }) => ({
-  type: types.CHOOSE_OPPONENT,
-  opponentAddress,
-  stake,
-});
+export const GameAction = {
+  chooseOpponent: (opponentAddress: string, stake: number) => ({
+    type: GameActionType.CHOOSE_OPPONENT as typeof GameActionType.CHOOSE_OPPONENT,
+    opponentAddress,
+    stake,
+  }),
 
-export const chooseAPlay = (aPlay: string) => ({
-  type: types.CHOOSE_A_PLAY,
-  aPlay,
-});
+  chooseAPlay: (aPlay: string) => ({
+    type: GameActionType.CHOOSE_A_PLAY as typeof GameActionType.CHOOSE_A_PLAY,
+    aPlay,
+  }),
 
-export const messageReceived = (message: Message) => ({
-  type: types.MESSAGE_RECEIVED,
-  message,
-});
+  messageReceived: (message: Message) => ({
+    type: GameActionType.MESSAGE_RECEIVED as typeof GameActionType.MESSAGE_RECEIVED,
+    message,
+  }),
 
-export const messageSent = (message: Message) => ({
-  type: types.MESSAGE_SENT,
-  message,
-});
+  messageSent: (message: Message) => ({
+    type: GameActionType.MESSAGE_SENT as typeof GameActionType.MESSAGE_SENT,
+    message,
+  }),
 
-export const eventReceived = (event: object) => ({
-  type: types.EVENT_RECEIVED,
-  event,
-});
+  eventReceived: (event: object) => ({
+    type: GameActionType.EVENT_RECEIVED as typeof GameActionType.EVENT_RECEIVED,
+    event,
+  }),
+};
+
+export type GameAction = ActionsUnion<typeof GameAction>;
