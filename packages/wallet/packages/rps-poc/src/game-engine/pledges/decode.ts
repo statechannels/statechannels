@@ -123,17 +123,17 @@ export default function decode(hexString) {
   const balances = extractBalances(hexString);
 
   switch (stateType) {
-    case State.StateTypes.CONCLUDE:
+    case State.StateType.Conclude:
       return new Conclude(channel, turnNum, balances);
-    case State.StateTypes.PREFUNDSETUP:
+    case State.StateType.PreFundSetup:
       const stateCountPre = extractStateCount(hexString);
       const stakePre = extractStake(hexString);
       return new PreFundSetup(channel, turnNum, balances, stateCountPre, stakePre);
-    case State.StateTypes.POSTFUNDSETUP:
+    case State.StateType.PostFundSetup:
       const stateCountPost = extractStateCount(hexString);
       const stakePost = extractStake(hexString);
       return new PostFundSetup(channel, turnNum, balances, stateCountPost, stakePost);
-    case State.StateTypes.GAME:
+    case State.StateType.Game:
       return decodeGameState(channel, turnNum, balances, hexString);
     default:
       throw new Error('unreachable');
