@@ -8,6 +8,10 @@ interface Props {
 };
 
 export default class WaitForOpponentStep extends React.PureComponent<Props> {
+  static propTypes = {
+    selectedPlayId: PropTypes.number.isRequired,
+  };
+
   render() {
     const { selectedPlayId } = this.props;
 
@@ -23,11 +27,5 @@ export default class WaitForOpponentStep extends React.PureComponent<Props> {
         )}
       </div>
     );
-  }
-
-  get propTypes() {
-    return {
-      selectedPlayId: PropTypes.number.isRequired,
-    };
   }
 }

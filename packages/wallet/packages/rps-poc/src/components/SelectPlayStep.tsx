@@ -9,6 +9,11 @@ interface Props {
 }
 
 export default class SelectPlayStep extends React.PureComponent<Props> {
+  static propTypes = {
+    afterOpponent: PropTypes.bool.isRequired,
+    handleSelectPlay: PropTypes.func.isRequired,
+  };
+
   render() {
     const { handleSelectPlay, afterOpponent } = this.props;
 
@@ -47,13 +52,6 @@ export default class SelectPlayStep extends React.PureComponent<Props> {
         </div>
       </div>
     );
-  }
-
-  get propTypes () {
-    return {
-      afterOpponent: PropTypes.bool.isRequired,
-      handleSelectPlay: PropTypes.func.isRequired,
-    };
   }
 }
 
