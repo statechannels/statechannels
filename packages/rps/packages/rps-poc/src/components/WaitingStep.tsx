@@ -3,21 +3,21 @@ import PropTypes from 'prop-types';
 
 import { Play } from '../game-engine/pledges/';
 
-const propTypes = {
-  message: PropTypes.string.isRequired,
-  selectedPlayId: PropTypes.number,
-};
-
-const defaultProps = {
-  selectedPlayId: null,
-};
-
 interface Props {
   message: string;
   selectedPlayId?: number;
 }
 
 export default class WaitingStep extends React.PureComponent<Props> {
+  static propTypes = {
+    message: PropTypes.string.isRequired,
+    selectedPlayId: PropTypes.number,
+  }
+
+  static defaultProps = {
+    selectedPlayId: null,
+  }
+
   render() {
     const { message, selectedPlayId } = this.props;
 
@@ -33,13 +33,5 @@ export default class WaitingStep extends React.PureComponent<Props> {
         )}
       </div>
     );
-  }
-
-  get propTypes() {
-    return propTypes;
-  }
-
-  get defaultProps() {
-    return defaultProps;
   }
 }
