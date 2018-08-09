@@ -5,6 +5,7 @@ import { LoginAction, LoginActionType } from '../actions/login';
 import { reduxSagaFirebase } from '../../gateways/firebase';
 import { fetchOrCreateWallet } from './wallet';
 import { fetchOrCreatePlayer, playerHeartbeatSaga } from './player';
+import { applicationControllerSaga } from './application-controller';
 
 const authProvider = new firebase.auth.GoogleAuthProvider();
 
@@ -30,6 +31,7 @@ function * loginStatusWatcherSaga () {
   // Events on this channel are triggered on login and logout
   const channel = yield call(reduxSagaFirebase.auth.channel);
   let playerHeartbeatThread;
+  let applicationThread;
 
   while (true) {
     const { user } = yield take(channel);
@@ -40,11 +42,13 @@ function * loginStatusWatcherSaga () {
       const player = yield fetchOrCreatePlayer(wallet.address, user.displayName);
 
       playerHeartbeatThread = yield fork(playerHeartbeatSaga, wallet.address);
+      applicationThread = yield fork(applicationControllerSaga, wallet.address);
 
       yield put(LoginAction.loginSuccess(user, wallet, player));
     } else {
       // Logout procedure
       if (playerHeartbeatThread) { yield cancel(playerHeartbeatThread); }
+      if (applicationThread) { yield cancel(applicationThread); }
       yield put(LoginAction.logoutSuccess());
     }
   }
