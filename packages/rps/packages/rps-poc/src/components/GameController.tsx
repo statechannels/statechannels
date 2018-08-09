@@ -6,7 +6,23 @@ import WaitingStep from './WaitingStep';
 import SelectPlayStep from './SelectPlayStep';
 import * as playerAStates from '../game-engine/application-states/PlayerA';
 
-export default class GameController extends PureComponent {
+interface Props {
+  applicationState: playerAStates.PlayerAState;
+  chooseAPlay: any; // TODO: what should this be?
+  chooseOpponent: (x: any, y: any) => void;
+  messageSent: (x: any, y: any) => void;
+  opponents: [
+    {
+      id: string;
+      name: string;
+      timestamp: string;
+      wager: string;
+    }
+  ];
+  subscribeOpponents: any;
+}
+
+export default class GameController extends PureComponent<Props> {
   render() {
     const {
       applicationState,
@@ -17,7 +33,7 @@ export default class GameController extends PureComponent {
       subscribeOpponents,
     } = this.props;
 
-    switch (applicationState && applicationState.type) {
+    switch (applicationState && applicationState.constructor) {
       case playerAStates.ReadyToSendPreFundSetupA:
         return <WaitingStep message="ready to propose game" />;
 
@@ -60,15 +76,20 @@ export default class GameController extends PureComponent {
           handleMessageSent={messageSent}
           handleCreateChallenge={chooseOpponent}
           opponents={opponents}
+          handleSelectChallenge={chooseAPlay} // TODO: right?
         />;
     }
   }
-}
 
-GameController.propTypes = {
-  applicationState: PropTypes.object.isRequired,
-  chooseAPlay: PropTypes.func.isRequired,
-  chooseOpponent: PropTypes.func.isRequired,
-  opponents: PropTypes.arrayOf(PropTypes.object).isRequired,
-  subscribeOpponents: PropTypes.func.isRequired,
-};
+  get propTypes() {
+    return {
+      applicationState: PropTypes.object.isRequired,
+      chooseAPlay: PropTypes.func.isRequired,
+      chooseOpponent: PropTypes.func.isRequired,
+      opponents: PropTypes.arrayOf(PropTypes.object).isRequired,
+      subscribeOpponents: PropTypes.func.isRequired,
+    }
+  };
+
+
+}

@@ -3,12 +3,12 @@ import PropTypes from 'prop-types';
 
 import { PLAY_OPTIONS } from '../constants';
 
-const propTypes = {
-  afterOpponent: PropTypes.bool.isRequired,
-  handleSelectPlay: PropTypes.func.isRequired,
-};
+interface Props {
+  handleSelectPlay: any;
+  afterOpponent?: any;
+}
 
-export default class SelectPlayStep extends React.PureComponent {
+export default class SelectPlayStep extends React.PureComponent<Props> {
   render() {
     const { handleSelectPlay, afterOpponent } = this.props;
 
@@ -48,6 +48,12 @@ export default class SelectPlayStep extends React.PureComponent {
       </div>
     );
   }
+
+  get propTypes () {
+    return {
+      afterOpponent: PropTypes.bool.isRequired,
+      handleSelectPlay: PropTypes.func.isRequired,
+    };
+  }
 }
 
-SelectPlayStep.propTypes = propTypes;
