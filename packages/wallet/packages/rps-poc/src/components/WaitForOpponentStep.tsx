@@ -1,13 +1,13 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import { PLAY_OPTIONS } from '../constants';
+import { Play } from '../game-engine/pledges/';
 
-const propTypes = {
-  selectedPlayId: PropTypes.number.isRequired,
+interface Props {
+  selectedPlayId: number;
 };
 
-export default class WaitForOpponentStep extends React.PureComponent {
+export default class WaitForOpponentStep extends React.PureComponent<Props> {
   render() {
     const { selectedPlayId } = this.props;
 
@@ -18,12 +18,16 @@ export default class WaitForOpponentStep extends React.PureComponent {
         </div>
         {selectedPlayId && (
           <div style={{ width: '100%' }}>
-            You&apos;ve chosen {PLAY_OPTIONS.find(option => option.id === selectedPlayId).name}
+            You&apos;ve chosen {Play[selectedPlayId]}
           </div>
         )}
       </div>
     );
   }
-}
 
-WaitForOpponentStep.propTypes = propTypes;
+  get propTypes() {
+    return {
+      selectedPlayId: PropTypes.number.isRequired,
+    };
+  }
+}
