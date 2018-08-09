@@ -15,6 +15,7 @@ config/development/*.sol.js
 config/test/contracts.json
 build
 built
+lib
 dist
 
 environments/*/contracts/**
