@@ -14,3 +14,5 @@ var increase_time_1 = require("../test/helpers/increase-time");
 exports.increaseTime = increase_time_1.increaseTime;
 exports.increaseTimeTo = increase_time_1.increaseTimeTo;
 exports.duration = increase_time_1.duration;
+var counting_game_1 = require("./test-game/counting-game");
+exports.CountingGame = counting_game_1.CountingGame;

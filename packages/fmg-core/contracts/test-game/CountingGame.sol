@@ -1,6 +1,6 @@
 pragma solidity ^0.4.18;
 
-import "../../../contracts/State.sol";
+import "../State.sol";
 import "./CountingState.sol";
 
 contract CountingGame {

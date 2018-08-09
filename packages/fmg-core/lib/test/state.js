@@ -42,7 +42,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var channel_1 = require("../src/channel");
 var state_1 = require("../src/state");
 var assert_revert_1 = __importDefault(require("./helpers/assert-revert"));
-var counting_game_1 = require("./test-game/src/counting-game");
+var counting_game_1 = require("../src/test-game/counting-game");
 var StateLib = artifacts.require("./State.sol");
 contract('State', function (accounts) {
     var stateLib;

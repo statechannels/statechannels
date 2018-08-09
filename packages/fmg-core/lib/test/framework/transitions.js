@@ -48,7 +48,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 var _this = this;
 Object.defineProperty(exports, "__esModule", { value: true });
 var assert_revert_1 = __importDefault(require("../helpers/assert-revert"));
-var counting_game_1 = require("../test-game/src/counting-game");
+var counting_game_1 = require("../../src/test-game/counting-game");
 var src_1 = require("../../src");
 var StateLib = artifacts.require("./State.sol");
 var Rules = artifacts.require("./Rules.sol");

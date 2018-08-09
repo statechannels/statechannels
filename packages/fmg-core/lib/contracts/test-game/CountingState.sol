@@ -1,6 +1,6 @@
 pragma solidity ^0.4.24;
 
-import "../../../contracts/State.sol";
+import "../State.sol";
 
 library CountingState {
     // CountingGame State Fields
