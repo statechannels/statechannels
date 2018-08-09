@@ -23,6 +23,14 @@ interface Props {
 }
 
 export default class GameController extends PureComponent<Props> {
+  static propTypes = {
+    applicationState: PropTypes.object.isRequired,
+    chooseAPlay: PropTypes.func.isRequired,
+    chooseOpponent: PropTypes.func.isRequired,
+    opponents: PropTypes.arrayOf(PropTypes.object).isRequired,
+    subscribeOpponents: PropTypes.func.isRequired,
+  };
+
   render() {
     const {
       applicationState,
@@ -80,16 +88,4 @@ export default class GameController extends PureComponent<Props> {
         />;
     }
   }
-
-  get propTypes() {
-    return {
-      applicationState: PropTypes.object.isRequired,
-      chooseAPlay: PropTypes.func.isRequired,
-      chooseOpponent: PropTypes.func.isRequired,
-      opponents: PropTypes.arrayOf(PropTypes.object).isRequired,
-      subscribeOpponents: PropTypes.func.isRequired,
-    }
-  };
-
-
 }
