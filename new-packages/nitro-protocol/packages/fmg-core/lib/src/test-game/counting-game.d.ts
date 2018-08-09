@@ -1,4 +1,4 @@
-import { State } from '../../../src';
+import { State } from '../../src';
 declare class CountingGame {
     static preFundSetupState(opts: any): PreFundSetupState;
     static PostFundSetupState(opts: any): PostFundSetupState;

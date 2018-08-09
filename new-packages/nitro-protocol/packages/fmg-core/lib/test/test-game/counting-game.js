@@ -47,9 +47,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 var _this = this;
 Object.defineProperty(exports, "__esModule", { value: true });
-var counting_game_1 = require("../src/counting-game");
-var assert_revert_1 = __importDefault(require("../../helpers/assert-revert"));
-var src_1 = require("../../../src");
+var counting_game_1 = require("../../src/test-game/counting-game");
+var assert_revert_1 = __importDefault(require("../helpers/assert-revert"));
+var src_1 = require("../../src");
 var StateLib = artifacts.require("./State.sol");
 var CountingStateContract = artifacts.require("./CountingState.sol");
 var CountingGameContract = artifacts.require("./CountingGame.sol");

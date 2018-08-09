@@ -1,6 +1,6 @@
 import assertRevert from '../helpers/assert-revert';
 
-import { CountingGame } from '../test-game/src/counting-game';
+import { CountingGame } from '../../src/test-game/counting-game';
 import { Channel, State } from '../../src';
 
 var StateLib = artifacts.require("./State.sol");

@@ -1,10 +1,9 @@
-import { Channel, State, assertRevert, increaseTime, duration } from 'fmg-core';
-import { CountingGame } from 'fmg-core/test/test-game/src/counting-game';
+import { Channel, State, assertRevert, increaseTime, duration, CountingGame } from 'fmg-core';
 
 var SimpleAdjudicator = artifacts.require("./SimpleAdjudicator.sol");
 var StateLib = artifacts.require("fmg-core/contracts/State.sol");
-var CountingStateContract = artifacts.require("fmg-core/test/test-game/contracts/CountingState.sol");
-var CountingGameContract = artifacts.require("fmg-core/test/test-game/contracts/CountingGame.sol");
+var CountingStateContract = artifacts.require("fmg-core/contracts/test-game/CountingState.sol");
+var CountingGameContract = artifacts.require("fmg-core/contracts/test-game/CountingGame.sol");
 const truffleAssert = require('truffle-assertions');
 
 const START_BALANCE = 100000000000000000000;
@@ -160,8 +159,8 @@ contract('SimpleAdjudicator', (accounts) => {
     alice = accounts[A_IDX];
     bob = accounts[B_IDX];
 
-    aliceState.stateType = State.StateTypes.CONCLUDE;
-    bobState.stateType = State.StateTypes.CONCLUDE;
+    aliceState.stateType = State.StateType.Conclude;
+    bobState.stateType = State.StateType.Conclude;
 
     [r0, s0, v0] = aliceState.sign(alice);
     [r1, s1, v1] = bobState.sign(bob);
@@ -275,8 +274,8 @@ contract('SimpleAdjudicator', (accounts) => {
         "Funds were not deposited from alice"
       );
 
-      aliceState.stateType = State.StateTypes.CONCLUDE;
-      bobState.stateType = State.StateTypes.CONCLUDE;
+      aliceState.stateType = State.StateType.Conclude;
+      bobState.stateType = State.StateType.Conclude;
 
       [r0, s0, v0] = aliceState.sign(alice);
       [r1, s1, v1] = bobState.sign(bob);
@@ -341,8 +340,8 @@ contract('SimpleAdjudicator', (accounts) => {
         "Funds were deposited from alice"
       );
 
-      aliceState.stateType = State.StateTypes.CONCLUDE;
-      bobState.stateType = State.StateTypes.CONCLUDE;
+      aliceState.stateType = State.StateType.Conclude;
+      bobState.stateType = State.StateType.Conclude;
 
       [r0, s0, v0] = aliceState.sign(alice);
       [r1, s1, v1] = bobState.sign(bob);

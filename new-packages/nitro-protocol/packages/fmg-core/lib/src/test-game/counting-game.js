@@ -10,7 +10,7 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-var src_1 = require("../../../src");
+var src_1 = require("../../src");
 var CountingGame = /** @class */ (function () {
     function CountingGame() {
     }
