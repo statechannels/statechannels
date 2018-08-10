@@ -76,7 +76,7 @@ class RpsBaseState extends State {
 class InitializationState extends RpsBaseState {
   constructor({ channel, stateCount, resolution, turnNum }) {
     super(...arguments);
-    this.stateType = State.StateTypes.PREFUNDSETUP;
+    this.stateType = State.StateType.PreFundSetup;
     this.positionType = RpsGame.PositionTypes.RESTING;
   }
 }
@@ -84,7 +84,7 @@ class InitializationState extends RpsBaseState {
 class FundConfirmationState extends RpsBaseState {
   constructor({ channel, stateCount, resolution, turnNum }) {
     super(...arguments);
-    this.stateType = State.StateTypes.POSTFUNDSETUP;
+    this.stateType = State.StateType.PostFundSetup;
     this.positionType = RpsGame.PositionTypes.RESTING;
   }
 }
@@ -92,7 +92,7 @@ class FundConfirmationState extends RpsBaseState {
 class ProposeState extends RpsBaseState {
   constructor({ channel, resolution, turnNum, stake, aPlay, salt }) {
     super(...arguments);
-    this.stateType = State.StateTypes.GAME;
+    this.stateType = State.StateType.Game;
     this.positionType = RpsGame.PositionTypes.ROUNDPROPOSED;
     this.preCommit = this.constructor.hashCommitment(aPlay, salt);
   }
@@ -101,7 +101,7 @@ class ProposeState extends RpsBaseState {
 class AcceptState extends RpsBaseState {
   constructor({ channel, resolution, turnNum, stake, preCommit, bPlay }) {
     super(...arguments);
-    this.stateType = State.StateTypes.GAME;
+    this.stateType = State.StateType.Game;
     this.positionType = RpsGame.PositionTypes.ROUNDACCEPTED;
   }
 }
@@ -109,7 +109,7 @@ class AcceptState extends RpsBaseState {
 class RevealState extends RpsBaseState {
   constructor({ channel, resolution, turnNum, stake, aPlay, bPlay, salt}) {
     super(...arguments);
-    this.stateType = State.StateTypes.GAME;
+    this.stateType = State.StateType.Game;
     this.positionType = RpsGame.PositionTypes.REVEAL;
   }
   isPreReveal() { return false; };
@@ -118,7 +118,7 @@ class RevealState extends RpsBaseState {
 class RestState extends RpsBaseState {
   constructor({ channnel, resolution, turnNum }) {
     super(...arguments);
-    this.stateType = State.StateTypes.GAME;
+    this.stateType = State.StateType.Game;
     this.positionType = RpsGame.PositionTypes.RESTING;
   }
   isPreReveal() { return false; };
@@ -127,7 +127,7 @@ class RestState extends RpsBaseState {
 class ConclusionState extends RpsBaseState {
   constructor({ channel, resolution, turnNum }) {
     super(...arguments);
-    this.stateType = State.StateTypes.CONCLUDE;
+    this.stateType = State.StateType.Conclude;
     this.positionType = RpsGame.PositionTypes.RESTING;
   }
 }
