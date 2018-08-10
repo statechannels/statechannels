@@ -3654,10 +3654,6 @@ eslint@^4.19.1:
     table "4.0.2"
     text-table "~0.2.0"
 
-esm@^3.0.52:
-  version "3.0.71"
-  resolved "https://registry.yarnpkg.com/esm/-/esm-3.0.71.tgz#3824987412d7d8fd7782d2381e990a621519a993"
-
 esm@^3.0.53:
   version "3.0.61"
   resolved "https://registry.yarnpkg.com/esm/-/esm-3.0.61.tgz#671dfb8cf57fe63852c191b85d7762d0d0789e00"
@@ -4196,11 +4192,10 @@ flush-write-stream@^1.0.0:
     inherits "^2.0.1"
     readable-stream "^2.0.4"
 
-fmg-core@^0.0.4:
-  version "0.0.4"
-  resolved "https://registry.yarnpkg.com/fmg-core/-/fmg-core-0.0.4.tgz#04d354517c9a9239edd02bea9186d8b384934d65"
+fmg-core@^0.0.6:
+  version "0.0.6"
+  resolved "https://registry.yarnpkg.com/fmg-core/-/fmg-core-0.0.6.tgz#3f1b3b06b0b5cc71f9ffc9122338ad5b8cc8d1b4"
   dependencies:
-    esm "^3.0.52"
     sha3 "^1.2.2"
     web3-utils "^1.0.0-beta.30"
 
