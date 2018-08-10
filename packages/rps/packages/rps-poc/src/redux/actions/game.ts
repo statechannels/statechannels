@@ -1,6 +1,7 @@
 import { ActionsUnion } from './type-helpers';
 
-import Message from '../../game-engine/Message'
+import { Play } from '../../game-engine/pledges';
+import Message from '../../game-engine/Message';
 
 export enum GameActionType {
   CHOOSE_OPPONENT = 'GAME.CHOOSE_OPPONENT',
@@ -17,7 +18,7 @@ export const GameAction = {
     stake,
   }),
 
-  chooseAPlay: (aPlay: string) => ({
+  chooseAPlay: (aPlay: Play) => ({
     type: GameActionType.CHOOSE_A_PLAY as typeof GameActionType.CHOOSE_A_PLAY,
     aPlay,
   }),

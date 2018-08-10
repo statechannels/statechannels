@@ -1,21 +1,15 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 
-import { PLAY_OPTIONS } from '../constants';
+import { Play } from '../game-engine/pledges';
 
 interface Props {
-  handleSelectPlay: any;
+  chooseAPlay: (aPlay: Play) => void;
   afterOpponent?: any;
 }
 
 export default class SelectPlayStep extends React.PureComponent<Props> {
-  static propTypes = {
-    afterOpponent: PropTypes.bool.isRequired,
-    handleSelectPlay: PropTypes.func.isRequired,
-  };
-
   render() {
-    const { handleSelectPlay, afterOpponent } = this.props;
+    const { chooseAPlay, afterOpponent } = this.props;
 
     return (
       <div style={{ maxWidth: '90%', margin: 'auto' }}>
@@ -27,12 +21,12 @@ export default class SelectPlayStep extends React.PureComponent<Props> {
           </h1>
         </div>
         <div style={{ width: '100%' }}>
-          {PLAY_OPTIONS.map(option => (
+          {Object.keys(Play).filter(key => !isNaN(Number(key))).map(option => (
             <button
               type="button"
-              onClick={() => handleSelectPlay(option.id)}
+              onClick={() => chooseAPlay(Play[option])}
               style={{ display: 'inline-block', width: '33%' }}
-              key={option.id}
+              key={option}
             >
               <div style={{ height: 250, background: 'maroon', margin: 4 }}>
                 <div
@@ -44,7 +38,7 @@ export default class SelectPlayStep extends React.PureComponent<Props> {
                     width: 'fit-content',
                   }}
                 >
-                  <h1>{option.name}</h1>
+                  <h1>{Play[option]}</h1>
                 </div>
               </div>
             </button>
