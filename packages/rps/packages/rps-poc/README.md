@@ -1,13 +1,5 @@
 ## Rock Paper Scissors: A Force-Move Games POC
 
-**NOTE:** the app currently requires to be run against the [generate-types](https://github.com/magmo/force-move-games/tree/generate-types)
-branch of fmg-core. To do this:
-
-1. Download [force-move-games](https://github.com/magmo/force-move-games) repo and checkout the `generate-types` branch
-2. Make sure to follow the setup instructions in that repo's README and `npm install`
-2. Inside the `force-move-games` folder: `cd packages/fmg-core && npm run-script build && npm link`
-3. Inside the `rps-poc` folder: `yarn link fmg-core`
-
 ### Setup
 
 #### Install yarn
