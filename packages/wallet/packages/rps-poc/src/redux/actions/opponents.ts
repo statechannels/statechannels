@@ -7,7 +7,7 @@ export enum OpponentActionType {
 };
 
 export const OpponentAction = {
-  syncOpponents: (opponents: string[]) => ({
+  syncOpponents: (opponents: any[]) => ({
     type: OpponentActionType.SYNC as typeof OpponentActionType.SYNC,
     opponents
   }),
