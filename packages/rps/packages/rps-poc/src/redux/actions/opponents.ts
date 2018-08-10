@@ -1,4 +1,5 @@
 import { ActionsUnion } from './type-helpers';
+import { Opponent } from '../reducers/opponents';
 
 export enum OpponentActionType {
   SYNC = 'OPPONENTS.SYNC',
@@ -7,7 +8,7 @@ export enum OpponentActionType {
 };
 
 export const OpponentAction = {
-  syncOpponents: (opponents: any[]) => ({
+  syncOpponents: (opponents: Opponent[]) => ({
     type: OpponentActionType.SYNC as typeof OpponentActionType.SYNC,
     opponents
   }),
