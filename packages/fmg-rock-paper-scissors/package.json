@@ -1,6 +1,6 @@
 {
   "name": "fmg-rock-paper-scissors",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Rock-paper-scissors as a force-move game",
   "directories": {
     "doc": "docs",
@@ -13,7 +13,7 @@
   "author": "Tom Close",
   "license": "MIT",
   "dependencies": {
-    "fmg-core": "^0.0.4",
+    "fmg-core": "^0.0.5",
     "sha3": "^1.2.2",
     "web3-utils": "^1.0.0-beta.30"
   },
