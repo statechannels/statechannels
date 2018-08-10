@@ -7,14 +7,14 @@ import { messagesReducer, MessageState } from './messages';
 
 export interface ApplicationState {
   game: GameState,
-  opponent: OpponentState,
+  opponents: OpponentState,
   login: LoginState,
   messages: MessageState,
 };
 
 export default combineReducers<ApplicationState>({
   game: gameReducer,
-  opponent: opponentReducer,
+  opponents: opponentReducer,
   login: loginReducer,
   messages: messagesReducer,
 });

@@ -3,16 +3,13 @@ import { reduxSagaFirebase } from '../../gateways/firebase';
 
 import { OpponentAction, OpponentActionType } from '../actions/opponents';
 
-const opponentsTransformer = (value: object) => Object.keys(value).map(key => ({
-  ...value[key],
-  id: key
-}));
-
+// { '0xabc': opponent1Data, ... } -> [opponent1Data, ....]
+const opponentsTransformer = (dict) => Object.keys(dict.value).map((key) => dict.value[key]);
 
 function * syncOpponentsSaga () {
   yield fork(
     reduxSagaFirebase.database.sync,
-    'opponents',
+    'players',
     {
       successActionCreator: OpponentAction.syncOpponents,
       transform: opponentsTransformer,
