@@ -7,12 +7,14 @@ import * as playerAStates from '../game-engine/application-states/PlayerA';
 import { GameState } from '../redux/reducers/game';
 import { Opponent } from '../redux/reducers/opponents';
 
+import { Play } from '../game-engine/pledges/index';
+
 interface Props {
   applicationState: GameState;
-  chooseAPlay: any; // TODO: what should this be?
-  chooseOpponent: (x: any, y: any) => void;
+  chooseAPlay: (aPlay: Play) => void; // TODO: what should this be?
+  chooseOpponent: (opponentAddress: string, stake: number) => void;
   opponents: Opponent[];
-  subscribeOpponents: any;
+  subscribeOpponents: () => void;
 }
 
 export default class GameController extends PureComponent<Props> {
@@ -48,7 +50,7 @@ export default class GameController extends PureComponent<Props> {
         return <WaitingStep message="opponent to confirm deposits" />;
 
       case playerAStates.ReadyToChooseAPlay:
-        return <SelectPlayStep handleSelectPlay={chooseAPlay} />;
+        return <SelectPlayStep chooseAPlay={chooseAPlay} />;
 
       case playerAStates.ReadyToSendPropose:
         return <WaitingStep message="ready to send round proposal" />;
