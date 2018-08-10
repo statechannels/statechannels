@@ -18,28 +18,28 @@ class PaymentGame {
 class InitializationState extends State {
     constructor({ channel, resolution, turnNum, stateCount }) {
         super(...arguments);
-        this.stateType = State.StateTypes.PREFUNDSETUP;
+        this.stateType = State.StateType.PreFundSetup;
     }
 }
 
 class FundConfirmationState extends State {
     constructor({ channel, resolution, turnNum, stateCount }) {
         super(...arguments);
-        this.stateType = State.StateTypes.POSTFUNDSETUP;
+        this.stateType = State.StateType.PostFundSetup;
     }
 }
 
 class GameState extends State {
     constructor({ channel, resolution, turnNum }) {
         super(...arguments);
-        this.stateType = State.StateTypes.GAME;
+        this.stateType = State.StateType.Game;
     }
 }
 
 class ConcludeState extends State {
     constructor({ channel, resolution, turnNum }) {
         super(...arguments);
-        this.stateType = State.StateTypes.CONCLUDE;
+        this.stateType = State.StateType.Conclude;
     }
 }
 
