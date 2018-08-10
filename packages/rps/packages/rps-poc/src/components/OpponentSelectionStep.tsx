@@ -6,7 +6,7 @@ import Button from './Button';
 
 
 interface Props {
-  chooseOpponent: (x: any, y: any) => void;
+  chooseOpponent: (opponentAddress: string, stake: number) => void;
   opponents: Opponent[];
 }
 
