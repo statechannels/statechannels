@@ -1,6 +1,6 @@
 import BasePlayerB from './Base';
 import Message from '../../Message';
-import { Play, Result } from '../../pledges';
+import { Play, Result } from '../../positions';
 
 export default class ReadyToSendResting extends BasePlayerB {
   message: Message;

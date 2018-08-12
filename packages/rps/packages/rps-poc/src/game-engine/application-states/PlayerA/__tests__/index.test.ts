@@ -1,7 +1,7 @@
 import * as AppStates from '..';
 import { Channel } from 'fmg-core';
 import Message from '../../../Message';
-import { Play, Result } from '../../../pledges';
+import { Play, Result } from '../../../positions';
 
 const gameLibrary = '0xc1912fee45d61c87cc5ea59dae31190fffff232d';
 const channelNonce = 15;

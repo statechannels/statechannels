@@ -1,5 +1,5 @@
 import BasePlayerA from './Base';
-import { Play } from '../../pledges';
+import { Play } from '../../positions';
 import Message from '../../Message';
 
 export default class ReadyToSendPropose extends BasePlayerA {
