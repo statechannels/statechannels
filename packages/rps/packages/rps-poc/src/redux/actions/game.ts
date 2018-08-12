@@ -2,6 +2,7 @@ import { ActionsUnion } from './type-helpers';
 
 import { Play } from '../../game-engine/pledges';
 import Message from '../../game-engine/Message';
+import { State } from '../../game-engine/application-states';
 
 export enum GameActionType {
   CHOOSE_OPPONENT = 'GAME.CHOOSE_OPPONENT',
@@ -9,12 +10,13 @@ export enum GameActionType {
   MESSAGE_RECEIVED = 'GAME.MESSAGE_RECEIVED',
   EVENT_RECEIVED = 'GAME.EVENT_RECEIVED',
   MESSAGE_SENT = 'GAME.MESSAGE_SENT',
+  STATE_CHANGED = 'GAME.STATE_CHANGED',
 }
 
 export const GameAction = {
-  chooseOpponent: (opponentAddress: string, stake: number) => ({
+  chooseOpponent: (opponent: string, stake: number) => ({
     type: GameActionType.CHOOSE_OPPONENT as typeof GameActionType.CHOOSE_OPPONENT,
-    opponentAddress,
+    opponent,
     stake,
   }),
 
@@ -36,6 +38,11 @@ export const GameAction = {
   eventReceived: (event: object) => ({
     type: GameActionType.EVENT_RECEIVED as typeof GameActionType.EVENT_RECEIVED,
     event,
+  }),
+
+  stateChanged: (state: State)=> ({
+    type: GameActionType.STATE_CHANGED as typeof GameActionType.STATE_CHANGED,
+    state,
   }),
 };
 

@@ -22,7 +22,7 @@ function* messageSender() {
     yield delay(2000);  // for dev purposes
     yield put(GameAction.messageSent(state.message));
     // push to firebase messages - organized by channel ID
-    yield call(reduxSagaFirebase.database.create, `messages.${state.channel}`, {
+    yield call(reduxSagaFirebase.database.create, `messages/${state.channelId}`, {
       message: JSON.stringify(state.message),
     });
     yield opponentResponseFaker();
@@ -31,6 +31,7 @@ function* messageSender() {
 
 function* blockchainResponseFaker() {
   const state = yield select(getApplicationState);
+  if (state == null) { return false; }
   if (state.type === playerAStates.WaitForBlockchainDeploy || state.type === playerAStates.WaitForBToDeposit) {
     yield delay(2000);
     yield put(GameAction.eventReceived(new Message('blah', 'sig')));
@@ -42,5 +43,5 @@ export default function* rootSaga() {
   yield fork(loginSaga);
   yield fork(messageSaga);
   yield takeEvery('*', blockchainResponseFaker);
-  yield takeEvery(GameActionType.MESSAGE_SENT, messageSender);
+  yield takeEvery(GameActionType.STATE_CHANGED, messageSender);
 }
