@@ -5,9 +5,13 @@ import Message from './Message';
 export default class ChannelWallet {
   account: any; // todo: figure out how to do types with web3
 
-  constructor() {
+  constructor(privateKey?: string) {
     const web3 = new Web3('');
-    this.account = web3.eth.accounts.create();
+    if (privateKey) {
+      this.account = web3.eth.accounts.privateKeyToAccount(privateKey);
+    } else {
+      this.account = web3.eth.accounts.create();
+    }
   }
 
   get address() {
