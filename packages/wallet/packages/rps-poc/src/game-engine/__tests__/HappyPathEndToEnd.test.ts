@@ -1,4 +1,4 @@
-import GameEngine from '../GameEngine';
+import * as GameEngine from '../GameEngine';
 import ChannelWallet from '../ChannelWallet';
 import Message from '../Message';
 import * as ApplicationStatesA from '../application-states/PlayerA';

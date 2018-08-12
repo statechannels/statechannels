@@ -12,7 +12,6 @@ import Resting from './pledges/Resting';
 import Conclude from './pledges/Conclude';
 
 export default class GameEngineB {
-
   static fromProposal({ message, wallet }: { message: Message, wallet: ChannelWallet }) {
     const position = decodePledge(message.state);
 

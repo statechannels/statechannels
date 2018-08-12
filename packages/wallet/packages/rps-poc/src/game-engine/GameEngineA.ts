@@ -13,12 +13,14 @@ import Reveal from './pledges/Reveal';
 import Resting from './pledges/Resting';
 import Conclude from './pledges/Conclude';
 
+const fakeGameLibraryAddress = '0xc1912fee45d61c87cc5ea59dae31190fffff232d';
+
 export default class GameEngineA {
   static setupGame({ opponent, stake, balances, wallet }: 
     { opponent: string, stake: number, balances: number[], wallet: ChannelWallet }
   ) {
     const participants = [wallet.address, opponent];
-    const channel = new Channel(`0x${'0'.repeat(61)}123`, 456, participants);
+    const channel = new Channel(fakeGameLibraryAddress, 456, participants);
 
     const nextPledge = new PreFundSetup(channel, 0, balances, 0, stake);
     const message = wallet.sign(nextPledge.toHex());
