@@ -1,45 +1,49 @@
+import { take, put } from 'redux-saga/effects';
 
-export function * applicationControllerSaga(walletAddress: string) {
-  // [if storage] rehdrate and start game sagas for each game in the store
-  
-  // const runningGames = {};
+import { MessageActionType } from '../actions/messages';
+import { GameActionType, GameAction } from '../actions/game';
+import ChannelWallet from '../../game-engine/ChannelWallet';
+import { setupGame, fromProposal, GameEngine } from '../../game-engine/GameEngine';
+import { State } from '../../game-engine/application-states';
 
-   // subscribe to messages sent to my wallet address
-      // subscribing to messageReceived (for my address)
+export default function* applicationControllerSaga(wallet: ChannelWallet) {
+  let gameEngine: GameEngine | null = null;
+  let newState: State | null = null;
 
-  // when messages arrive
-    // if there is an openChannel with that Id
-      // emit messageRouted(channelId)
+  while(true) {
+    const action = yield take('*');
 
-    // if not
-      // spawn a game controller with that channelId and the message
-      // openChannels[channelId] = yield fork(gameSaga, channelId, message);
+    if (gameEngine == null) {
+      switch(action.type) {
+        case GameActionType.CHOOSE_OPPONENT:
+          const { opponent, stake } = action;
+          const balances = [ 3 * stake, 3 * stake ];
+          gameEngine = setupGame({opponent, stake, balances, wallet})
+          newState = gameEngine.state;
+          break;
+        case MessageActionType.MESSAGE_RECEIVED:
+          gameEngine = fromProposal({message: action.message, wallet});
+          newState = gameEngine.state;
+          break;
+        default:
+          // do nothing
+      }
+    } else {
+      switch(action.type) {
+        case MessageActionType.MESSAGE_RECEIVED:
+          newState = gameEngine.receiveMessage(action.message);
+          break;
+        case GameActionType.MESSAGE_SENT:
+          newState = gameEngine.messageSent();
+          break;
+        case GameActionType.CHOOSE_A_PLAY:
+          newState = gameEngine.choosePlay(action.aPlay);
+          break;
+        default:
+          // do nothing
+      }
+    }
 
-  // [if storage] store the list of open channels?
+    if (newState) { yield put(GameAction.stateChanged(newState)) };
+  }
 }
-
-// export function * walletSign(wallet: ChannelWallet, channelId: string, pledge: Pledge) {
-  // fetch down the latest state from firebase for that channel
-
-  // fetch bytecode down from blockchain / cache
-  // check that oldState -> newState is a validTransition, by emulating solidity
-
-  // sign it with the private key
-
-  // put it in firebase (with uniqueness constraint, in case latest state has changed since line 25)
-
-  // return signed state to the user
-// }
-
-// export function * walletReceive(channelId: string, message: Message) {
-  // fetch down the latest state from firebase for the channel (if it exists?)
-
-  // check that message is signed by the sender
-
-  // fetch bytecode down from blockchain / cache
-  // check that oldState -> newState is a validTransition, by emulating solidity
-
-  // put it in firebase (with uniqueness constraint, in case latest state has changed since line 25)
-
-  // return the pledge
-// }
