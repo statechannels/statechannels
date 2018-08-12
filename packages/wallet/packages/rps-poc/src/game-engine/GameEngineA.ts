@@ -3,15 +3,15 @@ import { Channel } from 'fmg-core';
 import * as State from './application-states/PlayerA';
 import Message from './Message';
 import ChannelWallet from './ChannelWallet';
-import decodePledge from './pledges/decode';
-import { calculateResult, Result, Play }  from './pledges';
-import PreFundSetup from './pledges/PreFundSetup';
-import PostFundSetup from './pledges/PostFundSetup';
-import Propose from './pledges/Propose';
-import Accept from './pledges/Accept';
-import Reveal from './pledges/Reveal';
-import Resting from './pledges/Resting';
-import Conclude from './pledges/Conclude';
+import decodePledge from './positions/decode';
+import { calculateResult, Result, Play }  from './positions';
+import PreFundSetup from './positions/PreFundSetup';
+import PostFundSetup from './positions/PostFundSetup';
+import Propose from './positions/Propose';
+import Accept from './positions/Accept';
+import Reveal from './positions/Reveal';
+import Resting from './positions/Resting';
+import Conclude from './positions/Conclude';
 
 const fakeGameLibraryAddress = '0xc1912fee45d61c87cc5ea59dae31190fffff232d';
 

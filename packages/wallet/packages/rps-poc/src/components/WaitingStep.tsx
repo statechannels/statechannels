@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import { Play } from '../game-engine/pledges/';
+import { Play } from '../game-engine/positions/';
 
 interface Props {
   message: string;

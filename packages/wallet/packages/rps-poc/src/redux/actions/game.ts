@@ -1,6 +1,6 @@
 import { ActionsUnion } from './type-helpers';
 
-import { Play } from '../../game-engine/pledges';
+import { Play } from '../../game-engine/positions';
 import Message from '../../game-engine/Message';
 import { State } from '../../game-engine/application-states';
 

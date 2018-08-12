@@ -1,6 +1,6 @@
 import BasePlayerA from './Base';
 import Message from '../../Message';
-import { Play } from '../../pledges';
+import { Play } from '../../positions';
 
 export default class WaitForAccept extends BasePlayerA {
   message: Message;
