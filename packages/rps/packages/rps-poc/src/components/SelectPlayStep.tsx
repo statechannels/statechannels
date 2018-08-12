@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { Play } from '../game-engine/pledges';
+import { Play } from '../game-engine/positions';
 
 interface Props {
   chooseAPlay: (aPlay: Play) => void;

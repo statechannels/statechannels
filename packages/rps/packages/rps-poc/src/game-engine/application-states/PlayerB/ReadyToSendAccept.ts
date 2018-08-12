@@ -1,6 +1,6 @@
 import BasePlayerB from './Base';
 import Message from '../../Message';
-import { Play } from '../../pledges';
+import { Play } from '../../positions';
 
 export default class ReadyToSendAccept extends BasePlayerB {
   message: Message;

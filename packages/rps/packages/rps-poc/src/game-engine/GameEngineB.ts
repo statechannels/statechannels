@@ -1,15 +1,15 @@
 import * as State from './application-states/PlayerB';
 import Message from './Message';
 import ChannelWallet from './ChannelWallet';
-import decodePledge from './pledges/decode';
-import { calculateResult, Play }  from './pledges';
-import PreFundSetup from './pledges/PreFundSetup';
-import PostFundSetup from './pledges/PostFundSetup';
-import Reveal from './pledges/Reveal';
-import Propose from './pledges/Propose';
-import Accept from './pledges/Accept';
-import Resting from './pledges/Resting';
-import Conclude from './pledges/Conclude';
+import decodePledge from './positions/decode';
+import { calculateResult, Play }  from './positions';
+import PreFundSetup from './positions/PreFundSetup';
+import PostFundSetup from './positions/PostFundSetup';
+import Reveal from './positions/Reveal';
+import Propose from './positions/Propose';
+import Accept from './positions/Accept';
+import Resting from './positions/Resting';
+import Conclude from './positions/Conclude';
 
 export default class GameEngineB {
   static fromProposal({ message, wallet }: { message: Message, wallet: ChannelWallet }) {

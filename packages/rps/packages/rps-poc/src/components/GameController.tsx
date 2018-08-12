@@ -7,7 +7,7 @@ import * as playerAStates from '../game-engine/application-states/PlayerA';
 import { GameState } from '../redux/reducers/game';
 import { Opponent } from '../redux/reducers/opponents';
 
-import { Play } from '../game-engine/pledges/index';
+import { Play } from '../game-engine/positions/index';
 
 interface Props {
   applicationState: GameState;
