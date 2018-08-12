@@ -3,9 +3,13 @@ import { call } from 'redux-saga/effects';
 import { default as firebase, reduxSagaFirebase } from '../../gateways/firebase';
 import ChannelWallet from '../../game-engine/ChannelWallet';
 
-export function* fetchOrCreateWallet(uid: string | undefined) {
-  if (!uid) { return null; }
+interface WalletParams {
+  uid: string,
+  privateKey: string,
+  address: string,
+}
 
+export function* fetchOrCreateWallet(uid: string) {
   let wallet = yield fetchWallet(uid);
 
   if (!wallet) {
@@ -20,7 +24,7 @@ export function* fetchOrCreateWallet(uid: string | undefined) {
 const walletTransformer = (data: any) => ({
   ...data.val(),
   id: data.key,
-});
+} as WalletParams);
 
 const walletRef = (uid) => {
   return firebase.database()
@@ -43,7 +47,7 @@ function* fetchWallet(uid: string) {
   let wallet;
   result.forEach((data) => { wallet = walletTransformer(data); }); // result should have size 1
 
-  return wallet;
+  return new ChannelWallet(wallet.privateKey);
 }
 
 function* createWallet(uid: string) {
