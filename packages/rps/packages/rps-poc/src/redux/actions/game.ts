@@ -7,9 +7,9 @@ import { State } from '../../game-engine/application-states';
 export enum GameActionType {
   CHOOSE_OPPONENT = 'GAME.CHOOSE_OPPONENT',
   CHOOSE_A_PLAY = 'GAME.CHOOSE_A_PLAY',
-  MESSAGE_RECEIVED = 'GAME.MESSAGE_RECEIVED',
   EVENT_RECEIVED = 'GAME.EVENT_RECEIVED',
-  MESSAGE_SENT = 'GAME.MESSAGE_SENT',
+  MOVE_RECEIVED = 'GAME.MOVE_RECEIVED',
+  MOVE_SENT = 'GAME.MOVE_SENT',
   STATE_CHANGED = 'GAME.STATE_CHANGED',
 }
 
@@ -25,14 +25,14 @@ export const GameAction = {
     aPlay,
   }),
 
-  messageReceived: (message: Message) => ({
-    type: GameActionType.MESSAGE_RECEIVED as typeof GameActionType.MESSAGE_RECEIVED,
-    message,
+  moveReceived: (move: Move) => ({
+    type: GameActionType.MOVE_RECEIVED as typeof GameActionType.MOVE_RECEIVED,
+    move,
   }),
 
-  messageSent: (message: Message) => ({
-    type: GameActionType.MESSAGE_SENT as typeof GameActionType.MESSAGE_SENT,
-    message,
+  moveSent: (move: Move) => ({
+    type: GameActionType.MOVE_SENT as typeof GameActionType.MOVE_SENT,
+    move,
   }),
 
   eventReceived: (event: object) => ({

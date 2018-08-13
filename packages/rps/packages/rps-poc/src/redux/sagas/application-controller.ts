@@ -1,6 +1,6 @@
 import { take, put } from 'redux-saga/effects';
 
-import { MessageActionType } from '../actions/messages';
+import { MessageActionType, MessageAction } from '../actions/messages';
 import { GameActionType, GameAction } from '../actions/game';
 import ChannelWallet from '../../game-engine/ChannelWallet';
 import { setupGame, fromProposal, GameEngine } from '../../game-engine/GameEngine';
@@ -33,7 +33,7 @@ export default function* applicationControllerSaga(wallet: ChannelWallet) {
         case MessageActionType.MESSAGE_RECEIVED:
           newState = gameEngine.receiveMove(action.move);
           break;
-        case GameActionType.MESSAGE_SENT:
+        case GameActionType.MOVE_SENT:
           newState = gameEngine.moveSent();
           break;
         case GameActionType.CHOOSE_A_PLAY:
@@ -47,6 +47,13 @@ export default function* applicationControllerSaga(wallet: ChannelWallet) {
       }
     }
 
-    if (newState) { yield put(GameAction.stateChanged(newState)) };
+    if (newState) {
+      if (newState.isReadyToSend) {
+        yield put(MessageAction.sendMessage(newState.opponentAddress, newState.move.toHex()))
+      }
+      yield put(GameAction.stateChanged(newState));
+    }
   }
 }
+
+

@@ -1,24 +1,40 @@
-import { fork, take, cancel } from 'redux-saga/effects';
+import { fork, take, takeEvery, cancel, call, put } from 'redux-saga/effects';
 import { reduxSagaFirebase } from '../../gateways/firebase';
 
 import { MessageActionType, MessageAction } from '../actions/messages';
 
-function * syncMessagesSaga () {
-  // todo: sync messages for the current channel
-  yield fork(
-    reduxSagaFirebase.database.sync,
-    'messages',
-    {
-      successActionCreator: MessageAction.syncMessages,
-    },
-    'value'
+
+// watch messages on a given address
+
+// ? send messages to a given address
+
+function * sendMessage(action: any) {
+  const { to, data } = action;
+
+  yield call(reduxSagaFirebase.database.create, `/messages/${to}`, data);
+
+}
+
+function * listenForMessagesSaga(address) {
+  const channel = yield call(
+    reduxSagaFirebase.database.channel,
+    `/messages/${address}`,
+    'child_added',
   );
+
+  while(true) {
+    const message = yield take(channel);
+    yield put(MessageAction.messageReceived(message));
+  }
 }
 
 export default function * messageSaga () {
-  while( yield take(MessageActionType.SUBSCRIBE_MESSAGES) ) {
-    const messageSync = yield fork(syncMessagesSaga);
+  yield takeEvery(MessageActionType.SEND_MESSAGE, sendMessage);
+
+  while(true) {
+    const action = yield take(MessageActionType.SUBSCRIBE_MESSAGES);
+    const listener = yield fork(listenForMessagesSaga, action.address);
     yield take(MessageActionType.UNSUBSCRIBE_MESSAGES);
-    yield cancel(messageSync);
+    yield cancel(listener);
   }
 }
