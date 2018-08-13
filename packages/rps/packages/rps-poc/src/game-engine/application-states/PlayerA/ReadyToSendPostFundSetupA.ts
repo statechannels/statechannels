@@ -1,17 +1,17 @@
 import BasePlayerA from './Base';
-import Message from '../../Message';
+import Move from '../../Move';
 
 export default class ReadyToSendPostFundSetupA extends BasePlayerA {
   adjudicator: string; // address
-  message: Message;
+  move: Move;
 
-  constructor({ channel, stake, balances, adjudicator, message }) {
+  constructor({ channel, stake, balances, adjudicator, move }) {
     super({ channel, stake, balances });
     this.adjudicator = adjudicator;
-    this.message = message;
+    this.move = move;
   }
 
-  get shouldSendMessage() {
+  get shouldSendMove() {
     return true;
   }
 }

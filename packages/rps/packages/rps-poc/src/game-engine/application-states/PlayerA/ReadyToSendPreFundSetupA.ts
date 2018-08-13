@@ -1,25 +1,25 @@
 import { Channel } from 'fmg-core';
 
 import BasePlayerA from './Base';
-import Message from '../../Message';
+import Move from '../../Move';
 
 export default class ReadyToSendPreFundSetupA extends BasePlayerA {
-  message: Message;
+  move: Move;
 
-  constructor({ channel, stake, balances, message }:
-    { channel: Channel, stake: number, balances: number[], message: Message }) {
+  constructor({ channel, stake, balances, move }:
+    { channel: Channel, stake: number, balances: number[], move: Move }) {
     super({ channel, stake, balances });
-    this.message = message;
+    this.move = move;
   }
 
   toJSON() {
     return {
       ...this.commonAttributes,
-      message: this.message,
+      move: this.move,
     };
   }
 
-  get shouldSendMessage() {
+  get shouldSendMove() {
     return true;
   }
 }

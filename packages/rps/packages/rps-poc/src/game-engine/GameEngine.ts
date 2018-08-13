@@ -1,6 +1,6 @@
 import GameEngineA from './GameEngineA';
 import GameEngineB from './GameEngineB';
-import Message from './Message';
+import Move from './Move';
 import ChannelWallet from './ChannelWallet';
 import { Player, State as ApplicationState } from './application-states';
 
@@ -13,8 +13,8 @@ export function setupGame({ opponent, stake, balances, wallet }:
   return GameEngineA.setupGame({ opponent, stake, balances, wallet });
 }
 
-export function fromProposal({ message, wallet }: { message: Message, wallet: ChannelWallet }) {
-  return GameEngineB.fromProposal({ message, wallet });
+export function fromProposal({ move, wallet }: { move: Move, wallet: ChannelWallet }) {
+  return GameEngineB.fromProposal({ move, wallet });
 }
 
 // todo: state type

@@ -1,9 +1,9 @@
 import PlayerABase from './Base';
-import Message from '../../Message';
+import Move from '../../Move';
 
 export default class ReadyToSendConcludeA extends PlayerABase {
   adjudicator: any;
-  message: Message;
+  move: Move;
 
   constructor({ channel, balances, adjudicator }) {
     const stake = 0; // fake this until we fix the inheritance structure
