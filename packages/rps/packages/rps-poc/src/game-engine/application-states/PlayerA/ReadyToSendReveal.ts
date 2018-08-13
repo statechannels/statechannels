@@ -9,6 +9,7 @@ export default class ReadyToSendReveal extends BasePlayerA {
   result: Result;
   salt: string;
   adjudicator: string;
+  readonly isReadyToSend = true;
 
   constructor({ channel, stake, balances, adjudicator, aPlay, bPlay, result, salt, move }) {
     super({ channel, stake, balances });

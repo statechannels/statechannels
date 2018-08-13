@@ -3,6 +3,7 @@ import Move from '../../Move';
 
 export default class WaitForPreFundSetupB extends BasePlayerA {
   move: Move;
+  readonly isReadyToSend = false;
 
   constructor({ channel, stake, balances, move }) {
     super({ channel, stake, balances });

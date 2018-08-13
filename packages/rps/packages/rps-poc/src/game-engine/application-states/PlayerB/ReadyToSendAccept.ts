@@ -6,6 +6,7 @@ export default class ReadyToSendAccept extends BasePlayerB {
   move: Move;
   adjudicator: string;
   bPlay: Play;
+  readonly isReadyToSend = true;
 
   constructor({ channel, stake, balances, adjudicator, bPlay, move }) {
     super({ channel, stake, balances });

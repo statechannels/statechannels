@@ -4,6 +4,7 @@ import Move from '../../Move';
 export default class WaitForPropose extends BasePlayerB {
   move: Move;
   adjudicator: string;
+  readonly isReadyToSend = false;
 
   constructor({ channel, stake, balances, adjudicator, move }) {
     super({ channel, stake, balances });

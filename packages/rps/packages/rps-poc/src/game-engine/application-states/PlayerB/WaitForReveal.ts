@@ -6,6 +6,7 @@ export default class WaitForReveal extends BasePlayerB {
   move: Move;
   bPlay: Play;
   adjudicator: string;
+  readonly isReadyToSend = false;
 
   constructor({ channel, stake, balances, adjudicator, bPlay, move }) {
     super({ channel, stake, balances });
