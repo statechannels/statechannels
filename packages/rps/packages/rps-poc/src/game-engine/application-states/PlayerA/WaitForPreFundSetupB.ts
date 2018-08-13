@@ -1,11 +1,11 @@
 import BasePlayerA from './Base';
-import Message from '../../Message';
+import Move from '../../Move';
 
 export default class WaitForPreFundSetupB extends BasePlayerA {
-  message: Message;
+  move: Move;
 
-  constructor({ channel, stake, balances, message }) {
+  constructor({ channel, stake, balances, move }) {
     super({ channel, stake, balances });
-    this.message = message; // in case a resend is required
+    this.move = move; // in case a resend is required
   }
 }

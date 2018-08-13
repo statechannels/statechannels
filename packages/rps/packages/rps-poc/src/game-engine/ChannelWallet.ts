@@ -1,6 +1,6 @@
 import Web3 from 'web3';
 
-import Message from './Message';
+import Move from './Move';
 
 export default class ChannelWallet {
   account: any; // todo: figure out how to do types with web3
@@ -24,6 +24,6 @@ export default class ChannelWallet {
 
   sign(stateString: string) {
     const { signature } = this.account.sign(stateString);
-    return new Message(stateString, signature);
+    return new Move(stateString, signature);
   }
 }

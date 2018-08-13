@@ -1,10 +1,10 @@
-export default class Message {
+export default class Move {
    static fromHex(hexString) {
     const length = hexString.length;
     const state = '0x' + hexString.substr(2, length - 130 - 2);
     const signature = '0x' + hexString.substr(length - 130);
 
-    return new Message(state, signature);
+    return new Move(state, signature);
   }
 
   state: string;

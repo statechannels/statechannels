@@ -1,7 +1,7 @@
 import { Channel } from 'fmg-core';
 
 import * as State from './application-states/PlayerA';
-import Message from './Message';
+import Move from './Move';
 import ChannelWallet from './ChannelWallet';
 import decodePledge from './positions/decode';
 import { calculateResult, Result, Play }  from './positions';
@@ -23,13 +23,13 @@ export default class GameEngineA {
     const channel = new Channel(fakeGameLibraryAddress, 456, participants);
 
     const nextPledge = new PreFundSetup(channel, 0, balances, 0, stake);
-    const message = wallet.sign(nextPledge.toHex());
+    const move = wallet.sign(nextPledge.toHex());
 
     const appState = new State.ReadyToSendPreFundSetupA({
       channel,
       stake,
       balances,
-      message,
+      move,
     });
 
     return new GameEngineA(wallet, appState);
@@ -47,13 +47,13 @@ export default class GameEngineA {
     this.state = state;
   }
 
-  messageSent() {
+  moveSent() {
     switch(this.state.constructor) {
       case State.ReadyToSendPreFundSetupA:
         return this.transitionTo(
           new State.WaitForPreFundSetupB({
             ...this.state.commonAttributes,
-            message: this.state.message,
+            move: this.state.move,
           })
         );
       case State.ReadyToSendPostFundSetupA:
@@ -61,7 +61,7 @@ export default class GameEngineA {
           new State.WaitForPostFundSetupB({
             ...this.state.commonAttributes,
             adjudicator: this.state.adjudicator,
-            message: this.state.message,
+            move: this.state.move,
           })
         );
       case State.ReadyToSendPropose:
@@ -71,7 +71,7 @@ export default class GameEngineA {
             adjudicator: this.state.adjudicator,
             aPlay: this.state.aPlay,
             salt: this.state.salt,
-            message: this.state.message,
+            move: this.state.move,
           })
         );
       case State.ReadyToSendReveal:
@@ -84,8 +84,8 @@ export default class GameEngineA {
     }
   }
 
-  receiveMessage(message: Message) {
-    const positionReceived = decodePledge(message.state);
+  receiveMove(move: Move) {
+    const positionReceived = decodePledge(move.state);
 
     switch(positionReceived.constructor) {
       case PreFundSetup:
@@ -128,7 +128,7 @@ export default class GameEngineA {
         const stateCount  = 0;
         const turnNum = 2;
         const newPosition = new PostFundSetup(channel, turnNum, balances, stateCount, stake);
-        const message = this.channelWallet.sign(newPosition.toHex());
+        const move = this.channelWallet.sign(newPosition.toHex());
 
         return this.transitionTo(
           new State.ReadyToSendPostFundSetupA({
@@ -136,7 +136,7 @@ export default class GameEngineA {
             stake,
             balances,
             adjudicator: this.state.adjudicator,
-            message,
+            move,
           })
         );
       default:
@@ -160,7 +160,7 @@ export default class GameEngineA {
       salt
     );
 
-    const message = this.channelWallet.sign(newPosition.toHex());
+    const move = this.channelWallet.sign(newPosition.toHex());
 
     return this.transitionTo(
       new State.ReadyToSendPropose({
@@ -170,7 +170,7 @@ export default class GameEngineA {
         adjudicator,
         aPlay,
         salt,
-        message,
+        move,
       })
     );
   }
@@ -185,19 +185,19 @@ export default class GameEngineA {
     //   oldState.balances
     // );
 
-    // const concludeMessage = this.channelWallet.sign(concludePledge.toHex());
+    // const concludeMove = this.channelWallet.sign(concludePledge.toHex());
 
     // if (oldPledge.turnNum % 2 === 0) {
     //   newState = new State.ReadyToSendConcludeA({
     //     ...oldState.commonAttributes,
     //     adjudicator: oldState.adjudicator,
-    //     message: concludeMessage,
+    //     move: concludeMove,
     //   });
     // } else if (oldPledge.turnNum % 2 === 1) {
     //   newState = new ApplicationStatesB.ReadyToSendConcludeB({
     //     ...oldState.commonAttributes,
     //     adjudicator: oldState.adjudicator,
-    //     message: concludeMessage,
+    //     move: concludeMove,
     //   });
     // }
     return this.state;
@@ -247,7 +247,7 @@ export default class GameEngineA {
     }
 
     const nextPledge = new Reveal(channel, turnNum + 1, balances, stake, bPlay, aPlay, salt);
-    const message = this.channelWallet.sign(nextPledge.toHex());
+    const move = this.channelWallet.sign(nextPledge.toHex());
 
     return this.transitionTo(
       new State.ReadyToSendReveal({
@@ -259,7 +259,7 @@ export default class GameEngineA {
         bPlay,
         result,
         salt,
-        message,
+        move,
       })
     );
 
@@ -281,7 +281,7 @@ export default class GameEngineA {
     const { channel, resolution: balances } = position;
     const { adjudicator } = this.state;
 
-    // todo: need a message. Might also need an intermediate state here
+    // todo: need a move. Might also need an intermediate state here
     return this.transitionTo(
       new State.ReadyToSendConcludeA({ channel, balances, adjudicator })
     )

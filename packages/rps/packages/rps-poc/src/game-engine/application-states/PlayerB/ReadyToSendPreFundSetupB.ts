@@ -1,11 +1,11 @@
 import BasePlayerB from './Base';
-import Message from '../../Message';
+import Move from '../../Move';
 
 export default class ReadyToSendPreFundSetupB extends BasePlayerB {
-  message: Message;
+  move: Move;
 
-  constructor({ channel, stake, balances, message }) {
+  constructor({ channel, stake, balances, move }) {
     super({ channel, stake, balances });
-    this.message = message;
+    this.move = move;
   }
 }

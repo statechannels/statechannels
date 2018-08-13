@@ -1,16 +1,16 @@
 import BasePlayerA from './Base';
-import Message from '../../Message';
+import Move from '../../Move';
 import { Play } from '../../positions';
 
 export default class WaitForAccept extends BasePlayerA {
-  message: Message;
+  move: Move;
   aPlay: Play;
   salt: string;
   adjudicator: string;
 
-  constructor({ channel, stake, balances, adjudicator, aPlay, salt, message }) {
+  constructor({ channel, stake, balances, adjudicator, aPlay, salt, move }) {
     super({ channel, stake, balances });
-    this.message = message;
+    this.move = move;
     this.aPlay = aPlay;
     this.salt = salt;
     this.adjudicator = adjudicator;
