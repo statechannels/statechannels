@@ -26,7 +26,7 @@ function extractBytes(hexString: string, byteOffset: number = 0, numBytes: numbe
 }
 
 function extractChannel(hexString: string) {
-  const channelType = extractBytes(hexString);
+  const channelType = extractBytes(hexString, 12, 20);
   const channelNonce = extractInt(hexString, 32);
   const nPlayers = extractInt(hexString, 64);
   if (nPlayers !== N_PLAYERS) {
