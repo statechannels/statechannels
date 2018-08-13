@@ -39,6 +39,9 @@ export default function* applicationControllerSaga(wallet: ChannelWallet) {
         case GameActionType.CHOOSE_A_PLAY:
           newState = gameEngine.choosePlay(action.aPlay);
           break;
+        case GameActionType.EVENT_RECEIVED:
+          newState = gameEngine.receiveEvent(action.event);
+          break;
         default:
           // do nothing
       }
