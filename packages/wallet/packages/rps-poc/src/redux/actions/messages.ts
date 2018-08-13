@@ -1,34 +1,27 @@
 import { ActionsUnion } from './type-helpers';
 
-import Message from '../../game-engine/Message';
-
 export enum MessageActionType {
-  SYNC_MESSAGES = 'SYNC_MESSAGES',
   SUBSCRIBE_MESSAGES = 'SUBSCRIBE_MESSAGES',
   UNSUBSCRIBE_MESSAGES = 'UNSUBSCRIBE_MESSAGES',
-  MESSAGE_ROUTED = 'MESSAGE_ROUTED',
   MESSAGE_RECEIVED = 'MESSAGE_RECEIVED',
+  SEND_MESSAGE = 'SEND_MESSAGE',
 }
 
 export const MessageAction = {
-  messageRouted: (channelId: string, message: Message) => ({
-    type: MessageActionType.MESSAGE_ROUTED as typeof MessageActionType.MESSAGE_ROUTED,
-    channelId,
-    message,
+  sendMessage: (to: string, data: string) => ({
+    type: MessageActionType.SEND_MESSAGE as typeof MessageActionType.SEND_MESSAGE,
+    to,
+    data,
   }),
 
-  messageReceived: (message: Message) => ({
+  messageReceived: (message: any) => ({
     type: MessageActionType.MESSAGE_RECEIVED as typeof MessageActionType.MESSAGE_RECEIVED,
     message,
   }),
 
-  syncMessages: (messages: Message[]) => ({
-    type: MessageActionType.SYNC_MESSAGES as typeof MessageActionType.SYNC_MESSAGES,
-    messages,
-  }),
-
-  subscribeMessages: () => ({
+  subscribeMessages: (address) => ({
     type: MessageActionType.SUBSCRIBE_MESSAGES as typeof MessageActionType.SUBSCRIBE_MESSAGES,
+    address,
   }),
 
   unsubscribeMessages: () => ({
