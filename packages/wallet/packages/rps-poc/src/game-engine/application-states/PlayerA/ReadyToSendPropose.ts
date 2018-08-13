@@ -1,22 +1,22 @@
 import BasePlayerA from './Base';
 import { Play } from '../../positions';
-import Message from '../../Message';
+import Move from '../../Move';
 
 export default class ReadyToSendPropose extends BasePlayerA {
   aPlay: Play;
   salt: string;
   adjudicator;
-  message: Message;
+  move: Move;
 
-  constructor({ channel, stake, balances, adjudicator, aPlay, salt, message }) {
+  constructor({ channel, stake, balances, adjudicator, aPlay, salt, move }) {
     super({ channel, stake, balances });
     this.aPlay = aPlay;
     this.salt = salt;
-    this.message = message;
+    this.move = move;
     this.adjudicator = adjudicator;
   }
 
-  get shouldSendMessage() {
+  get shouldSendMove() {
     return true;
   }
 }

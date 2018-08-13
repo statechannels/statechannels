@@ -22,7 +22,7 @@ export default function* applicationControllerSaga(wallet: ChannelWallet) {
           newState = gameEngine.state;
           break;
         case MessageActionType.MESSAGE_RECEIVED:
-          gameEngine = fromProposal({message: action.message, wallet});
+          gameEngine = fromProposal({move: action.move, wallet});
           newState = gameEngine.state;
           break;
         default:
@@ -31,10 +31,10 @@ export default function* applicationControllerSaga(wallet: ChannelWallet) {
     } else {
       switch(action.type) {
         case MessageActionType.MESSAGE_RECEIVED:
-          newState = gameEngine.receiveMessage(action.message);
+          newState = gameEngine.receiveMove(action.move);
           break;
         case GameActionType.MESSAGE_SENT:
-          newState = gameEngine.messageSent();
+          newState = gameEngine.moveSent();
           break;
         case GameActionType.CHOOSE_A_PLAY:
           newState = gameEngine.choosePlay(action.aPlay);

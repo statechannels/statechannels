@@ -1,18 +1,18 @@
 import BasePlayerB from './Base';
-import Message from '../../Message';
+import Move from '../../Move';
 import { Play, Result } from '../../positions';
 
 export default class ReadyToSendResting extends BasePlayerB {
-  message: Message;
+  move: Move;
   aPlay: Play;
   bPlay: Play;
   result: Result;
   salt: string;
   adjudicator: string;
 
-  constructor({ channel, stake, balances, adjudicator, aPlay, bPlay, result, salt, message }) { 
+  constructor({ channel, stake, balances, adjudicator, aPlay, bPlay, result, salt, move }) { 
     super({ channel, stake, balances });
-    this.message = message;
+    this.move = move;
     this.aPlay = aPlay;
     this.bPlay = bPlay;
     this.result = result; // win/lose/draw

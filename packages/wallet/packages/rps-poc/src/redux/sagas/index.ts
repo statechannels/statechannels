@@ -20,10 +20,10 @@ function* messageSender() {
   const state = yield select(getApplicationState);
   if (state.shouldSendMessage) {
     yield delay(2000);  // for dev purposes
-    yield put(GameAction.messageSent(state.message));
+    yield put(GameAction.moveSent(state.move));
     // push to firebase messages - organized by channel ID
     yield call(reduxSagaFirebase.database.create, `messages/${state.channelId}`, {
-      message: JSON.stringify(state.message),
+      message: JSON.stringify(state.move),
     });
     yield opponentResponseFaker();
   }

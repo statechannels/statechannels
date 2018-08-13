@@ -1,7 +1,7 @@
 import { ActionsUnion } from './type-helpers';
 
 import { Play } from '../../game-engine/positions';
-import Message from '../../game-engine/Message';
+import Move from '../../game-engine/Move';
 import { State } from '../../game-engine/application-states';
 
 export enum GameActionType {

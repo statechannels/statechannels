@@ -40,7 +40,7 @@ export default class BaseState {
     };
   }
 
-  get shouldSendMessage() {
+  get shouldSendMove() {
     return false;
   }
 }

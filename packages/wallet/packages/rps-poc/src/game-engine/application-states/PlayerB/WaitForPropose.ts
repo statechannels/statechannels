@@ -1,13 +1,13 @@
 import BasePlayerB from './Base';
-import Message from '../../Message';
+import Move from '../../Move';
 
 export default class WaitForPropose extends BasePlayerB {
-  message: Message;
+  move: Move;
   adjudicator: string;
 
-  constructor({ channel, stake, balances, adjudicator, message }) {
+  constructor({ channel, stake, balances, adjudicator, move }) {
     super({ channel, stake, balances });
-    this.message = message;
+    this.move = move;
     this.adjudicator = adjudicator;
   }
 }

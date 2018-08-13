@@ -1,6 +1,6 @@
 import * as AppStates from '..';
 import { Channel } from 'fmg-core';
-import Message from '../../../Message';
+import Move from '../../../Move';
 import { Play, Result } from '../../../positions';
 
 const gameLibrary = '0xc1912fee45d61c87cc5ea59dae31190fffff232d';
@@ -18,7 +18,7 @@ const adjudicator = 0xc;
 const aPlay = Play.Rock;
 const bPlay = Play.Scissors;
 const salt = "abc123";
-const message = new Message('state', 'signature'); // fake message
+const move = new Move('state', 'signature'); // fake move
 const result = Result.AWon;
 
 const itHasSharedFunctionality = (appState) => {
@@ -44,22 +44,22 @@ const itHasSharedFunctionality = (appState) => {
 };
 
 describe("ReadyToSendPreFundSetupA", () => {
-  const appState = new AppStates.ReadyToSendPreFundSetupA({ ...coreProps, message });
+  const appState = new AppStates.ReadyToSendPreFundSetupA({ ...coreProps, move });
 
   itHasSharedFunctionality(appState);
 
-  it("has a message", () => {
-    expect(appState.message).toEqual(message);
+  it("has a move", () => {
+    expect(appState.move).toEqual(move);
   });
 });
 
 describe("WaitForPreFundSetupB", () => {
-  const appState = new AppStates.WaitForPreFundSetupB({ ...coreProps, message });
+  const appState = new AppStates.WaitForPreFundSetupB({ ...coreProps, move });
 
   itHasSharedFunctionality(appState);
 
-  it("has a message", () => {
-    expect(appState.message).toEqual(message);
+  it("has a move", () => {
+    expect(appState.move).toEqual(move);
   });
 });
 
@@ -91,7 +91,7 @@ describe("WaitForBToDeposit", () => {
 });
 
 describe("ReadyToSendPostFundSetupA", () => {
-  const appState = new AppStates.ReadyToSendPostFundSetupA({ ...coreProps, adjudicator, message });
+  const appState = new AppStates.ReadyToSendPostFundSetupA({ ...coreProps, adjudicator, move });
 
   itHasSharedFunctionality(appState);
 
@@ -99,13 +99,13 @@ describe("ReadyToSendPostFundSetupA", () => {
     expect(appState.adjudicator).toEqual(adjudicator);
   });
 
-  it("has a message", () => {
-    expect(appState.message).toEqual(message);
+  it("has a move", () => {
+    expect(appState.move).toEqual(move);
   });
 });
 
 describe("WaitForPostFundSetupB", () => {
-  const appState = new AppStates.WaitForPostFundSetupB({ ...coreProps, adjudicator, message });
+  const appState = new AppStates.WaitForPostFundSetupB({ ...coreProps, adjudicator, move });
 
   itHasSharedFunctionality(appState);
 
@@ -113,8 +113,8 @@ describe("WaitForPostFundSetupB", () => {
     expect(appState.adjudicator).toEqual(adjudicator);
   });
 
-  it("has a message", () => {
-    expect(appState.message).toEqual(message);
+  it("has a move", () => {
+    expect(appState.move).toEqual(move);
   });
 });
 
@@ -134,7 +134,7 @@ describe("ReadyToSendPropose", () => {
     adjudicator,
     aPlay,
     salt,
-    message,
+    move,
   });
 
   itHasSharedFunctionality(appState);
@@ -151,8 +151,8 @@ describe("ReadyToSendPropose", () => {
     expect(appState.salt).toEqual(salt);
   });
 
-  it("returns the message", () => {
-    expect(appState.message).toEqual(message);
+  it("returns the move", () => {
+    expect(appState.move).toEqual(move);
   });
 });
 
@@ -162,7 +162,7 @@ describe("WaitForAccept", () => {
     adjudicator,
     aPlay,
     salt,
-    message,
+    move,
   });
 
   itHasSharedFunctionality(appState);
@@ -179,8 +179,8 @@ describe("WaitForAccept", () => {
     expect(appState.salt).toEqual(salt);
   });
 
-  it("returns the message", () => {
-    expect(appState.message).toEqual(message);
+  it("returns the move", () => {
+    expect(appState.move).toEqual(move);
   });
 });
 
@@ -192,7 +192,7 @@ describe("ReadyToSendReveal", () => {
     bPlay,
     result,
     salt,
-    message,
+    move,
   });
 
   itHasSharedFunctionality(appState);
@@ -213,8 +213,8 @@ describe("ReadyToSendReveal", () => {
     expect(appState.bPlay).toEqual(bPlay);
   });
 
-  it("returns the message", () => {
-    expect(appState.message).toEqual(message);
+  it("returns the move", () => {
+    expect(appState.move).toEqual(move);
   });
 });
 
@@ -226,7 +226,7 @@ describe("WaitForResting", () => {
     bPlay,
     result,
     salt,
-    message,
+    move,
   });
 
   itHasSharedFunctionality(appState);
@@ -247,7 +247,7 @@ describe("WaitForResting", () => {
     expect(appState.bPlay).toEqual(bPlay);
   });
 
-  it("returns the message", () => {
-    expect(appState.message).toEqual(message);
+  it("returns the move", () => {
+    expect(appState.move).toEqual(move);
   });
 });
