@@ -5,6 +5,7 @@ import Move from '../../Move';
 
 export default class ReadyToSendPreFundSetupA extends BasePlayerA {
   move: Move;
+  readonly isReadyToSend = true;
 
   constructor({ channel, stake, balances, move }:
     { channel: Channel, stake: number, balances: number[], move: Move }) {

@@ -4,10 +4,10 @@ import Move from '../../Move';
 export default class WaitForConcludeA extends BasePlayerA {
   adjudicator: any;
   move: Move;
+  readonly isReadyToSend = false;
 
   constructor({ channel, balances, adjudicator, move }) {
-    const stake = 0;
-    super({ channel, balances, stake });
+    super({ channel, balances, stake: 0 });
     this.adjudicator = adjudicator;
     this.move = move;
   }

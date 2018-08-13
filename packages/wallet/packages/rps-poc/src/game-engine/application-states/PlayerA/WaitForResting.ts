@@ -9,6 +9,7 @@ export default class WaitForResting extends BasePlayerA {
   result: Result;
   salt: string;
   adjudicator: string;
+  readonly isReadyToSend = false;
 
   constructor({ channel, stake, balances, adjudicator, aPlay, bPlay, result, salt, move }) {
     super({ channel, stake, balances });

@@ -5,6 +5,7 @@ export default class BaseState {
   channel: Channel;
   stake: number;
   playerIndex: number; // overwritten by subclass
+  readonly isReadyToSend: boolean;
 
   constructor(params: {channel: Channel, stake: number, balances: number[]}) {
     this.balances = params.balances;
@@ -38,9 +39,5 @@ export default class BaseState {
       channel: this.channel,
       stake: this.stake,
     };
-  }
-
-  get shouldSendMove() {
-    return false;
   }
 }

@@ -4,6 +4,7 @@ export default class ReadyToChooseBPlay extends BasePlayerB {
   adjudicator: string;
   turnNum: number;
   preCommit: string;
+  readonly isReadyToSend = false;
 
   constructor({ channel, stake, balances, adjudicator, turnNum, preCommit }) {
     super({ channel, stake, balances });

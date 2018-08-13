@@ -29,7 +29,7 @@ export type PlayerAState = (
   ReadyToSendConcludeA |
   WaitForConcludeA
 );
-  
+
 export { ReadyToSendPreFundSetupA };
 export { WaitForPreFundSetupB };
 export { ReadyToDeploy };

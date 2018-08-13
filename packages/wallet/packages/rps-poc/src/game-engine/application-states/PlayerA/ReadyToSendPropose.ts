@@ -7,6 +7,7 @@ export default class ReadyToSendPropose extends BasePlayerA {
   salt: string;
   adjudicator;
   move: Move;
+  readonly isReadyToSend = true;
 
   constructor({ channel, stake, balances, adjudicator, aPlay, salt, move }) {
     super({ channel, stake, balances });
