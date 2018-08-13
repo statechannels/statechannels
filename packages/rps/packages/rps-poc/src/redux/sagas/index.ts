@@ -9,11 +9,11 @@ import loginSaga from './login';
 import messageSaga from './messages';
 import { getApplicationState } from '../store';
 import { reduxSagaFirebase } from '../../gateways/firebase';
-import Message from '../../game-engine/Message';
+import Move from '../../game-engine/Move';
 
 function* opponentResponseFaker() {
   yield delay(2000);
-  yield put(GameAction.messageReceived(new Message('blah', 'sig')));
+  yield put(GameAction.moveReceived(new Move('blah', 'sig')));
 }
 
 function* messageSender() {
@@ -34,7 +34,7 @@ function* blockchainResponseFaker() {
   if (state == null) { return false; }
   if (state.type === playerAStates.WaitForBlockchainDeploy || state.type === playerAStates.WaitForBToDeposit) {
     yield delay(2000);
-    yield put(GameAction.eventReceived(new Message('blah', 'sig')));
+    yield put(GameAction.eventReceived({}));
   }
 }
 
