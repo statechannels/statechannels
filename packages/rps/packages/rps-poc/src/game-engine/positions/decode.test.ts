@@ -10,7 +10,7 @@ import Reveal from './Reveal';
 import Resting from './Resting';
 import Conclude from './Conclude';
 
-const gameLibrary = '0x0000000000000000000000000000000000000000000000000000000000000111';
+const gameLibrary = '0x0000000000000000000000000000000000000111';
 const channelNonce = 15;
 const participantA = '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
 const participantB = '0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb';
