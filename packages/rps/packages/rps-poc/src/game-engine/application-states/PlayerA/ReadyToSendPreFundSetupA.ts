@@ -19,8 +19,4 @@ export default class ReadyToSendPreFundSetupA extends BasePlayerA {
       move: this.move,
     };
   }
-
-  get shouldSendMove() {
-    return true;
-  }
 }
