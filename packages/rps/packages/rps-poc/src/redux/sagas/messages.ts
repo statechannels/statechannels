@@ -23,16 +23,12 @@ function * listenForMessagesSaga(address) {
     'child_added',
     buffers.fixed(10),
   );
-    // tslint:disable-next-line:no-console
-    console.log(`My address: ${address}`);
 
   while(true) {
     const message = yield take(channel);
     const key = message.snapshot.key;
     yield put(MessageAction.messageReceived(message.value));
     yield call(reduxSagaFirebase.database.delete, `/messages/${address}/${key}`);
-    // tslint:disable-next-line:no-console
-    console.log(message.snapshot.key);
   }
 }
 
