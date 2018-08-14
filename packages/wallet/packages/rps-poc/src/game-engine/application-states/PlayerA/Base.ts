@@ -4,7 +4,7 @@ import { Player } from '..';
 
 export default class BasePlayerA extends BaseState {
   playerIndex = 0;
-  player = Player.PlayerA;
+  readonly player = Player.PlayerA;
 
   constructor(params: {channel: Channel, stake: number, balances: number[]}) {
     super(params);
