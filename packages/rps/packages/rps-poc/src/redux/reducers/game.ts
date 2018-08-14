@@ -5,7 +5,6 @@ import { State as ApplicationState } from '../../game-engine/application-states'
 export type GameState = ApplicationState | null;
 const initialState = null;
 
-// todo: rewrite this to use the gameEngine and return actual data
 export const gameReducer: Reducer<GameState> = (state=initialState, action: GameAction) => {
   switch (action.type) {
     case  GameActionType.STATE_CHANGED:

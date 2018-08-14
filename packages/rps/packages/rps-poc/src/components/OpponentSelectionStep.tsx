@@ -36,7 +36,7 @@ export default class OpponentSelectionStep extends React.PureComponent<Props> {
               {opponents.map(opponent => (
                 <tr key={opponent.address}>
                   <td>{opponent.name}</td>
-                  <td>{opponent.lastSeen}</td>
+                  <td>{opponent.address}</td>
                   <td>
                     <Button onClick={() => chooseOpponent(opponent.address, 50)} >
                       Challenge

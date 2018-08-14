@@ -1,17 +1,20 @@
-import { take, put } from 'redux-saga/effects';
+import { take, put, actionChannel } from 'redux-saga/effects';
 
 import { MessageActionType, MessageAction } from '../actions/messages';
 import { GameActionType, GameAction } from '../actions/game';
 import ChannelWallet from '../../game-engine/ChannelWallet';
 import { setupGame, fromProposal, GameEngine } from '../../game-engine/GameEngine';
 import { State } from '../../game-engine/application-states';
+import Move from '../../game-engine/Move';
 
 export default function* applicationControllerSaga(wallet: ChannelWallet) {
   let gameEngine: GameEngine | null = null;
-  let newState: State | null = null;
+
+  const channel = yield actionChannel('*');
 
   while(true) {
-    const action = yield take('*');
+    let newState: State | null = null;
+    const action = yield take(channel);
 
     if (gameEngine == null) {
       switch(action.type) {
@@ -22,7 +25,7 @@ export default function* applicationControllerSaga(wallet: ChannelWallet) {
           newState = gameEngine.state;
           break;
         case MessageActionType.MESSAGE_RECEIVED:
-          gameEngine = fromProposal({move: action.move, wallet});
+          gameEngine = fromProposal({move: Move.fromHex(action.message), wallet});
           newState = gameEngine.state;
           break;
         default:
@@ -31,7 +34,7 @@ export default function* applicationControllerSaga(wallet: ChannelWallet) {
     } else {
       switch(action.type) {
         case MessageActionType.MESSAGE_RECEIVED:
-          newState = gameEngine.receiveMove(action.move);
+          newState = gameEngine.receiveMove(Move.fromHex(action.message));
           break;
         case GameActionType.MOVE_SENT:
           newState = gameEngine.moveSent();
@@ -50,10 +53,9 @@ export default function* applicationControllerSaga(wallet: ChannelWallet) {
     if (newState) {
       if (newState.isReadyToSend) {
         yield put(MessageAction.sendMessage(newState.opponentAddress, newState.move.toHex()))
+        yield put(GameAction.moveSent(newState.move));
       }
       yield put(GameAction.stateChanged(newState));
     }
   }
 }
-
-

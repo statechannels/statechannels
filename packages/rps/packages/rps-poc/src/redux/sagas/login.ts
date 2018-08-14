@@ -6,6 +6,7 @@ import { reduxSagaFirebase } from '../../gateways/firebase';
 import { fetchOrCreateWallet } from './wallet';
 import { fetchOrCreatePlayer } from './player';
 import applicationControllerSaga from './application-controller';
+import { MessageAction } from '../actions/messages';
 
 const authProvider = new firebase.auth.GoogleAuthProvider();
 
@@ -42,6 +43,7 @@ function * loginStatusWatcherSaga () {
       const player = yield fetchOrCreatePlayer(wallet.address, user.displayName);
 
       // playerHeartbeatThread = yield fork(playerHeartbeatSaga, wallet.address);
+      yield put(MessageAction.subscribeMessages(wallet.address));
       applicationThread = yield fork(applicationControllerSaga, wallet);
 
       yield put(LoginAction.loginSuccess(user, wallet, player));
@@ -49,6 +51,7 @@ function * loginStatusWatcherSaga () {
       // Logout procedure
       // if (playerHeartbeatThread) { yield cancel(playerHeartbeatThread); }
       if (applicationThread) { yield cancel(applicationThread); }
+      yield put(MessageAction.unsubscribeMessages());
       yield put(LoginAction.logoutSuccess());
     }
   }
