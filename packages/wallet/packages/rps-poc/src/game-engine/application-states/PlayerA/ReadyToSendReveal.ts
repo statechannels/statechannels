@@ -20,8 +20,4 @@ export default class ReadyToSendReveal extends BasePlayerA {
     this.salt = salt;
     this.adjudicator = adjudicator;
   }
-
-  get shouldSendMove() {
-    return true;
-  }
 }

@@ -16,8 +16,4 @@ export default class ReadyToSendPropose extends BasePlayerA {
     this.move = move;
     this.adjudicator = adjudicator;
   }
-
-  get shouldSendMove() {
-    return true;
-  }
 }
