@@ -27,6 +27,14 @@ export default class GameController extends PureComponent<Props> {
       subscribeOpponents,
     } = this.props;
 
+    if (applicationState === null) {
+      subscribeOpponents();
+      return <OpponentSelectionStep
+        chooseOpponent={chooseOpponent}
+        opponents={opponents}
+      />;
+    }
+
     switch (applicationState && applicationState.constructor) {
       case playerAStates.ReadyToSendPreFundSetupA:
         return <WaitingStep message="ready to propose game" />;
@@ -65,11 +73,7 @@ export default class GameController extends PureComponent<Props> {
         return <WaitingStep message="opponent to accept the outcome" />;
 
       default:
-        subscribeOpponents();
-        return <OpponentSelectionStep
-          chooseOpponent={chooseOpponent}
-          opponents={opponents}
-        />;
+        return <WaitingStep message={`[view not implemented: ${applicationState.constructor.name}`} />;
     }
   }
 }
