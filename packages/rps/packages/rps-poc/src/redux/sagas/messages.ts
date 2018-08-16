@@ -2,14 +2,14 @@ import { fork, take, takeEvery, cancel, call, put } from 'redux-saga/effects';
 import { buffers } from 'redux-saga';
 import { reduxSagaFirebase } from '../../gateways/firebase';
 
-import { MessageActionType, MessageAction } from '../actions/messages';
+import { MessageActionType, MessageAction, SendMessageAction, SubscribeMessagesAction } from '../actions/messages';
 
 
 // watch messages on a given address
 
 // ? send messages to a given address
 
-function * sendMessage(action: any) {
+function * sendMessage(action: SendMessageAction) {
   const { to, data } = action;
 
   yield call(reduxSagaFirebase.database.create, `/messages/${to}`, data);
@@ -36,7 +36,7 @@ export default function * messageSaga () {
   yield takeEvery(MessageActionType.SEND_MESSAGE, sendMessage);
 
   while(true) {
-    const action = yield take(MessageActionType.SUBSCRIBE_MESSAGES);
+    const action : SubscribeMessagesAction = yield take(MessageActionType.SUBSCRIBE_MESSAGES);
     const listener = yield fork(listenForMessagesSaga, action.address);
     yield take(MessageActionType.UNSUBSCRIBE_MESSAGES);
     yield cancel(listener);

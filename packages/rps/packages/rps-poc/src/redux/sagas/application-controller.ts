@@ -14,7 +14,7 @@ export default function* applicationControllerSaga(wallet: ChannelWallet) {
 
   while(true) {
     let newState: State | null = null;
-    const action = yield take(channel);
+    const action: GameAction | MessageAction = yield take(channel);
 
     if (gameEngine == null) {
       switch(action.type) {
