@@ -44,7 +44,9 @@ function* fetchWallet(uid: string) {
   // It seems like rsf.database.read doesn't really work when the result is a collection
 
   const result = yield call([query, query.once], 'value');
-  const wallet  = walletTransformer(result); // There should only be 1 wallet returned
+  if (!result.exists()) { return null };
+  let wallet;
+  result.forEach((data) => { wallet = walletTransformer(data); }); // result should have size 1
 
   return new ChannelWallet(wallet.privateKey);
 }
