@@ -29,7 +29,7 @@ export enum Position {
 export enum Play {
   Rock,
   Paper,
-  Scissors
+  Scissors,
 }
 
 export enum Result {

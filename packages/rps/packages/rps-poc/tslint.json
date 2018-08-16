@@ -17,6 +17,7 @@
     "member-access": false,
     "ordered-imports": false,
     "jsx-no-lambda": false,
-    "interface-name": false
+    "interface-name": false,
+    "trailing-comma": [true, {"multiline":{"objects": "always"}}]
   }
 }

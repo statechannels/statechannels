@@ -76,7 +76,7 @@ export default class GameEngineB {
             balances,
             bPlay,
             adjudicator,
-            move: move2
+            move: move2,
           })
         );
       default:
@@ -228,7 +228,7 @@ export default class GameEngineB {
       stake,
       aPlay,
       bPlay,
-      salt
+      salt,
     } = position;
     const { adjudicator } = this.state;
     const turnNum = oldTurnNum + 1;

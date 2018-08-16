@@ -1,5 +1,3 @@
-import { ActionsUnion } from './type-helpers';
-
 export enum MessageActionType {
   SUBSCRIBE_MESSAGES = 'SUBSCRIBE_MESSAGES',
   UNSUBSCRIBE_MESSAGES = 'UNSUBSCRIBE_MESSAGES',
@@ -29,4 +27,10 @@ export const MessageAction = {
   }),
 }
 
-export type MessageAction = ActionsUnion<typeof MessageAction>;
+export type SendMessageAction = ReturnType<typeof MessageAction.sendMessage>;
+export type MessageReceivedAction = ReturnType<typeof MessageAction.messageReceived>;
+export type SubscribeMessagesAction = ReturnType<typeof MessageAction.subscribeMessages>;
+export type UnsubscribeMessagesAction = ReturnType<typeof MessageAction.unsubscribeMessages>;
+
+export type MessageAction = SendMessageAction | MessageReceivedAction | SubscribeMessagesAction | UnsubscribeMessagesAction;
+
