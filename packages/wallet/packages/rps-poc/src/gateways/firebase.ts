@@ -7,7 +7,7 @@ const config = {
   databaseURL: "https://rock-paper-scissors123.firebaseio.com",
   projectId: "rock-paper-scissors123",
   storageBucket: "",
-  messagingSenderId: "913007764573"
+  messagingSenderId: "913007764573",
 };
 
 const fire = firebase.initializeApp(config);

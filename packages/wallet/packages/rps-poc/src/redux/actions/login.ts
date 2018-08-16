@@ -1,5 +1,3 @@
-import { ActionsUnion } from './type-helpers';
-
 import ChannelWallet from '../../game-engine/ChannelWallet';
 
 export enum LoginActionType {
@@ -42,4 +40,11 @@ export const LoginAction = {
   }),
 };
 
-export type LoginAction = ActionsUnion<typeof LoginAction>;
+export type LoginRequestAction = ReturnType<typeof LoginAction.login>;
+export type LoginFailureAction = ReturnType<typeof LoginAction.loginFailure>;
+export type LogoutAction = ReturnType<typeof LoginAction.logout>;
+export type LogoutFailureAction = ReturnType<typeof LoginAction.logoutFailure>;
+export type LoginSuccessAction = ReturnType<typeof LoginAction.loginSuccess>;
+export type LogoutSuccessAction = ReturnType<typeof LoginAction.logoutSuccess>;
+
+export type LoginAction = LoginRequestAction | LoginFailureAction | LogoutAction | LogoutFailureAction | LoginSuccessAction | LogoutSuccessAction;
