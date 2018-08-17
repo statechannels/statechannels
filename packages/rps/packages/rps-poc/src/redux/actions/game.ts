@@ -5,7 +5,7 @@ import { State } from '../../game-engine/application-states';
 
 export enum GameActionType {
   CHOOSE_OPPONENT = 'GAME.CHOOSE_OPPONENT',
-  CHOOSE_A_PLAY = 'GAME.CHOOSE_A_PLAY',
+  CHOOSE_PLAY = 'GAME.CHOOSE_PLAY',
   EVENT_RECEIVED = 'GAME.EVENT_RECEIVED',
   MOVE_RECEIVED = 'GAME.MOVE_RECEIVED',
   MOVE_SENT = 'GAME.MOVE_SENT',
@@ -25,9 +25,9 @@ export const GameAction = {
     stake,
   }),
 
-  chooseAPlay: (aPlay: Play) => ({
-    type: GameActionType.CHOOSE_A_PLAY as typeof GameActionType.CHOOSE_A_PLAY,
-    aPlay,
+  choosePlay: (play: Play) => ({
+    type: GameActionType.CHOOSE_PLAY as typeof GameActionType.CHOOSE_PLAY,
+    play,
   }),
 
   moveReceived: (move: Move) => ({
@@ -52,10 +52,10 @@ export const GameAction = {
 };
 
 export type ChooseOpponentAction = ReturnType<typeof GameAction.chooseOpponent>;
-export type ChooseAPlayAction = ReturnType<typeof GameAction.chooseAPlay>;
+export type ChoosePlayAction = ReturnType<typeof GameAction.choosePlay>;
 export type MoveReceivedAction = ReturnType<typeof GameAction.moveReceived>;
 export type MoveSentAction = ReturnType<typeof GameAction.moveSent>;
 export type EventReceivedAction = ReturnType<typeof GameAction.eventReceived>;
 export type StateChangedAction = ReturnType<typeof GameAction.stateChanged>;
 export type PlayComputerAction = ReturnType<typeof GameAction.playComputer>;
-export type GameAction = ChooseOpponentAction | ChooseAPlayAction | MoveReceivedAction | MoveSentAction | EventReceivedAction | StateChangedAction | PlayComputerAction;
+export type GameAction = ChooseOpponentAction | ChoosePlayAction | MoveReceivedAction | MoveSentAction | EventReceivedAction | StateChangedAction | PlayComputerAction;
