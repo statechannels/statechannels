@@ -4,15 +4,15 @@ import { Opponent } from '../redux/reducers/opponents';
 
 import Button from './Button';
 
-
 interface Props {
   chooseOpponent: (opponentAddress: string, stake: number) => void;
+  playComputer: (stake: number) => void;
   opponents: Opponent[];
 }
 
 export default class OpponentSelectionStep extends React.PureComponent<Props> {
   render() {
-    const { opponents, chooseOpponent } = this.props;
+    const { opponents, chooseOpponent, playComputer } = this.props;
 
     return (
       <div style={{ maxWidth: '90%', margin: 'auto' }}>
@@ -46,6 +46,9 @@ export default class OpponentSelectionStep extends React.PureComponent<Props> {
               ))}
             </tbody>
           </table>
+          <div style={{textAlign:"center",padding:"20px"}}>
+          <Button onClick={() => playComputer(50)}>Play against computer</Button>
+          </div>
         </div>
       </div>
     );

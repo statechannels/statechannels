@@ -104,7 +104,7 @@ export default class GameEngineA {
     }
   }
 
-  transactionSent() {
+  transactionSent(): State.PlayerAState {
     if (!(this.state instanceof State.ReadyToDeploy)) { return this.state };
 
     const { channel, stake, balances } = this.state;
