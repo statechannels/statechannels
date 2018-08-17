@@ -10,9 +10,15 @@ export enum GameActionType {
   MOVE_RECEIVED = 'GAME.MOVE_RECEIVED',
   MOVE_SENT = 'GAME.MOVE_SENT',
   STATE_CHANGED = 'GAME.STATE_CHANGED',
+  PLAY_COMPUTER = 'GAME.PLAY_COMPUTER',
 }
 
 export const GameAction = {
+  playComputer: (stake: number) => ({
+    type: GameActionType.PLAY_COMPUTER as typeof GameActionType.PLAY_COMPUTER,
+    stake,
+  }),
+
   chooseOpponent: (opponent: string, stake: number) => ({
     type: GameActionType.CHOOSE_OPPONENT as typeof GameActionType.CHOOSE_OPPONENT,
     opponent,
@@ -51,5 +57,5 @@ export type MoveReceivedAction = ReturnType<typeof GameAction.moveReceived>;
 export type MoveSentAction = ReturnType<typeof GameAction.moveSent>;
 export type EventReceivedAction = ReturnType<typeof GameAction.eventReceived>;
 export type StateChangedAction = ReturnType<typeof GameAction.stateChanged>;
-
-export type GameAction = ChooseOpponentAction | ChooseAPlayAction | MoveReceivedAction | MoveSentAction | EventReceivedAction | StateChangedAction;
+export type PlayComputerAction = ReturnType<typeof GameAction.playComputer>;
+export type GameAction = ChooseOpponentAction | ChooseAPlayAction | MoveReceivedAction | MoveSentAction | EventReceivedAction | StateChangedAction | PlayComputerAction;
