@@ -4,6 +4,7 @@ export default class BaseState {
   balances: number[];
   channel: Channel;
   stake: number;
+  type: string;
   playerIndex: number; // overwritten by subclass
   readonly isReadyToSend: boolean;
 
@@ -11,6 +12,8 @@ export default class BaseState {
     this.balances = params.balances;
     this.channel = params.channel;
     this.stake = params.stake;
+    // To easier see the current state in redux for debugging
+    this.type = this.constructor.name;
   }
 
   get myAddress() {

@@ -10,6 +10,7 @@ import messageSaga from './messages';
 import { getApplicationState } from '../store';
 import { reduxSagaFirebase } from '../../gateways/firebase';
 import Move from '../../game-engine/Move';
+import autoOpponentSaga from './auto-opponent';
 
 function* opponentResponseFaker() {
   yield delay(2000);
@@ -32,7 +33,7 @@ function* messageSender() {
 function* blockchainResponseFaker() {
   const state = yield select(getApplicationState);
   if (state == null) { return false; }
-  if (state.type === playerAStates.WaitForBlockchainDeploy || state.type === playerAStates.WaitForBToDeposit) {
+  if (state instanceof playerAStates.WaitForBlockchainDeploy || state instanceof playerAStates.WaitForBToDeposit) {
     yield delay(2000);
     yield put(GameAction.eventReceived({}));
   }
@@ -42,6 +43,7 @@ export default function* rootSaga() {
   yield fork(opponentSaga);
   yield fork(loginSaga);
   yield fork(messageSaga);
+  yield fork(autoOpponentSaga);
   yield takeEvery('*', blockchainResponseFaker);
   yield takeEvery(GameActionType.STATE_CHANGED, messageSender);
 }

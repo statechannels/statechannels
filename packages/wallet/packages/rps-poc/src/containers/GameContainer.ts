@@ -14,6 +14,7 @@ const mapDispatchToProps = {
   chooseAPlay: GameAction.chooseAPlay,
   chooseOpponent: GameAction.chooseOpponent,
   subscribeOpponents: OpponentAction.subscribeOpponents,
+  playComputer: GameAction.playComputer,
 };
 
 export default connect(

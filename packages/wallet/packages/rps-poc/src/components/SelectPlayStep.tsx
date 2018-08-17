@@ -24,7 +24,7 @@ export default class SelectPlayStep extends React.PureComponent<Props> {
           {Object.keys(Play).filter(key => !isNaN(Number(key))).map(option => (
             <button
               type="button"
-              onClick={() => chooseAPlay(Play[option])}
+              onClick={() => chooseAPlay(parseInt(option,10))}
               style={{ display: 'inline-block', width: '33%' }}
               key={option}
             >

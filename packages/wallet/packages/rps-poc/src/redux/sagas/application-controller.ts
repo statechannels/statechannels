@@ -6,6 +6,7 @@ import ChannelWallet from '../../game-engine/ChannelWallet';
 import { setupGame, fromProposal, GameEngine } from '../../game-engine/GameEngine';
 import { State } from '../../game-engine/application-states';
 import Move from '../../game-engine/Move';
+import { ReadyToDeploy } from '../../game-engine/application-states/PlayerA';
 
 export default function* applicationControllerSaga(wallet: ChannelWallet) {
   let gameEngine: GameEngine | null = null;
@@ -52,10 +53,19 @@ export default function* applicationControllerSaga(wallet: ChannelWallet) {
 
     if (newState) {
       if (newState.isReadyToSend) {
+
         yield put(MessageAction.sendMessage(newState.opponentAddress, newState.move.toHex()))
         yield put(GameAction.moveSent(newState.move));
       }
-      yield put(GameAction.stateChanged(newState));
+      // Fake sending a transaction for now
+      if (newState instanceof ReadyToDeploy && gameEngine){
+          gameEngine!.transactionSent();
+          newState = gameEngine.state;
+      }
+      // TODO: Once we stop faking the transaction we won't need this null check
+      if (newState){
+        yield put(GameAction.stateChanged(newState));
+      }
     }
   }
 }

@@ -15,6 +15,7 @@ interface Props {
   chooseOpponent: (opponentAddress: string, stake: number) => void;
   opponents: Opponent[];
   subscribeOpponents: () => void;
+  playComputer: (stake: number) => void;
 }
 
 export default class GameController extends PureComponent<Props> {
@@ -25,14 +26,18 @@ export default class GameController extends PureComponent<Props> {
       chooseOpponent,
       opponents,
       subscribeOpponents,
+      playComputer,
     } = this.props;
 
     if (applicationState === null) {
       subscribeOpponents();
-      return <OpponentSelectionStep
-        chooseOpponent={chooseOpponent}
-        opponents={opponents}
-      />;
+      return (
+        <OpponentSelectionStep
+          chooseOpponent={chooseOpponent}
+          playComputer={playComputer}
+          opponents={opponents}
+        />
+      );
     }
 
     switch (applicationState && applicationState.constructor) {
@@ -73,7 +78,7 @@ export default class GameController extends PureComponent<Props> {
         return <WaitingStep message="opponent to accept the outcome" />;
 
       default:
-        return <WaitingStep message={`[view not implemented: ${applicationState.constructor.name}`} />;
+      return <WaitingStep message={`[view not implemented: ${applicationState.constructor.name}`} />;
     }
   }
 }
