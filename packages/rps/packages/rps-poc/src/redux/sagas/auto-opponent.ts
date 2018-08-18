@@ -5,13 +5,13 @@ import {
   actionChannel,
   select,
 } from 'redux-saga/effects';
-import { GameActionType, GameAction, MoveSentAction } from '../actions/game';
+import { delay } from 'redux-saga';
+import { GameActionType, GameAction } from '../actions/game';
 import { fetchOrCreateWallet } from './wallet';
 import { MessageActionType, MessageAction } from '../actions/messages';
 import { fromProposal, GameEngine } from '../../game-engine/GameEngine';
 import Move from '../../game-engine/Move';
-import { WaitForBToDeposit } from '../../game-engine/application-states/PlayerA';
-import { ReadyToChooseBPlay } from '../../game-engine/application-states/PlayerB';
+import { ReadyToChooseBPlay, ReadyToDeposit } from '../../game-engine/application-states/PlayerB';
 import { Play } from '../../game-engine/positions';
 import { getUser } from '../store';
 
@@ -31,8 +31,7 @@ function* startAutoOpponent() {
     return (
       (action.type === MessageActionType.SEND_MESSAGE &&
         action.to === wallet.address) ||
-      (action.type === GameActionType.STATE_CHANGED &&
-        action.state instanceof WaitForBToDeposit)
+      (action.type === GameActionType.EVENT_RECEIVED)
     );
   };
 
@@ -40,40 +39,43 @@ function* startAutoOpponent() {
   const channel = yield actionChannel(actionFilter);
 
   while (true) {
-    const action = yield take(channel);
+    const action: GameAction | MessageAction = yield take(channel);
 
+    yield delay(2000);
     if (gameEngine === null) {
+      if (action.type !== MessageActionType.SEND_MESSAGE) { return false; }
       // Start up the game engine for our autoplayer B
       gameEngine = fromProposal({ move: Move.fromHex(action.data), wallet });
-      yield put(MessageAction.messageReceived(gameEngine.state.move.toHex()));
+      yield continueWithFollowingActions(gameEngine);
     } else {
       switch (action.type) {
         case MessageActionType.SEND_MESSAGE:
-          yield handleMessage(gameEngine);
+          gameEngine.receiveMove(Move.fromHex(action.data));
           break;
-        // We're filtering our actions so the state will always be WaitForBToDeposit 
-        case GameActionType.STATE_CHANGED:
+        case GameActionType.EVENT_RECEIVED:
           // Fake sending to the blockchain for now
           gameEngine.receiveEvent({});
-          gameEngine.transactionSent();
           break;
       }
+      yield continueWithFollowingActions(gameEngine);
     }
   }
 }
 
-function* handleMessage(gameEngine: GameEngine) {
-  // We want to wait until move sent to prevent handling a move before player A is done processing
-  const action: MoveSentAction = yield take(GameActionType.MOVE_SENT);
-  let newState = gameEngine.receiveMove(action.move);
+function* continueWithFollowingActions(gameEngine: GameEngine) {
+  while (true) { // keep going until we don't have an action to take
+    const state = gameEngine.state;
 
-  if (newState instanceof ReadyToChooseBPlay) {
-    // Good ol rock, nothings beats that!
-    newState = gameEngine.choosePlay(Play.Rock);
-  }
-
-  if (newState.isReadyToSend) {
-    yield put(MessageAction.messageReceived(gameEngine.state.move.toHex()));
-    newState = gameEngine.moveSent();
+    if (state instanceof ReadyToChooseBPlay) {
+      // Good ol rock, nothings beats that!
+      gameEngine.choosePlay(Play.Rock);
+    } else if (state.isReadyToSend) {
+      yield put(MessageAction.messageReceived(gameEngine.state.move.toHex()));
+      gameEngine.moveSent();
+    } else if (state instanceof ReadyToDeposit) {
+      gameEngine.transactionSent();
+    } else {
+      return false;
+    }
   }
 }

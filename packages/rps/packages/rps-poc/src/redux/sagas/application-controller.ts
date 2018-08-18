@@ -59,7 +59,7 @@ export default function* applicationControllerSaga(wallet: ChannelWallet) {
       }
       // Fake sending a transaction for now
       if (newState instanceof ReadyToDeploy && gameEngine){
-          gameEngine!.transactionSent();
+          gameEngine.transactionSent();
           newState = gameEngine.state;
       }
       // TODO: Once we stop faking the transaction we won't need this null check
