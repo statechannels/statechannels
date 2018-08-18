@@ -79,6 +79,16 @@ export default class GameEngineB {
             move: move2,
           })
         );
+      case State.ReadyToSendResting:
+        return this.transitionTo(
+          new State.WaitForPropose({
+            channel,
+            stake,
+            balances,
+            adjudicator: this.state.adjudicator,
+            move: this.state.move,
+          })
+        )
       default:
         // todo: should we error here?
         return this.state;
