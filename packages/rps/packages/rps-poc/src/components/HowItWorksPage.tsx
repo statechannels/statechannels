@@ -1,23 +1,18 @@
 import React from 'react';
+import { StyleSheet, css } from 'aphrodite';
 
 import ButtonLink from './ButtonLink';
 import { ROUTE_PATHS } from '../constants';
 
 const HowItWorksPage: React.SFC = () => {
   return (
-    <div style={{ maxWidth: '90%', margin: 'auto' }}>
+    <div className={css(styles.container)}>
       <div>
         <h1>How it works</h1>
       </div>
-      <div style={{ width: '100%' }}>
-        <div
-          style={{
-            display: 'inline-block',
-            verticalAlign: 'top',
-            width: '50%',
-          }}
-        >
-          <div style={{ paddingRight: 8 }}>
+      <div className={css(styles.fullWidth)}>
+        <div className={css(styles.column)}>
+          <div className={css(styles.rightPadding)}>
             <div>
               <h3>Step 1: Select an opponent</h3>
               <p>Choose an opponent by the amount of Finney you want to bet.</p>
@@ -44,19 +39,11 @@ const HowItWorksPage: React.SFC = () => {
             </div>
           </div>
         </div>
-        <div style={{ width: '50%', display: 'inline-block' }}>
-          <div
-            style={{
-              backgroundColor: 'antiquewhite',
-              height: 350,
-              width: '100%',
-            }}
-          >
-            *** gif or video of game goes here **
-          </div>
+        <div className={css(styles.column)}>
+          <div className={css(styles.image)}>*** gif or video of game goes here **</div>
         </div>
       </div>
-      <div style={{ textAlign: 'center', paddingTop: 40 }}>
+      <div className={css(styles.link)}>
         <ButtonLink href={ROUTE_PATHS.PLAY}>Continue</ButtonLink>
       </div>
     </div>
@@ -64,3 +51,35 @@ const HowItWorksPage: React.SFC = () => {
 };
 
 export default HowItWorksPage;
+
+const styles = StyleSheet.create({
+  container: {
+    maxWidth: '90%',
+    margin: 'auto',
+  },
+
+  fullWidth: {
+    width: '100%',
+  },
+
+  column: {
+    display: 'inline-block',
+    verticalAlign: 'top',
+    width: '50%',
+  },
+
+  rightPadding: {
+    paddingRight: 8,
+  },
+
+  image: {
+    backgroundColor: 'antiquewhite',
+    height: 350,
+    width: '100%',
+  },
+
+  link: {
+    textAlign: 'center',
+    paddingTop: 40,
+  },
+});
