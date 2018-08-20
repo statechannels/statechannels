@@ -147,6 +147,8 @@ export default class GameEngineA {
   choosePlay(aPlay: Play) {
     if (!(this.state instanceof State.ReadyToChooseAPlay)) { return this.state };
 
+    this.validateBalances()
+
     const { balances, turnNum, stake, channel, adjudicator } = this.state;
 
     const salt = 'salt'; // todo: make random
@@ -285,5 +287,13 @@ export default class GameEngineA {
     return this.transitionTo(
       new State.ReadyToSendConcludeA({ channel, balances, adjudicator })
     )
+  }
+
+  validateBalances() {
+    if (
+      this.state.stake > this.state.balances[0]
+    ) {
+      throw(Error("Insufficient balance for player A."));
+    }
   }
 }
