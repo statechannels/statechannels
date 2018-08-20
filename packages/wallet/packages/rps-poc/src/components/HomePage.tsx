@@ -1,8 +1,12 @@
 import React from 'react';
+import { StyleSheet, css } from 'aphrodite';
 
 import Button from './Button';
 import ButtonLink from './ButtonLink';
 import { ROUTE_PATHS } from '../constants';
+import RockIcon from '../icons/rock_icon.jsx';
+import PaperIcon from '../icons/paper_icon.jsx';
+import ScissorsIcon from '../icons/scissors_icon.jsx';
 
 interface IProps {
   login: () => any;
@@ -19,34 +23,26 @@ const HomePage: React.SFC<IProps> = ({ login, logout, loggedIn }) => {
   }
 
   return (
-    <div style={{ maxWidth: '90%', margin: 'auto' }}>
-      <div style={{ textAlign: 'center' }}>
-        <h1 style={{ marginBottom: 0 }}>Rock, Paper, Scissors</h1>
+    <div className={css(styles.container)}>
+      <div className={css(styles.centerAligned)}>
+        <h1 className={css(styles.title)}>Rock, Paper, Scissors</h1>
         <p>
           <em>A State-Channel Proof-of-Concept Game</em>
         </p>
       </div>
       <div>
-        <div style={{ display: 'inline-block', maxWidth: '33%' }}>
-          <img alt="rock" width="100%" src="https://i.imgur.com/4JnbeAm.png" />
+        <div className={css(styles.image)}>
+          <RockIcon width="100%" />
         </div>
-        <div style={{ display: 'inline-block', maxWidth: '33%' }}>
-          <img
-            alt="paper"
-            width="100%"
-            src="https://images.vexels.com/media/users/3/128601/isolated/preview/adea4e2cdcac05cab39a471f7cd7178d-red-rectangular-origami-banner-by-vexels.png"
-          />
+        <div className={css(styles.image)}>
+          <PaperIcon width="100%" />
         </div>
-        <div style={{ display: 'inline-block', maxWidth: '33%' }}>
-          <img
-            alt="scissors"
-            width="100%"
-            src="http://www.pngmart.com/files/1/Scissors-PNG-Free-Download.png"
-          />
+        <div className={css(styles.image)}>
+          <ScissorsIcon width="100%" />
         </div>
       </div>
-      <div style={{ textAlign: 'center', paddingTop: 40 }}>
-        <ButtonLink href={ROUTE_PATHS.HOW_IT_WORKS}>Begin</ButtonLink>
+      <div className={css(styles.buttons)}>
+        {loggedIn && <ButtonLink href={ROUTE_PATHS.HOW_IT_WORKS}>Begin</ButtonLink>}
         {loginButton}
       </div>
     </div>
@@ -54,3 +50,28 @@ const HomePage: React.SFC<IProps> = ({ login, logout, loggedIn }) => {
 };
 
 export default HomePage;
+
+const styles = StyleSheet.create({
+  container: {
+    maxWidth: '90%',
+    margin: 'auto',
+  },
+
+  image: {
+    display: 'inline-block',
+    maxWidth: '33%',
+  },
+
+  title: {
+    marginBottom: 0,
+  },
+
+  centerAligned: {
+    textAlign: 'center',
+  },
+
+  buttons: {
+    textAlign: 'center',
+    paddingTop: 40,
+  },
+});

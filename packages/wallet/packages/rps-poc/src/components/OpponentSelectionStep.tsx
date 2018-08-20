@@ -1,4 +1,5 @@
 import React from 'react';
+import { StyleSheet, css } from 'aphrodite';
 
 import { Opponent } from '../redux/reducers/opponents';
 
@@ -15,20 +16,14 @@ export default class OpponentSelectionStep extends React.PureComponent<Props> {
     const { opponents, chooseOpponent, playComputer } = this.props;
 
     return (
-      <div style={{ maxWidth: '90%', margin: 'auto' }}>
+      <div className={css(styles.container)}>
         <div>
           <h1>Select an opponent:</h1>
         </div>
-        <div
-          style={{
-            left: '50%',
-            position: 'absolute',
-            transform: 'translateX(-50%)',
-          }}
-        >
-          <table style={{ textAlign: 'left' }}>
+        <div className={css(styles.centeredTable)}>
+          <table className={css(styles.leftAlign)}>
             <tbody>
-              <tr style={{ height: 60 }}>
+              <tr className={css(styles.titleRow)}>
                 <th>Name</th>
                 <th>Wager (Finney)</th>
                 <th>Time initiated</th>
@@ -38,19 +33,43 @@ export default class OpponentSelectionStep extends React.PureComponent<Props> {
                   <td>{opponent.name}</td>
                   <td>{opponent.address}</td>
                   <td>
-                    <Button onClick={() => chooseOpponent(opponent.address, 50)} >
-                      Challenge
-                    </Button>
+                    <Button onClick={() => chooseOpponent(opponent.address, 50)}>Challenge</Button>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
-          <div style={{textAlign:"center",padding:"20px"}}>
-          <Button onClick={() => playComputer(50)}>Play against computer</Button>
+          <div className={css(styles.buttonPosition)}>
+            <Button onClick={() => playComputer(50)}>Play against computer</Button>
           </div>
         </div>
       </div>
     );
   }
 }
+
+const styles = StyleSheet.create({
+  container: {
+    maxWidth: '90%',
+    margin: 'auto',
+  },
+
+  centeredTable: {
+    left: '50%',
+    position: 'absolute',
+    transform: 'translateX(-50%)',
+  },
+
+  leftAlign: {
+    textAlign: 'left',
+  },
+
+  buttonPosition: {
+    textAlign: 'center',
+    padding: '20px',
+  },
+
+  titleRow: {
+    height: 60,
+  },
+});
