@@ -80,7 +80,7 @@ export default class GameController extends PureComponent<Props> {
 
       case playerA.WaitForResting:
         // result 
-        return <WaitingStep message="Wait for resting" />;
+        return <WaitingStep message="resting" />;
       
       case playerB.ReadyToSendPreFundSetupB:
         return <WaitingStep message="ready to send prefund setup" />;

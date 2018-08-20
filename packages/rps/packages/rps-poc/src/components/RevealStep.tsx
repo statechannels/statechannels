@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { StyleSheet, css } from 'aphrodite';
 
 import { PLAY_OPTIONS } from '../constants';
 
@@ -7,7 +8,7 @@ interface IProps {
   opponentMoveId: number;
 }
 
-export default class RevealStep extends React.PureComponent<IProps> {
+class RevealStep extends React.PureComponent<IProps> {
   render() {
     const { selectedMoveId, opponentMoveId } = this.props;
 
@@ -15,13 +16,28 @@ export default class RevealStep extends React.PureComponent<IProps> {
     const theirPlay = PLAY_OPTIONS.find(option => option.id === opponentMoveId);
 
     return (
-      <div style={{ maxWidth: '90%', margin: 'auto' }}>
+      <div className={css(styles.container)}>
         <div>
           <h1>The result:</h1>
         </div>
-        <div style={{ width: '100%' }}>You chose {yourPlay && yourPlay.name}</div>
-        <div style={{ width: '100%' }}>Your opponent chose {theirPlay && theirPlay.name}</div>
+        <div className={css(styles.fullWidth)}>You chose {yourPlay && yourPlay.name}</div>
+        <div className={css(styles.fullWidth)}>
+          Your opponent chose {theirPlay && theirPlay.name}
+        </div>
       </div>
     );
   }
 }
+
+const styles = StyleSheet.create({
+  container: {
+    maxWidth: '90%',
+    margin: 'auto',
+  },
+
+  fullWidth: {
+    width: '100%',
+  },
+});
+
+export default RevealStep;

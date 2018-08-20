@@ -1,4 +1,5 @@
 import React from 'react';
+import { StyleSheet, css } from 'aphrodite';
 
 import Button from './Button';
 
@@ -12,11 +13,23 @@ export default class ConcludeStep extends React.PureComponent<IProps> {
     const { handleReturnToOpponentSelection, winnings } = this.props;
 
     return (
-      <div style={{ maxWidth: '90%', margin: 'auto' }}>
+      <div className={css(styles.container)}>
         <h1>The game has concluded.</h1>
-        <h3 style={{ width: '100%', paddingBottom: 16 }}>{`You've won ${winnings} Finney!`}</h3>
+        <h3 className={css(styles.subtitle)}>{`You've won ${winnings} Finney!`}</h3>
         <Button onClick={handleReturnToOpponentSelection}>Return to opponent selection</Button>
       </div>
     );
   }
 }
+
+const styles = StyleSheet.create({
+  container: {
+    maxWidth: '90%',
+    margin: 'auto',
+  },
+
+  subtitle: {
+    width: '100%',
+    paddingBottom: 16,
+  },
+});
