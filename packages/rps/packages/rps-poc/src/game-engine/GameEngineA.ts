@@ -243,7 +243,7 @@ export default class GameEngineA {
     if (result === Result.Tie) {
       balances[0] += stake;
       balances[1] -= stake;
-    } else if (result === Result.AWon) {
+    } else if (result === Result.YouWin) {
       balances[0] += 2 * stake;
       balances[1] -= 2 * stake;
     }
