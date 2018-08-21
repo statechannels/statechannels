@@ -19,7 +19,7 @@ const aPlay = Play.Rock;
 const bPlay = Play.Scissors;
 const salt = "abc123";
 const move = new Move('state', 'signature'); // fake move
-const result = Result.AWon;
+const result = Result.YouWin;
 
 const itHasSharedFunctionality = (appState) => {
   it("returns myAddress", () => {

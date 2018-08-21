@@ -165,7 +165,7 @@ it('runthrough', () => {
   expect(readyToSendReveal.aPlay).toEqual(Play.Rock);
   expect(readyToSendReveal.bPlay).toEqual(Play.Scissors);
   expect(readyToSendReveal.salt).toEqual(waitForAccept.salt);
-  expect(readyToSendReveal.result).toEqual(Result.AWon);
+  expect(readyToSendReveal.result).toEqual(Result.YouWin);
 
   const move6 = readyToSendReveal.move;
   const gameState6 = pledgeFromHex(move6.state) as positions.Reveal;

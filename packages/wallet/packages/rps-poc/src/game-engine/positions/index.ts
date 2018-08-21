@@ -34,8 +34,8 @@ export enum Play {
 
 export enum Result {
   Tie,
-  AWon,
-  BWon,
+  YouWin,
+  YouLose,
 }
 
 export function packRestingAttributes(stake: number) {
@@ -89,9 +89,9 @@ export function calculateResult(aPlay: Play, bPlay: Play) {
   const x = ((aPlay - bPlay) + 2) % 3;
   switch(x) {
     case 0:
-      return Result.AWon;
+      return Result.YouWin;
     case 1:
-      return Result.BWon;
+      return Result.YouLose;
     default:
       return Result.Tie;
   }
