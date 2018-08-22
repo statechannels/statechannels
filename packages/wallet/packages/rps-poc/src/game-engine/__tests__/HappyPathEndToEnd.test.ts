@@ -1,5 +1,5 @@
 import * as GameEngine from '../GameEngine';
-import ChannelWallet from '../ChannelWallet';
+import ChannelWallet from '../../wallet/domain/ChannelWallet';
 import Move from '../Move';
 import * as ApplicationStatesA from '../application-states/PlayerA';
 import * as ApplicationStatesB from '../application-states/PlayerB';

@@ -1,4 +1,4 @@
-import ChannelWallet from '../ChannelWallet';
+import ChannelWallet from '../../wallet/domain/ChannelWallet';
 import * as ApplicationStatesA from '../application-states/PlayerA';
 import * as GameEngine from '../GameEngine';
 import { Play } from '../positions';

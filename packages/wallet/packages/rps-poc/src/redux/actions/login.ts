@@ -1,4 +1,4 @@
-import ChannelWallet from '../../game-engine/ChannelWallet';
+import { Wallet } from '../../wallet';
 
 export enum LoginActionType {
   LOGIN_REQUEST = 'LOGIN.REQUEST',
@@ -28,7 +28,7 @@ export const LoginAction = {
     error,
   }),
 
-  loginSuccess: (user: object, wallet: ChannelWallet, player: object) => ({
+  loginSuccess: (user: object, wallet: Wallet, player: object) => ({
     type: LoginActionType.LOGIN_SUCCESS as typeof LoginActionType.LOGIN_SUCCESS,
     user,
     wallet,

@@ -2,7 +2,6 @@ import { Channel } from 'fmg-core';
 
 import * as State from './application-states/PlayerA';
 import Move from './Move';
-import ChannelWallet from './ChannelWallet';
 import decodePledge from './positions/decode';
 import { calculateResult, Result, Play }  from './positions';
 import PreFundSetup from './positions/PreFundSetup';
@@ -12,18 +11,19 @@ import Accept from './positions/Accept';
 import Reveal from './positions/Reveal';
 import Resting from './positions/Resting';
 import Conclude from './positions/Conclude';
+import { Wallet } from '../wallet';
 
 const fakeGameLibraryAddress = '0xc1912fee45d61c87cc5ea59dae31190fffff232d';
 
 export default class GameEngineA {
   static setupGame({ opponent, stake, balances, wallet }: 
-    { opponent: string, stake: number, balances: number[], wallet: ChannelWallet }
+    { opponent: string, stake: number, balances: number[], wallet: Wallet }
   ) {
     const participants = [wallet.address, opponent];
     const channel = new Channel(fakeGameLibraryAddress, 456, participants);
 
     const nextPledge = new PreFundSetup(channel, 0, balances, 0, stake);
-    const move = wallet.sign(nextPledge.toHex());
+    const move =new Move(nextPledge.toHex(), wallet.sign(nextPledge.toHex()));
 
     const appState = new State.ReadyToSendPreFundSetupA({
       channel,
@@ -35,15 +35,15 @@ export default class GameEngineA {
     return new GameEngineA(wallet, appState);
   }
 
-  static fromState({ state, wallet }: { state: State.PlayerAState, wallet: ChannelWallet }) {
+  static fromState({ state, wallet }: { state: State.PlayerAState, wallet: Wallet }) {
     return new GameEngineA(wallet, state);
   }
 
-  channelWallet: ChannelWallet;
+  wallet: Wallet;
   state: any;
  
-  constructor(channelWallet, state) {
-    this.channelWallet = channelWallet;
+  constructor(wallet, state) {
+    this.wallet = wallet;
     this.state = state;
   }
 
@@ -128,7 +128,7 @@ export default class GameEngineA {
         const stateCount  = 0;
         const turnNum = 2;
         const newPosition = new PostFundSetup(channel, turnNum, balances, stateCount, stake);
-        const move = this.channelWallet.sign(newPosition.toHex());
+        const move =new Move(newPosition.toHex() ,this.wallet.sign(newPosition.toHex()));
 
         return this.transitionTo(
           new State.ReadyToSendPostFundSetupA({
@@ -162,7 +162,7 @@ export default class GameEngineA {
       salt
     );
 
-    const move = this.channelWallet.sign(newPosition.toHex());
+    const move = new Move(newPosition.toHex() ,this.wallet.sign(newPosition.toHex()));
 
     return this.transitionTo(
       new State.ReadyToSendPropose({
@@ -249,7 +249,7 @@ export default class GameEngineA {
     }
 
     const nextPledge = new Reveal(channel, turnNum + 1, balances, stake, bPlay, aPlay, salt);
-    const move = this.channelWallet.sign(nextPledge.toHex());
+    const move = new Move(nextPledge.toHex() ,this.wallet.sign(nextPledge.toHex()));
 
     return this.transitionTo(
       new State.ReadyToSendReveal({
