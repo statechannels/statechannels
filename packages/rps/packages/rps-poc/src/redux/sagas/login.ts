@@ -3,14 +3,14 @@ import { call, fork, put, take, takeEvery, cancel } from 'redux-saga/effects';
 
 import { LoginAction, LoginActionType } from '../actions/login';
 import { reduxSagaFirebase } from '../../gateways/firebase';
-import { fetchOrCreateWallet } from './wallet';
 import { fetchOrCreatePlayer } from './player';
 import applicationControllerSaga from './application-controller';
 import { MessageAction } from '../actions/messages';
+import { WalletActionType, WalletAction } from '../../wallet';
 
 const authProvider = new firebase.auth.GoogleAuthProvider();
 
-function * loginSaga () {
+function* loginSaga() {
   try {
     yield call(reduxSagaFirebase.auth.signInWithPopup, authProvider);
     // successful login will trigger the loginStatusWatcher, which will update the state
@@ -19,7 +19,7 @@ function * loginSaga () {
   }
 }
 
-function * logoutSaga () {
+function* logoutSaga() {
   try {
     yield call(reduxSagaFirebase.auth.signOut);
     // successful logout will trigger the loginStatusWatcher, which will update the state
@@ -28,7 +28,7 @@ function * logoutSaga () {
   }
 }
 
-function * loginStatusWatcherSaga () {
+function* loginStatusWatcherSaga() {
   // Events on this channel are triggered on login and logout
   const channel = yield call(reduxSagaFirebase.auth.channel);
   // let playerHeartbeatThread;
@@ -39,7 +39,9 @@ function * loginStatusWatcherSaga () {
 
     if (user) {
       // login procedure
-      const wallet = yield fetchOrCreateWallet(user.uid);
+      yield put({ type: WalletActionType.WALLET_REQUESTED, uid: user.uid });
+      const walletAction: WalletAction = yield take(WalletActionType.WALLET_RETRIEVED);
+      const { wallet } = walletAction;
       const player = yield fetchOrCreatePlayer(wallet.address, user.displayName);
 
       // playerHeartbeatThread = yield fork(playerHeartbeatSaga, wallet.address);
@@ -50,17 +52,19 @@ function * loginStatusWatcherSaga () {
     } else {
       // Logout procedure
       // if (playerHeartbeatThread) { yield cancel(playerHeartbeatThread); }
-      if (applicationThread) { yield cancel(applicationThread); }
+      if (applicationThread) {
+        yield cancel(applicationThread);
+      }
       yield put(MessageAction.unsubscribeMessages());
       yield put(LoginAction.logoutSuccess());
     }
   }
 }
 
-export default function * loginRootSaga () {
+export default function* loginRootSaga() {
   yield fork(loginStatusWatcherSaga);
   yield [
     takeEvery(LoginActionType.LOGIN_REQUEST, loginSaga),
-    takeEvery(LoginActionType.LOGOUT_REQUEST, logoutSaga)
+    takeEvery(LoginActionType.LOGOUT_REQUEST, logoutSaga),
   ];
 }

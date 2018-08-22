@@ -1,6 +1,5 @@
 import * as State from './application-states/PlayerB';
 import Move from './Move';
-import ChannelWallet from './ChannelWallet';
 import decodePledge from './positions/decode';
 import { calculateResult, Play }  from './positions';
 import PreFundSetup from './positions/PreFundSetup';
@@ -10,9 +9,10 @@ import Propose from './positions/Propose';
 import Accept from './positions/Accept';
 import Resting from './positions/Resting';
 import Conclude from './positions/Conclude';
+import { Wallet } from '../wallet';
 
 export default class GameEngineB {
-  static fromProposal({ move, wallet }: { move: Move, wallet: ChannelWallet }) {
+  static fromProposal({ move, wallet }: { move: Move, wallet: Wallet }) {
     const position = decodePledge(move.state);
 
     if (!(position instanceof PreFundSetup)) { throw new Error('Not a PreFundSetup'); }
@@ -21,7 +21,7 @@ export default class GameEngineB {
 
     const nextPledge = new PreFundSetup(channel, turnNum + 1, balances, stateCount + 1, stake);
 
-    const nextMove = wallet.sign(nextPledge.toHex());
+    const nextMove =new Move(nextPledge.toHex(), wallet.sign(nextPledge.toHex()));
 
     const appState = new State.ReadyToSendPreFundSetupB({
       channel,
@@ -33,15 +33,15 @@ export default class GameEngineB {
     return new GameEngineB(wallet, appState);
   }
 
-  static fromState({ state, wallet }: { state: State.PlayerBState, wallet: ChannelWallet }) {
+  static fromState({ state, wallet }: { state: State.PlayerBState, wallet: Wallet }) {
     return new GameEngineB(wallet, state);
   }
 
-  channelWallet: ChannelWallet;
+  wallet: Wallet;
   state: any;
 
-  constructor(channelWallet, state) {
-    this.channelWallet = channelWallet;
+  constructor(wallet, state) {
+    this.wallet = wallet;
     this.state = state;
   }
 
@@ -57,7 +57,7 @@ export default class GameEngineB {
         const stateCount = this.state.stateCount + 1;
         const turnNum = 4; // todo: make this relative
         const nextPosition = new PostFundSetup(channel, turnNum, balances, stateCount, stake);
-        const move = this.channelWallet.sign(nextPosition.toHex());
+        const move = new Move(nextPosition.toHex(), this.wallet.sign(nextPosition.toHex()));
         return this.transitionTo(
           new State.WaitForPropose({
             channel,
@@ -148,7 +148,7 @@ export default class GameEngineB {
 
     const nextPosition = new Accept(channel, turnNum, newBalances, stake, preCommit, bPlay);
 
-    const move = this.channelWallet.sign(nextPosition.toHex());
+    const move = new Move(nextPosition.toHex(), this.wallet.sign(nextPosition.toHex()));
 
     return this.transitionTo(
       new State.ReadyToSendAccept({
@@ -175,7 +175,7 @@ export default class GameEngineB {
     //   oldState.balances
     // );
 
-    // const concludeMove = this.channelWallet.sign(concludePledge.toHex());
+    // const concludeMove = this.Wallet.sign(concludePledge.toHex());
 
     // if (oldPledge.turnNum % 2 === 0) {
     //   newState = new ApplicationStatesA.ReadyToSendConcludeA({
@@ -204,7 +204,7 @@ export default class GameEngineB {
     const { channel, stake, balances, adjudicator } = this.state;
     const turnNum = position.turnNum + 1;
     const nextPosition = new PostFundSetup(channel, turnNum, balances, 1, stake);
-    const move = this.channelWallet.sign(nextPosition.toHex());
+    const move = new Move(nextPosition.toHex() ,this.wallet.sign(nextPosition.toHex()));
 
     return this.transitionTo(
       new State.ReadyToSendPostFundSetupB({ channel, stake, balances, adjudicator, move })
@@ -246,9 +246,8 @@ export default class GameEngineB {
     const turnNum = oldTurnNum + 1;
 
     const nextPosition = new Resting(channel, turnNum, balances, stake);
-    const move = this.channelWallet.sign(nextPosition.toHex());
+    const move = new Move(nextPosition.toHex(),this.wallet.sign(nextPosition.toHex()));
     const result = calculateResult(bPlay, aPlay);
-
     return this.transitionTo(
       new State.ReadyToSendResting({
         channel,
@@ -269,7 +268,7 @@ export default class GameEngineB {
     const { adjudicator } = this.state;
 
     const newPosition = new Conclude(channel, position.turnNum + 1, balances);
-    const move = this.channelWallet.sign(newPosition.toHex());
+    const move =new Move (newPosition.toHex(), this.wallet.sign(newPosition.toHex()));
 
     // todo: need a move. Might also need an intermediate state here
     return this.transitionTo(

@@ -2,13 +2,13 @@ import { take, put, actionChannel } from 'redux-saga/effects';
 
 import { MessageActionType, MessageAction } from '../actions/messages';
 import { GameActionType, GameAction } from '../actions/game';
-import ChannelWallet from '../../game-engine/ChannelWallet';
 import { setupGame, fromProposal, GameEngine } from '../../game-engine/GameEngine';
 import { State } from '../../game-engine/application-states';
 import Move from '../../game-engine/Move';
 import { ReadyToDeploy } from '../../game-engine/application-states/PlayerA';
+import { Wallet } from '../../wallet';
 
-export default function* applicationControllerSaga(wallet: ChannelWallet) {
+export default function* applicationControllerSaga(wallet: Wallet) {
   let gameEngine: GameEngine | null = null;
 
   const channel = yield actionChannel('*');

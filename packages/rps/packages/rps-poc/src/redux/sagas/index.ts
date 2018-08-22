@@ -9,6 +9,7 @@ import loginSaga from './login';
 import messageSaga from './messages';
 import { getApplicationState } from '../store';
 import autoOpponentSaga from './auto-opponent';
+import { walletSaga } from '../../wallet/sagas/wallet';
 
 function* blockchainResponseFaker() {
   const state = yield select(getApplicationState);
@@ -21,8 +22,9 @@ function* blockchainResponseFaker() {
 
 export default function* rootSaga() {
   yield fork(opponentSaga);
+  yield fork(walletSaga);
   yield fork(loginSaga);
-  yield fork(messageSaga);
+  yield fork(messageSaga);  
   yield fork(autoOpponentSaga);
   yield takeEvery(GameActionType.STATE_CHANGED, blockchainResponseFaker);
 }
