@@ -4,9 +4,9 @@ import { StyleSheet, css } from 'aphrodite';
 import Button from './Button';
 import ButtonLink from './ButtonLink';
 import { ROUTE_PATHS } from '../constants';
-import RockIcon from '../icons/rock_icon.jsx';
-import PaperIcon from '../icons/paper_icon.jsx';
-import ScissorsIcon from '../icons/scissors_icon.jsx';
+import RockIcon from '../icons/rock_icon';
+import PaperIcon from '../icons/paper_icon';
+import ScissorsIcon from '../icons/scissors_icon';
 
 interface IProps {
   login: () => any;
