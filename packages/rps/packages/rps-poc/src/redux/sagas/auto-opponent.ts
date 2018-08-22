@@ -1,19 +1,13 @@
-import {
-  takeEvery,
-  put,
-  take,
-  actionChannel,
-  select,
-} from 'redux-saga/effects';
+import { takeEvery, put, take, actionChannel, select } from 'redux-saga/effects';
 import { delay } from 'redux-saga';
 import { GameActionType, GameAction } from '../actions/game';
-import { fetchOrCreateWallet } from './wallet';
 import { MessageActionType, MessageAction } from '../actions/messages';
 import { fromProposal, GameEngine } from '../../game-engine/GameEngine';
 import Move from '../../game-engine/Move';
 import { ReadyToChooseBPlay, ReadyToDeposit } from '../../game-engine/application-states/PlayerB';
 import { Play } from '../../game-engine/positions';
 import { getUser } from '../store';
+import { WalletActionType, WalletAction } from '../../wallet';
 
 export default function* autoOpponentSaga() {
   yield takeEvery(GameActionType.PLAY_COMPUTER, startAutoOpponent);
@@ -22,16 +16,17 @@ export default function* autoOpponentSaga() {
 function* startAutoOpponent() {
   const user = yield select(getUser);
 
-  const wallet = yield fetchOrCreateWallet(`AutoPlayer_${user.uid}`);
+  yield put({ type: WalletActionType.WALLET_REQUESTED, uid: user.uid });
+  const walletAction: WalletAction = yield take(WalletActionType.WALLET_RETRIEVED);
+  const {wallet} = walletAction;
   yield put(GameAction.chooseOpponent(wallet.address, 50));
 
   let gameEngine: GameEngine | null = null;
 
   const actionFilter = (action): boolean => {
     return (
-      (action.type === MessageActionType.SEND_MESSAGE &&
-        action.to === wallet.address) ||
-      (action.type === GameActionType.EVENT_RECEIVED)
+      (action.type === MessageActionType.SEND_MESSAGE && action.to === wallet.address) ||
+      action.type === GameActionType.EVENT_RECEIVED
     );
   };
 
@@ -43,7 +38,9 @@ function* startAutoOpponent() {
 
     yield delay(2000);
     if (gameEngine === null) {
-      if (action.type !== MessageActionType.SEND_MESSAGE) { return false; }
+      if (action.type !== MessageActionType.SEND_MESSAGE) {
+        return false;
+      }
       // Start up the game engine for our autoplayer B
       gameEngine = fromProposal({ move: Move.fromHex(action.data), wallet });
       yield continueWithFollowingActions(gameEngine);
@@ -63,7 +60,8 @@ function* startAutoOpponent() {
 }
 
 function* continueWithFollowingActions(gameEngine: GameEngine) {
-  while (true) { // keep going until we don't have an action to take
+  while (true) {
+    // keep going until we don't have an action to take
     const state = gameEngine.state;
 
     if (state instanceof ReadyToChooseBPlay) {
