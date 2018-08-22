@@ -5,25 +5,23 @@ import { Play } from '../game-engine/positions';
 
 interface Props {
   message: string;
-  selectedPlayId?: number;
+  yourPlay: Play;
 }
 
-export default class WaitingStep extends React.PureComponent<Props> {
+export default class PlaySelectedPage extends React.PureComponent<Props> {
   static defaultProps = {
     selectedPlayId: null,
   };
 
   render() {
-    const { message, selectedPlayId } = this.props;
+    const { message, yourPlay } = this.props;
 
     return (
       <div className={css(styles.container)}>
         <div>
           <h1>Waiting for {message}...</h1>
         </div>
-        {selectedPlayId && (
-          <div className={css(styles.fullWidth)}>You&apos;ve chosen {Play[selectedPlayId]}</div>
-        )}
+        <div className={css(styles.fullWidth)}>You&apos;ve chosen {Play[yourPlay]}</div>
       </div>
     );
   }
