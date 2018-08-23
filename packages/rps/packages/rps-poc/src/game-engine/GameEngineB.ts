@@ -1,7 +1,7 @@
 import * as State from './application-states/PlayerB';
 import Move from './Move';
 import decodePledge from './positions/decode';
-import { calculateResult, Play }  from './positions';
+import { calculateResult, Play } from './positions';
 import PreFundSetup from './positions/PreFundSetup';
 import PostFundSetup from './positions/PostFundSetup';
 import Reveal from './positions/Reveal';
@@ -12,16 +12,18 @@ import Conclude from './positions/Conclude';
 import { Wallet } from '../wallet';
 
 export default class GameEngineB {
-  static fromProposal({ move, wallet }: { move: Move, wallet: Wallet }) {
+  static fromProposal({ move, wallet }: { move: Move; wallet: Wallet }) {
     const position = decodePledge(move.state);
 
-    if (!(position instanceof PreFundSetup)) { throw new Error('Not a PreFundSetup'); }
+    if (!(position instanceof PreFundSetup)) {
+      throw new Error('Not a PreFundSetup');
+    }
 
     const { channel, stake, resolution: balances, turnNum, stateCount } = position;
 
     const nextPledge = new PreFundSetup(channel, turnNum + 1, balances, stateCount + 1, stake);
 
-    const nextMove =new Move(nextPledge.toHex(), wallet.sign(nextPledge.toHex()));
+    const nextMove = new Move(nextPledge.toHex(), wallet.sign(nextPledge.toHex()));
 
     const appState = new State.ReadyToSendPreFundSetupB({
       channel,
@@ -33,7 +35,7 @@ export default class GameEngineB {
     return new GameEngineB(wallet, appState);
   }
 
-  static fromState({ state, wallet }: { state: State.PlayerBState, wallet: Wallet }) {
+  static fromState({ state, wallet }: { state: State.PlayerBState; wallet: Wallet }) {
     return new GameEngineB(wallet, state);
   }
 
@@ -48,11 +50,9 @@ export default class GameEngineB {
   moveSent() {
     const { channel, balances, stake } = this.state;
 
-    switch(this.state.constructor) {
+    switch (this.state.constructor) {
       case State.ReadyToSendPreFundSetupB:
-        return this.transitionTo(
-          new State.WaitForAToDeploy({ channel, balances, stake })
-        )
+        return this.transitionTo(new State.WaitForFunding({ channel, balances, stake }));
       case State.ReadyToSendPostFundSetupB:
         const stateCount = this.state.stateCount + 1;
         const turnNum = 4; // todo: make this relative
@@ -65,8 +65,8 @@ export default class GameEngineB {
             balances,
             adjudicator: this.state.adjudicator,
             move,
-          })
-        )
+          }),
+        );
       case State.ReadyToSendAccept:
         const { bPlay, move: move2, adjudicator } = this.state;
         return this.transitionTo(
@@ -77,7 +77,7 @@ export default class GameEngineB {
             bPlay,
             adjudicator,
             move: move2,
-          })
+          }),
         );
       case State.ReadyToSendResting:
         return this.transitionTo(
@@ -87,8 +87,8 @@ export default class GameEngineB {
             balances,
             adjudicator: this.state.adjudicator,
             move: this.state.move,
-          })
-        )
+          }),
+        );
       default:
         // todo: should we error here?
         return this.state;
@@ -98,7 +98,7 @@ export default class GameEngineB {
   receiveMove(move: Move) {
     const positionReceived = decodePledge(move.state);
 
-    switch(positionReceived.constructor) {
+    switch (positionReceived.constructor) {
       case PostFundSetup:
         return this.receivedPostFundSetup(positionReceived as PostFundSetup);
       case Propose:
@@ -113,30 +113,23 @@ export default class GameEngineB {
     }
   }
 
-  transactionSent() {
-    if (!(this.state instanceof State.ReadyToDeposit)) { return this.state };
-
-    const { channel, stake, balances, adjudicator } = this.state;
-
-    return this.transitionTo(
-      new State.WaitForPostFundSetupA({ channel, stake, balances, adjudicator })
-    );
-  }
-
-  receiveEvent(event) {
-    if (!(this.state instanceof State.WaitForAToDeploy)) { return this.state };
+  fundingConfirmed(event) {
+    if (!(this.state instanceof State.WaitForFunding)) {
+      return this.state;
+    }
 
     const { channel, stake, balances } = this.state;
-    const adjudicator = event.adjudicator;
-    const transaction = 'todo: generate this';
+    const { adjudicator } = event;
 
     return this.transitionTo(
-      new State.ReadyToDeposit({ channel, stake, balances, adjudicator, transaction })
+      new State.WaitForPostFundSetupA({ channel, stake, balances, adjudicator }),
     );
   }
 
   choosePlay(bPlay: Play) {
-    if (!(this.state instanceof State.ReadyToChooseBPlay)) { return this.state };
+    if (!(this.state instanceof State.ReadyToChooseBPlay)) {
+      return this.state;
+    }
 
     this.validateBalances();
 
@@ -158,7 +151,7 @@ export default class GameEngineB {
         adjudicator,
         bPlay,
         move,
-      })
+      }),
     );
   }
 
@@ -199,20 +192,30 @@ export default class GameEngineB {
   }
 
   receivedPostFundSetup(position: PostFundSetup) {
-    if (!(this.state instanceof State.WaitForPostFundSetupA)) { return this.state };
+    if (!(this.state instanceof State.WaitForPostFundSetupA)) {
+      return this.state;
+    }
 
-    const { channel, stake, balances, adjudicator } = this.state;
+    const { channel, stake, balances } = this.state;
     const turnNum = position.turnNum + 1;
     const nextPosition = new PostFundSetup(channel, turnNum, balances, 1, stake);
-    const move = new Move(nextPosition.toHex() ,this.wallet.sign(nextPosition.toHex()));
+    const move = new Move(nextPosition.toHex(), this.wallet.sign(nextPosition.toHex()));
 
     return this.transitionTo(
-      new State.ReadyToSendPostFundSetupB({ channel, stake, balances, adjudicator, move })
+      new State.ReadyToSendPostFundSetupB({
+        channel,
+        stake,
+        balances,
+        move,
+        adjudicator: this.state.adjudicator,
+      }),
     );
   }
 
   receivedPropose(position: Propose) {
-    if (!(this.state instanceof State.WaitForPropose)) { return this.state };
+    if (!(this.state instanceof State.WaitForPropose)) {
+      return this.state;
+    }
 
     const { channel, stake, resolution: balances, preCommit } = position;
     const turnNum = position.turnNum + 1;
@@ -226,12 +229,14 @@ export default class GameEngineB {
         adjudicator,
         turnNum,
         preCommit,
-      })
+      }),
     );
   }
 
   receivedReveal(position: Reveal) {
-    if (!(this.state instanceof State.WaitForReveal)) { return this.state };
+    if (!(this.state instanceof State.WaitForReveal)) {
+      return this.state;
+    }
 
     const {
       channel,
@@ -246,7 +251,7 @@ export default class GameEngineB {
     const turnNum = oldTurnNum + 1;
 
     const nextPosition = new Resting(channel, turnNum, balances, stake);
-    const move = new Move(nextPosition.toHex(),this.wallet.sign(nextPosition.toHex()));
+    const move = new Move(nextPosition.toHex(), this.wallet.sign(nextPosition.toHex()));
     const result = calculateResult(bPlay, aPlay);
     return this.transitionTo(
       new State.ReadyToSendResting({
@@ -259,7 +264,7 @@ export default class GameEngineB {
         result,
         salt,
         move,
-      })
+      }),
     );
   }
 
@@ -268,19 +273,17 @@ export default class GameEngineB {
     const { adjudicator } = this.state;
 
     const newPosition = new Conclude(channel, position.turnNum + 1, balances);
-    const move =new Move (newPosition.toHex(), this.wallet.sign(newPosition.toHex()));
+    const move = new Move(newPosition.toHex(), this.wallet.sign(newPosition.toHex()));
 
     // todo: need a move. Might also need an intermediate state here
     return this.transitionTo(
-      new State.ReadyToSendConcludeB({ channel, balances, adjudicator, move })
-    )
+      new State.ReadyToSendConcludeB({ channel, balances, adjudicator, move }),
+    );
   }
 
   validateBalances() {
-    if (
-      this.state.stake > this.state.balances[1]
-    ) {
-      throw(Error("Insufficient balance for player B."));
+    if (this.state.stake > this.state.balances[1]) {
+      throw Error('Insufficient balance for player B.');
     }
   }
 }

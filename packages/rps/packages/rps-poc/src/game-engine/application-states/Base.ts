@@ -7,6 +7,7 @@ export default class BaseState {
   type: string;
   playerIndex: number; // overwritten by subclass
   readonly isReadyToSend: boolean;
+  readonly isReadyForFunding:boolean;
 
   constructor(params: {channel: Channel, stake: number, balances: number[]}) {
     this.balances = params.balances;

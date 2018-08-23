@@ -1,7 +1,5 @@
 import ReadyToSendPreFundSetupB from './ReadyToSendPreFundSetupB';
-import WaitForAToDeploy from './WaitForAToDeploy';
-import ReadyToDeposit from './ReadyToDeposit';
-import WaitForBlockchainDeposit from './WaitForBlockchainDeposit';
+
 import WaitForPostFundSetupA from './WaitForPostFundSetupA';
 import ReadyToSendPostFundSetupB from './ReadyToSendPostFundSetupB';
 import WaitForPropose from './WaitForPropose';
@@ -11,12 +9,10 @@ import WaitForReveal from './WaitForReveal';
 import ReadyToSendResting from './ReadyToSendResting';
 import ReadyToSendConcludeB from './ReadyToSendConcludeB';
 import WaitForConcludeB from './WaitForConcludeB';
+import  WaitForFunding  from './WaitForFunding';
 
 export type PlayerBState = (
   ReadyToSendPreFundSetupB |
-  WaitForAToDeploy |
-  ReadyToDeposit |
-  WaitForBlockchainDeposit |
   WaitForPostFundSetupA |
   ReadyToSendPostFundSetupB |
   WaitForPropose |
@@ -25,13 +21,11 @@ export type PlayerBState = (
   WaitForReveal |
   ReadyToSendResting |
   ReadyToSendConcludeB |
-  WaitForConcludeB 
+  WaitForConcludeB |
+  WaitForFunding
 );
 
 export { ReadyToSendPreFundSetupB };
-export { WaitForAToDeploy };
-export { ReadyToDeposit };
-export { WaitForBlockchainDeposit };
 export { WaitForPostFundSetupA };
 export { ReadyToSendPostFundSetupB };
 export { WaitForPropose };
@@ -41,3 +35,4 @@ export { WaitForReveal };
 export { ReadyToSendResting };
 export { ReadyToSendConcludeB };
 export { WaitForConcludeB };
+export { WaitForFunding };

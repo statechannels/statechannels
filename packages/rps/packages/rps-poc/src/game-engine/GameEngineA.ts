@@ -104,44 +104,22 @@ export default class GameEngineA {
     }
   }
 
-  transactionSent(): State.PlayerAState {
-    if (!(this.state instanceof State.ReadyToDeploy)) { return this.state };
-
+  fundingConfirmed(event) {
     const { channel, stake, balances } = this.state;
-
+    const stateCount = 0;
+    const turnNum = 2;
+    const newPosition = new PostFundSetup(channel, turnNum, balances, stateCount, stake);
+    const move = new Move(newPosition.toHex(), this.wallet.sign(newPosition.toHex()));
+    const {adjudicator} = event;
     return this.transitionTo(
-      new State.WaitForBlockchainDeploy({ channel, stake, balances })
+      new State.ReadyToSendPostFundSetupA({
+        channel,
+        stake,
+        balances,
+        move,
+        adjudicator,
+      })
     );
-  }
-
-  receiveEvent(event) {
-    const { channel, stake, balances } = this.state;
-
-    // todo: might be cleaner to switch on event.type, when we have that
-    switch(this.state.constructor) {
-      case State.WaitForBlockchainDeploy:
-        const adjudicator = event.adjudicator;
-        return this.transitionTo(
-          new State.WaitForBToDeposit({ channel, stake, balances, adjudicator })
-        );
-      case State.WaitForBToDeposit:
-        const stateCount  = 0;
-        const turnNum = 2;
-        const newPosition = new PostFundSetup(channel, turnNum, balances, stateCount, stake);
-        const move =new Move(newPosition.toHex() ,this.wallet.sign(newPosition.toHex()));
-
-        return this.transitionTo(
-          new State.ReadyToSendPostFundSetupA({
-            channel,
-            stake,
-            balances,
-            adjudicator: this.state.adjudicator,
-            move,
-          })
-        );
-      default:
-        return this.state;
-    }
   }
 
   choosePlay(aPlay: Play) {
@@ -214,10 +192,8 @@ export default class GameEngineA {
     if (!(this.state instanceof State.WaitForPreFundSetupB)) { return this.state };
 
     const { channel, stake, balances } = this.state;
-    const transaction = 'add transaction logic here';
-
     return this.transitionTo(
-      new State.ReadyToDeploy({ channel, stake, balances, transaction })
+      new State.WaitForFunding({ channel, stake, balances })
     );
   }
 

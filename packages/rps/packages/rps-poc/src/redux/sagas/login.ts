@@ -6,7 +6,7 @@ import { reduxSagaFirebase } from '../../gateways/firebase';
 import { fetchOrCreatePlayer } from './player';
 import applicationControllerSaga from './application-controller';
 import { MessageAction } from '../actions/messages';
-import { WalletActionType, WalletAction } from '../../wallet';
+import { WalletActionType, WalletRetrievedAction } from '../../wallet';
 
 const authProvider = new firebase.auth.GoogleAuthProvider();
 
@@ -40,7 +40,7 @@ function* loginStatusWatcherSaga() {
     if (user) {
       // login procedure
       yield put({ type: WalletActionType.WALLET_REQUESTED, uid: user.uid });
-      const walletAction: WalletAction = yield take(WalletActionType.WALLET_RETRIEVED);
+      const walletAction: WalletRetrievedAction = yield take(WalletActionType.WALLET_RETRIEVED);
       const { wallet } = walletAction;
       const player = yield fetchOrCreatePlayer(wallet.address, user.displayName);
 
