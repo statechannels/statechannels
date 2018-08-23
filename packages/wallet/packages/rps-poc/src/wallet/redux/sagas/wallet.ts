@@ -1,8 +1,8 @@
 import { call, put, take } from 'redux-saga/effects';
 
-import { default as firebase, reduxSagaFirebase } from '../../gateways/firebase';
-import ChannelWallet from '../domain/ChannelWallet';
-import { WalletAction, WalletActionType } from '..';
+import { default as firebase, reduxSagaFirebase } from '../../../gateways/firebase';
+import ChannelWallet from '../../domain/ChannelWallet';
+import { WalletAction, WalletActionType } from '../..';
 
 interface WalletParams {
   uid: string;

@@ -1,11 +1,11 @@
 import BasePlayerA from './Base';
 
 export default class WaitForBToDeposit extends BasePlayerA {
-  adjudicator: string; // address
+  adjudicator;
   readonly isReadyToSend = false;
-
-  constructor({ channel, stake, balances, adjudicator }) {
-    super({ channel, stake, balances });
+  readonly isFunded = false;
+  constructor({ adjudicator }) {
+    super();
     this.adjudicator = adjudicator;
   }
 }
