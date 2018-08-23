@@ -51,45 +51,19 @@ it('runthrough', () => {
   expect(gameState1.resolution).toEqual(initialBals);
   expect(gameState1.stake).toEqual(1);
 
-  const waitForDeployAdjudicatorB = gameEngineB.moveSent();
-  expect(waitForDeployAdjudicatorB).toBeInstanceOf(ApplicationStatesB.WaitForAToDeploy);
-  expect(waitForDeployAdjudicatorB.balances).toEqual(initialBals);
-
-  // In A's application //  should be in WaitForPreFundSetupB
-  const readyToDeployAdjudicator = gameEngineA.receiveMove(move1);
-  expect(readyToDeployAdjudicator).toBeInstanceOf(ApplicationStatesA.ReadyToDeploy);
-  expect(readyToDeployAdjudicator.transaction).not.toBeUndefined();
-
-  const waitForDeployAdjudicatorA = gameEngineA.transactionSent();
-  expect(waitForDeployAdjudicatorA).toBeInstanceOf(ApplicationStatesA.WaitForBlockchainDeploy);
-
-  // From the blockchain
-
-  const adjudicator = '0x2718';
-  const deploymentEvent = { adjudicator, funds: 1 }; // TODO
-
-  // In A's application
-  const waitForFundingA = gameEngineA.receiveEvent(deploymentEvent);
-  expect(waitForFundingA).toBeInstanceOf(ApplicationStatesA.WaitForBToDeposit);
-  expect(waitForFundingA.adjudicator).toEqual(adjudicator);
-
-  // In B's application
-  const readyToFund = gameEngineB.receiveEvent(deploymentEvent);
-  expect(readyToFund).toBeInstanceOf(ApplicationStatesB.ReadyToDeposit);
-  expect(readyToFund.adjudicator).toEqual(adjudicator);
-  expect(readyToFund.transaction).not.toBeUndefined();
-  expect(readyToFund.balances).toEqual(initialBals);
-
-  const waitForFundingB = gameEngineB.transactionSent();
-  expect(waitForFundingB).toBeInstanceOf(ApplicationStatesB.WaitForPostFundSetupA);
-  expect(waitForFundingB.adjudicator).toEqual(adjudicator);
+  const waitForFundingB = gameEngineB.moveSent();
+  expect(waitForFundingB).toBeInstanceOf(ApplicationStatesB.WaitForFunding);
   expect(waitForFundingB.balances).toEqual(initialBals);
 
+  // In A's application //  should be in WaitForPreFundSetupB
+  const waitForFundingA = gameEngineA.receiveMove(move1);
+  expect(waitForFundingA).toBeInstanceOf(ApplicationStatesA.WaitForFunding);
+
   // From the blockchain
-  const fundingEvent = { adjudicator, aBalance: 1, bBalance: 2 }; // TODO
+  const fundingEvent = { adjudicator: '0xBla', aBalance: 1, bBalance: 2 }; // TODO
 
   // In A's application
-  const readyToSendPostFundSetupA = gameEngineA.receiveEvent(fundingEvent);
+  const readyToSendPostFundSetupA = gameEngineA.fundingConfirmed(fundingEvent);
   expect(readyToSendPostFundSetupA).toBeInstanceOf(ApplicationStatesA.ReadyToSendPostFundSetupA);
 
   const move2 = readyToSendPostFundSetupA.move;
@@ -102,9 +76,12 @@ it('runthrough', () => {
 
   const waitForPostFundSetupB = gameEngineA.moveSent();
   expect(waitForPostFundSetupB).toBeInstanceOf(ApplicationStatesA.WaitForPostFundSetupB);
-  expect(waitForPostFundSetupB.adjudicator).toEqual(adjudicator);
+  expect(waitForPostFundSetupB.adjudicator).toEqual(fundingEvent.adjudicator);
 
   // In B's application
+  const WaitForPostFundSetupA = gameEngineB.fundingConfirmed(fundingEvent);
+  expect(WaitForPostFundSetupA).not.toBeUndefined();
+  expect(WaitForPostFundSetupA).toBeInstanceOf(ApplicationStatesB.WaitForPostFundSetupA);
   const readyToSendPostFundSetupB = gameEngineB.receiveMove(move2);
   expect(readyToSendPostFundSetupB).toBeInstanceOf(ApplicationStatesB.ReadyToSendPostFundSetupB);
   expect(readyToSendPostFundSetupB.balances).not.toBeUndefined();

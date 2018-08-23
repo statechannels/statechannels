@@ -63,32 +63,6 @@ describe("WaitForPreFundSetupB", () => {
   });
 });
 
-describe("ReadyToDeploy", () => {
-  const transaction = { some: "properties to craft a transaction" };
-  const appState = new AppStates.ReadyToDeploy({ ...coreProps, transaction });
-
-  itHasSharedFunctionality(appState);
-
-  it("has a transaction", () => {
-    expect(appState.transaction).toEqual(transaction);
-  });
-});
-
-describe("WaitForBlockchainDeploy", () => {
-  const appState = new AppStates.WaitForBlockchainDeploy({ ...coreProps });
-
-  itHasSharedFunctionality(appState);
-});
-
-describe("WaitForBToDeposit", () => {
-  const appState = new AppStates.WaitForBToDeposit({ ...coreProps, adjudicator });
-
-  itHasSharedFunctionality(appState);
-
-  it("returns the adjudicator address", () => {
-    expect(appState.adjudicator).toEqual(adjudicator);
-  });
-});
 
 describe("ReadyToSendPostFundSetupA", () => {
   const appState = new AppStates.ReadyToSendPostFundSetupA({ ...coreProps, adjudicator, move });
