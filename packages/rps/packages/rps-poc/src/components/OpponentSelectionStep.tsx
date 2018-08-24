@@ -9,9 +9,19 @@ interface Props {
   chooseOpponent: (opponentAddress: string, stake: number) => void;
   playComputer: (stake: number) => void;
   opponents: Opponent[];
+  currentPlayer: any;
+  createChallenge: (challenge: any) => void;
 }
 
 export default class OpponentSelectionStep extends React.PureComponent<Props> {
+  wagerInput: any
+
+  constructor(props) {
+    super(props);
+    this.createChallengeHandler = this.createChallengeHandler.bind(this);
+    this.wagerInput = React.createRef();
+  }
+
   render() {
     const { opponents, chooseOpponent, playComputer } = this.props;
 
@@ -31,7 +41,7 @@ export default class OpponentSelectionStep extends React.PureComponent<Props> {
               {opponents.map(opponent => (
                 <tr key={opponent.address}>
                   <td>{opponent.name}</td>
-                  <td>{opponent.address}</td>
+                  <td>{opponent.wager}</td>
                   <td>
                     <Button onClick={() => chooseOpponent(opponent.address, 50)}>Challenge</Button>
                   </td>
@@ -42,9 +52,28 @@ export default class OpponentSelectionStep extends React.PureComponent<Props> {
           <div className={css(styles.buttonPosition)}>
             <Button onClick={() => playComputer(50)}>Play against computer</Button>
           </div>
+          <div className={css(styles.buttonPosition)}>
+            <Button onClick={this.createChallengeHandler}>Create challenge</Button>
+            <input ref={this.wagerInput} />
+          </div>
         </div>
       </div>
     );
+  }
+
+  createChallengeHandler() {
+    const wager = this.wagerInput.current.value
+    if (!wager) {
+      return;
+    }
+
+    const currentPlayer = this.props.currentPlayer;
+    this.props.createChallenge({
+      address: currentPlayer.address,
+      lastSeen: Date.now(),
+      name: currentPlayer.name,
+      wager,
+    });
   }
 }
 
