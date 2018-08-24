@@ -28,16 +28,14 @@ describe('Messages', () => {
   const key = 'test';
   const value = 'testValue';
 
-  // Providers to fake firebase responses
-  const dataProviders = [
-    [matchers.call.fn(reduxSagaFirebase.database.channel), mockChannel],
-    [matchers.take(mockChannel), { snapshot: { key }, value }],
-  ];
 
   it('should subscribe to any messages and handle receiving a message', () => {
     const subAction = { type: MessageActionType.SUBSCRIBE_MESSAGES, address };
     return expectSaga(messageSaga)
-      .provide(dataProviders)
+      .provide( [
+        [matchers.call.fn(reduxSagaFirebase.database.channel), mockChannel],
+        [matchers.take(mockChannel), { snapshot: { key }, value }],
+      ])
       .dispatch(subAction)
       .put(MessageAction.messageReceived(value))
       .call(reduxSagaFirebase.database.delete, `/messages/${address}/${key}`)
@@ -52,7 +50,10 @@ describe('Messages', () => {
     };
 
     return expectSaga(messageSaga)
-      .provide(dataProviders)
+      .provide( [
+        [matchers.call.fn(reduxSagaFirebase.database.channel), mockChannel],
+        [matchers.take(mockChannel), { snapshot: { key }, value }],
+      ])
       .dispatch(sendAction)
       .call(reduxSagaFirebase.database.create, `/messages/${sendAction.to}`, sendAction.data)
       .silentRun();
