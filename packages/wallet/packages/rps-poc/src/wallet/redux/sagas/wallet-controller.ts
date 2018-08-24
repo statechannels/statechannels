@@ -27,7 +27,7 @@ export default function* walletControllerSaga() {
 
   if (walletEngine == null) {
     wallet = action.wallet;
-    walletEngine = setupWalletEngine(action.wallet, action.playerIndex);
+    walletEngine = setupWalletEngine(action.wallet, action.playerIndex, 'Dummy transaction');
 
     // Before waiting for any events check if we need to send something
     if (walletEngine != null && walletEngine.state != null && walletEngine.state.isReadyToSend) {
