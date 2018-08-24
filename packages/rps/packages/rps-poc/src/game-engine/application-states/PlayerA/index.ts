@@ -10,6 +10,7 @@ import ReadyToSendReveal from './ReadyToSendReveal';
 import WaitForResting from './WaitForResting';
 import ReadyToSendConcludeA from './ReadyToSendConcludeA';
 import WaitForConcludeA from './WaitForConcludeA';
+import ReadyToFund from './ReadyToFund'
 
 export type PlayerAState = (
   ReadyToSendPreFundSetupA |
@@ -23,7 +24,8 @@ export type PlayerAState = (
   ReadyToSendReveal |
   WaitForResting |
   ReadyToSendConcludeA |
-  WaitForConcludeA
+  WaitForConcludeA | 
+  ReadyToFund
 );
 
 export { ReadyToSendPreFundSetupA };
@@ -38,3 +40,4 @@ export { ReadyToSendReveal };
 export { WaitForResting };
 export { ReadyToSendConcludeA };
 export { WaitForConcludeA };
+export {ReadyToFund};
