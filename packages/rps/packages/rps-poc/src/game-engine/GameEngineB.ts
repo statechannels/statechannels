@@ -52,7 +52,7 @@ export default class GameEngineB {
 
     switch (this.state.constructor) {
       case State.ReadyToSendPreFundSetupB:
-        return this.transitionTo(new State.WaitForFunding({ channel, balances, stake }));
+        return this.transitionTo(new State.ReadyToFund({ channel, balances, stake }));
       case State.ReadyToSendPostFundSetupB:
         const stateCount = this.state.stateCount + 1;
         const turnNum = 4; // todo: make this relative
@@ -113,6 +113,17 @@ export default class GameEngineB {
     }
   }
 
+  fundingRequested() {
+    if (!(this.state instanceof State.ReadyToFund)) { return this.state; }
+    const { channel, stake, balances } = this.state;
+    return this.transitionTo(new State.WaitForFunding({
+      channel,
+      stake,
+      balances,
+    }));
+  }
+
+  
   fundingConfirmed(event) {
     if (!(this.state instanceof State.WaitForFunding)) {
       return this.state;
