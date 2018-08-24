@@ -10,6 +10,9 @@ describe('ReadyToDeploy', () => {
   it('is ready to send', () => {
     expect(walletState.isReadyToSend).toBe(true);
   });
+  it('is not funded', () => {
+    expect(walletState.isFunded).toBe(false);
+  });
 });
 
 describe('WaitForBToDeposit', () => {
@@ -19,6 +22,13 @@ describe('WaitForBToDeposit', () => {
   it('returns the adjudicator address', () => {
     expect(walletState.adjudicator).toEqual(adjudicator);
   });
+
+  it('is not ready to send', () => {
+    expect(walletState.isReadyToSend).toBe(false);
+  });
+  it('is not funded', () => {
+    expect(walletState.isFunded).toBe(false);
+  });
 });
 
 describe('Funded', () => {
@@ -27,5 +37,11 @@ describe('Funded', () => {
 
   it('returns the adjudicator address', () => {
     expect(walletState.adjudicator).toEqual(adjudicator);
+  });
+  it('is not ready to send', () => {
+    expect(walletState.isReadyToSend).toBe(false);
+  });
+  it('is funded', () => {
+    expect(walletState.isFunded).toBe(true);
   });
 });
