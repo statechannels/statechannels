@@ -48,9 +48,6 @@ export default function* applicationControllerSaga(wallet: Wallet) {
           newState = gameEngine.fundingConfirmed({ adjudicator });
           // We've received funding so we need to update the game state again
           break;
-          case WalletFundingActionType.WALLETFUNDING_REQUEST:
-          newState = gameEngine.fundingRequested();
-          break;
         default:
         // do nothing
       }
