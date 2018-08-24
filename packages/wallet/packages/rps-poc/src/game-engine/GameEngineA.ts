@@ -122,6 +122,16 @@ export default class GameEngineA {
     );
   }
 
+  fundingRequested() {
+    if (!(this.state instanceof State.ReadyToFund)) { return this.state; }
+    const { channel, stake, balances } = this.state;
+    return this.transitionTo(new State.WaitForFunding({
+      channel,
+      stake,
+      balances,
+    }));
+  }
+
   choosePlay(aPlay: Play) {
     if (!(this.state instanceof State.ReadyToChooseAPlay)) { return this.state };
 
@@ -193,7 +203,7 @@ export default class GameEngineA {
 
     const { channel, stake, balances } = this.state;
     return this.transitionTo(
-      new State.WaitForFunding({ channel, stake, balances })
+      new State.ReadyToFund({ channel, stake, balances })
     );
   }
 

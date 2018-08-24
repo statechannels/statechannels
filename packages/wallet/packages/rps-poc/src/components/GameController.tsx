@@ -54,6 +54,9 @@ export default class GameController extends PureComponent<Props> {
       case playerA.WaitForPreFundSetupB:
         return <ProposalSentPage message="Waiting for opponent to accept game" />;
 
+      case playerA.ReadyToFund:
+        return <WaitingStep message="ready to send funds"/>
+
       case playerA.WaitForFunding:
         return <WalletController />;
 
@@ -98,6 +101,10 @@ export default class GameController extends PureComponent<Props> {
 
       case playerB.ReadyToSendPreFundSetupB:
         return <WaitingStep message="ready to send prefund setup" />;
+      
+      case playerB.ReadyForFunding:
+        return <WaitingStep message="ready for funding"/>
+
       case playerB.WaitForFunding:
         return <WalletController />;
       case playerB.WaitForPostFundSetupA:
