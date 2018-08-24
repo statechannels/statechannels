@@ -5,6 +5,7 @@ export interface Opponent {
   address: string,
   name: string,
   lastSeen: number,
+  wager: number,
 }
 
 export type OpponentState = Opponent[];

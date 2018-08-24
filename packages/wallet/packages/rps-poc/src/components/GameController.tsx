@@ -23,6 +23,8 @@ interface Props {
   opponents: Opponent[];
   subscribeOpponents: () => void;
   playComputer: (stake: number) => void;
+  currentPlayer: any;
+  createChallenge: (challenge: any) => void;
 }
 
 export default class GameController extends PureComponent<Props> {
@@ -34,6 +36,8 @@ export default class GameController extends PureComponent<Props> {
       opponents,
       subscribeOpponents,
       playComputer,
+      currentPlayer,
+      createChallenge,
     } = this.props;
 
     if (applicationState === null) {
@@ -43,6 +47,8 @@ export default class GameController extends PureComponent<Props> {
           chooseOpponent={chooseOpponent}
           playComputer={playComputer}
           opponents={opponents}
+          currentPlayer={currentPlayer}
+          createChallenge={createChallenge}
         />
       );
     }

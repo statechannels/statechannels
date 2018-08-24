@@ -10,6 +10,7 @@ const mapStateToProps = (state: ApplicationState) => {
 	return {
 	  applicationState: state.game,
 	  opponents: getOpponents(),
+	  currentPlayer: state.login.player,
 	}
 
 	function getOpponents() {
@@ -21,6 +22,7 @@ const mapStateToProps = (state: ApplicationState) => {
 const mapDispatchToProps = {
   choosePlay: GameAction.choosePlay,
   chooseOpponent: GameAction.chooseOpponent,
+  createChallenge: OpponentAction.createChallenge,
   subscribeOpponents: OpponentAction.subscribeOpponents,
   playComputer: GameAction.playComputer,
 };
@@ -29,4 +31,3 @@ export default connect(
   mapStateToProps,
   mapDispatchToProps,
 )(GameController);
-
