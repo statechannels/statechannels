@@ -61,6 +61,7 @@ function* continueWithFollowingActions(gameEngine: GameEngine) {
       // If we're waiting for funding we broadcast to everyone that funding is done
       // TODO: This will be a bit strange with the blockchain faker competing against it
       yield put (WalletFundingAction.walletFunded('0xComputerPlayerFakeAddress'));
+      gameEngine.fundingRequested();
       gameEngine.fundingConfirmed({ adjudicator: '0xComputerPlayerFakeAddress' });
     } else {
       return false;
