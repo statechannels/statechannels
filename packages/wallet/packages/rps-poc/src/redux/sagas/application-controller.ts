@@ -10,7 +10,15 @@ import { Wallet, WalletFundingAction, WalletFundingActionType } from '../../wall
 export default function* applicationControllerSaga(wallet: Wallet) {
   let gameEngine: GameEngine | null = null;
 
-  const channel = yield actionChannel('*');
+  const actionTypesFilter = [
+    GameActionType.CHOOSE_OPPONENT,
+    MessageActionType.MESSAGE_RECEIVED,
+    GameActionType.MOVE_SENT,
+    GameActionType.CHOOSE_PLAY,
+    WalletFundingActionType.WALLETFUNDING_FUNDED,
+    WalletFundingActionType.WALLETFUNDING_REQUEST,
+  ];
+  const channel = yield actionChannel(actionTypesFilter);
 
   while (true) {
     let newState: State | null = null;
@@ -26,7 +34,9 @@ export default function* applicationControllerSaga(wallet: Wallet) {
           break;
         case MessageActionType.MESSAGE_RECEIVED:
           gameEngine = fromProposal({ move: Move.fromHex(action.message), wallet });
-          newState = gameEngine.state;
+          if (gameEngine !== null) {
+            newState = gameEngine.state;
+          }
           break;
         default:
         // do nothing
@@ -47,6 +57,9 @@ export default function* applicationControllerSaga(wallet: Wallet) {
           // TODO: We'll need the gameEngine to handle what happens if the funding fails for some reason
           newState = gameEngine.fundingConfirmed({ adjudicator });
           // We've received funding so we need to update the game state again
+          break;
+        case WalletFundingActionType.WALLETFUNDING_REQUEST:
+          newState = gameEngine.fundingRequested();
           break;
         default:
         // do nothing
