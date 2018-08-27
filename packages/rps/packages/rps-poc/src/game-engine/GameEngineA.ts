@@ -23,7 +23,7 @@ export default class GameEngineA {
     const channel = new Channel(fakeGameLibraryAddress, 456, participants);
 
     const nextPledge = new PreFundSetup(channel, 0, balances, 0, stake);
-    const move =new Move(nextPledge.toHex(), wallet.sign(nextPledge.toHex()));
+    const move = new Move(nextPledge.toHex(), wallet.sign(nextPledge.toHex()));
 
     const appState = new State.ReadyToSendPreFundSetupA({
       channel,
@@ -135,8 +135,6 @@ export default class GameEngineA {
   choosePlay(aPlay: Play) {
     if (!(this.state instanceof State.ReadyToChooseAPlay)) { return this.state };
 
-    this.validateBalances()
-
     const { balances, turnNum, stake, channel, adjudicator } = this.state;
 
     const salt = 'salt'; // todo: make random
@@ -147,7 +145,7 @@ export default class GameEngineA {
       balances,
       stake,
       aPlay,
-      salt
+      salt,
     );
 
     const move = new Move(newPosition.toHex() ,this.wallet.sign(newPosition.toHex()));
@@ -211,6 +209,15 @@ export default class GameEngineA {
     if (!(this.state instanceof State.WaitForPostFundSetupB)) { return this.state };
 
     const { channel, stake, balances, adjudicator } = this.state;
+
+    if (this.state.stake > this.state.balances[0] || this.state.stake > this.state.balances[0]) {
+      return this.transitionTo(
+        new State.InsufficientFundsA({
+          channel, balances, adjudicator,
+        })
+      )
+    };
+
     const turnNum = position.turnNum + 1;
 
     return this.transitionTo(
@@ -260,6 +267,11 @@ export default class GameEngineA {
     const { adjudicator } = this.state;
     const turnNum = oldTurnNum + 1;
 
+    const insufficientFundState = this.insufficientFundState()
+    if (insufficientFundState) {
+      return this.transitionTo(insufficientFundState)
+    }
+
     return this.transitionTo(
       new State.ReadyToChooseAPlay({channel, stake, balances, adjudicator, turnNum })
     );
@@ -275,11 +287,19 @@ export default class GameEngineA {
     )
   }
 
-  validateBalances() {
-    if (
-      this.state.stake > this.state.balances[0]
-    ) {
-      throw(Error("Insufficient balance for player A."));
+  insufficientFundState() : State.InsufficientFunds | null {
+    if (this.state.stake > this.state.balances[0]) {
+      const { channel, balances, adjudicator } = this.state
+      return new State.InsufficientFundsA({
+        channel, balances, adjudicator,
+      })
+    } else if (this.state.stake > this.state.balances[1]) {
+      const { channel, balances, adjudicator } = this.state
+      return new State.InsufficientFundsB({
+        channel, balances, adjudicator,
+      })
     }
+
+    return null;
   }
 }

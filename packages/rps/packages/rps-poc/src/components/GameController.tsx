@@ -104,6 +104,12 @@ export default class GameController extends PureComponent<Props> {
             result={state1.result}
           />
         );
+      
+      case playerA.InsufficientFundsA:
+        return <WaitingStep message="you to conclude the game -- you've run out of funds!" />;
+                           
+      case playerA.InsufficientFundsB:
+        return <WaitingStep message="you to conclude the game -- your opponent has run out of funds!" />;
 
       case playerB.ReadyToSendPreFundSetupB:
         return <WaitingStep message="ready to send prefund setup" />;
