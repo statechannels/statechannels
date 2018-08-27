@@ -19,6 +19,19 @@
 
 `yarn run test`
 
+#### To develop smart contracts
+
+```
+# compile project with tsc, and run `truffle compile` from within build/dist
+yarn truffle:compile
+
+# deploy smart contracts to a network
+TRUFFLE_NETWORK=<named network in truffle.ts> yarn truffle:migrate
+
+# run truffle tests, contained in ./test
+yarn truffle:test
+```
+
 #### To update dependencies:
 
 `yarn install`

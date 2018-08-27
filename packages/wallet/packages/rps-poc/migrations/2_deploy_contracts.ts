@@ -1,8 +1,8 @@
-const RockPaperScissorsGame = artifacts.require("./RockPaperScissorsGame.sol");
-const RockPaperScissorsState = artifacts.require("./RockPaperScissorsState.sol");
-const State = artifacts.require("fmg-core/contracts/State.sol");
+var RockPaperScissorsGame = artifacts.require("./RockPaperScissorsGame.sol");
+var RockPaperScissorsState = artifacts.require("./RockPaperScissorsState.sol");
+var State = artifacts.require("fmg-core/contracts/State.sol");
 
-export default function (deployer) {
+module.exports = function (deployer) {
   deployer.deploy(State);
 
   deployer.link(State, RockPaperScissorsState);
