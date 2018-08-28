@@ -7,7 +7,7 @@ export enum LoginActionType {
   LOGOUT_REQUEST = 'LOGOUT.REQUEST',
   LOGOUT_SUCCESS = 'LOGOUT.SUCCESS',
   LOGOUT_FAILURE = 'LOGOUT.FAILURE',
-};
+}
 
 export const LoginAction = {
   login: () => ({
@@ -28,7 +28,14 @@ export const LoginAction = {
     error,
   }),
 
-  loginSuccess: (user: object, wallet: Wallet, player: object) => ({
+  loginSuccess: (
+    user: object,
+    wallet: Wallet,
+    player?: {
+      address: string;
+      name: string;
+    },
+  ) => ({
     type: LoginActionType.LOGIN_SUCCESS as typeof LoginActionType.LOGIN_SUCCESS,
     user,
     wallet,
@@ -47,4 +54,10 @@ export type LogoutFailureAction = ReturnType<typeof LoginAction.logoutFailure>;
 export type LoginSuccessAction = ReturnType<typeof LoginAction.loginSuccess>;
 export type LogoutSuccessAction = ReturnType<typeof LoginAction.logoutSuccess>;
 
-export type LoginAction = LoginRequestAction | LoginFailureAction | LogoutAction | LogoutFailureAction | LoginSuccessAction | LogoutSuccessAction;
+export type LoginAction =
+  | LoginRequestAction
+  | LoginFailureAction
+  | LogoutAction
+  | LogoutFailureAction
+  | LoginSuccessAction
+  | LogoutSuccessAction;

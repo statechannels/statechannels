@@ -30,7 +30,7 @@ const HomePage: React.SFC<IProps> = ({ login, logout, loggedIn }) => {
           <em>A State-Channel Proof-of-Concept Game</em>
         </p>
       </div>
-      <div>
+      <div className={css(styles.centeredGroup, styles.icons)}>
         <div className={css(styles.image)}>
           <RockIcon width="100%" />
         </div>
@@ -41,8 +41,12 @@ const HomePage: React.SFC<IProps> = ({ login, logout, loggedIn }) => {
           <ScissorsIcon width="100%" />
         </div>
       </div>
-      <div className={css(styles.buttons)}>
-        {loggedIn && <ButtonLink href={ROUTE_PATHS.HOW_IT_WORKS}>Begin</ButtonLink>}
+      <div className={css(styles.centeredGroup, styles.buttons)}>
+        {loggedIn && (
+          <span className={css(styles.rightPadding)}>
+            <ButtonLink href={ROUTE_PATHS.HOW_IT_WORKS}>Begin</ButtonLink>
+          </span>
+        )}
         {loginButton}
       </div>
     </div>
@@ -66,12 +70,26 @@ const styles = StyleSheet.create({
     marginBottom: 0,
   },
 
+  centeredGroup: {
+    left: '50%',
+    transform: 'translateX(-50%)',
+  },
+
+  icons: {
+    position: 'relative',
+    width: 'max-content',
+  },
+
+  rightPadding: {
+    paddingRight: 12,
+  },
+
   centerAligned: {
     textAlign: 'center',
   },
 
   buttons: {
-    textAlign: 'center',
-    paddingTop: 40,
+    position: 'absolute',
+    bottom: 40,
   },
 });
