@@ -12,9 +12,13 @@ export default class ProposeGamePage extends React.PureComponent<Props> {
     return (
       <div className={css(styles.container)}>
         <div>
-          <h1>Game proposal sent</h1>
+          <h1>Game Proposed</h1>
 
-          <div>{message}</div>
+          <div>Waiting for your opponent to accept the game!</div>
+
+          <div className={css(styles.footerBar)}>
+            <div className={css(styles.container, styles.message)}>{message}</div>
+          </div>
         </div>
       </div>
     );
@@ -29,5 +33,20 @@ const styles = StyleSheet.create({
 
   fullWidth: {
     width: '100%',
+  },
+
+  message: {
+    paddingTop: 12,
+  },
+
+  footerBar: {
+    position: 'fixed',
+    bottom: 0,
+    height: 50,
+    left: 0,
+    right: 0,
+    borderTopColor: 'black',
+    borderTopStyle: 'solid',
+    borderTopWidth: 1,
   },
 });

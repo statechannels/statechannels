@@ -6,11 +6,11 @@ import { loginReducer, LoginState } from './login';
 import { WalletState, walletStateReducer } from '../../wallet/redux/reducers/wallet-state';
 
 export interface ApplicationState {
-  game: GameState,
-  opponents: OpponentState,
-  login: LoginState,
-  wallet: WalletState,
-};
+  game: GameState;
+  opponents: OpponentState;
+  login: LoginState;
+  wallet: WalletState;
+}
 
 export default combineReducers<ApplicationState>({
   game: gameReducer,

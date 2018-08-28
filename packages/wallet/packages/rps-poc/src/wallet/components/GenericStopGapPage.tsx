@@ -15,9 +15,11 @@ export default class WaitingStep extends React.PureComponent<Props> {
       <div className={css(styles.container)}>
         <div>
           <h1>
-            Waiting for {message}
-            ...
+            Wallet Screen
           </h1>
+          <div>
+            {message}
+          </div>
         </div>
       </div>
     );

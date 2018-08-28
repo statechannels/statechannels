@@ -2,12 +2,15 @@ import { Reducer } from 'redux';
 import { LoginActionType, LoginAction } from '../actions/login';
 
 export interface LoginState {
-  loading: boolean,
-  loggedIn: boolean,
-  user: any,
-  wallet: any,
-  player?: object,
-};
+  loading: boolean;
+  loggedIn: boolean;
+  user: any;
+  wallet: any;
+  player?: {
+    address: string;
+    name: string;
+  };
+}
 
 const initialState: LoginState = {
   loading: false,
@@ -17,7 +20,7 @@ const initialState: LoginState = {
   player: undefined,
 };
 
-export const loginReducer: Reducer<LoginState> = (state = initialState, action:LoginAction) => {
+export const loginReducer: Reducer<LoginState> = (state = initialState, action: LoginAction) => {
   switch (action.type) {
     case LoginActionType.LOGIN_REQUEST:
     case LoginActionType.LOGOUT_REQUEST:
@@ -50,4 +53,3 @@ export const loginReducer: Reducer<LoginState> = (state = initialState, action:L
       return state;
   }
 };
-
