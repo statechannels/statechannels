@@ -61,10 +61,10 @@
     "test": "run-s test:truffle 'test:app --all'",
     "test:ci": "run-s test:truffle 'test:app --all --ci'",
     "test:app": "node scripts/test.js --env=jsdom",
-    "test:truffle": "bash ./scripts/truffle_compile.sh  && (cd tmp && pwd && bash ../scripts/run-with-ganache.sh)",
+    "test:truffle": "bash ./scripts/truffle_compile.sh && (cd tmp && pwd && bash ../scripts/run-with-ganache.sh)",
     "postinstall": "rm -f node_modules/web3/index.d.ts",
-    "truffle:compile": "bash ./scripts/truffle_compile.sh && rm -rf tmp",
-    "truffle:migrate": "bash ./scripts/truffle_compile.sh &&  cd tmp && ../node_modules/.bin/truffle migrate --network development && rm -rf tmp"
+    "truffle:compile": "bash ./scripts/truffle_compile.sh -c",
+    "truffle:migrate": "bash ./scripts/truffle_compile.sh -c -m"
   },
   "devDependencies": {
     "@babel/runtime": "^7.0.0-beta.53",
