@@ -1,7 +1,7 @@
 import { State } from 'fmg-core';
 import { packProposeAttributes, hashCommitment, Play } from '.';
 
-export default class Resting extends State {
+export default class Propose extends State {
   static createWithPlayAndSalt (
     channel,
     turnNum: number,
@@ -11,7 +11,7 @@ export default class Resting extends State {
     salt: string,
   ) {
     const preCommit = hashCommitment(aPlay, salt);
-    return new Resting(channel, turnNum, balances, stake, preCommit);
+    return new Propose(channel, turnNum, balances, stake, preCommit);
   }
 
   stake: number;

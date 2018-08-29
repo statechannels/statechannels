@@ -15,10 +15,6 @@
 
 `yarn run build`
 
-#### To run tests:
-
-`yarn run test`
-
 #### To develop smart contracts
 
 ```
@@ -27,10 +23,19 @@ yarn truffle:compile
 
 # deploy smart contracts to a network
 TRUFFLE_NETWORK=<named network in truffle.ts> yarn truffle:migrate
-
-# run truffle tests, contained in ./test
-yarn truffle:test
 ```
+
+#### To run application tests in watch mode:
+
+`yarn run test:app`
+
+#### To run smart contract tests:
+
+`yarn run test:truffle`
+
+#### To run all tests (before submitting a PR):
+
+`yarn run test`
 
 #### To update dependencies:
 
