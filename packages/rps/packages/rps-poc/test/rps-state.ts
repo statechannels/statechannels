@@ -1,32 +1,28 @@
-import { Channel, assertRevert } from 'fmg-core';
-import { RpsGame } from '../src/rock-paper-scissors';
+import { Channel } from 'fmg-core';
+import { Play, Reveal, Propose } from '../src/game-engine/positions';
 
-var RpsStateContract = artifacts.require("./RockPaperScissorsState.sol");
+const RpsStateContract = artifacts.require("./RockPaperScissorsState.sol");
 
-contract('RockPaperScissorsPositions', (accounts) => {
+contract('RockPaperScissorsState', (accounts) => {
 
   const preCommit = "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
   const salt = "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb";
   const turnNum = 4;
-  const resolution = [4, 5];
+  const balances = [4, 5];
   const stake = 2;
-  const aPlay = RpsGame.Plays.ROCK;
-  const bPlay = RpsGame.Plays.SCISSORS;
+  const aPlay = Play.Rock;
+  const bPlay = Play.Scissors;
 
   // Serializing / Deserializing
   // ===========================
 
-  let channel = new Channel("0xdeadbeef", 0, [accounts[0], accounts[1]]);
-  let original = RpsGame.revealState({
-    channel,
-    turnNum,
-    resolution,
-    stake,
-    preCommit,
-    aPlay,
-    bPlay,
-    salt,
-  });
+  const channel = new Channel("0xdeadbeef", 0, [accounts[0], accounts[1]]);
+  const propose = new Propose(
+    channel, turnNum, balances, stake, preCommit
+  )
+  const reveal = new Reveal(
+    channel, turnNum, balances, stake, aPlay, bPlay, salt
+  )
   
   let stateContract;
 
@@ -36,37 +32,37 @@ contract('RockPaperScissorsPositions', (accounts) => {
 
   // skipped because web3 can't cope with the positionType object that is returned
   it.skip("can parse positionType", async () => {
-    assert.equal(await stateContract.positionType(original.toHex()), original.positionType);
+    assert.equal(await stateContract.positionType(reveal.toHex()), 'some type');
   });
 
   it("can parse aBal", async () => {
-    assert.equal(await stateContract.aResolution(original.toHex()), resolution[0]);
+    assert.equal(await stateContract.aResolution(reveal.toHex()), balances[0]);
   });
 
   it("can parse bBal", async () => {
-    assert.equal(await stateContract.bResolution(original.toHex()), resolution[1]);
+    assert.equal(await stateContract.bResolution(reveal.toHex()), balances[1]);
   });
 
   it("can parse stake", async () => {
-    assert.equal(await stateContract.stake(original.toHex()), stake);
+    assert.equal(await stateContract.stake(reveal.toHex()), stake);
   });
 
   it("can parse preCommit", async () => {
-    assert.equal(await stateContract.preCommit(original.toHex()), preCommit);
+    assert.equal(await stateContract.preCommit(propose.toHex()), preCommit);
   });
 
   // skipped because web3 can't cope with the Play object that is returned
   it.skip("can parse bPlay", async () => {
-    assert.equal(await stateContract.bPlay.call(original.toHex()), bPlay);
+    assert.equal(await stateContract.bPlay.call(reveal.toHex()), bPlay);
   });
 
   // skipped because web3 can't cope with the Play object that is returned
   it.skip("can parse aPlay", async () => {
-    assert.equal(await stateContract.aPlay.call(original.toHex()), aPlay);
+    assert.equal(await stateContract.aPlay.call(reveal.toHex()), aPlay);
   });
 
   it("can parse salt", async () => {
-    assert.equal(await stateContract.salt(original.toHex()), salt);
+    assert.equal(await stateContract.salt(reveal.toHex()), salt);
   });
 
 });

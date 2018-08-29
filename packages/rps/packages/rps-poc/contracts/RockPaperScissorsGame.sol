@@ -109,7 +109,7 @@ contract RockPaperScissorsGame {
         require(hashed == _old.preCommit());
 
         // calculate winnings
-        (aWinnings, bWinnings) = winnings(_old.aPlay(), _old.bPlay(), _old.stake());
+        (aWinnings, bWinnings) = winnings(_new.aPlay(), _new.bPlay(), _new.stake());
 
         require(_new.aResolution() == _old.aResolution() + aWinnings);
         require(_new.bResolution() == _old.bResolution() - 2 * _old.stake() + bWinnings);

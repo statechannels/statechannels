@@ -56,13 +56,15 @@
   "scripts": {
     "start": "node scripts/start.js",
     "build": "node scripts/build.js",
-    "test": "node scripts/test.js --env=jsdom",
+    "test": "run-s test:truffle 'test:app --all'",
+    "test:ci": "run-s test:truffle 'test:app --all --ci'",
+    "test:app": "node scripts/test.js --env=jsdom",
+    "test:truffle": "run-s truffle:compile && (cd build/dist && pwd && ../../scripts/run-with-ganache.sh)",
     "postinstall": "rm -f node_modules/web3/index.d.ts",
     "copy_truffle_files": "copyfiles './contracts/**/*' './migrations/**/*' ./build/dist",
     "copy_dotenv": "copyfiles '.env' ./build/dist",
     "truffle:compile": "tsc && tsc -p ./tsconfig.truffle.json && run-s copy_truffle_files && (cd build/dist && ../../node_modules/.bin/truffle compile)",
-    "truffle:migrate": "run-s truffle:compile copy_dotenv && (cd build/dist && ../../node_modules/.bin/truffle migrate --network $TRUFFLE_NETWORK)",
-    "truffle:test": "run-s truffle:compile && (cd build/dist && pwd && ../../scripts/run-with-ganache.sh)"
+    "truffle:migrate": "run-s truffle:compile copy_dotenv && (cd build/dist && ../../node_modules/.bin/truffle migrate --network ${TRUFFLE_NETWORK:development})"
   },
   "devDependencies": {
     "@babel/runtime": "^7.0.0-beta.53",
