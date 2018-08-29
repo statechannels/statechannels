@@ -1,6 +1,6 @@
 import { delay } from 'redux-saga';
 import {
-  put, takeEvery, select, fork,
+  put, takeEvery, select, fork, all,
 } from 'redux-saga/effects';
 import * as playerAStates from '../../game-engine/application-states/PlayerA';
 import { GameActionType } from '../actions/game';
@@ -12,6 +12,7 @@ import autoOpponentSaga from './auto-opponent';
 import { walletSaga } from '../../wallet/redux/sagas/wallet';
 import { BlockchainAction } from '../../wallet/redux/actions/blockchain';
 import walletControllerSaga from '../../wallet/redux/sagas/wallet-controller';
+import { drizzleSagas } from 'drizzle';
 
 function* blockchainResponseFaker() {
   const state = yield select(getApplicationState);
@@ -23,6 +24,7 @@ function* blockchainResponseFaker() {
 }
 
 export default function* rootSaga() {
+  yield all(drizzleSagas.map(saga => fork(saga)));
   yield fork(opponentSaga);
   yield fork(walletSaga);
   yield fork(walletControllerSaga);

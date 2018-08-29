@@ -29,6 +29,7 @@ function* logoutSaga() {
 }
 
 function* loginStatusWatcherSaga() {
+  yield take ('DRIZZLE_INITIALIZED');
   // Events on this channel are triggered on login and logout
   const channel = yield call(reduxSagaFirebase.auth.channel);
   // let playerHeartbeatThread;

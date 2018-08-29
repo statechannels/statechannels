@@ -23,9 +23,11 @@
     "chalk": "1.1.3",
     "css-loader": "0.28.7",
     "dotenv-expand": "4.2.0",
+    "drizzle": "^1.2.3",
     "enum": "^2.5.0",
     "firebase": "^5.0.4",
     "fmg-core": "^0.0.6",
+    "fmg-simple-adjudicator": "^0.0.6",
     "fs-extra": "3.0.1",
     "key-mirror": "^1.0.1",
     "lodash": "^4.17.10",
@@ -59,12 +61,10 @@
     "test": "run-s test:truffle 'test:app --all'",
     "test:ci": "run-s test:truffle 'test:app --all --ci'",
     "test:app": "node scripts/test.js --env=jsdom",
-    "test:truffle": "run-s truffle:compile && (cd build/dist && pwd && ../../scripts/run-with-ganache.sh)",
+    "test:truffle": "bash ./scripts/truffle_compile.sh  && (cd tmp && pwd && bash ../scripts/run-with-ganache.sh)",
     "postinstall": "rm -f node_modules/web3/index.d.ts",
-    "copy_truffle_files": "copyfiles './contracts/**/*' './migrations/**/*' ./build/dist",
-    "copy_dotenv": "copyfiles '.env' ./build/dist",
-    "truffle:compile": "tsc && tsc -p ./tsconfig.truffle.json && run-s copy_truffle_files && (cd build/dist && ../../node_modules/.bin/truffle compile)",
-    "truffle:migrate": "run-s truffle:compile copy_dotenv && (cd build/dist && ../../node_modules/.bin/truffle migrate --network ${TRUFFLE_NETWORK:development})"
+    "truffle:compile": "bash ./scripts/truffle_compile.sh && rm -rf tmp",
+    "truffle:migrate": "bash ./scripts/truffle_compile.sh &&  cd tmp && ../node_modules/.bin/truffle migrate --network development && rm -rf tmp"
   },
   "devDependencies": {
     "@babel/runtime": "^7.0.0-beta.53",
