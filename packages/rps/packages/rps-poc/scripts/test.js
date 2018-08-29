@@ -22,10 +22,10 @@ let argv = process.argv.slice(2);
 if (
   !process.env.CI &&
   argv.indexOf('--coverage') === -1 &&
-  argv.indexOf('--watchAll') === -1
+  argv.indexOf('--watchAll') === -1 && 
+  argv.indexOf('--all') === -1
 ) {
   argv.push('--watch');
 }
-
 
 jest.run(argv);

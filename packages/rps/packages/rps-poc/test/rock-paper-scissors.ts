@@ -1,14 +1,13 @@
-import { Channel, State, assertRevert, increaseTime, duration } from 'fmg-core';
+import { Channel, assertRevert, padBytes32 } from 'fmg-core';
+import { Play, Resting, Propose, Accept, Reveal } from '../src/game-engine/positions';
 
-import { RpsGame } from '../src/rock-paper-scissors';
-
-var RPS = artifacts.require("./RockPaperScissorsGame.sol");
+const RPS = artifacts.require("./RockPaperScissorsGame.sol");
 
 contract('RockPaperScissors', (accounts) => {
   let rpsContract;
-  const salt = "0xaaa"; // some random bytes32 value
-  const aPlay = RpsGame.Plays.ROCK;
-  const bPlay = RpsGame.Plays.SCISSORS;
+  const salt = padBytes32("0xaaa"); // some random bytes32 value
+  const aPlay = Play.Rock;
+  const bPlay = Play.Scissors;
   const stake = 2;
   const initBals = [5, 4];
   const aAhead = [7, 2];
@@ -22,14 +21,15 @@ contract('RockPaperScissors', (accounts) => {
   before(async () => {
     rpsContract = await RPS.deployed();
 
-    let channel = new Channel(rpsContract.address, 0, [accounts[0], accounts[1]]);
+    const channel = new Channel(rpsContract.address, 0, [accounts[0], accounts[1]]);
 
-    initialState = RpsGame.restingState({ channel, turnNum: 0, resolution: initBals, stake});
-    proposeState = RpsGame.proposeState({ channel, turnNum: 1, resolution: initBals, stake, aPlay, salt});
-    let preCommit = proposeState.preCommit;
-    acceptState = RpsGame.acceptState({ channel, turnNum: 2, stake, preCommit, bPlay, resolution: bAhead });
-    revealState = RpsGame.revealState({ channel, turnNum: 3, stake, aPlay, bPlay, salt, resolution: aAhead });
-    restState = RpsGame.restingState({ channel, turnNum: 4, stake, resolution: aAhead });
+    initialState = new Resting( channel, 0, initBals, stake);
+    proposeState = Propose.createWithPlayAndSalt(channel, 1, initBals, stake, aPlay, salt)
+    const preCommit = proposeState.preCommit;
+
+    acceptState = new Accept(channel, 2, bAhead, stake, preCommit, bPlay);
+    revealState = new Reveal(channel, 3, aAhead, stake, bPlay, aPlay, salt);
+    restState = new Resting(channel, 4, aAhead, stake);
   });
 
 
@@ -60,7 +60,7 @@ contract('RockPaperScissors', (accounts) => {
   });
 
   it("allows ROUNDACCEPTED -> REVEAL", async () => {
-    assert(await validTransition(acceptState, revealState));
+    assertRevert(await validTransition(acceptState, revealState));
   });
 
   it("allows REVEAL -> (updated) START", async () => {
