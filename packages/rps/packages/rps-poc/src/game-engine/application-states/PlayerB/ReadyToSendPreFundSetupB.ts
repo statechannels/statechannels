@@ -1,12 +1,12 @@
 import BasePlayerB from './Base';
-import Move from '../../Move';
+import { Position } from '../../positions';
 
 export default class ReadyToSendPreFundSetupB extends BasePlayerB {
-  move: Move;
+  position: Position;
   readonly isReadyToSend = true;
 
-  constructor({ channel, stake, balances, move }) {
+  constructor({ channel, stake, balances, position }) {
     super({ channel, stake, balances });
-    this.move = move;
+    this.position = position;
   }
 }

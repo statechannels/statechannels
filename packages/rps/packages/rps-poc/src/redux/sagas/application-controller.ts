@@ -4,8 +4,9 @@ import { MessageActionType, MessageAction } from '../actions/messages';
 import { GameActionType, GameAction } from '../actions/game';
 import { setupGame, fromProposal, GameEngine } from '../../game-engine/GameEngine';
 import { State } from '../../game-engine/application-states';
-import Move from '../../game-engine/Move';
+import { default as positionFromHex } from '../../game-engine/positions/decode';
 import { Wallet, WalletFundingAction, WalletFundingActionType } from '../../wallet';
+import Move from '../../game-engine/Move';
 
 export default function* applicationControllerSaga(wallet: Wallet) {
   let gameEngine: GameEngine | null = null;
@@ -29,11 +30,11 @@ export default function* applicationControllerSaga(wallet: Wallet) {
         case GameActionType.CHOOSE_OPPONENT:
           const { opponent, stake } = action;
           const balances = [3 * stake, 3 * stake];
-          gameEngine = setupGame({ opponent, stake, balances, wallet });
+          gameEngine = setupGame({ me: wallet.address, opponent, stake, balances });
           newState = gameEngine.state;
           break;
         case MessageActionType.MESSAGE_RECEIVED:
-          gameEngine = fromProposal({ move: Move.fromHex(action.message), wallet });
+          gameEngine = fromProposal(positionFromHex(action.message));
           if (gameEngine !== null) {
             newState = gameEngine.state;
           }
@@ -44,10 +45,10 @@ export default function* applicationControllerSaga(wallet: Wallet) {
     } else {
       switch (action.type) {
         case MessageActionType.MESSAGE_RECEIVED:
-          newState = gameEngine.receiveMove(Move.fromHex(action.message));
+          newState = gameEngine.receivePosition(positionFromHex(action.message));
           break;
         case GameActionType.MOVE_SENT:
-          newState = gameEngine.moveSent();
+          newState = gameEngine.positionSent();
           break;
         case GameActionType.CHOOSE_PLAY:
           newState = gameEngine.choosePlay(action.play);
@@ -67,8 +68,8 @@ export default function* applicationControllerSaga(wallet: Wallet) {
     }
     if (newState && gameEngine != null) {
       if (newState.isReadyToSend) {
-        yield put(MessageAction.sendMessage(newState.opponentAddress, newState.move.toHex()));
-        yield put(GameAction.moveSent(newState.move));
+        yield put(MessageAction.sendMessage(newState.opponentAddress, newState.position.toHex()));
+        yield put(GameAction.moveSent(new Move(newState.position.toHex(), 'fakesig'))); // TODO: fix
       }
       if (newState.isReadyForFunding) {
         yield put(WalletFundingAction.walletFundingRequest(wallet, newState.player));

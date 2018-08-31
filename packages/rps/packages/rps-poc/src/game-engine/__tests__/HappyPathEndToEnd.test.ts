@@ -1,62 +1,52 @@
 import * as GameEngine from '../GameEngine';
-import ChannelWallet from '../../wallet/domain/ChannelWallet';
-import Move from '../Move';
 import * as ApplicationStatesA from '../application-states/PlayerA';
 import * as ApplicationStatesB from '../application-states/PlayerB';
 import { Play, Result } from '../positions';
 import * as positions from '../positions';
-import pledgeFromHex from '../positions/decode';
 
 const stake = 1;
 const initialBals = [5, 4];
 const bWinsBals = [4, 5];
 const aWinsBals = [6, 3];
+const me = '0xa';
+const opponent = '0xb';
 
 it('runthrough', () => {
-  const channelWalletA = new ChannelWallet(); // generates ephemeral keys
-  const channelWalletB = new ChannelWallet(); // generates ephemeral keys
-
   // In A's application
-  const gameEngineA = GameEngine.setupGame({
-    opponent: channelWalletB.address,
-    stake,
-    balances: initialBals,
-    wallet: channelWalletA,
-  });
+  const gameEngineA = GameEngine.setupGame({me, opponent, stake, balances: initialBals});
   const readyToSendPreFundSetupA = gameEngineA.state;
   expect(readyToSendPreFundSetupA).toBeInstanceOf(ApplicationStatesA.ReadyToSendPreFundSetupA);
-  const move0 = readyToSendPreFundSetupA.move;
-  const gameState0 = pledgeFromHex(move0.state) as positions.PreFundSetup;
-  expect(gameState0.turnNum).toEqual(0);
-  expect(gameState0.stateCount).toEqual(0);
-  expect(gameState0.resolution).toEqual(initialBals);
-  expect(gameState0.stake).toEqual(1);
 
-  const waitForPreFundSetupB = gameEngineA.moveSent();
+  const position0 = readyToSendPreFundSetupA.position;
+  expect(position0.turnNum).toEqual(0);
+  expect(position0.stateCount).toEqual(0);
+  expect(position0.resolution).toEqual(initialBals);
+  expect(position0.stake).toEqual(1);
+
+  const waitForPreFundSetupB = gameEngineA.positionSent();
   expect(waitForPreFundSetupB).toBeInstanceOf(ApplicationStatesA.WaitForPreFundSetupB);
-  expect(waitForPreFundSetupB.move).toEqual(move0);
+  expect(waitForPreFundSetupB.position).toEqual(position0);
 
   // In B's application
-  const gameEngineB = GameEngine.fromProposal({ move: move0, wallet: channelWalletB });
+  const gameEngineB = GameEngine.fromProposal(position0);
   const readyToSendPreFundSetupB = gameEngineB.state;
   expect(readyToSendPreFundSetupB).toBeInstanceOf(ApplicationStatesB.ReadyToSendPreFundSetupB);
   expect(readyToSendPreFundSetupB.balances).toEqual(initialBals);
   expect(readyToSendPreFundSetupB.channel).toEqual(waitForPreFundSetupB.channel);
   expect(readyToSendPreFundSetupB.stake).toEqual(stake);
 
-  const move1 = readyToSendPreFundSetupB.move as Move;
-  const gameState1 = pledgeFromHex(move1.state) as positions.PreFundSetup;
-  expect(gameState1.turnNum).toEqual(1);
-  expect(gameState1.stateCount).toEqual(1);
-  expect(gameState1.resolution).toEqual(initialBals);
-  expect(gameState1.stake).toEqual(1);
+  const position1 = readyToSendPreFundSetupB.position as positions.PreFundSetup;
+  expect(position1.turnNum).toEqual(1);
+  expect(position1.stateCount).toEqual(1);
+  expect(position1.resolution).toEqual(initialBals);
+  expect(position1.stake).toEqual(1);
 
-  const readyToFundB = gameEngineB.moveSent();
+  const readyToFundB = gameEngineB.positionSent();
   expect(readyToFundB).toBeInstanceOf(ApplicationStatesB.ReadyToFund);
   expect(readyToFundB.balances).toEqual(initialBals);
 
   // In A's application 
-  const readyToFund = gameEngineA.receiveMove(move1);
+  const readyToFund = gameEngineA.receivePosition(position1);
   expect(readyToFund).toBeInstanceOf(ApplicationStatesA.ReadyToFund);
 
   const waitForFunding = gameEngineA.fundingRequested();
@@ -69,17 +59,15 @@ it('runthrough', () => {
   const readyToSendPostFundSetupA = gameEngineA.fundingConfirmed(fundingEvent);
   expect(readyToSendPostFundSetupA).toBeInstanceOf(ApplicationStatesA.ReadyToSendPostFundSetupA);
 
-  const move2 = readyToSendPostFundSetupA.move;
-  expect(move2).not.toBeUndefined();
-  const gameState2 = pledgeFromHex(move2.state) as positions.PostFundSetup;
-  expect(gameState2.turnNum).toEqual(2);
-  expect(gameState2.stateCount).toEqual(0);
-  expect(gameState2.resolution).toEqual(initialBals);
-  expect(gameState2.stake).toEqual(1);
+  const position2 = readyToSendPostFundSetupA.position;
+  expect(position2).not.toBeUndefined();
+  expect(position2.turnNum).toEqual(2);
+  expect(position2.stateCount).toEqual(0);
+  expect(position2.resolution).toEqual(initialBals);
+  expect(position2.stake).toEqual(1);
 
-  const waitForPostFundSetupB = gameEngineA.moveSent();
+  const waitForPostFundSetupB = gameEngineA.positionSent();
   expect(waitForPostFundSetupB).toBeInstanceOf(ApplicationStatesA.WaitForPostFundSetupB);
-  expect(waitForPostFundSetupB.adjudicator).toEqual(fundingEvent.adjudicator);
 
   // In B's application
   const waitForFundingB= gameEngineB.fundingRequested();
@@ -90,99 +78,95 @@ it('runthrough', () => {
   const WaitForPostFundSetupA = gameEngineB.fundingConfirmed(fundingEvent);
   expect(WaitForPostFundSetupA).not.toBeUndefined();
   expect(WaitForPostFundSetupA).toBeInstanceOf(ApplicationStatesB.WaitForPostFundSetupA);
-  const readyToSendPostFundSetupB = gameEngineB.receiveMove(move2);
+  const readyToSendPostFundSetupB = gameEngineB.receivePosition(position2);
   expect(readyToSendPostFundSetupB).toBeInstanceOf(ApplicationStatesB.ReadyToSendPostFundSetupB);
   expect(readyToSendPostFundSetupB.balances).not.toBeUndefined();
-  const move3 = readyToSendPostFundSetupB.move;
-  expect(move3).not.toBeUndefined();
+
+  const position3 = readyToSendPostFundSetupB.position;
+  expect(position3).not.toBeUndefined();
   expect(readyToSendPostFundSetupB.balances).toEqual(initialBals);
+  expect(position3.turnNum).toEqual(3);
+  expect(position3.stateCount).toEqual(1);
+  expect(position3.resolution).toEqual(initialBals);
+  expect(position3.stake).toEqual(1);
 
-  const gameState3 = pledgeFromHex(move3.state) as positions.PostFundSetup;
-  expect(gameState3.turnNum).toEqual(3);
-  expect(gameState3.stateCount).toEqual(1);
-  expect(gameState3.resolution).toEqual(initialBals);
-  expect(gameState3.stake).toEqual(1);
-
-  const waitForPropose = gameEngineB.moveSent();
+  const waitForPropose = gameEngineB.positionSent();
   expect(waitForPropose).toBeInstanceOf(ApplicationStatesB.WaitForPropose);
 
   // In A's application
-  const readyToChooseAPlay = gameEngineA.receiveMove(move3);
+  const readyToChooseAPlay = gameEngineA.receivePosition(position3);
   expect(readyToChooseAPlay).toBeInstanceOf(ApplicationStatesA.ReadyToChooseAPlay);
 
   const readyToSendPropose = gameEngineA.choosePlay(Play.Rock);
   expect(readyToSendPropose).toBeInstanceOf(ApplicationStatesA.ReadyToSendPropose);
   expect(readyToSendPropose.aPlay).toEqual(Play.Rock);
-  expect(readyToSendPropose.move).not.toBeUndefined();
+  expect(readyToSendPropose.position).not.toBeUndefined();
   expect(readyToSendPropose.salt).not.toBeUndefined();
 
-  const gameState4 = pledgeFromHex(readyToSendPropose.move.state) as positions.Propose;
-  expect(gameState4.turnNum).toEqual(4);
-  expect(gameState4.stake).toEqual(1);
-  expect(gameState4.resolution).toEqual(initialBals);
+  const position4 = readyToSendPropose.position;
+  expect(position4.turnNum).toEqual(4);
+  expect(position4.stake).toEqual(1);
+  expect(position4.resolution).toEqual(initialBals);
 
-  const waitForAccept = gameEngineA.moveSent();
+  const waitForAccept = gameEngineA.positionSent();
   expect(waitForAccept).toBeInstanceOf(ApplicationStatesA.WaitForAccept);
-  const proposal = waitForAccept.move;
+  const proposal = waitForAccept.position;
   expect(proposal).not.toBeUndefined();
   expect(waitForAccept.salt).toEqual(readyToSendPropose.salt);
 
   // In B's application
-  const readyToChooseBPlay = gameEngineB.receiveMove(proposal);
+  const readyToChooseBPlay = gameEngineB.receivePosition(proposal);
   expect(readyToChooseBPlay).toBeInstanceOf(ApplicationStatesB.ReadyToChooseBPlay);
 
   const readyToSendAccept = gameEngineB.choosePlay(Play.Scissors);
   expect(readyToSendAccept).toBeInstanceOf(ApplicationStatesB.ReadyToSendAccept);
-  const move5 = readyToSendAccept.move;
-  const gameState5 = pledgeFromHex(move5.state) as positions.Accept;
-  expect(gameState5.turnNum).toEqual(5);
-  expect(gameState5.stake).toEqual(1);
-  expect(gameState5.resolution).toEqual(bWinsBals);
+  const position5 = readyToSendAccept.position;
+  expect(position5.turnNum).toEqual(5);
+  expect(position5.stake).toEqual(1);
+  expect(position5.resolution).toEqual(bWinsBals);
 
-  const waitForReveal = gameEngineB.moveSent();
+  const waitForReveal = gameEngineB.positionSent();
   expect(waitForReveal).toBeInstanceOf(ApplicationStatesB.WaitForReveal);
   expect(waitForReveal.bPlay).toEqual(Play.Scissors);
-  expect(waitForReveal.move).not.toBeUndefined();
+  expect(waitForReveal.position).not.toBeUndefined();
 
   // In A's application
-  const readyToSendReveal = gameEngineA.receiveMove(move5);
+  const readyToSendReveal = gameEngineA.receivePosition(position5);
   expect(readyToSendReveal).toBeInstanceOf(ApplicationStatesA.ReadyToSendReveal);
   expect(readyToSendReveal.aPlay).toEqual(Play.Rock);
   expect(readyToSendReveal.bPlay).toEqual(Play.Scissors);
   expect(readyToSendReveal.salt).toEqual(waitForAccept.salt);
   expect(readyToSendReveal.result).toEqual(Result.YouWin);
 
-  const move6 = readyToSendReveal.move;
-  const gameState6 = pledgeFromHex(move6.state) as positions.Reveal;
-  expect(gameState6.turnNum).toEqual(6);
-  expect(gameState6.stake).toEqual(1);
-  expect(gameState6.aPlay).toEqual(Play.Rock);
-  expect(gameState6.bPlay).toEqual(Play.Scissors);
-  expect(gameState6.resolution).toEqual(aWinsBals);
+  const position6 = readyToSendReveal.position;
+  expect(position6.turnNum).toEqual(6);
+  expect(position6.stake).toEqual(1);
+  expect(position6.aPlay).toEqual(Play.Rock);
+  expect(position6.bPlay).toEqual(Play.Scissors);
+  expect(position6.resolution).toEqual(aWinsBals);
 
-  gameEngineA.moveSent();
+  gameEngineA.positionSent();
 
   // In B's application
-  const readyToSendResting = gameEngineB.receiveMove(move6);
+  const readyToSendResting = gameEngineB.receivePosition(position6);
   expect(readyToSendResting).toBeInstanceOf(ApplicationStatesB.ReadyToSendResting);
   expect(readyToSendResting.balances).toEqual([6, 3]);
-  const move7 = readyToSendResting.move;
-  const gameState7 = pledgeFromHex(move7.state);
-  expect(gameState7.turnNum).toEqual(7);
-  expect(gameState7.resolution).toEqual(aWinsBals);
+  const position7 = readyToSendResting.position;
+  expect(position7.turnNum).toEqual(7);
+  expect(position7.resolution).toEqual(aWinsBals);
 
   // In A's application
-  const readyToChoosePlay2 = gameEngineA.receiveMove(move7);
+  const readyToChoosePlay2 = gameEngineA.receivePosition(position7);
   expect(readyToChoosePlay2).toBeInstanceOf(ApplicationStatesA.ReadyToChooseAPlay);
 
   const readyToSendPropose2 = gameEngineA.choosePlay(Play.Paper);
   expect(readyToSendPropose2).toBeInstanceOf(ApplicationStatesA.ReadyToSendPropose);
   expect(readyToSendPropose2.aPlay).toEqual(Play.Paper);
-  expect(readyToSendPropose2.move).not.toBeUndefined();
+  expect(readyToSendPropose2.position).not.toBeUndefined();
   expect(readyToSendPropose2.salt).not.toBeUndefined();
 
-  const gameState8v0 = pledgeFromHex(readyToSendPropose2.move.state);
-  expect(gameState8v0.turnNum).toEqual(8);
+  const position8v0 = readyToSendPropose2.position;
+  expect(position8v0.turnNum).toEqual(8);
 
   // In B's application
   // const readyToSendConclude = gameEngineB.conclude();
@@ -190,10 +174,10 @@ it('runthrough', () => {
   // todo: put this back in
 
   // expect(readyToSendConclude instanceof ApplicationStatesB.ReadyToSendConcludeB).toBe(true);
-  // expect(readyToSendConclude.move).not.toBeUndefined();
-  // const gameState8v1 = pledgeFromHex(readyToSendConclude.move.state);
+  // expect(readyToSendConclude.position).not.toBeUndefined();
+  // const position8v1 = pledgeFromHex(readyToSendConclude.position.state);
 
-  // expect(gameState8v1.resolution).toEqual(aWinsBals);
-  // expect(gameState8v1.turnNum).toEqual(8);
-  // expect(gameState8v1.stateType).toEqual(3);
+  // expect(position8v1.resolution).toEqual(aWinsBals);
+  // expect(position8v1.turnNum).toEqual(8);
+  // expect(position8v1.stateType).toEqual(3);
 });

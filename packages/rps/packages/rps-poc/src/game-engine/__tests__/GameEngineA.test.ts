@@ -3,7 +3,6 @@ import { Channel } from 'fmg-core';
 import ChannelWallet from '../../wallet/domain/ChannelWallet';
 import * as ApplicationStatesA from '../application-states/PlayerA';
 import * as GameEngine from '../GameEngine';
-import Move from '../Move';
 import { Play, Result } from '../positions';
 import { PostFundSetup, Resting } from '../positions/'
 
@@ -12,25 +11,19 @@ it('requires sufficient funds to transition from WaitForPostFundSetupB to ReadyT
   const balances = [2, 5];
   const wallet = new ChannelWallet();
   const channel = new Channel(wallet.address, 456, [wallet.address, '0x123']);
-  const adjudicator = '0x2718';
 
-  const pledge = new PostFundSetup(channel, 0, balances, 0, stake);
-  const move = new Move(pledge.toHex(), wallet.sign(pledge.toHex()));
+  const position = new PostFundSetup(channel, 0, balances, 0, stake);
 
   const waitForPostFundSetupB = new ApplicationStatesA.WaitForPostFundSetupB({
     channel,
     stake,
     balances,
-    adjudicator,
-    move,
+    position,
   })
 
-  const gameEngineA = GameEngine.fromState({
-    state: waitForPostFundSetupB,
-    wallet,
-  })
+  const gameEngineA = GameEngine.fromState(waitForPostFundSetupB);
 
-  gameEngineA.receiveMove(move);
+  gameEngineA.receivePosition(position);
 
   expect(gameEngineA.state instanceof ApplicationStatesA.InsufficientFundsA).toBe(true)
 });
@@ -40,29 +33,23 @@ it('requires sufficient funds to transition from WaitForResting to ReadyToChoose
   const balances = [5, 2];
   const wallet = new ChannelWallet();
   const channel = new Channel(wallet.address, 456, [wallet.address, '0x123']);
-  const adjudicator = '0x2718';
 
-  const pledge = new Resting(channel, 3, balances, stake);
-  const move = new Move(pledge.toHex(), wallet.sign(pledge.toHex()));
+  const position = new Resting(channel, 3, balances, stake);
 
   const waitForResting = new ApplicationStatesA.WaitForResting({
     channel,
     stake,
     balances,
-    adjudicator,
     aPlay: Play.Rock,
     bPlay: Play.Scissors,
     result: Result.YouWin,
     salt: '0x123',
-    move,
+    position,
   })
 
-  const gameEngineA = GameEngine.fromState({
-    state: waitForResting,
-    wallet,
-  })
+  const gameEngineA = GameEngine.fromState(waitForResting);
 
-  gameEngineA.receiveMove(move);
+  gameEngineA.receivePosition(position);
 
   expect(gameEngineA.state instanceof ApplicationStatesA.InsufficientFundsB).toBe(true)
 });
