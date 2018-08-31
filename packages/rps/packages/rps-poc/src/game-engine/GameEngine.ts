@@ -1,28 +1,27 @@
 import GameEngineA from './GameEngineA';
 import GameEngineB from './GameEngineB';
-import Move from './Move';
+import { Position } from './positions';
 import { Player, State as ApplicationState } from './application-states';
-import { Wallet } from '../wallet';
 
 export type GameEngine = GameEngineA | GameEngineB;
 
 // todo: probably shouldn't be a class
-export function setupGame({ opponent, stake, balances, wallet }:
-  { opponent: string, stake: number, balances: number[], wallet: Wallet }
+export function setupGame({ me, opponent, stake, balances }:
+  { me: string, opponent: string, stake: number, balances: number[] }
 ) {
-  return GameEngineA.setupGame({ opponent, stake, balances, wallet });
+  return GameEngineA.setupGame({ me, opponent, stake, balances });
 }
 
-export function fromProposal({ move, wallet }: { move: Move, wallet: Wallet }) {
-  return GameEngineB.fromProposal({ move, wallet });
+export function fromProposal(proposedStartPosition: Position) {
+  return GameEngineB.fromProposal(proposedStartPosition);
 }
 
 // todo: state type
-export function fromState({ state, wallet }: { state: ApplicationState, wallet: Wallet }) {
+export function fromState(state: ApplicationState) {
   switch (state.player) {
     case Player.PlayerA:
-      return GameEngineA.fromState({ state, wallet });
+      return GameEngineA.fromState(state);
     case Player.PlayerB:
-      return GameEngineB.fromState({ state, wallet });
+      return GameEngineB.fromState(state);
   }
 }
