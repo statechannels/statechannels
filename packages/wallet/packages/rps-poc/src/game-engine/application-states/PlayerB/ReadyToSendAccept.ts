@@ -1,17 +1,15 @@
 import BasePlayerB from './Base';
-import Move from '../../Move';
+import { Position } from '../../positions';
 import { Play } from '../../positions';
 
 export default class ReadyToSendAccept extends BasePlayerB {
-  move: Move;
-  adjudicator: string;
+  position: Position;
   bPlay: Play;
   readonly isReadyToSend = true;
 
-  constructor({ channel, stake, balances, adjudicator, bPlay, move }) {
+  constructor({ channel, stake, balances, bPlay, position }) {
     super({ channel, stake, balances });
-    this.move = move;
-    this.adjudicator = adjudicator;
+    this.position = position;
     this.bPlay = bPlay;
   }
 }

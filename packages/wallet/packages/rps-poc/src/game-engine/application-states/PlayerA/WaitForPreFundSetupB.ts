@@ -1,12 +1,12 @@
 import BasePlayerA from './Base';
-import Move from '../../Move';
+import { Position } from '../../positions';
 
 export default class WaitForPreFundSetupB extends BasePlayerA {
-  move: Move;
+  position: Position;
   readonly isReadyToSend = false;
 
-  constructor({ channel, stake, balances, move }) {
+  constructor({ channel, stake, balances, position }) {
     super({ channel, stake, balances });
-    this.move = move; // in case a resend is required
+    this.position = position; // in case a resend is required
   }
 }

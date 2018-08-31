@@ -19,7 +19,16 @@ export {
   Reveal
 } 
 
-export enum Position {
+export type Position =
+  | Accept
+  | Conclude
+  | PostFundSetup
+  | PreFundSetup
+  | Propose
+  | Resting
+  | Reveal
+
+export enum GamePositionType {
   Resting,
   Propose,
   Accept,
@@ -40,14 +49,14 @@ export enum Result {
 
 export function packRestingAttributes(stake: number) {
   return (
-    toHex32(Position.Resting).substr(2) + 
+    toHex32(GamePositionType.Resting).substr(2) + 
     toHex32(stake).substr(2)
   );
 }
 
 export function packProposeAttributes(stake: number, preCommit: string) {
   return (
-    toHex32(Position.Propose).substr(2) + 
+    toHex32(GamePositionType.Propose).substr(2) + 
     toHex32(stake).substr(2) +
     padBytes32(preCommit).substr(2)
   );
@@ -55,7 +64,7 @@ export function packProposeAttributes(stake: number, preCommit: string) {
 
 export function packAcceptAttributes(stake: number, preCommit: string, bPlay: Play) {
   return (
-    toHex32(Position.Accept).substr(2) + 
+    toHex32(GamePositionType.Accept).substr(2) + 
     toHex32(stake).substr(2) +
     padBytes32(preCommit).substr(2) +
     toHex32(bPlay).substr(2)
@@ -69,7 +78,7 @@ export function packRevealAttributes(
   salt: string,
 ) {
   return (
-    toHex32(Position.Reveal).substr(2) + 
+    toHex32(GamePositionType.Reveal).substr(2) + 
     toHex32(stake).substr(2) +
     padBytes32('0x0').substr(2) + // don't need the preCommit
     toHex32(bPlay).substr(2) +

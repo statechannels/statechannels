@@ -1,14 +1,12 @@
 import BasePlayerA from './Base';
-import Move from '../../Move';
+import { Position } from '../../positions';
 
 export default class WaitForConcludeA extends BasePlayerA {
-  adjudicator: any;
-  move: Move;
+  position: Position;
   readonly isReadyToSend = false;
 
-  constructor({ channel, balances, adjudicator, move }) {
+  constructor({ channel, balances, position }) {
     super({ channel, balances, stake: 0 });
-    this.adjudicator = adjudicator;
-    this.move = move;
+    this.position = position;
   }
 }

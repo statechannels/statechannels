@@ -1,6 +1,6 @@
 import { Channel, State } from 'fmg-core';
 
-import { Play, Position } from '.';
+import { Play, GamePositionType } from '.';
 import PreFundSetup from './PreFundSetup';
 import PostFundSetup from './PostFundSetup';
 import Propose from './Propose';
@@ -70,8 +70,8 @@ function extractBalances(hexString: string) {
 // [160 - 191] bytes32 salt
 // [192 - 223] uint256 roundNum
 
-function extractPosition(hexString: string) {
-  return extractInt(hexString, GAME_ATTRIBUTE_OFFSET) as Position;
+function extractGamePositionType(hexString: string) {
+  return extractInt(hexString, GAME_ATTRIBUTE_OFFSET) as GamePositionType;
 }
 
 function extractStake(hexString: string) {
@@ -95,20 +95,20 @@ function extractSalt(hexString: string) {
 }
 
 function decodeGameState(channel, turnNum: number, balances: number[], hexString: string) {
-  const position = extractPosition(hexString);
+  const position = extractGamePositionType(hexString);
   const stake = extractStake(hexString);
 
   switch (position) {
-    case Position.Resting:
+    case GamePositionType.Resting:
       return new Resting(channel, turnNum, balances, stake);
-    case Position.Propose:
+    case GamePositionType.Propose:
       const preCommitPro = extractPreCommit(hexString);
       return new Propose(channel, turnNum, balances, stake, preCommitPro);
-    case Position.Accept:
+    case GamePositionType.Accept:
       const preCommitAcc = extractPreCommit(hexString);
       const bPlayAcc = extractBPlay(hexString);
       return new Accept(channel, turnNum, balances, stake, preCommitAcc, bPlayAcc);
-    case Position.Reveal:
+    case GamePositionType.Reveal:
       const bPlayRev = extractBPlay(hexString);
       const aPlay = extractAPlay(hexString);
       const salt = extractSalt(hexString);
