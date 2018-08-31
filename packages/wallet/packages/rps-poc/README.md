@@ -2,14 +2,31 @@
 
 ### Setup
 
-#### Install yarn
-`brew install yarn`
+1. Install yarn
+    ```
+    brew install yarn
+    ```
+2. Set up your `.env`
+    ```
+    cp .env.example .env
+    ```
 
 ### Developement Info
 
 #### To run a dev server:
 
-`yarn start`
+1. Start ganache
+    * Either using the app
+    * Or by running `ganache-cli` in a different tab
+2. Deploy the contracts:
+    ```
+    yarn truffle:migrate
+    ```
+3. Run the server:
+    ```
+    yarn start
+    ```
+4. In your browser make sure you have the local ganache network (probably `localhost:8545`) selected in metamask
 
 #### To build:
 
