@@ -1,14 +1,21 @@
 import { Channel } from 'fmg-core';
 
 import * as State from './application-states/PlayerA';
-import { calculateResult, Result, Play, Position }  from './positions';
-import PreFundSetup from './positions/PreFundSetup';
-import PostFundSetup from './positions/PostFundSetup';
-import Propose from './positions/Propose';
-import Accept from './positions/Accept';
-import Reveal from './positions/Reveal';
-import Resting from './positions/Resting';
-import Conclude from './positions/Conclude';
+import {
+  calculateResult,
+  Result,
+  Play,
+  Position,
+  PreFundSetupA,
+  PreFundSetupB,
+  PostFundSetupA,
+  PostFundSetupB,
+  Propose,
+  Accept,
+  Reveal,
+  Resting,
+  Conclude,
+}  from './positions';
 
 const fakeGameLibraryAddress = '0xc1912fee45d61c87cc5ea59dae31190fffff232d';
 
@@ -19,12 +26,9 @@ export default class GameEngineA {
     const participants = [me, opponent];
     const channel = new Channel(fakeGameLibraryAddress, 456, participants);
 
-    const position = new PreFundSetup(channel, 0, balances, 0, stake);
+    const position = new PreFundSetupA(channel, 0, balances, 0, stake);
 
-    const appState = new State.ReadyToSendPreFundSetupA({
-      channel,
-      stake,
-      balances,
+    const appState = new State.WaitForPreFundSetup({
       position,
     });
 
@@ -35,53 +39,18 @@ export default class GameEngineA {
     return new GameEngineA(state);
   }
 
-  state: any;
+  state: State.PlayerAState;
  
   constructor(state) {
     this.state = state;
   }
 
-  positionSent() {
-    switch(this.state.constructor) {
-      case State.ReadyToSendPreFundSetupA:
-        return this.transitionTo(
-          new State.WaitForPreFundSetupB({
-            ...this.state.commonAttributes,
-            position: this.state.position,
-          })
-        );
-      case State.ReadyToSendPostFundSetupA:
-        return this.transitionTo(
-          new State.WaitForPostFundSetupB({
-            ...this.state.commonAttributes,
-            position: this.state.position,
-          })
-        );
-      case State.ReadyToSendPropose:
-        return this.transitionTo(
-          new State.WaitForAccept({
-            ...this.state.commonAttributes,
-            aPlay: this.state.aPlay,
-            salt: this.state.salt,
-            position: this.state.position,
-          })
-        );
-      case State.ReadyToSendReveal:
-        return this.transitionTo(
-          new State.WaitForResting(this.state)
-        );
-      default:
-        // todo: should we error here?
-        return this.state;
-    }
-  }
-
   receivePosition(positionReceived: Position) {
     switch(positionReceived.constructor) {
-      case PreFundSetup:
-        return this.receivedPreFundSetup(positionReceived as PreFundSetup);
-      case PostFundSetup:
-        return this.receivedPostFundSetup(positionReceived as PostFundSetup);
+      case PreFundSetupB:
+        return this.receivedPreFundSetup(positionReceived as PreFundSetupB);
+      case PostFundSetupB:
+        return this.receivedPostFundSetup(positionReceived as PostFundSetupB);
       case Accept:
         return this.receivedAccept(positionReceived as Accept);
       case Resting:
@@ -94,33 +63,22 @@ export default class GameEngineA {
     }
   }
 
-  fundingConfirmed(event) {
+  fundingConfirmed() {
+    if (!(this.state instanceof State.WaitForFunding)) { return this.state; }
+
     const { channel, stake, balances } = this.state;
     const stateCount = 0;
     const turnNum = 2;
-    const newPosition = new PostFundSetup(channel, turnNum, balances, stateCount, stake);
+    const newPosition = new PostFundSetupA(channel, turnNum, balances, stateCount, stake);
     return this.transitionTo(
-      new State.ReadyToSendPostFundSetupA({
-        channel,
-        stake,
-        balances,
+      new State.WaitForPostFundSetup({
         position: newPosition,
       })
     );
   }
 
-  fundingRequested() {
-    if (!(this.state instanceof State.ReadyToFund)) { return this.state; }
-    const { channel, stake, balances } = this.state;
-    return this.transitionTo(new State.WaitForFunding({
-      channel,
-      stake,
-      balances,
-    }));
-  }
-
   choosePlay(aPlay: Play) {
-    if (!(this.state instanceof State.ReadyToChooseAPlay)) { return this.state };
+    if (!(this.state instanceof State.ChoosePlay)) { return this.state };
 
     const { balances, turnNum, stake, channel } = this.state;
 
@@ -128,7 +86,7 @@ export default class GameEngineA {
 
     const newPosition = Propose.createWithPlayAndSalt(
       channel,
-      turnNum,
+      turnNum + 1,
       balances,
       stake,
       aPlay,
@@ -136,13 +94,10 @@ export default class GameEngineA {
     );
 
     return this.transitionTo(
-      new State.ReadyToSendPropose({
-        channel,
-        stake,
-        balances, 
+      new State.WaitForAccept({
+        position: newPosition,
         aPlay,
         salt,
-        position: newPosition,
       })
     );
   }
@@ -178,33 +133,24 @@ export default class GameEngineA {
     return state;
   }
 
-  receivedPreFundSetup(position: PreFundSetup) {
-    if (!(this.state instanceof State.WaitForPreFundSetupB)) { return this.state };
+  receivedPreFundSetup(position: PreFundSetupB) {
+    if (!(this.state instanceof State.WaitForPreFundSetup)) { return this.state };
 
-    const { channel, stake, balances } = this.state;
     return this.transitionTo(
-      new State.ReadyToFund({ channel, stake, balances })
+      new State.WaitForFunding({ position })
     );
   }
 
-  receivedPostFundSetup(position: PostFundSetup) {
-    if (!(this.state instanceof State.WaitForPostFundSetupB)) { return this.state };
+  receivedPostFundSetup(position: PostFundSetupB) {
+    if (!(this.state instanceof State.WaitForPostFundSetup)) { return this.state };
 
-    const { channel, stake, balances } = this.state;
+    const { stake, balances } = this.state;
 
-    if (this.state.stake > this.state.balances[0] || this.state.stake > this.state.balances[0]) {
-      return this.transitionTo(
-        new State.InsufficientFundsA({
-          channel, balances,
-        })
-      )
+    if (stake > balances[0] || stake > balances[1]) {
+      return this.transitionTo(new State.InsufficientFunds({ position }));
     };
 
-    const turnNum = position.turnNum + 1;
-
-    return this.transitionTo(
-      new State.ReadyToChooseAPlay({ channel, stake, balances, turnNum })
-    );
+    return this.transitionTo(new State.ChoosePlay({ position }));
   }
 
   receivedAccept(position: Accept) {
@@ -225,59 +171,28 @@ export default class GameEngineA {
 
     const nextPosition = new Reveal(channel, turnNum + 1, balances, stake, bPlay, aPlay, salt);
 
-    return this.transitionTo(
-      new State.ReadyToSendReveal({
-        channel,
-        stake,
-        balances,
-        aPlay,
-        bPlay,
-        result,
-        salt,
-        position: nextPosition,
-      })
-    );
+    return this.transitionTo(new State.WaitForResting({ position: nextPosition }));
 
   }
 
   receivedResting(position: Resting) {
     if (!(this.state instanceof State.WaitForResting)) { return this.state };
 
-    const { channel, turnNum: oldTurnNum, resolution: balances, stake } = position;
-    const turnNum = oldTurnNum + 1;
+    const { stake, balances } = this.state;
 
-    const insufficientFundState = this.insufficientFundState()
-    if (insufficientFundState) {
-      return this.transitionTo(insufficientFundState)
+    if (stake > balances[0] || stake > balances[1]) {
+      return this.transitionTo(
+        new State.InsufficientFunds({ position })
+      );
     }
 
-    return this.transitionTo(
-      new State.ReadyToChooseAPlay({channel, stake, balances, turnNum })
-    );
+    return this.transitionTo(new State.ChoosePlay({ position }));
   }
 
   receivedConclude(position: Conclude) {
-    const { channel, resolution: balances } = position;
-
     // todo: need a move. Might also need an intermediate state here
     return this.transitionTo(
-      new State.ReadyToSendConcludeA({ channel, balances })
+      new State.WaitForConclude({ position })
     )
-  }
-
-  insufficientFundState() : State.InsufficientFunds | null {
-    if (this.state.stake > this.state.balances[0]) {
-      const { channel, balances } = this.state
-      return new State.InsufficientFundsA({
-        channel, balances,
-      })
-    } else if (this.state.stake > this.state.balances[1]) {
-      const { channel, balances } = this.state
-      return new State.InsufficientFundsB({
-        channel, balances,
-      })
-    }
-
-    return null;
   }
 }

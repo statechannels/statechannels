@@ -1,29 +1,29 @@
 import * as State from './application-states/PlayerB';
-import { calculateResult, Play, Position} from './positions';
-import PreFundSetup from './positions/PreFundSetup';
-import PostFundSetup from './positions/PostFundSetup';
-import Reveal from './positions/Reveal';
-import Propose from './positions/Propose';
-import Accept from './positions/Accept';
-import Resting from './positions/Resting';
-import Conclude from './positions/Conclude';
+import {
+  Play,
+  Position,
+  PreFundSetupA,
+  PreFundSetupB,
+  PostFundSetupA,
+  PostFundSetupB,
+  Propose,
+  Accept,
+  Reveal,
+  Resting,
+  Conclude,
+}  from './positions';
 
 export default class GameEngineB {
   static fromProposal(position: Position) {
-    if (!(position instanceof PreFundSetup)) {
+    if (!(position instanceof PreFundSetupA)) {
       throw new Error('Not a PreFundSetup');
     }
 
     const { channel, stake, resolution: balances, turnNum, stateCount } = position;
 
-    const nextPosition = new PreFundSetup(channel, turnNum + 1, balances, stateCount + 1, stake);
+    const nextPosition = new PreFundSetupB(channel, turnNum + 1, balances, stateCount + 1, stake);
 
-    const appState = new State.ReadyToSendPreFundSetupB({
-      channel,
-      balances,
-      stake,
-      position: nextPosition,
-    });
+    const appState = new State.WaitForFunding({ position: nextPosition });
 
     return new GameEngineB(appState);
   }
@@ -32,60 +32,17 @@ export default class GameEngineB {
     return new GameEngineB(state);
   }
 
-  state: any;
+  state: State.PlayerBState;
 
   constructor(state) {
     this.state = state;
   }
 
-  positionSent() {
-    const { channel, balances, stake } = this.state;
-
-    switch (this.state.constructor) {
-      case State.ReadyToSendPreFundSetupB:
-        return this.transitionTo(new State.ReadyToFund({ channel, balances, stake }));
-      case State.ReadyToSendPostFundSetupB:
-        const stateCount = this.state.stateCount + 1;
-        const turnNum = 4; // todo: make this relative
-        const nextPosition = new PostFundSetup(channel, turnNum, balances, stateCount, stake);
-        return this.transitionTo(
-          new State.WaitForPropose({
-            channel,
-            stake,
-            balances,
-            position: nextPosition,
-          }),
-        );
-      case State.ReadyToSendAccept:
-        const { bPlay, position: nextPosition2 } = this.state;
-        return this.transitionTo(
-          new State.WaitForReveal({
-            channel,
-            stake,
-            balances,
-            bPlay,
-            position: nextPosition2,
-          }),
-        );
-      case State.ReadyToSendResting:
-        return this.transitionTo(
-          new State.WaitForPropose({
-            channel,
-            stake,
-            balances,
-            position: this.state.position,
-          }),
-        );
-      default:
-        // todo: should we error here?
-        return this.state;
-    }
-  }
 
   receivePosition(positionReceived: Position) {
     switch (positionReceived.constructor) {
-      case PostFundSetup:
-        return this.receivedPostFundSetup(positionReceived as PostFundSetup);
+      case PostFundSetupA:
+        return this.receivedPostFundSetup(positionReceived as PostFundSetupA);
       case Propose:
         return this.receivedPropose(positionReceived as Propose);
       case Reveal:
@@ -97,32 +54,19 @@ export default class GameEngineB {
         return this.state;
     }
   }
-
-  fundingRequested() {
-    if (!(this.state instanceof State.ReadyToFund)) { return this.state; }
-    const { channel, stake, balances } = this.state;
-    return this.transitionTo(new State.WaitForFunding({
-      channel,
-      stake,
-      balances,
-    }));
-  }
-
   
-  fundingConfirmed(event) {
+  fundingConfirmed() {
     if (!(this.state instanceof State.WaitForFunding)) {
       return this.state;
     }
 
-    const { channel, stake, balances } = this.state;
-
     return this.transitionTo(
-      new State.WaitForPostFundSetupA({ channel, stake, balances }),
+      new State.WaitForPostFundSetup({ position: this.state.position }),
     );
   }
 
   choosePlay(bPlay: Play) {
-    if (!(this.state instanceof State.ReadyToChooseBPlay)) {
+    if (!(this.state instanceof State.ChoosePlay)) {
       return this.state;
     }
 
@@ -132,17 +76,9 @@ export default class GameEngineB {
     newBalances[0] -= stake;
     newBalances[1] += stake;
 
-    const nextPosition = new Accept(channel, turnNum, newBalances, stake, preCommit, bPlay);
+    const nextPosition = new Accept(channel, turnNum + 1, newBalances, stake, preCommit, bPlay);
 
-    return this.transitionTo(
-      new State.ReadyToSendAccept({
-        channel,
-        stake,
-        balances: newBalances,
-        bPlay,
-        position: nextPosition,
-      }),
-    );
+    return this.transitionTo(new State.WaitForReveal({ position: nextPosition }));
   }
 
   conclude() {
@@ -179,23 +115,16 @@ export default class GameEngineB {
     return state;
   }
 
-  receivedPostFundSetup(position: PostFundSetup) {
-    if (!(this.state instanceof State.WaitForPostFundSetupA)) {
+  receivedPostFundSetup(position: PostFundSetupA) {
+    if (!(this.state instanceof State.WaitForPostFundSetup)) {
       return this.state;
     }
 
     const { channel, stake, balances } = this.state;
     const turnNum = position.turnNum + 1;
-    const nextPosition = new PostFundSetup(channel, turnNum, balances, 1, stake);
+    const nextPosition = new PostFundSetupB(channel, turnNum, balances, 1, stake);
 
-    return this.transitionTo(
-      new State.ReadyToSendPostFundSetupB({
-        channel,
-        stake,
-        balances,
-        position: nextPosition,
-      }),
-    );
+    return this.transitionTo(new State.WaitForPropose({ position: nextPosition }));
   }
 
   receivedPropose(position: Propose) {
@@ -203,18 +132,7 @@ export default class GameEngineB {
       return this.state;
     }
 
-    const { channel, stake, resolution: balances, preCommit } = position;
-    const turnNum = position.turnNum + 1;
-
-    return this.transitionTo(
-      new State.ReadyToChooseBPlay({
-        channel,
-        stake,
-        balances,
-        turnNum,
-        preCommit,
-      }),
-    );
+    return this.transitionTo(new State.ChoosePlay({ position }));
   }
 
   receivedReveal(position: Reveal) {
@@ -229,23 +147,12 @@ export default class GameEngineB {
       stake,
       aPlay,
       bPlay,
-      salt,
     } = position;
     const turnNum = oldTurnNum + 1;
 
     const nextPosition = new Resting(channel, turnNum, balances, stake);
-    const result = calculateResult(bPlay, aPlay);
     return this.transitionTo(
-      new State.ReadyToSendResting({
-        channel,
-        stake,
-        balances,
-        aPlay,
-        bPlay,
-        result,
-        salt,
-        position: nextPosition,
-      }),
+      new State.ViewResult({ position: nextPosition, aPlay, bPlay }),
     );
   }
 
@@ -256,7 +163,7 @@ export default class GameEngineB {
 
     // todo: need a move. Might also need an intermediate state here
     return this.transitionTo(
-      new State.ReadyToSendConcludeB({ channel, balances, position: newPosition }),
+      new State.WaitForConclude({ position: newPosition }),
     );
   }
 }

@@ -4,11 +4,6 @@ import { reduxSagaFirebase } from '../../gateways/firebase';
 
 import { MessageActionType, MessageAction, SendMessageAction, SubscribeMessagesAction } from '../actions/messages';
 
-
-// watch messages on a given address
-
-// ? send messages to a given address
-
 function * sendMessage(action: SendMessageAction) {
   const { to, data } = action;
 
@@ -27,6 +22,7 @@ function * listenForMessagesSaga(address) {
   while(true) {
     const message = yield take(channel);
     const key = message.snapshot.key;
+
     yield put(MessageAction.messageReceived(message.value));
     yield call(reduxSagaFirebase.database.delete, `/messages/${address}/${key}`);
   }

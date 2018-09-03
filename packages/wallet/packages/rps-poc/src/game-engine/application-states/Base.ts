@@ -1,20 +1,34 @@
-import { Channel } from 'fmg-core';
+import { Player } from '.';
+import { Position } from '../positions';
 
-export default class BaseState {
-  balances: number[];
-  channel: Channel;
-  stake: number;
-  type: string;
-  playerIndex: number; // overwritten by subclass
+export default class BaseState<T extends Position> {
+  readonly position: T;
+  player: Player; // overwritten by subclass
   readonly isReadyToSend: boolean;
   readonly isReadyForFunding:boolean;
 
-  constructor(params: {channel: Channel, stake: number, balances: number[]}) {
-    this.balances = params.balances;
-    this.channel = params.channel;
-    this.stake = params.stake;
-    // To easier see the current state in redux for debugging
-    this.type = this.constructor.name;
+  constructor({ position }: { position: T }) {
+    this.position = position;
+  }
+
+  get channel() {
+    return this.position.channel;
+  }
+
+  get positionHex() {
+    return this.position.toHex();
+  }
+
+  get balances() {
+    return this.position.resolution;
+  }
+
+  get turnNum() {
+    return this.position.turnNum;
+  }
+
+  get playerIndex() {
+    return ((this.player === Player.PlayerA) ? 0 : 1);
   }
 
   get myAddress() {
@@ -35,13 +49,5 @@ export default class BaseState {
 
   get opponentBalance() {
     return this.balances[1 - this.playerIndex];
-  }
-
-  get commonAttributes() {
-    return {
-      balances: this.balances,
-      channel: this.channel,
-      stake: this.stake,
-    };
   }
 }
