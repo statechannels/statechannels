@@ -1,6 +1,14 @@
 import { Channel } from 'fmg-core';
 import * as AppStates from '..';
-import { Play, Result, PreFundSetup } from '../../../positions';
+import {
+  Play,
+  Result,
+  PostFundSetupB,
+  Accept,
+  Resting,
+  Propose,
+  PreFundSetupB,
+} from '../../../positions';
 
 const gameLibrary = '0xc1912fee45d61c87cc5ea59dae31190fffff232d';
 const channelNonce = 15;
@@ -12,12 +20,9 @@ const stake = 1;
 const aBal = 4;
 const bBal = 5
 const balances = [aBal, bBal];
-const coreProps = { channel, stake, balances };
 const aPlay = Play.Rock;
 const bPlay = Play.Scissors;
-const salt = "abc123";
-const position = new PreFundSetup(channel, 0, balances, 0, stake);
-const result = Result.YouWin;
+const result = Result.YouLose;
 
 const itHasSharedFunctionality = (appState) => {
   it("returns myAddress", () => {
@@ -39,109 +44,63 @@ const itHasSharedFunctionality = (appState) => {
   it("returns opponentBalance", () => {
     expect(appState.opponentBalance).toEqual(aBal);
   });
+
+  it("returns stake", () => {
+    expect(appState.stake).toEqual(stake);
+  });
 };
 
-describe("ReadyToSendPreFundSetupB", () => {
-  const appState = new AppStates.ReadyToSendPreFundSetupB({ ...coreProps, position });
+const itHasPosition = (state, position) => {
+   it("has a position", () => {
+    expect(state.position).toEqual(position);
+   });
+};
+
+describe("WaitForPostFundSetup", () => {
+  const position = new PreFundSetupB(channel, 0, balances, 0, stake);
+  const appState = new AppStates.WaitForPostFundSetup({ position });
 
   itHasSharedFunctionality(appState);
+  itHasPosition(appState, position);
 
-  it("has a position", () => {
-    expect(appState.position).toEqual(position);
-  });
-});
-
-
-describe("WaitForPostFundSetupA", () => {
-  const appState = new AppStates.WaitForPostFundSetupA({ ...coreProps });
-
-  itHasSharedFunctionality(appState);
-});
-
-describe("ReadyToSendPostFundSetupB", () => {
-  const appState = new AppStates.ReadyToSendPostFundSetupB({
-    ...coreProps,
-    position,
-  });
-
-  itHasSharedFunctionality(appState);
-
-  it("has a position", () => {
-    expect(appState.position).toEqual(position);
-  });
 });
 
 describe("WaitForPropose", () => {
-  const appState = new AppStates.WaitForPropose({
-    ...coreProps,
-    position,
-  });
+  const position = new PostFundSetupB(channel, 0, balances, 0, stake);
+  const appState = new AppStates.WaitForPropose({ position });
 
   itHasSharedFunctionality(appState);
-
-  it("has a position", () => {
-    expect(appState.position).toEqual(position);
-  });
-});
-
-describe("ReadyToChooseBPlay", () => {
-  const appState = new AppStates.ReadyToChooseBPlay({
-    ...coreProps,
-    turnNum: 4,
-    preCommit: '0xaaa',
-  });
-
-  itHasSharedFunctionality(appState);
+  itHasPosition(appState, position);
 
 });
 
-describe("ReadyToSendAccept", () => {
-  const appState = new AppStates.ReadyToSendAccept({
-    ...coreProps,
-    bPlay,
-    position,
-  });
+describe("ChoosePlay", () => {
+  const position = new Propose(channel, 0, balances, stake, 'precommit');
+  const appState = new AppStates.ChoosePlay({ position });
 
   itHasSharedFunctionality(appState);
+  itHasPosition(appState, position);
 
-  it("returns b's play", () => {
-    expect(appState.bPlay).toEqual(bPlay);
-  });
-
-  it("has a position", () => {
-    expect(appState.position).toEqual(position);
-  });
 });
 
 describe("WaitForReveal", () => {
-  const appState = new AppStates.WaitForReveal({
-    ...coreProps,
-    bPlay,
-    position,
-  });
+  const position = new Accept(channel, 0, balances, stake, 'precommit', bPlay);
+  const appState = new AppStates.WaitForReveal({ position });
 
   itHasSharedFunctionality(appState);
+  itHasPosition(appState, position);
 
   it("returns b's play", () => {
     expect(appState.bPlay).toEqual(bPlay);
   });
-
-  it("has a position", () => {
-    expect(appState.position).toEqual(position);
-  });
 });
 
-describe("ReadyToSendResting", () => {
-  const appState = new AppStates.ReadyToSendResting({
-    ...coreProps,
-    bPlay,
-    aPlay,
-    salt,
-    result,
-    position,
-  });
+describe("ViewREsult", () => {
+  const position = new Resting(channel, 0, balances, stake);
+  const appState = new AppStates.ViewResult({ position, aPlay, bPlay });
 
   itHasSharedFunctionality(appState);
+  itHasPosition(appState, position);
 
   it("returns b's play", () => {
     expect(appState.bPlay).toEqual(bPlay);
@@ -151,15 +110,7 @@ describe("ReadyToSendResting", () => {
     expect(appState.aPlay).toEqual(aPlay);
   });
 
-  it("returns the salt", () => {
-    expect(appState.aPlay).toEqual(aPlay);
-  });
-
   it("returns the result", () => {
     expect(appState.result).toEqual(result);
-  });
-
-  it("has a position", () => {
-    expect(appState.position).toEqual(position);
   });
 });

@@ -1,8 +1,10 @@
 import { Channel, State } from 'fmg-core';
 
 import { Play, GamePositionType } from '.';
-import PreFundSetup from './PreFundSetup';
-import PostFundSetup from './PostFundSetup';
+import PreFundSetupA from './PreFundSetupA';
+import PreFundSetupB from './PreFundSetupB';
+import PostFundSetupA from './PostFundSetupA';
+import PostFundSetupB from './PostFundSetupB';
 import Propose from './Propose';
 import Accept from './Accept';
 import Reveal from './Reveal';
@@ -128,11 +130,19 @@ export default function decode(hexString) {
     case State.StateType.PreFundSetup:
       const stateCountPre = extractStateCount(hexString);
       const stakePre = extractStake(hexString);
-      return new PreFundSetup(channel, turnNum, balances, stateCountPre, stakePre);
+      if (stateCountPre === 0) {
+        return new PreFundSetupA(channel, turnNum, balances, stateCountPre, stakePre);
+      } else {
+        return new PreFundSetupB(channel, turnNum, balances, stateCountPre, stakePre);
+      }
     case State.StateType.PostFundSetup:
       const stateCountPost = extractStateCount(hexString);
       const stakePost = extractStake(hexString);
-      return new PostFundSetup(channel, turnNum, balances, stateCountPost, stakePost);
+      if (stateCountPost === 0) {
+        return new PostFundSetupA(channel, turnNum, balances, stateCountPost, stakePost);
+      } else {
+        return new PostFundSetupB(channel, turnNum, balances, stateCountPost, stakePost);
+      }
     case State.StateType.Game:
       return decodeGameState(channel, turnNum, balances, hexString);
     default:

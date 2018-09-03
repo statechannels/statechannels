@@ -1,6 +1,13 @@
 import * as AppStates from '..';
 import { Channel } from 'fmg-core';
-import { Play, Result, PreFundSetup } from '../../../positions';
+import {
+  Play,
+  PreFundSetupA,
+  PostFundSetupA,
+  PostFundSetupB,
+  Propose,
+  Reveal,
+} from '../../../positions';
 
 const gameLibrary = '0xc1912fee45d61c87cc5ea59dae31190fffff232d';
 const channelNonce = 15;
@@ -12,12 +19,9 @@ const stake = 1;
 const aBal = 4;
 const bBal = 5;
 const balances = [aBal, bBal];
-const coreProps = { channel, stake, balances };
 const aPlay = Play.Rock;
 const bPlay = Play.Scissors;
 const salt = "abc123";
-const position = new PreFundSetup(channel, 0, balances, 0, stake);
-const result = Result.YouWin;
 
 const itHasSharedFunctionality = (appState) => {
   it("returns myAddress", () => {
@@ -39,87 +43,51 @@ const itHasSharedFunctionality = (appState) => {
   it("returns opponentBalance", () => {
     expect(appState.opponentBalance).toEqual(bBal);
   });
+
+  it("returns stake", () => {
+    expect(appState.stake).toEqual(stake);
+  });
 };
 
-describe("ReadyToSendPreFundSetupA", () => {
-  const appState = new AppStates.ReadyToSendPreFundSetupA({ ...coreProps, position });
+const itHasPosition = (state, position) => {
+   it("has a position", () => {
+    expect(state.position).toEqual(position);
+   });
+};
+
+describe("WaitForPreFundSetup", () => {
+  const position = new PreFundSetupA(channel, 0, balances, 0, stake);
+  const appState = new AppStates.WaitForPreFundSetup({ position });
 
   itHasSharedFunctionality(appState);
+  itHasPosition(appState, position);
 
-  it("has a position", () => {
-    expect(appState.position).toEqual(position);
-  });
 });
 
-describe("WaitForPreFundSetupB", () => {
-  const appState = new AppStates.WaitForPreFundSetupB({ ...coreProps, position });
+describe("WaitForPostFundSetup", () => {
+  const position = new PostFundSetupA(channel, 0, balances, 0, stake);
+  const appState = new AppStates.WaitForPostFundSetup({ position });
 
   itHasSharedFunctionality(appState);
+  itHasPosition(appState, position);
 
-  it("has a position", () => {
-    expect(appState.position).toEqual(position);
-  });
 });
 
-
-describe("ReadyToSendPostFundSetupA", () => {
-  const appState = new AppStates.ReadyToSendPostFundSetupA({ ...coreProps, position });
-
-  itHasSharedFunctionality(appState);
-
-  it("has a position", () => {
-    expect(appState.position).toEqual(position);
-  });
-});
-
-describe("WaitForPostFundSetupB", () => {
-  const appState = new AppStates.WaitForPostFundSetupB({ ...coreProps, position });
+describe("ChoosePlay", () => {
+  const position = new PostFundSetupB(channel, 0, balances, 0, stake);
+  const appState = new AppStates.ChoosePlay({ position });
 
   itHasSharedFunctionality(appState);
+  itHasPosition(appState, position);
 
-  it("has a position", () => {
-    expect(appState.position).toEqual(position);
-  });
-});
-
-describe("ReadyToChooseAPlay", () => {
-  const appState = new AppStates.ReadyToChooseAPlay({ ...coreProps, turnNum: 3 });
-
-  itHasSharedFunctionality(appState);
-});
-
-describe("ReadyToSendPropose", () => {
-  const appState = new AppStates.ReadyToSendPropose({
-    ...coreProps,
-    aPlay,
-    salt,
-    position,
-  });
-
-  itHasSharedFunctionality(appState);
-
-  it("returns aPlay", () => {
-    expect(appState.aPlay).toEqual(aPlay);
-  });
-
-  it("returns the salt", () => {
-    expect(appState.salt).toEqual(salt);
-  });
-
-  it("returns the position", () => {
-    expect(appState.position).toEqual(position);
-  });
 });
 
 describe("WaitForAccept", () => {
-  const appState = new AppStates.WaitForAccept({
-    ...coreProps,
-    aPlay,
-    salt,
-    position,
-  });
+  const position = new Propose(channel, 0, balances, stake, 'preCommit');
+  const appState = new AppStates.WaitForAccept({ position, aPlay, salt });
 
   itHasSharedFunctionality(appState);
+  itHasPosition(appState, position);
 
   it("returns aPlay", () => {
     expect(appState.aPlay).toEqual(aPlay);
@@ -127,53 +95,15 @@ describe("WaitForAccept", () => {
 
   it("returns the salt", () => {
     expect(appState.salt).toEqual(salt);
-  });
-
-  it("returns the position", () => {
-    expect(appState.position).toEqual(position);
-  });
-});
-
-describe("ReadyToSendReveal", () => {
-  const appState = new AppStates.ReadyToSendReveal({
-    ...coreProps,
-    aPlay,
-    bPlay,
-    result,
-    salt,
-    position,
-  });
-
-  itHasSharedFunctionality(appState);
-
-  it("returns aPlay", () => {
-    expect(appState.aPlay).toEqual(aPlay);
-  });
-
-  it("returns the salt", () => {
-    expect(appState.salt).toEqual(salt);
-  });
-
-  it("returns bPlay", () => {
-    expect(appState.bPlay).toEqual(bPlay);
-  });
-
-  it("returns the position", () => {
-    expect(appState.position).toEqual(position);
   });
 });
 
 describe("WaitForResting", () => {
-  const appState = new AppStates.WaitForResting({
-    ...coreProps,
-    aPlay,
-    bPlay,
-    result,
-    salt,
-    position,
-  });
+  const position = new Reveal(channel, 0, balances, stake, bPlay, aPlay, salt);
+  const appState = new AppStates.WaitForResting({ position });
 
   itHasSharedFunctionality(appState);
+  itHasPosition(appState, position);
 
   it("returns aPlay", () => {
     expect(appState.aPlay).toEqual(aPlay);
@@ -185,9 +115,5 @@ describe("WaitForResting", () => {
 
   it("returns bPlay", () => {
     expect(appState.bPlay).toEqual(bPlay);
-  });
-
-  it("returns the position", () => {
-    expect(appState.position).toEqual(position);
   });
 });

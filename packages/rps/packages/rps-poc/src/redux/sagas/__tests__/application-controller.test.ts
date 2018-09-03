@@ -6,8 +6,7 @@ import applicationControllerSaga from '../application-controller';
 import { GameAction } from '../../actions/game';
 import { MessageAction } from '../../actions/messages';
 import { Wallet, WalletFundingAction } from '../../../wallet';
-import { PostFundSetup  } from '../../../game-engine/positions';
-import Move from '../../../game-engine/Move';
+import { PreFundSetupA, PreFundSetupB  } from '../../../game-engine/positions';
 
 describe('Application Controller', () => {
   const address = 'our_address';
@@ -19,8 +18,7 @@ describe('Application Controller', () => {
   const opponent = 'opp_add';
   const stake = 1;
   const balances = [3 * stake, 3 * stake];
-  const channel = new Channel('fakeGameLibraryAddress', 456, ['0xa', '0xb']);
-  const position = new PostFundSetup(channel, 0, balances, 0, stake);
+  const channel = new Channel('fakeGameLibraryAddress', 456, [address, opponent]);
 
   const mockEngine = jest.spyOn(GameEngineA, 'setupGame');
 
@@ -31,15 +29,9 @@ describe('Application Controller', () => {
     expect(mockEngine).toHaveBeenCalledWith({ me: address, opponent, stake, balances });
   });
 
-  it('should send a message when isReadyToSend is true', () => {
-    const testChannel = new Channel('fake', 456, [address, opponent]);
-
-    const testState = new PlayerAState.ReadyToSendPreFundSetupA({
-      channel: testChannel,
-      stake,
-      balances,
-      position,
-    });
+  it('should send a message when the state is WaitForPreFundSetup (for example)', () => {
+    const position = new PreFundSetupA(channel, 0, balances, 0, stake);
+    const testState = new PlayerAState.WaitForPreFundSetup({ position });
 
     mockEngine.mockImplementation(() => {
       return {
@@ -53,19 +45,13 @@ describe('Application Controller', () => {
     return expectSaga(applicationControllerSaga, wallet)
       .dispatch(GameAction.chooseOpponent(opponent, stake))
       .put(MessageAction.sendMessage(opponent, testState.position.toHex()))
-      .put(GameAction.moveSent(new Move(testState.position.toHex(), 'fakesig')))
       .put(GameAction.stateChanged(testState))
       .silentRun();
   });
 
-  it('should send funding when the state isReadyForFunding', () => {
-    const testChannel = new Channel('fake', 456, [address, opponent]);
-
-    const testState = new PlayerAState.ReadyToFund({
-      channel: testChannel,
-      stake,
-      balances,
-    });
+  it('should send funding when the state is WaitForFunding', () => {
+    const position = new PreFundSetupB(channel, 0, balances, 0, stake);
+    const testState = new PlayerAState.WaitForFunding({ position });
 
     mockEngine.mockImplementation(() => {
       return {
