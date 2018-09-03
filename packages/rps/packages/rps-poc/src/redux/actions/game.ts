@@ -33,11 +33,6 @@ export const GameAction = {
     move,
   }),
 
-  moveSent: (move: Move) => ({
-    type: GameActionType.MOVE_SENT as typeof GameActionType.MOVE_SENT,
-    move,
-  }),
-
   stateChanged: (state: State) => ({
     type: GameActionType.STATE_CHANGED as typeof GameActionType.STATE_CHANGED,
     state,
@@ -47,13 +42,11 @@ export const GameAction = {
 export type ChooseOpponentAction = ReturnType<typeof GameAction.chooseOpponent>;
 export type ChoosePlayAction = ReturnType<typeof GameAction.choosePlay>;
 export type MoveReceivedAction = ReturnType<typeof GameAction.moveReceived>;
-export type MoveSentAction = ReturnType<typeof GameAction.moveSent>;
 export type StateChangedAction = ReturnType<typeof GameAction.stateChanged>;
 export type PlayComputerAction = ReturnType<typeof GameAction.playComputer>;
 export type GameAction =
   | ChooseOpponentAction
   | ChoosePlayAction
   | MoveReceivedAction
-  | MoveSentAction
   | StateChangedAction
   | PlayComputerAction;

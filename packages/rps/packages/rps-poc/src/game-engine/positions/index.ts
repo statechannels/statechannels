@@ -3,30 +3,37 @@ import { soliditySha3 } from 'web3-utils';
 
 import Accept from './Accept';
 import Conclude from './Conclude';
-import PostFundSetup from './PostFundSetup';
-import PreFundSetup from './PreFundSetup';
+import PostFundSetupA from './PostFundSetupA';
+import PreFundSetupA from './PreFundSetupA';
+import PostFundSetupB from './PostFundSetupB';
+import PreFundSetupB from './PreFundSetupB';
 import Propose from './Propose';
 import Resting from './Resting';
 import Reveal from './Reveal';
 
 export {
-  Accept,
-  Conclude,
-  PostFundSetup,
-  PreFundSetup,
+  PreFundSetupA,
+  PreFundSetupB,
+  PostFundSetupA,
+  PostFundSetupB,
   Propose,
+  Accept,
+  Reveal,
   Resting,
-  Reveal
+  Conclude,
 } 
 
-export type Position =
-  | Accept
-  | Conclude
-  | PostFundSetup
-  | PreFundSetup
+export type Position = (
+  | PreFundSetupA
+  | PreFundSetupB
+  | PostFundSetupA
+  | PostFundSetupB
   | Propose
-  | Resting
+  | Accept
   | Reveal
+  | Resting
+  | Conclude
+);
 
 export enum GamePositionType {
   Resting,

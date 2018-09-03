@@ -2,8 +2,10 @@ import { Channel } from 'fmg-core';
 
 import { hashCommitment, Play } from '.';
 import decode from './decode';
-import PreFundSetup from './PreFundSetup';
-import PostFundSetup from './PostFundSetup';
+import PreFundSetupA from './PreFundSetupA';
+import PreFundSetupB from './PreFundSetupB';
+import PostFundSetupA from './PostFundSetupA';
+import PostFundSetupB from './PostFundSetupB';
 import Propose from './Propose';
 import Accept from './Accept';
 import Reveal from './Reveal';
@@ -36,8 +38,10 @@ const testEncodeDecode = (pledge) => {
 };
 
 describe('decode', () => {
-  testEncodeDecode(new PreFundSetup(channel, turnNum, balances, stateCount, stake));
-  testEncodeDecode(new PostFundSetup(channel, turnNum, balances, stateCount, stake));
+  testEncodeDecode(new PreFundSetupA(channel, turnNum, balances, stateCount, stake));
+  testEncodeDecode(new PreFundSetupB(channel, turnNum, balances, stateCount, stake));
+  testEncodeDecode(new PostFundSetupA(channel, turnNum, balances, stateCount, stake));
+  testEncodeDecode(new PostFundSetupB(channel, turnNum, balances, stateCount, stake));
   testEncodeDecode(Propose.createWithPlayAndSalt(channel, turnNum, balances, stake, aPlay, salt));
   testEncodeDecode(new Accept(channel, turnNum, balances, stake, preCommit, bPlay));
   testEncodeDecode(new Reveal(channel, turnNum, balances, stake, bPlay, aPlay, salt));
