@@ -2,7 +2,8 @@ import * as playerA from '../wallet-engine/wallet-states/PlayerA';
 import * as playerB from '../wallet-engine/wallet-states/PlayerB';
 import { WalletState } from '../redux/reducers/wallet-state';
 import { PureComponent } from 'react';
-import GenericStopGap from './GenericStopGapPage';
+import WalletLayout from './WalletLayout';
+import FundingInProgress from './FundingInProgress';
 import React from 'react';
 
 interface Props {
@@ -10,29 +11,36 @@ interface Props {
 }
 
 export default class WalletController extends PureComponent<Props> {
-  render() {
+  renderWallet() {
     const { walletState } = this.props;
-    if (walletState==null){
-        return null;
+    if (walletState === null) {
+      return null;
     }
+
     switch (walletState && walletState.constructor) {
       case playerA.WaitForBlockchainDeploy:
-        return <GenericStopGap message="confirmation of adjudicator deployment" />;
+        return <FundingInProgress message="confirmation of adjudicator deployment" />;
 
       case playerA.WaitForBToDeposit:
-        return <GenericStopGap message="confirmation of opponent's deposit" />;
+        return <FundingInProgress message="confirmation of adjudicator deployment" />;
+
       case playerB.WaitForAToDeploy:
-        return <GenericStopGap message="waiting for adjudicator to be deployed" />;
+        return <FundingInProgress message="waiting for adjudicator to be deployed" />;
 
       case playerB.ReadyToDeposit:
-        return <GenericStopGap message="ready to deposit funds" />;
+        return <FundingInProgress message="ready to deposit funds" />;
 
       case playerB.WaitForBlockchainDeposit:
-        return <GenericStopGap message="waiting for deposit confirmation" />;
+        return <FundingInProgress message="waiting for deposit confirmation" />;
+
       default:
         return (
-          <GenericStopGap message={`[view not implemented: ${walletState.constructor.name}`} />
+          <FundingInProgress message={`[view not implemented: ${walletState.constructor.name}`} />
         );
     }
+  }
+
+  render() {
+    return <WalletLayout>{this.renderWallet()}</WalletLayout>;
   }
 }

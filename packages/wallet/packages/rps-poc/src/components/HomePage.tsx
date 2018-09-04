@@ -24,7 +24,7 @@ const HomePage: React.SFC<IProps> = ({ login, logout, loggedIn }) => {
 
   return (
     <div className={css(styles.container)}>
-      <div className={css(styles.centerAligned)}>
+      <div className={css(styles.headerText)}>
         <h1 className={css(styles.title)}>Rock, Paper, Scissors</h1>
         <p>
           <em>A State-Channel Proof-of-Concept Game</em>
@@ -84,8 +84,9 @@ const styles = StyleSheet.create({
     paddingRight: 12,
   },
 
-  centerAligned: {
+  headerText: {
     textAlign: 'center',
+    paddingBottom: 32,
   },
 
   buttons: {

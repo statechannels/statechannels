@@ -33,27 +33,34 @@ export class WaitForPreFundSetup extends BasePlayerA<PreFundSetupA> {
   readonly type = PlayerAStateType.WAIT_FOR_PRE_FUND_SETUP;
   readonly isReadyToSend = false;
 
-  get stake() { return this.position.stake; }
+  get stake() {
+    return this.position.stake;
+  }
 }
 
 export class WaitForFunding extends BasePlayerA<PreFundSetupB> {
   readonly type = PlayerAStateType.WAIT_FOR_FUNDING;
   readonly isReadyForFunding = false;
   readonly isReadyToSend = false;
-  get stake() { return this.position.stake; }
+  get stake() {
+    return this.position.stake;
+  }
 }
 
 export class WaitForPostFundSetup extends BasePlayerA<PostFundSetupA> {
   readonly type = PlayerAStateType.WAIT_FOR_POST_FUND_SETUP;
   readonly isReadyToSend = false;
-  get stake() { return this.position.stake; }
+  get stake() {
+    return this.position.stake;
+  }
 }
-
 
 export class ChoosePlay extends BasePlayerA<PostFundSetupB | Resting> {
   readonly type = PlayerAStateType.CHOOSE_PLAY;
   readonly isReadyToSend = false;
-  get stake() { return this.position.stake; }
+  get stake() {
+    return this.position.stake;
+  }
 }
 
 export class WaitForAccept extends BasePlayerA<Propose> {
@@ -68,18 +75,30 @@ export class WaitForAccept extends BasePlayerA<Propose> {
     this.salt = salt;
   }
 
-  get stake() { return this.position.stake; }
+  get stake() {
+    return this.position.stake;
+  }
 }
 
 export class WaitForResting extends BasePlayerA<Reveal> {
   readonly type = PlayerAStateType.WAIT_FOR_RESTING;
   readonly isReadyToSend = false;
 
-  get stake() { return this.position.stake; }
-  get aPlay() { return this.position.aPlay; }
-  get bPlay() { return this.position.bPlay; }
-  get salt() { return this.position.salt; }
-  get result() { return calculateResult(this.aPlay, this.bPlay); }
+  get stake() {
+    return this.position.stake;
+  }
+  get aPlay() {
+    return this.position.aPlay;
+  }
+  get bPlay() {
+    return this.position.bPlay;
+  }
+  get salt() {
+    return this.position.salt;
+  }
+  get result() {
+    return calculateResult(this.aPlay, this.bPlay);
+  }
 }
 
 // todo: what should Position be here?
@@ -93,7 +112,7 @@ export class WaitForConclude extends BasePlayerA<Conclude> {
   readonly isReadyToSend = false;
 }
 
-export type PlayerAState = (
+export type PlayerAState =
   | WaitForPreFundSetup
   | WaitForFunding
   | WaitForPostFundSetup
@@ -101,5 +120,4 @@ export type PlayerAState = (
   | WaitForAccept
   | WaitForResting
   | InsufficientFunds
-  | WaitForConclude
-);
+  | WaitForConclude;
