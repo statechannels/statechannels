@@ -5,28 +5,24 @@ import { Channel } from 'fmg-core';
 import applicationControllerSaga from '../application-controller';
 import { GameAction } from '../../actions/game';
 import { MessageAction } from '../../actions/messages';
-import { Wallet, WalletFundingAction } from '../../../wallet';
+import { actions as walletActions } from '../../../wallet';
 import { PreFundSetupA, PreFundSetupB  } from '../../../game-engine/positions';
 
 describe('Application Controller', () => {
-  const address = 'our_address';
-  const wallet: Wallet = {
-    address,
-    privateKey: 'privateKey',
-    sign: (stateString: string) => stateString,
-  };
-  const opponent = 'opp_add';
+  const me = '0xc1912fee45d61c87cc5ea59dae31190fffff232d';
+  const opponent = '0xc1912fee45d61c87cc5ea59dae31190fffff232d';
   const stake = 1;
   const balances = [3 * stake, 3 * stake];
-  const channel = new Channel('fakeGameLibraryAddress', 456, [address, opponent]);
+  const gameLibrary = '0xc1912fee45d61c87cc5ea59dae31190fffff232d';
+  const channel = new Channel(gameLibrary, 456, [me, opponent]);
 
   const mockEngine = jest.spyOn(GameEngineA, 'setupGame');
 
   it('should set up the game engine when an opponent is chosen', async () => {
-    await expectSaga(applicationControllerSaga, wallet)
+    await expectSaga(applicationControllerSaga, me)
       .dispatch(GameAction.chooseOpponent(opponent, stake))
       .silentRun();
-    expect(mockEngine).toHaveBeenCalledWith({ me: address, opponent, stake, balances });
+    expect(mockEngine).toHaveBeenCalledWith({ me, opponent, stake, balances });
   });
 
   it('should send a message when the state is WaitForPreFundSetup (for example)', () => {
@@ -42,7 +38,7 @@ describe('Application Controller', () => {
       };
     });
 
-    return expectSaga(applicationControllerSaga, wallet)
+    return expectSaga(applicationControllerSaga, me)
       .dispatch(GameAction.chooseOpponent(opponent, stake))
       .put(MessageAction.sendMessage(opponent, testState.position.toHex()))
       .put(GameAction.stateChanged(testState))
@@ -65,9 +61,9 @@ describe('Application Controller', () => {
       };
     });
 
-    return expectSaga(applicationControllerSaga, wallet)
+    return expectSaga(applicationControllerSaga, me)
       .dispatch(GameAction.chooseOpponent(opponent, stake))
-      .put(WalletFundingAction.walletFundingRequest(wallet, testState.player))
+      .put(walletActions.fundingRequest(testState.channelId))
       .put(GameAction.stateChanged(testState))
       .silentRun();
   });
