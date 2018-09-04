@@ -1,22 +1,34 @@
-import { Wallet } from '../..';
+export type DeploymentRequest = ReturnType<typeof deploymentRequest>;
+export type DeploymentSuccess = ReturnType<typeof deploymentSuccess>;
+export type DeploymentWrongNetworkFailure = ReturnType<typeof deploymentWrongNetworkFailure>;
+export type DeploymentMetamaskFailure = ReturnType<typeof deploymentMetamaskFailure>;
+export type DeploymentFailure = DeploymentWrongNetworkFailure | DeploymentMetamaskFailure;
+export type DeploymentResponse = DeploymentSuccess | DeploymentFailure;
 
-export type BlockchainSendTransactionAction = ReturnType<typeof BlockchainAction.sendTransaction>;
-export type BlockchainReceiveEventAction = ReturnType<typeof BlockchainAction.receiveEvent>;
-export type BlockchainAction = BlockchainSendTransactionAction | BlockchainReceiveEventAction;
+export const BLOCKCHAIN_DEPLOYADJUDICATOR = 'BLOCKCHAIN.DEPLOYADJUDICATOR';
+export const BLOCKCHAIN_ADJUDICATORDEPLOYED = 'BLOCKCHAIN.ADJUDICATORDEPLOYED';
+export const BLOCKCHAIN_METAMASKERROR = 'BLOCKCHAIN.METAMASKERROR';
+export const BLOCKCHAIN_WRONGNETWORK = 'BLOCKCHAIN.WRONGNETWORK';
+export const BLOCKCHAIN_RECEIVEEVENT = 'BLOCKCHAIN.RECEIVEEVENT';
 
-export enum BlockchainActionType {
-  BLOCKCHAIN_SENDTRANSACTION = 'BLOCKCHAIN.SENDTRANSACTION',
-  BLOCKCHAIN_RECEIVEEVENT = 'BLOCKCHAIN.RECEIVEEVENT',
-}
+export const deploymentRequest = (channelId: any) => ({
+  type: BLOCKCHAIN_DEPLOYADJUDICATOR,
+  channelId,
+});
+export const deploymentSuccess = (address: string) => ({
+  type: BLOCKCHAIN_ADJUDICATORDEPLOYED,
+  address,
+});
 
-export const BlockchainAction = {
-  sendTransaction: (transaction: string, wallet: Wallet) => ({
-    type: BlockchainActionType.BLOCKCHAIN_SENDTRANSACTION,
-    transaction,
-    wallet,
-  }),
-  receiveEvent: (event: any) => ({
-    type: BlockchainActionType.BLOCKCHAIN_RECEIVEEVENT,
-    event,
-  }),
-};
+export const deploymentMetamaskFailure = (error: any) => ({
+  type: BLOCKCHAIN_METAMASKERROR,
+  error,
+});
+export const deploymentWrongNetworkFailure = (networkId: number) => ({
+  type: BLOCKCHAIN_WRONGNETWORK,
+  networkId,
+});
+export const receiveEvent = (event: any) => ({
+  type: BLOCKCHAIN_RECEIVEEVENT,
+  event,
+});

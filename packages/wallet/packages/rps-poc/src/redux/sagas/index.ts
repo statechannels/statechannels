@@ -9,7 +9,7 @@ import loginSaga from './login';
 import messageSaga from './messages';
 import { getApplicationState } from '../store';
 import autoOpponentSaga from './auto-opponent';
-import { BlockchainAction } from '../../wallet/redux/actions/blockchain';
+import * as blockchainActions from '../../wallet/redux/actions/blockchain';
 import { drizzleSagas } from 'drizzle';
 
 function* blockchainResponseFaker() {
@@ -17,7 +17,7 @@ function* blockchainResponseFaker() {
   if (state == null) { return false; }
   if (state instanceof playerAStates.WaitForFunding) {
     yield delay(2000);
-    yield put(BlockchainAction.receiveEvent({adjudicator:"FakeAddress"}));
+    yield put(blockchainActions.receiveEvent({adjudicator:"FakeAddress"}));
   }
 }
 

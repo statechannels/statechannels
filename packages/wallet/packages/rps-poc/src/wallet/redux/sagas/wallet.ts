@@ -1,9 +1,10 @@
-import { actionChannel, take, put } from 'redux-saga/effects';
+import { actionChannel, take, put, fork } from 'redux-saga/effects';
 
 import { initializeWallet } from './initialization';
 import * as actions from '../actions/external';
 import ChannelWallet from '../../domain/ChannelWallet';
 import { fundingSaga } from './funding';
+import { blockchainSaga } from './blockchain';
 
 export function* walletSaga(uid: string): IterableIterator<any> {
   const wallet = yield initializeWallet(uid);
@@ -65,6 +66,7 @@ function * handleValidationRequest(requestId, data) {
 }
 
 function * handleFundingRequest(_wallet: ChannelWallet, channelId) {
+  yield fork(blockchainSaga);
   const success = yield fundingSaga(channelId);
 
   if (success) {
