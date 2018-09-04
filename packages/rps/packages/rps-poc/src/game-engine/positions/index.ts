@@ -21,9 +21,9 @@ export {
   Reveal,
   Resting,
   Conclude,
-} 
+};
 
-export type Position = (
+export type Position =
   | PreFundSetupA
   | PreFundSetupB
   | PostFundSetupA
@@ -32,8 +32,7 @@ export type Position = (
   | Accept
   | Reveal
   | Resting
-  | Conclude
-);
+  | Conclude;
 
 export enum GamePositionType {
   Resting,
@@ -55,15 +54,12 @@ export enum Result {
 }
 
 export function packRestingAttributes(stake: number) {
-  return (
-    toHex32(GamePositionType.Resting).substr(2) + 
-    toHex32(stake).substr(2)
-  );
+  return toHex32(GamePositionType.Resting).substr(2) + toHex32(stake).substr(2);
 }
 
 export function packProposeAttributes(stake: number, preCommit: string) {
   return (
-    toHex32(GamePositionType.Propose).substr(2) + 
+    toHex32(GamePositionType.Propose).substr(2) +
     toHex32(stake).substr(2) +
     padBytes32(preCommit).substr(2)
   );
@@ -71,21 +67,16 @@ export function packProposeAttributes(stake: number, preCommit: string) {
 
 export function packAcceptAttributes(stake: number, preCommit: string, bPlay: Play) {
   return (
-    toHex32(GamePositionType.Accept).substr(2) + 
+    toHex32(GamePositionType.Accept).substr(2) +
     toHex32(stake).substr(2) +
     padBytes32(preCommit).substr(2) +
     toHex32(bPlay).substr(2)
   );
 }
 
-export function packRevealAttributes(
-  stake: number, 
-  bPlay: Play,
-  aPlay: Play,
-  salt: string,
-) {
+export function packRevealAttributes(stake: number, bPlay: Play, aPlay: Play, salt: string) {
   return (
-    toHex32(GamePositionType.Reveal).substr(2) + 
+    toHex32(GamePositionType.Reveal).substr(2) +
     toHex32(stake).substr(2) +
     padBytes32('0x0').substr(2) + // don't need the preCommit
     toHex32(bPlay).substr(2) +
@@ -102,8 +93,8 @@ export function hashCommitment(play: Play, salt: string) {
 }
 
 export function calculateResult(aPlay: Play, bPlay: Play) {
-  const x = ((aPlay - bPlay) + 2) % 3;
-  switch(x) {
+  const x = (aPlay - bPlay + 2) % 3;
+  switch (x) {
     case 0:
       return Result.YouWin;
     case 1:
@@ -112,4 +103,3 @@ export function calculateResult(aPlay: Play, bPlay: Play) {
       return Result.Tie;
   }
 }
- 

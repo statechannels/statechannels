@@ -34,7 +34,7 @@ const styles = StyleSheet.create({
     borderBottomStyle: 'solid',
     borderBottomWidth: 1,
     color: '#fff',
-    height: 42,
+    height: 45,
     width: '100%',
   },
 

@@ -24,10 +24,8 @@ export default class OpponentSelectionStep extends React.PureComponent<Props> {
     const { opponents, chooseOpponent, playComputer } = this.props;
 
     return (
-      <div className={css(styles.container)}>
-        <div>
-          <h1>Select an opponent:</h1>
-        </div>
+      <React.Fragment>
+        <h1>Select an opponent:</h1>
         <div className={css(styles.centeredTable)}>
           <table className={css(styles.leftAlign)}>
             <tbody>
@@ -50,18 +48,21 @@ export default class OpponentSelectionStep extends React.PureComponent<Props> {
           <div className={css(styles.buttonPosition)}>
             <Button onClick={() => playComputer(50)}>Play against computer</Button>
           </div>
+          <div className={css(styles.buttonPosition)}>
+            <div className={css(styles.topAlign)}>
+              <Button onClick={this.createChallengeHandler}>Create challenge</Button>
+            </div>
+            <div className={css(styles.input, styles.topAlign)}>
+              <input ref={this.wagerInput} />
+            </div>
+          </div>
         </div>
-      </div>
+      </React.Fragment>
     );
   }
 }
 
 const styles = StyleSheet.create({
-  container: {
-    maxWidth: '90%',
-    margin: 'auto',
-  },
-
   centeredTable: {
     left: '50%',
     position: 'absolute',
@@ -75,6 +76,16 @@ const styles = StyleSheet.create({
   buttonPosition: {
     textAlign: 'center',
     padding: '20px',
+  },
+
+  input: {
+    fontSize: 18,
+    marginLeft: 8,
+  },
+
+  topAlign: {
+    verticalAlign: 'middle',
+    display: 'inline-block',
   },
 
   titleRow: {

@@ -1,7 +1,10 @@
-import React from 'react';
+import React, { ReactNode } from 'react';
 import { StyleSheet, css } from 'aphrodite';
 
 import { Play } from '../game-engine/positions';
+import RockIcon from '../icons/rock_icon';
+import PaperIcon from '../icons/paper_icon';
+import ScissorsIcon from '../icons/scissors_icon';
 
 interface Props {
   choosePlay: (play: Play) => void;
@@ -9,7 +12,12 @@ interface Props {
 }
 
 export default class SelectPlayStep extends React.PureComponent<Props> {
-  renderChooseButton(choosePlay: (play: Play) => void, play: Play, description: string) {
+  renderChooseButton(
+    choosePlay: (play: Play) => void,
+    play: Play,
+    description: string,
+    icon: ReactNode,
+  ) {
     return (
       <button
         type="button"
@@ -17,10 +25,9 @@ export default class SelectPlayStep extends React.PureComponent<Props> {
         key={play}
         className={css(styles.buttonContainer)}
       >
-        <div className={css(styles.buttonBackground)}>
-          <div className={css(styles.buttonContent)}>
-            <h1>{description}</h1>
-          </div>
+        <div className={css(styles.buttonContent)}>
+          <h1>{description}</h1>
+          {icon}
         </div>
       </button>
     );
@@ -31,30 +38,23 @@ export default class SelectPlayStep extends React.PureComponent<Props> {
     const renderChooseButton = this.renderChooseButton;
 
     return (
-      <div className={css(styles.container)}>
-        <div>
-          <h1>
-            {afterOpponent
-              ? 'Your opponent has chosen a move, now choose yours:'
-              : 'Choose your move:'}
-          </h1>
-        </div>
+      <React.Fragment>
+        <h1>
+          {afterOpponent
+            ? 'Your opponent has chosen a move, now choose yours:'
+            : 'Choose your move:'}
+        </h1>
         <div className={css(styles.fullWidth)}>
-          {renderChooseButton(choosePlay, Play.Rock, 'Rock')}
-          {renderChooseButton(choosePlay, Play.Paper, 'Paper')}
-          {renderChooseButton(choosePlay, Play.Scissors, 'Scissors')}
+          {renderChooseButton(choosePlay, Play.Rock, 'Rock', <RockIcon width="100%" />)}
+          {renderChooseButton(choosePlay, Play.Paper, 'Paper', <PaperIcon width="100%" />)}
+          {renderChooseButton(choosePlay, Play.Scissors, 'Scissors', <ScissorsIcon width="100%" />)}
         </div>
-      </div>
+      </React.Fragment>
     );
   }
 }
 
 const styles = StyleSheet.create({
-  container: {
-    maxWidth: '90%',
-    margin: 'auto',
-  },
-
   fullWidth: {
     width: '100%',
   },
@@ -62,19 +62,23 @@ const styles = StyleSheet.create({
   buttonContent: {
     left: '50%',
     position: 'relative',
-    top: '50%',
-    transform: 'translate(-50%, -50%)',
+    transform: 'translateX(-50%)',
     width: 'fit-content',
-  },
-
-  buttonBackground: {
-    height: 250,
-    background: 'maroon',
     margin: 4,
+    paddingBottom: 16,
   },
 
   buttonContainer: {
     display: 'inline-block',
     width: '33%',
+    borderWidth: '1px',
+    borderStyle: 'solid',
+    borderColor: 'white',
+    borderRadius: 5,
+
+    ':hover': {
+      textDecoration: 'underline',
+      borderColor: 'black',
+    },
   },
 });

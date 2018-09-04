@@ -1,4 +1,5 @@
 import React, { PureComponent } from 'react';
+import { StyleSheet, css } from 'aphrodite';
 
 import ChallengePage from './ChallengePage';
 import WaitingStep from './WaitingStep';
@@ -30,20 +31,27 @@ interface Props {
 }
 
 export default class GameController extends PureComponent<Props> {
-  render() {
+  constructor(props) {
+    super(props);
+
+    this.renderGame = this.renderGame.bind(this);
+  }
+
+  renderGame() {
     const {
       applicationState,
       choosePlay,
-      chooseOpponent,
-      opponents,
       subscribeOpponents,
       playComputer,
+      chooseOpponent,
+      opponents,
       currentPlayer,
       createChallenge,
     } = this.props;
 
     if (applicationState === null) {
       subscribeOpponents();
+
       return (
         <ChallengePage
           chooseOpponent={chooseOpponent}
@@ -70,7 +78,10 @@ export default class GameController extends PureComponent<Props> {
 
       case playerA.WAIT_FOR_ACCEPT:
         return (
-          <PlaySelectedPage message="Waiting for opponent to accept" yourPlay={applicationState.aPlay} />
+          <PlaySelectedPage
+            message="Waiting for opponent to accept"
+            yourPlay={applicationState.aPlay}
+          />
         );
 
       case playerA.WAIT_FOR_RESTING:
@@ -85,7 +96,10 @@ export default class GameController extends PureComponent<Props> {
 
       case playerA.INSUFFICIENT_FUNDS:
         // todo: add into the logic about who it was that ran out of funds
-        return <WaitingStep message="About to conclude the game – either you or your opponent has run out of funds!" />;
+        // Also todo: replace with new component (WaitingStep is just a filler)
+        return (
+          <WaitingStep message="About to conclude the game – either you or your opponent has run out of funds!" />
+        );
 
       case playerB.WAIT_FOR_FUNDING:
         return <WalletController />;
@@ -101,9 +115,18 @@ export default class GameController extends PureComponent<Props> {
         return <WaitingStep message="Waiting for opponent to reveal their move" />;
 
       default:
-        return (
-          <WaitingStep message={`[view not implemented: ${applicationState.type}`} />
-        );
+        return <WaitingStep message={`[view not implemented: ${applicationState.type}`} />;
     }
   }
+
+  render() {
+    return <div className={css(styles.container)}>{this.renderGame()}</div>;
+  }
 }
+
+const styles = StyleSheet.create({
+  container: {
+    maxWidth: '90%',
+    margin: 'auto',
+  },
+});

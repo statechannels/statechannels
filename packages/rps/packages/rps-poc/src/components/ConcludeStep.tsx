@@ -13,21 +13,16 @@ export default class ConcludeStep extends React.PureComponent<IProps> {
     const { handleReturnToOpponentSelection, winnings } = this.props;
 
     return (
-      <div className={css(styles.container)}>
+      <React.Fragment>
         <h1>The game has concluded.</h1>
         <h3 className={css(styles.subtitle)}>{`You've won ${winnings} Finney!`}</h3>
         <Button onClick={handleReturnToOpponentSelection}>Return to opponent selection</Button>
-      </div>
+      </React.Fragment>
     );
   }
 }
 
 const styles = StyleSheet.create({
-  container: {
-    maxWidth: '90%',
-    margin: 'auto',
-  },
-
   subtitle: {
     width: '100%',
     paddingBottom: 16,
