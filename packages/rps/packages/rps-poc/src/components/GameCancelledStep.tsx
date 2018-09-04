@@ -1,5 +1,4 @@
 import React from 'react';
-import { StyleSheet, css } from 'aphrodite';
 
 import Button from './Button';
 
@@ -13,7 +12,7 @@ export default class ConfirmWagerStep extends React.PureComponent<IProps> {
     const { cancelledByYou, returnToStart } = this.props;
 
     return (
-      <div className={css(styles.container)}>
+      <React.Fragment>
         <div>
           <h1>
             {cancelledByYou
@@ -22,14 +21,7 @@ export default class ConfirmWagerStep extends React.PureComponent<IProps> {
           </h1>
         </div>
         <Button onClick={returnToStart}>Return to Opponent Selection</Button>
-      </div>
+      </React.Fragment>
     );
   }
 }
-
-const styles = StyleSheet.create({
-  container: {
-    maxWidth: '90%',
-    margin: 'auto',
-  },
-});
