@@ -50,6 +50,7 @@
     "sha3": "^1.2.2",
     "truffle-contract": "^3.0.6",
     "web3": "^1.0.0-beta.34",
+    "web3-detect-network": "^0.0.17",
     "web3-utils": "^1.0.0-beta.30",
     "webpack": "3.8.1",
     "webpack-dev-server": "2.9.4",

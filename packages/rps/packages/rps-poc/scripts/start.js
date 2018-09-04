@@ -83,9 +83,25 @@ choosePort(HOST, DEFAULT_PORT)
       urls.lanUrlForConfig
     );
 
+    //Default accounts to seed so we can have accounts with 1M ether for testing
+    var accounts =
+      [
+        {
+          secretKey: '0xf2f48ee19680706196e2e339e5da3491186e0c4c5030670656b0e0164837257d',
+          balance: '0xD3C21BCECCEDA1000000'
+        },
+        {
+          secretKey: '0x5d862464fe9303452126c8bc94274b8c5f9874cbd219789b3eb2128075a76f72',
+          balance: '0xD3C21BCECCEDA1000000'
+        },
+        {
+          secretKey: '0xdf02719c4df8b9b8ac7f551fcb5d9ef48fa27eef7a66453879f4d8fdc6e78fb1',
+          balance: '0xD3C21BCECCEDA1000000'
+        }
+      ];
     var ganache = require("ganache-cli");
     console.log(`Starting ganache on port ${process.env.DEV_GANACHE_PORT}`)
-    var ganacheServer = ganache.server({port:process.env.DEV_GANACHE_PORT,network_id:0});
+    var ganacheServer = ganache.server({port:process.env.DEV_GANACHE_PORT,network_id:0,accounts});
     ganacheServer.listen(process.env.DEV_GANACHE_PORT, function(err, blockchain) {
     
       if (err){
