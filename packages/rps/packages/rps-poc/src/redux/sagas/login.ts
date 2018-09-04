@@ -1,12 +1,13 @@
 import firebase from 'firebase';
-import { call, fork, put, take, takeEvery, cancel } from 'redux-saga/effects';
+import { call, fork, put, take, takeEvery, cancel, race } from 'redux-saga/effects';
+import { delay } from 'redux-saga'
 
 import { LoginAction, LoginActionType } from '../actions/login';
 import { reduxSagaFirebase } from '../../gateways/firebase';
 import { fetchOrCreatePlayer } from './player';
 import applicationControllerSaga from './application-controller';
 import { MessageAction } from '../actions/messages';
-import { WalletActionType, WalletRetrievedAction } from '../../wallet';
+import { walletSaga, actions as walletActions } from '../../wallet';
 
 const authProvider = new firebase.auth.GoogleAuthProvider();
 
@@ -40,19 +41,26 @@ function* loginStatusWatcherSaga() {
 
     if (user) {
       // login procedure
-      yield put({ type: WalletActionType.WALLET_REQUESTED, uid: user.uid });
-      const walletAction: WalletRetrievedAction = yield take(WalletActionType.WALLET_RETRIEVED);
-      const { wallet } = walletAction;
-      const player = yield fetchOrCreatePlayer(wallet.address, user.displayName);
+      yield fork(walletSaga, user.uid);
 
-      // playerHeartbeatThread = yield fork(playerHeartbeatSaga, wallet.address);
-      yield put(MessageAction.subscribeMessages(wallet.address));
-      applicationThread = yield fork(applicationControllerSaga, wallet);
+      const { success, failure } = yield race({
+        success: take(walletActions.INITIALIZATION_SUCCESS),
+        failure: call(delay, 2000),
+      });
 
-      yield put(LoginAction.loginSuccess(user, wallet, player));
+      if (failure) { throw new Error('Wallet initialization timed out'); }
+
+      const address = (success as walletActions.InitializationSuccess).address;
+
+      const player = yield fetchOrCreatePlayer(address, user.displayName);
+
+      yield put(MessageAction.subscribeMessages(address));
+
+      applicationThread = yield fork(applicationControllerSaga, address);
+
+      yield put(LoginAction.loginSuccess(user, player));
+
     } else {
-      // Logout procedure
-      // if (playerHeartbeatThread) { yield cancel(playerHeartbeatThread); }
       if (applicationThread) {
         yield cancel(applicationThread);
       }

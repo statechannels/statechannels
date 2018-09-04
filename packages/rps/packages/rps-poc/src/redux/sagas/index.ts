@@ -9,9 +9,7 @@ import loginSaga from './login';
 import messageSaga from './messages';
 import { getApplicationState } from '../store';
 import autoOpponentSaga from './auto-opponent';
-import { walletSaga } from '../../wallet/redux/sagas/wallet';
 import { BlockchainAction } from '../../wallet/redux/actions/blockchain';
-import walletControllerSaga from '../../wallet/redux/sagas/wallet-controller';
 import { drizzleSagas } from 'drizzle';
 
 function* blockchainResponseFaker() {
@@ -26,8 +24,6 @@ function* blockchainResponseFaker() {
 export default function* rootSaga() {
   yield all(drizzleSagas.map(saga => fork(saga)));
   yield fork(opponentSaga);
-  yield fork(walletSaga);
-  yield fork(walletControllerSaga);
   yield fork(loginSaga);
   yield fork(messageSaga);  
   yield fork(autoOpponentSaga);

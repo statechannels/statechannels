@@ -5,7 +5,6 @@ export interface LoginState {
   loading: boolean;
   loggedIn: boolean;
   user: any;
-  wallet: any;
   player?: {
     address: string;
     name: string;
@@ -16,7 +15,6 @@ const initialState: LoginState = {
   loading: false,
   loggedIn: false,
   user: null,
-  wallet: null,
   player: undefined,
 };
 
@@ -34,7 +32,6 @@ export const loginReducer: Reducer<LoginState> = (state = initialState, action: 
         loading: false,
         loggedIn: true,
         user: action.user,
-        wallet: action.wallet,
         player: action.player,
       };
     case LoginActionType.LOGIN_FAILURE:
