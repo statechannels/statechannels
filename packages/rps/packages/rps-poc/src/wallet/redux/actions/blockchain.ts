@@ -1,33 +1,66 @@
 export type DeploymentRequest = ReturnType<typeof deploymentRequest>;
 export type DeploymentSuccess = ReturnType<typeof deploymentSuccess>;
-export type DeploymentWrongNetworkFailure = ReturnType<typeof deploymentWrongNetworkFailure>;
-export type DeploymentMetamaskFailure = ReturnType<typeof deploymentMetamaskFailure>;
-export type DeploymentFailure = DeploymentWrongNetworkFailure | DeploymentMetamaskFailure;
+export type DeploymentFailure = ReturnType<typeof deploymentFailure>;
 export type DeploymentResponse = DeploymentSuccess | DeploymentFailure;
 
-export const BLOCKCHAIN_DEPLOYADJUDICATOR = 'BLOCKCHAIN.DEPLOYADJUDICATOR';
-export const BLOCKCHAIN_ADJUDICATORDEPLOYED = 'BLOCKCHAIN.ADJUDICATORDEPLOYED';
-export const BLOCKCHAIN_METAMASKERROR = 'BLOCKCHAIN.METAMASKERROR';
-export const BLOCKCHAIN_WRONGNETWORK = 'BLOCKCHAIN.WRONGNETWORK';
+export type DepositRequest = ReturnType<typeof depositRequest>;
+export type DepositSuccess = ReturnType<typeof depositSuccess>;
+export type DepositFailure = ReturnType<typeof depositFailure>;
+export type DepositResponse = DepositSuccess | DepositFailure;
+
+export type WrongNetwork = ReturnType<typeof wrongNetwork>;
+
+export const DEPLOY_REQUEST = 'BLOCKCHAIN.DEPLOY.REQUEST';
+export const DEPLOY_SUCCESS = 'BLOCKCHAIN.DEPLOY.SUCCESS';
+export const DEPLOY_FAILURE = 'BLOCKCHAIN.DEPLOY.FAILURE';
+
+export const DEPOSIT_REQUEST = 'BLOCKCHAIN.DEPOSIT.REQUEST';
+export const DEPOSIT_SUCCESS = 'BLOCKCHAIN.DEPOSIT.SUCCESS';
+export const DEPOSIT_FAILURE = 'BLOCKCHAIN.DEPOSIT.FAILURE';
+
+export const WRONG_NETWORK = 'BLOCKCHAIN.WRONGNETWORK'
+
+// TODO: Remove this
 export const BLOCKCHAIN_RECEIVEEVENT = 'BLOCKCHAIN.RECEIVEEVENT';
 
+
 export const deploymentRequest = (channelId: any) => ({
-  type: BLOCKCHAIN_DEPLOYADJUDICATOR,
+  type: DEPLOY_REQUEST,
   channelId,
 });
 export const deploymentSuccess = (address: string) => ({
-  type: BLOCKCHAIN_ADJUDICATORDEPLOYED,
+  type: DEPLOY_SUCCESS,
   address,
 });
 
-export const deploymentMetamaskFailure = (error: any) => ({
-  type: BLOCKCHAIN_METAMASKERROR,
+export const deploymentFailure = (error: any) => ({
+  type: DEPLOY_FAILURE,
   error,
 });
-export const deploymentWrongNetworkFailure = (networkId: number) => ({
-  type: BLOCKCHAIN_WRONGNETWORK,
+
+
+export const depositRequest = (address: string, amount: number) => ({
+  type: DEPOSIT_REQUEST,
+  address,
+  amount,
+});
+export const depositSuccess = (transaction: any) => ({
+  type: DEPOSIT_SUCCESS,
+  transaction,
+});
+export const depositFailure = (error: any) => ({
+  type: DEPOSIT_FAILURE,
+  error,
+});
+
+
+
+export const wrongNetwork = (networkId: number) => ({
+  type: WRONG_NETWORK,
   networkId,
 });
+
+// TODO: Remove this
 export const receiveEvent = (event: any) => ({
   type: BLOCKCHAIN_RECEIVEEVENT,
   event,
