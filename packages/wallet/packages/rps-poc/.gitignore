@@ -25,3 +25,6 @@ yarn-error.log*
 # truffle
 /tmp
 /src/contracts
+# truffle-solidity-loader assumes the truffle file will be called truffle-config on windows
+# so we can just create a link to truffle.js and ignore truffle-config.js
+truffle-config.js

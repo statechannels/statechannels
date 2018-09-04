@@ -13,7 +13,13 @@ import {
 } from '../actions/blockchain';
 import { State } from '../../wallet-engine/wallet-states';
 import { WalletStateActions } from '../actions/wallet-state';
-
+// The State contract is just currently loaded to force the truffle migrations
+// and demonstrate how we can load a contract from the app
+// Once we have the ajudicator loading properly this can go.
+import contract from 'truffle-contract';
+// tslint:disable-next-line:comment-format
+//@ts-ignore
+import stateContractArtifact from 'fmg-core/contracts/State.sol';
 export default function* walletControllerSaga() {
   let walletEngine: WalletEngine | null = null;
   let wallet: Wallet | null = null;
@@ -32,6 +38,7 @@ export default function* walletControllerSaga() {
     // Before waiting for any events check if we need to send something
     if (walletEngine != null && walletEngine.state != null && walletEngine.state.isReadyToSend) {
       put(BlockchainAction.sendTransaction(walletEngine.state.transaction, wallet));
+      contract(stateContractArtifact);
       walletState = walletEngine.transactionSent();
       yield put(WalletStateActions.stateChanged(walletState));
     }
