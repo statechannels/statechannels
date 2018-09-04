@@ -1,7 +1,10 @@
 var HDWalletProvider = require("truffle-hdwallet-provider");
 require('dotenv').config()
 
-module.exports = {
+require('ts-node/register'); // To handle typescript dependencies in the test
+require('babel-register'); // To handle es6 syntax in the tests
+
+ module.exports = {
   networks: {
     development: {
       host: process.env.DEV_GANACHE_HOST,
