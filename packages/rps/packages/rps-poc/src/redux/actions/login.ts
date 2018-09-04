@@ -1,59 +1,59 @@
-export enum LoginActionType {
-  LOGIN_REQUEST = 'LOGIN.REQUEST',
-  LOGIN_SUCCESS = 'LOGIN.SUCCESS',
-  LOGIN_FAILURE = 'LOGIN.FAILURE',
-  LOGOUT_REQUEST = 'LOGOUT.REQUEST',
-  LOGOUT_SUCCESS = 'LOGOUT.SUCCESS',
-  LOGOUT_FAILURE = 'LOGOUT.FAILURE',
-}
+// LOGIN
+// =====
 
-export const LoginAction = {
-  login: () => ({
-    type: LoginActionType.LOGIN_REQUEST as typeof LoginActionType.LOGIN_REQUEST,
-  }),
+export const LOGIN_REQUEST = 'LOGIN.REQUEST';
+export const LOGIN_SUCCESS = 'LOGIN.SUCCESS';
+export const LOGIN_FAILURE = 'LOGIN.FAILURE';
 
-  loginFailure: (error: Error) => ({
-    type: LoginActionType.LOGIN_FAILURE as typeof LoginActionType.LOGIN_FAILURE,
-    error,
-  }),
+export const loginRequest = () => ({
+  type: LOGIN_REQUEST as typeof LOGIN_REQUEST,
+});
 
-  logout: () => ({
-    type: LoginActionType.LOGOUT_REQUEST as typeof LoginActionType.LOGOUT_REQUEST,
-  }),
+export const loginSuccess = (user: object, player: { address: string; name: string; }) => ({
+  type: LOGIN_SUCCESS as typeof LOGIN_SUCCESS,
+  user,
+  player,
+});
 
-  logoutFailure: (error: Error) => ({
-    type: LoginActionType.LOGOUT_FAILURE as typeof LoginActionType.LOGOUT_FAILURE,
-    error,
-  }),
+export const loginFailure = (error: Error) => ({
+  type: LOGIN_FAILURE as typeof LOGIN_FAILURE,
+  error,
+});
 
-  loginSuccess: (
-    user: object,
-    player?: {
-      address: string;
-      name: string;
-    },
-  ) => ({
-    type: LoginActionType.LOGIN_SUCCESS as typeof LoginActionType.LOGIN_SUCCESS,
-    user,
-    player,
-  }),
+export type LoginRequest = ReturnType<typeof loginRequest>;
+export type LoginSuccess = ReturnType<typeof loginSuccess>;
+export type LoginFailure = ReturnType<typeof loginFailure>;
+export type LoginResponse = LoginSuccess | LoginFailure;
 
-  logoutSuccess: () => ({
-    type: LoginActionType.LOGOUT_SUCCESS as typeof LoginActionType.LOGOUT_SUCCESS,
-  }),
-};
+// LOGOUT
+// ======
 
-export type LoginRequestAction = ReturnType<typeof LoginAction.login>;
-export type LoginFailureAction = ReturnType<typeof LoginAction.loginFailure>;
-export type LogoutAction = ReturnType<typeof LoginAction.logout>;
-export type LogoutFailureAction = ReturnType<typeof LoginAction.logoutFailure>;
-export type LoginSuccessAction = ReturnType<typeof LoginAction.loginSuccess>;
-export type LogoutSuccessAction = ReturnType<typeof LoginAction.logoutSuccess>;
+export const LOGOUT_REQUEST = 'LOGOUT.REQUEST';
+export const LOGOUT_SUCCESS = 'LOGOUT.SUCCESS';
+export const LOGOUT_FAILURE = 'LOGOUT.FAILURE';
 
-export type LoginAction =
-  | LoginRequestAction
-  | LoginFailureAction
-  | LogoutAction
-  | LogoutFailureAction
-  | LoginSuccessAction
-  | LogoutSuccessAction;
+export const logoutRequest = () => ({
+  type: LOGOUT_REQUEST as typeof LOGOUT_REQUEST,
+});
+
+export const logoutSuccess = () => ({
+  type: LOGOUT_SUCCESS as typeof LOGOUT_SUCCESS,
+});
+
+export const logoutFailure = (error: Error) => ({
+  type: LOGOUT_FAILURE as typeof LOGOUT_FAILURE,
+  error,
+});
+
+export type LogoutRequest = ReturnType<typeof logoutRequest>;
+export type LogoutSuccess = ReturnType<typeof logoutSuccess>;
+export type LogoutFailure = ReturnType<typeof logoutFailure>;
+export type LogoutResponse = LogoutSuccess | LogoutFailure;
+
+
+// 
+
+export type RequestAction = LoginRequest | LogoutRequest;
+export type ResponseAction = LoginResponse | LogoutResponse;
+
+export type AnyAction = RequestAction | ResponseAction;

@@ -2,7 +2,7 @@ import firebase from 'firebase';
 import { call, fork, put, take, takeEvery, cancel, race } from 'redux-saga/effects';
 import { delay } from 'redux-saga'
 
-import { LoginAction, LoginActionType } from '../actions/login';
+import * as loginActions from '../actions/login';
 import { reduxSagaFirebase } from '../../gateways/firebase';
 import { fetchOrCreatePlayer } from './player';
 import applicationControllerSaga from './application-controller';
@@ -16,7 +16,7 @@ function* loginSaga() {
     yield call(reduxSagaFirebase.auth.signInWithPopup, authProvider);
     // successful login will trigger the loginStatusWatcher, which will update the state
   } catch (error) {
-    yield put(LoginAction.loginFailure(error));
+    yield put(loginActions.loginFailure(error));
   }
 }
 
@@ -25,7 +25,7 @@ function* logoutSaga() {
     yield call(reduxSagaFirebase.auth.signOut);
     // successful logout will trigger the loginStatusWatcher, which will update the state
   } catch (error) {
-    yield put(LoginAction.logoutFailure(error));
+    yield put(loginActions.logoutFailure(error));
   }
 }
 
@@ -58,14 +58,14 @@ function* loginStatusWatcherSaga() {
 
       applicationThread = yield fork(applicationControllerSaga, address);
 
-      yield put(LoginAction.loginSuccess(user, player));
+      yield put(loginActions.loginSuccess(user, player));
 
     } else {
       if (applicationThread) {
         yield cancel(applicationThread);
       }
       yield put(MessageAction.unsubscribeMessages());
-      yield put(LoginAction.logoutSuccess());
+      yield put(loginActions.logoutSuccess());
     }
   }
 }
@@ -73,7 +73,7 @@ function* loginStatusWatcherSaga() {
 export default function* loginRootSaga() {
   yield fork(loginStatusWatcherSaga);
   yield [
-    takeEvery(LoginActionType.LOGIN_REQUEST, loginSaga),
-    takeEvery(LoginActionType.LOGOUT_REQUEST, logoutSaga),
+    takeEvery(loginActions.LOGIN_REQUEST, loginSaga),
+    takeEvery(loginActions.LOGOUT_REQUEST, logoutSaga),
   ];
 }
