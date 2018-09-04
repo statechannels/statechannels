@@ -1,6 +1,6 @@
 import { Reducer } from 'redux';
 import { State} from '../../wallet-engine/wallet-states';
-import { WalletStateChangedAction, WalletStateActionType } from '../actions/wallet-state';
+import { WalletStateChangedAction, WalletStateActionType } from '../actions/state';
 
 export type WalletState = State | null;
 const initialState = null;

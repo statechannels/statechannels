@@ -1,5 +1,3 @@
-import { Wallet } from '../../wallet';
-
 export enum LoginActionType {
   LOGIN_REQUEST = 'LOGIN.REQUEST',
   LOGIN_SUCCESS = 'LOGIN.SUCCESS',
@@ -30,7 +28,6 @@ export const LoginAction = {
 
   loginSuccess: (
     user: object,
-    wallet: Wallet,
     player?: {
       address: string;
       name: string;
@@ -38,7 +35,6 @@ export const LoginAction = {
   ) => ({
     type: LoginActionType.LOGIN_SUCCESS as typeof LoginActionType.LOGIN_SUCCESS,
     user,
-    wallet,
     player,
   }),
 

@@ -1,74 +1,76 @@
-import { call, put, take } from 'redux-saga/effects';
+import { actionChannel, take, put } from 'redux-saga/effects';
 
-import { default as firebase, reduxSagaFirebase } from '../../../gateways/firebase';
+import { initializeWallet } from './initialization';
+import * as actions from '../actions/external';
 import ChannelWallet from '../../domain/ChannelWallet';
-import { WalletAction, WalletActionType } from '../..';
+import { fundingSaga } from './funding';
 
-interface WalletParams {
-  uid: string;
-  privateKey: string;
-  address: string;
-}
+export function* walletSaga(uid: string): IterableIterator<any> {
+  const wallet = yield initializeWallet(uid);
 
-export function* walletSaga(): IterableIterator<any> {
-  while (true) {
-    const action = yield take(WalletActionType.WALLET_REQUESTED);
-    const { uid } = action;
-    let wallet = yield* fetchWallet(uid);
+  const channel = yield actionChannel([
+    actions.FUNDING_REQUEST,
+    actions.SIGNATURE_REQUEST,
+    actions.VALIDATION_REQUEST,
+  ]);
 
-    if (!wallet) {
-      yield* createWallet(uid);
-      // fetch again instead of using return val, just in case another wallet was created in the interim
-      wallet = yield* fetchWallet(uid);
+  yield put(actions.initializationSuccess(wallet.address));
+
+  while(true) {
+    const action: actions.RequestAction = yield take(channel);
+
+    // The handlers below will block, so the wallet will only ever
+    // process one action at a time from the queue.
+    switch (action.type) {
+      case actions.SIGNATURE_REQUEST:
+        yield handleSignatureRequest(wallet, action.requestId, action.positionData);
+        break;
+
+      case actions.VALIDATION_REQUEST:
+        yield handleValidationRequest(action.requestId, action.signedPositionData);
+        break;
+
+      case actions.FUNDING_REQUEST:
+        yield handleFundingRequest(wallet, action.channelId);
+        break;
+
+      default:
+        // const _exhaustiveCheck: never = action;
+        // todo: get this to work
+        // currently causes a 'noUnusedLocals' error on compilation
+        // underscored variables should be an exception but there seems to 
+        // be a bug in my current version of typescript
+        // https://github.com/Microsoft/TypeScript/issues/15053
     }
-
-    yield put(WalletAction.walletRetrieved(wallet));
   }
 }
 
-const walletTransformer = (data: any) =>
-  ({
-    ...data.val(),
-    id: data.key,
-  } as WalletParams);
+function * handleSignatureRequest(wallet: ChannelWallet, requestId, positionData) {
+  // todo:
+  // - validate the transition
+  // - sign the position
+  // - store the position
+  const signedPosition = wallet.sign(positionData)
 
-const walletRef = uid => {
-  return firebase
-    .database()
-    .ref('wallets')
-    .orderByChild('uid')
-    .equalTo(uid)
-    .limitToFirst(1);
-};
+  yield put(actions.signatureSuccess(requestId, signedPosition));
+}
 
-function* fetchWallet(uid: string) {
-  const query = walletRef(uid);
+function * handleValidationRequest(requestId, data) {
+  // todo:
+  // - check the signature
+  // - validate the transition
+  // - store the position
 
-  // const wallet = yield call(reduxSagaFirebase.database.read, query);
-  // ^ doesn't work as it returns an object like {-LIGGQQEI6OlWoveTPsq: {address: ... } }
-  // which doesn't have any useful methods on for extracting the part we want
-  // It seems like rsf.database.read doesn't really work when the result is a collection
+  yield put(actions.validationSuccess(requestId, data));
+}
 
-  const result = yield call([query, query.once], 'value');
-  if (!result.exists()) {
-    return null;
+function * handleFundingRequest(_wallet: ChannelWallet, channelId) {
+  const success = yield fundingSaga(channelId);
+
+  if (success) {
+    yield put(actions.fundingSuccess(channelId));
+  } else {
+    yield put(actions.fundingFailure(channelId, 'Something went wrong'));
   }
-  let wallet;
-  result.forEach(data => {
-    wallet = walletTransformer(data);
-  }); // result should have size 1
-
-  return new ChannelWallet(wallet.privateKey);
 }
 
-function* createWallet(uid: string) {
-  const newWallet = new ChannelWallet();
-
-  const walletParams = {
-    uid,
-    privateKey: newWallet.privateKey,
-    address: newWallet.address,
-  };
-
-  return yield call(reduxSagaFirebase.database.create, 'wallets', walletParams);
-}

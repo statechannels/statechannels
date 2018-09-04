@@ -22,6 +22,7 @@
     "jsx-no-lambda": false,
     "interface-name": false,
     "trailing-comma": [true, {"multiline":{"objects": "always"}}],
-    "max-classes-per-file": false
+    "max-classes-per-file": false,
+    "variable-name": [true, "ban-keywords", "check-format", "allow-pascal-case", "allow-leading-underscore"]
   }
 }
