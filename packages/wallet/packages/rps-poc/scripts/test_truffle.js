@@ -11,7 +11,7 @@ process.env.PUBLIC_URL = '';
 if (!process.env.DEV_GANACHE_PORT) {
   process.env.DEV_GANACHE_PORT = 5732;
 }
-console.log(`Using port ${process.env.DEV_GANACHE_PORT} for Ganache.`)
+console.log(`Using port ${process.env.DEV_GANACHE_PORT} for Ganache.`);
 
 try {
   var ganache = require('ganache-cli');
@@ -22,9 +22,17 @@ try {
     }
   });
 
-  exec('truffle.cmd test --network ganache', (err, stdout, stderr) => {
+  exec('truffle test --network ganache', (err, stdout, stderr) => {
     // Errors seem to be piped to stdout so we just output that always
     console.log(stdout);
+    if (stderr) {
+       console.log(stderr);
+       process.exit(1);
+    }
+    if (err) {
+       console.log(err);
+       process.exit(1);
+    }
   });
 
   server.close();
