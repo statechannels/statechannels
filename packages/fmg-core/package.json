@@ -13,7 +13,7 @@
     "copy_contracts": "copyfiles './contracts/**/*' './migrations/**/*' ./lib",
     "pre_build": "run-s copy_contracts",
     "build": "run-s clean copy_contracts && tsc",
-    "test": "npm run build && (cd lib; truffle test)"
+    "test": "npm run build && (cd lib && ../node_modules/.bin/truffle test)"
   },
   "repository": "https://github.com/magmo/force-move-games/tree/master/packages/fmg-core",
   "author": "Tom Close",
