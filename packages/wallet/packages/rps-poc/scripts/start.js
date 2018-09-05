@@ -3,10 +3,7 @@
 // Do this as the first thing so that any code reading it knows the right env.
 process.env.BABEL_ENV = 'development';
 process.env.NODE_ENV = 'development';
-process.env.DEV_GANACHE_HOST='localhost';
-process.env.DEV_GANACHE_PORT=7546;
-process.env.DEFAULT_GAS= 6721975;
-process.env.DEFAULT_GAS_PRICE = 20000000000;
+
 // Makes the script crash on unhandled rejections instead of silently
 // ignoring them. In the future, promise rejections that are not handled will
 // terminate the Node.js process with a non-zero exit code.
@@ -16,6 +13,11 @@ process.on('unhandledRejection', err => {
 
 // Ensure environment variables are read.
 require('../config/env');
+
+process.env.DEV_GANACHE_HOST = process.env.DEV_GANACHE_HOST || 'localhost';
+process.env.DEV_GANACHE_PORT = process.env.DEV_GANACHE_PORT || 7546;
+process.env.DEFAULT_GAS = process.env.DEFAULT_GAS || 6721975;
+process.env.DEFAULT_GAS_PRICE = process.env.DEFAULT_GAS_PRICE || 20000000000;
 
 const fs = require('fs');
 const chalk = require('chalk');
@@ -100,16 +102,24 @@ choosePort(HOST, DEFAULT_PORT)
         }
       ];
     var ganache = require("ganache-cli");
-    console.log(`Starting ganache on port ${process.env.DEV_GANACHE_PORT}`)
-    var ganacheServer = ganache.server({port:process.env.DEV_GANACHE_PORT,network_id:0,accounts});
-    ganacheServer.listen(process.env.DEV_GANACHE_PORT, function(err, blockchain) {
-    
-      if (err){
-        return console.log(err);
+    console.log(`Starting ganache on port ${process.env.DEV_GANACHE_PORT}`);
+    var ganacheServer = ganache.server({ port: process.env.DEV_GANACHE_PORT, network_id: 0, accounts });
+    var ganachePortInUse = false;
+    ganacheServer.on('error', function (err) {
+      if (err.code && err.code === 'EADDRINUSE') {
+        console.log(`Port ${process.env.DEV_GANACHE_PORT} in use. Assuming a ganache instance on that port.`);
+        ganachePortInUse = true;
+      } else {
+        throw err;
       }
-  
-  });
-
+    });
+    if (!ganachePortInUse) {
+      ganacheServer.listen(process.env.DEV_GANACHE_PORT, process.env.DEV_GANACHE_HOST, function (err, blockchain) {
+        if (err) {
+          return console.log(err);
+        }
+      });
+    }
     const devServer = new WebpackDevServer(compiler, serverConfig);
     // Launch WebpackDevServer.
     devServer.listen(port, HOST, err => {
