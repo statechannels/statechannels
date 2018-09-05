@@ -2,13 +2,14 @@
 
 ### Setup
 
+1. Add [MetaMask](https://metamask.io/) or an equivalent browser extension that injects a web3 object. 
 1. Install yarn
     ```
     brew install yarn
     ```
-2. Set up your `.env`
+1. Install dependencies
     ```
-    cp .env.example .env
+    yarn install
     ```
 
 ### Developement Info
@@ -18,15 +19,11 @@
 1. Start ganache
     * Either using the app
     * Or by running `ganache-cli` in a different tab
-2. Deploy the contracts:
-    ```
-    yarn truffle:migrate
-    ```
-3. Run the server:
+1. Run the server:
     ```
     yarn start
     ```
-4. In your browser make sure you have the local ganache network (probably `localhost:8545`) selected in metamask
+1. In your browser make sure you have the local ganache network (probably `localhost:7546`) selected in metamask
 
 #### To build:
 
