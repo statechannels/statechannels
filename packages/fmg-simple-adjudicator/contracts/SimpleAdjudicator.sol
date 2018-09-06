@@ -15,12 +15,29 @@ contract SimpleAdjudicator {
     uint challengeDuration = 1 days;
     uint[2] withdrawnAmount;
 
+    event FundsReceived(
+        uint amountReceived,
+        address sender,
+        uint adjudicatorBalance
+    );
+
     constructor(bytes32 _fundedChannelId) public payable {
         fundedChannelId = _fundedChannelId;
+
+        emit FundsReceived(
+            msg.value,
+            msg.sender,
+            address(this).balance
+        );
     }
 
     // allow funds to be sent to the contract
     function () public payable {
+        emit FundsReceived(
+            msg.value,
+            msg.sender,
+            address(this).balance
+        );
     }
 
     function forceMove (
