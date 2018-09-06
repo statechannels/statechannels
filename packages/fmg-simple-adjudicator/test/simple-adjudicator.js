@@ -10,8 +10,8 @@ const START_BALANCE = 100000000000000000000;
 
 const A_IDX = 1;
 const B_IDX = 2;
-const aBal = Number(web3.toWei(6, "ether"));
-const bBal = Number(web3.toWei(4, "ether"));
+const aBal = Number(web3.toWei('6', "ether"));
+const bBal = Number(web3.toWei('4', "ether"));
 const resolution = [aBal, bBal];
 const differentResolution = [bBal, aBal];
 
@@ -368,5 +368,44 @@ contract('SimpleAdjudicator', (accounts) => {
         "SimpleAdjudicator wasn't emptied"
       );
     });
+  });
+
+  describe('events', async () => {
+    it('emits fundsReceived upon contract creation', async () => {
+      CountingStateContract.link(StateLib);
+      let stateContract = await CountingStateContract.new();
+      CountingGameContract.link('CountingState', stateContract.address);
+      let countingGameContract = await CountingGameContract.new();
+      channel = new Channel(countingGameContract.address, 0, [accounts[A_IDX], accounts[B_IDX]]);
+  
+      simpleAdj = await SimpleAdjudicator.new(channel.id);
+
+      let result = await truffleAssert.createTransactionResult(simpleAdj, simpleAdj.transactionHash);
+
+      truffleAssert.eventEmitted(result, 'FundsReceived', (event) => {
+        return (
+          event.adjudicatorBalance.toPrecision(1) === '0'
+        );
+      });
+    });
+
+    it('emits fundsReceived upon being sent funds', async () => {
+      await simpleAdj.sendTransaction({
+        from: accounts[9],
+        value: 50
+      });
+      let result = await simpleAdj.sendTransaction({
+        from: accounts[9],
+        value: 100
+      });
+
+      truffleAssert.eventEmitted(result, 'FundsReceived', (event) => {
+        return (
+          event.adjudicatorBalance.toPrecision(3) === '150' &&
+          event.sender === accounts[9] &&
+          event.amountReceived.toPrecision(3) === '100'
+        );
+      });
+    })
   });
 });
