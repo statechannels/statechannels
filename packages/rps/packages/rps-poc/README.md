@@ -27,18 +27,21 @@
 
 #### To build:
 
-`yarn run build`
+1. Update your  `TARGET_NETWORK` in `.env` to a named network from `truffle.js` (default is `ropsten`)
+2. Build the application:
+    ```
+    yarn run build
+    ```
 
-#### To develop smart contracts
+#### To deploy smart contracts
 
-```
-# compile project with tsc, and run `truffle compile` from within build/dist
-yarn truffle:compile
-
-# deploy smart contracts to a network
-TRUFFLE_NETWORK=<named network in truffle.ts> yarn truffle:migrate
-```
-
+1. Add test eth to your account for the deployment using an eth faucet: https://faucet.ropsten.be/
+2. Deploy the contracts to the network:
+    ```
+    # deploy smart contracts to a network
+    yarn truffle:migrate --rps:deploymentNetwork=<named network in truffle.ts>
+    ``` 
+    
 #### To run application tests in watch mode:
 
 `yarn run test:app`
