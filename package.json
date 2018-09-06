@@ -1,4 +1,9 @@
 {
+	"scripts": {
+    "lerna:install": "./node_modules/lerna/bin/lerna.js bootstrap",
+    "lerna:test": "./node_modules/lerna/bin/lerna.js run test --stream",
+    "test": "npm run lerna:test"
+  },
 	"devDependencies": {
 		"lerna": "^2.11.0"
 	},
