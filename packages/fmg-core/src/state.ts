@@ -1,4 +1,4 @@
-import { soliditySha3 } from 'web3-utils';
+import { sha3 } from 'web3-utils';
 
 import { toHex32 } from './utils';
 import { Channel } from './channel';
@@ -37,7 +37,7 @@ class State {
   }
 
   sign(account) {
-    const digest = soliditySha3(this.toHex(), {encoding: 'hex'}).substr(2);
+    const digest = sha3(this.toHex(), {encoding: 'hex'});
     const sig = web3.eth.sign(account, digest).slice(2);
     const r = `0x${sig.slice(0, 64)}`;
     const s = `0x${sig.slice(64, 128)}`;
