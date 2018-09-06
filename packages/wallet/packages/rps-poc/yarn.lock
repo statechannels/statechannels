@@ -664,7 +664,7 @@ async-each@^1.0.0:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/async-each/-/async-each-1.0.1.tgz#19d386a1d9edc6e7c1c85d388aedbcc56d33602d"
 
-async-eventemitter@^0.2.2, async-eventemitter@^0.2.4:
+async-eventemitter@^0.2.2:
   version "0.2.4"
   resolved "https://registry.yarnpkg.com/async-eventemitter/-/async-eventemitter-0.2.4.tgz#f5e7c8ca7d3e46aab9ec40a292baf686a0bafaca"
   dependencies:
@@ -2997,7 +2997,7 @@ deep-is@~0.1.3:
   version "0.1.3"
   resolved "https://registry.yarnpkg.com/deep-is/-/deep-is-0.1.3.tgz#b369d6fb5dbc13eecf524f91b070feedc357cf34"
 
-deepmerge@^2.0.1, deepmerge@^2.1.1:
+deepmerge@^2.0.1:
   version "2.1.1"
   resolved "https://registry.yarnpkg.com/deepmerge/-/deepmerge-2.1.1.tgz#e862b4e45ea0555072bf51e7fd0d9845170ae768"
 
@@ -3267,17 +3267,6 @@ drbg.js@^1.0.1:
     browserify-aes "^1.0.6"
     create-hash "^1.1.2"
     create-hmac "^1.1.4"
-
-drizzle@^1.2.3:
-  version "1.2.3"
-  resolved "https://registry.yarnpkg.com/drizzle/-/drizzle-1.2.3.tgz#34a502fb0385061dd92c014f8fbdbcbec565a6b8"
-  dependencies:
-    deepmerge "^2.1.1"
-    eth-block-tracker-es5 "^2.3.2"
-    is-plain-object "^2.0.4"
-    redux "^4.0.0"
-    redux-saga "^0.16.0"
-    web3 "^1.0.0-beta.34"
 
 duplexer3@^0.1.4:
   version "0.1.4"
@@ -3636,19 +3625,6 @@ esutils@^2.0.2:
 etag@~1.8.1:
   version "1.8.1"
   resolved "https://registry.yarnpkg.com/etag/-/etag-1.8.1.tgz#41ae2eeb65efa62268aebfea83ac7d79299b0887"
-
-eth-block-tracker-es5@^2.3.2:
-  version "2.3.2"
-  resolved "https://registry.yarnpkg.com/eth-block-tracker-es5/-/eth-block-tracker-es5-2.3.2.tgz#c83d1fd95178e760fc3c3c88df5e64fe1918683c"
-  dependencies:
-    async-eventemitter "^0.2.4"
-    eth-query "^2.1.0"
-    ethereumjs-tx "^1.3.3"
-    ethereumjs-util "^5.1.3"
-    ethjs-util "^0.1.3"
-    json-rpc-engine "^3.6.0"
-    pify "^2.3.0"
-    tape "^4.6.3"
 
 eth-block-tracker@^2.2.2:
   version "2.3.1"

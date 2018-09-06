@@ -1,4 +1,3 @@
-import { initDrizzle } from '../blockchain/drizzle';
 import { applyMiddleware, compose, createStore } from 'redux';
 import createSagaMiddleware from 'redux-saga';
 
@@ -11,15 +10,7 @@ const enhancers = compose(
   (window as any).devToolsExtension ? (window as any).devToolsExtension() : f => f,
 );
 
-const drizzleOptions = {
-  
-};
-const initialState = {
-  contracts:{},
-};
-
-const store = createStore(reducer, initialState, enhancers);
-initDrizzle(store, drizzleOptions);
+const store = createStore(reducer, enhancers);
 sagaMiddleware.run(rootSaga);
 
 export default store;

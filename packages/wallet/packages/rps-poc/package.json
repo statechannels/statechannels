@@ -23,7 +23,6 @@
     "chalk": "1.1.3",
     "css-loader": "0.28.7",
     "dotenv-expand": "4.2.0",
-    "drizzle": "^1.2.3",
     "enum": "^2.5.0",
     "firebase": "^5.0.4",
     "fmg-core": "^0.0.6",
