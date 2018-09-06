@@ -1,6 +1,6 @@
 {
 	"scripts": {
-		"lerna:install": "./node_modules/lerna/bin/lerna.js bootstrap",
+		"lerna:bootstrap": "./node_modules/lerna/bin/lerna.js bootstrap",
 		"lerna:test": "./node_modules/lerna/bin/lerna.js run test --stream",
 		"test": "run-s test:fmg-core test:fmg-simple-adjudicator",
 		"test:fmg-core": "(cd packages/fmg-core && npm test)",

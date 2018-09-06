@@ -27,7 +27,7 @@ framework using the simple adjudicator in the [readme](./packages/fmg-simple-adj
 
 ### Packages
 
-This repository is split into packages which ~are~ will be published as independent node modules.
+This repository is split into packages, the first two of which are published as independent node modules.
                                                            
 | Package                       |  Description                                  |
 | ----------------------------- |  -------------------------------------------- |
@@ -38,10 +38,10 @@ This repository is split into packages which ~are~ will be published as independ
 
 ### TODO
 
-This project is still a work in progress! Still to do in the sort term:
+This project is still a work in progress! Still to do in the short term:
 
 - [x] Publish packages to npm
-- [ ] Release whitepaper
+- [x] Release whitepaper
 - [ ] Build out a full example application (including UI)
 - [ ] Optimize contracts for gas consumption
 - [ ] More tests to demonstrate the simple adjudicator
@@ -73,7 +73,9 @@ To get started:
 3. Install truffle: `npm install -g truffle`.
 4. Install [ganache](http://truffleframework.com/ganache/).
 5. Run `lerna bootstrap` anywhere in the project.
-6. Within a package run `npm test`.
+6. Within a package, run `npm test` for that package's tests. Or, run it from the project root to test both `fmg-core` and `fmg-simple-adjudicator`.
+
+NOTE: while the above instructions use globally installed `lerna` and `truffle` node modules, the tests running on circleci use dev dependencies, and may therefore produce different results.
 
 ### License
 
