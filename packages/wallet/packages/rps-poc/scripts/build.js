@@ -14,6 +14,11 @@ process.on('unhandledRejection', err => {
 // Ensure environment variables are read.
 require('../config/env');
 
+// Default to ropsten test network
+process.env.TARGET_NETWORK = process.env.TARGET_NETWORK || 'ropsten';
+process.env.DEFAULT_GAS = process.env.DEFAULT_GAS || 6721975;
+process.env.DEFAULT_GAS_PRICE = process.env.DEFAULT_GAS_PRICE || 20000000000;
+
 const path = require('path');
 const chalk = require('chalk');
 const fs = require('fs-extra');
