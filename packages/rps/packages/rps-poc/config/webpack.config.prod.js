@@ -109,11 +109,6 @@ module.exports = {
       'react-native': 'react-native-web',
     },
     plugins: [      
-       // This often causes confusion because we only process files within src/ with babel.
-      // To fix this, we prevent you from importing files out of src/ -- if you'd like to,
-      // please link the files into your node_modules/ and let module-resolution kick in.
-      // Make sure your source files are compiled, as they will not be processed in any way.
-      new ModuleScopePlugin(paths.appSrc, [paths.appPackageJson]),
       new TsconfigPathsPlugin({ configFile: paths.appTsConfig }),
     ],
   },
@@ -123,6 +118,14 @@ module.exports = {
       // TODO: Disable require.ensure as it's not a standard language feature.
       // We are waiting for https://github.com/facebookincubator/create-react-app/issues/2176.
       // { parser: { requireEnsure: false } },
+      {
+        test: /\.json/,
+        use: [
+          {
+            loader: 'json-loader'
+          },
+        ]
+        },
       {
         test: /\.(js|jsx|mjs)$/,
         loader: require.resolve('source-map-loader'),
@@ -295,6 +298,9 @@ module.exports = {
           // Pending further investigation:
           // https://github.com/mishoo/UglifyJS2/issues/2011
           comparisons: false,
+          // Don't inline functions with arguments, to avoid name collisions:
+          // https://github.com/mishoo/UglifyJS2/issues/2842
+          inline: 1,
         },
         mangle: {
           safari10: true,
@@ -365,6 +371,14 @@ module.exports = {
       tsconfig: paths.appTsProdConfig,
       tslint: paths.appTsLint,
     }),
+    // Instead of using the truffle loader we'll look for the already built truffle artifacts
+    new webpack.NormalModuleReplacementPlugin(
+      /.*\.sol/,
+      function(resource) {
+        const targetNetwork = process.env.TARGET_NETWORK;
+        const artifactsPath = path.join(paths.appContractArtifacts,targetNetwork);
+        resource.request = resource.request.replace(/.*contracts/,artifactsPath).replace('.sol','.json');
+      })
   ],
   // Some libraries import Node modules but don't use them in the browser.
   // Tell Webpack to provide empty mocks for them so importing them works.
