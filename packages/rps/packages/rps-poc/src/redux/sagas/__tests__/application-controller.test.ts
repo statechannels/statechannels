@@ -63,7 +63,7 @@ describe('Application Controller', () => {
 
     return expectSaga(applicationControllerSaga, me)
       .dispatch(GameAction.chooseOpponent(opponent, stake))
-      .put(walletActions.fundingRequest(testState.channelId))
+      .put(walletActions.fundingRequest(testState.channelId,testState))
       .put(GameAction.stateChanged(testState))
       .silentRun();
   });

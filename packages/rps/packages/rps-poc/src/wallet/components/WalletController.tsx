@@ -18,6 +18,7 @@ export default class WalletController extends PureComponent<Props> {
     }
 
     switch (walletState && walletState.constructor) {
+      
       case playerA.WaitForBlockchainDeploy:
         return <FundingInProgress message="confirmation of adjudicator deployment" />;
 
