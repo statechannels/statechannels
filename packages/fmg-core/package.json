@@ -19,6 +19,7 @@
   "author": "Tom Close",
   "license": "MIT",
   "dependencies": {
+    "bn.js": "^4.11.8",
     "sha3": "^1.2.2",
     "web3-utils": "^1.0.0-beta.30"
   },
