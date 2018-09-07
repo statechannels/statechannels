@@ -67,7 +67,7 @@ function * handleValidationRequest(requestId, data) {
 
 function * handleFundingRequest(_wallet: ChannelWallet, channelId, state) {
   yield fork(blockchainSaga);
-  const success = yield fundingSaga(channelId,state);
+  const success = yield fundingSaga(channelId, state);
 
   if (success) {
     yield put(actions.fundingSuccess(channelId));

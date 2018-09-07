@@ -17,7 +17,11 @@ export default class SelectChallenge extends React.PureComponent<Props> {
   }
 
   render() {
-    const { challenges, acceptChallenge, autoOpponentAddress } = this.props;
+    const {
+      challenges,
+      acceptChallenge,
+      autoOpponentAddress,
+    } = this.props;
 
     return (
       <React.Fragment>
