@@ -32,7 +32,7 @@ export function* walletSaga(uid: string): IterableIterator<any> {
         break;
 
       case actions.FUNDING_REQUEST:
-        yield handleFundingRequest(wallet, action.channelId);
+        yield handleFundingRequest(wallet, action.channelId, action.state);
         break;
 
       default:
@@ -65,9 +65,9 @@ function * handleValidationRequest(requestId, data) {
   yield put(actions.validationSuccess(requestId, data));
 }
 
-function * handleFundingRequest(_wallet: ChannelWallet, channelId) {
+function * handleFundingRequest(_wallet: ChannelWallet, channelId, state) {
   yield fork(blockchainSaga);
-  const success = yield fundingSaga(channelId);
+  const success = yield fundingSaga(channelId,state);
 
   if (success) {
     yield put(actions.fundingSuccess(channelId));

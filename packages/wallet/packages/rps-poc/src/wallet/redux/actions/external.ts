@@ -1,3 +1,6 @@
+import { WaitForFunding as WaitForFundingA } from '../../../game-engine/application-states/PlayerA';
+import { WaitForFunding as WaitForFundingB } from '../../../game-engine/application-states/PlayerB';
+
 // FUNDING
 // =======
 
@@ -5,11 +8,12 @@ export const FUNDING_REQUEST = 'WALLET.FUNDING.REQUEST';
 export const FUNDING_SUCCESS = 'WALLET.FUNDING.SUCCESS';
 export const FUNDING_FAILURE = 'WALLET.FUNDING.FAILURE';
 
-export const fundingRequest = (channelId) => ({
+export const fundingRequest = (channelId, state: WaitForFundingA | WaitForFundingB) => ({
   type: FUNDING_REQUEST as typeof FUNDING_REQUEST,
   channelId,
+  state,
 });
-export const fundingSuccess = (channelId) => ({
+export const fundingSuccess = channelId => ({
   type: FUNDING_SUCCESS as typeof FUNDING_SUCCESS,
   channelId,
 });
@@ -85,7 +89,7 @@ export type SignatureResponse = SignatureSuccess | SignatureFailure;
 
 export const INITIALIZATION_SUCCESS = 'WALLET.INITIALIZATION.SUCCESS';
 
-export const initializationSuccess = (address) => ({
+export const initializationSuccess = address => ({
   type: INITIALIZATION_SUCCESS as typeof INITIALIZATION_SUCCESS,
   address,
 });
@@ -95,8 +99,19 @@ export type InitializationSuccess = ReturnType<typeof initializationSuccess>;
 // Requests
 // ========
 
-export type RequestAction = (
-  | FundingRequest
-  | SignatureRequest
-  | ValidationRequest
-);
+export type RequestAction = FundingRequest | SignatureRequest | ValidationRequest;
+
+// MESSAGING
+// =========
+export type SendMessageAction = ReturnType<typeof sendMessage>;
+export const SEND_MESSAGE = 'WALLET.MESSAGING.SEND';
+export const RECEIVE_MESSAGE = 'WALLET.MESSAGING.RECEIVE';
+export const sendMessage = (data: string) => ({
+  type: SEND_MESSAGE as typeof SEND_MESSAGE,
+  data,
+});
+
+export const receiveMessage = (data: string) => ({
+  type: RECEIVE_MESSAGE,
+  data,
+});
