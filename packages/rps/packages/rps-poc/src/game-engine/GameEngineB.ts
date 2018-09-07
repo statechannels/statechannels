@@ -81,6 +81,16 @@ export default class GameEngineB {
     return this.transitionTo(new State.WaitForReveal({ position: nextPosition }));
   }
 
+  playAgain() {
+    if (!(this.state instanceof State.ViewResult)) {
+      return this.state;
+    }
+
+    const position = this.state.position;
+
+    return this.transitionTo(new State.WaitForPropose({ position }));
+  }
+
   conclude() {
     // problem - we don't necessarily have all the stuff here :()
 

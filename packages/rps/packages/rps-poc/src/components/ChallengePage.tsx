@@ -1,21 +1,17 @@
 import _ from 'lodash';
 import React from 'react';
 
-import { Opponent } from '../redux/reducers/opponents';
+import { Challenge } from '../redux/application/reducer';
 
 import CreateChallenge from './CreateChallenge';
-import OpponentSelectionStep from './OpponentSelectionStep';
+import SelectChallenge from './SelectChallenge';
 import Button from './Button';
 
 interface Props {
-  chooseOpponent: (opponentAddress: string, stake: number) => void;
-  playComputer: (stake: number) => void;
-  opponents: Opponent[];
-  currentPlayer?: {
-    address: string;
-    name: string;
-  };
-  createChallenge: (challenge: any) => void;
+  challenges: Challenge[],
+  acceptChallenge: (address: string, stake: number) => void,
+  createChallenge: (name: string, stake: number) => void,
+  autoOpponentAddress: string,
 }
 
 const initialState = { showChallenges: true };
@@ -26,12 +22,10 @@ export default class ChallengePage extends React.PureComponent<Props, State> {
 
   constructor(props) {
     super(props);
-    _.bindAll(this, [
-      'showChallengesList',
-      'showCreateChallenge',
-      'renderCreateChallenge',
-      'renderOpponentsList',
-    ]);
+    this.showChallengesList = this.showChallengesList.bind(this);
+    this.showCreateChallenge = this.showCreateChallenge.bind(this);
+    this.renderCreateChallenge = this.renderCreateChallenge.bind(this);
+    this.renderChallengesList = this.renderChallengesList.bind(this);
   }
 
   render() {
@@ -42,7 +36,7 @@ export default class ChallengePage extends React.PureComponent<Props, State> {
           <Button onClick={this.showCreateChallenge}>Create a challenge</Button>
         </div>
         {this.renderCreateChallenge()}
-        {this.renderOpponentsList()}
+        {this.renderChallengesList()}
       </div>
     );
   }
@@ -63,22 +57,20 @@ export default class ChallengePage extends React.PureComponent<Props, State> {
     return (
       <CreateChallenge
         createChallenge={this.props.createChallenge}
-        currentPlayer={this.props.currentPlayer}
       />
     );
   }
 
-  renderOpponentsList() {
+  renderChallengesList() {
     if (!this.state.showChallenges) {
       return null;
     }
 
     return (
-      <OpponentSelectionStep
-        chooseOpponent={this.props.chooseOpponent}
-        playComputer={this.props.playComputer}
-        opponents={this.props.opponents}
-        currentPlayer={this.props.currentPlayer}
+      <SelectChallenge
+        autoOpponentAddress={this.props.autoOpponentAddress}
+        challenges={this.props.challenges}
+        acceptChallenge={this.props.acceptChallenge}
       />
     );
   }

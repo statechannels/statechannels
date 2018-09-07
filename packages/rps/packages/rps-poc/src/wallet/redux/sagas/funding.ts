@@ -20,7 +20,7 @@ export function* fundingSaga(channelId: string, state: WaitForFundingA | WaitFor
     yield put(WalletStateActions.stateChanged(newState));
 
     const deploySuceededAction = yield take(blockchainActions.DEPLOY_SUCCESS);
-    yield put(walletExternalActions.sendMessage(deploySuceededAction.address));
+    yield put(walletExternalActions.sendMessage(deploySuceededAction.address, "SUCCESS"));
     walletEngine.transactionConfirmed(deploySuceededAction.address);
 
     let action = yield take(blockchainActions.FUNDSRECEIVED_EVENT);
