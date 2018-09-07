@@ -7,6 +7,7 @@ import { GameAction } from '../../actions/game';
 import { MessageAction } from '../../actions/messages';
 import { actions as walletActions } from '../../../wallet';
 import { PreFundSetupA, PreFundSetupB  } from '../../../game-engine/positions';
+import { encodeMessage, Queue } from '../../../utils/messages';
 
 describe('Application Controller', () => {
   const me = '0xc1912fee45d61c87cc5ea59dae31190fffff232d';
@@ -40,7 +41,7 @@ describe('Application Controller', () => {
 
     return expectSaga(applicationControllerSaga, me)
       .dispatch(GameAction.chooseOpponent(opponent, stake))
-      .put(MessageAction.sendMessage(opponent, testState.position.toHex()))
+      .put(MessageAction.sendMessage(opponent,encodeMessage(Queue.GAMEENGINE,testState.position.toHex())))
       .put(GameAction.stateChanged(testState))
       .silentRun();
   });
