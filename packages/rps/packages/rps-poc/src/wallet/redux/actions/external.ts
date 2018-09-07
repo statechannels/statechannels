@@ -103,11 +103,12 @@ export type RequestAction = FundingRequest | SignatureRequest | ValidationReques
 
 // MESSAGING
 // =========
-export type SendMessageAction = ReturnType<typeof sendMessage>;
 export const SEND_MESSAGE = 'WALLET.MESSAGING.SEND';
 export const RECEIVE_MESSAGE = 'WALLET.MESSAGING.RECEIVE';
-export const sendMessage = (data: string) => ({
+
+export const sendMessage = (to: string, data: string) => ({
   type: SEND_MESSAGE as typeof SEND_MESSAGE,
+  to,
   data,
 });
 
@@ -115,3 +116,6 @@ export const receiveMessage = (data: string) => ({
   type: RECEIVE_MESSAGE,
   data,
 });
+
+export type SendMessage = ReturnType<typeof sendMessage>;
+export type ReceiveMessage = ReturnType<typeof receiveMessage>;

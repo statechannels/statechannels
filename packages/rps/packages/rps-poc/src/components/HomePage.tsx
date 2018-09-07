@@ -2,8 +2,6 @@ import React from 'react';
 import { StyleSheet, css } from 'aphrodite';
 
 import Button from './Button';
-import ButtonLink from './ButtonLink';
-import { ROUTE_PATHS } from '../constants';
 import RockIcon from '../icons/rock_icon';
 import PaperIcon from '../icons/paper_icon';
 import ScissorsIcon from '../icons/scissors_icon';
@@ -42,11 +40,6 @@ const HomePage: React.SFC<IProps> = ({ login, logout, loggedIn }) => {
         </div>
       </div>
       <div className={css(styles.centeredGroup, styles.buttons)}>
-        {loggedIn && (
-          <span className={css(styles.rightPadding)}>
-            <ButtonLink href={ROUTE_PATHS.HOW_IT_WORKS}>Begin</ButtonLink>
-          </span>
-        )}
         {loginButton}
       </div>
     </div>

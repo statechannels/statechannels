@@ -1,8 +1,8 @@
-import { ApplicationState } from '../../redux/reducers';
+import { SiteState } from '../../redux/reducer';
 import { connect } from 'react-redux';
 import WalletController from '../components/WalletController';
 
-const mapStateToProps = (state: ApplicationState) => {
+const mapStateToProps = (state: SiteState) => {
 	return {
 	  walletState: state.wallet,
 	}
