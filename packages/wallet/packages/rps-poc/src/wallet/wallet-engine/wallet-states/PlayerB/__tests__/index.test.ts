@@ -8,12 +8,11 @@ describe('WaitForAToDeploy', () => {
   it('is not funded', () => {
     expect(walletState.isFunded).toBe(false);
   });
-
 });
 describe('ReadyToDeposit', () => {
   const adjudicator = 'address';
-  const walletState = new WalletStates.ReadyToDeposit({ adjudicator });
- 
+  const walletState = new WalletStates.ReadyToDeposit(adjudicator);
+
   it('returns the address of the adjudicator', () => {
     expect(walletState.adjudicator).toEqual(adjudicator);
   });
@@ -26,7 +25,7 @@ describe('ReadyToDeposit', () => {
 });
 describe('WaitForBlockchainDeposit', () => {
   const adjudicator = 'address';
-  const walletState = new WalletStates.WaitForBlockchainDeposit({ adjudicator });
+  const walletState = new WalletStates.WaitForBlockchainDeposit(adjudicator);
   it('returns the address of the adjudicator', () => {
     expect(walletState.adjudicator).toEqual(adjudicator);
   });

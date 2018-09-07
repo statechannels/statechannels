@@ -34,7 +34,7 @@ export default class WalletEngineB {
   transactionSent() {
     if (this.state.constructor === State.ReadyToDeposit) {
       const { adjudicator } = this.state;
-      return this.transitionTo(new State.WaitForBlockchainDeposit({ adjudicator }));
+      return this.transitionTo(new State.WaitForBlockchainDeposit( adjudicator ));
     } else {
       return this.state;
     }
