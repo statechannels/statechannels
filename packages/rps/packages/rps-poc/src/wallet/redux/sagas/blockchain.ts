@@ -7,14 +7,14 @@ import detectNetwork from 'web3-detect-network';
 import { eventChannel } from 'redux-saga';
 
 function* listenForFundsReceivedEvents(deployedContract) {
-  const watchChannel = creatEventChannel(deployedContract);
+  const watchChannel = createEventChannel(deployedContract);
   while (true) {
     const result = yield take(watchChannel);
     yield put(blockchainActions.fundsReceivedEvent({ ...result.args }));
   }
 }
 
-function creatEventChannel(deployedContract) {
+function createEventChannel(deployedContract) {
   const filter = deployedContract.FundsReceived();
   const channel = eventChannel(emitter => {
     filter.watch((error, results) => {

@@ -12,6 +12,7 @@ interface Props {
   acceptChallenge: (address: string, stake: number) => void,
   createChallenge: (name: string, stake: number) => void,
   autoOpponentAddress: string,
+  logoutRequest: () => void,
 }
 
 const initialState = { showChallenges: true };
@@ -37,6 +38,8 @@ export default class ChallengePage extends React.PureComponent<Props, State> {
         </div>
         {this.renderCreateChallenge()}
         {this.renderChallengesList()}
+
+        <Button onClick={() => this.props.logoutRequest()}>Logout</Button>
       </div>
     );
   }

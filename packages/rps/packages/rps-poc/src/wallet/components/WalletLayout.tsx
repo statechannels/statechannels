@@ -7,13 +7,17 @@ interface Props {
 }
 
 export default class WalletLayout extends React.PureComponent<Props> {
+  componentWillMount() {
+    Modal.setAppElement('body');
+  }
+
   render() {
     return (
       <Modal isOpen={true}>
         <div className={css(styles.topBar)}>
           <h2>Channel Wallet</h2>
         </div>
-        <p>{this.props.children}</p>
+        {this.props.children}
       </Modal>
     );
   }
