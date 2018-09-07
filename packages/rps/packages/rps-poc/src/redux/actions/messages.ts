@@ -12,7 +12,7 @@ export const MessageAction = {
     data,
   }),
 
-  messageReceived: (message: any) => ({
+  messageReceived: (message: string) => ({
     type: MessageActionType.MESSAGE_RECEIVED as typeof MessageActionType.MESSAGE_RECEIVED,
     message,
   }),

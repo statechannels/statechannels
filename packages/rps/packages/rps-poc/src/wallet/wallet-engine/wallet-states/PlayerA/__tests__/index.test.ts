@@ -1,12 +1,9 @@
 import * as WalletStates from '..';
 
 describe('ReadyToDeploy', () => {
-  const transaction = { some: 'properties to craft a transaction' };
-  const walletState = new WalletStates.ReadyToDeploy({ transaction });
+  // const transaction = { some: 'properties to craft a transaction' };
+  const walletState = new WalletStates.ReadyToDeploy();
 
-  it('has a transaction', () => {
-    expect(walletState.transaction).toEqual(transaction);
-  });
   it('is ready to send', () => {
     expect(walletState.isReadyToSend).toBe(true);
   });
@@ -17,7 +14,7 @@ describe('ReadyToDeploy', () => {
 
 describe('WaitForBToDeposit', () => {
   const adjudicator = 'address';
-  const walletState = new WalletStates.WaitForBToDeposit({ adjudicator });
+  const walletState = new WalletStates.WaitForBToDeposit( adjudicator );
 
   it('returns the adjudicator address', () => {
     expect(walletState.adjudicator).toEqual(adjudicator);
@@ -32,12 +29,8 @@ describe('WaitForBToDeposit', () => {
 });
 
 describe('Funded', () => {
-  const adjudicator = 'address';
-  const walletState = new WalletStates.Funded({ adjudicator });
+  const walletState = new WalletStates.Funded();
 
-  it('returns the adjudicator address', () => {
-    expect(walletState.adjudicator).toEqual(adjudicator);
-  });
   it('is not ready to send', () => {
     expect(walletState.isReadyToSend).toBe(false);
   });
