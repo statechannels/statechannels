@@ -2,6 +2,7 @@ import { Channel } from '../src/channel';
 import { State } from '../src/state';
 import assertRevert from './helpers/assert-revert';
 import { CountingGame } from '../src/test-game/counting-game';
+import BN from 'bn.js';
 
 var StateLib = artifacts.require("./State.sol");
 
@@ -11,7 +12,7 @@ contract('State', (accounts) => {
   const turnNum = 15;
   const channelType = accounts[0]; // just get a valid address
   const participants = [accounts[1], accounts[2]];
-  const resolution = [5, 4];
+  const resolution = [new BN(5), new BN(4)];
   const channel = new Channel(channelType, channelNonce, participants);
   const stateType = State.StateType.Game;
   const state = new State({
@@ -50,8 +51,8 @@ contract('State', (accounts) => {
 
   it("extracts the resolution", async () => {
     let result = await stateLib.resolution.call(statePacket);
-    assert.equal(resolution[0], result[0]);
-    assert.equal(resolution[1], result[1]);
+    assert.equal(resolution[0].toNumber(), result[0]);
+    assert.equal(resolution[1].toNumber(), result[1]);
   });
 
   it("identifies the mover based on the turnNum", async () => {
