@@ -2,12 +2,13 @@ import { sha3 } from 'web3-utils';
 
 import { toHex32 } from './utils';
 import { Channel } from './channel';
+import BN from 'bn.js';
 
 class State {
   channel: any;
   stateType: State.StateType
   turnNum: number;
-  resolution: number[];
+  resolution: BN[];
   stateCount: number;
 
   constructor({channel, stateType, turnNum, resolution, stateCount=0}: 
@@ -15,7 +16,7 @@ class State {
       channel: Channel, 
       stateType: State.StateType,
       turnNum: number,
-      resolution: number[],
+      resolution: BN[],
       stateCount?: number,
     }
   ) {
