@@ -8,7 +8,7 @@ import loginSaga from './login/saga';
 
 const enhancers = compose(
   applyMiddleware(sagaMiddleware),
-  (window as any).devToolsExtension ? (window as any).devToolsExtension() : f => f,
+  (window as any).__REDUX_DEVTOOLS_EXTENSION__ && (window as any).__REDUX_DEVTOOLS_EXTENSION__()
 );
 
 const store = createStore(reducer, enhancers);

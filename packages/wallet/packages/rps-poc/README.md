@@ -19,11 +19,17 @@
 1. Start ganache
     * Either using the app
     * Or by running `ganache-cli` in a different tab
-1. Run the server:
+2. Run the server:
     ```
     yarn start
     ```
-1. In your browser make sure you have the local ganache network (probably `localhost:7546`) selected in metamask
+3. In your browser make sure you have the local ganache network (probably `localhost:7546`) selected in metamask
+4. You will need to import one of the seed accounts from [`scripts/setup.js`](./scripts/setup.js) into metamask to have funds to transact.
+    1. Open the metamask browser extension
+    2. Click on the account icon (circle in the top right)
+    3. Select "Import"
+    4. Paste in the secret key from [`scripts/setup.js`](./scripts/setup.js)
+5. If you restart ganache, you will need to switch to another network and back in metamask to prevent transactions from failing with "incorrect nonce" errors
 
 #### To build:
 

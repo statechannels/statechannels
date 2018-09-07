@@ -14,7 +14,7 @@ import { PlayerBStateType } from '../../game-engine/application-states/PlayerB';
 
 export default function* gameSaga(gameEngine: GameEngine) {
   yield put(applicationActions.gameSuccess(gameEngine.state));
-  yield sendState(gameEngine.state);
+  yield processState(gameEngine.state);
 
   const channel = yield actionChannel([
     messageActions.MESSAGE_RECEIVED,
@@ -45,22 +45,27 @@ export default function* gameSaga(gameEngine: GameEngine) {
     }
 
     if (newState && newState !== oldState) {
-      switch (newState.type) {
-        case PlayerAStateType.WAIT_FOR_FUNDING:
-        case PlayerBStateType.WAIT_FOR_FUNDING:
-          yield put(walletActions.fundingRequest(newState.channelId, newState));
-          break;
-        case PlayerAStateType.CHOOSE_PLAY:
-        case PlayerBStateType.CHOOSE_PLAY:
-          break; // don't send anything if the next step is to ChoosePlay
-        default:
-          yield sendState(newState);
-      }
-      yield put(gameActions.stateChanged(newState));
+      yield processState(newState);
     }
   }
 }
 
 function* sendState(state) {
   yield put(messageActions.sendMessage(state.opponentAddress, state.position.toHex()));
+}
+
+function* processState(state) {
+  switch (state.type) {
+    case PlayerAStateType.WAIT_FOR_FUNDING:
+    case PlayerBStateType.WAIT_FOR_FUNDING:
+      yield put(walletActions.fundingRequest(state.channelId, state));
+      yield sendState(state);
+      break;
+    case PlayerAStateType.CHOOSE_PLAY:
+    case PlayerBStateType.CHOOSE_PLAY:
+      break; // don't send anything if the next step is to ChoosePlay
+    default:
+      yield sendState(state);
+  }
+  yield put(gameActions.stateChanged(state));
 }

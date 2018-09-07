@@ -1,13 +1,13 @@
 import { Reducer } from 'redux';
 import { State} from '../../wallet-engine/wallet-states';
-import { WalletStateChangedAction, WalletStateActionType } from '../actions/state';
+import * as stateActions from '../actions/state';
 
 export type WalletState = State | null;
 const initialState = null;
 
-export const walletStateReducer: Reducer<WalletState> = (state=initialState, action: WalletStateChangedAction) => {
+export const walletStateReducer: Reducer<WalletState> = (state=initialState, action: stateActions.StateChanged) => {
   switch (action.type) {
-    case  WalletStateActionType.STATE_CHANGED:
+    case  stateActions.STATE_CHANGED:
       return action.state;
     default:
       return state;
