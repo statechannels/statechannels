@@ -5,10 +5,11 @@ import * as ApplicationStatesA from '../application-states/PlayerA';
 import * as GameEngine from '../GameEngine';
 import { Play, Resting } from '../positions';
 import { PostFundSetupB, Reveal } from '../positions'
+import BN from 'bn.js';
 
 it('requires sufficient funds to transition from WaitForPostFundSetupB to ReadyToChooseAPlay', () => {
-  const stake = 5;
-  const balances = [2, 5];
+  const stake =new BN(5);
+  const balances = [ new BN(2), new BN(5)]
   const wallet = new ChannelWallet();
   const channel = new Channel(wallet.address, 456, [wallet.address, '0x123']);
 
@@ -24,8 +25,8 @@ it('requires sufficient funds to transition from WaitForPostFundSetupB to ReadyT
 });
 
 it('requires sufficient funds to transition from WaitForResting to ReadyToChooseAPlay', () => {
-  const stake = 5;
-  const balances = [5, 2];
+  const stake = new BN(5);
+  const balances = [ new BN(5), new BN(2)];
   const wallet = new ChannelWallet();
   const channel = new Channel(wallet.address, 456, [wallet.address, '0x123']);
 

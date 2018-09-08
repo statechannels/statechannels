@@ -10,6 +10,8 @@ import PreFundSetupB from './PreFundSetupB';
 import Propose from './Propose';
 import Resting from './Resting';
 import Reveal from './Reveal';
+import BN from 'bn.js';
+import { toPaddedHexString } from 'fmg-core/lib/src/utils';
 
 export {
   PreFundSetupA,
@@ -53,31 +55,35 @@ export enum Result {
   YouLose,
 }
 
-export function packRestingAttributes(stake: number) {
-  return toHex32(GamePositionType.Resting).substr(2) + toHex32(stake).substr(2);
+function packBN(num:BN){
+  return toPaddedHexString(num, 64);
 }
 
-export function packProposeAttributes(stake: number, preCommit: string) {
+export function packRestingAttributes(stake: BN) {
+  return toHex32(GamePositionType.Resting).substr(2) + packBN(stake);
+}
+
+export function packProposeAttributes(stake: BN, preCommit: string) {
   return (
     toHex32(GamePositionType.Propose).substr(2) +
-    toHex32(stake).substr(2) +
+    packBN(stake) +
     padBytes32(preCommit).substr(2)
   );
 }
 
-export function packAcceptAttributes(stake: number, preCommit: string, bPlay: Play) {
+export function packAcceptAttributes(stake: BN, preCommit: string, bPlay: Play) {
   return (
     toHex32(GamePositionType.Accept).substr(2) +
-    toHex32(stake).substr(2) +
+    packBN(stake) +
     padBytes32(preCommit).substr(2) +
     toHex32(bPlay).substr(2)
   );
 }
 
-export function packRevealAttributes(stake: number, bPlay: Play, aPlay: Play, salt: string) {
+export function packRevealAttributes(stake: BN, bPlay: Play, aPlay: Play, salt: string) {
   return (
     toHex32(GamePositionType.Reveal).substr(2) +
-    toHex32(stake).substr(2) +
+    packBN(stake)+
     padBytes32('0x0').substr(2) + // don't need the preCommit
     toHex32(bPlay).substr(2) +
     toHex32(aPlay).substr(2) +

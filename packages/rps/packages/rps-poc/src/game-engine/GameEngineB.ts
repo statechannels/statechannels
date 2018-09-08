@@ -12,6 +12,7 @@ import {
   Resting,
   Conclude,
 }  from './positions';
+import BN from 'bn.js';
 
 export default class GameEngineB {
   static fromProposal(position: Position) {
@@ -72,9 +73,9 @@ export default class GameEngineB {
 
     const { channel, stake, balances, preCommit, turnNum } = this.state;
 
-    const newBalances = [...balances];
-    newBalances[0] -= stake;
-    newBalances[1] += stake;
+    const newBalances:BN[]=[];
+    newBalances[0] = balances[0].sub(stake);
+    newBalances[1] = balances[1].add(stake);
 
     const nextPosition = new Accept(channel, turnNum + 1, newBalances, stake, preCommit, bPlay);
 

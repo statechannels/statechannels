@@ -6,11 +6,12 @@ import { Challenge } from '../redux/application/reducer';
 import CreateChallenge from './CreateChallenge';
 import SelectChallenge from './SelectChallenge';
 import Button from './Button';
+import BN from 'bn.js';
 
 interface Props {
   challenges: Challenge[],
-  acceptChallenge: (address: string, stake: number) => void,
-  createChallenge: (name: string, stake: number) => void,
+  acceptChallenge: (address: string, stake: BN) => void,
+  createChallenge: (name: string, stake: BN) => void,
   autoOpponentAddress: string,
   logoutRequest: () => void,
 }

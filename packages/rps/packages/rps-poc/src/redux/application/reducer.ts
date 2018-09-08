@@ -4,6 +4,7 @@ import * as gameActions from '../game/actions';
 import * as lobbyActions from '../lobby/actions';
 
 import { State as GameState } from '../../game-engine/application-states';
+import BN from 'bn.js';
 
 export enum Room {
   lobby = 'ROOM.LOBBY',
@@ -14,7 +15,7 @@ export enum Room {
 export interface Challenge {
   address: string,
   name: string,
-  stake: number,
+  stake: BN,
   isPublic: boolean,
   lastSeen: number,
 };

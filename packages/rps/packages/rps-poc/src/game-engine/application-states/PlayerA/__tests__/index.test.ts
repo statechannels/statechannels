@@ -8,6 +8,7 @@ import {
   Propose,
   Reveal,
 } from '../../../positions';
+import BN from 'bn.js';
 
 const gameLibrary = '0xc1912fee45d61c87cc5ea59dae31190fffff232d';
 const channelNonce = 15;
@@ -15,9 +16,9 @@ const participantA = '0xc1912fee45d61c87cc5ea59dae31190fffff232d';
 const participantB = '0xc1912fee45d61c87cc5ea59dae31190fffff232d';
 const participants = [participantA, participantB];
 const channel = new Channel(gameLibrary, channelNonce, participants);
-const stake = 1;
-const aBal = 4;
-const bBal = 5;
+const stake = new BN(1);
+const aBal = new BN(4);
+const bBal = new BN(5);
 const balances = [aBal, bBal];
 const aPlay = Play.Rock;
 const bPlay = Play.Scissors;

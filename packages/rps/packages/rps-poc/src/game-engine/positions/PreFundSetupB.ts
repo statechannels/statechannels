@@ -1,14 +1,15 @@
 import { State } from 'fmg-core';
 import { packRestingAttributes } from '.';
+import BN from 'bn.js';
 
 export default class PreFundSetup extends State {
-  stake: number;
+  stake: BN;
   turnNum: number;
   stateCount: number;
-  balances: number[];
+  balances: BN[];
   resolution: any;
 
-  constructor(channel, turnNum: number, balances: number[], stateCount: number, stake: number) {
+  constructor(channel, turnNum: number, balances: BN[], stateCount: number, stake: BN) {
     const stateType = State.StateType.PreFundSetup;
     super({ channel, stateType, turnNum, stateCount, resolution: balances });
     this.stake = stake;

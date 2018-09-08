@@ -16,12 +16,13 @@ import {
   Resting,
   Conclude,
 }  from './positions';
+import BN from 'bn.js';
 
 const fakeGameLibraryAddress = '0xc1912fee45d61c87cc5ea59dae31190fffff232d';
 
 export default class GameEngineA {
   static setupGame({ me, opponent, stake, balances }: 
-    { me: string, opponent: string, stake: number, balances: number[] }
+    { me: string, opponent: string, stake: BN, balances: BN[] }
   ) {
     const participants = [me, opponent];
     const channel = new Channel(fakeGameLibraryAddress, 456, participants);
@@ -159,14 +160,14 @@ export default class GameEngineA {
     const { channel, stake, resolution: oldBalances, bPlay, turnNum } = position;
     const { aPlay, salt } = this.state;
     const result = calculateResult(aPlay, bPlay);
-
+   
     const balances = [...oldBalances];
     if (result === Result.Tie) {
-      balances[0] += stake;
-      balances[1] -= stake;
+      balances[0] = balances[0].add(stake);
+      balances[1] =  balances[1].sub(stake);
     } else if (result === Result.YouWin) {
-      balances[0] += 2 * stake;
-      balances[1] -= 2 * stake;
+      balances[0] = balances[0].add(balances[0].mul(new BN(2)));
+      balances[1] = balances[1].sub(balances[1].mul(new BN(2)));
     }
 
     const nextPosition = new Reveal(channel, turnNum + 1, balances, stake, bPlay, aPlay, salt);
