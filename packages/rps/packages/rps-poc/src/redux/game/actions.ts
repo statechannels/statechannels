@@ -1,6 +1,7 @@
 import { Play } from '../../game-engine/positions';
 import Move from '../../game-engine/Move';
 import { State } from '../../game-engine/application-states';
+import BN from 'bn.js';
 
 export const CHOOSE_PLAY = 'GAME.CHOOSE_PLAY';
 export const MOVE_RECEIVED = 'GAME.MOVE_RECEIVED';
@@ -8,7 +9,7 @@ export const MOVE_SENT = 'GAME.MOVE_SENT';
 export const STATE_CHANGED = 'GAME.STATE_CHANGED';
 export const PLAY_COMPUTER = 'GAME.PLAY_COMPUTER';
 
-export const playComputer = (stake: number) => ({
+export const playComputer = (stake: BN) => ({
   type: PLAY_COMPUTER as typeof PLAY_COMPUTER,
   stake,
 });

@@ -1,6 +1,6 @@
 import { Channel, assertRevert, padBytes32 } from 'fmg-core';
 import { Play, Resting, Propose, Accept, Reveal } from '../src/game-engine/positions';
-
+import BN from 'bn.js';
 const RPS = artifacts.require("./RockPaperScissorsGame.sol");
 
 contract('RockPaperScissors', (accounts) => {
@@ -8,10 +8,10 @@ contract('RockPaperScissors', (accounts) => {
   const salt = padBytes32("0xaaa"); // some random bytes32 value
   const aPlay = Play.Rock;
   const bPlay = Play.Scissors;
-  const stake = 2;
-  const initBals = [5, 4];
-  const aAhead = [7, 2];
-  const bAhead = [3, 6];
+  const stake = new BN(2);
+  const initBals = [new BN(5), new BN(4)];
+  const aAhead = [new BN(7), new BN(2)];
+  const bAhead = [new BN(3), new BN(6)];
   let initialState;
   let proposeState;
   let acceptState;

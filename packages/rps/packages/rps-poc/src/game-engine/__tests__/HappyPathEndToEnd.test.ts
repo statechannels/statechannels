@@ -2,9 +2,10 @@ import * as GameEngine from '../GameEngine';
 import { PlayerAStateType } from '../application-states/PlayerA';
 import { PlayerBStateType } from '../application-states/PlayerB';
 import { Play, Result } from '../positions';
+import BN from 'bn.js';
 
-const stake = 1;
-const initialBals = [5, 4];
+const stake = new BN(1);
+const initialBals = [new BN(5), new BN(4)];
 const me = '0xa';
 const opponent = '0xb';
 
@@ -81,12 +82,13 @@ describe('game engine runthrough', () => {
 
   // balances
   describe('balances', () => {
-    const bWinsBals = [4, 5];
-    const aWinsBals = [6, 3];
+    const bWinsBals = [new BN(4),new BN(5)];
+    const aWinsBals = [new BN(6), new BN(3)];
 
     const testBalances = (state, balances) => {
       it(`creates the expected balances for state with type ${state.type}`, () => {
-        expect(state.balances).toEqual(balances);
+        expect(state.balances[0].eq(balances[0]));
+        expect(state.balances[1].eq(balances[1]));
       });
     };
 

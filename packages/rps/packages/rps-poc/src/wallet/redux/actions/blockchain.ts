@@ -1,12 +1,12 @@
 export type DeploymentRequest = ReturnType<typeof deploymentRequest>;
 export type DeploymentSuccess = ReturnType<typeof deploymentSuccess>;
 export type DeploymentFailure = ReturnType<typeof deploymentFailure>;
-export type DeploymentResponse = DeploymentSuccess | DeploymentFailure;
+export type DeploymentResponse = DeploymentSuccess | DeploymentFailure | WrongNetwork;
 
 export type DepositRequest = ReturnType<typeof depositRequest>;
 export type DepositSuccess = ReturnType<typeof depositSuccess>;
 export type DepositFailure = ReturnType<typeof depositFailure>;
-export type DepositResponse = DepositSuccess | DepositFailure;
+export type DepositResponse = DepositSuccess | DepositFailure | WrongNetwork;
 
 export type WrongNetwork = ReturnType<typeof wrongNetwork>;
 

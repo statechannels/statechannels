@@ -2,9 +2,11 @@ import _ from 'lodash';
 import React from 'react';
 
 import Button from './Button';
+import BN from 'bn.js';
+import web3Utils from 'web3-utils';
 
 interface Props {
-  createChallenge: (name: string, stake: number) => void;
+  createChallenge: (name: string, stake: BN) => void;
 }
 
 export default class CreateChallenge extends React.PureComponent<Props> {
@@ -26,7 +28,7 @@ export default class CreateChallenge extends React.PureComponent<Props> {
       return;
     }
 
-    this.props.createChallenge(name, wager);
+    this.props.createChallenge(name, new BN(web3Utils.toWei(wager.toString(),'finney')));
 
     this.wagerInput.current.value = '';
     this.nameInput.current.value = '';

@@ -1,5 +1,6 @@
 import { Channel } from 'fmg-core';
 import { Play, Reveal, Propose } from '../src/game-engine/positions';
+import BN from 'bn.js';
 
 const RpsStateContract = artifacts.require("./RockPaperScissorsState.sol");
 
@@ -8,8 +9,8 @@ contract('RockPaperScissorsState', (accounts) => {
   const preCommit = "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
   const salt = "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb";
   const turnNum = 4;
-  const balances = [4, 5];
-  const stake = 2;
+  const balances = [ new BN(4), new BN(5)]
+  const stake = new BN(2);
   const aPlay = Play.Rock;
   const bPlay = Play.Scissors;
 
@@ -36,15 +37,18 @@ contract('RockPaperScissorsState', (accounts) => {
   });
 
   it("can parse aBal", async () => {
-    assert.equal(await stateContract.aResolution(reveal.toHex()), balances[0]);
+    const val = await stateContract.aResolution(reveal.toHex());
+    assert(val.eq(balances[0]));
   });
 
   it("can parse bBal", async () => {
-    assert.equal(await stateContract.bResolution(reveal.toHex()), balances[1]);
+    const val = await stateContract.bResolution(reveal.toHex());
+    assert(val.eq(balances[1]));
   });
 
   it("can parse stake", async () => {
-    assert.equal(await stateContract.stake(reveal.toHex()), stake);
+    const val = await stateContract.stake(reveal.toHex());
+    assert(val.eq(stake));
   });
 
   it("can parse preCommit", async () => {
