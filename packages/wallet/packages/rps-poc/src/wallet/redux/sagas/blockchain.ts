@@ -54,7 +54,7 @@ export function* blockchainSaga() {
       case blockchainActions.DEPLOY_REQUEST:
         try {
           const deployedContract = yield call(simpleAdjudicatorContract.new, [action.channelId], {
-            value: action.amount,
+            value: action.amount.toString(),
           });
 
           yield put(blockchainActions.deploymentSuccess(deployedContract.address));
@@ -70,7 +70,7 @@ export function* blockchainSaga() {
       case blockchainActions.DEPOSIT_REQUEST:
         try {
           const existingContract = yield call(simpleAdjudicatorContract.at, action.address);
-          const transaction = yield call(existingContract.send, action.amount);
+          const transaction = yield call(existingContract.send, action.amount.toString());
           yield put(blockchainActions.depositSuccess(transaction));
           break;
         } catch (err) {

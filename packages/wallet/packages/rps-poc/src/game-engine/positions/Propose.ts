@@ -1,12 +1,13 @@
 import { State } from 'fmg-core';
 import { packProposeAttributes, hashCommitment, Play } from '.';
+import BN from 'bn.js';
 
 export default class Propose extends State {
   static createWithPlayAndSalt (
     channel,
     turnNum: number,
-    balances: number[],
-    stake: number,
+    balances: BN[],
+    stake: BN,
     aPlay: Play,
     salt: string,
   ) {
@@ -14,14 +15,14 @@ export default class Propose extends State {
     return new Propose(channel, turnNum, balances, stake, preCommit);
   }
 
-  stake: number;
+  stake: BN;
   preCommit: string;
 
   constructor(
     channel,
     turnNum: number,
-    balances: number[],
-    stake: number,
+    balances: BN[],
+    stake: BN,
     preCommit: string,
   ) {
     const stateType = State.StateType.Game;

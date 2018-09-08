@@ -10,6 +10,7 @@ import Accept from './Accept';
 import Reveal from './Reveal';
 import Resting from './Resting';
 import Conclude from './Conclude';
+import BN from 'bn.js';
 
 const PREFIX_CHARS = 2; // the 0x takes up 2 characters
 const CHARS_PER_BYTE = 2;
@@ -18,6 +19,9 @@ const CHANNEL_BYTES = 32 + 32 + 32 + 32 * N_PLAYERS; // type, nonce, nPlayers, [
 const STATE_BYTES = 32 + 32 + 32 + 32 * N_PLAYERS; // stateType, turnNum, stateCount, [balances]
 const GAME_ATTRIBUTE_OFFSET = CHANNEL_BYTES + STATE_BYTES;
 
+function extractBN(hexString: string, byteOffset: number = 0, numBytes: number = 32){
+  return new BN(extractBytes(hexString, byteOffset, numBytes).substr(2),16);
+}
 function extractInt(hexString: string, byteOffset: number = 0, numBytes: number = 32) {
   return parseInt(extractBytes(hexString, byteOffset, numBytes), 16);
 }
@@ -56,8 +60,8 @@ function extractStateCount(hexString: string) {
 }
 
 function extractBalances(hexString: string) {
-  const aBal = extractInt(hexString, CHANNEL_BYTES + 3 * 32);
-  const bBal = extractInt(hexString, CHANNEL_BYTES + 4 * 32);
+  const aBal = extractBN(hexString, CHANNEL_BYTES + 3 * 32);
+  const bBal = extractBN(hexString, CHANNEL_BYTES + 4 * 32);
   return [aBal, bBal];
 }
 
@@ -77,7 +81,7 @@ function extractGamePositionType(hexString: string) {
 }
 
 function extractStake(hexString: string) {
-  return extractInt(hexString, GAME_ATTRIBUTE_OFFSET + 32);
+  return extractBN(hexString, GAME_ATTRIBUTE_OFFSET + 32);
 }
 
 function extractPreCommit(hexString: string) {
@@ -96,7 +100,7 @@ function extractSalt(hexString: string) {
   return extractBytes(hexString, GAME_ATTRIBUTE_OFFSET + 5 * 32);
 }
 
-function decodeGameState(channel, turnNum: number, balances: number[], hexString: string) {
+function decodeGameState(channel, turnNum: number, balances: BN[], hexString: string) {
   const position = extractGamePositionType(hexString);
   const stake = extractStake(hexString);
 

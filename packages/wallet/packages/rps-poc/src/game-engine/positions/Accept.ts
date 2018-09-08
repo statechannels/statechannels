@@ -1,16 +1,17 @@
 import { State } from 'fmg-core';
 import { packAcceptAttributes, Play } from '.';
+import BN from 'bn.js';
 
 export default class Accept extends State {
-  stake: number;
+  stake: BN;
   preCommit: string;
   bPlay: Play;
 
   constructor(
     channel,
     turnNum: number,
-    balances: number[],
-    stake: number,
+    balances: BN[],
+    stake: BN,
     preCommit: string,
     bPlay: Play,
   ) {

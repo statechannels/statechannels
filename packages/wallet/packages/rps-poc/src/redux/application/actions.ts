@@ -1,6 +1,7 @@
 import { GameEngine } from "../../game-engine/GameEngine";
 import { State as GameState } from "../../game-engine/application-states";
 import { Challenge } from "./reducer";
+import BN from 'bn.js';
 
 export const LOBBY_REQUEST = 'APPLICATION.LOBBY_REQUEST';
 export const WAITING_ROOM_REQUEST = 'APPLICATION.WAITING_ROOM_REQUEST';
@@ -13,7 +14,7 @@ export const lobbyRequest = () => ({
   type: LOBBY_REQUEST as typeof LOBBY_REQUEST,
 });
 
-export const waitingRoomRequest = (name: string, stake: number) => ({
+export const waitingRoomRequest = (name: string, stake: BN) => ({
   type: WAITING_ROOM_REQUEST as typeof WAITING_ROOM_REQUEST,
   name,
   stake,

@@ -1,8 +1,9 @@
 import { State } from 'fmg-core';
 import { packRevealAttributes, Play } from '.';
+import BN from 'bn.js';
 
 export default class Reveal extends State {
-  stake: number;
+  stake: BN;
   preCommit: string;
   aPlay: Play;
   bPlay: Play;
@@ -11,8 +12,8 @@ export default class Reveal extends State {
   constructor(
     channel,
     turnNum: number,
-    balances: number[],
-    stake: number,
+    balances: BN[],
+    stake: BN,
     bPlay: Play,
     aPlay: Play,
     salt: string,

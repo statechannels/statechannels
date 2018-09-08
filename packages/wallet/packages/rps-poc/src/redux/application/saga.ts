@@ -26,7 +26,7 @@ export default function* applicationControllerSaga(userId: string) {
     applicationActions.GAME_REQUEST,
   ]);
   let currentRoom = yield fork(lobbySaga, address);
-
+  
   while (true) {
     const action: applicationActions.AnyAction = yield take(channel);
     yield cancel(currentRoom); // todo: maybe we should do some checks first
