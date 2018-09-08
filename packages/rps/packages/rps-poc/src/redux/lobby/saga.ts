@@ -46,9 +46,24 @@ export default function* lobbySaga(address: string) {
 };
 
 // maps { '0xabc': challenge1Data, ... } to [challenge1Data, ....]
-const challengeTransformer = (dict) => Object.keys(dict.value).map((key) => dict.value[key]);
+const challengeTransformer = (dict) => {
+  return Object.keys(dict.value).map((key) => {
+    return dict.value[key];
+  }).filter((challenge) => {
+    return challenge.expiresAt > Date.now().toFixed()
+  })
+}
 
 function * challengeSyncer() {
+  // Since everyone who is currently posting a challenge is refreshing it
+  // at a certain interval, the transformer will filter expired challenges
+  // regularly, so long as someone has an active challenge.
+  // The edge case where every active challenger simultaneously
+  // leaves the app without cancelling the challenge is not covered.
+
+  // TODO: The challengeSyncer should force a resync at time
+  //   max(activeChallenges.map((c) => c.expiresAt)
+
   yield fork(
     reduxSagaFirebase.database.sync,
     'challenges',
