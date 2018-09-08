@@ -1,6 +1,6 @@
 {
   "name": "fmg-payments",
-  "version": "0.0.6",
+  "version": "0.0.10",
   "description": "Force-move game payment channel",
   "directories": {
     "doc": "docs",
