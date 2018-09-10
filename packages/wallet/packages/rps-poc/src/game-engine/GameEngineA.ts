@@ -103,6 +103,11 @@ export default class GameEngineA {
     );
   }
 
+  playAgain() {
+    // todo
+
+    return this.state;
+  }
 
   conclude() {
     // problem - we don't necessarily have all the stuff here :()

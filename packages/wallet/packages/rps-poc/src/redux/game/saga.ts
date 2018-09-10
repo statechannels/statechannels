@@ -19,6 +19,8 @@ export default function* gameSaga(gameEngine: GameEngine) {
   const channel = yield actionChannel([
     messageActions.MESSAGE_RECEIVED,
     gameActions.CHOOSE_PLAY,
+    gameActions.PLAY_AGAIN,
+    gameActions.ABANDON_GAME,
     walletActions.FUNDING_SUCCESS,
     walletActions.FUNDING_FAILURE,
   ]);
@@ -34,6 +36,12 @@ export default function* gameSaga(gameEngine: GameEngine) {
         break;
       case gameActions.CHOOSE_PLAY:
         newState = gameEngine.choosePlay(action.play);
+        break;
+      case gameActions.PLAY_AGAIN:
+        newState = gameEngine.playAgain();
+        break;
+      case gameActions.ABANDON_GAME:
+        newState = gameEngine.conclude();
         break;
       case walletActions.FUNDING_SUCCESS:
         // TODO: We'll need the gameEngine to handle what happens if the funding fails for some reason

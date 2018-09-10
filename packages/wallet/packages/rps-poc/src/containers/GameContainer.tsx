@@ -22,21 +22,23 @@ import { Play } from '../game-engine/positions';
 
 interface GameProps {
   state: GameState,
-  choosePlay: (play: Play) => void; // TODO: what should this be?
+  choosePlay: (play: Play) => void;
+  abandonGame: () => void;
+  playAgain: () => void;
 }
 
 function GameContainer(props: GameProps) {
-  const { state, choosePlay } = props;
+  const { state, choosePlay, playAgain, abandonGame } = props;
 
   switch (state.type) {
     case playerA.WAIT_FOR_PRE_FUND_SETUP:
-      return <GameProposedPage message="Waiting for opponent to accept game" />;
+      return <GameProposedPage message="Waiting for your opponent to accept game" />;
 
     case playerA.WAIT_FOR_FUNDING:
       return <WalletController />;
 
     case playerA.WAIT_FOR_POST_FUND_SETUP:
-      return <FundingConfirmedPage message="Waiting for opponent to acknowledge" />;
+      return <FundingConfirmedPage message="Waiting for your opponent to acknowledge" />;
 
     case playerA.CHOOSE_PLAY:
       return <SelectPlayPage choosePlay={choosePlay} />;
@@ -44,7 +46,7 @@ function GameContainer(props: GameProps) {
     case playerA.WAIT_FOR_ACCEPT:
       return (
         <PlaySelectedPage
-          message="Waiting for opponent to accept"
+          message="Waiting for your opponent to choose their move"
           yourPlay={state.aPlay}
         />
       );
@@ -56,6 +58,8 @@ function GameContainer(props: GameProps) {
           yourPlay={state.aPlay}
           theirPlay={state.bPlay}
           result={state.result}
+          playAgain={playAgain}
+          abandonGame={abandonGame}
         />
       );
 
@@ -72,12 +76,27 @@ function GameContainer(props: GameProps) {
     case playerB.WAIT_FOR_POST_FUND_SETUP:
       return <WaitingStep message="Waiting for post-fund setup" />;
 
+    case playerB.WAIT_FOR_PROPOSE:
+      return <WaitingStep message="Waiting for your opponent to choose their move" />;
+
     case playerB.CHOOSE_PLAY:
       return <SelectPlayPage choosePlay={choosePlay} />;
 
     case playerB.WAIT_FOR_REVEAL:
       // choice made
       return <WaitingStep message="Waiting for opponent to reveal their move" />;
+
+    case playerB.VIEW_RESULT:
+        return (
+          <ResultPage
+            message="Waiting for opponent to suggest a new game"
+            yourPlay={state.bPlay}
+            theirPlay={state.aPlay}
+            result={state.result}
+            playAgain={playAgain}
+            abandonGame={abandonGame}
+          />
+        );
 
     default:
       return <WaitingStep message={`[view not implemented: ${state.type}`} />;
@@ -90,6 +109,8 @@ const mapStateToProps = (state: SiteState) => ({
 
 const mapDispatchToProps = {
   choosePlay: gameActions.choosePlay,
+  playAgain: gameActions.playAgain,
+  abandonGame: gameActions.abandonGame,
 };
 
 export default connect(
