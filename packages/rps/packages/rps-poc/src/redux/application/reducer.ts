@@ -17,7 +17,8 @@ export interface Challenge {
   name: string,
   stake: BN,
   isPublic: boolean,
-  lastSeen: number,
+  createdAt: number,
+  updatedAt: number,
 };
 
 export interface ApplicationState {
@@ -38,6 +39,7 @@ type StateAction =
   | applicationActions.GameSuccess
   | gameActions.StateChanged
   | lobbyActions.SyncChallenge
+  | lobbyActions.ExpireChallenges
 
 export const applicationReducer: Reducer<ApplicationState> = (state = initialState, action: StateAction) => {
   switch (action.type) {
@@ -59,6 +61,11 @@ export const applicationReducer: Reducer<ApplicationState> = (state = initialSta
         gameState: action.state,
       };
     case lobbyActions.SYNC_CHALLENGES:
+      return {
+        ...state,
+        challenges: action.challenges,
+      };
+    case lobbyActions.EXPIRE_CHALLENGES:
       return {
         ...state,
         challenges: action.challenges,

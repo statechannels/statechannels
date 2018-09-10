@@ -8,10 +8,9 @@ import GameEngineB from '../../game-engine/GameEngineB';
 import decode from '../../game-engine/positions/decode';
 import { delay } from 'redux-saga';
 import BN from 'bn.js';
-type ActionType = waitingRoomActions.CancelChallenge | messageActions.MessageReceived;
+import { CHALLENGE_REFRESH_INTERVAL } from '../../constants';
 
-const REFRESH_INTERVAL = 4000; // milliseconds
-const EXPIRATION_INTERVAL = 5000; // milliseconds
+type ActionType = waitingRoomActions.CancelChallenge | messageActions.MessageReceived;
 
 export default function* waitingRoomSaga(
   address: string,
@@ -28,8 +27,9 @@ export default function* waitingRoomSaga(
     address,
     name,
     isPublic,
-    lastSeen: new Date().getTime(),
-  };
+    createdAt: new Date().getTime(),
+    updatedAt: new Date().getTime(),
+  }
 
   yield put(applicationActions.waitingRoomSuccess({ ...commonChallengeProps, stake }));
   const serializedChallenge = {
@@ -41,7 +41,6 @@ export default function* waitingRoomSaga(
 
   yield fork(challengeHeartbeatSaga, {
     ...commonChallengeProps,
-    expiresAt: new Date().getTime() + EXPIRATION_INTERVAL,
     stake,
   });
 
@@ -66,9 +65,9 @@ export default function* waitingRoomSaga(
 }
 
 function* challengeHeartbeatSaga(challenge) {
-  while (true) {
-    yield call(delay, REFRESH_INTERVAL);
-    yield refreshChallenge(challenge);
+  while(true) {
+    yield call(delay, CHALLENGE_REFRESH_INTERVAL);
+    yield updateChallenge(challenge);
   }
 }
 
@@ -76,10 +75,11 @@ const challengeRef = challenge => {
   return firebase.database().ref(`challenges/${challenge.address}`);
 };
 
-function* refreshChallenge(challenge) {
+function* updateChallenge(challenge, updateParams?) {
   const challengeParams = {
-    expiresAt: new Date().getTime() + EXPIRATION_INTERVAL,
-  };
+    ...updateParams,
+    updatedAt: new Date().getTime(),
+  }
 
   return yield call(reduxSagaFirebase.database.patch, challengeRef(challenge), challengeParams);
-}
+};
