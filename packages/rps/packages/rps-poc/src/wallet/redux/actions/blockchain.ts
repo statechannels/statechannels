@@ -1,3 +1,5 @@
+import BN from 'bn.js';
+
 export type DeploymentRequest = ReturnType<typeof deploymentRequest>;
 export type DeploymentSuccess = ReturnType<typeof deploymentSuccess>;
 export type DeploymentFailure = ReturnType<typeof deploymentFailure>;
@@ -30,7 +32,7 @@ export const fundsReceivedEvent = ({ amountReceived, adjudicatorBalance, sender 
   sender,
 });
 
-export const deploymentRequest = (channelId: any, amount: number) => ({
+export const deploymentRequest = (channelId: any, amount: BN) => ({
   type: DEPLOY_REQUEST,
   channelId,
   amount,
@@ -45,7 +47,7 @@ export const deploymentFailure = (error: any) => ({
   error,
 });
 
-export const depositRequest = (address: string, amount: number) => ({
+export const depositRequest = (address: string, amount: BN) => ({
   type: DEPOSIT_REQUEST,
   address,
   amount,
