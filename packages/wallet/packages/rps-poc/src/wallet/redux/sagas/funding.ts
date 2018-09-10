@@ -28,7 +28,7 @@ export function* fundingSaga(channelId: string, state: WaitForFundingA | WaitFor
 
     let action = yield take(blockchainActions.FUNDSRECEIVED_EVENT);
     while (true) {
-      if (action.adjudicatorBalance.toNumber() === state.balances[0] + state.balances[1]) {
+      if (action.adjudicatorBalance.eq(state.balances[0].add(state.balances[1]))) {
         newState = walletEngine.receiveFundingEvent();
         yield put(blockchainActions.unsubscribeForEvents());
         yield put(stateActions.stateChanged(newState));
