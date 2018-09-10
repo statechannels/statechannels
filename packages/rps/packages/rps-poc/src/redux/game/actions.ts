@@ -1,27 +1,22 @@
 import { Play } from '../../game-engine/positions';
-import Move from '../../game-engine/Move';
 import { State } from '../../game-engine/application-states';
-import BN from 'bn.js';
 
 export const CHOOSE_PLAY = 'GAME.CHOOSE_PLAY';
-export const MOVE_RECEIVED = 'GAME.MOVE_RECEIVED';
-export const MOVE_SENT = 'GAME.MOVE_SENT';
+export const PLAY_AGAIN = 'GAME.PLAY_AGAIN';
+export const ABANDON_GAME = 'GAME.ABANDON_GAME';
 export const STATE_CHANGED = 'GAME.STATE_CHANGED';
-export const PLAY_COMPUTER = 'GAME.PLAY_COMPUTER';
-
-export const playComputer = (stake: BN) => ({
-  type: PLAY_COMPUTER as typeof PLAY_COMPUTER,
-  stake,
-});
 
 export const choosePlay = (play: Play) => ({
   type: CHOOSE_PLAY as typeof CHOOSE_PLAY,
   play,
 });
 
-export const moveReceived = (move: Move) => ({
-  type: MOVE_RECEIVED as typeof MOVE_RECEIVED,
-  move,
+export const playAgain = () => ({
+  type: PLAY_AGAIN as typeof PLAY_AGAIN,
+});
+
+export const abandonGame = () => ({
+  type: ABANDON_GAME as typeof ABANDON_GAME,
 });
 
 export const stateChanged = (state: State) => ({
@@ -30,11 +25,11 @@ export const stateChanged = (state: State) => ({
 });
 
 export type ChoosePlay = ReturnType<typeof choosePlay>;
-export type MoveReceived = ReturnType<typeof moveReceived>;
+export type PlayAgain = ReturnType<typeof playAgain>;
+export type AbandonGame = ReturnType<typeof abandonGame>;
 export type StateChanged = ReturnType<typeof stateChanged>;
-export type PlayComputer = ReturnType<typeof playComputer>;
 export type AnyAction =
   | ChoosePlay
-  | MoveReceived
-  | StateChanged
-  | PlayComputer;
+  | PlayAgain
+  | AbandonGame
+  | StateChanged; 
