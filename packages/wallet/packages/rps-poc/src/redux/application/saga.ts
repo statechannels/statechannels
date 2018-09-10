@@ -48,7 +48,7 @@ export default function* applicationControllerSaga(userId: string) {
   }
 }
 
-function * setupWallet(uid) {
+function* setupWallet(uid) {
   const channel = yield actionChannel(walletActions.INITIALIZATION_SUCCESS);
 
   yield fork(walletSaga, uid);
@@ -65,7 +65,7 @@ function * setupWallet(uid) {
   return address;
 }
 
-function * setupAutoOpponent() {
+function* setupAutoOpponent() {
   const channel = yield actionChannel(autoOpponentActions.INITIALIZATION_SUCCESS);
 
   yield fork(autoOpponentSaga);

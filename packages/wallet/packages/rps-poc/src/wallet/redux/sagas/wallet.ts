@@ -46,7 +46,7 @@ export function* walletSaga(uid: string): IterableIterator<any> {
   }
 }
 
-function * handleSignatureRequest(wallet: ChannelWallet, requestId, positionData) {
+function* handleSignatureRequest(wallet: ChannelWallet, requestId, positionData) {
   // todo:
   // - validate the transition
   // - sign the position
@@ -56,7 +56,7 @@ function * handleSignatureRequest(wallet: ChannelWallet, requestId, positionData
   yield put(actions.signatureSuccess(requestId, signedPosition));
 }
 
-function * handleValidationRequest(requestId, data) {
+function* handleValidationRequest(requestId, data) {
   // todo:
   // - check the signature
   // - validate the transition
@@ -65,7 +65,7 @@ function * handleValidationRequest(requestId, data) {
   yield put(actions.validationSuccess(requestId, data));
 }
 
-function * handleFundingRequest(_wallet: ChannelWallet, channelId, state) {
+function* handleFundingRequest(_wallet: ChannelWallet, channelId, state) {
   yield fork(blockchainSaga);
   const success = yield fundingSaga(channelId, state);
 

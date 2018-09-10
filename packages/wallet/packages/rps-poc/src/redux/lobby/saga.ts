@@ -1,4 +1,4 @@
-import { fork, put, take, actionChannel } from 'redux-saga/effects';
+import { fork, put, take, actionChannel, call, takeLatest, } from 'redux-saga/effects'; 
 
 import { reduxSagaFirebase } from '../../gateways/firebase';
 
@@ -7,6 +7,8 @@ import * as applicationActions from '../application/actions';
 
 import GameEngineA from '../../game-engine/GameEngineA';
 import BN from 'bn.js';
+import { delay } from 'redux-saga';
+import { CHALLENGE_EXPIRATION_INTERVAL } from '../../constants';
 
 export default function* lobbySaga(address: string) {
   yield put(applicationActions.lobbySuccess());
@@ -53,26 +55,35 @@ const challengeTransformer = (dict) => {
     dict.value[key].stake = new BN(dict.value[key].stake);
     return dict.value[key];
   }).filter((challenge) => {
-    return challenge.expiresAt > Date.now().toFixed()
+    // TODO: filter self challenges
+    return Date.now() < challenge.updatedAt + CHALLENGE_EXPIRATION_INTERVAL
 })};
 
 function* challengeSyncer() {
-  // Since everyone who is currently posting a challenge is refreshing it
-  // at a certain interval, the transformer will filter expired challenges
-  // regularly, so long as someone has an active challenge.
-  // The edge case where every active challenger simultaneously
-  // leaves the app without cancelling the challenge is not covered.
-
-  // TODO: The challengeSyncer should force a resync at time
-  //   max(activeChallenges.map((c) => c.expiresAt)
-
+  // TODO: figure out how to use a Firebase reference here to limit the data
   yield fork(
     reduxSagaFirebase.database.sync,
-    'challenges',
+    'challenges', 
     {
       successActionCreator: lobbyActions.syncChallenges,
       transform: challengeTransformer,
     },
     'value',
   );
+
+  yield takeLatest(lobbyActions.SYNC_CHALLENGES, expireChallenges)
+}
+
+function* expireChallenges() {
+  // This needs to be debounced at least as long as `CHALLENGE_EXPIRATION_INTERVAL`,
+  // in case we've just received a challenge that was just refreshed (In fact, this
+  // is the typical scenario.)
+  yield call(delay, CHALLENGE_EXPIRATION_INTERVAL)
+  const challenges = yield call(reduxSagaFirebase.database.read, '/challenges')
+  const activeChallenges = Object.keys(challenges).map(
+    (addr) => challenges[addr]
+  ).filter (
+    c => Date.now() < c.updatedAt + CHALLENGE_EXPIRATION_INTERVAL 
+  )
+  yield put(lobbyActions.expireChallenges(activeChallenges));
 }
