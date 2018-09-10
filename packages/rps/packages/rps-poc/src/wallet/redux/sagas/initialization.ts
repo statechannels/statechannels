@@ -9,7 +9,7 @@ interface WalletParams {
   address: string;
 }
 
-export function * initializeWallet(uid: string) {
+export function* initializeWallet(uid: string) {
   let wallet = yield* fetchWallet(uid);
 
   if (!wallet) {

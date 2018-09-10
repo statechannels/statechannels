@@ -11,7 +11,7 @@ export enum Queue {
   GAME_ENGINE = 'GAME_ENGINE',
 }
 
-function * sendMessagesSaga(address: string, autoOpponentAddress: string) {
+function* sendMessagesSaga(address: string, autoOpponentAddress: string) {
   const channel = yield actionChannel([
     messageActions.SEND_MESSAGE,
     walletActions.SEND_MESSAGE,
@@ -37,7 +37,7 @@ function * sendMessagesSaga(address: string, autoOpponentAddress: string) {
   }
 }
 
-function * receiveFromFirebaseSaga(address: string) {
+function* receiveFromFirebaseSaga(address: string) {
   const channel = yield call(
     reduxSagaFirebase.database.channel,
     `/messages/${address}`,
@@ -60,7 +60,7 @@ function * receiveFromFirebaseSaga(address: string) {
   }
 }
 
-function * receiveFromAutoOpponentSaga() {
+function* receiveFromAutoOpponentSaga() {
   const channel = yield actionChannel(autoOpponentActions.MESSAGE_TO_APP);
 
   while(true) {
@@ -69,7 +69,7 @@ function * receiveFromAutoOpponentSaga() {
   }
 }
 
-export default function * messageSaga(address: string, autoOpponentAddress: string) {
+export default function* messageSaga(address: string, autoOpponentAddress: string) {
   yield fork(sendMessagesSaga, address, autoOpponentAddress);
   yield fork(receiveFromFirebaseSaga, address);
   yield fork(receiveFromAutoOpponentSaga, address);
