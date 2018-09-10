@@ -48,7 +48,7 @@ export default function* lobbySaga(address: string) {
 
 // maps { '0xabc': challenge1Data, ... } to [challenge1Data, ....]
 const challengeTransformer = (dict) => {
-  Object.keys(dict.value).map(key => {
+  return Object.keys(dict.value).map(key => {
     // Convert the stake from a string to a BN
     dict.value[key].stake = new BN(dict.value[key].stake);
     return dict.value[key];
