@@ -5,10 +5,9 @@ import reducer from './reducer';
 const sagaMiddleware = createSagaMiddleware();
 
 import loginSaga from './login/saga';
-
-const enhancers = compose(
+const composeEnhancers = (window as  any).__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
+const enhancers = composeEnhancers(
   applyMiddleware(sagaMiddleware),
-  (window as any).__REDUX_DEVTOOLS_EXTENSION__ && (window as any).__REDUX_DEVTOOLS_EXTENSION__()
 );
 
 const store = createStore(reducer, enhancers);
