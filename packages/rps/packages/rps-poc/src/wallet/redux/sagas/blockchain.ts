@@ -43,10 +43,6 @@ export function* blockchainSaga() {
     const network = yield call(detectNetwork, web3.currentProvider);
     const simpleAdjudicatorContract = contract(simpleAdjudicatorArtifact);
     yield call(simpleAdjudicatorContract.defaults, { from: web3.eth.defaultAccount });
-    if (!Object.keys(simpleAdjudicatorContract.networks).find(id => id === network.id)) {
-      yield put(blockchainActions.wrongNetwork(network.id));
-      continue;
-    }
     simpleAdjudicatorContract.setProvider(web3.currentProvider);
     simpleAdjudicatorContract.setNetwork(network.id);
 
