@@ -63,7 +63,8 @@ export function* blockchainSaga() {
           yield take(blockchainActions.UNSUBSCRIBE_EVENTS);
           yield cancel(listener);
         } catch (err) {
-          yield put(blockchainActions.deploymentFailure(err));
+          const message = err.message ? err.message : "Something went wrong";
+          yield put(blockchainActions.deploymentFailure(message));
         }
 
         break;
@@ -74,7 +75,8 @@ export function* blockchainSaga() {
           yield put(blockchainActions.depositSuccess(transaction));
           break;
         } catch (err) {
-          yield put(blockchainActions.depositFailure(err));
+          const message = err.message ? err.message : "Something went wrong";
+          yield put(blockchainActions.depositFailure(message));
         }
     }
   }
