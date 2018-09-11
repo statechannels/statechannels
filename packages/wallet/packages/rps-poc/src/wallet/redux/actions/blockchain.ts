@@ -3,14 +3,13 @@ import BN from 'bn.js';
 export type DeploymentRequest = ReturnType<typeof deploymentRequest>;
 export type DeploymentSuccess = ReturnType<typeof deploymentSuccess>;
 export type DeploymentFailure = ReturnType<typeof deploymentFailure>;
-export type DeploymentResponse = DeploymentSuccess | DeploymentFailure | WrongNetwork;
+export type DeploymentResponse = DeploymentSuccess | DeploymentFailure;
 
 export type DepositRequest = ReturnType<typeof depositRequest>;
 export type DepositSuccess = ReturnType<typeof depositSuccess>;
 export type DepositFailure = ReturnType<typeof depositFailure>;
-export type DepositResponse = DepositSuccess | DepositFailure | WrongNetwork;
+export type DepositResponse = DepositSuccess | DepositFailure;
 
-export type WrongNetwork = ReturnType<typeof wrongNetwork>;
 
 export const DEPLOY_REQUEST = 'BLOCKCHAIN.DEPLOY.REQUEST';
 export const DEPLOY_SUCCESS = 'BLOCKCHAIN.DEPLOY.SUCCESS';
@@ -20,7 +19,6 @@ export const DEPOSIT_REQUEST = 'BLOCKCHAIN.DEPOSIT.REQUEST';
 export const DEPOSIT_SUCCESS = 'BLOCKCHAIN.DEPOSIT.SUCCESS';
 export const DEPOSIT_FAILURE = 'BLOCKCHAIN.DEPOSIT.FAILURE';
 
-export const WRONG_NETWORK = 'BLOCKCHAIN.WRONGNETWORK';
 export const FUNDSRECEIVED_EVENT = 'BLOCKCHAIN.EVENT.FUNDSRECEIVED';
 export const UNSUBSCRIBE_EVENTS = 'BLOCKCHAIN.EVENT.UNSUBSCRIBE';
 
@@ -59,11 +57,6 @@ export const depositSuccess = (transaction: any) => ({
 export const depositFailure = (error: any) => ({
   type: DEPOSIT_FAILURE,
   error,
-});
-
-export const wrongNetwork = (networkId: number) => ({
-  type: WRONG_NETWORK,
-  networkId,
 });
 
 export const unsubscribeForEvents = () => ({
