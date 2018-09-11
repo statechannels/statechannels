@@ -4,6 +4,7 @@ import { call, fork, put, take, takeEvery, cancel } from 'redux-saga/effects';
 import * as loginActions from './actions';
 import { reduxSagaFirebase } from '../../gateways/firebase';
 import applicationSaga from '../application/saga';
+import metamaskSaga from '../metamask/saga';
 
 const authProvider = new firebase.auth.GoogleAuthProvider();
 
@@ -26,7 +27,7 @@ function* logoutSaga() {
 }
 
 function* loginStatusWatcherSaga() {
-  // yield take ('DRIZZLE_INITIALIZED');
+
   // Events on this channel are triggered on login and logout
   const channel = yield call(reduxSagaFirebase.auth.channel);
   // let playerHeartbeatThread;
@@ -50,6 +51,13 @@ function* loginStatusWatcherSaga() {
 }
 
 export default function* loginRootSaga() {
+  const metaMask = yield metamaskSaga();
+  
+  // If metamask is not properly set up we can halt processing and wait for the reload
+  if (!metaMask){
+    return;
+  }
+  
   yield fork(loginStatusWatcherSaga);
   yield [
     takeEvery(loginActions.LOGIN_REQUEST, loginSaga),
