@@ -9,7 +9,6 @@ import { Challenge } from '../redux/application/reducer';
 
 const mapStateToProps = (state: SiteState) => ({
   challenges: state.app.challenges as Challenge[],
-  autoOpponentAddress: state.autoOpponentAddress,
 });
 
 const mapDispatchToProps = {

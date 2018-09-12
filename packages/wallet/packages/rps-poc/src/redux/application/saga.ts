@@ -11,14 +11,13 @@ import lobbySaga from '../lobby/saga';
 import messageServiceSaga from '../message-service/saga';
 import autoOpponentSaga from '../auto-opponent/saga';
 
-
 export default function* applicationControllerSaga(userId: string) {
   // need to yield* so that the fork(walletSaga) runs in the context of this saga -
   // otherwise it'll be killed when the setupWallet saga returns
   const address = yield* setupWallet(userId);
-  const autoOpponentAddress = yield* setupAutoOpponent();
+  yield* setupAutoOpponent();
 
-  yield fork(messageServiceSaga, address, autoOpponentAddress);
+  yield fork(messageServiceSaga, address);
 
   const channel = yield actionChannel([
     applicationActions.LOBBY_REQUEST,
