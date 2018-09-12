@@ -5,13 +5,14 @@ import { reduxSagaFirebase } from '../../gateways/firebase';
 import * as messageActions from './actions';
 import * as autoOpponentActions from '../auto-opponent/actions';
 import { actions as walletActions } from '../../wallet';
+import { AUTO_OPPONENT_ADDRESS } from '../../constants';
 
 export enum Queue {
   WALLET = 'WALLET',
   GAME_ENGINE = 'GAME_ENGINE',
 }
 
-function* sendMessagesSaga(address: string, autoOpponentAddress: string) {
+function* sendMessagesSaga() {
   const channel = yield actionChannel([
     messageActions.SEND_MESSAGE,
     walletActions.SEND_MESSAGE,
@@ -29,7 +30,7 @@ function* sendMessagesSaga(address: string, autoOpponentAddress: string) {
       queue = Queue.WALLET;
     }
 
-    if (to === autoOpponentAddress) {
+    if (to === AUTO_OPPONENT_ADDRESS) {
       yield put(autoOpponentActions.messageFromApp(data))
     } else {
       yield call(reduxSagaFirebase.database.create, `/messages/${to}`, { data, queue });
@@ -69,8 +70,8 @@ function* receiveFromAutoOpponentSaga() {
   }
 }
 
-export default function* messageSaga(address: string, autoOpponentAddress: string) {
-  yield fork(sendMessagesSaga, address, autoOpponentAddress);
+export default function* messageSaga(address: string) {
+  yield fork(sendMessagesSaga);
   yield fork(receiveFromFirebaseSaga, address);
-  yield fork(receiveFromAutoOpponentSaga, address);
+  yield fork(receiveFromAutoOpponentSaga);
 }

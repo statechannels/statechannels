@@ -32,6 +32,7 @@ export default function* gameSaga(gameEngine: GameEngine) {
 
     switch (action.type) {
       case messageActions.MESSAGE_RECEIVED:
+        gameEngine.fundingConfirmed()
         newState = gameEngine.receivePosition(positionFromHex(action.message));
         break;
       case gameActions.CHOOSE_PLAY:
@@ -49,7 +50,7 @@ export default function* gameSaga(gameEngine: GameEngine) {
         // We've received funding so we need to update the game state again
         break;
       default:
-      // do nothing
+        // do nothing
     }
 
     if (newState && newState !== oldState) {

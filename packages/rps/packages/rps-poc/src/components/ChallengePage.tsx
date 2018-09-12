@@ -12,7 +12,6 @@ interface Props {
   challenges: Challenge[],
   acceptChallenge: (address: string, stake: BN) => void,
   createChallenge: (name: string, stake: BN) => void,
-  autoOpponentAddress: string,
   logoutRequest: () => void,
 }
 
@@ -72,7 +71,6 @@ export default class ChallengePage extends React.PureComponent<Props, State> {
 
     return (
       <SelectChallenge
-        autoOpponentAddress={this.props.autoOpponentAddress}
         challenges={this.props.challenges}
         acceptChallenge={this.props.acceptChallenge}
       />
