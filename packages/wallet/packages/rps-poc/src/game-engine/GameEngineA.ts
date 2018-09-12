@@ -150,9 +150,7 @@ export default class GameEngineA {
   receivedPostFundSetup(position: PostFundSetupB) {
     if (!(this.state instanceof State.WaitForPostFundSetup)) { return this.state };
 
-    const { stake, balances } = this.state;
-
-    if (stake > balances[0] || stake > balances[1]) {
+    if (this.insufficientlyfunded(this.state)) {
       return this.transitionTo(new State.InsufficientFunds({ position }));
     };
 
@@ -184,15 +182,18 @@ export default class GameEngineA {
   receivedResting(position: Resting) {
     if (!(this.state instanceof State.WaitForResting)) { return this.state };
 
-    const { stake, balances } = this.state;
-
-    if (stake > balances[0] || stake > balances[1]) {
+    if (this.insufficientlyfunded(this.state)) {
       return this.transitionTo(
         new State.InsufficientFunds({ position })
       );
     }
 
     return this.transitionTo(new State.ChoosePlay({ position }));
+  }
+
+  insufficientlyfunded(state: State.WaitForResting | State.WaitForPostFundSetup): boolean {
+    const { stake, balances } = state;
+    return stake.gt(balances[0]) || stake.gt(balances[1])
   }
 
   receivedConclude(position: Conclude) {
