@@ -97,7 +97,7 @@ module.exports = {
       '.sol',
     ],
     alias: {
-      
+
       // Support React Native Web
       // https://www.smashingmagazine.com/2016/08/a-glimpse-into-the-future-with-react-native-for-web/
       'react-native': 'react-native-web',
@@ -113,19 +113,6 @@ module.exports = {
       // We are waiting for https://github.com/facebookincubator/create-react-app/issues/2176.
       // { parser: { requireEnsure: false } },
       {
-        test: /\.sol/,
-        use: [
-          {
-            loader: 'json-loader'
-          },
-          {
-            loader: 'truffle-solidity-loader',
-            options: {
-              network: 'development',
-            }
-          }]
-        },
-      {
         test: /\.(js|jsx|mjs)$/,
         loader: require.resolve('source-map-loader'),
         enforce: 'pre',
@@ -136,6 +123,20 @@ module.exports = {
         // match the requirements. When no loader matches it will fall
         // back to the "file" loader at the end of the loader list.
         oneOf: [
+          {
+            test: /\.sol/,
+            use: [
+              {
+                loader: 'json-loader'
+              },
+              {
+                loader: 'truffle-solidity-loader',
+                options: {
+                  network: 'development',
+                }
+              }
+            ]
+          },
           // "url" loader works like "file" loader except that it embeds assets
           // smaller than specified limit in bytes as data URLs to avoid requests.
           // A missing `test` is equivalent to a match.
@@ -152,7 +153,7 @@ module.exports = {
             include: paths.appSrc,
             loader: require.resolve('babel-loader'),
             options: {
-              
+
               compact: true,
             },
           },
