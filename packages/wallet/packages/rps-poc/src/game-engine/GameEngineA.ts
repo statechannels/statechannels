@@ -169,8 +169,8 @@ export default class GameEngineA {
       balances[0] = balances[0].add(stake);
       balances[1] =  balances[1].sub(stake);
     } else if (result === Result.YouWin) {
-      balances[0] = balances[0].add(balances[0].mul(new BN(2)));
-      balances[1] = balances[1].sub(balances[1].mul(new BN(2)));
+      balances[0] = balances[0].add(stake.mul(new BN(2)));
+      balances[1] = balances[1].sub(stake.mul(new BN(2)));
     }
 
     const nextPosition = new Reveal(channel, turnNum + 1, balances, stake, bPlay, aPlay, salt);
