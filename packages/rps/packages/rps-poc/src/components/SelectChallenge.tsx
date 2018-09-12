@@ -6,11 +6,11 @@ import { Challenge } from '../redux/application/reducer';
 import Button from './Button';
 import BN from 'bn.js';
 import web3Utils from 'web3-utils';
+import { AUTO_OPPONENT_ADDRESS } from '../constants';
 
 interface Props {
   challenges: Challenge[],
   acceptChallenge: (address: string, stake: BN) => void,
-  autoOpponentAddress: string,
 }
 
 export default class SelectChallenge extends React.PureComponent<Props> {
@@ -22,7 +22,6 @@ export default class SelectChallenge extends React.PureComponent<Props> {
     const {
       challenges,
       acceptChallenge,
-      autoOpponentAddress,
     } = this.props;
     return (
       <React.Fragment>
@@ -35,11 +34,11 @@ export default class SelectChallenge extends React.PureComponent<Props> {
                 <th>Wager (Finney)</th>
                 <th>Time initiated</th>
               </tr>
-              <tr key={autoOpponentAddress}>
+              <tr key={AUTO_OPPONENT_ADDRESS}>
                 <td>RockBot 🤖 </td>
                 <td>30</td>
                 <td>
-                  <Button onClick={() => acceptChallenge(autoOpponentAddress, new BN(web3Utils.toWei("30",'finney')))}>Challenge</Button>
+                  <Button onClick={() => acceptChallenge(AUTO_OPPONENT_ADDRESS, new BN(web3Utils.toWei("30",'finney')))}>Challenge</Button>
                 </td>
               </tr>
               {challenges.map(challenge => (

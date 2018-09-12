@@ -8,9 +8,10 @@ import { PlayerBStateType as StateType } from '../../game-engine/application-sta
 import { Play } from '../../game-engine/positions';
 import { default as positionFromHex } from '../../game-engine/positions/decode';
 import ChannelWallet from '../../wallet/domain/ChannelWallet';
+import { AUTO_OPPONENT_PRIVATE_KEY } from '../../constants';
 
 export default function* autoOpponentSaga() {
-  const wallet = new ChannelWallet(); // generate new wallet just for this process
+  const wallet = new ChannelWallet(AUTO_OPPONENT_PRIVATE_KEY); // generate new wallet just for this process
   yield put(autoOpponentActions.initializationSuccess(wallet.address));
 
   let gameEngine: GameEngine | null = null;
