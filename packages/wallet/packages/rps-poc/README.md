@@ -12,7 +12,7 @@
     yarn install
     ```
 
-### Developement Info
+### Development Info
 
 #### To run a dev server:
 
