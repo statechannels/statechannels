@@ -3,7 +3,7 @@ import { Channel } from 'fmg-core';
 import ChannelWallet from '../../wallet/domain/ChannelWallet';
 import * as ApplicationStatesA from '../application-states/PlayerA';
 import * as GameEngine from '../GameEngine';
-import { Play, Resting } from '../positions';
+import { Play, Resting, Accept, Propose } from '../positions';
 import { PostFundSetupB, Reveal } from '../positions'
 import BN from 'bn.js';
 
@@ -58,3 +58,41 @@ it('requires sufficient funds to transition from WaitForResting to ReadyToChoose
 
   expect(gameEngineA.state instanceof ApplicationStatesA.InsufficientFunds).toBe(true)
 });
+
+
+it('receives Accept positions correctly', () => {
+  const start = 5
+  const stake = new BN(2);
+  const balances = [ new BN(start), new BN(start)];
+  const aWinsBalances = [new BN(start).add(stake), new BN(start).sub(stake)]
+  const bWinsBalances = [new BN(start).sub(stake), new BN(start).add(stake)]
+  const wallet = new ChannelWallet();
+  const channel = new Channel(wallet.address, 456, [wallet.address, '0x123']);
+
+  const turnNum = 0;
+  const aPlay = Play.Rock;
+  const salt = '0x123'
+  const propose = Propose.createWithPlayAndSalt(
+    channel,
+    turnNum,
+    balances,
+    stake,
+    aPlay,
+    '0x123'
+  )
+  const waitForAccept = new ApplicationStatesA.WaitForAccept({
+    position: propose,
+    aPlay,
+    salt,
+  })
+
+  const gameEngineA = GameEngine.fromState(waitForAccept);
+
+  const preComit = propose.preCommit;
+  const bPlay = Play.Scissors;
+  const accept = new Accept(channel, turnNum + 1, bWinsBalances, stake, preComit, bPlay)
+  gameEngineA.receivePosition(accept);
+
+  expect(gameEngineA.state instanceof ApplicationStatesA.WaitForResting).toBe(true)
+  expect(gameEngineA.state.balances).toEqual(aWinsBalances)
+})

@@ -69,7 +69,11 @@ export class WaitForAccept extends BasePlayerA<Propose> {
   salt: string;
   readonly isReadyToSend = false;
 
-  constructor({ position, aPlay, salt }) {
+  constructor({ position, aPlay, salt }: {
+    position: Propose,
+    aPlay: Play,
+    salt: string
+  }) {
     super({ position });
     this.aPlay = aPlay;
     this.salt = salt;
