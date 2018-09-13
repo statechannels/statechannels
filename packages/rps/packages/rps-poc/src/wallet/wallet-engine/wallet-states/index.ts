@@ -1,7 +1,28 @@
-import { PlayerAState as A } from './PlayerA';
-import { PlayerBState as B } from './PlayerB';
+import BN from 'bn.js';
 
-export type PlayerAState = A;
-export type PlayerBState = B;
+export class FundingFailed {
+  message: string;
+  constructor(message) {
+    this.message = message;
+  }
+}
+export class WaitForApproval {
+  myAddress: string;
+  opponentAddress: string;
+  myBalance: BN;
+  opponentBalance: BN;
+  constructor({ myAddress, opponentAddress, myBalance, opponentBalance }) {
+    this.myAddress = myAddress;
+    this.opponentAddress = opponentAddress;
+    this.myBalance = myBalance;
+    this.opponentBalance = opponentBalance;
+  }
+}
+export class AdjudicatorReceived {
+  adjudicatorAddress: string;
+  constructor(adjudicatorAddress) {
+    this.adjudicatorAddress = adjudicatorAddress;
+  }
+}
 
-export type State = PlayerAState | PlayerBState;
+export class Funded {}
