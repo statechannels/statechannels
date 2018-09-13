@@ -110,28 +110,25 @@ export default class GameEngineA {
   }
 
   conclude() {
-    // problem - we don't necessarily have all the stuff here :()
+    if (this.state instanceof State.Concluded) {
+      return this.state;
+    }
 
-    // const concludePledge = new Conclude(
-    //   oldState.channel,
-    //   oldPledge.turnNum + 1,
-    //   oldState.balances
-    // );
+    const { channel, balances, turnNum } = this.state;
+    const conclude = new Conclude(channel, turnNum + 1, balances)
+    if (this.state instanceof State.WaitForConclude) {
+      return this.transitionTo(
+        new State.Concluded({
+          position: conclude,
+        })
+      );
+    }
 
-    // const concludeMove = this.channelWallet.sign(concludePledge.toHex());
-
-    // if (oldPledge.turnNum % 2 === 0) {
-    //   newState = new State.ReadyToSendConcludeA({
-    //     ...oldState.commonAttributes,
-    //     move: concludeMove,
-    //   });
-    // } else if (oldPledge.turnNum % 2 === 1) {
-    //   newState = new ApplicationStatesB.ReadyToSendConcludeB({
-    //     ...oldState.commonAttributes,
-    //     move: concludeMove,
-    //   });
-    // }
-    return this.state;
+    return this.transitionTo(
+      new State.WaitForConclude({
+        position: conclude,
+      })
+    );
   }
 
   transitionTo(state) {
@@ -197,6 +194,14 @@ export default class GameEngineA {
   }
 
   receivedConclude(position: Conclude) {
+    if (this.state instanceof State.Concluded) {
+      return this.state;
+    }
+    if (this.state instanceof State.WaitForConclude) {
+      return this.transitionTo(
+        new State.Concluded({ position })
+      )
+    }
     // todo: need a move. Might also need an intermediate state here
     return this.transitionTo(
       new State.WaitForConclude({ position })

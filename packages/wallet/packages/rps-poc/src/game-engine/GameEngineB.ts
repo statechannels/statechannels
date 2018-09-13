@@ -13,6 +13,7 @@ import {
   Conclude,
 }  from './positions';
 import BN from 'bn.js';
+import { WaitForConclude } from './application-states/PlayerA';
 
 export default class GameEngineB {
   static fromProposal(position: Position) {
@@ -38,7 +39,6 @@ export default class GameEngineB {
   constructor(state) {
     this.state = state;
   }
-
 
   receivePosition(positionReceived: Position) {
     switch (positionReceived.constructor) {
@@ -93,32 +93,26 @@ export default class GameEngineB {
   }
 
   conclude() {
-    // problem - we don't necessarily have all the stuff here :()
+    if (this.state instanceof State.Concluded) {
+      return this.state;
+    }
 
-    // const { move } = oldState;
-    // const oldPledge = decodePledge(move.state);
-    // let newState;
+    const { channel, balances, turnNum } = this.state;
+    const conclude = new Conclude(channel, turnNum + 1, balances)
+    if (this.state instanceof WaitForConclude) {
+      return this.transitionTo(
+        new State.Concluded({
+          position: conclude,
+        })
+      );
+    }
 
-    // const concludePledge = new Conclude(
-    //   oldState.channel,
-    //   oldPledge.turnNum + 1,
-    //   oldState.balances
-    // );
+    return this.transitionTo(
+      new State.WaitForConclude({
+        position: conclude,
+      })
+    );
 
-    // const concludeMove = this.Wallet.sign(concludePledge.toHex());
-
-    // if (oldPledge.turnNum % 2 === 0) {
-    //   newState = new ApplicationStatesA.ReadyToSendConcludeA({
-    //     ...oldState.commonAttributes,
-    //     move: concludeMove,
-    //   });
-    // } else if (oldPledge.turnNum % 2 === 1) {
-    //   newState = new State.ReadyToSendConcludeB({
-    //     ...oldState.commonAttributes,
-    //     move: concludeMove,
-    //   });
-    // }
-    return this.state;
   }
 
   transitionTo(state) {
@@ -168,6 +162,9 @@ export default class GameEngineB {
   }
 
   receivedConclude(position: Conclude) {
+    if (this.state instanceof State.Concluded) {
+      return this.state;
+    }
     const { channel, resolution: balances } = position;
 
     const newPosition = new Conclude(channel, position.turnNum + 1, balances);

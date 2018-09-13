@@ -32,7 +32,6 @@ export default function* gameSaga(gameEngine: GameEngine) {
 
     switch (action.type) {
       case messageActions.MESSAGE_RECEIVED:
-        gameEngine.fundingConfirmed();
         newState = gameEngine.receivePosition(positionFromHex(action.message));
         break;
       case gameActions.CHOOSE_PLAY:
@@ -75,6 +74,11 @@ function* processState(state) {
     case PlayerAStateType.CHOOSE_PLAY:
     case PlayerBStateType.CHOOSE_PLAY:
       break; // don't send anything if the next step is to ChoosePlay
+    case PlayerAStateType.CONCLUDED:
+    case PlayerBStateType.CONCLUDED:
+      yield put(walletActions.withdrawalRequest(state));
+      // Once the game is concluded, the players do not need to interact with each other
+      break;
     default:
       yield sendState(state);
   }
