@@ -5,7 +5,7 @@ import { Challenge } from '../redux/application/reducer';
 
 import CreateChallenge from './CreateChallenge';
 import SelectChallenge from './SelectChallenge';
-import Button from './Button';
+import { Button, ButtonGroup } from 'reactstrap';
 import BN from 'bn.js';
 
 interface Props {
@@ -31,15 +31,18 @@ export default class ChallengePage extends React.PureComponent<Props, State> {
 
   render() {
     return (
-      <div>
-        <div className="challengePageHeader">
-          <Button onClick={this.showChallengesList}>Select an opponent</Button>
-          <Button onClick={this.showCreateChallenge}>Create a challenge</Button>
+      <div className='container centered-container'>
+        <div className='w-100'>
+          <ButtonGroup className='d-flex w-100 mb-3'>
+            <Button className='w-50' outline={!this.state.showChallenges} onClick={this.showChallengesList}>Select an opponent</Button>
+            <Button className='w-50' outline={this.state.showChallenges} onClick={this.showCreateChallenge}>Create a challenge</Button>
+          </ButtonGroup>
+          <div className='mb-5'>
+            {this.renderCreateChallenge()}
+            {this.renderChallengesList()}
+          </div>
+          <Button onClick={() => this.props.logoutRequest()}>Logout</Button>
         </div>
-        {this.renderCreateChallenge()}
-        {this.renderChallengesList()}
-
-        <Button onClick={() => this.props.logoutRequest()}>Logout</Button>
       </div>
     );
   }

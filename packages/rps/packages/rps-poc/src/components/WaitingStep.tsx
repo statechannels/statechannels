@@ -1,36 +1,21 @@
 import React from 'react';
-import { StyleSheet, css } from 'aphrodite';
-
-import { Play } from '../game-engine/positions';
-import FooterBar from './FooterBar';
 
 interface Props {
   message: string;
-  selectedPlayId?: number;
 }
 
 export default class WaitingStep extends React.PureComponent<Props> {
-  static defaultProps = {
-    selectedPlayId: null,
-  };
-
   render() {
-    const { message, selectedPlayId } = this.props;
+    const { message } = this.props;
 
     return (
-      <React.Fragment>
-        <h2>Waiting: {message}</h2>
-        {selectedPlayId && (
-          <div className={css(styles.fullWidth)}>You&apos;ve chosen {Play[selectedPlayId]}</div>
-        )}
-        <FooterBar>{message}</FooterBar>
-      </React.Fragment>
+      <div className='container centered-container'>
+      <div className='w-100 text-center mb-5'>
+        <h1 className='mb-5'>Waiting ...</h1>
+        <p className='lead'>{message}</p>
+      </div>
+    </div>
     );
   }
 }
 
-const styles = StyleSheet.create({
-  fullWidth: {
-    width: '100%',
-  },
-});

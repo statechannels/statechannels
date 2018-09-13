@@ -4,12 +4,10 @@ import HomePage from '../components/HomePage';
 import * as loginActions from '../redux/login/actions';
 
 const mapStateToProps = (state) => ({
-  loggedIn: state.login.loggedIn,
 });
 
 const mapDispatchToProps = {
   login: loginActions.loginRequest,
-  logout: loginActions.logoutRequest,
 };
 
 export default connect(

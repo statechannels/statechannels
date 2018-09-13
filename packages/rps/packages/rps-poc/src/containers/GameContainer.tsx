@@ -74,7 +74,7 @@ function GameContainer(props: GameProps) {
       return <WalletController />;
 
     case playerB.WAIT_FOR_POST_FUND_SETUP:
-      return <WaitingStep message="Waiting for post-fund setup" />;
+      return <FundingConfirmedPage message="Waiting for your opponent to acknowledge" />;
 
     case playerB.WAIT_FOR_PROPOSE:
       return <WaitingStep message="Waiting for your opponent to choose their move" />;
@@ -83,8 +83,12 @@ function GameContainer(props: GameProps) {
       return <SelectPlayPage choosePlay={choosePlay} />;
 
     case playerB.WAIT_FOR_REVEAL:
-      // choice made
-      return <WaitingStep message="Waiting for opponent to reveal their move" />;
+      return (
+        <PlaySelectedPage
+          message="Waiting for your opponent to choose their move"
+          yourPlay={state.bPlay}
+        />
+      );
 
     case playerB.VIEW_RESULT:
         return (
