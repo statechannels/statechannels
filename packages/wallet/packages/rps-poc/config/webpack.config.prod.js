@@ -324,6 +324,8 @@ module.exports = {
         },
         mangle: {
           safari10: true,
+          // if we mangle BN the isBN function from web3 fails to work...
+          reserved: ['BN'],
         },
         output: {
           ecma: 5,
