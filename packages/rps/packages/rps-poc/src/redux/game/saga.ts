@@ -32,7 +32,7 @@ export default function* gameSaga(gameEngine: GameEngine) {
 
     switch (action.type) {
       case messageActions.MESSAGE_RECEIVED:
-        gameEngine.fundingConfirmed()
+        gameEngine.fundingConfirmed();
         newState = gameEngine.receivePosition(positionFromHex(action.message));
         break;
       case gameActions.CHOOSE_PLAY:
@@ -50,7 +50,7 @@ export default function* gameSaga(gameEngine: GameEngine) {
         // We've received funding so we need to update the game state again
         break;
       default:
-        // do nothing
+      // do nothing
     }
 
     if (newState && newState !== oldState) {
@@ -66,6 +66,8 @@ function* sendState(state) {
 function* processState(state) {
   switch (state.type) {
     case PlayerAStateType.WAIT_FOR_FUNDING:
+      yield put(walletActions.fundingRequest(state.channelId, state));
+      break;
     case PlayerBStateType.WAIT_FOR_FUNDING:
       yield put(walletActions.fundingRequest(state.channelId, state));
       yield sendState(state);
