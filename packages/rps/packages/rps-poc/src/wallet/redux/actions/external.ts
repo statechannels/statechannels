@@ -1,5 +1,11 @@
-import { WaitForFunding as WaitForFundingA } from '../../../game-engine/application-states/PlayerA';
-import { WaitForFunding as WaitForFundingB } from '../../../game-engine/application-states/PlayerB';
+import {
+  WaitForFunding as WaitForFundingA, 
+  Concluded as ConcludedA, 
+} from '../../../game-engine/application-states/PlayerA';
+import {
+  WaitForFunding as WaitForFundingB, 
+  Concluded as ConcludedB, 
+} from '../../../game-engine/application-states/PlayerB';
 
 // FUNDING
 // =======
@@ -84,6 +90,33 @@ export type SignatureSuccess = ReturnType<typeof signatureSuccess>;
 export type SignatureFailure = ReturnType<typeof signatureFailure>;
 export type SignatureResponse = SignatureSuccess | SignatureFailure;
 
+// WITHDRAWAL
+// ==========
+
+export const WITHDRAWAL_REQUEST = 'WALLET.WITHDRAWAL.REQUEST';
+export const WITHDRAWAL_SUCCESS = 'WALLET.WITHDRAWAL.SUCCESS';
+export const WITHDRAWAL_FAILURE = 'WALLET.WITHDRAWAL.FAILURE';
+
+export const withdrawalRequest = (state: ConcludedA | ConcludedB) => ({
+  type: WITHDRAWAL_REQUEST as typeof WITHDRAWAL_REQUEST,
+  state,
+});
+export const withdrawalSuccess = channelId => ({
+  type: WITHDRAWAL_SUCCESS as typeof WITHDRAWAL_SUCCESS,
+  channelId,
+});
+export const withdrawalFailure = (channelId, reason) => ({
+  type: WITHDRAWAL_FAILURE as typeof WITHDRAWAL_FAILURE,
+  channelId,
+  reason,
+});
+
+export type WithdrawalRequest = ReturnType<typeof withdrawalRequest>;
+export type WithdrawalSuccess = ReturnType<typeof withdrawalSuccess>;
+export type WithdrawalFailure = ReturnType<typeof withdrawalFailure>;
+export type WithdrawalResponse = FundingSuccess | FundingFailure;
+
+
 // INITIALIZATION
 // ==============
 
@@ -99,7 +132,7 @@ export type InitializationSuccess = ReturnType<typeof initializationSuccess>;
 // Requests
 // ========
 
-export type RequestAction = FundingRequest | SignatureRequest | ValidationRequest;
+export type RequestAction = FundingRequest | SignatureRequest | ValidationRequest | WithdrawalRequest;
 
 // MESSAGING
 // =========

@@ -41,7 +41,7 @@ function GameContainer(props: GameProps) {
       return <FundingConfirmedPage message="Waiting for your opponent to acknowledge" />;
 
     case playerA.CHOOSE_PLAY:
-      return <SelectPlayPage choosePlay={choosePlay} />;
+      return <SelectPlayPage choosePlay={choosePlay} abandonGame={abandonGame} />;
 
     case playerA.WAIT_FOR_ACCEPT:
       return (
@@ -70,6 +70,18 @@ function GameContainer(props: GameProps) {
         <WaitingStep message="About to conclude the game – either you or your opponent has run out of funds!" />
       );
 
+    case playerA.WAIT_FOR_CONCLUDE:
+      return (
+        <WaitingStep message="Waiting for opponent to conclude the game" />
+      );
+
+    case playerA.CONCLUDED:
+      // TODO: add withdraw button!
+      const message = `The game has concluded -- you may now withdraw your winnings of ${state.balances[state.playerIndex]} Finney! [Withdrawal not implemented]`
+      return (
+        <WaitingStep message={message} />
+      );
+
     case playerB.WAIT_FOR_FUNDING:
       return <WalletController />;
 
@@ -80,7 +92,7 @@ function GameContainer(props: GameProps) {
       return <WaitingStep message="Waiting for your opponent to choose their move" />;
 
     case playerB.CHOOSE_PLAY:
-      return <SelectPlayPage choosePlay={choosePlay} />;
+      return <SelectPlayPage choosePlay={choosePlay} abandonGame={abandonGame} />;
 
     case playerB.WAIT_FOR_REVEAL:
       return (

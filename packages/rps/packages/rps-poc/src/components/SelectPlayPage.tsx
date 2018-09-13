@@ -8,6 +8,7 @@ import { faHandRock, faHandPaper, faHandScissors } from '@fortawesome/free-solid
 
 interface Props {
   choosePlay: (play: Play) => void;
+  abandonGame: () => void;
   afterOpponent?: any;
 }
 
@@ -29,7 +30,7 @@ export default class SelectPlayStep extends React.PureComponent<Props> {
   }
 
   render() {
-    const { afterOpponent, choosePlay } = this.props;
+    const { afterOpponent, choosePlay, abandonGame } = this.props;
     const renderChooseButton = this.renderChooseButton;
 
     return (
@@ -51,6 +52,11 @@ export default class SelectPlayStep extends React.PureComponent<Props> {
               {renderChooseButton(choosePlay, Play.Scissors, 'Scissors', <FontAwesomeIcon icon={faHandScissors} size='7x' flip="horizontal" />)}
             </div>
           </div>
+          <Button onClick={() => abandonGame()} color="dark" className="w-75 p-3">
+            <div className='mb-3'>
+              <h1>Abandon game</h1>
+            </div>
+          </Button>
         </div>
       </div>
     );

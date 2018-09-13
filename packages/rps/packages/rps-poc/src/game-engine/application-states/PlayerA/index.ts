@@ -22,6 +22,7 @@ export enum PlayerAStateType {
   WAIT_FOR_ACCEPT = 'PLAYER_A.WAIT_FOR_ACCEPT',
   WAIT_FOR_RESTING = 'PLAYER_A.WAIT_FOR_RESTING',
   WAIT_FOR_CONCLUDE = 'PLAYER_A.WAIT_FOR_CONCLUDE',
+  CONCLUDED = 'PLAYER_A.CONCLUDED',
   INSUFFICIENT_FUNDS = 'PLAYER_A.INSUFFICIENT_FUNDS',
 }
 
@@ -116,6 +117,11 @@ export class WaitForConclude extends BasePlayerA<Conclude> {
   readonly isReadyToSend = false;
 }
 
+export class Concluded extends BasePlayerA<Conclude> {
+  readonly type = PlayerAStateType.CONCLUDED;
+  readonly isReadyToSend = false;
+}
+
 export type PlayerAState =
   | WaitForPreFundSetup
   | WaitForFunding
@@ -124,4 +130,5 @@ export type PlayerAState =
   | WaitForAccept
   | WaitForResting
   | InsufficientFunds
-  | WaitForConclude;
+  | WaitForConclude
+  | Concluded;
