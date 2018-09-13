@@ -4,16 +4,17 @@ import WalletController from '../components/WalletController';
 import * as playerActions from '../redux/actions/player';
 
 const mapStateToProps = (state: SiteState) => {
-	return {
-	  walletState: state.wallet,
-	}
-}
+  return {
+    walletState: state.wallet,
+  };
+};
 
 const mapDispatchToProps = {
-	tryAgain: playerActions.tryFundingAgain,
-}
+  tryFundingAgain: playerActions.tryFundingAgain,
+  approveFunding: playerActions.approveFunding,
+  declineFunding: playerActions.declineFunding,
+};
 export default connect(
-	mapStateToProps,
-	mapDispatchToProps,
+  mapStateToProps,
+  mapDispatchToProps,
 )(WalletController);
-

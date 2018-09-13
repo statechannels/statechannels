@@ -1,22 +1,17 @@
-import WaitForBlockchainDeploy from './WaitForBlockchainDeploy';
-import ReadyToDeploy from './ReadyToDeploy';
-import WaitForBToDeposit from './WaitForBToDeposit';
-import Funded from './Funded';
-import WaitForApproval from './WaitForApproval';
-import FundingFailed from '../PlayerB/FundingFailed';
+import * as CommonState from '../';
 
-export type PlayerAState = (
-  WaitForBlockchainDeploy |
-  ReadyToDeploy |
-  WaitForBToDeposit |
-  WaitForApproval|
-  Funded|
-  FundingFailed
-);
-
-export {WaitForBlockchainDeploy};
-export {ReadyToDeploy};
-export {WaitForBToDeposit};
-export {Funded};
-export {WaitForApproval};
-export {FundingFailed};
+export class ReadyToDeploy {}
+export class WaitForBlockchainDeploy {}
+export const WaitForBToDeposit  = CommonState.AdjudicatorReceived
+export const FundingFailed = CommonState.FundingFailed;
+export const WaitForApproval = CommonState.WaitForApproval;
+export const Funded = CommonState.Funded;
+export type WaitForBToDeposit = CommonState.AdjudicatorReceived;
+export type PlayerAState =
+  | ReadyToDeploy
+  | WaitForBlockchainDeploy
+  | WaitForBToDeposit
+  | CommonState.WaitForApproval
+  | CommonState.FundingFailed
+  | CommonState.AdjudicatorReceived
+  |CommonState.Funded;

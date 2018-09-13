@@ -1,19 +1,24 @@
-import WaitForBlockchainDeposit from './WaitForBlockchainDeposit';
-import ReadyToDeposit from './ReadyToDeposit';
-import WaitForAToDeploy from './WaitForAToDeploy';
-import Funded from './Funded';
-import FundingFailed from './FundingFailed';
+import * as CommonState from '..';
 
-export type PlayerBState = (
-  WaitForBlockchainDeposit |
-  ReadyToDeposit |
-  WaitForAToDeploy |
-  Funded |
-  FundingFailed
-);
-
-export {WaitForBlockchainDeposit};
-export {ReadyToDeposit};
-export {WaitForAToDeploy};
-export {Funded};
-export {FundingFailed};
+export type ReadyToDeposit = CommonState.AdjudicatorReceived;
+export class WaitForAToDeploy {}
+export class WaitForBlockchainDeposit {}
+export class WaitForApprovalWithAdjudicator extends CommonState.WaitForApproval {
+  adjudicatorAddress: string;
+  constructor({ adjudicatorAddress, myAddress, opponentAddress, myBalance, opponentBalance }) {
+    super({ myAddress, opponentAddress, myBalance, opponentBalance });
+    this.adjudicatorAddress = adjudicatorAddress;
+  }
+}
+export const FundingFailed = CommonState.FundingFailed;
+export const WaitForApproval = CommonState.WaitForApproval;
+export const Funded = CommonState.Funded;
+export const ReadyToDeposit = CommonState.AdjudicatorReceived;
+export type PlayerBState =
+  | ReadyToDeposit
+  | WaitForAToDeploy
+  | WaitForBlockchainDeposit
+  | CommonState.WaitForApproval
+  | CommonState.FundingFailed
+  | CommonState.AdjudicatorReceived
+  | CommonState.Funded;

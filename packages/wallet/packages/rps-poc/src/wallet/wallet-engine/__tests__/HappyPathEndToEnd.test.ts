@@ -1,19 +1,23 @@
-
 import WalletEngineA from '../WalletEngineA';
 import * as WalletStatesA from '../wallet-states/PlayerA';
 import * as WalletStatesB from '../wallet-states/PlayerB';
 import WalletEngineB from '../WalletEngineB';
+import BN from 'bn.js';
+
+const engineArgs = {
+  myAddress: 'me',
+  opponentAddress: 'you',
+  myBalance: new BN(5),
+  opponentBalance: new BN(5),
+};
 
 describe('Happy path runthrough', () => {
-
-
   // In A's application
-  const walletEngineA = WalletEngineA.setupWalletEngine();
+  const walletEngineA = WalletEngineA.setupWalletEngine(engineArgs);
   const waitForApproval = walletEngineA.state;
   it('should have the wait for approval state', () => {
     expect(waitForApproval).toBeInstanceOf(WalletStatesA.WaitForApproval);
   });
-
 
   it('should have the ready to deploy state', () => {
     const readyToDeploy = walletEngineA.approve();
@@ -31,10 +35,14 @@ describe('Happy path runthrough', () => {
   });
 
   // In B's application
-  const walletEngineB = WalletEngineB.setupWalletEngine();
+  const walletEngineB = WalletEngineB.setupWalletEngine(engineArgs);
+  it('should have the wait for approval state', () => {
+    const waitForApprovalB = walletEngineB.state;
+    expect(waitForApprovalB).toBeInstanceOf(WalletStatesB.WaitForApproval);
+  });
 
   it('should have the wait for A to deploy state', () => {
-    const waitForAToDeploy = walletEngineB.state;
+    const waitForAToDeploy =  walletEngineB.approve();
     expect(waitForAToDeploy).toBeInstanceOf(WalletStatesB.WaitForAToDeploy);
   });
 
@@ -48,7 +56,7 @@ describe('Happy path runthrough', () => {
     expect(waitForBlockchainDeposit).toBeInstanceOf(WalletStatesB.WaitForBlockchainDeposit);
   });
 
-  it("should have the funded state",()=>{
+  it('should have the funded state', () => {
     const funded = walletEngineB.transactionConfirmed();
     expect(funded).toBeInstanceOf(WalletStatesB.Funded);
   });
@@ -58,6 +66,4 @@ describe('Happy path runthrough', () => {
     const fundedA = walletEngineA.receiveFundingEvent();
     expect(fundedA).toBeInstanceOf(WalletStatesA.Funded);
   });
-
-
 });
