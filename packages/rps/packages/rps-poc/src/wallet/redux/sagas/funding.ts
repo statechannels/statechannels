@@ -45,7 +45,7 @@ export function* deployContract(channelId: string, walletEngine: WalletEngineA, 
 
 export function* fundContract(walletEngine: WalletEngineB, amount: BN) {
   let newState = walletEngine.state;
-  const { adjudicatorAddress } = newState.position;
+  const { adjudicatorAddress } = newState;
   yield put(stateActions.stateChanged(newState));
   yield put(blockchainActions.depositRequest(adjudicatorAddress, amount));
   while (true) {
