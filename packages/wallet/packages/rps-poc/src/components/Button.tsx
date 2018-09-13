@@ -1,8 +1,6 @@
 import React from 'react';
 import { StyleSheet, css } from 'aphrodite';
 
-import { BRAND_COLOR } from '../constants';
-
 interface ButtonStyles {
   button: Record<string, any>;
 }
@@ -11,7 +9,6 @@ export const buttonStyles: ButtonStyles = {
   button: {
     borderRadius: 3,
     padding: '3px 16px 4px',
-    backgroundColor: BRAND_COLOR,
     borderColor: '#666',
     borderStyle: 'solid',
     borderWidth: 1,

@@ -1,6 +1,6 @@
 import { connect } from 'react-redux';
 
-import ChallengePage from '../components/ChallengePage';
+import LobbyPage from '../components/LobbyPage';
 import * as lobbyActions from '../redux/lobby/actions';
 import * as loginActions from '../redux/login/actions';
 
@@ -20,4 +20,4 @@ const mapDispatchToProps = {
 export default connect(
   mapStateToProps,
   mapDispatchToProps,
-)(ChallengePage);
+)(LobbyPage);

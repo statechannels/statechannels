@@ -137,6 +137,26 @@ module.exports = {
               }
             ]
           },
+          {
+            test: /\.(scss)$/,
+            use: [{
+              loader: 'style-loader', // inject CSS to page
+            }, {
+              loader: 'css-loader', // translates CSS into CommonJS modules
+            }, {
+              loader: 'postcss-loader', // Run post css actions
+              options: {
+                plugins: function () { // post css plugins, can be exported to postcss.config.js
+                  return [
+                    require('precss'),
+                    require('autoprefixer')
+                  ];
+                }
+              }
+            }, {
+              loader: 'sass-loader' // compiles Sass to CSS
+            }]
+          },
           // "url" loader works like "file" loader except that it embeds assets
           // smaller than specified limit in bytes as data URLs to avoid requests.
           // A missing `test` is equivalent to a match.

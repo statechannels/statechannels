@@ -1,7 +1,5 @@
 import React from 'react';
 
-import FooterBar from './FooterBar';
-
 interface Props {
   message: string;
 }
@@ -11,12 +9,11 @@ export default class ProposeGamePage extends React.PureComponent<Props> {
     const { message } = this.props;
 
     return (
-      <div>
-        <h1>Game Proposed</h1>
-
-        <div>Waiting for your opponent to accept the game!</div>
-
-        <FooterBar>{message}</FooterBar>
+      <div className='container centered-container'>
+        <div className='w-100 text-center mb-5'>
+          <h1 className='mb-5'>Game Proposed!</h1>
+          <p className='lead'>{message}</p>
+        </div>
       </div>
     );
   }

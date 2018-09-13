@@ -1,0 +1,19 @@
+@import "~bootstrap/scss/bootstrap";
+
+html, body, #root {
+  height: 100%;
+}
+
+#root {
+  display: flex;
+}
+
+.centered-container {
+  display: flex;
+  align-items: center;
+}
+
+.fa-hand-scissors, .fa-hand-rock, .fa-hand-paper {
+  color: orange;
+}
+

@@ -1,10 +1,10 @@
 import React, { ReactNode } from 'react';
-import { StyleSheet, css } from 'aphrodite';
 
 import { Play } from '../game-engine/positions';
-import RockIcon from '../icons/rock_icon';
-import PaperIcon from '../icons/paper_icon';
-import ScissorsIcon from '../icons/scissors_icon';
+
+import { Button } from 'reactstrap';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faHandRock, faHandPaper, faHandScissors } from '@fortawesome/free-solid-svg-icons';
 
 interface Props {
   choosePlay: (play: Play) => void;
@@ -19,17 +19,12 @@ export default class SelectPlayStep extends React.PureComponent<Props> {
     icon: ReactNode,
   ) {
     return (
-      <button
-        type="button"
-        onClick={() => choosePlay(play)}
-        key={play}
-        className={css(styles.buttonContainer)}
-      >
-        <div className={css(styles.buttonContent)}>
+      <Button onClick={() => choosePlay(play)} color="light" className="w-75 p-3">
+        <div className='mb-3'>
           <h1>{description}</h1>
           {icon}
         </div>
-      </button>
+      </Button>
     );
   }
 
@@ -38,47 +33,26 @@ export default class SelectPlayStep extends React.PureComponent<Props> {
     const renderChooseButton = this.renderChooseButton;
 
     return (
-      <React.Fragment>
-        <h1>
-          {afterOpponent
-            ? 'Your opponent has chosen a move, now choose yours:'
-            : 'Choose your move:'}
-        </h1>
-        <div className={css(styles.fullWidth)}>
-          {renderChooseButton(choosePlay, Play.Rock, 'Rock', <RockIcon width="100%" />)}
-          {renderChooseButton(choosePlay, Play.Paper, 'Paper', <PaperIcon width="100%" />)}
-          {renderChooseButton(choosePlay, Play.Scissors, 'Scissors', <ScissorsIcon width="100%" />)}
+      <div className='container centered-container'>
+        <div className='w-100 text-center mb-5'>
+          <h1 className='mb-5'>
+            {afterOpponent
+              ? 'Your opponent has chosen a move, now choose yours:'
+              : 'Choose your move:'}
+          </h1>
+          <div className="row w-100">
+            <div className="col-sm-4">
+              {renderChooseButton(choosePlay, Play.Rock, 'Rock', <FontAwesomeIcon icon={faHandRock} size='7x' rotation={90} />)}
+            </div>
+            <div className="col-sm-4">
+              {renderChooseButton(choosePlay, Play.Paper, 'Paper', <FontAwesomeIcon icon={faHandPaper} size='7x' rotation={90} />)}
+            </div>
+            <div className="col-sm-4">
+              {renderChooseButton(choosePlay, Play.Scissors, 'Scissors', <FontAwesomeIcon icon={faHandScissors} size='7x' flip="horizontal" />)}
+            </div>
+          </div>
         </div>
-      </React.Fragment>
+      </div>
     );
   }
 }
-
-const styles = StyleSheet.create({
-  fullWidth: {
-    width: '100%',
-  },
-
-  buttonContent: {
-    left: '50%',
-    position: 'relative',
-    transform: 'translateX(-50%)',
-    width: 'fit-content',
-    margin: 4,
-    paddingBottom: 16,
-  },
-
-  buttonContainer: {
-    display: 'inline-block',
-    width: '33%',
-    borderWidth: '1px',
-    borderStyle: 'solid',
-    borderColor: 'white',
-    borderRadius: 5,
-
-    ':hover': {
-      textDecoration: 'underline',
-      borderColor: 'black',
-    },
-  },
-});

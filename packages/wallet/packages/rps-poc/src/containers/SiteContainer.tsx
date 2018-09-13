@@ -1,7 +1,5 @@
 import React from 'react';
 
-import '../App.css';
-import Header from '../components/Header';
 import ApplicationContainer from './ApplicationContainer';
 import HomePageContainer from './HomePageContainer';
 import { connect } from 'react-redux';
@@ -19,26 +17,16 @@ interface SiteProps {
 }
 
 function Site(props: SiteProps) {
-  let content;
   if (props.loading) {
-    content =<LoadingPage/>;
+    return <LoadingPage/>;
   } else if (props.metamaskError !== null) {
-    content = <MetamaskErrorPage error={props.metamaskError} />;
+    return <MetamaskErrorPage error={props.metamaskError} />;
   } else if (props.isAuthenticated) {
-    content = <ApplicationContainer />;
+    return <ApplicationContainer />;
   } else {
-    content = <HomePageContainer />;
+    return <HomePageContainer />;
   }
-
-  return (
-    <div>
-      <header>
-        <Header />
-      </header>
-      {content}
-    </div>
-  );
-}
+};
 
 const mapStateToProps = (state: SiteState): SiteProps => {
   return {
