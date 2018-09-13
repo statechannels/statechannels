@@ -1,8 +1,6 @@
 import * as React from 'react';
 import { StyleSheet, css } from 'aphrodite';
 
-import { BRAND_COLOR } from '../constants';
-
 export default function Header() {
   return (
     <div className={css(styles.container)}>
@@ -15,7 +13,6 @@ export default function Header() {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: BRAND_COLOR,
     borderBottomColor: '#bbb',
     borderBottomStyle: 'solid',
     borderBottomWidth: 1,

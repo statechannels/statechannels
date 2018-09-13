@@ -1,9 +1,8 @@
 import React from 'react';
-import { StyleSheet, css } from 'aphrodite';
 
 import { Challenge } from '../redux/application/reducer';
 
-import Button from './Button';
+import { Table } from 'reactstrap';
 import BN from 'bn.js';
 import web3Utils from 'web3-utils';
 import { AUTO_OPPONENT_ADDRESS } from '../constants';
@@ -25,56 +24,27 @@ export default class SelectChallenge extends React.PureComponent<Props> {
     } = this.props;
     return (
       <React.Fragment>
-        <h1>Select an opponent:</h1>
-        <div className={css(styles.centeredTable)}>
-          <table className={css(styles.leftAlign)}>
-            <tbody>
-              <tr className={css(styles.titleRow)}>
-                <th>Name</th>
-                <th>Wager (Finney)</th>
-                <th>Time initiated</th>
+        <Table hover={true}>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Wager (Finney)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr key={AUTO_OPPONENT_ADDRESS} onClick={() => acceptChallenge(AUTO_OPPONENT_ADDRESS, new BN(web3Utils.toWei("30", 'finney')))} >
+              <td>RockBot 🤖 </td>
+              <td>30</td>
+            </tr>
+            {challenges.map(challenge => (
+              <tr key={challenge.address} onClick={() => acceptChallenge(challenge.address, challenge.stake)} >
+                <td>{challenge.name}</td>
+                <td>{web3Utils.fromWei(challenge.stake.toString(), 'finney')}</td>
               </tr>
-              <tr key={AUTO_OPPONENT_ADDRESS}>
-                <td>RockBot 🤖 </td>
-                <td>30</td>
-                <td>
-                  <Button onClick={() => acceptChallenge(AUTO_OPPONENT_ADDRESS, new BN(web3Utils.toWei("30",'finney')))}>Challenge</Button>
-                </td>
-              </tr>
-              {challenges.map(challenge => (
-                <tr key={challenge.address}>
-                  <td>{challenge.name}</td>
-                  <td>{web3Utils.fromWei(challenge.stake.toString(),'finney')}</td>
-                  <td>
-                    <Button onClick={() => acceptChallenge(challenge.address, challenge.stake)}>Challenge</Button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+            ))}
+          </tbody>
+        </Table>
       </React.Fragment>
     );
   }
 }
-
-const styles = StyleSheet.create({
-  centeredTable: {
-    left: '50%',
-    position: 'absolute',
-    transform: 'translateX(-50%)',
-  },
-
-  leftAlign: {
-    textAlign: 'left',
-  },
-
-  buttonPosition: {
-    textAlign: 'center',
-    padding: '20px',
-  },
-
-  titleRow: {
-    height: 60,
-  },
-});

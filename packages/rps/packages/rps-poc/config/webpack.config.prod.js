@@ -137,6 +137,26 @@ module.exports = {
         // match the requirements. When no loader matches it will fall
         // back to the "file" loader at the end of the loader list.
         oneOf: [
+          {
+            test: /\.(scss)$/,
+            use: [{
+              loader: 'style-loader', // inject CSS to page
+            }, {
+              loader: 'css-loader', // translates CSS into CommonJS modules
+            }, {
+              loader: 'postcss-loader', // Run post css actions
+              options: {
+                plugins: function () { // post css plugins, can be exported to postcss.config.js
+                  return [
+                    require('precss'),
+                    require('autoprefixer')
+                  ];
+                }
+              }
+            }, {
+              loader: 'sass-loader' // compiles Sass to CSS
+            }]
+          },
           // "url" loader works just like "file" loader but it also embeds
           // assets smaller than specified size as data URLs to avoid requests.
           {

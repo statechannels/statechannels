@@ -1,46 +1,41 @@
 import React from 'react';
 import { StyleSheet, css } from 'aphrodite';
 
-import Button from './Button';
-import RockIcon from '../icons/rock_icon';
-import PaperIcon from '../icons/paper_icon';
-import ScissorsIcon from '../icons/scissors_icon';
+import { Button } from 'reactstrap';
+
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faHandRock, faHandPaper, faHandScissors } from '@fortawesome/free-solid-svg-icons';
 
 interface IProps {
   login: () => any;
-  logout: () => any;
-  loggedIn: boolean;
 }
 
-const HomePage: React.SFC<IProps> = ({ login, logout, loggedIn }) => {
-  let loginButton;
-  if (loggedIn) {
-    loginButton = <Button onClick={logout}>Logout</Button>;
-  } else {
-    loginButton = <Button onClick={login}>Login</Button>;
-  }
-
+const HomePage: React.SFC<IProps> = ({ login }) => {
   return (
-    <div className={css(styles.container)}>
-      <div className={css(styles.headerText)}>
-        <h1 className={css(styles.title)}>Rock, Paper, Scissors</h1>
-        <p>
-          <em>A State-Channel Proof-of-Concept Game</em>
-        </p>
-      </div>
-      <div className={css(styles.centeredGroup, styles.icons)}>
-        <div className={css(styles.image)}>
-          <RockIcon width="100%" />
+    <div className='container centered-container'>
+      <div className='w-100'>
+        <div className="mb-5 text-center">
+          <h1 className={css(styles.title)}>Rock, Paper, Scissors</h1>
+          <p>
+            <em>A State Channel Game</em>
+          </p>
         </div>
-        <div className={css(styles.image)}>
-          <PaperIcon width="100%" />
+        <div className='row text-center mb-5'>
+          <div className='col-sm-4'>
+            <FontAwesomeIcon icon={faHandRock} size='7x' rotation={90} />
+          </div>
+          <div className='col-sm-4'>
+            <FontAwesomeIcon icon={faHandPaper} size='7x' rotation={90} />
+          </div>
+          <div className='col-sm-4'>
+            <FontAwesomeIcon icon={faHandScissors} size='7x' flip="horizontal" />
+          </div>
         </div>
-        <div className={css(styles.image)}>
-          <ScissorsIcon width="100%" />
+        <div className='row mb-5'>
+          <div className='col-sm-12'>
+            <Button block={true} color="primary" onClick={login}>Login</Button>
+          </div>
         </div>
-      </div>
-      <div className={css(styles.centeredGroup, styles.buttons)}>
-        {loginButton}
       </div>
     </div>
   );
