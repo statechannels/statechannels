@@ -2,9 +2,7 @@ import * as State from './wallet-states/PlayerB';
 
 export default class WalletEngineB {
   static setupWalletEngine({ myAddress, opponentAddress, myBalance, opponentBalance }) {
-    const newPosition = new State.WaitForApproval({ myAddress, opponentAddress, myBalance, opponentBalance });
-
-    const walletState = new State.WaitForApproval(newPosition);
+    const walletState = new State.WaitForApproval({ myAddress, opponentAddress, myBalance, opponentBalance });
     return new WalletEngineB(walletState);
   }
   state: any;
