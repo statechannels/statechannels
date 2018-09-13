@@ -1,8 +1,13 @@
 import * as State from './wallet-states/PlayerA';
 
 export default class WalletEngineA {
-  static setupWalletEngine(): WalletEngineA {
-    const walletState = new State.WaitForApproval();
+  static setupWalletEngine({ myAddress, opponentAddress, myBalance, opponentBalance }) {
+    const walletState = new State.WaitForApproval({
+      myAddress,
+      opponentAddress,
+      myBalance,
+      opponentBalance,
+    });
     return new WalletEngineA(walletState);
   }
 
@@ -33,6 +38,7 @@ export default class WalletEngineA {
       return this.state;
     }
   }
+
   transactionConfirmed(adjudicator: string): State.PlayerAState {
     if (
       this.state.constructor === State.WaitForBlockchainDeploy ||
