@@ -37,14 +37,14 @@ export function* blockchainSaga() {
     blockchainActions.DEPOSIT_REQUEST,
   ]);
 
+  const network = yield call(detectNetwork, web3.currentProvider);
+  const simpleAdjudicatorContract = contract(simpleAdjudicatorArtifact);
+  yield call(simpleAdjudicatorContract.defaults, { from: web3.eth.defaultAccount });
+  simpleAdjudicatorContract.setProvider(web3.currentProvider);
+  simpleAdjudicatorContract.setNetwork(network.id);
+
   while (true) {
     const action = yield take(channel);
-
-    const network = yield call(detectNetwork, web3.currentProvider);
-    const simpleAdjudicatorContract = contract(simpleAdjudicatorArtifact);
-    yield call(simpleAdjudicatorContract.defaults, { from: web3.eth.defaultAccount });
-    simpleAdjudicatorContract.setProvider(web3.currentProvider);
-    simpleAdjudicatorContract.setNetwork(network.id);
 
     switch (action.type) {
       case blockchainActions.DEPLOY_REQUEST:
@@ -69,11 +69,11 @@ export function* blockchainSaga() {
           const existingContract = yield call(simpleAdjudicatorContract.at, action.address);
           const transaction = yield call(existingContract.send, action.amount.toString());
           yield put(blockchainActions.depositSuccess(transaction));
-          break;
         } catch (err) {
           const message = err.message ? err.message : "Something went wrong";
           yield put(blockchainActions.depositFailure(message));
         }
+        break;
     }
   }
 }
