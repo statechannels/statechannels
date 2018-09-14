@@ -21,7 +21,7 @@ import { State as GameState } from '../game-engine/application-states';
 import { Play } from '../game-engine/positions';
 
 interface GameProps {
-  state: GameState,
+  state: GameState;
   choosePlay: (play: Play) => void;
   abandonGame: () => void;
   playAgain: () => void;
@@ -71,16 +71,14 @@ function GameContainer(props: GameProps) {
       );
 
     case playerA.WAIT_FOR_CONCLUDE:
-      return (
-        <WaitingStep message="Waiting for opponent to conclude the game" />
-      );
+      return <WaitingStep message="Waiting for opponent to conclude the game" />;
 
     case playerA.CONCLUDED:
       // TODO: add withdraw button!
-      const message = `The game has concluded -- you may now withdraw your winnings of ${state.balances[state.playerIndex]} Finney! [Withdrawal not implemented]`
-      return (
-        <WaitingStep message={message} />
-      );
+      const message = `The game has concluded -- you may now withdraw your winnings of ${
+        state.balances[state.playerIndex]
+      } Finney! [Withdrawal not implemented]`;
+      return <WaitingStep message={message} />;
 
     case playerB.WAIT_FOR_FUNDING:
       return <WalletController />;
@@ -103,16 +101,16 @@ function GameContainer(props: GameProps) {
       );
 
     case playerB.VIEW_RESULT:
-        return (
-          <ResultPage
-            message="Waiting for opponent to suggest a new game"
-            yourPlay={state.bPlay}
-            theirPlay={state.aPlay}
-            result={state.result}
-            playAgain={playAgain}
-            abandonGame={abandonGame}
-          />
-        );
+      return (
+        <ResultPage
+          message="Waiting for opponent to suggest a new game"
+          yourPlay={state.bPlay}
+          theirPlay={state.aPlay}
+          result={state.result}
+          playAgain={playAgain}
+          abandonGame={abandonGame}
+        />
+      );
 
     default:
       return <WaitingStep message={`[view not implemented: ${state.type}`} />;

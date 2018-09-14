@@ -9,10 +9,10 @@ import { Button, ButtonGroup } from 'reactstrap';
 import BN from 'bn.js';
 
 interface Props {
-  challenges: Challenge[],
-  acceptChallenge: (address: string, stake: BN) => void,
-  createChallenge: (name: string, stake: BN) => void,
-  logoutRequest: () => void,
+  challenges: Challenge[];
+  acceptChallenge: (address: string, stake: BN) => void;
+  createChallenge: (name: string, stake: BN) => void;
+  logoutRequest: () => void;
 }
 
 const initialState = { showChallenges: true };
@@ -31,13 +31,25 @@ export default class ChallengePage extends React.PureComponent<Props, State> {
 
   render() {
     return (
-      <div className='container centered-container'>
-        <div className='w-100'>
-          <ButtonGroup className='d-flex w-100 mb-3'>
-            <Button className='w-50' outline={!this.state.showChallenges} onClick={this.showChallengesList}>Select an opponent</Button>
-            <Button className='w-50' outline={this.state.showChallenges} onClick={this.showCreateChallenge}>Create a challenge</Button>
+      <div className="container centered-container">
+        <div className="w-100">
+          <ButtonGroup className="d-flex w-100 mb-3">
+            <Button
+              className="w-50"
+              outline={!this.state.showChallenges}
+              onClick={this.showChallengesList}
+            >
+              Select an opponent
+            </Button>
+            <Button
+              className="w-50"
+              outline={this.state.showChallenges}
+              onClick={this.showCreateChallenge}
+            >
+              Create a challenge
+            </Button>
           </ButtonGroup>
-          <div className='mb-5'>
+          <div className="mb-5">
             {this.renderCreateChallenge()}
             {this.renderChallengesList()}
           </div>
@@ -60,11 +72,7 @@ export default class ChallengePage extends React.PureComponent<Props, State> {
       return null;
     }
 
-    return (
-      <CreateChallenge
-        createChallenge={this.props.createChallenge}
-      />
-    );
+    return <CreateChallenge createChallenge={this.props.createChallenge} />;
   }
 
   renderChallengesList() {

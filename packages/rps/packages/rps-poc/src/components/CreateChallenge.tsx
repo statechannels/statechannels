@@ -12,7 +12,7 @@ interface Props {
 
 export default class CreateChallenge extends React.PureComponent<Props> {
   wagerInput: any;
-  nameInput: any = "";
+  nameInput: any = '';
 
   constructor(props) {
     super(props);
@@ -42,24 +42,40 @@ export default class CreateChallenge extends React.PureComponent<Props> {
 
   render() {
     return (
-      <form onSubmit={(e) => this.createChallengeHandler(e)}>
-        <div className='row'>
-          <div className='form-group col-sm-6'>
+      <form onSubmit={e => this.createChallengeHandler(e)}>
+        <div className="row">
+          <div className="form-group col-sm-6">
             <label htmlFor="name">Name</label>
-            <input className="form-control" type="text" name="name" id="name" placeholder="Name" ref={this.nameInput} />
+            <input
+              className="form-control"
+              type="text"
+              name="name"
+              id="name"
+              placeholder="Name"
+              ref={this.nameInput}
+            />
             <small id="passwordHelpBlock" className="form-text text-muted">
               The name that will show to other players in the challenge list.
             </small>
           </div>
-          <div className='form-group col-sm-6'>
+          <div className="form-group col-sm-6">
             <label htmlFor="wager">Wager</label>
-            <input className="form-control" type="number" name="wager" id="wager" placeholder="5" ref={this.wagerInput} />
+            <input
+              className="form-control"
+              type="number"
+              name="wager"
+              id="wager"
+              placeholder="5"
+              ref={this.wagerInput}
+            />
             <small id="passwordHelpBlock" className="form-text text-muted">
               Your wager in Finney.
             </small>
           </div>
         </div>
-        <Button type="submit" block={true} color="primary">Create Challenge</Button>
+        <Button type="submit" block={true} color="primary">
+          Create Challenge
+        </Button>
       </form>
     );
   }

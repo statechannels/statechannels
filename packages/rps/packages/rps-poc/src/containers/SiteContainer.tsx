@@ -9,7 +9,6 @@ import MetamaskErrorPage from '../components/MetamaskErrorPage';
 import { MetamaskError } from '../redux/metamask/actions';
 import LoadingPage from '../components/LoadingPage';
 
-
 interface SiteProps {
   isAuthenticated: boolean;
   metamaskError: MetamaskError | null;
@@ -18,7 +17,7 @@ interface SiteProps {
 
 function Site(props: SiteProps) {
   if (props.loading) {
-    return <LoadingPage/>;
+    return <LoadingPage />;
   } else if (props.metamaskError !== null) {
     return <MetamaskErrorPage error={props.metamaskError} />;
   } else if (props.isAuthenticated) {
@@ -26,7 +25,7 @@ function Site(props: SiteProps) {
   } else {
     return <HomePageContainer />;
   }
-};
+}
 
 const mapStateToProps = (state: SiteState): SiteProps => {
   return {
