@@ -8,9 +8,11 @@ interface Props {
 
 export default class FundingError extends React.PureComponent<Props> {
   render() {
-    return <div>
-    <div>{this.props.message}</div>
-    <Button onClick={this.props.tryAgain}>Try Again</Button>
-    </div>;
+    return (
+      <div>
+        <div>{this.props.message}</div>
+        <Button onClick={this.props.tryAgain}>Try Again</Button>
+      </div>
+    );
   }
 }

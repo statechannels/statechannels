@@ -47,7 +47,12 @@ export default class WalletController extends PureComponent<Props> {
         return <FundingInProgress message="waiting for deposit confirmation" />;
       case WaitForApproval:
       case playerB.WaitForApprovalWithAdjudicator:
-        const { myAddress, opponentAddress, myBalance, opponentBalance } = walletState as WaitForApproval;
+        const {
+          myAddress,
+          opponentAddress,
+          myBalance,
+          opponentBalance,
+        } = walletState as WaitForApproval;
         const confirmFundingProps = {
           myAddress,
           opponentAddress,

@@ -22,7 +22,6 @@ function Application(props: ApplicationProps) {
   }
 }
 
-
 const mapStateToProps = (state: SiteState): ApplicationProps => ({
   currentRoom: state.app.currentRoom,
 });

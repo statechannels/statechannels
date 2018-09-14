@@ -3,8 +3,8 @@ import { StyleSheet, css } from 'aphrodite';
 
 import { Button } from 'reactstrap';
 
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faHandRock, faHandPaper, faHandScissors } from '@fortawesome/free-solid-svg-icons';
+import { Play } from '../game-engine/positions';
+import MoveIcon from './MoveIcon';
 
 interface IProps {
   login: () => any;
@@ -12,28 +12,30 @@ interface IProps {
 
 const HomePage: React.SFC<IProps> = ({ login }) => {
   return (
-    <div className='container centered-container'>
-      <div className='w-100'>
+    <div className="container centered-container">
+      <div className="w-100">
         <div className="mb-5 text-center">
           <h1 className={css(styles.title)}>Rock, Paper, Scissors</h1>
           <p>
             <em>A State Channel Game</em>
           </p>
         </div>
-        <div className='row text-center mb-5'>
-          <div className='col-sm-4'>
-            <FontAwesomeIcon icon={faHandRock} size='7x' rotation={90} />
+        <div className="row text-center mb-5">
+          <div className="col-sm-4">
+            <MoveIcon play={Play.Rock} />
           </div>
-          <div className='col-sm-4'>
-            <FontAwesomeIcon icon={faHandPaper} size='7x' rotation={90} />
+          <div className="col-sm-4">
+            <MoveIcon play={Play.Paper} />
           </div>
-          <div className='col-sm-4'>
-            <FontAwesomeIcon icon={faHandScissors} size='7x' flip="horizontal" />
+          <div className="col-sm-4">
+            <MoveIcon play={Play.Scissors} />
           </div>
         </div>
-        <div className='row mb-5'>
-          <div className='col-sm-12'>
-            <Button block={true} color="primary" onClick={login}>Login</Button>
+        <div className="row mb-5">
+          <div className="col-sm-12">
+            <Button block={true} color="primary" onClick={login}>
+              Login
+            </Button>
           </div>
         </div>
       </div>
