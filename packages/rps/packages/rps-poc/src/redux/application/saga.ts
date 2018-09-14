@@ -1,4 +1,4 @@
-import { take, cancel, actionChannel, fork, race, call } from 'redux-saga/effects';
+import { take, cancel, actionChannel, fork, spawn, race, call, put } from 'redux-saga/effects';
 import { delay } from 'redux-saga';
 
 import * as applicationActions from './actions';
@@ -14,8 +14,9 @@ import autoOpponentSaga from '../auto-opponent/saga';
 export default function* applicationControllerSaga(userId: string) {
   // need to yield* so that the fork(walletSaga) runs in the context of this saga -
   // otherwise it'll be killed when the setupWallet saga returns
-  const address = yield* setupWallet(userId);
-  yield* setupAutoOpponent();
+  const { address } = yield call(setupWallet, userId);
+
+  yield call(setupAutoOpponent);
 
   yield fork(messageServiceSaga, address);
 
@@ -50,24 +51,26 @@ export default function* applicationControllerSaga(userId: string) {
 function* setupWallet(uid) {
   const channel = yield actionChannel(walletActions.INITIALIZATION_SUCCESS);
 
-  yield fork(walletSaga, uid);
+  const task = yield spawn(walletSaga, uid);
 
   const { success, failure } = yield race({
     success: take(channel),
     failure: call(delay, 2000),
   });
 
-  if (failure) { throw new Error('Wallet initialization timed out'); }
+  if (failure) {
+    yield put(walletActions.initializationFailure('Wallet initialization timed out'))
+  } else {
+    const address = (success as walletActions.InitializationSuccess).address;
 
-  const address = (success as walletActions.InitializationSuccess).address;
-
-  return address;
+    return { address, task };
+  }
 }
 
 function* setupAutoOpponent() {
   const channel = yield actionChannel(autoOpponentActions.INITIALIZATION_SUCCESS);
 
-  yield fork(autoOpponentSaga);
+  const task = yield spawn(autoOpponentSaga);
 
   const { success, failure } = yield race({
     success: take(channel),
@@ -78,5 +81,5 @@ function* setupAutoOpponent() {
 
   const address = (success as autoOpponentActions.InitializationSuccess).address;
 
-  return address;
+  return { address, task };
 }

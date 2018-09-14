@@ -1,4 +1,4 @@
-import { actionChannel, take, put, fork } from 'redux-saga/effects';
+import { actionChannel, take, put, fork, } from 'redux-saga/effects';
 
 import { initializeWallet } from './initialization';
 import * as actions from '../actions/external';
@@ -9,6 +9,7 @@ import { AUTO_OPPONENT_ADDRESS } from '../../../constants';
 
 export function* walletSaga(uid: string): IterableIterator<any> {
   const wallet = yield initializeWallet(uid);
+  yield fork(blockchainSaga);
 
   const channel = yield actionChannel([
     actions.FUNDING_REQUEST,
@@ -19,7 +20,7 @@ export function* walletSaga(uid: string): IterableIterator<any> {
   yield put(actions.initializationSuccess(wallet.address));
 
   while(true) {
-    const action: actions.RequestAction = yield take(channel);
+    const action: actions.RequestAction = yield take(channel)
 
     // The handlers below will block, so the wallet will only ever
     // process one action at a time from the queue.
@@ -71,7 +72,6 @@ function* handleFundingRequest(_wallet: ChannelWallet, channelId, state) {
   if (state.opponentAddress === AUTO_OPPONENT_ADDRESS) {
     success = true
   } else {
-    yield fork(blockchainSaga);
     success = yield fundingSaga(channelId, state);
   }
 
@@ -80,5 +80,5 @@ function* handleFundingRequest(_wallet: ChannelWallet, channelId, state) {
   } else {
     yield put(actions.fundingFailure(channelId, 'Something went wrong'));
   }
+  return true;
 }
-
