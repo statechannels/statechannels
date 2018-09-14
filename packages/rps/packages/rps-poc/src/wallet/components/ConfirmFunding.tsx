@@ -4,7 +4,6 @@ import web3Utils from 'web3-utils';
 import Button from '../../components/Button';
 import { StyleSheet, css } from 'aphrodite';
 
-
 export interface ConfirmFundingProps {
   myBalance: BN;
   opponentBalance: BN;
@@ -41,32 +40,34 @@ export default class ConfirmFunding extends React.Component<
         <p>The initial deposits will be:</p>
         <div>
           <div>
-            You (
-            {myAddress}
+            You ({myAddress}
             ): {web3Utils.fromWei(myBalance, 'finney')} finney
           </div>
           <div>
-            Opponent (
-            {opponentAddress}
+            Opponent ({opponentAddress}
             ): {web3Utils.fromWei(opponentBalance, 'finney')} finney
           </div>
         </div>
         <p>Do you wish to open this channel?</p>
         <div className={css(styles.buttonContainer)}>
-          <span className={css(styles.button)}><Button onClick={decline}>No</Button></span>
-          <span className={css(styles.button)}><Button onClick={approve}>Yes</Button></span>
+          <span className={css(styles.button)}>
+            <Button onClick={decline}>No</Button>
+          </span>
+          <span className={css(styles.button)}>
+            <Button onClick={approve}>Yes</Button>
+          </span>
         </div>
       </div>
     );
   }
 }
 const styles = StyleSheet.create({
-    buttonContainer: {
-      display: 'flex',
-      justifyContent:'center',
-      padding:"5px",
-    },
-    button:{
-        margin:"15px",
-    },
+  buttonContainer: {
+    display: 'flex',
+    justifyContent: 'center',
+    padding: '5px',
+  },
+  button: {
+    margin: '15px',
+  },
 });
