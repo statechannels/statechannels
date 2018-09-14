@@ -121,10 +121,16 @@ export type WithdrawalResponse = FundingSuccess | FundingFailure;
 // ==============
 
 export const INITIALIZATION_SUCCESS = 'WALLET.INITIALIZATION.SUCCESS';
+export const INITIALIZATION_FAILURE = 'WALLET.INITIALIZATION.FAILURE';
 
 export const initializationSuccess = address => ({
   type: INITIALIZATION_SUCCESS as typeof INITIALIZATION_SUCCESS,
   address,
+});
+
+export const initializationFailure = (message: string) => ({
+  type: INITIALIZATION_FAILURE as typeof INITIALIZATION_FAILURE,
+  message,
 });
 
 export type InitializationSuccess = ReturnType<typeof initializationSuccess>;
