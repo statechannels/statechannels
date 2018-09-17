@@ -22,7 +22,6 @@ export default function* autoOpponentSaga() {
     const action: autoOpponentActions.MessageFromApp = yield take(channel);
 
     yield delay(2000);
-
     if (gameEngine === null) {
       // Start up the game engine for our autoplayer B
       gameEngine = fromProposal(positionFromHex(action.data));

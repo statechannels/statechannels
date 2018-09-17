@@ -65,7 +65,7 @@ export default function* waitingRoomSaga(
 }
 
 function* challengeHeartbeatSaga(challenge) {
-  while(true) {
+  while (true) {
     yield call(delay, CHALLENGE_REFRESH_INTERVAL);
     yield updateChallenge(challenge);
   }
