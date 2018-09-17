@@ -9,4 +9,4 @@ export type State = PlayerAState | PlayerBState;
 export enum Player {
   PlayerA,
   PlayerB,
-};
+}

@@ -13,4 +13,4 @@ export const walletStateReducer: Reducer<WalletState> = (state=initialState, act
     default:
       return state;
   }
-}
+};

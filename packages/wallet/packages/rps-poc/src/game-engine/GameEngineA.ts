@@ -79,7 +79,7 @@ export default class GameEngineA {
   }
 
   choosePlay(aPlay: Play) {
-    if (!(this.state instanceof State.ChoosePlay)) { return this.state };
+    if (!(this.state instanceof State.ChoosePlay)) { return this.state; }
 
     const { balances, turnNum, stake, channel } = this.state;
 
@@ -115,7 +115,7 @@ export default class GameEngineA {
     }
 
     const { channel, balances, turnNum } = this.state;
-    const conclude = new Conclude(channel, turnNum + 1, balances)
+    const conclude = new Conclude(channel, turnNum + 1, balances);
     if (this.state instanceof State.WaitForConclude) {
       return this.transitionTo(
         new State.Concluded({
@@ -137,7 +137,7 @@ export default class GameEngineA {
   }
 
   receivedPreFundSetup(position: PreFundSetupB) {
-    if (!(this.state instanceof State.WaitForPreFundSetup)) { return this.state };
+    if (!(this.state instanceof State.WaitForPreFundSetup)) { return this.state; }
 
     return this.transitionTo(
       new State.WaitForFunding({ position })
@@ -145,17 +145,17 @@ export default class GameEngineA {
   }
 
   receivedPostFundSetup(position: PostFundSetupB) {
-    if (!(this.state instanceof State.WaitForPostFundSetup)) { return this.state };
+    if (!(this.state instanceof State.WaitForPostFundSetup)) { return this.state; }
 
     if (this.insufficientlyfunded(this.state)) {
       return this.transitionTo(new State.InsufficientFunds({ position }));
-    };
+    }
 
     return this.transitionTo(new State.ChoosePlay({ position }));
   }
 
   receivedAccept(position: Accept) {
-    if (!(this.state instanceof State.WaitForAccept)) { return this.state };
+    if (!(this.state instanceof State.WaitForAccept)) { return this.state; }
 
     const { channel, stake, resolution: oldBalances, bPlay, turnNum } = position;
     const { aPlay, salt } = this.state;
@@ -177,7 +177,7 @@ export default class GameEngineA {
   }
 
   receivedResting(position: Resting) {
-    if (!(this.state instanceof State.WaitForResting)) { return this.state };
+    if (!(this.state instanceof State.WaitForResting)) { return this.state; }
 
     if (this.insufficientlyfunded(this.state)) {
       return this.transitionTo(
@@ -190,7 +190,7 @@ export default class GameEngineA {
 
   insufficientlyfunded(state: State.WaitForResting | State.WaitForPostFundSetup): boolean {
     const { stake, balances } = state;
-    return stake.gt(balances[0]) || stake.gt(balances[1])
+    return stake.gt(balances[0]) || stake.gt(balances[1]);
   }
 
   receivedConclude(position: Conclude) {
@@ -200,11 +200,11 @@ export default class GameEngineA {
     if (this.state instanceof State.WaitForConclude) {
       return this.transitionTo(
         new State.Concluded({ position })
-      )
+      );
     }
     // todo: need a move. Might also need an intermediate state here
     return this.transitionTo(
       new State.WaitForConclude({ position })
-    )
+    );
   }
 }

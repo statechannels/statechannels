@@ -23,6 +23,7 @@
     "interface-name": false,
     "trailing-comma": [true, {"multiline":{"objects": "always"}}],
     "max-classes-per-file": false,
-    "variable-name": [true, "ban-keywords", "check-format", "allow-pascal-case", "allow-leading-underscore"]
+    "variable-name": [true, "ban-keywords", "check-format", "allow-pascal-case", "allow-leading-underscore"],
+    "semicolon": [true, "always"]
   }
 }

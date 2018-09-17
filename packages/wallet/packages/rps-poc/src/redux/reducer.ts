@@ -10,7 +10,7 @@ export interface SiteState {
   login: LoginState;
   wallet: WalletState;
   metamask: MetamaskState;
-};
+}
 
 export default combineReducers<SiteState>({
   app: applicationReducer,
