@@ -10,6 +10,8 @@ import BN from 'bn.js';
 import { delay } from 'redux-saga';
 import { CHALLENGE_EXPIRATION_INTERVAL } from '../../constants';
 
+const DEFAULT_BALANCES = 50;
+
 export default function* lobbySaga(address: string) {
   yield put(applicationActions.lobbySuccess());
   // subscribe to challenges
@@ -29,7 +31,7 @@ export default function* lobbySaga(address: string) {
           me: address,
           opponent: action.address,
           stake: action.stake,
-          balances: [action.stake.mul(new BN(3)), action.stake.mul(new BN(3))],
+          balances: [action.stake.mul(new BN(DEFAULT_BALANCES)), action.stake.mul(new BN(DEFAULT_BALANCES))],
         });
         yield put(applicationActions.gameRequest(gameEngine));
         break;
