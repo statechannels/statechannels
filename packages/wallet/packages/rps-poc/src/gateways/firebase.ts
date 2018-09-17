@@ -2,10 +2,10 @@ import firebase from 'firebase'
 import ReduxSagaFirebase from 'redux-saga-firebase'
 
 const config = {
-  apiKey: "AIzaSyDulzMWkORgVPFwtxqQaTwOeNhOisGPtDs",
-  authDomain: "rock-paper-scissors123.firebaseapp.com",
-  databaseURL: "https://rock-paper-scissors123.firebaseio.com",
-  projectId: "rock-paper-scissors123",
+  apiKey: process.env.FIREBASE_API_KEY,
+  authDomain: `${process.env.FIREBASE_PROJECT}.firebaseapp.com`,
+  databaseURL: `https://${process.env.FIREBASE_PROJECT}.firebaseio.com`,
+  projectId: process.env.FIREBASE_PROJECT,
   storageBucket: "",
   messagingSenderId: "913007764573",
 };
