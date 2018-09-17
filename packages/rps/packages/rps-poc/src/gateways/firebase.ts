@@ -1,5 +1,5 @@
-import firebase from 'firebase'
-import ReduxSagaFirebase from 'redux-saga-firebase'
+import firebase from 'firebase';
+import ReduxSagaFirebase from 'redux-saga-firebase';
 
 const config = {
   apiKey: process.env.FIREBASE_API_KEY,

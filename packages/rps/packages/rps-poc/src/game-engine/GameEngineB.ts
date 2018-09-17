@@ -98,7 +98,7 @@ export default class GameEngineB {
     }
 
     const { channel, balances, turnNum } = this.state;
-    const conclude = new Conclude(channel, turnNum + 1, balances)
+    const conclude = new Conclude(channel, turnNum + 1, balances);
     if (this.state instanceof WaitForConclude) {
       return this.transitionTo(
         new State.Concluded({

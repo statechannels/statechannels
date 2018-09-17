@@ -59,7 +59,7 @@ function* setupWallet(uid) {
   });
 
   if (failure) {
-    yield put(walletActions.initializationFailure('Wallet initialization timed out'))
+    yield put(walletActions.initializationFailure('Wallet initialization timed out'));
   } else {
     const address = (success as walletActions.InitializationSuccess).address;
 
