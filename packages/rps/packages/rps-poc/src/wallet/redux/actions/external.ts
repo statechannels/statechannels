@@ -102,13 +102,12 @@ export const withdrawalRequest = (state: ConcludedA | ConcludedB) => ({
   type: WITHDRAWAL_REQUEST as typeof WITHDRAWAL_REQUEST,
   state,
 });
-export const withdrawalSuccess = channelId => ({
+export const withdrawalSuccess = transaction => ({
   type: WITHDRAWAL_SUCCESS as typeof WITHDRAWAL_SUCCESS,
-  channelId,
+  transaction,
 });
-export const withdrawalFailure = (channelId, reason) => ({
+export const withdrawalFailure = (reason) => ({
   type: WITHDRAWAL_FAILURE as typeof WITHDRAWAL_FAILURE,
-  channelId,
   reason,
 });
 
