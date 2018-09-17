@@ -1,4 +1,4 @@
-import { actionChannel, take, put, fork, } from 'redux-saga/effects';
+import { actionChannel, take, put, fork } from 'redux-saga/effects';
 
 import { initializeWallet } from './initialization';
 import * as actions from '../actions/external';
@@ -6,6 +6,7 @@ import ChannelWallet from '../../domain/ChannelWallet';
 import { fundingSaga } from './funding';
 import { blockchainSaga } from './blockchain';
 import { AUTO_OPPONENT_ADDRESS } from '../../../constants';
+import decode from '../../domain/decode';
 
 export function* walletSaga(uid: string): IterableIterator<any> {
   const wallet = yield initializeWallet(uid);
@@ -19,8 +20,8 @@ export function* walletSaga(uid: string): IterableIterator<any> {
 
   yield put(actions.initializationSuccess(wallet.address));
 
-  while(true) {
-    const action: actions.RequestAction = yield take(channel)
+  while (true) {
+    const action: actions.RequestAction = yield take(channel);
 
     // The handlers below will block, so the wallet will only ever
     // process one action at a time from the queue.
@@ -30,47 +31,64 @@ export function* walletSaga(uid: string): IterableIterator<any> {
         break;
 
       case actions.VALIDATION_REQUEST:
-        yield handleValidationRequest(action.requestId, action.signedPositionData);
+        yield handleValidationRequest(
+          wallet,
+          action.requestId,
+          action.positionData,
+          action.signature,
+          action.opponentIndex,
+        );
         break;
 
       case actions.FUNDING_REQUEST:
-        yield handleFundingRequest(wallet, action.channelId, action.state);
+        yield fork(handleFundingRequest, wallet, action.channelId, action.state);
         break;
-
       default:
-        // const _exhaustiveCheck: never = action;
-        // todo: get this to work
-        // currently causes a 'noUnusedLocals' error on compilation
-        // underscored variables should be an exception but there seems to 
-        // be a bug in my current version of typescript
-        // https://github.com/Microsoft/TypeScript/issues/15053
+      // const _exhaustiveCheck: never = action;
+      // todo: get this to work
+      // currently causes a 'noUnusedLocals' error on compilation
+      // underscored variables should be an exception but there seems to
+      // be a bug in my current version of typescript
+      // https://github.com/Microsoft/TypeScript/issues/15053
     }
   }
 }
+
 
 function* handleSignatureRequest(wallet: ChannelWallet, requestId, positionData) {
   // todo:
   // - validate the transition
   // - sign the position
   // - store the position
-  const signedPosition = wallet.sign(positionData)
+  const signedPosition = wallet.sign(positionData);
 
   yield put(actions.signatureSuccess(requestId, signedPosition));
 }
 
-function* handleValidationRequest(requestId, data) {
+function* handleValidationRequest(
+  wallet: ChannelWallet,
+  requestId,
+  data,
+  signature,
+  opponentIndex,
+) {
+
+  const address = wallet.recover(data, signature);
+  const state = decode(data);
+  if (state.channel.participants[opponentIndex] !== address) {
+    yield put(actions.validationFailure(requestId, 'INVALID SIGNATURE'));
+  }
   // todo:
-  // - check the signature
   // - validate the transition
   // - store the position
 
-  yield put(actions.validationSuccess(requestId, data));
+  yield put(actions.validationSuccess(requestId));
 }
 
 function* handleFundingRequest(_wallet: ChannelWallet, channelId, state) {
   let success;
   if (state.opponentAddress === AUTO_OPPONENT_ADDRESS) {
-    success = true
+    success = true;
   } else {
     success = yield fundingSaga(channelId, state);
   }

@@ -15,6 +15,6 @@ sagaMiddleware.run(loginSaga);
 
 export default store;
 
-export const getApplicationState = (storeObj: any) => storeObj.game;
+export const getApplicationState = (storeObj: any) => storeObj.app;
 export const getWalletState = (storeObj: any) => storeObj.wallet;
 export const getUser = (storeObj: any) => storeObj.login.user;

@@ -1,4 +1,4 @@
-import { Channel, State } from 'fmg-core';
+import { State } from 'fmg-core';
 
 import { Play, GamePositionType } from '.';
 import PreFundSetupA from './PreFundSetupA';
@@ -11,6 +11,7 @@ import Reveal from './Reveal';
 import Resting from './Resting';
 import Conclude from './Conclude';
 import BN from 'bn.js';
+import decodeState from '../../wallet/domain/decode';
 
 const PREFIX_CHARS = 2; // the 0x takes up 2 characters
 const CHARS_PER_BYTE = 2;
@@ -19,8 +20,8 @@ const CHANNEL_BYTES = 32 + 32 + 32 + 32 * N_PLAYERS; // type, nonce, nPlayers, [
 const STATE_BYTES = 32 + 32 + 32 + 32 * N_PLAYERS; // stateType, turnNum, stateCount, [balances]
 const GAME_ATTRIBUTE_OFFSET = CHANNEL_BYTES + STATE_BYTES;
 
-function extractBN(hexString: string, byteOffset: number = 0, numBytes: number = 32){
-  return new BN(extractBytes(hexString, byteOffset, numBytes).substr(2),16);
+function extractBN(hexString: string, byteOffset: number = 0, numBytes: number = 32) {
+  return new BN(extractBytes(hexString, byteOffset, numBytes).substr(2), 16);
 }
 function extractInt(hexString: string, byteOffset: number = 0, numBytes: number = 32) {
   return parseInt(extractBytes(hexString, byteOffset, numBytes), 16);
@@ -31,39 +32,6 @@ function extractBytes(hexString: string, byteOffset: number = 0, numBytes: numbe
   return '0x' + hexString.substr(charOffset, numBytes * CHARS_PER_BYTE);
 }
 
-function extractChannel(hexString: string) {
-  const channelType = extractBytes(hexString, 12, 20);
-  const channelNonce = extractInt(hexString, 32);
-  const nPlayers = extractInt(hexString, 64);
-  if (nPlayers !== N_PLAYERS) {
-    throw new Error(
-      `Rock-paper-scissors requires exactly ${N_PLAYERS} players. ${nPlayers} provided.`,
-    );
-  }
-
-  const participantA = extractBytes(hexString, 3 * 32 + 12, 20);
-  const participantB = extractBytes(hexString, 4 * 32 + 12, 20);
-
-  return new Channel(channelType, channelNonce, [participantA, participantB]);
-}
-
-function extractStateType(hexString: string) {
-  return extractInt(hexString, CHANNEL_BYTES);
-}
-
-function extractTurnNum(hexString: string) {
-  return extractInt(hexString, CHANNEL_BYTES + 32);
-}
-
-function extractStateCount(hexString: string) {
-  return extractInt(hexString, CHANNEL_BYTES + 64);
-}
-
-function extractBalances(hexString: string) {
-  const aBal = extractBN(hexString, CHANNEL_BYTES + 3 * 32);
-  const bBal = extractBN(hexString, CHANNEL_BYTES + 4 * 32);
-  return [aBal, bBal];
-}
 
 // RockPaperScissors State Fields
 // (relative to gamestate offset)
@@ -100,7 +68,41 @@ function extractSalt(hexString: string) {
   return extractBytes(hexString, GAME_ATTRIBUTE_OFFSET + 5 * 32);
 }
 
-function decodeGameState(channel, turnNum: number, balances: BN[], hexString: string) {
+export default function decode(hexString: string) {
+
+  const state = decodeState(hexString);
+  const channel = state.channel;
+  const turnNum = state.turnNum;
+  const stateType = state.stateType;
+  const balances = state.resolution;
+
+  switch (stateType) {
+    case State.StateType.Conclude:
+      return new Conclude(channel, turnNum, balances);
+    case State.StateType.PreFundSetup:
+      const stateCountPre = state.stateCount;
+      const stakePre = extractStake(hexString);
+      if (stateCountPre === 0) {
+        return new PreFundSetupA(channel, turnNum, balances, stateCountPre, stakePre);
+      } else {
+        return new PreFundSetupB(channel, turnNum, balances, stateCountPre, stakePre);
+      }
+    case State.StateType.PostFundSetup:
+      const stateCountPost = state.stateCount;
+      const stakePost = extractStake(hexString);
+      if (stateCountPost === 0) {
+        return new PostFundSetupA(channel, turnNum, balances, stateCountPost, stakePost);
+      } else {
+        return new PostFundSetupB(channel, turnNum, balances, stateCountPost, stakePost);
+      }
+    case State.StateType.Game:
+      return decodeGameState(channel, turnNum, balances, hexString);
+    default:
+      throw new Error('unreachable');
+  }
+}
+
+export function decodeGameState(channel, turnNum: number, balances: BN[], hexString: string) {
   const position = extractGamePositionType(hexString);
   const stake = extractStake(hexString);
 
@@ -122,34 +124,3 @@ function decodeGameState(channel, turnNum: number, balances: BN[], hexString: st
   }
 }
 
-export default function decode(hexString) {
-  const channel = extractChannel(hexString);
-  const turnNum = extractTurnNum(hexString);
-  const stateType = extractStateType(hexString);
-  const balances = extractBalances(hexString);
-
-  switch (stateType) {
-    case State.StateType.Conclude:
-      return new Conclude(channel, turnNum, balances);
-    case State.StateType.PreFundSetup:
-      const stateCountPre = extractStateCount(hexString);
-      const stakePre = extractStake(hexString);
-      if (stateCountPre === 0) {
-        return new PreFundSetupA(channel, turnNum, balances, stateCountPre, stakePre);
-      } else {
-        return new PreFundSetupB(channel, turnNum, balances, stateCountPre, stakePre);
-      }
-    case State.StateType.PostFundSetup:
-      const stateCountPost = extractStateCount(hexString);
-      const stakePost = extractStake(hexString);
-      if (stateCountPost === 0) {
-        return new PostFundSetupA(channel, turnNum, balances, stateCountPost, stakePost);
-      } else {
-        return new PostFundSetupB(channel, turnNum, balances, stateCountPost, stakePost);
-      }
-    case State.StateType.Game:
-      return decodeGameState(channel, turnNum, balances, hexString);
-    default:
-      throw new Error('unreachable');
-  }
-}
