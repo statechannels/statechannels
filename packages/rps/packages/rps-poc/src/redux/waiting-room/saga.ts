@@ -29,7 +29,7 @@ export default function* waitingRoomSaga(
     isPublic,
     createdAt: new Date().getTime(),
     updatedAt: new Date().getTime(),
-  }
+  };
 
   yield put(applicationActions.waitingRoomSuccess({ ...commonChallengeProps, stake }));
   const serializedChallenge = {
@@ -79,7 +79,7 @@ function* updateChallenge(challenge, updateParams?) {
   const challengeParams = {
     ...updateParams,
     updatedAt: new Date().getTime(),
-  }
+  };
 
   return yield call(reduxSagaFirebase.database.patch, challengeRef(challenge), challengeParams);
-};
+}

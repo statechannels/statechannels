@@ -10,7 +10,7 @@ export const approveFunding = ()=>({
 });
 export const declineFunding = () => ({
     type: DECLINE_FUNDING,
-})
+});
 
 export type TryFundingAgain = ReturnType<typeof tryFundingAgain>;
 export type ApproveFunding = ReturnType<typeof approveFunding>;

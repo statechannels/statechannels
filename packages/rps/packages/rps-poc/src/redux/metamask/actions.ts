@@ -1,6 +1,6 @@
 export const METAMASK_ERROR = 'METAMASK.ERROR';
 export const METAMASK_SUCCESS = 'METAMASK.SUCCESS';
-export const enum MetamaskErrorType {WrongNetwork="WrongNetwork", NoWeb3="NoWeb3"};
+export const enum MetamaskErrorType {WrongNetwork="WrongNetwork", NoWeb3="NoWeb3"}
 
 export interface MetamaskError {
   errorType: MetamaskErrorType;
