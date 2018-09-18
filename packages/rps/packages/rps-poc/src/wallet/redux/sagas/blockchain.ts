@@ -71,7 +71,7 @@ function* contractSetup() {
 
         return deployedContract;
       } catch (err) {
-        yield handleError(blockchainActions.deploymentFailure, err)
+        yield handleError(blockchainActions.deploymentFailure, err);
       }
 
       break;
@@ -83,7 +83,7 @@ function* contractSetup() {
 
         return existingContract;
       } catch (err) {
-        yield handleError(blockchainActions.depositFailure, err)
+        yield handleError(blockchainActions.depositFailure, err);
       }
       break;
     }
@@ -92,7 +92,7 @@ function* contractSetup() {
 
 function* watchAdjudicator() {
   while (true) {
-    yield take("Relevant blockchain events")
+    yield take("Relevant blockchain events");
     // TODO: Respond accordingly
   }
 }
@@ -107,7 +107,7 @@ function* blockchainWithdrawal(simpleAdjudicator) {
       yield put(blockchainActions.withdrawSuccess(transaction));
       return true;
     } catch (err) {
-      yield handleError(blockchainActions.withdrawFailure, err)
+      yield handleError(blockchainActions.withdrawFailure, err);
     }
   }
 }

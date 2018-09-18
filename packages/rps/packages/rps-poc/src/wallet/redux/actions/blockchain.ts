@@ -15,7 +15,7 @@ export type WithdrawSuccess = ReturnType<typeof withdrawSuccess>;
 export type WithdrawFailure = ReturnType<typeof withdrawFailure>;
 export type WithdrawResponse = WithdrawSuccess | WithdrawFailure;
 
-export type RequestAction = DeploymentRequest | DepositRequest | WithdrawRequest
+export type RequestAction = DeploymentRequest | DepositRequest | WithdrawRequest;
 
 export const DEPLOY_REQUEST = 'BLOCKCHAIN.DEPLOY.REQUEST';
 export const DEPLOY_SUCCESS = 'BLOCKCHAIN.DEPLOY.SUCCESS';
