@@ -5,10 +5,10 @@ export function* withdrawalSaga(playerAddress: string) {
   const channel = yield actionChannel([
     blockchainActions.WITHDRAW_SUCCESS,
     blockchainActions.WITHDRAW_FAILURE
-  ])
+  ]);
 
-  yield put(blockchainActions.withdrawRequest(playerAddress))
+  yield put(blockchainActions.withdrawRequest(playerAddress));
   const { transaction, reason: failureReason } = yield take(channel);
 
-  return { transaction, failureReason }
+  return { transaction, failureReason };
 }

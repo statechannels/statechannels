@@ -8,6 +8,8 @@ import { blockchainSaga } from './blockchain';
 import { AUTO_OPPONENT_ADDRESS } from '../../../constants';
 import { withdrawalSaga } from './withdrawal';
 import decode from '../../domain/decode';
+import { State } from 'fmg-core';
+import { reduxSagaFirebase, serverTimestamp } from '../../../gateways/firebase';
 
 export function* walletSaga(uid: string): IterableIterator<any> {
   const wallet = (yield initializeWallet(uid)) as ChannelWallet;
@@ -63,13 +65,25 @@ export function* walletSaga(uid: string): IterableIterator<any> {
 
 
 function* handleSignatureRequest(wallet: ChannelWallet, requestId, positionData) {
-  // todo:
-  // - validate the transition
-  // - sign the position
-  // - store the position
+  // TODO: Validate transition
   const signedPosition = wallet.sign(positionData);
-
+  const state = decode(positionData);
+  yield storeLastSentState(wallet, state, signedPosition);
   yield put(actions.signatureSuccess(requestId, signedPosition));
+}
+
+function* storeLastSentState(wallet: ChannelWallet, state: State, signature: string) {
+  yield call(reduxSagaFirebase.database.update,
+    `wallets/${wallet.id}/channels/${state.channel.id}/sent`,
+    { state, signature,updatedAt:serverTimestamp });
+
+}
+
+function* storeLastReceivedState(wallet: ChannelWallet, state: State, signature: string) {
+
+  yield call(reduxSagaFirebase.database.update,
+    `wallets/${wallet.id}/channels/${state.channel.id}/received`,
+    { state, signature, updatedAt: serverTimestamp });
 }
 
 function* handleValidationRequest(
@@ -82,6 +96,7 @@ function* handleValidationRequest(
 
   const address = wallet.recover(data, signature);
   const state = decode(data);
+  yield storeLastReceivedState(wallet, state, signature);
   if (state.channel.participants[opponentIndex] !== address) {
     yield put(actions.validationFailure(requestId, 'INVALID SIGNATURE'));
   }
@@ -111,7 +126,7 @@ function* handleFundingRequest(_wallet: ChannelWallet, channelId, state) {
 export function* handleWithdrawalRequest(
   wallet: ChannelWallet,
 ) {
-  const { address: playerAddress } = wallet
+  const { address: playerAddress } = wallet;
 
   const { transaction, failureReason } = yield call(withdrawalSaga, playerAddress);
   if (transaction) {

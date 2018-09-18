@@ -53,7 +53,7 @@ function* fetchWallet(uid: string) {
     wallet = walletTransformer(data);
   }); // result should have size 1
 
-  return new ChannelWallet(wallet.privateKey);
+  return new ChannelWallet(wallet.privateKey, wallet.id);
 }
 
 function* createWallet(uid: string) {
