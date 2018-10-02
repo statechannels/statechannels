@@ -36,7 +36,7 @@ export default class WalletEngineB {
         return this.transitionTo(new State.ReadyToDeposit(adjudicator));
       case State.WaitForApproval:
         return this.transitionTo(
-          new State.WaitForApprovalWithAdjudicator({adjudicator,...this.state}),
+          new State.WaitForApprovalWithAdjudicator({ adjudicatorAddress: adjudicator, ...this.state }),
         );
       default:
         return this.state;
