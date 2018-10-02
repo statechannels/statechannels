@@ -41,8 +41,8 @@ contract SimpleAdjudicator {
     }
 
     function forceMove (
-        bytes _yourState,
-        bytes _myState,
+        bytes _fromState,
+        bytes _toState,
         uint8[] _v,
         bytes32[] _r,
         bytes32[] _s
@@ -51,7 +51,7 @@ contract SimpleAdjudicator {
         onlyWhenCurrentChallengeNotPresent
       {
         // channelId must match the game supported by the channel
-        require(_yourState.channelId() == fundedChannelId);
+        require(_fromState.channelId() == fundedChannelId);
 
         // passing _v, _r, _s directly to validForceMove gives a "Stack too deep" error
         uint8[] memory v = _v;
@@ -59,14 +59,14 @@ contract SimpleAdjudicator {
         bytes32[] memory s = _s;
 
         // must be a valid force move
-        require(Rules.validForceMove(_yourState, _myState, v, r, s));
+        require(Rules.validForceMove(_fromState, _toState, v, r, s));
 
-        createChallenge(uint32(now + challengeDuration), _myState);
+        createChallenge(uint32(now + challengeDuration), _toState);
     }
 
     function conclude(
-        bytes _yourState,
-        bytes _myState,
+        bytes _penultimateState,
+        bytes _ultimateState,
         uint8[] _v,
         bytes32[] _r,
         bytes32[] _s
@@ -75,7 +75,7 @@ contract SimpleAdjudicator {
       onlyWhenGameOngoing
     {
         // channelId must match the game supported by the channel
-        require(_yourState.channelId() == fundedChannelId);
+        require(_penultimateState.channelId() == fundedChannelId);
 
         // passing _v, _r, _s directly to validConclusionProof gives a "Stack too deep" error
         uint8[] memory v = _v;
@@ -83,10 +83,10 @@ contract SimpleAdjudicator {
         bytes32[] memory s = _s;
 
         // must be a valid conclusion proof according to framework rules
-        require(Rules.validConclusionProof(_yourState, _myState, v, r, s));
+        require(Rules.validConclusionProof(_penultimateState, _ultimateState, v, r, s));
 
         // Create an expired challenge, (possibly) overwriting any existing challenge
-        createChallenge(uint32(now), _myState);
+        createChallenge(uint32(now), _ultimateState);
     }
 
     event Refuted(bytes refutation);
