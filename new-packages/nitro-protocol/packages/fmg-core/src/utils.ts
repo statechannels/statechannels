@@ -1,6 +1,8 @@
 import Web3 from 'web3';
-import { sha3 } from 'web3-utils';
+import { soliditySha3 } from 'web3-utils';
 import { Signature } from 'web3/eth/accounts';
+
+// TODO: write some jest tests for utils.
 
 export function toHex32(num) {
   return "0x" + toPaddedHexString(num, 64);
@@ -22,16 +24,46 @@ export function toPaddedHexString(num, len) {
     return "0".repeat(len - str.length) + str;
 }
 
-export function sign(state: string, privateKey)
+enum SolidityType {
+  // Only the types we'd use
+  bool,
+  uint8,
+  uint256,
+  address,
+  bytes,
+  bytes32,
+}
+
+class SolidityParameter {
+  type: SolidityType;
+  value: string;
+
+  constructor({ type, value }) {
+    this.type = type;
+    this.value = value;
+  }
+}
+
+export function sign(data: string | SolidityParameter | SolidityParameter[], privateKey)
   : {v: string, r: string, s: string} {
   const localWeb3 = new Web3('');
   const account:any = localWeb3.eth.accounts.privateKeyToAccount(privateKey);
-  const hash = sha3(state);
+  let hash;
+  if (typeof data === 'string' || data instanceof SolidityParameter) {
+    hash = soliditySha3(data);
+  } else {
+    hash = soliditySha3(...data);
+  }
   return localWeb3.eth.accounts.sign(hash, account.privateKey, true) as Signature;
 }
 
-export function recover(data: string, v: string, r: string, s: string): string {
+export function recover(data: string | SolidityParameter | SolidityParameter[],  v: string, r: string, s: string): string {
   const web3 = new Web3('');
-  const hash = sha3(data);
+  let hash;
+  if (typeof data === 'string' || data instanceof SolidityParameter) {
+    hash = soliditySha3(data);
+  } else {
+    hash = soliditySha3(...data);
+  }
   return web3.eth.accounts.recover(hash, v, r, s);
 }
