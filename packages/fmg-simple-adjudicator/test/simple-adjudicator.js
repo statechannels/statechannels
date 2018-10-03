@@ -1,4 +1,5 @@
-import { Channel, State, assertRevert, increaseTime, duration, CountingGame } from 'fmg-core';
+import { toWei, soliditySha3 } from 'web3-utils';
+import { Channel, State, assertRevert, increaseTime, DURATION, CountingGame, sign, } from 'fmg-core';
 
 var SimpleAdjudicator = artifacts.require("./SimpleAdjudicator.sol");
 var StateLib = artifacts.require("fmg-core/contracts/State.sol");
@@ -10,8 +11,8 @@ const START_BALANCE = 100000000000000000000;
 
 const A_IDX = 1;
 const B_IDX = 2;
-const aBal = Number(web3.toWei('6', "ether"));
-const bBal = Number(web3.toWei('4', "ether"));
+const aBal = Number(toWei('6', "ether"));
+const bBal = Number(toWei('4', "ether"));
 const resolution = [aBal, bBal];
 const differentResolution = [bBal, aBal];
 
@@ -25,6 +26,7 @@ contract('SimpleAdjudicator', (accounts) => {
   const bob = web3.eth.accounts.privateKeyToAccount('6370fd033278c143179d81c5526140625662b8daa446c22ee2d73db3707e620c');
   let aliceState, aliceBal, r0, v0, s0;
   let bobState,   bobBal,   r1, v1, s1;
+  let aliceEthAccount, bobEthAccount;
 
   before(async () => {
     CountingStateContract.link(StateLib);
@@ -179,13 +181,13 @@ contract('SimpleAdjudicator', (accounts) => {
       aliceBal = aBal;
       bobBal = bBal;
 
-      const aliceEthAccount = accounts[A_IDX];
-      const bobEthAccount = accounts[B_IDX];
+      aliceEthAccount = accounts[A_IDX];
+      bobEthAccount = accounts[B_IDX];
 
       simpleAdj = await SimpleAdjudicator.new(channel.id);
     });
 
-    it.only("conclude -> withdraw", async () => {
+    it("conclude -> withdraw", async () =>  {
       await web3.eth.sendTransaction({
         from: aliceEthAccount,
         to: simpleAdj.address,
@@ -201,17 +203,17 @@ contract('SimpleAdjudicator', (accounts) => {
       });
 
       assert.equal(
-        web3.eth.getBalance(simpleAdj.address),
+        await web3.eth.getBalance(simpleAdj.address),
         aliceBal + bobBal,
         "Funds were not deposited in the SimpleAdjudicator"
       );
       assert.equal(
-        Number(web3.eth.getBalance(bobEthAccount)),
+        Number(await web3.eth.getBalance(bobEthAccount)),
         START_BALANCE - bobBal,
         "Funds were not deposited from bob"
       );
       assert.equal(
-        Number(web3.eth.getBalance(aliceEthAccount)),
+        Number(await web3.eth.getBalance(aliceEthAccount)),
         START_BALANCE - aliceBal,
         "Funds were not deposited from alice"
       );
@@ -220,53 +222,87 @@ contract('SimpleAdjudicator', (accounts) => {
       aliceState.stateType = State.StateType.Conclude;
       bobState.stateType = State.StateType.Conclude;
 
-      const { r: r0, s: s0, v: v0 } = sign(aliceState, alice.privateKey);
-      const { r: r1, s: s1, v: v1 } = sign(bobState, bob.privateKey);
+      const { r: r0, s: s0, v: v0 } = sign(aliceState.toHex(), alice.privateKey);
+      const { r: r1, s: s1, v: v1 } = sign(bobState.toHex(), bob.privateKey);
 
       // pass the conclusion proof
       await simpleAdj.conclude(aliceState.toHex(), bobState.toHex(), [v0, v1], [r0, r1], [s0, s1] );
 
-      const destination = accounts[9];
-      const { v, r, s } = sign(destination, alice.privateKey);
+      const aliceDestination = web3.eth.accounts.create().address;
+      const bobDestination = web3.eth.accounts.create().address;
+
+      const { v: vB, r: rB, s: sB } = sign([
+        { type: 'address', value: bob.address },
+        { type: 'address', value: bobDestination },
+        { type: 'bytes', value: channel.id },
+      ],
+        bob.privateKey
+      );
+
 
       await simpleAdj.withdraw(
-        bob,
-        destination,
+        bob.address,
+        bobDestination,
         channel.id,
-        v,
-        r,
-        s
+        vB,
+        rB,
+        sB,
       );
 
       assert.equal(
-        Number(web3.eth.getBalance(bob)),
-        START_BALANCE,
+        Number(await web3.eth.getBalance(bobDestination)),
+        bBal,
         "Bob's balance resolved incorrectly after his withdrawal."
       );
 
       assert.equal(
-        Number(web3.eth.getBalance(alice)),
-        START_BALANCE - aliceBal,
+        Number(await web3.eth.getBalance(aliceDestination)),
+        0,
         "Alice's balance resolved incorrectly before her withdrawal."
       );
 
-      await simpleAdj.withdraw(alice);
+      const { v: vA, r: rA, s: sA } = sign(
+        [
+          { type: 'address', value: alice.address },
+          { type: 'address', value: aliceDestination },
+          { type: 'bytes32', value: channel.id },
+        ],
+        alice.privateKey
+      );
+
+      await simpleAdj.withdraw(
+        alice.address,
+        aliceDestination,
+        channel.id,
+        vA,
+        rA,
+        sA,
+      );
+
       assert.equal(
-        Number(web3.eth.getBalance(alice)),
-        START_BALANCE,
+        Number(await web3.eth.getBalance(aliceDestination)),
+        aBal,
         "Alice's balance resolved incorrectly after her withdrawal."
       );
 
       assert.equal(
-        web3.eth.getBalance(simpleAdj.address),
+        await web3.eth.getBalance(simpleAdj.address),
         0,
         "SimpleAdjudicator wasn't emptied"
       );
 
-      await simpleAdj.withdraw(bob);
+      await simpleAdj.withdraw(
+        bob.address,
+        bobDestination,
+        channel.id,
+        vB,
+        rB,
+        sB,
+      );
+
       assert.equal(
-        Number(web3.eth.getBalance(bob)),
-        START_BALANCE,
+        Number(await web3.eth.getBalance(bobDestination)),
+        bBal,
         "Bob withdrew multiple times."
       );
     });
@@ -288,17 +324,17 @@ contract('SimpleAdjudicator', (accounts) => {
       });
 
       assert.equal(
-        web3.eth.getBalance(simpleAdj.address),
+        await web3.eth.getBalance(simpleAdj.address),
         aliceBal + bobBal,
         "Funds were not deposited in the SimpleAdjudicator"
       );
       assert.equal(
-        Number(web3.eth.getBalance(bob)),
+        Number(await web3.eth.getBalance(bobEthAccount)),
         START_BALANCE - bobBal,
         "Funds were not deposited from bob"
       );
       assert.equal(
-        Number(web3.eth.getBalance(alice)),
+        Number(await web3.eth.getBalance(aliceEthAccount)),
         START_BALANCE - aliceBal,
         "Funds were not deposited from alice"
       );
@@ -308,22 +344,22 @@ contract('SimpleAdjudicator', (accounts) => {
       [r1, s1, v1] = bobState.sign(bob);
 
       await simpleAdj.forceMove(aliceState.toHex(), bobState.toHex(), [v0, v1], [r0, r1], [s0, s1] );
-      await increaseTime(duration.days(2));
+      await increaseTime(DURATION.days(2));
       await simpleAdj.withdraw(alice);
       await simpleAdj.withdraw(bob);
 
       assert.equal(
-        web3.eth.getBalance(simpleAdj.address),
+        await web3.eth.getBalance(simpleAdj.address),
         0,
         "SimpleAdjudicator wasn't emptied"
       );
       assert.equal(
-        Number(web3.eth.getBalance(bob)),
+        Number(await web3.eth.getBalance(bobEthAccount)),
         START_BALANCE,
         "Resolved balances incorrectly."
       );
       assert.equal(
-        Number(web3.eth.getBalance(alice)),
+        Number(await web3.eth.getBalance(aliceEthAccount)),
         START_BALANCE,
         "Resolved balances incorrectly."
       );
@@ -338,17 +374,17 @@ contract('SimpleAdjudicator', (accounts) => {
       });
 
       assert.equal(
-        Number(web3.eth.getBalance(simpleAdj.address)),
+        Number(await web3.eth.getBalance(simpleAdj.address)),
         bobBal,
         "Funds were not deposited in the SimpleAdjudicator"
       );
       assert.equal(
-        Number(web3.eth.getBalance(bob)),
+        Number(await web3.eth.getBalance(bobEthAccount)),
         START_BALANCE - bobBal,
         "Funds were not deposited from bob"
       );
       assert.equal(
-        Number(web3.eth.getBalance(alice)),
+        Number(await web3.eth.getBalance(aliceEthAccount)),
         START_BALANCE,
         "Funds were deposited from alice"
       );
@@ -363,20 +399,20 @@ contract('SimpleAdjudicator', (accounts) => {
       await simpleAdj.withdraw(bob);
 
       assert.equal(
-        Number(web3.eth.getBalance(bob)),
+        Number(await web3.eth.getBalance(bobEthAccount)),
         START_BALANCE - bobBal,
         "Bob took alice's money."
       );
 
       await simpleAdj.withdraw(alice);
       assert.equal(
-        Number(web3.eth.getBalance(alice)),
+        Number(await web3.eth.getBalance(aliceEthAccount)),
         START_BALANCE + bobBal,
         "Alice's balance resolved incorrectly after her withdrawal."
       );
 
       assert.equal(
-        web3.eth.getBalance(simpleAdj.address),
+        await web3.eth.getBalance(simpleAdj.address),
         0,
         "SimpleAdjudicator wasn't emptied"
       );
