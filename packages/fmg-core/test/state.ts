@@ -8,7 +8,7 @@ import assertRevert from './helpers/assert-revert';
 import { CountingGame } from '../src/test-game/counting-game';
 import { sign, recover } from '../src/utils';
 
-var StateLib = artifacts.require("./State.sol");
+const StateLib = artifacts.require("./State.sol");
 
 contract('State', (_accounts) => {
   let stateLib;
@@ -23,7 +23,7 @@ contract('State', (_accounts) => {
   const channel = new Channel(channelType, channelNonce, participants);
   const stateType = State.StateType.Game;
   const state = new State({
-    channel, stateType, turnNum, resolution, stateCount: 0
+    channel, stateType, turnNum, resolution, stateCount: 0,
   });
   const statePacket = state.toHex();
 
@@ -32,58 +32,58 @@ contract('State', (_accounts) => {
   });
 
   it("extracts the channelType", async () => {
-    let result = await stateLib.channelType.call(statePacket);
+    const result = await stateLib.channelType.call(statePacket);
     assert.equal(channelType, result);
   });
 
   it("extracts the channelNonce", async () => {
-    let result = await stateLib.channelNonce.call(statePacket);
+    const result = await stateLib.channelNonce.call(statePacket);
     assert.equal(channelNonce, result);
   });
 
   it("extracts the turnNum", async () => {
-    let result = await stateLib.turnNum.call(statePacket);
+    const result = await stateLib.turnNum.call(statePacket);
     assert.equal(turnNum, result);
   });
 
   it("extracts the number of participants", async () => {
-    let n = await stateLib.numberOfParticipants.call(statePacket);
+    const n = await stateLib.numberOfParticipants.call(statePacket);
     assert.equal(n, 2);
   });
 
   it("extracts the participants", async () => {
-    let result = await stateLib.participants.call(statePacket);
+    const result = await stateLib.participants.call(statePacket);
     assert.deepEqual(participants, result);
   });
 
   it("extracts the resolution", async () => {
-    let result = await stateLib.resolution.call(statePacket);
+    const result = await stateLib.resolution.call(statePacket);
     assert.equal(resolution[0].toNumber(), result[0]);
     assert.equal(resolution[1].toNumber(), result[1]);
   });
 
   it("identifies the mover based on the turnNum", async () => {
-    let mover = await stateLib.mover.call(statePacket);
+    const mover = await stateLib.mover.call(statePacket);
     // our state nonce is 15, which is odd, so it should be participant[1]
     assert.equal(mover, participants[1]);
   });
 
   it("identifies the indexOfMover based on the turnNum", async () => {
-    let index = await stateLib.indexOfMover.call(statePacket);
+    const index = await stateLib.indexOfMover.call(statePacket);
     // our state nonce is 15, which is odd, so it should be participant 1
     assert.equal(index, 1);
   });
 
   it("can calculate the channelId", async () => {
-    let chainId = await stateLib.channelId.call(statePacket);
-    let localId = channel.id;
+    const chainId = await stateLib.channelId.call(statePacket);
+    const localId = channel.id;
 
     assert.equal(chainId, localId);
   });
 
   it("can check if a state is signed", async () => {
     // needs to be signed by 1 as it's their move
-    let { r, s, v } = sign(
+    const { r, s, v } = sign(
       state.toHex(),
       participantB.privateKey,
     );
@@ -93,19 +93,19 @@ contract('State', (_accounts) => {
 
   it("will revert if the wrong party signed", async () => {
     // needs to be signed by 1 as it's their move
-    let { v, r, s } = sign(state.toHex(), participants[0]);
+    const { v, r, s } = sign(state.toHex(), participants[0]);
   assertRevert(stateLib.requireSignature.call(statePacket, v, r, s));
   });
 
   it("can check if the state is fully signed", async() => {
-    let { r: r0, s: s0, v: v0 } = sign(state.toHex(), participantA.privateKey);
-    let { r: r1, s: s1, v: v1 } = sign(state.toHex(), participantB.privateKey);
+    const { r: r0, s: s0, v: v0 } = sign(state.toHex(), participantA.privateKey);
+    const { r: r1, s: s1, v: v1 } = sign(state.toHex(), participantB.privateKey);
 
     await stateLib.requireFullySigned.call(statePacket, [v0, v1], [r0, r1], [s0, s1]);
   });
 
   it("calculates the offset for the gameState", async() => {
-    let offset = await stateLib.gameStateOffset.call(statePacket);
+    const offset = await stateLib.gameStateOffset.call(statePacket);
 
     // should be 128 + 2 * 64 + 96 = 352
     // TODO find better way to test this
@@ -113,8 +113,8 @@ contract('State', (_accounts) => {
   });
 
   it("can test if the gameAttributes are equal", async() => {
-    let state1 = CountingGame.preFundSetupState({channel, resolution, turnNum, gameCounter: 0 });
-    let state2 = CountingGame.preFundSetupState({channel, resolution, turnNum, gameCounter: 1 });
+    const state1 = CountingGame.preFundSetupState({channel, resolution, turnNum, gameCounter: 0 });
+    const state2 = CountingGame.preFundSetupState({channel, resolution, turnNum, gameCounter: 1 });
 
     await assertRevert(stateLib.gameAttributesEqual.call(state1.toHex(), state2.toHex()));
   });
