@@ -26,9 +26,6 @@ contract('Rules', (accounts) => {
         channel = new Channel(gameContract.address, 0, [accounts[0], accounts[1]]);
         otherChannel = new Channel(gameContract.address, 1, [accounts[0], accounts[1]]);
 
-        let challengeeBal = Number(web3.toWei(6, "ether"));
-        let challengerBal = Number(web3.toWei(4, "ether"));
-
         defaults = { channel, resolution, gameCounter: 0};
     });
 
