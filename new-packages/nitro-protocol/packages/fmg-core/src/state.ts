@@ -4,7 +4,7 @@ import BN from 'bn.js';
 
 class State {
   channel: any;
-  stateType: State.StateType
+  stateType: State.StateType;
   turnNum: number;
   resolution: BN[];
   stateCount: number;
@@ -32,7 +32,7 @@ class State {
       toHex32(this.turnNum).substr(2) +
       toHex32(this.stateCount).substr(2) +
       this.resolution.map(x => toHex32(x).substr(2)).join("")
-    )
+    );
   }
 
   get numberOfParticipants() {
@@ -44,7 +44,8 @@ class State {
   }
 }
 
-module State {
+// tslint:disable-next-line:no-namespace
+namespace State {
   export enum StateType {
     PreFundSetup,
     PostFundSetup,

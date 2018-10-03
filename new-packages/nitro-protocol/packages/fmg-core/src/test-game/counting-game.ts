@@ -16,6 +16,7 @@ class CountingBaseState extends State {
     this.initialize();
   }
 
+  // tslint:disable-next-line:no-empty
   initialize() {}
 
   toHex() {
