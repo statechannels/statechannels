@@ -1,7 +1,4 @@
-import Web3 from 'web3';
 import BN from 'bn.js';
-import { sha3 } from 'web3-utils';
-
 import { Channel } from '../src/channel';
 import { State } from '../src/state';
 import assertRevert from './helpers/assert-revert';
