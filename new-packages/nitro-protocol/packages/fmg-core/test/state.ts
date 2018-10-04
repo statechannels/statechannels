@@ -90,7 +90,7 @@ contract('State', (_accounts) => {
 
   it("will revert if the wrong party signed", async () => {
     // needs to be signed by 1 as it's their move
-    const { v, r, s } = sign(state.toHex(), participants[0]);
+    const { v, r, s } = sign(state.toHex(), participantA.privateKey);
   assertRevert(stateLib.requireSignature.call(statePacket, v, r, s));
   });
 
