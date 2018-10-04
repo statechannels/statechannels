@@ -416,7 +416,7 @@ contract('SimpleAdjudicator', (accounts) => {
   });
 
   describe('events', async () => {
-    it('emits fundsReceived upon contract creation', async () => {
+    it.skip('emits fundsReceived upon contract creation', async () => {
       CountingStateContract.link(StateLib);
       let stateContract = await CountingStateContract.new();
       CountingGameContract.link('CountingState', stateContract.address);
