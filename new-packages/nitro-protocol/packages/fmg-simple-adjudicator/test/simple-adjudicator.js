@@ -253,20 +253,7 @@ contract('SimpleAdjudicator', (accounts) => {
       // pass the conclusion proof
       await simpleAdj.conclude(aliceState.toHex(), bobState.toHex(), [v0, v1], [r0, r1], [s0, s1] );
 
-      const { v: vB, r: rB, s: sB } = sign([
-        { type: 'address', value: bob.address.toLowerCase() },
-        { type: 'address', value: bobDestination.toLowerCase() },
-        { type: 'bytes', value: channel.id.toLowerCase() },
-      ],
-        bob.privateKey
-      );
-
-      await simpleAdj.withdraw(
-        bob.address.toLowerCase(),
-        bobDestination.toLowerCase(),
-        channel.id,
-        vB, rB, sB,
-      );
+      await withdrawHelper(bob, bobDestination);
 
       assert.equal(
         Number(await web3.eth.getBalance(bobDestination)),
