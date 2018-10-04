@@ -101,6 +101,7 @@ contract SimpleAdjudicator {
         require(Rules.validRefute(currentChallenge.state, _refutationState, v, r, s));
 
         cancelCurrentChallenge();
+
         emit Refuted(_refutationState);
     }
 
@@ -160,11 +161,49 @@ contract SimpleAdjudicator {
         );
     }
 
-    function withdraw(address participant)
+    function recoverDestination(
+        address participant,
+        address destination,
+        bytes32 _channelId,
+        uint8 v,
+        bytes32 r,
+        bytes32 s
+    ) internal view returns (address) {
+        bytes32 h = keccak256(abi.encodePacked(participant, destination, fundedChannelId)); 
+        bytes memory prefix = "\x19Ethereum Signed Message:\n32";
+
+        bytes32 prefixedHash = keccak256(
+            abi.encodePacked(prefix, h)
+        );
+
+        return ecrecover(prefixedHash, v, r, s);
+    }
+
+    function withdraw(
+        address participant,
+        address destination,
+        bytes32 _channelId, // not needed for the simple adjudicator, which only supports one channel
+        uint8 v,
+        bytes32 r,
+        bytes32 s
+    )
       public
       onlyWhenGameTerminated
     {
+        require(
+            _channelId == fundedChannelId,
+            "Can only withdraw from the funded channel id"
+        );
+
+        // check that the participant has signed off on the destination
+        // address for the funds
+        require(
+            participant == recoverDestination(participant, destination, _channelId, v, r, s),
+            "Participant must sign off on destination address"
+        );
+
         uint8 idx = participantIdx(participant);
+
         uint owedToA = currentChallenge.payouts[0] - withdrawnAmount[0];
         uint aPending = min(address(this).balance, owedToA);
 
@@ -177,7 +216,7 @@ contract SimpleAdjudicator {
             amount = bPending;
         }
 
-        participant.transfer(amount);
+        destination.transfer(amount);
         withdrawnAmount[idx] = withdrawnAmount[idx] + amount;
     }
 
