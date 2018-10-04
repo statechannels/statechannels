@@ -1,6 +1,6 @@
 {
   "name": "fmg-rock-paper-scissors",
-  "version": "0.0.10",
+  "version": "0.1.0",
   "description": "Rock-paper-scissors as a force-move game",
   "directories": {
     "doc": "docs",
