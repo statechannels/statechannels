@@ -161,7 +161,7 @@ contract SimpleAdjudicator {
         );
     }
 
-    function recoverDestination(
+    function recoverParticipant(
         address participant,
         address destination,
         bytes32 _channelId,
@@ -198,7 +198,7 @@ contract SimpleAdjudicator {
         // check that the participant has signed off on the destination
         // address for the funds
         require(
-            participant == recoverDestination(participant, destination, _channelId, v, r, s),
+            participant == recoverParticipant(participant, destination, _channelId, v, r, s),
             "Participant must sign off on destination address"
         );
 
