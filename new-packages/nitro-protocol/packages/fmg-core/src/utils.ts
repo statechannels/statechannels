@@ -34,7 +34,7 @@ enum SolidityType {
   bytes32,
 }
 
-class SolidityParameter {
+export class SolidityParameter {
   type: SolidityType;
   value: string;
 
@@ -44,7 +44,10 @@ class SolidityParameter {
   }
 }
 
-export function sign(data: string | SolidityParameter | SolidityParameter[], privateKey)
+// TODO: Figure out how to export this type from index.ts
+type SignableData = string | SolidityParameter | SolidityParameter[];
+
+export function sign(data: SignableData, privateKey)
   : {v: string, r: string, s: string} {
   const localWeb3 = new Web3('');
   const account:any = localWeb3.eth.accounts.privateKeyToAccount(privateKey);
@@ -57,7 +60,7 @@ export function sign(data: string | SolidityParameter | SolidityParameter[], pri
   return localWeb3.eth.accounts.sign(hash, account.privateKey, true) as Signature;
 }
 
-export function recover(data: string | SolidityParameter | SolidityParameter[],  v: string, r: string, s: string): string {
+export function recover(data: SignableData,  v: string, r: string, s: string): string {
   const web3 = new Web3('');
   let hash;
   if (typeof data === 'string' || data instanceof SolidityParameter) {
