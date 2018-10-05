@@ -24,14 +24,14 @@ export function toPaddedHexString(num, len) {
     return "0".repeat(len - str.length) + str;
 }
 
-enum SolidityType {
-  // Only the types we'd use
-  bool,
-  uint8,
-  uint256,
-  address,
-  bytes,
-  bytes32,
+export enum SolidityType {
+  // For now, we only allow the types that we'd use.
+  bool = 'bool',
+  uint8 = 'uint8',
+  uint256 = 'uint256',
+  address = 'address',
+  bytes = 'bytes',
+  bytes32 = 'bytes32',
 }
 
 export class SolidityParameter {
