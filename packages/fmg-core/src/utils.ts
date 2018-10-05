@@ -70,3 +70,11 @@ export function recover(data: SignableData,  v: string, r: string, s: string): s
   }
   return web3.eth.accounts.recover(hash, v, r, s);
 }
+
+export function decodeSignature(signature: string) : { v, r, s } {
+  const r = '0x' + signature.slice(2, 66);
+  const s = '0x' + signature.slice(66, 130);
+  const v = '0x' + signature.slice(130, 132);
+
+  return { v, r, s };
+}
