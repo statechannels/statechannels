@@ -14,17 +14,17 @@ library Rules {
     }
 
     function validForceMove(
-        bytes _yourState,
-        bytes _myState,
+        bytes _fromState,
+        bytes _toState,
         uint8[] v,
         bytes32[] r,
         bytes32[] s
     ) public pure returns (bool) {
         // states must be signed by the appropriate participant
-        _yourState.requireSignature(v[0], r[0], s[0]);
-        _myState.requireSignature(v[1], r[1], s[1]);
+        _fromState.requireSignature(v[0], r[0], s[0]);
+        _toState.requireSignature(v[1], r[1], s[1]);
 
-        return validTransition(_yourState, _myState);
+        return validTransition(_fromState, _toState);
     }
 
     function validConclusionProof(

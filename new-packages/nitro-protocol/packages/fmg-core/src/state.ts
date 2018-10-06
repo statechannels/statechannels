@@ -1,12 +1,10 @@
-import { sha3 } from 'web3-utils';
-
 import { toHex32 } from './utils';
 import { Channel } from './channel';
 import BN from 'bn.js';
 
 class State {
   channel: any;
-  stateType: State.StateType
+  stateType: State.StateType;
   turnNum: number;
   resolution: BN[];
   stateCount: number;
@@ -34,17 +32,7 @@ class State {
       toHex32(this.turnNum).substr(2) +
       toHex32(this.stateCount).substr(2) +
       this.resolution.map(x => toHex32(x).substr(2)).join("")
-    )
-  }
-
-  sign(account) {
-    const digest = sha3(this.toHex(), {encoding: 'hex'});
-    const sig = web3.eth.sign(account, digest).slice(2);
-    const r = `0x${sig.slice(0, 64)}`;
-    const s = `0x${sig.slice(64, 128)}`;
-    const v = web3.toDecimal(sig.slice(128, 130)) + 27;
-
-    return [ r, s, v ];
+    );
   }
 
   get numberOfParticipants() {
@@ -56,7 +44,8 @@ class State {
   }
 }
 
-module State {
+// tslint:disable-next-line:no-namespace
+namespace State {
   export enum StateType {
     PreFundSetup,
     PostFundSetup,
