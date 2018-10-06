@@ -63,7 +63,7 @@ contract SimpleAdjudicator {
 
         createChallenge(uint32(now + challengeDuration), _toState);
     }
-
+    event GameConcluded();
     function conclude(
         bytes _penultimateState,
         bytes _ultimateState,
@@ -72,21 +72,24 @@ contract SimpleAdjudicator {
         bytes32[] _s
     )
       external
-      onlyWhenGameOngoing
     {
-        // channelId must match the game supported by the channel
-        require(_penultimateState.channelId() == fundedChannelId);
+        // Only attempt to conclude the game if it's not already concluded
+        if (!expiredChallengePresent()){
+            // channelId must match the game supported by the channel
+            require(_penultimateState.channelId() == fundedChannelId);
 
-        // passing _v, _r, _s directly to validConclusionProof gives a "Stack too deep" error
-        uint8[] memory v = _v;
-        bytes32[] memory r = _r;
-        bytes32[] memory s = _s;
+            // passing _v, _r, _s directly to validConclusionProof gives a "Stack too deep" error
+            uint8[] memory v = _v;
+            bytes32[] memory r = _r;
+            bytes32[] memory s = _s;
 
-        // must be a valid conclusion proof according to framework rules
-        require(Rules.validConclusionProof(_penultimateState, _ultimateState, v, r, s));
+            // must be a valid conclusion proof according to framework rules
+            require(Rules.validConclusionProof(_penultimateState, _ultimateState, v, r, s));
 
-        // Create an expired challenge, (possibly) overwriting any existing challenge
-        createChallenge(uint32(now), _ultimateState);
+            // Create an expired challenge, (possibly) overwriting any existing challenge
+            createChallenge(uint32(now), _ultimateState);
+            emit GameConcluded();
+        }
     }
 
     event Refuted(bytes refutation);
