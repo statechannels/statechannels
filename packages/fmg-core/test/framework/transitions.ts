@@ -3,31 +3,32 @@ import assertRevert from '../helpers/assert-revert';
 import { CountingGame } from '../../src/test-game/counting-game';
 import { Channel, State } from '../../src';
 
-var StateLib = artifacts.require("./State.sol");
-var Rules = artifacts.require("./Rules.sol");
-var CountingStateContract = artifacts.require("../test-game/contracts/CountingState.sol");
-var CountingGameContract = artifacts.require("../test-game/contracts/CountingGame.sol");
+const StateLib = artifacts.require("./State.sol");
+const Rules = artifacts.require("./Rules.sol");
+const CountingStateContract = artifacts.require("../test-game/contracts/CountingState.sol");
+const CountingGameContract = artifacts.require("../test-game/contracts/CountingGame.sol");
 
 contract('Rules', (accounts) => {
-    let channel, otherChannel, defaults, framework;
+    let channel;
+    let otherChannel;
+    let defaults;
+    let framework;
     const resolution = [12, 13];
     const otherResolution = [10, 15];
 
-    let fromState, toState;
+    let fromState;
+    let toState;
 
     before(async () => {
         framework = await Rules.deployed();
 
         CountingStateContract.link(StateLib);
-        let stateContract = await CountingStateContract.new();
+        const stateContract = await CountingStateContract.new();
         CountingGameContract.link("CountingState", stateContract.address);
-        let gameContract = await CountingGameContract.new();
+        const gameContract = await CountingGameContract.new();
 
         channel = new Channel(gameContract.address, 0, [accounts[0], accounts[1]]);
         otherChannel = new Channel(gameContract.address, 1, [accounts[0], accounts[1]]);
-
-        let challengeeBal = Number(web3.toWei(6, "ether"));
-        let challengerBal = Number(web3.toWei(4, "ether"));
 
         defaults = { channel, resolution, gameCounter: 0};
     });

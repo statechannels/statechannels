@@ -41,8 +41,8 @@ contract SimpleAdjudicator {
     }
 
     function forceMove (
-        bytes _yourState,
-        bytes _myState,
+        bytes _fromState,
+        bytes _toState,
         uint8[] _v,
         bytes32[] _r,
         bytes32[] _s
@@ -51,7 +51,7 @@ contract SimpleAdjudicator {
         onlyWhenCurrentChallengeNotPresent
       {
         // channelId must match the game supported by the channel
-        require(_yourState.channelId() == fundedChannelId);
+        require(_fromState.channelId() == fundedChannelId);
 
         // passing _v, _r, _s directly to validForceMove gives a "Stack too deep" error
         uint8[] memory v = _v;
@@ -59,14 +59,14 @@ contract SimpleAdjudicator {
         bytes32[] memory s = _s;
 
         // must be a valid force move
-        require(Rules.validForceMove(_yourState, _myState, v, r, s));
+        require(Rules.validForceMove(_fromState, _toState, v, r, s));
 
-        createChallenge(uint32(now + challengeDuration), _myState);
+        createChallenge(uint32(now + challengeDuration), _toState);
     }
 
     function conclude(
-        bytes _yourState,
-        bytes _myState,
+        bytes _penultimateState,
+        bytes _ultimateState,
         uint8[] _v,
         bytes32[] _r,
         bytes32[] _s
@@ -75,7 +75,7 @@ contract SimpleAdjudicator {
       onlyWhenGameOngoing
     {
         // channelId must match the game supported by the channel
-        require(_yourState.channelId() == fundedChannelId);
+        require(_penultimateState.channelId() == fundedChannelId);
 
         // passing _v, _r, _s directly to validConclusionProof gives a "Stack too deep" error
         uint8[] memory v = _v;
@@ -83,10 +83,10 @@ contract SimpleAdjudicator {
         bytes32[] memory s = _s;
 
         // must be a valid conclusion proof according to framework rules
-        require(Rules.validConclusionProof(_yourState, _myState, v, r, s));
+        require(Rules.validConclusionProof(_penultimateState, _ultimateState, v, r, s));
 
         // Create an expired challenge, (possibly) overwriting any existing challenge
-        createChallenge(uint32(now), _myState);
+        createChallenge(uint32(now), _ultimateState);
     }
 
     event Refuted(bytes refutation);
@@ -101,6 +101,7 @@ contract SimpleAdjudicator {
         require(Rules.validRefute(currentChallenge.state, _refutationState, v, r, s));
 
         cancelCurrentChallenge();
+
         emit Refuted(_refutationState);
     }
 
@@ -160,11 +161,49 @@ contract SimpleAdjudicator {
         );
     }
 
-    function withdraw(address participant)
+    function recoverParticipant(
+        address participant,
+        address destination,
+        bytes32 _channelId,
+        uint8 v,
+        bytes32 r,
+        bytes32 s
+    ) internal view returns (address) {
+        bytes32 h = keccak256(abi.encodePacked(participant, destination, fundedChannelId)); 
+        bytes memory prefix = "\x19Ethereum Signed Message:\n32";
+
+        bytes32 prefixedHash = keccak256(
+            abi.encodePacked(prefix, h)
+        );
+
+        return ecrecover(prefixedHash, v, r, s);
+    }
+
+    function withdraw(
+        address participant,
+        address destination,
+        bytes32 _channelId, // not needed for the simple adjudicator, which only supports one channel
+        uint8 v,
+        bytes32 r,
+        bytes32 s
+    )
       public
       onlyWhenGameTerminated
     {
+        require(
+            _channelId == fundedChannelId,
+            "Can only withdraw from the funded channel id"
+        );
+
+        // check that the participant has signed off on the destination
+        // address for the funds
+        require(
+            participant == recoverParticipant(participant, destination, _channelId, v, r, s),
+            "Participant must sign off on destination address"
+        );
+
         uint8 idx = participantIdx(participant);
+
         uint owedToA = currentChallenge.payouts[0] - withdrawnAmount[0];
         uint aPending = min(address(this).balance, owedToA);
 
@@ -177,7 +216,7 @@ contract SimpleAdjudicator {
             amount = bPending;
         }
 
-        participant.transfer(amount);
+        destination.transfer(amount);
         withdrawnAmount[idx] = withdrawnAmount[idx] + amount;
     }
 
