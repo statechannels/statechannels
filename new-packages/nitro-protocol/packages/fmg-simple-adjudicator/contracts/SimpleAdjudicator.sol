@@ -63,33 +63,65 @@ contract SimpleAdjudicator {
 
         createChallenge(uint32(now + challengeDuration), _toState);
     }
-    event GameConcluded();
+
+    function concludeAndWithdraw(
+        bytes _penultimateState,
+        bytes _ultimateState,
+        address participant,
+        address destination,
+        bytes32 _channelId,
+        uint8[] _v,
+        bytes32[] _r,
+        bytes32[] _s
+    ) external{
+        if (!expiredChallengePresent()){
+            _conclude(
+                _penultimateState,
+                _ultimateState,
+                _v,
+                _r,
+                _s
+            );
+        }
+        _withdraw(participant, destination,_channelId,_v[2],_r[2],_s[2]);
+
+    }
+
     function conclude(
+        bytes _penultimateState,
+        bytes _ultimateState,
+        uint8[] _v,
+        bytes32[] _r,
+        bytes32[] _s)
+    external onlyWhenGameOngoing 
+    {
+        _conclude(_penultimateState,_ultimateState,_v,_r,_s);
+    }
+    event GameConcluded();
+    function _conclude(
         bytes _penultimateState,
         bytes _ultimateState,
         uint8[] _v,
         bytes32[] _r,
         bytes32[] _s
     )
-      external
+      internal
     {
-        // Only attempt to conclude the game if it's not already concluded
-        if (!expiredChallengePresent()){
-            // channelId must match the game supported by the channel
-            require(_penultimateState.channelId() == fundedChannelId);
+        // channelId must match the game supported by the channel
+        require(_penultimateState.channelId() == fundedChannelId);
 
-            // passing _v, _r, _s directly to validConclusionProof gives a "Stack too deep" error
-            uint8[] memory v = _v;
-            bytes32[] memory r = _r;
-            bytes32[] memory s = _s;
+        // passing _v, _r, _s directly to validConclusionProof gives a "Stack too deep" error
+        uint8[] memory v = _v;
+        bytes32[] memory r = _r;
+        bytes32[] memory s = _s;
 
-            // must be a valid conclusion proof according to framework rules
-            require(Rules.validConclusionProof(_penultimateState, _ultimateState, v, r, s));
+        // must be a valid conclusion proof according to framework rules
+        require(Rules.validConclusionProof(_penultimateState, _ultimateState, v, r, s));
 
-            // Create an expired challenge, (possibly) overwriting any existing challenge
-            createChallenge(uint32(now), _ultimateState);
-            emit GameConcluded();
-        }
+        // Create an expired challenge, (possibly) overwriting any existing challenge
+        createChallenge(uint32(now), _ultimateState);
+        emit GameConcluded();
+        
     }
 
     event Refuted(bytes refutation);
@@ -182,6 +214,7 @@ contract SimpleAdjudicator {
         return ecrecover(prefixedHash, v, r, s);
     }
 
+
     function withdraw(
         address participant,
         address destination,
@@ -193,10 +226,19 @@ contract SimpleAdjudicator {
       public
       onlyWhenGameTerminated
     {
-        require(
-            _channelId == fundedChannelId,
-            "Can only withdraw from the funded channel id"
-        );
+        return _withdraw(participant, destination, _channelId,v,r,s);
+    }
+
+    function _withdraw(
+        address participant,
+        address destination,
+        bytes32 _channelId, // not needed for the simple adjudicator, which only supports one channel
+        uint8 v,
+        bytes32 r,
+        bytes32 s
+    )
+      internal
+    {
 
         // check that the participant has signed off on the destination
         // address for the funds
