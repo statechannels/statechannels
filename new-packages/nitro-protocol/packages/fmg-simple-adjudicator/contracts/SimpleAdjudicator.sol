@@ -83,6 +83,14 @@ contract SimpleAdjudicator {
                 _s
             );
         }
+
+        require(
+            // You can't compare calldata bytes (eg _ultimateState) with
+            // storage bytes (eg. currentChallenge.state)
+            keccak256(_ultimateState) == keccak256(currentChallenge.state),
+            "Game already concluded with a different conclusion proof"
+        );
+
         _withdraw(participant, destination,_channelId,_v[2],_r[2],_s[2]);
 
     }
