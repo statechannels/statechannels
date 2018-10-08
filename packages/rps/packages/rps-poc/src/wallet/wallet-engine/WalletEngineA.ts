@@ -17,12 +17,19 @@ export default class WalletEngineA {
     this.state = state;
   }
 
+  selectWithdrawalAddress(depositAddress:string):State.PlayerAState{
+    if (this.state.constructor!== State.SelectWithdrawalAddress){
+      return this.state;
+    }
+    return this.transitionTo(new State.WithdrawAndConclude(depositAddress));
+  }
+
   transitionTo(state): State.PlayerAState {
     this.state = state;
     return state;
   }
   errorOccurred(message: string): State.PlayerAState {
-    switch (this.state.constructor) {
+    switch (this.state.consWithdrawAndConcludetructor) {
       case State.WaitForApproval:
       case State.WaitForBlockchainDeploy:
         return this.transitionTo(new State.FundingFailed(message));
