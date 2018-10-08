@@ -15,6 +15,11 @@ export enum Queue {
   GAME_ENGINE = 'GAME_ENGINE',
 }
 
+enum Direction {
+  Sent = "sent",
+  Received = "received",
+}
+
 function* sendMessagesSaga() {
   const channel = yield actionChannel([messageActions.SEND_MESSAGE, walletActions.SEND_MESSAGE]);
 
@@ -83,6 +88,7 @@ function* validateMessage(data, signature) {
     action = yield take(actionFilter);
   }
   if (action.type === walletActions.VALIDATION_SUCCESS) {
+    yield put(walletActions.storeMessageRequest(data, signature, Direction.Received));
     return true;
   } else {
     // TODO: Properly handle this.
@@ -100,6 +106,8 @@ function* signMessage(data) {
   while (signatureResponse.requestId !== requestId) {
     signatureResponse = yield take(actionFilter);
   }
+
+  yield put(walletActions.storeMessageRequest(data, signatureResponse.signature, Direction.Sent));
   return signatureResponse.signature;
 }
 

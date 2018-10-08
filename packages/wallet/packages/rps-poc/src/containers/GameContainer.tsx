@@ -9,7 +9,6 @@ import GameProposedPage from '../components/GameProposedPage';
 import FundingConfirmedPage from '../components/FundingConfirmedPage';
 import PlaySelectedPage from '../components/PlaySelectedPage';
 import ResultPage from '../components/ResultPage';
-
 import { WalletController } from '../wallet';
 
 import { SiteState } from '../redux/reducer';
@@ -64,6 +63,7 @@ function GameContainer(props: GameProps) {
       );
 
     case playerA.INSUFFICIENT_FUNDS:
+    case playerB.INSUFFICIENT_FUNDS:
       // todo: add into the logic about who it was that ran out of funds
       // Also todo: replace with new component (WaitingStep is just a filler)
       return (
@@ -71,14 +71,10 @@ function GameContainer(props: GameProps) {
       );
 
     case playerA.WAIT_FOR_CONCLUDE:
-      return <WaitingStep message="Waiting for opponent to conclude the game" />;
-
+    case playerB.WAIT_FOR_CONCLUDE:
     case playerA.CONCLUDED:
-      // TODO: add withdraw button!
-      const message = `The game has concluded -- you may now withdraw your winnings of ${
-        state.balances[state.playerIndex]
-      } Finney! [Withdrawal not implemented]`;
-      return <WaitingStep message={message} />;
+    case playerB.CONCLUDED:
+      return <WalletController />;
 
     case playerB.WAIT_FOR_FUNDING:
       return <WalletController />;
@@ -111,9 +107,6 @@ function GameContainer(props: GameProps) {
           abandonGame={abandonGame}
         />
       );
-
-    default:
-      return <WaitingStep message={`[view not implemented: ${state.type}`} />;
   }
 }
 

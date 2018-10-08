@@ -11,7 +11,7 @@ import {
   Reveal,
   Resting,
   Conclude,
-}  from './positions';
+} from './positions';
 import BN from 'bn.js';
 import { WaitForConclude } from './application-states/PlayerA';
 
@@ -55,7 +55,7 @@ export default class GameEngineB {
         return this.state;
     }
   }
-  
+
   fundingConfirmed() {
     if (!(this.state instanceof State.WaitForFunding)) {
       return this.state;
@@ -73,7 +73,7 @@ export default class GameEngineB {
 
     const { channel, stake, balances, preCommit, turnNum } = this.state;
 
-    const newBalances:BN[]=[];
+    const newBalances: BN[] = [];
     newBalances[0] = balances[0].sub(stake);
     newBalances[1] = balances[1].add(stake);
 
@@ -165,13 +165,11 @@ export default class GameEngineB {
     if (this.state instanceof State.Concluded) {
       return this.state;
     }
-    const { channel, resolution: balances } = position;
-
-    const newPosition = new Conclude(channel, position.turnNum + 1, balances);
-
-    // todo: need a move. Might also need an intermediate state here
-    return this.transitionTo(
-      new State.WaitForConclude({ position: newPosition }),
-    );
+    const { channel, balances } = this.state;
+    const turnNum = position.turnNum + 1;
+    const conclude = new Conclude(channel, turnNum, balances);
+    return this.transitionTo(new State.Concluded({
+      position: conclude,
+    }));
   }
 }

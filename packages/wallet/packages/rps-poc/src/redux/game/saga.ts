@@ -13,6 +13,8 @@ import { PlayerAStateType } from '../../game-engine/application-states/PlayerA';
 import { PlayerBStateType } from '../../game-engine/application-states/PlayerB';
 
 export default function* gameSaga(gameEngine: GameEngine) {
+  yield put(walletActions.openChannelRequest(gameEngine.state.channel));
+  yield take(walletActions.CHANNEL_OPENED);
   yield put(applicationActions.gameSuccess(gameEngine.state));
   yield processState(gameEngine.state);
 
@@ -76,7 +78,12 @@ function* processState(state) {
       break; // don't send anything if the next step is to ChoosePlay
     case PlayerAStateType.CONCLUDED:
     case PlayerBStateType.CONCLUDED:
+      yield sendState(state);
+      yield put(gameActions.stateChanged(state));
       yield put(walletActions.withdrawalRequest(state));
+      yield take(walletActions.WITHDRAWAL_SUCCESS);
+      yield put(walletActions.closeChannelRequest());
+      yield put(applicationActions.lobbyRequest());
       // Once the game is concluded, the players do not need to interact with each other
       break;
     default:
