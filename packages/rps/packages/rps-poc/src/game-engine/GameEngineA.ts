@@ -15,13 +15,13 @@ import {
   Reveal,
   Resting,
   Conclude,
-}  from './positions';
+} from './positions';
 import BN from 'bn.js';
 
 const fakeGameLibraryAddress = '0xc1912fee45d61c87cc5ea59dae31190fffff232d';
 
 export default class GameEngineA {
-  static setupGame({ me, opponent, stake, balances }: 
+  static setupGame({ me, opponent, stake, balances }:
     { me: string, opponent: string, stake: BN, balances: BN[] }
   ) {
     const participants = [me, opponent];
@@ -41,13 +41,13 @@ export default class GameEngineA {
   }
 
   state: State.PlayerAState;
- 
+
   constructor(state) {
     this.state = state;
   }
 
   receivePosition(positionReceived: Position) {
-    switch(positionReceived.constructor) {
+    switch (positionReceived.constructor) {
       case PreFundSetupB:
         return this.receivedPreFundSetup(positionReceived as PreFundSetupB);
       case PostFundSetupB:
@@ -160,11 +160,11 @@ export default class GameEngineA {
     const { channel, stake, resolution: oldBalances, bPlay, turnNum } = position;
     const { aPlay, salt } = this.state;
     const result = calculateResult(aPlay, bPlay);
-   
+
     const balances = [...oldBalances];
     if (result === Result.Tie) {
       balances[0] = balances[0].add(stake);
-      balances[1] =  balances[1].sub(stake);
+      balances[1] = balances[1].sub(stake);
     } else if (result === Result.YouWin) {
       balances[0] = balances[0].add(stake.mul(new BN(2)));
       balances[1] = balances[1].sub(stake.mul(new BN(2)));
@@ -197,14 +197,11 @@ export default class GameEngineA {
     if (this.state instanceof State.Concluded) {
       return this.state;
     }
-    if (this.state instanceof State.WaitForConclude) {
-      return this.transitionTo(
-        new State.Concluded({ position })
-      );
-    }
-    // todo: need a move. Might also need an intermediate state here
-    return this.transitionTo(
-      new State.WaitForConclude({ position })
-    );
+    const { channel, balances } = this.state;
+    const turnNum = position.turnNum + 1;
+    const conclude = new Conclude(channel, turnNum, balances);
+    return this.transitionTo(new State.Concluded({
+      position: conclude,
+    }));
   }
 }

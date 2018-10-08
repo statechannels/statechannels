@@ -1,8 +1,8 @@
 import * as CommonState from '..';
 
 export type ReadyToDeposit = CommonState.AdjudicatorReceived;
-export class WaitForAToDeploy {}
-export class WaitForBlockchainDeposit {}
+export class WaitForAToDeploy { }
+export class WaitForBlockchainDeposit { }
 export class WaitForApprovalWithAdjudicator extends CommonState.WaitForApproval {
   adjudicatorAddress: string;
   constructor({ adjudicatorAddress, myAddress, opponentAddress, myBalance, opponentBalance }) {
@@ -14,6 +14,8 @@ export const FundingFailed = CommonState.FundingFailed;
 export const WaitForApproval = CommonState.WaitForApproval;
 export const Funded = CommonState.Funded;
 export const ReadyToDeposit = CommonState.AdjudicatorReceived;
+export const WithdrawAndConclude = CommonState.WaitForWithdrawal;
+export const SelectWithdrawalAddress = CommonState.SelectWithdrawalAddress;
 export type PlayerBState =
   | ReadyToDeposit
   | WaitForAToDeploy
@@ -21,4 +23,6 @@ export type PlayerBState =
   | CommonState.WaitForApproval
   | CommonState.FundingFailed
   | CommonState.AdjudicatorReceived
-  | CommonState.Funded;
+  | CommonState.Funded
+  | CommonState.SelectWithdrawalAddress
+  | CommonState.WaitForWithdrawal;

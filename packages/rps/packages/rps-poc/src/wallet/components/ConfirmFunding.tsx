@@ -1,7 +1,7 @@
 import React from 'react';
 import BN from 'bn.js';
 import web3Utils from 'web3-utils';
-import Button from '../../components/Button';
+import { Button } from 'reactstrap';
 import { StyleSheet, css } from 'aphrodite';
 
 export interface ConfirmFundingProps {

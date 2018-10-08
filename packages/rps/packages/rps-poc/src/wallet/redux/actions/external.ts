@@ -6,6 +6,8 @@ import {
   WaitForFunding as WaitForFundingB,
   Concluded as ConcludedB,
 } from '../../../game-engine/application-states/PlayerB';
+import  { SignableData } from '../../domain/ChannelWallet';
+import { Channel } from 'fmg-core';
 
 // FUNDING
 // =======
@@ -14,7 +16,10 @@ export const FUNDING_REQUEST = 'WALLET.FUNDING.REQUEST';
 export const FUNDING_SUCCESS = 'WALLET.FUNDING.SUCCESS';
 export const FUNDING_FAILURE = 'WALLET.FUNDING.FAILURE';
 
-export const fundingRequest = (channelId, state: WaitForFundingA | WaitForFundingB) => ({
+export const fundingRequest = (
+  channelId: string,
+  state: WaitForFundingA | WaitForFundingB
+) => ({
   type: FUNDING_REQUEST as typeof FUNDING_REQUEST,
   channelId,
   state,
@@ -34,6 +39,35 @@ export type FundingSuccess = ReturnType<typeof fundingSuccess>;
 export type FundingFailure = ReturnType<typeof fundingFailure>;
 export type FundingResponse = FundingSuccess | FundingFailure;
 
+// CHANNELS
+// ========
+
+export const OPEN_CHANNEL_REQUEST = 'WALLET.CHANNEL.REQUEST.OPEN';
+export const CLOSE_CHANNEL_REQUEST = 'WALLET.CHANNEL.REQUEST.CLOSE';
+export const CHANNEL_OPENED = 'WALLET.CHANNEL.OPENED';
+export const CHANNEL_CLOSED = 'WALLET.CHANNEL.CLOSED';
+
+export const openChannelRequest = (channel: Channel) => ({
+  type: OPEN_CHANNEL_REQUEST as typeof OPEN_CHANNEL_REQUEST,
+  channel,
+});
+export const channelOpened = (channelId: string) => ({
+  type: CHANNEL_OPENED as typeof CHANNEL_OPENED,
+  channelId,
+});
+export const closeChannelRequest = () => ({
+  type: CLOSE_CHANNEL_REQUEST as typeof CLOSE_CHANNEL_REQUEST,
+});
+export const channelClosed = (walletId: string) => ({
+  type: CHANNEL_CLOSED as typeof CHANNEL_CLOSED,
+  walletId,
+});
+
+export type OpenChannelRequest = ReturnType<typeof openChannelRequest>;
+export type ChannelOpened = ReturnType<typeof channelOpened>;
+export type CloseChannelRequest = ReturnType<typeof closeChannelRequest>;
+export type ChannelClosed = ReturnType<typeof channelClosed>;
+
 // VALIDATION
 // ==========
 
@@ -41,10 +75,10 @@ export const VALIDATION_REQUEST = 'WALLET.VALIDATION.REQUEST';
 export const VALIDATION_SUCCESS = 'WALLET.VALIDATION.SUCCESS';
 export const VALIDATION_FAILURE = 'WALLET.VALIDATION.FAILURE';
 
-export const validationRequest = (requestId: string, positionData: string, signature: string, opponentIndex: number) => ({
+export const validationRequest = (requestId: string, data: SignableData, signature: string, opponentIndex: number) => ({
   type: VALIDATION_REQUEST as typeof VALIDATION_REQUEST,
   requestId,
-  positionData,
+  data,
   signature,
   opponentIndex,
 });
@@ -70,10 +104,10 @@ export const SIGNATURE_REQUEST = 'WALLET.SIGNATURE.REQUEST';
 export const SIGNATURE_SUCCESS = 'WALLET.SIGNATURE.SUCCESS';
 export const SIGNATURE_FAILURE = 'WALLET.SIGNATURE.FAILURE';
 
-export const signatureRequest = (requestId: string, positionData: string) => ({
+export const signatureRequest = (requestId: string, data: SignableData) => ({
   type: SIGNATURE_REQUEST as typeof SIGNATURE_REQUEST,
   requestId,
-  positionData,
+  data,
 });
 export const signatureSuccess = (requestId: string, signature: string) => ({
   type: SIGNATURE_SUCCESS as typeof SIGNATURE_SUCCESS,
@@ -139,6 +173,8 @@ export type InitializationSuccess = ReturnType<typeof initializationSuccess>;
 // =========
 export const SEND_MESSAGE = 'WALLET.MESSAGING.SEND';
 export const RECEIVE_MESSAGE = 'WALLET.MESSAGING.RECEIVE';
+export const STORE_MESSAGE_REQUEST = 'WALLET.MESSAGING.REQUEST.STORE';
+
 
 export const sendMessage = (to: string, data: string) => ({
   type: SEND_MESSAGE as typeof SEND_MESSAGE,
@@ -151,12 +187,20 @@ export const receiveMessage = (data: string) => ({
   data,
 });
 
+export const storeMessageRequest = (positionData: string, signature: string, direction: "sent" | "received") => ({
+  type: STORE_MESSAGE_REQUEST as typeof STORE_MESSAGE_REQUEST,
+  positionData,
+  signature,
+  direction,
+});
+
 export type SendMessage = ReturnType<typeof sendMessage>;
 export type ReceiveMessage = ReturnType<typeof receiveMessage>;
+export type StoreMessageRequest = ReturnType<typeof storeMessageRequest>;
 
 // DECODING
 // ========
 
 // Requests
 // ========
-export type RequestAction = FundingRequest | SignatureRequest | ValidationRequest | WithdrawalRequest;
+export type RequestAction = OpenChannelRequest | CloseChannelRequest | FundingRequest | SignatureRequest | ValidationRequest | WithdrawalRequest | StoreMessageRequest;
