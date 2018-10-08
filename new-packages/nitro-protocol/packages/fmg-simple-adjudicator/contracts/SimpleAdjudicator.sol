@@ -64,15 +64,56 @@ contract SimpleAdjudicator {
         createChallenge(uint32(now + challengeDuration), _toState);
     }
 
+    function concludeAndWithdraw(
+        bytes _penultimateState,
+        bytes _ultimateState,
+        address participant,
+        address destination,
+        bytes32 _channelId,
+        uint8[] _v,
+        bytes32[] _r,
+        bytes32[] _s
+    ) external{
+        if (!expiredChallengePresent()){
+            _conclude(
+                _penultimateState,
+                _ultimateState,
+                _v,
+                _r,
+                _s
+            );
+        }
+
+        require(
+            // You can't compare calldata bytes (eg _ultimateState) with
+            // storage bytes (eg. currentChallenge.state)
+            keccak256(_ultimateState) == keccak256(currentChallenge.state),
+            "Game already concluded with a different conclusion proof"
+        );
+
+        _withdraw(participant, destination,_channelId,_v[2],_r[2],_s[2]);
+
+    }
+
     function conclude(
+        bytes _penultimateState,
+        bytes _ultimateState,
+        uint8[] _v,
+        bytes32[] _r,
+        bytes32[] _s)
+    external onlyWhenGameOngoing 
+    {
+        _conclude(_penultimateState,_ultimateState,_v,_r,_s);
+    }
+    event GameConcluded();
+    function _conclude(
         bytes _penultimateState,
         bytes _ultimateState,
         uint8[] _v,
         bytes32[] _r,
         bytes32[] _s
     )
-      external
-      onlyWhenGameOngoing
+      internal
     {
         // channelId must match the game supported by the channel
         require(_penultimateState.channelId() == fundedChannelId);
@@ -87,6 +128,8 @@ contract SimpleAdjudicator {
 
         // Create an expired challenge, (possibly) overwriting any existing challenge
         createChallenge(uint32(now), _ultimateState);
+        emit GameConcluded();
+        
     }
 
     event Refuted(bytes refutation);
@@ -179,6 +222,7 @@ contract SimpleAdjudicator {
         return ecrecover(prefixedHash, v, r, s);
     }
 
+
     function withdraw(
         address participant,
         address destination,
@@ -188,12 +232,21 @@ contract SimpleAdjudicator {
         bytes32 s
     )
       public
+    {
+        return _withdraw(participant, destination, _channelId,v,r,s);
+    }
+
+    function _withdraw(
+        address participant,
+        address destination,
+        bytes32 _channelId, // not needed for the simple adjudicator, which only supports one channel
+        uint8 v,
+        bytes32 r,
+        bytes32 s
+    )
+      internal
       onlyWhenGameTerminated
     {
-        require(
-            _channelId == fundedChannelId,
-            "Can only withdraw from the funded channel id"
-        );
 
         // check that the participant has signed off on the destination
         // address for the funds
