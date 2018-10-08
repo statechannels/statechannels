@@ -232,7 +232,6 @@ contract SimpleAdjudicator {
         bytes32 s
     )
       public
-      onlyWhenGameTerminated
     {
         return _withdraw(participant, destination, _channelId,v,r,s);
     }
@@ -246,6 +245,7 @@ contract SimpleAdjudicator {
         bytes32 s
     )
       internal
+      onlyWhenGameTerminated
     {
 
         // check that the participant has signed off on the destination
