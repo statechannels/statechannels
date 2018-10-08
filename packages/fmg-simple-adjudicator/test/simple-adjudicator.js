@@ -158,19 +158,16 @@ contract('SimpleAdjudicator', (accounts) => {
   it("can only be concluded once", async () => {
     aliceState = state0;
     bobState = state1;
-
-    aliceState.stateType = State.StateType.Conclude;
+     aliceState.stateType = State.StateType.Conclude;
     bobState.stateType = State.StateType.Conclude;
-
-    const { r: r0, s: s0, v: v0 } = sign(aliceState.toHex(), alice.privateKey);
+     const { r: r0, s: s0, v: v0 } = sign(aliceState.toHex(), alice.privateKey);
     const { r: r1, s: s1, v: v1 } = sign(bobState.toHex(), bob.privateKey);
-
-    await simpleAdj.conclude(aliceState.toHex(), bobState.toHex(), [v0, v1], [r0, r1], [s0, s1] );
+     await simpleAdj.conclude(aliceState.toHex(), bobState.toHex(), [v0, v1], [r0, r1], [s0, s1] );
     assertRevert(
       simpleAdj.conclude(aliceState.toHex(), bobState.toHex(), [v0, v1], [r0, r1], [s0, s1])
     );
   });
-
+  
   describe("withdrawals", () => {
     let aliceStart, bobStart;
     async function withdrawHelper(account, destination) {
