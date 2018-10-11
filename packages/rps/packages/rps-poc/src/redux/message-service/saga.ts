@@ -43,6 +43,7 @@ function* sendMessagesSaga() {
     } else {
       yield call(reduxSagaFirebase.database.create, `/messages/${to}`, message);
     }
+    yield put(messageActions.messageSent());
   }
 }
 

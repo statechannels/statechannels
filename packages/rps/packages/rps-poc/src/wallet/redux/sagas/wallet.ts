@@ -43,7 +43,7 @@ export function* walletSaga(uid: string): IterableIterator<any> {
         break;
 
       case actions.CLOSE_CHANNEL_REQUEST:
-        if (runningBlockchainSaga!=null){
+        if (runningBlockchainSaga != null) {
           yield cancel(runningBlockchainSaga);
         }
         yield wallet.closeChannel();
@@ -201,18 +201,26 @@ function* loadConclusionProof(
     `wallets/${wallet.id}/channels/${state.channel.id}/received`
   );
   const yourMove = yield call([yourQuery, yourQuery.once], 'value');
-  const { state: yourState, signature: yourSignature } = yourMove.val();
+  const { state: yourState, signature: yourSignature, updatedAt: yourUpdatedAt } = yourMove.val();
 
   const myQuery = firebase.database().ref(
     `wallets/${wallet.id}/channels/${state.channel.id}/sent`
   );
   const myMove = yield call([myQuery, myQuery.once], 'value');
-  const { state: myState, signature: mySignature } = myMove.val();
-
-  return new ConclusionProof(
-    myState,
-    yourState,
-    mySignature,
-    yourSignature,
-  );
+  const { state: myState, signature: mySignature, updatedAt: myUpdatedAt } = myMove.val();
+  if (myUpdatedAt > yourUpdatedAt) {
+    return new ConclusionProof(
+      yourState,
+      myState,
+      yourSignature,
+      mySignature,
+    );
+  } else {
+    return new ConclusionProof(
+      myState,
+      yourState,
+      mySignature,
+      yourSignature,
+    );
+  }
 }

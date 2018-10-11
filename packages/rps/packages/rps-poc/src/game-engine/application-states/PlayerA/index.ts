@@ -24,6 +24,7 @@ export enum PlayerAStateType {
   WAIT_FOR_CONCLUDE = 'PLAYER_A.WAIT_FOR_CONCLUDE',
   CONCLUDED = 'PLAYER_A.CONCLUDED',
   INSUFFICIENT_FUNDS = 'PLAYER_A.INSUFFICIENT_FUNDS',
+  CONCLUDE_RECEIVED = 'PLAYER_A.CONCLUDE_RECEIVED',
 }
 
 class BasePlayerA<T extends Position> extends BaseState<T> {
@@ -122,6 +123,11 @@ export class Concluded extends BasePlayerA<Conclude> {
   readonly isReadyToSend = false;
 }
 
+export class ConcludeReceived extends BasePlayerA<Conclude>{
+  readonly type = PlayerAStateType.CONCLUDE_RECEIVED;
+}
+
+
 export type PlayerAState =
   | WaitForPreFundSetup
   | WaitForFunding
@@ -131,4 +137,5 @@ export type PlayerAState =
   | WaitForResting
   | InsufficientFunds
   | WaitForConclude
+  | ConcludeReceived
   | Concluded;

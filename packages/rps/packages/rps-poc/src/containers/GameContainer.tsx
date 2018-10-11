@@ -74,6 +74,8 @@ function GameContainer(props: GameProps) {
     case playerB.WAIT_FOR_CONCLUDE:
     case playerA.CONCLUDED:
     case playerB.CONCLUDED:
+    case playerA.CONCLUDE_RECEIVED:
+    case playerB.CONCLUDE_RECEIVED:
       return <WalletController />;
 
     case playerB.WAIT_FOR_FUNDING:
