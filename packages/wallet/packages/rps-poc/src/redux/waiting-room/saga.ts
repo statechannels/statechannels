@@ -26,7 +26,6 @@ export default function* waitingRoomSaga(
     name,
     isPublic,
     createdAt: new Date().getTime(),
-    updatedAt: new Date().getTime(),
   };
 
   const challengeKey = `/challenges/${address}`;

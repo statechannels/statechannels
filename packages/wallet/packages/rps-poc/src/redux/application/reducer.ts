@@ -18,7 +18,6 @@ export interface Challenge {
   stake: BN;
   isPublic: boolean;
   createdAt: number;
-  updatedAt: number;
 }
 
 export interface ApplicationState {
