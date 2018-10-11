@@ -99,7 +99,8 @@ export default class GameEngineB {
 
     const { channel, balances, turnNum } = this.state;
     const conclude = new Conclude(channel, turnNum + 1, balances);
-    if (this.state instanceof WaitForConclude) {
+    if (this.state instanceof WaitForConclude
+      || this.state instanceof State.ConcludeReceived) {
       return this.transitionTo(
         new State.Concluded({
           position: conclude,
@@ -165,11 +166,13 @@ export default class GameEngineB {
     if (this.state instanceof State.Concluded) {
       return this.state;
     }
+    if (this.state instanceof State.WaitForConclude) {
+      return this.transitionTo(new State.Concluded({
+        position: this.state.position,
+      }));
+    }
     const { channel, balances } = this.state;
-    const turnNum = position.turnNum + 1;
-    const conclude = new Conclude(channel, turnNum, balances);
-    return this.transitionTo(new State.Concluded({
-      position: conclude,
-    }));
+    const conclude = new Conclude(channel, position.turnNum + 1, balances);
+    return this.transitionTo(new State.ConcludeReceived({ position: conclude }));
   }
 }

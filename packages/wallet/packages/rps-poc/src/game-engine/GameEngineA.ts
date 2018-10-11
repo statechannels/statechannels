@@ -116,7 +116,8 @@ export default class GameEngineA {
 
     const { channel, balances, turnNum } = this.state;
     const conclude = new Conclude(channel, turnNum + 1, balances);
-    if (this.state instanceof State.WaitForConclude) {
+    if (this.state instanceof State.WaitForConclude
+      || this.state instanceof State.ConcludeReceived) {
       return this.transitionTo(
         new State.Concluded({
           position: conclude,
@@ -129,6 +130,7 @@ export default class GameEngineA {
         position: conclude,
       })
     );
+
   }
 
   transitionTo(state) {
@@ -197,11 +199,13 @@ export default class GameEngineA {
     if (this.state instanceof State.Concluded) {
       return this.state;
     }
+    if (this.state instanceof State.WaitForConclude) {
+      return this.transitionTo(new State.Concluded({
+        position: this.state.position,
+      }));
+    }
     const { channel, balances } = this.state;
-    const turnNum = position.turnNum + 1;
-    const conclude = new Conclude(channel, turnNum, balances);
-    return this.transitionTo(new State.Concluded({
-      position: conclude,
-    }));
+    const conclude = new Conclude(channel, position.turnNum + 1, balances);
+    return this.transitionTo(new State.ConcludeReceived({ position: conclude }));
   }
 }

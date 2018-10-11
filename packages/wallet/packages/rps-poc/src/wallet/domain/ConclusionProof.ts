@@ -20,7 +20,7 @@ export class ConclusionProof {
     this.toState = decode(toState);
 
     // TODO: call SimpleAdjudicator.validConclusionProof instead
-    if( this.toState.stateType !== State.StateType.Conclude || this.toState.stateType !== State.StateType.Conclude ) {
+    if( this.toState.stateType !== State.StateType.Conclude || this.fromState.stateType !== State.StateType.Conclude ) {
       throw new Error("States must be Conclude states");
     }
     if (this.toState.turnNum !== this.fromState.turnNum + 1) {
