@@ -5,6 +5,7 @@ import { SiteState } from '../redux/reducer';
 import GameContainer from './GameContainer';
 import WaitingRoomContainer from './WaitingRoomContainer';
 import LobbyContainer from './LobbyContainer';
+import ErrorContainer from './ErrorContainer';
 import { Room } from '../redux/application/reducer';
 
 interface ApplicationProps {
@@ -17,6 +18,8 @@ function Application(props: ApplicationProps) {
       return <WaitingRoomContainer />;
     case Room.game:
       return <GameContainer />;
+    case Room.error:
+      return <ErrorContainer />;
     default:
       return <LobbyContainer />;
   }
