@@ -14,15 +14,15 @@ export const FundingFailed = CommonState.FundingFailed;
 export const WaitForApproval = CommonState.WaitForApproval;
 export const Funded = CommonState.Funded;
 export const ReadyToDeposit = CommonState.AdjudicatorReceived;
-export const WithdrawAndConclude = CommonState.WaitForWithdrawal;
+export const WaitForWithdrawal = CommonState.WaitForWithdrawal;
 export const SelectWithdrawalAddress = CommonState.SelectWithdrawalAddress;
 export type PlayerBState =
   | ReadyToDeposit
   | WaitForAToDeploy
   | WaitForBlockchainDeposit
-  | CommonState.WaitForApproval
-  | CommonState.FundingFailed
-  | CommonState.AdjudicatorReceived
-  | CommonState.Funded
-  | CommonState.SelectWithdrawalAddress
-  | CommonState.WaitForWithdrawal;
+  | typeof WaitForApproval
+  | typeof FundingFailed
+  | ReadyToDeposit
+  | typeof Funded
+  | typeof SelectWithdrawalAddress
+  | typeof WaitForWithdrawal;

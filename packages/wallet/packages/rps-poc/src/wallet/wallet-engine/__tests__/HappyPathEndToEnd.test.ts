@@ -1,7 +1,7 @@
-import WalletEngineA from '../WalletEngineA';
+import WalletEngine from '../WalletEngine';
+import { PlayerIndex } from '../wallet-states';
 import * as WalletStatesA from '../wallet-states/PlayerA';
 import * as WalletStatesB from '../wallet-states/PlayerB';
-import WalletEngineB from '../WalletEngineB';
 import BN from 'bn.js';
 
 const engineArgs = {
@@ -9,11 +9,12 @@ const engineArgs = {
   opponentAddress: 'you',
   myBalance: new BN(5),
   opponentBalance: new BN(5),
+  playerIndex: PlayerIndex.A,
 };
 
 describe('Happy path runthrough', () => {
   // In A's application
-  const walletEngineA = WalletEngineA.setupWalletEngine(engineArgs);
+  const walletEngineA = (new WalletEngine()).setup(engineArgs);
   const waitForApproval = walletEngineA.state;
   it('should have the wait for approval state', () => {
     expect(waitForApproval).toBeInstanceOf(WalletStatesA.WaitForApproval);
@@ -30,12 +31,13 @@ describe('Happy path runthrough', () => {
   });
 
   it('should have the wait for B to deposit state', () => {
-    const waitForB = walletEngineA.transactionConfirmed('');
+    const waitForB = walletEngineA.deployConfirmed('');
     expect(waitForB).toBeInstanceOf(WalletStatesA.WaitForBToDeposit);
   });
 
   // In B's application
-  const walletEngineB = WalletEngineB.setupWalletEngine(engineArgs);
+  engineArgs.playerIndex = PlayerIndex.B;
+  const walletEngineB = (new WalletEngine()).setup(engineArgs);
   it('should have the wait for approval state', () => {
     const waitForApprovalB = walletEngineB.state;
     expect(waitForApprovalB).toBeInstanceOf(WalletStatesB.WaitForApproval);
@@ -47,7 +49,7 @@ describe('Happy path runthrough', () => {
   });
 
   it('should have the ready to deposit state', () => {
-    const readyToDeposit = walletEngineB.deployConfirmed('');
+    const readyToDeposit = walletEngineB.deployConfirmed('0x123');
     expect(readyToDeposit).toBeInstanceOf(WalletStatesB.ReadyToDeposit);
   });
 
@@ -57,7 +59,7 @@ describe('Happy path runthrough', () => {
   });
 
   it('should have the funded state', () => {
-    const funded = walletEngineB.transactionConfirmed();
+    const funded = walletEngineB.fundingConfirmed('0x123');
     expect(funded).toBeInstanceOf(WalletStatesB.Funded);
   });
 

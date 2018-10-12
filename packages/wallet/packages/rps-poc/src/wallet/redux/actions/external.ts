@@ -1,13 +1,8 @@
-import {
-  WaitForFunding as WaitForFundingA,
-  Concluded as ConcludedA,
-} from '../../../game-engine/application-states/PlayerA';
-import {
-  WaitForFunding as WaitForFundingB,
-  Concluded as ConcludedB,
-} from '../../../game-engine/application-states/PlayerB';
+import BN from 'bn.js';
+import { Channel, State } from 'fmg-core';
+
 import  { SignableData } from '../../domain/ChannelWallet';
-import { Channel } from 'fmg-core';
+import { PlayerIndex } from '../../wallet-engine/wallet-states';
 
 // FUNDING
 // =======
@@ -18,11 +13,19 @@ export const FUNDING_FAILURE = 'WALLET.FUNDING.FAILURE';
 
 export const fundingRequest = (
   channelId: string,
-  state: WaitForFundingA | WaitForFundingB
+  myAddress: string,
+  opponentAddress: string,
+  myBalance: BN,
+  opponentBalance: BN,
+  playerIndex: PlayerIndex,
 ) => ({
   type: FUNDING_REQUEST as typeof FUNDING_REQUEST,
   channelId,
-  state,
+  myAddress,
+  opponentAddress,
+  myBalance,
+  opponentBalance,
+  playerIndex,
 });
 export const fundingSuccess = channelId => ({
   type: FUNDING_SUCCESS as typeof FUNDING_SUCCESS,
@@ -132,9 +135,9 @@ export const WITHDRAWAL_REQUEST = 'WALLET.WITHDRAWAL.REQUEST';
 export const WITHDRAWAL_SUCCESS = 'WALLET.WITHDRAWAL.SUCCESS';
 export const WITHDRAWAL_FAILURE = 'WALLET.WITHDRAWAL.FAILURE';
 
-export const withdrawalRequest = (state: ConcludedA | ConcludedB) => ({
+export const withdrawalRequest = (position: State) => ({
   type: WITHDRAWAL_REQUEST as typeof WITHDRAWAL_REQUEST,
-  state,
+  position,
 });
 export const withdrawalSuccess = transaction => ({
   type: WITHDRAWAL_SUCCESS as typeof WITHDRAWAL_SUCCESS,
