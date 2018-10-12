@@ -10,6 +10,7 @@ export enum Room {
   lobby = 'ROOM.LOBBY',
   waitingRoom = 'ROOM.WAITING_ROOM',
   game = 'ROOM.GAME',
+  error = 'ROOM.ERROR',
 }
 
 export interface Challenge {
@@ -25,6 +26,7 @@ export interface ApplicationState {
   gameState?: GameState;
   challenges?: Challenge[];
   myChallenge?: Challenge;
+  error?: string;
 }
 
 const initialState = {
@@ -36,6 +38,7 @@ type StateAction =
   | applicationActions.LobbySuccess
   | applicationActions.WaitingRoomSuccess
   | applicationActions.GameSuccess
+  | applicationActions.InitializationFailure
   | gameActions.StateChanged
   | lobbyActions.SyncChallenge;
 
@@ -52,6 +55,12 @@ export const applicationReducer: Reducer<ApplicationState> = (state = initialSta
       return {
         currentRoom: Room.game,
         gameState: action.state,
+      };
+    case applicationActions.INITIALIZATION_FAILURE:
+      return {
+        ...state,
+        currentRoom: Room.error,
+        error: action.error,
       };
     case gameActions.STATE_CHANGED:
       return {

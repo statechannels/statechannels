@@ -14,9 +14,15 @@ import autoOpponentSaga from '../auto-opponent/saga';
 export default function* applicationControllerSaga(userId: string) {
   // need to yield* so that the fork(walletSaga) runs in the context of this saga -
   // otherwise it'll be killed when the setupWallet saga returns
-  const { address } = yield call(setupWallet, userId);
+  const { error: autoOpponentError } = yield call(setupAutoOpponent);
+  const { address, error: walletError } = yield call(setupWallet, userId);
 
-  yield call(setupAutoOpponent);
+  const error = autoOpponentError || walletError;
+
+  if (error) {
+    yield put(applicationActions.initializationFailure(error));
+    yield take(applicationActions.RELOAD);
+  }
 
   yield fork(messageServiceSaga, address);
 
@@ -24,9 +30,10 @@ export default function* applicationControllerSaga(userId: string) {
     applicationActions.LOBBY_REQUEST,
     applicationActions.WAITING_ROOM_REQUEST,
     applicationActions.GAME_REQUEST,
+    applicationActions.INITIALIZATION_FAILURE,
   ]);
   let currentRoom = yield fork(lobbySaga, address);
-  
+
   while (true) {
     const action: applicationActions.AnyAction = yield take(channel);
     yield cancel(currentRoom); // todo: maybe we should do some checks first
@@ -59,7 +66,10 @@ function* setupWallet(uid) {
   });
 
   if (failure) {
-    yield put(walletActions.initializationFailure('Wallet initialization timed out'));
+    const error = 'Wallet initialization timed out';
+    yield put(walletActions.initializationFailure(error));
+    yield cancel(task);
+    return { error };
   } else {
     const address = (success as walletActions.InitializationSuccess).address;
 
@@ -77,7 +87,9 @@ function* setupAutoOpponent() {
     failure: call(delay, 2000),
   });
 
-  if (failure) { throw new Error('Auto-opponent initialization timed out'); }
+  if (failure) {
+    return { error: 'AutoOpponent failed to initialize' };
+  }
 
   const address = (success as autoOpponentActions.InitializationSuccess).address;
 
