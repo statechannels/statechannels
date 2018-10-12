@@ -1,25 +1,33 @@
 import { actionChannel, take, put, fork, call, cancel, } from 'redux-saga/effects';
-
-import { initializeWallet } from './initialization';
-import * as actions from '../actions/external';
-import * as blockchainActions from '../actions/blockchain';
-import ChannelWallet, { SignableData } from '../../domain/ChannelWallet';
-import { fundingSaga } from './funding';
-import { blockchainSaga } from './blockchain';
-import { AUTO_OPPONENT_ADDRESS } from '../../../constants';
 import { State, SolidityType, decodeSignature } from 'fmg-core';
+
+import { AUTO_OPPONENT_ADDRESS } from '../../../constants';
 import { default as firebase, reduxSagaFirebase, serverTimestamp } from '../../../gateways/firebase';
+
+import ChannelWallet, { SignableData } from '../../domain/ChannelWallet';
 import { ConclusionProof } from '../../domain/ConclusionProof';
 import decode from '../../domain/decode';
-import WalletEngineA from '../../wallet-engine/WalletEngineA';
-import { SelectWithdrawalAddress } from '../../wallet-engine/wallet-states/PlayerB';
-import WalletEngineB from '../../wallet-engine/WalletEngineB';
+import WalletEngine from '../../wallet-engine/WalletEngine';
+
+import * as actions from '../actions/external';
+import * as blockchainActions from '../actions/blockchain';
 import * as stateActions from '../actions/state';
 import * as playerActions from '../actions/player';
+
+import { initializeWallet } from './initialization';
+import { fundingSaga } from './funding';
+import { blockchainSaga } from './blockchain';
+
 export function* walletSaga(uid: string): IterableIterator<any> {
   const wallet = (yield initializeWallet(uid)) as ChannelWallet;
+  const walletEngine = new WalletEngine();
 
   yield put(actions.initializationSuccess(wallet.address));
+
+  yield fork(handleRequests, wallet, walletEngine);
+}
+
+function* handleRequests(wallet: ChannelWallet, walletEngine: WalletEngine) {
   let runningBlockchainSaga = null;
   const channel = yield actionChannel([
     actions.FUNDING_REQUEST,
@@ -74,12 +82,13 @@ export function* walletSaga(uid: string): IterableIterator<any> {
         break;
 
       case actions.FUNDING_REQUEST:
-        yield fork(handleFundingRequest, wallet, action.state);
+        walletEngine.setup(action);
+        yield fork(handleFundingRequest, wallet, walletEngine, action.playerIndex);
         break;
 
       case actions.WITHDRAWAL_REQUEST:
-        const { state } = action;
-        yield handleWithdrawalRequest(wallet, state.position);
+      const { position } = action;
+        yield handleWithdrawalRequest(wallet, walletEngine, position);
         break;
 
       default:
@@ -136,12 +145,12 @@ function* handleValidationRequest(
   yield put(actions.validationSuccess(requestId));
 }
 
-function* handleFundingRequest(wallet: ChannelWallet, state) {
+function* handleFundingRequest(wallet: ChannelWallet, walletEngine: WalletEngine) {
   let success;
-  if (state.opponentAddress === AUTO_OPPONENT_ADDRESS) {
+  if (walletEngine.opponentAddress === AUTO_OPPONENT_ADDRESS) {
     success = true;
   } else {
-    success = yield fundingSaga(wallet.channelId, state);
+    success = yield fundingSaga(wallet.channelId, walletEngine);
   }
 
   if (success) {
@@ -154,12 +163,13 @@ function* handleFundingRequest(wallet: ChannelWallet, state) {
 
 export function* handleWithdrawalRequest(
   wallet: ChannelWallet,
-  state,
+  walletEngine: WalletEngine,
+  position: State
 ) {
   // TODO: There's probably enough logic here to pull it out into it's own saga
   const { address: playerAddress, channelId } = wallet;
 
-  const walletEngine = state.playerIndex === 0 ? new WalletEngineA(new SelectWithdrawalAddress()) : new WalletEngineB(new SelectWithdrawalAddress());
+  walletEngine.requestWithdrawalAddress();
   yield put(stateActions.stateChanged(walletEngine.state));
 
   const action = yield take(playerActions.SELECT_WITHDRAWAL_ADDRESS);
@@ -175,7 +185,7 @@ export function* handleWithdrawalRequest(
 
   const { v, r, s } = decodeSignature(wallet.sign(data));
 
-  const proof = yield call(loadConclusionProof, wallet, state);
+  const proof = yield call(loadConclusionProof, wallet, position);
 
   yield put(blockchainActions.withdrawRequest(proof, { playerAddress, channelId, destination, v, r, s }));
   const { transaction, reason: failureReason } = yield take([

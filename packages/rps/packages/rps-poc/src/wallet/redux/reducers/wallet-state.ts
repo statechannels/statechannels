@@ -1,6 +1,6 @@
 import { Reducer } from 'redux';
 import * as stateActions from '../actions/state';
-import { PlayerAState } from '../../../game-engine/application-states';
+import { PlayerAState } from '../../wallet-engine/wallet-states/PlayerA';
 import { PlayerBState } from '../../wallet-engine/wallet-states/PlayerB';
 
 export type WalletState = PlayerAState | PlayerBState | null;

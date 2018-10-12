@@ -75,10 +75,17 @@ function* sendState(state) {
 function* processState(state) {
   switch (state.type) {
     case PlayerAStateType.WAIT_FOR_FUNDING:
-      yield put(walletActions.fundingRequest(state.channelId, state));
-      break;
     case PlayerBStateType.WAIT_FOR_FUNDING:
-      yield put(walletActions.fundingRequest(state.channelId, state));
+      const { myAddress, opponentAddress, myBalance, opponentBalance } = state;
+      const playerIndex = (state.type === PlayerAStateType.WAIT_FOR_FUNDING) ? 0 : 1;
+      yield put(walletActions.fundingRequest(
+        state.channelId,
+        myAddress,
+        opponentAddress,
+        myBalance,
+        opponentBalance,
+        playerIndex,
+ ));
       yield sendState(state);
       break;
     case PlayerAStateType.CHOOSE_PLAY:
