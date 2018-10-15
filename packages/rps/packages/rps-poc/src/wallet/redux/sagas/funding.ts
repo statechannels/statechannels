@@ -103,6 +103,7 @@ function* playerBFundingSaga(walletEngine: WalletEngine) {
   if (!(walletEngine.state instanceof PlayerB.WaitForApproval)) {
     throw new InvalidStateError(walletEngine.state);
   }
+  yield put(stateActions.stateChanged(walletEngine.state));
   const { myBalance } = walletEngine.state;
 
   let newState: PlayerB.PlayerBState = walletEngine.state;
