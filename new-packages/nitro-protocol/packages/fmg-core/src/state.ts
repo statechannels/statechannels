@@ -25,6 +25,10 @@ class State {
     this.stateCount = stateCount || 0;
   }
 
+  equals(other: State): boolean {
+    return this.toHex().toLowerCase() === other.toHex().toLowerCase();
+  }
+
   toHex() {
     return (
       this.channel.toHex() +
