@@ -1,7 +1,6 @@
 import * as metamaskActions from './actions';
 import { put, cps } from 'redux-saga/effects';
-// @ts-ignore
-import simpleAdjudicatorArtifact from 'fmg-simple-adjudicator/contracts/SimpleAdjudicator.sol';
+import truffle from 'truffle.js';
 import { MetamaskErrorType } from './actions';
 
 export default function* checkMetamask() {
@@ -14,17 +13,19 @@ export default function* checkMetamask() {
     return false;
   }
 
-  const selectedNetworkId = parseInt(yield cps(web3.version.getNetwork), 10);
-  // For development networks we can have multiple networks defined so we have to check all of them
-  if (!Object.keys(simpleAdjudicatorArtifact.networks).find(id=> parseInt(id,10) === selectedNetworkId)){
-    // We just grab the first network from the contract. In dev all the multiple networks will be called 'development'
-    // In non-dev environments there should only be only network 
-    const targetNetworkId = parseInt(Object.keys(simpleAdjudicatorArtifact.networks)[0], 10);
+  // TODO: Check if account is locked
 
+  const targetNetworkName = process.env.TARGET_NETWORK;
+  const selectedNetworkId = parseInt(yield cps(web3.version.getNetwork), 10);
+  // Find the network name that matches the currently selected network id
+  const selectedNetworkName = Object.keys(truffle.networks).find(networkName => 
+    truffle.networks[networkName].network_id === selectedNetworkId)|| "development";
+  
+    if (targetNetworkName !== selectedNetworkName) {
     yield put(
       metamaskActions.metamaskErrorOccurred({
         errorType: MetamaskErrorType.WrongNetwork,
-        networkId: targetNetworkId,
+        networkName: process.env.TARGET_NETWORK,
       }),
     );
     return false;

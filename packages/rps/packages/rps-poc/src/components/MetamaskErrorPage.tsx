@@ -7,13 +7,7 @@ interface MetamaskErrorProps {
 }
 
 export default function MetamaskErrorPage(props: MetamaskErrorProps) {
-  const networksTypes = {
-    1: 'mainnet',
-    2: 'morden',
-    3: 'ropsten',
-    42: 'kovan',
-    4: 'rinkeby',
-  };
+
   let message = (
     <span>
       This site needs to be connected to an ethereum wallet to function. If you have metamask,
@@ -24,14 +18,17 @@ export default function MetamaskErrorPage(props: MetamaskErrorProps) {
       .
     </span>
   );
-  if (props.error.errorType === 'WrongNetwork' && props.error.networkId) {
-    const type = networksTypes[props.error.networkId] || 'development';
+  if (props.error.errorType === 'WrongNetwork' && props.error.networkName) {
     message = (
       <span
-      >{`The wrong network is selected in your ethereum wallet. Please select the ${type} network in your ethereum wallet.`}</span>
+      >{`The wrong network is selected in metamask. Please select the ${props.error.networkName} network in metamask.`}</span>
     );
   }
-
+  if (props.error.errorType === "MetamaskLocked"){
+    message = (
+      <span>Your metamask account is currently locked. Please unlock it to continue.</span>
+    );
+  }
   return (
     <div className={css(styles.container)}>
       <div className={css(styles.headerText)}>
