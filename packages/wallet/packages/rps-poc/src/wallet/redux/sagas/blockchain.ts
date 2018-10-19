@@ -1,11 +1,11 @@
-import * as blockchainActions from '../actions/blockchain';
 import { take, put, actionChannel, call, fork, cancel, spawn } from 'redux-saga/effects';
 // @ts-ignore
 import simpleAdjudicatorArtifact from 'fmg-simple-adjudicator/contracts/SimpleAdjudicator.sol';
-import contract from 'truffle-contract';
-import detectNetwork from 'web3-detect-network';
 import { eventChannel } from 'redux-saga';
+
 import { ConclusionProof } from '../../domain/ConclusionProof';
+import * as blockchainActions from '../actions/blockchain';
+import { deploySimpleAdjudicator, simpleAdjudicatorAt } from '../../../contracts/SimpleAdjudicator';
 
 export function* blockchainSaga() {
   const { simpleAdjudicator, eventListener } = yield call(contractSetup);
@@ -24,21 +24,14 @@ function* contractSetup() {
     blockchainActions.DEPOSIT_REQUEST,
   ]);
 
-  const network = yield call(detectNetwork, web3.currentProvider);
-  const simpleAdjudicatorContract = contract(simpleAdjudicatorArtifact);
-  yield call(simpleAdjudicatorContract.defaults, { from: web3.eth.defaultAccount });
-  simpleAdjudicatorContract.setProvider(web3.currentProvider);
-  simpleAdjudicatorContract.setNetwork(network.id);
-
   while (true) {
     const action = yield take(channel);
 
     switch (action.type) {
       case blockchainActions.DEPLOY_REQUEST: // Player A
         try {
-          const deployedContract = yield call(simpleAdjudicatorContract.new, action.channelId, {
-            value: action.amount.toString(),
-          });
+          const { channelId, amount } = action;
+          const deployedContract = yield call(deploySimpleAdjudicator, { channelId, amount });
 
           yield put(blockchainActions.deploymentSuccess(deployedContract.address));
           // TODO: This should probably move out of this scope
@@ -53,7 +46,8 @@ function* contractSetup() {
         break;
       case blockchainActions.DEPOSIT_REQUEST: // Player B
         try {
-          const existingContract = yield call(simpleAdjudicatorContract.at, action.address);
+          const { address, amount } = action;
+          const existingContract = yield call(simpleAdjudicatorAt, { address, amount });
           const transaction = yield call(existingContract.send, action.amount.toString());
           yield put(blockchainActions.depositSuccess(transaction));
           const eventListener = yield spawn(watchAdjudicator, existingContract);
