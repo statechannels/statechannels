@@ -22,7 +22,6 @@ const publicPath = '/';
 const publicUrl = '';
 // Get environment variables to inject into our app.
 const env = getClientEnvironment(publicUrl);
-
 // This is the development configuration.
 // It is focused on developer experience and fast rebuilds.
 // The production configuration is different and lives in a separate file.
@@ -124,7 +123,10 @@ module.exports = {
         // back to the "file" loader at the end of the loader list.
         oneOf: [
           {
-            test: /\.sol/,
+            test: (path) => {
+              return process.env.TARGET_NETWORK==='development' &&
+              /\.sol$/.test(path);  
+          }, 
             use: [
               {
                 loader: 'json-loader'
@@ -252,6 +254,14 @@ module.exports = {
     ],
   },
   plugins: [
+     // Instead of using the truffle loader we'll look for the already built truffle artifacts
+     new webpack.NormalModuleReplacementPlugin(
+      /.*\.sol/,
+      function(resource) {
+        if (process.env.TARGET_NETWORK!=='development'){
+          resource.request = resource.request.replace(/.*contracts/, paths.appContractArtifacts).replace('.sol', '.json');
+        }
+      }),
     // Makes some environment variables available in index.html.
     // The public URL is available as %PUBLIC_URL% in index.html, e.g.:
     // <link rel="shortcut icon" href="%PUBLIC_URL%/favicon.ico">
@@ -293,7 +303,8 @@ module.exports = {
     }),
     new webpack.EnvironmentPlugin({
     FIREBASE_PROJECT: 'rock-paper-scissors-dev',
-    FIREBASE_API_KEY: 'AIzaSyAlGe17xjJjfoJ_KDYjCREg7ZL4ns61Chc'
+    FIREBASE_API_KEY: 'AIzaSyAlGe17xjJjfoJ_KDYjCREg7ZL4ns61Chc',
+    TARGET_NETWORK: process.env.TARGET_NETWORK,
     })],
   // Some libraries import Node modules but don't use them in the browser.
   // Tell Webpack to provide empty mocks for them so importing them works.

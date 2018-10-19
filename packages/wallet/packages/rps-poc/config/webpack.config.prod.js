@@ -397,13 +397,12 @@ module.exports = {
     new webpack.NormalModuleReplacementPlugin(
       /.*\.sol/,
       function(resource) {
-        const targetNetwork = process.env.TARGET_NETWORK;
-        const artifactsPath = path.join(paths.appContractArtifacts,targetNetwork);
-        resource.request = resource.request.replace(/.*contracts/,artifactsPath).replace('.sol','.json');
+        resource.request = resource.request.replace(/.*contracts/, paths.appContractArtifacts).replace('.sol', '.json');
       }),
       new webpack.EnvironmentPlugin({
         FIREBASE_PROJECT: 'rock-paper-scissors123',
-        FIREBASE_API_KEY: 'AIzaSyDulzMWkORgVPFwtxqQaTwOeNhOisGPtDs'
+        FIREBASE_API_KEY: 'AIzaSyDulzMWkORgVPFwtxqQaTwOeNhOisGPtDs',
+        TARGET_NETWORK: process.env.TARGET_NETWORK,
         })],
   // Some libraries import Node modules but don't use them in the browser.
   // Tell Webpack to provide empty mocks for them so importing them works.
