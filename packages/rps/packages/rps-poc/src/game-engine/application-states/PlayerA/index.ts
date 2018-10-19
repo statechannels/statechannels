@@ -5,7 +5,7 @@ import {
   Position,
   PreFundSetupA,
   PostFundSetupA,
-  PreFundSetupB,
+
   PostFundSetupB,
   Propose,
   Reveal,
@@ -16,7 +16,6 @@ import {
 
 export enum PlayerAStateType {
   WAIT_FOR_PRE_FUND_SETUP = 'PLAYER_A.WAIT_FOR_PRE_FUND_SETUP',
-  WAIT_FOR_FUNDING = 'PLAYER_A.WAIT_FOR_FUNDING',
   WAIT_FOR_POST_FUND_SETUP = 'PLAYER_A.WAIT_FOR_POST_FUND_SETUP',
   CHOOSE_PLAY = 'PLAYER_A.CHOOSE_PLAY',
   WAIT_FOR_ACCEPT = 'PLAYER_A.WAIT_FOR_ACCEPT',
@@ -40,19 +39,10 @@ export class WaitForPreFundSetup extends BasePlayerA<PreFundSetupA> {
   }
 }
 
-export class WaitForFunding extends BasePlayerA<PreFundSetupB> {
-  readonly type = PlayerAStateType.WAIT_FOR_FUNDING;
-  readonly isReadyForFunding = false;
-  readonly isReadyToSend = false;
-  get stake() {
-    return this.position.stake;
-  }
-}
-
 export class WaitForPostFundSetup extends BasePlayerA<PostFundSetupA> {
   readonly type = PlayerAStateType.WAIT_FOR_POST_FUND_SETUP;
   readonly isReadyToSend = false;
-  get stake() {
+  get stake() { 
     return this.position.stake;
   }
 }
@@ -106,7 +96,6 @@ export class WaitForResting extends BasePlayerA<Reveal> {
     return calculateResult(this.aPlay, this.bPlay);
   }
 }
-
 // todo: what should Position be here?
 export class InsufficientFunds extends BasePlayerA<Position> {
   readonly type = PlayerAStateType.INSUFFICIENT_FUNDS;
@@ -130,7 +119,6 @@ export class ConcludeReceived extends BasePlayerA<Conclude>{
 
 export type PlayerAState =
   | WaitForPreFundSetup
-  | WaitForFunding
   | WaitForPostFundSetup
   | ChoosePlay
   | WaitForAccept

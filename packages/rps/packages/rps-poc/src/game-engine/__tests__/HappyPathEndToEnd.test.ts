@@ -8,19 +8,16 @@ const stake = new BN(1);
 const initialBals = [new BN(5), new BN(4)];
 const me = '0xa';
 const opponent = '0xb';
-
+const libraryAddress = '0xc1912fEE45d61C87Cc5EA59DaE31190FFFFf232d'; 
 describe('game engine runthrough', () => {
-  const gameEngineA = GameEngine.setupGame({me, opponent, stake, balances: initialBals});
+  const gameEngineA = GameEngine.setupGame({me, opponent, stake, balances: initialBals,libraryAddress},);
   const aWaitForPreFundSetup = gameEngineA.state;
   // a sends PreFundSetupA to b
   const gameEngineB = GameEngine.fromProposal(aWaitForPreFundSetup.position);
-  const bWaitForFunding = gameEngineB.state;
+  const bWaitForPostFundSetup = gameEngineB.state;
   // b sends PrefundSetupB to a
-  const aWaitForFunding = gameEngineA.receivePosition(bWaitForFunding.position);
-  // a's wallet says fundingConfirmed
-  const aWaitForPostFundSetup = gameEngineA.fundingConfirmed();
-  // b's wallet says fundingConfirmed
-  const bWaitForPostFundSetup = gameEngineB.fundingConfirmed();
+  const aWaitForPostFundSetup = gameEngineA.receivePosition(bWaitForPostFundSetup.position);
+
   // a sends PostFundSetupA to b
   const bWaitForPropose = gameEngineB.receivePosition(aWaitForPostFundSetup.position);
   // b sends PostFundSetupB to a
@@ -45,8 +42,6 @@ describe('game engine runthrough', () => {
     };
 
     testStateType(aWaitForPreFundSetup, PlayerAStateType.WAIT_FOR_PRE_FUND_SETUP);
-    testStateType(bWaitForFunding, PlayerBStateType.WAIT_FOR_FUNDING);
-    testStateType(aWaitForFunding, PlayerAStateType.WAIT_FOR_FUNDING);
     testStateType(aWaitForPostFundSetup, PlayerAStateType.WAIT_FOR_POST_FUND_SETUP);
     testStateType(bWaitForPostFundSetup, PlayerBStateType.WAIT_FOR_POST_FUND_SETUP);
     testStateType(bWaitForPropose, PlayerBStateType.WAIT_FOR_PROPOSE);
@@ -67,8 +62,6 @@ describe('game engine runthrough', () => {
     };
 
     testTurnNum(aWaitForPreFundSetup, 0);
-    testTurnNum(bWaitForFunding, 1);
-    testTurnNum(aWaitForFunding, 1);
     testTurnNum(bWaitForPostFundSetup, 1);
     testTurnNum(aWaitForPostFundSetup, 2);
     testTurnNum(bWaitForPropose, 3);
@@ -93,8 +86,6 @@ describe('game engine runthrough', () => {
     };
 
     testBalances(aWaitForPreFundSetup, initialBals);
-    testBalances(bWaitForFunding, initialBals);
-    testBalances(aWaitForFunding, initialBals);
     testBalances(aWaitForPostFundSetup, initialBals);
     testBalances(bWaitForPostFundSetup, initialBals);
     testBalances(bWaitForPropose, initialBals);

@@ -1,4 +1,4 @@
-import { fork, put, take, actionChannel} from 'redux-saga/effects';
+import { fork, put, take, actionChannel, cps, } from 'redux-saga/effects';
 
 import { reduxSagaFirebase } from '../../gateways/firebase';
 
@@ -8,7 +8,8 @@ import * as applicationActions from '../application/actions';
 import GameEngineA from '../../game-engine/GameEngineA';
 import BN from 'bn.js';
 
-
+// @ts-ignore
+import RPSGameArtifact from '../../../contracts/RockPaperScissorsGame.sol';
 const DEFAULT_BALANCES = 50;
 
 export default function* lobbySaga(address: string) {
@@ -23,13 +24,14 @@ export default function* lobbySaga(address: string) {
 
   while (true) {
     const action: lobbyActions.AnyAction = yield take(channel);
-
     switch (action.type) {
       case lobbyActions.ACCEPT_CHALLENGE:
+        const libraryAddress = yield getLibraryAddress();
         const gameEngine = GameEngineA.setupGame({
           me: address,
           opponent: action.address,
           stake: action.stake,
+          libraryAddress,
           balances: [action.stake.mul(new BN(DEFAULT_BALANCES)), action.stake.mul(new BN(DEFAULT_BALANCES))],
         });
         yield put(applicationActions.gameRequest(gameEngine));
@@ -72,3 +74,9 @@ function* challengeSyncer() {
     'value',
   );
 }
+// TODO: This should be moved somewhere else
+function* getLibraryAddress() {
+  const selectedNetworkId = parseInt(yield cps(web3.version.getNetwork), 10);
+  return RPSGameArtifact.networks[selectedNetworkId].address;
+}
+

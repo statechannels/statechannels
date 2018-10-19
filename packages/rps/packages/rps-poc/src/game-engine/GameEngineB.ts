@@ -25,7 +25,7 @@ export default class GameEngineB {
 
     const nextPosition = new PreFundSetupB(channel, turnNum + 1, balances, stateCount + 1, stake);
 
-    const appState = new State.WaitForFunding({ position: nextPosition });
+    const appState = new State.WaitForPostFundSetup({ position: nextPosition });
 
     return new GameEngineB(appState);
   }
@@ -54,16 +54,6 @@ export default class GameEngineB {
         // raise an error?
         return this.state;
     }
-  }
-
-  fundingConfirmed() {
-    if (!(this.state instanceof State.WaitForFunding)) {
-      return this.state;
-    }
-
-    return this.transitionTo(
-      new State.WaitForPostFundSetup({ position: this.state.position }),
-    );
   }
 
   choosePlay(bPlay: Play) {

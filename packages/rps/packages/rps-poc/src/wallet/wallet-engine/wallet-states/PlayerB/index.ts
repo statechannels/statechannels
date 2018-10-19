@@ -16,6 +16,9 @@ export const Funded = CommonState.Funded;
 export const ReadyToDeposit = CommonState.AdjudicatorReceived;
 export const WaitForWithdrawal = CommonState.WaitForWithdrawal;
 export const SelectWithdrawalAddress = CommonState.SelectWithdrawalAddress;
+export const ChallengeRequested = CommonState.ChallengeRequested;
+export const ChallengeResponse = CommonState.ChallengeResponse;
+export const ChallengeTimeout = CommonState.ChallengeTimeout;
 export type PlayerBState =
   | ReadyToDeposit
   | WaitForAToDeploy
@@ -25,4 +28,7 @@ export type PlayerBState =
   | ReadyToDeposit
   | typeof Funded
   | typeof SelectWithdrawalAddress
-  | typeof WaitForWithdrawal;
+  | typeof WaitForWithdrawal
+  | typeof ChallengeRequested
+  | typeof ChallengeResponse
+  | typeof ChallengeTimeout;
