@@ -1,5 +1,7 @@
 import { Channel } from 'fmg-core';
+import BN from 'bn.js';
 
+import { randomHex } from '../utils/randomHex';
 import * as State from './application-states/PlayerA';
 import {
   calculateResult,
@@ -16,16 +18,13 @@ import {
   Resting,
   Conclude,
 } from './positions';
-import BN from 'bn.js';
-
-const fakeGameLibraryAddress = '0xc1912fee45d61c87cc5ea59dae31190fffff232d';
 
 export default class GameEngineA {
-  static setupGame({ me, opponent, stake, balances }:
-    { me: string, opponent: string, stake: BN, balances: BN[] }
+  static setupGame({ me, opponent, stake, balances, libraryAddress }:
+    { me: string, opponent: string, stake: BN, balances: BN[], libraryAddress:string }
   ) {
     const participants = [me, opponent];
-    const channel = new Channel(fakeGameLibraryAddress, 456, participants);
+    const channel = new Channel(libraryAddress, 456, participants);
 
     const position = new PreFundSetupA(channel, 0, balances, 0, stake);
 
@@ -64,26 +63,12 @@ export default class GameEngineA {
     }
   }
 
-  fundingConfirmed() {
-    if (!(this.state instanceof State.WaitForFunding)) { return this.state; }
-
-    const { channel, stake, balances } = this.state;
-    const stateCount = 0;
-    const turnNum = 2;
-    const newPosition = new PostFundSetupA(channel, turnNum, balances, stateCount, stake);
-    return this.transitionTo(
-      new State.WaitForPostFundSetup({
-        position: newPosition,
-      })
-    );
-  }
-
   choosePlay(aPlay: Play) {
     if (!(this.state instanceof State.ChoosePlay)) { return this.state; }
 
     const { balances, turnNum, stake, channel } = this.state;
 
-    const salt = 'salt'; // todo: make random
+    const salt = randomHex(64);
 
     const newPosition = Propose.createWithPlayAndSalt(
       channel,
@@ -141,8 +126,14 @@ export default class GameEngineA {
   receivedPreFundSetup(position: PreFundSetupB) {
     if (!(this.state instanceof State.WaitForPreFundSetup)) { return this.state; }
 
+    const { channel, stake, balances } = this.state;
+    const stateCount = 0;
+    const turnNum = 2;
+    const newPosition = new PostFundSetupA(channel, turnNum, balances, stateCount, stake);
     return this.transitionTo(
-      new State.WaitForFunding({ position })
+      new State.WaitForPostFundSetup({
+        position: newPosition,
+      })
     );
   }
 
@@ -199,6 +190,7 @@ export default class GameEngineA {
     if (this.state instanceof State.Concluded) {
       return this.state;
     }
+
     if (this.state instanceof State.WaitForConclude) {
       return this.transitionTo(new State.Concluded({
         position: this.state.position,

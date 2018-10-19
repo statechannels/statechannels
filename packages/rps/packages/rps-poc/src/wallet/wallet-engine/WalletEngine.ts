@@ -111,6 +111,10 @@ export default class WalletEngine {
     return state;
   }
 
+  fundingDeclined():State{
+    return this.transitionTo(new CommonState.FundingDeclined());
+  }
+
   errorOccurred(message: string): State {
     if (
       this.state instanceof CommonState.WaitForApproval ||
@@ -122,5 +126,4 @@ export default class WalletEngine {
 
     return this.state;
   }
-
 }
