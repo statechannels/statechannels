@@ -2,10 +2,12 @@ import React from 'react';
 
 import { Play } from '../game-engine/positions';
 import MoveIcon from './MoveIcon';
+import Button from 'reactstrap/lib/Button';
 
 interface Props {
   message: string;
   yourPlay: Play;
+  createBlockchainChallenge: ()=>void;
 }
 
 export default class PlaySelectedPage extends React.PureComponent<Props> {
@@ -14,7 +16,7 @@ export default class PlaySelectedPage extends React.PureComponent<Props> {
   };
 
   render() {
-    const { message, yourPlay } = this.props;
+    const { message, yourPlay, createBlockchainChallenge } = this.props;
 
     return (
       <div className="container centered-container">
@@ -25,9 +27,9 @@ export default class PlaySelectedPage extends React.PureComponent<Props> {
           </p>
 
           <div className="mb-5">
-            <MoveIcon play={yourPlay} />
+            <MoveIcon play={yourPlay} />`
           </div>
-
+          <Button onClick={createBlockchainChallenge}>Challenge</Button>
           <p>{message}</p>
         </div>
       </div>

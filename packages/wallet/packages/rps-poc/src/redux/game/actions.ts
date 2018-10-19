@@ -32,4 +32,4 @@ export type AnyAction =
   | ChoosePlay
   | PlayAgain
   | AbandonGame
-  | StateChanged; 
+  | StateChanged;

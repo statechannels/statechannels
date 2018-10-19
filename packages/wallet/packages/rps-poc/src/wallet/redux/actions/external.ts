@@ -78,12 +78,11 @@ export const VALIDATION_REQUEST = 'WALLET.VALIDATION.REQUEST';
 export const VALIDATION_SUCCESS = 'WALLET.VALIDATION.SUCCESS';
 export const VALIDATION_FAILURE = 'WALLET.VALIDATION.FAILURE';
 
-export const validationRequest = (requestId: string, data: SignableData, signature: string, opponentIndex: number) => ({
+export const validationRequest = (requestId: string, data: SignableData, signature: string) => ({
   type: VALIDATION_REQUEST as typeof VALIDATION_REQUEST,
   requestId,
   data,
   signature,
-  opponentIndex,
 });
 export const validationSuccess = (requestId: string) => ({
   type: VALIDATION_SUCCESS as typeof VALIDATION_SUCCESS,
@@ -176,8 +175,6 @@ export type InitializationSuccess = ReturnType<typeof initializationSuccess>;
 // =========
 export const SEND_MESSAGE = 'WALLET.MESSAGING.SEND';
 export const RECEIVE_MESSAGE = 'WALLET.MESSAGING.RECEIVE';
-export const STORE_MESSAGE_REQUEST = 'WALLET.MESSAGING.REQUEST.STORE';
-
 
 export const sendMessage = (to: string, data: string) => ({
   type: SEND_MESSAGE as typeof SEND_MESSAGE,
@@ -190,20 +187,53 @@ export const receiveMessage = (data: string) => ({
   data,
 });
 
-export const storeMessageRequest = (positionData: string, signature: string, direction: "sent" | "received") => ({
-  type: STORE_MESSAGE_REQUEST as typeof STORE_MESSAGE_REQUEST,
-  positionData,
-  signature,
-  direction,
-});
-
 export type SendMessage = ReturnType<typeof sendMessage>;
 export type ReceiveMessage = ReturnType<typeof receiveMessage>;
-export type StoreMessageRequest = ReturnType<typeof storeMessageRequest>;
 
-// DECODING
-// ========
+// Application Message Updates
+// =========
+export const MESSAGE_SENT = 'WALLET.MESSAGING.MESSAGE_SENT';
+export const MESSAGE_RECEIVED = 'WALLET.MESSAGING.MESSAGE_RECEIVED';
+export const messageSent = (positionData: string, signature:string ) => ({
+  type: MESSAGE_SENT as typeof MESSAGE_SENT,
+  positionData,
+  signature,
+});
 
+export const messageReceived = (positionData: string, signature:string ) => ({
+  type: MESSAGE_RECEIVED as typeof MESSAGE_RECEIVED,
+  positionData,
+  signature,
+});
+
+export type MessageSent = ReturnType<typeof messageSent>;
+export type MessageReceived = ReturnType<typeof messageReceived>;
+
+
+// Challenge
+// =========
+export const CREATE_CHALLENGE_REQUEST = 'WALLET.CHALLENGE.CREATE';
+export const CHALLENGE_RESPONSE_REQUEST = 'WALLET.CHALLENGE.RESPONSE';
+
+export const createChallenge = () => ({
+  type: CREATE_CHALLENGE_REQUEST as typeof CREATE_CHALLENGE_REQUEST,
+});
+
+export const challengeResponseRequest = (positionData: string) => ({
+  type: CHALLENGE_RESPONSE_REQUEST as typeof CHALLENGE_RESPONSE_REQUEST,
+  positionData,
+});
+
+export type CreateChallengeRequest = ReturnType<typeof createChallenge>;
+export type ChallengeResponseRequest = ReturnType<typeof challengeResponseRequest>;
 // Requests
 // ========
-export type RequestAction = OpenChannelRequest | CloseChannelRequest | FundingRequest | SignatureRequest | ValidationRequest | WithdrawalRequest | StoreMessageRequest;
+export type RequestAction =
+  OpenChannelRequest |
+  CloseChannelRequest |
+  FundingRequest |
+  SignatureRequest |
+  ValidationRequest |
+  WithdrawalRequest |
+  CreateChallengeRequest |
+  ChallengeResponseRequest;

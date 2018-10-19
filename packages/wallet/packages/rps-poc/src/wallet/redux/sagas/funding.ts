@@ -12,63 +12,22 @@ import * as PlayerB from '../../wallet-engine/wallet-states/PlayerB';
 import * as CommonState from '../../wallet-engine/wallet-states';
 import { InvalidStateError, PlayerIndex } from '../../wallet-engine/wallet-states';
 
-export function* deployContract(channelId: string, walletEngine: WalletEngine, amount: BN) {
-  let newState = walletEngine.state;
-  yield put(blockchainActions.deploymentRequest(channelId, amount));
-  newState = walletEngine.transactionSent();
-
-  yield put(stateActions.stateChanged(newState));
-
-  while (true) {
-    const deployAction = yield take([
-      blockchainActions.DEPLOY_SUCCESS,
-      blockchainActions.DEPLOY_FAILURE,
-    ]);
-    if (deployAction.type === blockchainActions.DEPLOY_FAILURE) {
-      newState = walletEngine.errorOccurred(deployAction.error);
-      yield put(stateActions.stateChanged(newState));
-      yield take(playerActions.TRY_FUNDING_AGAIN);
-      yield put(blockchainActions.deploymentRequest(channelId, amount));
-    } else {
-      newState = walletEngine.deployConfirmed(deployAction.adjudicator);
-      yield put(stateActions.stateChanged(newState));
-      return deployAction.address;
-    }
+export function* fundingSaga(channelId: string, walletEngine: WalletEngine) {
+  const state = walletEngine.state;
+  if (!(state instanceof CommonState.WaitForApproval)) {
+    throw new InvalidStateError(state);
   }
+
+  if (walletEngine.playerIndex === PlayerIndex.A) {
+    yield playerAFundingSaga(channelId, walletEngine);
+  } else if (walletEngine.playerIndex === PlayerIndex.B) {
+    yield playerBFundingSaga(walletEngine);
+  }
+
+  return true;
 }
 
-export function* fundContract(walletEngine: WalletEngine, amount: BN) {
-  let newState = walletEngine.state;
-  if (!(newState instanceof PlayerB.ReadyToDeposit)) {
-    throw new InvalidStateError(newState);
-  }
-  const { adjudicatorAddress } = newState;
-
-  yield put(blockchainActions.depositRequest(adjudicatorAddress, amount));
-  newState = walletEngine.transactionSent();
-  yield put(stateActions.stateChanged(newState));
-
-  while (true) {
-    const fundAction = yield take([
-      blockchainActions.DEPOSIT_FAILURE,
-      blockchainActions.DEPOSIT_SUCCESS,
-    ]);
-    if (fundAction.type === blockchainActions.DEPOSIT_FAILURE) {
-      newState = walletEngine.errorOccurred(fundAction.error);
-      yield put(stateActions.stateChanged(newState));
-      yield take(playerActions.TRY_FUNDING_AGAIN);
-      yield put(blockchainActions.depositRequest(adjudicatorAddress, amount));
-    } else {
-      newState = walletEngine.fundingConfirmed(adjudicatorAddress);
-      yield put(stateActions.stateChanged(newState));
-      return;
-    }
-  }
-}
-
-
-
-export function* playerAFundingSaga(channelId, walletEngine: WalletEngine) {
+function* playerAFundingSaga(channelId, walletEngine: WalletEngine) {
   if (!(walletEngine.state instanceof PlayerA.WaitForApproval)) {
     throw new InvalidStateError(walletEngine.state);
   }
@@ -96,6 +55,31 @@ export function* playerAFundingSaga(channelId, walletEngine: WalletEngine) {
       return true;
     }
     action = yield take(blockchainActions.FUNDSRECEIVED_EVENT);
+  }
+}
+
+function* deployContract(channelId: string, walletEngine: WalletEngine, amount: BN) {
+  let newState = walletEngine.state;
+  yield put(blockchainActions.deploymentRequest(channelId, amount));
+  newState = walletEngine.transactionSent();
+
+  yield put(stateActions.stateChanged(newState));
+
+  while (true) {
+    const deployAction = yield take([
+      blockchainActions.DEPLOY_SUCCESS,
+      blockchainActions.DEPLOY_FAILURE,
+    ]);
+    if (deployAction.type === blockchainActions.DEPLOY_FAILURE) {
+      newState = walletEngine.errorOccurred(deployAction.error);
+      yield put(stateActions.stateChanged(newState));
+      yield take(playerActions.TRY_FUNDING_AGAIN);
+      yield put(blockchainActions.deploymentRequest(channelId, amount));
+    } else {
+      newState = walletEngine.deployConfirmed(deployAction.adjudicator);
+      yield put(stateActions.stateChanged(newState));
+      return deployAction.address;
+    }
   }
 }
 
@@ -128,17 +112,31 @@ function* playerBFundingSaga(walletEngine: WalletEngine) {
   yield fundContract(walletEngine, myBalance);
 }
 
-export function* fundingSaga(channelId: string, walletEngine: WalletEngine) {
-  const state = walletEngine.state;
-  if (!(state instanceof CommonState.WaitForApproval)) {
-    throw new InvalidStateError(state);
+function* fundContract(walletEngine: WalletEngine, amount: BN) {
+  let newState = walletEngine.state;
+  if (!(newState instanceof PlayerB.ReadyToDeposit)) {
+    throw new InvalidStateError(newState);
   }
+  const { adjudicatorAddress } = newState;
 
-  if (walletEngine.playerIndex === PlayerIndex.A) {
-    yield playerAFundingSaga(channelId, walletEngine);
-  } else if (walletEngine.playerIndex === PlayerIndex.B) {
-    yield playerBFundingSaga(walletEngine);
+  yield put(blockchainActions.depositRequest(adjudicatorAddress, amount));
+  newState = walletEngine.transactionSent();
+  yield put(stateActions.stateChanged(newState));
+
+  while (true) {
+    const fundAction = yield take([
+      blockchainActions.DEPOSIT_FAILURE,
+      blockchainActions.DEPOSIT_SUCCESS,
+    ]);
+    if (fundAction.type === blockchainActions.DEPOSIT_FAILURE) {
+      newState = walletEngine.errorOccurred(fundAction.error);
+      yield put(stateActions.stateChanged(newState));
+      yield take(playerActions.TRY_FUNDING_AGAIN);
+      yield put(blockchainActions.depositRequest(adjudicatorAddress, amount));
+    } else {
+      newState = walletEngine.fundingConfirmed(adjudicatorAddress);
+      yield put(stateActions.stateChanged(newState));
+      return;
+    }
   }
-
-  return true;
 }

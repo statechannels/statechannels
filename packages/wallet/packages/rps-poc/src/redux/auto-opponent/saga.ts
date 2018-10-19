@@ -37,9 +37,8 @@ export default function* autoOpponentSaga() {
         state = gameEngine.choosePlay(Play.Rock);
         yield put(autoOpponentActions.messageToApp(state.position.toHex()));
         break;
-      case StateType.WAIT_FOR_FUNDING:
+      case StateType.WAIT_FOR_POST_FUND_SETUP:
         yield put(autoOpponentActions.messageToApp(state.position.toHex()));
-        gameEngine.fundingConfirmed();
         break;
       case StateType.VIEW_RESULT:
         yield put(autoOpponentActions.messageToApp(state.position.toHex()));

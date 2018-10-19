@@ -1,28 +1,58 @@
+import React from 'react';
+import { PureComponent } from 'react';
+
+import { ChallengeStatus, Signature, ConclusionProof } from '../domain';
+
 import * as playerA from '../wallet-engine/wallet-states/PlayerA';
 import * as playerB from '../wallet-engine/wallet-states/PlayerB';
+import { FundingFailed, WaitForApproval, SelectWithdrawalAddress, WaitForWithdrawal, ChallengeRequested, WaitForChallengeConcludeOrExpire } from '../wallet-engine/wallet-states';
+
 import { WalletState } from '../redux/reducers/wallet-state';
-import { PureComponent } from 'react';
+import { ChallengeState } from '../redux/reducers/challenge';
+
 import WalletLayout from './WalletLayout';
 import FundingInProgress from './FundingInProgress';
 import FundingError from './FundingError';
-import React from 'react';
 import ConfirmFunding from './ConfirmFunding';
-import { FundingFailed, WaitForApproval, SelectWithdrawalAddress, WaitForWithdrawal } from '../wallet-engine/wallet-states';
 import WithdrawFunds from './WithdrawFunds';
+import ChallengeIssued from './ChallengeIssued';
+import ChallengeResponse from './ChallengeResponse';
+import WaitingForCreateChallenge from './WaitingForCreateChallenge';
+import WaitingForConcludeChallenge from './WaitingForConcludeChallenge';
 
 interface Props {
   walletState: WalletState;
+  challengeState: ChallengeState;
   tryFundingAgain: () => void;
   approveFunding: () => void;
   declineFunding: () => void;
   selectWithdrawalAddress: (address: string) => void;
+  respondWithMove: () => void;
+  respondWithAlternativeMove: (alternativePosition: string, alternativeSignature: Signature, response: string, responseSignature: Signature) => void;
+  refute: (newerPosition: string, signature: Signature)=>void;
+  conclude: (proof: ConclusionProof)=>void;
 }
 
 export default class WalletController extends PureComponent<Props> {
   renderWallet() {
-    const { walletState } = this.props;
+    const { walletState, challengeState } = this.props;
     if (walletState === null) {
       return null;
+    }
+
+    if (challengeState !== null) {
+      switch (challengeState.status){
+        case ChallengeStatus.WaitingForUserSelection:
+          return (<ChallengeResponse expiryTime={challengeState.expirationTime} responseOptions={challengeState.responseOptions} respondWithMove={this.props.respondWithMove} respondWithAlternativeMove={this.props.respondWithAlternativeMove} refute={this.props.refute} conclude={this.props.conclude} />);
+        case ChallengeStatus.WaitingOnOtherPlayer:
+          return (<ChallengeIssued expiryTime={challengeState.expirationTime}/>);
+        case ChallengeStatus.WaitingForCreateChallenge:
+          return <WaitingForCreateChallenge />;
+        case ChallengeStatus.WaitingForCreateChallenge:
+          return <WaitingForCreateChallenge />;
+        case ChallengeStatus.WaitingForConcludeChallenge:
+          return <WaitingForConcludeChallenge />;
+      }
     }
 
     switch (walletState && walletState.constructor) {
@@ -39,6 +69,10 @@ export default class WalletController extends PureComponent<Props> {
       case SelectWithdrawalAddress:
         return <WithdrawFunds selectAddress={this.props.selectWithdrawalAddress} />;
         break;
+      case ChallengeRequested:
+        return <div>Waiting for challenge</div>;
+      case WaitForChallengeConcludeOrExpire:
+        return <div>Waiting for opponent to respond to challenge</div>;
       case playerA.WaitForBlockchainDeploy:
         return <FundingInProgress message="confirmation of adjudicator deployment" />;
 

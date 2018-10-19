@@ -7,10 +7,10 @@ import BN from 'bn.js';
 export type GameEngine = GameEngineA | GameEngineB;
 
 // todo: probably shouldn't be a class
-export function setupGame({ me, opponent, stake, balances }:
-  { me: string, opponent: string, stake: BN, balances: BN[] }
+export function setupGame({ me, opponent, stake, balances, libraryAddress }:
+  { me: string, opponent: string, stake: BN, balances: BN[], libraryAddress:string }
 ) {
-  return GameEngineA.setupGame({ me, opponent, stake, balances });
+  return GameEngineA.setupGame({ me, opponent, stake, balances, libraryAddress });
 }
 
 export function fromProposal(proposedStartPosition: Position) {

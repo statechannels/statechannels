@@ -13,7 +13,6 @@ import {
 } from '../../positions';
 
 export enum PlayerBStateType {
-  WAIT_FOR_FUNDING = 'PLAYER_B.WAIT_FOR_FUNDING',
   WAIT_FOR_POST_FUND_SETUP = 'PLAYER_B.WAIT_FOR_POST_FUND_SETUP',
   WAIT_FOR_PROPOSE = 'PLAYER_B.WAIT_FOR_PROPOSE',
   CHOOSE_PLAY = 'PLAYER_B.CHOOSE_PLAY',
@@ -27,14 +26,6 @@ export enum PlayerBStateType {
 
 class BasePlayerB<T extends Position> extends BaseState<T> {
   readonly player = Player.PlayerB;
-}
-
-export class WaitForFunding extends BasePlayerB<PreFundSetupB> {
-  readonly type = PlayerBStateType.WAIT_FOR_FUNDING;
-  readonly isReadyForFunding = false;
-  readonly isReadyToSend = false;
-
-  get stake() { return this.position.stake; }
 }
 
 export class WaitForPostFundSetup extends BasePlayerB<PreFundSetupB> {
@@ -67,7 +58,6 @@ export class WaitForReveal extends BasePlayerB<Accept> {
   get bPlay() { return this.position.bPlay; }
   get preCommit() { return this.position.preCommit; }
 }
-
 export class ViewResult extends BasePlayerB<Resting> {
   readonly type = PlayerBStateType.VIEW_RESULT;
   readonly isReadyToSend = false;
@@ -104,7 +94,6 @@ export class Concluded extends BasePlayerB<Conclude> {
 }
 
 export type PlayerBState = (
-  | WaitForFunding
   | WaitForPostFundSetup
   | ChoosePlay
   | WaitForPropose

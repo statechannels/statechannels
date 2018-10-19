@@ -9,6 +9,8 @@ interface Props {
   choosePlay: (play: Play) => void;
   abandonGame: () => void;
   afterOpponent?: any;
+  challengeExpirationDate?:number;
+
 }
 
 export default class SelectPlayStep extends React.PureComponent<Props> {
@@ -24,13 +26,14 @@ export default class SelectPlayStep extends React.PureComponent<Props> {
   }
 
   render() {
-    const { afterOpponent, choosePlay, abandonGame } = this.props;
+    const { afterOpponent, choosePlay, abandonGame, challengeExpirationDate } = this.props;
     const renderChooseButton = this.renderChooseButton;
 
     return (
       <div className="container centered-container">
         <div className="w-100 text-center mb-5">
           <h1 className="mb-5">
+          {challengeExpirationDate && `Challenge detected, respond by ${new Date(challengeExpirationDate).toString()}` }
             {afterOpponent
               ? 'Your opponent has chosen a move, now choose yours:'
               : 'Choose your move:'}

@@ -14,6 +14,7 @@ import { PlayerBStateType } from '../../game-engine/application-states/PlayerB';
 
 
 export default function* gameSaga(gameEngine: GameEngine) {
+
   yield put(walletActions.openChannelRequest(gameEngine.state.channel));
   yield take(walletActions.CHANNEL_OPENED);
   yield put(applicationActions.gameSuccess(gameEngine.state));
@@ -46,11 +47,6 @@ export default function* gameSaga(gameEngine: GameEngine) {
       case gameActions.ABANDON_GAME:
         newState = gameEngine.conclude();
         break;
-      case walletActions.FUNDING_SUCCESS:
-        // TODO: We'll need the gameEngine to handle what happens if the funding fails for some reason
-        newState = gameEngine.fundingConfirmed();
-        // We've received funding so we need to update the game state again
-        break;
       default:
       // do nothing
     }
@@ -69,28 +65,23 @@ export default function* gameSaga(gameEngine: GameEngine) {
 
 function* sendState(state) {
   yield put(messageActions.sendMessage(state.opponentAddress, state.position.toHex()));
-
 }
 
 function* processState(state) {
   switch (state.type) {
-    case PlayerAStateType.WAIT_FOR_FUNDING:
-    case PlayerBStateType.WAIT_FOR_FUNDING:
-      const { myAddress, opponentAddress, myBalance, opponentBalance } = state;
-      const playerIndex = (state.type === PlayerAStateType.WAIT_FOR_FUNDING) ? 0 : 1;
-      yield put(walletActions.fundingRequest(
-        state.channelId,
-        myAddress,
-        opponentAddress,
-        myBalance,
-        opponentBalance,
-        playerIndex,
- ));
+    case PlayerBStateType.WAIT_FOR_POST_FUND_SETUP:
+      // Send the state to player A and then proceed with funding
+      yield sendState(state);
+      yield requestFunding(state);
+      yield sendState(state);
+      break;
+    case PlayerAStateType.WAIT_FOR_POST_FUND_SETUP:
+      yield requestFunding(state);
       yield sendState(state);
       break;
     case PlayerAStateType.CHOOSE_PLAY:
     case PlayerBStateType.CHOOSE_PLAY:
-      break; // don't send anything if the next step is to ChoosePlay
+      break;
     case PlayerAStateType.CONCLUDED:
     case PlayerBStateType.CONCLUDED:
       yield put(walletActions.withdrawalRequest(state));
@@ -103,4 +94,18 @@ function* processState(state) {
       yield sendState(state);
   }
   yield put(gameActions.stateChanged(state));
+}
+
+function* requestFunding(state) {
+  const { myAddress, opponentAddress, myBalance, opponentBalance } = state;
+  const playerIndex = (state.type === PlayerAStateType.WAIT_FOR_POST_FUND_SETUP) ? 0 : 1;
+  yield put(walletActions.fundingRequest(
+    state.channelId,
+    myAddress,
+    opponentAddress,
+    myBalance,
+    opponentBalance,
+    playerIndex,
+  ));
+  yield take(walletActions.FUNDING_SUCCESS);
 }
