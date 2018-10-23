@@ -7,7 +7,7 @@ import * as blockchainActions from '../actions/blockchain';
 
 import decode from "../../domain/decode";
 import { Refute, ChallengeResponse, RespondWithMove, RespondWithAlternativeMove, RespondWithExistingMove } from "../../domain/ChallengeResponse";
-import { Signature } from "src/wallet/domain/Signature";
+import { Signature } from "../../domain/Signature";
 import { ChallengeStatus } from "../../domain/ChallengeStatus";
 import { ConclusionProof } from "../../domain/ConclusionProof";
 

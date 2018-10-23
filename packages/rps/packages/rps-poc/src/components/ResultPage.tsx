@@ -2,16 +2,16 @@ import * as React from 'react';
 
 import { Button } from 'reactstrap';
 
-import { Play, Result } from '../game-engine/positions';
+import { Move, Result } from '../core';
 import FooterBar from './FooterBar';
 import MoveIcon from './MoveIcon';
 
 interface Props {
-  yourPlay: Play;
-  theirPlay: Play;
+  yourMove: Move;
+  theirMove: Move;
   result: Result;
   message: string;
-  abandonGame: () => void;
+  resign: () => void;
   playAgain: () => void;
 }
 
@@ -32,7 +32,7 @@ export default class ResultPage extends React.PureComponent<Props> {
   }
 
   render() {
-    const { yourPlay, theirPlay, message, playAgain, abandonGame } = this.props;
+    const { yourMove, theirMove, message, playAgain, resign } = this.props;
 
     return (
       <div className="container centered-container">
@@ -41,23 +41,23 @@ export default class ResultPage extends React.PureComponent<Props> {
           <div className="row">
             <div className="col-sm-6">
               <p className="lead">
-                You chose <strong>{Play[yourPlay]}</strong>
+                You chose <strong>{Move[yourMove]}</strong>
               </p>
               <div className="mb-5">
-                <MoveIcon play={yourPlay} />
+                <MoveIcon move={yourMove} />
               </div>
             </div>
             <div className="col-sm-6">
               <p className="lead">
-                Your opponent chose <strong>{Play[theirPlay]}</strong>
+                Your opponent chose <strong>{Move[theirMove]}</strong>
               </p>
               <div className="mb-5">
-                <MoveIcon play={theirPlay} />
+                <MoveIcon move={theirMove} />
               </div>
             </div>
           </div>
 
-          <Button color="default" onClick={abandonGame}>
+          <Button color="default" onClick={resign}>
             Abandon game
           </Button>
           <Button color="primary" onClick={playAgain}>
