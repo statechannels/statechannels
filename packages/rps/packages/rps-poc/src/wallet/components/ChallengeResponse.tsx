@@ -12,6 +12,13 @@ interface Props {
 }
 
 export default class ChallengeResponse extends React.PureComponent<Props> {
+    constructor(props) {
+        super(props);
+        this.handleRespondWithMove = this.handleRespondWithMove.bind(this);
+        this.handleConclude = this.handleConclude.bind(this);
+        this.handleRespondWithAlternativeMove = this.handleRespondWithAlternativeMove.bind(this);
+        this.handleRefute = this.handleRefute.bind(this);
+    }
     handleRespondWithMove() {
         this.props.respondWithMove();
     }
