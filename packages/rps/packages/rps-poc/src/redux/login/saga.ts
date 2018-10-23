@@ -1,10 +1,13 @@
 import firebase from 'firebase';
-import { call, fork, put, take, takeEvery, cancel } from 'redux-saga/effects';
+import { call, fork, put, take, takeEvery, cancel, cps } from 'redux-saga/effects';
 
 import * as loginActions from './actions';
 import { reduxSagaFirebase } from '../../gateways/firebase';
 import { walletSaga } from '../../wallet';
 import metamaskSaga from '../metamask/saga';
+
+// @ts-ignore
+import RPSGameArtifact from '../../../contracts/RockPaperScissorsGame.sol';
 
 const authProvider = new firebase.auth.GoogleAuthProvider();
 
@@ -38,8 +41,8 @@ function* loginStatusWatcherSaga() {
 
     if (user) {
       applicationThread = yield fork(walletSaga, user.uid);
-
-      yield put(loginActions.loginSuccess(user));
+      const libraryAddress = yield getLibraryAddress();
+      yield put(loginActions.loginSuccess(user, libraryAddress));
 
     } else {
       if (applicationThread) {
@@ -63,4 +66,9 @@ export default function* loginRootSaga() {
     takeEvery(loginActions.LOGIN_REQUEST, loginSaga),
     takeEvery(loginActions.LOGOUT_REQUEST, logoutSaga),
   ];
+}
+
+function* getLibraryAddress() {
+  const selectedNetworkId = parseInt(yield cps(web3.version.getNetwork), 10);
+  return RPSGameArtifact.networks[selectedNetworkId].address;
 }
