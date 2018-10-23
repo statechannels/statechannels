@@ -9,7 +9,7 @@ import * as actions from './actions';
 
 import BN from 'bn.js';
 import { StateName, GameState } from '../game/state';
-import { OpenGame } from './state';
+
 
 export default function* openGameSaga() {
   // could be more efficient by only watching actions that could change the state
@@ -46,10 +46,10 @@ export default function* openGameSaga() {
           // my game isn't on firebase (as far as the app knows)
           // attempt to put the game on firebase - will be a no-op if already there
 
-          const myOpenGame: OpenGame = {
+          const myOpenGame = {
             address,
             name: gameState.myName,
-            stake: gameState.roundBuyIn,
+            stake: gameState.roundBuyIn.toString(),
             createdAt: new Date().getTime(),
             isPublic: true,
           };

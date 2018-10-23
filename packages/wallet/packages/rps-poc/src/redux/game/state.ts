@@ -29,39 +29,51 @@ export enum StateName {
 export interface Lobby {
   name: StateName.Lobby;
   myName: string;
+  myAddress:string;
+  libraryAddress:string;
 }
 interface LobbyParams {
   myName: string;
+  myAddress:string;
+  libraryAddress:string;
   [x: string]: any;
 }
 
 export function lobby(obj: LobbyParams): Lobby {
-  return { name: StateName.Lobby, myName: obj.myName };
+  const {myName,myAddress,libraryAddress} = obj;
+  return { name: StateName.Lobby,myName,myAddress,libraryAddress  };
 }
 
 export interface CreatingOpenGame {
   name: StateName.CreatingOpenGame;
   myName: string;
+  myAddress:string;
+  libraryAddress:string;
 }
 
 export function creatingOpenGame(obj: LobbyParams): CreatingOpenGame {
-  return { name: StateName.CreatingOpenGame, myName: obj.myName };
+  const {myName,myAddress,libraryAddress} = obj;
+  return { name: StateName.CreatingOpenGame, myName, myAddress, libraryAddress};
 }
 
 export interface WaitingRoom {
   name: StateName.WaitingRoom;
   myName: string;
+  myAddress:string;
+  libraryAddress:string;
   roundBuyIn: BN;
 }
 
 interface WaitingRoomParams {
   myName: string;
   roundBuyIn: BN;
+  myAddress:string;
+  libraryAddress:string;
   [x: string]: any;
 }
 export function waitingRoom(obj: WaitingRoomParams): WaitingRoom {
-  const { myName, roundBuyIn } = obj;
-  return { name: StateName.WaitingRoom, myName, roundBuyIn };
+  const { myName, roundBuyIn, libraryAddress, myAddress} = obj;
+  return { name: StateName.WaitingRoom, myName, roundBuyIn,libraryAddress,myAddress };
 }
 
 interface TwoChannel {

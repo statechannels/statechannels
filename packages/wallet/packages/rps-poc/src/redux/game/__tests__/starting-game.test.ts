@@ -12,7 +12,7 @@ const {
   asAddress, bsAddress, libraryAddress, channelNonce, roundBuyIn, preFundSetupA,
 } = scenarios.standard;
 
-const params = { myName: 'Tom', roundBuyIn };
+const params = { myName: 'Tom', roundBuyIn, myAddress:asAddress, libraryAddress };
 const messageState = {};
 
 describe('when in lobby', () => {
