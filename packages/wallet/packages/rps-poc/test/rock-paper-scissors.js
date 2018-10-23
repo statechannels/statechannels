@@ -1,48 +1,37 @@
-import { Channel, assertRevert, padBytes32 } from 'fmg-core';
-import { Play, Resting, Propose, Accept, Reveal } from '../src/game-engine/positions';
 import BN from 'bn.js';
+import { assertRevert } from 'fmg-core';
+import { scenarios, encode } from '../src/core';
+
 const RPS = artifacts.require("./RockPaperScissorsGame.sol");
 
 contract('RockPaperScissors', (accounts) => {
   let rpsContract;
-  const salt = padBytes32("0xaaa"); // some random bytes32 value
-  const aPlay = Play.Rock;
-  const bPlay = Play.Scissors;
-  const stake = new BN(2);
-  const initBals = [new BN(5), new BN(4)];
-  const aAhead = [new BN(7), new BN(2)];
-  const bAhead = [new BN(3), new BN(6)];
-  let initialState;
-  let proposeState;
-  let acceptState;
-  let revealState;
-  let restState;
+
+  let postFundSetupB, propose, accept, reveal, resting;
 
   before(async () => {
     rpsContract = await RPS.deployed();
+    const libraryAddress = rpsContract.address;
 
-    const channel = new Channel(rpsContract.address, 0, [accounts[0], accounts[1]]);
-
-    initialState = new Resting( channel, 0, initBals, stake);
-    proposeState = Propose.createWithPlayAndSalt(channel, 1, initBals, stake, aPlay, salt)
-    const preCommit = proposeState.preCommit;
-
-    acceptState = new Accept(channel, 2, bAhead, stake, preCommit, bPlay);
-    revealState = new Reveal(channel, 3, aAhead, stake, bPlay, aPlay, salt);
-    restState = new Resting(channel, 4, aAhead, stake);
+    const scenario = scenarios.build(libraryAddress, accounts[0], accounts[1]);
+    postFundSetupB = scenario.postFundSetupB;
+    propose = scenario.propose;
+    accept = scenario.accept;
+    reveal = scenario.reveal;
+    resting = scenario.resting;
   });
 
 
   const validTransition = async (state1, state2) => {
-    return await rpsContract.validTransition(state1.toHex(), state2.toHex());
+    return await rpsContract.validTransition(encode(state1), encode(state2));
   };
 
 
-  // Transition fuction tests
+  // Transition function tests
   // ========================
 
   it("allows START -> ROUNDPROPOSED", async () => {
-    assert(await validTransition(initialState, proposeState));
+    assert(await validTransition(postFundSetupB, propose));
   });
 
   // TODO: add this back in once concluded states are in
@@ -56,19 +45,19 @@ contract('RockPaperScissors', (accounts) => {
   // });
 
   it("allows ROUNDPROPOSED -> ROUNDACCEPTED", async () => {
-    assert(await validTransition(proposeState, acceptState));
+    assert(await validTransition(propose, accept));
   });
 
   it("allows ROUNDACCEPTED -> REVEAL", async () => {
-    assertRevert(await validTransition(acceptState, revealState));
+    assertRevert(await validTransition(accept, reveal));
   });
 
   it("allows REVEAL -> (updated) START", async () => {
-    assert(await validTransition(revealState, restState));
+    assert(await validTransition(reveal, resting));
   });
 
   it("disallows transitions where the stake changes", async () => {
-    revealState.stake = revealState.stake + 1;
-    assertRevert(validTransition(revealState, restState));
+    reveal.roundBuyIn = reveal.roundBuyIn.add(new BN(1));
+    assertRevert(validTransition(reveal, resting));
   });
 });

@@ -3,7 +3,7 @@ import { call, fork, put, take, takeEvery, cancel } from 'redux-saga/effects';
 
 import * as loginActions from './actions';
 import { reduxSagaFirebase } from '../../gateways/firebase';
-import applicationSaga from '../application/saga';
+import { walletSaga } from '../../wallet';
 import metamaskSaga from '../metamask/saga';
 
 const authProvider = new firebase.auth.GoogleAuthProvider();
@@ -37,7 +37,7 @@ function* loginStatusWatcherSaga() {
     const { user } = yield take(channel);
 
     if (user) {
-      applicationThread = yield fork(applicationSaga, user.uid);
+      applicationThread = yield fork(walletSaga, user.uid);
 
       yield put(loginActions.loginSuccess(user));
 

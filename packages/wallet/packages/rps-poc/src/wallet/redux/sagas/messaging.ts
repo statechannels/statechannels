@@ -1,8 +1,8 @@
 import { MESSAGE_RECEIVED, MESSAGE_SENT } from "../actions/external";
 import { actionChannel, take, call } from "redux-saga/effects";
-import ChannelWallet from "src/wallet/domain/ChannelWallet";
-import { reduxSagaFirebase, serverTimestamp } from "src/gateways/firebase";
-import decode from "src/wallet/domain/decode";
+import ChannelWallet from "../../domain/ChannelWallet";
+import { reduxSagaFirebase, serverTimestamp } from "../../../gateways/firebase";
+import decode from "../../domain/decode";
 
 export function* messageListenerSaga(wallet:ChannelWallet){
     const channel = yield actionChannel([MESSAGE_RECEIVED, MESSAGE_SENT]);

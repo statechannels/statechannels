@@ -5,7 +5,7 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Debug jest tests",
+      "name": "Jest All",
       "type": "node",
       "request": "launch",
       "args": [
@@ -13,6 +13,22 @@
           "--runInBand",
           "--no-cache",
           "--env=jsdom"
+      ],
+      "cwd": "${workspaceRoot}",
+      "protocol": "inspector",
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen"
+    },
+    {
+      "name": "Jest Current",
+      "type": "node",
+      "request": "launch",
+      "args": [
+          "scripts/test.js",
+          "--runInBand",
+          "--no-cache",
+          "--env=jsdom",
+          "${relativeFile}"
       ],
       "cwd": "${workspaceRoot}",
       "protocol": "inspector",

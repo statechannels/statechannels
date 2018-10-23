@@ -1,19 +1,19 @@
 import { connect } from 'react-redux';
 
 import LobbyPage from '../components/LobbyPage';
-import * as lobbyActions from '../redux/lobby/actions';
+import * as actions from '../redux/game/actions';
 import * as loginActions from '../redux/login/actions';
 
 import { SiteState } from '../redux/reducer';
-import { Challenge } from '../redux/application/reducer';
+import { OpenGame } from '../redux/open-games/state';
 
 const mapStateToProps = (state: SiteState) => ({
-  challenges: state.app.challenges as Challenge[],
+  openGames: state.openGames as OpenGame[],
 });
 
 const mapDispatchToProps = {
-  acceptChallenge: lobbyActions.acceptChallenge,
-  createChallenge: lobbyActions.createChallenge,
+  joinOpenGame: actions.joinOpenGame,
+  newOpenGame: actions.newOpenGame,
   logoutRequest: loginActions.logoutRequest,
 };
 
