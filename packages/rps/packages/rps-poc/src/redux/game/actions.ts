@@ -90,7 +90,7 @@ export const createOpenGame = (roundBuyIn: BN) => ({
   roundBuyIn,
 });
 
-export const enterLobby = (myName: string) => ({
+export const enterLobby = (myName: string,) => ({
   type: ENTER_LOBBY as typeof ENTER_LOBBY,
   myName,
 });

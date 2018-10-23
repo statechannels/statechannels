@@ -1,4 +1,4 @@
-import { fork, take, call, put, select } from 'redux-saga/effects';
+import { fork, take, call, put, select, actionChannel } from 'redux-saga/effects';
 import { buffers } from 'redux-saga';
 import hash from 'object-hash';
 
@@ -38,9 +38,23 @@ export function* sendWalletMessageSaga() {
 }
 
 export function* sendMessagesSaga() {
+  // We need to use an actionChannel to queue up actions that
+  // might be put from this saga
+  const channel = yield actionChannel([
+    gameActions.CHOOSE_MOVE,
+    gameActions.CONFIRM_GAME,
+    gameActions.CREATE_OPEN_GAME,
+    gameActions.INITIAL_POSITION_RECEIVED,
+    gameActions.PLAY_AGAIN,
+    gameActions.POSITION_RECEIVED,
+    gameActions.FUNDING_SUCCESS,
+    gameActions.WITHDRAWAL_SUCCESS,
+    gameActions.JOIN_OPEN_GAME,
+    gameActions.RESIGN,
+  ]);
   while (true) {
     // We take any action that might trigger the outbox to be updated
-    yield take('*');
+    yield take(channel);
 
     const messageState: MessageState = yield select(getMessageState);
     if (messageState.opponentOutbox) {
