@@ -48,6 +48,7 @@ export function* sendMessagesSaga() {
     gameActions.PLAY_AGAIN,
     gameActions.POSITION_RECEIVED,
     gameActions.FUNDING_SUCCESS,
+    gameActions.WITHDRAWAL_REQUEST,
     gameActions.WITHDRAWAL_SUCCESS,
     gameActions.JOIN_OPEN_GAME,
     gameActions.RESIGN,
@@ -174,6 +175,7 @@ function* handleWalletMessage(type, state: gameStates.PlayingState) {
       yield take(walletActions.WITHDRAWAL_SUCCESS);
       yield put(gameActions.messageSent());
       yield put(gameActions.withdrawalSuccess());
+      yield put(walletActions.closeChannelRequest());
 
   }
 }
