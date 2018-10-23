@@ -8,6 +8,7 @@ import {
   itTransitionsTo,
   itStoresAction,
   itCanHandleTheOpponentResigning,
+  itIncreasesTurnNumBy,
 } from './helpers';
 
 const {
@@ -64,6 +65,7 @@ describe('player B\'s app', () => {
       const updatedState = gameReducer({ messageState, gameState }, action);
 
       itSends(preFundSetupB, updatedState);
+      itIncreasesTurnNumBy(1, { gameState, messageState }, updatedState);
 
       it('requests funding from the wallet', () => {
         expect(updatedState.messageState.walletOutbox).toEqual('FUNDING_REQUESTED');
@@ -82,6 +84,7 @@ describe('player B\'s app', () => {
       const action = actions.fundingSuccess();
       const updatedState = gameReducer({ messageState, gameState }, action);
 
+      itIncreasesTurnNumBy(0, { gameState, messageState }, updatedState);
       itTransitionsTo(state.StateName.WaitForPostFundSetup, updatedState);
     });
   });
@@ -94,6 +97,7 @@ describe('player B\'s app', () => {
       const action = actions.positionReceived(postFundSetupA);
       const updatedState = gameReducer({ messageState, gameState }, action);
 
+      itIncreasesTurnNumBy(2, { gameState, messageState }, updatedState);
       itTransitionsTo(state.StateName.PickMove, updatedState);
       itSends(postFundSetupB, updatedState);
     });
@@ -110,6 +114,7 @@ describe('player B\'s app', () => {
 
       itTransitionsTo(state.StateName.WaitForOpponentToPickMoveB, updatedState);
 
+      itIncreasesTurnNumBy(0, { gameState, messageState }, updatedState);
       it('stores the move', () => {
         const updatedGameState = updatedState.gameState as state.WaitForOpponentToPickMoveA;
         expect(updatedGameState.myMove).toEqual(bsMove);
@@ -121,11 +126,13 @@ describe('player B\'s app', () => {
       const updatedState = gameReducer({ messageState, gameState }, action);
 
       itStoresAction(action, updatedState);
+      itIncreasesTurnNumBy(0, { gameState, messageState }, updatedState);
 
       describe('when a move is chosen', () => {
         const action2 = actions.chooseMove(bsMove);
         const updatedState2 = gameReducer(updatedState, action2);
 
+        itIncreasesTurnNumBy(2, { gameState, messageState }, updatedState2);
         itSends(accept, updatedState2);
         itTransitionsTo(state.StateName.WaitForRevealB, updatedState2);
       });
@@ -141,6 +148,7 @@ describe('player B\'s app', () => {
       const action = actions.positionReceived(propose);
       const updatedState = gameReducer({ messageState, gameState }, action);
 
+      itIncreasesTurnNumBy(2, { gameState, messageState }, updatedState);
       itSends(accept, updatedState);
       itTransitionsTo(state.StateName.WaitForRevealB, updatedState);
     });
@@ -156,6 +164,7 @@ describe('player B\'s app', () => {
         const action = actions.positionReceived(reveal);
         const updatedState = gameReducer({ messageState, gameState }, action);
 
+        itIncreasesTurnNumBy(1, { gameState, messageState }, updatedState);
         itTransitionsTo(state.StateName.PlayAgain, updatedState);
       });
 
@@ -166,6 +175,7 @@ describe('player B\'s app', () => {
           balances: acceptInsufficientFunds.balances };
         const updatedState = gameReducer({ messageState, gameState: gameState2 }, action);
 
+        itIncreasesTurnNumBy(2, { gameState: gameState2, messageState }, updatedState);
         itSends(concludeInsufficientFunds, updatedState);
         itTransitionsTo(state.StateName.InsufficientFunds, updatedState);
       });
@@ -181,6 +191,7 @@ describe('player B\'s app', () => {
       const action = actions.playAgain();
       const updatedState = gameReducer({ messageState, gameState }, action);
 
+      itIncreasesTurnNumBy(1, { gameState, messageState }, updatedState);
       itSends(resting, updatedState);
       itTransitionsTo(state.StateName.PickMove, updatedState);
     });
@@ -189,18 +200,20 @@ describe('player B\'s app', () => {
       const action = actions.resign();
       const updatedState = gameReducer({ messageState, gameState }, action);
 
+      itIncreasesTurnNumBy(1, { gameState, messageState }, updatedState);
       itSends(concludeResign, updatedState);
       itTransitionsTo(state.StateName.WaitForResignationAcknowledgement, updatedState);
     });
   });
 
   describe('when in InsufficientFunds', () => {
-    const gameState = state.insufficientFunds({ ...bProps, ...revealInsufficientFunds });
+    const gameState = state.insufficientFunds({ ...bProps, ...concludeInsufficientFunds });
 
     describe('when Conclude arrives', () => {
       const action = actions.positionReceived(concludeInsufficientFunds2);
       const updatedState = gameReducer({ messageState, gameState }, action);
 
+      itIncreasesTurnNumBy(1, { gameState, messageState }, updatedState);
       itTransitionsTo(state.StateName.GameOver, updatedState);
     });
   });
@@ -215,6 +228,7 @@ describe('player B\'s app', () => {
       const action = actions.positionReceived(conclude);
       const updatedState = gameReducer({ messageState, gameState }, action);
 
+      itIncreasesTurnNumBy(1, { gameState, messageState }, updatedState);
       itTransitionsTo(state.StateName.GameOver, updatedState);
     });
   });
@@ -228,6 +242,7 @@ describe('player B\'s app', () => {
 
       itTransitionsTo(state.StateName.WaitForWithdrawal, updatedState);
 
+      itIncreasesTurnNumBy(0, { gameState, messageState }, updatedState);
       it('requests a withdrawal from the wallet', () => {
         expect(updatedState.messageState.walletOutbox).toEqual('WITHDRAWAL_REQUESTED');
       });

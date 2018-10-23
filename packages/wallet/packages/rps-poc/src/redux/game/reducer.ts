@@ -504,7 +504,7 @@ function waitForResignationAcknowledgementReducer(gameState: states.WaitForResig
   if (action.type !== actions.POSITION_RECEIVED) { return { gameState, messageState }; }
   if (action.position.name !== positions.CONCLUDE) { return { gameState, messageState }; }
 
-  const newGameState = states.gameOver({ ...gameState });
+  const newGameState = states.gameOver({ ...gameState, turnNum: gameState.turnNum + 1 });
   return { gameState: newGameState, messageState };
 }
 
