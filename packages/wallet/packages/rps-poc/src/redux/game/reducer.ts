@@ -238,7 +238,7 @@ function waitForFundingReducer(gameState: states.WaitForFunding, messageState: M
   if (receivedConclude(action)) { return opponentResignationReducer(gameState, messageState, action); }
 
   if (action.type !== actions.FUNDING_SUCCESS) { return { gameState, messageState }; }
-  const turnNum = gameState.player === Player.PlayerA ? gameState.turnNum + 1 : gameState.turnNum + 2;
+  const turnNum = gameState.player === Player.PlayerA ? gameState.turnNum + 1 : gameState.turnNum;
   const newGameState = states.waitForPostFundSetup({ ...gameState, turnNum, stateCount: 0 });
 
   if (gameState.player === Player.PlayerA) {
