@@ -3,7 +3,7 @@ import { StyleSheet, css } from 'aphrodite';
 
 import { Button } from 'reactstrap';
 
-import { Play } from '../game-engine/positions';
+import { Move } from '../core';
 import MoveIcon from './MoveIcon';
 
 interface IProps {
@@ -22,13 +22,13 @@ const HomePage: React.SFC<IProps> = ({ login }) => {
         </div>
         <div className="row text-center mb-5">
           <div className="col-sm-4">
-            <MoveIcon play={Play.Rock} />
+            <MoveIcon move={Move.Rock} />
           </div>
           <div className="col-sm-4">
-            <MoveIcon play={Play.Paper} />
+            <MoveIcon move={Move.Paper} />
           </div>
           <div className="col-sm-4">
-            <MoveIcon play={Play.Scissors} />
+            <MoveIcon move={Move.Scissors} />
           </div>
         </div>
         <div className="row mb-5">
