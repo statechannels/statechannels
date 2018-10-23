@@ -23,6 +23,7 @@ import { Move } from '../core';
 import WalletHeader from '../wallet/containers/WalletHeader';
 import { GameState, StateName } from '../redux/game/state';
 import ConfirmGamePage from '../components/ConfirmGamePage';
+import GameOverPage from '../components/GameOverPage';
 
 interface GameProps {
   state: GameState;
@@ -35,6 +36,7 @@ interface GameProps {
   createOpenGame: (roundBuyIn: BN) => void;
   cancelOpenGame: () => void;
   resign: () => void;
+  withdraw:()=>void;
 }
 
 class GameContainer extends React.PureComponent<GameProps, {}> {
@@ -53,7 +55,7 @@ class GameContainer extends React.PureComponent<GameProps, {}> {
 }
 
 function RenderGame(props: GameProps) {
-  const { state, chooseMove, playAgain, resign, createBlockchainChallenge, confirmGame } = props;
+  const { state, chooseMove, playAgain, resign, createBlockchainChallenge, confirmGame, withdraw } = props;
   switch (state.name) {
     case StateName.CreatingOpenGame:
       return (
@@ -96,7 +98,9 @@ function RenderGame(props: GameProps) {
       );
 
     case StateName.GameOver:
-      return <WalletController />;
+    // TODO: We probably want a seperate message for when your opponent resigns
+    case StateName.OpponentResigned:
+      return <GameOverPage  withdraw={withdraw} />;
     case StateName.WaitForPostFundSetup:
       return <FundingConfirmedPage message="Waiting for your opponent to acknowledge" />;
 
@@ -142,6 +146,7 @@ const mapDispatchToProps = {
   createOpenGame: gameActions.createOpenGame,
   cancelOpenGame: gameActions.cancelOpenGame,
   resign: gameActions.resign,
+  withdraw:gameActions.withdrawalRequest,
 };
 
 // why does it think that mapStateToProps can return undefined??

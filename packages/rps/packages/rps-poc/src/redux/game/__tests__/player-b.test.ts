@@ -229,7 +229,7 @@ describe('player B\'s app', () => {
       itTransitionsTo(state.StateName.WaitForWithdrawal, updatedState);
 
       it('requests a withdrawal from the wallet', () => {
-        expect(updatedState.messageState.walletOutbox).toEqual('WITHDRAWAL');
+        expect(updatedState.messageState.walletOutbox).toEqual('WITHDRAWAL_REQUESTED');
       });
     });
   });
