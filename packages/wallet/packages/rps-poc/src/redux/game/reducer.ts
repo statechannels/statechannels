@@ -89,14 +89,14 @@ function singleActionReducer(state: JointState, action: actions.GameAction) {
       return insufficientFundsReducer(gameState, messageState, action);
     case states.StateName.WaitToResign:
       return waitToResignReducer(gameState, messageState, action);
-    // case states.StateName.OpponentResigned:
-    //   return opponentResignedReducer(gameState, messageState, action);
     case states.StateName.WaitForResignationAcknowledgement:
       return waitForResignationAcknowledgementReducer(gameState, messageState, action);
     case states.StateName.GameOver:
       return gameOverReducer(gameState, messageState, action);
-    // case states.StateName.WaitForWithdrawal:
-    //   return waitForWithdrawalReducer(gameState, messageState, action);
+    case states.StateName.WaitForWithdrawal:
+      return waitForWithdrawalReducer(gameState, messageState, action);
+    case states.StateName.OpponentResigned:
+      return opponentResignedReducer(gameState, messageState, action);
     default:
       throw new Error("Unreachable code");
   }
@@ -491,8 +491,14 @@ function waitToResignReducer(gameState: states.WaitToResign, messageState: Messa
   return { gameState: newGameState, messageState };
 }
 
-// function opponentResignedReducer(gameState: states.OpponentResigned, messageState: MessageState, action: actions.GameAction) {
-// }
+function opponentResignedReducer(gameState: states.OpponentResigned, messageState: MessageState, action: actions.GameAction) {
+  if (action.type !== actions.WITHDRAWAL_REQUEST) { return { gameState, messageState }; }
+
+  const newGameState = states.waitForWithdrawal(gameState);
+  messageState = { ...messageState, walletOutbox: 'WITHDRAWAL_REQUESTED' };
+
+  return { gameState: newGameState, messageState };
+}
 
 function waitForResignationAcknowledgementReducer(gameState: states.WaitForResignationAcknowledgement, messageState: MessageState, action: actions.GameAction): JointState {
   if (action.type !== actions.POSITION_RECEIVED) { return { gameState, messageState }; }
@@ -506,9 +512,16 @@ function gameOverReducer(gameState: states.GameOver, messageState: MessageState,
   if (action.type !== actions.WITHDRAWAL_REQUEST) { return { gameState, messageState }; }
 
   const newGameState = states.waitForWithdrawal(gameState);
-  messageState = { ...messageState, walletOutbox: 'WITHDRAWAL' };
+  messageState = { ...messageState, walletOutbox: 'WITHDRAWAL_REQUESTED' };
 
   return { gameState: newGameState, messageState };
 }
-// function waitForWithdrawalReducer(gameState: states.WaitForWithdrawal, messageState: MessageState, action: actions.GameAction) {
-// }
+function waitForWithdrawalReducer(gameState: states.WaitForWithdrawal, messageState: MessageState, action: actions.GameAction) {
+  if (action.type !== actions.WITHDRAWAL_SUCCESS) {
+    return { gameState, messageState };
+  }
+  const {myName,libraryAddress} = gameState;
+  const myAddress = gameState.participants[gameState.player];
+  const newGameState = states.lobby({myName,myAddress,libraryAddress});
+  return {gameState:newGameState ,messageState:{}};
+}  

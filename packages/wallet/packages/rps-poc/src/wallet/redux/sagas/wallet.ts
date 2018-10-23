@@ -163,6 +163,7 @@ export function* handleWithdrawalRequest(
   walletEngine: WalletEngine,
   position: State
 ) {
+  yield put(displayActions.showWallet());
   // TODO: There's probably enough logic here to pull it out into it's own saga
   const { address: playerAddress, channelId } = wallet;
 
@@ -196,31 +197,35 @@ export function* handleWithdrawalRequest(
   } else {
     yield put(actions.withdrawalFailure(failureReason));
   }
-
+  yield put(displayActions.hideWallet());
   return true;
 }
 
 function* blockchainEventListener(wallet: ChannelWallet) {
   while (true) {
     const action = yield take(blockchainActions.CHALLENGECREATED_EVENT);
-    const channelId = decode(action.state).channel.id;
-    const { position: theirPosition, signature: theirSignature } = yield loadPosition(wallet, channelId, 'received');
-    const { position: myPosition, signature: mySignature } = yield loadPosition(wallet, channelId, 'sent');
+    const challengeDate = action.expirationTime * 1000;
+    // Ignore expired challenges for now
+    if (Date.now() <= challengeDate) {
+      const channelId = decode(action.state).channel.id;
+      const { position: theirPosition, signature: theirSignature } = yield loadPosition(wallet, channelId, 'received');
+      const { position: myPosition, signature: mySignature } = yield loadPosition(wallet, channelId, 'sent');
 
-    const { challengeHandler } = yield race({
-      challengeHandler: call(challengeSaga, action, theirPosition, theirSignature, myPosition, mySignature),
-      conclusionAction: take(blockchainActions.CHALLENGECONCLUDED_EVENT),
-    });
+      const { challengeHandler } = yield race({
+        challengeHandler: call(challengeSaga, action, theirPosition, theirSignature, myPosition, mySignature),
+        conclusionAction: take(blockchainActions.CHALLENGECONCLUDED_EVENT),
+      });
 
-    if (challengeHandler) {
-      // The challenge should have been handled, but has not yet
-      // been concluded by the blockchain, so we block until the transaction
-      // has succeeded
-      yield take(blockchainActions.CHALLENGECONCLUDED_EVENT);
+      if (challengeHandler) {
+        // The challenge should have been handled, but has not yet
+        // been concluded by the blockchain, so we block until the transaction
+        // has succeeded
+        yield take(blockchainActions.CHALLENGECONCLUDED_EVENT);
+      }
+
+      yield put(challengeActions.clearChallenge());
+      yield put(displayActions.hideWallet());
     }
-
-    yield put(challengeActions.clearChallenge());
-    yield put(displayActions.hideWallet());
   }
 }
 
