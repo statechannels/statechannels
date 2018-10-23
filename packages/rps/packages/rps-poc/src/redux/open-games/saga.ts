@@ -65,6 +65,7 @@ export default function* openGameSaga() {
             // attempt to delete the game - will be a no-op if not there
 
             yield call(reduxSagaFirebase.database.delete, myOpenGameKey);
+            myGameIsOnFirebase = false;
           }
         }
 
