@@ -44,11 +44,10 @@ export const joinOpenGame = (
   roundBuyIn,
 });
 
-export const initialPositionReceived = (position: positions.PreFundSetupA, myName: string, opponentName: string) => ({
+export const initialPositionReceived = (position: positions.PreFundSetupA, opponentName:string) => ({
   type: INITIAL_POSITION_RECEIVED as typeof INITIAL_POSITION_RECEIVED,
   position,
-  myName,
-  opponentName,
+opponentName,
 });
 
 export const confirmGame = () => ({

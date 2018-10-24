@@ -130,7 +130,7 @@ function* receiveFromFirebaseSaga(address) {
       const position = decode(data);
       if (position.name === positions.PRE_FUND_SETUP_A) {
         // todo: how do we get actual names in here - will need to look up from firebase
-        yield put(gameActions.initialPositionReceived(position, 'Me', 'Opponent'));
+        yield put(gameActions.initialPositionReceived(position,'Opponent'));
       } else {
         yield put(gameActions.positionReceived(position));
       }
