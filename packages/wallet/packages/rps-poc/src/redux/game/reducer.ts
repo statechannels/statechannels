@@ -141,7 +141,8 @@ function creatingOpenGameReducer(gameState: states.CreatingOpenGame, messageStat
 function waitingRoomReducer(gameState: states.WaitingRoom, messageState: MessageState, action: actions.GameAction): JointState {
   switch (action.type) {
     case actions.INITIAL_POSITION_RECEIVED:
-      const { position, myName, opponentName } = action;
+      const { position, opponentName } = action;
+      const {myName} = gameState;
       if (position.name !== positions.PRE_FUND_SETUP_A) { return { gameState, messageState }; }
 
       const newGameState = states.confirmGameB({ ...position, myName, opponentName });

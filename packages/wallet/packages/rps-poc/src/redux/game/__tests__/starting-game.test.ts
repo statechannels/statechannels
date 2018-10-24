@@ -59,7 +59,7 @@ describe('when in waiting room', () => {
   const gameState = state.waitingRoom(params);
 
   describe('when PreFundSetupA arrives', () => {
-    const action = actions.initialPositionReceived(preFundSetupA,params.myName,'Tom');
+    const action = actions.initialPositionReceived(preFundSetupA,'Tom');
     const updatedState = gameReducer({ gameState, messageState }, action);
 
     itTransitionsTo(state.StateName.ConfirmGameB, updatedState);

@@ -6,7 +6,7 @@ import * as externalActions from '../actions/external';
 import * as blockchainActions from '../actions/blockchain';
 
 import decode from "../../domain/decode";
-import { Refute, ChallengeResponse, RespondWithMove, RespondWithAlternativeMove, RespondWithExistingMove } from "../../domain/ChallengeResponse";
+import { Refute, ChallengeResponse, RespondWithMove, RespondWithExistingMove } from "../../domain/ChallengeResponse";
 import { Signature } from "../../domain/Signature";
 import { ChallengeStatus } from "../../domain/ChallengeStatus";
 import { ConclusionProof } from "../../domain/ConclusionProof";
@@ -14,7 +14,6 @@ import { ConclusionProof } from "../../domain/ConclusionProof";
 export default function* challengeSaga(challenge, theirPositionString: string, theirSignatureString: string, myPositionString: string, mySignatureString: string) {
   const { expirationTime } = challenge;
   const myPosition = decode(myPositionString);
-  const mySignature = new Signature(mySignatureString);
   const theirPosition = decode(theirPositionString);
   const theirSignature = new Signature(theirSignatureString);
   const challengePosition = decode(challenge.state);
@@ -32,9 +31,6 @@ export default function* challengeSaga(challenge, theirPositionString: string, t
   }
 
   if (!theirPosition.equals(challengePosition)) {
-    if (theirPosition.turnNum >= challengePosition.turnNum) {
-      responseOptions.push(new RespondWithAlternativeMove({ theirPosition: theirPositionString, theirSignature, myPosition: myPositionString, mySignature }));
-    }
     if (theirPosition.turnNum > challengePosition.turnNum) {
       responseOptions.push(new Refute({ theirPosition: theirPositionString, theirSignature }));
     }
