@@ -1,1 +1,7 @@
-$rps-font-family: WoodfordBourne;
+$rps-font-family: WoodfordBourne; 
+
+@font-face {
+  font-family: "WoodfordBourne";
+  src: url("./fonts/woodfordbourne-regular-webfont.woff2") format("woff2"),
+  url("./fonts/woodfordbourne-regular-webfont.woff") format("woff"),
+}
