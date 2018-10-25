@@ -12,6 +12,7 @@ const mockStore = configureStore();
 
 
 describe('GameContainer', () => {
+  // skipping for the time being to avoid having to figure out how to test nested containers
   it('should render GameProposed for state WaitForGameConfirmationA', () => {
     const { preFundSetupA } = scenarios.standard;
 
