@@ -6,6 +6,8 @@ import { walletReducer, Wallet as WalletState } from '../wallet/redux/reducers/w
 import { gameReducer, JointState } from './game/reducer';
 import { OpenGameState } from './open-games/state';
 import { openGamesReducer } from './open-games/reducer';
+import { rulesReducer } from './global/reducer';
+import { RulesState } from './global/state';
 
 export interface SiteState {
   login: LoginState;
@@ -13,6 +15,7 @@ export interface SiteState {
   metamask: MetamaskState;
   openGames: OpenGameState;
   game: JointState;
+  rules: RulesState;
 }
 
 export default combineReducers<SiteState>({
@@ -21,4 +24,5 @@ export default combineReducers<SiteState>({
   metamask: metamaskReducer,
   openGames: openGamesReducer,
   game: gameReducer,
+  rules: rulesReducer,
 });

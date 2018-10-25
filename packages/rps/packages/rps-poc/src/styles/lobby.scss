@@ -1,0 +1,32 @@
+@import "./_colors";
+@import "./fonts";
+
+.navbar {
+    background-color: $rps-dark-blue;
+    height: 70px;
+}
+
+.navbar-button {
+    align-items: center;
+    font-size: 15px;
+    font-style: normal;
+    font-stretch: normal;
+    line-height: normal;
+    letter-spacing: normal;
+    color :$rps-light-grey;
+}
+
+.circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 20px;
+    background: $rps-red;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.navbar-user {
+    font-size: 15px;
+    color: $rps-white;
+}
