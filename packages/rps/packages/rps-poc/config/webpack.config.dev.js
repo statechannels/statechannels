@@ -112,6 +112,15 @@ module.exports = {
       // We are waiting for https://github.com/facebookincubator/create-react-app/issues/2176.
       // { parser: { requireEnsure: false } },
       {
+        test: /\.woff$/,
+        use: {
+          loader: "url-loader",
+          options: {
+            limit: 50000,
+          },
+        },
+      },
+      {
         test: /\.(js|jsx|mjs)$/,
         loader: require.resolve('source-map-loader'),
         enforce: 'pre',

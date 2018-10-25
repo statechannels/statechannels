@@ -1,0 +1,53 @@
+@import "../_colors";
+@import "../_fonts";
+
+.wallet-title{
+    font-family: $rps-font-family;
+    font-size: 30px;
+    font-weight: bold;
+    font-style: normal;
+    font-stretch: normal;
+    line-height: 1.64;
+    letter-spacing: normal;
+}
+
+.wallet-text{
+    font-family: $rps-font-family;
+}
+.wallet-button-container{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.wallet-container{
+    padding:28px;
+    display:flex;
+    flex-direction: column;
+    justify-content: center;
+    height: 100%;
+}
+.wallet-button {
+    font-family: $rps-font-family;
+    background-color: $rps-wallet-orange;
+    border-color: $rps-wallet-orange;
+    color:#fff;
+    width:90%;
+    border-radius: 10px;
+    margin: 0 auto;
+}
+
+.wallet-cancel-button {
+    font-family: $rps-font-family;
+    background-color: $rps-wallet-muted;
+    border-color: $rps-wallet-muted;
+    color: $rps-wallet-grey;
+    align-self: flex-start;
+    margin: auto 0 0 0;
+    
+}
+
+.wallet-icon {
+    height:50px;
+    width:50px;
+    margin: auto 0 20px 0;
+}

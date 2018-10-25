@@ -10,17 +10,18 @@ import { FundingFailed, WaitForApproval, SelectWithdrawalAddress, WaitForWithdra
 import { WalletState } from '../redux/reducers/wallet-state';
 import { ChallengeState } from '../redux/reducers/challenge';
 
-import WalletLayout from './WalletLayout';
 import FundingInProgress from './FundingInProgress';
 import FundingError from './FundingError';
-import ConfirmFunding from './ConfirmFunding';
 import WithdrawFunds from './WithdrawFunds';
 import ChallengeIssued from './ChallengeIssued';
 import ChallengeResponse from './ChallengeResponse';
 import WaitingForCreateChallenge from './WaitingForCreateChallenge';
 import WaitingForConcludeChallenge from './WaitingForConcludeChallenge';
+import Sidebar from 'react-sidebar';
+import FundingWelcome from './FundingWelcome';
 
 interface Props {
+  showWallet: boolean;
   walletState: WalletState;
   challengeState: ChallengeState;
   tryFundingAgain: () => void;
@@ -29,23 +30,23 @@ interface Props {
   selectWithdrawalAddress: (address: string) => void;
   respondWithMove: () => void;
   respondWithAlternativeMove: (alternativePosition: string, alternativeSignature: Signature, response: string, responseSignature: Signature) => void;
-  refute: (newerPosition: string, signature: Signature)=>void;
-  conclude: (proof: ConclusionProof)=>void;
+  refute: (newerPosition: string, signature: Signature) => void;
+  conclude: (proof: ConclusionProof) => void;
 }
 
 export default class WalletController extends PureComponent<Props> {
   renderWallet() {
     const { walletState, challengeState } = this.props;
     if (walletState === null) {
-      return null;
+      return <div />;
     }
 
-    if (challengeState !== null) {
-      switch (challengeState.status){
+    if (challengeState != null) {
+      switch (challengeState.status) {
         case ChallengeStatus.WaitingForUserSelection:
           return (<ChallengeResponse expiryTime={challengeState.expirationTime} responseOptions={challengeState.responseOptions} respondWithMove={this.props.respondWithMove} respondWithAlternativeMove={this.props.respondWithAlternativeMove} refute={this.props.refute} conclude={this.props.conclude} />);
         case ChallengeStatus.WaitingOnOtherPlayer:
-          return (<ChallengeIssued expiryTime={challengeState.expirationTime}/>);
+          return (<ChallengeIssued expiryTime={challengeState.expirationTime} />);
         case ChallengeStatus.WaitingForCreateChallenge:
           return <WaitingForCreateChallenge />;
         case ChallengeStatus.WaitingForCreateChallenge:
@@ -64,8 +65,8 @@ export default class WalletController extends PureComponent<Props> {
           />
         );
       case WaitForWithdrawal:
-      return <div>Waiting for withdrawal process to complete.</div>;
-      break;
+        return <div>Waiting for withdrawal process to complete.</div>;
+        break;
       case SelectWithdrawalAddress:
         return <WithdrawFunds selectAddress={this.props.selectWithdrawalAddress} />;
         break;
@@ -89,24 +90,12 @@ export default class WalletController extends PureComponent<Props> {
         return <FundingInProgress message="waiting for deposit confirmation" />;
       case WaitForApproval:
       case playerB.WaitForApprovalWithAdjudicator:
-        const {
-          myAddress,
-          opponentAddress,
-          myBalance,
-          opponentBalance,
-        } = walletState as WaitForApproval;
-        const confirmFundingProps = {
-          myAddress,
-          opponentAddress,
-          myBalance,
-          opponentBalance,
-          rulesAddress: '0x0123',
-          appName: 'Rock Paper Scissors',
-          approve: this.props.approveFunding,
-          decline: this.props.declineFunding,
-        };
-        return <ConfirmFunding {...confirmFundingProps} />;
+
+        return <FundingWelcome approve={this.props.approveFunding} decline={this.props.declineFunding} />;
       default:
+        if (!walletState) {
+          return <div />;
+        }
         return (
           <FundingInProgress message={`[view not implemented: ${walletState.constructor.name}`} />
         );
@@ -114,6 +103,12 @@ export default class WalletController extends PureComponent<Props> {
   }
 
   render() {
-    return <WalletLayout>{this.renderWallet()}</WalletLayout>;
+    return <Sidebar
+      sidebar={this.renderWallet()}
+      open={this.props.showWallet}
+      styles={{ sidebar: { width: "35%", background: "#f3f3f3" } }}
+    >
+      {this.props.children}
+    </Sidebar>;
   }
 }
