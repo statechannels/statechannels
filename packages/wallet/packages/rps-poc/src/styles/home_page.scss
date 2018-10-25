@@ -25,6 +25,7 @@ $background-image-size: 800px;
 
 .homePage-loginButton {
 	display: flex;
+	z-index: 999;
 	justify-content: flex-start;
 	cursor: pointer;
 	padding-top: $loginButton-height;
