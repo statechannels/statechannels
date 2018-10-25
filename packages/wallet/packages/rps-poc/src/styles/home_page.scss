@@ -1,8 +1,10 @@
+@import "./_colors";
+
 $loginButton-height: 44px;
 $background-image-size: 800px;
 
 .homePage {
-	background-color: #151b44;
+	background-color: $rps-dark-blue;
 	height: 100%;
 	position: absolute;
 	width: 100%;
@@ -30,8 +32,8 @@ $background-image-size: 800px;
 
 .homePage-loginButton-text {
 	align-items: center;
-	background-color: #4285f4;
-	color: white;
+	background-color: $rps-light-blue;
+	color: $rps-white;
 	display: flex;
 	flex-direction: row;
 	height: $loginButton-height;
@@ -41,7 +43,7 @@ $background-image-size: 800px;
 
 .homePage-loginButton-icon-container {
 	align-items: center;
-	background-color: white;
+	background-color: $rps-white;
 	display: flex;
 	flex-direction: row;
 	height: $loginButton-height;

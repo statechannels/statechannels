@@ -8,6 +8,7 @@ import { SiteState } from '../redux/reducer';
 
 const mapStateToProps = (state: SiteState) => ({
   showRules: state.rules.visible,
+  loginDisplayName: state.login.user.displayName,
 });
 
 const mapDispatchToProps = {
