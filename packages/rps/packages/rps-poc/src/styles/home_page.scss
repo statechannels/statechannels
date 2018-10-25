@@ -1,0 +1,66 @@
+$loginButton-height: 44px;
+$background-image-size: 800px;
+
+.homePage {
+	background-color: #151b44;
+	height: 100%;
+	position: absolute;
+	width: 100%;
+}
+
+.homePage-container {
+	display: flex;
+	flex-direction: column;
+	padding-left: 20%;
+	padding-top: 25%;
+}
+
+.homePage-title-container {
+	display: flex;
+	flex-direction: column;
+	justify-content: flex-start
+}
+
+.homePage-loginButton {
+	display: flex;
+	justify-content: flex-start;
+	cursor: pointer;
+	padding-top: $loginButton-height;
+}
+
+.homePage-loginButton-text {
+	align-items: center;
+	background-color: #4285f4;
+	color: white;
+	display: flex;
+	flex-direction: row;
+	height: $loginButton-height;
+	justify-content: center;
+	width: 300px;
+}
+
+.homePage-loginButton-icon-container {
+	align-items: center;
+	background-color: white;
+	display: flex;
+	flex-direction: row;
+	height: $loginButton-height;
+	justify-content: center;
+	width: $loginButton-height;
+}
+
+.homePage-loginButton-icon {
+	height: 25px;
+	width: 25px;
+}
+
+.homePage-image {
+  background-image: url(images/homepage_image.png);
+  background-repeat: no-repeat;
+  background-size: $background-image-size;
+  height: $background-image-size;
+  position: absolute;
+  right: 0px;
+  top: 0px;
+  width: $background-image-size;
+}

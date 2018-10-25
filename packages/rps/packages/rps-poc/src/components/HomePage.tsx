@@ -1,44 +1,28 @@
 import React from 'react';
 import { StyleSheet, css } from 'aphrodite';
 
-import { Button } from 'reactstrap';
-
-import { Move } from '../core';
-import MoveIcon from './MoveIcon';
-
 interface IProps {
   login: () => any;
 }
 
 const HomePage: React.SFC<IProps> = ({ login }) => {
   return (
-    <div className="container centered-container">
-      <div className="w-100">
-        <div className="mb-5 text-center">
-          <h1 className={css(styles.title)}>Rock, Paper, Scissors</h1>
-          <p>
-            <em>A State Channel Game</em>
-          </p>
-        </div>
-        <div className="row text-center mb-5">
-          <div className="col-sm-4">
-            <MoveIcon move={Move.Rock} />
+    <div>
+      <div className="homePage">
+        <div className="homePage-container">
+          <div className="homePage-title-container">
+            <h1 className={css(styles.title)}>Welcome to Rock, Paper Scissors</h1>
+            <h1 className={css(styles.title)}>State Channel Game</h1>
           </div>
-          <div className="col-sm-4">
-            <MoveIcon move={Move.Paper} />
-          </div>
-          <div className="col-sm-4">
-            <MoveIcon move={Move.Scissors} />
-          </div>
-        </div>
-        <div className="row mb-5">
-          <div className="col-sm-12">
-            <Button block={true} color="primary" onClick={login}>
-              Login
-            </Button>
+          <div className="homePage-loginButton" onClick={login}>
+            <div className="homePage-loginButton-icon-container">
+              <img className="homePage-loginButton-icon" src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Google_%22G%22_Logo.svg/32px-Google_%22G%22_Logo.svg.png" />
+            </div>
+            <div className="homePage-loginButton-text">Sign in with Google</div>
           </div>
         </div>
       </div>
+      <div className="homePage-image"/>
     </div>
   );
 };
@@ -58,6 +42,7 @@ const styles = StyleSheet.create({
 
   title: {
     marginBottom: 0,
+    color: 'white',
   },
 
   centeredGroup: {
