@@ -2,13 +2,10 @@ import React from "react";
 
 import { Button, Navbar } from "reactstrap";
 import { State } from "fmg-core";
-import { LoginState } from "src/redux/login/reducer";
-import { RulesState } from "src/redux/global/state";
 import { RulesModal } from "./RulesModal";
 
 interface Props {
-  login: LoginState;
-  rules: RulesState;
+  showRules: boolean;
   logoutRequest: () => void;
   rulesRequest: () => void;
 }
@@ -26,7 +23,7 @@ export default class NavigationBar extends React.PureComponent<Props, State> {
         <Button color="link" className="navbar-button ml-auto" onClick={this.props.logoutRequest}>
           Sign Out
         </Button>
-        <RulesModal visible={this.props.rules.visible} rulesRequest={this.props.rulesRequest}/>
+        <RulesModal visible={this.props.showRules} rulesRequest={this.props.rulesRequest}/>
       </Navbar>
     );
   }

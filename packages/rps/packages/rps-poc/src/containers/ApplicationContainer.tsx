@@ -14,7 +14,9 @@ function Application(props: ApplicationProps) {
   switch (props.gameState.name) {
     // lobby is special as we need access to the list of open challenges
     case gameStates.StateName.Lobby:
-      return <LobbyContainer />;
+      return (
+        <LobbyContainer />
+      );
     default:
       return <GameContainer />;
   }

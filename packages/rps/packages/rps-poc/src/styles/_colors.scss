@@ -9,3 +9,7 @@ $rps-wallet-grey: #595959;
 
 $navbar-color: $rps-dark-blue;
 $navbar-user-color: $rps-red; 
+
+// overriding bootstrap variables here will change the colors throughout reactstrap
+// take a look at node_modules/bootstrap/sass/_variables.scss for variable to override
+$body-bg: $rps-background;
