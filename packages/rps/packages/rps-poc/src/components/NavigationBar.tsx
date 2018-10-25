@@ -8,6 +8,12 @@ interface Props {
   showRules: boolean;
   logoutRequest: () => void;
   rulesRequest: () => void;
+  loginDisplayName: string;
+}
+
+function getInitials(loginDisplayName: string): string {
+  const userDisplayName = loginDisplayName.split(" ");
+  return userDisplayName.map(name => name.charAt(0)).join("");
 }
 
 export default class NavigationBar extends React.PureComponent<Props, State> {
@@ -18,7 +24,7 @@ export default class NavigationBar extends React.PureComponent<Props, State> {
           Rules
         </Button>
         <div className="circle">
-          <div className="navbar-user">TC</div>
+          <div className="navbar-user">{getInitials(this.props.loginDisplayName)}</div>
         </div>
         <Button color="link" className="navbar-button ml-auto" onClick={this.props.logoutRequest}>
           Sign Out
