@@ -1,3 +1,5 @@
+@import "./styles/_colors";
+
 @import "~bootstrap/scss/bootstrap";
 
 @import "./styles/home_page";
@@ -5,6 +7,7 @@
 @import "./styles/rules";
 @import "./styles/wallet/funding-welcome";
 @import "./styles/_fonts";
+
 
 html, body, #root {
   height: 100%;
@@ -17,6 +20,7 @@ html, body, #root {
 .centered-container {
   display: flex;
   align-items: center;
+  margin-top: 40px;
 }
 
 .fa-hand-scissors, .fa-hand-rock, .fa-hand-paper {
