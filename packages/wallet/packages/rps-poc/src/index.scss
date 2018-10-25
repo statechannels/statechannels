@@ -1,4 +1,5 @@
 @import "~bootstrap/scss/bootstrap";
+@import "./styles/home_page";
 
 html, body, #root {
   height: 100%;
@@ -16,4 +17,3 @@ html, body, #root {
 .fa-hand-scissors, .fa-hand-rock, .fa-hand-paper {
   color: orange;
 }
-

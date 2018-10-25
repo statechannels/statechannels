@@ -45,7 +45,7 @@
 2. Deploy the contracts to the network:
     ```
     # deploy smart contracts to a network
-    yarn truffle:migrate --rps:deploymentNetwork=<named network in truffle.ts>
+    yarn truffle:migrate --rps:deploymentNetwork=<named network in truffle.js>
     ``` 
     
 #### To run application tests in watch mode:
