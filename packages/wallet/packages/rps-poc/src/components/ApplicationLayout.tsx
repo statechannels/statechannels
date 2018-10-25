@@ -1,5 +1,5 @@
 import React from 'react';
-import NavigationBarContainer from "src/containers/NavigationBarContainer";
+import NavigationBarContainer from "../containers/NavigationBarContainer";
 
 export const ApplicationLayout = (props) => {
   return (
