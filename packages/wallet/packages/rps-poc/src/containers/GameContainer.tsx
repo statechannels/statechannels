@@ -42,17 +42,12 @@ interface GameProps {
   withdraw:()=>void;
 }
 
-class GameContainer extends React.PureComponent<GameProps, {}> {
-    render() {
-      const props = this.props;
-    if (props.showWallet) {
-      return <WalletController />;
-    }
-    else if (props.showWalletHeader) {
-      return <WalletHeader>{RenderGame(props)}</WalletHeader>;
-    } else {
-      return RenderGame(props);
-    }
+function GameContainer(props: GameProps) {
+
+ if (props.showWalletHeader){
+    return <WalletHeader>{RenderGame(props)}</WalletHeader>;
+  }else{
+    return <WalletController>{RenderGame(props)} </WalletController>;
   }
 
 }

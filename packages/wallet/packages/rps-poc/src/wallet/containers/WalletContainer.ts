@@ -8,6 +8,7 @@ const mapStateToProps = (state: SiteState) => {
   return {
     walletState: state.wallet.walletState,
     challengeState: state.wallet.challenge,
+    showWallet: state.wallet.display.showWallet,
   };
 };
 

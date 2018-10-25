@@ -1,7 +1,10 @@
 @import "~bootstrap/scss/bootstrap";
+
 @import "./styles/home_page";
 @import "./styles/lobby";
 @import "./styles/rules";
+@import "./styles/wallet/funding-welcome";
+@import "./styles/_fonts";
 
 html, body, #root {
   height: 100%;
