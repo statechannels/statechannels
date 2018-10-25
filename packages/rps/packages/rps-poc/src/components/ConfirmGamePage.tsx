@@ -4,7 +4,7 @@ import { Button } from 'reactstrap';
 
 import FooterBar from './FooterBar';
 import BN from 'bn.js';
-import ApplicationContainer from 'src/containers/ApplicationContainer';
+import { ApplicationLayout } from './ApplicationLayout';
 
 interface Props {
   confirmGame: () => void;
@@ -18,7 +18,7 @@ export default class ConfirmGamePage extends React.PureComponent<Props> {
     // TODO: Cancelling and a better display 
     const { confirmGame, cancelGame } = this.props;
     return (
-      <ApplicationContainer>
+      <ApplicationLayout>
         <div className="container centered-container">
           <h2 className="w-100">
             Please confirm the game.
@@ -32,7 +32,7 @@ export default class ConfirmGamePage extends React.PureComponent<Props> {
         </Button>
           <FooterBar>Waiting ...</FooterBar>
         </div>
-      </ApplicationContainer>
+      </ApplicationLayout>
     );
   }
 }
