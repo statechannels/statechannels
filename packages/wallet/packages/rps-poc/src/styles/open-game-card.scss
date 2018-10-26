@@ -1,0 +1,66 @@
+@import "./_colors";
+@import "./_fonts";
+
+.ogc-container {
+  width: 230px;
+  height: 241px;
+  border-radius: 10px;
+  border: solid 1px $rps-ogc-off-white;
+  background-color: $rps-white;
+}
+
+.ogc-header {
+  display: flex;
+  justify-content: center;
+}
+
+.ogc-card-title, .ogc-opponent-name, .ogc-vs {
+  font-family: $rps-font-family;
+  font-size: 25px;
+  font-weight: bold;
+}
+
+.ogc-vs {
+  @extend .ogc-card-title;
+  color: $rps-red;
+  margin-right: 10px;
+}
+
+.ogc-join {
+  width: 190px;
+  height: 36px;
+  border-radius: 40px;
+  background-color: $rps-red;
+  border-color: $rps-red;
+
+  font-family: $rps-font-family;
+  font-size: 18px;
+  font-weight: bold;
+  color: $rps-white;
+}
+
+.ogc-stakes {
+  display: flex;
+  justify-content: space-evenly;
+}
+
+.ogc-buyin, .ogc-wager {
+  display: flex;
+  flex-direction: column;
+}
+
+.ogc-stake-header {
+  font-family: $rps-font-family;
+  font-size: 12px;
+  color: $rps-ogc-grey;
+}
+
+.ogc-stake-amount {
+  font-family: $rps-font-family;
+  font-size: 18px;
+}
+
+.ogc-stake-currency {
+  font-family: $rps-font-family;
+  font-size: 10px;
+}

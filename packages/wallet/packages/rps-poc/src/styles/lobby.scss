@@ -1,0 +1,42 @@
+@import "./fonts";
+@import "./colors";
+
+.lobby-header {
+  text-align: center;
+}
+
+.lobby-header-title {
+  display: inline;
+  font-size: 50px;
+  font-family: $rps-font-family;
+  font-weight: bold;
+  font-style: normal;
+  font-stretch: normal;
+  line-height: normal;
+  letter-spacing: normal;
+}
+
+.lobby-new-game {
+  float: right;
+  font-family: $rps-font-family;
+  font-size: 18px;
+  font-weight: bold;
+  font-style: normal;
+  font-stretch: normal;
+  line-height: 1.64;
+  letter-spacing: normal;
+  color: $rps-red;
+
+  width: 188px;
+  height: 40px;
+  border-radius: 40px;
+  border: solid 1px $rps-lobby-border-off-white;
+  background-color: $white;
+}
+
+.lobby-ogc-container {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
