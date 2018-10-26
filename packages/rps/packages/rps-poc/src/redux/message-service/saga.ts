@@ -58,11 +58,13 @@ export function* sendMessagesSaga() {
     yield take(channel);
 
     const messageState: MessageState = yield select(getMessageState);
+    const gameState: gameStates.GameState = yield select(getGameState);
     if (messageState.opponentOutbox) {
       const queue = Queue.GAME_ENGINE;
       const data = encode(messageState.opponentOutbox.position);
       const signature = yield signMessage(data);
-      const message = { data, queue, signature };
+      const userName = gameState.myName;
+      const message = { data, queue, signature, userName };
       const { opponentAddress } = messageState.opponentOutbox;
       yield put(walletActions.messageSent(data, signature));
       // tslint:disable-next-line:no-console
@@ -73,7 +75,6 @@ export function* sendMessagesSaga() {
       yield put(gameActions.messageSent());
     }
     if (messageState.walletOutbox) {
-      const gameState: gameStates.GameState = yield select(getGameState);
       if (
         gameState.name !== gameStates.StateName.Lobby &&
         gameState.name !== gameStates.StateName.WaitingRoom &&
@@ -118,7 +119,7 @@ function* receiveFromFirebaseSaga(address) {
     console.log('[MESSAGE SAGA] message received');
     const key = message.snapshot.key;
 
-    const { data, queue } = message.value;
+    const { data, queue, userName } = message.value;
 
     if (queue === Queue.GAME_ENGINE) {
       const { signature } = message.value;
@@ -129,8 +130,7 @@ function* receiveFromFirebaseSaga(address) {
       yield put(walletActions.messageReceived(data, signature));
       const position = decode(data);
       if (position.name === positions.PRE_FUND_SETUP_A) {
-        // todo: how do we get actual names in here - will need to look up from firebase
-        yield put(gameActions.initialPositionReceived(position,'Opponent'));
+        yield put(gameActions.initialPositionReceived(position, userName? userName:'Opponent'));
       } else {
         yield put(gameActions.positionReceived(position));
       }
