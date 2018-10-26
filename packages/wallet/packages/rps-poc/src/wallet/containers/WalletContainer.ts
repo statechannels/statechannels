@@ -18,6 +18,7 @@ const mapDispatchToProps = {
   tryFundingAgain: playerActions.tryFundingAgain,
   approveFunding: playerActions.approveFunding,
   declineFunding: playerActions.declineFunding,
+  approveWithdrawal: playerActions.approveWithdrawal,
   closeWallet: playerActions.closeWallet,
   selectWithdrawalAddress: playerActions.selectWithdrawalAddress,
   respondWithMove: challengeActions.respondWithMove,

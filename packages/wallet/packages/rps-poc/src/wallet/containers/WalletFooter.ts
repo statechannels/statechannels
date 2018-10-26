@@ -1,6 +1,6 @@
 import { SiteState } from '../../redux/reducer';
 import { connect } from 'react-redux';
-import ChallengeHeader from '../components/ChallengeHeader';
+import ChallengeFooter from '../components/ChallengeFooter';
 
 const mapStateToProps = (state: SiteState) => {
   return {
@@ -10,4 +10,4 @@ const mapStateToProps = (state: SiteState) => {
 
 export default connect(
   mapStateToProps,
-)(ChallengeHeader);
+)(ChallengeFooter);

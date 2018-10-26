@@ -7,7 +7,7 @@ import * as gameActions from '../redux/game/actions';
 
 import { WalletController } from '../wallet';
 import * as walletActions from '../wallet/redux/actions/external';
-import WalletHeader from '../wallet/containers/WalletHeader';
+import WalletHeader from '../wallet/containers/WalletFooter';
 import CreatingOpenGamePage from '../components/CreatingOpenGamePage';
 import WaitingRoomPage from '../components/WaitingRoomPage';
 import ConfirmGamePage from '../components/ConfirmGamePage';

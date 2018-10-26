@@ -20,7 +20,7 @@ export type PlayerAState =
   | typeof FundingFailed
   | WaitForBToDeposit
   | typeof Funded
-  | typeof SelectWithdrawalAddress
+  |  CommonState.SelectWithdrawalAddress
   | typeof WaitForWithdrawal
   | typeof ChallengeRequested
   | typeof ChallengeResponse

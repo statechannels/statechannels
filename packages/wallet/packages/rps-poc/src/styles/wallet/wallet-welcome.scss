@@ -1,7 +1,7 @@
 @import "../_colors";
 @import "../_fonts";
 
-.wallet-title{
+.welcome-title{
     font-family: $rps-font-family;
     font-size: 30px;
     font-weight: bold;
@@ -11,22 +11,22 @@
     letter-spacing: normal;
 }
 
-.wallet-text{
+.welcome-text{
     font-family: $rps-font-family;
 }
-.wallet-button-container{
+.welcome-button-container{
     display: flex;
     align-items: center;
     justify-content: center;
 }
-.wallet-container{
+.welcome-container{
     padding:28px;
     display:flex;
     flex-direction: column;
     justify-content: center;
     height: 100%;
 }
-.wallet-button {
+.welcome-button {
     font-family: $rps-font-family;
     background-color: $rps-wallet-orange;
     border-color: $rps-wallet-orange;
@@ -36,7 +36,7 @@
     margin: 0 auto;
 }
 
-.wallet-cancel-button {
+.welcome-cancel-button {
     font-family: $rps-font-family;
     background-color: $rps-wallet-muted;
     border-color: $rps-wallet-muted;
@@ -45,8 +45,10 @@
     margin: auto 0 0 0;
     
 }
-
-.wallet-icon {
+.welcome-spacer{
+    margin: auto 0 0 0;
+}
+.welcome-icon {
     height:50px;
     width:50px;
     margin: auto 0 20px 0;
