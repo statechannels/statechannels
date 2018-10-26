@@ -1,0 +1,60 @@
+@import "../_colors";
+@import "../_fonts";
+
+.message-title{
+    font-family: $rps-font-family;
+    font-size: 30px;
+    font-weight: bold;
+    font-style: normal;
+    font-stretch: normal;
+    line-height: 1.64;
+    letter-spacing: normal;
+}
+
+.message-text{
+    font-family: $rps-font-family;
+    margin-top:200px;
+}
+
+.message-container{
+    padding:28px;
+    height: 100%;
+}
+.message-button {
+    font-family: $rps-font-family;
+    background-color: $rps-wallet-orange;
+    border-color: $rps-wallet-orange;
+    color:#fff;
+    width:90%;
+    border-radius: 10px;
+    margin: 0 auto;
+}
+
+
+.message-icon {
+    height:50px;
+    width:50px;
+    margin: auto 0 20px 0;
+}
+
+.message-user {
+    font-size: 15px;
+    color: $rps-white;
+}
+
+.message-header{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    margin:25px;
+}
+
+.message-circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 20px;
+    background: $rps-wallet-light-grey;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}

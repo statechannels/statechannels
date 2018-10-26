@@ -27,6 +27,7 @@ export type PlayerBState =
   | ReadyToDeposit
   | typeof Funded
   | CommonState.SelectWithdrawalAddress
+  | CommonState.ConfirmWithdrawal
   | typeof WaitForWithdrawal
   | typeof ChallengeRequested
   | typeof ChallengeResponse
