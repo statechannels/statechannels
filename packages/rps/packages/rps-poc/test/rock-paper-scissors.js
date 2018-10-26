@@ -2,6 +2,9 @@ import BN from 'bn.js';
 import { assertRevert } from 'fmg-core';
 import { scenarios, encode } from '../src/core';
 
+import hexToBN from '../src/utils/hexToBN';
+import bnToHex from '../src/utils/bnToHex';
+
 const RPS = artifacts.require("./RockPaperScissorsGame.sol");
 
 contract('RockPaperScissors', (accounts) => {
@@ -57,7 +60,7 @@ contract('RockPaperScissors', (accounts) => {
   });
 
   it("disallows transitions where the stake changes", async () => {
-    reveal.roundBuyIn = reveal.roundBuyIn.add(new BN(1));
+    reveal.roundBuyIn = bnToHex(hexToBN(reveal.roundBuyIn).add(new BN(1)));
     assertRevert(validTransition(reveal, resting));
   });
 });

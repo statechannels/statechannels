@@ -6,6 +6,7 @@ export const getWalletAddress = (storeObj:any) => storeObj.wallet.address;
 import { default as firebase, reduxSagaFirebase } from '../../gateways/firebase';
 
 import * as actions from './actions';
+import bnToHex from '../../utils/bnToHex';
 
 import BN from 'bn.js';
 import { StateName, GameState } from '../game/state';
@@ -81,7 +82,7 @@ const openGameTransformer = (dict) => {
   }
   return Object.keys(dict.value).map(key => {
     // Convert the stake from a string to a BN
-    dict.value[key].stake = new BN(dict.value[key].stake);
+    dict.value[key].stake = bnToHex(new BN(dict.value[key].stake));
     return dict.value[key];
   });
 };

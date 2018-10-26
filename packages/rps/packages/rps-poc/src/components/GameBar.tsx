@@ -1,5 +1,7 @@
 import React from "react";
-import BN from 'bn.js';
+
+import web3Utils from 'web3-utils';
+import hexToBN from '../utils/hexToBN';
 
 import { Navbar } from "reactstrap";
 import { State } from "fmg-core";
@@ -7,9 +9,9 @@ import { State } from "fmg-core";
 interface Props {
   myName: string;
   opponentName: string;
-  myBalance: BN;
-  opponentBalance: BN;
-  roundBuyIn: BN;
+  myBalance: string;
+  opponentBalance: string;
+  roundBuyIn: string;
 }
 
 export default class GameBar extends React.PureComponent<Props, State> {
@@ -36,15 +38,10 @@ export default class GameBar extends React.PureComponent<Props, State> {
   )
 
   render() {
-    const { myName, opponentName } = this.props;
+    const { myName, opponentName, roundBuyIn, myBalance, opponentBalance} = this.props;
 
-    // todo: fix this - the balances passed in seem to be strings and not BNs ....
-    const roundBuyIn = new BN(1);
-    const myBalance = new BN(5);
-    const opponentBalance = new BN(5);
-
-    const myGameCount = Math.round(myBalance.div(roundBuyIn).toNumber());
-    const opponentGameCount = Math.round(opponentBalance.div(roundBuyIn).toNumber());
+    const myGameCount = Math.round(hexToBN(myBalance).div(hexToBN(roundBuyIn)).toNumber());
+    const opponentGameCount = Math.round(hexToBN(opponentBalance).div(hexToBN(roundBuyIn)).toNumber());
 
     return (
       <Navbar className='game-bar'>
@@ -54,7 +51,7 @@ export default class GameBar extends React.PureComponent<Props, State> {
           </div>
           <div className="col-auto my-balance">
             <div className="text-center">
-              {myBalance.toNumber().toFixed(3)}
+              {web3Utils.fromWei(myBalance, 'ether')}
             </div>
             <div className="eth text-center">
               ETH
@@ -68,7 +65,7 @@ export default class GameBar extends React.PureComponent<Props, State> {
           </div>
           <div className="col-auto opponent-balance">
             <div className="text-center">
-              {opponentBalance.toNumber().toFixed(3)}
+              {web3Utils.fromWei(opponentBalance, 'ether')}
             </div>
             <div className="eth text-center">
               ETH
