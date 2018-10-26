@@ -1,5 +1,4 @@
 @import "./_colors";
-@import "./_fonts";
 
 .ogc-container {
   width: 230px;
@@ -7,6 +6,11 @@
   border-radius: 10px;
   border: solid 1px $rps-ogc-off-white;
   background-color: $rps-white;
+  
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  align-items: center;
 }
 
 .ogc-header {
@@ -15,7 +19,6 @@
 }
 
 .ogc-card-title, .ogc-opponent-name, .ogc-vs {
-  font-family: $rps-font-family;
   font-size: 25px;
   font-weight: bold;
 }
@@ -26,6 +29,37 @@
   margin-right: 10px;
 }
 
+.ogc-stakes {
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+}
+
+.ogc-buyin, .ogc-wager {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.ogc-stake-header {
+  font-size: 12px;
+  color: $rps-ogc-grey;
+}
+
+.ogc-stake-amount {
+  font-size: 18px;
+}
+
+.ogc-stake-currency {
+  font-size: 10px;
+}
+
+.ogc-divider {
+  width: 1px;
+  height: 14px;
+  stroke: $rps-ogc-divider-grey;
+}
+
 .ogc-join {
   width: 190px;
   height: 36px;
@@ -33,34 +67,7 @@
   background-color: $rps-red;
   border-color: $rps-red;
 
-  font-family: $rps-font-family;
   font-size: 18px;
   font-weight: bold;
   color: $rps-white;
-}
-
-.ogc-stakes {
-  display: flex;
-  justify-content: space-evenly;
-}
-
-.ogc-buyin, .ogc-wager {
-  display: flex;
-  flex-direction: column;
-}
-
-.ogc-stake-header {
-  font-family: $rps-font-family;
-  font-size: 12px;
-  color: $rps-ogc-grey;
-}
-
-.ogc-stake-amount {
-  font-family: $rps-font-family;
-  font-size: 18px;
-}
-
-.ogc-stake-currency {
-  font-family: $rps-font-family;
-  font-size: 10px;
 }

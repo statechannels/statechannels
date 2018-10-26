@@ -35,25 +35,26 @@ export class OpenGameEntry extends React.PureComponent<Props, State> {
     // TODO: should not hardcode the number of rounds
     const buyin = new BN(5000000000000000);
     return (
-      <div className="ogc-container card text-center">
-        <div className="card-body">
-          <div className="ogc-header">
-            <div className="ogc-vs">vs</div> <div className="ogc-opponent-name">{openGame.name}</div>
-          </div>
-          <div className="ogc-stakes">
-            <div className="ogc-buyin">
-              <div className="ogc-stake-header">Buy In:</div>
-              <div className="ogc-stake-amount">{web3Utils.fromWei(buyin.toString(), 'ether')}</div>
-              <div className="ogc-stake-currency">ETH</div>
-            </div>
-            <div className="ogc-wager">
-              <div className="ogc-stake-header">Wager:</div>
-              <div className="ogc-stake-amount">{web3Utils.fromWei(stake.toString(), 'ether')}</div>
-              <div className="ogc-stake-currency">ETH</div>
-            </div>
-          </div>
-          <Button className="ogc-join" onClick={joinThisGame}>Join</Button>
+      <div className="ogc-container m-1">
+        <div className="ogc-header">
+          <div className="ogc-vs">vs</div> <div className="ogc-opponent-name">{openGame.name}</div>
         </div>
+        <div className="ogc-stakes">
+          <div className="ogc-buyin pr-3">
+            <div className="ogc-stake-header">Buy In:</div>
+            <div className="ogc-stake-amount">{web3Utils.fromWei(buyin.toString(), 'ether')}</div>
+            <div className="ogc-stake-currency">ETH</div>
+          </div>
+          <svg className="ogc-divider">
+            <line x1="0" y1="0" x2="0" y2="14"/>
+          </svg>
+          <div className="ogc-wager pl-3">
+            <div className="ogc-stake-header">Wager:</div>
+            <div className="ogc-stake-amount">{web3Utils.fromWei(stake.toString(), 'ether')}</div>
+            <div className="ogc-stake-currency">ETH</div>
+          </div>
+        </div>
+        <Button className="ogc-join" onClick={joinThisGame}>Join</Button>
       </div>
 
     );
