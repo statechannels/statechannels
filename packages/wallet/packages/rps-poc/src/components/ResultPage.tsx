@@ -4,7 +4,7 @@ import { Button } from 'reactstrap';
 
 import { Move, Result } from '../core';
 import FooterBar from './FooterBar';
-import MoveIcon from './MoveIcon';
+import { MoveBadge } from './MoveBadge';
 import { GameLayout } from './GameLayout';
 
 interface Props {
@@ -45,7 +45,7 @@ export default class ResultPage extends React.PureComponent<Props> {
                 You chose <strong>{Move[yourMove]}</strong>
               </p>
               <div className="mb-5">
-                <MoveIcon move={yourMove} />
+                <MoveBadge move={yourMove} />
               </div>
             </div>
             <div className="col-sm-6">
@@ -53,7 +53,7 @@ export default class ResultPage extends React.PureComponent<Props> {
                 Your opponent chose <strong>{Move[theirMove]}</strong>
               </p>
               <div className="mb-5">
-                <MoveIcon move={theirMove} />
+                <MoveBadge move={theirMove} />
               </div>
             </div>
           </div>

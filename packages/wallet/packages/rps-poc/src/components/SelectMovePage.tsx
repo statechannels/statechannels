@@ -3,8 +3,10 @@ import React from 'react';
 import { Move } from '../core';
 
 import { Button } from 'reactstrap';
-import MoveIcon from './MoveIcon';
+import { MoveBadge } from './MoveBadge';
+
 import { GameLayout } from './GameLayout';
+
 
 interface Props {
   chooseMove: (move: Move) => void;
@@ -17,12 +19,7 @@ interface Props {
 export default class SelectMoveStep extends React.PureComponent<Props> {
   renderChooseButton(chooseMove: (move: Move) => void, move: Move, description: string) {
     return (
-      <Button onClick={() => chooseMove(move)} color="light" className="w-75 p-3">
-        <div className="mb-3">
-          <h1>{description}</h1>
-          <MoveIcon move={move} />
-        </div>
-      </Button>
+      <MoveBadge move={move} action={() => chooseMove(move)} />
     );
   }
 

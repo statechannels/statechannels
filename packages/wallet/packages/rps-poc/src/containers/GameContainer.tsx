@@ -39,14 +39,14 @@ interface GameProps {
   createOpenGame: (roundBuyIn: BN) => void;
   cancelOpenGame: () => void;
   resign: () => void;
-  withdraw:()=>void;
+  withdraw: () => void;
 }
 
 function GameContainer(props: GameProps) {
 
- if (props.showWalletHeader){
+  if (props.showWalletHeader) {
     return <WalletHeader>{RenderGame(props)}</WalletHeader>;
-  }else{
+  } else {
     return <WalletController>{RenderGame(props)} </WalletController>;
   }
 
@@ -85,19 +85,11 @@ function RenderGame(props: GameProps) {
         />
       );
 
-    case StateName.WaitForRestingA:
-      return (
-        <MoveSelectedPage
-          message="Waiting for resting"
-          yourMove={state.myMove}
-          createBlockchainChallenge={createBlockchainChallenge}
-        />
-      );
 
     case StateName.GameOver:
     // TODO: We probably want a seperate message for when your opponent resigns
     case StateName.OpponentResigned:
-      return <GameOverPage  withdraw={withdraw} />;
+      return <GameOverPage withdraw={withdraw} />;
     case StateName.WaitForPostFundSetup:
       return <FundingConfirmedPage message="Waiting for your opponent to acknowledge" />;
 
@@ -117,6 +109,19 @@ function RenderGame(props: GameProps) {
       return (
         <ResultPage
           message="Waiting for opponent to suggest a new game"
+          yourMove={state.myMove}
+          theirMove={state.theirMove}
+          result={state.result}
+          playAgain={playAgain}
+          resign={resign}
+        />
+      );
+
+
+    case StateName.WaitForRestingA:
+      return (
+        <ResultPage
+          message="Waiting for opponent to confirm"
           yourMove={state.myMove}
           theirMove={state.theirMove}
           result={state.result}
@@ -153,7 +158,7 @@ const mapDispatchToProps = {
   createOpenGame: gameActions.createOpenGame,
   cancelOpenGame: gameActions.cancelOpenGame,
   resign: gameActions.resign,
-  withdraw:gameActions.withdrawalRequest,
+  withdraw: gameActions.withdrawalRequest,
 };
 
 // why does it think that mapStateToProps can return undefined??
