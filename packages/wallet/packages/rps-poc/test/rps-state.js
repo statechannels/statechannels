@@ -1,5 +1,7 @@
 import { scenarios, encode } from '../src/core';
 
+import hexToBN from '../src/utils/hexToBN';
+
 const RpsStateContract = artifacts.require("./RockPaperScissorsState.sol");
 
 contract('RockPaperScissorsState', (accounts) => {
@@ -24,17 +26,17 @@ contract('RockPaperScissorsState', (accounts) => {
 
   it("can parse aBal", async () => {
     const val = await stateContract.aResolution(encode(reveal));
-    assert(val.eq(reveal.balances[0]));
+    assert(val.eq(hexToBN(reveal.balances[0])));
   });
 
   it("can parse bBal", async () => {
     const val = await stateContract.bResolution(encode(reveal));
-    assert(val.eq(reveal.balances[1]));
+    assert(val.eq(hexToBN(reveal.balances[1])));
   });
 
   it("can parse stake", async () => {
     const val = await stateContract.stake(encode(reveal));
-    assert(val.eq(reveal.roundBuyIn));
+    assert(val.eq(hexToBN(reveal.roundBuyIn)));
   });
 
   it("can parse preCommit", async () => {

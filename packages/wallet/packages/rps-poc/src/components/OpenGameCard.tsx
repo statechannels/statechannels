@@ -5,6 +5,8 @@ import { Button } from "reactstrap";
 import BN from 'bn.js';
 import web3Utils from 'web3-utils';
 import { OpenGame } from "src/redux/open-games/state";
+import hexToBN from "../utils/hexToBN";
+import bnToHex from "../utils/bnToHex";
 
 interface Props {
   openGame: OpenGame;
@@ -12,7 +14,7 @@ interface Props {
     opponentName: string,
     opponentAddress: string,
     channelNonce: number,
-    roundBuyIn: BN,
+    roundBuyIn: string,
   ) => void;
 }
 
@@ -26,8 +28,7 @@ export class OpenGameEntry extends React.PureComponent<Props, State> {
       openGame.stake);
 
     const stake = openGame.stake;
-    // TODO: should not hardcode the number of rounds
-    const buyin = new BN(5000000000000000);
+    const buyin = bnToHex(hexToBN(openGame.stake).mul(new BN(5)));
     return (
       <div className="ogc-container m-1">
         <div className="ogc-header">
@@ -36,7 +37,7 @@ export class OpenGameEntry extends React.PureComponent<Props, State> {
         <div className="ogc-stakes">
           <div className="ogc-buyin pr-3">
             <div className="ogc-stake-header">Buy In:</div>
-            <div className="ogc-stake-amount">{web3Utils.fromWei(buyin.toString(), 'ether')}</div>
+            <div className="ogc-stake-amount">{web3Utils.fromWei(buyin, 'ether')}</div>
             <div className="ogc-stake-currency">ETH</div>
           </div>
           <svg className="ogc-divider">
@@ -44,7 +45,7 @@ export class OpenGameEntry extends React.PureComponent<Props, State> {
           </svg>
           <div className="ogc-wager pl-3">
             <div className="ogc-stake-header">Wager:</div>
-            <div className="ogc-stake-amount">{web3Utils.fromWei(stake.toString(), 'ether')}</div>
+            <div className="ogc-stake-amount">{web3Utils.fromWei(stake, 'ether')}</div>
             <div className="ogc-stake-currency">ETH</div>
           </div>
         </div>

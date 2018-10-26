@@ -1,13 +1,8 @@
-import BN from 'bn.js';
 import { Channel, State, toHex32, padBytes32 } from 'fmg-core';
 import { soliditySha3 } from 'web3-utils';
 import * as positions from './positions';
-import { toPaddedHexString } from 'fmg-core/lib/src/utils';
 import { Move } from './moves';
-
-function packBN(num:BN){
-  return toPaddedHexString(num, 64);
-}
+import hexToBN from '../utils/hexToBN';
 
 export default function encode(position: positions.Position) {
   const { libraryAddress, channelNonce, participants, turnNum, balances } = position;
@@ -20,7 +15,7 @@ export default function encode(position: positions.Position) {
     stateType: stateType(position),
     turnNum,
     stateCount,
-    resolution: balances,
+    resolution: balances.map(hexToBN),
   });
 
   return state.toHex() + encodeGameAttributes(position);
@@ -64,15 +59,15 @@ export enum GamePositionType {
   Reveal = 3,
 }
 
-export function packRestingAttributes(stake: BN) {
-  return toHex32(GamePositionType.Resting).substr(2) + packBN(stake);
+export function packRestingAttributes(stake: string) {
+  return toHex32(GamePositionType.Resting).substr(2) + stake.substr(2);
 }
 
 export function packProposeAttributes(position: positions.Propose) {
   const { roundBuyIn, preCommit } = position;
   return (
     toHex32(GamePositionType.Propose).substr(2) +
-    packBN(roundBuyIn) +
+    padBytes32(roundBuyIn).substr(2) +
     padBytes32(preCommit).substr(2)
   );
 }
@@ -81,7 +76,7 @@ export function packAcceptAttributes(position: positions.Accept) {
   const { roundBuyIn, preCommit, bsMove } = position;
   return (
     toHex32(GamePositionType.Accept).substr(2) +
-    packBN(roundBuyIn) +
+    padBytes32(roundBuyIn).substr(2) +
     padBytes32(preCommit).substr(2) +
     toHex32(bsMove).substr(2)
   );
@@ -92,7 +87,7 @@ export function packRevealAttributes(position: positions.Reveal) {
 
   return (
     toHex32(GamePositionType.Reveal).substr(2) +
-    packBN(roundBuyIn)+
+    padBytes32(roundBuyIn).substr(2) +
     padBytes32('0x0').substr(2) + // don't need the preCommit
     toHex32(bsMove).substr(2) +
     toHex32(asMove).substr(2) +

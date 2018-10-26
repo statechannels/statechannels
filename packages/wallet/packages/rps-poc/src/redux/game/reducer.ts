@@ -9,6 +9,8 @@ import { MessageState, sendMessage } from '../message-service/state';
 import { LoginSuccess, LOGIN_SUCCESS } from '../login/actions';
 import { InitializationSuccess, INITIALIZATION_SUCCESS } from '../../wallet/redux/actions/external';
 
+import hexToBN from '../../utils/hexToBN';
+import bnToHex from '../../utils/bnToHex';
 
 export interface JointState {
   gameState: states.GameState;
@@ -110,7 +112,7 @@ function lobbyReducer(gameState: states.Lobby, messageState: MessageState, actio
     case actions.JOIN_OPEN_GAME:
       const { roundBuyIn, opponentAddress } = action;
       const { myName,myAddress, libraryAddress,} = gameState;
-      const balances: [BN, BN] = [(new BN(roundBuyIn)).muln(5), (new BN(roundBuyIn)).muln(5)];
+      const balances = [hexToBN(roundBuyIn).muln(5), hexToBN(roundBuyIn).muln(5)].map(bnToHex) as [string, string];
       const participants: [string, string] = [myAddress, opponentAddress];
       const turnNum = 0;
       const stateCount = 1;
@@ -320,8 +322,12 @@ function pickMoveReducer(gameState: states.PickMove, messageState: MessageState,
   return { gameState, messageState };
 }
 
-function insufficientFunds(balances: [BN, BN], roundBuyIn: BN): boolean {
-  return balances[0].lt(roundBuyIn) || balances[1].lt(roundBuyIn);
+function insufficientFunds(balances: [string, string], roundBuyIn: string): boolean {
+  const aBal = hexToBN(balances[0]);
+  const bBal = hexToBN(balances[1]);
+  const buyIn = hexToBN(roundBuyIn);
+
+  return aBal.lt(buyIn) || bBal.lt(buyIn);
 }
 
 function waitForOpponentToPickMoveAReducer(gameState: states.WaitForOpponentToPickMoveA, messageState: MessageState, action: actions.GameAction): JointState {
@@ -338,7 +344,9 @@ function waitForOpponentToPickMoveAReducer(gameState: states.WaitForOpponentToPi
   const { bsMove: theirMove, balances, turnNum } = theirPosition;
   const result = calculateResult(myMove, theirMove);
   const absoluteResult = calculateAbsoluteResult(myMove, theirMove);
-  const newBalances = balancesAfterResult(absoluteResult, roundBuyIn, balances);
+  const bnRoundBuyIn = hexToBN(roundBuyIn);
+  const bnBalances = balances.map(hexToBN) as [BN, BN];
+  const newBalances = balancesAfterResult(absoluteResult, bnRoundBuyIn, bnBalances).map(bnToHex) as [string, string];
 
   const newProperties = { myMove, theirMove, result, balances: newBalances, turnNum: turnNum + 1 };
 
@@ -367,7 +375,9 @@ function waitForOpponentToPickMoveBReducer(gameState: states.WaitForOpponentToPi
 
   const preCommit = position.preCommit;
   const { balances, turnNum, roundBuyIn } = gameState;
-  const newBalances: [BN, BN] = [balances[0].sub(roundBuyIn), balances[1].add(roundBuyIn)];
+  const aBal = bnToHex(hexToBN(balances[0]).sub(hexToBN(roundBuyIn)));
+  const bBal = bnToHex(hexToBN(balances[1]).add(hexToBN(roundBuyIn)));
+  const newBalances = [aBal, bBal] as [string, string];
 
   const newGameState = states.waitForRevealB({ ...gameState, balances: newBalances, preCommit, turnNum: turnNum + 2 });
 

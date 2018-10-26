@@ -13,6 +13,8 @@ import * as gameStates from '../game/state';
 import { Channel, State } from 'fmg-core';
 import { getMessageState, getGameState } from '../store';
 
+import hexToBN from '../../utils/hexToBN';
+
 export enum Queue {
   WALLET = 'WALLET',
   GAME_ENGINE = 'GAME_ENGINE',
@@ -153,8 +155,8 @@ function* handleWalletMessage(type, state: gameStates.PlayingState) {
 
       const opponentAddress = participants[1 - myIndex];
       const myAddress = participants[myIndex];
-      const myBalance = balances[myIndex];
-      const opponentBalance = balances[1 - myIndex];
+      const myBalance = hexToBN(balances[myIndex]);
+      const opponentBalance = hexToBN(balances[1 - myIndex]);
 
       yield put(walletActions.fundingRequest(channelId, myAddress, opponentAddress, myBalance, opponentBalance, myIndex));
       yield take(walletActions.FUNDING_SUCCESS);
@@ -168,7 +170,7 @@ function* handleWalletMessage(type, state: gameStates.PlayingState) {
         channel,
         stateType: State.StateType.Conclude,
         turnNum,
-        resolution: balances,
+        resolution: balances.map(hexToBN),
         stateCount: 0,
       });
       yield put(walletActions.withdrawalRequest(channelState));

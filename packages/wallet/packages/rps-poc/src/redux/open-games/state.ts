@@ -1,9 +1,7 @@
-import BN from 'bn.js';
-
 export interface OpenGame {
   address: string;
   name: string;
-  stake: BN;
+  stake: string;
   isPublic: boolean;
   createdAt: number;
 }

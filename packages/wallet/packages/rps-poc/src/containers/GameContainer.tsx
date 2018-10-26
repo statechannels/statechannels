@@ -1,8 +1,6 @@
 import React from 'react';
 import { connect } from 'react-redux';
 
-import BN from 'bn.js';
-
 import { Move } from '../core';
 import { SiteState } from '../redux/reducer';
 import * as gameActions from '../redux/game/actions';
@@ -37,7 +35,7 @@ interface GameProps {
   createBlockchainChallenge: () => void;
   confirmGame: () => void;
   declineGame: () => void;
-  createOpenGame: (roundBuyIn: BN) => void;
+  createOpenGame: (roundBuyIn: string) => void;
   cancelOpenGame: () => void;
   resign: () => void;
   withdraw: () => void;

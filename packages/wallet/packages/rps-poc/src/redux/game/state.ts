@@ -1,4 +1,3 @@
-import BN from 'bn.js';
 import { Result, Move, Player } from '../../core';
 
 // States of the form *A are player A only
@@ -62,12 +61,12 @@ export interface WaitingRoom {
   myName: string;
   myAddress:string;
   libraryAddress:string;
-  roundBuyIn: BN;
+  roundBuyIn: string;
 }
 
 interface WaitingRoomParams {
   myName: string;
-  roundBuyIn: BN;
+  roundBuyIn: string;
   myAddress:string;
   libraryAddress:string;
   [x: string]: any;
@@ -85,9 +84,9 @@ interface TwoChannel {
 
 interface Base extends TwoChannel {
   turnNum: number;
-  balances: [BN, BN];
+  balances: [string, string];
   stateCount: number;
-  roundBuyIn: BN;
+  roundBuyIn: string;
   myName: string;
   opponentName: string;
 }
