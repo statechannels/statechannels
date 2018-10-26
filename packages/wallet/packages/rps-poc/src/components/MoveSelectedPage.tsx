@@ -3,6 +3,7 @@ import React from 'react';
 import { Move } from '../core';
 import MoveIcon from './MoveIcon';
 import Button from 'reactstrap/lib/Button';
+import { GameLayout } from './GameLayout';
 
 interface Props {
   message: string;
@@ -19,7 +20,7 @@ export default class MoveSelectedPage extends React.PureComponent<Props> {
     const { message, yourMove, createBlockchainChallenge } = this.props;
 
     return (
-      <div className="container centered-container">
+      <GameLayout>
         <div className="w-100 text-center mb-5">
           <h1 className="mb-5">Move chosen!</h1>
           <p className="lead">
@@ -32,7 +33,7 @@ export default class MoveSelectedPage extends React.PureComponent<Props> {
           <Button onClick={createBlockchainChallenge}>Challenge</Button>
           <p>{message}</p>
         </div>
-      </div>
+      </GameLayout>
     );
   }
 }

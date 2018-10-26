@@ -20,6 +20,8 @@ describe('GameContainer', () => {
 
     const initialState = {
       game: { gameState },
+      rules: { visible: true },
+      login: { user: { displayName: "Tom", }, },
       wallet: {
         display: {
           showWallet: false,

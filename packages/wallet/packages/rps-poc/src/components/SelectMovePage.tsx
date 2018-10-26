@@ -4,6 +4,7 @@ import { Move } from '../core';
 
 import { Button } from 'reactstrap';
 import MoveIcon from './MoveIcon';
+import { GameLayout } from './GameLayout';
 
 interface Props {
   chooseMove: (move: Move) => void;
@@ -30,7 +31,7 @@ export default class SelectMoveStep extends React.PureComponent<Props> {
     const renderChooseButton = this.renderChooseButton;
 
     return (
-      <div className="container centered-container">
+      <GameLayout>
         <div className="w-100 text-center mb-5">
           <h1 className="mb-5">
           {challengeExpirationDate && `Challenge detected, respond by ${new Date(challengeExpirationDate).toString()}` }
@@ -51,7 +52,7 @@ export default class SelectMoveStep extends React.PureComponent<Props> {
             </Button>
           </div>
         </div>
-      </div>
+      </GameLayout>
     );
   }
 }

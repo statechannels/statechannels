@@ -5,6 +5,7 @@ import { Button } from 'reactstrap';
 import { Move, Result } from '../core';
 import FooterBar from './FooterBar';
 import MoveIcon from './MoveIcon';
+import { GameLayout } from './GameLayout';
 
 interface Props {
   yourMove: Move;
@@ -35,7 +36,7 @@ export default class ResultPage extends React.PureComponent<Props> {
     const { yourMove, theirMove, message, playAgain, resign } = this.props;
 
     return (
-      <div className="container centered-container">
+      <GameLayout>
         <div className="w-100 text-center mb-5">
           <h1 className="mb-5">{this.renderResultText()}</h1>
           <div className="row">
@@ -66,7 +67,7 @@ export default class ResultPage extends React.PureComponent<Props> {
         </div>
 
         <FooterBar>{message}</FooterBar>
-      </div>
+      </GameLayout>
     );
   }
 }
