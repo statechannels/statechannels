@@ -8,13 +8,18 @@
 @import "./styles/home-page";
 @import "./styles/navbar";
 @import "./styles/rules";
-@import "./styles/wallet/funding-welcome";
+@import "./styles/wallet/wallet-welcome";
+@import "./styles/wallet/wallet-message";
+@import "./styles/wallet/challenge-issued";
+@import "./styles/wallet/withdraw-in-progress";
 @import "./styles/wallet/funding-in-progress";
+@import "./styles/wallet/challenge-footer";
 @import "./styles/_fonts";
 @import "./styles/lobby";
 @import "./styles/open-game-card";
 @import "./styles/game-bar";
 @import './styles/confirm-game';
+
 
 
 html, body, #root {

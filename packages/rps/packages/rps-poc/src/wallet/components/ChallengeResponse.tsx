@@ -2,6 +2,8 @@ import React from 'react';
 import Button from 'reactstrap/lib/Button';
 import { ChallengeResponse as ResponseOption, RespondWithMove, RespondWithAlternativeMove, Refute, Conclude } from '../domain/ChallengeResponse';
 import { Signature, ConclusionProof } from '../domain';
+import ethIcon from '../../images/ethereum_icon.svg';
+
 interface Props {
   responseOptions: ResponseOption[];
   expiryTime: number;
@@ -37,36 +39,32 @@ export default class ChallengeResponse extends React.PureComponent<Props> {
   render() {
     const { responseOptions, expiryTime } = this.props;
     const parsedExpiryDate = new Date(expiryTime * 1000).toLocaleDateString();
-    return (
-      <div>
-        <h1>A challenge has been detected!</h1>
-        <p>
-          A challenge has been detected! The game will automatically conclude by {parsedExpiryDate} if no action is taken.
-        </p>
-        <p>
-          You can take the following actions:
-                    </p>
-        <div>
+
+      return(
+          <div className="challenge-issued-text welcome-container">
+          <img src={ethIcon} className="challenge-issued-icon"/>
+          <div className="challenge-issued-title">A challenge has been issued</div>
+          <p>A challenge has been detected! You need to respond by {parsedExpiryDate} or the game will conclude.</p>
+           <p>You can:</p>
+          <div className="challenge-issued-button-container" > 
           {responseOptions.map(option => {
             if (option instanceof RespondWithMove) {
-              return <Button onClick={this.handleRespondWithMove} key={option.constructor.name} >Respond with Move</Button>;
+              return <Button className="challenge-issued-button"  onClick={this.handleRespondWithMove} key={option.constructor.name} >Respond with Move</Button>;
             }
             else if (option instanceof RespondWithAlternativeMove) {
-              return <Button onClick={() => { this.handleRespondWithAlternativeMove(option); }} key={option.constructor.name} >Respond with Alternative Move</Button>;
+              return <Button className="challenge-issued-button" onClick={() => { this.handleRespondWithAlternativeMove(option); }} key={option.constructor.name} >Respond with Alternative Move</Button>;
             }
             else if (option instanceof Refute) {
-              return <Button onClick={() => { this.handleRefute(option); }} key={option.constructor.name} >Refute</Button>;
+              return <Button className="challenge-issued-button"  onClick={() => { this.handleRefute(option); }} key={option.constructor.name} >Refute</Button>;
             }
             else if (option instanceof Conclude) {
-              return <Button onClick={() => { this.handleConclude(option); }} key={option.constructor.name} >Conclude</Button>;
+              return <Button className="challenge-issued-button"  onClick={() => { this.handleConclude(option); }} key={option.constructor.name} >Conclude</Button>;
             } else {
               return null;
             }
-
           })}
-        </div>
-      </div>
-    );
-
+          </div>
+      </div>);
+        
   }
 }

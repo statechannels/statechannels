@@ -1,0 +1,64 @@
+@import "../_colors";
+@import "../_fonts";
+
+.withdraw-transfer-container {
+    display: flex;
+    flex-direction: column;
+    height: 95%;
+    margin: 0 35px 35px 35px;
+    justify-content: center;
+}
+.withdraw-container{
+    height:60%;
+
+}
+.withdraw-title, {
+    font-size:40px;
+    font-weight:bold;
+}
+
+.withdraw-icon {
+    margin-bottom: 10px;
+}
+
+.withdraw-amount{
+    font-size: 14px;
+}
+
+.withdraw-off{
+    color:#a6a6a6;
+}
+.withdraw-circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 20px;
+    background: #a6a6a6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.withdraw-user {
+    font-size: 15px;
+    color: $rps-white;
+}
+
+.withdraw-header{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    margin:25px;
+}
+
+.eth_icon{
+    width:40px;
+    height:40px;
+}
+
+.exit-game-button{
+    display: flex;
+    background-color: $rps-wallet-orange;
+    border-color: $rps-wallet-orange;
+    color:#fff;
+    margin: 0 auto;
+}
