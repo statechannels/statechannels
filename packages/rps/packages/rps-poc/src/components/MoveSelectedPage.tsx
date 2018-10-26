@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { Move } from '../core';
-import MoveIcon from './MoveIcon';
+import { MoveBadge } from './MoveBadge';
 import Button from 'reactstrap/lib/Button';
 import { GameLayout } from './GameLayout';
 
@@ -28,7 +28,7 @@ export default class MoveSelectedPage extends React.PureComponent<Props> {
           </p>
 
           <div className="mb-5">
-            <MoveIcon move={yourMove} />`
+            <MoveBadge move={yourMove} />`
           </div>
           <Button onClick={createBlockchainChallenge}>Challenge</Button>
           <p>{message}</p>
