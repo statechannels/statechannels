@@ -1,7 +1,7 @@
 import BN from 'bn.js';
 import { Channel, State } from 'fmg-core';
 
-import  { SignableData } from '../../domain/ChannelWallet';
+import { SignableData } from '../../domain/ChannelWallet';
 import { PlayerIndex } from '../../wallet-engine/wallet-states';
 
 // FUNDING
@@ -194,13 +194,13 @@ export type ReceiveMessage = ReturnType<typeof receiveMessage>;
 // =========
 export const MESSAGE_SENT = 'WALLET.MESSAGING.MESSAGE_SENT';
 export const MESSAGE_RECEIVED = 'WALLET.MESSAGING.MESSAGE_RECEIVED';
-export const messageSent = (positionData: string, signature:string ) => ({
+export const messageSent = (positionData: string, signature: string) => ({
   type: MESSAGE_SENT as typeof MESSAGE_SENT,
   positionData,
   signature,
 });
 
-export const messageReceived = (positionData: string, signature:string ) => ({
+export const messageReceived = (positionData: string, signature: string) => ({
   type: MESSAGE_RECEIVED as typeof MESSAGE_RECEIVED,
   positionData,
   signature,

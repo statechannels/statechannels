@@ -5,12 +5,12 @@ import { ChallengeStatus, Signature, ConclusionProof } from '../domain';
 
 import * as playerA from '../wallet-engine/wallet-states/PlayerA';
 import * as playerB from '../wallet-engine/wallet-states/PlayerB';
-import { FundingFailed, WaitForApproval, SelectWithdrawalAddress, WaitForWithdrawal, ChallengeRequested, WaitForChallengeConcludeOrExpire } from '../wallet-engine/wallet-states';
+import { FundingFailed, WaitForApproval, SelectWithdrawalAddress, WaitForWithdrawal, ChallengeRequested, WaitForChallengeConcludeOrExpire, Funded, } from '../wallet-engine/wallet-states';
 
 import { WalletState } from '../redux/reducers/wallet-state';
 import { ChallengeState } from '../redux/reducers/challenge';
 
-import FundingInProgress from './FundingInProgress';
+import FundingInProgress, { BlockchainStatus } from './FundingInProgress';
 import FundingError from './FundingError';
 import WithdrawFunds from './WithdrawFunds';
 import ChallengeIssued from './ChallengeIssued';
@@ -24,6 +24,8 @@ interface Props {
   showWallet: boolean;
   walletState: WalletState;
   challengeState: ChallengeState;
+  loginDisplayName: string;
+  closeWallet: () => void;
   tryFundingAgain: () => void;
   approveFunding: () => void;
   declineFunding: () => void;
@@ -36,7 +38,7 @@ interface Props {
 
 export default class WalletController extends PureComponent<Props> {
   renderWallet() {
-    const { walletState, challengeState } = this.props;
+    const { walletState, challengeState, loginDisplayName, closeWallet } = this.props;
     if (walletState === null) {
       return <div />;
     }
@@ -58,12 +60,16 @@ export default class WalletController extends PureComponent<Props> {
 
     switch (walletState && walletState.constructor) {
       case FundingFailed:
-        return (
-          <FundingError
-            message={(walletState as FundingFailed).message}
-            tryAgain={this.props.tryFundingAgain}
-          />
-        );
+        // TODO: Figure out why we have to do this
+        if (walletState instanceof FundingFailed) {
+          return (
+            <FundingError
+              message={(walletState as FundingFailed).message}
+              tryAgain={this.props.tryFundingAgain}
+            />
+          );
+        }
+        break;
       case WaitForWithdrawal:
         return <div>Waiting for withdrawal process to complete.</div>;
         break;
@@ -74,39 +80,94 @@ export default class WalletController extends PureComponent<Props> {
         return <div>Waiting for challenge</div>;
       case WaitForChallengeConcludeOrExpire:
         return <div>Waiting for opponent to respond to challenge</div>;
+      case playerA.ReadyToDeploy:
+        return <FundingInProgress
+          loginDisplayName={loginDisplayName}
+          deployStatus={BlockchainStatus.NotStarted}
+          depositStatus={BlockchainStatus.NotStarted}
+          player={0}
+          amount={(walletState as playerA.WaitForBlockchainDeploy).myBalance}
+        />;
+        break;
+      case playerA.Funded:
+        return <FundingInProgress
+          loginDisplayName={loginDisplayName}
+          deployStatus={BlockchainStatus.Completed}
+          depositStatus={BlockchainStatus.Completed}
+          player={0}
+          amount={(walletState as Funded).myBalance}
+          returnToGame={closeWallet}
+        />;
+        break;
+      case playerB.Funded:
+        return <FundingInProgress
+          loginDisplayName={loginDisplayName}
+          deployStatus={BlockchainStatus.Completed}
+          depositStatus={BlockchainStatus.Completed}
+          player={1}
+          amount={(walletState as Funded).myBalance}
+          returnToGame={closeWallet}
+
+        />;
       case playerA.WaitForBlockchainDeploy:
-        return <FundingInProgress message="confirmation of adjudicator deployment" />;
+        return <FundingInProgress
+          loginDisplayName={loginDisplayName}
+          deployStatus={BlockchainStatus.InProgress}
+          depositStatus={BlockchainStatus.NotStarted}
+          player={0}
+          amount={(walletState as playerA.WaitForBlockchainDeploy).myBalance}
+        />;
 
       case playerA.WaitForBToDeposit:
-        return <FundingInProgress message="confirmation of adjudicator deployment" />;
+        return <FundingInProgress
+          loginDisplayName={loginDisplayName}
+          deployStatus={BlockchainStatus.Completed}
+          depositStatus={BlockchainStatus.NotStarted}
+          player={0}
+          amount={(walletState as playerA.WaitForBlockchainDeploy).myBalance}
+        />;
 
       case playerB.WaitForAToDeploy:
-        return <FundingInProgress message="waiting for adjudicator to be deployed" />;
+        return <FundingInProgress
+          loginDisplayName={loginDisplayName}
+          deployStatus={BlockchainStatus.NotStarted}
+          depositStatus={BlockchainStatus.NotStarted}
+          player={1}
+          amount={(walletState as playerA.WaitForBlockchainDeploy).myBalance}
+        />;
 
       case playerB.ReadyToDeposit:
-        return <FundingInProgress message="ready to deposit funds" />;
+        return <FundingInProgress
+          loginDisplayName={loginDisplayName}
+          deployStatus={BlockchainStatus.Completed}
+          depositStatus={BlockchainStatus.NotStarted}
+          player={1}
+          amount={(walletState as playerA.WaitForBlockchainDeploy).myBalance}
+        />;
 
       case playerB.WaitForBlockchainDeposit:
-        return <FundingInProgress message="waiting for deposit confirmation" />;
+        return <FundingInProgress
+          loginDisplayName={loginDisplayName}
+          deployStatus={BlockchainStatus.Completed}
+          depositStatus={BlockchainStatus.InProgress}
+          player={1}
+          amount={(walletState as playerA.WaitForBlockchainDeploy).myBalance}
+        />;
       case WaitForApproval:
       case playerB.WaitForApprovalWithAdjudicator:
 
         return <FundingWelcome approve={this.props.approveFunding} decline={this.props.declineFunding} />;
       default:
-        if (!walletState) {
-          return <div />;
-        }
-        return (
-          <FundingInProgress message={`[view not implemented: ${walletState.constructor.name}`} />
-        );
+        return <div />;
     }
+    return <div />;
   }
 
   render() {
     return <Sidebar
       sidebar={this.renderWallet()}
       open={this.props.showWallet}
-      styles={{ sidebar: { width: "35%", background: "#f3f3f3" } }}
+      styles={{ sidebar: { width: "30%", background: "#f3f3f3" } }}
     >
       {this.props.children}
     </Sidebar>;

@@ -82,22 +82,22 @@ export const forceMoveFailure = () => ({
   type: FORCEMOVE_FAILURE as typeof FORCEMOVE_FAILURE,
 });
 
-export const respondWithMoveRequest= (positionData:string, signature:Signature) => ({
+export const respondWithMoveRequest = (positionData: string, signature: Signature) => ({
   type: RESPONDWITHMOVE_REQUEST as typeof RESPONDWITHMOVE_REQUEST,
   positionData,
   signature,
 });
 
-export const respondWithMoveSuccess = ()=>({
+export const respondWithMoveSuccess = () => ({
   type: RESPONDWITHMOVE_SUCCESS as typeof RESPONDWITHMOVE_SUCCESS,
 });
 
-export const respondWithMoveFailure = (error)=>({
+export const respondWithMoveFailure = (error) => ({
   type: RESPONDWITHMOVE_FAILURE as typeof RESPONDWITHMOVE_FAILURE,
   error,
 });
 
-export const respondWithAlternativeMoveRequest= (alternativePosition: string, alternativeSignature: Signature, response: string, responseSignature: Signature) => ({
+export const respondWithAlternativeMoveRequest = (alternativePosition: string, alternativeSignature: Signature, response: string, responseSignature: Signature) => ({
   type: RESPONDWITHALTERNATIVEMOVE_REQUEST as typeof RESPONDWITHALTERNATIVEMOVE_REQUEST,
   alternativePosition,
   alternativeSignature,
@@ -105,11 +105,11 @@ export const respondWithAlternativeMoveRequest= (alternativePosition: string, al
   responseSignature,
 });
 
-export const respondWithAlternativeMoveSuccess = ()=>({
+export const respondWithAlternativeMoveSuccess = () => ({
   type: RESPONDWITHALTERNATIVEMOVE_SUCCESS as typeof RESPONDWITHALTERNATIVEMOVE_SUCCESS,
 });
 
-export const respondWithAlternativeMoveFailure = (error)=>({
+export const respondWithAlternativeMoveFailure = (error) => ({
   type: RESPONDWITHALTERNATIVEMOVE_FAILURE as typeof RESPONDWITHALTERNATIVEMOVE_FAILURE,
   error,
 });
@@ -120,11 +120,11 @@ export const refuteRequest = (positionData: string, signature: Signature) => ({
   signature,
 });
 
-export const refuteSuccess = ()=>({
+export const refuteSuccess = () => ({
   type: REFUTE_SUCCESS as typeof REFUTE_SUCCESS,
 });
 
-export const refuteFailure = (error)=>({
+export const refuteFailure = (error) => ({
   type: REFUTE_FAILURE as typeof REFUTE_FAILURE,
   error,
 });
@@ -134,11 +134,11 @@ export const concludeRequest = (proof: ConclusionProof) => ({
   proof,
 });
 
-export const concludeSuccess = ()=>({
+export const concludeSuccess = () => ({
   type: CONCLUDE_SUCCESS as typeof CONCLUDE_SUCCESS,
 });
 
-export const concludeFailure = (error)=>({
+export const concludeFailure = (error) => ({
   type: CONCLUDE_FAILURE as typeof CONCLUDE_FAILURE,
   error,
 });
@@ -237,7 +237,7 @@ export const challengeCreatedEvent = ({ state, expirationTime }) => ({
   expirationTime,
 });
 
-export const challengeConcludedEvent = (responseState)=>({
+export const challengeConcludedEvent = (responseState) => ({
   type: CHALLENGECONCLUDED_EVENT as typeof CHALLENGECONCLUDED_EVENT,
   responseState,
 });

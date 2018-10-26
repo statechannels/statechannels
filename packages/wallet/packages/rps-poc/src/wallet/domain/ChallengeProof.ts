@@ -1,5 +1,5 @@
 import decode from './decode';
-import {Signature} from './Signature';
+import { Signature } from './Signature';
 
 export class ChallengeProof {
   // TODO: move to fmg-core
@@ -40,5 +40,5 @@ export class ChallengeProof {
   }
   get v() {
     return [this.fromSignature.v, this.toSignature.v];
-  } 
+  }
 }

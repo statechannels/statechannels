@@ -34,23 +34,23 @@ export default class WalletEngine {
 
   approve(): State {
     if (this.state instanceof PlayerB.WaitForApprovalWithAdjudicator) {
-      return this.transitionTo(new PlayerB.ReadyToDeposit(this.state.adjudicatorAddress));
+      return this.transitionTo(new PlayerB.ReadyToDeposit(this.state.adjudicatorAddress, this.state.myBalance));
     }
     if (this.state instanceof CommonState.WaitForApproval && this.playerIndex === PlayerIndex.A) {
-      return this.transitionTo(new PlayerA.ReadyToDeploy());
+      return this.transitionTo(new PlayerA.ReadyToDeploy(this.state.myBalance));
     }
     if (this.state instanceof CommonState.WaitForApproval && this.playerIndex === PlayerIndex.B) {
-      return this.transitionTo(new PlayerB.WaitForAToDeploy());
+      return this.transitionTo(new PlayerB.WaitForAToDeploy(this.state.myBalance));
     }
     return this.state;
   }
 
   transactionSent(): State {
     if (this.state instanceof PlayerA.ReadyToDeploy) {
-      return this.transitionTo(new PlayerA.WaitForBlockchainDeploy());
+      return this.transitionTo(new PlayerA.WaitForBlockchainDeploy(this.state.myBalance));
     }
     if (this.state instanceof PlayerB.ReadyToDeposit) {
-      return this.transitionTo(new PlayerB.WaitForBlockchainDeposit());
+      return this.transitionTo(new PlayerB.WaitForBlockchainDeposit(this.state.myBalance));
     }
     return this.state;
   }
@@ -60,13 +60,14 @@ export default class WalletEngine {
       this.state instanceof PlayerA.WaitForBlockchainDeploy ||
       this.state instanceof PlayerA.FundingFailed
     ) {
-      return this.transitionTo(new PlayerA.WaitForBToDeposit(adjudicator));
+      return this.transitionTo(new PlayerA.WaitForBToDeposit(adjudicator, this.state.myBalance));
     }
     if (this.state instanceof PlayerB.WaitForAToDeploy) {
-      return this.transitionTo(new PlayerB.ReadyToDeposit(adjudicator));
+      return this.transitionTo(new PlayerB.ReadyToDeposit(adjudicator, this.state.myBalance));
     }
     if (this.state instanceof PlayerB.WaitForApproval) {
-      return this.transitionTo(new PlayerB.WaitForApprovalWithAdjudicator({...this.state, adjudicatorAddress: adjudicator}));
+      const { myAddress, opponentAddress, myBalance, opponentBalance } = this.state;
+      return this.transitionTo(new PlayerB.WaitForApprovalWithAdjudicator({ myAddress, opponentAddress, myBalance, opponentBalance, adjudicatorAddress: adjudicator }));
     }
 
     return this.state;
@@ -74,32 +75,32 @@ export default class WalletEngine {
 
   fundingConfirmed(adjudicator: string): State {
     if (
-      this.state.constructor === PlayerB.WaitForBlockchainDeposit
+      this.state instanceof PlayerB.WaitForBlockchainDeposit
     ) {
-      return this.transitionTo(new PlayerB.Funded(adjudicator));
+      return this.transitionTo(new PlayerB.Funded(adjudicator, this.state.myBalance));
     }
 
     return this.state;
   }
 
-  receiveFundingEvent(): PlayerA.PlayerAState {
+  receiveFundingEvent(): State {
     if (this.state instanceof PlayerA.WaitForBToDeposit) {
-      return this.transitionTo(new PlayerA.Funded(this.state.adjudicatorAddress));
+      return this.transitionTo(new PlayerA.Funded(this.state.adjudicatorAddress, this.state.myBalance));
     }
 
     return this.state;
   }
 
   requestWithdrawalAddress(): State {
-    if (this.state instanceof CommonState.Funded){
+    if (this.state instanceof CommonState.Funded) {
       return this.transitionTo(new CommonState.SelectWithdrawalAddress());
     }
 
     return this.state;
   }
 
-  selectWithdrawalAddress(depositAddress:string): State {
-    if (this.state instanceof CommonState.SelectWithdrawalAddress){
+  selectWithdrawalAddress(depositAddress: string): State {
+    if (this.state instanceof CommonState.SelectWithdrawalAddress) {
       return this.transitionTo(new CommonState.WaitForWithdrawal(depositAddress));
     }
 
@@ -111,7 +112,7 @@ export default class WalletEngine {
     return state;
   }
 
-  fundingDeclined():State{
+  fundingDeclined(): State {
     return this.transitionTo(new CommonState.FundingDeclined());
   }
 
@@ -121,7 +122,7 @@ export default class WalletEngine {
       this.state instanceof PlayerA.WaitForBlockchainDeploy ||
       this.state instanceof PlayerB.WaitForBlockchainDeposit
     ) {
-      return this.transitionTo(new CommonState.FundingFailed(message));
+      return this.transitionTo(new CommonState.FundingFailed(message, this.state.myBalance));
     }
 
     return this.state;

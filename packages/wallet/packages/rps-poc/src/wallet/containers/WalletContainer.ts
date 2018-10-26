@@ -9,6 +9,8 @@ const mapStateToProps = (state: SiteState) => {
     walletState: state.wallet.walletState,
     challengeState: state.wallet.challenge,
     showWallet: state.wallet.display.showWallet,
+    // TODO: We should store this in the wallet state and get it from there
+    loginDisplayName: state.game.gameState ? state.game.gameState.myName : "",
   };
 };
 
@@ -16,6 +18,7 @@ const mapDispatchToProps = {
   tryFundingAgain: playerActions.tryFundingAgain,
   approveFunding: playerActions.approveFunding,
   declineFunding: playerActions.declineFunding,
+  closeWallet: playerActions.closeWallet,
   selectWithdrawalAddress: playerActions.selectWithdrawalAddress,
   respondWithMove: challengeActions.respondWithMove,
   respondWithAlternativeMove: challengeActions.respondWithAlternativeMove,

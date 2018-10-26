@@ -14,7 +14,7 @@ export class ConclusionProof extends ChallengeProof {
     const decodedFromState = decode(fromState);
     const decodedToState = decode(toState);
     // TODO: call SimpleAdjudicator.validConclusionProof instead
-    if (decodedFromState.stateType !== State.StateType.Conclude || decodedToState.stateType!== State.StateType.Conclude) {
+    if (decodedFromState.stateType !== State.StateType.Conclude || decodedToState.stateType !== State.StateType.Conclude) {
       throw new Error("States must be Conclude states");
     }
   }
