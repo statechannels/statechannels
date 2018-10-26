@@ -1,0 +1,73 @@
+@import "../_colors";
+@import "../_fonts";
+
+.transfer-container {
+    display: flex;
+    flex-direction: column;
+    height: 95%;
+    margin: -80px 35px 35px 35px;
+    justify-content: center;
+}
+.funding-container{
+    height:87%;
+}
+.deploy-title, .deposit-title{
+    font-size:40px;
+    font-weight:bold;
+}
+
+.deploy-icon, .deposit-icon {
+    margin-bottom: 10px;
+}
+
+
+.funding-divider{
+    height: 1px;
+    width:100%;
+    color: $rps-wallet-light-grey;
+    border-width: 1px;
+    border-style: dashed;
+    margin: 30px 0;
+}
+
+.deploy-amount, .deposit-amount {
+    font-size: 14px;
+}
+
+.funding-off{
+    color: $rps-wallet-light-grey;
+}
+.funding-circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 20px;
+    background: $rps-wallet-light-grey;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.funding-user {
+    font-size: 15px;
+    color: $rps-white;
+}
+
+.funding-header{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    margin:25px;
+}
+
+.eth_icon{
+    width:40px;
+    height:40px;
+}
+
+.return-button{
+    display: flex;
+    background-color: $rps-wallet-orange;
+    border-color: $rps-wallet-orange;
+    color:#fff;
+    margin: 0 auto;
+}

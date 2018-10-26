@@ -85,7 +85,7 @@ function* blockchainChallenge(simpleAdjudicator) {
         break;
       case blockchainActions.RESPONDWITHALTERNATIVEMOVE_REQUEST:
         const { alternativePosition, alternativeSignature, response, responseSignature } = action;
-        yield call(simpleAdjudicator.respondWithMove, alternativePosition, response,  [alternativeSignature.v, responseSignature.v], [alternativeSignature.r, responseSignature.r], [alternativeSignature.s, responseSignature.s]);
+        yield call(simpleAdjudicator.respondWithMove, alternativePosition, response, [alternativeSignature.v, responseSignature.v], [alternativeSignature.r, responseSignature.r], [alternativeSignature.s, responseSignature.s]);
         break;
       case blockchainActions.REFUTE_REQUEST:
         const { positionData: refutation, signature: refutationSignature } = action;
@@ -93,7 +93,7 @@ function* blockchainChallenge(simpleAdjudicator) {
         break;
       case blockchainActions.CONCLUDE_REQUEST:
         const { proof } = action;
-        yield call(simpleAdjudicator.conclude, proof.fromState, proof.toState, [proof.fromSignature.v, proof.toSignature.v], [proof.fromSignature.r, proof.toSignature.r],[proof.fromSignature.s, proof.toSignature.s]);
+        yield call(simpleAdjudicator.conclude, proof.fromState, proof.toState, [proof.fromSignature.v, proof.toSignature.v], [proof.fromSignature.r, proof.toSignature.r], [proof.fromSignature.s, proof.toSignature.s]);
         break;
     }
   }
