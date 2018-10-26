@@ -1,12 +1,14 @@
+// these files contain bootstrap sass variable overrides and must go in before bootsratrap
 @import "./styles/_colors";
+@import "./styles/_fonts";
 
 @import "~bootstrap/scss/bootstrap";
 
-@import "./styles/home_page";
-@import "./styles/lobby";
+@import "./styles/home-page";
+@import "./styles/navbar";
+@import "./styles/game-bar";
 @import "./styles/rules";
 @import "./styles/wallet/funding-welcome";
-@import "./styles/_fonts";
 
 
 html, body, #root {

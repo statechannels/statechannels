@@ -22,14 +22,14 @@ export default class ConfirmGamePage extends React.PureComponent<Props> {
         <div className="container centered-container">
           <h2 className="w-100">
             Please confirm the game.
-        </h2>
+          </h2>
 
           <Button block={true} onClick={confirmGame}>
             Confirm
-        </Button>
+          </Button>
           <Button block={true} onClick={cancelGame}>
             Cancel
-        </Button>
+          </Button>
           <FooterBar>Waiting ...</FooterBar>
         </div>
       </ApplicationLayout>
