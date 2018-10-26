@@ -4,11 +4,14 @@
 
 @import "~bootstrap/scss/bootstrap";
 
+@import "./styles/game-bar";
 @import "./styles/home-page";
 @import "./styles/navbar";
-@import "./styles/game-bar";
 @import "./styles/rules";
 @import "./styles/wallet/funding-welcome";
+@import "./styles/_fonts";
+@import "./styles/lobby";
+@import "./styles/open-game-card";
 
 
 html, body, #root {
