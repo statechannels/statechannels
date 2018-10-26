@@ -4,7 +4,7 @@
 
 @import "~bootstrap/scss/bootstrap";
 
-@import "./styles/game-bar";
+@import "./styles/move-badge";
 @import "./styles/home-page";
 @import "./styles/navbar";
 @import "./styles/rules";
@@ -13,6 +13,7 @@
 @import "./styles/_fonts";
 @import "./styles/lobby";
 @import "./styles/open-game-card";
+@import "./styles/game-bar";
 
 
 html, body, #root {

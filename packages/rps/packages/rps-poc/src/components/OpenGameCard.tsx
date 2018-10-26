@@ -33,7 +33,7 @@ export class OpenGameEntry extends React.PureComponent<Props, State> {
 
     const stake = openGame.stake;
     // TODO: should not hardcode the number of rounds
-    const buyin = stake.mul(new BN(5));
+    const buyin = new BN(5000000000000000);
     return (
       <div className="ogc-container card text-center">
         <div className="card-body">
