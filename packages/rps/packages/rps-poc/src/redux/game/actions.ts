@@ -1,4 +1,3 @@
-import BN from 'bn.js';
 import { Move, Position, positions } from '../../core';
 
 export const JOIN_OPEN_GAME = 'GAME.JOIN_OPEN_GAME';
@@ -29,8 +28,8 @@ export const cancelOpenGame = () => ({
 export const joinOpenGame = (
   opponentName: string,
   opponentAddress: string,
-  channelNonce:number,
-  roundBuyIn: BN,
+  channelNonce: number,
+  roundBuyIn: string,
 ) => ({
   type: JOIN_OPEN_GAME as typeof JOIN_OPEN_GAME,
   opponentName,
@@ -82,7 +81,7 @@ export const withdrawalSuccess = () => ({
   type: WITHDRAWAL_SUCCESS as typeof WITHDRAWAL_SUCCESS,
 });
 
-export const createOpenGame = (roundBuyIn: BN) => ({
+export const createOpenGame = (roundBuyIn: string) => ({
   type: CREATE_OPEN_GAME as typeof CREATE_OPEN_GAME,
   roundBuyIn,
 });

@@ -1,4 +1,3 @@
-import BN from 'bn.js';
 import { Move } from './moves';
 import { soliditySha3 } from 'web3-utils';
 import { padBytes32 } from 'fmg-core';
@@ -24,12 +23,12 @@ interface Base {
   channelNonce: number;
   participants: [string, string];
   turnNum: number;
-  balances: [BN, BN];
+  balances: [string, string];
 }
 
 // All positions apart from Conclude also have the buyIn
 interface BaseWithBuyIn extends Base {
-  roundBuyIn: BN;
+  roundBuyIn: string;
 }
 
 export interface PreFundSetupA extends BaseWithBuyIn {
@@ -104,7 +103,7 @@ interface BaseParams extends Base {
 }
 
 interface BaseWithBuyInParams extends BaseParams {
-  roundBuyIn: BN;
+  roundBuyIn: string;
 }
 
 function base(obj: BaseParams): Base {

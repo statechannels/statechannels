@@ -1,10 +1,10 @@
 import { State } from 'fmg-core';
-import BN from 'bn.js';
 import decodeState from '../wallet/domain/decode';
 
 import * as positions from './positions';
 import { Move } from './moves';
 import { GamePositionType } from './encode';
+import bnToHex from '../utils/bnToHex';
 
 const PREFIX_CHARS = 2; // the 0x takes up 2 characters
 const CHARS_PER_BYTE = 2;
@@ -13,9 +13,6 @@ const CHANNEL_BYTES = 32 + 32 + 32 + 32 * N_PLAYERS; // type, nonce, nPlayers, [
 const STATE_BYTES = 32 + 32 + 32 + 32 * N_PLAYERS; // stateType, turnNum, stateCount, [balances]
 const GAME_ATTRIBUTE_OFFSET = CHANNEL_BYTES + STATE_BYTES;
 
-function extractBN(hexString: string, byteOffset: number = 0, numBytes: number = 32) {
-  return new BN(extractBytes(hexString, byteOffset, numBytes).substr(2), 16);
-}
 function extractInt(hexString: string, byteOffset: number = 0, numBytes: number = 32) {
   return parseInt(extractBytes(hexString, byteOffset, numBytes), 16);
 }
@@ -41,7 +38,7 @@ function extractGamePositionType(hexString: string) {
 }
 
 function extractStake(hexString: string) {
-  return extractBN(hexString, GAME_ATTRIBUTE_OFFSET + 32);
+  return extractBytes(hexString, GAME_ATTRIBUTE_OFFSET + 32);
 }
 
 function extractPreCommit(hexString: string) {
@@ -62,9 +59,10 @@ function extractSalt(hexString: string) {
 
 export default function decode(hexString: string) {
   const state = decodeState(hexString);
-  const { channel, turnNum, stateType, resolution: balances } = state;
+  const balances = state.resolution.map(bnToHex) as [string, string];
+  const { channel, turnNum, stateType } = state;
   const { channelType: libraryAddress, channelNonce, participants } = channel;
-  const base = { libraryAddress, channelNonce, participants, turnNum, balances: balances as [BN, BN] };
+  const base = { libraryAddress, channelNonce, participants, turnNum, balances };
 
   // conclude is a special case as it doesn't have the buyIn
   if (stateType === State.StateType.Conclude) {
@@ -95,12 +93,13 @@ export default function decode(hexString: string) {
   }
 }
 
-export function decodeGameState(state: State, roundBuyIn: BN, hexString: string) {
+export function decodeGameState(state: State, roundBuyIn: string, hexString: string) {
   const position = extractGamePositionType(hexString);
-  const { channel, turnNum, resolution: balances } = state;
+  const balances = state.resolution.map(bnToHex) as [string, string];
+  const { channel, turnNum } = state;
   const { channelType: libraryAddress, channelNonce, participants } = channel;
   const channelParams = { libraryAddress, channelNonce, participants };
-  const base = { ...channelParams, turnNum, roundBuyIn, balances: balances as [BN, BN] };
+  const base = { ...channelParams, turnNum, roundBuyIn, balances };
 
   switch (position) {
     case GamePositionType.Resting:

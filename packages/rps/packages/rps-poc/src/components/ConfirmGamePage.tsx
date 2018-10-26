@@ -3,13 +3,12 @@ import React from 'react';
 import { Button } from 'reactstrap';
 
 import FooterBar from './FooterBar';
-import BN from 'bn.js';
 import { ApplicationLayout } from './ApplicationLayout';
 import web3Utils from 'web3-utils';
 interface Props {
   confirmGame: () => void;
   cancelGame: () => void;
-  stake: BN;
+  stake: string;
   opponentName: string;
 }
 
