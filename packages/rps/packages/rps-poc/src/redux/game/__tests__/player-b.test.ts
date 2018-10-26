@@ -41,7 +41,7 @@ const {
 const { libraryAddress, channelNonce, participants, roundBuyIn, myName, opponentName } = scenarios.standard;
 const base = { libraryAddress, channelNonce, participants, roundBuyIn, myName, opponentName };
 
-const messageState = { };
+const messageState = {};
 
 describe('player B\'s app', () => {
   const bProps = {
@@ -56,7 +56,7 @@ describe('player B\'s app', () => {
     result: bResult,
   };
   describe('when in confirmGameB', () => {
-    const gameState = state.confirmGameB({...bProps});
+    const gameState = state.confirmGameB({ ...bProps });
 
     itCanHandleTheOpponentResigning({ gameState, messageState });
 
@@ -76,7 +76,7 @@ describe('player B\'s app', () => {
   });
 
   describe('when in waitForFunding', () => {
-    const gameState = state.waitForFunding({...bProps, ...preFundSetupB });
+    const gameState = state.waitForFunding({ ...bProps, ...preFundSetupB });
 
     itCanHandleTheOpponentResigning({ gameState, messageState });
 
@@ -87,10 +87,26 @@ describe('player B\'s app', () => {
       itIncreasesTurnNumBy(0, { gameState, messageState }, updatedState);
       itTransitionsTo(state.StateName.WaitForPostFundSetup, updatedState);
     });
+
+    describe('if PostFundSetupA arrives', () => {
+      const action = actions.positionReceived(postFundSetupA);
+      const updatedState = gameReducer({ messageState, gameState }, action);
+
+      itStoresAction(action, updatedState);
+
+      describe('when funding is successful', () => {
+        const action2 = actions.fundingSuccess();
+        const updatedState2 = gameReducer(updatedState, action2);
+
+        itIncreasesTurnNumBy(2, { gameState, messageState }, updatedState2);
+        itTransitionsTo(state.StateName.PickMove, updatedState2);
+        itSends(postFundSetupB, updatedState2);
+      });
+    });
   });
 
   describe('when in WaitForPostFundSetup', () => {
-    const gameState = state.waitForPostFundSetup({...bProps, ...preFundSetupB});
+    const gameState = state.waitForPostFundSetup({ ...bProps, ...preFundSetupB });
     itCanHandleTheOpponentResigning({ gameState, messageState });
 
     describe('when PostFundSetupA arrives', () => {
@@ -104,7 +120,7 @@ describe('player B\'s app', () => {
   });
 
   describe('when in PickMove', () => {
-    const gameState = state.pickMove({...bProps, ...postFundSetupB });
+    const gameState = state.pickMove({ ...bProps, ...postFundSetupB });
 
     itCanHandleTheOpponentResigning({ gameState, messageState });
 
@@ -155,7 +171,7 @@ describe('player B\'s app', () => {
   });
 
   describe('when in WaitForRevealB', () => {
-    const gameState = state.waitForRevealB({ ...bProps, ...accept});
+    const gameState = state.waitForRevealB({ ...bProps, ...accept });
 
     itCanHandleTheOpponentResigning({ gameState, messageState });
 
@@ -172,7 +188,8 @@ describe('player B\'s app', () => {
         const action = actions.positionReceived(revealInsufficientFunds);
         const gameState2 = {
           ...gameState,
-          balances: acceptInsufficientFunds.balances };
+          balances: acceptInsufficientFunds.balances,
+        };
         const updatedState = gameReducer({ messageState, gameState: gameState2 }, action);
 
         itIncreasesTurnNumBy(2, { gameState: gameState2, messageState }, updatedState);
@@ -234,7 +251,7 @@ describe('player B\'s app', () => {
   });
 
   describe('when in GameOver', () => {
-    const gameState = state.gameOver({...bProps, ...conclude });
+    const gameState = state.gameOver({ ...bProps, ...conclude });
 
     describe('when the player wants to withdraw their funds', () => {
       const action = actions.withdrawalRequest();
