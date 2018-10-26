@@ -48,7 +48,7 @@ export default class ChannelWallet {
   }
 
   sign(data: SignableData): string {
-    const { v, r, s } =  coreSign(data, this.account.privateKey);
+    const { v, r, s } = coreSign(data, this.account.privateKey);
     return r + s.substr(2) + v.substr(2);
   }
 

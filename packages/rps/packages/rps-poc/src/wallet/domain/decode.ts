@@ -1,8 +1,8 @@
 import { Channel, State, } from 'fmg-core';
 import BN from 'bn.js';
 
-  // TODO: The decode function should really be part of FMG-Core
-  // Eventually it would be pulled out there
+// TODO: The decode function should really be part of FMG-Core
+// Eventually it would be pulled out there
 
 const PREFIX_CHARS = 2; // the 0x takes up 2 characters
 const CHARS_PER_BYTE = 2;

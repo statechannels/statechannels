@@ -9,12 +9,12 @@ export interface Wallet {
   challenge: ChallengeState;
   display: DisplayState;
   address: AddressState;
-  
+
 }
 
 export const walletReducer = combineReducers<Wallet>({
   walletState: walletStateReducer,
   challenge: challengeReducer,
-  display:  displayReducer,
+  display: displayReducer,
   address: addressReducer,
 });

@@ -6,9 +6,9 @@ import { PlayerBState } from '../../wallet-engine/wallet-states/PlayerB';
 export type WalletState = PlayerAState | PlayerBState | null;
 const initialState = null;
 
-export const walletStateReducer: Reducer<WalletState> = (state=initialState, action: stateActions.StateChanged) => {
+export const walletStateReducer: Reducer<WalletState> = (state = initialState, action: stateActions.StateChanged) => {
   switch (action.type) {
-    case  stateActions.STATE_CHANGED:
+    case stateActions.STATE_CHANGED:
       return action.state;
     default:
       return state;

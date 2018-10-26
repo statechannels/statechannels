@@ -5,7 +5,7 @@ export type ChallengeResponse = RespondWithMove | RespondWithExistingMove | Resp
 export class RespondWithMove {
 }
 
-export class RespondWithExistingMove{
+export class RespondWithExistingMove {
   response: string;
 
   constructor({ response }: { response: string }) {
@@ -19,7 +19,7 @@ export class RespondWithAlternativeMove {
   myPosition: string;
   mySignature: Signature;
 
-  constructor({ theirPosition, theirSignature, myPosition, mySignature }: { theirPosition: string, theirSignature: Signature, myPosition: string, mySignature: Signature,}) {
+  constructor({ theirPosition, theirSignature, myPosition, mySignature }: { theirPosition: string, theirSignature: Signature, myPosition: string, mySignature: Signature, }) {
     this.theirPosition = theirPosition;
     this.theirSignature = theirSignature;
     this.myPosition = myPosition;

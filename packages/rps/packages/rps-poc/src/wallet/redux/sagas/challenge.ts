@@ -78,7 +78,7 @@ function* respondWithMove() {
   yield put(challengeActions.setChallengeStatus(ChallengeStatus.WaitingForConcludeChallenge));
   yield put(displayActions.showWallet());
   yield put(displayActions.hideHeader());
-  
+
   const signature = new Signature(messageSentAction.signature);
   yield put(blockchainActions.respondWithMoveRequest(messageSentAction.positionData, signature));
 }

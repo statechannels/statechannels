@@ -150,6 +150,7 @@ function* handleFundingRequest(wallet: ChannelWallet, walletEngine: WalletEngine
   }
 
   if (success) {
+    yield take(playerActions.CLOSE_WALLET);
     yield put(actions.fundingSuccess(wallet.channelId));
   } else {
     yield put(actions.fundingFailure(wallet.channelId, 'Something went wrong'));
