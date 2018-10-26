@@ -36,6 +36,7 @@ interface GameProps {
   playAgain: () => void;
   createBlockchainChallenge: () => void;
   confirmGame: () => void;
+  declineGame: () => void;
   createOpenGame: (roundBuyIn: BN) => void;
   cancelOpenGame: () => void;
   resign: () => void;
@@ -53,7 +54,7 @@ function GameContainer(props: GameProps) {
 }
 
 function RenderGame(props: GameProps) {
-  const { state, chooseMove, playAgain, resign, createBlockchainChallenge, confirmGame, withdraw } = props;
+  const { state, chooseMove, playAgain, resign, createBlockchainChallenge, confirmGame, declineGame, withdraw } = props;
   switch (state.name) {
     case StateName.CreatingOpenGame:
       return (
@@ -72,7 +73,7 @@ function RenderGame(props: GameProps) {
     case StateName.WaitForGameConfirmationA:
       return <GameProposedPage message='Waiting for opponent to confirm' />;
     case StateName.ConfirmGameB:
-      return <ConfirmGamePage confirmGame={confirmGame} cancelGame={() => { return; }} stake={state.roundBuyIn} opponentName={state.opponentName} />;
+      return <ConfirmGamePage confirmGame={confirmGame} cancelGame={declineGame} stake={state.roundBuyIn} opponentName={state.opponentName} />;
     case StateName.PickMove:
       return <SelectMovePage chooseMove={chooseMove} resign={resign} />;
 
@@ -155,6 +156,7 @@ const mapDispatchToProps = {
   playAgain: gameActions.playAgain,
   createBlockchainChallenge: walletActions.createChallenge,
   confirmGame: gameActions.confirmGame,
+  declineGame: gameActions.declineGame,
   createOpenGame: gameActions.createOpenGame,
   cancelOpenGame: gameActions.cancelOpenGame,
   resign: gameActions.resign,

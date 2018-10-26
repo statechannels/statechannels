@@ -11,12 +11,9 @@ import { OpenGameEntry } from './OpenGameCard';
 interface Props {
   openGames: OpenGame[];
   joinOpenGame: (
-    myName: string,
-    myAddress: string,
     opponentName: string,
     opponentAddress: string,
-    libraryAddress: string,
-    channelNonce: number,
+    channelNonce:number,
     roundBuyIn: BN,
   ) => void;
   newOpenGame: () => void;

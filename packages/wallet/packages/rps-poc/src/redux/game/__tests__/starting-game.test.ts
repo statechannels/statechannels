@@ -9,7 +9,7 @@ import {
 } from './helpers';
 
 const {
-  asAddress, bsAddress, libraryAddress, channelNonce, roundBuyIn, preFundSetupA,
+  asAddress, bsAddress,channelNonce, libraryAddress, roundBuyIn, preFundSetupA,
 } = scenarios.standard;
 
 const params = { myName: 'Tom', roundBuyIn, myAddress:asAddress, libraryAddress };
@@ -20,7 +20,7 @@ describe('when in lobby', () => {
 
   describe('when the player joins a open game', () => {
     const action = actions.joinOpenGame(
-      'Tom', asAddress, 'Andrew', bsAddress, libraryAddress, channelNonce, roundBuyIn
+   'Andrew', bsAddress,channelNonce, roundBuyIn
     );
     const updatedState = gameReducer({ gameState, messageState }, action);
 
