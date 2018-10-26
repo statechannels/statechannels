@@ -8,7 +8,6 @@ import * as gameActions from '../redux/game/actions';
 import { WalletController } from '../wallet';
 import * as walletActions from '../wallet/redux/actions/external';
 import WalletHeader from '../wallet/containers/WalletFooter';
-import CreatingOpenGamePage from '../components/CreatingOpenGamePage';
 import WaitingRoomPage from '../components/WaitingRoomPage';
 import ConfirmGamePage from '../components/ConfirmGamePage';
 import FundingConfirmedPage from '../components/FundingConfirmedPage'; // WaitForPostFundSetup
@@ -54,12 +53,6 @@ function GameContainer(props: GameProps) {
 function RenderGame(props: GameProps) {
   const { state, chooseMove, playAgain, resign, createBlockchainChallenge, confirmGame, declineGame, withdraw } = props;
   switch (state.name) {
-    case StateName.CreatingOpenGame:
-      return (
-        <CreatingOpenGamePage
-          createOpenGame={props.createOpenGame}
-          cancelOpenGame={props.cancelOpenGame}
-        />);
     case StateName.WaitingRoom:
       return (
         <WaitingRoomPage

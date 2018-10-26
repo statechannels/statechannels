@@ -6,6 +6,7 @@ import { OpenGame } from '../redux/open-games/state';
 import { Button } from 'reactstrap';
 import { ApplicationLayout } from './ApplicationLayout';
 import { OpenGameEntry } from './OpenGameCard';
+import CreatingOpenGameContainer from 'src/containers/CreatingOpenGameContainer';
 
 interface Props {
   openGames: OpenGame[];
@@ -45,6 +46,7 @@ export default class LobbyPage extends React.PureComponent<Props, State> {
             </div>
           </div>
         </div>
+        <CreatingOpenGameContainer/>
       </ApplicationLayout >
     );
   }
