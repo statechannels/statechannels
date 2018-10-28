@@ -2,7 +2,7 @@ import React from 'react';
 import Button from 'reactstrap/lib/Button';
 import { ChallengeResponse as ResponseOption, RespondWithMove, RespondWithAlternativeMove, Refute, Conclude } from '../domain/ChallengeResponse';
 import { Signature, ConclusionProof } from '../domain';
-import ethIcon from '../../images/ethereum_icon.svg';
+import walletIcon from '../../images/wallet_icon.svg';
 
 interface Props {
   responseOptions: ResponseOption[];
@@ -44,12 +44,12 @@ export default class ChallengeResponse extends React.PureComponent<Props> {
       return(
           <div className="challenge-response-text challenge-response-container">
              <div className="challenge-response-header">
-            <img src ={ethIcon} />
+            <img src ={walletIcon} />
              <div className="challenge-response-circle">
                 <div className="challenge-response-user">{this.getInitials(this.props.loginDisplayName)}</div>
               </div>
             </div>
-          <img src={ethIcon} className="challenge-response-icon"/>
+          <img src={walletIcon} className="challenge-response-icon"/>
           <div className="challenge-response-title">A challenge has been issued</div>
           <p>A challenge has been detected! You need to respond by {parsedExpiryDate} or the game will conclude.</p>
            <p>You can:</p>

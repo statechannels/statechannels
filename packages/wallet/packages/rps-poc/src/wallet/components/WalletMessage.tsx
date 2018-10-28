@@ -1,5 +1,5 @@
 import React from 'react';
-import ethIcon from '../../images/ethereum_icon.svg';
+import walletHeaderIcon from '../../images/wallet_header_icon.svg';
 
 export interface Props {
     loginDisplayName;
@@ -13,7 +13,7 @@ export default class WalletMessage extends React.Component<Props>{
         return (
             <div className="message-container">
                 <div className="message-header">
-                    <img src={ethIcon} />
+                    <img src={walletHeaderIcon} className="message-header-icon" />
                     <div className="message-circle">
                         <div className="message-user">{this.getInitials(this.props.loginDisplayName)}</div>
                     </div>
