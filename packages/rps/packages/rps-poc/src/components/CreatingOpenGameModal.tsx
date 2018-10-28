@@ -11,12 +11,17 @@ interface Props {
   cancelOpenGame: () => void;
 }
 
+const MIN_BUYIN = 0.001;
+const MAX_BUYIN = 1;
+
 export default class CreatingOpenGameModal extends React.PureComponent<Props> {
   buyinInput: any;
+  invalidBuyin: number | null;
 
   constructor(props) {
     super(props);
     this.buyinInput = React.createRef();
+    this.invalidBuyin = null;
     this.createOpenGameHandler = this.createOpenGameHandler.bind(this);
   }
 
@@ -24,11 +29,18 @@ export default class CreatingOpenGameModal extends React.PureComponent<Props> {
     e.preventDefault();
     const buyin = Number(this.buyinInput.current.value);
 
+    if (buyin < MIN_BUYIN || buyin > MAX_BUYIN) {
+      this.invalidBuyin = buyin;
+      this.forceUpdate();
+      return;
+    } else {
+      this.invalidBuyin = null;
+    }
+
     // TODO: disable button when input is empty
     if (!buyin || Number.isNaN(buyin)) {
       return;
     }
-
     this.props.createOpenGame(web3Utils.toWei(buyin.toString(), 'ether'));
     this.buyinInput.current.value = '';
   }
@@ -39,6 +51,7 @@ export default class CreatingOpenGameModal extends React.PureComponent<Props> {
       <ModalHeader className="rules-header">
         Create A Game
       </ModalHeader>
+
       <ModalBody>
         <form className="cog-form" onSubmit={e => this.createOpenGameHandler(e)}>
           <div className="form-group">
@@ -51,7 +64,11 @@ export default class CreatingOpenGameModal extends React.PureComponent<Props> {
               ref={this.buyinInput}
             />
             <small className="form-text text-muted">
-              Enter an amount between 1 and 0.001
+            {
+              this.invalidBuyin
+              ? `Invalid buy in: ${this.invalidBuyin}. Please enter an amount between ${MIN_BUYIN} and ${MAX_BUYIN}`
+              : `Please enter an amount between ${MIN_BUYIN} and ${MAX_BUYIN}`
+            }
             </small>
             <div className="mt-2">Wage Per Round:</div>
             <small className="form-text text-muted">
