@@ -8,26 +8,30 @@
     margin: 0 35px 35px 35px;
     justify-content: center;
 }
-.withdraw-container{
-    height:60%;
+
+.withdraw-container {
+    height: 60%;
 
 }
-.withdraw-title, {
-    font-size:40px;
-    font-weight:bold;
+
+.withdraw-title,
+    {
+    font-size: 40px;
+    font-weight: bold;
 }
 
 .withdraw-icon {
     margin-bottom: 10px;
 }
 
-.withdraw-amount{
+.withdraw-amount {
     font-size: 14px;
 }
 
-.withdraw-off{
-    color:#a6a6a6;
+.withdraw-off {
+    color: #a6a6a6;
 }
+
 .withdraw-circle {
     width: 40px;
     height: 40px;
@@ -43,22 +47,22 @@
     color: $rps-white;
 }
 
-.withdraw-header{
+.withdraw-header {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
-    margin:25px;
+    margin: 25px;
 }
 
-.eth_icon{
-    width:40px;
-    height:40px;
+.withdraw-header-icon {
+    width: 50px;
+    height: 50px;
 }
 
-.exit-game-button{
+.exit-game-button {
     display: flex;
     background-color: $rps-wallet-orange;
     border-color: $rps-wallet-orange;
-    color:#fff;
+    color: #fff;
     margin: 0 auto;
 }
