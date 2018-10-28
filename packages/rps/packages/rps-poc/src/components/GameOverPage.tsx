@@ -1,21 +1,30 @@
+import _ from 'lodash';
 import React from 'react';
-import Button from 'reactstrap/lib/Button';
+
+import { Button, Modal, ModalBody } from 'reactstrap';
 
 interface Props {
-    withdraw:()=>void;
+  withdraw: () => void;
+  visible: boolean;
 }
 
 export default class GameOverPage extends React.PureComponent<Props> {
-  render() {
-    const { withdraw } = this.props;
 
+  render() {
     return (
-      <div className="container centered-container">
-        <div className="w-100 text-center mb-5">
-          <h1 className="mb-5">Game over</h1>
-          <Button onClick={withdraw}>Withdraw</Button>
-        </div>
-      </div>
+      <Modal className="game-over-container" isOpen={this.props.visible} centered={true}>
+
+        <ModalBody>
+
+          <div className="game-over-content">
+            <h1>The Game is over!</h1>
+            <div>You must withdraw your funds to exit the game.</div>
+            <Button className="game-over-button" onClick={this.props.withdraw} block={true}>
+              Withdraw Funds Now
+          </Button>
+          </div>
+        </ModalBody>
+      </Modal>
     );
   }
 }

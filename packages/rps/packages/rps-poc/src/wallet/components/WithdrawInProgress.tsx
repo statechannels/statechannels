@@ -47,6 +47,7 @@ export default class WithdrawInProgress extends React.PureComponent<Props> {
           <img className="withdraw-icon" src={this.getIcon(withdrawStatus)} />
           <div className="withdraw-title">{title}</div>
           <div className="withdraw-amount">Amount {web3Utils.fromWei(amount, 'ether')} ETH</div>
+          Check your wallet to the right to confirm the amount is correct.
         </div>
       </div>
       {withdrawStatus === BlockchainStatus.Completed && exitGame &&  <Button className="exit-game-button" onClick={exitGame} >Exit Game</Button> }
