@@ -6,7 +6,7 @@ import waitingIcon from '../../images/icon_loading.svg';
 import progressIconGrey from '../../images/icon_arrow_grey.svg';
 import completedIconGrey from '../../images/icon_success_grey.svg';
 import waitingIconGrey from '../../images/icon_loading_grey.svg';
-import ethIcon from '../../images/ethereum_icon.svg';
+import walletHeaderIcon from '../../images/wallet_header_icon.svg';
 
 import web3Utils from 'web3-utils';
 import Button from 'reactstrap/lib/Button';
@@ -37,7 +37,7 @@ export default class FundingInProgress extends React.PureComponent<Props> {
     return (
       <div className="funding-container" >
         <div className="funding-header">
-          <img src={ethIcon} />
+          <img src={walletHeaderIcon} className="funding-header-icon" />
           <div className="funding-circle">
             <div className="funding-user">{this.getInitials(this.props.loginDisplayName)}</div>
           </div>

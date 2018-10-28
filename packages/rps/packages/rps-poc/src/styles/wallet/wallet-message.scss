@@ -1,7 +1,7 @@
 @import "../_colors";
 @import "../_fonts";
 
-.message-title{
+.message-title {
     font-family: $rps-font-family;
     font-size: 30px;
     font-weight: bold;
@@ -11,30 +11,30 @@
     letter-spacing: normal;
 }
 
-.message-text{
+.message-text {
     font-family: $rps-font-family;
-    margin-top:200px;
+    margin-top: 200px;
 }
 
-.message-container{
-    padding:28px;
+.message-container {
+    padding: 28px;
     height: 100%;
 }
+
 .message-button {
     font-family: $rps-font-family;
     background-color: $rps-wallet-orange;
     border-color: $rps-wallet-orange;
-    color:#fff;
-    width:90%;
+    color: #fff;
+    width: 90%;
     border-radius: 10px;
     margin: 0 auto;
 }
 
 
-.message-icon {
-    height:50px;
-    width:50px;
-    margin: auto 0 20px 0;
+.message-header-icon {
+    height: 50px;
+    width: 50px;
 }
 
 .message-user {
@@ -42,7 +42,7 @@
     color: $rps-white;
 }
 
-.message-header{
+.message-header {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
