@@ -81,7 +81,7 @@ function RenderGame(props: GameProps) {
     case StateName.GameOver:
     // TODO: We probably want a seperate message for when your opponent resigns
     case StateName.OpponentResigned:
-      return <GameOverPage withdraw={withdraw} />;
+      return <GameOverPage visible={state.name === StateName.OpponentResigned || state.name === StateName.GameOver}  withdraw={withdraw} />;
     case StateName.WaitForPostFundSetup:
       return <FundingConfirmedPage message="Waiting for your opponent to acknowledge" />;
 

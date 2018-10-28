@@ -27,10 +27,13 @@ export default class FundingInProgress extends React.PureComponent<Props> {
   render() {
     const { player, deployStatus, depositStatus, amount, returnToGame } = this.props;
     const deployTitle = player === 0 ? "Your Transfer" : "Opponent Transfer";
-    const depositTitle = player === 0 ? "Opponent Transfer" : "Your Transfer";
-    const deployStyling = depositStatus !== BlockchainStatus.NotStarted ? "funding-off deploy-container" : 'deploy-container';
-    const depositStyling = depositStatus === BlockchainStatus.NotStarted ? "funding-off deposit-container" : 'deposit-container';
+    const depositTitle = player === 1 ? "Your Transfer" : "Opponent Transfer";
+    const playerAIsFunding = deployStatus !== BlockchainStatus.Completed;
+    const playerBIsFunding = depositStatus === BlockchainStatus.InProgress;
+    const deployStyling = !playerAIsFunding ? "funding-off deploy-container" : 'deploy-container';
+    const depositStyling = !playerBIsFunding ? "funding-off deposit-container" : 'deposit-container';
     const fundingComplete = deployStatus === BlockchainStatus.Completed && depositStatus === BlockchainStatus.Completed;
+
     return (
       <div className="funding-container" >
         <div className="funding-header">
@@ -41,15 +44,18 @@ export default class FundingInProgress extends React.PureComponent<Props> {
         </div>
         <div className="transfer-container">
           <div className={deployStyling}>
-            <img className="deploy-icon" src={this.getIcon(deployStatus, depositStatus !== BlockchainStatus.NotStarted)} />
+            <img className="deploy-icon" src={this.getIcon(deployStatus,!playerAIsFunding)} />
             <div className="deploy-title">{deployTitle}</div>
             <div className="deploy-amount">Amount {web3Utils.fromWei(amount, 'ether')} ETH</div>
+            {player === 0 && playerAIsFunding && <div >Check your wallet to the right to confirm the deposit amount is correct.</div>}
+            {}
           </div>
           <div className="funding-divider" />
           <div className={depositStyling}>
-            <img className="deposit-icon funding-off" src={this.getIcon(depositStatus, depositStatus === BlockchainStatus.NotStarted)} />
+            <img className="deposit-icon funding-off" src={this.getIcon(depositStatus, !playerBIsFunding)} />
             <div className="deposit-title">{depositTitle}</div>
             <div className="deposit-amount">Amount {web3Utils.fromWei(amount, 'ether')} ETH</div>
+            {player === 1 && playerBIsFunding && <div >Check your wallet to the right to confirm the deposit amount is correct.</div>}
           </div>
 
         </div>

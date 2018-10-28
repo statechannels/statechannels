@@ -10,7 +10,7 @@
 @import "./styles/rules";
 @import "./styles/wallet/wallet-welcome";
 @import "./styles/wallet/wallet-message";
-@import "./styles/wallet/challenge-issued";
+@import "./styles/wallet/challenge-response";
 @import "./styles/wallet/withdraw-in-progress";
 @import "./styles/wallet/funding-in-progress";
 @import "./styles/wallet/challenge-footer";
@@ -20,8 +20,8 @@
 @import "./styles/game-bar";
 @import './styles/confirm-game';
 @import "./styles/creating-open-game-modal";
-
-
+@import './styles/waiting-room.scss';
+@import './styles/game-over.scss';
 html, body, #root {
   height: 100%;
 }

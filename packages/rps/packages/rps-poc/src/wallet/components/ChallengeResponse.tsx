@@ -7,6 +7,7 @@ import ethIcon from '../../images/ethereum_icon.svg';
 interface Props {
   responseOptions: ResponseOption[];
   expiryTime: number;
+  loginDisplayName: string;
   respondWithMove: () => void;
   respondWithAlternativeMove: (alternativePosition: string, alternativeSignature: Signature, response: string, responseSignature: Signature) => void;
   refute: (newerPosition: string, signature: Signature) => void;
@@ -41,30 +42,39 @@ export default class ChallengeResponse extends React.PureComponent<Props> {
     const parsedExpiryDate = new Date(expiryTime * 1000).toLocaleDateString();
 
       return(
-          <div className="challenge-issued-text welcome-container">
-          <img src={ethIcon} className="challenge-issued-icon"/>
-          <div className="challenge-issued-title">A challenge has been issued</div>
+          <div className="challenge-response-text challenge-response-container">
+             <div className="challenge-response-header">
+            <img src ={ethIcon} />
+             <div className="challenge-response-circle">
+                <div className="challenge-response-user">{this.getInitials(this.props.loginDisplayName)}</div>
+              </div>
+            </div>
+          <img src={ethIcon} className="challenge-response-icon"/>
+          <div className="challenge-response-title">A challenge has been issued</div>
           <p>A challenge has been detected! You need to respond by {parsedExpiryDate} or the game will conclude.</p>
            <p>You can:</p>
-          <div className="challenge-issued-button-container" > 
+          <div className="challenge-response-button-container" > 
           {responseOptions.map(option => {
             if (option instanceof RespondWithMove) {
-              return <Button className="challenge-issued-button"  onClick={this.handleRespondWithMove} key={option.constructor.name} >Respond with Move</Button>;
+              return <Button className="challenge-response-button"  onClick={this.handleRespondWithMove} key={option.constructor.name} >Respond with Move</Button>;
             }
             else if (option instanceof RespondWithAlternativeMove) {
-              return <Button className="challenge-issued-button" onClick={() => { this.handleRespondWithAlternativeMove(option); }} key={option.constructor.name} >Respond with Alternative Move</Button>;
+              return <Button className="challenge-response-button" onClick={() => { this.handleRespondWithAlternativeMove(option); }} key={option.constructor.name} >Respond with Alternative Move</Button>;
             }
             else if (option instanceof Refute) {
-              return <Button className="challenge-issued-button"  onClick={() => { this.handleRefute(option); }} key={option.constructor.name} >Refute</Button>;
+              return <Button className="challenge-response-button"  onClick={() => { this.handleRefute(option); }} key={option.constructor.name} >Refute</Button>;
             }
             else if (option instanceof Conclude) {
-              return <Button className="challenge-issued-button"  onClick={() => { this.handleConclude(option); }} key={option.constructor.name} >Conclude</Button>;
+              return <Button className="challenge-response-button"  onClick={() => { this.handleConclude(option); }} key={option.constructor.name} >Conclude</Button>;
             } else {
               return null;
             }
           })}
           </div>
-      </div>);
-        
+      </div>); 
   }
+  getInitials(loginDisplayName: string): string {
+    const userDisplayName = loginDisplayName.split(" ");
+    return userDisplayName.map(name => name.charAt(0)).join("");
+}
 }
