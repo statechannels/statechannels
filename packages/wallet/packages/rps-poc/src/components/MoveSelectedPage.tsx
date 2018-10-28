@@ -2,7 +2,6 @@ import React from 'react';
 
 import { Move } from '../core';
 import { MoveBadge } from './MoveBadge';
-import Button from 'reactstrap/lib/Button';
 import { GameLayout } from './GameLayout';
 
 interface Props {
@@ -17,7 +16,7 @@ export default class MoveSelectedPage extends React.PureComponent<Props> {
   };
 
   render() {
-    const { message, yourMove, createBlockchainChallenge } = this.props;
+    const { message, yourMove } = this.props;
 
     return (
       <GameLayout>
@@ -30,7 +29,6 @@ export default class MoveSelectedPage extends React.PureComponent<Props> {
           <div className="mb-5">
             <MoveBadge move={yourMove} />`
           </div>
-          <Button onClick={createBlockchainChallenge}>Challenge</Button>
           <p>{message}</p>
         </div>
       </GameLayout>

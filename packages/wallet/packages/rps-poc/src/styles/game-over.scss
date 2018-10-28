@@ -1,0 +1,23 @@
+@import "./_colors";
+
+.game-over-container {
+    width: 500px;
+    height: 350px;
+    border-radius: 10px;
+}
+
+.game-over-button {
+    width: 252px;
+    height: 50px;
+    border-radius: 40px;
+    background-color: $rps-red;
+    border-color: $rps-red;
+}
+
+.game-over-content {
+    height: 300px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-evenly;
+}
