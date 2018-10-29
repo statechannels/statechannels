@@ -20,7 +20,7 @@ export enum Queue {
   GAME_ENGINE = 'GAME_ENGINE',
 }
 
-export const getWalletAddress = (storeObj:any) => storeObj.wallet.address;
+export const getWalletAddress = (storeObj: any) => storeObj.wallet.address;
 
 export default function* messageSaga() {
   yield fork(waitForWalletThenReceiveFromFirebaseSaga);
@@ -68,12 +68,9 @@ export function* sendMessagesSaga() {
       const userName = gameState.myName;
       const message = { data, queue, signature, userName };
       const { opponentAddress } = messageState.opponentOutbox;
+
       yield put(walletActions.messageSent(data, signature));
-      // tslint:disable-next-line:no-console
-      console.log('[MESSAGE_SERVICE] sending to firebase', opponentAddress, message);
       yield call(reduxSagaFirebase.database.create, `/messages/${opponentAddress.toLowerCase()}`, message);
-      // tslint:disable-next-line:no-console
-      console.log('[MESSAGE_SERVICE] sent to firebase');
       yield put(gameActions.messageSent());
     }
     if (messageState.walletOutbox) {
@@ -85,12 +82,12 @@ export function* sendMessagesSaga() {
         yield handleWalletMessage(messageState.walletOutbox, gameState);
       }
     }
-   
+
   }
 }
 
-function * waitForWalletThenReceiveFromFirebaseSaga() {
-  while(true) {
+function* waitForWalletThenReceiveFromFirebaseSaga() {
+  while (true) {
     yield take('*');
 
     const address = yield select(getWalletAddress);
@@ -105,9 +102,6 @@ function * waitForWalletThenReceiveFromFirebaseSaga() {
 function* receiveFromFirebaseSaga(address) {
   address = address.toLowerCase();
 
-  // tslint:disable-next-line:no-console
-  console.log('[MESSAGE SAGA] monitoring firebase');
-
   const channel = yield call(
     reduxSagaFirebase.database.channel,
     `/messages/${address}`,
@@ -117,10 +111,8 @@ function* receiveFromFirebaseSaga(address) {
 
   while (true) {
     const message = yield take(channel);
-    // tslint:disable-next-line:no-console
-    console.log('[MESSAGE SAGA] message received');
-    const key = message.snapshot.key;
 
+    const key = message.snapshot.key;
     const { data, queue, userName } = message.value;
 
     if (queue === Queue.GAME_ENGINE) {
@@ -132,7 +124,7 @@ function* receiveFromFirebaseSaga(address) {
       yield put(walletActions.messageReceived(data, signature));
       const position = decode(data);
       if (position.name === positions.PRE_FUND_SETUP_A) {
-        yield put(gameActions.initialPositionReceived(position, userName? userName:'Opponent'));
+        yield put(gameActions.initialPositionReceived(position, userName ? userName : 'Opponent'));
       } else {
         yield put(gameActions.positionReceived(position));
       }
