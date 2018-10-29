@@ -20,13 +20,13 @@ export default class MoveSelectedPage extends React.PureComponent<Props> {
 
     return (
       <GameLayout>
-        <div className="w-100 text-center mb-5">
-          <h1 className="mb-5">Move chosen!</h1>
+        <div className="w-100 text-center">
+          <h1>Move chosen!</h1>
           <p className="lead">
             You chose <strong>{Move[yourMove]}</strong>
           </p>
 
-          <div className="mb-5">
+          <div>
             <MoveBadge move={yourMove} />`
           </div>
           <p>{message}</p>

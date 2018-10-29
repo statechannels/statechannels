@@ -9,7 +9,7 @@ export const GameLayout = (props) => {
       <NavigationBarContainer />
       <GameBarContainer />
 
-      <div className="container centered-container w-100">
+      <div className="container centered-container w-100 game-container">
         {props.children}
       </div>
 

@@ -2,7 +2,7 @@ import _ from 'lodash';
 import React from 'react';
 
 import { Button, Form, FormGroup, Label, Input } from 'reactstrap';
-import { Modal, ModalHeader, ModalBody } from 'reactstrap';
+import { Modal, ModalBody } from 'reactstrap';
 
 interface Props {
   updateProfile: (name: string, twitterHandle?: string) => void;
@@ -32,11 +32,11 @@ export default class ProfilePage extends React.PureComponent<Props, State> {
     if (name === "") {
       nameErrorMessage = "Please enter a name";
     }
-    if (!/^[a-zA-Z0-9]*$/.test(name)) {
+    if (!/^[a-zA-Z0-9 ]*$/.test(name)) {
       nameErrorMessage = "Please use only alphanumeric characters for your name";
     }
-    if (name.length>20){
-      nameErrorMessage="Please use a name less than 20 characters";
+    if (name.length > 20) {
+      nameErrorMessage = "Please use a name less than 20 characters";
     }
     this.setState({ name, nameErrorMessage });
   }
@@ -61,51 +61,55 @@ export default class ProfilePage extends React.PureComponent<Props, State> {
     const submitEnabled = this.state.nameErrorMessage === "" && this.state.twitterErrorMessage === "" && this.state.name !== "";
     return (
       <Modal className="cog-container" isOpen={true} centered={true}>
-        <ModalHeader className="rules-header">
-          Set your name!
-        </ModalHeader>
+        <div className="modal-content">
+          <div className="modal-header rules-header">
+            <h5 className="modal-title">Tell us your name!</h5>
+            <Button className="close" onClick={(e) => this.props.logout()} aria-label="close">
+              <span aria-hidden="true">&times;</span>
+            </Button>
+          </div>
 
-        <ModalBody>
+          <ModalBody>
 
-          <Form className="form-profile" onSubmit={e => this.updateProfileHandler(e)}>
-            <FormGroup>
-              <Label for="name">Name</Label>
-              <Input
-                type="text"
-                name="name"
-                id="name"
-                value={this.state.name}
-                onChange={e => this.handleNameChange(e)}
-              />
-              <small className="form-text text-muted">
-                This will display to other players.
+            <Form className="form-profile" onSubmit={e => this.updateProfileHandler(e)}>
+              <FormGroup>
+                <Label for="name">Name</Label>
+                <Input
+                  type="text"
+                  name="name"
+                  id="name"
+                  value={this.state.name}
+                  onChange={e => this.handleNameChange(e)}
+                />
+                <small className="form-text text-muted">
+                  This will display to other players.
               </small>
-              <small className="form-text text-danger">
-                {this.state.nameErrorMessage}
+                <small className="form-text text-danger">
+                  {this.state.nameErrorMessage}
+                </small>
+              </FormGroup>
+              <FormGroup>
+                <Label for="twitterHandle">Twitter handle [optional]</Label>
+                <Input
+                  type="text"
+                  name="twitterHandle"
+                  id="twitterHandle"
+                  value={this.state.twitterHandle}
+                  onChange={e => this.handleTwitterChange(e)}
+                />
+                <small className="form-text text-muted">
+                  This will be used for your twitter shout-out if you beat the psychic bot.
               </small>
-            </FormGroup>
-            <FormGroup>
-              <Label for="twitterHandle">Twitter handle [optional]</Label>
-              <Input
-                type="text"
-                name="twitterHandle"
-                id="twitterHandle"
-                value={this.state.twitterHandle}
-                onChange={e => this.handleTwitterChange(e)}
-              />
-              <small className="form-text text-muted">
-                This will be used for your twitter shout-out if you beat the psychic bot.
-              </small>
-              <small className="form-text text-danger">
-                {this.state.twitterErrorMessage}
-              </small>
-            </FormGroup>
-            <Button className="profile-button" disabled={!submitEnabled} >
-              Submit
-          </Button>
-            <Button className="profile-button" onClick={(e) => this.props.logout()}>Logout</Button>
-          </Form>
-        </ModalBody>
+                <small className="form-text text-danger">
+                  {this.state.twitterErrorMessage}
+                </small>
+              </FormGroup>
+              <Button className="profile-button" disabled={!submitEnabled} >
+                Submit
+              </Button>
+            </Form>
+          </ModalBody>
+        </div>
       </Modal>
     );
   }
