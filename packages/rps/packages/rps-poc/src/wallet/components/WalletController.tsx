@@ -17,6 +17,7 @@ import FundingError from './FundingError';
 import ChallengeResponse from './ChallengeResponse';
 import Sidebar from 'react-sidebar';
 import WalletWelcome from './WalletWelcome';
+import WalletWithdrawalWelcome from './WalletWithdrawalWelcome';
 import WithdrawInProgress from './WithdrawInProgress';
 import WalletMessage from './WalletMessage';
 
@@ -95,7 +96,7 @@ export default class WalletController extends PureComponent<Props> {
       case ConfirmWithdrawal:
         const withdrawalContent = <div><p>This State Stash wallet enables you to quickly withdraw your funds.</p>
           <p>We’ll guide you through a few simple steps to get it setup and your ETH transferred.</p></div>;
-        return <WalletWelcome
+        return <WalletWithdrawalWelcome
           title="Withdraw with the State Stash Wallet"
           content={withdrawalContent}
           approve={approveWithdrawal}
@@ -173,10 +174,7 @@ export default class WalletController extends PureComponent<Props> {
         />;
       case WaitForApproval:
       case playerB.WaitForApprovalWithAdjudicator:
-        const fundingContent = <div><p>This wallet enables you to quickly transfer to funds to buy in and withdraw from games.</p>
-          <p>We’ll guide you through a few simple steps to get it setup and your ETH transferred.</p></div>;
-        return <WalletWelcome title="Transfer Funds with this State Stash Wallet"
-          content={fundingContent}
+        return <WalletWelcome
           approve={this.props.approveFunding} />;
       default:
         return <div />;
