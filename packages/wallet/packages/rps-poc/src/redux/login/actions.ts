@@ -5,6 +5,7 @@ export const LOGIN_REQUEST = 'LOGIN.REQUEST';
 export const LOGIN_SUCCESS = 'LOGIN.SUCCESS';
 export const LOGIN_FAILURE = 'LOGIN.FAILURE';
 
+
 export const loginRequest = () => ({
   type: LOGIN_REQUEST as typeof LOGIN_REQUEST,
 });
@@ -51,9 +52,20 @@ export type LogoutFailure = ReturnType<typeof logoutFailure>;
 export type LogoutResponse = LogoutSuccess | LogoutFailure;
 
 
-// 
+// PROFILE UPDATES 
+// ===============
+
+export const UPDATE_PROFILE = 'LOGIN.UPDATE_PROFILE';
+
+export const updateProfile = (name: string, twitterHandle?: string) => ({
+  type: UPDATE_PROFILE as typeof UPDATE_PROFILE,
+  name,
+  twitterHandle,
+});
+
+export type UpdateProfile = ReturnType<typeof updateProfile>;
 
 export type RequestAction = LoginRequest | LogoutRequest;
 export type ResponseAction = LoginResponse | LogoutResponse;
 
-export type AnyAction = RequestAction | ResponseAction;
+export type AnyAction = RequestAction | ResponseAction | UpdateProfile;

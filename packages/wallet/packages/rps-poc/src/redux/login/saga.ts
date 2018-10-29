@@ -1,5 +1,4 @@
-import firebase from 'firebase';
-import { call, fork, put, take, takeEvery, cancel, cps } from 'redux-saga/effects';
+import { call, fork, put, take, takeEvery, cancel, cps, select } from 'redux-saga/effects';
 
 import * as loginActions from './actions';
 import { reduxSagaFirebase } from '../../gateways/firebase';
@@ -9,11 +8,9 @@ import metamaskSaga from '../metamask/saga';
 // @ts-ignore
 import RPSGameArtifact from '../../../contracts/RockPaperScissorsGame.sol';
 
-const authProvider = new firebase.auth.GoogleAuthProvider();
-
 function* loginSaga() {
   try {
-    yield call(reduxSagaFirebase.auth.signInWithPopup, authProvider);
+    yield call(reduxSagaFirebase.auth.signInAnonymously);
     // successful login will trigger the loginStatusWatcher, which will update the state
   } catch (error) {
     yield put(loginActions.loginFailure(error));
@@ -60,15 +57,28 @@ export default function* loginRootSaga() {
   if (!metaMask){
     return;
   }
-  
+
   yield fork(loginStatusWatcherSaga);
   yield [
     takeEvery(loginActions.LOGIN_REQUEST, loginSaga),
     takeEvery(loginActions.LOGOUT_REQUEST, logoutSaga),
+    takeEvery(loginActions.UPDATE_PROFILE, syncProfileSaga),
   ];
 }
 
 function* getLibraryAddress() {
   const selectedNetworkId = parseInt(yield cps(web3.version.getNetwork), 10);
   return RPSGameArtifact.networks[selectedNetworkId].address;
+}
+
+// put these here instead of importing from store to avoid cyclic references
+// todo: do this better
+const getUid = (storeObj: any) => storeObj.login.user.uid;
+const getProfile = (storeObj: any) => storeObj.login.profile;
+
+function * syncProfileSaga() {
+  const uid = yield select(getUid);
+  const profile = yield select(getProfile);
+
+  yield call(reduxSagaFirebase.database.update, `/profiles/${uid}`, profile);
 }
