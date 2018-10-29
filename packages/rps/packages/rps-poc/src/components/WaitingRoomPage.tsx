@@ -17,7 +17,7 @@ export default class WaitingRoomPage extends React.PureComponent<Props> {
       <ApplicationLayout>
         <div className="waiting-room-container">
           <h2 className="w-100 text-center">
-            Waiting for someone to accept your challenge for {web3Utils.fromWei(roundBuyIn, 'ether')} ETH
+            Waiting for someone to join your game for {web3Utils.fromWei(roundBuyIn, 'ether')} ETH.
         </h2>
           <Button className="cancel-challenge-button" onClick={cancelOpenGame}>
             Cancel
