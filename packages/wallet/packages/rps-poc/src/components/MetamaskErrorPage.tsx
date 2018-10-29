@@ -24,15 +24,20 @@ export default function MetamaskErrorPage(props: MetamaskErrorProps) {
       >{`The wrong network is selected in metamask. Please select the ${props.error.networkName} network in metamask.`}</span>
     );
   }
-  if (props.error.errorType === "MetamaskLocked"){
+  if (props.error.errorType === "MetamaskLocked") {
     message = (
       <span>Your metamask account is currently locked. Please unlock it to continue.</span>
+    );
+  }
+  if (props.error.errorType === "UnknownError") {
+    message = (
+      <span>Something went wrong while attempting to connect to metamask. Please ensure metamask is installed and working correctly.</span>
     );
   }
   return (
     <div className={css(styles.container)}>
       <div className={css(styles.headerText)}>
-        <h1 className={css(styles.title)}>Ethereum Wallet Error</h1>
+        <h1 className={css(styles.title)}>Metamask Error</h1>
         <p>{message}</p>
       </div>
     </div>
