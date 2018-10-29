@@ -1,7 +1,10 @@
 @import "./_colors";
 
 $loginButton-height: 44px;
-$background-image-size: 800px;
+$homePage-container-max-width: 70%;
+$background-image-size: contain;
+$background-image-width: 70%;
+$background-image-max-width: 800px;
 
 .homePage {
 	background-color: $rps-dark-blue;
@@ -13,14 +16,16 @@ $background-image-size: 800px;
 .homePage-container {
 	display: flex;
 	flex-direction: column;
-	padding-left: 20%;
+	padding-left: 15%;
 	padding-top: 25%;
+	max-width: $homePage-container-max-width;
 }
 
 .homePage-title-container {
 	display: flex;
 	flex-direction: column;
-	justify-content: flex-start
+	justify-content: flex-start;
+	max-width: 70%; 
 }
 
 .homePage-loginButton {
@@ -61,9 +66,10 @@ $background-image-size: 800px;
   background-image: url(images/homepage_image.png);
   background-repeat: no-repeat;
   background-size: $background-image-size;
-  height: $background-image-size;
+	height: 100%;
   position: absolute;
   right: 0px;
   top: 0px;
-  width: $background-image-size;
+  width: $background-image-width;
+  max-width: $background-image-max-width;
 }
