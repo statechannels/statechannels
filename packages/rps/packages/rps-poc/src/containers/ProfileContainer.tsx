@@ -3,6 +3,7 @@ import { connect } from 'react-redux';
 import ProfilePage from '../components/ProfilePage';
 import { SiteState } from '../redux/reducer';
 
+import * as gameActions from '../redux/game/actions';
 import * as loginActions from '../redux/login/actions';
 
 function mapStateToProps(state: SiteState) {
@@ -11,7 +12,7 @@ function mapStateToProps(state: SiteState) {
 }
 
 const mapDispatchToProps = {
-  updateProfile: loginActions.updateProfile,
+  updateProfile: gameActions.updateProfile,
   logout: loginActions.logoutRequest,
 };
 

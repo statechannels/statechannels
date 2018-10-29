@@ -4,6 +4,7 @@ import { Result, Move, Player } from '../../core';
 // States of the form *B are player B only
 // All other states are both players
 export enum StateName {
+  NoName = 'NO_NAME',
   Lobby = 'Lobby',
   CreatingOpenGame = 'CREATING_OPEN_GAME',
   WaitingRoom = 'WaitingRoom',
@@ -26,54 +27,76 @@ export enum StateName {
   WaitForWithdrawal = 'WAIT_FOR_WITHDRAWAL',
 }
 
+export interface NoName {
+  name: StateName.NoName;
+  libraryAddress: string;
+  myAddress: string;
+}
+
+interface NoNameParams {
+  myAddress: string;
+  libraryAddress: string;
+  [x: string]: any;
+}
+
+export function noName(obj: NoNameParams): NoName {
+  const { myAddress, libraryAddress } = obj;
+  return { name: StateName.NoName, myAddress, libraryAddress };
+}
+
 export interface Lobby {
   name: StateName.Lobby;
   myName: string;
-  myAddress:string;
-  libraryAddress:string;
+  myAddress: string;
+  twitterHandle: string;
+  libraryAddress: string;
 }
 interface LobbyParams {
   myName: string;
-  myAddress:string;
-  libraryAddress:string;
+  twitterHandle: string;
+  myAddress: string;
+  libraryAddress: string;
   [x: string]: any;
 }
 
 export function lobby(obj: LobbyParams): Lobby {
-  const {myName,myAddress,libraryAddress} = obj;
-  return { name: StateName.Lobby,myName,myAddress,libraryAddress  };
+  const { myName, myAddress, libraryAddress, twitterHandle } = obj;
+  return { name: StateName.Lobby, myName, myAddress, libraryAddress, twitterHandle };
 }
 
 export interface CreatingOpenGame {
   name: StateName.CreatingOpenGame;
   myName: string;
-  myAddress:string;
-  libraryAddress:string;
+  twitterHandle: string;
+  myAddress: string;
+  libraryAddress: string;
 }
 
 export function creatingOpenGame(obj: LobbyParams): CreatingOpenGame {
-  const {myName,myAddress,libraryAddress} = obj;
-  return { name: StateName.CreatingOpenGame, myName, myAddress, libraryAddress};
+  const { myName, myAddress, libraryAddress, twitterHandle } = obj;
+  return { name: StateName.CreatingOpenGame, myName, myAddress, libraryAddress, twitterHandle };
 }
 
 export interface WaitingRoom {
   name: StateName.WaitingRoom;
   myName: string;
-  myAddress:string;
-  libraryAddress:string;
+  myAddress: string;
+  twitterHandle: string;
+  libraryAddress: string;
   roundBuyIn: string;
 }
 
 interface WaitingRoomParams {
   myName: string;
   roundBuyIn: string;
-  myAddress:string;
-  libraryAddress:string;
+  myAddress: string;
+  twitterHandle: string;
+  libraryAddress: string;
   [x: string]: any;
 }
 export function waitingRoom(obj: WaitingRoomParams): WaitingRoom {
-  const { myName, roundBuyIn, libraryAddress, myAddress} = obj;
-  return { name: StateName.WaitingRoom, myName, roundBuyIn,libraryAddress,myAddress };
+  const { myName, roundBuyIn, libraryAddress, myAddress, twitterHandle } = obj;
+  return { name: StateName.WaitingRoom, myName, roundBuyIn, libraryAddress, myAddress, twitterHandle };
 }
 
 interface TwoChannel {
@@ -86,6 +109,7 @@ interface Base extends TwoChannel {
   turnNum: number;
   balances: [string, string];
   stateCount: number;
+  twitterHandle: string;
   roundBuyIn: string;
   myName: string;
   opponentName: string;
@@ -106,6 +130,7 @@ export function base(state: IncludesBase) {
     roundBuyIn,
     myName,
     opponentName,
+    twitterHandle,
     player,
   } = state;
 
@@ -118,6 +143,7 @@ export function base(state: IncludesBase) {
     stateCount,
     roundBuyIn,
     myName,
+    twitterHandle,
     opponentName,
     player,
   };
@@ -143,7 +169,7 @@ export function confirmGameB(state: IncludesBase): ConfirmGameB {
   return { ...base(state), name: StateName.ConfirmGameB, player: Player.PlayerB };
 }
 
-export interface DeclineGameB extends Base{
+export interface DeclineGameB extends Base {
   name: StateName.DeclineGame;
   player: Player.PlayerB;
 }
@@ -330,6 +356,7 @@ export type PlayingState = (
 );
 
 export type GameState = (
+  | NoName
   | Lobby
   | CreatingOpenGame
   | WaitingRoom
