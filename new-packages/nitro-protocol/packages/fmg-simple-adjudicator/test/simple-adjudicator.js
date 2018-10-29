@@ -1,5 +1,15 @@
-import { toWei } from 'web3-utils';
-import { Channel, State, assertRevert, increaseTime, DURATION, CountingGame, sign, } from 'fmg-core';
+import {
+  toWei
+} from 'web3-utils';
+import {
+  Channel,
+  State,
+  assertRevert,
+  increaseTime,
+  DURATION,
+  CountingGame,
+  sign,
+} from 'fmg-core';
 import BN from 'bn.js';
 
 var SimpleAdjudicator = artifacts.require("./SimpleAdjudicator.sol");
@@ -31,7 +41,7 @@ contract('SimpleAdjudicator', (accounts) => {
   const challengee = alice;
 
   let aliceState, aliceBal, r0, v0, s0;
-  let bobState,   bobBal,   r1, v1, s1;
+  let bobState, bobBal, r1, v1, s1;
   let aliceEthAccount, bobEthAccount;
 
   before(async () => {
@@ -45,15 +55,45 @@ contract('SimpleAdjudicator', (accounts) => {
       [alice.address.toLowerCase(), bob.address.toLowerCase()]
     );
 
-    state0 = CountingGame.gameState({channel, resolution, turnNum: 6, gameCounter: 1});
-    state1 = CountingGame.gameState({channel, resolution, turnNum: 7, gameCounter: 2});
-    state2 = CountingGame.gameState({channel, resolution, turnNum: 8, gameCounter: 3});
-    state3 = CountingGame.gameState({channel, resolution, turnNum: 9, gameCounter: 4});
+    state0 = CountingGame.gameState({
+      channel,
+      resolution,
+      turnNum: 6,
+      gameCounter: 1
+    });
+    state1 = CountingGame.gameState({
+      channel,
+      resolution,
+      turnNum: 7,
+      gameCounter: 2
+    });
+    state2 = CountingGame.gameState({
+      channel,
+      resolution,
+      turnNum: 8,
+      gameCounter: 3
+    });
+    state3 = CountingGame.gameState({
+      channel,
+      resolution,
+      turnNum: 9,
+      gameCounter: 4
+    });
 
-    state1alt = CountingGame.gameState({channel, resolution: differentResolution, turnNum: 7, gameCounter: 2});
-    state2alt = CountingGame.gameState({channel, resolution: differentResolution, turnNum: 8, gameCounter: 3});
+    state1alt = CountingGame.gameState({
+      channel,
+      resolution: differentResolution,
+      turnNum: 7,
+      gameCounter: 2
+    });
+    state2alt = CountingGame.gameState({
+      channel,
+      resolution: differentResolution,
+      turnNum: 8,
+      gameCounter: 3
+    });
 
-    simpleAdj = await SimpleAdjudicator.new(channel.id);
+    simpleAdj = await SimpleAdjudicator.new(channel.id, 5);
   });
 
   it("forceMove emits ForceMove", async () => {
@@ -61,8 +101,16 @@ contract('SimpleAdjudicator', (accounts) => {
     let challengeState = state1;
     let responseState = state2;
 
-    let { r: r0, s: s0, v: v0 } = sign(agreedState.toHex(), challengee.privateKey);
-    let { r: r1, s: s1, v: v1 } = sign(challengeState.toHex(), challenger.privateKey);
+    let {
+      r: r0,
+      s: s0,
+      v: v0
+    } = sign(agreedState.toHex(), challengee.privateKey);
+    let {
+      r: r1,
+      s: s1,
+      v: v1
+    } = sign(challengeState.toHex(), challenger.privateKey);
 
     assert.equal(await simpleAdj.currentChallengePresent(), false);
 
@@ -75,7 +123,11 @@ contract('SimpleAdjudicator', (accounts) => {
     })
 
     // Have to cancel the challenge as to not muck up further tests...
-    const { r: r2, s: s2, v: v2 } = sign(responseState.toHex(), challengee.privateKey);
+    const {
+      r: r2,
+      s: s2,
+      v: v2
+    } = sign(responseState.toHex(), challengee.privateKey);
     await simpleAdj.respondWithMove(responseState.toHex(), v2, r2, s2);
   });
 
@@ -84,8 +136,16 @@ contract('SimpleAdjudicator', (accounts) => {
     let challengeState = state1;
     let responseState = state2;
 
-    const { r: r0, s: s0, v: v0 } = sign(agreedState.toHex(), challengee.privateKey)
-    const { r: r1, s: s1, v: v1 } = sign(challengeState.toHex(), challenger.privateKey);
+    const {
+      r: r0,
+      s: s0,
+      v: v0
+    } = sign(agreedState.toHex(), challengee.privateKey)
+    const {
+      r: r1,
+      s: s1,
+      v: v1
+    } = sign(challengeState.toHex(), challenger.privateKey);
 
     assert.equal(await simpleAdj.currentChallengePresent(), false);
 
@@ -94,7 +154,11 @@ contract('SimpleAdjudicator', (accounts) => {
     );
     assert.equal(await simpleAdj.currentChallengePresent(), true);
 
-    let { r: r2, s: s2, v: v2 } = sign(responseState.toHex(), challengee.privateKey);
+    let {
+      r: r2,
+      s: s2,
+      v: v2
+    } = sign(responseState.toHex(), challengee.privateKey);
     let tx = await simpleAdj.respondWithMove(responseState.toHex(), v2, r2, s2);
 
     assert.equal(await simpleAdj.currentChallengePresent(), false);
@@ -108,16 +172,28 @@ contract('SimpleAdjudicator', (accounts) => {
     let challengeState = state1;
     let refutationState = state3;
 
-    let { r: r0, s: s0, v: v0 } = sign(agreedState.toHex(), challengee.privateKey);
-    let { r: r1, s: s1, v: v1 } = sign(challengeState.toHex(), challenger.privateKey);
+    let {
+      r: r0,
+      s: s0,
+      v: v0
+    } = sign(agreedState.toHex(), challengee.privateKey);
+    let {
+      r: r1,
+      s: s1,
+      v: v1
+    } = sign(challengeState.toHex(), challenger.privateKey);
 
     assert.equal(await simpleAdj.currentChallengePresent(), false, "challenge exists at start of game");
 
-    await simpleAdj.forceMove(agreedState.toHex(), challengeState.toHex(), [v0, v1], [r0, r1], [s0, s1] );
+    await simpleAdj.forceMove(agreedState.toHex(), challengeState.toHex(), [v0, v1], [r0, r1], [s0, s1]);
     assert.equal(await simpleAdj.currentChallengePresent(), true, "challenge wasn't created");
 
     // refute
-    let { r: r2, s: s2, v: v2 } = sign(refutationState.toHex(), challenger.privateKey);
+    let {
+      r: r2,
+      s: s2,
+      v: v2
+    } = sign(refutationState.toHex(), challenger.privateKey);
 
     let tx = await simpleAdj.refute(refutationState.toHex(), v2, r2, s2);
     assert.equal(await simpleAdj.currentChallengePresent(), false, "challenge wasn't canceled");
@@ -132,16 +208,32 @@ contract('SimpleAdjudicator', (accounts) => {
     let alternativeState = state1alt;
     let responseState = state2alt;
 
-    let { r: r0, s: s0, v: v0 } = sign(agreedState.toHex(), challengee.privateKey);
-    let { r: r1, s: s1, v: v1 } = sign(challengeState.toHex(), challenger.privateKey);
+    let {
+      r: r0,
+      s: s0,
+      v: v0
+    } = sign(agreedState.toHex(), challengee.privateKey);
+    let {
+      r: r1,
+      s: s1,
+      v: v1
+    } = sign(challengeState.toHex(), challenger.privateKey);
 
     assert.equal(await simpleAdj.currentChallengePresent(), false, "challenge exists at start of game");
 
-    await simpleAdj.forceMove(agreedState.toHex(), challengeState.toHex(), [v0, v1], [r0, r1], [s0, s1] );
+    await simpleAdj.forceMove(agreedState.toHex(), challengeState.toHex(), [v0, v1], [r0, r1], [s0, s1]);
     assert.equal(await simpleAdj.currentChallengePresent(), true, "challenge not created");
 
-    let { r: r2, s: s2, v: v2 } = sign(alternativeState.toHex(), challenger.privateKey);
-    let { r: r3, s: s3, v: v3 } = sign(responseState.toHex(), challengee.privateKey);
+    let {
+      r: r2,
+      s: s2,
+      v: v2
+    } = sign(alternativeState.toHex(), challenger.privateKey);
+    let {
+      r: r3,
+      s: s3,
+      v: v3
+    } = sign(responseState.toHex(), challengee.privateKey);
 
     let tx = await simpleAdj.alternativeRespondWithMove(
       alternativeState.toHex(),
@@ -158,24 +250,44 @@ contract('SimpleAdjudicator', (accounts) => {
   it("can only be concluded once", async () => {
     aliceState = state0;
     bobState = state1;
-     aliceState.stateType = State.StateType.Conclude;
+    aliceState.stateType = State.StateType.Conclude;
     bobState.stateType = State.StateType.Conclude;
-     const { r: r0, s: s0, v: v0 } = sign(aliceState.toHex(), alice.privateKey);
-    const { r: r1, s: s1, v: v1 } = sign(bobState.toHex(), bob.privateKey);
-     await simpleAdj.conclude(aliceState.toHex(), bobState.toHex(), [v0, v1], [r0, r1], [s0, s1] );
+    const {
+      r: r0,
+      s: s0,
+      v: v0
+    } = sign(aliceState.toHex(), alice.privateKey);
+    const {
+      r: r1,
+      s: s1,
+      v: v1
+    } = sign(bobState.toHex(), bob.privateKey);
+    await simpleAdj.conclude(aliceState.toHex(), bobState.toHex(), [v0, v1], [r0, r1], [s0, s1]);
     assertRevert(
       simpleAdj.conclude(aliceState.toHex(), bobState.toHex(), [v0, v1], [r0, r1], [s0, s1])
     );
   });
-  
+
   describe("withdrawals", () => {
     let aliceStart, bobStart;
     async function withdrawHelper(account, destination) {
-      const { v, r, s } = sign(
-        [
-          { type: 'address', value: account.address },
-          { type: 'address', value: destination },
-          { type: 'bytes32', value: channel.id },
+      const {
+        v,
+        r,
+        s
+      } = sign(
+        [{
+            type: 'address',
+            value: account.address
+          },
+          {
+            type: 'address',
+            value: destination
+          },
+          {
+            type: 'bytes32',
+            value: channel.id
+          },
         ],
         account.privateKey
       );
@@ -206,10 +318,10 @@ contract('SimpleAdjudicator', (accounts) => {
       aliceDestination = web3.eth.accounts.create().address.toLowerCase();
       bobDestination = web3.eth.accounts.create().address.toLowerCase();
 
-      simpleAdj = await SimpleAdjudicator.new(channel.id);
+      simpleAdj = await SimpleAdjudicator.new(channel.id, 5);
     });
 
-    it("conclude -> withdraw", async () =>  {
+    it("conclude -> withdraw", async () => {
       await web3.eth.sendTransaction({
         from: aliceEthAccount,
         to: simpleAdj.address,
@@ -244,11 +356,19 @@ contract('SimpleAdjudicator', (accounts) => {
       aliceState.stateType = State.StateType.Conclude;
       bobState.stateType = State.StateType.Conclude;
 
-      const { r: r0, s: s0, v: v0 } = sign(aliceState.toHex(), alice.privateKey);
-      const { r: r1, s: s1, v: v1 } = sign(bobState.toHex(), bob.privateKey);
+      const {
+        r: r0,
+        s: s0,
+        v: v0
+      } = sign(aliceState.toHex(), alice.privateKey);
+      const {
+        r: r1,
+        s: s1,
+        v: v1
+      } = sign(bobState.toHex(), bob.privateKey);
 
       // pass the conclusion proof
-      await simpleAdj.conclude(aliceState.toHex(), bobState.toHex(), [v0, v1], [r0, r1], [s0, s1] );
+      await simpleAdj.conclude(aliceState.toHex(), bobState.toHex(), [v0, v1], [r0, r1], [s0, s1]);
 
       await withdrawHelper(bob, bobDestination);
 
@@ -319,10 +439,18 @@ contract('SimpleAdjudicator', (accounts) => {
       );
 
 
-      const { r: r0, s: s0, v: v0 } = sign(aliceState.toHex(), alice.privateKey);
-      const { r: r1, s: s1, v: v1 } = sign(bobState.toHex(), bob.privateKey)
+      const {
+        r: r0,
+        s: s0,
+        v: v0
+      } = sign(aliceState.toHex(), alice.privateKey);
+      const {
+        r: r1,
+        s: s1,
+        v: v1
+      } = sign(bobState.toHex(), bob.privateKey)
 
-      await simpleAdj.forceMove(aliceState.toHex(), bobState.toHex(), [v0, v1], [r0, r1], [s0, s1] );
+      await simpleAdj.forceMove(aliceState.toHex(), bobState.toHex(), [v0, v1], [r0, r1], [s0, s1]);
       await increaseTime(DURATION.days(2));
 
       await withdrawHelper(alice, aliceDestination);
@@ -372,10 +500,18 @@ contract('SimpleAdjudicator', (accounts) => {
       aliceState.stateType = State.StateType.Conclude;
       bobState.stateType = State.StateType.Conclude;
 
-      const { r: r0, s: s0, v: v0 } = sign(aliceState.toHex(), alice.privateKey)
-      const { r: r1, s: s1, v: v1 } = sign(bobState.toHex(), bob.privateKey);
+      const {
+        r: r0,
+        s: s0,
+        v: v0
+      } = sign(aliceState.toHex(), alice.privateKey)
+      const {
+        r: r1,
+        s: s1,
+        v: v1
+      } = sign(bobState.toHex(), bob.privateKey);
 
-      await simpleAdj.conclude(aliceState.toHex(), bobState.toHex(), [v0, v1], [r0, r1], [s0, s1] );
+      await simpleAdj.conclude(aliceState.toHex(), bobState.toHex(), [v0, v1], [r0, r1], [s0, s1]);
       await withdrawHelper(bob, bobDestination);
 
       assert.equal(
@@ -406,8 +542,8 @@ contract('SimpleAdjudicator', (accounts) => {
       CountingGameContract.link('CountingState', stateContract.address);
       let countingGameContract = await CountingGameContract.new();
       channel = new Channel(countingGameContract.address, 0, [alice.address, bob.address]);
-  
-      simpleAdj = await SimpleAdjudicator.new(channel.id);
+
+      simpleAdj = await SimpleAdjudicator.new(channel.id, 5);
 
       let result = await truffleAssert.createTransactionResult(simpleAdj, simpleAdj.transactionHash);
 
