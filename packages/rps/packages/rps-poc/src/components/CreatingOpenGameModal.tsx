@@ -19,8 +19,11 @@ const MIN_BUYIN = 0.001;
 const MAX_BUYIN = 1;
 
 export default class CreatingOpenGameModal extends React.PureComponent<Props, State> {
+  buyInInput: any;
+
   constructor(props) {
     super(props);
+    this.buyInInput = React.createRef();
     this.state = { validBuyIn: false, buyIn: "", buyInChanged: false };
     this.createOpenGameHandler = this.createOpenGameHandler.bind(this);
     this.handleBuyInChange = this.handleBuyInChange.bind(this);
@@ -34,6 +37,12 @@ export default class CreatingOpenGameModal extends React.PureComponent<Props, St
       validBuyIn = false;
     }
     this.setState({ validBuyIn, buyIn: e.target.value, buyInChanged: true });
+  }
+
+  componentDidUpdate() {
+    if (this.buyInInput.current) {
+      this.buyInInput.current.focus();
+    }
   }
 
   createOpenGameHandler(e) {
@@ -60,15 +69,18 @@ export default class CreatingOpenGameModal extends React.PureComponent<Props, St
         <ModalBody>
           <form className="cog-form" onSubmit={e => this.createOpenGameHandler(e)}>
             <div className="form-group">
-              <label htmlFor="buyin">Enter Buy In Amount</label>
-              <input
-                className="form-control"
-                name="buyin"
-                id="buyin"
-                placeholder="ETH"
-                value={this.state.buyIn}
-                onChange={e => this.handleBuyInChange(e)}
-              />
+              <label htmlFor="buyin">Enter Game Buy In Amount</label>
+              <div className="cog-input-group">
+                <input
+                  className="cog-input form-control"
+                  name="buyin"
+                  id="buyin"
+                  value={this.state.buyIn}
+                  ref={this.buyInInput}
+                  onChange={e => this.handleBuyInChange(e)}
+                />
+                <div>ETH</div>
+              </div>
               <small className="form-text text-muted">
                 {
                   `Please enter an amount between ${MIN_BUYIN} and ${MAX_BUYIN}`
@@ -82,7 +94,7 @@ export default class CreatingOpenGameModal extends React.PureComponent<Props, St
                   }
                 </small>
               }
-              <div className="mt-2">Wage Per Round:</div>
+              <div className="mt-2">Round Buy In:</div>
               <small className="form-text text-muted">
                 This will be 20% of the total buy in amount.
             </small>
