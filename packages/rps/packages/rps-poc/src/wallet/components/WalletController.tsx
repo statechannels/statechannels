@@ -188,7 +188,8 @@ export default class WalletController extends PureComponent<Props> {
     return <Sidebar
       sidebar={this.renderWallet()}
       open={this.props.showWallet}
-      styles={{ sidebar: { width: "25%", background: "#f3f3f3" } }}
+      styles={{ sidebar: { width: "450px", zIndex: "1040", background: "#f3f3f3" } }}
+      overlayClassName="wallet-overlay"
     >
       {this.props.children}
     </Sidebar>;
