@@ -12,7 +12,7 @@ contract SimpleAdjudicator {
     bytes32 public fundedChannelId;
 
     Rules.Challenge currentChallenge;
-    uint challengeDuration = 1 days;
+    uint challengeDuration;
     uint[2] withdrawnAmount;
 
     event FundsReceived(
@@ -21,8 +21,9 @@ contract SimpleAdjudicator {
         uint adjudicatorBalance
     );
 
-    constructor(bytes32 _fundedChannelId) public payable {
+    constructor(bytes32 _fundedChannelId, uint256 _challengeDurationMinutes) public payable {
         fundedChannelId = _fundedChannelId;
+        challengeDuration = _challengeDurationMinutes * 1 minutes;
 
         emit FundsReceived(
             msg.value,
