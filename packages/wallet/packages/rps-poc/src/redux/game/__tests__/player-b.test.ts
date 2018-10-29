@@ -136,6 +136,9 @@ describe('player B\'s app', () => {
         const updatedGameState = updatedState.gameState as state.WaitForOpponentToPickMoveA;
         expect(updatedGameState.myMove).toEqual(bsMove);
       });
+      it('doesn\'t send anything', () => {
+        expect(updatedState.messageState).toEqual(messageState);
+      });
     });
 
     describe('if Propose arrives', () => {
@@ -152,6 +155,9 @@ describe('player B\'s app', () => {
         itIncreasesTurnNumBy(2, { gameState, messageState }, updatedState2);
         itSends(accept, updatedState2);
         itTransitionsTo(state.StateName.WaitForRevealB, updatedState2);
+        it('clears the action', () => {
+          expect(updatedState2.messageState.actionToRetry).toBe(undefined);
+        });
       });
     });
   });
@@ -211,6 +217,7 @@ describe('player B\'s app', () => {
 
       itIncreasesTurnNumBy(1, { gameState, messageState }, updatedState);
       itSends(resting, updatedState);
+      // is this right?
       itTransitionsTo(state.StateName.PickMove, updatedState);
     });
 
