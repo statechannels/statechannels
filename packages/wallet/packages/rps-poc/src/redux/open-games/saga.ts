@@ -1,7 +1,7 @@
 import { fork, take, select, cancel, call, apply } from 'redux-saga/effects';
 
-export const getGameState = (storeObj:any) => storeObj.game.gameState;
-export const getWalletAddress = (storeObj:any) => storeObj.wallet.address;
+export const getGameState = (storeObj: any) => storeObj.game.gameState;
+export const getWalletAddress = (storeObj: any) => storeObj.wallet.address;
 
 import { default as firebase, reduxSagaFirebase } from '../../gateways/firebase';
 
@@ -15,13 +15,14 @@ import { StateName, GameState } from '../game/state';
 export default function* openGameSaga() {
   // could be more efficient by only watching actions that could change the state
   // this is more robust though, so stick to watching all actions for the time being
-  let openGameSyncerProcess:any = null;
+  let openGameSyncerProcess: any = null;
   let myGameIsOnFirebase = false;
 
   while (true) {
     yield take('*');
 
     const gameState: GameState = yield select(getGameState);
+    const address: string = yield select(getWalletAddress);
 
     if (gameState.name === StateName.Lobby) {
       // if we're in the lobby we need to sync openGames
@@ -36,9 +37,6 @@ export default function* openGameSaga() {
     }
 
     if (gameState.name === StateName.WaitingRoom) {
-      // need to make sure our open game is on firebase when we're in the waiting room
-      const address: string = yield select(getWalletAddress);
-
       // if we don't have a wallet address, something's gone very wrong
       if (address) {
         const myOpenGameKey = `/challenges/${address}`;
@@ -60,21 +58,22 @@ export default function* openGameSaga() {
           // use update to allow us to pick our own key
           yield call(reduxSagaFirebase.database.update, myOpenGameKey, myOpenGame);
           myGameIsOnFirebase = true;
-        } else {
-          if (myGameIsOnFirebase) {
-            // my game is on firebase (as far as the app remember)
-            // attempt to delete the game - will be a no-op if not there
-
-            yield call(reduxSagaFirebase.database.delete, myOpenGameKey);
-            myGameIsOnFirebase = false;
-          }
         }
+      }
+    }
+    else {
+      if (myGameIsOnFirebase) {
 
+        // if we don't have a wallet address, something's gone very wrong
+        if (address) {
+          const myOpenGameKey = `/challenges/${address}`;
+          yield call(reduxSagaFirebase.database.delete, myOpenGameKey);
+          myGameIsOnFirebase = false;
+        }
       }
     }
   }
 }
-
 // maps { '0xabc': openGame1Data, ... } to [openGame1Data, ....]
 const openGameTransformer = (dict) => {
   if (!dict.value) {
