@@ -34,11 +34,11 @@ export default class CreatingOpenGameModal extends React.PureComponent<Props, St
     const buyIn = Number(e.target.value);
     let errorMessage = "";
     if (e.target.value === "") {
-      errorMessage = "Please enter a buy in amount";
+      errorMessage = "Please enter a game buy in amount";
     } else if (Number.isNaN(buyIn)) {
-      errorMessage = "Please enter a number for the buy in";
+      errorMessage = "Please enter a number for the game buy in";
     } else if (buyIn < MIN_BUYIN || buyIn > MAX_BUYIN) {
-      errorMessage = `Invalid buy in amount ${this.state.buyIn}. Please enter an amount between ${MIN_BUYIN} and ${MAX_BUYIN}`;
+      errorMessage = `Invalid game buy in amount ${this.state.buyIn}. Please enter an amount between ${MIN_BUYIN} and ${MAX_BUYIN}`;
 
     }
     this.setState({ errorMessage, buyIn: e.target.value, buyInChanged: true });
@@ -100,19 +100,18 @@ export default class CreatingOpenGameModal extends React.PureComponent<Props, St
                   `Please enter an amount between ${MIN_BUYIN} and ${MAX_BUYIN}`
                 }
               </small>
-
               <small className="form-text text-danger cog-error-message">
                 {this.state.errorMessage}
               </small>
 
-              <div className="mt-2">Round Buy In:</div>
+              <div className="mt-2">Round Buy In: {this.calculateRoundBuyIn()}</div>
               <small className="form-text text-muted">
-                This is 20% of the total buy in amount.
+                This is 20% of the game buy in amount.
               </small>
             </div>
-            <Button className="cog-button" type="submit" disabled={this.state.errorMessage !== ""} block={true}>
+            <Button className="cog-button" type="submit" disabled={this.state.errorMessage !== "" || !this.state.buyInChanged } block={true}>
               Create Game
-          </Button>
+            </Button>
           </form>
         </ModalBody>
       </Modal>
