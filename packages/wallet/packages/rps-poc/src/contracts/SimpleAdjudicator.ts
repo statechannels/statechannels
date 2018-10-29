@@ -53,7 +53,7 @@ async function verifyContractDeployed(address){
   // Check if we can access the code at the address if not delay and try again
   let code = await connectWeb3().eth.getCode(address);
   let delayAmount = 100;
-  while ((code === '' || code === '0x') && delayAmount < 5000) {
+  while ((code === '' || code === '0x') && delayAmount < 120000) {
     await delay(delayAmount);
     delayAmount *= 2;
     code = await connectWeb3().eth.getCode(address);
