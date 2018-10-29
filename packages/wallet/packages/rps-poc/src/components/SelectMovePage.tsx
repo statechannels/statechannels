@@ -2,7 +2,6 @@ import React from 'react';
 
 import { Move } from '../core';
 
-import { Button } from 'reactstrap';
 import { MoveBadge } from './MoveBadge';
 
 import { GameLayout } from './GameLayout';
@@ -10,7 +9,6 @@ import { GameLayout } from './GameLayout';
 
 interface Props {
   chooseMove: (move: Move) => void;
-  resign: () => void;
   afterOpponent?: any;
   challengeExpirationDate?:number;
 
@@ -24,7 +22,7 @@ export default class SelectMoveStep extends React.PureComponent<Props> {
   }
 
   render() {
-    const { afterOpponent, chooseMove, resign, challengeExpirationDate } = this.props;
+    const { afterOpponent, chooseMove, challengeExpirationDate } = this.props;
     const renderChooseButton = this.renderChooseButton;
 
     return (
@@ -42,11 +40,6 @@ export default class SelectMoveStep extends React.PureComponent<Props> {
             <div className="col-sm-4">
               {renderChooseButton(chooseMove, Move.Scissors, 'Scissors')}
             </div>
-          </div>
-          <div className="mt-5">
-            <Button onClick={() => resign()} color="dark" className="w-75 p-3">
-              <h1>Abandon game</h1>
-            </Button>
           </div>
         </div>
       </GameLayout>

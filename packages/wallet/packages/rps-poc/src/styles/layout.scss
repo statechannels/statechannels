@@ -1,0 +1,41 @@
+
+html, body, #root {
+  height: 100%;
+}
+
+#root {
+  display: flex;
+}
+
+.centered-container {
+  display: flex;
+  align-items: center;
+  padding-top: 40px;
+}
+
+// from http://getbootstrap.com/docs/4.0/examples/sticky-footer-navbar/
+html {
+  position: relative;
+  min-height: 100%;
+}
+body {
+  /* Margin bottom by footer height */
+  padding-bottom: 60px;
+}
+
+/* Custom page CSS
+-------------------------------------------------- */
+/* Not required for template or sticky footer method. */
+
+body > .container {
+  padding: 60px 15px 0;
+}
+
+code {
+  font-size: 80%;
+}
+
+.wallet-overlay {
+  z-index: 1035 !important;
+
+}

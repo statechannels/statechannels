@@ -2,7 +2,6 @@ import React from 'react';
 
 import { Button } from 'reactstrap';
 
-import FooterBar from './FooterBar';
 import web3Utils from 'web3-utils';
 import { ApplicationLayout } from './ApplicationLayout';
 
@@ -24,8 +23,6 @@ export default class WaitingRoomPage extends React.PureComponent<Props> {
             Cancel
         </Button>
         </div>
-
-        <FooterBar>Waiting ...</FooterBar>
       </ApplicationLayout>
     );
   }

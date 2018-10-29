@@ -3,7 +3,6 @@ import * as React from 'react';
 import { Button } from 'reactstrap';
 
 import { Move, Result } from '../core';
-import FooterBar from './FooterBar';
 import { MoveBadge } from './MoveBadge';
 import { GameLayout } from './GameLayout';
 
@@ -12,7 +11,6 @@ interface Props {
   theirMove: Move;
   result: Result;
   message: string;
-  resign: () => void;
   playAgain: () => void;
 }
 
@@ -33,7 +31,7 @@ export default class ResultPage extends React.PureComponent<Props> {
   }
 
   render() {
-    const { yourMove, theirMove, message, playAgain, resign } = this.props;
+    const { yourMove, theirMove, playAgain } = this.props;
 
     return (
       <GameLayout>
@@ -58,15 +56,10 @@ export default class ResultPage extends React.PureComponent<Props> {
             </div>
           </div>
 
-          <Button color="default" onClick={resign}>
-            Abandon game
-          </Button>
           <Button color="primary" onClick={playAgain}>
             Play again
           </Button>
         </div>
-
-        <FooterBar>{message}</FooterBar>
       </GameLayout>
     );
   }

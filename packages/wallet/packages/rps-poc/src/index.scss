@@ -4,6 +4,8 @@
 
 @import "~bootstrap/scss/bootstrap";
 
+@import "./styles/layout";
+@import "./styles/footer";
 @import "./styles/move-badge";
 @import "./styles/home-page";
 @import "./styles/navbar";
@@ -22,20 +24,3 @@
 @import "./styles/creating-open-game-modal";
 @import './styles/waiting-room.scss';
 @import './styles/game-over.scss';
-html, body, #root {
-  height: 100%;
-}
-
-#root {
-  display: flex;
-}
-
-.centered-container {
-  display: flex;
-  align-items: center;
-  margin-top: 40px;
-}
-
-.fa-hand-scissors, .fa-hand-rock, .fa-hand-paper {
-  color: orange;
-}
