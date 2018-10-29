@@ -11,6 +11,18 @@
   flex-direction: column;
   align-items: center;
 }
+
+.cog-input-group {
+  display: flex;
+  align-items: center;
+}
+
+.cog-input {
+  width: 50%;
+  margin-right: 10px;
+  text-align: right;
+}
+
 .cog-button {
   width: 252px;
   height: 50px;
