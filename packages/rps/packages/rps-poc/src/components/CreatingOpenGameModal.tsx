@@ -11,7 +11,7 @@ interface Props {
   cancelOpenGame: () => void;
 }
 interface State {
-  validBuyIn: boolean;
+  errorMessage: string;
   buyIn: string;
   buyInChanged: boolean;
 }
@@ -24,7 +24,7 @@ export default class CreatingOpenGameModal extends React.PureComponent<Props, St
   constructor(props) {
     super(props);
     this.buyInInput = React.createRef();
-    this.state = { validBuyIn: false, buyIn: "", buyInChanged: false };
+    this.state = { errorMessage: "", buyIn: "", buyInChanged: false };
     this.createOpenGameHandler = this.createOpenGameHandler.bind(this);
     this.handleBuyInChange = this.handleBuyInChange.bind(this);
     this.modalClosed = this.modalClosed.bind(this);
@@ -32,11 +32,16 @@ export default class CreatingOpenGameModal extends React.PureComponent<Props, St
 
   handleBuyInChange(e) {
     const buyIn = Number(e.target.value);
-    let validBuyIn = true;
-    if (buyIn < MIN_BUYIN || buyIn > MAX_BUYIN) {
-      validBuyIn = false;
+    let errorMessage = "";
+    if (e.target.value === "") {
+      errorMessage = "Please enter a buy in amount";
+    } else if (Number.isNaN(buyIn)) {
+      errorMessage = "Please enter a number for the buy in";
+    } else if (buyIn < MIN_BUYIN || buyIn > MAX_BUYIN) {
+      errorMessage = `Invalid buy in amount ${this.state.buyIn}. Please enter an amount between ${MIN_BUYIN} and ${MAX_BUYIN}`;
+
     }
-    this.setState({ validBuyIn, buyIn: e.target.value, buyInChanged: true });
+    this.setState({ errorMessage, buyIn: e.target.value, buyInChanged: true });
   }
 
   componentDidUpdate() {
@@ -47,7 +52,7 @@ export default class CreatingOpenGameModal extends React.PureComponent<Props, St
 
   createOpenGameHandler(e) {
     e.preventDefault();
-    if (this.state.validBuyIn) {
+    if (this.state.errorMessage === "") {
       this.props.createOpenGame(web3Utils.toWei(this.state.buyIn, 'ether'));
     } else {
       this.setState({ buyInChanged: true });
@@ -55,7 +60,7 @@ export default class CreatingOpenGameModal extends React.PureComponent<Props, St
   }
 
   modalClosed() {
-    this.setState({ validBuyIn: false, buyIn: "", buyInChanged: false });
+    this.setState({ errorMessage: "", buyIn: "", buyInChanged: false });
     this.props.cancelOpenGame();
   }
 
@@ -68,6 +73,7 @@ export default class CreatingOpenGameModal extends React.PureComponent<Props, St
   }
 
   render() {
+
     return (
       <Modal className="cog-container" toggle={this.modalClosed} isOpen={this.props.visible} centered={true}>
         <ModalHeader className="rules-header">
@@ -94,20 +100,17 @@ export default class CreatingOpenGameModal extends React.PureComponent<Props, St
                   `Please enter an amount between ${MIN_BUYIN} and ${MAX_BUYIN}`
                 }
               </small>
-              {!this.state.validBuyIn && this.state.buyInChanged &&
-                <small className="form-text text-danger">
-                  {
-                    this.state.buyIn === "" ? "Please enter a buy-in amount" :
-                      `Invalid buy in amount ${this.state.buyIn}. Please enter an amount between ${MIN_BUYIN} and ${MAX_BUYIN}`
-                  }
-                </small>
-              }
-              <div className="mt-2">Round Buy In: {this.calculateRoundBuyIn()}</div>
+
+              <small className="form-text text-danger cog-error-message">
+                {this.state.errorMessage}
+              </small>
+
+              <div className="mt-2">Round Buy In:</div>
               <small className="form-text text-muted">
                 This is 20% of the total buy in amount.
               </small>
             </div>
-            <Button className="cog-button" type="submit" disabled={!this.state.validBuyIn} block={true}>
+            <Button className="cog-button" type="submit" disabled={this.state.errorMessage !== ""} block={true}>
               Create Game
           </Button>
           </form>
