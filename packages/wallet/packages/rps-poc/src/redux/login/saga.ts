@@ -1,4 +1,4 @@
-import { call, fork, put, take, takeEvery, cancel, cps, select } from 'redux-saga/effects';
+import { call, fork, put, take, takeEvery, cancel, cps } from 'redux-saga/effects';
 
 import * as loginActions from './actions';
 import { reduxSagaFirebase } from '../../gateways/firebase';
@@ -62,7 +62,6 @@ export default function* loginRootSaga() {
   yield [
     takeEvery(loginActions.LOGIN_REQUEST, loginSaga),
     takeEvery(loginActions.LOGOUT_REQUEST, logoutSaga),
-    takeEvery(loginActions.UPDATE_PROFILE, syncProfileSaga),
   ];
 }
 
@@ -71,14 +70,3 @@ function* getLibraryAddress() {
   return RPSGameArtifact.networks[selectedNetworkId].address;
 }
 
-// put these here instead of importing from store to avoid cyclic references
-// todo: do this better
-const getUid = (storeObj: any) => storeObj.login.user.uid;
-const getProfile = (storeObj: any) => storeObj.login.profile;
-
-function * syncProfileSaga() {
-  const uid = yield select(getUid);
-  const profile = yield select(getProfile);
-
-  yield call(reduxSagaFirebase.database.update, `/profiles/${uid}`, profile);
-}

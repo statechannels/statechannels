@@ -54,6 +54,7 @@ describe('player B\'s app', () => {
     myMove: bsMove,
     theirMove: asMove,
     result: bResult,
+    twitterHandle:"tweet",
   };
   describe('when in confirmGameB', () => {
     const gameState = state.confirmGameB({ ...bProps });

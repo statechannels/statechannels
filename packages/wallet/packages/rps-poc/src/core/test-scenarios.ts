@@ -32,6 +32,7 @@ const base = {
 const shared = {
   ...base,
   asAddress,
+  twitterHandle: "twtr",
   bsAddress,
   myName: 'Tom',
   opponentName: 'Alex',

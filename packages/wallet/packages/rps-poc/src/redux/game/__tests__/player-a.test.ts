@@ -49,6 +49,7 @@ describe('player A\'s app', () => {
     myMove: asMove,
     theirMove: bsMove,
     result: aResult,
+    twitterHandle: 'tweet',
   };
 
   describe('when in waitForGameConfirmationA', () => {

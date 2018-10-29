@@ -1,16 +1,10 @@
 import { Reducer } from 'redux';
 import * as loginActions from './actions';
 
-interface Profile {
-  name: string;
-  twitterHandle?: string;
-}
-
 export interface LoginState {
   loading: boolean;
   loggedIn: boolean;
   user: any;
-  profile?: Profile;
 }
 
 const initialState: LoginState = {
@@ -45,14 +39,6 @@ export const loginReducer: Reducer<LoginState> = (state = initialState, action: 
       return {
         ...state,
         loading: false,
-      };
-    case loginActions.UPDATE_PROFILE:
-      return {
-        ...state,
-        profile: {
-          name: action.name,
-          twitterHandle: action.twitterHandle,
-        },
       };
     default:
       return state;
