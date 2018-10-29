@@ -5,6 +5,7 @@ import BN from 'bn.js';
 import simpleAdjudicatorArtifact from 'fmg-simple-adjudicator/contracts/SimpleAdjudicator.sol';
 
 import { connectWeb3 } from '../wallet/web3';
+import { delay } from 'redux-saga';
 
 export async function deploySimpleAdjudicator({ channelId, amount }: { channelId: string, amount: BN }) {
   const connectedWeb3 = connectWeb3();
@@ -48,7 +49,25 @@ export async function deploySimpleAdjudicator({ channelId, amount }: { channelId
   return await truffleContract.at(deployedContract.options.address);
 }
 
-export async function simpleAdjudicatorAt({ address, amount } : { address: string, amount: BN }) {
+async function verifyContractDeployed(address){
+  // Check if we can access the code at the address if not delay and try again
+  let code = await connectWeb3().eth.getCode(address);
+  let delayAmount = 100;
+  while ((code === '' || code === '0x') && delayAmount < 5000) {
+    await delay(delayAmount);
+    delayAmount *= 2;
+    code = await connectWeb3().eth.getCode(address);
+  }
+  if (code === '' || code === '0x'){
+    return false;
+  }else{
+    return true;
+  }
+}
+
+export async function simpleAdjudicatorAt({ address, amount }: { address: string, amount: BN }) {
+  await verifyContractDeployed(address);
+  
   const truffleContract = await setupContract(connectWeb3());
   return await truffleContract.at(address, { value: amount.toString() });
 }
