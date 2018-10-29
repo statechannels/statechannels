@@ -1,0 +1,16 @@
+@import "./_colors";
+
+.profile-button {
+    width: 200px;
+    height: 50px;
+    border-radius: 40px;
+    background-color: $rps-red;
+    border-color: $rps-red;
+    align-self: center;
+    margin: 5px;
+}
+
+.form-profile {
+    display: flex;
+    flex-direction: column;
+}
