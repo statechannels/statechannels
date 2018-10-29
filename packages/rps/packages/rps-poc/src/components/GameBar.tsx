@@ -4,7 +4,6 @@ import web3Utils from 'web3-utils';
 import hexToBN from '../utils/hexToBN';
 
 import { Navbar } from "reactstrap";
-import { State } from "fmg-core";
 
 interface Props {
   myName: string;
@@ -14,7 +13,7 @@ interface Props {
   roundBuyIn: string;
 }
 
-export default class GameBar extends React.PureComponent<Props, State> {
+export default class GameBar extends React.PureComponent<Props> {
 
   myDot = () => (
     <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">

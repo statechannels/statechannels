@@ -2,7 +2,6 @@ import React from 'react';
 
 import { Button } from 'reactstrap';
 
-import FooterBar from './FooterBar';
 import { ApplicationLayout } from './ApplicationLayout';
 import web3Utils from 'web3-utils';
 interface Props {
@@ -33,7 +32,6 @@ export default class ConfirmGamePage extends React.PureComponent<Props> {
           </Button>
             </div>
           </div>
-          <FooterBar>Waiting ...</FooterBar>
         </div>
       </ApplicationLayout>
     );
