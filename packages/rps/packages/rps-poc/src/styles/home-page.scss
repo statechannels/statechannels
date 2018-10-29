@@ -29,37 +29,8 @@ $background-image-max-width: 800px;
 }
 
 .homePage-loginButton {
-	display: flex;
-	z-index: 999;
-	justify-content: flex-start;
-	cursor: pointer;
-	padding-top: $loginButton-height;
-}
-
-.homePage-loginButton-text {
-	align-items: center;
-	background-color: $rps-light-blue;
-	color: $rps-white;
-	display: flex;
-	flex-direction: row;
-	height: $loginButton-height;
-	justify-content: center;
-	width: 300px;
-}
-
-.homePage-loginButton-icon-container {
-	align-items: center;
-	background-color: $rps-white;
-	display: flex;
-	flex-direction: row;
-	height: $loginButton-height;
-	justify-content: center;
-	width: $loginButton-height;
-}
-
-.homePage-loginButton-icon {
-	height: 25px;
-	width: 25px;
+  margin-top: $loginButton-height;
+  font-size: 20px;
 }
 
 .homePage-image {
