@@ -35,14 +35,14 @@ export default class ResultPage extends React.PureComponent<Props> {
 
     return (
       <GameLayout>
-        <div className="w-100 text-center mb-5">
+        <div className="w-100 text-center">
           <h1 className="mb-5">{this.renderResultText()}</h1>
           <div className="row">
             <div className="col-sm-6">
               <p className="lead">
                 You chose <strong>{Move[yourMove]}</strong>
               </p>
-              <div className="mb-5">
+              <div>
                 <MoveBadge move={yourMove} />
               </div>
             </div>
@@ -50,13 +50,13 @@ export default class ResultPage extends React.PureComponent<Props> {
               <p className="lead">
                 Your opponent chose <strong>{Move[theirMove]}</strong>
               </p>
-              <div className="mb-5">
+              <div>
                 <MoveBadge move={theirMove} />
               </div>
             </div>
           </div>
 
-          <Button color="primary" onClick={playAgain}>
+          <Button className="cog-button" onClick={playAgain}>
             Play again
           </Button>
         </div>
