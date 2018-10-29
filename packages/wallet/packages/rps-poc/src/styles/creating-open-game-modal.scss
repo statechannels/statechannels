@@ -1,8 +1,8 @@
 @import "./_colors";
 
 .cog-container {
-  width: 335px;
-  height: 350px;
+  width: 350px;
+  height: 400px;
   border-radius: 10px;
 }
 
@@ -29,4 +29,9 @@
   border-radius: 40px;
   background-color: $rps-red;
   border-color: $rps-red;
+}
+
+.cog-error-message {
+  max-width: 225px;
+  min-height: 40px;
 }
