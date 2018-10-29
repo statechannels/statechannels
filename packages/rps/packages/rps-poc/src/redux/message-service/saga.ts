@@ -65,7 +65,7 @@ export function* sendMessagesSaga() {
       const queue = Queue.GAME_ENGINE;
       const data = encode(messageState.opponentOutbox.position);
       const signature = yield signMessage(data);
-      const userName = gameState.myName;
+      const userName = gameState.name !== gameStates.StateName.NoName ? gameState.myName : "";
       const message = { data, queue, signature, userName };
       const { opponentAddress } = messageState.opponentOutbox;
 
@@ -77,7 +77,8 @@ export function* sendMessagesSaga() {
       if (
         gameState.name !== gameStates.StateName.Lobby &&
         gameState.name !== gameStates.StateName.WaitingRoom &&
-        gameState.name !== gameStates.StateName.CreatingOpenGame
+        gameState.name !== gameStates.StateName.CreatingOpenGame &&
+        gameState.name !== gameStates.StateName.NoName
       ) {
         yield handleWalletMessage(messageState.walletOutbox, gameState);
       }

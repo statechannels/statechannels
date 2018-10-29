@@ -12,7 +12,7 @@ const {
   asAddress, bsAddress,channelNonce, libraryAddress, roundBuyIn, preFundSetupA,
 } = scenarios.standard;
 
-const params = { myName: 'Tom', roundBuyIn, myAddress:asAddress, libraryAddress };
+const params = { myName: 'Tom', roundBuyIn, myAddress:asAddress, libraryAddress, twitterHandle:"Tweet" };
 const messageState = {};
 
 describe('when in lobby', () => {

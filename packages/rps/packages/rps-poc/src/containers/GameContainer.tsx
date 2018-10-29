@@ -20,6 +20,7 @@ import WaitToResign from '../components/WaitToResign';
 import WaitForResignationAcknowledgement from '../components/WaitForResignationAcknowledgement';
 import GameOverPage from '../components/GameOverPage'; // GameOver, OpponentResigned
 import GameProposedPage from '../components/GameProposedPage';
+import ProfileContainer from './ProfileContainer';
 
 import WaitForWallet from '../components/WaitForWallet'; // WaitForFunding, maybe others?
 
@@ -52,6 +53,8 @@ function GameContainer(props: GameProps) {
 function RenderGame(props: GameProps) {
   const { state, chooseMove, playAgain, createBlockchainChallenge, confirmGame, declineGame, withdraw } = props;
   switch (state.name) {
+    case StateName.NoName:
+      return <ProfileContainer />;
     case StateName.WaitingRoom:
       return (
         <WaitingRoomPage

@@ -1,5 +1,6 @@
 import { Move, Position, positions } from '../../core';
 
+export const UPDATE_PROFILE = 'LOGIN.UPDATE_PROFILE';
 export const JOIN_OPEN_GAME = 'GAME.JOIN_OPEN_GAME';
 export const NEW_OPEN_GAME = 'GAME.NEW_OPEN_GAME';
 export const CREATE_OPEN_GAME = 'GAME.CREATE_OPEN_GAME';
@@ -16,6 +17,12 @@ export const WITHDRAWAL_REQUEST = 'GAME.WITHDRAWAL_REQUEST';
 export const WITHDRAWAL_SUCCESS = 'GAME.WITHDRAWAL_SUCCESS';
 export const ENTER_LOBBY = 'GAME.ENTER_LOBBY';
 export const MESSAGE_SENT = 'GAME.MESSAGE_SENT';
+
+export const updateProfile = (name: string, twitterHandle: string) => ({
+  type: UPDATE_PROFILE as typeof UPDATE_PROFILE,
+  name,
+  twitterHandle,
+});
 
 export const newOpenGame = () => ({
   type: NEW_OPEN_GAME as typeof NEW_OPEN_GAME,
@@ -111,9 +118,11 @@ export type WithdrawalSuccess = ReturnType<typeof withdrawalSuccess>;
 export type WithdrawalRequest = ReturnType<typeof withdrawalRequest>;
 export type CreateOpenGame = ReturnType<typeof createOpenGame>;
 export type EnterLobby = ReturnType<typeof enterLobby>;
+export type UpdateProfile = ReturnType<typeof updateProfile>;
 export type MessageSent = ReturnType<typeof messageSent>;
 
 export type GameAction = (
+  | UpdateProfile
   | NewOpenGame
   | CancelOpenGame
   | CreateOpenGame

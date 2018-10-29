@@ -17,7 +17,7 @@ export interface JointState {
   messageState: MessageState;
 }
 
-const emptyJointState: JointState = { messageState: {}, gameState: states.lobby({ myName: 'Me', myAddress: '', libraryAddress: '' }) };
+const emptyJointState: JointState = { messageState: {}, gameState: states.noName({ myAddress: '', libraryAddress: '' }) };
 
 export const gameReducer: Reducer<JointState> = (state = emptyJointState, action: actions.GameAction | LoginSuccess | InitializationSuccess) => {
 
@@ -28,9 +28,8 @@ export const gameReducer: Reducer<JointState> = (state = emptyJointState, action
   }
   if (action.type === LOGIN_SUCCESS) {
     const { messageState, gameState } = state;
-    const { user, libraryAddress } = action;
-    const myName = user.displayName;
-    return { gameState: { ...gameState, myName, libraryAddress }, messageState };
+    const { libraryAddress } = action;
+    return { gameState: { ...gameState, libraryAddress }, messageState };
   }
   if (action.type === INITIALIZATION_SUCCESS) {
     const { messageState, gameState } = state;
@@ -59,6 +58,8 @@ function singleActionReducer(state: JointState, action: actions.GameAction) {
   const { messageState, gameState } = state;
 
   switch (gameState.name) {
+    case states.StateName.NoName:
+      return noNameReducer(gameState, messageState, action);
     case states.StateName.Lobby:
       return lobbyReducer(gameState, messageState, action);
     case states.StateName.CreatingOpenGame:
@@ -104,6 +105,21 @@ function singleActionReducer(state: JointState, action: actions.GameAction) {
   }
 }
 
+function noNameReducer(gameState: states.NoName, messageState: MessageState, action: actions.GameAction): JointState {
+  switch (action.type) {
+    case actions.UPDATE_PROFILE:
+      const { name, twitterHandle } = action;
+      const { myAddress, libraryAddress } = gameState;
+
+      const lobby = states.lobby({
+        ...action, myName: name, myAddress, libraryAddress, twitterHandle,
+      });
+      return { gameState: lobby, messageState };
+    default:
+      return { gameState, messageState };
+  }
+}
+
 function lobbyReducer(gameState: states.Lobby, messageState: MessageState, action: actions.GameAction): JointState {
   switch (action.type) {
     case actions.NEW_OPEN_GAME:
@@ -111,14 +127,14 @@ function lobbyReducer(gameState: states.Lobby, messageState: MessageState, actio
       return { gameState: newGameState, messageState };
     case actions.JOIN_OPEN_GAME:
       const { roundBuyIn, opponentAddress } = action;
-      const { myName,myAddress, libraryAddress,} = gameState;
+      const { myName,myAddress, libraryAddress, twitterHandle} = gameState;
       const balances = [hexToBN(roundBuyIn).muln(5), hexToBN(roundBuyIn).muln(5)].map(bnToHex) as [string, string];
       const participants: [string, string] = [myAddress, opponentAddress];
       const turnNum = 0;
       const stateCount = 1;
 
       const waitForConfirmationState = states.waitForGameConfirmationA({
-        ...action, myName, balances, participants, turnNum, stateCount, libraryAddress,
+        ...action, myName, balances, participants, turnNum, stateCount, libraryAddress, twitterHandle,
       });
       messageState = sendMessage(positions.preFundSetupA(waitForConfirmationState), opponentAddress, messageState);
       return { gameState: waitForConfirmationState, messageState };
@@ -144,10 +160,11 @@ function waitingRoomReducer(gameState: states.WaitingRoom, messageState: Message
   switch (action.type) {
     case actions.INITIAL_POSITION_RECEIVED:
       const { position, opponentName } = action;
-      const {myName} = gameState;
+      const {myName, twitterHandle} = gameState;
+       
       if (position.name !== positions.PRE_FUND_SETUP_A) { return { gameState, messageState }; }
 
-      const newGameState = states.confirmGameB({ ...position, myName, opponentName });
+      const newGameState = states.confirmGameB({ ...position, myName, opponentName, twitterHandle });
       return { gameState: newGameState, messageState };
     case actions.CANCEL_OPEN_GAME:
       const newGameState1 = states.lobby(gameState);
@@ -237,9 +254,9 @@ function confirmGameBReducer(gameState: states.ConfirmGameB, messageState: Messa
   return { gameState: newGameState, messageState };
   } else {
 
-    const {myName,participants,libraryAddress, player} = gameState;
+    const {myName,participants,libraryAddress, player, twitterHandle} = gameState;
     // TODO: Probably should return to the waiting room instead of getting kicked back to the lobby
-    const newGameState = states.lobby({myName,myAddress:participants[player],libraryAddress});
+    const newGameState = states.lobby({myName,myAddress:participants[player],libraryAddress, twitterHandle});
     // TODO: Send a message to the other player that the game has been declined
     return {gameState:newGameState,messageState};
   }
@@ -550,8 +567,8 @@ function waitForWithdrawalReducer(gameState: states.WaitForWithdrawal, messageSt
   if (action.type !== actions.WITHDRAWAL_SUCCESS) {
     return { gameState, messageState };
   }
-  const {myName,libraryAddress} = gameState;
+  const {myName,libraryAddress, twitterHandle} = gameState;
   const myAddress = gameState.participants[gameState.player];
-  const newGameState = states.lobby({myName,myAddress,libraryAddress});
+  const newGameState = states.lobby({myName,myAddress,libraryAddress, twitterHandle});
   return {gameState:newGameState ,messageState:{}};
 }  
