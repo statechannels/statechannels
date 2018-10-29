@@ -29,6 +29,7 @@ export default store;
 export const getApplicationState = (storeObj: any) => storeObj.app;
 export const getWalletState = (storeObj: any) => storeObj.wallet;
 export const getUser = (storeObj: any) => storeObj.login.user;
+export const getProfile = (storeObj: any) => storeObj.login.profile;
 export const getGameState = (storeObj:any)=>storeObj.game.gameState;
 export const getGameStateName = (storeObj:any)=>storeObj.game.gameState.name;
 export const getMessageState = (storeObj:any)=>storeObj.game.messageState;

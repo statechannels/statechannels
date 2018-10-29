@@ -2,6 +2,7 @@ import React from 'react';
 
 import ApplicationContainer from './ApplicationContainer';
 import HomePageContainer from './HomePageContainer';
+import ProfileContainer from './ProfileContainer';
 import { connect } from 'react-redux';
 
 import { SiteState } from '../redux/reducer';
@@ -13,6 +14,7 @@ interface SiteProps {
   isAuthenticated: boolean;
   metamaskError: MetamaskError | null;
   loading: boolean;
+  hasProfile: boolean;
 }
 
 function Site(props: SiteProps) {
@@ -21,7 +23,11 @@ function Site(props: SiteProps) {
   } else if (props.metamaskError !== null) {
     return <MetamaskErrorPage error={props.metamaskError} />;
   } else if (props.isAuthenticated) {
-    return <ApplicationContainer />;
+    if (props.hasProfile) {
+      return <ApplicationContainer />;
+    } else {
+      return <ProfileContainer />;
+    }
   } else {
     return <HomePageContainer />;
   }
@@ -32,6 +38,7 @@ const mapStateToProps = (state: SiteState): SiteProps => {
     isAuthenticated: state.login && state.login.loggedIn,
     loading: state.metamask.loading,
     metamaskError: state.metamask.error,
+    hasProfile: state.login && !!state.login.profile && !!state.login.profile.name,
   };
 };
 
