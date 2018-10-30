@@ -3,4 +3,5 @@ export enum ChallengeStatus {
   WaitingForUserSelection,
   WaitingForCreateChallenge,
   WaitingForConcludeChallenge,
+  Expired,
 }

@@ -39,7 +39,7 @@ export default class ChallengeResponse extends React.PureComponent<Props> {
 
   render() {
     const { responseOptions, expiryTime } = this.props;
-    const parsedExpiryDate = new Date(expiryTime * 1000).toLocaleDateString();
+    const parsedExpiryDate = new Date(expiryTime * 1000).toLocaleTimeString();
 
       return(
           <div className="challenge-response-text challenge-response-container">

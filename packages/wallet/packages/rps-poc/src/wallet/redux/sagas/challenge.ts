@@ -1,4 +1,4 @@
-import { put, take } from "redux-saga/effects";
+import { put, take, fork } from "redux-saga/effects";
 
 import * as challengeActions from '../actions/challenge';
 import * as displayActions from '../actions/display';
@@ -10,6 +10,9 @@ import { Refute, ChallengeResponse, RespondWithMove, RespondWithExistingMove } f
 import { Signature } from "../../domain/Signature";
 import { ChallengeStatus } from "../../domain/ChallengeStatus";
 import { ConclusionProof } from "../../domain/ConclusionProof";
+import { delay } from "redux-saga";
+
+import * as gameActions from '../../../redux/game/actions';
 
 export default function* challengeSaga(challenge, theirPositionString: string, theirSignatureString: string, myPositionString: string, mySignatureString: string) {
   const { expirationTime } = challenge;
@@ -42,7 +45,7 @@ export default function* challengeSaga(challenge, theirPositionString: string, t
 
   yield put(challengeActions.setChallenge(expirationTime, responseOptions, userIsChallenger ? ChallengeStatus.WaitingOnOtherPlayer : ChallengeStatus.WaitingForUserSelection));
   yield put(displayActions.showWallet());
-
+  yield fork(challengeExpirer,expirationTime);
   if (!userIsChallenger) {
     const action: challengeActions.ResponseAction = yield take(challengeActions.RESPONSE_ACTIONS);
     switch (action.type) {
@@ -65,9 +68,21 @@ export default function* challengeSaga(challenge, theirPositionString: string, t
         break;
     }
   }
-
+ 
   return true;
 }
+
+function* challengeExpirer(expirationTime){
+  yield delay((expirationTime * 1000) - Date.now());
+  yield put (challengeActions.setChallengeStatus(ChallengeStatus.Expired));
+
+  // TODO: This is hack and needs to be replaced properly
+  yield take(blockchainActions.WITHDRAW_SUCCESS);
+  yield put(displayActions.hideWallet());
+  yield put(gameActions.exitToLobby());
+}
+
+
 
 function* respondWithMove() {
   // Hide the wallet to allow the user to select a move in the app
@@ -102,3 +117,4 @@ function* conclude({ proof }: { proof: ConclusionProof }) {
   yield put(challengeActions.setChallengeStatus(ChallengeStatus.WaitingForConcludeChallenge));
   yield put(blockchainActions.concludeRequest(proof));
 }
+

@@ -20,12 +20,14 @@ import WalletWelcome from './WalletWelcome';
 import WalletWithdrawalWelcome from './WalletWithdrawalWelcome';
 import WithdrawInProgress from './WithdrawInProgress';
 import WalletMessage from './WalletMessage';
+import ChallengeExpired from './ChallengeExpired';
 
 interface Props {
   showWallet: boolean;
   walletState: WalletState;
   challengeState: ChallengeState;
   loginDisplayName: string;
+  userAddress:string;
   closeWallet: () => void;
   tryFundingAgain: () => void;
   approveFunding: () => void;
@@ -36,8 +38,8 @@ interface Props {
   respondWithAlternativeMove: (alternativePosition: string, alternativeSignature: Signature, response: string, responseSignature: Signature) => void;
   refute: (newerPosition: string, signature: Signature) => void;
   conclude: (proof: ConclusionProof) => void;
+  withdraw: (address:string) => void;
 }
-
 export default class WalletController extends PureComponent<Props> {
   renderWallet() {
     const { walletState, challengeState, loginDisplayName, closeWallet, approveWithdrawal } = this.props;
@@ -46,20 +48,24 @@ export default class WalletController extends PureComponent<Props> {
     }
 
     if (challengeState != null) {
-      switch (challengeState.status) {
-        case ChallengeStatus.WaitingForUserSelection:
-          return (<ChallengeResponse loginDisplayName={loginDisplayName} expiryTime={challengeState.expirationTime} responseOptions={challengeState.responseOptions} respondWithMove={this.props.respondWithMove} respondWithAlternativeMove={this.props.respondWithAlternativeMove} refute={this.props.refute} conclude={this.props.conclude} />);
-        case ChallengeStatus.WaitingOnOtherPlayer:
-          const parsedExpiryDateTime = new Date(challengeState.expirationTime * 1000).toLocaleTimeString();
-          const waitForPlayerContent = <div><p>Your challenge has been issued.</p>
-            <p>The game will automatically conclude by {parsedExpiryDateTime} if no action is taken.</p></div>;
-          return (<WalletMessage loginDisplayName={loginDisplayName} content={waitForPlayerContent} title="Challenge Issued" />);
-        case ChallengeStatus.WaitingForCreateChallenge:
-          const waitForCreateContent = <div>Waiting for the challenge transaction to be recorded.</div>;
-          return <WalletMessage loginDisplayName={loginDisplayName} title="Waiting for challenge creation" content={waitForCreateContent} />;
-        case ChallengeStatus.WaitingForConcludeChallenge:
-          const waitForConcludeContent = <div>Waiting for the challenge to conclude</div>;
-          return <WalletMessage loginDisplayName={loginDisplayName} title="Waiting for challenge to conclude" content={waitForConcludeContent} />;
+      if (challengeState.status === ChallengeStatus.Expired) {
+        return <ChallengeExpired withdraw={()=>this.props.withdraw(this.props.userAddress)} loginDisplayName={loginDisplayName} expiryTime={challengeState.expirationTime} />;
+      } else {
+        switch (challengeState.status) {
+          case ChallengeStatus.WaitingForUserSelection:
+            return (<ChallengeResponse loginDisplayName={loginDisplayName} expiryTime={challengeState.expirationTime} responseOptions={challengeState.responseOptions} respondWithMove={this.props.respondWithMove} respondWithAlternativeMove={this.props.respondWithAlternativeMove} refute={this.props.refute} conclude={this.props.conclude} />);
+          case ChallengeStatus.WaitingOnOtherPlayer:
+            const parsedExpiryDateTime = new Date(challengeState.expirationTime * 1000).toLocaleTimeString();
+            const waitForPlayerContent = <div><p>Your challenge has been issued.</p>
+              <p>The game will automatically conclude by {parsedExpiryDateTime} if no action is taken.</p></div>;
+            return (<WalletMessage loginDisplayName={loginDisplayName} content={waitForPlayerContent} title="Challenge Issued" />);
+          case ChallengeStatus.WaitingForCreateChallenge:
+            const waitForCreateContent = <div>Waiting for the challenge transaction to be recorded.</div>;
+            return <WalletMessage loginDisplayName={loginDisplayName} title="Waiting for challenge creation" content={waitForCreateContent} />;
+          case ChallengeStatus.WaitingForConcludeChallenge:
+            const waitForConcludeContent = <div>Waiting for the challenge to conclude</div>;
+            return <WalletMessage loginDisplayName={loginDisplayName} title="Waiting for challenge to conclude" content={waitForConcludeContent} />;
+        }
       }
     }
 

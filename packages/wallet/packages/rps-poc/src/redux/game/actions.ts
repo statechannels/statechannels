@@ -15,7 +15,7 @@ export const POSITION_RECEIVED = 'GAME.POSITION_RECEIVED';
 export const FUNDING_SUCCESS = 'GAME.FUNDING_SUCCESS';
 export const WITHDRAWAL_REQUEST = 'GAME.WITHDRAWAL_REQUEST';
 export const WITHDRAWAL_SUCCESS = 'GAME.WITHDRAWAL_SUCCESS';
-export const ENTER_LOBBY = 'GAME.ENTER_LOBBY';
+export const EXIT_TO_LOBBY = 'GAME.EXIT_TO_LOBBY';
 export const MESSAGE_SENT = 'GAME.MESSAGE_SENT';
 
 export const updateProfile = (name: string, twitterHandle: string) => ({
@@ -93,9 +93,8 @@ export const createOpenGame = (roundBuyIn: string) => ({
   roundBuyIn,
 });
 
-export const enterLobby = (myName: string,) => ({
-  type: ENTER_LOBBY as typeof ENTER_LOBBY,
-  myName,
+export const exitToLobby = () => ({
+  type: EXIT_TO_LOBBY as typeof EXIT_TO_LOBBY,
 });
 
 // TODO: Should this be moved?
@@ -117,7 +116,7 @@ export type FundingSuccess = ReturnType<typeof fundingSuccess>;
 export type WithdrawalSuccess = ReturnType<typeof withdrawalSuccess>;
 export type WithdrawalRequest = ReturnType<typeof withdrawalRequest>;
 export type CreateOpenGame = ReturnType<typeof createOpenGame>;
-export type EnterLobby = ReturnType<typeof enterLobby>;
+export type ExitToLobby = ReturnType<typeof exitToLobby>;
 export type UpdateProfile = ReturnType<typeof updateProfile>;
 export type MessageSent = ReturnType<typeof messageSent>;
 
@@ -137,6 +136,6 @@ export type GameAction = (
   | WithdrawalRequest
   | Resign
   | InitialPositionReceived
-  | EnterLobby
+  | ExitToLobby
   | MessageSent
 );
