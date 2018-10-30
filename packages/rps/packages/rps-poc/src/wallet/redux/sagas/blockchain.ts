@@ -6,14 +6,20 @@ import { eventChannel } from 'redux-saga';
 import { ConclusionProof } from '../../domain/ConclusionProof';
 import * as blockchainActions from '../actions/blockchain';
 import { deploySimpleAdjudicator, simpleAdjudicatorAt } from '../../../contracts/SimpleAdjudicator';
+import * as externalActions from '../actions/external';
+import { Signature } from '../../../wallet/domain';
+import hash from 'object-hash';
+import { SolidityType } from 'fmg-core';
+import ChannelWallet from '../../../wallet/domain/ChannelWallet';
 
-export function* blockchainSaga() {
+
+export function* blockchainSaga(wallet) {
   const { simpleAdjudicator, eventListener } = yield call(contractSetup);
 
-  yield fork(blockchainWithdrawal, simpleAdjudicator);
-  yield fork(blockchainChallenge, simpleAdjudicator);
+  yield fork(blockchainConcludeAndWithdrawal, simpleAdjudicator);
+  yield fork(blockchainChallenge, simpleAdjudicator, wallet);
 
-  yield take(blockchainActions.WITHDRAW_SUCCESS);
+  yield take(blockchainActions.CONCLUDEANDWITHDRAW_SUCCESS);
   yield cancel(eventListener);
 
   return true;
@@ -62,19 +68,38 @@ function* contractSetup() {
   }
 }
 
-function* blockchainChallenge(simpleAdjudicator) {
+function* blockchainChallenge(simpleAdjudicator, wallet: ChannelWallet) {
   const channel = yield actionChannel([
     blockchainActions.FORCEMOVE_REQUEST,
     blockchainActions.RESPONDWITHMOVE_REQUEST,
     blockchainActions.RESPONDWITHALTERNATIVEMOVE_REQUEST,
     blockchainActions.REFUTE_REQUEST,
     blockchainActions.CONCLUDE_REQUEST,
+    blockchainActions.WITHDRAW_REQUEST,
   ]);
   while (true) {
     const action = yield take(channel);
 
     switch (action.type) {
-      // TODO: handle errors
+      case blockchainActions.WITHDRAW_REQUEST:
+        const { address } = action;
+
+        const data = [
+          { type: SolidityType.address, value: address },
+          { type: SolidityType.address, value: address },
+          { type: SolidityType.bytes32, value: wallet.channelId },
+        ];
+        const requestId = hash(data.toString() + Date.now());
+
+        yield put(externalActions.signatureRequest(requestId, data));
+        const signAction: externalActions.SignatureSuccess = yield take(externalActions.SIGNATURE_SUCCESS);
+        if (signAction.requestId === requestId) {
+          const withdrawSignature = new Signature(signAction.signature);
+          const transaction = yield call(simpleAdjudicator.withdraw, address, address, wallet.channelId, withdrawSignature.v, withdrawSignature.r, withdrawSignature.s);
+          yield put(blockchainActions.withdrawSuccess(transaction));
+        }
+
+        break;
       case blockchainActions.FORCEMOVE_REQUEST:
         const { fromState, toState, v, r, s } = action.challengeProof;
         yield call(simpleAdjudicator.forceMove, fromState, toState, v, r, s);
@@ -99,9 +124,10 @@ function* blockchainChallenge(simpleAdjudicator) {
   }
 }
 
-function* blockchainWithdrawal(simpleAdjudicator) {
+
+function* blockchainConcludeAndWithdrawal(simpleAdjudicator) {
   while (true) {
-    const action: blockchainActions.WithdrawRequest = yield take(blockchainActions.WITHDRAW_REQUEST);
+    const action: blockchainActions.ConcludeAndWithdrawRequest = yield take(blockchainActions.CONCLUDEANDWITHDRAW_REQUEST);
     try {
       const proof: ConclusionProof = action.proof;
       const { playerAddress, destination, channelId, v, r, s } = action.withdrawData;
@@ -118,10 +144,10 @@ function* blockchainWithdrawal(simpleAdjudicator) {
         [...proof.s, s]
       );
 
-      yield put(blockchainActions.withdrawSuccess(transaction));
+      yield put(blockchainActions.concludeAndWithdrawSuccess(transaction));
       return true;
     } catch (err) {
-      yield handleError(blockchainActions.withdrawFailure, err);
+      yield handleError(blockchainActions.concludeAndWithdrawFailure, err);
     }
   }
 }
