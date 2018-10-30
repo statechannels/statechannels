@@ -26,3 +26,9 @@
 .navbar.footer-bar {
   background-color: $rps-background;
 }
+
+.footer-logo-container {
+  display:flex;
+  flex-direction: column;
+  align-items: flex-end;
+}

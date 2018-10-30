@@ -47,7 +47,7 @@ export default class FundingInProgress extends React.PureComponent<Props> {
             <img className="deploy-icon" src={this.getIcon(deployStatus,!playerAIsFunding)} />
             <div className="deploy-title">{deployTitle}</div>
             <div className="deploy-amount">Amount {web3Utils.fromWei(amount, 'ether')} ETH</div>
-            {player === 0 && playerAIsFunding && <div >Check your wallet to the right to confirm the deposit amount is correct.</div>}
+            {player === 0 && playerAIsFunding && <div >Check your wallet to see the status of the transaction.</div>}
             {}
           </div>
           <div className="funding-divider" />
@@ -55,7 +55,7 @@ export default class FundingInProgress extends React.PureComponent<Props> {
             <img className="deposit-icon funding-off" src={this.getIcon(depositStatus, !playerBIsFunding)} />
             <div className="deposit-title">{depositTitle}</div>
             <div className="deposit-amount">Amount {web3Utils.fromWei(amount, 'ether')} ETH</div>
-            {player === 1 && playerBIsFunding && <div >Check your wallet to the right to confirm the deposit amount is correct.</div>}
+            {player === 1 && playerBIsFunding && <div >Check your wallet to see the status of the transaction.</div>}
           </div>
 
         </div>
