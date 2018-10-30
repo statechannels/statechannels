@@ -14,7 +14,8 @@ import FundingConfirmedPage from '../components/FundingConfirmedPage'; // WaitFo
 import SelectMovePage from '../components/SelectMovePage';
 import WaitForOpponentToPickMove from '../components/WaitForOpponentToPickMove';
 import MoveSelectedPage from '../components/MoveSelectedPage'; // WaitForReveal, WaitForResting
-import ResultPage from '../components/ResultPage'; // PlayAgain
+import PlayAgain from '../components/PlayAgain';
+import WaitForRestingA from '../components/WaitForRestingA';
 import InsufficientFunds from '../components/InsufficientFunds';
 import WaitToResign from '../components/WaitToResign';
 import WaitForResignationAcknowledgement from '../components/WaitForResignationAcknowledgement';
@@ -101,8 +102,7 @@ function RenderGame(props: GameProps) {
 
     case StateName.PlayAgain:
       return (
-        <ResultPage
-          message="Waiting for opponent to suggest a new game"
+        <PlayAgain
           yourMove={state.myMove}
           theirMove={state.theirMove}
           result={state.result}
@@ -113,8 +113,7 @@ function RenderGame(props: GameProps) {
 
     case StateName.WaitForRestingA:
       return (
-        <ResultPage
-          message="Waiting for opponent to confirm"
+        <WaitForRestingA
           yourMove={state.myMove}
           theirMove={state.theirMove}
           result={state.result}
