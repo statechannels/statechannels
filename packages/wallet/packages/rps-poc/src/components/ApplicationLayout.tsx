@@ -8,7 +8,7 @@ export const ApplicationLayout = (props) => {
     <div className="w-100">
       <NavigationBarContainer />
 
-      <div className="container centered-container w-100">
+      <div className="container centered-container w-100 mb-5">
         {props.children}
       </div>
 
