@@ -2,7 +2,8 @@ import BN from 'bn.js';
 import { ConclusionProof } from '../../domain/ConclusionProof';
 import { State } from 'fmg-core';
 import { ChallengeProof } from '../../domain/ChallengeProof';
-import { Signature } from 'src/wallet/domain/Signature';
+import { Signature } from '../../../wallet/domain/Signature';
+
 
 export type DeploymentRequest = ReturnType<typeof deploymentRequest>;
 export type DeploymentSuccess = ReturnType<typeof deploymentSuccess>;
@@ -16,6 +17,11 @@ export type DepositResponse = DepositSuccess | DepositFailure;
 
 export type ConcludeGame = ReturnType<typeof concludeGame>;
 
+export type ConcludeAndWithdrawRequest = ReturnType<typeof concludeAndWithdrawRequest>;
+export type ConcludeAndWithdrawSuccess = ReturnType<typeof concludeAndWithdrawSuccess>;
+export type ConcludeAndWithdrawFailure = ReturnType<typeof concludeAndWithdrawFailure>;
+export type ConcludeAndWithdrawResponse = ConcludeAndWithdrawSuccess | ConcludeAndWithdrawFailure;
+
 export type WithdrawRequest = ReturnType<typeof withdrawRequest>;
 export type WithdrawSuccess = ReturnType<typeof withdrawSuccess>;
 export type WithdrawFailure = ReturnType<typeof withdrawFailure>;
@@ -24,7 +30,7 @@ export type WithdrawResponse = WithdrawSuccess | WithdrawFailure;
 export type ForceMoveRequest = ReturnType<typeof forceMove>;
 export type RespondWithMoveRequest = ReturnType<typeof respondWithMoveRequest>;
 
-export type RequestAction = DeploymentRequest | DepositRequest | WithdrawRequest | ForceMoveRequest | RespondWithMoveRequest;
+export type RequestAction = DeploymentRequest | DepositRequest | ConcludeAndWithdrawRequest | ForceMoveRequest | RespondWithMoveRequest;
 
 export const DEPLOY_REQUEST = 'BLOCKCHAIN.DEPLOY.REQUEST';
 export const DEPLOY_SUCCESS = 'BLOCKCHAIN.DEPLOY.SUCCESS';
@@ -36,9 +42,9 @@ export const DEPOSIT_FAILURE = 'BLOCKCHAIN.DEPOSIT.FAILURE';
 
 export const CONCLUDE_GAME = 'BLOCKCHAIN.GAME.CONCLUDE';
 
-export const WITHDRAW_REQUEST = 'BLOCKCHAIN.WITHDRAW.REQUEST';
-export const WITHDRAW_SUCCESS = 'BLOCKCHAIN.WITHDRAW.SUCCESS';
-export const WITHDRAW_FAILURE = 'BLOCKCHAIN.WITHDRAW.FAILURE';
+export const CONCLUDEANDWITHDRAW_REQUEST = 'BLOCKCHAIN.CONCLUDEANDWITHDRAW.REQUEST';
+export const CONCLUDEANDWITHDRAW_SUCCESS = 'BLOCKCHAIN.CONCLUDEANDWITHDRAW.SUCCESS';
+export const CONCLUDEANDWITHDRAW_FAILURE = 'BLOCKCHAIN.CONCLUDEANDWITHDRAW.FAILURE';
 
 export const FORCEMOVE_REQUEST = 'BLOCKCHAIN.CHALLENGE.FORCE_MOVE.REQUEST';
 export const FORCEMOVE_SUCCESS = 'BLOCKCHAIN.CHALLENGE.FORCE_MOVE.SUCCESS';
@@ -59,6 +65,10 @@ export const REFUTE_FAILURE = 'BLOCKCHAIN.CHALLENGE.REFUTE.FAILURE';
 export const CONCLUDE_REQUEST = 'BLOCKCHAIN.CHALLENGE.CONCLUDE.REQUEST';
 export const CONCLUDE_SUCCESS = 'BLOCKCHAIN.CHALLENGE.CONCLUDE.SUCCESS';
 export const CONCLUDE_FAILURE = 'BLOCKCHAIN.CHALLENGE.CONCLUDE.FAILURE';
+
+export const WITHDRAW_REQUEST = 'BLOCKCHAIN.WITHDRAW.REQUEST';
+export const WITHDRAW_SUCCESS = 'BLOCKCHAIN.WITHDRAW.SUCCESS';
+export const WITHDRAW_FAILURE = 'BLOCKCHAIN.WITHDRAW.FAILURE';
 
 export const FUNDSRECEIVED_EVENT = 'BLOCKCHAIN.EVENT.FUNDSRECEIVED';
 export const GAMECONCLUDED_EVENT = 'BLOCKCHAIN.EVENT.GAMECONCLUDED';
@@ -172,6 +182,19 @@ export const depositFailure = (error: any) => ({
   error,
 });
 
+export const withdrawRequest = (address: string) => ({
+  type: WITHDRAW_REQUEST,
+  address,
+});
+export const withdrawSuccess = (transaction: any) => ({
+  type: WITHDRAW_SUCCESS,
+  transaction,
+});
+export const withdrawFailure = (error: any) => ({
+  type: WITHDRAW_FAILURE,
+  error,
+});
+
 export const concludeGame = (channelId: string, state: State) => {
   if (state.stateType !== State.StateType.Conclude) {
     throw new Error("State must be Conclude");
@@ -183,20 +206,20 @@ export const concludeGame = (channelId: string, state: State) => {
   });
 };
 
-export const withdrawRequest = (
+export const concludeAndWithdrawRequest = (
   proof: ConclusionProof,
   withdrawData: { playerAddress: string, destination: string, channelId: string, v: string, r: string, s: string },
 ) => ({
-  type: WITHDRAW_REQUEST,
+  type: CONCLUDEANDWITHDRAW_REQUEST,
   proof,
   withdrawData,
 });
-export const withdrawSuccess = (transaction: any) => ({
-  type: WITHDRAW_SUCCESS,
+export const concludeAndWithdrawSuccess = (transaction: any) => ({
+  type: CONCLUDEANDWITHDRAW_SUCCESS,
   transaction,
 });
-export const withdrawFailure = (error: any) => ({
-  type: WITHDRAW_FAILURE,
+export const concludeAndWithdrawFailure = (error: any) => ({
+  type: CONCLUDEANDWITHDRAW_FAILURE,
   error,
 });
 

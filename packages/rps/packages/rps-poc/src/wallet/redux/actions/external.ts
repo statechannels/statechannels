@@ -226,6 +226,17 @@ export const challengeResponseRequest = (positionData: string) => ({
 
 export type CreateChallengeRequest = ReturnType<typeof createChallenge>;
 export type ChallengeResponseRequest = ReturnType<typeof challengeResponseRequest>;
+
+// End Game
+// ========
+export const EXIT_GAME = 'WALLET.EXIT.GAME';
+
+export const exitGame=()=>({
+  type: EXIT_GAME as typeof EXIT_GAME,
+});
+
+export type ExitGame = ReturnType<typeof exitGame>;
+
 // Requests
 // ========
 export type RequestAction =

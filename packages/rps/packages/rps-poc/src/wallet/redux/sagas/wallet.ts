@@ -53,7 +53,7 @@ function* handleRequests(wallet: ChannelWallet, walletEngine: WalletEngine) {
     // process one action at a time from the queue.
     switch (action.type) {
       case actions.OPEN_CHANNEL_REQUEST:
-        runningBlockchainSaga = yield fork(blockchainSaga);
+        runningBlockchainSaga = yield fork(blockchainSaga, wallet);
         runningEventListener = yield fork(blockchainEventListener, wallet);
         yield wallet.openChannel(action.channel);
         yield put(actions.channelOpened(wallet.channelId));
@@ -189,10 +189,10 @@ export function* handleWithdrawalRequest(
 
   const proof = yield call(loadConclusionProof, wallet, position.channel.id);
 
-  yield put(blockchainActions.withdrawRequest(proof, { playerAddress, channelId, destination, v, r, s }));
+  yield put(blockchainActions.concludeAndWithdrawRequest(proof, { playerAddress, channelId, destination, v, r, s }));
   const { transaction, reason: failureReason } = yield take([
-    blockchainActions.WITHDRAW_SUCCESS,
-    blockchainActions.WITHDRAW_FAILURE
+    blockchainActions.CONCLUDEANDWITHDRAW_SUCCESS,
+    blockchainActions.CONCLUDEANDWITHDRAW_FAILURE
   ]);
 
   if (transaction) {
