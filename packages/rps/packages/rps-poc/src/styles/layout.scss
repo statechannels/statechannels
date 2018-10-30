@@ -1,3 +1,4 @@
+@import "./dimensions";
 
 html, body, #root {
   height: 100%;
@@ -11,6 +12,7 @@ html, body, #root {
   display: flex;
   align-items: center;
   padding-top: 40px;
+  margin-bottom: $navbar-height;
 }
 
 .game-container {
