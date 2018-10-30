@@ -17,7 +17,12 @@ export const ApplicationLayout = (props) => {
 
         <div className="container">
           <div className="ml-auto">
-            <img src={MAGMO_LOGO} />
+            <div className="footer-logo-container">
+              <img src={MAGMO_LOGO} />
+              <small className="text-muted">
+                Something not working? Email us at <a href="oops@magmo.com">oops@magmo.com</a>
+              </small>
+            </div>
           </div>
         </div>
       </nav>

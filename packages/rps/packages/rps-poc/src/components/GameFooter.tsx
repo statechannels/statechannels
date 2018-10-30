@@ -14,14 +14,19 @@ export default class GameFooter extends React.PureComponent<Props> {
     return (
       <nav className="navbar fixed-bottom navbar-light footer-bar">
         <div className="container">
-            <Button className="footer-resign" outline={true} onClick={resign}>
-              Resign
+          <Button className="footer-resign" outline={true} onClick={resign}>
+            Resign
             </Button>
-            <Button className="footer-challenge" outline={true} onClick={createBlockchainChallenge}>
-              Challenge on-chain
+          <Button className="footer-challenge" outline={true} onClick={createBlockchainChallenge}>
+            Challenge on-chain
             </Button>
           <div className="ml-auto">
-            <img src={MAGMO_LOGO} />
+            <div className="footer-logo-container">
+              <img src={MAGMO_LOGO} />
+              <small className="text-muted">
+                Something not working? Email us at <a href="oops@magmo.com">oops@magmo.com</a>
+              </small>
+            </div>
           </div>
         </div>
       </nav>
