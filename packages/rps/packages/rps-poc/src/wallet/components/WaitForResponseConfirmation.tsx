@@ -1,6 +1,6 @@
 import React from 'react';
 
-export default class WaitingForConcludeChallenge extends React.PureComponent<{}> {
+export default class WaitForResponseConfirmation extends React.PureComponent<{}> {
   render() {
     return (
       <div>

@@ -3,10 +3,10 @@ import * as stateActions from '../actions/state';
 import { PlayerAState } from '../../wallet-engine/wallet-states/PlayerA';
 import { PlayerBState } from '../../wallet-engine/wallet-states/PlayerB';
 
-export type WalletState = PlayerAState | PlayerBState | null;
+export type ChannelState = PlayerAState | PlayerBState | null;
 const initialState = null;
 
-export const walletStateReducer: Reducer<WalletState> = (state = initialState, action: stateActions.StateChanged) => {
+export const channelStateReducer: Reducer<ChannelState> = (state = initialState, action: stateActions.StateChanged) => {
   switch (action.type) {
     case stateActions.STATE_CHANGED:
       return action.state;

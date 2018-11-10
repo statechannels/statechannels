@@ -5,9 +5,7 @@ import { Move } from '../core';
 import { SiteState } from '../redux/reducer';
 import * as gameActions from '../redux/game/actions';
 
-import { WalletController } from '../wallet';
-import * as walletActions from '../wallet/redux/actions/external';
-import WalletHeader from '../wallet/containers/WalletFooter';
+import { Wallet, actions as walletActions } from '../wallet';
 import WaitingRoomPage from '../components/WaitingRoomPage';
 import ConfirmGamePage from '../components/ConfirmGamePage';
 import FundingConfirmedPage from '../components/FundingConfirmedPage'; // WaitForPostFundSetup
@@ -42,13 +40,7 @@ interface GameProps {
 }
 
 function GameContainer(props: GameProps) {
-
-  if (props.showWalletHeader) {
-    return <WalletHeader>{RenderGame(props)}</WalletHeader>;
-  } else {
-    return <WalletController>{RenderGame(props)} </WalletController>;
-  }
-
+  return <Wallet>{RenderGame(props)}</Wallet>;
 }
 
 function RenderGame(props: GameProps) {
@@ -138,7 +130,7 @@ function RenderGame(props: GameProps) {
 const mapStateToProps = (state: SiteState) => ({
   state: state.game.gameState,
   showWallet: state.wallet.display.showWallet,
-  showWalletHeader: state.wallet.display.showHeader,
+  showWalletHeader: state.wallet.display.showFooter,
 });
 
 const mapDispatchToProps = {

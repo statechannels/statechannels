@@ -1,19 +1,18 @@
 import { combineReducers } from 'redux';
-import { WalletState, walletStateReducer } from './wallet-state';
+import { ChannelState, channelStateReducer } from './channel';
 import { ChallengeState, challengeReducer } from './challenge';
 import { displayReducer, DisplayState } from './display';
 import { AddressState, addressReducer } from './address';
 
-export interface Wallet {
-  walletState: WalletState;
+export interface WalletState {
+  channelState: ChannelState;
   challenge: ChallengeState;
   display: DisplayState;
   address: AddressState;
-
 }
 
-export const walletReducer = combineReducers<Wallet>({
-  walletState: walletStateReducer,
+export const walletReducer = combineReducers<WalletState>({
+  channelState: channelStateReducer,
   challenge: challengeReducer,
   display: displayReducer,
   address: addressReducer,
