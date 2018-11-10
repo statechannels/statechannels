@@ -13,7 +13,6 @@ import Button from 'reactstrap/lib/Button';
 
 export enum BlockchainStatus { NotStarted, InProgress, Completed }
 interface Props {
-  loginDisplayName: string;
   player: number;
   amount: BN;
   deployStatus: BlockchainStatus;
@@ -38,9 +37,6 @@ export default class FundingInProgress extends React.PureComponent<Props> {
       <div className="funding-container" >
         <div className="funding-header">
           <img src={walletHeaderIcon} className="funding-header-icon" />
-          <div className="funding-circle">
-            <div className="funding-user">{this.getInitials(this.props.loginDisplayName)}</div>
-          </div>
         </div>
         <div className="transfer-container">
           <div className={deployStyling}>
@@ -63,11 +59,6 @@ export default class FundingInProgress extends React.PureComponent<Props> {
       </div>
     );
   }
-  getInitials(loginDisplayName: string): string {
-    const userDisplayName = loginDisplayName.split(" ");
-    return userDisplayName.map(name => name.charAt(0)).join("");
-  }
-
 
   getIcon(blockchainStatus: BlockchainStatus, disabledIcon: boolean) {
     switch (blockchainStatus) {

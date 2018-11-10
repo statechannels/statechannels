@@ -11,12 +11,10 @@ import Button from 'reactstrap/lib/Button';
 
 export enum BlockchainStatus { NotStarted, InProgress, Completed }
 interface Props {
-  loginDisplayName: string;
   amount: BN;
   withdrawStatus: BlockchainStatus;
   exitGame?: () => void;
 }
-
 
 export default class WithdrawInProgress extends React.PureComponent<Props> {
   render() {
@@ -38,9 +36,6 @@ export default class WithdrawInProgress extends React.PureComponent<Props> {
       <div className="withdraw-container" >
         <div className="withdraw-header">
           <img src={walletHeaderIcon} className="withdraw-header-icon" />
-          <div className="withdraw-circle">
-            <div className="withdraw-user">{this.getInitials(this.props.loginDisplayName)}</div>
-          </div>
         </div>
         <div className="withdraw-transfer-container">
           <div className="withdraw-container">
@@ -54,11 +49,6 @@ export default class WithdrawInProgress extends React.PureComponent<Props> {
       </div>
     );
   }
-  getInitials(loginDisplayName: string): string {
-    const userDisplayName = loginDisplayName.split(" ");
-    return userDisplayName.map(name => name.charAt(0)).join("");
-  }
-
 
   getIcon(blockchainStatus: BlockchainStatus) {
     switch (blockchainStatus) {
