@@ -1,13 +1,18 @@
 import BN from 'bn.js';
-import { Channel } from '../src/channel';
-import { State } from '../src/state';
+import { Channel } from '../channel';
+import { State } from '../state';
 import assertRevert from './helpers/assert-revert';
-import { CountingGame } from '../src/test-game/counting-game';
-import { sign, recover } from '../src/utils';
+import { CountingGame } from '../test-game/counting-game';
+import { sign } from '../utils';
 
-const StateLib = artifacts.require("./State.sol");
+import Web3 from 'web3';
+const web3 = new Web3('http://localhost:8545');
+import { ethers, ContractFactory, Wallet } from 'ethers';
 
-contract('State', (_accounts) => {
+// @ts-ignore
+import TruffleArtifact from "../../build/contracts/State.json";
+
+describe('State', () => {
   let stateLib;
   const channelNonce = 12;
   const turnNum = 15;
@@ -24,23 +29,28 @@ contract('State', (_accounts) => {
   });
   const statePacket = state.toHex();
 
-  before(async () => {
-    stateLib = await StateLib.deployed();
+  beforeEach(async () => {
+    const provider = new ethers.providers.JsonRpcProvider("http://localhost:8545");
+    const privateKey = '0x' + '1'.repeat(64);
+    const wallet = new Wallet(privateKey, provider);
+    const factory = ContractFactory.fromSolidity(TruffleArtifact, wallet);
+
+    stateLib = await factory.deploy();
   });
 
-  it("extracts the channelType", async () => {
-    const result = await stateLib.channelType.call(statePacket);
-    assert.equal(channelType, result);
+  it.only("extracts the channelType", async () => {
+    const result = await stateLib.channelType(statePacket);
+    expect(channelType).toEqual(result);
   });
 
   it("extracts the channelNonce", async () => {
-    const result = await stateLib.channelNonce.call(statePacket);
-    assert.equal(channelNonce, result);
+    const result = await stateLib.channelNonce(statePacket);
+    expect(channelNonce).toEqual(result.toNumber());
   });
 
   it("extracts the turnNum", async () => {
-    const result = await stateLib.turnNum.call(statePacket);
-    assert.equal(turnNum, result);
+    const result = await stateLib.turnNum(statePacket);
+    expect(turnNum).toEqual(result.toNumber());
   });
 
   it("extracts the number of participants", async () => {
