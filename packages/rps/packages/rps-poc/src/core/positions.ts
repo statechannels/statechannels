@@ -73,10 +73,6 @@ export interface Resting extends BaseWithBuyIn {
   name: typeof RESTING;
 }
 
-export interface Resting extends BaseWithBuyIn {
-  name: typeof RESTING;
-}
-
 export interface Conclude extends Base {
   name: typeof CONCLUDE;
 }
