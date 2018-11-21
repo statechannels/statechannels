@@ -49,24 +49,14 @@
     ],
     "testEnvironment": "node",
     "testURL": "http://localhost",
-    "transform": {
-      "^.+\\.tsx?$": "ts-jest"
-    },
     "transformIgnorePatterns": [
       "[/\\\\](node_modules|scripts)[/\\\\].+\\.(js|jsx|mjs)$"
     ],
-    "moduleFileExtensions": [
-      "ts",
-      "tsx",
-      "json",
-      "js",
-      "jsx",
-      "node"
-    ],
     "globals": {
       "ts-jest": {
-        "tsConfigFile": "./tsconfig.json"
+        "tsConfig": "./tsconfig.json"
       }
-    }
+    },
+    "preset": "ts-jest"
   }
 }
