@@ -3,7 +3,7 @@
 		"lerna:bootstrap": "./node_modules/lerna/cli.js bootstrap",
 		"lerna:test": "./node_modules/lerna/bin/lerna.js run test --stream",
 		"test": "run-s test:fmg-core test:fmg-simple-adjudicator",
-		"test:fmg-core": "(cd packages/fmg-core && npm test)",
+		"test:fmg-core": "(cd packages/fmg-core && npm run test:ci)",
 		"test:fmg-simple-adjudicator": "(cd packages/fmg-simple-adjudicator && npm test)"
 	},
 	"devDependencies": {

@@ -11,7 +11,9 @@
   "scripts": {
     "migrate": "npx truffle migrate",
     "test": "node scripts/test.js --env=jsdom",
-    "build": "tslint --project . && tsc && npx truffle migrate"
+    "test:ci": "npm run build && npm run ganache:start && npm run migrate && npm test",
+    "build": "tslint --project . && tsc",
+    "ganache:start": "npx ganache-cli -d -v -p 8546 > ganache.log &"
   },
   "repository": "https://github.com/magmo/force-move-games/tree/master/packages/fmg-core",
   "author": "Tom Close",
