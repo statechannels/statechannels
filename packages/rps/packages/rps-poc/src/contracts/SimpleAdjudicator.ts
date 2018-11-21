@@ -1,8 +1,8 @@
 import detectNetwork from 'web3-detect-network';
 import contract from 'truffle-contract';
 import BN from 'bn.js';
-// @ts-ignore
-import simpleAdjudicatorArtifact from 'fmg-simple-adjudicator/contracts/SimpleAdjudicator.sol';
+
+import simpleAdjudicatorArtifact from '../../contracts/artifacts/SimpleAdjudicator.json';
 
 import { connectWeb3 } from '../wallet/web3';
 import { delay } from 'redux-saga';
@@ -80,7 +80,7 @@ async function setupContract(connectedWeb3) {
 
   const network = await detectNetwork(web3.currentProvider);
   simpleAdjudicatorContract.setNetwork(network.id);
-
+  
   await simpleAdjudicatorContract.defaults({ from: connectedWeb3.eth.defaultAccount });
   return simpleAdjudicatorContract;
 }

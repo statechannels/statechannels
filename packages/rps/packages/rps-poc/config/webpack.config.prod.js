@@ -402,12 +402,6 @@ module.exports = {
       tsconfig: paths.appTsProdConfig,
       tslint: paths.appTsLint,
     }),
-    // Instead of using the truffle loader we'll look for the already built truffle artifacts
-    new webpack.NormalModuleReplacementPlugin(
-      /.*\.sol/,
-      function(resource) {
-        resource.request = resource.request.replace(/.*contracts/, paths.appContractArtifacts).replace('.sol', '.json');
-      }),
       new webpack.EnvironmentPlugin({
         FIREBASE_PROJECT: 'rock-paper-scissors123',
         FIREBASE_API_KEY: 'AIzaSyDulzMWkORgVPFwtxqQaTwOeNhOisGPtDs',

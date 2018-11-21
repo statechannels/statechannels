@@ -132,23 +132,6 @@ module.exports = {
         // back to the "file" loader at the end of the loader list.
         oneOf: [
           {
-            test: (path) => {
-              return process.env.TARGET_NETWORK==='development' &&
-              /\.sol$/.test(path);  
-          }, 
-            use: [
-              {
-                loader: 'json-loader'
-              },
-              {
-                loader: 'truffle-solidity-loader',
-                options: {
-                  network: 'development',
-                }
-              }
-            ]
-          },
-          {
             test: /\.(scss)$/,
             use: [{
               loader: 'style-loader', // inject CSS to page
@@ -263,15 +246,15 @@ module.exports = {
     ],
   },
   plugins: [
-     // Instead of using the truffle loader we'll look for the already built truffle artifacts
-     new webpack.NormalModuleReplacementPlugin(
-      /.*\.sol/,
-      function(resource) {
-        if (process.env.TARGET_NETWORK!=='development'){
-          resource.request = resource.request.replace(/.*contracts/, paths.appContractArtifacts).replace('.sol', '.json');
-        }
-      }),
-    // Makes some environment variables available in index.html.
+// Use pre-built artifacts for non-development networks.
+ new webpack.NormalModuleReplacementPlugin(
+  /.*\/contracts\/artifacts\/.*\.json/,
+  function(resource) {
+    if (process.env.TARGET_NETWORK==='development'){
+      resource.request = resource.request.replace(/.*\/contracts\/artifacts/, paths.buildContracts);
+    }
+  }),
+      // Makes some environment variables available in index.html.
     // The public URL is available as %PUBLIC_URL% in index.html, e.g.:
     // <link rel="shortcut icon" href="%PUBLIC_URL%/favicon.ico">
     // In development, this will be an empty string.

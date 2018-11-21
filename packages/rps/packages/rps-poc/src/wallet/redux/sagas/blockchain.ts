@@ -1,6 +1,4 @@
 import { take, put, actionChannel, call, fork, cancel, spawn } from 'redux-saga/effects';
-// @ts-ignore
-import simpleAdjudicatorArtifact from 'fmg-simple-adjudicator/contracts/SimpleAdjudicator.sol';
 import { eventChannel } from 'redux-saga';
 
 import { ConclusionProof } from '../../domain/ConclusionProof';
