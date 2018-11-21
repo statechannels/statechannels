@@ -13,7 +13,7 @@
     "test": "node scripts/test.js --env=jsdom",
     "test:ci": "npm run build && npm run ganache:start && npm run migrate && npm test",
     "build": "tslint --project . && tsc",
-    "ganache:start": "npx ganache-cli -d -v -p 8546 > ganache.log &"
+    "ganache:start": "npx ganache-cli -d -v > ganache.log &"
   },
   "repository": "https://github.com/magmo/force-move-games/tree/master/packages/fmg-core",
   "author": "Tom Close",
