@@ -101,7 +101,7 @@ describe('Rules', () => {
         });
 
         it("allows a valid transition", async() => {
-            assert(await validTransition(fromState, toState));
+            expect(await validTransition(fromState, toState)).toBeTruthy();
         });
 
         it("rejects a transition where the turnNum doesn't increment", async () => {
@@ -142,7 +142,7 @@ describe('Rules', () => {
         });
 
         it("allows a valid transition", async () => {
-            assert(await validTransition(fromState, toState));
+            expect(await validTransition(fromState, toState)).toBeTruthy();
         });
 
         it("rejects a transition where the turnNum doesn't increment", async () => {
@@ -173,7 +173,7 @@ describe('Rules', () => {
         });
 
         it("allows a valid transition", async () => {
-            assert(await validTransition(fromState, toState));
+            expect(await validTransition(fromState, toState)).toBeTruthy();
         });
 
         it("rejects a transition where the turnNum doesn't increment", async () => {
@@ -220,7 +220,7 @@ describe('Rules', () => {
         });
 
         it("allows a valid transition", async() => {
-            assert(await validTransition(fromState, toState));
+            expect(await validTransition(fromState, toState)).toBeTruthy();
         });
 
         it("rejects a transition where the balances changes", async () => {
@@ -241,7 +241,7 @@ describe('Rules', () => {
         });
 
         it("allows a valid transition", async() => {
-            assert(await validTransition(fromState, toState));
+            expect(await validTransition(fromState, toState)).toBeTruthy();
         });
 
         it("rejects a transition where the turnNum doesn't increment", async () => {
@@ -272,7 +272,7 @@ describe('Rules', () => {
         });
 
         it("allows a valid transition", async() => {
-            assert(await validTransition(fromState, toState));
+            expect(await validTransition(fromState, toState)).toBeTruthy();
         });
 
         it("rejects a transition where the turnNum doesn't increment", async () => {
@@ -298,7 +298,7 @@ describe('Rules', () => {
         });
 
         it("allows a valid transition", async() => {
-            assert(await validTransition(fromState, toState));
+            expect(await validTransition(fromState, toState)).toBeTruthy();
         });
 
         it("rejects a transition where the turnNum doesn't increment", async () => {
@@ -324,7 +324,7 @@ describe('Rules', () => {
         });
 
         it("allows a valid transition", async() => {
-            assert(await validTransition(fromState, toState));
+            expect(await validTransition(fromState, toState)).toBeTruthy();
         });
 
         it("rejects a transition where the turnNum doesn't increment", async () => {
