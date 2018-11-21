@@ -11,7 +11,7 @@
   "scripts": {
     "migrate": "npx truffle migrate",
     "test": "node scripts/test.js --env=jsdom",
-    "test:ci": "npm run build && npm run ganache:start && npm run migrate && npm test",
+    "test:ci": "npm run build && npm run ganache:start && sleep 10 && npm run migrate && npm test",
     "build": "tslint --project . && tsc",
     "ganache:start": "npx ganache-cli -d -v > ganache.log &"
   },
