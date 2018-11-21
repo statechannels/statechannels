@@ -10,7 +10,7 @@
   },
   "scripts": {
     "migrate": "npx truffle migrate",
-    "test": "npx jest --watch"
+    "test": "npx jest --watch --runInBand",
   },
   "repository": "https://github.com/magmo/force-move-games/tree/master/packages/fmg-core",
   "author": "Tom Close",
