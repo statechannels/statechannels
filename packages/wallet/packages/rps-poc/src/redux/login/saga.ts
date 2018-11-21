@@ -5,8 +5,7 @@ import { reduxSagaFirebase } from '../../gateways/firebase';
 import { walletSaga } from '../../wallet';
 import metamaskSaga from '../metamask/saga';
 
-// @ts-ignore
-import RPSGameArtifact from '../../../contracts/RockPaperScissorsGame.sol';
+import RPSGameArtifact from '../../../contracts/artifacts/RockPaperScissorsGame.json';
 
 function* loginSaga() {
   try {

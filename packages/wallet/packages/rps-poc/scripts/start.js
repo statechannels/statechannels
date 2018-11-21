@@ -15,7 +15,7 @@ process.on('unhandledRejection', err => {
 require('../config/env');
 
 process.env.DEV_GANACHE_HOST = process.env.DEV_GANACHE_HOST || 'localhost';
-process.env.DEV_GANACHE_PORT = process.env.DEV_GANACHE_PORT || 7546;
+process.env.DEV_GANACHE_PORT = process.env.DEV_GANACHE_PORT || 8545;
 process.env.DEFAULT_GAS = process.env.DEFAULT_GAS || 6721975;
 process.env.DEFAULT_GAS_PRICE = process.env.DEFAULT_GAS_PRICE || 20000000000;
 // Default to the development network
@@ -86,65 +86,38 @@ choosePort(HOST, DEFAULT_PORT)
       urls.lanUrlForConfig
     );
 
-    //Default accounts to seed so we can have accounts with 1M ether for testing
-    var accounts =
-      [
-        {
-          secretKey: '0xf2f48ee19680706196e2e339e5da3491186e0c4c5030670656b0e0164837257d',
-          balance: '0xD3C21BCECCEDA1000000'
-        },
-        {
-          secretKey: '0x5d862464fe9303452126c8bc94274b8c5f9874cbd219789b3eb2128075a76f72',
-          balance: '0xD3C21BCECCEDA1000000'
-        },
-        {
-          secretKey: '0xdf02719c4df8b9b8ac7f551fcb5d9ef48fa27eef7a66453879f4d8fdc6e78fb1',
-          balance: '0xD3C21BCECCEDA1000000'
-        }
-      ];
-    var ganache = require("ganache-cli");
-    console.log(`Starting ganache on port ${process.env.DEV_GANACHE_PORT}`);
-    var ganacheServer = ganache.server({ port: process.env.DEV_GANACHE_PORT, network_id: 0, accounts });
-    var ganachePortInUse = false;
-    ganacheServer.on('error', function (err) {
-      if (err.code && err.code === 'EADDRINUSE') {
-        console.log(`Port ${process.env.DEV_GANACHE_PORT} in use. Assuming a ganache instance on that port.`);
-        ganachePortInUse = true;
-      } else {
-        throw err;
-      }
-    });
-    if (!ganachePortInUse) {
-      ganacheServer.listen(process.env.DEV_GANACHE_PORT, process.env.DEV_GANACHE_HOST, function (err, blockchain) {
-        if (err) {
-          return console.log(err);
-        }
-      });
-    }
-    const devServer = new WebpackDevServer(compiler, serverConfig);
-    // Launch WebpackDevServer.
-    devServer.listen(port, HOST, err => {
-      if (err) {
-        return console.log(err);
-      }
-      if (isInteractive) {
-        clearConsole();
-      }
-      console.log(chalk.cyan('Starting the development server...\n'));
-      openBrowser(urls.localUrlForBrowser);
-    });
+    const {
+      deployContracts,
+      startGanache
+    } = require('./helperFunctions');
 
-    ['SIGINT', 'SIGTERM'].forEach(function(sig) {
-      process.on(sig, function() {
-        devServer.close();
-        ganacheServer.close();
-        process.exit();
-      });
-    });
-  })
-  .catch(err => {
-    if (err && err.message) {
-      console.log(err.message);
-    }
-    process.exit(1);
+    startGanache().then(() => {
+
+      deployContracts().then(value => {
+          
+          const devServer = new WebpackDevServer(compiler, serverConfig);
+          // Launch WebpackDevServer.
+          devServer.listen(port, HOST, err => {
+            console.log('he');
+            if (err) {
+              return console.log(err);
+            }
+            if (isInteractive) {
+              clearConsole();
+            }
+            console.log(chalk.cyan('Starting the development server...\n'));
+            openBrowser(urls.localUrlForBrowser);
+          });
+
+          ['SIGINT', 'SIGTERM'].forEach(function (sig) {
+            process.on(sig, function () {
+              devServer.close();
+              process.exit();
+            });
+          });
+        })
+        .catch(err =>
+          console.log(err)
+        );
+    })
   });

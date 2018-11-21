@@ -24,13 +24,9 @@ To run the app on your machine, clone the code and follow the instructions below
 
 1. Start ganache by running
     ```
-    ganache-cli
+    yarn ganache:start
     ```
 2. **In a new tab** Run the server
-    ```
-    yarn start
-    ```
-    After seeing the message "compiled successfully!", kill the server <kbd>cmd</kbd>+<kbd>C</kbd> and run it again
     ```
     yarn start
     ```
@@ -53,10 +49,10 @@ To run the app on your machine, clone the code and follow the instructions below
 #### To deploy smart contracts
 
 1. Add test eth to your account for the deployment using an eth faucet: https://faucet.ropsten.be/ or https://faucet.metamask.io.
-2. Deploy the contracts to the network:
+2. Set `TARGET_NETWORK` in your `.env` file to the network  you want to deploy to.
+3. Deploy the contracts to the network:
     ```
-    # deploy smart contracts to a network
-    yarn truffle:migrate --rps:deploymentNetwork=<named network in truffle.js>
+    yarn truffle:migrate
     ``` 
     
 #### To run application tests in watch mode:
