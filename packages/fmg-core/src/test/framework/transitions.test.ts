@@ -64,7 +64,7 @@ describe('Rules', () => {
             toState = CountingGame.preFundSetupState({ ...defaults, turnNum: 1, stateCount: 1 });
         });
 
-        it.only("allows a valid transition", async () => {
+        it("allows a valid transition", async () => {
             // expect(true).toEqual(true);
             expect(await validTransition(fromState, toState)).toEqual(true);
         });

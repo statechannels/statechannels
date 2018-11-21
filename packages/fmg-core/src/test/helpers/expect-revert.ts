@@ -6,6 +6,5 @@ export default async promise => {
   } catch (error) {
     const revertFound = error.message.search('revert') >= 0;
     expect(revertFound).toBe(true);
-    throw new Error(`Expected "revert", got ${error} instead`);
   }
 };
