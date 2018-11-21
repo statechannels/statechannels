@@ -1,7 +1,7 @@
 import BN from 'bn.js';
 import { Channel } from '../channel';
 import { State } from '../state';
-import assertRevert from './helpers/assert-revert';
+import expectRevert from './helpers/expect-revert';
 import { CountingGame } from '../test-game/counting-game';
 import { sign } from '../utils';
 
@@ -103,7 +103,7 @@ describe('State', () => {
   it.skip("will revert if the wrong party signed", async () => {
     // needs to be signed by 1 as it's their move
     const { v, r, s } = sign(state.toHex(), participantA.privateKey);
-    assertRevert(stateLib.requireSignature(statePacket, v, r, s));
+    expectRevert(stateLib.requireSignature(statePacket, v, r, s));
   });
 
   it("can check if the state is fully signed", async() => {
@@ -125,7 +125,7 @@ describe('State', () => {
     const state1 = CountingGame.preFundSetupState({channel, resolution, turnNum, gameCounter: 0 });
     const state2 = CountingGame.preFundSetupState({channel, resolution, turnNum, gameCounter: 1 });
 
-    await assertRevert(stateLib.gameAttributesEqual(state1.toHex(), state2.toHex()));
+    await expectRevert(stateLib.gameAttributesEqual(state1.toHex(), state2.toHex()));
   });
 
 

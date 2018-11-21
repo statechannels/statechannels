@@ -1,7 +1,7 @@
 import { ethers, ContractFactory, Wallet } from 'ethers';
 import linker from 'solc/linker';
 
-import assertRevert from '../helpers/assert-revert';
+import expectRevert from '../helpers/expect-revert';
 
 import { CountingGame } from '../..//test-game/counting-game';
 import { Channel } from '../..';
@@ -71,25 +71,25 @@ describe('Rules', () => {
 
         it("rejects a transition where the turnNum doesn't increment", async () => {
             toState.turnNum = fromState.turnNum;
-            await assertRevert(validTransition(fromState, toState));
+            await expectRevert(validTransition(fromState, toState));
         });
 
         it("rejects any transition where the channel changes", async () => {
             toState.channel = otherChannel;
-            await assertRevert(validTransition(fromState, toState));
+            await expectRevert(validTransition(fromState, toState));
         });
 
         it("rejects a transition where the balances changes", async () => {
             toState.resolution = otherResolution;
-            await assertRevert(validTransition(fromState, toState));
+            await expectRevert(validTransition(fromState, toState));
         });
         it("rejects a transition where the count doesn't increment", async () => {
             toState.stateCount = fromState.stateCount;
-            await assertRevert(validTransition(fromState, toState));
+            await expectRevert(validTransition(fromState, toState));
         });
         it("rejects a transition where the game attributes changes", async () => {
             toState.gameCounter = 45;
-            await assertRevert(validTransition(fromState, toState));
+            await expectRevert(validTransition(fromState, toState));
         });
     });
 
@@ -106,32 +106,32 @@ describe('Rules', () => {
 
         it("rejects a transition where the turnNum doesn't increment", async () => {
             toState.turnNum = fromState.turnNum;
-            await assertRevert(validTransition(fromState, toState));
+            await expectRevert(validTransition(fromState, toState));
         });
 
         it("rejects any transition where the channel changes", async () => {
             toState.channel = otherChannel;
-            await assertRevert(validTransition(fromState, toState));
+            await expectRevert(validTransition(fromState, toState));
         });
 
         it("rejects a transition not from the last preFundSetup state", async() => {
             fromState.stateCount = 0;
-            await assertRevert(validTransition(fromState, toState));
+            await expectRevert(validTransition(fromState, toState));
         });
 
         it("rejects a transition where the balances changes", async() => {
             toState.resolution = otherResolution;
-            await assertRevert(validTransition(fromState, toState));
+            await expectRevert(validTransition(fromState, toState));
         });
 
         it("rejects a transition where the count doesn't reset", async() => {
             toState.stateCount = 2;
-            await assertRevert(validTransition(fromState, toState));
+            await expectRevert(validTransition(fromState, toState));
         });
 
         it("rejects a transition where the position changes", async() => {
             toState.gameCounter = 45;
-            await assertRevert(validTransition(fromState, toState));
+            await expectRevert(validTransition(fromState, toState));
         });
     });
 
@@ -147,22 +147,22 @@ describe('Rules', () => {
 
         it("rejects a transition where the turnNum doesn't increment", async () => {
             toState.turnNum = fromState.turnNum;
-            await assertRevert(validTransition(fromState, toState));
+            await expectRevert(validTransition(fromState, toState));
         });
 
         it("rejects any transition where the channel changes", async () => {
             toState.channel = otherChannel;
-            await assertRevert(validTransition(fromState, toState));
+            await expectRevert(validTransition(fromState, toState));
         });
 
         it("rejects a transition where the balances changes", async () => {
             toState.resolution = otherResolution;
-            await assertRevert(validTransition(fromState, toState));
+            await expectRevert(validTransition(fromState, toState));
         });
 
         it("rejects a transition not from the last preFundSetup state", async () => {
             fromState.stateCount = 0;
-            await assertRevert(validTransition(fromState, toState));
+            await expectRevert(validTransition(fromState, toState));
         });
     });
 
@@ -178,27 +178,27 @@ describe('Rules', () => {
 
         it("rejects a transition where the turnNum doesn't increment", async () => {
             toState.turnNum = fromState.turnNum;
-            await assertRevert(validTransition(fromState, toState));
+            await expectRevert(validTransition(fromState, toState));
         });
 
         it("rejects any transition where the channel changes", async () => {
             toState.channel = otherChannel;
-            await assertRevert(validTransition(fromState, toState));
+            await expectRevert(validTransition(fromState, toState));
         });
 
         it("rejects a transition where the balances changes", async () => {
             toState.resolution = otherResolution;
-            await assertRevert(validTransition(fromState, toState));
+            await expectRevert(validTransition(fromState, toState));
         });
 
         it("rejects a transition where the count doesn't reset", async () => {
             toState.stateCount = 2;
-            await assertRevert(validTransition(fromState, toState));
+            await expectRevert(validTransition(fromState, toState));
         });
 
         it("rejects a transition from the last PostFundSetup state", async () => {
             fromState.stateCount = 1;
-            await assertRevert(validTransition(fromState, toState));
+            await expectRevert(validTransition(fromState, toState));
         });
     });
 
@@ -211,12 +211,12 @@ describe('Rules', () => {
 
         it("rejects a transition where the turnNum doesn't increment", async () => {
             toState.turnNum = fromState.turnNum;
-            await assertRevert(validTransition(fromState, toState));
+            await expectRevert(validTransition(fromState, toState));
         });
 
         it("rejects any transition where the channel changes", async () => {
             toState.channel = otherChannel;
-            await assertRevert(validTransition(fromState, toState));
+            await expectRevert(validTransition(fromState, toState));
         });
 
         it("allows a valid transition", async() => {
@@ -225,12 +225,12 @@ describe('Rules', () => {
 
         it("rejects a transition where the balances changes", async () => {
             toState.resolution = otherResolution;
-            await assertRevert(validTransition(fromState, toState));
+            await expectRevert(validTransition(fromState, toState));
         });
 
         it("rejects a transition from the last PostFundSetup state", async () => {
             fromState.stateCount = 1;
-            await assertRevert(validTransition(fromState, toState));
+            await expectRevert(validTransition(fromState, toState));
         });
     });
 
@@ -246,22 +246,22 @@ describe('Rules', () => {
 
         it("rejects a transition where the turnNum doesn't increment", async () => {
             toState.turnNum = fromState.turnNum;
-            await assertRevert(validTransition(fromState, toState));
+            await expectRevert(validTransition(fromState, toState));
         });
 
         it("rejects any transition where the channel changes", async () => {
             toState.channel = otherChannel;
-            await assertRevert(validTransition(fromState, toState));
+            await expectRevert(validTransition(fromState, toState));
         });
 
         it("rejects a transition not from the last PostFundSetup state", async () => {
             fromState.stateCount = 0;
-            await assertRevert(validTransition(fromState, toState));
+            await expectRevert(validTransition(fromState, toState));
         });
 
         it("rejects a transition where the game rules are broken", async() => {
             toState.gameCounter = 2; // game specifies that counter must increment
-            await assertRevert(validTransition(fromState, toState));
+            await expectRevert(validTransition(fromState, toState));
         });
     });
 
@@ -277,17 +277,17 @@ describe('Rules', () => {
 
         it("rejects a transition where the turnNum doesn't increment", async () => {
             toState.turnNum = fromState.turnNum;
-            await assertRevert(validTransition(fromState, toState));
+            await expectRevert(validTransition(fromState, toState));
         });
 
         it("rejects any transition where the channel changes", async () => {
             toState.channel = otherChannel;
-            await assertRevert(validTransition(fromState, toState));
+            await expectRevert(validTransition(fromState, toState));
         });
 
         it("rejects a transition where the game rules are broken", async() => {
             toState.gameCounter = 2; // game specifies that counter must increment
-            await assertRevert(validTransition(fromState, toState));
+            await expectRevert(validTransition(fromState, toState));
         });
     });
 
@@ -303,17 +303,17 @@ describe('Rules', () => {
 
         it("rejects a transition where the turnNum doesn't increment", async () => {
             toState.turnNum = fromState.turnNum;
-            await assertRevert(validTransition(fromState, toState));
+            await expectRevert(validTransition(fromState, toState));
         });
 
         it("rejects any transition where the channel changes", async () => {
             toState.channel = otherChannel;
-            await assertRevert(validTransition(fromState, toState));
+            await expectRevert(validTransition(fromState, toState));
         });
 
         it("rejects a transition where the balances changes", async () => {
             toState.resolution = otherResolution;
-            await assertRevert(validTransition(fromState, toState));
+            await expectRevert(validTransition(fromState, toState));
         });
     });
 
@@ -329,17 +329,17 @@ describe('Rules', () => {
 
         it("rejects a transition where the turnNum doesn't increment", async () => {
             toState.turnNum = fromState.turnNum;
-            await assertRevert(validTransition(fromState, toState));
+            await expectRevert(validTransition(fromState, toState));
         });
 
         it("rejects any transition where the channel changes", async () => {
             toState.channel = otherChannel;
-            await assertRevert(validTransition(fromState, toState));
+            await expectRevert(validTransition(fromState, toState));
         });
 
         it("rejects a transition where the balances changes", async () => {
             toState.resolution = otherResolution;
-            await assertRevert(validTransition(fromState, toState));
+            await expectRevert(validTransition(fromState, toState));
         });
     });
 });
