@@ -10,9 +10,13 @@ const web3 = new Web3('http://localhost:8545');
 import { ethers, ContractFactory, Wallet } from 'ethers';
 
 // @ts-ignore
-import TruffleArtifact from "../../build/contracts/State.json";
+import StateArtifact from "../../build/contracts/State.json";
 
 describe('State', () => {
+  const provider = new ethers.providers.JsonRpcProvider("http://localhost:8545");
+  const privateKey = '0x' + '1'.repeat(64);
+  const wallet = new Wallet(privateKey, provider);
+
   let stateLib;
   const channelNonce = 12;
   const turnNum = 15;
@@ -30,10 +34,7 @@ describe('State', () => {
   const statePacket = state.toHex();
 
   beforeEach(async () => {
-    const provider = new ethers.providers.JsonRpcProvider("http://localhost:8545");
-    const privateKey = '0x' + '1'.repeat(64);
-    const wallet = new Wallet(privateKey, provider);
-    const factory = ContractFactory.fromSolidity(TruffleArtifact, wallet);
+    const factory = ContractFactory.fromSolidity(StateArtifact, wallet);
 
     stateLib = await factory.deploy();
   });
