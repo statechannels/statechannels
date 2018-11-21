@@ -11,6 +11,7 @@
   "scripts": {
     "migrate": "npx truffle migrate",
     "test": "npx jest --watch --runInBand",
+    "build": "tslint --project . && tsc"
   },
   "repository": "https://github.com/magmo/force-move-games/tree/master/packages/fmg-core",
   "author": "Tom Close",
