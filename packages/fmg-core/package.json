@@ -11,7 +11,7 @@
   "scripts": {
     "migrate": "npx truffle migrate",
     "test": "node scripts/test.js --env=jsdom",
-    "build": "tslint --project . && tsc"
+    "build": "tslint --project . && tsc && npx truffle migrate"
   },
   "repository": "https://github.com/magmo/force-move-games/tree/master/packages/fmg-core",
   "author": "Tom Close",
