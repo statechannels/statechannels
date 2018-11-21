@@ -34,9 +34,10 @@ describe('State', () => {
   const statePacket = state.toHex();
 
   beforeEach(async () => {
+    const networkId = (await provider.getNetwork()).chainId;
     const factory = ContractFactory.fromSolidity(StateArtifact, wallet);
 
-    stateLib = await factory.deploy();
+    stateLib = await factory.attach(StateArtifact.networks[networkId].address);
   });
 
   it.only("extracts the channelType", async () => {

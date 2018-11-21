@@ -36,27 +36,17 @@ describe('Rules', () => {
     let fromState;
     let toState;
 
-    // before(async () => {
-
-    // });
-
     beforeEach(async () => {
-    //     framework = await RulesArtifact.deployed();
-
-        // CountingStateArtifact.link(StateArtifact);
         const networkId = (await provider.getNetwork()).chainId;
         CountingStateArtifact.bytecode = (linker.linkBytecode(CountingStateArtifact.bytecode, { "State": StateArtifact.networks[networkId].address }));
-        const stateContract = await ContractFactory.fromSolidity(CountingStateArtifact, wallet).deploy();
-        // CountingGameArtifact.link("CountingState", .address);
 
-        CountingGameArtifact.bytecode = (linker.linkBytecode(CountingGameArtifact.bytecode, { "CountingState": CountingStateArtifact.networks[networkId].address}))
-        const gameContract = await ContractFactory.fromSolidity(CountingGameArtifact, wallet).deploy();
+        CountingGameArtifact.bytecode = (linker.linkBytecode(CountingGameArtifact.bytecode, { "CountingState": CountingStateArtifact.networks[networkId].address}));
+        const gameContract = await ContractFactory.fromSolidity(CountingGameArtifact, wallet).attach(CountingGameArtifact.networks[networkId].address);
 
         otherChannel = new Channel(gameContract.address, 1, participants);
-        // const stateContract = await ContractFactory.fromSolidity(StateArtifact, wallet).deploy();
 
-        RulesArtifact.bytecode = (linker.linkBytecode(RulesArtifact.bytecode, { "State": StateArtifact.networks[networkId].address }))
-        framework = await ContractFactory.fromSolidity(RulesArtifact, wallet).deploy();
+        RulesArtifact.bytecode = (linker.linkBytecode(RulesArtifact.bytecode, { "State": StateArtifact.networks[networkId].address }));
+        framework = await ContractFactory.fromSolidity(RulesArtifact, wallet).attach(RulesArtifact.networks[networkId].address);
 
         channel = new Channel(gameContract.address, 0, participants);
         defaults = { channel, resolution, gameCounter: 0};
