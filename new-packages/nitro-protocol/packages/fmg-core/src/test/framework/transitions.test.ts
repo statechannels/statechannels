@@ -15,7 +15,6 @@ import RulesArtifact from "../../../build/contracts/Rules.json";
 import CountingStateArtifact from "../../../build/contracts/CountingState.json";
 // @ts-ignore
 import CountingGameArtifact from "../../../build/contracts/CountingGame.json";
-import { link } from 'fs';
 
 describe('Rules', () => {
     const provider = new ethers.providers.JsonRpcProvider("http://localhost:8545");
