@@ -1,6 +1,6 @@
 import {
-  toWei
-} from 'web3-utils';
+  utils
+} from 'web3';
 import {
   Channel,
   State,
@@ -22,8 +22,8 @@ const START_BALANCE = 100000000000000000000;
 
 const A_IDX = 1;
 const B_IDX = 2;
-const aBal = Number(toWei('6', "wei"));
-const bBal = Number(toWei('4', "wei"));
+const aBal = Number(utils.toWei('6', "wei"));
+const bBal = Number(utils.toWei('4', "wei"));
 const resolution = [aBal, bBal];
 const differentResolution = [bBal, aBal];
 
