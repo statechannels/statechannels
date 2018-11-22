@@ -45,21 +45,11 @@ const ACCOUNTS = [
   '0x1df62f291b2e969fb0849d99d9ce41e2f137006e',
 ]
 
-describe('foo', () => {
-  it("works", () => {
-    expect(1).toBe(1);
-  })
-})
-
-describe('SimpleAdjudicator', async () => {
-  it('does something', () => {
-    expect(1).toBe(1);
-  })
-
+describe('SimpleAdjudicator', () => {
+  let networkId;
   const provider = new ethers.providers.JsonRpcProvider("http://localhost:8545");
   const privateKey = '0x' + '1'.repeat(64);
   const wallet = new Wallet(privateKey, provider);
-  const networkId = (await provider.getNetwork()).chainId;
 
   let simpleAdj;
   let channel;
@@ -78,6 +68,7 @@ describe('SimpleAdjudicator', async () => {
   let aliceEthAccount, bobEthAccount;
 
   beforeEach(async () => {
+    const networkId = (await provider.getNetwork()).chainId;
     CountingStateArtifact.bytecode = (linker.linkBytecode(CountingStateArtifact.bytecode, { "State": StateLibArtifact.networks[networkId].address }));
 
     CountingGameArtifact.bytecode = (linker.linkBytecode(CountingGameArtifact.bytecode, { "CountingState": CountingStateArtifact.networks[networkId].address}));
@@ -130,8 +121,7 @@ describe('SimpleAdjudicator', async () => {
     simpleAdj = await ContractFactory.fromSolidity(SimpleAdjudicatorArtifact, wallet).deploy(channel.id, 5);
   });
 
-  it("forceMove emits ForceMove", async () => {
-    expect(1).toBe(0);
+  it.only("forceMove emits ForceMove", async () => {
     let agreedState = state0;
     let challengeState = state1;
     let responseState = state2;
