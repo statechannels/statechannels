@@ -23,7 +23,12 @@
     "web3": "^1.0.0-beta.36"
   },
   "devDependencies": {
+    "@types/chai": "^4.1.7",
+    "@types/jest": "^23.3.9",
+    "chai": "^4.2.0",
     "esm": "^3.0.52",
+    "ethers": "^4.0.13",
+    "solc": "^0.4.25",
     "truffle": "^5.0.0-beta.1",
     "truffle-assertions": "^0.4.0"
   },
@@ -32,7 +37,7 @@
       "src/**/*.{js,jsx,ts,tsx}"
     ],
     "testMatch": [
-      "<rootDir>/src/**/?(*.)(spec|test).(t)s?(x)"
+      "<rootDir>/test/**/?(*.)(spec|test).ts"
     ],
     "testPathIgnorePatterns": [
       "/node_modules/"
