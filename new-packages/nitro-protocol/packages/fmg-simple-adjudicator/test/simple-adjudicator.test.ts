@@ -11,13 +11,14 @@ import {
   CountingGame,
   sign,
   SolidityType,
-  StateLibArtifact,
+  StateArtifact,
   CountingStateArtifact,
   CountingGameArtifact,
+  RulesArtifact,
 } from 'fmg-core';
 import BN from 'bn.js';
 import { assert } from 'chai';
-import { linker } from 'solc/linker'
+import linker from 'solc/linker'
 import { ethers, ContractFactory, Wallet } from 'ethers';
 
 // @ts-ignore
@@ -68,8 +69,18 @@ describe('SimpleAdjudicator', () => {
   let aliceEthAccount, bobEthAccount;
 
   beforeEach(async () => {
+    function linkedByteCode(artifact, linkedLibrary, networkId) {
+      const lookup = {};
+      try { 
+        lookup[linkedLibrary.contractName] = linkedLibrary.networks[networkId].address;
+      } catch(err) {
+        console.log(linkedLibrary.networks, linkedLibrary.contractName, networkId);
+      }
+      return linker.linkBytecode(artifact.bytecode, lookup);
+    }
+
     const networkId = (await provider.getNetwork()).chainId;
-    CountingStateArtifact.bytecode = (linker.linkBytecode(CountingStateArtifact.bytecode, { "State": StateLibArtifact.networks[networkId].address }));
+    CountingStateArtifact.bytecode = linkedByteCode(CountingStateArtifact, StateArtifact, networkId);
 
     CountingGameArtifact.bytecode = (linker.linkBytecode(CountingGameArtifact.bytecode, { "CountingState": CountingStateArtifact.networks[networkId].address}));
     const countingGameContract = await ContractFactory.fromSolidity(CountingGameArtifact, wallet).attach(CountingGameArtifact.networks[networkId].address);
@@ -117,6 +128,9 @@ describe('SimpleAdjudicator', () => {
       turnNum: 8,
       gameCounter: 3
     });
+
+    SimpleAdjudicatorArtifact.bytecode = linkedByteCode(SimpleAdjudicatorArtifact, StateArtifact, networkId);
+    SimpleAdjudicatorArtifact.bytecode = linkedByteCode(SimpleAdjudicatorArtifact, RulesArtifact, networkId);
 
     simpleAdj = await ContractFactory.fromSolidity(SimpleAdjudicatorArtifact, wallet).deploy(channel.id, 5);
   });
@@ -561,9 +575,9 @@ describe('SimpleAdjudicator', () => {
     });
   });
 
-  describe('events', async () => {
+  describe.skip('events', async () => {
     it.skip('emits fundsReceived upon contract creation', async () => {
-      CountingStateArtifact.bytecode = (linker.linkBytecode(CountingStateArtifact.bytecode, { "State": StateLibArtifact.networks[networkId].address }));
+      CountingStateArtifact.bytecode = (linker.linkBytecode(CountingStateArtifact.bytecode, { "State": StateArtifact.networks[networkId].address }));
 
       CountingGameArtifact.bytecode = (linker.linkBytecode(CountingGameArtifact.bytecode, { "CountingState": CountingStateArtifact.networks[networkId].address}));
       const countingGameContract = await ContractFactory.fromSolidity(CountingGameArtifact, wallet).attach(CountingGameArtifact.networks[networkId].address);
