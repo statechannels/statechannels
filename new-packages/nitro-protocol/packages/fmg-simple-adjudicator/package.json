@@ -9,10 +9,12 @@
   "scripts": {
     "migrate": "npx truffle migrate",
     "test:all": "node scripts/test.js --env=jsdom --all",
-    "test": "node scripts/test.js --env=jsdom",
+    "test": "npm run copy_contracts:src && node scripts/test.js --env=jsdom",
     "test:ci": "npm run build && npm run ganache:start && sleep 10 && npm run migrate && npm test",
-    "build": "tslint --project . && tsc",
-    "ganache:start": "npx ganache-cli -d -v > ganache.log &"
+    "build": "tslint --project . && tsc && npm run migrate && npm run copy_contracts:lib",
+    "ganache:start": "npx ganache-cli -d -v > ganache.log &",
+    "copy_contracts:src": "copyfiles -f './build/contracts/**/*' ./src/artifacts/",
+    "copy_contracts:lib": "copyfiles -f './build/contracts/**/*' ./lib/artifacts/"
   },
   "repository": "https://github.com/magmo/force-move-games/tree/master/packages/fmg-simple-adjudicator",
   "author": "Tom Close",
@@ -29,9 +31,12 @@
     "dotenv": "^6.1.0",
     "esm": "^3.0.52",
     "ethers": "^4.0.13",
-    "solc": "^0.4.25",
+    "solc": "^0.5.0",
     "truffle": "^5.0.0-beta.1",
-    "truffle-assertions": "^0.4.0"
+    "truffle-assertions": "^0.4.0",
+    "tslint": "^5.11.0",
+    "tslint-config-prettier": "^1.15.0",
+    "typescript": "^2.9.2"
   },
   "jest": {
     "collectCoverageFrom": [
