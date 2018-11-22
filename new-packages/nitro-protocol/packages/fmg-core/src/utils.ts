@@ -1,5 +1,4 @@
 import Web3 from 'web3';
-import { soliditySha3 } from 'web3-utils';
 import { Signature } from 'web3/eth/accounts';
 
 // TODO: write some jest tests for utils.
@@ -53,9 +52,9 @@ export function sign(data: SignableData, privateKey)
   const account:any = localWeb3.eth.accounts.privateKeyToAccount(privateKey);
   let hash;
   if (typeof data === 'string' || data instanceof SolidityParameter) {
-    hash = soliditySha3(data);
+    hash = Web3.utils.soliditySha3(data);
   } else {
-    hash = soliditySha3(...data);
+    hash = Web3.utils.soliditySha3(...data);
   }
   return localWeb3.eth.accounts.sign(hash, account.privateKey) as Signature;
 }
@@ -64,9 +63,9 @@ export function recover(data: SignableData,  v: string, r: string, s: string): s
   const web3 = new Web3('');
   let hash;
   if (typeof data === 'string' || data instanceof SolidityParameter) {
-    hash = soliditySha3(data);
+    hash = Web3.utils.soliditySha3(data);
   } else {
-    hash = soliditySha3(...data);
+    hash = Web3.utils.soliditySha3(...data);
   }
   return web3.eth.accounts.recover(hash, v, r, s);
 }
