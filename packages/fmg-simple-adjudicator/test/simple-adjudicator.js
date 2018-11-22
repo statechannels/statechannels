@@ -4,7 +4,7 @@ import {
 import {
   Channel,
   State,
-  assertRevert,
+  expectRevert,
   increaseTime,
   DURATION,
   CountingGame,
@@ -263,7 +263,7 @@ contract('SimpleAdjudicator', (accounts) => {
       v: v1
     } = sign(bobState.toHex(), bob.privateKey);
     await simpleAdj.conclude(aliceState.toHex(), bobState.toHex(), [v0, v1], [r0, r1], [s0, s1]);
-    assertRevert(
+    expectRevert(
       simpleAdj.conclude(aliceState.toHex(), bobState.toHex(), [v0, v1], [r0, r1], [s0, s1])
     );
   });
