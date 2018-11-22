@@ -7,7 +7,12 @@
     "test": "test"
   },
   "scripts": {
-    "test": "node -r esm --max-old-space-size=4096 ./node_modules/.bin/truffle test"
+    "migrate": "npx truffle migrate",
+    "test:all": "node scripts/test.js --env=jsdom --all",
+    "test": "node scripts/test.js --env=jsdom",
+    "test:ci": "npm run build && npm run ganache:start && sleep 10 && npm run migrate && npm test",
+    "build": "tslint --project . && tsc",
+    "ganache:start": "npx ganache-cli -d -v > ganache.log &"
   },
   "repository": "https://github.com/magmo/force-move-games/tree/master/packages/fmg-simple-adjudicator",
   "author": "Tom Close",
@@ -21,5 +26,27 @@
     "esm": "^3.0.52",
     "truffle": "^5.0.0-beta.1",
     "truffle-assertions": "^0.4.0"
+  },
+  "jest": {
+    "collectCoverageFrom": [
+      "src/**/*.{js,jsx,ts,tsx}"
+    ],
+    "testMatch": [
+      "<rootDir>/src/**/?(*.)(spec|test).(t)s?(x)"
+    ],
+    "testPathIgnorePatterns": [
+      "/node_modules/"
+    ],
+    "testEnvironment": "node",
+    "testURL": "http://localhost",
+    "transformIgnorePatterns": [
+      "[/\\\\](node_modules|scripts)[/\\\\].+\\.(js|jsx|mjs)$"
+    ],
+    "globals": {
+      "ts-jest": {
+        "tsConfig": "./tsconfig.json"
+      }
+    },
+    "preset": "ts-jest"
   }
 }
