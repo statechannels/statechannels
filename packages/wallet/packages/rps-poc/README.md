@@ -17,6 +17,7 @@ To run the app on your machine, clone the code and follow the instructions below
     ```
     yarn install
     ```
+1. Add a `.env` file to the root directory of the repo. Refer to `.env.example` which includes an example of the required variables.
 
 ### Development Info
 
