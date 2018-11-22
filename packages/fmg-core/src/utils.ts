@@ -57,7 +57,7 @@ export function sign(data: SignableData, privateKey)
   } else {
     hash = soliditySha3(...data);
   }
-  return localWeb3.eth.accounts.sign(hash, account.privateKey, true) as Signature;
+  return localWeb3.eth.accounts.sign(hash, account.privateKey) as Signature;
 }
 
 export function recover(data: SignableData,  v: string, r: string, s: string): string {
