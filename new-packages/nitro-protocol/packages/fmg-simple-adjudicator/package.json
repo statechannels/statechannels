@@ -19,7 +19,7 @@
   "author": "Tom Close",
   "license": "MIT",
   "dependencies": {
-    "fmg-core": "^0.1.5",
+    "fmg-core": "^0.1.6",
     "sha3": "^1.2.2",
     "web3": "^1.0.0-beta.36"
   },
