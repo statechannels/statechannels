@@ -30,6 +30,7 @@
     "dotenv": "^6.1.0",
     "esm": "^3.0.52",
     "ethers": "^4.0.13",
+    "ganache-cli": "^6.1.8",
     "solc": "^0.5.0",
     "truffle": "^5.0.0-beta.1",
     "truffle-assertions": "^0.4.0",
