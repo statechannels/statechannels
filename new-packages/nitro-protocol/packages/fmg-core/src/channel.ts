@@ -1,5 +1,5 @@
-import { toHex32, padBytes32 } from './utils';
-import { soliditySha3 } from 'web3-utils';
+import { toHex32, padBytes32 } from "./utils";
+import { soliditySha3 } from "web3-utils";
 
 class Channel {
   channelType: string;
@@ -18,9 +18,9 @@ class Channel {
 
   get id() {
     return soliditySha3(
-      { type: 'address', value: this.channelType },
-      { type: 'uint256', value: this.channelNonce },
-      { type: 'address[]', value: this.participants },
+      { type: "address", value: this.channelType },
+      { type: "uint256", value: this.channelNonce },
+      { type: "address[]", value: this.participants },
     );
   }
 
@@ -29,7 +29,7 @@ class Channel {
       padBytes32(this.channelType) +
       toHex32(this.channelNonce).substr(2) +
       toHex32(this.numberOfParticipants).substr(2) +
-      this.participants.map(x => padBytes32(x).substr(2)).join("")
+      this.participants.map((x) => padBytes32(x).substr(2)).join("")
     );
   }
 }

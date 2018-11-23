@@ -11,8 +11,8 @@
   "scripts": {
     "migrate": "npx truffle migrate",
     "test": "node scripts/test.js --env=jsdom",
-    "test:ci": "npm run build && npm run ganache:start && sleep 10 && npm run migrate && npm test",
-    "build": "tslint --project . && tsc",
+    "test:ci": "npm run ganache:start && sleep 10 && npm run build && npm test",
+    "build": "npm run migrate && tslint --project . && tsc",
     "ganache:start": "npx ganache-cli -d -v > ganache.log &"
   },
   "repository": "https://github.com/magmo/force-move-games/tree/master/packages/fmg-core",
@@ -36,7 +36,6 @@
     "ts-jest": "^23.10.4",
     "tslint": "^5.11.0",
     "tslint-config-prettier": "^1.15.0",
-    "tslint-react": "^3.6.0",
     "typescript": "^2.9.2"
   },
   "jest": {
