@@ -12,7 +12,7 @@
     "migrate": "npx truffle migrate",
     "test": "node scripts/test.js --env=jsdom",
     "test:ci": "npm run ganache:start && sleep 10 && npm run build && npm test",
-    "build": "npm run migrate && tslint --project . && tsc",
+    "build": "npm run migrate && tslint --project .",
     "ganache:start": "npx ganache-cli -d -v > ganache.log &"
   },
   "repository": "https://github.com/magmo/force-move-games/tree/master/packages/fmg-core",
