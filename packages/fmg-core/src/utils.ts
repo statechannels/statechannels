@@ -1,5 +1,5 @@
-import Web3 from 'web3';
-import { Signature } from 'web3/eth/accounts';
+import Web3 from "web3";
+import { Signature } from "web3/eth/accounts";
 
 // TODO: write some jest tests for utils.
 
@@ -7,14 +7,14 @@ export function toHex32(num) {
   return "0x" + toPaddedHexString(num, 64);
 }
 
-export function padBytes32(data){
-  const l = 66-data.length;
+export function padBytes32(data) {
+  const l = 66 - data.length;
   let x = data.substr(2, data.length);
 
-  for(let i=0; i<l; i++) {
+  for (let i = 0; i < l; i++) {
     x = 0 + x;
   }
-  return '0x' + x;
+  return "0x" + x;
 }
 
 // https://stackoverflow.com/a/42203200
@@ -25,12 +25,12 @@ export function toPaddedHexString(num, len) {
 
 export enum SolidityType {
   // For now, we only allow the types that we'd use.
-  bool = 'bool',
-  uint8 = 'uint8',
-  uint256 = 'uint256',
-  address = 'address',
-  bytes = 'bytes',
-  bytes32 = 'bytes32',
+  bool = "bool",
+  uint8 = "uint8",
+  uint256 = "uint256",
+  address = "address",
+  bytes = "bytes",
+  bytes32 = "bytes32",
 }
 
 export class SolidityParameter {
@@ -48,10 +48,10 @@ type SignableData = string | SolidityParameter | SolidityParameter[];
 
 export function sign(data: SignableData, privateKey)
   : {v: string, r: string, s: string} {
-  const localWeb3 = new Web3('');
-  const account:any = localWeb3.eth.accounts.privateKeyToAccount(privateKey);
+  const localWeb3 = new Web3("");
+  const account: any = localWeb3.eth.accounts.privateKeyToAccount(privateKey);
   let hash;
-  if (typeof data === 'string' || data instanceof SolidityParameter) {
+  if (typeof data === "string" || data instanceof SolidityParameter) {
     hash = Web3.utils.soliditySha3(data);
   } else {
     hash = Web3.utils.soliditySha3(...data);
@@ -60,9 +60,9 @@ export function sign(data: SignableData, privateKey)
 }
 
 export function recover(data: SignableData,  v: string, r: string, s: string): string {
-  const web3 = new Web3('');
+  const web3 = new Web3("");
   let hash;
-  if (typeof data === 'string' || data instanceof SolidityParameter) {
+  if (typeof data === "string" || data instanceof SolidityParameter) {
     hash = Web3.utils.soliditySha3(data);
   } else {
     hash = Web3.utils.soliditySha3(...data);
@@ -70,10 +70,10 @@ export function recover(data: SignableData,  v: string, r: string, s: string): s
   return web3.eth.accounts.recover(hash, v, r, s);
 }
 
-export function decodeSignature(signature: string) : { v, r, s } {
-  const r = '0x' + signature.slice(2, 66);
-  const s = '0x' + signature.slice(66, 130);
-  const v = '0x' + signature.slice(130, 132);
+export function decodeSignature(signature: string): { v, r, s } {
+  const r = "0x" + signature.slice(2, 66);
+  const s = "0x" + signature.slice(66, 130);
+  const v = "0x" + signature.slice(130, 132);
 
   return { v, r, s };
 }

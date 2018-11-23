@@ -1,6 +1,6 @@
-import { toHex32 } from './utils';
-import { Channel } from './channel';
-import BN from 'bn.js';
+import { toHex32 } from "./utils";
+import { Channel } from "./channel";
+import BN from "bn.js";
 
 class State {
   channel: any;
@@ -9,9 +9,9 @@ class State {
   resolution: BN[];
   stateCount: number;
 
-  constructor({channel, stateType, turnNum, resolution, stateCount=0}: 
+  constructor({channel, stateType, turnNum, resolution, stateCount= 0}:
     {
-      channel: Channel, 
+      channel: Channel,
       stateType: State.StateType,
       turnNum: number,
       resolution: BN[],
@@ -35,7 +35,7 @@ class State {
       toHex32(this.stateType).substr(2) +
       toHex32(this.turnNum).substr(2) +
       toHex32(this.stateCount).substr(2) +
-      this.resolution.map(x => toHex32(x).substr(2)).join("")
+      this.resolution.map((x) => toHex32(x).substr(2)).join("")
     );
   }
 

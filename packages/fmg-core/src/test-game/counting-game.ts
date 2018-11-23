@@ -1,4 +1,4 @@
-import { State, toHex32, padBytes32 } from '..';
+import { State, toHex32, padBytes32 } from "..";
 
 class CountingGame {
   static preFundSetupState(opts) { return new PreFundSetupState(opts); }

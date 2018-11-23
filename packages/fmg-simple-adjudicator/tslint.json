@@ -2,6 +2,7 @@
   "extends": ["tslint:recommended", "tslint-config-prettier"],
   "linterOptions": {
     "exclude": [
+      "/**/*.json"
     ]
   },
   "jsRules": {
