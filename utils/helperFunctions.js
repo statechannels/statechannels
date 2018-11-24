@@ -23,7 +23,9 @@ module.exports = {
         } = require('child_process');
         process.env.TARGET_NETWORK = process.env.TARGET_NETWORK || 'development';
         process.env.DEV_GANACHE_HOST = process.env.DEV_GANACHE_HOST || '127.0.0.1';
-        const trufflePath = path.resolve(__dirname, '../node_modules/.bin/truffle');
+
+        // It is assumed that truffle is installed as a dependency of your project.
+        const trufflePath = path.resolve(__dirname, process.cwd() + '/node_modules/.bin/truffle');
 
 
         const migrate = spawn(trufflePath, ['migrate', '--network', process.env.TARGET_NETWORK]);
