@@ -4,11 +4,14 @@
   "description": "Scripts used for Magmo development processes",
   "main": "index.js",
   "bin": {
-    "ganache-then-jest": "bin/ganache-then-jest.js"
+    "ganache-then-jest": "bin/ganache-then-jest.js",
+    "deploy-contracts": "bin/deploy-contracts.js",
+    "run-jest": "bin/run-jest.js",
+    "start-ganache": "bin/start-ganache.js"
   },
   "author": "Andrew Stewart",
   "license": "MIT",
-  "repository": "https://github.com/magmo/force-move-games/tree/master/packages/fmg-scripts",
+  "repository": "https://github.com/magmo/devtools",
   "dependencies": {
     "detect-port": "^1.3.0"
   },
