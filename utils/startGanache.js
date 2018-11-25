@@ -1,5 +1,9 @@
 module.exports = {
     startGanache: function () {
+        let argv = process.argv.slice(2);
+        let verbose = argv.indexOf('-v') >= 0
+        let deterministic = argv.indexOf('-d') >= 0
+
         process.env.DEV_GANACHE_PORT = process.env.DEV_GANACHE_PORT || 8545;
         //Default accounts to seed so we can have accounts with 1M ether for testing
         var accounts = [{
@@ -32,6 +36,8 @@ module.exports = {
                         network_id: 0,
                         accounts,
                         logger: console,
+                        verbose: verbose,
+                        deterministic: deterministic
                     });
 
                     const {
