@@ -89,12 +89,12 @@ choosePort(HOST, DEFAULT_PORT)
     const {
       deployContracts,
       startGanache
-    } = require('./helperFunctions');
+    } = require('magmo-devtools');
 
     startGanache().then(() => {
 
       deployContracts().then(value => {
-          
+
           const devServer = new WebpackDevServer(compiler, serverConfig);
           // Launch WebpackDevServer.
           devServer.listen(port, HOST, err => {
