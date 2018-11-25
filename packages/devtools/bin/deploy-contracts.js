@@ -3,6 +3,6 @@
 'use strict';
 const {
     deployContracts,
-} = require('../utils/depoyContracts');
+} = require('../utils/deployContracts');
 
 deployContracts();
