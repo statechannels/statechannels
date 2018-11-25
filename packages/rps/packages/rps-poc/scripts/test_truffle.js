@@ -1,9 +1,10 @@
 'use strict';
 
-//TODO: Add more functionality
-var ganache = require('ganache-cli');
+//TODO: This will be obsolete when we move to jest tests
 var path = require('path');
-const { exec } = require('child_process');
+const {
+  exec
+} = require('child_process');
 
 process.env.BABEL_ENV = 'test';
 process.env.NODE_ENV = 'test';
@@ -12,14 +13,14 @@ process.env.PUBLIC_URL = '';
 if (!process.env.DEV_GANACHE_PORT) {
   process.env.DEV_GANACHE_PORT = 5732;
 }
+
+process.on('unhandledRejection', err => {
+  throw err;
+});
+
+
 console.log(`Using port ${process.env.DEV_GANACHE_PORT} for Ganache.`);
-try {
-  var server = ganache.server({ port: process.env.DEV_GANACHE_PORT });
-  server.listen(process.env.DEV_GANACHE_PORT, function(err, blockchain) {
-    if (err) {
-      return console.log(err);
-    }
-  });
+require('magmo-devtools').startGanache().then(() => {
   const trufflePath = path.resolve(__dirname, '../node_modules/.bin/truffle');
   const truffleCommand = `${trufflePath} test --network ganache`;
   exec(truffleCommand, (err, stdout, stderr) => {
@@ -32,12 +33,7 @@ try {
       console.log(err);
       process.exit(1);
     }
+    process.exit(0);
   });
 
-  server.close();
-} catch (err) {
-  if (err && err.message) {
-    console.log(err.message);
-  }
-  process.exit(1);
-}
+});

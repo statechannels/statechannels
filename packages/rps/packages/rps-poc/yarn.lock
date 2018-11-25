@@ -3170,7 +3170,7 @@ detect-port-alt@1.1.6:
     address "^1.0.1"
     debug "^2.6.0"
 
-detect-port@1.3.0:
+detect-port@1.3.0, detect-port@^1.3.0:
   version "1.3.0"
   resolved "https://registry.yarnpkg.com/detect-port/-/detect-port-1.3.0.tgz#d9c40e9accadd4df5cac6a782aefd014d573d1f1"
   integrity sha512-E+B1gzkl2gqxt1IhUzwjrxBKRqx1UzC3WLONHinn8S3T6lwV/agVCyitiFOsGJ/eYuEUBvD71MZHy3Pv1G9doQ==
@@ -6933,6 +6933,12 @@ ltgt@~2.2.0:
   version "2.2.1"
   resolved "https://registry.yarnpkg.com/ltgt/-/ltgt-2.2.1.tgz#f35ca91c493f7b73da0e07495304f17b31f87ee5"
   integrity sha1-81ypHEk/e3PaDgdJUwTxezH4fuU=
+
+"magmo-devtools@https://github.com/magmo/devtools":
+  version "0.1.0"
+  resolved "https://github.com/magmo/devtools#e9a395b4746c64fb969782a4b6674c1ae90bb698"
+  dependencies:
+    detect-port "^1.3.0"
 
 make-dir@^1.0.0:
   version "1.3.0"
