@@ -2,7 +2,6 @@ module.exports = {
     runJest: function () {
         const jest = require('jest');
         let argv = process.argv.slice(2);
-        console.log(argv)
 
         // Watch unless on CI, in coverage mode, or explicitly running all tests
         if (
