@@ -61,7 +61,6 @@ module.exports = {
                 balance: '0xD3C21BCECCEDA1000000'
             }
         ];
-        console.log(__dirname);
         var ganache = require("ganache-cli");
         console.log(`Starting ganache on port ${process.env.DEV_GANACHE_PORT}`);
 
