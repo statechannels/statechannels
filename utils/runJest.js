@@ -13,6 +13,6 @@ module.exports = {
             argv.push('--watch');
         }
 
-        jest.run(argv);
-    },
+        return jest.runCLI(argv, ['.']);
+    }
 }
