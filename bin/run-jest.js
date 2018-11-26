@@ -14,6 +14,6 @@ process.on('unhandledRejection', err => {
 });
 const {
     runJest
-} = require('../');
+} = require('../utils/runJest');
 
 runJest();
