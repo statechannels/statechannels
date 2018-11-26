@@ -1,15 +1,15 @@
 import { take, put, actionChannel, call, fork, cancel, spawn } from 'redux-saga/effects';
-import { eventChannel } from 'redux-saga';
+import { ethers } from 'ethers';
 
 import { ConclusionProof } from '../../domain/ConclusionProof';
 import * as blockchainActions from '../actions/blockchain';
-import { deploySimpleAdjudicator, simpleAdjudicatorAt } from '../../../contracts/SimpleAdjudicator';
 import * as externalActions from '../actions/external';
 import { Signature } from '../../../wallet/domain';
 import hash from 'object-hash';
 import { SolidityType } from 'fmg-core';
 import ChannelWallet from '../../../wallet/domain/ChannelWallet';
-
+import { createFactory, depositFunds, deployContract } from '../../../contracts/simpleAdjudicatorUtils';
+import { eventChannel } from 'redux-saga';
 
 export function* blockchainSaga(wallet) {
   const { simpleAdjudicator, eventListener } = yield call(contractSetup);
@@ -22,7 +22,6 @@ export function* blockchainSaga(wallet) {
 
   return true;
 }
-
 function* contractSetup() {
   const channel = yield actionChannel([
     blockchainActions.DEPLOY_REQUEST,
@@ -36,7 +35,7 @@ function* contractSetup() {
       case blockchainActions.DEPLOY_REQUEST: // Player A
         try {
           const { channelId, amount } = action;
-          const deployedContract = yield call(deploySimpleAdjudicator, { channelId, amount });
+          const deployedContract = yield call(deployContract, channelId, amount);
 
           yield put(blockchainActions.deploymentSuccess(deployedContract.address));
           // TODO: This should probably move out of this scope
@@ -52,8 +51,9 @@ function* contractSetup() {
       case blockchainActions.DEPOSIT_REQUEST: // Player B
         try {
           const { address, amount } = action;
-          const existingContract = yield call(simpleAdjudicatorAt, { address, amount });
-          const transaction = yield call(existingContract.send, action.amount.toString());
+          const factory = yield call(createFactory);
+          const existingContract: ethers.Contract = factory.attach(address);
+          const transaction = yield call(depositFunds, address, amount);
           yield put(blockchainActions.depositSuccess(transaction));
           const eventListener = yield spawn(watchAdjudicator, existingContract);
 
@@ -155,38 +155,47 @@ function handleError(action, err) {
   return put(action(message));
 }
 
-function* watchAdjudicator(deployedContract) {
+function convertBigNumberArgsToBN(argumentObject): any {
+  const convertedObject = {};
+  Object.keys(argumentObject).forEach(key => {
+    if (argumentObject[key].constructor.name === 'BigNumber') {
+      convertedObject[key] = argumentObject[key].toBn();
+    } else {
+      convertedObject[key] = argumentObject[key];
+    }
+  });
+  return convertedObject;
+}
+
+function* watchAdjudicator(deployedContract: ethers.Contract) {
   const watchChannel = createEventChannel(deployedContract);
   while (true) {
     const result = yield take(watchChannel);
-
+    const convertedArgs = convertBigNumberArgsToBN(result.args);
     if (result.event === "FundsReceived") {
-      yield put(blockchainActions.fundsReceivedEvent({ ...result.args }));
+      yield put(blockchainActions.fundsReceivedEvent({ ...convertedArgs }));
     } else if (result.event === "GameConcluded") {
-      yield put(blockchainActions.gameConcluded({ ...result.args }));
+      yield put(blockchainActions.gameConcluded({ ...convertedArgs }));
     } else if (result.event === "ChallengeCreated") {
-      yield put(blockchainActions.challengeCreatedEvent({ ...result.args }));
+      yield put(blockchainActions.challengeCreatedEvent({ ...convertedArgs }));
     } else if (
       result.event === "RespondedWithMove" ||
       result.event === "Refuted" ||
       result.event === "RespondedWithAlternativeMove"
     ) {
-      yield put(blockchainActions.challengeConcludedEvent({ ...result.args }));
+      yield put(blockchainActions.challengeConcludedEvent({ ...convertedArgs }));
     }
   }
 }
 
-function createEventChannel(deployedContract) {
-  const filter = deployedContract.allEvents();
+function createEventChannel(deployedContract: ethers.Contract) {
+
   const channel = eventChannel(emitter => {
-    filter.watch((error, results) => {
-      if (error) {
-        throw error;
-      }
-      emitter(results);
+    deployedContract.on('*', (event) => {
+      emitter(event);
     });
     return () => {
-      filter.stopWatching();
+      deployedContract.stopWatching();
     };
   });
   return channel;
