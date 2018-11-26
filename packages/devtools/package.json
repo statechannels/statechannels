@@ -4,7 +4,6 @@
   "description": "Scripts used for Magmo development processes",
   "main": "index.js",
   "bin": {
-    "ganache-then-jest": "bin/ganache-then-jest.js",
     "deploy-contracts": "bin/deploy-contracts.js",
     "run-jest": "bin/run-jest.js",
     "start-ganache": "bin/start-ganache.js"
