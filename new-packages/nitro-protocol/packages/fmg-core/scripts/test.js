@@ -31,7 +31,6 @@ startGanache().then(() => {
   deployContracts().then(() => {
     console.log('running jest');
     runJest()
-    process.exit(0);
   });
 
 });
