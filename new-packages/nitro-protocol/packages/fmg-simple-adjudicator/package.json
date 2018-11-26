@@ -8,12 +8,10 @@
     "test": "test"
   },
   "scripts": {
-    "migrate": "npx truffle migrate",
     "test:all": "node scripts/test.js --env=jsdom --all",
     "test": "node scripts/test.js --env=jsdom",
-    "test:ci": "npm run ganache:start && sleep 10 && npm run build && npm test",
-    "build": "npm run migrate && tslint --project .",
-    "ganache:start": "npx ganache-cli -d -v --account='0x1111111111111111111111111111111111111111111111111111111111111111,10000000000000000000000000000000000000000000000000' > ganache.log &"
+    "test:ci": "npx start-ganache -v -d 2>&1 > ganache-output.log & npx deploy-contracts && npx run-jest --all --runInBand",
+    "build": "npm run migrate && tslint --project ."
   },
   "repository": "https://github.com/magmo/force-move-games/tree/master/packages/fmg-simple-adjudicator",
   "author": "Tom Close",
@@ -32,6 +30,7 @@
     "ethers": "^4.0.13",
     "ganache-cli": "^6.1.8",
     "jest": "^23.6.0",
+    "magmo-devtools": "git+https://github.com/magmo/devtools.git",
     "solc": "^0.5.0",
     "truffle": "^5.0.0-beta.1",
     "truffle-assertions": "^0.4.0",
