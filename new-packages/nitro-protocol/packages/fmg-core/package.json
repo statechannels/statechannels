@@ -11,7 +11,7 @@
   "scripts": {
     "migrate": "deploy-contracts",
     "test": "node scripts/test.js --env=jsdom",
-    "test:ci": "node scripts/test.js --env=jsdom --all --detectOpenHandles",
+    "test:ci": "node scripts/test.js --env=jsdom --all --detectOpenHandles --runInBand",
     "build": "tslint --project . && tsc"
   },
   "repository": "https://github.com/magmo/force-move-games/tree/master/packages/fmg-core",
