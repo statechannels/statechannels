@@ -27,9 +27,7 @@ let {
 console.log(`Using port ${process.env.DEV_GANACHE_PORT} for Ganache.`);
 startGanache().then(() => {
 
-  console.log('deploying contracts');
   deployContracts().then(() => {
-    console.log('running jest');
     runJest()
   });
 
