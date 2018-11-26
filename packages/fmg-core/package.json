@@ -9,7 +9,6 @@
     "test": "test"
   },
   "scripts": {
-    "migrate": "deploy-contracts",
     "test": "node scripts/test.js --env=jsdom",
     "test:ci": "npx start-ganache -v -d 2>&1 > ganache-output.log & npx deploy-contracts && npx run-jest --all --runInBand",
     "build": "tslint --project . && tsc"
