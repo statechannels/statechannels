@@ -1,51 +1,9 @@
 module.exports = {
-    runJest: function () {
-        const jest = require('jest');
-        let argv = process.argv.slice(2);
-
-        // Watch unless on CI, in coverage mode, or explicitly running all tests
-        if (
-            !process.env.CI &&
-            argv.indexOf('--coverage') === -1 &&
-            argv.indexOf('--watchAll') === -1 &&
-            argv.indexOf('--all') === -1
-        ) {
-            argv.push('--watch');
-        }
-
-        jest.run(argv);
-    },
-    deployContracts: function () {
-
-        const path = require('path');
-        const {
-            spawn
-        } = require('child_process');
-        process.env.TARGET_NETWORK = process.env.TARGET_NETWORK || 'development';
-        process.env.DEV_GANACHE_HOST = process.env.DEV_GANACHE_HOST || '127.0.0.1';
-
-        // It is assumed that truffle is installed as a dependency of your project.
-        const trufflePath = path.resolve(__dirname, process.cwd() + '/node_modules/.bin/truffle');
-
-
-        const migrate = spawn(trufflePath, ['migrate', '--network', process.env.TARGET_NETWORK]);
-        migrate.stdout.on('data', function (data) {
-            console.log(data.toString());
-        });
-        migrate.stderr.on('data', function (data) {
-            console.log('ERROR: ' + data);
-        });
-
-        return new Promise(function (resolve, reject) {
-            migrate.addListener("error", (error) => {
-                console.log(error);
-                reject(error);
-            });
-            migrate.addListener("exit", resolve);
-        });
-
-    },
     startGanache: function () {
+        let argv = process.argv.slice(2);
+        let verbose = argv.indexOf('-v') >= 0
+        let deterministic = argv.indexOf('-d') >= 0
+
         process.env.DEV_GANACHE_PORT = process.env.DEV_GANACHE_PORT || 8545;
         //Default accounts to seed so we can have accounts with 1M ether for testing
         var accounts = [{
@@ -77,6 +35,8 @@ module.exports = {
                         network_id: 0,
                         accounts,
                         logger: console,
+                        verbose: verbose,
+                        deterministic: deterministic
                     });
 
                     const {

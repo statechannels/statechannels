@@ -3,6 +3,6 @@
 'use strict';
 const {
     startGanache,
-} = require('../utils/helperFunctions');
+} = require('../utils/startGanache');
 
 startGanache();
