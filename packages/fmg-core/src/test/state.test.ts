@@ -8,7 +8,7 @@ import { sign } from '../utils';
 import { ethers, ContractFactory, Wallet } from 'ethers';
 
 // @ts-ignore
-import StateArtifact from '../../build/contracts/StateV2.json';
+import StateArtifact from '../../build/contracts/State.json';
 
 describe('State', () => {
   const provider = new ethers.providers.JsonRpcProvider('http://localhost:8545');
@@ -48,7 +48,7 @@ describe('State', () => {
     stateLib = await factory.attach(StateArtifact.networks[networkId].address);
   });
 
-  it('identifies the mover based on the turnNum', async () => {
+  it.only('identifies the mover based on the turnNum', async () => {
     const mover = await stateLib.mover(statePacket);
     // our state nonce is 15, which is odd, so it should be participant[1]
     expect(mover).toEqual(participants[1]);
