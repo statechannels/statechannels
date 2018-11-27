@@ -3,13 +3,27 @@
     "configurations": [
         {
             "type": "node",
+            "name": "vscode-jest-tests-core",
             "request": "launch",
-            "name": "truffle test (debugable)",
-            "cwd": "${workspaceFolder}",
-            "program": "${workspaceFolder}/node_modules/truffle-core/cli.js",
+            "program": "${workspaceFolder}/node_modules/jest/bin/jest",
             "args": [
-                "test", "${file}"
-            ]
+                "--runInBand"
+            ],
+            "cwd": "${workspaceFolder}/packages/fmg-core",
+            "console": "integratedTerminal",
+            "internalConsoleOptions": "neverOpen"
+        },
+        {
+            "type": "node",
+            "name": "vscode-jest-tests-simple-adjudicator",
+            "request": "launch",
+            "program": "${workspaceFolder}/node_modules/jest/bin/jest",
+            "args": [
+                "--runInBand"
+            ],
+            "cwd": "${workspaceFolder}/packages/fmg-simple-adjudicator",
+            "console": "integratedTerminal",
+            "internalConsoleOptions": "neverOpen"
         }
     ]
 }

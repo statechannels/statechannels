@@ -29,7 +29,7 @@ class Channel {
       padBytes32(this.channelType) +
       toHex32(this.channelNonce).substr(2) +
       toHex32(this.numberOfParticipants).substr(2) +
-      this.participants.map(x => padBytes32(x).substr(2)).join("")
+      this.participants.map(x => padBytes32(x).substr(2)).join('')
     );
   }
 }

@@ -1,5 +1,6 @@
 {
   "name": "fmg-simple-adjudicator",
+  "main": "./lib/index.js",
   "version": "0.1.6",
   "description": "Simple adjudicator for force-move games",
   "directories": {
@@ -7,20 +8,59 @@
     "test": "test"
   },
   "scripts": {
-    "test": "node -r esm ./node_modules/.bin/truffle test"
+    "test:all": "node scripts/test.js --env=jsdom --all",
+    "test": "jest",
+    "test:ci": "npx ganache-then-jest"
   },
   "repository": "https://github.com/magmo/force-move-games/tree/master/packages/fmg-simple-adjudicator",
   "author": "Tom Close",
   "license": "MIT",
   "dependencies": {
-    "fmg-core": "^0.1.5",
+    "fmg-core": "^0.1.6",
     "sha3": "^1.2.2",
-    "web3": "^1.0.0-beta.36",
-    "web3-utils": "^1.0.0-beta.36"
+    "web3": "^1.0.0-beta.36"
   },
   "devDependencies": {
+    "@types/chai": "^4.1.7",
+    "@types/jest": "^23.3.9",
+    "chai": "^4.2.0",
+    "dotenv": "^6.1.0",
     "esm": "^3.0.52",
+    "ethers": "^4.0.13",
+    "ganache-cli": "^6.1.8",
+    "jest": "^23.6.0",
+    "magmo-devtools": "git+https://github.com/magmo/devtools.git",
+    "solc": "^0.5.0",
     "truffle": "^5.0.0-beta.1",
-    "truffle-assertions": "^0.4.0"
+    "tslint": "^5.11.0",
+    "tslint-config-prettier": "^1.17.0",
+    "typescript": "^2.9.2"
+  },
+  "jest": {
+    "collectCoverageFrom": [
+      "test/**/*.{js,jsx,ts,tsx}"
+    ],
+    "testMatch": [
+      "<rootDir>/test/**/?(*.)(spec|test).ts"
+    ],
+    "testPathIgnorePatterns": [
+      "/node_modules/"
+    ],
+    "testEnvironment": "node",
+    "testURL": "http://localhost",
+    "transformIgnorePatterns": [
+      "[/\\\\](node_modules|scripts)[/\\\\].+\\.(js|jsx|mjs)$"
+    ],
+    "globals": {
+      "ts-jest": {
+        "tsConfig": "./tsconfig.json"
+      }
+    },
+    "preset": "ts-jest"
+  },
+  "prettier": {
+    "printWidth": 100,
+    "singleQuote": true,
+    "trailingComma": "all"
   }
 }

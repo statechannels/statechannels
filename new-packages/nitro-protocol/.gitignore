@@ -18,4 +18,5 @@ built
 lib
 dist
 
-environments/*/contracts/**
+# environment
+.env
