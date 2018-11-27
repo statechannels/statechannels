@@ -50,24 +50,20 @@ export function sign(data: SignableData, privateKey)
   : {v: string, r: string, s: string} {
   const localWeb3 = new Web3("");
   const account: any = localWeb3.eth.accounts.privateKeyToAccount(privateKey);
-  let hash;
-  if (typeof data === "string" || data instanceof SolidityParameter) {
-    hash = Web3.utils.soliditySha3(data);
-  } else {
-    hash = Web3.utils.soliditySha3(...data);
-  }
-  return localWeb3.eth.accounts.sign(hash, account.privateKey) as Signature;
+  return localWeb3.eth.accounts.sign(hash(data), account.privateKey) as Signature;
 }
 
 export function recover(data: SignableData,  v: string, r: string, s: string): string {
   const web3 = new Web3("");
-  let hash;
+  return web3.eth.accounts.recover(hash(data), v, r, s);
+}
+
+function hash(data: SignableData): string {
   if (typeof data === "string" || data instanceof SolidityParameter) {
-    hash = Web3.utils.soliditySha3(data);
+    return Web3.utils.soliditySha3(data);
   } else {
-    hash = Web3.utils.soliditySha3(...data);
+    return Web3.utils.soliditySha3(...data);
   }
-  return web3.eth.accounts.recover(hash, v, r, s);
 }
 
 export function decodeSignature(signature: string): { v, r, s } {
