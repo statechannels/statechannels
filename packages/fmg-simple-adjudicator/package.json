@@ -10,8 +10,7 @@
   "scripts": {
     "test:all": "node scripts/test.js --env=jsdom --all",
     "test": "jest",
-    "test:ci": "npx ganache-then-jest",
-    "build": "npm run migrate && tslint --project ."
+    "test:ci": "npx ganache-then-jest"
   },
   "repository": "https://github.com/magmo/force-move-games/tree/master/packages/fmg-simple-adjudicator",
   "author": "Tom Close",
