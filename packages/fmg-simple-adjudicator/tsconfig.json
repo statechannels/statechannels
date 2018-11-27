@@ -13,9 +13,6 @@
     "resolveJsonModule": true,
   },
   "exclude": [
-    "**/*.test.(j|t)s",
-    "**/test/*",
-    "test/*",
     "lib",
     "node_modules"
   ]

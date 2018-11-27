@@ -2,39 +2,67 @@
   "name": "fmg-core",
   "version": "0.1.6",
   "description": "Force-move games core",
-  "main": "./lib/src/index.js",
-  "types": "./lib/src/index.d.ts",
+  "main": "./lib/index.js",
+  "types": "./lib/index.d.ts",
   "directories": {
     "doc": "docs",
     "test": "test"
   },
   "scripts": {
-    "clean": "shx rm -rf lib",
-    "copy_contracts": "copyfiles './contracts/**/*' './migrations/**/*' ./lib",
-    "pre_build": "run-s copy_contracts",
-    "build": "run-s clean copy_contracts && tslint --project . && tsc",
-    "test": "npm run build && (cd lib && ../node_modules/.bin/truffle test)"
+    "test": "jest",
+    "test:ci": "npx ganache-then-jest",
+    "build": "tslint --project . && tsc"
   },
   "repository": "https://github.com/magmo/force-move-games/tree/master/packages/fmg-core",
   "author": "Tom Close",
   "license": "MIT",
   "dependencies": {
     "bn.js": "^4.11.8",
+    "ethers": "^4.0.12",
     "sha3": "^1.2.2",
     "web3": "^1.0.0-beta.36",
+    "web3-utils": "^1.0.0-beta.36",
     "websocket": "^1.0.28"
   },
   "devDependencies": {
-    "@types/mocha": "^5.2.5",
+    "@types/jest": "^23.3.9",
     "@types/node": "^10.5.1",
     "@types/web3": "^1.0.0-beta.30",
-    "copyfiles": "^2.0.0",
-    "npm-run-all": "^4.1.3",
-    "shx": "^0.2.2",
-    "truffle": "^5.0.0-beta.1",
+    "dotenv": "^6.1.0",
+    "ganache-cli": "^6.1.8",
+    "jest": "^23.6.0",
+    "magmo-devtools": "https://github.com/magmo/devtools",
+    "truffle": "^5.0.0-next.17",
+    "ts-jest": "^23.10.4",
     "tslint": "^5.11.0",
-    "tslint-config-prettier": "^1.15.0",
-    "tslint-react": "^3.6.0",
+    "tslint-config-prettier": "^1.17.0",
     "typescript": "^2.9.2"
+  },
+  "jest": {
+    "collectCoverageFrom": [
+      "src/**/*.{js,jsx,ts,tsx}"
+    ],
+    "testMatch": [
+      "<rootDir>/src/**/?(*.)(spec|test).(t)s?(x)"
+    ],
+    "testPathIgnorePatterns": [
+      "/node_modules/"
+    ],
+    "testEnvironment": "node",
+    "testURL": "http://localhost",
+    "transformIgnorePatterns": [
+      "[/\\\\](node_modules|scripts)[/\\\\].+\\.(js|jsx|mjs)$"
+    ],
+    "globals": {
+      "ts-jest": {
+        "tsConfig": "./tsconfig.json"
+      }
+    },
+    "preset": "ts-jest"
+  },
+  "prettier": {
+    "printWidth": 100,
+    "singleQuote": true,
+    "trailingComma": "all"
   }
 }
