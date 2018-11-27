@@ -18,7 +18,7 @@ module.exports = {
   },
   compilers: {
     solc: {
-      version: process.env.SOLC_VERSION, // either a string like '0.5.0' or 'native', if you want to use your locally built solc compiler (eg. nightly)
+      version: "0.4.25"
     }
   }
 };
