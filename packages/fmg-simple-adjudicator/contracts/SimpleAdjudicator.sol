@@ -51,16 +51,21 @@ contract SimpleAdjudicator {
         external
         onlyWhenCurrentChallengeNotPresent
       {
-        // channelId must match the game supported by the channel
-        require(_fromState.channelId() == fundedChannelId);
+        // 
+        require(
+            _fromState.channelId() == fundedChannelId,
+            "channelId must match the game supported by the channel"
+        );
 
         // passing _v, _r, _s directly to validForceMove gives a "Stack too deep" error
         uint8[] memory v = _v;
         bytes32[] memory r = _r;
         bytes32[] memory s = _s;
 
-        // must be a valid force move
-        require(Rules.validForceMove(_fromState, _toState, v, r, s));
+        require(
+            Rules.validForceMove(_fromState, _toState, v, r, s),
+            "must be a valid force move"
+        );
 
         createChallenge(uint32(now + challengeDuration), _toState);
     }
@@ -106,6 +111,7 @@ contract SimpleAdjudicator {
     {
         _conclude(_penultimateState,_ultimateState,_v,_r,_s);
     }
+
     event GameConcluded();
     function _conclude(
         bytes _penultimateState,
@@ -139,10 +145,16 @@ contract SimpleAdjudicator {
       onlyWhenCurrentChallengeActive
     {
         // channelId must match the game supported by the channel
-        require(fundedChannelId == _refutationState.channelId());
+        require(
+            fundedChannelId == _refutationState.channelId(),
+            "channelId must match"
+        );
 
         // must be a valid refute according to framework rules
-        require(Rules.validRefute(currentChallenge.state, _refutationState, v, r, s));
+        require(
+            Rules.validRefute(currentChallenge.state, _refutationState, v, r, s),
+            "must be a valid refute"
+        );
 
         cancelCurrentChallenge();
 
@@ -154,8 +166,10 @@ contract SimpleAdjudicator {
       external
       onlyWhenCurrentChallengeActive
     {
-        // must be valid respond with move according to the framework rules
-        require(Rules.validRespondWithMove(currentChallenge.state, _nextState, v, r, s));
+        require(
+            Rules.validRespondWithMove(currentChallenge.state, _nextState, v, r, s),
+            "must be valid respond with move according to the framework rules"
+        );
 
         cancelCurrentChallenge();
         emit RespondedWithMove(_nextState);
@@ -315,27 +329,42 @@ contract SimpleAdjudicator {
 
     // Modifiers
     modifier onlyWhenCurrentChallengePresent() {
-        require(currentChallengePresent());
+        require(
+            currentChallengePresent(),
+            "current challenge must be present"
+        );
         _;
     }
 
     modifier onlyWhenCurrentChallengeNotPresent() {
-        require(!currentChallengePresent());
+        require(
+            !currentChallengePresent(),
+            "current challenge must not be present"
+        );
         _;
     }
 
     modifier onlyWhenGameTerminated() {
-        require(expiredChallengePresent());
+        require(
+            expiredChallengePresent(),
+            "game must be terminated"
+        );
         _;
     }
 
     modifier onlyWhenGameOngoing() {
-        require(!expiredChallengePresent());
+        require(
+            !expiredChallengePresent(),
+            "game must be ongoing"
+        );
         _;
     }
 
     modifier onlyWhenCurrentChallengeActive() {
-        require(activeChallengePresent());
+        require(
+            activeChallengePresent(),
+            "active challenge must be present"
+        );
         _;
     }
 }
