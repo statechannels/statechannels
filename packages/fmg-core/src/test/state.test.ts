@@ -8,7 +8,7 @@ import { sign } from '../utils';
 import { ethers, ContractFactory, Wallet } from 'ethers';
 
 // @ts-ignore
-import StateArtifact from '../../build/contracts/State.json';
+import StateArtifact from '../../build/contracts/StateV2.json';
 
 describe('State', () => {
   const provider = new ethers.providers.JsonRpcProvider('http://localhost:8545');
@@ -46,37 +46,6 @@ describe('State', () => {
     const factory = ContractFactory.fromSolidity(StateArtifact, wallet);
 
     stateLib = await factory.attach(StateArtifact.networks[networkId].address);
-  });
-
-  it('extracts the channelType', async () => {
-    const result = await stateLib.channelType(statePacket);
-    expect(channelType).toEqual(result);
-  });
-
-  it('extracts the channelNonce', async () => {
-    const result = await stateLib.channelNonce(statePacket);
-    expect(channelNonce).toEqual(result.toNumber());
-  });
-
-  it('extracts the turnNum', async () => {
-    const result = await stateLib.turnNum(statePacket);
-    expect(turnNum).toEqual(result.toNumber());
-  });
-
-  it('extracts the number of participants', async () => {
-    const n = await stateLib.numberOfParticipants(statePacket);
-    expect(n.toNumber()).toEqual(2);
-  });
-
-  it('extracts the participants', async () => {
-    const result = await stateLib.participants(statePacket);
-    expect(participants).toEqual(result);
-  });
-
-  it('extracts the resolution', async () => {
-    const result = await stateLib.resolution(statePacket);
-    expect(resolution[0].toNumber()).toEqual(result[0].toNumber());
-    expect(resolution[1].toNumber()).toEqual(result[1].toNumber());
   });
 
   it('identifies the mover based on the turnNum', async () => {
@@ -120,15 +89,7 @@ describe('State', () => {
     ).toBeTruthy();
   });
 
-  it('calculates the offset for the gameState', async () => {
-    const offset = await stateLib.gameStateOffset(statePacket);
-
-    // should be 128 + 2 * 64 + 96 = 352
-    // TODO find better way to test this
-    expect(offset.toNumber()).toEqual(352);
-  });
-
-  it.skip('can test if the gameAttributes are equal', async () => {
+  it('can test if the gameAttributes are equal', async () => {
     const state1 = CountingGame.preFundSetupState({ channel, resolution, turnNum, gameCounter: 0 });
     const state2 = CountingGame.preFundSetupState({ channel, resolution, turnNum, gameCounter: 1 });
 
