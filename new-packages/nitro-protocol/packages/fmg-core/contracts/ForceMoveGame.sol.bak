@@ -1,0 +1,7 @@
+pragma solidity ^0.5.0;
+
+import './StateV2.sol';
+
+interface ForceMoveGame {
+  function validTransition(StateV2.StateStruct calldata oldState, StateV2.StateStruct calldata newState) external pure returns (bool);
+}
