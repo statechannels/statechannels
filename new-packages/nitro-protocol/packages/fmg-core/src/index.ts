@@ -4,6 +4,6 @@ export { toHex32, padBytes32, sign, recover, decodeSignature, SolidityType, Soli
 
 // TODO: these should probably be in their own package
 export { default as expectRevert } from "./test/helpers/expect-revert";
-export { increaseTime, increaseTimeTo, DURATION } from "./test/helpers/increase-time";
+export { increaseTime, DURATION } from "./test/helpers/increase-time";
 
 export { CountingGame } from "./test-game/counting-game";
