@@ -1,43 +1,44 @@
+pragma solidity ^0.5.0;
 pragma experimental ABIEncoderV2;
 
-import "./StateV2.sol";
+import "./State.sol";
 
-contract RulesV2 is StateV2 {
+contract Rules is State {
     struct Challenge {
         bytes32 channelId;
-        StateV2.StateStruct state;
+        State.StateStruct state;
         uint32 expirationTime;
         uint256[] payouts;
     }
 
     function validForceMove(
-        StateV2.StateStruct memory _fromState,
-        StateV2.StateStruct memory _toState,
+        State.StateStruct memory _fromState,
+        State.StateStruct memory _toState,
         uint8[] memory v,
         bytes32[] memory r,
         bytes32[] memory s
     ) public pure returns (bool) {
         // states must be signed by the appropriate participant
         requireSignature(_fromState, v[0], r[0], s[0]);
-        StateV2.requireSignature(_toState, v[1], r[1], s[1]);
+        State.requireSignature(_toState, v[1], r[1], s[1]);
 
         return validTransition(_fromState, _toState);
     }
 
     function validConclusionProof(
-        StateV2.StateStruct memory _fromState,
-        StateV2.StateStruct memory _toState,
+        State.StateStruct memory _fromState,
+        State.StateStruct memory _toState,
         uint8[] memory v,
         bytes32[] memory r,
         bytes32[] memory s
     ) public pure returns (bool) {
         // states must be signed by the appropriate participant
-        StateV2.requireSignature(_fromState, v[0], r[0], s[0]);
-        StateV2.requireSignature(_toState, v[1], r[1], s[1]);
+        State.requireSignature(_fromState, v[0], r[0], s[0]);
+        State.requireSignature(_toState, v[1], r[1], s[1]);
 
         // first move must be a concluded state (transition rules will ensure this for the other states)
         require(
-            _fromState.stateType == StateV2.StateType.Conclude,
+            _fromState.stateType == State.StateType.Conclude,
             "fromState must be Conclude"
         );
         // must be a valid transition
@@ -45,8 +46,8 @@ contract RulesV2 is StateV2 {
     }
 
     function validRefute(
-        StateV2.StateStruct memory _challengeState,
-        StateV2.StateStruct memory _refutationState,
+        State.StateStruct memory _challengeState,
+        State.StateStruct memory _refutationState,
         uint8 v,
         bytes32 r,
         bytes32 s
@@ -56,24 +57,24 @@ contract RulesV2 is StateV2 {
             "the refutationState must have a higher nonce"
         );
         require(
-            StateV2.mover(_refutationState) == StateV2.mover(_challengeState),
+            State.mover(_refutationState) == State.mover(_challengeState),
             "refutationState must have same mover as challengeState"
         );
         // ... and be signed (by that mover)
-        StateV2.requireSignature(_refutationState, v, r, s);
+        State.requireSignature(_refutationState, v, r, s);
 
         return true;
     }
 
     function validRespondWithMove(
-        StateV2.StateStruct memory _challengeState,
-        StateV2.StateStruct memory _nextState,
+        State.StateStruct memory _challengeState,
+        State.StateStruct memory _nextState,
         uint8 v,
         bytes32 r,
         bytes32 s
     ) public pure returns (bool) {
         // check that the challengee's signature matches
-        StateV2.requireSignature(_nextState, v, r, s);
+        State.requireSignature(_nextState, v, r, s);
 
         require(
             validTransition(_challengeState, _nextState),
@@ -84,9 +85,9 @@ contract RulesV2 is StateV2 {
     }
 
     function validAlternativeRespondWithMove(
-        StateV2.StateStruct memory _challengeState,
-        StateV2.StateStruct memory _alternativeState,
-        StateV2.StateStruct memory _nextState,
+        State.StateStruct memory _challengeState,
+        State.StateStruct memory _alternativeState,
+        State.StateStruct memory _nextState,
         uint8[] memory v,
         bytes32[] memory r,
         bytes32[] memory s
@@ -94,7 +95,7 @@ contract RulesV2 is StateV2 {
 
         // checking the alternative state:
         require(
-            StateV2.channelId(_challengeState) == StateV2.channelId(_alternativeState),
+            State.channelId(_challengeState) == State.channelId(_alternativeState),
             "alternativeState must have the right channel"
         );
         require(
@@ -102,11 +103,11 @@ contract RulesV2 is StateV2 {
             "alternativeState must have the same nonce as the challenge state"
         );
         // .. it must be signed (by the challenger)
-        StateV2.requireSignature(_alternativeState, v[0], r[0], s[0]);
+        State.requireSignature(_alternativeState, v[0], r[0], s[0]);
 
         // checking the nextState:
         // .. it must be signed (my the challengee)
-        StateV2.requireSignature(_nextState, v[1], r[1], s[1]);
+        State.requireSignature(_nextState, v[1], r[1], s[1]);
         require(
             validTransition(_alternativeState, _nextState),
             "it must be a valid transition of the gamestate (from the alternative state)"
@@ -116,11 +117,11 @@ contract RulesV2 is StateV2 {
     }
 
     function validTransition(
-        StateV2.StateStruct memory  _fromState,
-        StateV2.StateStruct memory _toState
+        State.StateStruct memory  _fromState,
+        State.StateStruct memory _toState
     ) public pure returns (bool) {
         require(
-            StateV2.channelId(_toState) == StateV2.channelId(_fromState),
+            State.channelId(_toState) == State.channelId(_fromState),
             "channelId must match on toState"
         );
         require(
@@ -128,13 +129,13 @@ contract RulesV2 is StateV2 {
             "turnNum must increase by 1"
         );
 
-        if (_fromState.stateType == StateV2.StateType.PreFundSetup) {
+        if (_fromState.stateType == State.StateType.PreFundSetup) {
             return validTransitionFromPreFundSetup(_fromState, _toState);
-        } else if (_fromState.stateType == StateV2.StateType.PostFundSetup) {
+        } else if (_fromState.stateType == State.StateType.PostFundSetup) {
             return validTransitionFromPostFundSetup(_fromState, _toState);
-        } else if (_fromState.stateType == StateV2.StateType.Game) {
+        } else if (_fromState.stateType == State.StateType.Game) {
             return validTransitionFromGame(_fromState, _toState);
-        } else if (_fromState.stateType == StateV2.StateType.Conclude) {
+        } else if (_fromState.stateType == State.StateType.Conclude) {
             return validTransitionFromConclude(_fromState, _toState);
         }
 
@@ -142,44 +143,44 @@ contract RulesV2 is StateV2 {
     }
 
     function validTransitionFromPreFundSetup(
-        StateV2.StateStruct memory _fromState,
-        StateV2.StateStruct memory _toState
+        State.StateStruct memory _fromState,
+        State.StateStruct memory _toState
     ) public pure returns (bool) {
         if (_fromState.stateCount == _fromState.numberOfParticipants - 1) {
             // there are two options from the final PreFundSetup state
             // 1. PreFundSetup -> PostFundSetup transition
             // 2. PreFundSetup -> Conclude transition
-            if (_toState.stateType == StateV2.StateType.PostFundSetup) {
+            if (_toState.stateType == State.StateType.PostFundSetup) {
                 require(
                     _toState.stateCount == 0,
                     "stateCount must be reset when transitioning to PostFundSetup"
                 );
                 require(
-                    StateV2.gameAttributesEqual(_fromState, _toState),
+                    State.gameAttributesEqual(_fromState, _toState),
                     "gameAttributes must be equal"
                 );
                 require(
-                    StateV2.resolutionsEqual(_fromState, _toState),
+                    State.resolutionsEqual(_fromState, _toState),
                     "resolutions must be equal"
                 );
             } else {
                 require(
-                    _toState.stateType == StateV2.StateType.Conclude,
+                    _toState.stateType == State.StateType.Conclude,
                     "stateType must be conclude"
                 );
                 require(
-                    StateV2.resolutionsEqual(_fromState, _toState),
+                    State.resolutionsEqual(_fromState, _toState),
                     "resolutions must equal"
                 );
             }
         } else {
             // PreFundSetup -> PreFundSetup transition
             require(
-                _toState.stateType == StateV2.StateType.PreFundSetup,
+                _toState.stateType == State.StateType.PreFundSetup,
                 "stateType must be PreFundSetup"
             );
             require(
-                StateV2.gameAttributesEqual(_fromState, _toState),
+                State.gameAttributesEqual(_fromState, _toState),
                 "gameAttributes must be equal"
             );
             require(
@@ -187,7 +188,7 @@ contract RulesV2 is StateV2 {
                 "stateCount must increase by 1"
             );
             require(
-                StateV2.resolutionsEqual(_fromState, _toState),
+                State.resolutionsEqual(_fromState, _toState),
                 "resolutions must equal"
             );
         }
@@ -195,13 +196,13 @@ contract RulesV2 is StateV2 {
     }
 
     function validTransitionFromPostFundSetup(
-        StateV2.StateStruct memory  _fromState,
-        StateV2.StateStruct memory _toState
+        State.StateStruct memory  _fromState,
+        State.StateStruct memory _toState
     ) public pure returns (bool) {
         if (_fromState.stateCount == _fromState.numberOfParticipants - 1) {
             // PostFundSetup -> Game transition is the only option
             require(
-                _toState.stateType == StateV2.StateType.Game,
+                _toState.stateType == State.StateType.Game,
                 "stateType must be Game"
             );
             require(
@@ -212,10 +213,10 @@ contract RulesV2 is StateV2 {
             // Two possibilities:
             // 1. PostFundSetup -> PostFundSetup transition
             // 2. PostFundSetup -> Conclude transition
-            if (_toState.stateType == StateV2.StateType.PostFundSetup) {
+            if (_toState.stateType == State.StateType.PostFundSetup) {
                 // PostFundSetup -> PostFundSetup
                 require(
-                    StateV2.gameAttributesEqual(_fromState, _toState),
+                    State.gameAttributesEqual(_fromState, _toState),
                     "gameAttributes must be equal"
                 );
                 require(
@@ -223,17 +224,17 @@ contract RulesV2 is StateV2 {
                     "stateCount must increase by 1"
                 );
                 require(
-                    StateV2.resolutionsEqual(_fromState, _toState),
+                    State.resolutionsEqual(_fromState, _toState),
                     "resolutions must equal"
                 );
             } else {
                 // PostFundSetup -> Conclude
                 require(
-                    _toState.stateType == StateV2.StateType.Conclude,
+                    _toState.stateType == State.StateType.Conclude,
                     "stateType must be conclude"
                 );
                 require(
-                    StateV2.resolutionsEqual(_fromState, _toState),
+                    State.resolutionsEqual(_fromState, _toState),
                     "resolutions must equal"
                 );
             }
@@ -242,21 +243,21 @@ contract RulesV2 is StateV2 {
     }
 
     function validTransitionFromGame(
-        StateV2.StateStruct memory _fromState,
-        StateV2.StateStruct memory _toState
+        State.StateStruct memory _fromState,
+        State.StateStruct memory _toState
     ) public pure returns (bool) {
-        if (_toState.stateType == StateV2.StateType.Game) {
+        if (_toState.stateType == State.StateType.Game) {
             require(
                 validGameTransition(_fromState, _toState),
                 "transition must be valid"
             );
         } else {
             require(
-                _toState.stateType == StateV2.StateType.Conclude,
+                _toState.stateType == State.StateType.Conclude,
                 "stateType must be conclude"
             );
             require(
-                StateV2.resolutionsEqual(_fromState, _toState),
+                State.resolutionsEqual(_fromState, _toState),
                 "resolutions must equal"
             );
         }
@@ -264,22 +265,22 @@ contract RulesV2 is StateV2 {
     }
 
     function validTransitionFromConclude(
-        StateV2.StateStruct memory _fromState,
-        StateV2.StateStruct memory _toState
+        State.StateStruct memory _fromState,
+        State.StateStruct memory _toState
     ) public pure returns (bool) {
         require(
-            _toState.stateType == StateV2.StateType.Conclude,
+            _toState.stateType == State.StateType.Conclude,
             "stateType must be conclude"
         );
         require(
-            StateV2.resolutionsEqual(_fromState, _toState),
+            State.resolutionsEqual(_fromState, _toState),
             "resolutions must equal"
         );
         return true;
     }
 
     function validGameTransition(
-        StateV2.StateStruct memory _fromState,
-        StateV2.StateStruct memory _toState
+        State.StateStruct memory _fromState,
+        State.StateStruct memory _toState
     ) public pure returns (bool);
 }
