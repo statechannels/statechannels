@@ -1,7 +1,9 @@
 {
-  "extends": ["tslint:recommended"],
+  "extends": ["tslint:recommended", "tslint-config-prettier"],
   "linterOptions": {
     "exclude": [
+      "node_modules/**/*.ts",
+      "migrations/*",
       "/**/*.json"
     ]
   },
@@ -12,6 +14,7 @@
     "ordered-imports": false
   },
   "rules": {
+    "no-console": [true, "warning"],
     "object-literal-sort-keys": false,
     "member-access": false,
     "ordered-imports": false,
