@@ -32,7 +32,6 @@
     "magmo-devtools": "git+https://github.com/magmo/devtools.git",
     "solc": "^0.5.0",
     "truffle": "^5.0.0-beta.1",
-    "truffle-assertions": "^0.4.0",
     "tslint": "^5.11.0",
     "tslint-config-prettier": "^1.15.0",
     "typescript": "^2.9.2"
