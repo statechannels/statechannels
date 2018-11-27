@@ -1,4 +1,4 @@
-pragma solidity ^0.4.25
+pragma solidity ^0.4.25;
 
 import "fmg-core/contracts/State.sol";
 import "fmg-core/contracts/Rules.sol";

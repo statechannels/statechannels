@@ -1,4 +1,4 @@
-pragma solidity ^0.4.25
+pragma solidity ^0.4.25;
 
 library State {
     enum StateType { PreFundSetup, PostFundSetup, Game, Conclude }
