@@ -9,7 +9,7 @@
   },
   "scripts": {
     "test:all": "node scripts/test.js --env=jsdom --all",
-    "test": "node scripts/test.js --env=jsdom",
+    "test": "jest",
     "test:ci": "npx ganache-then-jest",
     "build": "npm run migrate && tslint --project ."
   },
