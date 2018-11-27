@@ -1,10 +1,18 @@
-import { State, toHex32, padBytes32 } from "..";
+import { State, toHex32 } from '..';
 
 class CountingGame {
-  static preFundSetupState(opts) { return new PreFundSetupState(opts); }
-  static PostFundSetupState(opts) { return new PostFundSetupState(opts); }
-  static gameState(opts) { return new GameState(opts); }
-  static concludeState(opts) { return new ConcludeState(opts); }
+  static preFundSetupState(opts) {
+    return new PreFundSetupState(opts);
+  }
+  static PostFundSetupState(opts) {
+    return new PostFundSetupState(opts);
+  }
+  static gameState(opts) {
+    return new GameState(opts);
+  }
+  static concludeState(opts) {
+    return new ConcludeState(opts);
+  }
 }
 
 class CountingBaseState extends State {
@@ -25,19 +33,27 @@ class CountingBaseState extends State {
 }
 
 class PreFundSetupState extends CountingBaseState {
-  initialize() { this.stateType = State.StateType.PreFundSetup; }
+  initialize() {
+    this.stateType = State.StateType.PreFundSetup;
+  }
 }
 
 class PostFundSetupState extends CountingBaseState {
-  initialize() { this.stateType = State.StateType.PostFundSetup; }
+  initialize() {
+    this.stateType = State.StateType.PostFundSetup;
+  }
 }
 
 class GameState extends CountingBaseState {
-  initialize() { this.stateType = State.StateType.Game; }
+  initialize() {
+    this.stateType = State.StateType.Game;
+  }
 }
 
 class ConcludeState extends CountingBaseState {
-  initialize() { this.stateType = State.StateType.Conclude; }
+  initialize() {
+    this.stateType = State.StateType.Conclude;
+  }
 }
 
 export { CountingGame };
