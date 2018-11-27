@@ -14,7 +14,7 @@ module.exports = {
 
         const migrate = spawn(trufflePath, ['migrate', '--network', process.env.TARGET_NETWORK]);
         migrate.stdout.on('data', function (data) {
-            console.log(data.toString());
+            console.log('DATA: ', data.toString());
         });
         migrate.stderr.on('data', function (data) {
             console.log('ERROR: ' + data);
@@ -22,11 +22,18 @@ module.exports = {
 
         return new Promise(function (resolve, reject) {
             migrate.addListener("error", (error) => {
-                console.log(error);
+                console.error(error);
                 reject(error);
             });
-            migrate.addListener("exit", resolve);
-        });
 
+            migrate.addListener("exit", (exitCode) => {
+                if (exitCode === 0) {
+                    resolve()
+
+                } else {
+                    process.exit(exitCode)
+                }
+            });
+        });
     }
 }
