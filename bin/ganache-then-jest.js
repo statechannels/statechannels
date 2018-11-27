@@ -21,10 +21,13 @@ const { startGanache } = require('../utils/startGanache');
 console.log(`Using port ${process.env.DEV_GANACHE_PORT} for Ganache.`);
 startGanache().then(() => {
   deployContracts().then(() => {
-    runJest().then(() => {
+    runJest().then((success) => {
       // startGanache does not exit on its own, so we have to exit the process manually
       // once jest has finished running
-      process.exit(0)
+      process.exit(0);
+    }).catch((failure) => {
+        console.error(failure);
+        process.exit(1);
     });
   });
 });
