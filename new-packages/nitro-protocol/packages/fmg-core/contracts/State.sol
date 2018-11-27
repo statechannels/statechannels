@@ -1,7 +1,7 @@
 pragma solidity ^0.5.0;
 pragma experimental ABIEncoderV2;
 
-contract State {
+library State {
     enum StateType { PreFundSetup, PostFundSetup, Game, Conclude }
 
     struct StateStruct {

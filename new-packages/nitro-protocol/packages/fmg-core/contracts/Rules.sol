@@ -2,8 +2,9 @@ pragma solidity ^0.5.0;
 pragma experimental ABIEncoderV2;
 
 import "./State.sol";
+import "./ForceMoveGame.sol";
 
-contract Rules is State {
+library Rules {
     struct Challenge {
         bytes32 channelId;
         State.StateStruct state;
@@ -19,7 +20,7 @@ contract Rules is State {
         bytes32[] memory s
     ) public pure returns (bool) {
         // states must be signed by the appropriate participant
-        requireSignature(_fromState, v[0], r[0], s[0]);
+        State.requireSignature(_fromState, v[0], r[0], s[0]);
         State.requireSignature(_toState, v[1], r[1], s[1]);
 
         return validTransition(_fromState, _toState);
@@ -282,5 +283,7 @@ contract Rules is State {
     function validGameTransition(
         State.StateStruct memory _fromState,
         State.StateStruct memory _toState
-    ) public pure returns (bool);
+    ) public pure returns (bool) {
+        return ForceMoveGame(_fromState.channelType).validTransition(_fromState.gameAttributes, _toState.gameAttributes);
+    }
 }
