@@ -21,11 +21,11 @@ describe('State', () => {
   const networkId = (await provider.getNetwork()).chainId;
   const s = await ContractFactory.fromSolidity(StateArtifact, wallet).deploy();
   console.log(await s.getStatus(0));
-  // ContractArtifact.bytecode = linker.linkBytecode(ContractArtifact.bytecode, {
-  //   SampleState: StateArtifact.networks[networkId].address,
-  // });
-  // const i = await ContractFactory.fromSolidity(ContractArtifact, wallet).deploy();
-  // console.log(await i.getStatus(0));
+  ContractArtifact.bytecode = linker.linkBytecode(ContractArtifact.bytecode, {
+    SampleState: StateArtifact.networks[networkId].address,
+  });
+  const i = await ContractFactory.fromSolidity(ContractArtifact, wallet).deploy();
+  console.log(await i.getStatus(0));
   // await ContractFactory.fromSolidity(EnumArtifact);
   // await ContractFactory.fromSolidity(FunctionArtifact);
   });
