@@ -3,13 +3,14 @@ pragma experimental ABIEncoderV2;
 
 library State {
     enum StateType { PreFundSetup, PostFundSetup, Game, Conclude }
+    uint8 PreFundSetup;
 
     struct StateStruct {
         address channelType;
         uint256 channelNonce;
         uint256 numberOfParticipants;
         address[] participants;
-        StateType stateType;
+        uint8 stateType;
         uint256 turnNum;
         uint256 stateCount;
         uint256[] resolution;
