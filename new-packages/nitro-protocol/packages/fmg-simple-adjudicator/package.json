@@ -1,7 +1,7 @@
 {
   "name": "fmg-simple-adjudicator",
   "main": "./lib/index.js",
-  "version": "0.1.6",
+  "version": "0.2.0",
   "description": "Simple adjudicator for force-move games",
   "directories": {
     "doc": "docs",
@@ -16,7 +16,7 @@
   "author": "Tom Close",
   "license": "MIT",
   "dependencies": {
-    "fmg-core": "^0.1.6",
+    "fmg-core": "^0.2.0",
     "sha3": "^1.2.2",
     "web3": "^1.0.0-beta.36"
   },
