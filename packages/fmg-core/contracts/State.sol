@@ -59,20 +59,11 @@ library State {
     }
 
     function gameAttributesEqual(StateStruct memory _state, StateStruct memory _otherState) public pure returns (bool) {
-        require(
-            keccak256(_state.gameAttributes) == keccak256(_otherState.gameAttributes),
-            "game attributes not equal"
-        );
-
-        return true;
+        return keccak256(_state.gameAttributes) == keccak256(_otherState.gameAttributes);
     }
 
     function resolutionsEqual(StateStruct memory _state, StateStruct memory _otherState) public pure returns (bool) {
-        require(
-            keccak256(abi.encodePacked(_state.resolution)) == keccak256(abi.encodePacked(_otherState.resolution)),
-            "resolutions not equal"
-        );
-        return true;
+        return keccak256(abi.encodePacked(_state.resolution)) == keccak256(abi.encodePacked(_otherState.resolution));
     }
 
     // utilities
