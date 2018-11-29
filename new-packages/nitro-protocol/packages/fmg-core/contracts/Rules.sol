@@ -203,15 +203,27 @@ library Rules {
         State.StateStruct memory _toState
     ) public pure returns (bool) {
         if (_fromState.stateCount == _fromState.numberOfParticipants - 1) {
-            // PostFundSetup -> Game transition is the only option
-            require(
-                _toState.isGame(),
-                "Invalid transition from PostFundSetup: stateType must be Game"
-            );
-            require(
-                validGameTransition(_fromState, _toState),
-                "Invalid transition from PostFundSetup: transition must be valid"
-            );
+            if (_toState.isGame()) {
+                require(
+                    validGameTransition(_fromState, _toState),
+                    "Invalid transition from PostFundSetup: transition must be valid"
+                );
+            } else {
+                require(
+                    _toState.isConclude(),
+                    "Invalid transition from PostFundSetup: stateType must be Conclude"
+                );
+
+                require(
+                    State.resolutionsEqual(_fromState, _toState),
+                    "Invalid transition from PostFundSetup: resolutions must be equal"
+                );
+
+                require(
+                    _toState.stateCount == 0,
+                    "Invalid transition from PostFundSetup: stateCount must be reset when transitioning to Conclude"
+                );
+            }
         } else {
             // Two possibilities:
             // 1. PostFundSetup -> PostFundSetup transition
