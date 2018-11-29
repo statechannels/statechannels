@@ -213,7 +213,7 @@ describe('Rules', () => {
       await expectRevert(validTransition(fromState, toState), resolutionsMustEqual("PostFundSetup"));
     });
 
-    it.skip('rejects a transition from the last PostFundSetup state', async () => {
+    it('rejects a transition from the last PostFundSetup state', async () => {
       fromState.stateCount = 1;
       await expectRevert(validTransition(fromState, toState), stateTypeMustBe("PostFundSetup", "Conclude"));
     });
