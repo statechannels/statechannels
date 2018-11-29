@@ -71,7 +71,7 @@
     "build": "node scripts/build.js",
     "test": "run-s test:truffle 'test:app --all'",
     "test:ci": "run-s build test:truffle 'test:app --all --ci'",
-    "test:app": "node scripts/test.js --env=jsdom",
+    "test:app": "node scripts/test.js",
     "test:truffle": "node scripts/test_truffle.js",
     "truffle:migrate": "deploy-contracts",
     "ganache:start": "start-ganache",
@@ -132,7 +132,7 @@
     "testMatch": [
       "<rootDir>/src/**/?(*.)(spec|test).(j|t)s?(x)"
     ],
-    "testEnvironment": "node",
+    "testEnvironment": "jsdom",
     "testURL": "http://localhost",
     "transform": {
       "^.+\\.(js|jsx|mjs)$": "<rootDir>/node_modules/babel-jest",
