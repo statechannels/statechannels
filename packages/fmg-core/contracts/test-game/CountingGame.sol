@@ -4,7 +4,7 @@ pragma experimental ABIEncoderV2;
 import "../State.sol";
 import "./CountingState.sol";
 
-contract CountingGame is Rules {
+contract CountingGame {
     // The following transitions are allowed:
     //
     // Start -> Concluded
@@ -15,22 +15,10 @@ contract CountingGame is Rules {
         // regardless of whether we move to a Start or Concluded state, we must have:
         // 1. balances remain the same
         // 2. count must increase
-        require(_new.aBal() == _old.aBal());
-        require(_new.bBal() == _old.bBal());
-        require(_new.count == _old.count + 1);
+        require(_new.frameworkState.resolution[0] == _old.frameworkState.resolution[0]);
+        require(_new.frameworkState.resolution[1] == _old.frameworkState.resolution[1]);
+        require(_new.gameCounter == _old.gameCounter + 1);
 
         return true;
     }
 }
-
-
-contract SimpleAdjudicator {
-    constructor(address rules) {
-
-    }
-}
-
-// two strategies:
-// 1. simple adjudicator points to CountingGame, which inherits from Rules
-// 2. - simple adjudicator points to Rules, and has a reference to CountingGame.
-//    - SimpleAdjudicator tells Rules to look at CountingGame to evaluate validGameTransition
