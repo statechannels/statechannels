@@ -7,19 +7,33 @@ import { CountingGame } from '../../test-game/counting-game';
 import { Channel } from '../..';
 
 import StateArtifact from '../../../build/contracts/State.json';
+
 import RulesArtifact from '../../../build/contracts/Rules.json';
+import TestRulesArtifact from '../../../build/contracts/TestRules.json';
+
 import CountingStateArtifact from '../../../build/contracts/CountingState.json';
 import CountingGameArtifact from '../../../build/contracts/CountingGame.json';
 
+const provider = new ethers.providers.JsonRpcProvider('http://localhost:8545');
+const privateKey = '0xf2f48ee19680706196e2e339e5da3491186e0c4c5030670656b0e0164837257d';
+const wallet = new Wallet(privateKey, provider);
+
+const TURN_NUM_MUST_INCREMENT = "turnNum must increase by 1";
+const CHANNEL_ID_MUST_MATCH = "channelId must match";
+const resolutionsMustEqual = (stateType) => `${stateType}: resolutions must be equal`;
+const gameAttributesMustMatch = (stateType) => `${stateType}: gameAttributes must be equal`;
+const stateCountMustIncrement = (stateType) => `${stateType}: stateCount must increase by 1`;
+const stateCountMustReset = (stateType, nextStateType) => `${stateType}: stateCount must be reset when transitioning to ${nextStateType}`;
+const stateTypeMustBe = (stateType, nextStateType) => `${stateType}: stateType must be ${nextStateType}`;
+
 describe('Rules', () => {
-  const provider = new ethers.providers.JsonRpcProvider('http://localhost:8545');
-  const privateKey = '0x' + '1'.repeat(64);
-  const wallet = new Wallet(privateKey, provider);
 
   let channel;
   let otherChannel;
   let defaults;
-  let framework;
+
+  let testFramework;
+
   const resolution = [12, 13];
   const otherResolution = [10, 15];
 
@@ -34,7 +48,9 @@ describe('Rules', () => {
   let fromState;
   let toState;
 
-  beforeEach(async () => {
+
+  beforeAll(async () => {
+    // Contract setup --------------------------------------------------------------------------
     const networkId = (await provider.getNetwork()).chainId;
     CountingStateArtifact.bytecode = linker.linkBytecode(CountingStateArtifact.bytecode, {
       State: StateArtifact.networks[networkId].address,
@@ -52,16 +68,18 @@ describe('Rules', () => {
     RulesArtifact.bytecode = linker.linkBytecode(RulesArtifact.bytecode, {
       State: StateArtifact.networks[networkId].address,
     });
-    framework = await ContractFactory.fromSolidity(RulesArtifact, wallet).attach(
-      RulesArtifact.networks[networkId].address,
-    );
+
+    TestRulesArtifact.bytecode = linker.linkBytecode(TestRulesArtifact.bytecode, { "State": StateArtifact.networks[networkId].address });
+    TestRulesArtifact.bytecode = linker.linkBytecode(TestRulesArtifact.bytecode, { "Rules": RulesArtifact.networks[networkId].address });
+    testFramework = await ContractFactory.fromSolidity(TestRulesArtifact, wallet).deploy();
+    // Contract setup --------------------------------------------------------------------------
 
     channel = new Channel(gameContract.address, 0, participants);
     defaults = { channel, resolution, gameCounter: 0 };
   });
 
   const validTransition = async (state1, state2) => {
-    return await framework.validTransition(state1.toHex(), state2.toHex());
+    return await testFramework.validTransition(state1.args, state2.args);
   };
 
   describe('preFundSetup -> preFundSetup', () => {
@@ -71,38 +89,37 @@ describe('Rules', () => {
     });
 
     it('allows a valid transition', async () => {
-      // expect(true).toEqual(true);
       expect(await validTransition(fromState, toState)).toEqual(true);
     });
 
     it("rejects a transition where the turnNum doesn't increment", async () => {
       toState.turnNum = fromState.turnNum;
-      await expectRevert(validTransition(fromState, toState));
+      await expectRevert(validTransition(fromState, toState), TURN_NUM_MUST_INCREMENT); // passes
     });
 
     it('rejects any transition where the channel changes', async () => {
       toState.channel = otherChannel;
-      await expectRevert(validTransition(fromState, toState));
+      await expectRevert(validTransition(fromState, toState), CHANNEL_ID_MUST_MATCH);
     });
 
     it('rejects a transition where the balances changes', async () => {
       toState.resolution = otherResolution;
-      await expectRevert(validTransition(fromState, toState));
+      await expectRevert(validTransition(fromState, toState), resolutionsMustEqual("PreFundSetup"));
     });
     it("rejects a transition where the count doesn't increment", async () => {
       toState.stateCount = fromState.stateCount;
-      await expectRevert(validTransition(fromState, toState));
+      await expectRevert(validTransition(fromState, toState), stateCountMustIncrement("PreFundSetup"));
     });
     it('rejects a transition where the game attributes changes', async () => {
       toState.gameCounter = 45;
-      await expectRevert(validTransition(fromState, toState));
+      await expectRevert(validTransition(fromState, toState), gameAttributesMustMatch("PreFundSetup"));
     });
   });
 
   describe('preFundSetup -> PostFundSetup', () => {
     beforeEach(() => {
       fromState = CountingGame.preFundSetupState({ ...defaults, turnNum: 1, stateCount: 1 });
-      toState = CountingGame.PostFundSetupState({ ...defaults, turnNum: 2, stateCount: 0 });
+      toState = CountingGame.postFundSetupState({ ...defaults, turnNum: 2, stateCount: 0 });
     });
 
     it('allows a valid transition', async () => {
@@ -111,32 +128,32 @@ describe('Rules', () => {
 
     it("rejects a transition where the turnNum doesn't increment", async () => {
       toState.turnNum = fromState.turnNum;
-      await expectRevert(validTransition(fromState, toState));
+      await expectRevert(validTransition(fromState, toState), TURN_NUM_MUST_INCREMENT);
     });
 
     it('rejects any transition where the channel changes', async () => {
       toState.channel = otherChannel;
-      await expectRevert(validTransition(fromState, toState));
+      await expectRevert(validTransition(fromState, toState), CHANNEL_ID_MUST_MATCH);
     });
 
     it('rejects a transition not from the last preFundSetup state', async () => {
       fromState.stateCount = 0;
-      await expectRevert(validTransition(fromState, toState));
+      await expectRevert(validTransition(fromState, toState), stateTypeMustBe("PreFundSetup", "PreFundSetup"));
     });
 
     it('rejects a transition where the balances changes', async () => {
       toState.resolution = otherResolution;
-      await expectRevert(validTransition(fromState, toState));
+      await expectRevert(validTransition(fromState, toState), resolutionsMustEqual("PreFundSetup"));
     });
 
     it("rejects a transition where the count doesn't reset", async () => {
       toState.stateCount = 2;
-      await expectRevert(validTransition(fromState, toState));
+      await expectRevert(validTransition(fromState, toState), stateCountMustReset("PreFundSetup", "PostFundSetup"));
     });
 
     it('rejects a transition where the position changes', async () => {
       toState.gameCounter = 45;
-      await expectRevert(validTransition(fromState, toState));
+      await expectRevert(validTransition(fromState, toState), gameAttributesMustMatch("PreFundSetup"));
     });
   });
 
@@ -152,29 +169,29 @@ describe('Rules', () => {
 
     it("rejects a transition where the turnNum doesn't increment", async () => {
       toState.turnNum = fromState.turnNum;
-      await expectRevert(validTransition(fromState, toState));
+      await expectRevert(validTransition(fromState, toState), TURN_NUM_MUST_INCREMENT);
     });
 
     it('rejects any transition where the channel changes', async () => {
       toState.channel = otherChannel;
-      await expectRevert(validTransition(fromState, toState));
+      await expectRevert(validTransition(fromState, toState), CHANNEL_ID_MUST_MATCH);
     });
 
     it('rejects a transition where the balances changes', async () => {
       toState.resolution = otherResolution;
-      await expectRevert(validTransition(fromState, toState));
+      await expectRevert(validTransition(fromState, toState), resolutionsMustEqual("PreFundSetup"));
     });
 
     it('rejects a transition not from the last preFundSetup state', async () => {
       fromState.stateCount = 0;
-      await expectRevert(validTransition(fromState, toState));
+      await expectRevert(validTransition(fromState, toState), stateTypeMustBe("PreFundSetup", "PreFundSetup"));
     });
   });
 
   describe('PostFundSetup -> PostFundSetup', () => {
     beforeEach(() => {
-      fromState = CountingGame.PostFundSetupState({ ...defaults, turnNum: 1, stateCount: 0 });
-      toState = CountingGame.PostFundSetupState({ ...defaults, turnNum: 2, stateCount: 1 });
+      fromState = CountingGame.postFundSetupState({ ...defaults, turnNum: 1, stateCount: 0 });
+      toState = CountingGame.postFundSetupState({ ...defaults, turnNum: 2, stateCount: 1 });
     });
 
     it('allows a valid transition', async () => {
@@ -183,33 +200,42 @@ describe('Rules', () => {
 
     it("rejects a transition where the turnNum doesn't increment", async () => {
       toState.turnNum = fromState.turnNum;
-      await expectRevert(validTransition(fromState, toState));
+      await expectRevert(validTransition(fromState, toState), TURN_NUM_MUST_INCREMENT);
     });
 
     it('rejects any transition where the channel changes', async () => {
       toState.channel = otherChannel;
-      await expectRevert(validTransition(fromState, toState));
+      await expectRevert(validTransition(fromState, toState), CHANNEL_ID_MUST_MATCH);
     });
 
     it('rejects a transition where the balances changes', async () => {
       toState.resolution = otherResolution;
-      await expectRevert(validTransition(fromState, toState));
+      await expectRevert(validTransition(fromState, toState), resolutionsMustEqual("PostFundSetup"));
     });
 
-    it("rejects a transition where the count doesn't reset", async () => {
-      toState.stateCount = 2;
-      await expectRevert(validTransition(fromState, toState));
-    });
-
-    it('rejects a transition from the last PostFundSetup state', async () => {
+    it.skip('rejects a transition from the last PostFundSetup state', async () => {
       fromState.stateCount = 1;
-      await expectRevert(validTransition(fromState, toState));
+      await expectRevert(validTransition(fromState, toState), stateTypeMustBe("PostFundSetup", "Conclude"));
+    });
+  });
+
+  describe('PostFundSetup -> Game', () => {
+    beforeEach(() => {
+      fromState = CountingGame.postFundSetupState({ ...defaults, turnNum: 3, stateCount: 1, gameCounter: 0 });
+      toState = CountingGame.gameState({ ...defaults, turnNum: 4, stateCount: 0, gameCounter: 0,  });
+    });
+
+    it("rejects a transition where the fromState is not the last player", async () => {
+      fromState.stateCount = 0;
+      // if the stateCount on fromState is not numParticipants - 1, then the player
+      // has to transition to either PostFundSetup or Conclude
+      await expectRevert(validTransition(fromState, toState), stateTypeMustBe("PostFundSetup", "Conclude"));
     });
   });
 
   describe('PostFundSetup -> conclude', () => {
     beforeEach(() => {
-      fromState = CountingGame.PostFundSetupState({ ...defaults, turnNum: 1, stateCount: 0 });
+      fromState = CountingGame.postFundSetupState({ ...defaults, turnNum: 1, stateCount: 0 });
       toState = CountingGame.concludeState({ ...defaults, turnNum: 2 });
     });
 
@@ -221,6 +247,12 @@ describe('Rules', () => {
     it('rejects any transition where the channel changes', async () => {
       toState.channel = otherChannel;
       await expectRevert(validTransition(fromState, toState));
+    });
+
+    it("rejects a transition where the count doesn't reset", async () => {
+      fromState.stateCount = 1;
+      toState.stateCount = 2;
+      await expectRevert(validTransition(fromState, toState), stateCountMustReset("PostFundSetup", "PostFundSetup"));
     });
 
     it('allows a valid transition', async () => {
@@ -240,7 +272,7 @@ describe('Rules', () => {
 
   describe('PostFundSetup -> game', () => {
     beforeEach(() => {
-      fromState = CountingGame.PostFundSetupState({
+      fromState = CountingGame.postFundSetupState({
         ...defaults,
         turnNum: 1,
         stateCount: 1,

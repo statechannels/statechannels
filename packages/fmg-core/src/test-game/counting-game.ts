@@ -1,10 +1,11 @@
-import { State, toHex32 } from '..';
+import { State } from '..';
+import abi from 'web3-eth-abi';
 
 class CountingGame {
   static preFundSetupState(opts) {
     return new PreFundSetupState(opts);
   }
-  static PostFundSetupState(opts) {
+  static postFundSetupState(opts) {
     return new PostFundSetupState(opts);
   }
   static gameState(opts) {
@@ -14,6 +15,12 @@ class CountingGame {
     return new ConcludeState(opts);
   }
 }
+
+const SolidityCountingStateType = {
+  "CountingStateStruct": {
+    "gameCounter": "uint256",
+  },
+};
 
 class CountingBaseState extends State {
   gameCounter: number;
@@ -27,8 +34,8 @@ class CountingBaseState extends State {
   // tslint:disable-next-line:no-empty
   initialize() {}
 
-  toHex() {
-    return super.toHex() + toHex32(this.gameCounter).substr(2);
+  get gameAttributes() {
+    return abi.encodeParameter(SolidityCountingStateType, [this.gameCounter]);
   }
 }
 
