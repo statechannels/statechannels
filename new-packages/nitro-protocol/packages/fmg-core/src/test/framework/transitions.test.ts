@@ -252,7 +252,7 @@ describe('Rules', () => {
     it("rejects a transition where the count doesn't reset", async () => {
       fromState.stateCount = 1;
       toState.stateCount = 2;
-      await expectRevert(validTransition(fromState, toState), stateCountMustReset("PostFundSetup", "PostFundSetup"));
+      await expectRevert(validTransition(fromState, toState), stateCountMustReset("PostFundSetup", "Conclude"));
     });
 
     it('allows a valid transition', async () => {
