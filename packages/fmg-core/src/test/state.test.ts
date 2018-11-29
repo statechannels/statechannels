@@ -12,10 +12,11 @@ import { ethers, ContractFactory, Wallet, Contract } from 'ethers';
 import StateArtifact from '../../build/contracts/State.json';
 import TestStateArtifact from '../../build/contracts/TestState.json';
 
+const provider = new ethers.providers.JsonRpcProvider('http://localhost:8545');
+const privateKey = '0xf2f48ee19680706196e2e339e5da3491186e0c4c5030670656b0e0164837257d';
+const wallet = new Wallet(privateKey, provider);
+
 describe('State', () => {
-  const provider = new ethers.providers.JsonRpcProvider('http://localhost:8545');
-  const privateKey = '0xf2f48ee19680706196e2e339e5da3491186e0c4c5030670656b0e0164837257d';
-  const wallet = new Wallet(privateKey, provider);
 
   let stateLib;
   let testStateLib;
@@ -53,8 +54,18 @@ describe('State', () => {
     testStateLib = await ContractFactory.fromSolidity(TestStateArtifact, wallet).deploy();
   });
 
-  it('identifies PreFundSetup states', async () => {
+  it('identifies stateTypes', async () => {
+    state.stateType = State.StateType.PreFundSetup;
     expect(await testStateLib.isPreFundSetup(state.args)).toBe(true);
+
+    state.stateType = State.StateType.PostFundSetup;
+    expect(await testStateLib.isPostFundSetup(state.args)).toBe(true);
+
+    state.stateType = State.StateType.Game;
+    expect(await testStateLib.isGame(state.args)).toBe(true);
+
+    state.stateType = State.StateType.Conclude;
+    expect(await testStateLib.isConclude(state.args)).toBe(true);
   });
 
   it('identifies the mover based on the turnNum', async () => {
@@ -77,7 +88,7 @@ describe('State', () => {
     expect(await testStateLib.requireSignature(state.args, v, r, s)).toBeTruthy();
   });
 
-  it.skip('will revert if the wrong party signed', async () => {
+  it('will revert if the wrong party signed', async () => {
     // needs to be signed by 1 as it's their move
     const { v, r, s } = sign(state.toHex(), participantA.privateKey);
     expectRevert(testStateLib.requireSignature(state.args, v, r, s));

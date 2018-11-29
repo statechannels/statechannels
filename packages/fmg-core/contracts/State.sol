@@ -21,15 +21,15 @@ library State {
     }
 
     function isPostFundSetup(StateStruct memory self) public pure returns (bool) {
-        return self.stateType == uint(StateType.PreFundSetup);
+        return self.stateType == uint(StateType.PostFundSetup);
     }
 
     function isGame(StateStruct memory self) public pure returns (bool) {
-        return self.stateType == uint(StateType.PreFundSetup);
+        return self.stateType == uint(StateType.Game);
     }
 
     function isConclude(StateStruct memory self) public pure returns (bool) {
-        return self.stateType == uint(StateType.PreFundSetup);
+        return self.stateType == uint(StateType.Conclude);
     }
 
     function channelId(StateStruct memory _state) public pure returns (bytes32) {
