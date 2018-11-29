@@ -69,7 +69,7 @@ class State {
       this.turnNum,
       this.stateCount,
       this.resolution.map(String),
-      '0x',
+      this.gameAttributes,
     ];
   }
 }
@@ -77,10 +77,10 @@ class State {
 // tslint:disable-next-line:no-namespace
 namespace State {
   export enum StateType {
-    PreFundSetup = '0',
-    PostFundSetup = '1',
-    Game = '2',
-    Conclude = '3',
+    PreFundSetup = 0,
+    PostFundSetup = 1,
+    Game = 2,
+    Conclude = 3,
   }
 }
 
