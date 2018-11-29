@@ -4,11 +4,13 @@ import { State } from '../state';
 import expectRevert from './helpers/expect-revert';
 import { CountingGame } from '../test-game/counting-game';
 import { sign } from '../utils';
+import linker from 'solc/linker';
 
 import { ethers, ContractFactory, Wallet, Contract } from 'ethers';
 
 // @ts-ignore
 import StateArtifact from '../../build/contracts/State.json';
+import TestStateArtifact from '../../build/contracts/TestState.json';
 
 describe('State', () => {
   const provider = new ethers.providers.JsonRpcProvider('http://localhost:8545');
@@ -16,6 +18,7 @@ describe('State', () => {
   const wallet = new Wallet(privateKey, provider);
 
   let stateLib;
+  let testStateLib;
   const channelNonce = 12;
   const turnNum = 15;
 
@@ -31,7 +34,7 @@ describe('State', () => {
   const participants = [participantA.address, participantB.address];
   const resolution = [new BN(5), new BN(4)];
   const channel = new Channel(channelType, channelNonce, participants);
-  const stateType = State.StateType.Game;
+  const stateType = State.StateType.PreFundSetup;
   const state = new State({
     channel,
     stateType,
@@ -39,33 +42,29 @@ describe('State', () => {
     resolution,
     stateCount: 0,
   });
-  const statePacket = state.toHex();
 
   beforeEach(async () => {
     const networkId = (await provider.getNetwork()).chainId;
-    const factory = ContractFactory.fromSolidity(StateArtifact, wallet);
-    // const factory = new ContractFactory(StateArtifact.abi, StateArtifact.bytecode, wallet);
-    // stateLib = await new Contract(StateArtifact.networks[networkId].address, StateArtifact.abi, wallet);
 
-    // stateLib = await factory.attach(StateArtifact.networks[networkId].address);
-    stateLib = await factory.deploy();
+    const factory = ContractFactory.fromSolidity(StateArtifact, wallet);
+    stateLib = await factory.attach(StateArtifact.networks[networkId].address);
+
+    TestStateArtifact.bytecode = linker.linkBytecode(TestStateArtifact.bytecode, { "State": StateArtifact.networks[networkId].address });
+    testStateLib = await ContractFactory.fromSolidity(TestStateArtifact, wallet).deploy();
   });
 
-  it.only('identifies the mover based on the turnNum', async () => {
-    expect(true).toBe(true);
-    const mover = await stateLib.isPreFundSetup(state);
+  it('identifies PreFundSetup states', async () => {
+    expect(await testStateLib.isPreFundSetup(state.args)).toBe(true);
+  });
+
+  it('identifies the mover based on the turnNum', async () => {
+    const mover = await testStateLib.mover(state.args);
     // our state nonce is 15, which is odd, so it should be participant[1]
     expect(mover).toEqual(participants[1]);
   });
 
-  it('identifies the indexOfMover based on the turnNum', async () => {
-    const index = await stateLib.indexOfMover(statePacket);
-    // our state nonce is 15, which is odd, so it should be participant 1
-    expect(index.toNumber()).toEqual(1);
-  });
-
   it('can calculate the channelId', async () => {
-    const chainId = await stateLib.channelId(statePacket);
+    const chainId = await testStateLib.channelId(state.args);
     const localId = channel.id;
 
     expect(chainId).toEqual(localId);
@@ -75,13 +74,13 @@ describe('State', () => {
     // needs to be signed by 1 as it's their move
     const { r, s, v } = sign(state.toHex(), participantB.privateKey);
 
-    expect(await stateLib.requireSignature(statePacket, v, r, s)).toBeTruthy();
+    expect(await testStateLib.requireSignature(state.args, v, r, s)).toBeTruthy();
   });
 
   it.skip('will revert if the wrong party signed', async () => {
     // needs to be signed by 1 as it's their move
     const { v, r, s } = sign(state.toHex(), participantA.privateKey);
-    expectRevert(stateLib.requireSignature(statePacket, v, r, s));
+    expectRevert(testStateLib.requireSignature(state.args, v, r, s));
   });
 
   it('can check if the state is fully signed', async () => {
@@ -89,7 +88,7 @@ describe('State', () => {
     const { r: r1, s: s1, v: v1 } = sign(state.toHex(), participantB.privateKey);
 
     expect(
-      await stateLib.requireFullySigned(statePacket, [v0, v1], [r0, r1], [s0, s1]),
+      await testStateLib.requireFullySigned(state.args, [v0, v1], [r0, r1], [s0, s1]),
     ).toBeTruthy();
   });
 
@@ -97,6 +96,6 @@ describe('State', () => {
     const state1 = CountingGame.preFundSetupState({ channel, resolution, turnNum, gameCounter: 0 });
     const state2 = CountingGame.preFundSetupState({ channel, resolution, turnNum, gameCounter: 1 });
 
-    await expectRevert(stateLib.gameAttributesEqual(state1.toHex(), state2.toHex()));
+    await expectRevert(stateLib.gameAttributesEqual(state1.args, state2.args));
   });
 });
