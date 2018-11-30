@@ -11,7 +11,6 @@ contract CountingGame {
     //
     using CountingState for CountingState.CountingStateStruct;
 
-    event Destructured(CountingState.CountingStateStruct oldState, CountingState.CountingStateStruct newState);
     function validTransition(State.StateStruct memory _old, State.StateStruct memory _new) public pure returns (bool) {
         // regardless of whether we move to a Start or Concluded state, we must have:
         // 1. balances remain the same
