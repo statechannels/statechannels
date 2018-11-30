@@ -13,7 +13,6 @@ import RulesArtifact from '../build/contracts/Rules.json';
 import CountingStateArtifact from '../build/contracts/CountingState.json';
 import CountingGameArtifact from '../build/contracts/CountingGame.json';
 import SimpleAdjudicatorArtifact from '../build/contracts/SimpleAdjudicator.json';
-import BN from 'bn.js';
 import { assert } from 'chai';
 import linker from 'solc/linker';
 import { ethers, ContractFactory, Wallet } from 'ethers';
@@ -26,13 +25,13 @@ const bBal = ethers.utils.parseUnits('4', 'wei');
 const resolution = [aBal, bBal];
 const differentResolution = [bBal, aBal];
 
-describe('SimpleAdjudicator', () => {
-  let networkId;
-  const provider = new ethers.providers.JsonRpcProvider('http://localhost:8545');
-  // the following private key is funded with 1 million eth in the startGanache function
-  const privateKey = '0xf2f48ee19680706196e2e339e5da3491186e0c4c5030670656b0e0164837257d';
-  const wallet = new Wallet(privateKey, provider);
+let networkId;
+const provider = new ethers.providers.JsonRpcProvider('http://localhost:8545');
+// the following private key is funded with 1 million eth in the startGanache function
+const privateKey = '0xf2f48ee19680706196e2e339e5da3491186e0c4c5030670656b0e0164837257d';
+const wallet = new Wallet(privateKey, provider);
 
+describe('SimpleAdjudicator', () => {
   let simpleAdj;
   let channel;
   let state0;
@@ -81,11 +80,12 @@ describe('SimpleAdjudicator', () => {
       bob.address.toLowerCase(),
     ]);
 
+    const defaults = { channel, resolution, gameCounter: 0 };
+
     state0 = CountingGame.gameState({
-      channel,
-      resolution,
-      turnNum: 6,
+      ...defaults,
       gameCounter: 1,
+      turnNum: 6,
     });
     state1 = CountingGame.gameState({
       channel,
@@ -131,7 +131,6 @@ describe('SimpleAdjudicator', () => {
   it('forceMove emits ForceMove', async () => {
     const agreedState = state0;
     const challengeState = state1;
-    const responseState = state2;
 
     const { r: r0, s: s0, v: v0 } = sign(agreedState.toHex(), challengee.privateKey);
     const { r: r1, s: s1, v: v1 } = sign(challengeState.toHex(), challenger.privateKey);
@@ -143,8 +142,8 @@ describe('SimpleAdjudicator', () => {
     const { emitterWitness, eventPromise } = expectEvent(simpleAdj, filter);
 
     await simpleAdj.forceMove(
-      agreedState.toHex(),
-      challengeState.toHex(),
+      agreedState.args,
+      challengeState.args,
       [v0, v1],
       [r0, r1],
       [s0, s1],
@@ -166,8 +165,8 @@ describe('SimpleAdjudicator', () => {
     assert.equal(await simpleAdj.currentChallengePresent(), false);
 
     await simpleAdj.forceMove(
-      agreedState.toHex(),
-      challengeState.toHex(),
+      agreedState.args,
+      challengeState.args,
       [v0, v1],
       [r0, r1],
       [s0, s1],
@@ -177,7 +176,7 @@ describe('SimpleAdjudicator', () => {
     const { r: r2, s: s2, v: v2 } = sign(responseState.toHex(), challengee.privateKey);
 
     const { emitterWitness, eventPromise } = expectEvent(simpleAdj, 'RespondedWithMove');
-    await simpleAdj.respondWithMove(responseState.toHex(), v2, r2, s2);
+    await simpleAdj.respondWithMove(responseState.args, v2, r2, s2);
     await eventPromise;
 
     expect(emitterWitness).toBeCalled();
@@ -199,8 +198,8 @@ describe('SimpleAdjudicator', () => {
     );
 
     await simpleAdj.forceMove(
-      agreedState.toHex(),
-      challengeState.toHex(),
+      agreedState.args,
+      challengeState.args,
       [v0, v1],
       [r0, r1],
       [s0, s1],
@@ -211,7 +210,7 @@ describe('SimpleAdjudicator', () => {
     const { r: r2, s: s2, v: v2 } = sign(refutationState.toHex(), challenger.privateKey);
 
     const { emitterWitness, eventPromise } = expectEvent(simpleAdj, 'Refuted');
-    await simpleAdj.refute(refutationState.toHex(), v2, r2, s2);
+    await simpleAdj.refute(refutationState.args, v2, r2, s2);
 
     await eventPromise;
     expect(emitterWitness).toBeCalled();
@@ -234,8 +233,8 @@ describe('SimpleAdjudicator', () => {
     );
 
     await simpleAdj.forceMove(
-      agreedState.toHex(),
-      challengeState.toHex(),
+      agreedState.args,
+      challengeState.args,
       [v0, v1],
       [r0, r1],
       [s0, s1],
@@ -247,8 +246,8 @@ describe('SimpleAdjudicator', () => {
 
     const { emitterWitness, eventPromise } = expectEvent(simpleAdj, 'RespondedWithAlternativeMove');
     await simpleAdj.alternativeRespondWithMove(
-      alternativeState.toHex(),
-      responseState.toHex(),
+      alternativeState.args,
+      responseState.args,
       [v2, v3],
       [r2, r3],
       [s2, s3],
@@ -267,9 +266,9 @@ describe('SimpleAdjudicator', () => {
     bobState.stateType = State.StateType.Conclude;
     const { r: r0, s: s0, v: v0 } = sign(aliceState.toHex(), alice.privateKey);
     const { r: r1, s: s1, v: v1 } = sign(bobState.toHex(), bob.privateKey);
-    await simpleAdj.conclude(aliceState.toHex(), bobState.toHex(), [v0, v1], [r0, r1], [s0, s1]);
+    await simpleAdj.conclude(aliceState.args, bobState.args, [v0, v1], [r0, r1], [s0, s1]);
     expectRevert(
-      simpleAdj.conclude(aliceState.toHex(), bobState.toHex(), [v0, v1], [r0, r1], [s0, s1]),
+      simpleAdj.conclude(aliceState.args, bobState.args, [v0, v1], [r0, r1], [s0, s1]),
     );
   });
 
@@ -339,7 +338,7 @@ describe('SimpleAdjudicator', () => {
       );
 
       // pass the conclusion proof
-      await simpleAdj.conclude(aliceState.toHex(), bobState.toHex(), [v0, v1], [r0, r1], [s0, s1]);
+      await simpleAdj.conclude(aliceState.args, bobState.args, [v0, v1], [r0, r1], [s0, s1]);
 
       await withdrawHelper(alice, aliceDestination);
 
@@ -395,7 +394,7 @@ describe('SimpleAdjudicator', () => {
       const { r: r0, s: s0, v: v0 } = sign(aliceState.toHex(), alice.privateKey);
       const { r: r1, s: s1, v: v1 } = sign(bobState.toHex(), bob.privateKey);
 
-      await simpleAdj.forceMove(aliceState.toHex(), bobState.toHex(), [v0, v1], [r0, r1], [s0, s1]);
+      await simpleAdj.forceMove(aliceState.args, bobState.args, [v0, v1], [r0, r1], [s0, s1]);
       await increaseTime(DURATION.days(2), provider);
 
       await withdrawHelper(alice, aliceDestination);
@@ -437,7 +436,7 @@ describe('SimpleAdjudicator', () => {
       const { r: r0, s: s0, v: v0 } = sign(aliceState.toHex(), alice.privateKey);
       const { r: r1, s: s1, v: v1 } = sign(bobState.toHex(), bob.privateKey);
 
-      await simpleAdj.conclude(aliceState.toHex(), bobState.toHex(), [v0, v1], [r0, r1], [s0, s1]);
+      await simpleAdj.conclude(aliceState.args, bobState.args, [v0, v1], [r0, r1], [s0, s1]);
       await withdrawHelper(bob, bobDestination);
 
       assert.equal(Number(await provider.getBalance(bobDestination)), 0, "Bob took alice's money.");
