@@ -11,13 +11,23 @@ contract CountingGame {
     //
     using CountingState for CountingState.CountingStateStruct;
 
-    function validGameTransition(CountingState.CountingStateStruct memory _old, CountingState.CountingStateStruct memory _new) public pure returns (bool) {
+    event Destructured(CountingState.CountingStateStruct oldState, CountingState.CountingStateStruct newState);
+    function validTransition(State.StateStruct memory _old, State.StateStruct memory _new) public pure returns (bool) {
         // regardless of whether we move to a Start or Concluded state, we must have:
         // 1. balances remain the same
         // 2. count must increase
-        require(_new.frameworkState.resolution[0] == _old.frameworkState.resolution[0]);
-        require(_new.frameworkState.resolution[1] == _old.frameworkState.resolution[1]);
-        require(_new.gameCounter == _old.gameCounter + 1);
+
+        CountingState.CountingStateStruct memory oldState = CountingState.fromFrameworkState(_old);
+        CountingState.CountingStateStruct memory newState = CountingState.fromFrameworkState(_new);
+
+        require(
+            keccak256(abi.encode(oldState.resolution)) == keccak256(abi.encode(newState.resolution)),
+            "CountingGame: resolutions must be equal"
+        );
+        require(
+            newState.gameCounter == oldState.gameCounter + 1,
+            "CountingGame: gameCounter must increment by 1"
+        );
 
         return true;
     }

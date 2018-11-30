@@ -1,5 +1,11 @@
 import { State } from '..';
 import abi from 'web3-eth-abi';
+import BN from 'bn.js';
+
+interface GameAttributes {
+  gameCounter: BN;
+  resolution: [BN, BN];
+}
 
 class CountingGame {
   static preFundSetupState(opts) {
@@ -13,6 +19,14 @@ class CountingGame {
   }
   static concludeState(opts) {
     return new ConcludeState(opts);
+  }
+
+  static gameAttributes(countingStateArgs: [BN, [BN, BN]]): GameAttributes {
+    //
+    return {
+      gameCounter: countingStateArgs[0],
+      resolution: countingStateArgs[1],
+    };
   }
 }
 
