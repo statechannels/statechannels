@@ -140,7 +140,7 @@ contract SimpleAdjudicator {
         
     }
 
-    event Refuted(bytes refutation);
+    event Refuted(State.StateStruct refutation);
     function refute(State.StateStruct memory _refutationState, uint8 v, bytes32 r, bytes32 s)
       public
       onlyWhenCurrentChallengeActive
@@ -159,10 +159,10 @@ contract SimpleAdjudicator {
 
         cancelCurrentChallenge();
 
-        // emit Refuted(abi.encode(_refutationState));
+        emit Refuted(_refutationState);
     }
 
-    event RespondedWithMove(bytes response);
+    event RespondedWithMove(State.StateStruct response);
     function respondWithMove(State.StateStruct memory _nextState, uint8 v, bytes32 r, bytes32 s)
       public
       onlyWhenCurrentChallengeActive
@@ -173,10 +173,10 @@ contract SimpleAdjudicator {
         );
 
         cancelCurrentChallenge();
-        // emit RespondedWithMove(abi.encode(_nextState));
+        emit RespondedWithMove(_nextState);
     }
 
-    event RespondedWithAlternativeMove(bytes alternativeResponse);
+    event RespondedWithAlternativeMove(State.StateStruct alternativeResponse);
     function alternativeRespondWithMove(
         State.StateStruct memory _alternativeState,
         State.StateStruct memory _nextState,
@@ -196,12 +196,12 @@ contract SimpleAdjudicator {
         require(Rules.validAlternativeRespondWithMove(currentChallenge.state, _alternativeState, _nextState, _v, _r, _s));
 
         cancelCurrentChallenge();
-        // emit RespondedWithAlternativeMove(abi.encode(_nextState));
+        emit RespondedWithAlternativeMove(_nextState);
     }
 
     event ChallengeCreated(
         bytes32 channelId,
-        bytes state,
+        State.StateStruct state,
         uint32 expirationTime,
         uint256[] payouts
     );
@@ -214,7 +214,7 @@ contract SimpleAdjudicator {
 
         emit ChallengeCreated(
             currentChallenge.channelId,
-            abi.encode(currentChallenge.state),
+            currentChallenge.state,
             currentChallenge.expirationTime,
             currentChallenge.payouts
         );
