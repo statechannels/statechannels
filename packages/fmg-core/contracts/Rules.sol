@@ -2,7 +2,7 @@ pragma solidity ^0.5.0;
 pragma experimental ABIEncoderV2;
 
 import "./State.sol";
-// import "./ForceMoveGame.sol";
+import "./ForceMoveGame.sol";
 
 library Rules {
     using State for State.StateStruct;
@@ -298,7 +298,6 @@ library Rules {
         State.StateStruct memory _fromState,
         State.StateStruct memory _toState
     ) public pure returns (bool) {
-        return true;
-        // return ForceMoveGame(_fromState.channelType).validTransition(_fromState.gameAttributes, _toState.gameAttributes);
+        return ForceMoveGame(_fromState.channelType).validTransition(_fromState, _toState);
     }
 }
