@@ -1,4 +1,5 @@
-pragma solidity ^0.4.25;
+pragma solidity ^0.5.0;
+pragma experimental ABIEncoderV2;
 
 import "fmg-core/contracts/State.sol";
 import "fmg-core/contracts/Rules.sol";
@@ -7,7 +8,7 @@ import "fmg-core/contracts/ForceMoveGame.sol";
 contract SimpleAdjudicator {
     // SimpleAdjudicator can support exactly one force move game channel
     // between exactly two players.
-    using State for bytes;
+    using State for State.StateStruct;
 
     bytes32 public fundedChannelId;
 
@@ -33,7 +34,7 @@ contract SimpleAdjudicator {
     }
 
     // allow funds to be sent to the contract
-    function () public payable {
+    function () external payable {
         emit FundsReceived(
             msg.value,
             msg.sender,
@@ -42,13 +43,13 @@ contract SimpleAdjudicator {
     }
 
     function forceMove (
-        bytes _fromState,
-        bytes _toState,
-        uint8[] _v,
-        bytes32[] _r,
-        bytes32[] _s
+        State.StateStruct memory _fromState,
+        State.StateStruct memory _toState,
+        uint8[] memory _v,
+        bytes32[] memory _r,
+        bytes32[] memory _s
       )
-        external
+        public
         onlyWhenCurrentChallengeNotPresent
       {
         // 
@@ -71,15 +72,15 @@ contract SimpleAdjudicator {
     }
 
     function concludeAndWithdraw(
-        bytes _penultimateState,
-        bytes _ultimateState,
+        State.StateStruct memory _penultimateState,
+        State.StateStruct memory _ultimateState,
         address participant,
-        address destination,
+        address payable destination,
         bytes32 _channelId,
-        uint8[] _v,
-        bytes32[] _r,
-        bytes32[] _s
-    ) external{
+        uint8[] memory _v,
+        bytes32[] memory _r,
+        bytes32[] memory _s
+    ) public {
         if (!expiredChallengePresent()){
             _conclude(
                 _penultimateState,
@@ -91,9 +92,9 @@ contract SimpleAdjudicator {
         }
 
         require(
-            // You can't compare calldata bytes (eg _ultimateState) with
+            // You can't compare memory bytes (eg _ultimateState) with
             // storage bytes (eg. currentChallenge.state)
-            keccak256(_ultimateState) == keccak256(currentChallenge.state),
+            keccak256(abi.encode(_ultimateState)) == keccak256(abi.encode(currentChallenge.state)),
             "Game already concluded with a different conclusion proof"
         );
 
@@ -102,23 +103,23 @@ contract SimpleAdjudicator {
     }
 
     function conclude(
-        bytes _penultimateState,
-        bytes _ultimateState,
-        uint8[] _v,
-        bytes32[] _r,
-        bytes32[] _s)
-    external onlyWhenGameOngoing 
+        State.StateStruct memory _penultimateState,
+        State.StateStruct memory _ultimateState,
+        uint8[] memory _v,
+        bytes32[] memory _r,
+        bytes32[] memory _s)
+    public onlyWhenGameOngoing 
     {
         _conclude(_penultimateState,_ultimateState,_v,_r,_s);
     }
 
     event GameConcluded();
     function _conclude(
-        bytes _penultimateState,
-        bytes _ultimateState,
-        uint8[] _v,
-        bytes32[] _r,
-        bytes32[] _s
+        State.StateStruct memory _penultimateState,
+        State.StateStruct memory _ultimateState,
+        uint8[] memory _v,
+        bytes32[] memory _r,
+        bytes32[] memory _s
     )
       internal
     {
@@ -140,8 +141,8 @@ contract SimpleAdjudicator {
     }
 
     event Refuted(bytes refutation);
-    function refute(bytes _refutationState, uint8 v, bytes32 r, bytes32 s)
-      external
+    function refute(State.StateStruct memory _refutationState, uint8 v, bytes32 r, bytes32 s)
+      public
       onlyWhenCurrentChallengeActive
     {
         // channelId must match the game supported by the channel
@@ -158,12 +159,12 @@ contract SimpleAdjudicator {
 
         cancelCurrentChallenge();
 
-        emit Refuted(_refutationState);
+        // emit Refuted(abi.encode(_refutationState));
     }
 
     event RespondedWithMove(bytes response);
-    function respondWithMove(bytes _nextState, uint8 v, bytes32 r, bytes32 s)
-      external
+    function respondWithMove(State.StateStruct memory _nextState, uint8 v, bytes32 r, bytes32 s)
+      public
       onlyWhenCurrentChallengeActive
     {
         require(
@@ -172,30 +173,30 @@ contract SimpleAdjudicator {
         );
 
         cancelCurrentChallenge();
-        emit RespondedWithMove(_nextState);
+        // emit RespondedWithMove(abi.encode(_nextState));
     }
 
     event RespondedWithAlternativeMove(bytes alternativeResponse);
     function alternativeRespondWithMove(
-        bytes _alternativeState,
-        bytes _nextState,
-        uint8[] _v,
-        bytes32[] _r,
-        bytes32[] _s
+        State.StateStruct memory _alternativeState,
+        State.StateStruct memory _nextState,
+        uint8[] memory _v,
+        bytes32[] memory _r,
+        bytes32[] memory _s
     )
-      external
+      public
       onlyWhenCurrentChallengeActive
     {
         // passing _v, _r, _s directly to validAlternativeRespondWithMove gives a "Stack too deep" error
-        uint8[] memory v = _v;
-        bytes32[] memory r = _r;
-        bytes32[] memory s = _s;
+        // uint8[] memory v = _v;
+        // bytes32[] memory r = _r;
+        // bytes32[] memory s = _s;
 
         // must be valid alternative respond with move according to the framework rules
-        require(Rules.validAlternativeRespondWithMove(currentChallenge.state, _alternativeState, _nextState, v, r, s));
+        require(Rules.validAlternativeRespondWithMove(currentChallenge.state, _alternativeState, _nextState, _v, _r, _s));
 
         cancelCurrentChallenge();
-        emit RespondedWithAlternativeMove(_nextState);
+        // emit RespondedWithAlternativeMove(abi.encode(_nextState));
     }
 
     event ChallengeCreated(
@@ -205,15 +206,15 @@ contract SimpleAdjudicator {
         uint256[] payouts
     );
 
-    function createChallenge(uint32 expirationTime, bytes _state) private {
+    function createChallenge(uint32 expirationTime, State.StateStruct memory _state) private {
         currentChallenge.channelId = fundedChannelId;
         currentChallenge.state = _state;
         currentChallenge.expirationTime = expirationTime;
-        currentChallenge.payouts = State.resolution(_state);
+        currentChallenge.payouts = _state.resolution;
 
         emit ChallengeCreated(
             currentChallenge.channelId,
-            currentChallenge.state,
+            abi.encode(currentChallenge.state),
             currentChallenge.expirationTime,
             currentChallenge.payouts
         );
@@ -240,7 +241,7 @@ contract SimpleAdjudicator {
 
     function withdraw(
         address participant,
-        address destination,
+        address payable destination,
         bytes32 _channelId, // not needed for the simple adjudicator, which only supports one channel
         uint8 v,
         bytes32 r,
@@ -253,7 +254,7 @@ contract SimpleAdjudicator {
 
     function _withdraw(
         address participant,
-        address destination,
+        address payable destination,
         bytes32 _channelId, // not needed for the simple adjudicator, which only supports one channel
         uint8 v,
         bytes32 r,
@@ -288,7 +289,7 @@ contract SimpleAdjudicator {
         withdrawnAmount[idx] = withdrawnAmount[idx] + amount;
     }
 
-    function validTransition(bytes _fromState, bytes _toState) public pure returns(bool) {
+    function validTransition(State.StateStruct memory _fromState, State.StateStruct memory _toState) public pure returns(bool) {
         return Rules.validTransition(_fromState, _toState);
     }
 
@@ -317,10 +318,9 @@ contract SimpleAdjudicator {
       private view
       onlyWhenCurrentChallengePresent // otherwise, we don't know that we've seen a valid game state yet
       returns (uint8) {
-        bytes memory endState = currentChallenge.state;
-        address[] memory p = State.participants(endState);
+        State.StateStruct memory endState = currentChallenge.state;
         for(uint8 i = 0; i < 2; i++) {
-            if (p[i] == participant) {
+            if (endState.participants[i] == participant) {
                 return i;
             }
         }
