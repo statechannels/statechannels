@@ -1,6 +1,6 @@
 const chai = require('chai');
 module.exports = {
-    expectRevert: (promise, pattern) => {
+    assertRevert: (promise, pattern) => {
         let revertFound, messageMatch;
         promise.then(() => {
             chai.assert.fail('Expected revert not received');
