@@ -1,7 +1,7 @@
 {
   "name": "fmg-simple-adjudicator",
   "main": "./lib/index.js",
-  "version": "0.2.1",
+  "version": "0.3.2",
   "description": "Simple adjudicator for force-move games",
   "directories": {
     "doc": "docs",
@@ -16,7 +16,7 @@
   "author": "Tom Close",
   "license": "MIT",
   "dependencies": {
-    "fmg-core": "^0.2.1",
+    "fmg-core": "^0.3.2",
     "sha3": "^1.2.2",
     "web3": "^1.0.0-beta.36"
   },
@@ -31,7 +31,7 @@
     "jest": "^23.6.0",
     "magmo-devtools": "git+https://github.com/magmo/devtools.git",
     "solc": "^0.5.0",
-    "truffle": "^5.0.0-beta.1",
+    "truffle": "^5.0.0-beta.2",
     "tslint": "^5.11.0",
     "tslint-config-prettier": "^1.17.0",
     "typescript": "^2.9.2"

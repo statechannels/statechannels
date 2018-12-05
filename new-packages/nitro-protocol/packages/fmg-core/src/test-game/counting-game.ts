@@ -1,11 +1,40 @@
-import { State, toHex32, padBytes32 } from "..";
+import { State } from '..';
+import abi from 'web3-eth-abi';
+import BN from 'bn.js';
+
+interface GameAttributes {
+  gameCounter: BN;
+  resolution: [BN, BN];
+}
 
 class CountingGame {
-  static preFundSetupState(opts) { return new PreFundSetupState(opts); }
-  static PostFundSetupState(opts) { return new PostFundSetupState(opts); }
-  static gameState(opts) { return new GameState(opts); }
-  static concludeState(opts) { return new ConcludeState(opts); }
+  static preFundSetupState(opts) {
+    return new PreFundSetupState(opts);
+  }
+  static postFundSetupState(opts) {
+    return new PostFundSetupState(opts);
+  }
+  static gameState(opts) {
+    return new GameState(opts);
+  }
+  static concludeState(opts) {
+    return new ConcludeState(opts);
+  }
+
+  static gameAttributes(countingStateArgs: [BN, [BN, BN]]): GameAttributes {
+    //
+    return {
+      gameCounter: countingStateArgs[0],
+      resolution: countingStateArgs[1],
+    };
+  }
 }
+
+const SolidityCountingStateType = {
+  "CountingStateStruct": {
+    "gameCounter": "uint256",
+  },
+};
 
 class CountingBaseState extends State {
   gameCounter: number;
@@ -19,25 +48,33 @@ class CountingBaseState extends State {
   // tslint:disable-next-line:no-empty
   initialize() {}
 
-  toHex() {
-    return super.toHex() + toHex32(this.gameCounter).substr(2);
+  get gameAttributes() {
+    return abi.encodeParameter(SolidityCountingStateType, [this.gameCounter]);
   }
 }
 
 class PreFundSetupState extends CountingBaseState {
-  initialize() { this.stateType = State.StateType.PreFundSetup; }
+  initialize() {
+    this.stateType = State.StateType.PreFundSetup;
+  }
 }
 
 class PostFundSetupState extends CountingBaseState {
-  initialize() { this.stateType = State.StateType.PostFundSetup; }
+  initialize() {
+    this.stateType = State.StateType.PostFundSetup;
+  }
 }
 
 class GameState extends CountingBaseState {
-  initialize() { this.stateType = State.StateType.Game; }
+  initialize() {
+    this.stateType = State.StateType.Game;
+  }
 }
 
 class ConcludeState extends CountingBaseState {
-  initialize() { this.stateType = State.StateType.Conclude; }
+  initialize() {
+    this.stateType = State.StateType.Conclude;
+  }
 }
 
 export { CountingGame };
