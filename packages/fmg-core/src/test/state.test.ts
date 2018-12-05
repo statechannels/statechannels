@@ -4,18 +4,22 @@ import { State } from '../state';
 import expectRevert from './helpers/expect-revert';
 import { CountingGame } from '../test-game/counting-game';
 import { sign } from '../utils';
+import linker from 'solc/linker';
 
-import { ethers, ContractFactory, Wallet } from 'ethers';
+import { ethers, ContractFactory, Wallet, Contract } from 'ethers';
 
 // @ts-ignore
 import StateArtifact from '../../build/contracts/State.json';
+import TestStateArtifact from '../../build/contracts/TestState.json';
+
+const provider = new ethers.providers.JsonRpcProvider('http://localhost:8545');
+const privateKey = '0xf2f48ee19680706196e2e339e5da3491186e0c4c5030670656b0e0164837257d';
+const wallet = new Wallet(privateKey, provider);
 
 describe('State', () => {
-  const provider = new ethers.providers.JsonRpcProvider('http://localhost:8545');
-  const privateKey = '0xf2f48ee19680706196e2e339e5da3491186e0c4c5030670656b0e0164837257d';
-  const wallet = new Wallet(privateKey, provider);
 
   let stateLib;
+  let testStateLib;
   const channelNonce = 12;
   const turnNum = 15;
 
@@ -31,7 +35,7 @@ describe('State', () => {
   const participants = [participantA.address, participantB.address];
   const resolution = [new BN(5), new BN(4)];
   const channel = new Channel(channelType, channelNonce, participants);
-  const stateType = State.StateType.Game;
+  const stateType = State.StateType.PreFundSetup;
   const state = new State({
     channel,
     stateType,
@@ -39,60 +43,39 @@ describe('State', () => {
     resolution,
     stateCount: 0,
   });
-  const statePacket = state.toHex();
 
   beforeEach(async () => {
     const networkId = (await provider.getNetwork()).chainId;
+
     const factory = ContractFactory.fromSolidity(StateArtifact, wallet);
-
     stateLib = await factory.attach(StateArtifact.networks[networkId].address);
+
+    TestStateArtifact.bytecode = linker.linkBytecode(TestStateArtifact.bytecode, { "State": StateArtifact.networks[networkId].address });
+    testStateLib = await ContractFactory.fromSolidity(TestStateArtifact, wallet).deploy();
   });
 
-  it('extracts the channelType', async () => {
-    const result = await stateLib.channelType(statePacket);
-    expect(channelType).toEqual(result);
-  });
+  it('identifies stateTypes', async () => {
+    state.stateType = State.StateType.PreFundSetup;
+    expect(await testStateLib.isPreFundSetup(state.args)).toBe(true);
 
-  it('extracts the channelNonce', async () => {
-    const result = await stateLib.channelNonce(statePacket);
-    expect(channelNonce).toEqual(result.toNumber());
-  });
+    state.stateType = State.StateType.PostFundSetup;
+    expect(await testStateLib.isPostFundSetup(state.args)).toBe(true);
 
-  it('extracts the turnNum', async () => {
-    const result = await stateLib.turnNum(statePacket);
-    expect(turnNum).toEqual(result.toNumber());
-  });
+    state.stateType = State.StateType.Game;
+    expect(await testStateLib.isGame(state.args)).toBe(true);
 
-  it('extracts the number of participants', async () => {
-    const n = await stateLib.numberOfParticipants(statePacket);
-    expect(n.toNumber()).toEqual(2);
-  });
-
-  it('extracts the participants', async () => {
-    const result = await stateLib.participants(statePacket);
-    expect(participants).toEqual(result);
-  });
-
-  it('extracts the resolution', async () => {
-    const result = await stateLib.resolution(statePacket);
-    expect(resolution[0].toNumber()).toEqual(result[0].toNumber());
-    expect(resolution[1].toNumber()).toEqual(result[1].toNumber());
+    state.stateType = State.StateType.Conclude;
+    expect(await testStateLib.isConclude(state.args)).toBe(true);
   });
 
   it('identifies the mover based on the turnNum', async () => {
-    const mover = await stateLib.mover(statePacket);
+    const mover = await testStateLib.mover(state.args);
     // our state nonce is 15, which is odd, so it should be participant[1]
     expect(mover).toEqual(participants[1]);
   });
 
-  it('identifies the indexOfMover based on the turnNum', async () => {
-    const index = await stateLib.indexOfMover(statePacket);
-    // our state nonce is 15, which is odd, so it should be participant 1
-    expect(index.toNumber()).toEqual(1);
-  });
-
   it('can calculate the channelId', async () => {
-    const chainId = await stateLib.channelId(statePacket);
+    const chainId = await testStateLib.channelId(state.args);
     const localId = channel.id;
 
     expect(chainId).toEqual(localId);
@@ -102,13 +85,13 @@ describe('State', () => {
     // needs to be signed by 1 as it's their move
     const { r, s, v } = sign(state.toHex(), participantB.privateKey);
 
-    expect(await stateLib.requireSignature(statePacket, v, r, s)).toBeTruthy();
+    expect(await testStateLib.requireSignature(state.args, v, r, s)).toBeTruthy();
   });
 
-  it.skip('will revert if the wrong party signed', async () => {
+  it('will revert if the wrong party signed', async () => {
     // needs to be signed by 1 as it's their move
     const { v, r, s } = sign(state.toHex(), participantA.privateKey);
-    expectRevert(stateLib.requireSignature(statePacket, v, r, s));
+    expectRevert(testStateLib.requireSignature(state.args, v, r, s));
   });
 
   it('can check if the state is fully signed', async () => {
@@ -116,22 +99,14 @@ describe('State', () => {
     const { r: r1, s: s1, v: v1 } = sign(state.toHex(), participantB.privateKey);
 
     expect(
-      await stateLib.requireFullySigned(statePacket, [v0, v1], [r0, r1], [s0, s1]),
+      await testStateLib.requireFullySigned(state.args, [v0, v1], [r0, r1], [s0, s1]),
     ).toBeTruthy();
   });
 
-  it('calculates the offset for the gameState', async () => {
-    const offset = await stateLib.gameStateOffset(statePacket);
-
-    // should be 128 + 2 * 64 + 96 = 352
-    // TODO find better way to test this
-    expect(offset.toNumber()).toEqual(352);
-  });
-
-  it.skip('can test if the gameAttributes are equal', async () => {
+  it('can test if the gameAttributes are equal', async () => {
     const state1 = CountingGame.preFundSetupState({ channel, resolution, turnNum, gameCounter: 0 });
     const state2 = CountingGame.preFundSetupState({ channel, resolution, turnNum, gameCounter: 1 });
 
-    await expectRevert(stateLib.gameAttributesEqual(state1.toHex(), state2.toHex()));
+    await expectRevert(stateLib.gameAttributesEqual(state1.args, state2.args));
   });
 });

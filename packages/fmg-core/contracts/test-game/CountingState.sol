@@ -1,26 +1,23 @@
-pragma solidity ^0.4.25;
+pragma solidity ^0.5.0;
+pragma experimental ABIEncoderV2;
 
 import "../State.sol";
 
 library CountingState {
-    // CountingGame State Fields
-    // (relative to gamestate offset)
-    // ==============================
-    // [  0 -  31] uint256 count
+    using State for State.StateStruct;
 
-    function count(bytes _state) public pure returns (uint256 _count) {
-        uint offset = State.gameStateOffset(_state);
-        assembly {
-            _count := mload(add(_state, offset))
-        }
+    struct GameAttributes {
+        uint256 gameCounter;
     }
 
-    // utility functions
-    function aBal(bytes _state) public pure returns (uint256) {
-        return State.resolution(_state)[0];
+    struct CountingStateStruct {
+        uint256 gameCounter;
+        uint256[] resolution;
     }
 
-    function bBal(bytes _state) public pure returns (uint256 _bBal) {
-        return State.resolution(_state)[1];
+    function fromFrameworkState(State.StateStruct memory frameworkState) public pure returns (CountingStateStruct memory) {
+        GameAttributes memory gameAttributes = abi.decode(frameworkState.gameAttributes, (GameAttributes));
+
+        return CountingStateStruct(gameAttributes.gameCounter, frameworkState.resolution);
     }
 }

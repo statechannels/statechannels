@@ -3,6 +3,14 @@
     "configurations": [
         {
             "type": "node",
+            "request": "launch",
+            "name": "truffle-compile",
+            "cwd": "${workspaceFolder}/packages/fmg-core",
+            "program": "${workspaceFolder}/packages/fmg-core/node_modules/.bin/truffle",
+            "args": ["compile"]
+        },
+        {
+            "type": "node",
             "name": "vscode-jest-tests-core",
             "request": "launch",
             "program": "${workspaceFolder}/node_modules/jest/bin/jest",

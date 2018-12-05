@@ -1,24 +1,24 @@
-pragma solidity ^0.4.25;
+pragma solidity ^0.5.0;
+pragma experimental ABIEncoderV2;
 
 import "./State.sol";
 import "./ForceMoveGame.sol";
 
 library Rules {
-    using State for bytes;
-
+    using State for State.StateStruct;
     struct Challenge {
         bytes32 channelId;
-        bytes state;
+        State.StateStruct state;
         uint32 expirationTime;
         uint256[] payouts;
     }
 
     function validForceMove(
-        bytes _fromState,
-        bytes _toState,
-        uint8[] v,
-        bytes32[] r,
-        bytes32[] s
+        State.StateStruct memory _fromState,
+        State.StateStruct memory _toState,
+        uint8[] memory v,
+        bytes32[] memory r,
+        bytes32[] memory s
     ) public pure returns (bool) {
         // states must be signed by the appropriate participant
         _fromState.requireSignature(v[0], r[0], s[0]);
@@ -28,33 +28,40 @@ library Rules {
     }
 
     function validConclusionProof(
-        bytes _fromState,
-        bytes _toState,
-        uint8[] v,
-        bytes32[] r,
-        bytes32[] s
+        State.StateStruct memory _fromState,
+        State.StateStruct memory _toState,
+        uint8[] memory v,
+        bytes32[] memory r,
+        bytes32[] memory s
     ) public pure returns (bool) {
         // states must be signed by the appropriate participant
         _fromState.requireSignature(v[0], r[0], s[0]);
         _toState.requireSignature(v[1], r[1], s[1]);
 
         // first move must be a concluded state (transition rules will ensure this for the other states)
-        require(_fromState.stateType() == State.StateType.Conclude);
+        require(
+            _fromState.isConclude(),
+            "fromState must be Conclude"
+        );
         // must be a valid transition
         return validTransition(_fromState, _toState);
     }
 
     function validRefute(
-        bytes _challengeState,
-        bytes _refutationState,
+        State.StateStruct memory _challengeState,
+        State.StateStruct memory _refutationState,
         uint8 v,
         bytes32 r,
         bytes32 s
     ) public pure returns (bool) {
-        // the refutationState must have a higher nonce
-        require(_refutationState.turnNum() > _challengeState.turnNum());
-        // ... with the same mover
-        require(_refutationState.mover() == _challengeState.mover());
+        require(
+            _refutationState.turnNum > _challengeState.turnNum,
+            "the refutationState must have a higher nonce"
+        );
+        require(
+            _refutationState.mover() == _challengeState.mover(),
+            "refutationState must have same mover as challengeState"
+        );
         // ... and be signed (by that mover)
         _refutationState.requireSignature(v, r, s);
 
@@ -62,8 +69,8 @@ library Rules {
     }
 
     function validRespondWithMove(
-        bytes _challengeState,
-        bytes _nextState,
+        State.StateStruct memory _challengeState,
+        State.StateStruct memory _nextState,
         uint8 v,
         bytes32 r,
         bytes32 s
@@ -71,113 +78,226 @@ library Rules {
         // check that the challengee's signature matches
         _nextState.requireSignature(v, r, s);
 
-        require(validTransition(_challengeState, _nextState));
+        require(
+            validTransition(_challengeState, _nextState),
+            "must be a valid transition"
+        );
 
         return true;
     }
 
     function validAlternativeRespondWithMove(
-        bytes _challengeState,
-        bytes _alternativeState,
-        bytes _nextState,
-        uint8[] v,
-        bytes32[] r,
-        bytes32[] s
+        State.StateStruct memory _challengeState,
+        State.StateStruct memory _alternativeState,
+        State.StateStruct memory _nextState,
+        uint8[] memory v,
+        bytes32[] memory r,
+        bytes32[] memory s
     ) public pure returns (bool) {
 
         // checking the alternative state:
-        // .. it must have the right channel
-        require(_challengeState.channelId() == _alternativeState.channelId());
-        // .. it must have the same nonce as the challenge state
-        require(_challengeState.turnNum() == _alternativeState.turnNum());
+        require(
+            _challengeState.channelId() == _alternativeState.channelId(),
+            "alternativeState must have the right channel"
+        );
+        require(
+            _challengeState.turnNum == _alternativeState.turnNum,
+            "alternativeState must have the same nonce as the challenge state"
+        );
         // .. it must be signed (by the challenger)
         _alternativeState.requireSignature(v[0], r[0], s[0]);
 
         // checking the nextState:
         // .. it must be signed (my the challengee)
         _nextState.requireSignature(v[1], r[1], s[1]);
-        // .. it must be a valid transition of the gamestate (from the alternative state)
-        require(validTransition(_alternativeState, _nextState));
+        require(
+            validTransition(_alternativeState, _nextState),
+            "it must be a valid transition of the gamestate (from the alternative state)"
+        );
 
         return true;
     }
 
-    function validTransition(bytes _fromState, bytes _toState) public pure returns (bool) {
-        require(_toState.channelId() == _fromState.channelId());
-        require(_toState.turnNum() == _fromState.turnNum() + 1);
+    function validTransition(
+        State.StateStruct memory  _fromState,
+        State.StateStruct memory _toState
+    ) public pure returns (bool) {
+        require(
+            _toState.channelId() == _fromState.channelId(),
+            "Invalid transition: channelId must match on toState"
+        );
+        require(
+            _toState.turnNum == _fromState.turnNum + 1,
+            "Invalid transition: turnNum must increase by 1"
+        );
 
-        if (_fromState.stateType() == State.StateType.PreFundSetup) {
+        if (_fromState.isPreFundSetup()) {
             return validTransitionFromPreFundSetup(_fromState, _toState);
-        } else if (_fromState.stateType() == State.StateType.PostFundSetup) {
+        } else if (_fromState.isPostFundSetup()) {
             return validTransitionFromPostFundSetup(_fromState, _toState);
-        } else if (_fromState.stateType() == State.StateType.Game) {
+        } else if (_fromState.isGame()) {
             return validTransitionFromGame(_fromState, _toState);
-        } else if (_fromState.stateType() == State.StateType.Conclude) {
+        } else if (_fromState.isConclude()) {
             return validTransitionFromConclude(_fromState, _toState);
         }
 
         return true;
     }
 
-    function validTransitionFromPreFundSetup(bytes _fromState, bytes _toState) public pure returns (bool) {
-        if (_fromState.stateCount() == _fromState.numberOfParticipants() - 1) {
+    function validTransitionFromPreFundSetup(
+        State.StateStruct memory _fromState,
+        State.StateStruct memory _toState
+    ) public pure returns (bool) {
+        if (_fromState.stateCount == _fromState.numberOfParticipants - 1) {
             // there are two options from the final PreFundSetup state
             // 1. PreFundSetup -> PostFundSetup transition
             // 2. PreFundSetup -> Conclude transition
-            if (_toState.stateType() == State.StateType.PostFundSetup) {
-                require(_toState.stateCount() == 0); // reset the stateCount
-                require(State.gameAttributesEqual(_fromState, _toState));
-                require(State.resolutionsEqual(_fromState, _toState));
+            if (_toState.isPostFundSetup()) {
+                require(
+                    _toState.stateCount == 0,
+                    "Invalid transition from PreFundSetup: stateCount must be reset when transitioning to PostFundSetup"
+                );
+                require(
+                    State.gameAttributesEqual(_fromState, _toState),
+                    "Invalid transition from PreFundSetup: gameAttributes must be equal"
+                );
+                require(
+                    State.resolutionsEqual(_fromState, _toState),
+                    "Invalid transition from PreFundSetup: resolutions must be equal"
+                );
             } else {
-                require(_toState.stateType() == State.StateType.Conclude);
-                require(State.resolutionsEqual(_fromState, _toState));
+                require(
+                    _toState.isConclude(),
+                    "Invalid transition from PreFundSetup: stateType must be Conclude"
+                );
+                require(
+                    State.resolutionsEqual(_fromState, _toState),
+                    "Invalid transition from PreFundSetup: resolutions must be equal"
+                );
+                
             }
         } else {
             // PreFundSetup -> PreFundSetup transition
-            require(_toState.stateType() == State.StateType.PreFundSetup);
-            require(State.gameAttributesEqual(_fromState, _toState));
-            require(_toState.stateCount() == _fromState.stateCount() + 1);
-            require(State.resolutionsEqual(_fromState, _toState));
+            require(
+                _toState.isPreFundSetup(),
+                "Invalid transition from PreFundSetup: stateType must be PreFundSetup"
+            );
+            require(
+                State.gameAttributesEqual(_fromState, _toState),
+                "Invalid transition from PreFundSetup: gameAttributes must be equal"
+            );
+            require(
+                _toState.stateCount == _fromState.stateCount + 1,
+                "Invalid transition from PreFundSetup: stateCount must increase by 1"
+            );
+            require(
+                State.resolutionsEqual(_fromState, _toState),
+                "Invalid transition from PreFundSetup: resolutions must be equal"
+            );
         }
         return true;
     }
 
-    function validTransitionFromPostFundSetup(bytes _fromState, bytes _toState) public pure returns (bool) {
-        if (_fromState.stateCount() == _fromState.numberOfParticipants() - 1) {
-            // PostFundSetup -> Game transition is the only option
-            require(_toState.stateType() == State.StateType.Game);
-            require(ForceMoveGame(_fromState.channelType()).validTransition(_fromState, _toState));
+    function validTransitionFromPostFundSetup(
+        State.StateStruct memory  _fromState,
+        State.StateStruct memory _toState
+    ) public pure returns (bool) {
+        if (_fromState.stateCount == _fromState.numberOfParticipants - 1) {
+            if (_toState.isGame()) {
+                require(
+                    validGameTransition(_fromState, _toState),
+                    "Invalid transition from PostFundSetup: transition must be valid"
+                );
+            } else {
+                require(
+                    _toState.isConclude(),
+                    "Invalid transition from PostFundSetup: stateType must be Conclude"
+                );
+
+                require(
+                    State.resolutionsEqual(_fromState, _toState),
+                    "Invalid transition from PostFundSetup: resolutions must be equal"
+                );
+
+                require(
+                    _toState.stateCount == 0,
+                    "Invalid transition from PostFundSetup: stateCount must be reset when transitioning to Conclude"
+                );
+            }
         } else {
             // Two possibilities:
             // 1. PostFundSetup -> PostFundSetup transition
             // 2. PostFundSetup -> Conclude transition
-            if (_toState.stateType() == State.StateType.PostFundSetup) {
+            if (_toState.isPostFundSetup()) {
                 // PostFundSetup -> PostFundSetup
-                require(State.gameAttributesEqual(_fromState, _toState));
-                require(_toState.stateCount() == _fromState.stateCount() + 1);
-                require(State.resolutionsEqual(_fromState, _toState));
+                require(
+                    State.gameAttributesEqual(_fromState, _toState),
+                    "Invalid transition from PostFundSetup: gameAttributes must be equal"
+                );
+                require(
+                    _toState.stateCount == _fromState.stateCount + 1,
+                    "Invalid transition from PostFundSetup: stateCount must increase by 1"
+                );
+                require(
+                    State.resolutionsEqual(_fromState, _toState),
+                    "Invalid transition from PostFundSetup: resolutions must be equal"
+                );
             } else {
                 // PostFundSetup -> Conclude
-                require(_toState.stateType() == State.StateType.Conclude);
-                require(State.resolutionsEqual(_fromState, _toState));
+                require(
+                    _toState.isConclude(),
+                    "Invalid transition from PostFundSetup: stateType must be Conclude"
+                );
+                require(
+                    State.resolutionsEqual(_fromState, _toState),
+                    "Invalid transition from PostFundSetup: resolutions must be equal"
+                );
             }
         }
         return true;
     }
 
-    function validTransitionFromGame(bytes _fromState, bytes _toState) public pure returns (bool) {
-        if (_toState.stateType() == State.StateType.Game) {
-            require(ForceMoveGame(_fromState.channelType()).validTransition(_fromState, _toState));
+    function validTransitionFromGame(
+        State.StateStruct memory _fromState,
+        State.StateStruct memory _toState
+    ) public pure returns (bool) {
+        if (_toState.isGame()) {
+            require(
+                validGameTransition(_fromState, _toState),
+                "Invalid transition from Game: transition must be valid"
+            );
         } else {
-            require(_toState.stateType() == State.StateType.Conclude);
-            require(State.resolutionsEqual(_fromState, _toState));
+            require(
+                _toState.isConclude(),
+                "Invalid transition from Game: stateType must be Conclude"
+            );
+            require(
+                State.resolutionsEqual(_fromState, _toState),
+                "Invalid transition from Game: resolutions must be equal"
+            );
         }
         return true;
     }
 
-    function validTransitionFromConclude(bytes _fromState, bytes _toState) public pure returns (bool) {
-        require(_toState.stateType() == State.StateType.Conclude);
-        require(State.resolutionsEqual(_fromState, _toState));
+    function validTransitionFromConclude(
+        State.StateStruct memory _fromState,
+        State.StateStruct memory _toState
+    ) public pure returns (bool) {
+        require(
+            _toState.isConclude(),
+            "Invalid transition from Conclude: stateType must be Conclude"
+        );
+        require(
+            State.resolutionsEqual(_fromState, _toState),
+            "Invalid transition from Conclude: resolutions must be equal"
+        );
         return true;
+    }
+
+    function validGameTransition(
+        State.StateStruct memory _fromState,
+        State.StateStruct memory _toState
+    ) public pure returns (bool) {
+        return ForceMoveGame(_fromState.channelType).validTransition(_fromState, _toState);
     }
 }
