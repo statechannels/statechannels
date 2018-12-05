@@ -13,13 +13,13 @@ module.exports = {
         ) {
             watch = true;
         }
-        if (argv.indexOf('--runInBand')) {
+        if (argv.indexOf('--runInBand') > -1) {
             runInBand = true;
         }
         // TODO: Figure out argVs
         return jest.runCLI({
             runInBand,
-            watch
+            watch,
         }, ['.']);
     }
 }
