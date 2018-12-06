@@ -34,3 +34,4 @@ contract SampleContract {
 
 However, external calls to these functions raise a runtime error.
 Therefore, to test a library `SomeLibrary` function `foo`, we define a test contract that imports `Library.sol`, and delegates `foo` to `Library`.
+
