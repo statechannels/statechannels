@@ -4,7 +4,12 @@ const { runJest } = require('./utils/runJest');
 const { expectEvent } = require('./utils/expectEvent');
 const { linkedByteCode } = require('./utils/linkedByteCode');
 const { assertRevert } = require('./utils/assertRevert');
-const { ganacheProvider, privateKeyWithEth, walletWithEthAndProvider, getNetworkId } = require("./utils/networkSetup");
+const {
+    getGanacheProvider,
+    getPrivateKeyWithEth,
+    getWalletWithEthAndProvider,
+    getNetworkId
+} = require("./utils/networkSetup");
 
 module.exports = {
     startGanache,
@@ -13,8 +18,8 @@ module.exports = {
     expectEvent,
     linkedByteCode,
     assertRevert,
-    ganacheProvider,
-    privateKeyWithEth,
-    walletWithEthAndProvider,
+    getGanacheProvider,
+    getPrivateKeyWithEth,
+    getWalletWithEthAndProvider,
     getNetworkId,
 };
