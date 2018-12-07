@@ -17,11 +17,11 @@ class Channel {
   }
 
   get id() {
-    return soliditySha3(
+    return "0x" + soliditySha3(
       { type: 'address', value: this.channelType },
       { type: 'uint256', value: this.channelNonce },
       { type: 'address[]', value: this.participants },
-    );
+    ).slice(26);
   }
 
   toHex() {
