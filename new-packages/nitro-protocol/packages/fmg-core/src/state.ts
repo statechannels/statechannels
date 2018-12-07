@@ -1,6 +1,7 @@
 import { Channel } from './channel';
 import BN from 'bn.js';
 import abi from 'web3-eth-abi';
+import { utils } from 'ethers';
 
 const SolidityStateType = {
   "StateStruct": {
@@ -71,6 +72,20 @@ class State {
       this.resolution.map(String),
       this.gameAttributes,
     ];
+  }
+
+  get asEthersObject() {
+    return { 
+      channelType: this.channel.channelType,
+      channelNonce: utils.bigNumberify(this.channel.channelNonce),
+      numberOfParticipants: utils.bigNumberify(this.numberOfParticipants),
+      participants: this.channel.participants,
+      stateType: this.stateType,
+      turnNum: utils.bigNumberify(this.turnNum),
+      stateCount: utils.bigNumberify(this.stateCount),
+      resolution: this.resolution.map(x => utils.bigNumberify(String(x))),
+      gameAttributes: this.gameAttributes,
+  };
   }
 }
 
