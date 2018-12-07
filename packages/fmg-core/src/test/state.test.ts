@@ -6,15 +6,14 @@ import { CountingGame } from '../test-game/counting-game';
 import { sign } from '../utils';
 import linker from 'solc/linker';
 
-import { ethers, ContractFactory, Wallet, Contract } from 'ethers';
+import { ethers, ContractFactory, Wallet } from 'ethers';
 
 // @ts-ignore
 import StateArtifact from '../../build/contracts/State.json';
 import TestStateArtifact from '../../build/contracts/TestState.json';
 
 const provider = new ethers.providers.JsonRpcProvider('http://localhost:8545');
-const privateKey = '0xf2f48ee19680706196e2e339e5da3491186e0c4c5030670656b0e0164837257d';
-const wallet = new Wallet(privateKey, provider);
+const signer = provider.getSigner();
 
 describe('State', () => {
 
@@ -47,11 +46,11 @@ describe('State', () => {
   beforeEach(async () => {
     const networkId = (await provider.getNetwork()).chainId;
 
-    const factory = ContractFactory.fromSolidity(StateArtifact, wallet);
+    const factory = ContractFactory.fromSolidity(StateArtifact, signer);
     stateLib = await factory.attach(StateArtifact.networks[networkId].address);
 
     TestStateArtifact.bytecode = linker.linkBytecode(TestStateArtifact.bytecode, { "State": StateArtifact.networks[networkId].address });
-    testStateLib = await ContractFactory.fromSolidity(TestStateArtifact, wallet).deploy();
+    testStateLib = await ContractFactory.fromSolidity(TestStateArtifact, signer).deploy();
   });
 
   it('identifies stateTypes', async () => {
