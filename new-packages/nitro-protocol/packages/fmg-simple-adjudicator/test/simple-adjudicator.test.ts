@@ -285,7 +285,7 @@ describe('SimpleAdjudicator', () => {
             value: destination,
           },
           {
-            type: SolidityType.bytes32,
+            type: SolidityType.address,
             value: channel.id,
           },
         ],
