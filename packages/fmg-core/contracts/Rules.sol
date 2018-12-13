@@ -7,7 +7,7 @@ import "./ForceMoveGame.sol";
 library Rules {
     using State for State.StateStruct;
     struct Challenge {
-        bytes32 channelId;
+        address channelId;
         State.StateStruct state;
         uint32 expirationTime;
         uint256[] payouts;

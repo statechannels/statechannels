@@ -32,10 +32,16 @@ library State {
         return self.stateType == uint(StateType.Conclude);
     }
 
-    function channelId(StateStruct memory _state) public pure returns (bytes32) {
-        return keccak256(
+    function channelId(StateStruct memory _state) public pure returns (address) {
+        bytes32 h = keccak256(
             abi.encodePacked(_state.channelType, _state.channelNonce, _state.participants)
         );
+        address addr;
+        assembly {
+            mstore(0, h)
+        addr := mload(0)
+        } 
+        return addr;
     }
 
     function mover(StateStruct memory _state) public pure returns (address) {

@@ -22,7 +22,7 @@ contract TestState {
         return _state.isConclude();
     }
 
-    function channelId(State.StateStruct memory _state) public pure returns (bytes32) {
+    function channelId(State.StateStruct memory _state) public pure returns (address) {
         return _state.channelId();
     }
 

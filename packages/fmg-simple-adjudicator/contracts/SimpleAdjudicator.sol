@@ -10,7 +10,7 @@ contract SimpleAdjudicator {
     // between exactly two players.
     using State for State.StateStruct;
 
-    bytes32 public fundedChannelId;
+    address public fundedChannelId;
 
     Rules.Challenge currentChallenge;
     uint challengeDuration;
@@ -22,7 +22,7 @@ contract SimpleAdjudicator {
         uint adjudicatorBalance
     );
 
-    constructor(bytes32 _fundedChannelId, uint256 _challengeDurationMinutes) public payable {
+    constructor(address _fundedChannelId, uint256 _challengeDurationMinutes) public payable {
         fundedChannelId = _fundedChannelId;
         challengeDuration = _challengeDurationMinutes * 1 minutes;
 
@@ -76,7 +76,7 @@ contract SimpleAdjudicator {
         State.StateStruct memory _ultimateState,
         address participant,
         address payable destination,
-        bytes32 _channelId,
+        address _channelId,
         uint8[] memory _v,
         bytes32[] memory _r,
         bytes32[] memory _s
@@ -200,7 +200,7 @@ contract SimpleAdjudicator {
     }
 
     event ChallengeCreated(
-        bytes32 channelId,
+        address channelId,
         State.StateStruct state,
         uint32 expirationTime,
         uint256[] payouts
@@ -223,7 +223,7 @@ contract SimpleAdjudicator {
     function recoverParticipant(
         address participant,
         address destination,
-        bytes32 _channelId,
+        address _channelId,
         uint8 v,
         bytes32 r,
         bytes32 s
@@ -242,7 +242,7 @@ contract SimpleAdjudicator {
     function withdraw(
         address participant,
         address payable destination,
-        bytes32 _channelId, // not needed for the simple adjudicator, which only supports one channel
+        address _channelId, // not needed for the simple adjudicator, which only supports one channel
         uint8 v,
         bytes32 r,
         bytes32 s
@@ -255,7 +255,7 @@ contract SimpleAdjudicator {
     function _withdraw(
         address participant,
         address payable destination,
-        bytes32 _channelId, // not needed for the simple adjudicator, which only supports one channel
+        address _channelId, // not needed for the simple adjudicator, which only supports one channel
         uint8 v,
         bytes32 r,
         bytes32 s
