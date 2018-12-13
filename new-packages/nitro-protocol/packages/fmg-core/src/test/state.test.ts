@@ -6,15 +6,14 @@ import { CountingGame } from '../test-game/counting-game';
 import { sign } from '../utils';
 import linker from 'solc/linker';
 
-import { ethers, ContractFactory, Wallet, Contract } from 'ethers';
+import { ethers, ContractFactory, Wallet } from 'ethers';
 
 // @ts-ignore
 import StateArtifact from '../../build/contracts/State.json';
 import TestStateArtifact from '../../build/contracts/TestState.json';
 
 const provider = new ethers.providers.JsonRpcProvider('http://localhost:8545');
-const privateKey = '0xf2f48ee19680706196e2e339e5da3491186e0c4c5030670656b0e0164837257d';
-const wallet = new Wallet(privateKey, provider);
+const signer = provider.getSigner();
 
 describe('State', () => {
 
@@ -47,36 +46,36 @@ describe('State', () => {
   beforeEach(async () => {
     const networkId = (await provider.getNetwork()).chainId;
 
-    const factory = ContractFactory.fromSolidity(StateArtifact, wallet);
+    const factory = ContractFactory.fromSolidity(StateArtifact, signer);
     stateLib = await factory.attach(StateArtifact.networks[networkId].address);
 
     TestStateArtifact.bytecode = linker.linkBytecode(TestStateArtifact.bytecode, { "State": StateArtifact.networks[networkId].address });
-    testStateLib = await ContractFactory.fromSolidity(TestStateArtifact, wallet).deploy();
+    testStateLib = await ContractFactory.fromSolidity(TestStateArtifact, signer).deploy();
   });
 
   it('identifies stateTypes', async () => {
     state.stateType = State.StateType.PreFundSetup;
-    expect(await testStateLib.isPreFundSetup(state.args)).toBe(true);
+    expect(await testStateLib.isPreFundSetup(state.asEthersObject)).toBe(true);
 
     state.stateType = State.StateType.PostFundSetup;
-    expect(await testStateLib.isPostFundSetup(state.args)).toBe(true);
+    expect(await testStateLib.isPostFundSetup(state.asEthersObject)).toBe(true);
 
     state.stateType = State.StateType.Game;
-    expect(await testStateLib.isGame(state.args)).toBe(true);
+    expect(await testStateLib.isGame(state.asEthersObject)).toBe(true);
 
     state.stateType = State.StateType.Conclude;
-    expect(await testStateLib.isConclude(state.args)).toBe(true);
+    expect(await testStateLib.isConclude(state.asEthersObject)).toBe(true);
   });
 
   it('identifies the mover based on the turnNum', async () => {
-    const mover = await testStateLib.mover(state.args);
+    const mover = await testStateLib.mover(state.asEthersObject);
     // our state nonce is 15, which is odd, so it should be participant[1]
     expect(mover).toEqual(participants[1]);
   });
 
   it('can calculate the channelId', async () => {
-    const chainId = await testStateLib.channelId(state.args);
-    const localId = channel.id;
+    const chainId: string = await testStateLib.channelId(state.asEthersObject);
+    const localId: string = channel.id;
 
     expect(chainId).toEqual(localId);
   });
@@ -85,13 +84,13 @@ describe('State', () => {
     // needs to be signed by 1 as it's their move
     const { r, s, v } = sign(state.toHex(), participantB.privateKey);
 
-    expect(await testStateLib.requireSignature(state.args, v, r, s)).toBeTruthy();
+    expect(await testStateLib.requireSignature(state.asEthersObject, v, r, s)).toBeTruthy();
   });
 
   it('will revert if the wrong party signed', async () => {
     // needs to be signed by 1 as it's their move
     const { v, r, s } = sign(state.toHex(), participantA.privateKey);
-    expectRevert(testStateLib.requireSignature(state.args, v, r, s));
+    expectRevert(testStateLib.requireSignature(state.asEthersObject, v, r, s));
   });
 
   it('can check if the state is fully signed', async () => {
@@ -99,7 +98,7 @@ describe('State', () => {
     const { r: r1, s: s1, v: v1 } = sign(state.toHex(), participantB.privateKey);
 
     expect(
-      await testStateLib.requireFullySigned(state.args, [v0, v1], [r0, r1], [s0, s1]),
+      await testStateLib.requireFullySigned(state.asEthersObject, [v0, v1], [r0, r1], [s0, s1]),
     ).toBeTruthy();
   });
 
@@ -107,6 +106,6 @@ describe('State', () => {
     const state1 = CountingGame.preFundSetupState({ channel, resolution, turnNum, gameCounter: 0 });
     const state2 = CountingGame.preFundSetupState({ channel, resolution, turnNum, gameCounter: 1 });
 
-    await expectRevert(stateLib.gameAttributesEqual(state1.args, state2.args));
+    await expectRevert(stateLib.gameAttributesEqual(state1.asEthersObject, state2.asEthersObject));
   });
 });

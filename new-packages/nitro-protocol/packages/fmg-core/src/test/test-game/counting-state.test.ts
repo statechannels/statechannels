@@ -2,7 +2,7 @@ import { CountingGame } from '../../test-game/counting-game';
 import linker from 'solc/linker';
 
 import { Channel } from '../../';
-import { ethers, Wallet, ContractFactory, utils } from 'ethers';
+import { ethers, ContractFactory, utils } from 'ethers';
 
 import StateArtifact from '../../../build/contracts/State.json';
 
@@ -10,8 +10,7 @@ import CountingStateArtifact from '../../../build/contracts/CountingState.json';
 import TestCountingStateArtifact from '../../../build/contracts/TestCountingState.json';
 
 const provider = new ethers.providers.JsonRpcProvider('http://localhost:8545');
-const privateKey = '0xf2f48ee19680706196e2e339e5da3491186e0c4c5030670656b0e0164837257d';
-const wallet = new Wallet(privateKey, provider);
+const signer = provider.getSigner();
 
 describe('CountingState', () => {
   let testCountingState;
@@ -32,7 +31,7 @@ describe('CountingState', () => {
         State: StateArtifact.networks[networkId].address,
     });
 
-    testCountingState = await ContractFactory.fromSolidity(TestCountingStateArtifact, wallet).deploy();
+    testCountingState = await ContractFactory.fromSolidity(TestCountingStateArtifact, signer).deploy();
 
     // Contract setup --------------------------------------------------------------------------
 
