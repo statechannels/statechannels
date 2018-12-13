@@ -12,8 +12,7 @@ import CountingStateArtifact from '../../../build/contracts/CountingState.json';
 import CountingGameArtifact from '../../../build/contracts/CountingGame.json';
 
 const provider = new ethers.providers.JsonRpcProvider('http://localhost:8545');
-const privateKey = '0xf2f48ee19680706196e2e339e5da3491186e0c4c5030670656b0e0164837257d';
-const wallet = new Wallet(privateKey, provider);
+const signer = provider.getSigner();
 
 describe('CountingGame', () => {
   let game;
@@ -31,7 +30,7 @@ describe('CountingGame', () => {
     CountingGameArtifact.bytecode = linker.linkBytecode(CountingGameArtifact.bytecode, {
       CountingState: CountingStateArtifact.networks[networkId].address,
     });
-    game = await ContractFactory.fromSolidity(CountingGameArtifact, wallet).attach(
+    game = await ContractFactory.fromSolidity(CountingGameArtifact, signer).attach(
       CountingGameArtifact.networks[networkId].address,
     );
     // Contract setup --------------------------------------------------------------------------

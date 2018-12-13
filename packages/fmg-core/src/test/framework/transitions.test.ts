@@ -1,4 +1,4 @@
-import { ethers, ContractFactory, Wallet } from 'ethers';
+import { ethers, ContractFactory } from 'ethers';
 import linker from 'solc/linker';
 
 import expectRevert from '../helpers/expect-revert';
@@ -15,8 +15,7 @@ import CountingStateArtifact from '../../../build/contracts/CountingState.json';
 import CountingGameArtifact from '../../../build/contracts/CountingGame.json';
 
 const provider = new ethers.providers.JsonRpcProvider('http://localhost:8545');
-const privateKey = '0xf2f48ee19680706196e2e339e5da3491186e0c4c5030670656b0e0164837257d';
-const wallet = new Wallet(privateKey, provider);
+const signer = provider.getSigner();
 
 const TURN_NUM_MUST_INCREMENT = "turnNum must increase by 1";
 const CHANNEL_ID_MUST_MATCH = "channelId must match";
@@ -59,7 +58,7 @@ describe('Rules', () => {
     CountingGameArtifact.bytecode = linker.linkBytecode(CountingGameArtifact.bytecode, {
       CountingState: CountingStateArtifact.networks[networkId].address,
     });
-    const gameContract = await ContractFactory.fromSolidity(CountingGameArtifact, wallet).attach(
+    const gameContract = await ContractFactory.fromSolidity(CountingGameArtifact, signer).attach(
       CountingGameArtifact.networks[networkId].address,
     );
 
@@ -71,7 +70,7 @@ describe('Rules', () => {
 
     TestRulesArtifact.bytecode = linker.linkBytecode(TestRulesArtifact.bytecode, { "State": StateArtifact.networks[networkId].address });
     TestRulesArtifact.bytecode = linker.linkBytecode(TestRulesArtifact.bytecode, { "Rules": RulesArtifact.networks[networkId].address });
-    testFramework = await ContractFactory.fromSolidity(TestRulesArtifact, wallet).deploy();
+    testFramework = await ContractFactory.fromSolidity(TestRulesArtifact, signer).deploy();
     // Contract setup --------------------------------------------------------------------------
 
     channel = new Channel(gameContract.address, 0, participants);
