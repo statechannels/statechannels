@@ -4,6 +4,7 @@ const { runJest } = require('./utils/runJest');
 const { expectEvent } = require('./utils/expectEvent');
 const { linkedByteCode } = require('./utils/linkedByteCode');
 const { assertRevert } = require('./utils/assertRevert');
+const { increaseTime, DURATION } = require('./utils/increaseTime');
 const {
     getGanacheProvider,
     getPrivateKeyWithEth,
@@ -18,6 +19,8 @@ module.exports = {
     expectEvent,
     linkedByteCode,
     assertRevert,
+    increaseTime,
+    DURATION,
     getGanacheProvider,
     getPrivateKeyWithEth,
     getWalletWithEthAndProvider,
