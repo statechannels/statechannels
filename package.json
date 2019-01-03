@@ -1,6 +1,7 @@
 {
   "name": "magmo-devtools",
-  "version": "0.1.0",
+  "private": true,
+  "version": "0.1.1",
   "description": "Scripts used for Magmo development processes",
   "main": "index.js",
   "bin": {
