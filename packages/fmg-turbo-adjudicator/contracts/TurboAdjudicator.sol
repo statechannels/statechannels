@@ -7,26 +7,15 @@ contract TurboAdjudicator {
     using State for State.StateStruct;
 
     struct Authorization {
-        // *********************************************************
-        // WARNING
-        // -------
-        // This authorization does not prevent collisions.
-        // It only prevents griefing: if the participant signs
-        // this authorization, we assume they wish to withdraw
-        // the amount to the destination. Therefore, any front-
-        // runner who submits the transaction in lieu of the
-        // participant is simply saving them some gas.
-        // (If the amount were not part of the authorization,
-        // then a malicious actor could submit a withdrawal
-        // for a tiny amount, forcing alice to submit a new
-        // signature with an increased nonce. If they have to
-        // submit the amount that the participant authorized,
-        // then the participant can be satisfied with the front-
-        // runner's transaction, which causes the desired transfer.)
-        // *********************************************************
-        address destination;
+        // Prevents replay attacks:
+        // It's required that the participant signs the message, meaning only
+        // the participant can authorize a withdrawal.
+        // Moreover, the participant should sign the address that they wish
+        // to send the transaction from, preventing any replay attack.
+        address participant; // the account used to sign state transitions
+        address destination; // either an account or a channel
         uint amount;
-        uint nonce;
+        address sender; // the account used to sign transactions
     }
 
     struct Outcome {
@@ -48,7 +37,6 @@ contract TurboAdjudicator {
     }
 
     mapping(address => uint) public allocations;
-    mapping(address => uint) public withdrawalNonce;
     mapping(address => Outcome) public outcomes;
 
     // TODO: Challenge duration should depend on the channel
@@ -62,27 +50,23 @@ contract TurboAdjudicator {
         allocations[destination] = allocations[destination] + msg.value;
     }
 
-    function withdraw(address participant, address payable destination, uint amount, bytes memory encodedAuthorization, uint8 _v, bytes32 _r, bytes32 _s) public payable {
+    function withdraw(address participant, address payable destination, uint amount, uint8 _v, bytes32 _r, bytes32 _s) public payable {
         require(
             allocations[participant] >= amount,
             "Withdraw: overdrawn"
         );
-        require(
-            recoverSigner(encodedAuthorization, _v, _r, _s) == participant,
-            "Withdraw: not authorized by fromParticipant"
-        );
-
         Authorization memory authorization = Authorization(
+            participant,
             destination,
             amount,
-            withdrawalNonce[participant]
-        );
-        require(
-            keccak256(encodedAuthorization) == keccak256(abi.encode(authorization)),
-            "Withdraw: invalid authorization"
+            msg.sender
         );
 
-        withdrawalNonce[participant] = withdrawalNonce[participant] + 1;
+        require(
+            recoverSigner(abi.encode(authorization), _v, _r, _s) == participant,
+            "Withdraw: not authorized by participant"
+        );
+
         allocations[participant] = allocations[participant] - amount;
         destination.transfer(amount);
     }
