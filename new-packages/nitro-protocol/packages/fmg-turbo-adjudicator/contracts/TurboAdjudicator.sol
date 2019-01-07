@@ -7,16 +7,15 @@ contract TurboAdjudicator {
     using State for State.StateStruct;
 
     struct Authorization {
-        // Prevents front-running:
-        // It's required that the source signs the message, meaning only
-        // the source can authorize a withdrawal.
-        // Moreover, the source should sign the address that they wish
-        // to send the transaction from, preventing any replay or front-running
-        // attacks.
-        address source;
-        address destination;
+        // Prevents replay attacks:
+        // It's required that the participant signs the message, meaning only
+        // the participant can authorize a withdrawal.
+        // Moreover, the participant should sign the address that they wish
+        // to send the transaction from, preventing any replay attack.
+        address participant; // the account used to sign state transitions
+        address destination; // either an account or a channel
         uint amount;
-        address sender;
+        address sender; // the account used to sign transactions
     }
 
     struct Outcome {
@@ -58,7 +57,7 @@ contract TurboAdjudicator {
         );
         require(
             recoverSigner(encodedAuthorization, _v, _r, _s) == participant,
-            "Withdraw: not authorized by fromParticipant"
+            "Withdraw: not authorized by participant"
         );
 
         Authorization memory authorization = Authorization(
