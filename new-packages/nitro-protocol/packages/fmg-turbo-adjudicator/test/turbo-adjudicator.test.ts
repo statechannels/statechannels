@@ -25,7 +25,7 @@ const DEPOSIT_AMOUNT = 255; //
 const SMALL_WITHDRAW_AMOUNT = 10;
 
 let nullOutcome: {} | any[];
-const AUTH_TYPES = ['address', 'uint256', 'uint256'];
+const AUTH_TYPES = ['address', 'address', 'uint256', 'address'];
 
 function depositTo(destination: any, value = DEPOSIT_AMOUNT): Promise<any> {
   return turbo.deposit(destination, { value });
@@ -36,16 +36,16 @@ async function withdraw(
   destination: string,
   signer = participant,
   amount = DEPOSIT_AMOUNT,
+  senderAddr = null
 ): Promise<any> {
-  const accountNonce = Number(await turbo.withdrawalNonce(participant.address));
-  const authorization = abiCoder.encode(AUTH_TYPES, [destination, amount, accountNonce]);
+  senderAddr = senderAddr || await turbo.signer.getAddress();
+  const authorization = abiCoder.encode(AUTH_TYPES, [participant.address, destination, amount, senderAddr]);
 
   const sig = sign(authorization, signer.privateKey);
   return turbo.withdraw(
     participant.address,
     destination,
     amount,
-    authorization,
     sig.v,
     sig.r,
     sig.s,
@@ -158,7 +158,7 @@ describe('TurboAdjudicator', () => {
     });
 
     const { r: r0, s: s0, v: v0 } = sign(state4.toHex(), alice.privateKey);
-    const { r: r1, s: s1, v: v1 } = sign(state5.toHex(), bob.privateKey); 
+    const { r: r1, s: s1, v: v1 } = sign(state5.toHex(), bob.privateKey);
 
     conclusionProof = {
             penultimateState: state4.asEthersObject,
@@ -179,12 +179,11 @@ describe('TurboAdjudicator', () => {
     });
 
     describe('withdraw', () => {
-      it('works when allocations[fromParticipant] >= amount and sent on behalf of fromParticipant', async () => {
+      it('works when allocations[participant] >= amount and sent on behalf of participant', async () => {
         await depositTo(alice.address);
 
         const startBal = await provider.getBalance(aliceDest.address);
         const allocatedAtStart = await turbo.allocations(alice.address); // should be at least DEPOSIT_AMOUNT, regardless of test ordering
-        const withdrawalNonce = await turbo.withdrawalNonce(alice.address);
 
         // Alice can withdraw some of her money
         await withdraw(alice, aliceDest.address, alice, SMALL_WITHDRAW_AMOUNT);
@@ -195,7 +194,6 @@ describe('TurboAdjudicator', () => {
         expect(Number(await turbo.allocations(alice.address))).toEqual(
           Number(allocatedAtStart - SMALL_WITHDRAW_AMOUNT),
         );
-        expect(await turbo.withdrawalNonce(alice.address)).toEqual(withdrawalNonce.add(1));
 
         // Alice should be able to withdraw all remaining funds allocated to her.
         await withdraw(alice, aliceDest.address, alice, allocatedAtStart - SMALL_WITHDRAW_AMOUNT);
@@ -204,25 +202,33 @@ describe('TurboAdjudicator', () => {
           Number(await provider.getBalance(aliceDest.address)),
         );
         expect(Number(await turbo.allocations(alice.address))).toEqual(0);
-        expect(await turbo.withdrawalNonce(alice.address)).toEqual(withdrawalNonce.add(2));
       });
 
-      it('reverts when allocations[fromParticipant] > amount but not sent on behalf of fromParticipant', async () => {
+      it('reverts when allocations[participant] > amount but not sent on behalf of participant', async () => {
         await delay();
         await depositTo(alice.address);
         assertRevert(
           withdraw(alice, aliceDest.address, bob),
-          'Withdraw: not authorized by fromParticipant',
+          'Withdraw: not authorized by participant',
         );
         await delay();
       });
 
-      it('reverts when sent on behalf of fromParticipant but allocations[fromParticipant] < amount', async () => {
+      it('reverts when sent on behalf of participant but allocations[participant] < amount', async () => {
         await delay(2000);
         await depositTo(alice.address);
         await delay();
         const allocated = await turbo.allocations(alice.address); // should be at least DEPOSIT_AMOUNT, regardless of test ordering
         assertRevert(withdraw(alice, aliceDest.address, alice, Number(allocated) + 100000));
+        await delay();
+      });
+
+      it('reverts when unauthorized', async () => {
+        await delay(2000);
+        await depositTo(alice.address);
+        await delay();
+        const allocated = await turbo.allocations(alice.address); // should be at least DEPOSIT_AMOUNT, regardless of test ordering
+        assertRevert(withdraw(alice, aliceDest.address, alice, 0, alice.address), "Withdraw: not authorized by participant"); // alice doesn't sign transactions, so the signature is incorrect 
         await delay();
       });
     });
