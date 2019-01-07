@@ -50,25 +50,21 @@ contract TurboAdjudicator {
         allocations[destination] = allocations[destination] + msg.value;
     }
 
-    function withdraw(address participant, address payable destination, uint amount, bytes memory encodedAuthorization, uint8 _v, bytes32 _r, bytes32 _s) public payable {
+    function withdraw(address participant, address payable destination, uint amount, uint8 _v, bytes32 _r, bytes32 _s) public payable {
         require(
             allocations[participant] >= amount,
             "Withdraw: overdrawn"
         );
-        require(
-            recoverSigner(encodedAuthorization, _v, _r, _s) == participant,
-            "Withdraw: not authorized by participant"
-        );
-
         Authorization memory authorization = Authorization(
             participant,
             destination,
             amount,
             msg.sender
         );
+
         require(
-            keccak256(encodedAuthorization) == keccak256(abi.encode(authorization)),
-            "Withdraw: invalid authorization"
+            recoverSigner(abi.encode(authorization), _v, _r, _s) == participant,
+            "Withdraw: not authorized by participant"
         );
 
         allocations[participant] = allocations[participant] - amount;
