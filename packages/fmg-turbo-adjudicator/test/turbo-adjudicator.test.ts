@@ -36,16 +36,16 @@ async function withdraw(
   destination: string,
   signer = participant,
   amount = DEPOSIT_AMOUNT,
+  senderAddr = null
 ): Promise<any> {
-  const sender = await turbo.signer.getAddress();
-  const authorization = abiCoder.encode(AUTH_TYPES, [participant.address, destination, amount, sender]);
+  senderAddr = senderAddr || await turbo.signer.getAddress();
+  const authorization = abiCoder.encode(AUTH_TYPES, [participant.address, destination, amount, senderAddr]);
 
   const sig = sign(authorization, signer.privateKey);
   return turbo.withdraw(
     participant.address,
     destination,
     amount,
-    authorization,
     sig.v,
     sig.r,
     sig.s,
@@ -220,6 +220,15 @@ describe('TurboAdjudicator', () => {
         await delay();
         const allocated = await turbo.allocations(alice.address); // should be at least DEPOSIT_AMOUNT, regardless of test ordering
         assertRevert(withdraw(alice, aliceDest.address, alice, Number(allocated) + 100000));
+        await delay();
+      });
+
+      it('reverts when unauthorized', async () => {
+        await delay(2000);
+        await depositTo(alice.address);
+        await delay();
+        const allocated = await turbo.allocations(alice.address); // should be at least DEPOSIT_AMOUNT, regardless of test ordering
+        assertRevert(withdraw(alice, aliceDest.address, alice, 0, alice.address), "Withdraw: not authorized by participant"); // alice doesn't sign transactions, so the signature is incorrect 
         await delay();
       });
     });
