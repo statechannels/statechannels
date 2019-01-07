@@ -179,7 +179,7 @@ describe('TurboAdjudicator', () => {
     });
 
     describe('withdraw', () => {
-      it('works when allocations[fromParticipant] >= amount and sent on behalf of fromParticipant', async () => {
+      it('works when allocations[participant] >= amount and sent on behalf of participant', async () => {
         await depositTo(alice.address);
 
         const startBal = await provider.getBalance(aliceDest.address);
@@ -204,17 +204,17 @@ describe('TurboAdjudicator', () => {
         expect(Number(await turbo.allocations(alice.address))).toEqual(0);
       });
 
-      it('reverts when allocations[fromParticipant] > amount but not sent on behalf of fromParticipant', async () => {
+      it('reverts when allocations[participant] > amount but not sent on behalf of participant', async () => {
         await delay();
         await depositTo(alice.address);
         assertRevert(
           withdraw(alice, aliceDest.address, bob),
-          'Withdraw: not authorized by fromParticipant',
+          'Withdraw: not authorized by participant',
         );
         await delay();
       });
 
-      it('reverts when sent on behalf of fromParticipant but allocations[fromParticipant] < amount', async () => {
+      it('reverts when sent on behalf of participant but allocations[participant] < amount', async () => {
         await delay(2000);
         await depositTo(alice.address);
         await delay();
