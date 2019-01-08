@@ -2,35 +2,36 @@ import React from 'react';
 import { PureComponent } from 'react';
 import { connect } from 'react-redux';
 
-import { WalletState } from '../redux/reducers';
+import * as states from '../states';
 import { SiteState } from '../../redux/reducer';
-import WalletContents from './WalletContents';
-import SidebarLayout from '../components/SidebarLayout';
-import FooterLayout from './WalletFooter';
+import FundingContainer from './Funding';
+import RespondingContainer from './Responding';
+import ChallengingContainer from './Challenging';
+import WithdrawingContainer from './Withdrawing';
+import ClosingContainer from './Closing';
 
 interface WalletProps {
-  state: WalletState;
+  state: states.WalletState;
 }
 
 class Wallet extends PureComponent<WalletProps> {
 
   render() {
-    const { showWallet, showFooter } = this.props.state.display;
+    const { state } = this.props;
 
-    if (showWallet) {
-      return (
-        <SidebarLayout contents={<WalletContents />}>
-          {this.props.children}
-        </SidebarLayout>
-      );
-    } else if (showFooter) {
-      return (
-        <FooterLayout>
-          {this.props.children}
-        </FooterLayout>
-      );
-    } else {
-      return this.props.children;
+    switch (state.stage) {
+      case states.FUNDING:
+        return <FundingContainer state={state} />;
+      case states.CHALLENGING:
+        return <ChallengingContainer state={state} />;
+      case states.WITHDRAWING:
+        return <WithdrawingContainer state={state} />;
+      case states.RESPONDING:
+        return <RespondingContainer state={state} />;
+      case states.CLOSING:
+        return <ClosingContainer state={state} />;
+      default:
+        return null;
     }
   }
 }

@@ -1,21 +1,33 @@
 import React from 'react';
 import { PureComponent } from 'react';
 
-import Sidebar from 'react-sidebar';
+import Modal from 'react-modal';
 
-interface Props {
-  contents: any;
-}
+// todo: style to appear from the left as per:
+// https://github.com/DimitryDushkin/sliding-pane/blob/master/src/index.styl
 
-export default class WalletController extends PureComponent<Props> {
+const customStyles = {
+  content: {
+    top: '50%',
+    left: '50%',
+    right: 'auto',
+    bottom: 'auto',
+    marginRight: '-50%',
+    transform: 'translate(-50%, -50%)',
+    width: '500px',
+  },
+  overlay: {
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+};
+
+export default class SidebarLayout extends PureComponent {
   render() {
-    return <Sidebar
-      sidebar={this.props.contents}
-      open={true}
-      styles={{ sidebar: { width: "450px", zIndex: "1040", background: "#f3f3f3" } }}
-      overlayClassName="wallet-overlay"
-    >
-      {this.props.children}
-    </Sidebar>;
+    return (
+      <Modal isOpen={true} style={customStyles} ariaHideApp={false}>
+        {this.props.children}
+      </Modal>
+    );
   }
 }
+
