@@ -1,14 +1,14 @@
-import React from 'react';
+import React, { Fragment } from 'react';
 import { connect } from 'react-redux';
 
 import { Move } from '../core';
 import { SiteState } from '../redux/reducer';
 import * as gameActions from '../redux/game/actions';
+import * as walletActions from '../wallet/interface/incoming';
 
-import { Wallet, actions as walletActions } from '../wallet';
+import { Wallet } from '../wallet';
 import WaitingRoomPage from '../components/WaitingRoomPage';
 import ConfirmGamePage from '../components/ConfirmGamePage';
-import FundingConfirmedPage from '../components/FundingConfirmedPage'; // WaitForPostFundSetup
 import SelectMovePage from '../components/SelectMovePage';
 import WaitForOpponentToPickMove from '../components/WaitForOpponentToPickMove';
 import MoveSelectedPage from '../components/MoveSelectedPage'; // WaitForReveal, WaitForResting
@@ -21,14 +21,13 @@ import GameOverPage from '../components/GameOverPage'; // GameOver, OpponentResi
 import GameProposedPage from '../components/GameProposedPage';
 import ProfileContainer from './ProfileContainer';
 
+
 import WaitForWallet from '../components/WaitForWallet'; // WaitForFunding, maybe others?
 
 import { GameState, StateName } from '../redux/game/state';
 
 interface GameProps {
   state: GameState;
-  showWallet: boolean;
-  showWalletHeader: boolean;
   chooseMove: (move: Move) => void;
   playAgain: () => void;
   createBlockchainChallenge: () => void;
@@ -40,7 +39,13 @@ interface GameProps {
 }
 
 function GameContainer(props: GameProps) {
-  return <Wallet>{RenderGame(props)}</Wallet>;
+  return (
+    <Fragment>
+      {RenderGame(props)}
+
+      <Wallet />
+    </Fragment>
+  );
 }
 
 function RenderGame(props: GameProps) {
@@ -61,6 +66,7 @@ function RenderGame(props: GameProps) {
     case StateName.ConfirmGameB:
       return <ConfirmGamePage confirmGame={confirmGame} cancelGame={declineGame} stake={state.roundBuyIn} opponentName={state.opponentName} />;
     case StateName.PickMove:
+    case StateName.PickChallengeMove:
       return <SelectMovePage chooseMove={chooseMove} />;
 
     case StateName.WaitForOpponentToPickMoveA:
@@ -76,9 +82,7 @@ function RenderGame(props: GameProps) {
     case StateName.GameOver:
     // TODO: We probably want a seperate message for when your opponent resigns
     case StateName.OpponentResigned:
-      return <GameOverPage visible={state.name === StateName.OpponentResigned || state.name === StateName.GameOver}  withdraw={withdraw} />;
-    case StateName.WaitForPostFundSetup:
-      return <FundingConfirmedPage message="Waiting for your opponent to acknowledge" />;
+      return <GameOverPage visible={state.name === StateName.OpponentResigned || state.name === StateName.GameOver} withdraw={withdraw} />;
 
     case StateName.WaitForOpponentToPickMoveB:
       return <WaitForOpponentToPickMove />;
@@ -129,8 +133,6 @@ function RenderGame(props: GameProps) {
 
 const mapStateToProps = (state: SiteState) => ({
   state: state.game.gameState,
-  showWallet: state.wallet.display.showWallet,
-  showWalletHeader: state.wallet.display.showFooter,
 });
 
 const mapDispatchToProps = {

@@ -4,6 +4,9 @@
   "private": true,
   "main": "index.js",
   "module": "src/index.js",
+  "resolutions": {
+    "firebase/**/grpc": "^1.16.1"
+  },
   "dependencies": {
     "@firebase/app-types": "^0.3.2",
     "@fortawesome/fontawesome-svg-core": "^1.2.4",
@@ -51,7 +54,6 @@
     "react-loader-spinner": "^2.0.6",
     "react-modal": "^3.5.1",
     "react-redux": "^5.0.7",
-    "react-sidebar": "3.0.2",
     "react-test-renderer": "^16.4.1",
     "reactstrap": "^6.4.0",
     "redux": "^4.0.0",
@@ -71,16 +73,20 @@
     "start": "node scripts/start.js",
     "build": "node scripts/build.js",
     "test": "run-s test:truffle 'test:app --all'",
-    "test:ci": "run-s build test:truffle 'test:app --all --ci'",
-    "test:app": "node scripts/test.js",
+    "test:ci": "run-s test:truffle 'test:app --all --ci' build",
+    "test:app": "npx ganache-then-jest --runInBand",
     "test:truffle": "node scripts/test_truffle.js",
-    "truffle:migrate": "deploy-contracts",
-    "ganache:start": "start-ganache",
-    "postinstall": "rm -f node_modules/web3/index.d.ts"
+    "truffle:migrate": "npx deploy-contracts",
+    "ganache:start": "npx start-ganache",
+    "postinstall": "rm -f node_modules/web3/index.d.ts",
+    "storybook": "start-storybook -p 9001 -c .storybook"
   },
   "devDependencies": {
     "@babel/runtime": "^7.0.0-beta.53",
+    "@storybook/react": "4.0.9",
     "@types/jest": "^23.3.1",
+    "@types/storybook__react": "4.0.0",
+    "awesome-typescript-loader": "5.2.1",
     "babel-jest": "^23.4.2",
     "babel-loader": "^7.1.5",
     "babel-polyfill": "^6.26.0",
@@ -91,18 +97,19 @@
     "enzyme": "^3.3.0",
     "enzyme-adapter-react-16": "^1.1.1",
     "extract-text-webpack-plugin": "3.0.2",
-    "file-loader": "0.11.2",
+    "file-loader": "^2.0.0",
     "fork-ts-checker-webpack-plugin": "0.4.9",
     "ganache-cli": "^6.1.8",
     "html-webpack-plugin": "2.29.0",
     "jest": "^23.5.0",
-    "magmo-devtools": "https://github.com/magmo/devtools",
+    "magmo-devtools": "git+https://github.com/magmo/devtools.git#v0.1.1",
     "node-sass": "^4.9.3",
     "postcss-flexbugs-fixes": "3.2.0",
     "postcss-loader": "^3.0.0",
     "precss": "^3.1.2",
     "redux-mock-store": "1.5.3",
     "redux-saga-test-plan": "^3.7.0",
+    "redux-saga-tester": "1.0.381",
     "sass-loader": "^7.1.0",
     "source-map-loader": "^0.2.1",
     "style-loader": "0.19.0",
@@ -119,7 +126,7 @@
     "typescript": "^3.0.1",
     "typescript-eslint-parser": "^17.0.1",
     "uglifyjs-webpack-plugin": "^1.1.8",
-    "url-loader": "0.6.2"
+    "url-loader": "^1.1.2"
   },
   "jest": {
     "collectCoverageFrom": [
@@ -136,7 +143,7 @@
     "testURL": "http://localhost",
     "transform": {
       "^.+\\.(js|jsx|mjs)$": "<rootDir>/node_modules/babel-jest",
-      "^.+\\.tsx?$": "<rootDir>/config/jest/typescriptTransform.js",
+      "^.+\\.tsx?$": "ts-jest",
       "^.+\\.css$": "<rootDir>/config/jest/cssTransform.js",
       "^(?!.*\\.(js|jsx|mjs|css|json)$)": "<rootDir>/config/jest/fileTransform.js"
     },

@@ -3,12 +3,11 @@ import { buffers } from 'redux-saga';
 import hash from 'object-hash';
 
 import { reduxSagaFirebase } from '../../gateways/firebase';
-import { actions as walletActions } from '../../wallet';
-import { SignatureSuccess } from '../../wallet/redux/actions/external';
-import * as challengeActions from '../../wallet/redux/actions/challenge';
+import * as fromWalletActions from '../../wallet/interface/outgoing';
+import * as toWalletActions from '../../wallet/interface/incoming';
 import { encode, decode, Player, positions } from '../../core';
 import * as gameActions from '../game/actions';
-import { MessageState } from './state';
+import { MessageState, WalletMessage } from './state';
 import * as gameStates from '../game/state';
 import { Channel, State } from 'fmg-core';
 import { getMessageState, getGameState } from '../store';
@@ -31,10 +30,10 @@ export default function* messageSaga() {
 
 export function* sendWalletMessageSaga() {
   while (true) {
-    const action = yield take(walletActions.SEND_MESSAGE);
+    const action = yield take(fromWalletActions.SEND_MESSAGE);
     const queue = Queue.WALLET;
-    const { data, to } = action;
-    const message = { data, queue };
+    const { data, to, signature } = action;
+    const message = { data, queue, signature };
     yield call(reduxSagaFirebase.database.create, `/messages/${to.toLowerCase()}`, message);
   }
 }
@@ -69,7 +68,7 @@ export function* sendMessagesSaga() {
       const message = { data, queue, signature, userName };
       const { opponentAddress } = messageState.opponentOutbox;
 
-      yield put(walletActions.messageSent(data, signature));
+      yield put(toWalletActions.messageSent(data, signature));
       yield call(reduxSagaFirebase.database.create, `/messages/${opponentAddress.toLowerCase()}`, message);
       yield put(gameActions.messageSent());
     }
@@ -122,7 +121,6 @@ function* receiveFromFirebaseSaga(address) {
       if (!validMessage) {
         // TODO: Handle this
       }
-      yield put(walletActions.messageReceived(data, signature));
       const position = decode(data);
       if (position.name === positions.PRE_FUND_SETUP_A) {
         yield put(gameActions.initialPositionReceived(position, userName ? userName : 'Opponent'));
@@ -130,20 +128,26 @@ function* receiveFromFirebaseSaga(address) {
         yield put(gameActions.positionReceived(position));
       }
     } else {
-      yield put(walletActions.receiveMessage(data));
+      const { signature } = message.value;
+      yield put(toWalletActions.receiveMessage(data, signature));
     }
     yield call(reduxSagaFirebase.database.delete, `/messages/${address}/${key}`);
   }
 }
-function* handleWalletMessage(type, state: gameStates.PlayingState) {
+function* handleWalletMessage(walletMessage: WalletMessage, state: gameStates.PlayingState) {
   const { libraryAddress, channelNonce, player, balances, participants } = state;
   const channel = new Channel(libraryAddress, channelNonce, participants);
   const channelId = channel.id;
 
-  switch (type) {
+  switch (walletMessage.type) {
+    case "RESPOND_TO_CHALLENGE":
+      if (state.name === gameStates.StateName.WaitForOpponentToPickMoveA || state.name === gameStates.StateName.WaitForOpponentToPickMoveB) {
+        yield put(toWalletActions.respondToChallenge(encode(walletMessage.data)));
+      }
+      break;
     case "FUNDING_REQUESTED":
       // TODO: We need to close the channel at some point
-      yield put(walletActions.openChannelRequest(channel));
+      yield put(toWalletActions.openChannelRequest(channel));
       const myIndex = player === Player.PlayerA ? 0 : 1;
 
       const opponentAddress = participants[1 - myIndex];
@@ -151,11 +155,34 @@ function* handleWalletMessage(type, state: gameStates.PlayingState) {
       const myBalance = hexToBN(balances[myIndex]);
       const opponentBalance = hexToBN(balances[1 - myIndex]);
 
-      yield put(walletActions.fundingRequest(channelId, myAddress, opponentAddress, myBalance, opponentBalance, myIndex));
-      yield take(walletActions.FUNDING_SUCCESS);
-      yield put(gameActions.messageSent());
-      yield put(gameActions.fundingSuccess());
-
+      yield put(toWalletActions.fundingRequest(channelId, myAddress, opponentAddress, myBalance, opponentBalance, myIndex));
+      const action = yield take([
+        fromWalletActions.FUNDING_SUCCESS,
+        fromWalletActions.FUNDING_FAILURE,
+        fromWalletActions.CONCLUDE_SUCCESS,
+        fromWalletActions.CONCLUDE_FAILURE,
+        gameActions.RESIGN,
+      ]);
+      switch (action.type) {
+        case fromWalletActions.FUNDING_SUCCESS:
+          yield put(gameActions.messageSent());
+          const position = decode(action.position);
+          yield put(gameActions.fundingSuccess(position));
+          break;
+        case fromWalletActions.FUNDING_FAILURE:
+          yield put(gameActions.messageSent());
+          yield put(gameActions.fundingFailure());
+          break;
+        case gameActions.RESIGN:
+          yield put(toWalletActions.closeChannelRequest());
+          break;
+        case fromWalletActions.CONCLUDE_SUCCESS:
+        case fromWalletActions.CONCLUDE_FAILURE:
+          yield put(gameActions.messageSent());
+          break;
+        default:
+          throw new Error("Expected FUNDING_SUCCESS or FUNDING_FAILURE or RESIGN or CONCLUDE_SUCCESS or CONCLUDE_FAILURE");
+      }
       break;
     case "WITHDRAWAL_REQUESTED":
       const { turnNum } = positions.conclude(state);
@@ -166,47 +193,70 @@ function* handleWalletMessage(type, state: gameStates.PlayingState) {
         resolution: balances.map(hexToBN),
         stateCount: 0,
       });
-      yield put(walletActions.withdrawalRequest(channelState));
-      yield take(walletActions.WITHDRAWAL_SUCCESS);
+      yield put(toWalletActions.withdrawalRequest(channelState));
+      yield take(fromWalletActions.WITHDRAWAL_SUCCESS);
       yield put(gameActions.messageSent());
       yield put(gameActions.withdrawalSuccess());
-      yield put(walletActions.closeChannelRequest());
-
+      yield put(toWalletActions.closeChannelRequest());
+    case "CONCLUDE_REQUESTED":
+      yield put(toWalletActions.concludeChannelRequest());
+      yield take([fromWalletActions.CONCLUDE_SUCCESS, fromWalletActions.CONCLUDE_FAILURE]);
+      yield put(gameActions.messageSent());
   }
 }
 
+
 function* receiveFromWalletSaga() {
   while (true) {
-    const { position } = yield take(challengeActions.SEND_CHALLENGE_POSITION);
+    const { positionData } = yield take(fromWalletActions.CHALLENGE_POSITION_RECEIVED);
+    const position = decode(positionData);
     yield put(gameActions.positionReceived(position));
   }
 }
 
+
 function* validateMessage(data, signature) {
   const requestId = hash(data + Date.now());
-  yield put(walletActions.validationRequest(requestId, data, signature));
-  const actionFilter = [walletActions.VALIDATION_SUCCESS, walletActions.VALIDATION_FAILURE];
-  let action: walletActions.ValidationResponse = yield take(actionFilter);
-  while (action.requestId !== requestId) {
-    action = yield take(actionFilter);
-  }
-  if (action.type === walletActions.VALIDATION_SUCCESS) {
+  yield put(toWalletActions.validationRequest(requestId, data, signature));
+  const actionFilter = [fromWalletActions.VALIDATION_SUCCESS, fromWalletActions.VALIDATION_FAILURE];
+  let action: fromWalletActions.ValidationResponse = yield take(actionFilter);
+  if (action.type === fromWalletActions.VALIDATION_SUCCESS) {
     return true;
   } else {
-    // TODO: Properly handle this.
-    throw new Error("Signature Validation error");
+    if (action.reason === "WalletBusy") {
+      yield take(fromWalletActions.CHALLENGE_COMPLETE);
+      yield put(toWalletActions.validationRequest(requestId, data, signature));
+      action = yield take(actionFilter);
+      if (action.type === fromWalletActions.VALIDATION_SUCCESS) {
+        return true;
+      }
+    }
+
+    throw new Error(`Signature Validation error ${action.reason}}`);
+
   }
 }
 
 function* signMessage(data) {
   const requestId = hash(data + Date.now());
 
-  yield put(walletActions.signatureRequest(requestId, data));
+  yield put(toWalletActions.signatureRequest(requestId, data));
   // TODO: Handle signature failure
-  const actionFilter = walletActions.SIGNATURE_SUCCESS;
-  let signatureResponse: SignatureSuccess = yield take(actionFilter);
-  while (signatureResponse.requestId !== requestId) {
-    signatureResponse = yield take(actionFilter);
+  const actionFilter = [fromWalletActions.SIGNATURE_SUCCESS, fromWalletActions.SIGNATURE_FAILURE];
+  let action: fromWalletActions.SignatureResponse = yield take(actionFilter);
+  if (action.type === fromWalletActions.SIGNATURE_SUCCESS) {
+    return action.signature;
+  } else {
+    if (action.reason === "WalletBusy") {
+      yield take(fromWalletActions.CHALLENGE_COMPLETE);
+      yield put(toWalletActions.signatureRequest(requestId, data));
+      action = yield take(actionFilter);
+      if (action.type === fromWalletActions.SIGNATURE_SUCCESS) {
+        return action.signature;
+      }
+    }
+
+    throw new Error(`Signing error ${action.reason}}`);
+
   }
-  return signatureResponse.signature;
 }

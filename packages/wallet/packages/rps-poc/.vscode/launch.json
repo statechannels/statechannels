@@ -9,10 +9,10 @@
       "type": "node",
       "request": "launch",
       "args": [
-          "scripts/test.js",
-          "--runInBand",
-          "--no-cache",
-          "--env=jsdom"
+        "scripts/test.js",
+        "--runInBand",
+        "--no-cache",
+        "--env=jsdom"
       ],
       "cwd": "${workspaceRoot}",
       "protocol": "inspector",
@@ -24,11 +24,10 @@
       "type": "node",
       "request": "launch",
       "args": [
-          "scripts/test.js",
-          "--runInBand",
-          "--no-cache",
-          "--env=jsdom",
-          "${relativeFile}"
+        "node_modules/.bin/jest",
+        "--runInBand",
+        "--env=jsdom",
+        "${relativeFile}"
       ],
       "cwd": "${workspaceRoot}",
       "protocol": "inspector",

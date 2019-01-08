@@ -1,5 +1,5 @@
 import { State } from 'fmg-core';
-import decodeState from '../wallet/domain/decode';
+import decodeState from '../wallet/utils/decode-utils';
 
 import * as positions from './positions';
 import { Move } from './moves';
@@ -106,16 +106,16 @@ export function decodeGameState(state: State, roundBuyIn: string, hexString: str
       return positions.resting(base);
     case GamePositionType.Propose:
       const preCommit0 = extractPreCommit(hexString);
-      return positions.propose({...base, preCommit: preCommit0 });
+      return positions.propose({ ...base, preCommit: preCommit0 });
     case GamePositionType.Accept:
       const preCommit1 = extractPreCommit(hexString);
       const bsMove1 = extractBPlay(hexString);
-      return positions.accept({...base, preCommit: preCommit1, bsMove: bsMove1 });
+      return positions.accept({ ...base, preCommit: preCommit1, bsMove: bsMove1 });
     case GamePositionType.Reveal:
       const bsMove2 = extractBPlay(hexString);
       const asMove2 = extractAPlay(hexString);
       const salt = extractSalt(hexString);
-      return positions.reveal({...base, asMove: asMove2, bsMove: bsMove2, salt });
+      return positions.reveal({ ...base, asMove: asMove2, bsMove: bsMove2, salt });
   }
 }
 

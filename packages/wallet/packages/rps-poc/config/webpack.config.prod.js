@@ -43,10 +43,11 @@ const cssFilename = 'static/css/[name].[contenthash:8].css';
 // (See https://github.com/webpack-contrib/extract-text-webpack-plugin/issues/27)
 // However, our output is structured with css, js and media folders.
 // To have this structure working with relative paths, we have to use custom options.
-const extractTextPluginOptions = shouldUseRelativeAssetPaths
-  ? // Making sure that the publicPath goes back to to build folder.
-    { publicPath: Array(cssFilename.split('/').length).join('../') }
-  : {};
+const extractTextPluginOptions = shouldUseRelativeAssetPaths ? // Making sure that the publicPath goes back to to build folder.
+  {
+    publicPath: Array(cssFilename.split('/').length).join('../')
+  } :
+  {};
 
 // This is the production configuration.
 // It compiles slowly and is focused on producing a fast and minimal bundle.
@@ -72,8 +73,8 @@ module.exports = {
     // Point sourcemap entries to original disk location (format as URL on Windows)
     devtoolModuleFilenameTemplate: info =>
       path
-        .relative(paths.appSrc, info.absoluteResourcePath)
-        .replace(/\\/g, '/'),
+      .relative(paths.appSrc, info.absoluteResourcePath)
+      .replace(/\\/g, '/'),
   },
   resolve: {
     // This allows you to set a fallback for where Webpack should look for modules.
@@ -103,13 +104,15 @@ module.exports = {
       '.jsx',
     ],
     alias: {
-      
+
       // Support React Native Web
       // https://www.smashingmagazine.com/2016/08/a-glimpse-into-the-future-with-react-native-for-web/
       'react-native': 'react-native-web',
     },
-    plugins: [      
-      new TsconfigPathsPlugin({ configFile: paths.appTsConfig }),
+    plugins: [
+      new TsconfigPathsPlugin({
+        configFile: paths.appTsConfig
+      }),
     ],
   },
   module: {
@@ -129,12 +132,10 @@ module.exports = {
       },
       {
         test: /\.json/,
-        use: [
-          {
-            loader: 'json-loader'
-          },
-        ]
-        },
+        use: [{
+          loader: 'json-loader'
+        }, ]
+      },
       {
         test: /\.(js|jsx|mjs)$/,
         loader: require.resolve('source-map-loader'),
@@ -145,8 +146,7 @@ module.exports = {
         // "oneOf" will traverse all following loaders until one will
         // match the requirements. When no loader matches it will fall
         // back to the "file" loader at the end of the loader list.
-        oneOf: [
-          {
+        oneOf: [{
             test: /\.(scss)$/,
             use: [{
               loader: 'style-loader', // inject CSS to page
@@ -181,7 +181,7 @@ module.exports = {
             include: paths.appSrc,
             loader: require.resolve('babel-loader'),
             options: {
-              
+
               compact: true,
             },
           },
@@ -189,16 +189,14 @@ module.exports = {
           {
             test: /\.(ts|tsx)$/,
             include: paths.appSrc,
-            use: [
-              {
-                loader: require.resolve('ts-loader'),
-                options: {
-                  // disable type checker - we will use it in fork plugin
-                  transpileOnly: true,
-                  configFile: paths.appTsProdConfig
-                },
+            use: [{
+              loader: require.resolve('ts-loader'),
+              options: {
+                // disable type checker - we will use it in fork plugin
+                transpileOnly: true,
+                configFile: paths.appTsProdConfig
               },
-            ],
+            }, ],
           },
           // The notation here is somewhat confusing.
           // "postcss" loader applies autoprefixer to our CSS.
@@ -215,16 +213,14 @@ module.exports = {
           {
             test: /\.css$/,
             loader: ExtractTextPlugin.extract(
-              Object.assign(
-                {
+              Object.assign({
                   fallback: {
                     loader: require.resolve('style-loader'),
                     options: {
                       hmr: false,
                     },
                   },
-                  use: [
-                    {
+                  use: [{
                       loader: require.resolve('css-loader'),
                       options: {
                         importLoaders: 1,
@@ -281,6 +277,14 @@ module.exports = {
     ],
   },
   plugins: [
+    // Use pre-built artifacts for non-development networks.
+    new webpack.NormalModuleReplacementPlugin(
+      /.*\/build\/contracts\/.*\.json/,
+      function (resource) {
+        if (process.env.TARGET_NETWORK !== 'development') {
+          resource.request = resource.request.replace(/.*\/build\/contracts/, paths.appContractArtifacts);
+        }
+      }),
     // Makes some environment variables available in index.html.
     // The public URL is available as %PUBLIC_URL% in index.html, e.g.:
     // <link rel="shortcut icon" href="%PUBLIC_URL%/favicon.ico">
@@ -350,7 +354,7 @@ module.exports = {
       // Enable file caching
       cache: true,
       sourceMap: shouldUseSourceMap,
-    }),    // Note: this won't work without ExtractTextPlugin.extract(..) in `loaders`.
+    }), // Note: this won't work without ExtractTextPlugin.extract(..) in `loaders`.
     new ExtractTextPlugin({
       filename: cssFilename,
     }),
@@ -402,11 +406,12 @@ module.exports = {
       tsconfig: paths.appTsProdConfig,
       tslint: paths.appTsLint,
     }),
-      new webpack.EnvironmentPlugin({
-        FIREBASE_PROJECT: 'rock-paper-scissors123',
-        FIREBASE_API_KEY: 'AIzaSyDulzMWkORgVPFwtxqQaTwOeNhOisGPtDs',
-        TARGET_NETWORK: process.env.TARGET_NETWORK,
-        })],
+    new webpack.EnvironmentPlugin({
+      FIREBASE_PROJECT: 'rock-paper-scissors123',
+      FIREBASE_API_KEY: 'AIzaSyDulzMWkORgVPFwtxqQaTwOeNhOisGPtDs',
+      TARGET_NETWORK: process.env.TARGET_NETWORK,
+    })
+  ],
   // Some libraries import Node modules but don't use them in the browser.
   // Tell Webpack to provide empty mocks for them so importing them works.
   node: {

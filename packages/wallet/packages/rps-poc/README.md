@@ -39,6 +39,15 @@ To run the app on your machine, clone the code and follow the instructions below
     4. Paste in the secret key from [`scripts/start.js`](./scripts/start.js)
 5. If you restart ganache, you will need to switch to another network and back in metamask to prevent transactions from failing with "incorrect nonce" errors
 
+#### To run storybook
+
+We use [Storybook](https://storybook.js.org/) to view our react components during development. You can start Storybook by running:
+```
+yarn storybook
+```
+This will fire up the Storybook panel inside a browser.
+
+
 #### To build:
 
 1. Update your  `TARGET_NETWORK` in `.env` to a named network from `truffle.js` (default is `ropsten`)
