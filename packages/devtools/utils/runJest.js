@@ -16,10 +16,25 @@ module.exports = {
         if (argv.indexOf('--runInBand') > -1) {
             runInBand = true;
         }
-        // TODO: Figure out argVs
+        let project = '.';
+        // This allows us to specify different config files to run jest with.
+        // Unfortunately its a bit awkward.
+
+        if (argv.indexOf('-c') > -1 || argv.indexOf('--config') > -1) {
+            const {
+                resolve
+            } = require('path')
+
+            const index = argv.indexOf('-c') > -1 ? argv.indexOf('-c') : argv.indexOf('-config');
+            if (argv.length >= index + 1) {
+                project = resolve(process.cwd(), argv[index + 1]);
+            }
+        }
+
+        // TODO: Figure figure out how jest parses out CLI arguments into a config object
         return jest.runCLI({
             runInBand,
             watch,
-        }, ['.']);
+        }, [project]);
     }
 }
