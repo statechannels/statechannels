@@ -40,6 +40,7 @@ function getServedPath(appPackageJson) {
 
 // config after eject: we're in ./config/
 module.exports = {
+  appContractArtifacts: resolveApp('contracts/artifacts'),
   appContracts: resolveApp('contracts'),
   buildContracts: resolveApp('build/contracts'),
   dotenv: resolveApp('.env'),

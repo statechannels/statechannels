@@ -1,12 +1,14 @@
+
 // FUNDING
 // =======
 
 export const FUNDING_SUCCESS = 'WALLET.FUNDING.SUCCESS';
 export const FUNDING_FAILURE = 'WALLET.FUNDING.FAILURE';
 
-export const fundingSuccess = channelId => ({
+export const fundingSuccess = (channelId, position: string) => ({
   type: FUNDING_SUCCESS as typeof FUNDING_SUCCESS,
   channelId,
+  position,
 });
 export const fundingFailure = (channelId, reason) => ({
   type: FUNDING_FAILURE as typeof FUNDING_FAILURE,
@@ -38,18 +40,18 @@ export type ChannelClosed = ReturnType<typeof channelClosed>;
 
 // VALIDATION
 // ==========
+export const enum ValidationFailureReasons { WalletBusy = "WalletBusy", InvalidSignature = "InvalidSignature", Other = "Other" }
 
 export const VALIDATION_SUCCESS = 'WALLET.VALIDATION.SUCCESS';
 export const VALIDATION_FAILURE = 'WALLET.VALIDATION.FAILURE';
 
-export const validationSuccess = (requestId: string) => ({
+export const validationSuccess = () => ({
   type: VALIDATION_SUCCESS as typeof VALIDATION_SUCCESS,
-  requestId,
 });
-export const validationFailure = (requestId: string, reason: string) => ({
+export const validationFailure = (reason: ValidationFailureReasons, error?: string) => ({
   type: VALIDATION_FAILURE as typeof VALIDATION_FAILURE,
-  requestId,
   reason,
+  error,
 });
 
 export type ValidationSuccess = ReturnType<typeof validationSuccess>;
@@ -60,18 +62,20 @@ export type ValidationResponse = ValidationSuccess | ValidationFailure;
 // SIGNATURE
 // =========
 
+export const enum SignatureFailureReasons { WalletBusy = "WalletBusy", Other = "Other" }
+
 export const SIGNATURE_SUCCESS = 'WALLET.SIGNATURE.SUCCESS';
 export const SIGNATURE_FAILURE = 'WALLET.SIGNATURE.FAILURE';
 
-export const signatureSuccess = (requestId: string, signature: string) => ({
+export const signatureSuccess = (signature: string) => ({
   type: SIGNATURE_SUCCESS as typeof SIGNATURE_SUCCESS,
-  requestId,
   signature,
 });
-export const signatureFailure = (requestId: string, reason: string) => ({
+
+export const signatureFailure = (reason: SignatureFailureReasons, error?: string) => ({
   type: SIGNATURE_FAILURE as typeof SIGNATURE_FAILURE,
-  requestId,
   reason,
+  error,
 });
 
 export type SignatureSuccess = ReturnType<typeof signatureSuccess>;
@@ -117,15 +121,40 @@ export const initializationFailure = (message: string) => ({
 
 export type InitializationSuccess = ReturnType<typeof initializationSuccess>;
 
+// CONCLUDE
+// ==============
+
+export const CONCLUDE_SUCCESS = 'WALLET.CONCLUDE.SUCCESS';
+export const CONCLUDE_FAILURE = 'WALLET.CONCLUDE.FAILURE';
+
+export const concludeSuccess = () => ({
+  type: CONCLUDE_SUCCESS as typeof CONCLUDE_SUCCESS,
+});
+
+export const concludeFailure = (message: string) => ({
+  type: CONCLUDE_FAILURE as typeof CONCLUDE_FAILURE,
+  message,
+});
+
+export type ConcludeSuccess = ReturnType<typeof concludeSuccess>;
+export type ConcludeFailure = ReturnType<typeof concludeFailure>;
+
+export const CLOSE_SUCCESS = 'WALLET.CLOSE.SUCCESS';
+export const closeSuccess = () => ({
+  type: CLOSE_SUCCESS as typeof CLOSE_SUCCESS,
+});
+export type CloseSuccess = ReturnType<typeof closeSuccess>;
+
 
 // MESSAGING
 // =========
 export const SEND_MESSAGE = 'WALLET.MESSAGING.SEND';
 
-export const sendMessage = (to: string, data: string) => ({
+export const sendMessage = (to: string, data: string, signature: string) => ({
   type: SEND_MESSAGE as typeof SEND_MESSAGE,
   to,
   data,
+  signature,
 });
 
 export type SendMessage = ReturnType<typeof sendMessage>;
@@ -136,6 +165,46 @@ export const messageReceived = (positionData: string, signature: string) => ({
   positionData,
   signature,
 });
-
-
 export type MessageReceived = ReturnType<typeof messageReceived>;
+
+export const CHALLENGE_POSITION_RECEIVED = 'WALLET.MESSAGING.CHALLENGE_POSITION_RECEIVED';
+export const challengePositionReceived = (positionData: string) => ({
+  type: CHALLENGE_POSITION_RECEIVED as typeof CHALLENGE_POSITION_RECEIVED,
+  positionData,
+});
+export type ChallengePositionReceived = ReturnType<typeof challengePositionReceived>;
+
+export const CHALLENGE_REJECTED = 'WALLET.CHALLENGING.CHALLENGE_REJECTED';
+export const challengeRejected = (reason) => ({
+  type: CHALLENGE_REJECTED as typeof CHALLENGE_REJECTED,
+  reason,
+});
+export type ChallengeRejected = ReturnType<typeof challengeRejected>;
+
+export const CHALLENGE_RESPONSE_REQUESTED = 'CHALLENGE_RESPONSE_REQUESTED';
+export const challengeResponseRequested = () => ({
+  type: CHALLENGE_RESPONSE_REQUESTED as typeof CHALLENGE_RESPONSE_REQUESTED,
+});
+export type ChallengeResponseRequested = ReturnType<typeof challengeResponseRequested>;
+
+export const CHALLENGE_COMPLETE = 'CHALLENGE_COMPLETE';
+export const challengeComplete = () => ({
+  type: CHALLENGE_COMPLETE as typeof CHALLENGE_COMPLETE,
+});
+export type ChallengeComplete = ReturnType<typeof challengeComplete>;
+
+export type ResponseAction =
+  InitializationSuccess |
+  ConcludeSuccess |
+  CloseSuccess |
+  ValidationSuccess |
+  ValidationFailure |
+  FundingSuccess |
+  FundingFailure |
+  SignatureSuccess |
+  SignatureFailure |
+  ChallengePositionReceived |
+  ChallengeRejected |
+  ChallengeResponseRequested |
+  ChallengeComplete |
+  SendMessage;
