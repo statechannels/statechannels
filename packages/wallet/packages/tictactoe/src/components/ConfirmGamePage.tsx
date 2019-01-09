@@ -1,0 +1,40 @@
+import React from 'react';
+
+import { Button } from 'reactstrap';
+
+import { ApplicationLayout } from './ApplicationLayout';
+import web3Utils from 'web3-utils';
+interface Props {
+  confirmGame: () => void;
+  cancelGame: () => void;
+  stake: string;
+  opponentName: string;
+}
+
+export default class ConfirmGamePage extends React.PureComponent<Props> {
+  render() {
+
+    const { confirmGame, cancelGame, stake, opponentName } = this.props;
+    const gameBuyIn = String(Number(stake)*5);
+    return (
+      <ApplicationLayout>
+        <div className="w-100 text-center mb-5">
+          <h1 className="w-100">Game Proposed!</h1>
+          <div>
+            <p>{opponentName} has accepted your challenge with a {web3Utils.fromWei(gameBuyIn, 'ether')} ETH game buy in.</p>
+            <p>Do you want to play?</p>
+
+            <div>
+              <Button className="confirm-button" outline={true} onClick={confirmGame}>
+                Play
+          </Button>
+              <Button className="confirm-button" outline={true} onClick={cancelGame}>
+                Cancel
+          </Button>
+            </div>
+          </div>
+        </div>
+      </ApplicationLayout>
+    );
+  }
+}
