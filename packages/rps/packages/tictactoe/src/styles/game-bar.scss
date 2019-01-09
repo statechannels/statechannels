@@ -1,0 +1,38 @@
+
+@import "./_colors";
+
+.game-bar {
+  color: white;
+  background-color: $game-bar-color;
+  height: 110px;
+}
+
+.game-bar .my-name, .game-bar .opponent-name {
+  font-family: $rps-font-family;
+  font-size: 16px;
+  font-weight: bold;
+  font-style: normal;
+  font-stretch: normal;
+  line-height: normal;
+  letter-spacing: normal;
+  color: #ffffff;
+  text-transform: uppercase;
+}
+
+.game-bar .my-balance, .game-bar .opponent-balance {
+  font-size: 26px;
+  text-align: center;
+}
+
+.game-bar .opponent-balance, .game-bar .opponent-name {
+  opacity: 0.6;
+}
+
+.game-bar .my-balance .eth, .game-bar .opponent-balance .eth {
+  font-size: 12px;
+}
+
+.game-bar .score-dot {
+  padding: 0;
+  text-align: center;
+}
