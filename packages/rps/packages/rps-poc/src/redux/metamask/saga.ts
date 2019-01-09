@@ -1,6 +1,6 @@
 import * as metamaskActions from './actions';
 import { put, cps } from 'redux-saga/effects';
-import truffle from 'truffle.js';
+import * as truffle from './../../../truffle';
 import { MetamaskErrorType } from './actions';
 import { delay } from 'redux-saga';
 
