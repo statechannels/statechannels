@@ -5,7 +5,7 @@ import { reduxSagaFirebase } from '../../gateways/firebase';
 import { walletSaga } from '../../wallet';
 import metamaskSaga from '../metamask/saga';
 
-import RPSGameArtifact from '../../../contracts/artifacts/RockPaperScissorsGame.json';
+import RPSGameArtifact from '../../../build/contracts/RockPaperScissorsGame.json';
 
 function* loginSaga() {
   try {
@@ -51,9 +51,9 @@ function* loginStatusWatcherSaga() {
 
 export default function* loginRootSaga() {
   const metaMask = yield metamaskSaga();
-  
+
   // If metamask is not properly set up we can halt processing and wait for the reload
-  if (!metaMask){
+  if (!metaMask) {
     return;
   }
 
