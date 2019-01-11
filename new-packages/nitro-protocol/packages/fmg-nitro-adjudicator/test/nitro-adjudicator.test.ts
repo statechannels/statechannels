@@ -252,6 +252,57 @@ describe('nitroAdjudicator', () => {
       });
     });
 
+    describe('overlap', () => {
+      it('returns funding when funding is less than the amount allocated to the recipient in the outcome', async () => {
+        const recipient = alice.address;
+        const outcome = {
+          destination: [alice.address, bob.address],
+          amount: resolution,
+          finalizedAt: ethers.utils.bigNumberify(0),
+          challengeState: state0.asEthersObject,
+        };
+        const funding = ethers.utils.bigNumberify(2);
+        expect(await nitro.overlap(recipient, outcome, funding)).toEqual(funding);
+      });
+
+      it('returns funding when funding is equal to than the amount allocated to the recipient in the outcome', async () => {
+        const recipient = alice.address;
+        const outcome = {
+          destination: [alice.address, bob.address],
+          amount: resolution,
+          finalizedAt: ethers.utils.bigNumberify(0),
+          challengeState: state0.asEthersObject,
+        };
+        const funding = aBal;
+        expect(await nitro.overlap(recipient, outcome, funding)).toEqual(funding);
+      });
+
+      it('returns the allocated amount when funding is greater than the amount allocated to the recipient in the outcome', async () => {
+        const recipient = alice.address;
+        const outcome = {
+          destination: [alice.address, bob.address],
+          amount: resolution,
+          finalizedAt: ethers.utils.bigNumberify(0),
+          challengeState: state0.asEthersObject,
+        };
+        const funding = aBal.add(1);
+        expect(await nitro.overlap(recipient, outcome, funding)).toEqual(aBal);
+      });
+
+      it('returns zero when recipient is not a participant', async () => {
+        const recipient = aliceDest.address;
+        const outcome = {
+          destination: [alice.address, bob.address],
+          amount: resolution,
+          finalizedAt: ethers.utils.bigNumberify(0),
+          challengeState: state0.asEthersObject,
+        };
+        const funding = aBal.add(1);
+        const zero = ethers.utils.bigNumberify(0);
+        expect(await nitro.overlap(recipient, outcome, funding)).toEqual(zero);
+      });
+    });
+
     describe('transfer', () => {
       it('works when \
           the outcome is final and \
@@ -354,7 +405,7 @@ describe('nitroAdjudicator', () => {
 
         assertRevert(
           nitro.transfer(channel.id, aliceDest.address, resolution[0]),
-          'Transfer: destination not in outcome',
+          'Transfer: transfer too large',
         );
 
         await delay(1000);
