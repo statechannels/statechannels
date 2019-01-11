@@ -81,39 +81,68 @@ contract nitroAdjudicator {
             "Transfer: outcome must be present"
         );
 
-        uint256 pending = 0;
-        for (uint256 i = 0; i < outcomes[channel].destination.length; i++) {
-            pending = pending + outcomes[channel].amount[i];
+        uint owedToDestination = overlap(destination, outcomes[channel], amount);
 
-            if (outcomes[channel].destination[i] == destination) {
-                require(
-                    pending <= allocations[channel],
-                    "Transfer: allocations[channel] must cover transfer"
-                );
+        require(
+            owedToDestination <= allocations[channel],
+            "Transfer: allocations[channel] must cover transfer"
+        );
+        require(
+            owedToDestination >= amount,
+            "Transfer: transfer too large"
+        );
 
-                require(
-                    amount <= outcomes[channel].amount[i],
-                    "Transfer: transfer too large"
-                );
+        allocations[destination] = allocations[destination] + owedToDestination;
+        allocations[channel] = allocations[channel] - owedToDestination;
 
-                allocations[destination] = allocations[destination] + amount;
-                allocations[channel] = allocations[channel] - amount;
+        outcomes[channel] = remove(outcomes[channel], destination, amount);
+    }
 
-                uint256[] memory updatedAmounts = outcomes[channel].amount;
-                updatedAmounts[i] = updatedAmounts[i] - amount;
+    function overlap(address recipient, Outcome memory outcome, uint funding) public pure returns (uint256) {
+        // TODO: Make overlap internal?
+        // We should probably write a TestNitroAdjudicator contract that inherits
+        // from NitroAdjudicator and wraps internal functions with a public
+        // function
+        uint result = 0;
 
-                Outcome memory updatedOutcome = Outcome(
-                    outcomes[channel].destination,
-                    updatedAmounts,
-                    outcomes[channel].finalizedAt,
-                    outcomes[channel].challengeState // Once the outcome is finalized, 
-                );
-                outcomes[channel] = updatedOutcome;
-                return;
+        for (uint i = 0; i < outcome.destination.length; i++) {
+            if (funding <= 0) {
+                break;
+            }
+
+            if (outcome.destination[i] == recipient) {
+                // It is technically allowed for a recipient to be listed in the
+                // outcome multiple times, so we must iterate through the entire
+                // array.
+                result += min(outcome.amount[i], funding);
+            }
+
+            funding -= outcome.amount[i];
+        }
+
+        return result;
+    }
+
+    function remove(Outcome memory outcome, address recipient, uint amount) internal pure returns (Outcome memory) { 
+        uint256[] memory updatedAmounts = outcome.amount;
+        uint256 reduction = 0;
+        for (uint i = 0; i < outcome.destination.length; i++) {
+            if (outcome.destination[i] == recipient) {
+                // It is technically allowed for a recipient to be listed in the
+                // outcome multiple times, so we must iterate through the entire
+                // array.
+                reduction += min(outcome.amount[i], amount);
+                amount = amount - reduction;
+                updatedAmounts[i] = updatedAmounts[i] - reduction;
             }
         }
 
-        revert("Transfer: destination not in outcome");
+        return Outcome(
+            outcome.destination,
+            updatedAmounts,
+            outcome.finalizedAt,
+            outcome.challengeState // Once the outcome is finalized, 
+        );
     }
 
     // ******
@@ -343,6 +372,14 @@ contract nitroAdjudicator {
         address a = ecrecover(prefixedHash, _v, _r, _s);
 
         return(a);
+    }
+
+    function min(uint a, uint b) public pure returns (uint) {
+        if (a <= b) {
+            return a;
+        }
+
+        return b;
     }
 
     // *********************************
