@@ -1,4 +1,4 @@
-import { splitSignature } from 'ethers/utils';
+import { splitSignature, getAddress } from 'ethers/utils';
 import { recover, sign, SolidityType } from 'fmg-core';
 
 
@@ -9,7 +9,7 @@ export const validSignature = (data: string, signature: string, address: string)
 
     const recovered = recover(data, v, r, s);
 
-    return recovered === address;
+    return recovered === getAddress(address);
   } catch (err) {
 
     return false;
