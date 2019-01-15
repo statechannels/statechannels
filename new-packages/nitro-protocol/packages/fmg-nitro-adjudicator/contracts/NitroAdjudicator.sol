@@ -24,6 +24,11 @@ contract nitroAdjudicator {
         uint256 finalizedAt;
         State.StateStruct challengeState;
     }
+    struct Guarantee {
+        address guarantor;
+        address target;
+        address[] priorities;
+    }
     struct Signature {
         uint8 v;
         bytes32 r;
@@ -98,8 +103,51 @@ contract nitroAdjudicator {
         outcomes[channel] = remove(outcomes[channel], destination, amount);
     }
 
+    function claim(address recipient, Guarantee memory guarantee, uint amount) public {
+        require(
+            isChannelClosed(guarantee.target),
+            "Claim: channel must be closed"
+        );
+        require(
+            // the outcome is assumed to be valid, so this check is sufficient
+            guarantee.priorities.length == outcomes[guarantee.target].destination.length,
+            'Claim: invalid guarantee -- wrong priorities list length'
+        );
+
+        uint funding = allocations[guarantee.guarantor];
+        Outcome memory reprioritizedOutcome = reprioritize(outcomes[guarantee.target], guarantee);
+        if (overlap(recipient, reprioritizedOutcome, funding) >= amount) {
+            outcomes[guarantee.target] = remove(outcomes[guarantee.target], recipient, amount);
+            allocations[guarantee.guarantor] -= amount;
+            allocations[recipient] += amount;
+        } else {
+            revert('Claim: guarantor must be sufficiently funded');
+        }
+    }
+
+    function reprioritize(Outcome memory outcome, Guarantee memory guarantee) public pure returns (Outcome memory) {
+        address[] memory newDestination = new address[](guarantee.priorities.length);
+        uint[] memory newAmount = new uint[](guarantee.priorities.length);
+        for (uint i = 0; i < guarantee.priorities.length; i++) {
+            for (uint j = 0; j < guarantee.priorities.length; j++) {
+                if (guarantee.priorities[i] == outcome.destination[j]) {
+                    newDestination[i] = outcome.destination[j];
+                    newAmount[i] = outcome.amount[j];
+                    break;
+                }
+            }
+        }
+
+        return Outcome(
+            newDestination,
+            newAmount,
+            outcome.finalizedAt,
+            outcome.challengeState
+        );
+    }
+
     function overlap(address recipient, Outcome memory outcome, uint funding) public pure returns (uint256) {
-        // TODO: Make overlap internal?
+        // TODO: Make overlap internal
         // We should probably write a TestNitroAdjudicator contract that inherits
         // from NitroAdjudicator and wraps internal functions with a public
         // function
@@ -123,7 +171,8 @@ contract nitroAdjudicator {
         return result;
     }
 
-    function remove(Outcome memory outcome, address recipient, uint amount) internal pure returns (Outcome memory) { 
+    function remove(Outcome memory outcome, address recipient, uint amount) public pure returns (Outcome memory) { 
+        // TODO: Make remove internal
         uint256[] memory updatedAmounts = outcome.amount;
         uint256 reduction = 0;
         for (uint i = 0; i < outcome.destination.length; i++) {
