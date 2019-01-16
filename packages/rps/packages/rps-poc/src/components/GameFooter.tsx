@@ -31,7 +31,7 @@ export default class GameFooter extends React.PureComponent<Props> {
               <div className="footer-logo-container">
                 <img src={MAGMO_LOGO} />
                 <small className="text-muted">
-                  Something not working? Email us at <a href="oops@magmo.com">oops@magmo.com</a>
+                  Something not working? Email us at <a href="mailto:oops@magmo.com">oops@magmo.com</a>
                 </small>
               </div>
             </div>
