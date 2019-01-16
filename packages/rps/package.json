@@ -2,5 +2,9 @@
   "dependencies": {
     "lerna": "^3.10.1"
   },
-  "name": "apps"
+  "name": "apps",
+
+  "scripts": {
+    "test:ci": "test:ci"
+  }
 }

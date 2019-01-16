@@ -8,4 +8,4 @@ curl --user ${CIRCLE_TOKEN}: \
     --form revision=$1\
     --form config=@config.yml \
     --form notify=false \
-        https://circleci.com/api/v1.1/project/github/magmo/rps-poc/tree/$2
+        https://circleci.com/api/v1.1/project/github/magmo/apps/tree/$2
