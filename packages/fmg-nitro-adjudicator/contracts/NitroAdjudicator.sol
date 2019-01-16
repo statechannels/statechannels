@@ -3,7 +3,7 @@ pragma experimental ABIEncoderV2;
 import "fmg-core/contracts/State.sol";
 import "fmg-core/contracts/Rules.sol";
 
-contract nitroAdjudicator {
+contract NitroAdjudicator {
     using State for State.StateStruct;
 
     struct Authorization {
@@ -125,7 +125,11 @@ contract nitroAdjudicator {
         }
     }
 
-    function reprioritize(Outcome memory outcome, Guarantee memory guarantee) public pure returns (Outcome memory) {
+    // ************************
+    // Eth Management Logic
+    // ************************
+
+    function reprioritize(Outcome memory outcome, Guarantee memory guarantee) internal pure returns (Outcome memory) {
         address[] memory newDestination = new address[](guarantee.priorities.length);
         uint[] memory newAmount = new uint[](guarantee.priorities.length);
         for (uint i = 0; i < guarantee.priorities.length; i++) {
@@ -146,11 +150,7 @@ contract nitroAdjudicator {
         );
     }
 
-    function overlap(address recipient, Outcome memory outcome, uint funding) public pure returns (uint256) {
-        // TODO: Make overlap internal
-        // We should probably write a TestNitroAdjudicator contract that inherits
-        // from NitroAdjudicator and wraps internal functions with a public
-        // function
+    function overlap(address recipient, Outcome memory outcome, uint funding) internal pure returns (uint256) {
         uint result = 0;
 
         for (uint i = 0; i < outcome.destination.length; i++) {
@@ -171,8 +171,7 @@ contract nitroAdjudicator {
         return result;
     }
 
-    function remove(Outcome memory outcome, address recipient, uint amount) public pure returns (Outcome memory) { 
-        // TODO: Make remove internal
+    function remove(Outcome memory outcome, address recipient, uint amount) internal pure returns (Outcome memory) { 
         uint256[] memory updatedAmounts = outcome.amount;
         uint256 reduction = 0;
         for (uint i = 0; i < outcome.destination.length; i++) {
@@ -194,9 +193,9 @@ contract nitroAdjudicator {
         );
     }
 
-    // ******
-    // Events
-    // ******
+    // ****************
+    // ForceMove Events
+    // ****************
 
     event ChallengeCreated(
         address channelId,
@@ -206,6 +205,7 @@ contract nitroAdjudicator {
     event Concluded(address channelId);
     event Refuted(address channelId, State.StateStruct refutation);
     event RespondedWithMove(address channelId, State.StateStruct response);
+    event RespondedWithAlternativeMove(State.StateStruct alternativeResponse);
 
     // **********************
     // ForceMove Protocol API
@@ -307,7 +307,6 @@ contract nitroAdjudicator {
         outcomes[channel] = updatedOutcome;
     }
 
-    event RespondedWithAlternativeMove(State.StateStruct alternativeResponse);
     function alternativeRespondWithMove(
         State.StateStruct memory _alternativeState,
         State.StateStruct memory _responseState,
@@ -387,23 +386,11 @@ contract nitroAdjudicator {
     // Helper functions
     // ****************
 
-    function isChallengeOngoing(address channel) public view returns (bool) {
-        return outcomes[channel].finalizedAt > now;
-    }
-
-    function isChannelClosed(address channel) public view returns (bool) {
+    function isChannelClosed(address channel) internal view returns (bool) {
         return outcomes[channel].finalizedAt < now && outcomes[channel].finalizedAt > 0;
     }
 
-    function outcomesEqual(Outcome memory a, Outcome memory b) internal pure returns (bool) {
-        return equals(abi.encode(a), abi.encode(b));
-    }
-
-    function equals(bytes memory a, bytes memory b) internal pure returns (bool) {
-        return keccak256(a) == keccak256(b);
-    }
-
-    function moveAuthorized(State.StateStruct memory _state, Signature memory signature) public pure returns (bool){
+    function moveAuthorized(State.StateStruct memory _state, Signature memory signature) internal pure returns (bool){
         return _state.mover() == recoverSigner(
             abi.encode(_state),
             signature.v,
@@ -412,7 +399,7 @@ contract nitroAdjudicator {
         );
     }
 
-    function recoverSigner(bytes memory _d, uint8 _v, bytes32 _r, bytes32 _s) public pure returns(address) {
+    function recoverSigner(bytes memory _d, uint8 _v, bytes32 _r, bytes32 _s) internal pure returns(address) {
         bytes memory prefix = "\x19Ethereum Signed Message:\n32";
         bytes32 h = keccak256(_d);
 
@@ -423,39 +410,11 @@ contract nitroAdjudicator {
         return(a);
     }
 
-    function min(uint a, uint b) public pure returns (uint) {
+    function min(uint a, uint b) internal pure returns (uint) {
         if (a <= b) {
             return a;
         }
 
         return b;
     }
-
-    // *********************************
-    // Helper functions -- TO BE REMOVED
-    // *********************************
-
-    function channelId(State.StateStruct memory state) public pure returns (address) {
-        return state.channelId();
-    }
-
-    function outcomeFinal(address channel) public view returns (bool) {
-        return outcomes[channel].finalizedAt > 0 && outcomes[channel].finalizedAt < now;
-    }
-
-    function setOutcome(address channel, Outcome memory outcome) public {
-        // Temporary helper function to set outcomes for testing
-
-        require(
-            outcome.destination.length == outcome.amount.length,
-            "destination.length must be equal to amount.length"
-        );
-
-        outcomes[channel] = outcome;
-    }
-
-    function getOutcome(address channel) public view returns (Outcome memory) {
-        return outcomes[channel];
-    }
-
 }
