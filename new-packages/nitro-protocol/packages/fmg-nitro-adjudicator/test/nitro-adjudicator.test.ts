@@ -368,14 +368,14 @@ describe('nitroAdjudicator', () => {
       const finalizedAt = 1;
       it('works', async () => {
         const target = bob.address;
-        const guarantee = [guarantor.address, channel.channelType, [bob.address, alice.address]];
+        const guarantee = [guarantor.address, channel.id, [bob.address, alice.address]];
         const outcome = {
           destination: [alice.address, bob.address],
           amount: resolution,
           finalizedAt: ethers.utils.bigNumberify(finalizedAt),
           challengeState: state0.asEthersObject,
         };
-        await (await nitro.setOutcome(channel.channelType, outcome)).wait();
+        await (await nitro.setOutcome(channel.id, outcome)).wait();
         const startBal = 5;
         const claimAmount = 2;
         await (await nitro.deposit(guarantor.address, { value: startBal })).wait();
@@ -393,12 +393,12 @@ describe('nitroAdjudicator', () => {
         // guarantor = G
         // target = χ (bob)
         // outcome = (A: 5, χ: 5)
-        // channel.channelType = L
+        // channel.id = L
         // C_{G,χ}(2) [[􏰀G:5 􏰂→ (L|χ), L:(A : 5, χ : 5)]]􏰁 =
         // 􏰀  [[G:3 􏰂→ (L|χ), L:(A : 5, χ : 3), χ:2]]􏰁
         await (await nitro.claim(target, guarantee, claimAmount)).wait();
 
-        const newOutcome = await nitro.getOutcome(channel.channelType);
+        const newOutcome = await nitro.getOutcome(channel.id);
         expect(newOutcome).toMatchObject(expectedOutcome);
         expect(Number(await nitro.allocations(guarantor.address))).toEqual(startBal - claimAmount);
         expect(Number(await nitro.allocations(target))).toEqual(claimAmount);
@@ -406,14 +406,14 @@ describe('nitroAdjudicator', () => {
 
       it('reverts if guarantor is underfunded', async () => {
         const target = bob.address;
-        const guarantee = [guarantor.address, channel.channelType, [bob.address, alice.address]];
+        const guarantee = [guarantor.address, channel.id, [bob.address, alice.address]];
         const outcome = {
           destination: [alice.address, bob.address],
           amount: resolution,
           finalizedAt: ethers.utils.bigNumberify(finalizedAt),
           challengeState: state0.asEthersObject,
         };
-        await (await nitro.setOutcome(channel.channelType, outcome)).wait();
+        await (await nitro.setOutcome(channel.id, outcome)).wait();
 
         const claimAmount = Number(await nitro.allocations(guarantor.address)) + 1;
         assertRevert(
@@ -425,14 +425,14 @@ describe('nitroAdjudicator', () => {
 
       it('reverts if the target channel\'s outcome is not finalized', async () => {
         const target = bob.address;
-        const guarantee = [guarantor.address, channel.channelType, [bob.address, alice.address]];
+        const guarantee = [guarantor.address, channel.id, [bob.address, alice.address]];
         const outcome = {
           destination: [alice.address, bob.address],
           amount: resolution,
           finalizedAt: ethers.utils.bigNumberify(0),
           challengeState: state0.asEthersObject,
         };
-        await (await nitro.setOutcome(channel.channelType, outcome)).wait();
+        await (await nitro.setOutcome(channel.id, outcome)).wait();
 
         assertRevert(
           nitro.claim(target, guarantee, 0),
@@ -442,14 +442,14 @@ describe('nitroAdjudicator', () => {
 
       it('reverts if the guarantee and outcome lengths do not match', async () => {
         const target = bob.address;
-        const guarantee = [guarantor.address, channel.channelType, [bob.address, alice.address, aliceDest.address]];
+        const guarantee = [guarantor.address, channel.id, [bob.address, alice.address, aliceDest.address]];
         const outcome = {
           destination: [alice.address, bob.address],
           amount: resolution,
           finalizedAt: ethers.utils.bigNumberify(finalizedAt),
           challengeState: state0.asEthersObject,
         };
-        await (await nitro.setOutcome(channel.channelType, outcome)).wait();
+        await (await nitro.setOutcome(channel.id, outcome)).wait();
 
         assertRevert(
           nitro.claim(target, guarantee, 0),
@@ -564,7 +564,7 @@ describe('nitroAdjudicator', () => {
           challengeState: state0.asEthersObject,
         };
 
-        const guarantee = [guarantor.address, channel.channelType,[bob.address, alice.address]];
+        const guarantee = [guarantor.address, channel.id,[bob.address, alice.address]];
 
         const expectedOutcome = {
           destination: [bob.address, alice.address],
@@ -662,7 +662,7 @@ describe('nitroAdjudicator', () => {
         await tx.wait();
         await eventPromise;
 
-        expect(await challengeInProgress(channel.id)).toBe(true);
+        expect(await nitro.challengeInProgress(channel.id)).toBe(true);
 
         expect(emitterWitness).toBeCalled();
       });
@@ -1065,8 +1065,4 @@ function delay(ms = 1000) {
   return new Promise(resolve => {
     setTimeout(resolve, ms);
   });
-}
-
-async function challengeInProgress(channelId: string) {
-  return 1000*Number((await nitro.outcomes(channelId)).finalizedAt) > Date.now();
 }
