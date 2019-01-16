@@ -12,7 +12,7 @@ import { sign, Channel, CountingGame } from 'fmg-core';
 
 import StateArtifact from '../build/contracts/State.json';
 import RulesArtifact from '../build/contracts/Rules.json';
-import nitroAdjudicatorArtifact from '../build/contracts/nitroAdjudicator.json';
+import testNitroAdjudicatorArtifact from '../build/contracts/testNitroAdjudicator.json';
 import { getCountingGame } from './CountingGame';
 
 jest.setTimeout(20000);
@@ -56,18 +56,18 @@ async function withdraw(
 async function setupContracts() {
   const networkId = await getNetworkId();
 
-  nitroAdjudicatorArtifact.bytecode = linkedByteCode(
-    nitroAdjudicatorArtifact,
+  testNitroAdjudicatorArtifact.bytecode = linkedByteCode(
+    testNitroAdjudicatorArtifact,
     StateArtifact,
     networkId,
   );
-  nitroAdjudicatorArtifact.bytecode = linkedByteCode(
-    nitroAdjudicatorArtifact,
+  testNitroAdjudicatorArtifact.bytecode = linkedByteCode(
+    testNitroAdjudicatorArtifact,
     RulesArtifact,
     networkId,
   );
 
-  nitro = await ContractFactory.fromSolidity(nitroAdjudicatorArtifact, providerSigner).deploy();
+  nitro = await ContractFactory.fromSolidity(testNitroAdjudicatorArtifact, providerSigner).deploy();
   await nitro.deployed();
 
   const unwrap = ({challengeState, finalizedAt }) => ({challengeState, finalizedAt});
@@ -235,126 +235,6 @@ describe('nitroAdjudicator', () => {
       });
     });
 
-    describe('setOutcome', () => {
-      it('works', async () => { 
-        await delay();
-        const outcome = {
-          destination: [alice.address, bob.address],
-          amount: resolution,
-          finalizedAt: ethers.utils.bigNumberify(0),
-          challengeState: state0.asEthersObject,
-        };
-        const tx = await nitro.setOutcome(channel.id, outcome);
-        await tx.wait();
-        await delay();
-
-        const setOutcome = await nitro.getOutcome(channel.id);
-        expect(setOutcome).toMatchObject(outcome);
-        await delay();
-      });
-    });
-
-    describe('overlap', () => {
-      it('returns funding when funding is less than the amount allocated to the recipient in the outcome', async () => {
-        const recipient = alice.address;
-        const outcome = {
-          destination: [alice.address, bob.address],
-          amount: resolution,
-          finalizedAt: ethers.utils.bigNumberify(0),
-          challengeState: state0.asEthersObject,
-        };
-        const funding = ethers.utils.bigNumberify(2);
-        expect(await nitro.overlap(recipient, outcome, funding)).toEqual(funding);
-      });
-
-      it('returns funding when funding is equal to than the amount allocated to the recipient in the outcome', async () => {
-        const recipient = alice.address;
-        const outcome = {
-          destination: [alice.address, bob.address],
-          amount: resolution,
-          finalizedAt: ethers.utils.bigNumberify(0),
-          challengeState: state0.asEthersObject,
-        };
-        const funding = aBal;
-        expect(await nitro.overlap(recipient, outcome, funding)).toEqual(funding);
-      });
-
-      it('returns the allocated amount when funding is greater than the amount allocated to the recipient in the outcome', async () => {
-        const recipient = alice.address;
-        const outcome = {
-          destination: [alice.address, bob.address],
-          amount: resolution,
-          finalizedAt: ethers.utils.bigNumberify(0),
-          challengeState: state0.asEthersObject,
-        };
-        const funding = aBal.add(1);
-        expect(await nitro.overlap(recipient, outcome, funding)).toEqual(aBal);
-      });
-
-      it('returns zero when recipient is not a participant', async () => {
-        const recipient = aliceDest.address;
-        const outcome = {
-          destination: [alice.address, bob.address],
-          amount: resolution,
-          finalizedAt: ethers.utils.bigNumberify(0),
-          challengeState: state0.asEthersObject,
-        };
-        const funding = aBal.add(1);
-        const zero = ethers.utils.bigNumberify(0);
-        expect(await nitro.overlap(recipient, outcome, funding)).toEqual(zero);
-      });
-    });
-
-    describe('remove', () => {
-      it('works', async() => {
-        const outcome = {
-          destination: [alice.address, bob.address],
-          amount: resolution,
-          finalizedAt: ethers.utils.bigNumberify(0),
-          challengeState: state0.asEthersObject,
-        };
-        const removeAmount = 2;
-        const resolutionAfterRemove = [aBal, bBal.sub(removeAmount)];
-
-        const expectedOutcome = {
-          destination: [alice.address, bob.address],
-          amount: resolutionAfterRemove,
-          finalizedAt: ethers.utils.bigNumberify(0),
-          challengeState: state0.asEthersObject,
-        };
-
-
-        const recipient = bob.address;
-        const newOutcome = await nitro.remove(outcome, recipient, removeAmount);
-
-        expect(newOutcome).toMatchObject(expectedOutcome);
-      });
-    });
-
-    describe('reprioritize', () => {
-      it('works', async () => {
-        const outcome = {
-          destination: [alice.address, bob.address],
-          amount: resolution,
-          finalizedAt: ethers.utils.bigNumberify(0),
-          challengeState: state0.asEthersObject,
-        };
-
-        const guarantee = [guarantor.address, channel.channelType,[bob.address, alice.address]];
-
-        const expectedOutcome = {
-          destination: [bob.address, alice.address],
-          amount: differentResolution,
-          finalizedAt: ethers.utils.bigNumberify(0),
-          challengeState: state0.asEthersObject,
-        };
-
-        const newOutcome = await nitro.reprioritize(outcome, guarantee);
-
-        expect(newOutcome).toMatchObject(expectedOutcome);
-      });
-    });
-
     describe('transfer', () => {
       it('works when \
           the outcome is final and \
@@ -484,7 +364,7 @@ describe('nitroAdjudicator', () => {
       });
     });
 
-    describe.only('claim', () => {
+    describe('claim', () => {
       const finalizedAt = 1;
       it('works', async () => {
         const target = bob.address;
@@ -578,6 +458,127 @@ describe('nitroAdjudicator', () => {
         await delay(50);
       });
     });
+
+    describe('setOutcome', () => {
+      it('works', async () => { 
+        await delay();
+        const outcome = {
+          destination: [alice.address, bob.address],
+          amount: resolution,
+          finalizedAt: ethers.utils.bigNumberify(0),
+          challengeState: state0.asEthersObject,
+        };
+        const tx = await nitro.setOutcome(channel.id, outcome);
+        await tx.wait();
+        await delay();
+
+        const setOutcome = await nitro.getOutcome(channel.id);
+        expect(setOutcome).toMatchObject(outcome);
+        await delay();
+      });
+    });
+
+    describe('overlap', () => {
+      it('returns funding when funding is less than the amount allocated to the recipient in the outcome', async () => {
+        const recipient = alice.address;
+        const outcome = {
+          destination: [alice.address, bob.address],
+          amount: resolution,
+          finalizedAt: ethers.utils.bigNumberify(0),
+          challengeState: state0.asEthersObject,
+        };
+        const funding = ethers.utils.bigNumberify(2);
+        expect(await nitro.overlapPub(recipient, outcome, funding)).toEqual(funding);
+      });
+
+      it('returns funding when funding is equal to than the amount allocated to the recipient in the outcome', async () => {
+        const recipient = alice.address;
+        const outcome = {
+          destination: [alice.address, bob.address],
+          amount: resolution,
+          finalizedAt: ethers.utils.bigNumberify(0),
+          challengeState: state0.asEthersObject,
+        };
+        const funding = aBal;
+        expect(await nitro.overlapPub(recipient, outcome, funding)).toEqual(funding);
+      });
+
+      it('returns the allocated amount when funding is greater than the amount allocated to the recipient in the outcome', async () => {
+        const recipient = alice.address;
+        const outcome = {
+          destination: [alice.address, bob.address],
+          amount: resolution,
+          finalizedAt: ethers.utils.bigNumberify(0),
+          challengeState: state0.asEthersObject,
+        };
+        const funding = aBal.add(1);
+        expect(await nitro.overlapPub(recipient, outcome, funding)).toEqual(aBal);
+      });
+
+      it('returns zero when recipient is not a participant', async () => {
+        const recipient = aliceDest.address;
+        const outcome = {
+          destination: [alice.address, bob.address],
+          amount: resolution,
+          finalizedAt: ethers.utils.bigNumberify(0),
+          challengeState: state0.asEthersObject,
+        };
+        const funding = aBal.add(1);
+        const zero = ethers.utils.bigNumberify(0);
+        expect(await nitro.overlapPub(recipient, outcome, funding)).toEqual(zero);
+      });
+    });
+
+    describe('remove', () => {
+      it('works', async() => {
+        const outcome = {
+          destination: [alice.address, bob.address],
+          amount: resolution,
+          finalizedAt: ethers.utils.bigNumberify(0),
+          challengeState: state0.asEthersObject,
+        };
+        const removeAmount = 2;
+        const resolutionAfterRemove = [aBal, bBal.sub(removeAmount)];
+
+        const expectedOutcome = {
+          destination: [alice.address, bob.address],
+          amount: resolutionAfterRemove,
+          finalizedAt: ethers.utils.bigNumberify(0),
+          challengeState: state0.asEthersObject,
+        };
+
+
+        const recipient = bob.address;
+        const newOutcome = await nitro.removePub(outcome, recipient, removeAmount);
+
+        expect(newOutcome).toMatchObject(expectedOutcome);
+      });
+    });
+
+    describe('reprioritize', () => {
+      it('works', async () => {
+        const outcome = {
+          destination: [alice.address, bob.address],
+          amount: resolution,
+          finalizedAt: ethers.utils.bigNumberify(0),
+          challengeState: state0.asEthersObject,
+        };
+
+        const guarantee = [guarantor.address, channel.channelType,[bob.address, alice.address]];
+
+        const expectedOutcome = {
+          destination: [bob.address, alice.address],
+          amount: differentResolution,
+          finalizedAt: ethers.utils.bigNumberify(0),
+          challengeState: state0.asEthersObject,
+        };
+
+        const newOutcome = await nitro.reprioritizePub(outcome, guarantee);
+
+        expect(newOutcome).toMatchObject(expectedOutcome);
+      });
+    });
+
   });
 
   describe('ForceMove Protocol', () => {
@@ -595,7 +596,7 @@ describe('nitroAdjudicator', () => {
       await (await nitro.setOutcome(channel.id, nullOutcome)).wait();
       // challenge doesn't exist at start of game
       expect(
-        await nitro.isChannelClosed(channel.id)
+        await nitro.isChannelClosedPub(channel.id)
       ).toBe(false);
     });
 
@@ -760,7 +761,7 @@ describe('nitroAdjudicator', () => {
         await (await nitro.setOutcome(channel.id, nullOutcome)).wait();
         // challenge doesn't exist at start of game
         expect(
-          await nitro.isChannelClosed(channel.id)
+          await nitro.isChannelClosedPub(channel.id)
         ).toBe(false);
     
         await nitro.forceMove(
@@ -807,7 +808,7 @@ describe('nitroAdjudicator', () => {
         // expired challenge exists at start of game
         await increaseTime(DURATION.days(2), provider);
         expect(
-          await nitro.isChannelClosed(channel.id)
+          await nitro.isChannelClosedPub(channel.id)
         ).toBe(true);
     
         assertRevert(
@@ -872,7 +873,7 @@ describe('nitroAdjudicator', () => {
         await (await nitro.setOutcome(channel.id, nullOutcome)).wait();
         // challenge doesn't exist at start of game
         expect(
-          await nitro.isChannelClosed(channel.id)
+          await nitro.isChannelClosedPub(channel.id)
         ).toBe(false);
     
         await nitro.forceMove(
@@ -903,7 +904,7 @@ describe('nitroAdjudicator', () => {
         // expired challenge exists at start of game
         await increaseTime(DURATION.days(2), provider);
         expect(
-          await nitro.isChannelClosed(channel.id)
+          await nitro.isChannelClosedPub(channel.id)
         ).toBe(true);
     
         assertRevert(
@@ -973,7 +974,7 @@ describe('nitroAdjudicator', () => {
         await (await nitro.setOutcome(channel.id, nullOutcome)).wait();
         // challenge doesn't exist at start of game
         expect(
-          await nitro.isChannelClosed(channel.id)
+          await nitro.isChannelClosedPub(channel.id)
         ).toBe(false);
     
         await nitro.forceMove(
@@ -1004,7 +1005,7 @@ describe('nitroAdjudicator', () => {
         // expired challenge exists at start of game
         await increaseTime(DURATION.days(2), provider);
         expect(
-          await nitro.isChannelClosed(channel.id)
+          await nitro.isChannelClosedPub(channel.id)
         ).toBe(true);
     
         assertRevert(
