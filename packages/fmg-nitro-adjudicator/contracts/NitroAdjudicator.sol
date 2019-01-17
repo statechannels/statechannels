@@ -41,7 +41,7 @@ contract NitroAdjudicator {
         Signature ultimateSignature;
     }
 
-    mapping(address => uint) public allocations;
+    mapping(address => uint) public holdings;
     mapping(address => Outcome) public outcomes;
 
     // TODO: Challenge duration should depend on the channel
@@ -52,12 +52,12 @@ contract NitroAdjudicator {
     // **************
 
     function deposit(address destination) public payable {
-        allocations[destination] = allocations[destination] + msg.value;
+        holdings[destination] = holdings[destination] + msg.value;
     }
 
     function withdraw(address participant, address payable destination, uint amount, uint8 _v, bytes32 _r, bytes32 _s) public payable {
         require(
-            allocations[participant] >= amount,
+            holdings[participant] >= amount,
             "Withdraw: overdrawn"
         );
         Authorization memory authorization = Authorization(
@@ -72,7 +72,7 @@ contract NitroAdjudicator {
             "Withdraw: not authorized by participant"
         );
 
-        allocations[participant] = allocations[participant] - amount;
+        holdings[participant] = holdings[participant] - amount;
         destination.transfer(amount);
     }
 
@@ -89,16 +89,16 @@ contract NitroAdjudicator {
         uint owedToDestination = overlap(destination, outcomes[channel], amount);
 
         require(
-            owedToDestination <= allocations[channel],
-            "Transfer: allocations[channel] must cover transfer"
+            owedToDestination <= holdings[channel],
+            "Transfer: holdings[channel] must cover transfer"
         );
         require(
             owedToDestination >= amount,
             "Transfer: transfer too large"
         );
 
-        allocations[destination] = allocations[destination] + owedToDestination;
-        allocations[channel] = allocations[channel] - owedToDestination;
+        holdings[destination] = holdings[destination] + owedToDestination;
+        holdings[channel] = holdings[channel] - owedToDestination;
 
         outcomes[channel] = remove(outcomes[channel], destination, amount);
     }
@@ -114,12 +114,12 @@ contract NitroAdjudicator {
             'Claim: invalid guarantee -- wrong priorities list length'
         );
 
-        uint funding = allocations[guarantee.guarantor];
+        uint funding = holdings[guarantee.guarantor];
         Outcome memory reprioritizedOutcome = reprioritize(outcomes[guarantee.target], guarantee);
         if (overlap(recipient, reprioritizedOutcome, funding) >= amount) {
             outcomes[guarantee.target] = remove(outcomes[guarantee.target], recipient, amount);
-            allocations[guarantee.guarantor] -= amount;
-            allocations[recipient] += amount;
+            holdings[guarantee.guarantor] -= amount;
+            holdings[recipient] += amount;
         } else {
             revert('Claim: guarantor must be sufficiently funded');
         }
