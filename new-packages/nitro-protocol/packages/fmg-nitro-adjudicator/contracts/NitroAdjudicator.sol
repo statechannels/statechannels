@@ -20,9 +20,9 @@ contract NitroAdjudicator {
 
     struct Outcome {
         address[] destination;
-        uint[] amount;
         uint256 finalizedAt;
         State.StateStruct challengeState;
+        uint[] allocation;         // should be zero length in guarantee channels
     }
     struct Guarantee {
         address guarantor;
@@ -131,12 +131,12 @@ contract NitroAdjudicator {
 
     function reprioritize(Outcome memory outcome, Guarantee memory guarantee) internal pure returns (Outcome memory) {
         address[] memory newDestination = new address[](guarantee.priorities.length);
-        uint[] memory newAmount = new uint[](guarantee.priorities.length);
+        uint[] memory newAllocation = new uint[](guarantee.priorities.length);
         for (uint i = 0; i < guarantee.priorities.length; i++) {
             for (uint j = 0; j < guarantee.priorities.length; j++) {
                 if (guarantee.priorities[i] == outcome.destination[j]) {
                     newDestination[i] = outcome.destination[j];
-                    newAmount[i] = outcome.amount[j];
+                    newAllocation[i] = outcome.allocation[j];
                     break;
                 }
             }
@@ -144,7 +144,7 @@ contract NitroAdjudicator {
 
         return Outcome(
             newDestination,
-            newAmount,
+            newAllocation,
             outcome.finalizedAt,
             outcome.challengeState
         );
@@ -162,32 +162,32 @@ contract NitroAdjudicator {
                 // It is technically allowed for a recipient to be listed in the
                 // outcome multiple times, so we must iterate through the entire
                 // array.
-                result += min(outcome.amount[i], funding);
+                result += min(outcome.allocation[i], funding);
             }
 
-            funding -= outcome.amount[i];
+            funding -= outcome.allocation[i];
         }
 
         return result;
     }
 
     function remove(Outcome memory outcome, address recipient, uint amount) internal pure returns (Outcome memory) { 
-        uint256[] memory updatedAmounts = outcome.amount;
+        uint256[] memory updatedAllocation = outcome.allocation;
         uint256 reduction = 0;
         for (uint i = 0; i < outcome.destination.length; i++) {
             if (outcome.destination[i] == recipient) {
                 // It is technically allowed for a recipient to be listed in the
                 // outcome multiple times, so we must iterate through the entire
                 // array.
-                reduction += min(outcome.amount[i], amount);
+                reduction += min(outcome.allocation[i], amount);
                 amount = amount - reduction;
-                updatedAmounts[i] = updatedAmounts[i] - reduction;
+                updatedAllocation[i] = updatedAllocation[i] - reduction;
             }
         }
 
         return Outcome(
             outcome.destination,
-            updatedAmounts,
+            updatedAllocation,
             outcome.finalizedAt,
             outcome.challengeState // Once the outcome is finalized, 
         );
