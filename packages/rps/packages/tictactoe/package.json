@@ -51,6 +51,7 @@
     "typescript-eslint-parser": "^17.0.1",
     "uglifyjs-webpack-plugin": "^1.1.8",
     "url-loader": "^1.1.2",
+    "wallet-client": "^0.0.1",
     "web3-detect-network": "^0.0.17",
     "webpack": "3.8.1",
     "webpack-dev-server": "2.9.4",

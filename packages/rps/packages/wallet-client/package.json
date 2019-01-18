@@ -1,0 +1,40 @@
+{
+  "name": "wallet-client",
+  "version": "0.0.1",
+  "description": "Utility library for communicating with the magmo wallet",
+  "author": "",
+  "homepage": "https://github.com/magmo/apps#readme",
+  "license": "MIT",
+  "main": "lib/index.js",
+  "directories": {
+    "lib": "lib",
+    "test": "__tests__"
+  },
+  "files": [
+    "lib"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/magmo/apps.git"
+  },
+  "scripts": {
+    "test": "echo \"Error: run tests from root\" && exit 1",
+    "build": "npx tsc",
+    "lint": "npx tslint -c tslint.json 'src/**/*.ts'",
+    "prepare": "npx tslint -c tslint.json 'src/**/*.ts' && npx tsc"
+  },
+  "bugs": {
+    "url": "https://github.com/magmo/apps/issues"
+  },
+  "dependencies": {
+    "bn.js": "4.11.8",
+    "eventemitter2": "5.0.1",
+    "fmg-core": "0.3.5"
+  },
+  "devDependencies": {
+    "tslint": "5.12.1",
+    "tslint-config-prettier": "1.17.0",
+    "tslint-react": "3.6.0",
+    "typescript": "3.2.2"
+  }
+}

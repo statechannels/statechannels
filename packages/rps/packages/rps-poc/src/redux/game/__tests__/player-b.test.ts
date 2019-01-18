@@ -35,8 +35,8 @@ const {
 
 } = scenarios.insufficientFunds;
 
-const { libraryAddress, channelNonce, participants, roundBuyIn, myName, opponentName } = scenarios.standard;
-const base = { libraryAddress, channelNonce, participants, roundBuyIn, myName, opponentName };
+const { libraryAddress, channelNonce, participants, roundBuyIn, myName, opponentName, bsAddress: myAddress } = scenarios.standard;
+const base = { libraryAddress, channelNonce, participants, roundBuyIn, myName, opponentName, myAddress };
 
 const messageState = {};
 
