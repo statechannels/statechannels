@@ -77,7 +77,7 @@ describe('State', () => {
     const chainId: string = await testStateLib.channelId(state.asEthersObject);
     const localId: string = channel.id;
 
-    expect(chainId.toLowerCase()).toEqual(localId);
+    expect(chainId).toEqual(localId);
   });
 
   it('can check if a state is signed', async () => {
