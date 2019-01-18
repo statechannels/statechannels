@@ -34,11 +34,11 @@ export default class CreatingOpenGameModal extends React.PureComponent<Props, St
     const buyIn = Number(e.target.value);
     let errorMessage = "";
     if (e.target.value === "") {
-      errorMessage = "Please enter a game buy in amount";
+      errorMessage = "Please enter a round buy in amount";
     } else if (Number.isNaN(buyIn)) {
-      errorMessage = "Please enter a number for the game buy in";
+      errorMessage = "Please enter a number for the round buy in";
     } else if (buyIn < MIN_BUYIN || buyIn > MAX_BUYIN) {
-      errorMessage = `Invalid game buy in amount ${this.state.buyIn}. Please enter an amount between ${MIN_BUYIN} and ${MAX_BUYIN}`;
+      errorMessage = `Invalid round buy in amount ${this.state.buyIn}. Please enter an amount between ${MIN_BUYIN} and ${MAX_BUYIN}`;
 
     }
     this.setState({ errorMessage, buyIn: e.target.value, buyInChanged: true });
@@ -53,6 +53,7 @@ export default class CreatingOpenGameModal extends React.PureComponent<Props, St
   createOpenGameHandler(e) {
     e.preventDefault();
     if (this.state.errorMessage === "") {
+
       this.props.createOpenGame(web3Utils.toWei(this.state.buyIn, 'ether'));
     } else {
       this.setState({ buyInChanged: true });
@@ -64,10 +65,10 @@ export default class CreatingOpenGameModal extends React.PureComponent<Props, St
     this.props.cancelOpenGame();
   }
 
-  calculateRoundBuyIn() {
-    const roundBuyIn = parseFloat(this.state.buyIn)/5;
-    if (roundBuyIn) {
-      return roundBuyIn;
+  calculateGameBuyIn() {
+    const gameBuyIn = parseFloat(this.state.buyIn) * 5;
+    if (gameBuyIn) {
+      return gameBuyIn;
     }
     return "";
   }
@@ -83,7 +84,7 @@ export default class CreatingOpenGameModal extends React.PureComponent<Props, St
         <ModalBody>
           <form className="cog-form" onSubmit={e => this.createOpenGameHandler(e)}>
             <div className="form-group">
-              <label htmlFor="buyin">Enter Game Buy In Amount</label>
+              <label htmlFor="buyin">Enter Round Buy In Amount</label>
               <div className="cog-input-group">
                 <input
                   className="cog-input form-control"
@@ -104,12 +105,12 @@ export default class CreatingOpenGameModal extends React.PureComponent<Props, St
                 {this.state.errorMessage}
               </small>
 
-              <div className="mt-2">Round Buy In: {this.calculateRoundBuyIn()}</div>
+              <div className="mt-2">Game Buy In: {this.calculateGameBuyIn()} {this.calculateGameBuyIn() ? 'ETH' : ''}</div>
               <small className="form-text text-muted">
-                This is 20% of the game buy in amount.
+                This is 5 times the round buy in amount.
               </small>
             </div>
-            <Button className="cog-button" type="submit" disabled={this.state.errorMessage !== "" || !this.state.buyInChanged } block={true}>
+            <Button className="cog-button" type="submit" disabled={this.state.errorMessage !== "" || !this.state.buyInChanged} block={true}>
               Create Game
             </Button>
           </form>
