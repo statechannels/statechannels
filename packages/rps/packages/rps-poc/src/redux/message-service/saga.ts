@@ -1,40 +1,52 @@
 import { fork, take, call, put, select, actionChannel } from 'redux-saga/effects';
-import { buffers } from 'redux-saga';
-import hash from 'object-hash';
+import { buffers, eventChannel } from 'redux-saga';
 
 import { reduxSagaFirebase } from '../../gateways/firebase';
-import * as fromWalletActions from '../../wallet/interface/outgoing';
-import * as toWalletActions from '../../wallet/interface/incoming';
+
 import { encode, decode, Player, positions } from '../../core';
 import * as gameActions from '../game/actions';
 import { MessageState, WalletMessage } from './state';
 import * as gameStates from '../game/state';
-import { Channel, State } from 'fmg-core';
+import { Channel } from 'fmg-core';
 import { getMessageState, getGameState } from '../store';
-
+import * as Wallet from 'wallet-client';
 import hexToBN from '../../utils/hexToBN';
+import { WALLET_IFRAME_ID } from '../../constants';
 
 export enum Queue {
   WALLET = 'WALLET',
   GAME_ENGINE = 'GAME_ENGINE',
 }
 
-export const getWalletAddress = (storeObj: any) => storeObj.wallet.address;
+// export const getWalletAddress = (storeObj: any) => storeObj.wallet.address;
 
 export default function* messageSaga() {
-  yield fork(waitForWalletThenReceiveFromFirebaseSaga);
-  yield fork(receiveFromWalletSaga);
   yield fork(sendMessagesSaga);
+  yield fork(waitForWalletThenReceiveFromFirebaseSaga);
   yield fork(sendWalletMessageSaga);
+  yield fork(exitGameSaga);
+  yield fork(receiveChallengePositionFromWalletSaga);
+  yield fork(receiveChallengeFromWalletSaga);
+
 }
 
 export function* sendWalletMessageSaga() {
   while (true) {
-    const action = yield take(fromWalletActions.SEND_MESSAGE);
+    const sendMessageChannel = createWalletEventChannel([Wallet.MESSAGE_REQUEST]);
+    const messageRequest = yield take(sendMessageChannel);
+    console.log('sendwalletmessage ', messageRequest);
     const queue = Queue.WALLET;
-    const { data, to, signature } = action;
+    const { data, to, signature } = messageRequest;
     const message = { data, queue, signature };
     yield call(reduxSagaFirebase.database.create, `/messages/${to.toLowerCase()}`, message);
+  }
+}
+
+export function* exitGameSaga() {
+  const closeGameChannel = createWalletEventChannel([Wallet.CLOSE_SUCCESS]);
+  while (true) {
+    yield take(closeGameChannel);
+    yield put(gameActions.exitToLobby());
   }
 }
 
@@ -53,11 +65,11 @@ export function* sendMessagesSaga() {
     gameActions.WITHDRAWAL_SUCCESS,
     gameActions.JOIN_OPEN_GAME,
     gameActions.RESIGN,
+    gameActions.CREATE_CHALLENGE
   ]);
   while (true) {
     // We take any action that might trigger the outbox to be updated
     yield take(channel);
-
     const messageState: MessageState = yield select(getMessageState);
     const gameState: gameStates.GameState = yield select(getGameState);
     if (messageState.opponentOutbox) {
@@ -68,7 +80,6 @@ export function* sendMessagesSaga() {
       const message = { data, queue, signature, userName };
       const { opponentAddress } = messageState.opponentOutbox;
 
-      yield put(toWalletActions.messageSent(data, signature));
       yield call(reduxSagaFirebase.database.create, `/messages/${opponentAddress.toLowerCase()}`, message);
       yield put(gameActions.messageSent());
     }
@@ -90,7 +101,8 @@ function* waitForWalletThenReceiveFromFirebaseSaga() {
   while (true) {
     yield take('*');
 
-    const address = yield select(getWalletAddress);
+    const gameState: gameStates.GameState = yield select(getGameState);
+    const address = gameState.myAddress;
 
     if (address) {
       // this will never return
@@ -128,87 +140,101 @@ function* receiveFromFirebaseSaga(address) {
         yield put(gameActions.positionReceived(position));
       }
     } else {
+
       const { signature } = message.value;
-      yield put(toWalletActions.receiveMessage(data, signature));
+      Wallet.messageWallet(WALLET_IFRAME_ID, data, signature);
+
     }
     yield call(reduxSagaFirebase.database.delete, `/messages/${address}/${key}`);
   }
 }
+
+// TODO: Type this properly
+function createWalletEventChannel(walletEventTypes: Wallet.ResponseActionTypes[]) {
+  const listener = new Wallet.WalletEventListener();
+  return eventChannel(emit => {
+    walletEventTypes.forEach(eventType => {
+      listener.subscribe(eventType, (event) => {
+        emit(event);
+      });
+    });
+
+    return () => {
+      listener.unSubscribeAll();
+    };
+  });
+}
+
 function* handleWalletMessage(walletMessage: WalletMessage, state: gameStates.PlayingState) {
+
   const { libraryAddress, channelNonce, player, balances, participants } = state;
   const channel = new Channel(libraryAddress, channelNonce, participants);
   const channelId = channel.id;
 
   switch (walletMessage.type) {
     case "RESPOND_TO_CHALLENGE":
-      if (state.name === gameStates.StateName.WaitForOpponentToPickMoveA || state.name === gameStates.StateName.WaitForOpponentToPickMoveB) {
-        yield put(toWalletActions.respondToChallenge(encode(walletMessage.data)));
+      if (state.name === gameStates.StateName.WaitForOpponentToPickMoveA || state.name === gameStates.StateName.WaitForRevealB) {
+        Wallet.respondToOngoingChallenge(WALLET_IFRAME_ID, encode(walletMessage.data));
+        yield put(gameActions.messageSent());
+        const challengeCompleteChannel = createWalletEventChannel([Wallet.CHALLENGE_COMPLETE]);
+        yield take(challengeCompleteChannel);
+        yield put(gameActions.challengeCompleted());
       }
       break;
     case "FUNDING_REQUESTED":
       // TODO: We need to close the channel at some point
-      yield put(toWalletActions.openChannelRequest(channel));
+      Wallet.openChannel(WALLET_IFRAME_ID, channel);
       const myIndex = player === Player.PlayerA ? 0 : 1;
 
       const opponentAddress = participants[1 - myIndex];
       const myAddress = participants[myIndex];
       const myBalance = hexToBN(balances[myIndex]);
       const opponentBalance = hexToBN(balances[1 - myIndex]);
+      const fundingChannel = createWalletEventChannel([Wallet.FUNDING_SUCCESS]);
 
-      yield put(toWalletActions.fundingRequest(channelId, myAddress, opponentAddress, myBalance, opponentBalance, myIndex));
-      const action = yield take([
-        fromWalletActions.FUNDING_SUCCESS,
-        fromWalletActions.FUNDING_FAILURE,
-        fromWalletActions.CONCLUDE_SUCCESS,
-        fromWalletActions.CONCLUDE_FAILURE,
-        gameActions.RESIGN,
-      ]);
-      switch (action.type) {
-        case fromWalletActions.FUNDING_SUCCESS:
-          yield put(gameActions.messageSent());
-          const position = decode(action.position);
-          yield put(gameActions.fundingSuccess(position));
-          break;
-        case fromWalletActions.FUNDING_FAILURE:
-          yield put(gameActions.messageSent());
-          yield put(gameActions.fundingFailure());
-          break;
-        case gameActions.RESIGN:
-          yield put(toWalletActions.closeChannelRequest());
-          break;
-        case fromWalletActions.CONCLUDE_SUCCESS:
-        case fromWalletActions.CONCLUDE_FAILURE:
-          yield put(gameActions.messageSent());
-          break;
-        default:
-          throw new Error("Expected FUNDING_SUCCESS or FUNDING_FAILURE or RESIGN or CONCLUDE_SUCCESS or CONCLUDE_FAILURE");
-      }
+      Wallet.startFunding(WALLET_IFRAME_ID, channelId, myAddress, opponentAddress, myBalance, opponentBalance, myIndex);
+      const fundingResponse = yield take(fundingChannel);
+
+      yield put(gameActions.messageSent());
+      const position = decode(fundingResponse.position);
+      yield put(gameActions.fundingSuccess(position));
+
       break;
-    case "WITHDRAWAL_REQUESTED":
-      const { turnNum } = positions.conclude(state);
-      const channelState = new State({
-        channel,
-        stateType: State.StateType.Conclude,
-        turnNum,
-        resolution: balances.map(hexToBN),
-        stateCount: 0,
-      });
-      yield put(toWalletActions.withdrawalRequest(channelState));
-      yield take(fromWalletActions.WITHDRAWAL_SUCCESS);
-      yield put(gameActions.messageSent());
-      yield put(gameActions.withdrawalSuccess());
-      yield put(toWalletActions.closeChannelRequest());
     case "CONCLUDE_REQUESTED":
-      yield put(toWalletActions.concludeChannelRequest());
-      yield take([fromWalletActions.CONCLUDE_SUCCESS, fromWalletActions.CONCLUDE_FAILURE]);
+
+      // TODO: handle failure
+      const conclusionChannel = createWalletEventChannel([Wallet.CONCLUDE_SUCCESS]);
+      Wallet.startConcludingGame(WALLET_IFRAME_ID);
+      yield take(conclusionChannel);
       yield put(gameActions.messageSent());
+      yield put(gameActions.exitToLobby());
+      break;
+    case "CHALLENGE_REQUESTED":
+      // TODO: handle failure and timeout?
+      const challengeChannel = createWalletEventChannel([Wallet.CHALLENGE_COMPLETE]);
+      Wallet.startChallenge(WALLET_IFRAME_ID);
+      yield put(gameActions.messageSent());
+      yield take(challengeChannel);
+      yield put(gameActions.challengeCompleted());
+
+      break;
   }
 }
 
+function* receiveChallengeFromWalletSaga() {
+  const challengeChannel = createWalletEventChannel([Wallet.CHALLENGE_RESPONSE_REQUESTED]);
 
-function* receiveFromWalletSaga() {
   while (true) {
-    const { positionData } = yield take(fromWalletActions.CHALLENGE_POSITION_RECEIVED);
+    yield take(challengeChannel);
+    yield put(gameActions.challengeResponseRequested());
+
+
+  }
+}
+function* receiveChallengePositionFromWalletSaga() {
+  const challengeChannel = createWalletEventChannel([Wallet.CHALLENGE_POSITION_RECEIVED]);
+  while (true) {
+    const { positionData } = yield take(challengeChannel);
     const position = decode(positionData);
     yield put(gameActions.positionReceived(position));
   }
@@ -216,47 +242,27 @@ function* receiveFromWalletSaga() {
 
 
 function* validateMessage(data, signature) {
-  const requestId = hash(data + Date.now());
-  yield put(toWalletActions.validationRequest(requestId, data, signature));
-  const actionFilter = [fromWalletActions.VALIDATION_SUCCESS, fromWalletActions.VALIDATION_FAILURE];
-  let action: fromWalletActions.ValidationResponse = yield take(actionFilter);
-  if (action.type === fromWalletActions.VALIDATION_SUCCESS) {
-    return true;
-  } else {
-    if (action.reason === "WalletBusy") {
-      yield take(fromWalletActions.CHALLENGE_COMPLETE);
-      yield put(toWalletActions.validationRequest(requestId, data, signature));
-      action = yield take(actionFilter);
-      if (action.type === fromWalletActions.VALIDATION_SUCCESS) {
-        return true;
-      }
+  try {
+    return yield Wallet.validateSignature(WALLET_IFRAME_ID, data, signature);
+  } catch (err) {
+    if (err.type && err.type === 'WalletBusy') {
+      const challengeChannel = createWalletEventChannel([Wallet.CHALLENGE_COMPLETE]);
+      yield take(challengeChannel);
+      return yield Wallet.validateSignature(WALLET_IFRAME_ID, data, signature);
+
     }
-
-    throw new Error(`Signature Validation error ${action.reason}}`);
-
   }
 }
 
 function* signMessage(data) {
-  const requestId = hash(data + Date.now());
+  try {
+    return yield Wallet.signData(WALLET_IFRAME_ID, data);
+  } catch (err) {
+    if (err.type && err.type === 'WalletBusy') {
+      const challengeChannel = createWalletEventChannel([Wallet.CHALLENGE_COMPLETE]);
+      yield take(challengeChannel);
+      return yield Wallet.signData(WALLET_IFRAME_ID, data);
 
-  yield put(toWalletActions.signatureRequest(requestId, data));
-  // TODO: Handle signature failure
-  const actionFilter = [fromWalletActions.SIGNATURE_SUCCESS, fromWalletActions.SIGNATURE_FAILURE];
-  let action: fromWalletActions.SignatureResponse = yield take(actionFilter);
-  if (action.type === fromWalletActions.SIGNATURE_SUCCESS) {
-    return action.signature;
-  } else {
-    if (action.reason === "WalletBusy") {
-      yield take(fromWalletActions.CHALLENGE_COMPLETE);
-      yield put(toWalletActions.signatureRequest(requestId, data));
-      action = yield take(actionFilter);
-      if (action.type === fromWalletActions.SIGNATURE_SUCCESS) {
-        return action.signature;
-      }
     }
-
-    throw new Error(`Signing error ${action.reason}}`);
-
   }
 }

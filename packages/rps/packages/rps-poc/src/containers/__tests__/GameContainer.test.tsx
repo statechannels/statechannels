@@ -6,8 +6,8 @@ import { waitForGameConfirmationA } from '../../redux/game/state';
 import configureStore from 'redux-mock-store';
 import GameProposed from '../../components/GameProposedPage';
 
-const { libraryAddress, channelNonce, participants, roundBuyIn, myName, opponentName, twitterHandle } = scenarios.standard;
-const base = { libraryAddress, channelNonce, participants, roundBuyIn, myName, opponentName, twitterHandle};
+const { libraryAddress, channelNonce, participants, roundBuyIn, myName, opponentName, twitterHandle, asAddress: myAddress } = scenarios.standard;
+const base = { libraryAddress, channelNonce, participants, roundBuyIn, myName, opponentName, twitterHandle, myAddress };
 const mockStore = configureStore();
 
 
