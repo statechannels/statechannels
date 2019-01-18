@@ -1,5 +1,5 @@
 import { toHex32, padBytes32 } from './utils';
-import { soliditySha3 } from 'web3-utils';
+import { soliditySha3, toChecksumAddress } from 'web3-utils';
 
 class Channel {
   channelType: string;
@@ -17,11 +17,13 @@ class Channel {
   }
 
   get id() {
-    return "0x" + soliditySha3(
+    const lowercaseID =  "0x" + soliditySha3(
       { type: 'address', value: this.channelType },
       { type: 'uint256', value: this.channelNonce },
       { type: 'address[]', value: this.participants },
     ).slice(26);
+
+    return toChecksumAddress(lowercaseID);
   }
 
   toHex() {
