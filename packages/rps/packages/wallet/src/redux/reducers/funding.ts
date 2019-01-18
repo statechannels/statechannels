@@ -111,9 +111,7 @@ const aSubmitDeployToMetaMaskReducer = (state: states.ASubmitDeployInMetaMask, a
     case actions.FUNDING_RECEIVED_EVENT:
       return states.aSubmitDeployInMetaMask({ ...state, unhandledAction: action });
     case actions.TRANSACTION_SUBMITTED:
-      return states.waitForDeployConfirmation({
-        ...state,
-      });
+      return states.waitForDeployConfirmation({ ...state, transactionHash: action.transactionHash });
     case actions.TRANSACTION_SUBMISSION_FAILED:
       return states.waitForChannel({
         ...state,
@@ -223,7 +221,7 @@ const bSubmitDepositInMetaMaskReducer = (state: states.BSubmitDepositInMetaMask,
         unhandledAction: action,
       });
     case actions.TRANSACTION_SUBMITTED:
-      return states.waitForDepositConfirmation(state);
+      return states.waitForDepositConfirmation({ ...state, transactionHash: action.transactionHash });
     case actions.TRANSACTION_SUBMISSION_FAILED:
       return states.waitForChannel({
         ...state,
@@ -241,6 +239,7 @@ const waitForDepositConfirmationReducer = (state: states.WaitForDepositConfirmat
       return states.waitForDepositConfirmation({
         ...state,
         unhandledAction: action,
+        transactionHash: state.transactionHash,
       });
     case actions.TRANSACTION_CONFIRMED:
       if (state.unhandledAction) {

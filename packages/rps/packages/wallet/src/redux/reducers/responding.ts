@@ -113,7 +113,7 @@ export const waitForResponseSubmissionReducer = (state: states.WaitForResponseSu
   switch (action.type) {
 
     case actions.TRANSACTION_SUBMITTED:
-      return states.waitForResponseConfirmation(state);
+      return states.waitForResponseConfirmation({ ...state, transactionHash: action.transactionHash });
     default:
       return state;
   }
