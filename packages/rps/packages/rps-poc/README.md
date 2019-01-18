@@ -62,7 +62,7 @@ This will fire up the Storybook panel inside a browser.
 2. Set `TARGET_NETWORK` in your `.env` file to the network  you want to deploy to.
 3. Deploy the contracts to the network:
     ```
-    yarn truffle:migrate
+    yarn deployContracts
     ``` 
     
 #### To run application tests in watch mode:
@@ -71,7 +71,7 @@ This will fire up the Storybook panel inside a browser.
 
 #### To run smart contract tests:
 
-`yarn run test:truffle`
+`yarn run test:contracts`
 
 #### To run all tests (before submitting a PR):
 

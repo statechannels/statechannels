@@ -34,8 +34,6 @@ jobs:
           key: v1-dependencies-{{ checksum "package.json" }}
         
       # run tests!
-      # TODO: Currently we run into concurrency issues testing packages at the same time.
-      #  We should figure out the concurrency issue(most likely ganache) and remove --concurrency 1
       - run: npx lerna run test:ci --stream
 
 
