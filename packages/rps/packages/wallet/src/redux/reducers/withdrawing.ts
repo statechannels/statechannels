@@ -43,7 +43,7 @@ const approveWithdrawalReducer = (state: states.ApproveWithdrawal, action: actio
 const waitForWithdrawalInitiationReducer = (state: states.WaitForWithdrawalInitiation, action: actions.WalletAction): states.WalletState => {
   switch (action.type) {
     case actions.TRANSACTION_SUBMITTED:
-      return states.waitForWithdrawalConfirmation(state);
+      return states.waitForWithdrawalConfirmation({ ...state, transactionHash: action.transactionHash });
     default:
       return state;
   }

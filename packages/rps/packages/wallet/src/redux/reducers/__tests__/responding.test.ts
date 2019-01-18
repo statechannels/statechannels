@@ -32,6 +32,7 @@ const defaults = {
   challengeExpiry: 0,
   moveSelected: false,
   challengeOptions: [],
+  transactionHash: '0x0',
 };
 
 describe('when in ACKNOWLEDGE_CHALLENGE', () => {
@@ -100,7 +101,7 @@ describe('when in INITIATE_RESPONSE', () => {
 describe('when in WAIT_FOR_RESPONSE_SUBMISSION', () => {
   const state = states.waitForResponseSubmission(defaults);
   describe('when the challenge response is submitted', () => {
-    const action = actions.transactionSubmitted();
+    const action = actions.transactionSubmitted('0x0');
     const updatedState = walletReducer(state, action);
     itTransitionsToStateType(states.WAIT_FOR_RESPONSE_CONFIRMATION, updatedState);
 

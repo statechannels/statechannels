@@ -37,6 +37,7 @@ const defaults = {
   networkId: 3,
   participants,
   uid: 'uid',
+  transactionHash: '0x0',
 };
 
 const defaultsA = {
@@ -164,7 +165,7 @@ describe('start in aSubmitDeployInMetaMask', () => {
   describe('incoming action: deploy submitted', () => { // player A scenario
     const testDefaults = { ...defaultsA, ...justReceivedPreFundSetupB };
     const state = states.aSubmitDeployInMetaMask(testDefaults);
-    const action = actions.transactionSubmitted();
+    const action = actions.transactionSubmitted('0x0');
     const updatedState = walletReducer(state, action);
 
     itTransitionsToStateType(states.WAIT_FOR_DEPLOY_CONFIRMATION, updatedState);
@@ -258,7 +259,7 @@ describe('start in BSubmitDepositInMetaMask', () => {
   describe('incoming action: transaction submitted', () => { // player B scenario
     const testDefaults = { ...defaultsA, ...justReceivedPreFundSetupB };
     const state = states.bSubmitDepositInMetaMask(testDefaults);
-    const action = actions.transactionSubmitted();
+    const action = actions.transactionSubmitted('0x0');
     const updatedState = walletReducer(state, action);
 
     itTransitionsToStateType(states.WAIT_FOR_DEPOSIT_CONFIRMATION, updatedState);

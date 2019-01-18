@@ -75,9 +75,9 @@ class ClosingContainer extends PureComponent<Props> {
       case states.WAIT_FOR_CLOSE_INITIATION:
         return <WaitForXInitiation name="close" />;
       case states.WAIT_FOR_CLOSE_SUBMISSION:
-        return <WaitForXConfirmation name="close" />;
+        return <WaitForXInitiation name="close" />;
       case states.WAIT_FOR_CLOSE_CONFIRMED:
-        return <WaitForXConfirmation name="close" />;
+        return <WaitForXConfirmation name="close" transactionID={state.transactionHash} networkId={state.networkId} />;
       default:
         return unreachable(state);
     }

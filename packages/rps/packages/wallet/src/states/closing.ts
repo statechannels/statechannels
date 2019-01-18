@@ -1,4 +1,4 @@
-import { AdjudicatorExists, adjudicatorExists, ChannelOpen, channelOpen, AdjudicatorMightExist, adjudicatorMightExist, } from './shared';
+import { AdjudicatorExists, adjudicatorExists, ChannelOpen, channelOpen, AdjudicatorMightExist, adjudicatorMightExist, TransactionExists, } from './shared';
 
 // stage
 export const CLOSING = 'CLOSING';
@@ -13,7 +13,7 @@ export const WAIT_FOR_CLOSE_INITIATION = 'WAIT_FOR_CLOSE_INITIATION';
 export const WAIT_FOR_CLOSE_SUBMISSION = 'WAIT_FOR_CLOSE_SUBMISSION';
 export const WAIT_FOR_CLOSE_CONFIRMED = 'WAIT_FOR_CLOSE_CONFIRMED';
 
-export interface WaitForCloseConfirmed extends AdjudicatorExists {
+export interface WaitForCloseConfirmed extends AdjudicatorExists, TransactionExists {
   type: typeof WAIT_FOR_CLOSE_CONFIRMED;
   stage: typeof CLOSING;
 }
@@ -84,8 +84,8 @@ export function waitForCloseSubmission<T extends AdjudicatorExists>(params: T): 
   return { type: WAIT_FOR_CLOSE_SUBMISSION, stage: CLOSING, ...adjudicatorExists(params) };
 }
 
-export function waitForCloseConfirmed<T extends AdjudicatorExists>(params: T): WaitForCloseConfirmed {
-  return { type: WAIT_FOR_CLOSE_CONFIRMED, stage: CLOSING, ...adjudicatorExists(params) };
+export function waitForCloseConfirmed<T extends AdjudicatorExists & TransactionExists>(params: T): WaitForCloseConfirmed {
+  return { type: WAIT_FOR_CLOSE_CONFIRMED, stage: CLOSING, ...adjudicatorExists(params), transactionHash: params.transactionHash };
 }
 
 

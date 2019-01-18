@@ -37,6 +37,9 @@ export interface ChannelOpen extends ChannelPartiallyOpen {
   penultimatePosition: SignedPosition;
   unhandledAction?: Action;
 }
+export interface ChannelOpenAndTransactionExists extends ChannelOpen {
+  transactionHash: string;
+}
 
 export interface AdjudicatorMightExist extends ChannelOpen {
   adjudicator?: string;
@@ -46,6 +49,9 @@ export interface AdjudicatorExists extends ChannelOpen {
   adjudicator: string;
 }
 
+export interface TransactionExists {
+  transactionHash: string;
+}
 export interface ChallengeExists extends AdjudicatorExists {
   challengeExpiry?: number;
 }
@@ -74,6 +80,7 @@ export function channelOpen<T extends ChannelOpen>(params: T): ChannelOpen {
   const { penultimatePosition, unhandledAction } = params;
   return { ...channelPartiallyOpen(params), penultimatePosition, unhandledAction };
 }
+
 
 export function adjudicatorMightExist<T extends AdjudicatorMightExist>(params: T): AdjudicatorMightExist {
   return { ...channelOpen(params), adjudicator: params.adjudicator };

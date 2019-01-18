@@ -1,4 +1,4 @@
-import { AdjudicatorExists, ChannelOpen, channelOpen, adjudicatorExists, AdjudicatorMightExist, adjudicatorMightExist, } from './shared';
+import { AdjudicatorExists, ChannelOpen, channelOpen, adjudicatorExists, AdjudicatorMightExist, adjudicatorMightExist, TransactionExists, } from './shared';
 
 // stage
 export const FUNDING = 'FUNDING';
@@ -42,7 +42,7 @@ export interface BWaitForDeployAddress extends ChannelOpen {
   stage: typeof FUNDING;
 }
 
-export interface WaitForDeployConfirmation extends ChannelOpen {
+export interface WaitForDeployConfirmation extends ChannelOpen, TransactionExists {
   type: typeof WAIT_FOR_DEPLOY_CONFIRMATION;
   stage: typeof FUNDING;
 }
@@ -62,7 +62,7 @@ export interface AWaitForDeposit extends AdjudicatorExists {
   stage: typeof FUNDING;
 }
 
-export interface WaitForDepositConfirmation extends AdjudicatorExists {
+export interface WaitForDepositConfirmation extends AdjudicatorExists, TransactionExists {
   type: typeof WAIT_FOR_DEPOSIT_CONFIRMATION;
   stage: typeof FUNDING;
 }
@@ -103,8 +103,8 @@ export function bWaitForDeployAddress<T extends ChannelOpen>(params: T): BWaitFo
   return { type: B_WAIT_FOR_DEPLOY_ADDRESS, stage: FUNDING, ...channelOpen(params) };
 }
 
-export function waitForDeployConfirmation<T extends ChannelOpen>(params: T): WaitForDeployConfirmation {
-  return { type: WAIT_FOR_DEPLOY_CONFIRMATION, stage: FUNDING, ...channelOpen(params) };
+export function waitForDeployConfirmation<T extends ChannelOpen & TransactionExists>(params: T): WaitForDeployConfirmation {
+  return { type: WAIT_FOR_DEPLOY_CONFIRMATION, stage: FUNDING, ...channelOpen(params), transactionHash: params.transactionHash };
 }
 
 export function aWaitForDeposit<T extends AdjudicatorExists>(params: T): AWaitForDeposit {
@@ -119,8 +119,8 @@ export function bSubmitDepositInMetaMask<T extends AdjudicatorExists>(params: T)
   return { type: B_SUBMIT_DEPOSIT_IN_METAMASK, stage: FUNDING, ...adjudicatorExists(params) };
 }
 
-export function waitForDepositConfirmation<T extends AdjudicatorExists>(params: T): WaitForDepositConfirmation {
-  return { type: WAIT_FOR_DEPOSIT_CONFIRMATION, stage: FUNDING, ...adjudicatorExists(params) };
+export function waitForDepositConfirmation<T extends AdjudicatorExists & TransactionExists>(params: T): WaitForDepositConfirmation {
+  return { type: WAIT_FOR_DEPOSIT_CONFIRMATION, stage: FUNDING, ...adjudicatorExists(params), transactionHash: params.transactionHash };
 }
 
 export function aWaitForPostFundSetup<T extends AdjudicatorExists>(params: T): AWaitForPostFundSetup {

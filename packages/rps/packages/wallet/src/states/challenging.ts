@@ -1,5 +1,5 @@
 import {
-  AdjudicatorExists, adjudicatorExists, ChallengeExists, challengeExists
+  AdjudicatorExists, adjudicatorExists, ChallengeExists, challengeExists, TransactionExists
 } from './shared';
 import { TransactionRequest } from 'ethers/providers';
 export const CHALLENGING = 'CHALLENGING';
@@ -52,15 +52,16 @@ export function waitForChallengeSubmission<T extends AdjudicatorExists>(params: 
 }
 
 
-export interface WaitForChallengeConfirmation extends ChallengeExists {
+export interface WaitForChallengeConfirmation extends ChallengeExists, TransactionExists {
   type: typeof WAIT_FOR_CHALLENGE_CONFIRMATION;
   stage: typeof CHALLENGING;
 }
-export function waitForChallengeConfirmation<T extends ChallengeExists>(params: T): WaitForChallengeConfirmation {
+export function waitForChallengeConfirmation<T extends ChallengeExists & TransactionExists>(params: T): WaitForChallengeConfirmation {
   return {
     type: WAIT_FOR_CHALLENGE_CONFIRMATION,
     stage: CHALLENGING,
     ...challengeExists(params),
+    transactionHash: params.transactionHash,
   };
 }
 

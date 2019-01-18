@@ -57,10 +57,10 @@ export const messageSent = () => ({
 export type MessageSent = ReturnType<typeof messageSent>;
 
 export const DISPLAY_MESSAGE_SENT = 'WALLET.DISPLAY_MESSAGE_SENT';
-export const displayMessageSent = ()=> ({
-type: DISPLAY_MESSAGE_SENT as typeof DISPLAY_MESSAGE_SENT,
+export const displayMessageSent = () => ({
+  type: DISPLAY_MESSAGE_SENT as typeof DISPLAY_MESSAGE_SENT,
 });
-export type DisplayMessageSent = ReturnType < typeof displayMessageSent> ;
+export type DisplayMessageSent = ReturnType<typeof displayMessageSent>;
 
 export const FUNDING_REQUESTED = 'WALLET.FUNDING_REQUESTED';
 export const fundingRequested = () => ({
@@ -213,7 +213,8 @@ export type TransactionSubmissionFailed = ReturnType<typeof transactionSubmissio
 
 
 export const TRANSACTION_SUBMITTED = 'WALLET.TRANSACTION_SUBMITTED';
-export const transactionSubmitted = () => ({
+export const transactionSubmitted = (transactionHash: string) => ({
+  transactionHash,
   type: TRANSACTION_SUBMITTED as typeof TRANSACTION_SUBMITTED,
 });
 export type TransactionSubmitted = ReturnType<typeof transactionSubmitted>;
