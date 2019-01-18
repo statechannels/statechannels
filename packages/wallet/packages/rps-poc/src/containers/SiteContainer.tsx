@@ -8,24 +8,42 @@ import { SiteState } from '../redux/reducer';
 import MetamaskErrorPage from '../components/MetamaskErrorPage';
 import { MetamaskError } from '../redux/metamask/actions';
 import LoadingPage from '../components/LoadingPage';
-
+import { createWalletIFrame } from 'wallet-client';
+import { WALLET_IFRAME_ID, WALLET_URL } from '../constants';
 interface SiteProps {
   isAuthenticated: boolean;
   metamaskError: MetamaskError | null;
   loading: boolean;
 }
 
-function Site(props: SiteProps) {
-  if (props.loading) {
-    return <LoadingPage />;
-  } else if (props.metamaskError !== null) {
-    return <MetamaskErrorPage error={props.metamaskError} />;
-  } else if (props.isAuthenticated) {
-    return <ApplicationContainer />;
-  } else {
-    return <HomePageContainer />;
+class Site extends React.PureComponent<SiteProps>{
+  walletDiv: React.RefObject<any>;
+  constructor(props) {
+    super(props);
+    this.walletDiv = React.createRef();
+  }
+  componentDidMount() {
+    const walletIframe = createWalletIFrame(WALLET_IFRAME_ID, WALLET_URL);
+    this.walletDiv.current.appendChild(walletIframe);
+
+  }
+  render() {
+
+    let component;
+    if (this.props.loading) {
+      component = <LoadingPage />;
+    } else if (this.props.metamaskError !== null) {
+      component = <MetamaskErrorPage error={this.props.metamaskError} />;
+    } else if (this.props.isAuthenticated) {
+      component = <ApplicationContainer />;
+    } else {
+      component = <HomePageContainer />;
+    }
+
+    return <div><div ref={this.walletDiv} />{component}</div>;
   }
 }
+
 
 const mapStateToProps = (state: SiteState): SiteProps => {
   return {

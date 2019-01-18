@@ -6,7 +6,7 @@ export interface OutgoingMessage {
   position: Position;
 }
 export interface WalletMessage {
-  type: "FUNDING_REQUESTED" | "RESPOND_TO_CHALLENGE" | "WITHDRAWAL_REQUESTED" | "CONCLUDE_REQUESTED";
+  type: "FUNDING_REQUESTED" | "RESPOND_TO_CHALLENGE" | "WITHDRAWAL_REQUESTED" | "CONCLUDE_REQUESTED" | 'CHALLENGE_REQUESTED';
   data?: any;
 }
 export interface MessageState {

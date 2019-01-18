@@ -33,8 +33,8 @@ const {
   conclude2: concludeInsufficientFunds2,
 } = scenarios.insufficientFunds;
 
-const { libraryAddress, channelNonce, participants, roundBuyIn, myName, opponentName } = scenarios.standard;
-const base = { libraryAddress, channelNonce, participants, roundBuyIn, myName, opponentName };
+const { libraryAddress, channelNonce, participants, roundBuyIn, myName, opponentName, asAddress: myAddress } = scenarios.standard;
+const base = { libraryAddress, channelNonce, participants, roundBuyIn, myName, opponentName, myAddress };
 
 const messageState = {};
 

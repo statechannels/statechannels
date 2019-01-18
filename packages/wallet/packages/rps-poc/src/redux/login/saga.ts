@@ -1,11 +1,11 @@
-import { call, fork, put, take, takeEvery, cancel, cps } from 'redux-saga/effects';
+import { call, fork, put, take, takeEvery, cps } from 'redux-saga/effects';
 
 import * as loginActions from './actions';
 import { reduxSagaFirebase } from '../../gateways/firebase';
-import { walletSaga } from '../../wallet';
 import metamaskSaga from '../metamask/saga';
-
+import { initializeWallet } from 'wallet-client';
 import RPSGameArtifact from '../../../build/contracts/RockPaperScissorsGame.json';
+import { WALLET_IFRAME_ID } from '../../constants';
 
 function* loginSaga() {
   try {
@@ -30,20 +30,20 @@ function* loginStatusWatcherSaga() {
   // Events on this channel are triggered on login and logout
   const channel = yield call(reduxSagaFirebase.auth.channel);
   // let playerHeartbeatThread;
-  let applicationThread;
 
   while (true) {
     const { user } = yield take(channel);
 
     if (user) {
-      applicationThread = yield fork(walletSaga, user.uid);
+      // TODO: pass uid to wallet
       const libraryAddress = yield getLibraryAddress();
+      const walletAddress = yield initializeWallet(WALLET_IFRAME_ID, user.uid);
+      yield put(loginActions.initializeWalletSuccess(walletAddress));
       yield put(loginActions.loginSuccess(user, libraryAddress));
 
+
+
     } else {
-      if (applicationThread) {
-        yield cancel(applicationThread);
-      }
       yield put(loginActions.logoutSuccess());
     }
   }

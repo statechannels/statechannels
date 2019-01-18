@@ -101,6 +101,7 @@ export function waitingRoom(obj: WaitingRoomParams): WaitingRoom {
 
 interface TwoChannel {
   libraryAddress: string;
+  myAddress: string;
   channelNonce: number;
   participants: [string, string];
 }
@@ -132,6 +133,7 @@ export function base(state: IncludesBase) {
     opponentName,
     twitterHandle,
     player,
+    myAddress,
   } = state;
 
   return {
@@ -146,6 +148,7 @@ export function base(state: IncludesBase) {
     twitterHandle,
     opponentName,
     player,
+    myAddress,
   };
 }
 

@@ -3,19 +3,23 @@
 //TODO: Add more functionality
 var ganache = require('ganache-cli');
 var path = require('path');
-const { exec } = require('child_process');
+const {
+  exec
+} = require('child_process');
 
 process.env.BABEL_ENV = 'test';
 process.env.NODE_ENV = 'test';
 process.env.PUBLIC_URL = '';
 
 if (!process.env.DEV_GANACHE_PORT) {
-  process.env.DEV_GANACHE_PORT = 5732;
+  process.env.DEV_GANACHE_PORT = 5734;
 }
 console.log(`Using port ${process.env.DEV_GANACHE_PORT} for Ganache.`);
 try {
-  var server = ganache.server({ port: process.env.DEV_GANACHE_PORT });
-  server.listen(process.env.DEV_GANACHE_PORT, function(err, blockchain) {
+  var server = ganache.server({
+    port: process.env.DEV_GANACHE_PORT
+  });
+  server.listen(process.env.DEV_GANACHE_PORT, function (err, blockchain) {
     if (err) {
       return console.log(err);
     }

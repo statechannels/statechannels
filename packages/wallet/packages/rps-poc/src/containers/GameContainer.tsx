@@ -4,9 +4,7 @@ import { connect } from 'react-redux';
 import { Move } from '../core';
 import { SiteState } from '../redux/reducer';
 import * as gameActions from '../redux/game/actions';
-import * as walletActions from '../wallet/interface/incoming';
 
-import { Wallet } from '../wallet';
 import WaitingRoomPage from '../components/WaitingRoomPage';
 import ConfirmGamePage from '../components/ConfirmGamePage';
 import SelectMovePage from '../components/SelectMovePage';
@@ -38,12 +36,13 @@ interface GameProps {
   withdraw: () => void;
 }
 
+// TODO: Add wallet from wallet package
 function GameContainer(props: GameProps) {
   return (
     <Fragment>
       {RenderGame(props)}
 
-      <Wallet />
+
     </Fragment>
   );
 }
@@ -138,7 +137,7 @@ const mapStateToProps = (state: SiteState) => ({
 const mapDispatchToProps = {
   chooseMove: gameActions.chooseMove,
   playAgain: gameActions.playAgain,
-  createBlockchainChallenge: walletActions.createChallenge,
+  createBlockchainChallenge: () => {/* TODO: Call create challenge on wallet */ },
   confirmGame: gameActions.confirmGame,
   declineGame: gameActions.declineGame,
   createOpenGame: gameActions.createOpenGame,

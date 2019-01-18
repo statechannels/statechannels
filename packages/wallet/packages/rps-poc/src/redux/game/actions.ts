@@ -18,6 +18,10 @@ export const WITHDRAWAL_REQUEST = 'GAME.WITHDRAWAL_REQUEST';
 export const WITHDRAWAL_SUCCESS = 'GAME.WITHDRAWAL_SUCCESS';
 export const EXIT_TO_LOBBY = 'GAME.EXIT_TO_LOBBY';
 export const MESSAGE_SENT = 'GAME.MESSAGE_SENT';
+export const CREATE_CHALLENGE = 'GAME.CREATE_CHALLENGE';
+export const RESPOND_TO_CHALLENGE = 'GAME.RESPOND_TO_CHALLENGE';
+export const CHALLENGE_RESPONSE_REQUESTED = 'GAME.CHALLENGE_RESPONSE_REQUESTED';
+export const CHALLENGE_COMPLETED = 'GAME.CHALLENGE_COMPLETED';
 
 export const updateProfile = (name: string, twitterHandle: string) => ({
   type: UPDATE_PROFILE as typeof UPDATE_PROFILE,
@@ -70,6 +74,18 @@ export const playAgain = () => ({
 
 export const resign = () => ({
   type: RESIGN as typeof RESIGN,
+});
+
+export const createChallenge = () => ({
+  type: CREATE_CHALLENGE as typeof CREATE_CHALLENGE,
+});
+
+export const challengeResponseRequested = () => ({
+  type: CHALLENGE_RESPONSE_REQUESTED as typeof CHALLENGE_RESPONSE_REQUESTED,
+});
+
+export const challengeCompleted = () => ({
+  type: CHALLENGE_COMPLETED as typeof CHALLENGE_COMPLETED,
 });
 
 export const positionReceived = (position: Position) => ({
@@ -127,6 +143,9 @@ export type CreateOpenGame = ReturnType<typeof createOpenGame>;
 export type ExitToLobby = ReturnType<typeof exitToLobby>;
 export type UpdateProfile = ReturnType<typeof updateProfile>;
 export type MessageSent = ReturnType<typeof messageSent>;
+export type CreateChallenge = ReturnType<typeof createChallenge>;
+export type ChallengeResponseRequested = ReturnType<typeof challengeResponseRequested>;
+export type ChallengeCompleted = ReturnType<typeof challengeCompleted>;
 
 export type GameAction = (
   | UpdateProfile
@@ -147,4 +166,7 @@ export type GameAction = (
   | InitialPositionReceived
   | ExitToLobby
   | MessageSent
+  | CreateChallenge
+  | ChallengeResponseRequested
+  | ChallengeCompleted
 );

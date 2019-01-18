@@ -1,0 +1,18 @@
+.cancel-challenge-button {
+    width: 100px;
+    height: 36px;
+    border-radius: 40px;
+    background-color: $rps-red;
+    border-color: $rps-red;
+    margin: 5px;
+    font-size: 18px;
+    font-weight: bold;
+    color: $rps-white;
+}
+
+.waiting-room-container {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    width: 100%;
+}
