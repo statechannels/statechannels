@@ -1,4 +1,4 @@
-import { AdjudicatorExists, adjudicatorExists } from './shared';
+import { AdjudicatorExists, adjudicatorExists, TransactionExists } from './shared';
 
 // stage
 export const WITHDRAWING = 'STAGE.WITHDRAWING';
@@ -21,7 +21,7 @@ export interface WaitForWithdrawalInitiation extends AdjudicatorExists {
   stage: typeof WITHDRAWING;
 }
 
-export interface WaitForWithdrawalConfirmation extends AdjudicatorExists {
+export interface WaitForWithdrawalConfirmation extends AdjudicatorExists, TransactionExists {
   type: typeof WAIT_FOR_WITHDRAWAL_CONFIRMATION;
   stage: typeof WITHDRAWING;
 }
@@ -39,8 +39,8 @@ export function waitForWithdrawalInitiation<T extends AdjudicatorExists>(params:
   return { ...adjudicatorExists(params), type: WAIT_FOR_WITHDRAWAL_INITIATION, stage: WITHDRAWING };
 }
 
-export function waitForWithdrawalConfirmation<T extends AdjudicatorExists>(params: T): WaitForWithdrawalConfirmation {
-  return { ...adjudicatorExists(params), type: WAIT_FOR_WITHDRAWAL_CONFIRMATION, stage: WITHDRAWING };
+export function waitForWithdrawalConfirmation<T extends AdjudicatorExists & TransactionExists>(params: T): WaitForWithdrawalConfirmation {
+  return { ...adjudicatorExists(params), transactionHash: params.transactionHash, type: WAIT_FOR_WITHDRAWAL_CONFIRMATION, stage: WITHDRAWING };
 }
 
 export function acknowledgeWithdrawalSuccess<T extends AdjudicatorExists>(params: T): AcknowledgeWithdrawalSuccess {

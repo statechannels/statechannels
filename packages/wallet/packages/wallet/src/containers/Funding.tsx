@@ -48,7 +48,7 @@ class FundingContainer extends PureComponent<Props> {
       case states.A_SUBMIT_DEPLOY_IN_METAMASK:
         return <SubmitX name="deploy" />;
       case states.WAIT_FOR_DEPLOY_CONFIRMATION:
-        return <WaitForXConfirmation name="deploy" />;
+        return <WaitForXConfirmation name="deploy" transactionID={state.transactionHash} networkId={state.networkId} />;
       case states.A_WAIT_FOR_DEPOSIT:
         return <WaitForOtherPlayer name="deposit" />;
       case states.A_WAIT_FOR_POST_FUND_SETUP:
@@ -63,7 +63,7 @@ class FundingContainer extends PureComponent<Props> {
         if (state.ourIndex === 0) {
           return <WaitForOtherPlayer name="deposit" />;
         } else {
-          return <WaitForXConfirmation name="deposit" />;
+          return <WaitForXConfirmation name="deposit" transactionID={state.transactionHash} networkId={state.networkId} />;
         }
       case states.B_WAIT_FOR_POST_FUND_SETUP:
         return <BWaitForPostFundSetup />;

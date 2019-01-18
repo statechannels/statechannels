@@ -55,7 +55,7 @@ class RespondingContainer extends PureComponent<Props> {
         // The game knows about the challenge so we don't need the wallet to display anything
         return null;
       case states.WAIT_FOR_RESPONSE_CONFIRMATION:
-        return <WaitForXConfirmation name='response' />;
+        return <WaitForXConfirmation name='response' transactionID={state.transactionHash} networkId={state.networkId} />;
       case states.INITIATE_RESPONSE:
       case states.WAIT_FOR_RESPONSE_SUBMISSION:
         return <SubmitX name='response' />;

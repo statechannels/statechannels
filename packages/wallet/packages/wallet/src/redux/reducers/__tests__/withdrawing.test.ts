@@ -30,6 +30,7 @@ const defaults = {
   address: 'address',
   privateKey: asPrivateKey,
   networkId: 23213,
+  transactionHash: '0x0',
 };
 
 
@@ -61,7 +62,7 @@ describe('when in WaitForWithdrawalInitiation', () => {
   const state = states.waitForWithdrawalInitiation(defaults);
 
   describe('and the transaction is submitted', () => {
-    const action = actions.transactionSubmitted();
+    const action = actions.transactionSubmitted('0x0');
     const updatedState = walletReducer(state, action);
 
     itTransitionsToStateType(states.WAIT_FOR_WITHDRAWAL_CONFIRMATION, updatedState);

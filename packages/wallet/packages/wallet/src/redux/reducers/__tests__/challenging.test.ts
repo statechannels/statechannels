@@ -31,6 +31,7 @@ const defaults = {
   privateKey: asPrivateKey,
   networkId: 2323,
   challengeExpiry: 12321,
+  transactionHash: '0x0',
 
 };
 
@@ -67,7 +68,7 @@ describe('when in WAIT_FOR_CHALLENGE_SUBMISSION', () => {
   const state = states.waitForChallengeSubmission(defaults);
 
   describe('when a challenge is submitted', () => {
-    const action = actions.transactionSubmitted();
+    const action = actions.transactionSubmitted('0x0');
     const updatedState = walletReducer(state, action);
 
     itTransitionsToStateType(states.WAIT_FOR_CHALLENGE_CONFIRMATION, updatedState);

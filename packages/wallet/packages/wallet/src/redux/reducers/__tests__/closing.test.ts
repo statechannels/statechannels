@@ -29,6 +29,7 @@ const defaults = {
   networkId: 3,
   participants,
   uid: 'uid',
+  transactionHash: '0x0',
 };
 
 const defaultsA = {
@@ -153,7 +154,7 @@ describe('start in WaitForCloseSubmission', () => {
   });
   describe('action taken: transaction submitted', () => {
 
-    const action = actions.transactionSubmitted();
+    const action = actions.transactionSubmitted('0x0');
     const updatedState = walletReducer(state, action);
     itTransitionsToStateType(states.WAIT_FOR_CLOSE_CONFIRMED, updatedState);
   });

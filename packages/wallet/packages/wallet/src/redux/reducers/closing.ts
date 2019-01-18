@@ -55,7 +55,7 @@ const waitForCloseInitiatorReducer = (state: states.WaitForCloseInitiation, acti
 const waitForCloseSubmissionReducer = (state: states.WaitForCloseSubmission, action: actions.WalletAction) => {
   switch (action.type) {
     case actions.TRANSACTION_SUBMITTED:
-      return states.waitForCloseConfirmed(state);
+      return states.waitForCloseConfirmed({ ...state, transactionHash: action.transactionHash });
     case actions.GAME_CONCLUDED_EVENT:
       return states.approveWithdrawal(state);
   }

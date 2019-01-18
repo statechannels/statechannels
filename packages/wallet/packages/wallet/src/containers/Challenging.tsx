@@ -46,7 +46,7 @@ class ChallengingContainer extends PureComponent<Props> {
       case states.WAIT_FOR_CHALLENGE_SUBMISSION:
         return <SubmitX name="challenge" />;
       case states.WAIT_FOR_CHALLENGE_CONFIRMATION:
-        return <WaitForXConfirmation name="challenge" />;
+        return <WaitForXConfirmation name="challenge" transactionID={state.transactionHash} networkId={state.networkId} />;
       case states.WAIT_FOR_RESPONSE_OR_TIMEOUT:
         return <WaitForResponseOrTimeout expirationTime={state.challengeExpiry ? state.challengeExpiry : 0} />;
       case states.ACKNOWLEDGE_CHALLENGE_RESPONSE:

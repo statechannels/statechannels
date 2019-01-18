@@ -60,7 +60,7 @@ const initiateChallengeReducer = (state: states.WaitForChallengeInitiation, acti
 const waitForChallengeSubmissionReducer = (state: states.WaitForChallengeSubmission, action: WalletAction): WalletState => {
   switch (action.type) {
     case actions.TRANSACTION_SUBMITTED:
-      return states.waitForChallengeConfirmation({ ...state });
+      return states.waitForChallengeConfirmation({ ...state, transactionHash: action.transactionHash });
     default:
       return state;
   }

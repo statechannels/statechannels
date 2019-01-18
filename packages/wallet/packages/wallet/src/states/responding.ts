@@ -1,4 +1,4 @@
-import { ChallengeExists, challengeExists } from './shared';
+import { ChallengeExists, challengeExists, TransactionExists } from './shared';
 
 // stage
 export const RESPONDING = 'RESPONDING';
@@ -50,12 +50,12 @@ export function waitForResponseSubmission<T extends ChallengeExists>(params: T):
   return { type: WAIT_FOR_RESPONSE_SUBMISSION, stage: RESPONDING, ...challengeExists(params) };
 }
 
-export interface WaitForResponseConfirmation extends ChallengeExists {
+export interface WaitForResponseConfirmation extends ChallengeExists, TransactionExists {
   type: typeof WAIT_FOR_RESPONSE_CONFIRMATION;
   stage: typeof RESPONDING;
 }
-export function waitForResponseConfirmation<T extends ChallengeExists>(params: T): WaitForResponseConfirmation {
-  return { type: WAIT_FOR_RESPONSE_CONFIRMATION, stage: RESPONDING, ...challengeExists(params) };
+export function waitForResponseConfirmation<T extends ChallengeExists & TransactionExists>(params: T): WaitForResponseConfirmation {
+  return { type: WAIT_FOR_RESPONSE_CONFIRMATION, stage: RESPONDING, ...challengeExists(params), transactionHash: params.transactionHash };
 }
 
 export interface AcknowledgeChallengeComplete extends ChallengeExists {
