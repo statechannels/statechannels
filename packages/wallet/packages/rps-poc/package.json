@@ -74,13 +74,14 @@
     "start": "node scripts/start.js",
     "build": "node scripts/build.js",
     "test": "run-s test:truffle 'test:app --all'",
-    "test:ci": "DEV_GANACHE_PORT=8501 run-s test:truffle 'test:app --all --ci' build",
-    "test:app": "npx ganache-then-jest --runInBand",
-    "test:truffle": "node scripts/test_truffle.js",
-    "truffle:migrate": "npx deploy-contracts",
+    "test:ci": "DEV_GANACHE_PORT=8502 run-s 'test:contracts --all --ci' 'test:app --all --ci' build",
+    "test:app": "npx run-jest -c ./config/jest/jest.config.js",
+    "test:contracts": "npx ganache-then-jest -c ./config/jest/jest.integration.config.js --runInBand",
+    "deployContracts": "npx deploy-contracts",
     "ganache:start": "npx start-ganache",
     "postinstall": "rm -f node_modules/web3/index.d.ts",
     "storybook": "start-storybook -p 9001 -c .storybook"
+
   },
   "devDependencies": {
     "@babel/runtime": "^7.0.0-beta.53",
@@ -103,7 +104,7 @@
     "ganache-cli": "^6.1.8",
     "html-webpack-plugin": "4.0.0-beta.5",
     "jest": "^23.5.0",
-    "magmo-devtools": "git+https://github.com/magmo/devtools.git#v0.1.1",
+    "magmo-devtools": "git+https://github.com/magmo/devtools.git#v0.1.2",
     "node-sass": "^4.9.3",
     "optimize-css-assets-webpack-plugin": "5.0.1",
     "pnp-webpack-plugin": "1.2.1",

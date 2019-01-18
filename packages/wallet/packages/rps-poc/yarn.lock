@@ -8312,9 +8312,9 @@ ltgt@~2.2.0:
   version "2.2.1"
   resolved "https://registry.yarnpkg.com/ltgt/-/ltgt-2.2.1.tgz#f35ca91c493f7b73da0e07495304f17b31f87ee5"
 
-"magmo-devtools@git+https://github.com/magmo/devtools.git#v0.1.1":
-  version "0.1.1"
-  resolved "git+https://github.com/magmo/devtools.git#2b55a462c6483befa7cc3a3cd4c10c8f59a948a0"
+"magmo-devtools@git+https://github.com/magmo/devtools.git#v0.1.2":
+  version "0.1.2"
+  resolved "git+https://github.com/magmo/devtools.git#4b1a01e4a25f2e394a7deaff0b9dbe10c6189bdc"
   dependencies:
     chai "^4.2.0"
     detect-port "^1.3.0"
