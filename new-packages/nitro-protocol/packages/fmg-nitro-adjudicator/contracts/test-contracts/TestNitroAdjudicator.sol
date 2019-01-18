@@ -7,16 +7,16 @@ import "../NitroAdjudicator.sol";
 contract TestNitroAdjudicator is NitroAdjudicator {
     using State for State.StateStruct;
 
-    function reprioritizePub(Outcome memory outcome, Guarantee memory guarantee) public pure returns (Outcome memory) {
-        return reprioritize(outcome, guarantee);
+    function reprioritizePub(Outcome memory allocation, Outcome memory guarantee) public pure returns (Outcome memory) {
+        return reprioritize(allocation, guarantee);
     }
 
-    function overlapPub(address recipient, Outcome memory outcome, uint funding) public pure returns (uint256) {
-        return overlap(recipient, outcome, funding);
+    function overlapPub(address recipient, Outcome memory allocation, uint funding) public pure returns (uint256) {
+        return overlap(recipient, allocation, funding);
     }
 
-    function removePub(Outcome memory outcome, address recipient, uint amount) public pure returns (Outcome memory) { 
-        return remove(outcome, recipient, amount);
+    function removePub(Outcome memory allocation, address recipient, uint amount) public pure returns (Outcome memory) { 
+        return remove(allocation, recipient, amount);
     }
 
     // ****************
@@ -44,13 +44,6 @@ contract TestNitroAdjudicator is NitroAdjudicator {
     }
 
     function setOutcome(address channel, Outcome memory outcome) public {
-        // Temporary helper function to set outcomes for testing
-
-        require(
-            outcome.destination.length == outcome.amount.length,
-            "destination.length must be equal to amount.length"
-        );
-
         outcomes[channel] = outcome;
     }
 

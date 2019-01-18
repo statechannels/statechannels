@@ -22,13 +22,13 @@ contract NitroAdjudicator {
         address[] destination;
         uint256 finalizedAt;
         State.StateStruct challengeState;
+
+        // exactly one of the following two should be non-null
+        // guarantee channels
+        address guaranteedChannel; // should be zero address in allocation channels
         uint[] allocation;         // should be zero length in guarantee channels
     }
-    struct Guarantee {
-        address guarantor;
-        address target;
-        address[] priorities;
-    }
+
     struct Signature {
         uint8 v;
         bytes32 r;
@@ -43,6 +43,7 @@ contract NitroAdjudicator {
 
     mapping(address => uint) public holdings;
     mapping(address => Outcome) public outcomes;
+    address private constant zeroAddress = address(0);
 
     // TODO: Challenge duration should depend on the channel
     uint constant CHALLENGE_DURATION = 5 minutes;
@@ -103,22 +104,22 @@ contract NitroAdjudicator {
         outcomes[channel] = remove(outcomes[channel], destination, amount);
     }
 
-    function claim(address recipient, Guarantee memory guarantee, uint amount) public {
+    function claim(address guarantor, address recipient, uint amount) public {
+        Outcome memory guarantee = outcomes[guarantor];
         require(
-            isChannelClosed(guarantee.target),
+            guarantee.guaranteedChannel != zeroAddress,
+            "Claim: a guarantee channel is required"
+        );
+        require(
+            isChannelClosed(guarantor),
             "Claim: channel must be closed"
         );
-        require(
-            // the outcome is assumed to be valid, so this check is sufficient
-            guarantee.priorities.length == outcomes[guarantee.target].destination.length,
-            'Claim: invalid guarantee -- wrong priorities list length'
-        );
 
-        uint funding = holdings[guarantee.guarantor];
-        Outcome memory reprioritizedOutcome = reprioritize(outcomes[guarantee.target], guarantee);
+        uint funding = holdings[guarantor];
+        Outcome memory reprioritizedOutcome = reprioritize(outcomes[guarantee.guaranteedChannel], guarantee);
         if (overlap(recipient, reprioritizedOutcome, funding) >= amount) {
-            outcomes[guarantee.target] = remove(outcomes[guarantee.target], recipient, amount);
-            holdings[guarantee.guarantor] -= amount;
+            outcomes[guarantee.guaranteedChannel] = remove(outcomes[guarantee.guaranteedChannel], recipient, amount);
+            holdings[guarantor] -= amount;
             holdings[recipient] += amount;
         } else {
             revert('Claim: guarantor must be sufficiently funded');
@@ -129,14 +130,18 @@ contract NitroAdjudicator {
     // Eth Management Logic
     // ************************
 
-    function reprioritize(Outcome memory outcome, Guarantee memory guarantee) internal pure returns (Outcome memory) {
-        address[] memory newDestination = new address[](guarantee.priorities.length);
-        uint[] memory newAllocation = new uint[](guarantee.priorities.length);
-        for (uint i = 0; i < guarantee.priorities.length; i++) {
-            for (uint j = 0; j < guarantee.priorities.length; j++) {
-                if (guarantee.priorities[i] == outcome.destination[j]) {
-                    newDestination[i] = outcome.destination[j];
-                    newAllocation[i] = outcome.allocation[j];
+    function reprioritize(Outcome memory allocation, Outcome memory guarantee) internal pure returns (Outcome memory) {
+        require(
+            guarantee.guaranteedChannel != address(0),
+            "Claim: a guarantee channel is required"
+        );
+        address[] memory newDestination = new address[](guarantee.destination.length);
+        uint[] memory newAllocation = new uint[](guarantee.destination.length);
+        for (uint aIdx = 0; aIdx < allocation.destination.length; aIdx++) {
+            for (uint gIdx = 0; gIdx < guarantee.destination.length; gIdx++) {
+                if (guarantee.destination[gIdx] == allocation.destination[aIdx]) {
+                    newDestination[gIdx] = allocation.destination[aIdx];
+                    newAllocation[gIdx] = allocation.allocation[aIdx];
                     break;
                 }
             }
@@ -144,9 +149,10 @@ contract NitroAdjudicator {
 
         return Outcome(
             newDestination,
-            newAllocation,
-            outcome.finalizedAt,
-            outcome.challengeState
+            allocation.finalizedAt,
+            allocation.challengeState,
+            zeroAddress,
+            newAllocation
         );
     }
 
@@ -187,9 +193,10 @@ contract NitroAdjudicator {
 
         return Outcome(
             outcome.destination,
-            updatedAllocation,
             outcome.finalizedAt,
-            outcome.challengeState // Once the outcome is finalized, 
+            outcome.challengeState, // Once the outcome is finalized, 
+            zeroAddress,
+            updatedAllocation
         );
     }
 
@@ -218,6 +225,7 @@ contract NitroAdjudicator {
     function forceMove(
         State.StateStruct memory agreedState,
         State.StateStruct memory challengeState,
+        address guaranteedChannel,
         Signature[] memory signatures
     ) public {
         require(
@@ -235,14 +243,30 @@ contract NitroAdjudicator {
         require(
             Rules.validTransition(agreedState, challengeState)
         );
+        if (guaranteedChannel == zeroAddress) {
+            // If the guaranteeChannel is the zeroAddress, this outcome
+            // is an allocation
+            require(
+                agreedState.resolution.length > 0,
+                "ForceMove: allocation outcome must have resolution"
+            );
+        } else {
+            // The non-zeroness of guaranteeChannel indicates that this outcome
+            // is a guarantee
+            require(
+                challengeState.resolution.length == 0,
+                "ForceMove: guarantee outcome cannot have allocation"
+            );
+        }
 
         address channelId = agreedState.channelId();
 
         outcomes[channelId] = Outcome(
             challengeState.participants,
-            challengeState.resolution,
             now + CHALLENGE_DURATION,
-            challengeState
+            challengeState,
+            guaranteedChannel,
+            challengeState.resolution
         );
 
         emit ChallengeCreated(
@@ -251,6 +275,8 @@ contract NitroAdjudicator {
             now
         );
     }
+
+    uint t = block.timestamp;
 
     function refute(State.StateStruct memory refutationState, Signature memory signature) public {
         address channel = refutationState.channelId();
@@ -272,9 +298,10 @@ contract NitroAdjudicator {
         emit Refuted(channel, refutationState);
         Outcome memory updatedOutcome = Outcome(
             outcomes[channel].destination,
-            refutationState.resolution,
             0,
-            refutationState
+            refutationState,
+            outcomes[channel].guaranteedChannel,
+            refutationState.resolution
         );
         outcomes[channel] = updatedOutcome;
     }
@@ -300,9 +327,10 @@ contract NitroAdjudicator {
 
         Outcome memory updatedOutcome = Outcome(
             outcomes[channel].destination,
-            responseState.resolution,
             0,
-            responseState
+            responseState,
+            outcomes[channel].guaranteedChannel,
+            responseState.resolution
         );
         outcomes[channel] = updatedOutcome;
     }
@@ -355,9 +383,10 @@ contract NitroAdjudicator {
 
         Outcome memory updatedOutcome = Outcome(
             outcomes[channel].destination,
-            _responseState.resolution,
             0,
-            _responseState
+            _responseState,
+            outcomes[channel].guaranteedChannel,
+            _responseState.resolution
         );
         outcomes[channel] = updatedOutcome;
     }
@@ -375,9 +404,10 @@ contract NitroAdjudicator {
 
         outcomes[channelId] = Outcome(
             proof.penultimateState.participants,
-            proof.penultimateState.resolution,
             now,
-            proof.penultimateState
+            proof.penultimateState,
+            outcomes[channelId].guaranteedChannel,
+            proof.penultimateState.resolution
         );
         emit Concluded(channelId);
     }
