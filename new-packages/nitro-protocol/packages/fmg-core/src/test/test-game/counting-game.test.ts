@@ -4,7 +4,7 @@ import linker from 'solc/linker';
 
 import { Channel } from '../../';
 import BN from 'bn.js';
-import { ethers, Wallet, ContractFactory } from 'ethers';
+import { ethers, utils, ContractFactory } from 'ethers';
 
 import StateArtifact from '../../../build/contracts/State.json';
 
@@ -46,14 +46,18 @@ describe('CountingGame', () => {
 
     const channel = new Channel(game.address, 0, participants);
     
-    const defaults = { channel, resolution: [new BN(5), new BN(4)] };
+    const defaults = {
+      channel,
+      allocation: [new utils.BigNumber(5), new utils.BigNumber(4)],
+      destination: [participantA.address, participantB.address],
+    };
 
     state0 = CountingGame.gameState({ ...defaults, turnNum: 6, gameCounter: 1 });
     state1 = CountingGame.gameState({ ...defaults, turnNum: 7, gameCounter: 2 });
 
     stateBalChange = CountingGame.gameState({
       ...defaults,
-      resolution: [new BN(6), new BN(3)],
+      allocation: [new utils.BigNumber(6), new utils.BigNumber(3)],
       turnNum: 7,
       gameCounter: 2,
     });
@@ -73,6 +77,6 @@ describe('CountingGame', () => {
   // });
 
   it("doesn't allow transitions if totals don't match", async () => {
-    await expectRevert(game.validTransition(state0.args, stateBalChange.args), "CountingGame: resolutions must be equal");
+    await expectRevert(game.validTransition(state0.args, stateBalChange.args), "CountingGame: allocations must be equal");
   });
 });

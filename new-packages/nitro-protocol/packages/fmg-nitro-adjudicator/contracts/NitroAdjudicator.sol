@@ -126,9 +126,9 @@ contract NitroAdjudicator {
         }
     }
 
-    // ************************
+    // ********************
     // Eth Management Logic
-    // ************************
+    // ********************
 
     function reprioritize(Outcome memory allocation, Outcome memory guarantee) internal pure returns (Outcome memory) {
         require(
@@ -247,14 +247,14 @@ contract NitroAdjudicator {
             // If the guaranteeChannel is the zeroAddress, this outcome
             // is an allocation
             require(
-                agreedState.resolution.length > 0,
+                agreedState.allocation.length > 0,
                 "ForceMove: allocation outcome must have resolution"
             );
         } else {
             // The non-zeroness of guaranteeChannel indicates that this outcome
             // is a guarantee
             require(
-                challengeState.resolution.length == 0,
+                challengeState.allocation.length == 0,
                 "ForceMove: guarantee outcome cannot have allocation"
             );
         }
@@ -266,7 +266,7 @@ contract NitroAdjudicator {
             now + CHALLENGE_DURATION,
             challengeState,
             guaranteedChannel,
-            challengeState.resolution
+            challengeState.allocation
         );
 
         emit ChallengeCreated(
@@ -301,7 +301,7 @@ contract NitroAdjudicator {
             0,
             refutationState,
             outcomes[channel].guaranteedChannel,
-            refutationState.resolution
+            refutationState.allocation
         );
         outcomes[channel] = updatedOutcome;
     }
@@ -330,7 +330,7 @@ contract NitroAdjudicator {
             0,
             responseState,
             outcomes[channel].guaranteedChannel,
-            responseState.resolution
+            responseState.allocation
         );
         outcomes[channel] = updatedOutcome;
     }
@@ -386,7 +386,7 @@ contract NitroAdjudicator {
             0,
             _responseState,
             outcomes[channel].guaranteedChannel,
-            _responseState.resolution
+            _responseState.allocation
         );
         outcomes[channel] = updatedOutcome;
     }
@@ -407,7 +407,7 @@ contract NitroAdjudicator {
             now,
             proof.penultimateState,
             outcomes[channelId].guaranteedChannel,
-            proof.penultimateState.resolution
+            proof.penultimateState.allocation
         );
         emit Concluded(channelId);
     }

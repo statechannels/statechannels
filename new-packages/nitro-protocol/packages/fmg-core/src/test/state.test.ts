@@ -1,4 +1,3 @@
-import BN from 'bn.js';
 import { Channel } from '../channel';
 import { State } from '../state';
 import expectRevert from './helpers/expect-revert';
@@ -32,14 +31,16 @@ describe('State', () => {
     '6370fd033278c143179d81c5526140625662b8daa446c22ee2d73db3707e620c',
   );
   const participants = [participantA.address, participantB.address];
-  const resolution = [new BN(5), new BN(4)];
+  const allocation = [new ethers.utils.BigNumber(5), new ethers.utils.BigNumber(4)];
+  const destination = [participantA.address, participantB.address];
   const channel = new Channel(channelType, channelNonce, participants);
   const stateType = State.StateType.PreFundSetup;
   const state = new State({
     channel,
     stateType,
     turnNum,
-    resolution,
+    allocation,
+    destination,
     stateCount: 0,
   });
 
@@ -103,8 +104,8 @@ describe('State', () => {
   });
 
   it('can test if the gameAttributes are equal', async () => {
-    const state1 = CountingGame.preFundSetupState({ channel, resolution, turnNum, gameCounter: 0 });
-    const state2 = CountingGame.preFundSetupState({ channel, resolution, turnNum, gameCounter: 1 });
+    const state1 = CountingGame.preFundSetupState({ channel, destination, allocation, turnNum, gameCounter: 0 });
+    const state2 = CountingGame.preFundSetupState({ channel, destination, allocation, turnNum, gameCounter: 1 });
 
     await expectRevert(stateLib.gameAttributesEqual(state1.asEthersObject, state2.asEthersObject));
   });

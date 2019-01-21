@@ -162,8 +162,8 @@ library Rules {
                     "Invalid transition from PreFundSetup: gameAttributes must be equal"
                 );
                 require(
-                    State.resolutionsEqual(_fromState, _toState),
-                    "Invalid transition from PreFundSetup: resolutions must be equal"
+                    State.allocationsEqual(_fromState, _toState),
+                    "Invalid transition from PreFundSetup: allocations must be equal"
                 );
             } else {
                 require(
@@ -171,8 +171,8 @@ library Rules {
                     "Invalid transition from PreFundSetup: stateType must be Conclude"
                 );
                 require(
-                    State.resolutionsEqual(_fromState, _toState),
-                    "Invalid transition from PreFundSetup: resolutions must be equal"
+                    State.allocationsEqual(_fromState, _toState),
+                    "Invalid transition from PreFundSetup: allocations must be equal"
                 );
                 
             }
@@ -191,8 +191,8 @@ library Rules {
                 "Invalid transition from PreFundSetup: stateCount must increase by 1"
             );
             require(
-                State.resolutionsEqual(_fromState, _toState),
-                "Invalid transition from PreFundSetup: resolutions must be equal"
+                State.allocationsEqual(_fromState, _toState),
+                "Invalid transition from PreFundSetup: allocations must be equal"
             );
         }
         return true;
@@ -215,8 +215,8 @@ library Rules {
                 );
 
                 require(
-                    State.resolutionsEqual(_fromState, _toState),
-                    "Invalid transition from PostFundSetup: resolutions must be equal"
+                    State.allocationsEqual(_fromState, _toState),
+                    "Invalid transition from PostFundSetup: allocations must be equal"
                 );
 
                 require(
@@ -239,8 +239,8 @@ library Rules {
                     "Invalid transition from PostFundSetup: stateCount must increase by 1"
                 );
                 require(
-                    State.resolutionsEqual(_fromState, _toState),
-                    "Invalid transition from PostFundSetup: resolutions must be equal"
+                    State.allocationsEqual(_fromState, _toState),
+                    "Invalid transition from PostFundSetup: allocations must be equal"
                 );
             } else {
                 // PostFundSetup -> Conclude
@@ -249,8 +249,8 @@ library Rules {
                     "Invalid transition from PostFundSetup: stateType must be Conclude"
                 );
                 require(
-                    State.resolutionsEqual(_fromState, _toState),
-                    "Invalid transition from PostFundSetup: resolutions must be equal"
+                    State.allocationsEqual(_fromState, _toState),
+                    "Invalid transition from PostFundSetup: allocations must be equal"
                 );
             }
         }
@@ -272,8 +272,8 @@ library Rules {
                 "Invalid transition from Game: stateType must be Conclude"
             );
             require(
-                State.resolutionsEqual(_fromState, _toState),
-                "Invalid transition from Game: resolutions must be equal"
+                State.allocationsEqual(_fromState, _toState),
+                "Invalid transition from Game: allocations must be equal"
             );
         }
         return true;
@@ -288,8 +288,8 @@ library Rules {
             "Invalid transition from Conclude: stateType must be Conclude"
         );
         require(
-            State.resolutionsEqual(_fromState, _toState),
-            "Invalid transition from Conclude: resolutions must be equal"
+            State.allocationsEqual(_fromState, _toState),
+            "Invalid transition from Conclude: allocations must be equal"
         );
         return true;
     }

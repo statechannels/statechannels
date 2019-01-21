@@ -12,7 +12,8 @@ library State {
         uint8 stateType;
         uint256 turnNum;
         uint256 stateCount;
-        uint256[] resolution;
+        address[] destination;
+        uint256[] allocation;
         bytes gameAttributes;
     }
 
@@ -68,8 +69,8 @@ library State {
         return keccak256(_state.gameAttributes) == keccak256(_otherState.gameAttributes);
     }
 
-    function resolutionsEqual(StateStruct memory _state, StateStruct memory _otherState) public pure returns (bool) {
-        return keccak256(abi.encodePacked(_state.resolution)) == keccak256(abi.encodePacked(_otherState.resolution));
+    function allocationsEqual(StateStruct memory _state, StateStruct memory _otherState) public pure returns (bool) {
+        return keccak256(abi.encodePacked(_state.allocation)) == keccak256(abi.encodePacked(_otherState.allocation));
     }
 
     // utilities

@@ -4,7 +4,6 @@ import BN from 'bn.js';
 
 interface GameAttributes {
   gameCounter: BN;
-  resolution: [BN, BN];
 }
 
 class CountingGame {
@@ -25,7 +24,6 @@ class CountingGame {
     //
     return {
       gameCounter: countingStateArgs[0],
-      resolution: countingStateArgs[1],
     };
   }
 }
@@ -39,8 +37,8 @@ const SolidityCountingStateType = {
 class CountingBaseState extends State {
   gameCounter: number;
 
-  constructor({ channel, turnNum, stateCount, resolution, gameCounter }) {
-    super({ channel, turnNum, stateCount, resolution, stateType: undefined });
+  constructor({ channel, turnNum, stateCount, allocation, destination, gameCounter }) {
+    super({ channel, turnNum, stateCount, allocation, destination, stateType: undefined });
     this.gameCounter = gameCounter;
     this.initialize();
   }

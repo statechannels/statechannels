@@ -12,12 +12,13 @@ library CountingState {
 
     struct CountingStateStruct {
         uint256 gameCounter;
-        uint256[] resolution;
+        uint256[] allocation;
+        address[] destination;
     }
 
     function fromFrameworkState(State.StateStruct memory frameworkState) public pure returns (CountingStateStruct memory) {
         GameAttributes memory gameAttributes = abi.decode(frameworkState.gameAttributes, (GameAttributes));
 
-        return CountingStateStruct(gameAttributes.gameCounter, frameworkState.resolution);
+        return CountingStateStruct(gameAttributes.gameCounter, frameworkState.allocation, frameworkState.destination);
     }
 }

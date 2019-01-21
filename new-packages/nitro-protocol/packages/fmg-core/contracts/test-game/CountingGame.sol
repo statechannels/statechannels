@@ -20,8 +20,8 @@ contract CountingGame {
         CountingState.CountingStateStruct memory newState = CountingState.fromFrameworkState(_new);
 
         require(
-            keccak256(abi.encode(oldState.resolution)) == keccak256(abi.encode(newState.resolution)),
-            "CountingGame: resolutions must be equal"
+            keccak256(abi.encode(oldState.allocation)) == keccak256(abi.encode(newState.allocation)),
+            "CountingGame: allocations must be equal"
         );
         require(
             newState.gameCounter == oldState.gameCounter + 1,

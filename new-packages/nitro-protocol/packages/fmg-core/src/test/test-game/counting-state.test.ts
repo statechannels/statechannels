@@ -46,7 +46,11 @@ describe('CountingState', () => {
 
     const channel = new Channel(participantB.address, 0, participants); // just use any valid address
     
-    const defaults = { channel, resolution: [new utils.BigNumber(5), new utils.BigNumber(4)] };
+    const defaults = {
+      channel,
+      allocation: [new utils.BigNumber(5), new utils.BigNumber(4)],
+      destination: [participantA.address, participantB.address],
+    };
 
     state = CountingGame.gameState({ ...defaults, turnNum: 6, gameCounter: 1 });
   });
@@ -57,7 +61,6 @@ describe('CountingState', () => {
 
     expect(gameAttributes).toMatchObject({
         gameCounter: new utils.BigNumber(1),
-        resolution: [new utils.BigNumber(5), new utils.BigNumber(4)],
     });
   });
 });
