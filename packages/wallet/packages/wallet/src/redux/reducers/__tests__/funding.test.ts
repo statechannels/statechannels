@@ -112,7 +112,7 @@ describe('start in ApproveFunding', () => {
     const action = actions.fundingRejected();
     const updatedState = walletReducer(state, action);
 
-    itTransitionsToStateType(states.WAIT_FOR_CHANNEL, updatedState);
+    itTransitionsToStateType(states.SEND_FUNDING_DECLINED_MESSAGE, updatedState);
   });
 
 
@@ -159,6 +159,13 @@ describe('start in aWaitForDeployToBeSentToMetaMask', () => {
 
     itTransitionsToStateType(states.A_SUBMIT_DEPLOY_IN_METAMASK, updatedState);
   });
+  describe('incoming action: Funding declined message received', () => {
+    const testDefaults = { ...defaultsA, ...justReceivedPreFundSetupB };
+    const state = states.aWaitForDeployToBeSentToMetaMask(testDefaults);
+    const action = actions.messageReceived("FundingDeclined");
+    const updatedState = walletReducer(state, action);
+    itTransitionsToStateType(states.ACKNOWLEDGE_FUNDING_DECLINED, updatedState);
+  });
 });
 
 describe('start in aSubmitDeployInMetaMask', () => {
@@ -180,6 +187,26 @@ describe('start in aSubmitDeployInMetaMask', () => {
     itTransitionsToStateType(states.WAIT_FOR_CHANNEL, updatedState);
   });
 
+  describe('incoming action: Funding declined message received', () => {
+    const testDefaults = { ...defaultsA, ...justReceivedPreFundSetupB };
+    const state = states.aSubmitDeployInMetaMask(testDefaults);
+    const action = actions.messageReceived("FundingDeclined");
+    const updatedState = walletReducer(state, action);
+    itTransitionsToStateType(states.ACKNOWLEDGE_FUNDING_DECLINED, updatedState);
+  });
+
+});
+
+describe('start in SendFundingDeclinedMessage', () => {
+  describe('incoming action: message sent', () => { // player A scenario
+    const testDefaults = { ...defaultsA, ...justReceivedPreFundSetupB };
+    const state = states.sendFundingDeclinedMessage(testDefaults);
+    const action = actions.messageSent();
+    const updatedState = walletReducer(state, action);
+
+    itTransitionsToStateType(states.WAIT_FOR_CHANNEL, updatedState);
+    expect((updatedState.messageOutbox as outgoing.MessageRequest).type).toEqual(outgoing.FUNDING_FAILURE);
+  });
 });
 
 describe('start in WaitForDeployConfirmation', () => {
@@ -190,6 +217,13 @@ describe('start in WaitForDeployConfirmation', () => {
     const updatedState = walletReducer(state, action);
 
     itTransitionsToStateType(states.A_WAIT_FOR_DEPOSIT, updatedState);
+  });
+  describe('incoming action: Funding declined message received', () => {
+    const testDefaults = { ...defaultsA, ...justReceivedPreFundSetupB };
+    const state = states.waitForDeployConfirmation(testDefaults);
+    const action = actions.messageReceived("FundingDeclined");
+    const updatedState = walletReducer(state, action);
+    itTransitionsToStateType(states.ACKNOWLEDGE_FUNDING_DECLINED, updatedState);
   });
   describe('incoming action: transaction confirmed, funding event already received', () => { // player A scenario
     const unhandledAction = actions.fundingReceivedEvent(1000, bsAddress, '0x0a');
@@ -205,6 +239,13 @@ describe('start in WaitForDeployConfirmation', () => {
 });
 
 describe('start in AWaitForDeposit', () => {
+  describe('incoming action: Funding declined message received', () => {
+  const testDefaults = { ...defaultsA, ...justReceivedPreFundSetupB };
+    const state = states.aWaitForDeposit(testDefaults);
+    const action = actions.messageReceived("FundingDeclined");
+    const updatedState = walletReducer(state, action);
+    itTransitionsToStateType(states.ACKNOWLEDGE_FUNDING_DECLINED, updatedState);
+  });
   describe('incoming action: funding received event', () => { // player A scenario
     const testDefaults = { ...defaultsA, ...justReceivedPreFundSetupB };
     const state = states.aWaitForDeposit(testDefaults);

@@ -20,6 +20,7 @@ interface Props {
   fundingApproved: () => void;
   fundingRejected: () => void;
   fundingSuccessAcknowledged: () => void;
+  fundingDeclinedAcknowledged:()=> void;
 }
 
 class FundingContainer extends PureComponent<Props> {
@@ -29,6 +30,7 @@ class FundingContainer extends PureComponent<Props> {
       fundingApproved,
       fundingRejected,
       fundingSuccessAcknowledged,
+      fundingDeclinedAcknowledged,
     } = this.props;
 
     switch (state.type) {
@@ -77,6 +79,15 @@ class FundingContainer extends PureComponent<Props> {
             actionTitle="Return to game"
           />
         );
+      case states.ACKNOWLEDGE_FUNDING_DECLINED:
+        return (<AcknowledgeX
+          title="Funding declined!"
+          action={fundingDeclinedAcknowledged}
+          description="Your opponent has declined to fund the game."
+          actionTitle="Return to game"
+        />);
+      case states.SEND_FUNDING_DECLINED_MESSAGE:
+        return null;
       default:
         return unreachable(state);
     }
@@ -87,6 +98,7 @@ const mapDispatchToProps = {
   fundingApproved: actions.fundingApproved,
   fundingRejected: actions.fundingRejected,
   fundingSuccessAcknowledged: actions.fundingSuccessAcknowledged,
+  fundingDeclinedAcknowledged: actions.fundingDeclinedAcknowledged,
 };
 
 // why does it think that mapStateToProps can return undefined??
