@@ -42,7 +42,7 @@ contract TestState {
         return State.gameAttributesEqual(_state, _otherState);
     }
 
-    function resolutionsEqual(State.StateStruct memory _state, State.StateStruct memory _otherState) public pure returns (bool) {
-        return resolutionsEqual(_state, _otherState);
+    function allocationsEqual(State.StateStruct memory _state, State.StateStruct memory _otherState) public pure returns (bool) {
+        return allocationsEqual(_state, _otherState);
     }
 }

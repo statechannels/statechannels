@@ -1,5 +1,4 @@
 import { Channel } from './channel';
-import BN from 'bn.js';
 import abi from 'web3-eth-abi';
 import { utils } from 'ethers';
 
@@ -12,7 +11,8 @@ const SolidityStateType = {
     "stateType": "uint8",
     "turnNum": "uint256",
     "stateCount": "uint256",
-    "resolution": "uint256[]",
+    "destination": "address[]",
+    "allocation": "uint256[]",
     "gameAttributes": "bytes",
   },
 };
@@ -21,22 +21,25 @@ class State {
   channel: Channel;
   stateType: State.StateType;
   turnNum: number;
-  resolution: BN[];
+  allocation: utils.BigNumber[];
+  destination: string[];
   stateCount: number;
 
-  constructor({channel, stateType, turnNum, resolution, stateCount=0}: 
+  constructor({channel, stateType, turnNum, allocation, destination, stateCount=0}: 
     {
       channel: Channel, 
       stateType: State.StateType,
       turnNum: number,
-      resolution: BN[],
+      allocation: utils.BigNumber[],
+      destination: string[],
       stateCount?: number,
     }
   ) {
     this.channel = channel;
     this.stateType = stateType;
     this.turnNum = turnNum;
-    this.resolution = resolution;
+    this.allocation = allocation;
+    this.destination = destination;
     this.stateCount = stateCount || 0;
   }
 
@@ -69,7 +72,8 @@ class State {
       this.stateType,
       this.turnNum,
       this.stateCount,
-      this.resolution.map(String),
+      this.destination.map(String),
+      this.allocation,
       this.gameAttributes,
     ];
   }
@@ -83,7 +87,8 @@ class State {
       stateType: this.stateType,
       turnNum: utils.bigNumberify(this.turnNum),
       stateCount: utils.bigNumberify(this.stateCount),
-      resolution: this.resolution.map(x => utils.bigNumberify(String(x))),
+      destination: this.destination,
+      allocation: this.allocation.map(x => utils.bigNumberify(String(x))),
       gameAttributes: this.gameAttributes,
   };
   }

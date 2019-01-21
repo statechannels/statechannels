@@ -19,7 +19,7 @@ const signer = provider.getSigner();
 
 const TURN_NUM_MUST_INCREMENT = "turnNum must increase by 1";
 const CHANNEL_ID_MUST_MATCH = "channelId must match";
-const resolutionsMustEqual = (stateType) => `${stateType}: resolutions must be equal`;
+const allocationsMustEqual = (stateType) => `${stateType}: allocations must be equal`;
 const gameAttributesMustMatch = (stateType) => `${stateType}: gameAttributes must be equal`;
 const stateCountMustIncrement = (stateType) => `${stateType}: stateCount must increase by 1`;
 const stateCountMustReset = (stateType, nextStateType) => `${stateType}: stateCount must be reset when transitioning to ${nextStateType}`;
@@ -33,8 +33,8 @@ describe('Rules', () => {
 
   let testFramework;
 
-  const resolution = [12, 13];
-  const otherResolution = [10, 15];
+  const allocation = [12, 13];
+  const otherallocation = [10, 15];
 
   const participantA = new ethers.Wallet(
     '6cbed15c793ce57650b9877cf6fa156fbef513c4e6134f022a85b1ffdd59b2a1',
@@ -43,6 +43,7 @@ describe('Rules', () => {
     '6370fd033278c143179d81c5526140625662b8daa446c22ee2d73db3707e620c',
   );
   const participants = [participantA.address, participantB.address];
+  const destination = [participantA.address, participantB.address];
 
   let fromState;
   let toState;
@@ -74,7 +75,7 @@ describe('Rules', () => {
     // Contract setup --------------------------------------------------------------------------
 
     channel = new Channel(gameContract.address, 0, participants);
-    defaults = { channel, resolution, gameCounter: 0 };
+    defaults = { channel, allocation, destination, gameCounter: 0 };
   });
 
   const validTransition = async (state1, state2) => {
@@ -102,8 +103,8 @@ describe('Rules', () => {
     });
 
     it('rejects a transition where the balances changes', async () => {
-      toState.resolution = otherResolution;
-      await expectRevert(validTransition(fromState, toState), resolutionsMustEqual("PreFundSetup"));
+      toState.allocation = otherallocation;
+      await expectRevert(validTransition(fromState, toState), allocationsMustEqual("PreFundSetup"));
     });
     it("rejects a transition where the count doesn't increment", async () => {
       toState.stateCount = fromState.stateCount;
@@ -141,8 +142,8 @@ describe('Rules', () => {
     });
 
     it('rejects a transition where the balances changes', async () => {
-      toState.resolution = otherResolution;
-      await expectRevert(validTransition(fromState, toState), resolutionsMustEqual("PreFundSetup"));
+      toState.allocation = otherallocation;
+      await expectRevert(validTransition(fromState, toState), allocationsMustEqual("PreFundSetup"));
     });
 
     it("rejects a transition where the count doesn't reset", async () => {
@@ -177,8 +178,8 @@ describe('Rules', () => {
     });
 
     it('rejects a transition where the balances changes', async () => {
-      toState.resolution = otherResolution;
-      await expectRevert(validTransition(fromState, toState), resolutionsMustEqual("PreFundSetup"));
+      toState.allocation = otherallocation;
+      await expectRevert(validTransition(fromState, toState), allocationsMustEqual("PreFundSetup"));
     });
 
     it('rejects a transition not from the last preFundSetup state', async () => {
@@ -208,8 +209,8 @@ describe('Rules', () => {
     });
 
     it('rejects a transition where the balances changes', async () => {
-      toState.resolution = otherResolution;
-      await expectRevert(validTransition(fromState, toState), resolutionsMustEqual("PostFundSetup"));
+      toState.allocation = otherallocation;
+      await expectRevert(validTransition(fromState, toState), allocationsMustEqual("PostFundSetup"));
     });
 
     it('rejects a transition from the last PostFundSetup state', async () => {
@@ -259,7 +260,7 @@ describe('Rules', () => {
     });
 
     it('rejects a transition where the balances changes', async () => {
-      toState.resolution = otherResolution;
+      toState.allocation = otherallocation;
       await expectRevert(validTransition(fromState, toState));
     });
 
@@ -352,7 +353,7 @@ describe('Rules', () => {
     });
 
     it('rejects a transition where the balances changes', async () => {
-      toState.resolution = otherResolution;
+      toState.allocation = otherallocation;
       await expectRevert(validTransition(fromState, toState));
     });
   });
@@ -378,7 +379,7 @@ describe('Rules', () => {
     });
 
     it('rejects a transition where the balances changes', async () => {
-      toState.resolution = otherResolution;
+      toState.allocation = otherallocation;
       await expectRevert(validTransition(fromState, toState));
     });
   });
