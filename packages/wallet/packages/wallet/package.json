@@ -74,7 +74,7 @@
     "start": "node scripts/start.js",
     "build": "node scripts/build.js",
     "test": "run-s 'test:app --all'",
-    "test:ci": "DEV_GANACHE_PORT=8502 run-s 'test:integration --all --ci' 'test:app --all --ci' build",
+    "test:ci": "DEV_GANACHE_PORT=8503 run-s 'test:integration --all --ci' 'test:app --all --ci' build",
     "test:app": "npx run-jest -c ./config/jest/jest.config.js",
     "deployContracts": "npx deploy-contracts",
     "ganache:start": "npx start-ganache",
