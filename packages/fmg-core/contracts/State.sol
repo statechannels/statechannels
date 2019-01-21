@@ -73,6 +73,10 @@ library State {
         return keccak256(abi.encodePacked(_state.allocation)) == keccak256(abi.encodePacked(_otherState.allocation));
     }
 
+    function destinationsEqual(StateStruct memory _state, StateStruct memory _otherState) public pure returns (bool) {
+        return keccak256(abi.encodePacked(_state.destination)) == keccak256(abi.encodePacked(_otherState.destination));
+    }
+
     // utilities
     // =========
 
