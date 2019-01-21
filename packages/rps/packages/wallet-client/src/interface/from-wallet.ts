@@ -11,10 +11,11 @@ export const fundingSuccess = (channelId, position: string) => ({
   channelId,
   position,
 });
-export const fundingFailure = (channelId, reason) => ({
+export const fundingFailure = (channelId: any, reason: 'FundingDeclined' | 'Other', error?: string) => ({
   type: FUNDING_FAILURE as typeof FUNDING_FAILURE,
   channelId,
   reason,
+  error,
 });
 
 export type FundingSuccess = ReturnType<typeof fundingSuccess>;

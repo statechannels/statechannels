@@ -31,11 +31,12 @@ import { showWallet } from 'wallet-client/lib/interface/from-wallet';
 const initialState = waitForLogin();
 
 export const walletReducer = (state: WalletState = initialState, action: WalletAction): WalletState => {
+
   if (action.type === MESSAGE_SENT) {
-    return { ...state, messageOutbox: undefined };
+    state = { ...state, messageOutbox: undefined };
   }
   if (action.type === DISPLAY_MESSAGE_SENT) {
-    return { ...state, displayOutbox: undefined };
+    state = { ...state, displayOutbox: undefined };
   }
 
   if (action.type === TRANSACTION_SENT_TO_METAMASK) {
@@ -68,6 +69,7 @@ export const walletReducer = (state: WalletState = initialState, action: WalletA
     default:
       return unreachable(state);
   }
+  return state;
 };
 
 const receivedValidOwnConclusionRequest = (state: WalletState, action: WalletAction): ApproveConclude | null => {

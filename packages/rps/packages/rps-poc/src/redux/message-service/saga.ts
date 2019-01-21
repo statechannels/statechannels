@@ -34,7 +34,6 @@ export function* sendWalletMessageSaga() {
   while (true) {
     const sendMessageChannel = createWalletEventChannel([Wallet.MESSAGE_REQUEST]);
     const messageRequest = yield take(sendMessageChannel);
-    console.log('sendwalletmessage ', messageRequest);
     const queue = Queue.WALLET;
     const { data, to, signature } = messageRequest;
     const message = { data, queue, signature };
@@ -190,15 +189,19 @@ function* handleWalletMessage(walletMessage: WalletMessage, state: gameStates.Pl
       const myAddress = participants[myIndex];
       const myBalance = hexToBN(balances[myIndex]);
       const opponentBalance = hexToBN(balances[1 - myIndex]);
-      const fundingChannel = createWalletEventChannel([Wallet.FUNDING_SUCCESS]);
+      const fundingChannel = createWalletEventChannel([Wallet.FUNDING_SUCCESS, Wallet.FUNDING_FAILURE]);
 
       Wallet.startFunding(WALLET_IFRAME_ID, channelId, myAddress, opponentAddress, myBalance, opponentBalance, myIndex);
       const fundingResponse = yield take(fundingChannel);
-
-      yield put(gameActions.messageSent());
-      const position = decode(fundingResponse.position);
-      yield put(gameActions.fundingSuccess(position));
-
+      if (fundingResponse.type === Wallet.FUNDING_FAILURE) {
+        if (fundingResponse.reason === 'FundingDeclined') {
+          yield put(gameActions.exitToLobby());
+        }
+      } else {
+        yield put(gameActions.messageSent());
+        const position = decode(fundingResponse.position);
+        yield put(gameActions.fundingSuccess(position));
+      }
       break;
     case "CONCLUDE_REQUESTED":
 

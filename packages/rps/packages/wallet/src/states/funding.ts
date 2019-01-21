@@ -17,6 +17,13 @@ export const B_SUBMIT_DEPOSIT_IN_METAMASK = 'B_SUBMIT_DEPOSIT_IN_METAMASK';
 export const WAIT_FOR_DEPOSIT_CONFIRMATION = 'WAIT_FOR_DEPOSIT_CONFIRMATION';
 export const B_WAIT_FOR_POST_FUND_SETUP = 'B_WAIT_FOR_POST_FUND_SETUP';
 export const ACKNOWLEDGE_FUNDING_SUCCESS = 'ACKNOWLEDGE_FUNDING_SUCCESS';
+export const SEND_FUNDING_DECLINED_MESSAGE = 'SEND_FUNDING_DECLINED_MESSAGE';
+export const ACKNOWLEDGE_FUNDING_DECLINED = 'ACKNOWLEDGE_FUNDING_DECLINED';
+
+export interface SendFundingDeclinedMessage extends ChannelOpen {
+  type: typeof SEND_FUNDING_DECLINED_MESSAGE;
+  stage: typeof FUNDING;
+}
 
 export interface WaitForFundingRequest extends ChannelOpen {
   type: typeof WAIT_FOR_FUNDING_REQUEST;
@@ -83,6 +90,11 @@ export interface AcknowledgeFundingSuccess extends AdjudicatorExists {
   stage: typeof FUNDING;
 }
 
+export interface AcknowledgeFundingDeclined extends ChannelOpen {
+  type: typeof ACKNOWLEDGE_FUNDING_DECLINED;
+  stage: typeof FUNDING;
+}
+
 export function waitForFundingRequest<T extends ChannelOpen>(params: T): WaitForFundingRequest {
   return { type: WAIT_FOR_FUNDING_REQUEST, stage: FUNDING, ...channelOpen(params) };
 }
@@ -135,6 +147,15 @@ export function acknowledgeFundingSuccess<T extends AdjudicatorExists>(params: T
   return { type: ACKNOWLEDGE_FUNDING_SUCCESS, stage: FUNDING, ...adjudicatorExists(params) };
 }
 
+export function sendFundingDeclinedMessage<T extends ChannelOpen>(params: T): SendFundingDeclinedMessage {
+  return { type: SEND_FUNDING_DECLINED_MESSAGE, stage: FUNDING, ...channelOpen(params) };
+}
+
+export function acknowledgeFundingDeclined<T extends ChannelOpen>(params: T): AcknowledgeFundingDeclined {
+  return { type: ACKNOWLEDGE_FUNDING_DECLINED, stage: FUNDING, ...channelOpen(params) };
+
+}
+
 export type FundingState = (
   | WaitForFundingRequest
   | ApproveFunding
@@ -149,4 +170,6 @@ export type FundingState = (
   | BWaitForPostFundSetup
   | AWaitForPostFundSetup
   | AcknowledgeFundingSuccess
+  | SendFundingDeclinedMessage
+  | AcknowledgeFundingDeclined
 );
