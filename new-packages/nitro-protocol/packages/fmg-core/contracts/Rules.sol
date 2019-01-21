@@ -165,6 +165,10 @@ library Rules {
                     State.allocationsEqual(_fromState, _toState),
                     "Invalid transition from PreFundSetup: allocations must be equal"
                 );
+                require(
+                    State.destinationsEqual(_fromState, _toState),
+                    "Invalid transition from PreFundSetup: destinations must be equal"
+                );
             } else {
                 require(
                     _toState.isConclude(),
@@ -173,6 +177,10 @@ library Rules {
                 require(
                     State.allocationsEqual(_fromState, _toState),
                     "Invalid transition from PreFundSetup: allocations must be equal"
+                );
+                require(
+                    State.destinationsEqual(_fromState, _toState),
+                    "Invalid transition from PreFundSetup: destinations must be equal"
                 );
                 
             }
@@ -193,6 +201,10 @@ library Rules {
             require(
                 State.allocationsEqual(_fromState, _toState),
                 "Invalid transition from PreFundSetup: allocations must be equal"
+            );
+            require(
+                State.destinationsEqual(_fromState, _toState),
+                "Invalid transition from PreFundSetup: destinations must be equal"
             );
         }
         return true;
@@ -218,6 +230,10 @@ library Rules {
                     State.allocationsEqual(_fromState, _toState),
                     "Invalid transition from PostFundSetup: allocations must be equal"
                 );
+                require(
+                    State.destinationsEqual(_fromState, _toState),
+                    "Invalid transition from PostFundSetup: destinations must be equal"
+                );
 
                 require(
                     _toState.stateCount == 0,
@@ -242,6 +258,10 @@ library Rules {
                     State.allocationsEqual(_fromState, _toState),
                     "Invalid transition from PostFundSetup: allocations must be equal"
                 );
+                require(
+                    State.destinationsEqual(_fromState, _toState),
+                    "Invalid transition from PostFundSetup: destinations must be equal"
+                );
             } else {
                 // PostFundSetup -> Conclude
                 require(
@@ -251,6 +271,10 @@ library Rules {
                 require(
                     State.allocationsEqual(_fromState, _toState),
                     "Invalid transition from PostFundSetup: allocations must be equal"
+                );
+                require(
+                    State.destinationsEqual(_fromState, _toState),
+                    "Invalid transition from PostFundSetup: destinations must be equal"
                 );
             }
         }
@@ -275,6 +299,10 @@ library Rules {
                 State.allocationsEqual(_fromState, _toState),
                 "Invalid transition from Game: allocations must be equal"
             );
+            require(
+                State.destinationsEqual(_fromState, _toState),
+                "Invalid transition from Game: destinations must be equal"
+            );
         }
         return true;
     }
@@ -290,6 +318,10 @@ library Rules {
         require(
             State.allocationsEqual(_fromState, _toState),
             "Invalid transition from Conclude: allocations must be equal"
+        );
+        require(
+            State.destinationsEqual(_fromState, _toState),
+            "Invalid transition from Conclude: destinations must be equal"
         );
         return true;
     }

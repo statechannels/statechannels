@@ -20,6 +20,7 @@ const signer = provider.getSigner();
 const TURN_NUM_MUST_INCREMENT = "turnNum must increase by 1";
 const CHANNEL_ID_MUST_MATCH = "channelId must match";
 const allocationsMustEqual = (stateType) => `${stateType}: allocations must be equal`;
+const destinationsMustEqual = (stateType) => `${stateType}: destinations must be equal`;
 const gameAttributesMustMatch = (stateType) => `${stateType}: gameAttributes must be equal`;
 const stateCountMustIncrement = (stateType) => `${stateType}: stateCount must increase by 1`;
 const stateCountMustReset = (stateType, nextStateType) => `${stateType}: stateCount must be reset when transitioning to ${nextStateType}`;
@@ -44,6 +45,7 @@ describe('Rules', () => {
   );
   const participants = [participantA.address, participantB.address];
   const destination = [participantA.address, participantB.address];
+  const otherDestination = [participantB.address, participantA.address];
 
   let fromState;
   let toState;
@@ -106,6 +108,12 @@ describe('Rules', () => {
       toState.allocation = otherallocation;
       await expectRevert(validTransition(fromState, toState), allocationsMustEqual("PreFundSetup"));
     });
+
+    it('rejects a transition where the destination changes', async () => {
+      toState.destination = otherDestination;
+      await expectRevert(validTransition(fromState, toState), destinationsMustEqual("PreFundSetup"));
+    });
+
     it("rejects a transition where the count doesn't increment", async () => {
       toState.stateCount = fromState.stateCount;
       await expectRevert(validTransition(fromState, toState), stateCountMustIncrement("PreFundSetup"));
@@ -146,6 +154,11 @@ describe('Rules', () => {
       await expectRevert(validTransition(fromState, toState), allocationsMustEqual("PreFundSetup"));
     });
 
+    it('rejects a transition where the destination changes', async () => {
+      toState.destination = otherDestination;
+      await expectRevert(validTransition(fromState, toState), destinationsMustEqual("PreFundSetup"));
+    });
+
     it("rejects a transition where the count doesn't reset", async () => {
       toState.stateCount = 2;
       await expectRevert(validTransition(fromState, toState), stateCountMustReset("PreFundSetup", "PostFundSetup"));
@@ -182,6 +195,11 @@ describe('Rules', () => {
       await expectRevert(validTransition(fromState, toState), allocationsMustEqual("PreFundSetup"));
     });
 
+    it('rejects a transition where the destination changes', async () => {
+      toState.destination = otherDestination;
+      await expectRevert(validTransition(fromState, toState), destinationsMustEqual("PreFundSetup"));
+    });
+
     it('rejects a transition not from the last preFundSetup state', async () => {
       fromState.stateCount = 0;
       await expectRevert(validTransition(fromState, toState), stateTypeMustBe("PreFundSetup", "PreFundSetup"));
@@ -211,6 +229,11 @@ describe('Rules', () => {
     it('rejects a transition where the balances changes', async () => {
       toState.allocation = otherallocation;
       await expectRevert(validTransition(fromState, toState), allocationsMustEqual("PostFundSetup"));
+    });
+
+    it('rejects a transition where the destination changes', async () => {
+      toState.destination = otherDestination;
+      await expectRevert(validTransition(fromState, toState), destinationsMustEqual("PostFundSetup"));
     });
 
     it('rejects a transition from the last PostFundSetup state', async () => {
@@ -262,6 +285,11 @@ describe('Rules', () => {
     it('rejects a transition where the balances changes', async () => {
       toState.allocation = otherallocation;
       await expectRevert(validTransition(fromState, toState));
+    });
+
+    it('rejects a transition where the destination changes', async () => {
+      toState.destination = otherDestination;
+      await expectRevert(validTransition(fromState, toState), destinationsMustEqual("PostFundSetup"));
     });
 
     it('rejects a transition from the last PostFundSetup state', async () => {
@@ -356,6 +384,11 @@ describe('Rules', () => {
       toState.allocation = otherallocation;
       await expectRevert(validTransition(fromState, toState));
     });
+
+    it('rejects a transition where the destination changes', async () => {
+      toState.destination = otherDestination;
+      await expectRevert(validTransition(fromState, toState), destinationsMustEqual("Game"));
+    });
   });
 
   describe('conclude -> conclude', () => {
@@ -381,6 +414,11 @@ describe('Rules', () => {
     it('rejects a transition where the balances changes', async () => {
       toState.allocation = otherallocation;
       await expectRevert(validTransition(fromState, toState));
+    });
+
+    it('rejects a transition where the destination changes', async () => {
+      toState.destination = otherDestination;
+      await expectRevert(validTransition(fromState, toState), destinationsMustEqual("Conclude"));
     });
   });
 });
