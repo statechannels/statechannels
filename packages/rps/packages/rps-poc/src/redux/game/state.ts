@@ -18,8 +18,6 @@ export enum StateName {
   WaitForRevealB = 'WAIT_FOR_REVEAL_B',
   WaitForRestingA = 'WAIT_FOR_RESTING_A',
   PlayAgain = 'PLAY_AGAIN',
-  InsufficientFunds = 'INSUFFICIENT_FUNDS',
-  WaitToResign = 'WAIT_TO_RESIGN',
   OpponentResigned = 'OPPONENT_RESIGNED',
   WaitForResignationAcknowledgement = 'WAIT_FOR_RESIGNATION_ACKNOWLEDGEMENT',
   GameOver = 'GAME_OVER',
@@ -286,26 +284,6 @@ export function waitForRestingA(state: IncludesResult): WaitForRestingA {
   return { ...base(state), name: StateName.WaitForRestingA, myMove, theirMove, result };
 }
 
-export interface InsufficientFunds extends Base {
-  name: StateName.InsufficientFunds;
-  myMove: Move;
-  theirMove: Move;
-  result: Result;
-  player: Player;
-}
-export function insufficientFunds(state: IncludesResult): InsufficientFunds {
-  const { myMove, theirMove, result } = state;
-  return { ...base(state), name: StateName.InsufficientFunds, myMove, theirMove, result };
-}
-
-export interface WaitToResign extends Base {
-  name: StateName.WaitToResign;
-  player: Player;
-}
-export function waitToResign(state: IncludesBase): WaitToResign {
-  return { ...base(state), name: StateName.WaitToResign };
-}
-
 export interface OpponentResigned extends Base {
   name: StateName.OpponentResigned;
   player: Player;
@@ -349,8 +327,6 @@ export type PlayingState = (
   | WaitForRevealB
   | PlayAgain
   | WaitForRestingA
-  | InsufficientFunds
-  | WaitToResign
   | OpponentResigned
   | WaitForResignationAcknowledgement
   | GameOver

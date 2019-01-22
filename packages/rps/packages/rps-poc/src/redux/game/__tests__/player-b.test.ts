@@ -30,9 +30,6 @@ const {
 const {
   accept: acceptInsufficientFunds,
   reveal: revealInsufficientFunds,
-  conclude: concludeInsufficientFunds,
-  conclude2: concludeInsufficientFunds2,
-
 } = scenarios.insufficientFunds;
 
 const { libraryAddress, channelNonce, participants, roundBuyIn, myName, opponentName, bsAddress: myAddress } = scenarios.standard;
@@ -155,10 +152,7 @@ describe('player B\'s app', () => {
           balances: acceptInsufficientFunds.balances,
         };
         const updatedState = gameReducer({ messageState, gameState: gameState2 }, action);
-
-        itIncreasesTurnNumBy(2, { gameState: gameState2, messageState }, updatedState);
-        itSends(concludeInsufficientFunds, updatedState);
-        itTransitionsTo(state.StateName.InsufficientFunds, updatedState);
+        itTransitionsTo(state.StateName.GameOver, updatedState);
       });
     });
   });
@@ -177,30 +171,19 @@ describe('player B\'s app', () => {
     });
   });
 
-  describe('when in InsufficientFunds', () => {
-    const gameState = state.insufficientFunds({ ...bProps, ...concludeInsufficientFunds });
-
-    describe('when Conclude arrives', () => {
-      const action = actions.positionReceived(concludeInsufficientFunds2);
-      const updatedState = gameReducer({ messageState, gameState }, action);
-
-      itIncreasesTurnNumBy(1, { gameState, messageState }, updatedState);
-      itTransitionsTo(state.StateName.GameOver, updatedState);
-    });
-  });
 
   describe('when in GameOver', () => {
     const gameState = state.gameOver({ ...bProps, ...conclude });
 
-    describe('when the player wants to withdraw their funds', () => {
-      const action = actions.withdrawalRequest();
+    describe('when the player wants to finish the game', () => {
+      const action = actions.resign();
       const updatedState = gameReducer({ messageState, gameState }, action);
 
       itTransitionsTo(state.StateName.WaitForWithdrawal, updatedState);
 
       itIncreasesTurnNumBy(0, { gameState, messageState }, updatedState);
-      it('requests a withdrawal from the wallet', () => {
-        expect(updatedState.messageState.walletOutbox).toEqual({ type: 'WITHDRAWAL_REQUESTED' });
+      it('requests a conclude from the wallet', () => {
+        expect(updatedState.messageState.walletOutbox).toEqual({ type: 'CONCLUDE_REQUESTED' });
       });
     });
   });

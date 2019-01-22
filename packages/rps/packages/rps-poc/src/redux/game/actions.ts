@@ -14,8 +14,6 @@ export const RESIGN = 'GAME.RESIGN';
 export const POSITION_RECEIVED = 'GAME.POSITION_RECEIVED';
 export const FUNDING_SUCCESS = 'GAME.FUNDING_SUCCESS';
 export const FUNDING_FAILURE = 'GAME.FUNDING_FAILURE';
-export const WITHDRAWAL_REQUEST = 'GAME.WITHDRAWAL_REQUEST';
-export const WITHDRAWAL_SUCCESS = 'GAME.WITHDRAWAL_SUCCESS';
 export const EXIT_TO_LOBBY = 'GAME.EXIT_TO_LOBBY';
 export const MESSAGE_SENT = 'GAME.MESSAGE_SENT';
 export const CREATE_CHALLENGE = 'GAME.CREATE_CHALLENGE';
@@ -102,15 +100,6 @@ export const fundingFailure = () => ({
   type: FUNDING_FAILURE as typeof FUNDING_FAILURE,
 });
 
-
-export const withdrawalRequest = () => ({
-  type: WITHDRAWAL_REQUEST as typeof WITHDRAWAL_REQUEST,
-});
-
-export const withdrawalSuccess = () => ({
-  type: WITHDRAWAL_SUCCESS as typeof WITHDRAWAL_SUCCESS,
-});
-
 export const createOpenGame = (roundBuyIn: string) => ({
   type: CREATE_OPEN_GAME as typeof CREATE_OPEN_GAME,
   roundBuyIn,
@@ -137,8 +126,6 @@ export type Resign = ReturnType<typeof resign>;
 export type PositionReceived = ReturnType<typeof positionReceived>;
 export type FundingSuccess = ReturnType<typeof fundingSuccess>;
 export type FundingFailure = ReturnType<typeof fundingFailure>;
-export type WithdrawalSuccess = ReturnType<typeof withdrawalSuccess>;
-export type WithdrawalRequest = ReturnType<typeof withdrawalRequest>;
 export type CreateOpenGame = ReturnType<typeof createOpenGame>;
 export type ExitToLobby = ReturnType<typeof exitToLobby>;
 export type UpdateProfile = ReturnType<typeof updateProfile>;
@@ -160,8 +147,6 @@ export type GameAction = (
   | PositionReceived
   | FundingSuccess
   | FundingFailure
-  | WithdrawalSuccess
-  | WithdrawalRequest
   | Resign
   | InitialPositionReceived
   | ExitToLobby

@@ -110,8 +110,6 @@ function singleActionReducer(state: JointState, action: actions.GameAction) {
       return playAgainReducer(gameState, messageState, action);
     case states.StateName.WaitForRestingA:
       return waitForRestingAReducer(gameState, messageState, action);
-    case states.StateName.InsufficientFunds:
-      return insufficientFundsReducer(gameState, messageState, action);
     case states.StateName.GameOver:
       return gameOverReducer(gameState, messageState, action);
     case states.StateName.WaitForWithdrawal:
@@ -384,7 +382,8 @@ function waitForOpponentToPickMoveAReducer(gameState: states.WaitForOpponentToPi
 
   let newGameState;
   if (insufficientFunds(newBalances, roundBuyIn)) {
-    newGameState = states.insufficientFunds({ ...gameState, ...newProperties });
+    newGameState = states.gameOver({ ...gameState, ...newProperties, messageState: { walletOutbox: {} } });
+
   } else {
     newGameState = states.playAgain({ ...gameState, ...newProperties });
   }
@@ -436,17 +435,12 @@ function waitForRevealBReducer(gameState: states.WaitForRevealB, messageState: M
 
   const result = calculateResult(myMove, theirMove);
   const newProperties = { theirMove, result, balances, turnNum };
-
   if (insufficientFunds(balances, roundBuyIn)) {
-    const newGameState1 = states.insufficientFunds({
+    const newGameState1 = states.gameOver({
       ...gameState,
       ...newProperties,
-      turnNum: turnNum + 1,
+      turnNum,
     });
-
-    const newPosition = positions.conclude(newGameState1);
-    const opponentAddress = states.getOpponentAddress(gameState);
-    messageState = sendMessage(newPosition, opponentAddress, messageState);
 
     return { gameState: newGameState1, messageState };
   } else {
@@ -512,39 +506,18 @@ function waitForRestingAReducer(gameState: states.WaitForRestingA, messageState:
   return { gameState: newGameState, messageState };
 }
 
-function insufficientFundsReducer(gameState: states.InsufficientFunds, messageState: MessageState, action: actions.GameAction): JointState {
-  if (action.type !== actions.POSITION_RECEIVED) { return { gameState, messageState }; }
-
-  const position = action.position;
-  if (position.name !== positions.CONCLUDE) { return { gameState, messageState }; }
-
-  const { turnNum } = position;
-
-  // transition to gameOver
-  const newGameState = states.gameOver({ ...gameState, turnNum });
-
-  if (gameState.player === Player.PlayerA) {
-    newGameState.turnNum = newGameState.turnNum + 1;
-    // send conclude if player A
-    const conclude = positions.conclude(newGameState);
-
-    const opponentAddress = states.getOpponentAddress(gameState);
-    messageState = sendMessage(conclude, opponentAddress, messageState);
-  }
-
-  return { gameState: newGameState, messageState };
-}
 
 function gameOverReducer(gameState: states.GameOver, messageState: MessageState, action: actions.GameAction): JointState {
-  if (action.type !== actions.WITHDRAWAL_REQUEST) { return { gameState, messageState }; }
+  if (action.type !== actions.RESIGN) { return { gameState, messageState }; }
 
   const newGameState = states.waitForWithdrawal(gameState);
-  messageState = { ...messageState, walletOutbox: { type: 'WITHDRAWAL_REQUESTED' } };
+  messageState = { ...messageState, walletOutbox: { type: 'CONCLUDE_REQUESTED' } };
 
   return { gameState: newGameState, messageState };
 }
+
 function waitForWithdrawalReducer(gameState: states.WaitForWithdrawal, messageState: MessageState, action: actions.GameAction) {
-  if (action.type !== actions.WITHDRAWAL_SUCCESS) {
+  if (action.type !== actions.RESIGN) {
     return { gameState, messageState };
   }
   const { myName, libraryAddress, twitterHandle } = gameState;
