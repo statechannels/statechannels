@@ -4,6 +4,7 @@ import * as states from '../../../states';
 import * as actions from '../../actions';
 import * as outgoing from 'wallet-client/lib/interface/from-wallet';
 import * as TransactionGenerator from '../../../utils/transaction-generator';
+import * as SigningUtils from '../../../utils/signing-utils';
 import * as scenarios from './test-scenarios';
 import { itTransitionsToStateType } from './helpers';
 
@@ -115,6 +116,7 @@ describe('start in ApproveCloseOnChain', () => {
     const action = actions.approveClose();
     const updatedState = walletReducer(state, action);
     itTransitionsToStateType(states.WAIT_FOR_CLOSE_INITIATION, updatedState);
+    expect((updatedState.messageOutbox!).type).toEqual(outgoing.MESSAGE_REQUEST);
   });
 
   describe('action taken: game concluded event', () => {
@@ -123,6 +125,29 @@ describe('start in ApproveCloseOnChain', () => {
     itTransitionsToStateType(states.APPROVE_WITHDRAWAL, updatedState);
   });
 
+  describe('action taken: opponent started close message',()=>{
+    const validateSignatureMock = jest.fn();
+    validateSignatureMock.mockReturnValue(true);
+    Object.defineProperty(SigningUtils,'validSignature',{value:validateSignatureMock});
+    const action = actions.messageReceived('CloseStarted','0x0');
+    const updatedState = walletReducer(state, action);
+    itTransitionsToStateType(states.WAIT_FOR_OPPONENT_CLOSE, updatedState);
+  });
+
+});
+
+describe('start in WaitForOpponentClose', () => {
+  const state = states.waitForOpponentClose({
+    ...defaultsA,
+    penultimatePosition: { data: aResignsAfterOneRound.concludeHex, signature: aResignsAfterOneRound.conclude2Sig },
+    lastPosition: { data: aResignsAfterOneRound.conclude2Hex, signature: aResignsAfterOneRound.conclude2Sig },
+    turnNum: 9,
+  });
+  describe('action take: game concluded event', () => {
+    const action = actions.gameConcludedEvent();
+    const updatedState = walletReducer(state, action);
+    itTransitionsToStateType(states.APPROVE_WITHDRAWAL, updatedState);
+  });
 });
 
 describe('start in WaitForCloseInitiation', () => {

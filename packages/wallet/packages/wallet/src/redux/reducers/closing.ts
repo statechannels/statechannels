@@ -28,10 +28,22 @@ export const closingReducer = (state: ClosingState, action: WalletAction): Walle
       return waitForCloseSubmissionReducer(state, action);
     case states.WAIT_FOR_CLOSE_CONFIRMED:
       return waitForCloseConfirmedReducer(state, action);
+    case states.WAIT_FOR_OPPONENT_CLOSE:
+      return waitForOpponentCloseReducer(state, action);
     default:
       return unreachable(state);
   }
 };
+
+const waitForOpponentCloseReducer = (state: states.WaitForOpponentClose, action: actions.WalletAction) => {
+  switch (action.type) {
+    case actions.GAME_CONCLUDED_EVENT:
+      return states.approveWithdrawal(state);
+  }
+  return state;
+
+};
+
 const waitForCloseConfirmedReducer = (state: states.WaitForCloseConfirmed, action: actions.WalletAction) => {
   switch (action.type) {
     case actions.TRANSACTION_CONFIRMED:
@@ -73,9 +85,20 @@ const approveCloseOnChainReducer = (state: states.ApproveCloseOnChain, action: a
         to.data,
         from.signature,
         to.signature);
-      return states.waitForCloseInitiation({ ...state, transactionOutbox });
+      const signature = signPositionHex('CloseStarted', state.privateKey);
+      const messageOutbox = messageRequest(state.participants[1 - state.ourIndex], 'CloseStarted', signature);
+      return states.waitForCloseInitiation({ ...state, transactionOutbox, messageOutbox });
     case actions.GAME_CONCLUDED_EVENT:
       return states.approveWithdrawal(state);
+    case actions.MESSAGE_RECEIVED:
+      console.log(action.data);
+     
+      const opponentAddress = state.participants[1 - state.ourIndex];
+       console.log(validSignature(action.data, action.signature || '0x0', opponentAddress));
+      if (action.data === 'CloseStarted' && validSignature(action.data, action.signature || '0x0', opponentAddress)) {
+        return states.waitForOpponentClose(state);
+
+      }
   }
   return state;
 };
