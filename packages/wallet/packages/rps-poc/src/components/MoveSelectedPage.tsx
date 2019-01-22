@@ -7,7 +7,6 @@ import { GameLayout } from './GameLayout';
 interface Props {
   message: string;
   yourMove: Move;
-  createBlockchainChallenge: ()=>void;
 }
 
 export default class MoveSelectedPage extends React.PureComponent<Props> {

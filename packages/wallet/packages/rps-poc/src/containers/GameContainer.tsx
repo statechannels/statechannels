@@ -1,7 +1,7 @@
 import React, { Fragment } from 'react';
 import { connect } from 'react-redux';
 
-import { Move } from '../core';
+import { Move, Player } from '../core';
 import { SiteState } from '../redux/reducer';
 import * as gameActions from '../redux/game/actions';
 
@@ -12,8 +12,6 @@ import WaitForOpponentToPickMove from '../components/WaitForOpponentToPickMove';
 import MoveSelectedPage from '../components/MoveSelectedPage'; // WaitForReveal, WaitForResting
 import PlayAgain from '../components/PlayAgain';
 import WaitForRestingA from '../components/WaitForRestingA';
-import InsufficientFunds from '../components/InsufficientFunds';
-import WaitToResign from '../components/WaitToResign';
 import WaitForResignationAcknowledgement from '../components/WaitForResignationAcknowledgement';
 import GameOverPage from '../components/GameOverPage'; // GameOver, OpponentResigned
 import GameProposedPage from '../components/GameProposedPage';
@@ -22,18 +20,17 @@ import ProfileContainer from './ProfileContainer';
 
 import WaitForWallet from '../components/WaitForWallet'; // WaitForFunding, maybe others?
 
-import { GameState, StateName } from '../redux/game/state';
+import { GameState, StateName, PlayingState } from '../redux/game/state';
 
 interface GameProps {
   state: GameState;
   chooseMove: (move: Move) => void;
   playAgain: () => void;
-  createBlockchainChallenge: () => void;
   confirmGame: () => void;
   declineGame: () => void;
   createOpenGame: (roundBuyIn: string) => void;
   cancelOpenGame: () => void;
-  withdraw: () => void;
+  conclude: () => void;
 }
 
 // TODO: Add wallet from wallet package
@@ -48,7 +45,9 @@ function GameContainer(props: GameProps) {
 }
 
 function RenderGame(props: GameProps) {
-  const { state, chooseMove, playAgain, createBlockchainChallenge, confirmGame, declineGame, withdraw } = props;
+  const { state, chooseMove, playAgain, confirmGame, declineGame, conclude } = props;
+  const { player, turnNum } = (state as PlayingState);
+  const ourTurn = player === Player.PlayerA ? turnNum % 2 !== 0 : turnNum % 2 === 0;
   switch (state.name) {
     case StateName.NoName:
       return <ProfileContainer />;
@@ -73,7 +72,6 @@ function RenderGame(props: GameProps) {
         <MoveSelectedPage
           message="Waiting for your opponent to choose their move"
           yourMove={state.myMove}
-          createBlockchainChallenge={createBlockchainChallenge}
         />
       );
 
@@ -81,8 +79,7 @@ function RenderGame(props: GameProps) {
     case StateName.GameOver:
     // TODO: We probably want a seperate message for when your opponent resigns
     case StateName.OpponentResigned:
-      return <GameOverPage visible={state.name === StateName.OpponentResigned || state.name === StateName.GameOver} withdraw={withdraw} />;
-
+      return <GameOverPage visible={state.name === StateName.OpponentResigned || state.name === StateName.GameOver} conclude={conclude} ourTurn={ourTurn} />;
     case StateName.WaitForOpponentToPickMoveB:
       return <WaitForOpponentToPickMove />;
 
@@ -91,7 +88,6 @@ function RenderGame(props: GameProps) {
         <MoveSelectedPage
           message="Waiting for your opponent to choose their move"
           yourMove={state.myMove}
-          createBlockchainChallenge={createBlockchainChallenge}
         />
       );
 
@@ -115,10 +111,6 @@ function RenderGame(props: GameProps) {
           playAgain={playAgain}
         />
       );
-    case StateName.InsufficientFunds:
-      return <InsufficientFunds />;
-    case StateName.WaitToResign:
-      return <WaitToResign />;
     case StateName.WaitForResignationAcknowledgement:
       return <WaitForResignationAcknowledgement />;
     case StateName.WaitForFunding:
@@ -137,12 +129,11 @@ const mapStateToProps = (state: SiteState) => ({
 const mapDispatchToProps = {
   chooseMove: gameActions.chooseMove,
   playAgain: gameActions.playAgain,
-  createBlockchainChallenge: () => {/* TODO: Call create challenge on wallet */ },
   confirmGame: gameActions.confirmGame,
   declineGame: gameActions.declineGame,
   createOpenGame: gameActions.createOpenGame,
   cancelOpenGame: gameActions.cancelOpenGame,
-  withdraw: gameActions.withdrawalRequest,
+  conclude: gameActions.resign,
 };
 
 // why does it think that mapStateToProps can return undefined??

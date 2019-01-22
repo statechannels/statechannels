@@ -60,8 +60,6 @@ export function* sendMessagesSaga() {
     gameActions.PLAY_AGAIN,
     gameActions.POSITION_RECEIVED,
     gameActions.FUNDING_SUCCESS,
-    gameActions.WITHDRAWAL_REQUEST,
-    gameActions.WITHDRAWAL_SUCCESS,
     gameActions.JOIN_OPEN_GAME,
     gameActions.RESIGN,
     gameActions.CREATE_CHALLENGE
