@@ -1,0 +1,14 @@
+steps:
+- name: 'gcr.io/cloud-builders/yarn'
+  args: ['install']
+- name: 'gcr.io/cloud-builders/yarn'
+  args: ['lerna','bootstrap']
+- name: 'gcr.io/cloud-builders/yarn'
+  args: [ 'lerna','run','build']
+- name: gcr.io/cloud-builders/gsutil
+  args: ["-m", "rsync", "-r", "-c", "-d", "./packages/wallet/build", "gs://wallet.magmo.com"]
+- name: gcr.io/cloud-builders/gsutil
+  args: ["-m", "rsync", "-r", "-c", "-d", "./packages/rps-poc/build", "gs://demo.magmo.com"]
+options:
+ machineType: 'N1_HIGHCPU_8'
+  
