@@ -419,7 +419,7 @@ module.exports = function (webpackEnv) {
         FIREBASE_PROJECT: isEnvProduction ? 'rock-paper-scissors123' : 'rock-paper-scissors-dev',
         FIREBASE_API_KEY: isEnvProduction ? 'AIzaSyDulzMWkORgVPFwtxqQaTwOeNhOisGPtDs' : 'AIzaSyAlGe17xjJjfoJ_KDYjCREg7ZL4ns61Chc',
         TARGET_NETWORK: process.env.TARGET_NETWORK,
-        WALLET_URL: 'http://localhost:3000'
+        WALLET_URL: isEnvProduction ? 'https://wallet.magmo.com' : 'http://localhost:3000',
       }),
       // Generates an `index.html` file with the <script> injected.
       new HtmlWebpackPlugin(

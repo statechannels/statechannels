@@ -5,6 +5,7 @@
   "name": "apps",
 
   "scripts": {
-    "test:ci": "test:ci"
+    "test:ci": "test:ci",
+    "build": "build"
   }
 }

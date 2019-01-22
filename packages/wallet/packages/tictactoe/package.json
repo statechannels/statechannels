@@ -14,6 +14,7 @@
     "bn.js": "4.11.8",
     "bootstrap": "^4.1.3",
     "ethers": "^4.0.18",
+    "extract-text-webpack-plugin": "^3.0.2",
     "file-loader": "^2.0.0",
     "firebase": "^5.7.0",
     "fmg-core": "0.1.6",
