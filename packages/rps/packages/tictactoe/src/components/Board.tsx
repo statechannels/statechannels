@@ -77,6 +77,20 @@ export default class Board extends React.PureComponent<Props> {
     }
   }
 
+  attemptToDispatchMarks(marks: Marks) {
+    const noughts = this.props.noughts;
+    const crosses = this.props.crosses;
+    if (
+      (crosses & marks) === marks ||
+      (noughts & marks) === marks
+      ) {
+      return;
+      }
+    else {
+      return this.props.marksMade(marks); // only allow this if tile is unoccupied
+    }
+    
+  }
   render() {
     const { noughts, crosses } = this.props;
     return (
@@ -84,35 +98,35 @@ export default class Board extends React.PureComponent<Props> {
         <table>
           <tbody>
           <tr>
-            <td id="tl" onClick={() => this.props.marksMade(Marks.tl)}>
+            <td id="tl" onClick={() => this.attemptToDispatchMarks(Marks.tl)}>
               {this.renderMark(noughts, crosses, Marks.tl)}
             </td>
-            <td id="tm" onClick={() => this.props.marksMade(Marks.tm)}>
+            <td id="tm" onClick={() => this.attemptToDispatchMarks(Marks.tm)}>
               {this.renderMark(noughts, crosses, Marks.tm)}
             </td>
-            <td id="tr" onClick={() => this.props.marksMade(Marks.tr)}>
+            <td id="tr" onClick={() => this.attemptToDispatchMarks(Marks.tr)}>
               {this.renderMark(noughts, crosses, Marks.tr)}
             </td>
           </tr>
           <tr>
-            <td id="ml" onClick={() => this.props.marksMade(Marks.ml)}>
+            <td id="ml" onClick={() => this.attemptToDispatchMarks(Marks.ml)}>
               {this.renderMark(noughts, crosses, Marks.ml)}
             </td>
-            <td id="mm" onClick={() => this.props.marksMade(Marks.mm)}>
+            <td id="mm" onClick={() => this.attemptToDispatchMarks(Marks.mm)}>
               {this.renderMark(noughts, crosses, Marks.mm)}
             </td>
-            <td id="mr" onClick={() => this.props.marksMade(Marks.mr)}>
+            <td id="mr" onClick={() => this.attemptToDispatchMarks(Marks.mr)}>
               {this.renderMark(noughts, crosses, Marks.mr)}
             </td>
           </tr>
           <tr>
-            <td id="bl" onClick={() => this.props.marksMade(Marks.bl)}>
+            <td id="bl" onClick={() => this.attemptToDispatchMarks(Marks.bl)}>
               {this.renderMark(noughts, crosses, Marks.bl)}
             </td>
-            <td id="bm" onClick={() => this.props.marksMade(Marks.bm)}>
+            <td id="bm" onClick={() => this.attemptToDispatchMarks(Marks.bm)}>
               {this.renderMark(noughts, crosses, Marks.bm)}
             </td>
-            <td id="br" onClick={() => this.props.marksMade(Marks.br)}>
+            <td id="br" onClick={() => this.attemptToDispatchMarks(Marks.br)}>
               {this.renderMark(noughts, crosses, Marks.br)}
             </td>
           </tr>

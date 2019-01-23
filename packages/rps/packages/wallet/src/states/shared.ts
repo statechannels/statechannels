@@ -1,5 +1,5 @@
 import { TransactionRequest } from "ethers/providers";
-import { ResponseAction, DisplayAction } from "wallet-client/lib/interface/from-wallet";
+import { ResponseAction, DisplayAction } from 'wallet-client/lib/interface/from-wallet';
 import { Action } from 'redux';
 
 export interface Base {

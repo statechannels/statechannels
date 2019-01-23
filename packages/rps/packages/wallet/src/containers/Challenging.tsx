@@ -39,6 +39,8 @@ class ChallengingContainer extends PureComponent<Props> {
             description="You've selected to launch an on-chain challenge. Do you want to proceed?"
             approvalAction={challengeApproved}
             rejectionAction={challengeRejected}
+            yesMessage="Launch challenge"
+            noMessage="Cancel"
           />
         );
       case states.WAIT_FOR_CHALLENGE_INITIATION:

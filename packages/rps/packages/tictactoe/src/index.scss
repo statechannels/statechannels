@@ -4,17 +4,13 @@
 
 @import "~bootstrap/scss/bootstrap";
 
+@import "./styles/board";
+
 @import "./styles/layout";
-// @import "./styles/footer";
+@import "./styles/footer";
 @import "./styles/home-page";
-// @import "./styles/navbar";
+@import "./styles/navbar";
 @import "./styles/rules";
-// @import "./styles/wallet/wallet-welcome";
-// @import "./styles/wallet/wallet-message";
-// @import "./styles/wallet/challenge-response";
-// @import "./styles/wallet/withdraw-in-progress";
-// @import "./styles/wallet/funding-in-progress";
-// @import "./styles/wallet/challenge-footer";
 @import "./styles/_fonts";
 @import "./styles/lobby";
 @import "./styles/open-game-card";
@@ -24,4 +20,3 @@
 @import './styles/waiting-room.scss';
 @import './styles/game-over.scss';
 @import './styles/profile-page.scss';
-// @import "./styles/wallet/challenge-expired";
