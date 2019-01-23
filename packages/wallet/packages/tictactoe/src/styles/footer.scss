@@ -1,34 +1,83 @@
-.footer-resign {
+.footer-resign, .footer-challenge, .footer-playagain {
   font-weight: bold;
   font-size: 16px;
-  color: $rps-footer-grey;
-
+  color: $white;
   width: 188px;
   height: 40px;
-  border-radius: 40px;
+  border-radius: 5px;
   border: solid 1px $rps-lobby-border-off-white;
+  // background-color: $rps-footer-grey;
+}
+
+.footer-playagain {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%,-50%);
+}
+
+.footer-resign:hover, .footer-challenge:hover, .footer-playagain:hover {
+  color: $black;
+  width: 188px;
+  height: 40px;
+  border-radius: 5px;
+  border: $black;
   background-color: $white;
 }
 
-.footer-challenge {
-  font-weight: bold;
-  font-size: 16px;
-  color: $rps-footer-grey;
-
-  margin-left: 10px;
-  width: 188px;
-  height: 40px;
-  border-radius: 40px;
-  border: solid 1px $rps-background;
-  background-color: $rps-background;
+.footer-resign:disabled, .footer-challenge:disabled {
+  color: $white;
 }
 
+// .footer-challenge {
+//   font-weight: bold;
+//   font-size: 16px;
+//   color: $rps-footer-grey;
+
+//   margin-left: 10px;
+//   width: 188px;
+//   height: 40px;
+//   border-radius: 40px;
+//   border: solid 1px $rps-background;
+//   background-color: $rps-background;
+// }
+
 .navbar.footer-bar {
-  background-color: $rps-background;
+  background-color: $rps-footer-grey;
+  font-size: 20px;
+  font-family: monospace;
+  color: white;
 }
 
 .footer-logo-container {
-  display:flex;
-  flex-direction: column;
-  align-items: flex-end;
+  position: absolute;
+  right: 10px;
+  bottom: $navbar-height;
+  text-align: right;
+  align-content: right;
+}
+
+
+#you-win {
+  background: green;
+}
+
+#you-lose {
+  background: red;
+}
+
+#tie {
+  background: darkorange;
+}
+
+#choose {
+  background: purple;
+}
+
+.resignButton {
+  position: absolute;
+  left: 5px;
+  bottom: 45px;
+  font-size: 20px;
+  transform: translate(0, 0);
 }

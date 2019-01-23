@@ -2,6 +2,10 @@
 
 html, body, #root {
   height: 100%;
+  overflow-x: hidden;
+  background-color: black;
+  /* color: white; */
+  font-family: 'Courier New', Courier, monospace;
 }
 
 #root {
@@ -44,4 +48,35 @@ code {
 .wallet-overlay {
   z-index: 1035 !important;
 
+}
+
+// p,
+// h1,
+// .status {
+//   font-size: 20px;
+//   font-family: monospace;
+//   color: white;
+// }
+
+#magmo-logo {
+  height: 40px;
+  position: absolute;
+  right: 0;
+  bottom: 45px;
+  transform: translate(0, -50%);
+}
+
+.turn-num {
+  position: absolute;
+  left: 0;
+}
+
+a {
+  color: white;
+  text-decoration: underline;
+}
+
+a:hover {
+  color: white;
+  text-decoration: none;
 }

@@ -1,11 +1,10 @@
-import React from 'react';
-import Board from './Board';
-import Outcome from './Outcome';
-import StatusAndBalances from './StatusAndBalances';
-import { Marks, Marker, Result, Player, Imperative } from '../core';
-import MAGMO_LOGO from '../images/magmo_logo.svg';
-import { Button } from 'reactstrap';
-
+import React from "react";
+import Board from "./Board";
+import NavigationBarContainer from "../containers/NavigationBarContainer";
+import GameBarContainer from "../containers/GameBarContainer";
+import MagmoLogoContainer from "../containers/MagmoLogoContainer";
+import GameFooterContainer from "../containers/GameFooterContainer";
+import { Marks, Marker, Result, Player, Imperative } from "../core";
 
 interface Props {
   you: Marker;
@@ -21,17 +20,25 @@ interface Props {
 
 export default class GameScreen extends React.PureComponent<Props> {
   render() {
-    const {you, noughts, crosses, onScreenBalances, player, result, marksMade, resign} = this.props;
+    const { you, noughts, crosses, marksMade } = this.props;
     return (
-    <div id="main-container">
-      <StatusAndBalances onScreenBalances={onScreenBalances} player={player} you = {you}/>
-      <Board noughts={noughts} crosses={crosses} marksMade={marksMade} you = {you}/>
-      <div id="magmo-logo"><img src={MAGMO_LOGO}/></div>
-      <Button className="cog-button-small resignButton" outline={false} onClick={resign}>
-            Resign
-      </Button>
-      <Outcome result={result} />
-    </div>
+      <div className="w-100">
+        <NavigationBarContainer />
+        <GameBarContainer />
+
+        <div className="container centered-container w-100 game-container">
+          <Board
+            noughts={noughts}
+            crosses={crosses}
+            marksMade={marksMade}
+            you={you}
+          />
+        </div>
+
+        <MagmoLogoContainer />
+
+        <GameFooterContainer />
+      </div>
     );
   }
 }

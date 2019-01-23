@@ -2,7 +2,7 @@
 @import "./dimensions";
 
 .navbar {
-    background-color: $rps-dark-blue;
+    background-color: $rps-footer-grey;
     height: $navbar-height;
 }
 
@@ -13,7 +13,13 @@
     font-stretch: normal;
     line-height: normal;
     letter-spacing: normal;
-    color: $rps-light-grey;
+    color: $rps-white;
+}
+
+.navbar-button:hover {
+    // color: $rps-white;
+    text-decoration: none;
+    font-weight: bold;
 }
 
 .circle {
@@ -30,3 +36,17 @@
     font-size: 15px;
     color: $rps-white;
 }
+
+#status-container {
+    position: absolute;
+    top: 0%;
+    left: 50%;
+    transform: translate(-50%, 0);
+  }
+  
+  .status {
+    background-color: black;
+    font-size: 50px;
+    text-emphasis: bold;
+    font-family: monospace;
+  }

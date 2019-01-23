@@ -1,8 +1,12 @@
-import React from 'react';
-import { Marks, Marker, Result, Player, Imperative } from '../core';
-import GameScreen from './GameScreen';
-import { Button } from 'reactstrap';
+import React from "react";
+import Board from "./Board";
+import { Marks, Marker, Result, Player, Imperative } from "../core";
+import NavigationBarContainer from "../containers/NavigationBarContainer";
+import GameBarContainer from "../containers/GameBarContainer";
+import GameFooterContainer from "../containers/GameFooterContainer";
 
+import { Button } from "reactstrap";
+import MagmoLogoContainer from "../containers/MagmoLogoContainer";
 
 interface Props {
   you: Marker;
@@ -17,24 +21,31 @@ interface Props {
   resign: () => void;
 }
 
-export default class PlayAgainWait extends React.PureComponent<Props> {
+export default class PlayAgain extends React.PureComponent<Props> {
   render() {
-    const { noughts, crosses, you, player, result, onScreenBalances, marksMade, playAgain, resign } = this.props;
+    const { you, noughts, crosses, marksMade, playAgain } = this.props;
     return (
-      <div>
-        <GameScreen
-        noughts={noughts}
-        crosses={crosses}
-        you={you} 
-        player={player}
-        result={result}
-        onScreenBalances={onScreenBalances}
-        marksMade={marksMade}
-        resign={resign}
-        />
-        <Button className="cog-button homePage-loginButton" onClick={playAgain} >
-        Waiting...
-        </Button>
+      <div className="w-100">
+        <NavigationBarContainer />
+        <GameBarContainer />
+
+        <div className="container centered-container w-100 game-container">
+          <Board
+            noughts={noughts}
+            crosses={crosses}
+            marksMade={marksMade}
+            you={you}
+          />
+          <Button
+            className="footer-playagain navbar-button ml-auto"
+            onClick={playAgain}
+          >
+            Waiting...
+          </Button>
+        </div>
+
+        <MagmoLogoContainer />
+        <GameFooterContainer />
       </div>
     );
   }

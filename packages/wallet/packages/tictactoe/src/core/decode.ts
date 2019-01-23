@@ -1,5 +1,5 @@
 import { State } from 'fmg-core';
-import decodeState from './walletdecode';
+import { decode as decodeState } from 'wallet-client';
 
 import * as positions from './positions';
 import { GamePositionType } from './encode';
@@ -51,7 +51,7 @@ export default function decode(hexString: string) {
   const balances = state.resolution.map(bnToHex) as [string, string];
   const { channel, turnNum, stateType } = state;
   const { channelType: libraryAddress, channelNonce, participants } = channel;
-  const base = { libraryAddress, channelNonce, participants, turnNum, balances };
+  const base = { libraryAddress, channelNonce, participants: participants as [string, string], turnNum, balances };
 
   // conclude is a special case as it doesn't have the buyIn
   if (stateType === State.StateType.Conclude) {

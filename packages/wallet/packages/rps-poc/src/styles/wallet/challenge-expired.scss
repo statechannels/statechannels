@@ -53,6 +53,15 @@
     margin-top: 180px;
 }
 
+.challenge-expired-button-container {
+    display: flex;
+    justify-content: center;
+    padding: 5px;
+    position: absolute;
+    top: auto;
+    bottom: 5%;
+}
+
 .challenge-expired-button {
     margin: 0 auto;
     display: flex;
