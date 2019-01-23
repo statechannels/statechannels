@@ -6,7 +6,8 @@ import {
   getGanacheProvider,
   expectEvent,
   increaseTime,
-  DURATION
+  DURATION,
+  delay,
 } from 'magmo-devtools';
 import { sign, Channel, CountingGame } from 'fmg-core';
 
@@ -1131,9 +1132,3 @@ describe('nitroAdjudicator', () => {
     });
   });
 });
-
-function delay(ms = 100) {
-  return new Promise(resolve => {
-    setTimeout(resolve, ms);
-  });
-}
