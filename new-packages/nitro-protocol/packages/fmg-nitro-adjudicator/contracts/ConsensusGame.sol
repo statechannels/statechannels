@@ -12,17 +12,6 @@ contract ConsensusGame {
         ConsensusState.ConsensusStateStruct memory oldState = ConsensusState.fromFrameworkState(_old);
         ConsensusState.ConsensusStateStruct memory newState = ConsensusState.fromFrameworkState(_new);
 
-        require(
-            newState.proposedAllocation.length == newState.proposedDestination.length,
-            'ConsensusGame: newState.proposedAllocation.length must match newState.proposedDestination.length'
-        );
-
-        // \begin{align*}
-        //     t_{L_C}(i, \beta, (j, x), \beta', (j', x')) \Leftrightarrow
-        //         [ & (j=n-1 \wedge j'= 0 \wedge \beta' = x = x')  \vee \\
-        //         & (j < n-1 \wedge j' = j+1, \beta = \beta', x = x') \vee \\
-        //         & (j'=0, \beta = \beta') ]
-        // \end{align*}
         uint numParticipants = oldState.numberOfParticipants;
         if (oldState.consensusCounter == numParticipants - 1) {
             require(
