@@ -2,11 +2,11 @@
 	"scripts": {
 		"lerna:bootstrap": "./node_modules/lerna/cli.js bootstrap",
 		"lerna:test": "./node_modules/lerna/bin/lerna.js run test --stream",
-		"test": "run-s test:fmg-core build:fmg-core test:fmg-simple-adjudicator test:fmg-turbo-adjudicator",
+		"test": "run-s test:fmg-core build:fmg-core test:fmg-simple-adjudicator test:fmg-nitro-adjudicator",
 		"test:fmg-core": "(cd packages/fmg-core && npm run test:ci)",
 		"build:fmg-core": "(cd packages/fmg-core && npm run build)",
 		"test:fmg-simple-adjudicator": "(cd packages/fmg-simple-adjudicator && npm run test:ci)",
-		"test:fmg-turbo-adjudicator": "(cd packages/fmg-turbo-adjudicator && yarn test:ci)"
+		"test:fmg-nitro-adjudicator": "(cd packages/fmg-nitro-adjudicator && yarn test:ci)"
 	},
 	"devDependencies": {
 		"@types/jest": "^23.3.9",
