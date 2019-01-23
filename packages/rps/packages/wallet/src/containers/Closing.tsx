@@ -40,6 +40,8 @@ class ClosingContainer extends PureComponent<Props> {
             description="Do you wish to conclude this game?"
             approvalAction={concludeApproved}
             rejectionAction={concludeRejected}
+            yesMessage="Conclude"
+            noMessage="Cancel"
           />
         );
       case states.WAIT_FOR_OPPONENT_CONCLUDE:

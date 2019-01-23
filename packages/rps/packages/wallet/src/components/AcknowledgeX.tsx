@@ -1,7 +1,8 @@
 import React from 'react';
-import Button from 'reactstrap/lib/Button';
-import walletIcon from '../images/wallet_icon.svg';
+import { Button } from 'reactstrap';
+import { StyleSheet, css } from 'aphrodite';
 import SidebarLayout from './SidebarLayout';
+import magmoFireBall from '../images/fireball.svg';
 
 interface Props {
   title: string;
@@ -15,19 +16,26 @@ export default class AcknowledgeX extends React.PureComponent<Props> {
     const { title, action, actionTitle, description } = this.props;
     return (
       <SidebarLayout>
-        <img src={walletIcon} />
-        <div className="challenge-expired-title">
+        <h1>
           {title}
-        </div>
+        </h1>
         <p>
           {description}
         </p>
         <div className="challenge-expired-button-container" >
-          <Button className="challenge-expired-button" onClick={action} >
-            {actionTitle}
-          </Button>
+          <span className={css(styles.button)}>
+            <Button onClick={action} >
+            <img src={magmoFireBall}/>&nbsp;&nbsp;{actionTitle}
+            </Button>
+          </span>
         </div>
       </SidebarLayout>
     );
   }
 }
+
+const styles = StyleSheet.create({
+  button: {
+    margin: '8px',
+  },
+});

@@ -11,11 +11,12 @@ export default class WaitForXInitiation extends React.PureComponent<Props> {
 
     return (
       <SidebarLayout>
-        <h1>Preparing your {name}!</h1>
+        <h1>Preparing your {name}</h1>
         <p>
-          Your {name} will be sent to MetaMask very soon. So soon, in fact,
+          Your {name} will be sent to MetaMask very soon...           
+          {/* So soon, in fact,
           that if you have time to read this, there's a good chance something
-          has gone wrong 😕.
+          has gone wrong 😕. */}
         </p>
       </SidebarLayout>
     );

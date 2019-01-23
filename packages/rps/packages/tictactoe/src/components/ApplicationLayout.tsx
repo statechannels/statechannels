@@ -12,20 +12,13 @@ export const ApplicationLayout = (props) => {
         {props.children}
       </div>
 
-
-      <nav className="navbar fixed-bottom navbar-light footer-bar">
-
-        <div className="container">
-          <div className="ml-auto">
-            <div className="footer-logo-container">
-              <img src={MAGMO_LOGO} />
-              <small className="text-muted">
+      <div className="footer-logo-container">
+        <img src={MAGMO_LOGO} className="magmo-logo"/> <br/>
+            <small className="text-white">
                 Something not working? Email us at <a href="mailto:oops@magmo.com">oops@magmo.com</a>
-              </small>
-            </div>
-          </div>
-        </div>
-      </nav>
+            </small>
+      </div>
+
     </div>
   );
 };
