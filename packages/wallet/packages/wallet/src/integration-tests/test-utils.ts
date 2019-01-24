@@ -6,12 +6,8 @@ import testGameArtifact from '../../build/contracts/TestGame.json';
 
 import BN from 'bn.js';
 
-export function bnToHex(bn: BN) {
+function bnToHex(bn: BN) {
   return padBytes32('0x' + bn.toString(16));
-}
-export function randomHex(n) {
-  // todo: make random
-  return '0x' + '4'.repeat(n);
 }
 
 export function getLibraryAddress(networkId) {
