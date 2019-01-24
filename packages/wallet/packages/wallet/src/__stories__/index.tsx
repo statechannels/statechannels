@@ -106,3 +106,6 @@ storiesOf('Wallet Screens / Closing', module)
   .add('ApproveConclude', testState(states.approveConclude(playerADefaults)))
   .add('WaitForOpponentConclude', testState(states.waitForOpponentConclude(playerADefaults)))
   .add('AcknowledgeConcludeSuccess', testState(states.approveCloseOnChain(playerADefaults)));
+
+storiesOf('Wallet Landing Page', module)
+  .add('Landing Page', testState(states.waitForLogin({})));
