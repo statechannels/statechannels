@@ -502,7 +502,7 @@ describe('nitroAdjudicator', () => {
         await delay();
 
         const setOutcome = await nitro.getOutcome(channel.id);
-        expect(setOutcome).toMatchObject(allocation);
+        expect(setOutcome).toMatchObject(allocationOutcome);
         await delay();
       });
     });
