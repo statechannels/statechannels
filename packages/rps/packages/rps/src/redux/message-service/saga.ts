@@ -194,6 +194,8 @@ function* handleWalletMessage(walletMessage: WalletMessage, state: gameStates.Pl
       if (fundingResponse.type === Wallet.FUNDING_FAILURE) {
         if (fundingResponse.reason === 'FundingDeclined') {
           yield put(gameActions.exitToLobby());
+        } else {
+          throw new Error(fundingResponse.error);
         }
       } else {
         yield put(gameActions.messageSent());
@@ -210,6 +212,10 @@ function* handleWalletMessage(walletMessage: WalletMessage, state: gameStates.Pl
       if (concludeResponse.type === Wallet.CONCLUDE_SUCCESS) {
         yield put(gameActions.messageSent());
         yield put(gameActions.exitToLobby());
+      } else {
+        if (concludeResponse.reason !== 'UserDeclined') {
+          throw new Error(concludeResponse.error);
+        }
       }
       break;
     case "CHALLENGE_REQUESTED":
