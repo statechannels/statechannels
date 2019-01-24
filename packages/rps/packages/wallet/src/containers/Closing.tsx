@@ -82,6 +82,15 @@ class ClosingContainer extends PureComponent<Props> {
         return <WaitForXConfirmation name="close" transactionID={state.transactionHash} networkId={state.networkId} />;
       case states.WAIT_FOR_OPPONENT_CLOSE:
         return <WaitForOtherPlayer name="close" />;
+      case states.ACKNOWLEDGE_CONCLUDE:
+        return (
+          <AcknowledgeX
+            title="Game Concluded!"
+            action={concludeApproved}
+            description="Your opponent has concluded the game!"
+            actionTitle="Ok!"
+          />
+        );
       default:
         return unreachable(state);
     }

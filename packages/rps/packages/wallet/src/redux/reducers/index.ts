@@ -11,6 +11,8 @@ import {
   waitForLogin,
   approveConclude,
   ApproveConclude,
+  acknowledgeConclude,
+  AcknowledgeConclude,
 } from '../../states';
 
 import { initializingReducer } from './initializing';
@@ -78,7 +80,7 @@ const receivedValidOwnConclusionRequest = (state: WalletState, action: WalletAct
   return approveConclude({ ...state, displayOutbox: showWallet() });
 };
 
-const receivedValidOpponentConclusionRequest = (state: WalletState, action: WalletAction): ApproveConclude | null => {
+const receivedValidOpponentConclusionRequest = (state: WalletState, action: WalletAction): AcknowledgeConclude | null => {
   if (state.stage !== FUNDING && state.stage !== RUNNING) { return null; }
   if (action.type !== MESSAGE_RECEIVED) { return null; }
 
@@ -98,7 +100,7 @@ const receivedValidOpponentConclusionRequest = (state: WalletState, action: Wall
   if (!validSignature(action.data, action.signature, opponentAddress)) { return null; }
   if (!validTransition(state, position)) { return null; }
 
-  return approveConclude({
+  return acknowledgeConclude({
     ...state,
     turnNum: position.turnNum,
     lastPosition: { data: action.data, signature: action.signature },

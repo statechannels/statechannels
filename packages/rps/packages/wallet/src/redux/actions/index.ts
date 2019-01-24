@@ -114,6 +114,7 @@ export const fundingDeclinedAcknowledged = () => ({
 });
 export type FundingDeclinedAcknowledged = ReturnType<typeof fundingDeclinedAcknowledged>;
 
+
 export const POST_FUND_SETUP_RECEIVED = 'WALLET.POST_FUND_SETUP_RECEIVED'; // when X blocks deep
 export const postFundSetupReceived = (data: string, signature: string) => ({
   type: POST_FUND_SETUP_RECEIVED as typeof POST_FUND_SETUP_RECEIVED,
@@ -387,4 +388,5 @@ export type WalletAction = (
   | ChallengePositionReceived
   | ApproveClose
   | FundingDeclinedAcknowledged
+  | ConcludeRejected
 );
