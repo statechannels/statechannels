@@ -13,7 +13,7 @@ import { sign, Channel, CountingGame } from 'fmg-core';
 
 import StateArtifact from '../build/contracts/State.json';
 import RulesArtifact from '../build/contracts/Rules.json';
-import testNitroAdjudicatorArtifact from '../build/contracts/testNitroAdjudicator.json';
+import testNitroAdjudicatorArtifact from '../build/contracts/TestNitroAdjudicator.json';
 import { getCountingGame } from './CountingGame';
 
 jest.setTimeout(20000);
