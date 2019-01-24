@@ -204,8 +204,6 @@ function* handleWalletMessage(walletMessage: WalletMessage, state: gameStates.Pl
       }
       break;
     case "CONCLUDE_REQUESTED":
-
-      // TODO: handle failure
       const conclusionChannel = createWalletEventChannel([Wallet.CONCLUDE_SUCCESS, Wallet.CONCLUDE_FAILURE]);
       Wallet.startConcludingGame(WALLET_IFRAME_ID);
       const concludeResponse = yield take(conclusionChannel);
@@ -219,7 +217,6 @@ function* handleWalletMessage(walletMessage: WalletMessage, state: gameStates.Pl
       }
       break;
     case "CHALLENGE_REQUESTED":
-      // TODO: handle failure and timeout?
       const challengeChannel = createWalletEventChannel([Wallet.CHALLENGE_COMPLETE]);
       Wallet.startChallenge(WALLET_IFRAME_ID);
       yield put(gameActions.messageSent());
@@ -258,7 +255,8 @@ function* validateMessage(data, signature) {
       const challengeChannel = createWalletEventChannel([Wallet.CHALLENGE_COMPLETE]);
       yield take(challengeChannel);
       return yield Wallet.validateSignature(WALLET_IFRAME_ID, data, signature);
-
+    } else {
+      throw new Error(err.error);
     }
   }
 }
@@ -271,7 +269,8 @@ function* signMessage(data) {
       const challengeChannel = createWalletEventChannel([Wallet.CHALLENGE_COMPLETE]);
       yield take(challengeChannel);
       return yield Wallet.signData(WALLET_IFRAME_ID, data);
-
+    } else {
+      throw new Error(err.error);
     }
   }
 }

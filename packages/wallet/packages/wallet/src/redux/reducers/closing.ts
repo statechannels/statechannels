@@ -41,7 +41,7 @@ export const closingReducer = (state: ClosingState, action: WalletAction): Walle
 const acknowledgeConcludeReducer = (state: states.AcknowledgeConclude, action: actions.WalletAction) => {
   switch (action.type) {
     case actions.CONCLUDE_APPROVED:
-      if (!ourTurn(state)) { return state; }
+      if (!ourTurn(state)) { return { ...state, displayOutbox: hideWallet(), messageOutbox: concludeFailure('Other', 'It is not the current user\'s turn') }; }
       const { positionData, positionSignature, sendMessageAction } = composeConcludePosition(state);
       const lastState = decode(state.lastPosition.data);
       if (lastState.stateType === State.StateType.Conclude) {
@@ -134,7 +134,7 @@ const approveCloseOnChainReducer = (state: states.ApproveCloseOnChain, action: a
 const approveConcludeReducer = (state: states.ApproveConclude, action: WalletAction) => {
   switch (action.type) {
     case actions.CONCLUDE_APPROVED:
-      if (!ourTurn(state)) { return state; }
+      if (!ourTurn(state)) { return { ...state, displayOutbox: hideWallet(), messageOutbox: concludeFailure('Other', 'It is not the current user\'s turn') }; }
 
       const { positionData, positionSignature, sendMessageAction } = composeConcludePosition(state);
       const lastState = decode(state.lastPosition.data);
@@ -179,13 +179,17 @@ const waitForOpponentConclude = (state: states.WaitForOpponentConclude, action: 
   switch (action.type) {
     case actions.MESSAGE_RECEIVED:
 
-      if (!action.signature) { return state; }
+      if (!action.signature) { return { ...state, displayOutbox: hideWallet(), messageOutbox: concludeFailure('Other', 'Signature is missing from the message.') }; }
 
       const opponentAddress = state.participants[1 - state.ourIndex];
-      if (!validSignature(action.data, action.signature, opponentAddress)) { return state; }
+      if (!validSignature(action.data, action.signature, opponentAddress)) {
+        return { ...state, displayOutbox: hideWallet(), messageOutbox: concludeFailure('Other', 'The signature provided is not valid.') };
+      }
       const concludePosition = decode(action.data);
       // check transition
-      if (!validTransition(state, concludePosition)) { return state; }
+      if (!validTransition(state, concludePosition)) {
+        return { ...state, displayOutbox: hideWallet(), messageOutbox: concludeFailure('Other', `The transition from ${state.type} to conclude is not valid.`) };
+      }
       if (state.adjudicator !== undefined) {
         return states.approveCloseOnChain({
           ...state,
