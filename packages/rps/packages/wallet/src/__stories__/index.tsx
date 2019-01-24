@@ -3,7 +3,7 @@ import { storiesOf } from '@storybook/react';
 import Wallet from '../containers/Wallet';
 import { Provider } from 'react-redux';
 import * as states from '../states';
-
+import '../index.scss';
 import * as scenarios from '../redux/reducers/__tests__/test-scenarios';
 
 
@@ -49,7 +49,7 @@ const fakeStore = (state) => ({
     alert(`Action ${action.type} triggered`);
     return action;
   },
-  getState: () => ({ wallet: state }),
+  getState: () => (state),
   subscribe: () => (() => {/* empty */ }),
   replaceReducer: () => { /* empty */ },
 });
@@ -57,7 +57,7 @@ const fakeStore = (state) => ({
 const testState = (state) => (
   () => (
     <Provider store={fakeStore(state)}>
-      <Wallet children={<div />} />
+      <Wallet />
     </Provider>
   )
 );
