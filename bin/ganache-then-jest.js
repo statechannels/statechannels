@@ -24,7 +24,7 @@ startGanache().then(() => {
     runJest().then((output) => {
       // startGanache does not exit on its own, so we have to exit the process manually
       // once jest has finished running
-      if (output.results.numFailedTests > 0) {
+      if (output.results.numFailedTestSuites > 0) {
           process.exit(1);
       } else {
           process.exit(0);
