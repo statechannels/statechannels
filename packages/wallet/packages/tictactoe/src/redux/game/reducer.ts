@@ -303,6 +303,14 @@ function waitingRoomReducer(
   }
 }
 
+function challengeReducer(gameState: states.PlayingState, messageState: MessageState): JointState {
+
+  messageState = { ...messageState, walletOutbox: { type: 'CHALLENGE_REQUESTED' } };
+
+  return { gameState, messageState };
+}
+
+
 function waitForGameConfirmationAReducer(
   gameState: states.WaitForGameConfirmationA,
   messageState: MessageState,
@@ -311,9 +319,7 @@ function waitForGameConfirmationAReducer(
   if (action.type === actions.RESIGN) {
     return resignationReducer(gameState, messageState);
   }
-  if (receivedConclude(action)) {
-    return opponentResignationReducer(gameState, messageState, action);
-  }
+  if (action.type === actions.CREATE_CHALLENGE) { return challengeReducer(gameState, messageState); }
   // only action we need to handle in this state is to receiving a PreFundSetupB
   if (action.type !== actions.POSITION_RECEIVED) {
     return { gameState, messageState };
@@ -345,6 +351,7 @@ function confirmGameBReducer(
   if (action.type === actions.RESIGN) {
     return resignationReducer(gameState, messageState);
   }
+  if (action.type === actions.CREATE_CHALLENGE) { return challengeReducer(gameState, messageState); }
   if (receivedConclude(action)) {
     return opponentResignationReducer(gameState, messageState, action);
   }
@@ -409,6 +416,7 @@ function waitForFundingReducer(
   if (action.type === actions.RESIGN) {
     return resignationReducer(gameState, messageState);
   }
+  if (action.type === actions.CREATE_CHALLENGE) { return challengeReducer(gameState, messageState); }
 
   if (action.type === actions.POSITION_RECEIVED) {
     const position = action.position;
@@ -739,11 +747,13 @@ function osPickMoveReducer(
 function xsWaitMoveReducer(
   gameState: states.XsWaitForOpponentToPickMove,
   messageState: MessageState,
-  action: actions.PositionReceived | actions.Resign
+  action: actions.PositionReceived | actions.Resign | actions.CreateChallenge
 ): JointState {
   if (action.type === actions.RESIGN) {
     return resignationReducer(gameState, messageState);
   }
+  if (action.type === actions.CREATE_CHALLENGE) { return challengeReducer(gameState, messageState); }
+
   if (receivedConclude(action)) {
     return opponentResignationReducer(gameState, messageState, action);
   }
@@ -807,11 +817,13 @@ function xsWaitMoveReducer(
 function osWaitMoveReducer(
   gameState: states.OsWaitForOpponentToPickMove,
   messageState: MessageState,
-  action: actions.PositionReceived | actions.Resign
+  action: actions.PositionReceived | actions.Resign | actions.CreateChallenge
 ): JointState {
   if (action.type === actions.RESIGN) {
     return resignationReducer(gameState, messageState);
   }
+  if (action.type === actions.CREATE_CHALLENGE) { return challengeReducer(gameState, messageState); }
+
   if (receivedConclude(action)) {
     return opponentResignationReducer(gameState, messageState, action);
   }
@@ -918,6 +930,7 @@ function playAgainReducer(
   if (action.type === actions.RESIGN) {
     return resignationReducer(gameState, messageState);
   }
+  if (action.type === actions.CREATE_CHALLENGE) { return challengeReducer(gameState, messageState); }
   if (receivedConclude(action)) {
     return opponentResignationReducer(gameState, messageState, action);
   }
@@ -953,6 +966,7 @@ function waitToPlayAgainReducer(
   if (action.type === actions.RESIGN) {
     return resignationReducer(gameState, messageState);
   }
+  if (action.type === actions.CREATE_CHALLENGE) { return challengeReducer(gameState, messageState); }
   if (receivedConclude(action)) {
     return opponentResignationReducer(gameState, messageState, action);
   }
