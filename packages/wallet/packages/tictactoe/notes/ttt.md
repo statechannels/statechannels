@@ -209,7 +209,7 @@ Having the `validTransition` contract coded in solidity, along with the contract
 The application needs to achieve multiple taks:
 
 - Present a front-end interface to users so that they can propose and accept games, make moves, and launch and respond to challenges
-- Sign, post and retrieve messages to instances of the app running on other player's clients (browsers). The messaging protocol could be almost anything: carrier-pigeon, SMS, semaphore. We are going to use a cloud-based database (firebase) for the purposes of this proof of concept. See [article on disruptive signing and ephemeral keys](https://github.com/magmo/apps/blob/master/packages/rps-poc/notes/how-to-handle-the-wallet.md).
+- Sign, post and retrieve messages to instances of the app running on other player's clients (browsers). The messaging protocol could be almost anything: carrier-pigeon, SMS, semaphore. We are going to use a cloud-based database (firebase) for the purposes of this proof of concept. See [article on disruptive signing and ephemeral keys](https://github.com/magmo/apps/blob/master/packages/rps/notes/how-to-handle-the-wallet.md).
 - Interact with the blockchain when necessary.
 
 Some of this funtionality will be extracted into a wallet, so that application/game developers do not need to do the heavy lifting.
@@ -253,7 +253,7 @@ interface BaseParams extends Base {
 
 the `any` type enables us to opt out of type checking (allowing data of any type to pass).
 
-There is likely a more elegant way of doing this. See https://github.com/magmo/rps-poc/commit/77a5b112434a197f19a416d36cf7c0d26641de34 .
+There is likely a more elegant way of doing this. See https://github.com/magmo/rps/commit/77a5b112434a197f19a416d36cf7c0d26641de34 .
 
 The pattern of defining nested interfaces, along with constructor functions that allow one to 'project out' the required paramters from a larger collection, is a pattern that we will be havily relying on.
 
