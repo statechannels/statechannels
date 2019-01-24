@@ -130,9 +130,10 @@ export const concludeSuccess = () => ({
   type: CONCLUDE_SUCCESS as typeof CONCLUDE_SUCCESS,
 });
 
-export const concludeFailure = (message: string) => ({
+export const concludeFailure = (reason: "UserDeclined" | "Other", error?: string) => ({
   type: CONCLUDE_FAILURE as typeof CONCLUDE_FAILURE,
-  message,
+  reason,
+  error,
 });
 
 export type ConcludeSuccess = ReturnType<typeof concludeSuccess>;
@@ -226,6 +227,7 @@ export type DisplayAction = ShowWallet | HideWallet;
 export type ResponseAction =
   InitializationSuccess |
   ConcludeSuccess |
+  ConcludeFailure |
   CloseSuccess |
   ValidationSuccess |
   ValidationFailure |

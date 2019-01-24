@@ -13,6 +13,14 @@ export const WAIT_FOR_CLOSE_INITIATION = 'WAIT_FOR_CLOSE_INITIATION';
 export const WAIT_FOR_CLOSE_SUBMISSION = 'WAIT_FOR_CLOSE_SUBMISSION';
 export const WAIT_FOR_CLOSE_CONFIRMED = 'WAIT_FOR_CLOSE_CONFIRMED';
 export const WAIT_FOR_OPPONENT_CLOSE = 'WAIT_FOR_OPPONENT_CLOSE';
+export const ACKNOWLEDGE_CONCLUDE = 'ACKNOWLEDGE_CONCLUDE';
+
+
+export interface AcknowledgeConclude extends AdjudicatorMightExist {
+  type: typeof ACKNOWLEDGE_CONCLUDE;
+  stage: typeof CLOSING;
+}
+
 export interface WaitForCloseConfirmed extends AdjudicatorExists, TransactionExists {
   type: typeof WAIT_FOR_CLOSE_CONFIRMED;
   stage: typeof CLOSING;
@@ -63,6 +71,7 @@ export interface WaitForOpponentClose extends AdjudicatorExists {
   stage: typeof CLOSING;
 }
 
+
 export function approveConclude<T extends AdjudicatorMightExist>(params: T): ApproveConclude {
   return { type: APPROVE_CONCLUDE, stage: CLOSING, ...adjudicatorMightExist(params) };
 }
@@ -96,7 +105,9 @@ export function waitForCloseConfirmed<T extends AdjudicatorExists & TransactionE
 export function waitForOpponentClose<T extends AdjudicatorExists>(params: T): WaitForOpponentClose {
   return { type: WAIT_FOR_OPPONENT_CLOSE, stage: CLOSING, ...adjudicatorExists(params) };
 }
-
+export function acknowledgeConclude<T extends AdjudicatorMightExist>(params: T): AcknowledgeConclude {
+  return { type: ACKNOWLEDGE_CONCLUDE, stage: CLOSING, ...adjudicatorMightExist(params) };
+}
 
 
 export type ClosingState = (
@@ -109,4 +120,5 @@ export type ClosingState = (
   | WaitForCloseSubmission
   | WaitForCloseConfirmed
   | WaitForOpponentClose
+  | AcknowledgeConclude
 );
