@@ -8,6 +8,7 @@ import RespondingContainer from './Responding';
 import ChallengingContainer from './Challenging';
 import WithdrawingContainer from './Withdrawing';
 import ClosingContainer from './Closing';
+import LandingPage from '../components/LandingPage';
 
 interface WalletProps {
   state: states.WalletState;
@@ -17,7 +18,6 @@ class Wallet extends PureComponent<WalletProps> {
 
   render() {
     const { state } = this.props;
-    console.log(state);
     switch (state.stage) {
       case states.FUNDING:
         return <FundingContainer state={state} />;
@@ -30,7 +30,7 @@ class Wallet extends PureComponent<WalletProps> {
       case states.CLOSING:
         return <ClosingContainer state={state} />;
       default:
-        return null;
+        return <LandingPage />;
     }
   }
 }
