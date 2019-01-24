@@ -101,5 +101,5 @@ Please use the Sublime/VS Code package _JsPrettier_ for formatting. Add the foll
 
 ## Problems?
 
-Please check [issues](https://github.com/magmo/rps-poc/issues), someone else may have had the same experience. You may find a solution -- if not, please add to or create an issue.
+Please check [issues](https://github.com/magmo/rps/issues), someone else may have had the same experience. You may find a solution -- if not, please add to or create an issue.
 
