@@ -204,11 +204,13 @@ function* handleWalletMessage(walletMessage: WalletMessage, state: gameStates.Pl
     case "CONCLUDE_REQUESTED":
 
       // TODO: handle failure
-      const conclusionChannel = createWalletEventChannel([Wallet.CONCLUDE_SUCCESS]);
+      const conclusionChannel = createWalletEventChannel([Wallet.CONCLUDE_SUCCESS, Wallet.CONCLUDE_FAILURE]);
       Wallet.startConcludingGame(WALLET_IFRAME_ID);
-      yield take(conclusionChannel);
-      yield put(gameActions.messageSent());
-      yield put(gameActions.exitToLobby());
+      const concludeResponse = yield take(conclusionChannel);
+      if (concludeResponse.type === Wallet.CONCLUDE_SUCCESS) {
+        yield put(gameActions.messageSent());
+        yield put(gameActions.exitToLobby());
+      }
       break;
     case "CHALLENGE_REQUESTED":
       // TODO: handle failure and timeout?
