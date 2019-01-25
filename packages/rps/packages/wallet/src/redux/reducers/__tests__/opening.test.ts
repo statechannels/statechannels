@@ -5,6 +5,7 @@ import * as actions from '../../actions';
 
 import { itTransitionsToStateType, itDoesntTransition } from './helpers';
 import * as scenarios from './test-scenarios';
+import { validationFailure, SIGNATURE_FAILURE } from 'wallet-client';
 
 const {
   preFundSetupAHex,
@@ -38,6 +39,7 @@ describe('when in WaitForChannel', () => {
     itTransitionsToStateType(states.WAIT_FOR_PRE_FUND_SETUP, updatedState);
   });
 
+
   describe('when an opponent sends a PreFundSetupA', () => {
     // preFundSetupA is A's move, so in this case we need to be player B
     const state = states.waitForChannel({ ...defaults, address: bsAddress, privateKey: bsPrivateKey });
@@ -48,12 +50,16 @@ describe('when in WaitForChannel', () => {
 
   });
 
-  describe('when an oppoent sends a PreFundSetupA but the signature is bad', () => {
+  describe('when an opponent sends a PreFundSetupA but the signature is bad', () => {
     const state = states.waitForChannel({ ...defaults, address: bsAddress, privateKey: bsPrivateKey });
     const action = actions.opponentPositionReceived(preFundSetupAHex, 'not-a-signature');
     const updatedState = walletReducer(state, action);
 
     itDoesntTransition(state, updatedState);
+    it(`sends a validation failed message`, () => {
+      expect(updatedState.messageOutbox).toEqual(validationFailure('InvalidSignature'));
+    });
+
   });
 
   describe('when we send in a a non-PreFundSetupA', () => {
@@ -62,6 +68,9 @@ describe('when in WaitForChannel', () => {
     const updatedState = walletReducer(state, action);
 
     itDoesntTransition(state, updatedState);
+    it(`sends a signature failed message`, () => {
+      expect(updatedState.messageOutbox!.type).toEqual(SIGNATURE_FAILURE);
+    });
   });
 });
 
@@ -95,10 +104,12 @@ describe('when in WaitForPreFundSetup', () => {
 
   describe('when an opponent sends a PreFundSetupB but the signature is bad', () => {
     const state = states.waitForPreFundSetup({ ...defaults2, ourIndex: 0 });
-    const action = actions.opponentPositionReceived(preFundSetupAHex, 'not-a-signature');
+    const action = actions.opponentPositionReceived(preFundSetupBHex, 'not-a-signature');
     const updatedState = walletReducer(state, action);
-
     itDoesntTransition(state, updatedState);
+    it(`sends a validation failed message`, () => {
+      expect(updatedState.messageOutbox).toEqual(validationFailure('InvalidSignature'));
+    });
   });
 
   describe('when we send in a a non-PreFundSetupB', () => {
@@ -107,6 +118,9 @@ describe('when in WaitForPreFundSetup', () => {
     const updatedState = walletReducer(state, action);
 
     itDoesntTransition(state, updatedState);
+    it(`sends a signature failed message`, () => {
+      expect(updatedState.messageOutbox!.type).toEqual(SIGNATURE_FAILURE);
+    });
   });
 
 });

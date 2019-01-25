@@ -75,19 +75,6 @@ export async function initializeWallet(iFrameId: string, userId: string): Promis
   return initPromise;
 }
 
-// TODO: Should this be part of funding? If not we should return a channelId
-/**
- * Opens a channel in the wallet so a game can be funded. This should be called before funding is started.
- * @param iFrameId The id of the embedded wallet iframe.
- * @param channel The channel to open in the wallet.
- */
-export function openChannel(iFrameId: string, channel: Channel): void {
-  const iFrame = document.getElementById(iFrameId) as HTMLIFrameElement;
-  const message = openChannelRequest(channel);
-  iFrame.contentWindow.postMessage(message, "*");
-
-}
-
 /**
  * Validates that data was signed by the opponent's wallet.
  * @param iFrameId The id of the embedded wallet iframe.
