@@ -1,8 +1,10 @@
 
-import { ResponseActionTypes as WalletEventTypes, ResponseAction as WalletEvent } from './interface/from-wallet';
 import { EventEmitter2 } from 'eventemitter2';
+import { WalletEventType, WalletEvent } from './wallet-events';
 
-// TODO: Type this so that we can specify the events that will be returned
+/**
+ * A wallet event listener that can be used to listen to the various [[WalletEvent]] that occur in the wallet.
+ */
 export class WalletEventListener {
   private eventEmitter: EventEmitter2;
 
@@ -17,15 +19,34 @@ export class WalletEventListener {
     });
   }
 
-  public subscribe(eventType: WalletEventTypes, eventHandler: (event: WalletEvent) => void) {
+  /**
+   * Subscribe an event handler to listen for when a specific [[WalletEvent]].
+   * @param eventType The [[WalletEventType]] of the event to listen for.
+   * @param eventHandler The event handler to subscribe to the event.
+   */
+  public subscribe(eventType: WalletEventType, eventHandler: (event: WalletEvent) => void) {
     this.eventEmitter.on(eventType, eventHandler);
   }
-  public unSubscribe(eventType: WalletEventTypes): void {
+
+  /**
+   * Removes all event listeners that were subscribed to listen for [[WalletEvent]].
+   * @param eventType The [[WalletEventType]] of the event to unsubscribe from.
+   */
+  public unSubscribe(eventType: WalletEventType): void {
     this.eventEmitter.removeAllListeners(eventType);
   }
+
+  /**
+   * Removes all subscribed event handlers.
+   */
   public unSubscribeAll() {
     this.eventEmitter.removeAllListeners();
   }
+
+  /**
+   * Subscribes an event handler for all [[WalletEvent]] that may be thrown.
+   * @param eventHandler The event handler to subscribe.
+   */
   public subscribeAll(eventHandler: (event: WalletEvent) => void) {
     this.eventEmitter.onAny((eventType, event) => eventHandler(event));
   }

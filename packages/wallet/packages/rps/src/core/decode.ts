@@ -4,7 +4,7 @@ import * as positions from './positions';
 import { Move } from './moves';
 import { GamePositionType } from './encode';
 import bnToHex from '../utils/bnToHex';
-import { decode as decodeState } from 'wallet-client';
+import { decode as decodeState } from 'wallet-client/lib/decode-utils';
 
 const PREFIX_CHARS = 2; // the 0x takes up 2 characters
 const CHARS_PER_BYTE = 2;

@@ -2,7 +2,7 @@ import { State } from 'fmg-core';
 
 import * as states from '../../states';
 import * as actions from '../actions';
-import { signatureSuccess, validationSuccess } from 'wallet-client/lib/interface/from-wallet';
+import { signatureSuccess, validationSuccess } from 'wallet-client/lib/wallet-events';
 
 import decode from '../../utils/decode-utils';
 import { unreachable } from '../../utils/reducer-utils';

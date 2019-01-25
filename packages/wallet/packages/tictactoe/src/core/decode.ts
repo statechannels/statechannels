@@ -1,5 +1,5 @@
 import { State } from 'fmg-core';
-import { decode as decodeState } from 'wallet-client';
+import { decode as decodeState } from 'wallet-client/lib/decode-utils';
 
 import * as positions from './positions';
 import { GamePositionType } from './encode';

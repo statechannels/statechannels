@@ -2,7 +2,7 @@ import { walletReducer } from '..';
 
 import * as states from '../../../states';
 import * as actions from '../../actions';
-import * as outgoing from 'wallet-client/lib/interface/from-wallet';
+import * as outgoing from 'wallet-client/lib/wallet-events';
 import * as TransactionGenerator from '../../../utils/transaction-generator';
 import * as SigningUtils from '../../../utils/signing-utils';
 import * as scenarios from './test-scenarios';

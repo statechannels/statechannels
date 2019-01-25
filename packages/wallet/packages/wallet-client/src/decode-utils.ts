@@ -1,3 +1,4 @@
+
 // TODO: This is a copy of decode from the wallet
 // This functionality should be pulled out to fmg-core so it can be properly shared
 import { Channel, State, } from 'fmg-core';
@@ -11,11 +12,18 @@ const CHARS_PER_BYTE = 2;
 const N_PLAYERS = 2;
 const CHANNEL_BYTES = 32 + 32 + 32 + 32 * N_PLAYERS; // type, nonce, nPlayers, [players]
 const STATE_BYTES = 32 + 32 + 32 + 32 * N_PLAYERS; // stateType, turnNum, stateCount, [balances]
+/**
+ * @hidden
+ */
 export const GAME_ATTRIBUTE_OFFSET = CHANNEL_BYTES + STATE_BYTES;
 
+/**
+ * @hidden
+ */
 function extractBN(hexString: string, byteOffset: number = 0, numBytes: number = 32) {
   return new BN(extractBytes(hexString, byteOffset, numBytes).substr(2), 16);
 }
+
 function extractInt(hexString: string, byteOffset: number = 0, numBytes: number = 32) {
   return parseInt(extractBytes(hexString, byteOffset, numBytes), 16);
 }
@@ -58,12 +66,16 @@ function extractBalances(hexString: string) {
   const bBal = extractBN(hexString, CHANNEL_BYTES + 4 * 32);
   return [aBal, bBal];
 }
-
+/**
+ * @hidden
+ */
 export function extractGameAttributes(hexString: string): string {
   const charOffset = PREFIX_CHARS + GAME_ATTRIBUTE_OFFSET * CHARS_PER_BYTE;
   return hexString.substr(charOffset);
 }
-
+/**
+ * @hidden
+ */
 export function decode(hexString) {
   const channel = extractChannel(hexString);
   const turnNum = extractTurnNum(hexString);

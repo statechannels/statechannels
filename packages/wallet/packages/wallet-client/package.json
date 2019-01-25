@@ -21,7 +21,8 @@
     "test": "echo \"Error: run tests from root\" && exit 1",
     "build": "npx tsc",
     "lint": "npx tslint -c tslint.json 'src/**/*.ts'",
-    "prepare": "npx tslint -c tslint.json 'src/**/*.ts' && npx tsc"
+    "prepare": "npx tslint -c tslint.json 'src/**/*.ts' && npx tsc",
+    "generateDocs": "npx typedoc --out ./docs --exclude '**/+(decode-utils|wallet-messages).ts'"
   },
   "bugs": {
     "url": "https://github.com/magmo/apps/issues"

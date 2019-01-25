@@ -1,16 +1,17 @@
 import { Channel } from 'fmg-core';
-import { INITIALIZATION_SUCCESS, INITIALIZATION_FAILURE, CHANNEL_OPENED, ChannelOpened, FUNDING_FAILURE, FUNDING_SUCCESS, FundingResponse, SIGNATURE_FAILURE, SIGNATURE_SUCCESS, SignatureResponse, VALIDATION_SUCCESS, VALIDATION_FAILURE, ValidationResponse, messageRequest, MESSAGE_REQUEST, SHOW_WALLET, HIDE_WALLET, CONCLUDE_FAILURE, CONCLUDE_SUCCESS } from './interface/from-wallet';
-import { openChannelRequest, initializeRequest, fundingRequest, signatureRequest, validationRequest, receiveMessage, concludeChannelRequest, createChallenge, respondToChallenge } from './interface/to-wallet';
+import { INITIALIZATION_SUCCESS, INITIALIZATION_FAILURE, CHANNEL_OPENED, ChannelOpened, FUNDING_FAILURE, FUNDING_SUCCESS, FundingResponse, SIGNATURE_FAILURE, SIGNATURE_SUCCESS, SignatureResponse, VALIDATION_SUCCESS, VALIDATION_FAILURE, ValidationResponse, messageRequest, MESSAGE_REQUEST, SHOW_WALLET, HIDE_WALLET, CONCLUDE_FAILURE, CONCLUDE_SUCCESS } from './wallet-events';
+import { openChannelRequest, initializeRequest, fundingRequest, signatureRequest, validationRequest, receiveMessage, concludeChannelRequest, createChallenge, respondToChallenge } from './messages-to-wallet';
 import BN from 'bn.js';
-import { WalletEventListener } from '.';
+
 
 /**
- * 
- * @param iframeId The id to create the iFrame with
- * @param walletUrl The url of the hosted wallet
- * @returns {HTMLIFrameElement} The iframe
+ * Creates an iframe element for the wallet to be embedded in the page. The wallet iframe will hide itself and only show when interaction with the wallet is necessary.
+ * @param iframeId The id for the iframe that will be created. This will be used in subsequent API calls to interact with the iframe.
+ * @param walletUrl An optional parameter to specify the url the iframe will use to load the wallet. This defaults to https://wallet.magmo.com.
+ * @returns {HTMLIFrameElement} The iframe element for the wallet that should be embedded in the page.
  */
-export function createWalletIFrame(iframeId: string, walletUrl: string): HTMLIFrameElement {
+export function createWalletIFrame(iframeId: string, walletUrl?: string): HTMLIFrameElement {
+  walletUrl = walletUrl || 'https://wallet.magmo.com';
   const iFrame = document.createElement("iframe");
   iFrame.src = walletUrl;
   iFrame.id = iframeId;
@@ -46,9 +47,10 @@ export function createWalletIFrame(iframeId: string, walletUrl: string): HTMLIFr
 
 
 /**
- * Initialized the wallet with a given user id.
- * The promise resolves when the wallet is initialized or an error occurs
- * The promise returns the wallet address.
+ * Initializes the wallet for a given user and provides a wallet address. This must be called before any other interaction with the wallet.
+ * @param iFrameId The id of the embedded wallet iframe.
+ * @param userId An id that is unique to the user who will be using the wallet. 
+ * @returns {Promise<string>} A promise that resolves with a wallet address generated for that user. 
  */
 export async function initializeWallet(iFrameId: string, userId: string): Promise<string> {
   const iFrame = document.getElementById(iFrameId) as HTMLIFrameElement;
@@ -73,20 +75,25 @@ export async function initializeWallet(iFrameId: string, userId: string): Promis
   return initPromise;
 }
 
-
+// TODO: Should this be part of funding? If not we should return a channelId
 /**
- * Opens the channel.
+ * Opens a channel in the wallet so a game can be funded. This should be called before funding is started.
+ * @param iFrameId The id of the embedded wallet iframe.
+ * @param channel The channel to open in the wallet.
  */
-// TODO: Can this be part of funding instead of it's own method
 export function openChannel(iFrameId: string, channel: Channel): void {
   const iFrame = document.getElementById(iFrameId) as HTMLIFrameElement;
   const message = openChannelRequest(channel);
   iFrame.contentWindow.postMessage(message, "*");
 
 }
+
 /**
- *  Validates signed data.
- * Promise resolves when the data is verified or an error occurs.
+ * Validates that data was signed by the opponent's wallet.
+ * @param iFrameId The id of the embedded wallet iframe.
+ * @param data The data that was signed.
+ * @param signature The signature to validate.
+ * @returns {Promise<Boolean>} A promise that resolves to whether the signature is valid for the data or not.
  */
 export async function validateSignature(iFrameId: string, data, signature: string): Promise<boolean> {
   const iFrame = document.getElementById(iFrameId) as HTMLIFrameElement;
@@ -113,8 +120,10 @@ export async function validateSignature(iFrameId: string, data, signature: strin
 }
 
 /**
- * Signs data with the wallet's private key. 
- * Promise resolves when a signature is received from the wallet or an error occurs.
+ * Signs data using the wallet's private key.
+ * @param iFrameId The id of the embedded wallet iframe.
+ * @param data The data for the wallet to sign.
+ * @returns {Promise<string>} A promise that resolves to the signature generated by the wallet.
  */
 export async function signData(iFrameId: string, data): Promise<string> {
   const iFrame = document.getElementById(iFrameId) as HTMLIFrameElement;
@@ -142,26 +151,36 @@ export async function signData(iFrameId: string, data): Promise<string> {
 }
 
 /**
- * Sends a message to the wallet.
- * This is used for communicating messages from the opponent's wallet to the current wallet.
+ * Sends a message to the wallet. This is used to send a message that was received from the opponent's wallet to the current user's wallet.
+ * @param iFrameId The id of the embedded wallet iframe.
+ * @param data The message to send to the wallet that was received from the opponent's wallet.
+ * @param signature The signature that was received from the opponent's wallet.
  */
-// TODO: Come up with a clearer name.
 export function messageWallet(iFrameId: string, data, signature: string) {
   const iFrame = document.getElementById(iFrameId) as HTMLIFrameElement;
   const message = receiveMessage(data, signature);
   iFrame.contentWindow.postMessage(message, '*');
 }
 
+/**
+ * Starts process of concluding the game. The wallet will communicate additional events during using the [[WalletEventListener]] during the conclusion process.
+ * @param iFrameId The id of the embedded wallet iframe.
+ */
 export function startConcludingGame(iFrameId: string): void {
-
   const iFrame = document.getElementById(iFrameId) as HTMLIFrameElement;
   const message = concludeChannelRequest();
   iFrame.contentWindow.postMessage(message, "*");
 }
 
-// TODO: Would it make sense to just accept an event handler as an argument instead of returning the event listener?
 /**
- * Starts the funding process. 
+ * Starts process of funding the game. The wallet will communicate additional events during using the [[WalletEventListener]] during the funding process.
+ * @param iFrameId The id of the embedded wallet iframe.
+ * @param channelId The id of the channel to fund.
+ * @param myAddress The user's wallet address.
+ * @param opponentAddress The opponent's wallet address.
+ * @param myBalance The user's balance at the beginning of the game.
+ * @param opponentBalance The opponent's balance at the beginning of the game.
+ * @param playerIndex Whether the player is the first or second player in the game.
  */
 export function startFunding(iFrameId: string,
   channelId: string,
@@ -176,12 +195,21 @@ export function startFunding(iFrameId: string,
   iFrame.contentWindow.postMessage(message, "*");
 }
 
+/**
+ * Starts a challenge in the wallet.The wallet will communicate additional events during using the [[WalletEventListener]] during the challenge process.
+ * @param iFrameId The id of the embedded wallet iframe.
+ */
 export function startChallenge(iFrameId: string) {
   const iFrame = document.getElementById(iFrameId) as HTMLIFrameElement;
   const message = createChallenge();
   iFrame.contentWindow.postMessage(message, "*");
 }
 
+/**
+ * Respond to a challenge when requested by the wallet.
+ * @param iFrameId The id of the embedded wallet iframe.
+ * @param responsePosition The response to the challenge from the other user.
+ */
 export function respondToOngoingChallenge(iFrameId: string, responsePosition: string) {
   const iFrame = document.getElementById(iFrameId) as HTMLIFrameElement;
   const message = respondToChallenge(responsePosition);
