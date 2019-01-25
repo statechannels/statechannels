@@ -1,10 +1,10 @@
 import { TransactionRequest } from "ethers/providers";
-import { ResponseAction, DisplayAction } from 'wallet-client/lib/interface/from-wallet';
+import { WalletEvent, DisplayAction } from 'wallet-client';
 import { Action } from 'redux';
 
 export interface Base {
   displayOutbox?: DisplayAction;
-  messageOutbox?: ResponseAction;
+  messageOutbox?: WalletEvent;
   transactionOutbox?: TransactionRequest;
 }
 

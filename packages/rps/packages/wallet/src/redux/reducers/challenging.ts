@@ -6,7 +6,7 @@ import * as actions from '../actions';
 import { WalletAction } from '../actions';
 import { unreachable } from '../../utils/reducer-utils';
 import { createForceMoveTransaction } from '../../utils/transaction-generator';
-import { challengePositionReceived, challengeComplete, hideWallet } from 'wallet-client/lib/interface/from-wallet';
+import { challengePositionReceived, challengeComplete, hideWallet } from 'wallet-client/lib/wallet-events';
 import { handleSignatureAndValidationMessages } from '../../utils/state-utils';
 
 export const challengingReducer = (state: states.ChallengingState, action: WalletAction): WalletState => {

@@ -6,7 +6,7 @@ import * as actions from '../../actions';
 import * as scenarios from './test-scenarios';
 import { itIncreasesTurnNumBy, itTransitionsToStateType } from './helpers';
 import * as TransactionGenerator from '../../../utils/transaction-generator';
-import * as outgoing from 'wallet-client/lib/interface/from-wallet';
+import * as outgoing from 'wallet-client/lib/wallet-events';
 import { ApproveFunding, WaitForDepositConfirmation } from '../../../states';
 
 
