@@ -1,5 +1,5 @@
 import { take, put } from "redux-saga/effects";
-import * as incoming from 'wallet-client/lib/interface/to-wallet';
+import * as incoming from 'wallet-client/lib/messages-to-wallet';
 
 import * as actions from "../actions";
 import { eventChannel } from 'redux-saga';

@@ -149,7 +149,7 @@ function* receiveFromFirebaseSaga(address) {
 }
 
 // TODO: Type this properly
-function createWalletEventChannel(walletEventTypes: Wallet.ResponseActionTypes[]) {
+function createWalletEventChannel(walletEventTypes: Wallet.WalletEventType[]) {
   const listener = new Wallet.WalletEventListener();
   return eventChannel(emit => {
     walletEventTypes.forEach(eventType => {
