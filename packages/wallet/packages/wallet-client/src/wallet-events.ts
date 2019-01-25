@@ -52,10 +52,13 @@ export type FundingResponse = FundingSuccess | FundingFailure;
 // ========
 
 /**
- * @ignore
- * Is this actually used?
+ * The type of event thrown when a channel is successfully opened.
  */
 export const CHANNEL_OPENED = 'WALLET.CHANNEL.OPENED';
+/**
+ * The type of event thrown when an error occurs trying to open a channel.
+ */
+export const CHANNEL_OPEN_FAILURE = 'WALLET.CHANNEL.OPEN_FAILURE';
 
 /**
  * @ignore
@@ -70,6 +73,12 @@ export const channelOpened = (channelId: string) => ({
   type: CHANNEL_OPENED as typeof CHANNEL_OPENED,
   channelId,
 });
+/**
+ * @ignore
+ */
+export const channelOpenFailure = () => ({
+  type: CHANNEL_OPEN_FAILURE as typeof CHANNEL_OPEN_FAILURE,
+});
 
 /**
  * @ignore
@@ -80,10 +89,14 @@ export const channelClosed = (walletId: string) => ({
 });
 
 /**
- * @ignore
- * Is this actually used?
+ * The event thrown when a channel is successfully opened 
  */
 export type ChannelOpened = ReturnType<typeof channelOpened>;
+
+/**
+ * The event thrown when a channel fails to open successfully.
+ */
+export type ChannelOpenFailure = ReturnType<typeof channelOpenFailure>;
 
 /**
  * @ignore
@@ -378,6 +391,7 @@ export type WalletEventType =
   typeof FUNDING_FAILURE |
   typeof FUNDING_SUCCESS |
   typeof CHANNEL_OPENED |
+  typeof CHANNEL_OPEN_FAILURE |
   typeof CHANNEL_CLOSED;
 
 /**
@@ -401,4 +415,5 @@ export type WalletEvent =
   ChallengeRejected |
   ChallengeResponseRequested |
   ChallengeComplete |
+  ChannelOpenFailure |
   MessageRequest;

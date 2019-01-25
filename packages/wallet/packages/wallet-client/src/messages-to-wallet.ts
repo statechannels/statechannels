@@ -37,36 +37,6 @@ export const fundingRequest = (
 });
 export type FundingRequest = ReturnType<typeof fundingRequest>;
 
-
-// CHANNELS
-// ========
-
-// Currently triggered in the app's messaging-service, immediately before funding is requested
-// Responsible for loading channel and kicking off the monitoring sagas.
-// TODO: remove - we shouldn't need this after the wallet refactor
-export const OPEN_CHANNEL_REQUEST = 'WALLET.CHANNEL.REQUEST.OPEN';
-export const openChannelRequest = (channel: Channel) => ({
-  type: OPEN_CHANNEL_REQUEST as typeof OPEN_CHANNEL_REQUEST,
-  channel,
-});
-export type OpenChannelRequest = ReturnType<typeof openChannelRequest>;
-
-export const CONCLUDE_CHANNEL_REQUEST = 'WALLET.CHANNEL.REQUEST.CONCLUDE';
-export const concludeChannelRequest = () => ({
-  type: CONCLUDE_CHANNEL_REQUEST as typeof CONCLUDE_CHANNEL_REQUEST,
-});
-export type ConcludeChannelRequest = ReturnType<typeof concludeChannelRequest>;
-
-// Currently called by the app's messaging-service, after withdrawal is requested.
-// Responsible for shutting down the sagas that openChannelRequest started.
-// TODO: remove - don't need after the refactor
-export const CLOSE_CHANNEL_REQUEST = 'WALLET.CHANNEL.REQUEST.CLOSE';
-export const closeChannelRequest = () => ({
-  type: CLOSE_CHANNEL_REQUEST as typeof CLOSE_CHANNEL_REQUEST,
-});
-export type CloseChannelRequest = ReturnType<typeof closeChannelRequest>;
-
-
 // VALIDATION
 // ==========
 

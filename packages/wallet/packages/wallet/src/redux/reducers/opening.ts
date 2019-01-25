@@ -2,7 +2,7 @@ import { State } from 'fmg-core';
 
 import * as states from '../../states';
 import * as actions from '../actions';
-import { signatureSuccess, validationSuccess } from 'wallet-client/lib/wallet-events';
+import { signatureSuccess, validationSuccess, signatureFailure, validationFailure } from 'wallet-client/lib/wallet-events';
 
 import decode from '../../utils/decode-utils';
 import { unreachable } from '../../utils/reducer-utils';
@@ -26,14 +26,22 @@ const waitForChannelReducer = (state: states.WaitForChannel, action: actions.Wal
       const data = action.data;
       const ownPosition = decode(data);
 
-      // all these checks will fail silently for the time being
       // check it's a PreFundSetupA
-      if (ownPosition.stateType !== State.StateType.PreFundSetup) { return state; }
-      if (ownPosition.stateCount !== 0) { return state; }
+      if (ownPosition.stateType !== State.StateType.PreFundSetup) {
+        // Since these checks are happening during a signature request we'll return a sig failure
+        return { ...state, messageOutbox: signatureFailure('Other', 'Expected a pre fund setup position.') };
+      }
+      if (ownPosition.stateCount !== 0) {
+        return { ...state, messageOutbox: signatureFailure('Other', 'Expected state count to 0.') };
+      }
+
 
       const ourAddress = ownPosition.channel.participants[0] as string;
 
-      if (ourAddress !== state.address) { return state; }
+      if (ourAddress !== state.address) {
+        return { ...state, messageOutbox: signatureFailure('Other', 'Address provided does not match the one stored in the wallet.') };
+      }
+
 
       const signature = signPositionHex(data, state.privateKey);
       // if so, unpack its contents into the state
@@ -54,16 +62,24 @@ const waitForChannelReducer = (state: states.WaitForChannel, action: actions.Wal
 
       // all these checks will fail silently for the time being
       // check it's a PreFundSetupA
-      if (opponentPosition.stateType !== State.StateType.PreFundSetup) { return state; }
-      if (opponentPosition.stateCount !== 0) { return state; }
+      if (opponentPosition.stateType !== State.StateType.PreFundSetup) {
+         return {...state, messageOutbox: validationFailure('Other','Expected a prefund setup position') };
+      }
+      if (opponentPosition.stateCount !== 0) {
+         return {...state, messageOutbox: validationFailure('Other','Expected state count to be 0') };
+      }
 
 
       const ourAddress2 = opponentPosition.channel.participants[1] as string;
       const opponentAddress2 = opponentPosition.channel.participants[0] as string;
 
-      if (!validSignature(action.data, action.signature, opponentAddress2)) { return state; }
+      if (!validSignature(action.data, action.signature, opponentAddress2)) {
+        return { ...state, messageOutbox: validationFailure('InvalidSignature') };
+      }
 
-      if (ourAddress2 !== state.address) { return state; }
+      if (ourAddress2 !== state.address) {
+        return { ...state, messageOutbox: validationFailure('Other', 'Address provided does not match the one stored in the wallet.') };
+      }
 
       // if so, unpack its contents into the state
       return states.waitForPreFundSetup({
@@ -89,10 +105,14 @@ const waitForPreFundSetupReducer = (state: states.WaitForPreFundSetup, action: a
       const data = action.data;
       const ownPosition = decode(data);
 
-      // all these checks will fail silently for the time being
       // check it's a PreFundSetupB
-      if (ownPosition.stateType !== State.StateType.PreFundSetup) { return state; }
-      if (ownPosition.stateCount !== 1) { return state; }
+      if (ownPosition.stateType !== State.StateType.PreFundSetup) {
+        return { ...state, messageOutbox: signatureFailure('Other', 'Expected a prefund setup position.') };
+
+      }
+      if (ownPosition.stateCount !== 1) {
+        return { ...state, messageOutbox: signatureFailure('Other', 'Expected state count to be 1.') };
+      }
 
       const signature = signPositionHex(data, state.privateKey);
 
@@ -108,14 +128,19 @@ const waitForPreFundSetupReducer = (state: states.WaitForPreFundSetup, action: a
     case actions.OPPONENT_POSITION_RECEIVED:
       const opponentPosition = decode(action.data);
 
-      // all these checks will fail silently for the time being
       // check it's a PreFundSetupB
-      if (opponentPosition.stateType !== State.StateType.PreFundSetup) { return state; }
-      if (opponentPosition.stateCount !== 1) { return state; }
+      if (opponentPosition.stateType !== State.StateType.PreFundSetup) {
+        return { ...state, messageOutbox: validationFailure('Other', 'Expected a prefund setup position.') };
+      }
 
+      if (opponentPosition.stateCount !== 1) {
+        return { ...state, messageOutbox: validationFailure('Other', 'Expected state count to be 1.') };
+      }
       const opponentAddress2 = state.participants[1 - state.ourIndex];
 
-      if (!validSignature(action.data, action.signature, opponentAddress2)) { return state; }
+      if (!validSignature(action.data, action.signature, opponentAddress2)) { 
+        return {...state, messageOutbox:validationFailure('InvalidSignature')};
+       }
 
       // if so, unpack its contents into the state
       return states.waitForFundingRequest({
