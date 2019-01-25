@@ -351,6 +351,9 @@ function waitForFundingReducer(
     });
     return { gameState: newGameState, messageState };
   }
+  if (action.type === actions.POSITION_RECEIVED) {
+    messageState = { ...messageState, actionToRetry: action };
+  }
 
   return { gameState, messageState };
 }
