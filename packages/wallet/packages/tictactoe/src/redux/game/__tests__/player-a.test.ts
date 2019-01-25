@@ -1,4 +1,4 @@
-import { gameReducer } from "../reducer";
+import { gameReducer, youWentLast } from "../reducer";
 import {
   Player,
   scenarios,
@@ -41,10 +41,14 @@ const {
   // playing7,
   playing8,
   draw,
-  resting,
 } = scenarios.standard;
 
-const noughtsabsolutevictory = scenarios.noughtsVictory.absolutevictory;
+const {
+  resting2,
+  resting3,
+} = scenarios.swapRoles;
+
+// const noughtsabsolutevictory = scenarios.noughtsVictory.absolutevictory;
 const noughtsconclude = scenarios.noughtsVictory.conclude;
 
 const {
@@ -281,11 +285,14 @@ describe("player A's app", () => {
     describe("if the player decides to continue", () => {
       const action = actions.playAgain();
       const updatedState = gameReducer({ messageState, gameState }, action);
-
-      itIncreasesTurnNumBy(0, { gameState, messageState }, updatedState);
+      if (!youWentLast(gameState)) {
+        itIncreasesTurnNumBy(1, { gameState, messageState }, updatedState);
+        itSends(resting2, updatedState);
+      }
+      else {
+        itIncreasesTurnNumBy(0, { gameState, messageState }, updatedState);
+      }
       itTransitionsTo(state.StateName.WaitToPlayAgain, updatedState);
-      // TODO check that whomever did not play last sends resting
-      //   (here we assume PlayerA = Xs and went last)
     });
 
   });
@@ -296,13 +303,18 @@ describe("player A's app", () => {
       ...draw,
       result: Result.Tie,
     });
-
     describe("when resting arrives", () => {
-      const action = actions.positionReceived(resting);
+      const action = actions.positionReceived(resting2);
       const updatedState = gameReducer({ messageState, gameState }, action);
-
-      itIncreasesTurnNumBy(2, { gameState, messageState }, updatedState);
-      itTransitionsTo(state.StateName.OsWaitForOpponentToPickMove, updatedState);
+      if (youWentLast(gameState)) {
+        itIncreasesTurnNumBy(2, { gameState, messageState }, updatedState);
+        itSends(resting3, updatedState);
+        itTransitionsTo(state.StateName.OsWaitForOpponentToPickMove, updatedState);
+      }
+      else {
+        itIncreasesTurnNumBy(1, { gameState, messageState }, updatedState);
+        itTransitionsTo(state.StateName.XsPickMove, updatedState);
+      }
     });
   });
 
@@ -325,25 +337,25 @@ describe("player A's app", () => {
     });
   });
 
-  describe("when in GameOver", () => {
-    const gameState = state.gameOver({
-      ...aProps,
-      ...noughtsabsolutevictory,
-      result: Result.YouLose,
-    });
+  // describe("when in GameOver", () => {
+  //   const gameState = state.gameOver({
+  //     ...aProps,
+  //     ...noughtsabsolutevictory,
+  //     result: Result.YouLose,
+  //   });
 
-    describe("when the player wants to withdraw their funds", () => {
-      const action = actions.withdrawalRequest();
-      const updatedState = gameReducer({ messageState, gameState }, action);
+  //   describe("when the player wants to withdraw their funds", () => {
+  //     const action = actions.withdrawalRequest();
+  //     const updatedState = gameReducer({ messageState, gameState }, action);
 
-      itTransitionsTo(state.StateName.WaitForWithdrawal, updatedState);
-      itIncreasesTurnNumBy(0, { gameState, messageState }, updatedState);
+  //     itTransitionsTo(state.StateName.WaitForWithdrawal, updatedState);
+  //     itIncreasesTurnNumBy(0, { gameState, messageState }, updatedState);
 
-      it("requests a withdrawal from the wallet", () => {
-        expect(updatedState.messageState.walletOutbox).toEqual({
-          type: "WITHDRAWAL_REQUESTED",
-        });
-      });
-    });
-  });
+  //     it("requests a withdrawal from the wallet", () => {
+  //       expect(updatedState.messageState.walletOutbox).toEqual({
+  //         type: "WITHDRAWAL_REQUESTED",
+  //       });
+  //     });
+  //   });
+  // });
 });

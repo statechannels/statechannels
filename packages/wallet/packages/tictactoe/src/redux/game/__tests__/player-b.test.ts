@@ -1,4 +1,4 @@
-import { gameReducer } from "../reducer";
+import { gameReducer, youWentLast } from "../reducer";
 import {
   Player,
   scenarios,
@@ -43,6 +43,11 @@ const {
 } = scenarios.standard;
 
 const {
+  resting2,
+  resting3,
+} = scenarios.swapRoles;
+
+const {
   libraryAddress,
   channelNonce,
   participants,
@@ -51,6 +56,7 @@ const {
   opponentName,
   bsAddress,
 } = scenarios.standard;
+
 const base = {
   libraryAddress,
   channelNonce,
@@ -256,4 +262,48 @@ describe("player B's app", () => {
       });
     });
   });
+
+  describe("when in PlayAgain", () => {
+    const gameState = state.playAgain({
+      ...bProps,
+      ...draw,
+      result: Result.Tie,
+    });
+
+    describe("if the player decides to continue", () => {
+      const action = actions.playAgain();
+      const updatedState = gameReducer({ messageState, gameState }, action);
+      if (!youWentLast(gameState)) {
+        itIncreasesTurnNumBy(1, { gameState, messageState }, updatedState);
+        itSends(resting2, updatedState);
+      }
+      else {
+        itIncreasesTurnNumBy(0, { gameState, messageState }, updatedState);
+      }
+      itTransitionsTo(state.StateName.WaitToPlayAgain, updatedState);
+    });
+
+  });
+
+  describe("when in Wait To Play Again", () => {
+    const gameState = state.waitToPlayAgain({
+      ...bProps,
+      ...draw,
+      result: Result.Tie,
+    });
+    describe("when resting arrives", () => {
+      const action = actions.positionReceived(resting2);
+      const updatedState = gameReducer({ messageState, gameState }, action);
+      if (youWentLast(gameState)) {
+        itIncreasesTurnNumBy(2, { gameState, messageState }, updatedState);
+        itSends(resting3, updatedState);
+        itTransitionsTo(state.StateName.OsWaitForOpponentToPickMove, updatedState);
+      }
+      else {
+        itIncreasesTurnNumBy(1, { gameState, messageState }, updatedState);
+        itTransitionsTo(state.StateName.XsPickMove, updatedState);
+      }
+    });
+  });
+
 });
