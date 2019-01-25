@@ -495,85 +495,26 @@ export const aRejectsGame = {
 };
 
 export const swapRoles = {
-  // TODO finish this!
   ...standard,
-  playing9: positions.Xplaying({
+  resting2: positions.resting({
     ...base,
-    turnNum: 4,
+    turnNum: 13,
+    balances: fiveFive,
+  }),
+  resting3: positions.resting({
+    ...base,
+    turnNum: 14,
+    balances: fiveFive,
+  }),
+  round2playing1: positions.Xplaying({
+    ...base,
+    turnNum: 14,
     noughts: 0b000000000,
     crosses: 0b100000000,
-    balances: sixFour,
-  }),
-  playing10: positions.Oplaying({
-    ...base,
-    turnNum: 5,
-    noughts: 0b000010000,
-    crosses: 0b100000000,
     balances: fourSix,
   }),
-  playing11: positions.Xplaying({
-    ...base,
-    turnNum: 6,
-    noughts: 0b000010000,
-    crosses: 0b100000001,
-    balances: sixFour,
-  }),
-  playing12: positions.Oplaying({
-    ...base,
-    turnNum: 7,
-    noughts: 0b000011000,
-    crosses: 0b100000001,
-    balances: fourSix,
-  }),
-  playing13: positions.Xplaying({
-    ...base,
-    turnNum: 8,
-    noughts: 0b000011000,
-    crosses: 0b100100001,
-    balances: sixFour,
-  }),
-  playing14: positions.Oplaying({
-    ...base,
-    turnNum: 9,
-    noughts: 0b000011100,
-    crosses: 0b100100001,
-    balances: fourSix,
-  }),
-  playing15: positions.Xplaying({
-    ...base,
-    turnNum: 10,
-    noughts: 0b000011100,
-    crosses: 0b101100001,
-    balances: sixFour,
-  }),
-  playing16: positions.Oplaying({
-    ...base,
-    turnNum: 11,
-    noughts: 0b010011100,
-    crosses: 0b101100001,
-    balances: fourSix,
-  }),
+
 };
-
-// export const bResignsAfterOneRound = {
-//   ...standard,
-//   conclude: positions.conclude({ ...base, turnNum: 7, balances: sixFour }),
-//   conclude2: positions.conclude({ ...base, turnNum: 8, balances: sixFour }),
-// };
-
-// export const insufficientFunds = {
-//   preFundSetupA: positions.preFundSetupB({ ...base, turnNum: 0, balances: nineOne, stateCount: 0 }),
-//   preFundSetupB: positions.preFundSetupB({ ...base, turnNum: 1, balances: nineOne, stateCount: 1 }),
-//   postFundSetupA: positions.postFundSetupA({ ...base, turnNum: 2, balances: nineOne, stateCount: 0 }),
-//   postFundSetupB: positions.postFundSetupB({ ...base, turnNum: 3, balances: nineOne, stateCount: 1 }),
-//   asMove,
-//   bsMove,
-//   propose: positions.proposeFromSalt({ ...base, turnNum: 4, balances: nineOne, asMove, salt }),
-//   accept: positions.accept({ ...base, turnNum: 5, balances: eightTwo, preCommit, bsMove }),
-//   reveal: positions.reveal({ ...base, turnNum: 6, balances: tenZero, bsMove, asMove, salt }),
-//   conclude: positions.conclude({ ...base, turnNum: 7, balances: tenZero }),
-//   conclude2: positions.conclude({ ...base, turnNum: 8, balances: tenZero }),
-// };
 
 export function build(
   customLibraryAddress: string,
