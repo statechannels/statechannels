@@ -88,7 +88,11 @@ export const respondToChallenge = (position: string) => ({
 });
 export type RespondToChallenge = ReturnType<typeof respondToChallenge>;
 
-
+export const CONCLUDE_CHANNEL_REQUEST = 'WALLET.CHANNEL.REQUEST.CONCLUDE';
+export const concludeChannelRequest = () => ({
+  type: CONCLUDE_CHANNEL_REQUEST as typeof CONCLUDE_CHANNEL_REQUEST,
+});
+export type ConcludeChannelRequest = ReturnType<typeof concludeChannelRequest>;
 // MESSAGING
 // =========
 
@@ -108,11 +112,9 @@ export type ReceiveMessage = ReturnType<typeof receiveMessage>;
 // Requests
 // ========
 export type RequestAction =
-  OpenChannelRequest |
-  CloseChannelRequest |
+  ConcludeChannelRequest |
   FundingRequest |
   SignatureRequest |
   ValidationRequest |
   WithdrawalRequest |
-  CreateChallengeRequest |
-  ConcludeChannelRequest;
+  CreateChallengeRequest;
