@@ -26,21 +26,6 @@ export function createWalletIFrame(iframeId: string, walletUrl?: string): HTMLIF
 
   iFrame.setAttribute('allowtransparency', 'true');
 
-  window.addEventListener('message', (event => {
-    if (event.data && event.data.type && event.data.type === SHOW_WALLET) {
-      iFrame.style.display = 'initial';
-      document.body.style.overflow = 'hidden';
-      iFrame.width = '100%';
-      iFrame.height = '100%';
-    }
-    if (event.data && event.data.type && event.data.type === HIDE_WALLET) {
-      iFrame.style.display = 'none';
-      document.body.style.overflow = 'initial';
-      iFrame.width = '0';
-      iFrame.height = '0';
-
-    }
-  }));
   return iFrame;
 }
 

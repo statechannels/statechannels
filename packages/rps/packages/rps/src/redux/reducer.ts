@@ -5,15 +5,15 @@ import { MetamaskState, metamaskReducer } from './metamask/reducer';
 import { gameReducer, JointState } from './game/reducer';
 import { OpenGameState } from './open-games/state';
 import { openGamesReducer } from './open-games/reducer';
-import { rulesReducer } from './global/reducer';
-import { RulesState } from './global/state';
+import { overlayReducer } from './global/reducer';
+import { OverlayState } from './global/state';
 
 export interface SiteState {
   login: LoginState;
   metamask: MetamaskState;
   openGames: OpenGameState;
   game: JointState;
-  rules: RulesState;
+  overlay: OverlayState;
 }
 
 export default combineReducers<SiteState>({
@@ -21,5 +21,5 @@ export default combineReducers<SiteState>({
   metamask: metamaskReducer,
   openGames: openGamesReducer,
   game: gameReducer,
-  rules: rulesReducer,
+  overlay: overlayReducer,
 });
