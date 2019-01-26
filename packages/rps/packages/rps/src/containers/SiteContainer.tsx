@@ -14,6 +14,7 @@ interface SiteProps {
   isAuthenticated: boolean;
   metamaskError: MetamaskError | null;
   loading: boolean;
+  walletVisible: boolean;
 }
 
 class Site extends React.PureComponent<SiteProps>{
@@ -36,6 +37,19 @@ class Site extends React.PureComponent<SiteProps>{
       component = <MetamaskErrorPage error={this.props.metamaskError} />;
     } else if (this.props.isAuthenticated) {
       component = <ApplicationContainer />;
+      const iFrame = document.getElementById(WALLET_IFRAME_ID) as HTMLIFrameElement;
+      if (this.props.walletVisible) {
+        iFrame.style.display = 'initial';
+        document.body.style.overflow = 'hidden';
+        iFrame.width = '100%';
+        iFrame.height = '100%';
+      }
+      else {
+        iFrame.style.display = 'none';
+        document.body.style.overflow = 'initial';
+        iFrame.width = '0';
+        iFrame.height = '0';
+      }
     } else {
       component = <HomePageContainer />;
     }
@@ -50,6 +64,7 @@ const mapStateToProps = (state: SiteState): SiteProps => {
     isAuthenticated: state.login && state.login.loggedIn,
     loading: state.metamask.loading,
     metamaskError: state.metamask.error,
+    walletVisible: state.overlay.walletVisible,
   };
 };
 
