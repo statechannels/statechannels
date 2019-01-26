@@ -333,10 +333,7 @@ export type WalletEventType =
   typeof VALIDATION_FAILURE |
   typeof VALIDATION_SUCCESS |
   typeof FUNDING_FAILURE |
-  typeof FUNDING_SUCCESS |
-  typeof CHANNEL_OPENED |
-  typeof CHANNEL_OPEN_FAILURE |
-  typeof CHANNEL_CLOSED;
+  typeof FUNDING_SUCCESS;
 
 /**
  * @ignore
