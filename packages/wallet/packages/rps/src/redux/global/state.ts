@@ -1,5 +1,6 @@
-export interface Rules {
-  visible: boolean;
+export interface Overlay {
+  rulesVisible: boolean;
+  walletVisible: boolean;
 }
 
-export type RulesState = Rules;
+export type OverlayState = Overlay;

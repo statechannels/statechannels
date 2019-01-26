@@ -5,6 +5,7 @@ import { reduxSagaFirebase } from '../../gateways/firebase';
 
 import { encode, decode, Player, positions } from '../../core';
 import * as gameActions from '../game/actions';
+import * as appActions from '../global/actions';
 import { MessageState, WalletMessage } from './state';
 import * as gameStates from '../game/state';
 import { Channel } from 'fmg-core';
@@ -27,7 +28,7 @@ export default function* messageSaga() {
   yield fork(exitGameSaga);
   yield fork(receiveChallengePositionFromWalletSaga);
   yield fork(receiveChallengeFromWalletSaga);
-
+  yield fork(recieveDisplayEventFromWalletSaga);
 }
 
 export function* sendWalletMessageSaga() {
@@ -236,6 +237,26 @@ function* receiveChallengeFromWalletSaga() {
 
   }
 }
+
+function* recieveDisplayEventFromWalletSaga() {
+  const displayChannel = createWalletEventChannel([Wallet.SHOW_WALLET, Wallet.HIDE_WALLET]);
+  while (true) {
+    const event = yield take(displayChannel);
+    switch (event.type) {
+      case Wallet.SHOW_WALLET:
+        yield put(appActions.showWallet());
+        break;
+      case Wallet.HIDE_WALLET:
+        yield put(appActions.hideWallet());
+        break;
+      default:
+        throw new Error(
+          'recieveDisplayFromWalletSaga: unexpected event'
+        );
+    }
+  }
+}
+
 function* receiveChallengePositionFromWalletSaga() {
   const challengeChannel = createWalletEventChannel([Wallet.CHALLENGE_POSITION_RECEIVED]);
   while (true) {

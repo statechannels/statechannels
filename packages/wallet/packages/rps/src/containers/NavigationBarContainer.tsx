@@ -9,14 +9,14 @@ import { SiteState } from '../redux/reducer';
 const mapStateToProps = (state: SiteState) => {
   const name = ('myName' in state.game.gameState) ? state.game.gameState.myName : "";
   return {
-    showRules: state.rules.visible,
+    showRules: state.overlay.rulesVisible,
     loginDisplayName: name,
   };
 };
 
 const mapDispatchToProps = {
   logoutRequest: loginActions.logoutRequest,
-  rulesRequest: globalActions.toggleVisibility,
+  rulesRequest: globalActions.toggleRulesVisibility,
 };
 
 export default connect(
