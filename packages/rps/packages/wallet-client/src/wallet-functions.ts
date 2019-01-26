@@ -1,6 +1,5 @@
-import { Channel } from 'fmg-core';
-import { INITIALIZATION_SUCCESS, INITIALIZATION_FAILURE, CHANNEL_OPENED, ChannelOpened, FUNDING_FAILURE, FUNDING_SUCCESS, FundingResponse, SIGNATURE_FAILURE, SIGNATURE_SUCCESS, SignatureResponse, VALIDATION_SUCCESS, VALIDATION_FAILURE, ValidationResponse, messageRequest, MESSAGE_REQUEST, SHOW_WALLET, HIDE_WALLET, CONCLUDE_FAILURE, CONCLUDE_SUCCESS } from './wallet-events';
-import { openChannelRequest, initializeRequest, fundingRequest, signatureRequest, validationRequest, receiveMessage, concludeChannelRequest, createChallenge, respondToChallenge } from './messages-to-wallet';
+import { INITIALIZATION_SUCCESS, INITIALIZATION_FAILURE, SIGNATURE_FAILURE, SIGNATURE_SUCCESS, SignatureResponse, VALIDATION_SUCCESS, VALIDATION_FAILURE, ValidationResponse, SHOW_WALLET, HIDE_WALLET } from './wallet-events';
+import { concludeChannelRequest, initializeRequest, fundingRequest, signatureRequest, validationRequest, receiveMessage, createChallenge, respondToChallenge } from './messages-to-wallet';
 import BN from 'bn.js';
 
 
