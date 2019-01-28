@@ -181,8 +181,6 @@ function* handleWalletMessage(walletMessage: WalletMessage, state: gameStates.Pl
       }
       break;
     case "FUNDING_REQUESTED":
-      // TODO: We need to close the channel at some point
-      Wallet.openChannel(WALLET_IFRAME_ID, channel);
       const myIndex = player === Player.PlayerA ? 0 : 1;
 
       const opponentAddress = participants[1 - myIndex];
