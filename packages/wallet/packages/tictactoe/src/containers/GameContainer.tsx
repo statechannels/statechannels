@@ -2,7 +2,7 @@ import React, { Fragment } from "react";
 import { connect } from "react-redux";
 
 import { SiteState } from "../redux/reducer";
-import { Marker } from "../core";
+import { Marker, Player } from "../core";
 import GameScreen from "../components/GameScreen";
 import ProfileContainer from "./ProfileContainer";
 import WaitingRoomPage from "../components/WaitingRoomPage";
@@ -18,7 +18,7 @@ import GameOverPage from "../components/GameOverPage";
 import WaitForWallet from "../components/WaitForWallet"; // WaitForFunding, maybe others?
 
 import { Marks } from "../core";
-import { GameState, StateName } from "../redux/game/state";
+import { GameState, StateName, PlayingState } from '../redux/game/state';
 import * as actions from "../redux/game/actions";
 
 interface GameProps {
@@ -30,7 +30,7 @@ interface GameProps {
   cancelOpenGame: () => void;
   resign: () => void;
   exitToLobby: () => void;
-  withdraw: () => void;
+  conclude: () => void;
 }
 
 function GameContainer(props: GameProps) {
@@ -49,8 +49,10 @@ function RenderGame(props: GameProps) {
     declineGame,
     playAgain,
     resign,
-    withdraw,
+    conclude,
   } = props;
+  const { player, turnNum } = (state as PlayingState);
+  const ourTurn = player === Player.PlayerA ? turnNum % 2 !== 0 : turnNum % 2 === 0;
   switch (state.name) {
     case StateName.NoName:
       return <ProfileContainer />;
@@ -184,7 +186,8 @@ function RenderGame(props: GameProps) {
             state.name === StateName.OpponentResigned ||
             state.name === StateName.GameOver
           }
-          withdraw={withdraw}
+          conclude={conclude}
+          ourTurn={ourTurn}
         />
       );
     case StateName.WaitForFunding:
@@ -206,10 +209,9 @@ const mapDispatchToProps = {
   confirmGame: actions.confirmGame,
   declineGame: actions.declineGame,
   playAgain: actions.playAgain,
-  createBlockchainChallenge: () => {/* TODO: Call create challenge on wallet */ },
-  resign: actions.resign,
   exitToLobby: actions.exitToLobby,
-  withdraw: actions.withdrawalRequest,
+  conclude: actions.resign,
+  resign: actions.resign,
 };
 
 // why does it think that mapStateToProps can return undefined??

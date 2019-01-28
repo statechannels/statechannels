@@ -7,12 +7,14 @@ import GameFooterContainer from "../containers/GameFooterContainer";
 import { Button, Modal, ModalBody } from "reactstrap";
 
 interface Props {
-  withdraw: () => void;
+  conclude: () => void;
   visible: boolean;
+  ourTurn: boolean;
 }
 
 export default class GameOverPage extends React.PureComponent<Props> {
   render() {
+    const { ourTurn } = this.props;
     return (
       <div className="w-100">
         <NavigationBarContainer />
@@ -25,14 +27,15 @@ export default class GameOverPage extends React.PureComponent<Props> {
           <ModalBody>
             <div className="game-over-content">
               <h1>The Game is over!</h1>
-              <div>You must withdraw your funds to exit the game.</div>
+              {ourTurn && <div>You must close the channel and withdraw your funds to exit the game.</div>}
               <Button
                 className="game-over-button"
-                onClick={this.props.withdraw}
+                onClick={this.props.conclude}
                 block={true}
               >
-                Withdraw Funds Now
-              </Button>
+                Close & Withdraw
+              </Button>}
+              {!ourTurn && <div>Waiting on the other player to close the channel so your funds can be withdrawn.</div>}
             </div>
           </ModalBody>
         </Modal>

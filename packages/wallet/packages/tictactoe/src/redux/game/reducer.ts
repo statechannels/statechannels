@@ -84,8 +84,6 @@ export const gameReducer: Reducer<JointState> = (
         gameState: states.xsPickChallengeMove(gameState),
         messageState,
       };
-    } else {
-      return state;
     }
   }
   // // apply the current action to the state
@@ -147,7 +145,8 @@ function singleActionReducer(state: JointState, action: actions.GameAction) {
     case states.StateName.XsWaitForOpponentToPickMove:
       if (
         action.type === actions.POSITION_RECEIVED ||
-        action.type === actions.RESIGN
+        action.type === actions.RESIGN || 
+        action.type === actions.CREATE_CHALLENGE 
       ) {
         return xsWaitMoveReducer(gameState, messageState, action);
       } else {
@@ -156,7 +155,8 @@ function singleActionReducer(state: JointState, action: actions.GameAction) {
     case states.StateName.OsWaitForOpponentToPickMove:
       if (
         action.type === actions.POSITION_RECEIVED ||
-        action.type === actions.RESIGN
+        action.type === actions.RESIGN || 
+        action.type === actions.CREATE_CHALLENGE 
       ) {
         return osWaitMoveReducer(gameState, messageState, action);
       } else {
@@ -319,7 +319,9 @@ function waitForGameConfirmationAReducer(
   if (action.type === actions.RESIGN) {
     return resignationReducer(gameState, messageState);
   }
-  if (action.type === actions.CREATE_CHALLENGE) { return challengeReducer(gameState, messageState); }
+  if (action.type === actions.CREATE_CHALLENGE) { 
+    return challengeReducer(gameState, messageState); 
+  }
   // only action we need to handle in this state is to receiving a PreFundSetupB
   if (action.type !== actions.POSITION_RECEIVED) {
     return { gameState, messageState };
