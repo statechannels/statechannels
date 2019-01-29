@@ -107,6 +107,13 @@ describe("player B's app", () => {
 
   describe("when in waitForFunding", () => {
     const gameState = state.waitForFunding({ ...bProps, ...preFundSetupB });
+    describe('when a position is received', () => {
+      const action = actions.positionReceived(playing1);
+      const updatedState = gameReducer({ messageState, gameState }, action);
+      it('stores the action in actionToRetry', () => {
+        expect(updatedState.messageState.actionToRetry).toEqual(action);
+      });
+  });
 
     describe("when funding is successful", () => {
       const action = actions.fundingSuccess(postFundSetupB);

@@ -417,7 +417,7 @@ function waitForFundingReducer(
 
   if (action.type === actions.POSITION_RECEIVED) {
     const position = action.position;
-    if (position.name !== positions.OPLAYING) {
+    if (position.name !== positions.XPLAYING) {
       return { gameState, messageState };
     }
     messageState = { ...messageState, actionToRetry: action };
