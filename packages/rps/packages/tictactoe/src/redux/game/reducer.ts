@@ -166,8 +166,6 @@ function singleActionReducer(state: JointState, action: actions.GameAction) {
       return playAgainReducer(gameState, messageState, action);
     case states.StateName.WaitToPlayAgain:
       return waitToPlayAgainReducer(gameState, messageState, action);
-    case states.StateName.InsufficientFunds:
-      return insufficientFundsReducer(gameState, messageState, action);
     case states.StateName.GameOver:
       return gameOverReducer(gameState, messageState, action);
     case states.StateName.WaitForWithdrawal:
@@ -354,9 +352,6 @@ function confirmGameBReducer(
     return resignationReducer(gameState, messageState);
   }
   if (action.type === actions.CREATE_CHALLENGE) { return challengeReducer(gameState, messageState); }
-  if (receivedConclude(action)) {
-    return opponentResignationReducer(gameState, messageState, action);
-  }
 
   if (
     action.type !== actions.CONFIRM_GAME &&
@@ -487,9 +482,7 @@ function xsPickMoveReducer(
   if (action.type === actions.RESIGN) {
     return resignationReducer(gameState, messageState);
   }
-  if (receivedConclude(action)) {
-    return opponentResignationReducer(gameState, messageState, action);
-  }
+
   const { player, balances, roundBuyIn, noughts, crosses, turnNum } = gameState;
   const newCrosses = crosses + action.marks;
   let newBalances: [string, string] = balances;
@@ -587,7 +580,7 @@ function xsPickMoveReducer(
       });
       pos = positions.victory({ ...newGameState });
     } else {
-      newGameState = states.insufficientFunds({
+      newGameState = states.gameOver({
         ...gameState,
         turnNum: turnNum + 1,
         crosses: newCrosses,
@@ -595,7 +588,7 @@ function xsPickMoveReducer(
         onScreenBalances: newBalances,
         result: Result.YouWin,
       });
-      pos = positions.conclude({ ...newGameState });
+      pos = positions.victory({ ...newGameState });
     }
   }
   if (gameState.name === states.StateName.XsPickChallengeMove) {
@@ -616,9 +609,6 @@ function osPickMoveReducer(
 ): JointState {
   if (action.type === actions.RESIGN) {
     return resignationReducer(gameState, messageState);
-  }
-  if (receivedConclude(action)) {
-    return opponentResignationReducer(gameState, messageState, action);
   }
   const { player, balances, roundBuyIn, noughts, crosses, turnNum } = gameState;
   const newNoughts = noughts + action.marks;
@@ -724,7 +714,7 @@ function osPickMoveReducer(
       });
       pos = positions.victory({ ...newGameState });
     } else {
-      newGameState = states.insufficientFunds({
+      newGameState = states.gameOver({
         ...gameState,
         turnNum: turnNum + 1,
         noughts: newNoughts,
@@ -732,7 +722,7 @@ function osPickMoveReducer(
         onScreenBalances: newBalances,
         result: Result.YouWin,
       });
-      pos = positions.conclude({ ...newGameState });
+      pos = positions.victory({ ...newGameState });
     }
   }
   if (gameState.name === states.StateName.OsPickChallengeMove) {
@@ -756,9 +746,6 @@ function xsWaitMoveReducer(
   }
   if (action.type === actions.CREATE_CHALLENGE) { return challengeReducer(gameState, messageState); }
 
-  if (receivedConclude(action)) {
-    return opponentResignationReducer(gameState, messageState, action);
-  }
   if (
     action.type === actions.POSITION_RECEIVED &&
     (action.position.name === positions.OPLAYING ||
@@ -774,7 +761,7 @@ function xsWaitMoveReducer(
     let newGameState:
       | states.XsPickMove
       | states.PlayAgain
-      | states.InsufficientFunds = states.xsPickMove({
+      | states.GameOver = states.xsPickMove({
       ...gameState,
       turnNum: turnNum + 1,
       noughts: receivedNoughts,
@@ -800,7 +787,7 @@ function xsWaitMoveReducer(
           turnNum: gameState.turnNum + 1,
         });
       } else {
-        newGameState = states.insufficientFunds({
+        newGameState = states.gameOver({
           ...gameState,
           noughts: receivedNoughts,
           balances: newBalances,
@@ -826,10 +813,6 @@ function osWaitMoveReducer(
   }
   if (action.type === actions.CREATE_CHALLENGE) { return challengeReducer(gameState, messageState); }
 
-  if (receivedConclude(action)) {
-    return opponentResignationReducer(gameState, messageState, action);
-  }
-
   if (
     action.type === actions.POSITION_RECEIVED &&
     (action.position.name === positions.XPLAYING ||
@@ -844,7 +827,7 @@ function osWaitMoveReducer(
     let newGameState:
       | states.OsPickMove
       | states.PlayAgain
-      | states.InsufficientFunds = states.osPickMove({
+      | states.GameOver = states.osPickMove({
       ...gameState,
       turnNum: turnNum + 1,
       crosses: receivedCrosses,
@@ -881,7 +864,7 @@ function osWaitMoveReducer(
           turnNum: gameState.turnNum + 1,
         });
       } else {
-        newGameState = states.insufficientFunds({
+        newGameState = states.gameOver({
           ...gameState,
           crosses: receivedCrosses,
           balances: newBalances,
@@ -933,9 +916,6 @@ function playAgainReducer(
     return resignationReducer(gameState, messageState);
   }
   if (action.type === actions.CREATE_CHALLENGE) { return challengeReducer(gameState, messageState); }
-  if (receivedConclude(action)) {
-    return opponentResignationReducer(gameState, messageState, action);
-  }
   const opponentAddress = states.getOpponentAddress(gameState);
   let newGameState: states.GameState;
   if (action.type === actions.POSITION_RECEIVED) {
@@ -969,9 +949,6 @@ function waitToPlayAgainReducer(
     return resignationReducer(gameState, messageState);
   }
   if (action.type === actions.CREATE_CHALLENGE) { return challengeReducer(gameState, messageState); }
-  if (receivedConclude(action)) {
-    return opponentResignationReducer(gameState, messageState, action);
-  }
   const opponentAddress = states.getOpponentAddress(gameState);
   let newGameState: states.GameState;
   if (
@@ -1022,13 +999,6 @@ function itsMyTurn(gameState: states.PlayingState) {
   return nextTurnNum % 2 === gameState.player;
 }
 
-function receivedConclude(action: actions.GameAction) {
-  return (
-    action.type === actions.POSITION_RECEIVED &&
-    action.position.name === positions.CONCLUDE
-  );
-}
-
 function resignationReducer(
   gameState: states.PlayingState,
   messageState: MessageState
@@ -1039,73 +1009,6 @@ function resignationReducer(
       walletOutbox: { type: "CONCLUDE_REQUESTED" },
     };
   }
-  return { gameState, messageState };
-}
-
-
-function insufficientFundsReducer(
-  gameState: states.InsufficientFunds,
-  messageState: MessageState,
-  action: actions.GameAction
-): JointState {
-  const opponentAddress = states.getOpponentAddress(gameState);
-  if (youWentLast) {
-    if (
-      action.type === actions.POSITION_RECEIVED && 
-      action.position.name === positions.CONCLUDE 
-      ) {
-        const newGameState = states.gameOver({ ...gameState, turnNum: gameState.turnNum + 2});
-        const conclude = positions.conclude( {...newGameState});
-        messageState = sendMessage(conclude, opponentAddress, messageState);
-        return { gameState: newGameState, messageState };
-      }
-  }
-  if (!youWentLast) {
-    if (action.type !== actions.POSITION_RECEIVED) {
-      const conclude = positions.conclude( {...gameState, turnNum: gameState.turnNum + 1});
-      messageState = sendMessage(conclude, opponentAddress, messageState);
-      return { gameState, messageState };
-    }
-    if (
-      action.type === actions.POSITION_RECEIVED && 
-      action.position.name === positions.CONCLUDE 
-      ) {
-        const newGameState2 = states.gameOver({ ...gameState, turnNum: gameState.turnNum + 2});
-        return { gameState: newGameState2, messageState };
-      }
-  }
-  return { gameState, messageState };
-}
-
-
-function opponentResignationReducer(
-  gameState: states.PlayingState,
-  messageState: MessageState,
-  action: actions.GameAction
-) {
-  if (action.type !== actions.POSITION_RECEIVED) {
-    return { gameState, messageState };
-  }
-
-  const position = action.position;
-  if (position.name !== positions.CONCLUDE) {
-    return { gameState, messageState };
-  }
-  // in taking the turnNum from their position, we're trusting the wallet to have caught
-  // the case where they resign when it isn't their turn
-  const { turnNum } = position;
-
-  // transition to OpponentResigned
-  gameState = states.opponentResigned({ ...gameState, turnNum: turnNum + 1 });
-
-  // send Conclude to our opponent
-  const opponentAddress = states.getOpponentAddress(gameState);
-  messageState = sendMessage(
-    positions.conclude(gameState),
-    opponentAddress,
-    messageState
-  );
-
   return { gameState, messageState };
 }
 
