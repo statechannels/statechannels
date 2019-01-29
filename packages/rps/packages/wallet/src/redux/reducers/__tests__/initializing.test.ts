@@ -26,5 +26,14 @@ describe('when in WaitForAddress', () => {
     const updatedState = walletReducer(state, action);
 
     itTransitionsToStateType(states.WAIT_FOR_CHANNEL, updatedState);
+
+  });
+
+  describe('when a metamask load error occurs',()=>{
+    const action = actions.metamaskLoadError();
+    const updatedState = walletReducer(state, action);
+
+    itTransitionsToStateType(states.METAMASK_ERROR, updatedState);
+
   });
 });
