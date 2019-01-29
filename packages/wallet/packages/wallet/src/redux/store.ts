@@ -7,7 +7,7 @@ const sagaMiddleware = createSagaMiddleware();
 import { walletReducer } from './reducers';
 import { sagaManager } from './sagas/saga-manager';
 
-const composeEnhancers = (window as any).__REDUX_DEVTOOLS_EXTENSION_COMPOSE__({ name: 'Wallet' }) || compose;
+const composeEnhancers = (window as any).__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 const enhancers = composeEnhancers(
   applyMiddleware(sagaMiddleware),
 );
