@@ -10,16 +10,11 @@ import {
 } from "../../../core";
 import * as actions from "../actions";
 import * as state from "../state";
-import BN from "bn.js";
-import bnToHex from "../../../utils/bnToHex";
+
 
 import {
-  // itSends,
   itTransitionsTo,
-  // itStoresAction,
   itIncreasesTurnNumBy,
-  // itHandlesResignLikeItsMyTurn,
-  // itHandlesResignLikeItsTheirTurn,
   itSends,
   itFullySwingsTheBalancesToA,
   itHalfSwingsTheBalancesToA,
@@ -30,15 +25,9 @@ import {
 const {
   preFundSetupA,
   preFundSetupB,
-  // postFundSetupA,
   postFundSetupB,
   playing1,
   playing2,
-  // playing3,
-  // playing4,
-  playing5,
-  // playing6,
-  // playing7,
   playing8,
   draw,
 } = scenarios.standard;
@@ -48,8 +37,7 @@ const {
   resting3,
 } = scenarios.swapRoles;
 
-// const noughtsabsolutevictory = scenarios.noughtsVictory.absolutevictory;
-const noughtsconclude = scenarios.noughtsVictory.conclude;
+const noughtsabsolutevictory = scenarios.noughtsVictory.absolutevictory;
 
 const {
   libraryAddress,
@@ -72,7 +60,6 @@ const base = {
 
 const messageState = {};
 const fiveFive = scenarios.fiveFive;
-const oneFive = [new BN(1), new BN(5)].map(bnToHex) as [string, string];
 
 describe("player A's app", () => {
   const aProps = {
@@ -260,7 +247,7 @@ describe("player A's app", () => {
         });
         const updatedState = gameReducer({ messageState, gameState }, action1);
 
-        itTransitionsTo(state.StateName.InsufficientFunds, updatedState);
+        itTransitionsTo(state.StateName.GameOver, updatedState);
         itIncreasesTurnNumBy(1, { gameState, messageState }, updatedState);
         itFullySwingsTheBalancesToB(
           roundBuyIn,
@@ -318,44 +305,19 @@ describe("player A's app", () => {
     });
   });
 
-  describe("when in InsufficientFunds", () => {
-    const gameState = state.insufficientFunds({
-      ...aProps,
-      ...playing5,
-      result: Result.YouLose,
-      roundBuyIn,
-      balances: oneFive,
-    });
+  describe('when in GameOver', () => {
+    const gameState = state.gameOver({ ...aProps, ...noughtsabsolutevictory, result: Result.YouLose });
 
-    describe("when Conclude arrives", () => {
-      const action = actions.positionReceived(noughtsconclude);
+    describe('when the player wants to finish the game', () => {
+      const action = actions.resign();
       const updatedState = gameReducer({ messageState, gameState }, action);
 
-      itIncreasesTurnNumBy(2, { gameState, messageState }, updatedState);
-      // itSends(noughtsabsolutevictory, updatedState);
-      itTransitionsTo(state.StateName.GameOver, updatedState);
+      itTransitionsTo(state.StateName.WaitForWithdrawal, updatedState);
+      itIncreasesTurnNumBy(0, { gameState, messageState }, updatedState);
+
+      it('requests a conclude from the wallet', () => {
+        expect(updatedState.messageState.walletOutbox).toEqual({ type: 'CONCLUDE_REQUESTED' });
+      });
     });
   });
-
-  // describe("when in GameOver", () => {
-  //   const gameState = state.gameOver({
-  //     ...aProps,
-  //     ...noughtsabsolutevictory,
-  //     result: Result.YouLose,
-  //   });
-
-  //   describe("when the player wants to withdraw their funds", () => {
-  //     const action = actions.withdrawalRequest();
-  //     const updatedState = gameReducer({ messageState, gameState }, action);
-
-  //     itTransitionsTo(state.StateName.WaitForWithdrawal, updatedState);
-  //     itIncreasesTurnNumBy(0, { gameState, messageState }, updatedState);
-
-  //     it("requests a withdrawal from the wallet", () => {
-  //       expect(updatedState.messageState.walletOutbox).toEqual({
-  //         type: "WITHDRAWAL_REQUESTED",
-  //       });
-  //     });
-  //   });
-  // });
 });
