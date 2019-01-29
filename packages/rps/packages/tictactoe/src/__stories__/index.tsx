@@ -240,6 +240,7 @@ const winnerGameOver = siteStateFromGameState(
     onScreenBalances: finneyFiveFive,
     turnNum: 6,
     balances: finneyFiveFive,
+    ourTurn: true,
   })
 );
 
@@ -254,6 +255,7 @@ const loserGameOver = siteStateFromGameState(
     onScreenBalances: finneyFiveFive,
     turnNum: 6,
     balances: finneyFiveFive,
+    ourTurn: false,
   })
 );
 

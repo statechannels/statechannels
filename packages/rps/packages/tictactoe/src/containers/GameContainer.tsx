@@ -10,7 +10,6 @@ import ConfirmGamePage from "../components/ConfirmGamePage";
 import GameProposedPage from "../components/GameProposedPage";
 import PlayAgain from "../components/PlayAgain";
 import PlayAgainWait from "../components/PlayAgainWait";
-import InsufficientFunds from "../components/InsufficientFunds";
 import WaitToResign from "../components/WaitToResign";
 import WaitForResignationAcknowledgement from "../components/WaitForResignationAcknowledgement";
 import GameOverPage from "../components/GameOverPage";
@@ -160,18 +159,6 @@ function RenderGame(props: GameProps) {
           marksMade={marksMade}
           playAgain={playAgain}
           resign={resign}
-        />
-      );
-    case StateName.InsufficientFunds:
-      return (
-        <InsufficientFunds
-          noughts={state.noughts}
-          crosses={state.crosses}
-          you={state.you}
-          player={state.player}
-          result={state.result}
-          onScreenBalances={state.onScreenBalances}
-          marksMade={marksMade}
         />
       );
     case StateName.WaitToResign:
