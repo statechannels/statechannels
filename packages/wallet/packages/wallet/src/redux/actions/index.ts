@@ -340,6 +340,12 @@ export const approveClose = () => ({
 });
 export type ApproveClose = ReturnType<typeof approveClose>;
 
+export const METAMASK_LOAD_ERROR = 'METAMASK_LOAD_ERROR';
+export const metamaskLoadError = () => ({
+  type: METAMASK_LOAD_ERROR as typeof METAMASK_LOAD_ERROR,
+});
+export type MetamaskLoadError = ReturnType<typeof metamaskLoadError>;
+
 // TODO: This is getting large, we should probably split this up into separate types for each stage
 export type WalletAction = (
   | LoggedIn
@@ -389,4 +395,5 @@ export type WalletAction = (
   | ApproveClose
   | FundingDeclinedAcknowledged
   | ConcludeRejected
+  | MetamaskLoadError
 );

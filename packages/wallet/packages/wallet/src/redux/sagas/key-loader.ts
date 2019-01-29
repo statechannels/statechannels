@@ -2,7 +2,7 @@ import { call, put, select } from 'redux-saga/effects';
 
 import { default as firebase, reduxSagaFirebase } from '../../../gateways/firebase';
 import ChannelWallet from '../../domain/ChannelWallet';
-import { keysLoaded } from '../actions';
+import { keysLoaded, metamaskLoadError } from '../actions';
 import { getProvider } from '../../utils/contract-utils';
 import { ethers } from 'ethers';
 import { WAIT_FOR_ADDRESS, WalletState } from '../../states';
@@ -24,10 +24,13 @@ export function* keyLoader() {
     // fetch again instead of using return val, just in case another wallet was created in the interim
     wallet = yield* fetchWallet(uid);
   }
-  // TODO: This should probably be its own saga? or at least its
-  const provider: ethers.providers.BaseProvider = yield call(getProvider);
-  const network = yield provider.getNetwork();
-  yield put(keysLoaded(wallet.address, wallet.privateKey, network.chainId));
+  if (typeof web3 === 'undefined') {
+  yield put(metamaskLoadError());
+  } else {
+      const provider: ethers.providers.BaseProvider = yield call(getProvider);
+      const network = yield provider.getNetwork();
+      yield put(keysLoaded(wallet.address, wallet.privateKey, network.chainId));
+    }
 }
 
 const walletTransformer = (data: any) =>

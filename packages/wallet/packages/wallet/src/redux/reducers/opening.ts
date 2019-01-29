@@ -63,10 +63,10 @@ const waitForChannelReducer = (state: states.WaitForChannel, action: actions.Wal
       // all these checks will fail silently for the time being
       // check it's a PreFundSetupA
       if (opponentPosition.stateType !== State.StateType.PreFundSetup) {
-         return {...state, messageOutbox: validationFailure('Other','Expected a prefund setup position') };
+        return { ...state, messageOutbox: validationFailure('Other', 'Expected a prefund setup position') };
       }
       if (opponentPosition.stateCount !== 0) {
-         return {...state, messageOutbox: validationFailure('Other','Expected state count to be 0') };
+        return { ...state, messageOutbox: validationFailure('Other', 'Expected state count to be 0') };
       }
 
 
@@ -138,9 +138,9 @@ const waitForPreFundSetupReducer = (state: states.WaitForPreFundSetup, action: a
       }
       const opponentAddress2 = state.participants[1 - state.ourIndex];
 
-      if (!validSignature(action.data, action.signature, opponentAddress2)) { 
-        return {...state, messageOutbox:validationFailure('InvalidSignature')};
-       }
+      if (!validSignature(action.data, action.signature, opponentAddress2)) {
+        return { ...state, messageOutbox: validationFailure('InvalidSignature') };
+      }
 
       // if so, unpack its contents into the state
       return states.waitForFundingRequest({

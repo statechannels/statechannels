@@ -7,6 +7,7 @@ import FundingContainer from './Funding';
 import RespondingContainer from './Responding';
 import ChallengingContainer from './Challenging';
 import WithdrawingContainer from './Withdrawing';
+import InitializingContainer from './Initializing';
 import ClosingContainer from './Closing';
 import LandingPage from '../components/LandingPage';
 
@@ -29,6 +30,8 @@ class Wallet extends PureComponent<WalletProps> {
         return <RespondingContainer state={state} />;
       case states.CLOSING:
         return <ClosingContainer state={state} />;
+      case states.INITIALIZING:
+        return <InitializingContainer state={state} />;
       default:
         return <LandingPage />;
     }

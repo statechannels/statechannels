@@ -6,12 +6,14 @@ import {
   WaitForAddress,
   WAIT_FOR_LOGIN,
   WAIT_FOR_ADDRESS,
-  waitForAddress
+  waitForAddress,
+  metaMaskError,
+  METAMASK_ERROR
 } from '../../states';
 
-import { WalletAction, KEYS_LOADED, LOGGED_IN } from '../actions';
+import { WalletAction, KEYS_LOADED, LOGGED_IN, METAMASK_LOAD_ERROR } from '../actions';
 import { unreachable } from '../../utils/reducer-utils';
-import { initializationSuccess } from 'wallet-client/lib/wallet-events';
+import { initializationSuccess, showWallet } from 'wallet-client/lib/wallet-events';
 
 
 export const initializingReducer = (state: InitializingState, action: WalletAction): WalletState => {
@@ -20,6 +22,10 @@ export const initializingReducer = (state: InitializingState, action: WalletActi
       return waitForLoginReducer(state, action);
     case WAIT_FOR_ADDRESS:
       return waitForAddressReducer(state, action);
+    case METAMASK_ERROR:
+      // We stay in the metamask error state until a change to 
+      // metamask settings forces a refresh 
+      return state;
     default:
       return unreachable(state);
   }
@@ -37,6 +43,8 @@ const waitForLoginReducer = (state: WaitForLogin, action: any) => {
 
 const waitForAddressReducer = (state: WaitForAddress, action: any) => {
   switch (action.type) {
+    case METAMASK_LOAD_ERROR:
+      return metaMaskError({ ...state, displayOutbox: showWallet() });
     case KEYS_LOADED:
       const { address, privateKey, networkId } = action;
       return waitForChannel({
