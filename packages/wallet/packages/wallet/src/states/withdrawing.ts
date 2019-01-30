@@ -8,13 +8,17 @@ export const APPROVE_WITHDRAWAL = 'APPROVE_WITHDRAWAL';
 export const WAIT_FOR_WITHDRAWAL_INITIATION = 'WAIT_FOR_WITHDRAWAL_INITIATION';
 export const WAIT_FOR_WITHDRAWAL_CONFIRMATION = 'WAIT_FOR_WITHDRAWAL_CONFIRMATION';
 export const ACKNOWLEDGE_WITHDRAWAL_SUCCESS = 'ACKNOWLEDGE_WITHDRAWAL_SUCCESS';
+export const WITHDRAW_TRANSACTION_FAILED = 'WITHDRAW_TRANSACTION_FAILED';
+
+export interface WithdrawTransactionFailed extends AdjudicatorExists {
+  type: typeof WITHDRAW_TRANSACTION_FAILED;
+  stage: typeof WITHDRAWING;
+}
 
 export interface ApproveWithdrawal extends AdjudicatorExists {
   type: typeof APPROVE_WITHDRAWAL;
   stage: typeof WITHDRAWING;
 }
-
-
 
 export interface WaitForWithdrawalInitiation extends AdjudicatorExists {
   type: typeof WAIT_FOR_WITHDRAWAL_INITIATION;
@@ -47,10 +51,13 @@ export function acknowledgeWithdrawalSuccess<T extends AdjudicatorExists>(params
   return { ...adjudicatorExists(params), type: ACKNOWLEDGE_WITHDRAWAL_SUCCESS, stage: WITHDRAWING };
 }
 
-
+export function withdrawTransactionFailed<T extends AdjudicatorExists>(params: T): WithdrawTransactionFailed {
+  return { type: WITHDRAW_TRANSACTION_FAILED, stage: WITHDRAWING, ...adjudicatorExists(params) };
+}
 export type WithdrawingState = (
   | ApproveWithdrawal
   | WaitForWithdrawalInitiation
   | WaitForWithdrawalConfirmation
   | AcknowledgeWithdrawalSuccess
+  | WithdrawTransactionFailed
 );

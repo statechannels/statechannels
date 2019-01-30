@@ -198,6 +198,12 @@ describe('start in WaitForCloseSubmission', () => {
     const updatedState = walletReducer(state, action);
     itTransitionsToStateType(states.WAIT_FOR_CLOSE_CONFIRMED, updatedState);
   });
+  describe('action taken: transaction submitted', () => {
+
+    const action = actions.transactionSubmissionFailed({ code: 0 });
+    const updatedState = walletReducer(state, action);
+    itTransitionsToStateType(states.CLOSE_TRANSACTION_FAILED, updatedState);
+  });
   describe('action taken: game concluded event', () => {
     const action = actions.gameConcludedEvent();
     const updatedState = walletReducer(state, action);
@@ -205,6 +211,23 @@ describe('start in WaitForCloseSubmission', () => {
   });
 });
 
+describe('start in closeTransactionFailed', () => {
+  const state = states.closeTransactionFailed({
+    ...defaultsA,
+    penultimatePosition: { data: aResignsAfterOneRound.concludeHex, signature: aResignsAfterOneRound.conclude2Sig },
+    lastPosition: { data: aResignsAfterOneRound.conclude2Hex, signature: aResignsAfterOneRound.conclude2Sig },
+    turnNum: 9,
+  });
+
+  describe('action taken: retry transaction', () => {
+    const createCloseTxMock = jest.fn();
+    Object.defineProperty(TransactionGenerator, 'createConcludeTransaction', { value: createCloseTxMock });
+    const action = actions.retryTransaction();
+    const updatedState = walletReducer(state, action);
+    itTransitionsToStateType(states.WAIT_FOR_CLOSE_SUBMISSION, updatedState);
+    expect(createCloseTxMock.mock.calls.length).toBe(1);
+  });
+});
 
 describe('start in WaitForCloseConfirmed', () => {
   const state = states.waitForCloseConfirmed({

@@ -29,9 +29,22 @@ export const challengingReducer = (state: states.ChallengingState, action: Walle
       return acknowledgeChallengeResponseReducer(state, action);
     case states.ACKNOWLEDGE_CHALLENGE_TIMEOUT:
       return acknowledgeChallengeTimeoutReducer(state, action);
+    case states.CHALLENGE_TRANSACTION_FAILED:
+      return challengeTransactionFailedReducer(state, action);
     default:
       return unreachable(state);
   }
+};
+
+const challengeTransactionFailedReducer = (state: states.ChallengeTransactionFailed, action: WalletAction) => {
+  switch (action.type) {
+    case actions.RETRY_TRANSACTION:
+      const { data: fromPosition, signature: fromSignature } = state.penultimatePosition;
+      const { data: toPosition, signature: toSignature } = state.lastPosition;
+      const transaction = createForceMoveTransaction(state.adjudicator, fromPosition, toPosition, fromSignature, toSignature);
+      return states.waitForChallengeInitiation(transaction, state);
+  }
+  return state;
 };
 
 const approveChallengeReducer = (state: states.ApproveChallenge, action: WalletAction): WalletState => {
@@ -61,6 +74,8 @@ const waitForChallengeSubmissionReducer = (state: states.WaitForChallengeSubmiss
   switch (action.type) {
     case actions.TRANSACTION_SUBMITTED:
       return states.waitForChallengeConfirmation({ ...state, transactionHash: action.transactionHash });
+    case actions.TRANSACTION_SUBMISSION_FAILED:
+      return states.challengeTransactionFailed(state);
     default:
       return state;
   }

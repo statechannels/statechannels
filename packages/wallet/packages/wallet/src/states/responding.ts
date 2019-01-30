@@ -11,6 +11,17 @@ export const INITIATE_RESPONSE = 'INITIATE_RESPONSE';
 export const WAIT_FOR_RESPONSE_CONFIRMATION = 'WAIT_FOR_RESPONSE_CONFIRMATION';
 export const WAIT_FOR_RESPONSE_SUBMISSION = 'WAIT_FOR_RESPONSE_SUBMISSION';
 export const ACKNOWLEDGE_CHALLENGE_COMPLETE = 'ACKNOWLEDGE_CHALLENGE_COMPLETE';
+export const RESPONSE_TRANSACTION_FAILED = 'RESPONSE_TRANSACTION_FAILED';
+
+export interface ResponseTransactionFailed extends ChallengeExists {
+  type: typeof RESPONSE_TRANSACTION_FAILED;
+  stage: typeof RESPONDING;
+}
+
+export function responseTransactionFailed<T extends ChallengeExists>(params: T): ResponseTransactionFailed {
+  return { type: RESPONSE_TRANSACTION_FAILED, stage: RESPONDING, ...challengeExists(params) };
+}
+
 export interface AcknowledgeChallenge extends ChallengeExists {
   type: typeof ACKNOWLEDGE_CHALLENGE;
   stage: typeof RESPONDING;
@@ -74,4 +85,5 @@ export type RespondingState = (
   | WaitForResponseSubmission
   | WaitForResponseConfirmation
   | AcknowledgeChallengeComplete
+  | ResponseTransactionFailed
 );

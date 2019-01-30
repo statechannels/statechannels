@@ -13,7 +13,6 @@ export function* transactionSender(transaction) {
   try {
     transactionResult = yield call([signer, signer.sendTransaction], transaction);
   } catch (err) {
-    console.error(err);
     yield put(transactionSubmissionFailed(err));
     return;
   }

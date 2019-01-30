@@ -10,12 +10,14 @@ import WaitForXConfirmation from '../components/WaitForXConfirmation';
 import WaitForXInitiation from '../components/WaitForXInitiation';
 import ApproveX from '../components/ApproveX';
 import { unreachable } from '../utils/reducer-utils';
+import TransactionFailed from '../components/TransactionFailed';
 
 interface Props {
   state: states.WithdrawingState;
   withdrawalApproved: (destinationAddress: string) => void;
   withdrawalRejected: () => void;
   withdrawalSuccessAcknowledged: () => void;
+  retryTransaction: () => void;
 }
 
 class WithdrawingContainer extends PureComponent<Props> {
@@ -25,6 +27,7 @@ class WithdrawingContainer extends PureComponent<Props> {
       withdrawalApproved,
       withdrawalRejected,
       withdrawalSuccessAcknowledged,
+      retryTransaction,
     } = this.props;
 
     switch (state.type) {
@@ -53,6 +56,8 @@ class WithdrawingContainer extends PureComponent<Props> {
             actionTitle="Return to app"
           />
         );
+      case states.WITHDRAW_TRANSACTION_FAILED:
+        return <TransactionFailed name='withdraw' retryAction={retryTransaction} />;
       default:
         return unreachable(state);
     }
@@ -63,6 +68,7 @@ const mapDispatchToProps = {
   withdrawalApproved: actions.withdrawalApproved,
   withdrawalRejected: actions.withdrawalRejected,
   withdrawalSuccessAcknowledged: actions.withdrawalSuccessAcknowledged,
+  retryTransaction: actions.retryTransaction,
 };
 
 // why does it think that mapStateToProps can return undefined??

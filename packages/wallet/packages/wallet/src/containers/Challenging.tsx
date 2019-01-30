@@ -12,6 +12,7 @@ import WaitForXConfirmation from '../components/WaitForXConfirmation';
 import WaitForXInitiation from '../components/WaitForXInitiation';
 import SubmitX from '../components/SubmitX';
 import { unreachable } from '../utils/reducer-utils';
+import TransactionFailed from '../components/TransactionFailed';
 
 interface Props {
   state: states.ChallengingState;
@@ -19,6 +20,7 @@ interface Props {
   challengeResponseAcknowledged: () => void;
   challengeApproved: () => void;
   challengeRejected: () => void;
+  retryTransaction: () => void;
 }
 
 class ChallengingContainer extends PureComponent<Props> {
@@ -29,6 +31,7 @@ class ChallengingContainer extends PureComponent<Props> {
       challengeResponseAcknowledged,
       challengeApproved,
       challengeRejected,
+      retryTransaction,
     } = this.props;
 
     switch (state.type) {
@@ -72,6 +75,9 @@ class ChallengingContainer extends PureComponent<Props> {
             actionTitle="Withdraw your funds"
           />
         );
+      case states.CHALLENGE_TRANSACTION_FAILED:
+        return <TransactionFailed name='challenge' retryAction={retryTransaction} />;
+
       default:
         return unreachable(state);
     }
@@ -83,6 +89,7 @@ const mapDispatchToProps = {
   challengeResponseAcknowledged: actions.challengeResponseAcknowledged,
   challengeApproved: actions.challengeApproved,
   challengeRejected: actions.challengeRejected,
+  retryTransaction: actions.retryTransaction,
 };
 
 export default connect(
