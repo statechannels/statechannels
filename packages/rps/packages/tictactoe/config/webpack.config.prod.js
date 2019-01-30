@@ -279,7 +279,7 @@ module.exports = {
       /.*\/build\/contracts\/.*\.json/,
       function (resource) {
         if (process.env.TARGET_NETWORK !== 'development') {
-          resource.request = resource.request.replace(/.*\/build\/contracts/, paths.appContractArtifacts);
+          resource.request = resource.request.replace(/.*\/build\/contracts/, paths.appPreBuiltContractArtifacts);
         }
       }),
     // Makes some environment variables available in index.html.
