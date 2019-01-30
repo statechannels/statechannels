@@ -120,8 +120,8 @@ module.exports = function (webpackEnv) {
     bail: isEnvProduction,
     devtool: isEnvProduction ?
       shouldUseSourceMap ?
-        'source-map' :
-        false : isEnvDevelopment && 'cheap-module-source-map',
+      'source-map' :
+      false : isEnvDevelopment && 'cheap-module-source-map',
     // These are the "entry points" to our application.
     // This means they will be the "root" imports that are included in JS bundle.
     entry: [
@@ -161,9 +161,9 @@ module.exports = function (webpackEnv) {
       // Point sourcemap entries to original disk location (format as URL on Windows)
       devtoolModuleFilenameTemplate: isEnvProduction ?
         info =>
-          path
-            .relative(paths.appSrc, info.absoluteResourcePath)
-            .replace(/\\/g, '/') : isEnvDevelopment &&
+        path
+        .relative(paths.appSrc, info.absoluteResourcePath)
+        .replace(/\\/g, '/') : isEnvDevelopment &&
         (info => path.resolve(info.absoluteResourcePath).replace(/\\/g, '/')),
     },
     optimization: {
@@ -321,7 +321,7 @@ module.exports = function (webpackEnv) {
                   // disable type checker - we will use it in fork plugin
                   transpileOnly: true,
                 },
-              },],
+              }, ],
             },
             // "postcss" loader applies autoprefixer to our CSS.
             // "css" loader resolves paths in CSS and adds assets as dependencies.
@@ -361,9 +361,9 @@ module.exports = function (webpackEnv) {
               test: sassRegex,
               exclude: sassModuleRegex,
               use: getStyleLoaders({
-                importLoaders: 2,
-                sourceMap: isEnvProduction && shouldUseSourceMap,
-              },
+                  importLoaders: 2,
+                  sourceMap: isEnvProduction && shouldUseSourceMap,
+                },
                 'sass-loader'
               ),
               // Don't consider CSS imports dead code even if the
@@ -377,11 +377,11 @@ module.exports = function (webpackEnv) {
             {
               test: sassModuleRegex,
               use: getStyleLoaders({
-                importLoaders: 2,
-                sourceMap: isEnvProduction && shouldUseSourceMap,
-                modules: true,
-                getLocalIdent: getCSSModuleLocalIdent,
-              },
+                  importLoaders: 2,
+                  sourceMap: isEnvProduction && shouldUseSourceMap,
+                  modules: true,
+                  getLocalIdent: getCSSModuleLocalIdent,
+                },
                 'sass-loader'
               ),
             },
@@ -412,21 +412,21 @@ module.exports = function (webpackEnv) {
         /.*\/build\/contracts\/.*\.json/,
         function (resource) {
           if (process.env.TARGET_NETWORK !== 'development') {
-            resource.request = resource.request.replace(/.*\/build\/contracts/, paths.appContractArtifacts);
+            resource.request = resource.request.replace(/.*\/build\/contracts/, paths.appPreBuiltContractArtifacts);
           }
         }),
       new webpack.EnvironmentPlugin({
         FIREBASE_PROJECT: isEnvProduction ? '' : 'tic-tac-toe-dev-3a21f',
         FIREBASE_API_KEY: isEnvProduction ? '' : 'AIzaSyAFlVSCTROvaGr4HcrnjpFhBGSkEMklcb8',
         TARGET_NETWORK: process.env.TARGET_NETWORK,
-        WALLET_URL: 'http://localhost:3000'
+        WALLET_URL: isEnvProduction ? 'https://wallet.magmo.com' : 'http://localhost:3000',
       }),
       // Generates an `index.html` file with the <script> injected.
       new HtmlWebpackPlugin(
         Object.assign({}, {
-          inject: true,
-          template: paths.appHtml,
-        },
+            inject: true,
+            template: paths.appHtml,
+          },
           isEnvProduction ? {
             minify: {
               removeComments: true,
@@ -441,7 +441,7 @@ module.exports = function (webpackEnv) {
               minifyURLs: true,
             },
           } :
-            undefined
+          undefined
         )
       ),
       // Inlines the webpack runtime script. This script is too small to warrant
