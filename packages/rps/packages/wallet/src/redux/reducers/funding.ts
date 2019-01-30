@@ -48,9 +48,38 @@ export const fundingReducer = (state: states.FundingState, action: actions.Walle
       return sendFundingDeclinedMessageReducer(state, action);
     case states.ACKNOWLEDGE_FUNDING_DECLINED:
       return acknowledgeFundingDeclinedReducer(state, action);
+    case states.DEPLOY_TRANSACTION_FAILED:
+      return deployTransactionFailedReducer(state, action);
+    case states.DEPOSIT_TRANSACTION_FAILED:
+      return depositTransactionFailedReducer(state, action);
     default:
       return unreachable(state);
   }
+};
+
+const deployTransactionFailedReducer = (state: states.DeployTransactionFailed, action: actions.WalletAction) => {
+  switch (action.type) {
+    case actions.RETRY_TRANSACTION:
+      const fundingAmount = getFundingAmount(state, state.ourIndex);
+      return states.aWaitForDeployToBeSentToMetaMask({
+        ...state,
+        transactionOutbox: createDeployTransaction(state.networkId, state.channelId, fundingAmount),
+      });
+  }
+  return state;
+};
+
+const depositTransactionFailedReducer = (state: states.DepositTransactionFailed, action: actions.WalletAction) => {
+  switch (action.type) {
+    case actions.RETRY_TRANSACTION:
+      const fundingAmount = getFundingAmount(state, state.ourIndex);
+      return states.bWaitForDepositToBeSentToMetaMask({
+        ...state,
+        adjudicator: state.adjudicator,
+        transactionOutbox: createDepositTransaction(state.adjudicator, fundingAmount),
+      });
+  }
+  return state;
 };
 
 const acknowledgeFundingDeclinedReducer = (state: states.AcknowledgeFundingDeclined, action: actions.WalletAction) => {
@@ -154,10 +183,7 @@ const aSubmitDeployToMetaMaskReducer = (state: states.ASubmitDeployInMetaMask, a
     case actions.TRANSACTION_SUBMITTED:
       return states.waitForDeployConfirmation({ ...state, transactionHash: action.transactionHash });
     case actions.TRANSACTION_SUBMISSION_FAILED:
-      return states.waitForChannel({
-        ...state,
-        messageOutbox: fundingFailure(state.channelId, "Other", action.error.message),
-      });
+      return states.deployTransactionFailed(state);
     case actions.MESSAGE_RECEIVED:
       if (action.data && action.data === 'FundingDeclined') {
         return states.acknowledgeFundingDeclined(state);
@@ -282,10 +308,7 @@ const bSubmitDepositInMetaMaskReducer = (state: states.BSubmitDepositInMetaMask,
     case actions.TRANSACTION_SUBMITTED:
       return states.waitForDepositConfirmation({ ...state, transactionHash: action.transactionHash });
     case actions.TRANSACTION_SUBMISSION_FAILED:
-      return states.waitForChannel({
-        ...state,
-        messageOutbox: fundingFailure(state.channelId, "Other", action.error.message),
-      });
+      return states.depositTransactionFailed(state);
     default:
       return state;
   }

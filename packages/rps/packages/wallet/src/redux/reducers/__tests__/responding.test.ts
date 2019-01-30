@@ -5,6 +5,8 @@ import * as actions from '../../actions';
 
 import { itTransitionsToStateType } from './helpers';
 import * as scenarios from './test-scenarios';
+import * as TransactionGenerator from '../../../utils/transaction-generator';
+
 const {
   asPrivateKey,
   revealHex,
@@ -104,7 +106,11 @@ describe('when in WAIT_FOR_RESPONSE_SUBMISSION', () => {
     const action = actions.transactionSubmitted('0x0');
     const updatedState = walletReducer(state, action);
     itTransitionsToStateType(states.WAIT_FOR_RESPONSE_CONFIRMATION, updatedState);
-
+  });
+  describe('when an error occurs when submitting a challenge response', () => {
+    const action = actions.transactionSubmissionFailed({ code: 0 });
+    const updatedState = walletReducer(state, action);
+    itTransitionsToStateType(states.RESPONSE_TRANSACTION_FAILED, updatedState);
   });
 });
 
@@ -118,13 +124,25 @@ describe('when in WAIT_FOR_RESPONSE_CONFIRMED', () => {
   });
 });
 
-
 describe('when in ACKNOWLEDGE_CHALLENGE_COMPLETE', () => {
   const state = states.acknowledgeChallengeComplete(defaults);
   describe('when the challenge is acknowledged as complete', () => {
     const action = actions.challengeResponseAcknowledged();
     const updatedState = walletReducer(state, action);
     itTransitionsToStateType(states.WAIT_FOR_UPDATE, updatedState);
+
+  });
+});
+
+describe('when in RESPONSE_TRANSACTION_FAILED', () => {
+  const state = states.responseTransactionFailed(defaults);
+  describe('when the transaction is retried', () => {
+    const action = actions.retryTransaction();
+    const createRespondTxMock = jest.fn();
+    Object.defineProperty(TransactionGenerator, 'createRespondWithMoveTransaction', { value: createRespondTxMock });
+    const updatedState = walletReducer(state, action);
+    itTransitionsToStateType(states.INITIATE_RESPONSE, updatedState);
+    expect(createRespondTxMock.mock.calls.length).toBe(1);
 
   });
 });

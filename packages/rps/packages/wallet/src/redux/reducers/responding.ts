@@ -33,10 +33,25 @@ export const respondingReducer = (state: RespondingState, action: WalletAction):
       return waitForResponseConfirmationReducer(state, action);
     case states.ACKNOWLEDGE_CHALLENGE_COMPLETE:
       return acknowledgeChallengeCompleteReducer(state, action);
+    case states.RESPONSE_TRANSACTION_FAILED:
+      return responseTransactionFailedReducer(state, action);
     default:
       return unreachable(state);
   }
 
+};
+
+const responseTransactionFailedReducer = (state: states.ResponseTransactionFailed, action: WalletAction) => {
+  switch (action.type) {
+    case actions.RETRY_TRANSACTION:
+      const { data, signature } = state.lastPosition;
+      const transaction = createRespondWithMoveTransaction(state.adjudicator, data, signature);
+      return states.initiateResponse({
+        ...state,
+        transactionOutbox: transaction,
+      });
+  }
+  return state;
 };
 
 export const acknowledgeChallengeReducer = (state: states.AcknowledgeChallenge, action: WalletAction): WalletState => {
@@ -114,6 +129,8 @@ export const waitForResponseSubmissionReducer = (state: states.WaitForResponseSu
 
     case actions.TRANSACTION_SUBMITTED:
       return states.waitForResponseConfirmation({ ...state, transactionHash: action.transactionHash });
+    case actions.TRANSACTION_SUBMISSION_FAILED:
+      return states.responseTransactionFailed(state);
     default:
       return state;
   }

@@ -19,6 +19,18 @@ export const B_WAIT_FOR_POST_FUND_SETUP = 'B_WAIT_FOR_POST_FUND_SETUP';
 export const ACKNOWLEDGE_FUNDING_SUCCESS = 'ACKNOWLEDGE_FUNDING_SUCCESS';
 export const SEND_FUNDING_DECLINED_MESSAGE = 'SEND_FUNDING_DECLINED_MESSAGE';
 export const ACKNOWLEDGE_FUNDING_DECLINED = 'ACKNOWLEDGE_FUNDING_DECLINED';
+export const DEPLOY_TRANSACTION_FAILED = 'DEPLOY_TRANSACTION_FAILED';
+export const DEPOSIT_TRANSACTION_FAILED = 'DEPOSIT_TRANSACTION_FAILED';
+
+export interface DeployTransactionFailed extends ChannelOpen {
+  type: typeof DEPLOY_TRANSACTION_FAILED;
+  stage: typeof FUNDING;
+}
+
+export interface DepositTransactionFailed extends AdjudicatorExists {
+  type: typeof DEPOSIT_TRANSACTION_FAILED;
+  stage: typeof FUNDING;
+}
 
 export interface SendFundingDeclinedMessage extends ChannelOpen {
   type: typeof SEND_FUNDING_DECLINED_MESSAGE;
@@ -156,6 +168,13 @@ export function acknowledgeFundingDeclined<T extends ChannelOpen>(params: T): Ac
 
 }
 
+export function deployTransactionFailed<T extends ChannelOpen>(params: T): DeployTransactionFailed {
+  return { type: DEPLOY_TRANSACTION_FAILED, stage: FUNDING, ...channelOpen(params) };
+}
+export function depositTransactionFailed<T extends AdjudicatorExists>(params: T): DepositTransactionFailed {
+  return { type: DEPOSIT_TRANSACTION_FAILED, stage: FUNDING, ...adjudicatorExists(params) };
+}
+
 export type FundingState = (
   | WaitForFundingRequest
   | ApproveFunding
@@ -172,4 +191,6 @@ export type FundingState = (
   | AcknowledgeFundingSuccess
   | SendFundingDeclinedMessage
   | AcknowledgeFundingDeclined
+  | DeployTransactionFailed
+  | DepositTransactionFailed
 );

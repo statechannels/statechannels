@@ -32,10 +32,26 @@ export const closingReducer = (state: ClosingState, action: WalletAction): Walle
       return waitForOpponentCloseReducer(state, action);
     case states.ACKNOWLEDGE_CONCLUDE:
       return acknowledgeConcludeReducer(state, action);
-
+    case states.CLOSE_TRANSACTION_FAILED:
+      return closeTransactionFailedReducer(state, action);
     default:
       return unreachable(state);
   }
+};
+
+const closeTransactionFailedReducer = (state: states.CloseTransactionFailed, action: actions.WalletAction) => {
+  switch (action.type) {
+    case actions.RETRY_TRANSACTION:
+      const { penultimatePosition: from, lastPosition: to } = state;
+      const transactionOutbox = createConcludeTransaction(
+        state.adjudicator,
+        from.data,
+        to.data,
+        from.signature,
+        to.signature);
+      return states.waitForCloseSubmission({ ...state, transactionOutbox });
+  }
+  return state;
 };
 
 const acknowledgeConcludeReducer = (state: states.AcknowledgeConclude, action: actions.WalletAction) => {
@@ -97,6 +113,8 @@ const waitForCloseInitiatorReducer = (state: states.WaitForCloseInitiation, acti
 
 const waitForCloseSubmissionReducer = (state: states.WaitForCloseSubmission, action: actions.WalletAction) => {
   switch (action.type) {
+    case actions.TRANSACTION_SUBMISSION_FAILED:
+      return states.closeTransactionFailed(state);
     case actions.TRANSACTION_SUBMITTED:
       return states.waitForCloseConfirmed({ ...state, transactionHash: action.transactionHash });
     case actions.GAME_CONCLUDED_EVENT:
