@@ -1,8 +1,14 @@
 module.exports = {
     startGanache: function () {
-        let argv = process.argv.slice(2);
-        let verbose = argv.indexOf('-v') >= 0
-        let deterministic = argv.indexOf('-d') >= 0
+        require("dotenv").config();
+        // TODO: This parsing should be done in the `start-ganache` binary.
+        // `startGanache` should instead accept an already parsed argv object.
+        // This would allow other binaries, such as ganache-then-jest,
+        // to more easily specify ganache options.
+        let argv = require('yargs').argv
+        let verbose = argv.v;
+        let deterministic = argv.d;
+        let network_id = argv.i || process.env.DEV_GANACHE_NETWORK_ID;
 
         process.env.DEV_GANACHE_PORT = process.env.DEV_GANACHE_PORT || 8545;
         //Default accounts to seed so we can have accounts with 1M ether for testing
@@ -32,11 +38,11 @@ module.exports = {
                 } else {
                     var ganacheServer = ganache.server({
                         port: process.env.DEV_GANACHE_PORT,
-                        network_id: 0,
+                        network_id: network_id,
                         accounts,
                         logger: console,
                         verbose: verbose,
-                        deterministic: deterministic
+                        deterministic: deterministic,
                     });
 
                     const {
