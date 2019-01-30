@@ -5,6 +5,7 @@ import * as actions from '../../actions';
 
 import { itTransitionsToStateType } from './helpers';
 import * as scenarios from './test-scenarios';
+import * as TransactionGenerator from '../../../utils/transaction-generator';
 
 const {
   asPrivateKey,
@@ -66,6 +67,25 @@ describe('when in WaitForWithdrawalInitiation', () => {
     const updatedState = walletReducer(state, action);
 
     itTransitionsToStateType(states.WAIT_FOR_WITHDRAWAL_CONFIRMATION, updatedState);
+  });
+  describe('and the transaction submission errors', () => {
+    const action = actions.transactionSubmissionFailed({ code: 0 });
+    const updatedState = walletReducer(state, action);
+
+    itTransitionsToStateType(states.WITHDRAW_TRANSACTION_FAILED, updatedState);
+  });
+});
+
+describe('when in withdrawTransactionFailed', () => {
+  describe('and the transaction is retried', () => {
+    const createWithdrawTxMock = jest.fn();
+    Object.defineProperty(TransactionGenerator, 'createWithdrawTransaction', { value: createWithdrawTxMock });
+    const state = states.withdrawTransactionFailed(defaults);
+    const action = actions.retryTransaction();
+    const updatedState = walletReducer(state, action);
+
+    itTransitionsToStateType(states.WAIT_FOR_WITHDRAWAL_INITIATION, updatedState);
+    expect(createWithdrawTxMock.mock.calls.length).toBe(1);
   });
 });
 

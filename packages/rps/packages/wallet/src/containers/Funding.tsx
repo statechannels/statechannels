@@ -14,13 +14,15 @@ import SubmitX from '../components/SubmitX';
 import ApproveX from '../components/ApproveX';
 import { unreachable } from '../utils/reducer-utils';
 import WaitForOtherPlayer from '../components/WaitForOtherPlayer';
+import TransactionFailed from '../components/TransactionFailed';
 
 interface Props {
   state: states.FundingState;
   fundingApproved: () => void;
   fundingRejected: () => void;
   fundingSuccessAcknowledged: () => void;
-  fundingDeclinedAcknowledged:()=> void;
+  fundingDeclinedAcknowledged: () => void;
+  retryTransactionAction: () => void;
 }
 
 class FundingContainer extends PureComponent<Props> {
@@ -31,6 +33,7 @@ class FundingContainer extends PureComponent<Props> {
       fundingRejected,
       fundingSuccessAcknowledged,
       fundingDeclinedAcknowledged,
+      retryTransactionAction,
     } = this.props;
 
     switch (state.type) {
@@ -90,6 +93,10 @@ class FundingContainer extends PureComponent<Props> {
         />);
       case states.SEND_FUNDING_DECLINED_MESSAGE:
         return null;
+      case states.DEPLOY_TRANSACTION_FAILED:
+        return <TransactionFailed name="deploy" retryAction={retryTransactionAction} />;
+      case states.DEPOSIT_TRANSACTION_FAILED:
+        return <TransactionFailed name="deposit" retryAction={retryTransactionAction} />;
       default:
         return unreachable(state);
     }
@@ -101,6 +108,7 @@ const mapDispatchToProps = {
   fundingRejected: actions.fundingRejected,
   fundingSuccessAcknowledged: actions.fundingSuccessAcknowledged,
   fundingDeclinedAcknowledged: actions.fundingDeclinedAcknowledged,
+  retryTransactionAction: actions.retryTransaction,
 };
 
 // why does it think that mapStateToProps can return undefined??

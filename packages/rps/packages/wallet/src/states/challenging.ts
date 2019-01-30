@@ -12,11 +12,26 @@ export const WAIT_FOR_CHALLENGE_CONFIRMATION = 'WAIT_FOR_CHALLENGE_CONFIRMATION'
 export const WAIT_FOR_RESPONSE_OR_TIMEOUT = 'WAIT_FOR_RESPONSE_OR_TIMEOUT';
 export const ACKNOWLEDGE_CHALLENGE_RESPONSE = 'ACKNOWLEDGE_CHALLENGE_RESPONSE';
 export const ACKNOWLEDGE_CHALLENGE_TIMEOUT = 'ACKNOWLEDGE_CHALLENGE_TIMEOUT';
+export const CHALLENGE_TRANSACTION_FAILED = 'CHALLENGE_TRANSACTION_FAILED';
+
+export interface ChallengeTransactionFailed extends AdjudicatorExists {
+  type: typeof CHALLENGE_TRANSACTION_FAILED;
+  stage: typeof CHALLENGING;
+}
+
+export function challengeTransactionFailed<T extends AdjudicatorExists>(params: T): ChallengeTransactionFailed {
+  return {
+    type: CHALLENGE_TRANSACTION_FAILED,
+    stage: CHALLENGING,
+    ...adjudicatorExists(params),
+  };
+}
 
 export interface ApproveChallenge extends AdjudicatorExists {
   type: typeof APPROVE_CHALLENGE;
   stage: typeof CHALLENGING;
 }
+
 
 export function approveChallenge<T extends AdjudicatorExists>(params: T): ApproveChallenge {
   return {
@@ -113,4 +128,5 @@ export type ChallengingState = (
   | AcknowledgeChallengeResponse
   | AcknowledgeChallengeTimeout
   | ApproveChallenge
+  | ChallengeTransactionFailed
 );

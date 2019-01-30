@@ -346,6 +346,12 @@ export const metamaskLoadError = () => ({
 });
 export type MetamaskLoadError = ReturnType<typeof metamaskLoadError>;
 
+export const RETRY_TRANSACTION = 'RETRY_TRANSACTION';
+export const retryTransaction = () => ({
+  type: RETRY_TRANSACTION as typeof RETRY_TRANSACTION,
+});
+export type RetryTransaction = ReturnType<typeof retryTransaction>;
+
 // TODO: This is getting large, we should probably split this up into separate types for each stage
 export type WalletAction = (
   | LoggedIn
@@ -396,4 +402,5 @@ export type WalletAction = (
   | FundingDeclinedAcknowledged
   | ConcludeRejected
   | MetamaskLoadError
+  | RetryTransaction
 );

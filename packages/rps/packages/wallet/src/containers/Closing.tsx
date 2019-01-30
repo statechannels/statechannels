@@ -11,6 +11,7 @@ import { unreachable } from '../utils/reducer-utils';
 import WaitForOtherPlayer from '../components/WaitForOtherPlayer';
 import WaitForXConfirmation from '../components/WaitForXConfirmation';
 import WaitForXInitiation from '../components/WaitForXInitiation';
+import TransactionFailed from '../components/TransactionFailed';
 
 interface Props {
   state: states.ClosingState;
@@ -19,6 +20,7 @@ interface Props {
   closeOnChain: () => void;
   closeSuccessAcknowledged: () => void;
   closedOnChainAcknowledged: () => void;
+  retryTransaction: () => void;
 }
 
 class ClosingContainer extends PureComponent<Props> {
@@ -30,6 +32,7 @@ class ClosingContainer extends PureComponent<Props> {
       closeSuccessAcknowledged,
       closedOnChainAcknowledged,
       closeOnChain,
+      retryTransaction,
     } = this.props;
 
     switch (state.type) {
@@ -91,6 +94,8 @@ class ClosingContainer extends PureComponent<Props> {
             actionTitle="Ok!"
           />
         );
+      case states.CLOSE_TRANSACTION_FAILED:
+        return <TransactionFailed name='conclude' retryAction={retryTransaction} />;
       default:
         return unreachable(state);
     }
@@ -103,6 +108,7 @@ const mapDispatchToProps = {
   closeSuccessAcknowledged: actions.closeSuccessAcknowledged,
   closedOnChainAcknowledged: actions.closedOnChainAcknowledged,
   closeOnChain: actions.approveClose,
+  retryTransaction: actions.retryTransaction,
 };
 
 export default connect(

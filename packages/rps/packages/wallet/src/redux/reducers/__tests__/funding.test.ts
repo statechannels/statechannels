@@ -184,7 +184,7 @@ describe('start in aSubmitDeployInMetaMask', () => {
     const action = actions.transactionSubmissionFailed({ code: "1234" });
     const updatedState = walletReducer(state, action);
 
-    itTransitionsToStateType(states.WAIT_FOR_CHANNEL, updatedState);
+    itTransitionsToStateType(states.DEPLOY_TRANSACTION_FAILED, updatedState);
   });
 
   describe('incoming action: Funding declined message received', () => {
@@ -240,7 +240,7 @@ describe('start in WaitForDeployConfirmation', () => {
 
 describe('start in AWaitForDeposit', () => {
   describe('incoming action: Funding declined message received', () => {
-  const testDefaults = { ...defaultsA, ...justReceivedPreFundSetupB };
+    const testDefaults = { ...defaultsA, ...justReceivedPreFundSetupB };
     const state = states.aWaitForDeposit(testDefaults);
     const action = actions.messageReceived("FundingDeclined");
     const updatedState = walletReducer(state, action);
@@ -312,7 +312,7 @@ describe('start in BSubmitDepositInMetaMask', () => {
     const action = actions.transactionSubmissionFailed({ code: "1234" });
     const updatedState = walletReducer(state, action);
 
-    itTransitionsToStateType(states.WAIT_FOR_CHANNEL, updatedState);
+    itTransitionsToStateType(states.DEPOSIT_TRANSACTION_FAILED, updatedState);
   });
 
 });
@@ -353,6 +353,34 @@ describe('start in WaitForDepositConfirmation', () => {
     itTransitionsToStateType(states.WAIT_FOR_DEPOSIT_CONFIRMATION, updatedState);
     itIncreasesTurnNumBy(0, state, updatedState);
     expect((updatedState as WaitForDepositConfirmation).unhandledAction).toEqual(action);
+  });
+});
+
+describe('start in depositTransactionFailed', () => {
+  describe('incoming action: retry transaction', () => {
+    const createDepositTxMock = jest.fn();
+    Object.defineProperty(TransactionGenerator, 'createDepositTransaction', { value: createDepositTxMock });
+    const testDefaults = { ...defaultsB, ...justReceivedPreFundSetupB };
+    const state = states.depositTransactionFailed(testDefaults);
+    const action = actions.retryTransaction();
+    const updatedState = walletReducer(state, action);
+
+    itTransitionsToStateType(states.B_WAIT_FOR_DEPOSIT_TO_BE_SENT_TO_METAMASK, updatedState);
+    expect(createDepositTxMock.mock.calls.length).toBe(1);
+  });
+});
+
+describe('start in deployTransactionFailure', () => {
+  describe('incoming action: retry transaction', () => {
+    const createDeployTxMock = jest.fn();
+    Object.defineProperty(TransactionGenerator, 'createDeployTransaction', { value: createDeployTxMock });
+    const testDefaults = { ...defaultsB, ...justReceivedPreFundSetupB };
+    const state = states.deployTransactionFailed(testDefaults);
+    const action = actions.retryTransaction();
+    const updatedState = walletReducer(state, action);
+
+    itTransitionsToStateType(states.A_WAIT_FOR_DEPLOY_TO_BE_SENT_TO_METAMASK, updatedState);
+    expect(createDeployTxMock.mock.calls.length).toBe(1);
   });
 });
 
