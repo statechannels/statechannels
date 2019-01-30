@@ -412,7 +412,7 @@ module.exports = function (webpackEnv) {
         /.*\/build\/contracts\/.*\.json/,
         function (resource) {
           if (process.env.TARGET_NETWORK !== 'development') {
-            resource.request = resource.request.replace(/.*\/build\/contracts/, paths.appContractArtifacts);
+            resource.request = resource.request.replace(/.*\/build\/contracts/, paths.appPreBuiltContractArtifacts);
           }
         }),
       new webpack.EnvironmentPlugin({

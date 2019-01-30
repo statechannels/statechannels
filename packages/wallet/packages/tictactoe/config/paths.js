@@ -67,7 +67,7 @@ const resolveModule = (resolveFn, filePath) => {
 
 // config after eject: we're in ./config/
 module.exports = {
-  appContractArtifacts: resolveApp('contracts/artifacts'),
+  appPreBuiltContractArtifacts: resolveApp('contracts/pre_built_artifacts'),
   appContracts: resolveApp('contracts'),
   buildContracts: resolveApp('build/contracts'),
   dotenv: resolveApp('.env'),
