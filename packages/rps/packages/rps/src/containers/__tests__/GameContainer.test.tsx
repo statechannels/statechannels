@@ -28,6 +28,10 @@ describe('GameContainer', () => {
           showWalletHeader: false,
         },
       },
+      overlay: {
+        rulesVisible: false,
+        walletVisible: false,
+      },
     };
     const store = mockStore(initialState);
     const component = mount(<GameContainer />, { context: { store } });
