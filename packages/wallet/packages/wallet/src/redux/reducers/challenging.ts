@@ -116,7 +116,7 @@ const acknowledgeChallengeResponseReducer = (state: states.AcknowledgeChallengeR
 const acknowledgeChallengeTimeoutReducer = (state: states.AcknowledgeChallengeTimeout, action: WalletAction): WalletState => {
   switch (action.type) {
     case actions.CHALLENGE_TIME_OUT_ACKNOWLEDGED:
-      return withdrawalStates.approveWithdrawal({ ...state, messageOutbox: challengeComplete(), displayOutbox: hideWallet() });
+      return withdrawalStates.approveWithdrawal({ ...state, messageOutbox: challengeComplete() });
     default:
       return state;
   }
