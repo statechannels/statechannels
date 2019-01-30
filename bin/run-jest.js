@@ -16,4 +16,10 @@ const {
     runJest
 } = require('../utils/runJest');
 
-runJest();
+runJest().then((output) => {
+    if (output.results.numFailedTests > 0) {
+        process.exit(1);
+    } else {
+        process.exit(0);
+    }
+});
