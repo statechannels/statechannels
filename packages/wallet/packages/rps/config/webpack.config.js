@@ -418,7 +418,6 @@ module.exports = function (webpackEnv) {
       new webpack.EnvironmentPlugin({
         FIREBASE_PROJECT: isEnvProduction ? 'rock-paper-scissors123' : 'rock-paper-scissors-dev',
         FIREBASE_API_KEY: isEnvProduction ? 'AIzaSyDulzMWkORgVPFwtxqQaTwOeNhOisGPtDs' : 'AIzaSyAlGe17xjJjfoJ_KDYjCREg7ZL4ns61Chc',
-        FIREBASE_SENDER_ID: '913007764573',
         TARGET_NETWORK: process.env.TARGET_NETWORK,
         WALLET_URL: isEnvProduction ? 'https://wallet.magmo.com' : 'http://localhost:3000',
       }),

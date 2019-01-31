@@ -417,8 +417,7 @@ module.exports = function (webpackEnv) {
         }),
       new webpack.EnvironmentPlugin({
         FIREBASE_PROJECT: isEnvProduction ? 'tic-tac-toe123' : 'tic-tac-toe-dev-3a21f',
-        FIREBASE_API_KEY: isEnvProduction ? 'AIzaSyBLmBfruupmeMDfE0YKPIqKps0fp3aMg94' : 'AIzaSyAFlVSCTROvaGr4HcrnjpFhBGSkEMklcb8',
-        FIREBASE_SENDER_ID: '913007764573',
+        FIREBASE_API_KEY: isEnvProduction ? 'AIzaSyBLmBfruupmeMDfE0YKPIqKps0fp3aMg94' : 'AIzaSyAFlVSCTROvaGr4HcrnjpFhBGSkEMklcb8',        
         TARGET_NETWORK: process.env.TARGET_NETWORK,
         WALLET_URL: isEnvProduction ? 'https://wallet.magmo.com' : 'http://localhost:3000',
       }),
