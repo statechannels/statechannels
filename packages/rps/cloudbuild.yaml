@@ -10,7 +10,7 @@ steps:
 - name: gcr.io/cloud-builders/gsutil
   args: ["-m", "rsync", "-r", "-c", "-d", "./packages/rps/build", "gs://demo.magmo.com"]
 - name: gcr.io/cloud-builders/gsutil
-  args: ["-m", "rsync", "-r", "-c", "-d", "./packages/ttt/build", "gs://ttt.magmo.com"]
+  args: ["-m", "rsync", "-r", "-c", "-d", "./packages/tictactoe/build", "gs://ttt.magmo.com"]
 options:
  machineType: 'N1_HIGHCPU_8'
   
