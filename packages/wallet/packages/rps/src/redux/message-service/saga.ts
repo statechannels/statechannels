@@ -171,7 +171,9 @@ function* handleWalletMessage(walletMessage: WalletMessage, state: gameStates.Pl
 
   switch (walletMessage.type) {
     case "RESPOND_TO_CHALLENGE":
-      if (state.name === gameStates.StateName.WaitForOpponentToPickMoveA || state.name === gameStates.StateName.WaitForRevealB) {
+      if (state.name === gameStates.StateName.WaitForOpponentToPickMoveA ||
+        state.name === gameStates.StateName.WaitForRevealB ||
+        state.name === gameStates.StateName.PickMove) {
         Wallet.respondToOngoingChallenge(WALLET_IFRAME_ID, encode(walletMessage.data));
         yield put(gameActions.messageSent());
         const challengeCompleteChannel = createWalletEventChannel([Wallet.CHALLENGE_COMPLETE]);
@@ -271,7 +273,7 @@ function* validateMessage(data, signature) {
   try {
     return yield Wallet.validateSignature(WALLET_IFRAME_ID, data, signature);
   } catch (err) {
-    if (err.type && err.type === 'WalletBusy') {
+    if (err.reason === 'WalletBusy') {
       const challengeChannel = createWalletEventChannel([Wallet.CHALLENGE_COMPLETE]);
       yield take(challengeChannel);
       return yield Wallet.validateSignature(WALLET_IFRAME_ID, data, signature);
@@ -285,7 +287,7 @@ function* signMessage(data) {
   try {
     return yield Wallet.signData(WALLET_IFRAME_ID, data);
   } catch (err) {
-    if (err.type && err.type === 'WalletBusy') {
+    if (err.reason === 'WalletBusy') {
       const challengeChannel = createWalletEventChannel([Wallet.CHALLENGE_COMPLETE]);
       yield take(challengeChannel);
       return yield Wallet.signData(WALLET_IFRAME_ID, data);
