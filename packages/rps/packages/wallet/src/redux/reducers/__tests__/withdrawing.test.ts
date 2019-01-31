@@ -6,6 +6,7 @@ import * as actions from '../../actions';
 import { itTransitionsToStateType } from './helpers';
 import * as scenarios from './test-scenarios';
 import * as TransactionGenerator from '../../../utils/transaction-generator';
+import * as SigningUtil from '../../../utils/signing-utils';
 
 const {
   asPrivateKey,
@@ -32,6 +33,7 @@ const defaults = {
   privateKey: asPrivateKey,
   networkId: 23213,
   transactionHash: '0x0',
+  userAddress: '0x0'
 };
 
 
@@ -40,15 +42,16 @@ describe('when in ApproveWithdrawal', () => {
 
   describe('and the user approves the withdrawal', () => {
     const destinationAddress = '0x123';
+    const createWithdrawTxMock = jest.fn();
+    Object.defineProperty(TransactionGenerator, 'createWithdrawTransaction', { value: createWithdrawTxMock });
+    const signMock = jest.fn().mockReturnValue('0x0');
+    Object.defineProperty(SigningUtil, 'signVerificationData', { value: signMock });
+
     const action = actions.withdrawalApproved(destinationAddress);
     const updatedState = walletReducer(state, action);
 
     itTransitionsToStateType(states.WAIT_FOR_WITHDRAWAL_INITIATION, updatedState);
-
-    it.skip('puts the withdrawal transaction in the outbox', () => {
-      expect(updatedState.transactionOutbox).toBe(expect.anything());
-      // todo
-    });
+    expect(createWithdrawTxMock.mock.calls.length).toBe(1);
   });
 
   describe('and the user rejects the withdrawal', () => {
@@ -80,6 +83,9 @@ describe('when in withdrawTransactionFailed', () => {
   describe('and the transaction is retried', () => {
     const createWithdrawTxMock = jest.fn();
     Object.defineProperty(TransactionGenerator, 'createWithdrawTransaction', { value: createWithdrawTxMock });
+    const signMock = jest.fn().mockReturnValue('0x0');
+    Object.defineProperty(SigningUtil, 'signVerificationData', { value: signMock });
+
     const state = states.withdrawTransactionFailed(defaults);
     const action = actions.retryTransaction();
     const updatedState = walletReducer(state, action);
