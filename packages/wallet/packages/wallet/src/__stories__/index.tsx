@@ -33,6 +33,7 @@ const defaults = {
   networkId: 123,
   challengeExpiry: 0,
   transactionHash: '0x0',
+  userAddress: '0x0',
 };
 const playerADefaults = {
   ...defaults,

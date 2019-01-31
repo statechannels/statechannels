@@ -31,8 +31,8 @@ const withdrawTransactionFailedReducer = (state: states.WithdrawTransactionFaile
   switch (action.type) {
     case actions.RETRY_TRANSACTION:
       const myAddress = state.participants[state.ourIndex];
-      const signature = signVerificationData(myAddress, myAddress, state.channelId, state.privateKey);
-      const transactionOutbox = createWithdrawTransaction(state.adjudicator, myAddress, myAddress, state.channelId, signature);
+      const signature = signVerificationData(myAddress, state.userAddress, state.channelId, state.privateKey);
+      const transactionOutbox = createWithdrawTransaction(state.adjudicator, myAddress, state.userAddress, state.channelId, signature);
       return states.waitForWithdrawalInitiation({ ...state, transactionOutbox });
   }
   return state;
@@ -42,9 +42,10 @@ const approveWithdrawalReducer = (state: states.ApproveWithdrawal, action: actio
   switch (action.type) {
     case actions.WITHDRAWAL_APPROVED:
       const myAddress = state.participants[state.ourIndex];
-      const signature = signVerificationData(myAddress, myAddress, state.channelId, state.privateKey);
-      const transactionOutbox = createWithdrawTransaction(state.adjudicator, myAddress, myAddress, state.channelId, signature);
-      return states.waitForWithdrawalInitiation({ ...state, transactionOutbox });
+      console.log('addresses ', myAddress, action.destinationAddress);
+      const signature = signVerificationData(myAddress, action.destinationAddress, state.channelId, state.privateKey);
+      const transactionOutbox = createWithdrawTransaction(state.adjudicator, myAddress, action.destinationAddress, state.channelId, signature);
+      return states.waitForWithdrawalInitiation({ ...state, transactionOutbox, userAddress: action.destinationAddress });
     case actions.WITHDRAWAL_REJECTED:
       return states.acknowledgeCloseSuccess(state);
     default:
