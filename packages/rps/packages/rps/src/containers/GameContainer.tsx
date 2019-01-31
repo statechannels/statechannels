@@ -92,6 +92,7 @@ function RenderGame(props: GameProps) {
       );
 
     case StateName.PlayAgain:
+    case StateName.ChallengePlayAgain:
       return (
         <PlayAgain
           yourMove={state.myMove}

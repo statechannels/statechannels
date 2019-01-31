@@ -11,7 +11,10 @@ function mapStateToProps(state: SiteState) {
   const gameState = state.game.gameState as PlayingState;
   const { player, turnNum } = gameState;
   const isNotOurTurn = player === Player.PlayerA ? turnNum % 2 === 0 : turnNum % 2 !== 0;
-  const canChallenge = gameState.name === StateName.WaitForOpponentToPickMoveA || gameState.name === StateName.WaitForOpponentToPickMoveB;
+  const canChallenge =
+    gameState.name === StateName.WaitForRestingA ||
+    gameState.name === StateName.WaitForOpponentToPickMoveA ||
+    gameState.name === StateName.WaitForOpponentToPickMoveB;
   const challengeOngoing = gameState.name === "PICK_CHALLENGE_MOVE";
   return {
     isNotOurTurn,
