@@ -108,7 +108,7 @@
     "test:app": "node scripts/test.js --env=jsdom",
     "test:truffle": "node scripts/test_truffle.js",
     "deployContracts": "npx deploy-contracts",
-    "test:ci": "DEV_GANACHE_PORT=8503 run-s 'test:truffle --all --ci' 'test:app --all --ci --runInBand' build",
+    "test:ci": "DEV_GANACHE_PORT=8503 run-s build 'test:truffle --all --ci' 'test:app --all --ci --runInBand'",
     "storybook": "start-storybook -p 9001 -c .storybook",
     "truffle:migrate": "npx deploy-contracts",
     "ganache:start": "npx start-ganache"
