@@ -14,21 +14,27 @@ process.on('unhandledRejection', err => {
   throw err;
 });
 
-const { runJest } = require('../utils/runJest');
-const { deployContracts } = require('../utils/deployContracts');
-const { startGanache } = require('../utils/startGanache');
-
+const {
+  runJest
+} = require('../utils/runJest');
+const {
+  deployContracts
+} = require('../utils/deployContracts');
+const {
+  startGanache
+} = require('../utils/startGanache');
+let argv = require('yargs').argv;
 console.log(`Using port ${process.env.DEV_GANACHE_PORT} for Ganache.`);
-startGanache().then(() => {
+startGanache(argv).then(() => {
   deployContracts().then(() => {
     runJest().then((output) => {
       // startGanache does not exit on its own, so we have to exit the process manually
       // once jest has finished running
       if (output.results.numFailedTestSuites > 0) {
-          process.exit(1);
+        process.exit(1);
       } else {
-          process.exit(0);
+        process.exit(0);
       }
-      })
+    })
   });
 });
