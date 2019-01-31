@@ -7,7 +7,7 @@ const config = {
   databaseURL: `https://${process.env.FIREBASE_PROJECT}.firebaseio.com`,
   projectId: process.env.FIREBASE_PROJECT,
   storageBucket: "",
-  messagingSenderId: "913007764573",
+  messagingSenderId: process.env.FIREBASE_SENDER_ID,
 };
 
 const fire = firebase.initializeApp(config);
@@ -15,4 +15,4 @@ export const reduxSagaFirebase = new ReduxSagaFirebase(fire);
 export const authProvider = new firebase.auth.GoogleAuthProvider();
 export default fire;
 
-export const  serverTimestamp = firebase.database.ServerValue.TIMESTAMP;
+export const serverTimestamp = firebase.database.ServerValue.TIMESTAMP;
