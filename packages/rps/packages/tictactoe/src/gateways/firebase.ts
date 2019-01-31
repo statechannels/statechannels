@@ -7,7 +7,7 @@ const config = {
   databaseURL: `https://${process.env.FIREBASE_PROJECT}.firebaseio.com`,
   projectId: process.env.FIREBASE_PROJECT,
   storageBucket: "tic-tac-toe-dev-3a21f.appspot.com",
-  messagingSenderId: "706533094816",
+  messagingSenderId: "205164424590",
 };
 
 
