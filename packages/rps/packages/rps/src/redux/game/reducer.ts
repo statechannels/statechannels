@@ -55,6 +55,12 @@ export const gameReducer: Reducer<JointState> = (state = emptyJointState,
         gameState: states.pickChallengeMove(gameState),
         messageState,
       };
+    } else if (state.gameState.name === states.StateName.PlayAgain) {
+      const { messageState, gameState } = state;
+      return {
+        gameState: states.challengePlayAgain(gameState),
+        messageState,
+      };
     } else {
       return state;
     }
@@ -117,6 +123,8 @@ function singleActionReducer(state: JointState, action: actions.GameAction) {
       return waitForWithdrawalReducer(gameState, messageState, action);
     case states.StateName.PickChallengeMove:
       return pickChallengeMoveReducer(gameState, messageState, action);
+    case states.StateName.ChallengePlayAgain:
+      return challengePlayAgainReducer(gameState, messageState, action);
     default:
       throw new Error("Unreachable code");
   }
@@ -602,6 +610,34 @@ function waitForRevealBReducer(gameState: states.WaitForRevealB, messageState: M
 
     return { gameState: newGameState2, messageState };
   }
+}
+
+function challengePlayAgainReducer(gameState: states.ChallengePlayAgain, messageState: MessageState, action: actions.GameAction): JointState {
+  switch (action.type) {
+    // case actions.RESIGN: // handled globally
+    // case actions.OPPONENT_RESIGNED: // handled globally
+    case actions.PLAY_AGAIN:
+      if (gameState.player === Player.PlayerA) {
+        // transition to WaitForResting
+        const newGameState = states.waitForRestingA(gameState);
+
+        return { gameState: newGameState, messageState };
+      } else {
+        // transition to PickMove
+        const { turnNum } = gameState;
+        const newGameState1 = states.pickMove({
+          ...gameState,
+          turnNum: turnNum + 1,
+        });
+
+        const resting = positions.resting(newGameState1);
+
+        messageState = { walletOutbox: { type: "RESPOND_TO_CHALLENGE", data: resting } };
+
+        return { gameState: newGameState1, messageState };
+      }
+  }
+  return { gameState, messageState };
 }
 
 function playAgainReducer(gameState: states.PlayAgain, messageState: MessageState, action: actions.GameAction): JointState {

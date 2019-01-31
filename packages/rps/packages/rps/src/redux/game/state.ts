@@ -23,6 +23,7 @@ export enum StateName {
   GameOver = 'GAME_OVER',
   WaitForWithdrawal = 'WAIT_FOR_WITHDRAWAL',
   PickChallengeMove = 'PICK_CHALLENGE_MOVE',
+  ChallengePlayAgain = 'CHALLENGE_PLAY_AGAIN',
 }
 
 export interface NoName {
@@ -316,6 +317,20 @@ export function waitForWithdrawal(state: IncludesBase): WaitForWithdrawal {
   return { ...base(state), name: StateName.WaitForWithdrawal };
 }
 
+
+export interface ChallengePlayAgain extends Base {
+  name: StateName.ChallengePlayAgain;
+  myMove: Move;
+  theirMove: Move;
+  result: Result;
+  player: Player;
+}
+export function challengePlayAgain(state: IncludesResult): ChallengePlayAgain {
+  const { myMove, theirMove, result } = state;
+  return { ...base(state), name: StateName.ChallengePlayAgain, myMove, theirMove, result };
+}
+
+
 export type PlayingState = (
   | WaitForGameConfirmationA
   | ConfirmGameB
@@ -332,6 +347,7 @@ export type PlayingState = (
   | GameOver
   | WaitForWithdrawal
   | PickChallengeMove
+  | ChallengePlayAgain
 );
 
 export type GameState = (
