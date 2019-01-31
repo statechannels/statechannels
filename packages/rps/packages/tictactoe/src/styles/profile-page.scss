@@ -1,11 +1,11 @@
-@import "./_colors";
+@import "./colors";
 
 .profile-button {
     width: 200px;
     height: 50px;
     border-radius: 40px;
-    background-color: $rps-red;
-    border-color: $rps-red;
+    background-color: $ttt-orange;
+    border-color: $ttt-orange;
     align-self: center;
     margin: 5px;
 }

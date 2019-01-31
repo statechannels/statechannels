@@ -9,18 +9,19 @@
 .lobby-header-title {
   font-size: 50px;
   font-weight: bold;
+  color: $ttt-white;
+  text-decoration: underline;
 }
 
 .lobby-new-game {
   font-size: 18px;
   font-weight: bold;
-  color: $rps-red;
-
+  color: $ttt-white;
   width: 188px;
   height: 40px;
   border-radius: 40px;
-  border: solid 1px $rps-lobby-border-off-white;
-  background-color: $white;
+  border-style: none;
+  background-color: $ttt-orange;
   position: absolute;
   right: 0;
   top: 25%;

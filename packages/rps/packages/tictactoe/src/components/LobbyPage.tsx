@@ -33,7 +33,7 @@ export default class LobbyPage extends React.PureComponent<Props, State> {
       <ApplicationLayout>
         <div className="w-100">
           <div className="lobby-header">
-            <a className="lobby-header-title">Games</a>
+            <span className="lobby-header-title">Games</span>
             <Button className="lobby-new-game" outline={true} onClick={newOpenGame}>
               Create a game
             </Button>

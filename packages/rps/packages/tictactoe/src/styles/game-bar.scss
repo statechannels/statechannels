@@ -1,15 +1,15 @@
-
-@import "./_colors";
+@import "./dimensions";
+@import "./colors";
 
 .game-bar {
   color: white;
-  background-color: $game-bar-color;
-  height: 110px;
+  background-color: $ttt-game-bar-color;
+  height: $gamebar-height;
 }
 
 .game-bar .my-name, .game-bar .opponent-name {
-  font-family: $rps-font-family;
-  font-size: 16px;
+  font-family: $ttt-font-family;
+  font-size: 24px;
   font-weight: bold;
   font-style: normal;
   font-stretch: normal;

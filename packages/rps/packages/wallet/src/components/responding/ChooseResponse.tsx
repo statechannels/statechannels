@@ -1,7 +1,7 @@
 import React from 'react';
 import Button from 'reactstrap/lib/Button';
 import SidebarLayout from '../SidebarLayout';
-import magmoFireBall from '../../images/fireball.svg';
+import magmoFireBall from '../../images/white_fireball.svg';
 import { StyleSheet, css } from 'aphrodite';
 
 export enum ChallengeOptions {
