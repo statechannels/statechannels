@@ -1,11 +1,12 @@
 @import "./dimensions";
+@import "./colors";
+@import "./fonts";
 
 html, body, #root {
   height: 100%;
   overflow-x: hidden;
-  background-color: black;
-  /* color: white; */
-  font-family: 'Courier New', Courier, monospace;
+  background-color: $ttt-background;
+  font-family: $ttt-font-family;
 }
 
 #root {
@@ -50,14 +51,6 @@ code {
 
 }
 
-// p,
-// h1,
-// .status {
-//   font-size: 20px;
-//   font-family: monospace;
-//   color: white;
-// }
-
 #magmo-logo {
   height: 40px;
   position: absolute;
@@ -71,6 +64,7 @@ code {
   left: 0;
 }
 
+// this mostly for magmo logo and oops email
 a {
   color: white;
   text-decoration: underline;

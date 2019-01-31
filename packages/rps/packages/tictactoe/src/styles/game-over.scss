@@ -1,8 +1,8 @@
-@import "./_colors";
+@import "./colors";
 
 .game-over-container {
     width: 500px;
-    height: 350px;
+    min-height: 350px;
     border-radius: 10px;
 }
 
@@ -10,15 +10,23 @@
     width: 252px;
     height: 50px;
     border-radius: 40px;
-    background-color: $rps-red;
-    border-color: $rps-red;
+    background-color: $ttt-orange;
+    border-color: $ttt-orange;
+    transform: translate(0,10px)
 }
 
 .game-over-content {
-    height: 300px;
+    width: 100%;
+    height: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: space-evenly;
-    color: black;
+    background: $ttt-background;
+    border-style: none;
+    color: $ttt-white;
+    padding: 5%;
+    border-radius: 10px;
 }
+
+

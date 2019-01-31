@@ -11,9 +11,9 @@ export default class ProposeGamePage extends React.PureComponent<Props> {
 
     return (
       <ApplicationLayout>
-        <div className="w-100 text-center mb-5">
-          <h1 className="mb-5">Game Proposed!</h1>
-          <p className="lead">{message}</p>
+        <div className="waiting-room-container">
+          <h2 className="w-100 text-center waiting-room-title">Game Proposed!</h2>
+          <p className="lead waiting-room-title">{message}</p>
         </div>
       </ApplicationLayout>
     );
