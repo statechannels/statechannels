@@ -61,8 +61,9 @@ const initialState: SiteState = {
     success: true,
   },
   openGames: [],
-  rules: {
-    visible: false,
+  overlay: {
+    rulesVisible: false,
+    walletVisible: false,
   },
   game: {
     messageState: {},

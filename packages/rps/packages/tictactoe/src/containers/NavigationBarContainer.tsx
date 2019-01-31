@@ -11,7 +11,7 @@ const mapStateToProps = (state: SiteState) => {
     "myName" in state.game.gameState ? state.game.gameState.myName : "";
   const you = "you" in state.game.gameState ? state.game.gameState.you : "";
   return {
-    showRules: state.rules.visible,
+    showRules: state.overlay.rulesVisible,
     loginDisplayName: name,
     you,
   };
@@ -19,7 +19,7 @@ const mapStateToProps = (state: SiteState) => {
 
 const mapDispatchToProps = {
   logoutRequest: loginActions.logoutRequest,
-  rulesRequest: globalActions.toggleVisibility,
+  rulesRequest: globalActions.toggleRulesVisibility,
 };
 
 export default connect(
