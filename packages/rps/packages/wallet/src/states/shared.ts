@@ -56,6 +56,10 @@ export interface ChallengeExists extends AdjudicatorExists {
   challengeExpiry?: number;
 }
 
+export interface UserAddressExists extends AdjudicatorExists {
+  userAddress: string;
+}
+
 // creators
 export function base<T extends Base>(params: T): Base {
   const { messageOutbox, transactionOutbox, displayOutbox } = params;
@@ -92,4 +96,8 @@ export function adjudicatorExists<T extends AdjudicatorExists>(params: T): Adjud
 
 export function challengeExists<T extends ChallengeExists>(params: T): ChallengeExists {
   return { ...adjudicatorExists(params), challengeExpiry: params.challengeExpiry };
+}
+
+export function userAddressExists<T extends UserAddressExists>(params: T): UserAddressExists {
+  return { ...adjudicatorExists(params), userAddress: params.userAddress };
 }
