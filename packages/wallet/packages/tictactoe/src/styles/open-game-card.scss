@@ -1,12 +1,12 @@
-@import "./_colors";
+@import "./colors";
 
 .ogc-container {
   width: 230px;
   height: 241px;
   border-radius: 10px;
-  border: solid 1px $rps-ogc-off-white;
-  background-color: $rps-white;
-  
+  border: solid 1px $ttt-ogc-off-white;
+  background-color: $ttt-white;
+  color: $ttt-mid-blue;
   display: flex;
   flex-direction: column;
   justify-content: space-evenly;
@@ -25,7 +25,7 @@
 
 .ogc-vs {
   @extend .ogc-card-title;
-  color: $rps-red;
+  color: $ttt-mid-blue;
   margin-right: 10px;
 }
 
@@ -43,7 +43,7 @@
 
 .ogc-stake-header {
   font-size: 12px;
-  color: $rps-ogc-grey;
+  color: $ttt-ogc-grey;
 }
 
 .ogc-stake-amount {
@@ -57,17 +57,18 @@
 .ogc-divider {
   width: 1px;
   height: 14px;
-  stroke: $rps-ogc-divider-grey;
+  stroke: $ttt-ogc-divider-grey;
 }
 
 .ogc-join {
   width: 190px;
   height: 36px;
   border-radius: 40px;
-  background-color: $rps-red;
-  border-color: $rps-red;
-
+  background-color: $ttt-orange;
+  border-color: $ttt-orange;
+  align-items: center;
+  line-height: normal;
   font-size: 18px;
   font-weight: bold;
-  color: $rps-white;
+  color: $ttt-white;
 }

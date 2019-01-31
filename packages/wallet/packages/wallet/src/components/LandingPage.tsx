@@ -1,5 +1,5 @@
 import React from 'react';
-import walletIcon from '../images/wallet_icon.svg';
+import walletIcon from '../images/orange_fireball.svg';
 
 export default class LandingPage extends React.PureComponent {
 

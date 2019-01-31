@@ -11,6 +11,11 @@ import { OpenGame } from "../redux/open-games/state";
 import "../index.scss";
 import { scenarios } from "../core";
 import { SiteState } from "../redux/reducer";
+import HomePage from "../components/HomePage";
+import LoadingPage from "../components/LoadingPage";
+import MetamaskErrorPage from '../components/MetamaskErrorPage';
+import { MetamaskErrorType } from '../redux/metamask/actions';
+import CreatingOpenGameModal from "../components/CreatingOpenGameModal";
 
 const finneyFourSix = [new BN(4000000000000000), new BN(6000000000000000)].map(
   bnToHex
@@ -49,7 +54,7 @@ const shared = {
   myAddress: '',
 };
 
-const initialState: SiteState = {
+const lobbyState: SiteState = {
   login: {
     loading: false,
     loggedIn: true,
@@ -65,6 +70,16 @@ const initialState: SiteState = {
     rulesVisible: false,
     walletVisible: false,
   },
+  game: {
+    messageState: {},
+    gameState: states.lobby({
+      ...shared,
+    }),
+  },
+};
+
+const initialState: SiteState = {
+...lobbyState,
   game: {
     messageState: {},
     gameState: states.xsPickMove({
@@ -89,6 +104,40 @@ export function siteStateFromGameState<T extends states.GameState>(
     game: { messageState: {}, gameState: gamestate },
   };
 }
+
+const noName = siteStateFromGameState(
+  states.noName({
+    ...shared,
+  })
+);
+
+const waitingRoom = siteStateFromGameState(
+  states.waitingRoom({
+    ...shared,
+  })
+);
+
+const gameProposed = siteStateFromGameState(
+  states.waitForGameConfirmationA({
+    ...shared,
+    player: Player.PlayerA,
+    onScreenBalances: finneyFiveFive,
+    turnNum: 6,
+    balances: finneySixFour,
+    stateCount: 0,
+  })
+);
+
+const confirmGame = siteStateFromGameState(
+  states.confirmGameB({
+    ...shared,    
+    player: Player.PlayerB,
+    onScreenBalances: finneyFiveFive,
+    turnNum: 6,
+    balances: finneySixFour,
+    stateCount: 0,
+  })
+);
 
 const xsWaiting = siteStateFromGameState(
   states.xsWaitForOpponentToPickMove({
@@ -270,9 +319,26 @@ const openGame: OpenGame = {
   createdAt: 0,
 };
 
-storiesOf("Lobby", module).add("Open Game Entry", () => (
-  <OpenGameEntry openGame={openGame} joinOpenGame={joinOpenGame} />
-));
+storiesOf("Setup", module)
+.add("Loading Page", () => (
+  <LoadingPage />))
+.add("MetaMask Error Page", () => (
+  <MetamaskErrorPage error={ {errorType: MetamaskErrorType.WrongNetwork} }/>))
+.add("Home Page", () => (
+  <HomePage login={()=>alert('login')}/>))
+.add("Profile Modal", testState(noName));
+
+storiesOf("Lobby", module)
+.add("Open Game Entry", () => (
+  <OpenGameEntry openGame={openGame} joinOpenGame={joinOpenGame} />))
+.add("Open Game Modal", () => (
+  <CreatingOpenGameModal visible={true} createOpenGame={()=>('')} cancelOpenGame={()=>('')}/>))
+.add("Lobby Page", testState(lobbyState));
+
+storiesOf("Game Opening", module)
+.add("Waiting Room", testState(waitingRoom))
+.add("Game Proposed", testState(gameProposed))
+.add("Confirm Game", testState(confirmGame));
 
 storiesOf("Game Screens / Crosses", module)
   .add("Choosing", testState(initialState))

@@ -18,19 +18,20 @@ export default class ConfirmGamePage extends React.PureComponent<Props> {
     const gameBuyIn = String(Number(stake)*5);
     return (
       <ApplicationLayout>
-        <div className="w-100 text-center mb-5">
-          <h1 className="w-100">Game Proposed!</h1>
+        <div className="waiting-room-container">
+          <h2 className="w-100 text-center waiting-room-title">Game Proposed!</h2>
           <div>
-            <p>{opponentName} has accepted your challenge with a {web3Utils.fromWei(gameBuyIn, 'ether')} ETH game buy in.</p>
-            <p>Do you want to play?</p>
-
+            <p className="lead waiting-room-title">{opponentName} has accepted your challenge with a {web3Utils.fromWei(gameBuyIn, 'ether')} ETH game buy in.</p>
+            <p className="lead waiting-room-title">Do you want to play?</p>
             <div>
-              <Button className="confirm-button" outline={true} onClick={confirmGame}>
+              <div className="cancel-challenge-button-container">
+              <Button className="cancel-challenge-button" outline={true} onClick={confirmGame}>
                 Play
-          </Button>
-              <Button className="confirm-button" outline={true} onClick={cancelGame}>
+              </Button>
+              <Button className="cancel-challenge-button" outline={true} onClick={cancelGame}>
                 Cancel
-          </Button>
+              </Button>
+              </div>
             </div>
           </div>
         </div>

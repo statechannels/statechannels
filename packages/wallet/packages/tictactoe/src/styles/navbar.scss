@@ -1,9 +1,10 @@
-@import "./_colors";
+@import "./colors";
 @import "./dimensions";
 
 .navbar {
-    background-color: $rps-footer-grey;
+    background-color: $ttt-mid-blue;
     height: $navbar-height;
+    line-height: 1;
 }
 
 .navbar-button {
@@ -13,20 +14,18 @@
     font-stretch: normal;
     line-height: normal;
     letter-spacing: normal;
-    color: $rps-white;
+    color: $ttt-white;
 }
 
 .navbar-button:hover {
-    // color: $rps-white;
-    text-decoration: none;
-    font-weight: bold;
+    color: $ttt-background;
 }
 
 .circle {
     width: 40px;
     height: 40px;
     border-radius: 20px;
-    background: $rps-red;
+    background: $ttt-mid-blue;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -34,7 +33,7 @@
 
 .navbar-user {
     font-size: 15px;
-    color: $rps-white;
+    color: $ttt-white;
 }
 
 #status-container {
@@ -45,8 +44,6 @@
   }
   
   .status {
-    background-color: black;
-    font-size: 50px;
     text-emphasis: bold;
     font-family: monospace;
   }

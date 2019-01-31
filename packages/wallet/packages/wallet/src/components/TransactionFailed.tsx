@@ -1,7 +1,7 @@
 import React from 'react';
 import SidebarLayout from './SidebarLayout';
 import { Button } from 'reactstrap';
-import magmoFireBall from '../images/fireball.svg';
+import magmoFireBall from '../images/white_fireball.svg';
 
 interface Props {
   name: string;

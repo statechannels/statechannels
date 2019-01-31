@@ -1,3 +1,6 @@
+@import "./dimensions";
+@import "./fonts";
+
 .footer-resign, .footer-challenge, .footer-playagain {
   font-weight: bold;
   font-size: 16px;
@@ -5,8 +8,7 @@
   width: 188px;
   height: 40px;
   border-radius: 5px;
-  border: solid 1px $rps-lobby-border-off-white;
-  // background-color: $rps-footer-grey;
+  border: solid 1px $ttt-lobby-border-off-white;
 }
 
 .footer-playagain {
@@ -29,30 +31,17 @@
   color: $white;
 }
 
-// .footer-challenge {
-//   font-weight: bold;
-//   font-size: 16px;
-//   color: $rps-footer-grey;
-
-//   margin-left: 10px;
-//   width: 188px;
-//   height: 40px;
-//   border-radius: 40px;
-//   border: solid 1px $rps-background;
-//   background-color: $rps-background;
-// }
-
 .navbar.footer-bar {
-  background-color: $rps-footer-grey;
+  background-color: $ttt-footer-grey;
   font-size: 20px;
-  font-family: monospace;
+  font-family: $ttt-font-family;
   color: white;
 }
 
 .footer-logo-container {
   position: absolute;
   right: 10px;
-  bottom: $navbar-height;
+  bottom: $footer-height;
   text-align: right;
   align-content: right;
 }

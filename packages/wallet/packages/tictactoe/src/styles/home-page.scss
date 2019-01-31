@@ -1,4 +1,4 @@
-@import "./_colors";
+@import "./colors";
 
 $loginButton-height: 44px;
 $homePage-container-max-width: 70%;
@@ -7,7 +7,7 @@ $background-image-width: 70%;
 $background-image-max-width: 400px;
 
 .homePage {
-	background-color: $rps-dark-blue;
+	background-color: $ttt-dark-blue;
 	height: 100%;
 	position: absolute;
 	width: 100%;
@@ -25,22 +25,34 @@ $background-image-max-width: 400px;
 	display: flex;
 	flex-direction: column;
 	justify-content: flex-start;
-	max-width: 70%; 
+	max-width: 67%; 
 }
 
 .homePage-loginButton {
   margin-top: $loginButton-height;
-  font-size: 20px;
+	font-size: 20px;
+	align-self: center;
+	background-color: $ttt-orange;
+	z-index: 500;
 }
 
+.homePage-image-container {
+	height: 100%;
+  position: fixed;
+  right: 0px;
+	top: 0px;
+	max-width: 33%;
+}
 .homePage-image {
   // background-image: url(images/homepage_image.png);
-  background-repeat: no-repeat;
-  background-size: $background-image-size;
+  // background-repeat: no-repeat;
+  // background-size: $background-image-size;
 	height: 100%;
   position: absolute;
   right: 0px;
   top: 0px;
-  width: $background-image-width;
-  max-width: $background-image-max-width;
+	height: 100%;
+	width: auto;
+	max-width: 100%;
+	z-index: 1;
 }

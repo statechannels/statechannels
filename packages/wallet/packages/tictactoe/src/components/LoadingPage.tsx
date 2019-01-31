@@ -15,5 +15,9 @@ const styles = StyleSheet.create({
     display: 'flex',
     'justify-content': 'center',
     height: '300px',
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%,-50%)',
   },
 });

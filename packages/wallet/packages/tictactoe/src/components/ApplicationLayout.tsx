@@ -1,13 +1,10 @@
 import React from 'react';
-import NavigationBarContainer from "../containers/NavigationBarContainer";
 
 import MAGMO_LOGO from '../images/magmo_logo.svg';
 
 export const ApplicationLayout = (props) => {
   return (
     <div className="w-100">
-      <NavigationBarContainer />
-
       <div className="container centered-container w-100 mb-5">
         {props.children}
       </div>

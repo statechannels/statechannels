@@ -1,7 +1,7 @@
 import React, { Fragment } from 'react';
 import { Button } from 'reactstrap';
 import { StyleSheet, css } from 'aphrodite';
-import magmoFireBall from '../images/fireball.svg';
+import magmoFireBall from '../images/white_fireball.svg';
 
 export interface Props {
   yesMessage: string;

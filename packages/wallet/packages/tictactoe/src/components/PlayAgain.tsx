@@ -1,8 +1,6 @@
 import React from "react";
 import Board from "./Board";
 import { Marks, Marker, Result, Player, Imperative } from "../core";
-import NavigationBarContainer from "../containers/NavigationBarContainer";
-import GameBarContainer from "../containers/GameBarContainer";
 import GameFooterContainer from "../containers/GameFooterContainer";
 
 import { Button } from "reactstrap";
@@ -26,9 +24,6 @@ export default class PlayAgain extends React.PureComponent<Props> {
     const { you, noughts, crosses, marksMade, playAgain } = this.props;
     return (
       <div className="w-100">
-        <NavigationBarContainer />
-        <GameBarContainer />
-
         <div className="container centered-container w-100 game-container">
           <Board
             noughts={noughts}
