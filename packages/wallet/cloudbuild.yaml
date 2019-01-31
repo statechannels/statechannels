@@ -9,7 +9,7 @@ steps:
   args: ["-m", "rsync", "-r", "-c", "-d", "./packages/wallet/build", "gs://wallet.magmo.com"]
 - name: gcr.io/cloud-builders/gsutil
   args: ["-m", "rsync", "-r", "-c", "-d", "./packages/rps/build", "gs://demo.magmo.com"]
-  - name: gcr.io/cloud-builders/gsutil
+- name: gcr.io/cloud-builders/gsutil
   args: ["-m", "rsync", "-r", "-c", "-d", "./packages/ttt/build", "gs://ttt.magmo.com"]
 options:
  machineType: 'N1_HIGHCPU_8'
