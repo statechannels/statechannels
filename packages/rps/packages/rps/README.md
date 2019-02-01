@@ -64,26 +64,27 @@ This will fire up the Storybook panel inside a browser.
     ```
     yarn deployContracts
     ``` 
-    
+
+
 #### To run application tests in watch mode:
 
-`yarn run test:app`
+`yarn test:app`
 
 #### To run smart contract tests:
 
-`yarn run test:contracts`
+`yarn test:contracts`
 
 #### To run all tests (before submitting a PR):
 
-`yarn run test`
+`yarn test`
 
 #### To update dependencies:
 
-`yarn install`
+`npx lerna bootstrap`
 
 #### To add a dependency:
 
-`yarn add [package-name]` - installs the latest version of the package
+`npx lerna add [package name] --scope=rps` - installs the latest version of the package to the rps package. Use `--dev` flag to add the new package to `devDependencies` instead of `dependencies`.
 
 #### To update the version of a dependency:
 
