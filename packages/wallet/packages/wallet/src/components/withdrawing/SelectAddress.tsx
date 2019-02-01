@@ -11,17 +11,36 @@ interface State {
   withdrawAddress: string;
 }
 export default class SelectAddress extends React.PureComponent<Props, State> {
+  interval: any;
   constructor(props) {
     super(props);
     const currentAddress = web3.eth.defaultAccount;
     this.state = { withdrawAddress: currentAddress };
 
     this.handleSubmitAddress = this.handleSubmitAddress.bind(this);
-    ethereum.on('accountsChanged', (accounts) => {
-      this.setState({ withdrawAddress: accounts[0] });
-    });
+
+
   }
 
+  componentDidMount() {
+    if (typeof ethereum !== 'undefined') {
+      ethereum.on('accountsChanged', (accounts) => {
+        this.setState({ withdrawAddress: accounts[0] });
+      });
+    } else {
+      this.interval = setInterval(() => {
+        if (web3.eth.defaultAccount !== this.state.withdrawAddress) {
+          this.setState({ withdrawAddress: web3.eth.defaultAccount });
+        }
+      }, 100);
+    }
+  }
+
+  componentWillUnmount() {
+    if (this.interval) {
+      clearInterval(this.interval);
+    }
+  }
   render() {
     const { declineWithdrawal } = this.props;
     return (
@@ -33,7 +52,7 @@ export default class SelectAddress extends React.PureComponent<Props, State> {
         <p>
           The funds will be sent to your current metamask account:
         </p>
-        <input disabled={true} style={{ width: '95%' }} type="text" readOnly={true} defaultValue={this.state.withdrawAddress} />
+        <input disabled={true} style={{ width: '95%' }} type="text" readOnly={true} value={this.state.withdrawAddress} />
         <YesOrNo yesAction={this.handleSubmitAddress} noAction={declineWithdrawal} yesMessage="Withdraw" noMessage="Cancel" />
 
       </SidebarLayout>
