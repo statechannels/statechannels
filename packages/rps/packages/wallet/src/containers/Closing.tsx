@@ -12,12 +12,13 @@ import WaitForOtherPlayer from '../components/WaitForOtherPlayer';
 import WaitForXConfirmation from '../components/WaitForXConfirmation';
 import WaitForXInitiation from '../components/WaitForXInitiation';
 import TransactionFailed from '../components/TransactionFailed';
+import SelectAddress from '../components/withdrawing/SelectAddress';
 
 interface Props {
   state: states.ClosingState;
   concludeApproved: () => void;
   concludeRejected: () => void;
-  closeOnChain: () => void;
+  closeOnChain: (withdrawAddress: string) => void;
   closeSuccessAcknowledged: () => void;
   closedOnChainAcknowledged: () => void;
   retryTransaction: () => void;
@@ -52,12 +53,11 @@ class ClosingContainer extends PureComponent<Props> {
       case states.APPROVE_CLOSE_ON_CHAIN:
         // TODO: Add option to reject closing the channel?  
         return (
-          <AcknowledgeX
-            title="Close Channel!"
-            action={closeOnChain}
-            description="The game has been concluded and the channel can now be closed."
-            actionTitle="Close channel"
-          />
+          <SelectAddress
+            approveAction={closeOnChain}
+            title="Close and Withdraw"
+            description="The game has been concluded! You can now close the channel and withdraw your funds."
+            approveButtonTitle="Close and Withdraw" />
         );
       case states.ACKNOWLEDGE_CLOSE_SUCCESS:
         return (

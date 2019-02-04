@@ -1,11 +1,14 @@
 import React from 'react';
 
+import { Button } from 'reactstrap';
 import SidebarLayout from '../SidebarLayout';
-import YesOrNo from '../YesOrNo';
+import magmoFireBall from '../../images/white_fireball.svg';
 
 interface Props {
-  approveWithdrawal: (address: string) => void;
-  declineWithdrawal: () => void;
+  approveAction: (address: string) => void;
+  approveButtonTitle: string;
+  title: string;
+  description: string;
 }
 interface State {
   withdrawAddress: string;
@@ -42,25 +45,30 @@ export default class SelectAddress extends React.PureComponent<Props, State> {
     }
   }
   render() {
-    const { declineWithdrawal } = this.props;
+    const { approveButtonTitle, title, description } = this.props;
     return (
       <SidebarLayout>
-        <h1>Approve Withdrawal</h1>
+        <h1>{title}</h1>
         <p>
-          Do you wish to withdraw your funds from this channel?
+          {description}
         </p>
         <p>
           The funds will be sent to your current metamask account:
         </p>
-        <input disabled={true} style={{ width: '95%' }} type="text" readOnly={true} value={this.state.withdrawAddress} />
-        <YesOrNo yesAction={this.handleSubmitAddress} noAction={declineWithdrawal} yesMessage="Withdraw" noMessage="Cancel" />
-
+        <input disabled={true} style={{ width: '95%' }} type="text" readOnly={true} defaultValue={this.state.withdrawAddress} />
+        <div className="select-address-button-container" >
+          <span className='select-address-button'>
+            <Button onClick={this.handleSubmitAddress} >
+              <img src={magmoFireBall} />&nbsp;&nbsp;{approveButtonTitle}
+            </Button>
+          </span>
+        </div>
       </SidebarLayout>
     );
   }
   handleSubmitAddress() {
-    this.props.approveWithdrawal(this.state.withdrawAddress);
+    this.props.approveAction(this.state.withdrawAddress);
   }
-
 }
+
 
