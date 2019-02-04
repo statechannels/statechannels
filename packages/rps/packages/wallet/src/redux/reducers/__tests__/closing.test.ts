@@ -123,12 +123,16 @@ describe('start in ApproveCloseOnChain', () => {
     penultimatePosition: { data: aResignsAfterOneRound.concludeHex, signature: aResignsAfterOneRound.conclude2Sig },
     lastPosition: { data: aResignsAfterOneRound.conclude2Hex, signature: aResignsAfterOneRound.conclude2Sig },
     turnNum: 9,
+    userAddress: '0x0',
   });
   describe('action taken: approve close on chain', () => {
     // TODO: Mock out Signature contructor so we don't have to pass a valid signature string in 
     const createConcludeTxMock = jest.fn();
-    Object.defineProperty(TransactionGenerator, 'createConcludeTransaction', { value: createConcludeTxMock });
-    const action = actions.approveClose();
+    Object.defineProperty(TransactionGenerator, 'createConcludeAndWithdrawTransaction', { value: createConcludeTxMock });
+    const signVerMock = jest.fn();
+    signVerMock.mockReturnValue('0x0');
+    Object.defineProperty(SigningUtils, 'signVerificationData', { value: signVerMock });
+    const action = actions.approveClose('0x0');
     const updatedState = walletReducer(state, action);
     itTransitionsToStateType(states.WAIT_FOR_CLOSE_INITIATION, updatedState);
     expect((updatedState.messageOutbox!).type).toEqual(outgoing.MESSAGE_REQUEST);
@@ -171,6 +175,7 @@ describe('start in WaitForCloseInitiation', () => {
     penultimatePosition: { data: aResignsAfterOneRound.concludeHex, signature: aResignsAfterOneRound.conclude2Sig },
     lastPosition: { data: aResignsAfterOneRound.conclude2Hex, signature: aResignsAfterOneRound.conclude2Sig },
     turnNum: 9,
+    userAddress: '0x0',
   });
   describe('action taken: transaction sent to metamask', () => {
 
@@ -191,6 +196,7 @@ describe('start in WaitForCloseSubmission', () => {
     penultimatePosition: { data: aResignsAfterOneRound.concludeHex, signature: aResignsAfterOneRound.conclude2Sig },
     lastPosition: { data: aResignsAfterOneRound.conclude2Hex, signature: aResignsAfterOneRound.conclude2Sig },
     turnNum: 9,
+    userAddress: '0x0',
   });
   describe('action taken: transaction submitted', () => {
 
@@ -204,11 +210,6 @@ describe('start in WaitForCloseSubmission', () => {
     const updatedState = walletReducer(state, action);
     itTransitionsToStateType(states.CLOSE_TRANSACTION_FAILED, updatedState);
   });
-  describe('action taken: game concluded event', () => {
-    const action = actions.gameConcludedEvent();
-    const updatedState = walletReducer(state, action);
-    itTransitionsToStateType(states.APPROVE_WITHDRAWAL, updatedState);
-  });
 });
 
 describe('start in closeTransactionFailed', () => {
@@ -217,15 +218,19 @@ describe('start in closeTransactionFailed', () => {
     penultimatePosition: { data: aResignsAfterOneRound.concludeHex, signature: aResignsAfterOneRound.conclude2Sig },
     lastPosition: { data: aResignsAfterOneRound.conclude2Hex, signature: aResignsAfterOneRound.conclude2Sig },
     turnNum: 9,
+    userAddress: '0x0',
   });
 
   describe('action taken: retry transaction', () => {
-    const createCloseTxMock = jest.fn();
-    Object.defineProperty(TransactionGenerator, 'createConcludeTransaction', { value: createCloseTxMock });
+    const createConcludeTxMock = jest.fn();
+    Object.defineProperty(TransactionGenerator, 'createConcludeAndWithdrawTransaction', { value: createConcludeTxMock });
+    const signVerMock = jest.fn();
+    signVerMock.mockReturnValue('0x0');
+    Object.defineProperty(SigningUtils, 'signVerificationData', { value: signVerMock });
     const action = actions.retryTransaction();
     const updatedState = walletReducer(state, action);
     itTransitionsToStateType(states.WAIT_FOR_CLOSE_SUBMISSION, updatedState);
-    expect(createCloseTxMock.mock.calls.length).toBe(1);
+    expect(createConcludeTxMock.mock.calls.length).toBe(1);
   });
 });
 
@@ -240,12 +245,7 @@ describe('start in WaitForCloseConfirmed', () => {
 
     const action = actions.transactionConfirmed();
     const updatedState = walletReducer(state, action);
-    itTransitionsToStateType(states.APPROVE_WITHDRAWAL, updatedState);
-  });
-  describe('action taken: game concluded event', () => {
-    const action = actions.gameConcludedEvent();
-    const updatedState = walletReducer(state, action);
-    itTransitionsToStateType(states.APPROVE_WITHDRAWAL, updatedState);
+    itTransitionsToStateType(states.WAIT_FOR_CHANNEL, updatedState);
   });
 });
 
