@@ -6,9 +6,9 @@ import { WalletAction } from '../actions';
 import { unreachable, ourTurn, validTransition } from '../../utils/reducer-utils';
 import { State, Channel } from 'fmg-core';
 import decode from '../../utils/decode-utils';
-import { signPositionHex, validSignature } from '../../utils/signing-utils';
+import { signPositionHex, validSignature, signVerificationData } from '../../utils/signing-utils';
 import { messageRequest, closeSuccess, concludeSuccess, concludeFailure, hideWallet } from 'wallet-client/lib/wallet-events';
-import { createConcludeTransaction } from '../../utils/transaction-generator';
+import { createConcludeAndWithdrawTransaction } from '../../utils/transaction-generator';
 
 export const closingReducer = (state: ClosingState, action: WalletAction): WalletState => {
   switch (state.type) {
@@ -43,12 +43,21 @@ const closeTransactionFailedReducer = (state: states.CloseTransactionFailed, act
   switch (action.type) {
     case actions.RETRY_TRANSACTION:
       const { penultimatePosition: from, lastPosition: to } = state;
-      const transactionOutbox = createConcludeTransaction(
-        state.adjudicator,
-        from.data,
-        to.data,
-        from.signature,
-        to.signature);
+      const myAddress = state.participants[state.ourIndex];
+      const verificationSignature = signVerificationData(myAddress, state.userAddress, state.channelId, state.privateKey);
+
+      const concludeAndWithdrawArgs = {
+        contractAddress: state.adjudicator,
+        fromState: from.data,
+        toState: to.data,
+        participant: state.participants[state.ourIndex],
+        destination: state.userAddress,
+        channelId: state.channelId,
+        fromSignature: from.signature,
+        toSignature: to.signature,
+        verificationSignature,
+      };
+      const transactionOutbox = createConcludeAndWithdrawTransaction(concludeAndWithdrawArgs);
       return states.waitForCloseSubmission({ ...state, transactionOutbox });
   }
   return state;
@@ -94,9 +103,7 @@ const waitForOpponentCloseReducer = (state: states.WaitForOpponentClose, action:
 const waitForCloseConfirmedReducer = (state: states.WaitForCloseConfirmed, action: actions.WalletAction) => {
   switch (action.type) {
     case actions.TRANSACTION_CONFIRMED:
-      return states.approveWithdrawal({ ...state });
-    case actions.GAME_CONCLUDED_EVENT:
-      return states.approveWithdrawal(state);
+      return states.waitForChannel({ ...state, messageOutbox: closeSuccess(), displayOutbox: hideWallet() });
   }
   return state;
 };
@@ -117,8 +124,6 @@ const waitForCloseSubmissionReducer = (state: states.WaitForCloseSubmission, act
       return states.closeTransactionFailed(state);
     case actions.TRANSACTION_SUBMITTED:
       return states.waitForCloseConfirmed({ ...state, transactionHash: action.transactionHash });
-    case actions.GAME_CONCLUDED_EVENT:
-      return states.approveWithdrawal(state);
   }
   return state;
 };
@@ -128,23 +133,31 @@ const approveCloseOnChainReducer = (state: states.ApproveCloseOnChain, action: a
     case actions.APPROVE_CLOSE:
 
       const { penultimatePosition: from, lastPosition: to } = state;
-      const transactionOutbox = createConcludeTransaction(
-        state.adjudicator,
-        from.data,
-        to.data,
-        from.signature,
-        to.signature);
+      const myAddress = state.participants[state.ourIndex];
+      const verificationSignature = signVerificationData(myAddress, action.withdrawAddress, state.channelId, state.privateKey);
+
+      const concludeAndWithdrawArgs = {
+        contractAddress: state.adjudicator,
+        fromState: from.data,
+        toState: to.data,
+        participant: state.participants[state.ourIndex],
+        destination: action.withdrawAddress,
+        channelId: state.channelId,
+        fromSignature: from.signature,
+        toSignature: to.signature,
+        verificationSignature,
+      };
+      const transactionOutbox = createConcludeAndWithdrawTransaction(concludeAndWithdrawArgs);
       const signature = signPositionHex('CloseStarted', state.privateKey);
       const messageOutbox = messageRequest(state.participants[1 - state.ourIndex], 'CloseStarted', signature);
-      return states.waitForCloseInitiation({ ...state, transactionOutbox, messageOutbox });
-    case actions.GAME_CONCLUDED_EVENT:
-      return states.approveWithdrawal(state);
+      return states.waitForCloseInitiation({ ...state, userAddress: action.withdrawAddress, transactionOutbox, messageOutbox });
     case actions.MESSAGE_RECEIVED:
       const opponentAddress = state.participants[1 - state.ourIndex];
       if (action.data === 'CloseStarted' && validSignature(action.data, action.signature || '0x0', opponentAddress)) {
         return states.waitForOpponentClose(state);
-
       }
+    case actions.GAME_CONCLUDED_EVENT:
+      return states.approveWithdrawal(state);
   }
   return state;
 };

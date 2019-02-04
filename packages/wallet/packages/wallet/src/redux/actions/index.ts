@@ -329,8 +329,9 @@ export const closedOnChainAcknowledged = () => ({
 export type ClosedOnChainAcknowledged = ReturnType<typeof closedOnChainAcknowledged>;
 
 export const APPROVE_CLOSE = 'APPROVE_CLOSE';
-export const approveClose = () => ({
+export const approveClose = (withdrawAddress: string) => ({
   type: APPROVE_CLOSE as typeof APPROVE_CLOSE,
+  withdrawAddress,
 });
 export type ApproveClose = ReturnType<typeof approveClose>;
 

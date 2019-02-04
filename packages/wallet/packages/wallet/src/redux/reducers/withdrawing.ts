@@ -42,7 +42,6 @@ const approveWithdrawalReducer = (state: states.ApproveWithdrawal, action: actio
   switch (action.type) {
     case actions.WITHDRAWAL_APPROVED:
       const myAddress = state.participants[state.ourIndex];
-      console.log('addresses ', myAddress, action.destinationAddress);
       const signature = signVerificationData(myAddress, action.destinationAddress, state.channelId, state.privateKey);
       const transactionOutbox = createWithdrawTransaction(state.adjudicator, myAddress, action.destinationAddress, state.channelId, signature);
       return states.waitForWithdrawalInitiation({ ...state, transactionOutbox, userAddress: action.destinationAddress });

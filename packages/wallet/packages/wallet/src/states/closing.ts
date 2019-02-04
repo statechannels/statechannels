@@ -1,4 +1,4 @@
-import { AdjudicatorExists, adjudicatorExists, ChannelOpen, channelOpen, AdjudicatorMightExist, adjudicatorMightExist, TransactionExists, } from './shared';
+import { AdjudicatorExists, adjudicatorExists, ChannelOpen, channelOpen, AdjudicatorMightExist, adjudicatorMightExist, TransactionExists, UserAddressExists, userAddressExists, } from './shared';
 
 // stage
 export const CLOSING = 'CLOSING';
@@ -16,7 +16,7 @@ export const WAIT_FOR_OPPONENT_CLOSE = 'WAIT_FOR_OPPONENT_CLOSE';
 export const ACKNOWLEDGE_CONCLUDE = 'ACKNOWLEDGE_CONCLUDE';
 export const CLOSE_TRANSACTION_FAILED = 'CLOSE_TRANSACTION_FAILED';
 
-export interface CloseTransactionFailed extends AdjudicatorExists {
+export interface CloseTransactionFailed extends UserAddressExists {
   type: typeof CLOSE_TRANSACTION_FAILED;
   stage: typeof CLOSING;
 }
@@ -61,12 +61,12 @@ export interface ApproveCloseOnChain extends AdjudicatorExists {
   stage: typeof CLOSING;
 }
 
-export interface WaitForCloseInitiation extends AdjudicatorExists {
+export interface WaitForCloseInitiation extends UserAddressExists {
   type: typeof WAIT_FOR_CLOSE_INITIATION;
   stage: typeof CLOSING;
 }
 
-export interface WaitForCloseSubmission extends AdjudicatorExists {
+export interface WaitForCloseSubmission extends UserAddressExists {
   type: typeof WAIT_FOR_CLOSE_SUBMISSION;
   stage: typeof CLOSING;
 }
@@ -96,12 +96,12 @@ export function acknowledgeClosedOnChain<T extends AdjudicatorExists>(params: T)
   return { type: ACKNOWLEDGE_CLOSED_ON_CHAIN, stage: CLOSING, ...adjudicatorExists(params) };
 }
 
-export function waitForCloseInitiation<T extends AdjudicatorExists>(params: T): WaitForCloseInitiation {
-  return { type: WAIT_FOR_CLOSE_INITIATION, stage: CLOSING, ...adjudicatorExists(params) };
+export function waitForCloseInitiation<T extends UserAddressExists>(params: T): WaitForCloseInitiation {
+  return { type: WAIT_FOR_CLOSE_INITIATION, stage: CLOSING, ...userAddressExists(params) };
 }
 
-export function waitForCloseSubmission<T extends AdjudicatorExists>(params: T): WaitForCloseSubmission {
-  return { type: WAIT_FOR_CLOSE_SUBMISSION, stage: CLOSING, ...adjudicatorExists(params) };
+export function waitForCloseSubmission<T extends UserAddressExists>(params: T): WaitForCloseSubmission {
+  return { type: WAIT_FOR_CLOSE_SUBMISSION, stage: CLOSING, ...userAddressExists(params) };
 }
 
 export function waitForCloseConfirmed<T extends AdjudicatorExists & TransactionExists>(params: T): WaitForCloseConfirmed {
@@ -114,8 +114,8 @@ export function acknowledgeConclude<T extends AdjudicatorMightExist>(params: T):
   return { type: ACKNOWLEDGE_CONCLUDE, stage: CLOSING, ...adjudicatorMightExist(params) };
 }
 
-export function closeTransactionFailed<T extends AdjudicatorExists>(params: T): CloseTransactionFailed {
-  return { type: CLOSE_TRANSACTION_FAILED, stage: CLOSING, ...adjudicatorExists(params) };
+export function closeTransactionFailed<T extends UserAddressExists>(params: T): CloseTransactionFailed {
+  return { type: CLOSE_TRANSACTION_FAILED, stage: CLOSING, ...userAddressExists(params) };
 }
 
 export type ClosingState = (
