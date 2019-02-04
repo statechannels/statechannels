@@ -92,8 +92,8 @@ choosePort(HOST, DEFAULT_PORT)
       deployContracts,
       startGanache
     } = require('magmo-devtools');
-
-    startGanache().then(() => {
+    let argv = require('yargs').argv;
+    startGanache(argv).then(() => {
 
       deployContracts().then(value => {
 

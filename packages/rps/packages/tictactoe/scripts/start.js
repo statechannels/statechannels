@@ -92,31 +92,31 @@ choosePort(HOST, DEFAULT_PORT)
       deployContracts,
       startGanache
     } = require('magmo-devtools');
-
-    startGanache().then(() => {
+    let argv = require('yargs').argv;
+    startGanache(argv).then(() => {
 
       deployContracts().then(value => {
 
-        const devServer = new WebpackDevServer(compiler, serverConfig);
-        // Launch WebpackDevServer.
-        devServer.listen(port, HOST, err => {
-          if (err) {
-            return console.log(err);
-          }
-          if (isInteractive) {
-            clearConsole();
-          }
-          console.log(chalk.cyan('Starting the development server...\n'));
-          openBrowser(urls.localUrlForBrowser);
-        });
-
-        ['SIGINT', 'SIGTERM'].forEach(function (sig) {
-          process.on(sig, function () {
-            devServer.close();
-            process.exit();
+          const devServer = new WebpackDevServer(compiler, serverConfig);
+          // Launch WebpackDevServer.
+          devServer.listen(port, HOST, err => {
+            if (err) {
+              return console.log(err);
+            }
+            if (isInteractive) {
+              clearConsole();
+            }
+            console.log(chalk.cyan('Starting the development server...\n'));
+            openBrowser(urls.localUrlForBrowser);
           });
-        });
-      })
+
+          ['SIGINT', 'SIGTERM'].forEach(function (sig) {
+            process.on(sig, function () {
+              devServer.close();
+              process.exit();
+            });
+          });
+        })
         .catch(err =>
           console.log(err)
         );

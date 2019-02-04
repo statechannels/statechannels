@@ -3,7 +3,7 @@ import { walletReducer } from '..';
 import * as states from '../../../states';
 import * as actions from '../../actions';
 
-import { itTransitionsToStateType } from './helpers';
+import { itTransitionsToStateType, itDoesntTransition } from './helpers';
 import * as scenarios from './test-scenarios';
 import * as TransactionGenerator from '../../../utils/transaction-generator';
 
@@ -31,7 +31,7 @@ const defaults = {
   address: 'address',
   privateKey: asPrivateKey,
   networkId: 2323,
-  challengeExpiry: 0,
+  challengeExpiry: 1,
   moveSelected: false,
   challengeOptions: [],
   transactionHash: '0x0',
@@ -47,9 +47,15 @@ describe('when in ACKNOWLEDGE_CHALLENGE', () => {
   });
 
   describe('when the challenge times out', () => {
-    const action = actions.challengedTimedOut();
+    const action = actions.blockMined({ number: 1, timestamp: 2 });
     const updatedState = walletReducer(state, action);
     itTransitionsToStateType(states.ACKNOWLEDGE_CHALLENGE_TIMEOUT, updatedState);
+  });
+
+  describe('when a block is mined but the challenge has not expired', () => {
+    const action = actions.blockMined({ number: 1, timestamp: 0 });
+    const updatedState = walletReducer(state, action);
+    itDoesntTransition(state, updatedState);
   });
 });
 
@@ -69,9 +75,15 @@ describe('when in CHOOSE_RESPONSE', () => {
   });
 
   describe('when the challenge times out', () => {
-    const action = actions.challengedTimedOut();
+    const action = actions.blockMined({ number: 1, timestamp: 2 });
     const updatedState = walletReducer(state, action);
     itTransitionsToStateType(states.ACKNOWLEDGE_CHALLENGE_TIMEOUT, updatedState);
+  });
+
+  describe('when a block is mined but the challenge has not expired', () => {
+    const action = actions.blockMined({ number: 1, timestamp: 0 });
+    const updatedState = walletReducer(state, action);
+    itDoesntTransition(state, updatedState);
   });
 });
 
@@ -84,9 +96,15 @@ describe('when in TAKE_MOVE_IN_APP', () => {
     itTransitionsToStateType(states.INITIATE_RESPONSE, updatedState);
   });
   describe('when the challenge times out', () => {
-    const action = actions.challengedTimedOut();
+    const action = actions.blockMined({ number: 1, timestamp: 2 });
     const updatedState = walletReducer(state, action);
     itTransitionsToStateType(states.ACKNOWLEDGE_CHALLENGE_TIMEOUT, updatedState);
+  });
+
+  describe('when a block is mined but the challenge has not expired', () => {
+    const action = actions.blockMined({ number: 1, timestamp: 0 });
+    const updatedState = walletReducer(state, action);
+    itDoesntTransition(state, updatedState);
   });
 });
 
