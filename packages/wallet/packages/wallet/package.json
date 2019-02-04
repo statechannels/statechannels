@@ -74,7 +74,7 @@
     "start": "node scripts/start.js",
     "build": "node scripts/build.js",
     "test": "run-s 'test:app --all'",
-    "test:ci": "DEV_GANACHE_PORT=8503 run-s build 'test:integration --all --ci' 'test:app --all --ci --runInBand'",
+    "test:ci": "DEV_GANACHE_PORT=8504 run-s build 'test:integration --all --ci' 'test:app --all --ci --runInBand'",
     "test:app": "npx run-jest -c ./config/jest/jest.config.js",
     "deployContracts": "npx deploy-contracts",
     "ganache:start": "npx start-ganache",
@@ -104,7 +104,7 @@
     "ganache-cli": "^6.1.8",
     "html-webpack-plugin": "4.0.0-beta.5",
     "jest": "^23.5.0",
-    "magmo-devtools": "git+https://github.com/magmo/devtools.git#v0.1.6",
+    "magmo-devtools": "git+https://github.com/magmo/devtools.git#v0.1.7",
     "node-sass": "^4.9.3",
     "optimize-css-assets-webpack-plugin": "5.0.1",
     "pnp-webpack-plugin": "1.2.1",
@@ -132,7 +132,8 @@
     "typescript-eslint-parser": "^17.0.1",
     "uglifyjs-webpack-plugin": "^1.1.8",
     "url-loader": "^1.1.2",
-    "workbox-webpack-plugin": "3.6.3"
+    "workbox-webpack-plugin": "3.6.3",
+    "yargs": "12.0.5"
   },
   "babel": {
     "presets": [

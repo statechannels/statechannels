@@ -64,8 +64,7 @@ class ChallengingContainer extends PureComponent<Props> {
           />
         );
       case states.ACKNOWLEDGE_CHALLENGE_TIMEOUT:
-
-        const parsedExpiryDate = new Date(state.challengeExpiry ? state.challengeExpiry * 1000 : 0).toLocaleTimeString();
+        const parsedExpiryDate = new Date(state.challengeExpiry ? state.challengeExpiry * 1000 : 0).toLocaleTimeString().replace(/:\d\d /, ' ');
         const description = `The challenge expired at ${parsedExpiryDate}. You may now withdraw your funds.`;
         return (
           <AcknowledgeX

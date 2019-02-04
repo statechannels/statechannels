@@ -20,7 +20,7 @@ export default class ChooseResponse extends React.PureComponent<Props> {
 
   render() {
     const { expiryTime, selectRespondWithMove, selectRespondWithExistingMove, challengeOptions } = this.props;
-    const expiryDate = new Date(expiryTime * 1000).toLocaleTimeString();
+    const expiryDate = new Date(expiryTime * 1000).toLocaleTimeString().replace(/:\d\d /, ' ');
     // TODO: We should add hover text or an icon to these options to fully explain what they mean to the user.
     return (
       <SidebarLayout>
@@ -28,15 +28,15 @@ export default class ChooseResponse extends React.PureComponent<Props> {
           A challenge has been issued
       </h1>
         <p>
-          The other player has challenged you and you need to respond by {expiryDate} or the game will conclude!
+          The other player has challenged you! The game will expire at {expiryDate} if you do not respond.
           Select how you would like to respond:
       </p>
         <div className="challenge-expired-button-container" >
           <span className={css(styles.button)}>
-            {challengeOptions.indexOf(ChallengeOptions.RespondWithMove) > -1 && <Button onClick={selectRespondWithMove} ><img src={magmoFireBall}/>&nbsp;&nbsp;
+            {challengeOptions.indexOf(ChallengeOptions.RespondWithMove) > -1 && <Button onClick={selectRespondWithMove} ><img src={magmoFireBall} />&nbsp;&nbsp;
               Respond with Move
           </Button>}
-            {challengeOptions.indexOf(ChallengeOptions.RespondWithExistingMove) > -1 && <Button onClick={selectRespondWithExistingMove} ><img src={magmoFireBall}/>&nbsp;&nbsp;
+            {challengeOptions.indexOf(ChallengeOptions.RespondWithExistingMove) > -1 && <Button onClick={selectRespondWithExistingMove} ><img src={magmoFireBall} />&nbsp;&nbsp;
               Respond with Existing Move
           </Button>}
           </span>

@@ -5,16 +5,17 @@ import { messageListener } from './message-listener';
 import { messageSender } from './message-sender';
 import { transactionSender } from './transaction-sender';
 import { adjudicatorWatcher } from './adjudicator-watcher';
-
+import { blockchainWatcher } from './blockchain-watcher';
 
 import { WalletState, WAIT_FOR_ADDRESS } from '../../states';
 import { getProvider } from '../../utils/contract-utils';
-import challengeTimeout from './challenge-timeout';
+
 import { displaySender } from './display-sender';
 
 export function* sagaManager(): IterableIterator<any> {
   let adjudicatorWatcherProcess;
-  let challengeTimeoutProcess;
+
+  let blockchainWatcherProcess;
 
   // always want the message listenter to be running
   yield fork(messageListener);
@@ -39,17 +40,17 @@ export function* sagaManager(): IterableIterator<any> {
         const provider = yield getProvider();
         adjudicatorWatcherProcess = yield fork(adjudicatorWatcher, state.adjudicator, provider);
       }
-      if (!challengeTimeoutProcess) {
-        challengeTimeoutProcess = yield fork(challengeTimeout);
+      if (!blockchainWatcherProcess) {
+        blockchainWatcherProcess = yield fork(blockchainWatcher);
       }
     } else {
       if (adjudicatorWatcherProcess) {
         yield cancel(adjudicatorWatcherProcess);
         adjudicatorWatcherProcess = undefined;
       }
-      if (challengeTimeoutProcess) {
-        yield cancel(challengeTimeoutProcess);
-        challengeTimeoutProcess = undefined;
+      if (blockchainWatcherProcess) {
+        yield cancel(blockchainWatcherProcess);
+        blockchainWatcherProcess = undefined;
       }
     }
 
