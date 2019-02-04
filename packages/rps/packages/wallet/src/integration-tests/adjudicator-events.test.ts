@@ -17,10 +17,10 @@ describe('adjudicator listener', () => {
 
   it("should handle a funds received event", async () => {
     const channelNonce = getNextNonce();
-    const contractAddress = await deployContract(channelNonce, participantA, participantB);
+    const contractAddress = await deployContract(provider, channelNonce, participantA, participantB);
     const sagaTester = new SagaTester({});
     sagaTester.start(adjudicatorWatcher, contractAddress, provider);
-    await depositContract(contractAddress);
+    await depositContract(provider, contractAddress);
     await sagaTester.waitFor(actions.FUNDING_RECEIVED_EVENT);
 
     const action = sagaTester.getLatestCalledAction();
@@ -33,12 +33,12 @@ describe('adjudicator listener', () => {
 
   it("should handle a challengeCreated event", async () => {
     const channelNonce = getNextNonce();
-    const contractAddress = await deployContract(channelNonce, participantA, participantB);
-    await depositContract(contractAddress);
+    const contractAddress = await deployContract(provider, channelNonce, participantA, participantB);
+    await depositContract(provider, contractAddress);
 
     const sagaTester = new SagaTester({});
     sagaTester.start(adjudicatorWatcher, contractAddress, provider);
-    const challengeState = await createChallenge(contractAddress, channelNonce, participantA, participantB);
+    const challengeState = await createChallenge(provider, contractAddress, channelNonce, participantA, participantB);
     await sagaTester.waitFor(actions.CHALLENGE_CREATED_EVENT);
     const action = sagaTester.getLatestCalledAction();
     expect(action.type === action.CHALLENGE_CREATED_EVENT);
@@ -48,11 +48,11 @@ describe('adjudicator listener', () => {
 
   it("should handle a concluded event", async () => {
     const channelNonce = getNextNonce();
-    const contractAddress = await deployContract(channelNonce, participantA, participantB);
-    await depositContract(contractAddress);
+    const contractAddress = await deployContract(provider, channelNonce, participantA, participantB);
+    await depositContract(provider, contractAddress);
     const sagaTester = new SagaTester({});
     sagaTester.start(adjudicatorWatcher, contractAddress, provider);
-    await concludeGame(contractAddress, channelNonce, participantA, participantB);
+    await concludeGame(provider, contractAddress, channelNonce, participantA, participantB);
     await sagaTester.waitFor(actions.GAME_CONCLUDED_EVENT);
     const action = sagaTester.getLatestCalledAction();
     expect(action.type === actions.GAME_CONCLUDED_EVENT);
@@ -60,13 +60,13 @@ describe('adjudicator listener', () => {
 
   it("should handle a refute event", async () => {
     const channelNonce = getNextNonce();
-    const contractAddress = await deployContract(channelNonce, participantA, participantB);
-    await depositContract(contractAddress);
-    await createChallenge(contractAddress, channelNonce, participantA, participantB);
+    const contractAddress = await deployContract(provider, channelNonce, participantA, participantB);
+    await depositContract(provider, contractAddress);
+    await createChallenge(provider, contractAddress, channelNonce, participantA, participantB);
 
     const sagaTester = new SagaTester({});
     sagaTester.start(adjudicatorWatcher, contractAddress, provider);
-    const refuteState = await refuteChallenge(contractAddress, channelNonce, participantA, participantB);
+    const refuteState = await refuteChallenge(provider, contractAddress, channelNonce, participantA, participantB);
     await sagaTester.waitFor(actions.REFUTED_EVENT);
     const action = sagaTester.getLatestCalledAction();
     expect(action.type === actions.REFUTED_EVENT);
@@ -76,13 +76,13 @@ describe('adjudicator listener', () => {
 
   it("should handle a respondWithMove event", async () => {
     const channelNonce = getNextNonce();
-    const contractAddress = await deployContract(channelNonce, participantA, participantB);
-    await depositContract(contractAddress);
-    await createChallenge(contractAddress, channelNonce, participantA, participantB);
+    const contractAddress = await deployContract(provider, channelNonce, participantA, participantB);
+    await depositContract(provider, contractAddress);
+    await createChallenge(provider, contractAddress, channelNonce, participantA, participantB);
 
     const sagaTester = new SagaTester({});
     sagaTester.start(adjudicatorWatcher, contractAddress, provider);
-    const responseState = await respondWithMove(contractAddress, channelNonce, participantA, participantB);
+    const responseState = await respondWithMove(provider, contractAddress, channelNonce, participantA, participantB);
     await sagaTester.waitFor(actions.RESPOND_WITH_MOVE_EVENT);
     const action: actions.RespondWithMoveEvent = sagaTester.getLatestCalledAction();
     expect(action.type === actions.RESPOND_WITH_MOVE_EVENT);

@@ -7,7 +7,7 @@ interface Props {
 
 export default class WaitForResponseOrTimeout extends React.PureComponent<Props> {
   render() {
-    const expiryDate = new Date(this.props.expirationTime * 1000).toLocaleTimeString();
+    const expiryDate = new Date(this.props.expirationTime * 1000).toLocaleTimeString().replace(/:\d\d /, ' ');
     return (
       <SidebarLayout>
         <h1>Waiting for your opponent to respond!</h1>

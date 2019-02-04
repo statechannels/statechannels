@@ -59,8 +59,10 @@ export const acknowledgeChallengeReducer = (state: states.AcknowledgeChallenge, 
 
     case actions.CHALLENGE_ACKNOWLEDGED:
       return states.chooseResponse(state);
-    case actions.CHALLENGE_TIMED_OUT:
-      return challengeStates.acknowledgeChallengeTimeout(state);
+    case actions.BLOCK_MINED:
+      if (typeof state.challengeExpiry !== 'undefined' && action.block.timestamp >= state.challengeExpiry) {
+        return challengeStates.acknowledgeChallengeTimeout({ ...state });
+      }
     default:
       return state;
   }
@@ -79,8 +81,10 @@ export const chooseResponseReducer = (state: states.ChooseResponse, action: Wall
       });
     case actions.RESPOND_WITH_REFUTE_CHOSEN:
       return states.initiateResponse(state);
-    case actions.CHALLENGE_TIMED_OUT:
-      return challengeStates.acknowledgeChallengeTimeout(state);
+    case actions.BLOCK_MINED:
+      if (typeof state.challengeExpiry !== 'undefined' && action.block.timestamp >= state.challengeExpiry) {
+        return challengeStates.acknowledgeChallengeTimeout({ ...state });
+      }
     default:
       return state;
   }
@@ -108,8 +112,10 @@ export const takeMoveInAppReducer = (state: states.TakeMoveInApp, action: Wallet
         displayOutbox: showWallet(),
       });
 
-    case actions.CHALLENGE_TIMED_OUT:
-      return challengeStates.acknowledgeChallengeTimeout(state);
+    case actions.BLOCK_MINED:
+      if (typeof state.challengeExpiry !== 'undefined' && action.block.timestamp >= state.challengeExpiry) {
+        return challengeStates.acknowledgeChallengeTimeout({ ...state });
+      }
     default:
       return state;
   }
