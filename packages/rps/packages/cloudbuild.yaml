@@ -6,7 +6,7 @@ steps:
 - name: 'gcr.io/cloud-builders/yarn'
   args: [ 'lerna','run','build']
 # - name: gcr.io/cloud-builders/gsutil
-#   args: ["-m", "rsync", "-r", "-c", "-d", "./build", "gs://demo.magmo.com"]
+#   args: ["-m", "rsync", "-r", "-c", "-d", "./build", "gs://rps.magmo.com"]
 options:
  machineType: 'N1_HIGHCPU_8'
   
