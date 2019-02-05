@@ -73,10 +73,10 @@
   "scripts": {
     "start": "node scripts/start.js",
     "build": "node scripts/build.js",
-    "test": "run-s test:truffle 'test:app --all'",
+    "test": "run-s test:contracts 'test:app --all'",
     "test:ci": "DEV_GANACHE_PORT=8502 run-s build 'test:contracts --all --ci' 'test:app --all --ci --runInBand'",
     "test:app": "npx run-jest -c ./config/jest/jest.config.js",
-    "test:contracts": "npx ganache-then-jest -c ./config/jest/jest.integration.config.js --runInBand",
+    "test:contracts": "npx ganache-then-jest -c ./config/jest/jest.contracts.config.js --runInBand",
     "deployContracts": "npx deploy-contracts",
     "ganache:start": "npx start-ganache",
     "postinstall": "rm -f node_modules/web3/index.d.ts",

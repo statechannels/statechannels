@@ -13,11 +13,11 @@ require("babel-register"); // To handle es6 syntax in the tests
 module.exports = {
   networks: {
     development: {
-      host: "localhost",
-      port: 8545, // Using ganache as development network
-      network_id: "*",
-      gas: 6721975,
-      gasPrice: 20000000,
+      host: process.env.DEV_GANACHE_HOST,
+      port: process.env.DEV_GANACHE_PORT,
+      network_id: '*', // match any network
+      gas: process.env.DEFAULT_GAS,
+      gasPrice: process.env.DEFAULT_GAS_PRICE,
     },
     main: {
       provider: () => new HDWalletProvider(process.env.ETH_ACCOUNT_MNENOMIC, "https://infura.io/v3/" + process.env.INFURA_API_KEY),
