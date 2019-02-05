@@ -13,7 +13,7 @@ In RPS and TTT, there are a number of points in the user flow where the wallet i
 The wallet is now its own mini-application. It has its own front end views/components, its own redux machinery (states, actions, reducers) as well as its own sagas. It is served in an iFrame of the parent app. Communication between app and wallet is achieved via pasing messages between the iframe and the parent window. 
 
 ### Signing the states
-It would be good to get clear on a diagram such as the following: 
+The following diagram gives an idea of how the wallet interacts with our game apps.
 
 ![Wallet connectivity](./wallet_connectivity.png)
 
