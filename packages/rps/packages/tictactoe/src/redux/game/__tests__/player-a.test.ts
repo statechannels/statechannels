@@ -1,3 +1,4 @@
+
 import { gameReducer, youWentLast } from "../reducer";
 import {
   Player,
@@ -33,8 +34,8 @@ const {
 } = scenarios.standard;
 
 const {
-  resting2,
-  resting3,
+  againMF,
+  againMS,
 } = scenarios.swapRoles;
 
 const noughtsabsolutevictory = scenarios.noughtsVictory.absolutevictory;
@@ -184,7 +185,7 @@ describe("player A's app", () => {
   });
 
   describe("when in XsWaitForOpponentToPickMove", () => {
-    describe("when inconclusive Oplaying arrives", () => {
+    describe("when inconclusive OPlaying arrives", () => {
       const gameState = state.xsWaitForOpponentToPickMove({
         ...aProps,
         ...playing1,
@@ -274,7 +275,7 @@ describe("player A's app", () => {
       const updatedState = gameReducer({ messageState, gameState }, action);
       if (!youWentLast(gameState)) {
         itIncreasesTurnNumBy(1, { gameState, messageState }, updatedState);
-        itSends(resting2, updatedState);
+        itSends(againMF, updatedState);
       }
       else {
         itIncreasesTurnNumBy(0, { gameState, messageState }, updatedState);
@@ -290,12 +291,12 @@ describe("player A's app", () => {
       ...draw,
       result: Result.Tie,
     });
-    describe("when resting arrives", () => {
-      const action = actions.positionReceived(resting2);
+    describe("when PlayAgainMeFirst arrives", () => {
+      const action = actions.positionReceived(againMF);
       const updatedState = gameReducer({ messageState, gameState }, action);
       if (youWentLast(gameState)) {
         itIncreasesTurnNumBy(2, { gameState, messageState }, updatedState);
-        itSends(resting3, updatedState);
+        itSends(againMS, updatedState);
         itTransitionsTo(state.StateName.OsWaitForOpponentToPickMove, updatedState);
       }
       else {

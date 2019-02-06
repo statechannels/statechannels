@@ -1,6 +1,3 @@
-// import { soliditySha3 } from 'web3-utils';
-// import { padBytes32 } from 'fmg-core';
-// import { positions } from '.';
 import {Marks} from './marks';
 // Position names
 // ==============
@@ -10,9 +7,10 @@ export const POST_FUND_SETUP_A = 'POST_FUND_SETUP_A';
 export const POST_FUND_SETUP_B = 'POST_FUND_SETUP_B';
 export const OPLAYING = 'OPLAYING';
 export const XPLAYING = 'XPLAYING';
-export const RESTING = 'RESTING';
 export const VICTORY = 'VICTORY';
 export const DRAW = 'DRAW';
+export const PLAY_AGAIN_ME_FIRST = 'PLAY_AGAIN_ME_FIRST';
+export const PLAY_AGAIN_ME_SECOND = 'PLAY_AGAIN_ME_SECOND';
 export const CONCLUDE = 'CONCLUDE';
 
 // Positions
@@ -59,20 +57,20 @@ interface BaseWithBuyIn extends Base {
   }
   
 
-  export interface Resting extends BaseWithBuyIn {
-    name: typeof RESTING;
+  export interface PlayAgainMeFirst extends BaseWithBuyIn {
+    name: typeof PLAY_AGAIN_ME_FIRST;
   }
 
-  export interface Oplaying extends BaseWithBuyIn {
+  export interface PlayAgainMeSecond extends BaseWithBuyIn {
+    name: typeof PLAY_AGAIN_ME_SECOND;
+  }
+
+  export interface OPlaying extends BaseWitNoughtsAndCrossesAndBuyIn {
     name: typeof OPLAYING;
-    noughts: Marks;
-    crosses: Marks;
   }
 
-  export interface Xplaying extends BaseWithBuyIn {
+  export interface XPlaying extends BaseWitNoughtsAndCrossesAndBuyIn {
     name: typeof XPLAYING;
-    noughts: Marks;
-    crosses: Marks;
   }
   
   export interface Victory extends BaseWitNoughtsAndCrossesAndBuyIn {
@@ -92,11 +90,12 @@ interface BaseWithBuyIn extends Base {
     | PreFundSetupB
     | PostFundSetupA
     | PostFundSetupB
-    | Xplaying
-    | Oplaying
-    | Resting
+    | XPlaying
+    | OPlaying
     | Victory
     | Draw
+    | PlayAgainMeFirst
+    | PlayAgainMeSecond
     | Conclude
   );
 
@@ -150,16 +149,19 @@ export function postFundSetupB(obj: BaseWithBuyInParams): PostFundSetupB {
   return { ...baseWithBuyIn(obj), name: POST_FUND_SETUP_B, stateCount: 1 };
 }
 
-
-export function resting(obj: BaseWithBuyInParams): Resting {
-  return { ...baseWithBuyIn(obj), name: RESTING };
+export function playAgainMeFirst(obj: BaseWithBuyInParams): PlayAgainMeFirst {
+  return { ...baseWithBuyIn(obj), name: PLAY_AGAIN_ME_FIRST };
 }
 
-export function Oplaying(obj: PlayingParams): Oplaying {
+export function playAgainMeSecond(obj: BaseWithBuyInParams): PlayAgainMeSecond {
+  return { ...baseWithBuyIn(obj), name: PLAY_AGAIN_ME_SECOND };
+}
+
+export function oPlaying(obj: PlayingParams): OPlaying {
   return { ...baseWithNoughtsAndCrossesAndBuyIn(obj), name: OPLAYING};
 }
 
-export function Xplaying(obj: PlayingParams): Xplaying {
+export function xPlaying(obj: PlayingParams): XPlaying {
   return { ...baseWithNoughtsAndCrossesAndBuyIn(obj), name: XPLAYING };
 }
 

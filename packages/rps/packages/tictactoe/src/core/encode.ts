@@ -25,12 +25,11 @@ function stateType(position: positions.Position) {
     case positions.POST_FUND_SETUP_B:
       return State.StateType.PostFundSetup;
     case positions.OPLAYING:
-      return State.StateType.Game;
     case positions.XPLAYING:
-      return State.StateType.Game;
     case positions.VICTORY:
-      return State.StateType.Game;
     case positions.DRAW:
+    case positions.PLAY_AGAIN_ME_FIRST:
+    case positions.PLAY_AGAIN_ME_SECOND:
       return State.StateType.Game;
     case positions.CONCLUDE:
       return State.StateType.Conclude;
@@ -41,49 +40,49 @@ function stateType(position: positions.Position) {
 
 function encodeGameAttributes(position: positions.Position) {
   switch (position.name) {
-    case positions.OPLAYING:
-      return packOplayingAttributes(position);
     case positions.XPLAYING:
-      return packXplayingAttributes(position);
+      return packXPlayingAttributes(position);
+    case positions.OPLAYING:
+      return packOPlayingAttributes(position);
     case positions.VICTORY:
       return packVictoryAttributes(position);
     case positions.DRAW:
       return packDrawAttributes(position);
+    case positions.PLAY_AGAIN_ME_FIRST:
+      return packPlayAgainMeFirstAttributes(position.roundBuyIn);
+    case positions.PLAY_AGAIN_ME_SECOND:
+      return packPlayAgainMeSecondAttributes(position.roundBuyIn);
     case positions.CONCLUDE:
       return '';
     default:
-      // unreachable
-      return packRestingAttributes(position.roundBuyIn);
+      // pack blank game attributes inside Pre/PostFundSetup
+      return packPlayAgainMeSecondAttributes(position.roundBuyIn);
   }
 }
-// TODO should resting have a roundbuyin?
 
 export enum GamePositionType {
-  Resting = 0,
-  Xplaying = 1,
-  Oplaying = 2,
-  Victory = 3,
-  Draw = 4,
+  XPlaying = 0,
+  OPlaying = 1,
+  Victory = 2,
+  Draw = 3,
+  PlayAgainMeFirst = 4,
+  PlayAgainMeSecond = 5,
 }
 
-export function packRestingAttributes(stake: string) {
-  return toHex32(GamePositionType.Resting).substr(2) + stake.substr(2);
-}
-
-export function packOplayingAttributes(position: positions.Oplaying) {
+export function packOPlayingAttributes(position: positions.OPlaying) {
   const { roundBuyIn, noughts, crosses } = position;
   return (
-    toHex32(GamePositionType.Oplaying).substr(2) +
+    toHex32(GamePositionType.OPlaying).substr(2) +
     padBytes32(roundBuyIn).substr(2) +
     toHex32(noughts).substr(2) +
     toHex32(crosses).substr(2)
   );
 }
 
-export function packXplayingAttributes(position: positions.Xplaying) {
+export function packXPlayingAttributes(position: positions.XPlaying) {
   const { roundBuyIn, noughts, crosses } = position;
   return (
-    toHex32(GamePositionType.Xplaying).substr(2) +
+    toHex32(GamePositionType.XPlaying).substr(2) +
     padBytes32(roundBuyIn).substr(2) +
     toHex32(noughts).substr(2) +
     toHex32(crosses).substr(2)
@@ -107,5 +106,19 @@ export function packDrawAttributes(position: positions.Draw) {
     padBytes32(roundBuyIn).substr(2) +
     toHex32(noughts).substr(2) +
     toHex32(crosses).substr(2)
+  );
+}
+
+export function packPlayAgainMeFirstAttributes(stake: string) {
+  return (
+    toHex32(GamePositionType.PlayAgainMeFirst).substr(2) +
+    padBytes32(stake).substr(2)
+  );
+}
+
+export function packPlayAgainMeSecondAttributes(stake: string) {
+  return (
+    toHex32(GamePositionType.PlayAgainMeSecond).substr(2) +
+    padBytes32(stake).substr(2)
   );
 }

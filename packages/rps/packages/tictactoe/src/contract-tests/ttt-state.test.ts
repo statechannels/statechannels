@@ -12,8 +12,6 @@ describe('TicTacToeState', () => {
   // ===========================
 
   const scenario = scenarios.standard;
-  // const propose = scenario.propose;
-  // const reveal = scenario.reveal;
   const playing1 = scenario.playing1;
   const playing2 = scenario.playing2;
   const provider = new ethers.providers.JsonRpcProvider(`http://localhost:${process.env.DEV_GANACHE_PORT}`);
@@ -21,7 +19,7 @@ describe('TicTacToeState', () => {
   let stateContract;
   let networkId;
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     networkId = (await provider.getNetwork()).chainId;
     const libraryAddress = TTTStateArtifact.networks[networkId].address;
     stateContract = new ethers.Contract(libraryAddress, TTTStateArtifact.abi, provider);
