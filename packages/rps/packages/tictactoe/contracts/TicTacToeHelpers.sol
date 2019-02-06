@@ -22,7 +22,7 @@ library TicTacToeHelpers {
     //   +-----------------+
     //         |     |     
     //   +-----------------+
-    //         |      |  0  
+    //         |     |  0  
     // 
     //
     uint16 constant topRow = 448; /*  0b111000000 = 448 mask for win @ row 1 */
@@ -86,7 +86,7 @@ library TicTacToeHelpers {
         uint8  count;
         for (i = 0; i < 9; i++){
             if ((_marks >> i)%2 == 1 ){
-                count++; // erased a mark
+                count++;
             } 
         }
         return count;
