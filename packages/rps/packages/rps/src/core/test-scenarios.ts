@@ -35,7 +35,7 @@ const base = {
   roundBuyIn,
 };
 
-const shared = {
+export const shared = {
   ...base,
   asAddress,
   twitterHandle: "twtr",
