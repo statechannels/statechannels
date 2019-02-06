@@ -1,6 +1,6 @@
 import * as React from 'react';
-import { StyleSheet, css } from 'aphrodite';
 import { MetamaskError } from '../redux/metamask/actions';
+import { ApplicationLayout } from './ApplicationLayout';
 
 interface MetamaskErrorProps {
   error: MetamaskError;
@@ -12,7 +12,7 @@ export default function MetamaskErrorPage(props: MetamaskErrorProps) {
     <span>
       This site needs to be connected to an ethereum wallet to function. If you have metamask,
       enable it now. If not, you can download a copy{' '}
-      <a className={css(styles.link)} href="https://metamask.io/">
+      <a href="https://metamask.io/">
         here
       </a>
       .
@@ -35,28 +35,15 @@ export default function MetamaskErrorPage(props: MetamaskErrorProps) {
     );
   }
   return (
-    <div className={css(styles.container)}>
-      <div className={css(styles.headerText)}>
-        <h1 className={css(styles.title)}>Metamask Error</h1>
-        <p>{message}</p>
+    <ApplicationLayout>
+    <div className="waiting-room-container">
+      <h1 className="w-100 text-center waiting-room-title">
+      Metamask Error
+      </h1>
+      <div className="w-100">
+      <p className="lead text-center waiting-room-title" >{message}</p>
       </div>
     </div>
+  </ApplicationLayout>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    maxWidth: '90%',
-    margin: 'auto',
-  },
-  headerText: {
-    textAlign: 'center',
-    paddingBottom: 32,
-  },
-  link: {
-    color: 'unset',
-  },
-  title: {
-    marginBottom: 0,
-  },
-});
