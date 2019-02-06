@@ -1,12 +1,12 @@
 pragma solidity ^0.4.18;
 
-import "fmg-core/contracts/State.sol"; // TODO ensure the fmg-core is reflected in a package.json
+import "fmg-core/contracts/State.sol";
 
 library TicTacToeState {
-    enum PositionType { Rest, Xplaying, Oplaying, Victory, Draw } 
+    enum PositionType { XPlaying, OPlaying, Victory, Draw, PlayAgainMeFirst, PlayAgainMeSecond } 
     
     // TicTacToe State Fields
-    // (relative to gamestate offset) <- GK / this is because the gamestate is appended to the full state of the channel, which has things like turnNum in it
+    // (relative to gamestate offset) <- this is because the gamestate is appended to the full state of the channel, which has things like turnNum in it
     // ==============================
     // [  0 -  31] enum positionType
     // [ 32 -  63] uint256 stake

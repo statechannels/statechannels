@@ -106,7 +106,7 @@ Please use the Sublime/VS Code package _JsPrettier_ for formatting. Add the foll
   "trailingComma": "all",
 ```
 ## Documentation
-We are working hard to produce documenation for our applications. In the interm, please see our [Developer Handbook](https://magmo.gitbook.io/developer-handbook/), which as some of the hints and tips
+We are working hard to produce documenation for our applications. In the interim, please see our [Developer Handbook](https://magmo.gitbook.io/developer-handbook/), which as some of the hints and tips
 for developing on ethereum that we have used to develop our apps. You will also find some information in the `/notes/` subdirectory of each app. 
 
 ## Problems?

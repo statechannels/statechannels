@@ -91,16 +91,14 @@ export function decodeGameState(state: State, roundBuyIn: string, hexString: str
   const base = { ...channelParams, turnNum, roundBuyIn, balances };
 
   switch (position) {
-    case GamePositionType.Resting:
-      return positions.resting(base);
-    case GamePositionType.Oplaying:
+    case GamePositionType.OPlaying:
       const oplayingnoughts = extractNoughts(hexString);
       const oplayingcrosses = extractCrosses(hexString);
-      return positions.Oplaying({ ...base, noughts: oplayingnoughts, crosses: oplayingcrosses });
-    case GamePositionType.Xplaying:
+      return positions.oPlaying({ ...base, noughts: oplayingnoughts, crosses: oplayingcrosses });
+    case GamePositionType.XPlaying:
       const xplayingnoughts = extractNoughts(hexString);
       const xplayingcrosses = extractCrosses(hexString);
-      return positions.Xplaying({ ...base, noughts: xplayingnoughts, crosses: xplayingcrosses });
+      return positions.xPlaying({ ...base, noughts: xplayingnoughts, crosses: xplayingcrosses });
     case GamePositionType.Victory:
       const victorynoughts = extractNoughts(hexString);
       const victorycrosses = extractCrosses(hexString);
@@ -109,6 +107,10 @@ export function decodeGameState(state: State, roundBuyIn: string, hexString: str
       const drawnoughts = extractNoughts(hexString);
       const drawcrosses = extractCrosses(hexString);
       return positions.draw({ ...base, noughts: drawnoughts, crosses: drawcrosses });
+    case GamePositionType.PlayAgainMeFirst:
+      return positions.playAgainMeFirst({ ...base });
+    case GamePositionType.PlayAgainMeSecond:
+      return positions.playAgainMeSecond({ ...base });
   }
 }
 

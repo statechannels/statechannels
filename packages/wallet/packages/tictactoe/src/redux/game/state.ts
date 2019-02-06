@@ -5,9 +5,9 @@ import { Result, Imperative, Marks, Player, Marker } from "../../core";
 // All other states are both players
 export enum StateName {
   NoName = "NO_NAME",
-  Lobby = "Lobby",
+  Lobby = "LOBBY",
   CreatingOpenGame = "CREATING_OPEN_GAME",
-  WaitingRoom = "WaitingRoom",
+  WaitingRoom = "WAITING_ROOM",
   WaitForGameConfirmationA = "WAIT_FOR_GAME_CONFIRMATION_A",
   ConfirmGameB = "CONFIRM_GAME_B",
   DeclineGame = "DECLINE_GAME_B",

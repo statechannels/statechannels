@@ -20,7 +20,8 @@ import bnToHex from "../../utils/bnToHex";
 import {
   PostFundSetupB,
   POST_FUND_SETUP_B,
-  RESTING
+  PLAY_AGAIN_ME_FIRST,
+  PLAY_AGAIN_ME_SECOND,
 } from "../../core/positions";
 
 export interface JointState {
@@ -564,7 +565,7 @@ function xsPickMoveReducer(
       result: Imperative.Wait,
       balances: newBalances,
     });
-    pos = positions.Xplaying({ ...newGameState });
+    pos = positions.xPlaying({ ...newGameState });
   }
 
   // if winning move
@@ -698,7 +699,7 @@ function osPickMoveReducer(
       result: Imperative.Wait,
       balances: newBalances,
     });
-    pos = positions.Oplaying({ ...newGameState, noughts: newNoughts });
+    pos = positions.oPlaying({ ...newGameState, noughts: newNoughts });
   }
 
   // if winning move
@@ -920,7 +921,7 @@ function playAgainReducer(
   let newGameState: states.GameState;
   if (action.type === actions.POSITION_RECEIVED) {
     const position = action.position;
-    if (position.name !== positions.RESTING) {
+    if (position.name !== (positions.PLAY_AGAIN_ME_FIRST || positions.PLAY_AGAIN_ME_SECOND)) {
       return { gameState, messageState };
     }
     messageState = { ...messageState, actionToRetry: action };
@@ -931,7 +932,7 @@ function playAgainReducer(
     return { gameState: newGameState, messageState };
   }
   if (action.type === actions.PLAY_AGAIN && !youWentLast(gameState)) {
-    const pos = positions.resting({ ...gameState, turnNum: gameState.turnNum + 1 });
+    const pos = positions.playAgainMeFirst({ ...gameState, turnNum: gameState.turnNum + 1 });
     messageState = sendMessage(pos, opponentAddress, messageState);
     newGameState = states.waitToPlayAgain({ ...gameState, turnNum: gameState.turnNum + 1 });
     return { gameState: newGameState, messageState };
@@ -953,7 +954,7 @@ function waitToPlayAgainReducer(
   let newGameState: states.GameState;
   if (
     action.type === actions.POSITION_RECEIVED &&
-    action.position.name === RESTING &&
+    action.position.name === PLAY_AGAIN_ME_FIRST &&
     youWentLast(gameState)
   ) {
        
@@ -965,7 +966,7 @@ function waitToPlayAgainReducer(
       result: Imperative.Wait,
       you: Marker.noughts,
     });
-    const pos = positions.resting({ ...newGameState });
+    const pos = positions.playAgainMeSecond({ ...newGameState });
     messageState = sendMessage(pos, opponentAddress, messageState);
     return {
       gameState: newGameState,
@@ -974,7 +975,7 @@ function waitToPlayAgainReducer(
   }
   if (
     action.type === actions.POSITION_RECEIVED &&
-    action.position.name === RESTING &&
+    action.position.name === PLAY_AGAIN_ME_SECOND &&
     !youWentLast(gameState)
   ) {
     newGameState = states.xsPickMove({
@@ -986,10 +987,6 @@ function waitToPlayAgainReducer(
       you: Marker.crosses,
     });
     return { gameState: newGameState, messageState };
-  }
-  if (action.type === actions.PLAY_AGAIN && !youWentLast(gameState)) {
-    const pos = positions.resting({ ...gameState });
-    messageState = sendMessage(pos, opponentAddress, messageState);
   }
   return { gameState: { ...gameState }, messageState };
 }

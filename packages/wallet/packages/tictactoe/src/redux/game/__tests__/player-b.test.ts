@@ -12,12 +12,8 @@ import * as actions from "../actions";
 import * as state from "../state";
 
 import {
-  // itSends,
   itTransitionsTo,
-  // itStoresAction,
   itIncreasesTurnNumBy,
-  // itHandlesResignLikeItsMyTurn,
-  // itHandlesResignLikeItsTheirTurn,
   itSends,
   itFullySwingsTheBalancesToA,
   itHalfSwingsTheBalancesToA,
@@ -26,25 +22,18 @@ import {
 } from "./helpers";
 
 const {
-  // preFundSetupA,
   preFundSetupB,
-  // postFundSetupA,
   postFundSetupB,
   playing1,
   playing2,
   playing3,
-  // playing4,
-  // playing5,
-  // playing6,
-  // playing7,
   playing8,
   draw,
-  // resting,
 } = scenarios.standard;
 
 const {
-  resting2,
-  resting3,
+  againMF,
+  againMS,
 } = scenarios.swapRoles;
 
 const {
@@ -169,7 +158,7 @@ describe("player B's app", () => {
   });
 
   describe("when in OsWaitForOpponentToPickMove", () => {
-    describe("when inconclusive Xplaying arrives", () => {
+    describe("when inconclusive XPlaying arrives", () => {
       const gameState = state.osWaitForOpponentToPickMove({
         ...bProps,
         ...playing2,
@@ -177,7 +166,7 @@ describe("player B's app", () => {
         onScreenBalances: ["", ""],
       });
       const action = actions.positionReceived({ ...playing3 });
-      const position = action.position as positions.Xplaying;
+      const position = action.position as positions.XPlaying;
       const receivedCrosses = position.crosses;
 
       const updatedState = gameReducer({ messageState, gameState }, action);
@@ -199,7 +188,7 @@ describe("player B's app", () => {
         onScreenBalances: ["", ""],
       });
       const action = actions.positionReceived({ ...draw });
-      const position = action.position as positions.Xplaying;
+      const position = action.position as positions.XPlaying;
       const receivedCrosses = position.crosses;
       const updatedState = gameReducer({ messageState, gameState }, action);
       itTransitionsTo(state.StateName.PlayAgain, updatedState);
@@ -219,7 +208,7 @@ describe("player B's app", () => {
       const action = actions.positionReceived({
         ...scenarios.crossesVictory.victory,
       });
-      const position = action.position as positions.Xplaying;
+      const position = action.position as positions.XPlaying;
       const receivedCrosses = position.crosses;
 
       describe("but they still have enough funds to continue", () => {
@@ -283,7 +272,7 @@ describe("player B's app", () => {
       const updatedState = gameReducer({ messageState, gameState }, action);
       if (!youWentLast(gameState)) {
         itIncreasesTurnNumBy(1, { gameState, messageState }, updatedState);
-        itSends(resting2, updatedState);
+        itSends(againMF, updatedState);
       }
       else {
         itIncreasesTurnNumBy(0, { gameState, messageState }, updatedState);
@@ -299,12 +288,11 @@ describe("player B's app", () => {
       ...draw,
       result: Result.Tie,
     });
-    describe("when resting arrives", () => {
-      const action = actions.positionReceived(resting2);
+    describe("when PlayAgainMeSecond arrives", () => {
+      const action = actions.positionReceived(againMS);
       const updatedState = gameReducer({ messageState, gameState }, action);
       if (youWentLast(gameState)) {
         itIncreasesTurnNumBy(2, { gameState, messageState }, updatedState);
-        itSends(resting3, updatedState);
         itTransitionsTo(state.StateName.OsWaitForOpponentToPickMove, updatedState);
       }
       else {

@@ -24,7 +24,6 @@ describe('decode', () => {
     expect(encode(scenarios.standard.playing7)).toEqual(scenarios.standard.playing7Hex);
     expect(encode(scenarios.standard.playing8)).toEqual(scenarios.standard.playing8Hex);
     expect(encode(scenarios.standard.draw)).toEqual(scenarios.standard.drawHex);
-    expect(encode(scenarios.standard.resting)).toEqual(scenarios.standard.restingHex);
   });
 
   it('encodes Draw', () => {
