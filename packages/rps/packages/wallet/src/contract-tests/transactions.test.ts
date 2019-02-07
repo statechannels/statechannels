@@ -55,7 +55,7 @@ describe('transactions', () => {
 
   }
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     const network = await provider.getNetwork();
     networkId = network.chainId;
     libraryAddress = getLibraryAddress(networkId);

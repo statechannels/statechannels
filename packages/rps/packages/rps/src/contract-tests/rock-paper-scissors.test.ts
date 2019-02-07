@@ -1,4 +1,5 @@
 import BN from 'bn.js';
+import { expectRevert } from 'magmo-devtools';
 import {
   scenarios,
   encode
@@ -25,7 +26,7 @@ describe("Rock paper Scissors", () => {
   let reveal;
   let resting;
 
-  beforeEach(async () => {
+  beforeAll(async () => {
 
     networkId = (await provider.getNetwork()).chainId;
     const libraryAddress = RPSGameArtifact.networks[networkId].address;
@@ -52,23 +53,27 @@ describe("Rock paper Scissors", () => {
   // ========================
 
   it("allows START -> ROUNDPROPOSED", async () => {
-    expect(validTransition(postFundSetupB, propose)).toBeTruthy();
+    expect(await validTransition(postFundSetupB, propose)).toBe(true);
   });
 
   it("allows ROUNDPROPOSED -> ROUNDACCEPTED", async () => {
-    expect(await validTransition(propose, accept)).toBeTruthy();
+    expect(await validTransition(propose, accept)).toBe(true);
   });
 
   it("allows ROUNDACCEPTED -> REVEAL", async () => {
-    expect(await validTransition(accept, reveal)).toBeTruthy();
+    expect(await validTransition(accept, reveal)).toBe(true);
   });
 
   it("allows REVEAL -> (updated) START", async () => {
-    expect(await validTransition(reveal, resting)).toBeTruthy();
+    expect(await validTransition(reveal, resting)).toBe(true);
   });
 
   it("disallows transitions where the stake changes", async () => {
     reveal.roundBuyIn = bnToHex(hexToBN(reveal.roundBuyIn).add(new BN(1)));
-    await expect(rpsContract.validTransition(encode(reveal), encode(resting))).rejects.toThrowError();
+    expect.assertions(1);
+    await expectRevert(
+      () => rpsContract.validTransition(encode(reveal), encode(resting)),
+      "The stake should be the same between states"
+    );
   });
 });
