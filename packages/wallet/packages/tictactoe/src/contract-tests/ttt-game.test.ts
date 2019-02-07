@@ -1,3 +1,4 @@
+import { expectRevert } from 'magmo-devtools';
 import { scenarios, encode } from '../core';
 import { ethers } from 'ethers';
 import TTTGameArtifact from "../../build/contracts/TicTacToeGame.json";
@@ -84,6 +85,9 @@ describe('TicTacToeGame', () => {
 
   it("disallows PLAY_AGAIN_ME_SECOND -> PLAY_AGAIN_ME_FIRST ", async () => {
     expect.assertions(1);
-    await expect(tttContract.validTransition(encode(againMS), encode(againMF))).rejects.toThrowError("Could not match to a valid transition.");
+    await expectRevert(
+      () => tttContract.validTransition(encode(againMS), encode(againMF)),
+      "Could not match to a valid transition."
+    );
   });
 });

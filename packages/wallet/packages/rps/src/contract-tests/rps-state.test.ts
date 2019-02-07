@@ -13,7 +13,7 @@ describe('RockPaperScissorsState', () => {
   const provider = new ethers.providers.JsonRpcProvider(`http://localhost:${process.env.DEV_GANACHE_PORT}`);
   let stateContract;
   let networkId;
-  beforeEach(async () => {
+  beforeAll(async () => {
 
     networkId = (await provider.getNetwork()).chainId;
     const libraryAddress = rpsStateArtifact.networks[networkId].address;
