@@ -417,7 +417,7 @@ module.exports = function (webpackEnv) {
         }),
       new webpack.EnvironmentPlugin({
         FIREBASE_PROJECT: isEnvProduction ? 'tic-tac-toe123' : 'tic-tac-toe-dev-3a21f',
-        FIREBASE_API_KEY: isEnvProduction ? 'AIzaSyBLmBfruupmeMDfE0YKPIqKps0fp3aMg94' : 'AIzaSyAFlVSCTROvaGr4HcrnjpFhBGSkEMklcb8',        
+        FIREBASE_API_KEY: isEnvProduction ? 'AIzaSyBLmBfruupmeMDfE0YKPIqKps0fp3aMg94' : 'AIzaSyAFlVSCTROvaGr4HcrnjpFhBGSkEMklcb8',
         TARGET_NETWORK: process.env.TARGET_NETWORK,
         WALLET_URL: isEnvProduction ? 'https://wallet.magmo.com' : 'http://localhost:3000',
       }),
@@ -522,6 +522,7 @@ module.exports = function (webpackEnv) {
         async: false,
         checkSyntacticErrors: true,
         tsconfig: paths.appTsConfig,
+        tslint: true,
         compilerOptions: {
           module: 'esnext',
           moduleResolution: 'node',

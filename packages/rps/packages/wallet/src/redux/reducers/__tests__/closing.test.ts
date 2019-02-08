@@ -6,7 +6,7 @@ import * as outgoing from 'wallet-client/lib/wallet-events';
 import * as TransactionGenerator from '../../../utils/transaction-generator';
 import * as SigningUtils from '../../../utils/signing-utils';
 import * as scenarios from './test-scenarios';
-import { itTransitionsToStateType } from './helpers';
+import { itTransitionsToStateType, itDoesntTransition } from './helpers';
 
 const {
   asAddress,
@@ -151,6 +151,15 @@ describe('start in ApproveCloseOnChain', () => {
     const action = actions.messageReceived('CloseStarted', '0x0');
     const updatedState = walletReducer(state, action);
     itTransitionsToStateType(states.WAIT_FOR_OPPONENT_CLOSE, updatedState);
+  });
+
+  describe('action taken: opponent sends incorrect message', () => {
+    const validateSignatureMock = jest.fn();
+    validateSignatureMock.mockReturnValue(true);
+    Object.defineProperty(SigningUtils, 'validSignature', { value: validateSignatureMock });
+    const action = actions.messageReceived('WRONG MESSAGE', '0x0');
+    const updatedState = walletReducer(state, action);
+    itDoesntTransition(state, updatedState);
   });
 
 });

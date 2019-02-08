@@ -62,6 +62,8 @@ export const acknowledgeChallengeReducer = (state: states.AcknowledgeChallenge, 
     case actions.BLOCK_MINED:
       if (typeof state.challengeExpiry !== 'undefined' && action.block.timestamp >= state.challengeExpiry) {
         return challengeStates.acknowledgeChallengeTimeout({ ...state });
+      }else{
+        return state;
       }
     default:
       return state;
@@ -84,6 +86,8 @@ export const chooseResponseReducer = (state: states.ChooseResponse, action: Wall
     case actions.BLOCK_MINED:
       if (typeof state.challengeExpiry !== 'undefined' && action.block.timestamp >= state.challengeExpiry) {
         return challengeStates.acknowledgeChallengeTimeout({ ...state });
+      }else{
+        return state;
       }
     default:
       return state;
@@ -115,6 +119,8 @@ export const takeMoveInAppReducer = (state: states.TakeMoveInApp, action: Wallet
     case actions.BLOCK_MINED:
       if (typeof state.challengeExpiry !== 'undefined' && action.block.timestamp >= state.challengeExpiry) {
         return challengeStates.acknowledgeChallengeTimeout({ ...state });
+      }else{
+        return state;
       }
     default:
       return state;
