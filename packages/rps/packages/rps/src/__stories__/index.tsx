@@ -16,6 +16,7 @@ import LoadingPage from "../components/LoadingPage";
 import MetamaskErrorPage from '../components/MetamaskErrorPage';
 import { MetamaskErrorType } from '../redux/metamask/actions';
 import CreatingOpenGameModal from "../components/CreatingOpenGameModal";
+import LoginErrorPage from '../components/LoginErrorPage';
 
 const finneyFiveFive = [new BN(5000000000000000), new BN(5000000000000000)].map(
   bnToHex
@@ -56,6 +57,7 @@ const lobbyState: SiteState = {
     loading: false,
     loggedIn: true,
     user: null,
+    error: undefined,
   },
   metamask: {
     loading: false,
@@ -76,7 +78,7 @@ const lobbyState: SiteState = {
 };
 
 const initialState: SiteState = {
-...lobbyState,
+  ...lobbyState,
   game: {
     messageState: {},
     gameState: states.pickMove({
@@ -122,7 +124,7 @@ const gameProposed = siteStateFromGameState(
 
 const confirmGame = siteStateFromGameState(
   states.confirmGameB({
-    ...shared,    
+    ...shared,
     player: Player.PlayerB,
     onScreenBalances: finneyFiveFive,
     turnNum: 6,
@@ -142,25 +144,27 @@ const openGame: OpenGame = {
 };
 
 storiesOf("Setup", module)
-.add("Loading Page", () => (
-  <LoadingPage />))
-.add("MetaMask Error Page", () => (
-  <MetamaskErrorPage error={ {errorType: MetamaskErrorType.WrongNetwork} }/>))
-.add("Home Page", () => (
-  <HomePage login={()=>alert('login')}/>))
-.add("Profile Modal", testState(noName));
+  .add("Loading Page", () => (
+    <LoadingPage />))
+  .add("Login Error Page", () => (
+    <LoginErrorPage error='Login error message' />))
+  .add("MetaMask Error Page", () => (
+    <MetamaskErrorPage error={{ errorType: MetamaskErrorType.WrongNetwork }} />))
+  .add("Home Page", () => (
+    <HomePage login={() => alert('login')} />))
+  .add("Profile Modal", testState(noName));
 
 storiesOf("Lobby", module)
-.add("Open Game Entry", () => (
-  <OpenGameEntry openGame={openGame} joinOpenGame={joinOpenGame} />))
-.add("Open Game Modal", () => (
-  <CreatingOpenGameModal visible={true} createOpenGame={()=>('')} cancelOpenGame={()=>('')}/>))
-.add("Lobby Page", testState(lobbyState));
+  .add("Open Game Entry", () => (
+    <OpenGameEntry openGame={openGame} joinOpenGame={joinOpenGame} />))
+  .add("Open Game Modal", () => (
+    <CreatingOpenGameModal visible={true} createOpenGame={() => ('')} cancelOpenGame={() => ('')} />))
+  .add("Lobby Page", testState(lobbyState));
 
 storiesOf("Game Opening", module)
-.add("Waiting Room", testState(waitingRoom))
-.add("Game Proposed", testState(gameProposed))
-.add("Confirm Game", testState(confirmGame));
+  .add("Waiting Room", testState(waitingRoom))
+  .add("Game Proposed", testState(gameProposed))
+  .add("Confirm Game", testState(confirmGame));
 
 storiesOf("Game Screens", module)
 storiesOf("Game Over", module)
