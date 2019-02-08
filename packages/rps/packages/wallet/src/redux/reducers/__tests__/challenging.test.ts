@@ -4,6 +4,7 @@ import * as states from '../../../states';
 import * as actions from '../../actions';
 import { itSendsATransaction, itTransitionsToStateType, itDoesntTransition } from './helpers';
 import * as TransactionGenerator from '../../../utils/transaction-generator';
+import { hideWallet, challengeComplete } from 'wallet-client';
 
 const {
   asPrivateKey,
@@ -49,6 +50,8 @@ describe('when in APPROVE_CHALLENGE', () => {
   describe('when a challenge is declined', () => {
     const action = actions.challengeRejected();
     const updatedState = walletReducer(state, action);
+    expect(updatedState.displayOutbox).toEqual(hideWallet());
+    expect(updatedState.messageOutbox).toEqual(challengeComplete());
     itTransitionsToStateType(states.WAIT_FOR_UPDATE, updatedState);
   });
 });
