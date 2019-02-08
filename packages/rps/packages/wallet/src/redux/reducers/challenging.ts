@@ -114,7 +114,8 @@ const waitForResponseOrTimeoutReducer = (state: states.WaitForResponseOrTimeout,
     case actions.BLOCK_MINED:
       if (typeof state.challengeExpiry !== 'undefined' && action.block.timestamp >= state.challengeExpiry) {
         return states.acknowledgeChallengeTimeout({ ...state });
-      }
+      } else { return state; }
+
     default:
       return state;
   }

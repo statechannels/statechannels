@@ -166,5 +166,5 @@ storiesOf("Game Opening", module)
   .add("Game Proposed", testState(gameProposed))
   .add("Confirm Game", testState(confirmGame));
 
-storiesOf("Game Screens", module)
-storiesOf("Game Over", module)
+storiesOf("Game Screens", module);
+storiesOf("Game Over", module);

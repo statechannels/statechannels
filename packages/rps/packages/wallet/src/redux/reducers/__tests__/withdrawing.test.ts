@@ -33,7 +33,7 @@ const defaults = {
   privateKey: asPrivateKey,
   networkId: 23213,
   transactionHash: '0x0',
-  userAddress: '0x0'
+  userAddress: '0x0',
 };
 
 
