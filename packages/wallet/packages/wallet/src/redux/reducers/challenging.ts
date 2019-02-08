@@ -55,7 +55,7 @@ const approveChallengeReducer = (state: states.ApproveChallenge, action: WalletA
       const transaction = createForceMoveTransaction(state.adjudicator, fromPosition, toPosition, fromSignature, toSignature);
       return states.waitForChallengeInitiation(transaction, state);
     case actions.CHALLENGE_REJECTED:
-      return runningStates.waitForUpdate({ ...state });
+      return runningStates.waitForUpdate({ ...state, messageOutbox: challengeComplete(), displayOutbox: hideWallet() });
     default:
       return state;
   }
