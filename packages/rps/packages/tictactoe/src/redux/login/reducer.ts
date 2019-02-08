@@ -5,12 +5,14 @@ export interface LoginState {
   loading: boolean;
   loggedIn: boolean;
   user: any;
+  error: string | undefined;
 }
 
 const initialState: LoginState = {
   loading: false,
   loggedIn: false,
   user: null,
+  error: undefined,
 };
 
 export const loginReducer: Reducer<LoginState> = (state = initialState, action: loginActions.AnyAction) => {
@@ -32,6 +34,7 @@ export const loginReducer: Reducer<LoginState> = (state = initialState, action: 
       return {
         ...state,
         loading: false,
+        error: action.error,
       };
     case loginActions.LOGOUT_SUCCESS:
       return initialState;
@@ -39,6 +42,7 @@ export const loginReducer: Reducer<LoginState> = (state = initialState, action: 
       return {
         ...state,
         loading: false,
+        error: action.error,
       };
     default:
       return state;

@@ -16,6 +16,7 @@ import LoadingPage from "../components/LoadingPage";
 import MetamaskErrorPage from '../components/MetamaskErrorPage';
 import { MetamaskErrorType } from '../redux/metamask/actions';
 import CreatingOpenGameModal from "../components/CreatingOpenGameModal";
+import LoginErrorPage from '../components/LoginErrorPage';
 
 const finneyFourSix = [new BN(4000000000000000), new BN(6000000000000000)].map(
   bnToHex
@@ -59,6 +60,7 @@ const lobbyState: SiteState = {
     loading: false,
     loggedIn: true,
     user: null,
+    error: undefined,
   },
   metamask: {
     loading: false,
@@ -322,6 +324,8 @@ const openGame: OpenGame = {
 storiesOf("Setup", module)
 .add("Loading Page", () => (
   <LoadingPage />))
+  .add("Login Error Page", () => (
+    <LoginErrorPage error='Login error message' />))
 .add("MetaMask Error Page", () => (
   <MetamaskErrorPage error={ {errorType: MetamaskErrorType.WrongNetwork} }/>))
 .add("Home Page", () => (

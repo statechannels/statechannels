@@ -10,11 +10,11 @@ import { MetamaskError } from '../redux/metamask/actions';
 import LoadingPage from '../components/LoadingPage';
 import { createWalletIFrame } from 'wallet-client';
 import { WALLET_IFRAME_ID, WALLET_URL } from '../constants';
-
-
+import LoginErrorPage from '../components/LoginErrorPage';
 interface SiteProps {
   isAuthenticated: boolean;
   metamaskError: MetamaskError | null;
+  loginError: string | undefined;
   loading: boolean;
   walletVisible: boolean;
 }
@@ -35,6 +35,8 @@ class Site extends React.PureComponent<SiteProps>{
     let component;
     if (this.props.loading) {
       component = <LoadingPage />;
+    } else if (this.props.loginError) {
+      component = <LoginErrorPage error={this.props.loginError} />
     } else if (this.props.metamaskError !== null) {
       component = <MetamaskErrorPage error={this.props.metamaskError} />;
     } else if (this.props.isAuthenticated) {
@@ -66,6 +68,7 @@ const mapStateToProps = (state: SiteState): SiteProps => {
     loading: state.metamask.loading,
     metamaskError: state.metamask.error,
     walletVisible: state.overlay.walletVisible,
+    loginError: state.login.error,
   };
 };
 
