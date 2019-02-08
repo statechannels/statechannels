@@ -6,8 +6,10 @@ import { eventChannel } from 'redux-saga';
 
 export function* messageListener() {
   const postMessageEventChannel = eventChannel(emitter => {
-    window.addEventListener('message', (event: Event) => {
-      emitter(event);
+    window.addEventListener('message', (event: MessageEvent) => {
+      if (event.data && event.data.type && event.data.type.indexOf('WALLET') > -1) {
+        emitter(event);
+      }
     });
     return () => { /* End channel here*/ };
   });
