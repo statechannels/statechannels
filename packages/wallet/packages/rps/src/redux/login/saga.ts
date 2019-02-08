@@ -37,10 +37,13 @@ function* loginStatusWatcherSaga() {
     if (user) {
       // TODO: pass uid to wallet
       const libraryAddress = yield getLibraryAddress();
-      const walletAddress = yield initializeWallet(WALLET_IFRAME_ID, user.uid);
-      yield put(loginActions.initializeWalletSuccess(walletAddress));
-      yield put(loginActions.loginSuccess(user, libraryAddress));
-
+      if (!libraryAddress) {
+        yield put(loginActions.loginFailure(`Could not find the deployed game library for the ${process.env.TARGET_NETWORK} network.`));
+      } else {
+        const walletAddress = yield initializeWallet(WALLET_IFRAME_ID, user.uid);
+        yield put(loginActions.initializeWalletSuccess(walletAddress));
+        yield put(loginActions.loginSuccess(user, libraryAddress));
+      }
 
 
     } else {
@@ -66,6 +69,9 @@ export default function* loginRootSaga() {
 
 function* getLibraryAddress() {
   const selectedNetworkId = parseInt(yield cps(web3.version.getNetwork), 10);
+  if (!RPSGameArtifact.networks || !RPSGameArtifact.networks[selectedNetworkId]) {
+    return undefined;
+  }
   return RPSGameArtifact.networks[selectedNetworkId].address;
 }
 

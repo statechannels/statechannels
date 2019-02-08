@@ -14,7 +14,6 @@ export const initializeWalletSuccess = (address: string) => ({
 });
 export type InitializeWalletSuccess = ReturnType<typeof initializeWalletSuccess>;
 
-
 export const loginRequest = () => ({
   type: LOGIN_REQUEST as typeof LOGIN_REQUEST,
 });
@@ -25,7 +24,7 @@ export const loginSuccess = (user: any, libraryAddress: string) => ({
   libraryAddress,
 });
 
-export const loginFailure = (error: Error) => ({
+export const loginFailure = (error: string) => ({
   type: LOGIN_FAILURE as typeof LOGIN_FAILURE,
   error,
 });
@@ -50,7 +49,7 @@ export const logoutSuccess = () => ({
   type: LOGOUT_SUCCESS as typeof LOGOUT_SUCCESS,
 });
 
-export const logoutFailure = (error: Error) => ({
+export const logoutFailure = (error: string) => ({
   type: LOGOUT_FAILURE as typeof LOGOUT_FAILURE,
   error,
 });
