@@ -156,6 +156,7 @@ const approveCloseOnChainReducer = (state: states.ApproveCloseOnChain, action: a
       if (action.data === 'CloseStarted' && validSignature(action.data, action.signature || '0x0', opponentAddress)) {
         return states.waitForOpponentClose(state);
       }
+      break;
     case actions.GAME_CONCLUDED_EVENT:
       return states.approveWithdrawal(state);
   }

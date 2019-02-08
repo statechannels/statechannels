@@ -36,7 +36,7 @@ class Site extends React.PureComponent<SiteProps>{
     if (this.props.loading) {
       component = <LoadingPage />;
     } else if (this.props.loginError) {
-      component = <LoginErrorPage error={this.props.loginError} />
+      component = <LoginErrorPage error={this.props.loginError} />;
     } else if (this.props.metamaskError !== null) {
       component = <MetamaskErrorPage error={this.props.metamaskError} />;
     } else if (this.props.isAuthenticated) {

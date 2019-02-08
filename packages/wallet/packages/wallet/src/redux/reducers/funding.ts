@@ -152,6 +152,8 @@ const approveFundingReducer = (state: states.ApproveFunding, action: actions.Wal
             ...state,
             adjudicator: action.data,
           });
+        }else{
+          return state;
         }
       }
     default:
