@@ -8,6 +8,8 @@
 */.env.test.local
 */.env.production.local
 */.vscode/settings.json
+*/*/.vscode/settings.json
+*/*/.vscode/tasks.json
 
 */npm-debug.log*
 */yarn-debug.log*

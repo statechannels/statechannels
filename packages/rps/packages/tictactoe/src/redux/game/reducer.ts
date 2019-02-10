@@ -22,6 +22,7 @@ import {
   POST_FUND_SETUP_B,
   PLAY_AGAIN_ME_FIRST,
   PLAY_AGAIN_ME_SECOND,
+  playAgainMeSecond,
 } from "../../core/positions";
 
 export interface JointState {
@@ -83,6 +84,12 @@ export const gameReducer: Reducer<JointState> = (
     if (gameState.name === states.StateName.XsPickMove) {
       return {
         gameState: states.xsPickChallengeMove(gameState),
+        messageState,
+      };
+    }
+    if (gameState.name === states.StateName.PlayAgain) {
+      return {
+        gameState: states.playAgainChallengeMove(gameState),
         messageState,
       };
     }
@@ -164,6 +171,7 @@ function singleActionReducer(state: JointState, action: actions.GameAction) {
         return state;
       }
     case states.StateName.PlayAgain:
+    case states.StateName.PlayAgainChallengeMove:
       return playAgainReducer(gameState, messageState, action);
     case states.StateName.WaitToPlayAgain:
       return waitToPlayAgainReducer(gameState, messageState, action);
@@ -495,7 +503,7 @@ function xsPickMoveReducer(
     balances: newBalances,
     turnNum: turnNum + 1,
   }); // default
-  let newGameState: states.GameState = states.playAgain({
+  let newGameState: states.GameState = states.waitToPlayAgain({
     ...gameState,
     turnNum: turnNum + 1,
     result: Result.Tie,
@@ -571,7 +579,7 @@ function xsPickMoveReducer(
   // if winning move
   if (isWinningMarks(newCrosses)) {
     if (newBalances[0] >= roundBuyIn && newBalances[1] >= roundBuyIn) {
-      newGameState = states.playAgain({
+      newGameState = states.waitToPlayAgain({
         ...gameState,
         turnNum: turnNum + 1,
         crosses: newCrosses,
@@ -621,7 +629,7 @@ function osPickMoveReducer(
     noughts: newNoughts,
     balances: newBalances,
   }); // default
-  let newGameState: states.GameState = states.playAgain({
+  let newGameState: states.GameState = states.waitToPlayAgain({
     ...gameState,
     turnNum: turnNum + 1,
     noughts: newNoughts,
@@ -640,7 +648,7 @@ function osPickMoveReducer(
         break;
       }
     }
-    newGameState = states.playAgain({
+    newGameState = states.waitToPlayAgain({
       ...gameState,
       turnNum: turnNum + 1,
       noughts: newNoughts,
@@ -705,7 +713,7 @@ function osPickMoveReducer(
   // if winning move
   if (isWinningMarks(newNoughts)) {
     if (newBalances[0] >= roundBuyIn && newBalances[1] >= roundBuyIn) {
-      newGameState = states.playAgain({
+      newGameState = states.waitToPlayAgain({
         ...gameState,
         turnNum: turnNum + 1,
         noughts: newNoughts,
@@ -909,7 +917,7 @@ function popCount(marks) {
 }
 
 function playAgainReducer(
-  gameState: states.PlayAgain,
+  gameState: states.PlayAgain | states.PlayAgainChallengeMove,
   messageState: MessageState,
   action: actions.GameAction
 ): JointState {
@@ -919,21 +927,36 @@ function playAgainReducer(
   if (action.type === actions.CREATE_CHALLENGE) { return challengeReducer(gameState, messageState); }
   const opponentAddress = states.getOpponentAddress(gameState);
   let newGameState: states.GameState;
-  if (action.type === actions.POSITION_RECEIVED) {
-    const position = action.position;
-    if (position.name !== (positions.PLAY_AGAIN_ME_FIRST || positions.PLAY_AGAIN_ME_SECOND)) {
-      return { gameState, messageState };
-    }
-    messageState = { ...messageState, actionToRetry: action };
-    return { gameState, messageState };
-  }
   if (action.type === actions.PLAY_AGAIN && youWentLast(gameState)) {
-    newGameState = states.waitToPlayAgain({ ...gameState });
+    newGameState = states.osWaitForOpponentToPickMove({
+       ...gameState,
+      turnNum: gameState.turnNum + 1,
+      noughts: 0,
+      crosses: 0,
+      result:Imperative.Wait,
+      you: Marker.noughts,
+         });
+    const pos = playAgainMeSecond({...gameState, turnNum: gameState.turnNum + 1});
+    if (gameState.name === states.StateName.PlayAgainChallengeMove) {
+      messageState = {
+        walletOutbox: { type: "RESPOND_TO_CHALLENGE", data: pos },
+      };
+    }
+    if (gameState.name === states.StateName.PlayAgain) {
+      messageState = sendMessage(pos, opponentAddress, messageState);
+    }
     return { gameState: newGameState, messageState };
   }
   if (action.type === actions.PLAY_AGAIN && !youWentLast(gameState)) {
     const pos = positions.playAgainMeFirst({ ...gameState, turnNum: gameState.turnNum + 1 });
-    messageState = sendMessage(pos, opponentAddress, messageState);
+    if (gameState.name === states.StateName.PlayAgainChallengeMove) {
+      messageState = {
+        walletOutbox: { type: "RESPOND_TO_CHALLENGE", data: pos },
+      };
+    }
+    if (gameState.name === states.StateName.PlayAgain) {
+      messageState = sendMessage(pos, opponentAddress, messageState);
+    }
     newGameState = states.waitToPlayAgain({ ...gameState, turnNum: gameState.turnNum + 1 });
     return { gameState: newGameState, messageState };
   }
@@ -950,7 +973,6 @@ function waitToPlayAgainReducer(
     return resignationReducer(gameState, messageState);
   }
   if (action.type === actions.CREATE_CHALLENGE) { return challengeReducer(gameState, messageState); }
-  const opponentAddress = states.getOpponentAddress(gameState);
   let newGameState: states.GameState;
   if (
     action.type === actions.POSITION_RECEIVED &&
@@ -958,16 +980,10 @@ function waitToPlayAgainReducer(
     youWentLast(gameState)
   ) {
        
-    newGameState = states.osWaitForOpponentToPickMove({
+    newGameState = states.playAgain({
       ...gameState,
-      noughts: 0,
-      crosses: 0,
-      turnNum: turnNum + 2, // because we recieve and immediately send
-      result: Imperative.Wait,
-      you: Marker.noughts,
+      turnNum: turnNum + 1,
     });
-    const pos = positions.playAgainMeSecond({ ...newGameState });
-    messageState = sendMessage(pos, opponentAddress, messageState);
     return {
       gameState: newGameState,
       messageState,
