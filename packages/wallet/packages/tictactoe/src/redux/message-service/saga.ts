@@ -171,7 +171,10 @@ function* handleWalletMessage(walletMessage: WalletMessage, state: gameStates.Pl
 
   switch (walletMessage.type) {
     case "RESPOND_TO_CHALLENGE":
-      if (state.name === gameStates.StateName.OsWaitForOpponentToPickMove || state.name === gameStates.StateName.XsWaitForOpponentToPickMove) {
+      if (
+        state.name === gameStates.StateName.OsWaitForOpponentToPickMove || state.name === gameStates.StateName.XsWaitForOpponentToPickMove ||
+        state.name === gameStates.StateName.WaitToPlayAgain
+        ) {
         Wallet.respondToOngoingChallenge(WALLET_IFRAME_ID, encode(walletMessage.data));
         yield put(gameActions.messageSent());
         const challengeCompleteChannel = createWalletEventChannel([Wallet.CHALLENGE_COMPLETE]);

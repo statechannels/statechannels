@@ -34,6 +34,7 @@ export default class PlayAgain extends React.PureComponent<Props> {
           <Button
             className="footer-playagain navbar-button ml-auto"
             onClick={playAgain}
+            disabled={true}
           >
             Waiting...
           </Button>

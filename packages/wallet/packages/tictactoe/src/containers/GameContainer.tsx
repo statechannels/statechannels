@@ -131,7 +131,8 @@ function RenderGame(props: GameProps) {
           resign={resign}
         />
       );
-    case StateName.PlayAgain:
+      case StateName.PlayAgainChallengeMove:
+      case StateName.PlayAgain:
       return (
         <PlayAgain
           noughts={state.noughts}

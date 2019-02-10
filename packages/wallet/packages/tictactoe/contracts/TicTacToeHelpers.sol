@@ -34,7 +34,7 @@ library TicTacToeHelpers {
     uint16 constant dhDiag = 273; /*  0b100010001 = 273 mask for win @ downhill diag */
     uint16 constant uhDiag =  84; /*  0b001010100 =  84 mask for win @ uphill diag */
     //
-    uint16 constant fullBd = 511; /* 0b111111111 = 511 full board */
+    uint16 constant fullBd = 511; /*  0b111111111 = 511 full board */
 
     function hasWon(uint16 _marks) public pure returns (bool) {
         return (
