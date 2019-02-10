@@ -38,4 +38,16 @@ describe('decode', () => {
     expect(encode(scenarios.aResignsAfterOneRound.conclude)).toEqual(scenarios.aResignsAfterOneRound.concludeHex);
   });
 
+  it('encodes PlayAgainmeFirst', () => {
+    expect(encode(scenarios.standard.againMF)).toEqual(scenarios.standard.againMFHex);
+  });
+
+  it('encodes PlayAgainMeSecond', () => {
+    expect(encode(scenarios.swapRoles.againMS)).toEqual(scenarios.swapRoles.againMSHex);
+  });
+
+  it('encodes Xplaying after swapping roles', () => {
+    expect(encode(scenarios.swapRoles.r2playing1)).toEqual(scenarios.swapRoles.r2playing1Hex);
+  });
+
 });

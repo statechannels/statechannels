@@ -26,6 +26,7 @@ export enum StateName {
   WaitForWithdrawal = "WAIT_FOR_WITHDRAWAL",
   XsPickChallengeMove = "XS_PICK_CHALLENGE_MOVE",
   OsPickChallengeMove = "OS_PICK_CHALLENGE_MOVE",
+  PlayAgainChallengeMove = "PLAY_AGAIN_CHALLENGE_MOVE",
 }
 
 export interface NoName {
@@ -340,6 +341,16 @@ export function playAgain<T extends HasResult>(state: T): PlayAgain {
   return { ...hasResult(state), name: StateName.PlayAgain };
 }
 
+export interface PlayAgainChallengeMove extends HasResult {
+  name: StateName.PlayAgainChallengeMove;
+  player: Player;
+}
+
+export function playAgainChallengeMove<T extends HasResult>(
+  state: T ): PlayAgainChallengeMove {
+  return {...hasResult(state), name: StateName.PlayAgainChallengeMove };
+}
+
 export interface WaitToPlayAgain extends HasResult {
   name: StateName.WaitToPlayAgain;
 }
@@ -407,7 +418,8 @@ export type PlayingState =
   | GameOver
   | WaitForWithdrawal
   | XsPickChallengeMove
-  | OsPickChallengeMove;
+  | OsPickChallengeMove
+  | PlayAgainChallengeMove;
 
 export type GameState =
   | NoName
