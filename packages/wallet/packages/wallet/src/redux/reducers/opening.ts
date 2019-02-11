@@ -22,6 +22,9 @@ export const openingReducer = (state: states.OpeningState, action: actions.Walle
 
 const waitForChannelReducer = (state: states.WaitForChannel, action: actions.WalletAction) => {
   switch (action.type) {
+    case actions.LOGGED_IN:
+      const { uid } = action;
+      return states.waitForAddress({ ...state, uid });
     case actions.OWN_POSITION_RECEIVED:
       const data = action.data;
       const ownPosition = decode(data);
