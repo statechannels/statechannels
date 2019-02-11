@@ -67,8 +67,7 @@ function getClientEnvironment(publicUrl) {
       (env, key) => {
         env[key] = process.env[key];
         return env;
-      },
-      {
+      }, {
         // Useful for determining whether we’re running in production mode.
         // Most importantly, it switches React into the correct mode.
         NODE_ENV: process.env.NODE_ENV || 'development',
@@ -77,6 +76,8 @@ function getClientEnvironment(publicUrl) {
         // This should only be used as an escape hatch. Normally you would put
         // images into the `src` and `import` them in code to get their paths.
         PUBLIC_URL: publicUrl,
+
+        BUILD_VERSION: new Date(Date.now()).toISOString(),
       }
     );
   // Stringify all values so we can feed into Webpack DefinePlugin
@@ -85,12 +86,17 @@ function getClientEnvironment(publicUrl) {
       (env, key) => {
         env[key] = JSON.stringify(raw[key]);
         return env;
-      },
-      {}
+      }, {}
     ),
   };
-
-  return { raw, stringified };
+  console.log({
+    raw,
+    stringified
+  });
+  return {
+    raw,
+    stringified
+  };
 }
 
 module.exports = getClientEnvironment;
