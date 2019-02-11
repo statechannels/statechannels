@@ -61,7 +61,7 @@
     "redux-saga-firebase": "^0.14.0",
     "resolve": "1.6.0",
     "sha3": "^1.2.2",
-    "wallet-client": "^0.0.1",
+    "magmo-wallet-client": "^0.0.1",
     "web3": "^1.0.0-beta.34",
     "web3-detect-network": "^0.0.17",
     "web3-utils": "^1.0.0-beta.30",

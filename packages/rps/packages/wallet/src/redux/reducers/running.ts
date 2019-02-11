@@ -5,7 +5,7 @@ import decode from '../../utils/decode-utils';
 
 import { ourTurn, validTransition } from '../../utils/reducer-utils';
 import { signPositionHex, validSignature } from '../../utils/signing-utils';
-import { challengeRejected, showWallet } from 'wallet-client/lib/wallet-events';
+import { challengeRejected, showWallet } from 'magmo-wallet-client/lib/wallet-events';
 import { handleSignatureAndValidationMessages } from '../../utils/state-utils';
 
 

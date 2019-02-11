@@ -1,5 +1,5 @@
-@import "../_colors";
-@import "../_fonts";
+@import "./_colors";
+@import "./_fonts";
 
 .welcome-title{
     font-family: $rps-font-family;
@@ -52,4 +52,9 @@
     height:50px;
     width:50px;
     margin: 150px auto 0 auto;
+}
+
+.wallet-body {
+    height: 440px;
+    padding-top: 1em;
 }

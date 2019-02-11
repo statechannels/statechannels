@@ -1,5 +1,5 @@
 import { TransactionRequest } from "ethers/providers";
-import { WalletEvent, DisplayAction } from 'wallet-client';
+import { WalletEvent, DisplayAction } from 'magmo-wallet-client';
 import { Action } from 'redux';
 
 export interface Base {
@@ -36,6 +36,8 @@ export interface ChannelPartiallyOpen extends AddressExists {
 export interface ChannelOpen extends ChannelPartiallyOpen {
   penultimatePosition: SignedPosition;
   unhandledAction?: Action;
+  requestedTotalFunds: string;
+  requestedYourDeposit: string;
 }
 export interface ChannelOpenAndTransactionExists extends ChannelOpen {
   transactionHash: string;
@@ -81,8 +83,8 @@ export function channelPartiallyOpen<T extends ChannelPartiallyOpen>(params: T):
 }
 
 export function channelOpen<T extends ChannelOpen>(params: T): ChannelOpen {
-  const { penultimatePosition, unhandledAction } = params;
-  return { ...channelPartiallyOpen(params), penultimatePosition, unhandledAction };
+  const { penultimatePosition, unhandledAction, requestedTotalFunds, requestedYourDeposit } = params;
+  return { ...channelPartiallyOpen(params), penultimatePosition, unhandledAction, requestedTotalFunds, requestedYourDeposit };
 }
 
 

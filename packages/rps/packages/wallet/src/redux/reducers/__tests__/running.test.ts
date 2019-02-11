@@ -3,6 +3,8 @@ import * as scenarios from './test-scenarios';
 import * as states from '../../../states';
 import * as actions from '../../actions';
 import { itDoesntTransition, itIncreasesTurnNumBy, itTransitionsToStateType, itSendsAMessage } from './helpers';
+import BN from "bn.js";
+import bnToHex from "../../../utils/bnToHex";
 
 const {
   asAddress,
@@ -30,6 +32,8 @@ const defaults = {
   adjudicator: 'adj-address',
   challengeExpiry: new Date(),
   networkId: 2132,
+  requestedTotalFunds: bnToHex(new BN(1000000000000000)),
+  requestedYourDeposit: bnToHex(new BN(500000000000000)),
 };
 
 const bParams = { address: bsAddress, ourIndex: 1, privateKey: bsPrivateKey };

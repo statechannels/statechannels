@@ -1,6 +1,7 @@
 import React from 'react';
 import { PureComponent } from 'react';
 import { connect } from 'react-redux';
+import { Button } from 'reactstrap';
 
 import * as states from '../states';
 import * as actions from '../redux/actions';
@@ -9,10 +10,12 @@ import AcknowledgeX from '../components/AcknowledgeX';
 import ApproveX from '../components/ApproveX';
 import { unreachable } from '../utils/reducer-utils';
 import WaitForOtherPlayer from '../components/WaitForOtherPlayer';
-import WaitForXConfirmation from '../components/WaitForXConfirmation';
-import WaitForXInitiation from '../components/WaitForXInitiation';
+// import WaitForXConfirmation from '../components/WaitForXConfirmation';
+// import WaitForXInitiation from '../components/WaitForXInitiation';
 import TransactionFailed from '../components/TransactionFailed';
 import SelectAddress from '../components/withdrawing/SelectAddress';
+import { ClosingStep } from '../components/closing/ClosingStep';
+import EtherscanLink from '../components/EtherscanLink';
 
 interface Props {
   state: states.ClosingState;
@@ -60,14 +63,19 @@ class ClosingContainer extends PureComponent<Props> {
             approveButtonTitle="Close and Withdraw" />
         );
       case states.ACKNOWLEDGE_CLOSE_SUCCESS:
-        return (
-          <AcknowledgeX
-            title="Channel closed!"
-            action={closeSuccessAcknowledged}
-            description="You have successfully closed your channel"
-            actionTitle="Ok!"
-          />
-        );
+        // return (
+        //   <AcknowledgeX
+        //     title="Channel closed!"
+        //     action={closeSuccessAcknowledged}
+        //     description="You have successfully closed your channel"
+        //     actionTitle="Ok!"
+        //   />
+        // );
+        return <ClosingStep step={4}>
+        <Button onClick={closeSuccessAcknowledged} >
+        {"Return to app"}
+        </Button>
+      </ClosingStep>;
       case states.ACKNOWLEDGE_CLOSED_ON_CHAIN:
         return (
           <AcknowledgeX
@@ -78,11 +86,20 @@ class ClosingContainer extends PureComponent<Props> {
           />
         );
       case states.WAIT_FOR_CLOSE_INITIATION:
-        return <WaitForXInitiation name="close" />;
+        // return <WaitForXInitiation name="close" />;
+        return <ClosingStep step={1}/>;
       case states.WAIT_FOR_CLOSE_SUBMISSION:
-        return <WaitForXInitiation name="close" />;
+        // return <WaitForXInitiation name="close" />;
+        return <ClosingStep step={1}/>;
       case states.WAIT_FOR_CLOSE_CONFIRMED:
-        return <WaitForXConfirmation name="close" transactionID={state.transactionHash} networkId={state.networkId} />;
+        // return <WaitForXConfirmation name="close" transactionID={state.transactionHash} networkId={state.networkId} />;
+        return <ClosingStep step={2}>Check the progress on&nbsp;
+        <EtherscanLink
+          transactionID={state.transactionHash}
+          networkId={state.networkId}
+          title="Etherscan"
+        />!
+        </ClosingStep>;
       case states.WAIT_FOR_OPPONENT_CLOSE:
         return <WaitForOtherPlayer name="close" />;
       case states.ACKNOWLEDGE_CONCLUDE:

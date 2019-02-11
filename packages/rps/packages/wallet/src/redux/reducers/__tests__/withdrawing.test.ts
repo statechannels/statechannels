@@ -7,6 +7,8 @@ import { itTransitionsToStateType } from './helpers';
 import * as scenarios from './test-scenarios';
 import * as TransactionGenerator from '../../../utils/transaction-generator';
 import * as SigningUtil from '../../../utils/signing-utils';
+import BN from "bn.js";
+import bnToHex from "../../../utils/bnToHex";
 
 const {
   asPrivateKey,
@@ -34,6 +36,8 @@ const defaults = {
   networkId: 23213,
   transactionHash: '0x0',
   userAddress: '0x0',
+  requestedTotalFunds: bnToHex(new BN(1000000000000000)),
+  requestedYourDeposit: bnToHex(new BN(500000000000000)),
 };
 
 
