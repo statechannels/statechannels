@@ -5,7 +5,7 @@ import * as actions from '../../actions';
 
 import { itTransitionsToStateType, itDoesntTransition } from './helpers';
 import * as scenarios from './test-scenarios';
-import { validationFailure, SIGNATURE_FAILURE } from 'wallet-client';
+import { validationFailure, SIGNATURE_FAILURE } from 'magmo-wallet-client';
 
 const {
   preFundSetupAHex,

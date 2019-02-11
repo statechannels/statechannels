@@ -1,6 +1,6 @@
 import { WalletState } from '../states';
 import { OWN_POSITION_RECEIVED, OPPONENT_POSITION_RECEIVED, WalletAction } from '../redux/actions';
-import { signatureFailure, signatureSuccess, validationFailure, validationSuccess, WalletEvent } from 'wallet-client';
+import { signatureFailure, signatureSuccess, validationFailure, validationSuccess, WalletEvent } from 'magmo-wallet-client';
 import { signPositionHex, validSignature } from './signing-utils';
 
 export function handleSignatureAndValidationMessages(state: WalletState, action: WalletAction): WalletEvent | undefined {

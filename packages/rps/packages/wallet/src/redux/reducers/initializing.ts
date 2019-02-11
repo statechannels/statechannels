@@ -13,7 +13,7 @@ import {
 
 import { WalletAction, KEYS_LOADED, LOGGED_IN, METAMASK_LOAD_ERROR } from '../actions';
 import { unreachable } from '../../utils/reducer-utils';
-import { initializationSuccess, showWallet } from 'wallet-client/lib/wallet-events';
+import { initializationSuccess, showWallet } from 'magmo-wallet-client/lib/wallet-events';
 
 
 export const initializingReducer = (state: InitializingState, action: WalletAction): WalletState => {

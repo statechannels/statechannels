@@ -1,6 +1,6 @@
 import * as states from '../../states';
 import * as actions from '../actions';
-import { messageRequest, fundingSuccess, fundingFailure, showWallet, hideWallet } from 'wallet-client/lib/wallet-events';
+import { messageRequest, fundingSuccess, fundingFailure, showWallet, hideWallet } from 'magmo-wallet-client/lib/wallet-events';
 
 import decode, { extractGameAttributes } from '../../utils/decode-utils';
 import { unreachable, validTransition } from '../../utils/reducer-utils';

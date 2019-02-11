@@ -6,8 +6,10 @@ import * as actions from '../../actions';
 import * as scenarios from './test-scenarios';
 import { itIncreasesTurnNumBy, itTransitionsToStateType } from './helpers';
 import * as TransactionGenerator from '../../../utils/transaction-generator';
-import * as outgoing from 'wallet-client/lib/wallet-events';
+import * as outgoing from 'magmo-wallet-client/lib/wallet-events';
 import { ApproveFunding, WaitForDepositConfirmation } from '../../../states';
+import BN from "bn.js";
+import bnToHex from "../../../utils/bnToHex";
 
 
 const {
@@ -38,18 +40,21 @@ const defaults = {
   participants,
   uid: 'uid',
   transactionHash: '0x0',
+  requestedTotalFunds: bnToHex(new BN(1000000000000000)),
 };
 
 const defaultsA = {
   ...defaults,
   ourIndex: 0,
   privateKey: asPrivateKey,
+  requestedYourDeposit: bnToHex(new BN(500000000000000)),
 };
 
 const defaultsB = {
   ...defaults,
   ourIndex: 1,
   privateKey: bsPrivateKey,
+  requestedYourDeposit: bnToHex(new BN(500000000000000)),
 };
 
 const justReceivedPreFundSetupB = {
