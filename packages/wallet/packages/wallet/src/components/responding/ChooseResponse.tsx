@@ -1,7 +1,6 @@
 import React from 'react';
 import Button from 'reactstrap/lib/Button';
 import SidebarLayout from '../SidebarLayout';
-import magmoFireBall from '../../images/white_fireball.svg';
 import { StyleSheet, css } from 'aphrodite';
 
 export enum ChallengeOptions {
@@ -33,11 +32,10 @@ export default class ChooseResponse extends React.PureComponent<Props> {
       </p>
         <div className="challenge-expired-button-container" >
           <span className={css(styles.button)}>
-            {challengeOptions.indexOf(ChallengeOptions.RespondWithMove) > -1 && <Button onClick={selectRespondWithMove} ><img src={magmoFireBall} />&nbsp;&nbsp;
+            {challengeOptions.indexOf(ChallengeOptions.RespondWithMove) > -1 && <Button onClick={selectRespondWithMove} >
               Respond with Move
           </Button>}
-            {challengeOptions.indexOf(ChallengeOptions.RespondWithExistingMove) > -1 && <Button onClick={selectRespondWithExistingMove} ><img src={magmoFireBall} />&nbsp;&nbsp;
-              Respond with Existing Move
+            {challengeOptions.indexOf(ChallengeOptions.RespondWithExistingMove) > -1 && <Button onClick={selectRespondWithExistingMove} >Respond with Existing Move
           </Button>}
           </span>
         </div>

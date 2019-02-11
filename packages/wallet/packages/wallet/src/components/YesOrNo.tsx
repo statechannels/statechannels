@@ -1,7 +1,6 @@
 import React, { Fragment } from 'react';
 import { Button } from 'reactstrap';
 import { StyleSheet, css } from 'aphrodite';
-import magmoFireBall from '../images/white_fireball.svg';
 
 export interface Props {
   yesMessage: string;
@@ -17,7 +16,7 @@ export default class YesOrNo extends React.Component<Props> {
       <Fragment>
         <div className={css(styles.buttonContainer)}>
           <span className={css(styles.button)}>
-            <Button onClick={yesAction}><img src={magmoFireBall}/>&nbsp;&nbsp;{yesMessage}</Button>
+            <Button onClick={yesAction}>{yesMessage}</Button>
           </span>
           <span className={css(styles.button)}>
             <Button onClick={noAction} color="link">{noMessage}</Button>
@@ -34,9 +33,6 @@ const styles = StyleSheet.create({
     display: 'flex',
     justifyContent: 'center',
     padding: '5px',
-    position: "absolute",
-    top: 'auto',
-    bottom: '5%',
   },
   button: {
     margin: '8px',

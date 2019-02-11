@@ -6,6 +6,8 @@ import * as actions from '../../actions';
 import { itTransitionsToStateType, itDoesntTransition } from './helpers';
 import * as scenarios from './test-scenarios';
 import * as TransactionGenerator from '../../../utils/transaction-generator';
+import BN from "bn.js";
+import bnToHex from "../../../utils/bnToHex";
 
 const {
   asPrivateKey,
@@ -35,6 +37,8 @@ const defaults = {
   moveSelected: false,
   challengeOptions: [],
   transactionHash: '0x0',
+  requestedTotalFunds: bnToHex(new BN(1000000000000000)),
+  requestedYourDeposit: bnToHex(new BN(500000000000000)),
 };
 
 describe('when in ACKNOWLEDGE_CHALLENGE', () => {

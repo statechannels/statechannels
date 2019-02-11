@@ -4,7 +4,9 @@ import * as states from '../../../states';
 import * as actions from '../../actions';
 import { itSendsATransaction, itTransitionsToStateType, itDoesntTransition } from './helpers';
 import * as TransactionGenerator from '../../../utils/transaction-generator';
-import { hideWallet, challengeComplete } from 'wallet-client';
+import { hideWallet, challengeComplete } from 'magmo-wallet-client';
+import BN from "bn.js";
+import bnToHex from "../../../utils/bnToHex";
 
 const {
   asPrivateKey,
@@ -34,7 +36,8 @@ const defaults = {
   networkId: 2323,
   challengeExpiry: 1,
   transactionHash: '0x0',
-
+  requestedTotalFunds: bnToHex(new BN(1000000000000000)),
+  requestedYourDeposit: bnToHex(new BN(500000000000000)),
 };
 
 

@@ -2,11 +2,12 @@ import { State } from 'fmg-core';
 
 import * as states from '../../states';
 import * as actions from '../actions';
-import { signatureSuccess, validationSuccess, signatureFailure, validationFailure } from 'wallet-client/lib/wallet-events';
+import { signatureSuccess, validationSuccess, signatureFailure, validationFailure } from 'magmo-wallet-client/lib/wallet-events';
 
 import decode from '../../utils/decode-utils';
 import { unreachable } from '../../utils/reducer-utils';
 import { signPositionHex, validSignature } from '../../utils/signing-utils';
+import bnToHex from '../../utils/bnToHex';
 
 
 export const openingReducer = (state: states.OpeningState, action: actions.WalletAction): states.WalletState => {
@@ -126,6 +127,8 @@ const waitForPreFundSetupReducer = (state: states.WaitForPreFundSetup, action: a
         lastPosition: { data, signature },
         penultimatePosition: state.lastPosition,
         messageOutbox: signatureSuccess(signature),
+        requestedTotalFunds: bnToHex(ownPosition.resolution[0].add(ownPosition.resolution[1])),
+        requestedYourDeposit: bnToHex(ownPosition.resolution[state.ourIndex]),
       });
 
     case actions.OPPONENT_POSITION_RECEIVED:
@@ -152,6 +155,8 @@ const waitForPreFundSetupReducer = (state: states.WaitForPreFundSetup, action: a
         lastPosition: { data: action.data, signature: action.signature },
         penultimatePosition: state.lastPosition,
         messageOutbox: validationSuccess(),
+        requestedTotalFunds: bnToHex(opponentPosition.resolution[0].add(opponentPosition.resolution[1])),
+        requestedYourDeposit: bnToHex(opponentPosition.resolution[state.ourIndex]),
       });
 
     default:

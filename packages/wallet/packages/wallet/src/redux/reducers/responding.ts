@@ -7,7 +7,7 @@ import * as actions from '../actions';
 import { unreachable, ourTurn, validTransition } from '../../utils/reducer-utils';
 import { signPositionHex } from '../../utils/signing-utils';
 import { createRespondWithMoveTransaction } from '../../utils/transaction-generator';
-import { challengeResponseRequested, challengeComplete, hideWallet, showWallet } from 'wallet-client/lib/wallet-events';
+import { challengeResponseRequested, challengeComplete, hideWallet, showWallet } from 'magmo-wallet-client/lib/wallet-events';
 import { handleSignatureAndValidationMessages } from '../../utils/state-utils';
 import decode from '../../utils/decode-utils';
 

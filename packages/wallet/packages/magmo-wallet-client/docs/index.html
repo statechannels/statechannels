@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>wallet-client</title>
+	<title>magmo-wallet-client</title>
 	<meta name="description" content="">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="assets/css/main.css">
@@ -22,7 +22,7 @@
 						<li class="state loading">Preparing search index...</li>
 						<li class="state failure">The search index is not available</li>
 					</ul>
-					<a href="index.html" class="title">wallet-client</a>
+					<a href="index.html" class="title">magmo-wallet-client</a>
 				</div>
 				<div class="table-cell" id="tsd-widgets">
 					<div id="tsd-filter">
@@ -56,7 +56,7 @@
 					<a href="globals.html">Globals</a>
 				</li>
 			</ul>
-			<h1> wallet-client</h1>
+			<h1> magmo-wallet-client</h1>
 		</div>
 	</div>
 </header>
@@ -64,7 +64,7 @@
 	<div class="row">
 		<div class="col-8 col-content">
 			<div class="tsd-panel tsd-typography">
-				<h1 id="wallet-client"><code>wallet-client</code></h1>
+				<h1 id="magmo-wallet-client"><code>magmo-wallet-client</code></h1>
 				<blockquote>
 					<p>A library for creating and interacting with a Magmo wallet.</p>
 				</blockquote>
@@ -72,14 +72,14 @@
 				<h3 id="creating-the-wallet-iframe">Creating the Wallet iframe</h3>
 				<p>The wallet iframe can be created by calling <code>createWalletIFrame</code> and then embedded anywhere in the page.
 				The wallet handles stying and displaying itself!</p>
-				<pre><code><span class="hljs-attribute">const walletClient</span> = require(<span class="hljs-string">'wallet-client'</span>);
+				<pre><code><span class="hljs-attribute">const walletClient</span> = require(<span class="hljs-string">'magmo-wallet-client'</span>);
 <span class="hljs-attribute">const walletIframe</span> = walletClient.createWalletIFrame(<span class="hljs-string">'magmo-wallet-00'</span>);</code></pre><h3 id="listening-for-wallet-events">Listening for Wallet events</h3>
 				<p>The <code>WalletEventListener</code> can be used to subscribe to <code>WalletEvent</code>s.</p>
-				<pre><code><span class="hljs-keyword">const</span> walletClient = <span class="hljs-built_in">require</span>(<span class="hljs-string">'wallet-client'</span>);
+				<pre><code><span class="hljs-keyword">const</span> walletClient = <span class="hljs-built_in">require</span>(<span class="hljs-string">'magmo-wallet-client'</span>);
 <span class="hljs-keyword">const</span> walletListener = <span class="hljs-keyword">new</span> walletClient.WalletEventListener();
 walletListener.subscribeAll(yourHandler);</code></pre><h3 id="wallet-functions">Wallet functions</h3>
 				<p>The wallet exposes various functions to interact with the wallet.</p>
-				<pre><code>const walletClient = require('wallet-client');
+				<pre><code>const walletClient = require('magmo-wallet-client');
 walletClient.initialize<span class="hljs-constructor">Wallet('<span class="hljs-params">magmo</span>-<span class="hljs-params">wallet</span>-00','<span class="hljs-params">my</span>-<span class="hljs-params">user</span>-<span class="hljs-params">id</span>')</span>;</code></pre>
 			</div>
 		</div>

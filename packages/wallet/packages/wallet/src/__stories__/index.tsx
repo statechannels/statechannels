@@ -5,7 +5,8 @@ import { Provider } from 'react-redux';
 import * as states from '../states';
 import '../index.scss';
 import * as scenarios from '../redux/reducers/__tests__/test-scenarios';
-
+import BN from "bn.js";
+import bnToHex from "../utils/bnToHex";
 
 const {
   asAddress,
@@ -30,19 +31,21 @@ const defaults = {
   penultimatePosition: { data: preFundSetupAHex, signature: 'fake-sig' },
   lastPosition: { data: preFundSetupBHex, signature: 'fake-sig' },
   turnNum: 1,
-  networkId: 123,
+  networkId: 3,
   challengeExpiry: 0,
   transactionHash: '0x0',
   userAddress: '0x0',
+  requestedTotalFunds: bnToHex(new BN(1000000000000000)),
 };
 const playerADefaults = {
   ...defaults,
   ourIndex: 0,
-
+  requestedYourDeposit: bnToHex(new BN(500000000000000)),
 };
 const playerBDefaults = {
   ...defaults,
   ourIndex: 1,
+  requestedYourDeposit: bnToHex(new BN(500000000000000)),
 };
 
 const fakeStore = (state) => ({
@@ -63,6 +66,12 @@ const testState = (state) => (
   )
 );
 
+storiesOf('Network Status', module)
+.add('Mainnet', testState(states.approveFunding({ ...playerADefaults, networkId: 1})))
+.add('Kovan', testState(states.approveFunding({ ...playerADefaults, networkId: 4})))
+.add('Ropsten', testState(states.approveFunding({ ...playerADefaults, networkId: 3})))
+.add('Rinkeby', testState(states.approveFunding({ ...playerADefaults, networkId: 42})))
+.add('Ganache', testState(states.approveFunding({ ...playerADefaults, networkId: 5777})));
 storiesOf('Wallet Screens / Funding / Player A', module)
   .add('ApproveFunding', testState(states.approveFunding(playerADefaults)))
   .add('AWaitForDeployToBeSentToMetaMask', testState(states.aWaitForDeployToBeSentToMetaMask(playerADefaults)))
@@ -75,7 +84,8 @@ storiesOf('Wallet Screens / Funding / Player A', module)
 storiesOf('Wallet Screens / Funding / Player B', module)
   .add('ApproveFunding', testState(states.approveFunding(playerBDefaults)))
   .add('BWaitForDeployAddress', testState(states.bWaitForDeployAddress(playerBDefaults)))
-  .add('WaitForDeployConfirmation', testState(states.waitForDeployConfirmation(playerBDefaults)))
+  .add('BWaitForDepositToBeSentToMetaMask', testState(states.bWaitForDepositToBeSentToMetaMask(playerBDefaults)))
+  .add('BSubmitDepositInMetaMask', testState(states.bSubmitDepositInMetaMask(playerBDefaults)))
   .add('WaitForDepositConfirmation', testState(states.waitForDepositConfirmation(playerBDefaults)))
   .add('BWaitForPostFundSetup', testState(states.bWaitForPostFundSetup(playerBDefaults)))
   .add('AcknowledgeFundingSuccess', testState(states.acknowledgeFundingSuccess(playerBDefaults)));
@@ -85,7 +95,7 @@ storiesOf('Wallet Screens / Withdrawing', module)
   .add('WaitForWithdrawalInitiation', testState(states.waitForWithdrawalInitiation(playerADefaults)))
   .add('WaitForWithdrawalConfirmation', testState(states.waitForWithdrawalConfirmation(playerADefaults)))
   .add('AcknowledgeWithdrawalSuccess', testState(states.acknowledgeWithdrawalSuccess(playerADefaults)));
-
+  
 storiesOf('Wallet Screens / Challenging', module)
   .add('ApproveChallenge', testState(states.approveChallenge(playerADefaults)))
   .add('WaitForChallengeInitiation', testState(states.waitForChallengeInitiation({}, playerADefaults)))

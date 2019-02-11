@@ -4,7 +4,7 @@ import { unreachable } from '../../utils/reducer-utils';
 import { handleSignatureAndValidationMessages } from '../../utils/state-utils';
 import { createWithdrawTransaction } from '../../utils/transaction-generator';
 import { signVerificationData } from '../../utils/signing-utils';
-import { closeSuccess, hideWallet } from 'wallet-client/lib/wallet-events';
+import { closeSuccess, hideWallet } from 'magmo-wallet-client/lib/wallet-events';
 
 export const withdrawingReducer = (state: states.WithdrawingState, action: actions.WalletAction): states.WalletState => {
   // Handle any signature/validation request centrally to avoid duplicating code for each state

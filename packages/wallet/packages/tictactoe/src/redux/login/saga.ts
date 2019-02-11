@@ -3,7 +3,7 @@ import { call, fork, put, take, takeEvery, cps } from 'redux-saga/effects';
 import * as loginActions from './actions';
 import { reduxSagaFirebase } from '../../gateways/firebase';
 import metamaskSaga from '../metamask/saga';
-import { initializeWallet } from 'wallet-client';
+import { initializeWallet } from 'magmo-wallet-client';
 import TTTGameArtifact from '../../../build/contracts/TicTacToeGame.json';
 import { WALLET_IFRAME_ID } from '../../constants';
 
