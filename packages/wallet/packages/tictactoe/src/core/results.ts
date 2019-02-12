@@ -23,8 +23,8 @@ export enum AbsoluteResult {
 }
 
 export enum Imperative {
-  Choose = 3,
-  Wait = 4,
+  Choose = 5,
+  Wait = 6,
 }
 
 
