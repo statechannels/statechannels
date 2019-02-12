@@ -8,15 +8,9 @@ steps:
 - name: gcr.io/cloud-builders/gsutil
   args: ["-m", "rsync", "-r", "-c", "-d", "./packages/wallet/build", "gs://wallet.magmo.com"]
 - name: gcr.io/cloud-builders/gsutil
-  args: ["setmeta", "-h","Cache-Control:private","gs://wallet.magmo.com/service-worker.js"]
-- name: gcr.io/cloud-builders/gsutil
   args: ["-m", "rsync", "-r", "-c", "-d", "./packages/rps/build", "gs://rps.magmo.com"]
 - name: gcr.io/cloud-builders/gsutil
-  args: ["setmeta", "-h","Cache-Control:private","gs://rps.magmo.com/service-worker.js"]
-- name: gcr.io/cloud-builders/gsutil
   args: ["-m", "rsync", "-r", "-c", "-d", "./packages/tictactoe/build", "gs://ttt.magmo.com"]
-- name: gcr.io/cloud-builders/gsutil
-  args: ["setmeta", "-h","Cache-Control:private","gs://ttt.magmo.com/service-worker.js"]
 options:
  machineType: 'N1_HIGHCPU_8'
   
