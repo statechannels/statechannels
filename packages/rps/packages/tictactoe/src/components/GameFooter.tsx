@@ -178,6 +178,14 @@ export default class GameFooter extends React.PureComponent<Props> {
         footerClass = "you-lose";
         footerMsg = "You lose!";
         break;
+      case Result.GameOverWin:
+        footerClass = "you-win";
+        footerMsg = "Game Over! You win!";
+        break;
+      case Result.GameOverLose:
+        footerClass = "you-lose";
+        footerMsg = "Game Over! You lose!";
+        break;
       case Imperative.Choose:
         footerClass = "choose";
         footerMsg = "Choose your move";

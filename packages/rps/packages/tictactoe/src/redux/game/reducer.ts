@@ -521,7 +521,7 @@ function xsPickMoveReducer(
         break;
       }
     }
-    newGameState = states.playAgain({
+    newGameState = states.waitToPlayAgain({
       ...gameState,
       turnNum: turnNum + 1,
       crosses: newCrosses,

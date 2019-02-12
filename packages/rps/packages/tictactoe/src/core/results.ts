@@ -12,6 +12,8 @@ export enum Result {
   Tie,
   YouWin,
   YouLose,
+  GameOverWin,
+  GameOverLose,
 }
 
 export enum AbsoluteResult {
@@ -99,8 +101,10 @@ export function convertToAbsoluteResult(relativeResult: Result, you: Marker): Ab
     case Result.Tie:
       return AbsoluteResult.Tie;
     case Result.YouWin:
+    case Result.GameOverWin:
       return you === Marker.crosses ? AbsoluteResult.CrossesWins : AbsoluteResult.NoughtsWins; // conditional type
     case Result.YouLose:
+    case Result.GameOverLose:
       return you === Marker.crosses ? AbsoluteResult.NoughtsWins : AbsoluteResult.CrossesWins;
   }
 }

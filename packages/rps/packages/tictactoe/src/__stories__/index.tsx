@@ -27,6 +27,8 @@ const finneyFiveFive = [new BN(5000000000000000), new BN(5000000000000000)].map(
 const finneySixFour = [new BN(6000000000000000), new BN(4000000000000000)].map(
   bnToHex
 ) as [string, string];
+const finneyZeroTen = ["0x0000000000000000000000000000000000000000000000000000000000000000",
+"0x2386f26fc10000"] as [string, string];
 
 const fakeStore = state => ({
   dispatch: action => {
@@ -272,12 +274,12 @@ const winnerGameOver = siteStateFromGameState(
     ...shared,
     noughts: 0b000011000,
     crosses: 0b111000000,
-    you: Marker.noughts,
+    you: Marker.crosses,
     player: Player.PlayerA,
-    result: Result.YouWin,
-    onScreenBalances: finneyFiveFive,
-    turnNum: 6,
-    balances: finneyFiveFive,
+    result: Result.GameOverWin,
+    onScreenBalances: finneyZeroTen,
+    turnNum: 106,
+    balances: finneyZeroTen,
     ourTurn: true,
   })
 );
@@ -289,10 +291,10 @@ const loserGameOver = siteStateFromGameState(
     crosses: 0b111000000,
     you: Marker.noughts,
     player: Player.PlayerB,
-    result: Result.YouLose,
-    onScreenBalances: finneyFiveFive,
-    turnNum: 6,
-    balances: finneyFiveFive,
+    result: Result.GameOverLose,
+    onScreenBalances: finneyZeroTen,
+    turnNum: 106,
+    balances: finneyZeroTen,
     ourTurn: false,
   })
 );
