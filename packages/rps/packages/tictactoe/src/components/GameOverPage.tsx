@@ -2,33 +2,49 @@ import _ from "lodash";
 import React from "react";
 import MagmoLogoContainer from "../containers/MagmoLogoContainer";
 import GameFooterContainer from "../containers/GameFooterContainer";
-import { Button, Modal } from "reactstrap";
+import { Button } from "reactstrap";
+import Board from "./Board";
+import { Marks, Marker } from "../core";
 
 interface Props {
+  you: Marker;
   conclude: () => void;
   visible: boolean;
   ourTurn: boolean;
+  noughts: Marks;
+  crosses: Marks;
+  marksMade: (x: Marks) => void;
 }
 
 export default class GameOverPage extends React.PureComponent<Props> {
   render() {
-    const { ourTurn } = this.props;
+    const { you, noughts, crosses, marksMade, ourTurn } = this.props;
     return (
       <div className="w-100">
-        <Modal
-          className="game-over-container"
-          isOpen={this.props.visible}
-          centered={true}
-        >
-            <div className="game-over-content">
-              <h1>The Game is over!</h1>
-              {ourTurn && <div>You must close the channel and withdraw your funds to exit the game.</div>}
-              {ourTurn && <Button className="game-over-button" onClick={this.props.conclude} block={true}>
-              Close & Withdraw
-          </Button>}
-              {!ourTurn && <div>Waiting on the other player to close the channel so your funds can be withdrawn.</div>}
-            </div>
-        </Modal>
+        <div className="container centered-container w-100 game-container">
+          <Board
+            noughts={noughts}
+            crosses={crosses}
+            marksMade={marksMade}
+            you={you}
+          />
+          {ourTurn && 
+          <Button
+            className="footer-playagain navbar-button ml-auto"
+            onClick={this.props.conclude}
+          >Close and Withdraw
+          </Button>
+          }
+          {!ourTurn && 
+          <Button
+          className="footer-playagain navbar-button ml-auto"
+          onClick={this.props.conclude}
+          disabled={true}
+        >Waiting...
+        </Button>
+          }
+        </div>
+
         <MagmoLogoContainer />
         <GameFooterContainer />
       </div>

@@ -167,15 +167,17 @@ function RenderGame(props: GameProps) {
     case StateName.WaitForResignationAcknowledgement:
       return <WaitForResignationAcknowledgement />;
     case StateName.GameOver:
-    case StateName.OpponentResigned:
       return (
         <GameOverPage
           visible={
-            state.name === StateName.OpponentResigned ||
             state.name === StateName.GameOver
           }
           conclude={conclude}
           ourTurn={ourTurn}
+          noughts={state.noughts}
+          crosses={state.crosses}
+          you={state.you}
+          marksMade={marksMade}
         />
       );
     case StateName.WaitForFunding:
