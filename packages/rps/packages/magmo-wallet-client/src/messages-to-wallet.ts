@@ -81,7 +81,7 @@ export const createChallenge = () => ({
 });
 export type CreateChallengeRequest = ReturnType<typeof createChallenge>;
 
-export const RESPOND_TO_CHALLENGE = 'RESPOND_TO_CHALLENGE';
+export const RESPOND_TO_CHALLENGE = 'WALLET.RESPOND_TO_CHALLENGE';
 export const respondToChallenge = (position: string) => ({
   position,
   type: RESPOND_TO_CHALLENGE as typeof RESPOND_TO_CHALLENGE,
