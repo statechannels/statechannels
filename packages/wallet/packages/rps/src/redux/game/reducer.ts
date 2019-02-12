@@ -24,7 +24,14 @@ const emptyJointState: JointState = {
 
 export const gameReducer: Reducer<JointState> = (state = emptyJointState,
   action: actions.GameAction | LoginSuccess | InitializeWalletSuccess) => {
-
+  // Filter out any actions except for game actions, and specific login/wallet actions
+  // TODO: We should find a better way of handling this
+  if (!action.type.startsWith('GAME') &&
+    action.type !== actions.UPDATE_PROFILE &&
+    action.type !== LOGIN_SUCCESS &&
+    action.type !== INITIALIZE_WALLET_SUCCESS) {
+    return state;
+  }
   if (action.type === actions.EXIT_TO_LOBBY && state.gameState.name !== states.StateName.NoName) {
     const myAddress = ('myAddress' in state.gameState) ? state.gameState.myAddress : "";
     const myName = ('myName' in state.gameState) ? state.gameState.myName : "";
