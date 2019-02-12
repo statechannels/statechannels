@@ -680,10 +680,8 @@ function osPickMoveReducer(
     case Player.PlayerA: {
       if (crosses !== 0) {
         newBalances = favorA(favorA(balances, roundBuyIn), roundBuyIn); // usually enact a full swing to current player
-        console.log("full swing!");
       } else {
         newBalances = favorA(balances, roundBuyIn); // if first move of a round, simply assign roundBuyIn to current player.
-        console.log("single swing!");
       }
       break;
     }
@@ -691,7 +689,6 @@ function osPickMoveReducer(
       if (crosses !== 0) {
         newBalances = favorB(favorB(balances, roundBuyIn), roundBuyIn);
       } else {
-        console.log("first move of the round");
         newBalances = favorB(balances, roundBuyIn);
       }
       break;
