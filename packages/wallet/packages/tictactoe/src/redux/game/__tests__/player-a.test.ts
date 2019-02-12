@@ -154,7 +154,7 @@ describe("player A's app", () => {
       const updatedState = gameReducer({ messageState, gameState }, action);
 
       itIncreasesTurnNumBy(1, { gameState, messageState }, updatedState);
-      itTransitionsTo(state.StateName.PlayAgain, updatedState);
+      itTransitionsTo(state.StateName.WaitToPlayAgain, updatedState);
       itSends(draw, updatedState);
       itHalfSwingsTheBalancesToA(
         aProps.roundBuyIn,
