@@ -120,6 +120,11 @@ describe('when in INITIATE_RESPONSE', () => {
     itTransitionsToStateType(states.WAIT_FOR_RESPONSE_SUBMISSION, updatedState);
 
   });
+  describe('when the challenge times out', () => {
+    const action = actions.blockMined({ number: 1, timestamp: 2 });
+    const updatedState = walletReducer(state, action);
+    itTransitionsToStateType(states.ACKNOWLEDGE_CHALLENGE_TIMEOUT, updatedState);
+  });
 });
 
 describe('when in WAIT_FOR_RESPONSE_SUBMISSION', () => {
@@ -134,6 +139,11 @@ describe('when in WAIT_FOR_RESPONSE_SUBMISSION', () => {
     const updatedState = walletReducer(state, action);
     itTransitionsToStateType(states.RESPONSE_TRANSACTION_FAILED, updatedState);
   });
+  describe('when the challenge times out', () => {
+    const action = actions.blockMined({ number: 1, timestamp: 2 });
+    const updatedState = walletReducer(state, action);
+    itTransitionsToStateType(states.ACKNOWLEDGE_CHALLENGE_TIMEOUT, updatedState);
+  });
 });
 
 describe('when in WAIT_FOR_RESPONSE_CONFIRMED', () => {
@@ -142,7 +152,11 @@ describe('when in WAIT_FOR_RESPONSE_CONFIRMED', () => {
     const action = actions.transactionConfirmed();
     const updatedState = walletReducer(state, action);
     itTransitionsToStateType(states.ACKNOWLEDGE_CHALLENGE_COMPLETE, updatedState);
-
+  });
+  describe('when the challenge times out', () => {
+    const action = actions.blockMined({ number: 1, timestamp: 2 });
+    const updatedState = walletReducer(state, action);
+    itTransitionsToStateType(states.ACKNOWLEDGE_CHALLENGE_TIMEOUT, updatedState);
   });
 });
 
@@ -166,5 +180,10 @@ describe('when in RESPONSE_TRANSACTION_FAILED', () => {
     itTransitionsToStateType(states.INITIATE_RESPONSE, updatedState);
     expect(createRespondTxMock.mock.calls.length).toBe(1);
 
+  });
+  describe('when the challenge times out', () => {
+    const action = actions.blockMined({ number: 1, timestamp: 2 });
+    const updatedState = walletReducer(state, action);
+    itTransitionsToStateType(states.ACKNOWLEDGE_CHALLENGE_TIMEOUT, updatedState);
   });
 });
