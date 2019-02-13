@@ -50,6 +50,12 @@ const responseTransactionFailedReducer = (state: states.ResponseTransactionFaile
         ...state,
         transactionOutbox: transaction,
       });
+    case actions.BLOCK_MINED:
+      if (typeof state.challengeExpiry !== 'undefined' && action.block.timestamp >= state.challengeExpiry) {
+        return challengeStates.acknowledgeChallengeTimeout({ ...state });
+      } else {
+        return state;
+      }
   }
   return state;
 };
@@ -62,7 +68,7 @@ export const acknowledgeChallengeReducer = (state: states.AcknowledgeChallenge, 
     case actions.BLOCK_MINED:
       if (typeof state.challengeExpiry !== 'undefined' && action.block.timestamp >= state.challengeExpiry) {
         return challengeStates.acknowledgeChallengeTimeout({ ...state });
-      }else{
+      } else {
         return state;
       }
     default:
@@ -86,7 +92,7 @@ export const chooseResponseReducer = (state: states.ChooseResponse, action: Wall
     case actions.BLOCK_MINED:
       if (typeof state.challengeExpiry !== 'undefined' && action.block.timestamp >= state.challengeExpiry) {
         return challengeStates.acknowledgeChallengeTimeout({ ...state });
-      }else{
+      } else {
         return state;
       }
     default:
@@ -119,7 +125,7 @@ export const takeMoveInAppReducer = (state: states.TakeMoveInApp, action: Wallet
     case actions.BLOCK_MINED:
       if (typeof state.challengeExpiry !== 'undefined' && action.block.timestamp >= state.challengeExpiry) {
         return challengeStates.acknowledgeChallengeTimeout({ ...state });
-      }else{
+      } else {
         return state;
       }
     default:
@@ -131,6 +137,12 @@ export const initiateResponseReducer = (state: states.InitiateResponse, action: 
   switch (action.type) {
     case actions.TRANSACTION_SENT_TO_METAMASK:
       return states.waitForResponseSubmission(state);
+    case actions.BLOCK_MINED:
+      if (typeof state.challengeExpiry !== 'undefined' && action.block.timestamp >= state.challengeExpiry) {
+        return challengeStates.acknowledgeChallengeTimeout({ ...state });
+      } else {
+        return state;
+      }
     default:
       return state;
   }
@@ -143,6 +155,12 @@ export const waitForResponseSubmissionReducer = (state: states.WaitForResponseSu
       return states.waitForResponseConfirmation({ ...state, transactionHash: action.transactionHash });
     case actions.TRANSACTION_SUBMISSION_FAILED:
       return states.responseTransactionFailed(state);
+    case actions.BLOCK_MINED:
+      if (typeof state.challengeExpiry !== 'undefined' && action.block.timestamp >= state.challengeExpiry) {
+        return challengeStates.acknowledgeChallengeTimeout({ ...state });
+      } else {
+        return state;
+      }
     default:
       return state;
   }
@@ -150,6 +168,12 @@ export const waitForResponseSubmissionReducer = (state: states.WaitForResponseSu
 
 export const waitForResponseConfirmationReducer = (state: states.WaitForResponseConfirmation, action: WalletAction): WalletState => {
   switch (action.type) {
+    case actions.BLOCK_MINED:
+      if (typeof state.challengeExpiry !== 'undefined' && action.block.timestamp >= state.challengeExpiry) {
+        return challengeStates.acknowledgeChallengeTimeout({ ...state });
+      } else {
+        return state;
+      }
     case actions.TRANSACTION_CONFIRMED:
       return states.acknowledgeChallengeComplete(state);
     default:
