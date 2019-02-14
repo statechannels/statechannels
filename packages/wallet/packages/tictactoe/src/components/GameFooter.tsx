@@ -6,6 +6,7 @@ import { YourMarker, TheirMarker } from './Marker';
 import { Marker } from '../core';
 import hexToBN from "../utils/hexToBN";
 import web3Utils from "web3-utils";
+import { RulesModal } from "./RulesModal";
 
 
 interface Props {
@@ -21,6 +22,7 @@ interface Props {
   opponentBalance: string;
   roundBuyIn: string;
   you: Marker;
+  showRules: boolean;
   rulesRequest: () => void;
   logoutRequest: () => void;
 }
@@ -126,6 +128,7 @@ export default class GameFooter extends React.PureComponent<Props> {
         <Button color="link" className="navbar-button ml-auto" onClick={this.props.logoutRequest}>
           Sign Out
         </Button>
+        <RulesModal visible={this.props.showRules} rulesRequest={this.props.rulesRequest}/>
       </Navbar>
 
         <Navbar id={footerClass} className="navbar fixed-bottom footer-bar">
