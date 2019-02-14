@@ -32,7 +32,7 @@ const finneyZeroTen = ["0x000000000000000000000000000000000000000000000000000000
 
 const fakeStore = state => ({
   dispatch: action => {
-    alert(`Action ${action.type} triggered`);
+    console.log(`Action ${action.type} triggered`);
     return action;
   },
   getState: () => state,
@@ -299,7 +299,10 @@ const loserGameOver = siteStateFromGameState(
   })
 );
 
-const joinOpenGame = () => alert("join open game");
+const osChoosingWithRules: SiteState = osChoosing;
+osChoosingWithRules.overlay.rulesVisible = true;
+
+const joinOpenGame = () => console.log("join open game");
 
 const openGame: OpenGame = {
   address: "test address",
@@ -317,7 +320,7 @@ storiesOf("Setup", module)
 .add("MetaMask Error Page", () => (
   <MetamaskErrorPage error={ {errorType: MetamaskErrorType.WrongNetwork} }/>))
 .add("Home Page", () => (
-  <HomePage login={()=>alert('login')}/>))
+  <HomePage login={()=>console.log('login')}/>))
 .add("Profile Modal", testState(noName));
 
 storiesOf("Lobby", module)
@@ -349,3 +352,6 @@ storiesOf("Game Screens / Noughts", module)
 storiesOf("Game Over", module)
   .add("Winner", testState(winnerGameOver))
   .add("Loser", testState(loserGameOver));
+
+storiesOf("Rules", module)
+  .add("Choosing With Rules", testState(osChoosingWithRules));
