@@ -33,3 +33,10 @@ export {
   Bytes,
   Byte,
 } from './types';
+export {
+  CountingState,
+  SolidityCountingStateType,
+  createState as createCountingState,
+  asCoreState as countingCommitmentAsCoreState,
+  args as countingGameEthereumArgs,
+} from './test-game/counting-game';
