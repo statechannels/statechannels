@@ -1,4 +1,5 @@
-export { State } from './state';
+import { ethers } from 'ethers';
+export * from './state';
 export { Channel } from './channel';
 export {
   toHex32,
@@ -21,3 +22,6 @@ export {
   asCoreState,
   args as ethereumArgs,
 } from './test-game/counting-game';
+
+
+export { bigNumberify } from 'ethers/utils';

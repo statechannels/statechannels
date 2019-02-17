@@ -1,5 +1,5 @@
 import { Channel } from '../channel';
-import { State, StateType, asEthersObject, toHex } from '../state';
+import { State, StateType, asEthersObject, toHex, fromHex } from '../state';
 import expectRevert from './helpers/expect-revert';
 // import { CountingGame } from '../test-game/counting-game';
 import { sign } from '../utils';
@@ -114,5 +114,11 @@ describe('State', () => {
     const state2 = asCoreState(countingState2);
 
     await expectRevert(stateLib.gameAttributesEqual(asEthersObject(state1), asEthersObject(state2)));
+  });
+
+  it('can encode and decode a state', () => {
+    const hexValue = toHex(state);
+    const decodedState = fromHex(hexValue);
+    expect(decodedState).toEqual(state);
   });
 });
