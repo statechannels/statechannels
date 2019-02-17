@@ -1,9 +1,7 @@
-import { gameAttributesFromState } from '../../test-game/counting-game';
 import linker from 'solc/linker';
 
 import { Channel } from '../../';
 import { ethers, ContractFactory, utils } from 'ethers';
-import BN from 'bn.js';
 
 import StateArtifact from '../../../build/contracts/State.json';
 
