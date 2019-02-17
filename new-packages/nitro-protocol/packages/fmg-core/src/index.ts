@@ -14,4 +14,10 @@ export {
 export { default as expectRevert } from './test/helpers/expect-revert';
 export { increaseTime, DURATION } from './test/helpers/increase-time';
 
-export { CountingGame } from './test-game/counting-game';
+export {
+  CountingState,
+  SolidityCountingStateType,
+  createState,
+  asCoreState,
+  args as ethereumArgs,
+} from './test-game/counting-game';
