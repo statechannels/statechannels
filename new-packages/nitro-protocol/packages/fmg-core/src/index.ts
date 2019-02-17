@@ -24,4 +24,4 @@ export {
 } from './test-game/counting-game';
 
 
-export { bigNumberify } from 'ethers/utils';
+export { bigNumberify, BigNumber } from 'ethers/utils';
