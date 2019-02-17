@@ -14,7 +14,7 @@ export interface CountingState extends CountingBaseState {
   stateType: StateType;
 }
 
-const SolidityCountingStateType = {
+export const SolidityCountingStateType = {
   "CountingStateStruct": {
     "gameCounter": "uint256",
   },
