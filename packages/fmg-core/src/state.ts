@@ -17,91 +17,60 @@ const SolidityStateType = {
   },
 };
 
-class State {
+export interface BaseState {
   channel: Channel;
-  stateType: State.StateType;
-  turnNum: number;
+  turnNum: utils.BigNumber;
   allocation: utils.BigNumber[];
   destination: string[];
-  stateCount: number;
+  stateCount: utils.BigNumber;
+}
 
-  constructor({channel, stateType, turnNum, allocation, destination, stateCount=0}: 
-    {
-      channel: Channel, 
-      stateType: State.StateType,
-      turnNum: number,
-      allocation: utils.BigNumber[],
-      destination: string[],
-      stateCount?: number,
-    }
-  ) {
-    this.channel = channel;
-    this.stateType = stateType;
-    this.turnNum = turnNum;
-    this.allocation = allocation;
-    this.destination = destination;
-    this.stateCount = stateCount || 0;
-  }
+export interface State extends BaseState {
+  stateType: StateType;
+  gameAttributes: string;
+}
 
-  equals(other: State): boolean {
-    return this.toHex().toLowerCase() === other.toHex().toLowerCase();
-  }
+export function toHex(state: State): string {
+    return abi.encodeParameter(SolidityStateType, ethereumArgs(state));
+}
 
-  toHex() {
-    return abi.encodeParameter(SolidityStateType, this.args);
-  }
+export function mover(state: State) {
+    return state.channel.participants[this.turnNum % this.numberOfParticipants];
+}
 
-  get numberOfParticipants() {
-    return this.channel.numberOfParticipants;
-  }
+export function ethereumArgs(state: State) {
+  return [
+    state.channel.channelType,
+    state.channel.channelNonce,
+    state.channel.participants.length,
+    state.channel.participants,
+    state.stateType,
+    state.turnNum,
+    state.stateCount,
+    state.destination.map(String),
+    state.allocation,
+    state.gameAttributes,
+  ];
+}
 
-  get gameAttributes() {
-    return "0x";
-  }
-
-  get mover() {
-    return this.channel.participants[this.turnNum % this.numberOfParticipants];
-  }
-
-  get args() {
-    return [
-      this.channel.channelType,
-      this.channel.channelNonce,
-      this.numberOfParticipants,
-      this.channel.participants,
-      this.stateType,
-      this.turnNum,
-      this.stateCount,
-      this.destination.map(String),
-      this.allocation,
-      this.gameAttributes,
-    ];
-  }
-
-  get asEthersObject() {
-    return { 
-      channelType: this.channel.channelType,
-      channelNonce: utils.bigNumberify(this.channel.channelNonce),
-      numberOfParticipants: utils.bigNumberify(this.numberOfParticipants),
-      participants: this.channel.participants,
-      stateType: this.stateType,
-      turnNum: utils.bigNumberify(this.turnNum),
-      stateCount: utils.bigNumberify(this.stateCount),
-      destination: this.destination,
-      allocation: this.allocation.map(x => utils.bigNumberify(String(x))),
-      gameAttributes: this.gameAttributes,
+export function asEthersObject(state: State) {
+  return {
+    channelType: state.channel.channelType,
+    channelNonce: utils.bigNumberify(state.channel.channelNonce),
+    numberOfParticipants: utils.bigNumberify(state.channel.participants.length),
+    participants: state.channel.participants,
+    stateType: state.stateType,
+    turnNum: utils.bigNumberify(state.turnNum),
+    stateCount: utils.bigNumberify(state.stateCount),
+    destination: state.destination,
+    allocation: state.allocation.map(x => utils.bigNumberify(String(x))),
+    gameAttributes: state.gameAttributes,
   };
-  }
 }
 
-// tslint:disable-next-line:no-namespace
-namespace State {
-  export enum StateType {
-    PreFundSetup = 0,
-    PostFundSetup = 1,
-    Game = 2,
-    Conclude = 3,
-  }
+export enum StateType {
+  PreFundSetup = 0,
+  PostFundSetup = 1,
+  Game = 2,
+  Conclude = 3,
 }
-
-export { State };

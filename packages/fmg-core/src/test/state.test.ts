@@ -1,7 +1,7 @@
 import { Channel } from '../channel';
-import { State } from '../state';
+import { State, StateType, asEthersObject, toHex } from '../state';
 import expectRevert from './helpers/expect-revert';
-import { CountingGame } from '../test-game/counting-game';
+// import { CountingGame } from '../test-game/counting-game';
 import { sign } from '../utils';
 import linker from 'solc/linker';
 
@@ -10,6 +10,8 @@ import { ethers, ContractFactory, Wallet } from 'ethers';
 // @ts-ignore
 import StateArtifact from '../../build/contracts/State.json';
 import TestStateArtifact from '../../build/contracts/TestState.json';
+import { utils } from 'ethers';
+import { CountingState, asCoreState } from '../test-game/counting-game';
 
 const provider = new ethers.providers.JsonRpcProvider('http://localhost:8545');
 const signer = provider.getSigner();
@@ -18,8 +20,8 @@ describe('State', () => {
 
   let stateLib;
   let testStateLib;
-  const channelNonce = 12;
-  const turnNum = 15;
+  const channelNonce = new utils.BigNumber(12);
+  const turnNum = new utils.BigNumber(15);
 
   const channelType = new Wallet('4f3edf983ac636a65a842ce7c78d9aa706d3b113bce9c46f30d7d21715b23b1d')
     .address;
@@ -34,15 +36,16 @@ describe('State', () => {
   const allocation = [new ethers.utils.BigNumber(5), new ethers.utils.BigNumber(4)];
   const destination = [participantA.address, participantB.address];
   const channel = new Channel(channelType, channelNonce, participants);
-  const stateType = State.StateType.PreFundSetup;
-  const state = new State({
+  const stateType = StateType.PreFundSetup;
+  const state: State = {
     channel,
     stateType,
     turnNum,
     allocation,
     destination,
-    stateCount: 0,
-  });
+    stateCount: new utils.BigNumber(0),
+    gameAttributes: '0x',
+  };
 
   beforeEach(async () => {
     const networkId = (await provider.getNetwork()).chainId;
@@ -55,27 +58,27 @@ describe('State', () => {
   });
 
   it('identifies stateTypes', async () => {
-    state.stateType = State.StateType.PreFundSetup;
-    expect(await testStateLib.isPreFundSetup(state.asEthersObject)).toBe(true);
+    state.stateType = StateType.PreFundSetup;
+    expect(await testStateLib.isPreFundSetup(asEthersObject(state))).toBe(true);
 
-    state.stateType = State.StateType.PostFundSetup;
-    expect(await testStateLib.isPostFundSetup(state.asEthersObject)).toBe(true);
+    state.stateType = StateType.PostFundSetup;
+    expect(await testStateLib.isPostFundSetup(asEthersObject(state))).toBe(true);
 
-    state.stateType = State.StateType.Game;
-    expect(await testStateLib.isGame(state.asEthersObject)).toBe(true);
+    state.stateType = StateType.Game;
+    expect(await testStateLib.isGame(asEthersObject(state))).toBe(true);
 
-    state.stateType = State.StateType.Conclude;
-    expect(await testStateLib.isConclude(state.asEthersObject)).toBe(true);
+    state.stateType = StateType.Conclude;
+    expect(await testStateLib.isConclude(asEthersObject(state))).toBe(true);
   });
 
   it('identifies the mover based on the turnNum', async () => {
-    const mover = await testStateLib.mover(state.asEthersObject);
+    const mover = await testStateLib.mover(asEthersObject(state));
     // our state nonce is 15, which is odd, so it should be participant[1]
     expect(mover).toEqual(participants[1]);
   });
 
   it('can calculate the channelId', async () => {
-    const chainId: string = await testStateLib.channelId(state.asEthersObject);
+    const chainId: string = await testStateLib.channelId(asEthersObject(state));
     const localId: string = channel.id;
 
     expect(chainId).toEqual(localId);
@@ -83,30 +86,33 @@ describe('State', () => {
 
   it('can check if a state is signed', async () => {
     // needs to be signed by 1 as it's their move
-    const { r, s, v } = sign(state.toHex(), participantB.privateKey);
+    const { r, s, v } = sign(toHex(state), participantB.privateKey);
 
-    expect(await testStateLib.requireSignature(state.asEthersObject, v, r, s)).toBeTruthy();
+    expect(await testStateLib.requireSignature(asEthersObject(state), v, r, s)).toBeTruthy();
   });
 
   it('will revert if the wrong party signed', async () => {
     // needs to be signed by 1 as it's their move
-    const { v, r, s } = sign(state.toHex(), participantA.privateKey);
-    expectRevert(testStateLib.requireSignature(state.asEthersObject, v, r, s));
+    const { v, r, s } = sign(toHex(state), participantA.privateKey);
+    expectRevert(testStateLib.requireSignature(asEthersObject(state), v, r, s));
   });
 
   it('can check if the state is fully signed', async () => {
-    const { r: r0, s: s0, v: v0 } = sign(state.toHex(), participantA.privateKey);
-    const { r: r1, s: s1, v: v1 } = sign(state.toHex(), participantB.privateKey);
+    const { r: r0, s: s0, v: v0 } = sign(toHex(state), participantA.privateKey);
+    const { r: r1, s: s1, v: v1 } = sign(toHex(state), participantB.privateKey);
 
     expect(
-      await testStateLib.requireFullySigned(state.asEthersObject, [v0, v1], [r0, r1], [s0, s1]),
+      await testStateLib.requireFullySigned(asEthersObject(state), [v0, v1], [r0, r1], [s0, s1]),
     ).toBeTruthy();
   });
 
   it('can test if the gameAttributes are equal', async () => {
-    const state1 = CountingGame.preFundSetupState({ channel, destination, allocation, turnNum, gameCounter: 0 });
-    const state2 = CountingGame.preFundSetupState({ channel, destination, allocation, turnNum, gameCounter: 1 });
+    const countingState1: CountingState = { channel, destination, allocation, turnNum, gameCounter: utils.bigNumberify(0), stateCount: utils.bigNumberify(0), stateType: StateType.PreFundSetup };
+    const countingState2: CountingState = { channel, destination, allocation, turnNum, gameCounter: utils.bigNumberify(1), stateCount: utils.bigNumberify(0), stateType: StateType.PostFundSetup };
 
-    await expectRevert(stateLib.gameAttributesEqual(state1.asEthersObject, state2.asEthersObject));
+    const state1 = asCoreState(countingState1);
+    const state2 = asCoreState(countingState2);
+
+    await expectRevert(stateLib.gameAttributesEqual(asEthersObject(state1), asEthersObject(state2)));
   });
 });

@@ -1,20 +1,23 @@
-import { CountingGame } from '../../test-game/counting-game';
+import { gameAttributesFromState } from '../../test-game/counting-game';
 import linker from 'solc/linker';
 
 import { Channel } from '../../';
 import { ethers, ContractFactory, utils } from 'ethers';
+import BN from 'bn.js';
 
 import StateArtifact from '../../../build/contracts/State.json';
 
 import CountingStateArtifact from '../../../build/contracts/CountingState.json';
 import TestCountingStateArtifact from '../../../build/contracts/TestCountingState.json';
+import { StateType, State, ethereumArgs } from '../../state';
+import { CountingState, asCoreState } from '../../test-game/counting-game';
 
 const provider = new ethers.providers.JsonRpcProvider('http://localhost:8545');
 const signer = provider.getSigner();
 
 describe('CountingState', () => {
   let testCountingState;
-  let state;
+  let state: CountingState;
 
   beforeAll(async () => {
     // Contract setup --------------------------------------------------------------------------
@@ -52,15 +55,19 @@ describe('CountingState', () => {
       destination: [participantA.address, participantB.address],
     };
 
-    state = CountingGame.gameState({ ...defaults, turnNum: 6, gameCounter: 1 });
+    state = {
+      ...defaults,
+      turnNum: new utils.BigNumber(6),
+      gameCounter: new utils.BigNumber(1),
+      stateType: StateType.PreFundSetup,
+      stateCount: new utils.BigNumber(6),
+    };
   });
 
   it('converts a framework state into a counting state', async () => {
-    const countingStateArgs = await testCountingState.fromFrameworkState(state.args);
-    const gameAttributes = CountingGame.gameAttributes(countingStateArgs);
-
-    expect(gameAttributes).toMatchObject({
-        gameCounter: new utils.BigNumber(1),
-    });
+    const coreState: State = asCoreState(state);
+    const countingStateArgs = await testCountingState.fromFrameworkState(ethereumArgs(coreState));
+    const { gameCounter } = countingStateArgs;
+    expect(gameCounter).toEqual(new utils.BigNumber(1));
   });
 });
