@@ -3,7 +3,7 @@ import linker from 'solc/linker';
 
 import expectRevert from '../helpers/expect-revert';
 
-import { CountingGame } from '../../test-game/counting-game';
+import { createState, args } from '../../test-game/counting-game';
 import { Channel } from '../..';
 
 import StateArtifact from '../../../build/contracts/State.json';
@@ -81,13 +81,13 @@ describe('Rules', () => {
   });
 
   const validTransition = async (state1, state2) => {
-    return await testFramework.validTransition(state1.args, state2.args);
+    return await testFramework.validTransition(args(state1), args(state2));
   };
 
   describe('preFundSetup -> preFundSetup', () => {
     beforeEach(() => {
-      fromState = CountingGame.preFundSetupState({ ...defaults, turnNum: 0, stateCount: 0 });
-      toState = CountingGame.preFundSetupState({ ...defaults, turnNum: 1, stateCount: 1 });
+      fromState = createState.preFundSetup({ ...defaults, turnNum: 0, stateCount: 0 });
+      toState = createState.preFundSetup({ ...defaults, turnNum: 1, stateCount: 1 });
     });
 
     it('allows a valid transition', async () => {
@@ -126,8 +126,8 @@ describe('Rules', () => {
 
   describe('preFundSetup -> PostFundSetup', () => {
     beforeEach(() => {
-      fromState = CountingGame.preFundSetupState({ ...defaults, turnNum: 1, stateCount: 1 });
-      toState = CountingGame.postFundSetupState({ ...defaults, turnNum: 2, stateCount: 0 });
+      fromState = createState.preFundSetup({ ...defaults, turnNum: 1, stateCount: 1 });
+      toState = createState.postFundSetup({ ...defaults, turnNum: 2, stateCount: 0 });
     });
 
     it('allows a valid transition', async () => {
@@ -172,8 +172,8 @@ describe('Rules', () => {
 
   describe('preFundSetup -> conclude', () => {
     beforeEach(() => {
-      fromState = CountingGame.preFundSetupState({ ...defaults, turnNum: 1, stateCount: 1 });
-      toState = CountingGame.concludeState({ ...defaults, turnNum: 2 });
+      fromState = createState.preFundSetup({ ...defaults, turnNum: 1, stateCount: 1 });
+      toState = createState.conclude({ ...defaults, turnNum: 2, stateCount: 2 });
     });
 
     it('allows a valid transition', async () => {
@@ -208,8 +208,8 @@ describe('Rules', () => {
 
   describe('PostFundSetup -> PostFundSetup', () => {
     beforeEach(() => {
-      fromState = CountingGame.postFundSetupState({ ...defaults, turnNum: 1, stateCount: 0 });
-      toState = CountingGame.postFundSetupState({ ...defaults, turnNum: 2, stateCount: 1 });
+      fromState = createState.postFundSetup({ ...defaults, turnNum: 1, stateCount: 0 });
+      toState = createState.postFundSetup({ ...defaults, turnNum: 2, stateCount: 1 });
     });
 
     it('allows a valid transition', async () => {
@@ -244,8 +244,8 @@ describe('Rules', () => {
 
   describe('PostFundSetup -> Game', () => {
     beforeEach(() => {
-      fromState = CountingGame.postFundSetupState({ ...defaults, turnNum: 3, stateCount: 1, gameCounter: 0 });
-      toState = CountingGame.gameState({ ...defaults, turnNum: 4, stateCount: 0, gameCounter: 0,  });
+      fromState = createState.postFundSetup({ ...defaults, turnNum: 3, stateCount: 1, gameCounter: 0 });
+      toState = createState.game({ ...defaults, turnNum: 4, stateCount: 0, gameCounter: 0,  });
     });
 
     it("rejects a transition where the fromState is not the last player", async () => {
@@ -258,8 +258,8 @@ describe('Rules', () => {
 
   describe('PostFundSetup -> conclude', () => {
     beforeEach(() => {
-      fromState = CountingGame.postFundSetupState({ ...defaults, turnNum: 1, stateCount: 0 });
-      toState = CountingGame.concludeState({ ...defaults, turnNum: 2 });
+      fromState = createState.postFundSetup({ ...defaults, turnNum: 1, stateCount: 0 });
+      toState = createState.conclude({ ...defaults, turnNum: 2, stateCount: 1 });
     });
 
     it("rejects a transition where the turnNum doesn't increment", async () => {
@@ -300,13 +300,13 @@ describe('Rules', () => {
 
   describe('PostFundSetup -> game', () => {
     beforeEach(() => {
-      fromState = CountingGame.postFundSetupState({
+      fromState = createState.postFundSetup({
         ...defaults,
         turnNum: 1,
         stateCount: 1,
         gameCounter: 3,
       });
-      toState = CountingGame.gameState({ ...defaults, turnNum: 2, gameCounter: 4 });
+      toState = createState.game({ ...defaults, turnNum: 2, gameCounter: 4, stateCount: 0 });
     });
 
     it('allows a valid transition', async () => {
@@ -336,8 +336,8 @@ describe('Rules', () => {
 
   describe('game -> game', () => {
     beforeEach(() => {
-      fromState = CountingGame.gameState({ ...defaults, turnNum: 1, gameCounter: 3 });
-      toState = CountingGame.gameState({ ...defaults, turnNum: 2, gameCounter: 4 });
+      fromState = createState.game({ ...defaults, turnNum: 1, gameCounter: 3, stateCount: 0 });
+      toState = createState.game({ ...defaults, turnNum: 2, gameCounter: 4, stateCount: 0 });
     });
 
     it('allows a valid transition', async () => {
@@ -362,8 +362,8 @@ describe('Rules', () => {
 
   describe('game -> conclude', () => {
     beforeEach(() => {
-      fromState = CountingGame.gameState({ ...defaults, turnNum: 1, gameCounter: 3 });
-      toState = CountingGame.concludeState({ ...defaults, turnNum: 2 });
+      fromState = createState.game({ ...defaults, turnNum: 1, gameCounter: 3, stateCount: 0 });
+      toState = createState.conclude({ ...defaults, turnNum: 2, stateCount: 0 });
     });
 
     it('allows a valid transition', async () => {
@@ -393,8 +393,8 @@ describe('Rules', () => {
 
   describe('conclude -> conclude', () => {
     beforeEach(() => {
-      fromState = CountingGame.concludeState({ ...defaults, turnNum: 1 });
-      toState = CountingGame.concludeState({ ...defaults, turnNum: 2 });
+      fromState = createState.conclude({ ...defaults, turnNum: 1, stateCount: 1 });
+      toState = createState.conclude({ ...defaults, turnNum: 2, stateCount: 2 });
     });
 
     it('allows a valid transition', async () => {

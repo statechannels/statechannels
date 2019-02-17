@@ -1,31 +1,17 @@
-import { State } from '..';
 import abi from 'web3-eth-abi';
-import BN from 'bn.js';
+import { StateType, State, BaseState, ethereumArgs } from '../state';
+import { utils } from 'ethers';
 
-interface GameAttributes {
-  gameCounter: BN;
+export interface GameAttributes {
+  gameCounter: utils.BigNumber;
 }
 
-class CountingGame {
-  static preFundSetupState(opts) {
-    return new PreFundSetupState(opts);
-  }
-  static postFundSetupState(opts) {
-    return new PostFundSetupState(opts);
-  }
-  static gameState(opts) {
-    return new GameState(opts);
-  }
-  static concludeState(opts) {
-    return new ConcludeState(opts);
-  }
+export interface CountingBaseState extends BaseState {
+  gameCounter: utils.BigNumber;
+}
 
-  static gameAttributes(countingStateArgs: [BN, [BN, BN]]): GameAttributes {
-    //
-    return {
-      gameCounter: countingStateArgs[0],
-    };
-  }
+export interface CountingState extends CountingBaseState {
+  stateType: StateType;
 }
 
 const SolidityCountingStateType = {
@@ -34,45 +20,47 @@ const SolidityCountingStateType = {
   },
 };
 
-class CountingBaseState extends State {
-  gameCounter: number;
+export const createState = {
+  preFundSetup: function preFundSetupState(opts: CountingBaseState): CountingState {
+    return { ...opts, stateType: StateType.PreFundSetup };
+  },
+  postFundSetup: function postFundSetupState(opts: CountingBaseState): CountingState {
+    return { ...opts, stateType: StateType.PostFundSetup };
+  },
+  game: function gameState(opts: CountingBaseState): CountingState {
+    return { ...opts, stateType: StateType.Game, stateCount: utils.bigNumberify(0) };
+  },
+  conclude: function concludeState(opts: CountingBaseState): CountingState {
+    return { ...opts, stateType: StateType.Conclude, };
+  },
+};
 
-  constructor({ channel, turnNum, stateCount, allocation, destination, gameCounter }) {
-    super({ channel, turnNum, stateCount, allocation, destination, stateType: undefined });
-    this.gameCounter = gameCounter;
-    this.initialize();
-  }
-
-  // tslint:disable-next-line:no-empty
-  initialize() {}
-
-  get gameAttributes() {
-    return abi.encodeParameter(SolidityCountingStateType, [this.gameCounter]);
-  }
+export function gameAttributesFromState(countingGameAttributes: GameAttributes): string {
+  return abi.encodeParameter(SolidityCountingStateType, [countingGameAttributes.gameCounter]);
 }
 
-class PreFundSetupState extends CountingBaseState {
-  initialize() {
-    this.stateType = State.StateType.PreFundSetup;
-  }
+export function args(state: CountingState) {
+  return ethereumArgs(asCoreState(state));
 }
 
-class PostFundSetupState extends CountingBaseState {
-  initialize() {
-    this.stateType = State.StateType.PostFundSetup;
-  }
-}
+export function asCoreState(state: CountingState): State {
+  const {
+    channel,
+    stateType,
+    turnNum,
+    allocation,
+    destination,
+    stateCount,
+    gameCounter,
+  } = state;
 
-class GameState extends CountingBaseState {
-  initialize() {
-    this.stateType = State.StateType.Game;
-  }
+  return {
+    channel,
+    stateType,
+    turnNum,
+    allocation,
+    destination,
+    stateCount,
+    gameAttributes: gameAttributesFromState({ gameCounter} ),
+  };
 }
-
-class ConcludeState extends CountingBaseState {
-  initialize() {
-    this.stateType = State.StateType.Conclude;
-  }
-}
-
-export { CountingGame };

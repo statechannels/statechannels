@@ -1,23 +1,22 @@
-import { CountingGame } from '../../test-game/counting-game';
 import expectRevert from '../helpers/expect-revert';
 import linker from 'solc/linker';
 
 import { Channel } from '../../';
-import BN from 'bn.js';
 import { ethers, utils, ContractFactory } from 'ethers';
 
 import StateArtifact from '../../../build/contracts/State.json';
 
 import CountingStateArtifact from '../../../build/contracts/CountingState.json';
 import CountingGameArtifact from '../../../build/contracts/CountingGame.json';
+import { createState, CountingState, args } from '../../test-game/counting-game';
 
 const provider = new ethers.providers.JsonRpcProvider('http://localhost:8545');
 const signer = provider.getSigner();
 
 describe('CountingGame', () => {
   let game;
-  let state0;
-  let state1;
+  let state0: CountingState;
+  let state1: CountingState;
   let stateBalChange;
 
   beforeAll(async () => {
@@ -52,14 +51,20 @@ describe('CountingGame', () => {
       destination: [participantA.address, participantB.address],
     };
 
-    state0 = CountingGame.gameState({ ...defaults, turnNum: 6, gameCounter: 1 });
-    state1 = CountingGame.gameState({ ...defaults, turnNum: 7, gameCounter: 2 });
+    const one = utils.bigNumberify(1);
+    const two = utils.bigNumberify(2);
+    const three = utils.bigNumberify(3); 
+    const six = utils.bigNumberify(6);
+    const seven = utils.bigNumberify(7);
+    state0 = createState.game({ ...defaults, turnNum: six, gameCounter: one, stateCount: one });
+    state1 = createState.game({ ...defaults, turnNum: seven, gameCounter: two, stateCount: two });
 
-    stateBalChange = CountingGame.gameState({
+    stateBalChange = createState.game({
       ...defaults,
-      allocation: [new utils.BigNumber(6), new utils.BigNumber(3)],
-      turnNum: 7,
-      gameCounter: 2,
+      allocation: [six, three],
+      turnNum: seven,
+      gameCounter: two,
+      stateCount: two,
     });
   });
 
@@ -67,16 +72,11 @@ describe('CountingGame', () => {
   // ========================
 
   it('allows a move where the count increment', async () => {
-    const output = await game.validTransition(state0.args, state1.args);
+    const output = await game.validTransition(args(state0), args(state1));
     expect(output).toBe(true);
   });
 
-  // it("allows START -> CONCLUDED if totals match", async () => {
-  //   var output = await game.validTransition.call(start, allowedConcluded);
-  //   assert.equal(output, true);
-  // });
-
   it("doesn't allow transitions if totals don't match", async () => {
-    await expectRevert(game.validTransition(state0.args, stateBalChange.args), "CountingGame: allocations must be equal");
+    await expectRevert(game.validTransition(args(state0), args(stateBalChange)), "CountingGame: allocations must be equal");
   });
 });

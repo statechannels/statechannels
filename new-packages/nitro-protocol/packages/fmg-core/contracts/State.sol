@@ -7,7 +7,7 @@ library State {
     struct StateStruct {
         address channelType;
         uint256 channelNonce;
-        uint256 numberOfParticipants;
+        uint256 numberOfParticipants; // todo: remove
         address[] participants;
         uint8 stateType;
         uint256 turnNum;
