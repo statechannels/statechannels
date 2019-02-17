@@ -31,11 +31,24 @@ export interface State extends BaseState {
 }
 
 export function toHex(state: State): string {
-    return abi.encodeParameter(SolidityStateType, ethereumArgs(state));
+  return abi.encodeParameter(SolidityStateType, ethereumArgs(state));
 }
+export function fromHex(state: string): State {
+  const parameters = abi.decodeParameter(SolidityStateType, state);
+  const channel = new Channel(parameters[0], utils.bigNumberify(parameters[1]), parameters[3]);
 
+  return {
+    channel,
+    stateType: Number.parseInt(parameters[4], 10) as StateType,
+    turnNum: utils.bigNumberify(parameters[5]),
+    stateCount: utils.bigNumberify(parameters[6]),
+    destination: parameters[7],
+    allocation: parameters[8].map(utils.bigNumberify),
+    gameAttributes: parameters[9],
+  };
+}
 export function mover(state: State) {
-    return state.channel.participants[this.turnNum % this.numberOfParticipants];
+  return state.channel.participants[this.turnNum % this.numberOfParticipants];
 }
 
 export function ethereumArgs(state: State) {
