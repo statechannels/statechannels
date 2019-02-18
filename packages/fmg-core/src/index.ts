@@ -30,4 +30,4 @@ export {
 } from './test-app/counting-app';
 
 
-export { bigNumberify, BigNumber } from 'ethers/utils';
+export { bigNumberify, BigNumber, BigNumberish } from 'ethers/utils';
