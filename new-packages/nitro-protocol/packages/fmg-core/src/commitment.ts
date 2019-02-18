@@ -1,6 +1,6 @@
 import { Channel } from './channel';
 import abi from 'web3-eth-abi';
-import { utils } from 'ethers';
+import { BigNumberish } from './types';
 
 const SolidityCommitmentType = {
   "CommitmentStruct": {
@@ -19,10 +19,10 @@ const SolidityCommitmentType = {
 
 export interface BaseCommitment {
   channel: Channel;
-  turnNum: utils.BigNumber;
-  allocation: utils.BigNumber[];
+  turnNum: BigNumberish;
+  allocation: BigNumberish[];
   destination: string[];
-  commitmentCount: utils.BigNumber;
+  commitmentCount: BigNumberish;
 }
 
 export interface Commitment extends BaseCommitment {
@@ -44,10 +44,10 @@ export function fromHex(commitment: string): Commitment {
   return {
     channel,
     commitmentType: Number.parseInt(parameters[4], 10) as CommitmentType,
-    turnNum: utils.bigNumberify(parameters[5]),
-    commitmentCount: utils.bigNumberify(parameters[6]),
+    turnNum: parameters[5],
+    commitmentCount: parameters[6],
     destination: parameters[7],
-    allocation: parameters[8].map(utils.bigNumberify),
+    allocation: parameters[8],
     appAttributes: parameters[9],
   };
 }
@@ -73,14 +73,14 @@ export function ethereumArgs(commitment: Commitment) {
 export function asEthersObject(commitment: Commitment) {
   return {
     channelType: commitment.channel.channelType,
-    channelNonce: utils.bigNumberify(commitment.channel.channelNonce),
-    numberOfParticipants: utils.bigNumberify(commitment.channel.participants.length),
+    channelNonce: commitment.channel.channelNonce,
+    numberOfParticipants: commitment.channel.participants.length,
     participants: commitment.channel.participants,
     commitmentType: commitment.commitmentType,
-    turnNum: utils.bigNumberify(commitment.turnNum),
-    commitmentCount: utils.bigNumberify(commitment.commitmentCount),
+    turnNum: commitment.turnNum,
+    commitmentCount: commitment.commitmentCount,
     destination: commitment.destination,
-    allocation: commitment.allocation.map(x => utils.bigNumberify(String(x))),
+    allocation: commitment.allocation,
     appAttributes: commitment.appAttributes,
   };
 }
