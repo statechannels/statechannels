@@ -1,66 +1,66 @@
 import abi from 'web3-eth-abi';
-import { StateType, State, BaseState, ethereumArgs } from '../state';
+import { CommitmentType, Commitment, BaseCommitment, ethereumArgs } from '../Commitment';
 import { utils } from 'ethers';
 
 export interface GameAttributes {
   gameCounter: utils.BigNumber;
 }
 
-export interface CountingBaseState extends BaseState {
+export interface CountingBaseCommitment extends BaseCommitment {
   gameCounter: utils.BigNumber;
 }
 
-export interface CountingState extends CountingBaseState {
-  stateType: StateType;
+export interface CountingCommitment extends CountingBaseCommitment {
+  commitmentType: CommitmentType;
 }
 
-export const SolidityCountingStateType = {
-  "CountingStateStruct": {
+export const SolidityCountingCommitmentType = {
+  "CountingCommitmentStruct": {
     "gameCounter": "uint256",
   },
 };
 
-export const createState = {
-  preFundSetup: function preFundSetupState(opts: CountingBaseState): CountingState {
-    return { ...opts, stateType: StateType.PreFundSetup };
+export const createCommitment = {
+  preFundSetup: function preFundSetupCommitment(opts: CountingBaseCommitment): CountingCommitment {
+    return { ...opts, commitmentType: CommitmentType.PreFundSetup };
   },
-  postFundSetup: function postFundSetupState(opts: CountingBaseState): CountingState {
-    return { ...opts, stateType: StateType.PostFundSetup };
+  postFundSetup: function postFundSetupCommitment(opts: CountingBaseCommitment): CountingCommitment {
+    return { ...opts, commitmentType: CommitmentType.PostFundSetup };
   },
-  game: function gameState(opts: CountingBaseState): CountingState {
-    return { ...opts, stateType: StateType.Game, stateCount: utils.bigNumberify(0) };
+  game: function gameCommitment(opts: CountingBaseCommitment): CountingCommitment {
+    return { ...opts, commitmentType: CommitmentType.Game, commitmentCount: utils.bigNumberify(0) };
   },
-  conclude: function concludeState(opts: CountingBaseState): CountingState {
-    return { ...opts, stateType: StateType.Conclude, };
+  conclude: function concludeCommitment(opts: CountingBaseCommitment): CountingCommitment {
+    return { ...opts, commitmentType: CommitmentType.Conclude, };
   },
 };
 
-export function gameAttributesFromState(countingGameAttributes: GameAttributes): string {
-  return abi.encodeParameter(SolidityCountingStateType, [countingGameAttributes.gameCounter]);
+export function gameAttributesFromCommitment(countingGameAttributes: GameAttributes): string {
+  return abi.encodeParameter(SolidityCountingCommitmentType, [countingGameAttributes.gameCounter]);
 }
 
-export function args(state: CountingState) {
-  return ethereumArgs(asCoreState(state));
+export function args(Commitment: CountingCommitment) {
+  return ethereumArgs(asCoreCommitment(Commitment));
 }
 
-export function asCoreState(state: CountingState): State {
+export function asCoreCommitment(Commitment: CountingCommitment): Commitment {
   const {
     channel,
-    stateType,
+    commitmentType,
     turnNum,
     allocation,
     destination,
-    stateCount,
+    commitmentCount,
     gameCounter,
-  } = state;
+  } = Commitment;
 
   return {
     channel,
-    stateType,
+    commitmentType,
     turnNum,
     allocation,
     destination,
-    stateCount,
-    gameAttributes: gameAttributesFromState({ gameCounter} ),
+    commitmentCount,
+    gameAttributes: gameAttributesFromCommitment({ gameCounter} ),
   };
 }

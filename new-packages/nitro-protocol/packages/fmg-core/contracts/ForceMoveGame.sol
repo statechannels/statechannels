@@ -1,7 +1,7 @@
 pragma solidity ^0.5.0;
 pragma experimental ABIEncoderV2;
 
-import './State.sol';
+import './Commitment.sol';
 interface ForceMoveGame {
-  function validTransition(State.StateStruct calldata oldState, State.StateStruct calldata newState) external pure returns (bool);
+  function validTransition(Commitment.CommitmentStruct calldata oldCommitment, Commitment.CommitmentStruct calldata newCommitment) external pure returns (bool);
 }

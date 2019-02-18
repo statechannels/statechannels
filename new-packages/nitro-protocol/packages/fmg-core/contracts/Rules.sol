@@ -1,85 +1,85 @@
 pragma solidity ^0.5.0;
 pragma experimental ABIEncoderV2;
 
-import "./State.sol";
+import "./Commitment.sol";
 import "./ForceMoveGame.sol";
 
 library Rules {
-    using State for State.StateStruct;
+    using Commitment for Commitment.CommitmentStruct;
     struct Challenge {
         address channelId;
-        State.StateStruct state;
+        Commitment.CommitmentStruct Commitment;
         uint32 expirationTime;
         uint256[] payouts;
     }
 
     function validForceMove(
-        State.StateStruct memory _fromState,
-        State.StateStruct memory _toState,
+        Commitment.CommitmentStruct memory _fromCommitment,
+        Commitment.CommitmentStruct memory _toCommitment,
         uint8[] memory v,
         bytes32[] memory r,
         bytes32[] memory s
     ) public pure returns (bool) {
-        // states must be signed by the appropriate participant
-        _fromState.requireSignature(v[0], r[0], s[0]);
-        _toState.requireSignature(v[1], r[1], s[1]);
+        // commitments must be signed by the appropriate participant
+        _fromCommitment.requireSignature(v[0], r[0], s[0]);
+        _toCommitment.requireSignature(v[1], r[1], s[1]);
 
-        return validTransition(_fromState, _toState);
+        return validTransition(_fromCommitment, _toCommitment);
     }
 
     function validConclusionProof(
-        State.StateStruct memory _fromState,
-        State.StateStruct memory _toState,
+        Commitment.CommitmentStruct memory _fromCommitment,
+        Commitment.CommitmentStruct memory _toCommitment,
         uint8[] memory v,
         bytes32[] memory r,
         bytes32[] memory s
     ) public pure returns (bool) {
-        // states must be signed by the appropriate participant
-        _fromState.requireSignature(v[0], r[0], s[0]);
-        _toState.requireSignature(v[1], r[1], s[1]);
+        // commitments must be signed by the appropriate participant
+        _fromCommitment.requireSignature(v[0], r[0], s[0]);
+        _toCommitment.requireSignature(v[1], r[1], s[1]);
 
-        // first move must be a concluded state (transition rules will ensure this for the other states)
+        // first move must be a concluded Commitment (transition rules will ensure this for the other commitments)
         require(
-            _fromState.isConclude(),
-            "fromState must be Conclude"
+            _fromCommitment.isConclude(),
+            "fromCommitment must be Conclude"
         );
         // must be a valid transition
-        return validTransition(_fromState, _toState);
+        return validTransition(_fromCommitment, _toCommitment);
     }
 
     function validRefute(
-        State.StateStruct memory _challengeState,
-        State.StateStruct memory _refutationState,
+        Commitment.CommitmentStruct memory _challengeCommitment,
+        Commitment.CommitmentStruct memory _refutationCommitment,
         uint8 v,
         bytes32 r,
         bytes32 s
     ) public pure returns (bool) {
         require(
-            _refutationState.turnNum > _challengeState.turnNum,
-            "the refutationState must have a higher nonce"
+            _refutationCommitment.turnNum > _challengeCommitment.turnNum,
+            "the refutationCommitment must have a higher nonce"
         );
         require(
-            _refutationState.mover() == _challengeState.mover(),
-            "refutationState must have same mover as challengeState"
+            _refutationCommitment.mover() == _challengeCommitment.mover(),
+            "refutationCommitment must have same mover as challengeCommitment"
         );
         // ... and be signed (by that mover)
-        _refutationState.requireSignature(v, r, s);
+        _refutationCommitment.requireSignature(v, r, s);
 
         return true;
     }
 
     function validRespondWithMove(
-        State.StateStruct memory _challengeState,
-        State.StateStruct memory _nextState,
+        Commitment.CommitmentStruct memory _challengeCommitment,
+        Commitment.CommitmentStruct memory _nextCommitment,
         uint8 v,
         bytes32 r,
         bytes32 s
     ) public pure returns (bool) {
         // check that the challengee's signature matches
-        _nextState.requireSignature(v, r, s);
+        _nextCommitment.requireSignature(v, r, s);
 
         require(
-            validTransition(_challengeState, _nextState),
+            validTransition(_challengeCommitment, _nextCommitment),
             "must be a valid transition"
         );
 
@@ -87,99 +87,99 @@ library Rules {
     }
 
     function validAlternativeRespondWithMove(
-        State.StateStruct memory _challengeState,
-        State.StateStruct memory _alternativeState,
-        State.StateStruct memory _nextState,
+        Commitment.CommitmentStruct memory _challengeCommitment,
+        Commitment.CommitmentStruct memory _alternativeCommitment,
+        Commitment.CommitmentStruct memory _nextCommitment,
         uint8[] memory v,
         bytes32[] memory r,
         bytes32[] memory s
     ) public pure returns (bool) {
 
-        // checking the alternative state:
+        // checking the alternative Commitment:
         require(
-            _challengeState.channelId() == _alternativeState.channelId(),
-            "alternativeState must have the right channel"
+            _challengeCommitment.channelId() == _alternativeCommitment.channelId(),
+            "alternativeCommitment must have the right channel"
         );
         require(
-            _challengeState.turnNum == _alternativeState.turnNum,
-            "alternativeState must have the same nonce as the challenge state"
+            _challengeCommitment.turnNum == _alternativeCommitment.turnNum,
+            "alternativeCommitment must have the same nonce as the challenge Commitment"
         );
         // .. it must be signed (by the challenger)
-        _alternativeState.requireSignature(v[0], r[0], s[0]);
+        _alternativeCommitment.requireSignature(v[0], r[0], s[0]);
 
-        // checking the nextState:
+        // checking the nextCommitment:
         // .. it must be signed (my the challengee)
-        _nextState.requireSignature(v[1], r[1], s[1]);
+        _nextCommitment.requireSignature(v[1], r[1], s[1]);
         require(
-            validTransition(_alternativeState, _nextState),
-            "it must be a valid transition of the gamestate (from the alternative state)"
+            validTransition(_alternativeCommitment, _nextCommitment),
+            "it must be a valid transition of the gamecommitment (from the alternative Commitment)"
         );
 
         return true;
     }
 
     function validTransition(
-        State.StateStruct memory  _fromState,
-        State.StateStruct memory _toState
+        Commitment.CommitmentStruct memory  _fromCommitment,
+        Commitment.CommitmentStruct memory _toCommitment
     ) public pure returns (bool) {
         require(
-            _toState.channelId() == _fromState.channelId(),
-            "Invalid transition: channelId must match on toState"
+            _toCommitment.channelId() == _fromCommitment.channelId(),
+            "Invalid transition: channelId must match on toCommitment"
         );
         require(
-            _toState.turnNum == _fromState.turnNum + 1,
+            _toCommitment.turnNum == _fromCommitment.turnNum + 1,
             "Invalid transition: turnNum must increase by 1"
         );
 
-        if (_fromState.isPreFundSetup()) {
-            return validTransitionFromPreFundSetup(_fromState, _toState);
-        } else if (_fromState.isPostFundSetup()) {
-            return validTransitionFromPostFundSetup(_fromState, _toState);
-        } else if (_fromState.isGame()) {
-            return validTransitionFromGame(_fromState, _toState);
-        } else if (_fromState.isConclude()) {
-            return validTransitionFromConclude(_fromState, _toState);
+        if (_fromCommitment.isPreFundSetup()) {
+            return validTransitionFromPreFundSetup(_fromCommitment, _toCommitment);
+        } else if (_fromCommitment.isPostFundSetup()) {
+            return validTransitionFromPostFundSetup(_fromCommitment, _toCommitment);
+        } else if (_fromCommitment.isGame()) {
+            return validTransitionFromGame(_fromCommitment, _toCommitment);
+        } else if (_fromCommitment.isConclude()) {
+            return validTransitionFromConclude(_fromCommitment, _toCommitment);
         }
 
         return true;
     }
 
     function validTransitionFromPreFundSetup(
-        State.StateStruct memory _fromState,
-        State.StateStruct memory _toState
+        Commitment.CommitmentStruct memory _fromCommitment,
+        Commitment.CommitmentStruct memory _toCommitment
     ) public pure returns (bool) {
-        if (_fromState.stateCount == _fromState.numberOfParticipants - 1) {
-            // there are two options from the final PreFundSetup state
+        if (_fromCommitment.commitmentCount == _fromCommitment.numberOfParticipants - 1) {
+            // there are two options from the final PreFundSetup Commitment
             // 1. PreFundSetup -> PostFundSetup transition
             // 2. PreFundSetup -> Conclude transition
-            if (_toState.isPostFundSetup()) {
+            if (_toCommitment.isPostFundSetup()) {
                 require(
-                    _toState.stateCount == 0,
-                    "Invalid transition from PreFundSetup: stateCount must be reset when transitioning to PostFundSetup"
+                    _toCommitment.commitmentCount == 0,
+                    "Invalid transition from PreFundSetup: commitmentCount must be reset when transitioning to PostFundSetup"
                 );
                 require(
-                    State.gameAttributesEqual(_fromState, _toState),
+                    Commitment.gameAttributesEqual(_fromCommitment, _toCommitment),
                     "Invalid transition from PreFundSetup: gameAttributes must be equal"
                 );
                 require(
-                    State.allocationsEqual(_fromState, _toState),
+                    Commitment.allocationsEqual(_fromCommitment, _toCommitment),
                     "Invalid transition from PreFundSetup: allocations must be equal"
                 );
                 require(
-                    State.destinationsEqual(_fromState, _toState),
+                    Commitment.destinationsEqual(_fromCommitment, _toCommitment),
                     "Invalid transition from PreFundSetup: destinations must be equal"
                 );
             } else {
                 require(
-                    _toState.isConclude(),
-                    "Invalid transition from PreFundSetup: stateType must be Conclude"
+                    _toCommitment.isConclude(),
+                    "Invalid transition from PreFundSetup: commitmentType must be Conclude"
                 );
                 require(
-                    State.allocationsEqual(_fromState, _toState),
+                    Commitment.allocationsEqual(_fromCommitment, _toCommitment),
                     "Invalid transition from PreFundSetup: allocations must be equal"
                 );
                 require(
-                    State.destinationsEqual(_fromState, _toState),
+                    Commitment.destinationsEqual(_fromCommitment, _toCommitment),
                     "Invalid transition from PreFundSetup: destinations must be equal"
                 );
                 
@@ -187,23 +187,23 @@ library Rules {
         } else {
             // PreFundSetup -> PreFundSetup transition
             require(
-                _toState.isPreFundSetup(),
-                "Invalid transition from PreFundSetup: stateType must be PreFundSetup"
+                _toCommitment.isPreFundSetup(),
+                "Invalid transition from PreFundSetup: commitmentType must be PreFundSetup"
             );
             require(
-                State.gameAttributesEqual(_fromState, _toState),
+                Commitment.gameAttributesEqual(_fromCommitment, _toCommitment),
                 "Invalid transition from PreFundSetup: gameAttributes must be equal"
             );
             require(
-                _toState.stateCount == _fromState.stateCount + 1,
-                "Invalid transition from PreFundSetup: stateCount must increase by 1"
+                _toCommitment.commitmentCount == _fromCommitment.commitmentCount + 1,
+                "Invalid transition from PreFundSetup: commitmentCount must increase by 1"
             );
             require(
-                State.allocationsEqual(_fromState, _toState),
+                Commitment.allocationsEqual(_fromCommitment, _toCommitment),
                 "Invalid transition from PreFundSetup: allocations must be equal"
             );
             require(
-                State.destinationsEqual(_fromState, _toState),
+                Commitment.destinationsEqual(_fromCommitment, _toCommitment),
                 "Invalid transition from PreFundSetup: destinations must be equal"
             );
         }
@@ -211,69 +211,69 @@ library Rules {
     }
 
     function validTransitionFromPostFundSetup(
-        State.StateStruct memory  _fromState,
-        State.StateStruct memory _toState
+        Commitment.CommitmentStruct memory  _fromCommitment,
+        Commitment.CommitmentStruct memory _toCommitment
     ) public pure returns (bool) {
-        if (_fromState.stateCount == _fromState.numberOfParticipants - 1) {
-            if (_toState.isGame()) {
+        if (_fromCommitment.commitmentCount == _fromCommitment.numberOfParticipants - 1) {
+            if (_toCommitment.isGame()) {
                 require(
-                    validGameTransition(_fromState, _toState),
+                    validGameTransition(_fromCommitment, _toCommitment),
                     "Invalid transition from PostFundSetup: transition must be valid"
                 );
             } else {
                 require(
-                    _toState.isConclude(),
-                    "Invalid transition from PostFundSetup: stateType must be Conclude"
+                    _toCommitment.isConclude(),
+                    "Invalid transition from PostFundSetup: commitmentType must be Conclude"
                 );
 
                 require(
-                    State.allocationsEqual(_fromState, _toState),
+                    Commitment.allocationsEqual(_fromCommitment, _toCommitment),
                     "Invalid transition from PostFundSetup: allocations must be equal"
                 );
                 require(
-                    State.destinationsEqual(_fromState, _toState),
+                    Commitment.destinationsEqual(_fromCommitment, _toCommitment),
                     "Invalid transition from PostFundSetup: destinations must be equal"
                 );
 
                 require(
-                    _toState.stateCount == 0,
-                    "Invalid transition from PostFundSetup: stateCount must be reset when transitioning to Conclude"
+                    _toCommitment.commitmentCount == 0,
+                    "Invalid transition from PostFundSetup: commitmentCount must be reset when transitioning to Conclude"
                 );
             }
         } else {
             // Two possibilities:
             // 1. PostFundSetup -> PostFundSetup transition
             // 2. PostFundSetup -> Conclude transition
-            if (_toState.isPostFundSetup()) {
+            if (_toCommitment.isPostFundSetup()) {
                 // PostFundSetup -> PostFundSetup
                 require(
-                    State.gameAttributesEqual(_fromState, _toState),
+                    Commitment.gameAttributesEqual(_fromCommitment, _toCommitment),
                     "Invalid transition from PostFundSetup: gameAttributes must be equal"
                 );
                 require(
-                    _toState.stateCount == _fromState.stateCount + 1,
-                    "Invalid transition from PostFundSetup: stateCount must increase by 1"
+                    _toCommitment.commitmentCount == _fromCommitment.commitmentCount + 1,
+                    "Invalid transition from PostFundSetup: commitmentCount must increase by 1"
                 );
                 require(
-                    State.allocationsEqual(_fromState, _toState),
+                    Commitment.allocationsEqual(_fromCommitment, _toCommitment),
                     "Invalid transition from PostFundSetup: allocations must be equal"
                 );
                 require(
-                    State.destinationsEqual(_fromState, _toState),
+                    Commitment.destinationsEqual(_fromCommitment, _toCommitment),
                     "Invalid transition from PostFundSetup: destinations must be equal"
                 );
             } else {
                 // PostFundSetup -> Conclude
                 require(
-                    _toState.isConclude(),
-                    "Invalid transition from PostFundSetup: stateType must be Conclude"
+                    _toCommitment.isConclude(),
+                    "Invalid transition from PostFundSetup: commitmentType must be Conclude"
                 );
                 require(
-                    State.allocationsEqual(_fromState, _toState),
+                    Commitment.allocationsEqual(_fromCommitment, _toCommitment),
                     "Invalid transition from PostFundSetup: allocations must be equal"
                 );
                 require(
-                    State.destinationsEqual(_fromState, _toState),
+                    Commitment.destinationsEqual(_fromCommitment, _toCommitment),
                     "Invalid transition from PostFundSetup: destinations must be equal"
                 );
             }
@@ -282,25 +282,25 @@ library Rules {
     }
 
     function validTransitionFromGame(
-        State.StateStruct memory _fromState,
-        State.StateStruct memory _toState
+        Commitment.CommitmentStruct memory _fromCommitment,
+        Commitment.CommitmentStruct memory _toCommitment
     ) public pure returns (bool) {
-        if (_toState.isGame()) {
+        if (_toCommitment.isGame()) {
             require(
-                validGameTransition(_fromState, _toState),
+                validGameTransition(_fromCommitment, _toCommitment),
                 "Invalid transition from Game: transition must be valid"
             );
         } else {
             require(
-                _toState.isConclude(),
-                "Invalid transition from Game: stateType must be Conclude"
+                _toCommitment.isConclude(),
+                "Invalid transition from Game: commitmentType must be Conclude"
             );
             require(
-                State.allocationsEqual(_fromState, _toState),
+                Commitment.allocationsEqual(_fromCommitment, _toCommitment),
                 "Invalid transition from Game: allocations must be equal"
             );
             require(
-                State.destinationsEqual(_fromState, _toState),
+                Commitment.destinationsEqual(_fromCommitment, _toCommitment),
                 "Invalid transition from Game: destinations must be equal"
             );
         }
@@ -308,28 +308,28 @@ library Rules {
     }
 
     function validTransitionFromConclude(
-        State.StateStruct memory _fromState,
-        State.StateStruct memory _toState
+        Commitment.CommitmentStruct memory _fromCommitment,
+        Commitment.CommitmentStruct memory _toCommitment
     ) public pure returns (bool) {
         require(
-            _toState.isConclude(),
-            "Invalid transition from Conclude: stateType must be Conclude"
+            _toCommitment.isConclude(),
+            "Invalid transition from Conclude: commitmentType must be Conclude"
         );
         require(
-            State.allocationsEqual(_fromState, _toState),
+            Commitment.allocationsEqual(_fromCommitment, _toCommitment),
             "Invalid transition from Conclude: allocations must be equal"
         );
         require(
-            State.destinationsEqual(_fromState, _toState),
+            Commitment.destinationsEqual(_fromCommitment, _toCommitment),
             "Invalid transition from Conclude: destinations must be equal"
         );
         return true;
     }
 
     function validGameTransition(
-        State.StateStruct memory _fromState,
-        State.StateStruct memory _toState
+        Commitment.CommitmentStruct memory _fromCommitment,
+        Commitment.CommitmentStruct memory _toCommitment
     ) public pure returns (bool) {
-        return ForceMoveGame(_fromState.channelType).validTransition(_fromState, _toState);
+        return ForceMoveGame(_fromCommitment.channelType).validTransition(_fromCommitment, _toCommitment);
     }
 }

@@ -1,5 +1,5 @@
 import { ethers } from 'ethers';
-export * from './state';
+export * from './Commitment';
 export { Channel } from './channel';
 export {
   toHex32,
@@ -16,10 +16,10 @@ export { default as expectRevert } from './test/helpers/expect-revert';
 export { increaseTime, DURATION } from './test/helpers/increase-time';
 
 export {
-  CountingState,
-  SolidityCountingStateType,
-  createState,
-  asCoreState,
+  CountingCommitment,
+  SolidityCountingCommitmentType,
+  createCommitment,
+  asCoreCommitment,
   args as ethereumArgs,
 } from './test-game/counting-game';
 

@@ -1,6 +1,6 @@
 import Web3 from 'web3';
 import { Signature } from 'web3/eth/accounts';
-import { State } from './state';
+import { Commitment } from './Commitment';
 
 // TODO: write some jest tests for utils.
 
