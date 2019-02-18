@@ -1,6 +1,5 @@
 import Web3 from 'web3';
-import { Signature } from 'web3/eth/accounts';
-import { Commitment } from './Commitment';
+import { MessageSignature } from 'web3/eth/accounts';
 
 // TODO: write some jest tests for utils.
 
@@ -47,10 +46,10 @@ export class SolidityParameter {
 // TODO: Figure out how to export this type from index.ts
 type SignableData = string | SolidityParameter | SolidityParameter[];
 
-export function sign(data: SignableData, privateKey): { v: string; r: string; s: string } {
+export function sign(data: SignableData, privateKey): MessageSignature {
   const localWeb3 = new Web3('');
   const account: any = localWeb3.eth.accounts.privateKeyToAccount(privateKey);
-  return localWeb3.eth.accounts.sign(hash(data), account.privateKey) as Signature;
+  return localWeb3.eth.accounts.sign(hash(data), account.privateKey);
 }
 
 export function recover(data: SignableData, v: string, r: string, s: string): string {
