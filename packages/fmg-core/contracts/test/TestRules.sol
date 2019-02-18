@@ -2,74 +2,74 @@ pragma solidity ^0.5.0;
 pragma experimental ABIEncoderV2;
 
 import "../Rules.sol";
-import "../State.sol";
+import "../Commitment.sol";
 
 contract TestRules {
-    using State for State.StateStruct;
+    using Commitment for Commitment.CommitmentStruct;
 
     function validForceMove(
-        State.StateStruct memory _fromState,
-        State.StateStruct memory _toState,
+        Commitment.CommitmentStruct memory _fromCommitment,
+        Commitment.CommitmentStruct memory _toCommitment,
         uint8[] memory v,
         bytes32[] memory r,
         bytes32[] memory s
     ) public pure returns (bool) {
-        return Rules.validForceMove(_fromState, _toState, v, r, s);
+        return Rules.validForceMove(_fromCommitment, _toCommitment, v, r, s);
     }
 
     function validConclusionProof(
-        State.StateStruct memory _fromState,
-        State.StateStruct memory _toState,
+        Commitment.CommitmentStruct memory _fromCommitment,
+        Commitment.CommitmentStruct memory _toCommitment,
         uint8[] memory v,
         bytes32[] memory r,
         bytes32[] memory s
     ) public pure returns (bool) {
-        return Rules.validConclusionProof(_fromState, _toState, v, r, s);
+        return Rules.validConclusionProof(_fromCommitment, _toCommitment, v, r, s);
     }
 
     function validRefute(
-        State.StateStruct memory _challengeState,
-        State.StateStruct memory _refutationState,
+        Commitment.CommitmentStruct memory _challengeCommitment,
+        Commitment.CommitmentStruct memory _refutationCommitment,
         uint8 v,
         bytes32 r,
         bytes32 s
     ) public pure returns (bool) {
-        return Rules.validRefute(_challengeState, _refutationState, v, r, s);
+        return Rules.validRefute(_challengeCommitment, _refutationCommitment, v, r, s);
     }
 
     function validRespondWithMove(
-        State.StateStruct memory _challengeState,
-        State.StateStruct memory _nextState,
+        Commitment.CommitmentStruct memory _challengeCommitment,
+        Commitment.CommitmentStruct memory _nextCommitment,
         uint8 v,
         bytes32 r,
         bytes32 s
     ) public pure returns (bool) {
-        return Rules.validRespondWithMove(_challengeState, _nextState, v, r, s);
+        return Rules.validRespondWithMove(_challengeCommitment, _nextCommitment, v, r, s);
     }
 
     function validAlternativeRespondWithMove(
-        State.StateStruct memory _challengeState,
-        State.StateStruct memory _alternativeState,
-        State.StateStruct memory _nextState,
+        Commitment.CommitmentStruct memory _challengeCommitment,
+        Commitment.CommitmentStruct memory _alternativeCommitment,
+        Commitment.CommitmentStruct memory _nextCommitment,
         uint8[] memory v,
         bytes32[] memory r,
         bytes32[] memory s
     ) public pure returns (bool) {
-        return Rules.validAlternativeRespondWithMove(_challengeState, _alternativeState, _nextState, v, r, s);
+        return Rules.validAlternativeRespondWithMove(_challengeCommitment, _alternativeCommitment, _nextCommitment, v, r, s);
     }
 
     function validTransition(
-        State.StateStruct memory  _fromState,
-        State.StateStruct memory _toState
+        Commitment.CommitmentStruct memory  _fromCommitment,
+        Commitment.CommitmentStruct memory _toCommitment
     ) public pure returns (bool) {
-        return Rules.validTransition(_fromState, _toState);
+        return Rules.validTransition(_fromCommitment, _toCommitment);
     }
 
     function validGameTransition(
-        State.StateStruct memory _fromState,
-        State.StateStruct memory _toState
+        Commitment.CommitmentStruct memory _fromCommitment,
+        Commitment.CommitmentStruct memory _toCommitment
     ) public pure returns (bool) {
         return true;
-        // return ForceMoveGame(_fromState.channelType).validTransition(_fromState.gameAttributes, _toState.gameAttributes);
+        // return ForceMoveGame(_fromCommitment.channelType).validTransition(_fromCommitment.gameAttributes, _toCommitment.gameAttributes);
     }
 }
