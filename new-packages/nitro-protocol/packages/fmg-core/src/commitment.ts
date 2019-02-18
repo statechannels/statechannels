@@ -13,7 +13,7 @@ const SolidityCommitmentType = {
     "commitmentCount": "uint256",
     "destination": "address[]",
     "allocation": "uint256[]",
-    "gameAttributes": "bytes",
+    "appAttributes": "bytes",
   },
 };
 
@@ -27,15 +27,19 @@ export interface BaseCommitment {
 
 export interface Commitment extends BaseCommitment {
   commitmentType: CommitmentType;
-  gameAttributes: string;
+  appAttributes: string;
 }
 
-export function toHex(Commitment: Commitment): string {
-  return abi.encodeParameter(SolidityCommitmentType, ethereumArgs(Commitment));
+export function toHex(commitment: Commitment): string {
+  return abi.encodeParameter(SolidityCommitmentType, ethereumArgs(commitment));
 }
-export function fromHex(Commitment: string): Commitment {
-  const parameters = abi.decodeParameter(SolidityCommitmentType, Commitment);
-  const channel = new Channel(parameters[0], utils.bigNumberify(parameters[1]), parameters[3]);
+export function fromHex(commitment: string): Commitment {
+  const parameters = abi.decodeParameter(SolidityCommitmentType, commitment);
+  const channel = {
+    channelType: parameters[0],
+    channelNonce: parameters[1],
+    participants: parameters[3],
+  };
 
   return {
     channel,
@@ -44,46 +48,46 @@ export function fromHex(Commitment: string): Commitment {
     commitmentCount: utils.bigNumberify(parameters[6]),
     destination: parameters[7],
     allocation: parameters[8].map(utils.bigNumberify),
-    gameAttributes: parameters[9],
+    appAttributes: parameters[9],
   };
 }
-export function mover(Commitment: Commitment) {
-  return Commitment.channel.participants[this.turnNum % this.numberOfParticipants];
+export function mover(commitment: Commitment) {
+  return commitment.channel.participants[this.turnNum % this.numberOfParticipants];
 }
 
-export function ethereumArgs(Commitment: Commitment) {
+export function ethereumArgs(commitment: Commitment) {
   return [
-    Commitment.channel.channelType,
-    Commitment.channel.channelNonce,
-    Commitment.channel.participants.length,
-    Commitment.channel.participants,
-    Commitment.commitmentType,
-    Commitment.turnNum,
-    Commitment.commitmentCount,
-    Commitment.destination.map(String),
-    Commitment.allocation,
-    Commitment.gameAttributes,
+    commitment.channel.channelType,
+    commitment.channel.channelNonce,
+    commitment.channel.participants.length,
+    commitment.channel.participants,
+    commitment.commitmentType,
+    commitment.turnNum,
+    commitment.commitmentCount,
+    commitment.destination.map(String),
+    commitment.allocation,
+    commitment.appAttributes,
   ];
 }
 
-export function asEthersObject(Commitment: Commitment) {
+export function asEthersObject(commitment: Commitment) {
   return {
-    channelType: Commitment.channel.channelType,
-    channelNonce: utils.bigNumberify(Commitment.channel.channelNonce),
-    numberOfParticipants: utils.bigNumberify(Commitment.channel.participants.length),
-    participants: Commitment.channel.participants,
-    commitmentType: Commitment.commitmentType,
-    turnNum: utils.bigNumberify(Commitment.turnNum),
-    commitmentCount: utils.bigNumberify(Commitment.commitmentCount),
-    destination: Commitment.destination,
-    allocation: Commitment.allocation.map(x => utils.bigNumberify(String(x))),
-    gameAttributes: Commitment.gameAttributes,
+    channelType: commitment.channel.channelType,
+    channelNonce: utils.bigNumberify(commitment.channel.channelNonce),
+    numberOfParticipants: utils.bigNumberify(commitment.channel.participants.length),
+    participants: commitment.channel.participants,
+    commitmentType: commitment.commitmentType,
+    turnNum: utils.bigNumberify(commitment.turnNum),
+    commitmentCount: utils.bigNumberify(commitment.commitmentCount),
+    destination: commitment.destination,
+    allocation: commitment.allocation.map(x => utils.bigNumberify(String(x))),
+    appAttributes: commitment.appAttributes,
   };
 }
 
 export enum CommitmentType {
   PreFundSetup = 0,
   PostFundSetup = 1,
-  Game = 2,
+  App = 2,
   Conclude = 3,
 }

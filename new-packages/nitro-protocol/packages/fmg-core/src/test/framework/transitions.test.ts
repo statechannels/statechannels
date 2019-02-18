@@ -3,7 +3,7 @@ import linker from 'solc/linker';
 
 import expectRevert from '../helpers/expect-revert';
 
-import { createCommitment, args } from '../../test-game/counting-game';
+import { createCommitment, args } from '../../test-app/counting-app';
 import { Channel } from '../..';
 
 import CommitmentArtifact from '../../../build/contracts/Commitment.json';
@@ -12,7 +12,7 @@ import RulesArtifact from '../../../build/contracts/Rules.json';
 import TestRulesArtifact from '../../../build/contracts/TestRules.json';
 
 import CountingCommitmentArtifact from '../../../build/contracts/CountingCommitment.json';
-import CountingGameArtifact from '../../../build/contracts/CountingGame.json';
+import CountingAppArtifact from '../../../build/contracts/CountingApp.json';
 
 const provider = new ethers.providers.JsonRpcProvider('http://localhost:8545');
 const signer = provider.getSigner();
@@ -21,7 +21,7 @@ const TURN_NUM_MUST_INCREMENT = "turnNum must increase by 1";
 const CHANNEL_ID_MUST_MATCH = "channelId must match";
 const allocationsMustEqual = (commitmentType) => `${commitmentType}: allocations must be equal`;
 const destinationsMustEqual = (commitmentType) => `${commitmentType}: destinations must be equal`;
-const gameAttributesMustMatch = (commitmentType) => `${commitmentType}: gameAttributes must be equal`;
+const appAttributesMustMatch = (commitmentType) => `${commitmentType}: appAttributes must be equal`;
 const commitmentCountMustIncrement = (commitmentType) => `${commitmentType}: commitmentCount must increase by 1`;
 const commitmentCountMustReset = (commitmentType, nextCommitmentType) => `${commitmentType}: commitmentCount must be reset when transitioning to ${nextCommitmentType}`;
 const commitmentTypeMustBe = (commitmentType, nextCommitmentType) => `${commitmentType}: commitmentType must be ${nextCommitmentType}`;
@@ -58,14 +58,14 @@ describe('Rules', () => {
       Commitment: CommitmentArtifact.networks[networkId].address,
     });
 
-    CountingGameArtifact.bytecode = linker.linkBytecode(CountingGameArtifact.bytecode, {
+    CountingAppArtifact.bytecode = linker.linkBytecode(CountingAppArtifact.bytecode, {
       CountingCommitment: CountingCommitmentArtifact.networks[networkId].address,
     });
-    const gameContract = await ContractFactory.fromSolidity(CountingGameArtifact, signer).attach(
-      CountingGameArtifact.networks[networkId].address,
+    const appContract = await ContractFactory.fromSolidity(CountingAppArtifact, signer).attach(
+      CountingAppArtifact.networks[networkId].address,
     );
 
-    otherChannel = new Channel(gameContract.address, 1, participants);
+    otherChannel = new Channel(appContract.address, 1, participants);
 
     RulesArtifact.bytecode = linker.linkBytecode(RulesArtifact.bytecode, {
       Commitment: CommitmentArtifact.networks[networkId].address,
@@ -76,8 +76,8 @@ describe('Rules', () => {
     testFramework = await ContractFactory.fromSolidity(TestRulesArtifact, signer).deploy();
     // Contract setup --------------------------------------------------------------------------
 
-    channel = new Channel(gameContract.address, 0, participants);
-    defaults = { channel, allocation, destination, gameCounter: 0 };
+    channel = new Channel(appContract.address, 0, participants);
+    defaults = { channel, allocation, destination, appCounter: 0 };
   });
 
   const validTransition = async (commitment1, commitment2) => {
@@ -118,9 +118,9 @@ describe('Rules', () => {
       toCommitment.commitmentCount = fromCommitment.commitmentCount;
       await expectRevert(validTransition(fromCommitment, toCommitment), commitmentCountMustIncrement("PreFundSetup"));
     });
-    it('rejects a transition where the game attributes changes', async () => {
-      toCommitment.gameCounter = 45;
-      await expectRevert(validTransition(fromCommitment, toCommitment), gameAttributesMustMatch("PreFundSetup"));
+    it('rejects a transition where the app attributes changes', async () => {
+      toCommitment.appCounter = 45;
+      await expectRevert(validTransition(fromCommitment, toCommitment), appAttributesMustMatch("PreFundSetup"));
     });
   });
 
@@ -165,8 +165,8 @@ describe('Rules', () => {
     });
 
     it('rejects a transition where the position changes', async () => {
-      toCommitment.gameCounter = 45;
-      await expectRevert(validTransition(fromCommitment, toCommitment), gameAttributesMustMatch("PreFundSetup"));
+      toCommitment.appCounter = 45;
+      await expectRevert(validTransition(fromCommitment, toCommitment), appAttributesMustMatch("PreFundSetup"));
     });
   });
 
@@ -242,10 +242,10 @@ describe('Rules', () => {
     });
   });
 
-  describe('PostFundSetup -> Game', () => {
+  describe('PostFundSetup -> App', () => {
     beforeEach(() => {
-      fromCommitment = createCommitment.postFundSetup({ ...defaults, turnNum: 3, commitmentCount: 1, gameCounter: 0 });
-      toCommitment = createCommitment.game({ ...defaults, turnNum: 4, commitmentCount: 0, gameCounter: 0,  });
+      fromCommitment = createCommitment.postFundSetup({ ...defaults, turnNum: 3, commitmentCount: 1, appCounter: 0 });
+      toCommitment = createCommitment.app({ ...defaults, turnNum: 4, commitmentCount: 0, appCounter: 0,  });
     });
 
     it("rejects a transition where the fromCommitment is not the last player", async () => {
@@ -298,15 +298,15 @@ describe('Rules', () => {
     });
   });
 
-  describe('PostFundSetup -> game', () => {
+  describe('PostFundSetup -> app', () => {
     beforeEach(() => {
       fromCommitment = createCommitment.postFundSetup({
         ...defaults,
         turnNum: 1,
         commitmentCount: 1,
-        gameCounter: 3,
+        appCounter: 3,
       });
-      toCommitment = createCommitment.game({ ...defaults, turnNum: 2, gameCounter: 4, commitmentCount: 0 });
+      toCommitment = createCommitment.app({ ...defaults, turnNum: 2, appCounter: 4, commitmentCount: 0 });
     });
 
     it('allows a valid transition', async () => {
@@ -328,16 +328,16 @@ describe('Rules', () => {
       await expectRevert(validTransition(fromCommitment, toCommitment));
     });
 
-    it('rejects a transition where the game rules are broken', async () => {
-      toCommitment.gameCounter = 2; // game specifies that counter must increment
+    it('rejects a transition where the app rules are broken', async () => {
+      toCommitment.appCounter = 2; // app specifies that counter must increment
       await expectRevert(validTransition(fromCommitment, toCommitment));
     });
   });
 
-  describe('game -> game', () => {
+  describe('app -> app', () => {
     beforeEach(() => {
-      fromCommitment = createCommitment.game({ ...defaults, turnNum: 1, gameCounter: 3, commitmentCount: 0 });
-      toCommitment = createCommitment.game({ ...defaults, turnNum: 2, gameCounter: 4, commitmentCount: 0 });
+      fromCommitment = createCommitment.app({ ...defaults, turnNum: 1, appCounter: 3, commitmentCount: 0 });
+      toCommitment = createCommitment.app({ ...defaults, turnNum: 2, appCounter: 4, commitmentCount: 0 });
     });
 
     it('allows a valid transition', async () => {
@@ -354,15 +354,15 @@ describe('Rules', () => {
       await expectRevert(validTransition(fromCommitment, toCommitment));
     });
 
-    it('rejects a transition where the game rules are broken', async () => {
-      toCommitment.gameCounter = 2; // game specifies that counter must increment
+    it('rejects a transition where the app rules are broken', async () => {
+      toCommitment.appCounter = 2; // app specifies that counter must increment
       await expectRevert(validTransition(fromCommitment, toCommitment));
     });
   });
 
-  describe('game -> conclude', () => {
+  describe('app -> conclude', () => {
     beforeEach(() => {
-      fromCommitment = createCommitment.game({ ...defaults, turnNum: 1, gameCounter: 3, commitmentCount: 0 });
+      fromCommitment = createCommitment.app({ ...defaults, turnNum: 1, appCounter: 3, commitmentCount: 0 });
       toCommitment = createCommitment.conclude({ ...defaults, turnNum: 2, commitmentCount: 0 });
     });
 
@@ -387,7 +387,7 @@ describe('Rules', () => {
 
     it('rejects a transition where the destination changes', async () => {
       toCommitment.destination = otherDestination;
-      await expectRevert(validTransition(fromCommitment, toCommitment), destinationsMustEqual("Game"));
+      await expectRevert(validTransition(fromCommitment, toCommitment), destinationsMustEqual("App"));
     });
   });
 

@@ -14,8 +14,8 @@ contract TestCommitment {
         return _commitment.isPostFundSetup();
     }
 
-    function isGame(Commitment.CommitmentStruct memory _commitment) public pure returns (bool) {
-        return _commitment.isGame();
+    function isApp(Commitment.CommitmentStruct memory _commitment) public pure returns (bool) {
+        return _commitment.isApp();
     }
 
     function isConclude(Commitment.CommitmentStruct memory _commitment) public pure returns (bool) {
@@ -38,8 +38,8 @@ contract TestCommitment {
         return Commitment.requireFullySigned(_commitment, _v, _r, _s);
     }
 
-    function gameAttributesEqual(Commitment.CommitmentStruct memory _commitment, Commitment.CommitmentStruct memory _otherCommitment) public pure returns (bool) {
-        return Commitment.gameAttributesEqual(_commitment, _otherCommitment);
+    function appAttributesEqual(Commitment.CommitmentStruct memory _commitment, Commitment.CommitmentStruct memory _otherCommitment) public pure returns (bool) {
+        return Commitment.appAttributesEqual(_commitment, _otherCommitment);
     }
 
     function allocationsEqual(Commitment.CommitmentStruct memory _commitment, Commitment.CommitmentStruct memory _otherCommitment) public pure returns (bool) {

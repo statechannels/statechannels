@@ -4,7 +4,7 @@ pragma experimental ABIEncoderV2;
 import "../Commitment.sol";
 import "./CountingCommitment.sol";
 
-contract CountingGame {
+contract CountingApp {
     // The following transitions are allowed:
     //
     // Start -> Concluded
@@ -21,11 +21,11 @@ contract CountingGame {
 
         require(
             keccak256(abi.encode(oldCommitment.allocation)) == keccak256(abi.encode(newCommitment.allocation)),
-            "CountingGame: allocations must be equal"
+            "CountingApp: allocations must be equal"
         );
         require(
-            newCommitment.gameCounter == oldCommitment.gameCounter + 1,
-            "CountingGame: gameCounter must increment by 1"
+            newCommitment.appCounter == oldCommitment.appCounter + 1,
+            "CountingApp: appCounter must increment by 1"
         );
 
         return true;

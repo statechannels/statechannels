@@ -1,5 +1,11 @@
-import { ethers } from 'ethers';
-export * from './Commitment';
+export {
+  Commitment,
+  CommitmentType,
+  toHex,
+  fromHex,
+  ethereumArgs,
+  asEthersObject,
+} from './Commitment';
 export { Channel } from './channel';
 export {
   toHex32,
@@ -20,8 +26,8 @@ export {
   SolidityCountingCommitmentType,
   createCommitment,
   asCoreCommitment,
-  args as ethereumArgs,
-} from './test-game/counting-game';
+  args as testEthereumArgs,
+} from './test-app/counting-app';
 
 
 export { bigNumberify, BigNumber } from 'ethers/utils';

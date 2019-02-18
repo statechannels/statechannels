@@ -2,12 +2,12 @@ import abi from 'web3-eth-abi';
 import { CommitmentType, Commitment, BaseCommitment, ethereumArgs } from '../Commitment';
 import { utils } from 'ethers';
 
-export interface GameAttributes {
-  gameCounter: utils.BigNumber;
+export interface AppAttributes {
+  appCounter: utils.BigNumber;
 }
 
 export interface CountingBaseCommitment extends BaseCommitment {
-  gameCounter: utils.BigNumber;
+  appCounter: utils.BigNumber;
 }
 
 export interface CountingCommitment extends CountingBaseCommitment {
@@ -16,7 +16,7 @@ export interface CountingCommitment extends CountingBaseCommitment {
 
 export const SolidityCountingCommitmentType = {
   "CountingCommitmentStruct": {
-    "gameCounter": "uint256",
+    "appCounter": "uint256",
   },
 };
 
@@ -27,23 +27,23 @@ export const createCommitment = {
   postFundSetup: function postFundSetupCommitment(opts: CountingBaseCommitment): CountingCommitment {
     return { ...opts, commitmentType: CommitmentType.PostFundSetup };
   },
-  game: function gameCommitment(opts: CountingBaseCommitment): CountingCommitment {
-    return { ...opts, commitmentType: CommitmentType.Game, commitmentCount: utils.bigNumberify(0) };
+  app: function appCommitment(opts: CountingBaseCommitment): CountingCommitment {
+    return { ...opts, commitmentType: CommitmentType.App, commitmentCount: utils.bigNumberify(0) };
   },
   conclude: function concludeCommitment(opts: CountingBaseCommitment): CountingCommitment {
     return { ...opts, commitmentType: CommitmentType.Conclude, };
   },
 };
 
-export function gameAttributesFromCommitment(countingGameAttributes: GameAttributes): string {
-  return abi.encodeParameter(SolidityCountingCommitmentType, [countingGameAttributes.gameCounter]);
+export function appAttributesFromCommitment(countingAppAttributes: AppAttributes): string {
+  return abi.encodeParameter(SolidityCountingCommitmentType, [countingAppAttributes.appCounter]);
 }
 
-export function args(Commitment: CountingCommitment) {
-  return ethereumArgs(asCoreCommitment(Commitment));
+export function args(commitment: CountingCommitment) {
+  return ethereumArgs(asCoreCommitment(commitment));
 }
 
-export function asCoreCommitment(Commitment: CountingCommitment): Commitment {
+export function asCoreCommitment(commitment: CountingCommitment): Commitment {
   const {
     channel,
     commitmentType,
@@ -51,8 +51,8 @@ export function asCoreCommitment(Commitment: CountingCommitment): Commitment {
     allocation,
     destination,
     commitmentCount,
-    gameCounter,
-  } = Commitment;
+    appCounter,
+  } = commitment;
 
   return {
     channel,
@@ -61,6 +61,6 @@ export function asCoreCommitment(Commitment: CountingCommitment): Commitment {
     allocation,
     destination,
     commitmentCount,
-    gameAttributes: gameAttributesFromCommitment({ gameCounter} ),
+    appAttributes: appAttributesFromCommitment({ appCounter} ),
   };
 }

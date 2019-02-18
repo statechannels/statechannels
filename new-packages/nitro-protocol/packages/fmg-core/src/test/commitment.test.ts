@@ -1,7 +1,7 @@
 import { Channel } from '../channel';
 import { Commitment, CommitmentType, asEthersObject, toHex, fromHex } from '../Commitment';
 import expectRevert from './helpers/expect-revert';
-// import { CountingGame } from '../test-game/counting-game';
+// import { CountingApp } from '../test-app/counting-app';
 import { sign } from '../utils';
 import linker from 'solc/linker';
 
@@ -11,7 +11,7 @@ import { ethers, ContractFactory, Wallet } from 'ethers';
 import CommitmentArtifact from '../../build/contracts/Commitment.json';
 import TestCommitmentArtifact from '../../build/contracts/TestCommitment.json';
 import { utils } from 'ethers';
-import { CountingCommitment, asCoreCommitment } from '../test-game/counting-game';
+import { CountingCommitment, asCoreCommitment } from '../test-app/counting-app';
 
 const provider = new ethers.providers.JsonRpcProvider('http://localhost:8545');
 const signer = provider.getSigner();
@@ -44,7 +44,7 @@ describe('Commitment', () => {
     allocation,
     destination,
     commitmentCount: new utils.BigNumber(0),
-    gameAttributes: '0x',
+    appAttributes: '0x',
   };
 
   beforeEach(async () => {
@@ -64,8 +64,8 @@ describe('Commitment', () => {
     Commitment.commitmentType = CommitmentType.PostFundSetup;
     expect(await testCommitmentLib.isPostFundSetup(asEthersObject(Commitment))).toBe(true);
 
-    Commitment.commitmentType = CommitmentType.Game;
-    expect(await testCommitmentLib.isGame(asEthersObject(Commitment))).toBe(true);
+    Commitment.commitmentType = CommitmentType.App;
+    expect(await testCommitmentLib.isApp(asEthersObject(Commitment))).toBe(true);
 
     Commitment.commitmentType = CommitmentType.Conclude;
     expect(await testCommitmentLib.isConclude(asEthersObject(Commitment))).toBe(true);
@@ -106,14 +106,14 @@ describe('Commitment', () => {
     ).toBeTruthy();
   });
 
-  it('can test if the gameAttributes are equal', async () => {
-    const countingCommitment1: CountingCommitment = { channel, destination, allocation, turnNum, gameCounter: utils.bigNumberify(0), commitmentCount: utils.bigNumberify(0), commitmentType: CommitmentType.PreFundSetup };
-    const countingCommitment2: CountingCommitment = { channel, destination, allocation, turnNum, gameCounter: utils.bigNumberify(1), commitmentCount: utils.bigNumberify(0), commitmentType: CommitmentType.PostFundSetup };
+  it('can test if the appAttributes are equal', async () => {
+    const countingCommitment1: CountingCommitment = { channel, destination, allocation, turnNum, appCounter: utils.bigNumberify(0), commitmentCount: utils.bigNumberify(0), commitmentType: CommitmentType.PreFundSetup };
+    const countingCommitment2: CountingCommitment = { channel, destination, allocation, turnNum, appCounter: utils.bigNumberify(1), commitmentCount: utils.bigNumberify(0), commitmentType: CommitmentType.PostFundSetup };
 
     const commitment1 = asCoreCommitment(countingCommitment1);
     const commitment2 = asCoreCommitment(countingCommitment2);
 
-    await expectRevert(commitmentLib.gameAttributesEqual(asEthersObject(commitment1), asEthersObject(commitment2)));
+    await expectRevert(commitmentLib.appAttributesEqual(asEthersObject(commitment1), asEthersObject(commitment2)));
   });
 
   it('can encode and decode a Commitment', () => {

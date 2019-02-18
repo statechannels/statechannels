@@ -2,7 +2,7 @@ pragma solidity ^0.5.0;
 pragma experimental ABIEncoderV2;
 
 import "./Commitment.sol";
-import "./ForceMoveGame.sol";
+import "./ForceMoveApp.sol";
 
 library Rules {
     using Commitment for Commitment.CommitmentStruct;
@@ -112,7 +112,7 @@ library Rules {
         _nextCommitment.requireSignature(v[1], r[1], s[1]);
         require(
             validTransition(_alternativeCommitment, _nextCommitment),
-            "it must be a valid transition of the gamecommitment (from the alternative Commitment)"
+            "it must be a valid transition of the appcommitment (from the alternative Commitment)"
         );
 
         return true;
@@ -135,8 +135,8 @@ library Rules {
             return validTransitionFromPreFundSetup(_fromCommitment, _toCommitment);
         } else if (_fromCommitment.isPostFundSetup()) {
             return validTransitionFromPostFundSetup(_fromCommitment, _toCommitment);
-        } else if (_fromCommitment.isGame()) {
-            return validTransitionFromGame(_fromCommitment, _toCommitment);
+        } else if (_fromCommitment.isApp()) {
+            return validTransitionFromApp(_fromCommitment, _toCommitment);
         } else if (_fromCommitment.isConclude()) {
             return validTransitionFromConclude(_fromCommitment, _toCommitment);
         }
@@ -158,8 +158,8 @@ library Rules {
                     "Invalid transition from PreFundSetup: commitmentCount must be reset when transitioning to PostFundSetup"
                 );
                 require(
-                    Commitment.gameAttributesEqual(_fromCommitment, _toCommitment),
-                    "Invalid transition from PreFundSetup: gameAttributes must be equal"
+                    Commitment.appAttributesEqual(_fromCommitment, _toCommitment),
+                    "Invalid transition from PreFundSetup: appAttributes must be equal"
                 );
                 require(
                     Commitment.allocationsEqual(_fromCommitment, _toCommitment),
@@ -191,8 +191,8 @@ library Rules {
                 "Invalid transition from PreFundSetup: commitmentType must be PreFundSetup"
             );
             require(
-                Commitment.gameAttributesEqual(_fromCommitment, _toCommitment),
-                "Invalid transition from PreFundSetup: gameAttributes must be equal"
+                Commitment.appAttributesEqual(_fromCommitment, _toCommitment),
+                "Invalid transition from PreFundSetup: appAttributes must be equal"
             );
             require(
                 _toCommitment.commitmentCount == _fromCommitment.commitmentCount + 1,
@@ -215,9 +215,9 @@ library Rules {
         Commitment.CommitmentStruct memory _toCommitment
     ) public pure returns (bool) {
         if (_fromCommitment.commitmentCount == _fromCommitment.numberOfParticipants - 1) {
-            if (_toCommitment.isGame()) {
+            if (_toCommitment.isApp()) {
                 require(
-                    validGameTransition(_fromCommitment, _toCommitment),
+                    validAppTransition(_fromCommitment, _toCommitment),
                     "Invalid transition from PostFundSetup: transition must be valid"
                 );
             } else {
@@ -247,8 +247,8 @@ library Rules {
             if (_toCommitment.isPostFundSetup()) {
                 // PostFundSetup -> PostFundSetup
                 require(
-                    Commitment.gameAttributesEqual(_fromCommitment, _toCommitment),
-                    "Invalid transition from PostFundSetup: gameAttributes must be equal"
+                    Commitment.appAttributesEqual(_fromCommitment, _toCommitment),
+                    "Invalid transition from PostFundSetup: appAttributes must be equal"
                 );
                 require(
                     _toCommitment.commitmentCount == _fromCommitment.commitmentCount + 1,
@@ -281,27 +281,27 @@ library Rules {
         return true;
     }
 
-    function validTransitionFromGame(
+    function validTransitionFromApp(
         Commitment.CommitmentStruct memory _fromCommitment,
         Commitment.CommitmentStruct memory _toCommitment
     ) public pure returns (bool) {
-        if (_toCommitment.isGame()) {
+        if (_toCommitment.isApp()) {
             require(
-                validGameTransition(_fromCommitment, _toCommitment),
-                "Invalid transition from Game: transition must be valid"
+                validAppTransition(_fromCommitment, _toCommitment),
+                "Invalid transition from App: transition must be valid"
             );
         } else {
             require(
                 _toCommitment.isConclude(),
-                "Invalid transition from Game: commitmentType must be Conclude"
+                "Invalid transition from App: commitmentType must be Conclude"
             );
             require(
                 Commitment.allocationsEqual(_fromCommitment, _toCommitment),
-                "Invalid transition from Game: allocations must be equal"
+                "Invalid transition from App: allocations must be equal"
             );
             require(
                 Commitment.destinationsEqual(_fromCommitment, _toCommitment),
-                "Invalid transition from Game: destinations must be equal"
+                "Invalid transition from App: destinations must be equal"
             );
         }
         return true;
@@ -326,10 +326,10 @@ library Rules {
         return true;
     }
 
-    function validGameTransition(
+    function validAppTransition(
         Commitment.CommitmentStruct memory _fromCommitment,
         Commitment.CommitmentStruct memory _toCommitment
     ) public pure returns (bool) {
-        return ForceMoveGame(_fromCommitment.channelType).validTransition(_fromCommitment, _toCommitment);
+        return ForceMoveApp(_fromCommitment.channelType).validTransition(_fromCommitment, _toCommitment);
     }
 }

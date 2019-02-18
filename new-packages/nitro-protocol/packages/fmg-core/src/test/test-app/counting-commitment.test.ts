@@ -8,7 +8,7 @@ import CommitmentArtifact from '../../../build/contracts/Commitment.json';
 import CountingCommitmentArtifact from '../../../build/contracts/CountingCommitment.json';
 import TestCountingCommitmentArtifact from '../../../build/contracts/TestCountingCommitment.json';
 import { CommitmentType, Commitment, ethereumArgs } from '../../Commitment';
-import { CountingCommitment, asCoreCommitment } from '../../test-game/counting-game';
+import { CountingCommitment, asCoreCommitment } from '../../test-app/counting-app';
 
 const provider = new ethers.providers.JsonRpcProvider('http://localhost:8545');
 const signer = provider.getSigner();
@@ -56,7 +56,7 @@ describe('CountingCommitment', () => {
     Commitment = {
       ...defaults,
       turnNum: new utils.BigNumber(6),
-      gameCounter: new utils.BigNumber(1),
+      appCounter: new utils.BigNumber(1),
       commitmentType: CommitmentType.PreFundSetup,
       commitmentCount: new utils.BigNumber(6),
     };
@@ -65,7 +65,7 @@ describe('CountingCommitment', () => {
   it('converts a framework Commitment into a counting Commitment', async () => {
     const coreCommitment: Commitment = asCoreCommitment(Commitment);
     const countingCommitmentArgs = await testCountingCommitment.fromFrameworkCommitment(ethereumArgs(coreCommitment));
-    const { gameCounter } = countingCommitmentArgs;
-    expect(gameCounter).toEqual(new utils.BigNumber(1));
+    const { appCounter } = countingCommitmentArgs;
+    expect(appCounter).toEqual(new utils.BigNumber(1));
   });
 });

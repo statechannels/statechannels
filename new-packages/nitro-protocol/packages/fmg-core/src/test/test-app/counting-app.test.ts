@@ -7,14 +7,14 @@ import { ethers, utils, ContractFactory } from 'ethers';
 import CommitmentArtifact from '../../../build/contracts/Commitment.json';
 
 import CountingCommitmentArtifact from '../../../build/contracts/CountingCommitment.json';
-import CountingGameArtifact from '../../../build/contracts/CountingGame.json';
-import { createCommitment, CountingCommitment, args } from '../../test-game/counting-game';
+import CountingAppArtifact from '../../../build/contracts/CountingApp.json';
+import { createCommitment, CountingCommitment, args } from '../../test-app/counting-app';
 
 const provider = new ethers.providers.JsonRpcProvider('http://localhost:8545');
 const signer = provider.getSigner();
 
-describe('CountingGame', () => {
-  let game;
+describe('CountingApp', () => {
+  let app;
   let commitment0: CountingCommitment;
   let commitment1: CountingCommitment;
   let commitmentBalChange;
@@ -26,11 +26,11 @@ describe('CountingGame', () => {
       Commitment: CommitmentArtifact.networks[networkId].address,
     });
 
-    CountingGameArtifact.bytecode = linker.linkBytecode(CountingGameArtifact.bytecode, {
+    CountingAppArtifact.bytecode = linker.linkBytecode(CountingAppArtifact.bytecode, {
       CountingCommitment: CountingCommitmentArtifact.networks[networkId].address,
     });
-    game = await ContractFactory.fromSolidity(CountingGameArtifact, signer).attach(
-      CountingGameArtifact.networks[networkId].address,
+    app = await ContractFactory.fromSolidity(CountingAppArtifact, signer).attach(
+      CountingAppArtifact.networks[networkId].address,
     );
     // Contract setup --------------------------------------------------------------------------
 
@@ -43,7 +43,7 @@ describe('CountingGame', () => {
     const participants = [participantA.address, participantB.address];
 
 
-    const channel = new Channel(game.address, 0, participants);
+    const channel = new Channel(app.address, 0, participants);
     
     const defaults = {
       channel,
@@ -56,14 +56,14 @@ describe('CountingGame', () => {
     const three = utils.bigNumberify(3); 
     const six = utils.bigNumberify(6);
     const seven = utils.bigNumberify(7);
-    commitment0 = createCommitment.game({ ...defaults, turnNum: six, gameCounter: one, commitmentCount: one });
-    commitment1 = createCommitment.game({ ...defaults, turnNum: seven, gameCounter: two, commitmentCount: two });
+    commitment0 = createCommitment.app({ ...defaults, turnNum: six, appCounter: one, commitmentCount: one });
+    commitment1 = createCommitment.app({ ...defaults, turnNum: seven, appCounter: two, commitmentCount: two });
 
-    commitmentBalChange = createCommitment.game({
+    commitmentBalChange = createCommitment.app({
       ...defaults,
       allocation: [six, three],
       turnNum: seven,
-      gameCounter: two,
+      appCounter: two,
       commitmentCount: two,
     });
   });
@@ -72,11 +72,11 @@ describe('CountingGame', () => {
   // ========================
 
   it('allows a move where the count increment', async () => {
-    const output = await game.validTransition(args(commitment0), args(commitment1));
+    const output = await app.validTransition(args(commitment0), args(commitment1));
     expect(output).toBe(true);
   });
 
   it("doesn't allow transitions if totals don't match", async () => {
-    await expectRevert(game.validTransition(args(commitment0), args(commitmentBalChange)), "CountingGame: allocations must be equal");
+    await expectRevert(app.validTransition(args(commitment0), args(commitmentBalChange)), "CountingApp: allocations must be equal");
   });
 });
