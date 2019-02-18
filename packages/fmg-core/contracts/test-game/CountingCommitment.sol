@@ -6,19 +6,19 @@ import "../Commitment.sol";
 library CountingCommitment {
     using Commitment for Commitment.CommitmentStruct;
 
-    struct GameAttributes {
-        uint256 gameCounter;
+    struct AppAttributes {
+        uint256 appCounter;
     }
 
     struct CountingCommitmentStruct {
-        uint256 gameCounter;
+        uint256 appCounter;
         uint256[] allocation;
         address[] destination;
     }
 
     function fromFrameworkCommitment(Commitment.CommitmentStruct memory frameworkCommitment) public pure returns (CountingCommitmentStruct memory) {
-        GameAttributes memory gameAttributes = abi.decode(frameworkCommitment.gameAttributes, (GameAttributes));
+        AppAttributes memory appAttributes = abi.decode(frameworkCommitment.appAttributes, (AppAttributes));
 
-        return CountingCommitmentStruct(gameAttributes.gameCounter, frameworkCommitment.allocation, frameworkCommitment.destination);
+        return CountingCommitmentStruct(appAttributes.appCounter, frameworkCommitment.allocation, frameworkCommitment.destination);
     }
 }

@@ -65,11 +65,11 @@ contract TestRules {
         return Rules.validTransition(_fromCommitment, _toCommitment);
     }
 
-    function validGameTransition(
+    function validAppTransition(
         Commitment.CommitmentStruct memory _fromCommitment,
         Commitment.CommitmentStruct memory _toCommitment
     ) public pure returns (bool) {
         return true;
-        // return ForceMoveGame(_fromCommitment.channelType).validTransition(_fromCommitment.gameAttributes, _toCommitment.gameAttributes);
+        // return ForceMoveApp(_fromCommitment.channelType).validTransition(_fromCommitment.appAttributes, _toCommitment.appAttributes);
     }
 }

@@ -2,7 +2,7 @@ pragma solidity ^0.5.0;
 pragma experimental ABIEncoderV2;
 
 library Commitment {
-    enum CommitmentType { PreFundSetup, PostFundSetup, Game, Conclude }
+    enum CommitmentType { PreFundSetup, PostFundSetup, App, Conclude }
 
     struct CommitmentStruct {
         address channelType;
@@ -14,7 +14,7 @@ library Commitment {
         uint256 commitmentCount;
         address[] destination;
         uint256[] allocation;
-        bytes gameAttributes;
+        bytes appAttributes;
     }
 
     function isPreFundSetup(CommitmentStruct memory self) public pure returns (bool) {
@@ -25,8 +25,8 @@ library Commitment {
         return self.commitmentType == uint(CommitmentType.PostFundSetup);
     }
 
-    function isGame(CommitmentStruct memory self) public pure returns (bool) {
-        return self.commitmentType == uint(CommitmentType.Game);
+    function isApp(CommitmentStruct memory self) public pure returns (bool) {
+        return self.commitmentType == uint(CommitmentType.App);
     }
 
     function isConclude(CommitmentStruct memory self) public pure returns (bool) {
@@ -65,8 +65,8 @@ library Commitment {
         }
     }
 
-    function gameAttributesEqual(CommitmentStruct memory _commitment, CommitmentStruct memory _otherCommitment) public pure returns (bool) {
-        return keccak256(_commitment.gameAttributes) == keccak256(_otherCommitment.gameAttributes);
+    function appAttributesEqual(CommitmentStruct memory _commitment, CommitmentStruct memory _otherCommitment) public pure returns (bool) {
+        return keccak256(_commitment.appAttributes) == keccak256(_otherCommitment.appAttributes);
     }
 
     function allocationsEqual(CommitmentStruct memory _commitment, CommitmentStruct memory _otherCommitment) public pure returns (bool) {
