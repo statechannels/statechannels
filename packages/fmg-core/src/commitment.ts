@@ -1,6 +1,6 @@
 import { Channel } from './channel';
 import abi from 'web3-eth-abi';
-import { BigNumberish } from './types';
+import { BigNumber, bigNumberify } from "./";
 
 const SolidityCommitmentType = {
   "CommitmentStruct": {
@@ -19,10 +19,10 @@ const SolidityCommitmentType = {
 
 export interface BaseCommitment {
   channel: Channel;
-  turnNum: BigNumberish;
-  allocation: BigNumberish[];
+  turnNum: BigNumber;
+  allocation: BigNumber[];
   destination: string[];
-  commitmentCount: BigNumberish;
+  commitmentCount: BigNumber;
 }
 
 export interface Commitment extends BaseCommitment {
@@ -37,15 +37,15 @@ export function fromHex(commitment: string): Commitment {
   const parameters = abi.decodeParameter(SolidityCommitmentType, commitment);
   const channel = {
     channelType: parameters[0],
-    channelNonce: parameters[1],
+    channelNonce: Number.parseInt(parameters[1], 10),
     participants: parameters[3],
   };
 
   return {
     channel,
     commitmentType: Number.parseInt(parameters[4], 10) as CommitmentType,
-    turnNum: parameters[5],
-    commitmentCount: parameters[6],
+    turnNum: bigNumberify(parameters[5]),
+    commitmentCount: bigNumberify(parameters[6]),
     destination: parameters[7],
     allocation: parameters[8],
     appAttributes: parameters[9],

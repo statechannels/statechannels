@@ -1,1 +1,1 @@
-export { bigNumberify, BigNumber, BigNumberish } from 'ethers/utils';
+export { BigNumber, BigNumberish } from 'ethers/utils';
