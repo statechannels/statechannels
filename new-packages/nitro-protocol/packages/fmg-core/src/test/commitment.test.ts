@@ -10,9 +10,9 @@ import { ethers, ContractFactory, Wallet } from 'ethers';
 // @ts-ignore
 import CommitmentArtifact from '../../build/contracts/Commitment.json';
 import TestCommitmentArtifact from '../../build/contracts/TestCommitment.json';
-import { utils } from 'ethers';
 import { CountingCommitment, asCoreCommitment } from '../test-app/counting-app';
-import { BigNumber } from '..';
+import { bigNumberify, BigNumber } from 'ethers/utils';
+import { Uint32 } from '../types';
 
 const provider = new ethers.providers.JsonRpcProvider('http://localhost:8545');
 const signer = provider.getSigner();
@@ -21,8 +21,8 @@ describe('Commitment', () => {
 
   let commitmentLib;
   let testCommitmentLib;
-  const channelNonce = new BigNumber(12);
-  const turnNum = new BigNumber(15);
+  const channelNonce = 12;
+  const turnNum: Uint32 = 15;
 
   const channelType = new Wallet('4f3edf983ac636a65a842ce7c78d9aa706d3b113bce9c46f30d7d21715b23b1d')
     .address;
@@ -34,7 +34,8 @@ describe('Commitment', () => {
     '6370fd033278c143179d81c5526140625662b8daa446c22ee2d73db3707e620c',
   );
   const participants = [participantA.address, participantB.address];
-  const allocation = [new BigNumber(5), new BigNumber(4)];
+  const allocation = ["0x5", "0x4"];
+  console.log(allocation);
   const destination = [participantA.address, participantB.address];
   const channel: Channel = { channelType, channelNonce, participants };
   const commitmentType = CommitmentType.PreFundSetup;
@@ -44,7 +45,7 @@ describe('Commitment', () => {
     turnNum,
     allocation,
     destination,
-    commitmentCount: new BigNumber(0),
+    commitmentCount: 0,
     appAttributes: '0x',
   };
 
@@ -108,8 +109,8 @@ describe('Commitment', () => {
   });
 
   it('can test if the appAttributes are equal', async () => {
-    const countingCommitment1: CountingCommitment = { channel, destination, allocation, turnNum, appCounter: new BigNumber(0), commitmentCount: new BigNumber(0), commitmentType: CommitmentType.PreFundSetup };
-    const countingCommitment2: CountingCommitment = { channel, destination, allocation, turnNum, appCounter: new BigNumber(1), commitmentCount: new BigNumber(0), commitmentType: CommitmentType.PostFundSetup };
+    const countingCommitment1: CountingCommitment = { channel, destination, allocation, turnNum, appCounter: new BigNumber(0), commitmentCount: 0, commitmentType: CommitmentType.PreFundSetup };
+    const countingCommitment2: CountingCommitment = { channel, destination, allocation, turnNum, appCounter: new BigNumber(1), commitmentCount: 0, commitmentType: CommitmentType.PostFundSetup };
 
     const commitment1 = asCoreCommitment(countingCommitment1);
     const commitment2 = asCoreCommitment(countingCommitment2);
