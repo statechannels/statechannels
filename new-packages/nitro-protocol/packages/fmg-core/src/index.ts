@@ -21,13 +21,8 @@ export {
 export { default as expectRevert } from './test/helpers/expect-revert';
 export { increaseTime, DURATION } from './test/helpers/increase-time';
 
-export {
-  CountingCommitment,
-  SolidityCountingCommitmentType,
-  createCommitment,
-  asCoreCommitment,
-  args as testEthereumArgs,
-} from './test-app/counting-app';
+import * as CountingApp from './test-app/counting-app';
+export { CountingApp };
 
 
 export { BigNumber, BigNumberish, MessageSignature } from './types';
