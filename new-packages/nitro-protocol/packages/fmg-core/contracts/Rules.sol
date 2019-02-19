@@ -8,7 +8,7 @@ library Rules {
     using Commitment for Commitment.CommitmentStruct;
     struct Challenge {
         address channelId;
-        Commitment.CommitmentStruct Commitment;
+        Commitment.CommitmentStruct commitment;
         uint32 expirationTime;
         uint256[] payouts;
     }
