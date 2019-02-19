@@ -1,8 +1,9 @@
 import { soliditySha3, toChecksumAddress } from 'web3-utils';
+import { BigNumber } from '.';
 
 export interface Channel {
   channelType: string;
-  channelNonce: number;
+  channelNonce: BigNumber;
   participants: string[];
 }
 

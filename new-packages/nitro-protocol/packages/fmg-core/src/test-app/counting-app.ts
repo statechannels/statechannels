@@ -1,13 +1,13 @@
 import abi from 'web3-eth-abi';
-import { CommitmentType, Commitment, BaseCommitment, ethereumArgs } from '../Commitment';
-import { utils } from 'ethers';
+import { CommitmentType, Commitment, BaseCommitment, ethereumArgs } from '../commitment';
+import { BigNumber } from '../';
 
 export interface AppAttributes {
-  appCounter: utils.BigNumber;
+  appCounter: BigNumber;
 }
 
 export interface CountingBaseCommitment extends BaseCommitment {
-  appCounter: utils.BigNumber;
+  appCounter: BigNumber;
 }
 
 export interface CountingCommitment extends CountingBaseCommitment {
@@ -28,7 +28,7 @@ export const createCommitment = {
     return { ...opts, commitmentType: CommitmentType.PostFundSetup };
   },
   app: function appCommitment(opts: CountingBaseCommitment): CountingCommitment {
-    return { ...opts, commitmentType: CommitmentType.App, commitmentCount: utils.bigNumberify(0) };
+    return { ...opts, commitmentType: CommitmentType.App, commitmentCount: new BigNumber(0) };
   },
   conclude: function concludeCommitment(opts: CountingBaseCommitment): CountingCommitment {
     return { ...opts, commitmentType: CommitmentType.Conclude, };

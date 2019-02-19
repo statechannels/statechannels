@@ -2,13 +2,14 @@ import expectRevert from '../helpers/expect-revert';
 import linker from 'solc/linker';
 
 import { Channel } from '../../';
-import { ethers, utils, ContractFactory } from 'ethers';
+import { ethers, ContractFactory } from 'ethers';
 
 import CommitmentArtifact from '../../../build/contracts/Commitment.json';
 
 import CountingCommitmentArtifact from '../../../build/contracts/CountingCommitment.json';
 import CountingAppArtifact from '../../../build/contracts/CountingApp.json';
 import { createCommitment, CountingCommitment, args } from '../../test-app/counting-app';
+import { BigNumber } from '../..';
 
 const provider = new ethers.providers.JsonRpcProvider('http://localhost:8545');
 const signer = provider.getSigner();
@@ -43,19 +44,19 @@ describe('CountingApp', () => {
     const participants = [participantA.address, participantB.address];
 
 
-    const channel = new Channel(app.address, 0, participants);
+    const channel: Channel = { channelType: app.address, channelNonce: new BigNumber(0), participants };
     
     const defaults = {
       channel,
-      allocation: [new utils.BigNumber(5), new utils.BigNumber(4)],
+      allocation: [new BigNumber(5), new BigNumber(4)],
       destination: [participantA.address, participantB.address],
     };
 
-    const one = utils.bigNumberify(1);
-    const two = utils.bigNumberify(2);
-    const three = utils.bigNumberify(3); 
-    const six = utils.bigNumberify(6);
-    const seven = utils.bigNumberify(7);
+    const one = new BigNumber(1);
+    const two = new BigNumber(2);
+    const three = new BigNumber(3); 
+    const six = new BigNumber(6);
+    const seven = new BigNumber(7);
     commitment0 = createCommitment.app({ ...defaults, turnNum: six, appCounter: one, commitmentCount: one });
     commitment1 = createCommitment.app({ ...defaults, turnNum: seven, appCounter: two, commitmentCount: two });
 

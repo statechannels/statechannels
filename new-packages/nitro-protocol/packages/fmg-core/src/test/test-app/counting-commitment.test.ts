@@ -1,21 +1,22 @@
 import linker from 'solc/linker';
 
 import { Channel } from '../../';
-import { ethers, ContractFactory, utils } from 'ethers';
+import { ethers, ContractFactory, } from 'ethers';
 
 import CommitmentArtifact from '../../../build/contracts/Commitment.json';
 
 import CountingCommitmentArtifact from '../../../build/contracts/CountingCommitment.json';
 import TestCountingCommitmentArtifact from '../../../build/contracts/TestCountingCommitment.json';
-import { CommitmentType, Commitment, ethereumArgs } from '../../Commitment';
+import { CommitmentType, Commitment, ethereumArgs } from '../../commitment';
 import { CountingCommitment, asCoreCommitment } from '../../test-app/counting-app';
+import { BigNumber } from '../..';
 
 const provider = new ethers.providers.JsonRpcProvider('http://localhost:8545');
 const signer = provider.getSigner();
 
 describe('CountingCommitment', () => {
   let testCountingCommitment;
-  let Commitment: CountingCommitment;
+  let commitment: CountingCommitment;
 
   beforeAll(async () => {
     // Contract setup --------------------------------------------------------------------------
@@ -45,27 +46,27 @@ describe('CountingCommitment', () => {
     const participants = [participantA.address, participantB.address];
 
 
-    const channel = new Channel(participantB.address, 0, participants); // just use any valid address
+    const channel: Channel = { channelType: participantB.address, channelNonce: new BigNumber(0), participants }; // just use any valid address
     
     const defaults = {
       channel,
-      allocation: [new utils.BigNumber(5), new utils.BigNumber(4)],
+      allocation: [new BigNumber(5), new BigNumber(4)],
       destination: [participantA.address, participantB.address],
     };
 
-    Commitment = {
+    commitment = {
       ...defaults,
-      turnNum: new utils.BigNumber(6),
-      appCounter: new utils.BigNumber(1),
+      turnNum: new BigNumber(6),
+      appCounter: new BigNumber(1),
       commitmentType: CommitmentType.PreFundSetup,
-      commitmentCount: new utils.BigNumber(6),
+      commitmentCount: new BigNumber(6),
     };
   });
 
   it('converts a framework Commitment into a counting Commitment', async () => {
-    const coreCommitment: Commitment = asCoreCommitment(Commitment);
+    const coreCommitment: Commitment = asCoreCommitment(commitment);
     const countingCommitmentArgs = await testCountingCommitment.fromFrameworkCommitment(ethereumArgs(coreCommitment));
     const { appCounter } = countingCommitmentArgs;
-    expect(appCounter).toEqual(new utils.BigNumber(1));
+    expect(appCounter).toEqual(new BigNumber(1));
   });
 });

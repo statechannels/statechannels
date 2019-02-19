@@ -5,7 +5,7 @@ export {
   fromHex,
   ethereumArgs,
   asEthersObject,
-} from './Commitment';
+} from './commitment';
 export { Channel } from './channel';
 export {
   toHex32,
@@ -31,4 +31,3 @@ export {
 
 
 export { BigNumber, BigNumberish, MessageSignature } from './types';
-export { bigNumberify } from "ethers/utils";
