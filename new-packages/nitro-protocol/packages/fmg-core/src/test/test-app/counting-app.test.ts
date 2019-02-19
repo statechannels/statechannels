@@ -9,6 +9,7 @@ import CommitmentArtifact from '../../../build/contracts/Commitment.json';
 import CountingCommitmentArtifact from '../../../build/contracts/CountingCommitment.json';
 import CountingAppArtifact from '../../../build/contracts/CountingApp.json';
 import { createCommitment, CountingCommitment, args } from '../../test-app/counting-app';
+import { BigNumber } from 'ethers/utils';
 
 
 const provider = new ethers.providers.JsonRpcProvider('http://localhost:8545');
@@ -57,14 +58,14 @@ describe('CountingApp', () => {
 
 
 
-    commitment0 = createCommitment.app({ ...defaults, turnNum: 6, appCounter: 1, commitmentCount: 1 });
-    commitment1 = createCommitment.app({ ...defaults, turnNum: 7, appCounter: 2, commitmentCount: 2 });
+    commitment0 = createCommitment.app({ ...defaults, turnNum: 6, appCounter: new BigNumber(1), commitmentCount: 1 });
+    commitment1 = createCommitment.app({ ...defaults, turnNum: 7, appCounter: new BigNumber(2), commitmentCount: 2 });
 
     commitmentBalChange = createCommitment.app({
       ...defaults,
       allocation: [numberToHexString(6), numberToHexString(3)],
       turnNum: 7,
-      appCounter: 2,
+      appCounter: new BigNumber(2),
       commitmentCount: 2,
     });
   });
