@@ -1,6 +1,6 @@
 import abi from 'web3-eth-abi';
 import { CommitmentType, Commitment, BaseCommitment, ethereumArgs } from '../commitment';
-import { BigNumber } from '../';
+import { BigNumber } from 'ethers/utils';
 
 export interface AppAttributes {
   appCounter: BigNumber;
@@ -28,7 +28,7 @@ export const createCommitment = {
     return { ...opts, commitmentType: CommitmentType.PostFundSetup };
   },
   app: function appCommitment(opts: CountingBaseCommitment): CountingCommitment {
-    return { ...opts, commitmentType: CommitmentType.App, commitmentCount: new BigNumber(0) };
+    return { ...opts, commitmentType: CommitmentType.App, commitmentCount: 0 };
   },
   conclude: function concludeCommitment(opts: CountingBaseCommitment): CountingCommitment {
     return { ...opts, commitmentType: CommitmentType.Conclude, };
@@ -61,6 +61,6 @@ export function asCoreCommitment(commitment: CountingCommitment): Commitment {
     allocation,
     destination,
     commitmentCount,
-    appAttributes: appAttributesFromCommitment({ appCounter} ),
+    appAttributes: appAttributesFromCommitment({ appCounter }),
   };
 }

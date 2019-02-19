@@ -2,14 +2,14 @@ import expectRevert from '../helpers/expect-revert';
 import linker from 'solc/linker';
 
 import { Channel } from '../../';
-import { ethers, ContractFactory } from 'ethers';
+import { ethers, ContractFactory, utils } from 'ethers';
 
 import CommitmentArtifact from '../../../build/contracts/Commitment.json';
 
 import CountingCommitmentArtifact from '../../../build/contracts/CountingCommitment.json';
 import CountingAppArtifact from '../../../build/contracts/CountingApp.json';
 import { createCommitment, CountingCommitment, args } from '../../test-app/counting-app';
-import { BigNumber } from '../..';
+
 
 const provider = new ethers.providers.JsonRpcProvider('http://localhost:8545');
 const signer = provider.getSigner();
@@ -44,28 +44,28 @@ describe('CountingApp', () => {
     const participants = [participantA.address, participantB.address];
 
 
-    const channel: Channel = { channelType: app.address, channelNonce: new BigNumber(0), participants };
-    
+    const channel: Channel = { channelType: app.address, channelNonce: 0, participants };
+    const numberToHexString = (value: number): string => {
+      return utils.bigNumberify(value).toHexString();
+    };
     const defaults = {
       channel,
-      allocation: [new BigNumber(5), new BigNumber(4)],
+      allocation: [numberToHexString(5), numberToHexString(4)],
       destination: [participantA.address, participantB.address],
     };
 
-    const one = new BigNumber(1);
-    const two = new BigNumber(2);
-    const three = new BigNumber(3); 
-    const six = new BigNumber(6);
-    const seven = new BigNumber(7);
-    commitment0 = createCommitment.app({ ...defaults, turnNum: six, appCounter: one, commitmentCount: one });
-    commitment1 = createCommitment.app({ ...defaults, turnNum: seven, appCounter: two, commitmentCount: two });
+
+
+
+    commitment0 = createCommitment.app({ ...defaults, turnNum: 6, appCounter: 1, commitmentCount: 1 });
+    commitment1 = createCommitment.app({ ...defaults, turnNum: 7, appCounter: 2, commitmentCount: 2 });
 
     commitmentBalChange = createCommitment.app({
       ...defaults,
-      allocation: [six, three],
-      turnNum: seven,
-      appCounter: two,
-      commitmentCount: two,
+      allocation: [numberToHexString(6), numberToHexString(3)],
+      turnNum: 7,
+      appCounter: 2,
+      commitmentCount: 2,
     });
   });
 

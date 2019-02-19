@@ -11,7 +11,7 @@ import { ethers, ContractFactory, Wallet } from 'ethers';
 import CommitmentArtifact from '../../build/contracts/Commitment.json';
 import TestCommitmentArtifact from '../../build/contracts/TestCommitment.json';
 import { CountingCommitment, asCoreCommitment } from '../test-app/counting-app';
-import { bigNumberify, BigNumber } from 'ethers/utils';
+import { BigNumber } from 'ethers/utils';
 import { Uint32 } from '../types';
 
 const provider = new ethers.providers.JsonRpcProvider('http://localhost:8545');
@@ -34,8 +34,8 @@ describe('Commitment', () => {
     '6370fd033278c143179d81c5526140625662b8daa446c22ee2d73db3707e620c',
   );
   const participants = [participantA.address, participantB.address];
-  const allocation = ["0x5", "0x4"];
-  console.log(allocation);
+  const allocation = [new BigNumber(5).toHexString(), new BigNumber(4).toHexString()];
+
   const destination = [participantA.address, participantB.address];
   const channel: Channel = { channelType, channelNonce, participants };
   const commitmentType = CommitmentType.PreFundSetup;

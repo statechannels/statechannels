@@ -1,7 +1,7 @@
 import { Channel } from './channel';
 import abi from 'web3-eth-abi';
 import { Uint32, Uint256, Address } from './types';
-import { BigNumber } from 'ethers/utils';
+import { bigNumberify } from 'ethers/utils';
 
 const SolidityCommitmentType = {
   "CommitmentStruct": {
@@ -42,17 +42,17 @@ export function fromHex(commitment: string): Commitment {
     channelNonce: Number.parseInt(parameters[1], 10),
     participants: parameters[3],
   };
-
   return {
     channel,
     commitmentType: Number.parseInt(parameters[4], 10) as CommitmentType,
     turnNum: Number.parseInt(parameters[5], 10),
     commitmentCount: Number.parseInt(parameters[6], 10),
     destination: parameters[7],
-    allocation: parameters[8].map(a => "0x" + a.toString(16)),
+    allocation: parameters[8].map(a => bigNumberify(a).toHexString()),
     appAttributes: parameters[9],
   };
 }
+
 export function mover(commitment: Commitment) {
   return commitment.channel.participants[this.turnNum % this.numberOfParticipants];
 }
