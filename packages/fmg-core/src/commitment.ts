@@ -1,6 +1,7 @@
 import { Channel } from './channel';
 import abi from 'web3-eth-abi';
-import { BigNumber } from "./";
+import { Uint32, Uint256, Address } from './types';
+import { BigNumber } from 'ethers/utils';
 
 const SolidityCommitmentType = {
   "CommitmentStruct": {
@@ -19,10 +20,10 @@ const SolidityCommitmentType = {
 
 export interface BaseCommitment {
   channel: Channel;
-  turnNum: BigNumber;
-  allocation: BigNumber[];
-  destination: string[];
-  commitmentCount: BigNumber;
+  turnNum: Uint32;
+  allocation: Uint256[];
+  destination: Address[];
+  commitmentCount: Uint32;
 }
 
 export interface Commitment extends BaseCommitment {
@@ -38,17 +39,17 @@ export function fromHex(commitment: string): Commitment {
   const parameters = abi.decodeParameter(SolidityCommitmentType, commitment);
   const channel = {
     channelType: parameters[0],
-    channelNonce: new BigNumber(parameters[1]),
+    channelNonce: Number.parseInt(parameters[1], 10),
     participants: parameters[3],
   };
 
   return {
     channel,
     commitmentType: Number.parseInt(parameters[4], 10) as CommitmentType,
-    turnNum: new BigNumber(parameters[5]),
-    commitmentCount: new BigNumber(parameters[6]),
+    turnNum: Number.parseInt(parameters[5], 10),
+    commitmentCount: Number.parseInt(parameters[6], 10),
     destination: parameters[7],
-    allocation: parameters[8].map((a) => new BigNumber(a)),
+    allocation: parameters[8].map(a => "0x" + a.toString(16)),
     appAttributes: parameters[9],
   };
 }
@@ -65,7 +66,7 @@ export function ethereumArgs(commitment: Commitment) {
     commitment.commitmentType,
     commitment.turnNum,
     commitment.commitmentCount,
-    commitment.destination.map(String),
+    commitment.destination,
     commitment.allocation,
     commitment.appAttributes,
   ];

@@ -25,4 +25,11 @@ import * as CountingApp from './test-app/counting-app';
 export { CountingApp };
 
 
-export { BigNumber, BigNumberish, MessageSignature } from './types';
+export {
+  MessageSignature,
+  Address,
+  Uint32,
+  Uint8,
+  Bytes32,
+  Bytes,
+} from './types';

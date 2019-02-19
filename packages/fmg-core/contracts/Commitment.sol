@@ -6,12 +6,12 @@ library Commitment {
 
     struct CommitmentStruct {
         address channelType;
-        uint256 channelNonce;
-        uint256 numberOfParticipants; // todo: remove
+        uint32 channelNonce;
+        uint32 numberOfParticipants; // todo: remove
         address[] participants;
         uint8 commitmentType;
-        uint256 turnNum;
-        uint256 commitmentCount;
+        uint32 turnNum;
+        uint32 commitmentCount;
         address[] destination;
         uint256[] allocation;
         bytes appAttributes;
