@@ -13,6 +13,7 @@ import TestRulesArtifact from '../../../build/contracts/TestRules.json';
 
 import CountingCommitmentArtifact from '../../../build/contracts/CountingCommitment.json';
 import CountingAppArtifact from '../../../build/contracts/CountingApp.json';
+import { BigNumber } from '../..';
 
 const provider = new ethers.providers.JsonRpcProvider('http://localhost:8545');
 const signer = provider.getSigner();
@@ -28,8 +29,8 @@ const commitmentTypeMustBe = (commitmentType, nextCommitmentType) => `${commitme
 
 describe('Rules', () => {
 
-  let channel;
-  let otherChannel;
+  let channel: Channel;
+  let otherChannel: Channel;
   let defaults;
 
   let testFramework;
@@ -65,7 +66,7 @@ describe('Rules', () => {
       CountingAppArtifact.networks[networkId].address,
     );
 
-    otherChannel = new Channel(appContract.address, 1, participants);
+    otherChannel = { channelType: appContract.address, channelNonce: new BigNumber(1), participants };
 
     RulesArtifact.bytecode = linker.linkBytecode(RulesArtifact.bytecode, {
       Commitment: CommitmentArtifact.networks[networkId].address,
@@ -76,7 +77,7 @@ describe('Rules', () => {
     testFramework = await ContractFactory.fromSolidity(TestRulesArtifact, signer).deploy();
     // Contract setup --------------------------------------------------------------------------
 
-    channel = new Channel(appContract.address, 0, participants);
+    channel = { channelType: appContract.address, channelNonce: new BigNumber(0), participants };
     defaults = { channel, allocation, destination, appCounter: 0 };
   });
 

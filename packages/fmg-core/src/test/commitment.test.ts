@@ -1,5 +1,5 @@
-import { Channel } from '../channel';
-import { Commitment, CommitmentType, asEthersObject, toHex, fromHex } from '../Commitment';
+import { Channel, channelID } from '../channel';
+import { Commitment, CommitmentType, asEthersObject, toHex, fromHex } from '../commitment';
 import expectRevert from './helpers/expect-revert';
 // import { CountingApp } from '../test-app/counting-app';
 import { sign } from '../utils';
@@ -12,6 +12,7 @@ import CommitmentArtifact from '../../build/contracts/Commitment.json';
 import TestCommitmentArtifact from '../../build/contracts/TestCommitment.json';
 import { utils } from 'ethers';
 import { CountingCommitment, asCoreCommitment } from '../test-app/counting-app';
+import { BigNumber } from '..';
 
 const provider = new ethers.providers.JsonRpcProvider('http://localhost:8545');
 const signer = provider.getSigner();
@@ -20,8 +21,8 @@ describe('Commitment', () => {
 
   let commitmentLib;
   let testCommitmentLib;
-  const channelNonce = new utils.BigNumber(12);
-  const turnNum = new utils.BigNumber(15);
+  const channelNonce = new BigNumber(12);
+  const turnNum = new BigNumber(15);
 
   const channelType = new Wallet('4f3edf983ac636a65a842ce7c78d9aa706d3b113bce9c46f30d7d21715b23b1d')
     .address;
@@ -33,17 +34,17 @@ describe('Commitment', () => {
     '6370fd033278c143179d81c5526140625662b8daa446c22ee2d73db3707e620c',
   );
   const participants = [participantA.address, participantB.address];
-  const allocation = [new ethers.utils.BigNumber(5), new ethers.utils.BigNumber(4)];
+  const allocation = [new BigNumber(5), new BigNumber(4)];
   const destination = [participantA.address, participantB.address];
-  const channel = new Channel(channelType, channelNonce, participants);
+  const channel: Channel = { channelType, channelNonce, participants };
   const commitmentType = CommitmentType.PreFundSetup;
-  const Commitment: Commitment = {
+  const commitment: Commitment = {
     channel,
     commitmentType,
     turnNum,
     allocation,
     destination,
-    commitmentCount: new utils.BigNumber(0),
+    commitmentCount: new BigNumber(0),
     appAttributes: '0x',
   };
 
@@ -58,57 +59,57 @@ describe('Commitment', () => {
   });
 
   it('identifies commitmentTypes', async () => {
-    Commitment.commitmentType = CommitmentType.PreFundSetup;
-    expect(await testCommitmentLib.isPreFundSetup(asEthersObject(Commitment))).toBe(true);
+    commitment.commitmentType = CommitmentType.PreFundSetup;
+    expect(await testCommitmentLib.isPreFundSetup(asEthersObject(commitment))).toBe(true);
 
-    Commitment.commitmentType = CommitmentType.PostFundSetup;
-    expect(await testCommitmentLib.isPostFundSetup(asEthersObject(Commitment))).toBe(true);
+    commitment.commitmentType = CommitmentType.PostFundSetup;
+    expect(await testCommitmentLib.isPostFundSetup(asEthersObject(commitment))).toBe(true);
 
-    Commitment.commitmentType = CommitmentType.App;
-    expect(await testCommitmentLib.isApp(asEthersObject(Commitment))).toBe(true);
+    commitment.commitmentType = CommitmentType.App;
+    expect(await testCommitmentLib.isApp(asEthersObject(commitment))).toBe(true);
 
-    Commitment.commitmentType = CommitmentType.Conclude;
-    expect(await testCommitmentLib.isConclude(asEthersObject(Commitment))).toBe(true);
+    commitment.commitmentType = CommitmentType.Conclude;
+    expect(await testCommitmentLib.isConclude(asEthersObject(commitment))).toBe(true);
   });
 
   it('identifies the mover based on the turnNum', async () => {
-    const mover = await testCommitmentLib.mover(asEthersObject(Commitment));
+    const mover = await testCommitmentLib.mover(asEthersObject(commitment));
     // our Commitment nonce is 15, which is odd, so it should be participant[1]
     expect(mover).toEqual(participants[1]);
   });
 
   it('can calculate the channelId', async () => {
-    const chainId: string = await testCommitmentLib.channelId(asEthersObject(Commitment));
-    const localId: string = channel.id;
+    const chainId: string = await testCommitmentLib.channelId(asEthersObject(commitment));
+    const localId: string = channelID(channel);
 
     expect(chainId).toEqual(localId);
   });
 
   it('can check if a Commitment is signed', async () => {
     // needs to be signed by 1 as it's their move
-    const { r, s, v } = sign(toHex(Commitment), participantB.privateKey);
+    const { r, s, v } = sign(toHex(commitment), participantB.privateKey);
 
-    expect(await testCommitmentLib.requireSignature(asEthersObject(Commitment), v, r, s)).toBeTruthy();
+    expect(await testCommitmentLib.requireSignature(asEthersObject(commitment), v, r, s)).toBeTruthy();
   });
 
   it('will revert if the wrong party signed', async () => {
     // needs to be signed by 1 as it's their move
-    const { v, r, s } = sign(toHex(Commitment), participantA.privateKey);
-    expectRevert(testCommitmentLib.requireSignature(asEthersObject(Commitment), v, r, s));
+    const { v, r, s } = sign(toHex(commitment), participantA.privateKey);
+    expectRevert(testCommitmentLib.requireSignature(asEthersObject(commitment), v, r, s));
   });
 
   it('can check if the Commitment is fully signed', async () => {
-    const { r: r0, s: s0, v: v0 } = sign(toHex(Commitment), participantA.privateKey);
-    const { r: r1, s: s1, v: v1 } = sign(toHex(Commitment), participantB.privateKey);
+    const { r: r0, s: s0, v: v0 } = sign(toHex(commitment), participantA.privateKey);
+    const { r: r1, s: s1, v: v1 } = sign(toHex(commitment), participantB.privateKey);
 
     expect(
-      await testCommitmentLib.requireFullySigned(asEthersObject(Commitment), [v0, v1], [r0, r1], [s0, s1]),
+      await testCommitmentLib.requireFullySigned(asEthersObject(commitment), [v0, v1], [r0, r1], [s0, s1]),
     ).toBeTruthy();
   });
 
   it('can test if the appAttributes are equal', async () => {
-    const countingCommitment1: CountingCommitment = { channel, destination, allocation, turnNum, appCounter: utils.bigNumberify(0), commitmentCount: utils.bigNumberify(0), commitmentType: CommitmentType.PreFundSetup };
-    const countingCommitment2: CountingCommitment = { channel, destination, allocation, turnNum, appCounter: utils.bigNumberify(1), commitmentCount: utils.bigNumberify(0), commitmentType: CommitmentType.PostFundSetup };
+    const countingCommitment1: CountingCommitment = { channel, destination, allocation, turnNum, appCounter: new BigNumber(0), commitmentCount: new BigNumber(0), commitmentType: CommitmentType.PreFundSetup };
+    const countingCommitment2: CountingCommitment = { channel, destination, allocation, turnNum, appCounter: new BigNumber(1), commitmentCount: new BigNumber(0), commitmentType: CommitmentType.PostFundSetup };
 
     const commitment1 = asCoreCommitment(countingCommitment1);
     const commitment2 = asCoreCommitment(countingCommitment2);
@@ -117,8 +118,8 @@ describe('Commitment', () => {
   });
 
   it('can encode and decode a Commitment', () => {
-    const hexValue = toHex(Commitment);
+    const hexValue = toHex(commitment);
     const decodedCommitment = fromHex(hexValue);
-    expect(decodedCommitment).toEqual(Commitment);
+    expect(decodedCommitment).toEqual(commitment);
   });
 });

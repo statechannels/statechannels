@@ -1,6 +1,6 @@
 import { Channel } from './channel';
 import abi from 'web3-eth-abi';
-import { BigNumber, bigNumberify } from "./";
+import { BigNumber } from "./";
 
 const SolidityCommitmentType = {
   "CommitmentStruct": {
@@ -33,21 +33,22 @@ export interface Commitment extends BaseCommitment {
 export function toHex(commitment: Commitment): string {
   return abi.encodeParameter(SolidityCommitmentType, ethereumArgs(commitment));
 }
+
 export function fromHex(commitment: string): Commitment {
   const parameters = abi.decodeParameter(SolidityCommitmentType, commitment);
   const channel = {
     channelType: parameters[0],
-    channelNonce: Number.parseInt(parameters[1], 10),
+    channelNonce: new BigNumber(parameters[1]),
     participants: parameters[3],
   };
 
   return {
     channel,
     commitmentType: Number.parseInt(parameters[4], 10) as CommitmentType,
-    turnNum: bigNumberify(parameters[5]),
-    commitmentCount: bigNumberify(parameters[6]),
+    turnNum: new BigNumber(parameters[5]),
+    commitmentCount: new BigNumber(parameters[6]),
     destination: parameters[7],
-    allocation: parameters[8],
+    allocation: parameters[8].map((a) => new BigNumber(a)),
     appAttributes: parameters[9],
   };
 }
