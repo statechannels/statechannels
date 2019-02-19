@@ -9,7 +9,7 @@ import CountingCommitmentArtifact from '../../../build/contracts/CountingCommitm
 import TestCountingCommitmentArtifact from '../../../build/contracts/TestCountingCommitment.json';
 import { CommitmentType, Commitment, ethereumArgs } from '../../commitment';
 import { CountingCommitment, asCoreCommitment } from '../../test-app/counting-app';
-import { BigNumber } from '../..';
+import { BigNumber } from 'ethers/utils';
 
 const provider = new ethers.providers.JsonRpcProvider('http://localhost:8545');
 const signer = provider.getSigner();
@@ -26,11 +26,11 @@ describe('CountingCommitment', () => {
     });
 
     TestCountingCommitmentArtifact.bytecode = linker.linkBytecode(TestCountingCommitmentArtifact.bytecode, {
-        CountingCommitment: CountingCommitmentArtifact.networks[networkId].address,
+      CountingCommitment: CountingCommitmentArtifact.networks[networkId].address,
     });
 
     TestCountingCommitmentArtifact.bytecode = linker.linkBytecode(TestCountingCommitmentArtifact.bytecode, {
-        Commitment: CommitmentArtifact.networks[networkId].address,
+      Commitment: CommitmentArtifact.networks[networkId].address,
     });
 
     testCountingCommitment = await ContractFactory.fromSolidity(TestCountingCommitmentArtifact, signer).deploy();
@@ -46,20 +46,20 @@ describe('CountingCommitment', () => {
     const participants = [participantA.address, participantB.address];
 
 
-    const channel: Channel = { channelType: participantB.address, channelNonce: new BigNumber(0), participants }; // just use any valid address
-    
+    const channel: Channel = { channelType: participantB.address, channelNonce: 0, participants }; // just use any valid address
+
     const defaults = {
       channel,
-      allocation: [new BigNumber(5), new BigNumber(4)],
+      allocation: [new BigNumber(5).toHexString(), new BigNumber(4).toHexString()],
       destination: [participantA.address, participantB.address],
     };
 
     commitment = {
       ...defaults,
-      turnNum: new BigNumber(6),
+      turnNum: 6,
       appCounter: new BigNumber(1),
       commitmentType: CommitmentType.PreFundSetup,
-      commitmentCount: new BigNumber(6),
+      commitmentCount: 6,
     };
   });
 

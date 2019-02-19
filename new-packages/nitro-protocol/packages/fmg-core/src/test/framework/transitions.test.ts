@@ -13,7 +13,6 @@ import TestRulesArtifact from '../../../build/contracts/TestRules.json';
 
 import CountingCommitmentArtifact from '../../../build/contracts/CountingCommitment.json';
 import CountingAppArtifact from '../../../build/contracts/CountingApp.json';
-import { BigNumber } from '../..';
 
 const provider = new ethers.providers.JsonRpcProvider('http://localhost:8545');
 const signer = provider.getSigner();
@@ -66,7 +65,7 @@ describe('Rules', () => {
       CountingAppArtifact.networks[networkId].address,
     );
 
-    otherChannel = { channelType: appContract.address, channelNonce: new BigNumber(1), participants };
+    otherChannel = { channelType: appContract.address, channelNonce: 1, participants };
 
     RulesArtifact.bytecode = linker.linkBytecode(RulesArtifact.bytecode, {
       Commitment: CommitmentArtifact.networks[networkId].address,
@@ -77,7 +76,7 @@ describe('Rules', () => {
     testFramework = await ContractFactory.fromSolidity(TestRulesArtifact, signer).deploy();
     // Contract setup --------------------------------------------------------------------------
 
-    channel = { channelType: appContract.address, channelNonce: new BigNumber(0), participants };
+    channel = { channelType: appContract.address, channelNonce: 0, participants };
     defaults = { channel, allocation, destination, appCounter: 0 };
   });
 
@@ -246,7 +245,7 @@ describe('Rules', () => {
   describe('PostFundSetup -> App', () => {
     beforeEach(() => {
       fromCommitment = createCommitment.postFundSetup({ ...defaults, turnNum: 3, commitmentCount: 1, appCounter: 0 });
-      toCommitment = createCommitment.app({ ...defaults, turnNum: 4, commitmentCount: 0, appCounter: 0,  });
+      toCommitment = createCommitment.app({ ...defaults, turnNum: 4, commitmentCount: 0, appCounter: 0, });
     });
 
     it("rejects a transition where the fromCommitment is not the last player", async () => {

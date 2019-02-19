@@ -173,7 +173,6 @@ describe('nitroAdjudicator', () => {
       appCounter: new BigNumber(3),
     });
 
-    console.log(typeof commitment4)
     const { r: r0, s: s0, v: v0 } = sign(toHex(commitment4), alice.privateKey);
     const { r: r1, s: s1, v: v1 } = sign(toHex(commitment5), bob.privateKey);
 
