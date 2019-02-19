@@ -1,29 +1,29 @@
-var State = artifacts.require('./State.sol');
+var Commitment = artifacts.require('./Commitment.sol');
 var Rules = artifacts.require('./Rules.sol');
-var CountingState = artifacts.require('./CountingState.sol');
-var CountingGame = artifacts.require('./CountingGame.sol');
-var ConsensusState = artifacts.require('./ConsensusState.sol');
-var ConsensusGame = artifacts.require('./ConsensusGame.sol');
+var CountingCommitment = artifacts.require('./CountingCommitment.sol');
+var CountingApp = artifacts.require('./CountingApp.sol');
+var ConsensusCommitment = artifacts.require('./ConsensusCommitment.sol');
+var ConsensusApp = artifacts.require('./ConsensusApp.sol');
 
 module.exports = function(deployer) {
-  deployer.deploy(State);
+  deployer.deploy(Commitment);
 
-  deployer.link(State, Rules);
+  deployer.link(Commitment, Rules);
   deployer.deploy(Rules);
 
-  deployer.link(State, CountingState);
-  deployer.deploy(CountingState);
+  deployer.link(Commitment, CountingCommitment);
+  deployer.deploy(CountingCommitment);
 
-  deployer.link(State, CountingGame);
-  deployer.link(Rules, CountingGame);
-  deployer.link(CountingState, CountingGame);
-  deployer.deploy(CountingGame);
+  deployer.link(Commitment, CountingApp);
+  deployer.link(Rules, CountingApp);
+  deployer.link(CountingCommitment, CountingApp);
+  deployer.deploy(CountingApp);
 
-  deployer.link(State, ConsensusState);
-  deployer.deploy(ConsensusState);
+  deployer.link(Commitment, ConsensusCommitment);
+  deployer.deploy(ConsensusCommitment);
 
-  deployer.link(State, ConsensusGame);
-  deployer.link(Rules, ConsensusGame);
-  deployer.link(ConsensusState, ConsensusGame);
-  deployer.deploy(ConsensusGame);
+  deployer.link(Commitment, ConsensusApp);
+  deployer.link(Rules, ConsensusApp);
+  deployer.link(ConsensusCommitment, ConsensusApp);
+  deployer.deploy(ConsensusApp);
 };

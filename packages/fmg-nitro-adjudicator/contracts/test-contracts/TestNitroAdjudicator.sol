@@ -1,11 +1,11 @@
 pragma solidity ^0.5.0;
 pragma experimental ABIEncoderV2;
-import "fmg-core/contracts/State.sol";
+import "fmg-core/contracts/Commitment.sol";
 import "fmg-core/contracts/Rules.sol";
 import "../NitroAdjudicator.sol";
 
 contract TestNitroAdjudicator is NitroAdjudicator {
-    using State for State.StateStruct;
+    using Commitment for Commitment.CommitmentStruct;
 
     function reprioritizePub(Outcome memory allocation, Outcome memory guarantee) public pure returns (Outcome memory) {
         return reprioritize(allocation, guarantee);
@@ -35,8 +35,8 @@ contract TestNitroAdjudicator is NitroAdjudicator {
         return outcomes[channel].finalizedAt > now;
     }
 
-    function channelId(State.StateStruct memory state) public pure returns (address) {
-        return state.channelId();
+    function channelId(Commitment.CommitmentStruct memory commitment) public pure returns (address) {
+        return commitment.channelId();
     }
 
     function outcomeFinal(address channel) public view returns (bool) {

@@ -1,10 +1,10 @@
 pragma solidity ^0.5.0;
 pragma experimental ABIEncoderV2;
-import "fmg-core/contracts/State.sol";
+import "fmg-core/contracts/Commitment.sol";
 import "fmg-core/contracts/Rules.sol";
 
 contract NitroAdjudicator {
-    using State for State.StateStruct;
+    using Commitment for Commitment.CommitmentStruct;
 
     struct Authorization {
         // Prevents replay attacks:
@@ -12,7 +12,7 @@ contract NitroAdjudicator {
         // the participant can authorize a withdrawal.
         // Moreover, the participant should sign the address that they wish
         // to send the transaction from, preventing any replay attack.
-        address participant; // the account used to sign state transitions
+        address participant; // the account used to sign commitment transitions
         address destination; // either an account or a channel
         uint amount;
         address sender; // the account used to sign transactions
@@ -21,7 +21,7 @@ contract NitroAdjudicator {
     struct Outcome {
         address[] destination;
         uint256 finalizedAt;
-        State.StateStruct challengeState;
+        Commitment.CommitmentStruct challengeCommitment;
 
         // exactly one of the following two should be non-null
         // guarantee channels
@@ -35,9 +35,9 @@ contract NitroAdjudicator {
         bytes32 s;
     }
     struct ConclusionProof {
-        State.StateStruct penultimateState;
+        Commitment.CommitmentStruct penultimateCommitment;
         Signature penultimateSignature;
-        State.StateStruct ultimateState;
+        Commitment.CommitmentStruct ultimateCommitment;
         Signature ultimateSignature;
     }
 
@@ -150,7 +150,7 @@ contract NitroAdjudicator {
         return Outcome(
             newDestination,
             allocation.finalizedAt,
-            allocation.challengeState,
+            allocation.challengeCommitment,
             zeroAddress,
             newAllocation
         );
@@ -194,7 +194,7 @@ contract NitroAdjudicator {
         return Outcome(
             outcome.destination,
             outcome.finalizedAt,
-            outcome.challengeState, // Once the outcome is finalized, 
+            outcome.challengeCommitment, // Once the outcome is finalized, 
             zeroAddress,
             updatedAllocation
         );
@@ -206,13 +206,13 @@ contract NitroAdjudicator {
 
     event ChallengeCreated(
         address channelId,
-        State.StateStruct state,
+        Commitment.CommitmentStruct commitment,
         uint256 finalizedAt
     );
     event Concluded(address channelId);
-    event Refuted(address channelId, State.StateStruct refutation);
-    event RespondedWithMove(address channelId, State.StateStruct response);
-    event RespondedWithAlternativeMove(State.StateStruct alternativeResponse);
+    event Refuted(address channelId, Commitment.CommitmentStruct refutation);
+    event RespondedWithMove(address channelId, Commitment.CommitmentStruct response);
+    event RespondedWithAlternativeMove(Commitment.CommitmentStruct alternativeResponse);
 
     // **********************
     // ForceMove Protocol API
@@ -223,134 +223,134 @@ contract NitroAdjudicator {
     }
 
     function forceMove(
-        State.StateStruct memory agreedState,
-        State.StateStruct memory challengeState,
+        Commitment.CommitmentStruct memory agreedCommitment,
+        Commitment.CommitmentStruct memory challengeCommitment,
         address guaranteedChannel,
         Signature[] memory signatures
     ) public {
         require(
-            !isChannelClosed(agreedState.channelId()),
+            !isChannelClosed(agreedCommitment.channelId()),
             "ForceMove: channel must be open"
         );
         require(
-            moveAuthorized(agreedState, signatures[0]),
-            "ForceMove: agreedState not authorized"
+            moveAuthorized(agreedCommitment, signatures[0]),
+            "ForceMove: agreedCommitment not authorized"
         );
         require(
-            moveAuthorized(challengeState, signatures[1]),
-            "ForceMove: challengeState not authorized"
+            moveAuthorized(challengeCommitment, signatures[1]),
+            "ForceMove: challengeCommitment not authorized"
         );
         require(
-            Rules.validTransition(agreedState, challengeState)
+            Rules.validTransition(agreedCommitment, challengeCommitment)
         );
         if (guaranteedChannel == zeroAddress) {
             // If the guaranteeChannel is the zeroAddress, this outcome
             // is an allocation
             require(
-                agreedState.allocation.length > 0,
+                agreedCommitment.allocation.length > 0,
                 "ForceMove: allocation outcome must have resolution"
             );
         } else {
             // The non-zeroness of guaranteeChannel indicates that this outcome
             // is a guarantee
             require(
-                challengeState.allocation.length == 0,
+                challengeCommitment.allocation.length == 0,
                 "ForceMove: guarantee outcome cannot have allocation"
             );
         }
 
-        address channelId = agreedState.channelId();
+        address channelId = agreedCommitment.channelId();
 
         outcomes[channelId] = Outcome(
-            challengeState.participants,
+            challengeCommitment.participants,
             now + CHALLENGE_DURATION,
-            challengeState,
+            challengeCommitment,
             guaranteedChannel,
-            challengeState.allocation
+            challengeCommitment.allocation
         );
 
         emit ChallengeCreated(
             channelId,
-            challengeState,
+            challengeCommitment,
             now
         );
     }
 
     uint t = block.timestamp;
 
-    function refute(State.StateStruct memory refutationState, Signature memory signature) public {
-        address channel = refutationState.channelId();
+    function refute(Commitment.CommitmentStruct memory refutationCommitment, Signature memory signature) public {
+        address channel = refutationCommitment.channelId();
         require(
             !isChannelClosed(channel),
             "Refute: channel must be open"
         );
 
         require(
-            moveAuthorized(refutationState, signature),
+            moveAuthorized(refutationCommitment, signature),
             "Refute: move must be authorized"
         );
 
         require(
-            Rules.validRefute(outcomes[channel].challengeState, refutationState, signature.v, signature.r, signature.s),
+            Rules.validRefute(outcomes[channel].challengeCommitment, refutationCommitment, signature.v, signature.r, signature.s),
             "Refute: must be a valid refute"
         );
 
-        emit Refuted(channel, refutationState);
+        emit Refuted(channel, refutationCommitment);
         Outcome memory updatedOutcome = Outcome(
             outcomes[channel].destination,
             0,
-            refutationState,
+            refutationCommitment,
             outcomes[channel].guaranteedChannel,
-            refutationState.allocation
+            refutationCommitment.allocation
         );
         outcomes[channel] = updatedOutcome;
     }
 
-    function respondWithMove(State.StateStruct memory responseState, Signature memory signature) public {
-        address channel = responseState.channelId();
+    function respondWithMove(Commitment.CommitmentStruct memory responseCommitment, Signature memory signature) public {
+        address channel = responseCommitment.channelId();
         require(
             !isChannelClosed(channel),
             "RespondWithMove: channel must be open"
         );
 
         require(
-            moveAuthorized(responseState, signature),
+            moveAuthorized(responseCommitment, signature),
             "RespondWithMove: move must be authorized"
         );
 
         require(
-            Rules.validRespondWithMove(outcomes[channel].challengeState, responseState, signature.v, signature.r, signature.s),
+            Rules.validRespondWithMove(outcomes[channel].challengeCommitment, responseCommitment, signature.v, signature.r, signature.s),
             "RespondWithMove: must be a valid response"
         );
 
-        emit RespondedWithMove(channel, responseState);
+        emit RespondedWithMove(channel, responseCommitment);
 
         Outcome memory updatedOutcome = Outcome(
             outcomes[channel].destination,
             0,
-            responseState,
+            responseCommitment,
             outcomes[channel].guaranteedChannel,
-            responseState.allocation
+            responseCommitment.allocation
         );
         outcomes[channel] = updatedOutcome;
     }
 
     function alternativeRespondWithMove(
-        State.StateStruct memory _alternativeState,
-        State.StateStruct memory _responseState,
+        Commitment.CommitmentStruct memory _alternativeCommitment,
+        Commitment.CommitmentStruct memory _responseCommitment,
         Signature memory _alternativeSignature,
         Signature memory _responseSignature
     )
       public
     {
-        address channel = _responseState.channelId();
+        address channel = _responseCommitment.channelId();
         require(
             !isChannelClosed(channel),
             "AlternativeRespondWithMove: channel must be open"
         );
 
         require(
-            moveAuthorized(_responseState, _responseSignature),
+            moveAuthorized(_responseCommitment, _responseSignature),
             "AlternativeRespondWithMove: move must be authorized"
         );
 
@@ -369,9 +369,9 @@ contract NitroAdjudicator {
 
         require(
             Rules.validAlternativeRespondWithMove(
-                outcomes[channel].challengeState,
-                _alternativeState,
-                _responseState,
+                outcomes[channel].challengeCommitment,
+                _alternativeCommitment,
+                _responseCommitment,
                 v,
                 r,
                 s
@@ -379,14 +379,14 @@ contract NitroAdjudicator {
             "RespondWithMove: must be a valid response"
         );
 
-        emit RespondedWithAlternativeMove(_responseState);
+        emit RespondedWithAlternativeMove(_responseCommitment);
 
         Outcome memory updatedOutcome = Outcome(
             outcomes[channel].destination,
             0,
-            _responseState,
+            _responseCommitment,
             outcomes[channel].guaranteedChannel,
-            _responseState.allocation
+            _responseCommitment.allocation
         );
         outcomes[channel] = updatedOutcome;
     }
@@ -396,18 +396,18 @@ contract NitroAdjudicator {
     // ************************
 
     function _conclude(ConclusionProof memory proof) internal {
-        address channelId = proof.penultimateState.channelId();
+        address channelId = proof.penultimateCommitment.channelId();
         require(
             (outcomes[channelId].finalizedAt > now || outcomes[channelId].finalizedAt == 0),
             "Conclude: channel must not be finalized"
         );
 
         outcomes[channelId] = Outcome(
-            proof.penultimateState.participants,
+            proof.penultimateCommitment.participants,
             now,
-            proof.penultimateState,
+            proof.penultimateCommitment,
             outcomes[channelId].guaranteedChannel,
-            proof.penultimateState.allocation
+            proof.penultimateCommitment.allocation
         );
         emit Concluded(channelId);
     }
@@ -420,9 +420,9 @@ contract NitroAdjudicator {
         return outcomes[channel].finalizedAt < now && outcomes[channel].finalizedAt > 0;
     }
 
-    function moveAuthorized(State.StateStruct memory _state, Signature memory signature) internal pure returns (bool){
-        return _state.mover() == recoverSigner(
-            abi.encode(_state),
+    function moveAuthorized(Commitment.CommitmentStruct memory _commitment, Signature memory signature) internal pure returns (bool){
+        return _commitment.mover() == recoverSigner(
+            abi.encode(_commitment),
             signature.v,
             signature.r,
             signature.s

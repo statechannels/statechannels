@@ -6,6 +6,6 @@ pragma solidity ^0.5.0;
 // that are used in the tests.
 
 import "fmg-core/contracts/Rules.sol";
-import "fmg-core/contracts/State.sol";
-import "fmg-core/contracts/test-game/CountingGame.sol";
-import "fmg-core/contracts/test-game/CountingState.sol";
+import "fmg-core/contracts/Commitment.sol";
+import "fmg-core/contracts/test-app/CountingApp.sol";
+import "fmg-core/contracts/test-app/CountingCommitment.sol";
