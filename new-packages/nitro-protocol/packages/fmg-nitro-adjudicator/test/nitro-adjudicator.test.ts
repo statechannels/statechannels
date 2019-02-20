@@ -723,8 +723,8 @@ describe('nitroAdjudicator', () => {
         const agreedCommitment = commitment0;
         const challengeCommitment = commitment1;
 
-        const { r: r0, s: s0, v: v0 } = sign(agreedCommitment.toHex(), challengee.privateKey);
-        const { r: r1, s: s1, v: v1 } = sign(challengeCommitment.toHex(), challenger.privateKey);
+        const { r: r0, s: s0, v: v0 } = sign(toHex(agreedCommitment), challengee.privateKey);
+        const { r: r1, s: s1, v: v1 } = sign(toHex(challengeCommitment), challenger.privateKey);
         const signatures = [
           { r: r0, s: s0, v: v0 },
           { r: r1, s: s1, v: v1 }
@@ -753,8 +753,8 @@ describe('nitroAdjudicator', () => {
         const agreedCommitment = commitment0;
         const challengeCommitment = commitment3;
 
-        const { r: r0, s: s0, v: v0 } = sign(agreedCommitment.toHex(), challengee.privateKey);
-        const { r: r1, s: s1, v: v1 } = sign(challengeCommitment.toHex(), challenger.privateKey);
+        const { r: r0, s: s0, v: v0 } = sign(toHex(agreedCommitment), challengee.privateKey);
+        const { r: r1, s: s1, v: v1 } = sign(toHex(challengeCommitment), challenger.privateKey);
         const signatures = [
           { r: r0, s: s0, v: v0 },
           { r: r1, s: s1, v: v1 }
@@ -779,8 +779,8 @@ describe('nitroAdjudicator', () => {
         const agreedCommitment = commitment0;
         const challengeCommitment = commitment1;
 
-        const { r: r0, s: s0, v: v0 } = sign(agreedCommitment.toHex(), challengee.privateKey);
-        const { r: r1, s: s1, v: v1 } = sign(commitment3.toHex(), challenger.privateKey);
+        const { r: r0, s: s0, v: v0 } = sign(toHex(agreedCommitment), challengee.privateKey);
+        const { r: r1, s: s1, v: v1 } = sign(toHex(commitment3), challenger.privateKey);
         const signatures = [
           { r: r0, s: s0, v: v0 },
           { r: r1, s: s1, v: v1 }
@@ -805,8 +805,8 @@ describe('nitroAdjudicator', () => {
         const agreedCommitment = commitment0;
         const challengeCommitment = commitment1;
 
-        const { r: r0, s: s0, v: v0 } = sign(agreedCommitment.toHex(), challengee.privateKey);
-        const { r: r1, s: s1, v: v1 } = sign(challengeCommitment.toHex(), challenger.privateKey);
+        const { r: r0, s: s0, v: v0 } = sign(toHex(agreedCommitment), challengee.privateKey);
+        const { r: r1, s: s1, v: v1 } = sign(toHex(challengeCommitment), challenger.privateKey);
         const signatures = [
           { r: r0, s: s0, v: v0 },
           { r: r1, s: s1, v: v1 }
@@ -878,14 +878,14 @@ describe('nitroAdjudicator', () => {
         challengeCommitment = commitment1;
         refutationCommitment = commitment3;
 
-        const { r: r0, s: s0, v: v0 } = sign(agreedCommitment.toHex(), challengee.privateKey);
-        const { r: r1, s: s1, v: v1 } = sign(challengeCommitment.toHex(), challenger.privateKey);
+        const { r: r0, s: s0, v: v0 } = sign(toHex(agreedCommitment), challengee.privateKey);
+        const { r: r1, s: s1, v: v1 } = sign(toHex(challengeCommitment), challenger.privateKey);
         signatures = [
           { r: r0, s: s0, v: v0 },
           { r: r1, s: s1, v: v1 },
         ];
 
-        const { r: r2, s: s2, v: v2 } = sign(refutationCommitment.toHex(), challenger.privateKey);
+        const { r: r2, s: s2, v: v2 } = sign(toHex(refutationCommitment), challenger.privateKey);
         refutationSignature = { r: r2, s: s2, v: v2 };
       });
 
@@ -921,7 +921,7 @@ describe('nitroAdjudicator', () => {
         const invalidRefutationCommitment = commitment3;
         invalidRefutationCommitment.turnNum = agreedCommitment.turnNum - 1;
 
-        const { r: r3, s: s3, v: v3 } = sign(invalidRefutationCommitment.toHex(), challenger.privateKey);
+        const { r: r3, s: s3, v: v3 } = sign(toHex(invalidRefutationCommitment), challenger.privateKey);
         const invalidRefutationSignature = { r: r3, s: s3, v: v3 };
 
         assertRevert(
@@ -945,14 +945,14 @@ describe('nitroAdjudicator', () => {
         challengeCommitment = commitment1;
         responseCommitment = commitment2;
 
-        const { r: r0, s: s0, v: v0 } = sign(agreedCommitment.toHex(), challengee.privateKey);
-        const { r: r1, s: s1, v: v1 } = sign(challengeCommitment.toHex(), challenger.privateKey);
+        const { r: r0, s: s0, v: v0 } = sign(toHex(agreedCommitment), challengee.privateKey);
+        const { r: r1, s: s1, v: v1 } = sign(toHex(challengeCommitment), challenger.privateKey);
         signatures = [
           { r: r0, s: s0, v: v0 },
           { r: r1, s: s1, v: v1 },
         ];
 
-        const { r: r2, s: s2, v: v2 } = sign(responseCommitment.toHex(), challengee.privateKey);
+        const { r: r2, s: s2, v: v2 } = sign(toHex(responseCommitment), challengee.privateKey);
         responseSignature = { r: r2, s: s2, v: v2 };
       });
 
@@ -1017,7 +1017,7 @@ describe('nitroAdjudicator', () => {
 
         const invalidResponseCommitment = commitment3;
 
-        const { r: r3, s: s3, v: v3 } = sign(invalidResponseCommitment.toHex(), challenger.privateKey);
+        const { r: r3, s: s3, v: v3 } = sign(toHex(invalidResponseCommitment), challenger.privateKey);
         const invalidResponseSignature = { r: r3, s: s3, v: v3 };
 
         assertRevert(
@@ -1044,15 +1044,15 @@ describe('nitroAdjudicator', () => {
         alternativeCommitment = commitment1alt;
         responseCommitment = commitment2alt;
 
-        const { r: r0, s: s0, v: v0 } = sign(agreedCommitment.toHex(), challengee.privateKey);
-        const { r: r1, s: s1, v: v1 } = sign(challengeCommitment.toHex(), challenger.privateKey);
+        const { r: r0, s: s0, v: v0 } = sign(toHex(agreedCommitment), challengee.privateKey);
+        const { r: r1, s: s1, v: v1 } = sign(toHex(challengeCommitment), challenger.privateKey);
         signatures = [
           { r: r0, s: s0, v: v0 },
           { r: r1, s: s1, v: v1 },
         ];
 
-        const { r: r2, s: s2, v: v2 } = sign(alternativeCommitment.toHex(), challenger.privateKey);
-        const { r: r3, s: s3, v: v3 } = sign(responseCommitment.toHex(), challengee.privateKey);
+        const { r: r2, s: s2, v: v2 } = sign(toHex(alternativeCommitment), challenger.privateKey);
+        const { r: r3, s: s3, v: v3 } = sign(toHex(responseCommitment), challengee.privateKey);
 
         alternativeSignature = { r: r2, s: s2, v: v2 };
         responseSignature = { r: r3, s: s3, v: v3 };
@@ -1119,7 +1119,7 @@ describe('nitroAdjudicator', () => {
 
         const invalidResponseCommitment = commitment3;
 
-        const { r: r3, s: s3, v: v3 } = sign(invalidResponseCommitment.toHex(), challenger.privateKey);
+        const { r: r3, s: s3, v: v3 } = sign(toHex(invalidResponseCommitment), challenger.privateKey);
         const invalidResponseSignature = { r: r3, s: s3, v: v3 };
 
         assertRevert(
@@ -1135,9 +1135,9 @@ describe('nitroAdjudicator', () => {
         const invalidAlternativeCommitment = commitment0;
         const invalidResponseCommitment = commitment1;
 
-        const { r: r3, s: s3, v: v3 } = sign(invalidAlternativeCommitment.toHex(), challenger.privateKey);
+        const { r: r3, s: s3, v: v3 } = sign(toHex(invalidAlternativeCommitment), challenger.privateKey);
         const invalidAlternativeSignature = { r: r3, s: s3, v: v3 };
-        const { r: r4, s: s4, v: v4 } = sign(invalidResponseCommitment.toHex(), challenger.privateKey);
+        const { r: r4, s: s4, v: v4 } = sign(toHex(invalidResponseCommitment), challenger.privateKey);
         const invalidResponseSignature = { r: r4, s: s4, v: v4 };
 
         assertRevert(
