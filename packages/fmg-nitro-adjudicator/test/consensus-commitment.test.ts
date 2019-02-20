@@ -4,8 +4,8 @@ import {
   getNetworkId,
   getGanacheProvider,
 } from 'magmo-devtools';
-import { Channel, BigNumber, asEthersObject, Commitment } from 'fmg-core';
-
+import { Channel, asEthersObject, Commitment } from 'fmg-core';
+import { BigNumber } from 'ethers/utils';
 import CommitmentArtifact from '../build/contracts/Commitment.json';
 import ConsensusCommitmentArtifact from '../build/contracts/ConsensusCommitment.json';
 import TestConsensusCommitmentArtifact from '../build/contracts/TestConsensusCommitment.json';
@@ -52,21 +52,21 @@ describe('ConsensusCommitment', () => {
   const allocation = [new ethers.utils.BigNumber(5), new ethers.utils.BigNumber(4)];
   const proposedAllocation = [new ethers.utils.BigNumber(9)];
 
-  const channel: Channel = { channelType: participantB.address, channelNonce: new BigNumber(0), participants }; // just use any valid address
+  const channel: Channel = { channelType: participantB.address, channelNonce: 0, participants }; // just use any valid address
   const defaults = { channel, allocation, destination: participants };
   const commitment: Commitment = ConsensusApp.appCommitment({ ...defaults, turnNum: 6, commitmentCount: 0, consensusCounter: 1, proposedAllocation, proposedDestination, });
 
- it('works', async () => {
+  it('works', async () => {
     await setupContracts();
     const consensusCommitmentAttrs = await consensusCommitment.fromFrameworkCommitment(asEthersObject(commitment));
 
     expect(consensusCommitmentAttrs).toMatchObject({
-        numberOfParticipants: new ethers.utils.BigNumber(2),
-        consensusCounter: new ethers.utils.BigNumber(1),
-        currentAllocation: allocation,
-        currentDestination: participants,
-        proposedAllocation,
-        proposedDestination,
+      numberOfParticipants: new ethers.utils.BigNumber(2),
+      consensusCounter: new ethers.utils.BigNumber(1),
+      currentAllocation: allocation,
+      currentDestination: participants,
+      proposedAllocation,
+      proposedDestination,
     });
   });
 });
