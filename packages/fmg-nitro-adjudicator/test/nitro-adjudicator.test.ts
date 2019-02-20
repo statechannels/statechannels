@@ -18,6 +18,7 @@ import { getCountingApp } from './CountingApp';
 import { channelID as getChannelID } from 'fmg-core/lib/channel';
 import { asCoreCommitment } from 'fmg-core/lib/test-app/counting-app';
 import { CountingCommitment } from 'fmg-core/src/test-app/counting-app';
+import { fromParameters } from 'fmg-core/lib/commitment';
 
 jest.setTimeout(20000);
 let nitro: ethers.Contract;
@@ -87,6 +88,17 @@ const getEthersObjectForCommitment = (commitment: CountingCommitment) => {
   return asEthersObject(asCoreCommitment(commitment));
 };
 
+const getOutcomeFromParameters = (parameters: any[]) => {
+  const outcome = {
+    destination: parameters[0],
+    finalizedAt: ethers.utils.bigNumberify(parameters[1]),
+    challengeCommitment:asEthersObject(fromParameters(parameters[2])),
+    guaranteedChannel: parameters[3],
+    allocation: parameters[4].map(a => a.toHexString()),
+  };
+  return outcome;
+};
+
 describe('nitroAdjudicator', () => {
   const aBal = ethers.utils.parseUnits('6', 'wei').toHexString();
   const bBal = ethers.utils.parseUnits('4', 'wei').toHexString();
@@ -112,7 +124,7 @@ describe('nitroAdjudicator', () => {
   let CountingAppContract;
 
   beforeAll(async () => {
-    //  await setupContracts();
+    await setupContracts();
 
     // alice and bob are both funded by startGanache in magmo devtools.
     alice = new ethers.Wallet("0x5d862464fe9303452126c8bc94274b8c5f9874cbd219789b3eb2128075a76f72");
@@ -420,8 +432,8 @@ describe('nitroAdjudicator', () => {
         await (await nitro.setOutcome(guarantor.address, guarantee)).wait();
         await (await nitro.setOutcome(getChannelID(channel), allocationOutcome)).wait();
 
-        expect(await nitro.getOutcome(getChannelID(channel))).toMatchObject(allocationOutcome);
-        expect(await nitro.getOutcome(guarantor.address)).toMatchObject(guarantee);
+        expect(getOutcomeFromParameters(await nitro.getOutcome(getChannelID(channel)))).toMatchObject(allocationOutcome);
+        expect(getOutcomeFromParameters(await nitro.getOutcome(guarantor.address))).toMatchObject(guarantee);
 
         let startBal = 5;
         const claimAmount = 2;
@@ -450,7 +462,7 @@ describe('nitroAdjudicator', () => {
         await (await nitro.claim(guarantor.address, recipient, claimAmount)).wait();
 
         const newOutcome = await nitro.getOutcome(getChannelID(channel));
-        expect(newOutcome).toMatchObject(expectedOutcome);
+        expect(getOutcomeFromParameters(newOutcome)).toMatchObject(expectedOutcome);
         expect(Number(await nitro.holdings(guarantor.address))).toEqual(startBal - claimAmount);
         expect(Number(await nitro.holdings(recipient))).toEqual(claimAmount);
       });
@@ -523,7 +535,7 @@ describe('nitroAdjudicator', () => {
         await delay();
 
         const setOutcome = await nitro.getOutcome(getChannelID(channel));
-        expect(setOutcome).toMatchObject(allocationOutcome);
+        expect(getOutcomeFromParameters(setOutcome)).toMatchObject(allocationOutcome);
         await delay();
       });
     });
@@ -552,7 +564,7 @@ describe('nitroAdjudicator', () => {
           guaranteedChannel: ZERO_ADDRESS,
         };
         const funding = aBal;
-        expect(await nitro.overlapPub(recipient, outcome, funding)).toEqual(funding);
+        expect((await nitro.overlapPub(recipient, outcome, funding)).toHexString()).toEqual(funding);
       });
 
       it('returns the allocated amount when funding is greater than the amount allocated to the recipient in the outcome', async () => {
@@ -565,7 +577,7 @@ describe('nitroAdjudicator', () => {
           guaranteedChannel: ZERO_ADDRESS,
         };
         const funding = bigNumberify(aBal).add(1).toHexString();
-        expect(await nitro.overlapPub(recipient, outcome, funding)).toEqual(aBal);
+        expect((await nitro.overlapPub(recipient, outcome, funding)).toHexString()).toEqual(aBal);
       });
 
       it('returns zero when recipient is not a participant', async () => {
@@ -607,7 +619,7 @@ describe('nitroAdjudicator', () => {
         const recipient = bob.address;
         const newOutcome = await nitro.removePub(outcome, recipient, removeAmount);
 
-        expect(newOutcome).toMatchObject(expectedOutcome);
+        expect(getOutcomeFromParameters(newOutcome)).toMatchObject(expectedOutcome);
       });
     });
 
@@ -640,7 +652,7 @@ describe('nitroAdjudicator', () => {
 
         const newOutcome = await nitro.reprioritizePub(allocationOutcome, guarantee);
 
-        expect(newOutcome).toMatchObject(expectedOutcome);
+        expect(getOutcomeFromParameters(newOutcome)).toMatchObject(expectedOutcome);
       });
 
       it('works when the guarantee destination length is less than the allocation outcome\'s allocation length', async () => {
@@ -671,7 +683,7 @@ describe('nitroAdjudicator', () => {
 
         const newOutcome = await nitro.reprioritizePub(allocationOutcome, guarantee);
 
-        expect(newOutcome).toMatchObject(expectedOutcome);
+        expect(getOutcomeFromParameters(newOutcome)).toMatchObject(expectedOutcome);
       });
 
     });
@@ -710,8 +722,8 @@ describe('nitroAdjudicator', () => {
         const { destination: endDestination, allocation: endAllocation, challengeCommitment } = await nitro.getOutcome(getChannelID(channel));
 
         expect(endDestination).toEqual([alice.address, bob.address]);
-        expect(endAllocation).toEqual(allocation);
-        expect(challengeCommitment).toMatchObject(conclusionProof.penultimateCommitment);
+        expect(endAllocation.map(a => a.toHexString())).toEqual(allocation);
+        expect(asEthersObject(fromParameters(challengeCommitment))).toMatchObject(conclusionProof.penultimateCommitment);
         // TODO: figure out how to test finalizedAt
 
       });
@@ -728,7 +740,7 @@ describe('nitroAdjudicator', () => {
       });
     });
 
-    describe.only('forceMove', () => {
+    describe('forceMove', () => {
       it('emits ForceMove', async () => {
         const agreedCommitment = commitment0;
         const challengeCommitment = commitment1;
@@ -861,8 +873,8 @@ describe('nitroAdjudicator', () => {
         ).toBe(false);
 
         await nitro.forceMove(
-          agreedCommitment.args,
-          challengeCommitment.args,
+          getEthersObjectForCommitment(agreedCommitment),
+          getEthersObjectForCommitment(challengeCommitment),
           ZERO_ADDRESS,
           signatures,
         );
@@ -974,8 +986,8 @@ describe('nitroAdjudicator', () => {
         ).toBe(false);
 
         await nitro.forceMove(
-          agreedCommitment.args,
-          challengeCommitment.args,
+          getEthersObjectForCommitment(agreedCommitment),
+          getEthersObjectForCommitment(challengeCommitment),
           ZERO_ADDRESS,
           signatures,
         );
@@ -1076,8 +1088,8 @@ describe('nitroAdjudicator', () => {
         ).toBe(false);
 
         await nitro.forceMove(
-          agreedCommitment.args,
-          challengeCommitment.args,
+          getEthersObjectForCommitment(agreedCommitment),
+          getEthersObjectForCommitment(challengeCommitment),
           ZERO_ADDRESS,
           signatures,
         );
