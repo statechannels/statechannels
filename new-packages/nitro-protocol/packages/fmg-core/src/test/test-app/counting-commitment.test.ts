@@ -57,7 +57,7 @@ describe('CountingCommitment', () => {
     commitment = {
       ...defaults,
       turnNum: 6,
-      appCounter: new BigNumber(1),
+      appCounter: new BigNumber(1).toHexString(),
       commitmentType: CommitmentType.PreFundSetup,
       commitmentCount: 6,
     };
