@@ -58,14 +58,14 @@ describe('CountingApp', () => {
 
 
 
-    commitment0 = createCommitment.app({ ...defaults, turnNum: 6, appCounter: new BigNumber(1), commitmentCount: 1 });
-    commitment1 = createCommitment.app({ ...defaults, turnNum: 7, appCounter: new BigNumber(2), commitmentCount: 2 });
+    commitment0 = createCommitment.app({ ...defaults, turnNum: 6, appCounter: new BigNumber(1).toHexString(), commitmentCount: 1 });
+    commitment1 = createCommitment.app({ ...defaults, turnNum: 7, appCounter: new BigNumber(2).toHexString(), commitmentCount: 2 });
 
     commitmentBalChange = createCommitment.app({
       ...defaults,
       allocation: [numberToHexString(6), numberToHexString(3)],
       turnNum: 7,
-      appCounter: new BigNumber(2),
+      appCounter: new BigNumber(2).toHexString(),
       commitmentCount: 2,
     });
   });
