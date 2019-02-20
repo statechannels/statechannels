@@ -1,13 +1,13 @@
 import abi from 'web3-eth-abi';
 import { CommitmentType, Commitment, BaseCommitment, ethereumArgs } from '../commitment';
-import { BigNumber } from 'ethers/utils';
+import { Uint256 } from '../types';
 
 export interface AppAttributes {
-  appCounter: BigNumber;
+  appCounter: Uint256;
 }
 
 export interface CountingBaseCommitment extends BaseCommitment {
-  appCounter: BigNumber;
+  appCounter: Uint256;
 }
 
 export interface CountingCommitment extends CountingBaseCommitment {
