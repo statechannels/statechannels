@@ -9,7 +9,7 @@ import {
   DURATION,
   delay,
 } from 'magmo-devtools';
-import { sign, Channel, CountingApp, toHex, Commitment } from 'fmg-core';
+import { sign, Channel, CountingApp, toHex, Commitment, asEthersObject } from 'fmg-core';
 import { BigNumber, bigNumberify } from 'ethers/utils';
 import CommitmentArtifact from '../build/contracts/Commitment.json';
 import RulesArtifact from '../build/contracts/Rules.json';
@@ -72,9 +72,12 @@ async function setupContracts() {
     networkId,
   );
 
-  nitro = await ContractFactory.fromSolidity(testNitroAdjudicatorArtifact, providerSigner).deploy();
+  const nitroFactory = await ContractFactory.fromSolidity(testNitroAdjudicatorArtifact, providerSigner);
+  const deployTran = await nitroFactory.getDeployTransaction();
+  const estimate = await provider.estimateGas(deployTran);
+  console.log('dploy gas cost ', estimate);
+  nitro = await nitroFactory.deploy();
   await nitro.deployed();
-
   const unwrap = ({ challengeCommitment, finalizedAt, guaranteedChannel }) => ({ challengeCommitment, finalizedAt, guaranteedChannel, allocation: [], destination: [], });
   nullOutcome = { ...unwrap(await nitro.outcomes(nitro.address)) };
 }
@@ -107,7 +110,7 @@ describe('nitroAdjudicator', () => {
   let CountingAppContract;
 
   beforeAll(async () => {
-    await setupContracts();
+    //  await setupContracts();
 
     // alice and bob are both funded by startGanache in magmo devtools.
     alice = new ethers.Wallet("0x5d862464fe9303452126c8bc94274b8c5f9874cbd219789b3eb2128075a76f72");
@@ -794,8 +797,8 @@ describe('nitroAdjudicator', () => {
         expect(await nitro.outcomeFinal(getChannelID(channel))).toBe(false);
 
         const tx = nitro.forceMove(
-          agreedCommitment.asEthersObject,
-          challengeCommitment.asEthersObject,
+          asEthersObject(agreedCommitment),
+          asEthersObject(challengeCommitment),
           ZERO_ADDRESS,
           signatures,
         );
@@ -821,15 +824,15 @@ describe('nitroAdjudicator', () => {
           destination: [alice.address, bob.address],
           allocation,
           finalizedAt: ethers.utils.bigNumberify(1),
-          challengeCommitment: commitment0.asEthersObject,
+          challengeCommitment: asEthersObject(commitment0),
           guaranteedChannel: ZERO_ADDRESS,
         };
         await (await nitro.setOutcome(getChannelID(channel), allocationOutcome)).wait();
         expect(await nitro.outcomeFinal(getChannelID(channel))).toBe(true);
 
         const tx = nitro.forceMove(
-          agreedCommitment.asEthersObject,
-          challengeCommitment.asEthersObject,
+          asEthersObject(agreedCommitment),
+          asEthersObject(challengeCommitment),
           ZERO_ADDRESS,
           signatures,
         );
