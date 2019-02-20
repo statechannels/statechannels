@@ -109,8 +109,8 @@ describe('Commitment', () => {
   });
 
   it('can test if the appAttributes are equal', async () => {
-    const countingCommitment1: CountingCommitment = { channel, destination, allocation, turnNum, appCounter: new BigNumber(0), commitmentCount: 0, commitmentType: CommitmentType.PreFundSetup };
-    const countingCommitment2: CountingCommitment = { channel, destination, allocation, turnNum, appCounter: new BigNumber(1), commitmentCount: 0, commitmentType: CommitmentType.PostFundSetup };
+    const countingCommitment1: CountingCommitment = { channel, destination, allocation, turnNum, appCounter: new BigNumber(0).toHexString(), commitmentCount: 0, commitmentType: CommitmentType.PreFundSetup };
+    const countingCommitment2: CountingCommitment = { channel, destination, allocation, turnNum, appCounter: new BigNumber(1).toHexString(), commitmentCount: 0, commitmentType: CommitmentType.PostFundSetup };
 
     const commitment1 = asCoreCommitment(countingCommitment1);
     const commitment2 = asCoreCommitment(countingCommitment2);
