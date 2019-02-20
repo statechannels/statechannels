@@ -6,7 +6,7 @@ import {
   assertRevert,
   delay,
 } from 'magmo-devtools';
-import { Channel, BigNumber, ethereumArgs } from 'fmg-core';
+import { Channel, ethereumArgs } from 'fmg-core';
 
 import CommitmentArtifact from '../build/contracts/Commitment.json';
 import RulesArtifact from '../build/contracts/Rules.json';
@@ -14,6 +14,7 @@ import ConsensusCommitmentArtifact from '../build/contracts/ConsensusCommitment.
 import ConsensusAppArtifact from '../build/contracts/ConsensusApp.json';
 
 import { commitments } from '../src/consensus-app';
+import { BigNumber } from 'ethers/utils';
 
 jest.setTimeout(20000);
 let consensusApp: ethers.Contract;
@@ -70,10 +71,10 @@ describe('ConsensusApp', () => {
   const NUM_PARTICIPANTS = participants.length;
   const proposedDestination = [participantA.address, participantB.address];
 
-  const allocation = [new BigNumber(1), new BigNumber(2), new BigNumber(3)];
-  const proposedAllocation = [new BigNumber(4), new BigNumber(2)];
+  const allocation = [new BigNumber(1).toHexString(), new BigNumber(2).toHexString(), new BigNumber(3).toHexString()];
+  const proposedAllocation = [new BigNumber(4).toHexString(), new BigNumber(2).toHexString()];
 
-  const channel: Channel = { channelType: participantB.address, channelNonce: new BigNumber(0), participants }; // just use any valid address
+  const channel: Channel = { channelType: participantB.address, channelNonce: 0, participants }; // just use any valid address
   const defaults = { channel, allocation, destination: participants, turnNum: 6, proposedDestination, proposedAllocation, commitmentCount: 0 };
 
   beforeAll(async () => {
@@ -90,12 +91,12 @@ describe('ConsensusApp', () => {
     });
     const toCommitment = commitments.appCommitment({
       ...defaults,
-       allocation: proposedAllocation,
-       destination: participants,
-       turnNum: 6,
-       consensusCounter: 1,
-       proposedAllocation: [new BigNumber(1), new BigNumber(2)],
-       proposedDestination: [participantA.address], 
+      allocation: proposedAllocation,
+      destination: participants,
+      turnNum: 6,
+      consensusCounter: 1,
+      proposedAllocation: [new BigNumber(1), new BigNumber(2)],
+      proposedDestination: [participantA.address],
     });
     invalidTransition(fromCommitment, toCommitment, "ConsensusApp: newCommitment.proposedAllocation.length must match newCommitment.proposedDestination.length");
   });
@@ -108,8 +109,8 @@ describe('ConsensusApp', () => {
     });
     const toCommitment = commitments.appCommitment({
       ...defaults,
-       turnNum: 6,
-       consensusCounter: 2,
+      turnNum: 6,
+      consensusCounter: 2,
 
     });
     invalidTransition(fromCommitment, toCommitment, "ConsensusApp: Invalid input -- consensus counters out of range");
