@@ -37,6 +37,10 @@ export function toHex(commitment: Commitment): string {
 
 export function fromHex(commitment: string): Commitment {
   const parameters = abi.decodeParameter(SolidityCommitmentType, commitment);
+  return fromParameters(parameters);
+}
+
+export function fromParameters(parameters: any[]): Commitment {
   const channel = {
     channelType: parameters[0],
     channelNonce: Number.parseInt(parameters[1], 10),
@@ -52,7 +56,6 @@ export function fromHex(commitment: string): Commitment {
     appAttributes: parameters[9],
   };
 }
-
 export function mover(commitment: Commitment) {
   return commitment.channel.participants[this.turnNum % this.numberOfParticipants];
 }
