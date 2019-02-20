@@ -1,9 +1,9 @@
-import { Commitment, CommitmentType, BigNumber } from 'fmg-core';
+import { Commitment, CommitmentType } from 'fmg-core';
 import abi from 'web3-eth-abi';
 
 interface AppAttributes {
-  consensusCounter: BigNumber;
-  proposedAllocation: BigNumber[];
+  consensusCounter: string;
+  proposedAllocation: string[];
   proposedDestination: string[];
 }
 
@@ -30,7 +30,7 @@ export const commitments = {
   concludeCommitment,
 };
 
-export function appAttributes(consensusCommitmentArgs: [BigNumber, BigNumber[], string[]]): AppAttributes {
+export function appAttributes(consensusCommitmentArgs: [string, string[], string[]]): AppAttributes {
   //
   return {
     consensusCounter: consensusCommitmentArgs[0],
