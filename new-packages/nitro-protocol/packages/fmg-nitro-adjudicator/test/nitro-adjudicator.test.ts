@@ -9,7 +9,7 @@ import {
   DURATION,
   delay,
 } from 'magmo-devtools';
-import { sign, Channel, CountingApp, toHex, Commitment, asEthersObject } from 'fmg-core';
+import { sign, Channel, CountingApp, toHex, asEthersObject } from 'fmg-core';
 import { BigNumber, bigNumberify } from 'ethers/utils';
 import CommitmentArtifact from '../build/contracts/Commitment.json';
 import RulesArtifact from '../build/contracts/Rules.json';
@@ -75,7 +75,6 @@ async function setupContracts() {
   const nitroFactory = await ContractFactory.fromSolidity(testNitroAdjudicatorArtifact, providerSigner);
   const deployTran = await nitroFactory.getDeployTransaction();
   const estimate = await provider.estimateGas(deployTran);
-  console.log('dploy gas cost ', estimate);
   nitro = await nitroFactory.deploy();
   await nitro.deployed();
   const unwrap = ({ challengeCommitment, finalizedAt, guaranteedChannel }) => ({ challengeCommitment, finalizedAt, guaranteedChannel, allocation: [], destination: [], });
@@ -83,6 +82,9 @@ async function setupContracts() {
 }
 const getHexForCommitment = (commitment: CountingCommitment) => {
   return toHex(asCoreCommitment(commitment));
+};
+const getEthersObjectForCommitment = (commitment: CountingCommitment) => {
+  return asEthersObject(asCoreCommitment(commitment));
 };
 
 describe('nitroAdjudicator', () => {
@@ -185,8 +187,8 @@ describe('nitroAdjudicator', () => {
     const { r: r1, s: s1, v: v1 } = sign(getHexForCommitment(commitment5), bob.privateKey);
 
     conclusionProof = {
-      penultimateCommitment: commitment4.asEthersObject,
-      ultimateCommitment: commitment5.asEthersObject,
+      penultimateCommitment: getEthersObjectForCommitment(commitment4),
+      ultimateCommitment: getEthersObjectForCommitment(commitment5),
       penultimateSignature: { v: v0, r: r0, s: s0 },
       ultimateSignature: { v: v1, r: r1, s: s1 },
     };
@@ -270,7 +272,7 @@ describe('nitroAdjudicator', () => {
             destination: [alice.address, bob.address],
             allocation,
             finalizedAt: ethers.utils.bigNumberify(1),
-            challengeCommitment: commitment0.asEthersObject,
+            challengeCommitment: getEthersObjectForCommitment(commitment0),
             guaranteedChannel: ZERO_ADDRESS,
           };
           const tx = await nitro.setOutcome(getChannelID(channel), allocationOutcome);
@@ -294,7 +296,7 @@ describe('nitroAdjudicator', () => {
           destination: [alice.address, bob.address],
           allocation,
           finalizedAt: ethers.utils.bigNumberify(Date.now() + 1000),
-          challengeCommitment: commitment0.asEthersObject,
+          challengeCommitment: getEthersObjectForCommitment(commitment0),
           guaranteedChannel: ZERO_ADDRESS,
         };
         const tx = await nitro.setOutcome(getChannelID(channel), allocationOutcome);
@@ -314,7 +316,7 @@ describe('nitroAdjudicator', () => {
           destination: [alice.address, bob.address],
           allocation: [allocated.add(1), allocation[1]],
           finalizedAt: ethers.utils.bigNumberify(1),
-          challengeCommitment: commitment0.asEthersObject,
+          challengeCommitment: getEthersObjectForCommitment(commitment0),
           guaranteedChannel: ZERO_ADDRESS,
         };
         const tx = await nitro.setOutcome(getChannelID(channel), allocationOutcome);
@@ -338,7 +340,7 @@ describe('nitroAdjudicator', () => {
             destination: [alice.address, bob.address],
             allocation,
             finalizedAt: ethers.utils.bigNumberify(1),
-            challengeCommitment: commitment0.asEthersObject,
+            challengeCommitment: getEthersObjectForCommitment(commitment0),
             guaranteedChannel: ZERO_ADDRESS,
           };
           const tx = await nitro.setOutcome(getChannelID(channel), allocationOutcome);
@@ -360,7 +362,7 @@ describe('nitroAdjudicator', () => {
           destination: [alice.address, bob.address],
           allocation,
           finalizedAt: ethers.utils.bigNumberify(1),
-          challengeCommitment: commitment0.asEthersObject,
+          challengeCommitment: getEthersObjectForCommitment(commitment0),
           guaranteedChannel: ZERO_ADDRESS,
         };
         const tx = await nitro.setOutcome(getChannelID(channel), allocationOutcome);
@@ -382,7 +384,7 @@ describe('nitroAdjudicator', () => {
           destination: [alice.address, bob.address],
           allocation,
           finalizedAt: ethers.utils.bigNumberify(0),
-          challengeCommitment: commitment0.asEthersObject,
+          challengeCommitment: getEthersObjectForCommitment(commitment0),
           guaranteedChannel: ZERO_ADDRESS,
         };
         const tx = await nitro.setOutcome(getChannelID(channel), allocationOutcome);
@@ -405,14 +407,14 @@ describe('nitroAdjudicator', () => {
           destination: [bob.address, alice.address],
           allocation: [],
           finalizedAt: ethers.utils.bigNumberify(finalizedAt),
-          challengeCommitment: commitment0.asEthersObject,
+          challengeCommitment: getEthersObjectForCommitment(commitment0),
           guaranteedChannel: getChannelID(channel),
         };
         const allocationOutcome = {
           destination: [alice.address, bob.address],
           allocation,
           finalizedAt: ethers.utils.bigNumberify(finalizedAt),
-          challengeCommitment: commitment0.asEthersObject,
+          challengeCommitment: getEthersObjectForCommitment(commitment0),
           guaranteedChannel: ZERO_ADDRESS,
         };
         await (await nitro.setOutcome(guarantor.address, guarantee)).wait();
@@ -435,7 +437,7 @@ describe('nitroAdjudicator', () => {
           destination: [alice.address, bob.address],
           allocation: allocationAfterClaim,
           finalizedAt: ethers.utils.bigNumberify(finalizedAt),
-          challengeCommitment: commitment0.asEthersObject,
+          challengeCommitment: getEthersObjectForCommitment(commitment0),
           guaranteedChannel: ZERO_ADDRESS,
         };
 
@@ -459,14 +461,14 @@ describe('nitroAdjudicator', () => {
           destination: [bob.address, alice.address],
           allocation: [],
           finalizedAt: ethers.utils.bigNumberify(finalizedAt),
-          challengeCommitment: commitment0.asEthersObject,
+          challengeCommitment: getEthersObjectForCommitment(commitment0),
           guaranteedChannel: getChannelID(channel),
         };
         const allocationOutcome = {
           destination: [alice.address, bob.address],
           allocation,
           finalizedAt: ethers.utils.bigNumberify(finalizedAt),
-          challengeCommitment: commitment0.asEthersObject,
+          challengeCommitment: getEthersObjectForCommitment(commitment0),
           guaranteedChannel: ZERO_ADDRESS,
         };
         await (await nitro.setOutcome(getChannelID(channel), allocationOutcome)).wait();
@@ -486,14 +488,14 @@ describe('nitroAdjudicator', () => {
           destination: [bob.address, alice.address],
           allocation: [],
           finalizedAt: ethers.utils.bigNumberify(0),
-          challengeCommitment: commitment0.asEthersObject,
+          challengeCommitment: getEthersObjectForCommitment(commitment0),
           guaranteedChannel: getChannelID(channel),
         };
         const allocationOutcome = {
           destination: [alice.address, bob.address],
           allocation,
           finalizedAt: ethers.utils.bigNumberify(0),
-          challengeCommitment: commitment0.asEthersObject,
+          challengeCommitment: getEthersObjectForCommitment(commitment0),
           guaranteedChannel: ZERO_ADDRESS,
         };
         await (await nitro.setOutcome(getChannelID(channel), allocationOutcome)).wait();
@@ -513,7 +515,7 @@ describe('nitroAdjudicator', () => {
           destination: [alice.address, bob.address],
           allocation,
           finalizedAt: ethers.utils.bigNumberify(0),
-          challengeCommitment: commitment0.asEthersObject,
+          challengeCommitment: getEthersObjectForCommitment(commitment0),
           guaranteedChannel: ZERO_ADDRESS,
         };
         const tx = await nitro.setOutcome(getChannelID(channel), allocationOutcome);
@@ -533,7 +535,7 @@ describe('nitroAdjudicator', () => {
           destination: [alice.address, bob.address],
           allocation,
           finalizedAt: ethers.utils.bigNumberify(0),
-          challengeCommitment: commitment0.asEthersObject,
+          challengeCommitment: getEthersObjectForCommitment(commitment0),
           guaranteedChannel: ZERO_ADDRESS,
         };
         const funding = ethers.utils.bigNumberify(2);
@@ -546,7 +548,7 @@ describe('nitroAdjudicator', () => {
           destination: [alice.address, bob.address],
           allocation,
           finalizedAt: ethers.utils.bigNumberify(0),
-          challengeCommitment: commitment0.asEthersObject,
+          challengeCommitment: getEthersObjectForCommitment(commitment0),
           guaranteedChannel: ZERO_ADDRESS,
         };
         const funding = aBal;
@@ -559,7 +561,7 @@ describe('nitroAdjudicator', () => {
           destination: [alice.address, bob.address],
           allocation,
           finalizedAt: ethers.utils.bigNumberify(0),
-          challengeCommitment: commitment0.asEthersObject,
+          challengeCommitment: getEthersObjectForCommitment(commitment0),
           guaranteedChannel: ZERO_ADDRESS,
         };
         const funding = bigNumberify(aBal).add(1).toHexString();
@@ -572,7 +574,7 @@ describe('nitroAdjudicator', () => {
           destination: [alice.address, bob.address],
           allocation,
           finalizedAt: ethers.utils.bigNumberify(0),
-          challengeCommitment: commitment0.asEthersObject,
+          challengeCommitment: getEthersObjectForCommitment(commitment0),
           guaranteedChannel: ZERO_ADDRESS,
         };
         const funding = bigNumberify(aBal).add(1).toHexString();
@@ -587,7 +589,7 @@ describe('nitroAdjudicator', () => {
           destination: [alice.address, bob.address],
           allocation,
           finalizedAt: ethers.utils.bigNumberify(0),
-          challengeCommitment: commitment0.asEthersObject,
+          challengeCommitment: getEthersObjectForCommitment(commitment0),
           guaranteedChannel: ZERO_ADDRESS,
         };
         const removeAmount = 2;
@@ -598,7 +600,7 @@ describe('nitroAdjudicator', () => {
           destination: [alice.address, bob.address],
           allocation: allocationAfterRemove,
           finalizedAt: ethers.utils.bigNumberify(0),
-          challengeCommitment: commitment0.asEthersObject,
+          challengeCommitment: getEthersObjectForCommitment(commitment0),
         };
 
 
@@ -615,7 +617,7 @@ describe('nitroAdjudicator', () => {
           destination: [alice.address, bob.address],
           allocation,
           finalizedAt: ethers.utils.bigNumberify(0),
-          challengeCommitment: commitment0.asEthersObject,
+          challengeCommitment: getEthersObjectForCommitment(commitment0),
           guaranteedChannel: ZERO_ADDRESS,
         };
 
@@ -623,7 +625,7 @@ describe('nitroAdjudicator', () => {
           destination: [bob.address, alice.address],
           allocation: [],
           finalizedAt: ethers.utils.bigNumberify(0),
-          challengeCommitment: commitment0.asEthersObject,
+          challengeCommitment: getEthersObjectForCommitment(commitment0),
           guaranteedChannel: getChannelID(channel),
         };
         // const guarantee = [guarantor.address, getChannelID(channel),[bob.address, alice.address]];
@@ -632,7 +634,7 @@ describe('nitroAdjudicator', () => {
           destination: [bob.address, alice.address],
           allocation: differentAllocation,
           finalizedAt: ethers.utils.bigNumberify(0),
-          challengeCommitment: commitment0.asEthersObject,
+          challengeCommitment: getEthersObjectForCommitment(commitment0),
           guaranteedChannel: ZERO_ADDRESS,
         };
 
@@ -646,7 +648,7 @@ describe('nitroAdjudicator', () => {
           destination: [alice.address, bob.address],
           allocation,
           finalizedAt: ethers.utils.bigNumberify(0),
-          challengeCommitment: commitment0.asEthersObject,
+          challengeCommitment: getEthersObjectForCommitment(commitment0),
           guaranteedChannel: ZERO_ADDRESS,
         };
 
@@ -654,7 +656,7 @@ describe('nitroAdjudicator', () => {
           destination: [bob.address],
           allocation: [],
           finalizedAt: ethers.utils.bigNumberify(0),
-          challengeCommitment: commitment0.asEthersObject,
+          challengeCommitment: getEthersObjectForCommitment(commitment0),
           guaranteedChannel: getChannelID(channel),
         };
         // const guarantee = [guarantor.address, getChannelID(channel),[bob.address, alice.address]];
@@ -663,7 +665,7 @@ describe('nitroAdjudicator', () => {
           destination: [bob.address],
           allocation: [bBal],
           finalizedAt: ethers.utils.bigNumberify(0),
-          challengeCommitment: commitment0.asEthersObject,
+          challengeCommitment: getEthersObjectForCommitment(commitment0),
           guaranteedChannel: ZERO_ADDRESS,
         };
 
@@ -744,8 +746,8 @@ describe('nitroAdjudicator', () => {
         const { emitterWitness, eventPromise } = expectEvent(nitro, filter);
 
         const tx = await nitro.forceMove(
-          agreedCommitment.asEthersObject,
-          challengeCommitment.asEthersObject,
+          getEthersObjectForCommitment(agreedCommitment),
+          getEthersObjectForCommitment(challengeCommitment),
           ZERO_ADDRESS,
           signatures,
         );
@@ -771,8 +773,8 @@ describe('nitroAdjudicator', () => {
         expect(await nitro.outcomeFinal(getChannelID(channel))).toBe(false);
 
         const tx = nitro.forceMove(
-          agreedCommitment.asEthersObject,
-          challengeCommitment.asEthersObject,
+          getEthersObjectForCommitment(agreedCommitment),
+          getEthersObjectForCommitment(challengeCommitment),
           ZERO_ADDRESS,
           signatures,
         );
@@ -797,8 +799,8 @@ describe('nitroAdjudicator', () => {
         expect(await nitro.outcomeFinal(getChannelID(channel))).toBe(false);
 
         const tx = nitro.forceMove(
-          asEthersObject(agreedCommitment),
-          asEthersObject(challengeCommitment),
+          getEthersObjectForCommitment(agreedCommitment),
+          getEthersObjectForCommitment(challengeCommitment),
           ZERO_ADDRESS,
           signatures,
         );
@@ -824,15 +826,15 @@ describe('nitroAdjudicator', () => {
           destination: [alice.address, bob.address],
           allocation,
           finalizedAt: ethers.utils.bigNumberify(1),
-          challengeCommitment: asEthersObject(commitment0),
+          challengeCommitment: getEthersObjectForCommitment(commitment0),
           guaranteedChannel: ZERO_ADDRESS,
         };
         await (await nitro.setOutcome(getChannelID(channel), allocationOutcome)).wait();
         expect(await nitro.outcomeFinal(getChannelID(channel))).toBe(true);
 
         const tx = nitro.forceMove(
-          asEthersObject(agreedCommitment),
-          asEthersObject(challengeCommitment),
+          getEthersObjectForCommitment(agreedCommitment),
+          getEthersObjectForCommitment(challengeCommitment),
           ZERO_ADDRESS,
           signatures,
         );
@@ -872,7 +874,7 @@ describe('nitroAdjudicator', () => {
         await runBeforeRefute();
 
         const { emitterWitness, eventPromise } = expectEvent(nitro, 'Refuted');
-        await nitro.refute(refutationCommitment.asEthersObject, refutationSignature);
+        await nitro.refute(getEthersObjectForCommitment(refutationCommitment), refutationSignature);
 
         await eventPromise;
         expect(emitterWitness).toBeCalled();
@@ -907,7 +909,7 @@ describe('nitroAdjudicator', () => {
         ).toBe(true);
 
         assertRevert(
-          nitro.refute(refutationCommitment.asEthersObject, refutationSignature),
+          nitro.refute(getEthersObjectForCommitment(refutationCommitment), refutationSignature),
           "Refute: channel must be open"
         );
         await delay();
@@ -917,7 +919,7 @@ describe('nitroAdjudicator', () => {
         await runBeforeRefute();
 
         assertRevert(
-          nitro.refute(refutationCommitment.asEthersObject, signatures[0]),
+          nitro.refute(getEthersObjectForCommitment(refutationCommitment), signatures[0]),
           "Refute: move must be authorized"
         );
         await delay();
@@ -933,7 +935,7 @@ describe('nitroAdjudicator', () => {
         const invalidRefutationSignature = { r: r3, s: s3, v: v3 };
 
         assertRevert(
-          nitro.refute(invalidRefutationCommitment.asEthersObject, invalidRefutationSignature),
+          nitro.refute(getEthersObjectForCommitment(invalidRefutationCommitment), invalidRefutationSignature),
           "the refutationCommitment must have a higher nonce"
         );
         await delay();
@@ -985,7 +987,7 @@ describe('nitroAdjudicator', () => {
         await runBeforeRespond();
 
         const { emitterWitness, eventPromise } = expectEvent(nitro, 'RespondedWithMove');
-        await nitro.respondWithMove(responseCommitment.asEthersObject, responseSignature);
+        await nitro.respondWithMove(getEthersObjectForCommitment(responseCommitment), responseSignature);
 
         await eventPromise;
         expect(emitterWitness).toBeCalled();
@@ -1004,7 +1006,7 @@ describe('nitroAdjudicator', () => {
         ).toBe(true);
 
         assertRevert(
-          nitro.respondWithMove(responseCommitment.asEthersObject, responseSignature),
+          nitro.respondWithMove(getEthersObjectForCommitment(responseCommitment), responseSignature),
           "RespondWithMove: channel must be open"
         );
         await delay();
@@ -1014,7 +1016,7 @@ describe('nitroAdjudicator', () => {
         await runBeforeRespond();
 
         assertRevert(
-          nitro.respondWithMove(responseCommitment.asEthersObject, signatures[0]),
+          nitro.respondWithMove(getEthersObjectForCommitment(responseCommitment), signatures[0]),
           "RespondWithMove: move must be authorized"
         );
         await delay();
@@ -1029,7 +1031,7 @@ describe('nitroAdjudicator', () => {
         const invalidResponseSignature = { r: r3, s: s3, v: v3 };
 
         assertRevert(
-          nitro.respondWithMove(invalidResponseCommitment.asEthersObject, invalidResponseSignature),
+          nitro.respondWithMove(getEthersObjectForCommitment(invalidResponseCommitment), invalidResponseSignature),
           "Invalid transition: turnNum must increase by 1"
         );
         await delay();
@@ -1087,7 +1089,7 @@ describe('nitroAdjudicator', () => {
         await runBeforeAlternativeRespond();
 
         const { emitterWitness, eventPromise } = expectEvent(nitro, 'RespondedWithAlternativeMove');
-        await nitro.alternativeRespondWithMove(alternativeCommitment.asEthersObject, responseCommitment.asEthersObject, alternativeSignature, responseSignature);
+        await nitro.alternativeRespondWithMove(getEthersObjectForCommitment(alternativeCommitment), getEthersObjectForCommitment(responseCommitment), alternativeSignature, responseSignature);
 
         await eventPromise;
         expect(emitterWitness).toBeCalled();
@@ -1106,7 +1108,7 @@ describe('nitroAdjudicator', () => {
         ).toBe(true);
 
         assertRevert(
-          nitro.alternativeRespondWithMove(alternativeCommitment.asEthersObject, responseCommitment.asEthersObject, alternativeSignature, responseSignature),
+          nitro.alternativeRespondWithMove(getEthersObjectForCommitment(alternativeCommitment), getEthersObjectForCommitment(responseCommitment), alternativeSignature, responseSignature),
           "AlternativeRespondWithMove: channel must be open"
         );
         await delay();
@@ -1116,7 +1118,7 @@ describe('nitroAdjudicator', () => {
         await runBeforeAlternativeRespond();
 
         assertRevert(
-          nitro.alternativeRespondWithMove(alternativeCommitment.asEthersObject, responseCommitment.asEthersObject, alternativeSignature, alternativeSignature),
+          nitro.alternativeRespondWithMove(getEthersObjectForCommitment(alternativeCommitment), getEthersObjectForCommitment(responseCommitment), alternativeSignature, alternativeSignature),
           "AlternativeRespondWithMove: move must be authorized"
         );
         await delay();
@@ -1131,7 +1133,7 @@ describe('nitroAdjudicator', () => {
         const invalidResponseSignature = { r: r3, s: s3, v: v3 };
 
         assertRevert(
-          nitro.alternativeRespondWithMove(alternativeCommitment.asEthersObject, invalidResponseCommitment.asEthersObject, alternativeSignature, invalidResponseSignature),
+          nitro.alternativeRespondWithMove(getEthersObjectForCommitment(alternativeCommitment), getEthersObjectForCommitment(invalidResponseCommitment), alternativeSignature, invalidResponseSignature),
           "Invalid transition: turnNum must increase by 1"
         );
         await delay();
@@ -1149,7 +1151,7 @@ describe('nitroAdjudicator', () => {
         const invalidResponseSignature = { r: r4, s: s4, v: v4 };
 
         assertRevert(
-          nitro.alternativeRespondWithMove(invalidAlternativeCommitment.asEthersObject, invalidResponseCommitment.asEthersObject, invalidAlternativeSignature, invalidResponseSignature),
+          nitro.alternativeRespondWithMove(getEthersObjectForCommitment(invalidAlternativeCommitment), getEthersObjectForCommitment(invalidResponseCommitment), invalidAlternativeSignature, invalidResponseSignature),
           "alternativeCommitment must have the same nonce as the challenge commitment"
         );
         await delay();
