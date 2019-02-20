@@ -5,7 +5,6 @@ import {
   getGanacheProvider,
 } from 'magmo-devtools';
 import { Channel, asEthersObject, Commitment } from 'fmg-core';
-import { BigNumber } from 'ethers/utils';
 import CommitmentArtifact from '../build/contracts/Commitment.json';
 import ConsensusCommitmentArtifact from '../build/contracts/ConsensusCommitment.json';
 import TestConsensusCommitmentArtifact from '../build/contracts/TestConsensusCommitment.json';
