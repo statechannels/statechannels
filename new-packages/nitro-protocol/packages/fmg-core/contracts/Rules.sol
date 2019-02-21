@@ -102,7 +102,7 @@ library Rules {
         );
         require(
             _challengeCommitment.turnNum == _alternativeCommitment.turnNum,
-            "alternativeCommitment must have the same nonce as the challenge Commitment"
+            "alternativeCommitment must have the same nonce as the challenge commitment"
         );
         // .. it must be signed (by the challenger)
         _alternativeCommitment.requireSignature(v[0], r[0], s[0]);
@@ -112,7 +112,7 @@ library Rules {
         _nextCommitment.requireSignature(v[1], r[1], s[1]);
         require(
             validTransition(_alternativeCommitment, _nextCommitment),
-            "it must be a valid transition of the appcommitment (from the alternative Commitment)"
+            "it must be a valid transition of the appcommitment (from the alternative commitment)"
         );
 
         return true;
