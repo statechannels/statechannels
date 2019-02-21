@@ -39,22 +39,23 @@ export function fromHex(commitment: string): Commitment {
   return fromParameters(parameters);
 }
 
-export function fromParameters(parameters: any): Commitment {
+export function fromParameters(parameters: any[]): Commitment {
   const channel = {
-    channelType: parameters.channelType,
-    channelNonce: Number.parseInt(parameters.channelNonce, 10),
-    participants: parameters.participants,
+    channelType: parameters[0],
+    channelNonce: Number.parseInt(parameters[1], 10),
+    participants: parameters[3],
   };
   return {
     channel,
-    commitmentType: Number.parseInt(parameters.commitmentType, 10) as CommitmentType,
-    turnNum: Number.parseInt(parameters.turnNum, 10),
-    commitmentCount: Number.parseInt(parameters.commitmentCount, 10),
-    destination: parameters.destination,
-    allocation: parameters.allocation.map(a => bigNumberify(a).toHexString()),
-    appAttributes: parameters.appAttributes,
+    commitmentType: Number.parseInt(parameters[4], 10) as CommitmentType,
+    turnNum: Number.parseInt(parameters[5], 10),
+    commitmentCount: Number.parseInt(parameters[6], 10),
+    destination: parameters[7],
+    allocation: parameters[8].map(a => bigNumberify(a).toHexString()),
+    appAttributes: parameters[9],
   };
 }
+
 export function mover(commitment: Commitment) {
   return commitment.channel.participants[this.turnNum % this.channel.participants.length];
 }
