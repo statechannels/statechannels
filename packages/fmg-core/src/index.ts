@@ -1,5 +1,6 @@
 export {
   Commitment,
+  BaseCommitment,
   CommitmentType,
   toHex,
   fromHex,

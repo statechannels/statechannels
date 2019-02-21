@@ -7,13 +7,13 @@ library ConsensusCommitment {
     using Commitment for Commitment.CommitmentStruct;
 
     struct AppAttributes {
-        uint256 consensusCounter;
+        uint32 consensusCounter;
         uint256[] proposedAllocation;
         address[] proposedDestination;
     }
 
     struct ConsensusCommitmentStruct {
-        uint256 consensusCounter;
+        uint32 consensusCounter;
         uint256[] currentAllocation;
         address[] currentDestination;
         uint256[] proposedAllocation;
