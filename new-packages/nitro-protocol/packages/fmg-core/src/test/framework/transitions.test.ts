@@ -1,7 +1,7 @@
 import { ethers, ContractFactory } from 'ethers';
 import linker from 'solc/linker';
 
-import expectRevert from '../helpers/expect-revert';
+import { expectRevert } from 'magmo-devtools';
 
 import { createCommitment, args } from '../../test-app/counting-app';
 import { Channel } from '../..';
@@ -96,31 +96,31 @@ describe('Rules', () => {
 
     it("rejects a transition where the turnNum doesn't increment", async () => {
       toCommitment.turnNum = fromCommitment.turnNum;
-      await expectRevert(validTransition(fromCommitment, toCommitment), TURN_NUM_MUST_INCREMENT); // passes
+      await expectRevert(() => validTransition(fromCommitment, toCommitment), TURN_NUM_MUST_INCREMENT); // passes
     });
 
     it('rejects any transition where the channel changes', async () => {
       toCommitment.channel = otherChannel;
-      await expectRevert(validTransition(fromCommitment, toCommitment), CHANNEL_ID_MUST_MATCH);
+      await expectRevert(() => validTransition(fromCommitment, toCommitment), CHANNEL_ID_MUST_MATCH);
     });
 
     it('rejects a transition where the balances changes', async () => {
       toCommitment.allocation = otherallocation;
-      await expectRevert(validTransition(fromCommitment, toCommitment), allocationsMustEqual("PreFundSetup"));
+      await expectRevert(() => validTransition(fromCommitment, toCommitment), allocationsMustEqual("PreFundSetup"));
     });
 
     it('rejects a transition where the destination changes', async () => {
       toCommitment.destination = otherDestination;
-      await expectRevert(validTransition(fromCommitment, toCommitment), destinationsMustEqual("PreFundSetup"));
+      await expectRevert(() => validTransition(fromCommitment, toCommitment), destinationsMustEqual("PreFundSetup"));
     });
 
     it("rejects a transition where the count doesn't increment", async () => {
       toCommitment.commitmentCount = fromCommitment.commitmentCount;
-      await expectRevert(validTransition(fromCommitment, toCommitment), commitmentCountMustIncrement("PreFundSetup"));
+      await expectRevert(() => validTransition(fromCommitment, toCommitment), commitmentCountMustIncrement("PreFundSetup"));
     });
     it('rejects a transition where the app attributes changes', async () => {
       toCommitment.appCounter = 45;
-      await expectRevert(validTransition(fromCommitment, toCommitment), appAttributesMustMatch("PreFundSetup"));
+      await expectRevert(() => validTransition(fromCommitment, toCommitment), appAttributesMustMatch("PreFundSetup"));
     });
   });
 
@@ -136,37 +136,37 @@ describe('Rules', () => {
 
     it("rejects a transition where the turnNum doesn't increment", async () => {
       toCommitment.turnNum = fromCommitment.turnNum;
-      await expectRevert(validTransition(fromCommitment, toCommitment), TURN_NUM_MUST_INCREMENT);
+      await expectRevert(() => validTransition(fromCommitment, toCommitment), TURN_NUM_MUST_INCREMENT);
     });
 
     it('rejects any transition where the channel changes', async () => {
       toCommitment.channel = otherChannel;
-      await expectRevert(validTransition(fromCommitment, toCommitment), CHANNEL_ID_MUST_MATCH);
+      await expectRevert(() => validTransition(fromCommitment, toCommitment), CHANNEL_ID_MUST_MATCH);
     });
 
     it('rejects a transition not from the last preFundSetup Commitment', async () => {
       fromCommitment.commitmentCount = 0;
-      await expectRevert(validTransition(fromCommitment, toCommitment), commitmentTypeMustBe("PreFundSetup", "PreFundSetup"));
+      await expectRevert(() => validTransition(fromCommitment, toCommitment), commitmentTypeMustBe("PreFundSetup", "PreFundSetup"));
     });
 
     it('rejects a transition where the balances changes', async () => {
       toCommitment.allocation = otherallocation;
-      await expectRevert(validTransition(fromCommitment, toCommitment), allocationsMustEqual("PreFundSetup"));
+      await expectRevert(() => validTransition(fromCommitment, toCommitment), allocationsMustEqual("PreFundSetup"));
     });
 
     it('rejects a transition where the destination changes', async () => {
       toCommitment.destination = otherDestination;
-      await expectRevert(validTransition(fromCommitment, toCommitment), destinationsMustEqual("PreFundSetup"));
+      await expectRevert(() => validTransition(fromCommitment, toCommitment), destinationsMustEqual("PreFundSetup"));
     });
 
     it("rejects a transition where the count doesn't reset", async () => {
       toCommitment.commitmentCount = 2;
-      await expectRevert(validTransition(fromCommitment, toCommitment), commitmentCountMustReset("PreFundSetup", "PostFundSetup"));
+      await expectRevert(() => validTransition(fromCommitment, toCommitment), commitmentCountMustReset("PreFundSetup", "PostFundSetup"));
     });
 
     it('rejects a transition where the position changes', async () => {
       toCommitment.appCounter = 45;
-      await expectRevert(validTransition(fromCommitment, toCommitment), appAttributesMustMatch("PreFundSetup"));
+      await expectRevert(() => validTransition(fromCommitment, toCommitment), appAttributesMustMatch("PreFundSetup"));
     });
   });
 
@@ -182,27 +182,27 @@ describe('Rules', () => {
 
     it("rejects a transition where the turnNum doesn't increment", async () => {
       toCommitment.turnNum = fromCommitment.turnNum;
-      await expectRevert(validTransition(fromCommitment, toCommitment), TURN_NUM_MUST_INCREMENT);
+      await expectRevert(() => validTransition(fromCommitment, toCommitment), TURN_NUM_MUST_INCREMENT);
     });
 
     it('rejects any transition where the channel changes', async () => {
       toCommitment.channel = otherChannel;
-      await expectRevert(validTransition(fromCommitment, toCommitment), CHANNEL_ID_MUST_MATCH);
+      await expectRevert(() => validTransition(fromCommitment, toCommitment), CHANNEL_ID_MUST_MATCH);
     });
 
     it('rejects a transition where the balances changes', async () => {
       toCommitment.allocation = otherallocation;
-      await expectRevert(validTransition(fromCommitment, toCommitment), allocationsMustEqual("PreFundSetup"));
+      await expectRevert(() => validTransition(fromCommitment, toCommitment), allocationsMustEqual("PreFundSetup"));
     });
 
     it('rejects a transition where the destination changes', async () => {
       toCommitment.destination = otherDestination;
-      await expectRevert(validTransition(fromCommitment, toCommitment), destinationsMustEqual("PreFundSetup"));
+      await expectRevert(() => validTransition(fromCommitment, toCommitment), destinationsMustEqual("PreFundSetup"));
     });
 
     it('rejects a transition not from the last preFundSetup Commitment', async () => {
       fromCommitment.commitmentCount = 0;
-      await expectRevert(validTransition(fromCommitment, toCommitment), commitmentTypeMustBe("PreFundSetup", "PreFundSetup"));
+      await expectRevert(() => validTransition(fromCommitment, toCommitment), commitmentTypeMustBe("PreFundSetup", "PreFundSetup"));
     });
   });
 
@@ -218,27 +218,27 @@ describe('Rules', () => {
 
     it("rejects a transition where the turnNum doesn't increment", async () => {
       toCommitment.turnNum = fromCommitment.turnNum;
-      await expectRevert(validTransition(fromCommitment, toCommitment), TURN_NUM_MUST_INCREMENT);
+      await expectRevert(() => validTransition(fromCommitment, toCommitment), TURN_NUM_MUST_INCREMENT);
     });
 
     it('rejects any transition where the channel changes', async () => {
       toCommitment.channel = otherChannel;
-      await expectRevert(validTransition(fromCommitment, toCommitment), CHANNEL_ID_MUST_MATCH);
+      await expectRevert(() => validTransition(fromCommitment, toCommitment), CHANNEL_ID_MUST_MATCH);
     });
 
     it('rejects a transition where the balances changes', async () => {
       toCommitment.allocation = otherallocation;
-      await expectRevert(validTransition(fromCommitment, toCommitment), allocationsMustEqual("PostFundSetup"));
+      await expectRevert(() => validTransition(fromCommitment, toCommitment), allocationsMustEqual("PostFundSetup"));
     });
 
     it('rejects a transition where the destination changes', async () => {
       toCommitment.destination = otherDestination;
-      await expectRevert(validTransition(fromCommitment, toCommitment), destinationsMustEqual("PostFundSetup"));
+      await expectRevert(() => validTransition(fromCommitment, toCommitment), destinationsMustEqual("PostFundSetup"));
     });
 
     it('rejects a transition from the last PostFundSetup Commitment', async () => {
       fromCommitment.commitmentCount = 1;
-      await expectRevert(validTransition(fromCommitment, toCommitment), commitmentTypeMustBe("PostFundSetup", "Conclude"));
+      await expectRevert(() => validTransition(fromCommitment, toCommitment), commitmentTypeMustBe("PostFundSetup", "Conclude"));
     });
   });
 
@@ -252,7 +252,7 @@ describe('Rules', () => {
       fromCommitment.commitmentCount = 0;
       // if the commitmentCount on fromCommitment is not numParticipants - 1, then the player
       // has to transition to either PostFundSetup or Conclude
-      await expectRevert(validTransition(fromCommitment, toCommitment), commitmentTypeMustBe("PostFundSetup", "Conclude"));
+      await expectRevert(() => validTransition(fromCommitment, toCommitment), commitmentTypeMustBe("PostFundSetup", "Conclude"));
     });
   });
 
@@ -264,18 +264,18 @@ describe('Rules', () => {
 
     it("rejects a transition where the turnNum doesn't increment", async () => {
       toCommitment.turnNum = fromCommitment.turnNum;
-      await expectRevert(validTransition(fromCommitment, toCommitment));
+      await expectRevert(() => validTransition(fromCommitment, toCommitment));
     });
 
     it('rejects any transition where the channel changes', async () => {
       toCommitment.channel = otherChannel;
-      await expectRevert(validTransition(fromCommitment, toCommitment));
+      await expectRevert(() => validTransition(fromCommitment, toCommitment));
     });
 
     it("rejects a transition where the count doesn't reset", async () => {
       fromCommitment.commitmentCount = 1;
       toCommitment.commitmentCount = 2;
-      await expectRevert(validTransition(fromCommitment, toCommitment), commitmentCountMustReset("PostFundSetup", "Conclude"));
+      await expectRevert(() => validTransition(fromCommitment, toCommitment), commitmentCountMustReset("PostFundSetup", "Conclude"));
     });
 
     it('allows a valid transition', async () => {
@@ -284,17 +284,17 @@ describe('Rules', () => {
 
     it('rejects a transition where the balances changes', async () => {
       toCommitment.allocation = otherallocation;
-      await expectRevert(validTransition(fromCommitment, toCommitment));
+      await expectRevert(() => validTransition(fromCommitment, toCommitment));
     });
 
     it('rejects a transition where the destination changes', async () => {
       toCommitment.destination = otherDestination;
-      await expectRevert(validTransition(fromCommitment, toCommitment), destinationsMustEqual("PostFundSetup"));
+      await expectRevert(() => validTransition(fromCommitment, toCommitment), destinationsMustEqual("PostFundSetup"));
     });
 
     it('rejects a transition from the last PostFundSetup Commitment', async () => {
       fromCommitment.commitmentCount = 1;
-      await expectRevert(validTransition(fromCommitment, toCommitment));
+      await expectRevert(() => validTransition(fromCommitment, toCommitment));
     });
   });
 
@@ -315,22 +315,22 @@ describe('Rules', () => {
 
     it("rejects a transition where the turnNum doesn't increment", async () => {
       toCommitment.turnNum = fromCommitment.turnNum;
-      await expectRevert(validTransition(fromCommitment, toCommitment));
+      await expectRevert(() => validTransition(fromCommitment, toCommitment));
     });
 
     it('rejects any transition where the channel changes', async () => {
       toCommitment.channel = otherChannel;
-      await expectRevert(validTransition(fromCommitment, toCommitment));
+      await expectRevert(() => validTransition(fromCommitment, toCommitment));
     });
 
     it('rejects a transition not from the last PostFundSetup Commitment', async () => {
       fromCommitment.commitmentCount = 0;
-      await expectRevert(validTransition(fromCommitment, toCommitment));
+      await expectRevert(() => validTransition(fromCommitment, toCommitment));
     });
 
     it('rejects a transition where the app rules are broken', async () => {
       toCommitment.appCounter = 2; // app specifies that counter must increment
-      await expectRevert(validTransition(fromCommitment, toCommitment));
+      await expectRevert(() => validTransition(fromCommitment, toCommitment));
     });
   });
 
@@ -346,17 +346,17 @@ describe('Rules', () => {
 
     it("rejects a transition where the turnNum doesn't increment", async () => {
       toCommitment.turnNum = fromCommitment.turnNum;
-      await expectRevert(validTransition(fromCommitment, toCommitment));
+      await expectRevert(() => validTransition(fromCommitment, toCommitment));
     });
 
     it('rejects any transition where the channel changes', async () => {
       toCommitment.channel = otherChannel;
-      await expectRevert(validTransition(fromCommitment, toCommitment));
+      await expectRevert(() => validTransition(fromCommitment, toCommitment));
     });
 
     it('rejects a transition where the app rules are broken', async () => {
       toCommitment.appCounter = 2; // app specifies that counter must increment
-      await expectRevert(validTransition(fromCommitment, toCommitment));
+      await expectRevert(() => validTransition(fromCommitment, toCommitment));
     });
   });
 
@@ -372,22 +372,22 @@ describe('Rules', () => {
 
     it("rejects a transition where the turnNum doesn't increment", async () => {
       toCommitment.turnNum = fromCommitment.turnNum;
-      await expectRevert(validTransition(fromCommitment, toCommitment));
+      await expectRevert(() => validTransition(fromCommitment, toCommitment));
     });
 
     it('rejects any transition where the channel changes', async () => {
       toCommitment.channel = otherChannel;
-      await expectRevert(validTransition(fromCommitment, toCommitment));
+      await expectRevert(() => validTransition(fromCommitment, toCommitment));
     });
 
     it('rejects a transition where the balances changes', async () => {
       toCommitment.allocation = otherallocation;
-      await expectRevert(validTransition(fromCommitment, toCommitment));
+      await expectRevert(() => validTransition(fromCommitment, toCommitment));
     });
 
     it('rejects a transition where the destination changes', async () => {
       toCommitment.destination = otherDestination;
-      await expectRevert(validTransition(fromCommitment, toCommitment), destinationsMustEqual("App"));
+      await expectRevert(() => validTransition(fromCommitment, toCommitment), destinationsMustEqual("App"));
     });
   });
 
@@ -403,22 +403,22 @@ describe('Rules', () => {
 
     it("rejects a transition where the turnNum doesn't increment", async () => {
       toCommitment.turnNum = fromCommitment.turnNum;
-      await expectRevert(validTransition(fromCommitment, toCommitment));
+      await expectRevert(() => validTransition(fromCommitment, toCommitment));
     });
 
     it('rejects any transition where the channel changes', async () => {
       toCommitment.channel = otherChannel;
-      await expectRevert(validTransition(fromCommitment, toCommitment));
+      await expectRevert(() => validTransition(fromCommitment, toCommitment));
     });
 
     it('rejects a transition where the balances changes', async () => {
       toCommitment.allocation = otherallocation;
-      await expectRevert(validTransition(fromCommitment, toCommitment));
+      await expectRevert(() => validTransition(fromCommitment, toCommitment));
     });
 
     it('rejects a transition where the destination changes', async () => {
       toCommitment.destination = otherDestination;
-      await expectRevert(validTransition(fromCommitment, toCommitment), destinationsMustEqual("Conclude"));
+      await expectRevert(() => validTransition(fromCommitment, toCommitment), destinationsMustEqual("Conclude"));
     });
   });
 });

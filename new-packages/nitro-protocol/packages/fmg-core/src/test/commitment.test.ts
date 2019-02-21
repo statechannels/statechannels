@@ -1,6 +1,6 @@
 import { Channel, channelID } from '../channel';
 import { Commitment, CommitmentType, asEthersObject, toHex, fromHex } from '../commitment';
-import expectRevert from './helpers/expect-revert';
+import { expectRevert } from 'magmo-devtools';
 // import { CountingApp } from '../test-app/counting-app';
 import { sign } from '../utils';
 import linker from 'solc/linker';
@@ -96,7 +96,7 @@ describe('Commitment', () => {
   it('will revert if the wrong party signed', async () => {
     // needs to be signed by 1 as it's their move
     const { v, r, s } = sign(toHex(commitment), participantA.privateKey);
-    expectRevert(testCommitmentLib.requireSignature(asEthersObject(commitment), v, r, s));
+    expectRevert(() => testCommitmentLib.requireSignature(asEthersObject(commitment), v, r, s));
   });
 
   it('can check if the Commitment is fully signed', async () => {
@@ -115,7 +115,7 @@ describe('Commitment', () => {
     const commitment1 = asCoreCommitment(countingCommitment1);
     const commitment2 = asCoreCommitment(countingCommitment2);
 
-    await expectRevert(commitmentLib.appAttributesEqual(asEthersObject(commitment1), asEthersObject(commitment2)));
+    await expectRevert(() => commitmentLib.appAttributesEqual(asEthersObject(commitment1), asEthersObject(commitment2)));
   });
 
   it('can encode and decode a Commitment', () => {

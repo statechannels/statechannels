@@ -1,4 +1,4 @@
-import expectRevert from '../helpers/expect-revert';
+import { expectRevert } from 'magmo-devtools';
 import linker from 'solc/linker';
 
 import { Channel } from '../../';
@@ -79,6 +79,6 @@ describe('CountingApp', () => {
   });
 
   it("doesn't allow transitions if totals don't match", async () => {
-    await expectRevert(app.validTransition(args(commitment0), args(commitmentBalChange)), "CountingApp: allocations must be equal");
+    await expectRevert(() => app.validTransition(args(commitment0), args(commitmentBalChange)), "CountingApp: allocations must be equal");
   });
 });
