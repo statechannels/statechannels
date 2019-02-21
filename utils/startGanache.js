@@ -1,3 +1,5 @@
+const Logger = require("./logger.js").Logger;
+
 module.exports = {
     startGanache: function (argv) {
         require("dotenv").config();
@@ -22,21 +24,21 @@ module.exports = {
             }
         ];
         var ganache = require("ganache-cli");
-        console.log(`Starting ganache on port ${process.env.DEV_GANACHE_PORT}`);
+        Logger.log(`Starting ganache on port ${process.env.DEV_GANACHE_PORT}`);
 
         const detect = require('detect-port');
         return detect(process.env.DEV_GANACHE_PORT)
             .then(_port => {
                 const portInUse = _port != process.env.DEV_GANACHE_PORT;
                 if (portInUse) {
-                    console.log(`Port ${process.env.DEV_GANACHE_PORT} in use. Assuming a ganache instance on that port.`);
+                    Logger.log(`Port ${process.env.DEV_GANACHE_PORT} in use. Assuming a ganache instance on that port.`);
                     return Promise.resolve();
                 } else {
                     var ganacheServer = ganache.server({
                         port: process.env.DEV_GANACHE_PORT,
                         network_id: network_id,
                         accounts,
-                        logger: console,
+                        logger: Logger,
                         verbose: verbose,
                         deterministic: deterministic,
                         blockTime,
@@ -50,7 +52,7 @@ module.exports = {
                 }
             })
             .catch(err => {
-                console.log(err);
+                Logger.err(err);
             });
 
     }

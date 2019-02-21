@@ -1,3 +1,5 @@
+const Logger = require("./logger.js").Logger;
+
 module.exports = {
     deployContracts: function () {
 
@@ -14,15 +16,15 @@ module.exports = {
 
         const migrate = spawn(trufflePath, ['migrate', '--network', process.env.TARGET_NETWORK]);
         migrate.stdout.on('data', function (data) {
-            console.log('DATA: ', data.toString());
+            Logger.log('DATA: ', data.toString());
         });
         migrate.stderr.on('data', function (data) {
-            console.log('ERROR: ' + data);
+            Logger.log('ERROR: ' + data);
         });
 
         return new Promise(function (resolve, reject) {
             migrate.addListener("error", (error) => {
-                console.error(error);
+                Logger.error(error);
                 reject(error);
             });
 
