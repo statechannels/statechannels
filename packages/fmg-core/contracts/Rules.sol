@@ -16,7 +16,7 @@ library Rules {
     function validForceMove(
         Commitment.CommitmentStruct memory _fromCommitment,
         Commitment.CommitmentStruct memory _toCommitment,
-        uint8[] memory v,
+        uint8[] memory v, // TODO: replace with Signature
         bytes32[] memory r,
         bytes32[] memory s
     ) public pure returns (bool) {
@@ -148,7 +148,7 @@ library Rules {
         Commitment.CommitmentStruct memory _fromCommitment,
         Commitment.CommitmentStruct memory _toCommitment
     ) public pure returns (bool) {
-        if (_fromCommitment.commitmentCount == _fromCommitment.numberOfParticipants - 1) {
+        if (_fromCommitment.commitmentCount == _fromCommitment.participants.length - 1) {
             // there are two options from the final PreFundSetup Commitment
             // 1. PreFundSetup -> PostFundSetup transition
             // 2. PreFundSetup -> Conclude transition
@@ -214,7 +214,7 @@ library Rules {
         Commitment.CommitmentStruct memory  _fromCommitment,
         Commitment.CommitmentStruct memory _toCommitment
     ) public pure returns (bool) {
-        if (_fromCommitment.commitmentCount == _fromCommitment.numberOfParticipants - 1) {
+        if (_fromCommitment.commitmentCount == _fromCommitment.participants.length - 1) {
             if (_toCommitment.isApp()) {
                 require(
                     validAppTransition(_fromCommitment, _toCommitment),
