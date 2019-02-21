@@ -17,10 +17,6 @@ export {
   SolidityParameter,
 } from './utils';
 
-// TODO: these should probably be in their own package
-export { default as expectRevert } from './test/helpers/expect-revert';
-export { increaseTime, DURATION } from './test/helpers/increase-time';
-
 import * as CountingApp from './test-app/counting-app';
 export { CountingApp };
 
