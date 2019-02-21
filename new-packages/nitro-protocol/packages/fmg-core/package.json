@@ -31,7 +31,7 @@
     "dotenv": "^6.1.0",
     "ganache-cli": "^6.1.8",
     "jest": "^23.6.0",
-    "magmo-devtools": "git+https://github.com/magmo/devtools.git#v0.1.10",
+    "magmo-devtools": "git+https://github.com/magmo/devtools.git#v0.1.11",
     "truffle": "^5.0.0-next.17",
     "ts-jest": "^23.10.4",
     "tslint": "^5.11.0",
