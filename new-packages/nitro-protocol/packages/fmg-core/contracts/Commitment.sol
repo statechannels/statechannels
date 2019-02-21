@@ -7,7 +7,6 @@ library Commitment {
     struct CommitmentStruct {
         address channelType;
         uint32 channelNonce;
-        uint32 numberOfParticipants; // todo: remove
         address[] participants;
         uint8 commitmentType;
         uint32 turnNum;
@@ -46,7 +45,7 @@ library Commitment {
     }
 
     function mover(CommitmentStruct memory _commitment) public pure returns (address) {
-        return _commitment.participants[_commitment.turnNum % _commitment.numberOfParticipants];
+        return _commitment.participants[_commitment.turnNum % _commitment.participants.length];
     }
 
     function requireSignature(CommitmentStruct memory _commitment, uint8 _v, bytes32 _r, bytes32 _s) public pure {
@@ -57,7 +56,7 @@ library Commitment {
     }
 
     function requireFullySigned(CommitmentStruct memory _commitment, uint8[] memory _v, bytes32[] memory _r, bytes32[] memory _s) public pure {
-        for(uint i = 0; i < _commitment.numberOfParticipants; i++) {
+        for(uint i = 0; i < _commitment.participants.length; i++) {
             require(
                 _commitment.participants[i] == recoverSigner(abi.encode(_commitment), _v[i], _r[i], _s[i]),
                 "all movers must have signed Commitment"
