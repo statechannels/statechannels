@@ -3,7 +3,7 @@ import linker from 'solc/linker';
 import {
   getNetworkId,
   getGanacheProvider,
-  assertRevert,
+  expectRevert,
   delay,
 } from 'magmo-devtools';
 import { Channel, ethereumArgs } from 'fmg-core';
@@ -43,8 +43,9 @@ async function setupContracts() {
 }
 
 async function invalidTransition(fromCommitment, toCommitment, reason?) {
-  assertRevert(
-    consensusApp.validTransition(ethereumArgs(fromCommitment), ethereumArgs(toCommitment)),
+  expect.assertions(1);
+  await expectRevert(
+    () => consensusApp.validTransition(ethereumArgs(fromCommitment), ethereumArgs(toCommitment)),
     reason
   );
 }
