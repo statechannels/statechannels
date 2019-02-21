@@ -43,16 +43,16 @@ export function fromParameters(parameters: any[]): Commitment {
   const channel = {
     channelType: parameters[0],
     channelNonce: Number.parseInt(parameters[1], 10),
-    participants: parameters[3],
+    participants: parameters[2],
   };
   return {
     channel,
-    commitmentType: Number.parseInt(parameters[4], 10) as CommitmentType,
-    turnNum: Number.parseInt(parameters[5], 10),
-    commitmentCount: Number.parseInt(parameters[6], 10),
-    destination: parameters[7],
-    allocation: parameters[8].map(a => bigNumberify(a).toHexString()),
-    appAttributes: parameters[9],
+    commitmentType: Number.parseInt(parameters[3], 10) as CommitmentType,
+    turnNum: Number.parseInt(parameters[4], 10),
+    commitmentCount: Number.parseInt(parameters[5], 10),
+    destination: parameters[6],
+    allocation: parameters[7].map(a => bigNumberify(a).toHexString()),
+    appAttributes: parameters[8],
   };
 }
 
