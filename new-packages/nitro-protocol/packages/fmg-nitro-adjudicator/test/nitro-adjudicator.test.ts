@@ -220,14 +220,13 @@ describe('nitroAdjudicator', () => {
         const filter = nitro.filters.Deposited(null, null, null);
         const { emitterWitness, eventPromise } = expectEvent(nitro, filter);
         const channelID = getChannelID(channel);
-        await depositTo(channelID, 1);
+        await depositTo(channelID);
         const event = await eventPromise;
 
         expect(emitterWitness).toBeCalled();
 
         expect(event.args.destination).toEqual(channelID);
-        expect(event.args.amountDeposited).toEqual(bigNumberify(1));
-        expect(event.args.destinationHoldings).toEqual(bigNumberify(1));
+        expect(event.args.amountDeposited).toEqual(bigNumberify(DEPOSIT_AMOUNT));
       });
     });
 
