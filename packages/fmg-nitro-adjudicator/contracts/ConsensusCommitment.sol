@@ -13,7 +13,6 @@ library ConsensusCommitment {
     }
 
     struct ConsensusCommitmentStruct {
-        uint256 numberOfParticipants;
         uint256 consensusCounter;
         uint256[] currentAllocation;
         address[] currentDestination;
@@ -29,7 +28,6 @@ library ConsensusCommitment {
         AppAttributes memory appAttributes = abi.decode(frameworkCommitment.appAttributes, (AppAttributes));
 
         return ConsensusCommitmentStruct(
-            frameworkCommitment.numberOfParticipants,
             appAttributes.consensusCounter,
             frameworkCommitment.allocation,
             frameworkCommitment.destination,
