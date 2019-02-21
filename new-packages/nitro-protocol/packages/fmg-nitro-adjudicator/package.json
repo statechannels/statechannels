@@ -1,13 +1,14 @@
 {
-  "name": "nitro-adjudicator",
+  "name": "fmg-nitro-adjudicator",
   "version": "0.0.4",
+  "main": "./lib/index.js",
   "repository": "https://github.com/magmo/nitro-adjudicator.git",
   "author": "Andrew Stewart <andrew.gord.stewart@gmail.com>",
   "license": "MIT",
   "scripts": {
     "test": "jest",
     "test:ci": "npx ganache-then-jest",
-    "build": "tslint --project ."
+    "build": "tslint --project . && tsc"
   },
   "devDependencies": {
     "@types/jest": "^23.3.10",
