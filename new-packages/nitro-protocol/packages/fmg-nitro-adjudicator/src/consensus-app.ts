@@ -1,4 +1,4 @@
-import { Commitment, CommitmentType, Uint32, Uint256, Address, Bytes } from 'fmg-core';
+import { Commitment, CommitmentType, Uint32, Uint256, Address, Bytes, BaseCommitment } from 'fmg-core';
 import abi from 'web3-eth-abi';
 
 interface AppAttributes {
@@ -7,7 +7,7 @@ interface AppAttributes {
   proposedDestination: Address[];
 }
 
-interface ConsensusBaseCommitment extends Commitment {
+interface ConsensusBaseCommitment extends BaseCommitment {
   consensusCounter: Uint32;
   proposedAllocation: Uint256[];
   proposedDestination: Address[];
@@ -47,7 +47,7 @@ export function appAttributes(consensusCommitmentArgs: [Uint32, Uint256[], Addre
 
 const SolidityConsensusCommitmentType = {
   "ConsensusCommitmentStruct": {
-    "consensusCounter": "uint256",
+    "consensusCounter": "uint32",
     "proposedAllocation": "uint256[]",
     "proposedDestination": "address[]",
   },
