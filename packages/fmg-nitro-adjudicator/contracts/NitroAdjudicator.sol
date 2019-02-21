@@ -54,6 +54,7 @@ contract NitroAdjudicator {
 
     function deposit(address destination) public payable {
         holdings[destination] = holdings[destination] + msg.value;
+        emit Deposited(destination,msg.value, holdings[destination]);
     }
 
     function withdraw(address participant, address payable destination, uint amount, uint8 _v, bytes32 _r, bytes32 _s) public payable {
@@ -213,7 +214,7 @@ contract NitroAdjudicator {
     event Refuted(address channelId, Commitment.CommitmentStruct refutation);
     event RespondedWithMove(address channelId, Commitment.CommitmentStruct response);
     event RespondedWithAlternativeMove(Commitment.CommitmentStruct alternativeResponse);
-
+    event Deposited(address destination, uint256 amountDeposited, uint256 destinationHoldings);
     // **********************
     // ForceMove Protocol API
     // **********************

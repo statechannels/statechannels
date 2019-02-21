@@ -92,7 +92,7 @@ const getOutcomeFromParameters = (parameters: any[]) => {
   const outcome = {
     destination: parameters[0],
     finalizedAt: ethers.utils.bigNumberify(parameters[1]),
-    challengeCommitment:asEthersObject(fromParameters(parameters[2])),
+    challengeCommitment: asEthersObject(fromParameters(parameters[2])),
     guaranteedChannel: parameters[3],
     allocation: parameters[4].map(a => a.toHexString()),
   };
@@ -214,6 +214,20 @@ describe('nitroAdjudicator', () => {
         const allocatedAmount = await nitro.holdings(channelID);
 
         expect(allocatedAmount.toNumber()).toEqual(DEPOSIT_AMOUNT);
+      });
+
+      it('fires a deposited event', async () => {
+        const filter = nitro.filters.Deposited(null, null, null);
+        const { emitterWitness, eventPromise } = expectEvent(nitro, filter);
+        const channelID = getChannelID(channel);
+        await depositTo(channelID, 1);
+        const event = await eventPromise;
+
+        expect(emitterWitness).toBeCalled();
+
+        expect(event.args.destination).toEqual(channelID);
+        expect(event.args.amountDeposited).toEqual(bigNumberify(1));
+        expect(event.args.destinationHoldings).toEqual(bigNumberify(1));
       });
     });
 
