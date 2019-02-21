@@ -1,5 +1,5 @@
 import Web3 from 'web3';
-import { Bytes32, Bytes, Byte, MessageSignature, Signature, Uint256 } from './types';
+import { MessageSignature, Signature, Uint256 } from './types';
 import { bigNumberify } from 'ethers/utils';
 
 // TODO: write some jest tests for utils.
