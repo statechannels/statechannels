@@ -8,7 +8,7 @@ import {
   increaseTime,
   DURATION,
 } from 'magmo-devtools';
-import { sign, Channel, CountingApp, toHex, asEthersObject } from 'fmg-core';
+import { sign, Channel, CountingApp, toHex, asEthersObject, Address } from 'fmg-core';
 import { BigNumber, bigNumberify } from 'ethers/utils';
 import CommitmentArtifact from '../build/contracts/Commitment.json';
 import RulesArtifact from '../build/contracts/Rules.json';
@@ -38,7 +38,7 @@ function depositTo(destination: any, value = DEPOSIT_AMOUNT): Promise<any> {
 
 async function withdraw(
   participant,
-  destination: string,
+  destination: Address,
   signer = participant,
   amount = DEPOSIT_AMOUNT,
   senderAddr = null
