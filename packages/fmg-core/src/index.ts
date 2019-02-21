@@ -28,6 +28,7 @@ export { CountingApp };
 export {
   MessageSignature,
   Address,
+  Uint256,
   Uint32,
   Uint8,
   Bytes32,
