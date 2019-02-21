@@ -18,7 +18,7 @@
   "license": "MIT",
   "dependencies": {
     "bn.js": "^4.11.8",
-    "ethers": "^4.0.12",
+    "ethers": "^4.0.23",
     "sha3": "^1.2.2",
     "web3": "^1.0.0-beta.36",
     "web3-utils": "^1.0.0-beta.36",
