@@ -96,7 +96,8 @@ describe('Commitment', () => {
   it('will revert if the wrong party signed', async () => {
     // needs to be signed by 1 as it's their move
     const { v, r, s } = sign(toHex(commitment), participantA.privateKey);
-    expectRevert(() => testCommitmentLib.requireSignature(asEthersObject(commitment), v, r, s));
+    expect.assertions(1);
+    await expectRevert(() => testCommitmentLib.requireSignature(asEthersObject(commitment), v, r, s));
   });
 
   it('can check if the Commitment is fully signed', async () => {
@@ -115,6 +116,7 @@ describe('Commitment', () => {
     const commitment1 = asCoreCommitment(countingCommitment1);
     const commitment2 = asCoreCommitment(countingCommitment2);
 
+    expect.assertions(1);
     await expectRevert(() => commitmentLib.appAttributesEqual(asEthersObject(commitment1), asEthersObject(commitment2)));
   });
 
