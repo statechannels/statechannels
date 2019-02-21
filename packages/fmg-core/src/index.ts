@@ -11,6 +11,7 @@ export { Channel } from './channel';
 export {
   toHex32,
   padBytes32,
+  toUint256,
   sign,
   recover,
   decodeSignature,

@@ -1,5 +1,6 @@
 import Web3 from 'web3';
-import { Bytes32, Bytes, Byte, MessageSignature, Signature } from './types';
+import { Bytes32, Bytes, Byte, MessageSignature, Signature, Uint256 } from './types';
+import { bigNumberify } from 'ethers/utils';
 
 // TODO: write some jest tests for utils.
 
@@ -15,6 +16,10 @@ export function padBytes32(data) {
     x = 0 + x;
   }
   return '0x' + x;
+}
+
+export function toUint256(num: number): Uint256 {
+  return bigNumberify(num).toHexString();
 }
 
 // https://stackoverflow.com/a/42203200
