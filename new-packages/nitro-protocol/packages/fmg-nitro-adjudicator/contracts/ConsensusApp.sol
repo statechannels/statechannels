@@ -12,7 +12,7 @@ contract ConsensusApp {
         ConsensusCommitment.ConsensusCommitmentStruct memory oldCommitment = ConsensusCommitment.fromFrameworkCommitment(_old);
         ConsensusCommitment.ConsensusCommitmentStruct memory newCommitment = ConsensusCommitment.fromFrameworkCommitment(_new);
 
-        uint numParticipants = oldCommitment.numberOfParticipants;
+        uint numParticipants = _old.participants.length;
         if (oldCommitment.consensusCounter == numParticipants - 1) {
             require(
                 newCommitment.consensusCounter == 0,

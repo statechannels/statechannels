@@ -60,7 +60,6 @@ describe('ConsensusCommitment', () => {
     const consensusCommitmentAttrs = await consensusCommitment.fromFrameworkCommitment(asEthersObject(commitment));
 
     expect(consensusCommitmentAttrs).toMatchObject({
-      numberOfParticipants: new ethers.utils.BigNumber(2),
       consensusCounter: new ethers.utils.BigNumber(1),
       currentAllocation: allocation,
       currentDestination: participants,
