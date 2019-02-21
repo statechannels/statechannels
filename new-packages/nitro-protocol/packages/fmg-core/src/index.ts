@@ -20,7 +20,6 @@ export {
 import * as CountingApp from './test-app/counting-app';
 export { CountingApp };
 
-
 export {
   MessageSignature,
   Signature,
