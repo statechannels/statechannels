@@ -1,26 +1,32 @@
-import { Commitment, CommitmentType } from 'fmg-core';
+import { Commitment, CommitmentType, Uint32, Uint256, Address, Bytes } from 'fmg-core';
 import abi from 'web3-eth-abi';
 
 interface AppAttributes {
-  consensusCounter: string;
-  proposedAllocation: string[];
-  proposedDestination: string[];
+  consensusCounter: Uint32;
+  proposedAllocation: Uint256[];
+  proposedDestination: Address[];
 }
 
-function preFundSetupCommitment(opts) {
-  return { ...opts, commitmentType: CommitmentType.PreFundSetup, appAttributes: appAttributesString(opts) };
+interface ConsensusBaseCommitment extends Commitment {
+  consensusCounter: Uint32;
+  proposedAllocation: Uint256[];
+  proposedDestination: Address[];
 }
 
-function postFundSetupCommitment(opts) {
-  return { ...opts, commitmentType: CommitmentType.PostFundSetup, appAttributes: appAttributesString(opts) };
+function preFundSetupCommitment(opts: ConsensusBaseCommitment) {
+  return { ...opts, commitmentType: CommitmentType.PreFundSetup, appAttributes: bytesFromAppAttributes(opts) };
 }
 
-function appCommitment(opts) {
-  return { ...opts, commitmentType: CommitmentType.App, appAttributes: appAttributesString(opts) };
+function postFundSetupCommitment(opts: ConsensusBaseCommitment) {
+  return { ...opts, commitmentType: CommitmentType.PostFundSetup, appAttributes: bytesFromAppAttributes(opts) };
 }
 
-function concludeCommitment(opts) {
-  return { ...opts, commitmentType: CommitmentType.Conclude, appAttributes: appAttributesString(opts) };
+function appCommitment(opts: ConsensusBaseCommitment) {
+  return { ...opts, commitmentType: CommitmentType.App, appAttributes: bytesFromAppAttributes(opts) };
+}
+
+function concludeCommitment(opts: ConsensusBaseCommitment) {
+  return { ...opts, commitmentType: CommitmentType.Conclude, appAttributes: bytesFromAppAttributes(opts) };
 }
 
 export const commitments = {
@@ -30,7 +36,7 @@ export const commitments = {
   concludeCommitment,
 };
 
-export function appAttributes(consensusCommitmentArgs: [string, string[], string[]]): AppAttributes {
+export function appAttributes(consensusCommitmentArgs: [Uint32, Uint256[], Address[]]): AppAttributes {
   //
   return {
     consensusCounter: consensusCommitmentArgs[0],
@@ -47,12 +53,6 @@ const SolidityConsensusCommitmentType = {
   },
 };
 
-interface ConsensusBaseCommitment extends Commitment {
-  consensusCounter: number;
-  proposedAllocation: number[];
-  proposedDestination: string[];
-}
-
-export function appAttributesString(commitment: ConsensusBaseCommitment): string {
-  return abi.encodeParameter(SolidityConsensusCommitmentType, [commitment.consensusCounter, commitment.proposedAllocation, commitment.proposedDestination]);
+export function bytesFromAppAttributes(appAttrs: AppAttributes): Bytes {
+  return abi.encodeParameter(SolidityConsensusCommitmentType, [appAttrs.consensusCounter, appAttrs.proposedAllocation, appAttrs.proposedDestination]);
 }
