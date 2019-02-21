@@ -79,6 +79,7 @@ describe('CountingApp', () => {
   });
 
   it("doesn't allow transitions if totals don't match", async () => {
+    expect.assertions(1);
     await expectRevert(() => app.validTransition(args(commitment0), args(commitmentBalChange)), "CountingApp: allocations must be equal");
   });
 });
