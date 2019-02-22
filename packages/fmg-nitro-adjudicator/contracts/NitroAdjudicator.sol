@@ -80,7 +80,7 @@ contract NitroAdjudicator {
 
     function transfer(address channel, address destination, uint amount) public {
         require(
-            outcomes[channel].finalizedAt < now,
+            outcomes[channel].finalizedAt <= now,
             "Transfer: outcome must be final"
         );
         require(
@@ -221,6 +221,18 @@ contract NitroAdjudicator {
 
     function conclude(ConclusionProof memory proof) public {
         _conclude(proof);
+    }
+
+    function concludeAndWithdraw(ConclusionProof memory proof,address participant, address payable destination, uint amount, uint8 _v, bytes32 _r, bytes32 _s) public{
+        address channelId = proof.penultimateCommitment.channelId();
+        if (outcomes[channelId].finalizedAt > now || outcomes[channelId].finalizedAt == 0){
+        _conclude(proof);
+        }else{
+            require(keccak256(abi.encode(proof.penultimateCommitment)) ==   keccak256(abi.encode( outcomes[channelId].challengeCommitment)),
+            "concludeAndWithdraw: channel already concluded with a different proof");
+        }
+        transfer(channelId,participant, amount);
+        withdraw(participant,destination, amount, _v,_r,_s);
     }
 
     function forceMove(
