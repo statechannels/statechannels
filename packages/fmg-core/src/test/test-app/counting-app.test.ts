@@ -8,9 +8,8 @@ import CommitmentArtifact from '../../../build/contracts/Commitment.json';
 
 import CountingCommitmentArtifact from '../../../build/contracts/CountingCommitment.json';
 import CountingAppArtifact from '../../../build/contracts/CountingApp.json';
-import { CountingCommitment, args } from '../../test-app/counting-app';
+import { createCommitment, CountingCommitment, args } from '../../test-app/counting-app';
 import { BigNumber } from 'ethers/utils';
-import { CommitmentType } from '../../commitment';
 
 
 const provider = new ethers.providers.JsonRpcProvider('http://localhost:8545');
@@ -59,17 +58,16 @@ describe('CountingApp', () => {
 
 
 
-    commitment0 = { ...defaults, commitmentType: CommitmentType.App, turnNum: 6, appCounter: new BigNumber(1).toHexString(), commitmentCount: 1 };
-    commitment1 = { ...defaults, commitmentType: CommitmentType.App, turnNum: 7, appCounter: new BigNumber(2).toHexString(), commitmentCount: 2 };
+    commitment0 = createCommitment.app({ ...defaults, turnNum: 6, appCounter: new BigNumber(1).toHexString(), commitmentCount: 1 });
+    commitment1 = createCommitment.app({ ...defaults, turnNum: 7, appCounter: new BigNumber(2).toHexString(), commitmentCount: 2 });
 
-    commitmentBalChange = {
+    commitmentBalChange = createCommitment.app({
       ...defaults,
-      commitmentType: CommitmentType.App,
       allocation: [numberToHexString(6), numberToHexString(3)],
       turnNum: 7,
       appCounter: new BigNumber(2).toHexString(),
       commitmentCount: 2,
-    };
+    });
   });
 
   // Transition fuction tests
