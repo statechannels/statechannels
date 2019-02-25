@@ -23,10 +23,10 @@ export interface BaseCommitment {
   allocation: Uint256[];
   destination: Address[];
   commitmentCount: Uint32;
+  commitmentType: CommitmentType;
 }
 
 export interface Commitment extends BaseCommitment {
-  commitmentType: CommitmentType;
   appAttributes: string;
 }
 

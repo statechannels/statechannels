@@ -6,14 +6,14 @@ import {
   expectRevert,
   delay,
 } from 'magmo-devtools';
-import { Channel, ethereumArgs, toUint256 } from 'fmg-core';
+import { Channel, ethereumArgs, toUint256, CommitmentType } from 'fmg-core';
 
 import CommitmentArtifact from '../build/contracts/Commitment.json';
 import RulesArtifact from '../build/contracts/Rules.json';
 import ConsensusCommitmentArtifact from '../build/contracts/ConsensusCommitment.json';
 import ConsensusAppArtifact from '../build/contracts/ConsensusApp.json';
 
-import { commitments } from '../src/consensus-app';
+import { asCoreCommitment } from '../src/consensus-app';
 
 jest.setTimeout(20000);
 let consensusApp: ethers.Contract;
@@ -84,13 +84,15 @@ describe('ConsensusApp', () => {
   it.skip('reverts when the proposed allocation and the proposed destination are the incorrect length', async () => {
     // I think this test should fail, since this requirement prevents
     // the nitro protocol
-    const fromCommitment = commitments.appCommitment({
+    const fromCommitment = asCoreCommitment({
       ...defaults,
+      commitmentType: CommitmentType.App,
       turnNum: 6,
       consensusCounter: 0,
     });
-    const toCommitment = commitments.appCommitment({
+    const toCommitment = asCoreCommitment({
       ...defaults,
+      commitmentType: CommitmentType.App,
       allocation: proposedAllocation,
       destination: participants,
       turnNum: 6,
@@ -102,13 +104,15 @@ describe('ConsensusApp', () => {
   });
 
   it('reverts when the consensusCount does not increment and is not reset', async () => {
-    const fromCommitment = commitments.appCommitment({
+    const fromCommitment = asCoreCommitment({
       ...defaults,
+      commitmentType: CommitmentType.App,
       turnNum: 6,
       consensusCounter: 0,
     });
-    const toCommitment = commitments.appCommitment({
+    const toCommitment = asCoreCommitment({
       ...defaults,
+      commitmentType: CommitmentType.App,
       turnNum: 6,
       consensusCounter: 2,
 
@@ -117,13 +121,15 @@ describe('ConsensusApp', () => {
   });
 
   describe('when the consensus round has finished', () => {
-    const fromCommitment = commitments.appCommitment({
+    const fromCommitment = asCoreCommitment({
       ...defaults,
+      commitmentType: CommitmentType.App,
       turnNum: 6,
       consensusCounter: NUM_PARTICIPANTS - 1,
     });
     const toCommitmentArgs = {
       ...defaults,
+      commitmentType: CommitmentType.App,
       allocation: proposedAllocation,
       destination: proposedDestination,
       turnNum: 6,
@@ -131,12 +137,12 @@ describe('ConsensusApp', () => {
     };
 
     it('returns true when the current balances have properly been set', async () => {
-      const toCommitment = commitments.appCommitment(toCommitmentArgs);
+      const toCommitment = asCoreCommitment(toCommitmentArgs);
       validTransition(fromCommitment, toCommitment);
     });
 
     it('reverts when the consensusCounter is not reset', async () => {
-      const toCommitment = commitments.appCommitment({
+      const toCommitment = asCoreCommitment({
         ...toCommitmentArgs,
         consensusCounter: 1,
       });
@@ -145,7 +151,7 @@ describe('ConsensusApp', () => {
     });
 
     it('reverts when the new commitment\'s proposed allocation does not match the new commitment\'s current allocation ', async () => {
-      const toCommitment = commitments.appCommitment({
+      const toCommitment = asCoreCommitment({
         ...toCommitmentArgs,
         allocation: [toUint256(99)],
         destination: [participantA.address],
@@ -154,7 +160,7 @@ describe('ConsensusApp', () => {
       invalidTransition(fromCommitment, toCommitment, "ConsensusApp: newCommitment.currentAllocation must match newCommitment.proposedAllocation at the end of the consensus round");
     });
     it('reverts when the new commitment\'s proposed destination does not match the new commitment\'s current destination ', async () => {
-      const toCommitment = commitments.appCommitment({
+      const toCommitment = asCoreCommitment({
         ...toCommitmentArgs,
         destination: participants,
       });
@@ -164,21 +170,23 @@ describe('ConsensusApp', () => {
   });
 
   describe('when the consensus round is ongoing and the counter was not reset', () => {
-    const fromCommitment = commitments.appCommitment({
+    const fromCommitment = asCoreCommitment({
       ...defaults,
+      commitmentType: CommitmentType.App,
       consensusCounter: 0,
     });
     const toCommitmentArgs = {
       ...defaults,
+      commitmentType: CommitmentType.App,
       consensusCounter: 1,
     };
     it('returns true when the consensus round is ongoing and the proposed balances haven\'t changed', async () => {
-      const toCommitment = commitments.appCommitment(toCommitmentArgs);
+      const toCommitment = asCoreCommitment(toCommitmentArgs);
       validTransition(fromCommitment, toCommitment);
     });
 
     it('reverts when the currentAllocation changes', async () => {
-      const toCommitment = commitments.appCommitment({
+      const toCommitment = asCoreCommitment({
         ...toCommitmentArgs,
         allocation: [toUint256(99)],
         destination: [participantA.address],
@@ -187,7 +195,7 @@ describe('ConsensusApp', () => {
       invalidTransition(fromCommitment, toCommitment, "ConsensusApp: currentAllocations must match during consensus round");
     });
     it('reverts when the currentDestination changes', async () => {
-      const toCommitment = commitments.appCommitment({
+      const toCommitment = asCoreCommitment({
         ...toCommitmentArgs,
         allocation,
         destination: [participantB.address, participantA.address, participantC.address],
@@ -197,7 +205,7 @@ describe('ConsensusApp', () => {
     });
 
     it('reverts when the proposedAllocation changes', async () => {
-      const toCommitment = commitments.appCommitment({
+      const toCommitment = asCoreCommitment({
         ...toCommitmentArgs,
         proposedAllocation: [toUint256(99), toUint256(99)],
       });
@@ -206,7 +214,7 @@ describe('ConsensusApp', () => {
     });
 
     it('reverts when the proposedDestination changes', async () => {
-      const toCommitment = commitments.appCommitment({
+      const toCommitment = asCoreCommitment({
         ...toCommitmentArgs,
         proposedDestination: [participantB.address, participantA.address],
       });
@@ -216,29 +224,32 @@ describe('ConsensusApp', () => {
   });
 
   describe('when the consensus round is ongoing and the counter was reset', () => {
-    const fromCommitment = commitments.appCommitment({
+    const fromCommitment = asCoreCommitment({
       ...defaults,
+      commitmentType: CommitmentType.App,
       consensusCounter: 1,
     });
     const toCommitmentArgs = {
       ...defaults,
+      commitmentType: CommitmentType.App,
       consensusCounter: 0,
     };
     it('returns true when the consensus round is reset before the end of the round', async () => {
-      const toCommitment = commitments.appCommitment(toCommitmentArgs);
+      const toCommitment = asCoreCommitment(toCommitmentArgs);
       validTransition(fromCommitment, toCommitment);
     });
 
     it('reverts when the currentAllocation changes', async () => {
-      const toCommitment = commitments.appCommitment({
+      const toCommitment = asCoreCommitment({
         ...toCommitmentArgs,
+
         allocation: proposedAllocation,
       });
 
       invalidTransition(fromCommitment, toCommitment, "CountingApp: currentAllocations must be equal when resetting the consensusCounter before the end of the round");
     });
     it('reverts when the currentDestination changes', async () => {
-      const toCommitment = commitments.appCommitment({
+      const toCommitment = asCoreCommitment({
         ...toCommitmentArgs,
         allocation,
         destination: [participantB.address, participantA.address, participantC.address],
