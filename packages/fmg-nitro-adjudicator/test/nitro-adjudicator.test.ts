@@ -17,7 +17,7 @@ import { getCountingApp } from './CountingApp';
 import { channelID as getChannelID } from 'fmg-core/lib/channel';
 import { asCoreCommitment } from 'fmg-core/lib/test-app/counting-app';
 import { CountingCommitment } from 'fmg-core/src/test-app/counting-app';
-import { fromParameters } from 'fmg-core/lib/commitment';
+import { fromParameters, CommitmentType } from 'fmg-core/lib/commitment';
 
 jest.setTimeout(20000);
 let nitro: ethers.Contract;
@@ -149,50 +149,58 @@ describe('nitroAdjudicator', () => {
       commitmentCount: 1,
     };
 
-    commitment0 = CountingApp.createCommitment.app({
+    commitment0 = {
       ...defaults,
+      commitmentType: CommitmentType.App,
       appCounter: new BigNumber(1).toHexString(),
       turnNum: 6,
-    });
-    commitment1 = CountingApp.createCommitment.app({
+    };
+    commitment1 = {
+      commitmentType: CommitmentType.App,
       ...defaults,
       turnNum: 7,
       appCounter: new BigNumber(2).toHexString(),
-    });
-    commitment2 = CountingApp.createCommitment.app({
+    };
+    commitment2 = {
       ...defaults,
+      commitmentType: CommitmentType.App,
       turnNum: 8,
       appCounter: new BigNumber(3).toHexString(),
-    });
-    commitment3 = CountingApp.createCommitment.app({
+    };
+    commitment3 = {
       ...defaults,
+      commitmentType: CommitmentType.App,
       turnNum: 9,
       appCounter: new BigNumber(4).toHexString(),
-    });
-    commitment4 = CountingApp.createCommitment.conclude({
+    };
+    commitment4 = {
       ...defaults,
+      commitmentType: CommitmentType.Conclude,
       turnNum: 10,
       appCounter: new BigNumber(5).toHexString(),
-    });
-    commitment5 = CountingApp.createCommitment.conclude({
+    };
+    commitment5 = {
       ...defaults,
+      commitmentType: CommitmentType.Conclude,
       turnNum: 11,
       appCounter: new BigNumber(6).toHexString(),
-    });
-    commitment1alt = CountingApp.createCommitment.app({
+    };
+    commitment1alt = {
       ...defaults,
+      commitmentType: CommitmentType.App,
       channel,
       allocation: differentAllocation,
       turnNum: 7,
       appCounter: new BigNumber(2).toHexString(),
-    });
-    commitment2alt = CountingApp.createCommitment.app({
+    };
+    commitment2alt = {
       ...defaults,
+      commitmentType: CommitmentType.App,
       channel,
       allocation: differentAllocation,
       turnNum: 8,
       appCounter: new BigNumber(3).toHexString(),
-    });
+    };
 
     const { r: r0, s: s0, v: v0 } = sign(getHexForCommitment(commitment4), alice.privateKey);
     const { r: r1, s: s1, v: v1 } = sign(getHexForCommitment(commitment5), bob.privateKey);
@@ -722,7 +730,7 @@ describe('nitroAdjudicator', () => {
     describe('concludeAndWithdraw', () => {
       it('works when the channel is not concluded', async () => {
         const total = bigNumberify(aBal).add(bBal);
-          const channelId = getChannelID(channel);
+        const channelId = getChannelID(channel);
         await depositTo(channelId, total.toNumber());
         const startBal = await provider.getBalance(aliceDest.address);
         const allocatedAtStart = await nitro.holdings(channelId);
@@ -760,7 +768,7 @@ describe('nitroAdjudicator', () => {
         await depositTo(channelId, total.toNumber());
         const concludeTx = await nitro.conclude(conclusionProof);
         await concludeTx.wait();
-        
+
         const participant = alice.address;
         const destination = aliceDest.address;
         const senderAddr = await nitro.signer.getAddress();
