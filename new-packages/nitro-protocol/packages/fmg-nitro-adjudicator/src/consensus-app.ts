@@ -7,34 +7,15 @@ interface AppAttributes {
   proposedDestination: Address[];
 }
 
-interface ConsensusBaseCommitment extends BaseCommitment {
+export interface ConsensusCommitment extends BaseCommitment {
   consensusCounter: Uint32;
   proposedAllocation: Uint256[];
   proposedDestination: Address[];
 }
 
-function preFundSetupCommitment(opts: ConsensusBaseCommitment) {
-  return { ...opts, commitmentType: CommitmentType.PreFundSetup, appAttributes: bytesFromAppAttributes(opts) };
+export function asCoreCommitment(consensusCommitment: ConsensusCommitment) {
+  return { ...consensusCommitment, appAttributes: bytesFromAppAttributes(consensusCommitment) };
 }
-
-function postFundSetupCommitment(opts: ConsensusBaseCommitment) {
-  return { ...opts, commitmentType: CommitmentType.PostFundSetup, appAttributes: bytesFromAppAttributes(opts) };
-}
-
-function appCommitment(opts: ConsensusBaseCommitment) {
-  return { ...opts, commitmentType: CommitmentType.App, appAttributes: bytesFromAppAttributes(opts) };
-}
-
-function concludeCommitment(opts: ConsensusBaseCommitment) {
-  return { ...opts, commitmentType: CommitmentType.Conclude, appAttributes: bytesFromAppAttributes(opts) };
-}
-
-export const commitments = {
-  preFundSetupCommitment,
-  postFundSetupCommitment,
-  appCommitment,
-  concludeCommitment,
-};
 
 export function appAttributes(consensusCommitmentArgs: [Uint32, Uint256[], Address[]]): AppAttributes {
   //

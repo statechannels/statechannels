@@ -3,8 +3,8 @@ import linker from 'solc/linker';
 
 import { expectRevert } from 'magmo-devtools';
 
-import { createCommitment, args } from '../../test-app/counting-app';
-import { Channel } from '../..';
+import { args } from '../../test-app/counting-app';
+import { Channel, CommitmentType } from '../..';
 
 import CommitmentArtifact from '../../../build/contracts/Commitment.json';
 
@@ -86,8 +86,8 @@ describe('Rules', () => {
 
   describe('preFundSetup -> preFundSetup', () => {
     beforeEach(() => {
-      fromCommitment = createCommitment.preFundSetup({ ...defaults, turnNum: 0, commitmentCount: 0 });
-      toCommitment = createCommitment.preFundSetup({ ...defaults, turnNum: 1, commitmentCount: 1 });
+      fromCommitment = { ...defaults, commitmentType: CommitmentType.PreFundSetup, turnNum: 0, commitmentCount: 0 };
+      toCommitment = { ...defaults, commitmentType: CommitmentType.PreFundSetup, turnNum: 1, commitmentCount: 1 };
     });
 
     it('allows a valid transition', async () => {
@@ -132,8 +132,8 @@ describe('Rules', () => {
 
   describe('preFundSetup -> PostFundSetup', () => {
     beforeEach(() => {
-      fromCommitment = createCommitment.preFundSetup({ ...defaults, turnNum: 1, commitmentCount: 1 });
-      toCommitment = createCommitment.postFundSetup({ ...defaults, turnNum: 2, commitmentCount: 0 });
+      fromCommitment = { ...defaults, commitmentType: CommitmentType.PreFundSetup, turnNum: 1, commitmentCount: 1 };
+      toCommitment = { ...defaults, commitmentType: CommitmentType.PostFundSetup, turnNum: 2, commitmentCount: 0 };
     });
 
     it('allows a valid transition', async () => {
@@ -185,8 +185,8 @@ describe('Rules', () => {
 
   describe('preFundSetup -> conclude', () => {
     beforeEach(() => {
-      fromCommitment = createCommitment.preFundSetup({ ...defaults, turnNum: 1, commitmentCount: 1 });
-      toCommitment = createCommitment.conclude({ ...defaults, turnNum: 2, commitmentCount: 2 });
+      fromCommitment = { ...defaults, commitmentType: CommitmentType.PreFundSetup, turnNum: 1, commitmentCount: 1 };
+      toCommitment = { ...defaults, commitmentType: CommitmentType.Conclude, turnNum: 2, commitmentCount: 2 };
     });
 
     it('allows a valid transition', async () => {
@@ -226,8 +226,8 @@ describe('Rules', () => {
 
   describe('PostFundSetup -> PostFundSetup', () => {
     beforeEach(() => {
-      fromCommitment = createCommitment.postFundSetup({ ...defaults, turnNum: 1, commitmentCount: 0 });
-      toCommitment = createCommitment.postFundSetup({ ...defaults, turnNum: 2, commitmentCount: 1 });
+      fromCommitment = { ...defaults, commitmentType: CommitmentType.PostFundSetup, turnNum: 1, commitmentCount: 0 };
+      toCommitment = { ...defaults, commitmentType: CommitmentType.PostFundSetup, turnNum: 2, commitmentCount: 1 };
     });
 
     it('allows a valid transition', async () => {
@@ -267,8 +267,8 @@ describe('Rules', () => {
 
   describe('PostFundSetup -> App', () => {
     beforeEach(() => {
-      fromCommitment = createCommitment.postFundSetup({ ...defaults, turnNum: 3, commitmentCount: 1, appCounter: 0 });
-      toCommitment = createCommitment.app({ ...defaults, turnNum: 4, commitmentCount: 0, appCounter: 0, });
+      fromCommitment = { ...defaults, commitmentType: CommitmentType.PostFundSetup, turnNum: 3, commitmentCount: 1, appCounter: 0 };
+      toCommitment = { ...defaults, commitmentType: CommitmentType.App, turnNum: 4, commitmentCount: 0, appCounter: 0, };
     });
 
     it("rejects a transition where the fromCommitment is not the last player", async () => {
@@ -282,8 +282,8 @@ describe('Rules', () => {
 
   describe('PostFundSetup -> conclude', () => {
     beforeEach(() => {
-      fromCommitment = createCommitment.postFundSetup({ ...defaults, turnNum: 1, commitmentCount: 0 });
-      toCommitment = createCommitment.conclude({ ...defaults, turnNum: 2, commitmentCount: 1 });
+      fromCommitment = { ...defaults, commitmentType: CommitmentType.PostFundSetup, turnNum: 1, commitmentCount: 0 };
+      toCommitment = { ...defaults, commitmentType: CommitmentType.Conclude, turnNum: 2, commitmentCount: 1 };
     });
 
     it("rejects a transition where the turnNum doesn't increment", async () => {
@@ -330,13 +330,14 @@ describe('Rules', () => {
 
   describe('PostFundSetup -> app', () => {
     beforeEach(() => {
-      fromCommitment = createCommitment.postFundSetup({
+      fromCommitment = {
         ...defaults,
+        commitmentType: CommitmentType.PostFundSetup,
         turnNum: 1,
         commitmentCount: 1,
         appCounter: 3,
-      });
-      toCommitment = createCommitment.app({ ...defaults, turnNum: 2, appCounter: 4, commitmentCount: 0 });
+      };
+      toCommitment = { ...defaults, commitmentType: CommitmentType.App, turnNum: 2, appCounter: 4, commitmentCount: 0 };
     });
 
     it('allows a valid transition', async () => {
@@ -370,8 +371,8 @@ describe('Rules', () => {
 
   describe('app -> app', () => {
     beforeEach(() => {
-      fromCommitment = createCommitment.app({ ...defaults, turnNum: 1, appCounter: 3, commitmentCount: 0 });
-      toCommitment = createCommitment.app({ ...defaults, turnNum: 2, appCounter: 4, commitmentCount: 0 });
+      fromCommitment = { ...defaults, commitmentType: CommitmentType.App, turnNum: 1, appCounter: 3, commitmentCount: 0 };
+      toCommitment = { ...defaults, commitmentType: CommitmentType.App, turnNum: 2, appCounter: 4, commitmentCount: 0 };
     });
 
     it('allows a valid transition', async () => {
@@ -399,8 +400,8 @@ describe('Rules', () => {
 
   describe('app -> conclude', () => {
     beforeEach(() => {
-      fromCommitment = createCommitment.app({ ...defaults, turnNum: 1, appCounter: 3, commitmentCount: 0 });
-      toCommitment = createCommitment.conclude({ ...defaults, turnNum: 2, commitmentCount: 0 });
+      fromCommitment = { ...defaults, commitmentType: CommitmentType.App, turnNum: 1, appCounter: 3, commitmentCount: 0 };
+      toCommitment = { ...defaults, commitmentType: CommitmentType.Conclude, turnNum: 2, commitmentCount: 0 };
     });
 
     it('allows a valid transition', async () => {
@@ -434,8 +435,8 @@ describe('Rules', () => {
 
   describe('conclude -> conclude', () => {
     beforeEach(() => {
-      fromCommitment = createCommitment.conclude({ ...defaults, turnNum: 1, commitmentCount: 1 });
-      toCommitment = createCommitment.conclude({ ...defaults, turnNum: 2, commitmentCount: 2 });
+      fromCommitment = { ...defaults, commitmentType: CommitmentType.Conclude, turnNum: 1, commitmentCount: 1 };
+      toCommitment = { ...defaults, commitmentType: CommitmentType.Conclude, turnNum: 2, commitmentCount: 2 };
     });
 
     it('allows a valid transition', async () => {
