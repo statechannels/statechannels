@@ -4,12 +4,12 @@ import {
   getNetworkId,
   getGanacheProvider,
 } from 'magmo-devtools';
-import { Channel, asEthersObject, Commitment, CommitmentType } from 'fmg-core';
+import { Channel, asEthersObject, Commitment } from 'fmg-core';
 import CommitmentArtifact from '../build/contracts/Commitment.json';
 import ConsensusCommitmentArtifact from '../build/contracts/ConsensusCommitment.json';
 import TestConsensusCommitmentArtifact from '../build/contracts/TestConsensusCommitment.json';
 
-import { asCoreCommitment } from '../src/consensus-app';
+import { commitments as ConsensusApp } from '../src/consensus-app';
 
 jest.setTimeout(20000);
 let consensusCommitment: ethers.Contract;
@@ -53,7 +53,7 @@ describe('ConsensusCommitment', () => {
 
   const channel: Channel = { channelType: participantB.address, channelNonce: 0, participants }; // just use any valid address
   const defaults = { channel, allocation, destination: participants };
-  const commitment: Commitment = asCoreCommitment({ ...defaults, commitmentType: CommitmentType.App, turnNum: 6, commitmentCount: 0, consensusCounter: 1, proposedAllocation, proposedDestination, });
+  const commitment: Commitment = ConsensusApp.appCommitment({ ...defaults, turnNum: 6, commitmentCount: 0, consensusCounter: 1, proposedAllocation, proposedDestination, });
 
   it('works', async () => {
     await setupContracts();
