@@ -22,7 +22,6 @@ export enum StateName {
   WaitToResign = "WAIT_TO_RESIGN",
   OpponentResigned = "OPPONENT_RESIGNED",
   WaitForResignationAcknowledgement = "WAIT_FOR_RESIGNATION_ACKNOWLEDGEMENT",
-  GameOver = "GAME_OVER",
   WaitForWithdrawal = "WAIT_FOR_WITHDRAWAL",
   XsPickChallengeMove = "XS_PICK_CHALLENGE_MOVE",
   OsPickChallengeMove = "OS_PICK_CHALLENGE_MOVE",
@@ -384,13 +383,6 @@ export function waitForResignationAcknowledgement<T extends HasResult>(
   };
 }
 
-export interface GameOver extends HasResult {
-  name: StateName.GameOver;
-}
-export function gameOver<T extends HasResult>(state: T): GameOver {
-  return { ...hasResult(state), name: StateName.GameOver };
-}
-
 export interface WaitForWithdrawal extends HasResult {
   name: StateName.WaitForWithdrawal;
 }
@@ -415,7 +407,6 @@ export type PlayingState =
   | WaitToResign
   | OpponentResigned
   | WaitForResignationAcknowledgement
-  | GameOver
   | WaitForWithdrawal
   | XsPickChallengeMove
   | OsPickChallengeMove

@@ -216,7 +216,7 @@ const osChoosing = siteStateFromGameState(
 const osWaiting = siteStateFromGameState(
   states.osWaitForOpponentToPickMove({
     ...shared,
-    noughts: 0b000000000,
+    noughts: 0b010000000,
     crosses: 0b000000001,
     you: Marker.noughts,
     player: Player.PlayerB,
@@ -231,7 +231,7 @@ const osVictory = siteStateFromGameState(
   states.waitToPlayAgain({
     ...shared,
     noughts: 0b001001001,
-    crosses: 0b000010010,
+    crosses: 0b100010010,
     you: Marker.noughts,
     player: Player.PlayerB,
     result: Result.YouWin,
@@ -244,7 +244,7 @@ const osVictory = siteStateFromGameState(
 const osDefeat = siteStateFromGameState(
   states.playAgain({
     ...shared,
-    noughts: 0b000001011,
+    noughts: 0b000001001,
     crosses: 0b111010000,
     you: Marker.noughts,
     player: Player.PlayerB,
@@ -270,7 +270,7 @@ const osTie = siteStateFromGameState(
 );
 
 const winnerGameOver = siteStateFromGameState(
-  states.gameOver({
+  states.waitToPlayAgain({
     ...shared,
     noughts: 0b000011000,
     crosses: 0b111000000,
@@ -285,7 +285,7 @@ const winnerGameOver = siteStateFromGameState(
 );
 
 const loserGameOver = siteStateFromGameState(
-  states.gameOver({
+  states.playAgain({
     ...shared,
     noughts: 0b000011000,
     crosses: 0b111000000,
@@ -299,8 +299,30 @@ const loserGameOver = siteStateFromGameState(
   })
 );
 
-const osChoosingWithRules: SiteState = osChoosing;
-osChoosingWithRules.overlay.rulesVisible = true;
+const xsPickgWithRules: SiteState = {
+  ...lobbyState,
+    overlay: {
+      rulesVisible: true,
+      walletVisible: false,
+    },
+    game: {
+      messageState: {},
+      gameState: states.xsPickMove({
+        ...shared,
+        noughts: 0b000000000,
+        crosses: 0b000000000,
+        you: Marker.crosses,
+        player: Player.PlayerA,
+        result: Imperative.Choose,
+        onScreenBalances: finneyFourSix,
+        turnNum: 5,
+        balances: finneyFiveFive,
+      }),
+    },
+  };
+
+
+
 
 const joinOpenGame = () => console.log("join open game");
 
@@ -354,4 +376,4 @@ storiesOf("Game Over", module)
   .add("Loser", testState(loserGameOver));
 
 storiesOf("Rules", module)
-  .add("Choosing With Rules", testState(osChoosingWithRules));
+  .add("Xs Picking With Rules", testState(xsPickgWithRules));
