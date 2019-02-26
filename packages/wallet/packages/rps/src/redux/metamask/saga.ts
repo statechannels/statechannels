@@ -16,6 +16,7 @@ export default function* checkMetamask() {
 
   try {
     const targetNetworkName = process.env.TARGET_NETWORK;
+    ethereum.enable();
     const selectedNetworkId = parseInt(yield cps(web3.version.getNetwork), 10);
     // Find the network name that matches the currently selected network id
     const selectedNetworkName = Object.keys(truffle.networks).find(networkName =>

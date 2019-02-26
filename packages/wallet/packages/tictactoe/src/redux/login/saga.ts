@@ -1,4 +1,4 @@
-import { call, fork, put, take, takeEvery, cps } from 'redux-saga/effects';
+import { call, fork, put, take, takeEvery, cps, all } from 'redux-saga/effects';
 
 import * as loginActions from './actions';
 import { reduxSagaFirebase } from '../../gateways/firebase';
@@ -61,13 +61,14 @@ export default function* loginRootSaga() {
   }
 
   yield fork(loginStatusWatcherSaga);
-  yield [
+  yield all([
     takeEvery(loginActions.LOGIN_REQUEST, loginSaga),
     takeEvery(loginActions.LOGOUT_REQUEST, logoutSaga),
-  ];
+  ]);
 }
 
 function* getLibraryAddress() {
+  ethereum.enable();
   const selectedNetworkId = parseInt(yield cps(web3.version.getNetwork), 10);
   if (!TTTGameArtifact.networks || !TTTGameArtifact.networks[selectedNetworkId]) {
     return undefined;

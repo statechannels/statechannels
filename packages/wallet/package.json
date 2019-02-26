@@ -3,6 +3,7 @@
     "lerna": "^3.10.1"
   },
   "name": "apps",
+  "license": "MIT",
 
   "scripts": {
     "test:ci": "test:ci",

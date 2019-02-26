@@ -1,6 +1,7 @@
 {
   "name": "wallet",
   "version": "0.1.0",
+  "license": "MIT",
   "private": true,
   "main": "index.js",
   "module": "src/index.js",
