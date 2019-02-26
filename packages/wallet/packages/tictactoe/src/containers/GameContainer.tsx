@@ -2,22 +2,19 @@ import React, { Fragment } from "react";
 import { connect } from "react-redux";
 
 import { SiteState } from "../redux/reducer";
-import { Marker, Player } from "../core";
+import { Marker } from "../core";
 import GameScreen from "../components/GameScreen";
 import ProfileContainer from "./ProfileContainer";
 import WaitingRoomPage from "../components/WaitingRoomPage";
 import ConfirmGamePage from "../components/ConfirmGamePage";
 import GameProposedPage from "../components/GameProposedPage";
 import PlayAgain from "../components/PlayAgain";
-import PlayAgainWait from "../components/PlayAgainWait";
 import WaitToResign from "../components/WaitToResign";
 import WaitForResignationAcknowledgement from "../components/WaitForResignationAcknowledgement";
-import GameOverPage from "../components/GameOverPage";
-
 import WaitForWallet from "../components/WaitForWallet"; // WaitForFunding, maybe others?
 
 import { Marks } from "../core";
-import { GameState, StateName, PlayingState } from '../redux/game/state';
+import { GameState, StateName } from '../redux/game/state';
 import * as actions from "../redux/game/actions";
 
 interface GameProps {
@@ -50,8 +47,6 @@ function RenderGame(props: GameProps) {
     resign,
     conclude,
   } = props;
-  const { player, turnNum } = (state as PlayingState);
-  const ourTurn = player === Player.PlayerA ? turnNum % 2 !== 0 : turnNum % 2 === 0;
   switch (state.name) {
     case StateName.NoName:
       return <ProfileContainer />;
@@ -133,6 +128,7 @@ function RenderGame(props: GameProps) {
       );
       case StateName.PlayAgainChallengeMove:
       case StateName.PlayAgain:
+      case StateName.WaitToPlayAgain:
       return (
         <PlayAgain
           noughts={state.noughts}
@@ -143,43 +139,17 @@ function RenderGame(props: GameProps) {
           onScreenBalances={state.onScreenBalances}
           // onScreenBalances={state.balances}
           marksMade={marksMade}
+          conclude={conclude}
           playAgain={playAgain}
           resign={resign}
-        />
-      );
-    case StateName.WaitToPlayAgain:
-      return (
-        <PlayAgainWait
-          noughts={state.noughts}
-          crosses={state.crosses}
-          you={state.you}
-          player={state.player}
-          result={state.result}
-          onScreenBalances={state.onScreenBalances}
-          // onScreenBalances={state.balances}
-          marksMade={marksMade}
-          playAgain={playAgain}
-          resign={resign}
+          turnNum={state.turnNum}
+          roundBuyIn={state.roundBuyIn}
         />
       );
     case StateName.WaitToResign:
       return <WaitToResign />;
     case StateName.WaitForResignationAcknowledgement:
       return <WaitForResignationAcknowledgement />;
-    case StateName.GameOver:
-      return (
-        <GameOverPage
-          visible={
-            state.name === StateName.GameOver
-          }
-          conclude={conclude}
-          ourTurn={ourTurn}
-          noughts={state.noughts}
-          crosses={state.crosses}
-          you={state.you}
-          marksMade={marksMade}
-        />
-      );
     case StateName.WaitForFunding:
       return <WaitForWallet reason={"Waiting for funding confirmation."} />;
     case StateName.WaitForWithdrawal:

@@ -16,11 +16,11 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%,-50%);
+  width: 220px;
 }
 
 .footer-resign:hover, .footer-challenge:hover, .footer-playagain:hover {
   color: $black;
-  width: 188px;
   height: 40px;
   border-radius: 5px;
   border: $black;

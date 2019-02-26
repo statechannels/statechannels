@@ -12,6 +12,7 @@ export default class LandingPage extends React.PureComponent {
         <p>The Magmo wallet cannot be directly accessed from here.</p>
         <p>Check out some of the applications that use the Magmo wallet:</p>
         <p><a href="https://rps.magmo.com">Rock Paper Scissors (by Magmo)</a></p>
+        <p><a href="https://ttt.magmo.com">Tic Tac Toe (by Magmo)</a></p>
       </div>
     );
   }
