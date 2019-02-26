@@ -43,17 +43,12 @@ export default class Board extends React.PureComponent<Props> {
     } else { return this.blankRenderMark(this.props.you); } 
   }
 
-
   noWinRenderMark(noughts: Marks, crosses: Marks, position: Marks) {
     if ((crosses & position) === position) {
-      if (this.crucialMark(crosses, position)) {
-        return (<span className="xs tile">×</span>);
-      } else { return (<span className="xs tile">×</span>); }
+      return (<span className="xs tile">×</span>);
     }
     if ((noughts & position) === position) {
-      if (this.crucialMark(noughts, position)) {
-        return (<span className="os tile">○</span>);
-      } else { return (<span className="os tile">○</span >); }
+      return (<span className="os tile">○</span >); 
     } else { return this.blankRenderMark(this.props.you); }
   }
 

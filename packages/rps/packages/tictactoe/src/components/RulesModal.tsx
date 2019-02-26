@@ -18,9 +18,8 @@ export const RulesModal = (props: Props) => {
           <li><span className="xs">×</span> always plays first.</li>
           <li>Players takes turns making a single mark in an unmarked cell.</li>
           <li>Three marks of a kind in a row, column or diagonal is always a win.</li>
-          <li>A full board is a draw.</li>
           <li>A loser is granted the right to play as <span className="xs">×</span> in the next round.</li>
-          <li>In the event of a draw, players exchange roles (○ ↔ <span className="xs">×</span>).</li>
+          <li>A full board is a draw: players then exchange roles (○ ↔ <span className="xs">×</span>).</li>
           </ul>
         Funds:
         <ul>

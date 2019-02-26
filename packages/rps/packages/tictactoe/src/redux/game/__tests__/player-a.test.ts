@@ -248,7 +248,7 @@ describe("player A's app", () => {
         });
         const updatedState = gameReducer({ messageState, gameState }, action1);
 
-        itTransitionsTo(state.StateName.GameOver, updatedState);
+        itTransitionsTo(state.StateName.PlayAgain, updatedState);
         itIncreasesTurnNumBy(1, { gameState, messageState }, updatedState);
         itFullySwingsTheBalancesToB(
           roundBuyIn,
@@ -296,18 +296,18 @@ describe("player A's app", () => {
     });
   });
 
-  describe('when in GameOver', () => {
-    const gameState = state.gameOver({ ...aProps, ...noughtsabsolutevictory, result: Result.YouLose });
+  describe('when in Wait To Play Again, and without sufficient funds', () => {
+    const gameState = state.waitToPlayAgain({ ...aProps, ...noughtsabsolutevictory, result: Result.YouLose });
 
-    describe('when the player wants to finish the game', () => {
-      const action = actions.resign();
+    describe('when the player launches a challenge', () => {
+      const action = actions.createChallenge();
       const updatedState = gameReducer({ messageState, gameState }, action);
 
-      itTransitionsTo(state.StateName.WaitForWithdrawal, updatedState);
+      // itTransitionsTo(state.StateName.WaitForWithdrawal, updatedState);
       itIncreasesTurnNumBy(0, { gameState, messageState }, updatedState);
 
-      it('requests a conclude from the wallet', () => {
-        expect(updatedState.messageState.walletOutbox).toEqual({ type: 'CONCLUDE_REQUESTED' });
+      it('requests a challenge in the wallet', () => {
+        expect(updatedState.messageState.walletOutbox).toEqual({ type: 'CHALLENGE_REQUESTED' });
       });
     });
   });
