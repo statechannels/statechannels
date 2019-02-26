@@ -1,8 +1,17 @@
-export { State } from './state';
+export {
+  Commitment,
+  BaseCommitment,
+  CommitmentType,
+  toHex,
+  fromHex,
+  ethereumArgs,
+  asEthersObject,
+} from './commitment';
 export { Channel } from './channel';
 export {
   toHex32,
   padBytes32,
+  toUint256,
   sign,
   recover,
   decodeSignature,
@@ -10,8 +19,17 @@ export {
   SolidityParameter,
 } from './utils';
 
-// TODO: these should probably be in their own package
-export { default as expectRevert } from './test/helpers/expect-revert';
-export { increaseTime, DURATION } from './test/helpers/increase-time';
+import * as CountingApp from './test-app/counting-app';
+export { CountingApp };
 
-export { CountingGame } from './test-game/counting-game';
+export {
+  MessageSignature,
+  Signature,
+  Address,
+  Uint256,
+  Uint32,
+  Uint8,
+  Bytes32,
+  Bytes,
+  Byte,
+} from './types';

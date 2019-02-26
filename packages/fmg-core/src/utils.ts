@@ -1,5 +1,6 @@
 import Web3 from 'web3';
-import { Signature } from 'web3/eth/accounts';
+import { MessageSignature, Signature, Uint256 } from './types';
+import { bigNumberify } from 'ethers/utils';
 
 // TODO: write some jest tests for utils.
 
@@ -15,6 +16,10 @@ export function padBytes32(data) {
     x = 0 + x;
   }
   return '0x' + x;
+}
+
+export function toUint256(num: number): Uint256 {
+  return bigNumberify(num).toHexString();
 }
 
 // https://stackoverflow.com/a/42203200
@@ -43,18 +48,17 @@ export class SolidityParameter {
   }
 }
 
-// TODO: Figure out how to export this type from index.ts
-type SignableData = string | SolidityParameter | SolidityParameter[];
+export type SignableData = string | SolidityParameter | SolidityParameter[];
 
-export function sign(data: SignableData, privateKey): { v: string; r: string; s: string } {
+
+export function sign(data: SignableData, privateKey): MessageSignature {
   const localWeb3 = new Web3('');
-  const account: any = localWeb3.eth.accounts.privateKeyToAccount(privateKey);
-  return localWeb3.eth.accounts.sign(hash(data), account.privateKey) as Signature;
+  return localWeb3.eth.accounts.sign(hash(data), privateKey) as MessageSignature;
 }
 
-export function recover(data: SignableData, v: string, r: string, s: string): string {
+export function recover(data: SignableData, signature: Signature): string {
   const web3 = new Web3('');
-  return web3.eth.accounts.recover(hash(data), v, r, s);
+  return web3.eth.accounts.recover(signature as MessageSignature, hash(data));
 }
 
 function hash(data: SignableData): string {

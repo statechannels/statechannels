@@ -1,40 +1,41 @@
 import { ethers, ContractFactory } from 'ethers';
 import linker from 'solc/linker';
 
-import expectRevert from '../helpers/expect-revert';
+import { expectRevert } from 'magmo-devtools';
 
-import { CountingGame } from '../../test-game/counting-game';
+import { createCommitment, args } from '../../test-app/counting-app';
 import { Channel } from '../..';
 
-import StateArtifact from '../../../build/contracts/State.json';
+import CommitmentArtifact from '../../../build/contracts/Commitment.json';
 
 import RulesArtifact from '../../../build/contracts/Rules.json';
 import TestRulesArtifact from '../../../build/contracts/TestRules.json';
 
-import CountingStateArtifact from '../../../build/contracts/CountingState.json';
-import CountingGameArtifact from '../../../build/contracts/CountingGame.json';
+import CountingCommitmentArtifact from '../../../build/contracts/CountingCommitment.json';
+import CountingAppArtifact from '../../../build/contracts/CountingApp.json';
 
 const provider = new ethers.providers.JsonRpcProvider('http://localhost:8545');
 const signer = provider.getSigner();
 
 const TURN_NUM_MUST_INCREMENT = "turnNum must increase by 1";
 const CHANNEL_ID_MUST_MATCH = "channelId must match";
-const resolutionsMustEqual = (stateType) => `${stateType}: resolutions must be equal`;
-const gameAttributesMustMatch = (stateType) => `${stateType}: gameAttributes must be equal`;
-const stateCountMustIncrement = (stateType) => `${stateType}: stateCount must increase by 1`;
-const stateCountMustReset = (stateType, nextStateType) => `${stateType}: stateCount must be reset when transitioning to ${nextStateType}`;
-const stateTypeMustBe = (stateType, nextStateType) => `${stateType}: stateType must be ${nextStateType}`;
+const allocationsMustEqual = (commitmentType) => `${commitmentType}: allocations must be equal`;
+const destinationsMustEqual = (commitmentType) => `${commitmentType}: destinations must be equal`;
+const appAttributesMustMatch = (commitmentType) => `${commitmentType}: appAttributes must be equal`;
+const commitmentCountMustIncrement = (commitmentType) => `${commitmentType}: commitmentCount must increase by 1`;
+const commitmentCountMustReset = (commitmentType, nextCommitmentType) => `${commitmentType}: commitmentCount must be reset when transitioning to ${nextCommitmentType}`;
+const commitmentTypeMustBe = (commitmentType, nextCommitmentType) => `${commitmentType}: commitmentType must be ${nextCommitmentType}`;
 
 describe('Rules', () => {
 
-  let channel;
-  let otherChannel;
+  let channel: Channel;
+  let otherChannel: Channel;
   let defaults;
 
   let testFramework;
 
-  const resolution = [12, 13];
-  const otherResolution = [10, 15];
+  const allocation = [12, 13];
+  const otherallocation = [10, 15];
 
   const participantA = new ethers.Wallet(
     '6cbed15c793ce57650b9877cf6fa156fbef513c4e6134f022a85b1ffdd59b2a1',
@@ -43,343 +44,426 @@ describe('Rules', () => {
     '6370fd033278c143179d81c5526140625662b8daa446c22ee2d73db3707e620c',
   );
   const participants = [participantA.address, participantB.address];
+  const destination = [participantA.address, participantB.address];
+  const otherDestination = [participantB.address, participantA.address];
 
-  let fromState;
-  let toState;
+  let fromCommitment;
+  let toCommitment;
 
 
   beforeAll(async () => {
     // Contract setup --------------------------------------------------------------------------
     const networkId = (await provider.getNetwork()).chainId;
-    CountingStateArtifact.bytecode = linker.linkBytecode(CountingStateArtifact.bytecode, {
-      State: StateArtifact.networks[networkId].address,
+    CountingCommitmentArtifact.bytecode = linker.linkBytecode(CountingCommitmentArtifact.bytecode, {
+      Commitment: CommitmentArtifact.networks[networkId].address,
     });
 
-    CountingGameArtifact.bytecode = linker.linkBytecode(CountingGameArtifact.bytecode, {
-      CountingState: CountingStateArtifact.networks[networkId].address,
+    CountingAppArtifact.bytecode = linker.linkBytecode(CountingAppArtifact.bytecode, {
+      CountingCommitment: CountingCommitmentArtifact.networks[networkId].address,
     });
-    const gameContract = await ContractFactory.fromSolidity(CountingGameArtifact, signer).attach(
-      CountingGameArtifact.networks[networkId].address,
+    const appContract = await ContractFactory.fromSolidity(CountingAppArtifact, signer).attach(
+      CountingAppArtifact.networks[networkId].address,
     );
 
-    otherChannel = new Channel(gameContract.address, 1, participants);
+    otherChannel = { channelType: appContract.address, channelNonce: 1, participants };
 
     RulesArtifact.bytecode = linker.linkBytecode(RulesArtifact.bytecode, {
-      State: StateArtifact.networks[networkId].address,
+      Commitment: CommitmentArtifact.networks[networkId].address,
     });
 
-    TestRulesArtifact.bytecode = linker.linkBytecode(TestRulesArtifact.bytecode, { "State": StateArtifact.networks[networkId].address });
+    TestRulesArtifact.bytecode = linker.linkBytecode(TestRulesArtifact.bytecode, { "Commitment": CommitmentArtifact.networks[networkId].address });
     TestRulesArtifact.bytecode = linker.linkBytecode(TestRulesArtifact.bytecode, { "Rules": RulesArtifact.networks[networkId].address });
     testFramework = await ContractFactory.fromSolidity(TestRulesArtifact, signer).deploy();
     // Contract setup --------------------------------------------------------------------------
 
-    channel = new Channel(gameContract.address, 0, participants);
-    defaults = { channel, resolution, gameCounter: 0 };
+    channel = { channelType: appContract.address, channelNonce: 0, participants };
+    defaults = { channel, allocation, destination, appCounter: 0 };
   });
 
-  const validTransition = async (state1, state2) => {
-    return await testFramework.validTransition(state1.args, state2.args);
+  const validTransition = async (commitment1, commitment2) => {
+    return await testFramework.validTransition(args(commitment1), args(commitment2));
   };
 
   describe('preFundSetup -> preFundSetup', () => {
     beforeEach(() => {
-      fromState = CountingGame.preFundSetupState({ ...defaults, turnNum: 0, stateCount: 0 });
-      toState = CountingGame.preFundSetupState({ ...defaults, turnNum: 1, stateCount: 1 });
+      fromCommitment = createCommitment.preFundSetup({ ...defaults, turnNum: 0, commitmentCount: 0 });
+      toCommitment = createCommitment.preFundSetup({ ...defaults, turnNum: 1, commitmentCount: 1 });
     });
 
     it('allows a valid transition', async () => {
-      expect(await validTransition(fromState, toState)).toEqual(true);
+      expect(await validTransition(fromCommitment, toCommitment)).toEqual(true);
     });
 
     it("rejects a transition where the turnNum doesn't increment", async () => {
-      toState.turnNum = fromState.turnNum;
-      await expectRevert(validTransition(fromState, toState), TURN_NUM_MUST_INCREMENT); // passes
+      toCommitment.turnNum = fromCommitment.turnNum;
+      expect.assertions(1);
+      await expectRevert(() => validTransition(fromCommitment, toCommitment), TURN_NUM_MUST_INCREMENT); // passes
     });
 
     it('rejects any transition where the channel changes', async () => {
-      toState.channel = otherChannel;
-      await expectRevert(validTransition(fromState, toState), CHANNEL_ID_MUST_MATCH);
+      toCommitment.channel = otherChannel;
+      expect.assertions(1);
+      await expectRevert(() => validTransition(fromCommitment, toCommitment), CHANNEL_ID_MUST_MATCH);
     });
 
     it('rejects a transition where the balances changes', async () => {
-      toState.resolution = otherResolution;
-      await expectRevert(validTransition(fromState, toState), resolutionsMustEqual("PreFundSetup"));
+      toCommitment.allocation = otherallocation;
+      expect.assertions(1);
+      await expectRevert(() => validTransition(fromCommitment, toCommitment), allocationsMustEqual("PreFundSetup"));
     });
+
+    it('rejects a transition where the destination changes', async () => {
+      toCommitment.destination = otherDestination;
+      expect.assertions(1);
+      await expectRevert(() => validTransition(fromCommitment, toCommitment), destinationsMustEqual("PreFundSetup"));
+    });
+
     it("rejects a transition where the count doesn't increment", async () => {
-      toState.stateCount = fromState.stateCount;
-      await expectRevert(validTransition(fromState, toState), stateCountMustIncrement("PreFundSetup"));
+      toCommitment.commitmentCount = fromCommitment.commitmentCount;
+      expect.assertions(1);
+      await expectRevert(() => validTransition(fromCommitment, toCommitment), commitmentCountMustIncrement("PreFundSetup"));
     });
-    it('rejects a transition where the game attributes changes', async () => {
-      toState.gameCounter = 45;
-      await expectRevert(validTransition(fromState, toState), gameAttributesMustMatch("PreFundSetup"));
+    it('rejects a transition where the app attributes changes', async () => {
+      toCommitment.appCounter = 45;
+      expect.assertions(1);
+      await expectRevert(() => validTransition(fromCommitment, toCommitment), appAttributesMustMatch("PreFundSetup"));
     });
   });
 
   describe('preFundSetup -> PostFundSetup', () => {
     beforeEach(() => {
-      fromState = CountingGame.preFundSetupState({ ...defaults, turnNum: 1, stateCount: 1 });
-      toState = CountingGame.postFundSetupState({ ...defaults, turnNum: 2, stateCount: 0 });
+      fromCommitment = createCommitment.preFundSetup({ ...defaults, turnNum: 1, commitmentCount: 1 });
+      toCommitment = createCommitment.postFundSetup({ ...defaults, turnNum: 2, commitmentCount: 0 });
     });
 
     it('allows a valid transition', async () => {
-      expect(await validTransition(fromState, toState)).toBeTruthy();
+      expect(await validTransition(fromCommitment, toCommitment)).toBeTruthy();
     });
 
     it("rejects a transition where the turnNum doesn't increment", async () => {
-      toState.turnNum = fromState.turnNum;
-      await expectRevert(validTransition(fromState, toState), TURN_NUM_MUST_INCREMENT);
+      toCommitment.turnNum = fromCommitment.turnNum;
+      expect.assertions(1);
+      await expectRevert(() => validTransition(fromCommitment, toCommitment), TURN_NUM_MUST_INCREMENT);
     });
 
     it('rejects any transition where the channel changes', async () => {
-      toState.channel = otherChannel;
-      await expectRevert(validTransition(fromState, toState), CHANNEL_ID_MUST_MATCH);
+      toCommitment.channel = otherChannel;
+      expect.assertions(1);
+      await expectRevert(() => validTransition(fromCommitment, toCommitment), CHANNEL_ID_MUST_MATCH);
     });
 
-    it('rejects a transition not from the last preFundSetup state', async () => {
-      fromState.stateCount = 0;
-      await expectRevert(validTransition(fromState, toState), stateTypeMustBe("PreFundSetup", "PreFundSetup"));
+    it('rejects a transition not from the last preFundSetup Commitment', async () => {
+      fromCommitment.commitmentCount = 0;
+      expect.assertions(1);
+      await expectRevert(() => validTransition(fromCommitment, toCommitment), commitmentTypeMustBe("PreFundSetup", "PreFundSetup"));
     });
 
     it('rejects a transition where the balances changes', async () => {
-      toState.resolution = otherResolution;
-      await expectRevert(validTransition(fromState, toState), resolutionsMustEqual("PreFundSetup"));
+      toCommitment.allocation = otherallocation;
+      expect.assertions(1);
+      await expectRevert(() => validTransition(fromCommitment, toCommitment), allocationsMustEqual("PreFundSetup"));
+    });
+
+    it('rejects a transition where the destination changes', async () => {
+      toCommitment.destination = otherDestination;
+      expect.assertions(1);
+      await expectRevert(() => validTransition(fromCommitment, toCommitment), destinationsMustEqual("PreFundSetup"));
     });
 
     it("rejects a transition where the count doesn't reset", async () => {
-      toState.stateCount = 2;
-      await expectRevert(validTransition(fromState, toState), stateCountMustReset("PreFundSetup", "PostFundSetup"));
+      toCommitment.commitmentCount = 2;
+      expect.assertions(1);
+      await expectRevert(() => validTransition(fromCommitment, toCommitment), commitmentCountMustReset("PreFundSetup", "PostFundSetup"));
     });
 
     it('rejects a transition where the position changes', async () => {
-      toState.gameCounter = 45;
-      await expectRevert(validTransition(fromState, toState), gameAttributesMustMatch("PreFundSetup"));
+      toCommitment.appCounter = 45;
+      expect.assertions(1);
+      await expectRevert(() => validTransition(fromCommitment, toCommitment), appAttributesMustMatch("PreFundSetup"));
     });
   });
 
   describe('preFundSetup -> conclude', () => {
     beforeEach(() => {
-      fromState = CountingGame.preFundSetupState({ ...defaults, turnNum: 1, stateCount: 1 });
-      toState = CountingGame.concludeState({ ...defaults, turnNum: 2 });
+      fromCommitment = createCommitment.preFundSetup({ ...defaults, turnNum: 1, commitmentCount: 1 });
+      toCommitment = createCommitment.conclude({ ...defaults, turnNum: 2, commitmentCount: 2 });
     });
 
     it('allows a valid transition', async () => {
-      expect(await validTransition(fromState, toState)).toBeTruthy();
+      expect(await validTransition(fromCommitment, toCommitment)).toBeTruthy();
     });
 
     it("rejects a transition where the turnNum doesn't increment", async () => {
-      toState.turnNum = fromState.turnNum;
-      await expectRevert(validTransition(fromState, toState), TURN_NUM_MUST_INCREMENT);
+      toCommitment.turnNum = fromCommitment.turnNum;
+      expect.assertions(1);
+      await expectRevert(() => validTransition(fromCommitment, toCommitment), TURN_NUM_MUST_INCREMENT);
     });
 
     it('rejects any transition where the channel changes', async () => {
-      toState.channel = otherChannel;
-      await expectRevert(validTransition(fromState, toState), CHANNEL_ID_MUST_MATCH);
+      toCommitment.channel = otherChannel;
+      expect.assertions(1);
+      await expectRevert(() => validTransition(fromCommitment, toCommitment), CHANNEL_ID_MUST_MATCH);
     });
 
     it('rejects a transition where the balances changes', async () => {
-      toState.resolution = otherResolution;
-      await expectRevert(validTransition(fromState, toState), resolutionsMustEqual("PreFundSetup"));
+      toCommitment.allocation = otherallocation;
+      expect.assertions(1);
+      await expectRevert(() => validTransition(fromCommitment, toCommitment), allocationsMustEqual("PreFundSetup"));
     });
 
-    it('rejects a transition not from the last preFundSetup state', async () => {
-      fromState.stateCount = 0;
-      await expectRevert(validTransition(fromState, toState), stateTypeMustBe("PreFundSetup", "PreFundSetup"));
+    it('rejects a transition where the destination changes', async () => {
+      toCommitment.destination = otherDestination;
+      expect.assertions(1);
+      await expectRevert(() => validTransition(fromCommitment, toCommitment), destinationsMustEqual("PreFundSetup"));
+    });
+
+    it('rejects a transition not from the last preFundSetup Commitment', async () => {
+      fromCommitment.commitmentCount = 0;
+      expect.assertions(1);
+      await expectRevert(() => validTransition(fromCommitment, toCommitment), commitmentTypeMustBe("PreFundSetup", "PreFundSetup"));
     });
   });
 
   describe('PostFundSetup -> PostFundSetup', () => {
     beforeEach(() => {
-      fromState = CountingGame.postFundSetupState({ ...defaults, turnNum: 1, stateCount: 0 });
-      toState = CountingGame.postFundSetupState({ ...defaults, turnNum: 2, stateCount: 1 });
+      fromCommitment = createCommitment.postFundSetup({ ...defaults, turnNum: 1, commitmentCount: 0 });
+      toCommitment = createCommitment.postFundSetup({ ...defaults, turnNum: 2, commitmentCount: 1 });
     });
 
     it('allows a valid transition', async () => {
-      expect(await validTransition(fromState, toState)).toBeTruthy();
+      expect(await validTransition(fromCommitment, toCommitment)).toBeTruthy();
     });
 
     it("rejects a transition where the turnNum doesn't increment", async () => {
-      toState.turnNum = fromState.turnNum;
-      await expectRevert(validTransition(fromState, toState), TURN_NUM_MUST_INCREMENT);
+      toCommitment.turnNum = fromCommitment.turnNum;
+      expect.assertions(1);
+      await expectRevert(() => validTransition(fromCommitment, toCommitment), TURN_NUM_MUST_INCREMENT);
     });
 
     it('rejects any transition where the channel changes', async () => {
-      toState.channel = otherChannel;
-      await expectRevert(validTransition(fromState, toState), CHANNEL_ID_MUST_MATCH);
+      toCommitment.channel = otherChannel;
+      expect.assertions(1);
+      await expectRevert(() => validTransition(fromCommitment, toCommitment), CHANNEL_ID_MUST_MATCH);
     });
 
     it('rejects a transition where the balances changes', async () => {
-      toState.resolution = otherResolution;
-      await expectRevert(validTransition(fromState, toState), resolutionsMustEqual("PostFundSetup"));
+      toCommitment.allocation = otherallocation;
+      expect.assertions(1);
+      await expectRevert(() => validTransition(fromCommitment, toCommitment), allocationsMustEqual("PostFundSetup"));
     });
 
-    it('rejects a transition from the last PostFundSetup state', async () => {
-      fromState.stateCount = 1;
-      await expectRevert(validTransition(fromState, toState), stateTypeMustBe("PostFundSetup", "Conclude"));
+    it('rejects a transition where the destination changes', async () => {
+      toCommitment.destination = otherDestination;
+      expect.assertions(1);
+      await expectRevert(() => validTransition(fromCommitment, toCommitment), destinationsMustEqual("PostFundSetup"));
+    });
+
+    it('rejects a transition from the last PostFundSetup Commitment', async () => {
+      fromCommitment.commitmentCount = 1;
+      expect.assertions(1);
+      await expectRevert(() => validTransition(fromCommitment, toCommitment), commitmentTypeMustBe("PostFundSetup", "Conclude"));
     });
   });
 
-  describe('PostFundSetup -> Game', () => {
+  describe('PostFundSetup -> App', () => {
     beforeEach(() => {
-      fromState = CountingGame.postFundSetupState({ ...defaults, turnNum: 3, stateCount: 1, gameCounter: 0 });
-      toState = CountingGame.gameState({ ...defaults, turnNum: 4, stateCount: 0, gameCounter: 0,  });
+      fromCommitment = createCommitment.postFundSetup({ ...defaults, turnNum: 3, commitmentCount: 1, appCounter: 0 });
+      toCommitment = createCommitment.app({ ...defaults, turnNum: 4, commitmentCount: 0, appCounter: 0, });
     });
 
-    it("rejects a transition where the fromState is not the last player", async () => {
-      fromState.stateCount = 0;
-      // if the stateCount on fromState is not numParticipants - 1, then the player
+    it("rejects a transition where the fromCommitment is not the last player", async () => {
+      fromCommitment.commitmentCount = 0;
+      // if the commitmentCount on fromCommitment is not numParticipants - 1, then the player
       // has to transition to either PostFundSetup or Conclude
-      await expectRevert(validTransition(fromState, toState), stateTypeMustBe("PostFundSetup", "Conclude"));
+      expect.assertions(1);
+      await expectRevert(() => validTransition(fromCommitment, toCommitment), commitmentTypeMustBe("PostFundSetup", "Conclude"));
     });
   });
 
   describe('PostFundSetup -> conclude', () => {
     beforeEach(() => {
-      fromState = CountingGame.postFundSetupState({ ...defaults, turnNum: 1, stateCount: 0 });
-      toState = CountingGame.concludeState({ ...defaults, turnNum: 2 });
+      fromCommitment = createCommitment.postFundSetup({ ...defaults, turnNum: 1, commitmentCount: 0 });
+      toCommitment = createCommitment.conclude({ ...defaults, turnNum: 2, commitmentCount: 1 });
     });
 
     it("rejects a transition where the turnNum doesn't increment", async () => {
-      toState.turnNum = fromState.turnNum;
-      await expectRevert(validTransition(fromState, toState));
+      toCommitment.turnNum = fromCommitment.turnNum;
+      expect.assertions(1);
+      await expectRevert(() => validTransition(fromCommitment, toCommitment));
     });
 
     it('rejects any transition where the channel changes', async () => {
-      toState.channel = otherChannel;
-      await expectRevert(validTransition(fromState, toState));
+      toCommitment.channel = otherChannel;
+      expect.assertions(1);
+      await expectRevert(() => validTransition(fromCommitment, toCommitment));
     });
 
     it("rejects a transition where the count doesn't reset", async () => {
-      fromState.stateCount = 1;
-      toState.stateCount = 2;
-      await expectRevert(validTransition(fromState, toState), stateCountMustReset("PostFundSetup", "Conclude"));
+      fromCommitment.commitmentCount = 1;
+      toCommitment.commitmentCount = 2;
+      expect.assertions(1);
+      await expectRevert(() => validTransition(fromCommitment, toCommitment), commitmentCountMustReset("PostFundSetup", "Conclude"));
     });
 
     it('allows a valid transition', async () => {
-      expect(await validTransition(fromState, toState)).toBeTruthy();
+      expect(await validTransition(fromCommitment, toCommitment)).toBeTruthy();
     });
 
     it('rejects a transition where the balances changes', async () => {
-      toState.resolution = otherResolution;
-      await expectRevert(validTransition(fromState, toState));
+      toCommitment.allocation = otherallocation;
+      expect.assertions(1);
+      await expectRevert(() => validTransition(fromCommitment, toCommitment));
     });
 
-    it('rejects a transition from the last PostFundSetup state', async () => {
-      fromState.stateCount = 1;
-      await expectRevert(validTransition(fromState, toState));
+    it('rejects a transition where the destination changes', async () => {
+      toCommitment.destination = otherDestination;
+      expect.assertions(1);
+      await expectRevert(() => validTransition(fromCommitment, toCommitment), destinationsMustEqual("PostFundSetup"));
+    });
+
+    it('rejects a transition from the last PostFundSetup Commitment', async () => {
+      fromCommitment.commitmentCount = 1;
+      expect.assertions(1);
+      await expectRevert(() => validTransition(fromCommitment, toCommitment));
     });
   });
 
-  describe('PostFundSetup -> game', () => {
+  describe('PostFundSetup -> app', () => {
     beforeEach(() => {
-      fromState = CountingGame.postFundSetupState({
+      fromCommitment = createCommitment.postFundSetup({
         ...defaults,
         turnNum: 1,
-        stateCount: 1,
-        gameCounter: 3,
+        commitmentCount: 1,
+        appCounter: 3,
       });
-      toState = CountingGame.gameState({ ...defaults, turnNum: 2, gameCounter: 4 });
+      toCommitment = createCommitment.app({ ...defaults, turnNum: 2, appCounter: 4, commitmentCount: 0 });
     });
 
     it('allows a valid transition', async () => {
-      expect(await validTransition(fromState, toState)).toBeTruthy();
+      expect(await validTransition(fromCommitment, toCommitment)).toBeTruthy();
     });
 
     it("rejects a transition where the turnNum doesn't increment", async () => {
-      toState.turnNum = fromState.turnNum;
-      await expectRevert(validTransition(fromState, toState));
+      toCommitment.turnNum = fromCommitment.turnNum;
+      expect.assertions(1);
+      await expectRevert(() => validTransition(fromCommitment, toCommitment));
     });
 
     it('rejects any transition where the channel changes', async () => {
-      toState.channel = otherChannel;
-      await expectRevert(validTransition(fromState, toState));
+      toCommitment.channel = otherChannel;
+      expect.assertions(1);
+      await expectRevert(() => validTransition(fromCommitment, toCommitment));
     });
 
-    it('rejects a transition not from the last PostFundSetup state', async () => {
-      fromState.stateCount = 0;
-      await expectRevert(validTransition(fromState, toState));
+    it('rejects a transition not from the last PostFundSetup Commitment', async () => {
+      fromCommitment.commitmentCount = 0;
+      expect.assertions(1);
+      await expectRevert(() => validTransition(fromCommitment, toCommitment));
     });
 
-    it('rejects a transition where the game rules are broken', async () => {
-      toState.gameCounter = 2; // game specifies that counter must increment
-      await expectRevert(validTransition(fromState, toState));
+    it('rejects a transition where the app rules are broken', async () => {
+      toCommitment.appCounter = 2; // app specifies that counter must increment
+      expect.assertions(1);
+      await expectRevert(() => validTransition(fromCommitment, toCommitment));
     });
   });
 
-  describe('game -> game', () => {
+  describe('app -> app', () => {
     beforeEach(() => {
-      fromState = CountingGame.gameState({ ...defaults, turnNum: 1, gameCounter: 3 });
-      toState = CountingGame.gameState({ ...defaults, turnNum: 2, gameCounter: 4 });
+      fromCommitment = createCommitment.app({ ...defaults, turnNum: 1, appCounter: 3, commitmentCount: 0 });
+      toCommitment = createCommitment.app({ ...defaults, turnNum: 2, appCounter: 4, commitmentCount: 0 });
     });
 
     it('allows a valid transition', async () => {
-      expect(await validTransition(fromState, toState)).toBeTruthy();
+      expect(await validTransition(fromCommitment, toCommitment)).toBeTruthy();
     });
 
     it("rejects a transition where the turnNum doesn't increment", async () => {
-      toState.turnNum = fromState.turnNum;
-      await expectRevert(validTransition(fromState, toState));
+      toCommitment.turnNum = fromCommitment.turnNum;
+      expect.assertions(1);
+      await expectRevert(() => validTransition(fromCommitment, toCommitment));
     });
 
     it('rejects any transition where the channel changes', async () => {
-      toState.channel = otherChannel;
-      await expectRevert(validTransition(fromState, toState));
+      toCommitment.channel = otherChannel;
+      expect.assertions(1);
+      await expectRevert(() => validTransition(fromCommitment, toCommitment));
     });
 
-    it('rejects a transition where the game rules are broken', async () => {
-      toState.gameCounter = 2; // game specifies that counter must increment
-      await expectRevert(validTransition(fromState, toState));
+    it('rejects a transition where the app rules are broken', async () => {
+      toCommitment.appCounter = 2; // app specifies that counter must increment
+      expect.assertions(1);
+      await expectRevert(() => validTransition(fromCommitment, toCommitment));
     });
   });
 
-  describe('game -> conclude', () => {
+  describe('app -> conclude', () => {
     beforeEach(() => {
-      fromState = CountingGame.gameState({ ...defaults, turnNum: 1, gameCounter: 3 });
-      toState = CountingGame.concludeState({ ...defaults, turnNum: 2 });
+      fromCommitment = createCommitment.app({ ...defaults, turnNum: 1, appCounter: 3, commitmentCount: 0 });
+      toCommitment = createCommitment.conclude({ ...defaults, turnNum: 2, commitmentCount: 0 });
     });
 
     it('allows a valid transition', async () => {
-      expect(await validTransition(fromState, toState)).toBeTruthy();
+      expect(await validTransition(fromCommitment, toCommitment)).toBeTruthy();
     });
 
     it("rejects a transition where the turnNum doesn't increment", async () => {
-      toState.turnNum = fromState.turnNum;
-      await expectRevert(validTransition(fromState, toState));
+      toCommitment.turnNum = fromCommitment.turnNum;
+      expect.assertions(1);
+      await expectRevert(() => validTransition(fromCommitment, toCommitment));
     });
 
     it('rejects any transition where the channel changes', async () => {
-      toState.channel = otherChannel;
-      await expectRevert(validTransition(fromState, toState));
+      toCommitment.channel = otherChannel;
+      expect.assertions(1);
+      await expectRevert(() => validTransition(fromCommitment, toCommitment));
     });
 
     it('rejects a transition where the balances changes', async () => {
-      toState.resolution = otherResolution;
-      await expectRevert(validTransition(fromState, toState));
+      toCommitment.allocation = otherallocation;
+      expect.assertions(1);
+      await expectRevert(() => validTransition(fromCommitment, toCommitment));
+    });
+
+    it('rejects a transition where the destination changes', async () => {
+      toCommitment.destination = otherDestination;
+      expect.assertions(1);
+      await expectRevert(() => validTransition(fromCommitment, toCommitment), destinationsMustEqual("App"));
     });
   });
 
   describe('conclude -> conclude', () => {
     beforeEach(() => {
-      fromState = CountingGame.concludeState({ ...defaults, turnNum: 1 });
-      toState = CountingGame.concludeState({ ...defaults, turnNum: 2 });
+      fromCommitment = createCommitment.conclude({ ...defaults, turnNum: 1, commitmentCount: 1 });
+      toCommitment = createCommitment.conclude({ ...defaults, turnNum: 2, commitmentCount: 2 });
     });
 
     it('allows a valid transition', async () => {
-      expect(await validTransition(fromState, toState)).toBeTruthy();
+      expect(await validTransition(fromCommitment, toCommitment)).toBeTruthy();
     });
 
     it("rejects a transition where the turnNum doesn't increment", async () => {
-      toState.turnNum = fromState.turnNum;
-      await expectRevert(validTransition(fromState, toState));
+      toCommitment.turnNum = fromCommitment.turnNum;
+      expect.assertions(1);
+      await expectRevert(() => validTransition(fromCommitment, toCommitment));
     });
 
     it('rejects any transition where the channel changes', async () => {
-      toState.channel = otherChannel;
-      await expectRevert(validTransition(fromState, toState));
+      toCommitment.channel = otherChannel;
+      expect.assertions(1);
+      await expectRevert(() => validTransition(fromCommitment, toCommitment));
     });
 
     it('rejects a transition where the balances changes', async () => {
-      toState.resolution = otherResolution;
-      await expectRevert(validTransition(fromState, toState));
+      toCommitment.allocation = otherallocation;
+      expect.assertions(1);
+      await expectRevert(() => validTransition(fromCommitment, toCommitment));
+    });
+
+    it('rejects a transition where the destination changes', async () => {
+      toCommitment.destination = otherDestination;
+      expect.assertions(1);
+      await expectRevert(() => validTransition(fromCommitment, toCommitment), destinationsMustEqual("Conclude"));
     });
   });
 });
