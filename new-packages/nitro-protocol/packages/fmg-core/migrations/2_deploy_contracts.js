@@ -1,20 +1,20 @@
-var State = artifacts.require('./State.sol');
+var Commitment = artifacts.require('./Commitment.sol');
 var Rules = artifacts.require('./Rules.sol');
 
-var CountingState = artifacts.require('./test-game/CountingState.sol');
-var CountingGame = artifacts.require('./test-game/CountingGame.sol');
+var CountingCommitment = artifacts.require('./test-game/CountingCommitment.sol');
+var CountingApp = artifacts.require('./test-game/CountingApp.sol');
 
 module.exports = function(deployer) {
-  deployer.deploy(State);
+  deployer.deploy(Commitment);
 
-  deployer.link(State, Rules);
+  deployer.link(Commitment, Rules);
   deployer.deploy(Rules);
 
-  deployer.link(State, CountingState);
-  deployer.deploy(CountingState);
+  deployer.link(Commitment, CountingCommitment);
+  deployer.deploy(CountingCommitment);
 
-  deployer.link(State, CountingGame);
-  deployer.link(CountingState, CountingGame);
-  deployer.link(Rules, CountingGame);
-  deployer.deploy(CountingGame);
+  deployer.link(Commitment, CountingApp);
+  deployer.link(CountingCommitment, CountingApp);
+  deployer.link(Rules, CountingApp);
+  deployer.deploy(CountingApp);
 };

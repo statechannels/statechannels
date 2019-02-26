@@ -1,49 +1,38 @@
 {
-  "name": "fmg-core",
-  "version": "0.5.1",
-  "description": "Force-move games core",
+  "name": "fmg-nitro-adjudicator",
+  "version": "0.0.4",
   "main": "./lib/index.js",
-  "types": "./lib/index.d.ts",
-  "directories": {
-    "doc": "docs",
-    "test": "test"
-  },
+  "repository": "https://github.com/magmo/nitro-adjudicator.git",
+  "author": "Andrew Stewart <andrew.gord.stewart@gmail.com>",
+  "license": "MIT",
   "scripts": {
     "test": "jest",
     "test:ci": "npx ganache-then-jest",
     "build": "tslint --project . && tsc"
   },
-  "repository": "https://github.com/magmo/force-move-games/tree/master/packages/fmg-core",
-  "author": "Tom Close",
-  "license": "MIT",
-  "dependencies": {
-    "bn.js": "^4.11.8",
-    "ethers": "^4.0.26",
-    "sha3": "^1.2.2",
-    "web3": "^1.0.0-beta.36",
-    "web3-utils": "^1.0.0-beta.36",
-    "websocket": "^1.0.28"
-  },
   "devDependencies": {
-    "@types/jest": "^23.3.9",
-    "@types/node": "^10.5.1",
-    "@types/web3": "^1.0.0-beta.30",
+    "@types/jest": "^23.3.10",
+    "@types/node": "^10.12.10",
+    "@types/web3": "^1.0.12",
     "dotenv": "^6.1.0",
-    "ganache-cli": "^6.1.8",
+    "ethers": "^4.0.26",
+    "fmg-core": "^0.5.1",
+    "ganache-cli": "6.1.8",
     "jest": "^23.6.0",
     "magmo-devtools": "git+https://github.com/magmo/devtools.git#v0.1.11",
-    "truffle": "^5.0.0-next.17",
-    "ts-jest": "^23.10.4",
+    "truffle": "^5.0.0-beta.2",
+    "ts-jest": "^23.10.5",
     "tslint": "^5.11.0",
     "tslint-config-prettier": "^1.17.0",
-    "typescript": "^2.9.2"
+    "typescript": "^3.2.1",
+    "web3": "^1.0.0-beta.37"
   },
   "jest": {
     "collectCoverageFrom": [
       "src/**/*.{js,jsx,ts,tsx}"
     ],
     "testMatch": [
-      "<rootDir>/src/**/?(*.)(spec|test).(t)s?(x)"
+      "<rootDir>/test/**/?(*.)(spec|test).(t)s?(x)"
     ],
     "testPathIgnorePatterns": [
       "/node_modules/"
