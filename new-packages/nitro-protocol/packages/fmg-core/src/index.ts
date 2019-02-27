@@ -3,6 +3,7 @@ export {
   BaseCommitment,
   CommitmentType,
   toHex,
+  mover,
   fromHex,
   ethereumArgs,
   asEthersObject,
