@@ -511,7 +511,7 @@ describe('nitroAdjudicator', () => {
         // Other tests may have deposited into guarantor.address, but we
         // ensure that the guarantor has at least 5 in holdings
         startBal = await nitro.holdings(guarantor.address);
-        expect(Number(await nitro.holdings(recipient))).toEqual(0);
+        const startBalRecipient = (await nitro.holdings(recipient)).toNumber();
         const bAllocation = bigNumberify(bBal).sub(claimAmount).toHexString();
         const allocationAfterClaim = [aBal, bAllocation];
         const expectedOutcome = {
@@ -533,7 +533,7 @@ describe('nitroAdjudicator', () => {
         const newOutcome = await nitro.getOutcome(getChannelID(channel));
         expect(getOutcomeFromParameters(newOutcome)).toMatchObject(expectedOutcome);
         expect(Number(await nitro.holdings(guarantor.address))).toEqual(startBal - claimAmount);
-        expect(Number(await nitro.holdings(recipient))).toEqual(claimAmount);
+        expect(Number(await nitro.holdings(recipient))).toEqual(startBalRecipient + claimAmount);
       });
 
       it('reverts if guarantor is underfunded', async () => {
