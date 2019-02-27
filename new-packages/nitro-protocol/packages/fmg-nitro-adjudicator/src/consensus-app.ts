@@ -1,7 +1,8 @@
-import { Commitment, CommitmentType, Uint32, Uint256, Address, Bytes, BaseCommitment } from 'fmg-core';
+import { CommitmentType, Uint32, Uint256, Address, Bytes, BaseCommitment, ethereumArgs } from 'fmg-core';
 import abi from 'web3-eth-abi';
+import { bigNumberify } from 'ethers/utils';
 
-interface AppAttributes {
+export interface AppAttributes {
   consensusCounter: Uint32;
   proposedAllocation: Uint256[];
   proposedDestination: Address[];
@@ -36,11 +37,10 @@ export const commitments = {
   concludeCommitment,
 };
 
-export function appAttributes(consensusCommitmentArgs: [Uint32, Uint256[], Address[]]): AppAttributes {
-  //
+export function appAttributes(consensusCommitmentArgs: [string, string[], string[]]): AppAttributes {
   return {
-    consensusCounter: consensusCommitmentArgs[0],
-    proposedAllocation: consensusCommitmentArgs[1],
+    consensusCounter: parseInt(consensusCommitmentArgs[0], 10),
+    proposedAllocation: consensusCommitmentArgs[1].map(bigNumberify).map(bn => bn.toHexString()),
     proposedDestination: consensusCommitmentArgs[2],
   };
 }
@@ -55,4 +55,8 @@ const SolidityConsensusCommitmentType = {
 
 export function bytesFromAppAttributes(appAttrs: AppAttributes): Bytes {
   return abi.encodeParameter(SolidityConsensusCommitmentType, [appAttrs.consensusCounter, appAttrs.proposedAllocation, appAttrs.proposedDestination]);
+}
+
+export function appAttributesFromBytes(appAttrs: Bytes): AppAttributes {
+  return appAttributes(abi.decodeParameter(SolidityConsensusCommitmentType, appAttrs));
 }
