@@ -49,7 +49,7 @@ describe('Commitment', () => {
     appAttributes: '0x',
   };
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     const networkId = (await provider.getNetwork()).chainId;
 
     const factory = ContractFactory.fromSolidity(CommitmentArtifact, signer);
