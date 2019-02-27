@@ -46,7 +46,7 @@ describe('CountingCommitment', () => {
     const participants = [participantA.address, participantB.address];
 
 
-    const channel: Channel = { channelType: participantB.address, channelNonce: 0, participants }; // just use any valid address
+    const channel: Channel = { channelType: participantB.address, nonce: 0, participants }; // just use any valid address
 
     const defaults = {
       channel,

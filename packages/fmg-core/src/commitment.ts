@@ -1,12 +1,12 @@
 import { Channel } from './channel';
 import abi from 'web3-eth-abi';
-import { Uint32, Uint256, Address } from './types';
+import { Uint32, Uint256, Address, Bytes } from './types';
 import { bigNumberify } from 'ethers/utils';
 
 const SolidityCommitmentType = {
   "CommitmentStruct": {
     "channelType": "address",
-    "channelNonce": "uint32",
+    "nonce": "uint32",
     "participants": "address[]",
     "commitmentType": "uint8",
     "turnNum": "uint32",
@@ -27,7 +27,7 @@ export interface BaseCommitment {
 
 export interface Commitment extends BaseCommitment {
   commitmentType: CommitmentType;
-  appAttributes: string;
+  appAttributes: Bytes;
 }
 
 export function toHex(commitment: Commitment): string {
@@ -42,7 +42,7 @@ export function fromHex(commitment: string): Commitment {
 export function fromParameters(parameters: any[]): Commitment {
   const channel = {
     channelType: parameters[0],
-    channelNonce: Number.parseInt(parameters[1], 10),
+    nonce: Number.parseInt(parameters[1], 10),
     participants: parameters[2],
   };
   return {
@@ -57,13 +57,13 @@ export function fromParameters(parameters: any[]): Commitment {
 }
 
 export function mover(commitment: Commitment) {
-  return commitment.channel.participants[this.turnNum % this.channel.participants.length];
+  return commitment.channel.participants[commitment.turnNum % commitment.channel.participants.length];
 }
 
 export function ethereumArgs(commitment: Commitment) {
   return [
     commitment.channel.channelType,
-    commitment.channel.channelNonce,
+    commitment.channel.nonce,
     commitment.channel.participants,
     commitment.commitmentType,
     commitment.turnNum,
@@ -77,7 +77,7 @@ export function ethereumArgs(commitment: Commitment) {
 export function asEthersObject(commitment: Commitment) {
   return {
     channelType: commitment.channel.channelType,
-    channelNonce: commitment.channel.channelNonce,
+    nonce: commitment.channel.nonce,
     participants: commitment.channel.participants,
     commitmentType: commitment.commitmentType,
     turnNum: commitment.turnNum,

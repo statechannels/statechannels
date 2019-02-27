@@ -137,7 +137,7 @@ describe('nitroAdjudicator', () => {
 
     channel = {
       channelType: CountingAppContract.address,
-      channelNonce: 0,
+      nonce: 0,
       participants,
     };
 
@@ -314,6 +314,64 @@ describe('nitroAdjudicator', () => {
 
         });
 
+        it('works when \
+        the outcome is final and \
+        outcomes[fromChannel].destination is covered by holdings[fromChannel] and \
+        the same participant calls it twice', async () => {
+          await depositTo(getChannelID(channel));
+
+          const allocationOutcome = {
+            destination: [alice.address, bob.address],
+            allocation,
+            finalizedAt: ethers.utils.bigNumberify(1),
+            challengeCommitment: getEthersObjectForCommitment(commitment0),
+            guaranteedChannel: ZERO_ADDRESS,
+          };
+          const tx = await nitro.setOutcome(getChannelID(channel), allocationOutcome);
+          await tx.wait();
+
+          const allocatedToChannel = await nitro.holdings(getChannelID(channel));
+          const allocatedToAlice = await nitro.holdings(alice.address);
+
+          await nitro.transfer(getChannelID(channel), alice.address, 1);
+          await nitro.transfer(getChannelID(channel), alice.address, 1);
+
+          expect(await nitro.holdings(alice.address)).toEqual(allocatedToAlice.add(2));
+          expect(await nitro.holdings(getChannelID(channel))).toEqual(
+            allocatedToChannel.sub(2),
+          );
+        });
+
+      it('works when \
+      the outcome is final and \
+      outcomes[fromChannel].destination is covered by holdings[fromChannel] and \
+      the same opponent had already called it', async () => {
+        await depositTo(getChannelID(channel));
+
+        const allocationOutcome = {
+          destination: [alice.address, bob.address],
+          allocation,
+          finalizedAt: ethers.utils.bigNumberify(1),
+          challengeCommitment: getEthersObjectForCommitment(commitment0),
+          guaranteedChannel: ZERO_ADDRESS,
+        };
+        const tx = await nitro.setOutcome(getChannelID(channel), allocationOutcome);
+        await tx.wait();
+
+        const allocatedToChannel = await nitro.holdings(getChannelID(channel));
+        const allocatedToAlice = await nitro.holdings(alice.address);
+        const allocatedToBob = await nitro.holdings(bob.address);
+
+        await nitro.transfer(getChannelID(channel), alice.address, 1);
+        await nitro.transfer(getChannelID(channel), bob.address, 1);
+
+        expect(await nitro.holdings(alice.address)).toEqual(allocatedToAlice.add(1));
+        expect(await nitro.holdings(bob.address)).toEqual(allocatedToBob.add(1));
+        expect(await nitro.holdings(getChannelID(channel))).toEqual(
+          allocatedToChannel.sub(2),
+        );
+      });
+
       it('reverts when the outcome is not final', async () => {
         const allocationOutcome = {
           destination: [alice.address, bob.address],
@@ -453,7 +511,7 @@ describe('nitroAdjudicator', () => {
         // Other tests may have deposited into guarantor.address, but we
         // ensure that the guarantor has at least 5 in holdings
         startBal = await nitro.holdings(guarantor.address);
-        expect(Number(await nitro.holdings(recipient))).toEqual(0);
+        const startBalRecipient = (await nitro.holdings(recipient)).toNumber();
         const bAllocation = bigNumberify(bBal).sub(claimAmount).toHexString();
         const allocationAfterClaim = [aBal, bAllocation];
         const expectedOutcome = {
@@ -475,7 +533,7 @@ describe('nitroAdjudicator', () => {
         const newOutcome = await nitro.getOutcome(getChannelID(channel));
         expect(getOutcomeFromParameters(newOutcome)).toMatchObject(expectedOutcome);
         expect(Number(await nitro.holdings(guarantor.address))).toEqual(startBal - claimAmount);
-        expect(Number(await nitro.holdings(recipient))).toEqual(claimAmount);
+        expect(Number(await nitro.holdings(recipient))).toEqual(startBalRecipient + claimAmount);
       });
 
       it('reverts if guarantor is underfunded', async () => {

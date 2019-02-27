@@ -51,7 +51,7 @@ describe('ConsensusCommitment', () => {
   const allocation = [ethers.utils.bigNumberify(5).toHexString(), ethers.utils.bigNumberify(4).toHexString()];
   const proposedAllocation = [ethers.utils.bigNumberify(9).toHexString()];
 
-  const channel: Channel = { channelType: participantB.address, channelNonce: 0, participants }; // just use any valid address
+  const channel: Channel = { channelType: participantB.address, nonce: 0, participants }; // just use any valid address
   const defaults = { channel, allocation, destination: participants };
   const commitment: Commitment = ConsensusApp.appCommitment({ ...defaults, turnNum: 6, commitmentCount: 0, consensusCounter: 1, proposedAllocation, proposedDestination, });
 

@@ -6,7 +6,7 @@ library Commitment {
 
     struct CommitmentStruct {
         address channelType;
-        uint32 channelNonce;
+        uint32 nonce;
         address[] participants;
         uint8 commitmentType;
         uint32 turnNum;
@@ -34,7 +34,7 @@ library Commitment {
 
     function channelId(CommitmentStruct memory _commitment) public pure returns (address) {
         bytes32 h = keccak256(
-            abi.encodePacked(_commitment.channelType, _commitment.channelNonce, _commitment.participants)
+            abi.encodePacked(_commitment.channelType, _commitment.nonce, _commitment.participants)
         );
         address addr;
         assembly {
