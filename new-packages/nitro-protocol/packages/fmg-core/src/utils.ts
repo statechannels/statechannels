@@ -35,7 +35,8 @@ export function sign(data: SignableData, privateKey): Signature {
 
 export function recover(data: SignableData, signature: Signature): string {
   const web3 = new Web3('');
-  return web3.eth.accounts.recover(signature as MessageSignature, hash(data));
+  const { v, r, s } = signature;
+  return web3.eth.accounts.recover(hash(data), v, r, s);
 }
 
 function hash(data: SignableData): string {
