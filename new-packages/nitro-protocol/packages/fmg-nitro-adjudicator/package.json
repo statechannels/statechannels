@@ -11,13 +11,16 @@
     "test:ci": "npx ganache-then-jest",
     "build": "tslint --project . && tsc"
   },
+  "dependencies": {
+    "web3": "^1.0.0-beta.37",
+    "ethers": "^4.0.26",
+    "fmg-core": "^0.5.4"
+  },
   "devDependencies": {
     "@types/jest": "^23.3.10",
     "@types/node": "^10.12.10",
     "@types/web3": "^1.0.12",
     "dotenv": "^6.1.0",
-    "ethers": "^4.0.26",
-    "fmg-core": "^0.5.4",
     "ganache-cli": "6.1.8",
     "jest": "^23.6.0",
     "magmo-devtools": "git+https://github.com/magmo/devtools.git#v0.1.11",
@@ -25,8 +28,7 @@
     "ts-jest": "^23.10.5",
     "tslint": "^5.11.0",
     "tslint-config-prettier": "^1.17.0",
-    "typescript": "^3.2.1",
-    "web3": "^1.0.0-beta.37"
+    "typescript": "^3.2.1"
   },
   "jest": {
     "collectCoverageFrom": [
