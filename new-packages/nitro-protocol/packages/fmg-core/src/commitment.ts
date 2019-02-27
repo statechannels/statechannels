@@ -1,6 +1,6 @@
 import { Channel } from './channel';
 import abi from 'web3-eth-abi';
-import { Uint32, Uint256, Address } from './types';
+import { Uint32, Uint256, Address, Bytes } from './types';
 import { bigNumberify } from 'ethers/utils';
 
 const SolidityCommitmentType = {
@@ -27,7 +27,7 @@ export interface BaseCommitment {
 
 export interface Commitment extends BaseCommitment {
   commitmentType: CommitmentType;
-  appAttributes: string;
+  appAttributes: Bytes;
 }
 
 export function toHex(commitment: Commitment): string {
