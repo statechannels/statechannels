@@ -37,7 +37,7 @@ describe('Commitment', () => {
   const allocation = [new BigNumber(5).toHexString(), new BigNumber(4).toHexString()];
 
   const destination = [participantA.address, participantB.address];
-  const channel: Channel = { channelType, channelNonce, participants };
+  const channel: Channel = { channelType, nonce: channelNonce, participants };
   const commitmentType = CommitmentType.PreFundSetup;
   const commitment: Commitment = {
     channel,
