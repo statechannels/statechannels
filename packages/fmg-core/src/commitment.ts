@@ -44,7 +44,8 @@ export function fromParameters(parameters: any[]): Commitment {
     channelType: parameters[0],
     channelNonce: Number.parseInt(parameters[1], 10),
     participants: parameters[2],
-  };
+  }
+
   return {
     channel,
     commitmentType: Number.parseInt(parameters[3], 10) as CommitmentType,
@@ -63,7 +64,7 @@ export function mover(commitment: Commitment) {
 export function ethereumArgs(commitment: Commitment) {
   return [
     commitment.channel.channelType,
-    commitment.channel.channelNonce,
+    commitment.channel.nonce,
     commitment.channel.participants,
     commitment.commitmentType,
     commitment.turnNum,
@@ -77,7 +78,7 @@ export function ethereumArgs(commitment: Commitment) {
 export function asEthersObject(commitment: Commitment) {
   return {
     channelType: commitment.channel.channelType,
-    channelNonce: commitment.channel.channelNonce,
+    channelNonce: commitment.channel.nonce,
     participants: commitment.channel.participants,
     commitmentType: commitment.commitmentType,
     turnNum: commitment.turnNum,
