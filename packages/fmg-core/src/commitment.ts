@@ -44,7 +44,7 @@ export function fromParameters(parameters: any[]): Commitment {
     channelType: parameters[0],
     nonce: Number.parseInt(parameters[1], 10),
     participants: parameters[2],
-  }
+  };
   return {
     channel,
     commitmentType: Number.parseInt(parameters[3], 10) as CommitmentType,
