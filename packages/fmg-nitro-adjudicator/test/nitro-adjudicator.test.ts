@@ -314,6 +314,64 @@ describe('nitroAdjudicator', () => {
 
         });
 
+        it('works when \
+        the outcome is final and \
+        outcomes[fromChannel].destination is covered by holdings[fromChannel] and \
+        the same participant calls it twice', async () => {
+          await depositTo(getChannelID(channel));
+
+          const allocationOutcome = {
+            destination: [alice.address, bob.address],
+            allocation,
+            finalizedAt: ethers.utils.bigNumberify(1),
+            challengeCommitment: getEthersObjectForCommitment(commitment0),
+            guaranteedChannel: ZERO_ADDRESS,
+          };
+          const tx = await nitro.setOutcome(getChannelID(channel), allocationOutcome);
+          await tx.wait();
+
+          const allocatedToChannel = await nitro.holdings(getChannelID(channel));
+          const allocatedToAlice = await nitro.holdings(alice.address);
+
+          await nitro.transfer(getChannelID(channel), alice.address, 1);
+          await nitro.transfer(getChannelID(channel), alice.address, 1);
+
+          expect(await nitro.holdings(alice.address)).toEqual(allocatedToAlice.add(2));
+          expect(await nitro.holdings(getChannelID(channel))).toEqual(
+            allocatedToChannel.sub(2),
+          );
+        });
+
+      it('works when \
+      the outcome is final and \
+      outcomes[fromChannel].destination is covered by holdings[fromChannel] and \
+      the same opponent had already called it', async () => {
+        await depositTo(getChannelID(channel));
+
+        const allocationOutcome = {
+          destination: [alice.address, bob.address],
+          allocation,
+          finalizedAt: ethers.utils.bigNumberify(1),
+          challengeCommitment: getEthersObjectForCommitment(commitment0),
+          guaranteedChannel: ZERO_ADDRESS,
+        };
+        const tx = await nitro.setOutcome(getChannelID(channel), allocationOutcome);
+        await tx.wait();
+
+        const allocatedToChannel = await nitro.holdings(getChannelID(channel));
+        const allocatedToAlice = await nitro.holdings(alice.address);
+        const allocatedToBob = await nitro.holdings(bob.address);
+
+        await nitro.transfer(getChannelID(channel), alice.address, 1);
+        await nitro.transfer(getChannelID(channel), bob.address, 1);
+
+        expect(await nitro.holdings(alice.address)).toEqual(allocatedToAlice.add(1));
+        expect(await nitro.holdings(bob.address)).toEqual(allocatedToBob.add(1));
+        expect(await nitro.holdings(getChannelID(channel))).toEqual(
+          allocatedToChannel.sub(2),
+        );
+      });
+
       it('reverts when the outcome is not final', async () => {
         const allocationOutcome = {
           destination: [alice.address, bob.address],
