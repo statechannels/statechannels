@@ -10,8 +10,6 @@ export {
 } from './commitment';
 export { Channel } from './channel';
 export {
-  toHex32,
-  padBytes32,
   toUint256,
   sign,
   recover,
@@ -24,7 +22,6 @@ import * as CountingApp from './test-app/counting-app';
 export { CountingApp };
 
 export {
-  MessageSignature,
   Signature,
   Address,
   Uint256,

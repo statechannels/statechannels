@@ -18,16 +18,11 @@ export type Uint256 = string;
 // We record the actual interface here, which is correct up to v1.0.0-beta.44, at least
 // https://github.com/ethereum/web3.js/blob/v1.0.0-beta.44/packages/web3-eth-accounts/src/Accounts.js#L303-L310
 type SigString = string; // should be 132 characters, 0x + r.slice(2) + s.slice(2) + v.slice(2)
-export interface MessageSignature { 
+export interface Signature { 
   message: Bytes;
   messageHash: Bytes32;
   v: Byte;
   r: Bytes32;
   s: Bytes32;
   signature: SigString;
-}
-export interface Signature {
-  v: Byte;
-  r: Bytes32;
-  s: Bytes32;
 }
