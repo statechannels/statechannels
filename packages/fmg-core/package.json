@@ -9,6 +9,7 @@
     "test": "test"
   },
   "scripts": {
+    "prepare": "yarn build",
     "test": "jest",
     "test:ci": "npx ganache-then-jest",
     "build": "tslint --project . && tsc"
