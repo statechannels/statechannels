@@ -6,7 +6,7 @@ import { bigNumberify } from 'ethers/utils';
 const SolidityCommitmentType = {
   "CommitmentStruct": {
     "channelType": "address",
-    "channelNonce": "uint32",
+    "nonce": "uint32",
     "participants": "address[]",
     "commitmentType": "uint8",
     "turnNum": "uint32",
@@ -45,7 +45,6 @@ export function fromParameters(parameters: any[]): Commitment {
     channelNonce: Number.parseInt(parameters[1], 10),
     participants: parameters[2],
   }
-
   return {
     channel,
     commitmentType: Number.parseInt(parameters[3], 10) as CommitmentType,
@@ -78,7 +77,7 @@ export function ethereumArgs(commitment: Commitment) {
 export function asEthersObject(commitment: Commitment) {
   return {
     channelType: commitment.channel.channelType,
-    channelNonce: commitment.channel.nonce,
+    nonce: commitment.channel.nonce,
     participants: commitment.channel.participants,
     commitmentType: commitment.commitmentType,
     turnNum: commitment.turnNum,

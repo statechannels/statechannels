@@ -21,7 +21,7 @@ describe('Commitment', () => {
 
   let commitmentLib;
   let testCommitmentLib;
-  const channelNonce = 12;
+  const nonce = 12;
   const turnNum: Uint32 = 15;
 
   const channelType = new Wallet('4f3edf983ac636a65a842ce7c78d9aa706d3b113bce9c46f30d7d21715b23b1d')
@@ -37,7 +37,7 @@ describe('Commitment', () => {
   const allocation = [new BigNumber(5).toHexString(), new BigNumber(4).toHexString()];
 
   const destination = [participantA.address, participantB.address];
-  const channel: Channel = { channelType, nonce: channelNonce, participants };
+  const channel: Channel = { channelType, nonce, participants };
   const commitmentType = CommitmentType.PreFundSetup;
   const commitment: Commitment = {
     channel,
