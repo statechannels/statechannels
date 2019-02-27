@@ -137,7 +137,7 @@ describe('nitroAdjudicator', () => {
 
     channel = {
       channelType: CountingAppContract.address,
-      channelNonce: 0,
+      nonce: 0,
       participants,
     };
 
