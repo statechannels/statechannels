@@ -13,7 +13,7 @@ import RulesArtifact from '../build/contracts/Rules.json';
 import ConsensusCommitmentArtifact from '../build/contracts/ConsensusCommitment.json';
 import ConsensusAppArtifact from '../build/contracts/ConsensusApp.json';
 
-import { commitments } from '../src/consensus-app';
+import { commitments, appAttributesFromBytes, bytesFromAppAttributes } from '../src/consensus-app';
 
 jest.setTimeout(20000);
 let consensusApp: ethers.Contract;
@@ -74,7 +74,7 @@ describe('ConsensusApp', () => {
   const allocation = [toUint256(1), toUint256(2), toUint256(3)];
   const proposedAllocation = [toUint256(4), toUint256(2)];
 
-  const channel: Channel = { channelType: participantB.address, channelNonce: 0, participants }; // just use any valid address
+  const channel: Channel = { channelType: participantB.address, nonce: 0, participants }; // just use any valid address
   const defaults = { channel, allocation, destination: participants, turnNum: 6, proposedDestination, proposedAllocation, commitmentCount: 0 };
 
   beforeAll(async () => {
@@ -245,6 +245,17 @@ describe('ConsensusApp', () => {
       });
 
       invalidTransition(fromCommitment, toCommitment, "CountingApp: currentDestinations must be equal when resetting the consensusCounter before the end of the round");
+    });
+  });
+
+  describe("app attributes", () => {
+    it('works', async () => {
+      const c = commitments.appCommitment({
+        ...defaults,
+        consensusCounter: 1,
+      });
+
+      expect(c).toMatchObject(appAttributesFromBytes(bytesFromAppAttributes(c)));
     });
   });
 });

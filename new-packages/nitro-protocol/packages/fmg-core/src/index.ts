@@ -3,14 +3,13 @@ export {
   BaseCommitment,
   CommitmentType,
   toHex,
+  mover,
   fromHex,
   ethereumArgs,
   asEthersObject,
 } from './commitment';
 export { Channel } from './channel';
 export {
-  toHex32,
-  padBytes32,
   toUint256,
   sign,
   recover,
@@ -23,7 +22,6 @@ import * as CountingApp from './test-app/counting-app';
 export { CountingApp };
 
 export {
-  MessageSignature,
   Signature,
   Address,
   Uint256,
@@ -33,3 +31,10 @@ export {
   Bytes,
   Byte,
 } from './types';
+export {
+  CountingCommitment,
+  SolidityCountingCommitmentType,
+  createCommitment as createCountingCommitment,
+  asCoreCommitment as countingCommitmentAsCoreCommitment,
+  args as countingAppEthereumArgs,
+} from './test-app/counting-app';

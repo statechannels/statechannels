@@ -65,7 +65,7 @@ describe('Rules', () => {
       CountingAppArtifact.networks[networkId].address,
     );
 
-    otherChannel = { channelType: appContract.address, channelNonce: 1, participants };
+    otherChannel = { channelType: appContract.address, nonce: 1, participants };
 
     RulesArtifact.bytecode = linker.linkBytecode(RulesArtifact.bytecode, {
       Commitment: CommitmentArtifact.networks[networkId].address,
@@ -76,7 +76,7 @@ describe('Rules', () => {
     testFramework = await ContractFactory.fromSolidity(TestRulesArtifact, signer).deploy();
     // Contract setup --------------------------------------------------------------------------
 
-    channel = { channelType: appContract.address, channelNonce: 0, participants };
+    channel = { channelType: appContract.address, nonce: 0, participants };
     defaults = { channel, allocation, destination, appCounter: 0 };
   });
 
