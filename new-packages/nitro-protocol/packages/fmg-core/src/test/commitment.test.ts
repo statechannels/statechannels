@@ -1,26 +1,12 @@
-import { Channel, channelID } from '../channel';
-import { Commitment, CommitmentType, asEthersObject, toHex, fromHex } from '../commitment';
-import { expectRevert } from 'magmo-devtools';
-// import { CountingApp } from '../test-app/counting-app';
-import { sign } from '../utils';
-import linker from 'solc/linker';
+import { Channel, } from '../channel';
+import { Commitment, CommitmentType, toHex, fromHex, mover } from '../commitment';
 
-import { ethers, ContractFactory, Wallet } from 'ethers';
-
-// @ts-ignore
-import CommitmentArtifact from '../../build/contracts/Commitment.json';
-import TestCommitmentArtifact from '../../build/contracts/TestCommitment.json';
-import { CountingCommitment, asCoreCommitment } from '../test-app/counting-app';
 import { BigNumber } from 'ethers/utils';
 import { Uint32 } from '../types';
-
-const provider = new ethers.providers.JsonRpcProvider('http://localhost:8545');
-const signer = provider.getSigner();
+import { Wallet } from 'ethers';
 
 describe('Commitment', () => {
 
-  let commitmentLib;
-  let testCommitmentLib;
   const channelNonce = 12;
   const turnNum: Uint32 = 15;
 
@@ -49,80 +35,13 @@ describe('Commitment', () => {
     appAttributes: '0x',
   };
 
-  beforeAll(async () => {
-    const networkId = (await provider.getNetwork()).chainId;
-
-    const factory = ContractFactory.fromSolidity(CommitmentArtifact, signer);
-    commitmentLib = await factory.attach(CommitmentArtifact.networks[networkId].address);
-
-    TestCommitmentArtifact.bytecode = linker.linkBytecode(TestCommitmentArtifact.bytecode, { "Commitment": CommitmentArtifact.networks[networkId].address });
-    testCommitmentLib = await ContractFactory.fromSolidity(TestCommitmentArtifact, signer).deploy();
-  });
-
-  it('identifies commitmentTypes', async () => {
-    commitment.commitmentType = CommitmentType.PreFundSetup;
-    expect(await testCommitmentLib.isPreFundSetup(asEthersObject(commitment))).toBe(true);
-
-    commitment.commitmentType = CommitmentType.PostFundSetup;
-    expect(await testCommitmentLib.isPostFundSetup(asEthersObject(commitment))).toBe(true);
-
-    commitment.commitmentType = CommitmentType.App;
-    expect(await testCommitmentLib.isApp(asEthersObject(commitment))).toBe(true);
-
-    commitment.commitmentType = CommitmentType.Conclude;
-    expect(await testCommitmentLib.isConclude(asEthersObject(commitment))).toBe(true);
-  });
-
-  it('identifies the mover based on the turnNum', async () => {
-    const mover = await testCommitmentLib.mover(asEthersObject(commitment));
-    // our Commitment nonce is 15, which is odd, so it should be participant[1]
-    expect(mover).toEqual(participants[1]);
-  });
-
-  it('can calculate the channelId', async () => {
-    const chainId: string = await testCommitmentLib.channelId(asEthersObject(commitment));
-    const localId: string = channelID(channel);
-
-    expect(chainId).toEqual(localId);
-  });
-
-  it('can check if a Commitment is signed', async () => {
-    // needs to be signed by 1 as it's their move
-    const { r, s, v } = sign(toHex(commitment), participantB.privateKey);
-
-    expect(await testCommitmentLib.requireSignature(asEthersObject(commitment), v, r, s)).toBeTruthy();
-  });
-
-  it('will revert if the wrong party signed', async () => {
-    // needs to be signed by 1 as it's their move
-    const { v, r, s } = sign(toHex(commitment), participantA.privateKey);
-    expect.assertions(1);
-    await expectRevert(() => testCommitmentLib.requireSignature(asEthersObject(commitment), v, r, s));
-  });
-
-  it('can check if the Commitment is fully signed', async () => {
-    const { r: r0, s: s0, v: v0 } = sign(toHex(commitment), participantA.privateKey);
-    const { r: r1, s: s1, v: v1 } = sign(toHex(commitment), participantB.privateKey);
-
-    expect(
-      await testCommitmentLib.requireFullySigned(asEthersObject(commitment), [v0, v1], [r0, r1], [s0, s1]),
-    ).toBeTruthy();
-  });
-
-  it('can test if the appAttributes are equal', async () => {
-    const countingCommitment1: CountingCommitment = { channel, destination, allocation, turnNum, appCounter: new BigNumber(0).toHexString(), commitmentCount: 0, commitmentType: CommitmentType.PreFundSetup };
-    const countingCommitment2: CountingCommitment = { channel, destination, allocation, turnNum, appCounter: new BigNumber(1).toHexString(), commitmentCount: 0, commitmentType: CommitmentType.PostFundSetup };
-
-    const commitment1 = asCoreCommitment(countingCommitment1);
-    const commitment2 = asCoreCommitment(countingCommitment2);
-
-    expect.assertions(1);
-    await expectRevert(() => commitmentLib.appAttributesEqual(asEthersObject(commitment1), asEthersObject(commitment2)));
-  });
-
   it('can encode and decode a Commitment', () => {
     const hexValue = toHex(commitment);
     const decodedCommitment = fromHex(hexValue);
     expect(decodedCommitment).toEqual(commitment);
+  });
+
+  it('can identify the mover of a commitment', () => {
+    expect(mover(commitment)).toEqual(participantA.address);
   });
 });

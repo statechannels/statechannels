@@ -58,7 +58,7 @@ export function fromParameters(parameters: any[]): Commitment {
 }
 
 export function mover(commitment: Commitment) {
-  return commitment.channel.participants[this.turnNum % this.channel.participants.length];
+  return commitment.channel.participants[commitment.turnNum % commitment.channel.participants.length];
 }
 
 export function ethereumArgs(commitment: Commitment) {
