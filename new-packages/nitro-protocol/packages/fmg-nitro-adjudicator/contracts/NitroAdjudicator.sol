@@ -99,8 +99,8 @@ contract NitroAdjudicator {
             "Transfer: transfer too large"
         );
 
-        holdings[destination] = holdings[destination] + owedToDestination;
-        holdings[channel] = holdings[channel] - owedToDestination;
+        holdings[destination] = holdings[destination] + amount;
+        holdings[channel] = holdings[channel] - amount;
 
         outcomes[channel] = remove(outcomes[channel], destination, amount);
     }
