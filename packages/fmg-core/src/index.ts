@@ -32,9 +32,9 @@ export {
   Byte,
 } from './types';
 export {
-  CountingState,
-  SolidityCountingStateType,
-  createState as createCountingState,
-  asCoreState as countingCommitmentAsCoreState,
-  args as countingGameEthereumArgs,
-} from './test-game/counting-game';
+  CountingCommitment,
+  SolidityCountingCommitmentType,
+  createCommitment as createCountingCommitment,
+  asCoreCommitment as countingCommitmentAsCoreCommitment,
+  args as countingAppEthereumArgs,
+} from './test-app/counting-app';
