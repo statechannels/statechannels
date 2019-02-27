@@ -42,6 +42,6 @@ describe('Commitment', () => {
   });
 
   it('can identify the mover of a commitment', () => {
-    expect(mover(commitment)).toEqual(participantA.address);
+    expect(mover(commitment)).toEqual(participantB.address);
   });
 });
