@@ -42,7 +42,7 @@ export function fromHex(commitment: string): Commitment {
 export function fromParameters(parameters: any[]): Commitment {
   const channel = {
     channelType: parameters[0],
-    channelNonce: Number.parseInt(parameters[1], 10),
+    nonce: Number.parseInt(parameters[1], 10),
     participants: parameters[2],
   }
   return {

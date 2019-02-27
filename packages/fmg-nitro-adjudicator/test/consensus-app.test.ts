@@ -74,7 +74,7 @@ describe('ConsensusApp', () => {
   const allocation = [toUint256(1), toUint256(2), toUint256(3)];
   const proposedAllocation = [toUint256(4), toUint256(2)];
 
-  const channel: Channel = { channelType: participantB.address, channelNonce: 0, participants }; // just use any valid address
+  const channel: Channel = { channelType: participantB.address, nonce: 0, participants }; // just use any valid address
   const defaults = { channel, allocation, destination: participants, turnNum: 6, proposedDestination, proposedAllocation, commitmentCount: 0 };
 
   beforeAll(async () => {
