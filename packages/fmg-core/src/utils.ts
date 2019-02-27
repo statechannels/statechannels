@@ -1,6 +1,8 @@
-import Web3 from 'web3';
 import { Signature, Uint256 } from './types';
 import { bigNumberify } from 'ethers/utils';
+
+import Web3Accounts from 'web3-eth-accounts';
+import web3Utils from 'web3-utils';
 
 export function toUint256(num: number): Uint256 {
   return bigNumberify(num).toHexString();
@@ -29,21 +31,19 @@ export class SolidityParameter {
 export type SignableData = string | SolidityParameter | SolidityParameter[];
 
 export function sign(data: SignableData, privateKey): Signature {
-  const localWeb3 = new Web3('');
-  return localWeb3.eth.accounts.sign(hash(data), privateKey);
+  return (new Web3Accounts('')).sign(hash(data), privateKey);
 }
 
 export function recover(data: SignableData, signature: Signature): string {
-  const web3 = new Web3('');
   const { v, r, s } = signature;
-  return web3.eth.accounts.recover(hash(data), v, r, s);
+  return (new Web3Accounts('')).recover(hash(data), v, r, s);
 }
 
 function hash(data: SignableData): string {
   if (typeof data === 'string' || data instanceof SolidityParameter) {
-    return Web3.utils.soliditySha3(data);
+    return web3Utils.soliditySha3(data);
   } else {
-    return Web3.utils.soliditySha3(...data);
+    return web3Utils.soliditySha3(...data);
   }
 }
 
