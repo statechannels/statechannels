@@ -2,9 +2,11 @@ pragma solidity ^0.5.0;
 pragma experimental ABIEncoderV2;
 import "fmg-core/contracts/Commitment.sol";
 import "fmg-core/contracts/Rules.sol";
+import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 contract NitroAdjudicator {
     using Commitment for Commitment.CommitmentStruct;
+    using SafeMath for uint;
 
     struct Authorization {
         // Prevents replay attacks:
@@ -53,7 +55,7 @@ contract NitroAdjudicator {
     // **************
 
     function deposit(address destination) public payable {
-        holdings[destination] = holdings[destination] + msg.value;
+        holdings[destination] = holdings[destination].add(msg.value);
         emit Deposited(destination,msg.value, holdings[destination]);
     }
 
@@ -74,7 +76,7 @@ contract NitroAdjudicator {
             "Withdraw: not authorized by participant"
         );
 
-        holdings[participant] = holdings[participant] - amount;
+        holdings[participant] = holdings[participant].sub(amount);
         destination.transfer(amount);
     }
 
@@ -99,8 +101,8 @@ contract NitroAdjudicator {
             "Transfer: transfer too large"
         );
 
-        holdings[destination] = holdings[destination] + amount;
-        holdings[channel] = holdings[channel] - amount;
+        holdings[destination] = holdings[destination].add(amount);
+        holdings[channel] = holdings[channel].sub(amount);
 
         outcomes[channel] = remove(outcomes[channel], destination, amount);
     }
@@ -120,8 +122,8 @@ contract NitroAdjudicator {
         Outcome memory reprioritizedOutcome = reprioritize(outcomes[guarantee.guaranteedChannel], guarantee);
         if (overlap(recipient, reprioritizedOutcome, funding) >= amount) {
             outcomes[guarantee.guaranteedChannel] = remove(outcomes[guarantee.guaranteedChannel], recipient, amount);
-            holdings[guarantor] -= amount;
-            holdings[recipient] += amount;
+            holdings[guarantor] = holdings[guarantor].sub(amount);
+            holdings[recipient] =  holdings[recipient].add(amount);
         } else {
             revert('Claim: guarantor must be sufficiently funded');
         }
@@ -169,10 +171,10 @@ contract NitroAdjudicator {
                 // It is technically allowed for a recipient to be listed in the
                 // outcome multiple times, so we must iterate through the entire
                 // array.
-                result += min(outcome.allocation[i], funding);
+                result =result.add(min(outcome.allocation[i], funding));
             }
 
-            funding -= outcome.allocation[i];
+            funding = funding.sub(outcome.allocation[i]);
         }
 
         return result;
@@ -186,9 +188,9 @@ contract NitroAdjudicator {
                 // It is technically allowed for a recipient to be listed in the
                 // outcome multiple times, so we must iterate through the entire
                 // array.
-                reduction += min(outcome.allocation[i], amount);
-                amount = amount - reduction;
-                updatedAllocation[i] = updatedAllocation[i] - reduction;
+                reduction = reduction.add(min(outcome.allocation[i], amount));
+                amount = amount.sub(reduction);
+                updatedAllocation[i] = updatedAllocation[i].sub(reduction);
             }
         }
 
