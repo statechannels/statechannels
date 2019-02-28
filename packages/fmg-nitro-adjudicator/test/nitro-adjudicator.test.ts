@@ -635,7 +635,7 @@ describe('nitroAdjudicator', () => {
       });
     });
 
-    describe('overlap', () => {
+    describe('affords', () => {
       it('returns funding when funding is less than the amount allocated to the recipient in the outcome', async () => {
         const recipient = alice.address;
         const outcome = {
@@ -646,7 +646,7 @@ describe('nitroAdjudicator', () => {
           guaranteedChannel: ZERO_ADDRESS,
         };
         const funding = ethers.utils.bigNumberify(2);
-        expect(await nitro.overlapPub(recipient, outcome, funding)).toEqual(funding);
+        expect(await nitro.affordsPub(recipient, outcome, funding)).toEqual(funding);
       });
 
       it('returns funding when funding is equal to than the amount allocated to the recipient in the outcome', async () => {
@@ -659,7 +659,7 @@ describe('nitroAdjudicator', () => {
           guaranteedChannel: ZERO_ADDRESS,
         };
         const funding = aBal;
-        expect((await nitro.overlapPub(recipient, outcome, funding)).toHexString()).toEqual(funding);
+        expect((await nitro.affordsPub(recipient, outcome, funding)).toHexString()).toEqual(funding);
       });
 
       it('returns the allocated amount when funding is greater than the amount allocated to the recipient in the outcome', async () => {
@@ -672,7 +672,7 @@ describe('nitroAdjudicator', () => {
           guaranteedChannel: ZERO_ADDRESS,
         };
         const funding = bigNumberify(aBal).add(1).toHexString();
-        expect((await nitro.overlapPub(recipient, outcome, funding)).toHexString()).toEqual(aBal);
+        expect((await nitro.affordsPub(recipient, outcome, funding)).toHexString()).toEqual(aBal);
       });
 
       it('returns zero when recipient is not a participant', async () => {
@@ -686,11 +686,11 @@ describe('nitroAdjudicator', () => {
         };
         const funding = bigNumberify(aBal).add(1).toHexString();
         const zero = ethers.utils.bigNumberify(0);
-        expect(await nitro.overlapPub(recipient, outcome, funding)).toEqual(zero);
+        expect(await nitro.affordsPub(recipient, outcome, funding)).toEqual(zero);
       });
     });
 
-    describe('remove', () => {
+    describe('reduce', () => {
       it('works', async () => {
         const outcome = {
           destination: [alice.address, bob.address],
@@ -699,20 +699,20 @@ describe('nitroAdjudicator', () => {
           challengeCommitment: getEthersObjectForCommitment(commitment0),
           guaranteedChannel: ZERO_ADDRESS,
         };
-        const removeAmount = 2;
-        const expectedBAllocation = bigNumberify(bBal).sub(removeAmount).toHexString();
-        const allocationAfterRemove = [aBal, expectedBAllocation];
+        const reduceAmount = 2;
+        const expectedBAllocation = bigNumberify(bBal).sub(reduceAmount).toHexString();
+        const allocationAfterReduce = [aBal, expectedBAllocation];
 
         const expectedOutcome = {
           destination: [alice.address, bob.address],
-          allocation: allocationAfterRemove,
+          allocation: allocationAfterReduce,
           finalizedAt: ethers.utils.bigNumberify(0),
           challengeCommitment: getEthersObjectForCommitment(commitment0),
         };
 
 
         const recipient = bob.address;
-        const newOutcome = await nitro.removePub(outcome, recipient, removeAmount);
+        const newOutcome = await nitro.reducePub(outcome, recipient, reduceAmount);
 
         expect(getOutcomeFromParameters(newOutcome)).toMatchObject(expectedOutcome);
       });

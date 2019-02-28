@@ -90,7 +90,7 @@ contract NitroAdjudicator {
             "Transfer: outcome must be present"
         );
 
-        uint channelAffordsForDestination = overlap(destination, outcomes[channel], holdings[channel]);
+        uint channelAffordsForDestination = affords(destination, outcomes[channel], holdings[channel]);
 
         require(
             amount <= channelAffordsForDestination,
@@ -100,7 +100,7 @@ contract NitroAdjudicator {
         holdings[destination] = holdings[destination] + amount;
         holdings[channel] = holdings[channel] - amount;
 
-        outcomes[channel] = remove(outcomes[channel], destination, amount);
+        outcomes[channel] = reduce(outcomes[channel], destination, amount);
     }
 
     function claim(address guarantor, address recipient, uint amount) public {
@@ -116,8 +116,8 @@ contract NitroAdjudicator {
 
         uint funding = holdings[guarantor];
         Outcome memory reprioritizedOutcome = reprioritize(outcomes[guarantee.guaranteedChannel], guarantee);
-        if (overlap(recipient, reprioritizedOutcome, funding) >= amount) {
-            outcomes[guarantee.guaranteedChannel] = remove(outcomes[guarantee.guaranteedChannel], recipient, amount);
+        if (affords(recipient, reprioritizedOutcome, funding) >= amount) {
+            outcomes[guarantee.guaranteedChannel] = reduce(outcomes[guarantee.guaranteedChannel], recipient, amount);
             holdings[guarantor] = holdings[guarantor].sub(amount);
             holdings[recipient] =  holdings[recipient].add(amount);
         } else {
@@ -155,7 +155,7 @@ contract NitroAdjudicator {
         );
     }
 
-    function overlap(address recipient, Outcome memory outcome, uint funding) internal pure returns (uint256) {
+    function affords(address recipient, Outcome memory outcome, uint funding) internal pure returns (uint256) {
         uint result = 0;
 
         for (uint i = 0; i < outcome.destination.length; i++) {
@@ -179,7 +179,7 @@ contract NitroAdjudicator {
         return result;
     }
 
-    function remove(Outcome memory outcome, address recipient, uint amount) internal pure returns (Outcome memory) { 
+    function reduce(Outcome memory outcome, address recipient, uint amount) internal pure returns (Outcome memory) { 
         uint256[] memory updatedAllocation = outcome.allocation;
         uint256 reduction = 0;
         for (uint i = 0; i < outcome.destination.length; i++) {
