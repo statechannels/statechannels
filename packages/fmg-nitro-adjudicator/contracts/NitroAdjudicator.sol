@@ -173,8 +173,11 @@ contract NitroAdjudicator {
                 // array.
                 result =result.add(min(outcome.allocation[i], funding));
             }
-
-            funding = funding.sub(outcome.allocation[i]);
+            if (funding > outcome.allocation[i]){
+                funding = funding.sub(outcome.allocation[i]);
+            }else{
+                funding = 0;
+            }
         }
 
         return result;
