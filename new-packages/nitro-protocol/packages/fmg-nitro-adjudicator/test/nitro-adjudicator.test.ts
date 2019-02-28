@@ -314,7 +314,35 @@ describe('nitroAdjudicator', () => {
 
         });
 
-        it('works when \
+      it('works when \
+          the outcome is final and \
+          outcomes[fromChannel].destination is covered by holdings[fromChannel] \
+          and the second participant calls transfer', async () => {
+          await depositTo(getChannelID(channel));
+          await depositTo(guarantor.address);
+
+          const allocationOutcome = {
+            destination: [alice.address, bob.address],
+            allocation,
+            finalizedAt: ethers.utils.bigNumberify(1),
+            challengeCommitment: getEthersObjectForCommitment(commitment0),
+            guaranteedChannel: ZERO_ADDRESS,
+          };
+          const tx = await nitro.setOutcome(getChannelID(channel), allocationOutcome);
+          await tx.wait();
+
+          const allocatedToChannel = await nitro.holdings(getChannelID(channel));
+          const allocatedToBob = await nitro.holdings(bob.address);
+          const allocatedToAlice = await nitro.holdings(alice.address);
+
+          await nitro.transfer(getChannelID(channel), bob.address, allocation[1]);
+          expect(await nitro.holdings(bob.address)).toEqual(allocatedToBob.add(allocation[1]));
+        
+          expect(await nitro.holdings(getChannelID(channel))).toEqual(allocatedToChannel.sub(allocation[1]));
+
+        });
+
+      it('works when \
         the outcome is final and \
         outcomes[fromChannel].destination is covered by holdings[fromChannel] and \
         the same participant calls it twice', async () => {
@@ -346,31 +374,31 @@ describe('nitroAdjudicator', () => {
       the outcome is final and \
       outcomes[fromChannel].destination is covered by holdings[fromChannel] and \
       the same opponent had already called it', async () => {
-        await depositTo(getChannelID(channel));
+          await depositTo(getChannelID(channel));
 
-        const allocationOutcome = {
-          destination: [alice.address, bob.address],
-          allocation,
-          finalizedAt: ethers.utils.bigNumberify(1),
-          challengeCommitment: getEthersObjectForCommitment(commitment0),
-          guaranteedChannel: ZERO_ADDRESS,
-        };
-        const tx = await nitro.setOutcome(getChannelID(channel), allocationOutcome);
-        await tx.wait();
+          const allocationOutcome = {
+            destination: [alice.address, bob.address],
+            allocation,
+            finalizedAt: ethers.utils.bigNumberify(1),
+            challengeCommitment: getEthersObjectForCommitment(commitment0),
+            guaranteedChannel: ZERO_ADDRESS,
+          };
+          const tx = await nitro.setOutcome(getChannelID(channel), allocationOutcome);
+          await tx.wait();
 
-        const allocatedToChannel = await nitro.holdings(getChannelID(channel));
-        const allocatedToAlice = await nitro.holdings(alice.address);
-        const allocatedToBob = await nitro.holdings(bob.address);
+          const allocatedToChannel = await nitro.holdings(getChannelID(channel));
+          const allocatedToAlice = await nitro.holdings(alice.address);
+          const allocatedToBob = await nitro.holdings(bob.address);
 
-        await nitro.transfer(getChannelID(channel), alice.address, 1);
-        await nitro.transfer(getChannelID(channel), bob.address, 1);
+          await nitro.transfer(getChannelID(channel), alice.address, 1);
+          await nitro.transfer(getChannelID(channel), bob.address, 1);
 
-        expect(await nitro.holdings(alice.address)).toEqual(allocatedToAlice.add(1));
-        expect(await nitro.holdings(bob.address)).toEqual(allocatedToBob.add(1));
-        expect(await nitro.holdings(getChannelID(channel))).toEqual(
-          allocatedToChannel.sub(2),
-        );
-      });
+          expect(await nitro.holdings(alice.address)).toEqual(allocatedToAlice.add(1));
+          expect(await nitro.holdings(bob.address)).toEqual(allocatedToBob.add(1));
+          expect(await nitro.holdings(getChannelID(channel))).toEqual(
+            allocatedToChannel.sub(2),
+          );
+        });
 
       it('reverts when the outcome is not final', async () => {
         const allocationOutcome = {
@@ -406,7 +434,7 @@ describe('nitroAdjudicator', () => {
         expect.assertions(expectedAssertions);
         await expectRevert(
           () => nitro.transfer(getChannelID(channel), alice.address, bigNumberify(allocated).add(1)),
-          'Transfer: holdings[channel] must cover transfer',
+             'Transfer: channel cannot afford the requested transfer amount',
         );
 
       });
@@ -430,7 +458,7 @@ describe('nitroAdjudicator', () => {
           expect.assertions(expectedAssertions);
           await expectRevert(
             () => nitro.transfer(getChannelID(channel), alice.address, transferAmount),
-            'Transfer: transfer too large',
+            'Transfer: channel cannot afford the requested transfer amount',
           );
 
         });
@@ -452,7 +480,7 @@ describe('nitroAdjudicator', () => {
         expect.assertions(expectedAssertions);
         await expectRevert(
           () => nitro.transfer(getChannelID(channel), aliceDest.address, allocation[0]),
-          'Transfer: transfer too large',
+          'Transfer: channel cannot afford the requested transfer amount',
         );
 
       });
@@ -780,7 +808,7 @@ describe('nitroAdjudicator', () => {
     describe('concludeAndWithdraw', () => {
       it('works when the channel is not concluded', async () => {
         const total = bigNumberify(aBal).add(bBal);
-          const channelId = getChannelID(channel);
+        const channelId = getChannelID(channel);
         await depositTo(channelId, total.toNumber());
         const startBal = await provider.getBalance(aliceDest.address);
         const allocatedAtStart = await nitro.holdings(channelId);
@@ -818,7 +846,7 @@ describe('nitroAdjudicator', () => {
         await depositTo(channelId, total.toNumber());
         const concludeTx = await nitro.conclude(conclusionProof);
         await concludeTx.wait();
-        
+
         const participant = alice.address;
         const destination = aliceDest.address;
         const senderAddr = await nitro.signer.getAddress();

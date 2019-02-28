@@ -90,19 +90,15 @@ contract NitroAdjudicator {
             "Transfer: outcome must be present"
         );
 
-        uint owedToDestination = overlap(destination, outcomes[channel], amount);
+        uint channelAffordsForDestination = overlap(destination, outcomes[channel], holdings[channel]);
 
         require(
-            owedToDestination <= holdings[channel],
-            "Transfer: holdings[channel] must cover transfer"
-        );
-        require(
-            owedToDestination >= amount,
-            "Transfer: transfer too large"
+            amount <= channelAffordsForDestination,
+            "Transfer: channel cannot afford the requested transfer amount"
         );
 
-        holdings[destination] = holdings[destination].add(amount);
-        holdings[channel] = holdings[channel].sub(amount);
+        holdings[destination] = holdings[destination] + amount;
+        holdings[channel] = holdings[channel] - amount;
 
         outcomes[channel] = remove(outcomes[channel], destination, amount);
     }
