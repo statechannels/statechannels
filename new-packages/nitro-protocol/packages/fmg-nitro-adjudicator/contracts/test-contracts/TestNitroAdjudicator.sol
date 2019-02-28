@@ -11,12 +11,12 @@ contract TestNitroAdjudicator is NitroAdjudicator {
         return reprioritize(allocation, guarantee);
     }
 
-    function overlapPub(address recipient, Outcome memory allocation, uint funding) public pure returns (uint256) {
-        return overlap(recipient, allocation, funding);
+    function affordsPub(address recipient, Outcome memory allocation, uint funding) public pure returns (uint256) {
+        return affords(recipient, allocation, funding);
     }
 
-    function removePub(Outcome memory allocation, address recipient, uint amount) public pure returns (Outcome memory) { 
-        return remove(allocation, recipient, amount);
+    function reducePub(Outcome memory allocation, address recipient, uint amount) public pure returns (Outcome memory) { 
+        return reduce(allocation, recipient, amount);
     }
 
     // ****************

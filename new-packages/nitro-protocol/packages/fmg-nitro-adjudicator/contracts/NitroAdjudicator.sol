@@ -2,9 +2,11 @@ pragma solidity ^0.5.0;
 pragma experimental ABIEncoderV2;
 import "fmg-core/contracts/Commitment.sol";
 import "fmg-core/contracts/Rules.sol";
+import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 contract NitroAdjudicator {
     using Commitment for Commitment.CommitmentStruct;
+    using SafeMath for uint;
 
     struct Authorization {
         // Prevents replay attacks:
@@ -53,7 +55,7 @@ contract NitroAdjudicator {
     // **************
 
     function deposit(address destination) public payable {
-        holdings[destination] = holdings[destination] + msg.value;
+        holdings[destination] = holdings[destination].add(msg.value);
         emit Deposited(destination,msg.value, holdings[destination]);
     }
 
@@ -74,7 +76,7 @@ contract NitroAdjudicator {
             "Withdraw: not authorized by participant"
         );
 
-        holdings[participant] = holdings[participant] - amount;
+        holdings[participant] = holdings[participant].sub(amount);
         destination.transfer(amount);
     }
 
@@ -88,21 +90,17 @@ contract NitroAdjudicator {
             "Transfer: outcome must be present"
         );
 
-        uint owedToDestination = overlap(destination, outcomes[channel], amount);
+        uint channelAffordsForDestination = affords(destination, outcomes[channel], holdings[channel]);
 
         require(
-            owedToDestination <= holdings[channel],
-            "Transfer: holdings[channel] must cover transfer"
-        );
-        require(
-            owedToDestination >= amount,
-            "Transfer: transfer too large"
+            amount <= channelAffordsForDestination,
+            "Transfer: channel cannot afford the requested transfer amount"
         );
 
         holdings[destination] = holdings[destination] + amount;
         holdings[channel] = holdings[channel] - amount;
 
-        outcomes[channel] = remove(outcomes[channel], destination, amount);
+        outcomes[channel] = reduce(outcomes[channel], destination, amount);
     }
 
     function claim(address guarantor, address recipient, uint amount) public {
@@ -118,10 +116,10 @@ contract NitroAdjudicator {
 
         uint funding = holdings[guarantor];
         Outcome memory reprioritizedOutcome = reprioritize(outcomes[guarantee.guaranteedChannel], guarantee);
-        if (overlap(recipient, reprioritizedOutcome, funding) >= amount) {
-            outcomes[guarantee.guaranteedChannel] = remove(outcomes[guarantee.guaranteedChannel], recipient, amount);
-            holdings[guarantor] -= amount;
-            holdings[recipient] += amount;
+        if (affords(recipient, reprioritizedOutcome, funding) >= amount) {
+            outcomes[guarantee.guaranteedChannel] = reduce(outcomes[guarantee.guaranteedChannel], recipient, amount);
+            holdings[guarantor] = holdings[guarantor].sub(amount);
+            holdings[recipient] =  holdings[recipient].add(amount);
         } else {
             revert('Claim: guarantor must be sufficiently funded');
         }
@@ -157,7 +155,7 @@ contract NitroAdjudicator {
         );
     }
 
-    function overlap(address recipient, Outcome memory outcome, uint funding) internal pure returns (uint256) {
+    function affords(address recipient, Outcome memory outcome, uint funding) internal pure returns (uint256) {
         uint result = 0;
 
         for (uint i = 0; i < outcome.destination.length; i++) {
@@ -169,16 +167,19 @@ contract NitroAdjudicator {
                 // It is technically allowed for a recipient to be listed in the
                 // outcome multiple times, so we must iterate through the entire
                 // array.
-                result += min(outcome.allocation[i], funding);
+                result =result.add(min(outcome.allocation[i], funding));
             }
-
-            funding -= outcome.allocation[i];
+            if (funding > outcome.allocation[i]){
+                funding = funding.sub(outcome.allocation[i]);
+            }else{
+                funding = 0;
+            }
         }
 
         return result;
     }
 
-    function remove(Outcome memory outcome, address recipient, uint amount) internal pure returns (Outcome memory) { 
+    function reduce(Outcome memory outcome, address recipient, uint amount) internal pure returns (Outcome memory) { 
         uint256[] memory updatedAllocation = outcome.allocation;
         uint256 reduction = 0;
         for (uint i = 0; i < outcome.destination.length; i++) {
@@ -186,9 +187,9 @@ contract NitroAdjudicator {
                 // It is technically allowed for a recipient to be listed in the
                 // outcome multiple times, so we must iterate through the entire
                 // array.
-                reduction += min(outcome.allocation[i], amount);
-                amount = amount - reduction;
-                updatedAllocation[i] = updatedAllocation[i] - reduction;
+                reduction = reduction.add(min(outcome.allocation[i], amount));
+                amount = amount.sub(reduction);
+                updatedAllocation[i] = updatedAllocation[i].sub(reduction);
             }
         }
 
