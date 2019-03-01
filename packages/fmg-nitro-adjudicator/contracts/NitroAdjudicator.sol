@@ -59,6 +59,11 @@ contract NitroAdjudicator {
         emit Deposited(destination,msg.value, holdings[destination]);
     }
 
+    function transferAndWithdraw(address channel, address participant, address payable destination, uint amount, uint8 _v, bytes32 _r, bytes32 _s) public payable {
+        transfer(channel, participant,amount);
+        withdraw(participant, destination, amount, _v,_r,_s);
+    }
+
     function withdraw(address participant, address payable destination, uint amount, uint8 _v, bytes32 _r, bytes32 _s) public payable {
         require(
             holdings[participant] >= amount,
