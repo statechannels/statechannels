@@ -2,7 +2,7 @@ const Logger = require("./logger.js").Logger;
 
 module.exports = {
     deployContracts: function () {
-
+        require("dotenv").config();
         const path = require('path');
         const {
             spawn
