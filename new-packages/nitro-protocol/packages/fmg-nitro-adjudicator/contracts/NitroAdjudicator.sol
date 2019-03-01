@@ -286,7 +286,7 @@ contract NitroAdjudicator {
         emit ChallengeCreated(
             channelId,
             challengeCommitment,
-            now
+            now + CHALLENGE_DURATION
         );
     }
 
