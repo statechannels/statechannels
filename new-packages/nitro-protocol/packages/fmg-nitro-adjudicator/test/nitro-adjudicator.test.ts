@@ -285,6 +285,37 @@ describe('nitroAdjudicator', () => {
       });
     });
 
+    describe('transferAndWithdraw', ()=>{
+      it('works', async () => {
+          await depositTo(getChannelID(channel));
+          const startBal = await provider.getBalance(aliceDest.address);
+          const allocatedToChannel = await nitro.holdings(getChannelID(channel));
+          const allocationOutcome = {
+            destination: [alice.address, bob.address],
+            allocation,
+            finalizedAt: ethers.utils.bigNumberify(1),
+            challengeCommitment: getEthersObjectForCommitment(commitment0),
+            guaranteedChannel: ZERO_ADDRESS,
+          };
+          const tx = await nitro.setOutcome(getChannelID(channel), allocationOutcome);
+          await tx.wait();
+
+          const senderAddr =  await nitro.signer.getAddress();
+          const authorization = abiCoder.encode(AUTH_TYPES, [alice.address, aliceDest.address, aBal, senderAddr]);
+
+          const sig = sign(authorization, alice.privateKey);
+          await nitro.transferAndWithdraw(getChannelID(channel), alice.address, aliceDest.address, allocation[0], sig.v, sig.r, sig.s,{ gasLimit: 3000000 });
+          const expectedBalance = startBal.add(allocation[0]);
+          const currentBalance = (await provider.getBalance(aliceDest.address));
+          
+          expect(currentBalance.eq(expectedBalance)).toBe(true);
+
+          const currentChannelHolding = await nitro.holdings(getChannelID(channel));
+          const expectedChannelHolding = allocatedToChannel.sub(allocation[0]);
+          expect(currentChannelHolding).toEqual(expectedChannelHolding);
+      });
+    });
+
     describe('transfer', () => {
       it('works when \
           the outcome is final and \
