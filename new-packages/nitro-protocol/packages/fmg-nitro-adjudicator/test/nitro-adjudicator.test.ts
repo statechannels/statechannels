@@ -285,8 +285,10 @@ describe('nitroAdjudicator', () => {
       });
     });
 
-    describe('transferAndWithdraw', ()=>{
-      it('works', async () => {
+    describe('transferAndWithdraw', () => {
+      it('works when \
+          the outcome is final and \
+          outcomes[fromChannel].destination is covered by holdings[fromChannel]', async () => {
           await depositTo(getChannelID(channel));
           const startBal = await provider.getBalance(aliceDest.address);
           const allocatedToChannel = await nitro.holdings(getChannelID(channel));
@@ -300,20 +302,20 @@ describe('nitroAdjudicator', () => {
           const tx = await nitro.setOutcome(getChannelID(channel), allocationOutcome);
           await tx.wait();
 
-          const senderAddr =  await nitro.signer.getAddress();
+          const senderAddr = await nitro.signer.getAddress();
           const authorization = abiCoder.encode(AUTH_TYPES, [alice.address, aliceDest.address, aBal, senderAddr]);
 
           const sig = sign(authorization, alice.privateKey);
-          await nitro.transferAndWithdraw(getChannelID(channel), alice.address, aliceDest.address, allocation[0], sig.v, sig.r, sig.s,{ gasLimit: 3000000 });
+          await nitro.transferAndWithdraw(getChannelID(channel), alice.address, aliceDest.address, allocation[0], sig.v, sig.r, sig.s, { gasLimit: 3000000 });
           const expectedBalance = startBal.add(allocation[0]);
           const currentBalance = (await provider.getBalance(aliceDest.address));
-          
+
           expect(currentBalance.eq(expectedBalance)).toBe(true);
 
           const currentChannelHolding = await nitro.holdings(getChannelID(channel));
           const expectedChannelHolding = allocatedToChannel.sub(allocation[0]);
           expect(currentChannelHolding).toEqual(expectedChannelHolding);
-      });
+        });
     });
 
     describe('transfer', () => {
@@ -995,12 +997,12 @@ describe('nitroAdjudicator', () => {
         );
         await tx.wait();
         const event = await eventPromise;
-     
+
         expect(await nitro.isChallengeOngoing(getChannelID(channel))).toBe(true);
         expect(emitterWitness).toBeCalled();
 
         // The challenge expiry should be in the future
-        const blockNumber =await provider.getBlockNumber();
+        const blockNumber = await provider.getBlockNumber();
         const blockTimestamp = (await provider.getBlock(blockNumber)).timestamp;
         expect(event.args.finalizedAt.gt(blockTimestamp)).toBe(true);
       });
