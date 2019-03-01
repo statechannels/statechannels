@@ -337,7 +337,7 @@ describe('nitroAdjudicator', () => {
 
           await nitro.transfer(getChannelID(channel), bob.address, allocation[1]);
           expect(await nitro.holdings(bob.address)).toEqual(allocatedToBob.add(allocation[1]));
-        
+
           expect(await nitro.holdings(getChannelID(channel))).toEqual(allocatedToChannel.sub(allocation[1]));
 
         });
@@ -434,7 +434,7 @@ describe('nitroAdjudicator', () => {
         expect.assertions(expectedAssertions);
         await expectRevert(
           () => nitro.transfer(getChannelID(channel), alice.address, bigNumberify(allocated).add(1)),
-             'Transfer: channel cannot afford the requested transfer amount',
+          'Transfer: channel cannot afford the requested transfer amount',
         );
 
       });
@@ -963,11 +963,15 @@ describe('nitroAdjudicator', () => {
           signatures,
         );
         await tx.wait();
-        await eventPromise;
-
+        const event = await eventPromise;
+     
         expect(await nitro.isChallengeOngoing(getChannelID(channel))).toBe(true);
-
         expect(emitterWitness).toBeCalled();
+
+        // The challenge expiry should be in the future
+        const blockNumber =await provider.getBlockNumber();
+        const blockTimestamp = (await provider.getBlock(blockNumber)).timestamp;
+        expect(event.args.finalizedAt.gt(blockTimestamp)).toBe(true);
       });
 
       it('reverts when the move is not valid', async () => {
