@@ -1,17 +1,13 @@
-import BN from 'bn.js';
 import { expectRevert } from 'magmo-devtools';
-import {
-  scenarios,
-  encode
-} from '../core';
+import * as scenarios from '../core/test-scenarios';
 
-import hexToBN from '../utils/hexToBN';
-import bnToHex from '../utils/bnToHex';
 import * as ethers from 'ethers';
 
 
 import RPSGameArtifact from '../../build/contracts/RockPaperScissorsGame.json';
-
+import { asEthersObject } from 'fmg-core';
+import { RPSCommitment, asCoreCommitment } from '../core/rps-commitment';
+import { bigNumberify } from 'ethers/utils';
 jest.setTimeout(20000);
 
 
@@ -20,11 +16,11 @@ describe("Rock paper Scissors", () => {
   const provider = new ethers.providers.JsonRpcProvider(`http://localhost:${process.env.DEV_GANACHE_PORT}`);
   let rpsContract;
 
-  let postFundSetupB;
-  let propose;
-  let accept;
-  let reveal;
-  let resting;
+  let postFundSetupB: RPSCommitment;
+  let propose: RPSCommitment;
+  let accept: RPSCommitment;
+  let reveal: RPSCommitment;
+  let resting: RPSCommitment;
 
   beforeAll(async () => {
 
@@ -45,14 +41,19 @@ describe("Rock paper Scissors", () => {
   });
 
 
-  const validTransition = async (state1, state2) => {
-    return await rpsContract.validTransition(encode(state1), encode(state2));
+
+  const validTransition = async (commitment1: RPSCommitment, commitment2: RPSCommitment) => {
+    const coreCommitment1 = asCoreCommitment(commitment1);
+    const coreCommitment2 = asCoreCommitment(commitment2);
+
+    return await rpsContract.validTransition(asEthersObject(coreCommitment1), asEthersObject(coreCommitment2));
   };
 
   // Transition function tests
   // ========================
 
   it("allows START -> ROUNDPROPOSED", async () => {
+
     expect(await validTransition(postFundSetupB, propose)).toBe(true);
   });
 
@@ -69,11 +70,13 @@ describe("Rock paper Scissors", () => {
   });
 
   it("disallows transitions where the stake changes", async () => {
-    reveal.roundBuyIn = bnToHex(hexToBN(reveal.roundBuyIn).add(new BN(1)));
+    reveal.stake = bigNumberify(88).toHexString();
+    const coreCommitment1 = asCoreCommitment(reveal);
+    const coreCommitment2 = asCoreCommitment(resting);
     expect.assertions(1);
     await expectRevert(
-      () => rpsContract.validTransition(encode(reveal), encode(resting)),
-      "The stake should be the same between states"
+      () => rpsContract.validTransition(asEthersObject(coreCommitment1), asEthersObject(coreCommitment2)),
+      "The stake should be the same between commitments"
     );
   });
 });

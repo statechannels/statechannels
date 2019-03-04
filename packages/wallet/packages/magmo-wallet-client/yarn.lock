@@ -720,10 +720,10 @@ ethers@4.0.0-beta.1:
     uuid "2.0.1"
     xmlhttprequest "1.8.0"
 
-ethers@^4.0.12:
-  version "4.0.20"
-  resolved "https://registry.yarnpkg.com/ethers/-/ethers-4.0.20.tgz#2b072b283bb19f4870daf42cf5593e5375697504"
-  integrity sha512-1XEejqGYWlcXoVCPFPRfJmf1QQGHW7TNfprtdT1Up66nSuqWE/lYSLgvTNvH/nbSTMRFZqM6ANAbv/1+eUDb7g==
+ethers@^4.0.26:
+  version "4.0.26"
+  resolved "https://registry.yarnpkg.com/ethers/-/ethers-4.0.26.tgz#a4b17184a0ed3db9c88d1b6d28beaa7d0e0ba3e4"
+  integrity sha512-3hK4S8eAGhuWZ/feip5z17MswjGgjb4lEPJqWO/O0dNqToYLSHhvu6gGQPs8d9f+XfpEB2EYexfF0qjhWiZjUA==
   dependencies:
     "@types/node" "^10.3.2"
     aes-js "3.0.0"
@@ -858,16 +858,18 @@ finalhandler@1.1.1:
     statuses "~1.4.0"
     unpipe "~1.0.0"
 
-fmg-core@0.3.5:
-  version "0.3.5"
-  resolved "https://registry.yarnpkg.com/fmg-core/-/fmg-core-0.3.5.tgz#826f277514a3a14ec1477a61981ac1718eb62954"
-  integrity sha512-t6JeBaMxgjDGNLSXbek8MblQHd6HHwac8dGzPGb8xABfnCE11FIYyMZslIJXYIpby+FRKQKVQzom/C/orm73ZQ==
+fmg-core@0.5.6:
+  version "0.5.6"
+  resolved "https://registry.yarnpkg.com/fmg-core/-/fmg-core-0.5.6.tgz#2a895b10f8fc6fe75bdd6ab320e1c97e483a92d2"
+  integrity sha512-aHWDk73c23X5n2T5LzCCDDX1ker2JVlR3wmdqN/nAgCLeNEeGUPH8fYYFAQv3wxXDXEBk8boeS5KWiVBjlgjpA==
   dependencies:
     bn.js "^4.11.8"
-    ethers "^4.0.12"
+    ethers "^4.0.26"
     sha3 "^1.2.2"
-    web3 "^1.0.0-beta.36"
-    web3-utils "^1.0.0-beta.36"
+    web3 "1.0.0-beta.37"
+    web3-eth-abi "1.0.0-beta.37"
+    web3-eth-accounts "1.0.0-beta.37"
+    web3-utils "1.0.0-beta.37"
     websocket "^1.0.28"
 
 for-each@^0.3.2:
@@ -2397,7 +2399,7 @@ web3-shh@1.0.0-beta.37:
     web3-core-subscriptions "1.0.0-beta.37"
     web3-net "1.0.0-beta.37"
 
-web3-utils@1.0.0-beta.37, web3-utils@^1.0.0-beta.36:
+web3-utils@1.0.0-beta.37:
   version "1.0.0-beta.37"
   resolved "https://registry.yarnpkg.com/web3-utils/-/web3-utils-1.0.0-beta.37.tgz#ab868a90fe5e649337e38bdaf72133fcbf4d414d"
   integrity sha512-kA1fyhO8nKgU21wi30oJQ/ssvu+9srMdjOTKbHYbQe4ATPcr5YNwwrxG3Bcpbu1bEwRUVKHCkqi+wTvcAWBdlQ==
@@ -2410,7 +2412,7 @@ web3-utils@1.0.0-beta.37, web3-utils@^1.0.0-beta.36:
     underscore "1.8.3"
     utf8 "2.1.1"
 
-web3@^1.0.0-beta.36:
+web3@1.0.0-beta.37:
   version "1.0.0-beta.37"
   resolved "https://registry.yarnpkg.com/web3/-/web3-1.0.0-beta.37.tgz#b42c30e67195f816cd19d048fda872f70eca7083"
   integrity sha512-8XLgUspdzicC/xHG82TLrcF/Fxzj2XYNJ1KTYnepOI77bj5rvpsxxwHYBWQ6/JOjk0HkZqoBfnXWgcIHCDhZhQ==

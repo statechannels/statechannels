@@ -25,5 +25,10 @@ module.exports = (baseConfig, env, config) => {
     }]
   });
   config.resolve.extensions.push('.ts', '.tsx', '.scss');
+  config.resolve.alias = {
+    ...baseConfig.resolve.alias,
+    'fs': path.resolve(__dirname, 'mock.js'),
+    'child_process': path.resolve(__dirname, 'mock.js'),
+  };
   return config;
 };

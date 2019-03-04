@@ -1,13 +1,12 @@
-import { State } from 'fmg-core';
-
 import * as states from '../../states';
 import * as actions from '../actions';
 import { signatureSuccess, validationSuccess, signatureFailure, validationFailure } from 'magmo-wallet-client/lib/wallet-events';
 
-import decode from '../../utils/decode-utils';
 import { unreachable } from '../../utils/reducer-utils';
-import { signPositionHex, validSignature } from '../../utils/signing-utils';
-import bnToHex from '../../utils/bnToHex';
+import { signCommitment, validCommitmentSignature } from '../../utils/signing-utils';
+import { CommitmentType } from 'fmg-core';
+import { bigNumberify } from 'ethers/utils';
+import { channelID } from 'fmg-core/lib/channel';
 
 
 export const openingReducer = (state: states.OpeningState, action: actions.WalletAction): states.WalletState => {
@@ -26,58 +25,59 @@ const waitForChannelReducer = (state: states.WaitForChannel, action: actions.Wal
     case actions.LOGGED_IN:
       const { uid } = action;
       return states.waitForAddress({ ...state, uid });
-    case actions.OWN_POSITION_RECEIVED:
-      const data = action.data;
-      const ownPosition = decode(data);
+    case actions.OWN_COMMITMENT_RECEIVED:
+      const ownCommitment = action.commitment;
 
       // check it's a PreFundSetupA
-      if (ownPosition.stateType !== State.StateType.PreFundSetup) {
+      if (ownCommitment.commitmentType !== CommitmentType.PreFundSetup) {
         // Since these checks are happening during a signature request we'll return a sig failure
         return { ...state, messageOutbox: signatureFailure('Other', 'Expected a pre fund setup position.') };
       }
-      if (ownPosition.stateCount !== 0) {
+      if (ownCommitment.commitmentCount !== 0) {
         return { ...state, messageOutbox: signatureFailure('Other', 'Expected state count to 0.') };
       }
 
 
-      const ourAddress = ownPosition.channel.participants[0] as string;
+      const ourAddress = ownCommitment.channel.participants[0] as string;
 
       if (ourAddress !== state.address) {
         return { ...state, messageOutbox: signatureFailure('Other', 'Address provided does not match the one stored in the wallet.') };
       }
 
 
-      const signature = signPositionHex(data, state.privateKey);
+      const signature = signCommitment(ownCommitment, state.privateKey);
       // if so, unpack its contents into the state
       return states.waitForPreFundSetup({
         ...state,
-        libraryAddress: ownPosition.channel.channelType,
-        channelId: ownPosition.channel.id,
-        ourIndex: ownPosition.channel.participants.indexOf(state.address),
-        participants: ownPosition.channel.participants,
-        channelNonce: ownPosition.channel.channelNonce,
+        libraryAddress: ownCommitment.channel.channelType,
+        channelId: channelID(ownCommitment.channel),
+        ourIndex: ownCommitment.channel.participants.indexOf(state.address),
+        participants: ownCommitment.channel.participants as [string, string],
+        channelNonce: ownCommitment.channel.nonce,
         turnNum: 0,
-        lastPosition: { data, signature },
+        lastCommitment: { commitment: ownCommitment, signature },
         messageOutbox: signatureSuccess(signature),
+        requestedTotalFunds: '0x0',
+        requestedYourDeposit: '0x0',
       });
 
-    case actions.OPPONENT_POSITION_RECEIVED:
-      const opponentPosition = decode(action.data);
+    case actions.OPPONENT_COMMITMENT_RECEIVED:
+      const opponentCommitment = action.commitment;
 
       // all these checks will fail silently for the time being
       // check it's a PreFundSetupA
-      if (opponentPosition.stateType !== State.StateType.PreFundSetup) {
+      if (opponentCommitment.commitmentType !== CommitmentType.PreFundSetup) {
         return { ...state, messageOutbox: validationFailure('Other', 'Expected a prefund setup position') };
       }
-      if (opponentPosition.stateCount !== 0) {
+      if (opponentCommitment.commitmentCount !== 0) {
         return { ...state, messageOutbox: validationFailure('Other', 'Expected state count to be 0') };
       }
 
 
-      const ourAddress2 = opponentPosition.channel.participants[1] as string;
-      const opponentAddress2 = opponentPosition.channel.participants[0] as string;
+      const ourAddress2 = opponentCommitment.channel.participants[1] as string;
+      const opponentAddress2 = opponentCommitment.channel.participants[0] as string;
 
-      if (!validSignature(action.data, action.signature, opponentAddress2)) {
+      if (!validCommitmentSignature(action.commitment, action.signature, opponentAddress2)) {
         return { ...state, messageOutbox: validationFailure('InvalidSignature') };
       }
 
@@ -88,14 +88,16 @@ const waitForChannelReducer = (state: states.WaitForChannel, action: actions.Wal
       // if so, unpack its contents into the state
       return states.waitForPreFundSetup({
         ...state,
-        libraryAddress: opponentPosition.channel.channelType,
-        channelId: opponentPosition.channel.id,
-        ourIndex: opponentPosition.channel.participants.indexOf(state.address),
-        participants: opponentPosition.channel.participants,
-        channelNonce: opponentPosition.channel.channelNonce,
+        libraryAddress: opponentCommitment.channel.channelType,
+        channelId: channelID(opponentCommitment.channel),
+        ourIndex: opponentCommitment.channel.participants.indexOf(state.address),
+        participants: opponentCommitment.channel.participants as [string, string],
+        channelNonce: opponentCommitment.channel.nonce,
         turnNum: 0,
-        lastPosition: { data: action.data, signature: action.signature },
+        lastCommitment: { commitment: action.commitment, signature: action.signature },
         messageOutbox: validationSuccess(),
+        requestedTotalFunds: '0x0',
+        requestedYourDeposit: '0x0',
       });
 
     default:
@@ -105,46 +107,45 @@ const waitForChannelReducer = (state: states.WaitForChannel, action: actions.Wal
 
 const waitForPreFundSetupReducer = (state: states.WaitForPreFundSetup, action: actions.WalletAction) => {
   switch (action.type) {
-    case actions.OWN_POSITION_RECEIVED:
-      const data = action.data;
-      const ownPosition = decode(data);
+    case actions.OWN_COMMITMENT_RECEIVED:
+      const ownCommitment = action.commitment;
 
       // check it's a PreFundSetupB
-      if (ownPosition.stateType !== State.StateType.PreFundSetup) {
+      if (ownCommitment.commitmentType !== CommitmentType.PreFundSetup) {
         return { ...state, messageOutbox: signatureFailure('Other', 'Expected a prefund setup position.') };
 
       }
-      if (ownPosition.stateCount !== 1) {
+      if (ownCommitment.commitmentCount !== 1) {
         return { ...state, messageOutbox: signatureFailure('Other', 'Expected state count to be 1.') };
       }
 
-      const signature = signPositionHex(data, state.privateKey);
+      const signature = signCommitment(ownCommitment, state.privateKey);
 
       // if so, unpack its contents into the state
       return states.waitForFundingRequest({
         ...state,
         turnNum: 1,
-        lastPosition: { data, signature },
-        penultimatePosition: state.lastPosition,
+        lastCommitment: { commitment: ownCommitment, signature },
+        penultimateCommitment: state.lastCommitment,
         messageOutbox: signatureSuccess(signature),
-        requestedTotalFunds: bnToHex(ownPosition.resolution[0].add(ownPosition.resolution[1])),
-        requestedYourDeposit: bnToHex(ownPosition.resolution[state.ourIndex]),
+        requestedTotalFunds: bigNumberify(ownCommitment.allocation[0]).add(ownCommitment.allocation[1]).toHexString(),
+        requestedYourDeposit: ownCommitment.allocation[state.ourIndex],
       });
 
-    case actions.OPPONENT_POSITION_RECEIVED:
-      const opponentPosition = decode(action.data);
+    case actions.OPPONENT_COMMITMENT_RECEIVED:
+      const opponentCommitment = action.commitment;
 
       // check it's a PreFundSetupB
-      if (opponentPosition.stateType !== State.StateType.PreFundSetup) {
+      if (opponentCommitment.commitmentType !== CommitmentType.PreFundSetup) {
         return { ...state, messageOutbox: validationFailure('Other', 'Expected a prefund setup position.') };
       }
 
-      if (opponentPosition.stateCount !== 1) {
+      if (opponentCommitment.commitmentCount !== 1) {
         return { ...state, messageOutbox: validationFailure('Other', 'Expected state count to be 1.') };
       }
       const opponentAddress2 = state.participants[1 - state.ourIndex];
 
-      if (!validSignature(action.data, action.signature, opponentAddress2)) {
+      if (!validCommitmentSignature(action.commitment, action.signature, opponentAddress2)) {
         return { ...state, messageOutbox: validationFailure('InvalidSignature') };
       }
 
@@ -152,11 +153,11 @@ const waitForPreFundSetupReducer = (state: states.WaitForPreFundSetup, action: a
       return states.waitForFundingRequest({
         ...state,
         turnNum: 1,
-        lastPosition: { data: action.data, signature: action.signature },
-        penultimatePosition: state.lastPosition,
+        lastCommitment: { commitment: action.commitment, signature: action.signature },
+        penultimateCommitment: state.lastCommitment,
         messageOutbox: validationSuccess(),
-        requestedTotalFunds: bnToHex(opponentPosition.resolution[0].add(opponentPosition.resolution[1])),
-        requestedYourDeposit: bnToHex(opponentPosition.resolution[state.ourIndex]),
+        requestedTotalFunds: bigNumberify(opponentCommitment.allocation[0]).add(opponentCommitment.allocation[1]).toHexString(),
+        requestedYourDeposit: opponentCommitment.allocation[state.ourIndex],
       });
 
     default:

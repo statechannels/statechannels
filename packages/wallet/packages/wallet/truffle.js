@@ -37,15 +37,16 @@ module.exports = {
       gasPrice: process.env.DEFAULT_GAS_PRICE,
     },
   },
-  compilers: {
-    solc: {
-      version: "0.4.25",
-    },
-  },
   solc: {
     optimizer: {
-      enabled: process.env.ENABLE_SOLC_OPTIMIZER === 'TRUE',
+      enabled: true,
       runs: 200,
     },
   },
+  compilers: {
+    solc: {
+      version: "0.5.0",
+    }
+  },
+
 };

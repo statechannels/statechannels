@@ -6,10 +6,9 @@ export const getGameState = (storeObj: any) => storeObj.game.gameState;
 import { default as firebase, reduxSagaFirebase } from '../../gateways/firebase';
 
 import * as actions from './actions';
-import bnToHex from '../../utils/bnToHex';
 
-import BN from 'bn.js';
 import { StateName, GameState } from '../game/state';
+import { bigNumberify } from 'ethers/utils';
 
 
 export default function* openGameSaga() {
@@ -80,8 +79,8 @@ const openGameTransformer = (dict) => {
     return [];
   }
   return Object.keys(dict.value).map(key => {
-    // Convert the stake from a string to a BN
-    dict.value[key].stake = bnToHex(new BN(dict.value[key].stake));
+    // Convert to a proper BN hex string
+    dict.value[key].stake = bigNumberify(dict.value[key].stake).toHexString();
     return dict.value[key];
   });
 };

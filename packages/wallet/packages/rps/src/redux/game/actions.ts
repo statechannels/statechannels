@@ -1,17 +1,18 @@
-import { Move, Position, positions } from '../../core';
+
+import { Weapon, RPSCommitment } from '../../core/rps-commitment';
 
 export const UPDATE_PROFILE = 'LOGIN.UPDATE_PROFILE';
 export const JOIN_OPEN_GAME = 'GAME.JOIN_OPEN_GAME';
 export const NEW_OPEN_GAME = 'GAME.NEW_OPEN_GAME';
 export const CREATE_OPEN_GAME = 'GAME.CREATE_OPEN_GAME';
 export const CANCEL_OPEN_GAME = 'GAME.CANCEL_OPEN_GAME';
-export const INITIAL_POSITION_RECEIVED = 'GAME.INITIAL_POSITION_RECEIVED';
+export const INITIAL_COMMITMENT_RECEIVED = 'GAME.INITIAL_COMMITMENT_RECEIVED';
 export const CONFIRM_GAME = 'GAME.CONFIRM_GAME';
 export const DECLINE_GAME = 'GAME.DECLINE_GAME';
-export const CHOOSE_MOVE = 'GAME.CHOOSE_MOVE';
+export const CHOOSE_WEAPON = 'GAME.CHOOSE_WEAPON';
 export const PLAY_AGAIN = 'GAME.PLAY_AGAIN';
 export const RESIGN = 'GAME.RESIGN';
-export const POSITION_RECEIVED = 'GAME.POSITION_RECEIVED';
+export const COMMITMENT_RECEIVED = 'GAME.COMMITMENT_RECEIVED';
 export const FUNDING_SUCCESS = 'GAME.FUNDING_SUCCESS';
 export const FUNDING_FAILURE = 'GAME.FUNDING_FAILURE';
 export const EXIT_TO_LOBBY = 'GAME.EXIT_TO_LOBBY';
@@ -48,9 +49,9 @@ export const joinOpenGame = (
   roundBuyIn,
 });
 
-export const initialPositionReceived = (position: positions.PreFundSetupA, opponentName: string) => ({
-  type: INITIAL_POSITION_RECEIVED as typeof INITIAL_POSITION_RECEIVED,
-  position,
+export const initialCommitmentReceived = (commitment: RPSCommitment, opponentName: string) => ({
+  type: INITIAL_COMMITMENT_RECEIVED as typeof INITIAL_COMMITMENT_RECEIVED,
+  commitment,
   opponentName,
 });
 
@@ -61,9 +62,9 @@ export const declineGame = () => ({
   type: DECLINE_GAME as typeof DECLINE_GAME,
 });
 
-export const chooseMove = (move: Move) => ({
-  type: CHOOSE_MOVE as typeof CHOOSE_MOVE,
-  move,
+export const chooseWeapon = (weapon: Weapon) => ({
+  type: CHOOSE_WEAPON as typeof CHOOSE_WEAPON,
+  weapon,
 });
 
 export const playAgain = () => ({
@@ -86,14 +87,14 @@ export const challengeCompleted = () => ({
   type: CHALLENGE_COMPLETED as typeof CHALLENGE_COMPLETED,
 });
 
-export const positionReceived = (position: Position) => ({
-  type: POSITION_RECEIVED as typeof POSITION_RECEIVED,
-  position,
+export const commitmentReceived = (commitment: RPSCommitment) => ({
+  type: COMMITMENT_RECEIVED as typeof COMMITMENT_RECEIVED,
+  commitment,
 });
 
-export const fundingSuccess = (position: Position) => ({
+export const fundingSuccess = (commitment: RPSCommitment) => ({
   type: FUNDING_SUCCESS as typeof FUNDING_SUCCESS,
-  position,
+  commitment,
 });
 
 export const fundingFailure = () => ({
@@ -114,16 +115,16 @@ export const messageSent = () => ({
   type: MESSAGE_SENT as typeof MESSAGE_SENT,
 });
 
-export type InitialPositionReceived = ReturnType<typeof initialPositionReceived>;
+export type InitialCommitmentReceived = ReturnType<typeof initialCommitmentReceived>;
 export type NewOpenGame = ReturnType<typeof newOpenGame>;
 export type CancelOpenGame = ReturnType<typeof cancelOpenGame>;
 export type JoinOpenGame = ReturnType<typeof joinOpenGame>;
 export type ConfirmGame = ReturnType<typeof confirmGame>;
 export type DeclineGame = ReturnType<typeof declineGame>;
-export type ChooseMove = ReturnType<typeof chooseMove>;
+export type ChooseWeapon = ReturnType<typeof chooseWeapon>;
 export type PlayAgain = ReturnType<typeof playAgain>;
 export type Resign = ReturnType<typeof resign>;
-export type PositionReceived = ReturnType<typeof positionReceived>;
+export type CommitmentReceived = ReturnType<typeof commitmentReceived>;
 export type FundingSuccess = ReturnType<typeof fundingSuccess>;
 export type FundingFailure = ReturnType<typeof fundingFailure>;
 export type CreateOpenGame = ReturnType<typeof createOpenGame>;
@@ -142,13 +143,13 @@ export type GameAction = (
   | ConfirmGame
   | DeclineGame
   | JoinOpenGame
-  | ChooseMove
+  | ChooseWeapon
   | PlayAgain
-  | PositionReceived
+  | CommitmentReceived
   | FundingSuccess
   | FundingFailure
   | Resign
-  | InitialPositionReceived
+  | InitialCommitmentReceived
   | ExitToLobby
   | MessageSent
   | CreateChallenge

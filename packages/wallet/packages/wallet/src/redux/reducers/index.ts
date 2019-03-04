@@ -25,10 +25,11 @@ import { withdrawingReducer } from './withdrawing';
 import { closingReducer } from './closing';
 import { WalletAction, CONCLUDE_REQUESTED, MESSAGE_RECEIVED, MESSAGE_SENT, TRANSACTION_SENT_TO_METAMASK, DISPLAY_MESSAGE_SENT } from '../actions';
 import { unreachable, ourTurn, validTransition } from '../../utils/reducer-utils';
-import decode from '../../utils/decode-utils';
-import { validSignature } from '../../utils/signing-utils';
-import { State } from 'fmg-core';
+import { validCommitmentSignature } from '../../utils/signing-utils';
 import { showWallet } from 'magmo-wallet-client/lib/wallet-events';
+import { fromHex, CommitmentType } from 'fmg-core';
+import { Commitment } from 'fmg-core/lib/commitment';
+
 
 const initialState = waitForLogin();
 
@@ -84,27 +85,27 @@ const receivedValidOpponentConclusionRequest = (state: WalletState, action: Wall
   if (state.stage !== FUNDING && state.stage !== RUNNING) { return null; }
   if (action.type !== MESSAGE_RECEIVED) { return null; }
 
-  let position;
+  let messageCommitment: Commitment;
   try {
-    position = decode(action.data);
+    messageCommitment = fromHex(action.data);
   } catch (error) {
     return null;
   }
 
-  if (position.stateType !== State.StateType.Conclude) {
+  if (messageCommitment.commitmentType !== CommitmentType.Conclude) {
     return null;
   }
   // check signature
   const opponentAddress = state.participants[1 - state.ourIndex];
   if (!action.signature) { return null; }
-  if (!validSignature(action.data, action.signature, opponentAddress)) { return null; }
-  if (!validTransition(state, position)) { return null; }
+  if (!validCommitmentSignature(messageCommitment, action.signature, opponentAddress)) { return null; }
+  if (!validTransition(state, messageCommitment)) { return null; }
 
   return acknowledgeConclude({
     ...state,
-    turnNum: position.turnNum,
-    lastPosition: { data: action.data, signature: action.signature },
-    penultimatePosition: state.lastPosition,
+    turnNum: messageCommitment.turnNum,
+    lastCommitment: { commitment: messageCommitment, signature: action.signature },
+    penultimateCommitment: state.lastCommitment,
     displayOutbox: showWallet(),
   });
 };

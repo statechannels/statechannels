@@ -1,40 +1,36 @@
 import { ethers } from 'ethers';
-import simpleAdjudicatorArtifact from '../../build/contracts/SimpleAdjudicator.json';
+
+import NitroAdjudicatorArtifact from '../../build/contracts/NitroAdjudicator.json';
 
 export async function getProvider(): Promise<ethers.providers.Web3Provider> {
   return await new ethers.providers.Web3Provider(web3.currentProvider);
 }
 
-export async function getAdjudicatorContract(contractAddress: string, provider) {
-  return new ethers.Contract(contractAddress, getSimpleAdjudicatorInterface(), provider);
+export async function getAdjudicatorContract(provider) {
+  await provider.ready;
+  const networkId = (await provider.getNetwork()).chainId;
+  const contractAddress = NitroAdjudicatorArtifact.networks[networkId].address;
+  return new ethers.Contract(contractAddress, getAdjudicatorInterface(), provider);
 }
 
-export function getSimpleAdjudicatorInterface(): ethers.utils.Interface {
-  return new ethers.utils.Interface(simpleAdjudicatorArtifact.abi);
+export function getAdjudicatorInterface(): ethers.utils.Interface {
+  return new ethers.utils.Interface(NitroAdjudicatorArtifact.abi);
 }
 
-export function getSimpleAdjudicatorBytecode(networkId) {
-  return linkBytecode(simpleAdjudicatorArtifact, networkId);
+export async function getAdjudicatorContractAddress(provider) {
+  await provider.ready;
+  const networkId = (await provider.getNetwork()).chainId;
+  return NitroAdjudicatorArtifact.networks[networkId].address;
 }
 
+export async function getAdjudicatorHoldings(provider, channelId) {
+  const contract = await getAdjudicatorContract(provider);
+  const holdingForChannel = await contract.holdings(channelId);
+  return holdingForChannel;
+}
 
-function linkBytecode(contractArtifact, networkId) {
-  let contractBytecode = contractArtifact.bytecode;
-  const links = contractArtifact.networks[networkId].links;
-  Object.keys(links).forEach(linkName => {
-    /*
-      `truffle compile` creates bytecode that is not a hex string.
-      Instead, the contract itself produces a valid hex string, followed
-      by `__${linkName}_________________________________${moreByteCode}`
-
-      We need to replace this stand-in with the address of the deployed
-      linked library.
-    */
-    const replace = `__${linkName}_________________________________`;
-    contractBytecode = contractBytecode.replace(
-      new RegExp(replace, "g"),
-      links[linkName].substr(2)
-    );
-  });
-  return contractBytecode;
+export async function getAdjudicatorOutcome(provider, channelId) {
+  const contract = await getAdjudicatorContract(provider);
+  const outcomeForChannel = await contract.outcomes(channelId);
+  return outcomeForChannel;
 }

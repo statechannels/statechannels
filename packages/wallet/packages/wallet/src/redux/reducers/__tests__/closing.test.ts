@@ -3,36 +3,35 @@ import { walletReducer } from '..';
 import * as states from '../../../states';
 import * as actions from '../../actions';
 import * as outgoing from 'magmo-wallet-client/lib/wallet-events';
-import * as TransactionGenerator from '../../../utils/transaction-generator';
-import * as SigningUtils from '../../../utils/signing-utils';
 import * as scenarios from './test-scenarios';
-import { itTransitionsToStateType, itDoesntTransition } from './helpers';
-import BN from "bn.js";
-import bnToHex from "../../../utils/bnToHex";
+import { itTransitionsToStateType } from './helpers';
+
+import * as SigningUtil from '../../../utils/signing-utils';
+import * as fmgCore from 'fmg-core';
+import * as TransactionGenerator from '../../../utils/transaction-generator';
+import { bigNumberify } from 'ethers/utils';
 
 const {
   asAddress,
   asPrivateKey,
+  channel,
+  gameCommitment1,
+  gameCommitment2,
+  concludeCommitment1,
+  concludeCommitment2,
   channelId,
-  channelNonce,
-  libraryAddress,
-  participants,
-  proposeHex,
-  acceptHex,
-} = scenarios.standard;
 
-const aResignsAfterOneRound = scenarios.aResignsAfterOneRound;
-
+} = scenarios;
 const defaults = {
   adjudicator: 'adj-address',
   channelId,
-  channelNonce,
-  libraryAddress,
+  channelNonce: channel.nonce,
+  libraryAddress: channel.channelType,
   networkId: 3,
-  participants,
+  participants: channel.participants as [string, string],
   uid: 'uid',
   transactionHash: '0x0',
-  requestedTotalFunds: bnToHex(new BN(1000000000000000)),
+  requestedTotalFunds: bigNumberify(1000000000000000).toHexString(),
 };
 
 const defaultsA = {
@@ -40,31 +39,26 @@ const defaultsA = {
   ourIndex: 0,
   address: asAddress,
   privateKey: asPrivateKey,
-  requestedYourDeposit: bnToHex(new BN(500000000000000)),
+  requestedYourDeposit: bigNumberify(500000000000000).toHexString(),
 };
+
 
 describe('start in AcknowledgeConclude', () => {
 
   describe('action taken: conclude approved', () => {
+
     const state = states.acknowledgeConclude({
       ...defaultsA,
-      penultimatePosition: { data: aResignsAfterOneRound.restingHex, signature: 'sig' },
-      lastPosition: { data: aResignsAfterOneRound.concludeHex, signature: 'sig' },
+      penultimateCommitment: { commitment: gameCommitment2, signature: 'sig' },
+      lastCommitment: { commitment: concludeCommitment1, signature: 'sig' },
       turnNum: 9,
     });
 
     const action = actions.concludeApproved();
-    describe(' where the adjudicator exists', () => {
-      const updatedState = walletReducer(state, action);
-      itTransitionsToStateType(states.APPROVE_CLOSE_ON_CHAIN, updatedState);
-      expect((updatedState.messageOutbox!).type).toEqual(outgoing.MESSAGE_REQUEST);
-    });
-    describe(' where the adjudicator does not exist', () => {
-      state.adjudicator = undefined;
-      const updatedState = walletReducer(state, action);
-      itTransitionsToStateType(states.ACKNOWLEDGE_CLOSE_SUCCESS, updatedState);
-      expect((updatedState.messageOutbox!).type).toEqual(outgoing.CONCLUDE_SUCCESS);
-    });
+
+    const updatedState = walletReducer(state, action);
+    itTransitionsToStateType(states.APPROVE_CLOSE_ON_CHAIN, updatedState);
+    expect((updatedState.messageOutbox!).type).toEqual(outgoing.MESSAGE_REQUEST);
   });
 
 });
@@ -73,8 +67,8 @@ describe('start in ApproveConclude', () => {
   describe('action taken: conclude rejected', () => {
     const state = states.approveConclude({
       ...defaultsA,
-      penultimatePosition: { data: proposeHex, signature: 'sig' },
-      lastPosition: { data: acceptHex, signature: 'sig' },
+      penultimateCommitment: { commitment: gameCommitment1, signature: 'sig' },
+      lastCommitment: { commitment: gameCommitment2, signature: 'sig' },
       turnNum: 1,
     });
     const action = actions.concludeRejected();
@@ -85,8 +79,8 @@ describe('start in ApproveConclude', () => {
   describe('action taken: conclude approved', () => {
     const state = states.approveConclude({
       ...defaultsA,
-      penultimatePosition: { data: proposeHex, signature: 'sig' },
-      lastPosition: { data: acceptHex, signature: 'sig' },
+      penultimateCommitment: { commitment: gameCommitment1, signature: 'sig' },
+      lastCommitment: { commitment: gameCommitment2, signature: 'sig' },
       turnNum: 1,
     });
 
@@ -101,21 +95,19 @@ describe('start in WaitForOpponentConclude', () => {
   describe('action taken: messageReceived', () => {
     const state = states.waitForOpponentConclude({
       ...defaultsA,
-      penultimatePosition: { data: aResignsAfterOneRound.restingHex, signature: 'sig' },
-      lastPosition: { data: aResignsAfterOneRound.concludeHex, signature: 'sig' },
-      turnNum: 8,
+      penultimateCommitment: { commitment: gameCommitment2, signature: 'sig' },
+      lastCommitment: { commitment: concludeCommitment1, signature: 'sig' },
+      turnNum: concludeCommitment1.turnNum,
     });
+    const validateMock = jest.fn().mockReturnValue(true);
+    Object.defineProperty(SigningUtil, 'validSignature', { value: validateMock });
+    const fromHexMock = jest.fn().mockReturnValue(concludeCommitment2);
+    Object.defineProperty(fmgCore, "fromHex", { value: fromHexMock });
 
-    const action = actions.messageReceived(aResignsAfterOneRound.conclude2Hex, aResignsAfterOneRound.conclude2Sig);
+    const action = actions.messageReceived('0x0', '0x0');
     describe(' where the adjudicator exists', () => {
       const updatedState = walletReducer(state, action);
       itTransitionsToStateType(states.APPROVE_CLOSE_ON_CHAIN, updatedState);
-      expect((updatedState.messageOutbox!).type).toEqual(outgoing.CONCLUDE_SUCCESS);
-    });
-    describe(' where the adjudicator does not exist', () => {
-      state.adjudicator = undefined;
-      const updatedState = walletReducer(state, action);
-      itTransitionsToStateType(states.ACKNOWLEDGE_CLOSE_SUCCESS, updatedState);
       expect((updatedState.messageOutbox!).type).toEqual(outgoing.CONCLUDE_SUCCESS);
     });
   });
@@ -124,9 +116,9 @@ describe('start in WaitForOpponentConclude', () => {
 describe('start in ApproveCloseOnChain', () => {
   const state = states.approveCloseOnChain({
     ...defaultsA,
-    penultimatePosition: { data: aResignsAfterOneRound.concludeHex, signature: aResignsAfterOneRound.conclude2Sig },
-    lastPosition: { data: aResignsAfterOneRound.conclude2Hex, signature: aResignsAfterOneRound.conclude2Sig },
-    turnNum: 9,
+    penultimateCommitment: { commitment: concludeCommitment1, signature: 'sig' },
+    lastCommitment: { commitment: concludeCommitment2, signature: 'sig' },
+    turnNum: concludeCommitment2.turnNum,
     userAddress: '0x0',
   });
   describe('action taken: approve close on chain', () => {
@@ -135,59 +127,22 @@ describe('start in ApproveCloseOnChain', () => {
     Object.defineProperty(TransactionGenerator, 'createConcludeAndWithdrawTransaction', { value: createConcludeTxMock });
     const signVerMock = jest.fn();
     signVerMock.mockReturnValue('0x0');
-    Object.defineProperty(SigningUtils, 'signVerificationData', { value: signVerMock });
+    Object.defineProperty(SigningUtil, 'signVerificationData', { value: signVerMock });
     const action = actions.approveClose('0x0');
     const updatedState = walletReducer(state, action);
     itTransitionsToStateType(states.WAIT_FOR_CLOSE_INITIATION, updatedState);
-    expect((updatedState.messageOutbox!).type).toEqual(outgoing.MESSAGE_REQUEST);
+
   });
 
-  describe('action taken: game concluded event', () => {
-    const action = actions.gameConcludedEvent();
-    const updatedState = walletReducer(state, action);
-    itTransitionsToStateType(states.APPROVE_WITHDRAWAL, updatedState);
-  });
 
-  describe('action taken: opponent started close message', () => {
-    const validateSignatureMock = jest.fn();
-    validateSignatureMock.mockReturnValue(true);
-    Object.defineProperty(SigningUtils, 'validSignature', { value: validateSignatureMock });
-    const action = actions.messageReceived('CloseStarted', '0x0');
-    const updatedState = walletReducer(state, action);
-    itTransitionsToStateType(states.WAIT_FOR_OPPONENT_CLOSE, updatedState);
-  });
-
-  describe('action taken: opponent sends incorrect message', () => {
-    const validateSignatureMock = jest.fn();
-    validateSignatureMock.mockReturnValue(true);
-    Object.defineProperty(SigningUtils, 'validSignature', { value: validateSignatureMock });
-    const action = actions.messageReceived('WRONG MESSAGE', '0x0');
-    const updatedState = walletReducer(state, action);
-    itDoesntTransition(state, updatedState);
-  });
-
-});
-
-describe('start in WaitForOpponentClose', () => {
-  const state = states.waitForOpponentClose({
-    ...defaultsA,
-    penultimatePosition: { data: aResignsAfterOneRound.concludeHex, signature: aResignsAfterOneRound.conclude2Sig },
-    lastPosition: { data: aResignsAfterOneRound.conclude2Hex, signature: aResignsAfterOneRound.conclude2Sig },
-    turnNum: 9,
-  });
-  describe('action take: game concluded event', () => {
-    const action = actions.gameConcludedEvent();
-    const updatedState = walletReducer(state, action);
-    itTransitionsToStateType(states.APPROVE_WITHDRAWAL, updatedState);
-  });
 });
 
 describe('start in WaitForCloseInitiation', () => {
   const state = states.waitForCloseInitiation({
     ...defaultsA,
-    penultimatePosition: { data: aResignsAfterOneRound.concludeHex, signature: aResignsAfterOneRound.conclude2Sig },
-    lastPosition: { data: aResignsAfterOneRound.conclude2Hex, signature: aResignsAfterOneRound.conclude2Sig },
-    turnNum: 9,
+    penultimateCommitment: { commitment: concludeCommitment1, signature: 'sig' },
+    lastCommitment: { commitment: concludeCommitment2, signature: 'sig' },
+    turnNum: concludeCommitment2.turnNum,
     userAddress: '0x0',
   });
   describe('action taken: transaction sent to metamask', () => {
@@ -196,19 +151,14 @@ describe('start in WaitForCloseInitiation', () => {
     const updatedState = walletReducer(state, action);
     itTransitionsToStateType(states.WAIT_FOR_CLOSE_SUBMISSION, updatedState);
   });
-  describe('action taken: game concluded event', () => {
-    const action = actions.gameConcludedEvent();
-    const updatedState = walletReducer(state, action);
-    itTransitionsToStateType(states.APPROVE_WITHDRAWAL, updatedState);
-  });
 });
 
 describe('start in WaitForCloseSubmission', () => {
   const state = states.waitForCloseSubmission({
     ...defaultsA,
-    penultimatePosition: { data: aResignsAfterOneRound.concludeHex, signature: aResignsAfterOneRound.conclude2Sig },
-    lastPosition: { data: aResignsAfterOneRound.conclude2Hex, signature: aResignsAfterOneRound.conclude2Sig },
-    turnNum: 9,
+    penultimateCommitment: { commitment: concludeCommitment1, signature: 'sig' },
+    lastCommitment: { commitment: concludeCommitment2, signature: 'sig' },
+    turnNum: concludeCommitment2.turnNum,
     userAddress: '0x0',
   });
   describe('action taken: transaction submitted', () => {
@@ -228,9 +178,9 @@ describe('start in WaitForCloseSubmission', () => {
 describe('start in closeTransactionFailed', () => {
   const state = states.closeTransactionFailed({
     ...defaultsA,
-    penultimatePosition: { data: aResignsAfterOneRound.concludeHex, signature: aResignsAfterOneRound.conclude2Sig },
-    lastPosition: { data: aResignsAfterOneRound.conclude2Hex, signature: aResignsAfterOneRound.conclude2Sig },
-    turnNum: 9,
+    penultimateCommitment: { commitment: concludeCommitment1, signature: 'sig' },
+    lastCommitment: { commitment: concludeCommitment2, signature: 'sig' },
+    turnNum: concludeCommitment2.turnNum,
     userAddress: '0x0',
   });
 
@@ -239,7 +189,7 @@ describe('start in closeTransactionFailed', () => {
     Object.defineProperty(TransactionGenerator, 'createConcludeAndWithdrawTransaction', { value: createConcludeTxMock });
     const signVerMock = jest.fn();
     signVerMock.mockReturnValue('0x0');
-    Object.defineProperty(SigningUtils, 'signVerificationData', { value: signVerMock });
+    Object.defineProperty(SigningUtil, 'signVerificationData', { value: signVerMock });
     const action = actions.retryTransaction();
     const updatedState = walletReducer(state, action);
     itTransitionsToStateType(states.WAIT_FOR_CLOSE_SUBMISSION, updatedState);
@@ -250,9 +200,9 @@ describe('start in closeTransactionFailed', () => {
 describe('start in WaitForCloseConfirmed', () => {
   const state = states.waitForCloseConfirmed({
     ...defaultsA,
-    penultimatePosition: { data: aResignsAfterOneRound.concludeHex, signature: aResignsAfterOneRound.conclude2Sig },
-    lastPosition: { data: aResignsAfterOneRound.conclude2Hex, signature: aResignsAfterOneRound.conclude2Sig },
-    turnNum: 9,
+    penultimateCommitment: { commitment: concludeCommitment1, signature: 'sig' },
+    lastCommitment: { commitment: concludeCommitment2, signature: 'sig' },
+    turnNum: concludeCommitment2.turnNum,
   });
   describe('action taken: transaction confirmed', () => {
 
@@ -266,9 +216,9 @@ describe('start in AcknowledgCloseSuccess', () => {
   describe('action taken: close success acknowledged', () => {
     const state = states.acknowledgeCloseSuccess({
       ...defaultsA,
-      penultimatePosition: { data: aResignsAfterOneRound.concludeHex, signature: 'sig' },
-      lastPosition: { data: aResignsAfterOneRound.conclude2Hex, signature: 'sig' },
-      turnNum: 9,
+      penultimateCommitment: { commitment: concludeCommitment1, signature: 'sig' },
+      lastCommitment: { commitment: concludeCommitment2, signature: 'sig' },
+      turnNum: concludeCommitment2.turnNum,
     });
 
     const action = actions.closeSuccessAcknowledged();

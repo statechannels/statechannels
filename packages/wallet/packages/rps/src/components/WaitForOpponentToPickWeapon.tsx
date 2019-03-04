@@ -1,7 +1,7 @@
 import React from 'react';
 import { GameLayout } from './GameLayout';
 
-export default class WaitForOpponentToPickMove extends React.PureComponent<{}> {
+export default class WaitForOpponentToPickWeapon extends React.PureComponent<{}> {
   render() {
     return (
       <GameLayout>

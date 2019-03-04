@@ -1,13 +1,13 @@
 var RockPaperScissorsGame = artifacts.require("./RockPaperScissorsGame.sol");
-var RockPaperScissorsState = artifacts.require("./RockPaperScissorsState.sol");
-var State = artifacts.require("fmg-core/contracts/State.sol");
+var RockPaperScissorsCommitment = artifacts.require("./RockPaperScissorsCommitment.sol");
+var Commitment = artifacts.require("fmg-core/contracts/Commitment.sol");
 
 module.exports = function (deployer) {
-  deployer.deploy(State);
-  deployer.link(State, RockPaperScissorsState);
-  deployer.deploy(RockPaperScissorsState);
-  deployer.link(RockPaperScissorsState, RockPaperScissorsGame);
-  deployer.link(State, RockPaperScissorsGame);
+  deployer.deploy(Commitment);
+  deployer.link(Commitment, RockPaperScissorsCommitment);
+  deployer.deploy(RockPaperScissorsCommitment);
+  deployer.link(RockPaperScissorsCommitment, RockPaperScissorsGame);
+  deployer.link(Commitment, RockPaperScissorsGame);
   deployer.deploy(RockPaperScissorsGame);
 
 };

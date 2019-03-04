@@ -1,39 +1,36 @@
 
 
 import { TransactionRequest } from "ethers/providers";
-import { getSimpleAdjudicatorInterface, getSimpleAdjudicatorBytecode } from "./contract-utils";
+import { getAdjudicatorInterface } from "./contract-utils";
 import { splitSignature } from 'ethers/utils';
+import { Commitment, asEthersObject } from 'fmg-core';
+const ZERO_ADDRESS = "0x" + "0".repeat(40);
 
+export function createForceMoveTransaction(contractAddress: string, fromState: Commitment, toState: Commitment, fromSignature: string, toSignature: string): TransactionRequest {
+  const adjudicatorInterface = getAdjudicatorInterface();
 
-export function createForceMoveTransaction(contractAddress: string, fromState: string, toState: string, fromSignature: string, toSignature: string): TransactionRequest {
-  const adjudicatorInterface = getSimpleAdjudicatorInterface();
   const splitFromSignature = splitSignature(fromSignature);
   const splitToSignature = splitSignature(toSignature);
-  const v = [splitFromSignature.v, splitToSignature.v];
-  const r = [splitFromSignature.r, splitToSignature.r];
-  const s = [splitFromSignature.s, splitToSignature.s];
-  const data = adjudicatorInterface.functions.forceMove.encode([fromState, toState, v, r, s]);
 
+  const data = adjudicatorInterface.functions.forceMove.encode([asEthersObject(fromState), asEthersObject(toState), ZERO_ADDRESS, [splitFromSignature, splitToSignature]]);
   return {
     to: contractAddress,
     data,
   };
 }
 
-export function createRespondWithMoveTransaction(contractAddress: string, nextState: string, signature: string): TransactionRequest {
-  const { v, r, s } = splitSignature(signature);
-  const adjudicatorInterface = getSimpleAdjudicatorInterface();
-  const data = adjudicatorInterface.functions.respondWithMove.encode([nextState, v, r, s]);
+export function createRespondWithMoveTransaction(contractAddress: string, nextState: Commitment, signature: string): TransactionRequest {
+  const adjudicatorInterface = getAdjudicatorInterface();
+  const data = adjudicatorInterface.functions.respondWithMove.encode([asEthersObject(nextState), splitSignature(signature)]);
   return {
     to: contractAddress,
     data,
   };
 }
 
-export function createRefuteTransaction(contractAddress: string, refuteState: string, signature: string): TransactionRequest {
-  const adjudicatorInterface = getSimpleAdjudicatorInterface();
-  const { v, r, s } = splitSignature(signature);
-  const data = adjudicatorInterface.functions.refute.encode([refuteState, v, r, s]);
+export function createRefuteTransaction(contractAddress: string, refuteState: Commitment, signature: string): TransactionRequest {
+  const adjudicatorInterface = getAdjudicatorInterface();
+  const data = adjudicatorInterface.functions.refute.encode([asEthersObject(refuteState), splitSignature(signature)]);
   return {
     to: contractAddress,
     data,
@@ -41,42 +38,47 @@ export function createRefuteTransaction(contractAddress: string, refuteState: st
 }
 
 export interface ConcludeAndWithdrawArgs {
-  contractAddress: string;
-  fromState: string;
-  toState: string;
-  participant: string;
-  destination: string;
-  channelId: string;
+  fromCommitment: Commitment;
+  toCommitment: Commitment;
   fromSignature: string;
   toSignature: string;
+  participant: string;
+  destination: string;
+  amount: string;
   verificationSignature: string;
 }
-export function createConcludeAndWithdrawTransaction(args: ConcludeAndWithdrawArgs): TransactionRequest {
-  const adjudicatorInterface = getSimpleAdjudicatorInterface();
+export function createConcludeAndWithdrawTransaction(contractAddress: string, args: ConcludeAndWithdrawArgs): TransactionRequest {
+  const adjudicatorInterface = getAdjudicatorInterface();
   const splitFromSignature = splitSignature(args.fromSignature);
   const splitToSignature = splitSignature(args.toSignature);
-  const splitVerifySignature = splitSignature(args.verificationSignature);
-
-  const v = [splitFromSignature.v, splitToSignature.v, splitVerifySignature.v];
-  const r = [splitFromSignature.r, splitToSignature.r, splitVerifySignature.r];
-  const s = [splitFromSignature.s, splitToSignature.s, splitVerifySignature.s];
-  const { fromState, toState, participant, destination, contractAddress, channelId } = args;
-  const data = adjudicatorInterface.functions.concludeAndWithdraw.encode([fromState, toState, participant, destination, channelId, v, r, s]);
+  const conclusionProof = {
+    penultimateCommitment: asEthersObject(args.fromCommitment),
+    ultimateCommitment: asEthersObject(args.toCommitment),
+    penultimateSignature: splitFromSignature,
+    ultimateSignature: splitToSignature,
+  };
+  const { v, r, s } = splitSignature(args.verificationSignature);
+  const { participant, destination, amount } = args;
+  const data = adjudicatorInterface.functions.concludeAndWithdraw.encode([conclusionProof, participant, destination, amount, v, r, s]);
 
   return {
     to: contractAddress,
     data,
+    gasLimit: 3000000,
   };
 }
 
-export function createConcludeTransaction(contractAddress: string, fromState: string, toState: string, fromSignature: string, toSignature: string): TransactionRequest {
-  const adjudicatorInterface = getSimpleAdjudicatorInterface();
+export function createConcludeTransaction(contractAddress: string, fromState: Commitment, toState: Commitment, fromSignature: string, toSignature: string): TransactionRequest {
+  const adjudicatorInterface = getAdjudicatorInterface();
   const splitFromSignature = splitSignature(fromSignature);
   const splitToSignature = splitSignature(toSignature);
-  const v = [splitFromSignature.v, splitToSignature.v];
-  const r = [splitFromSignature.r, splitToSignature.r];
-  const s = [splitFromSignature.s, splitToSignature.s];
-  const data = adjudicatorInterface.functions.conclude.encode([fromState, toState, v, r, s]);
+  const conclusionProof = {
+    penultimateCommitment: asEthersObject(fromState),
+    ultimateCommitment: asEthersObject(toState),
+    penultimateSignature: splitFromSignature,
+    ultimateSignature: splitToSignature,
+  };
+  const data = adjudicatorInterface.functions.conclude.encode([conclusionProof]);
 
   return {
     to: contractAddress,
@@ -84,29 +86,36 @@ export function createConcludeTransaction(contractAddress: string, fromState: st
   };
 }
 
-export function createWithdrawTransaction(contractAddress: string, participant: string, destination: string, channelId: string, verificationSignature: string) {
-  const adjudicatorInterface = getSimpleAdjudicatorInterface();
+export function createWithdrawTransaction(contractAddress: string, amount: string, participant: string, destination: string, verificationSignature: string) {
+  const adjudicatorInterface = getAdjudicatorInterface();
   const { v, r, s } = splitSignature(verificationSignature);
-  const data = adjudicatorInterface.functions.withdraw.encode([participant, destination, channelId, v, r, s]);
+  const data = adjudicatorInterface.functions.withdraw.encode([participant, destination, amount, v, r, s]);
 
   return {
     to: contractAddress,
     data,
+    gasLimit: 3000000,
   };
 }
 
-export function createDeployTransaction(networkId: number, channelId: string, depositAmount: string) {
-  const byteCode = getSimpleAdjudicatorBytecode(networkId);
-  const data = getSimpleAdjudicatorInterface().deployFunction.encode(byteCode, [channelId, 2]);
+export function createTransferAndWithdrawTransaction(contractAddress: string, channelId: string, participant: string, destination: string, amount: string, verificationSignature: string) {
+  const adjudicatorInterface = getAdjudicatorInterface();
+  const { v, r, s } = splitSignature(verificationSignature);
+  const data = adjudicatorInterface.functions.transferAndWithdraw.encode([channelId, participant, destination, amount, v, r, s]);
+
   return {
+    to: contractAddress,
     data,
-    value: depositAmount,
+    gasLimit: 3000000,
   };
 }
 
-export function createDepositTransaction(contractAddress: string, depositAmount: string) {
+export function createDepositTransaction(contractAddress: string, destination: string, depositAmount: string) {
+  const adjudicatorInterface = getAdjudicatorInterface();
+  const data = adjudicatorInterface.functions.deposit.encode([destination]);
   return {
     to: contractAddress,
     value: depositAmount,
+    data,
   };
 }

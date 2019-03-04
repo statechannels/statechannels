@@ -1,13 +1,13 @@
 import React from 'react';
 import { PureComponent } from 'react';
 import { connect } from 'react-redux';
+import { Button } from 'reactstrap';
 
 import * as states from '../states';
 import * as actions from '../redux/actions';
 
-import AcknowledgeX from '../components/AcknowledgeX';
-import WaitForXConfirmation from '../components/WaitForXConfirmation';
-import SubmitX from '../components/SubmitX';
+import { RespondingStep } from '../components/responding/RespondingStep';
+import AcknowledgeTimeout from '../components/responding/AcknowledgeTimeout';
 import { unreachable } from '../utils/reducer-utils';
 import ChooseResponse, { ChallengeOptions } from '../components/responding/ChooseResponse';
 import TransactionFailed from '../components/TransactionFailed';
@@ -19,29 +19,25 @@ interface Props {
   selectRespondWithMove: () => void;
   selectRespondWithExistingMove: () => void;
   retryTransaction: () => void;
+  timeoutAcknowledged: () => void;
 }
 
 class RespondingContainer extends PureComponent<Props> {
   render() {
     const {
       state,
-      challengeAcknowledged,
       challengeResponseAcknowledged,
       selectRespondWithMove,
       selectRespondWithExistingMove,
+      timeoutAcknowledged,
       retryTransaction,
     } = this.props;
 
     switch (state.type) {
-      case states.ACKNOWLEDGE_CHALLENGE:
-        return (
-          <AcknowledgeX
-            title="Challenge detected!"
-            description="Your opponent has challenged you on-chain."
-            action={challengeAcknowledged}
-            actionTitle="Proceed"
-          />
-        );
+      case states.CHALLENGEE_ACKNOWLEDGE_CHALLENGE_TIMEOUT:
+
+        return <AcknowledgeTimeout expiryTime={state.challengeExpiry ? state.challengeExpiry : 0} timeoutAcknowledged={timeoutAcknowledged} />;
+      
       case states.CHOOSE_RESPONSE:
         const { ourIndex, turnNum } = state;
         const moveSelected = ourIndex === 0 ? turnNum % 2 === 0 : turnNum % 2 !== 0;
@@ -57,20 +53,18 @@ class RespondingContainer extends PureComponent<Props> {
       case states.TAKE_MOVE_IN_APP:
         // The game knows about the challenge so we don't need the wallet to display anything
         return null;
-      case states.WAIT_FOR_RESPONSE_CONFIRMATION:
-        return <WaitForXConfirmation name='response' transactionID={state.transactionHash} networkId={state.networkId} />;
       case states.INITIATE_RESPONSE:
+        return <RespondingStep step={0}/>;
       case states.WAIT_FOR_RESPONSE_SUBMISSION:
-        return <SubmitX name='response' />;
+        return <RespondingStep step={1}/>;
+      case states.WAIT_FOR_RESPONSE_CONFIRMATION:
+        return <RespondingStep step={2}/>;
       case states.ACKNOWLEDGE_CHALLENGE_COMPLETE:
-        return (
-          <AcknowledgeX
-            title="Challenge over!"
-            description="Your response was successfully registered on-chain."
-            action={challengeResponseAcknowledged}
-            actionTitle="Return to app"
-          />
-        );
+        return <RespondingStep step={4}> 
+              <Button onClick={challengeResponseAcknowledged} >
+                {"Return to game"}
+              </Button>
+              </RespondingStep>;
       case states.RESPONSE_TRANSACTION_FAILED:
         return <TransactionFailed name='challenge response' retryAction={retryTransaction} />;
       default:
@@ -85,6 +79,7 @@ const mapDispatchToProps = {
   selectRespondWithMove: actions.respondWithMoveChosen,
   selectRespondWithExistingMove: actions.respondWithExistingMoveChosen,
   retryTransaction: actions.retryTransaction,
+  timeoutAcknowledged: actions.challengedTimedOutAcknowledged,
 };
 
 export default connect(

@@ -28,6 +28,38 @@ const icon = (iconStep:number, currentStep:number) => {
   }
 };
 
+// NOTE: the appearance of this modal is largely influenced by the amount of text in each message. Until a more robust front-end comes along, try to keep messages of the same length within each case block below.
+const message = (iconStep: number, currentStep: number) => {
+  switch (iconStep){
+    case 1:
+      if (currentStep < iconStep) {
+        return "Prepare your transaction";
+      } else if (currentStep === iconStep) {
+        return "Preparing your transaction...";
+      } else {
+        return "Withdrawal transaction sent";
+      }
+    case 2:
+      if (currentStep < iconStep) {
+        return "Transaction will be confirmed";
+      } else if (currentStep === iconStep) {
+        return "Waiting for confirmation...";
+      } else {
+        return "Transaction confirmed";
+      }
+    case 3:
+      if (currentStep < iconStep) {
+        return "Withdrawal will be confirmed";
+      } else if (currentStep === iconStep) {
+        return "Waiting for confirmation...";
+      } else {
+        return "Withdrawal successful!";
+      }
+    default:
+      return "";
+  }
+};
+
 
 export class WithdrawingStep extends React.PureComponent<Props> {
   render() {
@@ -40,15 +72,15 @@ export class WithdrawingStep extends React.PureComponent<Props> {
         <ul className="fa-ul">
           <li style={{ padding: "0.7em 1em" }}>
             {icon(1, currentStep)}
-            Preparing your withdrawal transaction
+            {message(1,currentStep)}
           </li>
           <li style={{ padding: "0.7em 1em" }}>
             {icon(2, currentStep)}
-            Wait for confirmation
+            {message(2,currentStep)}
           </li>
           <li style={{ padding: "0.7em 1em" }}>
             {icon(3, currentStep)}
-            Withdrawal Successful!
+            {message(3,currentStep)}
           </li>
         </ul>
         <div className="pb-2">

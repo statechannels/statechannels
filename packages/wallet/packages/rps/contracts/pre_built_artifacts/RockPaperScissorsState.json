@@ -54,9 +54,9 @@
         "name": "_state",
         "type": "bytes"
       }],
-      "name": "bPlay",
+      "name": "bWeapon",
       "outputs": [{
-        "name": "_aPlay",
+        "name": "_aWeapon",
         "type": "RockPaperScissorsState.Play"
       }],
       "payable": false,
@@ -70,9 +70,9 @@
         "name": "_state",
         "type": "bytes"
       }],
-      "name": "aPlay",
+      "name": "aWeapon",
       "outputs": [{
-        "name": "_bPlay",
+        "name": "_bWeapon",
         "type": "RockPaperScissorsState.Play"
       }],
       "payable": false,

@@ -6,18 +6,21 @@ import * as actions from '../../actions';
 import { itTransitionsToStateType, itDoesntTransition } from './helpers';
 import * as scenarios from './test-scenarios';
 import * as TransactionGenerator from '../../../utils/transaction-generator';
-import BN from "bn.js";
-import bnToHex from "../../../utils/bnToHex";
+import * as SigningUtil from '../../../utils/signing-utils';
+import * as FmgCore from 'fmg-core';
+import { bigNumberify } from 'ethers/utils';
+
 
 const {
   asPrivateKey,
-  revealHex,
-  acceptHex,
   participants,
   channelId,
   channelNonce,
   libraryAddress,
-} = scenarios.standard;
+  gameCommitment1,
+  gameCommitment2,
+  gameCommitment3,
+} = scenarios;
 
 const defaults = {
   uid: 'uid',
@@ -25,9 +28,9 @@ const defaults = {
   libraryAddress,
   channelId,
   channelNonce,
-  lastPosition: { data: revealHex, signature: 'fake-sig' },
-  penultimatePosition: { data: acceptHex, signature: 'fake-sig' },
-  turnNum: 6,
+  lastCommitment: { commitment: gameCommitment2, signature: 'fake-sig' },
+  penultimateCommitment: { commitment: gameCommitment1, signature: 'fake-sig' },
+  turnNum: gameCommitment2.turnNum,
   adjudicator: 'adj-address',
   ourIndex: 1,
   address: 'address',
@@ -37,31 +40,9 @@ const defaults = {
   moveSelected: false,
   challengeOptions: [],
   transactionHash: '0x0',
-  requestedTotalFunds: bnToHex(new BN(1000000000000000)),
-  requestedYourDeposit: bnToHex(new BN(500000000000000)),
+  requestedTotalFunds: bigNumberify(1000000000000000).toHexString(),
+  requestedYourDeposit: bigNumberify(500000000000000).toHexString(),
 };
-
-describe('when in ACKNOWLEDGE_CHALLENGE', () => {
-  const state = states.acknowledgeChallenge(defaults);
-
-  describe('when a challenge is acknowledged', () => {
-    const action = actions.challengeAcknowledged();
-    const updatedState = walletReducer(state, action);
-    itTransitionsToStateType(states.CHOOSE_RESPONSE, updatedState);
-  });
-
-  describe('when the challenge times out', () => {
-    const action = actions.blockMined({ number: 1, timestamp: 2 });
-    const updatedState = walletReducer(state, action);
-    itTransitionsToStateType(states.ACKNOWLEDGE_CHALLENGE_TIMEOUT, updatedState);
-  });
-
-  describe('when a block is mined but the challenge has not expired', () => {
-    const action = actions.blockMined({ number: 1, timestamp: 0 });
-    const updatedState = walletReducer(state, action);
-    itDoesntTransition(state, updatedState);
-  });
-});
 
 describe('when in CHOOSE_RESPONSE', () => {
   const state = states.chooseResponse(defaults);
@@ -81,7 +62,7 @@ describe('when in CHOOSE_RESPONSE', () => {
   describe('when the challenge times out', () => {
     const action = actions.blockMined({ number: 1, timestamp: 2 });
     const updatedState = walletReducer(state, action);
-    itTransitionsToStateType(states.ACKNOWLEDGE_CHALLENGE_TIMEOUT, updatedState);
+    itTransitionsToStateType(states.CHALLENGEE_ACKNOWLEDGE_CHALLENGE_TIMEOUT, updatedState);
   });
 
   describe('when a block is mined but the challenge has not expired', () => {
@@ -95,14 +76,20 @@ describe('when in TAKE_MOVE_IN_APP', () => {
   const state = states.takeMoveInApp(defaults);
 
   describe('when a challenge move is taken in the application', () => {
-    const action = actions.challengePositionReceived(scenarios.aResignsAfterOneRound.restingHex);
+    const action = actions.challengeCommitmentReceived(gameCommitment3);
+    const createRespondTxMock = jest.fn();
+    Object.defineProperty(TransactionGenerator, 'createRespondWithMoveTransaction', { value: createRespondTxMock });
+    const toHexMock = jest.fn().mockReturnValue('0x0');
+    Object.defineProperty(FmgCore, 'toHex', { value: toHexMock });
+    const signMock = jest.fn().mockReturnValue("0x0");
+    Object.defineProperty(SigningUtil, "signCommitment", { value: signMock });
     const updatedState = walletReducer(state, action);
     itTransitionsToStateType(states.INITIATE_RESPONSE, updatedState);
   });
   describe('when the challenge times out', () => {
     const action = actions.blockMined({ number: 1, timestamp: 2 });
     const updatedState = walletReducer(state, action);
-    itTransitionsToStateType(states.ACKNOWLEDGE_CHALLENGE_TIMEOUT, updatedState);
+    itTransitionsToStateType(states.CHALLENGEE_ACKNOWLEDGE_CHALLENGE_TIMEOUT, updatedState);
   });
 
   describe('when a block is mined but the challenge has not expired', () => {
@@ -123,7 +110,7 @@ describe('when in INITIATE_RESPONSE', () => {
   describe('when the challenge times out', () => {
     const action = actions.blockMined({ number: 1, timestamp: 2 });
     const updatedState = walletReducer(state, action);
-    itTransitionsToStateType(states.ACKNOWLEDGE_CHALLENGE_TIMEOUT, updatedState);
+    itTransitionsToStateType(states.CHALLENGEE_ACKNOWLEDGE_CHALLENGE_TIMEOUT, updatedState);
   });
 });
 
@@ -142,7 +129,7 @@ describe('when in WAIT_FOR_RESPONSE_SUBMISSION', () => {
   describe('when the challenge times out', () => {
     const action = actions.blockMined({ number: 1, timestamp: 2 });
     const updatedState = walletReducer(state, action);
-    itTransitionsToStateType(states.ACKNOWLEDGE_CHALLENGE_TIMEOUT, updatedState);
+    itTransitionsToStateType(states.CHALLENGEE_ACKNOWLEDGE_CHALLENGE_TIMEOUT, updatedState);
   });
 });
 
@@ -156,7 +143,7 @@ describe('when in WAIT_FOR_RESPONSE_CONFIRMED', () => {
   describe('when the challenge times out', () => {
     const action = actions.blockMined({ number: 1, timestamp: 2 });
     const updatedState = walletReducer(state, action);
-    itTransitionsToStateType(states.ACKNOWLEDGE_CHALLENGE_TIMEOUT, updatedState);
+    itTransitionsToStateType(states.CHALLENGEE_ACKNOWLEDGE_CHALLENGE_TIMEOUT, updatedState);
   });
 });
 
@@ -184,6 +171,6 @@ describe('when in RESPONSE_TRANSACTION_FAILED', () => {
   describe('when the challenge times out', () => {
     const action = actions.blockMined({ number: 1, timestamp: 2 });
     const updatedState = walletReducer(state, action);
-    itTransitionsToStateType(states.ACKNOWLEDGE_CHALLENGE_TIMEOUT, updatedState);
+    itTransitionsToStateType(states.CHALLENGEE_ACKNOWLEDGE_CHALLENGE_TIMEOUT, updatedState);
   });
 });
