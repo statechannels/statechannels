@@ -1,5 +1,4 @@
-import { State, Channel } from 'fmg-core';
-import BN from 'bn.js';
+import { Commitment } from 'fmg-core';
 
 export enum PlayerIndex {
   'A' = 0,
@@ -23,8 +22,8 @@ export const fundingRequest = (
   channelId: string,
   myAddress: string,
   opponentAddress: string,
-  myBalance: BN,
-  opponentBalance: BN,
+  myBalance: string,
+  opponentBalance: string,
   playerIndex: PlayerIndex,
 ) => ({
   type: FUNDING_REQUEST as typeof FUNDING_REQUEST,
@@ -41,33 +40,33 @@ export type FundingRequest = ReturnType<typeof fundingRequest>;
 // ==========
 
 // Called when a signed position is received from an opponent.
-export const VALIDATION_REQUEST = 'WALLET.VALIDATION.REQUEST';
-export const validationRequest = (data: any, signature: string) => ({
-  type: VALIDATION_REQUEST as typeof VALIDATION_REQUEST,
-  data,
+export const VALIDATE_COMMITMENT_REQUEST = 'WALLET.VALIDATION.REQUEST';
+export const validateCommitmentRequest = (commitment: Commitment, signature: string) => ({
+  type: VALIDATE_COMMITMENT_REQUEST as typeof VALIDATE_COMMITMENT_REQUEST,
+  commitment,
   signature,
 });
-export type ValidationRequest = ReturnType<typeof validationRequest>;
+export type ValidateCommitmentRequest = ReturnType<typeof validateCommitmentRequest>;
 
 
 // SIGNATURE
 // =========
 
 // Called to obtain a signature on a state before sending to an opponent.
-export const SIGNATURE_REQUEST = 'WALLET.SIGNATURE.REQUEST';
-export const signatureRequest = (data: any) => ({
-  type: SIGNATURE_REQUEST as typeof SIGNATURE_REQUEST,
-  data,
+export const SIGN_COMMITMENT_REQUEST = 'WALLET.SIGNATURE.REQUEST';
+export const signCommitmentRequest = (commitment: any) => ({
+  type: SIGN_COMMITMENT_REQUEST as typeof SIGN_COMMITMENT_REQUEST,
+  commitment,
 });
-export type SignatureRequest = ReturnType<typeof signatureRequest>;
+export type SignCommitmentRequest = ReturnType<typeof signCommitmentRequest>;
 
 // WITHDRAWAL
 // ==========
 
 export const WITHDRAWAL_REQUEST = 'WALLET.WITHDRAWAL.REQUEST';
-export const withdrawalRequest = (position: State) => ({
+export const withdrawalRequest = (commitment: Commitment) => ({
   type: WITHDRAWAL_REQUEST as typeof WITHDRAWAL_REQUEST,
-  position,
+  commitment,
 });
 export type WithdrawalRequest = ReturnType<typeof withdrawalRequest>;
 
@@ -82,8 +81,8 @@ export const createChallenge = () => ({
 export type CreateChallengeRequest = ReturnType<typeof createChallenge>;
 
 export const RESPOND_TO_CHALLENGE = 'WALLET.RESPOND_TO_CHALLENGE';
-export const respondToChallenge = (position: string) => ({
-  position,
+export const respondToChallenge = (commitment: Commitment) => ({
+  commitment,
   type: RESPOND_TO_CHALLENGE as typeof RESPOND_TO_CHALLENGE,
 });
 export type RespondToChallenge = ReturnType<typeof respondToChallenge>;
@@ -114,7 +113,7 @@ export type ReceiveMessage = ReturnType<typeof receiveMessage>;
 export type RequestAction =
   ConcludeChannelRequest |
   FundingRequest |
-  SignatureRequest |
-  ValidationRequest |
+  SignCommitmentRequest |
+  ValidateCommitmentRequest |
   WithdrawalRequest |
   CreateChallengeRequest;

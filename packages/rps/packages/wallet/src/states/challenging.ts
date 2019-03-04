@@ -1,5 +1,5 @@
 import {
-  AdjudicatorExists, adjudicatorExists, ChallengeExists, challengeExists, TransactionExists
+  ChallengeExists, challengeExists, TransactionExists, ChannelOpen, channelOpen
 } from './shared';
 import { TransactionRequest } from 'ethers/providers';
 export const CHALLENGING = 'CHALLENGING';
@@ -14,55 +14,55 @@ export const ACKNOWLEDGE_CHALLENGE_RESPONSE = 'ACKNOWLEDGE_CHALLENGE_RESPONSE';
 export const ACKNOWLEDGE_CHALLENGE_TIMEOUT = 'ACKNOWLEDGE_CHALLENGE_TIMEOUT';
 export const CHALLENGE_TRANSACTION_FAILED = 'CHALLENGE_TRANSACTION_FAILED';
 
-export interface ChallengeTransactionFailed extends AdjudicatorExists {
+export interface ChallengeTransactionFailed extends ChannelOpen {
   type: typeof CHALLENGE_TRANSACTION_FAILED;
   stage: typeof CHALLENGING;
 }
 
-export function challengeTransactionFailed<T extends AdjudicatorExists>(params: T): ChallengeTransactionFailed {
+export function challengeTransactionFailed<T extends ChannelOpen>(params: T): ChallengeTransactionFailed {
   return {
     type: CHALLENGE_TRANSACTION_FAILED,
     stage: CHALLENGING,
-    ...adjudicatorExists(params),
+    ...channelOpen(params),
   };
 }
 
-export interface ApproveChallenge extends AdjudicatorExists {
+export interface ApproveChallenge extends ChannelOpen {
   type: typeof APPROVE_CHALLENGE;
   stage: typeof CHALLENGING;
 }
 
 
-export function approveChallenge<T extends AdjudicatorExists>(params: T): ApproveChallenge {
+export function approveChallenge<T extends ChannelOpen>(params: T): ApproveChallenge {
   return {
     type: APPROVE_CHALLENGE,
     stage: CHALLENGING,
-    ...adjudicatorExists(params),
+    ...channelOpen(params),
   };
 }
 
-export interface WaitForChallengeInitiation extends AdjudicatorExists {
+export interface WaitForChallengeInitiation extends ChannelOpen {
   type: typeof WAIT_FOR_CHALLENGE_INITIATION;
   stage: typeof CHALLENGING;
 }
-export function waitForChallengeInitiation<T extends AdjudicatorExists>(transaction: TransactionRequest, params: T): WaitForChallengeInitiation {
+export function waitForChallengeInitiation<T extends ChannelOpen>(transaction: TransactionRequest, params: T): WaitForChallengeInitiation {
   return {
     type: WAIT_FOR_CHALLENGE_INITIATION,
     stage: CHALLENGING,
-    ...adjudicatorExists(params),
+    ...channelOpen(params),
     transactionOutbox: transaction,
   };
 }
 
-export interface WaitForChallengeSubmission extends AdjudicatorExists {
+export interface WaitForChallengeSubmission extends ChannelOpen {
   type: typeof WAIT_FOR_CHALLENGE_SUBMISSION;
   stage: typeof CHALLENGING;
 }
-export function waitForChallengeSubmission<T extends AdjudicatorExists>(params: T): WaitForChallengeSubmission {
+export function waitForChallengeSubmission<T extends ChannelOpen>(params: T): WaitForChallengeSubmission {
   return {
     type: WAIT_FOR_CHALLENGE_SUBMISSION,
     stage: CHALLENGING,
-    ...adjudicatorExists(params),
+    ...channelOpen(params),
   };
 }
 

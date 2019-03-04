@@ -1,9 +1,9 @@
 import React from "react";
 
 import web3Utils from 'web3-utils';
-import hexToBN from '../utils/hexToBN';
 
 import { Navbar } from "reactstrap";
+import { bigNumberify } from 'ethers/utils';
 
 interface Props {
   myName: string;
@@ -37,10 +37,10 @@ export default class GameBar extends React.PureComponent<Props> {
   )
 
   render() {
-    const { myName, opponentName, roundBuyIn, myBalance, opponentBalance} = this.props;
+    const { myName, opponentName, roundBuyIn, myBalance, opponentBalance } = this.props;
 
-    const myGameCount = Math.round(hexToBN(myBalance).div(hexToBN(roundBuyIn)).toNumber());
-    const opponentGameCount = Math.round(hexToBN(opponentBalance).div(hexToBN(roundBuyIn)).toNumber());
+    const myGameCount = Math.round(bigNumberify(myBalance).div(roundBuyIn).toNumber());
+    const opponentGameCount = Math.round(bigNumberify(opponentBalance).div(roundBuyIn).toNumber());
 
     return (
       <Navbar className='game-bar'>

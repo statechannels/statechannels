@@ -1,3 +1,5 @@
+import { Commitment } from 'fmg-core';
+
 // TODO: We should limit WalletEvent/WalletEventTypes to the bare minimum of events we expect the app to handle. Some of these can be pruned.
 // Events that we handle for the user (HideWallet,ShowWallet, ValidateSuccess, etc..) should be removed from WalletEvent/WalletEventTypes
 // We should also switch from ReturnType to declaring a fixed type/interface that the action creators implement.
@@ -17,10 +19,10 @@ export const FUNDING_FAILURE = 'WALLET.FUNDING.FAILURE';
 /**
  * @ignore
  */
-export const fundingSuccess = (channelId, position: string) => ({
+export const fundingSuccess = (channelId, commitment: Commitment) => ({
   type: FUNDING_SUCCESS as typeof FUNDING_SUCCESS,
   channelId,
-  position,
+  commitment,
 });
 
 /**
@@ -259,18 +261,18 @@ export type MessageRequest = ReturnType<typeof messageRequest>;
 /**
  * The type for events where a challenge position is received from the wallet.
  */
-export const CHALLENGE_POSITION_RECEIVED = 'WALLET.MESSAGING.CHALLENGE_POSITION_RECEIVED';
+export const CHALLENGE_COMMITMENT_RECEIVED = 'WALLET.MESSAGING.CHALLENGE_COMMITMENT_RECEIVED';
 /**
  * @ignore
  */
-export const challengePositionReceived = (positionData: string) => ({
-  type: CHALLENGE_POSITION_RECEIVED as typeof CHALLENGE_POSITION_RECEIVED,
-  positionData,
+export const challengeCommitmentReceived = (commitment: Commitment) => ({
+  type: CHALLENGE_COMMITMENT_RECEIVED as typeof CHALLENGE_COMMITMENT_RECEIVED,
+  commitment,
 });
 /**
  * The event thrown when the wallet has received a challenge position.
  */
-export type ChallengePositionReceived = ReturnType<typeof challengePositionReceived>;
+export type ChallengeCommitmentReceived = ReturnType<typeof challengeCommitmentReceived>;
 
 /**
  * The event type when a user rejects a challenge.
@@ -323,7 +325,7 @@ export type WalletEventType =
   typeof CHALLENGE_COMPLETE |
   typeof CHALLENGE_RESPONSE_REQUESTED |
   typeof CHALLENGE_REJECTED |
-  typeof CHALLENGE_POSITION_RECEIVED |
+  typeof CHALLENGE_COMMITMENT_RECEIVED |
   typeof MESSAGE_REQUEST |
   typeof CLOSE_SUCCESS |
   typeof CONCLUDE_FAILURE |
@@ -354,7 +356,7 @@ export type WalletEvent =
   FundingFailure |
   SignatureSuccess |
   SignatureFailure |
-  ChallengePositionReceived |
+  ChallengeCommitmentReceived |
   ChallengeRejected |
   ChallengeResponseRequested |
   ChallengeComplete |

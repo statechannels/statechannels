@@ -1,4 +1,4 @@
-import { AddressExists, addressExists, ChannelPartiallyOpen, channelPartiallyOpen } from './shared';
+import { AddressExists, addressExists, FirstMoveSent, firstMoveSent, } from './shared';
 
 // stage
 export const OPENING = 'OPENING';
@@ -12,7 +12,7 @@ export interface WaitForChannel extends AddressExists {
   type: typeof WAIT_FOR_CHANNEL;
   stage: typeof OPENING;
 }
-export interface WaitForPreFundSetup extends ChannelPartiallyOpen {
+export interface WaitForPreFundSetup extends FirstMoveSent {
   type: typeof WAIT_FOR_PRE_FUND_SETUP;
   stage: typeof OPENING;
 }
@@ -20,8 +20,8 @@ export interface WaitForPreFundSetup extends ChannelPartiallyOpen {
 export function waitForChannel<T extends AddressExists>(params: T): WaitForChannel {
   return { type: WAIT_FOR_CHANNEL, stage: OPENING, ...addressExists(params) };
 }
-export function waitForPreFundSetup<T extends ChannelPartiallyOpen>(params: T): WaitForPreFundSetup {
-  return { type: WAIT_FOR_PRE_FUND_SETUP, stage: OPENING, ...channelPartiallyOpen(params) };
+export function waitForPreFundSetup<T extends FirstMoveSent>(params: T): WaitForPreFundSetup {
+  return { type: WAIT_FOR_PRE_FUND_SETUP, stage: OPENING, ...firstMoveSent(params) };
 }
 
 export type OpeningState = (

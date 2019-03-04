@@ -1,15 +1,15 @@
 import React, { Fragment } from 'react';
 import { connect } from 'react-redux';
 
-import { Move, Player } from '../core';
+import { Weapon, Player } from '../core';
 import { SiteState } from '../redux/reducer';
 import * as gameActions from '../redux/game/actions';
 
 import WaitingRoomPage from '../components/WaitingRoomPage';
 import ConfirmGamePage from '../components/ConfirmGamePage';
-import SelectMovePage from '../components/SelectMovePage';
-import WaitForOpponentToPickMove from '../components/WaitForOpponentToPickMove';
-import MoveSelectedPage from '../components/MoveSelectedPage'; // WaitForReveal, WaitForResting
+import SelectWeaponPage from '../components/SelectWeaponPage';
+import WaitForOpponentToPickWeapon from '../components/WaitForOpponentToPickWeapon';
+import WeaponSelectedPage from '../components/WeaponSelectedPage'; // WaitForReveal, WaitForResting
 import PlayAgain from '../components/PlayAgain';
 import WaitForRestingA from '../components/WaitForRestingA';
 import WaitForResignationAcknowledgement from '../components/WaitForResignationAcknowledgement';
@@ -24,7 +24,7 @@ import { GameState, StateName, PlayingState } from '../redux/game/state';
 
 interface GameProps {
   state: GameState;
-  chooseMove: (move: Move) => void;
+  chooseWeapon: (move: Weapon) => void;
   playAgain: () => void;
   confirmGame: () => void;
   declineGame: () => void;
@@ -45,7 +45,7 @@ function GameContainer(props: GameProps) {
 }
 
 function RenderGame(props: GameProps) {
-  const { state, chooseMove, playAgain, confirmGame, declineGame, conclude } = props;
+  const { state, chooseWeapon, playAgain, confirmGame, declineGame, conclude } = props;
   const { player, turnNum } = (state as PlayingState);
   const ourTurn = player === Player.PlayerA ? turnNum % 2 !== 0 : turnNum % 2 === 0;
   switch (state.name) {
@@ -63,15 +63,15 @@ function RenderGame(props: GameProps) {
       return <GameProposedPage message='Waiting for opponent to confirm' />;
     case StateName.ConfirmGameB:
       return <ConfirmGamePage confirmGame={confirmGame} cancelGame={declineGame} stake={state.roundBuyIn} opponentName={state.opponentName} />;
-    case StateName.PickMove:
-    case StateName.PickChallengeMove:
-      return <SelectMovePage chooseMove={chooseMove} />;
+    case StateName.PickWeapon:
+    case StateName.PickChallengeWeapon:
+      return <SelectWeaponPage chooseWeapon={chooseWeapon} />;
 
-    case StateName.WaitForOpponentToPickMoveA:
+    case StateName.WaitForOpponentToPickWeaponA:
       return (
-        <MoveSelectedPage
+        <WeaponSelectedPage
           message="Waiting for your opponent to choose their move"
-          yourMove={state.myMove}
+          yourWeapon={state.myWeapon}
         />
       );
 
@@ -80,14 +80,14 @@ function RenderGame(props: GameProps) {
     // TODO: We probably want a seperate message for when your opponent resigns
     case StateName.OpponentResigned:
       return <GameOverPage visible={state.name === StateName.OpponentResigned || state.name === StateName.GameOver} conclude={conclude} ourTurn={ourTurn} />;
-    case StateName.WaitForOpponentToPickMoveB:
-      return <WaitForOpponentToPickMove />;
+    case StateName.WaitForOpponentToPickWeaponB:
+      return <WaitForOpponentToPickWeapon />;
 
     case StateName.WaitForRevealB:
       return (
-        <MoveSelectedPage
+        <WeaponSelectedPage
           message="Waiting for your opponent to choose their move"
-          yourMove={state.myMove}
+          yourWeapon={state.myWeapon}
         />
       );
 
@@ -95,8 +95,8 @@ function RenderGame(props: GameProps) {
     case StateName.ChallengePlayAgain:
       return (
         <PlayAgain
-          yourMove={state.myMove}
-          theirMove={state.theirMove}
+          yourWeapon={state.myWeapon}
+          theirWeapon={state.theirWeapon}
           result={state.result}
           playAgain={playAgain}
         />
@@ -106,8 +106,8 @@ function RenderGame(props: GameProps) {
     case StateName.WaitForRestingA:
       return (
         <WaitForRestingA
-          yourMove={state.myMove}
-          theirMove={state.theirMove}
+          yourWeapon={state.myWeapon}
+          theirWeapon={state.theirWeapon}
           result={state.result}
           playAgain={playAgain}
         />
@@ -128,7 +128,7 @@ const mapStateToProps = (state: SiteState) => ({
 });
 
 const mapDispatchToProps = {
-  chooseMove: gameActions.chooseMove,
+  chooseWeapon: gameActions.chooseWeapon,
   playAgain: gameActions.playAgain,
   confirmGame: gameActions.confirmGame,
   declineGame: gameActions.declineGame,

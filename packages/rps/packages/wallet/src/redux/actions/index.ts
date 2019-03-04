@@ -1,3 +1,5 @@
+import { Commitment } from 'fmg-core';
+
 export const LOGGED_IN = 'WALLET.LOGGED_IN';
 export const loggedIn = (uid: string) => ({
   type: LOGGED_IN as typeof LOGGED_IN,
@@ -6,12 +8,13 @@ export const loggedIn = (uid: string) => ({
 export type LoggedIn = ReturnType<typeof loggedIn>;
 
 export const KEYS_LOADED = 'WALLET.KEYS_LOADED';
-export const keysLoaded = (address: string, privateKey: string, networkId: string) => ({
+export const keysLoaded = (address: string, privateKey: string, networkId: string, adjudicator: string) => ({
   type: KEYS_LOADED as typeof KEYS_LOADED,
   address,
   privateKey,
   // TODO: This should be separated off into its own action
   networkId,
+  adjudicator,
 });
 export type KeysLoaded = ReturnType<typeof keysLoaded>;
 
@@ -20,27 +23,27 @@ export const CREATE_CHANNEL_REQUEST = ''; // send over opponent addresses, gameL
 export const JOIN_CHANNEL_REQUEST = '';
 export const ADDRESS_REQUEST = ''; // provide me with an address
 
-export const OWN_POSITION_RECEIVED = 'WALLET.OWN_POSITION_RECEIVED';
-export const ownPositionReceived = (data: string) => ({
-  type: OWN_POSITION_RECEIVED as typeof OWN_POSITION_RECEIVED,
-  data,
+export const OWN_COMMITMENT_RECEIVED = 'WALLET.OWN_COMMITMENT_RECEIVED';
+export const ownCommitmentReceived = (commitment: Commitment) => ({
+  type: OWN_COMMITMENT_RECEIVED as typeof OWN_COMMITMENT_RECEIVED,
+  commitment,
 });
-export type OwnPositionReceived = ReturnType<typeof ownPositionReceived>;
+export type OwnCommitmentReceived = ReturnType<typeof ownCommitmentReceived>;
 
-export const CHALLENGE_POSITION_RECEIVED = 'CHALLENGE_POSITION_RECEIVED';
-export const challengePositionReceived = (data: string) => ({
-  type: CHALLENGE_POSITION_RECEIVED as typeof CHALLENGE_POSITION_RECEIVED,
-  data,
+export const CHALLENGE_COMMITMENT_RECEIVED = 'CHALLENGE_COMMITMENT_RECEIVED';
+export const challengeCommitmentReceived = (commitment: Commitment) => ({
+  type: CHALLENGE_COMMITMENT_RECEIVED as typeof CHALLENGE_COMMITMENT_RECEIVED,
+  commitment,
 });
-export type ChallengePositionReceived = ReturnType<typeof challengePositionReceived>;
+export type ChallengeCommitmentReceived = ReturnType<typeof challengeCommitmentReceived>;
 
-export const OPPONENT_POSITION_RECEIVED = 'WALLET.OPPONENT_POSITION_RECEIVED';
-export const opponentPositionReceived = (data: string, signature: string, ) => ({
-  type: OPPONENT_POSITION_RECEIVED as typeof OPPONENT_POSITION_RECEIVED,
-  data,
+export const OPPONENT_COMMITMENT_RECEIVED = 'WALLET.OPPONENT_COMMITMENT_RECEIVED';
+export const opponentCommitmentReceived = (commitment: Commitment, signature: string, ) => ({
+  type: OPPONENT_COMMITMENT_RECEIVED as typeof OPPONENT_COMMITMENT_RECEIVED,
+  commitment,
   signature,
 });
-export type OpponentPositionReceived = ReturnType<typeof opponentPositionReceived>;
+export type OpponentCommitmentReceived = ReturnType<typeof opponentCommitmentReceived>;
 
 export const MESSAGE_RECEIVED = 'WALLET.MESSAGE_RECEIVED';
 export const messageReceived = (data: string, signature?: string) => ({
@@ -186,7 +189,7 @@ export const respondWithRefuteChosen = () => ({
 export type RespondWithRefuteChosen = ReturnType<typeof respondWithRefuteChosen>;
 
 export const TAKE_MOVE_IN_APP_ACKNOWLEDGED = 'WALLET.TAKE_MOVE_IN_APP_ACKNOWLEDGED';
-export const takeMoveInAppAcknowledged = (position: string, signature: string) => ({
+export const takeMoveInAppAcknowledged = (COMMITMENT: string, signature: string) => ({
   type: TAKE_MOVE_IN_APP_ACKNOWLEDGED as typeof TAKE_MOVE_IN_APP_ACKNOWLEDGED,
 });
 export type TakeMoveInAppAcknowledged = ReturnType<typeof takeMoveInAppAcknowledged>;
@@ -260,40 +263,42 @@ export const withdrawalSuccessAcknowledged = () => ({
 export type WithdrawalSuccessAcknowledged = ReturnType<typeof withdrawalSuccessAcknowledged>;
 
 export const FUNDING_RECEIVED_EVENT = 'FUNDING_RECEIVED_EVENT';
-export const fundingReceivedEvent = (amountReceived, sender, adjudicatorBalance) => ({
-  amountReceived,
-  sender,
-  adjudicatorBalance,
+export const fundingReceivedEvent = (destination, amount, totalForDestination) => ({
+  destination,
+  amount,
+  totalForDestination,
   type: FUNDING_RECEIVED_EVENT as typeof FUNDING_RECEIVED_EVENT,
 });
 export type FundingReceivedEvent = ReturnType<typeof fundingReceivedEvent>;
 
 export const CHALLENGE_CREATED_EVENT = 'CHALLENGE_CREATED_EVENT';
-export const challengeCreatedEvent = (channelId, state, expirationTime, payouts) => ({
+export const challengeCreatedEvent = (channelId, commitment, finalizedAt) => ({
   channelId,
-  state,
-  expirationTime,
-  payouts,
+  commitment,
+  finalizedAt,
   type: CHALLENGE_CREATED_EVENT as typeof CHALLENGE_CREATED_EVENT,
 });
 export type ChallengeCreatedEvent = ReturnType<typeof challengeCreatedEvent>;
 
-export const GAME_CONCLUDED_EVENT = 'GAME_CONCLUDED_EVENT';
-export const gameConcludedEvent = () => ({
-  type: GAME_CONCLUDED_EVENT as typeof GAME_CONCLUDED_EVENT,
+export const CONCLUDED_EVENT = 'CONCLUDED_EVENT';
+export const concludedEvent = (channelId) => ({
+  channelId,
+  type: CONCLUDED_EVENT as typeof CONCLUDED_EVENT,
 });
-export type GameConcludedEvent = ReturnType<typeof gameConcludedEvent>;
+export type concludedEvent = ReturnType<typeof concludedEvent>;
 
 export const REFUTED_EVENT = 'REFUTED_EVENT';
-export const refutedEvent = (refuteState) => ({
-  refuteState,
+export const refutedEvent = (channelId, refuteCommitment) => ({
+  channelId,
+  refuteCommitment,
   type: REFUTED_EVENT as typeof REFUTED_EVENT,
 });
 export type RefutedEvent = ReturnType<typeof refutedEvent>;
 
 export const RESPOND_WITH_MOVE_EVENT = 'RESPOND_WITH_MOVE_EVENT';
-export const respondWithMoveEvent = (responseState) => ({
-  responseState,
+export const respondWithMoveEvent = (channelId, responseCommitment) => ({
+  channelId,
+  responseCommitment,
   type: RESPOND_WITH_MOVE_EVENT as typeof RESPOND_WITH_MOVE_EVENT,
 });
 export type RespondWithMoveEvent = ReturnType<typeof respondWithMoveEvent>;
@@ -358,8 +363,8 @@ export type BlockMined = ReturnType<typeof blockMined>;
 export type WalletAction = (
   | LoggedIn
   | KeysLoaded
-  | OwnPositionReceived
-  | OpponentPositionReceived
+  | OwnCommitmentReceived
+  | OpponentCommitmentReceived
   | FundingRequested
   | FundingApproved
   | FundingRejected
@@ -392,13 +397,13 @@ export type WalletAction = (
   | MessageReceived
   | MessageSent
   | DisplayMessageSent
-  | GameConcludedEvent
+  | concludedEvent
   | ConcludeRequested
   | ConcludeApproved
   | CloseSuccessAcknowledged
   | ClosedOnChainAcknowledged
   | RespondWithMoveEvent
-  | ChallengePositionReceived
+  | ChallengeCommitmentReceived
   | ApproveClose
   | FundingDeclinedAcknowledged
   | ConcludeRejected

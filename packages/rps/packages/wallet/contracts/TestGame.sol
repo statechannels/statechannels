@@ -1,7 +1,10 @@
-pragma solidity ^0.4.18;
+pragma solidity ^0.5.0;
+pragma experimental ABIEncoderV2;
+import "fmg-nitro-adjudicator/contracts/NitroAdjudicator.sol";
+
 
 contract TestGame {
-    function validTransition(bytes _old, bytes _new) public pure returns (bool) {
-      return true;
+    function validTransition(Commitment.CommitmentStruct memory _old, Commitment.CommitmentStruct memory _new) public pure returns (bool) {
+       return true;
     }
 }

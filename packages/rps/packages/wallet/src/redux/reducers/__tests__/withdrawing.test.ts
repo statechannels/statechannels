@@ -7,18 +7,18 @@ import { itTransitionsToStateType } from './helpers';
 import * as scenarios from './test-scenarios';
 import * as TransactionGenerator from '../../../utils/transaction-generator';
 import * as SigningUtil from '../../../utils/signing-utils';
-import BN from "bn.js";
-import bnToHex from "../../../utils/bnToHex";
+import { bigNumberify } from 'ethers/utils';
+
 
 const {
   asPrivateKey,
-  revealHex,
-  acceptHex,
+  gameCommitment1,
+  gameCommitment2,
   participants,
   channelId,
   channelNonce,
   libraryAddress,
-} = scenarios.standard;
+} = scenarios;
 
 const defaults = {
   uid: 'uid',
@@ -26,9 +26,9 @@ const defaults = {
   libraryAddress,
   channelId,
   channelNonce,
-  lastPosition: { data: revealHex, signature: 'fake-sig' },
-  penultimatePosition: { data: acceptHex, signature: 'fake-sig' },
-  turnNum: 6,
+  lastCommitment: { commitment: gameCommitment2, signature: 'fake-sig' },
+  penultimateCommitment: { commitment: gameCommitment1, signature: 'fake-sig' },
+  turnNum: gameCommitment2.turnNum,
   adjudicator: 'adj-address',
   ourIndex: 0,
   address: 'address',
@@ -36,8 +36,8 @@ const defaults = {
   networkId: 23213,
   transactionHash: '0x0',
   userAddress: '0x0',
-  requestedTotalFunds: bnToHex(new BN(1000000000000000)),
-  requestedYourDeposit: bnToHex(new BN(500000000000000)),
+  requestedTotalFunds: bigNumberify(1000000000000000).toHexString(),
+  requestedYourDeposit: bigNumberify(500000000000000).toHexString(),
 };
 
 
@@ -47,7 +47,7 @@ describe('when in ApproveWithdrawal', () => {
   describe('and the user approves the withdrawal', () => {
     const destinationAddress = '0x123';
     const createWithdrawTxMock = jest.fn();
-    Object.defineProperty(TransactionGenerator, 'createWithdrawTransaction', { value: createWithdrawTxMock });
+    Object.defineProperty(TransactionGenerator, 'createTransferAndWithdrawTransaction', { value: createWithdrawTxMock });
     const signMock = jest.fn().mockReturnValue('0x0');
     Object.defineProperty(SigningUtil, 'signVerificationData', { value: signMock });
 
@@ -86,7 +86,7 @@ describe('when in WaitForWithdrawalInitiation', () => {
 describe('when in withdrawTransactionFailed', () => {
   describe('and the transaction is retried', () => {
     const createWithdrawTxMock = jest.fn();
-    Object.defineProperty(TransactionGenerator, 'createWithdrawTransaction', { value: createWithdrawTxMock });
+    Object.defineProperty(TransactionGenerator, 'createTransferAndWithdrawTransaction', { value: createWithdrawTxMock });
     const signMock = jest.fn().mockReturnValue('0x0');
     Object.defineProperty(SigningUtil, 'signVerificationData', { value: signMock });
 

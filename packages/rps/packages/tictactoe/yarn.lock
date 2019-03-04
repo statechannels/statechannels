@@ -5565,6 +5565,22 @@ ethers@4.0.0-beta.1:
     uuid "2.0.1"
     xmlhttprequest "1.8.0"
 
+ethers@^4.0.12:
+  version "4.0.26"
+  resolved "https://registry.yarnpkg.com/ethers/-/ethers-4.0.26.tgz#a4b17184a0ed3db9c88d1b6d28beaa7d0e0ba3e4"
+  integrity sha512-3hK4S8eAGhuWZ/feip5z17MswjGgjb4lEPJqWO/O0dNqToYLSHhvu6gGQPs8d9f+XfpEB2EYexfF0qjhWiZjUA==
+  dependencies:
+    "@types/node" "^10.3.2"
+    aes-js "3.0.0"
+    bn.js "^4.4.0"
+    elliptic "6.3.3"
+    hash.js "1.1.3"
+    js-sha3 "0.5.7"
+    scrypt-js "2.0.4"
+    setimmediate "1.0.4"
+    uuid "2.0.1"
+    xmlhttprequest "1.8.0"
+
 ethers@^4.0.15:
   version "4.0.18"
   resolved "https://registry.yarnpkg.com/ethers/-/ethers-4.0.18.tgz#04870405fe2066ccdaafe99d34a8806fd2191bc6"
@@ -5625,6 +5641,11 @@ event-stream@=3.3.4:
     split "0.3"
     stream-combiner "~0.0.4"
     through "~2.3.1"
+
+eventemitter2@5.0.1:
+  version "5.0.1"
+  resolved "https://registry.yarnpkg.com/eventemitter2/-/eventemitter2-5.0.1.tgz#6197a095d5fb6b57e8942f6fd7eaad63a09c9452"
+  integrity sha1-YZegldX7a1folC9v1+qtY6CclFI=
 
 eventemitter3@1.1.1:
   version "1.1.1"
@@ -6132,6 +6153,18 @@ fmg-core@0.1.6, fmg-core@^0.1.5:
     bn.js "^4.11.8"
     sha3 "^1.2.2"
     web3 "^1.0.0-beta.36"
+    websocket "^1.0.28"
+
+fmg-core@0.3.5:
+  version "0.3.5"
+  resolved "https://registry.yarnpkg.com/fmg-core/-/fmg-core-0.3.5.tgz#826f277514a3a14ec1477a61981ac1718eb62954"
+  integrity sha512-t6JeBaMxgjDGNLSXbek8MblQHd6HHwac8dGzPGb8xABfnCE11FIYyMZslIJXYIpby+FRKQKVQzom/C/orm73ZQ==
+  dependencies:
+    bn.js "^4.11.8"
+    ethers "^4.0.12"
+    sha3 "^1.2.2"
+    web3 "^1.0.0-beta.36"
+    web3-utils "^1.0.0-beta.36"
     websocket "^1.0.28"
 
 fmg-simple-adjudicator@0.1.6:
@@ -8878,6 +8911,15 @@ ltgt@~2.1.1:
     dotenv "^6.1.0"
     ethers "^4.0.15"
     yargs "^12.0.5"
+
+magmo-wallet-client@0.0.1:
+  version "0.0.1"
+  resolved "https://registry.yarnpkg.com/magmo-wallet-client/-/magmo-wallet-client-0.0.1.tgz#c1a9498005612a4b54a36c0f8e4ffb4371748f57"
+  integrity sha512-KLWG9QFMs1eOcRtij0DZrzvIMyedc8a9ctLCwQS/j2uJsNVaTYHeN7AQSBVNbLZ028UClp+khvLSPx2M5WjHIg==
+  dependencies:
+    bn.js "4.11.8"
+    eventemitter2 "5.0.1"
+    fmg-core "0.3.5"
 
 make-dir@^1.0.0:
   version "1.3.0"

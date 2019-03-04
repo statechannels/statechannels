@@ -1,7 +1,7 @@
 import React from "react";
 
 import { Button, Navbar } from "reactstrap";
-import { State } from "fmg-core";
+import { Commitment } from "fmg-core";
 import { RulesModal } from "./RulesModal";
 
 interface Props {
@@ -16,7 +16,7 @@ function getInitials(loginDisplayName: string): string {
   return userDisplayName.map(name => name.charAt(0)).join("");
 }
 
-export default class NavigationBar extends React.PureComponent<Props, State> {
+export default class NavigationBar extends React.PureComponent<Props, Commitment> {
   render() {
     return (
       <Navbar className='navbar'>

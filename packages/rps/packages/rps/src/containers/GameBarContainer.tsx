@@ -6,10 +6,10 @@ import { PlayingState } from '../redux/game/state';
 
 function mapStateToProps(state: SiteState) {
   const gameState = state.game.gameState as PlayingState;
-  const { myName, opponentName, roundBuyIn, player, balances } = gameState;
+  const { myName, opponentName, roundBuyIn, player, allocation } = gameState;
 
-  const myBalance = balances[player];
-  const opponentBalance = balances[1 - player];
+  const myBalance = allocation[player];
+  const opponentBalance = allocation[1 - player];
 
   return {
     myName,

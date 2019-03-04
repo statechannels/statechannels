@@ -1,12 +1,12 @@
 import React from 'react';
 
-import { Move } from '../core';
+import { Weapon } from '../core';
 import ROCK_BADGE from '../images/rock_badge.svg';
 import PAPER_BADGE from '../images/paper_badge.svg';
 import SCISSORS_BADGE from '../images/scissors_badge.svg';
 
 interface Props {
-  move: Move;
+  move: Weapon;
   action?: () => void;
 }
 
@@ -15,7 +15,7 @@ interface State {
 }
 const initialState = { hover: false };
 
-export class MoveBadge extends React.Component<Props, State> {
+export class WeaponBadge extends React.Component<Props, State> {
   constructor(props) {
     super(props);
     this.state = initialState;
@@ -35,11 +35,11 @@ export class MoveBadge extends React.Component<Props, State> {
   render() {
     const { move, action } = this.props;
     switch (move) {
-      case Move.Rock:
+      case Weapon.Rock:
         return <img className='move-badge' src={ROCK_BADGE} onClick={action} onMouseEnter={this.hoverOn} onMouseLeave={this.hoverOff} />;
-      case Move.Paper:
+      case Weapon.Paper:
         return <img className='move-badge' src={PAPER_BADGE} onClick={action} />;
-      default: // Move.Scissors:
+      default: // Weapon.Scissors:
         return <img className='move-badge' src={SCISSORS_BADGE} onClick={action} />;
     }
   }

@@ -22,14 +22,14 @@ describe('when in WaitForAddress', () => {
   const state = states.waitForAddress(defaults);
 
   describe('when the key loader provides the keys', () => {
-    const action = actions.keysLoaded('address', 'privateKey', 'networkId');
+    const action = actions.keysLoaded('address', 'privateKey', 'networkId', 'contractAddress');
     const updatedState = walletReducer(state, action);
 
     itTransitionsToStateType(states.WAIT_FOR_CHANNEL, updatedState);
 
   });
 
-  describe('when a metamask load error occurs',()=>{
+  describe('when a metamask load error occurs', () => {
     const action = actions.metamaskLoadError();
     const updatedState = walletReducer(state, action);
 
