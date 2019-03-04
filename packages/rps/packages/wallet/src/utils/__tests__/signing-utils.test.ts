@@ -1,35 +1,38 @@
 import * as scenarios from '../../redux/reducers/__tests__/test-scenarios';
-import { signPositionHex, validSignature, signVerificationData } from '../signing-utils';
+import { signCommitment, signData, validSignature, validCommitmentSignature, signVerificationData } from '../signing-utils';
 
-const s = scenarios.standard;
 
-const itSigns = (name, positionHex, key, signature) => {
-  it(`calculates the signature of ${name}`, () => {
-    expect(signPositionHex(positionHex, key)).toEqual(signature);
+describe("signing and validating commitments", () => {
+  let commitmentSignature;
+  it('should sign a commitment', () => {
+    commitmentSignature = signCommitment(scenarios.gameCommitment1, scenarios.asPrivateKey);
   });
-};
+  it("should return true when a signature is valid", () => {
+    expect(validCommitmentSignature(scenarios.gameCommitment1, commitmentSignature, scenarios.asAddress)).toBe(true);
+  });
 
-describe('signPositionHex', () => {
-  itSigns('PreFundSetupA', s.preFundSetupAHex, s.asPrivateKey, s.preFundSetupASig);
-  itSigns('PreFundSetupB', s.preFundSetupBHex, s.bsPrivateKey, s.preFundSetupBSig);
-  itSigns('Propose', s.proposeHex, s.asPrivateKey, s.proposeSig);
-  itSigns('Accept', s.acceptHex, s.bsPrivateKey, s.acceptSig);
+  it("should return false when a signature is invalid", () => {
+    expect(validCommitmentSignature(scenarios.gameCommitment1, '0x0', scenarios.asAddress)).toBe(false);
+  });
 });
 
-const itChecksSig = (name, positionHex, signature, address) => {
-  it(`checks the signature of ${name}`, () => {
-    expect(validSignature(positionHex, signature, address)).toEqual(true);
+describe("signing and validating arbitrary data", () => {
+  const data = 'Some stuff to sign';
+  let dataSignature;
+  it('should sign some data', () => {
+    dataSignature = signData(data, scenarios.asPrivateKey);
   });
-};
+  it("should return true when a signature is valid", () => {
+    expect(validSignature(data, dataSignature, scenarios.asAddress)).toBe(true);
+  });
 
-describe('validSignature', () => {
-  itChecksSig('PreFundSetupA', s.preFundSetupAHex, s.preFundSetupASig, s.asAddress);
-  itChecksSig('PreFundSetupB', s.preFundSetupBHex, s.preFundSetupBSig, s.bsAddress);
-  itChecksSig('Propose', s.proposeHex, s.proposeSig, s.asAddress);
-  itChecksSig('Accept', s.acceptHex, s.acceptSig, s.bsAddress);
+  it("should return false when a signature is invalid", () => {
+    expect(validSignature(data, '0x0', scenarios.asAddress)).toBe(false);
+  });
 });
 
 it('should sign verification data', () => {
-  const signature = signVerificationData(s.asAddress, s.asAddress, s.channelId, s.asPrivateKey);
-  expect(signature).toEqual('0x01fc4122f240d67822f54fe21095bd3577000603fb3661c7f68cf3ebb5cef39c3e1b5b3460e3240082eba63dc5ef61ab59ffc625af71378b4137b1f23cc708101c');
+  const signature = signVerificationData('0x5409ED021D9299bf6814279A6A1411A7e866A631', '0x5409ED021D9299bf6814279A6A1411A7e866A631', '0x6Ecbe1DB9EF729CBe972C83Fb886247691Fb6beb', '0x5409ED021D9299bf6814279A6A1411A7e866A631', '0xf2f48ee19680706196e2e339e5da3491186e0c4c5030670656b0e0164837257d');
+  // TODO: This isn't a great test since we can't really validate the signature 
+  expect(signature).toEqual('0xe302f47c6405ed3675f218d9e8af355822555b61755da582f478cb689e6c89e40e83a14205696217a25f4935dfaa52218a02050d99b560ddaa23426a4af6a0461c');
 });

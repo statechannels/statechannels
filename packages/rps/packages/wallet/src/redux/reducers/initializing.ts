@@ -46,9 +46,9 @@ const waitForAddressReducer = (state: WaitForAddress, action: any) => {
     case METAMASK_LOAD_ERROR:
       return metaMaskError({ ...state, displayOutbox: showWallet() });
     case KEYS_LOADED:
-      const { address, privateKey, networkId } = action;
+      const { address, privateKey, networkId, adjudicator } = action;
       return waitForChannel({
-        ...state, address, privateKey, networkId,
+        ...state, address, privateKey, networkId, adjudicator,
         messageOutbox: initializationSuccess(address),
       });
     default:

@@ -51,52 +51,37 @@ class FundingContainer extends PureComponent<Props> {
             requestedYourDeposit={state.requestedYourDeposit}
           />
         );
-      case states.A_WAIT_FOR_DEPLOY_TO_BE_SENT_TO_METAMASK:
+      case states.A_WAIT_FOR_DEPOSIT_TO_BE_SENT_TO_METAMASK:
+        return <AFundingStep step={0} />;
+      case states.A_SUBMIT_DEPOSIT_IN_METAMASK:
         return <AFundingStep step={1}>Please confirm the transaction in MetaMask!</AFundingStep>;
-      case states.A_SUBMIT_DEPLOY_IN_METAMASK:
-        return <AFundingStep step={1}>Please confirm the transaction in MetaMask!</AFundingStep>;
-      case states.WAIT_FOR_DEPLOY_CONFIRMATION:
-        if (state.ourIndex === 0){
-          return (
-            <AFundingStep step={2}>
-              Check the progress on&nbsp;
-              <EtherscanLink
-                transactionID={state.transactionHash}
-                networkId={state.networkId}
-                title="Etherscan"
-              />!
-            </AFundingStep>
-          );
-        } else {
-            return (
-            <BFundingStep step={1}>
-              Check the progress on&nbsp;
-              <EtherscanLink
-                transactionID={state.transactionHash}
-                networkId={state.networkId}
-                title="Etherscan"
-              />!
-            </BFundingStep>
-          );
-        }
-      case states.A_WAIT_FOR_DEPOSIT:
-        return <AFundingStep step={3}/>;
+      case states.A_WAIT_FOR_DEPOSIT_CONFIRMATION:
+          return <AFundingStep step={2}>
+            Check the progress on&nbsp;
+            <EtherscanLink
+              transactionID={state.transactionHash}
+              networkId={state.networkId}
+              title="Etherscan"
+            />!
+          </AFundingStep>;
+      case states.A_WAIT_FOR_OPPONENT_DEPOSIT:
+        return <AFundingStep step={3} />;
       case states.A_WAIT_FOR_POST_FUND_SETUP:
         // return <AWaitForPostFundSetup />;
         return <AFundingStep step={4}>Waiting for the other player
         </AFundingStep>;
-      case states.B_WAIT_FOR_DEPLOY_ADDRESS:
+      case states.B_WAIT_FOR_OPPONENT_DEPOSIT:
         // return <WaitForOtherPlayer name="deployment" />;
-        return <BFundingStep step={1}/>;
+        return <BFundingStep step={1} />;
       case states.B_WAIT_FOR_DEPOSIT_TO_BE_SENT_TO_METAMASK:
         // return <SubmitX name="deposit" />;
-        return <BFundingStep step={2}/>;
+        return <BFundingStep step={2} />;
       case states.B_SUBMIT_DEPOSIT_IN_METAMASK:
         // return <WaitForXInitiation name="deposit" />;
-        return <BFundingStep step={2}/>;
-      case states.WAIT_FOR_DEPOSIT_CONFIRMATION:
+        return <BFundingStep step={2}> Please confirm the transaction in MetaMask!</BFundingStep>;
+      case states.B_WAIT_FOR_DEPOSIT_CONFIRMATION:
         if (state.ourIndex === 0) {
-          return <AFundingStep step={3}/>;
+          return <AFundingStep step={3} />;
         } else {
           // return <WaitForXConfirmation name="deposit" transactionID={state.transactionHash} networkId={state.networkId} />;
           return <BFundingStep step={3}>
@@ -116,9 +101,9 @@ class FundingContainer extends PureComponent<Props> {
       case states.ACKNOWLEDGE_FUNDING_SUCCESS:
         if (state.ourIndex === 0) {
           return <AFundingStep step={5}>
-              <Button onClick={fundingSuccessAcknowledged} >
-                {"Return to game"}
-              </Button>
+            <Button onClick={fundingSuccessAcknowledged} >
+              {"Return to game"}
+            </Button>
           </AFundingStep>;
         }
         else {
@@ -129,13 +114,13 @@ class FundingContainer extends PureComponent<Props> {
           </BFundingStep>;
         }
       // return (
-          // <AcknowledgeX
-          //   title="Funding successful"
-          //   action={fundingSuccessAcknowledged}
-          //   description="You have successfully deposited funds into your channel"
-          //   actionTitle="Return to game"
-          // />
-        // );
+      // <AcknowledgeX
+      //   title="Funding successful"
+      //   action={fundingSuccessAcknowledged}
+      //   description="You have successfully deposited funds into your channel"
+      //   actionTitle="Return to game"
+      // />
+      // );
       case states.ACKNOWLEDGE_FUNDING_DECLINED:
         return (<AcknowledgeX
           title="Funding declined!"
@@ -145,9 +130,9 @@ class FundingContainer extends PureComponent<Props> {
         />);
       case states.SEND_FUNDING_DECLINED_MESSAGE:
         return null;
-      case states.DEPLOY_TRANSACTION_FAILED:
-        return <TransactionFailed name="deploy" retryAction={retryTransactionAction} />;
-      case states.DEPOSIT_TRANSACTION_FAILED:
+      case states.A_DEPOSIT_TRANSACTION_FAILED:
+        return <TransactionFailed name="deposit" retryAction={retryTransactionAction} />;
+      case states.B_DEPOSIT_TRANSACTION_FAILED:
         return <TransactionFailed name="deposit" retryAction={retryTransactionAction} />;
       default:
         return unreachable(state);

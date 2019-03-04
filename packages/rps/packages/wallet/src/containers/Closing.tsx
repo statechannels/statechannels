@@ -72,10 +72,10 @@ class ClosingContainer extends PureComponent<Props> {
         //   />
         // );
         return <ClosingStep step={4}>
-        <Button onClick={closeSuccessAcknowledged} >
-        {"Return to app"}
-        </Button>
-      </ClosingStep>;
+          <Button onClick={closeSuccessAcknowledged} >
+            {"Return to app"}
+          </Button>
+        </ClosingStep>;
       case states.ACKNOWLEDGE_CLOSED_ON_CHAIN:
         return (
           <AcknowledgeX
@@ -87,21 +87,19 @@ class ClosingContainer extends PureComponent<Props> {
         );
       case states.WAIT_FOR_CLOSE_INITIATION:
         // return <WaitForXInitiation name="close" />;
-        return <ClosingStep step={1}/>;
+        return <ClosingStep step={1} />;
       case states.WAIT_FOR_CLOSE_SUBMISSION:
         // return <WaitForXInitiation name="close" />;
-        return <ClosingStep step={1}/>;
+        return <ClosingStep step={1} />;
       case states.WAIT_FOR_CLOSE_CONFIRMED:
         // return <WaitForXConfirmation name="close" transactionID={state.transactionHash} networkId={state.networkId} />;
         return <ClosingStep step={2}>Check the progress on&nbsp;
         <EtherscanLink
-          transactionID={state.transactionHash}
-          networkId={state.networkId}
-          title="Etherscan"
-        />!
+            transactionID={state.transactionHash}
+            networkId={state.networkId}
+            title="Etherscan"
+          />!
         </ClosingStep>;
-      case states.WAIT_FOR_OPPONENT_CLOSE:
-        return <WaitForOtherPlayer name="close" />;
       case states.ACKNOWLEDGE_CONCLUDE:
         return (
           <AcknowledgeX

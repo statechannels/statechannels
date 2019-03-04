@@ -3,7 +3,7 @@ import { call, put, select } from 'redux-saga/effects';
 import { default as firebase, reduxSagaFirebase } from '../../../gateways/firebase';
 import ChannelWallet from '../../domain/ChannelWallet';
 import { keysLoaded, metamaskLoadError } from '../actions';
-import { getProvider } from '../../utils/contract-utils';
+import { getProvider, getAdjudicatorContractAddress } from '../../utils/contract-utils';
 import { ethers } from 'ethers';
 import { WAIT_FOR_ADDRESS, WalletState } from '../../states';
 
@@ -25,12 +25,13 @@ export function* keyLoader() {
     wallet = yield* fetchWallet(uid);
   }
   if (typeof web3 === 'undefined') {
-  yield put(metamaskLoadError());
+    yield put(metamaskLoadError());
   } else {
-      const provider: ethers.providers.BaseProvider = yield call(getProvider);
-      const network = yield provider.getNetwork();
-      yield put(keysLoaded(wallet.address, wallet.privateKey, network.chainId));
-    }
+    const provider: ethers.providers.BaseProvider = yield call(getProvider);
+    const network = yield provider.getNetwork();
+    const adjudicator = yield getAdjudicatorContractAddress(provider);
+    yield put(keysLoaded(wallet.address, wallet.privateKey, network.chainId, adjudicator));
+  }
 }
 
 const walletTransformer = (data: any) =>

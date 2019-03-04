@@ -1,18 +1,18 @@
 import { fork, take, call, put, select, actionChannel } from 'redux-saga/effects';
 import { buffers, eventChannel } from 'redux-saga';
-
 import { reduxSagaFirebase } from '../../gateways/firebase';
 
-import { encode, decode, Player, positions } from '../../core';
+import { Player, } from '../../core';
 import * as gameActions from '../game/actions';
 import * as appActions from '../global/actions';
 import { MessageState, WalletMessage } from './state';
 import * as gameStates from '../game/state';
-import { Channel } from 'fmg-core';
 import { getMessageState, getGameState } from '../store';
 import * as Wallet from 'magmo-wallet-client';
-import hexToBN from '../../utils/hexToBN';
 import { WALLET_IFRAME_ID } from '../../constants';
+import { channelID } from 'fmg-core/lib/channel';
+import { RPSCommitment, asCoreCommitment, fromCoreCommitment, PRE_FUND_SETUP_A } from '../../core/rps-commitment';
+import { ChallengeCommitmentReceived, FundingResponse } from 'magmo-wallet-client';
 
 export enum Queue {
   WALLET = 'WALLET',
@@ -54,12 +54,12 @@ export function* sendMessagesSaga() {
   // We need to use an actionChannel to queue up actions that
   // might be put from this saga
   const channel = yield actionChannel([
-    gameActions.CHOOSE_MOVE,
+    gameActions.CHOOSE_WEAPON,
     gameActions.CONFIRM_GAME,
     gameActions.CREATE_OPEN_GAME,
-    gameActions.INITIAL_POSITION_RECEIVED,
+    gameActions.INITIAL_COMMITMENT_RECEIVED,
     gameActions.PLAY_AGAIN,
-    gameActions.POSITION_RECEIVED,
+    gameActions.COMMITMENT_RECEIVED,
     gameActions.FUNDING_SUCCESS,
     gameActions.JOIN_OPEN_GAME,
     gameActions.RESIGN,
@@ -72,7 +72,7 @@ export function* sendMessagesSaga() {
     const gameState: gameStates.GameState = yield select(getGameState);
     if (messageState.opponentOutbox) {
       const queue = Queue.GAME_ENGINE;
-      const data = encode(messageState.opponentOutbox.position);
+      const data = messageState.opponentOutbox.commitment;
       const signature = yield signMessage(data);
       const userName = gameState.name !== gameStates.StateName.NoName ? gameState.myName : "";
       const message = { data, queue, signature, userName };
@@ -131,11 +131,12 @@ function* receiveFromFirebaseSaga(address) {
       if (!validMessage) {
         // TODO: Handle this
       }
-      const position = decode(data);
-      if (position.name === positions.PRE_FUND_SETUP_A) {
-        yield put(gameActions.initialPositionReceived(position, userName ? userName : 'Opponent'));
+
+      const commitment = data;
+      if (commitment.commitmentName === PRE_FUND_SETUP_A) {
+        yield put(gameActions.initialCommitmentReceived(commitment, userName ? userName : 'Opponent'));
       } else {
-        yield put(gameActions.positionReceived(position));
+        yield put(gameActions.commitmentReceived(commitment));
       }
     } else {
 
@@ -165,16 +166,16 @@ function createWalletEventChannel(walletEventTypes: Wallet.WalletEventType[]) {
 
 function* handleWalletMessage(walletMessage: WalletMessage, state: gameStates.PlayingState) {
 
-  const { libraryAddress, channelNonce, player, balances, participants } = state;
-  const channel = new Channel(libraryAddress, channelNonce, participants);
-  const channelId = channel.id;
+  const { channel, player, allocation: balances, destination: participants } = state;
+
+  const channelId = channelID(channel);
 
   switch (walletMessage.type) {
     case "RESPOND_TO_CHALLENGE":
-      if (state.name === gameStates.StateName.WaitForOpponentToPickMoveA ||
+      if (state.name === gameStates.StateName.WaitForOpponentToPickWeaponA ||
         state.name === gameStates.StateName.WaitForRevealB ||
-        state.name === gameStates.StateName.PickMove) {
-        Wallet.respondToOngoingChallenge(WALLET_IFRAME_ID, encode(walletMessage.data));
+        state.name === gameStates.StateName.PickWeapon) {
+        Wallet.respondToOngoingChallenge(WALLET_IFRAME_ID, asCoreCommitment(walletMessage.data));
         yield put(gameActions.messageSent());
         const challengeCompleteChannel = createWalletEventChannel([Wallet.CHALLENGE_COMPLETE]);
         yield take(challengeCompleteChannel);
@@ -187,12 +188,10 @@ function* handleWalletMessage(walletMessage: WalletMessage, state: gameStates.Pl
 
       const opponentAddress = participants[1 - myIndex];
       const myAddress = participants[myIndex];
-      const myBalance = hexToBN(balances[myIndex]);
-      const opponentBalance = hexToBN(balances[1 - myIndex]);
       const fundingChannel = createWalletEventChannel([Wallet.FUNDING_SUCCESS, Wallet.FUNDING_FAILURE]);
 
-      Wallet.startFunding(WALLET_IFRAME_ID, channelId, myAddress, opponentAddress, myBalance, opponentBalance, myIndex);
-      const fundingResponse = yield take(fundingChannel);
+      Wallet.startFunding(WALLET_IFRAME_ID, channelId, myAddress, opponentAddress, balances[myIndex], balances[1 - myIndex], myIndex);
+      const fundingResponse: FundingResponse = yield take(fundingChannel);
       if (fundingResponse.type === Wallet.FUNDING_FAILURE) {
         if (fundingResponse.reason === 'FundingDeclined') {
           yield put(gameActions.exitToLobby());
@@ -201,8 +200,8 @@ function* handleWalletMessage(walletMessage: WalletMessage, state: gameStates.Pl
         }
       } else {
         yield put(gameActions.messageSent());
-        const position = decode(fundingResponse.position);
-        yield put(gameActions.fundingSuccess(position));
+        const commitment = fromCoreCommitment(fundingResponse.commitment);
+        yield put(gameActions.fundingSuccess(commitment));
       }
       break;
     case "CONCLUDE_REQUESTED":
@@ -260,37 +259,37 @@ function* recieveDisplayEventFromWalletSaga() {
 }
 
 function* receiveChallengePositionFromWalletSaga() {
-  const challengeChannel = createWalletEventChannel([Wallet.CHALLENGE_POSITION_RECEIVED]);
+  const challengeChannel = createWalletEventChannel([Wallet.CHALLENGE_COMMITMENT_RECEIVED]); // TODO change to CHALLENGE_COMMITMENT_RECEIVED
   while (true) {
-    const { positionData } = yield take(challengeChannel);
-    const position = decode(positionData);
-    yield put(gameActions.positionReceived(position));
+    const challengeCommitmentReceived: ChallengeCommitmentReceived = yield take(challengeChannel);
+    const commitment = fromCoreCommitment(challengeCommitmentReceived.commitment);
+    yield put(gameActions.commitmentReceived(commitment));
   }
 }
 
 
-function* validateMessage(data, signature) {
+function* validateMessage(commitment: RPSCommitment, signature) {
   try {
-    return yield Wallet.validateSignature(WALLET_IFRAME_ID, data, signature);
+    return yield Wallet.validateCommitmentSignature(WALLET_IFRAME_ID, asCoreCommitment(commitment), signature);
   } catch (err) {
     if (err.reason === 'WalletBusy') {
       const challengeChannel = createWalletEventChannel([Wallet.CHALLENGE_COMPLETE]);
       yield take(challengeChannel);
-      return yield Wallet.validateSignature(WALLET_IFRAME_ID, data, signature);
+      return yield Wallet.validateCommitmentSignature(WALLET_IFRAME_ID, asCoreCommitment(commitment), signature);
     } else {
       throw new Error(err.error);
     }
   }
 }
 
-function* signMessage(data) {
+function* signMessage(commitment: RPSCommitment) {
   try {
-    return yield Wallet.signData(WALLET_IFRAME_ID, data);
+    return yield Wallet.signCommitment(WALLET_IFRAME_ID, asCoreCommitment(commitment));
   } catch (err) {
     if (err.reason === 'WalletBusy') {
       const challengeChannel = createWalletEventChannel([Wallet.CHALLENGE_COMPLETE]);
       yield take(challengeChannel);
-      return yield Wallet.signData(WALLET_IFRAME_ID, data);
+      return yield Wallet.signCommitment(WALLET_IFRAME_ID, asCoreCommitment(commitment));
     } else {
       throw new Error(err.error);
     }

@@ -1,5 +1,5 @@
 import { Player } from '../players';
-import { Move } from '../moves';
+import { Weapon }  from '../weapons';
 import {
   Result,
   calculateResult,
@@ -8,54 +8,54 @@ import {
   convertToRelativeResult,
 } from '../results';
 
-function testOutcome(yourMove: Move, theirMove: Move, expectedResult: Result) {
-  describe(`When you play ${Move[yourMove]} and they play ${Move[theirMove]}`, () => {
-    const relativeResultFromMoves = calculateResult(yourMove, theirMove);
+function testOutcome(yourWeapon: Weapon, theirWeapon: Weapon, expectedResult: Result) {
+  describe(`When you play ${Weapon[yourWeapon]} and they play ${Weapon[theirWeapon]}`, () => {
+    const relativeResultFromWeapons = calculateResult(yourWeapon, theirWeapon);
 
     it(`result gives ${Result[expectedResult]}`, () => {
-      expect(relativeResultFromMoves).toEqual(expectedResult);
+      expect(relativeResultFromWeapons).toEqual(expectedResult);
     });
 
     describe('when you are player A', () => {
-      const absoluteResultFromMoves = calculateAbsoluteResult(yourMove, theirMove);
+      const absoluteResultFromWeapons = calculateAbsoluteResult(yourWeapon, theirWeapon);
 
-      const relativeResultFromAbsolute = convertToRelativeResult(absoluteResultFromMoves, Player.PlayerA);
-      const absoluteResultFromRelative = convertToAbsoluteResult(relativeResultFromMoves, Player.PlayerA);
+      const relativeResultFromAbsolute = convertToRelativeResult(absoluteResultFromWeapons, Player.PlayerA);
+      const absoluteResultFromRelative = convertToAbsoluteResult(relativeResultFromWeapons, Player.PlayerA);
 
       it('relativeResult is consistent with calculateAbsoluteResult', () => {
-        expect(relativeResultFromMoves).toEqual(relativeResultFromAbsolute);
+        expect(relativeResultFromWeapons).toEqual(relativeResultFromAbsolute);
       });
 
       it('absoluteResult is consistent with calculateResult', () => {
-        expect(absoluteResultFromRelative).toEqual(absoluteResultFromMoves);
+        expect(absoluteResultFromRelative).toEqual(absoluteResultFromWeapons);
       });
     });
 
     describe('when you are player A', () => {
-      const absoluteResultFromMoves = calculateAbsoluteResult(theirMove, yourMove);
+      const absoluteResultFromWeapons = calculateAbsoluteResult(theirWeapon, yourWeapon);
 
-      const relativeResultFromAbsolute = convertToRelativeResult(absoluteResultFromMoves, Player.PlayerB);
-      const absoluteResultFromRelative = convertToAbsoluteResult(relativeResultFromMoves, Player.PlayerB);
+      const relativeResultFromAbsolute = convertToRelativeResult(absoluteResultFromWeapons, Player.PlayerB);
+      const absoluteResultFromRelative = convertToAbsoluteResult(relativeResultFromWeapons, Player.PlayerB);
 
       it('relativeResult is consistent with calculateAbsoluteResult', () => {
-        expect(relativeResultFromMoves).toEqual(relativeResultFromAbsolute);
+        expect(relativeResultFromWeapons).toEqual(relativeResultFromAbsolute);
       });
 
       it('absoluteResult is consistent with calculateResult', () => {
-        expect(absoluteResultFromRelative).toEqual(absoluteResultFromMoves);
+        expect(absoluteResultFromRelative).toEqual(absoluteResultFromWeapons);
       });
     });
   });
 }
 
 describe('result', () => {
-  testOutcome(Move.Rock, Move.Rock, Result.Tie);
-  testOutcome(Move.Rock, Move.Paper, Result.YouLose);
-  testOutcome(Move.Rock, Move.Scissors, Result.YouWin);
-  testOutcome(Move.Paper, Move.Rock, Result.YouWin);
-  testOutcome(Move.Paper, Move.Paper, Result.Tie);
-  testOutcome(Move.Paper, Move.Scissors, Result.YouLose);
-  testOutcome(Move.Scissors, Move.Rock, Result.YouLose);
-  testOutcome(Move.Scissors, Move.Paper, Result.YouWin);
-  testOutcome(Move.Scissors, Move.Scissors, Result.Tie);
+  testOutcome(Weapon.Rock, Weapon.Rock, Result.Tie);
+  testOutcome(Weapon.Rock, Weapon.Paper, Result.YouLose);
+  testOutcome(Weapon.Rock, Weapon.Scissors, Result.YouWin);
+  testOutcome(Weapon.Paper, Weapon.Rock, Result.YouWin);
+  testOutcome(Weapon.Paper, Weapon.Paper, Result.Tie);
+  testOutcome(Weapon.Paper, Weapon.Scissors, Result.YouLose);
+  testOutcome(Weapon.Scissors, Weapon.Rock, Result.YouLose);
+  testOutcome(Weapon.Scissors, Weapon.Paper, Result.YouWin);
+  testOutcome(Weapon.Scissors, Weapon.Scissors, Result.Tie);
 });

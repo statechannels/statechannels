@@ -1,17 +1,17 @@
-var State = artifacts.require("fmg-core/contracts/State.sol");
+var Commitment = artifacts.require("fmg-core/contracts/Commitment.sol");
 var Rules = artifacts.require("fmg-core/contracts/Rules.sol");
 var TestGame = artifacts.require('../contracts/TestGame.sol')
-var SimpleAdjudicator = artifacts.require("fmg-simple-adjudicator/contracts/SimpleAdjudicator.sol");
+var NitroAdjudicator = artifacts.require("fmg-nitro-adjudicator/contracts/NitroAdjudicator");
 
 module.exports = function (deployer) {
-  deployer.deploy(State);
+  deployer.deploy(Commitment);
 
-  deployer.link(State, Rules);
+  deployer.link(Commitment, Rules);
   deployer.deploy(Rules);
   // TODO: We should only deploy this when testing
   deployer.deploy(TestGame);
-  // Linking these without deploying doesn't seem to update the bytecode
-  // so we probably don't have to bother doing it.
-  deployer.link(State, SimpleAdjudicator);
-  deployer.link(Rules, SimpleAdjudicator);
+
+  deployer.link(Commitment, NitroAdjudicator);
+  deployer.link(Rules, NitroAdjudicator);
+  deployer.deploy(NitroAdjudicator);
 };

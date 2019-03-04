@@ -43,7 +43,7 @@ class WithdrawingContainer extends PureComponent<Props> {
         );
       case states.WAIT_FOR_WITHDRAWAL_INITIATION:
         // return <WaitForXInitiation name="withdrawal" />;
-        return <WithdrawingStep step={1}/>;
+        return <WithdrawingStep step={1}> Please confirm the transaction in MetaMask!</WithdrawingStep>;
       case states.WAIT_FOR_WITHDRAWAL_CONFIRMATION:
         // return <WaitForXConfirmation name="withdrawal" transactionID={state.transactionHash} networkId={state.networkId} />;
         return <WithdrawingStep step={2}>Check the progress on&nbsp;

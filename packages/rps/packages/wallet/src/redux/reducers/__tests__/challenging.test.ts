@@ -5,20 +5,18 @@ import * as actions from '../../actions';
 import { itSendsATransaction, itTransitionsToStateType, itDoesntTransition } from './helpers';
 import * as TransactionGenerator from '../../../utils/transaction-generator';
 import { hideWallet, challengeComplete } from 'magmo-wallet-client';
-import BN from "bn.js";
-import bnToHex from "../../../utils/bnToHex";
+import { bigNumberify } from 'ethers/utils';
+
 
 const {
   asPrivateKey,
-  acceptHex,
-  acceptSig,
-  proposeHex,
-  proposeSig,
   participants,
   channelId,
   channelNonce,
   libraryAddress,
-} = scenarios.standard;
+  gameCommitment1,
+  gameCommitment2,
+} = scenarios;
 
 const defaults = {
   uid: 'uid',
@@ -26,9 +24,9 @@ const defaults = {
   libraryAddress,
   channelId,
   channelNonce,
-  lastPosition: { data: acceptHex, signature: acceptSig },
-  penultimatePosition: { data: proposeHex, signature: proposeSig },
-  turnNum: 6,
+  lastCommitment: { commitment: gameCommitment1, signature: 'sig' },
+  penultimateCommitment: { commitment: gameCommitment2, signature: 'sig' },
+  turnNum: gameCommitment2.turnNum,
   adjudicator: 'adj-address',
   ourIndex: 0,
   address: 'address',
@@ -36,14 +34,15 @@ const defaults = {
   networkId: 2323,
   challengeExpiry: 1,
   transactionHash: '0x0',
-  requestedTotalFunds: bnToHex(new BN(1000000000000000)),
-  requestedYourDeposit: bnToHex(new BN(500000000000000)),
+  requestedTotalFunds: bigNumberify(1000000000000000).toHexString(),
+  requestedYourDeposit: bigNumberify(500000000000000).toHexString(),
 };
-
 
 describe('when in APPROVE_CHALLENGE', () => {
   const state = states.approveChallenge({ ...defaults });
   describe('when a challenge is approved', () => {
+    const createChallengeTxMock = jest.fn().mockReturnValue('0x0');
+    Object.defineProperty(TransactionGenerator, 'createForceMoveTransaction', { value: createChallengeTxMock });
     const action = actions.challengeApproved();
     const updatedState = walletReducer(state, action);
     itTransitionsToStateType(states.WAIT_FOR_CHALLENGE_INITIATION, updatedState);
@@ -118,7 +117,7 @@ describe('when in WAIT_FOR_RESPONSE_OR_TIMEOUT', () => {
   const state = states.waitForResponseOrTimeout({ ...defaults, challengeExpiry: 1, moveSelected: false, });
 
   describe('when the opponent responds', () => {
-    const action = actions.respondWithMoveEvent('0xC1');
+    const action = actions.respondWithMoveEvent('0x0', '0xC1');
     const updatedState = walletReducer(state, action);
 
     itTransitionsToStateType(states.ACKNOWLEDGE_CHALLENGE_RESPONSE, updatedState);

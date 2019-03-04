@@ -1,12 +1,12 @@
 import * as React from 'react';
 
-import { Move, Result } from '../core';
-import { MoveBadge } from './MoveBadge';
+import { Weapon, Result } from '../core';
+import { WeaponBadge } from './WeaponBadge';
 import { GameLayout } from './GameLayout';
 
 interface Props {
-  yourMove: Move;
-  theirMove: Move;
+  yourWeapon: Weapon;
+  theirWeapon: Weapon;
   result: Result;
   playAgain: () => void;
 }
@@ -28,7 +28,7 @@ export default class WaitForRestingA extends React.PureComponent<Props> {
   }
 
   render() {
-    const { yourMove, theirMove } = this.props;
+    const { yourWeapon, theirWeapon } = this.props;
 
     return (
       <GameLayout>
@@ -37,18 +37,18 @@ export default class WaitForRestingA extends React.PureComponent<Props> {
           <div className="row">
             <div className="col-sm-6">
               <p className="lead">
-                You chose <strong>{Move[yourMove]}</strong>
+                You chose <strong>{Weapon[yourWeapon]}</strong>
               </p>
               <div>
-                <MoveBadge move={yourMove} />
+                <WeaponBadge move={yourWeapon} />
               </div>
             </div>
             <div className="col-sm-6">
               <p className="lead">
-                Your opponent chose <strong>{Move[theirMove]}</strong>
+                Your opponent chose <strong>{Weapon[theirWeapon]}</strong>
               </p>
               <div>
-                <MoveBadge move={theirMove} />
+                <WeaponBadge move={theirWeapon} />
               </div>
             </div>
           </div>

@@ -1,42 +1,45 @@
-import BN from "bn.js";
-import { Move } from './moves';
-import { Result } from './results';
-import * as positions from './positions';
-import { randomHex } from "../utils/randomHex";
-import bnToHex from "../utils/bnToHex";
-import { Channel } from "fmg-core";
 
-const libraryAddress = '0x' + '1'.repeat(40);
+import { Result } from './results';
+import * as commitmentHelper from './rps-commitment-helper';
+import { randomHex } from "../utils/randomHex";
+import { Weapon } from './rps-commitment';
+import { bigNumberify } from 'ethers/utils';
+import { Channel } from 'fmg-core';
+
+export const libraryAddress = '0x' + '1'.repeat(40);
 const channelNonce = 4;
 const asPrivateKey = '0xf2f48ee19680706196e2e339e5da3491186e0c4c5030670656b0e0164837257d';
 const asAddress = '0x5409ED021D9299bf6814279A6A1411A7e866A631';
 const bsPrivateKey = '0x5d862464fe9303452126c8bc94274b8c5f9874cbd219789b3eb2128075a76f72';
 const bsAddress = '0x6Ecbe1DB9EF729CBe972C83Fb886247691Fb6beb';
 const participants: [string, string] = [asAddress, bsAddress];
-const roundBuyIn = bnToHex(new BN(1));
-const fiveFive = [new BN(5), new BN(5)].map(bnToHex) as [string, string];
-const sixFour = [new BN(6), new BN(4)].map(bnToHex) as [string, string];
-const fourSix = [new BN(4), new BN(6)].map(bnToHex) as [string, string];
-const nineOne = [new BN(9), new BN(1)].map(bnToHex) as [string, string];
-const eightTwo = [new BN(8), new BN(2)].map(bnToHex) as [string, string];
-const tenZero = [new BN(10), new BN(0)].map(bnToHex) as [string, string];
-const asMove = Move.Rock;
+const roundBuyIn = bigNumberify(1).toHexString();
+const fiveFive = [bigNumberify(5).toHexString(), bigNumberify(5).toHexString()] as [string, string];
+const sixFour = [bigNumberify(6).toHexString(), bigNumberify(4).toHexString()] as [string, string];
+const fourSix = [bigNumberify(4).toHexString(), bigNumberify(6).toHexString()] as [string, string];
+const nineOne = [bigNumberify(9).toHexString(), bigNumberify(1).toHexString()] as [string, string];
+const eightTwo = [bigNumberify(8).toHexString(), bigNumberify(2).toHexString()] as [string, string];
+const tenZero = [bigNumberify(10).toHexString(), bigNumberify(0).toHexString()] as [string, string];
+const aWeapon = Weapon.Rock;
 const salt = randomHex(64);
-const preCommit = positions.hashCommitment(asMove, salt);
-const bsMove = Move.Scissors;
+const preCommit = commitmentHelper.hashCommitment(aWeapon, salt);
+const bWeapon = Weapon.Scissors;
 
-const channelId = new Channel(libraryAddress, channelNonce, participants).id;
+const channel: Channel = { channelType: libraryAddress, nonce: channelNonce, participants };
 
 const base = {
-  channelId,
-  libraryAddress,
-  channelNonce,
-  participants,
+  channel,
+  destination: participants,
+  commitmentCount: 0,
+};
+
+const baseWithBuyIn = {
+  ...base,
   roundBuyIn,
 };
 
 export const shared = {
-  ...base,
+  ...baseWithBuyIn,
   asAddress,
   twitterHandle: "twtr",
   bsAddress,
@@ -48,19 +51,19 @@ export const shared = {
 
 export const standard = {
   ...shared,
-  preFundSetupA: positions.preFundSetupA({ ...base, turnNum: 0, balances: fiveFive, stateCount: 0 }),
-  preFundSetupB: positions.preFundSetupB({ ...base, turnNum: 1, balances: fiveFive, stateCount: 1 }),
-  postFundSetupA: positions.postFundSetupA({ ...base, turnNum: 2, balances: fiveFive, stateCount: 0 }),
-  postFundSetupB: positions.postFundSetupB({ ...base, turnNum: 3, balances: fiveFive, stateCount: 1 }),
-  asMove,
+  preFundSetupA: commitmentHelper.preFundSetupA({ ...baseWithBuyIn, turnNum: 0, allocation: fiveFive, commitmentCount: 0 }),
+  preFundSetupB: commitmentHelper.preFundSetupB({ ...baseWithBuyIn, turnNum: 1, allocation: fiveFive, commitmentCount: 1 }),
+  postFundSetupA: commitmentHelper.postFundSetupA({ ...baseWithBuyIn, turnNum: 2, allocation: fiveFive, commitmentCount: 0 }),
+  postFundSetupB: commitmentHelper.postFundSetupB({ ...baseWithBuyIn, turnNum: 3, allocation: fiveFive, commitmentCount: 1 }),
+  aWeapon,
   salt,
   preCommit,
-  bsMove,
+  bWeapon,
   aResult: Result.YouWin,
   bResult: Result.YouLose,
-  propose: positions.proposeFromSalt({ ...base, turnNum: 4, balances: fiveFive, asMove, salt }),
-  accept: positions.accept({ ...base, turnNum: 5, balances: fourSix, preCommit, bsMove }),
-  reveal: positions.reveal({ ...base, turnNum: 6, balances: sixFour, bsMove, asMove, salt }),
+  propose: commitmentHelper.proposeFromSalt({ ...baseWithBuyIn, turnNum: 4, allocation: fiveFive, aWeapon, salt }),
+  accept: commitmentHelper.accept({ ...baseWithBuyIn, turnNum: 5, allocation: fourSix, preCommit, bWeapon }),
+  reveal: commitmentHelper.reveal({ ...baseWithBuyIn, turnNum: 6, allocation: sixFour, bWeapon, aWeapon, salt }),
 
   preFundSetupAHex: '0x0000000000000000000000001111111111111111111111111111111111111111000000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000020000000000000000000000005409ED021D9299bf6814279A6A1411A7e866A6310000000000000000000000006Ecbe1DB9EF729CBe972C83Fb886247691Fb6beb0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000005000000000000000000000000000000000000000000000000000000000000000500000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001',
   preFundSetupASig: '0xe08144da0aa0a49be55e6ace7143702be8f4929559af6f3f7e7530912785c1aa173f9bb2c013e86c2a5a40b225adbb07891ccb613a921396a2f2478741dbf3611c',
@@ -80,9 +83,9 @@ export const standard = {
 
 export const aResignsAfterOneRound = {
   ...standard,
-  resting: positions.resting({ ...base, turnNum: 7, balances: sixFour }),
-  conclude: positions.conclude({ ...base, turnNum: 8, balances: sixFour }),
-  conclude2: positions.conclude({ ...base, turnNum: 9, balances: sixFour }),
+  resting: commitmentHelper.resting({ ...baseWithBuyIn, turnNum: 7, allocation: sixFour }),
+  conclude: commitmentHelper.conclude({ ...base, turnNum: 8, allocation: sixFour }),
+  conclude2: commitmentHelper.conclude({ ...base, turnNum: 9, allocation: sixFour }),
   restingHex: '0x0000000000000000000000001111111111111111111111111111111111111111000000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000020000000000000000000000005409ED021D9299bf6814279A6A1411A7e866A6310000000000000000000000006Ecbe1DB9EF729CBe972C83Fb886247691Fb6beb0000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000700000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000006000000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001',
   restingSig: '0xaad2107ef36e03cbbd94123937ee73f3fea31ea36d4f15467656a67a32c09e844ea3cb51830619eb38c3ed944f645afcbab422bf2a13c9516e63b27210c5ea1d1c',
   concludeHex: '0x0000000000000000000000001111111111111111111111111111111111111111000000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000020000000000000000000000005409ED021D9299bf6814279A6A1411A7e866A6310000000000000000000000006Ecbe1DB9EF729CBe972C83Fb886247691Fb6beb00000000000000000000000000000000000000000000000000000000000000030000000000000000000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000060000000000000000000000000000000000000000000000000000000000000004',
@@ -92,24 +95,24 @@ export const aResignsAfterOneRound = {
 
 export const bResignsAfterOneRound = {
   ...standard,
-  conclude: positions.conclude({ ...base, turnNum: 7, balances: sixFour }),
+  conclude: commitmentHelper.conclude({ ...base, turnNum: 7, allocation: sixFour }),
   concludeHex: '0x0000000000000000000000001111111111111111111111111111111111111111000000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000020000000000000000000000005409ED021D9299bf6814279A6A1411A7e866A6310000000000000000000000006Ecbe1DB9EF729CBe972C83Fb886247691Fb6beb00000000000000000000000000000000000000000000000000000000000000030000000000000000000000000000000000000000000000000000000000000007000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000060000000000000000000000000000000000000000000000000000000000000004',
   concludeSig: '0xee40164052e7f409acd840ac099eee45ec233e068fb5b883e6871ea6d1e3b1516c7b4f7b587844b87ec20191daf2f891b81758db23481b2777bae653748efbf61b',
-  conclude2: positions.conclude({ ...base, turnNum: 8, balances: sixFour }),
+  conclude2: commitmentHelper.conclude({ ...base, turnNum: 8, allocation: sixFour }),
 };
 
 export const insufficientFunds = {
-  preFundSetupA: positions.preFundSetupB({ ...base, turnNum: 0, balances: nineOne, stateCount: 0 }),
-  preFundSetupB: positions.preFundSetupB({ ...base, turnNum: 1, balances: nineOne, stateCount: 1 }),
-  postFundSetupA: positions.postFundSetupA({ ...base, turnNum: 2, balances: nineOne, stateCount: 0 }),
-  postFundSetupB: positions.postFundSetupB({ ...base, turnNum: 3, balances: nineOne, stateCount: 1 }),
-  asMove,
-  bsMove,
-  propose: positions.proposeFromSalt({ ...base, turnNum: 4, balances: nineOne, asMove, salt }),
-  accept: positions.accept({ ...base, turnNum: 5, balances: eightTwo, preCommit, bsMove }),
-  reveal: positions.reveal({ ...base, turnNum: 6, balances: tenZero, bsMove, asMove, salt }),
-  conclude: positions.conclude({ ...base, turnNum: 7, balances: tenZero }),
-  conclude2: positions.conclude({ ...base, turnNum: 8, balances: tenZero }),
+  preFundSetupA: commitmentHelper.preFundSetupB({ ...baseWithBuyIn, turnNum: 0, allocation: nineOne, commitmentCount: 0 }),
+  preFundSetupB: commitmentHelper.preFundSetupB({ ...baseWithBuyIn, turnNum: 1, allocation: nineOne, commitmentCount: 1 }),
+  postFundSetupA: commitmentHelper.postFundSetupA({ ...baseWithBuyIn, turnNum: 2, allocation: nineOne, commitmentCount: 0 }),
+  postFundSetupB: commitmentHelper.postFundSetupB({ ...baseWithBuyIn, turnNum: 3, allocation: nineOne, commitmentCount: 1 }),
+  aWeapon,
+  bWeapon,
+  propose: commitmentHelper.proposeFromSalt({ ...baseWithBuyIn, turnNum: 4, allocation: nineOne, aWeapon, salt }),
+  accept: commitmentHelper.accept({ ...baseWithBuyIn, turnNum: 5, allocation: eightTwo, preCommit, bWeapon }),
+  reveal: commitmentHelper.reveal({ ...baseWithBuyIn, turnNum: 6, allocation: tenZero, bWeapon, aWeapon, salt }),
+  conclude: commitmentHelper.conclude({ ...base, turnNum: 7, allocation: tenZero }),
+  conclude2: commitmentHelper.conclude({ ...base, turnNum: 8, allocation: tenZero }),
 };
 
 export function build(customLibraryAddress: string, customAsAddress: string, customBsAddress: string) {
@@ -131,19 +134,19 @@ export function build(customLibraryAddress: string, customAsAddress: string, cus
 
   return {
     ...customShared,
-    preFundSetupA: positions.preFundSetupA({ ...base, turnNum: 0, balances: fiveFive, stateCount: 0 }),
-    preFundSetupB: positions.preFundSetupB({ ...base, turnNum: 1, balances: fiveFive, stateCount: 1 }),
-    postFundSetupA: positions.postFundSetupA({ ...base, turnNum: 2, balances: fiveFive, stateCount: 0 }),
-    postFundSetupB: positions.postFundSetupB({ ...base, turnNum: 3, balances: fiveFive, stateCount: 1 }),
-    asMove,
+    preFundSetupA: commitmentHelper.preFundSetupA({ ...baseWithBuyIn, turnNum: 0, allocation: fiveFive, commitmentCount: 0 }),
+    preFundSetupB: commitmentHelper.preFundSetupB({ ...baseWithBuyIn, turnNum: 1, allocation: fiveFive, commitmentCount: 1 }),
+    postFundSetupA: commitmentHelper.postFundSetupA({ ...baseWithBuyIn, turnNum: 2, allocation: fiveFive, commitmentCount: 0 }),
+    postFundSetupB: commitmentHelper.postFundSetupB({ ...baseWithBuyIn, turnNum: 3, allocation: fiveFive, commitmentCount: 1 }),
+    aWeapon,
     salt,
     preCommit,
-    bsMove,
+    bWeapon,
     aResult: Result.YouWin,
     bResult: Result.YouLose,
-    propose: positions.proposeFromSalt({ ...base, turnNum: 4, balances: fiveFive, asMove, salt }),
-    accept: positions.accept({ ...base, turnNum: 5, balances: fourSix, preCommit, bsMove }),
-    reveal: positions.reveal({ ...base, turnNum: 6, balances: sixFour, bsMove, asMove, salt }),
-    resting: positions.resting({ ...base, turnNum: 7, balances: sixFour }),
+    propose: commitmentHelper.proposeFromSalt({ ...baseWithBuyIn, turnNum: 4, allocation: fiveFive, aWeapon, salt }),
+    accept: commitmentHelper.accept({ ...baseWithBuyIn, turnNum: 5, allocation: fourSix, preCommit, bWeapon }),
+    reveal: commitmentHelper.reveal({ ...baseWithBuyIn, turnNum: 6, allocation: sixFour, bWeapon, aWeapon, salt }),
+    resting: commitmentHelper.resting({ ...baseWithBuyIn, turnNum: 7, allocation: sixFour }),
   };
 }
