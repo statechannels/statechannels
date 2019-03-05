@@ -415,11 +415,6 @@ module.exports = function (webpackEnv) {
             resource.request = resource.request.replace(/.*\/build\/contracts/, paths.appPreBuiltContractArtifacts);
           }
         }),
-      new webpack.EnvironmentPlugin({
-        FIREBASE_PROJECT: isEnvProduction ? 'rock-paper-scissors123' : 'rock-paper-scissors-dev',
-        FIREBASE_API_KEY: isEnvProduction ? 'AIzaSyDulzMWkORgVPFwtxqQaTwOeNhOisGPtDs' : 'AIzaSyAlGe17xjJjfoJ_KDYjCREg7ZL4ns61Chc',
-        TARGET_NETWORK: process.env.TARGET_NETWORK,
-      }),
       // Generates an `index.html` file with the <script> injected.
       new HtmlWebpackPlugin(
         Object.assign({}, {

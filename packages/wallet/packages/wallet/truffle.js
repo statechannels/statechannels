@@ -39,7 +39,7 @@ module.exports = {
   },
   solc: {
     optimizer: {
-      enabled: true,
+      enabled: process.env.ENABLE_SOLC_OPTIMIZER === 'TRUE',
       runs: 200,
     },
   },

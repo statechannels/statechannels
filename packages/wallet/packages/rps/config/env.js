@@ -59,10 +59,14 @@ process.env.NODE_PATH = (process.env.NODE_PATH || '')
 // Grab NODE_ENV and REACT_APP_* environment variables and prepare them to be
 // injected into the application via DefinePlugin in Webpack configuration.
 const REACT_APP = /^REACT_APP_/i;
+// These are Magmo specific values that should be injected into the application
+const MAGMO_VALUES = ['TARGET_NETWORK', 'FIREBASE_PROJECT', 'FIREBASE_API_KEY', 'WALLET_URL'];
 
 function getClientEnvironment(publicUrl) {
   const raw = Object.keys(process.env)
-    .filter(key => REACT_APP.test(key))
+    .filter(key => {
+      return REACT_APP.test(key) || MAGMO_VALUES.indexOf(key) > -1
+    })
     .reduce(
       (env, key) => {
         env[key] = process.env[key];
@@ -76,6 +80,7 @@ function getClientEnvironment(publicUrl) {
         // This should only be used as an escape hatch. Normally you would put
         // images into the `src` and `import` them in code to get their paths.
         PUBLIC_URL: publicUrl,
+
         BUILD_VERSION: new Date(Date.now()).toISOString(),
       }
     );
@@ -88,7 +93,6 @@ function getClientEnvironment(publicUrl) {
       }, {}
     ),
   };
-
   return {
     raw,
     stringified
