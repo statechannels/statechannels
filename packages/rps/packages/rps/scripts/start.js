@@ -14,13 +14,6 @@ process.on('unhandledRejection', err => {
 // Ensure environment variables are read.
 require('../config/env');
 
-process.env.DEV_GANACHE_HOST = process.env.DEV_GANACHE_HOST || 'localhost';
-process.env.DEV_GANACHE_PORT = process.env.DEV_GANACHE_PORT || 8545;
-process.env.DEV_GANACHE_NETWORK_ID = process.env.DEV_GANACHE_NETWORK_ID || 5777;
-process.env.DEFAULT_GAS = process.env.DEFAULT_GAS || 6721975;
-process.env.DEFAULT_GAS_PRICE = process.env.DEFAULT_GAS_PRICE || 20000000000;
-// Default to the development network
-process.env.TARGET_NETWORK = process.env.TARGET_NETWORK || 'development';
 const fs = require('fs');
 const chalk = require('chalk');
 const webpack = require('webpack');
