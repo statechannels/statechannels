@@ -1,6 +1,6 @@
 import * as firebase from 'firebase/app';
-import "firebase/auth";
-import "firebase/database";
+import 'firebase/auth';
+import 'firebase/database';
 
 import ReduxSagaFirebase from 'redux-saga-firebase';
 
@@ -9,8 +9,8 @@ const config = {
   authDomain: `${process.env.FIREBASE_PROJECT}.firebaseapp.com`,
   databaseURL: `https://${process.env.FIREBASE_PROJECT}.firebaseio.com`,
   projectId: process.env.FIREBASE_PROJECT,
-  storageBucket: "",
-  messagingSenderId: "913007764573",
+  storageBucket: '',
+  messagingSenderId: '913007764573',
 };
 
 const fire = firebase.initializeApp(config);
@@ -18,4 +18,4 @@ export const reduxSagaFirebase = new ReduxSagaFirebase(fire);
 export const authProvider = new firebase.auth.GoogleAuthProvider();
 export default fire;
 
-export const  serverTimestamp = firebase.database.ServerValue.TIMESTAMP;
+export const serverTimestamp = firebase.database.ServerValue.TIMESTAMP;
