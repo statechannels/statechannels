@@ -1,4 +1,3 @@
-
 import { EventEmitter2 } from 'eventemitter2';
 import { WalletEventType, WalletEvent } from './wallet-events';
 
@@ -13,7 +12,6 @@ export class WalletEventListener {
     window.addEventListener('message', (event: MessageEvent) => {
       // TODO: Check where the message came from
       if (event.data && event.data.type && event.data.type.startsWith('WALLET.')) {
-
         this.eventEmitter.emit(event.data.type, event.data);
       }
     });
@@ -50,5 +48,4 @@ export class WalletEventListener {
   public subscribeAll(eventHandler: (event: WalletEvent) => void) {
     this.eventEmitter.onAny((eventType, event) => eventHandler(event));
   }
-
 }

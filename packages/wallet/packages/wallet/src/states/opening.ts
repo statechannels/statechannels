@@ -1,4 +1,4 @@
-import { AddressExists, addressExists, FirstMoveSent, firstMoveSent, } from './shared';
+import { AddressExists, addressExists, FirstMoveSent, firstMoveSent } from './shared';
 
 // stage
 export const OPENING = 'OPENING';
@@ -6,7 +6,6 @@ export const OPENING = 'OPENING';
 // state type
 export const WAIT_FOR_PRE_FUND_SETUP = 'WAIT_FOR_PRE_FUND_SETUP';
 export const WAIT_FOR_CHANNEL = 'WAIT_FOR_CHANNEL';
-
 
 export interface WaitForChannel extends AddressExists {
   type: typeof WAIT_FOR_CHANNEL;
@@ -24,7 +23,4 @@ export function waitForPreFundSetup<T extends FirstMoveSent>(params: T): WaitFor
   return { type: WAIT_FOR_PRE_FUND_SETUP, stage: OPENING, ...firstMoveSent(params) };
 }
 
-export type OpeningState = (
-  | WaitForChannel
-  | WaitForPreFundSetup
-);
+export type OpeningState = WaitForChannel | WaitForPreFundSetup;

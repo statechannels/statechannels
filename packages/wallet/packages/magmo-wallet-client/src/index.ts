@@ -1,5 +1,5 @@
 /**
- * @module 
+ * @module
  * The wallet client.
  */
 

@@ -1,8 +1,26 @@
-import { INITIALIZATION_SUCCESS, INITIALIZATION_FAILURE, SIGNATURE_FAILURE, SIGNATURE_SUCCESS, SignatureResponse, VALIDATION_SUCCESS, VALIDATION_FAILURE, ValidationResponse, SHOW_WALLET, HIDE_WALLET } from './wallet-events';
-import { concludeChannelRequest, initializeRequest, fundingRequest, signCommitmentRequest, validateCommitmentRequest, receiveMessage, createChallenge, respondToChallenge } from './messages-to-wallet';
+import {
+  INITIALIZATION_SUCCESS,
+  INITIALIZATION_FAILURE,
+  SIGNATURE_FAILURE,
+  SIGNATURE_SUCCESS,
+  SignatureResponse,
+  VALIDATION_SUCCESS,
+  VALIDATION_FAILURE,
+  ValidationResponse,
+  SHOW_WALLET,
+  HIDE_WALLET,
+} from './wallet-events';
+import {
+  concludeChannelRequest,
+  initializeRequest,
+  fundingRequest,
+  signCommitmentRequest,
+  validateCommitmentRequest,
+  receiveMessage,
+  createChallenge,
+  respondToChallenge,
+} from './messages-to-wallet';
 import { Commitment } from 'fmg-core';
-
-
 
 /**
  * Creates an iframe element for the wallet to be embedded in the page. The wallet iframe will hide itself and only show when interaction with the wallet is necessary.
@@ -12,7 +30,7 @@ import { Commitment } from 'fmg-core';
  */
 export function createWalletIFrame(iframeId: string, walletUrl?: string): HTMLIFrameElement {
   walletUrl = walletUrl || 'https://wallet.magmo.com';
-  const iFrame = document.createElement("iframe");
+  const iFrame = document.createElement('iframe');
   iFrame.src = walletUrl;
   iFrame.id = iframeId;
   iFrame.style.display = 'none';
@@ -30,23 +48,24 @@ export function createWalletIFrame(iframeId: string, walletUrl?: string): HTMLIF
   return iFrame;
 }
 
-
 /**
  * Initializes the wallet for a given user and provides a wallet address. This must be called before any other interaction with the wallet.
  * @param iFrameId The id of the embedded wallet iframe.
- * @param userId An id that is unique to the user who will be using the wallet. 
- * @returns {Promise<string>} A promise that resolves with a wallet address generated for that user. 
+ * @param userId An id that is unique to the user who will be using the wallet.
+ * @returns {Promise<string>} A promise that resolves with a wallet address generated for that user.
  */
 export async function initializeWallet(iFrameId: string, userId: string): Promise<string> {
   const iFrame = document.getElementById(iFrameId) as HTMLIFrameElement;
   const message = initializeRequest(userId);
 
   const initPromise = new Promise<string>((resolve, reject) => {
-    window.addEventListener("message", function eventListener(event: MessageEvent) {
-      if (event.data && event.data.type && (
-        event.data.type === INITIALIZATION_SUCCESS || event.data.type === INITIALIZATION_FAILURE)) {
-
-        window.removeEventListener("message", eventListener);
+    window.addEventListener('message', function eventListener(event: MessageEvent) {
+      if (
+        event.data &&
+        event.data.type &&
+        (event.data.type === INITIALIZATION_SUCCESS || event.data.type === INITIALIZATION_FAILURE)
+      ) {
+        window.removeEventListener('message', eventListener);
         if (event.data.type === INITIALIZATION_SUCCESS) {
           resolve(event.data.address);
         } else {
@@ -56,7 +75,7 @@ export async function initializeWallet(iFrameId: string, userId: string): Promis
     });
   });
 
-  iFrame.contentWindow.postMessage(message, "*");
+  iFrame.contentWindow.postMessage(message, '*');
   return initPromise;
 }
 
@@ -67,16 +86,23 @@ export async function initializeWallet(iFrameId: string, userId: string): Promis
  * @param signature The signature to validate.
  * @returns {Promise<Boolean>} A promise that resolves to whether the signature is valid for the data or not.
  */
-export async function validateCommitmentSignature(iFrameId: string, commitment: Commitment, signature: string): Promise<boolean> {
+export async function validateCommitmentSignature(
+  iFrameId: string,
+  commitment: Commitment,
+  signature: string,
+): Promise<boolean> {
   const iFrame = document.getElementById(iFrameId) as HTMLIFrameElement;
   const message = validateCommitmentRequest(commitment, signature);
 
   const validatePromise = new Promise<boolean>((resolve, reject) => {
-    window.addEventListener("message", function eventListener(event: MessageEvent) {
-      if (event.data && event.data.type &&
-        (event.data.type === VALIDATION_SUCCESS || event.data.type === VALIDATION_FAILURE)) {
+    window.addEventListener('message', function eventListener(event: MessageEvent) {
+      if (
+        event.data &&
+        event.data.type &&
+        (event.data.type === VALIDATION_SUCCESS || event.data.type === VALIDATION_FAILURE)
+      ) {
         const receivedMessage = event.data as ValidationResponse;
-        window.removeEventListener("message", eventListener);
+        window.removeEventListener('message', eventListener);
         if (receivedMessage.type === VALIDATION_SUCCESS) {
           resolve(true);
         } else {
@@ -87,7 +113,7 @@ export async function validateCommitmentSignature(iFrameId: string, commitment: 
     });
   });
 
-  iFrame.contentWindow.postMessage(message, "*");
+  iFrame.contentWindow.postMessage(message, '*');
   return validatePromise;
 }
 
@@ -102,11 +128,14 @@ export async function signCommitment(iFrameId: string, commitment: Commitment): 
   const message = signCommitmentRequest(commitment);
 
   const signPromise = new Promise<string>((resolve, reject) => {
-    window.addEventListener("message", function eventListener(event: MessageEvent) {
-      if (event.data && event.data.type &&
-        (event.data.type === SIGNATURE_SUCCESS || event.data.type === SIGNATURE_FAILURE)) {
+    window.addEventListener('message', function eventListener(event: MessageEvent) {
+      if (
+        event.data &&
+        event.data.type &&
+        (event.data.type === SIGNATURE_SUCCESS || event.data.type === SIGNATURE_FAILURE)
+      ) {
         const receivedMessage = event.data as SignatureResponse;
-        window.removeEventListener("message", eventListener);
+        window.removeEventListener('message', eventListener);
         if (receivedMessage.type === SIGNATURE_SUCCESS) {
           const { signature } = receivedMessage;
           resolve(signature);
@@ -118,7 +147,7 @@ export async function signCommitment(iFrameId: string, commitment: Commitment): 
     });
   });
 
-  iFrame.contentWindow.postMessage(message, "*");
+  iFrame.contentWindow.postMessage(message, '*');
   return signPromise;
 }
 
@@ -141,7 +170,7 @@ export function messageWallet(iFrameId: string, data: Commitment | string, signa
 export function startConcludingGame(iFrameId: string): void {
   const iFrame = document.getElementById(iFrameId) as HTMLIFrameElement;
   const message = concludeChannelRequest();
-  iFrame.contentWindow.postMessage(message, "*");
+  iFrame.contentWindow.postMessage(message, '*');
 }
 
 /**
@@ -154,17 +183,25 @@ export function startConcludingGame(iFrameId: string): void {
  * @param opponentBalance The opponent's balance at the beginning of the game.
  * @param playerIndex Whether the player is the first or second player in the game.
  */
-export function startFunding(iFrameId: string,
+export function startFunding(
+  iFrameId: string,
   channelId: string,
   myAddress: string,
   opponentAddress: string,
   myBalance: string,
   opponentBalance: string,
-  playerIndex: number): void {
-
+  playerIndex: number,
+): void {
   const iFrame = document.getElementById(iFrameId) as HTMLIFrameElement;
-  const message = fundingRequest(channelId, myAddress, opponentAddress, myBalance, opponentBalance, playerIndex);
-  iFrame.contentWindow.postMessage(message, "*");
+  const message = fundingRequest(
+    channelId,
+    myAddress,
+    opponentAddress,
+    myBalance,
+    opponentBalance,
+    playerIndex,
+  );
+  iFrame.contentWindow.postMessage(message, '*');
 }
 
 /**
@@ -174,7 +211,7 @@ export function startFunding(iFrameId: string,
 export function startChallenge(iFrameId: string) {
   const iFrame = document.getElementById(iFrameId) as HTMLIFrameElement;
   const message = createChallenge();
-  iFrame.contentWindow.postMessage(message, "*");
+  iFrame.contentWindow.postMessage(message, '*');
 }
 
 /**
@@ -185,5 +222,5 @@ export function startChallenge(iFrameId: string) {
 export function respondToOngoingChallenge(iFrameId: string, responseCommitment: Commitment) {
   const iFrame = document.getElementById(iFrameId) as HTMLIFrameElement;
   const message = respondToChallenge(responseCommitment);
-  iFrame.contentWindow.postMessage(message, "*");
+  iFrame.contentWindow.postMessage(message, '*');
 }

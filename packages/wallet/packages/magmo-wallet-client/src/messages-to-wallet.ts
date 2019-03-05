@@ -6,7 +6,7 @@ export enum PlayerIndex {
 }
 
 export const INITIALIZE_REQUEST = 'WALLET.INITIALIZE_REQUEST';
-export const initializeRequest = (userId) => ({
+export const initializeRequest = userId => ({
   type: INITIALIZE_REQUEST as typeof INITIALIZE_REQUEST,
   userId,
 });
@@ -48,7 +48,6 @@ export const validateCommitmentRequest = (commitment: Commitment, signature: str
 });
 export type ValidateCommitmentRequest = ReturnType<typeof validateCommitmentRequest>;
 
-
 // SIGNATURE
 // =========
 
@@ -69,7 +68,6 @@ export const withdrawalRequest = (commitment: Commitment) => ({
   commitment,
 });
 export type WithdrawalRequest = ReturnType<typeof withdrawalRequest>;
-
 
 // Challenge
 // =========
@@ -107,13 +105,12 @@ export const receiveMessage = (data: Commitment | string, signature?: string) =>
 });
 export type ReceiveMessage = ReturnType<typeof receiveMessage>;
 
-
 // Requests
 // ========
 export type RequestAction =
-  ConcludeChannelRequest |
-  FundingRequest |
-  SignCommitmentRequest |
-  ValidateCommitmentRequest |
-  WithdrawalRequest |
-  CreateChallengeRequest;
+  | ConcludeChannelRequest
+  | FundingRequest
+  | SignCommitmentRequest
+  | ValidateCommitmentRequest
+  | WithdrawalRequest
+  | CreateChallengeRequest;

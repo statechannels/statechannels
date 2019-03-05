@@ -7,7 +7,7 @@ import { RespondingState } from './responding';
 import { WithdrawingState } from './withdrawing';
 import { ClosingState } from './closing';
 
-export type WalletState = (
+export type WalletState =
   | InitializingState
   | OpeningState
   | FundingState
@@ -15,8 +15,7 @@ export type WalletState = (
   | ChallengingState
   | RespondingState
   | WithdrawingState
-  | ClosingState
-);
+  | ClosingState;
 
 export * from './initializing';
 export * from './opening';

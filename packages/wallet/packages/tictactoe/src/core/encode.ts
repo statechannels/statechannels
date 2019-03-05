@@ -5,7 +5,7 @@ import hexToBN from '../utils/hexToBN';
 export default function encode(position: positions.Position) {
   const { libraryAddress, channelNonce, participants, turnNum, balances } = position;
   const channel = new Channel(libraryAddress, channelNonce, participants);
-  const stateCount = ('stateCount' in position) ? position.stateCount : 0;
+  const stateCount = 'stateCount' in position ? position.stateCount : 0;
   const state = new State({
     channel,
     stateType: stateType(position),
@@ -110,15 +110,9 @@ export function packDrawAttributes(position: positions.Draw) {
 }
 
 export function packPlayAgainMeFirstAttributes(stake: string) {
-  return (
-    toHex32(GamePositionType.PlayAgainMeFirst).substr(2) +
-    padBytes32(stake).substr(2)
-  );
+  return toHex32(GamePositionType.PlayAgainMeFirst).substr(2) + padBytes32(stake).substr(2);
 }
 
 export function packPlayAgainMeSecondAttributes(stake: string) {
-  return (
-    toHex32(GamePositionType.PlayAgainMeSecond).substr(2) +
-    padBytes32(stake).substr(2)
-  );
+  return toHex32(GamePositionType.PlayAgainMeSecond).substr(2) + padBytes32(stake).substr(2);
 }

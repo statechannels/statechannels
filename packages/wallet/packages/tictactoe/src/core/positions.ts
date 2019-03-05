@@ -1,4 +1,4 @@
-import {Marks} from './marks';
+import { Marks } from './marks';
 // Position names
 // ==============
 export const PRE_FUND_SETUP_A = 'PRE_FUND_SETUP_A';
@@ -27,78 +27,74 @@ interface Base {
 
 // All positions apart from Conclude also have the buyIn
 interface BaseWithBuyIn extends Base {
-    roundBuyIn: string;
-  }
+  roundBuyIn: string;
+}
 
+interface BaseWitNoughtsAndCrossesAndBuyIn extends BaseWithBuyIn {
+  noughts: Marks;
+  crosses: Marks;
+}
 
-  interface BaseWitNoughtsAndCrossesAndBuyIn extends BaseWithBuyIn {
-    noughts: Marks;
-    crosses: Marks;
-  }
-  
-  export interface PreFundSetupA extends BaseWithBuyIn {
-    stateCount: 0;
-    name: typeof PRE_FUND_SETUP_A;
-  }
-  
-  export interface PreFundSetupB extends BaseWithBuyIn {
-    stateCount: 1;
-    name: typeof PRE_FUND_SETUP_B;
-  }
-  
-  export interface PostFundSetupA extends BaseWithBuyIn {
-    stateCount: 0;
-    name: typeof POST_FUND_SETUP_A;
-  }
-  
-  export interface PostFundSetupB extends BaseWithBuyIn {
-    stateCount: 1;
-    name: typeof POST_FUND_SETUP_B;
-  }
-  
+export interface PreFundSetupA extends BaseWithBuyIn {
+  stateCount: 0;
+  name: typeof PRE_FUND_SETUP_A;
+}
 
-  export interface PlayAgainMeFirst extends BaseWithBuyIn {
-    name: typeof PLAY_AGAIN_ME_FIRST;
-  }
+export interface PreFundSetupB extends BaseWithBuyIn {
+  stateCount: 1;
+  name: typeof PRE_FUND_SETUP_B;
+}
 
-  export interface PlayAgainMeSecond extends BaseWithBuyIn {
-    name: typeof PLAY_AGAIN_ME_SECOND;
-  }
+export interface PostFundSetupA extends BaseWithBuyIn {
+  stateCount: 0;
+  name: typeof POST_FUND_SETUP_A;
+}
 
-  export interface OPlaying extends BaseWitNoughtsAndCrossesAndBuyIn {
-    name: typeof OPLAYING;
-  }
+export interface PostFundSetupB extends BaseWithBuyIn {
+  stateCount: 1;
+  name: typeof POST_FUND_SETUP_B;
+}
 
-  export interface XPlaying extends BaseWitNoughtsAndCrossesAndBuyIn {
-    name: typeof XPLAYING;
-  }
-  
-  export interface Victory extends BaseWitNoughtsAndCrossesAndBuyIn {
-    name: typeof VICTORY;
-  }
+export interface PlayAgainMeFirst extends BaseWithBuyIn {
+  name: typeof PLAY_AGAIN_ME_FIRST;
+}
 
-  export interface Draw extends BaseWitNoughtsAndCrossesAndBuyIn {
-    name: typeof DRAW;
-  }
+export interface PlayAgainMeSecond extends BaseWithBuyIn {
+  name: typeof PLAY_AGAIN_ME_SECOND;
+}
 
-  export interface Conclude extends Base {
-    name: typeof CONCLUDE;
-  }
-  
-  export type Position = (
-    | PreFundSetupA
-    | PreFundSetupB
-    | PostFundSetupA
-    | PostFundSetupB
-    | XPlaying
-    | OPlaying
-    | Victory
-    | Draw
-    | PlayAgainMeFirst
-    | PlayAgainMeSecond
-    | Conclude
-  );
+export interface OPlaying extends BaseWitNoughtsAndCrossesAndBuyIn {
+  name: typeof OPLAYING;
+}
 
+export interface XPlaying extends BaseWitNoughtsAndCrossesAndBuyIn {
+  name: typeof XPLAYING;
+}
+
+export interface Victory extends BaseWitNoughtsAndCrossesAndBuyIn {
+  name: typeof VICTORY;
+}
+
+export interface Draw extends BaseWitNoughtsAndCrossesAndBuyIn {
+  name: typeof DRAW;
+}
+
+export interface Conclude extends Base {
+  name: typeof CONCLUDE;
+}
+
+export type Position =
+  | PreFundSetupA
+  | PreFundSetupB
+  | PostFundSetupA
+  | PostFundSetupB
+  | XPlaying
+  | OPlaying
+  | Victory
+  | Draw
+  | PlayAgainMeFirst
+  | PlayAgainMeSecond
+  | Conclude;
 
 // Position Constructors
 // =====================
@@ -117,7 +113,6 @@ interface PlayingParams extends BaseWithBuyInParams {
   noughts: Marks;
   crosses: Marks;
 }
-
 
 function base(obj: BaseParams): Base {
   const { libraryAddress, channelNonce, participants, turnNum, balances } = obj;
@@ -158,7 +153,7 @@ export function playAgainMeSecond(obj: BaseWithBuyInParams): PlayAgainMeSecond {
 }
 
 export function oPlaying(obj: PlayingParams): OPlaying {
-  return { ...baseWithNoughtsAndCrossesAndBuyIn(obj), name: OPLAYING};
+  return { ...baseWithNoughtsAndCrossesAndBuyIn(obj), name: OPLAYING };
 }
 
 export function xPlaying(obj: PlayingParams): XPlaying {
@@ -176,9 +171,3 @@ export function draw(obj: PlayingParams): Draw {
 export function conclude(obj: BaseParams): Conclude {
   return { ...base(obj), name: CONCLUDE };
 }
-
-
-
-
-
-

@@ -14,6 +14,4 @@ export function waitForUpdate<T extends ChannelOpen>(params: T): WaitForUpdate {
   return { type: WAIT_FOR_UPDATE, stage: RUNNING, ...channelOpen(params) };
 }
 
-export type RunningState = (
-  | WaitForUpdate
-);
+export type RunningState = WaitForUpdate;

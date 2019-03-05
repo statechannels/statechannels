@@ -1,4 +1,4 @@
-import { Channel, State, } from 'fmg-core';
+import { Channel, State } from 'fmg-core';
 import BN from 'bn.js';
 
 // TODO: The decode function should really be part of FMG-Core
@@ -28,9 +28,7 @@ function extractChannel(hexString: string) {
   const channelNonce = extractInt(hexString, 32);
   const nPlayers = extractInt(hexString, 64);
   if (nPlayers !== N_PLAYERS) {
-    throw new Error(
-      `${N_PLAYERS} players required. ${nPlayers} provided.`,
-    );
+    throw new Error(`${N_PLAYERS} players required. ${nPlayers} provided.`);
   }
 
   const participantA = extractBytes(hexString, 3 * 32 + 12, 20);
@@ -57,8 +55,6 @@ function extractBalances(hexString: string) {
   return [aBal, bBal];
 }
 
-
-
 export default function decode(hexString) {
   const channel = extractChannel(hexString);
   const turnNum = extractTurnNum(hexString);
@@ -66,5 +62,4 @@ export default function decode(hexString) {
   const balances = extractBalances(hexString);
   const stateCount = extractStateCount(hexString);
   return new State({ channel, turnNum, resolution: balances, stateCount, stateType });
-
 }

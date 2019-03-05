@@ -1,4 +1,10 @@
-import { TransactionExists, UserAddressExists, userAddressExists, ChannelOpen, channelOpen } from './shared';
+import {
+  TransactionExists,
+  UserAddressExists,
+  userAddressExists,
+  ChannelOpen,
+  channelOpen,
+} from './shared';
 
 // stage
 export const WITHDRAWING = 'STAGE.WITHDRAWING';
@@ -39,25 +45,37 @@ export function approveWithdrawal<T extends ChannelOpen>(params: T): ApproveWith
   return { ...channelOpen(params), type: APPROVE_WITHDRAWAL, stage: WITHDRAWING };
 }
 
-export function waitForWithdrawalInitiation<T extends UserAddressExists>(params: T): WaitForWithdrawalInitiation {
+export function waitForWithdrawalInitiation<T extends UserAddressExists>(
+  params: T,
+): WaitForWithdrawalInitiation {
   return { ...userAddressExists(params), type: WAIT_FOR_WITHDRAWAL_INITIATION, stage: WITHDRAWING };
 }
 
-export function waitForWithdrawalConfirmation<T extends UserAddressExists & TransactionExists>(params: T): WaitForWithdrawalConfirmation {
-  return { ...userAddressExists(params), transactionHash: params.transactionHash, type: WAIT_FOR_WITHDRAWAL_CONFIRMATION, stage: WITHDRAWING };
+export function waitForWithdrawalConfirmation<T extends UserAddressExists & TransactionExists>(
+  params: T,
+): WaitForWithdrawalConfirmation {
+  return {
+    ...userAddressExists(params),
+    transactionHash: params.transactionHash,
+    type: WAIT_FOR_WITHDRAWAL_CONFIRMATION,
+    stage: WITHDRAWING,
+  };
 }
 
-export function acknowledgeWithdrawalSuccess<T extends ChannelOpen>(params: T): AcknowledgeWithdrawalSuccess {
+export function acknowledgeWithdrawalSuccess<T extends ChannelOpen>(
+  params: T,
+): AcknowledgeWithdrawalSuccess {
   return { ...channelOpen(params), type: ACKNOWLEDGE_WITHDRAWAL_SUCCESS, stage: WITHDRAWING };
 }
 
-export function withdrawTransactionFailed<T extends UserAddressExists>(params: T): WithdrawTransactionFailed {
+export function withdrawTransactionFailed<T extends UserAddressExists>(
+  params: T,
+): WithdrawTransactionFailed {
   return { type: WITHDRAW_TRANSACTION_FAILED, stage: WITHDRAWING, ...userAddressExists(params) };
 }
-export type WithdrawingState = (
+export type WithdrawingState =
   | ApproveWithdrawal
   | WaitForWithdrawalInitiation
   | WaitForWithdrawalConfirmation
   | AcknowledgeWithdrawalSuccess
-  | WithdrawTransactionFailed
-);
+  | WithdrawTransactionFailed;

@@ -11,7 +11,16 @@ out our apps, or get involved more deeply we would love to hear your thoughts. D
 * [Rock Paper Scissors](https://rps.magmo.com) (RPS)
 * [Tic Tac Toe](https://ttt.magmo.com) (TTT)
 
-## Setting up development environment and running a game application
+## Development Conventions
+#### Prettier
+Prettier is configured via `.prettierrc`.
+Tests will fail if code does not satisfy the rules specificied in `.prettierrc`.
+We suggest that you configure your editor to auto-format using prettier,
+or that you run it in a pre-commit git hook.
+You can also run `yarn prettier:write`.
+
+
+#### Setting up development environment and running a game application
 You will need `yarn` installed (see [here](https://yarnpkg.com/lang/en/docs/install/) for instructions). After cloning the code, 
 1. In the top directory, run `yarn install`.
 2. Run `npx lerna bootstrap`.
