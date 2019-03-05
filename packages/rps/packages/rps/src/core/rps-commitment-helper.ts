@@ -1,7 +1,20 @@
-
 import { soliditySha3 } from 'web3-utils';
 import { BaseCommitment, CommitmentType, Bytes32 } from 'fmg-core';
-import { AppAttributes, RPSCommitment, Weapon, PositionType, PRE_FUND_SETUP_A, PRE_FUND_SETUP_B, POST_FUND_SETUP_A, POST_FUND_SETUP_B, APP_PROPOSE, APP_ACCEPT, APP_REVEAL, APP_RESTING, CONCLUDE } from './rps-commitment';
+import {
+  AppAttributes,
+  RPSCommitment,
+  Weapon,
+  PositionType,
+  PRE_FUND_SETUP_A,
+  PRE_FUND_SETUP_B,
+  POST_FUND_SETUP_A,
+  POST_FUND_SETUP_B,
+  APP_PROPOSE,
+  APP_ACCEPT,
+  APP_REVEAL,
+  APP_RESTING,
+  CONCLUDE,
+} from './rps-commitment';
 
 // Commitment Constructors
 // =====================
@@ -15,13 +28,7 @@ interface BaseWithBuyInParams extends BaseParams {
 }
 
 function base(obj: BaseCommitment): BaseCommitment {
-  const {
-    channel,
-    turnNum,
-    allocation,
-    destination,
-    commitmentCount,
-  } = obj;
+  const { channel, turnNum, allocation, destination, commitmentCount } = obj;
   return {
     channel,
     turnNum,
@@ -31,7 +38,7 @@ function base(obj: BaseCommitment): BaseCommitment {
   };
 }
 
-const zeroBytes32: Bytes32 = "0x" + "0".repeat(64);
+const zeroBytes32: Bytes32 = '0x' + '0'.repeat(64);
 function defaultAppAttrs(roundBuyIn): AppAttributes {
   return {
     stake: roundBuyIn,
@@ -102,10 +109,7 @@ export function propose(obj: ProposeParams): RPSCommitment {
 }
 
 export function hashCommitment(play: Weapon, salt: string) {
-  return soliditySha3(
-    { type: 'uint256', value: play },
-    { type: 'bytes32', value: salt },
-  );
+  return soliditySha3({ type: 'uint256', value: play }, { type: 'bytes32', value: salt });
 }
 
 interface ProposeWithWeaponAndSaltParams extends BaseWithBuyInParams {
