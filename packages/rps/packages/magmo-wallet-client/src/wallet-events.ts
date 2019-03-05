@@ -246,7 +246,7 @@ export const MESSAGE_REQUEST = 'WALLET.MESSAGING.MESSAGE_REQUEST';
 /**
  * @ignore
  */
-export const messageRequest = (to: string, data: string, signature: string) => ({
+export const messageRequest = (to: string, data: Commitment | string, signature: string) => ({
   type: MESSAGE_REQUEST as typeof MESSAGE_REQUEST,
   to,
   data,

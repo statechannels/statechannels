@@ -1,9 +1,9 @@
 import { JointState } from '../reducer';
-import { RPSCommitment } from 'src/core/rps-commitment';
+import { RPSCommitment, asCoreCommitment } from '../../../core/rps-commitment';
 
 export const itSends = (commitment: RPSCommitment, jointState) => {
   it(`sends ${commitment.commitmentName}`, () => {
-    expect(jointState.messageState.opponentOutbox.commitment).toEqual(commitment);
+    expect(jointState.messageState.opponentOutbox.commitment).toEqual(asCoreCommitment(commitment));
     expect(jointState.gameState.turnNum).toEqual(commitment.turnNum);
   });
 };

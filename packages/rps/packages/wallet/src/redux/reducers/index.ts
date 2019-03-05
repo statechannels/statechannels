@@ -27,9 +27,8 @@ import { WalletAction, CONCLUDE_REQUESTED, MESSAGE_RECEIVED, MESSAGE_SENT, TRANS
 import { unreachable, ourTurn, validTransition } from '../../utils/reducer-utils';
 import { validCommitmentSignature } from '../../utils/signing-utils';
 import { showWallet } from 'magmo-wallet-client/lib/wallet-events';
-import { fromHex, CommitmentType } from 'fmg-core';
+import { CommitmentType } from 'fmg-core';
 import { Commitment } from 'fmg-core/lib/commitment';
-
 
 const initialState = waitForLogin();
 
@@ -72,7 +71,6 @@ export const walletReducer = (state: WalletState = initialState, action: WalletA
     default:
       return unreachable(state);
   }
-  return state;
 };
 
 const receivedValidOwnConclusionRequest = (state: WalletState, action: WalletAction): ApproveConclude | null => {
@@ -85,12 +83,7 @@ const receivedValidOpponentConclusionRequest = (state: WalletState, action: Wall
   if (state.stage !== FUNDING && state.stage !== RUNNING) { return null; }
   if (action.type !== MESSAGE_RECEIVED) { return null; }
 
-  let messageCommitment: Commitment;
-  try {
-    messageCommitment = fromHex(action.data);
-  } catch (error) {
-    return null;
-  }
+  const messageCommitment = action.data as Commitment;
 
   if (messageCommitment.commitmentType !== CommitmentType.Conclude) {
     return null;

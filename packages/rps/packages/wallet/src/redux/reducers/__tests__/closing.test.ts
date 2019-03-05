@@ -7,9 +7,10 @@ import * as scenarios from './test-scenarios';
 import { itTransitionsToStateType } from './helpers';
 
 import * as SigningUtil from '../../../utils/signing-utils';
-import * as fmgCore from 'fmg-core';
+import * as ReducerUtil from '../../../utils/reducer-utils';
 import * as TransactionGenerator from '../../../utils/transaction-generator';
 import { bigNumberify } from 'ethers/utils';
+import { Commitment } from 'fmg-core/lib/commitment';
 
 const {
   asAddress,
@@ -100,12 +101,12 @@ describe('start in WaitForOpponentConclude', () => {
       turnNum: concludeCommitment1.turnNum,
     });
     const validateMock = jest.fn().mockReturnValue(true);
-    Object.defineProperty(SigningUtil, 'validSignature', { value: validateMock });
-    const fromHexMock = jest.fn().mockReturnValue(concludeCommitment2);
-    Object.defineProperty(fmgCore, "fromHex", { value: fromHexMock });
+    Object.defineProperty(SigningUtil, 'validCommitmentSignature', { value: validateMock });
+    Object.defineProperty(ReducerUtil, "validTransition", { value: validateMock });
 
-    const action = actions.messageReceived('0x0', '0x0');
+    const action = actions.messageReceived('commitment' as unknown as Commitment, '0x0');
     describe(' where the adjudicator exists', () => {
+
       const updatedState = walletReducer(state, action);
       itTransitionsToStateType(states.APPROVE_CLOSE_ON_CHAIN, updatedState);
       expect((updatedState.messageOutbox!).type).toEqual(outgoing.CONCLUDE_SUCCESS);
