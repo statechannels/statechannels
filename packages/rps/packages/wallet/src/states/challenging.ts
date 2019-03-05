@@ -1,10 +1,14 @@
 import {
-  ChallengeExists, challengeExists, TransactionExists, ChannelOpen, channelOpen
+  ChallengeExists,
+  challengeExists,
+  TransactionExists,
+  ChannelOpen,
+  channelOpen,
 } from './shared';
 import { TransactionRequest } from 'ethers/providers';
 export const CHALLENGING = 'CHALLENGING';
 
-export const APPROVE_CHALLENGE = "APPROVE_CHALLENGE";
+export const APPROVE_CHALLENGE = 'APPROVE_CHALLENGE';
 export const WAIT_FOR_CHALLENGE_INITIATION = 'INITIATE_CHALLENGE';
 export const WAIT_FOR_CHALLENGE_SUBMISSION = 'WAIT_FOR_CHALLENGE_SUBMISSION';
 export const WAIT_FOR_CHALLENGE_CONFIRMATION = 'WAIT_FOR_CHALLENGE_CONFIRMATION';
@@ -19,7 +23,9 @@ export interface ChallengeTransactionFailed extends ChannelOpen {
   stage: typeof CHALLENGING;
 }
 
-export function challengeTransactionFailed<T extends ChannelOpen>(params: T): ChallengeTransactionFailed {
+export function challengeTransactionFailed<T extends ChannelOpen>(
+  params: T,
+): ChallengeTransactionFailed {
   return {
     type: CHALLENGE_TRANSACTION_FAILED,
     stage: CHALLENGING,
@@ -31,7 +37,6 @@ export interface ApproveChallenge extends ChannelOpen {
   type: typeof APPROVE_CHALLENGE;
   stage: typeof CHALLENGING;
 }
-
 
 export function approveChallenge<T extends ChannelOpen>(params: T): ApproveChallenge {
   return {
@@ -45,7 +50,10 @@ export interface WaitForChallengeInitiation extends ChannelOpen {
   type: typeof WAIT_FOR_CHALLENGE_INITIATION;
   stage: typeof CHALLENGING;
 }
-export function waitForChallengeInitiation<T extends ChannelOpen>(transaction: TransactionRequest, params: T): WaitForChallengeInitiation {
+export function waitForChallengeInitiation<T extends ChannelOpen>(
+  transaction: TransactionRequest,
+  params: T,
+): WaitForChallengeInitiation {
   return {
     type: WAIT_FOR_CHALLENGE_INITIATION,
     stage: CHALLENGING,
@@ -58,7 +66,9 @@ export interface WaitForChallengeSubmission extends ChannelOpen {
   type: typeof WAIT_FOR_CHALLENGE_SUBMISSION;
   stage: typeof CHALLENGING;
 }
-export function waitForChallengeSubmission<T extends ChannelOpen>(params: T): WaitForChallengeSubmission {
+export function waitForChallengeSubmission<T extends ChannelOpen>(
+  params: T,
+): WaitForChallengeSubmission {
   return {
     type: WAIT_FOR_CHALLENGE_SUBMISSION,
     stage: CHALLENGING,
@@ -66,12 +76,13 @@ export function waitForChallengeSubmission<T extends ChannelOpen>(params: T): Wa
   };
 }
 
-
 export interface WaitForChallengeConfirmation extends ChallengeExists, TransactionExists {
   type: typeof WAIT_FOR_CHALLENGE_CONFIRMATION;
   stage: typeof CHALLENGING;
 }
-export function waitForChallengeConfirmation<T extends ChallengeExists & TransactionExists>(params: T): WaitForChallengeConfirmation {
+export function waitForChallengeConfirmation<T extends ChallengeExists & TransactionExists>(
+  params: T,
+): WaitForChallengeConfirmation {
   return {
     type: WAIT_FOR_CHALLENGE_CONFIRMATION,
     stage: CHALLENGING,
@@ -85,7 +96,9 @@ export interface WaitForResponseOrTimeout extends ChallengeExists {
   stage: typeof CHALLENGING;
 }
 
-export function waitForResponseOrTimeout<T extends ChallengeExists>(params: T): WaitForResponseOrTimeout {
+export function waitForResponseOrTimeout<T extends ChallengeExists>(
+  params: T,
+): WaitForResponseOrTimeout {
   return {
     type: WAIT_FOR_RESPONSE_OR_TIMEOUT,
     stage: CHALLENGING,
@@ -98,8 +111,9 @@ export interface AcknowledgeChallengeResponse extends ChallengeExists {
   stage: typeof CHALLENGING;
 }
 
-
-export function acknowledgeChallengeResponse<T extends ChallengeExists>(params: T): AcknowledgeChallengeResponse {
+export function acknowledgeChallengeResponse<T extends ChallengeExists>(
+  params: T,
+): AcknowledgeChallengeResponse {
   return {
     type: ACKNOWLEDGE_CHALLENGE_RESPONSE,
     stage: CHALLENGING,
@@ -112,7 +126,9 @@ export interface AcknowledgeChallengeTimeout extends ChallengeExists {
   stage: typeof CHALLENGING;
 }
 
-export function acknowledgeChallengeTimeout<T extends ChallengeExists>(params: T): AcknowledgeChallengeTimeout {
+export function acknowledgeChallengeTimeout<T extends ChallengeExists>(
+  params: T,
+): AcknowledgeChallengeTimeout {
   return {
     type: ACKNOWLEDGE_CHALLENGE_TIMEOUT,
     stage: CHALLENGING,
@@ -120,7 +136,7 @@ export function acknowledgeChallengeTimeout<T extends ChallengeExists>(params: T
   };
 }
 
-export type ChallengingState = (
+export type ChallengingState =
   | WaitForChallengeInitiation
   | WaitForChallengeSubmission
   | WaitForChallengeConfirmation
@@ -128,5 +144,4 @@ export type ChallengingState = (
   | AcknowledgeChallengeResponse
   | AcknowledgeChallengeTimeout
   | ApproveChallenge
-  | ChallengeTransactionFailed
-);
+  | ChallengeTransactionFailed;

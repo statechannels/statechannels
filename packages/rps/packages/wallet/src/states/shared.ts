@@ -1,4 +1,4 @@
-import { TransactionRequest } from "ethers/providers";
+import { TransactionRequest } from 'ethers/providers';
 import { WalletEvent, DisplayAction } from 'magmo-wallet-client';
 import { Action } from 'redux';
 import { Commitment } from 'fmg-core';
@@ -57,7 +57,7 @@ export interface UserAddressExists extends ChannelOpen {
 
 // creators
 export function base<T extends Base>(params: T): Base {
-  const { messageOutbox, transactionOutbox, displayOutbox, } = params;
+  const { messageOutbox, transactionOutbox, displayOutbox } = params;
   return { messageOutbox, transactionOutbox, displayOutbox };
 }
 
@@ -71,15 +71,37 @@ export function addressExists<T extends AddressExists>(params: T): AddressExists
 }
 
 export function firstMoveSent<T extends FirstMoveSent>(params: T): FirstMoveSent {
-  const { channelId, ourIndex, participants, channelNonce, turnNum, lastCommitment: lastPosition, libraryAddress, unhandledAction, requestedTotalFunds, requestedYourDeposit } = params;
-  return { ...addressExists(params), channelId, ourIndex, participants, channelNonce, turnNum, lastCommitment: lastPosition, libraryAddress, unhandledAction, requestedTotalFunds, requestedYourDeposit };
+  const {
+    channelId,
+    ourIndex,
+    participants,
+    channelNonce,
+    turnNum,
+    lastCommitment: lastPosition,
+    libraryAddress,
+    unhandledAction,
+    requestedTotalFunds,
+    requestedYourDeposit,
+  } = params;
+  return {
+    ...addressExists(params),
+    channelId,
+    ourIndex,
+    participants,
+    channelNonce,
+    turnNum,
+    lastCommitment: lastPosition,
+    libraryAddress,
+    unhandledAction,
+    requestedTotalFunds,
+    requestedYourDeposit,
+  };
 }
 
 export function channelOpen<T extends ChannelOpen>(params: T): ChannelOpen {
-  const { penultimateCommitment, } = params;
-  return { ...firstMoveSent(params), penultimateCommitment, };
+  const { penultimateCommitment } = params;
+  return { ...firstMoveSent(params), penultimateCommitment };
 }
-
 
 export function challengeExists<T extends ChallengeExists>(params: T): ChallengeExists {
   return { ...channelOpen(params), challengeExpiry: params.challengeExpiry };

@@ -9,14 +9,12 @@ import loginSaga from './login/saga';
 import openGameSaga from './open-games/saga';
 import messageSaga from './message-service/saga';
 
-const composeEnhancers = (window as  any).__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
-const enhancers = composeEnhancers(
-  applyMiddleware(sagaMiddleware),
-);
+const composeEnhancers = (window as any).__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
+const enhancers = composeEnhancers(applyMiddleware(sagaMiddleware));
 
 const store = createStore(reducer, enhancers);
 
-function * rootSaga() {
+function* rootSaga() {
   yield fork(loginSaga);
   yield fork(openGameSaga);
   yield fork(messageSaga);
@@ -30,6 +28,6 @@ export const getApplicationState = (storeObj: any) => storeObj.app;
 export const getWalletState = (storeObj: any) => storeObj.wallet;
 export const getUser = (storeObj: any) => storeObj.login.user;
 export const getProfile = (storeObj: any) => storeObj.login.profile;
-export const getGameState = (storeObj:any)=>storeObj.game.gameState;
-export const getGameStateName = (storeObj:any)=>storeObj.game.gameState.name;
-export const getMessageState = (storeObj:any)=>storeObj.game.messageState;
+export const getGameState = (storeObj: any) => storeObj.game.gameState;
+export const getGameStateName = (storeObj: any) => storeObj.game.gameState.name;
+export const getMessageState = (storeObj: any) => storeObj.game.messageState;
