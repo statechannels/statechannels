@@ -128,7 +128,7 @@ export async function signCommitment(iFrameId: string, commitment: Commitment): 
  * @param data The message to send to the wallet that was received from the opponent's wallet.
  * @param signature The signature that was received from the opponent's wallet.
  */
-export function messageWallet(iFrameId: string, data, signature: string) {
+export function messageWallet(iFrameId: string, data: Commitment | string, signature: string) {
   const iFrame = document.getElementById(iFrameId) as HTMLIFrameElement;
   const message = receiveMessage(data, signature);
   iFrame.contentWindow.postMessage(message, '*');

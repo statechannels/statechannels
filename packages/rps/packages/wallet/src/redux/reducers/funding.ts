@@ -8,7 +8,6 @@ import { signCommitment, validCommitmentSignature } from '../../utils/signing-ut
 
 import { Channel, Commitment, CommitmentType, } from 'fmg-core';
 import { handleSignatureAndValidationMessages } from '../../utils/state-utils';
-import { fromHex, toHex } from 'fmg-core';
 import { bigNumberify } from 'ethers/utils';
 
 
@@ -254,14 +253,13 @@ const aWaitForOpponentDepositReducer = (state: states.AWaitForOpponentDeposit, a
 const aWaitForPostFundSetupReducer = (state: states.AWaitForPostFundSetup, action: actions.WalletAction) => {
   switch (action.type) {
     case actions.MESSAGE_RECEIVED:
-      const messageState = fromHex(action.data);
-      if (!validTransitionToPostFundState(state, messageState, action.signature)) { return state; }
+      const postFundState = action.data as Commitment;
+      if (!validTransitionToPostFundState(state, postFundState, action.signature)) { return state; }
 
-      const postFundState = fromHex(action.data);
       return states.acknowledgeFundingSuccess({
         ...state,
         turnNum: postFundState.turnNum,
-        lastCommitment: { commitment: messageState, signature: action.signature! },
+        lastCommitment: { commitment: postFundState, signature: action.signature! },
         penultimateCommitment: state.lastCommitment,
       });
     default:
@@ -342,7 +340,7 @@ const bWaitForDepositConfirmationReducer = (state: states.BWaitForDepositConfirm
 const bWaitForPostFundSetupReducer = (state: states.BWaitForPostFundSetup, action: actions.WalletAction) => {
   switch (action.type) {
     case actions.MESSAGE_RECEIVED:
-      const messageCommitment = fromHex(action.data);
+      const messageCommitment = action.data as Commitment;
       if (!validTransitionToPostFundState(state, messageCommitment, action.signature)) {
         return state;
       }
@@ -380,7 +378,6 @@ const validTransitionToPostFundState = (state: states.FundingState, data: Commit
   const opponentAddress = state.participants[1 - state.ourIndex];
 
   if (!validCommitmentSignature(data, signature, opponentAddress)) { return false; }
-  // check transition
   if (!validTransition(state, data)) { return false; }
   if (data.commitmentType !== 1) { return false; }
   return true;
@@ -401,7 +398,7 @@ const composePostFundCommitment = (state: states.AWaitForOpponentDeposit | state
   };
   const commitmentSignature = signCommitment(postFundSetupCommitment, state.privateKey);
 
-  const sendMessageAction = messageRequest(state.participants[1 - state.ourIndex], toHex(postFundSetupCommitment), commitmentSignature);
+  const sendMessageAction = messageRequest(state.participants[1 - state.ourIndex], postFundSetupCommitment, commitmentSignature);
   return { postFundSetupCommitment, commitmentSignature, sendMessageAction };
 };
 
