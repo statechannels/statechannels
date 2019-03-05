@@ -1,7 +1,6 @@
-
 import { Player } from './players';
 import { BigNumber } from 'ethers/utils';
-import { Weapon }  from './rps-commitment';
+import { Weapon } from './rps-commitment';
 
 export enum Result {
   Tie,
@@ -63,10 +62,13 @@ export function convertToRelativeResult(absoluteResult: AbsoluteResult, youAre: 
     case AbsoluteResult.BWins:
       return youArePlayerA ? Result.YouLose : Result.YouWin;
   }
-
 }
 
-export function allocationAfterResult(absoluteResult: AbsoluteResult, roundBuyIn: BigNumber, balances: BigNumber[]): BigNumber[] {
+export function allocationAfterResult(
+  absoluteResult: AbsoluteResult,
+  roundBuyIn: BigNumber,
+  balances: BigNumber[],
+): BigNumber[] {
   switch (absoluteResult) {
     case AbsoluteResult.AWins:
       return [balances[0].add(roundBuyIn.mul(2)), balances[1].sub(roundBuyIn.mul(2))];
