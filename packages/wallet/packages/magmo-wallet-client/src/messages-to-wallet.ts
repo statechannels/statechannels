@@ -100,7 +100,7 @@ export type ConcludeChannelRequest = ReturnType<typeof concludeChannelRequest>;
 // wallet meant for wallet-to-wallet communication (e.g. communicating the address of the
 // adjudicator).
 export const RECEIVE_MESSAGE = 'WALLET.MESSAGING.RECEIVE';
-export const receiveMessage = (data: string, signature?: string) => ({
+export const receiveMessage = (data: Commitment | string, signature?: string) => ({
   type: RECEIVE_MESSAGE,
   data,
   signature,

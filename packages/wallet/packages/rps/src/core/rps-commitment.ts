@@ -43,13 +43,13 @@ function encodeAppAttributes(appAttrs: AppAttributes): string {
 }
 
 function decodeAppAttributes(appAttrs: string): AppAttributes {
-  const parameters = abi.decodeParameter(SolidityRPSCommitmentType, appAttrs);
+  const parameters = abi.decodeParameter(SolidityRPSCommitmentType, appAttrs) as string[];
   return {
-    positionType: Number.parseInt(parameters[0], 10) as PositionType,
+    positionType: Number.parseInt(parameters[0], 10),
     stake: parameters[1],
     preCommit: parameters[2],
-    bWeapon: Number.parseInt(parameters[3], 10) as Weapon,
-    aWeapon: Number.parseInt(parameters[4], 10) as Weapon,
+    bWeapon: Number.parseInt(parameters[3], 10),
+    aWeapon: Number.parseInt(parameters[4], 10),
     salt: parameters[5],
   };
 }

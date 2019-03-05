@@ -451,12 +451,18 @@ function pickWeaponReducer(gameState: states.PickWeapon, messageState: MessageSt
     const salt = randomHex(64);
     const asWeapon = action.weapon;
 
+    const { allocation: allocation, roundBuyIn } = gameState;
+    const aBal = (bigNumberify(allocation[0]).sub(bigNumberify(roundBuyIn))).toHexString();
+    const bBal = (bigNumberify(allocation[1]).add(bigNumberify(roundBuyIn))).toHexString();
+    const newAllocation = [aBal, bBal] as [string, string];
+
     const propose = rpsCommitmentHelper.proposeFromSalt({
       ...gameState,
       aWeapon: asWeapon,
       salt,
       commitmentCount: 0, // we are transitioning from a consensus game, so need to reset this
       turnNum: turnNum + 1,
+      allocation: newAllocation,
     });
     const newGameStateA = states.waitForOpponentToPickWeaponA({
       ...gameState,

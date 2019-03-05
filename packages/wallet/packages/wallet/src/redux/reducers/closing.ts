@@ -4,9 +4,9 @@ import * as actions from '../actions';
 import { WalletState, ClosingState } from '../../states';
 import { WalletAction } from '../actions';
 import { unreachable, ourTurn, validTransition } from '../../utils/reducer-utils';
-import { signCommitment, validSignature, signVerificationData } from '../../utils/signing-utils';
+import { signCommitment, signVerificationData, validCommitmentSignature } from '../../utils/signing-utils';
 import { messageRequest, closeSuccess, concludeSuccess, concludeFailure, hideWallet } from 'magmo-wallet-client/lib/wallet-events';
-import { fromHex, toHex, CommitmentType, Commitment } from 'fmg-core';
+import { CommitmentType, Commitment } from 'fmg-core';
 import { createConcludeAndWithdrawTransaction, ConcludeAndWithdrawArgs } from '../../utils/transaction-generator';
 
 
@@ -139,8 +139,6 @@ const approveCloseOnChainReducer = (state: states.ApproveCloseOnChain, action: a
       };
       const transactionOutbox = createConcludeAndWithdrawTransaction(state.adjudicator, args);
       return states.waitForCloseInitiation({ ...state, userAddress: action.withdrawAddress, transactionOutbox });
-
-      break;
   }
   return state;
 };
@@ -184,24 +182,23 @@ const waitForOpponentConclude = (state: states.WaitForOpponentConclude, action: 
     case actions.MESSAGE_RECEIVED:
 
       if (!action.signature) { return { ...state, displayOutbox: hideWallet(), messageOutbox: concludeFailure('Other', 'Signature is missing from the message.') }; }
+      const commitment = action.data as Commitment;
 
       const opponentAddress = state.participants[1 - state.ourIndex];
-      if (!validSignature(action.data, action.signature, opponentAddress)) {
+      if (!validCommitmentSignature(commitment, action.signature, opponentAddress)) {
 
         return { ...state, displayOutbox: hideWallet(), messageOutbox: concludeFailure('Other', 'The signature provided is not valid.') };
       }
-      const concludeCommitment = fromHex(action.data);
-      // check transition
-      if (!validTransition(state, concludeCommitment)) {
+      if (!validTransition(state, commitment)) {
         return { ...state, displayOutbox: hideWallet(), messageOutbox: concludeFailure('Other', `The transition from ${state.type} to conclude is not valid.`) };
       }
       if (state.adjudicator !== undefined) {
         return states.approveCloseOnChain({
           ...state,
           adjudicator: state.adjudicator,
-          turnNum: concludeCommitment.turnNum,
+          turnNum: commitment.turnNum,
           penultimateCommitment: state.lastCommitment,
-          lastCommitment: { commitment: concludeCommitment, signature: action.signature },
+          lastCommitment: { commitment, signature: action.signature },
           messageOutbox: concludeSuccess(),
         });
       } else {
@@ -215,8 +212,6 @@ const waitForOpponentConclude = (state: states.WaitForOpponentConclude, action: 
       return state;
   }
 };
-
-
 
 const acknowledgeCloseSuccessReducer = (state: states.AcknowledgeCloseSuccess, action: WalletAction) => {
   switch (action.type) {
@@ -253,6 +248,6 @@ const composeConcludePosition = (state: states.ClosingState) => {
   };
 
   const commitmentSignature = signCommitment(concludeCommitment, state.privateKey);
-  const sendMessageAction = messageRequest(state.participants[1 - state.ourIndex], toHex(concludeCommitment), commitmentSignature);
+  const sendMessageAction = messageRequest(state.participants[1 - state.ourIndex], concludeCommitment, commitmentSignature);
   return { concludeCommitment, positionSignature: commitmentSignature, sendMessageAction };
 };

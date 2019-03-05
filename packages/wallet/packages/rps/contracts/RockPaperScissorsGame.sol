@@ -55,12 +55,12 @@ contract RockPaperScissorsGame {
         revert("No valid transition found for commitments");
     }
 
-    function winnings(RockPaperScissorsCommitment.Play firstPlay, RockPaperScissorsCommitment.Play secondPlay, uint256 stake)
+    function winnings(RockPaperScissorsCommitment.Weapon firstWeapon, RockPaperScissorsCommitment.Weapon secondWeapon, uint256 stake)
     private pure returns (uint256, uint256) {
-        if (firstPlay == secondPlay) { // no-one won
+        if (firstWeapon == secondWeapon) { // no-one won
             return (stake, stake);
-        } else if ((firstPlay == RockPaperScissorsCommitment.Play.Rock && secondPlay == RockPaperScissorsCommitment.Play.Scissors) ||
-                  (firstPlay > secondPlay)) { // first player won
+        } else if ((firstWeapon == RockPaperScissorsCommitment.Weapon.Rock && secondWeapon == RockPaperScissorsCommitment.Weapon.Scissors) ||
+                  (firstWeapon > secondWeapon)) { // first player won
             return (2 * stake, 0);
         } else { // second player won
             return (0, 2 * stake);
@@ -106,7 +106,7 @@ contract RockPaperScissorsGame {
         require(newCommitment.bWeapon == oldCommitment.bWeapon,"Player Bs play should be the same between commitments.");
 
         // check hash matches
-        // need to convert Play -> uint256 to get hash to work
+        // need to convert Weapon -> uint256 to get hash to work
         bytes32 hashed = keccak256(abi.encodePacked(uint256(newCommitment.aWeapon), newCommitment.salt));
         require(hashed == oldCommitment.preCommit,"The hash needs to match the precommit");
 

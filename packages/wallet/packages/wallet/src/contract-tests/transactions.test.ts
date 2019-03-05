@@ -173,7 +173,7 @@ describe('transactions', () => {
     await testTransactionSender(concludeTransaction);
   });
 
-  it.only("should send a transferAndWithdraw transaction", async () => {
+  it("should send a transferAndWithdraw transaction", async () => {
     const channel: Channel = { channelType: libraryAddress, nonce: getNextNonce(), participants };
     const channelId = channelID(channel);
     const contractAddress = await getAdjudicatorContractAddress(provider);

@@ -6,14 +6,14 @@ import "fmg-core/contracts/Commitment.sol";
 library RockPaperScissorsCommitment {
     using Commitment for Commitment.CommitmentStruct;
     enum PositionType { Start, RoundProposed, RoundAccepted, Reveal }
-    enum Play { Rock, Paper, Scissors }
+    enum Weapon { Rock, Paper, Scissors }
 
     struct AppAttributes {
         PositionType positionType;
         uint256 stake;
         bytes32 preCommit;
-        Play bWeapon;
-        Play aWeapon;
+        Weapon bWeapon;
+        Weapon aWeapon;
         bytes32 salt;
     }
 
@@ -21,8 +21,8 @@ library RockPaperScissorsCommitment {
         PositionType positionType;
         uint256 stake;
         bytes32 preCommit;
-        Play bWeapon;
-        Play aWeapon;
+        Weapon bWeapon;
+        Weapon aWeapon;
         bytes32 salt;
         uint256[] allocation;
     }

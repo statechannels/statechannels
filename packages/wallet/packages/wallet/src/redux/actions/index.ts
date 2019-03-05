@@ -46,7 +46,7 @@ export const opponentCommitmentReceived = (commitment: Commitment, signature: st
 export type OpponentCommitmentReceived = ReturnType<typeof opponentCommitmentReceived>;
 
 export const MESSAGE_RECEIVED = 'WALLET.MESSAGE_RECEIVED';
-export const messageReceived = (data: string, signature?: string) => ({
+export const messageReceived = (data: Commitment | 'FundingDeclined', signature?: string) => ({
   type: MESSAGE_RECEIVED as typeof MESSAGE_RECEIVED,
   data,
   signature,

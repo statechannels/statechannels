@@ -61,7 +61,7 @@ export const standard = {
   bWeapon,
   aResult: Result.YouWin,
   bResult: Result.YouLose,
-  propose: commitmentHelper.proposeFromSalt({ ...baseWithBuyIn, turnNum: 4, allocation: fiveFive, aWeapon, salt }),
+  propose: commitmentHelper.proposeFromSalt({ ...baseWithBuyIn, turnNum: 4, allocation: fourSix, aWeapon, salt }),
   accept: commitmentHelper.accept({ ...baseWithBuyIn, turnNum: 5, allocation: fourSix, preCommit, bWeapon }),
   reveal: commitmentHelper.reveal({ ...baseWithBuyIn, turnNum: 6, allocation: sixFour, bWeapon, aWeapon, salt }),
 
