@@ -4,7 +4,6 @@
   },
   "name": "apps",
   "license": "MIT",
-
   "scripts": {
     "test:ci": "test:ci",
     "build": "build"

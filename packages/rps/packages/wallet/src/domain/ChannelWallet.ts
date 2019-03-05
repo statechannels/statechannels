@@ -16,7 +16,7 @@ export default class ChannelWallet {
     if (this.channel) {
       return channelID(this.channel);
     } else {
-      throw new Error("Channel must be opened");
+      throw new Error('Channel must be opened');
     }
   }
 
@@ -38,7 +38,7 @@ export default class ChannelWallet {
 
   openChannel(channel: Channel): Channel {
     if (this.channel) {
-      throw new Error("Only one open channel is supported");
+      throw new Error('Only one open channel is supported');
     }
     this.channel = channel;
     return channel;
@@ -47,5 +47,4 @@ export default class ChannelWallet {
   closeChannel() {
     this.channel = null;
   }
-
 }

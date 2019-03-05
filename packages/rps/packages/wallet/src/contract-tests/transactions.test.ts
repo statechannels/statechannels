@@ -1,13 +1,26 @@
-import { ethers } from "ethers";
+import { ethers } from 'ethers';
 
-import { put } from "redux-saga/effects";
+import { put } from 'redux-saga/effects';
 
-import { transactionConfirmed, transactionFinalized, transactionSentToMetamask, transactionSubmitted } from '../redux/actions';
-import { transactionSender } from "../redux/sagas/transaction-sender";
+import {
+  transactionConfirmed,
+  transactionFinalized,
+  transactionSentToMetamask,
+  transactionSubmitted,
+} from '../redux/actions';
+import { transactionSender } from '../redux/sagas/transaction-sender';
 import { signCommitment, signVerificationData } from '../utils/signing-utils';
 import { getLibraryAddress, createChallenge, concludeGame } from './test-utils';
 import {
-  createForceMoveTransaction, createDepositTransaction, createRespondWithMoveTransaction, createRefuteTransaction, createConcludeTransaction, createWithdrawTransaction, ConcludeAndWithdrawArgs, createConcludeAndWithdrawTransaction, createTransferAndWithdrawTransaction
+  createForceMoveTransaction,
+  createDepositTransaction,
+  createRespondWithMoveTransaction,
+  createRefuteTransaction,
+  createConcludeTransaction,
+  createWithdrawTransaction,
+  ConcludeAndWithdrawArgs,
+  createConcludeAndWithdrawTransaction,
+  createTransferAndWithdrawTransaction,
 } from '../utils/transaction-generator';
 
 import { depositContract } from './test-utils';
@@ -21,7 +34,9 @@ describe('transactions', () => {
   let networkId;
   let libraryAddress;
   let nonce = 5;
-  const provider: ethers.providers.JsonRpcProvider = new ethers.providers.JsonRpcProvider(`http://localhost:${process.env.DEV_GANACHE_PORT}`);
+  const provider: ethers.providers.JsonRpcProvider = new ethers.providers.JsonRpcProvider(
+    `http://localhost:${process.env.DEV_GANACHE_PORT}`,
+  );
 
   const participantA = ethers.Wallet.createRandom();
   const participantB = ethers.Wallet.createRandom();
@@ -38,15 +53,18 @@ describe('transactions', () => {
     const transactionReceipt = await signer.sendTransaction(transactionToSend);
 
     saga.next();
-    expect(saga.next(transactionReceipt).value).toEqual(put(transactionSubmitted(transactionReceipt.hash || "")));
+    expect(saga.next(transactionReceipt).value).toEqual(
+      put(transactionSubmitted(transactionReceipt.hash || '')),
+    );
     const confirmedTransaction = await transactionReceipt.wait();
     saga.next();
-    expect(saga.next(confirmedTransaction).value).toEqual(put(transactionConfirmed(confirmedTransaction.contractAddress)));
+    expect(saga.next(confirmedTransaction).value).toEqual(
+      put(transactionConfirmed(confirmedTransaction.contractAddress)),
+    );
 
     //  saga.next();
     expect(saga.next().value).toEqual(put(transactionFinalized()));
     expect(saga.next().done).toBe(true);
-
   }
 
   beforeAll(async () => {
@@ -55,15 +73,17 @@ describe('transactions', () => {
     libraryAddress = getLibraryAddress(networkId);
   });
 
-
-
   it('should deposit into the contract', async () => {
     const contractAddress = await getAdjudicatorContractAddress(provider);
-    const depositTransaction = createDepositTransaction(contractAddress, participantA.address, '0x5');
+    const depositTransaction = createDepositTransaction(
+      contractAddress,
+      participantA.address,
+      '0x5',
+    );
     await testTransactionSender(depositTransaction);
   });
 
-  it("should send a forceMove transaction", async () => {
+  it('should send a forceMove transaction', async () => {
     const channel: Channel = { channelType: libraryAddress, nonce: getNextNonce(), participants };
     const contractAddress = await getAdjudicatorContractAddress(provider);
     await depositContract(provider, contractAddress, participantA.address);
@@ -91,12 +111,17 @@ describe('transactions', () => {
     const fromSig = signCommitment(fromCommitment, participantB.privateKey);
     const toSig = signCommitment(toCommitment, participantA.privateKey);
 
-    const forceMoveTransaction = createForceMoveTransaction(contractAddress, fromCommitment, toCommitment, fromSig, toSig);
+    const forceMoveTransaction = createForceMoveTransaction(
+      contractAddress,
+      fromCommitment,
+      toCommitment,
+      fromSig,
+      toSig,
+    );
     await testTransactionSender(forceMoveTransaction);
-
   });
 
-  it("should send a respondWithMove transaction", async () => {
+  it('should send a respondWithMove transaction', async () => {
     const channel: Channel = { channelType: libraryAddress, nonce: getNextNonce(), participants };
     const { nonce: channelNonce } = channel;
     const contractAddress = await getAdjudicatorContractAddress(provider);
@@ -115,11 +140,15 @@ describe('transactions', () => {
 
     const toSig = signCommitment(toCommitment, participantB.privateKey);
 
-    const respondWithMoveTransaction = createRespondWithMoveTransaction(contractAddress, toCommitment, toSig);
+    const respondWithMoveTransaction = createRespondWithMoveTransaction(
+      contractAddress,
+      toCommitment,
+      toSig,
+    );
     await testTransactionSender(respondWithMoveTransaction);
   });
 
-  it("should send a refute transaction", async () => {
+  it('should send a refute transaction', async () => {
     const channel: Channel = { channelType: libraryAddress, nonce: getNextNonce(), participants };
     const { nonce: channelNonce } = channel;
     const contractAddress = await getAdjudicatorContractAddress(provider);
@@ -142,7 +171,7 @@ describe('transactions', () => {
     await testTransactionSender(refuteTransaction);
   });
 
-  it("should send a conclude transaction", async () => {
+  it('should send a conclude transaction', async () => {
     const channel: Channel = { channelType: libraryAddress, nonce: getNextNonce(), participants };
     const contractAddress = await getAdjudicatorContractAddress(provider);
     await depositContract(provider, contractAddress, participantA.address);
@@ -169,11 +198,17 @@ describe('transactions', () => {
     const fromSignature = signCommitment(fromCommitment, participantA.privateKey);
     const toSignature = signCommitment(toCommitment, participantB.privateKey);
 
-    const concludeTransaction = createConcludeTransaction(contractAddress, fromCommitment, toCommitment, fromSignature, toSignature);
+    const concludeTransaction = createConcludeTransaction(
+      contractAddress,
+      fromCommitment,
+      toCommitment,
+      fromSignature,
+      toSignature,
+    );
     await testTransactionSender(concludeTransaction);
   });
 
-  it("should send a transferAndWithdraw transaction", async () => {
+  it('should send a transferAndWithdraw transaction', async () => {
     const channel: Channel = { channelType: libraryAddress, nonce: getNextNonce(), participants };
     const channelId = channelID(channel);
     const contractAddress = await getAdjudicatorContractAddress(provider);
@@ -181,27 +216,58 @@ describe('transactions', () => {
     await depositContract(provider, contractAddress, channelId);
     await concludeGame(provider, contractAddress, channel.nonce, participantA, participantB);
     const senderAddress = await provider.getSigner().getAddress();
-    const verificationSignature = signVerificationData(participantA.address, participantA.address, '0x01', senderAddress, participantA.privateKey);
-    const transferAndWithdraw = createTransferAndWithdrawTransaction(contractAddress, channelId, participantA.address, participantA.address, '0x01', verificationSignature);
+    const verificationSignature = signVerificationData(
+      participantA.address,
+      participantA.address,
+      '0x01',
+      senderAddress,
+      participantA.privateKey,
+    );
+    const transferAndWithdraw = createTransferAndWithdrawTransaction(
+      contractAddress,
+      channelId,
+      participantA.address,
+      participantA.address,
+      '0x01',
+      verificationSignature,
+    );
     await testTransactionSender(transferAndWithdraw);
   });
 
-  it("should send a withdraw transaction", async () => {
+  it('should send a withdraw transaction', async () => {
     const contractAddress = await getAdjudicatorContractAddress(provider);
     await depositContract(provider, contractAddress, participantA.address);
     const senderAddress = await provider.getSigner().getAddress();
-    const verificationSignature = signVerificationData(participantA.address, participantA.address, '0x01', senderAddress, participantA.privateKey);
-    const withdrawTransaction = createWithdrawTransaction(contractAddress, '0x01', participantA.address, participantA.address, verificationSignature);
+    const verificationSignature = signVerificationData(
+      participantA.address,
+      participantA.address,
+      '0x01',
+      senderAddress,
+      participantA.privateKey,
+    );
+    const withdrawTransaction = createWithdrawTransaction(
+      contractAddress,
+      '0x01',
+      participantA.address,
+      participantA.address,
+      verificationSignature,
+    );
     await testTransactionSender(withdrawTransaction);
   });
 
-  it("should send a conclude and withdraw transaction", async () => {
+  it('should send a conclude and withdraw transaction', async () => {
     const channel: Channel = { channelType: libraryAddress, nonce: getNextNonce(), participants };
     const channelId = channelID(channel);
     const contractAddress = await getAdjudicatorContractAddress(provider);
     await depositContract(provider, contractAddress, channelId);
     const senderAddress = await provider.getSigner().getAddress();
-    const verificationSignature = signVerificationData(participantA.address, participantA.address, '0x05', senderAddress, participantA.privateKey);
+    const verificationSignature = signVerificationData(
+      participantA.address,
+      participantA.address,
+      '0x05',
+      senderAddress,
+      participantA.privateKey,
+    );
     const fromCommitment: Commitment = {
       channel,
       allocation: ['0x05', '0x05'],
@@ -234,7 +300,10 @@ describe('transactions', () => {
       destination: participantA.address,
       amount: '0x05',
     };
-    const concludeAndWithdrawTransaction = createConcludeAndWithdrawTransaction(contractAddress, args);
+    const concludeAndWithdrawTransaction = createConcludeAndWithdrawTransaction(
+      contractAddress,
+      args,
+    );
     await testTransactionSender(concludeAndWithdrawTransaction);
   });
 });

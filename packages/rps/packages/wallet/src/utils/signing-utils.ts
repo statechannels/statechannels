@@ -3,8 +3,11 @@ import { recover, sign, Commitment, toHex } from 'fmg-core';
 import { ethers } from 'ethers';
 import { MessageSignature } from 'web3/eth/accounts';
 
-
-export const validCommitmentSignature = (commitment: Commitment, signature: string, address: string) => {
+export const validCommitmentSignature = (
+  commitment: Commitment,
+  signature: string,
+  address: string,
+) => {
   return validSignature(toHex(commitment), signature, address);
 };
 
@@ -17,7 +20,6 @@ export const validSignature = (data: string, signature: string, address: string)
 
     return recovered === getAddress(address);
   } catch (err) {
-
     return false;
   }
 };
@@ -31,7 +33,13 @@ export const signData = (data: string, privateKey: string) => {
   return signature.signature;
 };
 
-export const signVerificationData = (playerAddress: string, destination: string, amount: string, sender: string, privateKey) => {
+export const signVerificationData = (
+  playerAddress: string,
+  destination: string,
+  amount: string,
+  sender: string,
+  privateKey,
+) => {
   const AUTH_TYPES = ['address', 'address', 'uint256', 'address'];
   const abiCoder = new ethers.utils.AbiCoder();
   const authorization = abiCoder.encode(AUTH_TYPES, [playerAddress, destination, amount, sender]);

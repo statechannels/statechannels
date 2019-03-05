@@ -8,6 +8,20 @@
   "resolutions": {
     "firebase/**/grpc": "^1.16.1"
   },
+  "scripts": {
+    "start": "node scripts/start.js",
+    "build": "node --max-old-space-size=4076 scripts/build.js",
+    "test": "run-s prettier:check test:contracts 'test:app --all'",
+    "test:ci": "DEV_GANACHE_PORT=8504 run-s prettier:check build 'test:contracts --all --ci' 'test:app --all --ci --runInBand'",
+    "test:app": "npx run-jest -c ./config/jest/jest.config.js",
+    "test:contracts": "npx ganache-then-jest -c ./config/jest/jest.contracts.config.js --runInBand",
+		"prettier:check": "npx prettier --check src/**/*.ts",
+		"prettier:write": "npx prettier --write src/**/*.ts",
+    "deployContracts": "npx deploy-contracts",
+    "storybook": "start-storybook -p 9001 -c .storybook",
+    "truffle:migrate": "npx deploy-contracts",
+    "ganache:start": "npx start-ganache"
+  },
   "dependencies": {
     "@types/react-redux": "^6.0.11",
     "@types/reactstrap": "^6.4.3",
@@ -103,18 +117,6 @@
   },
   "config": {
     "deploymentNetwork": "ropsten"
-  },
-  "scripts": {
-    "start": "node scripts/start.js",
-    "build": "node --max-old-space-size=4076 scripts/build.js",
-    "test": "run-s test:contracts 'test:app --all'",
-    "test:app": "npx run-jest -c ./config/jest/jest.config.js",
-    "test:contracts": "npx ganache-then-jest -c ./config/jest/jest.contracts.config.js --runInBand",
-    "deployContracts": "npx deploy-contracts",
-    "test:ci": "DEV_GANACHE_PORT=8504 run-s build 'test:contracts --all --ci' 'test:app --all --ci --runInBand'",
-    "storybook": "start-storybook -p 9001 -c .storybook",
-    "truffle:migrate": "npx deploy-contracts",
-    "ganache:start": "npx start-ganache"
   },
   "devDependencies": {
     "@babel/runtime": "^7.0.0-beta.53",

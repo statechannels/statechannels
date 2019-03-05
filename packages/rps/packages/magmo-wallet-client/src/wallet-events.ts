@@ -28,7 +28,11 @@ export const fundingSuccess = (channelId, commitment: Commitment) => ({
 /**
  * @ignore
  */
-export const fundingFailure = (channelId: any, reason: 'FundingDeclined' | 'Other', error?: string) => ({
+export const fundingFailure = (
+  channelId: any,
+  reason: 'FundingDeclined' | 'Other',
+  error?: string,
+) => ({
   type: FUNDING_FAILURE as typeof FUNDING_FAILURE,
   channelId,
   reason,
@@ -69,7 +73,10 @@ export const validationSuccess = () => ({
 /**
  * @ignore
  */
-export const validationFailure = (reason: "WalletBusy" | "InvalidSignature" | "Other", error?: string) => ({
+export const validationFailure = (
+  reason: 'WalletBusy' | 'InvalidSignature' | 'Other',
+  error?: string,
+) => ({
   type: VALIDATION_FAILURE as typeof VALIDATION_FAILURE,
   reason,
   error,
@@ -86,7 +93,6 @@ export type ValidationFailure = ReturnType<typeof validationFailure>;
  * @ignore
  */
 export type ValidationResponse = ValidationSuccess | ValidationFailure;
-
 
 // SIGNATURE
 // =========
@@ -108,7 +114,7 @@ export const signatureSuccess = (signature: string) => ({
 /**
  * @ignore
  */
-export const signatureFailure = (reason: "WalletBusy" | "Other", error?: string) => ({
+export const signatureFailure = (reason: 'WalletBusy' | 'Other', error?: string) => ({
   type: SIGNATURE_FAILURE as typeof SIGNATURE_FAILURE,
   reason,
   error,
@@ -125,7 +131,6 @@ export type SignatureFailure = ReturnType<typeof signatureFailure>;
  * @ignore
  */
 export type SignatureResponse = SignatureSuccess | SignatureFailure;
-
 
 // INITIALIZATION
 // ==============
@@ -176,7 +181,7 @@ export const concludeSuccess = () => ({
 /**
  * @ignore
  */
-export const concludeFailure = (reason: "UserDeclined" | "Other", error?: string) => ({
+export const concludeFailure = (reason: 'UserDeclined' | 'Other', error?: string) => ({
   type: CONCLUDE_FAILURE as typeof CONCLUDE_FAILURE,
   reason,
   error,
@@ -204,7 +209,6 @@ export const closeSuccess = () => ({
  * The event thrown when the game has been successfully closed.
  */
 export type CloseSuccess = ReturnType<typeof closeSuccess>;
-
 
 // DISPLAY
 /**
@@ -281,7 +285,7 @@ export const CHALLENGE_REJECTED = 'WALLET.CHALLENGING.CHALLENGE_REJECTED';
 /**
  * @ignore
  */
-export const challengeRejected = (reason) => ({
+export const challengeRejected = reason => ({
   type: CHALLENGE_REJECTED as typeof CHALLENGE_REJECTED,
   reason,
 });
@@ -322,22 +326,22 @@ export type ChallengeComplete = ReturnType<typeof challengeComplete>;
  * The various types of wallet events that can occur.
  */
 export type WalletEventType =
-  typeof CHALLENGE_COMPLETE |
-  typeof CHALLENGE_RESPONSE_REQUESTED |
-  typeof CHALLENGE_REJECTED |
-  typeof CHALLENGE_COMMITMENT_RECEIVED |
-  typeof MESSAGE_REQUEST |
-  typeof CLOSE_SUCCESS |
-  typeof CONCLUDE_FAILURE |
-  typeof CONCLUDE_SUCCESS |
-  typeof SIGNATURE_FAILURE |
-  typeof SIGNATURE_SUCCESS |
-  typeof VALIDATION_FAILURE |
-  typeof VALIDATION_SUCCESS |
-  typeof FUNDING_FAILURE |
-  typeof FUNDING_SUCCESS |
-  typeof SHOW_WALLET |
-  typeof HIDE_WALLET;
+  | typeof CHALLENGE_COMPLETE
+  | typeof CHALLENGE_RESPONSE_REQUESTED
+  | typeof CHALLENGE_REJECTED
+  | typeof CHALLENGE_COMMITMENT_RECEIVED
+  | typeof MESSAGE_REQUEST
+  | typeof CLOSE_SUCCESS
+  | typeof CONCLUDE_FAILURE
+  | typeof CONCLUDE_SUCCESS
+  | typeof SIGNATURE_FAILURE
+  | typeof SIGNATURE_SUCCESS
+  | typeof VALIDATION_FAILURE
+  | typeof VALIDATION_SUCCESS
+  | typeof FUNDING_FAILURE
+  | typeof FUNDING_SUCCESS
+  | typeof SHOW_WALLET
+  | typeof HIDE_WALLET;
 
 /**
  * @ignore
@@ -346,18 +350,18 @@ export type DisplayAction = ShowWallet | HideWallet;
 
 // TODO: This could live exclusively in the wallet
 export type WalletEvent =
-  InitializationSuccess |
-  ConcludeSuccess |
-  ConcludeFailure |
-  CloseSuccess |
-  ValidationSuccess |
-  ValidationFailure |
-  FundingSuccess |
-  FundingFailure |
-  SignatureSuccess |
-  SignatureFailure |
-  ChallengeCommitmentReceived |
-  ChallengeRejected |
-  ChallengeResponseRequested |
-  ChallengeComplete |
-  MessageRequest;
+  | InitializationSuccess
+  | ConcludeSuccess
+  | ConcludeFailure
+  | CloseSuccess
+  | ValidationSuccess
+  | ValidationFailure
+  | FundingSuccess
+  | FundingFailure
+  | SignatureSuccess
+  | SignatureFailure
+  | ChallengeCommitmentReceived
+  | ChallengeRejected
+  | ChallengeResponseRequested
+  | ChallengeComplete
+  | MessageRequest;

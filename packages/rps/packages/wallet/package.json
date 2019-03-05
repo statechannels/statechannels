@@ -8,6 +8,20 @@
   "resolutions": {
     "firebase/**/grpc": "^1.16.1"
   },
+  "scripts": {
+    "start": "node scripts/start.js",
+    "build": "node scripts/build.js",
+    "test": "run-s prettier:check 'test:app --all'",
+    "test:ci": "DEV_GANACHE_PORT=8503 run-s prettier:check build 'test:contracts --all --ci' 'test:app --all --ci --runInBand'",
+    "test:app": "npx run-jest -c ./config/jest/jest.config.js",
+    "prettier:check": "npx prettier --check src/**/*.ts",
+    "prettier:write": "npx prettier --write src/**/*.ts",
+    "deployContracts": "npx deploy-contracts",
+    "ganache:start": "npx start-ganache -b 1",
+    "postinstall": "rm -f node_modules/web3/index.d.ts",
+    "storybook": "start-storybook -p 9001 -c .storybook",
+    "test:contracts": "npx ganache-then-jest -c ./config/jest/jest.contracts.config.js --runInBand"
+  },
   "dependencies": {
     "@firebase/app-types": "^0.3.2",
     "@fortawesome/fontawesome-svg-core": "^1.2.4",
@@ -72,19 +86,8 @@
     "webpack-manifest-plugin": "2.0.4",
     "whatwg-fetch": "2.0.3"
   },
-  "scripts": {
-    "start": "node scripts/start.js",
-    "build": "node scripts/build.js",
-    "test": "run-s 'test:app --all'",
-    "test:ci": "DEV_GANACHE_PORT=8503 run-s build 'test:contracts --all --ci' 'test:app --all --ci --runInBand'",
-    "test:app": "npx run-jest -c ./config/jest/jest.config.js",
-    "deployContracts": "npx deploy-contracts",
-    "ganache:start": "npx start-ganache -b 1",
-    "postinstall": "rm -f node_modules/web3/index.d.ts",
-    "storybook": "start-storybook -p 9001 -c .storybook",
-    "test:contracts": "npx ganache-then-jest -c ./config/jest/jest.contracts.config.js --runInBand"
-  },
   "devDependencies": {
+    "prettier": "^1.16.4",
     "@babel/runtime": "^7.0.0-beta.53",
     "@storybook/react": "4.0.9",
     "@types/jest": "^23.3.1",

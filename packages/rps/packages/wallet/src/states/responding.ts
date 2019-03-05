@@ -19,7 +19,9 @@ export interface ResponseTransactionFailed extends ChallengeExists {
   stage: typeof RESPONDING;
 }
 
-export function responseTransactionFailed<T extends ChallengeExists>(params: T): ResponseTransactionFailed {
+export function responseTransactionFailed<T extends ChallengeExists>(
+  params: T,
+): ResponseTransactionFailed {
   return { type: RESPONSE_TRANSACTION_FAILED, stage: RESPONDING, ...challengeExists(params) };
 }
 
@@ -50,7 +52,9 @@ export interface WaitForResponseSubmission extends ChallengeExists {
   type: typeof WAIT_FOR_RESPONSE_SUBMISSION;
   stage: typeof RESPONDING;
 }
-export function waitForResponseSubmission<T extends ChallengeExists>(params: T): WaitForResponseSubmission {
+export function waitForResponseSubmission<T extends ChallengeExists>(
+  params: T,
+): WaitForResponseSubmission {
   return { type: WAIT_FOR_RESPONSE_SUBMISSION, stage: RESPONDING, ...challengeExists(params) };
 }
 
@@ -58,27 +62,42 @@ export interface WaitForResponseConfirmation extends ChallengeExists, Transactio
   type: typeof WAIT_FOR_RESPONSE_CONFIRMATION;
   stage: typeof RESPONDING;
 }
-export function waitForResponseConfirmation<T extends ChallengeExists & TransactionExists>(params: T): WaitForResponseConfirmation {
-  return { type: WAIT_FOR_RESPONSE_CONFIRMATION, stage: RESPONDING, ...challengeExists(params), transactionHash: params.transactionHash };
+export function waitForResponseConfirmation<T extends ChallengeExists & TransactionExists>(
+  params: T,
+): WaitForResponseConfirmation {
+  return {
+    type: WAIT_FOR_RESPONSE_CONFIRMATION,
+    stage: RESPONDING,
+    ...challengeExists(params),
+    transactionHash: params.transactionHash,
+  };
 }
 
 export interface ChallengeeAcknowledgeChallengeTimeout extends ChallengeExists {
   type: typeof CHALLENGEE_ACKNOWLEDGE_CHALLENGE_TIMEOUT;
   stage: typeof RESPONDING;
 }
-export function challengeeAcknowledgeChallengeTimeOut<T extends ChallengeExists>(params: T): ChallengeeAcknowledgeChallengeTimeout {
-  return { type: CHALLENGEE_ACKNOWLEDGE_CHALLENGE_TIMEOUT, stage: RESPONDING, ...challengeExists(params) };
+export function challengeeAcknowledgeChallengeTimeOut<T extends ChallengeExists>(
+  params: T,
+): ChallengeeAcknowledgeChallengeTimeout {
+  return {
+    type: CHALLENGEE_ACKNOWLEDGE_CHALLENGE_TIMEOUT,
+    stage: RESPONDING,
+    ...challengeExists(params),
+  };
 }
 
 export interface AcknowledgeChallengeComplete extends ChallengeExists {
   type: typeof ACKNOWLEDGE_CHALLENGE_COMPLETE;
   stage: typeof RESPONDING;
 }
-export function acknowledgeChallengeComplete<T extends ChallengeExists>(params: T): AcknowledgeChallengeComplete {
+export function acknowledgeChallengeComplete<T extends ChallengeExists>(
+  params: T,
+): AcknowledgeChallengeComplete {
   return { type: ACKNOWLEDGE_CHALLENGE_COMPLETE, stage: RESPONDING, ...challengeExists(params) };
 }
 
-export type RespondingState = (
+export type RespondingState =
   | ChooseResponse
   | TakeMoveInApp
   | InitiateResponse
@@ -86,5 +105,4 @@ export type RespondingState = (
   | WaitForResponseConfirmation
   | ChallengeeAcknowledgeChallengeTimeout
   | AcknowledgeChallengeComplete
-  | ResponseTransactionFailed
-);
+  | ResponseTransactionFailed;
