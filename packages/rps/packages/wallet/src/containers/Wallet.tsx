@@ -2,7 +2,7 @@ import React from 'react';
 import { PureComponent } from 'react';
 import { connect } from 'react-redux';
 
-import * as states from '../states';
+import * as states from '../redux/states';
 import FundingContainer from './Funding';
 import RespondingContainer from './Responding';
 import ChallengingContainer from './Challenging';
@@ -16,7 +16,6 @@ interface WalletProps {
 }
 
 class Wallet extends PureComponent<WalletProps> {
-
   render() {
     const { state } = this.props;
     switch (state.stage) {

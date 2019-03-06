@@ -3,7 +3,7 @@ import { PureComponent } from 'react';
 import { connect } from 'react-redux';
 import { Button } from 'reactstrap';
 
-import * as states from '../states';
+import * as states from '../redux/states';
 import * as actions from '../redux/actions';
 
 // import BWaitForPostFundSetup from '../components/funding/BWaitForPostFundSetup';
@@ -56,20 +56,22 @@ class FundingContainer extends PureComponent<Props> {
       case states.A_SUBMIT_DEPOSIT_IN_METAMASK:
         return <AFundingStep step={1}>Please confirm the transaction in MetaMask!</AFundingStep>;
       case states.A_WAIT_FOR_DEPOSIT_CONFIRMATION:
-          return <AFundingStep step={2}>
+        return (
+          <AFundingStep step={2}>
             Check the progress on&nbsp;
             <EtherscanLink
               transactionID={state.transactionHash}
               networkId={state.networkId}
               title="Etherscan"
-            />!
-          </AFundingStep>;
+            />
+            !
+          </AFundingStep>
+        );
       case states.A_WAIT_FOR_OPPONENT_DEPOSIT:
         return <AFundingStep step={3} />;
       case states.A_WAIT_FOR_POST_FUND_SETUP:
         // return <AWaitForPostFundSetup />;
-        return <AFundingStep step={4}>Waiting for the other player
-        </AFundingStep>;
+        return <AFundingStep step={4}>Waiting for the other player</AFundingStep>;
       case states.B_WAIT_FOR_OPPONENT_DEPOSIT:
         // return <WaitForOtherPlayer name="deployment" />;
         return <BFundingStep step={1} />;
@@ -84,34 +86,35 @@ class FundingContainer extends PureComponent<Props> {
           return <AFundingStep step={3} />;
         } else {
           // return <WaitForXConfirmation name="deposit" transactionID={state.transactionHash} networkId={state.networkId} />;
-          return <BFundingStep step={3}>
-            Check the progress on&nbsp;
-            <EtherscanLink
-              transactionID={state.transactionHash}
-              networkId={state.networkId}
-              title="Etherscan"
-            />!
-          </BFundingStep>;
+          return (
+            <BFundingStep step={3}>
+              Check the progress on&nbsp;
+              <EtherscanLink
+                transactionID={state.transactionHash}
+                networkId={state.networkId}
+                title="Etherscan"
+              />
+              !
+            </BFundingStep>
+          );
         }
       case states.B_WAIT_FOR_POST_FUND_SETUP:
         // return <BWaitForPostFundSetup />;
-        return <BFundingStep step={4}>Waiting for the other player
-        </BFundingStep>;
+        return <BFundingStep step={4}>Waiting for the other player</BFundingStep>;
 
       case states.ACKNOWLEDGE_FUNDING_SUCCESS:
         if (state.ourIndex === 0) {
-          return <AFundingStep step={5}>
-            <Button onClick={fundingSuccessAcknowledged} >
-              {"Return to game"}
-            </Button>
-          </AFundingStep>;
-        }
-        else {
-          return <BFundingStep step={5}>
-            <Button onClick={fundingSuccessAcknowledged} >
-              {"Return to game"}
-            </Button>
-          </BFundingStep>;
+          return (
+            <AFundingStep step={5}>
+              <Button onClick={fundingSuccessAcknowledged}>{'Return to game'}</Button>
+            </AFundingStep>
+          );
+        } else {
+          return (
+            <BFundingStep step={5}>
+              <Button onClick={fundingSuccessAcknowledged}>{'Return to game'}</Button>
+            </BFundingStep>
+          );
         }
       // return (
       // <AcknowledgeX
@@ -122,12 +125,14 @@ class FundingContainer extends PureComponent<Props> {
       // />
       // );
       case states.ACKNOWLEDGE_FUNDING_DECLINED:
-        return (<AcknowledgeX
-          title="Funding declined!"
-          action={fundingDeclinedAcknowledged}
-          description="Your opponent has declined to fund the game."
-          actionTitle="Return to game"
-        />);
+        return (
+          <AcknowledgeX
+            title="Funding declined!"
+            action={fundingDeclinedAcknowledged}
+            description="Your opponent has declined to fund the game."
+            actionTitle="Return to game"
+          />
+        );
       case states.SEND_FUNDING_DECLINED_MESSAGE:
         return null;
       case states.A_DEPOSIT_TRANSACTION_FAILED:

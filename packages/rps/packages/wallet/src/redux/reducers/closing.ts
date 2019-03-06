@@ -1,7 +1,7 @@
-import * as states from '../../states';
+import * as states from '.././states';
 import * as actions from '../actions';
 
-import { WalletState, ClosingState } from '../../states';
+import { WalletState, ClosingState } from '.././states';
 import { WalletAction } from '../actions';
 import { unreachable, ourTurn, validTransition } from '../../utils/reducer-utils';
 import { signCommitment, signVerificationData, validCommitmentSignature } from '../../utils/signing-utils';
