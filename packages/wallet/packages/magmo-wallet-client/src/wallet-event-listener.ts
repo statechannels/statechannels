@@ -42,7 +42,7 @@ export class WalletEventListener {
   }
 
   /**
-   * Subscribes an event handler for all [[WalletEvent]] that may be thrown.
+   * Subscribes an event handler for all [[WalletEvent]] that may be emitted.
    * @param eventHandler The event handler to subscribe.
    */
   public subscribeAll(eventHandler: (event: WalletEvent) => void) {

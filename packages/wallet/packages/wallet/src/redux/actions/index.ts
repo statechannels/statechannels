@@ -8,7 +8,12 @@ export const loggedIn = (uid: string) => ({
 export type LoggedIn = ReturnType<typeof loggedIn>;
 
 export const KEYS_LOADED = 'WALLET.KEYS_LOADED';
-export const keysLoaded = (address: string, privateKey: string, networkId: string, adjudicator: string) => ({
+export const keysLoaded = (
+  address: string,
+  privateKey: string,
+  networkId: string,
+  adjudicator: string,
+) => ({
   type: KEYS_LOADED as typeof KEYS_LOADED,
   address,
   privateKey,
@@ -38,7 +43,7 @@ export const challengeCommitmentReceived = (commitment: Commitment) => ({
 export type ChallengeCommitmentReceived = ReturnType<typeof challengeCommitmentReceived>;
 
 export const OPPONENT_COMMITMENT_RECEIVED = 'WALLET.OPPONENT_COMMITMENT_RECEIVED';
-export const opponentCommitmentReceived = (commitment: Commitment, signature: string, ) => ({
+export const opponentCommitmentReceived = (commitment: Commitment, signature: string) => ({
   type: OPPONENT_COMMITMENT_RECEIVED as typeof OPPONENT_COMMITMENT_RECEIVED,
   commitment,
   signature,
@@ -46,12 +51,19 @@ export const opponentCommitmentReceived = (commitment: Commitment, signature: st
 export type OpponentCommitmentReceived = ReturnType<typeof opponentCommitmentReceived>;
 
 export const MESSAGE_RECEIVED = 'WALLET.MESSAGE_RECEIVED';
-export const messageReceived = (data: Commitment | 'FundingDeclined', signature?: string) => ({
+export const messageReceived = (data: 'FundingDeclined') => ({
   type: MESSAGE_RECEIVED as typeof MESSAGE_RECEIVED,
   data,
-  signature,
 });
 export type MessageReceived = ReturnType<typeof messageReceived>;
+
+export const COMMITMENT_RECEIVED = 'WALLET.COMMITMENT_RECEIVED';
+export const commitmentReceived = (commitment: Commitment, signature: string) => ({
+  type: COMMITMENT_RECEIVED as typeof COMMITMENT_RECEIVED,
+  commitment,
+  signature,
+});
+export type CommitmentReceived = ReturnType<typeof commitmentReceived>;
 
 export const MESSAGE_SENT = 'WALLET.MESSAGE_SENT';
 export const messageSent = () => ({
@@ -71,7 +83,6 @@ export const fundingRequested = () => ({
 });
 export type FundingRequested = ReturnType<typeof fundingRequested>;
 
-
 export const FUNDING_APPROVED = 'WALLET.FUNDING_APPROVED';
 export const fundingApproved = () => ({
   type: FUNDING_APPROVED as typeof FUNDING_APPROVED,
@@ -89,7 +100,6 @@ export const depositInitiated = () => ({
   type: DEPOSIT_INITIATED as typeof DEPOSIT_INITIATED,
 });
 export type DepositInitiated = ReturnType<typeof depositInitiated>;
-
 
 export const DEPOSIT_SUBMITTED = '.'; // when submitted to network
 
@@ -117,7 +127,6 @@ export const fundingDeclinedAcknowledged = () => ({
 });
 export type FundingDeclinedAcknowledged = ReturnType<typeof fundingDeclinedAcknowledged>;
 
-
 export const POST_FUND_SETUP_RECEIVED = 'WALLET.POST_FUND_SETUP_RECEIVED'; // when X blocks deep
 export const postFundSetupReceived = (data: string, signature: string) => ({
   type: POST_FUND_SETUP_RECEIVED as typeof POST_FUND_SETUP_RECEIVED,
@@ -143,7 +152,6 @@ export const challengeRequested = () => ({
   type: CHALLENGE_REQUESTED as typeof CHALLENGE_REQUESTED,
 });
 export type ChallengeRequested = ReturnType<typeof challengeRequested>;
-
 
 export const CHALLENGE_RESPONSE_RECEIVED = 'WALLET.CHALLENGE_RESPONSE_RECEIVED';
 export const challengeResponseReceived = (data: string) => ({
@@ -208,12 +216,11 @@ export const transactionSentToMetamask = () => ({
 export type TransactionSentToMetamask = ReturnType<typeof transactionSentToMetamask>;
 
 export const TRANSACTION_SUBMISSION_FAILED = 'WALLET.TRANSACTION_SUBMISSION_FAILED';
-export const transactionSubmissionFailed = (error: { message?: string, code }) => ({
+export const transactionSubmissionFailed = (error: { message?: string; code }) => ({
   error,
   type: TRANSACTION_SUBMISSION_FAILED as typeof TRANSACTION_SUBMISSION_FAILED,
 });
 export type TransactionSubmissionFailed = ReturnType<typeof transactionSubmissionFailed>;
-
 
 export const TRANSACTION_SUBMITTED = 'WALLET.TRANSACTION_SUBMITTED';
 export const transactionSubmitted = (transactionHash: string) => ({
@@ -234,8 +241,6 @@ export const transactionFinalized = () => ({
   type: TRANSACTION_FINALIZED as typeof TRANSACTION_FINALIZED,
 });
 export type TransactionFinalized = ReturnType<typeof transactionFinalized>;
-
-
 
 export const WITHDRAWAL_REQUESTED = 'WALLET.WITHDRAWAL_REQUESTED';
 export const withdrawalRequested = () => ({
@@ -281,7 +286,7 @@ export const challengeCreatedEvent = (channelId, commitment, finalizedAt) => ({
 export type ChallengeCreatedEvent = ReturnType<typeof challengeCreatedEvent>;
 
 export const CONCLUDED_EVENT = 'CONCLUDED_EVENT';
-export const concludedEvent = (channelId) => ({
+export const concludedEvent = channelId => ({
   channelId,
   type: CONCLUDED_EVENT as typeof CONCLUDED_EVENT,
 });
@@ -353,61 +358,61 @@ export const retryTransaction = () => ({
 export type RetryTransaction = ReturnType<typeof retryTransaction>;
 
 export const BLOCK_MINED = 'BLOCK_MINED';
-export const blockMined = (block: { timestamp: number, number: number }) => ({
+export const blockMined = (block: { timestamp: number; number: number }) => ({
   type: BLOCK_MINED as typeof BLOCK_MINED,
   block,
 });
 export type BlockMined = ReturnType<typeof blockMined>;
 
 // TODO: This is getting large, we should probably split this up into separate types for each stage
-export type WalletAction = (
-  | LoggedIn
-  | KeysLoaded
-  | OwnCommitmentReceived
-  | OpponentCommitmentReceived
-  | FundingRequested
-  | FundingApproved
-  | FundingRejected
-  | FundingReceivedEvent
-  | DepositInitiated
-  | DepositConfirmed
-  | PostFundSetupReceived
-  | FundingSuccessAcknowledged
-  | ChallengeRequested
-  | ChallengeCreatedEvent
-  | ChallengeResponseReceived
-  | TakeMoveInAppAcknowledged
-  | ChallengeApproved
-  | ChallengeRejected
-  | ChallengeResponseAcknowledged
-  | ChallengeTimeoutAcknowledged
-  | ChallengeCompletionAcknowledged
+export type WalletAction =
+  | ApproveClose
+  | BlockMined
   | ChallengeAcknowledged
-  | RespondWithMoveChosen
-  | RespondWithExistingMoveChosen
-  | RespondWithRefuteChosen
-  | WithdrawalRequested
-  | WithdrawalApproved
-  | WithdrawalRejected
-  | TransactionSubmitted
-  | TransactionSubmissionFailed
-  | TransactionConfirmed
-  | TransactionSentToMetamask
-  | WithdrawalSuccessAcknowledged
+  | ChallengeApproved
+  | ChallengeCommitmentReceived
+  | ChallengeCompletionAcknowledged
+  | ChallengeCreatedEvent
+  | ChallengeRejected
+  | ChallengeRequested
+  | ChallengeResponseAcknowledged
+  | ChallengeResponseReceived
+  | ChallengeTimeoutAcknowledged
+  | ClosedOnChainAcknowledged
+  | CloseSuccessAcknowledged
+  | CommitmentReceived
+  | ConcludeApproved
+  | concludedEvent
+  | ConcludeRejected
+  | ConcludeRequested
+  | DepositConfirmed
+  | DepositInitiated
+  | DisplayMessageSent
+  | FundingApproved
+  | FundingDeclinedAcknowledged
+  | FundingReceivedEvent
+  | FundingRejected
+  | FundingRequested
+  | FundingSuccessAcknowledged
+  | KeysLoaded
+  | LoggedIn
   | MessageReceived
   | MessageSent
-  | DisplayMessageSent
-  | concludedEvent
-  | ConcludeRequested
-  | ConcludeApproved
-  | CloseSuccessAcknowledged
-  | ClosedOnChainAcknowledged
-  | RespondWithMoveEvent
-  | ChallengeCommitmentReceived
-  | ApproveClose
-  | FundingDeclinedAcknowledged
-  | ConcludeRejected
   | MetamaskLoadError
+  | OpponentCommitmentReceived
+  | OwnCommitmentReceived
+  | PostFundSetupReceived
+  | RespondWithExistingMoveChosen
+  | RespondWithMoveChosen
+  | RespondWithMoveEvent
+  | RespondWithRefuteChosen
   | RetryTransaction
-  | BlockMined
-);
+  | TakeMoveInAppAcknowledged
+  | TransactionConfirmed
+  | TransactionSentToMetamask
+  | TransactionSubmissionFailed
+  | TransactionSubmitted
+  | WithdrawalApproved
+  | WithdrawalRejected
+  | WithdrawalRequested
+  | WithdrawalSuccessAcknowledged;

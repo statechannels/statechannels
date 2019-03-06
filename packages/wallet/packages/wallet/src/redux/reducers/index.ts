@@ -23,12 +23,11 @@ import { challengingReducer } from './challenging';
 import { respondingReducer } from './responding';
 import { withdrawingReducer } from './withdrawing';
 import { closingReducer } from './closing';
-import { WalletAction, CONCLUDE_REQUESTED, MESSAGE_RECEIVED, MESSAGE_SENT, TRANSACTION_SENT_TO_METAMASK, DISPLAY_MESSAGE_SENT } from '../actions';
+import { WalletAction, CONCLUDE_REQUESTED, MESSAGE_SENT, TRANSACTION_SENT_TO_METAMASK, DISPLAY_MESSAGE_SENT, COMMITMENT_RECEIVED } from '../actions';
 import { unreachable, ourTurn, validTransition } from '../../utils/reducer-utils';
 import { validCommitmentSignature } from '../../utils/signing-utils';
 import { showWallet } from 'magmo-wallet-client/lib/wallet-events';
 import { CommitmentType } from 'fmg-core';
-import { Commitment } from 'fmg-core/lib/commitment';
 
 const initialState = waitForLogin();
 
@@ -81,23 +80,22 @@ const receivedValidOwnConclusionRequest = (state: WalletState, action: WalletAct
 
 const receivedValidOpponentConclusionRequest = (state: WalletState, action: WalletAction): AcknowledgeConclude | null => {
   if (state.stage !== FUNDING && state.stage !== RUNNING) { return null; }
-  if (action.type !== MESSAGE_RECEIVED) { return null; }
+  if (action.type !== COMMITMENT_RECEIVED) { return null; }
 
-  const messageCommitment = action.data as Commitment;
+  const { commitment, signature } = action;
 
-  if (messageCommitment.commitmentType !== CommitmentType.Conclude) {
+  if (commitment.commitmentType !== CommitmentType.Conclude) {
     return null;
   }
   // check signature
   const opponentAddress = state.participants[1 - state.ourIndex];
-  if (!action.signature) { return null; }
-  if (!validCommitmentSignature(messageCommitment, action.signature, opponentAddress)) { return null; }
-  if (!validTransition(state, messageCommitment)) { return null; }
+  if (!validCommitmentSignature(commitment, signature, opponentAddress)) { return null; }
+  if (!validTransition(state, commitment)) { return null; }
 
   return acknowledgeConclude({
     ...state,
-    turnNum: messageCommitment.turnNum,
-    lastCommitment: { commitment: messageCommitment, signature: action.signature },
+    turnNum: commitment.turnNum,
+    lastCommitment: { commitment, signature },
     penultimateCommitment: state.lastCommitment,
     displayOutbox: showWallet(),
   });

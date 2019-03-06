@@ -90,20 +90,31 @@ export const concludeChannelRequest = () => ({
   type: CONCLUDE_CHANNEL_REQUEST as typeof CONCLUDE_CHANNEL_REQUEST,
 });
 export type ConcludeChannelRequest = ReturnType<typeof concludeChannelRequest>;
-// MESSAGING
+
+// Wallet-to-wallet communication
 // =========
 
 // Called when a "wallet message" is received from the opponent.
 // By "wallet message" we mean a message that was created directly from the opponent's
 // wallet meant for wallet-to-wallet communication (e.g. communicating the address of the
 // adjudicator).
-export const RECEIVE_MESSAGE = 'WALLET.MESSAGING.RECEIVE';
-export const receiveMessage = (data: Commitment | string, signature?: string) => ({
+export const RECEIVE_MESSAGE = 'WALLET.MESSAGING.RECEIVE_MESSAGE';
+export const receiveMessage = (data: string) => ({
   type: RECEIVE_MESSAGE,
   data,
-  signature,
 });
 export type ReceiveMessage = ReturnType<typeof receiveMessage>;
+
+// Called when a "wallet commitment" is received from the opponent.
+// By "wallet commitment" we mean a commitment that was created directly from the opponent's
+// wallet meant for wallet-to-wallet communication (e.g. commitments used to set up a ledger channel)
+export const RECEIVE_COMMITMENT = 'WALLET.MESSAGING.RECEIVE_COMMITMENT';
+export const receiveCommitment = (commitment: Commitment, signature: string) => ({
+  type: RECEIVE_MESSAGE,
+  commitment,
+  signature,
+});
+export type ReceiveCommitment = ReturnType<typeof receiveCommitment>;
 
 // Requests
 // ========

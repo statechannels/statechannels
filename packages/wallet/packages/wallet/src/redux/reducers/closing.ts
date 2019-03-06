@@ -5,7 +5,7 @@ import { WalletState, ClosingState } from '../../states';
 import { WalletAction } from '../actions';
 import { unreachable, ourTurn, validTransition } from '../../utils/reducer-utils';
 import { signCommitment, signVerificationData, validCommitmentSignature } from '../../utils/signing-utils';
-import { messageRequest, closeSuccess, concludeSuccess, concludeFailure, hideWallet } from 'magmo-wallet-client/lib/wallet-events';
+import { commitmentRelayRequested, closeSuccess, concludeSuccess, concludeFailure, hideWallet } from 'magmo-wallet-client/lib/wallet-events';
 import { CommitmentType, Commitment } from 'fmg-core';
 import { createConcludeAndWithdrawTransaction, ConcludeAndWithdrawArgs } from '../../utils/transaction-generator';
 
@@ -66,7 +66,7 @@ const acknowledgeConcludeReducer = (state: states.AcknowledgeConclude, action: a
   switch (action.type) {
     case actions.CONCLUDE_APPROVED:
       if (!ourTurn(state)) { return { ...state, displayOutbox: hideWallet(), messageOutbox: concludeFailure('Other', 'It is not the current user\'s turn') }; }
-      const { positionSignature, sendMessageAction, concludeCommitment } = composeConcludePosition(state);
+      const { positionSignature, sendCommitmentAction, concludeCommitment } = composeConcludePosition(state);
       const lastState = state.lastCommitment.commitment;
       if (lastState.commitmentType === CommitmentType.Conclude) {
         if (state.adjudicator) {
@@ -76,7 +76,7 @@ const acknowledgeConcludeReducer = (state: states.AcknowledgeConclude, action: a
             turnNum: concludeCommitment.turnNum,
             penultimateCommitment: state.lastCommitment,
             lastCommitment: { commitment: concludeCommitment, signature: positionSignature },
-            messageOutbox: sendMessageAction,
+            messageOutbox: sendCommitmentAction,
           });
         } else {
           return states.acknowledgeCloseSuccess({
@@ -148,7 +148,7 @@ const approveConcludeReducer = (state: states.ApproveConclude, action: WalletAct
     case actions.CONCLUDE_APPROVED:
       if (!ourTurn(state)) { return { ...state, displayOutbox: hideWallet(), messageOutbox: concludeFailure('Other', 'It is not the current user\'s turn') }; }
 
-      const { concludeCommitment, positionSignature, sendMessageAction } = composeConcludePosition(state);
+      const { concludeCommitment, positionSignature, sendCommitmentAction } = composeConcludePosition(state);
       const { lastCommitment } = state;
       if (lastCommitment.commitment.commitmentType === CommitmentType.Conclude) {
         return states.approveCloseOnChain({
@@ -157,7 +157,7 @@ const approveConcludeReducer = (state: states.ApproveConclude, action: WalletAct
           turnNum: concludeCommitment.turnNum,
           penultimateCommitment: state.lastCommitment,
           lastCommitment: { commitment: concludeCommitment, signature: positionSignature },
-          messageOutbox: sendMessageAction,
+          messageOutbox: sendCommitmentAction,
         });
 
       } else {
@@ -166,7 +166,7 @@ const approveConcludeReducer = (state: states.ApproveConclude, action: WalletAct
           turnNum: concludeCommitment.turnNum,
           penultimateCommitment: state.lastCommitment,
           lastCommitment: { commitment: concludeCommitment, signature: positionSignature },
-          messageOutbox: sendMessageAction,
+          messageOutbox: sendCommitmentAction,
         });
       }
       break;
@@ -179,13 +179,12 @@ const approveConcludeReducer = (state: states.ApproveConclude, action: WalletAct
 
 const waitForOpponentConclude = (state: states.WaitForOpponentConclude, action: WalletAction) => {
   switch (action.type) {
-    case actions.MESSAGE_RECEIVED:
+    case actions.COMMITMENT_RECEIVED:
 
-      if (!action.signature) { return { ...state, displayOutbox: hideWallet(), messageOutbox: concludeFailure('Other', 'Signature is missing from the message.') }; }
-      const commitment = action.data as Commitment;
+      const { commitment, signature } = action;
 
       const opponentAddress = state.participants[1 - state.ourIndex];
-      if (!validCommitmentSignature(commitment, action.signature, opponentAddress)) {
+      if (!validCommitmentSignature(commitment, signature, opponentAddress)) {
 
         return { ...state, displayOutbox: hideWallet(), messageOutbox: concludeFailure('Other', 'The signature provided is not valid.') };
       }
@@ -198,7 +197,7 @@ const waitForOpponentConclude = (state: states.WaitForOpponentConclude, action: 
           adjudicator: state.adjudicator,
           turnNum: commitment.turnNum,
           penultimateCommitment: state.lastCommitment,
-          lastCommitment: { commitment, signature: action.signature },
+          lastCommitment: { commitment, signature },
           messageOutbox: concludeSuccess(),
         });
       } else {
@@ -248,6 +247,6 @@ const composeConcludePosition = (state: states.ClosingState) => {
   };
 
   const commitmentSignature = signCommitment(concludeCommitment, state.privateKey);
-  const sendMessageAction = messageRequest(state.participants[1 - state.ourIndex], concludeCommitment, commitmentSignature);
-  return { concludeCommitment, positionSignature: commitmentSignature, sendMessageAction };
+  const sendCommitmentAction = commitmentRelayRequested(state.participants[1 - state.ourIndex], concludeCommitment, commitmentSignature);
+  return { concludeCommitment, positionSignature: commitmentSignature, sendCommitmentAction };
 };

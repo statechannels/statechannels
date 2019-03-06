@@ -59,7 +59,7 @@ describe('start in AcknowledgeConclude', () => {
 
     const updatedState = walletReducer(state, action);
     itTransitionsToStateType(states.APPROVE_CLOSE_ON_CHAIN, updatedState);
-    expect((updatedState.messageOutbox!).type).toEqual(outgoing.MESSAGE_REQUEST);
+    expect((updatedState.messageOutbox!).type).toEqual(outgoing.COMMITMENT_RELAY_REQUESTED);
   });
 
 });
@@ -104,7 +104,7 @@ describe('start in WaitForOpponentConclude', () => {
     Object.defineProperty(SigningUtil, 'validCommitmentSignature', { value: validateMock });
     Object.defineProperty(ReducerUtil, "validTransition", { value: validateMock });
 
-    const action = actions.messageReceived('commitment' as unknown as Commitment, '0x0');
+    const action = actions.commitmentReceived('commitment' as unknown as Commitment, '0x0');
     describe(' where the adjudicator exists', () => {
 
       const updatedState = walletReducer(state, action);

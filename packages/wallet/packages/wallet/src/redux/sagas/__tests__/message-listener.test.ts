@@ -1,5 +1,5 @@
 import { put } from 'redux-saga/effects';
-import * as incoming from 'magmo-wallet-client/lib/messages-to-wallet';
+import * as incoming from 'magmo-wallet-client/lib/wallet-instructions';
 
 import { messageListener } from '../message-listener';
 import * as actions from '../../actions';
@@ -24,16 +24,21 @@ describe('message listener', () => {
 
   // todo: is OWN_POSITION_RECEIVED actually easier to think about than SIGNATURE_REQUEST?
   it.skip('converts SIGNATURE_REQUEST into OWN_POSITION_RECEIVED', () => {
-    const output = saga.next({ data: incoming.signCommitmentRequest(scenarios.gameCommitment1) }).value;
+    const output = saga.next({ data: incoming.signCommitmentRequest(scenarios.gameCommitment1) })
+      .value;
     saga.next(); // the take
 
     expect(output).toEqual(put(actions.ownCommitmentReceived(scenarios.gameCommitment1)));
   });
 
   it.skip('converts VALIDATION_REQUEST into OPPONENT_POSITION_RECEIVED', () => {
-    const output = saga.next({ data: incoming.validateCommitmentRequest(scenarios.gameCommitment1, 'signature') }).value;
+    const output = saga.next({
+      data: incoming.validateCommitmentRequest(scenarios.gameCommitment1, 'signature'),
+    }).value;
     saga.next(); // the take
 
-    expect(output).toEqual(put(actions.opponentCommitmentReceived(scenarios.gameCommitment2, 'signature')));
+    expect(output).toEqual(
+      put(actions.opponentCommitmentReceived(scenarios.gameCommitment2, 'signature')),
+    );
   });
 });
