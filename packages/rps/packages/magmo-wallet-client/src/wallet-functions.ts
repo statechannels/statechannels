@@ -7,8 +7,6 @@ import {
   VALIDATION_SUCCESS,
   VALIDATION_FAILURE,
   ValidationResponse,
-  SHOW_WALLET,
-  HIDE_WALLET,
 } from './wallet-events';
 import {
   concludeChannelRequest,
@@ -19,7 +17,8 @@ import {
   receiveMessage,
   createChallenge,
   respondToChallenge,
-} from './messages-to-wallet';
+  receiveCommitment,
+} from './wallet-instructions';
 import { Commitment } from 'fmg-core';
 
 /**
@@ -49,7 +48,8 @@ export function createWalletIFrame(iframeId: string, walletUrl?: string): HTMLIF
 }
 
 /**
- * Initializes the wallet for a given user and provides a wallet address. This must be called before any other interaction with the wallet.
+ * Initializes the wallet for a given user and provides a wallet address.
+ * This must be called before any other interaction with the wallet.
  * @param iFrameId The id of the embedded wallet iframe.
  * @param userId An id that is unique to the user who will be using the wallet.
  * @returns {Promise<string>} A promise that resolves with a wallet address generated for that user.
@@ -152,19 +152,32 @@ export async function signCommitment(iFrameId: string, commitment: Commitment): 
 }
 
 /**
- * Sends a message to the wallet. This is used to send a message that was received from the opponent's wallet to the current user's wallet.
+ * Relays a commitment to the wallet, from the opponent's wallet.
+ * Used, for example, when the opponent's wallet is funding a channel through a ledger channel.
  * @param iFrameId The id of the embedded wallet iframe.
- * @param data The message to send to the wallet that was received from the opponent's wallet.
+ * @param commitment The commitment to send to the wallet that was received from the opponent's wallet.
  * @param signature The signature that was received from the opponent's wallet.
  */
-export function messageWallet(iFrameId: string, data: Commitment | string, signature: string) {
+export function relayCommitment(iFrameId: string, commitment: Commitment, signature: string) {
   const iFrame = document.getElementById(iFrameId) as HTMLIFrameElement;
-  const message = receiveMessage(data, signature);
+  const message = receiveCommitment(commitment, signature);
   iFrame.contentWindow.postMessage(message, '*');
 }
 
 /**
- * Starts process of concluding the game. The wallet will communicate additional events during using the [[WalletEventListener]] during the conclusion process.
+ * Relays a message to the wallet, from the opponent's wallet.
+ * @param iFrameId The id of the embedded wallet iframe.
+ * @param data The message to send to the wallet that was received from the opponent's wallet.
+ */
+export function relayMessage(iFrameId: string, data: string) {
+  const iFrame = document.getElementById(iFrameId) as HTMLIFrameElement;
+  const message = receiveMessage(data);
+  iFrame.contentWindow.postMessage(message, '*');
+}
+
+/**
+ * Starts process of concluding the game. The wallet will communicate additional events during
+ * using the [[WalletEventListener]] during the conclusion process.
  * @param iFrameId The id of the embedded wallet iframe.
  */
 export function startConcludingGame(iFrameId: string): void {
@@ -174,7 +187,8 @@ export function startConcludingGame(iFrameId: string): void {
 }
 
 /**
- * Starts process of funding the game. The wallet will communicate additional events during using the [[WalletEventListener]] during the funding process.
+ * Starts process of funding the game. The wallet will communicate additional events during using
+ * the [[WalletEventListener]] during the funding process.
  * @param iFrameId The id of the embedded wallet iframe.
  * @param channelId The id of the channel to fund.
  * @param myAddress The user's wallet address.
@@ -205,7 +219,8 @@ export function startFunding(
 }
 
 /**
- * Starts a challenge in the wallet.The wallet will communicate additional events during using the [[WalletEventListener]] during the challenge process.
+ * Starts a challenge in the wallet.The wallet will communicate additional events during using the
+ * [[WalletEventListener]] during the challenge process.
  * @param iFrameId The id of the embedded wallet iframe.
  */
 export function startChallenge(iFrameId: string) {

@@ -199,7 +199,7 @@ describe('start in SendFundingDeclinedMessage', () => {
     const updatedState = walletReducer(state, action);
 
     itTransitionsToStateType(states.WAIT_FOR_CHANNEL, updatedState);
-    expect((updatedState.messageOutbox as outgoing.MessageRequest).type).toEqual(outgoing.FUNDING_FAILURE);
+    expect((updatedState.messageOutbox as outgoing.MessageRelayRequested).type).toEqual(outgoing.FUNDING_FAILURE);
   });
 });
 
@@ -228,7 +228,7 @@ describe('start in WaitForDepositConfirmation', () => {
 
     itTransitionsToStateType(states.A_WAIT_FOR_POST_FUND_SETUP, updatedState);
     itIncreasesTurnNumBy(1, state, updatedState);
-    expect((updatedState.messageOutbox as outgoing.MessageRequest).type).toEqual(outgoing.MESSAGE_REQUEST);
+    expect((updatedState.messageOutbox as outgoing.WalletEvent).type).toEqual(outgoing.COMMITMENT_RELAY_REQUESTED);
   });
 });
 
@@ -248,7 +248,7 @@ describe('start in AWaitForOpponentDeposit', () => {
 
     itTransitionsToStateType(states.A_WAIT_FOR_POST_FUND_SETUP, updatedState);
     itIncreasesTurnNumBy(1, state, updatedState);
-    expect((updatedState.messageOutbox as outgoing.MessageRequest).type).toEqual(outgoing.MESSAGE_REQUEST);
+    expect((updatedState.messageOutbox as outgoing.CommitmentRelayRequested).type).toEqual(outgoing.COMMITMENT_RELAY_REQUESTED);
   });
 });
 
@@ -259,7 +259,7 @@ describe('start in AWaitForPostFundSetup', () => {
 
     const testDefaults = { ...defaultsA, ...justReceivedPostFundSetupA };
     const state = states.aWaitForPostFundSetup(testDefaults);
-    const action = actions.messageReceived(postFundCommitment2, 'sig');
+    const action = actions.commitmentReceived(postFundCommitment2, 'sig');
     const updatedState = walletReducer(state, action);
 
     itTransitionsToStateType(states.ACKNOWLEDGE_FUNDING_SUCCESS, updatedState);
@@ -334,7 +334,7 @@ describe('start in WaitForDepositConfirmation', () => {
     const testDefaults = {
       ...defaultsB,
       ...justReceivedPreFundSetupB,
-      unhandledAction: actions.messageReceived(postFundCommitment1, '0x0'),
+      unhandledAction: actions.commitmentReceived(postFundCommitment1, '0x0'),
     };
     const state = states.bWaitForDepositConfirmation(testDefaults);
     const action = actions.transactionConfirmed();
@@ -351,12 +351,14 @@ describe('start in WaitForDepositConfirmation', () => {
 
     const testDefaults = { ...defaultsB, ...justReceivedPreFundSetupB };
     const state = states.bWaitForDepositConfirmation(testDefaults);
-    const action = actions.messageReceived(postFundCommitment2, '0x0');
+    const action = actions.commitmentReceived(postFundCommitment2, '0x0');
     const updatedState = walletReducer(state, action);
 
     itTransitionsToStateType(states.B_WAIT_FOR_DEPOSIT_CONFIRMATION, updatedState);
     itIncreasesTurnNumBy(0, state, updatedState);
-    expect((updatedState as BWaitForDepositConfirmation).unhandledAction).toEqual(action);
+    it('works', async () => {
+      expect((updatedState as BWaitForDepositConfirmation).unhandledAction).toEqual(action);
+    });
   });
 });
 
@@ -394,11 +396,11 @@ describe('start in BWaitForPostFundSetup', () => {
     const state = states.bWaitForPostFundSetup(testDefaults);
     const validateMock = jest.fn().mockReturnValue(true);
     Object.defineProperty(SigningUtil, 'validSignature', { value: validateMock });
-    const action = actions.messageReceived(postFundCommitment1, 'sig'); const updatedState = walletReducer(state, action);
+    const action = actions.commitmentReceived(postFundCommitment1, 'sig'); const updatedState = walletReducer(state, action);
 
     itTransitionsToStateType(states.ACKNOWLEDGE_FUNDING_SUCCESS, updatedState);
     itIncreasesTurnNumBy(2, state, updatedState);
-    expect((updatedState.messageOutbox as outgoing.MessageRequest).type).toEqual(outgoing.MESSAGE_REQUEST);
+    expect((updatedState.messageOutbox as outgoing.CommitmentRelayRequested).type).toEqual(outgoing.COMMITMENT_RELAY_REQUESTED);
   });
 });
 
