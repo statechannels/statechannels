@@ -5,17 +5,20 @@ import { messageListener } from './message-listener';
 import { messageSender } from './message-sender';
 import { transactionSender } from './transaction-sender';
 import { adjudicatorWatcher } from './adjudicator-watcher';
-import { blockchainWatcher } from './blockchain-watcher';
+import { blockMiningWatcher } from './block-mining-watcher';
 
 import { WalletState, WAIT_FOR_ADDRESS } from '../../states';
 import { getProvider } from '../../utils/contract-utils';
 
 import { displaySender } from './display-sender';
+import { ganacheMiner } from './ganache-miner';
 
 export function* sagaManager(): IterableIterator<any> {
   let adjudicatorWatcherProcess;
 
-  let blockchainWatcherProcess;
+  let blockMiningWatcherProcess;
+
+  let ganacheMinerProcess;
 
   // always want the message listenter to be running
   yield fork(messageListener);
@@ -40,17 +43,32 @@ export function* sagaManager(): IterableIterator<any> {
         const provider = yield getProvider();
         adjudicatorWatcherProcess = yield fork(adjudicatorWatcher, state.channelId, provider);
       }
-      if (!blockchainWatcherProcess) {
-        blockchainWatcherProcess = yield fork(blockchainWatcher);
-      }
+
     } else {
       if (adjudicatorWatcherProcess) {
         yield cancel(adjudicatorWatcherProcess);
         adjudicatorWatcherProcess = undefined;
       }
-      if (blockchainWatcherProcess) {
-        yield cancel(blockchainWatcherProcess);
-        blockchainWatcherProcess = undefined;
+
+    }
+
+    // We only watch for mined blocks when waiting for a challenge expiry
+    if ('challengeExpiry' in state && state.challengeExpiry) {
+
+      if (!blockMiningWatcherProcess) {
+        blockMiningWatcherProcess = yield fork(blockMiningWatcher);
+      }
+      if (process.env.TARGET_NETWORK === 'development' && !ganacheMinerProcess) {
+        ganacheMinerProcess = yield fork(ganacheMiner);
+      }
+    } else {
+      if (blockMiningWatcherProcess) {
+        yield cancel(blockMiningWatcherProcess);
+        blockMiningWatcherProcess = undefined;
+      }
+      if (ganacheMinerProcess) {
+        yield cancel(ganacheMinerProcess);
+        ganacheMinerProcess = undefined;
       }
     }
 

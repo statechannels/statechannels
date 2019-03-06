@@ -60,7 +60,7 @@ process.env.NODE_PATH = (process.env.NODE_PATH || '')
 // injected into the application via DefinePlugin in Webpack configuration.
 const REACT_APP = /^REACT_APP_/i;
 // These are Magmo specific values that should be injected into the application
-const MAGMO_VALUES = ['TARGET_NETWORK', 'FIREBASE_PROJECT', 'FIREBASE_API_KEY'];
+const MAGMO_VALUES = ['TARGET_NETWORK', 'FIREBASE_PROJECT', 'FIREBASE_API_KEY', 'DEV_GANACHE_PORT'];
 
 function getClientEnvironment(publicUrl) {
   const raw = Object.keys(process.env)

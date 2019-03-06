@@ -109,10 +109,6 @@ npx lerna add [dependency name] --scope=[target package]
 yarn upgrade [package-name@version-number]
 ```
 
-#### Running ganache
-The `wallet` application depends on blocks being mined periodically. To accomplish this the `yarn ganache:start` command configures ganache to mine a block every second.
-If running the `wallet` against a different instance of ganache (such as the UI version of ganache) it must be configured to mine blocks periodically.
-
 ## Documentation
 We are working hard to produce documenation for our applications. In the interim, please see our [Developer Handbook](https://magmo.gitbook.io/developer-handbook/), which as some of the hints and tips
 for developing on ethereum that we have used to develop our apps. You will also find some information in the `/notes/` subdirectory of each app. 
