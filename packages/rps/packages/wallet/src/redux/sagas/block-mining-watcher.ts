@@ -3,7 +3,7 @@ import { eventChannel } from 'redux-saga';
 import { take, put } from 'redux-saga/effects';
 import { blockMined } from '../actions';
 
-export function* blockchainWatcher() {
+export function* blockMiningWatcher() {
   const provider = yield getProvider();
   const blockchainEventChannel =
     eventChannel(emit => {

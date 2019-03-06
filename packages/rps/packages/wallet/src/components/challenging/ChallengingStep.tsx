@@ -4,10 +4,10 @@ import { faCheckCircle, faSpinner, faHourglassEnd, faHourglassHalf, faHourglassS
 import { faCircle } from '@fortawesome/free-regular-svg-icons';
 import SidebarLayout from '../SidebarLayout';
 
-interface Props { 
+interface Props {
   step: number;
   expirationTime: number;
- }
+}
 
 const completeIcon = (
   <span className="fa-li" ><FontAwesomeIcon icon={faCheckCircle} color="green" size="lg" /></span>
@@ -35,7 +35,7 @@ const responseIcon = (
   <span className="fa-li" ><FontAwesomeIcon icon={faBullhorn} size="lg" color="red" /></span>
 );
 
-const icon = (iconStep:number, currentStep:number) => {
+const icon = (iconStep: number, currentStep: number) => {
   if (iconStep < 3) {
     if (currentStep < iconStep) {
       return todoIcon;
@@ -44,31 +44,31 @@ const icon = (iconStep:number, currentStep:number) => {
     } else {
       return completeIcon;
     }
-} else {
+  } else {
     if (currentStep < iconStep) {
       return timeReadyIcon;
     } else if (currentStep === iconStep) {
       return timeRunningIcon;
-    } else if (currentStep === 777 ) {
+    } else if (currentStep === 777) {
       return responseIcon;
-    } else if (currentStep === 999 ) {
+    } else if (currentStep === 999) {
       return timeOutIcon;
-  } else {
-    return;
+    } else {
+      return;
+    }
   }
-}
 };
 
 // NOTE: the appearance of this modal is largely influenced by the amount of text in each message. Until a more robust front-end comes along, try to keep messages of the same length within each case block below.
 const message = (iconStep: number, currentStep: number) => {
-  switch (iconStep){
+  switch (iconStep) {
     case 1:
       if (currentStep < iconStep) {
         return "Send your transaction";
       } else if (currentStep === iconStep) {
         return "Preparing your transaction...";
       } else {
-        return "Withdrawal transaction sent";
+        return "Challenge transaction sent";
       }
     case 2:
       if (currentStep < iconStep) {
@@ -108,20 +108,20 @@ export class ChallengingStep extends React.PureComponent<Props> {
         <ul className="fa-ul">
           <li style={{ padding: "0.7em 1em" }}>
             {icon(1, currentStep)}
-            {message(1,currentStep)}
+            {message(1, currentStep)}
           </li>
           <li style={{ padding: "0.7em 1em" }}>
             {icon(2, currentStep)}
-            {message(2,currentStep)}
+            {message(2, currentStep)}
           </li>
           <li style={{ padding: "0.7em 1em" }}>
             {icon(3, currentStep)}
-            {message(3,currentStep)}
+            {message(3, currentStep)}
           </li>
         </ul>
         <div className="pb-2">
           {children}
-          {(currentStep === 3)  ?  CHALLENGE_PERIOD_MESSAGE : null }
+          {(currentStep === 3) ? CHALLENGE_PERIOD_MESSAGE : null}
         </div>
       </SidebarLayout>
     );
