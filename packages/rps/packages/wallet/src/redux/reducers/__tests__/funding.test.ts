@@ -1,6 +1,6 @@
 import { walletReducer } from '..';
 
-import * as states from '../.././states';
+import * as states from '../../states';
 import * as actions from '../../actions';
 
 import * as scenarios from './test-scenarios';
@@ -10,7 +10,7 @@ import * as outgoing from 'magmo-wallet-client/lib/wallet-events';
 import * as SigningUtil from '../../../utils/signing-utils';
 import * as fmgCore from 'fmg-core';
 import { bigNumberify } from 'ethers/utils';
-import { BWaitForDepositConfirmation, } from '../.././states';
+import { BWaitForDepositConfirmation, } from '../../states';
 
 const {
   asAddress,

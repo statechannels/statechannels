@@ -1,4 +1,4 @@
-import * as states from '.././states';
+import * as states from '../states';
 import * as actions from '../actions';
 import { unreachable } from '../../utils/reducer-utils';
 import { handleSignatureAndValidationMessages } from '../../utils/state-utils';

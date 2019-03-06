@@ -1,6 +1,6 @@
 import { walletReducer } from '..';
 import * as scenarios from './test-scenarios';
-import * as states from '../.././states';
+import * as states from '../../states';
 import * as actions from '../../actions';
 import { itDoesntTransition, itIncreasesTurnNumBy, itTransitionsToStateType, itSendsAMessage } from './helpers';
 import * as SigningUtil from '../../../utils/signing-utils';

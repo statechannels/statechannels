@@ -1,6 +1,6 @@
 import { walletReducer } from '..';
 import * as scenarios from './test-scenarios';
-import * as states from '../.././states';
+import * as states from '../../states';
 import * as actions from '../../actions';
 import { itSendsATransaction, itTransitionsToStateType, itDoesntTransition } from './helpers';
 import * as TransactionGenerator from '../../../utils/transaction-generator';
