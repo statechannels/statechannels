@@ -9,7 +9,7 @@ import {
   waitForAddress,
   metaMaskError,
   METAMASK_ERROR
-} from '.././states';
+} from '../states';
 
 import { WalletAction, KEYS_LOADED, LOGGED_IN, METAMASK_LOAD_ERROR } from '../actions';
 import { unreachable } from '../../utils/reducer-utils';

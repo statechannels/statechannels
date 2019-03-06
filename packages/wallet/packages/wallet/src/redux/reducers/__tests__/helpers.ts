@@ -1,4 +1,4 @@
-import { WalletState } from '../.././states';
+import { WalletState } from '../../states';
 
 export const itSendsAMessage = (state: WalletState) => {
   it(`sends a message`, () => {

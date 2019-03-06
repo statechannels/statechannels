@@ -1,5 +1,5 @@
 
-import * as states from '.././states';
+import * as states from '../states';
 import * as actions from '../actions';
 
 import { ourTurn, validTransition } from '../../utils/reducer-utils';
