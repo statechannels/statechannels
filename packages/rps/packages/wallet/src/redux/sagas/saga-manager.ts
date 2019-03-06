@@ -7,7 +7,7 @@ import { transactionSender } from './transaction-sender';
 import { adjudicatorWatcher } from './adjudicator-watcher';
 import { blockMiningWatcher } from './block-mining-watcher';
 
-import { WalletState, WAIT_FOR_ADDRESS } from '../../states';
+import { WalletState, WAIT_FOR_ADDRESS } from '.././states';
 import { getProvider } from '../../utils/contract-utils';
 
 import { displaySender } from './display-sender';

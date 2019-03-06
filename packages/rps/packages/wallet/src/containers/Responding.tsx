@@ -3,7 +3,7 @@ import { PureComponent } from 'react';
 import { connect } from 'react-redux';
 import { Button } from 'reactstrap';
 
-import * as states from '../states';
+import * as states from '../redux/states';
 import * as actions from '../redux/actions';
 
 import { RespondingStep } from '../components/responding/RespondingStep';
@@ -35,9 +35,13 @@ class RespondingContainer extends PureComponent<Props> {
 
     switch (state.type) {
       case states.CHALLENGEE_ACKNOWLEDGE_CHALLENGE_TIMEOUT:
+        return (
+          <AcknowledgeTimeout
+            expiryTime={state.challengeExpiry ? state.challengeExpiry : 0}
+            timeoutAcknowledged={timeoutAcknowledged}
+          />
+        );
 
-        return <AcknowledgeTimeout expiryTime={state.challengeExpiry ? state.challengeExpiry : 0} timeoutAcknowledged={timeoutAcknowledged} />;
-      
       case states.CHOOSE_RESPONSE:
         const { ourIndex, turnNum } = state;
         const moveSelected = ourIndex === 0 ? turnNum % 2 === 0 : turnNum % 2 !== 0;
@@ -46,27 +50,31 @@ class RespondingContainer extends PureComponent<Props> {
           // TODO: We need to update the game to allow the user to choose a move even after they've selected an existing move.
           challengeOptions = [ChallengeOptions.RespondWithExistingMove];
         }
-        return <ChooseResponse expiryTime={state.challengeExpiry ? state.challengeExpiry : 0}
-          selectRespondWithMove={selectRespondWithMove}
-          selectRespondWithExistingMove={selectRespondWithExistingMove}
-          challengeOptions={challengeOptions} />;
+        return (
+          <ChooseResponse
+            expiryTime={state.challengeExpiry ? state.challengeExpiry : 0}
+            selectRespondWithMove={selectRespondWithMove}
+            selectRespondWithExistingMove={selectRespondWithExistingMove}
+            challengeOptions={challengeOptions}
+          />
+        );
       case states.TAKE_MOVE_IN_APP:
         // The game knows about the challenge so we don't need the wallet to display anything
         return null;
       case states.INITIATE_RESPONSE:
-        return <RespondingStep step={0}/>;
+        return <RespondingStep step={0} />;
       case states.WAIT_FOR_RESPONSE_SUBMISSION:
-        return <RespondingStep step={1}/>;
+        return <RespondingStep step={1} />;
       case states.WAIT_FOR_RESPONSE_CONFIRMATION:
-        return <RespondingStep step={2}/>;
+        return <RespondingStep step={2} />;
       case states.ACKNOWLEDGE_CHALLENGE_COMPLETE:
-        return <RespondingStep step={4}> 
-              <Button onClick={challengeResponseAcknowledged} >
-                {"Return to game"}
-              </Button>
-              </RespondingStep>;
+        return (
+          <RespondingStep step={4}>
+            <Button onClick={challengeResponseAcknowledged}>{'Return to game'}</Button>
+          </RespondingStep>
+        );
       case states.RESPONSE_TRANSACTION_FAILED:
-        return <TransactionFailed name='challenge response' retryAction={retryTransaction} />;
+        return <TransactionFailed name="challenge response" retryAction={retryTransaction} />;
       default:
         return unreachable(state);
     }

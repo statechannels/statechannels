@@ -1,4 +1,4 @@
-import * as states from '../states';
+import * as states from '../redux/states';
 import React, { PureComponent } from 'react';
 import SidebarLayout from '../components/SidebarLayout';
 import LandingPage from '../components/LandingPage';
@@ -16,8 +16,8 @@ class InitializingContainer extends PureComponent<Props> {
           <SidebarLayout>
             <h1>A metamask error has occurred.</h1>
             <p>
-              Something went wrong loading metamask.
-              Please make sure metamask is installed and has permission to access {window.location.href}.
+              Something went wrong loading metamask. Please make sure metamask is installed and has
+              permission to access {window.location.href}.
             </p>
           </SidebarLayout>
         );
@@ -26,6 +26,4 @@ class InitializingContainer extends PureComponent<Props> {
     }
   }
 }
-export default connect(
-  () => ({}),
-)(InitializingContainer);
+export default connect(() => ({}))(InitializingContainer);

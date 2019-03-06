@@ -13,7 +13,7 @@ import {
   ApproveConclude,
   acknowledgeConclude,
   AcknowledgeConclude,
-} from '../../states';
+} from '.././states';
 
 import { initializingReducer } from './initializing';
 import { openingReducer } from './opening';

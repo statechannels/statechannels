@@ -1,4 +1,4 @@
-import * as states from '../../states';
+import * as states from '.././states';
 import * as actions from '../actions';
 import { signatureSuccess, validationSuccess, signatureFailure, validationFailure } from 'magmo-wallet-client/lib/wallet-events';
 
