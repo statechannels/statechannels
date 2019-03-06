@@ -1,4 +1,4 @@
-import { WalletState } from '../states';
+import { WalletState } from '../redux/states';
 import {
   OWN_COMMITMENT_RECEIVED,
   OPPONENT_COMMITMENT_RECEIVED,

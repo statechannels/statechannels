@@ -1,7 +1,7 @@
-import { WalletState, RespondingState } from '../../states';
-import * as states from '../../states/responding';
-import * as runningStates from '../../states/running';
-import * as withdrawalStates from '../../states/withdrawing';
+import { WalletState, RespondingState } from '.././states';
+import * as states from '.././states/responding';
+import * as runningStates from '.././states/running';
+import * as withdrawalStates from '.././states/withdrawing';
 
 import { WalletAction } from '../actions';
 import * as actions from '../actions';

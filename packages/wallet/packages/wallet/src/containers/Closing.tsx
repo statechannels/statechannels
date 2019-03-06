@@ -3,7 +3,7 @@ import { PureComponent } from 'react';
 import { connect } from 'react-redux';
 import { Button } from 'reactstrap';
 
-import * as states from '../states';
+import * as states from '../redux/states';
 import * as actions from '../redux/actions';
 
 import AcknowledgeX from '../components/AcknowledgeX';
@@ -54,13 +54,14 @@ class ClosingContainer extends PureComponent<Props> {
       case states.WAIT_FOR_OPPONENT_CONCLUDE:
         return <WaitForOtherPlayer name="conclude" />;
       case states.APPROVE_CLOSE_ON_CHAIN:
-        // TODO: Add option to reject closing the channel?  
+        // TODO: Add option to reject closing the channel?
         return (
           <SelectAddress
             approveAction={closeOnChain}
             title="Close and Withdraw"
             description="The game has been concluded! You can now close the channel and withdraw your funds."
-            approveButtonTitle="Close and Withdraw" />
+            approveButtonTitle="Close and Withdraw"
+          />
         );
       case states.ACKNOWLEDGE_CLOSE_SUCCESS:
         // return (
@@ -71,11 +72,11 @@ class ClosingContainer extends PureComponent<Props> {
         //     actionTitle="Ok!"
         //   />
         // );
-        return <ClosingStep step={4}>
-          <Button onClick={closeSuccessAcknowledged} >
-            {"Return to app"}
-          </Button>
-        </ClosingStep>;
+        return (
+          <ClosingStep step={4}>
+            <Button onClick={closeSuccessAcknowledged}>{'Return to app'}</Button>
+          </ClosingStep>
+        );
       case states.ACKNOWLEDGE_CLOSED_ON_CHAIN:
         return (
           <AcknowledgeX
@@ -93,13 +94,17 @@ class ClosingContainer extends PureComponent<Props> {
         return <ClosingStep step={1} />;
       case states.WAIT_FOR_CLOSE_CONFIRMED:
         // return <WaitForXConfirmation name="close" transactionID={state.transactionHash} networkId={state.networkId} />;
-        return <ClosingStep step={2}>Check the progress on&nbsp;
-        <EtherscanLink
-            transactionID={state.transactionHash}
-            networkId={state.networkId}
-            title="Etherscan"
-          />!
-        </ClosingStep>;
+        return (
+          <ClosingStep step={2}>
+            Check the progress on&nbsp;
+            <EtherscanLink
+              transactionID={state.transactionHash}
+              networkId={state.networkId}
+              title="Etherscan"
+            />
+            !
+          </ClosingStep>
+        );
       case states.ACKNOWLEDGE_CONCLUDE:
         return (
           <AcknowledgeX
@@ -110,7 +115,7 @@ class ClosingContainer extends PureComponent<Props> {
           />
         );
       case states.CLOSE_TRANSACTION_FAILED:
-        return <TransactionFailed name='conclude' retryAction={retryTransaction} />;
+        return <TransactionFailed name="conclude" retryAction={retryTransaction} />;
       default:
         return unreachable(state);
     }

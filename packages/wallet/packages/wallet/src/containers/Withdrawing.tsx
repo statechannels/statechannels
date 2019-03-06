@@ -3,7 +3,7 @@ import { PureComponent } from 'react';
 import { connect } from 'react-redux';
 import { Button } from 'reactstrap';
 
-import * as states from '../states';
+import * as states from '../redux/states';
 import * as actions from '../redux/actions';
 
 // import AcknowledgeX from '../components/AcknowledgeX';
@@ -39,20 +39,27 @@ class WithdrawingContainer extends PureComponent<Props> {
             approveAction={withdrawalApproved}
             title="Withdraw"
             description="Do you wish to withdraw your funds from this channel?"
-            approveButtonTitle="Withdraw" />
+            approveButtonTitle="Withdraw"
+          />
         );
       case states.WAIT_FOR_WITHDRAWAL_INITIATION:
         // return <WaitForXInitiation name="withdrawal" />;
-        return <WithdrawingStep step={1}> Please confirm the transaction in MetaMask!</WithdrawingStep>;
+        return (
+          <WithdrawingStep step={1}> Please confirm the transaction in MetaMask!</WithdrawingStep>
+        );
       case states.WAIT_FOR_WITHDRAWAL_CONFIRMATION:
         // return <WaitForXConfirmation name="withdrawal" transactionID={state.transactionHash} networkId={state.networkId} />;
-        return <WithdrawingStep step={2}>Check the progress on&nbsp;
+        return (
+          <WithdrawingStep step={2}>
+            Check the progress on&nbsp;
             <EtherscanLink
               transactionID={state.transactionHash}
               networkId={state.networkId}
               title="Etherscan"
-            />!
-            </WithdrawingStep>;
+            />
+            !
+          </WithdrawingStep>
+        );
       case states.ACKNOWLEDGE_WITHDRAWAL_SUCCESS:
         // return (
         //   <AcknowledgeX
@@ -62,13 +69,13 @@ class WithdrawingContainer extends PureComponent<Props> {
         //     actionTitle="Return to app"
         //   />
         // );
-        return <WithdrawingStep step={4}>
-        <Button onClick={withdrawalSuccessAcknowledged} >
-        {"Return to app"}
-      </Button>
-      </WithdrawingStep>;
+        return (
+          <WithdrawingStep step={4}>
+            <Button onClick={withdrawalSuccessAcknowledged}>{'Return to app'}</Button>
+          </WithdrawingStep>
+        );
       case states.WITHDRAW_TRANSACTION_FAILED:
-        return <TransactionFailed name='withdraw' retryAction={retryTransaction} />;
+        return <TransactionFailed name="withdraw" retryAction={retryTransaction} />;
       default:
         return unreachable(state);
     }

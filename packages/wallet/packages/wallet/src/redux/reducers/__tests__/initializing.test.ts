@@ -1,6 +1,6 @@
 import { walletReducer } from '..';
 
-import * as states from '../../../states';
+import * as states from '../.././states';
 import * as actions from '../../actions';
 
 import { itTransitionsToStateType } from './helpers';
