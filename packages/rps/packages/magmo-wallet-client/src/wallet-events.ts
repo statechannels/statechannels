@@ -40,17 +40,17 @@ export const fundingFailure = (
 });
 
 /**
- * The event that is thrown on funding success.
+ * The event that is emitted on funding success.
  */
 export type FundingSuccess = ReturnType<typeof fundingSuccess>;
 
 /**
- * The event that is thrown on funding failure.
+ * The event that is emitted on funding failure.
  */
 export type FundingFailure = ReturnType<typeof fundingFailure>;
 
 /**
- * The events that will be thrown for funding.
+ * The events that will be emitted for funding.
  */
 export type FundingResponse = FundingSuccess | FundingFailure;
 
@@ -187,11 +187,11 @@ export const concludeFailure = (reason: 'UserDeclined' | 'Other', error?: string
   error,
 });
 /**
- * The event thrown when a conclude succeeds.
+ * The event emitted when a conclude succeeds.
  */
 export type ConcludeSuccess = ReturnType<typeof concludeSuccess>;
 /**
- * The event thrown when a conclude fails.
+ * The event emitted when a conclude fails.
  */
 export type ConcludeFailure = ReturnType<typeof concludeFailure>;
 /**
@@ -206,7 +206,7 @@ export const closeSuccess = () => ({
 });
 
 /**
- * The event thrown when the game has been successfully closed.
+ * The event emitted when the game has been successfully closed.
  */
 export type CloseSuccess = ReturnType<typeof closeSuccess>;
 
@@ -241,26 +241,48 @@ export const hideWallet = () => ({
  */
 export type HideWallet = ReturnType<typeof hideWallet>;
 
-// MESSAGING
+// WALLET-TO-WALLET COMMUNICATION
 // =========
 /**
- * The type of event when a message to the opponent's wallet is requested.
+ * The type of event when a message relay to the opponent's wallet is requested.
  */
-export const MESSAGE_REQUEST = 'WALLET.MESSAGING.MESSAGE_REQUEST';
+export const MESSAGE_RELAY_REQUESTED = 'WALLET.MESSAGING.MESSAGE_RELAY_REQUESTED';
 /**
  * @ignore
  */
-export const messageRequest = (to: string, data: Commitment | string, signature: string) => ({
-  type: MESSAGE_REQUEST as typeof MESSAGE_REQUEST,
+export const messageRelayRequested = (to: string, data: string) => ({
+  type: MESSAGE_RELAY_REQUESTED as typeof MESSAGE_RELAY_REQUESTED,
   to,
   data,
+});
+
+/**
+ * The event emitted when the wallet requests a message be relayed to the opponent's wallet.
+ */
+export type MessageRelayRequested = ReturnType<typeof messageRelayRequested>;
+
+/**
+ * The type of event when a commitment relay to the opponent's wallet is requested.
+ */
+export const COMMITMENT_RELAY_REQUESTED = 'WALLET.MESSAGING.COMMITMENT_RELAY_REQUESTED';
+/**
+ * @ignore
+ */
+export const commitmentRelayRequested = (
+  to: string,
+  commitment: Commitment,
+  signature: string,
+) => ({
+  type: COMMITMENT_RELAY_REQUESTED as typeof COMMITMENT_RELAY_REQUESTED,
+  to,
+  commitment,
   signature,
 });
 
 /**
- * The event thrown when the wallet requests a message be sent to the opponent's wallet.
+ * The event emitted when the wallet requests a commitment be relayed to the opponent's wallet.
  */
-export type MessageRequest = ReturnType<typeof messageRequest>;
+export type CommitmentRelayRequested = ReturnType<typeof commitmentRelayRequested>;
 
 /**
  * The type for events where a challenge position is received from the wallet.
@@ -274,7 +296,7 @@ export const challengeCommitmentReceived = (commitment: Commitment) => ({
   commitment,
 });
 /**
- * The event thrown when the wallet has received a challenge position.
+ * The event emitted when the wallet has received a challenge position.
  */
 export type ChallengeCommitmentReceived = ReturnType<typeof challengeCommitmentReceived>;
 
@@ -290,7 +312,7 @@ export const challengeRejected = reason => ({
   reason,
 });
 /**
- * The event thrown when a user rejects a challenge.
+ * The event emitted when a user rejects a challenge.
  */
 export type ChallengeRejected = ReturnType<typeof challengeRejected>;
 /**
@@ -304,7 +326,7 @@ export const challengeResponseRequested = () => ({
   type: CHALLENGE_RESPONSE_REQUESTED as typeof CHALLENGE_RESPONSE_REQUESTED,
 });
 /**
- * The event thrown when a response to a challenge is requested from the application.
+ * The event emitted when a response to a challenge is requested from the application.
  */
 export type ChallengeResponseRequested = ReturnType<typeof challengeResponseRequested>;
 /**
@@ -318,7 +340,7 @@ export const challengeComplete = () => ({
   type: CHALLENGE_COMPLETE as typeof CHALLENGE_COMPLETE,
 });
 /**
- * The event thrown when the challenge is over.
+ * The event emitted when the challenge is over.
  */
 export type ChallengeComplete = ReturnType<typeof challengeComplete>;
 
@@ -326,22 +348,23 @@ export type ChallengeComplete = ReturnType<typeof challengeComplete>;
  * The various types of wallet events that can occur.
  */
 export type WalletEventType =
-  | typeof CHALLENGE_COMPLETE
-  | typeof CHALLENGE_RESPONSE_REQUESTED
-  | typeof CHALLENGE_REJECTED
   | typeof CHALLENGE_COMMITMENT_RECEIVED
-  | typeof MESSAGE_REQUEST
+  | typeof CHALLENGE_COMPLETE
+  | typeof CHALLENGE_REJECTED
+  | typeof CHALLENGE_RESPONSE_REQUESTED
   | typeof CLOSE_SUCCESS
+  | typeof COMMITMENT_RELAY_REQUESTED
   | typeof CONCLUDE_FAILURE
   | typeof CONCLUDE_SUCCESS
+  | typeof FUNDING_FAILURE
+  | typeof FUNDING_SUCCESS
+  | typeof HIDE_WALLET
+  | typeof MESSAGE_RELAY_REQUESTED
+  | typeof SHOW_WALLET
   | typeof SIGNATURE_FAILURE
   | typeof SIGNATURE_SUCCESS
   | typeof VALIDATION_FAILURE
-  | typeof VALIDATION_SUCCESS
-  | typeof FUNDING_FAILURE
-  | typeof FUNDING_SUCCESS
-  | typeof SHOW_WALLET
-  | typeof HIDE_WALLET;
+  | typeof VALIDATION_SUCCESS;
 
 /**
  * @ignore
@@ -350,18 +373,19 @@ export type DisplayAction = ShowWallet | HideWallet;
 
 // TODO: This could live exclusively in the wallet
 export type WalletEvent =
-  | InitializationSuccess
-  | ConcludeSuccess
-  | ConcludeFailure
-  | CloseSuccess
-  | ValidationSuccess
-  | ValidationFailure
-  | FundingSuccess
-  | FundingFailure
-  | SignatureSuccess
-  | SignatureFailure
   | ChallengeCommitmentReceived
+  | ChallengeComplete
   | ChallengeRejected
   | ChallengeResponseRequested
-  | ChallengeComplete
-  | MessageRequest;
+  | CloseSuccess
+  | CommitmentRelayRequested
+  | ConcludeFailure
+  | ConcludeSuccess
+  | FundingFailure
+  | FundingSuccess
+  | InitializationSuccess
+  | MessageRelayRequested
+  | SignatureFailure
+  | SignatureSuccess
+  | ValidationFailure
+  | ValidationSuccess;
