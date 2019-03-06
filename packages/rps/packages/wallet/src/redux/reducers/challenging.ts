@@ -8,6 +8,7 @@ import { unreachable } from '../../utils/reducer-utils';
 import { createForceMoveTransaction } from '../../utils/transaction-generator';
 import { challengeCommitmentReceived, challengeComplete, hideWallet } from 'magmo-wallet-client/lib/wallet-events';
 import { handleSignatureAndValidationMessages } from '../../utils/state-utils';
+import { bigNumberify } from 'ethers/utils';
 
 export const challengingReducer = (state: states.ChallengingState, action: WalletAction): WalletState => {
   // Handle any signature/validation request centrally to avoid duplicating code for each state
@@ -72,6 +73,8 @@ const initiateChallengeReducer = (state: states.WaitForChallengeInitiation, acti
 
 const waitForChallengeSubmissionReducer = (state: states.WaitForChallengeSubmission, action: WalletAction): WalletState => {
   switch (action.type) {
+    case actions.CHALLENGE_CREATED_EVENT:
+      return states.waitForChallengeSubmission({ ...state, challengeExpiry: bigNumberify(action.finalizedAt).toNumber() });
     case actions.TRANSACTION_SUBMITTED:
       return states.waitForChallengeConfirmation({ ...state, transactionHash: action.transactionHash });
     case actions.TRANSACTION_SUBMISSION_FAILED:
@@ -84,11 +87,11 @@ const waitForChallengeSubmissionReducer = (state: states.WaitForChallengeSubmiss
 const waitForChallengeConfirmationReducer = (state: states.WaitForChallengeConfirmation, action: WalletAction): WalletState => {
   switch (action.type) {
     case actions.CHALLENGE_CREATED_EVENT:
-      return states.waitForChallengeConfirmation({ ...state, challengeExpiry: action.finalizedAt });
+      return states.waitForChallengeConfirmation({ ...state, challengeExpiry: bigNumberify(action.finalizedAt).toNumber() });
     case actions.TRANSACTION_CONFIRMED:
       // This is a best guess on when the challenge will expire and will be updated by the challenge created event
       // TODO: Mover challenge duration to a shared constant
-      const challengeExpiry = state.challengeExpiry ? state.challengeExpiry : new Date(Date.now() + 2 * 60000).getTime() / 1000;
+      const challengeExpiry = state.challengeExpiry ? state.challengeExpiry : new Date(Date.now() + 5 * 60000).getTime() / 1000;
       return states.waitForResponseOrTimeout({ ...state, challengeExpiry });
     default:
       return state;
@@ -98,7 +101,7 @@ const waitForChallengeConfirmationReducer = (state: states.WaitForChallengeConfi
 const waitForResponseOrTimeoutReducer = (state: states.WaitForResponseOrTimeout, action: WalletAction): WalletState => {
   switch (action.type) {
     case actions.CHALLENGE_CREATED_EVENT:
-      return states.waitForResponseOrTimeout({ ...state, challengeExpiry: action.finalizedAt });
+      return states.waitForResponseOrTimeout({ ...state, challengeExpiry: bigNumberify(action.finalizedAt).toNumber() });
     case actions.RESPOND_WITH_MOVE_EVENT:
       const message = challengeCommitmentReceived(action.responseCommitment);
       // TODO: Right now we're just storing a dummy signature since we don't get one 
