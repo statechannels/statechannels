@@ -20,8 +20,7 @@ function mapStateToProps(state: SiteState) {
   };
 }
 
-const mapDispatchToProps = {
-};
+const mapDispatchToProps = {};
 
 export default connect(
   mapStateToProps,

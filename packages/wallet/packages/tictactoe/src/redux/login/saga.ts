@@ -26,7 +26,6 @@ function* logoutSaga() {
 }
 
 function* loginStatusWatcherSaga() {
-
   // Events on this channel are triggered on login and logout
   const channel = yield call(reduxSagaFirebase.auth.channel);
   // let playerHeartbeatThread;
@@ -37,14 +36,18 @@ function* loginStatusWatcherSaga() {
     if (user) {
       const libraryAddress = yield getLibraryAddress();
       if (!libraryAddress) {
-        yield put(loginActions.loginFailure(`Could not find the deployed game library for the ${process.env.TARGET_NETWORK} network.`));
+        yield put(
+          loginActions.loginFailure(
+            `Could not find the deployed game library for the ${
+              process.env.TARGET_NETWORK
+            } network.`,
+          ),
+        );
       } else {
         const walletAddress = yield initializeWallet(WALLET_IFRAME_ID, user.uid);
         yield put(loginActions.initializeWalletSuccess(walletAddress));
         yield put(loginActions.loginSuccess(user, libraryAddress));
       }
-
-
     } else {
       yield put(loginActions.logoutSuccess());
     }
@@ -75,4 +78,3 @@ function* getLibraryAddress() {
   }
   return TTTGameArtifact.networks[selectedNetworkId].address;
 }
-

@@ -97,7 +97,14 @@ interface WaitingRoomParams {
 }
 export function waitingRoom(obj: WaitingRoomParams): WaitingRoom {
   const { myName, roundBuyIn, libraryAddress, myAddress, twitterHandle } = obj;
-  return { name: StateName.WaitingRoom, myName, roundBuyIn, libraryAddress, myAddress, twitterHandle };
+  return {
+    name: StateName.WaitingRoom,
+    myName,
+    roundBuyIn,
+    libraryAddress,
+    myAddress,
+    twitterHandle,
+  };
 }
 
 interface TwoChannel {
@@ -181,7 +188,6 @@ export function declineGameB(state: IncludesBase): DeclineGameB {
   return { ...base(state), name: StateName.DeclineGame, player: Player.PlayerB };
 }
 
-
 export interface WaitForFunding extends Base {
   name: StateName.WaitForFunding;
   player: Player;
@@ -219,7 +225,9 @@ interface IncludesWeapon extends IncludesBase {
 interface IncludesWeaponAndSalt extends IncludesWeapon {
   salt: string;
 }
-export function waitForOpponentToPickWeaponA(state: IncludesWeaponAndSalt): WaitForOpponentToPickWeaponA {
+export function waitForOpponentToPickWeaponA(
+  state: IncludesWeaponAndSalt,
+): WaitForOpponentToPickWeaponA {
   return {
     ...base(state),
     name: StateName.WaitForOpponentToPickWeaponA,
@@ -299,7 +307,9 @@ export interface WaitForResignationAcknowledgement extends Base {
   name: StateName.WaitForResignationAcknowledgement;
   player: Player;
 }
-export function waitForResignationAcknowledgement(state: IncludesBase): WaitForResignationAcknowledgement {
+export function waitForResignationAcknowledgement(
+  state: IncludesBase,
+): WaitForResignationAcknowledgement {
   return { ...base(state), name: StateName.WaitForResignationAcknowledgement };
 }
 
@@ -319,7 +329,6 @@ export function waitForWithdrawal(state: IncludesBase): WaitForWithdrawal {
   return { ...base(state), name: StateName.WaitForWithdrawal };
 }
 
-
 export interface ChallengePlayAgain extends Base {
   name: StateName.ChallengePlayAgain;
   myWeapon: Weapon;
@@ -332,8 +341,7 @@ export function challengePlayAgain(state: IncludesResult): ChallengePlayAgain {
   return { ...base(state), name: StateName.ChallengePlayAgain, myWeapon, theirWeapon, result };
 }
 
-
-export type PlayingState = (
+export type PlayingState =
   | WaitForGameConfirmationA
   | ConfirmGameB
   | DeclineGameB
@@ -349,13 +357,6 @@ export type PlayingState = (
   | GameOver
   | WaitForWithdrawal
   | PickChallengeWeapon
-  | ChallengePlayAgain
-);
+  | ChallengePlayAgain;
 
-export type GameState = (
-  | NoName
-  | Lobby
-  | CreatingOpenGame
-  | WaitingRoom
-  | PlayingState
-);
+export type GameState = NoName | Lobby | CreatingOpenGame | WaitingRoom | PlayingState;

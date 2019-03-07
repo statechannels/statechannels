@@ -17,7 +17,7 @@ export function connectWeb3() {
     ethereum.enable();
     currentProvider = ethereum.currentProvider;
   } else {
-    throw new Error("No provider injected by metamask.");
+    throw new Error('No provider injected by metamask.');
   }
 
   const connectedWeb3 = new Web3(currentProvider);

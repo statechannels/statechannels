@@ -2,10 +2,14 @@ import { walletReducer } from '..';
 import * as scenarios from './test-scenarios';
 import * as states from '../../states';
 import * as actions from '../../actions';
-import { itDoesntTransition, itIncreasesTurnNumBy, itTransitionsToStateType, itSendsAMessage } from './helpers';
+import {
+  itDoesntTransition,
+  itIncreasesTurnNumBy,
+  itTransitionsToStateType,
+  itSendsAMessage,
+} from './helpers';
 import * as SigningUtil from '../../../utils/signing-utils';
 import { bigNumberify } from 'ethers/utils';
-
 
 const {
   asAddress,
@@ -38,7 +42,6 @@ const defaults = {
 
 const bParams = { address: bsAddress, ourIndex: 1, privateKey: bsPrivateKey };
 const aParams = { address: asAddress, ourIndex: 0, privateKey: asPrivateKey };
-
 
 describe('when in WaitForUpdate on our turn', () => {
   // after the reveal it is B's turn. So we must be B here
@@ -100,7 +103,7 @@ describe(`when in WaitForUpdate on our opponent's turn`, () => {
   describe('when an opponent sends a new position', () => {
     const action = actions.opponentCommitmentReceived(gameCommitment3, 'sig');
     const signMock = jest.fn().mockReturnValue('0x0');
-    Object.defineProperty(SigningUtil, "validCommitmentSignature", { value: signMock });
+    Object.defineProperty(SigningUtil, 'validCommitmentSignature', { value: signMock });
     const updatedState = walletReducer(state, action);
 
     itTransitionsToStateType(states.WAIT_FOR_UPDATE, updatedState);
@@ -120,7 +123,6 @@ describe(`when in WaitForUpdate on our opponent's turn`, () => {
 
     itDoesntTransition(state, updatedState);
   });
-
 
   describe('when the wallet detects an opponent challenge', () => {
     const action = actions.challengeCreatedEvent(1, '0x0', defaults.challengeExpiry);

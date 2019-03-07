@@ -4,12 +4,7 @@ import * as scenarios from '../../../core/test-scenarios';
 import * as actions from '../actions';
 import * as state from '../state';
 
-import {
-  itSends,
-  itTransitionsTo,
-  itStoresAction,
-  itIncreasesTurnNumBy,
-} from './helpers';
+import { itSends, itTransitionsTo, itStoresAction, itIncreasesTurnNumBy } from './helpers';
 
 const {
   preFundSetupA,
@@ -25,20 +20,35 @@ const {
   resting,
 } = scenarios.aResignsAfterOneRound;
 
-const {
-} = scenarios.bResignsAfterOneRound;
+const {} = scenarios.bResignsAfterOneRound;
 
 const {
   accept: acceptInsufficientFunds,
   reveal: revealInsufficientFunds,
 } = scenarios.insufficientFunds;
 
-const { channel, destination, roundBuyIn, myName, opponentName, bsAddress: myAddress } = scenarios.standard;
-const base = { libraryAddress: channel.channelType, channelNonce: channel.nonce, channel, participants: destination, roundBuyIn, myName, opponentName, myAddress };
+const {
+  channel,
+  destination,
+  roundBuyIn,
+  myName,
+  opponentName,
+  bsAddress: myAddress,
+} = scenarios.standard;
+const base = {
+  libraryAddress: channel.channelType,
+  channelNonce: channel.nonce,
+  channel,
+  participants: destination,
+  roundBuyIn,
+  myName,
+  opponentName,
+  myAddress,
+};
 
 const messageState = {};
 
-describe('player B\'s app', () => {
+describe("player B's app", () => {
   const bProps = {
     ...base,
     player: Player.PlayerB as Player.PlayerB,
@@ -49,7 +59,7 @@ describe('player B\'s app', () => {
     myWeapon: bWeapon,
     theirWeapon: aWeapon,
     result: bResult,
-    twitterHandle: "tweet",
+    twitterHandle: 'tweet',
     destination,
   };
   describe('when in confirmGameB', () => {
@@ -78,7 +88,6 @@ describe('player B\'s app', () => {
       it('stores the action in actionToRetry', () => {
         expect(updatedState.messageState.actionToRetry).toEqual(action);
       });
-
     });
     describe('when funding is successful', () => {
       const action = actions.fundingSuccess(postFundSetupB);
@@ -103,7 +112,7 @@ describe('player B\'s app', () => {
         const updatedGameState = updatedState.gameState as state.WaitForOpponentToPickWeaponA;
         expect(updatedGameState.myWeapon).toEqual(bWeapon);
       });
-      it('doesn\'t send anything', () => {
+      it("doesn't send anything", () => {
         expect(updatedState.messageState).toEqual(messageState);
       });
     });
@@ -179,7 +188,6 @@ describe('player B\'s app', () => {
       itTransitionsTo(state.StateName.PickWeapon, updatedState);
     });
   });
-
 
   describe('when in GameOver', () => {
     const gameState = state.gameOver({ ...bProps, ...conclude });

@@ -9,7 +9,6 @@ import * as TransactionGenerator from '../../../utils/transaction-generator';
 import * as SigningUtil from '../../../utils/signing-utils';
 import { bigNumberify } from 'ethers/utils';
 
-
 const {
   asPrivateKey,
   gameCommitment1,
@@ -40,14 +39,15 @@ const defaults = {
   requestedYourDeposit: bigNumberify(500000000000000).toHexString(),
 };
 
-
 describe('when in ApproveWithdrawal', () => {
   const state = states.approveWithdrawal(defaults);
 
   describe('and the user approves the withdrawal', () => {
     const destinationAddress = '0x123';
     const createWithdrawTxMock = jest.fn();
-    Object.defineProperty(TransactionGenerator, 'createTransferAndWithdrawTransaction', { value: createWithdrawTxMock });
+    Object.defineProperty(TransactionGenerator, 'createTransferAndWithdrawTransaction', {
+      value: createWithdrawTxMock,
+    });
     const signMock = jest.fn().mockReturnValue('0x0');
     Object.defineProperty(SigningUtil, 'signVerificationData', { value: signMock });
 
@@ -86,7 +86,9 @@ describe('when in WaitForWithdrawalInitiation', () => {
 describe('when in withdrawTransactionFailed', () => {
   describe('and the transaction is retried', () => {
     const createWithdrawTxMock = jest.fn();
-    Object.defineProperty(TransactionGenerator, 'createTransferAndWithdrawTransaction', { value: createWithdrawTxMock });
+    Object.defineProperty(TransactionGenerator, 'createTransferAndWithdrawTransaction', {
+      value: createWithdrawTxMock,
+    });
     const signMock = jest.fn().mockReturnValue('0x0');
     Object.defineProperty(SigningUtil, 'signVerificationData', { value: signMock });
 

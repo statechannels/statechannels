@@ -43,18 +43,15 @@ export function* sagaManager(): IterableIterator<any> {
         const provider = yield getProvider();
         adjudicatorWatcherProcess = yield fork(adjudicatorWatcher, state.channelId, provider);
       }
-
     } else {
       if (adjudicatorWatcherProcess) {
         yield cancel(adjudicatorWatcherProcess);
         adjudicatorWatcherProcess = undefined;
       }
-
     }
 
     // We only watch for mined blocks when waiting for a challenge expiry
     if ('challengeExpiry' in state && state.challengeExpiry) {
-
       if (!blockMiningWatcherProcess) {
         blockMiningWatcherProcess = yield fork(blockMiningWatcher);
       }
@@ -84,8 +81,6 @@ export function* sagaManager(): IterableIterator<any> {
     if (state.transactionOutbox) {
       const transactionToSend = state.transactionOutbox;
       yield transactionSender(transactionToSend);
-
     }
   }
 }
-

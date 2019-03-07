@@ -10,7 +10,6 @@ import * as SigningUtil from '../../../utils/signing-utils';
 import * as FmgCore from 'fmg-core';
 import { bigNumberify } from 'ethers/utils';
 
-
 const {
   asPrivateKey,
   participants,
@@ -78,11 +77,13 @@ describe('when in TAKE_MOVE_IN_APP', () => {
   describe('when a challenge move is taken in the application', () => {
     const action = actions.challengeCommitmentReceived(gameCommitment3);
     const createRespondTxMock = jest.fn();
-    Object.defineProperty(TransactionGenerator, 'createRespondWithMoveTransaction', { value: createRespondTxMock });
+    Object.defineProperty(TransactionGenerator, 'createRespondWithMoveTransaction', {
+      value: createRespondTxMock,
+    });
     const toHexMock = jest.fn().mockReturnValue('0x0');
     Object.defineProperty(FmgCore, 'toHex', { value: toHexMock });
-    const signMock = jest.fn().mockReturnValue("0x0");
-    Object.defineProperty(SigningUtil, "signCommitment", { value: signMock });
+    const signMock = jest.fn().mockReturnValue('0x0');
+    Object.defineProperty(SigningUtil, 'signCommitment', { value: signMock });
     const updatedState = walletReducer(state, action);
     itTransitionsToStateType(states.INITIATE_RESPONSE, updatedState);
   });
@@ -105,7 +106,6 @@ describe('when in INITIATE_RESPONSE', () => {
     const action = actions.transactionSentToMetamask();
     const updatedState = walletReducer(state, action);
     itTransitionsToStateType(states.WAIT_FOR_RESPONSE_SUBMISSION, updatedState);
-
   });
   describe('when the challenge times out', () => {
     const action = actions.blockMined({ number: 1, timestamp: 2 });
@@ -153,7 +153,6 @@ describe('when in ACKNOWLEDGE_CHALLENGE_COMPLETE', () => {
     const action = actions.challengeResponseAcknowledged();
     const updatedState = walletReducer(state, action);
     itTransitionsToStateType(states.WAIT_FOR_UPDATE, updatedState);
-
   });
 });
 
@@ -162,11 +161,12 @@ describe('when in RESPONSE_TRANSACTION_FAILED', () => {
   describe('when the transaction is retried', () => {
     const action = actions.retryTransaction();
     const createRespondTxMock = jest.fn();
-    Object.defineProperty(TransactionGenerator, 'createRespondWithMoveTransaction', { value: createRespondTxMock });
+    Object.defineProperty(TransactionGenerator, 'createRespondWithMoveTransaction', {
+      value: createRespondTxMock,
+    });
     const updatedState = walletReducer(state, action);
     itTransitionsToStateType(states.INITIATE_RESPONSE, updatedState);
     expect(createRespondTxMock.mock.calls.length).toBe(1);
-
   });
   describe('when the challenge times out', () => {
     const action = actions.blockMined({ number: 1, timestamp: 2 });

@@ -1,6 +1,5 @@
 import * as React from 'react';
 
-
 interface LoginErrorProps {
   error: string;
 }
@@ -17,4 +16,3 @@ export default function LoginErrorPage(props: LoginErrorProps) {
     </div>
   );
 }
-

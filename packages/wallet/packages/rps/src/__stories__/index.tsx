@@ -1,27 +1,31 @@
-import React from "react";
-import { storiesOf } from "@storybook/react";
-import SiteContainer from "../containers/SiteContainer";
-import { Provider } from "react-redux";
+import React from 'react';
+import { storiesOf } from '@storybook/react';
+import SiteContainer from '../containers/SiteContainer';
+import { Provider } from 'react-redux';
 // import { OpenGameEntry } from "../components/OpenGameCard";
-import * as states from "../redux/game/state";
-import { Player } from "../core/players";
-import BN from "bn.js";
+import * as states from '../redux/game/state';
+import { Player } from '../core/players';
+import BN from 'bn.js';
 // import { OpenGame } from "../redux/open-games/state";
-import "../index.scss";
-import { SiteState } from "../redux/reducer";
-import HomePage from "../components/HomePage";
-import LoadingPage from "../components/LoadingPage";
+import '../index.scss';
+import { SiteState } from '../redux/reducer';
+import HomePage from '../components/HomePage';
+import LoadingPage from '../components/LoadingPage';
 import MetamaskErrorPage from '../components/MetamaskErrorPage';
 import { MetamaskErrorType } from '../redux/metamask/actions';
 // import CreatingOpenGameModal from "../components/CreatingOpenGameModal";
 import LoginErrorPage from '../components/LoginErrorPage';
 import { Channel } from 'fmg-core';
 
+const finneyFiveFive = ['0x' + new BN(5).toString(16), '0x' + new BN(5).toString(16)] as [
+  string,
+  string
+];
 
-const finneyFiveFive = ['0x' + new BN(5).toString(16), '0x' + new BN(5).toString(16)] as [string, string];
-
-const finneySixFour = ['0x' + new BN(6).toString(16), '0x' + new BN(4).toString(16)] as [string, string];
-
+const finneySixFour = ['0x' + new BN(6).toString(16), '0x' + new BN(4).toString(16)] as [
+  string,
+  string
+];
 
 const fakeStore = state => ({
   dispatch: action => {
@@ -68,7 +72,7 @@ const baseWithBuyIn = {
 export const shared = {
   ...baseWithBuyIn,
   asAddress,
-  twitterHandle: "twtr",
+  twitterHandle: 'twtr',
   bsAddress,
   myName: 'Tom',
   opponentName: 'Alex',
@@ -116,9 +120,7 @@ const initialState: SiteState = {
   },
 };
 
-export function siteStateFromGameState<T extends states.GameState>(
-  gamestate: T
-): SiteState {
+export function siteStateFromGameState<T extends states.GameState>(gamestate: T): SiteState {
   return {
     ...initialState,
     game: { messageState: {}, gameState: gamestate },
@@ -128,13 +130,13 @@ export function siteStateFromGameState<T extends states.GameState>(
 const noName = siteStateFromGameState(
   states.noName({
     ...shared,
-  })
+  }),
 );
 
 const waitingRoom = siteStateFromGameState(
   states.waitingRoom({
     ...shared,
-  })
+  }),
 );
 
 const gameProposed = siteStateFromGameState(
@@ -145,7 +147,7 @@ const gameProposed = siteStateFromGameState(
     turnNum: 6,
     allocation: finneySixFour,
     stateCount: 0,
-  })
+  }),
 );
 
 const confirmGame = siteStateFromGameState(
@@ -156,7 +158,7 @@ const confirmGame = siteStateFromGameState(
     turnNum: 6,
     allocation: finneySixFour,
     stateCount: 0,
-  })
+  }),
 );
 
 // const joinOpenGame = () => alert("join open game");
@@ -169,16 +171,14 @@ const confirmGame = siteStateFromGameState(
 //   createdAt: 0,
 // };
 
-storiesOf("Setup", module)
-  .add("Loading Page", () => (
-    <LoadingPage />))
-  .add("Login Error Page", () => (
-    <LoginErrorPage error='Login error message' />))
-  .add("MetaMask Error Page", () => (
-    <MetamaskErrorPage error={{ errorType: MetamaskErrorType.WrongNetwork }} />))
-  .add("Home Page", () => (
-    <HomePage login={() => alert('login')} />))
-  .add("Profile Modal", testState(noName));
+storiesOf('Setup', module)
+  .add('Loading Page', () => <LoadingPage />)
+  .add('Login Error Page', () => <LoginErrorPage error="Login error message" />)
+  .add('MetaMask Error Page', () => (
+    <MetamaskErrorPage error={{ errorType: MetamaskErrorType.WrongNetwork }} />
+  ))
+  .add('Home Page', () => <HomePage login={() => alert('login')} />)
+  .add('Profile Modal', testState(noName));
 
 // storiesOf("Lobby", module)
 //   .add("Open Game Entry", () => (
@@ -187,10 +187,10 @@ storiesOf("Setup", module)
 //     <CreatingOpenGameModal visible={true} createOpenGame={() => ('')} cancelOpenGame={() => ('')} />))
 //   .add("Lobby Page", testState(lobbyState));
 
-storiesOf("Game Opening", module)
-  .add("Waiting Room", testState(waitingRoom))
-  .add("Game Proposed", testState(gameProposed))
-  .add("Confirm Game", testState(confirmGame));
+storiesOf('Game Opening', module)
+  .add('Waiting Room', testState(waitingRoom))
+  .add('Game Proposed', testState(gameProposed))
+  .add('Confirm Game', testState(confirmGame));
 
-storiesOf("Game Screens", module);
-storiesOf("Game Over", module);
+storiesOf('Game Screens', module);
+storiesOf('Game Over', module);

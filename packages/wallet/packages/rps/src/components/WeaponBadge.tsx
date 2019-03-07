@@ -36,11 +36,20 @@ export class WeaponBadge extends React.Component<Props, State> {
     const { move, action } = this.props;
     switch (move) {
       case Weapon.Rock:
-        return <img className='move-badge' src={ROCK_BADGE} onClick={action} onMouseEnter={this.hoverOn} onMouseLeave={this.hoverOff} />;
+        return (
+          <img
+            className="move-badge"
+            src={ROCK_BADGE}
+            onClick={action}
+            onMouseEnter={this.hoverOn}
+            onMouseLeave={this.hoverOff}
+          />
+        );
       case Weapon.Paper:
-        return <img className='move-badge' src={PAPER_BADGE} onClick={action} />;
-      default: // Weapon.Scissors:
-        return <img className='move-badge' src={SCISSORS_BADGE} onClick={action} />;
+        return <img className="move-badge" src={PAPER_BADGE} onClick={action} />;
+      default:
+        // Weapon.Scissors:
+        return <img className="move-badge" src={SCISSORS_BADGE} onClick={action} />;
     }
   }
 }

@@ -20,13 +20,11 @@ export default class SelectAddress extends React.PureComponent<Props, State> {
     this.state = { withdrawAddress: currentAddress };
 
     this.handleSubmitAddress = this.handleSubmitAddress.bind(this);
-
-
   }
 
   componentDidMount() {
     if (typeof ethereum !== 'undefined') {
-      ethereum.on('accountsChanged', (accounts) => {
+      ethereum.on('accountsChanged', accounts => {
         this.setState({ withdrawAddress: accounts[0] });
       });
     } else {
@@ -48,18 +46,19 @@ export default class SelectAddress extends React.PureComponent<Props, State> {
     return (
       <SidebarLayout>
         <h2 className="bp-2">{title}</h2>
-        <p>
-          {description}
-        </p>
-        <p>
-          The funds will be sent to your current metamask account:
-        </p>
+        <p>{description}</p>
+        <p>The funds will be sent to your current metamask account:</p>
         <div className="pb-2">
-          <input disabled={true} style={{ width: '95%' }} type="text" readOnly={true} defaultValue={this.state.withdrawAddress} />
+          <input
+            disabled={true}
+            style={{ width: '95%' }}
+            type="text"
+            readOnly={true}
+            defaultValue={this.state.withdrawAddress}
+          />
         </div>
         <div className="pb-2">
-          <Button onClick={this.handleSubmitAddress} >{approveButtonTitle}
-          </Button>
+          <Button onClick={this.handleSubmitAddress}>{approveButtonTitle}</Button>
         </div>
       </SidebarLayout>
     );
@@ -68,5 +67,3 @@ export default class SelectAddress extends React.PureComponent<Props, State> {
     this.props.approveAction(this.state.withdrawAddress);
   }
 }
-
-

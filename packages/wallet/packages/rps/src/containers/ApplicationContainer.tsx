@@ -15,9 +15,7 @@ function Application(props: ApplicationProps) {
     // lobby is special as we need access to the list of open challenges
     case gameStates.StateName.Lobby:
     case gameStates.StateName.CreatingOpenGame:
-      return (
-        <LobbyContainer />
-      );
+      return <LobbyContainer />;
     default:
       return <GameContainer />;
   }

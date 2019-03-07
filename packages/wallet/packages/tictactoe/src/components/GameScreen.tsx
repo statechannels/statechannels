@@ -1,8 +1,8 @@
-import React from "react";
-import Board from "./Board";
-import MagmoLogoContainer from "../containers/MagmoLogoContainer";
-import GameFooterContainer from "../containers/GameFooterContainer";
-import { Marks, Marker, Result, Player, Imperative } from "../core";
+import React from 'react';
+import Board from './Board';
+import MagmoLogoContainer from '../containers/MagmoLogoContainer';
+import GameFooterContainer from '../containers/GameFooterContainer';
+import { Marks, Marker, Result, Player, Imperative } from '../core';
 
 interface Props {
   you: Marker;
@@ -22,12 +22,7 @@ export default class GameScreen extends React.PureComponent<Props> {
     return (
       <div>
         <div className="container centered-container game-container">
-          <Board
-            noughts={noughts}
-            crosses={crosses}
-            marksMade={marksMade}
-            you={you}
-          />
+          <Board noughts={noughts} crosses={crosses} marksMade={marksMade} you={you} />
         </div>
 
         <MagmoLogoContainer />

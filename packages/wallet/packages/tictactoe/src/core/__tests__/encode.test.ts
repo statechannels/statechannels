@@ -35,7 +35,9 @@ describe('decode', () => {
   });
 
   it('encodes resigning Conclude', () => {
-    expect(encode(scenarios.aResignsAfterOneRound.conclude)).toEqual(scenarios.aResignsAfterOneRound.concludeHex);
+    expect(encode(scenarios.aResignsAfterOneRound.conclude)).toEqual(
+      scenarios.aResignsAfterOneRound.concludeHex,
+    );
   });
 
   it('encodes PlayAgainmeFirst', () => {
@@ -49,5 +51,4 @@ describe('decode', () => {
   it('encodes Xplaying after swapping roles', () => {
     expect(encode(scenarios.swapRoles.r2playing1)).toEqual(scenarios.swapRoles.r2playing1Hex);
   });
-
 });

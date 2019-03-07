@@ -1,8 +1,8 @@
-import React from "react";
+import React from 'react';
 
-import { Button, Navbar } from "reactstrap";
-import { Commitment } from "fmg-core";
-import { RulesModal } from "./RulesModal";
+import { Button, Navbar } from 'reactstrap';
+import { Commitment } from 'fmg-core';
+import { RulesModal } from './RulesModal';
 
 interface Props {
   showRules: boolean;
@@ -12,14 +12,14 @@ interface Props {
 }
 
 function getInitials(loginDisplayName: string): string {
-  const userDisplayName = loginDisplayName.split(" ");
-  return userDisplayName.map(name => name.charAt(0)).join("");
+  const userDisplayName = loginDisplayName.split(' ');
+  return userDisplayName.map(name => name.charAt(0)).join('');
 }
 
 export default class NavigationBar extends React.PureComponent<Props, Commitment> {
   render() {
     return (
-      <Navbar className='navbar'>
+      <Navbar className="navbar">
         <Button color="link" className="navbar-button mr-auto" onClick={this.props.rulesRequest}>
           Rules
         </Button>
@@ -29,7 +29,7 @@ export default class NavigationBar extends React.PureComponent<Props, Commitment
         <Button color="link" className="navbar-button ml-auto" onClick={this.props.logoutRequest}>
           Sign Out
         </Button>
-        <RulesModal visible={this.props.showRules} rulesRequest={this.props.rulesRequest}/>
+        <RulesModal visible={this.props.showRules} rulesRequest={this.props.rulesRequest} />
       </Navbar>
     );
   }

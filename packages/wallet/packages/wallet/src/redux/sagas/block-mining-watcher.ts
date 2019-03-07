@@ -5,16 +5,15 @@ import { blockMined } from '../actions';
 
 export function* blockMiningWatcher() {
   const provider = yield getProvider();
-  const blockchainEventChannel =
-    eventChannel(emit => {
-      provider.on('block', (blockNumber) => {
-        emit(blockNumber);
-      });
-
-      return () => {
-        provider.removeAllListeners('block');
-      };
+  const blockchainEventChannel = eventChannel(emit => {
+    provider.on('block', blockNumber => {
+      emit(blockNumber);
     });
+
+    return () => {
+      provider.removeAllListeners('block');
+    };
+  });
 
   while (true) {
     const blockNumber = yield take(blockchainEventChannel);

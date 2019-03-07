@@ -7,8 +7,7 @@ import * as gameActions from '../redux/game/actions';
 import * as loginActions from '../redux/login/actions';
 
 function mapStateToProps(state: SiteState) {
-  return {
-  };
+  return {};
 }
 
 const mapDispatchToProps = {

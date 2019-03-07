@@ -9,7 +9,6 @@ interface Props {
 }
 
 export default class TransactionFailed extends React.PureComponent<Props> {
-
   render() {
     const { name, retryAction } = this.props;
     return (
@@ -17,10 +16,10 @@ export default class TransactionFailed extends React.PureComponent<Props> {
         <h1>Transaction Failed</h1>
         <p>The {name} transaction was not submitted to the network. Hit retry to try again.</p>
 
-        <Button onClick={retryAction} >
-          <img src={magmoFireBall} />&nbsp;&nbsp;Retry
+        <Button onClick={retryAction}>
+          <img src={magmoFireBall} />
+          &nbsp;&nbsp;Retry
         </Button>
-
       </SidebarLayout>
     );
   }

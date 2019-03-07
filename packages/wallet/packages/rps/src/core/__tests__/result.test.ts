@@ -1,5 +1,5 @@
 import { Player } from '../players';
-import { Weapon }  from '../weapons';
+import { Weapon } from '../weapons';
 import {
   Result,
   calculateResult,
@@ -19,8 +19,14 @@ function testOutcome(yourWeapon: Weapon, theirWeapon: Weapon, expectedResult: Re
     describe('when you are player A', () => {
       const absoluteResultFromWeapons = calculateAbsoluteResult(yourWeapon, theirWeapon);
 
-      const relativeResultFromAbsolute = convertToRelativeResult(absoluteResultFromWeapons, Player.PlayerA);
-      const absoluteResultFromRelative = convertToAbsoluteResult(relativeResultFromWeapons, Player.PlayerA);
+      const relativeResultFromAbsolute = convertToRelativeResult(
+        absoluteResultFromWeapons,
+        Player.PlayerA,
+      );
+      const absoluteResultFromRelative = convertToAbsoluteResult(
+        relativeResultFromWeapons,
+        Player.PlayerA,
+      );
 
       it('relativeResult is consistent with calculateAbsoluteResult', () => {
         expect(relativeResultFromWeapons).toEqual(relativeResultFromAbsolute);
@@ -34,8 +40,14 @@ function testOutcome(yourWeapon: Weapon, theirWeapon: Weapon, expectedResult: Re
     describe('when you are player A', () => {
       const absoluteResultFromWeapons = calculateAbsoluteResult(theirWeapon, yourWeapon);
 
-      const relativeResultFromAbsolute = convertToRelativeResult(absoluteResultFromWeapons, Player.PlayerB);
-      const absoluteResultFromRelative = convertToAbsoluteResult(relativeResultFromWeapons, Player.PlayerB);
+      const relativeResultFromAbsolute = convertToRelativeResult(
+        absoluteResultFromWeapons,
+        Player.PlayerB,
+      );
+      const absoluteResultFromRelative = convertToAbsoluteResult(
+        relativeResultFromWeapons,
+        Player.PlayerB,
+      );
 
       it('relativeResult is consistent with calculateAbsoluteResult', () => {
         expect(relativeResultFromWeapons).toEqual(relativeResultFromAbsolute);

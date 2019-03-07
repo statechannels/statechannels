@@ -16,13 +16,13 @@ const HomePage: React.SFC<IProps> = ({ login }) => {
             <h1 className={css(styles.title)}>Welcome to Rock, Paper Scissors</h1>
             <h1 className={css(styles.title)}>State Channel Game</h1>
           </div>
-          <Button className="cog-button homePage-loginButton" onClick={login} >
+          <Button className="cog-button homePage-loginButton" onClick={login}>
             Start Playing!
           </Button>
         </div>
       </div>
-    <div className="homePage-image" />
-    </div >
+      <div className="homePage-image" />
+    </div>
   );
 };
 

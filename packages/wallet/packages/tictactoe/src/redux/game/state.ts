@@ -1,31 +1,31 @@
-import { Result, Imperative, Marks, Player, Marker } from "../../core";
+import { Result, Imperative, Marks, Player, Marker } from '../../core';
 
 // States of the form *A are player A only
 // States of the form *B are player B only
 // All other states are both players
 export enum StateName {
-  NoName = "NO_NAME",
-  Lobby = "LOBBY",
-  CreatingOpenGame = "CREATING_OPEN_GAME",
-  WaitingRoom = "WAITING_ROOM",
-  WaitForGameConfirmationA = "WAIT_FOR_GAME_CONFIRMATION_A",
-  ConfirmGameB = "CONFIRM_GAME_B",
-  DeclineGame = "DECLINE_GAME_B",
-  WaitForFunding = "WAIT_FOR_FUNDING",
-  WaitForPostFundSetup = "WAIT_FOR_POST_FUND_SETUP",
-  OsPickMove = "OS_PICK_MOVE",
-  XsPickMove = "XS_PICK_MOVE",
-  OsWaitForOpponentToPickMove = "OS_WAIT_FOR_OPPONENT_TO_PICK_MOVE",
-  XsWaitForOpponentToPickMove = "XS_WAIT_FOR_OPPONENT_TO_PICK_MOVE",
-  WaitToPlayAgain = "WAIT_TO_PLAY_AGAIN",
-  PlayAgain = "PLAY_AGAIN",
-  WaitToResign = "WAIT_TO_RESIGN",
-  OpponentResigned = "OPPONENT_RESIGNED",
-  WaitForResignationAcknowledgement = "WAIT_FOR_RESIGNATION_ACKNOWLEDGEMENT",
-  WaitForWithdrawal = "WAIT_FOR_WITHDRAWAL",
-  XsPickChallengeMove = "XS_PICK_CHALLENGE_MOVE",
-  OsPickChallengeMove = "OS_PICK_CHALLENGE_MOVE",
-  PlayAgainChallengeMove = "PLAY_AGAIN_CHALLENGE_MOVE",
+  NoName = 'NO_NAME',
+  Lobby = 'LOBBY',
+  CreatingOpenGame = 'CREATING_OPEN_GAME',
+  WaitingRoom = 'WAITING_ROOM',
+  WaitForGameConfirmationA = 'WAIT_FOR_GAME_CONFIRMATION_A',
+  ConfirmGameB = 'CONFIRM_GAME_B',
+  DeclineGame = 'DECLINE_GAME_B',
+  WaitForFunding = 'WAIT_FOR_FUNDING',
+  WaitForPostFundSetup = 'WAIT_FOR_POST_FUND_SETUP',
+  OsPickMove = 'OS_PICK_MOVE',
+  XsPickMove = 'XS_PICK_MOVE',
+  OsWaitForOpponentToPickMove = 'OS_WAIT_FOR_OPPONENT_TO_PICK_MOVE',
+  XsWaitForOpponentToPickMove = 'XS_WAIT_FOR_OPPONENT_TO_PICK_MOVE',
+  WaitToPlayAgain = 'WAIT_TO_PLAY_AGAIN',
+  PlayAgain = 'PLAY_AGAIN',
+  WaitToResign = 'WAIT_TO_RESIGN',
+  OpponentResigned = 'OPPONENT_RESIGNED',
+  WaitForResignationAcknowledgement = 'WAIT_FOR_RESIGNATION_ACKNOWLEDGEMENT',
+  WaitForWithdrawal = 'WAIT_FOR_WITHDRAWAL',
+  XsPickChallengeMove = 'XS_PICK_CHALLENGE_MOVE',
+  OsPickChallengeMove = 'OS_PICK_CHALLENGE_MOVE',
+  PlayAgainChallengeMove = 'PLAY_AGAIN_CHALLENGE_MOVE',
 }
 
 export interface NoName {
@@ -207,9 +207,7 @@ export interface WaitForGameConfirmationA extends Base {
   name: StateName.WaitForGameConfirmationA;
   player: Player.PlayerA;
 }
-export function waitForGameConfirmationA<T extends Base>(
-  state: T
-): WaitForGameConfirmationA {
+export function waitForGameConfirmationA<T extends Base>(state: T): WaitForGameConfirmationA {
   return {
     ...base(state),
     name: StateName.WaitForGameConfirmationA,
@@ -259,9 +257,7 @@ export interface WaitForPostFundSetup extends HasResult {
   player: Player;
 }
 
-export function waitForPostFundSetup<T extends HasResult>(
-  state: T
-): WaitForPostFundSetup {
+export function waitForPostFundSetup<T extends HasResult>(state: T): WaitForPostFundSetup {
   return {
     ...base(state),
     name: StateName.WaitForPostFundSetup,
@@ -292,7 +288,7 @@ export interface OsWaitForOpponentToPickMove extends HasResult {
   name: StateName.OsWaitForOpponentToPickMove;
 }
 export function osWaitForOpponentToPickMove<T extends HasResult>(
-  state: T
+  state: T,
 ): OsWaitForOpponentToPickMove {
   return {
     ...hasResult(state),
@@ -304,7 +300,7 @@ export interface XsWaitForOpponentToPickMove extends HasResult {
   name: StateName.XsWaitForOpponentToPickMove;
 }
 export function xsWaitForOpponentToPickMove<T extends HasResult>(
-  state: T
+  state: T,
 ): XsWaitForOpponentToPickMove {
   return {
     ...hasResult(state),
@@ -316,9 +312,7 @@ export interface XsPickChallengeMove extends HasResult {
   name: StateName.XsPickChallengeMove;
   player: Player;
 }
-export function xsPickChallengeMove<T extends HasResult>(
-  state: T
-): XsPickChallengeMove {
+export function xsPickChallengeMove<T extends HasResult>(state: T): XsPickChallengeMove {
   return { ...hasResult(state), name: StateName.XsPickChallengeMove };
 }
 
@@ -326,9 +320,7 @@ export interface OsPickChallengeMove extends HasResult {
   name: StateName.OsPickChallengeMove;
   player: Player;
 }
-export function osPickChallengeMove<T extends HasResult>(
-  state: T
-): OsPickChallengeMove {
+export function osPickChallengeMove<T extends HasResult>(state: T): OsPickChallengeMove {
   return { ...hasResult(state), name: StateName.OsPickChallengeMove };
 }
 
@@ -345,9 +337,8 @@ export interface PlayAgainChallengeMove extends HasResult {
   player: Player;
 }
 
-export function playAgainChallengeMove<T extends HasResult>(
-  state: T ): PlayAgainChallengeMove {
-  return {...hasResult(state), name: StateName.PlayAgainChallengeMove };
+export function playAgainChallengeMove<T extends HasResult>(state: T): PlayAgainChallengeMove {
+  return { ...hasResult(state), name: StateName.PlayAgainChallengeMove };
 }
 
 export interface WaitToPlayAgain extends HasResult {
@@ -375,7 +366,7 @@ export interface WaitForResignationAcknowledgement extends HasResult {
   name: StateName.WaitForResignationAcknowledgement;
 }
 export function waitForResignationAcknowledgement<T extends HasResult>(
-  state: T
+  state: T,
 ): WaitForResignationAcknowledgement {
   return {
     ...hasResult(state),
@@ -386,9 +377,7 @@ export function waitForResignationAcknowledgement<T extends HasResult>(
 export interface WaitForWithdrawal extends HasResult {
   name: StateName.WaitForWithdrawal;
 }
-export function waitForWithdrawal<T extends HasResult>(
-  state: T
-): WaitForWithdrawal {
+export function waitForWithdrawal<T extends HasResult>(state: T): WaitForWithdrawal {
   return { ...hasResult(state), name: StateName.WaitForWithdrawal };
 }
 
@@ -412,9 +401,4 @@ export type PlayingState =
   | OsPickChallengeMove
   | PlayAgainChallengeMove;
 
-export type GameState =
-  | NoName
-  | Lobby
-  | CreatingOpenGame
-  | WaitingRoom
-  | PlayingState;
+export type GameState = NoName | Lobby | CreatingOpenGame | WaitingRoom | PlayingState;

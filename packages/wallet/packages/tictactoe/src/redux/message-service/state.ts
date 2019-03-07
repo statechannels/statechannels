@@ -6,7 +6,12 @@ export interface OutgoingMessage {
   position: Position;
 }
 export interface WalletMessage {
-  type: "FUNDING_REQUESTED" | "RESPOND_TO_CHALLENGE" | "WITHDRAWAL_REQUESTED" | "CONCLUDE_REQUESTED" | 'CHALLENGE_REQUESTED';
+  type:
+    | 'FUNDING_REQUESTED'
+    | 'RESPOND_TO_CHALLENGE'
+    | 'WITHDRAWAL_REQUESTED'
+    | 'CONCLUDE_REQUESTED'
+    | 'CHALLENGE_REQUESTED';
   data?: any;
 }
 export interface MessageState {
@@ -15,6 +20,10 @@ export interface MessageState {
   actionToRetry?: actions.PositionReceived;
 }
 
-export function sendMessage(position: Position, opponentAddress: string, state: MessageState): MessageState {
+export function sendMessage(
+  position: Position,
+  opponentAddress: string,
+  state: MessageState,
+): MessageState {
   return { ...state, opponentOutbox: { opponentAddress, position } };
 }
