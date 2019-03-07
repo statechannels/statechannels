@@ -17,7 +17,6 @@ import GameOverPage from '../components/GameOverPage'; // GameOver, OpponentResi
 import GameProposedPage from '../components/GameProposedPage';
 import ProfileContainer from './ProfileContainer';
 
-
 import WaitForWallet from '../components/WaitForWallet'; // WaitForFunding, maybe others?
 
 import { GameState, StateName, PlayingState } from '../redux/game/state';
@@ -35,34 +34,32 @@ interface GameProps {
 
 // TODO: Add wallet from wallet package
 function GameContainer(props: GameProps) {
-  return (
-    <Fragment>
-      {RenderGame(props)}
-
-
-    </Fragment>
-  );
+  return <Fragment>{RenderGame(props)}</Fragment>;
 }
 
 function RenderGame(props: GameProps) {
   const { state, chooseWeapon, playAgain, confirmGame, declineGame, conclude } = props;
-  const { player, turnNum } = (state as PlayingState);
+  const { player, turnNum } = state as PlayingState;
   const ourTurn = player === Player.PlayerA ? turnNum % 2 !== 0 : turnNum % 2 === 0;
   switch (state.name) {
     case StateName.NoName:
       return <ProfileContainer />;
     case StateName.WaitingRoom:
       return (
-        <WaitingRoomPage
-          cancelOpenGame={props.cancelOpenGame}
-          roundBuyIn={state.roundBuyIn}
-        />
+        <WaitingRoomPage cancelOpenGame={props.cancelOpenGame} roundBuyIn={state.roundBuyIn} />
       );
 
     case StateName.WaitForGameConfirmationA:
-      return <GameProposedPage message='Waiting for opponent to confirm' />;
+      return <GameProposedPage message="Waiting for opponent to confirm" />;
     case StateName.ConfirmGameB:
-      return <ConfirmGamePage confirmGame={confirmGame} cancelGame={declineGame} stake={state.roundBuyIn} opponentName={state.opponentName} />;
+      return (
+        <ConfirmGamePage
+          confirmGame={confirmGame}
+          cancelGame={declineGame}
+          stake={state.roundBuyIn}
+          opponentName={state.opponentName}
+        />
+      );
     case StateName.PickWeapon:
     case StateName.PickChallengeWeapon:
       return <SelectWeaponPage chooseWeapon={chooseWeapon} />;
@@ -75,11 +72,16 @@ function RenderGame(props: GameProps) {
         />
       );
 
-
     case StateName.GameOver:
     // TODO: We probably want a seperate message for when your opponent resigns
     case StateName.OpponentResigned:
-      return <GameOverPage visible={state.name === StateName.OpponentResigned || state.name === StateName.GameOver} conclude={conclude} ourTurn={ourTurn} />;
+      return (
+        <GameOverPage
+          visible={state.name === StateName.OpponentResigned || state.name === StateName.GameOver}
+          conclude={conclude}
+          ourTurn={ourTurn}
+        />
+      );
     case StateName.WaitForOpponentToPickWeaponB:
       return <WaitForOpponentToPickWeapon />;
 
@@ -102,7 +104,6 @@ function RenderGame(props: GameProps) {
         />
       );
 
-
     case StateName.WaitForRestingA:
       return (
         <WaitForRestingA
@@ -115,9 +116,9 @@ function RenderGame(props: GameProps) {
     case StateName.WaitForResignationAcknowledgement:
       return <WaitForResignationAcknowledgement />;
     case StateName.WaitForFunding:
-      return <WaitForWallet reason={"Waiting for funding confirmation."} />;
+      return <WaitForWallet reason={'Waiting for funding confirmation.'} />;
     case StateName.WaitForWithdrawal:
-      return <WaitForWallet reason={"Waiting for funds withdrawal."} />;
+      return <WaitForWallet reason={'Waiting for funds withdrawal.'} />;
     default:
       throw new Error(`View not created for ${state.name}`);
   }

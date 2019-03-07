@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { Weapon }  from '../core';
+import { Weapon } from '../core';
 import { WeaponBadge } from './WeaponBadge';
 import { GameLayout } from './GameLayout';
 

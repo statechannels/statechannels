@@ -21,7 +21,6 @@ const {
   concludeCommitment1,
   concludeCommitment2,
   channelId,
-
 } = scenarios;
 const defaults = {
   adjudicator: 'adj-address',
@@ -43,11 +42,8 @@ const defaultsA = {
   requestedYourDeposit: bigNumberify(500000000000000).toHexString(),
 };
 
-
 describe('start in AcknowledgeConclude', () => {
-
   describe('action taken: conclude approved', () => {
-
     const state = states.acknowledgeConclude({
       ...defaultsA,
       penultimateCommitment: { commitment: gameCommitment2, signature: 'sig' },
@@ -59,9 +55,8 @@ describe('start in AcknowledgeConclude', () => {
 
     const updatedState = walletReducer(state, action);
     itTransitionsToStateType(states.APPROVE_CLOSE_ON_CHAIN, updatedState);
-    expect((updatedState.messageOutbox!).type).toEqual(outgoing.COMMITMENT_RELAY_REQUESTED);
+    expect(updatedState.messageOutbox!.type).toEqual(outgoing.COMMITMENT_RELAY_REQUESTED);
   });
-
 });
 
 describe('start in ApproveConclude', () => {
@@ -89,7 +84,6 @@ describe('start in ApproveConclude', () => {
     const updatedState = walletReducer(state, action);
     itTransitionsToStateType(states.WAIT_FOR_OPPONENT_CONCLUDE, updatedState);
   });
-
 });
 
 describe('start in WaitForOpponentConclude', () => {
@@ -102,14 +96,13 @@ describe('start in WaitForOpponentConclude', () => {
     });
     const validateMock = jest.fn().mockReturnValue(true);
     Object.defineProperty(SigningUtil, 'validCommitmentSignature', { value: validateMock });
-    Object.defineProperty(ReducerUtil, "validTransition", { value: validateMock });
+    Object.defineProperty(ReducerUtil, 'validTransition', { value: validateMock });
 
-    const action = actions.commitmentReceived('commitment' as unknown as Commitment, '0x0');
+    const action = actions.commitmentReceived(('commitment' as unknown) as Commitment, '0x0');
     describe(' where the adjudicator exists', () => {
-
       const updatedState = walletReducer(state, action);
       itTransitionsToStateType(states.APPROVE_CLOSE_ON_CHAIN, updatedState);
-      expect((updatedState.messageOutbox!).type).toEqual(outgoing.CONCLUDE_SUCCESS);
+      expect(updatedState.messageOutbox!.type).toEqual(outgoing.CONCLUDE_SUCCESS);
     });
   });
 });
@@ -123,19 +116,18 @@ describe('start in ApproveCloseOnChain', () => {
     userAddress: '0x0',
   });
   describe('action taken: approve close on chain', () => {
-    // TODO: Mock out Signature contructor so we don't have to pass a valid signature string in 
+    // TODO: Mock out Signature contructor so we don't have to pass a valid signature string in
     const createConcludeTxMock = jest.fn();
-    Object.defineProperty(TransactionGenerator, 'createConcludeAndWithdrawTransaction', { value: createConcludeTxMock });
+    Object.defineProperty(TransactionGenerator, 'createConcludeAndWithdrawTransaction', {
+      value: createConcludeTxMock,
+    });
     const signVerMock = jest.fn();
     signVerMock.mockReturnValue('0x0');
     Object.defineProperty(SigningUtil, 'signVerificationData', { value: signVerMock });
     const action = actions.approveClose('0x0');
     const updatedState = walletReducer(state, action);
     itTransitionsToStateType(states.WAIT_FOR_CLOSE_INITIATION, updatedState);
-
   });
-
-
 });
 
 describe('start in WaitForCloseInitiation', () => {
@@ -147,7 +139,6 @@ describe('start in WaitForCloseInitiation', () => {
     userAddress: '0x0',
   });
   describe('action taken: transaction sent to metamask', () => {
-
     const action = actions.transactionSentToMetamask();
     const updatedState = walletReducer(state, action);
     itTransitionsToStateType(states.WAIT_FOR_CLOSE_SUBMISSION, updatedState);
@@ -163,13 +154,11 @@ describe('start in WaitForCloseSubmission', () => {
     userAddress: '0x0',
   });
   describe('action taken: transaction submitted', () => {
-
     const action = actions.transactionSubmitted('0x0');
     const updatedState = walletReducer(state, action);
     itTransitionsToStateType(states.WAIT_FOR_CLOSE_CONFIRMED, updatedState);
   });
   describe('action taken: transaction submitted', () => {
-
     const action = actions.transactionSubmissionFailed({ code: 0 });
     const updatedState = walletReducer(state, action);
     itTransitionsToStateType(states.CLOSE_TRANSACTION_FAILED, updatedState);
@@ -187,7 +176,9 @@ describe('start in closeTransactionFailed', () => {
 
   describe('action taken: retry transaction', () => {
     const createConcludeTxMock = jest.fn();
-    Object.defineProperty(TransactionGenerator, 'createConcludeAndWithdrawTransaction', { value: createConcludeTxMock });
+    Object.defineProperty(TransactionGenerator, 'createConcludeAndWithdrawTransaction', {
+      value: createConcludeTxMock,
+    });
     const signVerMock = jest.fn();
     signVerMock.mockReturnValue('0x0');
     Object.defineProperty(SigningUtil, 'signVerificationData', { value: signVerMock });
@@ -206,7 +197,6 @@ describe('start in WaitForCloseConfirmed', () => {
     turnNum: concludeCommitment2.turnNum,
   });
   describe('action taken: transaction confirmed', () => {
-
     const action = actions.transactionConfirmed();
     const updatedState = walletReducer(state, action);
     itTransitionsToStateType(states.ACKNOWLEDGE_CLOSE_SUCCESS, updatedState);
@@ -225,6 +215,6 @@ describe('start in AcknowledgCloseSuccess', () => {
     const action = actions.closeSuccessAcknowledged();
     const updatedState = walletReducer(state, action);
     itTransitionsToStateType(states.WAIT_FOR_CHANNEL, updatedState);
-    expect((updatedState.messageOutbox!).type).toEqual(outgoing.CLOSE_SUCCESS);
+    expect(updatedState.messageOutbox!.type).toEqual(outgoing.CLOSE_SUCCESS);
   });
 });

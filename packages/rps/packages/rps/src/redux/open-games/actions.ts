@@ -1,4 +1,4 @@
-import { OpenGame } from "./state";
+import { OpenGame } from './state';
 
 export const SYNC_OPEN_GAMES = 'OPEN_GAMES.SYNC_OPEN_GAMES';
 

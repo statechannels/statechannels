@@ -4,12 +4,7 @@ import * as scenarios from '../../../core/test-scenarios';
 import * as actions from '../actions';
 import * as state from '../state';
 
-import {
-  itSends,
-  itTransitionsTo,
-  itStoresAction,
-  itIncreasesTurnNumBy,
-} from './helpers';
+import { itSends, itTransitionsTo, itStoresAction, itIncreasesTurnNumBy } from './helpers';
 
 const {
   preFundSetupA,
@@ -32,12 +27,27 @@ const {
   reveal: revealInsufficientFunds,
 } = scenarios.insufficientFunds;
 
-const { channel, destination, roundBuyIn, myName, opponentName, asAddress: myAddress } = scenarios.standard;
-const base = { libraryAddress: channel.channelType, channelNonce: channel.nonce, participants: destination, roundBuyIn, myName, opponentName, myAddress };
+const {
+  channel,
+  destination,
+  roundBuyIn,
+  myName,
+  opponentName,
+  asAddress: myAddress,
+} = scenarios.standard;
+const base = {
+  libraryAddress: channel.channelType,
+  channelNonce: channel.nonce,
+  participants: destination,
+  roundBuyIn,
+  myName,
+  opponentName,
+  myAddress,
+};
 
 const messageState = {};
 
-describe('player A\'s app', () => {
+describe("player A's app", () => {
   const aProps = {
     ...base,
     commitmentCount: 0,
@@ -94,7 +104,6 @@ describe('player A\'s app', () => {
         expect(newGameState.myWeapon).toEqual(aWeapon);
         expect(newGameState.salt).toEqual(salt);
       });
-
     });
   });
 
@@ -172,7 +181,6 @@ describe('player A\'s app', () => {
       itTransitionsTo(state.StateName.PickWeapon, updatedState);
     });
   });
-
 
   describe('when in GameOver', () => {
     const gameState = state.gameOver({ ...aProps, ...conclude });

@@ -13,7 +13,8 @@ export default class WaitForOtherPlayer extends React.PureComponent<Props> {
       <SidebarLayout>
         <h2>Waiting for the other player</h2>
         <p>
-          We're waiting on the other player to complete their {name}. Hang tight and we'll let you know when they're done!
+          We're waiting on the other player to complete their {name}. Hang tight and we'll let you
+          know when they're done!
         </p>
       </SidebarLayout>
     );

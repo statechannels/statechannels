@@ -48,7 +48,10 @@ export const joinOpenGame = (
   roundBuyIn,
 });
 
-export const initialPositionReceived = (position: positions.PreFundSetupA, opponentName: string) => ({
+export const initialPositionReceived = (
+  position: positions.PreFundSetupA,
+  opponentName: string,
+) => ({
   type: INITIAL_POSITION_RECEIVED as typeof INITIAL_POSITION_RECEIVED,
   position,
   opponentName,
@@ -134,7 +137,7 @@ export type CreateChallenge = ReturnType<typeof createChallenge>;
 export type ChallengeResponseRequested = ReturnType<typeof challengeResponseRequested>;
 export type ChallengeCompleted = ReturnType<typeof challengeCompleted>;
 
-export type GameAction = (
+export type GameAction =
   | UpdateProfile
   | NewOpenGame
   | CancelOpenGame
@@ -153,5 +156,4 @@ export type GameAction = (
   | MessageSent
   | CreateChallenge
   | ChallengeResponseRequested
-  | ChallengeCompleted
-);
+  | ChallengeCompleted;

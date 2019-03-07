@@ -24,7 +24,9 @@ export default class EtherscanLink extends React.PureComponent<Props> {
   }
   render() {
     return (
-      <a target="_blank" href={this.buildEtherscanLink()}>{this.props.title}</a>
+      <a target="_blank" href={this.buildEtherscanLink()}>
+        {this.props.title}
+      </a>
     );
   }
 }

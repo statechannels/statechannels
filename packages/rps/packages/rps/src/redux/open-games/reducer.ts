@@ -11,11 +11,12 @@ export const openGamesReducer: Reducer<OpenGameState> = (
 ) => {
   switch (action.type) {
     case actions.SYNC_OPEN_GAMES:
-      const allGames = state
-        .filter(game => game.name.match('Neo Bot'))
-        .concat(action.openGames);
+      const allGames = state.filter(game => game.name.match('Neo Bot')).concat(action.openGames);
 
-      const gameMap = allGames.reduce((m, game) => { m[game.name] = game; return m; }, {});
+      const gameMap = allGames.reduce((m, game) => {
+        m[game.name] = game;
+        return m;
+      }, {});
       return Object.keys(gameMap).map(k => gameMap[k]);
 
     default:

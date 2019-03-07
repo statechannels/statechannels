@@ -1,7 +1,7 @@
-import { Reducer } from "redux";
+import { Reducer } from 'redux';
 
-import * as actions from "./actions";
-import { OverlayState } from "./state";
+import * as actions from './actions';
+import { OverlayState } from './state';
 
 const initialState: OverlayState = {
   rulesVisible: false,

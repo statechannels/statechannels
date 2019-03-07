@@ -11,7 +11,6 @@ import bnToHex from '../../utils/bnToHex';
 import BN from 'bn.js';
 import { StateName, GameState } from '../game/state';
 
-
 export default function* openGameSaga() {
   // could be more efficient by only watching actions that could change the state
   // this is more robust though, so stick to watching all actions for the time being
@@ -53,17 +52,18 @@ export default function* openGameSaga() {
             isPublic: true,
           };
 
-          const disconnect = firebase.database().ref(myOpenGameKey).onDisconnect();
+          const disconnect = firebase
+            .database()
+            .ref(myOpenGameKey)
+            .onDisconnect();
           yield apply(disconnect, disconnect.remove);
           // use update to allow us to pick our own key
           yield call(reduxSagaFirebase.database.update, myOpenGameKey, myOpenGame);
           myGameIsOnFirebase = true;
         }
       }
-    }
-    else {
+    } else {
       if (myGameIsOnFirebase) {
-
         // if we don't have a wallet address, something's gone very wrong
         if (address) {
           const myOpenGameKey = `/open-games/${address}`;
@@ -75,7 +75,7 @@ export default function* openGameSaga() {
   }
 }
 // maps { '0xabc': openGame1Data, ... } to [openGame1Data, ....]
-const openGameTransformer = (dict) => {
+const openGameTransformer = dict => {
   if (!dict.value) {
     return [];
   }
@@ -97,4 +97,3 @@ function* openGameSyncer() {
     'value',
   );
 }
-

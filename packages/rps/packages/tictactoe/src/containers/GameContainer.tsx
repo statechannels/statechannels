@@ -1,21 +1,21 @@
-import React, { Fragment } from "react";
-import { connect } from "react-redux";
+import React, { Fragment } from 'react';
+import { connect } from 'react-redux';
 
-import { SiteState } from "../redux/reducer";
-import { Marker } from "../core";
-import GameScreen from "../components/GameScreen";
-import ProfileContainer from "./ProfileContainer";
-import WaitingRoomPage from "../components/WaitingRoomPage";
-import ConfirmGamePage from "../components/ConfirmGamePage";
-import GameProposedPage from "../components/GameProposedPage";
-import PlayAgain from "../components/PlayAgain";
-import WaitToResign from "../components/WaitToResign";
-import WaitForResignationAcknowledgement from "../components/WaitForResignationAcknowledgement";
-import WaitForWallet from "../components/WaitForWallet"; // WaitForFunding, maybe others?
+import { SiteState } from '../redux/reducer';
+import { Marker } from '../core';
+import GameScreen from '../components/GameScreen';
+import ProfileContainer from './ProfileContainer';
+import WaitingRoomPage from '../components/WaitingRoomPage';
+import ConfirmGamePage from '../components/ConfirmGamePage';
+import GameProposedPage from '../components/GameProposedPage';
+import PlayAgain from '../components/PlayAgain';
+import WaitToResign from '../components/WaitToResign';
+import WaitForResignationAcknowledgement from '../components/WaitForResignationAcknowledgement';
+import WaitForWallet from '../components/WaitForWallet'; // WaitForFunding, maybe others?
 
-import { Marks } from "../core";
+import { Marks } from '../core';
 import { GameState, StateName } from '../redux/game/state';
-import * as actions from "../redux/game/actions";
+import * as actions from '../redux/game/actions';
 
 interface GameProps {
   state: GameState;
@@ -30,32 +30,17 @@ interface GameProps {
 }
 
 function GameContainer(props: GameProps) {
-  return (
-    <Fragment>
-      {RenderGame(props)}
-    </Fragment>
-  );
+  return <Fragment>{RenderGame(props)}</Fragment>;
 }
 
 function RenderGame(props: GameProps) {
-  const {
-    state,
-    marksMade,
-    confirmGame,
-    declineGame,
-    playAgain,
-    resign,
-    conclude,
-  } = props;
+  const { state, marksMade, confirmGame, declineGame, playAgain, resign, conclude } = props;
   switch (state.name) {
     case StateName.NoName:
       return <ProfileContainer />;
     case StateName.WaitingRoom:
       return (
-        <WaitingRoomPage
-          cancelOpenGame={props.cancelOpenGame}
-          roundBuyIn={state.roundBuyIn}
-        />
+        <WaitingRoomPage cancelOpenGame={props.cancelOpenGame} roundBuyIn={state.roundBuyIn} />
       );
     case StateName.WaitForGameConfirmationA:
       return <GameProposedPage message="Waiting for opponent to confirm" />;
@@ -126,9 +111,9 @@ function RenderGame(props: GameProps) {
           resign={resign}
         />
       );
-      case StateName.PlayAgainChallengeMove:
-      case StateName.PlayAgain:
-      case StateName.WaitToPlayAgain:
+    case StateName.PlayAgainChallengeMove:
+    case StateName.PlayAgain:
+    case StateName.WaitToPlayAgain:
       return (
         <PlayAgain
           noughts={state.noughts}
@@ -151,9 +136,9 @@ function RenderGame(props: GameProps) {
     case StateName.WaitForResignationAcknowledgement:
       return <WaitForResignationAcknowledgement />;
     case StateName.WaitForFunding:
-      return <WaitForWallet reason={"Waiting for funding confirmation."} />;
+      return <WaitForWallet reason={'Waiting for funding confirmation.'} />;
     case StateName.WaitForWithdrawal:
-      return <WaitForWallet reason={"Waiting for funds withdrawal."} />;
+      return <WaitForWallet reason={'Waiting for funds withdrawal.'} />;
     default:
       throw new Error(`View not created for ${state.name}`);
   }
@@ -178,5 +163,5 @@ const mapDispatchToProps = {
 
 export default connect(
   mapStateToProps,
-  mapDispatchToProps
+  mapDispatchToProps,
 )(GameContainer);

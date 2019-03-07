@@ -6,9 +6,7 @@ export default class AWaitForPostFundSetup extends React.PureComponent<{}> {
     return (
       <SidebarLayout>
         <h1>Waiting for confirmation</h1>
-        <p>
-          Waiting for your opponent to confirm the deposit.
-        </p>
+        <p>Waiting for your opponent to confirm the deposit.</p>
       </SidebarLayout>
     );
   }

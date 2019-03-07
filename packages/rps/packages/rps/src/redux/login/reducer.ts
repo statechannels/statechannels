@@ -15,7 +15,10 @@ const initialState: LoginState = {
   error: undefined,
 };
 
-export const loginReducer: Reducer<LoginState> = (state = initialState, action: loginActions.AnyAction) => {
+export const loginReducer: Reducer<LoginState> = (
+  state = initialState,
+  action: loginActions.AnyAction,
+) => {
   switch (action.type) {
     case loginActions.LOGIN_REQUEST:
     case loginActions.LOGOUT_REQUEST:

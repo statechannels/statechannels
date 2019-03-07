@@ -11,9 +11,7 @@ export default class SubmitX extends React.PureComponent<Props> {
     return (
       <SidebarLayout>
         <h1>Sending your {name}</h1>
-        <p>
-          Please confirm the transaction in MetaMask.
-        </p>
+        <p>Please confirm the transaction in MetaMask.</p>
       </SidebarLayout>
     );
   }

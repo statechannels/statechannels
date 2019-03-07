@@ -1,5 +1,5 @@
-import React from "react";
-import { GameScreenNoGameBar } from "./GameScreenNoGameBar";
+import React from 'react';
+import { GameScreenNoGameBar } from './GameScreenNoGameBar';
 
 interface Props {
   reason: string;

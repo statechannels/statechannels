@@ -24,7 +24,7 @@ export default class CreatingOpenGameModal extends React.PureComponent<Props, St
   constructor(props) {
     super(props);
     this.buyInInput = React.createRef();
-    this.state = { errorMessage: "", buyIn: String(MIN_BUYIN), buyInChanged: true };
+    this.state = { errorMessage: '', buyIn: String(MIN_BUYIN), buyInChanged: true };
     this.createOpenGameHandler = this.createOpenGameHandler.bind(this);
     this.handleBuyInChange = this.handleBuyInChange.bind(this);
     this.modalClosed = this.modalClosed.bind(this);
@@ -32,14 +32,15 @@ export default class CreatingOpenGameModal extends React.PureComponent<Props, St
 
   handleBuyInChange(e) {
     const buyIn = Number(e.target.value);
-    let errorMessage = "";
-    if (e.target.value === "") {
-      errorMessage = "Please enter a round buy in amount";
+    let errorMessage = '';
+    if (e.target.value === '') {
+      errorMessage = 'Please enter a round buy in amount';
     } else if (Number.isNaN(buyIn)) {
-      errorMessage = "Please enter a number for the game buy in";
+      errorMessage = 'Please enter a number for the game buy in';
     } else if (buyIn < MIN_BUYIN || buyIn > MAX_BUYIN) {
-      errorMessage = `Invalid game buy in amount ${this.state.buyIn}. Please enter an amount between ${MIN_BUYIN} and ${MAX_BUYIN}`;
-
+      errorMessage = `Invalid game buy in amount ${
+        this.state.buyIn
+      }. Please enter an amount between ${MIN_BUYIN} and ${MAX_BUYIN}`;
     }
     this.setState({ errorMessage, buyIn: e.target.value, buyInChanged: true });
   }
@@ -52,8 +53,7 @@ export default class CreatingOpenGameModal extends React.PureComponent<Props, St
 
   createOpenGameHandler(e) {
     e.preventDefault();
-    if (this.state.errorMessage === "") {
-
+    if (this.state.errorMessage === '') {
       this.props.createOpenGame(web3Utils.toWei(this.state.buyIn, 'ether'));
     } else {
       this.setState({ buyInChanged: true });
@@ -61,7 +61,7 @@ export default class CreatingOpenGameModal extends React.PureComponent<Props, St
   }
 
   modalClosed() {
-    this.setState({ errorMessage: "", buyIn: "", buyInChanged: false });
+    this.setState({ errorMessage: '', buyIn: '', buyInChanged: false });
     this.props.cancelOpenGame();
   }
 
@@ -70,16 +70,18 @@ export default class CreatingOpenGameModal extends React.PureComponent<Props, St
     if (gameBuyIn) {
       return gameBuyIn;
     }
-    return "";
+    return '';
   }
 
   render() {
-
     return (
-      <Modal className="cog-container" toggle={this.modalClosed} isOpen={this.props.visible} centered={true}>
-        <ModalHeader className="rules-header">
-          Create A Game
-      </ModalHeader>
+      <Modal
+        className="cog-container"
+        toggle={this.modalClosed}
+        isOpen={this.props.visible}
+        centered={true}
+      >
+        <ModalHeader className="rules-header">Create A Game</ModalHeader>
 
         <ModalBody>
           <form className="cog-form" onSubmit={e => this.createOpenGameHandler(e)}>
@@ -97,9 +99,7 @@ export default class CreatingOpenGameModal extends React.PureComponent<Props, St
                 <div>ETH</div>
               </div>
               <small className="form-text text-muted">
-                {
-                  `Please enter an amount between ${MIN_BUYIN} and ${MAX_BUYIN}`
-                }
+                {`Please enter an amount between ${MIN_BUYIN} and ${MAX_BUYIN}`}
               </small>
               <small className="form-text text-danger cog-error-message">
                 {this.state.errorMessage}
@@ -110,7 +110,12 @@ export default class CreatingOpenGameModal extends React.PureComponent<Props, St
                 This is 5 times the round buy in amount.
               </small>
             </div>
-            <Button className="cog-button" type="submit" disabled={this.state.errorMessage !== "" } block={true}>
+            <Button
+              className="cog-button"
+              type="submit"
+              disabled={this.state.errorMessage !== ''}
+              block={true}
+            >
               Create Game
             </Button>
           </form>

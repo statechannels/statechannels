@@ -7,7 +7,12 @@ export interface OutgoingMessage {
   commitment: Commitment;
 }
 export interface WalletMessage {
-  type: "FUNDING_REQUESTED" | "RESPOND_TO_CHALLENGE" | "WITHDRAWAL_REQUESTED" | "CONCLUDE_REQUESTED" | 'CHALLENGE_REQUESTED';
+  type:
+    | 'FUNDING_REQUESTED'
+    | 'RESPOND_TO_CHALLENGE'
+    | 'WITHDRAWAL_REQUESTED'
+    | 'CONCLUDE_REQUESTED'
+    | 'CHALLENGE_REQUESTED';
   data?: any;
 }
 export interface MessageState {
@@ -16,6 +21,13 @@ export interface MessageState {
   actionToRetry?: actions.CommitmentReceived;
 }
 
-export function sendMessage(commitment: RPSCommitment, opponentAddress: string, state: MessageState): MessageState {
-  return { ...state, opponentOutbox: { opponentAddress, commitment: asCoreCommitment(commitment) } };
+export function sendMessage(
+  commitment: RPSCommitment,
+  opponentAddress: string,
+  state: MessageState,
+): MessageState {
+  return {
+    ...state,
+    opponentOutbox: { opponentAddress, commitment: asCoreCommitment(commitment) },
+  };
 }

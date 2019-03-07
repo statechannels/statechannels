@@ -1,4 +1,4 @@
-import { Channel, CommitmentType, Commitment } from "fmg-core";
+import { Channel, CommitmentType, Commitment } from 'fmg-core';
 import { channelID } from 'fmg-core/lib/channel';
 import { bigNumberify } from 'ethers/utils';
 

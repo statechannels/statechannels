@@ -13,9 +13,16 @@ interface Props {
 }
 
 export default class ApproveX extends React.PureComponent<Props> {
-
   render() {
-    const { yesMessage, noMessage, approvalAction, rejectionAction, title, description, children } = this.props;
+    const {
+      yesMessage,
+      noMessage,
+      approvalAction,
+      rejectionAction,
+      title,
+      description,
+      children,
+    } = this.props;
     return (
       <SidebarLayout>
         <h2>{title}</h2>
@@ -24,7 +31,12 @@ export default class ApproveX extends React.PureComponent<Props> {
 
         <p>{description}</p>
 
-        <YesOrNo yesAction={approvalAction} noAction={rejectionAction} yesMessage={yesMessage} noMessage={noMessage} />
+        <YesOrNo
+          yesAction={approvalAction}
+          noAction={rejectionAction}
+          yesMessage={yesMessage}
+          noMessage={noMessage}
+        />
       </SidebarLayout>
     );
   }
