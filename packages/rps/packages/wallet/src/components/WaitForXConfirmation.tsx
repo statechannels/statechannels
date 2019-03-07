@@ -29,7 +29,11 @@ export default class WaitForXConfirmation extends React.PureComponent<Props> {
       <SidebarLayout>
         <h1>Waiting for your {name} to be mined!</h1>
         <p>
-          Hold tight! Visit <a target="_blank" href={this.buildEtherscanLink()}>this link</a> to check on its status.
+          Hold tight! Visit{' '}
+          <a target="_blank" href={this.buildEtherscanLink()}>
+            this link
+          </a>{' '}
+          to check on its status.
         </p>
       </SidebarLayout>
     );

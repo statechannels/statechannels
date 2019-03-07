@@ -15,7 +15,9 @@ interface WalletParams {
 
 export function* keyLoader() {
   const state: WalletState = yield select((walletState: WalletState) => walletState);
-  if (state.type !== WAIT_FOR_ADDRESS) { return; }
+  if (state.type !== WAIT_FOR_ADDRESS) {
+    return;
+  }
   const { uid } = state;
   let wallet = yield* fetchWallet(uid);
 

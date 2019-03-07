@@ -6,11 +6,27 @@ import { waitForGameConfirmationA } from '../../redux/game/state';
 import configureStore from 'redux-mock-store';
 import GameProposed from '../../components/GameProposedPage';
 
-const { channel, destination, roundBuyIn, myName, opponentName, twitterHandle, asAddress: myAddress } = scenarios.standard;
-const { libraryAddress }  = scenarios;
-const base = { channel, destination, roundBuyIn, myName, opponentName, twitterHandle, myAddress, libraryAddress };
+const {
+  channel,
+  destination,
+  roundBuyIn,
+  myName,
+  opponentName,
+  twitterHandle,
+  asAddress: myAddress,
+} = scenarios.standard;
+const { libraryAddress } = scenarios;
+const base = {
+  channel,
+  destination,
+  roundBuyIn,
+  myName,
+  opponentName,
+  twitterHandle,
+  myAddress,
+  libraryAddress,
+};
 const mockStore = configureStore();
-
 
 describe('GameContainer', () => {
   // skipping for the time being to avoid having to figure out how to test nested containers
@@ -22,7 +38,7 @@ describe('GameContainer', () => {
     const initialState = {
       game: { gameState },
       rules: { visible: true },
-      login: { user: { displayName: "Tom", }, },
+      login: { user: { displayName: 'Tom' } },
       wallet: {
         display: {
           showWallet: false,

@@ -25,8 +25,8 @@
     "prepare": "run-s prettier:check lint build",
     "build": "npx tsc",
     "lint": "npx tslint -c tslint.json 'src/**/*.ts'",
-    "prettier:check": "npx prettier --check src/**/*.ts",
-    "prettier:write": "npx prettier --write src/**/*.ts",
+    "prettier:check": "npx prettier --check 'src/**/*.{ts,tsx}'",
+    "prettier:write": "npx prettier --write 'src/**/*.{ts,tsx}'",
     "generateDocs": "npx typedoc --out ./docs --exclude '**/+(decode-utils|wallet-messages).ts'"
   },
   "dependencies": {

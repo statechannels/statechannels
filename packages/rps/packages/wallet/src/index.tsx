@@ -8,7 +8,6 @@ import './index.scss';
 import store from './redux/store';
 import WalletContainer from './containers/Wallet';
 render(
-
   <Provider store={store}>
     <WalletContainer />
   </Provider>,

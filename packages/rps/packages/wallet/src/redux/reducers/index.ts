@@ -23,7 +23,14 @@ import { challengingReducer } from './challenging';
 import { respondingReducer } from './responding';
 import { withdrawingReducer } from './withdrawing';
 import { closingReducer } from './closing';
-import { WalletAction, CONCLUDE_REQUESTED, MESSAGE_SENT, TRANSACTION_SENT_TO_METAMASK, DISPLAY_MESSAGE_SENT, COMMITMENT_RECEIVED } from '../actions';
+import {
+  WalletAction,
+  CONCLUDE_REQUESTED,
+  MESSAGE_SENT,
+  TRANSACTION_SENT_TO_METAMASK,
+  DISPLAY_MESSAGE_SENT,
+  COMMITMENT_RECEIVED,
+} from '../actions';
 import { unreachable, ourTurn, validTransition } from '../../utils/reducer-utils';
 import { validCommitmentSignature } from '../../utils/signing-utils';
 import { showWallet } from 'magmo-wallet-client/lib/wallet-events';
@@ -31,8 +38,10 @@ import { CommitmentType } from 'fmg-core';
 
 const initialState = waitForLogin();
 
-export const walletReducer = (state: WalletState = initialState, action: WalletAction): WalletState => {
-
+export const walletReducer = (
+  state: WalletState = initialState,
+  action: WalletAction,
+): WalletState => {
   if (action.type === MESSAGE_SENT) {
     state = { ...state, messageOutbox: undefined };
   }
@@ -45,10 +54,14 @@ export const walletReducer = (state: WalletState = initialState, action: WalletA
   }
 
   const conclusionStateFromOwnRequest = receivedValidOwnConclusionRequest(state, action);
-  if (conclusionStateFromOwnRequest) { return conclusionStateFromOwnRequest; }
+  if (conclusionStateFromOwnRequest) {
+    return conclusionStateFromOwnRequest;
+  }
 
   const conclusionStateFromOpponentRequest = receivedValidOpponentConclusionRequest(state, action);
-  if (conclusionStateFromOpponentRequest) { return conclusionStateFromOpponentRequest; }
+  if (conclusionStateFromOpponentRequest) {
+    return conclusionStateFromOpponentRequest;
+  }
 
   switch (state.stage) {
     case INITIALIZING:
@@ -72,15 +85,29 @@ export const walletReducer = (state: WalletState = initialState, action: WalletA
   }
 };
 
-const receivedValidOwnConclusionRequest = (state: WalletState, action: WalletAction): ApproveConclude | null => {
-  if (state.stage !== FUNDING && state.stage !== RUNNING) { return null; }
-  if (action.type !== CONCLUDE_REQUESTED || !ourTurn(state)) { return null; }
+const receivedValidOwnConclusionRequest = (
+  state: WalletState,
+  action: WalletAction,
+): ApproveConclude | null => {
+  if (state.stage !== FUNDING && state.stage !== RUNNING) {
+    return null;
+  }
+  if (action.type !== CONCLUDE_REQUESTED || !ourTurn(state)) {
+    return null;
+  }
   return approveConclude({ ...state, displayOutbox: showWallet() });
 };
 
-const receivedValidOpponentConclusionRequest = (state: WalletState, action: WalletAction): AcknowledgeConclude | null => {
-  if (state.stage !== FUNDING && state.stage !== RUNNING) { return null; }
-  if (action.type !== COMMITMENT_RECEIVED) { return null; }
+const receivedValidOpponentConclusionRequest = (
+  state: WalletState,
+  action: WalletAction,
+): AcknowledgeConclude | null => {
+  if (state.stage !== FUNDING && state.stage !== RUNNING) {
+    return null;
+  }
+  if (action.type !== COMMITMENT_RECEIVED) {
+    return null;
+  }
 
   const { commitment, signature } = action;
 
@@ -89,8 +116,12 @@ const receivedValidOpponentConclusionRequest = (state: WalletState, action: Wall
   }
   // check signature
   const opponentAddress = state.participants[1 - state.ourIndex];
-  if (!validCommitmentSignature(commitment, signature, opponentAddress)) { return null; }
-  if (!validTransition(state, commitment)) { return null; }
+  if (!validCommitmentSignature(commitment, signature, opponentAddress)) {
+    return null;
+  }
+  if (!validTransition(state, commitment)) {
+    return null;
+  }
 
   return acknowledgeConclude({
     ...state,
@@ -100,4 +131,3 @@ const receivedValidOpponentConclusionRequest = (state: WalletState, action: Wall
     displayOutbox: showWallet(),
   });
 };
-

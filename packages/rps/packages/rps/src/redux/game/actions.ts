@@ -1,4 +1,3 @@
-
 import { Weapon, RPSCommitment } from '../../core/rps-commitment';
 
 export const UPDATE_PROFILE = 'LOGIN.UPDATE_PROFILE';
@@ -135,7 +134,7 @@ export type CreateChallenge = ReturnType<typeof createChallenge>;
 export type ChallengeResponseRequested = ReturnType<typeof challengeResponseRequested>;
 export type ChallengeCompleted = ReturnType<typeof challengeCompleted>;
 
-export type GameAction = (
+export type GameAction =
   | UpdateProfile
   | NewOpenGame
   | CancelOpenGame
@@ -154,5 +153,4 @@ export type GameAction = (
   | MessageSent
   | CreateChallenge
   | ChallengeResponseRequested
-  | ChallengeCompleted
-);
+  | ChallengeCompleted;

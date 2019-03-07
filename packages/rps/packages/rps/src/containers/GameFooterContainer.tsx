@@ -15,7 +15,7 @@ function mapStateToProps(state: SiteState) {
     gameState.name === StateName.WaitForRestingA ||
     gameState.name === StateName.WaitForOpponentToPickWeaponA ||
     gameState.name === StateName.WaitForOpponentToPickWeaponB;
-  const challengeOngoing = gameState.name === "PICK_CHALLENGE_WEAPON";
+  const challengeOngoing = gameState.name === 'PICK_CHALLENGE_WEAPON';
   return {
     isNotOurTurn,
     canChallenge,

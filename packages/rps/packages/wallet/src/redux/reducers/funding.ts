@@ -325,7 +325,7 @@ const aWaitForPostFundSetupReducer = (
 ) => {
   switch (action.type) {
     case actions.COMMITMENT_RECEIVED:
-      const { commitment: postFundState, signature} = action;
+      const { commitment: postFundState, signature } = action;
       if (!validTransitionToPostFundState(state, postFundState, signature)) {
         return state;
       }

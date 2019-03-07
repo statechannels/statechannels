@@ -8,13 +8,16 @@ export const itSends = (commitment: RPSCommitment, jointState) => {
   });
 };
 
-export const itIncreasesTurnNumBy = (increase: number, oldState: JointState, newState: JointState) => {
+export const itIncreasesTurnNumBy = (
+  increase: number,
+  oldState: JointState,
+  newState: JointState,
+) => {
   it(`increases the turnNum by ${increase}`, () => {
     if (!('turnNum' in newState.gameState) || !('turnNum' in oldState.gameState)) {
       return fail('turnNum does not exist on one of the states');
     }
     expect(newState.gameState.turnNum).toEqual(oldState.gameState.turnNum + increase);
-
   });
 };
 
@@ -29,5 +32,3 @@ export const itStoresAction = (action, jointState) => {
     expect(jointState.messageState.actionToRetry).toEqual(action);
   });
 };
-
-

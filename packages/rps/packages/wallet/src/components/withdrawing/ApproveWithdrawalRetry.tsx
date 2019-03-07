@@ -13,14 +13,10 @@ export default class ApproveWithdrawalRetry extends React.PureComponent<Props> {
     return (
       <SidebarLayout>
         <img src={walletIcon} />
-        <div className="challenge-expired-title">
-          Withdrawal successful!
-        </div>
-        <p>
-          You have successfully deposited funds into your channel.
-        </p>
-        <div className="challenge-expired-button-container" >
-          <Button className="challenge-expired-button" onClick={withdrawalSuccessAcknowledged} >
+        <div className="challenge-expired-title">Withdrawal successful!</div>
+        <p>You have successfully deposited funds into your channel.</p>
+        <div className="challenge-expired-button-container">
+          <Button className="challenge-expired-button" onClick={withdrawalSuccessAcknowledged}>
             Return to app
           </Button>
         </div>

@@ -15,14 +15,12 @@ export default class AcknowledgeX extends React.PureComponent<Props> {
     const { title, action, actionTitle, description } = this.props;
     return (
       <SidebarLayout>
-          <h2>{title}</h2>
-          <p>{description}</p>
-        <div className="challenge-expired-button-container" >
+        <h2>{title}</h2>
+        <p>{description}</p>
+        <div className="challenge-expired-button-container">
           <div className={css(styles.buttonContainer)}>
             <span className={css(styles.button)}>
-              <Button onClick={action} >
-                {actionTitle}
-              </Button>
+              <Button onClick={action}>{actionTitle}</Button>
             </span>
           </div>
         </div>

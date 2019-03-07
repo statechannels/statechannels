@@ -41,13 +41,17 @@ export default class LobbyPage extends React.PureComponent<Props, State> {
           <div className="mt-5">
             <div className="lobby-ogc-container">
               {openGames.map(openGame => (
-                  <OpenGameEntry key={openGame.address} openGame={openGame} joinOpenGame={joinOpenGame}/>
+                <OpenGameEntry
+                  key={openGame.address}
+                  openGame={openGame}
+                  joinOpenGame={joinOpenGame}
+                />
               ))}
             </div>
           </div>
         </div>
-        <CreatingOpenGameContainer/>
-      </ApplicationLayout >
+        <CreatingOpenGameContainer />
+      </ApplicationLayout>
     );
   }
 }

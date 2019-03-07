@@ -1,20 +1,9 @@
-import {
-  fork,
-  take,
-  select,
-  cancel,
-  call,
-  apply,
-  put,
-} from 'redux-saga/effects';
+import { fork, take, select, cancel, call, apply, put } from 'redux-saga/effects';
 
 export const getGameState = (storeObj: any) => storeObj.game.gameState;
 // export const getWalletAddress = (storeObj: any) => storeObj.wallet.address;
 
-import {
-  default as firebase,
-  reduxSagaFirebase,
-} from '../../gateways/firebase';
+import { default as firebase, reduxSagaFirebase } from '../../gateways/firebase';
 
 import * as actions from './actions';
 
@@ -68,11 +57,7 @@ export default function* openGameSaga() {
             .onDisconnect();
           yield apply(disconnect, disconnect.remove);
           // use update to allow us to pick our own key
-          yield call(
-            reduxSagaFirebase.database.update,
-            myOpenGameKey,
-            myOpenGame,
-          );
+          yield call(reduxSagaFirebase.database.update, myOpenGameKey, myOpenGame);
           myGameIsOnFirebase = true;
         }
       }
@@ -105,13 +90,9 @@ function* openGameSyncer() {
     try {
       // If the bot url is configured, try to fetch from the local server wallet
       // Assumes the server is running locally at the configured url
-      const response = yield fetch(`${process.env.BOT_URL}/api/v1/rps_games`).then(
-        r => r.json(),
-      );
+      const response = yield fetch(`${process.env.BOT_URL}/api/v1/rps_games`).then(r => r.json());
       yield put(
-        actions.syncOpenGames(
-          response.games.map(g => ({ ...g, address: response.address, })),
-        ),
+        actions.syncOpenGames(response.games.map(g => ({ ...g, address: response.address }))),
       );
     } catch (err) {
       if (err.message === 'Failed to fetch') {
