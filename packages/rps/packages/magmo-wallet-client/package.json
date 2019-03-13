@@ -22,7 +22,7 @@
   },
   "scripts": {
     "test": "echo \"Error: run tests from root\" && exit 1",
-    "prepare": "run-s prettier:check lint build",
+    "prepare": "yarn prettier:check && yarn lint && yarn build",
     "build": "npx tsc",
     "lint": "npx tslint -c tslint.json 'src/**/*.ts'",
     "prettier:check": "npx prettier --check 'src/**/*.{ts,tsx}'",
