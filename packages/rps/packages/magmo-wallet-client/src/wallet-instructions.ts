@@ -12,6 +12,12 @@ export const initializeRequest = userId => ({
 });
 export type InitializeRequest = ReturnType<typeof initializeRequest>;
 
+export const INITIALIZE_CHANNEL_REQUEST = 'WALLET.INITIALIZE_CHANNEL_REQUEST';
+export const initializeChannelRequest = () => ({
+  type: INITIALIZE_CHANNEL_REQUEST as typeof INITIALIZE_CHANNEL_REQUEST,
+});
+export type InitializeChannelRequest = ReturnType<typeof initializeChannelRequest>;
+
 // FUNDING
 // =======
 
@@ -110,7 +116,7 @@ export type ReceiveMessage = ReturnType<typeof receiveMessage>;
 // wallet meant for wallet-to-wallet communication (e.g. commitments used to set up a ledger channel)
 export const RECEIVE_COMMITMENT = 'WALLET.MESSAGING.RECEIVE_COMMITMENT';
 export const receiveCommitment = (commitment: Commitment, signature: string) => ({
-  type: RECEIVE_MESSAGE,
+  type: RECEIVE_COMMITMENT,
   commitment,
   signature,
 });

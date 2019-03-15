@@ -1,8 +1,14 @@
-import { walletReducer } from '..';
+import { challengingReducer } from '../channels/challenging';
 import * as scenarios from './test-scenarios';
-import * as states from '../../states';
+import * as states from '../../states/channels';
 import * as actions from '../../actions';
-import { itSendsATransaction, itTransitionsToStateType, itDoesntTransition } from './helpers';
+import {
+  itSendsATransaction,
+  itTransitionsToStateType,
+  itDoesntTransition,
+  itSendsThisMessage,
+  itSendsThisDisplayEvent,
+} from './helpers';
 import * as TransactionGenerator from '../../../utils/transaction-generator';
 import { hideWallet, challengeComplete } from 'magmo-wallet-client';
 import { bigNumberify } from 'ethers/utils';
@@ -45,27 +51,26 @@ describe('when in APPROVE_CHALLENGE', () => {
       value: createChallengeTxMock,
     });
     const action = actions.challengeApproved();
-    const updatedState = walletReducer(state, action);
+    const updatedState = challengingReducer(state, action);
     itTransitionsToStateType(states.WAIT_FOR_CHALLENGE_INITIATION, updatedState);
     itSendsATransaction(updatedState);
   });
 
   describe('when a challenge is declined', () => {
     const action = actions.challengeRejected();
-    const updatedState = walletReducer(state, action);
-    expect(updatedState.displayOutbox).toEqual(hideWallet());
-    expect(updatedState.messageOutbox).toEqual(challengeComplete());
+    const updatedState = challengingReducer(state, action);
+    itSendsThisDisplayEvent(updatedState, hideWallet().type);
+    itSendsThisMessage(updatedState, challengeComplete().type);
     itTransitionsToStateType(states.WAIT_FOR_UPDATE, updatedState);
   });
 });
 
 describe('when in INITIATE_CHALLENGE', () => {
-  const transaction = {};
-  const state = states.waitForChallengeInitiation(transaction, defaults);
+  const state = states.waitForChallengeInitiation(defaults);
 
   describe('when a challenge is initiated', () => {
     const action = actions.transactionSentToMetamask();
-    const updatedState = walletReducer(state, action);
+    const updatedState = challengingReducer(state, action);
 
     itTransitionsToStateType(states.WAIT_FOR_CHALLENGE_SUBMISSION, updatedState);
   });
@@ -76,14 +81,14 @@ describe('when in WAIT_FOR_CHALLENGE_SUBMISSION', () => {
 
   describe('when a challenge is submitted', () => {
     const action = actions.transactionSubmitted('0x0');
-    const updatedState = walletReducer(state, action);
+    const updatedState = challengingReducer(state, action);
 
     itTransitionsToStateType(states.WAIT_FOR_CHALLENGE_CONFIRMATION, updatedState);
   });
 
   describe('when a challenge submissions fails', () => {
     const action = actions.transactionSubmissionFailed({ code: 0 });
-    const updatedState = walletReducer(state, action);
+    const updatedState = challengingReducer(state, action);
 
     itTransitionsToStateType(states.CHALLENGE_TRANSACTION_FAILED, updatedState);
   });
@@ -97,7 +102,7 @@ describe('when in CHALLENGE_TRANSACTION_FAILED', () => {
       value: createChallengeTxMock,
     });
     const action = actions.retryTransaction();
-    const updatedState = walletReducer(state, action);
+    const updatedState = challengingReducer(state, action);
     itTransitionsToStateType(states.WAIT_FOR_CHALLENGE_INITIATION, updatedState);
     expect(createChallengeTxMock.mock.calls.length).toBe(1);
   });
@@ -108,7 +113,7 @@ describe('when in WAIT_FOR_CHALLENGE_CONFIRMATION', () => {
 
   describe('when a challenge is confirmed', () => {
     const action = actions.transactionConfirmed();
-    const updatedState = walletReducer(state, action);
+    const updatedState = challengingReducer(state, action);
 
     itTransitionsToStateType(states.WAIT_FOR_RESPONSE_OR_TIMEOUT, updatedState);
   });
@@ -123,21 +128,21 @@ describe('when in WAIT_FOR_RESPONSE_OR_TIMEOUT', () => {
 
   describe('when the opponent responds', () => {
     const action = actions.respondWithMoveEvent('0x0', '0xC1');
-    const updatedState = walletReducer(state, action);
+    const updatedState = challengingReducer(state, action);
 
     itTransitionsToStateType(states.ACKNOWLEDGE_CHALLENGE_RESPONSE, updatedState);
   });
 
   describe('when the challenge times out', () => {
     const action = actions.blockMined({ timestamp: 2, number: 2 });
-    const updatedState = walletReducer(state, action);
+    const updatedState = challengingReducer(state, action);
 
     itTransitionsToStateType(states.ACKNOWLEDGE_CHALLENGE_TIMEOUT, updatedState);
   });
 
   describe('when a block is mined but the challenge has not expired', () => {
     const action = actions.blockMined({ number: 1, timestamp: 0 });
-    const updatedState = walletReducer(state, action);
+    const updatedState = challengingReducer(state, action);
     itDoesntTransition(state, updatedState);
   });
 });
@@ -145,7 +150,7 @@ describe('when in WAIT_FOR_RESPONSE_OR_TIMEOUT', () => {
 describe('when in ACKNOWLEDGE_RESPONSE', () => {
   const state = states.acknowledgeChallengeResponse({ ...defaults });
   const action = actions.challengeResponseAcknowledged();
-  const updatedState = walletReducer(state, action);
+  const updatedState = challengingReducer(state, action);
 
   itTransitionsToStateType(states.WAIT_FOR_UPDATE, updatedState);
 });
@@ -153,7 +158,7 @@ describe('when in ACKNOWLEDGE_RESPONSE', () => {
 describe('when in ACKNOWLEDGE_TIMEOUT', () => {
   const state = states.acknowledgeChallengeTimeout({ ...defaults });
   const action = actions.challengedTimedOutAcknowledged();
-  const updatedState = walletReducer(state, action);
+  const updatedState = challengingReducer(state, action);
 
   itTransitionsToStateType(states.APPROVE_WITHDRAWAL, updatedState);
 });

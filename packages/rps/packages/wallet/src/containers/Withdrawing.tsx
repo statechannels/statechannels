@@ -3,7 +3,7 @@ import { PureComponent } from 'react';
 import { connect } from 'react-redux';
 import { Button } from 'reactstrap';
 
-import * as states from '../redux/states';
+import * as states from '../redux/states/channels';
 import * as actions from '../redux/actions';
 
 // import AcknowledgeX from '../components/AcknowledgeX';
@@ -54,7 +54,7 @@ class WithdrawingContainer extends PureComponent<Props> {
             Check the progress on&nbsp;
             <EtherscanLink
               transactionID={state.transactionHash}
-              networkId={state.networkId}
+              networkId={-1} // TODO: Put in network id
               title="Etherscan"
             />
             !

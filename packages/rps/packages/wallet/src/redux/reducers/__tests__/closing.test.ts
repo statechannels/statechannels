@@ -1,10 +1,10 @@
-import { walletReducer } from '..';
+import { closingReducer } from '../channels/closing';
 
-import * as states from '../../states';
+import * as states from '../../states/channels';
 import * as actions from '../../actions';
 import * as outgoing from 'magmo-wallet-client/lib/wallet-events';
 import * as scenarios from './test-scenarios';
-import { itTransitionsToStateType } from './helpers';
+import { itTransitionsToStateType, itSendsThisMessage, itSendsThisTransaction } from './helpers';
 
 import * as SigningUtil from '../../../utils/signing-utils';
 import * as ReducerUtil from '../../../utils/reducer-utils';
@@ -44,6 +44,9 @@ const defaultsA = {
 
 describe('start in AcknowledgeConclude', () => {
   describe('action taken: conclude approved', () => {
+    // TODO: Why should you conditionally transition to ApproveCloseOnChain or AcknowledgeCloseSuccess
+    // based on whether the adjudicator is on the current state?
+
     const state = states.acknowledgeConclude({
       ...defaultsA,
       penultimateCommitment: { commitment: gameCommitment2, signature: 'sig' },
@@ -53,9 +56,9 @@ describe('start in AcknowledgeConclude', () => {
 
     const action = actions.concludeApproved();
 
-    const updatedState = walletReducer(state, action);
+    const updatedState = closingReducer(state, action);
     itTransitionsToStateType(states.APPROVE_CLOSE_ON_CHAIN, updatedState);
-    expect(updatedState.messageOutbox!.type).toEqual(outgoing.COMMITMENT_RELAY_REQUESTED);
+    itSendsThisMessage(updatedState, outgoing.COMMITMENT_RELAY_REQUESTED);
   });
 });
 
@@ -68,7 +71,7 @@ describe('start in ApproveConclude', () => {
       turnNum: 1,
     });
     const action = actions.concludeRejected();
-    const updatedState = walletReducer(state, action);
+    const updatedState = closingReducer(state, action);
     itTransitionsToStateType(states.WAIT_FOR_UPDATE, updatedState);
   });
 
@@ -81,7 +84,7 @@ describe('start in ApproveConclude', () => {
     });
 
     const action = actions.concludeApproved();
-    const updatedState = walletReducer(state, action);
+    const updatedState = closingReducer(state, action);
     itTransitionsToStateType(states.WAIT_FOR_OPPONENT_CONCLUDE, updatedState);
   });
 });
@@ -100,9 +103,9 @@ describe('start in WaitForOpponentConclude', () => {
 
     const action = actions.commitmentReceived(('commitment' as unknown) as Commitment, '0x0');
     describe(' where the adjudicator exists', () => {
-      const updatedState = walletReducer(state, action);
+      const updatedState = closingReducer(state, action);
       itTransitionsToStateType(states.APPROVE_CLOSE_ON_CHAIN, updatedState);
-      expect(updatedState.messageOutbox!.type).toEqual(outgoing.CONCLUDE_SUCCESS);
+      itSendsThisMessage(updatedState, outgoing.CONCLUDE_SUCCESS);
     });
   });
 });
@@ -116,8 +119,7 @@ describe('start in ApproveCloseOnChain', () => {
     userAddress: '0x0',
   });
   describe('action taken: approve close on chain', () => {
-    // TODO: Mock out Signature contructor so we don't have to pass a valid signature string in
-    const createConcludeTxMock = jest.fn();
+    const createConcludeTxMock = jest.fn(() => 'conclude-tx');
     Object.defineProperty(TransactionGenerator, 'createConcludeAndWithdrawTransaction', {
       value: createConcludeTxMock,
     });
@@ -125,8 +127,9 @@ describe('start in ApproveCloseOnChain', () => {
     signVerMock.mockReturnValue('0x0');
     Object.defineProperty(SigningUtil, 'signVerificationData', { value: signVerMock });
     const action = actions.approveClose('0x0');
-    const updatedState = walletReducer(state, action);
+    const updatedState = closingReducer(state, action);
     itTransitionsToStateType(states.WAIT_FOR_CLOSE_INITIATION, updatedState);
+    itSendsThisTransaction(updatedState, 'conclude-tx');
   });
 });
 
@@ -140,7 +143,7 @@ describe('start in WaitForCloseInitiation', () => {
   });
   describe('action taken: transaction sent to metamask', () => {
     const action = actions.transactionSentToMetamask();
-    const updatedState = walletReducer(state, action);
+    const updatedState = closingReducer(state, action);
     itTransitionsToStateType(states.WAIT_FOR_CLOSE_SUBMISSION, updatedState);
   });
 });
@@ -155,12 +158,12 @@ describe('start in WaitForCloseSubmission', () => {
   });
   describe('action taken: transaction submitted', () => {
     const action = actions.transactionSubmitted('0x0');
-    const updatedState = walletReducer(state, action);
+    const updatedState = closingReducer(state, action);
     itTransitionsToStateType(states.WAIT_FOR_CLOSE_CONFIRMED, updatedState);
   });
   describe('action taken: transaction submitted', () => {
     const action = actions.transactionSubmissionFailed({ code: 0 });
-    const updatedState = walletReducer(state, action);
+    const updatedState = closingReducer(state, action);
     itTransitionsToStateType(states.CLOSE_TRANSACTION_FAILED, updatedState);
   });
 });
@@ -183,7 +186,7 @@ describe('start in closeTransactionFailed', () => {
     signVerMock.mockReturnValue('0x0');
     Object.defineProperty(SigningUtil, 'signVerificationData', { value: signVerMock });
     const action = actions.retryTransaction();
-    const updatedState = walletReducer(state, action);
+    const updatedState = closingReducer(state, action);
     itTransitionsToStateType(states.WAIT_FOR_CLOSE_SUBMISSION, updatedState);
     expect(createConcludeTxMock.mock.calls.length).toBe(1);
   });
@@ -198,7 +201,7 @@ describe('start in WaitForCloseConfirmed', () => {
   });
   describe('action taken: transaction confirmed', () => {
     const action = actions.transactionConfirmed();
-    const updatedState = walletReducer(state, action);
+    const updatedState = closingReducer(state, action);
     itTransitionsToStateType(states.ACKNOWLEDGE_CLOSE_SUCCESS, updatedState);
   });
 });
@@ -213,8 +216,8 @@ describe('start in AcknowledgCloseSuccess', () => {
     });
 
     const action = actions.closeSuccessAcknowledged();
-    const updatedState = walletReducer(state, action);
+    const updatedState = closingReducer(state, action);
     itTransitionsToStateType(states.WAIT_FOR_CHANNEL, updatedState);
-    expect(updatedState.messageOutbox!.type).toEqual(outgoing.CLOSE_SUCCESS);
+    itSendsThisMessage(updatedState, outgoing.CLOSE_SUCCESS);
   });
 });

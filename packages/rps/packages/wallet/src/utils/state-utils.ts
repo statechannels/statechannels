@@ -1,4 +1,4 @@
-import { WalletState } from '../redux/states';
+import { ChannelState } from '../redux/states/channels';
 import {
   OWN_COMMITMENT_RECEIVED,
   OPPONENT_COMMITMENT_RECEIVED,
@@ -14,7 +14,7 @@ import {
 import { signCommitment, validCommitmentSignature } from './signing-utils';
 
 export function handleSignatureAndValidationMessages(
-  state: WalletState,
+  state: ChannelState,
   action: WalletAction,
 ): WalletEvent | undefined {
   switch (action.type) {

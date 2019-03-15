@@ -1,37 +1,32 @@
-import { walletReducer } from '..';
+import { initializingReducer } from '../initializing';
 
 import * as states from '../../states';
 import * as actions from '../../actions';
 
-import { itTransitionsToStateType } from './helpers';
-
-const defaults = { uid: 'uid', address: '0xa', privateKey: '0xb' };
+const defaults = { uid: 'uid', outboxState: {} };
 
 describe('when in WaitForLogin', () => {
   const state = states.waitForLogin();
 
   describe('when the player logs in', () => {
     const action = actions.loggedIn('uid');
-    const updatedState = walletReducer(state, action);
+    const updatedState = initializingReducer(state, action);
 
-    itTransitionsToStateType(states.WAIT_FOR_ADDRESS, updatedState);
+    it('transitions to WAIT_FOR_ADJUDICATOR', async () => {
+      expect(updatedState.type).toEqual(states.WAIT_FOR_ADJUDICATOR);
+    });
   });
 });
 
-describe('when in WaitForAddress', () => {
-  const state = states.waitForAddress(defaults);
+describe('when in WaitForAdjudicator', () => {
+  const state = states.waitForAdjudicator(defaults);
 
-  describe('when the key loader provides the keys', () => {
-    const action = actions.keysLoaded('address', 'privateKey', 'networkId', 'contractAddress');
-    const updatedState = walletReducer(state, action);
+  describe('when the adjudicator is known', () => {
+    const action = actions.adjudicatorKnown('address', 'network_id');
+    const updatedState = initializingReducer(state, action);
 
-    itTransitionsToStateType(states.WAIT_FOR_CHANNEL, updatedState);
-  });
-
-  describe('when a metamask load error occurs', () => {
-    const action = actions.metamaskLoadError();
-    const updatedState = walletReducer(state, action);
-
-    itTransitionsToStateType(states.METAMASK_ERROR, updatedState);
+    it('transitions to WAIT_FOR_ADJUDICATOR', async () => {
+      expect(updatedState.type).toEqual(states.WAITING_FOR_CHANNEL_INITIALIZATION);
+    });
   });
 });
