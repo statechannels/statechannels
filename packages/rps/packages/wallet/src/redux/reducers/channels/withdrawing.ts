@@ -1,21 +1,25 @@
-import * as states from '../states';
-import * as actions from '../actions';
-import { unreachable } from '../../utils/reducer-utils';
-import { handleSignatureAndValidationMessages } from '../../utils/state-utils';
-import { createTransferAndWithdrawTransaction } from '../../utils/transaction-generator';
-import { signVerificationData } from '../../utils/signing-utils';
+import * as states from '../../states/channels';
+import * as actions from '../../actions';
+import { unreachable } from '../../../utils/reducer-utils';
+import { handleSignatureAndValidationMessages } from '../../../utils/state-utils';
+import { createTransferAndWithdrawTransaction } from '../../../utils/transaction-generator';
+import { signVerificationData } from '../../../utils/signing-utils';
 import { closeSuccess, hideWallet } from 'magmo-wallet-client/lib/wallet-events';
+import { NextChannelState } from '../../states/shared';
 
 export const withdrawingReducer = (
   state: states.WithdrawingState,
   action: actions.WalletAction,
-): states.WalletState => {
+): NextChannelState<states.ChannelState> => {
   // Handle any signature/validation request centrally to avoid duplicating code for each state
   if (
     action.type === actions.OWN_COMMITMENT_RECEIVED ||
     action.type === actions.OPPONENT_COMMITMENT_RECEIVED
   ) {
-    return { ...state, messageOutbox: handleSignatureAndValidationMessages(state, action) };
+    return {
+      channelState: state,
+      outboxState: { messageOutbox: handleSignatureAndValidationMessages(state, action) },
+    };
   }
   switch (state.type) {
     case states.APPROVE_WITHDRAWAL:
@@ -36,7 +40,7 @@ export const withdrawingReducer = (
 const withdrawTransactionFailedReducer = (
   state: states.WithdrawTransactionFailed,
   action: actions.WalletAction,
-) => {
+): NextChannelState<states.ChannelState> => {
   switch (action.type) {
     case actions.RETRY_TRANSACTION:
       const myAddress = state.participants[state.ourIndex];
@@ -50,22 +54,24 @@ const withdrawTransactionFailedReducer = (
         state.privateKey,
       );
       const transactionOutbox = createTransferAndWithdrawTransaction(
-        state.adjudicator,
         state.channelId,
         myAddress,
         state.userAddress,
         myAmount,
         signature,
       );
-      return states.waitForWithdrawalInitiation({ ...state, transactionOutbox });
+      return {
+        channelState: states.waitForWithdrawalInitiation({ ...state }),
+        outboxState: { transactionOutbox },
+      };
   }
-  return state;
+  return { channelState: state };
 };
 
 const approveWithdrawalReducer = (
   state: states.ApproveWithdrawal,
   action: actions.WalletAction,
-): states.WalletState => {
+): NextChannelState<states.ChannelState> => {
   switch (action.type) {
     case actions.WITHDRAWAL_APPROVED:
       const myAddress = state.participants[state.ourIndex];
@@ -78,67 +84,71 @@ const approveWithdrawalReducer = (
         state.privateKey,
       );
       const transactionOutbox = createTransferAndWithdrawTransaction(
-        state.adjudicator,
         state.channelId,
         myAddress,
         action.destinationAddress,
         myAmount,
         signature,
       );
-      return states.waitForWithdrawalInitiation({
-        ...state,
-        transactionOutbox,
-        userAddress: action.destinationAddress,
-      });
+      return {
+        channelState: states.waitForWithdrawalInitiation({
+          ...state,
+          userAddress: action.destinationAddress,
+        }),
+        outboxState: { transactionOutbox },
+      };
     case actions.WITHDRAWAL_REJECTED:
-      return states.acknowledgeCloseSuccess(state);
+      return { channelState: states.acknowledgeCloseSuccess(state) };
     default:
-      return state;
+      return { channelState: state };
   }
 };
 
 const waitForWithdrawalInitiationReducer = (
   state: states.WaitForWithdrawalInitiation,
   action: actions.WalletAction,
-): states.WalletState => {
+): NextChannelState<states.ChannelState> => {
   switch (action.type) {
     case actions.TRANSACTION_SUBMITTED:
-      return states.waitForWithdrawalConfirmation({
-        ...state,
-        transactionHash: action.transactionHash,
-      });
+      return {
+        channelState: states.waitForWithdrawalConfirmation({
+          ...state,
+          transactionHash: action.transactionHash,
+        }),
+      };
     case actions.TRANSACTION_SUBMISSION_FAILED:
-      return states.withdrawTransactionFailed(state);
+      return { channelState: states.withdrawTransactionFailed(state) };
     default:
-      return state;
+      return { channelState: state };
   }
 };
 
 const waitForWithdrawalConfirmationReducer = (
   state: states.WaitForWithdrawalConfirmation,
   action: actions.WalletAction,
-): states.WalletState => {
+): NextChannelState<states.ChannelState> => {
   switch (action.type) {
     case actions.TRANSACTION_CONFIRMED:
-      return states.acknowledgeWithdrawalSuccess(state);
+      return { channelState: states.acknowledgeWithdrawalSuccess(state) };
     default:
-      return state;
+      return { channelState: state };
   }
 };
 
 const acknowledgeWithdrawalSuccessReducer = (
   state: states.AcknowledgeWithdrawalSuccess,
   action: actions.WalletAction,
-): states.WalletState => {
+): NextChannelState<states.ChannelState> => {
   switch (action.type) {
     case actions.WITHDRAWAL_SUCCESS_ACKNOWLEDGED:
       // TODO: We shouldn't be sending out a close success in the withdrawal reducer
-      return states.waitForChannel({
-        ...state,
-        messageOutbox: closeSuccess(),
-        displayOutbox: hideWallet(),
-      });
+      return {
+        channelState: states.waitForChannel({
+          ...state,
+        }),
+        outboxState: { messageOutbox: closeSuccess(), displayOutbox: hideWallet() },
+      };
     default:
-      return state;
+      return { channelState: state };
   }
 };

@@ -7,21 +7,19 @@ export const loggedIn = (uid: string) => ({
 });
 export type LoggedIn = ReturnType<typeof loggedIn>;
 
-export const KEYS_LOADED = 'WALLET.KEYS_LOADED';
-export const keysLoaded = (
-  address: string,
-  privateKey: string,
-  networkId: string,
-  adjudicator: string,
-) => ({
-  type: KEYS_LOADED as typeof KEYS_LOADED,
-  address,
-  privateKey,
-  // TODO: This should be separated off into its own action
+export const ADJUDICATOR_KNOWN = 'WALLET.ADJUDICATOR_KNOWN';
+export const adjudicatorKnown = (networkId: string, adjudicator: string) => ({
+  type: ADJUDICATOR_KNOWN as typeof ADJUDICATOR_KNOWN,
   networkId,
   adjudicator,
 });
-export type KeysLoaded = ReturnType<typeof keysLoaded>;
+export type AdjudicatorKnown = ReturnType<typeof adjudicatorKnown>;
+
+export const CHANNEL_INITIALIZED = 'WALLET.CHANNEL_INITIALIZED';
+export const channelInitialized = () => ({
+  type: CHANNEL_INITIALIZED as typeof CHANNEL_INITIALIZED,
+});
+export type ChannelInitialized = ReturnType<typeof channelInitialized>;
 
 export const CREATE_CHANNEL_REQUEST = ''; // send over opponent addresses, gameLibrary
 // return nonce etc.
@@ -366,6 +364,7 @@ export type BlockMined = ReturnType<typeof blockMined>;
 
 // TODO: This is getting large, we should probably split this up into separate types for each stage
 export type WalletAction =
+  | AdjudicatorKnown
   | ApproveClose
   | BlockMined
   | ChallengeAcknowledged
@@ -378,6 +377,7 @@ export type WalletAction =
   | ChallengeResponseAcknowledged
   | ChallengeResponseReceived
   | ChallengeTimeoutAcknowledged
+  | ChannelInitialized
   | ClosedOnChainAcknowledged
   | CloseSuccessAcknowledged
   | CommitmentReceived
@@ -394,7 +394,6 @@ export type WalletAction =
   | FundingRejected
   | FundingRequested
   | FundingSuccessAcknowledged
-  | KeysLoaded
   | LoggedIn
   | MessageReceived
   | MessageSent

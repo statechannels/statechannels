@@ -1,6 +1,6 @@
-import { walletReducer } from '..';
+import { withdrawingReducer } from '../channels/withdrawing';
 
-import * as states from '../../states';
+import * as states from '../../states/channels';
 import * as actions from '../../actions';
 
 import { itTransitionsToStateType } from './helpers';
@@ -52,7 +52,7 @@ describe('when in ApproveWithdrawal', () => {
     Object.defineProperty(SigningUtil, 'signVerificationData', { value: signMock });
 
     const action = actions.withdrawalApproved(destinationAddress);
-    const updatedState = walletReducer(state, action);
+    const updatedState = withdrawingReducer(state, action);
 
     itTransitionsToStateType(states.WAIT_FOR_WITHDRAWAL_INITIATION, updatedState);
     expect(createWithdrawTxMock.mock.calls.length).toBe(1);
@@ -60,7 +60,7 @@ describe('when in ApproveWithdrawal', () => {
 
   describe('and the user rejects the withdrawal', () => {
     const action = actions.withdrawalRejected();
-    const updatedState = walletReducer(state, action);
+    const updatedState = withdrawingReducer(state, action);
 
     itTransitionsToStateType(states.ACKNOWLEDGE_CLOSE_SUCCESS, updatedState);
   });
@@ -71,13 +71,13 @@ describe('when in WaitForWithdrawalInitiation', () => {
 
   describe('and the transaction is submitted', () => {
     const action = actions.transactionSubmitted('0x0');
-    const updatedState = walletReducer(state, action);
+    const updatedState = withdrawingReducer(state, action);
 
     itTransitionsToStateType(states.WAIT_FOR_WITHDRAWAL_CONFIRMATION, updatedState);
   });
   describe('and the transaction submission errors', () => {
     const action = actions.transactionSubmissionFailed({ code: 0 });
-    const updatedState = walletReducer(state, action);
+    const updatedState = withdrawingReducer(state, action);
 
     itTransitionsToStateType(states.WITHDRAW_TRANSACTION_FAILED, updatedState);
   });
@@ -94,7 +94,7 @@ describe('when in withdrawTransactionFailed', () => {
 
     const state = states.withdrawTransactionFailed(defaults);
     const action = actions.retryTransaction();
-    const updatedState = walletReducer(state, action);
+    const updatedState = withdrawingReducer(state, action);
 
     itTransitionsToStateType(states.WAIT_FOR_WITHDRAWAL_INITIATION, updatedState);
     expect(createWithdrawTxMock.mock.calls.length).toBe(1);
@@ -106,7 +106,7 @@ describe('when in WaitForWithdrawalConfirmation', () => {
 
   describe('and the transaction is confirmed', () => {
     const action = actions.transactionConfirmed();
-    const updatedState = walletReducer(state, action);
+    const updatedState = withdrawingReducer(state, action);
 
     itTransitionsToStateType(states.ACKNOWLEDGE_WITHDRAWAL_SUCCESS, updatedState);
   });
@@ -117,7 +117,7 @@ describe('when in AcknowledgeWithdrawalSuccess', () => {
 
   describe('and the user acknowledges the withdrawal', () => {
     const action = actions.withdrawalSuccessAcknowledged();
-    const updatedState = walletReducer(state, action);
+    const updatedState = withdrawingReducer(state, action);
 
     itTransitionsToStateType(states.WAIT_FOR_CHANNEL, updatedState);
   });

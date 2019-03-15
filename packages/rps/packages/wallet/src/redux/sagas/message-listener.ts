@@ -28,6 +28,9 @@ export function* messageListener() {
       case incoming.INITIALIZE_REQUEST:
         yield put(actions.loggedIn(action.userId));
         break;
+      case incoming.INITIALIZE_CHANNEL_REQUEST:
+        yield put(actions.channelInitialized());
+        break;
       case incoming.SIGN_COMMITMENT_REQUEST:
         yield put(actions.ownCommitmentReceived(action.commitment));
         break;
@@ -38,7 +41,7 @@ export function* messageListener() {
         yield put(actions.messageReceived(action.data));
         break;
       case incoming.RECEIVE_COMMITMENT:
-        yield put(actions.commitmentReceived(action.data, action.signature));
+        yield put(actions.commitmentReceived(action.commitment, action.signature));
         break;
       case incoming.RESPOND_TO_CHALLENGE:
         yield put(actions.challengeCommitmentReceived(action.commitment));
