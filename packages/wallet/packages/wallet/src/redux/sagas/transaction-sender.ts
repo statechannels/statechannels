@@ -7,7 +7,7 @@ import {
   transactionSubmissionFailed,
 } from '../actions';
 import { ethers } from 'ethers';
-import { getProvider } from '../../utils/contract-utils';
+import { getProvider, getAdjudicatorContractAddress } from '../../utils/contract-utils';
 import { TransactionResponse } from 'ethers/providers';
 
 export function* transactionSender(transaction) {
@@ -16,7 +16,11 @@ export function* transactionSender(transaction) {
   yield put(transactionSentToMetamask());
   let transactionResult: TransactionResponse;
   try {
-    transactionResult = yield call([signer, signer.sendTransaction], transaction);
+    const contractAddress = yield call(getAdjudicatorContractAddress, provider);
+    transactionResult = yield call([signer, signer.sendTransaction], {
+      ...transaction,
+      to: contractAddress,
+    });
   } catch (err) {
     yield put(transactionSubmissionFailed(err));
     return;

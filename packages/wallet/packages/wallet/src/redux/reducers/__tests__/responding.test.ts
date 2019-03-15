@@ -1,6 +1,6 @@
-import { walletReducer } from '..';
+import { respondingReducer } from '../channels/responding';
 
-import * as states from '../../states';
+import * as states from '../../states/channels';
 import * as actions from '../../actions';
 
 import { itTransitionsToStateType, itDoesntTransition } from './helpers';
@@ -48,25 +48,25 @@ describe('when in CHOOSE_RESPONSE', () => {
 
   describe('when respond with move is chosen', () => {
     const action = actions.respondWithMoveChosen();
-    const updatedState = walletReducer(state, action);
+    const updatedState = respondingReducer(state, action);
     itTransitionsToStateType(states.TAKE_MOVE_IN_APP, updatedState);
   });
 
   describe('when respond with refute is chosen', () => {
     const action = actions.respondWithRefuteChosen();
-    const updatedState = walletReducer(state, action);
+    const updatedState = respondingReducer(state, action);
     itTransitionsToStateType(states.INITIATE_RESPONSE, updatedState);
   });
 
   describe('when the challenge times out', () => {
     const action = actions.blockMined({ number: 1, timestamp: 2 });
-    const updatedState = walletReducer(state, action);
+    const updatedState = respondingReducer(state, action);
     itTransitionsToStateType(states.CHALLENGEE_ACKNOWLEDGE_CHALLENGE_TIMEOUT, updatedState);
   });
 
   describe('when a block is mined but the challenge has not expired', () => {
     const action = actions.blockMined({ number: 1, timestamp: 0 });
-    const updatedState = walletReducer(state, action);
+    const updatedState = respondingReducer(state, action);
     itDoesntTransition(state, updatedState);
   });
 });
@@ -84,18 +84,18 @@ describe('when in TAKE_MOVE_IN_APP', () => {
     Object.defineProperty(FmgCore, 'toHex', { value: toHexMock });
     const signMock = jest.fn().mockReturnValue('0x0');
     Object.defineProperty(SigningUtil, 'signCommitment', { value: signMock });
-    const updatedState = walletReducer(state, action);
+    const updatedState = respondingReducer(state, action);
     itTransitionsToStateType(states.INITIATE_RESPONSE, updatedState);
   });
   describe('when the challenge times out', () => {
     const action = actions.blockMined({ number: 1, timestamp: 2 });
-    const updatedState = walletReducer(state, action);
+    const updatedState = respondingReducer(state, action);
     itTransitionsToStateType(states.CHALLENGEE_ACKNOWLEDGE_CHALLENGE_TIMEOUT, updatedState);
   });
 
   describe('when a block is mined but the challenge has not expired', () => {
     const action = actions.blockMined({ number: 1, timestamp: 0 });
-    const updatedState = walletReducer(state, action);
+    const updatedState = respondingReducer(state, action);
     itDoesntTransition(state, updatedState);
   });
 });
@@ -104,12 +104,12 @@ describe('when in INITIATE_RESPONSE', () => {
   const state = states.initiateResponse(defaults);
   describe('when the challenge response is initiated', () => {
     const action = actions.transactionSentToMetamask();
-    const updatedState = walletReducer(state, action);
+    const updatedState = respondingReducer(state, action);
     itTransitionsToStateType(states.WAIT_FOR_RESPONSE_SUBMISSION, updatedState);
   });
   describe('when the challenge times out', () => {
     const action = actions.blockMined({ number: 1, timestamp: 2 });
-    const updatedState = walletReducer(state, action);
+    const updatedState = respondingReducer(state, action);
     itTransitionsToStateType(states.CHALLENGEE_ACKNOWLEDGE_CHALLENGE_TIMEOUT, updatedState);
   });
 });
@@ -118,17 +118,17 @@ describe('when in WAIT_FOR_RESPONSE_SUBMISSION', () => {
   const state = states.waitForResponseSubmission(defaults);
   describe('when the challenge response is submitted', () => {
     const action = actions.transactionSubmitted('0x0');
-    const updatedState = walletReducer(state, action);
+    const updatedState = respondingReducer(state, action);
     itTransitionsToStateType(states.WAIT_FOR_RESPONSE_CONFIRMATION, updatedState);
   });
   describe('when an error occurs when submitting a challenge response', () => {
     const action = actions.transactionSubmissionFailed({ code: 0 });
-    const updatedState = walletReducer(state, action);
+    const updatedState = respondingReducer(state, action);
     itTransitionsToStateType(states.RESPONSE_TRANSACTION_FAILED, updatedState);
   });
   describe('when the challenge times out', () => {
     const action = actions.blockMined({ number: 1, timestamp: 2 });
-    const updatedState = walletReducer(state, action);
+    const updatedState = respondingReducer(state, action);
     itTransitionsToStateType(states.CHALLENGEE_ACKNOWLEDGE_CHALLENGE_TIMEOUT, updatedState);
   });
 });
@@ -137,12 +137,12 @@ describe('when in WAIT_FOR_RESPONSE_CONFIRMED', () => {
   const state = states.waitForResponseConfirmation(defaults);
   describe('when the challenge response is confirmed', () => {
     const action = actions.transactionConfirmed();
-    const updatedState = walletReducer(state, action);
+    const updatedState = respondingReducer(state, action);
     itTransitionsToStateType(states.ACKNOWLEDGE_CHALLENGE_COMPLETE, updatedState);
   });
   describe('when the challenge times out', () => {
     const action = actions.blockMined({ number: 1, timestamp: 2 });
-    const updatedState = walletReducer(state, action);
+    const updatedState = respondingReducer(state, action);
     itTransitionsToStateType(states.CHALLENGEE_ACKNOWLEDGE_CHALLENGE_TIMEOUT, updatedState);
   });
 });
@@ -151,7 +151,7 @@ describe('when in ACKNOWLEDGE_CHALLENGE_COMPLETE', () => {
   const state = states.acknowledgeChallengeComplete(defaults);
   describe('when the challenge is acknowledged as complete', () => {
     const action = actions.challengeResponseAcknowledged();
-    const updatedState = walletReducer(state, action);
+    const updatedState = respondingReducer(state, action);
     itTransitionsToStateType(states.WAIT_FOR_UPDATE, updatedState);
   });
 });
@@ -164,13 +164,13 @@ describe('when in RESPONSE_TRANSACTION_FAILED', () => {
     Object.defineProperty(TransactionGenerator, 'createRespondWithMoveTransaction', {
       value: createRespondTxMock,
     });
-    const updatedState = walletReducer(state, action);
+    const updatedState = respondingReducer(state, action);
     itTransitionsToStateType(states.INITIATE_RESPONSE, updatedState);
     expect(createRespondTxMock.mock.calls.length).toBe(1);
   });
   describe('when the challenge times out', () => {
     const action = actions.blockMined({ number: 1, timestamp: 2 });
-    const updatedState = walletReducer(state, action);
+    const updatedState = respondingReducer(state, action);
     itTransitionsToStateType(states.CHALLENGEE_ACKNOWLEDGE_CHALLENGE_TIMEOUT, updatedState);
   });
 });

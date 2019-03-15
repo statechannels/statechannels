@@ -7,6 +7,8 @@ import {
   VALIDATION_SUCCESS,
   VALIDATION_FAILURE,
   ValidationResponse,
+  CHANNEL_INITIALIZATION_SUCCESS,
+  CHANNEL_INITIALIZATION_FAILURE,
 } from './wallet-events';
 import {
   concludeChannelRequest,
@@ -18,6 +20,7 @@ import {
   createChallenge,
   respondToChallenge,
   receiveCommitment,
+  initializeChannelRequest,
 } from './wallet-instructions';
 import { Commitment } from 'fmg-core';
 
@@ -48,17 +51,17 @@ export function createWalletIFrame(iframeId: string, walletUrl?: string): HTMLIF
 }
 
 /**
- * Initializes the wallet for a given user and provides a wallet address.
+ * Initializes the wallet for a given user.
  * This must be called before any other interaction with the wallet.
  * @param iFrameId The id of the embedded wallet iframe.
  * @param userId An id that is unique to the user who will be using the wallet.
- * @returns {Promise<string>} A promise that resolves with a wallet address generated for that user.
+ * @returns {Promise<null>} A promise that resolves to null.
  */
-export async function initializeWallet(iFrameId: string, userId: string): Promise<string> {
+export async function initializeWallet(iFrameId: string, userId: string): Promise<null> {
   const iFrame = document.getElementById(iFrameId) as HTMLIFrameElement;
   const message = initializeRequest(userId);
 
-  const initPromise = new Promise<string>((resolve, reject) => {
+  const initPromise = new Promise<null>((resolve, reject) => {
     window.addEventListener('message', function eventListener(event: MessageEvent) {
       if (
         event.data &&
@@ -67,6 +70,37 @@ export async function initializeWallet(iFrameId: string, userId: string): Promis
       ) {
         window.removeEventListener('message', eventListener);
         if (event.data.type === INITIALIZATION_SUCCESS) {
+          resolve();
+        } else {
+          reject(event.data.message);
+        }
+      }
+    });
+  });
+
+  iFrame.contentWindow.postMessage(message, '*');
+  return initPromise;
+}
+
+/**
+ * Initializes a channel, returning a promise resolving to an address to be used for that channel.
+ * @param iFrameId The id of the embedded wallet iframe.
+ * @returns {Promise<address>} A promise that resolves to a wallet address.
+ */
+export async function initializeChannel(iFrameId: string): Promise<string> {
+  const iFrame = document.getElementById(iFrameId) as HTMLIFrameElement;
+  const message = initializeChannelRequest();
+
+  const initPromise = new Promise<string>((resolve, reject) => {
+    window.addEventListener('message', function eventListener(event: MessageEvent) {
+      if (
+        event.data &&
+        event.data.type &&
+        (event.data.type === CHANNEL_INITIALIZATION_SUCCESS ||
+          event.data.type === CHANNEL_INITIALIZATION_FAILURE)
+      ) {
+        window.removeEventListener('message', eventListener);
+        if (event.data.type === CHANNEL_INITIALIZATION_SUCCESS) {
           resolve(event.data.address);
         } else {
           reject(event.data.message);

@@ -1,12 +1,12 @@
 import { Commitment } from 'fmg-core';
-import { WalletState } from '../redux/states';
+import { ChannelState } from '../redux/states/channels';
 import { channelID } from 'fmg-core/lib/channel';
 
 export function unreachable(x: never) {
   return x;
 }
 
-export const validTransition = (fromState: WalletState, toCommitment: Commitment) => {
+export const validTransition = (fromState: ChannelState, toCommitment: Commitment) => {
   // todo: check the game rules
 
   if (!('turnNum' in fromState)) {
@@ -26,7 +26,7 @@ export const validTransition = (fromState: WalletState, toCommitment: Commitment
   );
 };
 
-export const ourTurn = (state: WalletState) => {
+export const ourTurn = (state: ChannelState) => {
   if (!('turnNum' in state)) {
     return false;
   }

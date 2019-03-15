@@ -95,7 +95,10 @@ function* openGameSyncer() {
         actions.syncOpenGames(response.games.map(g => ({ ...g, address: response.address }))),
       );
     } catch (err) {
-      if (err.message === 'Failed to fetch') {
+      if (
+        err.message === 'Failed to fetch' ||
+        err.message === 'NetworkError when attempting to fetch resource.'
+      ) {
         console.log(`WARNING: server wallet not running at ${process.env.BOT_URL}`);
       } else {
         throw err;

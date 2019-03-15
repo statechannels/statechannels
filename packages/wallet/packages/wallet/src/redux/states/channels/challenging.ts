@@ -5,7 +5,6 @@ import {
   ChannelOpen,
   channelOpen,
 } from './shared';
-import { TransactionRequest } from 'ethers/providers';
 export const CHALLENGING = 'CHALLENGING';
 
 export const APPROVE_CHALLENGE = 'APPROVE_CHALLENGE';
@@ -51,14 +50,12 @@ export interface WaitForChallengeInitiation extends ChannelOpen {
   stage: typeof CHALLENGING;
 }
 export function waitForChallengeInitiation<T extends ChannelOpen>(
-  transaction: TransactionRequest,
   params: T,
 ): WaitForChallengeInitiation {
   return {
     type: WAIT_FOR_CHALLENGE_INITIATION,
     stage: CHALLENGING,
     ...channelOpen(params),
-    transactionOutbox: transaction,
   };
 }
 
