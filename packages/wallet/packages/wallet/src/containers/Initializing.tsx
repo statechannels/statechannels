@@ -1,4 +1,4 @@
-import * as states from '../redux/states';
+import * as states from '../redux/state';
 import React, { PureComponent } from 'react';
 import SidebarLayout from '../components/SidebarLayout';
 import LandingPage from '../components/LandingPage';

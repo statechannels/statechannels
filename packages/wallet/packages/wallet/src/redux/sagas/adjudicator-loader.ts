@@ -3,7 +3,7 @@ import { call, put, select } from 'redux-saga/effects';
 import { metamaskLoadError, adjudicatorKnown } from '../actions';
 import { getProvider, getAdjudicatorContractAddress } from '../../utils/contract-utils';
 import { ethers } from 'ethers';
-import { WalletState, WAIT_FOR_ADJUDICATOR } from '../states';
+import { WalletState, WAIT_FOR_ADJUDICATOR } from '../state';
 
 export function* adjudicatorLoader() {
   const state: WalletState = yield select((walletState: WalletState) => walletState);

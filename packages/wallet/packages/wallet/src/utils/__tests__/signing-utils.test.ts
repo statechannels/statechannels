@@ -1,4 +1,4 @@
-import * as scenarios from '../../redux/reducers/__tests__/test-scenarios';
+import * as scenarios from '../../redux/__tests__/test-scenarios';
 import {
   signCommitment,
   signData,

@@ -3,7 +3,7 @@ import { PureComponent } from 'react';
 import { connect } from 'react-redux';
 import { Button } from 'reactstrap';
 
-import * as states from '../redux/states/channels';
+import * as states from '../redux/channelState/state';
 import * as actions from '../redux/actions';
 
 import ApproveX from '../components/ApproveX';

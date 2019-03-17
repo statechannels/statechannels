@@ -1,5 +1,5 @@
 import { Commitment } from 'fmg-core';
-import { ChannelState } from '../redux/states/channels';
+import { ChannelState } from '../redux/channelState/state';
 import { channelID } from 'fmg-core/lib/channel';
 
 export function unreachable(x: never) {
