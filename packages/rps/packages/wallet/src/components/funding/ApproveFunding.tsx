@@ -6,7 +6,7 @@ interface Props {
   fundingApproved: () => void;
   fundingRejected: () => void;
   requestedTotalFunds: string;
-  requestedYourDeposit: string;
+  requestedYourContribution: string;
 }
 
 export default class ApproveFunding extends React.PureComponent<Props> {
@@ -15,7 +15,7 @@ export default class ApproveFunding extends React.PureComponent<Props> {
       fundingApproved,
       fundingRejected,
       requestedTotalFunds,
-      requestedYourDeposit,
+      requestedYourContribution,
     } = this.props;
     return (
       <ApproveX
@@ -36,7 +36,7 @@ export default class ApproveFunding extends React.PureComponent<Props> {
               <div>Total</div>
             </div>
             <div className="col-sm-6">
-              <h3>{web3Utils.fromWei(requestedYourDeposit, 'ether')} ETH</h3>
+              <h3>{web3Utils.fromWei(requestedYourContribution, 'ether')} ETH</h3>
               <div>Your deposit</div>
             </div>
           </div>
