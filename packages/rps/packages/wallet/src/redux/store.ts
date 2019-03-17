@@ -3,7 +3,7 @@ import { fork } from 'redux-saga/effects';
 import createSagaMiddleware from 'redux-saga';
 const sagaMiddleware = createSagaMiddleware();
 
-import { walletReducer } from './reducers';
+import { walletReducer } from './reducer';
 import { sagaManager } from './sagas/saga-manager';
 
 const composeEnhancers = (window as any).__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
