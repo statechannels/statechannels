@@ -1,14 +1,15 @@
 import { Commitment } from 'fmg-core';
-import { ChannelState } from '../redux/channelState/state';
+import { ChannelStatus } from '../redux/channelState/state';
 import { channelID } from 'fmg-core/lib/channel';
 import { applySideEffects } from '../redux/outbox';
 import { OutboxState } from 'src/redux/outbox/state';
+import { WalletAction } from 'src/redux/actions';
 
 export function unreachable(x: never) {
   return x;
 }
 
-export const validTransition = (fromState: ChannelState, toCommitment: Commitment) => {
+export const validTransition = (fromState: ChannelStatus, toCommitment: Commitment) => {
   // todo: check the game rules
 
   if (!('turnNum' in fromState)) {
@@ -28,30 +29,42 @@ export const validTransition = (fromState: ChannelState, toCommitment: Commitmen
   );
 };
 
-export const ourTurn = (state: ChannelState) => {
+export const ourTurn = (state: ChannelStatus) => {
   if (!('turnNum' in state)) {
     return false;
   }
   return state.turnNum % 2 !== state.ourIndex;
 };
 
-export type ReducerWithSideEffects<T> = (
-  state: T,
-  action,
-) => { state: T; outboxState?: OutboxState };
-export function combineReducersWithSideEffects(reducers: {
-  [branch: string]: ReducerWithSideEffects<any>;
-}) {
-  return (state, action) => {
+export type ReducersMapObject<S = any, A extends WalletAction = WalletAction> = {
+  [K in keyof S]: ReducerWithSideEffects<S[K], A>
+};
+
+export type ReducerWithSideEffects<Tree, A extends WalletAction = WalletAction> = (
+  state: Tree,
+  action: A,
+  data?: any,
+) => { state: Tree; outboxState?: OutboxState };
+
+export function combineReducersWithSideEffects<Tree, A extends WalletAction>(
+  reducers: ReducersMapObject<Tree, A>,
+) {
+  return (state: Tree, action: A, data?: { [Branch in keyof Tree]?: any }) => {
     const nextState = { ...state };
-    let outboxState = { ...state.outboxState };
+    let outboxState = {};
 
     Object.keys(reducers).map(branch => {
       const reducer = reducers[branch];
-      const { state: updatedState, outboxState: sideEffects } = reducer(state[branch], action);
+      let result;
+      if (data && data[branch]) {
+        result = reducer(state[branch], action, data[branch]);
+      } else {
+        result = reducer(state[branch], action);
+      }
+      const { state: updatedState, outboxState: sideEffects } = result;
       nextState[branch] = updatedState;
       outboxState = applySideEffects(outboxState, sideEffects);
     });
-    return { ...nextState, outboxState };
+    return { state: { ...nextState }, outboxState };
   };
 }

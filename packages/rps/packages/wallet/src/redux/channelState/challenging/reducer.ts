@@ -15,7 +15,7 @@ import { StateWithSideEffects } from '../../shared/state';
 export const challengingReducer = (
   state: states.ChallengingState,
   action: WalletAction,
-): StateWithSideEffects<states.ChannelState> => {
+): StateWithSideEffects<states.ChannelStatus> => {
   // Handle any signature/validation request centrally to avoid duplicating code for each state
   if (
     action.type === actions.OWN_COMMITMENT_RECEIVED ||
@@ -51,7 +51,7 @@ export const challengingReducer = (
 const challengeTransactionFailedReducer = (
   state: states.ChallengeTransactionFailed,
   action: WalletAction,
-): StateWithSideEffects<states.ChannelState> => {
+): StateWithSideEffects<states.ChannelStatus> => {
   switch (action.type) {
     case actions.RETRY_TRANSACTION:
       const { commitment: fromPosition, signature: fromSignature } = state.penultimateCommitment;
@@ -73,7 +73,7 @@ const challengeTransactionFailedReducer = (
 const approveChallengeReducer = (
   state: states.ApproveChallenge,
   action: WalletAction,
-): StateWithSideEffects<states.ChannelState> => {
+): StateWithSideEffects<states.ChannelStatus> => {
   switch (action.type) {
     case actions.CHALLENGE_APPROVED:
       const { commitment: fromPosition, signature: fromSignature } = state.penultimateCommitment;
@@ -101,7 +101,7 @@ const approveChallengeReducer = (
 const initiateChallengeReducer = (
   state: states.WaitForChallengeInitiation,
   action: WalletAction,
-): StateWithSideEffects<states.ChannelState> => {
+): StateWithSideEffects<states.ChannelStatus> => {
   switch (action.type) {
     case actions.TRANSACTION_SENT_TO_METAMASK:
       return { state: states.waitForChallengeSubmission(state) };
@@ -113,7 +113,7 @@ const initiateChallengeReducer = (
 const waitForChallengeSubmissionReducer = (
   state: states.WaitForChallengeSubmission,
   action: WalletAction,
-): StateWithSideEffects<states.ChannelState> => {
+): StateWithSideEffects<states.ChannelStatus> => {
   switch (action.type) {
     case actions.CHALLENGE_CREATED_EVENT:
       return {
@@ -139,7 +139,7 @@ const waitForChallengeSubmissionReducer = (
 const waitForChallengeConfirmationReducer = (
   state: states.WaitForChallengeConfirmation,
   action: WalletAction,
-): StateWithSideEffects<states.ChannelState> => {
+): StateWithSideEffects<states.ChannelStatus> => {
   switch (action.type) {
     case actions.CHALLENGE_CREATED_EVENT:
       return {
@@ -163,7 +163,7 @@ const waitForChallengeConfirmationReducer = (
 const waitForResponseOrTimeoutReducer = (
   state: states.WaitForResponseOrTimeout,
   action: WalletAction,
-): StateWithSideEffects<states.ChannelState> => {
+): StateWithSideEffects<states.ChannelStatus> => {
   switch (action.type) {
     case actions.CHALLENGE_CREATED_EVENT:
       return {
@@ -204,7 +204,7 @@ const waitForResponseOrTimeoutReducer = (
 const acknowledgeChallengeResponseReducer = (
   state: states.AcknowledgeChallengeResponse,
   action: WalletAction,
-): StateWithSideEffects<states.ChannelState> => {
+): StateWithSideEffects<states.ChannelStatus> => {
   switch (action.type) {
     case actions.CHALLENGE_RESPONSE_ACKNOWLEDGED:
       return {
@@ -219,7 +219,7 @@ const acknowledgeChallengeResponseReducer = (
 const acknowledgeChallengeTimeoutReducer = (
   state: states.AcknowledgeChallengeTimeout,
   action: WalletAction,
-): StateWithSideEffects<states.ChannelState> => {
+): StateWithSideEffects<states.ChannelStatus> => {
   switch (action.type) {
     case actions.CHALLENGE_TIME_OUT_ACKNOWLEDGED:
       return {

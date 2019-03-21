@@ -10,7 +10,7 @@ import { StateWithSideEffects } from '../../shared/state';
 export const withdrawingReducer = (
   state: states.WithdrawingState,
   action: actions.WalletAction,
-): StateWithSideEffects<states.ChannelState> => {
+): StateWithSideEffects<states.ChannelStatus> => {
   // Handle any signature/validation request centrally to avoid duplicating code for each state
   if (
     action.type === actions.OWN_COMMITMENT_RECEIVED ||
@@ -40,7 +40,7 @@ export const withdrawingReducer = (
 const withdrawTransactionFailedReducer = (
   state: states.WithdrawTransactionFailed,
   action: actions.WalletAction,
-): StateWithSideEffects<states.ChannelState> => {
+): StateWithSideEffects<states.ChannelStatus> => {
   switch (action.type) {
     case actions.RETRY_TRANSACTION:
       const myAddress = state.participants[state.ourIndex];
@@ -71,7 +71,7 @@ const withdrawTransactionFailedReducer = (
 const approveWithdrawalReducer = (
   state: states.ApproveWithdrawal,
   action: actions.WalletAction,
-): StateWithSideEffects<states.ChannelState> => {
+): StateWithSideEffects<states.ChannelStatus> => {
   switch (action.type) {
     case actions.WITHDRAWAL_APPROVED:
       const myAddress = state.participants[state.ourIndex];
@@ -107,7 +107,7 @@ const approveWithdrawalReducer = (
 const waitForWithdrawalInitiationReducer = (
   state: states.WaitForWithdrawalInitiation,
   action: actions.WalletAction,
-): StateWithSideEffects<states.ChannelState> => {
+): StateWithSideEffects<states.ChannelStatus> => {
   switch (action.type) {
     case actions.TRANSACTION_SUBMITTED:
       return {
@@ -126,7 +126,7 @@ const waitForWithdrawalInitiationReducer = (
 const waitForWithdrawalConfirmationReducer = (
   state: states.WaitForWithdrawalConfirmation,
   action: actions.WalletAction,
-): StateWithSideEffects<states.ChannelState> => {
+): StateWithSideEffects<states.ChannelStatus> => {
   switch (action.type) {
     case actions.TRANSACTION_CONFIRMED:
       return { state: states.acknowledgeWithdrawalSuccess(state) };
@@ -138,7 +138,7 @@ const waitForWithdrawalConfirmationReducer = (
 const acknowledgeWithdrawalSuccessReducer = (
   state: states.AcknowledgeWithdrawalSuccess,
   action: actions.WalletAction,
-): StateWithSideEffects<states.ChannelState> => {
+): StateWithSideEffects<states.ChannelStatus> => {
   switch (action.type) {
     case actions.WITHDRAWAL_SUCCESS_ACKNOWLEDGED:
       // TODO: We shouldn't be sending out a close success in the withdrawal reducer
