@@ -48,13 +48,14 @@ export interface InitializingChannel extends BaseInitializingChannel {
 export function initializingChannel<T extends BaseInitializingChannel>(
   params: T,
 ): InitializingChannel {
-  const { outboxState, channelState } = params;
+  const { outboxState, channelState, fundingState } = params;
   return {
     ...adjudicatorKnown(params),
     type: INITIALIZING_CHANNEL,
     stage: WALLET_INITIALIZED,
     outboxState,
     channelState: waitForChannel(channelState),
+    fundingState,
   };
 }
 

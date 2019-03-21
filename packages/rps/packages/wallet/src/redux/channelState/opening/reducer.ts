@@ -10,15 +10,13 @@ import {
 import { unreachable } from '../../../utils/reducer-utils';
 import { signCommitment, validCommitmentSignature } from '../../../utils/signing-utils';
 import { CommitmentType } from 'fmg-core';
-import { bigNumberify } from 'ethers/utils';
 import { channelID } from 'fmg-core/lib/channel';
-import { NextChannelState } from '../../shared/state';
-import { WAIT_FOR_FUNDING_REQUEST, UNKNOWN_FUNDING_TYPE } from '../fundingState/state';
+import { StateWithSideEffects } from '../../shared/state';
 
 export const openingReducer = (
   state: channelStates.OpeningState,
   action: actions.WalletAction,
-): NextChannelState<channelStates.ChannelState> => {
+): StateWithSideEffects<channelStates.ChannelState> => {
   switch (state.type) {
     case channelStates.WAIT_FOR_CHANNEL:
       return waitForChannelReducer(state, action);
@@ -32,7 +30,7 @@ export const openingReducer = (
 const waitForChannelReducer = (
   state: channelStates.WaitForChannel,
   action: actions.WalletAction,
-): NextChannelState<channelStates.WaitForPreFundSetup | channelStates.WaitForChannel> => {
+): StateWithSideEffects<channelStates.WaitForPreFundSetup | channelStates.WaitForChannel> => {
   switch (action.type) {
     case actions.OWN_COMMITMENT_RECEIVED:
       const ownCommitment = action.commitment;
@@ -41,7 +39,7 @@ const waitForChannelReducer = (
       if (ownCommitment.commitmentType !== CommitmentType.PreFundSetup) {
         // Since these checks are happening during a signature request we'll return a sig failure
         return {
-          channelState: state,
+          state,
           outboxState: {
             messageOutbox: signatureFailure('Other', 'Expected a pre fund setup position.'),
           },
@@ -49,7 +47,7 @@ const waitForChannelReducer = (
       }
       if (ownCommitment.commitmentCount !== 0) {
         return {
-          channelState: state,
+          state,
           outboxState: { messageOutbox: signatureFailure('Other', 'Expected state count to 0.') },
         };
       }
@@ -58,7 +56,7 @@ const waitForChannelReducer = (
 
       if (ourAddress !== state.address) {
         return {
-          channelState: state,
+          state,
           outboxState: {
             messageOutbox: signatureFailure(
               'Other',
@@ -71,7 +69,7 @@ const waitForChannelReducer = (
       const signature = signCommitment(ownCommitment, state.privateKey);
       // if so, unpack its contents into the state
       return {
-        channelState: channelStates.waitForPreFundSetup({
+        state: channelStates.waitForPreFundSetup({
           ...state,
           libraryAddress: ownCommitment.channel.channelType,
           channelId: channelID(ownCommitment.channel),
@@ -80,13 +78,7 @@ const waitForChannelReducer = (
           channelNonce: ownCommitment.channel.nonce,
           turnNum: 0,
           lastCommitment: { commitment: ownCommitment, signature },
-          fundingState: {
-            type: WAIT_FOR_FUNDING_REQUEST,
-            fundingType: UNKNOWN_FUNDING_TYPE,
-            requestedTotalFunds: '0x0',
-            requestedYourContribution: '0x0',
-            channelId: channelID(ownCommitment.channel),
-          },
+          funded: false,
         }),
         outboxState: { messageOutbox: signatureSuccess(signature) },
       };
@@ -98,7 +90,7 @@ const waitForChannelReducer = (
       // check it's a PreFundSetupA
       if (opponentCommitment.commitmentType !== CommitmentType.PreFundSetup) {
         return {
-          channelState: state,
+          state,
           outboxState: {
             messageOutbox: validationFailure('Other', 'Expected a prefund setup position'),
           },
@@ -106,7 +98,7 @@ const waitForChannelReducer = (
       }
       if (opponentCommitment.commitmentCount !== 0) {
         return {
-          channelState: state,
+          state,
           outboxState: {
             messageOutbox: validationFailure('Other', 'Expected state count to be 0'),
           },
@@ -118,14 +110,14 @@ const waitForChannelReducer = (
 
       if (!validCommitmentSignature(action.commitment, action.signature, opponentAddress2)) {
         return {
-          channelState: state,
+          state,
           outboxState: { messageOutbox: validationFailure('InvalidSignature') },
         };
       }
 
       if (ourAddress2 !== state.address) {
         return {
-          channelState: state,
+          state,
           outboxState: {
             messageOutbox: validationFailure(
               'Other',
@@ -137,7 +129,7 @@ const waitForChannelReducer = (
 
       // if so, unpack its contents into the state
       return {
-        channelState: channelStates.waitForPreFundSetup({
+        state: channelStates.waitForPreFundSetup({
           ...state,
           libraryAddress: opponentCommitment.channel.channelType,
           channelId: channelID(opponentCommitment.channel),
@@ -146,25 +138,21 @@ const waitForChannelReducer = (
           channelNonce: opponentCommitment.channel.nonce,
           turnNum: 0,
           lastCommitment: { commitment: action.commitment, signature: action.signature },
-          fundingState: {
-            type: WAIT_FOR_FUNDING_REQUEST,
-            fundingType: UNKNOWN_FUNDING_TYPE,
-            requestedTotalFunds: '0x0',
-            requestedYourContribution: '0x0',
-            channelId: channelID(opponentCommitment.channel),
-          },
+          funded: false,
         }),
         outboxState: { messageOutbox: validationSuccess() },
       };
     default:
-      return { channelState: state };
+      return { state };
   }
 };
 
 const waitForPreFundSetupReducer = (
   state: channelStates.WaitForPreFundSetup,
   action: actions.WalletAction,
-): NextChannelState<channelStates.WaitForPreFundSetup | channelStates.WaitForFundingRequest> => {
+): StateWithSideEffects<
+  channelStates.WaitForPreFundSetup | channelStates.WaitForFundingRequest
+> => {
   switch (action.type) {
     case actions.OWN_COMMITMENT_RECEIVED:
       const ownCommitment = action.commitment;
@@ -172,7 +160,7 @@ const waitForPreFundSetupReducer = (
       // check it's a PreFundSetupB
       if (ownCommitment.commitmentType !== CommitmentType.PreFundSetup) {
         return {
-          channelState: state,
+          state,
           outboxState: {
             messageOutbox: signatureFailure('Other', 'Expected a prefund setup position.'),
           },
@@ -180,7 +168,7 @@ const waitForPreFundSetupReducer = (
       }
       if (ownCommitment.commitmentCount !== 1) {
         return {
-          channelState: state,
+          state,
           outboxState: {
             messageOutbox: signatureFailure('Other', 'Expected state count to be 1.'),
           },
@@ -191,20 +179,11 @@ const waitForPreFundSetupReducer = (
 
       // if so, unpack its contents into the state
       return {
-        channelState: channelStates.waitForFundingRequest({
+        state: channelStates.waitForFundingRequest({
           ...state,
           turnNum: 1,
           lastCommitment: { commitment: ownCommitment, signature },
           penultimateCommitment: state.lastCommitment,
-          fundingState: {
-            type: WAIT_FOR_FUNDING_REQUEST,
-            fundingType: UNKNOWN_FUNDING_TYPE,
-            requestedTotalFunds: bigNumberify(ownCommitment.allocation[0])
-              .add(ownCommitment.allocation[1])
-              .toHexString(),
-            requestedYourContribution: ownCommitment.allocation[state.ourIndex],
-            channelId: channelID(ownCommitment.channel),
-          },
           funded: false,
         }),
         outboxState: { messageOutbox: signatureSuccess(signature) },
@@ -216,7 +195,7 @@ const waitForPreFundSetupReducer = (
       // check it's a PreFundSetupB
       if (opponentCommitment.commitmentType !== CommitmentType.PreFundSetup) {
         return {
-          channelState: state,
+          state,
           outboxState: {
             messageOutbox: validationFailure('Other', 'Expected a prefund setup position.'),
           },
@@ -225,7 +204,7 @@ const waitForPreFundSetupReducer = (
 
       if (opponentCommitment.commitmentCount !== 1) {
         return {
-          channelState: state,
+          state,
           outboxState: {
             messageOutbox: validationFailure('Other', 'Expected state count to be 1.'),
           },
@@ -235,33 +214,24 @@ const waitForPreFundSetupReducer = (
 
       if (!validCommitmentSignature(action.commitment, action.signature, opponentAddress2)) {
         return {
-          channelState: state,
+          state,
           outboxState: { messageOutbox: validationFailure('InvalidSignature') },
         };
       }
 
       // if so, unpack its contents into the state
       return {
-        channelState: channelStates.waitForFundingRequest({
+        state: channelStates.waitForFundingRequest({
           ...state,
           turnNum: 1,
           lastCommitment: { commitment: action.commitment, signature: action.signature },
           penultimateCommitment: state.lastCommitment,
-          fundingState: {
-            type: WAIT_FOR_FUNDING_REQUEST,
-            fundingType: UNKNOWN_FUNDING_TYPE,
-            requestedTotalFunds: bigNumberify(opponentCommitment.allocation[0])
-              .add(opponentCommitment.allocation[1])
-              .toHexString(),
-            requestedYourContribution: opponentCommitment.allocation[state.ourIndex],
-            channelId: channelID(action.commitment.channel),
-          },
           funded: false,
         }),
         outboxState: { messageOutbox: validationSuccess() },
       };
 
     default:
-      return { channelState: state };
+      return { state };
   }
 };

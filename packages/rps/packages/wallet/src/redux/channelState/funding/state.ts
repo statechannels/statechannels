@@ -3,7 +3,7 @@
  * the actual funding of the channel.
  */
 
-import { MaybeFunded, channelOpen } from '../shared/state';
+import { channelOpen, ChannelOpen } from '../shared/state';
 
 // stage
 export const FUNDING = 'FUNDING';
@@ -11,7 +11,7 @@ export const FUNDING = 'FUNDING';
 // STATE TYPES
 // Funding setup
 export const WAIT_FOR_FUNDING_REQUEST = 'CHANNEL.WAIT_FOR_FUNDING_REQUEST';
-export const WAIT_FOR_FUNDING_APPROVAL = 'APPROVE_FUNDING';
+export const WAIT_FOR_FUNDING_APPROVAL = 'CHANNEL.WAIT_FOR_FUNDING_APPROVAL';
 
 // Funding ongoing
 export const WAIT_FOR_FUNDING_AND_POST_FUND_SETUP = 'WAIT_FOR_FUNDING_AND_POST_FUND_SETUP';
@@ -24,132 +24,110 @@ export const ACKNOWLEDGE_FUNDING_SUCCESS = 'ACKNOWLEDGE_FUNDING_SUCCESS';
 export const SEND_FUNDING_DECLINED_MESSAGE = 'SEND_FUNDING_DECLINED_MESSAGE';
 export const ACKNOWLEDGE_FUNDING_DECLINED = 'ACKNOWLEDGE_FUNDING_DECLINED';
 
-interface BaseFundingChannelState extends MaybeFunded {
-  funded: boolean; // Though this is computable from fundingState, it might be convenient to record this on the top-level of the channel state
-}
-
-function fundingChannelState<T extends BaseFundingChannelState>(
-  params: T,
-): BaseFundingChannelState {
-  const { fundingState, funded } = params;
-  return { ...channelOpen(params), fundingState, funded };
-}
-
-export interface WaitForFundingRequest extends BaseFundingChannelState {
+export interface WaitForFundingRequest extends ChannelOpen {
   type: typeof WAIT_FOR_FUNDING_REQUEST;
   stage: typeof FUNDING;
 }
 
-export interface WaitForFundingApproval extends BaseFundingChannelState {
+export interface WaitForFundingApproval extends ChannelOpen {
   type: typeof WAIT_FOR_FUNDING_APPROVAL;
   stage: typeof FUNDING;
 }
 
-export interface WaitForFundingAndPostFundSetup extends BaseFundingChannelState {
+export interface WaitForFundingAndPostFundSetup extends ChannelOpen {
   type: typeof WAIT_FOR_FUNDING_AND_POST_FUND_SETUP;
   stage: typeof FUNDING;
 }
 
-export interface WaitForFundingConfirmation extends BaseFundingChannelState {
+export interface WaitForFundingConfirmation extends ChannelOpen {
   type: typeof WAIT_FOR_FUNDING_CONFIRMATION;
   stage: typeof FUNDING;
 }
 
-export interface AWaitForPostFundSetup extends BaseFundingChannelState {
+export interface AWaitForPostFundSetup extends ChannelOpen {
   type: typeof A_WAIT_FOR_POST_FUND_SETUP;
   stage: typeof FUNDING;
 }
 
-export interface BWaitForPostFundSetup extends BaseFundingChannelState {
+export interface BWaitForPostFundSetup extends ChannelOpen {
   type: typeof B_WAIT_FOR_POST_FUND_SETUP;
   stage: typeof FUNDING;
 }
 
-export interface SendFundingDeclinedMessage extends BaseFundingChannelState {
+export interface SendFundingDeclinedMessage extends ChannelOpen {
   type: typeof SEND_FUNDING_DECLINED_MESSAGE;
   stage: typeof FUNDING;
 }
 
-export interface AcknowledgeFundingSuccess extends BaseFundingChannelState {
+export interface AcknowledgeFundingSuccess extends ChannelOpen {
   type: typeof ACKNOWLEDGE_FUNDING_SUCCESS;
   stage: typeof FUNDING;
 }
 
-export interface AcknowledgeFundingDeclined extends BaseFundingChannelState {
+export interface AcknowledgeFundingDeclined extends ChannelOpen {
   type: typeof ACKNOWLEDGE_FUNDING_DECLINED;
   stage: typeof FUNDING;
 }
 
-export function waitForFundingRequest<T extends BaseFundingChannelState>(
-  params: T,
-): WaitForFundingRequest {
+export function waitForFundingRequest<T extends ChannelOpen>(params: T): WaitForFundingRequest {
   return {
     type: WAIT_FOR_FUNDING_REQUEST,
     stage: FUNDING,
     ...channelOpen(params),
-    fundingState: params.fundingState,
-    funded: false,
   };
 }
 
-export function approveFunding<T extends BaseFundingChannelState>(
-  params: T,
-): WaitForFundingApproval {
+export function approveFunding<T extends ChannelOpen>(params: T): WaitForFundingApproval {
   return {
     type: WAIT_FOR_FUNDING_APPROVAL,
     stage: FUNDING,
-    ...fundingChannelState(params),
-    fundingState: params.fundingState,
+    ...channelOpen(params),
   };
 }
 
-export function waitForFundingAndPostFundSetup<T extends BaseFundingChannelState>(
+export function waitForFundingAndPostFundSetup<T extends ChannelOpen>(
   params: T,
 ): WaitForFundingAndPostFundSetup {
   return {
     type: WAIT_FOR_FUNDING_AND_POST_FUND_SETUP,
     stage: FUNDING,
-    ...fundingChannelState(params),
+    ...channelOpen(params),
   };
 }
 
-export function waitForFundingConfirmation<T extends BaseFundingChannelState>(
+export function waitForFundingConfirmation<T extends ChannelOpen>(
   params: T,
 ): WaitForFundingConfirmation {
-  return { type: WAIT_FOR_FUNDING_CONFIRMATION, stage: FUNDING, ...fundingChannelState(params) };
+  return { type: WAIT_FOR_FUNDING_CONFIRMATION, stage: FUNDING, ...channelOpen(params) };
 }
 
-export function aWaitForPostFundSetup<T extends BaseFundingChannelState>(
-  params: T,
-): AWaitForPostFundSetup {
-  return { type: A_WAIT_FOR_POST_FUND_SETUP, stage: FUNDING, ...fundingChannelState(params) };
+export function aWaitForPostFundSetup<T extends ChannelOpen>(params: T): AWaitForPostFundSetup {
+  return { type: A_WAIT_FOR_POST_FUND_SETUP, stage: FUNDING, ...channelOpen(params) };
 }
 
-export function bWaitForPostFundSetup<T extends BaseFundingChannelState>(
-  params: T,
-): BWaitForPostFundSetup {
-  return { type: B_WAIT_FOR_POST_FUND_SETUP, stage: FUNDING, ...fundingChannelState(params) };
+export function bWaitForPostFundSetup<T extends ChannelOpen>(params: T): BWaitForPostFundSetup {
+  return { type: B_WAIT_FOR_POST_FUND_SETUP, stage: FUNDING, ...channelOpen(params) };
 }
 
-export function acknowledgeFundingSuccess<T extends BaseFundingChannelState>(
+export function acknowledgeFundingSuccess<T extends ChannelOpen>(
   params: T,
 ): AcknowledgeFundingSuccess {
-  return { type: ACKNOWLEDGE_FUNDING_SUCCESS, stage: FUNDING, ...fundingChannelState(params) };
+  return { type: ACKNOWLEDGE_FUNDING_SUCCESS, stage: FUNDING, ...channelOpen(params) };
 }
 
-export function sendFundingDeclinedMessage<T extends BaseFundingChannelState>(
+export function sendFundingDeclinedMessage<T extends ChannelOpen>(
   params: T,
 ): SendFundingDeclinedMessage {
-  return { type: SEND_FUNDING_DECLINED_MESSAGE, stage: FUNDING, ...fundingChannelState(params) };
+  return { type: SEND_FUNDING_DECLINED_MESSAGE, stage: FUNDING, ...channelOpen(params) };
 }
 
-export function acknowledgeFundingDeclined<T extends BaseFundingChannelState>(
+export function acknowledgeFundingDeclined<T extends ChannelOpen>(
   params: T,
 ): AcknowledgeFundingDeclined {
-  return { type: ACKNOWLEDGE_FUNDING_DECLINED, stage: FUNDING, ...fundingChannelState(params) };
+  return { type: ACKNOWLEDGE_FUNDING_DECLINED, stage: FUNDING, ...channelOpen(params) };
 }
 
-export type FundingChannelState =
+export type FundingState =
   | WaitForFundingRequest
   | WaitForFundingApproval
   | WaitForFundingAndPostFundSetup
