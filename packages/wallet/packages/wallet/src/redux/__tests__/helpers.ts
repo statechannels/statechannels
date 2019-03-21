@@ -1,16 +1,16 @@
-import { ChannelState } from '../channelState/state';
+import { ChannelStatus } from '../channelState/state';
 import { OutboxState } from '../outbox/state';
 import { StateWithSideEffects } from '../shared/state';
 import { Commitment } from 'fmg-core';
 import * as outgoing from 'magmo-wallet-client/lib/wallet-events';
 
-export const itSendsAMessage = (state: StateWithSideEffects<ChannelState>) => {
+export const itSendsAMessage = (state: StateWithSideEffects<ChannelStatus>) => {
   it(`sends a message`, () => {
     expect(state.outboxState!.messageOutbox).toEqual(expect.anything());
   });
 };
 
-export const itSendsNoMessage = (state: StateWithSideEffects<ChannelState>) => {
+export const itSendsNoMessage = (state: StateWithSideEffects<ChannelStatus>) => {
   it(`sends no message`, () => {
     if (state.outboxState) {
       expect(state.outboxState!.messageOutbox).toBeUndefined();
@@ -32,7 +32,7 @@ export const itSendsThisMessage = (state: { outboxState?: OutboxState }, message
   }
 };
 
-export const itSendsThisDisplayEvent = (state: StateWithSideEffects<ChannelState>, event) => {
+export const itSendsThisDisplayEvent = (state: StateWithSideEffects<ChannelStatus>, event) => {
   it(`sends event ${event.type}`, () => {
     expect(state.outboxState!.displayOutbox!.type).toEqual(event);
   });
@@ -41,13 +41,13 @@ export const itSendsThisDisplayEvent = (state: StateWithSideEffects<ChannelState
 type CommitmentMessage = outgoing.FundingSuccess;
 
 export const expectThisCommitmentSent = (
-  state: StateWithSideEffects<ChannelState>,
+  state: StateWithSideEffects<ChannelStatus>,
   c: Partial<Commitment>,
 ) => {
   expect((state.outboxState!.messageOutbox! as CommitmentMessage).commitment).toMatchObject(c);
 };
 
-export const itSendsATransaction = (state: StateWithSideEffects<ChannelState>) => {
+export const itSendsATransaction = (state: StateWithSideEffects<ChannelStatus>) => {
   it(`sends a transaction`, () => {
     expect(state.outboxState!.transactionOutbox).toEqual(expect.anything());
   });
@@ -69,7 +69,7 @@ export const itSendsNoTransaction = (state: { outboxState?: OutboxState }) => {
 
 export const itTransitionsToChannelStateType = (
   type,
-  state: StateWithSideEffects<ChannelState>,
+  state: StateWithSideEffects<ChannelStatus>,
 ) => {
   it(`transitions to ${type}`, () => {
     expect(state.state.type).toEqual(type);
@@ -86,8 +86,8 @@ export const itTransitionsToStateType = (
 };
 
 export const itDoesntTransition = (
-  oldState: ChannelState,
-  newState: StateWithSideEffects<ChannelState>,
+  oldState: ChannelStatus,
+  newState: StateWithSideEffects<ChannelStatus>,
 ) => {
   it(`doesn't transition`, () => {
     expect(newState.state.type).toEqual(oldState.type);
@@ -96,8 +96,8 @@ export const itDoesntTransition = (
 
 export const itIncreasesTurnNumBy = (
   increase: number,
-  oldState: ChannelState,
-  newState: StateWithSideEffects<ChannelState>,
+  oldState: ChannelStatus,
+  newState: StateWithSideEffects<ChannelStatus>,
 ) => {
   it(`increases the turnNum by ${increase}`, () => {
     if (!('turnNum' in newState.state) || !('turnNum' in oldState)) {

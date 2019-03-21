@@ -1,4 +1,4 @@
-import { select, cancel, take, fork, actionChannel, put } from 'redux-saga/effects';
+import { select, take, fork, actionChannel, put, cancel } from 'redux-saga/effects';
 
 import { messageListener } from './message-listener';
 import { messageSender } from './message-sender';
@@ -6,12 +6,13 @@ import { transactionSender } from './transaction-sender';
 import { adjudicatorWatcher } from './adjudicator-watcher';
 import { blockMiningWatcher } from './block-mining-watcher';
 
-import { WalletState, CHANNEL_INITIALIZED, WAIT_FOR_ADJUDICATOR } from '../state';
+import { WalletState, WAIT_FOR_ADJUDICATOR } from '../state';
 import { getProvider } from '../../utils/contract-utils';
 
 import { displaySender } from './display-sender';
 import { ganacheMiner } from './ganache-miner';
 import { adjudicatorLoader } from './adjudicator-loader';
+import { WALLET_INITIALIZED } from '../initialized/state';
 
 export function* sagaManager(): IterableIterator<any> {
   let adjudicatorWatcherProcess;
@@ -36,13 +37,13 @@ export function* sagaManager(): IterableIterator<any> {
     }
 
     // if have adjudicator, make sure that the adjudicator watcher is running
-    if (state.type === CHANNEL_INITIALIZED) {
-      if ('channelId' in state.channelState) {
+    if (state.type === WALLET_INITIALIZED) {
+      if (state.channelState && 'activeAppChannelId' in state.channelState) {
         if (!adjudicatorWatcherProcess) {
           const provider = yield getProvider();
           adjudicatorWatcherProcess = yield fork(
             adjudicatorWatcher,
-            state.channelState.channelId,
+            state.channelState.activeAppChannelId,
             provider,
           );
         }
@@ -53,8 +54,13 @@ export function* sagaManager(): IterableIterator<any> {
         }
       }
 
-      // We only watch for mined blocks when waiting for a challenge expiry
-      if ('challengeExpiry' in state.channelState && state.channelState.challengeExpiry) {
+      // We only watch for mined blocks when { waiting } for a challenge expiry {
+      const appChannel =
+        state.channelState && state.channelState.activeAppChannelId
+          ? state.channelState.initializedChannels[state.channelState.activeAppChannelId]
+          : undefined;
+
+      if (appChannel && 'challengeExpiry' in appChannel) {
         if (!blockMiningWatcherProcess) {
           blockMiningWatcherProcess = yield fork(blockMiningWatcher);
         }

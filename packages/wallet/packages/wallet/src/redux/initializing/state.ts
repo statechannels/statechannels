@@ -1,5 +1,4 @@
-import { SharedWalletState, base, LoggedIn, loggedIn } from '../shared/state';
-import { waitForFundingRequest } from '../fundingState/state';
+import { SharedWalletState, base, LoggedIn, loggedIn, emptyState } from '../shared/state';
 
 export const INITIALIZING = 'INITIALIZING';
 
@@ -11,12 +10,11 @@ export interface WaitForLogin extends SharedWalletState {
   type: typeof WAIT_FOR_LOGIN;
   stage: typeof INITIALIZING;
 }
-export function waitForLogin<T extends SharedWalletState>(params = {} as T): WaitForLogin {
+export function waitForLogin(): WaitForLogin {
   return {
     type: WAIT_FOR_LOGIN,
     stage: INITIALIZING,
-    fundingState: waitForFundingRequest(),
-    ...base(params),
+    ...emptyState,
   };
 }
 

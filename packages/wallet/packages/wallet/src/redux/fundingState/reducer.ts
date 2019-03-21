@@ -45,11 +45,11 @@ const unknownFundingTypeReducer = (
 
       const alreadySafeToDeposit =
         bigNumberify(safeToDepositLevel).eq('0x') ||
-        (state.destination === action.channelId &&
+        (state.channelId === action.channelId &&
           bigNumberify(action.safeToDepositLevel).lte(state.totalForDestination!));
       const alreadyFunded =
         bigNumberify(totalFundingRequired).eq('0x') ||
-        (state.destination === action.channelId &&
+        (state.channelId === action.channelId &&
           bigNumberify(action.totalFundingRequired).lte(state.totalForDestination!));
 
       const channelFundingStatus = alreadyFunded

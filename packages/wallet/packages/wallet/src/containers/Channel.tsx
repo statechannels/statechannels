@@ -11,7 +11,7 @@ import ClosingContainer from './Closing';
 import LandingPage from '../components/LandingPage';
 
 interface ChannelProps {
-  state: states.ChannelState;
+  state: states.ChannelStatus;
 }
 
 class ChannelContainer extends PureComponent<ChannelProps> {

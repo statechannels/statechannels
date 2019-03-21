@@ -2,7 +2,6 @@ import React from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faDotCircle } from '@fortawesome/free-solid-svg-icons';
 import { connect } from 'react-redux';
-import * as states from '../redux/channelState/state';
 import { AdjudicatorKnown } from '../redux/shared/state';
 
 interface NetworkStatusProps {
@@ -53,11 +52,7 @@ export class NetworkStatus extends React.PureComponent<NetworkStatusProps> {
   }
 }
 
-interface ChannelInFundingState extends AdjudicatorKnown {
-  channelState: states.FundingState;
-}
-
-const mapStateToProps = (state: ChannelInFundingState): NetworkStatusProps => ({
+const mapStateToProps = (state: AdjudicatorKnown): NetworkStatusProps => ({
   networkId: state.networkId,
 });
 

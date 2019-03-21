@@ -5,8 +5,6 @@ export interface SharedChannelState {
   privateKey: string;
 }
 
-export const CHANNEL_INITIALIZED = 'CHANNEL.INITIALIZED';
-
 export interface SignedCommitment {
   commitment: Commitment;
   signature: string;

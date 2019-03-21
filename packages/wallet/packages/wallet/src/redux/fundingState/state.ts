@@ -6,7 +6,7 @@ export const FUNDING_NOT_STARTED = 'FUNDING_NOT_STARTED';
 
 interface SharedFundingState {
   totalForDestination?: string;
-  destination?: string;
+  channelId?: string;
 }
 export interface UnknownFundingState extends SharedFundingState {
   fundingType: typeof UNKNOWN_FUNDING_TYPE;

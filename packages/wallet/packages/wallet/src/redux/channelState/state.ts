@@ -6,7 +6,16 @@ import { RespondingState } from './responding/state';
 import { WithdrawingState } from './withdrawing/state';
 import { ClosingState } from './closing/state';
 
-export type OpenedChannelState =
+export interface InitializingChannelStatus {
+  address: string;
+  privateKey: string;
+}
+
+export interface InitializingChannelState {
+  [participantAddress: string]: InitializingChannelStatus;
+}
+
+export type OpenedState =
   | FundingState
   | RunningState
   | ChallengingState
@@ -14,7 +23,16 @@ export type OpenedChannelState =
   | WithdrawingState
   | ClosingState;
 
-export type ChannelState = OpeningState | OpenedChannelState;
+export type ChannelStatus = OpeningState | OpenedState;
+
+export interface InitializedChannelState {
+  [channelId: string]: ChannelStatus;
+}
+export interface ChannelState {
+  initializingChannels: InitializingChannelState;
+  initializedChannels: InitializedChannelState;
+  activeAppChannelId?: string;
+}
 
 export * from './opening/state';
 export * from './running/state';

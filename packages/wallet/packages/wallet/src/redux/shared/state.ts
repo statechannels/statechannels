@@ -1,7 +1,6 @@
-import { WalletAction } from '../actions';
-import { SharedChannelState } from '../channelState/shared/state';
 import { OutboxState } from '../outbox/state';
-import { FundingState } from '../fundingState/state';
+import { FundingState, waitForFundingRequest } from '../fundingState/state';
+import { ChannelState } from '../channelState/state';
 
 export interface StateWithSideEffects<T> {
   state: T;
@@ -9,11 +8,16 @@ export interface StateWithSideEffects<T> {
 }
 
 export interface SharedWalletState {
-  channelState?: SharedChannelState;
-  fundingState?: FundingState;
+  channelState: ChannelState;
+  fundingState: FundingState;
   outboxState: OutboxState;
-  unhandledAction?: WalletAction;
 }
+
+export const emptyState: SharedWalletState = {
+  outboxState: {},
+  fundingState: waitForFundingRequest(),
+  channelState: { initializedChannels: {}, initializingChannels: {} },
+};
 
 export interface LoggedIn extends SharedWalletState {
   uid: string;
@@ -39,6 +43,6 @@ export function loggedIn<T extends LoggedIn>(params: T): LoggedIn {
 }
 
 export function adjudicatorKnown<T extends AdjudicatorKnown>(params: T): AdjudicatorKnown {
-  const { networkId, adjudicator } = params;
-  return { ...loggedIn(params), networkId, adjudicator };
+  const { networkId, adjudicator, channelState } = params;
+  return { ...loggedIn(params), networkId, adjudicator, channelState };
 }
