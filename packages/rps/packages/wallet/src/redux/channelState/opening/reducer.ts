@@ -16,7 +16,7 @@ import { StateWithSideEffects } from '../../shared/state';
 export const openingReducer = (
   state: channelStates.OpeningState,
   action: actions.WalletAction,
-): StateWithSideEffects<channelStates.ChannelState> => {
+): StateWithSideEffects<channelStates.ChannelStatus> => {
   switch (state.type) {
     case channelStates.WAIT_FOR_CHANNEL:
       return waitForChannelReducer(state, action);

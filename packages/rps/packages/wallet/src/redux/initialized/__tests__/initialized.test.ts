@@ -4,52 +4,42 @@ import * as states from '../../state';
 import * as fundingStates from '../../fundingState/state';
 import * as actions from '../../actions';
 import * as outgoing from 'magmo-wallet-client/lib/wallet-events';
-import * as channelStates from '../../channelState/state';
-import { INITIALIZING_CHANNEL, CHANNEL_INITIALIZED, channelInitialized } from '../../state';
 import * as scenarios from '../../__tests__/test-scenarios';
-import { itSendsThisMessage } from '../../__tests__/helpers';
+import { itSendsThisMessage, itDispatchesThisAction } from '../../__tests__/helpers';
 import { waitForUpdate } from '../../channelState/state';
 
+const { channelId } = scenarios;
+
 const defaults = {
+  ...states.emptyState,
   uid: 'uid',
   adjudicator: 'adjudicator',
   networkId: 1,
-  outboxState: {},
-  fundingState: fundingStates.waitForFundingRequest(),
 };
 
-const { preFundCommitment1 } = scenarios;
-
-describe('when in WAITING_FOR_CHANNEL_INITIALIZATION', () => {
-  const state = states.waitingForChannelInitialization({ ...defaults });
+describe('when in WALLET_INITIALIED', () => {
+  const state = states.initialized({ ...defaults });
 
   describe('when the player initializes a channel', () => {
     const action = actions.channelInitialized();
     const updatedState = initializedReducer(state, action);
 
-    it('transitions to INITIALIZING_CHANNEL', async () => {
-      expect(updatedState.type).toEqual(INITIALIZING_CHANNEL);
-      expect((updatedState.channelState as channelStates.WaitForChannel).type).toEqual(
-        channelStates.WAIT_FOR_CHANNEL,
+    it('applies the channel reducer', async () => {
+      const ids = Object.keys(updatedState.channelState.initializingChannels);
+      expect(ids.length).toEqual(1);
+      expect(updatedState.channelState.initializingChannels[ids[0]].privateKey).toEqual(
+        expect.any(String),
       );
     });
   });
-});
 
-describe('when in INITIALIZING_CHANNEL', () => {
-  const state = states.initializingChannel({
-    ...defaults,
-    channelState: { address: 'address', privateKey: 'privateKey' },
-  });
-
-  describe('when the participant sends a commitment', () => {
-    const action = actions.ownCommitmentReceived(preFundCommitment1);
+  describe('when a funding related action arrives', () => {
+    const action = actions.fundingReceivedEvent('0xf00', '0x', '0x');
     const updatedState = initializedReducer(state, action);
 
-    it('transitions to CHANNEL_INITIALIZED', async () => {
-      expect(updatedState.type).toEqual(CHANNEL_INITIALIZED);
-      expect((updatedState.channelState as channelStates.WaitForPreFundSetup).type).toEqual(
-        channelStates.WAIT_FOR_CHANNEL,
+    it('applies the funding state reducer', async () => {
+      expect(updatedState.fundingState.channelFundingStatus).toEqual(
+        fundingStates.FUNDING_NOT_STARTED,
       );
     });
   });
@@ -62,12 +52,16 @@ describe('When the channel reducer declares a side effect', () => {
     gameCommitment1,
     gameCommitment2,
     channelNonce,
-    channelId,
     channel,
-    fundingState,
   } = scenarios;
-  const params = {
+  const walletParams = {
+    ...states.emptyState,
     uid: 'uid',
+    adjudicator: 'adj-address',
+    networkId: 2132,
+  };
+
+  const channelParams = {
     participants: channel.participants as [string, string],
     libraryAddress: channel.channelType,
     channelId,
@@ -75,26 +69,27 @@ describe('When the channel reducer declares a side effect', () => {
     lastCommitment: { commitment: gameCommitment1, signature: 'sig' },
     penultimateCommitment: { commitment: gameCommitment2, signature: 'sig' },
     turnNum: gameCommitment2.turnNum,
-    adjudicator: 'adj-address',
     challengeExpiry: new Date(),
-    networkId: 2132,
-    fundingState,
     funded: false,
   };
 
   const bParams = { address: bsAddress, ourIndex: 1, privateKey: bsPrivateKey };
-  const bDefaults = { ...params, ...bParams };
+  const bDefaults = { ...channelParams, ...bParams };
 
-  const state = channelInitialized({
-    ...params,
-    channelState: waitForUpdate(bDefaults),
-    outboxState: {},
-    fundingState: fundingStates.waitForFundingRequest(),
+  const state = states.initialized({
+    ...walletParams,
+    channelState: {
+      initializedChannels: { [channelId]: waitForUpdate(bDefaults) },
+      initializingChannels: {},
+      activeAppChannelId: channelId,
+    },
+    outboxState: { actionOutbox: actions.internal.directFundingConfirmed('channelId') },
   });
 
   const action = actions.challengeRequested();
+
   const updatedState = initializedReducer(state, action);
 
-  expect(state.outboxState).toEqual({});
   itSendsThisMessage(updatedState, outgoing.CHALLENGE_REJECTED);
+  itDispatchesThisAction(actions.internal.DIRECT_FUNDING_CONFIRMED, updatedState);
 });

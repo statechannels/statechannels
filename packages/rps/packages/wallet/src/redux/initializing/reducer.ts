@@ -7,11 +7,12 @@ import {
   WaitForLogin,
   WaitForAdjudicator,
 } from './state';
-import { waitingForChannelInitialization, InitializedState } from '../state';
+import { InitializedState } from '../state';
 
 import { WalletAction, LOGGED_IN, ADJUDICATOR_KNOWN } from '../actions';
 import { unreachable } from '../../utils/reducer-utils';
 import { initializationSuccess } from 'magmo-wallet-client/lib/wallet-events';
+import { initialized } from '../initialized/state';
 
 export const initializingReducer = (
   state: InitializingState,
@@ -50,7 +51,7 @@ const waitForAdjudicatorReducer = (
   switch (action.type) {
     case ADJUDICATOR_KNOWN:
       const { adjudicator, networkId } = action;
-      return waitingForChannelInitialization({
+      return initialized({
         ...state,
         outboxState: { messageOutbox: initializationSuccess() },
         adjudicator,

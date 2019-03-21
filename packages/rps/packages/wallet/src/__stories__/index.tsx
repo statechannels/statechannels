@@ -83,24 +83,30 @@ const fakeStore = state => ({
   },
 });
 
-const initializedWalletState = walletStates.channelInitialized({
+const initializedWalletState = walletStates.initialized({
   ...walletStates.waitForLogin(),
   unhandledAction: undefined,
   outboxState: {},
-  channelState: channelStates.approveFunding({ ...playerADefaults }),
+  channelState: {
+    initializedChannels: { [channelId]: channelStates.approveFunding({ ...playerADefaults }) },
+    initializingChannels: {},
+  },
   networkId: 4,
   adjudicator: '',
   uid: '',
 });
 
 // Want to return top level wallet state, not the channel state
-function walletStateFromChannelState<T extends channelStates.ChannelState>(
+function walletStateFromChannelState<T extends channelStates.OpenedState>(
   channelState: T,
   networkId?: number,
 ): walletStates.WalletState {
   return {
     ...initializedWalletState,
-    channelState: { ...channelState },
+    channelState: {
+      initializedChannels: { [channelState.channelId]: channelState },
+      initializingChannels: {},
+    },
     networkId: networkId || 3,
   };
 }
@@ -298,5 +304,5 @@ addStoriesFromCollection(WalletScreendsClosing, 'Wallet Screens / Closing');
 
 storiesOf('Wallet Landing Page', module).add(
   'Landing Page',
-  channelStateRender(walletStates.waitForLogin({ outboxState: {} })),
+  channelStateRender(walletStates.waitForLogin()),
 );

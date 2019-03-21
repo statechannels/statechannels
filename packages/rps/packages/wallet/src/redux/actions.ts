@@ -1,4 +1,5 @@
 import { Commitment } from 'fmg-core';
+import * as internal from './internal/actions';
 
 export const LOGGED_IN = 'WALLET.LOGGED_IN';
 export const loggedIn = (uid: string) => ({
@@ -279,7 +280,7 @@ export const fundingReceivedEvent = (
 export type FundingReceivedEvent = ReturnType<typeof fundingReceivedEvent>;
 
 export const CHALLENGE_CREATED_EVENT = 'CHALLENGE_CREATED_EVENT';
-export const challengeCreatedEvent = (channelId, commitment, finalizedAt) => ({
+export const challengeCreatedEvent = (channelId: string, commitment: Commitment, finalizedAt) => ({
   channelId,
   commitment,
   finalizedAt,
@@ -366,15 +367,10 @@ export const blockMined = (block: { timestamp: number; number: number }) => ({
 });
 export type BlockMined = ReturnType<typeof blockMined>;
 
-import * as internal from './internal/actions';
-
 export { internal };
 
-// TODO: This is getting large, we should probably split this up into separate types for each stage
-export type WalletAction =
-  | AdjudicatorKnown
+export type ChannelAction =  // TODO: Some of these actions probably also belong in a FundingAction type
   | ApproveClose
-  | BlockMined
   | ChallengeAcknowledged
   | ChallengeApproved
   | ChallengeCommitmentReceived
@@ -393,19 +389,9 @@ export type WalletAction =
   | concludedEvent
   | ConcludeRejected
   | ConcludeRequested
-  | DepositConfirmed
-  | DepositInitiated
-  | DisplayMessageSent
-  | FundingApproved
-  | FundingDeclinedAcknowledged
-  | FundingReceivedEvent
-  | FundingRejected
   | FundingRequested
   | FundingSuccessAcknowledged
-  | LoggedIn
   | MessageReceived
-  | MessageSent
-  | MetamaskLoadError
   | OpponentCommitmentReceived
   | OwnCommitmentReceived
   | PostFundSetupReceived
@@ -413,7 +399,6 @@ export type WalletAction =
   | RespondWithMoveChosen
   | RespondWithMoveEvent
   | RespondWithRefuteChosen
-  | RetryTransaction
   | TakeMoveInAppAcknowledged
   | TransactionConfirmed
   | TransactionSentToMetamask
@@ -424,3 +409,35 @@ export type WalletAction =
   | WithdrawalRequested
   | WithdrawalSuccessAcknowledged
   | internal.InternalAction;
+
+// TODO: This is getting large, we should probably split this up into separate types for each stage
+export type WalletAction =
+  | AdjudicatorKnown
+  | BlockMined
+  | DepositConfirmed
+  | DepositInitiated
+  | DisplayMessageSent
+  | FundingApproved
+  | FundingDeclinedAcknowledged
+  | FundingReceivedEvent
+  | FundingRejected
+  | LoggedIn
+  | MessageSent
+  | MetamaskLoadError
+  | RetryTransaction
+  | ChannelAction;
+
+export const isChannelAction = (action: WalletAction): action is ChannelAction => {
+  // In order for an action to act on a specific channel, it needs to somehow contain a
+  // channel id.
+  // By rights, the actions themselves should extend a ChannelAction interface
+  // that looks like { channelId: string }
+  // This might require a change to the wallet API
+  return 'channelId' in action || 'commitment' in action || action.type === CHANNEL_INITIALIZED;
+};
+
+export const isReceiveFirstCommitment = (
+  action: WalletAction,
+): action is OwnCommitmentReceived | OpponentCommitmentReceived => {
+  return 'commitment' in action && action.commitment.turnNum === 0;
+};
