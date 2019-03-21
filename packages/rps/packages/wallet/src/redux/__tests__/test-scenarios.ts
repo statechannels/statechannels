@@ -14,21 +14,18 @@ export const channel: Channel = { channelType: libraryAddress, nonce: channelNon
 export const channelId = channelID(channel);
 
 export const fundingState = {
-  type: 'FUNDING_CONFIRMED' as 'FUNDING_CONFIRMED',
-  fundingType: 'FUNDING_TYPE.DIRECT' as 'FUNDING_TYPE.DIRECT',
-  requestedTotalFunds: bigNumberify(1000000000000000).toHexString(),
-  requestedYourContribution: bigNumberify(500000000000000).toHexString(),
-  channelId,
+  fundingType: 'FUNDING_TYPE.UNKNOWN' as 'FUNDING_TYPE.UNKNOWN',
+  channelFundingStatus: 'FUNDING_NOT_STARTED' as 'FUNDING_NOT_STARTED',
 };
 
-const oneOne = [bigNumberify(1).toHexString(), bigNumberify(1).toHexString()];
+export const twoThree = [bigNumberify(2).toHexString(), bigNumberify(3).toHexString()];
 export const postFundCommitment1: Commitment = {
   channel,
   commitmentCount: 0,
   commitmentType: CommitmentType.PostFundSetup,
   appAttributes: '0x0',
   turnNum: 2,
-  allocation: oneOne,
+  allocation: twoThree,
   destination: participants,
 };
 export const postFundCommitment2: Commitment = {
@@ -37,7 +34,7 @@ export const postFundCommitment2: Commitment = {
   commitmentType: CommitmentType.PostFundSetup,
   appAttributes: '0x0',
   turnNum: 3,
-  allocation: oneOne,
+  allocation: twoThree,
   destination: participants,
 };
 export const preFundCommitment1: Commitment = {
@@ -46,7 +43,7 @@ export const preFundCommitment1: Commitment = {
   commitmentType: CommitmentType.PreFundSetup,
   appAttributes: '0x0',
   turnNum: 0,
-  allocation: oneOne,
+  allocation: twoThree,
   destination: participants,
 };
 export const preFundCommitment2: Commitment = {
@@ -55,7 +52,7 @@ export const preFundCommitment2: Commitment = {
   commitmentType: CommitmentType.PreFundSetup,
   appAttributes: '0x0',
   turnNum: 1,
-  allocation: oneOne,
+  allocation: twoThree,
   destination: participants,
 };
 export const gameCommitment1: Commitment = {

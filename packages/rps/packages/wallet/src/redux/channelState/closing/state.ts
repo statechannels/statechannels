@@ -1,10 +1,5 @@
-import {
-  MaybeFunded,
-  channelOpen,
-  TransactionExists,
-  UserAddressExists,
-  userAddressExists,
-} from '../shared/state';
+import { ChannelOpen, channelOpen, UserAddressExists, userAddressExists } from '../shared/state';
+import { TransactionExists } from '../../shared/state';
 
 // stage
 export const CLOSING = 'CLOSING';
@@ -26,41 +21,41 @@ export interface CloseTransactionFailed extends UserAddressExists {
   stage: typeof CLOSING;
 }
 
-export interface AcknowledgeConclude extends MaybeFunded {
+export interface AcknowledgeConclude extends ChannelOpen {
   type: typeof ACKNOWLEDGE_CONCLUDE;
   stage: typeof CLOSING;
 }
 
-export interface WaitForCloseConfirmed extends MaybeFunded, TransactionExists {
+export interface WaitForCloseConfirmed extends ChannelOpen, TransactionExists {
   type: typeof WAIT_FOR_CLOSE_CONFIRMED;
   stage: typeof CLOSING;
 }
 
-export interface ApproveConclude extends MaybeFunded {
+export interface ApproveConclude extends ChannelOpen {
   type: typeof APPROVE_CONCLUDE;
   stage: typeof CLOSING;
 }
 
-export interface WaitForOpponentConclude extends MaybeFunded {
+export interface WaitForOpponentConclude extends ChannelOpen {
   type: typeof WAIT_FOR_OPPONENT_CONCLUDE;
   stage: typeof CLOSING;
 }
 
-export interface AcknowledgeConcludeSuccess extends MaybeFunded {
+export interface AcknowledgeConcludeSuccess extends ChannelOpen {
   type: typeof WAIT_FOR_OPPONENT_CONCLUDE;
   stage: typeof CLOSING;
 }
 
-export interface AcknowledgeCloseSuccess extends MaybeFunded {
+export interface AcknowledgeCloseSuccess extends ChannelOpen {
   type: typeof ACKNOWLEDGE_CLOSE_SUCCESS;
   stage: typeof CLOSING;
 }
 
-export interface AcknowledgeClosedOnChain extends MaybeFunded {
+export interface AcknowledgeClosedOnChain extends ChannelOpen {
   type: typeof ACKNOWLEDGE_CLOSED_ON_CHAIN;
   stage: typeof CLOSING;
 }
-export interface ApproveCloseOnChain extends MaybeFunded {
+export interface ApproveCloseOnChain extends ChannelOpen {
   type: typeof APPROVE_CLOSE_ON_CHAIN;
   stage: typeof CLOSING;
 }
@@ -75,22 +70,22 @@ export interface WaitForCloseSubmission extends UserAddressExists {
   stage: typeof CLOSING;
 }
 
-export function approveConclude<T extends MaybeFunded>(params: T): ApproveConclude {
+export function approveConclude<T extends ChannelOpen>(params: T): ApproveConclude {
   return { type: APPROVE_CONCLUDE, stage: CLOSING, ...channelOpen(params) };
 }
-export function approveCloseOnChain<T extends MaybeFunded>(params: T): ApproveCloseOnChain {
+export function approveCloseOnChain<T extends ChannelOpen>(params: T): ApproveCloseOnChain {
   return { type: APPROVE_CLOSE_ON_CHAIN, stage: CLOSING, ...channelOpen(params) };
 }
 
-export function waitForOpponentConclude<T extends MaybeFunded>(params: T): WaitForOpponentConclude {
+export function waitForOpponentConclude<T extends ChannelOpen>(params: T): WaitForOpponentConclude {
   return { type: WAIT_FOR_OPPONENT_CONCLUDE, stage: CLOSING, ...channelOpen(params) };
 }
 
-export function acknowledgeCloseSuccess<T extends MaybeFunded>(params: T): AcknowledgeCloseSuccess {
+export function acknowledgeCloseSuccess<T extends ChannelOpen>(params: T): AcknowledgeCloseSuccess {
   return { type: ACKNOWLEDGE_CLOSE_SUCCESS, stage: CLOSING, ...channelOpen(params) };
 }
 
-export function acknowledgeClosedOnChain<T extends MaybeFunded>(
+export function acknowledgeClosedOnChain<T extends ChannelOpen>(
   params: T,
 ): AcknowledgeClosedOnChain {
   return { type: ACKNOWLEDGE_CLOSED_ON_CHAIN, stage: CLOSING, ...channelOpen(params) };
@@ -108,7 +103,7 @@ export function waitForCloseSubmission<T extends UserAddressExists>(
   return { type: WAIT_FOR_CLOSE_SUBMISSION, stage: CLOSING, ...userAddressExists(params) };
 }
 
-export function waitForCloseConfirmed<T extends MaybeFunded & TransactionExists>(
+export function waitForCloseConfirmed<T extends ChannelOpen & TransactionExists>(
   params: T,
 ): WaitForCloseConfirmed {
   return {
@@ -119,7 +114,7 @@ export function waitForCloseConfirmed<T extends MaybeFunded & TransactionExists>
   };
 }
 
-export function acknowledgeConclude<T extends MaybeFunded>(params: T): AcknowledgeConclude {
+export function acknowledgeConclude<T extends ChannelOpen>(params: T): AcknowledgeConclude {
   return { type: ACKNOWLEDGE_CONCLUDE, stage: CLOSING, ...channelOpen(params) };
 }
 

@@ -1,15 +1,16 @@
 import { WalletAction } from '../actions';
 import { SharedChannelState } from '../channelState/shared/state';
 import { OutboxState } from '../outbox/state';
+import { FundingState } from '../fundingState/state';
 
-export interface NextChannelState<T extends SharedChannelState> {
-  channelState: T;
-  unhandledAction?: WalletAction;
+export interface StateWithSideEffects<T> {
+  state: T;
   outboxState?: OutboxState;
 }
 
 export interface SharedWalletState {
   channelState?: SharedChannelState;
+  fundingState?: FundingState;
   outboxState: OutboxState;
   unhandledAction?: WalletAction;
 }
@@ -23,10 +24,14 @@ export interface AdjudicatorKnown extends LoggedIn {
   adjudicator: string;
 }
 
+export interface TransactionExists {
+  transactionHash: string;
+}
+
 // creators
 export function base<T extends SharedWalletState>(params: T): SharedWalletState {
-  const { outboxState, channelState } = params;
-  return { outboxState, channelState };
+  const { outboxState, channelState, fundingState } = params;
+  return { outboxState, channelState, fundingState };
 }
 
 export function loggedIn<T extends LoggedIn>(params: T): LoggedIn {

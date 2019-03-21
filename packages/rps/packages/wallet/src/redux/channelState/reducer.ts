@@ -21,21 +21,25 @@ import { respondingReducer } from './responding/reducer';
 import { withdrawingReducer } from './withdrawing/reducer';
 import { closingReducer } from './closing/reducer';
 import { WalletAction, CONCLUDE_REQUESTED, COMMITMENT_RECEIVED } from '../actions';
-import { unreachable, ourTurn, validTransition } from '../../utils/reducer-utils';
+import {
+  unreachable,
+  ourTurn,
+  validTransition,
+  ReducerWithSideEffects,
+} from '../../utils/reducer-utils';
 import { validCommitmentSignature } from '../../utils/signing-utils';
 import { showWallet } from 'magmo-wallet-client/lib/wallet-events';
 import { CommitmentType } from 'fmg-core';
-import { NextChannelState } from '../shared/state';
+import { StateWithSideEffects } from '../shared/state';
 
-export const channelReducer = (
+export const channelReducer: ReducerWithSideEffects<ChannelState> = (
   state: ChannelState,
   action: WalletAction,
-  unhandledAction?: WalletAction,
-): NextChannelState<ChannelState> => {
+): StateWithSideEffects<ChannelState> => {
   const conclusionStateFromOwnRequest = receivedValidOwnConclusionRequest(state, action);
   if (conclusionStateFromOwnRequest) {
     return {
-      channelState: conclusionStateFromOwnRequest,
+      state: conclusionStateFromOwnRequest,
       outboxState: { displayOutbox: showWallet() },
     };
   }
@@ -43,7 +47,7 @@ export const channelReducer = (
   const conclusionStateFromOpponentRequest = receivedValidOpponentConclusionRequest(state, action);
   if (conclusionStateFromOpponentRequest) {
     return {
-      channelState: conclusionStateFromOpponentRequest,
+      state: conclusionStateFromOpponentRequest,
       outboxState: { displayOutbox: showWallet() },
     };
   }

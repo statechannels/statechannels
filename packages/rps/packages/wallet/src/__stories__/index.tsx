@@ -4,12 +4,12 @@ import WalletContainer from '../containers/Wallet';
 import { Provider } from 'react-redux';
 import * as walletStates from '../redux/state';
 import * as channelStates from '../redux/channelState/state';
-import * as fundingStates from '../redux/channelState/fundingState/state';
+import * as fundingStates from '../redux/fundingState/state';
 import '../index.scss';
 import * as scenarios from '../redux/__tests__/test-scenarios';
 import { bigNumberify } from 'ethers/utils';
 import NetworkStatus from '../components/NetworkStatus';
-import { fundingConfirmed } from '../redux/channelState/fundingState/state';
+import { channelFunded } from '../redux/fundingState/state';
 
 const {
   asAddress,
@@ -22,11 +22,20 @@ const {
   preFundCommitment2,
 } = scenarios;
 
-const defaultFundingState: fundingStates.SharedFundingState = {
+const YOUR_CONTRIBUTION = bigNumberify(500000000000000).toHexString();
+const TOTAL_CONTRIBUTION = bigNumberify(YOUR_CONTRIBUTION)
+  .mul(2)
+  .toHexString();
+
+const defaultFundingState: fundingStates.DirectFundingState = {
   fundingType: fundingStates.DIRECT_FUNDING,
-  requestedTotalFunds: bigNumberify(1000000000000000).toHexString(),
-  requestedYourContribution: bigNumberify(500000000000000).toHexString(),
+  requestedTotalFunds: TOTAL_CONTRIBUTION,
+  requestedYourContribution: YOUR_CONTRIBUTION,
   channelId: 'channel id',
+  ourIndex: 0,
+  safeToDepositLevel: YOUR_CONTRIBUTION,
+  depositStatus: fundingStates.depositing.WAIT_FOR_TRANSACTION_SENT,
+  channelFundingStatus: fundingStates.NOT_SAFE_TO_DEPOSIT,
 };
 
 const fundingStateWithTX = { ...defaultFundingState, transactionHash: 'TX_HASH' };
@@ -52,12 +61,12 @@ const defaults = {
 const playerADefaults = {
   ...defaults,
   ourIndex: 0,
-  fundingState: fundingConfirmed(defaultFundingState),
+  fundingState: channelFunded(defaultFundingState),
 };
 const playerBDefaults = {
   ...defaults,
   ourIndex: 1,
-  fundingState: fundingConfirmed(defaultFundingState),
+  fundingState: channelFunded(defaultFundingState),
 };
 
 const fakeStore = state => ({
@@ -96,11 +105,23 @@ function walletStateFromChannelState<T extends channelStates.ChannelState>(
   };
 }
 
-const channelStateRender = channelState => () => (
-  <Provider store={fakeStore(walletStateFromChannelState(channelState))}>
-    <WalletContainer />
-  </Provider>
-);
+const walletStateRender = state => () => {
+  const fullState = { ...initializedWalletState, networkId: 3, ...state };
+  return (
+    <Provider store={fakeStore(fullState)}>
+      <WalletContainer />
+    </Provider>
+  );
+};
+
+const channelStateRender = channelState => () => {
+  const walletState = walletStateFromChannelState(channelState);
+  return (
+    <Provider store={fakeStore(walletState)}>
+      <WalletContainer />
+    </Provider>
+  );
+};
 
 storiesOf('Network Status', module)
   .add('Mainnet', () => (
@@ -129,57 +150,114 @@ storiesOf('Network Status', module)
     </Provider>
   ));
 
-function addStoriesFromCollection(collection, chapter) {
+function addStoriesFromCollection(collection, chapter, renderer = channelStateRender) {
   Object.keys(collection).map(storyName => {
-    storiesOf(chapter, module).add(storyName, channelStateRender(collection[storyName]));
+    storiesOf(chapter, module).add(storyName, renderer(collection[storyName]));
   });
 }
 
 const WalletScreensFundingPlayerA = {
-  ApproveFunding: channelStates.approveFunding(playerADefaults),
-  AWaitForDepositToBeSentToMetaMask: channelStates.waitForFundingAndPostFundSetup({
-    ...playerADefaults,
-    fundingState: fundingStates.aWaitForDepositToBeSentToMetaMask(defaultFundingState),
-  }),
-  ASubmitDepositInMetaMask: channelStates.waitForFundingAndPostFundSetup({
-    ...playerADefaults,
-    fundingState: fundingStates.aSubmitDepositInMetaMask(defaultFundingState),
-  }),
-  AWaitForDepositConfirmation: channelStates.waitForFundingAndPostFundSetup({
-    ...playerADefaults,
-    fundingState: fundingStates.aWaitForDepositConfirmation(fundingStateWithTX),
-  }),
-  AWaitForOpponentDeposit: channelStates.waitForFundingAndPostFundSetup({
-    ...playerADefaults,
-    fundingState: fundingStates.aWaitForOpponentDeposit(defaultFundingState),
-  }),
-  AWaitForPostFundSetup: channelStates.aWaitForPostFundSetup(playerADefaults),
-  AcknowledgeFundingSuccess: channelStates.acknowledgeFundingSuccess(playerADefaults),
+  ApproveFunding: { channelState: channelStates.approveFunding(playerADefaults) },
+  WaitForTransactionSent: {
+    channelState: channelStates.waitForFundingAndPostFundSetup(playerADefaults),
+    fundingState: fundingStates.depositing.waitForTransactionSent(defaultFundingState),
+  },
+  WaitForDepositApproval: {
+    channelState: channelStates.waitForFundingAndPostFundSetup({
+      ...playerADefaults,
+    }),
+    fundingState: fundingStates.depositing.waitForDepositApproval(defaultFundingState),
+  },
+  WaitForDepositConfirmation: {
+    channelState: channelStates.waitForFundingAndPostFundSetup({
+      ...playerADefaults,
+    }),
+    fundingState: fundingStates.depositing.waitForDepositConfirmation(fundingStateWithTX),
+  },
+  WaitForFundingConfirmed: {
+    channelState: channelStates.waitForFundingAndPostFundSetup({
+      ...playerADefaults,
+    }),
+    fundingState: fundingStates.waitForFundingConfirmed(defaultFundingState),
+  },
+  WaitForPostFundSetup: { channelState: channelStates.aWaitForPostFundSetup(playerADefaults) },
+  AcknowledgeFundingSuccess: {
+    channelState: channelStates.acknowledgeFundingSuccess(playerADefaults),
+  },
 };
-addStoriesFromCollection(WalletScreensFundingPlayerA, 'Wallet Screens / Funding / Player A');
+addStoriesFromCollection(
+  WalletScreensFundingPlayerA,
+  'Wallet Screens / Funding / Player A',
+  walletStateRender,
+);
 
 const WalletScreensFundingPlayerB = {
-  ApproveFunding: channelStates.approveFunding(playerBDefaults),
-  BWaitForOpponentDeposit: channelStates.waitForFundingAndPostFundSetup({
-    ...playerBDefaults,
-    fundingState: fundingStates.bWaitForOpponentDeposit(defaultFundingState),
-  }),
-  BWaitForDepositToBeSentToMetaMask: channelStates.waitForFundingAndPostFundSetup({
-    ...playerBDefaults,
-    fundingState: fundingStates.bWaitForDepositToBeSentToMetaMask(defaultFundingState),
-  }),
-  BSubmitDepositInMetaMask: channelStates.waitForFundingAndPostFundSetup({
-    ...playerBDefaults,
-    fundingState: fundingStates.bSubmitDepositInMetaMask(defaultFundingState),
-  }),
-  BWaitForDepositConfirmation: channelStates.waitForFundingAndPostFundSetup({
-    ...playerBDefaults,
-    fundingState: fundingStates.bWaitForDepositConfirmation(fundingStateWithTX),
-  }),
-  BWaitForPostFundSetup: channelStates.bWaitForPostFundSetup(playerBDefaults),
-  AcknowledgeFundingSuccess: channelStates.acknowledgeFundingSuccess(playerBDefaults),
+  ApproveFunding: { channelState: channelStates.approveFunding(playerBDefaults) },
+  NotSafeToDeposit: {
+    channelState: channelStates.waitForFundingAndPostFundSetup(playerBDefaults),
+    fundingState: fundingStates.notSafeToDeposit(defaultFundingState),
+  },
+  WaitForTransactionSent: {
+    channelState: channelStates.waitForFundingAndPostFundSetup(playerBDefaults),
+    fundingState: fundingStates.depositing.waitForTransactionSent(defaultFundingState),
+  },
+  WaitForDepositApproval: {
+    channelState: channelStates.waitForFundingAndPostFundSetup(playerBDefaults),
+    fundingState: fundingStates.depositing.waitForDepositApproval(defaultFundingState),
+  },
+  WaitForDepositConfirmation: {
+    channelState: channelStates.waitForFundingAndPostFundSetup(playerBDefaults),
+    fundingState: fundingStates.depositing.waitForDepositConfirmation(fundingStateWithTX),
+  },
+  WaitForFundingConfirmed: {
+    channelState: channelStates.waitForFundingAndPostFundSetup(playerBDefaults),
+    fundingState: fundingStates.waitForFundingConfirmed(defaultFundingState),
+  },
+  WaitForPostFundSetup: { channelState: channelStates.aWaitForPostFundSetup(playerBDefaults) },
+  AcknowledgeFundingSuccess: {
+    channelState: channelStates.acknowledgeFundingSuccess(playerBDefaults),
+  },
 };
-addStoriesFromCollection(WalletScreensFundingPlayerB, 'Wallet Screens / Funding / Player B');
+addStoriesFromCollection(
+  WalletScreensFundingPlayerB,
+  'Wallet Screens / Funding / Player B',
+  walletStateRender,
+);
+
+// Against bot, who sends funding too early:
+const WalletScreensFundingPlayerAPart2 = {
+  ApproveFunding: { channelState: channelStates.approveFunding(playerADefaults) },
+  WaitForTransactionSent: {
+    channelState: channelStates.waitForFundingConfirmation(playerADefaults),
+    fundingState: fundingStates.depositing.waitForTransactionSent(defaultFundingState),
+  },
+  WaitForDepositApproval: {
+    channelState: channelStates.waitForFundingConfirmation({
+      ...playerADefaults,
+    }),
+    fundingState: fundingStates.depositing.waitForDepositApproval(defaultFundingState),
+  },
+  WaitForDepositConfirmation: {
+    channelState: channelStates.waitForFundingConfirmation({
+      ...playerADefaults,
+    }),
+    fundingState: fundingStates.depositing.waitForDepositConfirmation(fundingStateWithTX),
+  },
+  WaitForFundingConfirmed: {
+    channelState: channelStates.waitForFundingConfirmation({
+      ...playerADefaults,
+    }),
+    fundingState: fundingStates.waitForFundingConfirmed(defaultFundingState),
+  },
+  AcknowledgeFundingSuccess: {
+    channelState: channelStates.acknowledgeFundingSuccess(playerADefaults),
+  },
+};
+addStoriesFromCollection(
+  WalletScreensFundingPlayerAPart2,
+  'Wallet Screens / Funding / Player A -- already have PostFundSetup',
+  walletStateRender,
+);
 
 const WalletScreendsWithdrawing = {
   ApproveWithdrawal: channelStates.approveWithdrawal(playerADefaults),
