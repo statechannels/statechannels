@@ -10,19 +10,19 @@ import {
 } from 'magmo-wallet-client/lib/wallet-events';
 import { handleSignatureAndValidationMessages } from '../../../utils/state-utils';
 import { bigNumberify } from 'ethers/utils';
-import { NextChannelState } from '../../shared/state';
+import { StateWithSideEffects } from '../../shared/state';
 
 export const challengingReducer = (
   state: states.ChallengingState,
   action: WalletAction,
-): NextChannelState<states.ChannelState> => {
+): StateWithSideEffects<states.ChannelState> => {
   // Handle any signature/validation request centrally to avoid duplicating code for each state
   if (
     action.type === actions.OWN_COMMITMENT_RECEIVED ||
     action.type === actions.OPPONENT_COMMITMENT_RECEIVED
   ) {
     return {
-      channelState: state,
+      state,
       outboxState: { messageOutbox: handleSignatureAndValidationMessages(state, action) },
     };
   }
@@ -51,7 +51,7 @@ export const challengingReducer = (
 const challengeTransactionFailedReducer = (
   state: states.ChallengeTransactionFailed,
   action: WalletAction,
-): NextChannelState<states.ChannelState> => {
+): StateWithSideEffects<states.ChannelState> => {
   switch (action.type) {
     case actions.RETRY_TRANSACTION:
       const { commitment: fromPosition, signature: fromSignature } = state.penultimateCommitment;
@@ -63,17 +63,17 @@ const challengeTransactionFailedReducer = (
         toSignature,
       );
       return {
-        channelState: states.waitForChallengeInitiation(state),
+        state: states.waitForChallengeInitiation(state),
         outboxState: { transactionOutbox: transaction },
       };
   }
-  return { channelState: state };
+  return { state };
 };
 
 const approveChallengeReducer = (
   state: states.ApproveChallenge,
   action: WalletAction,
-): NextChannelState<states.ChannelState> => {
+): StateWithSideEffects<states.ChannelState> => {
   switch (action.type) {
     case actions.CHALLENGE_APPROVED:
       const { commitment: fromPosition, signature: fromSignature } = state.penultimateCommitment;
@@ -85,65 +85,65 @@ const approveChallengeReducer = (
         toSignature,
       );
       return {
-        channelState: states.waitForChallengeInitiation(state),
+        state: states.waitForChallengeInitiation(state),
         outboxState: { transactionOutbox: transaction },
       };
     case actions.CHALLENGE_REJECTED:
       return {
-        channelState: states.waitForUpdate(state),
+        state: states.waitForUpdate(state),
         outboxState: { messageOutbox: challengeComplete(), displayOutbox: hideWallet() },
       };
     default:
-      return { channelState: state };
+      return { state };
   }
 };
 
 const initiateChallengeReducer = (
   state: states.WaitForChallengeInitiation,
   action: WalletAction,
-): NextChannelState<states.ChannelState> => {
+): StateWithSideEffects<states.ChannelState> => {
   switch (action.type) {
     case actions.TRANSACTION_SENT_TO_METAMASK:
-      return { channelState: states.waitForChallengeSubmission(state) };
+      return { state: states.waitForChallengeSubmission(state) };
     default:
-      return { channelState: state };
+      return { state };
   }
 };
 
 const waitForChallengeSubmissionReducer = (
   state: states.WaitForChallengeSubmission,
   action: WalletAction,
-): NextChannelState<states.ChannelState> => {
+): StateWithSideEffects<states.ChannelState> => {
   switch (action.type) {
     case actions.CHALLENGE_CREATED_EVENT:
       return {
-        channelState: states.waitForChallengeSubmission({
+        state: states.waitForChallengeSubmission({
           ...state,
           challengeExpiry: bigNumberify(action.finalizedAt).toNumber(),
         }),
       };
     case actions.TRANSACTION_SUBMITTED:
       return {
-        channelState: states.waitForChallengeConfirmation({
+        state: states.waitForChallengeConfirmation({
           ...state,
           transactionHash: action.transactionHash,
         }),
       };
     case actions.TRANSACTION_SUBMISSION_FAILED:
-      return { channelState: states.challengeTransactionFailed(state) };
+      return { state: states.challengeTransactionFailed(state) };
     default:
-      return { channelState: state };
+      return { state };
   }
 };
 
 const waitForChallengeConfirmationReducer = (
   state: states.WaitForChallengeConfirmation,
   action: WalletAction,
-): NextChannelState<states.ChannelState> => {
+): StateWithSideEffects<states.ChannelState> => {
   switch (action.type) {
     case actions.CHALLENGE_CREATED_EVENT:
       return {
-        channelState: states.waitForChallengeConfirmation({
+        state: states.waitForChallengeConfirmation({
           ...state,
           challengeExpiry: bigNumberify(action.finalizedAt).toNumber(),
         }),
@@ -154,20 +154,20 @@ const waitForChallengeConfirmationReducer = (
       const challengeExpiry = state.challengeExpiry
         ? state.challengeExpiry
         : new Date(Date.now() + 5 * 60000).getTime() / 1000;
-      return { channelState: states.waitForResponseOrTimeout({ ...state, challengeExpiry }) };
+      return { state: states.waitForResponseOrTimeout({ ...state, challengeExpiry }) };
     default:
-      return { channelState: state };
+      return { state };
   }
 };
 
 const waitForResponseOrTimeoutReducer = (
   state: states.WaitForResponseOrTimeout,
   action: WalletAction,
-): NextChannelState<states.ChannelState> => {
+): StateWithSideEffects<states.ChannelState> => {
   switch (action.type) {
     case actions.CHALLENGE_CREATED_EVENT:
       return {
-        channelState: states.waitForResponseOrTimeout({
+        state: states.waitForResponseOrTimeout({
           ...state,
           challengeExpiry: bigNumberify(action.finalizedAt).toNumber(),
         }),
@@ -177,7 +177,7 @@ const waitForResponseOrTimeoutReducer = (
       // TODO: Right now we're just storing a dummy signature since we don't get one
       // from the challenge.
       return {
-        channelState: states.acknowledgeChallengeResponse({
+        state: states.acknowledgeChallengeResponse({
           ...state,
           turnNum: state.turnNum + 1,
           lastCommitment: { commitment: action.responseCommitment, signature: '0x0' },
@@ -191,42 +191,42 @@ const waitForResponseOrTimeoutReducer = (
         typeof state.challengeExpiry !== 'undefined' &&
         action.block.timestamp >= state.challengeExpiry
       ) {
-        return { channelState: states.acknowledgeChallengeTimeout(state) };
+        return { state: states.acknowledgeChallengeTimeout(state) };
       } else {
-        return { channelState: state };
+        return { state };
       }
 
     default:
-      return { channelState: state };
+      return { state };
   }
 };
 
 const acknowledgeChallengeResponseReducer = (
   state: states.AcknowledgeChallengeResponse,
   action: WalletAction,
-): NextChannelState<states.ChannelState> => {
+): StateWithSideEffects<states.ChannelState> => {
   switch (action.type) {
     case actions.CHALLENGE_RESPONSE_ACKNOWLEDGED:
       return {
-        channelState: states.waitForUpdate(state),
+        state: states.waitForUpdate(state),
         outboxState: { messageOutbox: challengeComplete(), displayOutbox: hideWallet() },
       };
     default:
-      return { channelState: state };
+      return { state };
   }
 };
 
 const acknowledgeChallengeTimeoutReducer = (
   state: states.AcknowledgeChallengeTimeout,
   action: WalletAction,
-): NextChannelState<states.ChannelState> => {
+): StateWithSideEffects<states.ChannelState> => {
   switch (action.type) {
     case actions.CHALLENGE_TIME_OUT_ACKNOWLEDGED:
       return {
-        channelState: states.approveWithdrawal(state),
+        state: states.approveWithdrawal(state),
         outboxState: { messageOutbox: challengeComplete() },
       };
     default:
-      return { channelState: state };
+      return { state };
   }
 };

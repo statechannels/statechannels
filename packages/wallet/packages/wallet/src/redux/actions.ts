@@ -366,6 +366,10 @@ export const blockMined = (block: { timestamp: number; number: number }) => ({
 });
 export type BlockMined = ReturnType<typeof blockMined>;
 
+import * as internal from './internal/actions';
+
+export { internal };
+
 // TODO: This is getting large, we should probably split this up into separate types for each stage
 export type WalletAction =
   | AdjudicatorKnown
@@ -418,4 +422,5 @@ export type WalletAction =
   | WithdrawalApproved
   | WithdrawalRejected
   | WithdrawalRequested
-  | WithdrawalSuccessAcknowledged;
+  | WithdrawalSuccessAcknowledged
+  | internal.InternalAction;

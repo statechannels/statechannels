@@ -10,6 +10,7 @@ import {
 import { unreachable } from '../utils/reducer-utils';
 import { OutboxState } from './outbox/state';
 import { initializedReducer } from './initialized/reducer';
+import { applySideEffects } from './outbox';
 
 const initialState = waitForLogin();
 
@@ -27,7 +28,13 @@ export const walletReducer = (
   if (action.type === TRANSACTION_SENT_TO_METAMASK) {
     sideEffects.transactionOutbox = undefined;
   }
-  state = { ...state, outboxState: outboxStateReducer(state.outboxState, sideEffects) };
+
+  if (action.type.match('WALLET.INTERNAL')) {
+    // For the moment, only one action should ever be put in the actionOutbox,
+    // so it's always safe to clear it.
+    sideEffects.actionOutbox = undefined;
+  }
+  state = { ...state, outboxState: applySideEffects(state.outboxState, sideEffects) };
 
   switch (state.stage) {
     case INITIALIZING:
@@ -38,27 +45,3 @@ export const walletReducer = (
       return unreachable(state);
   }
 };
-
-/**
- *
- * @param state current global state
- * @param sideEffects: OutboxState -- side effects that the channel reducer declared should happen
- *
- * For each key k in sideEffects, replace state[k] with sideEffects[k]
- */
-export function outboxStateReducer(
-  state: OutboxState,
-  sideEffects: OutboxState | undefined,
-): OutboxState {
-  if (!sideEffects) {
-    return state;
-  }
-  // Defensively copy object as to not modify existing state
-  const newState = { ...state };
-
-  // TODO: We need to think about whether we really want to overwrite
-  // existing outbox items
-  Object.keys(sideEffects).map(k => (newState[k] = sideEffects[k]));
-
-  return newState;
-}

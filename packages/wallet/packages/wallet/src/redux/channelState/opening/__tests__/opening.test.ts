@@ -71,7 +71,7 @@ describe('when in WaitForChannel', () => {
     const updatedState = openingReducer(state, action);
 
     itDoesntTransition(state, updatedState);
-    itSendsThisMessage(updatedState, validationFailure('InvalidSignature'), false);
+    itSendsThisMessage(updatedState, validationFailure('InvalidSignature'));
   });
 
   describe('when we send in a a non-PreFundSetupA', () => {
@@ -124,7 +124,7 @@ describe('when in WaitForPreFundSetup', () => {
 
     const updatedState = openingReducer(state, action);
     itDoesntTransition(state, updatedState);
-    itSendsThisMessage(updatedState, validationFailure('InvalidSignature'), false);
+    itSendsThisMessage(updatedState, validationFailure('InvalidSignature'));
   });
 
   describe('when we send in a a non-PreFundSetupB', () => {

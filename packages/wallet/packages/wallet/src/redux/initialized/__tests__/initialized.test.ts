@@ -1,6 +1,7 @@
 import { initializedReducer } from '../reducer';
 
 import * as states from '../../state';
+import * as fundingStates from '../../fundingState/state';
 import * as actions from '../../actions';
 import * as outgoing from 'magmo-wallet-client/lib/wallet-events';
 import * as channelStates from '../../channelState/state';
@@ -14,6 +15,7 @@ const defaults = {
   adjudicator: 'adjudicator',
   networkId: 1,
   outboxState: {},
+  fundingState: fundingStates.waitForFundingRequest(),
 };
 
 const { preFundCommitment1 } = scenarios;
@@ -87,6 +89,7 @@ describe('When the channel reducer declares a side effect', () => {
     ...params,
     channelState: waitForUpdate(bDefaults),
     outboxState: {},
+    fundingState: fundingStates.waitForFundingRequest(),
   });
 
   const action = actions.challengeRequested();

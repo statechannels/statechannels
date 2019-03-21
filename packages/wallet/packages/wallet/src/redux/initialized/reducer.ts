@@ -7,12 +7,14 @@ import {
   channelInitialized,
 } from './state';
 
+import { waitForFundingRequest } from '../fundingState/state';
+
 import { WalletAction, CHANNEL_INITIALIZED } from '../actions';
 import { channelInitializationSuccess } from 'magmo-wallet-client/lib/wallet-events';
 import { ethers } from 'ethers';
 import { channelReducer } from '../channelState/reducer';
-import { unreachable } from '../../utils/reducer-utils';
-import { outboxStateReducer } from '../reducer';
+import { unreachable, combineReducersWithSideEffects } from '../../utils/reducer-utils';
+import { fundingStateReducer } from '../fundingState/reducer';
 
 export const initializedReducer = (
   state: InitializedState,
@@ -32,25 +34,22 @@ export const initializedReducer = (
           ...state,
           outboxState: { messageOutbox: channelInitializationSuccess(wallet.address) },
           channelState: { address, privateKey },
+          fundingState: waitForFundingRequest(),
         });
       }
       break;
-    case INITIALIZING_CHANNEL:
-    case CHANNEL_INITIALIZED:
-      const { channelState, outboxState: sideEffects, unhandledAction } = channelReducer(
-        state.channelState,
-        action,
-        state.unhandledAction,
-      );
-      state = { ...state, outboxState: outboxStateReducer(state.outboxState, sideEffects) };
-      return channelInitialized({
-        ...state,
-        channelState,
-        unhandledAction,
-      });
+    case INITIALIZING_CHANNEL: // TODO: We could probably get rid of this stage
+    case CHANNEL_INITIALIZED: {
+      return channelInitialized(channelInitializedReducer(state, action));
+    }
     default:
       return unreachable(state);
   }
 
   return state;
 };
+
+const channelInitializedReducer = combineReducersWithSideEffects({
+  channelState: channelReducer,
+  fundingState: fundingStateReducer,
+});

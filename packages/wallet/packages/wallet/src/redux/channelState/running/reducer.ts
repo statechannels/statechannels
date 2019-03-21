@@ -7,12 +7,12 @@ import { ourTurn, validTransition } from '../../../utils/reducer-utils';
 import { signCommitment, validCommitmentSignature } from '../../../utils/signing-utils';
 import { challengeRejected, showWallet } from 'magmo-wallet-client/lib/wallet-events';
 import { handleSignatureAndValidationMessages } from '../../../utils/state-utils';
-import { NextChannelState } from '../../shared/state';
+import { StateWithSideEffects } from '../../shared/state';
 
 export const runningReducer = (
   state: runningStates.RunningState,
   action: actions.WalletAction,
-): NextChannelState<
+): StateWithSideEffects<
   runningStates.RunningState | challengingStates.ApproveChallenge | respondingStates.ChooseResponse
 > => {
   return waitForUpdateReducer(state, action);
@@ -21,7 +21,7 @@ export const runningReducer = (
 const waitForUpdateReducer = (
   state: runningStates.WaitForUpdate,
   action: actions.WalletAction,
-): NextChannelState<
+): StateWithSideEffects<
   runningStates.WaitForUpdate | challengingStates.ApproveChallenge | respondingStates.ChooseResponse
 > => {
   switch (action.type) {
@@ -31,7 +31,7 @@ const waitForUpdateReducer = (
       // check it's our turn
       if (!ourTurn(state)) {
         return {
-          channelState: state,
+          state,
           outboxState: { messageOutbox },
         };
       }
@@ -39,7 +39,7 @@ const waitForUpdateReducer = (
       // check transition
       if (!validTransition(state, action.commitment)) {
         return {
-          channelState: state,
+          state,
           outboxState: { messageOutbox },
         };
       }
@@ -47,7 +47,7 @@ const waitForUpdateReducer = (
       const signature = signCommitment(action.commitment, state.privateKey);
 
       return {
-        channelState: runningStates.waitForUpdate({
+        state: runningStates.waitForUpdate({
           ...state,
           turnNum: state.turnNum + 1,
           lastCommitment: { commitment: action.commitment, signature },
@@ -59,26 +59,26 @@ const waitForUpdateReducer = (
     case actions.OPPONENT_COMMITMENT_RECEIVED:
       const validationMessage = handleSignatureAndValidationMessages(state, action);
       if (ourTurn(state)) {
-        return { channelState: state, outboxState: { messageOutbox: validationMessage } };
+        return { state, outboxState: { messageOutbox: validationMessage } };
       }
 
       // check signature
       if (!action.signature) {
-        return { channelState: state, outboxState: { messageOutbox: validationMessage } };
+        return { state, outboxState: { messageOutbox: validationMessage } };
       }
       const messageSignature = action.signature as string;
       const opponentAddress = state.participants[1 - state.ourIndex];
       if (!validCommitmentSignature(action.commitment, messageSignature, opponentAddress)) {
-        return { channelState: state, outboxState: { messageOutbox: validationMessage } };
+        return { state, outboxState: { messageOutbox: validationMessage } };
       }
 
       // check transition
       if (!validTransition(state, action.commitment)) {
-        return { channelState: state, outboxState: { messageOutbox: validationMessage } };
+        return { state, outboxState: { messageOutbox: validationMessage } };
       }
 
       return {
-        channelState: runningStates.waitForUpdate({
+        state: runningStates.waitForUpdate({
           ...state,
           turnNum: state.turnNum + 1,
           lastCommitment: { commitment: action.commitment, signature: messageSignature },
@@ -90,7 +90,7 @@ const waitForUpdateReducer = (
     case actions.CHALLENGE_CREATED_EVENT:
       // transition to responding
       return {
-        channelState: respondingStates.chooseResponse({
+        state: respondingStates.chooseResponse({
           ...state,
           challengeExpiry: action.finalizedAt,
         }),
@@ -104,17 +104,17 @@ const waitForUpdateReducer = (
           'Challenges can only be issued when waiting for the other user.',
         );
         return {
-          channelState: runningStates.waitForUpdate({ ...state }),
+          state: runningStates.waitForUpdate({ ...state }),
           outboxState: { messageOutbox: message },
         };
       }
       // transition to challenging
       return {
-        channelState: challengingStates.approveChallenge({ ...state }),
+        state: challengingStates.approveChallenge({ ...state }),
         outboxState: { displayOutbox: showWallet() },
       };
 
     default:
-      return { channelState: state };
+      return { state };
   }
 };

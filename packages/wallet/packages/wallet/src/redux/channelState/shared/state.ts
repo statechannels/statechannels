@@ -1,10 +1,8 @@
 import { Commitment } from 'fmg-core';
-import { SharedFundingState, FundingState } from '../fundingState/state';
 
 export interface SharedChannelState {
   address: string;
   privateKey: string;
-  fundingState?: SharedFundingState;
 }
 
 export const CHANNEL_INITIALIZED = 'CHANNEL.INITIALIZED';
@@ -22,26 +20,17 @@ export interface FirstCommitmentReceived extends SharedChannelState {
   channelNonce: number;
   turnNum: number;
   lastCommitment: SignedCommitment;
-  fundingState: SharedFundingState;
+  funded: boolean;
 }
 export interface ChannelOpen extends FirstCommitmentReceived {
   penultimateCommitment: SignedCommitment;
-  funded: boolean; // Though this is computable from fundingState, it might be convenient to record this on the top-level of the channel state
 }
 
-// TODO: Find a better name for this
-export interface MaybeFunded extends ChannelOpen {
-  fundingState: FundingState;
-}
-
-export interface TransactionExists {
-  transactionHash: string;
-}
-export interface ChallengeExists extends MaybeFunded {
+export interface ChallengeExists extends ChannelOpen {
   challengeExpiry?: number;
 }
 
-export interface UserAddressExists extends MaybeFunded {
+export interface UserAddressExists extends ChannelOpen {
   userAddress: string;
 }
 
@@ -65,7 +54,7 @@ export function firstCommitmentReceived<T extends FirstCommitmentReceived>(
     turnNum,
     lastCommitment: lastPosition,
     libraryAddress,
-    fundingState,
+    funded,
   } = params;
   return {
     ...baseChannelState(params),
@@ -76,16 +65,14 @@ export function firstCommitmentReceived<T extends FirstCommitmentReceived>(
     turnNum,
     lastCommitment: lastPosition,
     libraryAddress,
-    fundingState,
+    funded,
   };
 }
 
-export function channelOpen<T extends MaybeFunded>(params: T): MaybeFunded {
+export function channelOpen<T extends ChannelOpen>(params: T): ChannelOpen {
   return {
     ...firstCommitmentReceived(params),
     penultimateCommitment: params.penultimateCommitment,
-    funded: params.funded,
-    fundingState: params.fundingState,
   };
 }
 
