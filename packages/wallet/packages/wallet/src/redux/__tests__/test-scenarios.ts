@@ -19,6 +19,8 @@ export const fundingState = {
   channelFundingStatus: 'FUNDING_NOT_STARTED' as 'FUNDING_NOT_STARTED',
 };
 
+export const mockTransaction = { to: '0xabc' };
+
 export const twoThree = [bigNumberify(2).toHexString(), bigNumberify(3).toHexString()];
 export const postFundCommitment1: Commitment = {
   channel,

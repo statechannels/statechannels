@@ -13,6 +13,7 @@ import { WalletAction, LOGGED_IN, ADJUDICATOR_KNOWN } from '../actions';
 import { unreachable } from '../../utils/reducer-utils';
 import { initializationSuccess } from 'magmo-wallet-client/lib/wallet-events';
 import { initialized } from '../initialized/state';
+import { accumulateSideEffects } from '../outbox';
 
 export const initializingReducer = (
   state: InitializingState,
@@ -53,7 +54,9 @@ const waitForAdjudicatorReducer = (
       const { adjudicator, networkId } = action;
       return initialized({
         ...state,
-        outboxState: { messageOutbox: initializationSuccess() },
+        outboxState: accumulateSideEffects(state.outboxState, {
+          messageOutbox: [initializationSuccess()],
+        }),
         adjudicator,
         networkId,
       });

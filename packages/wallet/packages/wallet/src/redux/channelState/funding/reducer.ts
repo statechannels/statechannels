@@ -28,7 +28,7 @@ export const fundingReducer = (
   ) {
     return {
       state,
-      outboxState: { messageOutbox: handleSignatureAndValidationMessages(state, action) },
+      sideEffects: { messageOutbox: handleSignatureAndValidationMessages(state, action) },
     };
   }
 
@@ -70,7 +70,7 @@ const waitForFundingRequestReducer = (
     case actions.FUNDING_REQUESTED:
       return {
         state: states.approveFunding({ ...state }),
-        outboxState: { displayOutbox: showWallet() },
+        sideEffects: { displayOutbox: showWallet() },
       };
     default:
       return { state };
@@ -91,7 +91,7 @@ const approveFundingReducer = (
       const ourDeposit = state.lastCommitment.commitment.allocation[state.ourIndex];
       return {
         state: states.waitForFundingAndPostFundSetup(state),
-        outboxState: {
+        sideEffects: {
           actionOutbox: actions.internal.directFundingRequested(
             state.channelId,
             safeToDepositLevel,
@@ -108,7 +108,7 @@ const approveFundingReducer = (
       );
       return {
         state: states.sendFundingDeclinedMessage({ ...state }),
-        outboxState: { messageOutbox: sendFundingDeclinedAction, displayOutbox: hideWallet() },
+        sideEffects: { messageOutbox: sendFundingDeclinedAction, displayOutbox: hideWallet() },
       };
     case actions.MESSAGE_RECEIVED:
       if (action.data && action.data === 'FundingDeclined') {
@@ -178,14 +178,14 @@ const waitForFundingAndPostFundSetupReducer = (
         if (state.ourIndex === 0) {
           return {
             state: states.aWaitForPostFundSetup(params),
-            outboxState: {
+            sideEffects: {
               messageOutbox: sendCommitmentAction,
             },
           };
         } else {
           return {
             state: states.bWaitForPostFundSetup({ ...state }),
-            outboxState: {
+            sideEffects: {
               messageOutbox: sendCommitmentAction,
             },
           };
@@ -263,7 +263,7 @@ const bWaitForPostFundSetupReducer = (
           lastCommitment: { commitment: postFundSetupCommitment, signature: commitmentSignature },
           penultimateCommitment: { commitment, signature },
         }),
-        outboxState: { messageOutbox: sendCommitmentAction },
+        sideEffects: { messageOutbox: sendCommitmentAction },
       };
     default:
       return { state };
@@ -292,7 +292,7 @@ const waitForFundingConfirmationReducer = (
               signature: commitmentSignature,
             },
           }),
-          outboxState: { messageOutbox: sendCommitmentAction },
+          sideEffects: { messageOutbox: sendCommitmentAction },
         };
       } else {
         return { state };
@@ -313,7 +313,7 @@ const acknowledgeFundingDeclinedReducer = (
         state: states.waitForChannel({
           ...state,
         }),
-        outboxState: {
+        sideEffects: {
           messageOutbox: fundingFailure(state.channelId, 'FundingDeclined'),
           displayOutbox: hideWallet(),
         },
@@ -332,7 +332,7 @@ const sendFundingDeclinedMessageReducer = (
         state: states.waitForChannel({
           ...state,
         }),
-        outboxState: {
+        sideEffects: {
           messageOutbox: fundingFailure(state.channelId, 'FundingDeclined'),
           displayOutbox: hideWallet(),
         },
@@ -350,7 +350,7 @@ const acknowledgeFundingSuccessReducer = (
         state: states.waitForUpdate({
           ...state,
         }),
-        outboxState: {
+        sideEffects: {
           displayOutbox: hideWallet(),
           messageOutbox: fundingSuccess(state.channelId, state.lastCommitment.commitment),
         },

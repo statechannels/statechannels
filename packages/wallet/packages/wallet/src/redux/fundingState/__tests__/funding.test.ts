@@ -13,7 +13,7 @@ import {
 } from '../../__tests__/helpers';
 import { addHex } from '../../../utils/hex-utils';
 
-const { channelId, twoThree } = scenarios;
+const { channelId, twoThree, mockTransaction } = scenarios;
 
 const YOUR_DEPOSIT_A = twoThree[0];
 const YOUR_DEPOSIT_B = twoThree[1];
@@ -29,11 +29,10 @@ const defaultsForB: directFundingStates.DirectFundingState = {
   channelFundingStatus: directFundingStates.NOT_SAFE_TO_DEPOSIT,
 };
 
-const TX = 'TX';
 describe('start in UNKNOWN_FUNDING_TYPE', () => {
   describe('incoming action: DIRECT_FUNDING_REQUESTED', () => {
     // player A scenario
-    const createDepositTxMock = jest.fn(() => TX);
+    const createDepositTxMock = jest.fn(() => mockTransaction);
     Object.defineProperty(TransactionGenerator, 'createDepositTransaction', {
       value: createDepositTxMock,
     });
@@ -48,7 +47,7 @@ describe('start in UNKNOWN_FUNDING_TYPE', () => {
     const updatedState = fundingStateReducer(state, action);
 
     itChangesChannelFundingStatusTo(states.SAFE_TO_DEPOSIT, updatedState);
-    itSendsThisTransaction(updatedState, TX);
+    itSendsThisTransaction(updatedState, mockTransaction);
   });
 
   describe('incoming action: DIRECT_FUNDING_REQUESTED', () => {
@@ -77,7 +76,7 @@ describe('start in UNKNOWN_FUNDING_TYPE', () => {
 });
 
 describe('start in DIRECT_FUNDING_TYPE', () => {
-  const createDepositTxMock = jest.fn(() => TX);
+  const createDepositTxMock = jest.fn(() => mockTransaction);
   Object.defineProperty(TransactionGenerator, 'createDepositTransaction', {
     value: createDepositTxMock,
   });
@@ -87,5 +86,5 @@ describe('start in DIRECT_FUNDING_TYPE', () => {
   const updatedState = fundingStateReducer(state, action);
   // TODO: Mock the delegation
   itChangesChannelFundingStatusTo(states.SAFE_TO_DEPOSIT, updatedState);
-  itSendsThisTransaction(updatedState, TX);
+  itSendsThisTransaction(updatedState, mockTransaction);
 });

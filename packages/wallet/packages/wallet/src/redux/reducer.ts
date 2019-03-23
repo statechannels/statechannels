@@ -8,9 +8,7 @@ import {
   DISPLAY_MESSAGE_SENT,
 } from './actions';
 import { unreachable } from '../utils/reducer-utils';
-import { OutboxState } from './outbox/state';
 import { initializedReducer } from './initialized/reducer';
-import { applySideEffects } from './outbox';
 
 const initialState = waitForLogin();
 
@@ -18,30 +16,30 @@ export const walletReducer = (
   state: WalletState = initialState,
   action: WalletAction,
 ): WalletState => {
-  const sideEffects: OutboxState = {};
+  const nextOutbox = { ...state.outboxState };
   if (action.type === MESSAGE_SENT) {
-    sideEffects.messageOutbox = undefined;
+    nextOutbox.messageOutbox = nextOutbox.messageOutbox.slice(1);
   }
   if (action.type === DISPLAY_MESSAGE_SENT) {
-    sideEffects.displayOutbox = undefined;
+    nextOutbox.displayOutbox = nextOutbox.displayOutbox.slice(1);
   }
   if (action.type === TRANSACTION_SENT_TO_METAMASK) {
-    sideEffects.transactionOutbox = undefined;
+    nextOutbox.transactionOutbox = nextOutbox.transactionOutbox.slice(1);
   }
 
   if (action.type.match('WALLET.INTERNAL')) {
     // For the moment, only one action should ever be put in the actionOutbox,
     // so it's always safe to clear it.
-    sideEffects.actionOutbox = undefined;
+    nextOutbox.actionOutbox = nextOutbox.actionOutbox.slice(1);
   }
-  state = { ...state, outboxState: applySideEffects(state.outboxState, sideEffects) };
 
-  switch (state.stage) {
+  const nextState = { ...state, outboxState: nextOutbox };
+  switch (nextState.stage) {
     case INITIALIZING:
-      return initializingReducer(state, action);
+      return initializingReducer(nextState, action);
     case WALLET_INITIALIZED:
-      return initializedReducer(state, action);
+      return initializedReducer(nextState, action);
     default:
-      return unreachable(state);
+      return unreachable(nextState);
   }
 };

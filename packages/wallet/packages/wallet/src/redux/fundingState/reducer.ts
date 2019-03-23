@@ -79,7 +79,7 @@ const unknownFundingTypeReducer = (
           requestedYourContribution: requiredDeposit,
           ourIndex,
         }),
-        outboxState: { transactionOutbox },
+        sideEffects: { transactionOutbox },
       };
     default:
       return { state };

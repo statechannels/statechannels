@@ -1,4 +1,4 @@
-import { OutboxState } from './state';
+import { SideEffects, OutboxState } from './state';
 /**
  *
  * @param state current global state
@@ -6,10 +6,10 @@ import { OutboxState } from './state';
  *
  * For each key k in sideEffects, replace state[k] with sideEffects[k]
  */
-export function applySideEffects(
-  state: OutboxState,
-  sideEffects: OutboxState | undefined,
-): OutboxState {
+export function accumulateSideEffects<T = SideEffects | OutboxState>(
+  state: T,
+  sideEffects: SideEffects | undefined,
+): T {
   if (!sideEffects) {
     return state;
   }
@@ -17,6 +17,16 @@ export function applySideEffects(
   const newState = { ...state };
   // TODO: We need to think about whether we really want to overwrite
   // existing outbox items
-  Object.keys(sideEffects).map(k => (newState[k] = sideEffects[k]));
+  Object.keys(sideEffects).map(k => {
+    newState[k] = arrayify(newState[k] || []).concat(arrayify(sideEffects[k]));
+  });
   return newState;
+}
+
+function arrayify<T>(x: T | T[]): T[] {
+  if (Array.isArray(x)) {
+    return x;
+  } else {
+    return [x];
+  }
 }

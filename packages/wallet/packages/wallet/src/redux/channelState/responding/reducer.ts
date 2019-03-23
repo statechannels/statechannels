@@ -24,7 +24,7 @@ export const respondingReducer = (
   ) {
     return {
       state,
-      outboxState: { messageOutbox: handleSignatureAndValidationMessages(state, action) },
+      sideEffects: { messageOutbox: handleSignatureAndValidationMessages(state, action) },
     };
   }
 
@@ -62,7 +62,7 @@ const responseTransactionFailedReducer = (
       );
       return {
         state: states.initiateResponse(state),
-        outboxState: { transactionOutbox },
+        sideEffects: { transactionOutbox },
       };
     case actions.BLOCK_MINED:
       if (
@@ -85,7 +85,7 @@ export const chooseResponseReducer = (
     case actions.RESPOND_WITH_MOVE_CHOSEN:
       return {
         state: states.takeMoveInApp(state),
-        outboxState: { messageOutbox: challengeResponseRequested(), displayOutbox: hideWallet() },
+        sideEffects: { messageOutbox: challengeResponseRequested(), displayOutbox: hideWallet() },
       };
     case actions.RESPOND_WITH_EXISTING_MOVE_CHOSEN:
       const transaction = createRespondWithMoveTransaction(
@@ -94,7 +94,7 @@ export const chooseResponseReducer = (
       );
       return {
         state: states.initiateResponse(state),
-        outboxState: { transactionOutbox: transaction },
+        sideEffects: { transactionOutbox: transaction },
       };
     case actions.RESPOND_WITH_REFUTE_CHOSEN:
       return { state: states.initiateResponse(state) };
@@ -137,7 +137,7 @@ export const takeMoveInAppReducer = (
           lastCommitment: { commitment: action.commitment, signature },
           penultimateCommitment: state.lastCommitment,
         }),
-        outboxState: { transactionOutbox: transaction, displayOutbox: showWallet() },
+        sideEffects: { transactionOutbox: transaction, displayOutbox: showWallet() },
       };
 
     case actions.BLOCK_MINED:
@@ -232,7 +232,7 @@ export const acknowledgeChallengeCompleteReducer = (
     case actions.CHALLENGE_RESPONSE_ACKNOWLEDGED:
       return {
         state: states.waitForUpdate(state),
-        outboxState: { messageOutbox: challengeComplete(), displayOutbox: hideWallet() },
+        sideEffects: { messageOutbox: challengeComplete(), displayOutbox: hideWallet() },
       };
     default:
       return { state };
@@ -247,7 +247,7 @@ const challengeeAcknowledgeChallengeTimeoutReducer = (
     case actions.CHALLENGE_TIME_OUT_ACKNOWLEDGED:
       return {
         state: states.approveWithdrawal(state),
-        outboxState: { messageOutbox: challengeComplete() },
+        sideEffects: { messageOutbox: challengeComplete() },
       };
     default:
       return { state };
