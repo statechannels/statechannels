@@ -7,7 +7,7 @@ import {
   itTransitionsToChannelStateType,
   itDoesntTransition,
   itSendsThisMessage,
-  itSendsThisDisplayEvent,
+  itSendsThisDisplayEventType,
 } from '../../../__tests__/helpers';
 import * as TransactionGenerator from '../../../../utils/transaction-generator';
 import { hideWallet, challengeComplete } from 'magmo-wallet-client';
@@ -21,6 +21,7 @@ const {
   gameCommitment1,
   gameCommitment2,
   fundingState,
+  mockTransaction,
 } = scenarios;
 
 const defaults = {
@@ -46,7 +47,7 @@ const defaults = {
 describe('when in APPROVE_CHALLENGE', () => {
   const state = states.approveChallenge({ ...defaults });
   describe('when a challenge is approved', () => {
-    const createChallengeTxMock = jest.fn().mockReturnValue('0x0');
+    const createChallengeTxMock = jest.fn().mockReturnValue(mockTransaction);
     Object.defineProperty(TransactionGenerator, 'createForceMoveTransaction', {
       value: createChallengeTxMock,
     });
@@ -59,7 +60,7 @@ describe('when in APPROVE_CHALLENGE', () => {
   describe('when a challenge is declined', () => {
     const action = actions.challengeRejected();
     const updatedState = challengingReducer(state, action);
-    itSendsThisDisplayEvent(updatedState, hideWallet().type);
+    itSendsThisDisplayEventType(updatedState, hideWallet().type);
     itSendsThisMessage(updatedState, challengeComplete().type);
     itTransitionsToChannelStateType(states.WAIT_FOR_UPDATE, updatedState);
   });

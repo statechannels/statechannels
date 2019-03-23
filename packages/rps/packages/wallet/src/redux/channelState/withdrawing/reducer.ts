@@ -18,7 +18,7 @@ export const withdrawingReducer = (
   ) {
     return {
       state,
-      outboxState: { messageOutbox: handleSignatureAndValidationMessages(state, action) },
+      sideEffects: { messageOutbox: handleSignatureAndValidationMessages(state, action) },
     };
   }
   switch (state.type) {
@@ -62,7 +62,7 @@ const withdrawTransactionFailedReducer = (
       );
       return {
         state: states.waitForWithdrawalInitiation({ ...state }),
-        outboxState: { transactionOutbox },
+        sideEffects: { transactionOutbox },
       };
   }
   return { state };
@@ -95,7 +95,7 @@ const approveWithdrawalReducer = (
           ...state,
           userAddress: action.destinationAddress,
         }),
-        outboxState: { transactionOutbox },
+        sideEffects: { transactionOutbox },
       };
     case actions.WITHDRAWAL_REJECTED:
       return { state: states.acknowledgeCloseSuccess(state) };
@@ -146,7 +146,7 @@ const acknowledgeWithdrawalSuccessReducer = (
         state: states.waitForChannel({
           ...state,
         }),
-        outboxState: { messageOutbox: closeSuccess(), displayOutbox: hideWallet() },
+        sideEffects: { messageOutbox: closeSuccess(), displayOutbox: hideWallet() },
       };
     default:
       return { state };

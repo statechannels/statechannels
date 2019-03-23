@@ -40,7 +40,7 @@ const waitForChannelReducer = (
         // Since these checks are happening during a signature request we'll return a sig failure
         return {
           state,
-          outboxState: {
+          sideEffects: {
             messageOutbox: signatureFailure('Other', 'Expected a pre fund setup position.'),
           },
         };
@@ -48,7 +48,7 @@ const waitForChannelReducer = (
       if (ownCommitment.commitmentCount !== 0) {
         return {
           state,
-          outboxState: { messageOutbox: signatureFailure('Other', 'Expected state count to 0.') },
+          sideEffects: { messageOutbox: signatureFailure('Other', 'Expected state count to 0.') },
         };
       }
 
@@ -57,7 +57,7 @@ const waitForChannelReducer = (
       if (ourAddress !== state.address) {
         return {
           state,
-          outboxState: {
+          sideEffects: {
             messageOutbox: signatureFailure(
               'Other',
               'Address provided does not match the one stored in the wallet.',
@@ -80,7 +80,7 @@ const waitForChannelReducer = (
           lastCommitment: { commitment: ownCommitment, signature },
           funded: false,
         }),
-        outboxState: { messageOutbox: signatureSuccess(signature) },
+        sideEffects: { messageOutbox: signatureSuccess(signature) },
       };
 
     case actions.OPPONENT_COMMITMENT_RECEIVED:
@@ -91,7 +91,7 @@ const waitForChannelReducer = (
       if (opponentCommitment.commitmentType !== CommitmentType.PreFundSetup) {
         return {
           state,
-          outboxState: {
+          sideEffects: {
             messageOutbox: validationFailure('Other', 'Expected a prefund setup position'),
           },
         };
@@ -99,7 +99,7 @@ const waitForChannelReducer = (
       if (opponentCommitment.commitmentCount !== 0) {
         return {
           state,
-          outboxState: {
+          sideEffects: {
             messageOutbox: validationFailure('Other', 'Expected state count to be 0'),
           },
         };
@@ -111,14 +111,14 @@ const waitForChannelReducer = (
       if (!validCommitmentSignature(action.commitment, action.signature, opponentAddress2)) {
         return {
           state,
-          outboxState: { messageOutbox: validationFailure('InvalidSignature') },
+          sideEffects: { messageOutbox: validationFailure('InvalidSignature') },
         };
       }
 
       if (ourAddress2 !== state.address) {
         return {
           state,
-          outboxState: {
+          sideEffects: {
             messageOutbox: validationFailure(
               'Other',
               'Address provided does not match the one stored in the wallet.',
@@ -140,7 +140,7 @@ const waitForChannelReducer = (
           lastCommitment: { commitment: action.commitment, signature: action.signature },
           funded: false,
         }),
-        outboxState: { messageOutbox: validationSuccess() },
+        sideEffects: { messageOutbox: validationSuccess() },
       };
     default:
       return { state };
@@ -161,7 +161,7 @@ const waitForPreFundSetupReducer = (
       if (ownCommitment.commitmentType !== CommitmentType.PreFundSetup) {
         return {
           state,
-          outboxState: {
+          sideEffects: {
             messageOutbox: signatureFailure('Other', 'Expected a prefund setup position.'),
           },
         };
@@ -169,7 +169,7 @@ const waitForPreFundSetupReducer = (
       if (ownCommitment.commitmentCount !== 1) {
         return {
           state,
-          outboxState: {
+          sideEffects: {
             messageOutbox: signatureFailure('Other', 'Expected state count to be 1.'),
           },
         };
@@ -186,7 +186,7 @@ const waitForPreFundSetupReducer = (
           penultimateCommitment: state.lastCommitment,
           funded: false,
         }),
-        outboxState: { messageOutbox: signatureSuccess(signature) },
+        sideEffects: { messageOutbox: signatureSuccess(signature) },
       };
 
     case actions.OPPONENT_COMMITMENT_RECEIVED:
@@ -196,7 +196,7 @@ const waitForPreFundSetupReducer = (
       if (opponentCommitment.commitmentType !== CommitmentType.PreFundSetup) {
         return {
           state,
-          outboxState: {
+          sideEffects: {
             messageOutbox: validationFailure('Other', 'Expected a prefund setup position.'),
           },
         };
@@ -205,7 +205,7 @@ const waitForPreFundSetupReducer = (
       if (opponentCommitment.commitmentCount !== 1) {
         return {
           state,
-          outboxState: {
+          sideEffects: {
             messageOutbox: validationFailure('Other', 'Expected state count to be 1.'),
           },
         };
@@ -215,7 +215,7 @@ const waitForPreFundSetupReducer = (
       if (!validCommitmentSignature(action.commitment, action.signature, opponentAddress2)) {
         return {
           state,
-          outboxState: { messageOutbox: validationFailure('InvalidSignature') },
+          sideEffects: { messageOutbox: validationFailure('InvalidSignature') },
         };
       }
 
@@ -228,7 +228,7 @@ const waitForPreFundSetupReducer = (
           penultimateCommitment: state.lastCommitment,
           funded: false,
         }),
-        outboxState: { messageOutbox: validationSuccess() },
+        sideEffects: { messageOutbox: validationSuccess() },
       };
 
     default:

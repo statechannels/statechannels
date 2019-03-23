@@ -10,6 +10,7 @@ import * as scenarios from '../redux/__tests__/test-scenarios';
 import { bigNumberify } from 'ethers/utils';
 import NetworkStatus from '../components/NetworkStatus';
 import { channelFunded } from '../redux/fundingState/state';
+import { EMPTY_OUTBOX_STATE } from 'src/redux/outbox/state';
 
 const {
   asAddress,
@@ -86,7 +87,7 @@ const fakeStore = state => ({
 const initializedWalletState = walletStates.initialized({
   ...walletStates.waitForLogin(),
   unhandledAction: undefined,
-  outboxState: {},
+  outboxState: EMPTY_OUTBOX_STATE,
   channelState: {
     initializedChannels: { [channelId]: channelStates.approveFunding({ ...playerADefaults }) },
     initializingChannels: {},

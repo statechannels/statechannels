@@ -23,7 +23,7 @@ export const challengingReducer = (
   ) {
     return {
       state,
-      outboxState: { messageOutbox: handleSignatureAndValidationMessages(state, action) },
+      sideEffects: { messageOutbox: handleSignatureAndValidationMessages(state, action) },
     };
   }
   switch (state.type) {
@@ -64,7 +64,7 @@ const challengeTransactionFailedReducer = (
       );
       return {
         state: states.waitForChallengeInitiation(state),
-        outboxState: { transactionOutbox: transaction },
+        sideEffects: { transactionOutbox: transaction },
       };
   }
   return { state };
@@ -86,12 +86,12 @@ const approveChallengeReducer = (
       );
       return {
         state: states.waitForChallengeInitiation(state),
-        outboxState: { transactionOutbox: transaction },
+        sideEffects: { transactionOutbox: transaction },
       };
     case actions.CHALLENGE_REJECTED:
       return {
         state: states.waitForUpdate(state),
-        outboxState: { messageOutbox: challengeComplete(), displayOutbox: hideWallet() },
+        sideEffects: { messageOutbox: challengeComplete(), displayOutbox: hideWallet() },
       };
     default:
       return { state };
@@ -183,7 +183,7 @@ const waitForResponseOrTimeoutReducer = (
           lastCommitment: { commitment: action.responseCommitment, signature: '0x0' },
           penultimatePosition: state.lastCommitment,
         }),
-        outboxState: { messageOutbox: message },
+        sideEffects: { messageOutbox: message },
       };
 
     case actions.BLOCK_MINED:
@@ -209,7 +209,7 @@ const acknowledgeChallengeResponseReducer = (
     case actions.CHALLENGE_RESPONSE_ACKNOWLEDGED:
       return {
         state: states.waitForUpdate(state),
-        outboxState: { messageOutbox: challengeComplete(), displayOutbox: hideWallet() },
+        sideEffects: { messageOutbox: challengeComplete(), displayOutbox: hideWallet() },
       };
     default:
       return { state };
@@ -224,7 +224,7 @@ const acknowledgeChallengeTimeoutReducer = (
     case actions.CHALLENGE_TIME_OUT_ACKNOWLEDGED:
       return {
         state: states.approveWithdrawal(state),
-        outboxState: { messageOutbox: challengeComplete() },
+        sideEffects: { messageOutbox: challengeComplete() },
       };
     default:
       return { state };

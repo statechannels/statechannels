@@ -26,6 +26,7 @@ const {
   concludeCommitment2,
   channelId,
   fundingState,
+  mockTransaction,
 } = scenarios;
 const defaults = {
   adjudicator: 'adj-address',
@@ -125,7 +126,7 @@ describe('start in ApproveCloseOnChain', () => {
     userAddress: '0x0',
   });
   describe('action taken: approve close on chain', () => {
-    const createConcludeTxMock = jest.fn(() => 'conclude-tx');
+    const createConcludeTxMock = jest.fn(() => mockTransaction);
     Object.defineProperty(TransactionGenerator, 'createConcludeAndWithdrawTransaction', {
       value: createConcludeTxMock,
     });
@@ -135,7 +136,7 @@ describe('start in ApproveCloseOnChain', () => {
     const action = actions.approveClose('0x0');
     const updatedState = closingReducer(state, action);
     itTransitionsToChannelStateType(states.WAIT_FOR_CLOSE_INITIATION, updatedState);
-    itSendsThisTransaction(updatedState, 'conclude-tx');
+    itSendsThisTransaction(updatedState, mockTransaction);
   });
 });
 
