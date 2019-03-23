@@ -5,8 +5,8 @@ import * as fundingStates from '../../fundingState/state';
 import * as actions from '../../actions';
 import * as outgoing from 'magmo-wallet-client/lib/wallet-events';
 import * as scenarios from '../../__tests__/test-scenarios';
-import { itSendsThisMessage, itDispatchesThisAction } from '../../__tests__/helpers';
 import { waitForUpdate } from '../../channelState/state';
+import { EMPTY_OUTBOX_STATE } from '../../outbox/state';
 
 const { channelId } = scenarios;
 
@@ -17,31 +17,29 @@ const defaults = {
   networkId: 1,
 };
 
-describe('when in WALLET_INITIALIED', () => {
-  const state = states.initialized({ ...defaults });
+const initializedState = states.initialized({ ...defaults });
 
-  describe('when the player initializes a channel', () => {
-    const action = actions.channelInitialized();
-    const updatedState = initializedReducer(state, action);
+describe('when the player initializes a channel', () => {
+  const action = actions.channelInitialized();
+  const updatedState = initializedReducer(initializedState, action);
 
-    it('applies the channel reducer', async () => {
-      const ids = Object.keys(updatedState.channelState.initializingChannels);
-      expect(ids.length).toEqual(1);
-      expect(updatedState.channelState.initializingChannels[ids[0]].privateKey).toEqual(
-        expect.any(String),
-      );
-    });
+  it('applies the channel reducer', async () => {
+    const ids = Object.keys(updatedState.channelState.initializingChannels);
+    expect(ids.length).toEqual(1);
+    expect(updatedState.channelState.initializingChannels[ids[0]].privateKey).toEqual(
+      expect.any(String),
+    );
   });
+});
 
-  describe('when a funding related action arrives', () => {
-    const action = actions.fundingReceivedEvent('0xf00', '0x', '0x');
-    const updatedState = initializedReducer(state, action);
+describe('when a funding related action arrives', () => {
+  const action = actions.fundingReceivedEvent('0xf00', '0x', '0x');
+  const updatedState = initializedReducer(initializedState, action);
 
-    it('applies the funding state reducer', async () => {
-      expect(updatedState.fundingState.channelFundingStatus).toEqual(
-        fundingStates.FUNDING_NOT_STARTED,
-      );
-    });
+  it('applies the funding state reducer', async () => {
+    expect(updatedState.fundingState.channelFundingStatus).toEqual(
+      fundingStates.FUNDING_NOT_STARTED,
+    );
   });
 });
 
@@ -83,13 +81,18 @@ describe('When the channel reducer declares a side effect', () => {
       initializingChannels: {},
       activeAppChannelId: channelId,
     },
-    outboxState: { actionOutbox: actions.internal.directFundingConfirmed('channelId') },
+    outboxState: {
+      ...EMPTY_OUTBOX_STATE,
+      actionOutbox: [actions.internal.directFundingConfirmed('channelId')],
+    },
   });
 
   const action = actions.challengeRequested();
 
   const updatedState = initializedReducer(state, action);
 
-  itSendsThisMessage(updatedState, outgoing.CHALLENGE_REJECTED);
-  itDispatchesThisAction(actions.internal.DIRECT_FUNDING_CONFIRMED, updatedState);
+  expect(updatedState.outboxState.messageOutbox![0].type).toEqual(outgoing.CHALLENGE_REJECTED);
+  expect(updatedState.outboxState!.actionOutbox![0].type).toEqual(
+    actions.internal.DIRECT_FUNDING_CONFIRMED,
+  );
 });

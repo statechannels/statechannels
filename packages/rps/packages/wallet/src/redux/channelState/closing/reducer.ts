@@ -83,7 +83,7 @@ const closeTransactionFailedReducer = (
       const transactionOutbox = createConcludeAndWithdrawTransaction(args);
       return {
         state: channelStates.waitForCloseSubmission({ ...state }),
-        outboxState: { transactionOutbox },
+        sideEffects: { transactionOutbox },
       };
   }
   return { state };
@@ -98,7 +98,7 @@ const acknowledgeConcludeReducer = (
       if (!ourTurn(state)) {
         return {
           state,
-          outboxState: {
+          sideEffects: {
             displayOutbox: hideWallet(),
             messageOutbox: concludeFailure('Other', "It is not the current user's turn"),
           },
@@ -118,7 +118,7 @@ const acknowledgeConcludeReducer = (
             penultimateCommitment: state.lastCommitment,
             lastCommitment: { commitment: concludeCommitment, signature: positionSignature },
           }),
-          outboxState: { messageOutbox: sendCommitmentAction },
+          sideEffects: { messageOutbox: sendCommitmentAction },
         };
       }
   }
@@ -133,7 +133,7 @@ const waitForCloseConfirmedReducer = (
     case actions.TRANSACTION_CONFIRMED:
       return {
         state: channelStates.acknowledgeCloseSuccess({ ...state }),
-        outboxState: { messageOutbox: closeSuccess() },
+        sideEffects: { messageOutbox: closeSuccess() },
       };
   }
   return { state };
@@ -201,7 +201,7 @@ const approveCloseOnChainReducer = (
           ...state,
           userAddress: action.withdrawAddress,
         }),
-        outboxState: { transactionOutbox },
+        sideEffects: { transactionOutbox },
       };
   }
   return { state };
@@ -216,7 +216,7 @@ const approveConcludeReducer = (
       if (!ourTurn(state)) {
         return {
           state,
-          outboxState: {
+          sideEffects: {
             displayOutbox: hideWallet(),
             messageOutbox: concludeFailure('Other', "It is not the current user's turn"),
           },
@@ -237,7 +237,7 @@ const approveConcludeReducer = (
             penultimateCommitment: state.lastCommitment,
             lastCommitment: { commitment: concludeCommitment, signature: positionSignature },
           }),
-          outboxState: { messageOutbox: sendCommitmentAction },
+          sideEffects: { messageOutbox: sendCommitmentAction },
         };
       } else {
         return {
@@ -247,7 +247,7 @@ const approveConcludeReducer = (
             penultimateCommitment: state.lastCommitment,
             lastCommitment: { commitment: concludeCommitment, signature: positionSignature },
           }),
-          outboxState: { messageOutbox: sendCommitmentAction },
+          sideEffects: { messageOutbox: sendCommitmentAction },
         };
       }
       break;
@@ -256,7 +256,7 @@ const approveConcludeReducer = (
         state: channelStates.waitForUpdate({
           ...state,
         }),
-        outboxState: {
+        sideEffects: {
           displayOutbox: hideWallet(),
           messageOutbox: concludeFailure('UserDeclined'),
         },
@@ -278,7 +278,7 @@ const waitForOpponentConclude = (
       if (!validCommitmentSignature(commitment, signature, opponentAddress)) {
         return {
           state,
-          outboxState: {
+          sideEffects: {
             displayOutbox: hideWallet(),
             messageOutbox: concludeFailure('Other', 'The signature provided is not valid.'),
           },
@@ -287,7 +287,7 @@ const waitForOpponentConclude = (
       if (!validTransition(state, commitment)) {
         return {
           state,
-          outboxState: {
+          sideEffects: {
             displayOutbox: hideWallet(),
             messageOutbox: concludeFailure(
               'Other',
@@ -303,7 +303,7 @@ const waitForOpponentConclude = (
           penultimateCommitment: state.lastCommitment,
           lastCommitment: { commitment, signature },
         }),
-        outboxState: { messageOutbox: concludeSuccess() },
+        sideEffects: { messageOutbox: concludeSuccess() },
       };
     default:
       return { state };
@@ -320,7 +320,7 @@ const acknowledgeCloseSuccessReducer = (
         state: channelStates.waitForChannel({
           ...state,
         }),
-        outboxState: { messageOutbox: closeSuccess(), displayOutbox: hideWallet() },
+        sideEffects: { messageOutbox: closeSuccess(), displayOutbox: hideWallet() },
       };
     default:
       return { state };
@@ -335,7 +335,7 @@ const acknowledgeClosedOnChainReducer = (
     case actions.CLOSED_ON_CHAIN_ACKNOWLEDGED:
       return {
         state: channelStates.waitForChannel({ ...state }),
-        outboxState: { messageOutbox: closeSuccess() },
+        sideEffects: { messageOutbox: closeSuccess() },
       };
     default:
       return { state };

@@ -20,7 +20,7 @@ export const directFundingStateReducer = (
     if (bigNumberify(action.totalForDestination).gte(state.requestedTotalFunds)) {
       return {
         state: states.channelFunded(state),
-        outboxState: { actionOutbox: actions.internal.directFundingConfirmed(state.channelId) },
+        sideEffects: { actionOutbox: actions.internal.directFundingConfirmed(state.channelId) },
       };
     }
   }
@@ -53,7 +53,7 @@ const notSafeToDepositReducer = (
       ) {
         return {
           state: depositingStates.waitForTransactionSent({ ...state }),
-          outboxState: {
+          sideEffects: {
             transactionOutbox: createDepositTransaction(
               state.channelId,
               state.requestedYourContribution,
@@ -82,7 +82,7 @@ const waitForFundingConfirmationReducer = (
       ) {
         return {
           state: states.channelFunded(state),
-          outboxState: { actionOutbox: actions.internal.directFundingConfirmed(state.channelId) },
+          sideEffects: { actionOutbox: actions.internal.directFundingConfirmed(state.channelId) },
         };
       } else {
         return { state };

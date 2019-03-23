@@ -80,7 +80,7 @@ const depositTransactionFailedReducer = (
         state: states.waitForTransactionSent({
           ...state,
         }),
-        outboxState: {
+        sideEffects: {
           transactionOutbox: createDepositTransaction(
             state.channelId,
             state.requestedYourContribution,

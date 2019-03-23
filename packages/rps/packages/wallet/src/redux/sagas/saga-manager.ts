@@ -80,21 +80,21 @@ export function* sagaManager(): IterableIterator<any> {
     }
 
     const { outboxState } = state;
-    if (outboxState.messageOutbox) {
-      const messageToSend = outboxState.messageOutbox;
+    if (outboxState.messageOutbox.length) {
+      const messageToSend = outboxState.messageOutbox[0];
       yield messageSender(messageToSend);
     }
-    if (outboxState.displayOutbox) {
-      const displayMessageToSend = outboxState.displayOutbox;
+    if (outboxState.displayOutbox.length) {
+      const displayMessageToSend = outboxState.displayOutbox[0];
       yield displaySender(displayMessageToSend);
     }
-    if (outboxState.transactionOutbox) {
-      const transactionToSend = outboxState.transactionOutbox;
+    if (outboxState.transactionOutbox.length) {
+      const transactionToSend = outboxState.transactionOutbox[0];
       yield transactionSender(transactionToSend);
     }
 
-    if (outboxState.actionOutbox) {
-      yield put(outboxState.actionOutbox);
+    if (outboxState.actionOutbox.length) {
+      yield put(outboxState.actionOutbox[0]);
     }
   }
 }

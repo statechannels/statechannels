@@ -32,7 +32,7 @@ const waitForUpdateReducer = (
       if (!ourTurn(state)) {
         return {
           state,
-          outboxState: { messageOutbox },
+          sideEffects: { messageOutbox },
         };
       }
 
@@ -40,7 +40,7 @@ const waitForUpdateReducer = (
       if (!validTransition(state, action.commitment)) {
         return {
           state,
-          outboxState: { messageOutbox },
+          sideEffects: { messageOutbox },
         };
       }
 
@@ -53,28 +53,28 @@ const waitForUpdateReducer = (
           lastCommitment: { commitment: action.commitment, signature },
           penultimateCommitment: state.lastCommitment,
         }),
-        outboxState: { messageOutbox },
+        sideEffects: { messageOutbox },
       };
 
     case actions.OPPONENT_COMMITMENT_RECEIVED:
       const validationMessage = handleSignatureAndValidationMessages(state, action);
       if (ourTurn(state)) {
-        return { state, outboxState: { messageOutbox: validationMessage } };
+        return { state, sideEffects: { messageOutbox: validationMessage } };
       }
 
       // check signature
       if (!action.signature) {
-        return { state, outboxState: { messageOutbox: validationMessage } };
+        return { state, sideEffects: { messageOutbox: validationMessage } };
       }
       const messageSignature = action.signature as string;
       const opponentAddress = state.participants[1 - state.ourIndex];
       if (!validCommitmentSignature(action.commitment, messageSignature, opponentAddress)) {
-        return { state, outboxState: { messageOutbox: validationMessage } };
+        return { state, sideEffects: { messageOutbox: validationMessage } };
       }
 
       // check transition
       if (!validTransition(state, action.commitment)) {
-        return { state, outboxState: { messageOutbox: validationMessage } };
+        return { state, sideEffects: { messageOutbox: validationMessage } };
       }
 
       return {
@@ -84,7 +84,7 @@ const waitForUpdateReducer = (
           lastCommitment: { commitment: action.commitment, signature: messageSignature },
           penultimateCommitment: state.lastCommitment,
         }),
-        outboxState: { messageOutbox: handleSignatureAndValidationMessages(state, action) },
+        sideEffects: { messageOutbox: handleSignatureAndValidationMessages(state, action) },
       };
 
     case actions.CHALLENGE_CREATED_EVENT:
@@ -94,7 +94,7 @@ const waitForUpdateReducer = (
           ...state,
           challengeExpiry: action.finalizedAt,
         }),
-        outboxState: { displayOutbox: showWallet() },
+        sideEffects: { displayOutbox: showWallet() },
       };
 
     case actions.CHALLENGE_REQUESTED:
@@ -105,13 +105,13 @@ const waitForUpdateReducer = (
         );
         return {
           state: runningStates.waitForUpdate({ ...state }),
-          outboxState: { messageOutbox: message },
+          sideEffects: { messageOutbox: message },
         };
       }
       // transition to challenging
       return {
         state: challengingStates.approveChallenge({ ...state }),
-        outboxState: { displayOutbox: showWallet() },
+        sideEffects: { displayOutbox: showWallet() },
       };
 
     default:

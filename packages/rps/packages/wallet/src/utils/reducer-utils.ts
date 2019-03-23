@@ -1,9 +1,10 @@
 import { Commitment } from 'fmg-core';
 import { ChannelStatus } from '../redux/channelState/state';
 import { channelID } from 'fmg-core/lib/channel';
-import { applySideEffects } from '../redux/outbox';
-import { OutboxState } from 'src/redux/outbox/state';
+import { accumulateSideEffects } from '../redux/outbox';
+import { SideEffects } from 'src/redux/outbox/state';
 import { WalletAction } from 'src/redux/actions';
+import { StateWithSideEffects } from 'src/redux/shared/state';
 
 export function unreachable(x: never) {
   return x;
@@ -36,22 +37,22 @@ export const ourTurn = (state: ChannelStatus) => {
   return state.turnNum % 2 !== state.ourIndex;
 };
 
-export type ReducersMapObject<S = any, A extends WalletAction = WalletAction> = {
-  [K in keyof S]: ReducerWithSideEffects<S[K], A>
+export type ReducersMapObject<Tree = any, A extends WalletAction = WalletAction> = {
+  [Branch in keyof Tree]: ReducerWithSideEffects<Tree[Branch], A>
 };
 
-export type ReducerWithSideEffects<Tree, A extends WalletAction = WalletAction> = (
-  state: Tree,
+export type ReducerWithSideEffects<T, A extends WalletAction = WalletAction> = (
+  state: T,
   action: A,
   data?: any,
-) => { state: Tree; outboxState?: OutboxState };
+) => StateWithSideEffects<T>;
 
 export function combineReducersWithSideEffects<Tree, A extends WalletAction>(
   reducers: ReducersMapObject<Tree, A>,
-) {
+): ReducerWithSideEffects<Tree> {
   return (state: Tree, action: A, data?: { [Branch in keyof Tree]?: any }) => {
     const nextState = { ...state };
-    let outboxState = {};
+    let sideEffects: SideEffects = {};
 
     Object.keys(reducers).map(branch => {
       const reducer = reducers[branch];
@@ -61,10 +62,10 @@ export function combineReducersWithSideEffects<Tree, A extends WalletAction>(
       } else {
         result = reducer(state[branch], action);
       }
-      const { state: updatedState, outboxState: sideEffects } = result;
+      const { state: updatedState, sideEffects: nextSideEffects } = result;
       nextState[branch] = updatedState;
-      outboxState = applySideEffects(outboxState, sideEffects);
+      sideEffects = accumulateSideEffects(sideEffects, nextSideEffects);
     });
-    return { state: { ...nextState }, outboxState };
+    return { state: { ...nextState }, sideEffects };
   };
 }
