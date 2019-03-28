@@ -1,6 +1,7 @@
 import * as states from '../state';
 import { addHex } from '../../../utils/hex-utils';
-import * as actions from '../../actions';
+import * as actions from '../actions';
+import { internal, TRANSACTION_CONFIRMED } from '../../actions';
 import {
   messageRelayRequested,
   fundingSuccess,
@@ -19,7 +20,7 @@ import { StateWithSideEffects } from '../../shared/state';
 
 export const fundingReducer = (
   state: states.FundingState,
-  action: actions.WalletAction,
+  action: actions.ChannelAction | internal.DirectFundingConfirmed,
 ): StateWithSideEffects<states.ChannelStatus> => {
   // Handle any signature/validation request centrally to avoid duplicating code for each state
   if (
@@ -52,8 +53,6 @@ export const fundingReducer = (
     // Ending the stage
     case states.ACKNOWLEDGE_FUNDING_SUCCESS:
       return acknowledgeFundingSuccessReducer(state, action);
-    case states.SEND_FUNDING_DECLINED_MESSAGE:
-      return sendFundingDeclinedMessageReducer(state, action);
     case states.ACKNOWLEDGE_FUNDING_DECLINED:
       return acknowledgeFundingDeclinedReducer(state, action);
     //
@@ -64,7 +63,7 @@ export const fundingReducer = (
 
 const waitForFundingRequestReducer = (
   state: states.WaitForFundingRequest,
-  action: actions.WalletAction,
+  action: actions.ChannelAction | internal.InternalAction,
 ): StateWithSideEffects<states.OpenedState> => {
   switch (action.type) {
     case actions.FUNDING_REQUESTED:
@@ -79,8 +78,8 @@ const waitForFundingRequestReducer = (
 
 const approveFundingReducer = (
   state: states.WaitForFundingApproval,
-  action: actions.WalletAction,
-): StateWithSideEffects<states.OpenedState> => {
+  action: actions.ChannelAction | internal.InternalAction,
+): StateWithSideEffects<states.OpenedState | states.WaitForChannel> => {
   switch (action.type) {
     case actions.FUNDING_APPROVED:
       const totalFundingRequired = state.lastCommitment.commitment.allocation.reduce(addHex);
@@ -92,7 +91,7 @@ const approveFundingReducer = (
       return {
         state: states.waitForFundingAndPostFundSetup(state),
         sideEffects: {
-          actionOutbox: actions.internal.directFundingRequested(
+          actionOutbox: internal.directFundingRequested(
             state.channelId,
             safeToDepositLevel,
             totalFundingRequired,
@@ -102,13 +101,17 @@ const approveFundingReducer = (
         },
       };
     case actions.FUNDING_REJECTED:
-      const sendFundingDeclinedAction = messageRelayRequested(
+      const relayFundingDeclinedMessage = messageRelayRequested(
         state.participants[1 - state.ourIndex],
         'FundingDeclined',
       );
+      const fundingFailureMessage = fundingFailure(state.channelId, 'FundingDeclined');
       return {
-        state: states.sendFundingDeclinedMessage({ ...state }),
-        sideEffects: { messageOutbox: sendFundingDeclinedAction, displayOutbox: hideWallet() },
+        state: states.waitForChannel({ ...state }),
+        sideEffects: {
+          messageOutbox: [relayFundingDeclinedMessage, fundingFailureMessage],
+          displayOutbox: hideWallet(),
+        },
       };
     case actions.MESSAGE_RECEIVED:
       if (action.data && action.data === 'FundingDeclined') {
@@ -125,7 +128,7 @@ const approveFundingReducer = (
 
 const waitForFundingAndPostFundSetupReducer = (
   state: states.WaitForFundingAndPostFundSetup,
-  action: actions.WalletAction,
+  action: actions.ChannelAction | internal.InternalAction,
 ): StateWithSideEffects<states.OpenedState> => {
   switch (action.type) {
     case actions.MESSAGE_RECEIVED:
@@ -157,7 +160,7 @@ const waitForFundingAndPostFundSetupReducer = (
         };
       }
 
-    case actions.internal.DIRECT_FUNDING_CONFIRMED:
+    case internal.DIRECT_FUNDING_CONFIRMED:
       if (action.channelId === state.channelId) {
         const {
           postFundSetupCommitment,
@@ -194,7 +197,7 @@ const waitForFundingAndPostFundSetupReducer = (
         return { state };
       }
 
-    case actions.TRANSACTION_CONFIRMED:
+    case TRANSACTION_CONFIRMED:
       // WARNING: This is pretty brittle
       if (state.funded) {
         // Player B can now confirm funding and is only waiting on post fund setup
@@ -217,7 +220,7 @@ const waitForFundingAndPostFundSetupReducer = (
 
 const aWaitForPostFundSetupReducer = (
   state: states.AWaitForPostFundSetup,
-  action: actions.WalletAction,
+  action: actions.ChannelAction | internal.InternalAction,
 ): StateWithSideEffects<states.OpenedState> => {
   switch (action.type) {
     case actions.COMMITMENT_RECEIVED:
@@ -241,7 +244,7 @@ const aWaitForPostFundSetupReducer = (
 
 const bWaitForPostFundSetupReducer = (
   state: states.BWaitForPostFundSetup,
-  action: actions.WalletAction,
+  action: actions.ChannelAction | internal.InternalAction,
 ): StateWithSideEffects<states.OpenedState> => {
   switch (action.type) {
     case actions.COMMITMENT_RECEIVED:
@@ -272,10 +275,10 @@ const bWaitForPostFundSetupReducer = (
 
 const waitForFundingConfirmationReducer = (
   state: states.WaitForFundingConfirmation,
-  action: actions.WalletAction,
+  action: actions.ChannelAction | internal.InternalAction,
 ): StateWithSideEffects<states.OpenedState> => {
   switch (action.type) {
-    case actions.internal.DIRECT_FUNDING_CONFIRMED:
+    case internal.DIRECT_FUNDING_CONFIRMED:
       if (state.channelId === action.channelId) {
         const {
           postFundSetupCommitment,
@@ -305,7 +308,7 @@ const waitForFundingConfirmationReducer = (
 
 const acknowledgeFundingDeclinedReducer = (
   state: states.AcknowledgeFundingDeclined,
-  action: actions.WalletAction,
+  action: actions.ChannelAction | internal.InternalAction,
 ): StateWithSideEffects<states.ChannelStatus> => {
   switch (action.type) {
     case actions.FUNDING_DECLINED_ACKNOWLEDGED:
@@ -322,27 +325,9 @@ const acknowledgeFundingDeclinedReducer = (
   return { state };
 };
 
-const sendFundingDeclinedMessageReducer = (
-  state: states.SendFundingDeclinedMessage,
-  action: actions.WalletAction,
-): StateWithSideEffects<states.WaitForChannel | states.SendFundingDeclinedMessage> => {
-  switch (action.type) {
-    case actions.MESSAGE_SENT:
-      return {
-        state: states.waitForChannel({
-          ...state,
-        }),
-        sideEffects: {
-          messageOutbox: fundingFailure(state.channelId, 'FundingDeclined'),
-          displayOutbox: hideWallet(),
-        },
-      };
-  }
-  return { state };
-};
 const acknowledgeFundingSuccessReducer = (
   state: states.AcknowledgeFundingSuccess,
-  action: actions.WalletAction,
+  action: actions.ChannelAction | internal.InternalAction,
 ): StateWithSideEffects<states.OpenedState> => {
   switch (action.type) {
     case actions.FUNDING_SUCCESS_ACKNOWLEDGED:

@@ -28,7 +28,7 @@ describe('message listener', () => {
       .value;
     saga.next(); // the take
 
-    expect(output).toEqual(put(actions.ownCommitmentReceived(scenarios.gameCommitment1)));
+    expect(output).toEqual(put(actions.channel.ownCommitmentReceived(scenarios.gameCommitment1)));
   });
 
   it.skip('converts VALIDATION_REQUEST into OPPONENT_POSITION_RECEIVED', () => {
@@ -38,7 +38,7 @@ describe('message listener', () => {
     saga.next(); // the take
 
     expect(output).toEqual(
-      put(actions.opponentCommitmentReceived(scenarios.gameCommitment2, 'signature')),
+      put(actions.channel.opponentCommitmentReceived(scenarios.gameCommitment2, 'signature')),
     );
   });
 });

@@ -44,7 +44,7 @@ describe('when in WaitForChannel', () => {
   describe('when we send in a PreFundSetupA', () => {
     // preFundSetupA is A's move, so in this case we need to be player A
     const state = states.waitForChannel(defaults);
-    const action = actions.ownCommitmentReceived(preFundCommitment1);
+    const action = actions.channel.ownCommitmentReceived(preFundCommitment1);
     const updatedState = openingReducer(state, action);
 
     itTransitionsToChannelStateType(states.WAIT_FOR_PRE_FUND_SETUP, updatedState);
@@ -53,7 +53,7 @@ describe('when in WaitForChannel', () => {
   describe('when an opponent sends a PreFundSetupA', () => {
     // preFundSetupA is A's move, so in this case we need to be player B
     const state = states.waitForChannel({ address: bsAddress, privateKey: bsPrivateKey });
-    const action = actions.opponentCommitmentReceived(preFundCommitment1, 'sig');
+    const action = actions.channel.opponentCommitmentReceived(preFundCommitment1, 'sig');
     const validateMock = jest.fn().mockReturnValue(true);
     Object.defineProperty(SigningUtil, 'validCommitmentSignature', { value: validateMock });
 
@@ -64,7 +64,10 @@ describe('when in WaitForChannel', () => {
 
   describe('when an opponent sends a PreFundSetupA but the signature is bad', () => {
     const state = states.waitForChannel(defaults);
-    const action = actions.opponentCommitmentReceived(preFundCommitment1, 'not-a-signature');
+    const action = actions.channel.opponentCommitmentReceived(
+      preFundCommitment1,
+      'not-a-signature',
+    );
     const validateMock = jest.fn().mockReturnValue(false);
     Object.defineProperty(SigningUtil, 'validCommitmentSignature', { value: validateMock });
 
@@ -76,7 +79,7 @@ describe('when in WaitForChannel', () => {
 
   describe('when we send in a a non-PreFundSetupA', () => {
     const state = states.waitForChannel(defaults);
-    const action = actions.ownCommitmentReceived(preFundCommitment2);
+    const action = actions.channel.ownCommitmentReceived(preFundCommitment2);
     const updatedState = openingReducer(state, action);
 
     itDoesntTransition(state, updatedState);
@@ -98,7 +101,7 @@ describe('when in WaitForPreFundSetup', () => {
   describe('when we send a PreFundSetupB', () => {
     // preFundSetupB is B's move, so in this case we need to be player B
     const state = states.waitForPreFundSetup({ ...defaults2, ourIndex: 1 });
-    const action = actions.ownCommitmentReceived(preFundCommitment2);
+    const action = actions.channel.ownCommitmentReceived(preFundCommitment2);
     const updatedState = openingReducer(state, action);
 
     itTransitionsToChannelStateType(states.WAIT_FOR_FUNDING_REQUEST, updatedState);
@@ -110,7 +113,7 @@ describe('when in WaitForPreFundSetup', () => {
     const validateMock = jest.fn().mockReturnValue(true);
     Object.defineProperty(SigningUtil, 'validCommitmentSignature', { value: validateMock });
 
-    const action = actions.opponentCommitmentReceived(preFundCommitment2, 'sig');
+    const action = actions.channel.opponentCommitmentReceived(preFundCommitment2, 'sig');
     const updatedState = openingReducer(state, action);
 
     itTransitionsToChannelStateType(states.WAIT_FOR_FUNDING_REQUEST, updatedState);
@@ -118,7 +121,7 @@ describe('when in WaitForPreFundSetup', () => {
 
   describe('when an opponent sends a PreFundSetupB but the signature is bad', () => {
     const state = states.waitForPreFundSetup({ ...defaults2, ourIndex: 0 });
-    const action = actions.opponentCommitmentReceived(preFundCommitment2, 'sig');
+    const action = actions.channel.opponentCommitmentReceived(preFundCommitment2, 'sig');
     const validateMock = jest.fn().mockReturnValue(false);
     Object.defineProperty(SigningUtil, 'validCommitmentSignature', { value: validateMock });
 
@@ -129,7 +132,7 @@ describe('when in WaitForPreFundSetup', () => {
 
   describe('when we send in a a non-PreFundSetupB', () => {
     const state = states.waitForPreFundSetup({ ...defaults2, ourIndex: 1 });
-    const action = actions.ownCommitmentReceived(preFundCommitment1);
+    const action = actions.channel.ownCommitmentReceived(preFundCommitment1);
     const updatedState = openingReducer(state, action);
 
     itDoesntTransition(state, updatedState);

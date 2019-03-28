@@ -90,7 +90,7 @@ describe('start in WaitForFundingRequest', () => {
       ...justReceivedPreFundSetupB,
     };
     const state = states.waitForFundingRequest(testDefaults);
-    const action = actions.fundingRequested();
+    const action = actions.channel.fundingRequested();
     const updatedState = fundingReducer(state, action);
 
     itTransitionsToChannelStateType(states.WAIT_FOR_FUNDING_APPROVAL, updatedState);
@@ -104,7 +104,7 @@ describe('start in WaitForFundingRequest', () => {
       ...justReceivedPreFundSetupB,
     };
     const state = states.waitForFundingRequest(testDefaults);
-    const action = actions.fundingRequested();
+    const action = actions.channel.fundingRequested();
     const updatedState = fundingReducer(state, action);
 
     itTransitionsToChannelStateType(states.WAIT_FOR_FUNDING_APPROVAL, updatedState);
@@ -117,7 +117,7 @@ describe('start in WaitForFundingApproval', () => {
     // player A scenario
     const testDefaults = { ...defaultsA, ...justReceivedPreFundSetupB };
     const state = states.approveFunding(testDefaults);
-    const action = actions.fundingApproved();
+    const action = actions.channel.fundingApproved();
     const updatedState = fundingReducer(state, action);
 
     itTransitionsToChannelStateType(states.WAIT_FOR_FUNDING_AND_POST_FUND_SETUP, updatedState);
@@ -136,18 +136,18 @@ describe('start in WaitForFundingApproval', () => {
   describe('incoming action: funding rejected', () => {
     const testDefaults = { ...defaultsA, ...justReceivedPreFundSetupB };
     const state = states.approveFunding(testDefaults);
-    const action = actions.fundingRejected();
+    const action = actions.channel.fundingRejected();
     const updatedState = fundingReducer(state, action);
 
-    itTransitionsToChannelStateType(states.SEND_FUNDING_DECLINED_MESSAGE, updatedState);
+    itTransitionsToChannelStateType(states.WAIT_FOR_CHANNEL, updatedState);
     itDispatchesNoAction(updatedState);
-    itIncreasesTurnNumBy(0, state, updatedState);
+    itSendsThisMessage(updatedState, [outgoing.MESSAGE_RELAY_REQUESTED, outgoing.FUNDING_FAILURE]);
   });
 
   describe('incoming action: Funding declined message received', () => {
     const testDefaults = { ...defaultsA, ...justReceivedPreFundSetupB };
     const state = states.approveFunding(testDefaults);
-    const action = actions.messageReceived('FundingDeclined');
+    const action = actions.channel.messageReceived('FundingDeclined');
     const updatedState = fundingReducer(state, action);
     itTransitionsToChannelStateType(states.ACKNOWLEDGE_FUNDING_DECLINED, updatedState);
     itDispatchesNoAction(updatedState);
@@ -158,7 +158,7 @@ describe('start in WaitForFundingApproval', () => {
     // player B scenario
     const testDefaults = { ...defaultsB, ...justReceivedPreFundSetupB };
     const state = states.approveFunding(testDefaults);
-    const action = actions.fundingApproved();
+    const action = actions.channel.fundingApproved();
     const updatedState = fundingReducer(state, action);
 
     itTransitionsToChannelStateType(states.WAIT_FOR_FUNDING_AND_POST_FUND_SETUP, updatedState);
@@ -187,7 +187,7 @@ describe('start in WaitForFundingAndPostFundSetup', () => {
 
   describe('incoming action: Funding declined message received', () => {
     const state = startingState('A');
-    const action = actions.messageReceived('FundingDeclined');
+    const action = actions.channel.messageReceived('FundingDeclined');
     const updatedState = fundingReducer(state, action);
 
     itTransitionsToChannelStateType(states.ACKNOWLEDGE_FUNDING_DECLINED, updatedState);
@@ -208,7 +208,7 @@ describe('start in WaitForFundingAndPostFundSetup', () => {
     const validateMock = jest.fn().mockReturnValue(true);
     Object.defineProperty(SigningUtil, 'validCommitmentSignature', { value: validateMock });
 
-    const action = actions.commitmentReceived(postFundCommitment1, '0x0');
+    const action = actions.channel.commitmentReceived(postFundCommitment1, '0x0');
     const updatedState = fundingReducer(state, action);
 
     itTransitionsToChannelStateType(states.WAIT_FOR_FUNDING_AND_POST_FUND_SETUP, updatedState);
@@ -221,7 +221,7 @@ describe('start in WaitForFundingAndPostFundSetup', () => {
     const validateMock = jest.fn().mockReturnValue(true);
     Object.defineProperty(SigningUtil, 'validCommitmentSignature', { value: validateMock });
 
-    const action = actions.commitmentReceived(postFundCommitment1, '0x0');
+    const action = actions.channel.commitmentReceived(postFundCommitment1, '0x0');
     const updatedState = fundingReducer(state, action);
 
     itTransitionsToChannelStateType(states.WAIT_FOR_FUNDING_CONFIRMATION, updatedState);
@@ -263,19 +263,6 @@ describe('start in WaitForFundingConfirmation', () => {
   });
 });
 
-describe('start in SendFundingDeclinedMessage', () => {
-  describe('incoming action: message sent', () => {
-    // player A scenario
-    const testDefaults = { ...defaultsA, ...justReceivedPreFundSetupB };
-    const state = states.sendFundingDeclinedMessage(testDefaults);
-    const action = actions.messageSent();
-    const updatedState = fundingReducer(state, action);
-
-    itTransitionsToChannelStateType(states.WAIT_FOR_CHANNEL, updatedState);
-    itSendsThisMessage(updatedState, outgoing.FUNDING_FAILURE);
-  });
-});
-
 describe('start in AWaitForPostFundSetup', () => {
   describe('incoming action: message received', () => {
     // player A scenario
@@ -284,7 +271,7 @@ describe('start in AWaitForPostFundSetup', () => {
 
     const testDefaults = { ...defaultsA, ...justReceivedPostFundSetupA };
     const state = states.aWaitForPostFundSetup({ ...testDefaults });
-    const action = actions.commitmentReceived(postFundCommitment2, MOCK_SIGNATURE);
+    const action = actions.channel.commitmentReceived(postFundCommitment2, MOCK_SIGNATURE);
     const updatedState = fundingReducer(state, action);
 
     itTransitionsToChannelStateType(states.ACKNOWLEDGE_FUNDING_SUCCESS, updatedState);
@@ -299,7 +286,7 @@ describe('start in BWaitForPostFundSetup', () => {
     const state = states.bWaitForPostFundSetup(testDefaults);
     const validateMock = jest.fn().mockReturnValue(true);
     Object.defineProperty(SigningUtil, 'validSignature', { value: validateMock });
-    const action = actions.commitmentReceived(postFundCommitment1, MOCK_SIGNATURE);
+    const action = actions.channel.commitmentReceived(postFundCommitment1, MOCK_SIGNATURE);
     const updatedState = fundingReducer(state, action);
 
     itTransitionsToChannelStateType(states.ACKNOWLEDGE_FUNDING_SUCCESS, updatedState);
@@ -313,7 +300,7 @@ describe('start in AcknowledgeFundingSuccess', () => {
     // player A scenario
     const testDefaults = { ...defaultsA, ...justReceivedPostFundSetupB };
     const state = states.acknowledgeFundingSuccess(testDefaults);
-    const action = actions.fundingSuccessAcknowledged();
+    const action = actions.channel.fundingSuccessAcknowledged();
     const updatedState = fundingReducer(state, action);
 
     itTransitionsToChannelStateType(states.WAIT_FOR_UPDATE, updatedState);
@@ -325,7 +312,7 @@ describe('start in AcknowledgeFundingSuccess', () => {
     // player B scenario
     const testDefaults = { ...defaultsB, ...justReceivedPostFundSetupB };
     const state = states.acknowledgeFundingSuccess(testDefaults);
-    const action = actions.fundingSuccessAcknowledged();
+    const action = actions.channel.fundingSuccessAcknowledged();
     const updatedState = fundingReducer(state, action);
 
     itTransitionsToChannelStateType(states.WAIT_FOR_UPDATE, updatedState);

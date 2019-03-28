@@ -1,4 +1,4 @@
-import { BaseDirectFundingState, SAFE_TO_DEPOSIT, sharedDirectFundingState } from '../state';
+import { BaseDirectFundingState, SAFE_TO_DEPOSIT, baseDirectFundingState } from '../state';
 import { TransactionExists } from '../../../shared/state';
 
 // Deposit status
@@ -46,7 +46,7 @@ export function waitForTransactionSent<T extends BaseDirectFundingState>(
   params: T,
 ): WaitForTransactionSent {
   return {
-    ...sharedDirectFundingState(params),
+    ...baseDirectFundingState(params),
     depositStatus: WAIT_FOR_TRANSACTION_SENT,
     channelFundingStatus: SAFE_TO_DEPOSIT,
   };
@@ -56,7 +56,7 @@ export function waitForDepositApproval<T extends BaseDirectFundingState>(
   params: T,
 ): WaitForDepositApproval {
   return {
-    ...sharedDirectFundingState(params),
+    ...baseDirectFundingState(params),
     depositStatus: WAIT_FOR_DEPOSIT_APPROVAL,
     channelFundingStatus: SAFE_TO_DEPOSIT,
   };
@@ -65,7 +65,7 @@ export function waitForDepositConfirmation<T extends BaseWithTransaction>(
   params: T,
 ): WaitForDepositConfirmation {
   return {
-    ...sharedDirectFundingState(params),
+    ...baseDirectFundingState(params),
     depositStatus: WAIT_FOR_DEPOSIT_CONFIRMATION,
     channelFundingStatus: SAFE_TO_DEPOSIT,
     transactionHash: params.transactionHash,
@@ -75,7 +75,7 @@ export function depositTransactionFailed<T extends BaseDirectFundingState>(
   params: T,
 ): DepositTransactionFailed {
   return {
-    ...sharedDirectFundingState(params),
+    ...baseDirectFundingState(params),
     depositStatus: DEPOSIT_TRANSACTION_FAILED,
     channelFundingStatus: SAFE_TO_DEPOSIT,
   };

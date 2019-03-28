@@ -13,8 +13,8 @@ export const withdrawingReducer = (
 ): StateWithSideEffects<states.ChannelStatus> => {
   // Handle any signature/validation request centrally to avoid duplicating code for each state
   if (
-    action.type === actions.OWN_COMMITMENT_RECEIVED ||
-    action.type === actions.OPPONENT_COMMITMENT_RECEIVED
+    action.type === actions.channel.OWN_COMMITMENT_RECEIVED ||
+    action.type === actions.channel.OPPONENT_COMMITMENT_RECEIVED
   ) {
     return {
       state,
@@ -53,7 +53,7 @@ const withdrawTransactionFailedReducer = (
         state.userAddress,
         state.privateKey,
       );
-      const transactionOutbox = createTransferAndWithdrawTransaction(
+      const transactionRequest = createTransferAndWithdrawTransaction(
         state.channelId,
         myAddress,
         state.userAddress,
@@ -62,7 +62,7 @@ const withdrawTransactionFailedReducer = (
       );
       return {
         state: states.waitForWithdrawalInitiation({ ...state }),
-        sideEffects: { transactionOutbox },
+        sideEffects: { transactionOutbox: { transactionRequest, channelId: state.channelId } },
       };
   }
   return { state };
@@ -73,7 +73,7 @@ const approveWithdrawalReducer = (
   action: actions.WalletAction,
 ): StateWithSideEffects<states.ChannelStatus> => {
   switch (action.type) {
-    case actions.WITHDRAWAL_APPROVED:
+    case actions.channel.WITHDRAWAL_APPROVED:
       const myAddress = state.participants[state.ourIndex];
       const myAmount = state.lastCommitment.commitment.allocation[state.ourIndex];
       const signature = signVerificationData(
@@ -83,7 +83,7 @@ const approveWithdrawalReducer = (
         action.destinationAddress,
         state.privateKey,
       );
-      const transactionOutbox = createTransferAndWithdrawTransaction(
+      const transactionRequest = createTransferAndWithdrawTransaction(
         state.channelId,
         myAddress,
         action.destinationAddress,
@@ -95,9 +95,9 @@ const approveWithdrawalReducer = (
           ...state,
           userAddress: action.destinationAddress,
         }),
-        sideEffects: { transactionOutbox },
+        sideEffects: { transactionOutbox: { transactionRequest, channelId: state.channelId } },
       };
-    case actions.WITHDRAWAL_REJECTED:
+    case actions.channel.WITHDRAWAL_REJECTED:
       return { state: states.acknowledgeCloseSuccess(state) };
     default:
       return { state };
@@ -140,7 +140,7 @@ const acknowledgeWithdrawalSuccessReducer = (
   action: actions.WalletAction,
 ): StateWithSideEffects<states.ChannelStatus> => {
   switch (action.type) {
-    case actions.WITHDRAWAL_SUCCESS_ACKNOWLEDGED:
+    case actions.channel.WITHDRAWAL_SUCCESS_ACKNOWLEDGED:
       // TODO: We shouldn't be sending out a close success in the withdrawal reducer
       return {
         state: states.waitForChannel({

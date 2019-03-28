@@ -36,7 +36,7 @@ const icon = (iconStep: number, currentStep: number) => {
   }
 };
 
-export const fundingStepByState = (state: states.DirectFundingState): Step => {
+export const fundingStepByState = (state: states.DirectFundingStatus): Step => {
   if (states.stateIsNotSafeToDeposit(state)) {
     return Step.NOT_SAFE_TO_DEPOSIT;
   }

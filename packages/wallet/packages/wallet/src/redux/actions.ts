@@ -1,5 +1,6 @@
-import { Commitment } from 'fmg-core';
 import * as internal from './internal/actions';
+import * as channel from './channelState/actions';
+import * as funding from './fundingState/actions';
 
 export const LOGGED_IN = 'WALLET.LOGGED_IN';
 export const loggedIn = (uid: string) => ({
@@ -16,54 +17,6 @@ export const adjudicatorKnown = (networkId: string, adjudicator: string) => ({
 });
 export type AdjudicatorKnown = ReturnType<typeof adjudicatorKnown>;
 
-export const CHANNEL_INITIALIZED = 'WALLET.CHANNEL_INITIALIZED';
-export const channelInitialized = () => ({
-  type: CHANNEL_INITIALIZED as typeof CHANNEL_INITIALIZED,
-});
-export type ChannelInitialized = ReturnType<typeof channelInitialized>;
-
-export const CREATE_CHANNEL_REQUEST = ''; // send over opponent addresses, gameLibrary
-// return nonce etc.
-export const JOIN_CHANNEL_REQUEST = '';
-export const ADDRESS_REQUEST = ''; // provide me with an address
-
-export const OWN_COMMITMENT_RECEIVED = 'WALLET.OWN_COMMITMENT_RECEIVED';
-export const ownCommitmentReceived = (commitment: Commitment) => ({
-  type: OWN_COMMITMENT_RECEIVED as typeof OWN_COMMITMENT_RECEIVED,
-  commitment,
-});
-export type OwnCommitmentReceived = ReturnType<typeof ownCommitmentReceived>;
-
-export const CHALLENGE_COMMITMENT_RECEIVED = 'CHALLENGE_COMMITMENT_RECEIVED';
-export const challengeCommitmentReceived = (commitment: Commitment) => ({
-  type: CHALLENGE_COMMITMENT_RECEIVED as typeof CHALLENGE_COMMITMENT_RECEIVED,
-  commitment,
-});
-export type ChallengeCommitmentReceived = ReturnType<typeof challengeCommitmentReceived>;
-
-export const OPPONENT_COMMITMENT_RECEIVED = 'WALLET.OPPONENT_COMMITMENT_RECEIVED';
-export const opponentCommitmentReceived = (commitment: Commitment, signature: string) => ({
-  type: OPPONENT_COMMITMENT_RECEIVED as typeof OPPONENT_COMMITMENT_RECEIVED,
-  commitment,
-  signature,
-});
-export type OpponentCommitmentReceived = ReturnType<typeof opponentCommitmentReceived>;
-
-export const MESSAGE_RECEIVED = 'WALLET.MESSAGE_RECEIVED';
-export const messageReceived = (data: 'FundingDeclined') => ({
-  type: MESSAGE_RECEIVED as typeof MESSAGE_RECEIVED,
-  data,
-});
-export type MessageReceived = ReturnType<typeof messageReceived>;
-
-export const COMMITMENT_RECEIVED = 'WALLET.COMMITMENT_RECEIVED';
-export const commitmentReceived = (commitment: Commitment, signature: string) => ({
-  type: COMMITMENT_RECEIVED as typeof COMMITMENT_RECEIVED,
-  commitment,
-  signature,
-});
-export type CommitmentReceived = ReturnType<typeof commitmentReceived>;
-
 export const MESSAGE_SENT = 'WALLET.MESSAGE_SENT';
 export const messageSent = () => ({
   type: MESSAGE_SENT as typeof MESSAGE_SENT,
@@ -75,24 +28,6 @@ export const displayMessageSent = () => ({
   type: DISPLAY_MESSAGE_SENT as typeof DISPLAY_MESSAGE_SENT,
 });
 export type DisplayMessageSent = ReturnType<typeof displayMessageSent>;
-
-export const FUNDING_REQUESTED = 'WALLET.FUNDING_REQUESTED';
-export const fundingRequested = () => ({
-  type: FUNDING_REQUESTED as typeof FUNDING_REQUESTED,
-});
-export type FundingRequested = ReturnType<typeof fundingRequested>;
-
-export const FUNDING_APPROVED = 'WALLET.FUNDING_APPROVED';
-export const fundingApproved = () => ({
-  type: FUNDING_APPROVED as typeof FUNDING_APPROVED,
-});
-export type FundingApproved = ReturnType<typeof fundingApproved>;
-
-export const FUNDING_REJECTED = 'WALLET.FUNDING_REJECTED';
-export const fundingRejected = () => ({
-  type: FUNDING_REJECTED as typeof FUNDING_REJECTED,
-});
-export type FundingRejected = ReturnType<typeof fundingRejected>;
 
 export const DEPOSIT_INITIATED = 'WALLET.DEPOSIT_INITIATED'; // when sent to metamask
 export const depositInitiated = () => ({
@@ -114,252 +49,6 @@ export const depositFinalised = () => ({
 });
 export type DepositFinalised = ReturnType<typeof depositFinalised>;
 
-export const FUNDING_SUCCESS_ACKNOWLEDGED = 'WALLET.FUNDING_SUCCESS_ACKNOWLEDGED';
-export const fundingSuccessAcknowledged = () => ({
-  type: FUNDING_SUCCESS_ACKNOWLEDGED as typeof FUNDING_SUCCESS_ACKNOWLEDGED,
-});
-export type FundingSuccessAcknowledged = ReturnType<typeof fundingSuccessAcknowledged>;
-
-export const FUNDING_DECLINED_ACKNOWLEDGED = 'WALLET.FUNDING_DECLINED_ACKNOWLEDGED';
-export const fundingDeclinedAcknowledged = () => ({
-  type: FUNDING_DECLINED_ACKNOWLEDGED as typeof FUNDING_DECLINED_ACKNOWLEDGED,
-});
-export type FundingDeclinedAcknowledged = ReturnType<typeof fundingDeclinedAcknowledged>;
-
-export const POST_FUND_SETUP_RECEIVED = 'WALLET.POST_FUND_SETUP_RECEIVED'; // when X blocks deep
-export const postFundSetupReceived = (data: string, signature: string) => ({
-  type: POST_FUND_SETUP_RECEIVED as typeof POST_FUND_SETUP_RECEIVED,
-  data,
-  signature,
-});
-export type PostFundSetupReceived = ReturnType<typeof postFundSetupReceived>;
-
-export const CHALLENGE_APPROVED = 'WALLET.CHALLENGE_APPROVED';
-export const challengeApproved = () => ({
-  type: CHALLENGE_APPROVED as typeof CHALLENGE_APPROVED,
-});
-export type ChallengeApproved = ReturnType<typeof challengeApproved>;
-
-export const CHALLENGE_REJECTED = 'WALLET.CHALLENGE_REJECTED';
-export const challengeRejected = () => ({
-  type: CHALLENGE_REJECTED as typeof CHALLENGE_REJECTED,
-});
-export type ChallengeRejected = ReturnType<typeof challengeRejected>;
-
-export const CHALLENGE_REQUESTED = 'WALLET.CHALLENGE_REQUESTED';
-export const challengeRequested = () => ({
-  type: CHALLENGE_REQUESTED as typeof CHALLENGE_REQUESTED,
-});
-export type ChallengeRequested = ReturnType<typeof challengeRequested>;
-
-export const CHALLENGE_RESPONSE_RECEIVED = 'WALLET.CHALLENGE_RESPONSE_RECEIVED';
-export const challengeResponseReceived = (data: string) => ({
-  type: CHALLENGE_RESPONSE_RECEIVED as typeof CHALLENGE_RESPONSE_RECEIVED,
-  data,
-});
-export type ChallengeResponseReceived = ReturnType<typeof challengeResponseReceived>;
-
-export const CHALLENGE_TIME_OUT_ACKNOWLEDGED = 'WALLET.CHALLENGE_TIME_OUT_ACKNOWLEDGED';
-export const challengedTimedOutAcknowledged = () => ({
-  type: CHALLENGE_TIME_OUT_ACKNOWLEDGED as typeof CHALLENGE_TIME_OUT_ACKNOWLEDGED,
-});
-export type ChallengeTimeoutAcknowledged = ReturnType<typeof challengedTimedOutAcknowledged>;
-
-export const CHALLENGE_RESPONSE_ACKNOWLEDGED = 'WALLET.CHALLENGE_RESPONSE_ACKNOWLEDGED';
-export const challengeResponseAcknowledged = () => ({
-  type: CHALLENGE_RESPONSE_ACKNOWLEDGED as typeof CHALLENGE_RESPONSE_ACKNOWLEDGED,
-});
-export type ChallengeResponseAcknowledged = ReturnType<typeof challengeResponseAcknowledged>;
-
-export const CHALLENGE_ACKNOWLEDGED = 'WALLET.CHALLENGE_ACKNOWLEDGED';
-export const challengeAcknowledged = () => ({
-  type: CHALLENGE_ACKNOWLEDGED as typeof CHALLENGE_ACKNOWLEDGED,
-});
-export type ChallengeAcknowledged = ReturnType<typeof challengeAcknowledged>;
-
-export const RESPOND_WITH_EXISTING_MOVE_CHOSEN = 'WALLET.RESPOND_WITH_EXISTING_MOVE_CHOSEN';
-export const respondWithExistingMoveChosen = () => ({
-  type: RESPOND_WITH_EXISTING_MOVE_CHOSEN as typeof RESPOND_WITH_EXISTING_MOVE_CHOSEN,
-});
-export type RespondWithExistingMoveChosen = ReturnType<typeof respondWithExistingMoveChosen>;
-
-export const RESPOND_WITH_MOVE_CHOSEN = 'WALLET.RESPOND_WITH_MOVE_CHOSEN';
-export const respondWithMoveChosen = () => ({
-  type: RESPOND_WITH_MOVE_CHOSEN as typeof RESPOND_WITH_MOVE_CHOSEN,
-});
-export type RespondWithMoveChosen = ReturnType<typeof respondWithMoveChosen>;
-
-export const RESPOND_WITH_REFUTE_CHOSEN = 'WALLET.RESPOND_WITH_REFUTE_CHOSEN';
-export const respondWithRefuteChosen = () => ({
-  type: RESPOND_WITH_REFUTE_CHOSEN as typeof RESPOND_WITH_REFUTE_CHOSEN,
-});
-export type RespondWithRefuteChosen = ReturnType<typeof respondWithRefuteChosen>;
-
-export const TAKE_MOVE_IN_APP_ACKNOWLEDGED = 'WALLET.TAKE_MOVE_IN_APP_ACKNOWLEDGED';
-export const takeMoveInAppAcknowledged = (COMMITMENT: string, signature: string) => ({
-  type: TAKE_MOVE_IN_APP_ACKNOWLEDGED as typeof TAKE_MOVE_IN_APP_ACKNOWLEDGED,
-});
-export type TakeMoveInAppAcknowledged = ReturnType<typeof takeMoveInAppAcknowledged>;
-
-export const CHALLENGE_COMPLETION_ACKNOWLEDGED = 'WALLET.CHALLENGE_COMPLETION_ACKNOWLEDGED';
-export const challengeCompletionAcknowledged = () => ({
-  type: CHALLENGE_COMPLETION_ACKNOWLEDGED as typeof CHALLENGE_COMPLETION_ACKNOWLEDGED,
-});
-export type ChallengeCompletionAcknowledged = ReturnType<typeof challengeCompletionAcknowledged>;
-
-// Common Transaction Actions
-export const TRANSACTION_SENT_TO_METAMASK = 'WALLET.TRANSACTION_SENT_TO_METAMASK';
-export const transactionSentToMetamask = () => ({
-  type: TRANSACTION_SENT_TO_METAMASK as typeof TRANSACTION_SENT_TO_METAMASK,
-});
-export type TransactionSentToMetamask = ReturnType<typeof transactionSentToMetamask>;
-
-export const TRANSACTION_SUBMISSION_FAILED = 'WALLET.TRANSACTION_SUBMISSION_FAILED';
-export const transactionSubmissionFailed = (error: { message?: string; code }) => ({
-  error,
-  type: TRANSACTION_SUBMISSION_FAILED as typeof TRANSACTION_SUBMISSION_FAILED,
-});
-export type TransactionSubmissionFailed = ReturnType<typeof transactionSubmissionFailed>;
-
-export const TRANSACTION_SUBMITTED = 'WALLET.TRANSACTION_SUBMITTED';
-export const transactionSubmitted = (transactionHash: string) => ({
-  transactionHash,
-  type: TRANSACTION_SUBMITTED as typeof TRANSACTION_SUBMITTED,
-});
-export type TransactionSubmitted = ReturnType<typeof transactionSubmitted>;
-
-export const TRANSACTION_CONFIRMED = 'WALLET.TRANSACTION_CONFIRMED';
-export const transactionConfirmed = (contractAddress?: string) => ({
-  type: TRANSACTION_CONFIRMED as typeof TRANSACTION_CONFIRMED,
-  contractAddress,
-});
-export type TransactionConfirmed = ReturnType<typeof transactionConfirmed>;
-
-export const TRANSACTION_FINALIZED = 'WALLET.TRANSACTION_FINALIZED';
-export const transactionFinalized = () => ({
-  type: TRANSACTION_FINALIZED as typeof TRANSACTION_FINALIZED,
-});
-export type TransactionFinalized = ReturnType<typeof transactionFinalized>;
-
-export const WITHDRAWAL_REQUESTED = 'WALLET.WITHDRAWAL_REQUESTED';
-export const withdrawalRequested = () => ({
-  type: WITHDRAWAL_REQUESTED as typeof WITHDRAWAL_REQUESTED,
-});
-export type WithdrawalRequested = ReturnType<typeof withdrawalRequested>;
-
-export const WITHDRAWAL_APPROVED = 'WALLET.WITHDRAWAL_APPROVED';
-export const withdrawalApproved = (destinationAddress: string) => ({
-  type: WITHDRAWAL_APPROVED as typeof WITHDRAWAL_APPROVED,
-  destinationAddress,
-});
-export type WithdrawalApproved = ReturnType<typeof withdrawalApproved>;
-
-export const WITHDRAWAL_REJECTED = 'WALLET.WITHDRAWAL_REJECTED';
-export const withdrawalRejected = () => ({
-  type: WITHDRAWAL_REJECTED as typeof WITHDRAWAL_REJECTED,
-});
-export type WithdrawalRejected = ReturnType<typeof withdrawalRejected>;
-
-export const WITHDRAWAL_SUCCESS_ACKNOWLEDGED = 'WALLET.WITHDRAWAL_SUCCESS_ACKNOWLEDGED';
-export const withdrawalSuccessAcknowledged = () => ({
-  type: WITHDRAWAL_SUCCESS_ACKNOWLEDGED as typeof WITHDRAWAL_SUCCESS_ACKNOWLEDGED,
-});
-export type WithdrawalSuccessAcknowledged = ReturnType<typeof withdrawalSuccessAcknowledged>;
-
-export const FUNDING_RECEIVED_EVENT = 'FUNDING_RECEIVED_EVENT';
-export const fundingReceivedEvent = (
-  destination: string,
-  amount: string,
-  totalForDestination: string,
-) => ({
-  destination,
-  amount,
-  totalForDestination,
-  type: FUNDING_RECEIVED_EVENT as typeof FUNDING_RECEIVED_EVENT,
-});
-export type FundingReceivedEvent = ReturnType<typeof fundingReceivedEvent>;
-
-export const CHALLENGE_CREATED_EVENT = 'CHALLENGE_CREATED_EVENT';
-export const challengeCreatedEvent = (channelId: string, commitment: Commitment, finalizedAt) => ({
-  channelId,
-  commitment,
-  finalizedAt,
-  type: CHALLENGE_CREATED_EVENT as typeof CHALLENGE_CREATED_EVENT,
-});
-export type ChallengeCreatedEvent = ReturnType<typeof challengeCreatedEvent>;
-
-export const CONCLUDED_EVENT = 'CONCLUDED_EVENT';
-export const concludedEvent = channelId => ({
-  channelId,
-  type: CONCLUDED_EVENT as typeof CONCLUDED_EVENT,
-});
-export type concludedEvent = ReturnType<typeof concludedEvent>;
-
-export const REFUTED_EVENT = 'REFUTED_EVENT';
-export const refutedEvent = (channelId, refuteCommitment) => ({
-  channelId,
-  refuteCommitment,
-  type: REFUTED_EVENT as typeof REFUTED_EVENT,
-});
-export type RefutedEvent = ReturnType<typeof refutedEvent>;
-
-export const RESPOND_WITH_MOVE_EVENT = 'RESPOND_WITH_MOVE_EVENT';
-export const respondWithMoveEvent = (channelId, responseCommitment) => ({
-  channelId,
-  responseCommitment,
-  type: RESPOND_WITH_MOVE_EVENT as typeof RESPOND_WITH_MOVE_EVENT,
-});
-export type RespondWithMoveEvent = ReturnType<typeof respondWithMoveEvent>;
-
-export const CONCLUDE_REQUESTED = 'WALLET.CONCLUDE_REQUESTED';
-export const concludeRequested = () => ({
-  type: CONCLUDE_REQUESTED as typeof CONCLUDE_REQUESTED,
-});
-export type ConcludeRequested = ReturnType<typeof concludeRequested>;
-
-export const CONCLUDE_APPROVED = 'WALLET.CONCLUDE_APPROVED';
-export const concludeApproved = () => ({
-  type: CONCLUDE_APPROVED as typeof CONCLUDE_APPROVED,
-});
-export type ConcludeApproved = ReturnType<typeof concludeApproved>;
-
-export const CONCLUDE_REJECTED = 'WALLET.CONCLUDE_REJECTED';
-export const concludeRejected = () => ({
-  type: CONCLUDE_REJECTED as typeof CONCLUDE_REJECTED,
-});
-export type ConcludeRejected = ReturnType<typeof concludeRejected>;
-
-export const CLOSE_SUCCESS_ACKNOWLEDGED = 'WALLET.CLOSE_SUCCESS_ACKNOWLEDGED';
-export const closeSuccessAcknowledged = () => ({
-  type: CLOSE_SUCCESS_ACKNOWLEDGED as typeof CLOSE_SUCCESS_ACKNOWLEDGED,
-});
-export type CloseSuccessAcknowledged = ReturnType<typeof closeSuccessAcknowledged>;
-
-export const CLOSED_ON_CHAIN_ACKNOWLEDGED = 'WALLET.CLOSED_ON_CHAIN_ACKNOWLEDGED';
-export const closedOnChainAcknowledged = () => ({
-  type: CLOSED_ON_CHAIN_ACKNOWLEDGED as typeof CLOSED_ON_CHAIN_ACKNOWLEDGED,
-});
-export type ClosedOnChainAcknowledged = ReturnType<typeof closedOnChainAcknowledged>;
-
-export const APPROVE_CLOSE = 'APPROVE_CLOSE';
-export const approveClose = (withdrawAddress: string) => ({
-  type: APPROVE_CLOSE as typeof APPROVE_CLOSE,
-  withdrawAddress,
-});
-export type ApproveClose = ReturnType<typeof approveClose>;
-
-export const METAMASK_LOAD_ERROR = 'METAMASK_LOAD_ERROR';
-export const metamaskLoadError = () => ({
-  type: METAMASK_LOAD_ERROR as typeof METAMASK_LOAD_ERROR,
-});
-export type MetamaskLoadError = ReturnType<typeof metamaskLoadError>;
-
-export const RETRY_TRANSACTION = 'RETRY_TRANSACTION';
-export const retryTransaction = () => ({
-  type: RETRY_TRANSACTION as typeof RETRY_TRANSACTION,
-});
-export type RetryTransaction = ReturnType<typeof retryTransaction>;
-
 export const BLOCK_MINED = 'BLOCK_MINED';
 export const blockMined = (block: { timestamp: number; number: number }) => ({
   type: BLOCK_MINED as typeof BLOCK_MINED,
@@ -367,48 +56,73 @@ export const blockMined = (block: { timestamp: number; number: number }) => ({
 });
 export type BlockMined = ReturnType<typeof blockMined>;
 
-export { internal };
+export const METAMASK_LOAD_ERROR = 'METAMASK_LOAD_ERROR';
+export const metamaskLoadError = () => ({
+  type: METAMASK_LOAD_ERROR as typeof METAMASK_LOAD_ERROR,
+});
+export type MetamaskLoadError = ReturnType<typeof metamaskLoadError>;
 
-export type ChannelAction =  // TODO: Some of these actions probably also belong in a FundingAction type
-  | ApproveClose
-  | ChallengeAcknowledged
-  | ChallengeApproved
-  | ChallengeCommitmentReceived
-  | ChallengeCompletionAcknowledged
-  | ChallengeCreatedEvent
-  | ChallengeRejected
-  | ChallengeRequested
-  | ChallengeResponseAcknowledged
-  | ChallengeResponseReceived
-  | ChallengeTimeoutAcknowledged
-  | ChannelInitialized
-  | ClosedOnChainAcknowledged
-  | CloseSuccessAcknowledged
-  | CommitmentReceived
-  | ConcludeApproved
-  | concludedEvent
-  | ConcludeRejected
-  | ConcludeRequested
-  | FundingRequested
-  | FundingSuccessAcknowledged
-  | MessageReceived
-  | OpponentCommitmentReceived
-  | OwnCommitmentReceived
-  | PostFundSetupReceived
-  | RespondWithExistingMoveChosen
-  | RespondWithMoveChosen
-  | RespondWithMoveEvent
-  | RespondWithRefuteChosen
-  | TakeMoveInAppAcknowledged
+// Common Transaction Actions
+// These actions are relevant to multiple branches of the wallet state tree
+export const TRANSACTION_SENT_TO_METAMASK = 'WALLET.COMMON.TRANSACTION_SENT_TO_METAMASK';
+export const transactionSentToMetamask = (channelId: string) => ({
+  type: TRANSACTION_SENT_TO_METAMASK as typeof TRANSACTION_SENT_TO_METAMASK,
+  channelId,
+});
+export type TransactionSentToMetamask = ReturnType<typeof transactionSentToMetamask>;
+
+export const TRANSACTION_SUBMISSION_FAILED = 'WALLET.COMMON.TRANSACTION_SUBMISSION_FAILED';
+export const transactionSubmissionFailed = (
+  channelId: string,
+  error: { message?: string; code },
+) => ({
+  error,
+  channelId,
+  type: TRANSACTION_SUBMISSION_FAILED as typeof TRANSACTION_SUBMISSION_FAILED,
+});
+export type TransactionSubmissionFailed = ReturnType<typeof transactionSubmissionFailed>;
+
+export const TRANSACTION_SUBMITTED = 'WALLET.COMMON.TRANSACTION_SUBMITTED';
+export const transactionSubmitted = (channelId: string, transactionHash: string) => ({
+  channelId,
+  transactionHash,
+  type: TRANSACTION_SUBMITTED as typeof TRANSACTION_SUBMITTED,
+});
+export type TransactionSubmitted = ReturnType<typeof transactionSubmitted>;
+
+export const TRANSACTION_CONFIRMED = 'WALLET.COMMON.TRANSACTION_CONFIRMED';
+export const transactionConfirmed = (channelId: string, contractAddress?: string) => ({
+  channelId,
+  contractAddress,
+  type: TRANSACTION_CONFIRMED as typeof TRANSACTION_CONFIRMED,
+});
+export type TransactionConfirmed = ReturnType<typeof transactionConfirmed>;
+
+export const TRANSACTION_FINALIZED = 'WALLET.COMMON.TRANSACTION_FINALIZED';
+export const transactionFinalized = () => ({
+  type: TRANSACTION_FINALIZED as typeof TRANSACTION_FINALIZED,
+});
+export type TransactionFinalized = ReturnType<typeof transactionFinalized>;
+
+export const RETRY_TRANSACTION = 'WALLET.COMMON.RETRY_TRANSACTION';
+export const retryTransaction = (channelId: string) => ({
+  type: RETRY_TRANSACTION as typeof RETRY_TRANSACTION,
+  channelId,
+});
+export type RetryTransaction = ReturnType<typeof retryTransaction>;
+
+export type CommonAction =
   | TransactionConfirmed
   | TransactionSentToMetamask
   | TransactionSubmissionFailed
   | TransactionSubmitted
-  | WithdrawalApproved
-  | WithdrawalRejected
-  | WithdrawalRequested
-  | WithdrawalSuccessAcknowledged
-  | internal.InternalAction;
+  | RetryTransaction;
+
+export function isCommonAction(action: WalletAction): action is CommonAction {
+  return action.type.match('WALLET.COMMON') ? true : false;
+}
+
+export { internal, channel, funding };
 
 // TODO: This is getting large, we should probably split this up into separate types for each stage
 export type WalletAction =
@@ -417,27 +131,10 @@ export type WalletAction =
   | DepositConfirmed
   | DepositInitiated
   | DisplayMessageSent
-  | FundingApproved
-  | FundingDeclinedAcknowledged
-  | FundingReceivedEvent
-  | FundingRejected
   | LoggedIn
   | MessageSent
   | MetamaskLoadError
-  | RetryTransaction
-  | ChannelAction;
-
-export const isChannelAction = (action: WalletAction): action is ChannelAction => {
-  // In order for an action to act on a specific channel, it needs to somehow contain a
-  // channel id.
-  // By rights, the actions themselves should extend a ChannelAction interface
-  // that looks like { channelId: string }
-  // This might require a change to the wallet API
-  return 'channelId' in action || 'commitment' in action || action.type === CHANNEL_INITIALIZED;
-};
-
-export const isReceiveFirstCommitment = (
-  action: WalletAction,
-): action is OwnCommitmentReceived | OpponentCommitmentReceived => {
-  return 'commitment' in action && action.commitment.turnNum === 0;
-};
+  | CommonAction
+  | channel.ChannelAction
+  | internal.InternalAction
+  | funding.FundingAction;

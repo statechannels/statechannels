@@ -45,10 +45,11 @@ describe('transactions', () => {
   function getNextNonce() {
     return ++nonce;
   }
+
   async function testTransactionSender(transactionToSend) {
-    const saga = transactionSender(transactionToSend);
+    const saga = transactionSender(transactionToSend, 'channelId');
     saga.next();
-    expect(saga.next(provider).value).toEqual(put(transactionSentToMetamask()));
+    expect(saga.next(provider).value).toEqual(put(transactionSentToMetamask('channelId')));
     saga.next();
     const signer = provider.getSigner();
     const contractAddress = await getAdjudicatorContractAddress(provider);
@@ -57,12 +58,12 @@ describe('transactions', () => {
 
     saga.next();
     expect(saga.next(transactionReceipt).value).toEqual(
-      put(transactionSubmitted(transactionReceipt.hash || '')),
+      put(transactionSubmitted('channelId', transactionReceipt.hash || '')),
     );
     const confirmedTransaction = await transactionReceipt.wait();
     saga.next();
     expect(saga.next(confirmedTransaction).value).toEqual(
-      put(transactionConfirmed(confirmedTransaction.contractAddress)),
+      put(transactionConfirmed('channelId', confirmedTransaction.contractAddress)),
     );
 
     expect(saga.next().value).toEqual(put(transactionFinalized()));

@@ -21,7 +21,6 @@ export const B_WAIT_FOR_POST_FUND_SETUP = 'B_WAIT_FOR_POST_FUND_SETUP';
 
 // Possible end states
 export const ACKNOWLEDGE_FUNDING_SUCCESS = 'ACKNOWLEDGE_FUNDING_SUCCESS';
-export const SEND_FUNDING_DECLINED_MESSAGE = 'SEND_FUNDING_DECLINED_MESSAGE';
 export const ACKNOWLEDGE_FUNDING_DECLINED = 'ACKNOWLEDGE_FUNDING_DECLINED';
 
 export interface WaitForFundingRequest extends ChannelOpen {
@@ -51,11 +50,6 @@ export interface AWaitForPostFundSetup extends ChannelOpen {
 
 export interface BWaitForPostFundSetup extends ChannelOpen {
   type: typeof B_WAIT_FOR_POST_FUND_SETUP;
-  stage: typeof FUNDING;
-}
-
-export interface SendFundingDeclinedMessage extends ChannelOpen {
-  type: typeof SEND_FUNDING_DECLINED_MESSAGE;
   stage: typeof FUNDING;
 }
 
@@ -115,12 +109,6 @@ export function acknowledgeFundingSuccess<T extends ChannelOpen>(
   return { type: ACKNOWLEDGE_FUNDING_SUCCESS, stage: FUNDING, ...channelOpen(params) };
 }
 
-export function sendFundingDeclinedMessage<T extends ChannelOpen>(
-  params: T,
-): SendFundingDeclinedMessage {
-  return { type: SEND_FUNDING_DECLINED_MESSAGE, stage: FUNDING, ...channelOpen(params) };
-}
-
 export function acknowledgeFundingDeclined<T extends ChannelOpen>(
   params: T,
 ): AcknowledgeFundingDeclined {
@@ -137,5 +125,4 @@ export type FundingState =
   | AWaitForPostFundSetup
   | BWaitForPostFundSetup
   | AcknowledgeFundingSuccess // <-- at this point, a message might need to be sent
-  | SendFundingDeclinedMessage
   | AcknowledgeFundingDeclined;
