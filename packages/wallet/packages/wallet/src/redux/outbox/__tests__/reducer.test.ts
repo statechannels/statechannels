@@ -1,19 +1,11 @@
-import { walletReducer } from '../reducer';
+import { clearOutbox } from '../reducer';
 
-import * as states from '../state';
-import * as actions from '../actions';
+import * as actions from '../../actions';
 import * as outgoing from 'magmo-wallet-client/lib/wallet-events';
-import * as scenarios from '../__tests__/test-scenarios';
-import { OutboxState } from '../outbox/state';
+import * as scenarios from '../../__tests__/test-scenarios';
+import { OutboxState } from '../state';
 
 const { channelId, mockTransactionOutboxItem } = scenarios;
-
-const defaults = {
-  ...states.emptyState,
-  uid: 'uid',
-  adjudicator: 'adjudicator',
-  networkId: 1,
-};
 
 describe('when a side effect occured', () => {
   const sendFundingDeclinedActionA = outgoing.messageRelayRequested('0xa00', 'FundingDeclined');
@@ -25,35 +17,34 @@ describe('when a side effect occured', () => {
   ];
   const transactionOutbox = [mockTransactionOutboxItem, mockTransactionOutboxItem];
   const messageOutbox = [sendFundingDeclinedActionA, sendFundingDeclinedActionB];
-  const outboxState: OutboxState = {
+  const state: OutboxState = {
     displayOutbox,
     actionOutbox,
     transactionOutbox,
     messageOutbox,
   };
-  const state = states.initialized({ ...defaults, outboxState });
 
   it('clears the first element of the displayOutbox', () => {
     const action = actions.displayMessageSent();
-    const updatedState = walletReducer(state, action);
-    expect(updatedState.outboxState.displayOutbox).toMatchObject(displayOutbox.slice(1));
+    const updatedState = clearOutbox(state, action);
+    expect(updatedState.displayOutbox).toMatchObject(displayOutbox.slice(1));
   });
 
   it('clears the first element of the messageOutbox', () => {
     const action = actions.messageSent();
-    const updatedState = walletReducer(state, action);
-    expect(updatedState.outboxState.messageOutbox).toMatchObject(messageOutbox.slice(1));
+    const updatedState = clearOutbox(state, action);
+    expect(updatedState.messageOutbox).toMatchObject(messageOutbox.slice(1));
   });
 
   it('clears the first element of the transactionOutbox', () => {
     const action = actions.transactionSentToMetamask(channelId);
-    const updatedState = walletReducer(state, action);
-    expect(updatedState.outboxState.transactionOutbox).toMatchObject(transactionOutbox.slice(1));
+    const updatedState = clearOutbox(state, action);
+    expect(updatedState.transactionOutbox).toMatchObject(transactionOutbox.slice(1));
   });
 
   it('clears the first element of the actionOutbox', () => {
-    const action = outboxState.actionOutbox[0];
-    const updatedState = walletReducer(state, action);
-    expect(updatedState.outboxState.actionOutbox).toMatchObject(actionOutbox.slice(1));
+    const action = state.actionOutbox[0];
+    const updatedState = clearOutbox(state, action);
+    expect(updatedState.actionOutbox).toMatchObject(actionOutbox.slice(1));
   });
 });
