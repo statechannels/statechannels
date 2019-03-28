@@ -1,9 +1,5 @@
 import { ChannelStatus } from '../redux/channelState/state';
-import {
-  OWN_COMMITMENT_RECEIVED,
-  OPPONENT_COMMITMENT_RECEIVED,
-  WalletAction,
-} from '../redux/actions';
+import * as actions from '../redux/actions';
 import {
   signatureFailure,
   signatureSuccess,
@@ -15,10 +11,10 @@ import { signCommitment, validCommitmentSignature } from './signing-utils';
 
 export function handleSignatureAndValidationMessages(
   state: ChannelStatus,
-  action: WalletAction,
+  action: actions.WalletAction,
 ): WalletEvent | undefined {
   switch (action.type) {
-    case OWN_COMMITMENT_RECEIVED:
+    case actions.channel.OWN_COMMITMENT_RECEIVED:
       if (state.stage !== 'RUNNING') {
         return signatureFailure('WalletBusy');
       } else {
@@ -26,7 +22,7 @@ export function handleSignatureAndValidationMessages(
 
         return signatureSuccess(signature);
       }
-    case OPPONENT_COMMITMENT_RECEIVED:
+    case actions.channel.OPPONENT_COMMITMENT_RECEIVED:
       if (state.stage !== 'RUNNING') {
         return validationFailure('WalletBusy');
       } else {

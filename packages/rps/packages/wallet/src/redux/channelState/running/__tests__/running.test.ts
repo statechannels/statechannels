@@ -50,7 +50,7 @@ describe('when in WaitForUpdate on our turn', () => {
   const state = states.waitForUpdate(bDefaults);
 
   describe('when we send in a new position', () => {
-    const action = actions.ownCommitmentReceived(gameCommitment3);
+    const action = actions.channel.ownCommitmentReceived(gameCommitment3);
     const updatedState = runningReducer(state, action);
 
     itTransitionsToChannelStateType(states.WAIT_FOR_UPDATE, updatedState);
@@ -58,21 +58,21 @@ describe('when in WaitForUpdate on our turn', () => {
   });
 
   describe('when we send in a position with the wrong turnNum', () => {
-    const action = actions.ownCommitmentReceived(gameCommitment2);
+    const action = actions.channel.ownCommitmentReceived(gameCommitment2);
     const updatedState = runningReducer(state, action);
 
     itDoesntTransition(state, updatedState);
   });
 
   describe('when an opponent sends a new position', () => {
-    const action = actions.opponentCommitmentReceived(gameCommitment3, 'sig');
+    const action = actions.channel.opponentCommitmentReceived(gameCommitment3, 'sig');
     const updatedState = runningReducer(state, action);
 
     itDoesntTransition(state, updatedState); // because it's our turn
   });
 
   describe('when the wallet detects an opponent challenge', () => {
-    const action = actions.challengeCreatedEvent(
+    const action = actions.channel.challengeCreatedEvent(
       '0xf00',
       scenarios.preFundCommitment1,
       defaults.challengeExpiry,
@@ -84,7 +84,7 @@ describe('when in WaitForUpdate on our turn', () => {
   });
 
   describe('when we request to launch a challenge', () => {
-    const action = actions.challengeRequested();
+    const action = actions.channel.challengeRequested();
     const updatedState = runningReducer(state, action);
 
     itTransitionsToChannelStateType(states.WAIT_FOR_UPDATE, updatedState);
@@ -99,14 +99,14 @@ describe(`when in WaitForUpdate on our opponent's turn`, () => {
   const state = states.waitForUpdate(aDefaults);
 
   describe('when we send in a new position', () => {
-    const action = actions.ownCommitmentReceived(gameCommitment3);
+    const action = actions.channel.ownCommitmentReceived(gameCommitment3);
     const updatedState = runningReducer(state, action);
     // it ignores it
     itDoesntTransition(state, updatedState);
   });
 
   describe('when an opponent sends a new position', () => {
-    const action = actions.opponentCommitmentReceived(gameCommitment3, 'sig');
+    const action = actions.channel.opponentCommitmentReceived(gameCommitment3, 'sig');
     const signMock = jest.fn().mockReturnValue('0x0');
     Object.defineProperty(SigningUtil, 'validCommitmentSignature', { value: signMock });
     const updatedState = runningReducer(state, action);
@@ -116,21 +116,21 @@ describe(`when in WaitForUpdate on our opponent's turn`, () => {
   });
 
   describe('when an opponent sends a new position with the wrong turnNum', () => {
-    const action = actions.opponentCommitmentReceived(gameCommitment1, 'sig');
+    const action = actions.channel.opponentCommitmentReceived(gameCommitment1, 'sig');
     const updatedState = runningReducer(state, action);
 
     itDoesntTransition(state, updatedState);
   });
 
   describe('when an opponent sends a new position with the wrong signature', () => {
-    const action = actions.opponentCommitmentReceived(gameCommitment3, 'not-a-signature');
+    const action = actions.channel.opponentCommitmentReceived(gameCommitment3, 'not-a-signature');
     const updatedState = runningReducer(state, action);
 
     itDoesntTransition(state, updatedState);
   });
 
   describe('when the wallet detects an opponent challenge', () => {
-    const action = actions.challengeCreatedEvent(
+    const action = actions.channel.challengeCreatedEvent(
       '0xf00',
       scenarios.preFundCommitment1,
       defaults.challengeExpiry,
@@ -142,7 +142,7 @@ describe(`when in WaitForUpdate on our opponent's turn`, () => {
   });
 
   describe('when we request to launch a challenge ', () => {
-    const action = actions.challengeRequested();
+    const action = actions.channel.challengeRequested();
     const updatedState = runningReducer(state, action);
 
     itTransitionsToChannelStateType(states.APPROVE_CHALLENGE, updatedState);

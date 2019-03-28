@@ -10,7 +10,7 @@ import * as scenarios from '../redux/__tests__/test-scenarios';
 import { bigNumberify } from 'ethers/utils';
 import NetworkStatus from '../components/NetworkStatus';
 import { channelFunded } from '../redux/fundingState/state';
-import { EMPTY_OUTBOX_STATE } from 'src/redux/outbox/state';
+import { EMPTY_OUTBOX_STATE } from '../redux/outbox/state';
 
 const {
   asAddress,
@@ -28,7 +28,7 @@ const TOTAL_CONTRIBUTION = bigNumberify(YOUR_CONTRIBUTION)
   .mul(2)
   .toHexString();
 
-const defaultFundingState: fundingStates.DirectFundingState = {
+const defaultFundingState: fundingStates.DirectFundingStatus = {
   fundingType: fundingStates.DIRECT_FUNDING,
   requestedTotalFunds: TOTAL_CONTRIBUTION,
   requestedYourContribution: YOUR_CONTRIBUTION,

@@ -1,6 +1,6 @@
 import { call, put, select } from 'redux-saga/effects';
 
-import { metamaskLoadError, adjudicatorKnown } from '../actions';
+import * as actions from '../actions';
 import { getProvider, getAdjudicatorContractAddress } from '../../utils/contract-utils';
 import { ethers } from 'ethers';
 import { WalletState, WAIT_FOR_ADJUDICATOR } from '../state';
@@ -11,11 +11,11 @@ export function* adjudicatorLoader() {
     return;
   }
   if (typeof web3 === 'undefined') {
-    yield put(metamaskLoadError());
+    yield put(actions.metamaskLoadError());
   } else {
     const provider: ethers.providers.BaseProvider = yield call(getProvider);
     const network = yield provider.getNetwork();
     const adjudicator = yield getAdjudicatorContractAddress(provider);
-    yield put(adjudicatorKnown(network.chainId, adjudicator));
+    yield put(actions.adjudicatorKnown(network.chainId, adjudicator));
   }
 }

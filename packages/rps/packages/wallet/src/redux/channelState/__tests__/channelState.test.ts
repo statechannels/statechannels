@@ -22,7 +22,7 @@ const defaults = {
 describe('when CHANNEL_INITIALIZED arrives', () => {
   it('updates state.channelState.initializingChannels', async () => {
     const state = defaults;
-    const action = actions.channelInitialized();
+    const action = actions.channel.channelInitialized();
 
     const updatedState = channelStateReducer(state, action);
 
@@ -40,7 +40,7 @@ describe('when the channel is part of the initializedChannelState', () => {
   describe('when the first commitment arrives', () => {
     it('moves the channel from initializingChannels to initializedChannels', () => {
       const state = { ...defaults, initializingChannels };
-      const action = actions.ownCommitmentReceived(preFundCommitment1);
+      const action = actions.channel.ownCommitmentReceived(preFundCommitment1);
 
       const updatedState = channelStateReducer(state, action);
 
@@ -63,7 +63,7 @@ describe('when the channel is part of the channelState', () => {
   describe('when a channel action arrives', () => {
     it('delegates to the single channel reducer', async () => {
       const state = { ...defaults, initializedChannels };
-      const action = actions.ownCommitmentReceived(preFundCommitment2);
+      const action = actions.channel.ownCommitmentReceived(preFundCommitment2);
 
       const updatedState = channelStateReducer(state, action);
 

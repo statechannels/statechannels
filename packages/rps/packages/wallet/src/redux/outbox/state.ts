@@ -9,10 +9,14 @@ export const EMPTY_OUTBOX_STATE: OutboxState = {
   actionOutbox: [],
 };
 
+export interface TransactionOutboxItem {
+  transactionRequest: TransactionRequest;
+  channelId: string;
+}
 export interface OutboxState {
   displayOutbox: DisplayAction[];
   messageOutbox: WalletEvent[];
-  transactionOutbox: TransactionRequest[];
+  transactionOutbox: TransactionOutboxItem[];
   actionOutbox: internal.InternalAction[];
 }
 

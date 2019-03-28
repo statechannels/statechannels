@@ -7,14 +7,7 @@ import { challengingReducer } from './challenging/reducer';
 import { respondingReducer } from './responding/reducer';
 import { withdrawingReducer } from './withdrawing/reducer';
 import { closingReducer } from './closing/reducer';
-import {
-  WalletAction,
-  CONCLUDE_REQUESTED,
-  COMMITMENT_RECEIVED,
-  CHANNEL_INITIALIZED,
-  ChannelAction,
-  isReceiveFirstCommitment,
-} from '../actions';
+import * as actions from './actions';
 import {
   unreachable,
   ourTurn,
@@ -28,13 +21,18 @@ import { CommitmentType } from 'fmg-core';
 import { StateWithSideEffects } from '../shared/state';
 import { ethers } from 'ethers';
 import { channelID } from 'fmg-core/lib/channel';
+import { WalletAction } from '../actions';
 
 export const channelStateReducer: ReducerWithSideEffects<states.ChannelState> = (
   state: states.ChannelState,
   action: WalletAction,
 ): StateWithSideEffects<states.ChannelState> => {
+  if (!actions.isChannelAction(action)) {
+    return { state };
+  }
+
   const newState = { ...state };
-  if (isReceiveFirstCommitment(action)) {
+  if (actions.isReceiveFirstCommitment(action)) {
     // We manually select and move the initializing channel into the initializedChannelState
     // before applying the combined reducer, so that the address and private key is in the
     // right slot (by its channelId)
@@ -73,9 +71,9 @@ export const channelStateReducer: ReducerWithSideEffects<states.ChannelState> = 
 
 const initializingChannels: ReducerWithSideEffects<states.InitializingChannelState> = (
   state: states.InitializingChannelState,
-  action: ChannelAction,
+  action: actions.ChannelAction,
 ): StateWithSideEffects<states.InitializingChannelState> => {
-  if (action.type !== CHANNEL_INITIALIZED) {
+  if (action.type !== actions.CHANNEL_INITIALIZED) {
     return { state };
   }
 
@@ -94,10 +92,10 @@ const initializingChannels: ReducerWithSideEffects<states.InitializingChannelSta
 
 const initializedChannels: ReducerWithSideEffects<states.InitializedChannelState> = (
   state: states.InitializedChannelState,
-  action: ChannelAction,
+  action: actions.ChannelAction,
   data: { appChannelId: string },
 ): StateWithSideEffects<states.InitializedChannelState> => {
-  if (action.type === CHANNEL_INITIALIZED) {
+  if (action.type === actions.CHANNEL_INITIALIZED) {
     return { state };
   }
   const { appChannelId } = data;
@@ -118,7 +116,7 @@ const initializedChannels: ReducerWithSideEffects<states.InitializedChannelState
 
 const initializedChannelStatusReducer: ReducerWithSideEffects<states.ChannelStatus> = (
   state: states.ChannelStatus,
-  action: ChannelAction,
+  action: actions.ChannelAction,
 ): StateWithSideEffects<states.ChannelStatus> => {
   const conclusionStateFromOwnRequest = receivedValidOwnConclusionRequest(state, action);
   if (conclusionStateFromOwnRequest) {
@@ -163,12 +161,12 @@ const combinedReducer = combineReducersWithSideEffects({
 
 const receivedValidOwnConclusionRequest = (
   state: states.ChannelStatus,
-  action: WalletAction,
+  action: actions.ChannelAction,
 ): states.ApproveConclude | null => {
   if (state.stage !== states.FUNDING && state.stage !== states.RUNNING) {
     return null;
   }
-  if (action.type !== CONCLUDE_REQUESTED || !ourTurn(state)) {
+  if (action.type !== actions.CONCLUDE_REQUESTED || !ourTurn(state)) {
     return null;
   }
   return states.approveConclude({ ...state });
@@ -176,12 +174,12 @@ const receivedValidOwnConclusionRequest = (
 
 const receivedValidOpponentConclusionRequest = (
   state: states.ChannelStatus,
-  action: WalletAction,
+  action: actions.ChannelAction,
 ): states.AcknowledgeConclude | null => {
   if (state.stage !== states.FUNDING && state.stage !== states.RUNNING) {
     return null;
   }
-  if (action.type !== COMMITMENT_RECEIVED) {
+  if (action.type !== actions.COMMITMENT_RECEIVED) {
     return null;
   }
 

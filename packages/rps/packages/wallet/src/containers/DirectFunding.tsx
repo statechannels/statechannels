@@ -15,21 +15,22 @@ interface Props {
   channelId: string;
   fundingSuccessAcknowledged: () => void;
   fundingDeclinedAcknowledged: () => void;
-  retryTransactionAction: () => void;
+  retryTransactionAction: (channelId: string) => void;
 }
 
 class DirectFundingContainer extends PureComponent<Props> {
   render() {
-    const { state, retryTransactionAction } = this.props;
-    const step = fundingStepByState(state);
+    const { state, retryTransactionAction, channelId } = this.props;
+    const status = state[channelId];
+    const step = fundingStepByState(status);
     if (
-      fundingStates.stateIsNotSafeToDeposit(state) ||
-      fundingStates.stateIsWaitForFundingConfirmation(state)
+      fundingStates.stateIsNotSafeToDeposit(status) ||
+      fundingStates.stateIsWaitForFundingConfirmation(status)
     ) {
       return <FundingStep step={step} />;
     }
-    if (fundingStates.stateIsDepositing(state)) {
-      switch (state.depositStatus) {
+    if (fundingStates.stateIsDepositing(status)) {
+      switch (status.depositStatus) {
         case fundingStates.depositing.WAIT_FOR_TRANSACTION_SENT:
           return <FundingStep step={step} />;
         case fundingStates.depositing.WAIT_FOR_DEPOSIT_APPROVAL:
@@ -39,7 +40,7 @@ class DirectFundingContainer extends PureComponent<Props> {
             <FundingStep step={step}>
               Check the progress on&nbsp;
               <EtherscanLink
-                transactionID={state.transactionHash}
+                transactionID={status.transactionHash}
                 networkId={-1} // TODO: Fix network id
                 title="Etherscan"
               />
@@ -47,31 +48,36 @@ class DirectFundingContainer extends PureComponent<Props> {
             </FundingStep>
           );
         case fundingStates.depositing.DEPOSIT_TRANSACTION_FAILED:
-          return <TransactionFailed name="deposit" retryAction={retryTransactionAction} />;
+          return (
+            <TransactionFailed
+              name="deposit"
+              retryAction={() => retryTransactionAction(status.channelId)}
+            />
+          );
 
         default:
-          return unreachable(state);
+          return unreachable(status);
       }
     }
-    if (fundingStates.stateIsChannelFunded(state)) {
+    if (fundingStates.stateIsChannelFunded(status)) {
       return null;
     }
 
-    return unreachable(state);
+    return unreachable(status);
   }
 }
 
 const mapDispatchToProps = {
-  fundingApproved: actions.fundingApproved,
-  fundingRejected: actions.fundingRejected,
-  fundingSuccessAcknowledged: actions.fundingSuccessAcknowledged,
-  fundingDeclinedAcknowledged: actions.fundingDeclinedAcknowledged,
+  fundingApproved: actions.channel.fundingApproved,
+  fundingRejected: actions.channel.fundingRejected,
+  fundingSuccessAcknowledged: actions.channel.fundingSuccessAcknowledged,
+  fundingDeclinedAcknowledged: actions.channel.fundingDeclinedAcknowledged,
   retryTransactionAction: actions.retryTransaction,
 };
 
 // why does it think that mapStateToProps can return undefined??
 
 export default connect(
-  (state: any) => ({ state: state.fundingState }),
+  (state: any) => ({ state: state.fundingState.directFunding }),
   mapDispatchToProps,
 )(DirectFundingContainer);
