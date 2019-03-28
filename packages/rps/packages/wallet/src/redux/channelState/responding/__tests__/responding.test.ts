@@ -47,13 +47,13 @@ describe('when in CHOOSE_RESPONSE', () => {
   const state = states.chooseResponse(defaults);
 
   describe('when respond with move is chosen', () => {
-    const action = actions.respondWithMoveChosen();
+    const action = actions.channel.respondWithMoveChosen();
     const updatedState = respondingReducer(state, action);
     itTransitionsToChannelStateType(states.TAKE_MOVE_IN_APP, updatedState);
   });
 
   describe('when respond with refute is chosen', () => {
-    const action = actions.respondWithRefuteChosen();
+    const action = actions.channel.respondWithRefuteChosen();
     const updatedState = respondingReducer(state, action);
     itTransitionsToChannelStateType(states.INITIATE_RESPONSE, updatedState);
   });
@@ -75,7 +75,7 @@ describe('when in TAKE_MOVE_IN_APP', () => {
   const state = states.takeMoveInApp(defaults);
 
   describe('when a challenge move is taken in the application', () => {
-    const action = actions.challengeCommitmentReceived(gameCommitment3);
+    const action = actions.channel.challengeCommitmentReceived(gameCommitment3);
     const createRespondTxMock = jest.fn();
     Object.defineProperty(TransactionGenerator, 'createRespondWithMoveTransaction', {
       value: createRespondTxMock,
@@ -103,7 +103,7 @@ describe('when in TAKE_MOVE_IN_APP', () => {
 describe('when in INITIATE_RESPONSE', () => {
   const state = states.initiateResponse(defaults);
   describe('when the challenge response is initiated', () => {
-    const action = actions.transactionSentToMetamask();
+    const action = actions.transactionSentToMetamask(channelId);
     const updatedState = respondingReducer(state, action);
     itTransitionsToChannelStateType(states.WAIT_FOR_RESPONSE_SUBMISSION, updatedState);
   });
@@ -117,12 +117,12 @@ describe('when in INITIATE_RESPONSE', () => {
 describe('when in WAIT_FOR_RESPONSE_SUBMISSION', () => {
   const state = states.waitForResponseSubmission(defaults);
   describe('when the challenge response is submitted', () => {
-    const action = actions.transactionSubmitted('0x0');
+    const action = actions.transactionSubmitted(channelId, '0x0');
     const updatedState = respondingReducer(state, action);
     itTransitionsToChannelStateType(states.WAIT_FOR_RESPONSE_CONFIRMATION, updatedState);
   });
   describe('when an error occurs when submitting a challenge response', () => {
-    const action = actions.transactionSubmissionFailed({ code: 0 });
+    const action = actions.transactionSubmissionFailed(channelId, { code: 0 });
     const updatedState = respondingReducer(state, action);
     itTransitionsToChannelStateType(states.RESPONSE_TRANSACTION_FAILED, updatedState);
   });
@@ -136,7 +136,7 @@ describe('when in WAIT_FOR_RESPONSE_SUBMISSION', () => {
 describe('when in WAIT_FOR_RESPONSE_CONFIRMED', () => {
   const state = states.waitForResponseConfirmation(defaults);
   describe('when the challenge response is confirmed', () => {
-    const action = actions.transactionConfirmed();
+    const action = actions.transactionConfirmed(channelId);
     const updatedState = respondingReducer(state, action);
     itTransitionsToChannelStateType(states.ACKNOWLEDGE_CHALLENGE_COMPLETE, updatedState);
   });
@@ -150,7 +150,7 @@ describe('when in WAIT_FOR_RESPONSE_CONFIRMED', () => {
 describe('when in ACKNOWLEDGE_CHALLENGE_COMPLETE', () => {
   const state = states.acknowledgeChallengeComplete(defaults);
   describe('when the challenge is acknowledged as complete', () => {
-    const action = actions.challengeResponseAcknowledged();
+    const action = actions.channel.challengeResponseAcknowledged();
     const updatedState = respondingReducer(state, action);
     itTransitionsToChannelStateType(states.WAIT_FOR_UPDATE, updatedState);
   });
@@ -159,7 +159,7 @@ describe('when in ACKNOWLEDGE_CHALLENGE_COMPLETE', () => {
 describe('when in RESPONSE_TRANSACTION_FAILED', () => {
   const state = states.responseTransactionFailed(defaults);
   describe('when the transaction is retried', () => {
-    const action = actions.retryTransaction();
+    const action = actions.retryTransaction(channelId);
     const createRespondTxMock = jest.fn();
     Object.defineProperty(TransactionGenerator, 'createRespondWithMoveTransaction', {
       value: createRespondTxMock,

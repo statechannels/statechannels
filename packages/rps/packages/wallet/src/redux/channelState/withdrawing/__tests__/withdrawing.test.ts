@@ -51,7 +51,7 @@ describe('when in ApproveWithdrawal', () => {
     const signMock = jest.fn().mockReturnValue('0x0');
     Object.defineProperty(SigningUtil, 'signVerificationData', { value: signMock });
 
-    const action = actions.withdrawalApproved(destinationAddress);
+    const action = actions.channel.withdrawalApproved(destinationAddress);
     const updatedState = withdrawingReducer(state, action);
 
     itTransitionsToChannelStateType(states.WAIT_FOR_WITHDRAWAL_INITIATION, updatedState);
@@ -59,7 +59,7 @@ describe('when in ApproveWithdrawal', () => {
   });
 
   describe('and the user rejects the withdrawal', () => {
-    const action = actions.withdrawalRejected();
+    const action = actions.channel.withdrawalRejected();
     const updatedState = withdrawingReducer(state, action);
 
     itTransitionsToChannelStateType(states.ACKNOWLEDGE_CLOSE_SUCCESS, updatedState);
@@ -70,13 +70,13 @@ describe('when in WaitForWithdrawalInitiation', () => {
   const state = states.waitForWithdrawalInitiation(defaults);
 
   describe('and the transaction is submitted', () => {
-    const action = actions.transactionSubmitted('0x0');
+    const action = actions.transactionSubmitted(channelId, '0x0');
     const updatedState = withdrawingReducer(state, action);
 
     itTransitionsToChannelStateType(states.WAIT_FOR_WITHDRAWAL_CONFIRMATION, updatedState);
   });
   describe('and the transaction submission errors', () => {
-    const action = actions.transactionSubmissionFailed({ code: 0 });
+    const action = actions.transactionSubmissionFailed(channelId, { code: 0 });
     const updatedState = withdrawingReducer(state, action);
 
     itTransitionsToChannelStateType(states.WITHDRAW_TRANSACTION_FAILED, updatedState);
@@ -93,7 +93,7 @@ describe('when in withdrawTransactionFailed', () => {
     Object.defineProperty(SigningUtil, 'signVerificationData', { value: signMock });
 
     const state = states.withdrawTransactionFailed(defaults);
-    const action = actions.retryTransaction();
+    const action = actions.retryTransaction(channelId);
     const updatedState = withdrawingReducer(state, action);
 
     itTransitionsToChannelStateType(states.WAIT_FOR_WITHDRAWAL_INITIATION, updatedState);
@@ -105,7 +105,7 @@ describe('when in WaitForWithdrawalConfirmation', () => {
   const state = states.waitForWithdrawalConfirmation(defaults);
 
   describe('and the transaction is confirmed', () => {
-    const action = actions.transactionConfirmed();
+    const action = actions.transactionConfirmed(channelId);
     const updatedState = withdrawingReducer(state, action);
 
     itTransitionsToChannelStateType(states.ACKNOWLEDGE_WITHDRAWAL_SUCCESS, updatedState);
@@ -116,7 +116,7 @@ describe('when in AcknowledgeWithdrawalSuccess', () => {
   const state = states.acknowledgeWithdrawalSuccess(defaults);
 
   describe('and the user acknowledges the withdrawal', () => {
-    const action = actions.withdrawalSuccessAcknowledged();
+    const action = actions.channel.withdrawalSuccessAcknowledged();
     const updatedState = withdrawingReducer(state, action);
 
     itTransitionsToChannelStateType(states.WAIT_FOR_CHANNEL, updatedState);

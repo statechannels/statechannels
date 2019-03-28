@@ -32,7 +32,7 @@ const waitForChannelReducer = (
   action: actions.WalletAction,
 ): StateWithSideEffects<channelStates.WaitForPreFundSetup | channelStates.WaitForChannel> => {
   switch (action.type) {
-    case actions.OWN_COMMITMENT_RECEIVED:
+    case actions.channel.OWN_COMMITMENT_RECEIVED:
       const ownCommitment = action.commitment;
 
       // check it's a PreFundSetupA
@@ -83,7 +83,7 @@ const waitForChannelReducer = (
         sideEffects: { messageOutbox: signatureSuccess(signature) },
       };
 
-    case actions.OPPONENT_COMMITMENT_RECEIVED:
+    case actions.channel.OPPONENT_COMMITMENT_RECEIVED:
       const opponentCommitment = action.commitment;
 
       // all these checks will fail silently for the time being
@@ -154,7 +154,7 @@ const waitForPreFundSetupReducer = (
   channelStates.WaitForPreFundSetup | channelStates.WaitForFundingRequest
 > => {
   switch (action.type) {
-    case actions.OWN_COMMITMENT_RECEIVED:
+    case actions.channel.OWN_COMMITMENT_RECEIVED:
       const ownCommitment = action.commitment;
 
       // check it's a PreFundSetupB
@@ -189,7 +189,7 @@ const waitForPreFundSetupReducer = (
         sideEffects: { messageOutbox: signatureSuccess(signature) },
       };
 
-    case actions.OPPONENT_COMMITMENT_RECEIVED:
+    case actions.channel.OPPONENT_COMMITMENT_RECEIVED:
       const opponentCommitment = action.commitment;
 
       // check it's a PreFundSetupB

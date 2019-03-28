@@ -37,11 +37,11 @@ describe('adjudicator listener', () => {
     const sagaTester = new SagaTester({});
     sagaTester.start(adjudicatorWatcher, channelId, provider);
     await depositContract(provider, channelId);
-    await sagaTester.waitFor(actions.FUNDING_RECEIVED_EVENT);
+    await sagaTester.waitFor(actions.funding.FUNDING_RECEIVED_EVENT);
 
-    const action: actions.FundingReceivedEvent = sagaTester.getLatestCalledAction();
-    expect(action.type).toEqual(actions.FUNDING_RECEIVED_EVENT);
-    expect(action.destination).toEqual(channelId);
+    const action: actions.funding.FundingReceivedEvent = sagaTester.getLatestCalledAction();
+    expect(action.type).toEqual(actions.funding.FUNDING_RECEIVED_EVENT);
+    expect(action.channelId).toEqual(channelId);
     expect(action.amount).toEqual('0x05');
     expect(action.totalForDestination).toEqual('0x05');
   });
@@ -59,8 +59,8 @@ describe('adjudicator listener', () => {
       participantA,
       participantB,
     );
-    await sagaTester.waitFor(actions.CHALLENGE_CREATED_EVENT);
-    const action: actions.ChallengeCreatedEvent = sagaTester.getLatestCalledAction();
+    await sagaTester.waitFor(actions.channel.CHALLENGE_CREATED_EVENT);
+    const action: actions.channel.ChallengeCreatedEvent = sagaTester.getLatestCalledAction();
 
     expect(action.finalizedAt * 1000).toBeGreaterThan(startTimestamp);
     expect(action.commitment).toEqual(challengeState);
@@ -72,8 +72,8 @@ describe('adjudicator listener', () => {
     const sagaTester = new SagaTester({});
     sagaTester.start(adjudicatorWatcher, channelId, provider);
     await concludeGame(provider, channelNonce, participantA, participantB);
-    await sagaTester.waitFor(actions.CONCLUDED_EVENT);
-    const action: actions.concludedEvent = sagaTester.getLatestCalledAction();
+    await sagaTester.waitFor(actions.channel.CONCLUDED_EVENT);
+    const action: actions.channel.concludedEvent = sagaTester.getLatestCalledAction();
     // TODO: We should check the channel ID
     expect(action.channelId).toBeDefined();
   });
@@ -92,9 +92,9 @@ describe('adjudicator listener', () => {
       participantA,
       participantB,
     );
-    await sagaTester.waitFor(actions.REFUTED_EVENT);
-    const action: actions.RefutedEvent = sagaTester.getLatestCalledAction();
-    expect(action.type === actions.REFUTED_EVENT);
+    await sagaTester.waitFor(actions.channel.REFUTED_EVENT);
+    const action: actions.channel.RefutedEvent = sagaTester.getLatestCalledAction();
+    expect(action.type === actions.channel.REFUTED_EVENT);
     expect(action.refuteCommitment).toEqual(refuteCommitment);
   });
 
@@ -113,9 +113,9 @@ describe('adjudicator listener', () => {
       participantA,
       participantB,
     );
-    await sagaTester.waitFor(actions.RESPOND_WITH_MOVE_EVENT);
-    const action: actions.RespondWithMoveEvent = sagaTester.getLatestCalledAction();
-    expect(action.type === actions.RESPOND_WITH_MOVE_EVENT);
+    await sagaTester.waitFor(actions.channel.RESPOND_WITH_MOVE_EVENT);
+    const action: actions.channel.RespondWithMoveEvent = sagaTester.getLatestCalledAction();
+    expect(action.type === actions.channel.RESPOND_WITH_MOVE_EVENT);
     expect(action.responseCommitment).toEqual(responseState);
   });
 });

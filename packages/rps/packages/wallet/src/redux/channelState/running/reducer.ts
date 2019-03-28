@@ -25,7 +25,7 @@ const waitForUpdateReducer = (
   runningStates.WaitForUpdate | challengingStates.ApproveChallenge | respondingStates.ChooseResponse
 > => {
   switch (action.type) {
-    case actions.OWN_COMMITMENT_RECEIVED:
+    case actions.channel.OWN_COMMITMENT_RECEIVED:
       const messageOutbox = handleSignatureAndValidationMessages(state, action);
 
       // check it's our turn
@@ -56,7 +56,7 @@ const waitForUpdateReducer = (
         sideEffects: { messageOutbox },
       };
 
-    case actions.OPPONENT_COMMITMENT_RECEIVED:
+    case actions.channel.OPPONENT_COMMITMENT_RECEIVED:
       const validationMessage = handleSignatureAndValidationMessages(state, action);
       if (ourTurn(state)) {
         return { state, sideEffects: { messageOutbox: validationMessage } };
@@ -87,7 +87,7 @@ const waitForUpdateReducer = (
         sideEffects: { messageOutbox: handleSignatureAndValidationMessages(state, action) },
       };
 
-    case actions.CHALLENGE_CREATED_EVENT:
+    case actions.channel.CHALLENGE_CREATED_EVENT:
       // transition to responding
       return {
         state: respondingStates.chooseResponse({
@@ -97,7 +97,7 @@ const waitForUpdateReducer = (
         sideEffects: { displayOutbox: showWallet() },
       };
 
-    case actions.CHALLENGE_REQUESTED:
+    case actions.channel.CHALLENGE_REQUESTED:
       // The application should validate this but just in case we check as well
       if (ourTurn(state)) {
         const message = challengeRejected(

@@ -18,8 +18,8 @@ export const challengingReducer = (
 ): StateWithSideEffects<states.ChannelStatus> => {
   // Handle any signature/validation request centrally to avoid duplicating code for each state
   if (
-    action.type === actions.OWN_COMMITMENT_RECEIVED ||
-    action.type === actions.OPPONENT_COMMITMENT_RECEIVED
+    action.type === actions.channel.OWN_COMMITMENT_RECEIVED ||
+    action.type === actions.channel.OPPONENT_COMMITMENT_RECEIVED
   ) {
     return {
       state,
@@ -56,7 +56,7 @@ const challengeTransactionFailedReducer = (
     case actions.RETRY_TRANSACTION:
       const { commitment: fromPosition, signature: fromSignature } = state.penultimateCommitment;
       const { commitment: toPosition, signature: toSignature } = state.lastCommitment;
-      const transaction = createForceMoveTransaction(
+      const transactionRequest = createForceMoveTransaction(
         fromPosition,
         toPosition,
         fromSignature,
@@ -64,7 +64,7 @@ const challengeTransactionFailedReducer = (
       );
       return {
         state: states.waitForChallengeInitiation(state),
-        sideEffects: { transactionOutbox: transaction },
+        sideEffects: { transactionOutbox: { transactionRequest, channelId: state.channelId } },
       };
   }
   return { state };
@@ -75,10 +75,10 @@ const approveChallengeReducer = (
   action: WalletAction,
 ): StateWithSideEffects<states.ChannelStatus> => {
   switch (action.type) {
-    case actions.CHALLENGE_APPROVED:
+    case actions.channel.CHALLENGE_APPROVED:
       const { commitment: fromPosition, signature: fromSignature } = state.penultimateCommitment;
       const { commitment: toPosition, signature: toSignature } = state.lastCommitment;
-      const transaction = createForceMoveTransaction(
+      const transactionRequest = createForceMoveTransaction(
         fromPosition,
         toPosition,
         fromSignature,
@@ -86,9 +86,9 @@ const approveChallengeReducer = (
       );
       return {
         state: states.waitForChallengeInitiation(state),
-        sideEffects: { transactionOutbox: transaction },
+        sideEffects: { transactionOutbox: { transactionRequest, channelId: state.channelId } },
       };
-    case actions.CHALLENGE_REJECTED:
+    case actions.channel.CHALLENGE_REJECTED:
       return {
         state: states.waitForUpdate(state),
         sideEffects: { messageOutbox: challengeComplete(), displayOutbox: hideWallet() },
@@ -115,7 +115,7 @@ const waitForChallengeSubmissionReducer = (
   action: WalletAction,
 ): StateWithSideEffects<states.ChannelStatus> => {
   switch (action.type) {
-    case actions.CHALLENGE_CREATED_EVENT:
+    case actions.channel.CHALLENGE_CREATED_EVENT:
       return {
         state: states.waitForChallengeSubmission({
           ...state,
@@ -141,7 +141,7 @@ const waitForChallengeConfirmationReducer = (
   action: WalletAction,
 ): StateWithSideEffects<states.ChannelStatus> => {
   switch (action.type) {
-    case actions.CHALLENGE_CREATED_EVENT:
+    case actions.channel.CHALLENGE_CREATED_EVENT:
       return {
         state: states.waitForChallengeConfirmation({
           ...state,
@@ -165,14 +165,14 @@ const waitForResponseOrTimeoutReducer = (
   action: WalletAction,
 ): StateWithSideEffects<states.ChannelStatus> => {
   switch (action.type) {
-    case actions.CHALLENGE_CREATED_EVENT:
+    case actions.channel.CHALLENGE_CREATED_EVENT:
       return {
         state: states.waitForResponseOrTimeout({
           ...state,
           challengeExpiry: bigNumberify(action.finalizedAt).toNumber(),
         }),
       };
-    case actions.RESPOND_WITH_MOVE_EVENT:
+    case actions.channel.RESPOND_WITH_MOVE_EVENT:
       const message = challengeCommitmentReceived(action.responseCommitment);
       // TODO: Right now we're just storing a dummy signature since we don't get one
       // from the challenge.
@@ -206,7 +206,7 @@ const acknowledgeChallengeResponseReducer = (
   action: WalletAction,
 ): StateWithSideEffects<states.ChannelStatus> => {
   switch (action.type) {
-    case actions.CHALLENGE_RESPONSE_ACKNOWLEDGED:
+    case actions.channel.CHALLENGE_RESPONSE_ACKNOWLEDGED:
       return {
         state: states.waitForUpdate(state),
         sideEffects: { messageOutbox: challengeComplete(), displayOutbox: hideWallet() },
@@ -221,7 +221,7 @@ const acknowledgeChallengeTimeoutReducer = (
   action: WalletAction,
 ): StateWithSideEffects<states.ChannelStatus> => {
   switch (action.type) {
-    case actions.CHALLENGE_TIME_OUT_ACKNOWLEDGED:
+    case actions.channel.CHALLENGE_TIME_OUT_ACKNOWLEDGED:
       return {
         state: states.approveWithdrawal(state),
         sideEffects: { messageOutbox: challengeComplete() },

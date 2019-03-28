@@ -6,7 +6,7 @@ import * as outgoing from 'magmo-wallet-client/lib/wallet-events';
 import * as scenarios from '../__tests__/test-scenarios';
 import { OutboxState } from '../outbox/state';
 
-const { channelId, mockTransaction } = scenarios;
+const { channelId, mockTransactionOutboxItem } = scenarios;
 
 const defaults = {
   ...states.emptyState,
@@ -23,7 +23,7 @@ describe('when a side effect occured', () => {
     actions.internal.directFundingConfirmed(channelId),
     actions.internal.directFundingConfirmed(channelId),
   ];
-  const transactionOutbox = [mockTransaction, mockTransaction];
+  const transactionOutbox = [mockTransactionOutboxItem, mockTransactionOutboxItem];
   const messageOutbox = [sendFundingDeclinedActionA, sendFundingDeclinedActionB];
   const outboxState: OutboxState = {
     displayOutbox,
@@ -46,7 +46,7 @@ describe('when a side effect occured', () => {
   });
 
   it('clears the first element of the transactionOutbox', () => {
-    const action = actions.transactionSentToMetamask();
+    const action = actions.transactionSentToMetamask(channelId);
     const updatedState = walletReducer(state, action);
     expect(updatedState.outboxState.transactionOutbox).toMatchObject(transactionOutbox.slice(1));
   });

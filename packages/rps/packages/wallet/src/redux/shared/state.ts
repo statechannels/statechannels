@@ -1,5 +1,5 @@
 import { OutboxState, SideEffects, EMPTY_OUTBOX_STATE } from '../outbox/state';
-import { FundingState, waitForFundingRequest } from '../fundingState/state';
+import { FundingState, EMPTY_FUNDING_STATE } from '../fundingState/state';
 import { ChannelState } from '../channelState/state';
 
 export interface StateWithSideEffects<T> {
@@ -15,7 +15,7 @@ export interface SharedWalletState {
 
 export const emptyState: SharedWalletState = {
   outboxState: EMPTY_OUTBOX_STATE,
-  fundingState: waitForFundingRequest(),
+  fundingState: EMPTY_FUNDING_STATE,
   channelState: { initializedChannels: {}, initializingChannels: {} },
 };
 

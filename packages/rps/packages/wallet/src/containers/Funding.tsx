@@ -19,7 +19,7 @@ interface Props {
   fundingRejected: () => void;
   fundingSuccessAcknowledged: () => void;
   fundingDeclinedAcknowledged: () => void;
-  retryTransactionAction: () => void;
+  retryTransactionAction: (channelId: string) => void;
 }
 
 class FundingContainer extends PureComponent<Props> {
@@ -65,8 +65,6 @@ class FundingContainer extends PureComponent<Props> {
             actionTitle="Return to game"
           />
         );
-      case channelStates.SEND_FUNDING_DECLINED_MESSAGE:
-        return null;
       default:
         return unreachable(state);
     }
@@ -74,10 +72,10 @@ class FundingContainer extends PureComponent<Props> {
 }
 
 const mapDispatchToProps = {
-  fundingApproved: actions.fundingApproved,
-  fundingRejected: actions.fundingRejected,
-  fundingSuccessAcknowledged: actions.fundingSuccessAcknowledged,
-  fundingDeclinedAcknowledged: actions.fundingDeclinedAcknowledged,
+  fundingApproved: actions.channel.fundingApproved,
+  fundingRejected: actions.channel.fundingRejected,
+  fundingSuccessAcknowledged: actions.channel.fundingSuccessAcknowledged,
+  fundingDeclinedAcknowledged: actions.channel.fundingDeclinedAcknowledged,
   retryTransactionAction: actions.retryTransaction,
 };
 

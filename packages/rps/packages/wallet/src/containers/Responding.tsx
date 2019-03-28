@@ -18,7 +18,7 @@ interface Props {
   challengeResponseAcknowledged: () => void;
   selectRespondWithMove: () => void;
   selectRespondWithExistingMove: () => void;
-  retryTransaction: () => void;
+  retryTransaction: (channelId: string) => void;
   timeoutAcknowledged: () => void;
 }
 
@@ -74,7 +74,12 @@ class RespondingContainer extends PureComponent<Props> {
           </RespondingStep>
         );
       case states.RESPONSE_TRANSACTION_FAILED:
-        return <TransactionFailed name="challenge response" retryAction={retryTransaction} />;
+        return (
+          <TransactionFailed
+            name="challenge response"
+            retryAction={() => retryTransaction(state.channelId)}
+          />
+        );
       default:
         return unreachable(state);
     }
@@ -82,12 +87,12 @@ class RespondingContainer extends PureComponent<Props> {
 }
 
 const mapDispatchToProps = {
-  challengeAcknowledged: actions.challengeAcknowledged,
-  challengeResponseAcknowledged: actions.challengeResponseAcknowledged,
-  selectRespondWithMove: actions.respondWithMoveChosen,
-  selectRespondWithExistingMove: actions.respondWithExistingMoveChosen,
+  challengeAcknowledged: actions.channel.challengeAcknowledged,
+  challengeResponseAcknowledged: actions.channel.challengeResponseAcknowledged,
+  selectRespondWithMove: actions.channel.respondWithMoveChosen,
+  selectRespondWithExistingMove: actions.channel.respondWithExistingMoveChosen,
   retryTransaction: actions.retryTransaction,
-  timeoutAcknowledged: actions.challengedTimedOutAcknowledged,
+  timeoutAcknowledged: actions.channel.challengedTimedOutAcknowledged,
 };
 
 export default connect(

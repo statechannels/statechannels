@@ -21,7 +21,7 @@ const {
   gameCommitment1,
   gameCommitment2,
   fundingState,
-  mockTransaction,
+  mockTransactionOutboxItem,
 } = scenarios;
 
 const defaults = {
@@ -47,18 +47,18 @@ const defaults = {
 describe('when in APPROVE_CHALLENGE', () => {
   const state = states.approveChallenge({ ...defaults });
   describe('when a challenge is approved', () => {
-    const createChallengeTxMock = jest.fn().mockReturnValue(mockTransaction);
+    const createChallengeTxMock = jest.fn().mockReturnValue(mockTransactionOutboxItem);
     Object.defineProperty(TransactionGenerator, 'createForceMoveTransaction', {
       value: createChallengeTxMock,
     });
-    const action = actions.challengeApproved();
+    const action = actions.channel.challengeApproved();
     const updatedState = challengingReducer(state, action);
     itTransitionsToChannelStateType(states.WAIT_FOR_CHALLENGE_INITIATION, updatedState);
     itSendsATransaction(updatedState);
   });
 
   describe('when a challenge is declined', () => {
-    const action = actions.challengeRejected();
+    const action = actions.channel.challengeRejected();
     const updatedState = challengingReducer(state, action);
     itSendsThisDisplayEventType(updatedState, hideWallet().type);
     itSendsThisMessage(updatedState, challengeComplete().type);
@@ -70,7 +70,7 @@ describe('when in INITIATE_CHALLENGE', () => {
   const state = states.waitForChallengeInitiation(defaults);
 
   describe('when a challenge is initiated', () => {
-    const action = actions.transactionSentToMetamask();
+    const action = actions.transactionSentToMetamask(channelId);
     const updatedState = challengingReducer(state, action);
 
     itTransitionsToChannelStateType(states.WAIT_FOR_CHALLENGE_SUBMISSION, updatedState);
@@ -81,14 +81,14 @@ describe('when in WAIT_FOR_CHALLENGE_SUBMISSION', () => {
   const state = states.waitForChallengeSubmission(defaults);
 
   describe('when a challenge is submitted', () => {
-    const action = actions.transactionSubmitted('0x0');
+    const action = actions.transactionSubmitted(channelId, '0x0');
     const updatedState = challengingReducer(state, action);
 
     itTransitionsToChannelStateType(states.WAIT_FOR_CHALLENGE_CONFIRMATION, updatedState);
   });
 
   describe('when a challenge submissions fails', () => {
-    const action = actions.transactionSubmissionFailed({ code: 0 });
+    const action = actions.transactionSubmissionFailed(channelId, { code: 0 });
     const updatedState = challengingReducer(state, action);
 
     itTransitionsToChannelStateType(states.CHALLENGE_TRANSACTION_FAILED, updatedState);
@@ -102,7 +102,7 @@ describe('when in CHALLENGE_TRANSACTION_FAILED', () => {
     Object.defineProperty(TransactionGenerator, 'createForceMoveTransaction', {
       value: createChallengeTxMock,
     });
-    const action = actions.retryTransaction();
+    const action = actions.retryTransaction(channelId);
     const updatedState = challengingReducer(state, action);
     itTransitionsToChannelStateType(states.WAIT_FOR_CHALLENGE_INITIATION, updatedState);
     expect(createChallengeTxMock.mock.calls.length).toBe(1);
@@ -113,7 +113,7 @@ describe('when in WAIT_FOR_CHALLENGE_CONFIRMATION', () => {
   const state = states.waitForChallengeConfirmation({ ...defaults });
 
   describe('when a challenge is confirmed', () => {
-    const action = actions.transactionConfirmed();
+    const action = actions.transactionConfirmed(channelId);
     const updatedState = challengingReducer(state, action);
 
     itTransitionsToChannelStateType(states.WAIT_FOR_RESPONSE_OR_TIMEOUT, updatedState);
@@ -128,7 +128,7 @@ describe('when in WAIT_FOR_RESPONSE_OR_TIMEOUT', () => {
   });
 
   describe('when the opponent responds', () => {
-    const action = actions.respondWithMoveEvent('0x0', '0xC1');
+    const action = actions.channel.respondWithMoveEvent('0x0', '0xC1');
     const updatedState = challengingReducer(state, action);
 
     itTransitionsToChannelStateType(states.ACKNOWLEDGE_CHALLENGE_RESPONSE, updatedState);
@@ -150,7 +150,7 @@ describe('when in WAIT_FOR_RESPONSE_OR_TIMEOUT', () => {
 
 describe('when in ACKNOWLEDGE_RESPONSE', () => {
   const state = states.acknowledgeChallengeResponse({ ...defaults });
-  const action = actions.challengeResponseAcknowledged();
+  const action = actions.channel.challengeResponseAcknowledged();
   const updatedState = challengingReducer(state, action);
 
   itTransitionsToChannelStateType(states.WAIT_FOR_UPDATE, updatedState);
@@ -158,7 +158,7 @@ describe('when in ACKNOWLEDGE_RESPONSE', () => {
 
 describe('when in ACKNOWLEDGE_TIMEOUT', () => {
   const state = states.acknowledgeChallengeTimeout({ ...defaults });
-  const action = actions.challengedTimedOutAcknowledged();
+  const action = actions.channel.challengedTimedOutAcknowledged();
   const updatedState = challengingReducer(state, action);
 
   itTransitionsToChannelStateType(states.APPROVE_WITHDRAWAL, updatedState);
