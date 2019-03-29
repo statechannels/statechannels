@@ -193,22 +193,13 @@ describe('nitroAdjudicator', () => {
       turnNum: 8,
       appCounter: new BigNumber(3).toHexString(),
     });
-
-    const { r: r0, s: s0, v: v0 } = sign(getHexForCommitment(commitment4), alice.privateKey);
-    const { r: r1, s: s1, v: v1 } = sign(getHexForCommitment(commitment5), bob.privateKey);
-
-    conclusionProof = {
-      penultimateCommitment: getEthersObjectForCommitment(commitment4),
-      ultimateCommitment: getEthersObjectForCommitment(commitment5),
-      penultimateSignature: { v: v0, r: r0, s: s0 },
-      ultimateSignature: { v: v1, r: r1, s: s1 },
-    };
   });
 
   let expectedAssertions;
 
   beforeEach(() => {
     expectedAssertions = 1;
+    channel.nonce += 1;
   });
 
   describe('Eth management', () => {
@@ -839,6 +830,16 @@ describe('nitroAdjudicator', () => {
     });
 
     describe('concludeAndWithdraw', () => {
+      beforeEach(() => {
+        const { r: r0, s: s0, v: v0 } = sign(getHexForCommitment(commitment4), alice.privateKey);
+        const { r: r1, s: s1, v: v1 } = sign(getHexForCommitment(commitment5), bob.privateKey);
+        conclusionProof = {
+          penultimateCommitment: getEthersObjectForCommitment(commitment4),
+          ultimateCommitment: getEthersObjectForCommitment(commitment5),
+          penultimateSignature: { v: v0, r: r0, s: s0 },
+          ultimateSignature: { v: v1, r: r1, s: s1 },
+        };
+      });
       it('works when the channel is not concluded', async () => {
         const total = bigNumberify(aBal).add(bBal);
         const channelId = getChannelID(channel);
@@ -1123,6 +1124,28 @@ describe('nitroAdjudicator', () => {
         expect(await nitro.isChallengeOngoing(getChannelID(channel))).toBe(true);
       }
 
+      beforeEach(() => {
+        agreedCommitment = commitment0;
+        challengeCommitment = commitment1;
+        refutationCommitment = commitment3;
+
+        const { r: r0, s: s0, v: v0 } = sign(
+          getHexForCommitment(agreedCommitment),
+          challengee.privateKey,
+        );
+        const { r: r1, s: s1, v: v1 } = sign(
+          getHexForCommitment(challengeCommitment),
+          challenger.privateKey,
+        );
+        signatures = [{ r: r0, s: s0, v: v0 }, { r: r1, s: s1, v: v1 }];
+
+        const { r: r2, s: s2, v: v2 } = sign(
+          getHexForCommitment(refutationCommitment),
+          challenger.privateKey,
+        );
+        refutationSignature = { r: r2, s: s2, v: v2 };
+      });
+
       it('works', async () => {
         await runBeforeRefute();
 
@@ -1134,22 +1157,6 @@ describe('nitroAdjudicator', () => {
 
         // "challenge should be cancelled
         expect(await nitro.isChallengeOngoing(getChannelID(channel))).toBe(false);
-      });
-
-      beforeAll(() => {
-        agreedCommitment = commitment0;
-        challengeCommitment = commitment1;
-        refutationCommitment = commitment3;
-
-        const { r: r0, s: s0, v: v0 } = sign(getHexForCommitment(agreedCommitment), challengee.privateKey);
-        const { r: r1, s: s1, v: v1 } = sign(getHexForCommitment(challengeCommitment), challenger.privateKey);
-        signatures = [
-          { r: r0, s: s0, v: v0 },
-          { r: r1, s: s1, v: v1 },
-        ];
-
-        const { r: r2, s: s2, v: v2 } = sign(getHexForCommitment(refutationCommitment), challenger.privateKey);
-        refutationSignature = { r: r2, s: s2, v: v2 };
       });
 
       it('reverts when the channel is closed', async () => {
@@ -1204,19 +1211,25 @@ describe('nitroAdjudicator', () => {
       let signatures;
       let responseSignature;
 
-      beforeAll(() => {
+      beforeEach(() => {
         agreedCommitment = commitment0;
         challengeCommitment = commitment1;
         responseCommitment = commitment2;
 
-        const { r: r0, s: s0, v: v0 } = sign(getHexForCommitment(agreedCommitment), challengee.privateKey);
-        const { r: r1, s: s1, v: v1 } = sign(getHexForCommitment(challengeCommitment), challenger.privateKey);
-        signatures = [
-          { r: r0, s: s0, v: v0 },
-          { r: r1, s: s1, v: v1 },
-        ];
+        const { r: r0, s: s0, v: v0 } = sign(
+          getHexForCommitment(agreedCommitment),
+          challengee.privateKey,
+        );
+        const { r: r1, s: s1, v: v1 } = sign(
+          getHexForCommitment(challengeCommitment),
+          challenger.privateKey,
+        );
+        signatures = [{ r: r0, s: s0, v: v0 }, { r: r1, s: s1, v: v1 }];
 
-        const { r: r2, s: s2, v: v2 } = sign(getHexForCommitment(responseCommitment), challengee.privateKey);
+        const { r: r2, s: s2, v: v2 } = sign(
+          getHexForCommitment(responseCommitment),
+          challengee.privateKey,
+        );
         responseSignature = { r: r2, s: s2, v: v2 };
       });
 
@@ -1305,21 +1318,30 @@ describe('nitroAdjudicator', () => {
       let alternativeSignature;
       let responseSignature;
 
-      beforeAll(() => {
+      beforeEach(() => {
         agreedCommitment = commitment0;
         challengeCommitment = commitment1;
         alternativeCommitment = commitment1alt;
         responseCommitment = commitment2alt;
 
-        const { r: r0, s: s0, v: v0 } = sign(getHexForCommitment(agreedCommitment), challengee.privateKey);
-        const { r: r1, s: s1, v: v1 } = sign(getHexForCommitment(challengeCommitment), challenger.privateKey);
-        signatures = [
-          { r: r0, s: s0, v: v0 },
-          { r: r1, s: s1, v: v1 },
-        ];
+        const { r: r0, s: s0, v: v0 } = sign(
+          getHexForCommitment(agreedCommitment),
+          challengee.privateKey,
+        );
+        const { r: r1, s: s1, v: v1 } = sign(
+          getHexForCommitment(challengeCommitment),
+          challenger.privateKey,
+        );
+        signatures = [{ r: r0, s: s0, v: v0 }, { r: r1, s: s1, v: v1 }];
 
-        const { r: r2, s: s2, v: v2 } = sign(getHexForCommitment(alternativeCommitment), challenger.privateKey);
-        const { r: r3, s: s3, v: v3 } = sign(getHexForCommitment(responseCommitment), challengee.privateKey);
+        const { r: r2, s: s2, v: v2 } = sign(
+          getHexForCommitment(alternativeCommitment),
+          challenger.privateKey,
+        );
+        const { r: r3, s: s3, v: v3 } = sign(
+          getHexForCommitment(responseCommitment),
+          challengee.privateKey,
+        );
 
         alternativeSignature = { r: r2, s: s2, v: v2 };
         responseSignature = { r: r3, s: s3, v: v3 };
