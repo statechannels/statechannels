@@ -141,31 +141,6 @@ export const itIncreasesTurnNumBy = (
   });
 };
 
-export const itDispatchesThisAction = (action, state: StateWithSideEffects<any>) => {
-  if (action.type) {
-    it(`dispatches ${action.type}`, () => {
-      // The actionOutbox should only dispatch internal actions
-      // We were passed the whole action
-      expect(action.type).toMatch('WALLET.INTERNAL');
-      expectSideEffect('actionOutbox', state, action);
-    });
-  } else {
-    it(`dispatches ${action}`, () => {
-      // We were just passed the type
-      expect(action).toMatch('WALLET.INTERNAL');
-      expectSideEffect('actionOutbox', state, action);
-    });
-  }
-};
-
-export const itDispatchesNoAction = (state: StateWithSideEffects<any>) => {
-  it(`dispatches no action`, () => {
-    if (state.sideEffects) {
-      expectSideEffect('actionOutbox', state, undefined);
-    }
-  });
-};
-
 export function itChangesDepositStatusTo(status: string, state) {
   it(`changes depositStatus to ${status} `, () => {
     expect(state.state.depositStatus).toEqual(status);

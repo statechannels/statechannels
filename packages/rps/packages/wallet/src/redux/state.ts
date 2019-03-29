@@ -1,6 +1,6 @@
 import { OutboxState, EMPTY_OUTBOX_STATE } from './outbox/state';
 import { FundingState, EMPTY_FUNDING_STATE } from './fundingState/state';
-import { ChannelState } from './channelState/state';
+import { ChannelState, ChannelStatus } from './channelState/state';
 import { Properties } from './utils';
 
 export type WalletState = WaitForLogin | WaitForAdjudicator | MetaMaskError | Initialized;
@@ -82,4 +82,8 @@ export function initialized(params: Properties<Initialized>): Initialized {
     networkId,
     adjudicator,
   };
+}
+
+export function getChannelStatus(state: WalletState, channelId: string): ChannelStatus {
+  return state.channelState.initializedChannels[channelId];
 }

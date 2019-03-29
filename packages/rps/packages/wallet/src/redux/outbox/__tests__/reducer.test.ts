@@ -11,15 +11,10 @@ describe('when a side effect occured', () => {
   const sendFundingDeclinedActionA = outgoing.messageRelayRequested('0xa00', 'FundingDeclined');
   const sendFundingDeclinedActionB = outgoing.messageRelayRequested('0xb00', 'FundingDeclined');
   const displayOutbox = [outgoing.hideWallet(), outgoing.showWallet()];
-  const actionOutbox = [
-    actions.internal.directFundingConfirmed(channelId),
-    actions.internal.directFundingConfirmed(channelId),
-  ];
   const transactionOutbox = [mockTransactionOutboxItem, mockTransactionOutboxItem];
   const messageOutbox = [sendFundingDeclinedActionA, sendFundingDeclinedActionB];
   const state: OutboxState = {
     displayOutbox,
-    actionOutbox,
     transactionOutbox,
     messageOutbox,
   };
@@ -40,11 +35,5 @@ describe('when a side effect occured', () => {
     const action = actions.transactionSentToMetamask(channelId);
     const updatedState = clearOutbox(state, action);
     expect(updatedState.transactionOutbox).toMatchObject(transactionOutbox.slice(1));
-  });
-
-  it('clears the first element of the actionOutbox', () => {
-    const action = state.actionOutbox[0];
-    const updatedState = clearOutbox(state, action);
-    expect(updatedState.actionOutbox).toMatchObject(actionOutbox.slice(1));
   });
 });

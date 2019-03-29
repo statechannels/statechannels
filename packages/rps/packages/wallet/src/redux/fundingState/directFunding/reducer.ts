@@ -23,7 +23,6 @@ export const directFundingStatusReducer = (
     if (bigNumberify(action.totalForDestination).gte(state.requestedTotalFunds)) {
       return {
         state: states.channelFunded(state),
-        sideEffects: { actionOutbox: actions.internal.directFundingConfirmed(state.channelId) },
       };
     }
   }
@@ -88,7 +87,6 @@ const waitForFundingConfirmationReducer = (
       ) {
         return {
           state: states.channelFunded(state),
-          sideEffects: { actionOutbox: actions.internal.directFundingConfirmed(state.channelId) },
         };
       } else {
         return { state };
