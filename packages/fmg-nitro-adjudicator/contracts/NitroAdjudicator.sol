@@ -54,14 +54,34 @@ contract NitroAdjudicator {
     // Eth Management
     // **************
 
-    function deposit(address destination) public payable {
-        holdings[destination] = holdings[destination].add(msg.value);
-        emit Deposited(destination,msg.value, holdings[destination]);
+    function deposit(address destination, uint expectedHeld) public payable {
+        uint amount = msg.value;
+        uint amountDeposited;
+
+        require(
+            holdings[destination] >= expectedHeld,
+            "Deposit: holdings[destination] is less than expected"
+        );
+        if (holdings[destination] == expectedHeld) {
+            amountDeposited = amount;
+        } else if (holdings[destination] < expectedHeld.add(amount)) {
+            amountDeposited = expectedHeld.add(amount).sub(holdings[destination]);
+        } else {
+            amountDeposited = 0;
+        }
+
+        holdings[destination] = holdings[destination].add(amountDeposited);
+        if (amountDeposited < amount) {
+            // refund whatever wasn't deposited.
+            msg.sender.transfer(amount - amountDeposited);
+        }
+
+        emit Deposited(destination, amountDeposited, holdings[destination]);
     }
 
     function transferAndWithdraw(address channel, address participant, address payable destination, uint amount, uint8 _v, bytes32 _r, bytes32 _s) public payable {
-        transfer(channel, participant,amount);
-        withdraw(participant, destination, amount, _v,_r,_s);
+        transfer(channel, participant, amount);
+        withdraw(participant, destination, amount, _v, _r ,_s);
     }
 
     function withdraw(address participant, address payable destination, uint amount, uint8 _v, bytes32 _r, bytes32 _s) public payable {
