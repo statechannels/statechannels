@@ -1,6 +1,6 @@
 import { unreachable } from '../../../../utils/reducer-utils';
 import { createDepositTransaction } from '../../../../utils/transaction-generator';
-import { StateWithSideEffects } from '../../../shared/state';
+import { StateWithSideEffects } from '../../../utils';
 
 import * as actions from '../../../actions';
 import * as states from './state';

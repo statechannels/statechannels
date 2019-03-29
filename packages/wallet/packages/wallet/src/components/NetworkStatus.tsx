@@ -2,7 +2,7 @@ import React from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faDotCircle } from '@fortawesome/free-solid-svg-icons';
 import { connect } from 'react-redux';
-import { AdjudicatorKnown } from '../redux/shared/state';
+import { Initialized } from '../redux/state';
 
 interface NetworkStatusProps {
   networkId: number;
@@ -52,7 +52,7 @@ export class NetworkStatus extends React.PureComponent<NetworkStatusProps> {
   }
 }
 
-const mapStateToProps = (state: AdjudicatorKnown): NetworkStatusProps => ({
+const mapStateToProps = (state: Initialized): NetworkStatusProps => ({
   networkId: state.networkId,
 });
 

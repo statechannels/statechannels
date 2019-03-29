@@ -14,8 +14,10 @@ interface WalletProps {
 class WalletContainer extends PureComponent<WalletProps> {
   render() {
     const { state } = this.props;
-    switch (state.stage) {
-      case states.INITIALIZING:
+    switch (state.type) {
+      case states.WAIT_FOR_LOGIN:
+      case states.METAMASK_ERROR:
+      case states.WAIT_FOR_ADJUDICATOR:
         return <InitializingContainer state={state} />;
       case states.WALLET_INITIALIZED:
         return <WalletInitializedContainer state={state} />;

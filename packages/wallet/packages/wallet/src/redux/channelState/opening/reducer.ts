@@ -11,7 +11,7 @@ import { unreachable } from '../../../utils/reducer-utils';
 import { signCommitment, validCommitmentSignature } from '../../../utils/signing-utils';
 import { CommitmentType } from 'fmg-core';
 import { channelID } from 'fmg-core/lib/channel';
-import { StateWithSideEffects } from '../../shared/state';
+import { StateWithSideEffects } from '../../utils';
 
 export const openingReducer = (
   state: channelStates.OpeningState,

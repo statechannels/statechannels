@@ -3,7 +3,7 @@ import * as actions from '../actions';
 
 import { ReducerWithSideEffects, combineReducersWithSideEffects } from '../../utils/reducer-utils';
 
-import { StateWithSideEffects } from '../shared/state';
+import { StateWithSideEffects } from '../utils';
 import { bigNumberify } from 'ethers/utils';
 import { createDepositTransaction } from '../../utils/transaction-generator';
 import { directFundingStatusReducer } from './directFunding/reducer';

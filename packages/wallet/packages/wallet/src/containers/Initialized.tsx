@@ -4,7 +4,7 @@ import SidebarLayout from '../components/SidebarLayout';
 import { connect } from 'react-redux';
 import ChannelContainer from './Channel';
 interface Props {
-  state: states.InitializedState;
+  state: states.Initialized;
 }
 
 class WalletInitializedContainer extends PureComponent<Props> {

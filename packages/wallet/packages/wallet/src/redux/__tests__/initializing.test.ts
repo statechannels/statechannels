@@ -1,7 +1,7 @@
-import { initializingReducer } from '../reducer';
+import { walletReducer } from '../reducer';
 
-import * as states from '../../state';
-import * as actions from '../../actions';
+import * as states from '../state';
+import * as actions from '../actions';
 
 const defaults = { ...states.emptyState, uid: 'uid' };
 
@@ -10,7 +10,7 @@ describe('when in WaitForLogin', () => {
 
   describe('when the player logs in', () => {
     const action = actions.loggedIn('uid');
-    const updatedState = initializingReducer(state, action);
+    const updatedState = walletReducer(state, action);
 
     it('transitions to WAIT_FOR_ADJUDICATOR', async () => {
       expect(updatedState.type).toEqual(states.WAIT_FOR_ADJUDICATOR);
@@ -23,7 +23,7 @@ describe('when in WaitForAdjudicator', () => {
 
   describe('when the adjudicator is known', () => {
     const action = actions.adjudicatorKnown('address', 'network_id');
-    const updatedState = initializingReducer(state, action);
+    const updatedState = walletReducer(state, action);
 
     it('transitions to WALLET_INITIALIZED', async () => {
       expect(updatedState.type).toEqual(states.WALLET_INITIALIZED);
