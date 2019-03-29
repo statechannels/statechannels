@@ -1,5 +1,5 @@
 import { getGanacheProvider } from "magmo-devtools";
-import { ethers, providers } from "ethers";
+import { ethers } from "ethers";
 import fs from "fs";
 import path from "path";
 import easyTable from "easy-table";
@@ -17,13 +17,16 @@ interface ContractCalls {
     address?: string;
     code: string;
     methodCalls: MethodCalls;
+    deploy?: {
+      gasData: number[];
+      calls: number;
+    };
   };
 }
 
 /* TODO: 
  - Handle failures gracefully
- - Contract deployment costs (if possible?)
- - Refactor
+ - Organize and clean up
 */
 
 export class GasReporter implements jest.Reporter {
@@ -128,7 +131,9 @@ export class GasReporter implements jest.Reporter {
   outputGasInfo(contractCalls: ContractCalls) {
     console.log();
     console.log("Gas Info:");
-    const table = new easyTable();
+    console.log();
+    console.log("Function Calls:");
+    const methodTable = new easyTable();
     for (const contractName of Object.keys(contractCalls)) {
       const methodCalls = contractCalls[contractName].methodCalls;
       Object.keys(methodCalls).forEach(methodName => {
@@ -137,35 +142,52 @@ export class GasReporter implements jest.Reporter {
         const average = Math.round(total / method.gasData.length);
         const min = Math.min(...method.gasData);
         const max = Math.max(...method.gasData);
-        table.cell("Contract Name", contractName);
-        table.cell("Method Name", methodName);
-        table.cell("Calls", method.calls);
-        table.cell("Min Gas", min);
-        table.cell("Max Gas", max);
-        table.cell("Average Gas", average);
-        table.newRow();
+        methodTable.cell("Contract Name", contractName);
+        methodTable.cell("Method Name", methodName);
+        methodTable.cell("Calls", method.calls);
+        methodTable.cell("Min Gas", min);
+        methodTable.cell("Max Gas", max);
+        methodTable.cell("Average Gas", average);
+        methodTable.newRow();
       });
     }
+    console.log(methodTable.toString());
+    console.log("Deployments:");
+    const deployTable = new easyTable();
+    for (const contractName of Object.keys(contractCalls)) {
+      if (contractCalls[contractName].deploy) {
+        const deploy = contractCalls[contractName].deploy;
 
-    console.log(table.toString());
+        const total = deploy.gasData.reduce((acc, datum) => acc + datum, 0);
+        const average = Math.round(total / deploy.gasData.length);
+        const min = Math.min(...deploy.gasData);
+        const max = Math.max(...deploy.gasData);
+
+        deployTable.cell("Contract Name", contractName);
+        deployTable.cell("Deployments", deploy.calls);
+        deployTable.cell("Min Gas", min);
+        deployTable.cell("Max Gas", max);
+        deployTable.cell("Average Gas", average);
+        deployTable.newRow();
+      }
+    }
+    console.log(deployTable.toString());
   }
 
   async parseBlock(blockNum: number, contractCalls: ContractCalls) {
     const block = await this.provider.getBlock(blockNum);
     for (const transHash of block.transactions) {
       const transaction = await this.provider.getTransaction(transHash);
-
       const transactionReceipt = await this.provider.getTransactionReceipt(transHash);
+
       if (transaction.to) {
         const code = await this.provider.getCode(transaction.to);
+
         for (const contractName of Object.keys(contractCalls)) {
           const contractCall = contractCalls[contractName];
-          if (
-            contractCall.code.localeCompare(code, undefined, {
-              sensitivity: "base",
-            }) === 0
-          ) {
+          if (contractCall.code.localeCompare(code, undefined, { sensitivity: "base" }) === 0) {
             const details = contractCall.interface.parseTransaction(transaction);
+
             if (details != null) {
               if (!contractCall.methodCalls[details.name]) {
                 contractCall.methodCalls[details.name] = {
@@ -176,6 +198,19 @@ export class GasReporter implements jest.Reporter {
               contractCall.methodCalls[details.name].gasData.push(transactionReceipt.gasUsed.toNumber());
               contractCall.methodCalls[details.name].calls++;
             }
+          }
+        }
+      } else if (transactionReceipt.contractAddress) {
+        const code = await this.provider.getCode(transactionReceipt.contractAddress);
+
+        for (const contractName of Object.keys(contractCalls)) {
+          const contractCall = contractCalls[contractName];
+          if (contractCall.code.localeCompare(code, undefined, { sensitivity: "base" }) === 0) {
+            if (!contractCall.deploy) {
+              contractCall.deploy = { calls: 0, gasData: [] };
+            }
+            contractCall.deploy.calls++;
+            contractCall.deploy.gasData.push(transactionReceipt.gasUsed.toNumber());
           }
         }
       }
