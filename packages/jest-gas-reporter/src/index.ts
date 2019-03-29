@@ -1,8 +1,9 @@
 import { getGanacheProvider } from "magmo-devtools";
-import { ethers } from "ethers";
+import { ethers, providers } from "ethers";
 import fs from "fs";
 import path from "path";
 import easyTable from "easy-table";
+import linker from "solc/linker";
 interface MethodCalls {
   [methodName: string]: {
     gasData: number[];
@@ -13,6 +14,8 @@ interface MethodCalls {
 interface ContractCalls {
   [contractName: string]: {
     interface: ethers.utils.Interface;
+    address?: string;
+    code: string;
     methodCalls: MethodCalls;
   };
 }
@@ -20,6 +23,7 @@ interface ContractCalls {
 /* TODO: 
  - Handle failures gracefully
  - Contract deployment costs (if possible?)
+ - Refactor
 */
 
 export class GasReporter implements jest.Reporter {
@@ -27,47 +31,98 @@ export class GasReporter implements jest.Reporter {
   provider: ethers.providers.JsonRpcProvider;
   globalConfig: any;
   startBlockNum: number;
-  contractCalls: ContractCalls = {};
+  contractArtifactDirectory: string;
 
   constructor(globalConfig: any, options: any) {
     this.globalConfig = globalConfig;
     this.options = options;
     this.provider = getGanacheProvider();
-    this.startBlockNum = 0;
-    if (!options.contractArtifactFolder) {
-      console.log(
-        "The contractArtifactFolder was not set in options, assuming a default folder of '/build/contracts/'"
-      );
-      this.parseContractArtifactFolder("./build/contracts");
-    } else {
-      this.parseContractArtifactFolder(options.contractArtifactFolder);
-    }
   }
 
-  onRunStart(
-    results: jest.AggregatedResult,
-    options: jest.ReporterOnStartOptions
-  ): Promise<void> {
+  onRunStart(results: jest.AggregatedResult, options: jest.ReporterOnStartOptions): void {
+    if (!this.options.contractArtifactFolder) {
+      console.log("The contractArtifactFolder was not set in options, assuming a default folder of '/build/contracts/'");
+      this.options.contractArtifactFolder = "build/contracts";
+    }
+    this.provider.getBlockNumber().then(blockNum => {
+      // We know that the next block could contain relevant transactions
+      this.startBlockNum = blockNum + 1;
+    });
+  }
+
+  onRunComplete(contexts: jest.Set<jest.Context>, results: jest.AggregatedResult): Promise<void> {
     return new Promise((resolve, reject) => {
-      this.provider.getBlockNumber().then(blockNum => {
-        this.startBlockNum = blockNum;
+      this.generateFinalResults().then(() => {
         resolve();
       });
     });
   }
 
-  onRunComplete(
-    contexts: jest.Set<jest.Context>,
-    results: jest.AggregatedResult
-  ): Promise<void> {
-    return new Promise((resolve, reject) => {
-      this.provider.getBlockNumber().then(blockNum => {
-        this.parseAllBlocks(this.startBlockNum + 1, blockNum).then(() => {
-          this.outputGasInfo(this.contractCalls);
-          resolve();
-        });
-      });
+  async generateFinalResults() {
+    const endBlockNum = await this.provider.getBlockNumber();
+    const contractCalls = await this.parseContractCalls(this.startBlockNum, endBlockNum, this.options.contractArtifactFolder);
+    this.outputGasInfo(contractCalls);
+  }
+
+  async parseContractCalls(startBlockNum: number, endBlockNum: number, contractFolder: string): Promise<ContractCalls> {
+    const networkId = (await this.provider.getNetwork()).chainId;
+    const contractCalls = await this.parseContractArtifactFolder(contractFolder, networkId);
+    for (let i = startBlockNum; i <= endBlockNum; i++) {
+      await this.parseBlock(i, contractCalls);
+    }
+    return contractCalls;
+  }
+
+  parseContractArtifactFolder(contractFolder: string, networkId: number): ContractCalls {
+    const contractCalls: ContractCalls = {};
+    const contractArtifacts = fs.readdirSync(contractFolder);
+
+    contractArtifacts.forEach((artifact: string) => {
+      const fileLocation = path.join(contractFolder, artifact);
+      const fileContent = fs.readFileSync(fileLocation, "utf8");
+      const parsedArtifact = JSON.parse(fileContent);
+      this.parseInterfaceAndAddress(parsedArtifact, networkId, contractCalls);
     });
+
+    contractArtifacts.forEach((artifact: string) => {
+      const fileLocation = path.join(contractFolder, artifact);
+      const fileContent = fs.readFileSync(fileLocation, "utf8");
+      const parsedArtifact = JSON.parse(fileContent);
+      this.parseCode(parsedArtifact, contractCalls);
+    });
+
+    return contractCalls;
+  }
+
+  parseCode(parsedArtifact: any, contractCalls: ContractCalls) {
+    const lookup = {};
+    for (const contractName of Object.keys(contractCalls)) {
+      if (contractCalls[contractName].address) {
+        lookup[contractName] = contractCalls[contractName].address;
+      }
+    }
+
+    if (parsedArtifact.deployedBytecode) {
+      const linkedCode = linker.linkBytecode(parsedArtifact.deployedBytecode, lookup);
+      contractCalls[parsedArtifact.contractName].code = linkedCode;
+    }
+  }
+
+  parseInterfaceAndAddress(parsedArtifact: any, networkId: number, contractCalls: ContractCalls) {
+    // Only attempt to parse as a contract if we have a defined ABI and contractName
+    if (parsedArtifact.abi && parsedArtifact.contractName) {
+      const contractInterface = new ethers.utils.Interface(parsedArtifact.abi);
+
+      contractCalls[parsedArtifact.contractName] = {
+        methodCalls: {},
+        code: "",
+        interface: contractInterface,
+      };
+
+      if (parsedArtifact.networks[networkId]) {
+        contractCalls[parsedArtifact.contractName].address = parsedArtifact.networks[networkId].address;
+      }
+    }
   }
 
   outputGasInfo(contractCalls: ContractCalls) {
@@ -89,57 +144,37 @@ export class GasReporter implements jest.Reporter {
         table.newRow();
       });
     }
+
     console.log(table.toString());
   }
 
-  parseContractArtifactFolder(contractFolder: string) {
-    const contractArtifacts = fs.readdirSync(contractFolder);
-    contractArtifacts.forEach((artifact: string) => {
-      const fileLocation = path.join(contractFolder, artifact);
-      const fileContent = fs.readFileSync(fileLocation, "utf8");
-
-      const parsedArtifact = JSON.parse(fileContent);
-      // Only attempt to parse as a contract if we have a defined ABI and contractName
-      if (parsedArtifact.abi && parsedArtifact.contractName) {
-        const contractInterface = new ethers.utils.Interface(
-          parsedArtifact.abi
-        );
-        this.contractCalls[parsedArtifact.contractName] = {
-          methodCalls: {},
-          interface: contractInterface,
-        };
-      }
-    });
-  }
-
-  async parseAllBlocks(startBlockNum: number, endBlockNum: number) {
-    for (let i = startBlockNum; i <= endBlockNum; i++) {
-      await this.parseBlock(i);
-    }
-  }
-
-  async parseBlock(blockNum: number) {
+  async parseBlock(blockNum: number, contractCalls: ContractCalls) {
     const block = await this.provider.getBlock(blockNum);
     for (const transHash of block.transactions) {
       const transaction = await this.provider.getTransaction(transHash);
-      const transactionReceipt = await this.provider.getTransactionReceipt(
-        transHash
-      );
 
-      for (const contractName of Object.keys(this.contractCalls)) {
-        const contractCall = this.contractCalls[contractName];
-        const details = contractCall.interface.parseTransaction(transaction);
-        if (details != null) {
-          if (!contractCall.methodCalls[details.name]) {
-            contractCall.methodCalls[details.name] = {
-              gasData: [],
-              calls: 0,
-            };
+      const transactionReceipt = await this.provider.getTransactionReceipt(transHash);
+      if (transaction.to) {
+        const code = await this.provider.getCode(transaction.to);
+        for (const contractName of Object.keys(contractCalls)) {
+          const contractCall = contractCalls[contractName];
+          if (
+            contractCall.code.localeCompare(code, undefined, {
+              sensitivity: "base",
+            }) === 0
+          ) {
+            const details = contractCall.interface.parseTransaction(transaction);
+            if (details != null) {
+              if (!contractCall.methodCalls[details.name]) {
+                contractCall.methodCalls[details.name] = {
+                  gasData: [],
+                  calls: 0,
+                };
+              }
+              contractCall.methodCalls[details.name].gasData.push(transactionReceipt.gasUsed.toNumber());
+              contractCall.methodCalls[details.name].calls++;
+            }
           }
-          contractCall.methodCalls[details.name].gasData.push(
-            transactionReceipt.gasUsed.toNumber()
-          );
-          contractCall.methodCalls[details.name].calls++;
         }
       }
     }
