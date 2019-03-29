@@ -221,16 +221,11 @@ describe('nitroAdjudicator', () => {
       });
 
       it('fires a deposited event', async () => {
-        const filter = nitro.filters.Deposited(null, null, null);
-        const { emitterWitness, eventPromise } = expectEvent(nitro, filter);
         const channelID = getChannelID(channel);
-        await depositTo(channelID);
-        const event = await eventPromise;
-
-        expect(emitterWitness).toBeCalled();
-
-        expect(event.args.destination).toEqual(channelID);
-        expect(event.args.amountDeposited).toEqual(bigNumberify(DEPOSIT_AMOUNT));
+        expectEvent(await (await depositTo(channelID)).wait(), 'Deposited', {
+          destination: channelID,
+          amountDeposited: bigNumberify(DEPOSIT_AMOUNT),
+        });
       });
 
       it('reverts when holdings is less than or equal to the expected level', async () => {
@@ -244,58 +239,34 @@ describe('nitroAdjudicator', () => {
       it('refunds the entire deposit when holdings is greater than the expected held plus the amount sent', async () => {
         const channelID = getChannelID(channel);
         {
-          const filter = nitro.filters.Deposited(null, null, null);
-          const { emitterWitness, eventPromise } = expectEvent(nitro, filter);
-
-          const tx = await depositTo(channelID, DEPOSIT_AMOUNT, 0);
-          await tx.wait();
-
-          const event = await eventPromise;
-          expect(emitterWitness).toBeCalled();
-          expect(event.args.destination).toEqual(channelID);
-          expect(event.args.amountDeposited).toEqual(bigNumberify(DEPOSIT_AMOUNT));
+          await expectEvent(await depositTo(channelID, DEPOSIT_AMOUNT, 0), 'Deposited', {
+            destination: channelID,
+            amountDeposited: bigNumberify(DEPOSIT_AMOUNT),
+          });
         }
 
         {
-          const filter = nitro.filters.Deposited(null, null, null);
-          const { emitterWitness, eventPromise } = expectEvent(nitro, filter);
-
-          const tx = await depositTo(channelID, DEPOSIT_AMOUNT, 0);
-          await tx.wait();
-
-          const event = await eventPromise;
-          expect(emitterWitness).toBeCalled();
-          expect(event.args.destination).toEqual(channelID);
-          expect(event.args.amountDeposited).toEqual(bigNumberify(0));
+          await expectEvent(await depositTo(channelID, DEPOSIT_AMOUNT, 0), 'Deposited', {
+            destination: channelID,
+            amountDeposited: bigNumberify(0),
+          });
         }
       });
 
       it('refunds part of the deposit when holdings is greater than the expected held plus the amount sent', async () => {
         const channelID = getChannelID(channel);
         {
-          const filter = nitro.filters.Deposited(null, null, null);
-          const { emitterWitness, eventPromise } = expectEvent(nitro, filter);
-
-          const tx = await depositTo(channelID, DEPOSIT_AMOUNT, 0);
-          await tx.wait();
-
-          const event = await eventPromise;
-          expect(emitterWitness).toBeCalled();
-          expect(event.args.destination).toEqual(channelID);
-          expect(event.args.amountDeposited).toEqual(bigNumberify(DEPOSIT_AMOUNT));
+          await expectEvent(await depositTo(channelID, DEPOSIT_AMOUNT, 0), 'Deposited', {
+            destination: channelID,
+            amountDeposited: bigNumberify(DEPOSIT_AMOUNT),
+          });
         }
 
         {
-          const filter = nitro.filters.Deposited(null, null, null);
-          const { emitterWitness, eventPromise } = expectEvent(nitro, filter);
-
-          const tx = await depositTo(channelID, DEPOSIT_AMOUNT, 1);
-          await tx.wait();
-
-          const event = await eventPromise;
-          expect(emitterWitness).toBeCalled();
-          expect(event.args.destination).toEqual(channelID);
-          expect(event.args.amountDeposited).toEqual(bigNumberify(1));
+          await expectEvent(await depositTo(channelID, DEPOSIT_AMOUNT, 1), 'Deposited', {
+            destination: channelID,
+            amountDeposited: bigNumberify(1),
+          });
         }
       });
     });
@@ -1156,26 +1127,20 @@ describe('nitroAdjudicator', () => {
 
         expectedAssertions += 1;
         expect(await nitro.outcomeFinal(getChannelID(channel))).toBe(false);
-        const filter = nitro.filters.ChallengeCreated(null, null, null);
-
-        const { emitterWitness, eventPromise } = expectEvent(nitro, filter);
-
         const tx = await nitro.forceMove(
           getEthersObjectForCommitment(agreedCommitment),
           getEthersObjectForCommitment(challengeCommitment),
           ZERO_ADDRESS,
           signatures,
         );
-        await tx.wait();
-        const event = await eventPromise;
+        const { events } = await tx.wait();
 
         expect(await nitro.isChallengeOngoing(getChannelID(channel))).toBe(true);
-        expect(emitterWitness).toBeCalled();
 
         // The challenge expiry should be in the future
         const blockNumber = await provider.getBlockNumber();
         const blockTimestamp = (await provider.getBlock(blockNumber)).timestamp;
-        expect(event.args.finalizedAt.gt(blockTimestamp)).toBe(true);
+        expect(events[0].args.finalizedAt.gt(blockTimestamp)).toBe(true);
       });
 
       it('reverts when the move is not valid', async () => {
@@ -1317,11 +1282,13 @@ describe('nitroAdjudicator', () => {
       it('works', async () => {
         await runBeforeRefute();
 
-        const { emitterWitness, eventPromise } = expectEvent(nitro, 'Refuted');
-        await nitro.refute(getEthersObjectForCommitment(refutationCommitment), refutationSignature);
-
-        await eventPromise;
-        expect(emitterWitness).toBeCalled();
+        await expectEvent(
+          await nitro.refute(
+            getEthersObjectForCommitment(refutationCommitment),
+            refutationSignature,
+          ),
+          'Refuted',
+        );
 
         // "challenge should be cancelled
         expect(await nitro.isChallengeOngoing(getChannelID(channel))).toBe(false);
@@ -1427,14 +1394,13 @@ describe('nitroAdjudicator', () => {
       it('works', async () => {
         await runBeforeRespond();
 
-        const { emitterWitness, eventPromise } = expectEvent(nitro, 'RespondedWithMove');
-        await nitro.respondWithMove(
-          getEthersObjectForCommitment(responseCommitment),
-          responseSignature,
+        await expectEvent(
+          await nitro.respondWithMove(
+            getEthersObjectForCommitment(responseCommitment),
+            responseSignature,
+          ),
+          'RespondedWithMove',
         );
-
-        await eventPromise;
-        expect(emitterWitness).toBeCalled();
 
         // "challenge should be cancelled
         expect(await nitro.isChallengeOngoing(getChannelID(channel))).toBe(false);
@@ -1552,16 +1518,15 @@ describe('nitroAdjudicator', () => {
       it('works', async () => {
         await runBeforeAlternativeRespond();
 
-        const { emitterWitness, eventPromise } = expectEvent(nitro, 'RespondedWithAlternativeMove');
-        await nitro.alternativeRespondWithMove(
-          getEthersObjectForCommitment(alternativeCommitment),
-          getEthersObjectForCommitment(responseCommitment),
-          alternativeSignature,
-          responseSignature,
+        await expectEvent(
+          await nitro.alternativeRespondWithMove(
+            getEthersObjectForCommitment(alternativeCommitment),
+            getEthersObjectForCommitment(responseCommitment),
+            alternativeSignature,
+            responseSignature,
+          ),
+          'RespondedWithAlternativeMove',
         );
-
-        await eventPromise;
-        expect(emitterWitness).toBeCalled();
 
         // "challenge should be cancelled
         expect(await nitro.isChallengeOngoing(getChannelID(channel))).toBe(false);
