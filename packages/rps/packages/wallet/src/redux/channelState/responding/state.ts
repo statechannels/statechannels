@@ -1,5 +1,5 @@
 import { ChallengeExists, challengeExists } from '../shared/state';
-import { TransactionExists } from '../../shared/state';
+import { TransactionExists } from '../../utils';
 
 // stage
 export const RESPONDING = 'RESPONDING';

@@ -4,7 +4,7 @@ import * as actions from '../../actions';
 
 import { unreachable } from '../../../utils/reducer-utils';
 
-import { StateWithSideEffects } from 'src/redux/shared/state';
+import { StateWithSideEffects } from 'src/redux/utils';
 import { depositingReducer } from './depositing/reducer';
 import { bigNumberify } from 'ethers/utils';
 import { createDepositTransaction } from '../../../utils/transaction-generator';

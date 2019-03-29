@@ -16,7 +16,7 @@ import { signCommitment, validCommitmentSignature } from '../../../utils/signing
 
 import { Channel, Commitment, CommitmentType } from 'fmg-core';
 import { handleSignatureAndValidationMessages } from '../../../utils/state-utils';
-import { StateWithSideEffects } from '../../shared/state';
+import { StateWithSideEffects } from '../../utils';
 
 export const fundingReducer = (
   state: states.FundingState,

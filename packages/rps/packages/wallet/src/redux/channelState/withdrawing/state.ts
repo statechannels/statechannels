@@ -1,5 +1,5 @@
 import { UserAddressExists, userAddressExists, channelOpen, ChannelOpen } from '../shared/state';
-import { TransactionExists } from '../../shared/state';
+import { TransactionExists } from '../../utils';
 
 // stage
 export const WITHDRAWING = 'STAGE.WITHDRAWING';

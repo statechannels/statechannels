@@ -1,5 +1,5 @@
 import { ChannelStatus } from '../channelState/state';
-import { StateWithSideEffects } from '../shared/state';
+import { StateWithSideEffects } from '../utils';
 import { Commitment } from 'fmg-core';
 import { TransactionOutboxItem } from '../outbox/state';
 

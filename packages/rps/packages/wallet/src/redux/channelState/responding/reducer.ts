@@ -11,7 +11,7 @@ import {
   showWallet,
 } from 'magmo-wallet-client/lib/wallet-events';
 import { handleSignatureAndValidationMessages } from '../../../utils/state-utils';
-import { StateWithSideEffects } from '../../shared/state';
+import { StateWithSideEffects } from '../../utils';
 
 export const respondingReducer = (
   state: states.RespondingState,

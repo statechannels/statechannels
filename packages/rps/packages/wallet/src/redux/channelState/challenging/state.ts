@@ -1,5 +1,5 @@
 import { ChallengeExists, challengeExists, ChannelOpen, channelOpen } from '../shared/state';
-import { TransactionExists } from '../../shared/state';
+import { TransactionExists } from '../../utils';
 export const CHALLENGING = 'CHALLENGING';
 
 export const APPROVE_CHALLENGE = 'APPROVE_CHALLENGE';
