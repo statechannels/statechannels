@@ -895,6 +895,11 @@ combined-stream@^1.0.6, combined-stream@~1.0.6:
   dependencies:
     delayed-stream "~1.0.0"
 
+command-exists@^1.2.8:
+  version "1.2.8"
+  resolved "https://registry.yarnpkg.com/command-exists/-/command-exists-1.2.8.tgz#715acefdd1223b9c9b37110a149c6392c2852291"
+  integrity sha512-PM54PkseWbiiD/mMsbvW351/u+dafwTJ0ye2qB60G1aGQP9j3xK2gmMDc+R34L3nDtx4qMCitXT75mkbkGJDLw==
+
 commander@2.11.0:
   version "2.11.0"
   resolved "https://registry.yarnpkg.com/commander/-/commander-2.11.0.tgz#157152fd1e7a6c8d98a5b715cf376df928004563"
@@ -3286,14 +3291,15 @@ lru-cache@^4.0.1:
     pseudomap "^1.0.2"
     yallist "^2.1.2"
 
-"magmo-devtools@git+https://github.com/magmo/devtools.git#v0.1.11":
-  version "0.1.11"
-  resolved "git+https://github.com/magmo/devtools.git#ff7e4b18122c465c64c478d8561d7f4f47d4932e"
+"magmo-devtools@git+https://github.com/magmo/devtools.git#v0.1.13":
+  version "0.1.13"
+  resolved "git+https://github.com/magmo/devtools.git#650f698f2468ae76020e1466b9686939aa018c4e"
   dependencies:
     chai "^4.2.0"
     detect-port "^1.3.0"
     dotenv "^6.1.0"
     ethers "^4.0.15"
+    solc "^0.5.4"
     yargs "^12.0.5"
 
 make-dir@^1.0.0:
@@ -3830,6 +3836,11 @@ once@^1.3.0, once@^1.3.1, once@^1.4.0:
   dependencies:
     wrappy "1"
 
+openzeppelin-solidity@^2.1.3:
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/openzeppelin-solidity/-/openzeppelin-solidity-2.2.0.tgz#1f0e857f53bda29b77a8e72f9a629db81015fd34"
+  integrity sha512-HfQq0xyT+EPs/lTWEd5Odu4T7CYdYe+qwf54EH28FQZthp4Bs6IWvOlOumTdS2dvpwZoTXURAopHn2LN1pwAGQ==
+
 optimist@^0.6.1:
   version "0.6.1"
   resolved "https://registry.yarnpkg.com/optimist/-/optimist-0.6.1.tgz#da3ea74686fa21a19a111c326e90eb15a0196686"
@@ -3878,7 +3889,7 @@ os-locale@^3.0.0:
     lcid "^2.0.0"
     mem "^4.0.0"
 
-os-tmpdir@^1.0.0, os-tmpdir@^1.0.1:
+os-tmpdir@^1.0.0, os-tmpdir@^1.0.1, os-tmpdir@~1.0.2:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/os-tmpdir/-/os-tmpdir-1.0.2.tgz#bbe67406c79aa85c5cfec766fe5734555dfa1274"
   integrity sha1-u+Z0BseaqFxc/sdm/lc0VV36EnQ=
@@ -4748,6 +4759,20 @@ solc@^0.5.0:
     semver "^5.5.0"
     yargs "^11.0.0"
 
+solc@^0.5.4:
+  version "0.5.7"
+  resolved "https://registry.yarnpkg.com/solc/-/solc-0.5.7.tgz#d84697ac5cc63d9b2139bfb349cec64b64861cdc"
+  integrity sha512-DaYFzB3AAYjzPtgUl9LenPY2xjI3wG9k8U8T8YE/sXHVIoCirCY5MB6mhcFPgk/VyUtaWZPUCWiYS1E6RSiiqw==
+  dependencies:
+    command-exists "^1.2.8"
+    fs-extra "^0.30.0"
+    keccak "^1.0.2"
+    memorystream "^0.3.1"
+    require-from-string "^2.0.0"
+    semver "^5.5.0"
+    tmp "0.0.33"
+    yargs "^11.0.0"
+
 source-map-resolve@^0.5.0:
   version "0.5.2"
   resolved "https://registry.yarnpkg.com/source-map-resolve/-/source-map-resolve-0.5.2.tgz#72e2cc34095543e43b2c62b2c4c10d4a9054f259"
@@ -5092,6 +5117,13 @@ timed-out@^4.0.0, timed-out@^4.0.1:
   version "4.0.1"
   resolved "https://registry.yarnpkg.com/timed-out/-/timed-out-4.0.1.tgz#f32eacac5a175bea25d7fab565ab3ed8741ef56f"
   integrity sha1-8y6srFoXW+ol1/q1Zas+2HQe9W8=
+
+tmp@0.0.33:
+  version "0.0.33"
+  resolved "https://registry.yarnpkg.com/tmp/-/tmp-0.0.33.tgz#6d34335889768d21b2bcda0aa277ced3b1bfadf9"
+  integrity sha512-jRCJlojKnZ3addtTOjdIqoRuPEKBvNXcGYqzO6zWZX8KfKEpnGY5jfggJQ3EjKuu8D4bJRr0y+cYJFmYbImXGw==
+  dependencies:
+    os-tmpdir "~1.0.2"
 
 tmpl@1.0.x:
   version "1.0.4"
