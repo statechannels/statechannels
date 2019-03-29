@@ -126,6 +126,8 @@ export class GasReporter implements jest.Reporter {
   }
 
   outputGasInfo(contractCalls: ContractCalls) {
+    console.log();
+    console.log("Gas Info:");
     const table = new easyTable();
     for (const contractName of Object.keys(contractCalls)) {
       const methodCalls = contractCalls[contractName].methodCalls;
