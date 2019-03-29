@@ -4,7 +4,7 @@ import { channelID } from 'fmg-core/lib/channel';
 import { accumulateSideEffects } from '../redux/outbox';
 import { SideEffects } from 'src/redux/outbox/state';
 import { WalletAction } from 'src/redux/actions';
-import { StateWithSideEffects } from 'src/redux/shared/state';
+import { StateWithSideEffects } from 'src/redux/utils';
 
 export function unreachable(x: never) {
   return x;

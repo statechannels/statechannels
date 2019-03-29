@@ -12,7 +12,7 @@ import { getProvider } from '../../utils/contract-utils';
 import { displaySender } from './display-sender';
 import { ganacheMiner } from './ganache-miner';
 import { adjudicatorLoader } from './adjudicator-loader';
-import { WALLET_INITIALIZED } from '../initialized/state';
+import { WALLET_INITIALIZED } from '../state';
 
 export function* sagaManager(): IterableIterator<any> {
   let adjudicatorWatcherProcess;

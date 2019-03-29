@@ -18,7 +18,7 @@ import {
 import { validCommitmentSignature } from '../../utils/signing-utils';
 import { showWallet, channelInitializationSuccess } from 'magmo-wallet-client/lib/wallet-events';
 import { CommitmentType } from 'fmg-core';
-import { StateWithSideEffects } from '../shared/state';
+import { StateWithSideEffects } from '../utils';
 import { ethers } from 'ethers';
 import { channelID } from 'fmg-core/lib/channel';
 import { WalletAction } from '../actions';

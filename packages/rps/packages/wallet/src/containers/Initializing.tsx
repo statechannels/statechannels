@@ -4,7 +4,7 @@ import SidebarLayout from '../components/SidebarLayout';
 import LandingPage from '../components/LandingPage';
 import { connect } from 'react-redux';
 interface Props {
-  state: states.InitializingState;
+  state: states.WalletState;
 }
 
 class InitializingContainer extends PureComponent<Props> {
