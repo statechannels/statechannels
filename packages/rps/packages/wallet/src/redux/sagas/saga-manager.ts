@@ -1,4 +1,4 @@
-import { select, take, fork, actionChannel, put, cancel } from 'redux-saga/effects';
+import { select, take, fork, actionChannel, cancel } from 'redux-saga/effects';
 
 import { messageListener } from './message-listener';
 import { messageSender } from './message-sender';
@@ -91,10 +91,6 @@ export function* sagaManager(): IterableIterator<any> {
     if (outboxState.transactionOutbox.length) {
       const { transactionRequest, channelId } = outboxState.transactionOutbox[0];
       yield transactionSender(transactionRequest, channelId);
-    }
-
-    if (outboxState.actionOutbox.length) {
-      yield put(outboxState.actionOutbox[0]);
     }
   }
 }

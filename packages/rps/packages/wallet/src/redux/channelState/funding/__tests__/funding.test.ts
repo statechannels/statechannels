@@ -8,14 +8,10 @@ import {
   itTransitionsToChannelStateType,
   itIncreasesTurnNumBy,
   itSendsThisMessage,
-  itDispatchesThisAction,
-  itDispatchesNoAction,
   itSendsNoMessage,
 } from '../../../__tests__/helpers';
 import * as outgoing from 'magmo-wallet-client/lib/wallet-events';
 import * as SigningUtil from '../../../../utils/signing-utils';
-import { addHex } from '../../../../utils/hex-utils';
-
 const {
   asAddress,
   asPrivateKey,
@@ -28,7 +24,6 @@ const {
   postFundCommitment1,
   postFundCommitment2,
   channelId,
-  twoThree,
 } = scenarios;
 
 const defaults = {
@@ -121,16 +116,6 @@ describe('start in WaitForFundingApproval', () => {
     const updatedState = fundingReducer(state, action);
 
     itTransitionsToChannelStateType(states.WAIT_FOR_FUNDING_AND_POST_FUND_SETUP, updatedState);
-    itDispatchesThisAction(
-      actions.internal.directFundingRequested(
-        channelId,
-        '0x00',
-        twoThree.reduce(addHex),
-        twoThree[0],
-        0,
-      ),
-      updatedState,
-    );
     itIncreasesTurnNumBy(0, state, updatedState);
   });
   describe('incoming action: funding rejected', () => {
@@ -140,7 +125,6 @@ describe('start in WaitForFundingApproval', () => {
     const updatedState = fundingReducer(state, action);
 
     itTransitionsToChannelStateType(states.WAIT_FOR_CHANNEL, updatedState);
-    itDispatchesNoAction(updatedState);
     itSendsThisMessage(updatedState, [outgoing.MESSAGE_RELAY_REQUESTED, outgoing.FUNDING_FAILURE]);
   });
 
@@ -150,7 +134,6 @@ describe('start in WaitForFundingApproval', () => {
     const action = actions.channel.messageReceived('FundingDeclined');
     const updatedState = fundingReducer(state, action);
     itTransitionsToChannelStateType(states.ACKNOWLEDGE_FUNDING_DECLINED, updatedState);
-    itDispatchesNoAction(updatedState);
     itIncreasesTurnNumBy(0, state, updatedState);
   });
 
@@ -162,16 +145,6 @@ describe('start in WaitForFundingApproval', () => {
     const updatedState = fundingReducer(state, action);
 
     itTransitionsToChannelStateType(states.WAIT_FOR_FUNDING_AND_POST_FUND_SETUP, updatedState);
-    itDispatchesThisAction(
-      actions.internal.directFundingRequested(
-        channelId,
-        twoThree[0],
-        twoThree.reduce(addHex),
-        twoThree[1],
-        1,
-      ),
-      updatedState,
-    );
     itIncreasesTurnNumBy(0, state, updatedState);
   });
 });
