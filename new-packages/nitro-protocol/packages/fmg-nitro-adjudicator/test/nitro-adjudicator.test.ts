@@ -32,8 +32,8 @@ const ZERO_ADDRESS = "0x" + "0".repeat(40);
 let nullOutcome: {} | any[];
 const AUTH_TYPES = ['address', 'address', 'uint256', 'address'];
 
-function depositTo(destination: any, value = DEPOSIT_AMOUNT): Promise<any> {
-  return nitro.deposit(destination, { value });
+function depositTo(destination: any, value = DEPOSIT_AMOUNT, expectedHeld = 0): Promise<any> {
+  return nitro.deposit(destination, expectedHeld, { value });
 }
 
 async function withdraw(
@@ -223,6 +223,72 @@ describe('nitroAdjudicator', () => {
 
         expect(event.args.destination).toEqual(channelID);
         expect(event.args.amountDeposited).toEqual(bigNumberify(DEPOSIT_AMOUNT));
+      });
+
+      it('reverts when holdings is less than or equal to the expected level', async () => {
+        const channelID = getChannelID(channel);
+        await expectRevert(
+          () => depositTo(channelID, 10, 5),
+          'Deposit: holdings[destination] is less than expected',
+        );
+      });
+
+      it('refunds the entire deposit when holdings is greater than the expected held plus the amount sent', async () => {
+        const channelID = getChannelID(channel);
+        {
+          const filter = nitro.filters.Deposited(null, null, null);
+          const { emitterWitness, eventPromise } = expectEvent(nitro, filter);
+
+          const tx = await depositTo(channelID, DEPOSIT_AMOUNT, 0);
+          await tx.wait();
+
+          const event = await eventPromise;
+          expect(emitterWitness).toBeCalled();
+          expect(event.args.destination).toEqual(channelID);
+          expect(event.args.amountDeposited).toEqual(bigNumberify(DEPOSIT_AMOUNT));
+        }
+
+        {
+          const filter = nitro.filters.Deposited(null, null, null);
+          const { emitterWitness, eventPromise } = expectEvent(nitro, filter);
+
+          const tx = await depositTo(channelID, DEPOSIT_AMOUNT, 0);
+          await tx.wait();
+
+          const event = await eventPromise;
+          expect(emitterWitness).toBeCalled();
+          expect(event.args.destination).toEqual(channelID);
+          expect(event.args.amountDeposited).toEqual(bigNumberify(0));
+        }
+      });
+
+      it('refunds part of the deposit when holdings is greater than the expected held plus the amount sent', async () => {
+        const channelID = getChannelID(channel);
+        {
+          const filter = nitro.filters.Deposited(null, null, null);
+          const { emitterWitness, eventPromise } = expectEvent(nitro, filter);
+
+          const tx = await depositTo(channelID, DEPOSIT_AMOUNT, 0);
+          await tx.wait();
+
+          const event = await eventPromise;
+          expect(emitterWitness).toBeCalled();
+          expect(event.args.destination).toEqual(channelID);
+          expect(event.args.amountDeposited).toEqual(bigNumberify(DEPOSIT_AMOUNT));
+        }
+
+        {
+          const filter = nitro.filters.Deposited(null, null, null);
+          const { emitterWitness, eventPromise } = expectEvent(nitro, filter);
+
+          const tx = await depositTo(channelID, DEPOSIT_AMOUNT, 1);
+          await tx.wait();
+
+          const event = await eventPromise;
+          expect(emitterWitness).toBeCalled();
+          expect(event.args.destination).toEqual(channelID);
+          expect(event.args.amountDeposited).toEqual(bigNumberify(1));
+        }
       });
     });
 
