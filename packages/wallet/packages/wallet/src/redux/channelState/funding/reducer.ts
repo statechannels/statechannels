@@ -1,5 +1,4 @@
 import * as states from '../state';
-import { addHex } from '../../../utils/hex-utils';
 import * as actions from '../actions';
 import { internal, TRANSACTION_CONFIRMED } from '../../actions';
 import {
@@ -82,23 +81,8 @@ const approveFundingReducer = (
 ): StateWithSideEffects<states.OpenedState | states.WaitForChannel> => {
   switch (action.type) {
     case actions.FUNDING_APPROVED:
-      const totalFundingRequired = state.lastCommitment.commitment.allocation.reduce(addHex);
-      const safeToDepositLevel =
-        state.ourIndex === 0
-          ? '0x00'
-          : state.lastCommitment.commitment.allocation.slice(0, state.ourIndex).reduce(addHex);
-      const ourDeposit = state.lastCommitment.commitment.allocation[state.ourIndex];
       return {
         state: states.waitForFundingAndPostFundSetup(state),
-        sideEffects: {
-          actionOutbox: internal.directFundingRequested(
-            state.channelId,
-            safeToDepositLevel,
-            totalFundingRequired,
-            ourDeposit,
-            state.ourIndex,
-          ),
-        },
       };
     case actions.FUNDING_REJECTED:
       const relayFundingDeclinedMessage = messageRelayRequested(

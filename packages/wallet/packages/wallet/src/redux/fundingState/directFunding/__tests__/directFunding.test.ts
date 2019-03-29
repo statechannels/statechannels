@@ -8,8 +8,6 @@ import * as scenarios from '../../../__tests__/test-scenarios';
 import {
   itChangesChannelFundingStatusTo,
   itChangesDepositStatusTo,
-  itDispatchesThisAction,
-  itDispatchesNoAction,
 } from '../../../__tests__/helpers';
 import { addHex } from '../../../../utils/hex-utils';
 
@@ -51,7 +49,6 @@ describe(startingIn('any state'), () => {
         );
         const updatedState = directFundingStatusReducer(state, action);
         itChangesChannelFundingStatusTo(states.CHANNEL_FUNDED, updatedState);
-        itDispatchesThisAction(actions.internal.DIRECT_FUNDING_CONFIRMED, updatedState);
       });
       describe('when the channel is still not funded', () => {
         const state = states.notSafeToDeposit(defaultsForB);
@@ -62,7 +59,6 @@ describe(startingIn('any state'), () => {
         );
         const updatedState = directFundingStatusReducer(state, action);
         itChangesChannelFundingStatusTo(states.NOT_SAFE_TO_DEPOSIT, updatedState);
-        itDispatchesNoAction(updatedState);
       });
     });
 
@@ -71,7 +67,6 @@ describe(startingIn('any state'), () => {
       const action = actions.funding.fundingReceivedEvent('0xf00', TOTAL_REQUIRED, TOTAL_REQUIRED);
       const updatedState = directFundingStatusReducer(state, action);
       itChangesChannelFundingStatusTo(states.NOT_SAFE_TO_DEPOSIT, updatedState);
-      itDispatchesNoAction(updatedState);
     });
   });
 });
@@ -114,7 +109,6 @@ describe(startingIn(states.SAFE_TO_DEPOSIT), () => {
       const updatedState = directFundingStatusReducer(state, action);
 
       itChangesChannelFundingStatusTo(states.CHANNEL_FUNDED, updatedState);
-      itDispatchesThisAction(actions.internal.DIRECT_FUNDING_CONFIRMED, updatedState);
     });
 
     describe('when it is still not fully funded', () => {
@@ -123,8 +117,6 @@ describe(startingIn(states.SAFE_TO_DEPOSIT), () => {
       const updatedState = directFundingStatusReducer(state, action);
 
       itChangesChannelFundingStatusTo(states.SAFE_TO_DEPOSIT, updatedState);
-      itDispatchesNoAction(updatedState);
-      // itSendsNoMessage(updatedState);
     });
 
     describe('when it is for the wrong channel', () => {
@@ -133,8 +125,6 @@ describe(startingIn(states.SAFE_TO_DEPOSIT), () => {
       const updatedState = directFundingStatusReducer(state, action);
 
       itChangesChannelFundingStatusTo(states.SAFE_TO_DEPOSIT, updatedState);
-      itDispatchesNoAction(updatedState);
-      // itSendsNoMessage(updatedState);
     });
   });
 });

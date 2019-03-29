@@ -13,10 +13,6 @@ export function clearOutbox(state: OutboxState, action: actions.WalletAction): O
     // TODO: Should this be a channel message?
     nextOutbox.transactionOutbox = nextOutbox.transactionOutbox.slice(1);
   }
-  if (action.type.match('WALLET.INTERNAL')) {
-    // For the moment, only one action should ever be put in the actionOutbox,
-    // so it's always safe to clear it.
-    nextOutbox.actionOutbox = nextOutbox.actionOutbox.slice(1);
-  }
+
   return nextOutbox;
 }
