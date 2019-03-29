@@ -3291,9 +3291,9 @@ lru-cache@^4.0.1:
     pseudomap "^1.0.2"
     yallist "^2.1.2"
 
-"magmo-devtools@git+https://github.com/magmo/devtools.git#v0.1.13":
+"magmo-devtools@git+https://github.com/magmo/devtools.git#v0.1.14":
   version "0.1.13"
-  resolved "git+https://github.com/magmo/devtools.git#650f698f2468ae76020e1466b9686939aa018c4e"
+  resolved "git+https://github.com/magmo/devtools.git#8fece104b7b4b7ead39fb9b5d03c661f7b094f90"
   dependencies:
     chai "^4.2.0"
     detect-port "^1.3.0"
