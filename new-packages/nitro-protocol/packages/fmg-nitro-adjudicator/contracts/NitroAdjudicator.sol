@@ -58,10 +58,18 @@ contract NitroAdjudicator {
         uint amount = msg.value;
         uint amountDeposited;
 
+        // This protects against a directly funded channel being defunded due to chain re-orgs,
+        // and allow a wallet implementation to ensure the safety of deposits.
         require(
             holdings[destination] >= expectedHeld,
             "Deposit: holdings[destination] is less than expected"
         );
+
+
+        // If I expect there to be 10 eth and deposit 2, my goal was to get the
+        // balance to 12 eth.
+        // In case some arbitrary person deposited 1 eth before I noticed, making the
+        // holdings 11 eth, I should be refunded 1 eth.
         if (holdings[destination] == expectedHeld) {
             amountDeposited = amount;
         } else if (holdings[destination] < expectedHeld.add(amount)) {
