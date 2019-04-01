@@ -3350,6 +3350,17 @@ lru-cache@^4.0.1:
     ethers "^4.0.15"
     yargs "^12.0.5"
 
+"magmo-devtools@git+https://github.com/magmo/devtools.git#v0.1.14":
+  version "0.1.13"
+  resolved "git+https://github.com/magmo/devtools.git#8fece104b7b4b7ead39fb9b5d03c661f7b094f90"
+  dependencies:
+    chai "^4.2.0"
+    detect-port "^1.3.0"
+    dotenv "^6.1.0"
+    ethers "^4.0.15"
+    solc "^0.5.4"
+    yargs "^12.0.5"
+
 make-dir@^1.0.0:
   version "1.3.0"
   resolved "https://registry.yarnpkg.com/make-dir/-/make-dir-1.3.0.tgz#79c1033b80515bd6d24ec9933e860ca75ee27f0c"
@@ -4808,7 +4819,7 @@ snapdragon@^0.8.1:
     source-map-resolve "^0.5.0"
     use "^3.1.0"
 
-solc@0.5.7:
+solc@0.5.7, solc@^0.5.4:
   version "0.5.7"
   resolved "https://registry.yarnpkg.com/solc/-/solc-0.5.7.tgz#d84697ac5cc63d9b2139bfb349cec64b64861cdc"
   integrity sha512-DaYFzB3AAYjzPtgUl9LenPY2xjI3wG9k8U8T8YE/sXHVIoCirCY5MB6mhcFPgk/VyUtaWZPUCWiYS1E6RSiiqw==
