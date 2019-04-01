@@ -25,14 +25,19 @@ const abiCoder = new ethers.utils.AbiCoder();
 const provider = getGanacheProvider();
 const providerSigner = provider.getSigner();
 
-const DEPOSIT_AMOUNT = 255; //
-const SMALL_WITHDRAW_AMOUNT = 10;
+const DEPOSIT_AMOUNT = ethers.utils.parseEther('100'); //
+const SMALL_WITHDRAW_AMOUNT = ethers.utils.parseEther('10');
+const EPSILON = ethers.utils.parseEther('0.01');
 const ZERO_ADDRESS = '0x' + '0'.repeat(40);
 
 let nullOutcome: {} | any[];
 const AUTH_TYPES = ['address', 'address', 'uint256', 'address'];
 
-function depositTo(destination: any, value = DEPOSIT_AMOUNT, expectedHeld = 0): Promise<any> {
+function depositTo(
+  destination: any,
+  value: ethers.utils.BigNumberish = DEPOSIT_AMOUNT,
+  expectedHeld = 0,
+): Promise<any> {
   return nitro.deposit(destination, expectedHeld, { value });
 }
 
@@ -40,7 +45,7 @@ async function withdraw(
   participant,
   destination: Address,
   signer = participant,
-  amount = DEPOSIT_AMOUNT,
+  amount: ethers.utils.BigNumberish = DEPOSIT_AMOUNT,
   senderAddr = null,
 ): Promise<any> {
   senderAddr = senderAddr || (await nitro.signer.getAddress());
@@ -217,7 +222,7 @@ describe('nitroAdjudicator', () => {
         await depositTo(channelID);
         const allocatedAmount = await nitro.holdings(channelID);
 
-        expect(allocatedAmount.toNumber()).toEqual(DEPOSIT_AMOUNT);
+        expect(allocatedAmount).toEqual(DEPOSIT_AMOUNT);
       });
 
       it('fires a deposited event', async () => {
@@ -263,10 +268,16 @@ describe('nitroAdjudicator', () => {
         }
 
         {
+          const currentBalance = await providerSigner.getBalance();
           await expectEvent(await depositTo(channelID, DEPOSIT_AMOUNT, 1), 'Deposited', {
             destination: channelID,
             amountDeposited: bigNumberify(1),
           });
+          expect(
+            currentBalance
+              .sub(await providerSigner.getBalance()) // after the refund, we should be at the same balance, minus gas fees
+              .lte(EPSILON),
+          ).toBe(true);
         }
       });
     });
@@ -285,11 +296,16 @@ describe('nitroAdjudicator', () => {
           Number(startBal.add(SMALL_WITHDRAW_AMOUNT)),
         );
         expect(Number(await nitro.holdings(alice.address))).toEqual(
-          Number(allocatedAtStart - SMALL_WITHDRAW_AMOUNT),
+          Number(allocatedAtStart.sub(SMALL_WITHDRAW_AMOUNT)),
         );
 
         // Alice should be able to withdraw all remaining funds allocated to her.
-        await withdraw(alice, aliceDest.address, alice, allocatedAtStart - SMALL_WITHDRAW_AMOUNT);
+        await withdraw(
+          alice,
+          aliceDest.address,
+          alice,
+          allocatedAtStart.sub(SMALL_WITHDRAW_AMOUNT),
+        );
 
         expect(Number(await provider.getBalance(aliceDest.address))).toEqual(
           Number(await provider.getBalance(aliceDest.address)),
@@ -311,7 +327,7 @@ describe('nitroAdjudicator', () => {
         const allocated = await nitro.holdings(alice.address); // should be at least DEPOSIT_AMOUNT, regardless of test ordering
         expect.assertions(expectedAssertions);
         await expectRevert(() =>
-          withdraw(alice, aliceDest.address, alice, Number(allocated) + 100000),
+          withdraw(alice, aliceDest.address, alice, Number(allocated.add(100000))),
         );
       });
 
@@ -677,7 +693,7 @@ describe('nitroAdjudicator', () => {
         await (await nitro.setOutcome(getChannelID(channel), allocationOutcome)).wait();
         await (await nitro.setOutcome(guarantor.address, guarantee)).wait();
 
-        const claimAmount = Number(await nitro.holdings(guarantor.address)) + 1;
+        const claimAmount = (await nitro.holdings(guarantor.address)).add(1);
         expect.assertions(expectedAssertions);
         await expectRevert(
           () => nitro.claim(guarantor.address, recipient, claimAmount),
