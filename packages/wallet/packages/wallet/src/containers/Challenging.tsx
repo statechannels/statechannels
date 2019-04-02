@@ -11,6 +11,7 @@ import { unreachable } from '../utils/reducer-utils';
 import TransactionFailed from '../components/TransactionFailed';
 import { ChallengingStep } from '../components/challenging/ChallengingStep';
 import EtherscanLink from '../components/EtherscanLink';
+import { WalletProcedure } from '../redux/types';
 
 interface Props {
   state: states.ChallengingState;
@@ -18,7 +19,7 @@ interface Props {
   challengeResponseAcknowledged: () => void;
   challengeApproved: () => void;
   challengeRejected: () => void;
-  retryTransaction: (channelId: string) => void;
+  retryTransaction: (channelId: string, procedure: WalletProcedure) => void;
 }
 
 class ChallengingContainer extends PureComponent<Props> {
@@ -94,7 +95,7 @@ class ChallengingContainer extends PureComponent<Props> {
         return (
           <TransactionFailed
             name="challenge"
-            retryAction={() => retryTransaction(state.channelId)}
+            retryAction={() => retryTransaction(state.channelId, WalletProcedure.Challenging)}
           />
         );
 

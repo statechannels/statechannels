@@ -6,6 +6,7 @@ import { createTransferAndWithdrawTransaction } from '../../../utils/transaction
 import { signVerificationData } from '../../../utils/signing-utils';
 import { closeSuccess, hideWallet } from 'magmo-wallet-client/lib/wallet-events';
 import { StateWithSideEffects } from '../../utils';
+import { WalletProcedure } from '../../types';
 
 export const withdrawingReducer = (
   state: states.WithdrawingState,
@@ -62,7 +63,14 @@ const withdrawTransactionFailedReducer = (
       );
       return {
         state: states.waitForWithdrawalInitiation({ ...state }),
-        sideEffects: { transactionOutbox: { transactionRequest, channelId: state.channelId } },
+        // TODO: This will be factored out as channel reducers should not be sending transactions itself
+        sideEffects: {
+          transactionOutbox: {
+            transactionRequest,
+            channelId: state.channelId,
+            procedure: WalletProcedure.Withdrawing,
+          },
+        },
       };
   }
   return { state };
@@ -95,7 +103,14 @@ const approveWithdrawalReducer = (
           ...state,
           userAddress: action.destinationAddress,
         }),
-        sideEffects: { transactionOutbox: { transactionRequest, channelId: state.channelId } },
+        // TODO: This will be factored out as channel reducers should not be sending transactions itself
+        sideEffects: {
+          transactionOutbox: {
+            transactionRequest,
+            channelId: state.channelId,
+            procedure: WalletProcedure.Withdrawing,
+          },
+        },
       };
     case actions.channel.WITHDRAWAL_REJECTED:
       return { state: states.acknowledgeCloseSuccess(state) };

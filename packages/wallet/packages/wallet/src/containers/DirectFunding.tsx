@@ -9,13 +9,14 @@ import { unreachable } from '../utils/reducer-utils';
 import { FundingStep, fundingStepByState } from '../components/funding/FundingStep';
 import EtherscanLink from '../components/EtherscanLink';
 import TransactionFailed from '../components/TransactionFailed';
+import { WalletProcedure } from '../redux/types';
 
 interface Props {
   state: fundingStates.DirectFundingState;
   channelId: string;
   fundingSuccessAcknowledged: () => void;
   fundingDeclinedAcknowledged: () => void;
-  retryTransactionAction: (channelId: string) => void;
+  retryTransactionAction: (channelId: string, procedure: WalletProcedure) => void;
 }
 
 class DirectFundingContainer extends PureComponent<Props> {
@@ -51,7 +52,9 @@ class DirectFundingContainer extends PureComponent<Props> {
           return (
             <TransactionFailed
               name="deposit"
-              retryAction={() => retryTransactionAction(status.channelId)}
+              retryAction={() =>
+                retryTransactionAction(status.channelId, WalletProcedure.DirectFunding)
+              }
             />
           );
 

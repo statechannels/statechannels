@@ -16,6 +16,7 @@ import TransactionFailed from '../components/TransactionFailed';
 import SelectAddress from '../components/withdrawing/SelectAddress';
 import { ClosingStep } from '../components/closing/ClosingStep';
 import EtherscanLink from '../components/EtherscanLink';
+import { WalletProcedure } from '../redux/types';
 
 interface Props {
   state: states.ClosingState;
@@ -24,7 +25,7 @@ interface Props {
   closeOnChain: (withdrawAddress: string) => void;
   closeSuccessAcknowledged: () => void;
   closedOnChainAcknowledged: () => void;
-  retryTransaction: (channelId: string) => void;
+  retryTransaction: (channelId: string, procedure: WalletProcedure) => void;
 }
 
 class ClosingContainer extends PureComponent<Props> {
@@ -118,7 +119,7 @@ class ClosingContainer extends PureComponent<Props> {
         return (
           <TransactionFailed
             name="conclude"
-            retryAction={() => retryTransaction(state.channelId)}
+            retryAction={() => retryTransaction(state.channelId, WalletProcedure.Closing)}
           />
         );
       default:

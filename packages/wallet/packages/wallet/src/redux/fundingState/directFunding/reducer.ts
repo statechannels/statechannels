@@ -8,6 +8,7 @@ import { StateWithSideEffects } from 'src/redux/utils';
 import { depositingReducer } from './depositing/reducer';
 import { bigNumberify } from 'ethers/utils';
 import { createDepositTransaction } from '../../../utils/transaction-generator';
+import { WalletProcedure } from '../../types';
 
 export const directFundingStatusReducer = (
   state: states.DirectFundingStatus,
@@ -56,12 +57,15 @@ const notSafeToDepositReducer = (
         return {
           state: depositingStates.waitForTransactionSent({ ...state }),
           sideEffects: {
+            // TODO: This will be factored out as channel reducers should not be sending transactions itself
             transactionOutbox: {
               transactionRequest: createDepositTransaction(
                 state.channelId,
                 state.requestedYourContribution,
               ),
               channelId: action.channelId,
+
+              procedure: WalletProcedure.DirectFunding,
             },
           },
         };

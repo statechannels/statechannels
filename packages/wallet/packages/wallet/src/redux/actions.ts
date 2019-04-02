@@ -1,6 +1,7 @@
 import * as internal from './internal/actions';
 import * as channel from './channelState/actions';
 import * as funding from './fundingState/actions';
+import { WalletProcedure } from './types';
 
 export const LOGGED_IN = 'WALLET.LOGGED_IN';
 export const loggedIn = (uid: string) => ({
@@ -65,49 +66,65 @@ export type MetamaskLoadError = ReturnType<typeof metamaskLoadError>;
 // Common Transaction Actions
 // These actions are relevant to multiple branches of the wallet state tree
 export const TRANSACTION_SENT_TO_METAMASK = 'WALLET.COMMON.TRANSACTION_SENT_TO_METAMASK';
-export const transactionSentToMetamask = (channelId: string) => ({
+export const transactionSentToMetamask = (channelId: string, procedure: WalletProcedure) => ({
   type: TRANSACTION_SENT_TO_METAMASK as typeof TRANSACTION_SENT_TO_METAMASK,
   channelId,
+  procedure,
 });
 export type TransactionSentToMetamask = ReturnType<typeof transactionSentToMetamask>;
 
 export const TRANSACTION_SUBMISSION_FAILED = 'WALLET.COMMON.TRANSACTION_SUBMISSION_FAILED';
 export const transactionSubmissionFailed = (
   channelId: string,
+  procedure: WalletProcedure,
   error: { message?: string; code },
 ) => ({
   error,
   channelId,
+  procedure,
   type: TRANSACTION_SUBMISSION_FAILED as typeof TRANSACTION_SUBMISSION_FAILED,
 });
 export type TransactionSubmissionFailed = ReturnType<typeof transactionSubmissionFailed>;
 
 export const TRANSACTION_SUBMITTED = 'WALLET.COMMON.TRANSACTION_SUBMITTED';
-export const transactionSubmitted = (channelId: string, transactionHash: string) => ({
+export const transactionSubmitted = (
+  channelId: string,
+  procedure: WalletProcedure,
+  transactionHash: string,
+) => ({
   channelId,
+  procedure,
   transactionHash,
   type: TRANSACTION_SUBMITTED as typeof TRANSACTION_SUBMITTED,
 });
 export type TransactionSubmitted = ReturnType<typeof transactionSubmitted>;
 
 export const TRANSACTION_CONFIRMED = 'WALLET.COMMON.TRANSACTION_CONFIRMED';
-export const transactionConfirmed = (channelId: string, contractAddress?: string) => ({
+export const transactionConfirmed = (
+  channelId: string,
+  procedure: WalletProcedure,
+  contractAddress?: string,
+) => ({
   channelId,
+  procedure,
   contractAddress,
   type: TRANSACTION_CONFIRMED as typeof TRANSACTION_CONFIRMED,
 });
 export type TransactionConfirmed = ReturnType<typeof transactionConfirmed>;
 
 export const TRANSACTION_FINALIZED = 'WALLET.COMMON.TRANSACTION_FINALIZED';
-export const transactionFinalized = () => ({
+export const transactionFinalized = (channelId: string, procedure: WalletProcedure) => ({
+  channelId,
+  procedure,
   type: TRANSACTION_FINALIZED as typeof TRANSACTION_FINALIZED,
 });
 export type TransactionFinalized = ReturnType<typeof transactionFinalized>;
 
 export const RETRY_TRANSACTION = 'WALLET.COMMON.RETRY_TRANSACTION';
-export const retryTransaction = (channelId: string) => ({
+export const retryTransaction = (channelId: string, procedure: WalletProcedure) => ({
   type: RETRY_TRANSACTION as typeof RETRY_TRANSACTION,
   channelId,
+  procedure,
 });
 export type RetryTransaction = ReturnType<typeof retryTransaction>;
 
