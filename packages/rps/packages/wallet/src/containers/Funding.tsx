@@ -12,6 +12,7 @@ import ApproveFunding from '../components/funding/ApproveFunding';
 import DirectFunding from './DirectFunding';
 import { addHex } from '../utils/hex-utils';
 import { FundingStep, Step } from '../components/funding/FundingStep';
+import { WalletProcedure } from '../redux/types';
 
 interface Props {
   state: channelStates.FundingState;
@@ -19,7 +20,7 @@ interface Props {
   fundingRejected: () => void;
   fundingSuccessAcknowledged: () => void;
   fundingDeclinedAcknowledged: () => void;
-  retryTransactionAction: (channelId: string) => void;
+  retryTransactionAction: (channelId: string, procedure: WalletProcedure) => void;
 }
 
 class FundingContainer extends PureComponent<Props> {
