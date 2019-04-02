@@ -6,3 +6,8 @@ export const enum WalletProcedure {
   Withdrawing = 'Withdrawing',
   Responding = 'Responding',
 }
+
+export const enum PlayerIndex {
+  A = 0,
+  B = 1,
+}
