@@ -6,7 +6,7 @@ export interface OutgoingMessage {
   opponentAddress: Address;
   commitment: Commitment;
 }
-export interface WalletMessage {
+export interface WalletRequest {
   type:
     | 'FUNDING_REQUESTED'
     | 'RESPOND_TO_CHALLENGE'
@@ -17,7 +17,7 @@ export interface WalletMessage {
 }
 export interface MessageState {
   opponentOutbox?: OutgoingMessage;
-  walletOutbox?: WalletMessage;
+  walletOutbox?: WalletRequest;
   actionToRetry?: actions.CommitmentReceived;
 }
 

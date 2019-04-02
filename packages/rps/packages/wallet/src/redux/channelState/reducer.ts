@@ -21,7 +21,7 @@ import { CommitmentType } from 'fmg-core';
 import { StateWithSideEffects } from '../utils';
 import { ethers } from 'ethers';
 import { channelID } from 'fmg-core/lib/channel';
-import { WalletAction } from '../actions';
+import { WalletAction, COMMITMENT_RECEIVED } from '../actions';
 
 export const channelStateReducer: ReducerWithSideEffects<states.ChannelState> = (
   state: states.ChannelState,
@@ -179,7 +179,7 @@ const receivedValidOpponentConclusionRequest = (
   if (state.stage !== states.FUNDING && state.stage !== states.RUNNING) {
     return null;
   }
-  if (action.type !== actions.COMMITMENT_RECEIVED) {
+  if (action.type !== COMMITMENT_RECEIVED) {
     return null;
   }
 
