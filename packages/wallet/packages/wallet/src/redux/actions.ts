@@ -2,6 +2,7 @@ import * as internal from './internal/actions';
 import * as channel from './channelState/actions';
 import * as funding from './fundingState/actions';
 import { WalletProcedure } from './types';
+import { Commitment } from 'fmg-core';
 
 export const LOGGED_IN = 'WALLET.LOGGED_IN';
 export const loggedIn = (uid: string) => ({
@@ -128,12 +129,39 @@ export const retryTransaction = (channelId: string, procedure: WalletProcedure) 
 });
 export type RetryTransaction = ReturnType<typeof retryTransaction>;
 
+export type Message = 'FundingDeclined';
+export const MESSAGE_RECEIVED = 'WALLET.COMMON.MESSAGE_RECEIVED';
+export const messageReceived = (channelId: string, procedure: WalletProcedure, data: Message) => ({
+  type: MESSAGE_RECEIVED as typeof MESSAGE_RECEIVED,
+  channelId,
+  procedure,
+  data,
+});
+export type MessageReceived = ReturnType<typeof messageReceived>;
+
+export const COMMITMENT_RECEIVED = 'WALLET.COMMON.COMMITMENT_RECEIVED';
+export const commitmentReceived = (
+  channelId: string,
+  procedure: WalletProcedure,
+  commitment: Commitment,
+  signature: string,
+) => ({
+  type: COMMITMENT_RECEIVED as typeof COMMITMENT_RECEIVED,
+  channelId,
+  procedure,
+  commitment,
+  signature,
+});
+export type CommitmentReceived = ReturnType<typeof commitmentReceived>;
+
 export type CommonAction =
   | TransactionConfirmed
   | TransactionSentToMetamask
   | TransactionSubmissionFailed
   | TransactionSubmitted
-  | RetryTransaction;
+  | RetryTransaction
+  | MessageReceived
+  | CommitmentReceived;
 
 export function isCommonAction(action: WalletAction): action is CommonAction {
   return action.type.match('WALLET.COMMON') ? true : false;

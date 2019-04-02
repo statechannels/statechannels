@@ -66,7 +66,7 @@ describe('start in AcknowledgeConclude', () => {
 
     const updatedState = closingReducer(state, action);
     itTransitionsToChannelStateType(states.APPROVE_CLOSE_ON_CHAIN, updatedState);
-    itSendsThisMessage(updatedState, outgoing.COMMITMENT_RELAY_REQUESTED);
+    itSendsThisMessage(updatedState, outgoing.MESSAGE_RELAY_REQUESTED);
   });
 });
 
@@ -109,7 +109,9 @@ describe('start in WaitForOpponentConclude', () => {
     Object.defineProperty(SigningUtil, 'validCommitmentSignature', { value: validateMock });
     Object.defineProperty(ReducerUtil, 'validTransition', { value: validateMock });
 
-    const action = actions.channel.commitmentReceived(
+    const action = actions.commitmentReceived(
+      channelId,
+      WalletProcedure.DirectFunding,
       ('commitment' as unknown) as Commitment,
       '0x0',
     );

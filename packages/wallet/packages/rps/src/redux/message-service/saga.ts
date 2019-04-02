@@ -5,7 +5,7 @@ import { reduxSagaFirebase } from '../../gateways/firebase';
 import { Player } from '../../core';
 import * as gameActions from '../game/actions';
 import * as appActions from '../global/actions';
-import { MessageState, WalletMessage } from './state';
+import { MessageState, WalletRequest } from './state';
 import * as gameStates from '../game/state';
 import { getMessageState, getGameState } from '../store';
 import * as Wallet from 'magmo-wallet-client';
@@ -13,6 +13,7 @@ import { WALLET_IFRAME_ID } from '../../constants';
 import { channelID } from 'fmg-core/lib/channel';
 import { asCoreCommitment, fromCoreCommitment } from '../../core/rps-commitment';
 import { Commitment } from 'fmg-core';
+import { MessageRelayRequested } from 'magmo-wallet-client';
 
 export enum Queue {
   WALLET = 'WALLET',
@@ -27,87 +28,48 @@ export default function* messageSaga() {
   yield fork(sendWalletMessageSaga);
   yield fork(receiveChallengePositionFromWalletSaga);
   yield fork(receiveChallengeFromWalletSaga);
-  yield fork(recieveDisplayEventFromWalletSaga);
+  yield fork(receiveDisplayEventFromWalletSaga);
   yield fork(exitGameSaga);
 }
 
-interface CommitmentMessage {
-  data: Commitment;
+interface AppMessage {
+  commitment: Commitment;
   signature: string;
-  queue: Queue;
+  queue: Queue.GAME_ENGINE;
   userName?: string;
 }
 
-interface NonCommitmentMessage {
-  data: string;
+interface WalletMessage {
+  payload: any;
   queue: Queue.WALLET;
   userName?: string;
 }
 
-type Message = CommitmentMessage | NonCommitmentMessage;
+type Message = AppMessage | WalletMessage;
 
 export function* sendWalletMessageSaga() {
-  const sendMessageChannel = createWalletEventChannel([
-    Wallet.COMMITMENT_RELAY_REQUESTED,
-    Wallet.MESSAGE_RELAY_REQUESTED,
-  ]);
+  const sendMessageChannel = createWalletEventChannel([Wallet.MESSAGE_RELAY_REQUESTED]);
   while (true) {
-    const messageRequest = yield take(sendMessageChannel);
-    const queue = Queue.WALLET;
+    const messageRelayRequest: MessageRelayRequested = yield take(sendMessageChannel);
 
-    switch (messageRequest.type) {
-      case Wallet.COMMITMENT_RELAY_REQUESTED: {
-        const { commitment, to, signature } = messageRequest;
-        const message: CommitmentMessage = { data: commitment, queue, signature };
+    const { messagePayload, to } = messageRelayRequest;
+    const messageToSend: WalletMessage = { payload: messagePayload, queue: Queue.WALLET };
 
-        if (
-          process.env.NODE_ENV === 'development' &&
-          commitment.channel.participants[1] === process.env.SERVER_WALLET_ADDRESS
-        ) {
-          const response = yield call(postData, { ...message, commitment });
-          const { commitment: theirCommitment, signature: theirSignature } = response;
+    if (process.env.NODE_ENV === 'development' && to === process.env.SERVER_WALLET_ADDRESS) {
+      try {
+        const response = yield call(postData, { ...messagePayload });
 
-          // Since the response is returned straight away, we have to relay the commitment
-          // immediately
-          relayToWallet({
-            commitment: theirCommitment,
-            signature: theirSignature,
-            type: 'Commitment',
-          });
-        } else {
-          yield call(reduxSagaFirebase.database.create, `/messages/${to.toLowerCase()}`, message);
-        }
-        break;
+        // Since the response is returned straight away, we have to relay the commitment
+        // immediately
+        Wallet.relayMessage(WALLET_IFRAME_ID, response.data);
+      } catch (err) {
+        console.error(err);
       }
-      case Wallet.MESSAGE_RELAY_REQUESTED: {
-        const { data, to } = messageRequest;
-        const message: NonCommitmentMessage = { data, queue };
-
-        if (process.env.NODE_ENV === 'development' && to === process.env.SERVER_WALLET_ADDRESS) {
-          try {
-            const response = yield call(postData, { ...message });
-            const { commitment: theirCommitment, signature: theirSignature } = response;
-
-            // Since the response is returned straight away, we have to relay the commitment
-            // immediately
-            relayToWallet({
-              commitment: theirCommitment,
-              signature: theirSignature,
-              type: 'Commitment',
-            });
-          } catch (err) {
-            console.error(err);
-          }
-        } else {
-          yield call(reduxSagaFirebase.database.create, `/messages/${to.toLowerCase()}`, message);
-        }
-        yield call(reduxSagaFirebase.database.create, `/messages/${to.toLowerCase()}`, message);
-        break;
-      }
-
-      default:
-        break;
+    } else {
+      yield call(reduxSagaFirebase.database.create, `/messages/${to.toLowerCase()}`, messageToSend);
     }
+    yield call(reduxSagaFirebase.database.create, `/messages/${to.toLowerCase()}`, messageToSend);
+    break;
   }
 }
 
@@ -144,7 +106,7 @@ export function* sendMessagesSaga() {
       const commitment = messageState.opponentOutbox.commitment;
       const signature = yield signMessage(commitment);
       const userName = gameState.name !== gameStates.StateName.NoName ? gameState.myName : '';
-      const message: CommitmentMessage = { data: commitment, queue, signature, userName };
+      const toSend: AppMessage = { commitment, queue, signature, userName };
       const { opponentAddress } = messageState.opponentOutbox;
 
       if (
@@ -152,13 +114,13 @@ export function* sendMessagesSaga() {
         commitment.channel.participants[1] === process.env.SERVER_WALLET_ADDRESS
       ) {
         // To ease local development, we bypass firebase and make http requests directly against the local server
-        const response = yield call(postData, { ...message, commitment: message.data });
+        const response = yield call(postData, { ...toSend, commitment: toSend.commitment });
         yield put(gameActions.messageSent());
 
         // Since the response is returned straight away, we have to receive the commitment immediately
         const { commitment: theirCommitment, signature: theirSignature } = response;
         yield receiveCommitmentSaga({
-          data: theirCommitment,
+          commitment: theirCommitment,
           signature: theirSignature,
           queue: Queue.GAME_ENGINE,
           userName: 'Neo Bot',
@@ -167,7 +129,7 @@ export function* sendMessagesSaga() {
         yield call(
           reduxSagaFirebase.database.create,
           `/messages/${opponentAddress.toLowerCase()}`,
-          message,
+          toSend,
         );
         yield put(gameActions.messageSent());
       }
@@ -222,12 +184,13 @@ function* receiveFromFirebaseSaga(address) {
         throw new Error('Invalid game message received: signature missing');
       }
     } else {
-      if ('signature' in value) {
-        relayToWallet({ ...value, commitment: value.data, type: 'Commitment' });
+      if ('payload' in value) {
+        Wallet.relayMessage(WALLET_IFRAME_ID, value.payload);
       } else {
-        relayToWallet({ ...value, type: 'Message' });
+        throw new Error('Invalid wallet message received: message missing');
       }
     }
+
     yield call(reduxSagaFirebase.database.delete, `/messages/${address}/${key}`);
   }
 }
@@ -248,7 +211,7 @@ function createWalletEventChannel(walletEventTypes: Wallet.WalletEventType[]) {
   });
 }
 
-function* handleWalletMessage(walletMessage: WalletMessage, state: gameStates.PlayingState) {
+function* handleWalletMessage(walletMessage: WalletRequest, state: gameStates.PlayingState) {
   const { channel, player, allocation: balances, destination: participants } = state;
   const channelId = channelID(channel);
 
@@ -334,7 +297,7 @@ function* receiveChallengeFromWalletSaga() {
   }
 }
 
-function* recieveDisplayEventFromWalletSaga() {
+function* receiveDisplayEventFromWalletSaga() {
   const displayChannel = createWalletEventChannel([Wallet.SHOW_WALLET, Wallet.HIDE_WALLET]);
   while (true) {
     const event = yield take(displayChannel);
@@ -362,23 +325,8 @@ function* receiveChallengePositionFromWalletSaga() {
   }
 }
 
-function relayToWallet(
-  message:
-    | { data: string; type: 'Message' }
-    | { commitment: Commitment; signature: string; type: 'Commitment' },
-) {
-  switch (message.type) {
-    case 'Message':
-      Wallet.relayMessage(WALLET_IFRAME_ID, message.data);
-      return;
-    case 'Commitment':
-      const { commitment, signature } = message;
-      Wallet.relayCommitment(WALLET_IFRAME_ID, commitment, signature);
-  }
-}
-
-function* receiveCommitmentSaga(message: CommitmentMessage) {
-  const { data, signature, userName } = message;
+function* receiveCommitmentSaga(message: AppMessage) {
+  const { commitment: data, signature, userName } = message;
   const validMessage = yield validateMessage(data, signature);
   if (!validMessage) {
     // TODO: Handle this

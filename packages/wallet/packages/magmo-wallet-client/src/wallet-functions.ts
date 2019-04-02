@@ -19,10 +19,10 @@ import {
   receiveMessage,
   createChallenge,
   respondToChallenge,
-  receiveCommitment,
   initializeChannelRequest,
 } from './wallet-instructions';
 import { Commitment } from 'fmg-core';
+import { WalletMessagePayload } from './wallet-types';
 
 /**
  * Creates an iframe element for the wallet to be embedded in the page. The wallet iframe will hide itself and only show when interaction with the wallet is necessary.
@@ -186,26 +186,13 @@ export async function signCommitment(iFrameId: string, commitment: Commitment): 
 }
 
 /**
- * Relays a commitment to the wallet, from the opponent's wallet.
- * Used, for example, when the opponent's wallet is funding a channel through a ledger channel.
- * @param iFrameId The id of the embedded wallet iframe.
- * @param commitment The commitment to send to the wallet that was received from the opponent's wallet.
- * @param signature The signature that was received from the opponent's wallet.
- */
-export function relayCommitment(iFrameId: string, commitment: Commitment, signature: string) {
-  const iFrame = document.getElementById(iFrameId) as HTMLIFrameElement;
-  const message = receiveCommitment(commitment, signature);
-  iFrame.contentWindow.postMessage(message, '*');
-}
-
-/**
  * Relays a message to the wallet, from the opponent's wallet.
  * @param iFrameId The id of the embedded wallet iframe.
- * @param data The message to send to the wallet that was received from the opponent's wallet.
+ * @param walletMessage The message to send to the wallet that was received from the opponent's wallet.
  */
-export function relayMessage(iFrameId: string, data: string) {
+export function relayMessage(iFrameId: string, messagePayload: WalletMessagePayload) {
   const iFrame = document.getElementById(iFrameId) as HTMLIFrameElement;
-  const message = receiveMessage(data);
+  const message = receiveMessage(messagePayload);
   iFrame.contentWindow.postMessage(message, '*');
 }
 

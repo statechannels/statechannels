@@ -9,8 +9,16 @@ import { WalletProcedure } from '../../types';
 const { channelId, mockTransactionOutboxItem } = scenarios;
 
 describe('when a side effect occured', () => {
-  const sendFundingDeclinedActionA = outgoing.messageRelayRequested('0xa00', 'FundingDeclined');
-  const sendFundingDeclinedActionB = outgoing.messageRelayRequested('0xb00', 'FundingDeclined');
+  const sendFundingDeclinedActionA = outgoing.messageRelayRequested('0xa00', {
+    channelId: '0x0',
+    procedure: WalletProcedure.DirectFunding,
+    data: 'FundingDeclined',
+  });
+  const sendFundingDeclinedActionB = outgoing.messageRelayRequested('0xb00', {
+    channelId: '0x0',
+    procedure: WalletProcedure.DirectFunding,
+    data: 'FundingDeclined',
+  });
   const displayOutbox = [outgoing.hideWallet(), outgoing.showWallet()];
   const transactionOutbox = [mockTransactionOutboxItem, mockTransactionOutboxItem];
   const messageOutbox = [sendFundingDeclinedActionA, sendFundingDeclinedActionB];

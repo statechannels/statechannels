@@ -1,4 +1,5 @@
 import { Commitment } from 'fmg-core';
+import { WalletMessagePayload } from './wallet-types';
 
 export enum PlayerIndex {
   'A' = 0,
@@ -105,22 +106,11 @@ export type ConcludeChannelRequest = ReturnType<typeof concludeChannelRequest>;
 // wallet meant for wallet-to-wallet communication (e.g. communicating the address of the
 // adjudicator).
 export const RECEIVE_MESSAGE = 'WALLET.MESSAGING.RECEIVE_MESSAGE';
-export const receiveMessage = (data: string) => ({
+export const receiveMessage = (messagePayload: WalletMessagePayload) => ({
   type: RECEIVE_MESSAGE,
-  data,
+  messagePayload,
 });
 export type ReceiveMessage = ReturnType<typeof receiveMessage>;
-
-// Called when a "wallet commitment" is received from the opponent.
-// By "wallet commitment" we mean a commitment that was created directly from the opponent's
-// wallet meant for wallet-to-wallet communication (e.g. commitments used to set up a ledger channel)
-export const RECEIVE_COMMITMENT = 'WALLET.MESSAGING.RECEIVE_COMMITMENT';
-export const receiveCommitment = (commitment: Commitment, signature: string) => ({
-  type: RECEIVE_COMMITMENT,
-  commitment,
-  signature,
-});
-export type ReceiveCommitment = ReturnType<typeof receiveCommitment>;
 
 // Requests
 // ========

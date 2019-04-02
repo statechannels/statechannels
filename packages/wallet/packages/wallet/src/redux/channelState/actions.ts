@@ -34,14 +34,6 @@ export const opponentCommitmentReceived = (commitment: Commitment, signature: st
 });
 export type OpponentCommitmentReceived = ReturnType<typeof opponentCommitmentReceived>;
 
-export const COMMITMENT_RECEIVED = 'WALLET.CHANNEL.COMMITMENT_RECEIVED';
-export const commitmentReceived = (commitment: Commitment, signature: string) => ({
-  type: COMMITMENT_RECEIVED as typeof COMMITMENT_RECEIVED,
-  commitment,
-  signature,
-});
-export type CommitmentReceived = ReturnType<typeof commitmentReceived>;
-
 export const FUNDING_REQUESTED = 'WALLET.CHANNEL.FUNDING_REQUESTED';
 export const fundingRequested = () => ({
   type: FUNDING_REQUESTED as typeof FUNDING_REQUESTED,
@@ -247,13 +239,6 @@ export const approveClose = (withdrawAddress: string) => ({
 });
 export type ApproveClose = ReturnType<typeof approveClose>;
 
-export const MESSAGE_RECEIVED = 'WALLET.CHANNEL.MESSAGE_RECEIVED';
-export const messageReceived = (data: 'FundingDeclined') => ({
-  type: MESSAGE_RECEIVED as typeof MESSAGE_RECEIVED,
-  data,
-});
-export type MessageReceived = ReturnType<typeof messageReceived>;
-
 export type ChannelAction =  // TODO: Some of these actions probably also belong in a FundingAction type
   | ApproveClose
   | ChallengeAcknowledged
@@ -269,7 +254,6 @@ export type ChannelAction =  // TODO: Some of these actions probably also belong
   | ChannelInitialized
   | ClosedOnChainAcknowledged
   | CloseSuccessAcknowledged
-  | CommitmentReceived
   | ConcludeApproved
   | concludedEvent
   | ConcludeRejected
@@ -279,7 +263,6 @@ export type ChannelAction =  // TODO: Some of these actions probably also belong
   | FundingRejected
   | FundingRequested
   | FundingSuccessAcknowledged
-  | MessageReceived
   | OpponentCommitmentReceived
   | OwnCommitmentReceived
   | PostFundSetupReceived
