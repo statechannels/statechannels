@@ -31,26 +31,6 @@ export const displayMessageSent = () => ({
 });
 export type DisplayMessageSent = ReturnType<typeof displayMessageSent>;
 
-export const DEPOSIT_INITIATED = 'WALLET.DEPOSIT_INITIATED'; // when sent to metamask
-export const depositInitiated = () => ({
-  type: DEPOSIT_INITIATED as typeof DEPOSIT_INITIATED,
-});
-export type DepositInitiated = ReturnType<typeof depositInitiated>;
-
-export const DEPOSIT_SUBMITTED = '.'; // when submitted to network
-
-export const DEPOSIT_CONFIRMED = 'WALLET.DEPOSIT_CONFIRMED'; // when first seen in a block
-export const depositConfirmed = () => ({
-  type: DEPOSIT_CONFIRMED as typeof DEPOSIT_CONFIRMED,
-});
-export type DepositConfirmed = ReturnType<typeof depositConfirmed>;
-
-export const DEPOSIT_FINALISED = 'WALLET.DEPOSIT_FINALISED'; // when X blocks deep
-export const depositFinalised = () => ({
-  type: DEPOSIT_FINALISED as typeof DEPOSIT_FINALISED,
-});
-export type DepositFinalised = ReturnType<typeof depositFinalised>;
-
 export const BLOCK_MINED = 'BLOCK_MINED';
 export const blockMined = (block: { timestamp: number; number: number }) => ({
   type: BLOCK_MINED as typeof BLOCK_MINED,
@@ -163,18 +143,21 @@ export type CommonAction =
   | MessageReceived
   | CommitmentReceived;
 
+export type ProcedureAction = CommonAction;
+
 export function isCommonAction(action: WalletAction): action is CommonAction {
   return action.type.match('WALLET.COMMON') ? true : false;
 }
 
+export function isProcedureAction(action: WalletAction): action is ProcedureAction {
+  return 'procedure' in action;
+}
+
 export { internal, channel, funding };
 
-// TODO: This is getting large, we should probably split this up into separate types for each stage
 export type WalletAction =
   | AdjudicatorKnown
   | BlockMined
-  | DepositConfirmed
-  | DepositInitiated
   | DisplayMessageSent
   | LoggedIn
   | MessageSent
