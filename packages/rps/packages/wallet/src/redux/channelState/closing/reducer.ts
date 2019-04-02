@@ -9,11 +9,11 @@ import {
   validCommitmentSignature,
 } from '../../../utils/signing-utils';
 import {
-  commitmentRelayRequested,
   closeSuccess,
   concludeSuccess,
   concludeFailure,
   hideWallet,
+  messageRelayRequested,
 } from 'magmo-wallet-client/lib/wallet-events';
 import { CommitmentType, Commitment } from 'fmg-core';
 import {
@@ -286,7 +286,7 @@ const waitForOpponentConclude = (
   action: WalletAction,
 ): StateWithSideEffects<channelStates.ChannelStatus> => {
   switch (action.type) {
-    case actions.channel.COMMITMENT_RECEIVED:
+    case actions.COMMITMENT_RECEIVED:
       const { commitment, signature } = action;
 
       const opponentAddress = state.participants[1 - state.ourIndex];
@@ -368,10 +368,13 @@ const composeConcludePosition = (state: channelStates.ClosingState) => {
   };
 
   const commitmentSignature = signCommitment(concludeCommitment, state.privateKey);
-  const sendCommitmentAction = commitmentRelayRequested(
-    state.participants[1 - state.ourIndex],
-    concludeCommitment,
-    commitmentSignature,
-  );
+  const sendCommitmentAction = messageRelayRequested(state.participants[1 - state.ourIndex], {
+    channelId: state.channelId,
+    procedure: WalletProcedure.DirectFunding,
+    data: {
+      concludeCommitment,
+      commitmentSignature,
+    },
+  });
   return { concludeCommitment, positionSignature: commitmentSignature, sendCommitmentAction };
 };

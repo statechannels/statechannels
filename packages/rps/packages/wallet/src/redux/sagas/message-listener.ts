@@ -3,6 +3,7 @@ import * as incoming from 'magmo-wallet-client/lib/wallet-instructions';
 
 import * as actions from '../actions';
 import { eventChannel } from 'redux-saga';
+import { WalletProcedure } from '../types';
 
 export function* messageListener() {
   const postMessageEventChannel = eventChannel(emitter => {
@@ -38,10 +39,19 @@ export function* messageListener() {
         yield put(actions.channel.opponentCommitmentReceived(action.commitment, action.signature));
         break;
       case incoming.RECEIVE_MESSAGE:
-        yield put(actions.channel.messageReceived(action.data));
-        break;
-      case incoming.RECEIVE_COMMITMENT:
-        yield put(actions.channel.commitmentReceived(action.commitment, action.signature));
+        const {
+          data,
+          channelId,
+          procedure: incomingProcedure,
+        } = (action as incoming.ReceiveMessage).messagePayload;
+        const procedure = convertToWalletProcedure(incomingProcedure);
+        if ('commitment' in data) {
+          yield put(
+            actions.commitmentReceived(channelId, procedure, data.commitment, data.signature),
+          );
+        } else {
+          yield put(actions.messageReceived(channelId, procedure, data));
+        }
         break;
       case incoming.RESPOND_TO_CHALLENGE:
         yield put(actions.channel.challengeCommitmentReceived(action.commitment));
@@ -53,3 +63,13 @@ export function* messageListener() {
     }
   }
 }
+
+const convertToWalletProcedure = (procedure: string) => {
+  if (procedure === WalletProcedure.DirectFunding) {
+    return WalletProcedure.DirectFunding;
+  } else if (procedure === WalletProcedure.IndirectFunding) {
+    return WalletProcedure.IndirectFunding;
+  } else {
+    throw new Error(`Could not convert ${procedure} to a valid wallet procedure`);
+  }
+};

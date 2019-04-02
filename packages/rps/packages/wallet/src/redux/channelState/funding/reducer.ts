@@ -1,13 +1,17 @@
 import * as states from '../state';
 import * as actions from '../actions';
-import { internal, TRANSACTION_CONFIRMED } from '../../actions';
+import {
+  internal,
+  TRANSACTION_CONFIRMED,
+  MESSAGE_RECEIVED,
+  COMMITMENT_RECEIVED,
+} from '../../actions';
 import {
   messageRelayRequested,
   fundingSuccess,
   fundingFailure,
   showWallet,
   hideWallet,
-  commitmentRelayRequested,
 } from 'magmo-wallet-client/lib/wallet-events';
 
 import { unreachable, validTransition } from '../../../utils/reducer-utils';
@@ -16,6 +20,7 @@ import { signCommitment, validCommitmentSignature } from '../../../utils/signing
 import { Channel, Commitment, CommitmentType } from 'fmg-core';
 import { handleSignatureAndValidationMessages } from '../../../utils/state-utils';
 import { StateWithSideEffects } from '../../utils';
+import { WalletProcedure } from '../../types';
 
 export const fundingReducer = (
   state: states.FundingState,
@@ -87,7 +92,11 @@ const approveFundingReducer = (
     case actions.FUNDING_REJECTED:
       const relayFundingDeclinedMessage = messageRelayRequested(
         state.participants[1 - state.ourIndex],
-        'FundingDeclined',
+        {
+          channelId: state.channelId,
+          procedure: WalletProcedure.DirectFunding,
+          data: 'FundingDeclined',
+        },
       );
       const fundingFailureMessage = fundingFailure(state.channelId, 'FundingDeclined');
       return {
@@ -97,8 +106,8 @@ const approveFundingReducer = (
           displayOutbox: hideWallet(),
         },
       };
-    case actions.MESSAGE_RECEIVED:
-      if (action.data && action.data === 'FundingDeclined') {
+    case MESSAGE_RECEIVED:
+      if (action.data === 'FundingDeclined') {
         return { state: states.acknowledgeFundingDeclined(state) };
       } else {
         return { state };
@@ -115,7 +124,7 @@ const waitForFundingAndPostFundSetupReducer = (
   action: actions.ChannelAction | internal.InternalAction,
 ): StateWithSideEffects<states.OpenedState> => {
   switch (action.type) {
-    case actions.MESSAGE_RECEIVED:
+    case MESSAGE_RECEIVED:
       if (action.data === 'FundingDeclined') {
         return {
           state: states.acknowledgeFundingDeclined({ ...state }),
@@ -123,7 +132,7 @@ const waitForFundingAndPostFundSetupReducer = (
       } else {
         return { state };
       }
-    case actions.COMMITMENT_RECEIVED:
+    case COMMITMENT_RECEIVED:
       const { commitment, signature } = action;
       if (!validTransitionToPostFundState(state, commitment, signature)) {
         return { state };
@@ -207,7 +216,7 @@ const aWaitForPostFundSetupReducer = (
   action: actions.ChannelAction | internal.InternalAction,
 ): StateWithSideEffects<states.OpenedState> => {
   switch (action.type) {
-    case actions.COMMITMENT_RECEIVED:
+    case COMMITMENT_RECEIVED:
       const { commitment: postFundState, signature } = action;
       if (!validTransitionToPostFundState(state, postFundState, signature)) {
         return { state };
@@ -231,7 +240,7 @@ const bWaitForPostFundSetupReducer = (
   action: actions.ChannelAction | internal.InternalAction,
 ): StateWithSideEffects<states.OpenedState> => {
   switch (action.type) {
-    case actions.COMMITMENT_RECEIVED:
+    case COMMITMENT_RECEIVED:
       const { commitment, signature } = action;
       if (!validTransitionToPostFundState(state, commitment, signature)) {
         return { state };
@@ -376,10 +385,13 @@ const composePostFundCommitment = (
   };
   const commitmentSignature = signCommitment(postFundSetupCommitment, state.privateKey);
 
-  const sendCommitmentAction = commitmentRelayRequested(
-    state.participants[1 - state.ourIndex],
-    postFundSetupCommitment,
-    commitmentSignature,
-  );
+  const sendCommitmentAction = messageRelayRequested(state.participants[1 - state.ourIndex], {
+    channelId: state.channelId,
+    procedure: WalletProcedure.DirectFunding,
+    data: {
+      commitment: postFundSetupCommitment,
+      signature: commitmentSignature,
+    },
+  });
   return { postFundSetupCommitment, commitmentSignature, sendCommitmentAction };
 };
