@@ -14,13 +14,14 @@ import TransactionFailed from '../components/TransactionFailed';
 import SelectAddress from '../components/withdrawing/SelectAddress';
 import { WithdrawingStep } from '../components/withdrawing/WithdrawingStep';
 import EtherscanLink from '../components/EtherscanLink';
+import { WalletProcedure } from '../redux/types';
 
 interface Props {
   state: states.WithdrawingState;
   withdrawalApproved: (destinationAddress: string) => void;
   withdrawalRejected: () => void;
   withdrawalSuccessAcknowledged: () => void;
-  retryTransaction: (channelId: string) => void;
+  retryTransaction: (channelId: string, procedure: WalletProcedure) => void;
 }
 
 class WithdrawingContainer extends PureComponent<Props> {
@@ -78,7 +79,7 @@ class WithdrawingContainer extends PureComponent<Props> {
         return (
           <TransactionFailed
             name="withdraw"
-            retryAction={() => retryTransaction(state.channelId)}
+            retryAction={() => retryTransaction(state.channelId, WalletProcedure.Withdrawing)}
           />
         );
       default:

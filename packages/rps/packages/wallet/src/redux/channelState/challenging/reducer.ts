@@ -11,6 +11,7 @@ import {
 import { handleSignatureAndValidationMessages } from '../../../utils/state-utils';
 import { bigNumberify } from 'ethers/utils';
 import { StateWithSideEffects } from '../../utils';
+import { WalletProcedure } from '../../types';
 
 export const challengingReducer = (
   state: states.ChallengingState,
@@ -64,7 +65,14 @@ const challengeTransactionFailedReducer = (
       );
       return {
         state: states.waitForChallengeInitiation(state),
-        sideEffects: { transactionOutbox: { transactionRequest, channelId: state.channelId } },
+        // TODO: This will be factored out as channel reducers should not be sending transactions itself
+        sideEffects: {
+          transactionOutbox: {
+            transactionRequest,
+            channelId: state.channelId,
+            procedure: WalletProcedure.Challenging,
+          },
+        },
       };
   }
   return { state };
@@ -86,7 +94,14 @@ const approveChallengeReducer = (
       );
       return {
         state: states.waitForChallengeInitiation(state),
-        sideEffects: { transactionOutbox: { transactionRequest, channelId: state.channelId } },
+        // TODO: This will be factored out as channel reducers should not be sending transactions itself
+        sideEffects: {
+          transactionOutbox: {
+            transactionRequest,
+            channelId: state.channelId,
+            procedure: WalletProcedure.Challenging,
+          },
+        },
       };
     case actions.channel.CHALLENGE_REJECTED:
       return {
