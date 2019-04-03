@@ -90,7 +90,7 @@ const initializedWalletState = walletStates.initialized({
   outboxState: EMPTY_OUTBOX_STATE,
   channelState: {
     initializedChannels: {
-      [channelId]: channelStates.waitForFundingRequest({ ...playerADefaults }),
+      [channelId]: channelStates.waitForFundingAndPostFundSetup({ ...playerADefaults }),
     },
     initializingChannels: {},
   },

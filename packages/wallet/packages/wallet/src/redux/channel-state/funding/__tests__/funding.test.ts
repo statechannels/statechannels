@@ -71,36 +71,6 @@ const playerDefaults = {
   B: defaultsB,
 };
 
-describe('start in WaitForFundingRequest', () => {
-  describe('action taken: funding requested', () => {
-    // player A scenario
-    const testDefaults = {
-      ...defaultsA,
-      ...justReceivedPreFundSetupB,
-    };
-    const state = states.waitForFundingRequest(testDefaults);
-    const action = actions.channel.fundingRequested();
-    const updatedState = fundingReducer(state, action);
-
-    itTransitionsToChannelStateType(states.WAIT_FOR_FUNDING_AND_POST_FUND_SETUP, updatedState);
-    itIncreasesTurnNumBy(0, state, updatedState);
-  });
-
-  describe('action taken: funding requested', () => {
-    // player B scenario
-    const testDefaults = {
-      ...defaultsB,
-      ...justReceivedPreFundSetupB,
-    };
-    const state = states.waitForFundingRequest(testDefaults);
-    const action = actions.channel.fundingRequested();
-    const updatedState = fundingReducer(state, action);
-
-    itTransitionsToChannelStateType(states.WAIT_FOR_FUNDING_AND_POST_FUND_SETUP, updatedState);
-    itIncreasesTurnNumBy(0, state, updatedState);
-  });
-});
-
 describe('start in WaitForFundingAndPostFundSetup', () => {
   function startingState(player: 'A' | 'B') {
     const params = {

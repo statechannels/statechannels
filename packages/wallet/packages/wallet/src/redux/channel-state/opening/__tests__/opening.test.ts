@@ -104,7 +104,7 @@ describe('when in WaitForPreFundSetup', () => {
     const action = actions.channel.ownCommitmentReceived(preFundCommitment2);
     const updatedState = openingReducer(state, action);
 
-    itTransitionsToChannelStateType(states.WAIT_FOR_FUNDING_REQUEST, updatedState);
+    itTransitionsToChannelStateType(states.WAIT_FOR_FUNDING_AND_POST_FUND_SETUP, updatedState);
   });
 
   describe('when an opponent sends a PreFundSetupB', () => {
@@ -116,7 +116,7 @@ describe('when in WaitForPreFundSetup', () => {
     const action = actions.channel.opponentCommitmentReceived(preFundCommitment2, 'sig');
     const updatedState = openingReducer(state, action);
 
-    itTransitionsToChannelStateType(states.WAIT_FOR_FUNDING_REQUEST, updatedState);
+    itTransitionsToChannelStateType(states.WAIT_FOR_FUNDING_AND_POST_FUND_SETUP, updatedState);
   });
 
   describe('when an opponent sends a PreFundSetupB but the signature is bad', () => {
