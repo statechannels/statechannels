@@ -1,7 +1,7 @@
 import React from 'react';
 import { Button } from 'reactstrap';
 import { StyleSheet, css } from 'aphrodite';
-import SidebarLayout from './SidebarLayout';
+import SidebarLayout from './sidebar-layout';
 
 interface Props {
   title: string;

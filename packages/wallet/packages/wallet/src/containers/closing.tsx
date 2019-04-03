@@ -6,16 +6,16 @@ import { Button } from 'reactstrap';
 import * as states from '../redux/channel-state/state';
 import * as actions from '../redux/actions';
 
-import AcknowledgeX from '../components/AcknowledgeX';
-import ApproveX from '../components/ApproveX';
+import AcknowledgeX from '../components/acknowledge-x';
+import ApproveX from '../components/approve-x';
 import { unreachable } from '../utils/reducer-utils';
-import WaitForOtherPlayer from '../components/WaitForOtherPlayer';
+import WaitForOtherPlayer from '../components/wait-for-other-player';
 // import WaitForXConfirmation from '../components/WaitForXConfirmation';
 // import WaitForXInitiation from '../components/WaitForXInitiation';
-import TransactionFailed from '../components/TransactionFailed';
-import SelectAddress from '../components/withdrawing/SelectAddress';
-import { ClosingStep } from '../components/closing/ClosingStep';
-import EtherscanLink from '../components/EtherscanLink';
+import TransactionFailed from '../components/transaction-failed';
+import SelectAddress from '../components/withdrawing/select-address';
+import { ClosingStep } from '../components/closing/closing-step';
+import EtherscanLink from '../components/etherscan-link';
 import { WalletProcedure } from '../redux/types';
 
 interface Props {

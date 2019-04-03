@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { Button } from 'reactstrap';
-import SidebarLayout from '../SidebarLayout';
+import SidebarLayout from '../sidebar-layout';
 
 interface Props {
   approveAction: (address: string) => void;

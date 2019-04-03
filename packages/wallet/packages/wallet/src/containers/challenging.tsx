@@ -6,11 +6,11 @@ import { Button } from 'reactstrap';
 import * as states from '../redux/channel-state/state';
 import * as actions from '../redux/actions';
 
-import ApproveX from '../components/ApproveX';
+import ApproveX from '../components/approve-x';
 import { unreachable } from '../utils/reducer-utils';
-import TransactionFailed from '../components/TransactionFailed';
-import { ChallengingStep } from '../components/challenging/ChallengingStep';
-import EtherscanLink from '../components/EtherscanLink';
+import TransactionFailed from '../components/transaction-failed';
+import { ChallengingStep } from '../components/challenging/challenging-step';
+import EtherscanLink from '../components/etherscan-link';
 import { WalletProcedure } from '../redux/types';
 
 interface Props {

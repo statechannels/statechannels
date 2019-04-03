@@ -1,5 +1,5 @@
 import React from 'react';
-import SidebarLayout from '../SidebarLayout';
+import SidebarLayout from '../sidebar-layout';
 
 export default class AWaitForPostFundSetup extends React.PureComponent<{}> {
   render() {

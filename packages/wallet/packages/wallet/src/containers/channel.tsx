@@ -3,12 +3,12 @@ import { PureComponent } from 'react';
 import { connect } from 'react-redux';
 
 import * as states from '../redux/channel-state/state';
-import FundingContainer from './Funding';
-import RespondingContainer from './Responding';
-import ChallengingContainer from './Challenging';
-import WithdrawingContainer from './Withdrawing';
-import ClosingContainer from './Closing';
-import LandingPage from '../components/LandingPage';
+import FundingContainer from './funding';
+import RespondingContainer from './responding';
+import ChallengingContainer from './challenging';
+import WithdrawingContainer from './withdrawing';
+import ClosingContainer from './closing';
+import LandingPage from '../components/landing-page';
 
 interface ChannelProps {
   state: states.ChannelStatus;

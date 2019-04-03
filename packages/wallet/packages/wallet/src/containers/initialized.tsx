@@ -1,8 +1,8 @@
 import * as states from '../redux/state';
 import React, { PureComponent } from 'react';
-import SidebarLayout from '../components/SidebarLayout';
+import SidebarLayout from '../components/sidebar-layout';
 import { connect } from 'react-redux';
-import ChannelContainer from './Channel';
+import ChannelContainer from './channel';
 interface Props {
   state: states.Initialized;
 }

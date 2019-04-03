@@ -1,5 +1,5 @@
 import React from 'react';
-import SidebarLayout from '../SidebarLayout';
+import SidebarLayout from '../sidebar-layout';
 
 interface Props {
   expirationTime: number;

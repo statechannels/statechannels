@@ -3,9 +3,9 @@ import { PureComponent } from 'react';
 import { connect } from 'react-redux';
 
 import * as states from '../redux/state';
-import InitializingContainer from './Initializing';
-import WalletInitializedContainer from './Initialized';
-import LandingPage from '../components/LandingPage';
+import InitializingContainer from './initializing';
+import WalletInitializedContainer from './initialized';
+import LandingPage from '../components/landing-page';
 
 interface WalletProps {
   state: states.WalletState;

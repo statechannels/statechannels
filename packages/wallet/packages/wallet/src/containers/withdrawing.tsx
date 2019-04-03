@@ -10,10 +10,10 @@ import * as actions from '../redux/actions';
 // import WaitForXConfirmation from '../components/WaitForXConfirmation';
 // import WaitForXInitiation from '../components/WaitForXInitiation';
 import { unreachable } from '../utils/reducer-utils';
-import TransactionFailed from '../components/TransactionFailed';
-import SelectAddress from '../components/withdrawing/SelectAddress';
-import { WithdrawingStep } from '../components/withdrawing/WithdrawingStep';
-import EtherscanLink from '../components/EtherscanLink';
+import TransactionFailed from '../components/transaction-failed';
+import SelectAddress from '../components/withdrawing/select-address';
+import { WithdrawingStep } from '../components/withdrawing/withdrawing-step';
+import EtherscanLink from '../components/etherscan-link';
 import { WalletProcedure } from '../redux/types';
 
 interface Props {
