@@ -89,7 +89,9 @@ const initializedWalletState = walletStates.initialized({
   unhandledAction: undefined,
   outboxState: EMPTY_OUTBOX_STATE,
   channelState: {
-    initializedChannels: { [channelId]: channelStates.approveFunding({ ...playerADefaults }) },
+    initializedChannels: {
+      [channelId]: channelStates.waitForFundingRequest({ ...playerADefaults }),
+    },
     initializingChannels: {},
   },
   networkId: 4,
@@ -164,7 +166,6 @@ function addStoriesFromCollection(collection, chapter, renderer = channelStateRe
 }
 
 const WalletScreensFundingPlayerA = {
-  ApproveFunding: { channelState: channelStates.approveFunding(playerADefaults) },
   WaitForTransactionSent: {
     channelState: channelStates.waitForFundingAndPostFundSetup(playerADefaults),
     fundingState: fundingStates.depositing.waitForTransactionSent(defaultFundingState),
@@ -188,9 +189,6 @@ const WalletScreensFundingPlayerA = {
     fundingState: fundingStates.waitForFundingConfirmed(defaultFundingState),
   },
   WaitForPostFundSetup: { channelState: channelStates.aWaitForPostFundSetup(playerADefaults) },
-  AcknowledgeFundingSuccess: {
-    channelState: channelStates.acknowledgeFundingSuccess(playerADefaults),
-  },
 };
 addStoriesFromCollection(
   WalletScreensFundingPlayerA,
@@ -199,7 +197,6 @@ addStoriesFromCollection(
 );
 
 const WalletScreensFundingPlayerB = {
-  ApproveFunding: { channelState: channelStates.approveFunding(playerBDefaults) },
   NotSafeToDeposit: {
     channelState: channelStates.waitForFundingAndPostFundSetup(playerBDefaults),
     fundingState: fundingStates.notSafeToDeposit(defaultFundingState),
@@ -221,9 +218,6 @@ const WalletScreensFundingPlayerB = {
     fundingState: fundingStates.waitForFundingConfirmed(defaultFundingState),
   },
   WaitForPostFundSetup: { channelState: channelStates.aWaitForPostFundSetup(playerBDefaults) },
-  AcknowledgeFundingSuccess: {
-    channelState: channelStates.acknowledgeFundingSuccess(playerBDefaults),
-  },
 };
 addStoriesFromCollection(
   WalletScreensFundingPlayerB,
@@ -233,7 +227,6 @@ addStoriesFromCollection(
 
 // Against bot, who sends funding too early:
 const WalletScreensFundingPlayerAPart2 = {
-  ApproveFunding: { channelState: channelStates.approveFunding(playerADefaults) },
   WaitForTransactionSent: {
     channelState: channelStates.waitForFundingConfirmation(playerADefaults),
     fundingState: fundingStates.depositing.waitForTransactionSent(defaultFundingState),
@@ -255,9 +248,6 @@ const WalletScreensFundingPlayerAPart2 = {
       ...playerADefaults,
     }),
     fundingState: fundingStates.waitForFundingConfirmed(defaultFundingState),
-  },
-  AcknowledgeFundingSuccess: {
-    channelState: channelStates.acknowledgeFundingSuccess(playerADefaults),
   },
 };
 addStoriesFromCollection(

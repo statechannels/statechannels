@@ -17,15 +17,15 @@ export const directFundingRequested = (
 });
 export type DirectFundingRequested = ReturnType<typeof directFundingRequested>;
 
-export const DIRECT_FUNDING_CONFIRMED = 'WALLET.INTERNAL.CHANNEL.DIRECT_FUNDING_CONFIRMED';
-export const directFundingConfirmed = (channelId: string) => ({
-  type: DIRECT_FUNDING_CONFIRMED as typeof DIRECT_FUNDING_CONFIRMED,
+export const FUNDING_CONFIRMED = 'WALLET.INTERNAL.CHANNEL.FUNDING_CONFIRMED';
+export const fundingConfirmed = (channelId: string) => ({
+  type: FUNDING_CONFIRMED as typeof FUNDING_CONFIRMED,
   channelId,
 });
-export type DirectFundingConfirmed = ReturnType<typeof directFundingConfirmed>;
+export type FundingConfirmed = ReturnType<typeof fundingConfirmed>;
 
 export type InternalFundingAction = DirectFundingRequested;
-export type InternalChannelAction = DirectFundingConfirmed;
+export type InternalChannelAction = FundingConfirmed;
 
 export type InternalAction = InternalFundingAction | InternalChannelAction;
 
