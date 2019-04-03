@@ -25,7 +25,7 @@ You will need `yarn` installed (see [here](https://yarnpkg.com/lang/en/docs/inst
 1. In the top directory, run `yarn install`.
 2. Run `npx lerna bootstrap`.
 
-3. Start [ganache](https://truffleframework.com/ganache) by running `yarn ganache:start` .
+3. Start [ganache](https://truffleframework.com/ganache) by running `yarn ganache:start` in one of the package directories.
 4. (In a new shell) Run the wallet via `yarn start` in the `wallet` package directory
 5. (In a new shell) Run a game (either RPS or TTT) via `yarn start` in the relevant package directory.
 6. Add [MetaMask](https://metamask.io/) to your browser, and point it to `localhost:3001` to view the application. You will need to import one of our (testnet-only) seed accounts into metamask to have funds to transact.
