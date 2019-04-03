@@ -24,8 +24,6 @@ class FundingContainer extends PureComponent<Props> {
     const { state } = this.props;
 
     switch (state.type) {
-      case channelStates.WAIT_FOR_FUNDING_REQUEST:
-        return null;
       case channelStates.WAIT_FOR_FUNDING_AND_POST_FUND_SETUP:
       case channelStates.WAIT_FOR_FUNDING_CONFIRMATION:
         return <DirectFunding channelId={state.channelId} />;

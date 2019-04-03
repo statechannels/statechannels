@@ -9,19 +9,10 @@ import { channelOpen, ChannelOpen } from '../shared/state';
 export const FUNDING = 'FUNDING';
 
 // STATE TYPES
-// Funding setup
-export const WAIT_FOR_FUNDING_REQUEST = 'CHANNEL.WAIT_FOR_FUNDING_REQUEST';
-
-// Funding ongoing
 export const WAIT_FOR_FUNDING_AND_POST_FUND_SETUP = 'WAIT_FOR_FUNDING_AND_POST_FUND_SETUP';
 export const WAIT_FOR_FUNDING_CONFIRMATION = 'WAIT_FOR_FUNDING_CONFIRMATION';
 export const A_WAIT_FOR_POST_FUND_SETUP = 'A_WAIT_FOR_POST_FUND_SETUP';
 export const B_WAIT_FOR_POST_FUND_SETUP = 'B_WAIT_FOR_POST_FUND_SETUP';
-
-export interface WaitForFundingRequest extends ChannelOpen {
-  type: typeof WAIT_FOR_FUNDING_REQUEST;
-  stage: typeof FUNDING;
-}
 
 export interface WaitForFundingAndPostFundSetup extends ChannelOpen {
   type: typeof WAIT_FOR_FUNDING_AND_POST_FUND_SETUP;
@@ -41,14 +32,6 @@ export interface AWaitForPostFundSetup extends ChannelOpen {
 export interface BWaitForPostFundSetup extends ChannelOpen {
   type: typeof B_WAIT_FOR_POST_FUND_SETUP;
   stage: typeof FUNDING;
-}
-
-export function waitForFundingRequest<T extends ChannelOpen>(params: T): WaitForFundingRequest {
-  return {
-    type: WAIT_FOR_FUNDING_REQUEST,
-    stage: FUNDING,
-    ...channelOpen(params),
-  };
 }
 
 export function waitForFundingAndPostFundSetup<T extends ChannelOpen>(
@@ -76,7 +59,6 @@ export function bWaitForPostFundSetup<T extends ChannelOpen>(params: T): BWaitFo
 }
 
 export type FundingState =
-  | WaitForFundingRequest
   | WaitForFundingAndPostFundSetup
   | WaitForFundingConfirmation
   // ^^^ PlayerA should never let PlayerB get into this state, as it lets PlayerB move to the application phase

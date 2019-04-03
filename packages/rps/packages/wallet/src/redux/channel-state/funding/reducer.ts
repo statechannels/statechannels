@@ -28,10 +28,6 @@ export const fundingReducer = (
   }
 
   switch (state.type) {
-    // Setup funding process
-    case states.WAIT_FOR_FUNDING_REQUEST:
-      return waitForFundingRequestReducer(state, action);
-
     // Funding is ongoing
     case states.WAIT_FOR_FUNDING_AND_POST_FUND_SETUP:
       return waitForFundingAndPostFundSetupReducer(state, action);
@@ -45,20 +41,6 @@ export const fundingReducer = (
     //
     default:
       return unreachable(state);
-  }
-};
-
-const waitForFundingRequestReducer = (
-  state: states.WaitForFundingRequest,
-  action: actions.ChannelAction | internal.InternalAction,
-): StateWithSideEffects<states.OpenedState> => {
-  switch (action.type) {
-    case actions.FUNDING_REQUESTED:
-      return {
-        state: states.waitForFundingAndPostFundSetup({ ...state }),
-      };
-    default:
-      return { state };
   }
 };
 
