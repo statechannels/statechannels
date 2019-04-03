@@ -151,7 +151,7 @@ const waitForPreFundSetupReducer = (
   state: channelStates.WaitForPreFundSetup,
   action: actions.WalletAction,
 ): StateWithSideEffects<
-  channelStates.WaitForPreFundSetup | channelStates.WaitForFundingRequest
+  channelStates.WaitForPreFundSetup | channelStates.WaitForFundingAndPostFundSetup
 > => {
   switch (action.type) {
     case actions.channel.OWN_COMMITMENT_RECEIVED:
@@ -179,7 +179,7 @@ const waitForPreFundSetupReducer = (
 
       // if so, unpack its contents into the state
       return {
-        state: channelStates.waitForFundingRequest({
+        state: channelStates.waitForFundingAndPostFundSetup({
           ...state,
           turnNum: 1,
           lastCommitment: { commitment: ownCommitment, signature },
@@ -221,7 +221,7 @@ const waitForPreFundSetupReducer = (
 
       // if so, unpack its contents into the state
       return {
-        state: channelStates.waitForFundingRequest({
+        state: channelStates.waitForFundingAndPostFundSetup({
           ...state,
           turnNum: 1,
           lastCommitment: { commitment: action.commitment, signature: action.signature },
