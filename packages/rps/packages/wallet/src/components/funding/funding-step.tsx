@@ -3,7 +3,7 @@ import * as states from '../../redux/funding-state/directFunding/state';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCheckCircle, faSpinner } from '@fortawesome/free-solid-svg-icons';
 import { faCircle } from '@fortawesome/free-regular-svg-icons';
-import SidebarLayout from '../SidebarLayout';
+import SidebarLayout from '../sidebar-layout';
 import { unreachable } from '../../utils/reducer-utils';
 
 interface Props {

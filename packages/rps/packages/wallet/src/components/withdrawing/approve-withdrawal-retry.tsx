@@ -1,7 +1,7 @@
 import React from 'react';
 import Button from 'reactstrap/lib/Button';
 import walletIcon from '../../../images/wallet_icon.svg';
-import SidebarLayout from '../SidebarLayout';
+import SidebarLayout from '../sidebar-layout';
 
 interface Props {
   withdrawalSuccessAcknowledged: () => void;

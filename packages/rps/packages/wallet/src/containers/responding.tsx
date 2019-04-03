@@ -6,11 +6,11 @@ import { Button } from 'reactstrap';
 import * as states from '../redux/channel-state/state';
 import * as actions from '../redux/actions';
 
-import { RespondingStep } from '../components/responding/RespondingStep';
-import AcknowledgeTimeout from '../components/responding/AcknowledgeTimeout';
+import { RespondingStep } from '../components/responding/responding-step';
+import AcknowledgeTimeout from '../components/responding/acknowledge-timeout';
 import { unreachable } from '../utils/reducer-utils';
-import ChooseResponse, { ChallengeOptions } from '../components/responding/ChooseResponse';
-import TransactionFailed from '../components/TransactionFailed';
+import ChooseResponse, { ChallengeOptions } from '../components/responding/choose-response';
+import TransactionFailed from '../components/transaction-failed';
 import { WalletProcedure } from '../redux/types';
 
 interface Props {

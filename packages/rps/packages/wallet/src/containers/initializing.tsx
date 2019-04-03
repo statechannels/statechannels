@@ -1,7 +1,7 @@
 import * as states from '../redux/state';
 import React, { PureComponent } from 'react';
-import SidebarLayout from '../components/SidebarLayout';
-import LandingPage from '../components/LandingPage';
+import SidebarLayout from '../components/sidebar-layout';
+import LandingPage from '../components/landing-page';
 import { connect } from 'react-redux';
 interface Props {
   state: states.WalletState;

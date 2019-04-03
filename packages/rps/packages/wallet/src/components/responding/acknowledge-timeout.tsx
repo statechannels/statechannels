@@ -1,6 +1,6 @@
 import React from 'react';
 import Button from 'reactstrap/lib/Button';
-import SidebarLayout from '../SidebarLayout';
+import SidebarLayout from '../sidebar-layout';
 import { StyleSheet, css } from 'aphrodite';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHourglassEnd } from '@fortawesome/free-solid-svg-icons';

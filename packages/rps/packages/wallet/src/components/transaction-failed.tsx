@@ -1,5 +1,5 @@
 import React from 'react';
-import SidebarLayout from './SidebarLayout';
+import SidebarLayout from './sidebar-layout';
 import { Button } from 'reactstrap';
 import magmoFireBall from '../images/white_fireball.svg';
 

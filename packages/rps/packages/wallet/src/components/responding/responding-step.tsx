@@ -2,7 +2,7 @@ import React from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCheckCircle, faSpinner } from '@fortawesome/free-solid-svg-icons';
 import { faCircle } from '@fortawesome/free-regular-svg-icons';
-import SidebarLayout from '../SidebarLayout';
+import SidebarLayout from '../sidebar-layout';
 
 interface Props {
   step: number;
@@ -34,26 +34,58 @@ const icon = (iconStep: number, currentStep: number) => {
   }
 };
 
-export class ClosingStep extends React.PureComponent<Props> {
+// NOTE: the appearance of this modal is largely influenced by the amount of text in each message. Until a more robust front-end comes along, try to keep messages of the same length within each case block below.
+const message = (iconStep: number, currentStep: number) => {
+  switch (iconStep) {
+    case 1:
+      if (currentStep < iconStep) {
+        return 'Prepare your transaction';
+      } else if (currentStep === iconStep) {
+        return 'Preparing your transaction...';
+      } else {
+        return 'Response transaction sent';
+      }
+    case 2:
+      if (currentStep < iconStep) {
+        return 'Response will be registered on chain ';
+      } else if (currentStep === iconStep) {
+        return 'Waiting for confirmation of response being registered...';
+      } else {
+        return 'Your response was successfully registered on chain';
+      }
+    case 3:
+      if (currentStep < iconStep) {
+        return 'Challenge will end';
+      } else if (currentStep === iconStep) {
+        return 'Waiting for confirmation...';
+      } else {
+        return 'Challenge Over!';
+      }
+    default:
+      return '';
+  }
+};
+
+export class RespondingStep extends React.PureComponent<Props> {
   render() {
     const currentStep = this.props.step;
     const children = this.props.children;
 
     return (
       <SidebarLayout>
-        <h2 className="bp-2">Closing channel</h2>
+        <h2 className="bp-2">Responding</h2>
         <ul className="fa-ul">
           <li style={{ padding: '0.7em 1em' }}>
             {icon(1, currentStep)}
-            Preparing your close transaction
+            {message(1, currentStep)}
           </li>
           <li style={{ padding: '0.7em 1em' }}>
             {icon(2, currentStep)}
-            Wait for confirmation
+            {message(2, currentStep)}
           </li>
           <li style={{ padding: '0.7em 1em' }}>
             {icon(3, currentStep)}
-            Close and Withdrawal Successful!
+            {message(3, currentStep)}
           </li>
         </ul>
         <div className="pb-2">{children}</div>

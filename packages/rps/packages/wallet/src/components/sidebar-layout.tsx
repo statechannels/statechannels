@@ -1,6 +1,6 @@
 import React from 'react';
 import { PureComponent } from 'react';
-import NetworkStatus from './NetworkStatus';
+import NetworkStatus from './network-status';
 import Modal from 'react-modal';
 
 // todo: style to appear from the left as per:

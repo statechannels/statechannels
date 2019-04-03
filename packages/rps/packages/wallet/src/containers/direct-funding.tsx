@@ -6,9 +6,9 @@ import * as fundingStates from '../redux/funding-state/state';
 import * as actions from '../redux/actions';
 
 import { unreachable } from '../utils/reducer-utils';
-import { FundingStep, fundingStepByState } from '../components/funding/FundingStep';
-import EtherscanLink from '../components/EtherscanLink';
-import TransactionFailed from '../components/TransactionFailed';
+import { FundingStep, fundingStepByState } from '../components/funding/funding-step';
+import EtherscanLink from '../components/etherscan-link';
+import TransactionFailed from '../components/transaction-failed';
 import { WalletProcedure } from '../redux/types';
 
 interface Props {
