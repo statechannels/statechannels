@@ -1,5 +1,5 @@
-import * as playerA from './playerA/actions';
-import * as playerB from './playerB/actions';
+import * as playerA from './player-a/actions';
+import * as playerB from './player-b/actions';
 import { CommonAction } from '../actions';
 import { PlayerIndex } from '../types';
 
