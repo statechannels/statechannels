@@ -100,8 +100,7 @@ Once the state machine reaches a terminated state, the process is dismantled.
 ```mermaid
   graph TD
   linkStyle default interpolate basis
-    WAIT_FOR_APPROVAL -->|INDIRECT_FUNDING_APPROVED| WAIT_FOR_INDIRECT_STRATEGY_RESPONSE[WAIT_FOR_STRATEGY_RESPONSE: INDIRECT]
-    WAIT_FOR_APPROVAL -->|DIRECT_FUNDING_APPROVED| WAIT_FOR_DIRECT_STRATEGY_RESPONSE[WAIT_FOR_STRATEGY_RESPONSE: DIRECT]
+    WAIT_FOR_APPROVAL -->|FUNDING_APPROVED| WAIT_FOR_INDIRECT_STRATEGY_RESPONSE[WAIT_FOR_STRATEGY_RESPONSE: INDIRECT]
     WAIT_FOR_APPROVAL -->|REJECTED| earlyFail{FAIL}
 
     WAIT_FOR_INDIRECT_STRATEGY_RESPONSE -->|STRATEGY_AGREED| WAIT_FOR_PREFUND_SETUP1
@@ -116,12 +115,8 @@ Once the state machine reaches a terminated state, the process is dismantled.
 
     WAIT_FOR_LEDGER_UPDATE1 --> |RECEIVE_COMMITMENT| success{ SUCCESS }
 
-    WAIT_FOR_DIRECT_STRATEGY_RESPONSE -->|STRATEGY_AGREED| direct[WAIT_FOR_DIRECT_FUNDING]
 
-    direct[WAIT_FOR_DIRECT_FUNDING] -->|FUNDING_EVENT| direct[WAIT_FOR_DIRECT_FUNDING]
-    direct[WAIT_FOR_DIRECT_FUNDING] -->|"FUNDING_RECEIVED_EVENT(funded)"| success{ SUCCESS }
 
-    WAIT_FOR_DIRECT_STRATEGY_RESPONSE -->|STRATEGY_REFUSED| fail{ FAIL }
 ```
 
 ### Player B
@@ -129,11 +124,10 @@ Once the state machine reaches a terminated state, the process is dismantled.
 ```mermaid
   graph TD
   linkStyle default interpolate basis
-    WAIT_FOR_STRATEGY_REQUEST -->|INDIRECT| indirectStrategy[WAIT_FOR_APPROVAL]
-    WAIT_FOR_STRATEGY_REQUEST -->|DIRECT| directStrategy[WAIT_FOR_APPROVAL]
+    WAIT_FOR_APPROVAL -->|FUNDING_APPROVED| WAIT_FOR_STRATEGY_REQUEST
 
-    indirectStrategy[WAIT_FOR_APPROVAL] -->|FUNDING_APPROVED| WAIT_FOR_PREFUND_SETUP0
-    indirectStrategy[WAIT_FOR_APPROVAL] -->|REJECTED| fail{FAIL}
+    WAIT_FOR_STRATEGY_REQUEST -->|Receive strategy, send strategy approval| WAIT_FOR_PREFUND_SETUP0
+    WAIT_FOR_APPROVAL -->|REJECTED| fail{FAIL}
 
     WAIT_FOR_PREFUND_SETUP0 -->|RECEIVE_COMMITMENT| WAIT_FOR_DIRECT_FUNDING
 
@@ -144,9 +138,6 @@ Once the state machine reaches a terminated state, the process is dismantled.
 
     WAIT_FOR_LEDGER_UPDATE0 --> |RECEIVE_COMMITMENT| success{SUCCESS}
 
-    directStrategy[WAIT_FOR_APPROVAL] -->|FUNDING_APPROVED| direct[WAIT_FOR_DIRECT_FUNDING]
-    directStrategy[WAIT_FOR_APPROVAL] -->|REJECTED| fail{FAIL}
-    direct[WAIT_FOR_DIRECT_FUNDING] -->|"FUNDING_RECEIVED_EVENT(funded)"| success{ SUCCESS }
 ```
 
 ## Indirect funding sequence diagram
