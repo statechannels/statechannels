@@ -1,4 +1,4 @@
-import { ChannelStatus } from '../redux/channelState/state';
+import { ChannelStatus } from '../redux/channel-state/state';
 import * as actions from '../redux/actions';
 import {
   signatureFailure,
