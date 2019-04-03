@@ -5,8 +5,8 @@ import { unreachable } from '../utils/reducer-utils';
 import { clearOutbox } from './outbox/reducer';
 import { accumulateSideEffects } from './outbox';
 import { initializationSuccess } from 'magmo-wallet-client/lib/wallet-events';
-import { channelStateReducer } from './channelState/reducer';
-import { fundingStateReducer } from './fundingState/reducer';
+import { channelStateReducer } from './channel-state/reducer';
+import { fundingStateReducer } from './funding-state/reducer';
 import { combineReducersWithSideEffects } from './../utils/reducer-utils';
 
 const initialState = states.waitForLogin();

@@ -1,5 +1,5 @@
 import { Commitment } from 'fmg-core';
-import { ChannelStatus } from '../redux/channelState/state';
+import { ChannelStatus } from '../redux/channel-state/state';
 import { channelID } from 'fmg-core/lib/channel';
 import { accumulateSideEffects } from '../redux/outbox';
 import { SideEffects } from 'src/redux/outbox/state';

@@ -3,13 +3,13 @@ import { storiesOf } from '@storybook/react';
 import WalletContainer from '../containers/Wallet';
 import { Provider } from 'react-redux';
 import * as walletStates from '../redux/state';
-import * as channelStates from '../redux/channelState/state';
-import * as fundingStates from '../redux/fundingState/state';
+import * as channelStates from '../redux/channel-state/state';
+import * as fundingStates from '../redux/funding-state/state';
 import '../index.scss';
 import * as scenarios from '../redux/__tests__/test-scenarios';
 import { bigNumberify } from 'ethers/utils';
 import NetworkStatus from '../components/NetworkStatus';
-import { channelFunded } from '../redux/fundingState/state';
+import { channelFunded } from '../redux/funding-state/state';
 import { EMPTY_OUTBOX_STATE } from '../redux/outbox/state';
 
 const {

@@ -1,7 +1,7 @@
 import { walletReducer } from '../reducer';
 
 import * as states from './../state';
-import * as fundingStates from './../fundingState/state';
+import * as fundingStates from './../funding-state/state';
 import * as actions from './../actions';
 
 const defaults = {

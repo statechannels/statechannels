@@ -1,5 +1,5 @@
-import * as playerA from './playerA/state';
-import * as playerB from './playerB/state';
+import * as playerA from './player-a/state';
+import * as playerB from './player-b/state';
 
 export { playerA, playerB };
 

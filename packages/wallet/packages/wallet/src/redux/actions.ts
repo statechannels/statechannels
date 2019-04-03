@@ -1,7 +1,7 @@
 import * as internal from './internal/actions';
-import * as channel from './channelState/actions';
-import * as funding from './fundingState/actions';
-import * as indirectFunding from './indirectFunding/actions';
+import * as channel from './channel-state/actions';
+import * as funding from './funding-state/actions';
+import * as indirectFunding from './indirect-funding/actions';
 import { WalletProcedure } from './types';
 import { Commitment } from 'fmg-core';
 

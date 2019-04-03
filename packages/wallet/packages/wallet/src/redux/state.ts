@@ -1,8 +1,8 @@
 import { OutboxState, EMPTY_OUTBOX_STATE } from './outbox/state';
-import { FundingState, EMPTY_FUNDING_STATE } from './fundingState/state';
-import { ChannelState, ChannelStatus } from './channelState/state';
+import { FundingState, EMPTY_FUNDING_STATE } from './funding-state/state';
+import { ChannelState, ChannelStatus } from './channel-state/state';
 import { Properties } from './utils';
-import { IndirectFundingState } from './indirectFunding/state';
+import { IndirectFundingState } from './indirect-funding/state';
 
 export type WalletState = WaitForLogin | WaitForAdjudicator | MetaMaskError | Initialized;
 
