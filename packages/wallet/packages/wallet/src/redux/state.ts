@@ -2,6 +2,7 @@ import { OutboxState, EMPTY_OUTBOX_STATE } from './outbox/state';
 import { FundingState, EMPTY_FUNDING_STATE } from './fundingState/state';
 import { ChannelState, ChannelStatus } from './channelState/state';
 import { Properties } from './utils';
+import { IndirectFundingState } from './indirectFunding/state';
 
 export type WalletState = WaitForLogin | WaitForAdjudicator | MetaMaskError | Initialized;
 
@@ -42,10 +43,14 @@ export interface Initialized {
   type: typeof WALLET_INITIALIZED;
   channelState: ChannelState;
   fundingState: FundingState;
+
   outboxState: OutboxState;
   uid: string;
   networkId: number;
   adjudicator: string;
+
+  // procedure branches are optional, and exist precisely when that procedure is running
+  indirectFunding?: IndirectFundingState;
 }
 
 // ------------
