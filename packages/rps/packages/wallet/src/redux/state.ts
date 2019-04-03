@@ -2,7 +2,7 @@ import { OutboxState, EMPTY_OUTBOX_STATE } from './outbox/state';
 import { FundingState, EMPTY_FUNDING_STATE } from './funding-state/state';
 import { ChannelState, ChannelStatus } from './channel-state/state';
 import { Properties } from './utils';
-import { IndirectFundingState } from './indirect-funding/state';
+import * as indirectFunding from './indirect-funding/state';
 
 export type WalletState = WaitForLogin | WaitForAdjudicator | MetaMaskError | Initialized;
 
@@ -50,7 +50,7 @@ export interface Initialized {
   adjudicator: string;
 
   // procedure branches are optional, and exist precisely when that procedure is running
-  indirectFunding?: IndirectFundingState;
+  indirectFunding?: indirectFunding.IndirectFundingState;
 }
 
 // ------------
@@ -92,3 +92,5 @@ export function initialized(params: Properties<Initialized>): Initialized {
 export function getChannelStatus(state: WalletState, channelId: string): ChannelStatus {
   return state.channelState.initializedChannels[channelId];
 }
+
+export { indirectFunding };
