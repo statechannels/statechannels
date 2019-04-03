@@ -24,3 +24,5 @@ export const allocationChangeRequested = (
   commitment,
 });
 export type AllocationChangeRequested = ReturnType<typeof allocationChangeRequested>;
+
+export type Action = StrategyProposed | AllocationChangeRequested;

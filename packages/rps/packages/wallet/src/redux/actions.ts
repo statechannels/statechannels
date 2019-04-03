@@ -1,6 +1,7 @@
 import * as internal from './internal/actions';
 import * as channel from './channelState/actions';
 import * as funding from './fundingState/actions';
+import * as indirectFunding from './indirectFunding/actions';
 import { WalletProcedure } from './types';
 import { Commitment } from 'fmg-core';
 
@@ -153,7 +154,7 @@ export function isProcedureAction(action: WalletAction): action is ProcedureActi
   return 'procedure' in action;
 }
 
-export { internal, channel, funding };
+export { internal, channel, funding, indirectFunding };
 
 export type WalletAction =
   | AdjudicatorKnown
@@ -165,4 +166,5 @@ export type WalletAction =
   | CommonAction
   | channel.ChannelAction
   | internal.InternalAction
-  | funding.FundingAction;
+  | funding.FundingAction
+  | indirectFunding.Action;
