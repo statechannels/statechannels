@@ -32,7 +32,14 @@ function playerBReducer(
   state: states.Initialized,
   action: actions.indirectFunding.Action,
 ): states.Initialized {
-  return state;
+  return {
+    ...state,
+    indirectFunding: states.indirectFunding.playerB.waitForDirectFunding({
+      ledgerId: 'ledgerId',
+      channelId: 'channelId',
+      player: PlayerIndex.B,
+    }),
+  };
 }
 
 function fundingRequestedReducer(
