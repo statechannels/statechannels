@@ -6,7 +6,7 @@ import { Provider } from 'react-redux';
 // import 'bootstrap/dist/css/bootstrap.min.css';
 import './index.scss';
 import store from './redux/store';
-import WalletContainer from './containers/Wallet';
+import WalletContainer from './containers/wallet';
 render(
   <Provider store={store}>
     <WalletContainer />

@@ -1,5 +1,5 @@
 import React from 'react';
-import ApproveX from '../ApproveX';
+import ApproveX from '../approve-x';
 import web3Utils from 'web3-utils';
 
 interface Props {

@@ -1,7 +1,7 @@
 import React from 'react';
 // import walletIcon from '../../images/wallet_icon.svg';
-import SidebarLayout from './SidebarLayout';
-import YesOrNo from './YesOrNo';
+import SidebarLayout from './sidebar-layout';
+import YesOrNo from './yes-or-no';
 
 interface Props {
   yesMessage: string;

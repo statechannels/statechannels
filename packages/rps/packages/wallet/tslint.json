@@ -38,6 +38,7 @@
       "allow-pascal-case",
       "allow-leading-underscore"
     ],
-    "no-switch-case-fall-through": true
+    "no-switch-case-fall-through": true,
+    "file-name-casing": [true, "kebab-case"]
   }
 }
