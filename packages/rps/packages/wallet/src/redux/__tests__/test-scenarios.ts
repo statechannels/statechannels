@@ -3,6 +3,7 @@ import { channelID } from 'fmg-core/lib/channel';
 import { bigNumberify } from 'ethers/utils';
 import { waitForPreFundSetup } from '../channel-state/state';
 import { WalletProcedure } from '../types';
+import * as states from '../state';
 
 export const libraryAddress = '0x' + '1'.repeat(40);
 export const channelNonce = 4;
@@ -18,6 +19,14 @@ export const channelId = channelID(channel);
 export const fundingState = {
   fundingType: 'FUNDING_TYPE.UNKNOWN' as 'FUNDING_TYPE.UNKNOWN',
   channelFundingStatus: 'FUNDING_NOT_STARTED' as 'FUNDING_NOT_STARTED',
+};
+
+export const initializedState: states.Initialized = {
+  ...states.emptyState,
+  type: states.WALLET_INITIALIZED,
+  adjudicator: 'adjudicator',
+  uid: 'uid',
+  networkId: 3,
 };
 
 export const mockTransactionOutboxItem = {
