@@ -1,19 +1,17 @@
 import * as states from './state';
-import * as depositingStates from './depositing/state';
 import * as actions from '../../actions';
+import * as depositingStates from './depositing/state';
 
 import { unreachable } from '../../../utils/reducer-utils';
-
 import { StateWithSideEffects } from 'src/redux/utils';
 import { depositingReducer } from './depositing/reducer';
 import { bigNumberify } from 'ethers/utils';
 import { createDepositTransaction } from '../../../utils/transaction-generator';
 import { WalletProcedure } from '../../types';
-
-export const directFundingStatusReducer = (
-  state: states.DirectFundingStatus,
+export const directFundingStateReducer = (
+  state: states.DirectFundingState,
   action: actions.WalletAction,
-): StateWithSideEffects<states.DirectFundingStatus> => {
+): StateWithSideEffects<states.DirectFundingState> => {
   if (
     action.type === actions.funding.FUNDING_RECEIVED_EVENT &&
     action.channelId === state.channelId
@@ -27,7 +25,6 @@ export const directFundingStatusReducer = (
       };
     }
   }
-
   if (states.stateIsNotSafeToDeposit(state)) {
     return notSafeToDepositReducer(state, action);
   }
@@ -40,14 +37,12 @@ export const directFundingStatusReducer = (
   if (states.stateIsChannelFunded(state)) {
     return channelFundedReducer(state, action);
   }
-
   return unreachable(state);
 };
-
 const notSafeToDepositReducer = (
   state: states.NotSafeToDeposit,
   action: actions.WalletAction,
-): StateWithSideEffects<states.DirectFundingStatus> => {
+): StateWithSideEffects<states.DirectFundingState> => {
   switch (action.type) {
     case actions.funding.FUNDING_RECEIVED_EVENT:
       if (
@@ -64,7 +59,6 @@ const notSafeToDepositReducer = (
                 state.requestedYourContribution,
               ),
               channelId: action.channelId,
-
               procedure: WalletProcedure.DirectFunding,
             },
           },
@@ -76,11 +70,10 @@ const notSafeToDepositReducer = (
       return { state };
   }
 };
-
 const waitForFundingConfirmationReducer = (
   state: states.WaitForFundingConfirmation,
   action: actions.WalletAction,
-): StateWithSideEffects<states.DirectFundingStatus> => {
+): StateWithSideEffects<states.DirectFundingState> => {
   // TODO: This code path is unreachable, but the compiler doesn't know that.
   // Can we fix that?
   switch (action.type) {
@@ -99,11 +92,10 @@ const waitForFundingConfirmationReducer = (
       return { state };
   }
 };
-
 const channelFundedReducer = (
   state: states.ChannelFunded,
   action: actions.WalletAction,
-): StateWithSideEffects<states.DirectFundingStatus> => {
+): StateWithSideEffects<states.DirectFundingState> => {
   if (action.type === actions.funding.FUNDING_RECEIVED_EVENT) {
     if (bigNumberify(action.totalForDestination).lt(state.requestedTotalFunds)) {
       // TODO: Deal with chain re-orgs that de-fund the channel here
