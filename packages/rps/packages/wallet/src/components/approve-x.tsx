@@ -1,5 +1,5 @@
 import React from 'react';
-// import walletIcon from '../../images/wallet_icon.svg';
+// import walletIcon from '../../images/wallet-iconn.svg';
 import SidebarLayout from './sidebar-layout';
 import YesOrNo from './yes-or-no';
 

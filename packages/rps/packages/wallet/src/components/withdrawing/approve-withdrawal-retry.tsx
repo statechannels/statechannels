@@ -1,6 +1,6 @@
 import React from 'react';
 import Button from 'reactstrap/lib/Button';
-import walletIcon from '../../../images/wallet_icon.svg';
+import walletIcon from '../../../images/wallet-iconn.svg';
 import SidebarLayout from '../sidebar-layout';
 
 interface Props {
