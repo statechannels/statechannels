@@ -1,7 +1,7 @@
 import { depositingReducer } from '../reducer';
 
 import * as states from '../state';
-import * as directFundingStates from '../../state';
+import * as directFundingStates from '../../../direct-funding-state/state';
 import * as actions from '../../../../actions';
 
 import * as scenarios from '../../../../__tests__/test-scenarios';
@@ -23,7 +23,6 @@ const YOUR_DEPOSIT_B = bigNumberify(TOTAL_REQUIRED)
   .toHexString();
 
 const defaultsForA: states.Depositing = {
-  fundingType: directFundingStates.DIRECT_FUNDING,
   requestedTotalFunds: TOTAL_REQUIRED,
   requestedYourContribution: YOUR_DEPOSIT_A,
   channelId,
