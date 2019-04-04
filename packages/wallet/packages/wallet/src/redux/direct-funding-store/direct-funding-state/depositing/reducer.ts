@@ -4,13 +4,13 @@ import { StateWithSideEffects } from '../../../utils';
 
 import * as actions from '../../../actions';
 import * as states from './state';
-import * as fundingStates from '../state';
+import * as fundingStates from '../../direct-funding-state/state';
 import { WalletProcedure } from '../../../types';
 
 export const depositingReducer = (
   state: states.Depositing,
   action: actions.WalletAction,
-): StateWithSideEffects<fundingStates.DirectFundingStatus> => {
+): StateWithSideEffects<fundingStates.DirectFundingState> => {
   switch (state.depositStatus) {
     case states.WAIT_FOR_TRANSACTION_SENT:
       return waitForTransactionSentReducer(state, action);
@@ -62,7 +62,7 @@ const waitForDepositApprovalReducer = (
 const waitForDepositConfirmationReducer = (
   state: states.WaitForDepositConfirmation,
   action: actions.WalletAction,
-): StateWithSideEffects<fundingStates.DirectFundingStatus> => {
+): StateWithSideEffects<fundingStates.DirectFundingState> => {
   switch (action.type) {
     case actions.TRANSACTION_CONFIRMED:
       return { state: fundingStates.waitForFundingConfirmed(state) };

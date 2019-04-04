@@ -1,8 +1,8 @@
 import { OutboxState, EMPTY_OUTBOX_STATE } from './outbox/state';
-import { FundingState, EMPTY_FUNDING_STATE } from './funding-state/state';
 import { ChannelState, ChannelStatus } from './channel-state/state';
 import { Properties } from './utils';
 import * as indirectFunding from './indirect-funding/state';
+import { DirectFundingStore } from './direct-funding-store/state';
 
 export type WalletState = WaitForLogin | WaitForAdjudicator | MetaMaskError | Initialized;
 
@@ -17,34 +17,28 @@ export const WALLET_INITIALIZED = 'WALLET.INITIALIZED';
 // ------
 // States
 // ------
-export interface WaitForLogin {
+
+interface Shared {
+  channelState: ChannelState;
+  outboxState: OutboxState;
+  directFundingStore: DirectFundingStore;
+}
+
+export interface WaitForLogin extends Shared {
   type: typeof WAIT_FOR_LOGIN;
-  channelState: ChannelState;
-  fundingState: FundingState;
-  outboxState: OutboxState;
 }
 
-export interface MetaMaskError {
+export interface MetaMaskError extends Shared {
   type: typeof METAMASK_ERROR;
-  channelState: ChannelState;
-  fundingState: FundingState;
-  outboxState: OutboxState;
 }
 
-export interface WaitForAdjudicator {
+export interface WaitForAdjudicator extends Shared {
   type: typeof WAIT_FOR_ADJUDICATOR;
-  channelState: ChannelState;
-  fundingState: FundingState;
-  outboxState: OutboxState;
   uid: string;
 }
 
-export interface Initialized {
+export interface Initialized extends Shared {
   type: typeof WALLET_INITIALIZED;
-  channelState: ChannelState;
-  fundingState: FundingState;
-
-  outboxState: OutboxState;
   uid: string;
   networkId: number;
   adjudicator: string;
@@ -56,33 +50,35 @@ export interface Initialized {
 // ------------
 // Constructors
 // ------------
-export const emptyState = {
+export const emptyState: Shared = {
   outboxState: EMPTY_OUTBOX_STATE,
-  fundingState: EMPTY_FUNDING_STATE,
   channelState: { initializedChannels: {}, initializingChannels: {} },
+  directFundingStore: {},
 };
+
+function shared(params: Shared): Shared {
+  const { outboxState, channelState, directFundingStore } = params;
+  return { outboxState, channelState, directFundingStore };
+}
 
 export function waitForLogin(): WaitForLogin {
   return { type: WAIT_FOR_LOGIN, ...emptyState };
 }
 
 export function metaMaskError(params: Properties<MetaMaskError>): MetaMaskError {
-  const { outboxState, fundingState, channelState } = params;
-  return { type: METAMASK_ERROR, outboxState, fundingState, channelState };
+  return { ...shared(params), type: METAMASK_ERROR };
 }
 
 export function waitForAdjudicator(params: Properties<WaitForAdjudicator>): WaitForAdjudicator {
-  const { outboxState, fundingState, channelState, uid } = params;
-  return { type: WAIT_FOR_ADJUDICATOR, outboxState, fundingState, channelState, uid };
+  const { uid } = params;
+  return { ...shared(params), type: WAIT_FOR_ADJUDICATOR, uid };
 }
 
 export function initialized(params: Properties<Initialized>): Initialized {
-  const { outboxState, fundingState, channelState, uid, networkId, adjudicator } = params;
+  const { uid, networkId, adjudicator } = params;
   return {
+    ...shared(params),
     type: WALLET_INITIALIZED,
-    channelState,
-    fundingState,
-    outboxState,
     uid,
     networkId,
     adjudicator,

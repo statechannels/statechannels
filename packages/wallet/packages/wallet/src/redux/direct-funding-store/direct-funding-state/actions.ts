@@ -1,4 +1,4 @@
-import * as actions from '../actions';
+import * as actions from '../../actions';
 
 export const FUNDING_RECEIVED_EVENT = 'WALLET.FUNDING.FUNDING_RECEIVED_EVENT';
 export const fundingReceivedEvent = (

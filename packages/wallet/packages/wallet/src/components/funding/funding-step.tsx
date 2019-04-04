@@ -1,5 +1,5 @@
 import React from 'react';
-import * as states from '../../redux/funding-state/directFunding/state';
+import * as states from '../../redux/direct-funding-store/direct-funding-state/state';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCheckCircle, faSpinner } from '@fortawesome/free-solid-svg-icons';
 import { faCircle } from '@fortawesome/free-regular-svg-icons';
@@ -36,7 +36,7 @@ const icon = (iconStep: number, currentStep: number) => {
   }
 };
 
-export const fundingStepByState = (state: states.DirectFundingStatus): Step => {
+export const fundingStepByState = (state: states.DirectFundingState): Step => {
   if (states.stateIsNotSafeToDeposit(state)) {
     return Step.NOT_SAFE_TO_DEPOSIT;
   }
