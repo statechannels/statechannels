@@ -7,6 +7,13 @@ export const strategyApproved = (channelId: string) => ({
   channelId,
   procedure: WalletProcedure.IndirectFunding as WalletProcedure.IndirectFunding,
 });
+export const FUNDING_APPROVED = 'FUNDING_APPROVED';
+export const fundingApproved = (channelId: string) => ({
+  type: FUNDING_APPROVED as typeof FUNDING_APPROVED,
+  channelId,
+});
+export type FundingApproved = ReturnType<typeof fundingApproved>;
+
 export type StrategyApproved = ReturnType<typeof strategyApproved>;
 
 export const ALLOCATION_CHANGED = 'WALLET.INDIRECT_FUNDING.ALLOCATION_CHANGED';
@@ -18,4 +25,4 @@ export const allocationChanged = (channelId: string, commitment: Commitment) => 
 });
 export type AllocationChanged = ReturnType<typeof allocationChanged>;
 
-export type Action = StrategyApproved | AllocationChanged;
+export type Action = FundingApproved | StrategyApproved | AllocationChanged;

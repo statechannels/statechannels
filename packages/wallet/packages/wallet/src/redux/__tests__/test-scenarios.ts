@@ -27,6 +27,7 @@ export const initializedState: states.Initialized = {
   adjudicator: 'adjudicator',
   uid: 'uid',
   networkId: 3,
+  consensusLibrary: '0x0',
 };
 
 export const mockTransactionOutboxItem = {
