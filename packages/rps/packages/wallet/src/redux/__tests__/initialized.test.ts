@@ -8,6 +8,7 @@ const defaults = {
   uid: 'uid',
   adjudicator: 'adjudicator',
   networkId: 1,
+  consensusLibrary: '0x0',
 };
 
 const initializedState = states.initialized({ ...defaults });
