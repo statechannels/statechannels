@@ -1,5 +1,5 @@
 import { ChannelOpen, channelOpen, UserAddressExists, userAddressExists } from '../shared/state';
-import { TransactionExists } from '../../utils';
+import { TransactionExists, Properties as Props } from '../../utils';
 
 // stage
 export const CLOSING = 'CLOSING';
@@ -15,6 +15,8 @@ export const WAIT_FOR_CLOSE_SUBMISSION = 'WAIT_FOR_CLOSE_SUBMISSION';
 export const WAIT_FOR_CLOSE_CONFIRMED = 'WAIT_FOR_CLOSE_CONFIRMED';
 export const ACKNOWLEDGE_CONCLUDE = 'ACKNOWLEDGE_CONCLUDE';
 export const CLOSE_TRANSACTION_FAILED = 'CLOSE_TRANSACTION_FAILED';
+
+export const FINALIZED = 'FINALIZED'; // when the outcome has been finalized in the adjudicator
 
 export interface CloseTransactionFailed extends UserAddressExists {
   type: typeof CLOSE_TRANSACTION_FAILED;
@@ -70,42 +72,49 @@ export interface WaitForCloseSubmission extends UserAddressExists {
   stage: typeof CLOSING;
 }
 
-export function approveConclude<T extends ChannelOpen>(params: T): ApproveConclude {
+export interface Finalized extends ChannelOpen {
+  type: typeof FINALIZED;
+  stage: typeof CLOSING;
+}
+
+export function approveConclude(params: Props<ApproveConclude>): ApproveConclude {
   return { type: APPROVE_CONCLUDE, stage: CLOSING, ...channelOpen(params) };
 }
-export function approveCloseOnChain<T extends ChannelOpen>(params: T): ApproveCloseOnChain {
+export function approveCloseOnChain(params: Props<ApproveCloseOnChain>): ApproveCloseOnChain {
   return { type: APPROVE_CLOSE_ON_CHAIN, stage: CLOSING, ...channelOpen(params) };
 }
 
-export function waitForOpponentConclude<T extends ChannelOpen>(params: T): WaitForOpponentConclude {
+export function waitForOpponentConclude(
+  params: Props<WaitForOpponentConclude>,
+): WaitForOpponentConclude {
   return { type: WAIT_FOR_OPPONENT_CONCLUDE, stage: CLOSING, ...channelOpen(params) };
 }
 
-export function acknowledgeCloseSuccess<T extends ChannelOpen>(params: T): AcknowledgeCloseSuccess {
+export function acknowledgeCloseSuccess(
+  params: Props<AcknowledgeCloseSuccess>,
+): AcknowledgeCloseSuccess {
   return { type: ACKNOWLEDGE_CLOSE_SUCCESS, stage: CLOSING, ...channelOpen(params) };
 }
 
-export function acknowledgeClosedOnChain<T extends ChannelOpen>(
-  params: T,
+export function acknowledgeClosedOnChain(
+  params: Props<AcknowledgeClosedOnChain>,
 ): AcknowledgeClosedOnChain {
   return { type: ACKNOWLEDGE_CLOSED_ON_CHAIN, stage: CLOSING, ...channelOpen(params) };
 }
 
-export function waitForCloseInitiation<T extends UserAddressExists>(
-  params: T,
+export function waitForCloseInitiation(
+  params: Props<WaitForCloseInitiation>,
 ): WaitForCloseInitiation {
   return { type: WAIT_FOR_CLOSE_INITIATION, stage: CLOSING, ...userAddressExists(params) };
 }
 
-export function waitForCloseSubmission<T extends UserAddressExists>(
-  params: T,
+export function waitForCloseSubmission(
+  params: Props<WaitForCloseSubmission>,
 ): WaitForCloseSubmission {
   return { type: WAIT_FOR_CLOSE_SUBMISSION, stage: CLOSING, ...userAddressExists(params) };
 }
 
-export function waitForCloseConfirmed<T extends ChannelOpen & TransactionExists>(
-  params: T,
-): WaitForCloseConfirmed {
+export function waitForCloseConfirmed(params: Props<WaitForCloseConfirmed>): WaitForCloseConfirmed {
   return {
     type: WAIT_FOR_CLOSE_CONFIRMED,
     stage: CLOSING,
@@ -114,14 +123,18 @@ export function waitForCloseConfirmed<T extends ChannelOpen & TransactionExists>
   };
 }
 
-export function acknowledgeConclude<T extends ChannelOpen>(params: T): AcknowledgeConclude {
+export function acknowledgeConclude(params: Props<AcknowledgeConclude>): AcknowledgeConclude {
   return { type: ACKNOWLEDGE_CONCLUDE, stage: CLOSING, ...channelOpen(params) };
 }
 
-export function closeTransactionFailed<T extends UserAddressExists>(
-  params: T,
+export function closeTransactionFailed(
+  params: Props<CloseTransactionFailed>,
 ): CloseTransactionFailed {
   return { type: CLOSE_TRANSACTION_FAILED, stage: CLOSING, ...userAddressExists(params) };
+}
+
+export function finalized(params: Props<Finalized>): Finalized {
+  return { type: FINALIZED, stage: CLOSING, ...channelOpen(params) };
 }
 
 export type ClosingState =
@@ -134,4 +147,5 @@ export type ClosingState =
   | WaitForCloseSubmission
   | WaitForCloseConfirmed
   | AcknowledgeConclude
-  | CloseTransactionFailed;
+  | CloseTransactionFailed
+  | Finalized;
