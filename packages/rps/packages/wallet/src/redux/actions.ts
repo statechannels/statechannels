@@ -142,7 +142,8 @@ export type CommonAction =
   | TransactionSubmitted
   | RetryTransaction
   | MessageReceived
-  | CommitmentReceived;
+  | CommitmentReceived
+  | funding.FundingReceivedEvent;
 
 export type ProcedureAction = CommonAction;
 

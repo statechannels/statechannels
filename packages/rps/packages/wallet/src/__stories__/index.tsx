@@ -73,6 +73,7 @@ const initializedWalletState = walletStates.initialized({
   networkId: 4,
   adjudicator: '',
   uid: '',
+  consensusLibrary: '0x0',
 });
 
 // Want to return top level wallet state, not the channel state
