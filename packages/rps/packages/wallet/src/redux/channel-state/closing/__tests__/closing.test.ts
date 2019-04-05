@@ -232,7 +232,7 @@ describe('start in AcknowledgCloseSuccess', () => {
 
     const action = actions.channel.closeSuccessAcknowledged();
     const updatedState = closingReducer(state, action);
-    itTransitionsToChannelStateType(states.WAIT_FOR_CHANNEL, updatedState);
+    itTransitionsToChannelStateType(states.FINALIZED, updatedState);
     itSendsThisMessage(updatedState, outgoing.CLOSE_SUCCESS);
   });
 });

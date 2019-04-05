@@ -158,7 +158,7 @@ const acknowledgeWithdrawalSuccessReducer = (
     case actions.channel.WITHDRAWAL_SUCCESS_ACKNOWLEDGED:
       // TODO: We shouldn't be sending out a close success in the withdrawal reducer
       return {
-        state: states.waitForChannel({
+        state: states.finalized({
           ...state,
         }),
         sideEffects: { messageOutbox: closeSuccess(), displayOutbox: hideWallet() },
