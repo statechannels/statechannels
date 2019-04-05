@@ -1,8 +1,14 @@
-import { OutboxState, EMPTY_OUTBOX_STATE } from './outbox/state';
-import { ChannelState, ChannelStatus } from './channel-state/state';
+import { OutboxState, EMPTY_OUTBOX_STATE, SideEffects } from './outbox/state';
+import {
+  ChannelState,
+  ChannelStatus,
+  setChannel as setChannelInStore,
+  WaitForChannel,
+} from './channel-state/state';
 import { Properties } from './utils';
 import * as indirectFunding from './indirect-funding/state';
 import { DirectFundingStore } from './direct-funding-store/state';
+import { accumulateSideEffects } from './outbox';
 
 export type WalletState = WaitForLogin | WaitForAdjudicator | MetaMaskError | Initialized;
 
@@ -87,8 +93,25 @@ export function initialized(params: Properties<Initialized>): Initialized {
   };
 }
 
+// -------------------
+// Getters and setters
+// -------------------
+
 export function getChannelStatus(state: WalletState, channelId: string): ChannelStatus {
   return state.channelState.initializedChannels[channelId];
+}
+
+export function setSideEffects(state: Initialized, sideEffects: SideEffects): Initialized {
+  return { ...state, outboxState: accumulateSideEffects(state.outboxState, sideEffects) };
+}
+
+// WaitForChannel is the only ChannelStatus without a channelId.
+// We don't need it anymore, as it's covered by InitializingChannelStatus.
+// This is a temporary fix to the signature while we work to remove it.
+type ChannelStatusV2 = Exclude<ChannelStatus, WaitForChannel>;
+
+export function setChannel(state: Initialized, channel: ChannelStatusV2): Initialized {
+  return { ...state, channelState: setChannelInStore(state.channelState, channel) };
 }
 
 export { indirectFunding };
