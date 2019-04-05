@@ -1,4 +1,4 @@
-import { OpeningState } from './opening/state';
+import { OpeningState, WaitForChannel } from './opening/state';
 import { RunningState } from './running/state';
 import { FundingState } from './funding/state';
 import { ChallengingState } from './challenging/state';
@@ -32,6 +32,21 @@ export interface ChannelState {
   initializingChannels: InitializingChannelState;
   initializedChannels: InitializedChannelState;
   activeAppChannelId?: string;
+}
+
+// -------------------
+// Getters and setters
+// -------------------
+
+// WaitForChannel is the only ChannelStatus without a channelId.
+// We don't need it anymore, as it's covered by InitializingChannelStatus.
+// This is a temporary fix to the signature while we work to remove it.
+type ChannelStatusV2 = Exclude<ChannelStatus, WaitForChannel>;
+
+export function setChannel(channelStore: ChannelState, channel: ChannelStatusV2): ChannelState {
+  const channelId = channel.channelId;
+  const initializedChannels = { ...channelStore.initializedChannels, [channelId]: channel };
+  return { ...channelStore, initializedChannels };
 }
 
 export * from './opening/state';
