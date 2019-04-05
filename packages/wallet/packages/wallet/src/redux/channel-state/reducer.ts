@@ -98,9 +98,16 @@ const initializedChannels: ReducerWithSideEffects<states.InitializedChannelState
   if (action.type === actions.CHANNEL_INITIALIZED) {
     return { state };
   }
-  const { appChannelId } = data;
 
-  const existingChannel = state[appChannelId];
+  // If an action has a channelId/commitment we update the channel state for that channel
+  let channelId = data.appChannelId;
+  if ('channelId' in action) {
+    channelId = action.channelId;
+  } else if ('commitment' in action) {
+    channelId = channelID(action.commitment.channel);
+  }
+
+  const existingChannel = state[channelId];
   if (!existingChannel) {
     // TODO:  This channel should really exist -- should we throw?
     return { state };
@@ -111,10 +118,10 @@ const initializedChannels: ReducerWithSideEffects<states.InitializedChannelState
     action,
   );
 
-  return { state: { ...state, [appChannelId]: newState }, sideEffects: outboxState };
+  return { state: { ...state, [channelId]: newState }, sideEffects: outboxState };
 };
 
-const initializedChannelStatusReducer: ReducerWithSideEffects<states.ChannelStatus> = (
+export const initializedChannelStatusReducer: ReducerWithSideEffects<states.ChannelStatus> = (
   state: states.ChannelStatus,
   action: actions.ChannelAction,
 ): StateWithSideEffects<states.ChannelStatus> => {
