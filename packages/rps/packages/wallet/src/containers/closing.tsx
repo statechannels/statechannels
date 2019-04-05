@@ -17,6 +17,7 @@ import SelectAddress from '../components/withdrawing/select-address';
 import { ClosingStep } from '../components/closing/closing-step';
 import EtherscanLink from '../components/etherscan-link';
 import { WalletProcedure } from '../redux/types';
+import Todo from '../components/todo';
 
 interface Props {
   state: states.ClosingState;
@@ -122,6 +123,8 @@ class ClosingContainer extends PureComponent<Props> {
             retryAction={() => retryTransaction(state.channelId, WalletProcedure.Closing)}
           />
         );
+      case states.FINALIZED:
+        return <Todo stateType={state.type} />;
       default:
         return unreachable(state);
     }

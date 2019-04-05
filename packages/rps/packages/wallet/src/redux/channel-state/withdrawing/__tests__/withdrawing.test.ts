@@ -122,6 +122,6 @@ describe('when in AcknowledgeWithdrawalSuccess', () => {
     const action = actions.channel.withdrawalSuccessAcknowledged();
     const updatedState = withdrawingReducer(state, action);
 
-    itTransitionsToChannelStateType(states.WAIT_FOR_CHANNEL, updatedState);
+    itTransitionsToChannelStateType(states.FINALIZED, updatedState);
   });
 });
