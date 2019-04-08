@@ -12,39 +12,7 @@ out our apps, or get involved more deeply we would love to hear your thoughts. D
 - [Rock Paper Scissors](https://rps.magmo.com) (RPS)
 - [Tic Tac Toe](https://ttt.magmo.com) (TTT)
 
-## Development Conventions
-
-#### Prettier
-
-Prettier is configured via `.prettierrc`.
-Tests will fail if code does not satisfy the rules specificied in `.prettierrc`.
-We suggest that you configure your editor to auto-format using prettier,
-or that you run it in a pre-commit git hook.
-You can also run `yarn prettier:write`.
-
-#### Naming
-
-- Directories and files should be kebab-cased.
-
-```
-// ok
-foo/bar/foo-bar/foo-bar.ts
-
-// ok
-foo/bar/foo-bar/foo-bar.tsx
-
-// tslint error
-foo/bar/foo-bar/fooBar.ts
-
-// tslint error
-foo/bar/foo-bar/FooBar.tsx
-
-// no tslint error, but please avoid this
-foo/bar/fooBar/foo-bar.svg
-
-// no tslint error, but please avoid this
-foo/bar/foo-bar/FooBar.svg
-```
+## Getting Started
 
 #### Setting up development environment and running a game application
 
@@ -152,3 +120,39 @@ Frequently, problems can be sorted by one or more of the following steps:
 - Running `npx lerna bootstrap` if you changed any dependencies
 
 Otherwise, please check [issues](https://github.com/magmo/rps/issues), someone else may have had the same experience. You may find a solution -- if not, please add to or create an issue.
+
+## Contributing
+
+We welcome contributions! If you want to contribute, you should be aware of the following conventions:
+
+#### Prettier
+
+Prettier is configured via `.prettierrc`.
+Tests will fail if code does not satisfy the rules specificied in `.prettierrc`.
+We suggest that you configure your editor to auto-format using prettier,
+or that you run it in a pre-commit git hook.
+You can also run `yarn prettier:write`.
+
+#### Naming
+
+- Directories and files should be kebab-cased.
+
+```
+// ok
+foo/bar/foo-bar/foo-bar.ts
+
+// ok
+foo/bar/foo-bar/foo-bar.tsx
+
+// tslint error
+foo/bar/foo-bar/fooBar.ts
+
+// tslint error
+foo/bar/foo-bar/FooBar.tsx
+
+// no tslint error, but please avoid this
+foo/bar/fooBar/foo-bar.svg
+
+// no tslint error, but please avoid this
+foo/bar/foo-bar/FooBar.svg
+```
