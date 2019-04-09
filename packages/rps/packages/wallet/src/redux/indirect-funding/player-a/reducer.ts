@@ -10,7 +10,7 @@ import * as channelState from '../../channel-state/state';
 import { Commitment } from 'fmg-core/lib/commitment';
 import { channelStateReducer } from '../../channel-state/reducer';
 import * as channelActions from '../../channel-state/actions';
-import { messageRelayRequested } from 'magmo-wallet-client';
+import { messageRelayRequested, WalletEvent } from 'magmo-wallet-client';
 import * as selectors from '../../selectors';
 import * as channelStates from '../../channel-state/state';
 import { addHex } from '../../../utils/hex-utils';
@@ -24,6 +24,8 @@ import { isFundingAction } from '../../internal/actions';
 import { bigNumberify } from 'ethers/utils';
 import { directFundingStoreReducer } from '../../direct-funding-store/reducer';
 import { CHANNEL_FUNDED } from '../../direct-funding-store/direct-funding-state/state';
+import { waitForPreFundSetup } from '../../channel-state/state';
+import { SignedCommitment } from 'src/redux/channel-state/shared/state';
 
 export function playerAReducer(
   state: walletStates.Initialized,
@@ -158,25 +160,67 @@ const waitForApprovalReducer = (
 
       const appChannelState = selectors.getOpenedChannelState(state, action.channelId);
 
-      const { state: ledgerChannelState, ledgerChannel } = createLedgerChannel(
-        newState,
+      const { ledgerChannelState, preFundSetupMessage } = createLedgerChannel(
+        state,
         appChannelState,
       );
-      newState = ledgerChannelState;
 
-      const ledgerChannelId = channelID(ledgerChannel);
-
-      newState = createAndSendPreFundCommitment(newState, appChannelState, ledgerChannel);
+      newState = walletStates.setChannel(newState, ledgerChannelState);
+      newState = walletStates.queueMessage(newState, preFundSetupMessage);
 
       newState.indirectFunding = states.waitForPreFundSetup1({
         channelId: action.channelId,
-        ledgerId: ledgerChannelId,
+        ledgerId: ledgerChannelState.channelId,
       });
 
       return newState;
     default:
       return state;
   }
+};
+
+const createLedgerChannel = (
+  state: walletStates.Initialized,
+  appChannelState: channelState.OpenedState,
+): { ledgerChannelState: channelState.WaitForPreFundSetup; preFundSetupMessage: WalletEvent } => {
+  // 1. Determine ledger channel properties
+  const nonce = 4; // TODO: Make random
+  const { participants, address, privateKey } = appChannelState;
+  const channelType = state.consensusLibrary;
+  const ledgerChannel: Channel = { channelType, nonce, participants };
+  const ledgerChannelId = channelID(ledgerChannel);
+  const { allocation, destination } = appChannelState.lastCommitment.commitment;
+
+  // 2. Create preFundSetupMessage
+  const preFundSetupCommitment = composePreFundCommitment(
+    ledgerChannel,
+    allocation,
+    destination,
+    appChannelState.ourIndex,
+    appChannelState.privateKey,
+  );
+
+  // 3. Create the channel state
+  const ledgerChannelState = waitForPreFundSetup({
+    address,
+    privateKey,
+    channelId: ledgerChannelId,
+    libraryAddress: channelType,
+    ourIndex: 0,
+    participants,
+    channelNonce: nonce,
+    turnNum: 0,
+    lastCommitment: preFundSetupCommitment,
+    funded: false,
+  });
+
+  const preFundSetupMessage = createCommitmentMessageRelay(
+    appChannelState.participants[PlayerIndex.B],
+    appChannelState.channelId,
+    preFundSetupCommitment,
+  );
+
+  return { ledgerChannelState, preFundSetupMessage };
 };
 
 const ledgerChannelIsWaitingForUpdate = (
@@ -224,7 +268,7 @@ const createAndSendUpdateCommitment = (
   const proposedDestination = [appChannelState.channelId];
   // Compose the update commitment
   const ledgerChannelState = selectors.getOpenedChannelState(state, ledgerChannelId);
-  const { updateCommitment, commitmentSignature } = composeLedgerUpdateCommitment(
+  const signedCommitment = composeLedgerUpdateCommitment(
     ledgerChannelState.lastCommitment.commitment,
     ledgerChannelState.ourIndex,
     proposedAllocation,
@@ -233,15 +277,14 @@ const createAndSendUpdateCommitment = (
   );
 
   // Update our ledger channel with the latest commitment
-  const newState = receiveOwnLedgerCommitment(state, updateCommitment);
+  const newState = receiveOwnLedgerCommitment(state, signedCommitment.commitment);
 
   // Send out the commitment to the opponent
   newState.outboxState.messageOutbox = [
     createCommitmentMessageRelay(
       ledgerChannelState.participants[PlayerIndex.B],
       appChannelId,
-      updateCommitment,
-      commitmentSignature,
+      signedCommitment,
     ),
   ];
   return newState;
@@ -253,51 +296,19 @@ const createAndSendPostFundCommitment = (
 ): walletStates.Initialized => {
   let newState = { ...state };
   const ledgerChannelState = selectors.getOpenedChannelState(newState, ledgerChannelId);
-  const { postFundCommitment, commitmentSignature } = composePostFundCommitment(
+  const signedCommitment = composePostFundCommitment(
     ledgerChannelState.lastCommitment.commitment,
     ledgerChannelState.ourIndex,
     ledgerChannelState.privateKey,
   );
 
-  newState = receiveOwnLedgerCommitment(state, postFundCommitment);
+  newState = receiveOwnLedgerCommitment(state, signedCommitment.commitment);
 
   newState.outboxState.messageOutbox = [
     createCommitmentMessageRelay(
       ledgerChannelState.participants[PlayerIndex.B],
       ledgerChannelId,
-      postFundCommitment,
-      commitmentSignature,
-    ),
-  ];
-  return newState;
-};
-
-const createAndSendPreFundCommitment = (
-  state: walletStates.Initialized,
-  appChannelState: channelState.OpenedState,
-  ledgerChannel: Channel,
-): walletStates.Initialized => {
-  const newState = { ...state };
-  // Create prefund commitment
-  const { allocation, destination } = appChannelState.lastCommitment.commitment;
-  const { preFundSetupCommitment, commitmentSignature } = composePreFundCommitment(
-    ledgerChannel,
-    allocation,
-    destination,
-    appChannelState.ourIndex,
-    appChannelState.privateKey,
-  );
-
-  // Update state
-  receiveOwnLedgerCommitment(newState, preFundSetupCommitment);
-
-  // Message opponent
-  newState.outboxState.messageOutbox = [
-    createCommitmentMessageRelay(
-      appChannelState.participants[PlayerIndex.B],
-      appChannelState.channelId,
-      preFundSetupCommitment,
-      commitmentSignature,
+      signedCommitment,
     ),
   ];
   return newState;
@@ -351,55 +362,19 @@ const receiveOwnLedgerCommitment = (
   return updateChannelState(state, channelActions.ownCommitmentReceived(commitment));
 };
 
-const createLedgerChannel = (
-  state: walletStates.Initialized,
-  appChannelState: channelState.OpenedState,
-): { state: walletStates.Initialized; ledgerChannel: Channel } => {
-  const nonce = 4; // TODO: Make random
-  const { participants } = appChannelState;
-  const ledgerChannel: Channel = {
-    channelType: state.consensusLibrary,
-    nonce,
-    participants, // TODO: In the future we can use different participants
-  };
-  const ledgerChannelId = channelID(ledgerChannel);
-  const updatedState = initializeChannelState(
-    state,
-    ledgerChannelId,
-    appChannelState.address,
-    appChannelState.privateKey,
-  );
-  return { state: updatedState, ledgerChannel };
-};
-
 export const createCommitmentMessageRelay = (
   to: string,
   channelId: string,
-  commitment: Commitment,
-  signature: string,
+  signedCommitment: SignedCommitment,
 ) => {
   const payload = {
     channelId,
     procedure: WalletProcedure.IndirectFunding,
-    data: { commitment, signature },
+    data: signedCommitment,
   };
   return messageRelayRequested(to, payload);
 };
 
-export const initializeChannelState = (
-  state: walletStates.Initialized,
-  channelId: string,
-  address: string,
-  privateKey: string,
-): walletStates.Initialized => {
-  const newState = { ...state };
-  // Create initial channel state for new ledger channel
-  newState.channelState.initializedChannels[channelId] = channelState.waitForChannel({
-    address,
-    privateKey,
-  });
-  return newState;
-};
 export const updateChannelState = (
   state: walletStates.Initialized,
   channelAction: actions.channel.ChannelAction,

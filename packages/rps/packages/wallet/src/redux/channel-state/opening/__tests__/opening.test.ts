@@ -17,8 +17,6 @@ const {
   preFundCommitment1,
   preFundCommitment2,
   libraryAddress,
-  bsAddress,
-  bsPrivateKey,
   fundingState,
 } = scenarios;
 
@@ -28,64 +26,6 @@ const defaults = {
   libraryAddress,
   fundingState,
 };
-
-describe('when in WaitForChannel', () => {
-  describe('when initializeChannel is requested again', () => {
-    it.skip('works', async () => {
-      // TODO: What to do here?
-      expect.assertions(1);
-    });
-    // const state = states.waitForChannel(defaultsdefaults);
-    // const action = actions.loggedIn(defaults.uid);
-    // const updatedState = openingReducer(state, action);
-    // itTransitionsToStateType(states.WAIT_FOR_ADDRESS, updatedState);
-  });
-
-  describe('when we send in a PreFundSetupA', () => {
-    // preFundSetupA is A's move, so in this case we need to be player A
-    const state = states.waitForChannel(defaults);
-    const action = actions.channel.ownCommitmentReceived(preFundCommitment1);
-    const updatedState = openingReducer(state, action);
-
-    itTransitionsToChannelStateType(states.WAIT_FOR_PRE_FUND_SETUP, updatedState);
-  });
-
-  describe('when an opponent sends a PreFundSetupA', () => {
-    // preFundSetupA is A's move, so in this case we need to be player B
-    const state = states.waitForChannel({ address: bsAddress, privateKey: bsPrivateKey });
-    const action = actions.channel.opponentCommitmentReceived(preFundCommitment1, 'sig');
-    const validateMock = jest.fn().mockReturnValue(true);
-    Object.defineProperty(SigningUtil, 'validCommitmentSignature', { value: validateMock });
-
-    const updatedState = openingReducer(state, action);
-
-    itTransitionsToChannelStateType(states.WAIT_FOR_PRE_FUND_SETUP, updatedState);
-  });
-
-  describe('when an opponent sends a PreFundSetupA but the signature is bad', () => {
-    const state = states.waitForChannel(defaults);
-    const action = actions.channel.opponentCommitmentReceived(
-      preFundCommitment1,
-      'not-a-signature',
-    );
-    const validateMock = jest.fn().mockReturnValue(false);
-    Object.defineProperty(SigningUtil, 'validCommitmentSignature', { value: validateMock });
-
-    const updatedState = openingReducer(state, action);
-
-    itDoesntTransition(state, updatedState);
-    itSendsThisMessage(updatedState, validationFailure('InvalidSignature'));
-  });
-
-  describe('when we send in a a non-PreFundSetupA', () => {
-    const state = states.waitForChannel(defaults);
-    const action = actions.channel.ownCommitmentReceived(preFundCommitment2);
-    const updatedState = openingReducer(state, action);
-
-    itDoesntTransition(state, updatedState);
-    itSendsThisMessage(updatedState, SIGNATURE_FAILURE);
-  });
-});
 
 describe('when in WaitForPreFundSetup', () => {
   const defaults2 = {
