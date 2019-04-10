@@ -29,6 +29,7 @@ import { StateWithSideEffects } from '../utils';
 import { ethers } from 'ethers';
 import { channelID } from 'fmg-core/lib/channel';
 import { WalletAction, COMMITMENT_RECEIVED } from '../actions';
+import { Commitment } from 'fmg-core';
 
 export const channelStateReducer: ReducerWithSideEffects<states.ChannelState> = (
   state: states.ChannelState,
@@ -39,7 +40,7 @@ export const channelStateReducer: ReducerWithSideEffects<states.ChannelState> = 
   }
 
   const newState = { ...state };
-  if (actions.isReceiveFirstCommitment(action)) {
+  if (actions.isReceiveFirstCommitment(action) && !channelIsInitialized(action.commitment, state)) {
     return handleFirstCommmit(state, action);
   }
 
@@ -352,4 +353,9 @@ const receivedValidOpponentConclusionRequest = (
     lastCommitment: { commitment, signature },
     penultimateCommitment: state.lastCommitment,
   });
+};
+
+const channelIsInitialized = (commitment: Commitment, state: states.ChannelState): boolean => {
+  const channelId = channelID(commitment.channel);
+  return channelId in state.initializedChannels;
 };
