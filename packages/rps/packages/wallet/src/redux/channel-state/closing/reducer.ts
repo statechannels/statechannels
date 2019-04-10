@@ -371,7 +371,7 @@ const composeConcludePosition = (state: channelStates.ClosingState) => {
 
   const commitmentSignature = signCommitment(concludeCommitment, state.privateKey);
   const sendCommitmentAction = messageRelayRequested(state.participants[1 - state.ourIndex], {
-    channelId: state.channelId,
+    processId: state.channelId,
     procedure: WalletProcedure.DirectFunding,
     data: {
       concludeCommitment,

@@ -260,7 +260,7 @@ const composePostFundCommitment = (
   const commitmentSignature = signCommitment(postFundSetupCommitment, state.privateKey);
 
   const sendCommitmentAction = messageRelayRequested(state.participants[1 - state.ourIndex], {
-    channelId: state.channelId,
+    processId: state.channelId,
     procedure: WalletProcedure.DirectFunding,
     data: {
       commitment: postFundSetupCommitment,

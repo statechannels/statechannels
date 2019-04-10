@@ -150,7 +150,7 @@ describe('start in WaitForFundingConfirmation', () => {
     const sendCommitmentAction = outgoing.messageRelayRequested(
       state.participants[1 - state.ourIndex],
       {
-        channelId: state.channelId,
+        processId: state.channelId,
         procedure: WalletProcedure.DirectFunding,
         data: {
           commitment: postFundCommitment2,
