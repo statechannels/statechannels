@@ -34,6 +34,11 @@ export interface ChannelState {
   activeAppChannelId?: string;
 }
 
+export const EMPTY_CHANNEL_STATE: ChannelState = {
+  initializedChannels: {},
+  initializingChannels: {},
+};
+
 // -------------------
 // Getters and setters
 // -------------------

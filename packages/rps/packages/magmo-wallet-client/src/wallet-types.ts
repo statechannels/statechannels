@@ -1,5 +1,5 @@
 export interface WalletMessagePayload {
-  channelId: string;
+  processId: string;
   procedure: string;
   data: any;
 }
