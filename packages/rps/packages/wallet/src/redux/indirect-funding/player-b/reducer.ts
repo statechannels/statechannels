@@ -14,7 +14,7 @@ import {
   safeToSendLedgerUpdate,
   createAndSendUpdateCommitment,
   ledgerChannelFundsAppChannel,
-  confirmFundingForAppChannel,
+  confirmFundingForChannel,
   receiveLedgerCommitment,
 } from '../reducer-helpers';
 
@@ -148,7 +148,7 @@ const waitForConsensus = (
           indirectFundingState.ledgerId,
         )
       ) {
-        newState = confirmFundingForAppChannel(newState, indirectFundingState.channelId);
+        newState = confirmFundingForChannel(newState, indirectFundingState.channelId);
       }
       return newState;
     default:

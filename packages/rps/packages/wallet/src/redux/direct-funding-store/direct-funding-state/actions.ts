@@ -16,7 +16,7 @@ export type FundingReceivedEvent = ReturnType<typeof fundingReceivedEvent>;
 export function isfundingAction(action: actions.WalletAction): action is FundingAction {
   return action.type.match('WALLET.FUNDING') ||
     actions.internal.isFundingAction(action) ||
-    actions.isCommonAction(action)
+    actions.isTransactionAction(action)
     ? true
     : false;
 }
@@ -24,4 +24,4 @@ export function isfundingAction(action: actions.WalletAction): action is Funding
 export type FundingAction =
   | FundingReceivedEvent
   | actions.internal.InternalFundingAction
-  | actions.CommonAction;
+  | actions.TransactionAction;
