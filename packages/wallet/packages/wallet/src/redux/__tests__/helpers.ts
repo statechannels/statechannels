@@ -1,23 +1,23 @@
 import { ChannelStatus } from '../channel-state/state';
 import { StateWithSideEffects } from '../utils';
 import { Commitment } from 'fmg-core';
-import { TransactionOutboxItem } from '../outbox/state';
+import { TransactionOutboxItem, OutboxState } from '../outbox/state';
+import { Initialized } from '../state';
 
-export const itSendsAMessage = (state: StateWithSideEffects<ChannelStatus>) => {
+type SideEffectState = StateWithSideEffects<any> | { outboxState: OutboxState };
+export const itSendsAMessage = (state: SideEffectState) => {
   it(`sends a message`, () => {
-    expect(state.sideEffects!.messageOutbox).toEqual(expect.anything());
+    expectSideEffect('messageOutbox', state, item => expect(item).toEqual(expect.anything()));
   });
 };
 
-export const itSendsNoMessage = (state: StateWithSideEffects<ChannelStatus>) => {
+export const itSendsNoMessage = (state: SideEffectState) => {
   it(`sends no message`, () => {
-    if (state.sideEffects) {
-      expect(state.sideEffects!.messageOutbox).toBeUndefined();
-    }
+    expectSideEffect('messageOutbox', state, item => expect(item).toBeUndefined());
   });
 };
 
-export const itSendsThisMessage = (state: StateWithSideEffects<any>, message, idx = 0) => {
+export const itSendsThisMessage = (state: SideEffectState, message, idx = 0) => {
   if (Array.isArray(message)) {
     message.map((m, i) => itSendsThisMessage(state, m, i));
     return;
@@ -26,77 +26,63 @@ export const itSendsThisMessage = (state: StateWithSideEffects<any>, message, id
   if (message.type) {
     // We've received the entire action
     it(`sends a message`, () => {
-      expectSideEffect('messageOutbox', state, message, idx);
+      expectSideEffect('messageOutbox', state, item => expect(item).toMatchObject(message), idx);
     });
   } else {
     // Assume we've only received the type of the message
     it(`sends message ${message}`, () => {
-      expectSideEffect('messageOutbox', state, message, idx);
+      expectSideEffect('messageOutbox', state, item => expect(item.type).toEqual(message), idx);
     });
   }
 };
 
-export const itSendsThisDisplayEventType = (
-  state: StateWithSideEffects<ChannelStatus>,
-  eventType: string,
-) => {
+export const itSendsThisDisplayEventType = (state: SideEffectState, eventType: string) => {
   it(`sends event ${eventType}`, () => {
-    expectSideEffect('displayOutbox', state, eventType);
+    expectSideEffect('displayOutbox', state, item => expect(item.type).toEqual(eventType));
   });
 };
 
 const expectSideEffect = <StateType>(
   outboxBranch: string,
-  state: StateWithSideEffects<StateType>,
-  actionOrObject: object | string | undefined,
+  state: SideEffectState,
+  expectation: (item) => any,
+  // actionOrObject: object | string | undefined,
   idx = 0,
 ) => {
-  const outbox = state.sideEffects![outboxBranch];
-  const item = Array.isArray(outbox) ? outbox[idx] : outbox;
-  if (typeof actionOrObject === 'string') {
-    expect(item.type).toEqual(actionOrObject);
-  } else if (typeof actionOrObject === 'undefined') {
-    expect(item).toBeUndefined();
-  } else {
-    expect(item).toMatchObject(actionOrObject);
+  let outbox;
+  if ('sideEffects' in state && state.sideEffects) {
+    outbox = state.sideEffects[outboxBranch];
+  } else if ('outboxState' in state) {
+    outbox = state.outboxState[outboxBranch];
   }
+  const item = Array.isArray(outbox) ? outbox[idx] : outbox;
+  expectation(item);
 };
 
-export const expectThisCommitmentSent = (
-  state: StateWithSideEffects<ChannelStatus>,
-  c: Partial<Commitment>,
-) => {
-  expect(state.sideEffects!.messageOutbox![0].commitment).toMatchObject(c);
-  const outbox = state.sideEffects!.messageOutbox;
-  const item = Array.isArray(outbox) ? outbox[0] : outbox;
-  expect((item as { commitment: any }).commitment).toMatchObject(c);
+export const expectThisCommitmentSent = (state: SideEffectState, c: Partial<Commitment>) => {
+  expectSideEffect('messageOutbox', state, item =>
+    expect(item.messagePayload.data.commitment).toMatchObject(c),
+  );
 };
 
-export const itSendsATransaction = (state: StateWithSideEffects<ChannelStatus>) => {
+export const itSendsATransaction = (state: SideEffectState) => {
   it(`sends a transaction`, () => {
-    expectSideEffect('transactionOutbox', state, expect.anything());
+    expectSideEffect('transactionOutbox', state, item => expect(item).toBeDefined());
   });
 };
 
-export const itSendsThisTransaction = (
-  state: StateWithSideEffects<any>,
-  tx: TransactionOutboxItem,
-) => {
+export const itSendsThisTransaction = (state: SideEffectState, tx: TransactionOutboxItem) => {
   it(`sends a transaction`, () => {
     const { transactionRequest } = tx;
-    expectSideEffect('transactionOutbox', state, {
-      transactionRequest,
-      channelId: expect.any(String),
-    });
+    expectSideEffect('transactionOutbox', state, item =>
+      expect(item).toMatchObject({ transactionRequest, channelId: expect.any(String) }),
+    );
   });
 };
 
-export const itSendsNoTransaction = (state: StateWithSideEffects<any>) => {
+export const itSendsNoTransaction = (state: SideEffectState) => {
   it(`doesn't send a transaction`, () => {
-    if (state.sideEffects) {
-      expectSideEffect('transactionOutbox', state, undefined);
-      expect(state.sideEffects.transactionOutbox).toBeUndefined();
-    }
+    expectSideEffect('transactionOutbox', state, item => expect(item).toBeUndefined());
   });
 };
 
@@ -152,5 +138,16 @@ export function itChangesChannelFundingStatusTo<T extends { state: { channelFund
 ) {
   it(`changes channelFundingStatus to ${status}`, () => {
     expect(state.state.channelFundingStatus).toEqual(status);
+  });
+}
+
+// Procedure helpers
+export function itTransitionsProcedureToStateType(
+  procedureBranchName: string,
+  state: Initialized,
+  type: string,
+) {
+  it(`transitions the ${procedureBranchName} state to ${type}`, () => {
+    expect(state[procedureBranchName].type).toEqual(type);
   });
 }

@@ -46,6 +46,7 @@ export const metamaskLoadError = () => ({
 export type MetamaskLoadError = ReturnType<typeof metamaskLoadError>;
 
 // Common Transaction Actions
+// TODO: These should be switched from channelId to processId
 // These actions are relevant to multiple branches of the wallet state tree
 export const TRANSACTION_SENT_TO_METAMASK = 'WALLET.COMMON.TRANSACTION_SENT_TO_METAMASK';
 export const transactionSentToMetamask = (channelId: string, procedure: WalletProcedure) => ({
@@ -112,9 +113,9 @@ export type RetryTransaction = ReturnType<typeof retryTransaction>;
 
 export type Message = 'FundingDeclined';
 export const MESSAGE_RECEIVED = 'WALLET.COMMON.MESSAGE_RECEIVED';
-export const messageReceived = (channelId: string, procedure: WalletProcedure, data: Message) => ({
+export const messageReceived = (processId: string, procedure: WalletProcedure, data: Message) => ({
   type: MESSAGE_RECEIVED as typeof MESSAGE_RECEIVED,
-  channelId,
+  processId,
   procedure,
   data,
 });
@@ -122,13 +123,13 @@ export type MessageReceived = ReturnType<typeof messageReceived>;
 
 export const COMMITMENT_RECEIVED = 'WALLET.COMMON.COMMITMENT_RECEIVED';
 export const commitmentReceived = (
-  channelId: string,
+  processId: string,
   procedure: WalletProcedure,
   commitment: Commitment,
   signature: string,
 ) => ({
   type: COMMITMENT_RECEIVED as typeof COMMITMENT_RECEIVED,
-  channelId,
+  processId,
   procedure,
   commitment,
   signature,

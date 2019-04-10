@@ -59,6 +59,13 @@ export interface Initialized extends Shared {
   indirectFunding?: indirectFunding.IndirectFundingState;
 }
 
+export interface IndirectFundingOngoing extends Initialized {
+  indirectFunding: indirectFunding.IndirectFundingState;
+}
+export function indirectFundingOngoing(state: Initialized): state is IndirectFundingOngoing {
+  return state.indirectFunding ? true : false;
+}
+
 // ------------
 // Constructors
 // ------------

@@ -41,16 +41,16 @@ export function* messageListener() {
       case incoming.RECEIVE_MESSAGE:
         const {
           data,
-          channelId,
+          processId,
           procedure: incomingProcedure,
         } = (action as incoming.ReceiveMessage).messagePayload;
         const procedure = convertToWalletProcedure(incomingProcedure);
         if ('commitment' in data) {
           yield put(
-            actions.commitmentReceived(channelId, procedure, data.commitment, data.signature),
+            actions.commitmentReceived(processId, procedure, data.commitment, data.signature),
           );
         } else {
-          yield put(actions.messageReceived(channelId, procedure, data));
+          yield put(actions.messageReceived(processId, procedure, data));
         }
         break;
       case incoming.RESPOND_TO_CHALLENGE:

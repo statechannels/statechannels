@@ -6,6 +6,7 @@ export const WAIT_FOR_PRE_FUND_SETUP_0 = 'WAIT_FOR_PRE_FUND_SETUP_0';
 export const WAIT_FOR_DIRECT_FUNDING = 'WAIT_FOR_DIRECT_FUNDING';
 export const WAIT_FOR_POST_FUND_SETUP_0 = 'WAIT_FOR_POST_FUND_SETUP_0';
 export const WAIT_FOR_LEDGER_UPDATE_0 = 'WAIT_FOR_LEDGER_UPDATE_0';
+export const WAIT_FOR_CONSENSUS = 'WAIT_FOR_CONSENSUS';
 
 interface BasePlayerBState {
   channelId: string;
@@ -34,12 +35,17 @@ export interface WaitForLedgerUpdate0 extends LedgerChannelExists {
   type: typeof WAIT_FOR_LEDGER_UPDATE_0;
 }
 
+export interface WaitForConsensus extends LedgerChannelExists {
+  type: typeof WAIT_FOR_CONSENSUS;
+}
+
 export type PlayerBState =
   | WaitForApproval
   | WaitForPreFundSetup0
   | WaitForDirectFunding
   | WaitForPostFundSetup0
-  | WaitForLedgerUpdate0;
+  | WaitForLedgerUpdate0
+  | WaitForConsensus;
 
 export function waitForApproval(params: Properties<WaitForApproval>): WaitForApproval {
   const { channelId } = params;
@@ -73,4 +79,9 @@ export function waitForLedgerUpdate0(
 ): WaitForLedgerUpdate0 {
   const { channelId, ledgerId } = params;
   return { type: WAIT_FOR_LEDGER_UPDATE_0, player: PlayerIndex.B, channelId, ledgerId };
+}
+
+export function waitForConsensus(params: Properties<WaitForConsensus>): WaitForConsensus {
+  const { channelId, ledgerId } = params;
+  return { type: WAIT_FOR_CONSENSUS, player: PlayerIndex.B, channelId, ledgerId };
 }
