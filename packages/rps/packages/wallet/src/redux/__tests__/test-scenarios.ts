@@ -216,7 +216,7 @@ export const ledgerCommitments = {
   },
   ledgerUpdate1: {
     ...updatedLedgerChannelAttrs(1),
-    commitmentCount: 0,
+    commitmentCount: 1,
     commitmentType: CommitmentType.App,
     turnNum: 5,
   },

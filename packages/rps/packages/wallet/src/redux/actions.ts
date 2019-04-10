@@ -148,6 +148,18 @@ export type CommonAction =
 
 export type ProcedureAction = CommonAction;
 
+export type TransactionAction =
+  | TransactionConfirmed
+  | TransactionSentToMetamask
+  | TransactionSubmitted
+  | RetryTransaction
+  | TransactionSubmissionFailed;
+
+export function isTransactionAction(action: WalletAction): action is TransactionAction {
+  // TODO: This is a weak check. We need to refactor these actions once we clean up the channel reducer and funding
+  return action.type.indexOf('TRANSACTION') > -1;
+}
+
 export function isCommonAction(action: WalletAction): action is CommonAction {
   return action.type.match('WALLET.COMMON') ? true : false;
 }

@@ -18,6 +18,8 @@ import { messageRelayRequested } from 'magmo-wallet-client';
 import { addHex } from '../../utils/hex-utils';
 import { bigNumberify } from 'ethers/utils';
 import { ourTurn } from '../../utils/reducer-utils';
+import { directFundingStateReducer } from '../direct-funding-store/direct-funding-state/reducer';
+import { FundingAction } from '../direct-funding-store/direct-funding-state/actions';
 
 export const appChannelIsWaitingForFunding = (
   state: walletStates.Initialized,
@@ -74,7 +76,7 @@ export const requestDirectFunding = (
   );
 };
 
-export const confirmFundingForAppChannel = (
+export const confirmFundingForChannel = (
   state: walletStates.Initialized,
   channelId: string,
 ): walletStates.Initialized => {
@@ -118,11 +120,15 @@ export const createAndSendUpdateCommitment = (
 
   // Compose the update commitment
   const ledgerChannelState = selectors.getOpenedChannelState(state, ledgerChannelId);
+  const { commitment: lastLedgerCommitment } = ledgerChannelState.lastCommitment;
   const { commitment, signature } = composeLedgerUpdateCommitment(
-    ledgerChannelState.lastCommitment.commitment,
+    lastLedgerCommitment.channel,
+    ledgerChannelState.turnNum + 1,
     ledgerChannelState.ourIndex,
     proposedAllocation,
     proposedDestination,
+    lastLedgerCommitment.allocation,
+    lastLedgerCommitment.destination,
     ledgerChannelState.privateKey,
   );
 
@@ -196,11 +202,16 @@ export const updateChannelState = (
 
 export const updateDirectFundingStatus = (
   state: walletStates.Initialized,
-  action: actions.funding.FundingAction,
+  action: FundingAction,
 ): walletStates.Initialized => {
   const newState = { ...state };
   const updatedDirectFundingStore = directFundingStoreReducer(state.directFundingStore, action);
   newState.directFundingStore = updatedDirectFundingStore.state;
+  const updatedDirectFundingState = directFundingStateReducer(
+    newState.directFundingStore[action.channelId],
+    action,
+  );
+  newState.directFundingStore[action.channelId] = updatedDirectFundingState.state;
   return newState;
 };
 
