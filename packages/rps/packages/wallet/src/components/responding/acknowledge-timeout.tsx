@@ -1,6 +1,6 @@
 import React from 'react';
 import Button from 'reactstrap/lib/Button';
-import SidebarLayout from '../sidebar-layout';
+import StatusBarLayout from '../status-bar-layout';
 import { StyleSheet, css } from 'aphrodite';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHourglassEnd } from '@fortawesome/free-solid-svg-icons';
@@ -27,12 +27,12 @@ export default class AcknowledgeTimeout extends React.PureComponent<Props> {
     const expiryDate = new Date(expiryTime * 1000).toLocaleTimeString().replace(/:\d\d /, ' ');
     // TODO: We should add hover text or an icon to these options to fully explain what they mean to the user.
     return (
-      <SidebarLayout>
+      <StatusBarLayout>
         <h2>You failed to respond!</h2>
         <div>
           The game expired at
           <ul className="fa-ul">
-            <li style={{ padding: '0.7em 1em' }}>
+            <li>
               {timeOutIcon}
               {expiryDate}
             </li>
@@ -44,7 +44,7 @@ export default class AcknowledgeTimeout extends React.PureComponent<Props> {
             <Button onClick={timeoutAcknowledged}>Withdraw your funds</Button>
           </span>
         </div>
-      </SidebarLayout>
+      </StatusBarLayout>
     );
   }
 }

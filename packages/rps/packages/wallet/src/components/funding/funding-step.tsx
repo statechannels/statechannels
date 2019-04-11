@@ -3,7 +3,7 @@ import * as states from '../../redux/direct-funding-store/direct-funding-state/s
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCheckCircle, faSpinner } from '@fortawesome/free-solid-svg-icons';
 import { faCircle } from '@fortawesome/free-regular-svg-icons';
-import SidebarLayout from '../sidebar-layout';
+import StatusBarLayout from '../status-bar-layout';
 import { unreachable } from '../../utils/reducer-utils';
 
 interface Props {
@@ -117,32 +117,32 @@ export class FundingStep extends React.PureComponent<Props> {
     const children = this.props.children;
 
     return (
-      <SidebarLayout>
+      <StatusBarLayout>
         <h2 className="bp-2">Opening channel</h2>
         <ul className="fa-ul">
-          <li style={{ padding: '0.7em 1em' }}>
+          <li>
             {icon(Step.NOT_SAFE_TO_DEPOSIT, currentStep)}
             {message(Step.NOT_SAFE_TO_DEPOSIT, currentStep)}
           </li>
-          <li style={{ padding: '0.7em 1em' }}>
+          <li>
             {icon(Step.SENDING_DEPOSIT, currentStep)}
             {message(Step.SENDING_DEPOSIT, currentStep)}
           </li>
-          <li style={{ padding: '0.7em 1em' }}>
+          <li>
             {icon(Step.CONFIRMING_DEPOSIT, currentStep)}
             {message(Step.CONFIRMING_DEPOSIT, currentStep)}
           </li>
-          <li style={{ padding: '0.7em 1em' }}>
+          <li>
             {icon(Step.WAITING_FOR_FUNDING_CONFIRMATION, currentStep)}
             {message(Step.WAITING_FOR_FUNDING_CONFIRMATION, currentStep)}
           </li>
-          <li style={{ padding: '0.7em 1em' }}>
+          <li>
             {icon(Step.CHANNEL_FUNDED, currentStep)}
             {message(Step.CHANNEL_FUNDED, currentStep)}
           </li>
         </ul>
         <div className="pb-2">{children}</div>
-      </SidebarLayout>
+      </StatusBarLayout>
     );
   }
 }

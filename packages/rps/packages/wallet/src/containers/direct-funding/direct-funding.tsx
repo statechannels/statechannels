@@ -2,14 +2,14 @@ import React from 'react';
 import { PureComponent } from 'react';
 import { connect } from 'react-redux';
 
-import * as fundingStore from '../redux/direct-funding-store/state';
-import * as actions from '../redux/actions';
+import * as fundingStore from '../../redux/direct-funding-store/state';
+import * as actions from '../../redux/actions';
 
-import { unreachable } from '../utils/reducer-utils';
-import { FundingStep, fundingStepByState } from '../components/funding/funding-step';
-import EtherscanLink from '../components/etherscan-link';
-import TransactionFailed from '../components/transaction-failed';
-import { WalletProcedure } from '../redux/types';
+import { unreachable } from '../../utils/reducer-utils';
+import { FundingStep, fundingStepByState } from '../../components/funding/funding-step';
+import EtherscanLink from '../../components/etherscan-link';
+import TransactionFailed from '../../components/transaction-failed';
+import { WalletProcedure } from '../../redux/types';
 
 interface Props {
   directFundingStore: fundingStore.DirectFundingStore;
