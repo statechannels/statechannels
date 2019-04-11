@@ -1,5 +1,5 @@
 import React from 'react';
-import * as states from '../../redux/direct-funding-store/direct-funding-state/state';
+import * as states from '../../redux/protocols/direct-funding/state';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCheckCircle, faSpinner } from '@fortawesome/free-solid-svg-icons';
 import { faCircle } from '@fortawesome/free-regular-svg-icons';

@@ -58,7 +58,12 @@ export function waitForDirectFunding(
   params: Properties<WaitForDirectFunding>,
 ): WaitForDirectFunding {
   const { channelId, ledgerId } = params;
-  return { type: WAIT_FOR_DIRECT_FUNDING, player: PlayerIndex.A, channelId, ledgerId };
+  return {
+    type: WAIT_FOR_DIRECT_FUNDING,
+    player: PlayerIndex.A,
+    channelId,
+    ledgerId,
+  };
 }
 
 export function waitForPostFundSetup1(

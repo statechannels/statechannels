@@ -1,7 +1,7 @@
 import { depositingReducer } from '../reducer';
 
 import * as states from '../state';
-import * as directFundingStates from '../../../direct-funding-state/state';
+import * as directFundingStates from '../../state';
 import * as actions from '../../../../actions';
 
 import * as scenarios from '../../../../__tests__/test-scenarios';
@@ -13,6 +13,7 @@ import {
 import * as TransactionGenerator from '../../../../../utils/transaction-generator';
 import { bigNumberify } from 'ethers/utils';
 import { WalletProcedure } from '../../../../types';
+import { EMPTY_SHARED_DATA } from '../../../../protocols';
 
 const { channelId, mockTransactionOutboxItem } = scenarios;
 
@@ -50,7 +51,7 @@ describe(startingIn(states.WAIT_FOR_TRANSACTION_SENT), () => {
     // player A scenario
     const state = states.waitForTransactionSent(defaultsForA);
     const action = actions.transactionSentToMetamask(channelId, WalletProcedure.DirectFunding);
-    const updatedState = depositingReducer(state, action);
+    const updatedState = depositingReducer(state, EMPTY_SHARED_DATA, action);
 
     itChangesDepositStatusTo(states.WAIT_FOR_DEPOSIT_APPROVAL, updatedState);
   });
@@ -61,7 +62,7 @@ describe(startingIn(states.WAIT_FOR_DEPOSIT_APPROVAL), () => {
     // player A scenario
     const state = states.waitForDepositApproval(defaultsForA);
     const action = actions.transactionSubmitted(channelId, WalletProcedure.DirectFunding, '0x0');
-    const updatedState = depositingReducer(state, action);
+    const updatedState = depositingReducer(state, EMPTY_SHARED_DATA, action);
 
     itChangesDepositStatusTo(states.WAIT_FOR_DEPOSIT_CONFIRMATION, updatedState);
   });
@@ -72,7 +73,7 @@ describe(startingIn(states.WAIT_FOR_DEPOSIT_APPROVAL), () => {
     const action = actions.transactionSubmissionFailed(channelId, WalletProcedure.DirectFunding, {
       code: '1234',
     });
-    const updatedState = depositingReducer(state, action);
+    const updatedState = depositingReducer(state, EMPTY_SHARED_DATA, action);
 
     itChangesDepositStatusTo(states.DEPOSIT_TRANSACTION_FAILED, updatedState);
   });
@@ -84,7 +85,7 @@ describe(startingIn(states.WAIT_FOR_DEPOSIT_CONFIRMATION), () => {
     const state = states.waitForDepositConfirmation(defaultsWithTx);
     // TODO: This needs to change
     const action = actions.transactionConfirmed(TX_HASH, WalletProcedure.DirectFunding);
-    const updatedState = depositingReducer(state, action);
+    const updatedState = depositingReducer(state, EMPTY_SHARED_DATA, action);
 
     itChangesChannelFundingStatusTo(directFundingStates.SAFE_TO_DEPOSIT, updatedState);
   });
@@ -101,7 +102,7 @@ describe(startingIn(states.DEPOSIT_TRANSACTION_FAILED), () => {
 
     const state = states.depositTransactionFailed(defaultsForB);
     const action = actions.retryTransaction(channelId, WalletProcedure.DirectFunding);
-    const updatedState = depositingReducer(state, action);
+    const updatedState = depositingReducer(state, EMPTY_SHARED_DATA, action);
 
     itChangesDepositStatusTo(states.WAIT_FOR_TRANSACTION_SENT, updatedState);
     itSendsThisTransaction(updatedState, mockTransactionOutboxItem);

@@ -1,4 +1,8 @@
 import * as depositing from './depositing/state';
+import { DirectFundingRequested } from '../../internal/actions';
+import { bigNumberify } from 'ethers/utils';
+import { createDepositTransaction } from '../../../utils/transaction-generator';
+import { WalletProcedure } from '../../types';
 export { depositing };
 // ChannelFundingStatus
 export const NOT_SAFE_TO_DEPOSIT = 'NOT_SAFE_TO_DEPOSIT';
@@ -100,3 +104,43 @@ export type DirectFundingState =
   | depositing.Depositing
   | WaitForFundingConfirmation
   | ChannelFunded;
+
+export function initialDirectFundingState(action: DirectFundingRequested) {
+  const { safeToDepositLevel, totalFundingRequired, requiredDeposit, channelId, ourIndex } = action;
+
+  const alreadySafeToDeposit = bigNumberify(safeToDepositLevel).eq('0x');
+  const alreadyFunded = bigNumberify(totalFundingRequired).eq('0x');
+
+  const channelFundingStatus = alreadyFunded
+    ? CHANNEL_FUNDED
+    : alreadySafeToDeposit
+    ? SAFE_TO_DEPOSIT
+    : NOT_SAFE_TO_DEPOSIT;
+
+  const stateConstructor: any = alreadyFunded
+    ? channelFunded
+    : alreadySafeToDeposit
+    ? depositing.waitForTransactionSent
+    : notSafeToDeposit;
+
+  const transactionOutbox = alreadySafeToDeposit
+    ? {
+        transactionRequest: createDepositTransaction(action.channelId, action.requiredDeposit),
+        channelId,
+        procedure: WalletProcedure.DirectFunding,
+      }
+    : undefined;
+
+  return {
+    state: stateConstructor({
+      fundingType: DIRECT_FUNDING,
+      channelFundingStatus,
+      safeToDepositLevel,
+      channelId,
+      requestedTotalFunds: totalFundingRequired,
+      requestedYourContribution: requiredDeposit,
+      ourIndex,
+    }),
+    sideEffects: { transactionOutbox },
+  };
+}
