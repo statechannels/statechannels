@@ -163,8 +163,8 @@ describe(startingIn(states.WAIT_FOR_DIRECT_FUNDING), () => {
     channelId: ledgerId,
     ourIndex: PlayerIndex.A,
   });
-  describe(whenActionArrives(actions.funding.FUNDING_RECEIVED_EVENT), () => {
-    const action = actions.funding.fundingReceivedEvent(defaults.ledgerId, total, total);
+  describe(whenActionArrives(actions.FUNDING_RECEIVED_EVENT), () => {
+    const action = actions.fundingReceivedEvent(channelId, defaults.ledgerId, total, total);
     const updatedState = playerAReducer(walletState, action);
 
     itTransitionToStateType(updatedState, states.WAIT_FOR_POST_FUND_SETUP_1);

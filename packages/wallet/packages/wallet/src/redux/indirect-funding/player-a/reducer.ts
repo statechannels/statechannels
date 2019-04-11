@@ -128,7 +128,6 @@ const waitForDirectFunding = (
   const indirectFundingState = selectors.getIndirectFundingState(
     state,
   ) as states.WaitForDirectFunding;
-  // Funding events currently occur directly against the ledger channel
   if (!isfundingAction(action)) {
     return state;
   } else {

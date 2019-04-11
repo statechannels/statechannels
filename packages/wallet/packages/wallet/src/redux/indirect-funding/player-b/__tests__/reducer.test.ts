@@ -130,7 +130,7 @@ describe(startingIn(states.WAIT_FOR_PRE_FUND_SETUP_0), () => {
 });
 
 describe(startingIn(states.WAIT_FOR_DIRECT_FUNDING), () => {
-  describe.skip(whenActionArrives(actions.funding.FUNDING_RECEIVED_EVENT), () => {
+  describe.skip(whenActionArrives(actions.FUNDING_RECEIVED_EVENT), () => {
     // Need to hook up the direct funding store first, which isn't yet in this branch
     const state = startingState(states.waitForDirectFunding({ channelId, ledgerId }), {
       [channelId]: channelStates.waitForFundingAndPostFundSetup(appChannelStateDefaults),

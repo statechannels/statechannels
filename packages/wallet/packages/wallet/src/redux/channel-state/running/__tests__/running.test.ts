@@ -72,7 +72,8 @@ describe('when in WaitForUpdate on our turn', () => {
   });
 
   describe('when the wallet detects an opponent challenge', () => {
-    const action = actions.channel.challengeCreatedEvent(
+    const action = actions.challengeCreatedEvent(
+      '0xf00',
       '0xf00',
       scenarios.preFundCommitment1,
       defaults.challengeExpiry,
@@ -130,7 +131,8 @@ describe(`when in WaitForUpdate on our opponent's turn`, () => {
   });
 
   describe('when the wallet detects an opponent challenge', () => {
-    const action = actions.channel.challengeCreatedEvent(
+    const action = actions.challengeCreatedEvent(
+      '0xf00',
       '0xf00',
       scenarios.preFundCommitment1,
       defaults.challengeExpiry,

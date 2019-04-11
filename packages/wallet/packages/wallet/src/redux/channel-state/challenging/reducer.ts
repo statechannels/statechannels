@@ -130,7 +130,7 @@ const waitForChallengeSubmissionReducer = (
   action: WalletAction,
 ): StateWithSideEffects<states.ChannelStatus> => {
   switch (action.type) {
-    case actions.channel.CHALLENGE_CREATED_EVENT:
+    case actions.CHALLENGE_CREATED_EVENT:
       return {
         state: states.waitForChallengeSubmission({
           ...state,
@@ -156,7 +156,7 @@ const waitForChallengeConfirmationReducer = (
   action: WalletAction,
 ): StateWithSideEffects<states.ChannelStatus> => {
   switch (action.type) {
-    case actions.channel.CHALLENGE_CREATED_EVENT:
+    case actions.CHALLENGE_CREATED_EVENT:
       return {
         state: states.waitForChallengeConfirmation({
           ...state,
@@ -180,14 +180,14 @@ const waitForResponseOrTimeoutReducer = (
   action: WalletAction,
 ): StateWithSideEffects<states.ChannelStatus> => {
   switch (action.type) {
-    case actions.channel.CHALLENGE_CREATED_EVENT:
+    case actions.CHALLENGE_CREATED_EVENT:
       return {
         state: states.waitForResponseOrTimeout({
           ...state,
           challengeExpiry: bigNumberify(action.finalizedAt).toNumber(),
         }),
       };
-    case actions.channel.RESPOND_WITH_MOVE_EVENT:
+    case actions.RESPOND_WITH_MOVE_EVENT:
       const message = challengeCommitmentReceived(action.responseCommitment);
       // TODO: Right now we're just storing a dummy signature since we don't get one
       // from the challenge.

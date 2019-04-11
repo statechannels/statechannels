@@ -87,7 +87,7 @@ const waitForUpdateReducer = (
         sideEffects: { messageOutbox: handleSignatureAndValidationMessages(state, action) },
       };
 
-    case actions.channel.CHALLENGE_CREATED_EVENT:
+    case actions.CHALLENGE_CREATED_EVENT:
       // transition to responding
       return {
         state: respondingStates.chooseResponse({

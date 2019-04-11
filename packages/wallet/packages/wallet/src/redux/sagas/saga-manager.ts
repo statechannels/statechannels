@@ -36,46 +36,30 @@ export function* sagaManager(): IterableIterator<any> {
       yield adjudicatorLoader();
     }
 
-    // if have adjudicator, make sure that the adjudicator watcher is running
     if (state.type === WALLET_INITIALIZED) {
-      if (state.channelState && 'activeAppChannelId' in state.channelState) {
-        if (!adjudicatorWatcherProcess) {
-          const provider = yield getProvider();
-          adjudicatorWatcherProcess = yield fork(
-            adjudicatorWatcher,
-            state.channelState.activeAppChannelId,
-            provider,
-          );
-        }
-      } else {
-        if (adjudicatorWatcherProcess) {
-          yield cancel(adjudicatorWatcherProcess);
-          adjudicatorWatcherProcess = undefined;
-        }
+      if (!adjudicatorWatcherProcess) {
+        const provider = yield getProvider();
+        adjudicatorWatcherProcess = yield fork(adjudicatorWatcher, provider);
       }
-
-      // We only watch for mined blocks when { waiting } for a challenge expiry {
-      const appChannel =
-        state.channelState && state.channelState.activeAppChannelId
-          ? state.channelState.initializedChannels[state.channelState.activeAppChannelId]
-          : undefined;
-
-      if (appChannel && 'challengeExpiry' in appChannel) {
-        if (!blockMiningWatcherProcess) {
-          blockMiningWatcherProcess = yield fork(blockMiningWatcher);
-        }
-        if (process.env.TARGET_NETWORK === 'development' && !ganacheMinerProcess) {
-          ganacheMinerProcess = yield fork(ganacheMiner);
-        }
-      } else {
-        if (blockMiningWatcherProcess) {
-          yield cancel(blockMiningWatcherProcess);
-          blockMiningWatcherProcess = undefined;
-        }
-        if (ganacheMinerProcess) {
-          yield cancel(ganacheMinerProcess);
-          ganacheMinerProcess = undefined;
-        }
+      // TODO: To cut down on block mined spam we could require processes to register/unregister when they want to listen for these events
+      if (!blockMiningWatcherProcess) {
+        blockMiningWatcherProcess = yield fork(blockMiningWatcher);
+      }
+      if (process.env.TARGET_NETWORK === 'development' && !ganacheMinerProcess) {
+        ganacheMinerProcess = yield fork(ganacheMiner);
+      }
+    } else {
+      if (blockMiningWatcherProcess) {
+        yield cancel(blockMiningWatcherProcess);
+        blockMiningWatcherProcess = undefined;
+      }
+      if (ganacheMinerProcess) {
+        yield cancel(ganacheMinerProcess);
+        ganacheMinerProcess = undefined;
+      }
+      if (adjudicatorWatcherProcess) {
+        yield cancel(adjudicatorWatcherProcess);
+        adjudicatorWatcherProcess = undefined;
       }
     }
 

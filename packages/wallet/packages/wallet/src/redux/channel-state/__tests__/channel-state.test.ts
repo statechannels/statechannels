@@ -6,6 +6,7 @@ import * as states from '../state';
 import { itTransitionsToChannelStateType, itSendsThisMessage } from '../../__tests__/helpers';
 import * as SigningUtil from '../../../utils/signing-utils';
 import { validationFailure, SIGNATURE_FAILURE } from 'magmo-wallet-client';
+import { fundingConfirmed } from '../../internal/actions';
 
 const {
   initializingChannelState: initializingChannels,
@@ -68,7 +69,7 @@ describe('when the channel is part of the channelState', () => {
   describe('when a channel action with a channelId arrives', () => {
     it('delegates to the single channel reducer', async () => {
       const state = { ...defaults, initializedChannels };
-      const action = actions.channel.concludedEvent(channelId);
+      const action = fundingConfirmed(channelId);
       const mock = jest.fn().mockReturnValue({ state });
       Object.defineProperty(channelState, 'initializedChannelStatusReducer', { value: mock });
       channelState.channelStateReducer(state, action);

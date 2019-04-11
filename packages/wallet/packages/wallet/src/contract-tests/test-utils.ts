@@ -24,6 +24,8 @@ export const fourSix = [bigNumberify(4).toHexString(), bigNumberify(6).toHexStri
   string
 ];
 
+export const defaultDepositAmount = fiveFive[0];
+
 export async function getChannelId(provider, channelNonce, participantA, participantB) {
   const network = await provider.getNetwork();
   const networkId = network.chainId;
@@ -38,8 +40,9 @@ export async function getChannelId(provider, channelNonce, participantA, partici
 export async function depositContract(
   provider: ethers.providers.JsonRpcProvider,
   participant: string,
+  amount = defaultDepositAmount,
 ) {
-  const deployTransaction = createDepositTransaction(participant, '0x5');
+  const deployTransaction = createDepositTransaction(participant, amount);
   const transactionReceipt = await sendTransaction(provider, deployTransaction);
   await transactionReceipt.wait();
 }
@@ -61,7 +64,7 @@ export async function createChallenge(
 
   const fromCommitment: Commitment = {
     channel,
-    allocation: ['0x05', '0x05'],
+    allocation: fiveFive,
     destination: [participantA.address, participantB.address],
     turnNum: 5,
     commitmentType: CommitmentType.App,
@@ -71,7 +74,7 @@ export async function createChallenge(
 
   const toCommitment: Commitment = {
     channel,
-    allocation: ['0x05', '0x05'],
+    allocation: fiveFive,
     destination: [participantA.address, participantB.address],
     turnNum: 6,
     commitmentType: CommitmentType.App,
@@ -109,7 +112,7 @@ export async function concludeGame(
 
   const fromCommitment: Commitment = {
     channel,
-    allocation: ['0x05', '0x05'],
+    allocation: fiveFive,
     destination: [participantA.address, participantB.address],
     turnNum: 5,
     commitmentType: CommitmentType.Conclude,
@@ -119,7 +122,7 @@ export async function concludeGame(
 
   const toCommitment: Commitment = {
     channel,
-    allocation: ['0x05', '0x05'],
+    allocation: fiveFive,
     destination: [participantA.address, participantB.address],
     turnNum: 6,
     commitmentType: CommitmentType.Conclude,
@@ -157,7 +160,7 @@ export async function respondWithMove(
 
   const toCommitment: Commitment = {
     channel,
-    allocation: ['0x05', '0x05'],
+    allocation: fiveFive,
     destination: [participantA.address, participantB.address],
     turnNum: 7,
     commitmentType: CommitmentType.App,
@@ -190,7 +193,7 @@ export async function refuteChallenge(
 
   const toCommitment: Commitment = {
     channel,
-    allocation: ['0x05', '0x05'],
+    allocation: fiveFive,
     destination: [participantA.address, participantB.address],
     turnNum: 8,
     commitmentType: CommitmentType.App,

@@ -136,6 +136,73 @@ export const commitmentReceived = (
 });
 export type CommitmentReceived = ReturnType<typeof commitmentReceived>;
 
+export const CHALLENGE_CREATED_EVENT = 'WALLET.ADJUDICATOR.CHALLENGE_CREATED_EVENT';
+export const challengeCreatedEvent = (
+  processId: string,
+  channelId: string,
+  commitment: Commitment,
+  finalizedAt,
+) => ({
+  processId,
+  channelId,
+  commitment,
+  finalizedAt,
+  type: CHALLENGE_CREATED_EVENT as typeof CHALLENGE_CREATED_EVENT,
+});
+export type ChallengeCreatedEvent = ReturnType<typeof challengeCreatedEvent>;
+
+export const CONCLUDED_EVENT = 'WALLET.ADJUDICATOR.CONCLUDED_EVENT';
+export const concludedEvent = (processId: string, channelId: string) => ({
+  processId,
+  channelId,
+  type: CONCLUDED_EVENT as typeof CONCLUDED_EVENT,
+});
+export type ConcludedEvent = ReturnType<typeof concludedEvent>;
+
+export const REFUTED_EVENT = 'WALLET.ADJUDICATOR.REFUTED_EVENT';
+export const refutedEvent = (
+  processId: string,
+  channelId: string,
+  refuteCommitment: Commitment,
+) => ({
+  processId,
+  channelId,
+  refuteCommitment,
+  type: REFUTED_EVENT as typeof REFUTED_EVENT,
+});
+export type RefutedEvent = ReturnType<typeof refutedEvent>;
+
+export const RESPOND_WITH_MOVE_EVENT = 'WALLET.ADJUDICATOR.RESPOND_WITH_MOVE_EVENT';
+export const respondWithMoveEvent = (processId: string, channelId: string, responseCommitment) => ({
+  processId,
+  channelId,
+  responseCommitment,
+  type: RESPOND_WITH_MOVE_EVENT as typeof RESPOND_WITH_MOVE_EVENT,
+});
+export type RespondWithMoveEvent = ReturnType<typeof respondWithMoveEvent>;
+
+export const FUNDING_RECEIVED_EVENT = 'WALLET.ADJUDICATOR.FUNDING_RECEIVED_EVENT';
+export const fundingReceivedEvent = (
+  processId: string,
+  channelId: string,
+  amount: string,
+  totalForDestination: string,
+) => ({
+  processId,
+  channelId,
+  amount,
+  totalForDestination,
+  type: FUNDING_RECEIVED_EVENT as typeof FUNDING_RECEIVED_EVENT,
+});
+export type FundingReceivedEvent = ReturnType<typeof fundingReceivedEvent>;
+
+export type AdjudicatorEventAction =
+  | ChallengeCreatedEvent
+  | ConcludedEvent
+  | RefutedEvent
+  | RespondWithMoveEvent
+  | FundingReceivedEvent;
+
 export type CommonAction =
   | TransactionConfirmed
   | TransactionSentToMetamask
@@ -144,7 +211,7 @@ export type CommonAction =
   | RetryTransaction
   | MessageReceived
   | CommitmentReceived
-  | funding.FundingReceivedEvent;
+  | AdjudicatorEventAction;
 
 export type ProcedureAction = CommonAction;
 
