@@ -131,7 +131,7 @@ describe('when in WAIT_FOR_RESPONSE_OR_TIMEOUT', () => {
   });
 
   describe('when the opponent responds', () => {
-    const action = actions.channel.respondWithMoveEvent('0x0', '0xC1');
+    const action = actions.respondWithMoveEvent('0x0', '0x0', '0xC1');
     const updatedState = challengingReducer(state, action);
 
     itTransitionsToChannelStateType(states.ACKNOWLEDGE_CHALLENGE_RESPONSE, updatedState);

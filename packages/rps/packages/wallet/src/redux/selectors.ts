@@ -45,3 +45,22 @@ export const getDirectFundingState = (
   }
   return fundingStatus;
 };
+
+export const getAdjudicatorWatcherProcessesForChannel = (
+  state: walletStates.Initialized,
+  channelId: string,
+): string[] => {
+  const processIds: string[] = [];
+
+  if (!state.processStore) {
+    return processIds;
+  }
+  for (const processId of Object.keys(state.processStore)) {
+    const { channelsToMonitor } = state.processStore[processId];
+
+    if (channelsToMonitor.indexOf(channelId) > -1) {
+      processIds.push(processId);
+    }
+  }
+  return processIds;
+};

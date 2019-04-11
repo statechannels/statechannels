@@ -31,6 +31,7 @@ export const initializedState: states.Initialized = {
   uid: 'uid',
   networkId: 3,
   consensusLibrary: '0x0',
+  processStore: {},
 };
 
 export const mockTransactionOutboxItem = {

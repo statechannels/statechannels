@@ -170,38 +170,6 @@ export const withdrawalSuccessAcknowledged = () => ({
 });
 export type WithdrawalSuccessAcknowledged = ReturnType<typeof withdrawalSuccessAcknowledged>;
 
-export const CHALLENGE_CREATED_EVENT = 'WALLET.CHANNEL.CHALLENGE_CREATED_EVENT';
-export const challengeCreatedEvent = (channelId: string, commitment: Commitment, finalizedAt) => ({
-  channelId,
-  commitment,
-  finalizedAt,
-  type: CHALLENGE_CREATED_EVENT as typeof CHALLENGE_CREATED_EVENT,
-});
-export type ChallengeCreatedEvent = ReturnType<typeof challengeCreatedEvent>;
-
-export const CONCLUDED_EVENT = 'WALLET.CHANNEL.CONCLUDED_EVENT';
-export const concludedEvent = channelId => ({
-  channelId,
-  type: CONCLUDED_EVENT as typeof CONCLUDED_EVENT,
-});
-export type concludedEvent = ReturnType<typeof concludedEvent>;
-
-export const REFUTED_EVENT = 'WALLET.CHANNEL.REFUTED_EVENT';
-export const refutedEvent = (channelId, refuteCommitment) => ({
-  channelId,
-  refuteCommitment,
-  type: REFUTED_EVENT as typeof REFUTED_EVENT,
-});
-export type RefutedEvent = ReturnType<typeof refutedEvent>;
-
-export const RESPOND_WITH_MOVE_EVENT = 'WALLET.CHANNEL.RESPOND_WITH_MOVE_EVENT';
-export const respondWithMoveEvent = (channelId, responseCommitment) => ({
-  channelId,
-  responseCommitment,
-  type: RESPOND_WITH_MOVE_EVENT as typeof RESPOND_WITH_MOVE_EVENT,
-});
-export type RespondWithMoveEvent = ReturnType<typeof respondWithMoveEvent>;
-
 export const CONCLUDE_REQUESTED = 'WALLET.CHANNEL.CONCLUDE_REQUESTED';
 export const concludeRequested = () => ({
   type: CONCLUDE_REQUESTED as typeof CONCLUDE_REQUESTED,
@@ -245,7 +213,6 @@ export type ChannelAction =  // TODO: Some of these actions probably also belong
   | ChallengeApproved
   | ChallengeCommitmentReceived
   | ChallengeCompletionAcknowledged
-  | ChallengeCreatedEvent
   | ChallengeRejected
   | ChallengeRequested
   | ChallengeResponseAcknowledged
@@ -255,7 +222,6 @@ export type ChannelAction =  // TODO: Some of these actions probably also belong
   | ClosedOnChainAcknowledged
   | CloseSuccessAcknowledged
   | ConcludeApproved
-  | concludedEvent
   | ConcludeRejected
   | ConcludeRequested
   | FundingApproved
@@ -268,7 +234,6 @@ export type ChannelAction =  // TODO: Some of these actions probably also belong
   | PostFundSetupReceived
   | RespondWithExistingMoveChosen
   | RespondWithMoveChosen
-  | RespondWithMoveEvent
   | RespondWithRefuteChosen
   | TakeMoveInAppAcknowledged
   | WithdrawalApproved
