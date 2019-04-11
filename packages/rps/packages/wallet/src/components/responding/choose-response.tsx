@@ -1,6 +1,6 @@
 import React from 'react';
 import Button from 'reactstrap/lib/Button';
-import SidebarLayout from '../sidebar-layout';
+import StatusBarLayout from '../status-bar-layout';
 import { StyleSheet, css } from 'aphrodite';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHourglassHalf } from '@fortawesome/free-solid-svg-icons';
@@ -40,12 +40,12 @@ export default class ChooseResponse extends React.PureComponent<Props> {
     const expiryDate = new Date(expiryTime * 1000).toLocaleTimeString().replace(/:\d\d /, ' ');
     // TODO: We should add hover text or an icon to these options to fully explain what they mean to the user.
     return (
-      <SidebarLayout>
+      <StatusBarLayout>
         <h2>A challenge has been issued</h2>
         <div style={{ paddingBottom: '1em' }}>
           The game will expire at
           <ul className="fa-ul">
-            <li style={{ padding: '0.7em 1em' }}>
+            <li>
               {timeRunningIcon}
               {expiryDate}
             </li>
@@ -64,7 +64,7 @@ export default class ChooseResponse extends React.PureComponent<Props> {
             )}
           </span>
         </div>
-      </SidebarLayout>
+      </StatusBarLayout>
     );
   }
 }

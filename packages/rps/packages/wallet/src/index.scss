@@ -1,12 +1,7 @@
-// these files contain bootstrap sass variable overrides and must go in before bootsratrap
-@import "./styles/_colors";
-@import "./styles/_fonts";
+// these files contain bootstrap sass variable overrides and must go in before bootstrap
+@import './styles/_colors';
+@import './styles/_fonts';
 
-@import "~bootstrap/scss/bootstrap";
+@import '~bootstrap/scss/bootstrap';
 
-@import "./styles/wallet-welcome";
-@import "./styles/wallet-message";
-@import "./styles/challenge-response";
-@import "./styles/withdraw-in-progress";
-@import "./styles/funding-in-progress";
-@import "./styles/challenge-footer";
+@import './styles/wallet';

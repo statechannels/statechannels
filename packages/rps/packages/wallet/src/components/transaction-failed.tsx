@@ -1,5 +1,5 @@
 import React from 'react';
-import SidebarLayout from './sidebar-layout';
+import StatusBarLayout from './status-bar-layout';
 import { Button } from 'reactstrap';
 import magmoFireBall from '../images/white-fireball.svg';
 
@@ -12,7 +12,7 @@ export default class TransactionFailed extends React.PureComponent<Props> {
   render() {
     const { name, retryAction } = this.props;
     return (
-      <SidebarLayout>
+      <StatusBarLayout>
         <h1>Transaction Failed</h1>
         <p>The {name} transaction was not submitted to the network. Hit retry to try again.</p>
 
@@ -20,7 +20,7 @@ export default class TransactionFailed extends React.PureComponent<Props> {
           <img src={magmoFireBall} />
           &nbsp;&nbsp;Retry
         </Button>
-      </SidebarLayout>
+      </StatusBarLayout>
     );
   }
 }

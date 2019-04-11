@@ -1,5 +1,5 @@
 import React from 'react';
-import SidebarLayout from './sidebar-layout';
+import StatusBarLayout from './status-bar-layout';
 
 interface Props {
   name: string;
@@ -26,7 +26,7 @@ export default class WaitForXConfirmation extends React.PureComponent<Props> {
   render() {
     const { name } = this.props;
     return (
-      <SidebarLayout>
+      <StatusBarLayout>
         <h1>Waiting for your {name} to be mined!</h1>
         <p>
           Hold tight! Visit{' '}
@@ -35,7 +35,7 @@ export default class WaitForXConfirmation extends React.PureComponent<Props> {
           </a>{' '}
           to check on its status.
         </p>
-      </SidebarLayout>
+      </StatusBarLayout>
     );
   }
 }

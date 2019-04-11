@@ -6,7 +6,7 @@ import * as channelStates from '../redux/channel-state/state';
 import * as actions from '../redux/actions';
 
 import { unreachable } from '../utils/reducer-utils';
-import DirectFunding from './direct-funding';
+import DirectFunding from './direct-funding/direct-funding';
 import { FundingStep, Step } from '../components/funding/funding-step';
 import { WalletProcedure } from '../redux/types';
 
