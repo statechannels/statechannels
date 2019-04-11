@@ -6,7 +6,7 @@ import { unreachable } from '../../../utils/reducer-utils';
 import { depositingReducer } from './depositing/reducer';
 import { bigNumberify } from 'ethers/utils';
 import { createDepositTransaction } from '../../../utils/transaction-generator';
-import { WalletProcedure } from '../../types';
+import { WalletProtocol } from '../../types';
 import { ProtocolReducer, ProtocolStateWithSharedData, SharedData } from '../../protocols';
 import { accumulateSideEffects } from '../../outbox';
 
@@ -63,7 +63,7 @@ const notSafeToDepositReducer: DFReducer = (
               state.requestedYourContribution,
             ),
             channelId: action.channelId,
-            procedure: WalletProcedure.DirectFunding,
+            protocol: WalletProtocol.DirectFunding,
           },
         };
         return {

@@ -7,7 +7,7 @@ import { itTransitionsToChannelStateType } from '../../../__tests__/helpers';
 import * as scenarios from '../../../__tests__/test-scenarios';
 import * as TransactionGenerator from '../../../../utils/transaction-generator';
 import * as SigningUtil from '../../../../utils/signing-utils';
-import { WalletProcedure } from '../../../types';
+import { WalletProtocol } from '../../../types';
 
 const {
   asPrivateKey,
@@ -71,13 +71,13 @@ describe('when in WaitForWithdrawalInitiation', () => {
   const state = states.waitForWithdrawalInitiation(defaults);
 
   describe('and the transaction is submitted', () => {
-    const action = actions.transactionSubmitted(channelId, WalletProcedure.Withdrawing, '0x0');
+    const action = actions.transactionSubmitted(channelId, WalletProtocol.Withdrawing, '0x0');
     const updatedState = withdrawingReducer(state, action);
 
     itTransitionsToChannelStateType(states.WAIT_FOR_WITHDRAWAL_CONFIRMATION, updatedState);
   });
   describe('and the transaction submission errors', () => {
-    const action = actions.transactionSubmissionFailed(channelId, WalletProcedure.Withdrawing, {
+    const action = actions.transactionSubmissionFailed(channelId, WalletProtocol.Withdrawing, {
       code: 0,
     });
     const updatedState = withdrawingReducer(state, action);
@@ -96,7 +96,7 @@ describe('when in withdrawTransactionFailed', () => {
     Object.defineProperty(SigningUtil, 'signVerificationData', { value: signMock });
 
     const state = states.withdrawTransactionFailed(defaults);
-    const action = actions.retryTransaction(channelId, WalletProcedure.Withdrawing);
+    const action = actions.retryTransaction(channelId, WalletProtocol.Withdrawing);
     const updatedState = withdrawingReducer(state, action);
 
     itTransitionsToChannelStateType(states.WAIT_FOR_WITHDRAWAL_INITIATION, updatedState);
@@ -108,7 +108,7 @@ describe('when in WaitForWithdrawalConfirmation', () => {
   const state = states.waitForWithdrawalConfirmation(defaults);
 
   describe('and the transaction is confirmed', () => {
-    const action = actions.transactionConfirmed(channelId, WalletProcedure.Withdrawing);
+    const action = actions.transactionConfirmed(channelId, WalletProtocol.Withdrawing);
     const updatedState = withdrawingReducer(state, action);
 
     itTransitionsToChannelStateType(states.ACKNOWLEDGE_WITHDRAWAL_SUCCESS, updatedState);

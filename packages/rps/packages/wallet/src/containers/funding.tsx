@@ -8,7 +8,7 @@ import * as actions from '../redux/actions';
 import { unreachable } from '../utils/reducer-utils';
 import DirectFunding from './direct-funding/direct-funding';
 import { FundingStep, Step } from '../components/funding/funding-step';
-import { WalletProcedure } from '../redux/types';
+import { WalletProtocol } from '../redux/types';
 
 interface Props {
   state: channelStates.FundingState;
@@ -16,7 +16,7 @@ interface Props {
   fundingRejected: () => void;
   fundingSuccessAcknowledged: () => void;
   fundingDeclinedAcknowledged: () => void;
-  retryTransactionAction: (channelId: string, procedure: WalletProcedure) => void;
+  retryTransactionAction: (channelId: string, protocol: WalletProtocol) => void;
 }
 
 class FundingContainer extends PureComponent<Props> {

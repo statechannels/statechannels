@@ -12,7 +12,7 @@ import {
 } from 'magmo-wallet-client/lib/wallet-events';
 import { handleSignatureAndValidationMessages } from '../../../utils/state-utils';
 import { StateWithSideEffects } from '../../utils';
-import { WalletProcedure } from '../../types';
+import { WalletProtocol } from '../../types';
 
 export const respondingReducer = (
   state: states.RespondingState,
@@ -68,7 +68,7 @@ const responseTransactionFailedReducer = (
           transactionOutbox: {
             transactionRequest,
             channelId: state.channelId,
-            procedure: WalletProcedure.Responding,
+            protocol: WalletProtocol.Responding,
           },
         },
       };
@@ -107,7 +107,7 @@ export const chooseResponseReducer = (
           transactionOutbox: {
             transactionRequest,
             channelId: state.channelId,
-            procedure: WalletProcedure.Responding,
+            protocol: WalletProtocol.Responding,
           },
         },
       };
@@ -156,7 +156,7 @@ export const takeMoveInAppReducer = (
           transactionOutbox: {
             transactionRequest,
             channelId: state.channelId,
-            procedure: WalletProcedure.Responding,
+            protocol: WalletProtocol.Responding,
           },
           displayOutbox: showWallet(),
         },
