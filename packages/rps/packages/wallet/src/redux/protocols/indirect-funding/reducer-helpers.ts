@@ -1,25 +1,25 @@
-import * as selectors from '../selectors';
-import * as channelStates from '../channel-state/state';
+import * as selectors from '../../selectors';
+import * as channelStates from '../../channel-state/state';
 
-import * as actions from '../actions';
-import * as channelActions from '../channel-state/actions';
+import * as actions from '../../actions';
+import * as channelActions from '../../channel-state/actions';
 
-import { channelStateReducer } from '../channel-state/reducer';
-import { accumulateSideEffects } from '../outbox';
+import { channelStateReducer } from '../../channel-state/reducer';
+import { accumulateSideEffects } from '../../outbox';
 import { Commitment } from 'fmg-core';
 import {
   composePostFundCommitment,
   composeLedgerUpdateCommitment,
-} from '../../utils/commitment-utils';
-import { WalletProcedure } from '../types';
+} from '../../../utils/commitment-utils';
+import { WalletProcedure } from '../../types';
 import { messageRelayRequested, WalletEvent } from 'magmo-wallet-client';
-import { addHex } from '../../utils/hex-utils';
+import { addHex } from '../../../utils/hex-utils';
 import { bigNumberify } from 'ethers/utils';
-import { ourTurn } from '../../utils/reducer-utils';
-import { SharedData } from '../protocols';
-import { queueMessage as queueMessageOutbox } from '../outbox/state';
-import { DirectFundingState } from '../protocols/direct-funding/state';
-import { FundingAction } from '../protocols/direct-funding/actions';
+import { ourTurn } from '../../../utils/reducer-utils';
+import { SharedData } from '../../protocols';
+import { queueMessage as queueMessageOutbox } from '../../outbox/state';
+import { DirectFundingState } from '../../protocols/direct-funding/state';
+import { FundingAction } from '../../protocols/direct-funding/actions';
 
 export const appChannelIsWaitingForFunding = (
   sharedData: SharedData,

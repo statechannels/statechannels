@@ -1,4 +1,4 @@
-import { WalletProcedure } from '../../types';
+import { WalletProcedure } from '../../../types';
 import { Commitment } from 'fmg-core/lib/commitment';
 
 export const STRATEGY_APPROVED = 'WALLET.INDIRECT_FUNDING.STRATEGY_APPROVED';

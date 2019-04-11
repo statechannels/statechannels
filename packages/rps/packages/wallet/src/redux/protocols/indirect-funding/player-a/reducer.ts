@@ -1,12 +1,12 @@
 import * as states from './state';
-import * as channelState from '../../channel-state/state';
+import * as channelState from '../../../channel-state/state';
 
-import * as actions from '../../actions';
+import * as actions from '../../../actions';
 
-import * as selectors from '../../selectors';
+import * as selectors from '../../../selectors';
 
-import { unreachable } from '../../../utils/reducer-utils';
-import { PlayerIndex } from '../../types';
+import { unreachable } from '../../../../utils/reducer-utils';
+import { PlayerIndex } from '../../../types';
 
 import { Channel } from 'fmg-core';
 import { channelID } from 'magmo-wallet-client/node_modules/fmg-core/lib/channel';
@@ -26,11 +26,11 @@ import {
 import {
   composePreFundCommitment,
   composeLedgerUpdateCommitment,
-} from '../../../utils/commitment-utils';
+} from '../../../../utils/commitment-utils';
 import { WalletEvent } from 'magmo-wallet-client';
-import { isfundingAction } from '../../protocols/direct-funding/actions';
-import { addHex } from '../../../utils/hex-utils';
-import { ProtocolStateWithSharedData, SharedData } from '../../protocols';
+import { isfundingAction } from '../../direct-funding/actions';
+import { addHex } from '../../../../utils/hex-utils';
+import { ProtocolStateWithSharedData, SharedData } from '../../';
 
 export function playerAReducer(
   protocolState: states.PlayerAState,

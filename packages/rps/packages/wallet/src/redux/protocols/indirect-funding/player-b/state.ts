@@ -1,5 +1,5 @@
-import { Properties } from '../../utils';
-import { PlayerIndex } from '../../types';
+import { Properties } from '../../../utils';
+import { PlayerIndex } from '../../../types';
 
 export const WAIT_FOR_APPROVAL = 'WAIT_FOR_APPROVAL';
 export const WAIT_FOR_PRE_FUND_SETUP_0 = 'WAIT_FOR_PRE_FUND_SETUP_0';
