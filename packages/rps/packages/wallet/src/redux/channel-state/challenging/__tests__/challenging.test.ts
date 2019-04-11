@@ -45,6 +45,8 @@ const defaults = {
   funded: true,
 };
 
+const processId = 'procedure-id';
+
 describe('when in APPROVE_CHALLENGE', () => {
   const state = states.approveChallenge({ ...defaults });
   describe('when a challenge is approved', () => {
@@ -116,7 +118,7 @@ describe('when in WAIT_FOR_CHALLENGE_CONFIRMATION', () => {
   const state = states.waitForChallengeConfirmation({ ...defaults });
 
   describe('when a challenge is confirmed', () => {
-    const action = actions.transactionConfirmed(channelId, WalletProcedure.Challenging);
+    const action = actions.transactionConfirmed(channelId, processId, 'transactionHash');
     const updatedState = challengingReducer(state, action);
 
     itTransitionsToChannelStateType(states.WAIT_FOR_RESPONSE_OR_TIMEOUT, updatedState);
