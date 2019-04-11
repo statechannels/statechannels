@@ -2,7 +2,7 @@ import * as internal from './internal/actions';
 import * as channel from './channel-state/actions';
 import * as funding from './protocols/direct-funding/actions';
 import * as indirectFunding from './protocols/indirect-funding/actions';
-import { WalletProcedure } from './types';
+import { WalletProtocol } from './types';
 import { Commitment } from 'fmg-core';
 import { TransactionAction as TA } from './protocols/transaction-submission/actions';
 export * from './protocols/transaction-submission/actions';
@@ -51,10 +51,10 @@ export type MetamaskLoadError = ReturnType<typeof metamaskLoadError>;
 
 export type Message = 'FundingDeclined';
 export const MESSAGE_RECEIVED = 'WALLET.COMMON.MESSAGE_RECEIVED';
-export const messageReceived = (processId: string, procedure: WalletProcedure, data: Message) => ({
+export const messageReceived = (processId: string, protocol: WalletProtocol, data: Message) => ({
   type: MESSAGE_RECEIVED as typeof MESSAGE_RECEIVED,
   processId,
-  procedure,
+  protocol,
   data,
 });
 export type MessageReceived = ReturnType<typeof messageReceived>;
@@ -62,13 +62,13 @@ export type MessageReceived = ReturnType<typeof messageReceived>;
 export const COMMITMENT_RECEIVED = 'WALLET.COMMON.COMMITMENT_RECEIVED';
 export const commitmentReceived = (
   processId: string,
-  procedure: WalletProcedure,
+  protocol: WalletProtocol,
   commitment: Commitment,
   signature: string,
 ) => ({
   type: COMMITMENT_RECEIVED as typeof COMMITMENT_RECEIVED,
   processId,
-  procedure,
+  protocol,
   commitment,
   signature,
 });
@@ -147,7 +147,7 @@ export type CommonAction =
   | CommitmentReceived
   | AdjudicatorEventAction;
 
-export type ProcedureAction = CommonAction;
+export type protocolAction = CommonAction;
 
 export function isTransactionAction(action: WalletAction): action is TransactionAction {
   // TODO: This is a weak check. We need to refactor these actions once we clean up the channel reducer and funding
@@ -158,8 +158,8 @@ export function isCommonAction(action: WalletAction): action is CommonAction {
   return action.type.match('WALLET.COMMON') ? true : false;
 }
 
-export function isProcedureAction(action: WalletAction): action is ProcedureAction {
-  return 'procedure' in action;
+export function isprotocolAction(action: WalletAction): action is protocolAction {
+  return 'protocol' in action;
 }
 
 export { internal, channel, funding, indirectFunding };

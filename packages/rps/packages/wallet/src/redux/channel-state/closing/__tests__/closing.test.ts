@@ -15,7 +15,7 @@ import * as ReducerUtil from '../../../../utils/reducer-utils';
 import * as TransactionGenerator from '../../../../utils/transaction-generator';
 import { Commitment } from 'fmg-core/lib/commitment';
 import { bigNumberify } from 'ethers/utils';
-import { WalletProcedure } from '../../../types';
+import { WalletProtocol } from '../../../types';
 
 const {
   asAddress,
@@ -111,7 +111,7 @@ describe('start in WaitForOpponentConclude', () => {
 
     const action = actions.commitmentReceived(
       channelId,
-      WalletProcedure.DirectFunding,
+      WalletProtocol.DirectFunding,
       ('commitment' as unknown) as Commitment,
       '0x0',
     );
@@ -155,7 +155,7 @@ describe('start in WaitForCloseInitiation', () => {
     userAddress: '0x0',
   });
   describe('action taken: transaction sent to metamask', () => {
-    const action = actions.transactionSentToMetamask(channelId, WalletProcedure.Closing);
+    const action = actions.transactionSentToMetamask(channelId, WalletProtocol.Closing);
     const updatedState = closingReducer(state, action);
     itTransitionsToChannelStateType(states.WAIT_FOR_CLOSE_SUBMISSION, updatedState);
   });
@@ -170,12 +170,12 @@ describe('start in WaitForCloseSubmission', () => {
     userAddress: '0x0',
   });
   describe('action taken: transaction submitted', () => {
-    const action = actions.transactionSubmitted(channelId, WalletProcedure.Closing, '0x0');
+    const action = actions.transactionSubmitted(channelId, WalletProtocol.Closing, '0x0');
     const updatedState = closingReducer(state, action);
     itTransitionsToChannelStateType(states.WAIT_FOR_CLOSE_CONFIRMED, updatedState);
   });
   describe('action taken: transaction submitted', () => {
-    const action = actions.transactionSubmissionFailed(channelId, WalletProcedure.Closing, {
+    const action = actions.transactionSubmissionFailed(channelId, WalletProtocol.Closing, {
       code: 0,
     });
     const updatedState = closingReducer(state, action);
@@ -200,7 +200,7 @@ describe('start in closeTransactionFailed', () => {
     const signVerMock = jest.fn();
     signVerMock.mockReturnValue('0x0');
     Object.defineProperty(SigningUtil, 'signVerificationData', { value: signVerMock });
-    const action = actions.retryTransaction(channelId, WalletProcedure.Responding);
+    const action = actions.retryTransaction(channelId, WalletProtocol.Responding);
     const updatedState = closingReducer(state, action);
     itTransitionsToChannelStateType(states.WAIT_FOR_CLOSE_SUBMISSION, updatedState);
     expect(createConcludeTxMock.mock.calls.length).toBe(1);
@@ -215,7 +215,7 @@ describe('start in WaitForCloseConfirmed', () => {
     turnNum: concludeCommitment2.turnNum,
   });
   describe('action taken: transaction confirmed', () => {
-    const action = actions.transactionConfirmed(channelId, WalletProcedure.Closing);
+    const action = actions.transactionConfirmed(channelId, WalletProtocol.Closing);
     const updatedState = closingReducer(state, action);
     itTransitionsToChannelStateType(states.ACKNOWLEDGE_CLOSE_SUCCESS, updatedState);
   });

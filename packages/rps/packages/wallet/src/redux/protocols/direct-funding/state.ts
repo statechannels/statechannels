@@ -2,7 +2,7 @@ import * as depositing from './depositing/state';
 import { DirectFundingRequested } from '../../internal/actions';
 import { bigNumberify } from 'ethers/utils';
 import { createDepositTransaction } from '../../../utils/transaction-generator';
-import { WalletProcedure } from '../../types';
+import { WalletProtocol } from '../../types';
 export { depositing };
 // ChannelFundingStatus
 export const NOT_SAFE_TO_DEPOSIT = 'NOT_SAFE_TO_DEPOSIT';
@@ -127,7 +127,7 @@ export function initialDirectFundingState(action: DirectFundingRequested) {
     ? {
         transactionRequest: createDepositTransaction(action.channelId, action.requiredDeposit),
         channelId,
-        procedure: WalletProcedure.DirectFunding,
+        protocol: WalletProtocol.DirectFunding,
       }
     : undefined;
 

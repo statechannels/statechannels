@@ -1,4 +1,4 @@
-export const enum WalletProcedure {
+export const enum WalletProtocol {
   DirectFunding = 'DirectFunding',
   IndirectFunding = 'IndirectFunding',
   Challenging = 'Challenging',

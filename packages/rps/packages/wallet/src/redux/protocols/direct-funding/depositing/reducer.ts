@@ -4,7 +4,7 @@ import { createDepositTransaction } from '../../../../utils/transaction-generato
 import * as actions from '../../../actions';
 import * as states from './state';
 import * as fundingStates from '../state';
-import { WalletProcedure } from '../../../types';
+import { WalletProtocol } from '../../../types';
 import { ProtocolReducer, ProtocolStateWithSharedData, SharedData } from '../../../protocols';
 import { accumulateSideEffects } from '../../../outbox';
 
@@ -93,7 +93,7 @@ const depositTransactionFailedReducer: DFReducer = (
             state.requestedYourContribution,
           ),
           channelId: action.channelId,
-          procedure: WalletProcedure.DirectFunding,
+          protocol: WalletProtocol.DirectFunding,
         },
       };
       return {

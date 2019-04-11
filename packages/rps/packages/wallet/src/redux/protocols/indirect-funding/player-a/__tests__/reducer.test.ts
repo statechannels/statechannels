@@ -5,7 +5,7 @@ import * as channelStates from '../../../../channel-state/state';
 import { PlayerIndex } from 'magmo-wallet-client/lib/wallet-instructions';
 import { itSendsThisMessage, itTransitionsToChannelStateType } from '../../../../__tests__/helpers';
 import { MESSAGE_RELAY_REQUESTED } from 'magmo-wallet-client';
-import { WalletProcedure } from '../../../../types';
+import { WalletProtocol } from '../../../../types';
 import * as SigningUtil from '../../../../../utils/signing-utils';
 import {} from '../../../../__tests__/test-scenarios';
 import * as testScenarios from '../../../../__tests__/test-scenarios';
@@ -126,7 +126,7 @@ describe(startingIn(states.WAIT_FOR_PRE_FUND_SETUP_1), () => {
   describe(whenActionArrives(actions.COMMITMENT_RECEIVED), () => {
     const action = actions.commitmentReceived(
       ledgerId,
-      WalletProcedure.IndirectFunding,
+      WalletProtocol.IndirectFunding,
       testScenarios.ledgerCommitments.preFundCommitment1,
       '0x0',
     );
@@ -182,7 +182,7 @@ describe(startingIn(states.WAIT_FOR_POST_FUND_SETUP_1), () => {
   describe(whenActionArrives(actions.COMMITMENT_RECEIVED), () => {
     const action = actions.commitmentReceived(
       ledgerId,
-      WalletProcedure.IndirectFunding,
+      WalletProtocol.IndirectFunding,
       testScenarios.ledgerCommitments.postFundCommitment1,
       '0x0',
     );
@@ -212,7 +212,7 @@ describe(startingIn(states.WAIT_FOR_LEDGER_UPDATE_1), () => {
   describe(whenActionArrives(actions.COMMITMENT_RECEIVED), () => {
     const action = actions.commitmentReceived(
       ledgerId,
-      WalletProcedure.IndirectFunding,
+      WalletProtocol.IndirectFunding,
       testScenarios.ledgerCommitments.ledgerUpdate1,
       '0x0',
     );
