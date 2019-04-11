@@ -27,7 +27,7 @@ import { depositContract } from './test-utils';
 import { Channel, Commitment, CommitmentType } from 'fmg-core';
 import { getAdjudicatorContractAddress } from '../utils/contract-utils';
 import { channelID } from 'fmg-core/lib/channel';
-import { WalletProcedure } from '../redux/types';
+import { WalletProtocol } from '../redux/types';
 
 jest.setTimeout(90000);
 
@@ -48,11 +48,11 @@ describe('transactions', () => {
   }
 
   async function testTransactionSender(transactionToSend) {
-    const procedure = WalletProcedure.DirectFunding;
+    const protocol = WalletProtocol.DirectFunding;
     const channelId = 'channelId';
-    const saga = transactionSender(transactionToSend, channelId, procedure);
+    const saga = transactionSender(transactionToSend, channelId, protocol);
     saga.next();
-    expect(saga.next(provider).value).toEqual(put(transactionSentToMetamask(channelId, procedure)));
+    expect(saga.next(provider).value).toEqual(put(transactionSentToMetamask(channelId, protocol)));
     saga.next();
     const signer = provider.getSigner();
     const contractAddress = await getAdjudicatorContractAddress(provider);
@@ -61,15 +61,15 @@ describe('transactions', () => {
 
     saga.next();
     expect(saga.next(transactionReceipt).value).toEqual(
-      put(transactionSubmitted(channelId, procedure, transactionReceipt.hash || '')),
+      put(transactionSubmitted(channelId, protocol, transactionReceipt.hash || '')),
     );
     const confirmedTransaction = await transactionReceipt.wait();
     saga.next();
     expect(saga.next(confirmedTransaction).value).toEqual(
-      put(transactionConfirmed(channelId, procedure, confirmedTransaction.contractAddress)),
+      put(transactionConfirmed(channelId, protocol, confirmedTransaction.contractAddress)),
     );
 
-    expect(saga.next().value).toEqual(put(transactionFinalized(channelId, procedure)));
+    expect(saga.next().value).toEqual(put(transactionFinalized(channelId, protocol)));
     expect(saga.next().done).toBe(true);
   }
 

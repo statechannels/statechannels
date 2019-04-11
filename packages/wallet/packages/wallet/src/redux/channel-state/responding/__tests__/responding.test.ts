@@ -8,7 +8,7 @@ import * as scenarios from '../../../__tests__/test-scenarios';
 import * as TransactionGenerator from '../../../../utils/transaction-generator';
 import * as SigningUtil from '../../../../utils/signing-utils';
 import * as FmgCore from 'fmg-core';
-import { WalletProcedure } from '../../../types';
+import { WalletProtocol } from '../../../types';
 
 const {
   asPrivateKey,
@@ -104,7 +104,7 @@ describe('when in TAKE_MOVE_IN_APP', () => {
 describe('when in INITIATE_RESPONSE', () => {
   const state = states.initiateResponse(defaults);
   describe('when the challenge response is initiated', () => {
-    const action = actions.transactionSentToMetamask(channelId, WalletProcedure.Responding);
+    const action = actions.transactionSentToMetamask(channelId, WalletProtocol.Responding);
     const updatedState = respondingReducer(state, action);
     itTransitionsToChannelStateType(states.WAIT_FOR_RESPONSE_SUBMISSION, updatedState);
   });
@@ -118,12 +118,12 @@ describe('when in INITIATE_RESPONSE', () => {
 describe('when in WAIT_FOR_RESPONSE_SUBMISSION', () => {
   const state = states.waitForResponseSubmission(defaults);
   describe('when the challenge response is submitted', () => {
-    const action = actions.transactionSubmitted(channelId, WalletProcedure.Responding, '0x0');
+    const action = actions.transactionSubmitted(channelId, WalletProtocol.Responding, '0x0');
     const updatedState = respondingReducer(state, action);
     itTransitionsToChannelStateType(states.WAIT_FOR_RESPONSE_CONFIRMATION, updatedState);
   });
   describe('when an error occurs when submitting a challenge response', () => {
-    const action = actions.transactionSubmissionFailed(channelId, WalletProcedure.Responding, {
+    const action = actions.transactionSubmissionFailed(channelId, WalletProtocol.Responding, {
       code: 0,
     });
     const updatedState = respondingReducer(state, action);
@@ -139,7 +139,7 @@ describe('when in WAIT_FOR_RESPONSE_SUBMISSION', () => {
 describe('when in WAIT_FOR_RESPONSE_CONFIRMED', () => {
   const state = states.waitForResponseConfirmation(defaults);
   describe('when the challenge response is confirmed', () => {
-    const action = actions.transactionConfirmed(channelId, WalletProcedure.Responding);
+    const action = actions.transactionConfirmed(channelId, WalletProtocol.Responding);
     const updatedState = respondingReducer(state, action);
     itTransitionsToChannelStateType(states.ACKNOWLEDGE_CHALLENGE_COMPLETE, updatedState);
   });
@@ -162,7 +162,7 @@ describe('when in ACKNOWLEDGE_CHALLENGE_COMPLETE', () => {
 describe('when in RESPONSE_TRANSACTION_FAILED', () => {
   const state = states.responseTransactionFailed(defaults);
   describe('when the transaction is retried', () => {
-    const action = actions.retryTransaction(channelId, WalletProcedure.Responding);
+    const action = actions.retryTransaction(channelId, WalletProtocol.Responding);
     const createRespondTxMock = jest.fn();
     Object.defineProperty(TransactionGenerator, 'createRespondWithMoveTransaction', {
       value: createRespondTxMock,

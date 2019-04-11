@@ -6,7 +6,7 @@ import { createTransferAndWithdrawTransaction } from '../../../utils/transaction
 import { signVerificationData } from '../../../utils/signing-utils';
 import { closeSuccess, hideWallet } from 'magmo-wallet-client/lib/wallet-events';
 import { StateWithSideEffects } from '../../utils';
-import { WalletProcedure } from '../../types';
+import { WalletProtocol } from '../../types';
 
 export const withdrawingReducer = (
   state: states.WithdrawingState,
@@ -68,7 +68,7 @@ const withdrawTransactionFailedReducer = (
           transactionOutbox: {
             transactionRequest,
             channelId: state.channelId,
-            procedure: WalletProcedure.Withdrawing,
+            protocol: WalletProtocol.Withdrawing,
           },
         },
       };
@@ -108,7 +108,7 @@ const approveWithdrawalReducer = (
           transactionOutbox: {
             transactionRequest,
             channelId: state.channelId,
-            procedure: WalletProcedure.Withdrawing,
+            protocol: WalletProtocol.Withdrawing,
           },
         },
       };

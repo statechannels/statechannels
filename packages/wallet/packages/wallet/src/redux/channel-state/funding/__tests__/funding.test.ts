@@ -12,7 +12,7 @@ import {
 } from '../../../__tests__/helpers';
 import * as outgoing from 'magmo-wallet-client/lib/wallet-events';
 import * as SigningUtil from '../../../../utils/signing-utils';
-import { WalletProcedure } from '../../../types';
+import { WalletProtocol } from '../../../types';
 const {
   asAddress,
   asPrivateKey,
@@ -96,7 +96,7 @@ describe('start in WaitForFundingAndPostFundSetup', () => {
     Object.defineProperty(SigningUtil, 'validCommitmentSignature', { value: validateMock });
     const action = actions.commitmentReceived(
       channelId,
-      WalletProcedure.DirectFunding,
+      WalletProtocol.DirectFunding,
       postFundCommitment1,
       MOCK_SIGNATURE,
     );
@@ -114,7 +114,7 @@ describe('start in WaitForFundingAndPostFundSetup', () => {
 
     const action = actions.commitmentReceived(
       channelId,
-      WalletProcedure.DirectFunding,
+      WalletProtocol.DirectFunding,
       postFundCommitment1,
       MOCK_SIGNATURE,
     );
@@ -151,7 +151,7 @@ describe('start in WaitForFundingConfirmation', () => {
       state.participants[1 - state.ourIndex],
       {
         processId: state.channelId,
-        procedure: WalletProcedure.DirectFunding,
+        protocol: WalletProtocol.DirectFunding,
         data: {
           commitment: postFundCommitment2,
           signature: MOCK_SIGNATURE,
@@ -175,7 +175,7 @@ describe('start in AWaitForPostFundSetup', () => {
     const state = states.aWaitForPostFundSetup({ ...testDefaults });
     const action = actions.commitmentReceived(
       channelId,
-      WalletProcedure.DirectFunding,
+      WalletProtocol.DirectFunding,
       postFundCommitment2,
       MOCK_SIGNATURE,
     );
@@ -196,7 +196,7 @@ describe('start in BWaitForPostFundSetup', () => {
     Object.defineProperty(SigningUtil, 'validSignature', { value: validateMock });
     const action = actions.commitmentReceived(
       channelId,
-      WalletProcedure.DirectFunding,
+      WalletProtocol.DirectFunding,
       postFundCommitment1,
       MOCK_SIGNATURE,
     );

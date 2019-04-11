@@ -2,7 +2,7 @@ import { Channel, CommitmentType, Commitment } from 'fmg-core';
 import { channelID } from 'fmg-core/lib/channel';
 import { bigNumberify } from 'ethers/utils';
 import { waitForPreFundSetup } from '../channel-state/state';
-import { WalletProcedure } from '../types';
+import { WalletProtocol } from '../types';
 import * as states from '../state';
 import { bytesFromAppAttributes } from 'fmg-nitro-adjudicator';
 import { addHex } from '../../utils/hex-utils';
@@ -37,7 +37,7 @@ export const initializedState: states.Initialized = {
 export const mockTransactionOutboxItem = {
   transactionRequest: { to: '0xabc' },
   channelId: 'channelId',
-  procedure: WalletProcedure.DirectFunding,
+  protocol: WalletProtocol.DirectFunding,
 };
 
 export const twoThree = [bigNumberify(2).toHexString(), bigNumberify(3).toHexString()];

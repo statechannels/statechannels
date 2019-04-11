@@ -11,7 +11,7 @@ import {
   composePostFundCommitment,
   composeLedgerUpdateCommitment,
 } from '../../../utils/commitment-utils';
-import { WalletProcedure } from '../../types';
+import { WalletProtocol } from '../../types';
 import { messageRelayRequested, WalletEvent } from 'magmo-wallet-client';
 import { addHex } from '../../../utils/hex-utils';
 import { bigNumberify } from 'ethers/utils';
@@ -220,7 +220,7 @@ export const createCommitmentMessageRelay = (
 ) => {
   const payload = {
     processId,
-    procedure: WalletProcedure.IndirectFunding,
+    protocol: WalletProtocol.IndirectFunding,
     data: { commitment, signature },
   };
   return messageRelayRequested(to, payload);

@@ -11,7 +11,7 @@ import {
 import { handleSignatureAndValidationMessages } from '../../../utils/state-utils';
 import { bigNumberify } from 'ethers/utils';
 import { StateWithSideEffects } from '../../utils';
-import { WalletProcedure } from '../../types';
+import { WalletProtocol } from '../../types';
 
 export const challengingReducer = (
   state: states.ChallengingState,
@@ -70,7 +70,7 @@ const challengeTransactionFailedReducer = (
           transactionOutbox: {
             transactionRequest,
             channelId: state.channelId,
-            procedure: WalletProcedure.Challenging,
+            protocol: WalletProtocol.Challenging,
           },
         },
       };
@@ -99,7 +99,7 @@ const approveChallengeReducer = (
           transactionOutbox: {
             transactionRequest,
             channelId: state.channelId,
-            procedure: WalletProcedure.Challenging,
+            protocol: WalletProtocol.Challenging,
           },
         },
       };

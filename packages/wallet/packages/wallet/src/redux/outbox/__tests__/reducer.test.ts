@@ -4,19 +4,19 @@ import * as actions from '../../actions';
 import * as outgoing from 'magmo-wallet-client/lib/wallet-events';
 import * as scenarios from '../../__tests__/test-scenarios';
 import { OutboxState } from '../state';
-import { WalletProcedure } from '../../types';
+import { WalletProtocol } from '../../types';
 
 const { channelId, mockTransactionOutboxItem } = scenarios;
 
 describe('when a side effect occured', () => {
   const sendFundingDeclinedActionA = outgoing.messageRelayRequested('0xa00', {
     processId: '0x0',
-    procedure: WalletProcedure.DirectFunding,
+    protocol: WalletProtocol.DirectFunding,
     data: 'FundingDeclined',
   });
   const sendFundingDeclinedActionB = outgoing.messageRelayRequested('0xb00', {
     processId: '0x0',
-    procedure: WalletProcedure.DirectFunding,
+    protocol: WalletProtocol.DirectFunding,
     data: 'FundingDeclined',
   });
   const displayOutbox = [outgoing.hideWallet(), outgoing.showWallet()];
@@ -41,7 +41,7 @@ describe('when a side effect occured', () => {
   });
 
   it('clears the first element of the transactionOutbox', () => {
-    const action = actions.transactionSentToMetamask(channelId, WalletProcedure.DirectFunding);
+    const action = actions.transactionSentToMetamask(channelId, WalletProtocol.DirectFunding);
     const updatedState = clearOutbox(state, action);
     expect(updatedState.transactionOutbox).toMatchObject(transactionOutbox.slice(1));
   });

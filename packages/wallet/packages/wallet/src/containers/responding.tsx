@@ -11,7 +11,7 @@ import AcknowledgeTimeout from '../components/responding/acknowledge-timeout';
 import { unreachable } from '../utils/reducer-utils';
 import ChooseResponse, { ChallengeOptions } from '../components/responding/choose-response';
 import TransactionFailed from '../components/transaction-failed';
-import { WalletProcedure } from '../redux/types';
+import { WalletProtocol } from '../redux/types';
 
 interface Props {
   state: states.RespondingState;
@@ -19,7 +19,7 @@ interface Props {
   challengeResponseAcknowledged: () => void;
   selectRespondWithMove: () => void;
   selectRespondWithExistingMove: () => void;
-  retryTransaction: (channelId: string, procedure: WalletProcedure) => void;
+  retryTransaction: (channelId: string, protocol: WalletProtocol) => void;
   timeoutAcknowledged: () => void;
 }
 
@@ -78,7 +78,7 @@ class RespondingContainer extends PureComponent<Props> {
         return (
           <TransactionFailed
             name="challenge response"
-            retryAction={() => retryTransaction(state.channelId, WalletProcedure.Responding)}
+            retryAction={() => retryTransaction(state.channelId, WalletProtocol.Responding)}
           />
         );
       default:

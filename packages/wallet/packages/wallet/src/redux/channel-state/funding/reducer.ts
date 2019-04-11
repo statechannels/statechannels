@@ -10,7 +10,7 @@ import { signCommitment, validCommitmentSignature } from '../../../utils/signing
 import { Channel, Commitment, CommitmentType } from 'fmg-core';
 import { handleSignatureAndValidationMessages } from '../../../utils/state-utils';
 import { StateWithSideEffects } from '../../utils';
-import { WalletProcedure } from '../../types';
+import { WalletProtocol } from '../../types';
 
 export const fundingReducer = (
   state: states.FundingState,
@@ -261,7 +261,7 @@ const composePostFundCommitment = (
 
   const sendCommitmentAction = messageRelayRequested(state.participants[1 - state.ourIndex], {
     processId: state.channelId,
-    procedure: WalletProcedure.DirectFunding,
+    protocol: WalletProtocol.DirectFunding,
     data: {
       commitment: postFundSetupCommitment,
       signature: commitmentSignature,
