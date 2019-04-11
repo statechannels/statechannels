@@ -1,8 +1,8 @@
 import * as states from './state';
 
-import * as actions from '../../actions';
+import * as actions from '../../../actions';
 
-import { unreachable } from '../../../utils/reducer-utils';
+import { unreachable } from '../../../../utils/reducer-utils';
 import { channelID } from 'fmg-core/lib/channel';
 
 import {
@@ -14,7 +14,7 @@ import {
   confirmFundingForChannel,
   receiveLedgerCommitment,
 } from '../reducer-helpers';
-import { ProtocolStateWithSharedData, SharedData } from '../../protocols';
+import { ProtocolStateWithSharedData, SharedData } from '../../';
 
 export function playerBReducer(
   protocolState: states.PlayerBState,

@@ -1,8 +1,8 @@
 import * as indirectFundingState from './state';
-import * as actions from '../actions';
-import { unreachable } from '../../utils/reducer-utils';
-import { PlayerIndex } from '../types';
-import { ProtocolStateWithSharedData, ProtocolReducer, SharedData } from '../protocols';
+import * as actions from '../../actions';
+import { unreachable } from '../../../utils/reducer-utils';
+import { PlayerIndex } from '../../types';
+import { ProtocolStateWithSharedData, ProtocolReducer, SharedData } from '../';
 import { playerAReducer } from './player-a/reducer';
 import { playerBReducer } from './player-b/reducer';
 

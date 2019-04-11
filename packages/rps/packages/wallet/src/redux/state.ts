@@ -10,7 +10,7 @@ import {
   setChannel as setChannelInStore,
 } from './channel-state/state';
 import { Properties } from './utils';
-import * as indirectFunding from './indirect-funding/state';
+import * as indirectFunding from './protocols/indirect-funding/state';
 import { DirectFundingStore } from './direct-funding-store/state';
 import { accumulateSideEffects } from './outbox';
 import { WalletEvent } from 'magmo-wallet-client';

@@ -2,8 +2,8 @@ import React, { PureComponent } from 'react';
 import { connect } from 'react-redux';
 import ApproveFunding from '../../components/indirect-funding/approve-funding';
 import { FundingStep, fundingStepByState } from '../../components/indirect-funding/funding-step';
-import * as actions from '../../redux/indirect-funding/player-a/actions';
-import * as indirectFundingPlayerA from '../../redux/indirect-funding/player-a/state';
+import * as actions from '../../redux/protocols/indirect-funding/player-a/actions';
+import * as indirectFundingPlayerA from '../../redux/protocols/indirect-funding/player-a/state';
 import { unreachable } from '../../utils/reducer-utils';
 
 interface Props {
