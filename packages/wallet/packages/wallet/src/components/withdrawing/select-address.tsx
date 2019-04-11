@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { Button } from 'reactstrap';
-import SidebarLayout from '../sidebar-layout';
+import StatusBarLayout from '../status-bar-layout';
 
 interface Props {
   approveAction: (address: string) => void;
@@ -44,7 +44,7 @@ export default class SelectAddress extends React.PureComponent<Props, State> {
   render() {
     const { approveButtonTitle, title, description } = this.props;
     return (
-      <SidebarLayout>
+      <StatusBarLayout>
         <h2 className="bp-2">{title}</h2>
         <p>{description}</p>
         <p>The funds will be sent to your current metamask account:</p>
@@ -60,7 +60,7 @@ export default class SelectAddress extends React.PureComponent<Props, State> {
         <div className="pb-2">
           <Button onClick={this.handleSubmitAddress}>{approveButtonTitle}</Button>
         </div>
-      </SidebarLayout>
+      </StatusBarLayout>
     );
   }
   handleSubmitAddress() {

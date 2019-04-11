@@ -1,8 +1,9 @@
 import * as states from '../redux/state';
 import React, { PureComponent } from 'react';
-import SidebarLayout from '../components/sidebar-layout';
+import LandingPage from '../components/landing-page';
 import { connect } from 'react-redux';
-import ChannelContainer from './channel';
+import IndirectFundingContainer from './indirect-funding/indirect-funding';
+
 interface Props {
   state: states.Initialized;
 }
@@ -10,19 +11,11 @@ interface Props {
 class WalletInitializedContainer extends PureComponent<Props> {
   render() {
     const { state } = this.props;
-    if (state.channelState.activeAppChannelId) {
-      return (
-        <ChannelContainer
-          state={state.channelState.initializedChannels[state.channelState.activeAppChannelId]}
-        />
-      );
+    if (state.indirectFunding) {
+      return <IndirectFundingContainer state={state.indirectFunding} />;
     } else {
-      return (
-        <SidebarLayout>
-          <h1>Wallet initialized</h1>
-        </SidebarLayout>
-      );
-    }
+      return <LandingPage />;
+    } // Wallet is neither handling an active application channel process nor managing an indirect funding process.
   }
 }
 
