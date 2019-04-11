@@ -2,7 +2,6 @@ import { ChannelStatus } from '../channel-state/state';
 import { StateWithSideEffects } from '../utils';
 import { Commitment } from 'fmg-core';
 import { TransactionOutboxItem, OutboxState } from '../outbox/state';
-import { Initialized } from '../state';
 import { SharedData } from '../protocols';
 
 type SideEffectState =
@@ -46,7 +45,7 @@ export const itSendsThisDisplayEventType = (state: SideEffectState, eventType: s
   });
 };
 
-const expectSideEffect = <StateType>(
+const expectSideEffect = (
   outboxBranch: string,
   state: SideEffectState,
   expectation: (item) => any,
@@ -143,16 +142,5 @@ export function itChangesChannelFundingStatusTo<
 >(status: string, state: T) {
   it(`changes channelFundingStatus to ${status}`, () => {
     expect(state.protocolState.channelFundingStatus).toEqual(status);
-  });
-}
-
-// Procedure helpers
-export function itTransitionsProcedureToStateType(
-  procedureBranchName: string,
-  state: Initialized,
-  type: string,
-) {
-  it(`transitions the ${procedureBranchName} state to ${type}`, () => {
-    expect(state[procedureBranchName].type).toEqual(type);
   });
 }
