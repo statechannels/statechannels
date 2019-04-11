@@ -1,6 +1,5 @@
 import { OpenedState, OPENING, ChannelStatus } from './channel-state/state';
 import * as walletStates from './state';
-import * as indirectFundingStates from './indirect-funding/state';
 import { DirectFundingState } from './protocols/direct-funding/state';
 import { SharedData } from './protocols';
 
@@ -19,16 +18,6 @@ export const getChannelState = (state: SharedData, channelId: string): ChannelSt
   }
   return channelStatus;
 };
-
-// TODO: Ideally we should be able to pass in a expected state type and have the selector either return that type of state or throw an error
-export function getIndirectFundingState(
-  state: walletStates.Initialized,
-): indirectFundingStates.IndirectFundingState {
-  if (!state.indirectFunding) {
-    throw new Error('Indirect Funding state is not defined.');
-  }
-  return state.indirectFunding;
-}
 
 export const getDirectFundingState = (
   state: walletStates.Initialized,

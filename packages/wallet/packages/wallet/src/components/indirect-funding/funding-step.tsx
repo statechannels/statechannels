@@ -2,9 +2,9 @@ import { faCircle } from '@fortawesome/free-regular-svg-icons';
 import { faCheckCircle, faSpinner } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React from 'react';
-import * as indirectFundingPlayerA from '../../redux/indirect-funding/player-a/state';
-import * as indirectFundingPlayerB from '../../redux/indirect-funding/player-b/state';
-import * as indirectFunding from '../../redux/indirect-funding/state';
+import * as indirectFundingPlayerA from '../../redux/protocols/indirect-funding/player-a/state';
+import * as indirectFundingPlayerB from '../../redux/protocols/indirect-funding/player-b/state';
+import * as indirectFunding from '../../redux/protocols/indirect-funding/state';
 import { unreachable } from '../../utils/reducer-utils';
 import StatusBarLayout from '../status-bar-layout';
 

@@ -1,6 +1,6 @@
 import React, { PureComponent } from 'react';
 import { connect } from 'react-redux';
-import * as indirectFundingState from '../../redux/indirect-funding/state';
+import * as indirectFundingState from '../../redux/protocols/indirect-funding/state';
 import { PlayerIndex } from '../../redux/types';
 import { unreachable } from '../../utils/reducer-utils';
 import IndirectFundingAContainer from './indirect-funding-a';

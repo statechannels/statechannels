@@ -1,7 +1,7 @@
 import * as playerA from './player-a/actions';
 import * as playerB from './player-b/actions';
-import { CommonAction } from '../actions';
-import { PlayerIndex } from '../types';
+import { CommonAction } from '../../actions';
+import { PlayerIndex } from '../../types';
 
 export const FUNDING_REQUESTED = 'WALLET.INDIRECT_FUNDING.FUNDING_REQUESTED';
 export const fundingRequested = (channelId: string, playerIndex: PlayerIndex) => ({

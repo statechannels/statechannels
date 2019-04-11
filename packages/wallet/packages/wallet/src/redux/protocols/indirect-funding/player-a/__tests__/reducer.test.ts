@@ -1,17 +1,17 @@
 import * as states from '../state';
-import * as actions from '../../../actions';
+import * as actions from '../../../../actions';
 import { playerAReducer } from '../reducer';
-import * as channelStates from '../../../channel-state/state';
+import * as channelStates from '../../../../channel-state/state';
 import { PlayerIndex } from 'magmo-wallet-client/lib/wallet-instructions';
-import { itSendsThisMessage, itTransitionsToChannelStateType } from '../../../__tests__/helpers';
+import { itSendsThisMessage, itTransitionsToChannelStateType } from '../../../../__tests__/helpers';
 import { MESSAGE_RELAY_REQUESTED } from 'magmo-wallet-client';
-import { WalletProcedure } from '../../../types';
-import * as SigningUtil from '../../../../utils/signing-utils';
-import {} from '../../../__tests__/test-scenarios';
-import * as testScenarios from '../../../__tests__/test-scenarios';
-import { addHex } from '../../../../utils/hex-utils';
-import { ProtocolStateWithSharedData } from '../../../protocols';
-import { EMPTY_OUTBOX_STATE } from '../../../outbox/state';
+import { WalletProcedure } from '../../../../types';
+import * as SigningUtil from '../../../../../utils/signing-utils';
+import {} from '../../../../__tests__/test-scenarios';
+import * as testScenarios from '../../../../__tests__/test-scenarios';
+import { addHex } from '../../../../../utils/hex-utils';
+import { ProtocolStateWithSharedData } from '../../../../protocols';
+import { EMPTY_OUTBOX_STATE } from '../../../../outbox/state';
 
 const startingIn = stage => `start in ${stage}`;
 const whenActionArrives = action => `incoming action ${action}`;

@@ -1,8 +1,8 @@
 import * as states from '../state';
-import * as channelStates from '../../../channel-state/state';
-import * as actions from '../../../actions';
+import * as channelStates from '../../../../channel-state/state';
+import * as actions from '../../../../actions';
 
-import * as scenarios from '../../../__tests__/test-scenarios';
+import * as scenarios from '../../../../__tests__/test-scenarios';
 import { playerBReducer } from '../reducer';
 import {
   itSendsNoMessage,
@@ -10,13 +10,13 @@ import {
   itSendsThisMessage,
   expectThisCommitmentSent,
   itTransitionsToChannelStateType,
-} from '../../../__tests__/helpers';
-import { WalletProcedure } from '../../../types';
+} from '../../../../__tests__/helpers';
+import { WalletProcedure } from '../../../../types';
 import { PlayerIndex } from 'magmo-wallet-client/lib/wallet-instructions';
 
-import * as SigningUtil from '../../../../utils/signing-utils';
-import { ProtocolStateWithSharedData } from '../../../protocols';
-import { EMPTY_OUTBOX_STATE } from '../../../outbox/state';
+import * as SigningUtil from '../../../../../utils/signing-utils';
+import { ProtocolStateWithSharedData } from '../../../../protocols';
+import { EMPTY_OUTBOX_STATE } from '../../../../outbox/state';
 const validCommitmentSignature = jest.fn().mockReturnValue(true);
 Object.defineProperty(SigningUtil, 'validCommitmentSignature', {
   value: validCommitmentSignature,
