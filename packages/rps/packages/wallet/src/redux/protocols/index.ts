@@ -10,7 +10,8 @@ export interface SharedData {
 export type ProtocolState = IndirectFundingState;
 
 export type ProtocolReducer<T extends ProtocolState> = (
-  state: ProtocolStateWithSharedData<T>,
+  protocolState: T,
+  sharedData: SharedData,
   action,
 ) => ProtocolStateWithSharedData<T>;
 
