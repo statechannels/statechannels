@@ -8,18 +8,20 @@ import { unreachable } from '../../utils/reducer-utils';
 
 interface Props {
   indirectFundingBState: indirectFundingPlayerB.PlayerBState;
-  fundingApproved: (processId: string) => void;
-  fundingRejected: (processId: string) => void;
+  fundingApproved: (processId: string, consensusLibrary: string) => void;
+  fundingRejected: (processId: string, consensusLibrary: string) => void;
 }
 
 class IndirectFundingBContainer extends PureComponent<Props> {
   render() {
     // TODO: where is the processId  stored?
     const processId = '123';
+    // TODO: This should be mapped from state
+    const consensusLibrary = '0x0123';
     const { indirectFundingBState, fundingApproved } = this.props;
     const step = fundingStepByState(indirectFundingBState);
-    const processFundingApproved = () => fundingApproved(processId);
-    const processFundingRejected = () => fundingApproved(processId);
+    const processFundingApproved = () => fundingApproved(processId, consensusLibrary);
+    const processFundingRejected = () => fundingApproved(processId, consensusLibrary);
 
     switch (indirectFundingBState.type) {
       case indirectFundingPlayerB.WAIT_FOR_APPROVAL:
