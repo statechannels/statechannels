@@ -18,8 +18,9 @@ import { messageRelayRequested } from 'magmo-wallet-client';
 import { addHex } from '../../utils/hex-utils';
 import { bigNumberify } from 'ethers/utils';
 import { ourTurn } from '../../utils/reducer-utils';
-import { directFundingStateReducer } from '../direct-funding-store/direct-funding-state/reducer';
-import { FundingAction } from '../direct-funding-store/direct-funding-state/actions';
+import { directFundingStateReducer } from '../protocols/direct-funding/reducer';
+import { FundingAction } from '../protocols/direct-funding/actions';
+import { EMPTY_SHARED_DATA } from '../protocols';
 
 export const appChannelIsWaitingForFunding = (
   state: walletStates.Initialized,
@@ -209,9 +210,10 @@ export const updateDirectFundingStatus = (
   newState.directFundingStore = updatedDirectFundingStore.state;
   const updatedDirectFundingState = directFundingStateReducer(
     newState.directFundingStore[action.channelId],
+    EMPTY_SHARED_DATA,
     action,
   );
-  newState.directFundingStore[action.channelId] = updatedDirectFundingState.state;
+  newState.directFundingStore[action.channelId] = updatedDirectFundingState.protocolState;
   return newState;
 };
 

@@ -15,7 +15,7 @@ import * as selectors from '../../../selectors';
 import * as SigningUtil from '../../../../utils/signing-utils';
 import {} from '../../../__tests__/test-scenarios';
 import * as testScenarios from '../../../__tests__/test-scenarios';
-import * as fundingStates from '../../../direct-funding-store/direct-funding-state/state';
+import * as fundingStates from '../../../protocols/direct-funding/state';
 import { addHex } from '../../../../utils/hex-utils';
 
 const startingIn = stage => `start in ${stage}`;

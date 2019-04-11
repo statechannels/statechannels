@@ -1,6 +1,6 @@
 import { directFundingStoreReducer } from '../reducer';
 
-import * as states from '../direct-funding-state/state';
+import * as states from '../../protocols/direct-funding/state';
 import * as actions from '../../actions';
 import * as TransactionGenerator from '../../../utils/transaction-generator';
 
@@ -45,7 +45,7 @@ describe('incoming action: DIRECT_FUNDING_REQUESTED', () => {
   const updatedState = directFundingStoreReducer(state, action);
 
   itChangesChannelFundingStatusTo(states.SAFE_TO_DEPOSIT, {
-    state: updatedState.state[channelId],
+    protocolState: updatedState.state[channelId],
   });
   itSendsThisTransaction(updatedState, mockTransactionOutboxItem);
 });
@@ -63,7 +63,7 @@ describe('incoming action: DIRECT_FUNDING_REQUESTED', () => {
   const updatedState = directFundingStoreReducer(state, action);
 
   itChangesChannelFundingStatusTo(states.NOT_SAFE_TO_DEPOSIT, {
-    state: updatedState.state[channelId],
+    protocolState: updatedState.state[channelId],
   });
   itSendsNoTransaction(updatedState);
 });
@@ -86,7 +86,7 @@ describe('when a directFunding status already exists for the channel', () => {
     // If the channel weren't already set up in the funding state,
     // the deposit status would be WAIT_FOR_TRANSACTION
     itChangesDepositStatusTo(states.depositing.DEPOSIT_CONFIRMED, {
-      state: updatedState.state[channelId],
+      protocolState: updatedState.state[channelId],
     });
     itSendsNoTransaction(updatedState);
   });
