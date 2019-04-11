@@ -1,11 +1,8 @@
 import * as directFundingStore from './state';
-import * as states from './direct-funding-state/state';
+import * as states from '../protocols/direct-funding/state';
 import * as actions from '../actions';
 
 import { StateWithSideEffects } from 'src/redux/utils';
-import { bigNumberify } from 'ethers/utils';
-import { createDepositTransaction } from '../../utils/transaction-generator';
-import { WalletProcedure } from '../types';
 
 export const directFundingStoreReducer = (
   state: directFundingStore.DirectFundingStore,
@@ -17,50 +14,19 @@ export const directFundingStoreReducer = (
     return { state };
   }
 
-  const { safeToDepositLevel, totalFundingRequired, requiredDeposit, channelId, ourIndex } = action;
+  const { channelId } = action;
   if (state[channelId]) {
     // The wallet has requested to start the funding for a channel that already has
     // a funding state
     return { state };
   }
-
-  const alreadySafeToDeposit = bigNumberify(safeToDepositLevel).eq('0x');
-  const alreadyFunded = bigNumberify(totalFundingRequired).eq('0x');
-
-  const channelFundingStatus = alreadyFunded
-    ? states.CHANNEL_FUNDED
-    : alreadySafeToDeposit
-    ? states.SAFE_TO_DEPOSIT
-    : states.NOT_SAFE_TO_DEPOSIT;
-
-  const stateConstructor: any = alreadyFunded
-    ? states.channelFunded
-    : alreadySafeToDeposit
-    ? states.depositing.waitForTransactionSent
-    : states.notSafeToDeposit;
-
-  const transactionOutbox = alreadySafeToDeposit
-    ? {
-        transactionRequest: createDepositTransaction(action.channelId, action.requiredDeposit),
-        channelId,
-        procedure: WalletProcedure.DirectFunding,
-      }
-    : undefined;
+  const { state: directFunding, sideEffects } = states.initialDirectFundingState(action);
 
   return {
     state: {
       ...state,
-      [channelId]: stateConstructor({
-        ...state,
-        fundingType: states.DIRECT_FUNDING,
-        channelFundingStatus,
-        safeToDepositLevel,
-        channelId,
-        requestedTotalFunds: totalFundingRequired,
-        requestedYourContribution: requiredDeposit,
-        ourIndex,
-      }),
+      [channelId]: directFunding,
     },
-    sideEffects: { transactionOutbox },
+    sideEffects,
   };
 };

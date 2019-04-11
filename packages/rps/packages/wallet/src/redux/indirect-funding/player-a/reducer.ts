@@ -11,7 +11,7 @@ import { PlayerIndex } from '../../types';
 
 import { Channel } from 'fmg-core';
 import { channelID } from 'magmo-wallet-client/node_modules/fmg-core/lib/channel';
-import { CHANNEL_FUNDED } from '../../direct-funding-store/direct-funding-state/state';
+import { CHANNEL_FUNDED } from '../../protocols/direct-funding/state';
 import {
   appChannelIsWaitingForFunding,
   updateDirectFundingStatus,
@@ -30,7 +30,7 @@ import {
   composeLedgerUpdateCommitment,
 } from '../../../utils/commitment-utils';
 import { WalletEvent } from 'magmo-wallet-client';
-import { isfundingAction } from '../../direct-funding-store/direct-funding-state/actions';
+import { isfundingAction } from '../../protocols/direct-funding/actions';
 import { addHex } from '../../../utils/hex-utils';
 
 export function playerAReducer(
