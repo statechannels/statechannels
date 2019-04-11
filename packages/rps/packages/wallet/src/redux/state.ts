@@ -54,9 +54,19 @@ export interface Initialized extends Shared {
   networkId: number;
   adjudicator: string;
   consensusLibrary: string;
-
+  processStore: ProcessStore;
   // procedure branches are optional, and exist precisely when that procedure is running
   indirectFunding?: indirectFunding.IndirectFundingState;
+}
+
+// TODO: Once these are fleshed out they should be moved to their own file.
+export interface ProcessStore {
+  [processId: string]: ProcessState;
+}
+export interface ProcessState {
+  processId: string;
+  protocolState: any;
+  channelsToMonitor: string[];
 }
 
 export interface IndirectFundingOngoing extends Initialized {
@@ -94,7 +104,7 @@ export function waitForAdjudicator(params: Properties<WaitForAdjudicator>): Wait
 }
 
 export function initialized(params: Properties<Initialized>): Initialized {
-  const { uid, networkId, adjudicator, consensusLibrary } = params;
+  const { uid, networkId, adjudicator, consensusLibrary, processStore } = params;
   return {
     ...shared(params),
     type: WALLET_INITIALIZED,
@@ -102,6 +112,7 @@ export function initialized(params: Properties<Initialized>): Initialized {
     networkId,
     adjudicator,
     consensusLibrary,
+    processStore,
   };
 }
 
