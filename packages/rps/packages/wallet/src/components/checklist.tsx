@@ -58,6 +58,7 @@ export const message = (messageForStep: MessagesForStep, iconStep: number, curre
 interface Props {
   step: number;
   stepMessages: MessagesForStep[];
+  title: string;
 }
 
 export class Checklist extends React.PureComponent<Props> {
@@ -65,10 +66,11 @@ export class Checklist extends React.PureComponent<Props> {
     const currentStep = this.props.step;
     const stepMessages = this.props.stepMessages;
     const children = this.props.children;
+    const title = this.props.title;
 
     return (
       <StatusBarLayout>
-        <h2 className="bp-2">Opening ledger channel</h2>
+        <h2 className="bp-2">{title}</h2>
         <ul className="fa-ul">
           {this.props.stepMessages.map((step, stepIndex) => (
             <li key={stepIndex}>

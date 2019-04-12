@@ -3,7 +3,7 @@ import * as indirectFundingPlayerA from '../../redux/protocols/indirect-funding/
 import * as indirectFundingPlayerB from '../../redux/protocols/indirect-funding/player-b/state';
 import * as indirectFunding from '../../redux/protocols/indirect-funding/state';
 import { unreachable } from '../../utils/reducer-utils';
-import { MessagesForStep, messagesForStep, Checklist } from '../checklist';
+import { MessagesForStep, Checklist, messagesForStep } from '../checklist';
 
 interface Props {
   fundingState: indirectFunding.IndirectFundingState;
@@ -42,7 +42,7 @@ const fundingStepByState = (state: indirectFunding.IndirectFundingState): Step =
   }
 };
 
-const stepMessages: MessagesForStep[] = [
+const messagesForStepList: MessagesForStep[] = [
   messagesForStep(
     'Not ready for prefund setup',
     'Waiting for opponent prefund setup',
@@ -75,6 +75,12 @@ export class FundingStep extends React.PureComponent<Props> {
     const fundingState = this.props.fundingState;
     const currentStep = fundingStepByState(fundingState);
 
-    return <Checklist step={currentStep} stepMessages={stepMessages} />;
+    return (
+      <Checklist
+        step={currentStep}
+        stepMessages={messagesForStepList}
+        title="Funding from a new ledger channel"
+      />
+    );
   }
 }
