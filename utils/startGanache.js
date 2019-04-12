@@ -5,7 +5,7 @@ module.exports = {
         require("dotenv").config();
         let verbose = argv.v;
         let deterministic = argv.d;
-        let network_id = argv.i || process.env.DEV_GANACHE_NETWORK_ID;
+        let network_id = argv.i || process.env.DEV_GANACHE_NETWORK_ID || process.env.TARGET_NETWORK_ID;
         let blockTime = argv.b || process.env.GANACHE_BLOCK_TIME;
 
         process.env.DEV_GANACHE_PORT = process.env.DEV_GANACHE_PORT || 8545;
