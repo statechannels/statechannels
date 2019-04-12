@@ -21,5 +21,19 @@ module.exports = {
         const ethers = require('ethers');
         const ganacheProvider = new ethers.providers.JsonRpcProvider(`http://${process.env.DEV_GANACHE_HOST}:${process.env.DEV_GANACHE_PORT}`);
         return (await ganacheProvider.getNetwork()).chainId;
+    },
+    getNetworkName: function (networkId) {
+        switch (networkId) {
+            case 1:
+                return 'live';
+            case 3:
+                return 'ropsten';
+            case 4:
+                return 'rinkeby';
+            case 42:
+                return 'kovan';
+            default:
+                return 'development';
+        }
     }
 }
