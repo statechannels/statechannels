@@ -1,4 +1,5 @@
-import { faCheckCircle, faCircle, faSpinner } from '@fortawesome/free-solid-svg-icons';
+import { faCircle } from '@fortawesome/free-regular-svg-icons';
+import { faCheckCircle, faSpinner } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React from 'react';
 import StatusBarLayout from './status-bar-layout';
