@@ -1,7 +1,7 @@
 import React, { PureComponent } from 'react';
 import { connect } from 'react-redux';
 import ApproveFunding from '../../components/indirect-funding/approve-funding';
-import { FundingStep, fundingStepByState } from '../../components/indirect-funding/funding-step';
+import { FundingStep } from '../../components/indirect-funding/funding-step';
 import * as actions from '../../redux/protocols/indirect-funding/player-a/actions';
 import * as indirectFundingPlayerB from '../../redux/protocols/indirect-funding/player-b/state';
 import { unreachable } from '../../utils/reducer-utils';
@@ -19,7 +19,6 @@ class IndirectFundingBContainer extends PureComponent<Props> {
     // TODO: This should be mapped from state
     const consensusLibrary = '0x0123';
     const { indirectFundingBState, fundingApproved } = this.props;
-    const step = fundingStepByState(indirectFundingBState);
     const processFundingApproved = () => fundingApproved(processId, consensusLibrary);
     const processFundingRejected = () => fundingApproved(processId, consensusLibrary);
 
@@ -37,7 +36,7 @@ class IndirectFundingBContainer extends PureComponent<Props> {
       case indirectFundingPlayerB.WAIT_FOR_POST_FUND_SETUP_0:
       case indirectFundingPlayerB.WAIT_FOR_LEDGER_UPDATE_0:
       case indirectFundingPlayerB.WAIT_FOR_CONSENSUS:
-        return <FundingStep step={step} />;
+        return <FundingStep fundingState={indirectFundingBState} />;
       case indirectFundingPlayerB.WAIT_FOR_DIRECT_FUNDING:
         return <div />;
       // TODO: pass the relevant state to DirectFundingContainer
