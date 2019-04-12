@@ -3,11 +3,18 @@ import * as indirectFundingPlayerA from '../../redux/protocols/indirect-funding/
 import * as indirectFundingPlayerB from '../../redux/protocols/indirect-funding/player-b/state';
 import * as indirectFunding from '../../redux/protocols/indirect-funding/state';
 import { unreachable } from '../../utils/reducer-utils';
-import StatusBarLayout from '../status-bar-layout';
-import { icon, message, MessagesForStep, messagesForStep } from '../list-util';
+import { MessagesForStep, messagesForStep, Checklist } from '../checklist';
 
 interface Props {
   fundingState: indirectFunding.IndirectFundingState;
+}
+
+const enum Step {
+  WAIT_FOR_PRE_FUND_SETUP,
+  WAIT_FOR_DIRECT_FUNDING,
+  WAIT_FOR_POST_FUND_SETUP,
+  WAIT_FOR_LEDGER_UPDATE,
+  WAIT_FOR_CONSENSUS,
 }
 
 const fundingStepByState = (state: indirectFunding.IndirectFundingState): Step => {
@@ -34,14 +41,6 @@ const fundingStepByState = (state: indirectFunding.IndirectFundingState): Step =
       return unreachable(state);
   }
 };
-
-export enum Step {
-  WAIT_FOR_PRE_FUND_SETUP,
-  WAIT_FOR_DIRECT_FUNDING,
-  WAIT_FOR_POST_FUND_SETUP,
-  WAIT_FOR_LEDGER_UPDATE,
-  WAIT_FOR_CONSENSUS,
-}
 
 const stepMessages: MessagesForStep[] = [
   messagesForStep(
@@ -74,22 +73,8 @@ const stepMessages: MessagesForStep[] = [
 export class FundingStep extends React.PureComponent<Props> {
   render() {
     const fundingState = this.props.fundingState;
-    const children = this.props.children;
     const currentStep = fundingStepByState(fundingState);
 
-    return (
-      <StatusBarLayout>
-        <h2 className="bp-2">Opening ledger channel</h2>
-        <ul className="fa-ul">
-          {stepMessages.map((stepMessage, stepIndex) => (
-            <li key={stepIndex}>
-              {icon(stepIndex, currentStep)}
-              {message(stepMessages, stepIndex, currentStep)}
-            </li>
-          ))}
-        </ul>
-        <div className="pb-2">{children}</div>
-      </StatusBarLayout>
-    );
+    return <Checklist step={currentStep} stepMessages={stepMessages} />;
   }
 }

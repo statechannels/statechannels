@@ -1,6 +1,7 @@
 import { faCheckCircle, faCircle, faSpinner } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React from 'react';
+import StatusBarLayout from './status-bar-layout';
 
 const completeIcon = (
   <span className="fa-li">
@@ -42,8 +43,7 @@ export const messagesForStep = (
   return { preStep, step, postStep };
 };
 
-export const message = (messages: MessagesForStep[], iconStep: number, currentStep: number) => {
-  const messageForStep = messages[currentStep];
+export const message = (messageForStep: MessagesForStep, iconStep: number, currentStep: number) => {
   if (currentStep < iconStep) {
     return messageForStep.preStep;
   }
@@ -53,3 +53,31 @@ export const message = (messages: MessagesForStep[], iconStep: number, currentSt
     return messageForStep.postStep;
   }
 };
+
+interface Props {
+  step: number;
+  stepMessages: MessagesForStep[];
+}
+
+export class Checklist extends React.PureComponent<Props> {
+  render() {
+    const currentStep = this.props.step;
+    const stepMessages = this.props.stepMessages;
+    const children = this.props.children;
+
+    return (
+      <StatusBarLayout>
+        <h2 className="bp-2">Opening ledger channel</h2>
+        <ul className="fa-ul">
+          {this.props.stepMessages.map((step, stepIndex) => (
+            <li key={stepIndex}>
+              {icon(stepIndex, currentStep)}
+              {message(stepMessages[stepIndex], stepIndex, currentStep)}
+            </li>
+          ))}
+        </ul>
+        <div className="pb-2">{children}</div>
+      </StatusBarLayout>
+    );
+  }
+}
