@@ -5,11 +5,10 @@ import * as actions from '../../../../actions';
 import * as scenarios from '../../../../__tests__/test-scenarios';
 import { playerBReducer } from '../reducer';
 import {
-  itSendsNoMessage,
   itSendsNoTransaction,
-  itSendsThisMessage,
   expectThisCommitmentSent,
   itTransitionsToChannelStateType,
+  itSendsNoMessage,
 } from '../../../../__tests__/helpers';
 import { WalletProtocol } from '../../../../types';
 import { PlayerIndex } from 'magmo-wallet-client/lib/wallet-instructions';
@@ -17,6 +16,7 @@ import { PlayerIndex } from 'magmo-wallet-client/lib/wallet-instructions';
 import * as SigningUtil from '../../../../../utils/signing-utils';
 import { ProtocolStateWithSharedData } from '../../../../protocols';
 import { EMPTY_OUTBOX_STATE } from '../../../../outbox/state';
+import { addHex } from '../../../../../utils/hex-utils';
 const validCommitmentSignature = jest.fn().mockReturnValue(true);
 Object.defineProperty(SigningUtil, 'validCommitmentSignature', {
   value: validCommitmentSignature,
@@ -53,6 +53,8 @@ const {
   channelId,
   ledgerId,
   ledgerChannel,
+  ledgerDirectFundingStates,
+  twoThree,
 } = scenarios;
 
 const { preFundCommitment0, postFundCommitment0 } = ledgerCommitments;
@@ -140,30 +142,30 @@ describe(startingIn(states.WAIT_FOR_PRE_FUND_SETUP_0), () => {
     const updatedState = playerBReducer(state.protocolState, state.sharedData, action);
 
     itTransitionToStateType(updatedState, states.WAIT_FOR_DIRECT_FUNDING);
-    itSendsNoMessage(updatedState.sharedData);
+    expectThisCommitmentSent(updatedState.sharedData, ledgerCommitments.preFundCommitment1);
     itSendsNoTransaction(updatedState.sharedData);
   });
 });
 
 describe(startingIn(states.WAIT_FOR_DIRECT_FUNDING), () => {
-  describe.skip(whenActionArrives(actions.FUNDING_RECEIVED_EVENT), () => {
-    // Need to hook up the direct funding store first, which isn't yet in this branch
+  describe(whenActionArrives(actions.FUNDING_RECEIVED_EVENT), () => {
+    const total = twoThree.reduce(addHex);
     const state = startingState(
-      states.waitForDirectFunding({ channelId, ledgerId }),
+      states.waitForDirectFunding({
+        channelId,
+        ledgerId,
+        directFundingState: ledgerDirectFundingStates.playerB,
+      }),
       channelStates.waitForFundingAndPostFundSetup(appChannelStateDefaults),
+      channelStates.waitForFundingConfirmation(ledgerChannelStateDefaults),
     );
 
-    const action = actions.commitmentReceived(
-      channelId,
-      WalletProtocol.IndirectFunding,
-      preFundCommitment0,
-      'signature',
-    );
-    // TODO: This should fail, since we're not mocking the signature...
+    const action = actions.fundingReceivedEvent('processId', ledgerId, total, total);
+
     const updatedState = playerBReducer(state.protocolState, state.sharedData, action);
 
-    itTransitionToStateType(updatedState, states.WAIT_FOR_LEDGER_UPDATE_0);
-    itSendsThisMessage(updatedState.sharedData, { foo: 'foo' });
+    itTransitionToStateType(updatedState, states.WAIT_FOR_POST_FUND_SETUP_0);
+    itSendsNoMessage(updatedState.sharedData);
     itSendsNoTransaction(updatedState.sharedData);
   });
 });
@@ -258,7 +260,6 @@ describe(startingIn(states.WAIT_FOR_CONSENSUS), () => {
     const updatedState = playerBReducer(state.protocolState, state.sharedData, action);
 
     itTransitionToStateType(updatedState, states.WAIT_FOR_CONSENSUS);
-    // itSendsNoCommitment(updatedState);
     itSendsNoTransaction(updatedState.sharedData);
     itTransitionsChannelToStateType(
       updatedState,

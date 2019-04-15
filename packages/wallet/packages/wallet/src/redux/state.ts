@@ -11,7 +11,6 @@ import {
 } from './channel-state/state';
 import { Properties } from './utils';
 import * as indirectFunding from './protocols/indirect-funding/state';
-import { DirectFundingStore } from './direct-funding-store/state';
 import { accumulateSideEffects } from './outbox';
 import { WalletEvent } from 'magmo-wallet-client';
 
@@ -32,7 +31,6 @@ export const WALLET_INITIALIZED = 'WALLET.INITIALIZED';
 interface Shared {
   channelState: ChannelState;
   outboxState: OutboxState;
-  directFundingStore: DirectFundingStore;
 }
 
 export interface WaitForLogin extends Shared {
@@ -82,12 +80,11 @@ export function indirectFundingOngoing(state: Initialized): state is IndirectFun
 export const emptyState: Shared = {
   outboxState: EMPTY_OUTBOX_STATE,
   channelState: { initializedChannels: {}, initializingChannels: {} },
-  directFundingStore: {},
 };
 
 function shared(params: Shared): Shared {
-  const { outboxState, channelState, directFundingStore } = params;
-  return { outboxState, channelState, directFundingStore };
+  const { outboxState, channelState } = params;
+  return { outboxState, channelState };
 }
 
 export function waitForLogin(): WaitForLogin {

@@ -72,23 +72,22 @@ const waitForFundingAndPostFundSetupReducer = (
 
     case internal.FUNDING_CONFIRMED:
       if (action.channelId === state.channelId) {
-        const {
-          postFundSetupCommitment,
-          commitmentSignature,
-          sendCommitmentAction,
-        } = composePostFundCommitment(state);
-
-        const params = {
-          ...state,
-          turnNum: postFundSetupCommitment.turnNum,
-          penultimateCommitment: state.lastCommitment,
-          lastCommitment: {
-            commitment: postFundSetupCommitment,
-            signature: commitmentSignature,
-          },
-        };
-
         if (state.ourIndex === 0) {
+          const {
+            postFundSetupCommitment,
+            commitmentSignature,
+            sendCommitmentAction,
+          } = composePostFundCommitment(state);
+
+          const params = {
+            ...state,
+            turnNum: postFundSetupCommitment.turnNum,
+            penultimateCommitment: state.lastCommitment,
+            lastCommitment: {
+              commitment: postFundSetupCommitment,
+              signature: commitmentSignature,
+            },
+          };
           return {
             state: states.aWaitForPostFundSetup(params),
             sideEffects: {
@@ -98,9 +97,6 @@ const waitForFundingAndPostFundSetupReducer = (
         } else {
           return {
             state: states.bWaitForPostFundSetup({ ...state }),
-            sideEffects: {
-              messageOutbox: sendCommitmentAction,
-            },
           };
         }
       } else {

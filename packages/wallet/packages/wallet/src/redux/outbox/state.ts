@@ -31,3 +31,10 @@ export type SideEffects = {
 export function queueMessage(state: OutboxState, message: WalletEvent): OutboxState {
   return accumulateSideEffects(state, { messageOutbox: [message] });
 }
+
+export function queueTransaction(
+  state: OutboxState,
+  transaction: TransactionOutboxItem,
+): OutboxState {
+  return accumulateSideEffects(state, { transactionOutbox: [transaction] });
+}

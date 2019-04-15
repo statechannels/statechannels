@@ -2,7 +2,7 @@ import React from 'react';
 import { PureComponent } from 'react';
 import { connect } from 'react-redux';
 
-import * as fundingStore from '../../redux/direct-funding-store/state';
+import * as directFundingStates from '../../redux/protocols/direct-funding/state';
 import * as actions from '../../redux/actions';
 
 import { unreachable } from '../../utils/reducer-utils';
@@ -12,7 +12,7 @@ import TransactionFailed from '../../components/transaction-failed';
 import { WalletProtocol } from '../../redux/types';
 
 interface Props {
-  directFundingStore: fundingStore.DirectFundingStore;
+  directFundingState: directFundingStates.DirectFundingState;
   channelId: string;
   fundingSuccessAcknowledged: () => void;
   fundingDeclinedAcknowledged: () => void;
@@ -21,52 +21,51 @@ interface Props {
 
 class DirectFundingContainer extends PureComponent<Props> {
   render() {
-    const { directFundingStore, retryTransactionAction, channelId } = this.props;
-    const state = directFundingStore[channelId];
-    const step = fundingStepByState(state);
+    const { directFundingState, retryTransactionAction } = this.props;
+    const step = fundingStepByState(directFundingState);
     if (
-      fundingStore.states.stateIsNotSafeToDeposit(state) ||
-      fundingStore.states.stateIsWaitForFundingConfirmation(state)
+      directFundingStates.stateIsNotSafeToDeposit(directFundingState) ||
+      directFundingStates.stateIsWaitForFundingConfirmation(directFundingState)
     ) {
       return <FundingStep step={step} />;
     }
-    if (fundingStore.states.stateIsDepositing(state)) {
-      switch (state.depositStatus) {
-        case fundingStore.states.depositing.WAIT_FOR_TRANSACTION_SENT:
+    if (directFundingStates.stateIsDepositing(directFundingState)) {
+      switch (directFundingState.depositStatus) {
+        case directFundingStates.depositing.WAIT_FOR_TRANSACTION_SENT:
           return <FundingStep step={step} />;
-        case fundingStore.states.depositing.WAIT_FOR_DEPOSIT_APPROVAL:
+        case directFundingStates.depositing.WAIT_FOR_DEPOSIT_APPROVAL:
           return <FundingStep step={step}>Please confirm the transaction in MetaMask!</FundingStep>;
-        case fundingStore.states.depositing.WAIT_FOR_DEPOSIT_CONFIRMATION:
+        case directFundingStates.depositing.WAIT_FOR_DEPOSIT_CONFIRMATION:
           return (
             <FundingStep step={step}>
               Check the progress on&nbsp;
               <EtherscanLink
-                transactionID={state.transactionHash}
+                transactionID={directFundingState.transactionHash}
                 networkId={-1} // TODO: Fix network id
                 title="Etherscan"
               />
               !
             </FundingStep>
           );
-        case fundingStore.states.depositing.DEPOSIT_TRANSACTION_FAILED:
+        case directFundingStates.depositing.DEPOSIT_TRANSACTION_FAILED:
           return (
             <TransactionFailed
               name="deposit"
               retryAction={() =>
-                retryTransactionAction(state.channelId, WalletProtocol.DirectFunding)
+                retryTransactionAction(directFundingState.channelId, WalletProtocol.DirectFunding)
               }
             />
           );
 
         default:
-          return unreachable(state);
+          return unreachable(directFundingState);
       }
     }
-    if (fundingStore.states.stateIsChannelFunded(state)) {
+    if (directFundingStates.stateIsChannelFunded(directFundingState)) {
       return null;
     }
 
-    return unreachable(state);
+    return unreachable(directFundingState);
   }
 }
 
@@ -81,6 +80,6 @@ const mapDispatchToProps = {
 // why does it think that mapStateToProps can return undefined??
 
 export default connect(
-  (state: any) => ({ directFundingStore: state.channelState.directFunding }),
+  (state: any) => ({ directFundingState: state.channelState.directFunding }),
   mapDispatchToProps,
 )(DirectFundingContainer);
