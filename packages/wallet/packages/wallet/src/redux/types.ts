@@ -5,6 +5,7 @@ export const enum WalletProtocol {
   Closing = 'Closing',
   Withdrawing = 'Withdrawing',
   Responding = 'Responding',
+  TransactionSubmission = 'TransactionSubmission',
 }
 
 export const enum PlayerIndex {

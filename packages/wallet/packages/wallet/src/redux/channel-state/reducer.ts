@@ -35,10 +35,6 @@ export const channelStateReducer: ReducerWithSideEffects<states.ChannelState> = 
   state: states.ChannelState,
   action: WalletAction,
 ): StateWithSideEffects<states.ChannelState> => {
-  if (!actions.isChannelAction(action)) {
-    return { state };
-  }
-
   const newState = { ...state };
   if (actions.isReceiveFirstCommitment(action) && !channelIsInitialized(action.commitment, state)) {
     return handleFirstCommmit(state, action);

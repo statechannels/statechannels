@@ -147,19 +147,10 @@ export type CommonAction =
   | CommitmentReceived
   | AdjudicatorEventAction;
 
-export type protocolAction = CommonAction;
+export type ProtocolAction = CommonAction;
 
 export function isTransactionAction(action: WalletAction): action is TransactionAction {
-  // TODO: This is a weak check. We need to refactor these actions once we clean up the channel reducer and funding
-  return action.type.indexOf('TRANSACTION') > -1;
-}
-
-export function isCommonAction(action: WalletAction): action is CommonAction {
-  return action.type.match('WALLET.COMMON') ? true : false;
-}
-
-export function isprotocolAction(action: WalletAction): action is protocolAction {
-  return 'protocol' in action;
+  return 'protocol' in action && action.protocol === WalletProtocol.TransactionSubmission;
 }
 
 export { internal, channel, funding, indirectFunding };
