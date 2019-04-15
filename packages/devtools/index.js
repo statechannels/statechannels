@@ -31,6 +31,11 @@ const {
     getNetworkName
 } = require("./utils/networkSetup");
 
+const {
+    parseContractAddress,
+    parseABI
+} = require('./utils/artifactParsers');
+
 module.exports = {
     startGanache,
     deployContracts,
@@ -46,4 +51,6 @@ module.exports = {
     getNetworkId,
     delay,
     getNetworkName,
+    parseContractAddress,
+    parseABI,
 };
