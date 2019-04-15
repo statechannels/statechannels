@@ -12,9 +12,9 @@ module.exports = {
     const contractArtifact = require(pathToArtifact);
     const abi = contractArtifact.abi;
     if (!abi) {
-      console.error(`There is no abi information for network id ${networkId} in the artifact file ${pathToArtifact}`);
+      console.error(`There is no abi information in the artifact file ${pathToArtifact}`);
       process.exit(1);
     }
-    return abi;
+    return JSON.stringify(abi);
   }
 }
