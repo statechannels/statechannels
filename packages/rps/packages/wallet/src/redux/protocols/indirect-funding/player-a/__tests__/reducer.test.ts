@@ -34,6 +34,7 @@ const defaults = {
   ...testScenarios,
   ourIndex: PlayerIndex.A,
   privateKey: testScenarios.asPrivateKey,
+  directFundingState: testScenarios.ledgerDirectFundingStates.playerA,
 };
 
 const ledgerChannelDefaults = {
@@ -142,17 +143,19 @@ describe(startingIn(states.WAIT_FOR_PRE_FUND_SETUP_1), () => {
 });
 
 describe(startingIn(states.WAIT_FOR_DIRECT_FUNDING), () => {
-  const { channelId, ledgerId } = defaults;
+  const { channelId, ledgerId, directFundingState } = defaults;
   const ledgerChannelState = channelStates.waitForFundingAndPostFundSetup({
     ...ledgerChannelDefaults,
     channelId: ledgerId,
   });
+  const total = testScenarios.twoThree.reduce(addHex);
+
   const state = startingState(
-    states.waitForDirectFunding({ channelId, ledgerId }),
+    states.waitForDirectFunding({ channelId, ledgerId, directFundingState }),
     ledgerChannelState,
   );
   // Add the ledger channel to state
-  const total = testScenarios.twoThree.reduce(addHex);
+
   describe(whenActionArrives(actions.FUNDING_RECEIVED_EVENT), () => {
     const action = actions.fundingReceivedEvent('processId', defaults.ledgerId, total, total);
     const updatedState = playerAReducer(state.protocolState, state.sharedData, action);

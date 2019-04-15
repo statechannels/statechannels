@@ -5,7 +5,11 @@ import * as channelStates from '../redux/channel-state/state';
 import * as indirectFundingPlayerB from '../redux/protocols/indirect-funding/player-b/state';
 import { EMPTY_OUTBOX_STATE } from '../redux/outbox/state';
 import * as walletStates from '../redux/state';
-import { bsAddress, bsPrivateKey } from '../redux/__tests__/test-scenarios';
+import {
+  bsAddress,
+  bsPrivateKey,
+  ledgerDirectFundingStates,
+} from '../redux/__tests__/test-scenarios';
 import { defaultParams } from './dummy-wallet-states';
 
 const { channelId } = defaultParams;
@@ -15,6 +19,7 @@ export const playerBDefaults = {
   ourIndex: 1,
   address: bsAddress,
   privateKey: bsPrivateKey,
+  directFundingState: ledgerDirectFundingStates.playerB,
 };
 
 /////////////////////
@@ -67,6 +72,7 @@ const waitForPreFundSetup1State = indirectFundingPlayerB.waitForPreFundSetup0({
 const waitForDirectFundingState = indirectFundingPlayerB.waitForDirectFunding({
   channelId,
   ledgerId,
+  directFundingState: playerBDefaults.directFundingState,
 });
 const waitForPostFundSetup1State = indirectFundingPlayerB.waitForPostFundSetup0({
   channelId,

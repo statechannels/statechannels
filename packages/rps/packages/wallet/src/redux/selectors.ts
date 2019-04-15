@@ -1,6 +1,5 @@
 import { OpenedState, OPENING, ChannelStatus } from './channel-state/state';
 import * as walletStates from './state';
-import { DirectFundingState } from './protocols/direct-funding/state';
 import { SharedData } from './protocols';
 
 export const getOpenedChannelState = (state: SharedData, channelId: string): OpenedState => {
@@ -17,17 +16,6 @@ export const getChannelState = (state: SharedData, channelId: string): ChannelSt
     throw new Error(`Could not find any initialized channel state for channel ${channelId}.`);
   }
   return channelStatus;
-};
-
-export const getDirectFundingState = (
-  state: walletStates.Initialized,
-  channelId: string,
-): DirectFundingState => {
-  const fundingStatus = state.directFundingStore[channelId];
-  if (!fundingStatus) {
-    throw new Error(`No funding status for channel ${channelId}`);
-  }
-  return fundingStatus;
 };
 
 export const getAdjudicatorWatcherProcessesForChannel = (

@@ -90,7 +90,7 @@ export const composePreFundCommitment = (
   const appAttributes = bytesFromAppAttributes({
     proposedAllocation: allocation,
     proposedDestination: destination,
-    consensusCounter: ourIndex,
+    consensusCounter: 0,
   });
   const commitment: Commitment = {
     channel,
