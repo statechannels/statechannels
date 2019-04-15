@@ -3,6 +3,9 @@ import { DirectFundingRequested } from '../../internal/actions';
 import { bigNumberify } from 'ethers/utils';
 import { createDepositTransaction } from '../../../utils/transaction-generator';
 import { WalletProtocol } from '../../types';
+import { ProtocolStateWithSharedData, SharedData } from '..';
+
+import { queueTransaction } from './reducer-helpers';
 export { depositing };
 // ChannelFundingStatus
 export const NOT_SAFE_TO_DEPOSIT = 'NOT_SAFE_TO_DEPOSIT';
@@ -105,7 +108,10 @@ export type DirectFundingState =
   | WaitForFundingConfirmation
   | ChannelFunded;
 
-export function initialDirectFundingState(action: DirectFundingRequested) {
+export function initialDirectFundingState(
+  action: DirectFundingRequested,
+  sharedData: SharedData,
+): ProtocolStateWithSharedData<DirectFundingState> {
   const { safeToDepositLevel, totalFundingRequired, requiredDeposit, channelId, ourIndex } = action;
 
   const alreadySafeToDeposit = bigNumberify(safeToDepositLevel).eq('0x');
@@ -132,7 +138,7 @@ export function initialDirectFundingState(action: DirectFundingRequested) {
     : undefined;
 
   return {
-    state: stateConstructor({
+    protocolState: stateConstructor({
       fundingType: DIRECT_FUNDING,
       channelFundingStatus,
       safeToDepositLevel,
@@ -141,6 +147,6 @@ export function initialDirectFundingState(action: DirectFundingRequested) {
       requestedYourContribution: requiredDeposit,
       ourIndex,
     }),
-    sideEffects: { transactionOutbox },
+    sharedData: transactionOutbox ? queueTransaction(sharedData, transactionOutbox) : sharedData,
   };
 }
