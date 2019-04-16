@@ -32,10 +32,6 @@ export const defaultParams = {
 ////////////////////////////
 
 export const dummyWaitForLogin: walletStates.WalletState = walletStates.waitForLogin();
-export const dummyWaitForAdjudicator: walletStates.WalletState = walletStates.waitForAdjudicator({
-  ...dummyWaitForLogin,
-  uid: '',
-});
 export const dummyWaitForMetaMask: walletStates.WalletState = walletStates.metaMaskError({
   ...dummyWaitForLogin,
 });

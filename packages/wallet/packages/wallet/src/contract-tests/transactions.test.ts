@@ -25,8 +25,8 @@ import {
 
 import { depositContract } from './test-utils';
 import { Channel, Commitment, CommitmentType } from 'fmg-core';
-import { getAdjudicatorContractAddress } from '../utils/contract-utils';
 import { channelID } from 'fmg-core/lib/channel';
+import { ADJUDICATOR_ADDRESS } from '../constants';
 
 jest.setTimeout(90000);
 
@@ -54,11 +54,9 @@ describe('transactions', () => {
     expect(saga.next(provider).value).toEqual(put(transactionSent(processId)));
     saga.next();
     const signer = provider.getSigner();
-    const contractAddress = await getAdjudicatorContractAddress(provider);
-    transactionToSend = { ...transactionToSend, to: contractAddress };
+    transactionToSend = { ...transactionToSend, to: ADJUDICATOR_ADDRESS };
     const transactionReceipt = await signer.sendTransaction(transactionToSend);
 
-    saga.next();
     expect(saga.next(transactionReceipt).value).toEqual(
       put(transactionSubmitted(processId, transactionReceipt.hash || '')),
     );

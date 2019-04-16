@@ -2,15 +2,11 @@ import React from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faDotCircle } from '@fortawesome/free-solid-svg-icons';
 import { connect } from 'react-redux';
-import { Initialized } from '../redux/state';
+import { getNetworkId } from '../utils/contract-utils';
 
-interface NetworkStatusProps {
-  networkId: number;
-}
-
-export class NetworkStatus extends React.PureComponent<NetworkStatusProps> {
+export class NetworkStatus extends React.PureComponent {
   render() {
-    const { networkId } = this.props;
+    const networkId = getNetworkId();
     switch (networkId) {
       case 1:
         return (
@@ -52,8 +48,4 @@ export class NetworkStatus extends React.PureComponent<NetworkStatusProps> {
   }
 }
 
-const mapStateToProps = (state: Initialized): NetworkStatusProps => ({
-  networkId: state.networkId,
-});
-
-export default connect(mapStateToProps)(NetworkStatus);
+export default connect()(NetworkStatus);

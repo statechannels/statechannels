@@ -32,10 +32,7 @@ export const twoThree = [bigNumberify(2).toHexString(), bigNumberify(3).toHexStr
 export const initializedState: states.Initialized = {
   ...states.emptyState,
   type: states.WALLET_INITIALIZED,
-  adjudicator: 'adjudicator',
   uid: 'uid',
-  networkId: 3,
-  consensusLibrary: '0x0',
   processStore: {},
 };
 

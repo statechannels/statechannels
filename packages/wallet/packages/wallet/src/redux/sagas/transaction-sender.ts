@@ -1,21 +1,21 @@
 import { call, put } from 'redux-saga/effects';
 import * as actions from '../actions';
 import { ethers } from 'ethers';
-import { getProvider, getAdjudicatorContractAddress } from '../../utils/contract-utils';
+import { getProvider } from '../../utils/contract-utils';
 import { TransactionResponse } from 'ethers/providers';
 import { QueuedTransaction } from '../outbox';
+import { ADJUDICATOR_ADDRESS } from '../../constants';
 
 export function* transactionSender(transaction: QueuedTransaction) {
   const provider: ethers.providers.JsonRpcProvider = yield call(getProvider);
   const signer = provider.getSigner();
-  const { processId, transactionRequest } = transaction;
+  const { processId } = transaction;
   yield put(actions.transactionSent(processId));
   let transactionResult: TransactionResponse;
   try {
-    const contractAddress = yield call(getAdjudicatorContractAddress, provider);
     transactionResult = yield call([signer, signer.sendTransaction], {
-      ...transactionRequest,
-      to: contractAddress,
+      ...transaction,
+      to: ADJUDICATOR_ADDRESS,
     });
   } catch (err) {
     yield put(actions.transactionSubmissionFailed(processId, err));

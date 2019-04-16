@@ -20,8 +20,6 @@ export const walletReducer = (
   switch (nextState.type) {
     case states.WAIT_FOR_LOGIN:
       return waitForLoginReducer(nextState, action);
-    case states.WAIT_FOR_ADJUDICATOR:
-      return waitForAdjudicatorReducer(nextState, action);
     case states.METAMASK_ERROR:
       // We stay in the metamask error state until a change to
       // metamask settings forces a refresh
@@ -80,27 +78,12 @@ const waitForLoginReducer = (
 ): states.WalletState => {
   switch (action.type) {
     case actions.LOGGED_IN:
-      return states.waitForAdjudicator({ ...state, uid: action.uid });
-    default:
-      return state;
-  }
-};
-
-const waitForAdjudicatorReducer = (
-  state: states.WaitForAdjudicator,
-  action: any,
-): states.WalletState => {
-  switch (action.type) {
-    case actions.ADJUDICATOR_KNOWN:
-      const { adjudicator, networkId } = action;
       return states.initialized({
         ...state,
+        uid: action.uid,
         outboxState: accumulateSideEffects(state.outboxState, {
           messageOutbox: [initializationSuccess()],
         }),
-        adjudicator,
-        networkId,
-        consensusLibrary: '0x0FA5E',
         processStore: {},
       });
     default:

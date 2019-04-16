@@ -19,7 +19,6 @@ class WalletContainer extends PureComponent<WalletProps> {
     switch (state.type) {
       case states.WAIT_FOR_LOGIN:
       case states.METAMASK_ERROR:
-      case states.WAIT_FOR_ADJUDICATOR:
         return (
           <Modal
             isOpen={true}

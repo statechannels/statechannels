@@ -17,14 +17,13 @@ import { WalletEvent } from 'magmo-wallet-client';
 import { SharedData } from './protocols';
 import { TransactionRequest } from 'ethers/providers';
 
-export type WalletState = WaitForLogin | WaitForAdjudicator | MetaMaskError | Initialized;
+export type WalletState = WaitForLogin | MetaMaskError | Initialized;
 
 // -----------
 // State types
 // -----------
 export const WAIT_FOR_LOGIN = 'INITIALIZING.WAIT_FOR_LOGIN';
 export const METAMASK_ERROR = 'INITIALIZING.METAMASK_ERROR';
-export const WAIT_FOR_ADJUDICATOR = 'INITIALIZING.WAIT_FOR_ADJUDICATOR';
 export const WALLET_INITIALIZED = 'WALLET.INITIALIZED';
 
 // ------
@@ -44,17 +43,9 @@ export interface MetaMaskError extends Shared {
   type: typeof METAMASK_ERROR;
 }
 
-export interface WaitForAdjudicator extends Shared {
-  type: typeof WAIT_FOR_ADJUDICATOR;
-  uid: string;
-}
-
 export interface Initialized extends Shared {
   type: typeof WALLET_INITIALIZED;
   uid: string;
-  networkId: number;
-  adjudicator: string;
-  consensusLibrary: string;
   processStore: ProcessStore;
   // procedure branches are optional, and exist precisely when that procedure is running
   indirectFunding?: indirectFunding.IndirectFundingState;
@@ -97,21 +88,12 @@ export function waitForLogin(): WaitForLogin {
 export function metaMaskError(params: Properties<MetaMaskError>): MetaMaskError {
   return { ...shared(params), type: METAMASK_ERROR };
 }
-
-export function waitForAdjudicator(params: Properties<WaitForAdjudicator>): WaitForAdjudicator {
-  const { uid } = params;
-  return { ...shared(params), type: WAIT_FOR_ADJUDICATOR, uid };
-}
-
 export function initialized(params: Properties<Initialized>): Initialized {
-  const { uid, networkId, adjudicator, consensusLibrary, processStore } = params;
+  const { uid, processStore } = params;
   return {
     ...shared(params),
     type: WALLET_INITIALIZED,
     uid,
-    networkId,
-    adjudicator,
-    consensusLibrary,
     processStore,
   };
 }

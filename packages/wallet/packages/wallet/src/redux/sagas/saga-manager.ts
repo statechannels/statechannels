@@ -6,12 +6,11 @@ import { transactionSender } from './transaction-sender';
 import { adjudicatorWatcher } from './adjudicator-watcher';
 import { blockMiningWatcher } from './block-mining-watcher';
 
-import { WalletState, WAIT_FOR_ADJUDICATOR } from '../state';
-import { getProvider } from '../../utils/contract-utils';
+import { WalletState } from '../state';
+import { getProvider, isDevelopmentNetwork } from '../../utils/contract-utils';
 
 import { displaySender } from './display-sender';
 import { ganacheMiner } from './ganache-miner';
-import { adjudicatorLoader } from './adjudicator-loader';
 import { WALLET_INITIALIZED } from '../state';
 
 export function* sagaManager(): IterableIterator<any> {
@@ -30,12 +29,6 @@ export function* sagaManager(): IterableIterator<any> {
 
     const state: WalletState = yield select((walletState: WalletState) => walletState);
 
-    // if we don't have an adjudicator, make sure that the adjudicatorLoader runs once
-    // todo: can we be sure that this won't be called more than once if successful?
-    if (state.type === WAIT_FOR_ADJUDICATOR) {
-      yield adjudicatorLoader();
-    }
-
     if (state.type === WALLET_INITIALIZED) {
       if (!adjudicatorWatcherProcess) {
         const provider = yield getProvider();
@@ -45,7 +38,7 @@ export function* sagaManager(): IterableIterator<any> {
       if (!blockMiningWatcherProcess) {
         blockMiningWatcherProcess = yield fork(blockMiningWatcher);
       }
-      if (process.env.TARGET_NETWORK === 'development' && !ganacheMinerProcess) {
+      if (isDevelopmentNetwork() && !ganacheMinerProcess) {
         ganacheMinerProcess = yield fork(ganacheMiner);
       }
     } else {
