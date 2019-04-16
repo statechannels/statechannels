@@ -51,10 +51,9 @@ export type MetamaskLoadError = ReturnType<typeof metamaskLoadError>;
 
 export type Message = 'FundingDeclined';
 export const MESSAGE_RECEIVED = 'WALLET.COMMON.MESSAGE_RECEIVED';
-export const messageReceived = (processId: string, protocol: WalletProtocol, data: Message) => ({
+export const messageReceived = (processId: string, data: Message) => ({
   type: MESSAGE_RECEIVED as typeof MESSAGE_RECEIVED,
   processId,
-  protocol,
   data,
 });
 export type MessageReceived = ReturnType<typeof messageReceived>;
@@ -62,13 +61,11 @@ export type MessageReceived = ReturnType<typeof messageReceived>;
 export const COMMITMENT_RECEIVED = 'WALLET.COMMON.COMMITMENT_RECEIVED';
 export const commitmentReceived = (
   processId: string,
-  protocol: WalletProtocol,
   commitment: Commitment,
   signature: string,
 ) => ({
   type: COMMITMENT_RECEIVED as typeof COMMITMENT_RECEIVED,
   processId,
-  protocol,
   commitment,
   signature,
 });

@@ -94,12 +94,7 @@ describe('start in WaitForFundingAndPostFundSetup', () => {
     const state = startingState('A');
     const validateMock = jest.fn().mockReturnValue(true);
     Object.defineProperty(SigningUtil, 'validCommitmentSignature', { value: validateMock });
-    const action = actions.commitmentReceived(
-      channelId,
-      WalletProtocol.DirectFunding,
-      postFundCommitment1,
-      MOCK_SIGNATURE,
-    );
+    const action = actions.commitmentReceived(channelId, postFundCommitment1, MOCK_SIGNATURE);
     const updatedState = fundingReducer(state, action);
 
     itTransitionsToChannelStateType(states.WAIT_FOR_FUNDING_AND_POST_FUND_SETUP, updatedState);
@@ -112,12 +107,7 @@ describe('start in WaitForFundingAndPostFundSetup', () => {
     const validateMock = jest.fn().mockReturnValue(true);
     Object.defineProperty(SigningUtil, 'validCommitmentSignature', { value: validateMock });
 
-    const action = actions.commitmentReceived(
-      channelId,
-      WalletProtocol.DirectFunding,
-      postFundCommitment1,
-      MOCK_SIGNATURE,
-    );
+    const action = actions.commitmentReceived(channelId, postFundCommitment1, MOCK_SIGNATURE);
     const updatedState = fundingReducer(state, action);
 
     itTransitionsToChannelStateType(states.WAIT_FOR_FUNDING_CONFIRMATION, updatedState);
@@ -173,12 +163,7 @@ describe('start in AWaitForPostFundSetup', () => {
 
     const testDefaults = { ...defaultsA, ...justReceivedPostFundSetupA };
     const state = states.aWaitForPostFundSetup({ ...testDefaults });
-    const action = actions.commitmentReceived(
-      channelId,
-      WalletProtocol.DirectFunding,
-      postFundCommitment2,
-      MOCK_SIGNATURE,
-    );
+    const action = actions.commitmentReceived(channelId, postFundCommitment2, MOCK_SIGNATURE);
     const updatedState = fundingReducer(state, action);
 
     itTransitionsToChannelStateType(states.WAIT_FOR_UPDATE, updatedState);
@@ -194,12 +179,7 @@ describe('start in BWaitForPostFundSetup', () => {
     const state = states.bWaitForPostFundSetup(testDefaults);
     const validateMock = jest.fn().mockReturnValue(true);
     Object.defineProperty(SigningUtil, 'validSignature', { value: validateMock });
-    const action = actions.commitmentReceived(
-      channelId,
-      WalletProtocol.DirectFunding,
-      postFundCommitment1,
-      MOCK_SIGNATURE,
-    );
+    const action = actions.commitmentReceived(channelId, postFundCommitment1, MOCK_SIGNATURE);
     const updatedState = fundingReducer(state, action);
 
     itTransitionsToChannelStateType(states.WAIT_FOR_UPDATE, updatedState);

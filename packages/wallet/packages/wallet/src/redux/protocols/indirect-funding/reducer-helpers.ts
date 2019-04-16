@@ -247,9 +247,8 @@ export const createCommitmentMessageRelay = (
   signature: string,
 ) => {
   const payload = {
-    processId,
     protocol: WalletProtocol.IndirectFunding,
-    data: { commitment, signature },
+    data: { commitment, signature, processId },
   };
   return messageRelayRequested(to, payload);
 };

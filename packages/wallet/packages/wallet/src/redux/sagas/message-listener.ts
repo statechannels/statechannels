@@ -3,7 +3,7 @@ import * as incoming from 'magmo-wallet-client/lib/wallet-instructions';
 
 import * as actions from '../actions';
 import { eventChannel } from 'redux-saga';
-import { WalletProtocol } from '../types';
+import { unreachable } from '../../utils/reducer-utils';
 
 export function* messageListener() {
   const postMessageEventChannel = eventChannel(emitter => {
@@ -39,19 +39,7 @@ export function* messageListener() {
         yield put(actions.channel.opponentCommitmentReceived(action.commitment, action.signature));
         break;
       case incoming.RECEIVE_MESSAGE:
-        const {
-          data,
-          processId,
-          protocol: incomingprotocol,
-        } = (action as incoming.ReceiveMessage).messagePayload;
-        const protocol = convertToWalletprotocol(incomingprotocol);
-        if ('commitment' in data) {
-          yield put(
-            actions.commitmentReceived(processId, protocol, data.commitment, data.signature),
-          );
-        } else {
-          yield put(actions.messageReceived(processId, protocol, data));
-        }
+        yield put(handleIncomingMessage(action));
         break;
       case incoming.RESPOND_TO_CHALLENGE:
         yield put(actions.channel.challengeCommitmentReceived(action.commitment));
@@ -64,12 +52,18 @@ export function* messageListener() {
   }
 }
 
-const convertToWalletprotocol = (protocol: string) => {
-  if (protocol === WalletProtocol.DirectFunding) {
-    return WalletProtocol.DirectFunding;
-  } else if (protocol === WalletProtocol.IndirectFunding) {
-    return WalletProtocol.IndirectFunding;
-  } else {
-    throw new Error(`Could not convert ${protocol} to a valid wallet protocol`);
+function handleIncomingMessage(action: incoming.ReceiveMessage) {
+  const { messagePayload } = action as incoming.ReceiveMessage;
+
+  if ('processId' in messagePayload) {
+    const { data, processId } = messagePayload;
+    if ('commitment' in data) {
+      return actions.commitmentReceived(processId, data.commitment, data.signature);
+    } else {
+      return actions.messageReceived(processId, data);
+    }
+  } else if ('protocol' in messagePayload) {
+    throw new Error('Unexpected message');
   }
-};
+  return unreachable(messagePayload);
+}

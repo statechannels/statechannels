@@ -111,7 +111,6 @@ describe('start in WaitForOpponentConclude', () => {
 
     const action = actions.commitmentReceived(
       channelId,
-      WalletProtocol.DirectFunding,
       ('commitment' as unknown) as Commitment,
       '0x0',
     );
