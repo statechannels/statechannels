@@ -19,7 +19,7 @@ interface Props {
   challengeResponseAcknowledged: () => void;
   challengeApproved: () => void;
   challengeRejected: () => void;
-  retryTransaction: (channelId: string, protocol: WalletProtocol) => void;
+  transactionRetryApproved: (channelId: string, protocol: WalletProtocol) => void;
 }
 
 class ChallengingContainer extends PureComponent<Props> {
@@ -30,7 +30,7 @@ class ChallengingContainer extends PureComponent<Props> {
       challengeResponseAcknowledged,
       challengeApproved,
       challengeRejected,
-      retryTransaction,
+      transactionRetryApproved,
     } = this.props;
 
     switch (state.type) {
@@ -95,7 +95,9 @@ class ChallengingContainer extends PureComponent<Props> {
         return (
           <TransactionFailed
             name="challenge"
-            retryAction={() => retryTransaction(state.channelId, WalletProtocol.Challenging)}
+            retryAction={() =>
+              transactionRetryApproved(state.channelId, WalletProtocol.Challenging)
+            }
           />
         );
 
@@ -110,7 +112,7 @@ const mapDispatchToProps = {
   challengeResponseAcknowledged: actions.channel.challengeResponseAcknowledged,
   challengeApproved: actions.channel.challengeApproved,
   challengeRejected: actions.channel.challengeRejected,
-  retryTransaction: actions.retryTransaction,
+  transactionRetryApproved: actions.transactionRetryApproved,
 };
 
 export default connect(

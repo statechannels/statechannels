@@ -1,4 +1,6 @@
 import { SideEffects, OutboxState } from './state';
+export { QueuedTransaction } from './state';
+
 /**
  *
  * @param state current global state

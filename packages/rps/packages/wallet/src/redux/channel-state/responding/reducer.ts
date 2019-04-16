@@ -12,7 +12,6 @@ import {
 } from 'magmo-wallet-client/lib/wallet-events';
 import { handleSignatureAndValidationMessages } from '../../../utils/state-utils';
 import { StateWithSideEffects } from '../../utils';
-import { WalletProtocol } from '../../types';
 
 export const respondingReducer = (
   state: states.RespondingState,
@@ -56,7 +55,7 @@ const responseTransactionFailedReducer = (
   action: WalletAction,
 ): StateWithSideEffects<states.ChannelStatus> => {
   switch (action.type) {
-    case actions.RETRY_TRANSACTION:
+    case actions.TRANSACTION_RETRY_APPROVED:
       const transactionRequest = createRespondWithMoveTransaction(
         state.lastCommitment.commitment,
         state.lastCommitment.signature,
@@ -67,8 +66,7 @@ const responseTransactionFailedReducer = (
         sideEffects: {
           transactionOutbox: {
             transactionRequest,
-            channelId: state.channelId,
-            protocol: WalletProtocol.Responding,
+            processId: `responding.${state.channelId}`,
           },
         },
       };
@@ -106,8 +104,7 @@ export const chooseResponseReducer = (
         sideEffects: {
           transactionOutbox: {
             transactionRequest,
-            channelId: state.channelId,
-            protocol: WalletProtocol.Responding,
+            processId: `responding.${state.channelId}`,
           },
         },
       };
@@ -155,8 +152,7 @@ export const takeMoveInAppReducer = (
         sideEffects: {
           transactionOutbox: {
             transactionRequest,
-            channelId: state.channelId,
-            protocol: WalletProtocol.Responding,
+            processId: `responding.${state.channelId}`,
           },
           displayOutbox: showWallet(),
         },
@@ -181,7 +177,7 @@ export const initiateResponseReducer = (
   action: WalletAction,
 ): StateWithSideEffects<states.ChannelStatus> => {
   switch (action.type) {
-    case actions.TRANSACTION_SENT_TO_METAMASK:
+    case actions.TRANSACTION_SENT:
       return { state: states.waitForResponseSubmission(state) };
     case actions.BLOCK_MINED:
       if (

@@ -2,10 +2,9 @@ import * as depositing from './depositing/state';
 import { DirectFundingRequested } from '../../internal/actions';
 import { bigNumberify } from 'ethers/utils';
 import { createDepositTransaction } from '../../../utils/transaction-generator';
-import { WalletProtocol } from '../../types';
 import { ProtocolStateWithSharedData, SharedData } from '..';
 
-import { queueTransaction } from './reducer-helpers';
+import { queueTransaction } from '../../state';
 export { depositing };
 // ChannelFundingStatus
 export const NOT_SAFE_TO_DEPOSIT = 'NOT_SAFE_TO_DEPOSIT';
@@ -129,13 +128,11 @@ export function initialDirectFundingState(
     ? depositing.waitForTransactionSent
     : notSafeToDeposit;
 
-  const transactionOutbox = alreadySafeToDeposit
-    ? {
-        transactionRequest: createDepositTransaction(action.channelId, action.requiredDeposit),
-        channelId,
-        protocol: WalletProtocol.DirectFunding,
-      }
-    : undefined;
+  if (alreadySafeToDeposit) {
+    const transactionRequest = createDepositTransaction(action.channelId, action.requiredDeposit);
+    const processId = `depositing.${channelId}`;
+    sharedData = queueTransaction(sharedData, transactionRequest, processId);
+  }
 
   return {
     protocolState: stateConstructor({
@@ -147,6 +144,6 @@ export function initialDirectFundingState(
       requestedYourContribution: requiredDeposit,
       ourIndex,
     }),
-    sharedData: transactionOutbox ? queueTransaction(sharedData, transactionOutbox) : sharedData,
+    sharedData,
   };
 }

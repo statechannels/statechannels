@@ -1,6 +1,5 @@
 import { TransactionRequest } from 'ethers/providers';
 import { WalletEvent, DisplayAction } from 'magmo-wallet-client';
-import { WalletProtocol } from '../types';
 import { accumulateSideEffects } from '.';
 
 export const EMPTY_OUTBOX_STATE: OutboxState = {
@@ -9,15 +8,14 @@ export const EMPTY_OUTBOX_STATE: OutboxState = {
   transactionOutbox: [],
 };
 
-export interface TransactionOutboxItem {
+export interface QueuedTransaction {
   transactionRequest: TransactionRequest;
-  channelId: string;
-  protocol: WalletProtocol;
+  processId: string;
 }
 export interface OutboxState {
   displayOutbox: DisplayAction[];
   messageOutbox: WalletEvent[];
-  transactionOutbox: TransactionOutboxItem[];
+  transactionOutbox: QueuedTransaction[];
 }
 
 export type SideEffects = {
@@ -34,7 +32,10 @@ export function queueMessage(state: OutboxState, message: WalletEvent): OutboxSt
 
 export function queueTransaction(
   state: OutboxState,
-  transaction: TransactionOutboxItem,
+  transaction: TransactionRequest,
+  processId: string,
 ): OutboxState {
-  return accumulateSideEffects(state, { transactionOutbox: [transaction] });
+  return accumulateSideEffects(state, {
+    transactionOutbox: { transactionRequest: transaction, processId },
+  });
 }
