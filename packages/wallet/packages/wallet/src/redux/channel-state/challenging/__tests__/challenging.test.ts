@@ -11,7 +11,6 @@ import {
 } from '../../../__tests__/helpers';
 import * as TransactionGenerator from '../../../../utils/transaction-generator';
 import { hideWallet, challengeComplete } from 'magmo-wallet-client';
-import { WalletProtocol } from '../../../types';
 
 const {
   asPrivateKey,
@@ -73,7 +72,7 @@ describe('when in INITIATE_CHALLENGE', () => {
   const state = states.waitForChallengeInitiation(defaults);
 
   describe('when a challenge is initiated', () => {
-    const action = actions.transactionSentToMetamask(channelId, WalletProtocol.Challenging);
+    const action = actions.transactionSent(channelId);
     const updatedState = challengingReducer(state, action);
 
     itTransitionsToChannelStateType(states.WAIT_FOR_CHALLENGE_SUBMISSION, updatedState);
@@ -84,14 +83,14 @@ describe('when in WAIT_FOR_CHALLENGE_SUBMISSION', () => {
   const state = states.waitForChallengeSubmission(defaults);
 
   describe('when a challenge is submitted', () => {
-    const action = actions.transactionSubmitted(channelId, WalletProtocol.Challenging, '0x0');
+    const action = actions.transactionSubmitted(channelId, '0x0');
     const updatedState = challengingReducer(state, action);
 
     itTransitionsToChannelStateType(states.WAIT_FOR_CHALLENGE_CONFIRMATION, updatedState);
   });
 
   describe('when a challenge submissions fails', () => {
-    const action = actions.transactionSubmissionFailed(channelId, WalletProtocol.Challenging, {
+    const action = actions.transactionSubmissionFailed(channelId, {
       code: 0,
     });
     const updatedState = challengingReducer(state, action);
@@ -107,7 +106,7 @@ describe('when in CHALLENGE_TRANSACTION_FAILED', () => {
     Object.defineProperty(TransactionGenerator, 'createForceMoveTransaction', {
       value: createChallengeTxMock,
     });
-    const action = actions.retryTransaction(channelId, WalletProtocol.Challenging);
+    const action = actions.transactionRetryApproved(channelId);
     const updatedState = challengingReducer(state, action);
     itTransitionsToChannelStateType(states.WAIT_FOR_CHALLENGE_INITIATION, updatedState);
     expect(createChallengeTxMock.mock.calls.length).toBe(1);
@@ -118,7 +117,7 @@ describe('when in WAIT_FOR_CHALLENGE_CONFIRMATION', () => {
   const state = states.waitForChallengeConfirmation({ ...defaults });
 
   describe('when a challenge is confirmed', () => {
-    const action = actions.transactionConfirmed(channelId, processId, 'transactionHash');
+    const action = actions.transactionConfirmed(processId, 'transactionHash');
     const updatedState = challengingReducer(state, action);
 
     itTransitionsToChannelStateType(states.WAIT_FOR_RESPONSE_OR_TIMEOUT, updatedState);

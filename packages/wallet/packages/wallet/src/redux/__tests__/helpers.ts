@@ -1,7 +1,7 @@
 import { ChannelStatus } from '../channel-state/state';
 import { StateWithSideEffects } from '../utils';
 import { Commitment } from 'fmg-core';
-import { TransactionOutboxItem, OutboxState } from '../outbox/state';
+import { QueuedTransaction, OutboxState } from '../outbox/state';
 import { SharedData } from '../protocols';
 
 type SideEffectState =
@@ -76,11 +76,14 @@ export const itSendsATransaction = (state: SideEffectState) => {
   });
 };
 
-export const itSendsThisTransaction = (state: SideEffectState, tx: TransactionOutboxItem) => {
+export const itSendsThisTransaction = (state: SideEffectState, tx: QueuedTransaction) => {
   it(`sends a transaction`, () => {
     const { transactionRequest } = tx;
     expectSideEffect('transactionOutbox', state, item =>
-      expect(item).toMatchObject({ transactionRequest, channelId: expect.any(String) }),
+      expect(item).toMatchObject({
+        transactionRequest,
+        processId: expect.any(String),
+      }),
     );
   });
 };

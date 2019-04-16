@@ -6,7 +6,7 @@ import * as scenarios from '../../__tests__/test-scenarios';
 import { OutboxState } from '../state';
 import { WalletProtocol } from '../../types';
 
-const { channelId, mockTransactionOutboxItem } = scenarios;
+const { mockTransactionOutboxItem } = scenarios;
 
 describe('when a side effect occured', () => {
   const sendFundingDeclinedActionA = outgoing.messageRelayRequested('0xa00', {
@@ -41,7 +41,7 @@ describe('when a side effect occured', () => {
   });
 
   it('clears the first element of the transactionOutbox', () => {
-    const action = actions.transactionSentToMetamask(channelId, WalletProtocol.DirectFunding);
+    const action = actions.transactionSent('processId');
     const updatedState = clearOutbox(state, action);
     expect(updatedState.transactionOutbox).toMatchObject(transactionOutbox.slice(1));
   });

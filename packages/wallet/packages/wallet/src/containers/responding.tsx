@@ -19,7 +19,7 @@ interface Props {
   challengeResponseAcknowledged: () => void;
   selectRespondWithMove: () => void;
   selectRespondWithExistingMove: () => void;
-  retryTransaction: (channelId: string, protocol: WalletProtocol) => void;
+  transactionRetryApproved: (channelId: string, protocol: WalletProtocol) => void;
   timeoutAcknowledged: () => void;
 }
 
@@ -31,7 +31,7 @@ class RespondingContainer extends PureComponent<Props> {
       selectRespondWithMove,
       selectRespondWithExistingMove,
       timeoutAcknowledged,
-      retryTransaction,
+      transactionRetryApproved,
     } = this.props;
 
     switch (state.type) {
@@ -78,7 +78,7 @@ class RespondingContainer extends PureComponent<Props> {
         return (
           <TransactionFailed
             name="challenge response"
-            retryAction={() => retryTransaction(state.channelId, WalletProtocol.Responding)}
+            retryAction={() => transactionRetryApproved(state.channelId, WalletProtocol.Responding)}
           />
         );
       default:
@@ -92,7 +92,7 @@ const mapDispatchToProps = {
   challengeResponseAcknowledged: actions.channel.challengeResponseAcknowledged,
   selectRespondWithMove: actions.channel.respondWithMoveChosen,
   selectRespondWithExistingMove: actions.channel.respondWithExistingMoveChosen,
-  retryTransaction: actions.retryTransaction,
+  transactionRetryApproved: actions.transactionRetryApproved,
   timeoutAcknowledged: actions.channel.challengedTimedOutAcknowledged,
 };
 

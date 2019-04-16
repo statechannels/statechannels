@@ -11,7 +11,6 @@ import {
 import { handleSignatureAndValidationMessages } from '../../../utils/state-utils';
 import { bigNumberify } from 'ethers/utils';
 import { StateWithSideEffects } from '../../utils';
-import { WalletProtocol } from '../../types';
 
 export const challengingReducer = (
   state: states.ChallengingState,
@@ -54,7 +53,7 @@ const challengeTransactionFailedReducer = (
   action: WalletAction,
 ): StateWithSideEffects<states.ChannelStatus> => {
   switch (action.type) {
-    case actions.RETRY_TRANSACTION:
+    case actions.TRANSACTION_RETRY_APPROVED:
       const { commitment: fromPosition, signature: fromSignature } = state.penultimateCommitment;
       const { commitment: toPosition, signature: toSignature } = state.lastCommitment;
       const transactionRequest = createForceMoveTransaction(
@@ -69,8 +68,7 @@ const challengeTransactionFailedReducer = (
         sideEffects: {
           transactionOutbox: {
             transactionRequest,
-            channelId: state.channelId,
-            protocol: WalletProtocol.Challenging,
+            processId: `challenging.${state.channelId}`,
           },
         },
       };
@@ -98,8 +96,7 @@ const approveChallengeReducer = (
         sideEffects: {
           transactionOutbox: {
             transactionRequest,
-            channelId: state.channelId,
-            protocol: WalletProtocol.Challenging,
+            processId: `challenging.${state.channelId}`,
           },
         },
       };
@@ -118,7 +115,7 @@ const initiateChallengeReducer = (
   action: WalletAction,
 ): StateWithSideEffects<states.ChannelStatus> => {
   switch (action.type) {
-    case actions.TRANSACTION_SENT_TO_METAMASK:
+    case actions.TRANSACTION_SENT:
       return { state: states.waitForChallengeSubmission(state) };
     default:
       return { state };

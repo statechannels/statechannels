@@ -33,7 +33,7 @@ const waitForTransactionSentReducer: DFReducer = (
   action: actions.WalletAction,
 ): ProtocolStateWithSharedData<states.Depositing> => {
   switch (action.type) {
-    case actions.TRANSACTION_SENT_TO_METAMASK:
+    case actions.TRANSACTION_SENT:
       return {
         protocolState: states.waitForDepositApproval(state),
         sharedData,
@@ -85,15 +85,14 @@ const depositTransactionFailedReducer: DFReducer = (
   action: actions.WalletAction,
 ): ProtocolStateWithSharedData<states.Depositing> => {
   switch (action.type) {
-    case actions.RETRY_TRANSACTION:
+    case actions.TRANSACTION_RETRY_APPROVED:
       const sideEffects = {
         transactionOutbox: {
           transactionRequest: createDepositTransaction(
             state.channelId,
             state.requestedYourContribution,
           ),
-          channelId: action.channelId,
-          protocol: WalletProtocol.DirectFunding,
+          processId: WalletProtocol.DirectFunding,
         },
       };
       return {

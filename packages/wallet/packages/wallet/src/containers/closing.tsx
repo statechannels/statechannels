@@ -26,7 +26,7 @@ interface Props {
   closeOnChain: (withdrawAddress: string) => void;
   closeSuccessAcknowledged: () => void;
   closedOnChainAcknowledged: () => void;
-  retryTransaction: (channelId: string, protocol: WalletProtocol) => void;
+  transactionRetryApproved: (channelId: string, protocol: WalletProtocol) => void;
 }
 
 class ClosingContainer extends PureComponent<Props> {
@@ -38,7 +38,7 @@ class ClosingContainer extends PureComponent<Props> {
       closeSuccessAcknowledged,
       closedOnChainAcknowledged,
       closeOnChain,
-      retryTransaction,
+      transactionRetryApproved,
     } = this.props;
 
     switch (state.type) {
@@ -120,7 +120,7 @@ class ClosingContainer extends PureComponent<Props> {
         return (
           <TransactionFailed
             name="conclude"
-            retryAction={() => retryTransaction(state.channelId, WalletProtocol.Closing)}
+            retryAction={() => transactionRetryApproved(state.channelId, WalletProtocol.Closing)}
           />
         );
       case states.FINALIZED:
@@ -137,7 +137,7 @@ const mapDispatchToProps = {
   closeSuccessAcknowledged: actions.channel.closeSuccessAcknowledged,
   closedOnChainAcknowledged: actions.channel.closedOnChainAcknowledged,
   closeOnChain: actions.channel.approveClose,
-  retryTransaction: actions.retryTransaction,
+  transactionRetryApproved: actions.transactionRetryApproved,
 };
 
 export default connect(

@@ -21,7 +21,7 @@ interface Props {
   withdrawalApproved: (destinationAddress: string) => void;
   withdrawalRejected: () => void;
   withdrawalSuccessAcknowledged: () => void;
-  retryTransaction: (channelId: string, protocol: WalletProtocol) => void;
+  transactionRetryApproved: (channelId: string, protocol: WalletProtocol) => void;
 }
 
 class WithdrawingContainer extends PureComponent<Props> {
@@ -30,7 +30,7 @@ class WithdrawingContainer extends PureComponent<Props> {
       state,
       withdrawalApproved,
       withdrawalSuccessAcknowledged,
-      retryTransaction,
+      transactionRetryApproved,
     } = this.props;
 
     switch (state.type) {
@@ -79,7 +79,9 @@ class WithdrawingContainer extends PureComponent<Props> {
         return (
           <TransactionFailed
             name="withdraw"
-            retryAction={() => retryTransaction(state.channelId, WalletProtocol.Withdrawing)}
+            retryAction={() =>
+              transactionRetryApproved(state.channelId, WalletProtocol.Withdrawing)
+            }
           />
         );
       default:
@@ -92,7 +94,7 @@ const mapDispatchToProps = {
   withdrawalApproved: actions.channel.withdrawalApproved,
   withdrawalRejected: actions.channel.withdrawalRejected,
   withdrawalSuccessAcknowledged: actions.channel.withdrawalSuccessAcknowledged,
-  retryTransaction: actions.retryTransaction,
+  transactionRetryApproved: actions.transactionRetryApproved,
 };
 
 // why does it think that mapStateToProps can return undefined??

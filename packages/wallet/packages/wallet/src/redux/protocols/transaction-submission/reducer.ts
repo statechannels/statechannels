@@ -1,10 +1,12 @@
 import {
   TransactionAction,
-  TRANSACTION_SENT_TO_METAMASK,
+  TRANSACTION_SENT,
   TRANSACTION_SUBMISSION_FAILED,
   TRANSACTION_SUBMITTED,
   TRANSACTION_CONFIRMED,
-  RETRY_TRANSACTION,
+  TRANSACTION_FAILED,
+  TRANSACTION_RETRY_APPROVED,
+  TRANSACTION_RETRY_DENIED,
 } from './actions';
 import {
   TransactionSubmissionState as TSState,
@@ -12,19 +14,21 @@ import {
   approveRetry,
   waitForConfirmation,
   success,
-  start,
-  START,
+  waitForSend,
+  WAIT_FOR_SEND,
   WAIT_FOR_SUBMISSION,
   WAIT_FOR_CONFIRMATION,
   APPROVE_RETRY,
+  failure,
 } from './states';
-import { TransactionRequest } from 'ethers/providers';
 import { unreachable } from '../../../utils/reducer-utils';
 import { SharedData } from '..';
+import { TransactionRequest } from 'ethers/providers';
+import { queueTransaction } from '../../state';
 
 type Storage = SharedData;
 
-interface ReturnVal {
+export interface ReturnVal {
   state: TSState;
   storage: Storage;
 }
@@ -35,28 +39,36 @@ export function transactionReducer(
   action: TransactionAction,
 ): ReturnVal {
   switch (action.type) {
-    case TRANSACTION_SENT_TO_METAMASK:
-      return transactionSentToMetamask(state, storage);
+    case TRANSACTION_SENT:
+      return transactionSent(state, storage);
     case TRANSACTION_SUBMISSION_FAILED:
       return transactionSubmissionFailed(state, storage);
     case TRANSACTION_SUBMITTED:
       return transactionSubmitted(state, storage, action.transactionHash);
     case TRANSACTION_CONFIRMED:
       return transactionConfirmed(state, storage);
-    case RETRY_TRANSACTION:
-      return retryTransaction(state, storage);
+    case TRANSACTION_RETRY_APPROVED:
+      return transactionRetryApproved(state, storage);
+    case TRANSACTION_RETRY_DENIED:
+      return transactionRetryDenied(state, storage);
+    case TRANSACTION_FAILED:
+      return transactionFailed(state, storage);
     default:
       return unreachable(action);
   }
 }
 
-export function initialize(transaction: TransactionRequest, storage: Storage): ReturnVal {
-  // TODO: queue transaction
-  return { state: start({ transaction }), storage };
+export function initialize(
+  transaction: TransactionRequest,
+  processId: string,
+  storage: Storage,
+): ReturnVal {
+  storage = queueTransaction(storage, transaction, processId);
+  return { state: waitForSend({ transaction, processId }), storage };
 }
 
-function transactionSentToMetamask(state: TSState, storage: Storage): ReturnVal {
-  if (state.type !== START) {
+function transactionSent(state: TSState, storage: Storage): ReturnVal {
+  if (state.type !== WAIT_FOR_SEND) {
     return { state, storage };
   }
   return { state: waitForSubmission(state), storage };
@@ -76,7 +88,7 @@ function transactionSubmitted(
 ): ReturnVal {
   switch (state.type) {
     case WAIT_FOR_SUBMISSION:
-    case START: // just in case we didn't hear the TRANSACTION_SENT_TO_METAMASK
+    case WAIT_FOR_SEND: // just in case we didn't hear the TRANSACTION_SENT
       return { state: waitForConfirmation({ ...state, transactionHash }), storage };
     default:
       return { state, storage };
@@ -87,17 +99,26 @@ function transactionConfirmed(state: TSState, storage: Storage): ReturnVal {
   switch (state.type) {
     case WAIT_FOR_CONFIRMATION:
     case WAIT_FOR_SUBMISSION: // in case we didn't hear the TRANSACTION_SUBMITTED
-    case START: // in case we didn't hear the TRANSACTION_SENT_TO_METAMASK
+    case WAIT_FOR_SEND: // in case we didn't hear the TRANSACTION_SENT
       return { state: success(), storage };
     default:
       return { state, storage };
   }
 }
 
-function retryTransaction(state: TSState, storage: Storage): ReturnVal {
+function transactionRetryApproved(state: TSState, storage: Storage): ReturnVal {
   if (state.type !== APPROVE_RETRY) {
     return { state, storage };
   }
-  // TODO: queue transaction
-  return { state: start(state), storage };
+  const { transaction, processId } = state;
+  storage = queueTransaction(storage, transaction, processId);
+  return { state: waitForSend({ transaction, processId }), storage };
+}
+
+function transactionRetryDenied(state: TSState, storage: Storage): ReturnVal {
+  return { state: failure('User denied retry'), storage };
+}
+
+function transactionFailed(state: TSState, storage: Storage): ReturnVal {
+  return { state: failure('Transaction failed'), storage };
 }

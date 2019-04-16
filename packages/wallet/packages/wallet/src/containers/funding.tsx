@@ -16,7 +16,7 @@ interface Props {
   fundingRejected: () => void;
   fundingSuccessAcknowledged: () => void;
   fundingDeclinedAcknowledged: () => void;
-  retryTransactionAction: (channelId: string, protocol: WalletProtocol) => void;
+  transactionRetryApprovedAction: (channelId: string, protocol: WalletProtocol) => void;
 }
 
 class FundingContainer extends PureComponent<Props> {
@@ -41,7 +41,7 @@ const mapDispatchToProps = {
   fundingRejected: actions.channel.fundingRejected,
   fundingSuccessAcknowledged: actions.channel.fundingSuccessAcknowledged,
   fundingDeclinedAcknowledged: actions.channel.fundingDeclinedAcknowledged,
-  retryTransactionAction: actions.retryTransaction,
+  transactionRetryApprovedAction: actions.transactionRetryApproved,
 };
 
 // why does it think that mapStateToProps can return undefined??

@@ -1,28 +1,37 @@
-<!-- Recommend VSCode plugin 
+<!-- Recommend VSCode plugin
 Name: Markdown Preview Mermaid Support
 Id: bierner.markdown-mermaid
 Description: Adds Mermaid diagram and flowchart support to VS Code's builtin markdown preview
 Version: 1.1.2
 Publisher: Matt Bierner
 VS Marketplace Link: https://marketplace.visualstudio.com/items?itemName=bierner.markdown-mermaid -->
+
 # Redux diagrams (desired state)
+
 (using our conventions at https://magmo.gitbook.io/reference/developer-handbook/react-redux-conventions)
+
 ### Methodology
-These flowcharts are made by constructing nodes from the *state types* or (*stage types* where indicated), from the relevant file in a `/states/` directory, and then constructing edges from the relationships defined in the relevant `/reducers/` directory. Edges are labelled with the *action types* from the `/actions/` directory (or function calls such as other reducers), and the flowcharts suppress information about conditional checks that are performed by the reducers. Where useful, reducers have had their sub-reducers unpacked -- making for a fewer number of more complicated flowcharts. When a reducer returns the same state, these loops are also suppressed. Globally handled actions are also sometimes suppressed.
+
+These flowcharts are made by constructing nodes from the _state types_ or (_stage types_ where indicated), from the relevant file in a `/states/` directory, and then constructing edges from the relationships defined in the relevant `/reducers/` directory. Edges are labelled with the _action types_ from the `/actions/` directory (or function calls such as other reducers), and the flowcharts suppress information about conditional checks that are performed by the reducers. Where useful, reducers have had their sub-reducers unpacked -- making for a fewer number of more complicated flowcharts. When a reducer returns the same state, these loops are also suppressed. Globally handled actions are also sometimes suppressed.
+
 <!-- TODO: consider using the actual `string` value of the types, rather than the variable name. -->
 <!-- TODO: related to ^, consider enforcing this string to be *exactly* the same as the type variable name -->
 <!-- TODO: use hyperlinks / anchors to make this document easier to navigate. -->
 
-### Key: 
+### Key:
+
 ```mermaid
   graph LR
     STATE --> |ACTION| ANOTHER_STATE
     ANOTHER_STATE.->|functionCall| YET_ANOTHER_STATE
 ```
+
 # Top level
+
 [`/packages/wallet/src/redux/reducers/index.ts`](../src/redux/reducers/index.ts)
 
 We initialize the wallet, but we open a channel.
+
 ```mermaid
   graph TD
     WAIT_FOR_LOGIN -->|LOGGED_IN| WAIT_FOR_ADJUDICATOR
@@ -30,7 +39,7 @@ We initialize the wallet, but we open a channel.
     WAIT_FOR_ADJUDICATOR-->|ADJUDICATOR_KNOWN| WAIT_FOR_CHANNEL_OPENING
 
     METAMASK_ERROR
-    
+
     WAIT_FOR_CHANNEL_OPENING -->|CHANNEL_OPENED| OPEN_A_CHANNEL
 
     OPEN_A_CHANNEL .->|channelReducer| CHANNEL_OPENED
@@ -38,12 +47,15 @@ We initialize the wallet, but we open a channel.
     CHANNEL_OPENED .->|channelReducer| CHANNEL_OPENED
 
 ```
+
 TODO: side effects
 
 # channelReducer
+
 [`/packages/wallet/src/redux/reducers/channels/index.ts`](../src/redux/reducers/channels/index.ts)
 
 These are values for `channelStage` rather than `type`:
+
 ```mermaid
   graph TD
     OPENING .->|openingReducer| OPENING
@@ -64,7 +76,9 @@ These are values for `channelStage` rather than `type`:
 ```
 
 ## openingReducer
+
 [`/packages/wallet/src/redux/reducers/channels/opening.ts`](../src/redux/reducers/channels/opening.ts)
+
 ```mermaid
   graph TD
     WAIT_FOR_CHANNEL -->|OWN_COMMITMENT_RECEIEVED| WAIT_FOR_PRE_FUND_SETUP
@@ -76,7 +90,9 @@ These are values for `channelStage` rather than `type`:
 ```
 
 # fundingReducer
+
 [`/packages/wallet/src/redux/reducers/channels/funding/index.ts`](../src/redux/reducers/channels/funding/index.ts)
+
 ```mermaid
   graph TD
     WAIT_FOR_FUNDING_REQUEST -->|FUNDING_REQUESTED| WAIT_FOR_FUNDING_APPROVAL
@@ -100,12 +116,14 @@ These are values for `channelStage` rather than `type`:
     ACKNOWLEDGE_FUNDING_SUCCESS -->|FUNDING_SUCCESS_ACKNOWLEDGED| ACKNOWLEDGE_FUNDING_SUCCESS
 
     SEND_FUNDING_DECLINED_MESSAGE -->|MESSAGE_SENT| SEND_FUNDING_DECLINED_MESSAGE
-        
-    ACKNOWLEDGE_FUNDING_DECLINED -->|FUNDING_DECLINED_ACKNOWLEDGED| ACKNOWLEDGE_FUNDING_DECLINED 
+
+    ACKNOWLEDGE_FUNDING_DECLINED -->|FUNDING_DECLINED_ACKNOWLEDGED| ACKNOWLEDGE_FUNDING_DECLINED
 ```
 
 ## runningReducer
+
 [`/packages/wallet/src/redux/reducers/channels/running.ts`](../src/redux/reducers/channels/running.ts)
+
 ```mermaid
   graph TD
     RUNNING .-> |waitForUpdateReducer|...
@@ -118,19 +136,21 @@ These are values for `channelStage` rather than `type`:
 ```
 
 ## challengingReducer
+
 [`/packages/wallet/src/redux/reducers/channels/challenging/index.ts`](../src/redux/reducers/channels/challenging/index.ts)
+
 ```mermaid
   graph TD
     APPROVE_CHALLENGE --> |CHALLENGE_APPROVED|WAIT_FOR_CHALLENGE_INITIATION
     APPROVE_CHALLENGE --> |CHALLENGE_REJECTED|WAIT_FOR_UPDATE
 
-    WAIT_FOR_CHALLENGE_INITIATION --> |TRANSACTION_SENT_TO_METAMASK| WAIT_FOR_CHALLENGE_SUBMISSION
+    WAIT_FOR_CHALLENGE_INITIATION --> |TRANSACTION_SENT| WAIT_FOR_CHALLENGE_SUBMISSION
 
     WAIT_FOR_CHALLENGE_SUBMISSION --> |CHALLENGE_CREATED_EVENT| WAIT_FOR_CHALLENGE_SUBMISSION
     WAIT_FOR_CHALLENGE_SUBMISSION --> |TRANSACTION_SUBMITTED| WAIT_FOR_CHALLENGE_CONFIRMATION
     WAIT_FOR_CHALLENGE_SUBMISSION --> |TRANSACTION_SUBMISSION_FAILED| CHALLENGE_TRANSACTION_FAILED
 
-    WAIT_FOR_CHALLENGE_CONFIRMATION --> |CHALLENGE_CREATED_EVENT| WAIT_FOR_CHALLENGE_CONFIRMATION 
+    WAIT_FOR_CHALLENGE_CONFIRMATION --> |CHALLENGE_CREATED_EVENT| WAIT_FOR_CHALLENGE_CONFIRMATION
     WAIT_FOR_CHALLENGE_CONFIRMATION --> |TRANSACTION_CONFIRMED| WAIT_FOR_RESPONSE_OR_TIMEOUT
 
     WAIT_FOR_RESPONSE_OR_TIMEOUT --> |CHALLENGE_CREATED_EVENT| WAIT_FOR_RESPONSE_OR_TIMEOUT
@@ -139,14 +159,16 @@ These are values for `channelStage` rather than `type`:
     WAIT_FOR_RESPONSE_OR_TIMEOUT --> |BLOCK_MINED| WAIT_FOR_RESPONSE_OR_TIMEOUT
 
     ACKNOWLEDGE_CHALLENGE_RESPONSE --> |CHALLENGE_RESPONSE_ACKNOWLEDGED| WAIT_FOR_UPDATE
-    
+
     ACKNOWLEDGE_CHALLENGE_TIMEOUT --> |CHALLENGE_TIME_OUT_ACKNOWLEDGED| APPROVE_WITHDRAWAL
-    
-    CHALLENGE_TRANSACTION_FAILED --> |RETRY_TRANSACTION| WAIT_FOR_CHALLENGE_INITIATION
+
+    CHALLENGE_TRANSACTION_FAILED --> |TRANSACTION_RETRY_APPROVED| WAIT_FOR_CHALLENGE_INITIATION
 ```
 
 ## respondingReducer
+
 [`/packages/wallet/src/redux/reducers/channels/responding/index.ts`](../src/redux/reducers/channels/responding/index.ts)
+
 ```mermaid
   graph TD
     CHOOSE_RESPONSE --> |RESPOND_WITH_MOVE_CHOSEN| TAKE_MOVE_IN_APP
@@ -158,9 +180,9 @@ These are values for `channelStage` rather than `type`:
     TAKE_MOVE_IN_APP --> |CHALLENGE_COMMITMENT_RECEIVED| INITIATE_RESPONSE
     TAKE_MOVE_IN_APP --> |BLOCK_MINED| CHALLENGEE_ACKNOWLEDGE_CHALLENGE_TIMEOUT
 
-    INITIATE_RESPONSE --> |TRANSACTION_SENT_TO_METAMASK| WAIT_FOR_RESPONSE_SUBMISSION
+    INITIATE_RESPONSE --> |TRANSACTION_SENT| WAIT_FOR_RESPONSE_SUBMISSION
     INITIATE_RESPONSE --> |BLOCK_MINED| CHALLENGEE_ACKNOWLEDGE_CHALLENGE_TIMEOUT
-    
+
     WAIT_FOR_RESPONSE_SUBMISSION --> |TRANSACTION_SUBMITTED| WAIT_FOR_RESPONSE_CONFIRMATION
     WAIT_FOR_RESPONSE_SUBMISSION --> |TRANSACTION_SUBMISSION_FAILED| RESPSONSE_TRANSACTION_FAILED
     WAIT_FOR_RESPONSE_SUBMISSION --> |BLOCK_MINED| CHALLENGEE_ACKNOWLEDGE_CHALLENGE_TIMEOUT
@@ -168,16 +190,18 @@ These are values for `channelStage` rather than `type`:
     WAIT_FOR_RESPONSE_CONFIRMATION --> |BLOCK_MINED| CHALLENGEE_ACKNOWLEDGE_CHALLENGE_TIMEOUT
     WAIT_FOR_RESPONSE_CONFIRMATION --> |TRANSACTION_CONFIRMED| ACKNOWLEDGE_CHALLENGE_COMPLETE
 
-    
+
     CHALLENGEE_ACKNOWLEDGE_CHALLENGE_TIMEOUT --> |CHALLENGE_TIME_OUT_ACKNOWLEDGED| APPROVE_WITHDRAWAL
-   
+
     ACKNOWLEDGE_CHALLENGE_COMPLETE --> |CHALLENGE_RESPONSE_ACKNOWLEDGED| WAIT_FOR_UPDATE
 CHALLENGEE_ACKNOWLEDGE_CHALLENGE_TIMEOUT
-    RESPONSE_TRANSACTION_FAILED --> |RETRY_TRANSACTION| INITIATE_RESPONSE
+    RESPONSE_TRANSACTION_FAILED --> |TRANSACTION_RETRY_APPROVED| INITIATE_RESPONSE
 ```
 
 ## withdrawingReducer
+
 [`/packages/wallet/src/redux/reducers/channels/withdrawing/index.ts`](../src/redux/reducers/channels/withdrawing/index.ts)
+
 ```mermaid
   graph TD
     APPROVE_WITHDRAWAL --> |WITHDRAWAL_APPROVED| WAIT_FOR_WITHDRAWAL_INITIATION
@@ -187,7 +211,7 @@ CHALLENGEE_ACKNOWLEDGE_CHALLENGE_TIMEOUT
     WAIT_FOR_WITHDRAWAL_INITIATION --> |TRANSACTION_SUBMITTED| WAIT_FOR_WITHDRAWAL_CONFIRMATION
     WAIT_FOR_WITHDRAWAL_INITIATION --> |TRANSACTION_SUBMISSION_FAILED| WITHDRAW_TRANSACTION_FAILED
 
-    WAIT_FOR_WITHDRAWAL_CONFIRMATION --> |TRANSACTION_CONFIRMED| ACKNOWLEDGE_WITHDRAWAL_SUCCESS 
+    WAIT_FOR_WITHDRAWAL_CONFIRMATION --> |TRANSACTION_CONFIRMED| ACKNOWLEDGE_WITHDRAWAL_SUCCESS
 
     ACKNOWLEDGE_WITHDRAWAL_SUCCESS --> |WITHDRAWAL_SUCCESS_ACKNOWLEDGED| WAIT_FOR_CHANNEL
 
@@ -195,7 +219,9 @@ CHALLENGEE_ACKNOWLEDGE_CHALLENGE_TIMEOUT
 ```
 
 ## closingReducer
+
 [`/packages/wallet/src/redux/reducers/channels/closing/index.ts`](../src/redux/reducers/channels/closing/index.ts)
+
 ```mermaid
   graph TD
     APPROVE_CONCLUDE --> |CONCLUDE_APPROVED| APPROVE_CLOSE_ON_CHAIN
@@ -210,7 +236,7 @@ CHALLENGEE_ACKNOWLEDGE_CHALLENGE_TIMEOUT
 
     APPROVE_CLOSE_ON_CHAIN --> |APPROVE_CLOSE| WAIT_FOR_CLOSE_INITIATION
 
-    WAIT_FOR_CLOSE_INITIATION --> |TRANSACTION_SENT_TO_METAMASK| WAIT_FOR_CLOSE_SUBMISSION
+    WAIT_FOR_CLOSE_INITIATION --> |TRANSACTION_SENT| WAIT_FOR_CLOSE_SUBMISSION
 
     WAIT_FOR_CLOSE_SUBMISSION --> |TRANSACTION_SUBMISSION_FAILED| CLOSE_TRANSACTION_FAILED
     WAIT_FOR_CLOSE_SUBMISSION --> |TRANSACTION_SUBMITTED| WAIT_FOR_CLOSE_CONFIRMED
@@ -219,12 +245,15 @@ CHALLENGEE_ACKNOWLEDGE_CHALLENGE_TIMEOUT
 
     ACKNOWLEDGE_CONCLUDE --> |CONCLUDE_APPROVED| APPROVE_CLOSE_ON_CHAIN
 
-    CLOSE_TRANSACTION_FAILED --> |RETRY_TRANSACTION| WAIT_FOR_CLOSE_SUBMISSION
+    CLOSE_TRANSACTION_FAILED --> |TRANSACTION_RETRY_APPROVED| WAIT_FOR_CLOSE_SUBMISSION
 ```
 
 # WIP
+
 ## directFunding
+
 [`/packages/wallet/src/redux/reducers/channels/funding/directFunding.ts`](../src/redux/reducers/channels/funding/directFunding.ts`)
+
 ```mermaid
   graph TD
     WAIT_FOR_FUNDING_REQUEST -->|FUNDING_REQUESTED| WAIT_FOR_FUNDING_APPROVAL
@@ -234,7 +263,7 @@ CHALLENGEE_ACKNOWLEDGE_CHALLENGE_TIMEOUT
     WAIT_FOR_FUNDING_APPROVAL -->|MESSAGE_RECEIVED| ACKNOWLEDGE_FUNDING_DECLINED
     WAIT_FOR_FUNDING_APPROVAL -->|FUNDING_DECLINED_ACKNOWLEDGED| WAIT_FOR_FUNDING_APPROVAL
 
-    A_WAIT_FOR_DEPOSIT_TO_BE_SENT_TO_METAMASK --> |TRANSACTION_SENT_TO_METAMASK| A_SUBMIT_DEPOSIT_IN_METAMASK
+    A_WAIT_FOR_DEPOSIT_TO_BE_SENT_TO_METAMASK --> |TRANSACTION_SENT| A_SUBMIT_DEPOSIT_IN_METAMASK
     A_WAIT_FOR_DEPOSIT_TO_BE_SENT_TO_METAMASK --> |FUNDING_RECEIVED_EVENT| A_WAIT_FOR_DEPOSIT_TO_BE_SENT_TO_METAMASK
 
     A_SUBMIT_DEPOSIT_IN_METAMASK --> |FUNDING_RECEIVED_EVENT| A_SUBMIT_DEPOSIT_IN_METAMASK
@@ -248,16 +277,16 @@ CHALLENGEE_ACKNOWLEDGE_CHALLENGE_TIMEOUT
 
     B_WAIT_FOR_OPPONENT_DEPOSIT --> |FUNDING_RECEIVED_EVENT| B_WAIT_FOR_DEPOSIT_TO_BE_SENT_TO_METAMASK
 
-    B_WAIT_FOR_DEPOSIT_TO_BE_SENT_TO_METAMASK --> |TRANSACTION_SENT_TO_METAMASK| B_SUBMIT_DEPOSIT_IN_METAMASK
+    B_WAIT_FOR_DEPOSIT_TO_BE_SENT_TO_METAMASK --> |TRANSACTION_SENT| B_SUBMIT_DEPOSIT_IN_METAMASK
 
     B_SUBMIT_DEPOSIT_IN_METAMASK --> |TRANSACTION_SUBMITTED| B_WAIT_FOR_DEPOSIT_CONFIRMATION
     B_SUBMIT_DEPOSIT_IN_METAMASK --> |TRANSACTION_SUBMISSION_FAILED| B_DEPOSIT_TRANSACTION_FAILED
 
     B_WAIT_FOR_DEPOSIT_CONFIRMATION --> |TRANSACTION_CONFIRMED| FUNDING_CONFIRMED
 
-    A_DEPOSIT_TRANSACTION_FAILED --> |RETRY_TRANSACTION| A_WAIT_FOR_DEPOSIT_TO_BE_SENT_TO_METAMASK
+    A_DEPOSIT_TRANSACTION_FAILED --> |TRANSACTION_RETRY_APPROVED| A_WAIT_FOR_DEPOSIT_TO_BE_SENT_TO_METAMASK
 
-    B_DEPOSIT_TRANSACTION_FAILED --> |RETRY_TRANSACTION| B_WAIT_FOR_DEPOSIT_TO_BE_SENT_TO_METAMASK
+    B_DEPOSIT_TRANSACTION_FAILED --> |TRANSACTION_RETRY_APPROVED| B_WAIT_FOR_DEPOSIT_TO_BE_SENT_TO_METAMASK
 
     FUNDING_CONFIRMED
 

@@ -3,6 +3,7 @@ import {
   EMPTY_OUTBOX_STATE,
   SideEffects,
   queueMessage as queueMessageOutbox,
+  queueTransaction as queueTransactionOutbox,
 } from './outbox/state';
 import {
   ChannelState,
@@ -13,6 +14,8 @@ import { Properties } from './utils';
 import * as indirectFunding from './protocols/indirect-funding/state';
 import { accumulateSideEffects } from './outbox';
 import { WalletEvent } from 'magmo-wallet-client';
+import { SharedData } from './protocols';
+import { TransactionRequest } from 'ethers/providers';
 
 export type WalletState = WaitForLogin | WaitForAdjudicator | MetaMaskError | Initialized;
 
@@ -131,6 +134,17 @@ export function setChannel(state: Initialized, channel: ChannelStatus): Initiali
 
 export function queueMessage(state: Initialized, message: WalletEvent): Initialized {
   return { ...state, outboxState: queueMessageOutbox(state.outboxState, message) };
+}
+
+export function queueTransaction(
+  state: SharedData,
+  transaction: TransactionRequest,
+  processId: string,
+): SharedData {
+  return {
+    ...state,
+    outboxState: queueTransactionOutbox(state.outboxState, transaction, processId),
+  };
 }
 
 export { indirectFunding };

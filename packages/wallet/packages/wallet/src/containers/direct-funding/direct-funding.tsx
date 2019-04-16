@@ -16,13 +16,14 @@ interface Props {
   channelId: string;
   fundingSuccessAcknowledged: () => void;
   fundingDeclinedAcknowledged: () => void;
-  retryTransactionAction: (channelId: string, protocol: WalletProtocol) => void;
+  transactionRetryApprovedAction: (channelId: string, protocol: WalletProtocol) => void;
 }
 
 class DirectFundingContainer extends PureComponent<Props> {
   render() {
-    const { directFundingState, retryTransactionAction } = this.props;
-    const step = fundingStepByState(directFundingState);
+    const { directFundingState, transactionRetryApprovedAction, channelId } = this.props;
+    const state = directFundingState[channelId];
+    const step = fundingStepByState(state);
     if (
       directFundingStates.stateIsNotSafeToDeposit(directFundingState) ||
       directFundingStates.stateIsWaitForFundingConfirmation(directFundingState)
@@ -52,7 +53,7 @@ class DirectFundingContainer extends PureComponent<Props> {
             <TransactionFailed
               name="deposit"
               retryAction={() =>
-                retryTransactionAction(directFundingState.channelId, WalletProtocol.DirectFunding)
+                transactionRetryApprovedAction(state.channelId, WalletProtocol.DirectFunding)
               }
             />
           );
@@ -74,7 +75,7 @@ const mapDispatchToProps = {
   fundingRejected: actions.channel.fundingRejected,
   fundingSuccessAcknowledged: actions.channel.fundingSuccessAcknowledged,
   fundingDeclinedAcknowledged: actions.channel.fundingDeclinedAcknowledged,
-  retryTransactionAction: actions.retryTransaction,
+  transactionRetryApprovedAction: actions.transactionRetryApproved,
 };
 
 // why does it think that mapStateToProps can return undefined??
