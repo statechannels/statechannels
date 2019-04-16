@@ -109,7 +109,7 @@
     "ganache-cli": "^6.3.0",
     "html-webpack-plugin": "4.0.0-beta.5",
     "jest": "^23.5.0",
-    "magmo-devtools": "git+https://github.com/magmo/devtools.git#v0.1.12",
+    "magmo-devtools": "git+https://github.com/magmo/devtools.git#v0.1.15",
     "fmg-nitro-adjudicator": "0.0.12",
     "node-sass": "^4.9.3",
     "optimize-css-assets-webpack-plugin": "5.0.1",
