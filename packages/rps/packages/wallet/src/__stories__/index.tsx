@@ -8,11 +8,7 @@ import * as indirectFundingPlayerB from '../redux/protocols/indirect-funding/pla
 import * as walletStates from '../redux/state';
 import { indirectFundingWalletState as indirectFundingWalletStateA } from './a-dummy-wallet-states';
 import { indirectFundingWalletState as indirectFundingWalletStateB } from './b-dummy-wallet-states';
-import {
-  dummyWaitForAdjudicator,
-  dummyWaitForLogin,
-  dummyWaitForMetaMask,
-} from './dummy-wallet-states';
+import { dummyWaitForLogin, dummyWaitForMetaMask } from './dummy-wallet-states';
 
 const fakeStore = state => ({
   dispatch: action => {
@@ -70,7 +66,6 @@ function addStoriesFromCollection(collection, chapter, renderer = walletStateRen
 
 const WalletScreensNotInitialized = {
   WaitForLogIn: dummyWaitForLogin,
-  WaitForAdjudicator: dummyWaitForAdjudicator,
   WaitForMetaMask: dummyWaitForMetaMask,
 };
 

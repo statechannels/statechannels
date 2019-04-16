@@ -11,7 +11,7 @@ import { signCommitment } from '../utils/signing-utils';
 import testGameArtifact from '../../build/contracts/TestGame.json';
 import { bigNumberify } from 'ethers/utils';
 import { channelID } from 'fmg-core/lib/channel';
-import { getAdjudicatorContractAddress } from '../utils/contract-utils';
+import { ADJUDICATOR_ADDRESS } from '../constants';
 export function getLibraryAddress(networkId) {
   return testGameArtifact.networks[networkId].address;
 }
@@ -210,6 +210,5 @@ export async function refuteChallenge(
 
 async function sendTransaction(provider, tx) {
   const signer = provider.getSigner();
-  const contractAddress = await getAdjudicatorContractAddress(provider);
-  return await signer.sendTransaction({ ...tx, to: contractAddress });
+  return await signer.sendTransaction({ ...tx, to: ADJUDICATOR_ADDRESS });
 }

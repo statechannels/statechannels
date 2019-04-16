@@ -1,6 +1,7 @@
 import { ethers } from 'ethers';
 
 import NitroAdjudicatorArtifact from '../../build/contracts/NitroAdjudicator.json';
+import ConsensusAppArtifact from '../../build/contracts/ConsensusApp.json';
 
 export async function getProvider(): Promise<ethers.providers.Web3Provider> {
   return await new ethers.providers.Web3Provider(web3.currentProvider);
@@ -17,10 +18,37 @@ export function getAdjudicatorInterface(): ethers.utils.Interface {
   return new ethers.utils.Interface(NitroAdjudicatorArtifact.abi);
 }
 
-export async function getAdjudicatorContractAddress(provider) {
-  await provider.ready;
-  const networkId = (await provider.getNetwork()).chainId;
-  return NitroAdjudicatorArtifact.networks[networkId].address;
+export function getAdjudicatorContractAddress(): string {
+  return NitroAdjudicatorArtifact.networks[getNetworkId()].address;
+}
+
+export function getConsensusContractAddress(): string {
+  return ConsensusAppArtifact.networks[getNetworkId()].address;
+}
+
+export function getNetworkId(): number {
+  if (!!process.env.TARGET_NETWORK_ID) {
+    return parseInt(process.env.TARGET_NETWORK_ID, 10);
+  } else {
+    throw new Error('There is no target network ID specified.');
+  }
+}
+
+export function isDevelopmentNetwork(): boolean {
+  const networkId = getNetworkId();
+
+  return (
+    networkId > 8 && // various test nets
+    networkId !== 42 && // kovan
+    networkId !== 60 && // go chain
+    networkId !== 77 && // sokol
+    networkId !== 99 && // core
+    networkId !== 100 && // xDai
+    networkId !== 31337 && // go chain test
+    networkId !== 401697 && // tobalaba
+    networkId !== 7762959 && // musicoin
+    networkId !== 61717561 // aquachain
+  );
 }
 
 export async function getAdjudicatorHoldings(provider, channelId) {
