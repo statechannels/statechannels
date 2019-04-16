@@ -10,7 +10,6 @@ import {
   itTransitionsToChannelStateType,
   itSendsNoMessage,
 } from '../../../../__tests__/helpers';
-import { WalletProtocol } from '../../../../types';
 import { PlayerIndex } from 'magmo-wallet-client/lib/wallet-instructions';
 
 import * as SigningUtil from '../../../../../utils/signing-utils';
@@ -133,12 +132,7 @@ describe(startingIn(states.WAIT_FOR_PRE_FUND_SETUP_0), () => {
       channelStates.waitForFundingAndPostFundSetup(appChannelStateDefaults),
     );
 
-    const action = actions.commitmentReceived(
-      channelId,
-      WalletProtocol.IndirectFunding,
-      preFundCommitment0,
-      'signature',
-    );
+    const action = actions.commitmentReceived(channelId, preFundCommitment0, 'signature');
     const updatedState = playerBReducer(state.protocolState, state.sharedData, action);
 
     itTransitionToStateType(updatedState, states.WAIT_FOR_DIRECT_FUNDING);
@@ -184,12 +178,7 @@ describe(startingIn(states.WAIT_FOR_POST_FUND_SETUP_0), () => {
       }),
     );
 
-    const action = actions.commitmentReceived(
-      channelId,
-      WalletProtocol.IndirectFunding,
-      postFundCommitment0,
-      'signature',
-    );
+    const action = actions.commitmentReceived(channelId, postFundCommitment0, 'signature');
     const updatedState = playerBReducer(state.protocolState, state.sharedData, action);
 
     itTransitionToStateType(updatedState, states.WAIT_FOR_LEDGER_UPDATE_0);
@@ -219,7 +208,6 @@ describe(startingIn(states.WAIT_FOR_LEDGER_UPDATE_0), () => {
 
     const action = actions.commitmentReceived(
       channelId,
-      WalletProtocol.IndirectFunding,
       ledgerCommitments.ledgerUpdate0,
       'signature',
     );
@@ -253,7 +241,6 @@ describe(startingIn(states.WAIT_FOR_CONSENSUS), () => {
 
     const action = actions.commitmentReceived(
       channelId,
-      WalletProtocol.IndirectFunding,
       ledgerCommitments.ledgerUpdate2,
       'signature',
     );
