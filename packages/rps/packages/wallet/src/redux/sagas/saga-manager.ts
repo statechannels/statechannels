@@ -73,8 +73,8 @@ export function* sagaManager(): IterableIterator<any> {
       yield displaySender(displayMessageToSend);
     }
     if (outboxState.transactionOutbox.length) {
-      const { transactionRequest, channelId, protocol } = outboxState.transactionOutbox[0];
-      yield transactionSender(transactionRequest, channelId, protocol);
+      const queuedTransaction = outboxState.transactionOutbox[0];
+      yield transactionSender(queuedTransaction);
     }
   }
 }

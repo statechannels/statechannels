@@ -61,7 +61,7 @@ const closeTransactionFailedReducer = (
   action: actions.WalletAction,
 ): StateWithSideEffects<channelStates.ChannelStatus> => {
   switch (action.type) {
-    case actions.RETRY_TRANSACTION:
+    case actions.TRANSACTION_RETRY_APPROVED:
       const { penultimateCommitment: from, lastCommitment: to } = state;
       const myAddress = state.participants[state.ourIndex];
       const amount = to.commitment.allocation[state.ourIndex];
@@ -90,8 +90,7 @@ const closeTransactionFailedReducer = (
         sideEffects: {
           transactionOutbox: {
             transactionRequest,
-            channelId: state.channelId,
-            protocol: WalletProtocol.Closing,
+            processId: `closing.${state.channelId}`,
           },
         },
       };
@@ -154,7 +153,7 @@ const waitForCloseInitiatorReducer = (
   action: actions.WalletAction,
 ): StateWithSideEffects<channelStates.ChannelStatus> => {
   switch (action.type) {
-    case actions.TRANSACTION_SENT_TO_METAMASK:
+    case actions.TRANSACTION_SENT:
       return { state: channelStates.waitForCloseSubmission(state) };
   }
   return { state };
@@ -215,8 +214,7 @@ const approveCloseOnChainReducer = (
         sideEffects: {
           transactionOutbox: {
             transactionRequest,
-            channelId: state.channelId,
-            protocol: WalletProtocol.Closing,
+            processId: `closing.${state.channelId}`,
           },
         },
       };
