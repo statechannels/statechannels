@@ -53,7 +53,7 @@ const retryAndApprove = {
 const retryAndDeny = {
   WaitForSubmission: scenarios.retryAndDeny.waitForSubmission,
   ApproveRetry: scenarios.retryAndDeny.approveRetry,
-  WaitForSend: scenarios.retryAndDeny.failure,
+  Failure: scenarios.retryAndDeny.failure,
 };
 
 const transactionFails = {
@@ -69,6 +69,9 @@ addStories(transactionFails, 'Transaction Submission / Transaction fails');
 function addStories(collection, chapter) {
   Object.keys(collection).map(storyName => {
     const state = collection[storyName];
-    storiesOf(chapter, module).add(storyName, render(<TransactionSubmission state={state} />));
+    storiesOf(chapter, module).add(
+      storyName,
+      render(<TransactionSubmission transactionName="deposit" state={state} />),
+    );
   });
 }
