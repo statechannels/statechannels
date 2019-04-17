@@ -14,7 +14,7 @@ import { PlayerIndex } from 'magmo-wallet-client/lib/wallet-instructions';
 
 import * as SigningUtil from '../../../../../utils/signing-utils';
 import { ProtocolStateWithSharedData } from '../../../../protocols';
-import { EMPTY_OUTBOX_STATE } from '../../../../outbox/state';
+import { emptyDisplayOutboxState } from '../../../../outbox/state';
 import { addHex } from '../../../../../utils/hex-utils';
 const validCommitmentSignature = jest.fn().mockReturnValue(true);
 Object.defineProperty(SigningUtil, 'validCommitmentSignature', {
@@ -102,14 +102,14 @@ const startingState = (
   protocolState: states.PlayerBState,
   ...channelStatuses: channelStates.ChannelStatus[]
 ): ProtocolStateWithSharedData<states.PlayerBState> => {
-  const channelState = { ...channelStates.EMPTY_CHANNEL_STATE };
+  const channelState = { ...channelStates.emptyChannelState() };
   for (const channelStatus of channelStatuses) {
     channelState.initializedChannels[channelStatus.channelId] = channelStatus;
   }
   return {
     protocolState,
     sharedData: {
-      outboxState: EMPTY_OUTBOX_STATE,
+      outboxState: emptyDisplayOutboxState(),
       channelState,
     },
   };

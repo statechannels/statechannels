@@ -1,6 +1,6 @@
 import {
   OutboxState,
-  EMPTY_OUTBOX_STATE,
+  emptyDisplayOutboxState,
   SideEffects,
   queueMessage as queueMessageOutbox,
   queueTransaction as queueTransactionOutbox,
@@ -72,7 +72,7 @@ export function indirectFundingOngoing(state: Initialized): state is IndirectFun
 // Constructors
 // ------------
 export const emptyState: Shared = {
-  outboxState: EMPTY_OUTBOX_STATE,
+  outboxState: emptyDisplayOutboxState(),
   channelState: { initializedChannels: {}, initializingChannels: {} },
 };
 

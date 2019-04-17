@@ -7,12 +7,12 @@ import * as playerB from '../player-b/reducer';
 import * as scenarios from '../../../__tests__/test-scenarios';
 import { PlayerIndex } from '../../../types';
 import * as indirectFundingStates from '../../indirect-funding/state';
-import { EMPTY_OUTBOX_STATE } from '../../../outbox/state';
-import { EMPTY_CHANNEL_STATE } from '../../../channel-state/state';
+import { emptyDisplayOutboxState } from '../../../outbox/state';
+import { emptyChannelState } from '../../../channel-state/state';
 const { channelId, ledgerChannel } = scenarios;
 const emptySharedData = {
-  outboxState: EMPTY_OUTBOX_STATE,
-  channelState: EMPTY_CHANNEL_STATE,
+  outboxState: emptyDisplayOutboxState(),
+  channelState: emptyChannelState(),
 };
 
 const defaultProtocolState = indirectFundingStates.playerB.waitForApproval(channelId);

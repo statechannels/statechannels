@@ -3,7 +3,7 @@ import * as fundingStates from '../redux/channel-state/funding/state';
 import * as sharedStates from '../redux/channel-state/shared/state';
 import * as channelStates from '../redux/channel-state/state';
 import * as indirectFundingPlayerB from '../redux/protocols/indirect-funding/player-b/state';
-import { EMPTY_OUTBOX_STATE } from '../redux/outbox/state';
+import { emptyDisplayOutboxState } from '../redux/outbox/state';
 import * as walletStates from '../redux/state';
 import {
   bsAddress,
@@ -53,7 +53,7 @@ const defaultChannelState: channelStates.ChannelState = {
 const defaultInitialized: walletStates.Initialized = walletStates.initialized({
   ...defaultParams,
   channelState: defaultChannelState,
-  outboxState: EMPTY_OUTBOX_STATE,
+  outboxState: emptyDisplayOutboxState(),
   consensusLibrary: '',
   processStore: {},
   directFundingStore: {},
