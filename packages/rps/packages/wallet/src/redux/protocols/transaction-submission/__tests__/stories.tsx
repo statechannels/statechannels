@@ -1,25 +1,11 @@
 import { storiesOf } from '@storybook/react';
 import React from 'react';
-import { Provider } from 'react-redux';
-
-import * as scenarios from './scenarios';
-import { TransactionSubmission } from '..';
-import StatusBarLayout from '../../../../components/status-bar-layout';
 import Modal from 'react-modal';
-
-const fakeStore = state => ({
-  dispatch: action => {
-    alert(`Action ${action.type} triggered`);
-    return action;
-  },
-  getState: () => state,
-  subscribe: () => () => {
-    /* empty */
-  },
-  replaceReducer: () => {
-    /* empty */
-  },
-});
+import { Provider } from 'react-redux';
+import { TransactionSubmission } from '..';
+import { fakeStore } from '../../../../__stories__/index';
+import StatusBarLayout from '../../../../components/status-bar-layout';
+import * as scenarios from './scenarios';
 
 const render = container => () => {
   // todo: rework this modal stuff

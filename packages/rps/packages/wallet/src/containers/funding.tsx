@@ -6,7 +6,6 @@ import * as channelStates from '../redux/channel-state/state';
 import * as actions from '../redux/actions';
 
 import { unreachable } from '../utils/reducer-utils';
-import DirectFunding from './direct-funding/direct-funding';
 import { FundingStep, Step } from '../components/funding/funding-step';
 import { WalletProtocol } from '../redux/types';
 
@@ -26,7 +25,9 @@ class FundingContainer extends PureComponent<Props> {
     switch (state.type) {
       case channelStates.WAIT_FOR_FUNDING_AND_POST_FUND_SETUP:
       case channelStates.WAIT_FOR_FUNDING_CONFIRMATION:
-        return <DirectFunding channelId={state.channelId} />;
+        // TODO: this line is causing a TS error. This whole container will disappear soon.
+        // return <DirectFunding channelId={state.channelId} />;
+        return <div />;
       case channelStates.A_WAIT_FOR_POST_FUND_SETUP:
       case channelStates.B_WAIT_FOR_POST_FUND_SETUP:
         return <FundingStep step={Step.CHANNEL_FUNDED}>Waiting for the other player</FundingStep>;

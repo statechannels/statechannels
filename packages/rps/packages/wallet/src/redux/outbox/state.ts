@@ -2,11 +2,9 @@ import { TransactionRequest } from 'ethers/providers';
 import { WalletEvent, DisplayAction } from 'magmo-wallet-client';
 import { accumulateSideEffects } from '.';
 
-export const EMPTY_OUTBOX_STATE: OutboxState = {
-  displayOutbox: [],
-  messageOutbox: [],
-  transactionOutbox: [],
-};
+export function emptyDisplayOutboxState(): OutboxState {
+  return { displayOutbox: [], messageOutbox: [], transactionOutbox: [] };
+}
 
 export interface QueuedTransaction {
   transactionRequest: TransactionRequest;
