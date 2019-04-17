@@ -9,10 +9,10 @@
     "firebase/**/grpc": "^1.16.1"
   },
   "scripts": {
-    "start": "node scripts/start.js",
-    "build": "node scripts/build.js",
+    "start": "npm run clearContracts && node scripts/start.js",
+    "build": "npm run clearContracts && node scripts/build.js",
     "test": "run-s prettier:check 'test:app --all'",
-    "test:ci": "DEV_GANACHE_PORT=8503 run-s prettier:check build 'test:contracts --all --ci' 'test:app --all --ci --runInBand'",
+    "test:ci": "DEV_GANACHE_PORT=8503  run-s clearContracts prettier:check build 'test:contracts --all --ci' 'test:app --all --ci --runInBand'",
     "test:app": "npx run-jest -c ./config/jest/jest.config.js",
     "prettier:check": "npx prettier --check 'src/**/*.{ts,tsx}'",
     "prettier:write": "npx prettier --write 'src/**/*.{ts,tsx}'",
@@ -20,7 +20,8 @@
     "ganache:start": "npx start-ganache",
     "postinstall": "rm -f node_modules/web3/index.d.ts",
     "storybook": "start-storybook -p 9001 -c .storybook",
-    "test:contracts": "npx ganache-then-jest -c ./config/jest/jest.contracts.config.js --runInBand"
+    "test:contracts": "npx ganache-then-jest -c ./config/jest/jest.contracts.config.js --runInBand",
+    "clearContracts": "rm -rf ./build/contracts"
   },
   "dependencies": {
     "@firebase/app-types": "^0.3.2",
