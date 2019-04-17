@@ -4,29 +4,58 @@ import { connect } from 'react-redux';
 import { TransactionSubmissionState } from './states';
 import { unreachable } from '../../../utils/reducer-utils';
 import * as states from './states';
+import WaitForConfirmation from './components/wait-for-confirmation';
+import WaitForSubmission from './components/wait-for-submission';
+import { NETWORK_ID } from '../../../constants';
+import ApproveRetry from './components/approve-retry';
+import * as actions from './actions';
+import Failure from './components/failure';
+import Success from './components/success';
 
 interface Props {
   state: TransactionSubmissionState;
+  transactionName: string;
+  transactionRetryApproved: (processId: string) => void;
+  transactionRetryDenied: (processId: string) => void;
 }
 
 class TransactionSubmissionContainer extends PureComponent<Props> {
   render() {
-    const { state } = this.props;
+    const { state, transactionName, transactionRetryApproved, transactionRetryDenied } = this.props;
     switch (state.type) {
       case states.WAIT_FOR_SEND:
       case states.WAIT_FOR_SUBMISSION:
+        return <WaitForSubmission name={transactionName} />;
       case states.WAIT_FOR_CONFIRMATION:
+        return (
+          <WaitForConfirmation
+            name={transactionName}
+            transactionId={state.transactionHash}
+            networkId={NETWORK_ID}
+          />
+        );
       case states.APPROVE_RETRY:
+        return (
+          <ApproveRetry
+            name={transactionName}
+            approve={() => transactionRetryApproved(state.processId)}
+            deny={() => transactionRetryDenied(state.processId)}
+          />
+        );
       case states.FAILURE:
+        return <Failure name={transactionName} reason={state.reason} />;
       case states.SUCCESS:
-        return <div>Hello</div>;
+        return <Success name={transactionName} />;
       default:
         return unreachable(state);
     }
   }
 }
 
-const mapDispatchToProps = {};
+const mapDispatchToProps = {
+  transactionRetryApproved: actions.transactionRetryApproved,
+  transactionRetryDenied: actions.transactionRetryDenied,
+};
 
 export const TransactionSubmission = connect(
   () => ({}),
