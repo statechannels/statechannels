@@ -1,7 +1,7 @@
 import React from 'react';
 import Modal from 'react-modal';
 import { Provider } from 'react-redux';
-import IndirectFundingContainer from '../../../../../containers/indirect-funding/indirect-funding';
+import IndirectFundingContainer from '../../container';
 import { happyPath } from './scenarios';
 import * as storybookUtils from '../../../../../__stories__/index';
 

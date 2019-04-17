@@ -1,9 +1,9 @@
 import React from 'react';
-import * as indirectFundingPlayerA from '../../redux/protocols/indirect-funding/player-a/state';
-import * as indirectFundingPlayerB from '../../redux/protocols/indirect-funding/player-b/state';
-import * as indirectFunding from '../../redux/protocols/indirect-funding/state';
-import { unreachable } from '../../utils/reducer-utils';
-import { MessagesForStep, Checklist, messagesForStep } from '../checklist';
+import * as indirectFundingPlayerA from '../player-a/state';
+import * as indirectFundingPlayerB from '../player-b/state';
+import * as indirectFunding from '../state';
+import { unreachable } from '../../../../utils/reducer-utils';
+import { MessagesForStep, Checklist, messagesForStep } from '../../../../components/checklist';
 
 interface Props {
   fundingState: indirectFunding.IndirectFundingState;
