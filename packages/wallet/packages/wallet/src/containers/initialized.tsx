@@ -2,7 +2,7 @@ import * as states from '../redux/state';
 import React, { PureComponent } from 'react';
 import LandingPage from '../components/landing-page';
 import { connect } from 'react-redux';
-import IndirectFundingContainer from './indirect-funding/indirect-funding';
+import IndirectFundingContainer from '../redux/protocols/indirect-funding/container';
 
 interface Props {
   state: states.Initialized;

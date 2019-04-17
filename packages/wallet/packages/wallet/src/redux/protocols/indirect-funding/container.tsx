@@ -1,10 +1,10 @@
 import React, { PureComponent } from 'react';
 import { connect } from 'react-redux';
-import * as indirectFundingState from '../../redux/protocols/indirect-funding/state';
-import { PlayerIndex } from '../../redux/types';
-import { unreachable } from '../../utils/reducer-utils';
-import IndirectFundingAContainer from './indirect-funding-a';
-import IndirectFundingBContainer from './indirect-funding-b';
+import * as indirectFundingState from './state';
+import { PlayerIndex } from '../../types';
+import { unreachable } from '../../../utils/reducer-utils';
+import IndirectFundingAContainer from './player-a/container';
+import IndirectFundingBContainer from './player-b/container';
 
 interface Props {
   state: indirectFundingState.IndirectFundingState;
