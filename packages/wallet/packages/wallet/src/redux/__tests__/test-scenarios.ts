@@ -8,7 +8,6 @@ import { addHex } from '../../utils/hex-utils';
 import * as directFundingStates from '../../redux/protocols/direct-funding/state';
 import { PlayerIndex } from 'magmo-wallet-client/lib/wallet-instructions';
 import * as actions from '../actions';
-import { EMPTY_SHARED_DATA } from '../protocols';
 
 export const libraryAddress = '0x' + '1'.repeat(40);
 export const ledgerLibraryAddress = '0x' + '2'.repeat(40);
@@ -30,7 +29,7 @@ export const fundingState = {
 export const twoThree = [bigNumberify(2).toHexString(), bigNumberify(3).toHexString()];
 
 export const initializedState: states.Initialized = {
-  ...states.emptyState,
+  ...states.EMPTY_SHARED_DATA,
   type: states.WALLET_INITIALIZED,
   uid: 'uid',
   processStore: {},
@@ -243,7 +242,8 @@ const initialFundingState = (ourIndex: PlayerIndex, fundingRequestChannelId: str
     requiredDeposit,
     ourIndex,
   );
-  return directFundingStates.initialDirectFundingState(action, EMPTY_SHARED_DATA).protocolState;
+  return directFundingStates.initialDirectFundingState(action, states.EMPTY_SHARED_DATA)
+    .protocolState;
 };
 
 export const ledgerDirectFundingStates = {

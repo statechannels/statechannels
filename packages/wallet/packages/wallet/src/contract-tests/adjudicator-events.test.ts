@@ -12,6 +12,7 @@ import {
   defaultDepositAmount,
 } from './test-utils';
 import { ProcessStore } from '../redux/state';
+import { WalletProtocol } from '../redux/types';
 
 jest.setTimeout(60000);
 
@@ -21,6 +22,7 @@ const createWatcherState = (processId: string, ...channelIds: string[]) => {
       protocolState: {},
       processId,
       channelsToMonitor: channelIds,
+      protocol: WalletProtocol.TransactionSubmission,
     },
   };
   return { processStore };

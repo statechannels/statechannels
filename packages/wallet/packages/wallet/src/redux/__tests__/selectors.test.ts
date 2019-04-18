@@ -1,5 +1,6 @@
 import * as walletStates from '../state';
 import * as selectors from '../selectors';
+import { WalletProtocol } from '../types';
 
 describe('getAdjudicatorWatcherProcessesForChannel', () => {
   const createWatcherState = (
@@ -13,10 +14,11 @@ describe('getAdjudicatorWatcherProcessesForChannel', () => {
         protocolState: {},
         processId,
         channelsToMonitor,
+        protocol: WalletProtocol.TransactionSubmission,
       };
     }
     return walletStates.initialized({
-      ...walletStates.emptyState,
+      ...walletStates.EMPTY_SHARED_DATA,
       uid: '',
       consensusLibrary: '',
       networkId: 0,

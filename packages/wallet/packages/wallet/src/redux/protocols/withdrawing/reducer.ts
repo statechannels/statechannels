@@ -1,4 +1,4 @@
-import { SharedData, ProtocolStateWithSharedData } from '..';
+import { ProtocolStateWithSharedData } from '..';
 import * as states from './states';
 import * as actions from './actions';
 import { WithdrawalAction } from './actions';
@@ -17,6 +17,7 @@ import {
 import { isTransactionAction } from '../transaction-submission/actions';
 import { SUCCESS, isTerminal, TransactionSubmissionState } from '../transaction-submission/states';
 import { unreachable } from '../../../utils/reducer-utils';
+import { SharedData } from '../../state';
 
 export const initialize = (
   withdrawalAmount: string,

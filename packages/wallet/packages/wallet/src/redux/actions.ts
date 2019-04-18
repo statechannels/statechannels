@@ -2,6 +2,7 @@ import * as internal from './internal/actions';
 import * as channel from './channel-state/actions';
 import * as funding from './protocols/direct-funding/actions';
 import * as indirectFunding from './protocols/indirect-funding/actions';
+import * as protocol from './protocols/actions';
 import { WalletProtocol } from './types';
 import { Commitment } from 'fmg-core';
 import { TransactionAction as TA } from './protocols/transaction-submission/actions';
@@ -151,7 +152,7 @@ export function isTransactionAction(action: WalletAction): action is Transaction
   return 'protocol' in action && action.protocol === WalletProtocol.TransactionSubmission;
 }
 
-export { internal, channel, funding, indirectFunding };
+export { internal, channel, funding, indirectFunding, protocol };
 
 export type WalletAction =
   | AdjudicatorKnown

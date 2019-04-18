@@ -5,8 +5,9 @@ import * as actions from '../../../actions';
 import * as states from './state';
 import * as fundingStates from '../state';
 import { WalletProtocol } from '../../../types';
-import { ProtocolReducer, ProtocolStateWithSharedData, SharedData } from '../../../protocols';
+import { ProtocolReducer, ProtocolStateWithSharedData } from '../../../protocols';
 import { accumulateSideEffects } from '../../../outbox';
+import { SharedData } from '../../../state';
 
 type DFReducer = ProtocolReducer<fundingStates.DirectFundingState>;
 export const depositingReducer: DFReducer = (

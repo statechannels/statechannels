@@ -20,7 +20,7 @@ import {
 import { addHex } from '../../../utils/hex-utils';
 import { bigNumberify } from 'ethers/utils';
 import { ourTurn } from '../../../utils/reducer-utils';
-import { SharedData, ProtocolStateWithSharedData } from '../../protocols';
+import { ProtocolStateWithSharedData } from '../../protocols';
 import { queueMessage as queueMessageOutbox, SideEffects } from '../../outbox/state';
 import {
   DirectFundingState,
@@ -30,6 +30,7 @@ import {
 import { FundingAction } from '../../protocols/direct-funding/actions';
 import { directFundingStateReducer } from '../direct-funding/reducer';
 import { accumulateSideEffects } from '../../outbox';
+import { SharedData } from '../../state';
 
 export const directFundingIsComplete = (directFundingState: DirectFundingState): boolean => {
   return directFundingState.channelFundingStatus === CHANNEL_FUNDED;

@@ -2,7 +2,7 @@ import { ChannelStatus } from '../channel-state/state';
 import { StateWithSideEffects } from '../utils';
 import { Commitment } from 'fmg-core';
 import { QueuedTransaction, OutboxState } from '../outbox/state';
-import { SharedData } from '../protocols';
+import { SharedData } from '../state';
 
 type SideEffectState =
   | StateWithSideEffects<any>
