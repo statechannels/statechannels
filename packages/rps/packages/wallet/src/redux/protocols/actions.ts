@@ -19,6 +19,7 @@ export function createsNewProcess(action: WalletAction): boolean {
 
 export interface BaseProcessAction {
   processId: string;
+  type: string;
 }
 
 export type ProcessAction = IndirectFundingProcessAction;
