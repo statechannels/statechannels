@@ -9,8 +9,8 @@ import WaitForSubmission from './components/wait-for-submission';
 import { NETWORK_ID } from '../../../constants';
 import ApproveRetry from './components/approve-retry';
 import * as actions from './actions';
-import Failure from './components/failure';
-import Success from './components/success';
+import Failure from '../shared-components/failure';
+import Success from '../shared-components/success';
 
 interface Props {
   state: TransactionSubmissionState;
