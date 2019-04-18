@@ -1,20 +1,22 @@
-import { WalletProtocol } from '../types';
 import { WalletAction } from '../actions';
-import { ProcessAction as IndirectFundingProcessAction } from './indirect-funding/actions';
+import {
+  ProcessAction as IndirectFundingProcessAction,
+  FUNDING_REQUESTED,
+  FundingRequested,
+} from './indirect-funding/actions';
 
-export interface NewProcessAction {
-  protocol: WalletProtocol;
-}
+// For the moment, the FundingRequested action is tied to the indirect funding
+// protocol. It should change in the future to be a generic action, tied to the
+// "Funding" protocol, and that protocol is responsible for choosing a funding strategy.
+export type NewProcessAction = FundingRequested;
 
-export function createsNewProcess(action: WalletAction): boolean {
-  if ('protocol' in action) {
-    if ('processId' in action) {
-      throw new Error('Action cannot have both protocol and processId');
-    }
-
-    return true;
+export function createsNewProcess(action: WalletAction): action is NewProcessAction {
+  switch (action.type) {
+    case FUNDING_REQUESTED:
+      return true;
+    default:
+      return false;
   }
-  return false;
 }
 
 export interface BaseProcessAction {

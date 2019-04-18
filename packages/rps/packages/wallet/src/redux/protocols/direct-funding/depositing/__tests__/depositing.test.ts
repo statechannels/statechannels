@@ -13,7 +13,7 @@ import {
 import * as TransactionGenerator from '../../../../../utils/transaction-generator';
 import { bigNumberify } from 'ethers/utils';
 import { WalletProtocol } from '../../../../types';
-import { EMPTY_SHARED_DATA } from '../../../../protocols';
+import { EMPTY_SHARED_DATA } from '../../../../state';
 
 const { channelId, mockTransactionOutboxItem } = scenarios;
 

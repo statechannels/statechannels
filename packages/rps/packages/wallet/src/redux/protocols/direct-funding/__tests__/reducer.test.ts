@@ -9,7 +9,7 @@ import {
   itChangesDepositStatusTo,
 } from '../../../__tests__/helpers';
 import { addHex } from '../../../../utils/hex-utils';
-import { EMPTY_SHARED_DATA } from '../..';
+import { EMPTY_SHARED_DATA } from '../../../state';
 
 const { channelId, twoThree } = scenarios;
 

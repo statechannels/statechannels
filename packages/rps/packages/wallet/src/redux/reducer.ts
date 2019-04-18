@@ -7,7 +7,10 @@ import { accumulateSideEffects } from './outbox';
 import { initializationSuccess } from 'magmo-wallet-client/lib/wallet-events';
 import { channelStateReducer } from './channel-state/reducer';
 import { combineReducersWithSideEffects } from './../utils/reducer-utils';
-import { createsNewProcess, routesToProcess } from './protocols/actions';
+import { createsNewProcess, routesToProcess, NewProcessAction } from './protocols/actions';
+import * as indirectFunding from './protocols/indirect-funding/reducer';
+import { ProtocolState } from './protocols';
+import { WalletProtocol } from './types';
 
 const initialState = states.waitForLogin();
 
@@ -36,7 +39,7 @@ export function initializedReducer(
   action: actions.WalletAction,
 ): states.WalletState {
   if (createsNewProcess(action)) {
-    routeToNewProcessInitializer(state, action);
+    return routeToNewProcessInitializer(state, action);
   } else if (routesToProcess(action)) {
     return routeToProtocolReducer(state, action);
   }
@@ -52,20 +55,63 @@ export function initializedReducer(
   };
 }
 
-function routeToProtocolReducer(state, action) {
-  // TODO: Call the protocol's reducer
+function routeToProtocolReducer(state: states.Initialized, action: actions.protocol.ProcessAction) {
   const processState = state.processStore[action.processId];
   if (!processState) {
     // Log warning?
     return state;
   } else {
-    return state;
+    switch (processState.protocol) {
+      case WalletProtocol.IndirectFunding:
+        const { protocolState, sharedData } = indirectFunding.indirectFundingReducer(
+          processState.protocolState,
+          states.sharedData(state),
+          action,
+        );
+
+        return updatedState(state, sharedData, processState, protocolState);
+
+      default:
+        // TODO: This should return unreachable(state), but right now, only some protocols are
+        // "whitelisted" to run as a top-level process, which means we can't
+        // exhaust all options
+        return state;
+    }
   }
 }
 
-function routeToNewProcessInitializer(state, action) {
-  // TODO: Call the process creator
-  return state;
+function updatedState(
+  state: states.Initialized,
+  sharedData: states.SharedData,
+  processState: states.ProcessState,
+  protocolState: states.indirectFunding.IndirectFundingState,
+) {
+  const newState = { ...state, sharedData };
+  const newProcessState = { ...processState, protocolState };
+  newState.processStore = {
+    ...newState.processStore,
+    [processState.processId]: newProcessState,
+  };
+  return newState;
+}
+
+function routeToNewProcessInitializer(
+  state: states.Initialized,
+  action: actions.protocol.NewProcessAction,
+) {
+  switch (action.type) {
+    case actions.indirectFunding.FUNDING_REQUESTED:
+      const { protocolState, sharedData } = indirectFunding.initialize(
+        action,
+        states.sharedData(state),
+      );
+
+      return startProcess(state, sharedData, action, protocolState);
+    default:
+      return state;
+    // TODO: Why is the discriminated union not working here?
+    // return unreachable(action);
+  }
 }
 
 const combinedReducer = combineReducersWithSideEffects({
@@ -90,3 +136,19 @@ const waitForLoginReducer = (
       return state;
   }
 };
+function startProcess(
+  state: states.Initialized,
+  sharedData: states.SharedData,
+  action: NewProcessAction,
+  protocolState: ProtocolState,
+): states.Initialized {
+  const newState = { ...state, ...sharedData };
+  const processId = action.channelId;
+  const { protocol } = action;
+  newState.processStore = {
+    ...newState.processStore,
+    [processId]: { processId, protocolState, channelsToMonitor: [], protocol },
+  };
+
+  return newState;
+}

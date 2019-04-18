@@ -1,6 +1,6 @@
 import * as states from '../states';
 import * as actions from '../actions';
-import { EMPTY_SHARED_DATA } from '../..';
+import { EMPTY_SHARED_DATA } from '../../../state';
 
 // To test all paths through the state machine we will use 4 different scenarios:
 //

@@ -2,8 +2,7 @@ import * as scenarios from './scenarios';
 import { withdrawalReducer as reducer, initialize } from '../reducer';
 import * as states from '../states';
 import * as TransactionGenerator from '../../../../utils/transaction-generator';
-
-import { SharedData } from '../..';
+import { SharedData } from '../../../state';
 
 // Mocks
 const mockTransaction = { to: '0xabc' };
@@ -26,6 +25,7 @@ const itTransitionsTo = (result: { protocolState: states.WithdrawalState }, type
     expect(result.protocolState.type).toEqual(type);
   });
 };
+
 const itSendsConcludeAndWithdrawTransaction = (result: { sharedData: SharedData }) => {
   it('sends the conclude and withdraw transaction', () => {
     // TODO: This is painful :()

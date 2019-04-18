@@ -6,8 +6,9 @@ import { unreachable } from '../../../utils/reducer-utils';
 import { depositingReducer } from './depositing/reducer';
 import { bigNumberify } from 'ethers/utils';
 import { createDepositTransaction } from '../../../utils/transaction-generator';
-import { ProtocolReducer, ProtocolStateWithSharedData, SharedData } from '../../protocols';
+import { ProtocolReducer, ProtocolStateWithSharedData } from '../../protocols';
 import { accumulateSideEffects } from '../../outbox';
+import { SharedData } from '../../state';
 
 type DFReducer = ProtocolReducer<states.DirectFundingState>;
 
