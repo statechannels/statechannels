@@ -9,6 +9,7 @@ import {
   ledgerId,
 } from '../../../../__tests__/test-scenarios';
 import * as states from '../state';
+import { EMPTY_SHARED_DATA } from '../../../../state';
 
 const protocolStateDefaults = {
   channelId,
@@ -146,6 +147,8 @@ const waitForLedgerUpdate1 = constructWalletState(
   waitForUpdateLedgerChannelState,
 );
 
+const sharedData = EMPTY_SHARED_DATA;
+
 // TODO: maybe add happy path actions later. But these would only be used by unit tests, so maybe the actions do not belong here.
 export const happyPath = {
   states: {
@@ -156,4 +159,5 @@ export const happyPath = {
     waitForLedgerUpdate1,
   },
   actions: {},
+  sharedData,
 };

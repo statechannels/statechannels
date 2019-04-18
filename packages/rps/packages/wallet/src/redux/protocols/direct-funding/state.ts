@@ -2,9 +2,9 @@ import * as depositing from './depositing/state';
 import { DirectFundingRequested } from '../../internal/actions';
 import { bigNumberify } from 'ethers/utils';
 import { createDepositTransaction } from '../../../utils/transaction-generator';
-import { ProtocolStateWithSharedData, SharedData } from '..';
+import { ProtocolStateWithSharedData } from '..';
 
-import { queueTransaction } from '../../state';
+import { queueTransaction, SharedData } from '../../state';
 export { depositing };
 // ChannelFundingStatus
 export const NOT_SAFE_TO_DEPOSIT = 'NOT_SAFE_TO_DEPOSIT';

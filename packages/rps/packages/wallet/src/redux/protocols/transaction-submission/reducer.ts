@@ -22,9 +22,8 @@ import {
   failure,
 } from './states';
 import { unreachable } from '../../../utils/reducer-utils';
-import { SharedData } from '..';
 import { TransactionRequest } from 'ethers/providers';
-import { queueTransaction } from '../../state';
+import { queueTransaction, SharedData } from '../../state';
 
 type Storage = SharedData;
 

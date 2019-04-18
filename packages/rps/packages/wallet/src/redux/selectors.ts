@@ -1,6 +1,6 @@
 import { OpenedState, OPENING, ChannelStatus } from './channel-state/state';
 import * as walletStates from './state';
-import { SharedData } from './protocols';
+import { SharedData } from './state';
 
 export const getOpenedChannelState = (state: SharedData, channelId: string): OpenedState => {
   const channelStatus = getChannelState(state, channelId);

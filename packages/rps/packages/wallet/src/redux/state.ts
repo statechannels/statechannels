@@ -9,13 +9,14 @@ import {
   ChannelState,
   ChannelStatus,
   setChannel as setChannelInStore,
+  emptyChannelState,
 } from './channel-state/state';
 import { Properties } from './utils';
 import * as indirectFunding from './protocols/indirect-funding/state';
 import { accumulateSideEffects } from './outbox';
 import { WalletEvent } from 'magmo-wallet-client';
-import { SharedData } from './protocols';
 import { TransactionRequest } from 'ethers/providers';
+import { WalletProtocol } from './types';
 
 export type WalletState = WaitForLogin | MetaMaskError | Initialized;
 
@@ -30,20 +31,20 @@ export const WALLET_INITIALIZED = 'WALLET.INITIALIZED';
 // States
 // ------
 
-interface Shared {
+export interface SharedData {
   channelState: ChannelState;
   outboxState: OutboxState;
 }
 
-export interface WaitForLogin extends Shared {
+export interface WaitForLogin extends SharedData {
   type: typeof WAIT_FOR_LOGIN;
 }
 
-export interface MetaMaskError extends Shared {
+export interface MetaMaskError extends SharedData {
   type: typeof METAMASK_ERROR;
 }
 
-export interface Initialized extends Shared {
+export interface Initialized extends SharedData {
   type: typeof WALLET_INITIALIZED;
   uid: string;
   processStore: ProcessStore;
@@ -57,6 +58,7 @@ export interface ProcessStore {
 }
 export interface ProcessState {
   processId: string;
+  protocol: WalletProtocol;
   protocolState: any;
   channelsToMonitor: string[];
 }
@@ -71,27 +73,27 @@ export function indirectFundingOngoing(state: Initialized): state is IndirectFun
 // ------------
 // Constructors
 // ------------
-export const emptyState: Shared = {
+export const EMPTY_SHARED_DATA: SharedData = {
   outboxState: emptyDisplayOutboxState(),
-  channelState: { initializedChannels: {}, initializingChannels: {} },
+  channelState: emptyChannelState(),
 };
 
-function shared(params: Shared): Shared {
+export function sharedData(params: SharedData): SharedData {
   const { outboxState, channelState } = params;
   return { outboxState, channelState };
 }
 
 export function waitForLogin(): WaitForLogin {
-  return { type: WAIT_FOR_LOGIN, ...emptyState };
+  return { type: WAIT_FOR_LOGIN, ...EMPTY_SHARED_DATA };
 }
 
 export function metaMaskError(params: Properties<MetaMaskError>): MetaMaskError {
-  return { ...shared(params), type: METAMASK_ERROR };
+  return { ...sharedData(params), type: METAMASK_ERROR };
 }
 export function initialized(params: Properties<Initialized>): Initialized {
   const { uid, processStore } = params;
   return {
-    ...shared(params),
+    ...sharedData(params),
     type: WALLET_INITIALIZED,
     uid,
     processStore,
