@@ -2,6 +2,7 @@ import { OutboxState, emptyDisplayOutboxState } from '../outbox/state';
 import { ChannelState, emptyChannelState } from '../channel-state/state';
 import { IndirectFundingState } from './indirect-funding/state';
 import { DirectFundingState } from './direct-funding/state';
+import { WithdrawalState } from './withdrawing/states';
 
 export interface SharedData {
   channelState: ChannelState;
@@ -13,7 +14,7 @@ export const EMPTY_SHARED_DATA: SharedData = {
   outboxState: emptyDisplayOutboxState(),
 };
 
-export type ProtocolState = IndirectFundingState | DirectFundingState;
+export type ProtocolState = IndirectFundingState | DirectFundingState | WithdrawalState;
 
 export type ProtocolReducer<T extends ProtocolState> = (
   protocolState: T,

@@ -5,6 +5,7 @@ import * as indirectFunding from './protocols/indirect-funding/actions';
 import { WalletProtocol } from './types';
 import { Commitment } from 'fmg-core';
 import { TransactionAction as TA } from './protocols/transaction-submission/actions';
+import { WithdrawalAction } from './protocols/withdrawing/actions';
 export * from './protocols/transaction-submission/actions';
 
 export type TransactionAction = TA;
@@ -163,4 +164,5 @@ export type WalletAction =
   | channel.ChannelAction
   | internal.InternalAction
   | funding.FundingAction
-  | indirectFunding.Action;
+  | indirectFunding.Action
+  | WithdrawalAction;
