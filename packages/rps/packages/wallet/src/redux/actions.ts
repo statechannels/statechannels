@@ -10,6 +10,7 @@ import {
   isTransactionAction as isTA,
 } from './protocols/transaction-submission/actions';
 import { WithdrawalAction } from './protocols/withdrawing/actions';
+import { RespondingAction } from './protocols/responding/actions';
 export * from './protocols/transaction-submission/actions';
 
 export type TransactionAction = TA;
@@ -167,4 +168,5 @@ export type WalletAction =
   | internal.InternalAction
   | funding.FundingAction
   | indirectFunding.Action
-  | WithdrawalAction;
+  | WithdrawalAction
+  | RespondingAction;
