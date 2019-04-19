@@ -112,8 +112,12 @@ export function setSideEffects(state: Initialized, sideEffects: SideEffects): In
   return { ...state, outboxState: accumulateSideEffects(state.outboxState, sideEffects) };
 }
 
-export function setChannel(state: Initialized, channel: ChannelStatus): Initialized {
+export function setChannel(state: SharedData, channel: ChannelStatus): SharedData {
   return { ...state, channelState: setChannelInStore(state.channelState, channel) };
+}
+
+export function getChannel(state: SharedData, channelId: string): ChannelStatus | undefined {
+  return state.channelState.initializedChannels[channelId];
 }
 
 export function queueMessage(state: Initialized, message: WalletEvent): Initialized {

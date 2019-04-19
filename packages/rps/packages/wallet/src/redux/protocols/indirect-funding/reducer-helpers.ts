@@ -30,7 +30,7 @@ import {
 import { FundingAction } from '../../protocols/direct-funding/actions';
 import { directFundingStateReducer } from '../direct-funding/reducer';
 import { accumulateSideEffects } from '../../outbox';
-import { SharedData } from '../../state';
+import { SharedData, setChannel } from '../../state';
 
 export const directFundingIsComplete = (directFundingState: DirectFundingState): boolean => {
   return directFundingState.channelFundingStatus === CHANNEL_FUNDED;
@@ -258,11 +258,7 @@ export const initializeChannelState = (
   sharedData: SharedData,
   channelState: channelStates.ChannelStatus,
 ): SharedData => {
-  const newSharedData = { ...sharedData };
-  return {
-    ...newSharedData,
-    channelState: channelStates.setChannel(newSharedData.channelState, channelState),
-  };
+  return setChannel(sharedData, channelState);
 };
 
 export const queueMessage = (sharedData: SharedData, message: WalletEvent) => {

@@ -33,7 +33,7 @@ const happyPathStories = {
 const retryAndApprove = {
   WaitForSubmission: scenarios.retryAndApprove.waitForSubmission,
   ApproveRetry: scenarios.retryAndApprove.approveRetry,
-  WaitForSend: scenarios.retryAndApprove.waitForSend2,
+  WaitForSend: scenarios.retryAndApprove.waitForSend,
 };
 
 const retryAndDeny = {
@@ -44,7 +44,7 @@ const retryAndDeny = {
 
 const transactionFails = {
   WaitForConfirmation: scenarios.transactionFailed.waitForConfirmation,
-  Failure: scenarios.transactionFailed.failure2,
+  Failure: scenarios.transactionFailed.failure,
 };
 
 addStories(happyPathStories, 'Transaction Submission / Happy path');
