@@ -58,6 +58,14 @@ export function isTerminal(state: TransactionSubmissionState): state is Failure 
   return state.type === FAILURE || state.type === SUCCESS;
 }
 
+export function isSuccess(state: TransactionSubmissionState): state is Success {
+  return state.type === SUCCESS;
+}
+
+export function isFailure(state: TransactionSubmissionState): state is Failure {
+  return state.type === FAILURE;
+}
+
 // ------------
 // Constructors
 // ------------

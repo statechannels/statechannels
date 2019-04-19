@@ -8,6 +8,7 @@ import { addHex } from '../../utils/hex-utils';
 import * as directFundingStates from '../../redux/protocols/direct-funding/state';
 import { PlayerIndex } from 'magmo-wallet-client/lib/wallet-instructions';
 import * as actions from '../actions';
+import { signCommitment } from '../../utils/signing-utils';
 
 export const libraryAddress = '0x' + '1'.repeat(40);
 export const ledgerLibraryAddress = '0x' + '2'.repeat(40);
@@ -50,6 +51,10 @@ export const postFundCommitment1: Commitment = {
   allocation: twoThree,
   destination: participants,
 };
+export const signedCommitment0 = {
+  commitment: postFundCommitment1,
+  signature: signCommitment(postFundCommitment1, asPrivateKey),
+};
 export const postFundCommitment2: Commitment = {
   channel,
   commitmentCount: 1,
@@ -86,6 +91,10 @@ export const gameCommitment1: Commitment = {
   allocation: ['0x05', '0x05'],
   destination: [],
 };
+export const signedCommitment19 = {
+  commitment: gameCommitment1,
+  signature: signCommitment(gameCommitment1, bsPrivateKey),
+};
 export const gameCommitment2: Commitment = {
   channel,
   commitmentCount: 2,
@@ -95,6 +104,10 @@ export const gameCommitment2: Commitment = {
   allocation: [],
   destination: [],
 };
+export const signedCommitment20 = {
+  commitment: gameCommitment2,
+  signature: signCommitment(gameCommitment2, asPrivateKey),
+};
 export const gameCommitment3: Commitment = {
   channel,
   commitmentCount: 3,
@@ -103,6 +116,10 @@ export const gameCommitment3: Commitment = {
   turnNum: 21,
   allocation: [],
   destination: [],
+};
+export const signedCommitment21 = {
+  commitment: gameCommitment3,
+  signature: signCommitment(gameCommitment3, bsPrivateKey),
 };
 export const concludeCommitment1: Commitment = {
   channel,

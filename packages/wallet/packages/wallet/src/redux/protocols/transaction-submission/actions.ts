@@ -1,4 +1,3 @@
-import { BaseProcessAction } from '../actions';
 import { WalletAction } from '../../actions';
 
 export type TransactionAction =
@@ -24,25 +23,25 @@ export interface TransactionSent {
   processId: string;
 }
 
-export interface TransactionSubmissionFailed extends BaseProcessAction {
+export interface TransactionSubmissionFailed {
   type: typeof TRANSACTION_SUBMISSION_FAILED;
   processId: string;
   error: { message?: string; code };
 }
 
-export interface TransactionSubmitted extends BaseProcessAction {
+export interface TransactionSubmitted {
   type: typeof TRANSACTION_SUBMITTED;
   processId: string;
   transactionHash: string;
 }
 
-export interface TransactionConfirmed extends BaseProcessAction {
+export interface TransactionConfirmed {
   type: typeof TRANSACTION_CONFIRMED;
   processId: string;
   contractAddress?: string;
 }
 
-export interface TransactionFinalized extends BaseProcessAction {
+export interface TransactionFinalized {
   type: typeof TRANSACTION_FINALIZED;
   processId: string;
 }
@@ -117,6 +116,9 @@ export const transactionFailed = (processId: string): TransactionFailed => ({
   processId,
 });
 
+// -------
+// Helpers
+// -------
 export const isTransactionAction = (action: WalletAction): action is TransactionAction => {
   return (
     action.type === TRANSACTION_CONFIRMED ||

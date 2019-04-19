@@ -66,7 +66,7 @@ export const retryAndApprove = {
   // States
   waitForSubmission,
   approveRetry,
-  waitForSend2,
+  waitForSend: waitForSend2,
   // Actions
   submissionFailed,
   retryApproved,
@@ -87,7 +87,7 @@ export const transactionFailed = {
   ...props,
   // States
   waitForConfirmation,
-  failure2,
+  failure: failure2,
   // Actions
   failed,
 };
