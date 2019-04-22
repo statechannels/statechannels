@@ -1,6 +1,7 @@
 import * as internal from './internal/actions';
 import * as channel from './channel-state/actions';
-import * as funding from './protocols/direct-funding/actions';
+import { FundingAction } from './protocols/funding/actions';
+import * as directFunding from './protocols/direct-funding/actions';
 import * as indirectFunding from './protocols/indirect-funding/actions';
 import * as protocol from './protocols/actions';
 import * as challenging from './protocols/challenging/actions';
@@ -149,15 +150,16 @@ export type AdjudicatorEventAction =
   | FundingReceivedEvent
   | ChallengeExpiredEvent;
 
-export type CommonAction =
+export type CommonAction = MessageReceived | CommitmentReceived | AdjudicatorEventAction;
+export type ProtocolAction =
+  | CommonAction
+  | FundingAction
   | TransactionAction
-  | MessageReceived
-  | CommitmentReceived
-  | AdjudicatorEventAction;
-
-export type ProtocolAction = CommonAction;
-
-export { internal, channel, funding, indirectFunding, protocol };
+  | challenging.ChallengingAction
+  | directFunding.FundingAction
+  | indirectFunding.Action
+  | WithdrawalAction
+  | RespondingAction;
 
 export type WalletAction =
   | AdjudicatorKnown
@@ -166,11 +168,21 @@ export type WalletAction =
   | LoggedIn
   | MessageSent
   | MetamaskLoadError
-  | CommonAction
-  | challenging.ChallengingAction
+  | ProtocolAction
   | channel.ChannelAction
-  | internal.InternalAction
-  | funding.FundingAction
-  | indirectFunding.Action
-  | WithdrawalAction
-  | RespondingAction;
+  | internal.InternalAction;
+
+function isCommonAction(action: WalletAction): action is CommonAction {
+  return (
+    [
+      MESSAGE_RECEIVED,
+      COMMITMENT_RECEIVED,
+      CHALLENGE_CREATED_EVENT,
+      CONCLUDED_EVENT,
+      REFUTED_EVENT,
+      RESPOND_WITH_MOVE_EVENT,
+      FUNDING_RECEIVED_EVENT,
+    ].indexOf(action.type) >= 0
+  );
+}
+export { internal, channel, directFunding as funding, indirectFunding, protocol, isCommonAction };

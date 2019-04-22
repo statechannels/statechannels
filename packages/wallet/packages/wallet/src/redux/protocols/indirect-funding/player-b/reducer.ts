@@ -22,7 +22,7 @@ import {
   directFundingIsComplete,
 } from '../reducer-helpers';
 import { ProtocolStateWithSharedData } from '../../';
-import { FundingAction, isfundingAction } from '../../direct-funding/actions';
+import { FundingAction, isDirectFundingAction } from '../../direct-funding/actions';
 import * as channelState from '../../../channel-state/state';
 import { Commitment } from 'fmg-core/lib/commitment';
 import { composePreFundCommitment } from '../../../../utils/commitment-utils';
@@ -106,7 +106,7 @@ const waitForDirectFunding = (
   sharedData: SharedData,
   action: actions.indirectFunding.Action,
 ): ProtocolStateWithSharedData<states.PlayerBState> => {
-  if (!isfundingAction(action)) {
+  if (!isDirectFundingAction(action)) {
     return { sharedData, protocolState };
   } else {
     const updatedStateAndSharedData = updateStateWithDirectFundingAction(
