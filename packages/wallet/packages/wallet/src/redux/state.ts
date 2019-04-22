@@ -17,6 +17,7 @@ import { accumulateSideEffects } from './outbox';
 import { WalletEvent } from 'magmo-wallet-client';
 import { TransactionRequest } from 'ethers/providers';
 import { WalletProtocol } from './types';
+import { AdjudicatorState } from './adjudicator-state/state';
 
 export type WalletState = WaitForLogin | MetaMaskError | Initialized;
 
@@ -34,6 +35,7 @@ export const WALLET_INITIALIZED = 'WALLET.INITIALIZED';
 export interface SharedData {
   channelState: ChannelState;
   outboxState: OutboxState;
+  adjudicatorState: AdjudicatorState;
 }
 
 export interface WaitForLogin extends SharedData {
@@ -48,7 +50,9 @@ export interface Initialized extends SharedData {
   type: typeof WALLET_INITIALIZED;
   uid: string;
   processStore: ProcessStore;
-  // procedure branches are optional, and exist precisely when that procedure is running
+
+  // TODO: This is obsolete now that we have ProcessStore
+  // This should be deleted once we clean up the code still using this
   indirectFunding?: indirectFunding.IndirectFundingState;
 }
 
@@ -76,11 +80,12 @@ export function indirectFundingOngoing(state: Initialized): state is IndirectFun
 export const EMPTY_SHARED_DATA: SharedData = {
   outboxState: emptyDisplayOutboxState(),
   channelState: emptyChannelState(),
+  adjudicatorState: {},
 };
 
 export function sharedData(params: SharedData): SharedData {
-  const { outboxState, channelState } = params;
-  return { outboxState, channelState };
+  const { outboxState, channelState, adjudicatorState } = params;
+  return { outboxState, channelState, adjudicatorState };
 }
 
 export function waitForLogin(): WaitForLogin {

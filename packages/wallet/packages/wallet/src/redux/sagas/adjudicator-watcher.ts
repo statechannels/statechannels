@@ -3,7 +3,6 @@ import { call, take, put, select } from 'redux-saga/effects';
 import { eventChannel } from 'redux-saga';
 import * as actions from '../actions';
 import { ethers } from 'ethers';
-import { unreachable } from '../../utils/reducer-utils';
 import { fromParameters } from 'fmg-core/lib/commitment';
 import { getAdjudicatorWatcherProcessesForChannel } from '../selectors';
 
@@ -31,26 +30,26 @@ export function* adjudicatorWatcher(provider) {
       event.channelId,
     );
 
+    yield dispatchEventAction(event);
     for (const processId of processIdsToAlert) {
-      yield dispatchEventAction(event, processId);
+      yield dispatchProcessEventAction(event, processId);
     }
   }
 }
 
-function* dispatchEventAction(event: AdjudicatorEvent, processId: string) {
-  const { channelId } = event;
+function* dispatchEventAction(event: AdjudicatorEvent) {
   switch (event.eventType) {
     case AdjudicatorEventType.ChallengeCreated:
+      const { channelId } = event;
       const { commitment, finalizedAt } = event.eventArgs;
-      yield put(
-        actions.challengeCreatedEvent(
-          processId,
-          channelId,
-          fromParameters(commitment),
-          finalizedAt,
-        ),
-      );
+      yield put(actions.challengeCreatedEvent(channelId, fromParameters(commitment), finalizedAt));
       break;
+  }
+}
+
+function* dispatchProcessEventAction(event: AdjudicatorEvent, processId: string) {
+  const { channelId } = event;
+  switch (event.eventType) {
     case AdjudicatorEventType.Concluded:
       yield put(actions.concludedEvent(processId, channelId));
       break;
@@ -78,8 +77,6 @@ function* dispatchEventAction(event: AdjudicatorEvent, processId: string) {
         ),
       );
       break;
-    default:
-      unreachable(event.eventType);
   }
 }
 

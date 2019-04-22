@@ -11,10 +11,8 @@ const { channelId } = scenarios;
 const defaults = {
   ...states.EMPTY_SHARED_DATA,
   uid: 'uid',
-  adjudicator: 'adjudicator',
-  networkId: 1,
-  consensusLibrary: '0x0',
   processStore: {},
+  adjudicatorStore: {},
 };
 
 const initializedState = states.initialized({ ...defaults });

@@ -54,9 +54,8 @@ const defaultInitialized: walletStates.Initialized = walletStates.initialized({
   ...defaultParams,
   channelState: defaultChannelState,
   outboxState: emptyDisplayOutboxState(),
-  consensusLibrary: '',
+  adjudicatorState: {},
   processStore: {},
-  directFundingStore: {},
 });
 
 ////////////////////////////////////////////////

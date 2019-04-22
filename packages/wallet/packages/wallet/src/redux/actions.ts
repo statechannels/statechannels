@@ -79,13 +79,7 @@ export const commitmentReceived = (
 export type CommitmentReceived = ReturnType<typeof commitmentReceived>;
 
 export const CHALLENGE_CREATED_EVENT = 'WALLET.ADJUDICATOR.CHALLENGE_CREATED_EVENT';
-export const challengeCreatedEvent = (
-  processId: string,
-  channelId: string,
-  commitment: Commitment,
-  finalizedAt,
-) => ({
-  processId,
+export const challengeCreatedEvent = (channelId: string, commitment: Commitment, finalizedAt) => ({
   channelId,
   commitment,
   finalizedAt,
@@ -138,12 +132,22 @@ export const fundingReceivedEvent = (
 });
 export type FundingReceivedEvent = ReturnType<typeof fundingReceivedEvent>;
 
+export const CHALLENGE_EXPIRED_EVENT = 'WALLET.ADJUDICATOR.CHALLENGE_EXPIRED';
+export const challengeExpiredEvent = (processId: string, channelId: string, timestamp: number) => ({
+  processId,
+  channelId,
+  timestamp,
+  type: CHALLENGE_EXPIRED_EVENT as typeof CHALLENGE_EXPIRED_EVENT,
+});
+export type ChallengeExpiredEvent = ReturnType<typeof challengeExpiredEvent>;
+
 export type AdjudicatorEventAction =
   | ChallengeCreatedEvent
   | ConcludedEvent
   | RefutedEvent
   | RespondWithMoveEvent
-  | FundingReceivedEvent;
+  | FundingReceivedEvent
+  | ChallengeExpiredEvent;
 
 export type CommonAction =
   | TransactionAction

@@ -109,6 +109,7 @@ const startingState = (
   return {
     protocolState,
     sharedData: {
+      adjudicatorState: {},
       outboxState: emptyDisplayOutboxState(),
       channelState,
     },
