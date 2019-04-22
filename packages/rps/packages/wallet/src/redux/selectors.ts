@@ -36,3 +36,7 @@ export const getAdjudicatorWatcherProcessesForChannel = (
   }
   return processIds;
 };
+
+export const getAdjudicatorState = (state: walletStates.Initialized) => {
+  return state.channelState;
+};

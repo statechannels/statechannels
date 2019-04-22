@@ -13,6 +13,7 @@ const { channelId, ledgerChannel } = scenarios;
 const emptySharedData = {
   outboxState: emptyDisplayOutboxState(),
   channelState: emptyChannelState(),
+  adjudicatorState: {},
 };
 
 const defaultProtocolState = indirectFundingStates.playerB.waitForApproval(channelId);

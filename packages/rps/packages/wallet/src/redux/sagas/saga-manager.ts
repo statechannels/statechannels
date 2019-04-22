@@ -4,7 +4,7 @@ import { messageListener } from './message-listener';
 import { messageSender } from './message-sender';
 import { transactionSender } from './transaction-sender';
 import { adjudicatorWatcher } from './adjudicator-watcher';
-import { blockMiningWatcher } from './block-mining-watcher';
+import { challengeWatcher } from './challenge-watcher';
 
 import { WalletState } from '../state';
 import { getProvider, isDevelopmentNetwork } from '../../utils/contract-utils';
@@ -15,7 +15,7 @@ import { WALLET_INITIALIZED } from '../state';
 
 export function* sagaManager(): IterableIterator<any> {
   let adjudicatorWatcherProcess;
-  let blockMiningWatcherProcess;
+  let challengeWatcherProcess;
   let ganacheMinerProcess;
 
   // always want the message listenter to be running
@@ -35,16 +35,16 @@ export function* sagaManager(): IterableIterator<any> {
         adjudicatorWatcherProcess = yield fork(adjudicatorWatcher, provider);
       }
       // TODO: To cut down on block mined spam we could require processes to register/unregister when they want to listen for these events
-      if (!blockMiningWatcherProcess) {
-        blockMiningWatcherProcess = yield fork(blockMiningWatcher);
+      if (!challengeWatcherProcess) {
+        challengeWatcherProcess = yield fork(challengeWatcher);
       }
       if (isDevelopmentNetwork() && !ganacheMinerProcess) {
         ganacheMinerProcess = yield fork(ganacheMiner);
       }
     } else {
-      if (blockMiningWatcherProcess) {
-        yield cancel(blockMiningWatcherProcess);
-        blockMiningWatcherProcess = undefined;
+      if (challengeWatcherProcess) {
+        yield cancel(challengeWatcherProcess);
+        challengeWatcherProcess = undefined;
       }
       if (ganacheMinerProcess) {
         yield cancel(ganacheMinerProcess);

@@ -20,10 +20,8 @@ describe('getAdjudicatorWatcherProcessesForChannel', () => {
     return walletStates.initialized({
       ...walletStates.EMPTY_SHARED_DATA,
       uid: '',
-      consensusLibrary: '',
-      networkId: 0,
-      adjudicator: '',
       processStore,
+      adjudicatorStore: {},
     });
   };
 

@@ -38,6 +38,7 @@ export function initializedReducer(
   state: states.Initialized,
   action: actions.WalletAction,
 ): states.WalletState {
+  // TODO: We will need to update SharedData here first
   if (createsNewProcess(action)) {
     return routeToNewProcessInitializer(state, action);
   } else if (routesToProcess(action)) {
@@ -131,6 +132,7 @@ const waitForLoginReducer = (
           messageOutbox: [initializationSuccess()],
         }),
         processStore: {},
+        adjudicatorStore: {},
       });
     default:
       return state;
