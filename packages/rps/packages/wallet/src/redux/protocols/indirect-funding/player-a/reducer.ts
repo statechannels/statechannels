@@ -31,7 +31,7 @@ import {
   composeLedgerUpdateCommitment,
 } from '../../../../utils/commitment-utils';
 import { WalletEvent } from 'magmo-wallet-client';
-import { isfundingAction, FundingAction } from '../../direct-funding/actions';
+import { isDirectFundingAction, FundingAction } from '../../direct-funding/actions';
 import { addHex } from '../../../../utils/hex-utils';
 import { ProtocolStateWithSharedData } from '../../';
 import { SharedData } from '../../../state';
@@ -125,7 +125,7 @@ const waitForDirectFunding = (
   action: actions.indirectFunding.Action,
 ): ProtocolStateWithSharedData<states.PlayerAState> => {
   // Funding events currently occur directly against the ledger channel
-  if (!isfundingAction(action)) {
+  if (!isDirectFundingAction(action)) {
     return { sharedData, protocolState };
   } else {
     const updatedStateAndSharedData = updateStateWithDirectFundingAction(
