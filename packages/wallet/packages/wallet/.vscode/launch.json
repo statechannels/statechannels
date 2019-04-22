@@ -7,7 +7,12 @@
       "name": "Jest All",
       "type": "node",
       "request": "launch",
-      "args": ["scripts/test.js", "--runInBand", "--no-cache", "--env=jsdom"],
+      "args": [
+        "node_modules/.bin/jest",
+        "--runInBand",
+        "--env=jsdom",
+        "--config=${workspaceRoot}/config/jest/jest.config.js",
+      ],
       "cwd": "${workspaceRoot}",
       "protocol": "inspector",
       "console": "integratedTerminal",
