@@ -14,6 +14,7 @@ const emptySharedData = {
   outboxState: emptyDisplayOutboxState(),
   channelState: emptyChannelState(),
   adjudicatorState: {},
+  fundingState: {},
 };
 
 const defaultProtocolState = indirectFundingStates.playerB.waitForApproval(channelId);

@@ -112,6 +112,7 @@ const startingState = (
       adjudicatorState: {},
       outboxState: emptyDisplayOutboxState(),
       channelState,
+      fundingState: {},
     },
   };
 };
