@@ -6,7 +6,6 @@ import * as channelStates from '../redux/channel-state/state';
 import * as actions from '../redux/actions';
 
 import { unreachable } from '../utils/reducer-utils';
-import { FundingStep, Step } from '../components/funding/funding-step';
 import { WalletProtocol } from '../redux/types';
 
 interface Props {
@@ -30,7 +29,8 @@ class FundingContainer extends PureComponent<Props> {
         return <div />;
       case channelStates.A_WAIT_FOR_POST_FUND_SETUP:
       case channelStates.B_WAIT_FOR_POST_FUND_SETUP:
-        return <FundingStep step={Step.CHANNEL_FUNDED}>Waiting for the other player</FundingStep>;
+        // return <FundingStep step={Step.CHANNEL_FUNDED}>Waiting for the other player</FundingStep>;
+        return <div />;
       default:
         return unreachable(state);
     }
