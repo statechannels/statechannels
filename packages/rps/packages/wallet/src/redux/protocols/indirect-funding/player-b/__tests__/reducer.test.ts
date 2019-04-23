@@ -143,8 +143,9 @@ describe(startingIn(states.WAIT_FOR_PRE_FUND_SETUP_0), () => {
   });
 });
 
+// TODO: post fund messages are moving to direct funding
 describe(startingIn(states.WAIT_FOR_DIRECT_FUNDING), () => {
-  describe(whenActionArrives(actions.FUNDING_RECEIVED_EVENT), () => {
+  it.skip(whenActionArrives(actions.FUNDING_RECEIVED_EVENT), () => {
     const total = twoThree.reduce(addHex);
     const state = startingState(
       states.waitForDirectFunding({

@@ -5,7 +5,7 @@ import { FundingStep } from '../components/funding-step';
 import * as actions from './actions';
 import * as indirectFundingPlayerA from './state';
 import { unreachable } from '../../../../utils/reducer-utils';
-import DirectFundingContainer from '../../../../containers/direct-funding/direct-funding';
+import DirectFundingContainer from '../../direct-funding/container';
 
 interface Props {
   indirectFundingAState: indirectFundingPlayerA.PlayerAState;
