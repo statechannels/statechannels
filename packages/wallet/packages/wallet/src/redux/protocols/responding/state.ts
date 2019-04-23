@@ -1,4 +1,4 @@
-import { TransactionSubmissionState } from '../transaction-submission/states';
+import { NonTerminalTransactionSubmissionState as NonTerminalTSState } from '../transaction-submission/states';
 import { Properties } from '../../utils';
 import { Commitment } from 'fmg-core/lib/commitment';
 export type RespondingState =
@@ -30,7 +30,7 @@ export interface WaitForApproval {
 export interface WaitForTransaction {
   type: typeof WAIT_FOR_TRANSACTION;
   processId: string;
-  transactionSubmissionState: TransactionSubmissionState;
+  transactionSubmissionState: NonTerminalTSState;
 }
 export interface WaitForAcknowledgement {
   type: typeof WAIT_FOR_ACKNOWLEDGEMENT;

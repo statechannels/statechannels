@@ -1,5 +1,5 @@
 import { Properties as P } from '../../utils';
-import { TransactionSubmissionState } from '../transaction-submission';
+import { NonTerminalTransactionSubmissionState } from '../transaction-submission';
 
 export type ChallengingState = NonTerminalState | TerminalState;
 export type ChallengingStateType = ChallengingState['type'];
@@ -32,7 +32,7 @@ export interface WaitForTransaction {
   type: 'WaitForTransaction';
   processId: string;
   channelId: string;
-  transactionSubmission: TransactionSubmissionState;
+  transactionSubmission: NonTerminalTransactionSubmissionState;
 }
 
 export interface WaitForResponseOrTimeout {

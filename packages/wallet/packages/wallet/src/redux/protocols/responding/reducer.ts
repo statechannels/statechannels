@@ -15,7 +15,11 @@ import {
 import { SharedData } from '../../state';
 import * as SigningUtils from '../../../utils/signing-utils';
 import { isTransactionAction } from '../transaction-submission/actions';
-import { isTerminal, TransactionSubmissionState, SUCCESS } from '../transaction-submission/states';
+import {
+  isTerminal,
+  TransactionSubmissionState,
+  isSuccess,
+} from '../transaction-submission/states';
 
 export const initialize = (
   processId: string,
@@ -145,7 +149,7 @@ const handleTransactionSubmissionComplete = (
   transactionState: TransactionSubmissionState,
   sharedData: SharedData,
 ) => {
-  if (transactionState.type === SUCCESS) {
+  if (isSuccess(transactionState)) {
     return {
       protocolState: states.waitForAcknowledgement(protocolState),
       sharedData,

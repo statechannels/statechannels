@@ -15,7 +15,11 @@ import {
   transactionReducer,
 } from '../transaction-submission/reducer';
 import { isTransactionAction } from '../transaction-submission/actions';
-import { SUCCESS, isTerminal, TransactionSubmissionState } from '../transaction-submission/states';
+import {
+  isTerminal,
+  TransactionSubmissionState,
+  isSuccess,
+} from '../transaction-submission/states';
 import { unreachable } from '../../../utils/reducer-utils';
 import { SharedData } from '../../state';
 
@@ -133,7 +137,7 @@ const handleTransactionSubmissionComplete = (
   transactionState: TransactionSubmissionState,
   sharedData: SharedData,
 ) => {
-  if (transactionState.type === SUCCESS) {
+  if (isSuccess(transactionState)) {
     return {
       protocolState: states.waitForAcknowledgement(protocolState),
       sharedData,

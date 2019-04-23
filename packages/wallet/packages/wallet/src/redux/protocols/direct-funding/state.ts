@@ -4,7 +4,7 @@ import { createDepositTransaction } from '../../../utils/transaction-generator';
 import { DirectFundingRequested } from '../../internal/actions';
 import { SharedData } from '../../state';
 import { initialize as initTransactionState } from '../transaction-submission/reducer';
-import { TransactionSubmissionState } from '../transaction-submission/states';
+import { NonTerminalTransactionSubmissionState } from '../transaction-submission/states';
 import { Properties } from '../../utils';
 
 // ChannelFundingStatus
@@ -32,7 +32,7 @@ export interface NotSafeToDeposit extends BaseDirectFundingState {
 }
 export interface WaitForDepositTransaction extends BaseDirectFundingState {
   type: typeof WAIT_FOR_DEPOSIT_TRANSACTION;
-  transactionSubmissionState: TransactionSubmissionState;
+  transactionSubmissionState: NonTerminalTransactionSubmissionState;
 }
 export interface WaitForFundingAndPostFundSetup extends BaseDirectFundingState {
   type: typeof WAIT_FOR_FUNDING_AND_POST_FUND_SETUP;
@@ -70,9 +70,9 @@ export function notSafeToDeposit(params: Properties<BaseDirectFundingState>): No
   };
 }
 export function waitForDepositTransaction(
-  params: Properties<BaseDirectFundingState>,
-  transactionSubmissionState: TransactionSubmissionState,
+  params: Properties<WaitForDepositTransaction>,
 ): WaitForDepositTransaction {
+  const { transactionSubmissionState } = params;
   return {
     ...baseDirectFundingState(params),
     type: WAIT_FOR_DEPOSIT_TRANSACTION,
@@ -84,7 +84,7 @@ interface ConditionalParams {
   channelFunded: boolean;
   postFundSetupReceived: boolean;
 }
-export function waitForFundingAndPostFundSetup<T extends BaseDirectFundingState>(
+export function waitForFundingAndPostFundSetup(
   params: Properties<BaseDirectFundingState>,
   conditionalParams: ConditionalParams,
 ): WaitForFundingAndPostFundSetup {
@@ -138,16 +138,14 @@ export function initialDirectFundingState(
     );
 
     return {
-      protocolState: waitForDepositTransaction(
-        {
-          requestedTotalFunds: totalFundingRequired,
-          requestedYourContribution: requiredDeposit,
-          channelId,
-          ourIndex,
-          safeToDepositLevel,
-        },
+      protocolState: waitForDepositTransaction({
+        requestedTotalFunds: totalFundingRequired,
+        requestedYourContribution: requiredDeposit,
+        channelId,
+        ourIndex,
+        safeToDepositLevel,
         transactionSubmissionState,
-      ),
+      }),
       sharedData: newSharedData,
     };
   }

@@ -17,7 +17,7 @@ import {
   initialize as initTransactionState,
   transactionReducer,
 } from '../transaction-submission/reducer';
-import { isTerminal, SUCCESS } from '../transaction-submission/states';
+import { isTerminal, isSuccess } from '../transaction-submission/states';
 import * as states from './state';
 
 type DFReducer = ProtocolReducer<states.DirectFundingState>;
@@ -147,7 +147,7 @@ const notSafeToDepositReducer: DFReducer = (
           sharedData,
         );
         return {
-          protocolState: states.waitForDepositTransaction(state, transactionSubmissionState),
+          protocolState: states.waitForDepositTransaction({ ...state, transactionSubmissionState }),
           sharedData: newSharedData,
         };
       } else {
@@ -177,7 +177,7 @@ const waitForDepositTransactionReducer: DFReducer = (
       protocolState: { ...protocolState, transactionSubmissionState: newTransactionState },
     };
   } else {
-    if (newTransactionState.type === SUCCESS) {
+    if (isSuccess(newTransactionState)) {
       return {
         protocolState: states.waitForFundingAndPostFundSetup(protocolState, {
           channelFunded: false,
