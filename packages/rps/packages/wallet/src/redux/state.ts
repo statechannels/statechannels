@@ -36,6 +36,7 @@ export interface SharedData {
   channelState: ChannelState;
   outboxState: OutboxState;
   adjudicatorState: AdjudicatorState;
+  fundingState: FundingState;
 }
 
 export interface WaitForLogin extends SharedData {
@@ -67,6 +68,15 @@ export interface ProcessState {
   channelsToMonitor: string[];
 }
 
+export interface FundingState {
+  [channelId: string]: ChannelFundingState;
+}
+
+export interface ChannelFundingState {
+  directlyFunded: boolean;
+  fundingChannel?: string;
+}
+
 export interface IndirectFundingOngoing extends Initialized {
   indirectFunding: indirectFunding.IndirectFundingState;
 }
@@ -81,11 +91,12 @@ export const EMPTY_SHARED_DATA: SharedData = {
   outboxState: emptyDisplayOutboxState(),
   channelState: emptyChannelState(),
   adjudicatorState: {},
+  fundingState: {},
 };
 
 export function sharedData(params: SharedData): SharedData {
-  const { outboxState, channelState, adjudicatorState } = params;
-  return { outboxState, channelState, adjudicatorState };
+  const { outboxState, channelState, adjudicatorState, fundingState } = params;
+  return { outboxState, channelState, adjudicatorState, fundingState };
 }
 
 export function waitForLogin(): WaitForLogin {

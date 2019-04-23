@@ -1,6 +1,6 @@
 import { OpenedState, OPENING, ChannelStatus } from './channel-state/state';
 import * as walletStates from './state';
-import { SharedData } from './state';
+import { SharedData, FundingState } from './state';
 
 export const getOpenedChannelState = (state: SharedData, channelId: string): OpenedState => {
   const channelStatus = getChannelState(state, channelId);
@@ -37,6 +37,21 @@ export const getAdjudicatorWatcherProcessesForChannel = (
   return processIds;
 };
 
-export const getAdjudicatorState = (state: walletStates.Initialized) => {
-  return state.channelState;
+export const getAdjudicatorState = (state: SharedData) => {
+  return state.adjudicatorState;
+};
+
+export const getAdjudicatorChannelState = (state: SharedData, channelId: string) => {
+  return getAdjudicatorState(state)[channelId];
+};
+
+export const getFundingState = (state: SharedData): FundingState => {
+  return state.fundingState;
+};
+
+export const getChannelFundingState = (
+  state: SharedData,
+  channelId: string,
+): walletStates.ChannelFundingState => {
+  return state.fundingState[channelId];
 };
