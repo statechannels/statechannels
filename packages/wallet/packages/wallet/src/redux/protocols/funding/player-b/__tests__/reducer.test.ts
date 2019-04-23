@@ -33,15 +33,7 @@ describe('happyPath', () => {
     // const state = scenario.waitForFunding;
     // const action = scenario.indirectFundingSuccess;
     // const result = reducer(state, sharedData, action);
-    // itTransitionsTo(result, states.WAIT_FOR_POSTFUND_SETUP);
-  });
-
-  describe.skip(whenIn(states.WAIT_FOR_POSTFUND_SETUP), () => {
-    const state = scenario.waitForPostFundSetup;
-    const action = scenario.postFundSetupArrived;
-    const result = reducer(state, sharedData, action);
-
-    itTransitionsTo(result, states.WAIT_FOR_SUCCESS_CONFIRMATION);
+    // itTransitionsTo(result, states.WAIT_FOR_SUCCESS_CONFIRMATION);
   });
 
   describe.skip(whenIn(states.WAIT_FOR_SUCCESS_CONFIRMATION), () => {
