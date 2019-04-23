@@ -84,17 +84,17 @@ export const aDepositsBDepositsAHappyStates = {
     waitForFundingChannelState,
   ),
   waitForDepositTransactionStart: constructWalletState(
-    states.waitForDepositTransaction(
-      defaultsForA,
-      transactionSubmissionScenarios.happyPath.waitForSend,
-    ),
+    states.waitForDepositTransaction({
+      ...defaultsForA,
+      transactionSubmissionState: transactionSubmissionScenarios.happyPath.waitForSend,
+    }),
     waitForFundingChannelState,
   ),
   waitForDepositTransactionEnd: constructWalletState(
-    states.waitForDepositTransaction(
-      defaultsForA,
-      transactionSubmissionScenarios.happyPath.waitForConfirmation,
-    ),
+    states.waitForDepositTransaction({
+      ...defaultsForA,
+      transactionSubmissionState: transactionSubmissionScenarios.happyPath.waitForConfirmation,
+    }),
     waitForFundingChannelState,
   ),
   waitForFundingAndPostFundSetup: constructWalletState(
@@ -124,17 +124,17 @@ export const aDepositsBDepositsBHappyStates = {
     waitForFundingChannelState,
   ),
   waitForDepositTransactionStart: constructWalletState(
-    states.waitForDepositTransaction(
-      defaultsForB,
-      transactionSubmissionScenarios.happyPath.waitForSend,
-    ),
+    states.waitForDepositTransaction({
+      ...defaultsForB,
+      transactionSubmissionState: transactionSubmissionScenarios.happyPath.waitForSend,
+    }),
     waitForFundingChannelState,
   ),
   waitForDepositTransactionEnd: constructWalletState(
-    states.waitForDepositTransaction(
-      defaultsForB,
-      transactionSubmissionScenarios.happyPath.waitForConfirmation,
-    ),
+    states.waitForDepositTransaction({
+      ...defaultsForB,
+      transactionSubmissionState: transactionSubmissionScenarios.happyPath.waitForConfirmation,
+    }),
     waitForFundingChannelState,
   ),
   waitForFundingAndPostFundSetup: constructWalletState(
