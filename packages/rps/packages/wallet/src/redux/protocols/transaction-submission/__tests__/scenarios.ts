@@ -2,13 +2,6 @@ import * as states from '../states';
 import * as actions from '../actions';
 import { EMPTY_SHARED_DATA } from '../../../state';
 
-// To test all paths through the state machine we will use 4 different scenarios:
-//
-// 1. Happy path: WaitForSend -> WaitForSubmission -> WaitForConfirmation -> Success
-// 2. Retry and approve: WaitForSubmission -> ApproveRetry -> WaitForSend2
-// 3. Retry and deny: WaitForSubmission -> ApprovedRetry -> Failure
-// 4. Transaction failed: WaitForConfirmation -> Failure2
-
 // ---------
 // Test data
 // ---------
@@ -28,8 +21,8 @@ const waitForSend2 = states.waitForSubmission(props);
 const waitForConfirmation = states.waitForConfirmation(props);
 const success = states.success();
 const approveRetry = states.approveRetry(props);
-const failure = states.failure('User refused');
-const failure2 = states.failure('Transaction failed');
+const failure = states.failure('UserDeclinedRetry');
+const failure2 = states.failure('TransactionFailed');
 
 // -------
 // Actions

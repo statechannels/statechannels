@@ -10,15 +10,12 @@ import {
 } from './actions';
 import {
   TransactionSubmissionState as TSState,
+  NonTerminalTransactionSubmissionState as NonTerminalTSState,
   waitForSubmission,
   approveRetry,
   waitForConfirmation,
   success,
   waitForSend,
-  WAIT_FOR_SEND,
-  WAIT_FOR_SUBMISSION,
-  WAIT_FOR_CONFIRMATION,
-  APPROVE_RETRY,
   failure,
 } from './states';
 import { unreachable } from '../../../utils/reducer-utils';
@@ -33,7 +30,7 @@ export interface ReturnVal {
 }
 // call it storage?
 export function transactionReducer(
-  state: TSState,
+  state: NonTerminalTSState,
   storage: SharedData,
   action: TransactionAction,
 ): ReturnVal {
@@ -61,52 +58,52 @@ export function initialize(
   transaction: TransactionRequest,
   processId: string,
   storage: Storage,
-): ReturnVal {
+): { state: NonTerminalTSState; storage: SharedData } {
   storage = queueTransaction(storage, transaction, processId);
   return { state: waitForSend({ transaction, processId }), storage };
 }
 
 function transactionSent(state: TSState, storage: Storage): ReturnVal {
-  if (state.type !== WAIT_FOR_SEND) {
+  if (state.type !== 'WaitForSend') {
     return { state, storage };
   }
   return { state: waitForSubmission(state), storage };
 }
 
 function transactionSubmissionFailed(state: TSState, storage: Storage): ReturnVal {
-  if (state.type !== WAIT_FOR_SUBMISSION) {
+  if (state.type !== 'WaitForSubmission') {
     return { state, storage };
   }
   return { state: approveRetry(state), storage };
 }
 
 function transactionSubmitted(
-  state: TSState,
+  state: NonTerminalTSState,
   storage: Storage,
   transactionHash: string,
 ): ReturnVal {
   switch (state.type) {
-    case WAIT_FOR_SUBMISSION:
-    case WAIT_FOR_SEND: // just in case we didn't hear the TRANSACTION_SENT
+    case 'WaitForSubmission':
+    case 'WaitForSend': // just in case we didn't hear the TRANSACTION_SENT
       return { state: waitForConfirmation({ ...state, transactionHash }), storage };
     default:
       return { state, storage };
   }
 }
 
-function transactionConfirmed(state: TSState, storage: Storage): ReturnVal {
+function transactionConfirmed(state: NonTerminalTSState, storage: Storage): ReturnVal {
   switch (state.type) {
-    case WAIT_FOR_CONFIRMATION:
-    case WAIT_FOR_SUBMISSION: // in case we didn't hear the TRANSACTION_SUBMITTED
-    case WAIT_FOR_SEND: // in case we didn't hear the TRANSACTION_SENT
+    case 'WaitForConfirmation':
+    case 'WaitForSubmission': // in case we didn't hear the TRANSACTION_SUBMITTED
+    case 'WaitForSend': // in case we didn't hear the TRANSACTION_SENT
       return { state: success(), storage };
     default:
       return { state, storage };
   }
 }
 
-function transactionRetryApproved(state: TSState, storage: Storage): ReturnVal {
-  if (state.type !== APPROVE_RETRY) {
+function transactionRetryApproved(state: NonTerminalTSState, storage: Storage): ReturnVal {
+  if (state.type !== 'ApproveRetry') {
     return { state, storage };
   }
   const { transaction, processId } = state;
@@ -114,10 +111,10 @@ function transactionRetryApproved(state: TSState, storage: Storage): ReturnVal {
   return { state: waitForSend({ transaction, processId }), storage };
 }
 
-function transactionRetryDenied(state: TSState, storage: Storage): ReturnVal {
-  return { state: failure('User denied retry'), storage };
+function transactionRetryDenied(state: NonTerminalTSState, storage: Storage): ReturnVal {
+  return { state: failure('UserDeclinedRetry'), storage };
 }
 
-function transactionFailed(state: TSState, storage: Storage): ReturnVal {
-  return { state: failure('Transaction failed'), storage };
+function transactionFailed(state: NonTerminalTSState, storage: Storage): ReturnVal {
+  return { state: failure('TransactionFailed'), storage };
 }

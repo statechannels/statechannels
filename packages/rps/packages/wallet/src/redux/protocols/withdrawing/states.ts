@@ -1,4 +1,4 @@
-import { TransactionSubmissionState } from '../transaction-submission/states';
+import { NonTerminalTransactionSubmissionState as NonTerminalTSState } from '../transaction-submission/states';
 import { Properties } from '../../utils';
 export type WithdrawalState =
   | WaitForApproval
@@ -25,7 +25,7 @@ export interface WaitForTransaction {
   type: typeof WAIT_FOR_TRANSACTION;
   processId: string;
   channelId: string;
-  transactionSubmissionState: TransactionSubmissionState;
+  transactionSubmissionState: NonTerminalTSState;
   withdrawalAddress: string;
 }
 
