@@ -12,7 +12,7 @@ describe('happyPath', () => {
   const scenario = scenarios.happyPath;
   const sharedData = scenario.sharedData;
 
-  describe.skip(whenIn(states.WAIT_FOR_STRATEGY_CHOICE), () => {
+  describe(whenIn(states.WAIT_FOR_STRATEGY_CHOICE), () => {
     const state = scenario.waitForStrategyChoice;
     const action = scenario.strategyChosen;
     const result = reducer(state, sharedData, action);
@@ -20,7 +20,7 @@ describe('happyPath', () => {
     itTransitionsTo(result, states.WAIT_FOR_STRATEGY_RESPONSE);
   });
 
-  describe.skip(whenIn(states.WAIT_FOR_STRATEGY_RESPONSE), () => {
+  describe(whenIn(states.WAIT_FOR_STRATEGY_RESPONSE), () => {
     const state = scenario.waitForStrategyResponse;
     const action = scenario.strategyApproved;
     const result = reducer(state, sharedData, action);
@@ -28,23 +28,15 @@ describe('happyPath', () => {
     itTransitionsTo(result, states.WAIT_FOR_FUNDING);
   });
 
-  describe.skip(whenIn(states.WAIT_FOR_FUNDING), () => {
+  describe(whenIn(states.WAIT_FOR_FUNDING), () => {
     // TODO: This test depends on updating the indirect funding protocol
     // const state = scenario.waitForFunding;
     // const action = scenario.indirectFundingSuccess;
     // const result = reducer(state, sharedData, action);
-    // itTransitionsTo(result, states.WAIT_FOR_POSTFUND_SETUP);
+    // itTransitionsTo(result, states.WAIT_FOR_SUCCESS_CONFIRMATION);
   });
 
-  describe.skip(whenIn(states.WAIT_FOR_POSTFUND_SETUP), () => {
-    const state = scenario.waitForPostFundSetup;
-    const action = scenario.postFundSetupArrived;
-    const result = reducer(state, sharedData, action);
-
-    itTransitionsTo(result, states.WAIT_FOR_SUCCESS_CONFIRMATION);
-  });
-
-  describe.skip(whenIn(states.WAIT_FOR_SUCCESS_CONFIRMATION), () => {
+  describe(whenIn(states.WAIT_FOR_SUCCESS_CONFIRMATION), () => {
     const state = scenario.waitForSuccessConfirmation;
     const action = scenario.successConfirmed;
     const result = reducer(state, sharedData, action);
@@ -57,7 +49,7 @@ describe('When a strategy is rejected', () => {
   const scenario = scenarios.rejectedStrategy;
   const sharedData = scenario.sharedData;
 
-  describe.skip(whenIn(states.WAIT_FOR_STRATEGY_RESPONSE), () => {
+  describe(whenIn(states.WAIT_FOR_STRATEGY_RESPONSE), () => {
     const state = scenario.waitForStrategyResponse;
     const action = scenario.strategyRejected;
     const result = reducer(state, sharedData, action);
@@ -70,22 +62,22 @@ describe('when cancelled by the opponent', () => {
   const scenario = scenarios.cancelledByOpponent;
   const sharedData = scenario.sharedData;
 
-  describe.skip(whenIn(states.WAIT_FOR_STRATEGY_CHOICE), () => {
+  describe(whenIn(states.WAIT_FOR_STRATEGY_CHOICE), () => {
     const state = scenario.waitForStrategyChoice;
     const action = scenario.cancelledByB;
     const result = reducer(state, sharedData, action);
 
     itTransitionsTo(result, states.FAILURE);
-    itSendsThisMessage(result, 'User refused');
+    itSendsThisMessage(result, 'WALLET.FUNDING.FAILURE');
   });
 
-  describe.skip(whenIn(states.WAIT_FOR_STRATEGY_RESPONSE), () => {
+  describe(whenIn(states.WAIT_FOR_STRATEGY_RESPONSE), () => {
     const state = scenario.waitForStrategyResponse;
     const action = scenario.cancelledByB;
     const result = reducer(state, sharedData, action);
 
     itTransitionsTo(result, states.FAILURE);
-    itSendsThisMessage(result, 'Opponent refused');
+    itSendsThisMessage(result, 'WALLET.FUNDING.FAILURE');
   });
 });
 
@@ -93,22 +85,22 @@ describe('when cancelled by the user', () => {
   const scenario = scenarios.cancelledByUser;
   const sharedData = scenario.sharedData;
 
-  describe.skip(whenIn(states.WAIT_FOR_STRATEGY_CHOICE), () => {
+  describe(whenIn(states.WAIT_FOR_STRATEGY_CHOICE), () => {
     const state = scenario.waitForStrategyChoice;
     const action = scenario.cancelledByA;
     const result = reducer(state, sharedData, action);
 
     itTransitionsTo(result, states.FAILURE);
-    itSendsThisMessage(result, 'User refused');
+    itSendsThisMessage(result, 'WALLET.FUNDING.FAILURE');
   });
 
-  describe.skip(whenIn(states.WAIT_FOR_STRATEGY_RESPONSE), () => {
+  describe(whenIn(states.WAIT_FOR_STRATEGY_RESPONSE), () => {
     const state = scenario.waitForStrategyResponse;
     const action = scenario.cancelledByA;
     const result = reducer(state, sharedData, action);
 
     itTransitionsTo(result, states.FAILURE);
-    itSendsThisMessage(result, 'User refused');
+    itSendsThisMessage(result, 'WALLET.FUNDING.FAILURE');
   });
 });
 

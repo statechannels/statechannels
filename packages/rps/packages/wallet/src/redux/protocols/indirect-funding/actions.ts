@@ -18,11 +18,9 @@ export type ProcessAction = playerA.Action | playerB.Action;
 export type Action = FundingRequested | ProcessAction | CommonAction;
 
 export function isIndirectFundingAction(action: WalletAction): action is Action {
-  return isCommonAction(action)
-    ? true
-    : isDirectFundingAction(action)
-    ? true
-    : action.type.indexOf('WALLET.INDIRECT_FUNDING') === 0
-    ? true
-    : false;
+  return (
+    isCommonAction(action) ||
+    isDirectFundingAction(action) ||
+    action.type.indexOf('WALLET.INDIRECT_FUNDING') === 0
+  );
 }
