@@ -23,7 +23,12 @@ import { EMPTY_SHARED_DATA } from '../../../../state';
 const processId = 'process-id.123';
 const sharedData = EMPTY_SHARED_DATA;
 
-const props = { processId, sharedData, fundingState: 'funding state' as 'funding state' };
+const props = {
+  processId,
+  sharedData,
+  fundingState: 'funding state' as 'funding state',
+  targetChannelId: '0x1324',
+};
 
 // ------
 // States
