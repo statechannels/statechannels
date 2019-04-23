@@ -5,9 +5,11 @@ import {
   Action as IndirectFundingAction,
   isIndirectFundingAction,
 } from '../../indirect-funding/actions';
-import { SharedData } from '../../../state';
+import { SharedData, queueMessage } from '../../../state';
 import { ProtocolStateWithSharedData } from '../..';
 import { unreachable } from '../../../../utils/reducer-utils';
+import { PlayerIndex } from '../../../types';
+import { fundingFailure } from 'magmo-wallet-client';
 
 type EmbeddedAction = IndirectFundingAction;
 
@@ -48,7 +50,11 @@ function strategyProposed(
   sharedData: SharedData,
   action: actions.StrategyProposed,
 ) {
-  return { protocolState: state, sharedData };
+  if (state.type !== states.WAIT_FOR_STRATEGY_PROPOSAL) {
+    return { protocolState: state, sharedData };
+  }
+
+  return { protocolState: states.waitForStrategyApproval(state), sharedData };
 }
 
 function strategyApproved(
@@ -56,7 +62,14 @@ function strategyApproved(
   sharedData: SharedData,
   action: actions.StrategyApproved,
 ) {
-  return { protocolState: state, sharedData };
+  if (state.type !== states.WAIT_FOR_STRATEGY_APPROVAL) {
+    return { protocolState: state, sharedData };
+  }
+
+  return {
+    protocolState: states.waitForFunding({ ...state, fundingState: 'funding state' }),
+    sharedData,
+  };
 }
 
 function strategyRejected(
@@ -64,7 +77,14 @@ function strategyRejected(
   sharedData: SharedData,
   action: actions.StrategyRejected,
 ) {
-  return { protocolState: state, sharedData };
+  if (state.type !== states.WAIT_FOR_STRATEGY_APPROVAL) {
+    return { protocolState: state, sharedData };
+  }
+
+  return {
+    protocolState: states.waitForStrategyProposal({ ...state }),
+    sharedData,
+  };
 }
 
 function fundingSuccessAcknowledged(
@@ -72,9 +92,37 @@ function fundingSuccessAcknowledged(
   sharedData: SharedData,
   action: actions.FundingSuccessAcknowledged,
 ) {
-  return { protocolState: state, sharedData };
+  if (state.type !== states.WAIT_FOR_SUCCESS_CONFIRMATION) {
+    return { protocolState: state, sharedData };
+  }
+  return { protocolState: states.success(), sharedData };
 }
 
 function cancelled(state: states.FundingState, sharedData: SharedData, action: actions.Cancelled) {
-  return { protocolState: state, sharedData };
+  if (
+    state.type !== states.WAIT_FOR_STRATEGY_PROPOSAL &&
+    state.type !== states.WAIT_FOR_STRATEGY_APPROVAL
+  ) {
+    return { protocolState: state, sharedData };
+  }
+  switch (action.by) {
+    case PlayerIndex.A: {
+      const { targetChannelId } = state;
+      const message = fundingFailure(targetChannelId, 'FundingDeclined');
+      return {
+        protocolState: states.failure('Opponent refused'),
+        sharedData: queueMessage(sharedData, message),
+      };
+    }
+    case PlayerIndex.B: {
+      const { targetChannelId } = state;
+      const message = fundingFailure(targetChannelId, 'FundingDeclined');
+      return {
+        protocolState: states.failure('User refused'),
+        sharedData: queueMessage(sharedData, message),
+      };
+    }
+    default:
+      return unreachable(action.by);
+  }
 }
