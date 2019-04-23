@@ -3,6 +3,7 @@ import { StateWithSideEffects } from '../utils';
 import { Commitment } from 'fmg-core';
 import { QueuedTransaction, OutboxState } from '../outbox/state';
 import { SharedData } from '../state';
+import { ProtocolStateWithSharedData } from '../protocols';
 
 type SideEffectState =
   | StateWithSideEffects<any>
@@ -105,10 +106,10 @@ export const itTransitionsToChannelStateType = (
 
 export const itTransitionsToStateType = (
   type,
-  stateWithSideEffects: StateWithSideEffects<{ type: any }>,
+  protocolStateWithSharedData: ProtocolStateWithSharedData<{ type: any }>,
 ) => {
   it(`transitions to ${type}`, () => {
-    expect(stateWithSideEffects.state.type).toEqual(type);
+    expect(protocolStateWithSharedData.protocolState.type).toEqual(type);
   });
 };
 
@@ -134,16 +135,3 @@ export const itIncreasesTurnNumBy = (
     }
   });
 };
-
-export function itChangesDepositStatusTo(status: string, state: { protocolState: any }) {
-  it(`changes depositStatus to ${status} `, () => {
-    expect(state.protocolState.depositStatus).toEqual(status);
-  });
-}
-export function itChangesChannelFundingStatusTo<
-  T extends { protocolState: { channelFundingStatus: any } }
->(status: string, state: T) {
-  it(`changes channelFundingStatus to ${status}`, () => {
-    expect(state.protocolState.channelFundingStatus).toEqual(status);
-  });
-}

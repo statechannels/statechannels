@@ -1,39 +1,31 @@
-import * as selectors from '../../selectors';
-import * as channelStates from '../../channel-state/state';
-
+import { bigNumberify } from 'ethers/utils';
+import { Commitment } from 'fmg-core';
+import { messageRelayRequested, WalletEvent } from 'magmo-wallet-client';
+import {
+  composeLedgerUpdateCommitment,
+  composePostFundCommitment,
+} from '../../../utils/commitment-utils';
+import { addHex } from '../../../utils/hex-utils';
+import { ourTurn } from '../../../utils/reducer-utils';
 import * as actions from '../../actions';
 import * as channelActions from '../../channel-state/actions';
-
-import { channelStateReducer } from '../../channel-state/reducer';
-import { Commitment } from 'fmg-core';
-import {
-  composePostFundCommitment,
-  composeLedgerUpdateCommitment,
-} from '../../../utils/commitment-utils';
-import { WalletProtocol } from '../../types';
-import {
-  messageRelayRequested,
-  WalletEvent,
-  VALIDATION_SUCCESS,
-  SIGNATURE_SUCCESS,
-} from 'magmo-wallet-client';
-import { addHex } from '../../../utils/hex-utils';
-import { bigNumberify } from 'ethers/utils';
-import { ourTurn } from '../../../utils/reducer-utils';
+import * as channelStates from '../../channel-state/state';
+import { queueMessage as queueMessageOutbox } from '../../outbox/state';
 import { ProtocolStateWithSharedData } from '../../protocols';
-import { queueMessage as queueMessageOutbox, SideEffects } from '../../outbox/state';
+import { FundingAction } from '../../protocols/direct-funding/actions';
 import {
   DirectFundingState,
+  FUNDING_SUCCESS,
   initialDirectFundingState,
-  CHANNEL_FUNDED,
 } from '../../protocols/direct-funding/state';
-import { FundingAction } from '../../protocols/direct-funding/actions';
+import * as selectors from '../../selectors';
+import { setChannel, SharedData } from '../../state';
+import { WalletProtocol } from '../../types';
 import { directFundingStateReducer } from '../direct-funding/reducer';
-import { accumulateSideEffects } from '../../outbox';
-import { SharedData, setChannel } from '../../state';
+import { updateChannelState } from '../reducer-helpers';
 
 export const directFundingIsComplete = (directFundingState: DirectFundingState): boolean => {
-  return directFundingState.channelFundingStatus === CHANNEL_FUNDED;
+  return directFundingState.type === FUNDING_SUCCESS;
 };
 
 export const appChannelIsWaitingForFunding = (
@@ -194,38 +186,6 @@ export const requestDirectFunding = (
     ourIndex,
   );
   return initialDirectFundingState(action, sharedData);
-};
-
-const filterOutSignatureMessages = (sideEffects?: SideEffects): SideEffects | undefined => {
-  if (sideEffects && sideEffects.messageOutbox) {
-    let messageArray = Array.isArray(sideEffects.messageOutbox)
-      ? sideEffects.messageOutbox
-      : [sideEffects.messageOutbox];
-    messageArray = messageArray.filter(
-      walletEvent =>
-        walletEvent.type !== VALIDATION_SUCCESS && walletEvent.type !== SIGNATURE_SUCCESS,
-    );
-    return {
-      ...sideEffects,
-      messageOutbox: messageArray,
-    };
-  }
-  return sideEffects;
-};
-export const updateChannelState = (
-  sharedData: SharedData,
-  channelAction: actions.channel.ChannelAction,
-): SharedData => {
-  const newSharedData = { ...sharedData };
-  const updatedChannelState = channelStateReducer(newSharedData.channelState, channelAction);
-  newSharedData.channelState = updatedChannelState.state;
-
-  // TODO: Currently we need to filter out signature/validation messages that are meant to the app
-  // This might change based on whether protocol reducers or channel reducers craft commitments
-  const filteredSideEffects = filterOutSignatureMessages(updatedChannelState.sideEffects);
-  // App channel state may still generate side effects
-  newSharedData.outboxState = accumulateSideEffects(newSharedData.outboxState, filteredSideEffects);
-  return newSharedData;
 };
 
 export const updateDirectFundingStatus = (

@@ -1,44 +1,50 @@
-import * as depositing from './depositing/state';
-import { DirectFundingRequested } from '../../internal/actions';
 import { bigNumberify } from 'ethers/utils';
-import { createDepositTransaction } from '../../../utils/transaction-generator';
 import { ProtocolStateWithSharedData } from '..';
+import { createDepositTransaction } from '../../../utils/transaction-generator';
+import { DirectFundingRequested } from '../../internal/actions';
+import { SharedData } from '../../state';
+import { initialize as initTransactionState } from '../transaction-submission/reducer';
+import { TransactionSubmissionState } from '../transaction-submission/states';
+import { Properties } from '../../utils';
 
-import { queueTransaction, SharedData } from '../../state';
-export { depositing };
 // ChannelFundingStatus
 export const NOT_SAFE_TO_DEPOSIT = 'NOT_SAFE_TO_DEPOSIT';
-export const SAFE_TO_DEPOSIT = 'SAFE_TO_DEPOSIT';
-export const CHANNEL_FUNDED = 'CHANNEL_FUNDED';
+export const WAIT_FOR_DEPOSIT_TRANSACTION = 'WAIT_FOR_DEPOSIT_TRANSACTION';
+export const WAIT_FOR_FUNDING_AND_POST_FUND_SETUP = 'WAIT_FOR_FUNDING_AND_POST_FUND_SETUP';
+export const FUNDING_SUCCESS = 'CHANNEL_FUNDED';
 // Funding status
 export type ChannelFundingStatus =
   | typeof NOT_SAFE_TO_DEPOSIT
-  | typeof SAFE_TO_DEPOSIT
-  | typeof CHANNEL_FUNDED;
+  | typeof WAIT_FOR_DEPOSIT_TRANSACTION
+  | typeof WAIT_FOR_FUNDING_AND_POST_FUND_SETUP
+  | typeof FUNDING_SUCCESS;
 export const DIRECT_FUNDING = 'FUNDING_TYPE.DIRECT';
 export interface BaseDirectFundingState {
   safeToDepositLevel: string;
-  depositStatus?: depositing.DepositStatus;
-  channelFundingStatus: ChannelFundingStatus;
+  type: ChannelFundingStatus;
   requestedTotalFunds: string;
   requestedYourContribution: string;
   channelId: string;
   ourIndex: number;
 }
 export interface NotSafeToDeposit extends BaseDirectFundingState {
-  channelFundingStatus: typeof NOT_SAFE_TO_DEPOSIT;
+  type: typeof NOT_SAFE_TO_DEPOSIT;
 }
-export interface WaitForFundingConfirmation extends BaseDirectFundingState {
-  depositStatus: typeof depositing.DEPOSIT_CONFIRMED;
-  channelFundingStatus: typeof SAFE_TO_DEPOSIT;
+export interface WaitForDepositTransaction extends BaseDirectFundingState {
+  type: typeof WAIT_FOR_DEPOSIT_TRANSACTION;
+  transactionSubmissionState: TransactionSubmissionState;
 }
-export interface ChannelFunded extends BaseDirectFundingState {
-  depositStatus: depositing.DepositStatus;
-  channelFundingStatus: typeof CHANNEL_FUNDED;
+export interface WaitForFundingAndPostFundSetup extends BaseDirectFundingState {
+  type: typeof WAIT_FOR_FUNDING_AND_POST_FUND_SETUP;
+  channelFunded: boolean;
+  postFundSetupReceived: boolean;
+}
+export interface FundingSuccess extends BaseDirectFundingState {
+  type: typeof FUNDING_SUCCESS;
 }
 // constructors
-export function baseDirectFundingState<T extends BaseDirectFundingState>(
-  params: T,
+export function baseDirectFundingState(
+  params: Properties<BaseDirectFundingState>,
 ): BaseDirectFundingState {
   const {
     requestedTotalFunds,
@@ -46,7 +52,7 @@ export function baseDirectFundingState<T extends BaseDirectFundingState>(
     channelId,
     ourIndex,
     safeToDepositLevel,
-    channelFundingStatus,
+    type: channelFundingStatus,
   } = params;
   return {
     requestedTotalFunds,
@@ -54,58 +60,52 @@ export function baseDirectFundingState<T extends BaseDirectFundingState>(
     channelId,
     ourIndex,
     safeToDepositLevel,
-    channelFundingStatus,
+    type: channelFundingStatus,
   };
 }
-export function notSafeToDeposit<T extends BaseDirectFundingState>(params: T): NotSafeToDeposit {
+export function notSafeToDeposit(params: Properties<BaseDirectFundingState>): NotSafeToDeposit {
   return {
     ...baseDirectFundingState(params),
-    channelFundingStatus: NOT_SAFE_TO_DEPOSIT,
+    type: NOT_SAFE_TO_DEPOSIT,
   };
 }
-export function waitForFundingConfirmed<T extends BaseDirectFundingState>(
-  params: T,
-): WaitForFundingConfirmation {
+export function waitForDepositTransaction(
+  params: Properties<BaseDirectFundingState>,
+  transactionSubmissionState: TransactionSubmissionState,
+): WaitForDepositTransaction {
   return {
     ...baseDirectFundingState(params),
-    depositStatus: depositing.DEPOSIT_CONFIRMED,
-    channelFundingStatus: SAFE_TO_DEPOSIT,
+    type: WAIT_FOR_DEPOSIT_TRANSACTION,
+    transactionSubmissionState,
   };
 }
-export function channelFunded<T extends BaseDirectFundingState>(params: T): ChannelFunded {
+
+interface ConditionalParams {
+  channelFunded: boolean;
+  postFundSetupReceived: boolean;
+}
+export function waitForFundingAndPostFundSetup<T extends BaseDirectFundingState>(
+  params: Properties<BaseDirectFundingState>,
+  conditionalParams: ConditionalParams,
+): WaitForFundingAndPostFundSetup {
   return {
     ...baseDirectFundingState(params),
-    depositStatus: depositing.DEPOSIT_CONFIRMED,
-    channelFundingStatus: CHANNEL_FUNDED,
+    channelFunded: conditionalParams.channelFunded,
+    postFundSetupReceived: conditionalParams.postFundSetupReceived,
+    type: WAIT_FOR_FUNDING_AND_POST_FUND_SETUP,
   };
 }
-// type guards
-const guardGenerator = <T extends DirectFundingState>(type) => (
-  state: DirectFundingState,
-): state is T => {
-  return state.channelFundingStatus === type;
-};
-export const stateIsNotSafeToDeposit = guardGenerator<NotSafeToDeposit>(NOT_SAFE_TO_DEPOSIT);
-export const stateIsDepositing = (state: DirectFundingState): state is depositing.Depositing => {
-  return (
-    state.channelFundingStatus === SAFE_TO_DEPOSIT &&
-    state.depositStatus !== depositing.DEPOSIT_CONFIRMED
-  );
-};
-export const stateIsWaitForFundingConfirmation = (
-  state: DirectFundingState,
-): state is WaitForFundingConfirmation => {
-  return (
-    state.channelFundingStatus === SAFE_TO_DEPOSIT &&
-    state.depositStatus === depositing.DEPOSIT_CONFIRMED
-  );
-};
-export const stateIsChannelFunded = guardGenerator<ChannelFunded>(CHANNEL_FUNDED);
+export function fundingSuccess(params: Properties<BaseDirectFundingState>): FundingSuccess {
+  return {
+    ...baseDirectFundingState(params),
+    type: FUNDING_SUCCESS,
+  };
+}
 export type DirectFundingState =
   | NotSafeToDeposit
-  | depositing.Depositing
-  | WaitForFundingConfirmation
-  | ChannelFunded;
+  | WaitForDepositTransaction
+  | WaitForFundingAndPostFundSetup
+  | FundingSuccess;
 
 export function initialDirectFundingState(
   action: DirectFundingRequested,
@@ -116,33 +116,49 @@ export function initialDirectFundingState(
   const alreadySafeToDeposit = bigNumberify(safeToDepositLevel).eq('0x');
   const alreadyFunded = bigNumberify(totalFundingRequired).eq('0x');
 
-  const channelFundingStatus = alreadyFunded
-    ? CHANNEL_FUNDED
-    : alreadySafeToDeposit
-    ? SAFE_TO_DEPOSIT
-    : NOT_SAFE_TO_DEPOSIT;
-
-  const stateConstructor: any = alreadyFunded
-    ? channelFunded
-    : alreadySafeToDeposit
-    ? depositing.waitForTransactionSent
-    : notSafeToDeposit;
+  if (alreadyFunded) {
+    return {
+      protocolState: fundingSuccess({
+        requestedTotalFunds: totalFundingRequired,
+        requestedYourContribution: requiredDeposit,
+        channelId,
+        ourIndex,
+        safeToDepositLevel,
+      }),
+      sharedData,
+    };
+  }
 
   if (alreadySafeToDeposit) {
-    const transactionRequest = createDepositTransaction(action.channelId, action.requiredDeposit);
-    const processId = `depositing.${channelId}`;
-    sharedData = queueTransaction(sharedData, transactionRequest, processId);
+    const depositTransaction = createDepositTransaction(action.channelId, action.requiredDeposit);
+    const { storage: newSharedData, state: transactionSubmissionState } = initTransactionState(
+      depositTransaction,
+      `direct-funding.${action.channelId}`, // TODO: what is the correct way of fetching the process id?
+      sharedData,
+    );
+
+    return {
+      protocolState: waitForDepositTransaction(
+        {
+          requestedTotalFunds: totalFundingRequired,
+          requestedYourContribution: requiredDeposit,
+          channelId,
+          ourIndex,
+          safeToDepositLevel,
+        },
+        transactionSubmissionState,
+      ),
+      sharedData: newSharedData,
+    };
   }
 
   return {
-    protocolState: stateConstructor({
-      fundingType: DIRECT_FUNDING,
-      channelFundingStatus,
-      safeToDepositLevel,
-      channelId,
+    protocolState: notSafeToDeposit({
       requestedTotalFunds: totalFundingRequired,
       requestedYourContribution: requiredDeposit,
+      channelId,
       ourIndex,
+      safeToDepositLevel,
     }),
     sharedData,
   };
