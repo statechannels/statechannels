@@ -136,7 +136,7 @@ export function getChannel(state: SharedData, channelId: string): ChannelStatus 
   return state.channelState.initializedChannels[channelId];
 }
 
-export function queueMessage(state: Initialized, message: WalletEvent): Initialized {
+export function queueMessage(state: SharedData, message: WalletEvent): SharedData {
   return { ...state, outboxState: queueMessageOutbox(state.outboxState, message) };
 }
 
