@@ -12,7 +12,7 @@ describe('happyPath', () => {
   const scenario = scenarios.happyPath;
   const sharedData = scenario.sharedData;
 
-  describe.skip(whenIn(states.WAIT_FOR_STRATEGY_PROPOSAL), () => {
+  describe(whenIn(states.WAIT_FOR_STRATEGY_PROPOSAL), () => {
     const state = scenario.waitForStrategyProposal;
     const action = scenario.strategyProposed;
     const result = reducer(state, sharedData, action);
@@ -20,7 +20,7 @@ describe('happyPath', () => {
     itTransitionsTo(result, states.WAIT_FOR_STRATEGY_APPROVAL);
   });
 
-  describe.skip(whenIn(states.WAIT_FOR_STRATEGY_APPROVAL), () => {
+  describe(whenIn(states.WAIT_FOR_STRATEGY_APPROVAL), () => {
     const state = scenario.waitForStrategyApproval;
     const action = scenario.strategyApproved;
     const result = reducer(state, sharedData, action);
@@ -28,7 +28,7 @@ describe('happyPath', () => {
     itTransitionsTo(result, states.WAIT_FOR_FUNDING);
   });
 
-  describe.skip(whenIn(states.WAIT_FOR_FUNDING), () => {
+  describe(whenIn(states.WAIT_FOR_FUNDING), () => {
     // TODO: This test depends on updating the indirect funding protocol
     // const state = scenario.waitForFunding;
     // const action = scenario.indirectFundingSuccess;
@@ -36,7 +36,7 @@ describe('happyPath', () => {
     // itTransitionsTo(result, states.WAIT_FOR_SUCCESS_CONFIRMATION);
   });
 
-  describe.skip(whenIn(states.WAIT_FOR_SUCCESS_CONFIRMATION), () => {
+  describe(whenIn(states.WAIT_FOR_SUCCESS_CONFIRMATION), () => {
     const state = scenario.waitForSuccessConfirmation;
     const action = scenario.successConfirmed;
     const result = reducer(state, sharedData, action);
@@ -49,7 +49,7 @@ describe('When a strategy is rejected', () => {
   const scenario = scenarios.rejectedStrategy;
   const sharedData = scenario.sharedData;
 
-  describe.skip(whenIn(states.WAIT_FOR_STRATEGY_APPROVAL), () => {
+  describe(whenIn(states.WAIT_FOR_STRATEGY_APPROVAL), () => {
     const state = scenario.waitForStrategyApproval;
     const action = scenario.strategyRejected;
     const result = reducer(state, sharedData, action);
@@ -62,22 +62,22 @@ describe('when cancelled by the opponent', () => {
   const scenario = scenarios.cancelledByOpponent;
   const sharedData = scenario.sharedData;
 
-  describe.skip(whenIn(states.WAIT_FOR_STRATEGY_PROPOSAL), () => {
+  describe(whenIn(states.WAIT_FOR_STRATEGY_PROPOSAL), () => {
     const state = scenario.waitForStrategyProposal;
     const action = scenario.cancelledByA;
     const result = reducer(state, sharedData, action);
 
     itTransitionsTo(result, states.FAILURE);
-    itSendsThisMessage(result, 'User refused');
+    itSendsThisMessage(result, 'WALLET.FUNDING.FAILURE');
   });
 
-  describe.skip(whenIn(states.WAIT_FOR_STRATEGY_APPROVAL), () => {
+  describe(whenIn(states.WAIT_FOR_STRATEGY_APPROVAL), () => {
     const state = scenario.waitForStrategyApproval;
     const action = scenario.cancelledByA;
     const result = reducer(state, sharedData, action);
 
     itTransitionsTo(result, states.FAILURE);
-    itSendsThisMessage(result, 'Opponent refused');
+    itSendsThisMessage(result, 'WALLET.FUNDING.FAILURE');
   });
 });
 
@@ -85,22 +85,22 @@ describe('when cancelled by the user', () => {
   const scenario = scenarios.cancelledByUser;
   const sharedData = scenario.sharedData;
 
-  describe.skip(whenIn(states.WAIT_FOR_STRATEGY_PROPOSAL), () => {
+  describe(whenIn(states.WAIT_FOR_STRATEGY_PROPOSAL), () => {
     const state = scenario.waitForStrategyProposal;
     const action = scenario.cancelledByB;
     const result = reducer(state, sharedData, action);
 
     itTransitionsTo(result, states.FAILURE);
-    itSendsThisMessage(result, 'User refused');
+    itSendsThisMessage(result, 'WALLET.FUNDING.FAILURE');
   });
 
-  describe.skip(whenIn(states.WAIT_FOR_STRATEGY_APPROVAL), () => {
+  describe(whenIn(states.WAIT_FOR_STRATEGY_APPROVAL), () => {
     const state = scenario.waitForStrategyApproval;
     const action = scenario.cancelledByB;
     const result = reducer(state, sharedData, action);
 
     itTransitionsTo(result, states.FAILURE);
-    itSendsThisMessage(result, 'User refused');
+    itSendsThisMessage(result, 'WALLET.FUNDING.FAILURE');
   });
 });
 
