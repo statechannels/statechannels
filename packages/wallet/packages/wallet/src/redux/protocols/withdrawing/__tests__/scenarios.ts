@@ -1,7 +1,7 @@
 import * as states from '../states';
 import * as actions from '../actions';
 import * as transactionActions from '../../transaction-submission/actions';
-import * as transactionScenarios from '../../transaction-submission/__tests__/scenarios';
+import * as transactionScenarios from '../../transaction-submission/__tests__';
 import {
   ChannelStatus,
   RUNNING,
@@ -72,7 +72,7 @@ const withdrawalAddress = Wallet.createRandom().address;
 const processId = 'process-id.123';
 const sharedData: SharedData = { ...EMPTY_SHARED_DATA, channelState };
 const withdrawalAmount = web3Utils.toWei('5');
-const transactionSubmissionState = transactionScenarios.happyPath.waitForConfirmation;
+const transactionSubmissionState = transactionScenarios.preSuccessState;
 const props = {
   transaction,
   processId,

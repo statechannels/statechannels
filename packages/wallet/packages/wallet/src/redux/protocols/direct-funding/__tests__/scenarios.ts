@@ -7,7 +7,7 @@ import { PlayerIndex } from '../../../types';
 import * as globalTestScenarios from '../../../__tests__/test-scenarios';
 import * as scenarios from '../../../__tests__/test-scenarios';
 import * as testScenarios from '../../../__tests__/test-scenarios';
-import * as transactionSubmissionScenarios from '../../transaction-submission/__tests__/scenarios';
+import * as transactionSubmissionScenarios from '../../transaction-submission/__tests__';
 import * as states from '../state';
 
 const { channelId, twoThree } = scenarios;
@@ -86,14 +86,14 @@ export const aDepositsBDepositsAHappyStates = {
   waitForDepositTransactionStart: constructWalletState(
     states.waitForDepositTransaction({
       ...defaultsForA,
-      transactionSubmissionState: transactionSubmissionScenarios.happyPath.waitForSend,
+      transactionSubmissionState: transactionSubmissionScenarios.initialState,
     }),
     waitForFundingChannelState,
   ),
   waitForDepositTransactionEnd: constructWalletState(
     states.waitForDepositTransaction({
       ...defaultsForA,
-      transactionSubmissionState: transactionSubmissionScenarios.happyPath.waitForConfirmation,
+      transactionSubmissionState: transactionSubmissionScenarios.preSuccessState,
     }),
     waitForFundingChannelState,
   ),
@@ -126,14 +126,14 @@ export const aDepositsBDepositsBHappyStates = {
   waitForDepositTransactionStart: constructWalletState(
     states.waitForDepositTransaction({
       ...defaultsForB,
-      transactionSubmissionState: transactionSubmissionScenarios.happyPath.waitForSend,
+      transactionSubmissionState: transactionSubmissionScenarios.initialState,
     }),
     waitForFundingChannelState,
   ),
   waitForDepositTransactionEnd: constructWalletState(
     states.waitForDepositTransaction({
       ...defaultsForB,
-      transactionSubmissionState: transactionSubmissionScenarios.happyPath.waitForConfirmation,
+      transactionSubmissionState: transactionSubmissionScenarios.preSuccessState,
     }),
     waitForFundingChannelState,
   ),
