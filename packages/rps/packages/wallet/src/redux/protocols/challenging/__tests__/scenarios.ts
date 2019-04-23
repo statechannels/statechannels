@@ -1,6 +1,6 @@
 import * as states from '../states';
 import * as actions from '../actions';
-import * as tsScenarios from '../../transaction-submission/__tests__/scenarios';
+import * as tsScenarios from '../../transaction-submission/__tests__';
 import { setChannel, EMPTY_SHARED_DATA } from '../../../state';
 import { ChannelStatus, waitForPreFundSetup, waitForUpdate } from '../../../channel-state/state';
 import * as channelScenarios from '../../../__tests__/test-scenarios';
@@ -48,8 +48,8 @@ const ourTurn = waitForUpdate({
 // Defaults
 // --------
 const processId = 'processId';
-const tsPreSuccess = tsScenarios.happyPath.waitForConfirmation;
-const tsPreFailure = tsScenarios.transactionFailed.waitForConfirmation;
+const tsPreSuccess = tsScenarios.preSuccessState;
+const tsPreFailure = tsScenarios.preFailureState;
 const storage = (channelState: ChannelStatus) => setChannel(EMPTY_SHARED_DATA, channelState);
 
 const defaults = { processId, channelId, storage: storage(theirTurn) };
@@ -80,8 +80,8 @@ const failure = (reason: Reason) => states.failure({ reason });
 const challengeApproved = actions.challengeApproved(processId);
 const challengeDenied = actions.challengeDenied(processId);
 const challengeTimedOut = actions.challengeTimedOut(processId);
-const transactionSuccessTrigger = tsScenarios.happyPath.confirmed;
-const transactionFailureTrigger = tsScenarios.transactionFailed.failed;
+const transactionSuccessTrigger = tsScenarios.successTrigger;
+const transactionFailureTrigger = tsScenarios.failureTrigger;
 const responseReceived = actions.challengeResponseReceived(processId);
 const responseAcknowledged = actions.challengeResponseAcknowledged(processId);
 const timeoutAcknowledged = actions.challengeTimeoutAcknowledged(processId);
