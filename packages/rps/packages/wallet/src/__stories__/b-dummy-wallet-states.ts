@@ -56,6 +56,7 @@ const defaultInitialized: walletStates.Initialized = walletStates.initialized({
   outboxState: emptyDisplayOutboxState(),
   adjudicatorState: {},
   processStore: {},
+  fundingState: {},
 });
 
 ////////////////////////////////////////////////

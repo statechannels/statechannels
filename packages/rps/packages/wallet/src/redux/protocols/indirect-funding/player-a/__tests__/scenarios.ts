@@ -111,6 +111,7 @@ const constructWalletState = (
       outboxState: emptyDisplayOutboxState(),
       channelState,
       adjudicatorState: {},
+      fundingState: {},
     },
   };
 };
