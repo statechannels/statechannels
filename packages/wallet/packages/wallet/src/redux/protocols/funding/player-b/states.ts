@@ -19,11 +19,13 @@ export const SUCCESS = 'Success';
 
 export interface WaitForStrategyProposal {
   type: typeof WAIT_FOR_STRATEGY_PROPOSAL;
+  targetChannelId: string;
   processId: string;
 }
 
 export interface WaitForStrategyApproval {
   type: typeof WAIT_FOR_STRATEGY_APPROVAL;
+  targetChannelId: string;
   processId: string;
 }
 
@@ -65,13 +67,13 @@ export function isTerminal(state: FundingState): state is Failure | Success {
 // ------------
 
 export function waitForStrategyProposal(p: P<WaitForStrategyProposal>): WaitForStrategyProposal {
-  const { processId } = p;
-  return { type: WAIT_FOR_STRATEGY_PROPOSAL, processId };
+  const { processId, targetChannelId } = p;
+  return { type: WAIT_FOR_STRATEGY_PROPOSAL, processId, targetChannelId };
 }
 
 export function waitForStrategyApproval(p: P<WaitForStrategyApproval>): WaitForStrategyApproval {
-  const { processId } = p;
-  return { type: WAIT_FOR_STRATEGY_APPROVAL, processId };
+  const { processId, targetChannelId } = p;
+  return { type: WAIT_FOR_STRATEGY_APPROVAL, processId, targetChannelId };
 }
 
 export function waitForFunding(p: P<WaitForFunding>): WaitForFunding {
