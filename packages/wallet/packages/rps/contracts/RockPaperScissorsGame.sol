@@ -3,13 +3,10 @@ pragma experimental ABIEncoderV2;
 
 import "fmg-core/contracts/Commitment.sol";
 import "./RockPaperScissorsCommitment.sol";
+import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 contract RockPaperScissorsGame {
-    string constant RESOLUTION_A_SAME = "The resolution for player A must be the same between commitments.";
-    string constant RESOLUTION_B_SAME = "The resolution for player B must be the same between commitments.";
-    string constant INTEGER_OVERFLOW_PREVENT = "Preventing a integer overflow attack";
-    string constant SAME_STAKE = "The stake should be the same between commitments";
-
+    using SafeMath for uint256;
     // The following transitions are allowed:
     //
     // Start -> RoundProposed
@@ -18,6 +15,7 @@ contract RockPaperScissorsGame {
     // RoundAccepted -> Reveal
     // Reveal -> Start
     //
+
     function validTransition(Commitment.CommitmentStruct memory _old, Commitment.CommitmentStruct memory _new) public pure returns (bool) {
         RockPaperScissorsCommitment.RPSCommitmentStruct memory oldCommitment = RockPaperScissorsCommitment.fromFrameworkCommitment(_old);
         RockPaperScissorsCommitment.RPSCommitmentStruct memory newCommitment = RockPaperScissorsCommitment.fromFrameworkCommitment(_new);
@@ -67,43 +65,72 @@ contract RockPaperScissorsGame {
         }
     }
 
-    // transition validations
-    function validateStartToRoundProposed(RockPaperScissorsCommitment.RPSCommitmentStruct memory oldCommitment, RockPaperScissorsCommitment.RPSCommitmentStruct memory newCommitment) private pure {
-        require(newCommitment.stake == oldCommitment.stake);
-        require(oldCommitment.allocation[0] >= newCommitment.stake,INTEGER_OVERFLOW_PREVENT); // avoid integer overflow attacks
-        require(oldCommitment.allocation[1] >= newCommitment.stake,INTEGER_OVERFLOW_PREVENT); // avoid integer overflow attacks
-        require(newCommitment.allocation[0] == oldCommitment.allocation[0],RESOLUTION_A_SAME); // resolution unchanged
-        require(newCommitment.allocation[1] == oldCommitment.allocation[1],RESOLUTION_B_SAME); // resolution unchanged
+    modifier allocationsUnchanged(RockPaperScissorsCommitment.RPSCommitmentStruct memory oldCommitment, RockPaperScissorsCommitment.RPSCommitmentStruct memory newCommitment) {
+        uint aOldBal = oldCommitment.allocation[0];
+        uint bOldBal = oldCommitment.allocation[1];
+        uint aNewBal = newCommitment.allocation[0];
+        uint bNewBal = newCommitment.allocation[1];
 
+        require(aOldBal == aNewBal,"The allocation for player A must be the same between commitments."); 
+        require(bOldBal == bNewBal,"The allocation for player B must be the same between commitments."); 
+        _;
+    }
+
+    modifier stakeUnchanged(RockPaperScissorsCommitment.RPSCommitmentStruct memory oldCommitment, RockPaperScissorsCommitment.RPSCommitmentStruct memory newCommitment) {
+        require(newCommitment.stake == oldCommitment.stake,"The stake should be the same between commitments");
+        _;
+    }
+
+    modifier allocationsNotLessThanStake(RockPaperScissorsCommitment.RPSCommitmentStruct memory oldCommitment, RockPaperScissorsCommitment.RPSCommitmentStruct memory newCommitment) {
+        require(oldCommitment.allocation[0] >= newCommitment.stake, "The allocation for player A must not fall below the stake.");
+        require(oldCommitment.allocation[1] >= newCommitment.stake, "The allocation for player B must not fall below the stake.");
+        _;
+    }
+
+    // transition validations
+    function validateStartToRoundProposed(RockPaperScissorsCommitment.RPSCommitmentStruct memory oldCommitment, RockPaperScissorsCommitment.RPSCommitmentStruct memory newCommitment)
+     private
+     pure
+     allocationsUnchanged(oldCommitment, newCommitment)
+     stakeUnchanged(oldCommitment, newCommitment)
+     allocationsNotLessThanStake(oldCommitment, newCommitment)
+     {
         // we should maybe require that aPreCommit isn't empty, but then it will only hurt a later if it is
     }
 
-    function validateStartToConcluded(RockPaperScissorsCommitment.RPSCommitmentStruct memory oldCommitment, RockPaperScissorsCommitment.RPSCommitmentStruct memory newCommitment) private pure {
-        require(newCommitment.stake == oldCommitment.stake);
-        require(newCommitment.allocation[0] == oldCommitment.allocation[0],RESOLUTION_A_SAME);
-        require(newCommitment.allocation[1] == oldCommitment.allocation[1], RESOLUTION_B_SAME);
-    }
+    function validateStartToConcluded(RockPaperScissorsCommitment.RPSCommitmentStruct memory oldCommitment, RockPaperScissorsCommitment.RPSCommitmentStruct memory newCommitment)
+    private
+    pure
+    allocationsUnchanged(oldCommitment, newCommitment)
+    stakeUnchanged(oldCommitment, newCommitment)
+    { }
 
-    function validateRoundProposedToRejected(RockPaperScissorsCommitment.RPSCommitmentStruct memory oldCommitment, RockPaperScissorsCommitment.RPSCommitmentStruct memory newCommitment) private pure {
-        require(newCommitment.stake == oldCommitment.stake);
-        require(newCommitment.allocation[0] == oldCommitment.allocation[0],RESOLUTION_A_SAME); // resolution unchanged
-        require(newCommitment.allocation[1] == oldCommitment.allocation[1],RESOLUTION_B_SAME); // resolution unchanged
-    }
+    function validateRoundProposedToRejected(RockPaperScissorsCommitment.RPSCommitmentStruct memory oldCommitment, RockPaperScissorsCommitment.RPSCommitmentStruct memory newCommitment)
+    private
+    pure
+    allocationsUnchanged(oldCommitment, newCommitment)
+    stakeUnchanged(oldCommitment, newCommitment)
+    { }
 
-    function validateRoundProposedToRoundAccepted(RockPaperScissorsCommitment.RPSCommitmentStruct memory oldCommitment, RockPaperScissorsCommitment.RPSCommitmentStruct memory newCommitment) private pure {
+    function validateRoundProposedToRoundAccepted(RockPaperScissorsCommitment.RPSCommitmentStruct memory oldCommitment, RockPaperScissorsCommitment.RPSCommitmentStruct memory newCommitment)
+    private
+    pure
+    stakeUnchanged(oldCommitment, newCommitment)
+    {
         // a will have to reveal, so remove the stake beforehand
-        require(newCommitment.allocation[0] == oldCommitment.allocation[0] - oldCommitment.stake,"Resolution for player A should be decremented by 1 stake from the previous commitment.");
-        require(newCommitment.allocation[1] == oldCommitment.allocation[1] + oldCommitment.stake,"Resolution for player B should be incremented by 1 stake from the previous commitment.");
-        require(newCommitment.stake == oldCommitment.stake,SAME_STAKE);
+        require(newCommitment.allocation[0] == oldCommitment.allocation[0].sub(oldCommitment.stake),"Allocation for player A should be decremented by 1 stake from the previous commitment.");
+        require(newCommitment.allocation[1] == oldCommitment.allocation[1].add(oldCommitment.stake),"Allocation for player B should be incremented by 1 stake from the previous commitment.");
         require(newCommitment.preCommit == oldCommitment.preCommit,"Precommit should be the same as the previous commitment.");
     }
 
-    function validateRoundAcceptedToReveal(RockPaperScissorsCommitment.RPSCommitmentStruct memory oldCommitment, RockPaperScissorsCommitment.RPSCommitmentStruct memory newCommitment) private pure {
+    function validateRoundAcceptedToReveal(RockPaperScissorsCommitment.RPSCommitmentStruct memory oldCommitment, RockPaperScissorsCommitment.RPSCommitmentStruct memory newCommitment)
+    private
+    pure
+    stakeUnchanged(oldCommitment, newCommitment)
+    {
         uint256 aWinnings;
         uint256 bWinnings;
-
-        require(newCommitment.stake == oldCommitment.stake,SAME_STAKE);
-        require(newCommitment.bWeapon == oldCommitment.bWeapon,"Player Bs play should be the same between commitments.");
+        require(newCommitment.bWeapon == oldCommitment.bWeapon,"Player B's weapon should be the same between commitments.");
 
         // check hash matches
         // need to convert Weapon -> uint256 to get hash to work
@@ -113,13 +140,14 @@ contract RockPaperScissorsGame {
         // calculate winnings
         (aWinnings, bWinnings) = winnings(newCommitment.aWeapon, newCommitment.bWeapon, newCommitment.stake);
 
-        require(newCommitment.allocation[0] == oldCommitment.allocation[0] + aWinnings,"Player A's resolution should be updated with the winning");
-        require(newCommitment.allocation[1] == oldCommitment.allocation[1] - 2 * oldCommitment.stake + bWinnings,"Player B's resolution should be updated with the winning");
+        require(newCommitment.allocation[0] == oldCommitment.allocation[0].add(aWinnings),"Player A's allocation should be updated with the winnings.");
+        require(newCommitment.allocation[1] == oldCommitment.allocation[1].sub(oldCommitment.stake.mul(2)).add(bWinnings),"Player B's allocation should be updated with the winnings.");
     }
 
-    function validateRevealToStart(RockPaperScissorsCommitment.RPSCommitmentStruct memory oldCommitment, RockPaperScissorsCommitment.RPSCommitmentStruct memory newCommitment) private pure {
-        require(newCommitment.stake == oldCommitment.stake,SAME_STAKE);
-        require(newCommitment.allocation[0] == oldCommitment.allocation[0],RESOLUTION_A_SAME);
-        require(newCommitment.allocation[1] == oldCommitment.allocation[1],RESOLUTION_B_SAME);
-    }
+    function validateRevealToStart(RockPaperScissorsCommitment.RPSCommitmentStruct memory oldCommitment, RockPaperScissorsCommitment.RPSCommitmentStruct memory newCommitment)
+    private
+    pure
+    allocationsUnchanged(oldCommitment, newCommitment)
+    stakeUnchanged(oldCommitment, newCommitment)
+    { }
 }
