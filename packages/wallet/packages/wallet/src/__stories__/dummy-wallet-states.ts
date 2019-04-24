@@ -6,8 +6,8 @@ const {
   channelNonce,
   libraryAddress,
   participants,
-  preFundCommitment1,
-  preFundCommitment2,
+  preFundCommitment0: preFundCommitment1,
+  preFundCommitment1: preFundCommitment2,
 } = scenarios;
 
 export const defaultParams = {

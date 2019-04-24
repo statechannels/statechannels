@@ -14,8 +14,8 @@ import { openingReducer } from '../reducer';
 const {
   asAddress,
   asPrivateKey,
-  preFundCommitment1,
-  preFundCommitment2,
+  preFundCommitment0: preFundCommitment1,
+  preFundCommitment1: preFundCommitment2,
   libraryAddress,
   fundingState,
 } = scenarios;

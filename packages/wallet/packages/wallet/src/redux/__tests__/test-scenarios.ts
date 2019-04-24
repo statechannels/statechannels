@@ -42,7 +42,7 @@ export const mockTransactionOutboxItem = {
   requestId: 'requestId',
 };
 
-export const postFundCommitment1: Commitment = {
+export const postFundCommitment0: Commitment = {
   channel,
   commitmentCount: 0,
   commitmentType: CommitmentType.PostFundSetup,
@@ -52,10 +52,10 @@ export const postFundCommitment1: Commitment = {
   destination: participants,
 };
 export const signedCommitment0 = {
-  commitment: postFundCommitment1,
-  signature: signCommitment(postFundCommitment1, asPrivateKey),
+  commitment: postFundCommitment0,
+  signature: signCommitment(postFundCommitment0, asPrivateKey),
 };
-export const postFundCommitment2: Commitment = {
+export const postFundCommitment1: Commitment = {
   channel,
   commitmentCount: 1,
   commitmentType: CommitmentType.PostFundSetup,
@@ -64,7 +64,7 @@ export const postFundCommitment2: Commitment = {
   allocation: twoThree,
   destination: participants,
 };
-export const preFundCommitment1: Commitment = {
+export const preFundCommitment0: Commitment = {
   channel,
   commitmentCount: 0,
   commitmentType: CommitmentType.PreFundSetup,
@@ -73,7 +73,7 @@ export const preFundCommitment1: Commitment = {
   allocation: twoThree,
   destination: participants,
 };
-export const preFundCommitment2: Commitment = {
+export const preFundCommitment1: Commitment = {
   channel,
   commitmentCount: 1,
   commitmentType: CommitmentType.PreFundSetup,
@@ -160,7 +160,7 @@ export const initializedChannelState = {
     funded: false,
     address: asAddress,
     privateKey: asPrivateKey,
-    lastCommitment: { commitment: preFundCommitment1, signature: 'signature' },
+    lastCommitment: { commitment: preFundCommitment0, signature: 'signature' },
     turnNum: 0,
   }),
 };
@@ -263,6 +263,7 @@ const initialFundingState = (ourIndex: PlayerIndex, fundingRequestChannelId: str
   const requiredDeposit = twoThree[ourIndex];
 
   const action = actions.internal.directFundingRequested(
+    `processId:${fundingRequestChannelId}`,
     fundingRequestChannelId,
     safeToDepositLevel,
     total,

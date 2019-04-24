@@ -1,6 +1,6 @@
 import { bigNumberify } from 'ethers/utils';
 import { Commitment } from 'fmg-core';
-import { messageRelayRequested, WalletEvent } from 'magmo-wallet-client';
+import { WalletEvent } from 'magmo-wallet-client';
 import {
   composeLedgerUpdateCommitment,
   composePostFundCommitment,
@@ -22,7 +22,14 @@ import * as selectors from '../../selectors';
 import { setChannel, SharedData } from '../../state';
 import { WalletProtocol } from '../../types';
 import { directFundingStateReducer } from '../direct-funding/reducer';
-import { updateChannelState } from '../reducer-helpers';
+import {
+  confirmFundingForChannel,
+  createCommitmentMessageRelay,
+  theirAddress,
+  updateChannelState,
+} from '../reducer-helpers';
+
+export { confirmFundingForChannel, createCommitmentMessageRelay };
 
 export const directFundingIsComplete = (directFundingState: DirectFundingState): boolean => {
   return directFundingState.type === FUNDING_SUCCESS;
@@ -59,10 +66,6 @@ export const ledgerChannelFundsAppChannel = (
   return bigNumberify(allocation[indexOfTargetChannel] || '0x0').gte(appChannelTotal);
 };
 
-export const confirmFundingForChannel = (sharedData: SharedData, channelId: string): SharedData => {
-  return updateChannelState(sharedData, actions.internal.fundingConfirmed(channelId));
-};
-
 export const createAndSendPostFundCommitment = (
   sharedData: SharedData,
   ledgerChannelId: string,
@@ -83,6 +86,7 @@ export const createAndSendPostFundCommitment = (
 
   newSharedData.outboxState.messageOutbox = [
     createCommitmentMessageRelay(
+      WalletProtocol.IndirectFunding,
       theirAddress(appChannelState),
       ledgerChannelId,
       commitment,
@@ -121,6 +125,7 @@ export const createAndSendUpdateCommitment = (
   // Send out the commitment to the opponent
   newSharedState.outboxState.messageOutbox = [
     createCommitmentMessageRelay(
+      WalletProtocol.IndirectFunding,
       theirAddress(appChannelState),
       appChannelId,
       commitment,
@@ -169,6 +174,7 @@ export const receiveLedgerCommitment = (
 // STATE UPDATERS
 // Global state updaters
 export const requestDirectFunding = (
+  processId: string,
   sharedData: SharedData,
   ledgerChannelId: string,
 ): ProtocolStateWithSharedData<DirectFundingState> => {
@@ -179,6 +185,7 @@ export const requestDirectFunding = (
   const totalFundingRequested = allocation.reduce(addHex);
   const depositAmount = allocation[ourIndex];
   const action = actions.internal.directFundingRequested(
+    processId,
     ledgerChannelId,
     safeToDeposit,
     totalFundingRequested,
@@ -194,24 +201,6 @@ export const updateDirectFundingStatus = (
   action: FundingAction,
 ): ProtocolStateWithSharedData<DirectFundingState> => {
   return directFundingStateReducer(directFundingState, sharedData, action);
-};
-
-function theirAddress(appChannelState: channelStates.OpenedState) {
-  const theirIndex = (appChannelState.ourIndex + 1) % appChannelState.participants.length;
-  return appChannelState.participants[theirIndex];
-}
-
-export const createCommitmentMessageRelay = (
-  to: string,
-  processId: string,
-  commitment: Commitment,
-  signature: string,
-) => {
-  const payload = {
-    protocol: WalletProtocol.IndirectFunding,
-    data: { commitment, signature, processId },
-  };
-  return messageRelayRequested(to, payload);
 };
 
 export const initializeChannelState = (

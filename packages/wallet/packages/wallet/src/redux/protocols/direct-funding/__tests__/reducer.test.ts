@@ -4,7 +4,6 @@ TODO Remaining work:
 - Transaction failure testing.  
  */
 
-import { addHex } from '../../../../utils/hex-utils';
 import * as actions from '../../../actions';
 import * as globalTestScenarios from '../../../__tests__/test-scenarios';
 import { directFundingStateReducer } from '../reducer';
@@ -12,17 +11,15 @@ import * as states from '../state';
 import * as scenarios from './scenarios';
 import * as transactionSubmissionStates from '../../transaction-submission/states';
 import { ProtocolStateWithSharedData } from '../..';
+import { bigNumberify } from 'ethers/utils';
+import { expectThisCommitmentSent } from '../../../__tests__/helpers';
 
-const { channelId, twoThree } = globalTestScenarios;
-
-const YOUR_DEPOSIT_A = twoThree[1];
-const YOUR_DEPOSIT_B = twoThree[0];
-const TOTAL_REQUIRED = twoThree.reduce(addHex);
+const { channelId } = globalTestScenarios;
 
 const startingIn = stage => `start in ${stage}`;
 const whenActionArrives = action => `incoming action ${action}`;
 
-describe(startingIn('any state'), () => {
+describe(startingIn('Any state'), () => {
   describe(whenActionArrives(actions.FUNDING_RECEIVED_EVENT), () => {
     describe("When it's for the correct channel", () => {
       describe('when the channel is now funded', () => {
@@ -30,8 +27,8 @@ describe(startingIn('any state'), () => {
         const action = actions.fundingReceivedEvent(
           channelId,
           channelId,
-          TOTAL_REQUIRED,
-          TOTAL_REQUIRED,
+          scenarios.TOTAL_REQUIRED,
+          scenarios.TOTAL_REQUIRED,
         );
         const updatedState = directFundingStateReducer(
           state.protocolState,
@@ -39,14 +36,15 @@ describe(startingIn('any state'), () => {
           action,
         );
         itTransitionsTo(updatedState, states.WAIT_FOR_FUNDING_AND_POST_FUND_SETUP);
+        expectThisCommitmentSent(updatedState.sharedData, globalTestScenarios.postFundCommitment0);
       });
       describe('when the channel is still not funded', () => {
         const state = scenarios.aDepositsBDepositsBHappyStates.notSafeToDeposit;
         const action = actions.fundingReceivedEvent(
           channelId,
           channelId,
-          YOUR_DEPOSIT_B,
-          YOUR_DEPOSIT_B,
+          bigNumberify(1).toHexString(),
+          bigNumberify(1).toHexString(),
         );
         const updatedState = directFundingStateReducer(
           state.protocolState,
@@ -62,8 +60,8 @@ describe(startingIn('any state'), () => {
       const action = actions.fundingReceivedEvent(
         channelId,
         '0xf00',
-        TOTAL_REQUIRED,
-        TOTAL_REQUIRED,
+        scenarios.TOTAL_REQUIRED,
+        scenarios.TOTAL_REQUIRED,
       );
       const updatedState = directFundingStateReducer(state.protocolState, state.sharedData, action);
       itTransitionsTo(updatedState, states.NOT_SAFE_TO_DEPOSIT);
@@ -79,8 +77,8 @@ describe(startingIn(states.NOT_SAFE_TO_DEPOSIT), () => {
       const action = actions.fundingReceivedEvent(
         channelId,
         channelId,
-        YOUR_DEPOSIT_A,
-        YOUR_DEPOSIT_A,
+        scenarios.YOUR_DEPOSIT_A,
+        scenarios.YOUR_DEPOSIT_A,
       );
       const updatedState = directFundingStateReducer(state.protocolState, state.sharedData, action);
 
@@ -135,8 +133,8 @@ describe(startingIn(states.WAIT_FOR_FUNDING_AND_POST_FUND_SETUP), () => {
       const action = actions.fundingReceivedEvent(
         channelId,
         channelId,
-        YOUR_DEPOSIT_B,
-        TOTAL_REQUIRED,
+        scenarios.YOUR_DEPOSIT_B,
+        scenarios.TOTAL_REQUIRED,
       );
       const updatedState = directFundingStateReducer(state.protocolState, state.sharedData, action);
 
@@ -145,7 +143,12 @@ describe(startingIn(states.WAIT_FOR_FUNDING_AND_POST_FUND_SETUP), () => {
 
     describe('when it is still not fully funded', () => {
       const state = scenarios.aDepositsBDepositsBHappyStates.waitForFundingAndPostFundSetup;
-      const action = actions.fundingReceivedEvent(channelId, channelId, '0x', YOUR_DEPOSIT_A);
+      const action = actions.fundingReceivedEvent(
+        channelId,
+        channelId,
+        '0x',
+        scenarios.YOUR_DEPOSIT_A,
+      );
       const updatedState = directFundingStateReducer(state.protocolState, state.sharedData, action);
 
       itTransitionsTo(updatedState, states.WAIT_FOR_FUNDING_AND_POST_FUND_SETUP);
@@ -156,8 +159,8 @@ describe(startingIn(states.WAIT_FOR_FUNDING_AND_POST_FUND_SETUP), () => {
       const action = actions.fundingReceivedEvent(
         channelId,
         '0 xf00',
-        TOTAL_REQUIRED,
-        TOTAL_REQUIRED,
+        scenarios.TOTAL_REQUIRED,
+        scenarios.TOTAL_REQUIRED,
       );
       const updatedState = directFundingStateReducer(state.protocolState, state.sharedData, action);
 
@@ -174,6 +177,7 @@ describe(startingIn(states.WAIT_FOR_FUNDING_AND_POST_FUND_SETUP), () => {
         scenarios.actions.postFundSetup0,
       );
       itTransitionsTo(updatedState, states.FUNDING_SUCCESS);
+      expectThisCommitmentSent(updatedState.sharedData, globalTestScenarios.postFundCommitment1);
     });
 
     describe('Player B: channel is not funded', () => {

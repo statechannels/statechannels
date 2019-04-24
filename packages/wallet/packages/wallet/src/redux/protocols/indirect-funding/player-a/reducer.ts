@@ -6,7 +6,7 @@ import * as actions from '../../../actions';
 import * as selectors from '../../../selectors';
 
 import { unreachable } from '../../../../utils/reducer-utils';
-import { PlayerIndex } from '../../../types';
+import { PlayerIndex, WalletProtocol } from '../../../types';
 
 import { Channel } from 'fmg-core';
 import { channelID } from 'magmo-wallet-client/node_modules/fmg-core/lib/channel';
@@ -219,10 +219,15 @@ const startDirectFunding = (
   protocolState: states.WaitForPreFundSetup1,
   sharedData: SharedData,
 ): ProtocolStateWithSharedData<states.WaitForDirectFunding> => {
+  // TODO: indirect funding state should store the processId
   const {
     protocolState: directFundingProtocolState,
     sharedData: updatedSharedData,
-  } = requestDirectFunding(sharedData, protocolState.ledgerId);
+  } = requestDirectFunding(
+    `processId:${protocolState.channelId}`,
+    sharedData,
+    protocolState.ledgerId,
+  );
   const newProtocolState = states.waitForDirectFunding({
     ...protocolState,
     directFundingState: directFundingProtocolState,
@@ -257,6 +262,7 @@ const createAndSendFinalUpdateCommitment = (
   // Send out the commitment to the opponent
   newSharedData.outboxState.messageOutbox = [
     createCommitmentMessageRelay(
+      WalletProtocol.IndirectFunding,
       ledgerChannelState.participants[PlayerIndex.B],
       appChannelId,
       commitment,
@@ -294,6 +300,7 @@ const createAndSendFirstUpdateCommitment = (
   // Send out the commitment to the opponent
   newSharedData.outboxState.messageOutbox = [
     createCommitmentMessageRelay(
+      WalletProtocol.IndirectFunding,
       ledgerChannelState.participants[PlayerIndex.B],
       appChannelId,
       commitment,
@@ -340,6 +347,7 @@ const createLedgerChannel = (
 
   const { commitment, signature } = preFundSetupCommitment;
   const preFundSetupMessage = createCommitmentMessageRelay(
+    WalletProtocol.IndirectFunding,
     appChannelState.participants[PlayerIndex.B],
     appChannelState.channelId,
     commitment,
