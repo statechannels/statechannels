@@ -20,10 +20,10 @@ const {
   channelNonce,
   libraryAddress,
   participants,
-  preFundCommitment1,
-  preFundCommitment2,
-  postFundCommitment1,
-  postFundCommitment2,
+  preFundCommitment0: preFundCommitment1,
+  preFundCommitment1: preFundCommitment2,
+  postFundCommitment0: postFundCommitment1,
+  postFundCommitment1: postFundCommitment2,
   channelId,
 } = scenarios;
 

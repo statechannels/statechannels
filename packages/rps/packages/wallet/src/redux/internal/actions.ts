@@ -2,6 +2,7 @@ import { WalletAction } from '../actions';
 
 export const DIRECT_FUNDING_REQUESTED = 'WALLET.INTERNAL.FUNDING.DIRECT_FUNDING_REQUESTED';
 export const directFundingRequested = (
+  processId,
   channelId: string,
   safeToDepositLevel: string,
   totalFundingRequired: string,
@@ -9,6 +10,7 @@ export const directFundingRequested = (
   ourIndex: number,
 ) => ({
   type: DIRECT_FUNDING_REQUESTED as typeof DIRECT_FUNDING_REQUESTED,
+  processId,
   channelId,
   totalFundingRequired,
   safeToDepositLevel,

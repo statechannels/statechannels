@@ -16,8 +16,8 @@ const {
   asPrivateKey,
   bsAddress,
   bsPrivateKey,
-  preFundCommitment1,
-  preFundCommitment2,
+  preFundCommitment0: preFundCommitment1,
+  preFundCommitment1: preFundCommitment2,
 } = scenarios;
 
 const defaults = {
