@@ -50,6 +50,9 @@ export const directFundingStateReducer: DFReducer = (
       return waitForFundingAndPostFundSetupReducer(state, sharedData, action);
     case states.FUNDING_SUCCESS:
       return channelFundedReducer(state, sharedData, action);
+    case states.FUNDING_FAILURE:
+      // todo: restrict the reducer to only accept non-terminal states
+      return { protocolState: state, sharedData };
     default:
       return unreachable(state);
   }
@@ -199,8 +202,7 @@ const waitForDepositTransactionReducer: DFReducer = (
         sharedData,
       };
     } else {
-      // TODO: treat the transaction failure case
-      return { protocolState, sharedData };
+      return { protocolState: states.fundingFailure(protocolState), sharedData };
     }
   }
 };

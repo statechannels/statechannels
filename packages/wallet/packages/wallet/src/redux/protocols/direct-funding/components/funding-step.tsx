@@ -12,6 +12,7 @@ export enum Step {
   WAIT_FOR_DEPOSIT_TRANSACTION,
   WAITING_FOR_FUNDING_CONFIRMATION,
   CHANNEL_FUNDED,
+  FUNDING_FAILED,
 }
 
 const fundingStepByState = (state: directFundingState.DirectFundingState): Step => {
@@ -23,6 +24,9 @@ const fundingStepByState = (state: directFundingState.DirectFundingState): Step 
       return Step.WAITING_FOR_FUNDING_CONFIRMATION;
     case directFundingState.FUNDING_SUCCESS:
       return Step.CHANNEL_FUNDED;
+    case directFundingState.FUNDING_FAILURE:
+      // todo: restrict this to non-terminal states
+      return Step.FUNDING_FAILED;
     default:
       return unreachable(state);
   }

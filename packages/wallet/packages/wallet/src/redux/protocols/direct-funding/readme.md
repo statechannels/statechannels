@@ -25,3 +25,11 @@ ST-->WFFCPF
 
 - If the transaction submission state machine fails, we do not retry the transaction.
 - There are no protections against missing the blockchain funding events.
+
+## Test scenarios
+
+To test all paths through the state machine we will use the following scenarios:
+
+1. **A-deposits-B-deposits-A**: `WaitForDepositTransaction` -> `WaitForConfirmationAndPostFund` -> `ChannelFunded`
+2. **A-deposits-B-deposits-B**: `NotSafeToDeposit` -> `WaitForDepositTransaction` -> `WaitForConfirmationAndPostFund` -> `ChannelFunded`
+3. **Transaction fails**: `WaitForDepositTransaction` -> `Failure`

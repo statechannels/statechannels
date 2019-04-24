@@ -222,9 +222,13 @@ describe(startingIn(states.WAIT_FOR_FUNDING_AND_POST_FUND_SETUP), () => {
   });
 });
 
-describe(startingIn(states.FUNDING_SUCCESS), () => {
-  it.skip('works', () => {
-    expect.assertions(1);
+describe('transaction-fails scenario', () => {
+  describe('when in WaitForDepositTransaction', () => {
+    const state = scenarios.transactionFails.waitForDepositTransaction;
+    const action = scenarios.transactionFails.failureTrigger;
+    const updatedState = directFundingStateReducer(state.protocolState, state.sharedData, action);
+
+    itTransitionsTo(updatedState, states.FUNDING_FAILURE);
   });
 });
 
