@@ -13,16 +13,16 @@ describe('happyPath', () => {
   const sharedData = scenario.sharedData;
 
   describe(whenIn(states.WAIT_FOR_STRATEGY_CHOICE), () => {
-    const state = scenario.waitForStrategyChoice;
-    const action = scenario.strategyChosen;
+    const state = scenario.states.waitForStrategyChoice;
+    const action = scenario.actions.strategyChosen;
     const result = reducer(state, sharedData, action);
 
     itTransitionsTo(result, states.WAIT_FOR_STRATEGY_RESPONSE);
   });
 
   describe(whenIn(states.WAIT_FOR_STRATEGY_RESPONSE), () => {
-    const state = scenario.waitForStrategyResponse;
-    const action = scenario.strategyApproved;
+    const state = scenario.states.waitForStrategyResponse;
+    const action = scenario.actions.strategyApproved;
     const result = reducer(state, sharedData, action);
 
     itTransitionsTo(result, states.WAIT_FOR_FUNDING);
@@ -30,15 +30,15 @@ describe('happyPath', () => {
 
   describe(whenIn(states.WAIT_FOR_FUNDING), () => {
     // TODO: This test depends on updating the indirect funding protocol
-    // const state = scenario.waitForFunding;
-    // const action = scenario.indirectFundingSuccess;
+    // const state = scenario.states.waitForFunding;
+    // const action = scenario.actions.indirectFundingSuccess;
     // const result = reducer(state, sharedData, action);
     // itTransitionsTo(result, states.WAIT_FOR_SUCCESS_CONFIRMATION);
   });
 
   describe(whenIn(states.WAIT_FOR_SUCCESS_CONFIRMATION), () => {
-    const state = scenario.waitForSuccessConfirmation;
-    const action = scenario.successConfirmed;
+    const state = scenario.states.waitForSuccessConfirmation;
+    const action = scenario.actions.successConfirmed;
     const result = reducer(state, sharedData, action);
 
     itTransitionsTo(result, states.SUCCESS);
@@ -50,8 +50,8 @@ describe('When a strategy is rejected', () => {
   const sharedData = scenario.sharedData;
 
   describe(whenIn(states.WAIT_FOR_STRATEGY_RESPONSE), () => {
-    const state = scenario.waitForStrategyResponse;
-    const action = scenario.strategyRejected;
+    const state = scenario.states.waitForStrategyResponse;
+    const action = scenario.actions.strategyRejected;
     const result = reducer(state, sharedData, action);
 
     itTransitionsTo(result, states.WAIT_FOR_STRATEGY_CHOICE);
@@ -63,8 +63,8 @@ describe('when cancelled by the opponent', () => {
   const sharedData = scenario.sharedData;
 
   describe(whenIn(states.WAIT_FOR_STRATEGY_CHOICE), () => {
-    const state = scenario.waitForStrategyChoice;
-    const action = scenario.cancelledByB;
+    const state = scenario.states.waitForStrategyChoice;
+    const action = scenario.actions.cancelledByB;
     const result = reducer(state, sharedData, action);
 
     itTransitionsTo(result, states.FAILURE);
@@ -72,8 +72,8 @@ describe('when cancelled by the opponent', () => {
   });
 
   describe(whenIn(states.WAIT_FOR_STRATEGY_RESPONSE), () => {
-    const state = scenario.waitForStrategyResponse;
-    const action = scenario.cancelledByB;
+    const state = scenario.states.waitForStrategyResponse;
+    const action = scenario.actions.cancelledByB;
     const result = reducer(state, sharedData, action);
 
     itTransitionsTo(result, states.FAILURE);
@@ -86,8 +86,8 @@ describe('when cancelled by the user', () => {
   const sharedData = scenario.sharedData;
 
   describe(whenIn(states.WAIT_FOR_STRATEGY_CHOICE), () => {
-    const state = scenario.waitForStrategyChoice;
-    const action = scenario.cancelledByA;
+    const state = scenario.states.waitForStrategyChoice;
+    const action = scenario.actions.cancelledByA;
     const result = reducer(state, sharedData, action);
 
     itTransitionsTo(result, states.FAILURE);
@@ -95,8 +95,8 @@ describe('when cancelled by the user', () => {
   });
 
   describe(whenIn(states.WAIT_FOR_STRATEGY_RESPONSE), () => {
-    const state = scenario.waitForStrategyResponse;
-    const action = scenario.cancelledByA;
+    const state = scenario.states.waitForStrategyResponse;
+    const action = scenario.actions.cancelledByA;
     const result = reducer(state, sharedData, action);
 
     itTransitionsTo(result, states.FAILURE);

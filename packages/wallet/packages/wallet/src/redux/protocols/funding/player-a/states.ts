@@ -1,18 +1,17 @@
 import { Properties as P } from '../../../utils';
 
-export type FundingState =
+export type OngoingFundingState =
   | WaitForStrategyChoice
   | WaitForStrategyResponse
   | WaitForFunding
-  | WaitForPostFundSetup
-  | WaitForSuccessConfirmation
-  | Success
-  | Failure;
+  | WaitForSuccessConfirmation;
+
+export type TerminalFundingState = Success | Failure;
+export type FundingState = OngoingFundingState | TerminalFundingState;
 
 export const WAIT_FOR_STRATEGY_CHOICE = 'WaitForStrategyChoice';
 export const WAIT_FOR_STRATEGY_RESPONSE = 'WaitForStrategyResponse';
 export const WAIT_FOR_FUNDING = 'WaitForFunding';
-export const WAIT_FOR_POSTFUND_SETUP = 'WaitForPostFundSetup';
 export const WAIT_FOR_SUCCESS_CONFIRMATION = 'WaitForSuccessConfirmation';
 export const FAILURE = 'Failure';
 export const SUCCESS = 'Success';
@@ -35,11 +34,6 @@ export interface WaitForFunding {
   fundingState: 'funding state';
 }
 
-export interface WaitForPostFundSetup {
-  type: typeof WAIT_FOR_POSTFUND_SETUP;
-  processId: string;
-}
-
 export interface WaitForSuccessConfirmation {
   type: typeof WAIT_FOR_SUCCESS_CONFIRMATION;
   processId: string;
@@ -58,7 +52,7 @@ export interface Success {
 // Helpers
 // -------
 
-export function isTerminal(state: FundingState): state is Failure | Success {
+export function isTerminal(state: FundingState): state is TerminalFundingState {
   return state.type === FAILURE || state.type === SUCCESS;
 }
 
@@ -79,11 +73,6 @@ export function waitForStrategyResponse(p: P<WaitForStrategyResponse>): WaitForS
 export function waitForFunding(p: P<WaitForFunding>): WaitForFunding {
   const { processId, fundingState } = p;
   return { type: WAIT_FOR_FUNDING, processId, fundingState };
-}
-
-export function waitForPostFundSetup(p: P<WaitForPostFundSetup>): WaitForPostFundSetup {
-  const { processId } = p;
-  return { type: WAIT_FOR_POSTFUND_SETUP, processId };
 }
 
 export function waitForSuccessConfirmation(

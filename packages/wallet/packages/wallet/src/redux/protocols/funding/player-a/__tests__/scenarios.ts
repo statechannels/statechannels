@@ -57,43 +57,43 @@ const cancelledByB = actions.cancelled(processId, PlayerIndex.B);
 // ---------
 export const happyPath = {
   ...props,
-  // States
-  waitForStrategyChoice,
-  waitForStrategyResponse,
-  waitForFunding,
-  waitForSuccessConfirmation,
-  success,
-  // Actions
-  strategyChosen,
-  strategyApproved,
-  successConfirmed,
+  states: {
+    waitForStrategyChoice,
+    waitForStrategyResponse,
+    waitForFunding,
+    waitForSuccessConfirmation,
+    success,
+  },
+  actions: {
+    strategyChosen,
+    strategyApproved,
+    successConfirmed,
+  },
 };
 
 export const rejectedStrategy = {
   ...props,
-  // States
-  waitForStrategyResponse,
-  waitForStrategyChoice,
-  // Actions
-  strategyRejected,
+  states: {
+    waitForStrategyResponse,
+    waitForStrategyChoice,
+  },
+  actions: { strategyRejected },
 };
 
 export const cancelledByUser = {
   ...props,
-  // States
-  waitForStrategyChoice,
-  waitForStrategyResponse,
-  failure,
-  // Actions
-  cancelledByA,
+  states: { waitForStrategyChoice, waitForStrategyResponse, failure },
+  actions: { cancelledByA },
 };
 
 export const cancelledByOpponent = {
   ...props,
-  // States
-  waitForStrategyChoice,
-  waitForStrategyResponse,
-  failure2,
-  // Actions
-  cancelledByB,
+  states: {
+    waitForStrategyChoice,
+    waitForStrategyResponse,
+    failure2,
+  },
+  actions: {
+    cancelledByB,
+  },
 };
