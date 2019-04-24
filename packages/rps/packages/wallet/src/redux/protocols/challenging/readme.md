@@ -41,7 +41,7 @@ Note:
 
 ## Scenarios
 
-To test all paths through the state machine we will use 5 different scenarios:
+To test all paths through the state machine we will the following scenarios:
 
 1. **Opponent responds**: `ApproveChallenge` -> `WaitForTransaction` -> `WaitForResponseOrTimeout`
    -> `AcknowledgeResponse` -> `Open`

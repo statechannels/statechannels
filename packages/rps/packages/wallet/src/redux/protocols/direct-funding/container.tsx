@@ -30,6 +30,9 @@ class DirectFundingContainer extends PureComponent<Props> {
             transactionName={'direct deposit'}
           />
         );
+      case directFundingStates.FUNDING_FAILURE:
+        // todo: restrict the container to non-terminal states
+        return <div>This shouldn't ever get shown.</div>;
       default:
         return unreachable(directFundingState);
     }

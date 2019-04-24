@@ -178,6 +178,23 @@ export const aDepositsBDepositsBHappyStates = {
   ),
 };
 
+export const transactionFails = {
+  waitForDepositTransaction: constructWalletState(
+    states.waitForDepositTransaction({
+      ...defaultsForA,
+      transactionSubmissionState: transactionSubmissionScenarios.preFailureState,
+    }),
+    waitForFundingChannelState,
+  ),
+  failureTrigger: transactionSubmissionScenarios.failureTrigger,
+
+  failure: constructWalletState(
+    states.fundingFailure(defaultsForA),
+    // TODO: this is an incorrect channel state
+    waitForFundingChannelState,
+  ),
+};
+
 export const actions = {
   postFundSetup0: globalActions.commitmentReceived(
     channelId,
