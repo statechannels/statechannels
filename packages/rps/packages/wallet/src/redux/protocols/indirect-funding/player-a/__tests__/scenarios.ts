@@ -32,11 +32,11 @@ const waitForFundingAppChannelState = channelStates.waitForFundingAndPostFundSet
   funded: false,
   turnNum: 5,
   lastCommitment: {
-    commitment: testScenarios.preFundCommitment2,
+    commitment: testScenarios.preFundCommitment1,
     signature: '0x0',
   },
   penultimateCommitment: {
-    commitment: testScenarios.preFundCommitment1,
+    commitment: testScenarios.preFundCommitment0,
     signature: '0x0',
   },
 });
