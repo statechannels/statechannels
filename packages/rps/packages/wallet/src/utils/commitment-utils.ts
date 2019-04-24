@@ -3,7 +3,10 @@ import { appAttributesFromBytes, bytesFromAppAttributes } from 'fmg-nitro-adjudi
 import { PlayerIndex } from '../redux/types';
 import { signCommitment } from './signing-utils';
 import { Channel } from 'fmg-core';
-import { SignedCommitment } from 'src/redux/channel-state/shared/state';
+import { SignedCommitment } from '../redux/channel-state/shared/state';
+import { messageRelayRequested } from 'magmo-wallet-client/lib/wallet-events';
+import { WalletProtocol } from '../redux/types';
+import { ChannelStatus } from '../redux/channel-state/state';
 
 export const hasConsensusBeenReached = (
   lastCommitment: Commitment,
@@ -104,4 +107,31 @@ export const composePreFundCommitment = (
   const signature = signCommitment(commitment, privateKey);
 
   return { commitment, signature };
+};
+
+export const composeConcludeCommitment = (channelState: ChannelStatus) => {
+  const commitmentCount =
+    channelState.lastCommitment.commitment.commitmentType === CommitmentType.Conclude ? 1 : 0;
+
+  const concludeCommitment: Commitment = {
+    ...channelState.lastCommitment.commitment,
+    appAttributes: '',
+    commitmentType: CommitmentType.Conclude,
+    turnNum: channelState.lastCommitment.commitment.turnNum + 1,
+    commitmentCount,
+  };
+
+  const commitmentSignature = signCommitment(concludeCommitment, channelState.privateKey);
+  const sendCommitmentAction = messageRelayRequested(
+    channelState.participants[1 - channelState.ourIndex],
+    {
+      processId: channelState.channelId,
+      protocol: WalletProtocol.DirectFunding,
+      data: {
+        concludeCommitment,
+        commitmentSignature,
+      },
+    },
+  );
+  return { concludeCommitment, commitmentSignature, sendCommitmentAction };
 };
