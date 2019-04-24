@@ -7,11 +7,12 @@ import * as states from './states';
 
 import { unreachable } from '../../../../utils/reducer-utils';
 import { PlayerIndex } from '../../../types';
+import { Strategy } from '..';
 
 interface Props {
   state: states.OngoingFundingState;
-  strategyChosen: (processId: string) => void;
-  strategyApproved: (processId: string) => void;
+  strategyChosen: (processId: string, strategy: Strategy) => void;
+  strategyApproved: (processId: string, strategy: Strategy) => void;
   strategyRejected: (processId: string) => void;
   fundingSuccessAcknowledged: (processId: string) => void;
   cancelled: (processId: string, by: PlayerIndex) => void;

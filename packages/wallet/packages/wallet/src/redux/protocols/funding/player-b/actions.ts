@@ -1,5 +1,6 @@
 import { BaseProcessAction } from '../../actions';
 import { PlayerIndex } from '../../../types';
+import { Strategy } from '..';
 
 export type FundingAction =
   | StrategyProposed
@@ -17,10 +18,12 @@ export const CANCELLED_BY_OPPONENT = 'WALLET.FUNDING.CANCELLED_BY_OPPONENT';
 
 export interface StrategyProposed extends BaseProcessAction {
   type: typeof STRATEGY_PROPOSED;
+  strategy: Strategy;
 }
 
 export interface StrategyApproved extends BaseProcessAction {
   type: typeof STRATEGY_APPROVED;
+  strategy: Strategy;
 }
 
 export interface FundingSuccessAcknowledged extends BaseProcessAction {
@@ -40,14 +43,16 @@ export interface Cancelled extends BaseProcessAction {
 // Creators
 // --------
 
-export const strategyProposed = (processId: string): StrategyProposed => ({
+export const strategyProposed = (processId: string, strategy): StrategyProposed => ({
   type: STRATEGY_PROPOSED,
   processId,
+  strategy,
 });
 
-export const strategyApproved = (processId: string): StrategyApproved => ({
+export const strategyApproved = (processId: string, strategy): StrategyApproved => ({
   type: STRATEGY_APPROVED,
   processId,
+  strategy,
 });
 
 export const fundingSuccessAcknowledged = (processId: string): FundingSuccessAcknowledged => ({
