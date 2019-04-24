@@ -3,6 +3,7 @@ import * as actions from '../actions';
 import { PlayerIndex } from '../../../../types';
 
 import { EMPTY_SHARED_DATA } from '../../../../state';
+import { Strategy } from '../..';
 
 // To test all paths through the state machine we will use 4 different scenarios:
 //
@@ -22,12 +23,17 @@ import { EMPTY_SHARED_DATA } from '../../../../state';
 // ---------
 const processId = 'process-id.123';
 const sharedData = EMPTY_SHARED_DATA;
+const targetChannelId = '0x1324';
+const opponentAddress = '0xf00';
+const strategy = Strategy.IndirectFunding;
 
 const props = {
   processId,
   sharedData,
   fundingState: 'funding state' as 'funding state',
-  targetChannelId: '0x1324',
+  targetChannelId,
+  opponentAddress,
+  strategy,
 };
 
 // ------
@@ -44,8 +50,8 @@ const failure2 = states.failure('Opponent refused');
 // -------
 // Actions
 // -------
-const strategyProposed = actions.strategyProposed(processId);
-const strategyApproved = actions.strategyApproved(processId);
+const strategyProposed = actions.strategyProposed(processId, strategy);
+const strategyApproved = actions.strategyApproved(processId, strategy);
 const successConfirmed = actions.fundingSuccessAcknowledged(processId);
 const strategyRejected = actions.strategyRejected(processId);
 const cancelledByB = actions.cancelled(processId, PlayerIndex.B);

@@ -54,7 +54,8 @@ function strategyProposed(
     return { protocolState: state, sharedData };
   }
 
-  return { protocolState: states.waitForStrategyApproval(state), sharedData };
+  const { strategy } = action;
+  return { protocolState: states.waitForStrategyApproval({ ...state, strategy }), sharedData };
 }
 
 function strategyApproved(
