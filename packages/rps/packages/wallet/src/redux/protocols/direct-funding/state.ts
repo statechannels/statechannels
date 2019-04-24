@@ -12,12 +12,15 @@ export const NOT_SAFE_TO_DEPOSIT = 'NOT_SAFE_TO_DEPOSIT';
 export const WAIT_FOR_DEPOSIT_TRANSACTION = 'WAIT_FOR_DEPOSIT_TRANSACTION';
 export const WAIT_FOR_FUNDING_AND_POST_FUND_SETUP = 'WAIT_FOR_FUNDING_AND_POST_FUND_SETUP';
 export const FUNDING_SUCCESS = 'CHANNEL_FUNDED';
+export const FUNDING_FAILURE = 'FUNDING_FAILURE';
 // Funding status
 export type ChannelFundingStatus =
   | typeof NOT_SAFE_TO_DEPOSIT
   | typeof WAIT_FOR_DEPOSIT_TRANSACTION
   | typeof WAIT_FOR_FUNDING_AND_POST_FUND_SETUP
-  | typeof FUNDING_SUCCESS;
+  | typeof FUNDING_SUCCESS
+  | typeof FUNDING_FAILURE;
+
 export const DIRECT_FUNDING = 'FUNDING_TYPE.DIRECT';
 export interface BaseDirectFundingState {
   processId: string;
@@ -43,6 +46,11 @@ export interface WaitForFundingAndPostFundSetup extends BaseDirectFundingState {
 export interface FundingSuccess extends BaseDirectFundingState {
   type: typeof FUNDING_SUCCESS;
 }
+
+export interface FundingFailure extends BaseDirectFundingState {
+  type: typeof FUNDING_FAILURE;
+}
+
 // constructors
 export const baseDirectFundingState: Constructor<BaseDirectFundingState> = params => {
   const {
@@ -96,11 +104,20 @@ export const fundingSuccess: Constructor<FundingSuccess> = params => {
     type: FUNDING_SUCCESS,
   };
 };
+
+export const fundingFailure: Constructor<FundingFailure> = params => {
+  return {
+    ...baseDirectFundingState(params),
+    type: FUNDING_FAILURE,
+  };
+};
+
 export type DirectFundingState =
   | NotSafeToDeposit
   | WaitForDepositTransaction
   | WaitForFundingAndPostFundSetup
-  | FundingSuccess;
+  | FundingSuccess
+  | FundingFailure;
 
 export function initialDirectFundingState(
   action: DirectFundingRequested,
