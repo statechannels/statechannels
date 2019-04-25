@@ -10,7 +10,7 @@ import { unreachable } from '../../utils/reducer-utils';
 
 export const adjudicatorStateReducer = (
   state: AdjudicatorState,
-  action: actions.AdjudicatorEventAction,
+  action: actions.AdjudicatorEventAction | actions.ChallengeCreatedEvent,
 ) => {
   switch (action.type) {
     case actions.CHALLENGE_EXPIRED_EVENT:

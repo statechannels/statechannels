@@ -27,7 +27,7 @@ export function* messageListener() {
         yield put(actions.channel.challengeRequested());
         break;
       case incoming.FUNDING_REQUEST:
-        yield put(actions.channel.fundingRequested());
+        yield put(actions.protocol.fundingRequested(action.channelId, action.playerIndex));
         break;
       case incoming.INITIALIZE_CHANNEL_REQUEST:
         yield put(actions.channel.channelInitialized());

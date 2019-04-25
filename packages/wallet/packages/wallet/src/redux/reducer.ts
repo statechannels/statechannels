@@ -7,10 +7,11 @@ import { accumulateSideEffects } from './outbox';
 import { initializationSuccess } from 'magmo-wallet-client/lib/wallet-events';
 import { channelStateReducer } from './channel-state/reducer';
 import { combineReducersWithSideEffects } from './../utils/reducer-utils';
-import { createsNewProcess, routesToProcess, NewProcessAction } from './protocols/actions';
-import * as indirectFunding from './protocols/indirect-funding/reducer';
+import { NewProcessAction, isNewProcessAction, isProtocolAction } from './protocols/actions';
+import * as funding from './protocols/funding/reducer';
 import { ProtocolState } from './protocols';
 import { WalletProtocol } from './types';
+import { FundingState } from './protocols/funding/states';
 
 const initialState = states.waitForLogin();
 
@@ -39,9 +40,9 @@ export function initializedReducer(
   action: actions.WalletAction,
 ): states.WalletState {
   // TODO: We will need to update SharedData here first
-  if (createsNewProcess(action)) {
+  if (isNewProcessAction(action)) {
     return routeToNewProcessInitializer(state, action);
-  } else if (routesToProcess(action)) {
+  } else if (isProtocolAction(action)) {
     return routeToProtocolReducer(state, action);
   }
 
@@ -56,15 +57,15 @@ export function initializedReducer(
   };
 }
 
-function routeToProtocolReducer(state: states.Initialized, action: actions.protocol.ProcessAction) {
+function routeToProtocolReducer(state: states.Initialized, action: actions.ProtocolAction) {
   const processState = state.processStore[action.processId];
   if (!processState) {
     // Log warning?
     return state;
   } else {
     switch (processState.protocol) {
-      case WalletProtocol.IndirectFunding:
-        const { protocolState, sharedData } = indirectFunding.indirectFundingReducer(
+      case WalletProtocol.Funding:
+        const { protocolState, sharedData } = funding.fundingReducer(
           processState.protocolState,
           states.sharedData(state),
           action,
@@ -85,7 +86,7 @@ function updatedState(
   state: states.Initialized,
   sharedData: states.SharedData,
   processState: states.ProcessState,
-  protocolState: states.indirectFunding.IndirectFundingState,
+  protocolState: FundingState,
 ) {
   const newState = { ...state, sharedData };
   const newProcessState = { ...processState, protocolState };
@@ -101,13 +102,16 @@ function routeToNewProcessInitializer(
   action: actions.protocol.NewProcessAction,
 ) {
   switch (action.type) {
-    case actions.indirectFunding.FUNDING_REQUESTED:
-      const { protocolState, sharedData } = indirectFunding.initialize(
-        action,
+    case actions.protocol.FUNDING_REQUESTED:
+      const processId = action.channelId;
+      const { protocolState, sharedData } = funding.initialize(
         states.sharedData(state),
+        processId,
+        action.channelId,
+        action.playerIndex,
       );
 
-      return startProcess(state, sharedData, action, protocolState);
+      return startProcess(state, sharedData, action, protocolState, processId);
     default:
       return state;
     // TODO: Why is the discriminated union not working here?
@@ -143,14 +147,16 @@ function startProcess(
   sharedData: states.SharedData,
   action: NewProcessAction,
   protocolState: ProtocolState,
+  processId: string,
 ): states.Initialized {
   const newState = { ...state, ...sharedData };
-  const processId = action.channelId;
   const { protocol } = action;
   newState.processStore = {
     ...newState.processStore,
     [processId]: { processId, protocolState, channelsToMonitor: [], protocol },
   };
+  // TODO: Right now any new processId get sets to the current process Id. We might need to be smarter about this in the future.
+  newState.currentProcessId = processId;
 
   return newState;
 }

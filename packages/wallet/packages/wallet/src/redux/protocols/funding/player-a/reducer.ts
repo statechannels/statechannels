@@ -9,10 +9,26 @@ import { SharedData, queueMessage } from '../../../state';
 import { ProtocolStateWithSharedData } from '../..';
 import { unreachable } from '../../../../utils/reducer-utils';
 import { PlayerIndex } from '../../../types';
+import { showWallet } from '../../reducer-helpers';
 import { fundingFailure, messageRelayRequested } from 'magmo-wallet-client';
 import { strategyProposed } from '../player-b/actions';
-
 type EmbeddedAction = IndirectFundingAction;
+
+export function initialize(
+  sharedData: SharedData,
+  processId: string,
+  channelId: string,
+  opponentAddress: string,
+): ProtocolStateWithSharedData<states.FundingState> {
+  return {
+    protocolState: states.waitForStrategyChoice({
+      processId,
+      targetChannelId: channelId,
+      opponentAddress,
+    }),
+    sharedData: showWallet(sharedData),
+  };
+}
 
 export function fundingReducer(
   state: states.FundingState,

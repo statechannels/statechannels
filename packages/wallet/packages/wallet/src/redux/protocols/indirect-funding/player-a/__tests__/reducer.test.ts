@@ -10,7 +10,6 @@ import {} from '../../../../__tests__/test-scenarios';
 import { playerAReducer, initialize } from '../reducer';
 import * as states from '../state';
 import * as scenarios from './scenarios';
-import { PlayerIndex } from '../../../../types';
 
 const startingIn = stage => `start in ${stage}`;
 const whenActionArrives = action => `incoming action ${action}`;
@@ -36,9 +35,8 @@ const validateMock = jest.fn().mockReturnValue(true);
 Object.defineProperty(SigningUtil, 'validCommitmentSignature', { value: validateMock });
 
 describe('initializing the protocol', () => {
-  const action = actions.indirectFunding.fundingRequested(channelId, PlayerIndex.A);
   const sharedData = scenarios.happyPath.sharedData;
-  const result = initialize(action, sharedData);
+  const result = initialize(channelId, sharedData);
   itTransitionToStateType(result, states.WAIT_FOR_APPROVAL);
 });
 

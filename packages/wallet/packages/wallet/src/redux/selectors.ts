@@ -1,6 +1,7 @@
 import { OpenedState, OPENING, ChannelStatus } from './channel-state/state';
 import * as walletStates from './state';
 import { SharedData, FundingState } from './state';
+import { WalletProtocol } from './types';
 
 export const getOpenedChannelState = (state: SharedData, channelId: string): OpenedState => {
   const channelStatus = getChannelState(state, channelId);
@@ -54,4 +55,19 @@ export const getChannelFundingState = (
   channelId: string,
 ): walletStates.ChannelFundingState => {
   return state.fundingState[channelId];
+};
+
+export const getProtocolForProcessId = (
+  state: walletStates.Initialized,
+  processId: string,
+): WalletProtocol => {
+  if (state.processStore[processId]) {
+    throw new Error(`No process state for process Id`);
+  } else {
+    return state.processStore[processId].protocol;
+  }
+};
+
+export const getProtocolState = (state: walletStates.Initialized, processId: string) => {
+  return state.processStore[processId].protocolState;
 };

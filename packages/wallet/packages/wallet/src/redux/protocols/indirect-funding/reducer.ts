@@ -8,17 +8,17 @@ import { playerBReducer, initialize as initializeB } from './player-b/reducer';
 import { SharedData } from '../../state';
 
 export function initialize(
-  action: actions.indirectFunding.FundingRequested,
+  channelId: string,
+  playerIndex: PlayerIndex,
   sharedData: SharedData,
 ): ProtocolStateWithSharedData<
   indirectFundingState.playerA.WaitForApproval | indirectFundingState.playerB.WaitForApproval
 > {
-  const { playerIndex } = action;
   switch (playerIndex) {
     case PlayerIndex.A:
-      return initializeA(action, sharedData);
+      return initializeA(channelId, sharedData);
     case PlayerIndex.B:
-      return initializeB(action, sharedData);
+      return initializeB(channelId, sharedData);
     default:
       return unreachable(playerIndex);
   }
@@ -29,9 +29,6 @@ export const indirectFundingReducer: ProtocolReducer<indirectFundingState.Indire
   sharedData: SharedData,
   action: actions.indirectFunding.Action,
 ): ProtocolStateWithSharedData<indirectFundingState.IndirectFundingState> => {
-  if (action.type === actions.indirectFunding.FUNDING_REQUESTED) {
-    return fundingRequestedReducer(protocolState, sharedData, action);
-  }
   switch (protocolState.player) {
     case PlayerIndex.A:
       return playerAReducer(protocolState, sharedData, action);
@@ -42,25 +39,3 @@ export const indirectFundingReducer: ProtocolReducer<indirectFundingState.Indire
       return unreachable(protocolState);
   }
 };
-
-function fundingRequestedReducer(
-  protocolState: indirectFundingState.IndirectFundingState,
-  sharedData: SharedData,
-  action: actions.indirectFunding.FundingRequested,
-): ProtocolStateWithSharedData<indirectFundingState.IndirectFundingState> {
-  const { channelId, playerIndex: player } = action;
-  switch (player) {
-    case PlayerIndex.A:
-      return {
-        sharedData,
-        protocolState: indirectFundingState.playerA.waitForApproval({ channelId, player }),
-      };
-    case PlayerIndex.B:
-      return {
-        sharedData,
-        protocolState: indirectFundingState.playerB.waitForApproval({ channelId, player }),
-      };
-    default:
-      return unreachable(player);
-  }
-}

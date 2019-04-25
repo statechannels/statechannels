@@ -27,7 +27,7 @@ class FundingContainer extends PureComponent<Props> {
       case states.WAIT_FOR_STRATEGY_RESPONSE:
       case states.WAIT_FOR_FUNDING:
       case states.WAIT_FOR_SUCCESS_CONFIRMATION:
-        return <div />;
+        return <div>Hello World From Player A Funding</div>;
       default:
         return unreachable(state);
     }
