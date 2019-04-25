@@ -30,6 +30,7 @@ import { ethers } from 'ethers';
 import { channelID } from 'fmg-core/lib/channel';
 import { WalletAction, COMMITMENT_RECEIVED } from '../actions';
 import { Commitment } from 'fmg-core';
+import { FUNDING_CONFIRMED } from '../internal/actions';
 
 export const channelStateReducer: ReducerWithSideEffects<states.ChannelState> = (
   state: states.ChannelState,
@@ -226,6 +227,10 @@ const initializedChannels: ReducerWithSideEffects<states.InitializedChannelState
   data: { appChannelId: string },
 ): StateWithSideEffects<states.InitializedChannelState> => {
   if (action.type === actions.CHANNEL_INITIALIZED) {
+    return { state };
+  }
+  // TODO: Figure out which actions should be allowed here
+  if (!('commitment' in action) && action.type !== FUNDING_CONFIRMED) {
     return { state };
   }
 

@@ -31,10 +31,10 @@ import * as selectors from '../../../selectors';
 import { SharedData } from '../../../state';
 
 export function initialize(
-  action: actions.indirectFunding.FundingRequested,
+  channelId: string,
   sharedData: SharedData,
 ): ProtocolStateWithSharedData<states.WaitForApproval> {
-  return { protocolState: states.waitForApproval(action), sharedData };
+  return { protocolState: states.waitForApproval({ channelId }), sharedData };
 }
 
 export function playerBReducer(

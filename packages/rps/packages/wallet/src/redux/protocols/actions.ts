@@ -1,22 +1,18 @@
-import { WalletAction } from '../actions';
-import {
-  ProcessAction as IndirectFundingProcessAction,
-  FUNDING_REQUESTED,
-  FundingRequested,
-} from './indirect-funding/actions';
+import { WalletAction, ProtocolAction } from '../actions';
+import { PlayerIndex, WalletProtocol } from '../types';
 
-// For the moment, the FundingRequested action is tied to the indirect funding
-// protocol. It should change in the future to be a generic action, tied to the
-// "Funding" protocol, and that protocol is responsible for choosing a funding strategy.
+export const FUNDING_REQUESTED = 'WALLET.NEW_PROCESS.FUNDING_REQUESTED';
+export const fundingRequested = (channelId: string, playerIndex: PlayerIndex) => ({
+  type: FUNDING_REQUESTED as typeof FUNDING_REQUESTED,
+  channelId,
+  playerIndex,
+  protocol: WalletProtocol.IndirectFunding,
+});
+export type FundingRequested = ReturnType<typeof fundingRequested>;
+
 export type NewProcessAction = FundingRequested;
-
-export function createsNewProcess(action: WalletAction): action is NewProcessAction {
-  switch (action.type) {
-    case FUNDING_REQUESTED:
-      return true;
-    default:
-      return false;
-  }
+export function isNewProcessAction(action: WalletAction): action is NewProcessAction {
+  return action.type === FUNDING_REQUESTED;
 }
 
 export interface BaseProcessAction {
@@ -24,8 +20,6 @@ export interface BaseProcessAction {
   type: string;
 }
 
-export type ProcessAction = IndirectFundingProcessAction;
-
-export function routesToProcess(action: WalletAction): action is ProcessAction {
+export function isProtocolAction(action: WalletAction): action is ProtocolAction {
   return 'processId' in action;
 }

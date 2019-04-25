@@ -51,7 +51,7 @@ export interface Initialized extends SharedData {
   type: typeof WALLET_INITIALIZED;
   uid: string;
   processStore: ProcessStore;
-
+  currentProcessId?: string;
   // TODO: This is obsolete now that we have ProcessStore
   // This should be deleted once we clean up the code still using this
   indirectFunding?: indirectFunding.IndirectFundingState;
