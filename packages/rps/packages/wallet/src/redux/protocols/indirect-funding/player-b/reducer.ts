@@ -26,7 +26,7 @@ import { FundingAction, isDirectFundingAction } from '../../direct-funding/actio
 import * as channelState from '../../../channel-state/state';
 import { Commitment } from 'fmg-core/lib/commitment';
 import { composePreFundCommitment } from '../../../../utils/commitment-utils';
-import { PlayerIndex, WalletProtocol } from '../../../types';
+import { PlayerIndex } from '../../../types';
 import * as selectors from '../../../selectors';
 import { SharedData } from '../../../state';
 
@@ -283,7 +283,6 @@ const respondWithPreFundSetup = (
 
   // Send the message to the opponent.
   const preFundSetupMessage = createCommitmentMessageRelay(
-    WalletProtocol.IndirectFunding,
     appChannelState.participants[PlayerIndex.B],
     appChannelState.channelId,
     commitment,
