@@ -1,6 +1,6 @@
 import { addHex } from '../../../../utils/hex-utils';
 import * as globalActions from '../../../actions';
-import * as channelStates from '../../../channel-state/state';
+import * as channelStates from '../../../channel-store/state';
 import { emptyDisplayOutboxState } from '../../../outbox/state';
 import { ProtocolStateWithSharedData } from '../../../protocols';
 import { PlayerIndex } from '../../../types';
@@ -19,9 +19,9 @@ export const TOTAL_REQUIRED = twoThree.reduce(addHex);
 // Helpers
 const constructWalletState = (
   protocolState: states.DirectFundingState,
-  ...channelStatuses: channelStates.ChannelStatus[]
+  ...channelStatuses: channelStates.ChannelState[]
 ): ProtocolStateWithSharedData<states.DirectFundingState> => {
-  const channelState = channelStates.emptyChannelState();
+  const channelState = channelStates.emptyChannelStore();
   for (const channelStatus of channelStatuses) {
     channelState.initializedChannels[channelStatus.channelId] = { ...channelStatus };
   }
@@ -30,7 +30,7 @@ const constructWalletState = (
     sharedData: {
       outboxState: emptyDisplayOutboxState(),
       fundingState: {},
-      channelState,
+      channelStore: channelState,
       adjudicatorState: {},
     },
   };

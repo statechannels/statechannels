@@ -32,10 +32,10 @@ import { WalletAction, COMMITMENT_RECEIVED } from '../actions';
 import { Commitment } from 'fmg-core';
 import { FUNDING_CONFIRMED } from '../internal/actions';
 
-export const channelStateReducer: ReducerWithSideEffects<states.ChannelState> = (
-  state: states.ChannelState,
+export const channelStateReducer: ReducerWithSideEffects<states.ChannelStore> = (
+  state: states.ChannelStore,
   action: WalletAction,
-): StateWithSideEffects<states.ChannelState> => {
+): StateWithSideEffects<states.ChannelStore> => {
   const newState = { ...state };
   if (actions.isReceiveFirstCommitment(action) && !channelIsInitialized(action.commitment, state)) {
     return handleFirstCommmit(state, action);
@@ -46,10 +46,10 @@ export const channelStateReducer: ReducerWithSideEffects<states.ChannelState> = 
   });
 };
 
-const initializingChannels: ReducerWithSideEffects<states.InitializingChannelState> = (
-  state: states.InitializingChannelState,
+const initializingChannels: ReducerWithSideEffects<states.InitializingChannels> = (
+  state: states.InitializingChannels,
   action: actions.ChannelAction,
-): StateWithSideEffects<states.InitializingChannelState> => {
+): StateWithSideEffects<states.InitializingChannels> => {
   if (action.type !== actions.CHANNEL_INITIALIZED) {
     return { state };
   }
@@ -69,9 +69,9 @@ const initializingChannels: ReducerWithSideEffects<states.InitializingChannelSta
 
 type CommitmentReceived = actions.OwnCommitmentReceived | actions.OpponentCommitmentReceived;
 const handleFirstCommmit = (
-  state: states.ChannelState,
+  state: states.ChannelStore,
   action: CommitmentReceived,
-): StateWithSideEffects<states.ChannelState> => {
+): StateWithSideEffects<states.ChannelStore> => {
   // We manually select and move the initializing channel into the initializedChannelState
   // before applying the combined reducer, so that the address and private key is in the
   // right slot (by its channelId)
@@ -221,11 +221,11 @@ const handleFirstCommmit = (
   }
 };
 
-const initializedChannels: ReducerWithSideEffects<states.InitializedChannelState> = (
-  state: states.InitializedChannelState,
+const initializedChannels: ReducerWithSideEffects<states.InitializedChannels> = (
+  state: states.InitializedChannels,
   action: actions.ChannelAction,
   data: { appChannelId: string },
-): StateWithSideEffects<states.InitializedChannelState> => {
+): StateWithSideEffects<states.InitializedChannels> => {
   if (action.type === actions.CHANNEL_INITIALIZED) {
     return { state };
   }
@@ -265,10 +265,10 @@ const initializedChannels: ReducerWithSideEffects<states.InitializedChannelState
   return { state: { ...state, [channelId]: newState }, sideEffects: outboxState };
 };
 
-export const initializedChannelStatusReducer: ReducerWithSideEffects<states.ChannelStatus> = (
-  state: states.ChannelStatus,
+export const initializedChannelStatusReducer: ReducerWithSideEffects<states.ChannelState> = (
+  state: states.ChannelState,
   action: actions.ChannelAction,
-): StateWithSideEffects<states.ChannelStatus> => {
+): StateWithSideEffects<states.ChannelState> => {
   const conclusionStateFromOwnRequest = receivedValidOwnConclusionRequest(state, action);
   if (conclusionStateFromOwnRequest) {
     return {
@@ -311,7 +311,7 @@ const combinedReducer = combineReducersWithSideEffects({
 });
 
 const receivedValidOwnConclusionRequest = (
-  state: states.ChannelStatus,
+  state: states.ChannelState,
   action: actions.ChannelAction,
 ): states.ApproveConclude | null => {
   if (state.stage !== states.FUNDING && state.stage !== states.RUNNING) {
@@ -324,7 +324,7 @@ const receivedValidOwnConclusionRequest = (
 };
 
 const receivedValidOpponentConclusionRequest = (
-  state: states.ChannelStatus,
+  state: states.ChannelState,
   action: actions.ChannelAction,
 ): states.AcknowledgeConclude | null => {
   if (state.stage !== states.FUNDING && state.stage !== states.RUNNING) {
@@ -356,7 +356,7 @@ const receivedValidOpponentConclusionRequest = (
   });
 };
 
-const channelIsInitialized = (commitment: Commitment, state: states.ChannelState): boolean => {
+const channelIsInitialized = (commitment: Commitment, state: states.ChannelStore): boolean => {
   const channelId = channelID(commitment.channel);
   return channelId in state.initializedChannels;
 };

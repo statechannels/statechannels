@@ -1,6 +1,6 @@
 import { PlayerIndex } from 'magmo-wallet-client/lib/wallet-instructions';
 import { emptyDisplayOutboxState } from '../../../../outbox/state';
-import * as channelStates from '../../../../channel-state/state';
+import * as channelStates from '../../../../channel-store/state';
 import { ProtocolStateWithSharedData } from '../../../../protocols';
 import * as testScenarios from '../../../../__tests__/test-scenarios';
 import {
@@ -99,9 +99,9 @@ const waitForUpdateLedgerChannelState = channelStates.waitForUpdate({
 
 const constructWalletState = (
   protocolState: states.PlayerAState,
-  ...channelStatuses: channelStates.ChannelStatus[]
+  ...channelStatuses: channelStates.ChannelState[]
 ): ProtocolStateWithSharedData<states.PlayerAState> => {
-  const channelState = channelStates.emptyChannelState();
+  const channelState = channelStates.emptyChannelStore();
   for (const channelStatus of channelStatuses) {
     channelState.initializedChannels[channelStatus.channelId] = { ...channelStatus };
   }
@@ -109,7 +109,7 @@ const constructWalletState = (
     protocolState,
     sharedData: {
       outboxState: emptyDisplayOutboxState(),
-      channelState,
+      channelStore: channelState,
       adjudicatorState: {},
       fundingState: {},
     },

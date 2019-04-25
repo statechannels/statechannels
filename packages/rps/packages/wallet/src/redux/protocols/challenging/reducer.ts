@@ -22,7 +22,7 @@ import { transactionReducer, initialize as initializeTransaction } from '../tran
 import { isSuccess, isFailure } from '../transaction-submission/states';
 import { getChannel } from '../../state';
 import { createForceMoveTransaction } from '../../../utils/transaction-generator';
-import { WAIT_FOR_PRE_FUND_SETUP } from '../../channel-state/state';
+import { WAIT_FOR_PRE_FUND_SETUP } from '../../channel-store/state';
 
 type Storage = SharedData;
 

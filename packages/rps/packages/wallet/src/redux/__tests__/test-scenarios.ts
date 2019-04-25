@@ -1,7 +1,7 @@
 import { Channel, CommitmentType, Commitment } from 'fmg-core';
 import { channelID } from 'fmg-core/lib/channel';
 import { bigNumberify } from 'ethers/utils';
-import { waitForPreFundSetup } from '../channel-state/state';
+import { waitForPreFundSetup } from '../channel-store/state';
 import * as states from '../state';
 import { bytesFromAppAttributes } from 'fmg-nitro-adjudicator';
 import { addHex } from '../../utils/hex-utils';

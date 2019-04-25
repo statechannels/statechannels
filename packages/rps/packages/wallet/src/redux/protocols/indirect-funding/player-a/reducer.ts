@@ -1,5 +1,5 @@
 import * as states from './state';
-import * as channelState from '../../../channel-state/state';
+import * as channelState from '../../../channel-store/state';
 
 import * as actions from '../../../actions';
 
