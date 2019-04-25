@@ -3,7 +3,6 @@ import * as incoming from 'magmo-wallet-client/lib/wallet-instructions';
 
 import * as actions from '../actions';
 import { eventChannel } from 'redux-saga';
-import { unreachable } from '../../utils/reducer-utils';
 
 export function* messageListener() {
   const postMessageEventChannel = eventChannel(emitter => {
@@ -55,15 +54,14 @@ export function* messageListener() {
 function handleIncomingMessage(action: incoming.ReceiveMessage) {
   const { messagePayload } = action as incoming.ReceiveMessage;
 
-  if ('processId' in messagePayload) {
-    const { data, processId } = messagePayload;
-    if ('commitment' in data) {
-      return actions.commitmentReceived(processId, data.commitment, data.signature);
-    } else {
-      return actions.messageReceived(processId, data);
-    }
-  } else if ('protocol' in messagePayload) {
-    throw new Error('Unexpected message');
+  const { data, processId } = messagePayload;
+
+  if ('commitment' in data) {
+    return actions.commitmentReceived(processId, data.commitment, data.signature);
+  } else if ('type' in data) {
+    // TODO: It would be nice if eventually every message simply wrapped an action
+    return data;
+  } else {
+    return actions.messageReceived(processId, data);
   }
-  return unreachable(messagePayload);
 }

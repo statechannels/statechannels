@@ -6,7 +6,7 @@ import * as actions from '../../actions';
 import { ProtocolReducer, ProtocolStateWithSharedData } from '../../protocols';
 import * as selectors from '../../selectors';
 import { SharedData } from '../../state';
-import { WalletProtocol, PlayerIndex } from '../../types';
+import { PlayerIndex } from '../../types';
 import { isTransactionAction } from '../transaction-submission/actions';
 import {
   initialize as initTransactionState,
@@ -245,13 +245,7 @@ const createAndSendPostFundCommitment = (sharedData: SharedData, channelId: stri
     outboxState: {
       ...sharedData.outboxState,
       messageOutbox: [
-        createCommitmentMessageRelay(
-          WalletProtocol.DirectFunding,
-          theirAddress(channelState),
-          channelId,
-          commitment,
-          signature,
-        ),
+        createCommitmentMessageRelay(theirAddress(channelState), channelId, commitment, signature),
       ],
     },
   };

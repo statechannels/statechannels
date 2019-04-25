@@ -6,7 +6,6 @@ import { channelStateReducer } from '../channel-state/reducer';
 import { accumulateSideEffects } from '../outbox';
 import { SideEffects } from '../outbox/state';
 import { SharedData } from '../state';
-import { WalletProtocol } from '../types';
 import * as magmoWalletClient from 'magmo-wallet-client';
 
 export const updateChannelState = (
@@ -46,14 +45,13 @@ export const confirmFundingForChannel = (sharedData: SharedData, channelId: stri
 };
 
 export const createCommitmentMessageRelay = (
-  protocol: WalletProtocol,
   to: string,
   processId: string,
   commitment: Commitment,
   signature: string,
 ) => {
   const payload = {
-    protocol,
+    processId,
     data: { commitment, signature, processId },
   };
   return messageRelayRequested(to, payload);

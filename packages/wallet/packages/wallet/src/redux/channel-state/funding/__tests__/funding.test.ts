@@ -12,7 +12,6 @@ import {
 } from '../../../__tests__/helpers';
 import * as outgoing from 'magmo-wallet-client/lib/wallet-events';
 import * as SigningUtil from '../../../../utils/signing-utils';
-import { WalletProtocol } from '../../../types';
 const {
   asAddress,
   asPrivateKey,
@@ -141,7 +140,6 @@ describe('start in WaitForFundingConfirmation', () => {
       state.participants[1 - state.ourIndex],
       {
         processId: state.channelId,
-        protocol: WalletProtocol.DirectFunding,
         data: {
           commitment: postFundCommitment2,
           signature: MOCK_SIGNATURE,

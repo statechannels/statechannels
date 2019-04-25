@@ -20,7 +20,6 @@ import {
 } from '../../protocols/direct-funding/state';
 import * as selectors from '../../selectors';
 import { setChannel, SharedData } from '../../state';
-import { WalletProtocol } from '../../types';
 import { directFundingStateReducer } from '../direct-funding/reducer';
 import {
   confirmFundingForChannel,
@@ -86,7 +85,6 @@ export const createAndSendPostFundCommitment = (
 
   newSharedData.outboxState.messageOutbox = [
     createCommitmentMessageRelay(
-      WalletProtocol.IndirectFunding,
       theirAddress(appChannelState),
       ledgerChannelId,
       commitment,
@@ -125,7 +123,6 @@ export const createAndSendUpdateCommitment = (
   // Send out the commitment to the opponent
   newSharedState.outboxState.messageOutbox = [
     createCommitmentMessageRelay(
-      WalletProtocol.IndirectFunding,
       theirAddress(appChannelState),
       appChannelId,
       commitment,

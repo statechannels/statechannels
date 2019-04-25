@@ -21,7 +21,6 @@ import {
   ConcludeAndWithdrawArgs,
 } from '../../../utils/transaction-generator';
 import { StateWithSideEffects } from '../../utils';
-import { WalletProtocol } from '../../types';
 
 export const closingReducer = (
   state: channelStates.ClosingState,
@@ -370,7 +369,6 @@ const composeConcludePosition = (state: channelStates.ClosingState) => {
   const commitmentSignature = signCommitment(concludeCommitment, state.privateKey);
   const sendCommitmentAction = messageRelayRequested(state.participants[1 - state.ourIndex], {
     processId: state.channelId,
-    protocol: WalletProtocol.DirectFunding,
     data: {
       concludeCommitment,
       commitmentSignature,
