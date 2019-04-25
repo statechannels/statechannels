@@ -8,6 +8,9 @@ import * as states from './states';
 import { unreachable } from '../../../../utils/reducer-utils';
 import { PlayerIndex } from '../../../types';
 import { Strategy } from '..';
+import ApproveStrategy from '../../../../components/funding/approve-strategy';
+import WaitForOtherPlayer from '../../../../components/wait-for-other-player';
+import AcknowledgeX from '../../../../components/acknowledge-x';
 
 interface Props {
   state: states.OngoingFundingState;
@@ -21,13 +24,30 @@ interface Props {
 class FundingContainer extends PureComponent<Props> {
   render() {
     const { state } = this.props;
+    const { processId } = state;
 
     switch (state.type) {
       case states.WAIT_FOR_STRATEGY_PROPOSAL:
+        return <WaitForOtherPlayer name={'strategy choice'} />;
       case states.WAIT_FOR_STRATEGY_APPROVAL:
+        return (
+          <ApproveStrategy
+            strategyChosen={(strategy: Strategy) => actions.strategyApproved(processId, strategy)}
+            cancelled={() => actions.cancelled(processId, PlayerIndex.B)}
+          />
+        );
       case states.WAIT_FOR_FUNDING:
+        // TODO: embed the funding container
+        return <div />;
       case states.WAIT_FOR_SUCCESS_CONFIRMATION:
-        return <div>Hello World From Player B Funding</div>;
+        return (
+          <AcknowledgeX
+            title="Channel funded!"
+            action={() => actions.fundingSuccessAcknowledged(processId)}
+            description="You have successfully funded your channel"
+            actionTitle="Ok!"
+          />
+        );
       default:
         return unreachable(state);
     }
