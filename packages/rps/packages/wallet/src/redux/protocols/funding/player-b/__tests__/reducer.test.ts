@@ -3,6 +3,8 @@ import * as states from '../states';
 import { fundingReducer as reducer } from '../reducer';
 import { ProtocolStateWithSharedData } from '../../..';
 import { itSendsThisMessage } from '../../../../__tests__/helpers';
+import { strategyApproved } from '../../player-a/actions';
+import { messageRelayRequested } from 'magmo-wallet-client';
 
 function whenIn(state) {
   return `when in ${state}`;
@@ -26,6 +28,13 @@ describe('happyPath', () => {
     const result = reducer(state, sharedData, action);
 
     itTransitionsTo(result, states.WAIT_FOR_FUNDING);
+
+    const { processId, opponentAddress } = scenario;
+    const sentAction = strategyApproved(processId);
+    itSendsThisMessage(
+      result,
+      messageRelayRequested(opponentAddress, { processId, data: { sentAction } }),
+    );
   });
 
   describe(whenIn(states.WAIT_FOR_FUNDING), () => {
