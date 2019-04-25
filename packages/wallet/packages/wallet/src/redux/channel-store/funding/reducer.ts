@@ -14,7 +14,7 @@ import { StateWithSideEffects } from '../../utils';
 export const fundingReducer = (
   state: states.FundingState,
   action: actions.ChannelAction | internal.FundingConfirmed,
-): StateWithSideEffects<states.ChannelStatus> => {
+): StateWithSideEffects<states.ChannelState> => {
   // Handle any signature/validation request centrally to avoid duplicating code for each state
   if (
     action.type === actions.OWN_COMMITMENT_RECEIVED ||

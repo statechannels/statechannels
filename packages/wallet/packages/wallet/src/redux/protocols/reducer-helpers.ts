@@ -1,8 +1,8 @@
 import { Commitment } from 'fmg-core';
 import { messageRelayRequested, SIGNATURE_SUCCESS, VALIDATION_SUCCESS } from 'magmo-wallet-client';
-import * as channelStates from '../channel-state/state';
+import * as channelStates from '../channel-store/state';
 import * as actions from '../actions';
-import { channelStateReducer } from '../channel-state/reducer';
+import { channelStateReducer } from '../channel-store/reducer';
 import { accumulateSideEffects } from '../outbox';
 import { SideEffects } from '../outbox/state';
 import { SharedData } from '../state';
@@ -13,8 +13,8 @@ export const updateChannelState = (
   channelAction: actions.channel.ChannelAction,
 ): SharedData => {
   const newSharedData = { ...sharedData };
-  const updatedChannelState = channelStateReducer(newSharedData.channelState, channelAction);
-  newSharedData.channelState = updatedChannelState.state;
+  const updatedChannelState = channelStateReducer(newSharedData.channelStore, channelAction);
+  newSharedData.channelStore = updatedChannelState.state;
   // TODO: Currently we need to filter out signature/validation messages that are meant to the app
   // This might change based on whether protocol reducers or channel reducers craft commitments
   const filteredSideEffects = filterOutSignatureMessages(updatedChannelState.sideEffects);

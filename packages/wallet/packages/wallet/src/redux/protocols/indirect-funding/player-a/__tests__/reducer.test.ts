@@ -2,7 +2,7 @@ import { MESSAGE_RELAY_REQUESTED } from 'magmo-wallet-client';
 import { addHex } from '../../../../../utils/hex-utils';
 import * as SigningUtil from '../../../../../utils/signing-utils';
 import * as actions from '../../../../actions';
-import * as channelStates from '../../../../channel-state/state';
+import * as channelStates from '../../../../channel-store/state';
 import { ProtocolStateWithSharedData } from '../../../../protocols';
 import { itSendsThisMessage, itTransitionsToChannelStateType } from '../../../../__tests__/helpers';
 import * as testScenarios from '../../../../__tests__/test-scenarios';
@@ -24,7 +24,7 @@ function itTransitionsChannelToStateType(
   stateChannelId: string,
   type,
 ) {
-  const channelState = state.sharedData.channelState.initializedChannels[stateChannelId];
+  const channelState = state.sharedData.channelStore.initializedChannels[stateChannelId];
   itTransitionsToChannelStateType(type, { state: channelState });
 }
 

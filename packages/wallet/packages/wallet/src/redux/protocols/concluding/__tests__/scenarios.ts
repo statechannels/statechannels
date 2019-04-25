@@ -9,7 +9,7 @@ const { channelId, libraryAddress, channelNonce, participants } = channelScenari
 const channel = { channelId, libraryAddress, channelNonce, participants };
 const { asAddress: address, asPrivateKey: privateKey } = channelScenarios;
 const participant = { address, privateKey, ourIndex: 0 };
-import { ChannelStatus, waitForUpdate } from '../../../channel-state/state';
+import { ChannelState, waitForUpdate } from '../../../channel-store/state';
 const channelDefaults = { ...channel, ...participant };
 import { setChannel, EMPTY_SHARED_DATA } from '../../../state';
 
@@ -34,7 +34,7 @@ const ourTurn = waitForUpdate({
 // Defaults
 // --------
 const processId = 'processId';
-const storage = (channelState: ChannelStatus) => setChannel(EMPTY_SHARED_DATA, channelState);
+const storage = (channelState: ChannelState) => setChannel(EMPTY_SHARED_DATA, channelState);
 
 const defaults = { processId, channelId };
 

@@ -2,7 +2,7 @@ import React from 'react';
 import { PureComponent } from 'react';
 import { connect } from 'react-redux';
 
-import * as channelStates from '../redux/channel-state/state';
+import * as channelStates from '../redux/channel-store/state';
 import * as actions from '../redux/actions';
 
 import { unreachable } from '../utils/reducer-utils';

@@ -25,7 +25,7 @@ import { StateWithSideEffects } from '../../utils';
 export const closingReducer = (
   state: channelStates.ClosingState,
   action: WalletAction,
-): StateWithSideEffects<channelStates.ChannelStatus> => {
+): StateWithSideEffects<channelStates.ChannelState> => {
   // TODO: Clear funding status.
   switch (state.type) {
     case channelStates.APPROVE_CONCLUDE:
@@ -58,7 +58,7 @@ export const closingReducer = (
 const closeTransactionFailedReducer = (
   state: channelStates.CloseTransactionFailed,
   action: actions.WalletAction,
-): StateWithSideEffects<channelStates.ChannelStatus> => {
+): StateWithSideEffects<channelStates.ChannelState> => {
   switch (action.type) {
     case actions.TRANSACTION_RETRY_APPROVED:
       const { penultimateCommitment: from, lastCommitment: to } = state;
@@ -100,7 +100,7 @@ const closeTransactionFailedReducer = (
 const acknowledgeConcludeReducer = (
   state: channelStates.AcknowledgeConclude,
   action: actions.WalletAction,
-): StateWithSideEffects<channelStates.ChannelStatus> => {
+): StateWithSideEffects<channelStates.ChannelState> => {
   switch (action.type) {
     case actions.channel.CONCLUDE_APPROVED:
       if (!ourTurn(state)) {
@@ -136,7 +136,7 @@ const acknowledgeConcludeReducer = (
 const waitForCloseConfirmedReducer = (
   state: channelStates.WaitForCloseConfirmed,
   action: actions.WalletAction,
-): StateWithSideEffects<channelStates.ChannelStatus> => {
+): StateWithSideEffects<channelStates.ChannelState> => {
   switch (action.type) {
     case actions.TRANSACTION_CONFIRMED:
       return {
@@ -150,7 +150,7 @@ const waitForCloseConfirmedReducer = (
 const waitForCloseInitiatorReducer = (
   state: channelStates.WaitForCloseInitiation,
   action: actions.WalletAction,
-): StateWithSideEffects<channelStates.ChannelStatus> => {
+): StateWithSideEffects<channelStates.ChannelState> => {
   switch (action.type) {
     case actions.TRANSACTION_SENT:
       return { state: channelStates.waitForCloseSubmission(state) };
@@ -161,7 +161,7 @@ const waitForCloseInitiatorReducer = (
 const waitForCloseSubmissionReducer = (
   state: channelStates.WaitForCloseSubmission,
   action: actions.WalletAction,
-): StateWithSideEffects<channelStates.ChannelStatus> => {
+): StateWithSideEffects<channelStates.ChannelState> => {
   switch (action.type) {
     case actions.TRANSACTION_SUBMISSION_FAILED:
       return { state: channelStates.closeTransactionFailed(state) };
@@ -179,7 +179,7 @@ const waitForCloseSubmissionReducer = (
 const approveCloseOnChainReducer = (
   state: channelStates.ApproveCloseOnChain,
   action: actions.WalletAction,
-): StateWithSideEffects<channelStates.ChannelStatus> => {
+): StateWithSideEffects<channelStates.ChannelState> => {
   switch (action.type) {
     case actions.channel.APPROVE_CLOSE:
       const { penultimateCommitment: from, lastCommitment: to } = state;
@@ -224,7 +224,7 @@ const approveCloseOnChainReducer = (
 const approveConcludeReducer = (
   state: channelStates.ApproveConclude,
   action: WalletAction,
-): StateWithSideEffects<channelStates.ChannelStatus> => {
+): StateWithSideEffects<channelStates.ChannelState> => {
   switch (action.type) {
     case actions.channel.CONCLUDE_APPROVED:
       if (!ourTurn(state)) {
@@ -283,7 +283,7 @@ const approveConcludeReducer = (
 const waitForOpponentConclude = (
   state: channelStates.WaitForOpponentConclude,
   action: WalletAction,
-): StateWithSideEffects<channelStates.ChannelStatus> => {
+): StateWithSideEffects<channelStates.ChannelState> => {
   switch (action.type) {
     case actions.COMMITMENT_RECEIVED:
       const { commitment, signature } = action;
@@ -327,7 +327,7 @@ const waitForOpponentConclude = (
 const acknowledgeCloseSuccessReducer = (
   state: channelStates.AcknowledgeCloseSuccess,
   action: WalletAction,
-): StateWithSideEffects<channelStates.ChannelStatus> => {
+): StateWithSideEffects<channelStates.ChannelState> => {
   switch (action.type) {
     case actions.channel.CLOSE_SUCCESS_ACKNOWLEDGED:
       return {
@@ -344,7 +344,7 @@ const acknowledgeCloseSuccessReducer = (
 const acknowledgeClosedOnChainReducer = (
   state: channelStates.AcknowledgeClosedOnChain,
   action: WalletAction,
-): StateWithSideEffects<channelStates.ChannelStatus> => {
+): StateWithSideEffects<channelStates.ChannelState> => {
   switch (action.type) {
     case actions.channel.CLOSED_ON_CHAIN_ACKNOWLEDGED:
       return {

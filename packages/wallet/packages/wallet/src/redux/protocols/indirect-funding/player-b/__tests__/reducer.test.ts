@@ -1,5 +1,5 @@
 import * as states from '../state';
-import * as channelStates from '../../../../channel-state/state';
+import * as channelStates from '../../../../channel-store/state';
 import * as actions from '../../../../actions';
 
 import * as scenarios from '../../../../__tests__/test-scenarios';
@@ -35,7 +35,7 @@ function itTransitionsChannelToStateType(
   channelIdToCheck: string,
   type,
 ) {
-  const channelState = state.sharedData.channelState.initializedChannels[channelIdToCheck];
+  const channelState = state.sharedData.channelStore.initializedChannels[channelIdToCheck];
   itTransitionsToChannelStateType(type, { state: channelState });
 }
 
@@ -100,9 +100,9 @@ const ledgerChannelStateDefaults = {
 
 const startingState = (
   protocolState: states.PlayerBState,
-  ...channelStatuses: channelStates.ChannelStatus[]
+  ...channelStatuses: channelStates.ChannelState[]
 ): ProtocolStateWithSharedData<states.PlayerBState> => {
-  const channelState = { ...channelStates.emptyChannelState() };
+  const channelState = { ...channelStates.emptyChannelStore() };
   for (const channelStatus of channelStatuses) {
     channelState.initializedChannels[channelStatus.channelId] = channelStatus;
   }
@@ -111,7 +111,7 @@ const startingState = (
     sharedData: {
       adjudicatorState: {},
       outboxState: emptyDisplayOutboxState(),
-      channelState,
+      channelStore: channelState,
       fundingState: {},
     },
   };

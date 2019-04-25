@@ -5,7 +5,7 @@ import { unreachable } from '../utils/reducer-utils';
 import { clearOutbox } from './outbox/reducer';
 import { accumulateSideEffects } from './outbox';
 import { initializationSuccess } from 'magmo-wallet-client/lib/wallet-events';
-import { channelStateReducer } from './channel-state/reducer';
+import { channelStateReducer } from './channel-store/reducer';
 import { combineReducersWithSideEffects } from './../utils/reducer-utils';
 import { NewProcessAction, isNewProcessAction, isProtocolAction } from './protocols/actions';
 import * as funding from './protocols/funding/reducer';
@@ -120,7 +120,7 @@ function routeToNewProcessInitializer(
 }
 
 const combinedReducer = combineReducersWithSideEffects({
-  channelState: channelStateReducer,
+  channelStore: channelStateReducer,
 });
 
 const waitForLoginReducer = (

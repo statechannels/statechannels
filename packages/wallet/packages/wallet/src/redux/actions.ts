@@ -1,5 +1,5 @@
 import * as internal from './internal/actions';
-import * as channel from './channel-state/actions';
+import * as channel from './channel-store/actions';
 import { FundingAction } from './protocols/funding/actions';
 import * as directFunding from './protocols/direct-funding/actions';
 import * as indirectFunding from './protocols/indirect-funding/actions';
