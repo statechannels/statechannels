@@ -2,7 +2,7 @@ import * as states from '../states';
 import * as actions from '../actions';
 import * as tsScenarios from '../../transaction-submission/__tests__';
 import { setChannel, EMPTY_SHARED_DATA } from '../../../state';
-import { ChannelStatus, waitForPreFundSetup, waitForUpdate } from '../../../channel-state/state';
+import { ChannelState, waitForPreFundSetup, waitForUpdate } from '../../../channel-store/state';
 import * as channelScenarios from '../../../__tests__/test-scenarios';
 
 type Reason = states.FailureReason;
@@ -50,7 +50,7 @@ const ourTurn = waitForUpdate({
 const processId = 'processId';
 const tsPreSuccess = tsScenarios.preSuccessState;
 const tsPreFailure = tsScenarios.preFailureState;
-const storage = (channelState: ChannelStatus) => setChannel(EMPTY_SHARED_DATA, channelState);
+const storage = (channelState: ChannelState) => setChannel(EMPTY_SHARED_DATA, channelState);
 
 const defaults = { processId, channelId, storage: storage(theirTurn) };
 

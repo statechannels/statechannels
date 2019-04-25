@@ -8,8 +8,8 @@ import {
 import { addHex } from '../../../utils/hex-utils';
 import { ourTurn } from '../../../utils/reducer-utils';
 import * as actions from '../../actions';
-import * as channelActions from '../../channel-state/actions';
-import * as channelStates from '../../channel-state/state';
+import * as channelActions from '../../channel-store/actions';
+import * as channelStates from '../../channel-store/state';
 import { queueMessage as queueMessageOutbox } from '../../outbox/state';
 import { ProtocolStateWithSharedData } from '../../protocols';
 import { FundingAction } from '../../protocols/direct-funding/actions';
@@ -202,7 +202,7 @@ export const updateDirectFundingStatus = (
 
 export const initializeChannelState = (
   sharedData: SharedData,
-  channelState: channelStates.ChannelStatus,
+  channelState: channelStates.ChannelState,
 ): SharedData => {
   return setChannel(sharedData, channelState);
 };

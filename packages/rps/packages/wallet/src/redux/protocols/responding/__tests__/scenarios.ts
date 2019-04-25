@@ -4,12 +4,7 @@ import * as testScenarios from '../../../__tests__/test-scenarios';
 import * as transactionScenarios from '../../transaction-submission/__tests__';
 import { EMPTY_SHARED_DATA, SharedData } from '../../../state';
 
-import {
-  ChannelStatus,
-  RUNNING,
-  WAIT_FOR_UPDATE,
-  ChannelState,
-} from '../../../channel-state/state';
+import { ChannelState, RUNNING, WAIT_FOR_UPDATE, ChannelStore } from '../../../channel-store/state';
 import * as transactionActions from '../../transaction-submission/actions';
 
 // ---------
@@ -28,7 +23,7 @@ const {
   gameCommitment3,
 } = testScenarios;
 
-const channelStatus: ChannelStatus = {
+const channelStatus: ChannelState = {
   address,
   privateKey,
   stage: RUNNING,
@@ -44,7 +39,7 @@ const channelStatus: ChannelStatus = {
   turnNum: gameCommitment2.turnNum,
 };
 
-const channelState: ChannelState = {
+const channelStore: ChannelStore = {
   initializingChannels: {},
   initializedChannels: {
     [channelId]: channelStatus,
@@ -65,7 +60,7 @@ const refuteChannelState = {
 };
 const transactionSubmissionState = transactionScenarios.preSuccessState;
 const processId = 'process-id.123';
-const sharedData: SharedData = { ...EMPTY_SHARED_DATA, channelState };
+const sharedData: SharedData = { ...EMPTY_SHARED_DATA, channelStore };
 const props = { processId, transactionSubmissionState, sharedData };
 
 // ------
@@ -119,7 +114,7 @@ export const respondWithExistingCommitmentHappyPath = {
 
 export const refuteHappyPath = {
   ...props,
-  sharedData: { ...props.sharedData, channelState: refuteChannelState },
+  sharedData: { ...props.sharedData, channelStore: refuteChannelState },
   challengeCommitment: gameCommitment1,
   refuteCommitment: gameCommitment3,
   // States

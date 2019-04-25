@@ -6,13 +6,13 @@ import { RespondingState } from './responding/state';
 import { WithdrawingState } from './withdrawing/state';
 import { ClosingState } from './closing/state';
 
-export interface InitializingChannelStatus {
+export interface InitializingChannelState {
   address: string;
   privateKey: string;
 }
 
-export interface InitializingChannelState {
-  [participantAddress: string]: InitializingChannelStatus;
+export interface InitializingChannels {
+  [participantAddress: string]: InitializingChannelState;
 }
 
 export type OpenedState =
@@ -23,18 +23,18 @@ export type OpenedState =
   | WithdrawingState
   | ClosingState;
 
-export type ChannelStatus = OpeningState | OpenedState;
+export type ChannelState = OpeningState | OpenedState;
 
-export interface InitializedChannelState {
-  [channelId: string]: ChannelStatus;
+export interface InitializedChannels {
+  [channelId: string]: ChannelState;
 }
-export interface ChannelState {
-  initializingChannels: InitializingChannelState;
-  initializedChannels: InitializedChannelState;
+export interface ChannelStore {
+  initializingChannels: InitializingChannels;
+  initializedChannels: InitializedChannels;
   activeAppChannelId?: string;
 }
 
-export function emptyChannelState(): ChannelState {
+export function emptyChannelStore(): ChannelStore {
   return { initializedChannels: {}, initializingChannels: {} };
 }
 
@@ -42,13 +42,13 @@ export function emptyChannelState(): ChannelState {
 // Getters and setters
 // -------------------
 
-export function setChannel(channelStore: ChannelState, channel: ChannelStatus): ChannelState {
+export function setChannel(channelStore: ChannelStore, channel: ChannelState): ChannelStore {
   const channelId = channel.channelId;
   const initializedChannels = { ...channelStore.initializedChannels, [channelId]: channel };
   return { ...channelStore, initializedChannels };
 }
 
-export function getChannel(channelStore: ChannelState, channelId: string) {
+export function getChannel(channelStore: ChannelStore, channelId: string) {
   return channelStore.initializedChannels[channelId];
 }
 

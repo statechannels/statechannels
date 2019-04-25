@@ -1,5 +1,5 @@
 import { Commitment } from 'fmg-core';
-import { ChannelStatus } from '../redux/channel-state/state';
+import { ChannelState } from '../redux/channel-store/state';
 import { channelID } from 'fmg-core/lib/channel';
 import { accumulateSideEffects } from '../redux/outbox';
 import { SideEffects } from 'src/redux/outbox/state';
@@ -10,7 +10,7 @@ export function unreachable(x: never) {
   return x;
 }
 
-export const validTransition = (fromState: ChannelStatus, toCommitment: Commitment) => {
+export const validTransition = (fromState: ChannelState, toCommitment: Commitment) => {
   // todo: check the game rules
 
   if (!('turnNum' in fromState)) {
@@ -30,7 +30,7 @@ export const validTransition = (fromState: ChannelStatus, toCommitment: Commitme
   );
 };
 
-export const ourTurn = (state: ChannelStatus) => {
+export const ourTurn = (state: ChannelState) => {
   if (!('turnNum' in state)) {
     return false;
   }

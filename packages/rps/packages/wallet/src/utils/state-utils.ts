@@ -1,4 +1,4 @@
-import { ChannelStatus } from '../redux/channel-state/state';
+import { ChannelState } from '../redux/channel-store/state';
 import * as actions from '../redux/actions';
 import {
   signatureFailure,
@@ -10,7 +10,7 @@ import {
 import { signCommitment, validCommitmentSignature } from './signing-utils';
 
 export function handleSignatureAndValidationMessages(
-  state: ChannelStatus,
+  state: ChannelState,
   action: actions.WalletAction,
 ): WalletEvent | undefined {
   switch (action.type) {
