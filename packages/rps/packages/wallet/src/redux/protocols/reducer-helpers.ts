@@ -7,6 +7,7 @@ import { accumulateSideEffects } from '../outbox';
 import { SideEffects } from '../outbox/state';
 import { SharedData } from '../state';
 import { WalletProtocol } from '../types';
+import * as magmoWalletClient from 'magmo-wallet-client';
 
 export const updateChannelState = (
   sharedData: SharedData,
@@ -61,4 +62,20 @@ export const createCommitmentMessageRelay = (
 export function theirAddress(channelState: channelStates.OpenedState) {
   const theirIndex = (channelState.ourIndex + 1) % channelState.participants.length;
   return channelState.participants[theirIndex];
+}
+
+export function showWallet(sharedData: SharedData): SharedData {
+  const newSharedData = { ...sharedData };
+  newSharedData.outboxState = accumulateSideEffects(newSharedData.outboxState, {
+    displayOutbox: magmoWalletClient.showWallet(),
+  });
+  return newSharedData;
+}
+
+export function hideWallet(sharedData: SharedData): SharedData {
+  const newSharedData = { ...sharedData };
+  newSharedData.outboxState = accumulateSideEffects(newSharedData.outboxState, {
+    displayOutbox: magmoWalletClient.hideWallet(),
+  });
+  return newSharedData;
 }

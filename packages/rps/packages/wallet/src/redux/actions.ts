@@ -143,7 +143,6 @@ export const challengeExpiredEvent = (processId: string, channelId: string, time
 export type ChallengeExpiredEvent = ReturnType<typeof challengeExpiredEvent>;
 
 export type AdjudicatorEventAction =
-  | ChallengeCreatedEvent
   | ConcludedEvent
   | RefutedEvent
   | RespondWithMoveEvent
@@ -169,8 +168,10 @@ export type WalletAction =
   | MessageSent
   | MetamaskLoadError
   | ProtocolAction
+  | protocol.NewProcessAction
   | channel.ChannelAction
-  | internal.InternalAction;
+  | internal.InternalAction
+  | ChallengeCreatedEvent;
 
 function isCommonAction(action: WalletAction): action is CommonAction {
   return (

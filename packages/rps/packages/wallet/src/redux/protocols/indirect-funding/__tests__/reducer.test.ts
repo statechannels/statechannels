@@ -1,15 +1,14 @@
 import * as actions from '../../../actions';
 import * as states from '../../../state';
-import { indirectFundingReducer } from '../reducer';
+import { indirectFundingReducer, initialize } from '../reducer';
 import * as playerA from '../player-a/reducer';
 import * as playerB from '../player-b/reducer';
 
 import * as scenarios from '../../../__tests__/test-scenarios';
 import { PlayerIndex } from '../../../types';
-import * as indirectFundingStates from '../../indirect-funding/state';
 import { emptyDisplayOutboxState } from '../../../outbox/state';
 import { emptyChannelState } from '../../../channel-state/state';
-const { channelId, ledgerChannel } = scenarios;
+const { channelId } = scenarios;
 const emptySharedData = {
   outboxState: emptyDisplayOutboxState(),
   channelState: emptyChannelState(),
@@ -17,13 +16,11 @@ const emptySharedData = {
   fundingState: {},
 };
 
-const defaultProtocolState = indirectFundingStates.playerB.waitForApproval(channelId);
 const defaultSharedData = emptySharedData;
 
-describe('when FUNDING_REQUESTED arrives', () => {
+describe('when intialize is called', () => {
   it('works as player A', () => {
-    const action = actions.indirectFunding.fundingRequested(channelId, PlayerIndex.A);
-    const updatedState = indirectFundingReducer(defaultProtocolState, defaultSharedData, action);
+    const updatedState = initialize(channelId, PlayerIndex.A, defaultSharedData);
 
     expect(updatedState.protocolState).toMatchObject({
       type: states.indirectFunding.playerA.WAIT_FOR_APPROVAL,
@@ -31,9 +28,7 @@ describe('when FUNDING_REQUESTED arrives', () => {
   });
 
   it('works as player B', () => {
-    const action = actions.indirectFunding.fundingRequested(channelId, PlayerIndex.B);
-    const updatedState = indirectFundingReducer(defaultProtocolState, defaultSharedData, action);
-
+    const updatedState = initialize(channelId, PlayerIndex.B, defaultSharedData);
     expect(updatedState.protocolState).toMatchObject({
       type: states.indirectFunding.playerB.WAIT_FOR_APPROVAL,
     });
@@ -45,10 +40,7 @@ describe('when in a player A state', () => {
   it('delegates to the playerAReducer', () => {
     const protocolState = states.indirectFunding.playerA.waitForApproval({ channelId, player });
 
-    const action = actions.indirectFunding.playerA.strategyApproved(
-      channelId,
-      ledgerChannel.channelType,
-    );
+    const action = actions.commitmentReceived(channelId, scenarios.gameCommitment1, '0x0');
 
     const playerAReducer = jest.fn();
     Object.defineProperty(playerA, 'playerAReducer', { value: playerAReducer });
@@ -63,7 +55,7 @@ describe('when in a player B state', () => {
   it('delegates to the playerBReducer', () => {
     const protocolState = states.indirectFunding.playerB.waitForApproval({ channelId, player });
 
-    const action = actions.indirectFunding.playerB.strategyProposed(channelId);
+    const action = actions.commitmentReceived(channelId, scenarios.gameCommitment1, '0x0');
 
     const playerBReducer = jest.fn();
     Object.defineProperty(playerB, 'playerBReducer', { value: playerBReducer });
