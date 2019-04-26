@@ -1,14 +1,14 @@
 import { Channel, CommitmentType, Commitment } from 'fmg-core';
 import { channelID } from 'fmg-core/lib/channel';
 import { bigNumberify } from 'ethers/utils';
-import { waitForPreFundSetup } from '../channel-store/state';
 import * as states from '../state';
 import { bytesFromAppAttributes } from 'fmg-nitro-adjudicator';
 import { addHex } from '../../utils/hex-utils';
 import * as directFundingStates from '../../redux/protocols/direct-funding/state';
 import { PlayerIndex } from 'magmo-wallet-client/lib/wallet-instructions';
 import * as actions from '../actions';
-import { signCommitment } from '../../domain';
+import { signCommitment, signCommitment2 } from '../../domain';
+import { ChannelState } from '../channel-store';
 
 export const libraryAddress = '0x' + '1'.repeat(40);
 export const ledgerLibraryAddress = '0x' + '2'.repeat(40);
@@ -42,28 +42,6 @@ export const mockTransactionOutboxItem = {
   requestId: 'requestId',
 };
 
-export const postFundCommitment0: Commitment = {
-  channel,
-  commitmentCount: 0,
-  commitmentType: CommitmentType.PostFundSetup,
-  appAttributes: '0x0',
-  turnNum: 2,
-  allocation: twoThree,
-  destination: participants,
-};
-export const signedCommitment0 = {
-  commitment: postFundCommitment0,
-  signature: signCommitment(postFundCommitment0, asPrivateKey),
-};
-export const postFundCommitment1: Commitment = {
-  channel,
-  commitmentCount: 1,
-  commitmentType: CommitmentType.PostFundSetup,
-  appAttributes: '0x0',
-  turnNum: 3,
-  allocation: twoThree,
-  destination: participants,
-};
 export const preFundCommitment0: Commitment = {
   channel,
   commitmentCount: 0,
@@ -73,6 +51,8 @@ export const preFundCommitment0: Commitment = {
   allocation: twoThree,
   destination: participants,
 };
+export const signedCommitment0 = signCommitment2(preFundCommitment0, asPrivateKey);
+
 export const preFundCommitment1: Commitment = {
   channel,
   commitmentCount: 1,
@@ -82,6 +62,28 @@ export const preFundCommitment1: Commitment = {
   allocation: twoThree,
   destination: participants,
 };
+export const signedCommitment1 = signCommitment2(preFundCommitment1, asPrivateKey);
+
+export const postFundCommitment0: Commitment = {
+  channel,
+  commitmentCount: 0,
+  commitmentType: CommitmentType.PostFundSetup,
+  appAttributes: '0x0',
+  turnNum: 2,
+  allocation: twoThree,
+  destination: participants,
+};
+export const signedCommitment2 = signCommitment2(postFundCommitment0, asPrivateKey);
+export const postFundCommitment1: Commitment = {
+  channel,
+  commitmentCount: 1,
+  commitmentType: CommitmentType.PostFundSetup,
+  appAttributes: '0x0',
+  turnNum: 3,
+  allocation: twoThree,
+  destination: participants,
+};
+export const signedCommitment3 = signCommitment2(postFundCommitment1, bsPrivateKey);
 export const gameCommitment1: Commitment = {
   channel,
   commitmentCount: 2,
@@ -150,19 +152,21 @@ export const concludeCommitment2: Commitment = {
   destination: [],
 };
 
+const initializedChannel: ChannelState = {
+  channelId,
+  libraryAddress,
+  ourIndex: 0,
+  participants,
+  channelNonce,
+  funded: false,
+  address: asAddress,
+  privateKey: asPrivateKey,
+  lastCommitment: { commitment: preFundCommitment0, signature: 'signature' },
+  turnNum: 0,
+};
+
 export const initializedChannelState = {
-  [channelId]: waitForPreFundSetup({
-    channelId,
-    libraryAddress,
-    ourIndex: 0,
-    participants,
-    channelNonce,
-    funded: false,
-    address: asAddress,
-    privateKey: asPrivateKey,
-    lastCommitment: { commitment: preFundCommitment0, signature: 'signature' },
-    turnNum: 0,
-  }),
+  [channelId]: initializedChannel,
 };
 export const initializingChannelState = {
   [asAddress]: { address: asAddress, privateKey: asPrivateKey },

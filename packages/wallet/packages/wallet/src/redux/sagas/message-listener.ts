@@ -38,7 +38,7 @@ export function* messageListener() {
         yield put(actions.loggedIn(action.userId));
         break;
       case incoming.INITIALIZE_CHANNEL_REQUEST:
-        yield put(actions.channel.channelInitialized());
+        // todo: what do we need to do here?
         break;
       case incoming.SIGN_COMMITMENT_REQUEST:
         yield put(actions.channel.ownCommitmentReceived(action.commitment));

@@ -1,4 +1,4 @@
-import { ChannelState } from '../channel-store/state';
+import { ChannelState } from '../channel-store';
 import { StateWithSideEffects } from '../utils';
 import { Commitment } from '../../domain';
 import { QueuedTransaction, OutboxState } from '../outbox/state';
@@ -95,30 +95,12 @@ export const itSendsNoTransaction = (state: SideEffectState) => {
   });
 };
 
-export const itTransitionsToChannelStateType = (
-  type,
-  state: StateWithSideEffects<ChannelState>,
-) => {
-  it(`transitions to ${type}`, () => {
-    expect(state.state.type).toEqual(type);
-  });
-};
-
 export const itTransitionsToStateType = (
   type,
   protocolStateWithSharedData: ProtocolStateWithSharedData<{ type: any }>,
 ) => {
   it(`transitions to ${type}`, () => {
     expect(protocolStateWithSharedData.protocolState.type).toEqual(type);
-  });
-};
-
-export const itDoesntTransition = (
-  oldState: ChannelState,
-  newState: StateWithSideEffects<ChannelState>,
-) => {
-  it(`doesn't transition`, () => {
-    expect(newState.state.type).toEqual(oldState.type);
   });
 };
 

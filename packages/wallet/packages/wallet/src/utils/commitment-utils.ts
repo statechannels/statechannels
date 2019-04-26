@@ -5,7 +5,7 @@ import { signCommitment } from '../domain';
 import { Channel } from 'fmg-core';
 import { SignedCommitment } from '../domain';
 import { messageRelayRequested } from 'magmo-wallet-client/lib/wallet-events';
-import { ChannelState } from '../redux/channel-store/state';
+import { ChannelState } from '../redux/channel-store';
 
 export const hasConsensusBeenReached = (
   lastCommitment: Commitment,

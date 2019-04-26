@@ -3,7 +3,7 @@ import { PureComponent } from 'react';
 import { connect } from 'react-redux';
 
 import * as states from '../redux/state';
-import InitializingContainer from './initializing';
+import MetamaskErrorContainer from './metamask-error';
 import WalletInitializedContainer from './initialized';
 import LandingPage from '../components/landing-page';
 import Modal from 'react-modal';
@@ -26,7 +26,7 @@ class WalletContainer extends PureComponent<WalletProps> {
             overlayClassName={'wallet-overlay-' + this.props.position}
             ariaHideApp={false}
           >
-            <InitializingContainer state={state} />
+            <MetamaskErrorContainer state={state} />
           </Modal>
         );
       case states.WALLET_INITIALIZED:

@@ -1,7 +1,7 @@
 import * as states from '../state';
 import * as withdrawalScenarios from '../../withdrawing/__tests__/scenarios';
 import * as testScenarios from '../../../__tests__/test-scenarios';
-import { ChannelState, RUNNING, WAIT_FOR_UPDATE, ChannelStore } from '../../../channel-store/state';
+import { ChannelState, ChannelStore } from '../../../channel-store';
 import { EMPTY_SHARED_DATA, FundingState } from '../../../state';
 
 const processId = 'process-id.123';
@@ -22,8 +22,6 @@ const {
 const channelStatus: ChannelState = {
   address,
   privateKey,
-  stage: RUNNING,
-  type: WAIT_FOR_UPDATE,
   channelId,
   libraryAddress,
   ourIndex: 0,

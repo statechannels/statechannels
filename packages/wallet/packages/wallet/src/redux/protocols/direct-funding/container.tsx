@@ -9,8 +9,6 @@ import { TransactionSubmission } from '../../protocols/transaction-submission/co
 
 interface Props {
   directFundingState: directFundingStates.DirectFundingState;
-  fundingSuccessAcknowledged: () => void;
-  fundingDeclinedAcknowledged: () => void;
   transactionRetryApprovedAction: (channelId: string, protocol: WalletProtocol) => void;
 }
 
@@ -40,10 +38,6 @@ class DirectFundingContainer extends PureComponent<Props> {
 }
 
 const mapDispatchToProps = {
-  fundingApproved: actions.channel.fundingApproved,
-  fundingRejected: actions.channel.fundingRejected,
-  fundingSuccessAcknowledged: actions.channel.fundingSuccessAcknowledged,
-  fundingDeclinedAcknowledged: actions.channel.fundingDeclinedAcknowledged,
   transactionRetryApprovedAction: actions.transactionRetryApproved,
 };
 

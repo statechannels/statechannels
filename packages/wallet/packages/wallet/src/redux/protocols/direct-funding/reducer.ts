@@ -14,7 +14,8 @@ import {
 } from '../transaction-submission/reducer';
 import { isTerminal, isSuccess } from '../transaction-submission/states';
 import * as states from './state';
-import { createCommitmentMessageRelay, theirAddress } from '../reducer-helpers';
+import { createCommitmentMessageRelay } from '../reducer-helpers';
+import { theirAddress } from '../../channel-store';
 
 /* Note on PostFund commitment exchange:
  After the protocol refactor, the PostFund commitments are created and sent by funding protocols: 

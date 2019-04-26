@@ -1,6 +1,5 @@
 import { Commitment } from '../../domain';
 import { messageRelayRequested, SIGNATURE_SUCCESS, VALIDATION_SUCCESS } from 'magmo-wallet-client';
-import * as channelStates from '../channel-store/state';
 import * as actions from '../actions';
 import { channelStateReducer } from '../channel-store/reducer';
 import { accumulateSideEffects } from '../outbox';
@@ -56,11 +55,6 @@ export const createCommitmentMessageRelay = (
   };
   return messageRelayRequested(to, payload);
 };
-
-export function theirAddress(channelState: channelStates.OpenedState) {
-  const theirIndex = (channelState.ourIndex + 1) % channelState.participants.length;
-  return channelState.participants[theirIndex];
-}
 
 export function showWallet(sharedData: SharedData): SharedData {
   const newSharedData = { ...sharedData };

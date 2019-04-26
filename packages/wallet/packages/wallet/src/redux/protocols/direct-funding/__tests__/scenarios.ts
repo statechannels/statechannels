@@ -1,14 +1,14 @@
 import { addHex } from '../../../../utils/hex-utils';
 import * as globalActions from '../../../actions';
-import * as channelStates from '../../../channel-store/state';
+import * as channelStates from '../../../channel-store';
 import { emptyDisplayOutboxState } from '../../../outbox/state';
 import { ProtocolStateWithSharedData } from '../../../protocols';
-import { PlayerIndex } from '../../../types';
 import * as globalTestScenarios from '../../../__tests__/test-scenarios';
 import * as scenarios from '../../../__tests__/test-scenarios';
 import * as testScenarios from '../../../__tests__/test-scenarios';
 import * as transactionSubmissionScenarios from '../../transaction-submission/__tests__';
 import * as states from '../state';
+import { channelFromCommitments } from '../../../channel-store/channel-state/__tests__';
 
 const { channelId, twoThree } = scenarios;
 
@@ -37,44 +37,19 @@ const constructWalletState = (
 };
 
 // Channel states
-const channelStateDefaults = {
-  ourIndex: PlayerIndex.A,
-  privateKey: testScenarios.asPrivateKey,
-  channelId,
-  libraryAddress: testScenarios.libraryAddress,
-  participants: testScenarios.participants,
-  channelNonce: testScenarios.channelNonce,
-  address: testScenarios.participants[0],
-};
+const waitForFundingChannelState = channelFromCommitments(
+  testScenarios.signedCommitment0,
+  testScenarios.signedCommitment1,
+  globalTestScenarios.asAddress,
+  globalTestScenarios.asPrivateKey,
+);
 
-const waitForFundingChannelState = channelStates.waitForFundingAndPostFundSetup({
-  ...channelStateDefaults,
-  funded: false,
-  turnNum: 5,
-  lastCommitment: {
-    commitment: testScenarios.preFundCommitment1,
-    signature: '0x0',
-  },
-  penultimateCommitment: {
-    commitment: testScenarios.preFundCommitment0,
-    signature: '0x0',
-  },
-});
-
-const receivedPostFund0ChannelState = channelStates.waitForFundingAndPostFundSetup({
-  ...channelStateDefaults,
-  ourIndex: PlayerIndex.B,
-  funded: false,
-  turnNum: 5,
-  lastCommitment: {
-    commitment: testScenarios.postFundCommitment0,
-    signature: '0x0',
-  },
-  penultimateCommitment: {
-    commitment: testScenarios.preFundCommitment1,
-    signature: '0x0',
-  },
-});
+const receivedPostFund0ChannelState = channelFromCommitments(
+  testScenarios.signedCommitment1,
+  testScenarios.signedCommitment2,
+  globalTestScenarios.bsAddress,
+  globalTestScenarios.bsPrivateKey,
+);
 
 // Direct funding state machine states
 const defaultsForA: states.DirectFundingState = {

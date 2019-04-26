@@ -1,11 +1,11 @@
-import { OpenedState, OPENING, ChannelState } from './channel-store/state';
+import { OpenChannelState, ChannelState, isFullyOpen } from './channel-store';
 import * as walletStates from './state';
 import { SharedData, FundingState } from './state';
 import { WalletProtocol } from './types';
 
-export const getOpenedChannelState = (state: SharedData, channelId: string): OpenedState => {
+export const getOpenedChannelState = (state: SharedData, channelId: string): OpenChannelState => {
   const channelStatus = getChannelState(state, channelId);
-  if (channelStatus.stage === OPENING) {
+  if (!isFullyOpen(channelStatus)) {
     throw new Error(`Channel ${channelId} is still in the process of being opened.`);
   }
   return channelStatus;
