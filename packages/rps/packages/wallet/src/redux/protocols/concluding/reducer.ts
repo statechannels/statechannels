@@ -12,10 +12,10 @@ import {
   acknowledgeDefundFailed,
 } from './states';
 import { ConcludingAction } from './actions';
-import { unreachable, ourTurn } from '../../../utils/reducer-utils';
+import { unreachable } from '../../../utils/reducer-utils';
 import { SharedData, getChannel } from '../../state';
 import { composeConcludeCommitment } from '../../../utils/commitment-utils';
-import { ChannelState } from '../../channel-store/state';
+import { ChannelState, ourTurn } from '../../channel-store';
 type Storage = SharedData;
 
 export interface ReturnVal {

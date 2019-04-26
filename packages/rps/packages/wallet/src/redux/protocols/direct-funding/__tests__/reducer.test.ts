@@ -176,7 +176,9 @@ describe(startingIn(states.WAIT_FOR_FUNDING_AND_POST_FUND_SETUP), () => {
         scenarios.actions.postFundSetup0,
       );
       itTransitionsTo(updatedState, states.FUNDING_SUCCESS);
-      expectThisCommitmentSent(updatedState.sharedData, globalTestScenarios.postFundCommitment1);
+      it('sends a commitment', () => {
+        expectThisCommitmentSent(updatedState.sharedData, globalTestScenarios.postFundCommitment1);
+      });
     });
 
     describe('Player B: channel is not funded', () => {

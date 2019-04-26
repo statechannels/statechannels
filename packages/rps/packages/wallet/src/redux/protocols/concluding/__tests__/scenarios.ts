@@ -5,30 +5,19 @@ import * as channelScenarios from '../../../__tests__/test-scenarios';
 // -----------------
 // Channel Scenarios
 // -----------------
-const { channelId, libraryAddress, channelNonce, participants } = channelScenarios;
-const channel = { channelId, libraryAddress, channelNonce, participants };
-const { asAddress: address, asPrivateKey: privateKey } = channelScenarios;
-const participant = { address, privateKey, ourIndex: 0 };
-import { ChannelState, waitForUpdate } from '../../../channel-store/state';
-const channelDefaults = { ...channel, ...participant };
+const { channelId, asAddress: address, asPrivateKey: privateKey } = channelScenarios;
+import { ChannelState } from '../../../channel-store';
 import { setChannel, EMPTY_SHARED_DATA } from '../../../state';
+import { channelFromCommitments } from '../../../channel-store/channel-state/__tests__';
 
 const { signedCommitment19, signedCommitment20, signedCommitment21 } = channelScenarios;
-
-const theirTurn = waitForUpdate({
-  ...channelDefaults,
-  turnNum: 20,
-  lastCommitment: signedCommitment20,
-  penultimateCommitment: signedCommitment19,
-  funded: true,
-});
-const ourTurn = waitForUpdate({
-  ...channelDefaults,
-  turnNum: 21,
-  lastCommitment: signedCommitment21,
-  penultimateCommitment: signedCommitment20,
-  funded: true,
-});
+const theirTurn = channelFromCommitments(
+  signedCommitment19,
+  signedCommitment20,
+  address,
+  privateKey,
+);
+const ourTurn = channelFromCommitments(signedCommitment20, signedCommitment21, address, privateKey);
 
 // --------
 // Defaults
