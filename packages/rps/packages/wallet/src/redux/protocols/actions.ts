@@ -21,17 +21,19 @@ export const concludeRequested = (channelId: string) => ({
 export type ConcludeRequested = ReturnType<typeof concludeRequested>;
 
 export const CREATE_CHALLENGE_REQUESTED = 'WALLET.NEW_PROCESS.CREATE_CHALLENGE_REQUESTED';
-export const createChallengeRequested = (channelId: string) => ({
+export const createChallengeRequested = (channelId: string, commitment: Commitment) => ({
   type: CREATE_CHALLENGE_REQUESTED as typeof CREATE_CHALLENGE_REQUESTED,
   channelId,
+  commitment,
   protocol: WalletProtocol.Challenging,
 });
 export type CreateChallengeRequested = ReturnType<typeof createChallengeRequested>;
 
 export const RESPOND_TO_CHALLENGE_REQUESTED = 'WALLET.NEW_PROCESS.RESPOND_TO_CHALLENGE_REQUESTED';
-export const respondToChallengeRequested = (challengeCommitment: Commitment) => ({
+export const respondToChallengeRequested = (channelId: string, commitment: Commitment) => ({
   type: RESPOND_TO_CHALLENGE_REQUESTED as typeof RESPOND_TO_CHALLENGE_REQUESTED,
-  challengeCommitment,
+  channelId,
+  commitment,
   protocol: WalletProtocol.Responding,
 });
 export type RespondToChallengeRequested = ReturnType<typeof respondToChallengeRequested>;
