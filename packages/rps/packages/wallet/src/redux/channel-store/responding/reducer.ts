@@ -2,7 +2,7 @@ import * as states from '../state';
 import { WalletAction } from '../../actions';
 import * as actions from '../../actions';
 import { unreachable, ourTurn, validTransition } from '../../../utils/reducer-utils';
-import { signCommitment } from '../../../utils/signing-utils';
+import { signCommitment } from '../../../domain';
 import { createRespondWithMoveTransaction } from '../../../utils/transaction-generator';
 import {
   challengeResponseRequested,

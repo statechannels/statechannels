@@ -1,6 +1,6 @@
 import { MESSAGE_RELAY_REQUESTED } from 'magmo-wallet-client';
 import { addHex } from '../../../../../utils/hex-utils';
-import * as SigningUtil from '../../../../../utils/signing-utils';
+import * as SigningUtil from '../../../../../domain';
 import * as actions from '../../../../actions';
 import * as channelStates from '../../../../channel-store/state';
 import { ProtocolStateWithSharedData } from '../../../../protocols';

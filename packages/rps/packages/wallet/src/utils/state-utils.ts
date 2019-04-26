@@ -7,7 +7,7 @@ import {
   validationSuccess,
   WalletEvent,
 } from 'magmo-wallet-client';
-import { signCommitment, validCommitmentSignature } from './signing-utils';
+import { signCommitment, validCommitmentSignature } from '../domain';
 
 export function handleSignatureAndValidationMessages(
   state: ChannelState,

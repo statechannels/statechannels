@@ -1,4 +1,4 @@
-import { Commitment } from 'fmg-core/lib/commitment';
+import { Commitment } from '../../../domain';
 import { ProtocolStateWithSharedData } from '..';
 import * as states from './state';
 import * as actions from './actions';
@@ -13,7 +13,7 @@ import {
   transactionReducer,
 } from '../transaction-submission/reducer';
 import { SharedData } from '../../state';
-import * as SigningUtils from '../../../utils/signing-utils';
+import * as SigningUtils from '../../../domain';
 import { isTransactionAction } from '../transaction-submission/actions';
 import {
   isTerminal,

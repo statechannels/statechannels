@@ -1,7 +1,7 @@
 import * as states from './state';
 import * as actions from './actions';
 import { PureComponent } from 'react';
-import { Commitment } from 'fmg-core/lib/commitment';
+import { Commitment } from '../../../domain';
 import React from 'react';
 import Success from '../shared-components/success';
 import Failure from '../shared-components/failure';

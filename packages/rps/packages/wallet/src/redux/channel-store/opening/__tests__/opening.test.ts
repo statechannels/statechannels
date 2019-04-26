@@ -7,7 +7,7 @@ import {
   itSendsThisMessage,
 } from '../../../__tests__/helpers';
 import * as scenarios from '../../../__tests__/test-scenarios';
-import * as SigningUtil from '../../../../utils/signing-utils';
+import * as SigningUtil from '../../../../domain';
 import { validationFailure, SIGNATURE_FAILURE } from 'magmo-wallet-client';
 import { openingReducer } from '../reducer';
 

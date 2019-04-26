@@ -11,7 +11,7 @@ import {
   itSendsNoMessage,
 } from '../../../__tests__/helpers';
 import * as outgoing from 'magmo-wallet-client/lib/wallet-events';
-import * as SigningUtil from '../../../../utils/signing-utils';
+import * as SigningUtil from '../../../../domain';
 const {
   asAddress,
   asPrivateKey,

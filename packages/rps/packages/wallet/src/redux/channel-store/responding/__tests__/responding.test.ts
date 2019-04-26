@@ -6,7 +6,7 @@ import * as actions from '../../../actions';
 import { itTransitionsToChannelStateType, itDoesntTransition } from '../../../__tests__/helpers';
 import * as scenarios from '../../../__tests__/test-scenarios';
 import * as TransactionGenerator from '../../../../utils/transaction-generator';
-import * as SigningUtil from '../../../../utils/signing-utils';
+import * as SigningUtil from '../../../../domain';
 import * as FmgCore from 'fmg-core';
 import { WalletProtocol } from '../../../types';
 

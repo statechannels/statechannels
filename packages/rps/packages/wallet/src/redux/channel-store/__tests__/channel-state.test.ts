@@ -4,7 +4,7 @@ import * as scenarios from '../../__tests__/test-scenarios';
 import * as channelState from '../reducer';
 import * as states from '../state';
 import { itTransitionsToChannelStateType, itSendsThisMessage } from '../../__tests__/helpers';
-import * as SigningUtil from '../../../utils/signing-utils';
+import * as SigningUtil from '../../../domain';
 import { validationFailure, SIGNATURE_FAILURE } from 'magmo-wallet-client';
 import { fundingConfirmed } from '../../internal/actions';
 

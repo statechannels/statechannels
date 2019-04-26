@@ -12,7 +12,7 @@ import {
 } from '../../../../__tests__/helpers';
 import { PlayerIndex } from 'magmo-wallet-client/lib/wallet-instructions';
 
-import * as SigningUtil from '../../../../../utils/signing-utils';
+import * as SigningUtil from '../../../../../domain';
 import { ProtocolStateWithSharedData } from '../../../../protocols';
 import { emptyDisplayOutboxState } from '../../../../outbox/state';
 import { addHex } from '../../../../../utils/hex-utils';

@@ -10,7 +10,7 @@ import {
   itSendsThisTransaction,
 } from '../../../__tests__/helpers';
 
-import * as SigningUtil from '../../../../utils/signing-utils';
+import * as SigningUtil from '../../../../domain';
 import * as ReducerUtil from '../../../../utils/reducer-utils';
 import * as TransactionGenerator from '../../../../utils/transaction-generator';
 import { Commitment } from 'fmg-core/lib/commitment';

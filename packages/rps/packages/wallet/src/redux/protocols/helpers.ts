@@ -1,6 +1,6 @@
 import * as selectors from '../selectors';
 import { SharedData } from '../state';
-import { CommitmentType } from 'magmo-wallet-client/node_modules/fmg-core';
+import { CommitmentType } from '../../domain';
 
 export const channelIsClosed = (channelId: string, sharedData: SharedData): boolean => {
   return (
