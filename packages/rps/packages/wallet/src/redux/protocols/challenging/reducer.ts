@@ -13,7 +13,7 @@ import {
   successOpen,
   failure,
 } from './states';
-import { unreachable, ourTurn } from '../../../utils/reducer-utils';
+import { unreachable } from '../../../utils/reducer-utils';
 import { SharedData } from '../../state';
 import * as actions from './actions';
 import { TransactionAction } from '../transaction-submission/actions';
@@ -22,7 +22,7 @@ import { transactionReducer, initialize as initializeTransaction } from '../tran
 import { isSuccess, isFailure } from '../transaction-submission/states';
 import { getChannel } from '../../state';
 import { createForceMoveTransaction } from '../../../utils/transaction-generator';
-import { WAIT_FOR_PRE_FUND_SETUP } from '../../channel-store/state';
+import { isFullyOpen, ourTurn } from '../../channel-store';
 
 type Storage = SharedData;
 
@@ -68,7 +68,7 @@ export function initialize(channelId: string, processId: string, storage: Storag
     return { state: acknowledgeFailure(props, 'ChannelDoesntExist'), storage };
   }
 
-  if (channelState.type === WAIT_FOR_PRE_FUND_SETUP) {
+  if (!isFullyOpen(channelState)) {
     return { state: acknowledgeFailure(props, 'NotFullyOpen'), storage };
   }
 
@@ -115,7 +115,7 @@ function challengeApproved(state: NonTerminalCState, storage: Storage): ReturnVa
   if (!channelState) {
     return { state: acknowledgeFailure(state, 'ChannelDoesntExist'), storage };
   }
-  if (channelState.type === WAIT_FOR_PRE_FUND_SETUP) {
+  if (!isFullyOpen(channelState)) {
     return { state: acknowledgeFailure(state, 'NotFullyOpen'), storage };
   }
 

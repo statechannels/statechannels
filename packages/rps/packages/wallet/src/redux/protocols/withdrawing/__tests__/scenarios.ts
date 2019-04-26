@@ -2,7 +2,7 @@ import * as states from '../states';
 import * as actions from '../actions';
 import * as transactionActions from '../../transaction-submission/actions';
 import * as transactionScenarios from '../../transaction-submission/__tests__';
-import { ChannelState, RUNNING, WAIT_FOR_UPDATE, ChannelStore } from '../../../channel-store/state';
+import { ChannelState, ChannelStore } from '../../../channel-store';
 import * as testScenarios from '../../../__tests__/test-scenarios';
 import { Wallet } from 'ethers';
 import { EMPTY_SHARED_DATA, SharedData } from '../../../state';
@@ -28,8 +28,6 @@ const {
 const channelStatus: ChannelState = {
   address,
   privateKey,
-  stage: RUNNING,
-  type: WAIT_FOR_UPDATE,
   channelId,
   libraryAddress,
   ourIndex: 0,

@@ -10,7 +10,7 @@ import {
   ChannelState,
   setChannel as setChannelInStore,
   emptyChannelStore,
-} from './channel-store/state';
+} from './channel-store';
 import { Properties } from './utils';
 import * as indirectFunding from './protocols/indirect-funding/state';
 import { accumulateSideEffects } from './outbox';

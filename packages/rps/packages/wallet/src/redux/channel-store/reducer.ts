@@ -1,362 +1,118 @@
-import * as states from './state';
+import { ChannelStore, getChannel, setChannel } from './state';
 
-import { openingReducer } from './opening/reducer';
-import { fundingReducer } from './funding/reducer';
-import { runningReducer } from './running/reducer';
-import { challengingReducer } from './challenging/reducer';
-import { respondingReducer } from './responding/reducer';
-import { withdrawingReducer } from './withdrawing/reducer';
-import { closingReducer } from './closing/reducer';
-import * as actions from './actions';
-import {
-  unreachable,
-  ourTurn,
-  validTransition,
-  ReducerWithSideEffects,
-  combineReducersWithSideEffects,
-} from '../../utils/reducer-utils';
-import { validCommitmentSignature, signCommitment } from '../../domain';
-import {
-  showWallet,
-  channelInitializationSuccess,
-  signatureFailure,
-  signatureSuccess,
-  validationFailure,
-  validationSuccess,
-} from 'magmo-wallet-client/lib/wallet-events';
-import { CommitmentType } from 'fmg-core';
+import { ReducerWithSideEffects } from '../../utils/reducer-utils';
 import { StateWithSideEffects } from '../utils';
-import { ethers } from 'ethers';
-import { channelID } from 'fmg-core/lib/channel';
-import { WalletAction, COMMITMENT_RECEIVED } from '../actions';
-import { Commitment } from 'fmg-core';
-import { FUNDING_CONFIRMED } from '../internal/actions';
+import { WalletAction } from '../actions';
+import {
+  SignedCommitment,
+  Commitment,
+  signCommitment2,
+  getChannelId,
+  hasValidSignature,
+} from '../../domain';
+import { pushCommitment, ChannelState } from './channel-state/states';
+import { validTransition } from './channel-state';
 
-export const channelStateReducer: ReducerWithSideEffects<states.ChannelStore> = (
-  state: states.ChannelStore,
+export const channelStateReducer: ReducerWithSideEffects<ChannelStore> = (
+  state: ChannelStore,
   action: WalletAction,
-): StateWithSideEffects<states.ChannelStore> => {
-  const newState = { ...state };
-  if (actions.isReceiveFirstCommitment(action) && !channelIsInitialized(action.commitment, state)) {
-    return handleFirstCommmit(state, action);
-  }
-
-  return combinedReducer(newState, action, {
-    initializedChannels: { appChannelId: newState.activeAppChannelId },
-  });
+): StateWithSideEffects<ChannelStore> => {
+  return { state };
 };
 
-const initializingChannels: ReducerWithSideEffects<states.InitializingChannels> = (
-  state: states.InitializingChannels,
-  action: actions.ChannelAction,
-): StateWithSideEffects<states.InitializingChannels> => {
-  if (action.type !== actions.CHANNEL_INITIALIZED) {
-    return { state };
+// -----------------
+// NEW FUNCTIONALITY
+// -----------------
+
+interface SignSuccess {
+  isSuccess: true;
+  signedCommitment: SignedCommitment;
+  store: ChannelStore;
+}
+
+interface SignFailure {
+  isSuccess: false;
+  reason: SignFailureReason;
+}
+
+type SignFailureReason = 'ChannelDoesntExist' | 'TransitionUnsafe' | 'NotOurTurn';
+type SignResult = SignSuccess | SignFailure;
+
+// Signs and stores a commitment from our own app or wallet.
+// Doesn't work for the first state - the channel must already exist.
+export function signAndStore(store: ChannelStore, commitment: Commitment): SignResult {
+  const channelId = getChannelId(commitment);
+  let channel = getChannel(store, channelId);
+  if (!channel) {
+    return { isSuccess: false, reason: 'ChannelDoesntExist' };
+  }
+  const signedCommitment = signCommitment2(commitment, channel.address);
+
+  // this next check is weird. It'll check whether it was our turn.
+  // Maybe this should be done as part of signCommitment2
+  if (!hasValidSignature(signedCommitment)) {
+    return { isSuccess: false, reason: 'NotOurTurn' };
   }
 
-  const wallet = ethers.Wallet.createRandom();
-  const { address, privateKey } = wallet;
-  return {
-    state: {
-      ...state,
-      // We have to temporarily store the private key under the address, since
-      // we can't know the channel id until both participants know their addresses.
-      [address]: { address, privateKey },
-    },
-    sideEffects: { messageOutbox: channelInitializationSuccess(wallet.address) },
-  };
-};
-
-type CommitmentReceived = actions.OwnCommitmentReceived | actions.OpponentCommitmentReceived;
-const handleFirstCommmit = (
-  state: states.ChannelStore,
-  action: CommitmentReceived,
-): StateWithSideEffects<states.ChannelStore> => {
-  // We manually select and move the initializing channel into the initializedChannelState
-  // before applying the combined reducer, so that the address and private key is in the
-  // right slot (by its channelId)
-  const channel = action.commitment.channel;
-  const channelId = channelID(channel);
-  if (state.initializedChannels[channelId]) {
-    throw new Error('Channel already exists');
-  }
-  const initializingAddresses = new Set(Object.keys(state.initializingChannels));
-  const ourAddress = channel.participants.find(addr => initializingAddresses.has(addr));
-  if (!ourAddress) {
-    return { state };
-  }
-  const ourIndex = channel.participants.indexOf(ourAddress);
-
-  const { address, privateKey } = state.initializingChannels[ourAddress];
-  delete state.initializingChannels[ourAddress];
-
-  // Since the wallet only manages one channel at a time, when it receives the first
-  // prefundsetup commitment for a channel, from the application, we set the
-  // activeAppChannelId accordingly.
-  // In the future, the application might need to specify the intended channel id
-  // for the action
-  state.activeAppChannelId = channelId;
-
-  const channelState = {
-    address,
-    privateKey,
-    ourIndex,
-  };
-
-  switch (action.type) {
-    case actions.OWN_COMMITMENT_RECEIVED:
-      const ownCommitment = action.commitment;
-
-      // check it's a PreFundSetupA
-      if (ownCommitment.commitmentType !== CommitmentType.PreFundSetup) {
-        // Since these checks are happening during a signature request we'll return a sig failure
-        return {
-          state,
-          sideEffects: {
-            messageOutbox: signatureFailure('Other', 'Expected a pre fund setup position.'),
-          },
-        };
-      }
-      if (ownCommitment.commitmentCount !== 0) {
-        return {
-          state,
-          sideEffects: { messageOutbox: signatureFailure('Other', 'Expected state count to 0.') },
-        };
-      }
-
-      if (ourAddress !== channelState.address) {
-        return {
-          state,
-          sideEffects: {
-            messageOutbox: signatureFailure(
-              'Other',
-              'Address provided does not match the one stored in the wallet.',
-            ),
-          },
-        };
-      }
-
-      const signature = signCommitment(ownCommitment, channelState.privateKey);
-      // if so, unpack its contents into the state
-      return {
-        state: states.setChannel(
-          state,
-          states.waitForPreFundSetup({
-            ...channelState,
-            libraryAddress: ownCommitment.channel.channelType,
-            channelId: channelID(ownCommitment.channel),
-            ourIndex: ownCommitment.channel.participants.indexOf(channelState.address),
-            participants: ownCommitment.channel.participants as [string, string],
-            channelNonce: ownCommitment.channel.nonce,
-            turnNum: 0,
-            lastCommitment: { commitment: ownCommitment, signature },
-            funded: false,
-          }),
-        ),
-        sideEffects: { messageOutbox: signatureSuccess(signature) },
-      };
-
-    case actions.OPPONENT_COMMITMENT_RECEIVED:
-      const opponentCommitment = action.commitment;
-
-      // all these checks will fail silently for the time being
-      // check it's a PreFundSetupA
-      if (opponentCommitment.commitmentType !== CommitmentType.PreFundSetup) {
-        return {
-          state,
-          sideEffects: {
-            messageOutbox: validationFailure('Other', 'Expected a prefund setup position'),
-          },
-        };
-      }
-      if (opponentCommitment.commitmentCount !== 0) {
-        return {
-          state,
-          sideEffects: {
-            messageOutbox: validationFailure('Other', 'Expected state count to be 0'),
-          },
-        };
-      }
-
-      const ourAddress2 = opponentCommitment.channel.participants[1];
-      const opponentAddress2 = opponentCommitment.channel.participants[0] as string;
-
-      if (!validCommitmentSignature(action.commitment, action.signature, opponentAddress2)) {
-        return {
-          state,
-          sideEffects: { messageOutbox: validationFailure('InvalidSignature') },
-        };
-      }
-
-      if (ourAddress2 !== channelState.address) {
-        return {
-          state,
-          sideEffects: {
-            messageOutbox: validationFailure(
-              'Other',
-              'Address provided does not match the one stored in the wallet.',
-            ),
-          },
-        };
-      }
-
-      // if so, unpack its contents into the state
-      return {
-        state: states.setChannel(
-          state,
-          states.waitForPreFundSetup({
-            ...channelState,
-            libraryAddress: opponentCommitment.channel.channelType,
-            channelId: channelID(opponentCommitment.channel),
-            ourIndex: opponentCommitment.channel.participants.indexOf(channelState.address),
-            participants: opponentCommitment.channel.participants as [string, string],
-            channelNonce: opponentCommitment.channel.nonce,
-            turnNum: 0,
-            lastCommitment: { commitment: action.commitment, signature: action.signature },
-            funded: false,
-          }),
-        ),
-        sideEffects: { messageOutbox: validationSuccess() },
-      };
-  }
-};
-
-const initializedChannels: ReducerWithSideEffects<states.InitializedChannels> = (
-  state: states.InitializedChannels,
-  action: actions.ChannelAction,
-  data: { appChannelId: string },
-): StateWithSideEffects<states.InitializedChannels> => {
-  if (action.type === actions.CHANNEL_INITIALIZED) {
-    return { state };
-  }
-  // TODO: Figure out which actions should be allowed here
-  if (!('commitment' in action) && action.type !== FUNDING_CONFIRMED) {
-    return { state };
+  // store if safe
+  if (!isSafeTransition(store, channel, commitment)) {
+    return { isSuccess: false, reason: 'TransitionUnsafe' };
   }
 
-  // If an action has a channelId/commitment we update the channel state for that channel
-  let channelId = data.appChannelId;
-  if ('channelId' in action) {
-    channelId = action.channelId;
-  } else if ('commitment' in action) {
-    channelId = channelID(action.commitment.channel);
+  channel = pushCommitment(channel, signedCommitment);
+  store = setChannel(store, channel);
+
+  return { isSuccess: true, signedCommitment, store };
+}
+
+interface CheckSuccess {
+  isSuccess: true;
+  store: ChannelStore;
+}
+
+interface CheckFailure {
+  isSuccess: false;
+}
+
+type CheckResult = CheckSuccess | CheckFailure;
+
+// For use with a signed commitment received from an opponent.
+// Will create a channel if turnNum=0 and channel doesn't already exist.
+export function checkAndStore(
+  store: ChannelStore,
+  signedCommitment: SignedCommitment,
+): CheckResult {
+  if (!hasValidSignature(signedCommitment)) {
+    return { isSuccess: false };
+  }
+  const commitment = signedCommitment.commitment;
+  const channelId = getChannelId(commitment);
+  let channel = getChannel(store, channelId);
+
+  if (!channel) {
+    // do I need to do any checks? seems like no?
+    // I guess I need to make sure I'm a participant and set my participant number
+    // just create a channel from the commitment?
+    // store = setChannel(store, channel);
+    return { isSuccess: true, store };
   }
 
-  const existingChannel = state[channelId];
-  if (!existingChannel) {
-    // return a signature failure
-    return {
-      state,
-      sideEffects: {
-        messageOutbox: signatureFailure(
-          'Other',
-          `Wallet doesn't have an initialized channel for the provided commitment.
-          Expected a pre fund setup commitment.`,
-        ),
-      },
-    };
+  if (!isSafeTransition(store, channel, commitment)) {
+    return { isSuccess: false };
   }
 
-  const { state: newState, sideEffects: outboxState } = initializedChannelStatusReducer(
-    existingChannel,
-    action,
-  );
+  channel = pushCommitment(channel, signedCommitment);
 
-  return { state: { ...state, [channelId]: newState }, sideEffects: outboxState };
-};
+  // todo
+  return { isSuccess: false };
+}
 
-export const initializedChannelStatusReducer: ReducerWithSideEffects<states.ChannelState> = (
-  state: states.ChannelState,
-  action: actions.ChannelAction,
-): StateWithSideEffects<states.ChannelState> => {
-  const conclusionStateFromOwnRequest = receivedValidOwnConclusionRequest(state, action);
-  if (conclusionStateFromOwnRequest) {
-    return {
-      state: conclusionStateFromOwnRequest,
-      sideEffects: { displayOutbox: showWallet() },
-    };
-  }
-
-  const conclusionStateFromOpponentRequest = receivedValidOpponentConclusionRequest(state, action);
-  if (conclusionStateFromOpponentRequest) {
-    return {
-      state: conclusionStateFromOpponentRequest,
-      sideEffects: { displayOutbox: showWallet() },
-    };
-  }
-
-  switch (state.stage) {
-    case states.OPENING:
-      return openingReducer(state, action);
-    case states.FUNDING:
-      return fundingReducer(state, action);
-    case states.RUNNING:
-      return runningReducer(state, action);
-    case states.CHALLENGING:
-      return challengingReducer(state, action);
-    case states.RESPONDING:
-      return respondingReducer(state, action);
-    case states.WITHDRAWING:
-      return withdrawingReducer(state, action);
-    case states.CLOSING:
-      return closingReducer(state, action);
-    default:
-      return unreachable(state);
-  }
-};
-
-const combinedReducer = combineReducersWithSideEffects({
-  initializingChannels,
-  initializedChannels,
-});
-
-const receivedValidOwnConclusionRequest = (
-  state: states.ChannelState,
-  action: actions.ChannelAction,
-): states.ApproveConclude | null => {
-  if (state.stage !== states.FUNDING && state.stage !== states.RUNNING) {
-    return null;
-  }
-  if (action.type !== actions.CONCLUDE_REQUESTED || !ourTurn(state)) {
-    return null;
-  }
-  return states.approveConclude({ ...state });
-};
-
-const receivedValidOpponentConclusionRequest = (
-  state: states.ChannelState,
-  action: actions.ChannelAction,
-): states.AcknowledgeConclude | null => {
-  if (state.stage !== states.FUNDING && state.stage !== states.RUNNING) {
-    return null;
-  }
-  if (action.type !== COMMITMENT_RECEIVED) {
-    return null;
-  }
-
-  const { commitment, signature } = action;
-
-  if (commitment.commitmentType !== CommitmentType.Conclude) {
-    return null;
-  }
-  // check signature
-  const opponentAddress = state.participants[1 - state.ourIndex];
-  if (!validCommitmentSignature(commitment, signature, opponentAddress)) {
-    return null;
-  }
-  if (!validTransition(state, commitment)) {
-    return null;
-  }
-
-  return states.acknowledgeConclude({
-    ...state,
-    turnNum: commitment.turnNum,
-    lastCommitment: { commitment, signature },
-    penultimateCommitment: state.lastCommitment,
-  });
-};
-
-const channelIsInitialized = (commitment: Commitment, state: states.ChannelStore): boolean => {
-  const channelId = channelID(commitment.channel);
-  return channelId in state.initializedChannels;
-};
+// Currently just checks for validTransition
+// In the future might check things like value preservation in the network.
+function isSafeTransition(
+  store: ChannelStore,
+  channel: ChannelState,
+  commitment: Commitment,
+): boolean {
+  return validTransition(channel, commitment);
+}

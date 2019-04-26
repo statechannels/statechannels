@@ -2,19 +2,19 @@ import * as states from '../states';
 import * as actions from '../actions';
 import * as tsScenarios from '../../transaction-submission/__tests__';
 import { setChannel, EMPTY_SHARED_DATA } from '../../../state';
-import { ChannelState, waitForPreFundSetup, waitForUpdate } from '../../../channel-store/state';
+import { ChannelState } from '../../../channel-store';
 import * as channelScenarios from '../../../__tests__/test-scenarios';
+import {
+  channelFromCommitments,
+  partiallyOpenChannelFromCommitment,
+} from '../../../channel-store/channel-state/__tests__';
 
 type Reason = states.FailureReason;
 
 // -----------------
 // Channel Scenarios
 // -----------------
-const { channelId, libraryAddress, channelNonce, participants } = channelScenarios;
-const channel = { channelId, libraryAddress, channelNonce, participants };
-const { asAddress: address, asPrivateKey: privateKey } = channelScenarios;
-const participant = { address, privateKey, ourIndex: 0 };
-const channelDefaults = { ...channel, ...participant };
+const { channelId, asAddress: address, asPrivateKey: privateKey } = channelScenarios;
 
 const {
   signedCommitment0,
@@ -23,26 +23,14 @@ const {
   signedCommitment21,
 } = channelScenarios;
 
-const partiallyOpen = waitForPreFundSetup({
-  ...channelDefaults,
-  turnNum: 0,
-  lastCommitment: signedCommitment0,
-  funded: false,
-});
-const theirTurn = waitForUpdate({
-  ...channelDefaults,
-  turnNum: 20,
-  lastCommitment: signedCommitment20,
-  penultimateCommitment: signedCommitment19,
-  funded: true,
-});
-const ourTurn = waitForUpdate({
-  ...channelDefaults,
-  turnNum: 21,
-  lastCommitment: signedCommitment21,
-  penultimateCommitment: signedCommitment20,
-  funded: true,
-});
+const partiallyOpen = partiallyOpenChannelFromCommitment(signedCommitment0, address, privateKey);
+const theirTurn = channelFromCommitments(
+  signedCommitment19,
+  signedCommitment20,
+  address,
+  privateKey,
+);
+const ourTurn = channelFromCommitments(signedCommitment20, signedCommitment21, address, privateKey);
 
 // --------
 // Defaults
