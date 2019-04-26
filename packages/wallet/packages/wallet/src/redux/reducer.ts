@@ -1,15 +1,17 @@
-import * as states from './state';
-
-import * as actions from './actions';
-import { unreachable } from '../utils/reducer-utils';
-import { clearOutbox } from './outbox/reducer';
-import { accumulateSideEffects } from './outbox';
 import { initializationSuccess } from 'magmo-wallet-client/lib/wallet-events';
-import { NewProcessAction, isNewProcessAction, isProtocolAction } from './protocols/actions';
-import * as funding from './protocols/funding/reducer';
+import { unreachable } from '../utils/reducer-utils';
+import * as actions from './actions';
+import { accumulateSideEffects } from './outbox';
+import { clearOutbox } from './outbox/reducer';
 import { ProtocolState } from './protocols';
-import { WalletProtocol } from './types';
+import { isNewProcessAction, isProtocolAction, NewProcessAction } from './protocols/actions';
+import * as challengeProtocol from './protocols/challenging/reducer';
+import * as funding from './protocols/funding/reducer';
 import { FundingState } from './protocols/funding/states';
+import * as respondingProtocol from './protocols/responding/reducer';
+import * as states from './state';
+import { WalletProtocol } from './types';
+import * as concludeProtocol from './protocols/concluding/reducer';
 
 const initialState = states.waitForLogin();
 
@@ -87,28 +89,45 @@ function updatedState(
   return newState;
 }
 
+function initializeNewProtocol(
+  state: states.Initialized,
+  action: actions.protocol.NewProcessAction,
+): { protocolState: ProtocolState; sharedData: states.SharedData } {
+  const channelId = action.channelId;
+  const processId = action.channelId;
+  switch (action.type) {
+    case actions.protocol.FUNDING_REQUESTED:
+      return funding.initialize(states.sharedData(state), channelId, processId, action.playerIndex);
+    case actions.protocol.CONCLUDE_REQUESTED: {
+      const { state: protocolState, storage: sharedData } = challengeProtocol.initialize(
+        channelId,
+        processId,
+        states.sharedData(state),
+      );
+      return { protocolState, sharedData };
+    }
+    case actions.protocol.CREATE_CHALLENGE_REQUESTED: {
+      const { state: protocolState, storage: sharedData } = concludeProtocol.initialize(
+        channelId,
+        processId,
+        states.sharedData(state),
+      );
+      return { protocolState, sharedData };
+    }
+    case actions.protocol.RESPOND_TO_CHALLENGE_REQUESTED:
+      return respondingProtocol.initialize(processId, states.sharedData(state), action.commitment);
+    default:
+      return unreachable(action);
+  }
+}
+
 function routeToNewProcessInitializer(
   state: states.Initialized,
   action: actions.protocol.NewProcessAction,
 ): states.Initialized {
-  switch (action.type) {
-    case actions.protocol.FUNDING_REQUESTED:
-      const processId = action.channelId;
-      const { protocolState, sharedData } = funding.initialize(
-        states.sharedData(state),
-        processId,
-        action.channelId,
-        action.playerIndex,
-      );
-
-      return startProcess(state, sharedData, action, protocolState, processId);
-    case actions.protocol.CONCLUDE_REQUESTED:
-    case actions.protocol.CREATE_CHALLENGE_REQUESTED:
-    case actions.protocol.RESPOND_TO_CHALLENGE_REQUESTED:
-      return state;
-    default:
-      return unreachable(action);
-  }
+  const processId = action.channelId;
+  const { protocolState, sharedData } = initializeNewProtocol(state, action);
+  return startProcess(state, sharedData, action, protocolState, processId);
 }
 
 const waitForLoginReducer = (
