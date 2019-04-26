@@ -93,7 +93,7 @@ function initializeNewProtocol(
   state: states.Initialized,
   action: actions.protocol.NewProcessAction,
 ): { protocolState: ProtocolState; sharedData: states.SharedData } {
-  const channelId = action.channelId;
+  const { channelId } = action;
   const processId = action.channelId;
   const incomingSharedData = states.sharedData(state);
   switch (action.type) {
