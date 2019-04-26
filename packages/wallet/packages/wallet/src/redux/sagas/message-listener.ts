@@ -19,14 +19,23 @@ export function* messageListener() {
     const messageEvent = yield take(postMessageEventChannel);
     const action = messageEvent.data;
     switch (messageEvent.data.type) {
-      case incoming.INITIALIZE_REQUEST:
-        yield put(actions.loggedIn(action.userId));
+      // Events that need a new process
+      case incoming.CONCLUDE_CHANNEL_REQUEST:
+        yield put(actions.protocol.concludeRequested(action.channelId));
         break;
       case incoming.CREATE_CHALLENGE_REQUEST:
-        yield put(actions.channel.challengeRequested());
+        yield put(actions.protocol.createChallengeRequested(action.channelId));
         break;
       case incoming.FUNDING_REQUEST:
         yield put(actions.protocol.fundingRequested(action.channelId, action.playerIndex));
+        break;
+      case incoming.RESPOND_TO_CHALLENGE:
+        yield put(actions.protocol.respondToChallengeRequested(action.commitment));
+        break;
+
+      // Events that do not need a new process
+      case incoming.INITIALIZE_REQUEST:
+        yield put(actions.loggedIn(action.userId));
         break;
       case incoming.INITIALIZE_CHANNEL_REQUEST:
         yield put(actions.channel.channelInitialized());
@@ -39,12 +48,6 @@ export function* messageListener() {
         break;
       case incoming.RECEIVE_MESSAGE:
         yield put(handleIncomingMessage(action));
-        break;
-      case incoming.RESPOND_TO_CHALLENGE:
-        yield put(actions.channel.challengeCommitmentReceived(action.commitment));
-        break;
-      case incoming.CONCLUDE_CHANNEL_REQUEST:
-        yield put(actions.channel.concludeRequested());
         break;
       default:
     }
