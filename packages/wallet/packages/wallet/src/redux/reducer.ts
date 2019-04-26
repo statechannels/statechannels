@@ -5,11 +5,11 @@ import { accumulateSideEffects } from './outbox';
 import { clearOutbox } from './outbox/reducer';
 import { ProtocolState } from './protocols';
 import { isNewProcessAction, isProtocolAction, NewProcessAction } from './protocols/actions';
-import * as challengeProtocolReducer from './protocols/challenging/reducer';
-import * as concludeProtocolReducer from './protocols/concluding/reducer';
-import * as fundingProtocolReducer from './protocols/funding/reducer';
+import * as challengeProtocol from './protocols/challenging';
+import * as concludeProtocol from './protocols/concluding';
+import * as fundProtocol from './protocols/funding';
 import { FundingState } from './protocols/funding/states';
-import * as respondingProtocolReducer from './protocols/responding/reducer';
+import * as challengeResponseProtocol from './protocols/responding';
 import * as states from './state';
 import { WalletProtocol } from './types';
 
@@ -57,7 +57,7 @@ function routeToProtocolReducer(state: states.Initialized, action: actions.Proto
   } else {
     switch (processState.protocol) {
       case WalletProtocol.Funding:
-        const { protocolState, sharedData } = fundingProtocolReducer.fundingReducer(
+        const { protocolState, sharedData } = fundProtocol.reducer(
           processState.protocolState,
           states.sharedData(state),
           action,
@@ -98,14 +98,9 @@ function initializeNewProtocol(
   const incomingSharedData = states.sharedData(state);
   switch (action.type) {
     case actions.protocol.FUNDING_REQUESTED:
-      return fundingProtocolReducer.initialize(
-        incomingSharedData,
-        channelId,
-        processId,
-        action.playerIndex,
-      );
+      return fundProtocol.initialize(incomingSharedData, channelId, processId, action.playerIndex);
     case actions.protocol.CONCLUDE_REQUESTED: {
-      const { state: protocolState, storage: sharedData } = concludeProtocolReducer.initialize(
+      const { state: protocolState, storage: sharedData } = concludeProtocol.initialize(
         channelId,
         processId,
         incomingSharedData,
@@ -113,7 +108,7 @@ function initializeNewProtocol(
       return { protocolState, sharedData };
     }
     case actions.protocol.CREATE_CHALLENGE_REQUESTED: {
-      const { state: protocolState, storage: sharedData } = challengeProtocolReducer.initialize(
+      const { state: protocolState, storage: sharedData } = challengeProtocol.initialize(
         channelId,
         processId,
         incomingSharedData,
@@ -121,7 +116,7 @@ function initializeNewProtocol(
       return { protocolState, sharedData };
     }
     case actions.protocol.RESPOND_TO_CHALLENGE_REQUESTED:
-      return respondingProtocolReducer.initialize(processId, incomingSharedData, action.commitment);
+      return challengeResponseProtocol.initialize(processId, incomingSharedData, action.commitment);
     default:
       return unreachable(action);
   }
