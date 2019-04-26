@@ -113,7 +113,7 @@ function initializeNewProtocol(
       return { protocolState, sharedData };
     }
     case actions.protocol.CREATE_CHALLENGE_REQUESTED: {
-      const { state: protocolState, storage: sharedData } = concludeProtocolReducer.initialize(
+      const { state: protocolState, storage: sharedData } = challengeProtocolReducer.initialize(
         channelId,
         processId,
         incomingSharedData,
