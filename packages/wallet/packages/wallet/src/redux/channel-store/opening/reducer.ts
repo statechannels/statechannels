@@ -7,7 +7,7 @@ import {
   validationFailure,
 } from 'magmo-wallet-client/lib/wallet-events';
 
-import { signCommitment, validCommitmentSignature } from '../../../utils/signing-utils';
+import { signCommitment, validCommitmentSignature } from '../../../domain';
 import { CommitmentType } from 'fmg-core';
 import { StateWithSideEffects } from '../../utils';
 

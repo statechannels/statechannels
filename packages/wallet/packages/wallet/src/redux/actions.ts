@@ -5,7 +5,7 @@ import * as directFunding from './protocols/direct-funding/actions';
 import * as indirectFunding from './protocols/indirect-funding/actions';
 import * as protocol from './protocols/actions';
 import * as challenging from './protocols/challenging/actions';
-import { Commitment } from 'fmg-core';
+import { Commitment } from '../domain';
 import {
   TransactionAction as TA,
   isTransactionAction as isTA,

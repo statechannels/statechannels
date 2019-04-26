@@ -1,13 +1,8 @@
-import { Commitment } from 'fmg-core';
+import { SignedCommitment } from '../../../domain';
 
 export interface SharedChannelState {
   address: string;
   privateKey: string;
-}
-
-export interface SignedCommitment {
-  commitment: Commitment;
-  signature: string;
 }
 
 export interface FirstCommitmentReceived extends SharedChannelState {

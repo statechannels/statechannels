@@ -1,4 +1,4 @@
-import { Commitment } from 'fmg-core';
+import { Commitment } from '../../domain';
 import { messageRelayRequested, SIGNATURE_SUCCESS, VALIDATION_SUCCESS } from 'magmo-wallet-client';
 import * as channelStates from '../channel-store/state';
 import * as actions from '../actions';

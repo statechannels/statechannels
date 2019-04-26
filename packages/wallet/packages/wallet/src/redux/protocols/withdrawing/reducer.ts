@@ -3,12 +3,12 @@ import * as states from './states';
 import * as actions from './actions';
 import { WithdrawalAction } from './actions';
 import * as selectors from '../../selectors';
-import { CommitmentType } from 'fmg-core/lib/commitment';
+import { CommitmentType } from '../../../domain';
 import {
   createConcludeAndWithdrawTransaction,
   ConcludeAndWithdrawArgs,
 } from '../../../utils/transaction-generator';
-import { signVerificationData } from '../../../utils/signing-utils';
+import { signVerificationData } from '../../../domain';
 import { TransactionRequest } from 'ethers/providers';
 import {
   initialize as initTransactionState,

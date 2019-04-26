@@ -1,6 +1,6 @@
 import { NonTerminalTransactionSubmissionState as NonTerminalTSState } from '../transaction-submission/states';
 import { Properties } from '../../utils';
-import { Commitment } from 'fmg-core/lib/commitment';
+import { Commitment } from '../../../domain';
 export type RespondingState =
   | WaitForApproval
   | WaitForTransaction

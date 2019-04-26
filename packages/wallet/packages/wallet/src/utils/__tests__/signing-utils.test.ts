@@ -5,7 +5,7 @@ import {
   validSignature,
   validCommitmentSignature,
   signVerificationData,
-} from '../signing-utils';
+} from '../../domain';
 
 describe('signing and validating commitments', () => {
   let commitmentSignature;

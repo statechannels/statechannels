@@ -5,7 +5,7 @@ import { internal, COMMITMENT_RECEIVED } from '../../actions';
 import { messageRelayRequested, fundingSuccess } from 'magmo-wallet-client/lib/wallet-events';
 
 import { unreachable, validTransition } from '../../../utils/reducer-utils';
-import { signCommitment, validCommitmentSignature } from '../../../utils/signing-utils';
+import { signCommitment, validCommitmentSignature } from '../../../domain';
 
 import { Channel, Commitment, CommitmentType } from 'fmg-core';
 import { handleSignatureAndValidationMessages } from '../../../utils/state-utils';

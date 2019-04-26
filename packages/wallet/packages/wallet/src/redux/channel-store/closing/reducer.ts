@@ -3,11 +3,7 @@ import * as actions from '../../actions';
 
 import { WalletAction } from '../../actions';
 import { unreachable, ourTurn, validTransition } from '../../../utils/reducer-utils';
-import {
-  signCommitment,
-  signVerificationData,
-  validCommitmentSignature,
-} from '../../../utils/signing-utils';
+import { signCommitment, signVerificationData, validCommitmentSignature } from '../../../domain';
 import {
   closeSuccess,
   concludeSuccess,

@@ -15,7 +15,7 @@ import {
   ReducerWithSideEffects,
   combineReducersWithSideEffects,
 } from '../../utils/reducer-utils';
-import { validCommitmentSignature, signCommitment } from '../../utils/signing-utils';
+import { validCommitmentSignature, signCommitment } from '../../domain';
 import {
   showWallet,
   channelInitializationSuccess,

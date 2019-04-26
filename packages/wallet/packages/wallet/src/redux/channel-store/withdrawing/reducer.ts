@@ -3,7 +3,7 @@ import * as actions from '../../actions';
 import { unreachable } from '../../../utils/reducer-utils';
 import { handleSignatureAndValidationMessages } from '../../../utils/state-utils';
 import { createTransferAndWithdrawTransaction } from '../../../utils/transaction-generator';
-import { signVerificationData } from '../../../utils/signing-utils';
+import { signVerificationData } from '../../../domain';
 import { closeSuccess, hideWallet } from 'magmo-wallet-client/lib/wallet-events';
 import { StateWithSideEffects } from '../../utils';
 

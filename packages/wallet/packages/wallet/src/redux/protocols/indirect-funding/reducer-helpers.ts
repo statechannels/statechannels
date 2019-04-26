@@ -1,5 +1,5 @@
 import { bigNumberify } from 'ethers/utils';
-import { Commitment } from 'fmg-core';
+import { Commitment } from '../../../domain';
 import { WalletEvent } from 'magmo-wallet-client';
 import {
   composeLedgerUpdateCommitment,

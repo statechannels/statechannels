@@ -1,4 +1,4 @@
-import { Commitment } from 'magmo-wallet-client/node_modules/fmg-core';
+import { Commitment } from '../../domain';
 import * as walletActions from '../actions';
 
 export const CHANNEL_INITIALIZED = 'WALLET.CHANNEL.CHANNEL_INITIALIZED';

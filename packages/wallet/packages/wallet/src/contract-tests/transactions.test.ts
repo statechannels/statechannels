@@ -9,7 +9,7 @@ import {
   transactionSubmitted,
 } from '../redux/actions';
 import { transactionSender } from '../redux/sagas/transaction-sender';
-import { signCommitment, signVerificationData } from '../utils/signing-utils';
+import { signCommitment, signVerificationData } from '../domain';
 import { getLibraryAddress, createChallenge, concludeGame } from './test-utils';
 import {
   createForceMoveTransaction,

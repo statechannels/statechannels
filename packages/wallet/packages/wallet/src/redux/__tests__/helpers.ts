@@ -1,6 +1,6 @@
 import { ChannelState } from '../channel-store/state';
 import { StateWithSideEffects } from '../utils';
-import { Commitment } from 'fmg-core';
+import { Commitment } from '../../domain';
 import { QueuedTransaction, OutboxState } from '../outbox/state';
 import { SharedData } from '../state';
 import { ProtocolStateWithSharedData } from '../protocols';

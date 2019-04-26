@@ -1,9 +1,9 @@
-import { Commitment, CommitmentType } from 'magmo-wallet-client/node_modules/fmg-core';
+import { Commitment, CommitmentType, signCommitment2 } from '../domain';
 import { appAttributesFromBytes, bytesFromAppAttributes } from 'fmg-nitro-adjudicator';
 import { PlayerIndex } from '../redux/types';
-import { signCommitment } from './signing-utils';
+import { signCommitment } from '../domain';
 import { Channel } from 'fmg-core';
-import { SignedCommitment } from '../redux/channel-store/shared/state';
+import { SignedCommitment } from '../domain';
 import { messageRelayRequested } from 'magmo-wallet-client/lib/wallet-events';
 import { ChannelState } from '../redux/channel-store/state';
 
@@ -52,9 +52,8 @@ export const composeLedgerUpdateCommitment = (
     destination,
     appAttributes,
   };
-  const signature = signCommitment(commitment, privateKey);
 
-  return { commitment, signature };
+  return signCommitment2(commitment, privateKey);
 };
 
 export const composePostFundCommitment = (
@@ -78,9 +77,8 @@ export const composePostFundCommitment = (
     destination,
     appAttributes,
   };
-  const signature = signCommitment(commitment, privateKey);
 
-  return { commitment, signature };
+  return signCommitment2(commitment, privateKey);
 };
 export const composePreFundCommitment = (
   channel: Channel,
@@ -103,9 +101,7 @@ export const composePreFundCommitment = (
     destination,
     appAttributes,
   };
-  const signature = signCommitment(commitment, privateKey);
-
-  return { commitment, signature };
+  return signCommitment2(commitment, privateKey);
 };
 
 export const composeConcludeCommitment = (channelState: ChannelState) => {

@@ -4,7 +4,7 @@ import * as respondingStates from '../responding/state';
 import * as actions from '../../actions';
 
 import { ourTurn, validTransition } from '../../../utils/reducer-utils';
-import { signCommitment, validCommitmentSignature } from '../../../utils/signing-utils';
+import { signCommitment, validCommitmentSignature } from '../../../domain';
 import { challengeRejected, showWallet } from 'magmo-wallet-client/lib/wallet-events';
 import { handleSignatureAndValidationMessages } from '../../../utils/state-utils';
 import { StateWithSideEffects } from '../../utils';

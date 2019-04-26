@@ -1,5 +1,5 @@
 import { BaseProcessAction } from '../actions';
-import { Commitment } from 'fmg-core/lib/commitment';
+import { Commitment } from '../../../domain';
 import { TransactionAction } from '../transaction-submission/actions';
 
 export type RespondingAction =

@@ -24,7 +24,7 @@ import {
 import { ProtocolStateWithSharedData } from '../../';
 import { FundingAction, isDirectFundingAction } from '../../direct-funding/actions';
 import * as channelState from '../../../channel-store/state';
-import { Commitment } from 'fmg-core/lib/commitment';
+import { Commitment } from '../../../../domain';
 import { composePreFundCommitment } from '../../../../utils/commitment-utils';
 import { PlayerIndex } from '../../../types';
 import * as selectors from '../../../selectors';

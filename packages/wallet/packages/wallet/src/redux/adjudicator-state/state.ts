@@ -1,4 +1,4 @@
-import { Commitment } from 'fmg-core/lib/commitment';
+import { Commitment } from '../../domain';
 import { bigNumberify } from 'ethers/utils';
 
 export interface AdjudicatorState {

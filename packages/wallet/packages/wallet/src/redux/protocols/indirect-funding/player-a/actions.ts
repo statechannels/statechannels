@@ -1,4 +1,4 @@
-import { Commitment } from 'fmg-core/lib/commitment';
+import { Commitment } from '../../../../domain';
 
 export const STRATEGY_APPROVED = 'WALLET.INDIRECT_FUNDING.STRATEGY_APPROVED';
 export const strategyApproved = (channelId: string, consensusLibrary: string) => ({
