@@ -95,10 +95,11 @@ function initializeNewProtocol(
 ): { protocolState: ProtocolState; sharedData: states.SharedData } {
   const channelId = action.channelId;
   const processId = action.channelId;
+  const incomingSharedData = states.sharedData(state);
   switch (action.type) {
     case actions.protocol.FUNDING_REQUESTED:
       return fundingProtocolReducer.initialize(
-        states.sharedData(state),
+        incomingSharedData,
         channelId,
         processId,
         action.playerIndex,
@@ -107,7 +108,7 @@ function initializeNewProtocol(
       const { state: protocolState, storage: sharedData } = challengeProtocolReducer.initialize(
         channelId,
         processId,
-        states.sharedData(state),
+        incomingSharedData,
       );
       return { protocolState, sharedData };
     }
@@ -115,16 +116,12 @@ function initializeNewProtocol(
       const { state: protocolState, storage: sharedData } = concludeProtocolReducer.initialize(
         channelId,
         processId,
-        states.sharedData(state),
+        incomingSharedData,
       );
       return { protocolState, sharedData };
     }
     case actions.protocol.RESPOND_TO_CHALLENGE_REQUESTED:
-      return respondingProtocolReducer.initialize(
-        processId,
-        states.sharedData(state),
-        action.commitment,
-      );
+      return respondingProtocolReducer.initialize(processId, incomingSharedData, action.commitment);
     default:
       return unreachable(action);
   }
