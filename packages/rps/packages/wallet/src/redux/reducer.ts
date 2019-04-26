@@ -105,7 +105,7 @@ function initializeNewProtocol(
         action.playerIndex,
       );
     case actions.protocol.CONCLUDE_REQUESTED: {
-      const { state: protocolState, storage: sharedData } = challengeProtocolReducer.initialize(
+      const { state: protocolState, storage: sharedData } = concludeProtocolReducer.initialize(
         channelId,
         processId,
         incomingSharedData,
