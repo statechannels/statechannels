@@ -100,7 +100,7 @@ function updatedState(
 function routeToNewProcessInitializer(
   state: states.Initialized,
   action: actions.protocol.NewProcessAction,
-) {
+): states.Initialized {
   switch (action.type) {
     case actions.protocol.FUNDING_REQUESTED:
       const processId = action.channelId;
@@ -112,10 +112,12 @@ function routeToNewProcessInitializer(
       );
 
       return startProcess(state, sharedData, action, protocolState, processId);
-    default:
+    case actions.protocol.CONCLUDE_REQUESTED:
+    case actions.protocol.CREATE_CHALLENGE_REQUESTED:
+    case actions.protocol.RESPOND_TO_CHALLENGE_REQUESTED:
       return state;
-    // TODO: Why is the discriminated union not working here?
-    // return unreachable(action);
+    default:
+      return unreachable(action);
   }
 }
 
