@@ -2,7 +2,7 @@ import * as scenarios from './scenarios';
 import { initialize, respondingReducer } from '../reducer';
 
 import * as states from '../state';
-import { Commitment } from 'fmg-core/lib/commitment';
+import { Commitment } from '../../../../domain';
 import * as TransactionGenerator from '../../../../utils/transaction-generator';
 
 // Mocks

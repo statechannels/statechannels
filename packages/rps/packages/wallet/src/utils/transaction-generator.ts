@@ -1,7 +1,8 @@
 import { TransactionRequest } from 'ethers/providers';
 import { getAdjudicatorInterface } from './contract-utils';
 import { splitSignature } from 'ethers/utils';
-import { Commitment, asEthersObject } from 'fmg-core';
+import { Commitment } from '../domain';
+import { asEthersObject } from 'fmg-core';
 const ZERO_ADDRESS = '0x' + '0'.repeat(40);
 
 export function createForceMoveTransaction(

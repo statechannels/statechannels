@@ -8,7 +8,7 @@ import { addHex } from '../../utils/hex-utils';
 import * as directFundingStates from '../../redux/protocols/direct-funding/state';
 import { PlayerIndex } from 'magmo-wallet-client/lib/wallet-instructions';
 import * as actions from '../actions';
-import { signCommitment } from '../../utils/signing-utils';
+import { signCommitment } from '../../domain';
 
 export const libraryAddress = '0x' + '1'.repeat(40);
 export const ledgerLibraryAddress = '0x' + '2'.repeat(40);
