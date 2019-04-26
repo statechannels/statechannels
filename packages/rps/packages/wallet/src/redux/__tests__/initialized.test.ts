@@ -4,7 +4,7 @@ import * as states from './../state';
 import * as actions from './../actions';
 import * as scenarios from './test-scenarios';
 import { PlayerIndex, WalletProtocol } from '../types';
-import * as Funding from '../protocols/funding/reducer';
+import * as fundProtocol from '../protocols/funding';
 import { fundingRequested } from '../protocols/actions';
 
 const { channelId } = scenarios;
@@ -26,7 +26,7 @@ describe('when a NewProcessAction arrives', () => {
     protocolState: 'protocolState',
     sharedData: { prop: 'value' },
   }));
-  Object.defineProperty(Funding, 'initialize', { value: initialize });
+  Object.defineProperty(fundProtocol, 'initialize', { value: initialize });
 
   const updatedState = walletReducer(initializedState, action);
   it('calls initialize', () => {
@@ -61,7 +61,7 @@ describe('when a ProcessAction arrives', () => {
     protocolState: 'protocolState',
     sharedData: 'sharedData ',
   }));
-  Object.defineProperty(Funding, 'fundingReducer', {
+  Object.defineProperty(fundProtocol, 'reducer', {
     value: indirectFundingReducer,
   });
 
