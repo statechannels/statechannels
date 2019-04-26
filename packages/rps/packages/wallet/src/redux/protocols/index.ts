@@ -1,10 +1,12 @@
-import { IndirectFundingState } from './indirect-funding/state';
-import { DirectFundingState } from './direct-funding/state';
-import { WithdrawalState } from './withdrawing/states';
 import { SharedData } from '../state';
-import { RespondingState } from './responding/state';
-import { FundingState } from './funding/states';
+import { ChallengingState } from './challenging/states';
+import { ConcludingState } from './concluding/states';
 import { DefundingState } from './defunding/state';
+import { DirectFundingState } from './direct-funding/state';
+import { FundingState } from './funding/states';
+import { IndirectFundingState } from './indirect-funding/state';
+import { RespondingState } from './responding/state';
+import { WithdrawalState } from './withdrawing/states';
 
 export type ProtocolState =
   | IndirectFundingState
@@ -12,7 +14,9 @@ export type ProtocolState =
   | WithdrawalState
   | RespondingState
   | FundingState
-  | DefundingState;
+  | DefundingState
+  | ChallengingState
+  | ConcludingState;
 
 export type ProtocolReducer<T extends ProtocolState> = (
   protocolState: T,
