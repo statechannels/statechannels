@@ -1,8 +1,7 @@
 /* 
 TODO Remaining work:
 - Check outgoing postfund messages.
-- Transaction failure testing.  
- */
+*/
 
 import * as actions from '../../../actions';
 import * as globalTestScenarios from '../../../__tests__/test-scenarios';
