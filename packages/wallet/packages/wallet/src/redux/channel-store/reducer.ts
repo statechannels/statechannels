@@ -46,7 +46,7 @@ export function signAndStore(store: ChannelStore, commitment: Commitment): SignR
   if (!channel) {
     return { isSuccess: false, reason: 'ChannelDoesntExist' };
   }
-  const signedCommitment = signCommitment2(commitment, channel.address);
+  const signedCommitment = signCommitment2(commitment, channel.privateKey);
 
   // this next check is weird. It'll check whether it was our turn.
   // Maybe this should be done as part of signCommitment2
@@ -102,9 +102,9 @@ export function checkAndStore(
   }
 
   channel = pushCommitment(channel, signedCommitment);
+  store = setChannel(store, channel);
 
-  // todo
-  return { isSuccess: false };
+  return { isSuccess: true, store };
 }
 
 // Currently just checks for validTransition

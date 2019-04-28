@@ -5,7 +5,7 @@ import { createDepositTransaction } from '../../../utils/transaction-generator';
 import * as actions from '../../actions';
 import { ProtocolReducer, ProtocolStateWithSharedData } from '../../protocols';
 import * as selectors from '../../selectors';
-import { SharedData } from '../../state';
+import { SharedData, setChannelStore, queueMessage } from '../../state';
 import { PlayerIndex } from '../../types';
 import { isTransactionAction } from '../transaction-submission/actions';
 import {
@@ -16,14 +16,7 @@ import { isTerminal, isSuccess } from '../transaction-submission/states';
 import * as states from './state';
 import { createCommitmentMessageRelay } from '../reducer-helpers';
 import { theirAddress } from '../../channel-store';
-
-/* Note on PostFund commitment exchange:
- After the protocol refactor, the PostFund commitments are created and sent by funding protocols: 
- indirect funding and direct funding protocols. Before the refactor, the PostFund commitments
- were created and sent by the channel state reducer. Until the channel state reducer is 
- refactored, there will be duplicate PostFund commitments.
- For context, refer to https://zube.io/magmo/apps/c/716.
- */
+import * as channelStoreReducer from '../../channel-store/reducer';
 
 type DFReducer = ProtocolReducer<states.DirectFundingState>;
 
@@ -69,14 +62,17 @@ const fundingReceiveEventReducer: DFReducer = (
 
   // If we are player A, the channel is now funded, so we should send the PostFundSetup
   if (protocolState.ourIndex === PlayerIndex.A) {
-    const newSharedData = createAndSendPostFundCommitment(sharedData, protocolState.channelId);
+    const sharedDataWithOwnCommitment = createAndSendPostFundCommitment(
+      sharedData,
+      protocolState.channelId,
+    );
     return {
       protocolState: states.waitForFundingAndPostFundSetup({
         ...protocolState,
         channelFunded: true,
         postFundSetupReceived: false,
       }),
-      sharedData: newSharedData,
+      sharedData: sharedDataWithOwnCommitment,
     };
   }
 
@@ -85,10 +81,13 @@ const fundingReceiveEventReducer: DFReducer = (
     protocolState.type === states.WAIT_FOR_FUNDING_AND_POST_FUND_SETUP &&
     protocolState.postFundSetupReceived
   ) {
-    const newSharedData = createAndSendPostFundCommitment(sharedData, protocolState.channelId);
+    const sharedDataWithOwnCommitment = createAndSendPostFundCommitment(
+      sharedData,
+      protocolState.channelId,
+    );
     return {
       protocolState: states.fundingSuccess(protocolState),
-      sharedData: newSharedData,
+      sharedData: sharedDataWithOwnCommitment,
     };
   }
   return {
@@ -111,8 +110,20 @@ const commitmentReceivedReducer: DFReducer = (
       protocolState.type === states.WAIT_FOR_FUNDING_AND_POST_FUND_SETUP &&
       protocolState.channelFunded
     ) {
-      // TODO[Channel state side effect]: use channel state reducer to validate and store incoming commitment.
-      return { protocolState: states.fundingSuccess(protocolState), sharedData };
+      const checkResult = channelStoreReducer.checkAndStore(
+        sharedData.channelStore,
+        action.signedCommitment,
+      );
+      if (!checkResult.isSuccess) {
+        throw new Error(
+          'Direct funding protocol, commitmentReceivedReducer: unable to validate commitment',
+        );
+      }
+      const sharedDataWithReceivedCommitment = setChannelStore(sharedData, checkResult.store);
+      return {
+        protocolState: states.fundingSuccess(protocolState),
+        sharedData: sharedDataWithReceivedCommitment,
+      };
     } else {
       // In this case: Player B sent a PostFund commitment before Player A sent a PostFund commitment.
       // Ignore the Player B PostFund commitment.
@@ -125,9 +136,25 @@ const commitmentReceivedReducer: DFReducer = (
     protocolState.type === states.WAIT_FOR_FUNDING_AND_POST_FUND_SETUP &&
     protocolState.channelFunded
   ) {
-    // TODO[Channel state side effect]: use channel state reducer to validate and store incoming commitment.
-    const newSharedData = createAndSendPostFundCommitment(sharedData, protocolState.channelId);
-    return { protocolState: states.fundingSuccess(protocolState), sharedData: newSharedData };
+    const checkResult = channelStoreReducer.checkAndStore(
+      sharedData.channelStore,
+      action.signedCommitment,
+    );
+    if (!checkResult.isSuccess) {
+      throw new Error(
+        'Direct funding protocol, commitmentReceivedReducer: unable to validate commitment',
+      );
+    }
+
+    const sharedDataWithReceivedCommitment = setChannelStore(sharedData, checkResult.store);
+    const sharedDataWithOwnCommitment = createAndSendPostFundCommitment(
+      sharedDataWithReceivedCommitment,
+      protocolState.channelId,
+    );
+    return {
+      protocolState: states.fundingSuccess(protocolState),
+      sharedData: sharedDataWithOwnCommitment,
+    };
   } else {
     return {
       protocolState: states.waitForFundingAndPostFundSetup({
@@ -157,14 +184,13 @@ const notSafeToDepositReducer: DFReducer = (
           state.requestedYourContribution,
         );
 
-        const { storage: newSharedData, state: transactionSubmissionState } = initTransactionState(
-          depositTransaction,
-          state.processId,
-          sharedData,
-        );
+        const {
+          storage: sharedDataWithTransactionState,
+          state: transactionSubmissionState,
+        } = initTransactionState(depositTransaction, state.processId, sharedData);
         return {
           protocolState: states.waitForDepositTransaction({ ...state, transactionSubmissionState }),
-          sharedData: newSharedData,
+          sharedData: sharedDataWithTransactionState,
         };
       } else {
         return { protocolState: state, sharedData };
@@ -182,14 +208,13 @@ const waitForDepositTransactionReducer: DFReducer = (
   if (!isTransactionAction(action)) {
     return { protocolState, sharedData };
   }
-  const { storage: newSharedData, state: newTransactionState } = transactionReducer(
-    protocolState.transactionSubmissionState,
-    sharedData,
-    action,
-  );
+  const {
+    storage: sharedDataWithTransactionUpdate,
+    state: newTransactionState,
+  } = transactionReducer(protocolState.transactionSubmissionState, sharedData, action);
   if (!isTerminal(newTransactionState)) {
     return {
-      sharedData: newSharedData,
+      sharedData: sharedDataWithTransactionUpdate,
       protocolState: { ...protocolState, transactionSubmissionState: newTransactionState },
     };
   } else {
@@ -233,22 +258,26 @@ const channelFundedReducer: DFReducer = (
 const createAndSendPostFundCommitment = (sharedData: SharedData, channelId: string): SharedData => {
   const channelState = selectors.getOpenedChannelState(sharedData, channelId);
 
-  const { commitment, signature } = composePostFundCommitment(
+  const commitment = composePostFundCommitment(
     channelState.lastCommitment.commitment,
     channelState.ourIndex,
-    channelState.privateKey,
   );
 
-  // TODO[Channel state side effect]: use channel state reducer to sign and store own commitment.
-
-  const newSharedData = {
-    ...sharedData,
-    outboxState: {
-      ...sharedData.outboxState,
-      messageOutbox: [
-        createCommitmentMessageRelay(theirAddress(channelState), channelId, commitment, signature),
-      ],
-    },
-  };
-  return newSharedData;
+  const signResult = channelStoreReducer.signAndStore(sharedData.channelStore, commitment);
+  if (signResult.isSuccess) {
+    const sharedDataWithOwnCommitment = setChannelStore(sharedData, signResult.store);
+    const messageRelay = createCommitmentMessageRelay(
+      theirAddress(channelState),
+      channelId,
+      signResult.signedCommitment.commitment,
+      signResult.signedCommitment.signature,
+    );
+    return queueMessage(sharedDataWithOwnCommitment, messageRelay);
+  } else {
+    throw new Error(
+      `Direct funding protocol, createAndSendPostFundCommitment, unable to sign commitment: ${
+        signResult.reason
+      }`,
+    );
+  }
 };

@@ -59,8 +59,7 @@ export const composeLedgerUpdateCommitment = (
 export const composePostFundCommitment = (
   lastCommitment: Commitment,
   ourIndex: PlayerIndex,
-  privateKey: string,
-): SignedCommitment => {
+): Commitment => {
   const {
     channel,
     turnNum: previousTurnNum,
@@ -78,7 +77,7 @@ export const composePostFundCommitment = (
     appAttributes,
   };
 
-  return signCommitment2(commitment, privateKey);
+  return commitment;
 };
 export const composePreFundCommitment = (
   channel: Channel,
