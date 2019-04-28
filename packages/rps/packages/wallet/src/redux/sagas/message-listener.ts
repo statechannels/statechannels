@@ -62,7 +62,10 @@ function handleIncomingMessage(action: incoming.ReceiveMessage) {
   const { data, processId } = messagePayload;
 
   if ('commitment' in data) {
-    return actions.commitmentReceived(processId, data.commitment, data.signature);
+    return actions.commitmentReceived(processId, {
+      commitment: data.commitment,
+      signature: data.signature,
+    });
   } else if ('type' in data) {
     // TODO: It would be nice if eventually every message simply wrapped an action
     return data;

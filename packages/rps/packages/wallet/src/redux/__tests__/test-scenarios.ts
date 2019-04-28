@@ -62,7 +62,7 @@ export const preFundCommitment1: Commitment = {
   allocation: twoThree,
   destination: participants,
 };
-export const signedCommitment1 = signCommitment2(preFundCommitment1, asPrivateKey);
+export const signedCommitment1 = signCommitment2(preFundCommitment1, bsPrivateKey);
 
 export const postFundCommitment0: Commitment = {
   channel,
