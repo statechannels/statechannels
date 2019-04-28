@@ -140,6 +140,10 @@ export function queueMessage(state: SharedData, message: WalletEvent): SharedDat
   return { ...state, outboxState: queueMessageOutbox(state.outboxState, message) };
 }
 
+export function setChannelStore(state: SharedData, channelStore: ChannelStore): SharedData {
+  return { ...state, channelStore };
+}
+
 export function queueTransaction(
   state: SharedData,
   transaction: TransactionRequest,

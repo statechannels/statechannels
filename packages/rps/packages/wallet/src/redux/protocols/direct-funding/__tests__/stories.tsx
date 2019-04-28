@@ -2,7 +2,7 @@ import React from 'react';
 import Modal from 'react-modal';
 import { Provider } from 'react-redux';
 import DirectFundingContainer from '../container';
-import { aDepositsBDepositsAHappyStates } from './scenarios';
+import { aEachDepositsInSequenceHappyStates } from './scenarios';
 import * as storybookUtils from '../../../../__stories__/index';
 
 const render = state => () => {
@@ -22,14 +22,14 @@ const render = state => () => {
 };
 
 const directFundingScreens = {
-  NotSafeToDeposit: aDepositsBDepositsAHappyStates.notSafeToDeposit.protocolState,
+  NotSafeToDeposit: aEachDepositsInSequenceHappyStates.notSafeToDeposit.protocolState,
   WaitForTransactionSubmissionStart:
-    aDepositsBDepositsAHappyStates.waitForDepositTransactionStart.protocolState,
+    aEachDepositsInSequenceHappyStates.waitForDepositTransactionStart.protocolState,
   WaitForTransactionSubmissionEnd:
-    aDepositsBDepositsAHappyStates.waitForDepositTransactionEnd.protocolState,
+    aEachDepositsInSequenceHappyStates.waitForDepositTransactionEnd.protocolState,
   WaitForFundingConfirmation:
-    aDepositsBDepositsAHappyStates.waitForFundingAndPostFundSetup.protocolState,
-  ChannelFunded: aDepositsBDepositsAHappyStates.fundingSuccess.protocolState,
+    aEachDepositsInSequenceHappyStates.waitForFundingAndPostFundSetup.protocolState,
+  ChannelFunded: aEachDepositsInSequenceHappyStates.fundingSuccess.protocolState,
 };
 
 storybookUtils.addStoriesFromCollection(directFundingScreens, 'Direct Funding Happy Path', render);
