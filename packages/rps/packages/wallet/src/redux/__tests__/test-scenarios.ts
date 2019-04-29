@@ -28,7 +28,6 @@ export const fundingState = {
 };
 
 export const twoThree = [bigNumberify(2).toHexString(), bigNumberify(3).toHexString()];
-
 export const initializedState: states.Initialized = {
   ...states.EMPTY_SHARED_DATA,
   type: states.WALLET_INITIALIZED,
@@ -200,6 +199,7 @@ const ledgerChannelAttrs = {
 
 const allocatesToChannel = [twoThree.reduce(addHex, '0x0')];
 const destinationChannel = [channelId];
+
 const updatedLedgerChannelAttrs = consensusCounter => ({
   channel: ledgerChannel,
   appAttributes: ledgerAppAttributes(consensusCounter, allocatesToChannel, destinationChannel),
@@ -258,8 +258,52 @@ export const ledgerCommitments = {
     commitmentType: CommitmentType.App,
     turnNum: 6,
   },
+  ledgerUpdate3: {
+    ...allocatesToChannelAttrs,
+    appAttributes: ledgerAppAttributes(1, allocatesToChannel, [channelId]),
+    commitmentCount: 0,
+    commitmentType: CommitmentType.App,
+    turnNum: 7,
+  },
+  ledgerDefundUpdate0: {
+    ...allocatesToChannelAttrs,
+    appAttributes: ledgerAppAttributes(0),
+    commitmentCount: 0,
+    commitmentType: CommitmentType.App,
+    turnNum: 8,
+  },
+  ledgerDefundUpdate1: {
+    ...allocatesToChannelAttrs,
+    appAttributes: ledgerAppAttributes(1),
+    commitmentCount: 1,
+    commitmentType: CommitmentType.App,
+    turnNum: 9,
+  },
+  ledgerDefundUpdate2: {
+    ...ledgerChannelAttrs,
+    commitmentCount: 0,
+    commitmentType: CommitmentType.App,
+    turnNum: 10,
+  },
 };
-
+export const signedLedgerCommitments = {
+  signedLedgerCommitment0: {
+    commitment: ledgerCommitments.preFundCommitment0,
+    signature: signCommitment(ledgerCommitments.preFundCommitment0, asPrivateKey),
+  },
+  signedLedgerCommitment8: {
+    commitment: ledgerCommitments.ledgerDefundUpdate0,
+    signature: signCommitment(ledgerCommitments.ledgerDefundUpdate0, asPrivateKey),
+  },
+  signedLedgerCommitment9: {
+    commitment: ledgerCommitments.ledgerDefundUpdate1,
+    signature: signCommitment(ledgerCommitments.ledgerDefundUpdate1, bsPrivateKey),
+  },
+  signedLedgerCommitment10: {
+    commitment: ledgerCommitments.ledgerDefundUpdate2,
+    signature: signCommitment(ledgerCommitments.ledgerDefundUpdate2, asPrivateKey),
+  },
+};
 // Direct funding states
 const initialFundingState = (ourIndex: PlayerIndex, fundingRequestChannelId: string) => {
   const total = twoThree.reduce(addHex);

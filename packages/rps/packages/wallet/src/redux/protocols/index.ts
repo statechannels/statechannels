@@ -7,7 +7,7 @@ import { FundingState } from './funding/states';
 import { IndirectFundingState } from './indirect-funding/state';
 import { RespondingState } from './responding/state';
 import { WithdrawalState } from './withdrawing/states';
-
+import { IndirectDefundingState } from './indirect-defunding/state';
 export type ProtocolState =
   | IndirectFundingState
   | DirectFundingState
@@ -16,7 +16,8 @@ export type ProtocolState =
   | FundingState
   | DefundingState
   | ChallengingState
-  | ConcludingState;
+  | ConcludingState
+  | IndirectDefundingState;
 
 export type ProtocolReducer<T extends ProtocolState> = (
   protocolState: T,
