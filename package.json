@@ -43,6 +43,7 @@
     "@types/knex": "^0.15.2",
     "@types/koa": "^2.0.48",
     "@types/koa-router": "^7.0.39",
+    "@types/node": "^11.13.8",
     "@types/supertest": "^2.0.7",
     "babel-register": "^6.26.0",
     "ganache-cli": "^6.3.0",
