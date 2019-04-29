@@ -1,11 +1,11 @@
 import { bigNumberify } from 'ethers/utils';
 import { ProtocolStateWithSharedData } from '..';
 import { createDepositTransaction } from '../../../utils/transaction-generator';
-import { DirectFundingRequested } from '../../internal/actions';
 import { SharedData } from '../../state';
 import { initialize as initTransactionState } from '../transaction-submission/reducer';
 import { NonTerminalTransactionSubmissionState } from '../transaction-submission/states';
 import { Properties, Constructor } from '../../utils';
+import { DirectFundingRequested } from './actions';
 
 // ChannelFundingStatus
 export const NOT_SAFE_TO_DEPOSIT = 'NOT_SAFE_TO_DEPOSIT';

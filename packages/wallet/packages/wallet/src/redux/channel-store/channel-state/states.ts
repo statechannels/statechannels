@@ -1,4 +1,4 @@
-import { SignedCommitment } from '../../../domain';
+import { SignedCommitment, getChannelId } from '../../../domain';
 
 export type ChannelState = PartiallyOpenChannelState | OpenChannelState;
 
@@ -22,6 +22,29 @@ export interface OpenChannelState extends PartiallyOpenChannelState {
 // -------
 // Helpers
 // -------
+
+export function initializeChannel(
+  signedCommitment: SignedCommitment,
+  address: string,
+  privateKey: string,
+): PartiallyOpenChannelState {
+  const { commitment } = signedCommitment;
+  const { turnNum, channel } = commitment;
+  const ourIndex = commitment.destination.indexOf(address);
+  const channelId = getChannelId(commitment);
+  return {
+    address,
+    privateKey,
+    turnNum,
+    ourIndex,
+    libraryAddress: channel.channelType,
+    participants: channel.participants as [string, string],
+    channelNonce: channel.nonce,
+    channelId,
+    funded: false,
+    lastCommitment: signedCommitment,
+  };
+}
 
 // Pushes a commitment onto the state, updating penultimate/last commitments and the turn number
 export function pushCommitment(

@@ -3,6 +3,7 @@ import * as incoming from 'magmo-wallet-client/lib/wallet-instructions';
 
 import * as actions from '../actions';
 import { eventChannel } from 'redux-saga';
+import * as application from '../protocols/application/reducer';
 
 export function* messageListener() {
   const postMessageEventChannel = eventChannel(emitter => {
@@ -20,8 +21,12 @@ export function* messageListener() {
     const action = messageEvent.data;
     switch (messageEvent.data.type) {
       // Events that need a new process
+      case incoming.INITIALIZE_CHANNEL_REQUEST:
+        yield put(actions.protocol.initializeChannel());
+        break;
       case incoming.CONCLUDE_CHANNEL_REQUEST:
         yield put(actions.protocol.concludeRequested(action.channelId));
+        yield put(actions.application.closeRequested(application.APPLICATION_PROCESS_ID));
         break;
       case incoming.CREATE_CHALLENGE_REQUEST:
         yield put(actions.protocol.createChallengeRequested(action.channelId, action.commitment));
@@ -39,14 +44,22 @@ export function* messageListener() {
       case incoming.INITIALIZE_REQUEST:
         yield put(actions.loggedIn(action.userId));
         break;
-      case incoming.INITIALIZE_CHANNEL_REQUEST:
-        // todo: what do we need to do here?
-        break;
       case incoming.SIGN_COMMITMENT_REQUEST:
-        yield put(actions.channel.ownCommitmentReceived(action.commitment));
+        yield put(
+          actions.application.ownCommitmentReceived(
+            application.APPLICATION_PROCESS_ID,
+            action.commitment,
+          ),
+        );
         break;
       case incoming.VALIDATE_COMMITMENT_REQUEST:
-        yield put(actions.channel.opponentCommitmentReceived(action.commitment, action.signature));
+        yield put(
+          actions.application.opponentCommitmentReceived(
+            application.APPLICATION_PROCESS_ID,
+            action.commitment,
+            action.signature,
+          ),
+        );
         break;
       case incoming.RECEIVE_MESSAGE:
         yield put(handleIncomingMessage(action));

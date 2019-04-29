@@ -38,10 +38,7 @@ const channelStatus: ChannelState = {
 };
 
 const channelStore: ChannelStore = {
-  initializingChannels: {},
-  initializedChannels: {
-    [channelId]: channelStatus,
-  },
+  [channelId]: channelStatus,
 };
 
 const refuteChannelStatus = {
@@ -51,10 +48,7 @@ const refuteChannelStatus = {
   turnNum: gameCommitment2.turnNum,
 };
 const refuteChannelState = {
-  initializingChannels: {},
-  initializedChannels: {
-    [channelId]: refuteChannelStatus,
-  },
+  [channelId]: refuteChannelStatus,
 };
 const transactionSubmissionState = transactionScenarios.preSuccessState;
 const processId = 'process-id.123';

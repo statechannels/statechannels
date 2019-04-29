@@ -5,13 +5,14 @@ import { accumulateSideEffects } from './outbox';
 import { clearOutbox } from './outbox/reducer';
 import { ProtocolState } from './protocols';
 import { isNewProcessAction, isProtocolAction, NewProcessAction } from './protocols/actions';
+import * as applicationProtocol from './protocols/application';
 import * as challengeProtocol from './protocols/challenging';
 import * as concludeProtocol from './protocols/concluding';
 import * as fundProtocol from './protocols/funding';
-import { FundingState } from './protocols/funding/states';
 import * as challengeResponseProtocol from './protocols/responding';
 import * as states from './state';
 import { WalletProtocol } from './types';
+import { FundingState } from './protocols/funding/states';
 
 const initialState = states.waitForLogin();
 
@@ -40,6 +41,7 @@ export function initializedReducer(
   action: actions.WalletAction,
 ): states.WalletState {
   // TODO: We will need to update SharedData here first
+
   if (isNewProcessAction(action)) {
     return routeToNewProcessInitializer(state, action);
   } else if (isProtocolAction(action)) {
@@ -89,17 +91,26 @@ function updatedState(
   return newState;
 }
 
+function getProcessId(action: NewProcessAction): string {
+  if ('channelId' in action) {
+    return action.channelId;
+  }
+  return 'application';
+}
+
 function initializeNewProtocol(
   state: states.Initialized,
   action: actions.protocol.NewProcessAction,
 ): { protocolState: ProtocolState; sharedData: states.SharedData } {
-  const { channelId } = action;
-  const processId = action.channelId;
+  const processId = getProcessId(action);
   const incomingSharedData = states.sharedData(state);
   switch (action.type) {
-    case actions.protocol.FUNDING_REQUESTED:
+    case actions.protocol.FUNDING_REQUESTED: {
+      const { channelId } = action;
       return fundProtocol.initialize(incomingSharedData, channelId, processId, action.playerIndex);
+    }
     case actions.protocol.CONCLUDE_REQUESTED: {
+      const { channelId } = action;
       const { state: protocolState, storage: sharedData } = concludeProtocol.initialize(
         channelId,
         processId,
@@ -108,6 +119,7 @@ function initializeNewProtocol(
       return { protocolState, sharedData };
     }
     case actions.protocol.CREATE_CHALLENGE_REQUESTED: {
+      const { channelId } = action;
       const { state: protocolState, storage: sharedData } = challengeProtocol.initialize(
         channelId,
         processId,
@@ -117,6 +129,8 @@ function initializeNewProtocol(
     }
     case actions.protocol.RESPOND_TO_CHALLENGE_REQUESTED:
       return challengeResponseProtocol.initialize(processId, incomingSharedData, action.commitment);
+    case actions.protocol.INITIALIZE_CHANNEL:
+      return applicationProtocol.initialize(incomingSharedData);
     default:
       return unreachable(action);
   }
@@ -126,7 +140,7 @@ function routeToNewProcessInitializer(
   state: states.Initialized,
   action: actions.protocol.NewProcessAction,
 ): states.Initialized {
-  const processId = action.channelId;
+  const processId = getProcessId(action);
   const { protocolState, sharedData } = initializeNewProtocol(state, action);
   return startProcess(state, sharedData, action, protocolState, processId);
 }
@@ -150,6 +164,7 @@ const waitForLoginReducer = (
       return state;
   }
 };
+
 function startProcess(
   state: states.Initialized,
   sharedData: states.SharedData,
@@ -163,7 +178,9 @@ function startProcess(
     ...newState.processStore,
     [processId]: { processId, protocolState, channelsToMonitor: [], protocol },
   };
-  // TODO: Right now any new processId get sets to the current process Id. We might need to be smarter about this in the future.
+  // TODO: Right now any new processId get sets to the current process Id.
+  // We probably need a priority queue so some protocols can override another
+  // IE: Responding to a challenge is higher priority than funding.
   newState.currentProcessId = processId;
 
   return newState;

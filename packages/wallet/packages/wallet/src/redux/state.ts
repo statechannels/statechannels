@@ -37,6 +37,7 @@ export interface SharedData {
   outboxState: OutboxState;
   adjudicatorState: AdjudicatorState;
   fundingState: FundingState;
+  activeAppChannelId?: string;
 }
 
 export interface WaitForLogin extends SharedData {
@@ -52,9 +53,7 @@ export interface Initialized extends SharedData {
   uid: string;
   processStore: ProcessStore;
   currentProcessId?: string;
-  // TODO: This is obsolete now that we have ProcessStore
-  // This should be deleted once we clean up the code still using this
-  indirectFunding?: indirectFunding.IndirectFundingState;
+  activeAppChannelId?: string;
 }
 
 // TODO: Once these are fleshed out they should be moved to their own file.
@@ -77,13 +76,6 @@ export interface ChannelFundingState {
   fundingChannel?: string;
 }
 
-export interface IndirectFundingOngoing extends Initialized {
-  indirectFunding: indirectFunding.IndirectFundingState;
-}
-export function indirectFundingOngoing(state: Initialized): state is IndirectFundingOngoing {
-  return state.indirectFunding ? true : false;
-}
-
 // ------------
 // Constructors
 // ------------
@@ -95,8 +87,20 @@ export const EMPTY_SHARED_DATA: SharedData = {
 };
 
 export function sharedData(params: SharedData): SharedData {
-  const { outboxState, channelStore: channelState, adjudicatorState, fundingState } = params;
-  return { outboxState, channelStore: channelState, adjudicatorState, fundingState };
+  const {
+    outboxState,
+    channelStore: channelState,
+    adjudicatorState,
+    fundingState,
+    activeAppChannelId,
+  } = params;
+  return {
+    outboxState,
+    channelStore: channelState,
+    adjudicatorState,
+    fundingState,
+    activeAppChannelId,
+  };
 }
 
 export function waitForLogin(): WaitForLogin {
@@ -121,7 +125,7 @@ export function initialized(params: Properties<Initialized>): Initialized {
 // -------------------
 
 export function getChannelStatus(state: WalletState, channelId: string): ChannelState {
-  return state.channelStore.initializedChannels[channelId];
+  return state.channelStore[channelId];
 }
 
 export function setSideEffects(state: Initialized, sideEffects: SideEffects): Initialized {
@@ -133,7 +137,7 @@ export function setChannel(state: SharedData, channel: ChannelState): SharedData
 }
 
 export function getChannel(state: SharedData, channelId: string): ChannelState | undefined {
-  return state.channelStore.initializedChannels[channelId];
+  return state.channelStore[channelId];
 }
 
 export function queueMessage(state: SharedData, message: WalletEvent): SharedData {

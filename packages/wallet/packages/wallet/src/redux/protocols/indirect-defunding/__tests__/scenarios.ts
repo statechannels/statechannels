@@ -34,50 +34,38 @@ const baseChannelStatus: ChannelState = {
 };
 
 const playerAStartChannelState: ChannelStore = {
-  initializingChannels: {},
-  initializedChannels: {
-    [channelId]: baseChannelStatus,
-  },
+  [channelId]: baseChannelStatus,
 };
 
 const playerAWaitForCommitmentChannelState: ChannelStore = {
-  initializingChannels: {},
-  initializedChannels: {
-    [channelId]: {
-      ...baseChannelStatus,
-      lastCommitment: { commitment: ledgerCommitments.ledgerDefundUpdate1, signature: '0x0' },
-      penultimateCommitment: {
-        commitment: ledgerCommitments.ledgerDefundUpdate0,
-        signature: '0x0',
-      },
-      turnNum: ledgerCommitments.ledgerDefundUpdate1.turnNum,
+  [channelId]: {
+    ...baseChannelStatus,
+    lastCommitment: { commitment: ledgerCommitments.ledgerDefundUpdate1, signature: '0x0' },
+    penultimateCommitment: {
+      commitment: ledgerCommitments.ledgerDefundUpdate0,
+      signature: '0x0',
     },
+    turnNum: ledgerCommitments.ledgerDefundUpdate1.turnNum,
   },
 };
 
 const playerBStartChannelState: ChannelStore = {
-  initializingChannels: {},
-  initializedChannels: {
-    [channelId]: {
-      ...baseChannelStatus,
-      ourIndex: 1,
-    },
+  [channelId]: {
+    ...baseChannelStatus,
+    ourIndex: 1,
   },
 };
 
 const playerBWaitForFinalCommitmentChannelState: ChannelStore = {
-  initializingChannels: {},
-  initializedChannels: {
-    [channelId]: {
-      ...baseChannelStatus,
-      ourIndex: 1,
-      lastCommitment: { commitment: ledgerCommitments.ledgerDefundUpdate1, signature: '0x0' },
-      penultimateCommitment: {
-        commitment: ledgerCommitments.ledgerDefundUpdate0,
-        signature: '0x0',
-      },
-      turnNum: ledgerCommitments.ledgerDefundUpdate1.turnNum,
+  [channelId]: {
+    ...baseChannelStatus,
+    ourIndex: 1,
+    lastCommitment: { commitment: ledgerCommitments.ledgerDefundUpdate1, signature: '0x0' },
+    penultimateCommitment: {
+      commitment: ledgerCommitments.ledgerDefundUpdate0,
+      signature: '0x0',
     },
+    turnNum: ledgerCommitments.ledgerDefundUpdate1.turnNum,
   },
 };
 

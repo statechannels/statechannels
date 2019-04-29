@@ -2,7 +2,6 @@ import { ChannelStore, getChannel, setChannel } from './state';
 
 import { ReducerWithSideEffects } from '../../utils/reducer-utils';
 import { StateWithSideEffects } from '../utils';
-import { WalletAction } from '../actions';
 import {
   SignedCommitment,
   Commitment,
@@ -10,13 +9,31 @@ import {
   getChannelId,
   hasValidSignature,
 } from '../../domain';
-import { pushCommitment, ChannelState } from './channel-state/states';
+import { pushCommitment, ChannelState, initializeChannel } from './channel-state/states';
 import { validTransition } from './channel-state';
+import * as channelActions from './actions';
 
-export const channelStateReducer: ReducerWithSideEffects<ChannelStore> = (
+export const channelStoreReducer: ReducerWithSideEffects<ChannelStore> = (
   state: ChannelStore,
-  action: WalletAction,
+  action: channelActions.ChannelAction,
 ): StateWithSideEffects<ChannelStore> => {
+  switch (action.type) {
+    case channelActions.OPPONENT_COMMITMENT_RECEIVED:
+      const { commitment, signature } = action;
+      const checkResult = checkAndStore(state, { commitment, signature });
+      // TODO Handle failure cases
+      if (checkResult.isSuccess) {
+        return { state: checkResult.store };
+      }
+      break;
+    case channelActions.OWN_COMMITMENT_RECEIVED:
+      const signResult = signAndStore(state, action.commitment);
+      // TODO Handle failure cases
+      if (signResult.isSuccess) {
+        return { state: signResult.store };
+      }
+      break;
+  }
   return { state };
 };
 
@@ -37,6 +54,45 @@ interface SignFailure {
 
 type SignFailureReason = 'ChannelDoesntExist' | 'TransitionUnsafe' | 'NotOurTurn';
 type SignResult = SignSuccess | SignFailure;
+// TODO: These methods could probably be part of signAndStore/checkAndStore but that means
+// that the address/privateKey would be required when calling them.
+// That would make them difficult to use from other protocols.
+export function signAndInitialize(
+  store: ChannelStore,
+  commitment: Commitment,
+  address: string,
+  privateKey: string,
+): SignResult {
+  const signedCommitment = signCommitment2(commitment, privateKey);
+  if (!hasValidSignature(signedCommitment)) {
+    return { isSuccess: false, reason: 'NotOurTurn' };
+  }
+  if (signedCommitment.commitment.turnNum !== 0) {
+    return { isSuccess: false, reason: 'ChannelDoesntExist' };
+  }
+  const channel = initializeChannel(signedCommitment, address, privateKey);
+  store = setChannel(store, channel);
+
+  return { isSuccess: true, signedCommitment, store };
+}
+
+export function checkAndInitialize(
+  store: ChannelStore,
+  signedCommitment: SignedCommitment,
+  address: string,
+  privateKey: string,
+): CheckResult {
+  if (signedCommitment.commitment.turnNum !== 0) {
+    return { isSuccess: false };
+  }
+  if (!hasValidSignature(signedCommitment)) {
+    return { isSuccess: false };
+  }
+  const channel = initializeChannel(signedCommitment, address, privateKey);
+  store = setChannel(store, channel);
+
+  return { isSuccess: true, store };
+}
 
 // Signs and stores a commitment from our own app or wallet.
 // Doesn't work for the first state - the channel must already exist.
@@ -77,7 +133,6 @@ interface CheckFailure {
 type CheckResult = CheckSuccess | CheckFailure;
 
 // For use with a signed commitment received from an opponent.
-// Will create a channel if turnNum=0 and channel doesn't already exist.
 export function checkAndStore(
   store: ChannelStore,
   signedCommitment: SignedCommitment,
@@ -90,11 +145,7 @@ export function checkAndStore(
   let channel = getChannel(store, channelId);
 
   if (!channel) {
-    // do I need to do any checks? seems like no?
-    // I guess I need to make sure I'm a participant and set my participant number
-    // just create a channel from the commitment?
-    // store = setChannel(store, channel);
-    return { isSuccess: true, store };
+    return { isSuccess: false };
   }
 
   if (!isSafeTransition(store, channel, commitment)) {

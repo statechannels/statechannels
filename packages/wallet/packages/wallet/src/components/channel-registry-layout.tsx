@@ -9,7 +9,7 @@ interface Props {
 // TODO: This component is unused
 class ChannelRegistryLayout extends PureComponent<Props> {
   render() {
-    const channels = this.props.state.channelStore.initializedChannels;
+    const channels = this.props.state.channelStore;
     const channelList: string[] = [];
     for (const key in channels) {
       if (key) {
