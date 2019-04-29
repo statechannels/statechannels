@@ -2,7 +2,7 @@ import { SharedData } from '../../state';
 import { ProtocolStateWithSharedData } from '..';
 import * as states from './state';
 import { DefundingAction } from './actions';
-import * as helpers from '../helpers';
+import * as helpers from '../reducer-helpers';
 import { withdrawalReducer, initialize as withdrawalInitialize } from './../withdrawing/reducer';
 import * as selectors from '../../selectors';
 import * as actions from './actions';

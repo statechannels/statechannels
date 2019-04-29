@@ -16,8 +16,10 @@ It covers:
 graph TD
   St((start))-->DF{Defundable?}
   DF --> |No| F((Failure))
-  DF --> |Yes| WFU(WaitForLedgerUpdate1)
-  WFU --> |"CommitmentReceived(Accept)"| Su((Success))
+  DF -->|Yes|SC0[SendLedgerUpdate0]
+  SC0-->WFU(WaitForLedgerUpdate)
+  WFU --> |"CommitmentReceived(Accept)"|SC1[SendLedgerUpdate2]
+  SC1-->S((success))
   WFU --> |"CommitmentReceived(Reject)"| F
 ```
 
@@ -27,15 +29,29 @@ graph TD
 graph TD
   St((start))-->DF{Defundable?}
   DF --> |No| F((Failure))
-  DF --> |Yes| WFU(WaitForLedgerUpdate0)
-  WFU --> |CommitmentReceived| Su((Success))
+  DF --> |Yes| WFU(WaitForLedgerUpdate)
+  WFU-->|"CommitmentReceived(Accept)"|SC1[SendLedgerUpdate1]
+  WFU --> |"CommitmentReceived(Reject)"| F
+  SC1-->WFFU(WaitForFinalLedgerUpdate)
+  WFFU-->|"CommitmentReceived(Accept)"|S((success))
+  WFFU-->|"CommitmentReceived(Reject)"|F
+
 ```
 
 Notes:
 
-- Currently doesn't handle the case where one player approves, one player declines
+- SendLedgerUpdate0/1 are not states but indicate when the ledger update is sent.
+- A single reducer implements both the player A and B state machine.
 
-## Open Questions
+Assumptions:
 
-1. Is this a top-level protocol? If so what closes the channel?
-2. Can we rely on this being performed co-operatively?
+- It is Player A's turn to make the next ledger update.
+
+## Scenarios
+
+1. **Happy Path - Player A** Start->WaitForLedgerUpdate->Success
+2. **Happy Path - Player B** Start->WaitForLedgerUpdate->WaitForFinalLedgerUpdate->Success
+3. **Not De-fundable** Start->Failure
+4. **Commitment Rejected - Player A** Start->WaitForLedgerUpdate->Failure
+5. **First Commitment Rejected - Player B** Start->WaitForLedgerUpdate->Failure
+6. **Final Commitment Rejected - Player B** Start->WaitForLedgerUpdate->WaitForFinalLedgerUpdate->Failure
