@@ -1,7 +1,7 @@
 {
-  "name": "rps-autoplayer",
+  "name": "nitro-server",
   "version": "0.0.1",
-  "description": "hub prototype",
+  "description": "nitro hub prototype",
   "main": "lib/index.js",
   "scripts": {
     "splice-networks": "bin/splice-networks.sh",
