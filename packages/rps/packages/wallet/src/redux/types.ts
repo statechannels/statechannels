@@ -1,13 +1,15 @@
 export const enum WalletProtocol {
-  DirectFunding = 'DirectFunding',
-  IndirectFunding = 'IndirectFunding',
+  Application = 'Application',
+  Funding = 'Funding',
   Challenging = 'Challenging',
   Closing = 'Closing',
-  Withdrawing = 'Withdrawing',
   Responding = 'Responding',
+
+  Withdrawing = 'Withdrawing',
+  DirectFunding = 'DirectFunding',
+  IndirectFunding = 'IndirectFunding',
   TransactionSubmission = 'TransactionSubmission',
   IndirectDefunding = 'IndirectDefunding',
-  Funding = 'Funding',
 }
 
 export const enum PlayerIndex {
