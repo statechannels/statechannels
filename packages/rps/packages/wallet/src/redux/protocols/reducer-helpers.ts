@@ -1,7 +1,7 @@
 import { Commitment } from '../../domain';
 import { messageRelayRequested, SIGNATURE_SUCCESS, VALIDATION_SUCCESS } from 'magmo-wallet-client';
 import * as actions from '../actions';
-import { channelStateReducer } from '../channel-store/reducer';
+import { channelStoreReducer } from '../channel-store/reducer';
 import { accumulateSideEffects } from '../outbox';
 import { SideEffects } from '../outbox/state';
 import { SharedData } from '../state';
@@ -15,7 +15,7 @@ export const updateChannelState = (
   channelAction: actions.channel.ChannelAction,
 ): SharedData => {
   const newSharedData = { ...sharedData };
-  const updatedChannelState = channelStateReducer(newSharedData.channelStore, channelAction);
+  const updatedChannelState = channelStoreReducer(newSharedData.channelStore, channelAction);
   newSharedData.channelStore = updatedChannelState.state;
   // TODO: Currently we need to filter out signature/validation messages that are meant to the app
   // This might change based on whether protocol reducers or channel reducers craft commitments
@@ -40,10 +40,6 @@ export const filterOutSignatureMessages = (sideEffects?: SideEffects): SideEffec
     };
   }
   return sideEffects;
-};
-
-export const confirmFundingForChannel = (sharedData: SharedData, channelId: string): SharedData => {
-  return updateChannelState(sharedData, actions.internal.fundingConfirmed(channelId));
 };
 
 export const createCommitmentMessageRelay = (

@@ -4,9 +4,6 @@ import { bigNumberify } from 'ethers/utils';
 import * as states from '../state';
 import { bytesFromAppAttributes } from 'fmg-nitro-adjudicator';
 import { addHex } from '../../utils/hex-utils';
-import * as directFundingStates from '../../redux/protocols/direct-funding/state';
-import { PlayerIndex } from 'magmo-wallet-client/lib/wallet-instructions';
-import * as actions from '../actions';
 import { signCommitment, signCommitment2 } from '../../domain';
 import { ChannelState } from '../channel-store';
 
@@ -132,6 +129,21 @@ export const signedCommitment21 = {
   commitment: gameCommitment3,
   signature: signCommitment(gameCommitment3, bsPrivateKey),
 };
+
+export const gameCommitment4: Commitment = {
+  channel,
+  commitmentCount: 4,
+  commitmentType: CommitmentType.App,
+  appAttributes: '0x0',
+  turnNum: 22,
+  allocation: [],
+  destination: [],
+};
+export const signedCommitment22 = {
+  commitment: gameCommitment4,
+  signature: signCommitment(gameCommitment4, bsPrivateKey),
+};
+
 export const concludeCommitment1: Commitment = {
   channel,
   commitmentCount: 0,
@@ -303,26 +315,4 @@ export const signedLedgerCommitments = {
     commitment: ledgerCommitments.ledgerDefundUpdate2,
     signature: signCommitment(ledgerCommitments.ledgerDefundUpdate2, asPrivateKey),
   },
-};
-// Direct funding states
-const initialFundingState = (ourIndex: PlayerIndex, fundingRequestChannelId: string) => {
-  const total = twoThree.reduce(addHex);
-  const safeToDepositLevel = ourIndex === PlayerIndex.A ? '0x0' : twoThree[1];
-  const requiredDeposit = twoThree[ourIndex];
-
-  const action = actions.internal.directFundingRequested(
-    `processId:${fundingRequestChannelId}`,
-    fundingRequestChannelId,
-    safeToDepositLevel,
-    total,
-    requiredDeposit,
-    ourIndex,
-  );
-  return directFundingStates.initialDirectFundingState(action, states.EMPTY_SHARED_DATA)
-    .protocolState;
-};
-
-export const ledgerDirectFundingStates = {
-  playerA: initialFundingState(PlayerIndex.A, channelID(ledgerChannel)),
-  playerB: initialFundingState(PlayerIndex.B, channelID(ledgerChannel)),
 };

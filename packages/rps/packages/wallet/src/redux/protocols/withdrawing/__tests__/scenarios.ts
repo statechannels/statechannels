@@ -40,10 +40,7 @@ const channelStatus: ChannelState = {
 };
 
 const channelStore: ChannelStore = {
-  initializingChannels: {},
-  initializedChannels: {
-    [channelId]: channelStatus,
-  },
+  [channelId]: channelStatus,
 };
 
 const notClosedChannelStatus = {
@@ -54,10 +51,7 @@ const notClosedChannelStatus = {
 };
 
 const notClosedChannelState = {
-  initializingChannels: {},
-  initializedChannels: {
-    [channelId]: notClosedChannelStatus,
-  },
+  [channelId]: notClosedChannelStatus,
 };
 
 const transaction = {};

@@ -12,7 +12,7 @@ export const getOpenedChannelState = (state: SharedData, channelId: string): Ope
 };
 
 export const getChannelState = (state: SharedData, channelId: string): ChannelState => {
-  const channelStatus = state.channelStore.initializedChannels[channelId];
+  const channelStatus = state.channelStore[channelId];
   if (!channelStatus) {
     throw new Error(`Could not find any initialized channel state for channel ${channelId}.`);
   }
