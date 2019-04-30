@@ -1,0 +1,106 @@
+{
+  "abi": [
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "components": [
+            {
+              "name": "channelType",
+              "type": "address"
+            },
+            {
+              "name": "channelNonce",
+              "type": "uint32"
+            },
+            {
+              "name": "participants",
+              "type": "address[]"
+            },
+            {
+              "name": "commitmentType",
+              "type": "uint8"
+            },
+            {
+              "name": "turnNum",
+              "type": "uint32"
+            },
+            {
+              "name": "commitmentCount",
+              "type": "uint32"
+            },
+            {
+              "name": "destination",
+              "type": "address[]"
+            },
+            {
+              "name": "allocation",
+              "type": "uint256[]"
+            },
+            {
+              "name": "appAttributes",
+              "type": "bytes"
+            }
+          ],
+          "name": "oldCommitment",
+          "type": "tuple"
+        },
+        {
+          "components": [
+            {
+              "name": "channelType",
+              "type": "address"
+            },
+            {
+              "name": "channelNonce",
+              "type": "uint32"
+            },
+            {
+              "name": "participants",
+              "type": "address[]"
+            },
+            {
+              "name": "commitmentType",
+              "type": "uint8"
+            },
+            {
+              "name": "turnNum",
+              "type": "uint32"
+            },
+            {
+              "name": "commitmentCount",
+              "type": "uint32"
+            },
+            {
+              "name": "destination",
+              "type": "address[]"
+            },
+            {
+              "name": "allocation",
+              "type": "uint256[]"
+            },
+            {
+              "name": "appAttributes",
+              "type": "bytes"
+            }
+          ],
+          "name": "newCommitment",
+          "type": "tuple"
+        }
+      ],
+      "name": "validTransition",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "pure",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x",
+  "contractName": "ForceMoveApp",
+  "networks": {}
+}
