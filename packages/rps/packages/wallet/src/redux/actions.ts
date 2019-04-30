@@ -12,6 +12,8 @@ import {
 } from './protocols/transaction-submission/actions';
 import { WithdrawalAction } from './protocols/withdrawing/actions';
 import { RespondingAction } from './protocols/responding/actions';
+import { DefundingAction } from './protocols/defunding/actions';
+import { ConcludingAction } from './protocols/concluding/actions';
 export * from './protocols/transaction-submission/actions';
 
 export type TransactionAction = TA;
@@ -154,7 +156,9 @@ export type ProtocolAction =
   | indirectFunding.Action
   | WithdrawalAction
   | RespondingAction
-  | application.ApplicationAction;
+  | application.ApplicationAction
+  | DefundingAction
+  | ConcludingAction;
 
 export type WalletAction =
   | AdjudicatorKnown

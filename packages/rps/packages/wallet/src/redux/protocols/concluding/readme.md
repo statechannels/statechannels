@@ -21,23 +21,43 @@ The protocol is implemented with the following state machine
 ```mermaid
 graph TD
   S((Start)) --> E{Channel Exists?}
-  E --> |No| ACDE(AcknowledgeChannelDoesntExist)
-  ACDE -->|ACKNOWLEDGED| F((Failure))
+  E --> |No| AF(AcknowledgeFailure)
+  AF -->|ACKNOWLEDGED| F((Failure))
   E --> |Yes| MT{My turn?}
   MT  --> |Yes| CC(ApproveConcluding)
-  MT  --> |No| RC(AcknowledgeConcludingImpossible)
-  CC  --> |CANCELLED| F
+  MT  --> |No| AF(AcknowledgeFailure)
+  CC  --> |CONCLUDING.CANCELLED| F
   CC  --> |CONCLUDE.SENT| WOC(WaitForOpponentConclude)
-  WOC --> |CONCLUDE.RECEIVED| ACC(AcknowledgeChannelConcluded)
-  ACC --> |DEFUND.CHOSEN| D(WaitForDefund)
-  D   --> |DEFUND.SUCCEEDED| SS((Success))
-  D   --> |DEFUND.FAILED| ADF(AcknowledgeDefundFailed)
-  ADF -->|ACKNOWLEDGED| F((Failure))
-  RC  --> |CONCLUDING.IMPOSSIBLE.ACKNOWLEDGED| F
+  WOC --> |CONCLUDE.RECEIVED| ACR(AcknowledgeConcludeReceived)
+  ACR --> |DEFUND.CHOSEN| D(WaitForDefund)
+  D   --> |defunding protocol succeeded| AS(AcknowledgeSuccess)
+  AS -->  |ACKNOWLEDGED| SS((Success))
+  D   --> |defunding protocol failed| AF(AcknowledgeFailure)
   style S  fill:#efdd20
   style E  fill:#efdd20
   style MT fill:#efdd20
   style SS fill:#58ef21
+  style F  fill:#f45941
+  style D stroke:#333,stroke-width:4px
+```
+
+Key:
+
+```mermaid
+  graph TD
+  St((Start))-->L
+  L{Flow Logic} --> NT1(Non-Terminal States)
+  NT1 -->|ACTION| C
+  C(Call child reducer) -->|child return status| NT2
+  NT2(More Non-Terminal States) --> |SUCCESS_TRIGGER| Su
+  Su((Success))
+  NT2(More Non-Terminal States) --> |FAILURE_TRIGGER| F
+  F((Failure))
+
+  style St  fill:#efdd20
+  style L fill:#efdd20
+  style C stroke:#333,stroke-width:4px
+  style Su fill:#58ef21
   style F  fill:#f45941
 ```
 
@@ -46,10 +66,10 @@ graph TD
 We will use the following scenarios for testing:
 
 1. **Happy path**: `ApproveConcluding` -> `WaitForOpponentConclude` -> `AcknowledgeChannelConcluded` -> `WaitForDefund` -> `Success`
-2. **Channel doesnt exist** `Failure`
-3. **Concluding not possible**: `AcknowledgeConcludingImpossible` -> `Failure`
+2. **Channel doesnt exist** `AcknowledgeFailure` -> `Failure`
+3. **Concluding not possible**: `AcknowledgeFailure` -> `Failure`
 4. **Concluding cancelled** `ApproveConcluding` -> `Failure`
-5. **Defund failed** `WaitForDefund` -> `Failure`
+5. **Defund failed** `WaitForDefund` -> `AcknowledgeFailure` -> `Failure`
 
 # Terminology
 
