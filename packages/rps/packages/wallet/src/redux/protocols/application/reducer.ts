@@ -20,6 +20,7 @@ import {
 } from '../../channel-store/reducer';
 import { ADDRESS_KNOWN } from './states';
 import { Commitment } from '../../../domain';
+import { ProtocolAction } from '../../actions';
 
 // TODO: Right now we're using a fixed application ID
 // since we're not too concerned with handling multiple running app channels.
@@ -40,9 +41,12 @@ export function initialize(
 export function applicationReducer(
   protocolState: states.ApplicationState,
   sharedData: SharedData,
-  action: actions.ApplicationAction,
+  action: ProtocolAction,
 ): ProtocolStateWithSharedData<states.ApplicationState> {
   if (states.isTerminal(protocolState)) {
+    return { protocolState, sharedData };
+  }
+  if (!actions.isApplicationAction(action)) {
     return { protocolState, sharedData };
   }
   switch (action.type) {

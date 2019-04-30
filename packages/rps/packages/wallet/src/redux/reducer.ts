@@ -12,7 +12,7 @@ import * as fundProtocol from './protocols/funding';
 import * as challengeResponseProtocol from './protocols/responding';
 import * as states from './state';
 import { WalletProtocol } from './types';
-import { FundingState } from './protocols/funding/states';
+import { APPLICATION_PROCESS_ID } from './protocols/application/reducer';
 
 const initialState = states.waitForLogin();
 
@@ -51,7 +51,10 @@ export function initializedReducer(
   return state;
 }
 
-function routeToProtocolReducer(state: states.Initialized, action: actions.ProtocolAction) {
+function routeToProtocolReducer(
+  state: states.Initialized,
+  action: actions.ProtocolAction,
+): states.Initialized {
   const processState = state.processStore[action.processId];
   if (!processState) {
     // Log warning?
@@ -66,7 +69,16 @@ function routeToProtocolReducer(state: states.Initialized, action: actions.Proto
         );
 
         return updatedState(state, sharedData, processState, protocolState);
-
+      case WalletProtocol.Application:
+        const {
+          protocolState: appProtocolState,
+          sharedData: appSharedData,
+        } = applicationProtocol.reducer(
+          processState.protocolState,
+          states.sharedData(state),
+          action,
+        );
+        return updatedState(state, appSharedData, processState, appProtocolState);
       default:
         // TODO: This should return unreachable(state), but right now, only some protocols are
         // "whitelisted" to run as a top-level process, which means we can't
@@ -80,9 +92,9 @@ function updatedState(
   state: states.Initialized,
   sharedData: states.SharedData,
   processState: states.ProcessState,
-  protocolState: FundingState,
+  protocolState: ProtocolState,
 ) {
-  const newState = { ...state, sharedData };
+  const newState = { ...state, ...sharedData };
   const newProcessState = { ...processState, protocolState };
   newState.processStore = {
     ...newState.processStore,
@@ -95,7 +107,7 @@ function getProcessId(action: NewProcessAction): string {
   if ('channelId' in action) {
     return action.channelId;
   }
-  return 'application';
+  return APPLICATION_PROCESS_ID;
 }
 
 function initializeNewProtocol(
