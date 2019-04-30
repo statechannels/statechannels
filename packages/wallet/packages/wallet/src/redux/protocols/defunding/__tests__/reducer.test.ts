@@ -1,4 +1,4 @@
-import * as states from '../state';
+import * as states from '../states';
 import { initialize, defundingReducer } from '../reducer';
 import * as scenarios from './scenarios';
 

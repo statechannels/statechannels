@@ -1,6 +1,6 @@
 import { SharedData } from '../../state';
 import { ProtocolStateWithSharedData } from '..';
-import * as states from './state';
+import * as states from './states';
 import { DefundingAction } from './actions';
 import * as helpers from '../reducer-helpers';
 import { withdrawalReducer, initialize as withdrawalInitialize } from './../withdrawing/reducer';

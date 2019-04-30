@@ -6,6 +6,7 @@ export const WAIT_FOR_LEDGER_DEFUNDING = 'WaitForLedgerDefunding';
 export const FAILURE = 'Failure';
 export const SUCCESS = 'Success';
 
+export type NonTerminalDefundingState = WaitForWithdrawal | WaitForLedgerDefunding;
 export type DefundingState = WaitForWithdrawal | WaitForLedgerDefunding | Failure | Success;
 
 export type FailureReason =
@@ -41,6 +42,14 @@ export interface Success {
 
 export function isTerminal(state: DefundingState): state is Failure | Success {
   return state.type === FAILURE || state.type === SUCCESS;
+}
+
+export function isSuccess(state: DefundingState): state is Success {
+  return state.type === SUCCESS;
+}
+
+export function isFailure(state: DefundingState): state is Failure {
+  return state.type === FAILURE;
 }
 
 // -------

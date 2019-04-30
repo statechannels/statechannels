@@ -1,4 +1,4 @@
-import * as states from './state';
+import * as states from './states';
 import { PureComponent } from 'react';
 import { Withdrawal } from '../withdrawing/container';
 import React from 'react';
