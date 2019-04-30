@@ -1,4 +1,5 @@
 import { Commitment } from '../../../domain';
+import { ProtocolAction } from '../../actions';
 
 export const OWN_COMMITMENT_RECEIVED = 'WALLET.APPLICATION.OWN_COMMITMENT_RECEIVED';
 export const ownCommitmentReceived = (processId: string, commitment: Commitment) => ({
@@ -29,3 +30,11 @@ export const closeRequested = (processId: string) => ({
 export type CloseRequested = ReturnType<typeof closeRequested>;
 
 export type ApplicationAction = OpponentCommitmentReceived | OwnCommitmentReceived | CloseRequested;
+
+export function isApplicationAction(action: ProtocolAction): action is ApplicationAction {
+  return (
+    action.type === OPPONENT_COMMITMENT_RECEIVED ||
+    action.type === OWN_COMMITMENT_RECEIVED ||
+    action.type === CLOSE_REQUESTED
+  );
+}

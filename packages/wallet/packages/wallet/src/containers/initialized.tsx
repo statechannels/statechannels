@@ -2,6 +2,8 @@ import * as states from '../redux/state';
 import React, { PureComponent } from 'react';
 import LandingPage from '../components/landing-page';
 import { connect } from 'react-redux';
+import * as selectors from '../redux/selectors';
+import { Protocol } from '../redux/protocols/container';
 
 interface Props {
   state: states.Initialized;
@@ -13,7 +15,8 @@ class WalletInitializedContainer extends PureComponent<Props> {
     if (!state.currentProcessId) {
       return <LandingPage />;
     } else {
-      // todo: show protocol container
+      const protocolState = selectors.getProtocolState(state, state.currentProcessId);
+      return <Protocol protocolState={protocolState} />;
     }
     return <LandingPage />;
   }
