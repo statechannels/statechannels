@@ -9,5 +9,5 @@
     "resolveJsonModule": true
   },
   "include": ["./src/**/*"],
-  "exclude": ["**/*.test.ts", "**/*test_data.ts"]
+  "exclude": ["**/*test_data.ts"]
 }
