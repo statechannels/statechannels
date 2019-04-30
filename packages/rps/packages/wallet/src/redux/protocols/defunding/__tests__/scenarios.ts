@@ -1,4 +1,4 @@
-import * as states from '../state';
+import * as states from '../states';
 import * as withdrawalScenarios from '../../withdrawing/__tests__/scenarios';
 import * as testScenarios from '../../../__tests__/test-scenarios';
 import { ChannelState, ChannelStore } from '../../../channel-store';
