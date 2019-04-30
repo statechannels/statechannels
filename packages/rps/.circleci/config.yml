@@ -7,12 +7,17 @@ jobs:
   build:
     docker:
       # specify the version you desire here
-      - image: circleci/node:9.11.2
-      
+      - image: circleci/node:10.15.3
+
       # Specify service dependencies here if necessary
       # CircleCI maintains a library of pre-built images
       # documented at https://circleci.com/docs/2.0/circleci-images/
-      # - image: circleci/mongo:3.4.4
+
+      - image: circleci/postgres:11.2-alpine-postgis
+        environment:
+          POSTGRES_USER: root
+          POSTGRES_DB: server_wallet_test
+          POSTGRES_PASSWORD: ''
 
     working_directory: ~/apps
 
@@ -22,9 +27,9 @@ jobs:
       # Download and cache dependencies
       - restore_cache:
           keys:
-          - v1-dependencies-{{ checksum "package.json" }}
-          # fallback to using the latest cache if no exact match is found
-          - v1-dependencies-
+            - v1-dependencies-{{ checksum "package.json" }}
+            # fallback to using the latest cache if no exact match is found
+            - v1-dependencies-
 
       - run: npx lerna bootstrap
 
@@ -32,9 +37,17 @@ jobs:
           paths:
             - node_modules
           key: v1-dependencies-{{ checksum "package.json" }}
-        
+
+      - run:
+          name: Waiting for Postgres to be ready
+          command: |
+            for i in `seq 1 10`;
+            do
+              nc -z localhost 5432 && echo Success && exit 0
+              echo -n .
+              sleep 1
+            done
+            echo Failed waiting for Postgres && exit 1
+
       # run tests!
       - run: npx lerna run test:ci --stream --concurrency 2
-
-
-

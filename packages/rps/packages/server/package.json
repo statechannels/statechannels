@@ -1,0 +1,105 @@
+{
+  "name": "nitro-server",
+  "private": true,
+  "version": "0.0.1",
+  "description": "nitro hub prototype",
+  "main": "lib/index.js",
+  "scripts": {
+    "splice-networks": "bin/splice-networks.sh",
+    "db:drop": "dropdb server_wallet_${NODE_ENV}",
+    "db:create": "createdb server_wallet_${NODE_ENV}",
+    "db:migrate": "npx knex migrate:latest",
+    "db:rollback": "npx knex migrate:rollback",
+    "db:seed": "npx knex seed:run",
+    "test": "npx jest --runInBand",
+    "test:ci": "run-s prettier:check test",
+    "watch-server": "nodemon --watch 'src/**/*' -e ts,tsx --exec ts-node ./src/app/server.ts",
+    "build": "npx tsc && npx tsc knexfile.ts",
+    "start": "node ./lib/app/server.js",
+    "prestart": "npm run db:rollback && npm run db:migrate && npm run db:seed",
+    "prettier:check": "npx prettier --check 'src/**/*.{ts,tsx}'",
+    "prettier:write": "npx prettier --write 'src/**/*.{ts,tsx}'",
+    "postinstall": "npm run build"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@koa/cors": "2",
+    "dotenv": "^6.2.0",
+    "dotenv-expand": "^4.2.0",
+    "fmg-core": "^0.5.6",
+    "fmg-nitro-adjudicator": "^0.0.10",
+    "knex": "^0.13.0",
+    "koa": "^2.7.0",
+    "koa-body": "^4.0.8",
+    "koa-router": "^7.4.0",
+    "magmo-devtools": "git+https://github.com/magmo/devtools.git#v0.1.13",
+    "objection": "^1.6.0",
+    "pg": "^7.1.2"
+  },
+  "devDependencies": {
+    "@types/config": "^0.0.34",
+    "@types/dotenv": "^6.1.0",
+    "@types/jest": "^24.0.6",
+    "@types/knex": "^0.15.2",
+    "@types/koa": "^2.0.48",
+    "@types/koa-router": "^7.0.39",
+    "@types/node": "^11.13.8",
+    "@types/supertest": "^2.0.7",
+    "babel-register": "^6.26.0",
+    "ganache-cli": "^6.3.0",
+    "jest": "^24.0.6",
+    "koa-bodyparser": "^4.2.1",
+    "node-jq": "^1.5.0",
+    "nodemon": "^1.18.10",
+    "npm-run-all": "^4.1.5",
+    "prettier": "^1.17.0",
+    "supertest": "^3.4.2",
+    "truffle": "^5.0.0-beta.2",
+    "truffle-hdwallet-provider": "^1.0.4",
+    "ts-jest": "^24",
+    "ts-lint": "^4.5.1",
+    "ts-node": "^8.0.2",
+    "tslint-config": "^0.0.1",
+    "tslint-config-prettier": "^1.18.0",
+    "typescript": "^3.3.3"
+  },
+  "jest": {
+    "collectCoverageFrom": [
+      "src/**/*.{js,jsx,ts,tsx}"
+    ],
+    "setupFiles": [],
+    "setupFilesAfterEnv": [
+      "./src/config/knexSetupTeardown.ts"
+    ],
+    "testMatch": [
+      "<rootDir>/**/?(*.)(spec|test).ts"
+    ],
+    "testEnvironment": "node",
+    "testURL": "http://localhost",
+    "transform": {
+      "^.+\\.tsx?$": "ts-jest"
+    },
+    "transformIgnorePatterns": [
+      "[/\\\\]node_modules[/\\\\].+\\.(js|jsx|mjs|ts|tsx)$"
+    ],
+    "moduleFileExtensions": [
+      "web.ts",
+      "ts",
+      "web.tsx",
+      "tsx",
+      "web.js",
+      "js",
+      "web.jsx",
+      "jsx",
+      "json",
+      "node",
+      "mjs"
+    ],
+    "globals": {
+      "ts-jest": {
+        "tsConfig": "./tsconfig.json"
+      }
+    }
+  }
+}
