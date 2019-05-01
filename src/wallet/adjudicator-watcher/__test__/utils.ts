@@ -14,9 +14,6 @@ const nitroContractAddress = NitroAdjudicatorArtifact.networks[process.env.NETWO
 
 async function sendTransaction(provider, tx) {
   const signer = provider.getSigner();
-  console.log(
-    `The contract address is ${NitroAdjudicatorArtifact.networks[process.env.NETWORK_ID].address}`,
-  );
   return await signer.sendTransaction({
     ...tx,
     to: nitroContractAddress,

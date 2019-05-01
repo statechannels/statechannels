@@ -5,10 +5,10 @@ import AllocatorChannel from '../models/allocatorChannel.js';
 import { nitroAdjudicator } from '../utilities/blockchain.js';
 
 /**
- * todos:
- * - define database schema for the adjudicator state: maybe use allocator channels for now
- * - update state when a notification arrives.
+ * funding todos:
  * - test state update.
+ *
+ * then other event todos.
  * */
 
 async function start() {
@@ -16,11 +16,8 @@ async function start() {
   const adjudicator: ethers.Contract = await nitroAdjudicator();
   const depositedFilter = adjudicator.filters.Deposited();
   adjudicator.on(depositedFilter, async (channelId, amountDeposited, destinationHoldings) => {
-    // todo: update the database
     console.log(`Deposit detected  with ${amountDeposited} ${destinationHoldings} ${channelId}`);
 
-    // 1. Check that the channel exists in the database
-    // 2. Update the DB
     const allocator_channel = await AllocatorChannel.query()
       .where({ channel_id: channelId })
       .select('id')
@@ -31,14 +28,14 @@ async function start() {
     }
 
     await AllocatorChannel.query()
-      .patch({ holdings: destinationHoldings })
+      .patch({ holdings: destinationHoldings.toHexString() })
       .where({ id: allocator_channel.id });
   });
 
   console.log('Adding challenge watcher');
   const challengeCreatedFilter = adjudicator.filters.ChallengeCreated();
   adjudicator.on(challengeCreatedFilter, (channelId, commitment, finalizedAt) => {
-    console.log(`Deposit detected  with ${channelId} ${commitment} ${finalizedAt}`);
+    console.log(`Challenge detected  with ${channelId} ${commitment} ${finalizedAt}`);
   });
 }
 
