@@ -227,6 +227,7 @@ const allocatesToChannelAttrs = {
 };
 
 export const ledgerId = channelID(ledgerChannel);
+
 export const ledgerCommitments = {
   preFundCommitment0: {
     ...ledgerChannelAttrs,
@@ -298,6 +299,7 @@ export const ledgerCommitments = {
     turnNum: 10,
   },
 };
+
 export const signedLedgerCommitments = {
   signedLedgerCommitment0: {
     commitment: ledgerCommitments.preFundCommitment0,

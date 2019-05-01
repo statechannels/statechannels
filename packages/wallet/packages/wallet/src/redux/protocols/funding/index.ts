@@ -1,5 +1,2 @@
-export enum Strategy {
-  IndirectFunding = 'IndirectFunding',
-}
-
+export { FundingStrategy } from '../../../communication';
 export { initialize, fundingReducer as reducer } from './reducer';

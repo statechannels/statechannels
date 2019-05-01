@@ -1,6 +1,6 @@
 import { Properties as P } from '../../../utils';
 import { ProtocolState } from '../..';
-import { Strategy } from '..';
+import { FundingStrategy } from '..';
 
 export type OngoingFundingState =
   | WaitForStrategyChoice
@@ -31,7 +31,7 @@ export interface WaitForStrategyChoice extends BaseState {
 export interface WaitForStrategyResponse extends BaseState {
   type: typeof WAIT_FOR_STRATEGY_RESPONSE;
   targetChannelId: string;
-  strategy: Strategy;
+  strategy: FundingStrategy;
 }
 
 export interface WaitForFunding extends BaseState {

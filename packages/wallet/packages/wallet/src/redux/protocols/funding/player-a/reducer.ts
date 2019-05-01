@@ -10,8 +10,8 @@ import { ProtocolStateWithSharedData } from '../..';
 import { unreachable } from '../../../../utils/reducer-utils';
 import { PlayerIndex } from '../../../types';
 import { showWallet } from '../../reducer-helpers';
-import { fundingFailure, messageRelayRequested } from 'magmo-wallet-client';
-import { strategyProposed } from '../player-b/actions';
+import { fundingFailure } from 'magmo-wallet-client';
+import { sendStrategyProposed } from '../../../../communication';
 type EmbeddedAction = IndirectFundingAction;
 
 export function initialize(
@@ -72,9 +72,7 @@ function strategyChosen(
   }
   const { processId, opponentAddress } = state;
   const { strategy } = action;
-  const sentAction = strategyProposed(processId, strategy);
-  const payload = { processId, data: { sentAction } };
-  const message = messageRelayRequested(opponentAddress, payload);
+  const message = sendStrategyProposed(opponentAddress, processId, strategy);
   return {
     protocolState: states.waitForStrategyResponse({ ...state, strategy }),
     sharedData: queueMessage(sharedData, message),

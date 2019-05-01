@@ -4,8 +4,8 @@ import { PlayerIndex } from '../redux/types';
 import { signCommitment } from '../domain';
 import { Channel } from 'fmg-core';
 import { SignedCommitment } from '../domain';
-import { messageRelayRequested } from 'magmo-wallet-client/lib/wallet-events';
 import { ChannelState } from '../redux/channel-store';
+import { sendConcludeChannel } from '../communication';
 
 export const hasConsensusBeenReached = (
   lastCommitment: Commitment,
@@ -115,16 +115,13 @@ export const composeConcludeCommitment = (channelState: ChannelState) => {
     commitmentCount,
   };
 
-  const commitmentSignature = signCommitment(concludeCommitment, channelState.privateKey);
-  const sendCommitmentAction = messageRelayRequested(
+  const signature = signCommitment(concludeCommitment, channelState.privateKey);
+  const processId = channelState.channelId;
+  const sendCommitmentAction = sendConcludeChannel(
     channelState.participants[1 - channelState.ourIndex],
-    {
-      processId: channelState.channelId,
-      data: {
-        commitment: concludeCommitment,
-        commitmentSignature,
-      },
-    },
+    processId,
+    concludeCommitment,
+    signature,
   );
-  return { concludeCommitment, commitmentSignature, sendCommitmentAction };
+  return { concludeCommitment, signature, sendCommitmentAction };
 };
