@@ -6,7 +6,7 @@ import * as scenarios from './test-scenarios';
 import { PlayerIndex, WalletProtocol } from '../types';
 import * as fundProtocol from '../protocols/funding';
 import { fundingRequested } from '../protocols/actions';
-
+import * as adjudicatorState from '../adjudicator-state/reducer';
 const { channelId } = scenarios;
 
 const defaults = {
@@ -72,5 +72,18 @@ describe('when a ProcessAction arrives', () => {
       states.EMPTY_SHARED_DATA,
       action,
     );
+  });
+});
+
+describe('when a updateSharedData action arrives', () => {
+  const reducer = jest.fn(() => ({}));
+  Object.defineProperty(adjudicatorState, 'adjudicatorStateReducer', { value: reducer });
+
+  const action = actions.challengeExpiredEvent('123', '123', 1);
+  const state = { ...initializedState, adjudicatorState: {} };
+  walletReducer(initializedState, action);
+
+  it('passes the action to the adjudicator state reducer', () => {
+    expect(reducer).toHaveBeenCalledWith(state.adjudicatorState, action);
   });
 });

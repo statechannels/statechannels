@@ -11,7 +11,7 @@ import { unreachable } from '../../utils/reducer-utils';
 export const adjudicatorStateReducer = (
   state: AdjudicatorState,
   action: actions.AdjudicatorEventAction | actions.ChallengeCreatedEvent,
-) => {
+): AdjudicatorState => {
   switch (action.type) {
     case actions.CHALLENGE_EXPIRED_EVENT:
       return challengeExpiredReducer(state, action);
@@ -54,7 +54,7 @@ const fundingReceivedEventReducer = (
   action: actions.FundingReceivedEvent,
 ) => {
   const { channelId } = action;
-  addToBalance(state, channelId, action.amount);
+  return addToBalance(state, channelId, action.amount);
 };
 
 const challengeExpiredReducer = (
