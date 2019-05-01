@@ -52,7 +52,7 @@ interface SignFailure {
   reason: SignFailureReason;
 }
 
-type SignFailureReason = 'ChannelDoesntExist' | 'TransitionUnsafe' | 'NotOurTurn';
+export type SignFailureReason = 'ChannelDoesntExist' | 'TransitionUnsafe' | 'NotOurTurn';
 type SignResult = SignSuccess | SignFailure;
 // TODO: These methods could probably be part of signAndStore/checkAndStore but that means
 // that the address/privateKey would be required when calling them.
@@ -138,6 +138,7 @@ export function checkAndStore(
   signedCommitment: SignedCommitment,
 ): CheckResult {
   if (!hasValidSignature(signedCommitment)) {
+    console.log('Failed to validate commitment signature');
     return { isSuccess: false };
   }
   const commitment = signedCommitment.commitment;
@@ -145,10 +146,12 @@ export function checkAndStore(
   let channel = getChannel(store, channelId);
 
   if (!channel) {
+    console.log('Cannot store commitment: no channel');
     return { isSuccess: false };
   }
 
   if (!isSafeTransition(store, channel, commitment)) {
+    console.log('Failed to verify a safe transition');
     return { isSuccess: false };
   }
 

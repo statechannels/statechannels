@@ -1,84 +1,74 @@
-import { Properties } from '../../../utils';
-import { PlayerIndex } from '../../../types';
+import { Properties as P } from '../../../utils';
 import { DirectFundingState } from '../../direct-funding/state';
+import { IndirectFundingState } from '../state';
 
-export const WAIT_FOR_APPROVAL = 'WAIT_FOR_APPROVAL';
-export const WAIT_FOR_PRE_FUND_SETUP_1 = 'WAIT_FOR_PRE_FUND_SETUP_1';
-export const WAIT_FOR_DIRECT_FUNDING = 'WAIT_FOR_DIRECT_FUNDING';
-export const WAIT_FOR_POST_FUND_SETUP_1 = 'WAIT_FOR_POST_FUND_SETUP_1';
-export const WAIT_FOR_LEDGER_UPDATE_1 = 'WAIT_FOR_LEDGER_UPDATE_1';
+export type PlayerAState =
+  | AWaitForPreFundSetup1
+  | AWaitForDirectFunding
+  | AWaitForPostFundSetup1
+  | AWaitForLedgerUpdate1;
 
-interface BasePlayerAState {
+export interface AWaitForPreFundSetup1 {
+  type: 'AWaitForPreFundSetup1';
   channelId: string;
-  player: PlayerIndex.A;
-}
-
-interface LedgerChannelExists extends BasePlayerAState {
   ledgerId: string;
 }
 
-export interface WaitForApproval extends BasePlayerAState {
-  type: typeof WAIT_FOR_APPROVAL;
-}
-
-export interface WaitForPreFundSetup1 extends LedgerChannelExists {
-  type: typeof WAIT_FOR_PRE_FUND_SETUP_1;
-}
-
-export interface WaitForDirectFunding extends LedgerChannelExists {
-  type: typeof WAIT_FOR_DIRECT_FUNDING;
+export interface AWaitForDirectFunding {
+  type: 'AWaitForDirectFunding';
+  channelId: string;
+  ledgerId: string;
   directFundingState: DirectFundingState;
 }
-export interface WaitForPostFundSetup1 extends LedgerChannelExists {
-  type: typeof WAIT_FOR_POST_FUND_SETUP_1;
+export interface AWaitForPostFundSetup1 {
+  type: 'AWaitForPostFundSetup1';
+  channelId: string;
+  ledgerId: string;
 }
-export interface WaitForLedgerUpdate1 extends LedgerChannelExists {
-  type: typeof WAIT_FOR_LEDGER_UPDATE_1;
-}
-
-export type PlayerAState =
-  | WaitForApproval
-  | WaitForPreFundSetup1
-  | WaitForDirectFunding
-  | WaitForPostFundSetup1
-  | WaitForLedgerUpdate1;
-
-export function waitForApproval(params: Properties<WaitForApproval>): WaitForApproval {
-  const { channelId } = params;
-
-  return { type: WAIT_FOR_APPROVAL, player: PlayerIndex.A, channelId };
+export interface AWaitForLedgerUpdate1 {
+  type: 'AWaitForLedgerUpdate1';
+  channelId: string;
+  ledgerId: string;
 }
 
-export function waitForPreFundSetup1(
-  params: Properties<WaitForPreFundSetup1>,
-): WaitForPreFundSetup1 {
+// -------
+// Helpers
+// -------
+
+export function isPlayerAState(state: IndirectFundingState): state is PlayerAState {
+  return (
+    state.type === 'AWaitForPreFundSetup1' ||
+    state.type === 'AWaitForDirectFunding' ||
+    state.type === 'AWaitForPostFundSetup1' ||
+    state.type === 'AWaitForLedgerUpdate1'
+  );
+}
+
+// --------
+// Creators
+// --------
+
+export function aWaitForPreFundSetup1(params: P<AWaitForPreFundSetup1>): AWaitForPreFundSetup1 {
   const { channelId, ledgerId } = params;
-  return { type: WAIT_FOR_PRE_FUND_SETUP_1, player: PlayerIndex.A, channelId, ledgerId };
+  return { type: 'AWaitForPreFundSetup1', channelId, ledgerId };
 }
 
-export function waitForDirectFunding(
-  params: Properties<WaitForDirectFunding>,
-): WaitForDirectFunding {
+export function aWaitForDirectFunding(params: P<AWaitForDirectFunding>): AWaitForDirectFunding {
   const { channelId, ledgerId, directFundingState } = params;
   return {
-    type: WAIT_FOR_DIRECT_FUNDING,
-    player: PlayerIndex.A,
+    type: 'AWaitForDirectFunding',
     channelId,
     ledgerId,
     directFundingState,
   };
 }
 
-export function waitForPostFundSetup1(
-  params: Properties<WaitForPostFundSetup1>,
-): WaitForPostFundSetup1 {
+export function aWaitForPostFundSetup1(params: P<AWaitForPostFundSetup1>): AWaitForPostFundSetup1 {
   const { channelId, ledgerId } = params;
-  return { type: WAIT_FOR_POST_FUND_SETUP_1, player: PlayerIndex.A, channelId, ledgerId };
+  return { type: 'AWaitForPostFundSetup1', channelId, ledgerId };
 }
 
-export function waitForLedgerUpdate1(
-  params: Properties<WaitForLedgerUpdate1>,
-): WaitForLedgerUpdate1 {
+export function aWaitForLedgerUpdate1(params: P<AWaitForLedgerUpdate1>): AWaitForLedgerUpdate1 {
   const { channelId, ledgerId } = params;
-  return { type: WAIT_FOR_LEDGER_UPDATE_1, player: PlayerIndex.A, channelId, ledgerId };
+  return { type: 'AWaitForLedgerUpdate1', channelId, ledgerId };
 }

@@ -20,3 +20,7 @@ export function setChannel(store: ChannelStore, channel: ChannelState): ChannelS
 export function getChannel(store: ChannelStore, channelId: string): ChannelState | undefined {
   return store[channelId];
 }
+
+export function setChannels(store: ChannelStore, channels: ChannelState[]): ChannelStore {
+  return channels.reduce((st, ch) => setChannel(st, ch), store);
+}

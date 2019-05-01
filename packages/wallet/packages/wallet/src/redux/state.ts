@@ -4,12 +4,19 @@ import {
   SideEffects,
   queueMessage as queueMessageOutbox,
   queueTransaction as queueTransactionOutbox,
+  getLastMessage as getLastMessageFromOutbox,
 } from './outbox/state';
 import {
   ChannelStore,
   ChannelState,
   setChannel as setChannelInStore,
+  setChannels as setChannelsInStore,
+  checkAndStore as checkAndStoreChannelStore,
+  checkAndInitialize as checkAndInitializeChannelStore,
+  signAndStore as signAndStoreChannelStore,
+  signAndInitialize as signAndInitializeChannelStore,
   emptyChannelStore,
+  SignFailureReason,
 } from './channel-store';
 import { Properties } from './utils';
 import * as indirectFunding from './protocols/indirect-funding/state';
@@ -18,6 +25,7 @@ import { WalletEvent } from 'magmo-wallet-client';
 import { TransactionRequest } from 'ethers/providers';
 import { WalletProtocol } from './types';
 import { AdjudicatorState } from './adjudicator-state/state';
+import { SignedCommitment, Commitment } from '../domain';
 
 export type WalletState = WaitForLogin | MetaMaskError | Initialized;
 
@@ -136,6 +144,10 @@ export function setChannel(state: SharedData, channel: ChannelState): SharedData
   return { ...state, channelStore: setChannelInStore(state.channelStore, channel) };
 }
 
+export function setChannels(state: SharedData, channels: ChannelState[]): SharedData {
+  return { ...state, channelStore: setChannelsInStore(state.channelStore, channels) };
+}
+
 export function getChannel(state: SharedData, channelId: string): ChannelState | undefined {
   return state.channelStore[channelId];
 }
@@ -146,6 +158,92 @@ export function queueMessage(state: SharedData, message: WalletEvent): SharedDat
 
 export function setChannelStore(state: SharedData, channelStore: ChannelStore): SharedData {
   return { ...state, channelStore };
+}
+
+export function getLastMessage(state: SharedData): WalletEvent | undefined {
+  return getLastMessageFromOutbox(state.outboxState);
+}
+
+export function getAddressAndPrivateKey(
+  state: SharedData,
+  channelId: string,
+): { address: string; privateKey: string } | undefined {
+  const channel = getChannel(state, channelId);
+  if (!channel) {
+    return undefined;
+  } else {
+    const { address, privateKey } = channel;
+    return { address, privateKey };
+  }
+}
+
+export function signAndInitialize(
+  state: SharedData,
+  commitment: Commitment,
+  address: string,
+  privateKey: string,
+): SignResult {
+  const result = signAndInitializeChannelStore(state.channelStore, commitment, address, privateKey);
+  if (result.isSuccess) {
+    return { ...result, store: setChannelStore(state, result.store) };
+  } else {
+    return result;
+  }
+}
+
+export function checkAndInitialize(
+  state: SharedData,
+  signedCommitment: SignedCommitment,
+  address: string,
+  privateKey: string,
+): CheckResult {
+  const result = checkAndInitializeChannelStore(
+    state.channelStore,
+    signedCommitment,
+    address,
+    privateKey,
+  );
+  if (result.isSuccess) {
+    return { ...result, store: setChannelStore(state, result.store) };
+  } else {
+    return result;
+  }
+}
+
+export function checkAndStore(state: SharedData, signedCommitment: SignedCommitment): CheckResult {
+  const result = checkAndStoreChannelStore(state.channelStore, signedCommitment);
+  if (result.isSuccess) {
+    return { ...result, store: setChannelStore(state, result.store) };
+  } else {
+    return result;
+  }
+}
+type CheckResult = CheckSuccess | CheckFailure;
+interface CheckSuccess {
+  isSuccess: true;
+  store: SharedData;
+}
+interface CheckFailure {
+  isSuccess: false;
+}
+
+export function signAndStore(state: SharedData, commitment: Commitment): SignResult {
+  const result = signAndStoreChannelStore(state.channelStore, commitment);
+  if (result.isSuccess) {
+    return { ...result, store: setChannelStore(state, result.store) };
+  } else {
+    return result;
+  }
+}
+type SignResult = SignSuccess | SignFailure;
+interface SignSuccess {
+  isSuccess: true;
+  signedCommitment: SignedCommitment;
+  store: SharedData;
+}
+interface SignFailure {
+  isSuccess: false;
+  reason: SignFailureReason;
 }
 
 export function queueTransaction(
