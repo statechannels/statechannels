@@ -193,3 +193,20 @@ export {
   isCommonAction,
   application,
 };
+
+// These are any actions that update shared data directly without any protocol
+export type SharedDataUpdateAction = AdjudicatorEventAction;
+
+export function isSharedDataUpdateAction(action: WalletAction): action is SharedDataUpdateAction {
+  return isAdjudicatorEventAction(action);
+}
+
+export function isAdjudicatorEventAction(action: WalletAction): action is AdjudicatorEventAction {
+  return (
+    action.type === CONCLUDED_EVENT ||
+    action.type === REFUTED_EVENT ||
+    action.type === RESPOND_WITH_MOVE_EVENT ||
+    action.type === FUNDING_RECEIVED_EVENT ||
+    action.type === CHALLENGE_EXPIRED_EVENT
+  );
+}
