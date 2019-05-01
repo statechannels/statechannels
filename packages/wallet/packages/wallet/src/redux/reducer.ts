@@ -13,6 +13,7 @@ import * as challengeResponseProtocol from './protocols/responding';
 import * as states from './state';
 import { WalletProtocol } from './types';
 import { APPLICATION_PROCESS_ID } from './protocols/application/reducer';
+import { adjudicatorStateReducer } from './adjudicator-state/reducer';
 
 const initialState = states.waitForLogin();
 
@@ -40,15 +41,28 @@ export function initializedReducer(
   state: states.Initialized,
   action: actions.WalletAction,
 ): states.WalletState {
-  // TODO: We will need to update SharedData here first
+  let newState = { ...state };
+  if (actions.isSharedDataUpdateAction(action)) {
+    newState = updateSharedData(newState, action);
+  }
 
   if (isNewProcessAction(action)) {
-    return routeToNewProcessInitializer(state, action);
+    return routeToNewProcessInitializer(newState, action);
   } else if (isProtocolAction(action)) {
-    return routeToProtocolReducer(state, action);
+    return routeToProtocolReducer(newState, action);
   }
 
   return state;
+}
+function updateSharedData(
+  state: states.Initialized,
+  action: actions.SharedDataUpdateAction,
+): states.Initialized {
+  if (actions.isAdjudicatorEventAction(action)) {
+    return { ...state, adjudicatorState: adjudicatorStateReducer(state.adjudicatorState, action) };
+  } else {
+    return state;
+  }
 }
 
 function routeToProtocolReducer(
