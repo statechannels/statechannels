@@ -51,6 +51,22 @@ export interface FundingFailure extends BaseDirectFundingState {
   type: typeof FUNDING_FAILURE;
 }
 
+// -------
+// Helpers
+// -------
+
+export function isTerminal(state: DirectFundingState): state is FundingFailure | FundingSuccess {
+  return state.type === FUNDING_FAILURE || state.type === FUNDING_SUCCESS;
+}
+
+export function isSuccess(state: DirectFundingState): state is FundingSuccess {
+  return state.type === FUNDING_SUCCESS;
+}
+
+export function isFailure(state: DirectFundingState): state is FundingFailure {
+  return state.type === FUNDING_FAILURE;
+}
+
 // constructors
 export const baseDirectFundingState: Constructor<BaseDirectFundingState> = params => {
   const {

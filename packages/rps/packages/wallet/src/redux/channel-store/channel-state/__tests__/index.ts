@@ -28,7 +28,7 @@ export function partiallyOpenChannelFromCommitment(
 }
 
 export function channelFromCommitments(
-  penultimateCommitment: SignedCommitment,
+  penultimateCommitment: SignedCommitment | undefined,
   lastCommitment: SignedCommitment,
   ourAddress: string,
   ourPrivateKey: string,
