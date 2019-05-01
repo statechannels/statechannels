@@ -24,7 +24,7 @@ describe('happyPath', () => {
     const sentAction = strategyProposed(processId, strategy);
     itSendsThisMessage(
       result,
-      messageRelayRequested(opponentAddress, { processId, data: { sentAction } }),
+      messageRelayRequested(opponentAddress, { processId, data: sentAction }),
     );
   });
 

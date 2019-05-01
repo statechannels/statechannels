@@ -3,7 +3,7 @@ import * as actions from '../actions';
 import { PlayerIndex } from '../../../../types';
 
 import { EMPTY_SHARED_DATA } from '../../../../state';
-import { Strategy } from '../..';
+import { FundingStrategy } from '../../../../../communication';
 
 // To test all paths through the state machine we will use 4 different scenarios:
 //
@@ -25,7 +25,7 @@ const processId = 'process-id.123';
 const sharedData = EMPTY_SHARED_DATA;
 const targetChannelId = '0x1324';
 const opponentAddress = '0xf00';
-const strategy = Strategy.IndirectFunding;
+const strategy: FundingStrategy = 'IndirectFundingStrategy';
 
 const props = {
   processId,
