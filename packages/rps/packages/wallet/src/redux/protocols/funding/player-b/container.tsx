@@ -7,15 +7,15 @@ import * as states from './states';
 
 import { unreachable } from '../../../../utils/reducer-utils';
 import { PlayerIndex } from '../../../types';
-import { Strategy } from '..';
 import ApproveStrategy from '../../../../components/funding/approve-strategy';
 import WaitForOtherPlayer from '../../../../components/wait-for-other-player';
 import AcknowledgeX from '../../../../components/acknowledge-x';
+import { FundingStrategy } from '..';
 
 interface Props {
   state: states.OngoingFundingState;
-  strategyChosen: (processId: string, strategy: Strategy) => void;
-  strategyApproved: (processId: string, strategy: Strategy) => void;
+  strategyChosen: (processId: string, strategy: FundingStrategy) => void;
+  strategyApproved: (processId: string, strategy: FundingStrategy) => void;
   strategyRejected: (processId: string) => void;
   fundingSuccessAcknowledged: (processId: string) => void;
   cancelled: (processId: string, by: PlayerIndex) => void;
@@ -32,7 +32,9 @@ class FundingContainer extends PureComponent<Props> {
       case states.WAIT_FOR_STRATEGY_APPROVAL:
         return (
           <ApproveStrategy
-            strategyChosen={(strategy: Strategy) => actions.strategyApproved(processId, strategy)}
+            strategyChosen={(strategy: FundingStrategy) =>
+              actions.strategyApproved(processId, strategy)
+            }
             cancelled={() => actions.cancelled(processId, PlayerIndex.B)}
           />
         );

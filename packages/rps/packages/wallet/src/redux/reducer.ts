@@ -54,6 +54,7 @@ export function initializedReducer(
 
   return state;
 }
+
 function updateSharedData(
   state: states.Initialized,
   action: actions.SharedDataUpdateAction,
