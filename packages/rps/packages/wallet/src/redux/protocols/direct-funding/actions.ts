@@ -20,14 +20,16 @@ export const directFundingRequested = (
 export type DirectFundingRequested = ReturnType<typeof directFundingRequested>;
 
 export function isDirectFundingAction(action: actions.WalletAction): action is FundingAction {
-  return action.type === 'WALLET.ADJUDICATOR.FUNDING_RECEIVED_EVENT' ||
+  return (
+    action.type === 'WALLET.ADJUDICATOR.FUNDING_RECEIVED_EVENT' ||
     action.type === DIRECT_FUNDING_REQUESTED ||
+    action.type === 'WALLET.COMMON.COMMITMENT_RECEIVED' ||
     actions.isTransactionAction(action)
-    ? true
-    : false;
+  );
 }
 
 export type FundingAction =
   | DirectFundingRequested
+  | actions.CommitmentReceived
   | actions.FundingReceivedEvent
   | actions.TransactionAction;

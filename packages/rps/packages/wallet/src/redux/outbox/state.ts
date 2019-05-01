@@ -37,3 +37,8 @@ export function queueTransaction(
     transactionOutbox: { transactionRequest: transaction, processId },
   });
 }
+
+export function getLastMessage(state: OutboxState): WalletEvent | undefined {
+  const messages = state.messageOutbox;
+  return messages[messages.length - 1];
+}

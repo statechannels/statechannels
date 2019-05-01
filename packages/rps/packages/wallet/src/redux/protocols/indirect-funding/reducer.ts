@@ -1,33 +1,38 @@
-import * as indirectFundingState from './state';
 import * as actions from '../../actions';
 import { unreachable } from '../../../utils/reducer-utils';
 import { PlayerIndex } from '../../types';
-import { ProtocolStateWithSharedData, ProtocolReducer } from '../';
-import { initialize as initializeA } from './player-a/reducer';
-import { initialize as initializeB } from './player-b/reducer';
+import { ProtocolStateWithSharedData } from '../';
+import { playerAReducer, initialize as initializeA } from './player-a/reducer';
+import { playerBReducer, initialize as initializeB } from './player-b/reducer';
 import { SharedData } from '../../state';
+import { ChannelState } from '../../channel-store';
+import { isPlayerAState } from './player-a/state';
+import { NonTerminalIndirectFundingState, IndirectFundingState } from './state';
 
-export function initialize(
-  channelId: string,
-  playerIndex: PlayerIndex,
-  sharedData: SharedData,
-): ProtocolStateWithSharedData<
-  indirectFundingState.playerA.WaitForApproval | indirectFundingState.playerB.WaitForApproval
-> {
-  switch (playerIndex) {
+type ReturnVal = ProtocolStateWithSharedData<IndirectFundingState>;
+
+export function initialize(channel: ChannelState, sharedData: SharedData): ReturnVal {
+  // todo: would be nice to avoid casting here
+  const ourIndex: PlayerIndex = channel.ourIndex;
+
+  switch (ourIndex) {
     case PlayerIndex.A:
-      return initializeA(channelId, sharedData);
+      return initializeA(channel.channelId, sharedData);
     case PlayerIndex.B:
-      return initializeB(channelId, sharedData);
+      return initializeB(channel.channelId, sharedData);
     default:
-      return unreachable(playerIndex);
+      return unreachable(ourIndex);
   }
 }
 
-export const indirectFundingReducer: ProtocolReducer<indirectFundingState.IndirectFundingState> = (
-  protocolState: indirectFundingState.IndirectFundingState,
+export const indirectFundingReducer = (
+  protocolState: NonTerminalIndirectFundingState,
   sharedData: SharedData,
   action: actions.indirectFunding.Action,
-): ProtocolStateWithSharedData<indirectFundingState.IndirectFundingState> => {
-  return { protocolState, sharedData };
+): ReturnVal => {
+  if (isPlayerAState(protocolState)) {
+    return playerAReducer(protocolState, sharedData, action);
+  } else {
+    return playerBReducer(protocolState, sharedData, action);
+  }
 };
