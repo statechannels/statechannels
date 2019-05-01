@@ -1,24 +1,38 @@
-import { config as dotenvConfig } from 'dotenv';
-import { nitroAdjudicator } from './../utilities/blockchain';
-import * as dotenvExpand from 'dotenv-expand';
 import { ethers } from 'ethers';
-import * as NitroAdjudicatorArtifact from '../../contracts/prebuilt_contracts/NitroAdjudicator.json';
+import { Model } from 'objection';
+import knex from '../db/connection';
+import AllocatorChannel from '../models/allocatorChannel.js';
+import { nitroAdjudicator } from '../utilities/blockchain.js';
 
-// todo: how is a sample event generated?
+/**
+ * todos:
+ * - define database schema for the adjudicator state: maybe use allocator channels for now
+ * - update state when a notification arrives.
+ * - test state update.
+ * */
 
 async function start() {
   console.log('Starting chain watcher');
-  // todo: do not hardcode the contract address
-  // const adjudicator: ethers.Contract = await nitroAdjudicator();
-  const adjudicator = new ethers.Contract(
-    '0x8726C7414ac023D23348326B47AF3205185Fd035',
-    NitroAdjudicatorArtifact.abi,
-    new ethers.providers.JsonRpcProvider(`http://localhost:${process.env.DEV_GANACHE_PORT}`),
-  );
+  const adjudicator: ethers.Contract = await nitroAdjudicator();
   const depositedFilter = adjudicator.filters.Deposited();
-  adjudicator.on(depositedFilter, (channelId, amountDeposited, destinationHoldings) => {
+  adjudicator.on(depositedFilter, async (channelId, amountDeposited, destinationHoldings) => {
     // todo: update the database
     console.log(`Deposit detected  with ${amountDeposited} ${destinationHoldings} ${channelId}`);
+
+    // 1. Check that the channel exists in the database
+    // 2. Update the DB
+    const allocator_channel = await AllocatorChannel.query()
+      .where({ channel_id: channelId })
+      .select('id')
+      .first();
+    if (!allocator_channel) {
+      console.log(`Allocator channel ${channelId} not in database`);
+      return;
+    }
+
+    await AllocatorChannel.query()
+      .patch({ holdings: destinationHoldings })
+      .where({ id: allocator_channel.id });
   });
 
   console.log('Adding challenge watcher');
@@ -28,5 +42,5 @@ async function start() {
   });
 }
 
-dotenvExpand(dotenvConfig());
+Model.knex(knex);
 start();

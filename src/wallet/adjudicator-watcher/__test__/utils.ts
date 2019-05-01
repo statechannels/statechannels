@@ -2,17 +2,15 @@ import { ethers } from 'ethers';
 import { bigNumberify } from 'ethers/utils';
 import { Channel } from 'fmg-core';
 import * as NitroAdjudicatorArtifact from '../../../contracts/prebuilt_contracts/NitroAdjudicator.json';
+import { DUMMY_RULES_ADDRESS, FUNDED_CHANNEL_NONCE, PARTICIPANTS } from '../../../constants';
 
-const libraryAddress = '0x' + '1'.repeat(40);
-const channelNonce = 4;
-const asAddress = '0x5409ED021D9299bf6814279A6A1411A7e866A631';
-const bsAddress = '0x6Ecbe1DB9EF729CBe972C83Fb886247691Fb6beb';
-const participants: [string, string] = [asAddress, bsAddress];
-export const channel: Channel = { channelType: libraryAddress, nonce: channelNonce, participants };
+export const channel: Channel = {
+  channelType: DUMMY_RULES_ADDRESS,
+  nonce: FUNDED_CHANNEL_NONCE,
+  participants: PARTICIPANTS,
+};
 
-// todo: should not hardcode the contract address
-const nitroContractAddress = '0x8726C7414ac023D23348326B47AF3205185Fd035';
-// const nitroContractAddress = NitroAdjudicatorArtifact.networks[process.env.NETWORK_ID].address;
+const nitroContractAddress = NitroAdjudicatorArtifact.networks[process.env.NETWORK_ID].address;
 
 async function sendTransaction(provider, tx) {
   const signer = provider.getSigner();
