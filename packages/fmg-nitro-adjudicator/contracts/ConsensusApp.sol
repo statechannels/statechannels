@@ -13,62 +13,100 @@ contract ConsensusApp {
         ConsensusCommitment.ConsensusCommitmentStruct memory newCommitment = ConsensusCommitment.fromFrameworkCommitment(_new);
 
         uint numParticipants = _old.participants.length;
-        if (oldCommitment.consensusCounter == numParticipants - 1) {
-            require(
-                newCommitment.consensusCounter == 0,
-                "ConsensusApp: consensus counter must be reset at the end of the consensus round"
-            );
-            require(
-              hashedAllocation(newCommitment.currentAllocation) == hashedAllocation(newCommitment.proposedAllocation) && hashedAllocation(oldCommitment.proposedAllocation) == hashedAllocation(newCommitment.proposedAllocation),
-              "ConsensusApp: newCommitment.currentAllocation must match newCommitment.proposedAllocation at the end of the consensus round"
-            );
-            require(
-              hashedDestination(newCommitment.currentDestination) == hashedDestination(newCommitment.proposedDestination) && hashedDestination(oldCommitment.proposedDestination) == hashedDestination(newCommitment.proposedDestination),
-              "ConsensusApp: newCommitment.currentDestination must match newCommitment.proposedDestination at the end of the consensus round"
-            );
 
-            return true;
+// State machine transition identifier
 
-        } else if (oldCommitment.consensusCounter < numParticipants - 1 && newCommitment.consensusCounter == oldCommitment.consensusCounter + 1) {
-            require(
-              hashedAllocation(oldCommitment.currentAllocation) == hashedAllocation(newCommitment.currentAllocation),
-              "ConsensusApp: currentAllocations must match during consensus round"
-            );
-            require(
-              hashedDestination(oldCommitment.currentDestination) == hashedDestination(newCommitment.currentDestination),
-              "ConsensusApp: currentDestinations must match during consensus round"
-            );
-            require(
-              hashedAllocation(oldCommitment.proposedAllocation) == hashedAllocation(newCommitment.proposedAllocation),
-              "ConsensusApp: proposedAllocations must match during consensus round"
-            );
-            require(
-              hashedDestination(oldCommitment.proposedDestination) == hashedDestination(newCommitment.proposedDestination),
-              "ConsensusApp: proposedDestinations must match during consensus round"
-            );
-
-            return true;
-
-        } else if (newCommitment.consensusCounter == 0) {
-            require(
-                hashedAllocation(oldCommitment.currentAllocation) == hashedAllocation(newCommitment.currentAllocation),
-                "CountingApp: currentAllocations must be equal when resetting the consensusCounter before the end of the round"
-            );
-            require(
-                hashedDestination(oldCommitment.currentDestination) == hashedDestination(newCommitment.currentDestination),
-                "CountingApp: currentDestinations must be equal when resetting the consensusCounter before the end of the round"
-            );
-            return true;
+        if (oldCommitment.updateType == ConsensusCommitment.UpdateType.Accord) {
+            if (newCommitment.UpdateType == ConsensusCommitment.UpdateType.Accord) {
+                validatePass(oldCommitment, newCommitment);
+                return true;
+            } else if (newCommitment.UpdateType == ConsensusCommitment.UpdateType.Motion) {
+                validatePropose(oldCommitment, newCommitment);
+                return true;
+            }
+        } else if (oldCommitment.UpdateType == ConsensusCommitment.UpdateType.Motion) {
+            if (newCommitment.UpdateType == ConsensusCommitment.UpdateType.Motion) { 
+                if (newCommitment.numVotes == 1) {
+                  validateModify(oldCommitment, newCommitment);
+                  return true;
+                } else if (newCommitment.numVotes == oldCommitment.numVotes + 1) {
+                  validateAddVote(oldCommitment, newCommitment);
+                  return true;
+                } else revert('ConsensusApp: numVotes must be reset to 1 (modify the proposal) or incremented (add your vote)');
+            } else if (newCommitment.UpdateType == ConsensusCommitment.UpdateType.Accord) { 
+                require(newCommitment.numVotes == 0, 'ConsensusApp: To veto or make new Accord, numVotes must be 0');
+                if (newCommitment.allocation == oldCommitment.proposedAllocation && newCommitment.destination == oldCommitment.proposedDestination ) {
+                  validateNewAccord(oldCommitment, newCommitment);
+                  return true;
+                } else if (newCommitment.proposedAllocation == oldCommitment.allocation && newCommitment.proposedDestination == oldCommitment.destination) {
+                  validateVeto(oldCommitment, newCommitment);
+                  return true;
+                } else revert('ConsensusApp: Proposed quantities must be updated to match actual quantities (veto) or actual quantities updated to match proposed quantitites (new accord)');
+            }
         }
+        revert("ConsensusApp: No valid transition found for commitments");
+      }
 
-        revert('ConsensusApp: Invalid input -- consensus counters out of range');
+// modifiers
+
+    modifier actualsUnchanged(ConsensusCommitment.ConsensusCommitmentStruct memory oldCommitment, ConsensusCommitment.ConsensusCommitmentStruct memory newCommitment) {
+      require(oldCommitment.allocation == newCommitment.allocation,"ConsensusApp: : 'allocation' must be the same between commitments."); 
+      require(oldCommitment.destination == newCommitment.destination,"ConsensusApp:  'destination' must be the same between commitments."); 
+        _;
     }
 
-    function hashedAllocation(uint256[] memory allocation) internal pure returns (bytes32) {
-        return keccak256(abi.encode(allocation));
+    modifier proposalsUnchanged(ConsensusCommitment.ConsensusCommitmentStruct memory oldCommitment, ConsensusCommitment.ConsensusCommitmentStruct memory newCommitment) {
+      require(oldCommitment.proposedAllocation == newCommitment.proposedAllocation,"ConsensusApp:  'proposedAllocation' must be the same between commitments."); 
+      require(oldCommitment.proposedDestination == newCommitment.proposedDestination,"ConsensusApp:  'proposedDestination' must be the same between commitments."); 
+        _;
     }
 
-    function hashedDestination(address[] memory destination) internal pure returns (bytes32) {
-        return keccak256(abi.encode(destination));
+    modifier totalAllocationConserved(ConsensusCommitment.ConsensusCommitmentStruct memory oldCommitment, ConsensusCommitment.ConsensusCommitmentStruct memory newCommitment) {
+      require(sum(newCommitment.proposedAllocation)==sum(oldCommitment.allocation), "ConsensusApp:  allocation must be conserved");
+      _;
     }
+    
+ // transition validations
+ 
+    function validatePass(ConsensusCommitment.ConsensusCommitmentStruct memory oldCommitment, ConsensusCommitment.ConsensusCommitmentStruct memory newCommitment)
+    private
+    pure
+    actualsUnchanged(oldCommitment, newCommitment)
+    proposalsUnchanged(oldCommitment, newCommitment)
+    { }
+
+    function validatePropose(ConsensusCommitment.ConsensusCommitmentStruct memory oldCommitment, ConsensusCommitment.ConsensusCommitmentStruct memory newCommitment)
+    private
+    pure
+    actualsUnchanged(oldCommitment, newCommitment)
+    totalAllocationConserved(oldCommitment, newCommitment)
+    { }
+
+    function validateAddVote(ConsensusCommitment.ConsensusCommitmentStruct memory oldCommitment, ConsensusCommitment.ConsensusCommitmentStruct memory newCommitment)
+    private
+    pure
+    actualsUnchanged(oldCommitment, newCommitment)
+    proposalsUnchanged(oldCommitment, newCommitment)
+    { }
+
+    function validateModify(ConsensusCommitment.ConsensusCommitmentStruct memory oldCommitment, ConsensusCommitment.ConsensusCommitmentStruct memory newCommitment)
+    private
+    pure
+    actualsUnchanged(oldCommitment, newCommitment)
+    totalAllocationConserved(oldCommitment, newCommitment)
+    { }
+
+    function validateVeto(ConsensusCommitment.ConsensusCommitmentStruct memory oldCommitment, ConsensusCommitment.ConsensusCommitmentStruct memory newCommitment)
+    private
+    pure
+    actualsUnchanged(oldCommitment, newCommitment)
+    { // no additional checks necessary
+    }
+
+    function validateNewAccord(ConsensusCommitment.ConsensusCommitmentStruct memory oldCommitment, ConsensusCommitment.ConsensusCommitmentStruct memory newCommitment)
+    private
+    pure
+    proposalsUnchanged(oldCommitment, newCommitment)
+    { }
+
 }

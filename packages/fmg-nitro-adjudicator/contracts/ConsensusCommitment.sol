@@ -5,11 +5,14 @@ import "fmg-core/contracts/Commitment.sol";
 
 library ConsensusCommitment {
     using Commitment for Commitment.CommitmentStruct;
+    
+    enum UpdateType { Accord, Motion }
 
     struct AppAttributes {
         uint32 consensusCounter;
         uint256[] proposedAllocation;
         address[] proposedDestination;
+        UpdateType updateType;
     }
 
     struct ConsensusCommitmentStruct {
@@ -18,6 +21,7 @@ library ConsensusCommitment {
         address[] currentDestination;
         uint256[] proposedAllocation;
         address[] proposedDestination;
+        UpdateType updateType;
     }
 
     function appAttributes(Commitment.CommitmentStruct memory frameworkCommitment) public pure returns(AppAttributes memory) {
@@ -32,7 +36,8 @@ library ConsensusCommitment {
             frameworkCommitment.allocation,
             frameworkCommitment.destination,
             appAttributes.proposedAllocation,
-            appAttributes.proposedDestination
+            appAttributes.proposedDestination,
+            appAttributes.updateType
         );
     }
 }
