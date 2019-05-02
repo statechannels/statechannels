@@ -5,14 +5,14 @@ import AllocatorChannel from '../models/allocatorChannel';
 import { nitroAdjudicator } from '../utilities/blockchain';
 
 /**
- * then other event todos.
- * */
+ * todos:
+ * - wire up then other events.
+ **/
 
 async function onDeposit(channelId, amountDeposited, destinationHoldings) {
   console.log(`Deposit detected  with ${amountDeposited} ${destinationHoldings} ${channelId}`);
 
   const allocatorChannel = await AllocatorChannel.query()
-    // Is there a better way to specify columns?
     .where('channel_id', channelId)
     .select('id')
     .first();
@@ -51,5 +51,3 @@ export async function start(eventCallback?: EventCallback) {
     console.log(`Challenge detected  with ${channelId} ${commitment} ${finalizedAt}`);
   });
 }
-
-// start();
