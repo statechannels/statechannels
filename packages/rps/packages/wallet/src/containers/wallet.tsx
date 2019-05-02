@@ -7,6 +7,7 @@ import MetamaskErrorContainer from './metamask-error';
 import WalletInitializedContainer from './initialized';
 import LandingPage from '../components/landing-page';
 import Modal from 'react-modal';
+import StatusBarLayout from '../components/status-bar-layout';
 
 interface WalletProps {
   state: states.WalletState;
@@ -26,7 +27,9 @@ class WalletContainer extends PureComponent<WalletProps> {
             overlayClassName={'wallet-overlay-' + this.props.position}
             ariaHideApp={false}
           >
-            <MetamaskErrorContainer state={state} />
+            <StatusBarLayout>
+              <MetamaskErrorContainer state={state} />
+            </StatusBarLayout>
           </Modal>
         );
       case states.WALLET_INITIALIZED:
@@ -37,7 +40,9 @@ class WalletContainer extends PureComponent<WalletProps> {
             overlayClassName={'wallet-overlay-' + this.props.position}
             ariaHideApp={false}
           >
-            <WalletInitializedContainer state={state} />
+            <StatusBarLayout>
+              <WalletInitializedContainer state={state} />
+            </StatusBarLayout>
           </Modal>
         );
       default:

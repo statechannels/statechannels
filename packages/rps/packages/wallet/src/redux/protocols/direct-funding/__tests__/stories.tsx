@@ -4,6 +4,7 @@ import { Provider } from 'react-redux';
 import DirectFundingContainer from '../container';
 import { aEachDepositsInSequenceHappyStates } from './scenarios';
 import * as storybookUtils from '../../../../__stories__/index';
+import StatusBarLayout from '../../../../components/status-bar-layout';
 
 const render = state => () => {
   const container = <DirectFundingContainer directFundingState={state} />;
@@ -15,7 +16,7 @@ const render = state => () => {
         overlayClassName={'wallet-overlay-center'}
         ariaHideApp={false}
       >
-        {container}
+        <StatusBarLayout>{container}</StatusBarLayout>
       </Modal>
     </Provider>
   );
