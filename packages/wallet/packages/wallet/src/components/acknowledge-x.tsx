@@ -1,7 +1,6 @@
 import React from 'react';
 import { Button } from 'reactstrap';
 import { StyleSheet, css } from 'aphrodite';
-import StatusBarLayout from './status-bar-layout';
 
 interface Props {
   title: string;
@@ -14,7 +13,7 @@ export default class AcknowledgeX extends React.PureComponent<Props> {
   render() {
     const { title, action, actionTitle, description } = this.props;
     return (
-      <StatusBarLayout>
+      <div>
         <h2>{title}</h2>
         <p>{description}</p>
         <div className="challenge-expired-button-container">
@@ -24,7 +23,7 @@ export default class AcknowledgeX extends React.PureComponent<Props> {
             </span>
           </div>
         </div>
-      </StatusBarLayout>
+      </div>
     );
   }
 }

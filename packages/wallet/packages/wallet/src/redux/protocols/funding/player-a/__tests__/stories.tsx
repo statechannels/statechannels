@@ -6,6 +6,7 @@ import { Funding } from '..';
 import { fakeStore } from '../../../../../__stories__/index';
 import StatusBarLayout from '../../../../../components/status-bar-layout';
 import * as scenarios from './scenarios';
+import { isTerminal } from '../states';
 
 const render = container => () => {
   // todo: rework this modal stuff
@@ -23,13 +24,15 @@ const render = container => () => {
   );
 };
 
-addStories(scenarios.happyPath, 'Funding / Happy path');
-addStories(scenarios.rejectedStrategy, 'Funding / Rejected strategy');
-addStories(scenarios.cancelledByUser, 'Funding / Cancelled by user');
-addStories(scenarios.cancelledByOpponent, 'Funding / Cancelled by opponent');
+addStories(scenarios.happyPath, 'Funding / Player A / Happy path');
+addStories(scenarios.rejectedStrategy, 'Funding / Player A / Rejected strategy');
+addStories(scenarios.cancelledByUser, 'Funding / Player A / Cancelled by user');
+addStories(scenarios.cancelledByOpponent, 'Funding / Player A / Cancelled by opponent');
 
 function addStories(scenario, chapter) {
   Object.keys(scenario.states).forEach(key => {
-    storiesOf(chapter, module).add(key, render(<Funding state={scenario.states[key]} />));
+    if (!isTerminal(scenario.states[key])) {
+      storiesOf(chapter, module).add(key, render(<Funding state={scenario.states[key]} />));
+    }
   });
 }
