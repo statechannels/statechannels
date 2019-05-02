@@ -2,7 +2,6 @@ import { faCircle } from '@fortawesome/free-regular-svg-icons';
 import { faCheckCircle, faSpinner } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React from 'react';
-import StatusBarLayout from './status-bar-layout';
 
 const completeIcon = (
   <span className="fa-li">
@@ -69,7 +68,7 @@ export class Checklist extends React.PureComponent<Props> {
     const title = this.props.title;
 
     return (
-      <StatusBarLayout>
+      <div>
         <h2 className="bp-2">{title}</h2>
         <ul className="fa-ul">
           {this.props.stepMessages.map((step, stepIndex) => (
@@ -80,7 +79,7 @@ export class Checklist extends React.PureComponent<Props> {
           ))}
         </ul>
         <div className="pb-2">{children}</div>
-      </StatusBarLayout>
+      </div>
     );
   }
 }

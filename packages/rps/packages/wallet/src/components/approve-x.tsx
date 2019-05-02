@@ -1,6 +1,5 @@
 import React from 'react';
 // import walletIcon from '../../images/wallet-iconn.svg';
-import StatusBarLayout from './status-bar-layout';
 import YesOrNo from './yes-or-no';
 
 interface Props {
@@ -24,7 +23,7 @@ export default class ApproveX extends React.PureComponent<Props> {
       children,
     } = this.props;
     return (
-      <StatusBarLayout>
+      <div>
         <h2>{title}</h2>
 
         {children}
@@ -37,7 +36,7 @@ export default class ApproveX extends React.PureComponent<Props> {
           yesMessage={yesMessage}
           noMessage={noMessage}
         />
-      </StatusBarLayout>
+      </div>
     );
   }
 }
