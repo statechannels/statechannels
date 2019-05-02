@@ -1,4 +1,4 @@
-pragma solidity ^0.5.0;
+pragma solidity ^0.5.2;
 
 // truffle will only create artifacts for contracts from external modules if they
 // are referenced by a contract in the `contracts` or `test` directory. The purpose

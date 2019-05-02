@@ -1,4 +1,4 @@
-require('dotenv').config()
+require('dotenv').config();
 
 module.exports = {
   networks: {
@@ -18,7 +18,7 @@ module.exports = {
   },
   compilers: {
     solc: {
-      version: "0.5.0",
-    }
-  }
+      version: '0.5.2',
+    },
+  },
 };
