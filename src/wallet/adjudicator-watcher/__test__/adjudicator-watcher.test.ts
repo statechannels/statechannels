@@ -1,6 +1,9 @@
 import { ethers } from 'ethers';
+import { bigNumberify } from 'ethers/utils';
 import { channelID } from 'fmg-core/lib/channel';
-import { depositContract, channel } from './utils';
+import AllocatorChannel from '../../models/allocatorChannel';
+import { channel, depositContract } from './utils';
+import { start } from '../../adjudicator-watcher';
 
 jest.setTimeout(60000);
 
@@ -9,7 +12,29 @@ describe('adjudicator listener', () => {
     `http://localhost:${process.env.DEV_GANACHE_PORT}`,
   );
 
-  it('should handle a funds received event when registered for that channel', async () => {
-    await depositContract(provider, channelID(channel));
+  it('should handle a funds received event when channel is in the database', async done => {
+    const channelId = channelID(channel);
+    const preEventHoldings = await AllocatorChannel.query()
+      .where({ channel_id: channelId })
+      .first()
+      .select('holdings');
+
+    const eventCallback = jest.fn(async eventType => {
+      const postEventHoldings = await AllocatorChannel.query()
+        .where({ channel_id: channelId })
+        .first()
+        .select('holdings');
+
+      // todo:
+      // - wait for event monitor
+      const eventDeposit = bigNumberify(postEventHoldings.holdings).sub(
+        bigNumberify(preEventHoldings.holdings),
+      );
+      expect(eventDeposit.toHexString()).toBe(bigNumberify(5).toHexString());
+      done();
+    });
+    start(eventCallback);
+
+    await depositContract(provider, channelId);
   });
 });
