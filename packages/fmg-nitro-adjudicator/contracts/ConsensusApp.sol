@@ -1,4 +1,4 @@
-pragma solidity ^0.5.0;
+pragma solidity ^0.5.2;
 pragma experimental ABIEncoderV2;
 
 import "fmg-core/contracts/Commitment.sol";
@@ -17,15 +17,15 @@ contract ConsensusApp {
 // State machine transition identifier
 
         if (oldCommitment.updateType == ConsensusCommitment.UpdateType.Accord) {
-            if (newCommitment.UpdateType == ConsensusCommitment.UpdateType.Accord) {
+            if (newCommitment.updateType == ConsensusCommitment.UpdateType.Accord) {
                 validatePass(oldCommitment, newCommitment);
                 return true;
-            } else if (newCommitment.UpdateType == ConsensusCommitment.UpdateType.Motion) {
+            } else if (newCommitment.updateType == ConsensusCommitment.UpdateType.Motion) {
                 validatePropose(oldCommitment, newCommitment);
                 return true;
             }
-        } else if (oldCommitment.UpdateType == ConsensusCommitment.UpdateType.Motion) {
-            if (newCommitment.UpdateType == ConsensusCommitment.UpdateType.Motion) { 
+        } else if (oldCommitment.updateType == ConsensusCommitment.UpdateType.Motion) {
+            if (newCommitment.updateType == ConsensusCommitment.UpdateType.Motion) { 
                 if (newCommitment.numVotes == 1) {
                   validateModify(oldCommitment, newCommitment);
                   return true;
@@ -33,15 +33,15 @@ contract ConsensusApp {
                   validateAddVote(oldCommitment, newCommitment);
                   return true;
                 } else revert('ConsensusApp: numVotes must be reset to 1 (modify the proposal) or incremented (add your vote)');
-            } else if (newCommitment.UpdateType == ConsensusCommitment.UpdateType.Accord) { 
+            } else if (newCommitment.updateType == ConsensusCommitment.UpdateType.Accord) { 
                 require(newCommitment.numVotes == 0, 'ConsensusApp: To veto or make new Accord, numVotes must be 0');
-                if (newCommitment.allocation == oldCommitment.proposedAllocation && newCommitment.destination == oldCommitment.proposedDestination ) {
+                if (encodeAndHashAllocation(newCommitment.currentAllocation) == encodeAndHashAllocation(oldCommitment.proposedAllocation) && encodeAndHashDestination(newCommitment.currentDestination) == encodeAndHashDestination(oldCommitment.proposedDestination)) {
                   validateNewAccord(oldCommitment, newCommitment);
                   return true;
-                } else if (newCommitment.proposedAllocation == oldCommitment.allocation && newCommitment.proposedDestination == oldCommitment.destination) {
+                } else if (encodeAndHashAllocation(newCommitment.proposedAllocation) == encodeAndHashAllocation(oldCommitment.currentAllocation) && encodeAndHashDestination(newCommitment.proposedDestination) == encodeAndHashDestination(oldCommitment.currentDestination)) {
                   validateVeto(oldCommitment, newCommitment);
                   return true;
-                } else revert('ConsensusApp: Proposed quantities must be updated to match actual quantities (veto) or actual quantities updated to match proposed quantitites (new accord)');
+                } else revert('ConsensusApp: Proposed quantities must be updated to match current quantities (veto) or current quantities updated to match proposed quantitites (new accord)');
             }
         }
         revert("ConsensusApp: No valid transition found for commitments");
@@ -49,20 +49,20 @@ contract ConsensusApp {
 
 // modifiers
 
-    modifier actualsUnchanged(ConsensusCommitment.ConsensusCommitmentStruct memory oldCommitment, ConsensusCommitment.ConsensusCommitmentStruct memory newCommitment) {
-      require(oldCommitment.allocation == newCommitment.allocation,"ConsensusApp: : 'allocation' must be the same between commitments."); 
-      require(oldCommitment.destination == newCommitment.destination,"ConsensusApp:  'destination' must be the same between commitments."); 
+    modifier currentsUnchanged(ConsensusCommitment.ConsensusCommitmentStruct memory oldCommitment, ConsensusCommitment.ConsensusCommitmentStruct memory newCommitment) {
+      require(encodeAndHashAllocation(oldCommitment.currentAllocation) == encodeAndHashAllocation(newCommitment.currentAllocation), "ConsensusApp: : 'allocation' must be the same between commitments."); 
+      require(encodeAndHashDestination(oldCommitment.currentDestination) == encodeAndHashDestination(newCommitment.currentDestination), "ConsensusApp:  'destination' must be the same between commitments.");
         _;
     }
 
     modifier proposalsUnchanged(ConsensusCommitment.ConsensusCommitmentStruct memory oldCommitment, ConsensusCommitment.ConsensusCommitmentStruct memory newCommitment) {
-      require(oldCommitment.proposedAllocation == newCommitment.proposedAllocation,"ConsensusApp:  'proposedAllocation' must be the same between commitments."); 
-      require(oldCommitment.proposedDestination == newCommitment.proposedDestination,"ConsensusApp:  'proposedDestination' must be the same between commitments."); 
+      require(encodeAndHashAllocation(oldCommitment.proposedAllocation) == encodeAndHashAllocation(newCommitment.proposedAllocation),"ConsensusApp:  'proposedAllocation' must be the same between commitments."); 
+      require(encodeAndHashDestination(oldCommitment.proposedDestination) == encodeAndHashDestination(newCommitment.proposedDestination),"ConsensusApp:  'proposedDestination' must be the same between commitments."); 
         _;
     }
 
     modifier totalAllocationConserved(ConsensusCommitment.ConsensusCommitmentStruct memory oldCommitment, ConsensusCommitment.ConsensusCommitmentStruct memory newCommitment) {
-      require(sum(newCommitment.proposedAllocation)==sum(oldCommitment.allocation), "ConsensusApp:  allocation must be conserved");
+      require(sum(newCommitment.proposedAllocation)==sum(oldCommitment.currentAllocation), "ConsensusApp:  allocation must be conserved");
       _;
     }
     
@@ -71,35 +71,35 @@ contract ConsensusApp {
     function validatePass(ConsensusCommitment.ConsensusCommitmentStruct memory oldCommitment, ConsensusCommitment.ConsensusCommitmentStruct memory newCommitment)
     private
     pure
-    actualsUnchanged(oldCommitment, newCommitment)
+    currentsUnchanged(oldCommitment, newCommitment)
     proposalsUnchanged(oldCommitment, newCommitment)
     { }
 
     function validatePropose(ConsensusCommitment.ConsensusCommitmentStruct memory oldCommitment, ConsensusCommitment.ConsensusCommitmentStruct memory newCommitment)
     private
     pure
-    actualsUnchanged(oldCommitment, newCommitment)
+    currentsUnchanged(oldCommitment, newCommitment)
     totalAllocationConserved(oldCommitment, newCommitment)
     { }
 
     function validateAddVote(ConsensusCommitment.ConsensusCommitmentStruct memory oldCommitment, ConsensusCommitment.ConsensusCommitmentStruct memory newCommitment)
     private
     pure
-    actualsUnchanged(oldCommitment, newCommitment)
+    currentsUnchanged(oldCommitment, newCommitment)
     proposalsUnchanged(oldCommitment, newCommitment)
     { }
 
     function validateModify(ConsensusCommitment.ConsensusCommitmentStruct memory oldCommitment, ConsensusCommitment.ConsensusCommitmentStruct memory newCommitment)
     private
     pure
-    actualsUnchanged(oldCommitment, newCommitment)
+    currentsUnchanged(oldCommitment, newCommitment)
     totalAllocationConserved(oldCommitment, newCommitment)
     { }
 
     function validateVeto(ConsensusCommitment.ConsensusCommitmentStruct memory oldCommitment, ConsensusCommitment.ConsensusCommitmentStruct memory newCommitment)
     private
     pure
-    actualsUnchanged(oldCommitment, newCommitment)
+    currentsUnchanged(oldCommitment, newCommitment)
     { // no additional checks necessary
     }
 
@@ -109,4 +109,24 @@ contract ConsensusApp {
     proposalsUnchanged(oldCommitment, newCommitment)
     { }
 
+
+// helpers
+    function sum(uint[] memory _array) 
+        public 
+        pure 
+        returns (uint sum_) 
+    {
+        sum_ = 0;
+        for (uint i = 0; i < _array.length; i++) {
+            sum_ += _array[i];
+        }
+    }
+
+    function encodeAndHashAllocation(uint256[] memory allocation) internal pure returns (bytes32) {
+        return keccak256(abi.encode(allocation));
+    }
+
+    function encodeAndHashDestination(address[] memory destination) internal pure returns (bytes32) {
+        return keccak256(abi.encode(destination));
+    }
 }

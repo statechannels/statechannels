@@ -4,7 +4,7 @@
 
 ## `ConsensusApp.sol`
 
-The consensus application (or consensus game), is the unique application that runs in Nitro ledger channels. Its purpose is to allow ledger channel participants to safely update how the funds in the ledger channel are distributed, by way of unanimous consensus. Recall that a ledger channel can allocate to other channels as well as the participants themselves.
+The consensus application (or consensus game) is the unique application that runs in Nitro ledger channels. Its purpose is to allow ledger channel participants to safely update how the funds in the ledger channel are distributed, by way of unanimous consensus. Recall that a ledger channel can allocate to other channels as well as the participants themselves.
 
 The consensus application is compatible with Nitro protocol, and therefore specifies some `AppAttributes` to be included in each commitment as well as a `validTransition` function which helps the nitro-adjudicator to settle disputes.
 
