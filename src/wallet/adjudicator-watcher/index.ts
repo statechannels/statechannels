@@ -5,9 +5,6 @@ import AllocatorChannel from '../models/allocatorChannel';
 import { nitroAdjudicator } from '../utilities/blockchain';
 
 /**
- * funding todos:
- * - test state update.
- *
  * then other event todos.
  * */
 
@@ -15,7 +12,8 @@ async function onDeposit(channelId, amountDeposited, destinationHoldings) {
   console.log(`Deposit detected  with ${amountDeposited} ${destinationHoldings} ${channelId}`);
 
   const allocatorChannel = await AllocatorChannel.query()
-    .where({ channel_id: channelId })
+    // Is there a better way to specify columns?
+    .where('channel_id', channelId)
     .select('id')
     .first();
 
@@ -25,10 +23,9 @@ async function onDeposit(channelId, amountDeposited, destinationHoldings) {
     return;
   }
 
-  const numUpdatedRows = await AllocatorChannel.query()
-    .patch({ holdings: destinationHoldings.toHexString() })
-    .where({ id: allocatorChannel.id });
-  console.log(`Updated ${numUpdatedRows} rows`);
+  await AllocatorChannel.query()
+    .findById(allocatorChannel.id)
+    .patch({ holdings: destinationHoldings.toHexString() });
 }
 
 enum EventType {
@@ -42,14 +39,13 @@ export async function start(eventCallback?: EventCallback) {
   console.log('Starting chain watcher');
   const adjudicator: ethers.Contract = await nitroAdjudicator();
   const depositedFilter = adjudicator.filters.Deposited();
-  adjudicator.on(depositedFilter, (channelId, amountDeposited, destinationHoldings) => async {
+  adjudicator.on(depositedFilter, async (channelId, amountDeposited, destinationHoldings) => {
     await onDeposit(channelId, amountDeposited, destinationHoldings);
     if (eventCallback) {
       eventCallback(EventType.Deposited);
     }
   });
 
-  console.log('Adding challenge watcher');
   const challengeCreatedFilter = adjudicator.filters.ChallengeCreated();
   adjudicator.on(challengeCreatedFilter, (channelId, commitment, finalizedAt) => {
     console.log(`Challenge detected  with ${channelId} ${commitment} ${finalizedAt}`);

@@ -14,23 +14,25 @@ describe('adjudicator listener', () => {
 
   it('should handle a funds received event when channel is in the database', async done => {
     const channelId = channelID(channel);
-    const preEventHoldings = await AllocatorChannel.query()
-      .where({ channel_id: channelId })
+
+    // todo: probably connected to a dev database
+    const preEventRow = await AllocatorChannel.query()
+      .where('channel_id', channelId)
       .first()
-      .select('holdings');
+      .select('holdings', 'channel_id', 'nonce');
+
+    const preEventHoldings = preEventRow.holdings;
 
     const eventCallback = jest.fn(async eventType => {
-      const postEventHoldings = await AllocatorChannel.query()
+      const postEventHoldings = (await AllocatorChannel.query()
         .where({ channel_id: channelId })
         .first()
-        .select('holdings');
+        .select('holdings')).holdings;
 
       // todo:
       // - wait for event monitor
-      const eventDeposit = bigNumberify(postEventHoldings.holdings).sub(
-        bigNumberify(preEventHoldings.holdings),
-      );
-      expect(eventDeposit.toHexString()).toBe(bigNumberify(5).toHexString());
+      const eventDeposit = bigNumberify(postEventHoldings).sub(bigNumberify(preEventHoldings));
+      expect(eventDeposit.toNumber()).toBeGreaterThan(5);
       done();
     });
     start(eventCallback);
