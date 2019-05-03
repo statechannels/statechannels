@@ -3,9 +3,18 @@ import { bigNumberify } from 'ethers/utils';
 import { channelID } from 'fmg-core/lib/channel';
 import AllocatorChannel from '../../models/allocatorChannel';
 import { channel, depositContract } from './utils';
-import { start } from '../../adjudicator-watcher';
+import { listen } from '../../adjudicator-watcher';
 
 jest.setTimeout(60000);
+const channelId = channelID(channel);
+let removeListeners = null;
+
+async function getHoldings() {
+  return (await AllocatorChannel.query()
+    .where('channel_id', channelId)
+    .first()
+    .select('holdings')).holdings;
+}
 
 describe('adjudicator listener', () => {
   const provider: ethers.providers.JsonRpcProvider = new ethers.providers.JsonRpcProvider(
@@ -13,23 +22,21 @@ describe('adjudicator listener', () => {
   );
 
   it('should handle a funds received event when channel is in the database', async done => {
-    const channelId = channelID(channel);
-    const preEventHoldings = (await AllocatorChannel.query()
-      .where('channel_id', channelId)
-      .first()
-      .select('holdings')).holdings;
-    const eventCallback = jest.fn(async eventType => {
-      const postEventHoldings = (await AllocatorChannel.query()
-        .where({ channel_id: channelId })
-        .first()
-        .select('holdings')).holdings;
+    const preEventHoldings = await getHoldings();
+
+    const eventCallback = async eventType => {
+      const postEventHoldings = await getHoldings();
 
       const eventDeposit = bigNumberify(postEventHoldings).sub(bigNumberify(preEventHoldings));
       expect(eventDeposit.toNumber()).toBeGreaterThan(5);
       done();
-    });
-    start(eventCallback);
+    };
 
+    removeListeners = await listen(eventCallback);
     await depositContract(provider, channelId);
   });
+});
+
+afterEach(() => {
+  removeListeners();
 });

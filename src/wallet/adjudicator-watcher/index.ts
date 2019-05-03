@@ -9,6 +9,12 @@ import { nitroAdjudicator } from '../utilities/blockchain';
  * - wire up then other events.
  **/
 
+enum EventType {
+  Deposited,
+  ChallengeCreated,
+}
+type EventCallback = (eventType: EventType) => void;
+
 async function onDeposit(channelId, amountDeposited, destinationHoldings) {
   console.log(`Deposit detected  with ${amountDeposited} ${destinationHoldings} ${channelId}`);
 
@@ -17,7 +23,6 @@ async function onDeposit(channelId, amountDeposited, destinationHoldings) {
     .select('id')
     .first();
 
-  // todo: is this the correct way to check that the query contains at least one row?
   if (!allocatorChannel) {
     console.log(`Allocator channel ${channelId} not in database`);
     return;
@@ -28,13 +33,7 @@ async function onDeposit(channelId, amountDeposited, destinationHoldings) {
     .patch({ holdings: destinationHoldings.toHexString() });
 }
 
-enum EventType {
-  Deposited,
-  ChallengeCreated,
-}
-type EventCallback = (eventType: EventType) => void;
-
-export async function start(eventCallback?: EventCallback) {
+export async function listen(eventCallback?: EventCallback) {
   Model.knex(knex);
   console.log('Starting chain watcher');
   const adjudicator: ethers.Contract = await nitroAdjudicator();
@@ -50,4 +49,9 @@ export async function start(eventCallback?: EventCallback) {
   adjudicator.on(challengeCreatedFilter, (channelId, commitment, finalizedAt) => {
     console.log(`Challenge detected  with ${channelId} ${commitment} ${finalizedAt}`);
   });
+
+  return () => {
+    adjudicator.removeAllListeners(depositedFilter);
+    adjudicator.removeAllListeners(challengeCreatedFilter);
+  };
 }
