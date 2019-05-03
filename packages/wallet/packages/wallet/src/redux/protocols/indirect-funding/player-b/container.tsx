@@ -3,6 +3,7 @@ import { PureComponent } from 'react';
 import { connect } from 'react-redux';
 import { PlayerBState } from './state';
 import { unreachable } from '../../../../utils/reducer-utils';
+import { FundingStep } from './components/funding-step';
 
 interface Props {
   state: PlayerBState;
@@ -16,7 +17,7 @@ class IndirectFundingContainer extends PureComponent<Props> {
       case 'BWaitForDirectFunding':
       case 'BWaitForPostFundSetup0':
       case 'BWaitForLedgerUpdate0':
-        return <div>TODO Player B</div>;
+        return <FundingStep indirectFundingStateB={state} />;
       default:
         return unreachable(state);
     }
