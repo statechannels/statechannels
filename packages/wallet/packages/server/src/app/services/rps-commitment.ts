@@ -113,5 +113,8 @@ export function generateSalt(): Bytes32 {
 }
 
 export function hashCommitment(weapon: Weapon, salt: string) {
-  return soliditySha3({ type: 'uint256', value: weapon }, { type: 'bytes32', value: salt });
+  return soliditySha3(
+    { type: 'uint256', value: weapon.toString() },
+    { type: 'bytes32', value: salt },
+  );
 }
