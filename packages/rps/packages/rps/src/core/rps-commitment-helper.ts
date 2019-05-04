@@ -109,7 +109,10 @@ export function propose(obj: ProposeParams): RPSCommitment {
 }
 
 export function hashCommitment(play: Weapon, salt: string) {
-  return soliditySha3({ type: 'uint256', value: play }, { type: 'bytes32', value: salt });
+  return soliditySha3(
+    { type: 'uint256', value: play.toString() },
+    { type: 'bytes32', value: salt },
+  );
 }
 
 interface ProposeWithWeaponAndSaltParams extends BaseWithBuyInParams {

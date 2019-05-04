@@ -23,17 +23,15 @@ interface Props {
 
 class FundingContainer extends PureComponent<Props> {
   render() {
-    const { state } = this.props;
+    const { state, strategyChosen, cancelled } = this.props;
     const { processId } = state;
 
     switch (state.type) {
       case states.WAIT_FOR_STRATEGY_CHOICE:
         return (
           <ChooseStrategy
-            strategyChosen={(strategy: FundingStrategy) =>
-              actions.strategyChosen(processId, strategy)
-            }
-            cancelled={() => actions.cancelled(processId, PlayerIndex.B)}
+            strategyChosen={(strategy: FundingStrategy) => strategyChosen(processId, strategy)}
+            cancelled={() => cancelled(processId, PlayerIndex.B)}
           />
         );
       case states.WAIT_FOR_STRATEGY_RESPONSE:

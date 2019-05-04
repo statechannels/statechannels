@@ -9,6 +9,7 @@ import { unreachable } from '../../../utils/reducer-utils';
 import { Action as IndirectFundingAction } from '../indirect-funding/actions';
 import * as playerAStates from './player-a/states';
 import * as selectors from '../../selectors';
+import { getOpponentAddress } from '../reducer-helpers';
 
 export function initialize(
   sharedData: SharedData,
@@ -16,9 +17,8 @@ export function initialize(
   processId: string,
   playerIndex: PlayerIndex,
 ): ProtocolStateWithSharedData<states.FundingState> {
-  // TODO: We probably want to handle this in the root reducer
   const channelState = selectors.getChannelState(sharedData, channelId);
-  const opponentAddress = channelState.participants[playerIndex];
+  const opponentAddress = getOpponentAddress(channelState, playerIndex);
   switch (playerIndex) {
     case PlayerIndex.A:
       return initializeA(sharedData, processId, channelId, opponentAddress);
