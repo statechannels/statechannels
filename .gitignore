@@ -13,6 +13,7 @@
 **/*.log
 build
 lib
+contracts
 
 # This is checked in as a typescript file
 knexfile.js

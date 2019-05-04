@@ -1,7 +1,7 @@
 import { ethers } from 'ethers';
 import { bigNumberify } from 'ethers/utils';
 import { Channel } from 'fmg-core';
-import * as NitroAdjudicatorArtifact from '../../../contracts/prebuilt_contracts/NitroAdjudicator.json';
+import * as NitroAdjudicatorArtifact from '../../../../build/contracts/NitroAdjudicator.json';
 import { DUMMY_RULES_ADDRESS, FUNDED_CHANNEL_NONCE, PARTICIPANTS } from '../../../constants';
 
 export const channel: Channel = {
