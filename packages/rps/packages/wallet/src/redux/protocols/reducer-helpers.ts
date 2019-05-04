@@ -1,5 +1,4 @@
-import { Commitment } from '../../domain';
-import { messageRelayRequested, SIGNATURE_SUCCESS, VALIDATION_SUCCESS } from 'magmo-wallet-client';
+import { SIGNATURE_SUCCESS, VALIDATION_SUCCESS } from 'magmo-wallet-client';
 import * as actions from '../actions';
 import { channelStoreReducer } from '../channel-store/reducer';
 import { accumulateSideEffects } from '../outbox';
@@ -40,19 +39,6 @@ export const filterOutSignatureMessages = (sideEffects?: SideEffects): SideEffec
     };
   }
   return sideEffects;
-};
-
-export const createCommitmentMessageRelay = (
-  to: string,
-  processId: string,
-  commitment: Commitment,
-  signature: string,
-) => {
-  const payload = {
-    processId,
-    data: { commitment, signature, processId },
-  };
-  return messageRelayRequested(to, payload);
 };
 
 export function showWallet(sharedData: SharedData): SharedData {
