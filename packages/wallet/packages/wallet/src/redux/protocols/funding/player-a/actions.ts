@@ -1,11 +1,7 @@
 import { BaseProcessAction } from '../../actions';
 import { PlayerIndex } from '../../../types';
-import {
-  strategyApproved,
-  StrategyApproved,
-  STRATEGY_APPROVED,
-  FundingStrategy,
-} from '../../../../communication';
+import { FundingStrategy } from '../../../../communication';
+import { strategyApproved, StrategyApproved, STRATEGY_APPROVED } from '../../../../communication';
 export { strategyApproved, StrategyApproved, STRATEGY_APPROVED };
 
 export type FundingAction =

@@ -17,7 +17,6 @@ import { CommitmentType, Commitment, getChannelId } from '../../../../domain';
 import { Channel } from 'fmg-core/lib/channel';
 import { CONSENSUS_LIBRARY_ADDRESS } from '../../../../constants';
 import { getChannel, theirAddress } from '../../../channel-store';
-import { createCommitmentMessageRelay } from '../../reducer-helpers';
 import { DirectFundingAction } from '../../direct-funding';
 import { directFundingRequested } from '../../direct-funding/actions';
 import {
@@ -28,6 +27,7 @@ import {
 } from '../../direct-funding/state';
 import { directFundingStateReducer } from '../../direct-funding/reducer';
 import { addHex } from '../../../../utils/hex-utils';
+import { sendCommitmentReceived } from '../../../../communication';
 
 type ReturnVal = ProtocolStateWithSharedData<IndirectFundingState>;
 type IDFAction = actions.indirectFunding.Action;
@@ -56,7 +56,7 @@ export function initialize(channelId: string, sharedData: SharedData): ReturnVal
   const ledgerId = getChannelId(ourCommitment);
 
   // just need to put our message in the outbox
-  const messageRelay = createCommitmentMessageRelay(
+  const messageRelay = sendCommitmentReceived(
     theirAddress(channel),
     'processId', // TODO don't use dummy values
     signResult.signedCommitment.commitment,
@@ -171,7 +171,7 @@ function handleWaitForDirectFunding(
     }
     sharedData = signResult.store;
 
-    const messageRelay = createCommitmentMessageRelay(
+    const messageRelay = sendCommitmentReceived(
       theirAddress(channel),
       'processId', // TODO don't use dummy values
       signResult.signedCommitment.commitment,
@@ -238,7 +238,7 @@ function handleWaitForLedgerUpdate(
   sharedData = signResult.store;
 
   // just need to put our message in the outbox
-  const messageRelay = createCommitmentMessageRelay(
+  const messageRelay = sendCommitmentReceived(
     theirAddress(channel),
     'processId', // TODO don't use dummy values
     signResult.signedCommitment.commitment,

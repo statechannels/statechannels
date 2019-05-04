@@ -1,5 +1,21 @@
 import { messageRelayRequested } from 'magmo-wallet-client';
-import { strategyProposed, strategyApproved } from '../';
+import { strategyProposed, strategyApproved } from '..';
+import { commitmentReceived } from '../../redux/actions';
+import {
+  signedCommitment2,
+  signedCommitment3,
+  signedCommitment51,
+  signedCommitment52,
+  signedLedgerCommitments,
+} from './commitments';
+const {
+  signedLedgerCommitment0,
+  signedLedgerCommitment1,
+  signedLedgerCommitment2,
+  signedLedgerCommitment3,
+  signedLedgerCommitment4,
+  signedLedgerCommitment5,
+} = signedLedgerCommitments;
 
 export const asAddress = '0x5409ED021D9299bf6814279A6A1411A7e866A631';
 export const bsAddress = '0x6Ecbe1DB9EF729CBe972C83Fb886247691Fb6beb';
@@ -19,52 +35,52 @@ const indirectStrategyApproved = messageRelayRequested(asAddress, {
 
 const sendLedgerPrefundSetup = messageRelayRequested(bsAddress, {
   processId: fundingProcessId,
-  data: '',
+  data: commitmentReceived(fundingProcessId, signedLedgerCommitment0),
 });
 
 const respondToLedgerPreFundSetup = messageRelayRequested(asAddress, {
   processId: fundingProcessId,
-  data: '',
+  data: commitmentReceived(fundingProcessId, signedLedgerCommitment1),
 });
 
 const sendLedgerPostfundSetup = messageRelayRequested(bsAddress, {
   processId: fundingProcessId,
-  data: '',
+  data: commitmentReceived(fundingProcessId, signedLedgerCommitment2),
 });
 
 const respondToLedgerPostFundSetup = messageRelayRequested(asAddress, {
   processId: fundingProcessId,
-  data: '',
+  data: commitmentReceived(fundingProcessId, signedLedgerCommitment3),
 });
 
 const sendLedgerUpdate = messageRelayRequested(bsAddress, {
   processId: fundingProcessId,
-  data: '',
+  data: commitmentReceived(fundingProcessId, signedLedgerCommitment4),
 });
 
 const respondToLedgerUpdate = messageRelayRequested(asAddress, {
   processId: fundingProcessId,
-  data: '',
+  data: commitmentReceived(fundingProcessId, signedLedgerCommitment5),
 });
 
 const sendAppPostFundSetup = messageRelayRequested(bsAddress, {
   processId: fundingProcessId,
-  data: '',
+  data: commitmentReceived(fundingProcessId, signedCommitment2),
 });
 
 const respondToAppPostFundSetup = messageRelayRequested(asAddress, {
   processId: fundingProcessId,
-  data: '',
+  data: commitmentReceived(fundingProcessId, signedCommitment3),
 });
 
 const concludeGame = messageRelayRequested(bsAddress, {
   processId: concludeProcessId,
-  data: '',
+  data: commitmentReceived(fundingProcessId, signedCommitment51),
 });
 
 const respondToConclude = messageRelayRequested(asAddress, {
   processId: concludeProcessId,
-  data: '',
+  data: commitmentReceived(fundingProcessId, signedCommitment52),
 });
 
 export default {

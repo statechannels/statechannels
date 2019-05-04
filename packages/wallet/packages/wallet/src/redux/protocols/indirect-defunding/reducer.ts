@@ -10,6 +10,7 @@ import { unreachable } from '../../../utils/reducer-utils';
 import { bytesFromAppAttributes } from 'fmg-nitro-adjudicator';
 import { PlayerIndex } from '../../types';
 import { checkAndStore, signAndStore } from '../../channel-store/reducer';
+import { sendCommitmentReceived } from '../../../communication';
 
 export const initialize = (
   processId: string,
@@ -221,7 +222,7 @@ const receiveAndSendUpdateCommitment = (
   const result = signAndStore(sharedData.channelStore, commitment);
   if (result.isSuccess) {
     const newSharedData = setChannelStore(sharedData, result.store);
-    const message = helpers.createCommitmentMessageRelay(
+    const message = sendCommitmentReceived(
       processId,
       channelState.participants[ourIndex],
       commitment,

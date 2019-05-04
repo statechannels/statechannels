@@ -1,11 +1,9 @@
 import { Commitment, CommitmentType, signCommitment2 } from '../domain';
 import { appAttributesFromBytes, bytesFromAppAttributes } from 'fmg-nitro-adjudicator';
 import { PlayerIndex } from '../redux/types';
-import { signCommitment } from '../domain';
 import { Channel } from 'fmg-core';
 import { SignedCommitment } from '../domain';
 import { ChannelState } from '../redux/channel-store';
-import { sendConcludeChannel } from '../communication';
 
 export const hasConsensusBeenReached = (
   lastCommitment: Commitment,
@@ -115,13 +113,5 @@ export const composeConcludeCommitment = (channelState: ChannelState) => {
     commitmentCount,
   };
 
-  const signature = signCommitment(concludeCommitment, channelState.privateKey);
-  const processId = channelState.channelId;
-  const sendCommitmentAction = sendConcludeChannel(
-    channelState.participants[1 - channelState.ourIndex],
-    processId,
-    concludeCommitment,
-    signature,
-  );
-  return { concludeCommitment, signature, sendCommitmentAction };
+  return signCommitment2(concludeCommitment, channelState.privateKey);
 };

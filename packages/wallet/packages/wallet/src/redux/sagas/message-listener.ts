@@ -4,6 +4,7 @@ import * as incoming from 'magmo-wallet-client/lib/wallet-instructions';
 import * as actions from '../actions';
 import { eventChannel } from 'redux-saga';
 import * as application from '../protocols/application/reducer';
+import { isRelayableAction } from '../../communication';
 
 export function* messageListener() {
   const postMessageEventChannel = eventChannel(emitter => {
@@ -72,17 +73,11 @@ export function* messageListener() {
 function handleIncomingMessage(action: incoming.ReceiveMessage) {
   const { messagePayload } = action as incoming.ReceiveMessage;
 
-  const { data, processId } = messagePayload;
+  const { data } = messagePayload;
 
-  if ('commitment' in data) {
-    return actions.commitmentReceived(processId, {
-      commitment: data.commitment,
-      signature: data.signature,
-    });
-  } else if ('type' in data) {
-    // TODO: It would be nice if eventually every message simply wrapped an action
+  if ('type' in data && isRelayableAction(data)) {
     return data;
   } else {
-    return actions.messageReceived(processId, data);
+    throw new Error('Invalid action');
   }
 }

@@ -3,8 +3,7 @@ import * as states from '../states';
 import { fundingReducer as reducer } from '../reducer';
 import { ProtocolStateWithSharedData } from '../../..';
 import { itSendsThisMessage } from '../../../../__tests__/helpers';
-import { messageRelayRequested } from 'magmo-wallet-client';
-import { strategyProposed } from '../../player-b/actions';
+import { sendStrategyProposed } from '../../../../../communication';
 
 function whenIn(state) {
   return `when in ${state}`;
@@ -21,11 +20,7 @@ describe('happyPath', () => {
 
     itTransitionsTo(result, states.WAIT_FOR_STRATEGY_RESPONSE);
     const { processId, strategy, opponentAddress } = scenario;
-    const sentAction = strategyProposed(processId, strategy);
-    itSendsThisMessage(
-      result,
-      messageRelayRequested(opponentAddress, { processId, data: sentAction }),
-    );
+    itSendsThisMessage(result, sendStrategyProposed(opponentAddress, processId, strategy));
   });
 
   describe(whenIn(states.WAIT_FOR_STRATEGY_RESPONSE), () => {
