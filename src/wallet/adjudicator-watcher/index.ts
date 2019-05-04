@@ -44,7 +44,6 @@ export async function listen(eventCallback?: EventCallback) {
       eventCallback(EventType.Deposited);
     }
   });
-
   const challengeCreatedFilter = adjudicator.filters.ChallengeCreated();
   adjudicator.on(challengeCreatedFilter, (channelId, commitment, finalizedAt) => {
     console.log(`Challenge detected  with ${channelId} ${commitment} ${finalizedAt}`);

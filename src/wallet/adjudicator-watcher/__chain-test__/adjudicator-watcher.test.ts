@@ -3,7 +3,7 @@ import { bigNumberify } from 'ethers/utils';
 import { channelID } from 'fmg-core/lib/channel';
 import AllocatorChannel from '../../models/allocatorChannel';
 import { channel, depositContract } from './utils';
-import { listen } from '../../adjudicator-watcher';
+import { listen } from '..';
 
 jest.setTimeout(60000);
 const channelId = channelID(channel);
