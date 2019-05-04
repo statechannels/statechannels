@@ -8,6 +8,7 @@ import * as selectors from '../selectors';
 import { PlayerIndex } from '../types';
 import { CommitmentType } from 'fmg-core/lib/commitment';
 import * as magmoWalletClient from 'magmo-wallet-client';
+import { ChannelState } from '../channel-store';
 
 export const updateChannelState = (
   sharedData: SharedData,
@@ -90,3 +91,9 @@ export const isFirstPlayer = (channelId: string, sharedData: SharedData) => {
   const channelState = selectors.getChannelState(sharedData, channelId);
   return channelState.ourIndex === PlayerIndex.A;
 };
+
+export function getOpponentAddress(channelState: ChannelState, playerIndex: PlayerIndex) {
+  const { participants } = channelState;
+  const opponentAddress = participants[playerIndex + (1 % participants.length)];
+  return opponentAddress;
+}
