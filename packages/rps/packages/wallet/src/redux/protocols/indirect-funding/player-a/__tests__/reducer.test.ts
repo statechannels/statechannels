@@ -25,7 +25,6 @@ describe('happy-path scenario', () => {
     const { state, action, reply } = scenario.waitForDirectFunding;
     const updatedState = playerAReducer(state.state, state.store, action);
 
-    // TODO need to check for ledger update commitment being sent
     itTransitionsTo(updatedState, 'AWaitForLedgerUpdate1');
     itSendsMessage(updatedState, reply);
   });
@@ -73,13 +72,10 @@ function itSendsMessage(state: ReturnVal, message: SignedCommitment) {
     if (lastMessage && 'messagePayload' in lastMessage) {
       const dataPayload = lastMessage.messagePayload.data;
       // This is yuk. The data in a message is currently of 'any' type..
-      if (!('commitment' in dataPayload)) {
-        fail('No commitment in the last message.');
+      if (!('signedCommitment' in dataPayload)) {
+        fail('No signed commitment in the last message.');
       }
-      if (!('signature' in dataPayload)) {
-        fail('No signature in the last message.');
-      }
-      const { commitment, signature } = dataPayload;
+      const { commitment, signature } = dataPayload.signedCommitment;
       expect({ commitment, signature }).toEqual(message);
     } else {
       fail('No messages in the outbox.');

@@ -4,6 +4,7 @@ import { Commitment } from '../../domain';
 import { QueuedTransaction, OutboxState } from '../outbox/state';
 import { SharedData } from '../state';
 import { ProtocolStateWithSharedData } from '../protocols';
+import { COMMITMENT_RECEIVED } from '../actions';
 
 type SideEffectState =
   | StateWithSideEffects<any>
@@ -66,9 +67,10 @@ const expectSideEffect = (
 };
 
 export const expectThisCommitmentSent = (state: SideEffectState, c: Partial<Commitment>) => {
-  expectSideEffect('messageOutbox', state, item =>
-    expect(item.messagePayload.data.commitment).toMatchObject(c),
-  );
+  expectSideEffect('messageOutbox', state, item => {
+    expect(item.messagePayload.data.type).toEqual(COMMITMENT_RECEIVED);
+    expect(item.messagePayload.data.signedCommitment.commitment).toMatchObject(c);
+  });
 };
 
 export const itSendsATransaction = (state: SideEffectState) => {

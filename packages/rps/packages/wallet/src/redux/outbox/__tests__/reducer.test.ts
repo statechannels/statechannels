@@ -4,21 +4,17 @@ import * as actions from '../../actions';
 import * as outgoing from 'magmo-wallet-client/lib/wallet-events';
 import * as scenarios from '../../__tests__/test-scenarios';
 import { OutboxState } from '../state';
+import { sendStrategyApproved, sendStrategyProposed } from '../../../communication';
 
 const { mockTransactionOutboxItem } = scenarios;
 
 describe('when a side effect occured', () => {
-  const sendFundingDeclinedActionA = outgoing.messageRelayRequested('0xa00', {
-    processId: '0x0',
-    data: 'FundingDeclined',
-  });
-  const sendFundingDeclinedActionB = outgoing.messageRelayRequested('0xb00', {
-    processId: '0x0',
-    data: 'FundingDeclined',
-  });
+  const processId = '0x0';
+  const sendMessageA = sendStrategyProposed('0xa00', processId, 'IndirectFundingStrategy');
+  const sendMessageB = sendStrategyApproved('0xb00', processId);
   const displayOutbox = [outgoing.hideWallet(), outgoing.showWallet()];
   const transactionOutbox = [mockTransactionOutboxItem, mockTransactionOutboxItem];
-  const messageOutbox = [sendFundingDeclinedActionA, sendFundingDeclinedActionB];
+  const messageOutbox = [sendMessageA, sendMessageB];
   const state: OutboxState = {
     displayOutbox,
     transactionOutbox,

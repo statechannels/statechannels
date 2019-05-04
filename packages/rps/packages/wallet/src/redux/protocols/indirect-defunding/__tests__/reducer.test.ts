@@ -1,10 +1,10 @@
 import * as states from '../state';
 import { initialize, indirectDefundingReducer } from '../reducer';
 import * as scenarios from './scenarios';
-import { Commitment } from 'magmo-wallet-client/node_modules/fmg-core';
 import { ProtocolStateWithSharedData } from '../..';
 import { expectThisCommitmentSent } from '../../../__tests__/helpers';
 import * as SigningUtil from '../../../../domain/signing-utils';
+import { Commitment } from '../../../../domain';
 
 // Mocks
 const validateMock = jest.fn().mockReturnValue(true);

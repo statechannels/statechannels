@@ -19,6 +19,7 @@ import { DefundingAction, isDefundingAction } from '../defunding/actions';
 import { initialize as initializeDefunding, defundingReducer } from '../defunding/reducer';
 type Storage = SharedData;
 import { isSuccess, isFailure } from '../defunding/states';
+import { sendConcludeChannel } from '../../../communication';
 
 export interface ReturnVal {
   state: CState;
@@ -102,11 +103,15 @@ function concludeSent(state: NonTerminalCState, storage: Storage): ReturnVal {
   const channelState = getChannel(storage, state.channelId);
 
   if (channelState) {
-    const { sendCommitmentAction } = composeConcludeCommitment(channelState);
+    const opponentAddress = channelState.participants[1 - channelState.ourIndex];
+    const processId = channelState.channelId;
+    const { commitment, signature } = composeConcludeCommitment(channelState);
 
     return {
       state: waitForOpponentConclude({ ...state }),
-      sideEffects: { messageOutbox: sendCommitmentAction },
+      sideEffects: {
+        messageOutbox: sendConcludeChannel(opponentAddress, processId, commitment, signature),
+      },
       storage,
     };
   } else {

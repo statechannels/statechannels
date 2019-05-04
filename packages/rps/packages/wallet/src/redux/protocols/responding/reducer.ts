@@ -4,7 +4,6 @@ import * as states from './state';
 import * as actions from './actions';
 import { unreachable } from '../../../utils/reducer-utils';
 import * as selectors from '../../selectors';
-import { channelID } from 'magmo-wallet-client/node_modules/fmg-core/lib/channel';
 import * as TransactionGenerator from '../../../utils/transaction-generator';
 import { PlayerIndex } from '../../types';
 import { TransactionRequest } from 'ethers/providers';
@@ -20,6 +19,7 @@ import {
   TransactionSubmissionState,
   isSuccess,
 } from '../transaction-submission/states';
+import { channelID } from 'fmg-core/lib/channel';
 
 export const initialize = (
   processId: string,
