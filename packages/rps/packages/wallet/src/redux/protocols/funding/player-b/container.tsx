@@ -14,7 +14,6 @@ import { FundingStrategy } from '..';
 
 interface Props {
   state: states.OngoingFundingState;
-  strategyChosen: (processId: string, strategy: FundingStrategy) => void;
   strategyApproved: (processId: string, strategy: FundingStrategy) => void;
   strategyRejected: (processId: string) => void;
   fundingSuccessAcknowledged: (processId: string) => void;
@@ -23,7 +22,7 @@ interface Props {
 
 class FundingContainer extends PureComponent<Props> {
   render() {
-    const { state } = this.props;
+    const { state, strategyApproved, cancelled } = this.props;
     const { processId } = state;
 
     switch (state.type) {
@@ -32,10 +31,8 @@ class FundingContainer extends PureComponent<Props> {
       case states.WAIT_FOR_STRATEGY_APPROVAL:
         return (
           <ApproveStrategy
-            strategyChosen={(strategy: FundingStrategy) =>
-              actions.strategyApproved(processId, strategy)
-            }
-            cancelled={() => actions.cancelled(processId, PlayerIndex.B)}
+            strategyChosen={(strategy: FundingStrategy) => strategyApproved(processId, strategy)}
+            cancelled={() => cancelled(processId, PlayerIndex.B)}
           />
         );
       case states.WAIT_FOR_FUNDING:

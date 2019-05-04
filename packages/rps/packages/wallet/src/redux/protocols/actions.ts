@@ -15,7 +15,7 @@ export const fundingRequested = (channelId: string, playerIndex: PlayerIndex) =>
   type: FUNDING_REQUESTED as typeof FUNDING_REQUESTED,
   channelId,
   playerIndex,
-  protocol: WalletProtocol.IndirectFunding,
+  protocol: WalletProtocol.Funding,
 });
 export type FundingRequested = ReturnType<typeof fundingRequested>;
 
