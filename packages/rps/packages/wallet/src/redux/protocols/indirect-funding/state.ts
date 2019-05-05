@@ -22,3 +22,7 @@ export function success(): Success {
 export function failure(): Failure {
   return { type: 'Failure' };
 }
+
+export function isTerminal(state: IndirectFundingState): state is Failure | Success {
+  return state.type === 'Failure' || state.type === 'Success';
+}

@@ -94,6 +94,6 @@ export const isFirstPlayer = (channelId: string, sharedData: SharedData) => {
 
 export function getOpponentAddress(channelState: ChannelState, playerIndex: PlayerIndex) {
   const { participants } = channelState;
-  const opponentAddress = participants[playerIndex + (1 % participants.length)];
+  const opponentAddress = participants[(playerIndex + 1) % participants.length];
   return opponentAddress;
 }
