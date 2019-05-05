@@ -11,7 +11,7 @@ import ApproveStrategy from '../../../../components/funding/approve-strategy';
 import WaitForOtherPlayer from '../../../../components/wait-for-other-player';
 import AcknowledgeX from '../../../../components/acknowledge-x';
 import { FundingStrategy } from '..';
-
+import { IndirectFunding } from '../../indirect-funding/container';
 interface Props {
   state: states.OngoingFundingState;
   strategyApproved: (processId: string, strategy: FundingStrategy) => void;
@@ -36,8 +36,7 @@ class FundingContainer extends PureComponent<Props> {
           />
         );
       case states.WAIT_FOR_FUNDING:
-        // TODO: embed the funding container
-        return <div />;
+        return <IndirectFunding state={state.fundingState} />;
       case states.WAIT_FOR_SUCCESS_CONFIRMATION:
         return (
           <AcknowledgeX

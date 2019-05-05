@@ -81,7 +81,7 @@ const waitForLedgerUpdate1 = {
 const waitForPostFund1 = {
   state: aWaitForPostFundSetup1(props),
   store: setChannels(EMPTY_SHARED_DATA, [
-    channelFromCommitments(app0, app1, asAddress, asPrivateKey),
+    channelFromCommitments(app1, app2, asAddress, asPrivateKey),
     channelFromCommitments(ledger4, ledger5, asAddress, asPrivateKey),
   ]),
 };

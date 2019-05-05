@@ -4,6 +4,8 @@ import { PlayerIndex } from '../../../../types';
 
 import { EMPTY_SHARED_DATA } from '../../../../state';
 import { FundingStrategy } from '../..';
+import * as indirectFundingTests from '../../../indirect-funding/player-a/__tests__';
+import { channelId, bsAddress } from '../../../../../domain/commitments/__tests__';
 
 // To test all paths through the state machine we will use 4 different scenarios:
 //
@@ -22,15 +24,12 @@ import { FundingStrategy } from '../..';
 // Test data
 // ---------
 const processId = 'process-id.123';
-const sharedData = EMPTY_SHARED_DATA;
 const strategy: FundingStrategy = 'IndirectFundingStrategy';
-const targetChannelId = '0x123';
-const opponentAddress = '0xf00';
+const targetChannelId = channelId;
+const opponentAddress = bsAddress;
 
 const props = {
   processId,
-  sharedData,
-  fundingState: 'funding state' as 'funding state',
   targetChannelId,
   opponentAddress,
   strategy,
@@ -39,10 +38,26 @@ const props = {
 // ----
 // States
 // ------
-const waitForStrategyChoice = states.waitForStrategyChoice(props);
-const waitForStrategyResponse = states.waitForStrategyResponse(props);
-const waitForFunding = states.waitForFunding(props);
-const waitForSuccessConfirmation = states.waitForSuccessConfirmation(props);
+const waitForStrategyChoice = {
+  state: states.waitForStrategyChoice(props),
+  store: EMPTY_SHARED_DATA,
+};
+const waitForStrategyResponse = {
+  state: states.waitForStrategyResponse(props),
+  store: indirectFundingTests.preSuccessState.store,
+};
+const waitForFunding = {
+  state: states.waitForFunding({
+    ...props,
+    fundingState: indirectFundingTests.preSuccessState.state,
+  }),
+  store: indirectFundingTests.preSuccessState.store,
+};
+
+const waitForSuccessConfirmation = {
+  state: states.waitForSuccessConfirmation(props),
+  store: indirectFundingTests.preSuccessState.store,
+};
 const success = states.success();
 const failure = states.failure('User refused');
 const failure2 = states.failure('Opponent refused');
@@ -53,7 +68,7 @@ const failure2 = states.failure('Opponent refused');
 const strategyChosen = actions.strategyChosen(processId, strategy);
 const strategyApproved = actions.strategyApproved(processId);
 const successConfirmed = actions.fundingSuccessAcknowledged(processId);
-
+const fundingSuccess = indirectFundingTests.successTrigger;
 const strategyRejected = actions.strategyRejected(processId);
 const cancelledByA = actions.cancelled(processId, PlayerIndex.A);
 const cancelledByB = actions.cancelled(processId, PlayerIndex.B);
@@ -73,6 +88,7 @@ export const happyPath = {
   actions: {
     strategyChosen,
     strategyApproved,
+    fundingSuccess,
     successConfirmed,
   },
 };
