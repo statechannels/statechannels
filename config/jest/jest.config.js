@@ -6,7 +6,7 @@ module.exports = {
   collectCoverageFrom: ['src/**/*.{js,jsx,ts,tsx}'],
   setupFiles: [],
   setupFilesAfterEnv: ['./src/config/knexSetupTeardown.ts'],
-  testMatch: ['<rootDir>/**/?(*.)(spec|test).ts'],
+  testMatch: ['<rootDir>/**/__test__/**/?(*.)(spec|test).ts'],
   testEnvironment: 'node',
   testURL: 'http://localhost',
   transform: {
