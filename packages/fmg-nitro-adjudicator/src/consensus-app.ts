@@ -11,18 +11,18 @@ import abi from 'web3-eth-abi';
 import { bigNumberify } from 'ethers/utils';
 
 export enum UpdateType {
-  Accord,
-  Motion,
+  Consensus,
+  Proposal,
 }
 export interface AppAttributes {
-  voteNum: Uint32;
+  furtherVotesRequired: Uint32;
   proposedAllocation: Uint256[];
   proposedDestination: Address[];
   updateType: UpdateType;
 }
 
 interface ConsensusBaseCommitment extends BaseCommitment {
-  voteNum: Uint32;
+  furtherVotesRequired: Uint32;
   proposedAllocation: Uint256[];
   proposedDestination: Address[];
   updateType: UpdateType;
@@ -71,7 +71,7 @@ export function appAttributes(
   consensusCommitmentArgs: [string, string[], string[], string],
 ): AppAttributes {
   return {
-    voteNum: parseInt(consensusCommitmentArgs[0], 10),
+    furtherVotesRequired: parseInt(consensusCommitmentArgs[0], 10),
     proposedAllocation: consensusCommitmentArgs[1].map(bigNumberify).map(bn => bn.toHexString()),
     proposedDestination: consensusCommitmentArgs[2],
     updateType: parseInt(consensusCommitmentArgs[3], 10),
@@ -89,7 +89,7 @@ const SolidityConsensusCommitmentType = {
 
 export function bytesFromAppAttributes(appAttrs: AppAttributes): Bytes {
   return abi.encodeParameter(SolidityConsensusCommitmentType, [
-    appAttrs.voteNum,
+    appAttrs.furtherVotesRequired,
     appAttrs.proposedAllocation,
     appAttrs.proposedDestination,
     appAttrs.updateType,
