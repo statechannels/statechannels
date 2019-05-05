@@ -13,7 +13,7 @@
     "db:seed": "npx knex seed:run",
     "test:server": "npx jest --runInBand -c ./config/jest/jest.config.js",
     "test:chain": "npx ganache-then-jest -c ./config/jest/jest.chain.config.js --runInBand",
-    "test:ci": "run-s prettier:check 'test:chain --all --ci' test:server",
+    "test:ci": "DEV_GANACHE_PORT=8545 run-s prettier:check 'test:chain --all --ci' test:server",
     "watch-server": "nodemon --watch 'src/**/*' -e ts,tsx --exec ts-node ./src/app/server.ts",
     "build": "yarn clearContracts && yarn copyContracts && npx tsc knexfile.ts",
     "start": "node ./lib/app/server.js",
