@@ -107,10 +107,7 @@ describe('ConsensusApp', () => {
       alternativeProposedDestination,
     );
 
-    it('returns true on a valid transition', async () => {
-      await validTransition(fromCommitment, toCommitment);
-    });
-
+    itReturnsTrueOnAValidTransition(fromCommitment, toCommitment);
     it('reverts when the furtherVotesRequired is not re-initialized', async () => {
       await invalidTransition(fromCommitment, {
         ...toCommitment,
@@ -124,10 +121,7 @@ describe('ConsensusApp', () => {
     const fromCommitment = oneVoteComplete;
     const toCommitment = vote(fromCommitment);
 
-    it('returns true on a valid transition', async () => {
-      await validTransition(fromCommitment, toCommitment);
-    });
-
+    itReturnsTrueOnAValidTransition(fromCommitment, toCommitment);
     itRevertsWhenFurtherVotesRequiredIsNotDecremented(fromCommitment, toCommitment);
     itRevertsWhenTheBalancesAreChanged(fromCommitment, toCommitment);
     itRevertsWhenTheProposalsAreChanged(fromCommitment, toCommitment);
@@ -137,10 +131,7 @@ describe('ConsensusApp', () => {
     const fromCommitment = twoVotesComplete;
     const toCommitment = finalVote(fromCommitment);
 
-    it('returns true on a valid transition', async () => {
-      await validTransition(fromCommitment, toCommitment);
-    });
-
+    itReturnsTrueOnAValidTransition(fromCommitment, toCommitment);
     itRevertsForAnInvalidConsensusState(fromCommitment, toCommitment);
     itRevertsWhenTheBalancesAreNotUpdated(fromCommitment, toCommitment);
   });
@@ -150,10 +141,7 @@ describe('ConsensusApp', () => {
 
     const toCommitment = veto(fromCommitment);
 
-    it('returns true on a valid transition', async () => {
-      await validTransition(fromCommitment, toCommitment);
-    });
-
+    itReturnsTrueOnAValidTransition(fromCommitment, toCommitment);
     itRevertsWhenTheBalancesAreChanged(fromCommitment, toCommitment);
     itRevertsForAnInvalidConsensusState(fromCommitment, toCommitment);
   });
@@ -183,6 +171,12 @@ describe('ConsensusApp', () => {
     expect(
       await consensusApp.validTransition(ethereumArgs(fromCommitment), ethereumArgs(toCommitment)),
     ).toBe(true);
+  }
+
+  function itReturnsTrueOnAValidTransition(fromCommitment, toCommitment) {
+    it('returns true on a valid transition', async () => {
+      await validTransition(fromCommitment, toCommitment);
+    });
   }
 
   function itRevertsForAnInvalidConsensusState(fromCommitmentArgs, toCommitmentArgs) {
