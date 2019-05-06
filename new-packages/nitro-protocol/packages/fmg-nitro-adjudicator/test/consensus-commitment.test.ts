@@ -2,8 +2,6 @@ import { ContractFactory, ethers } from 'ethers';
 import linker from 'solc/linker';
 import { getNetworkId, getGanacheProvider } from 'magmo-devtools';
 import { Channel, asEthersObject, Commitment } from 'fmg-core';
-import CommitmentArtifact from '../build/contracts/Commitment.json';
-import ConsensusCommitmentArtifact from '../build/contracts/ConsensusCommitment.json';
 import TestConsensusCommitmentArtifact from '../build/contracts/TestConsensusCommitment.json';
 
 import { commitments as ConsensusApp, UpdateType } from '../src/consensus-app';
@@ -15,29 +13,12 @@ const providerSigner = provider.getSigner();
 
 async function setupContracts() {
   const networkId = await getNetworkId();
-
-  ConsensusCommitmentArtifact.bytecode = linker.linkBytecode(ConsensusCommitmentArtifact.bytecode, {
-    Commitment: CommitmentArtifact.networks[networkId].address,
-  });
-
-  TestConsensusCommitmentArtifact.bytecode = linker.linkBytecode(
-    TestConsensusCommitmentArtifact.bytecode,
-    { Commitment: CommitmentArtifact.networks[networkId].address },
-  );
-
-  TestConsensusCommitmentArtifact.bytecode = linker.linkBytecode(
-    TestConsensusCommitmentArtifact.bytecode,
-    { ConsensusCommitment: ConsensusCommitmentArtifact.networks[networkId].address },
-  );
-
-  consensusCommitment = await ContractFactory.fromSolidity(
-    TestConsensusCommitmentArtifact,
-    providerSigner,
-  ).deploy();
-  await consensusCommitment.deployed();
+  const address = TestConsensusCommitmentArtifact.networks[networkId].address;
+  const abi = TestConsensusCommitmentArtifact.abi;
+  consensusCommitment = await new ethers.Contract(address, abi, provider);
 }
 
-describe.skip('ConsensusCommitment', () => {
+describe('ConsensusCommitment', () => {
   const participantA = new ethers.Wallet(
     '6cbed15c793ce57650b9877cf6fa156fbef513c4e6134f022a85b1ffdd59b2a1',
   );
@@ -58,9 +39,9 @@ describe.skip('ConsensusCommitment', () => {
   const commitment: Commitment = ConsensusApp.appCommitment({
     ...defaults,
     turnNum: 6,
-    updateType: UpdateType.Accord,
+    updateType: UpdateType.Consensus,
     commitmentCount: 0,
-    voteNum: 1,
+    furtherVotesRequired: 1,
     proposedAllocation,
     proposedDestination,
   });
