@@ -9,7 +9,10 @@
     "prepare": "yarn build",
     "test": "jest",
     "test:ci": "npx ganache-then-jest",
-    "build": "tslint --project . && tsc"
+    "deploy": "yarn clearContracts && npx truffle migrate",
+    "build:typescript": "tslint --project . && tsc",
+    "clearContracts": "rm -rf build/contracts",
+    "build": "yarn clearContracts && npx truffle build && yarn build:typescript"
   },
   "dependencies": {
     "ethers": "^4.0.26",
