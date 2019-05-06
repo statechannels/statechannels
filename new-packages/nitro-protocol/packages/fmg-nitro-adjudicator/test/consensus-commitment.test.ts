@@ -1,15 +1,11 @@
 import { ContractFactory, ethers } from 'ethers';
 import linker from 'solc/linker';
-import {
-  getNetworkId,
-  getGanacheProvider,
-} from 'magmo-devtools';
+import { getNetworkId, getGanacheProvider } from 'magmo-devtools';
 import { Channel, asEthersObject, Commitment } from 'fmg-core';
-import CommitmentArtifact from '../build/contracts/Commitment.json';
-import ConsensusCommitmentArtifact from '../build/contracts/ConsensusCommitment.json';
 import TestConsensusCommitmentArtifact from '../build/contracts/TestConsensusCommitment.json';
 
-import { commitments as ConsensusApp } from '../src/consensus-app';
+import { commitments as ConsensusApp, UpdateType, appAttributes } from '../src/consensus-app';
+import { bigNumberify } from 'ethers/utils';
 
 jest.setTimeout(20000);
 let consensusCommitment: ethers.Contract;
@@ -18,24 +14,9 @@ const providerSigner = provider.getSigner();
 
 async function setupContracts() {
   const networkId = await getNetworkId();
-
-  ConsensusCommitmentArtifact.bytecode = linker.linkBytecode(
-    ConsensusCommitmentArtifact.bytecode,
-    { Commitment: CommitmentArtifact.networks[networkId].address },
-  );
-
-  TestConsensusCommitmentArtifact.bytecode = linker.linkBytecode(
-    TestConsensusCommitmentArtifact.bytecode,
-    { Commitment: CommitmentArtifact.networks[networkId].address },
-  );
-
-  TestConsensusCommitmentArtifact.bytecode = linker.linkBytecode(
-    TestConsensusCommitmentArtifact.bytecode,
-    { ConsensusCommitment: ConsensusCommitmentArtifact.networks[networkId].address },
-  );
-
-  consensusCommitment = await ContractFactory.fromSolidity(TestConsensusCommitmentArtifact, providerSigner).deploy();
-  await consensusCommitment.deployed();
+  const address = TestConsensusCommitmentArtifact.networks[networkId].address;
+  const abi = TestConsensusCommitmentArtifact.abi;
+  consensusCommitment = await new ethers.Contract(address, abi, provider);
 }
 
 describe('ConsensusCommitment', () => {
@@ -48,23 +29,61 @@ describe('ConsensusCommitment', () => {
   const participants = [participantA.address, participantB.address];
   const proposedDestination = [participantB.address];
 
-  const allocation = [ethers.utils.bigNumberify(5).toHexString(), ethers.utils.bigNumberify(4).toHexString()];
+  const allocation = [
+    ethers.utils.bigNumberify(5).toHexString(),
+    ethers.utils.bigNumberify(4).toHexString(),
+  ];
   const proposedAllocation = [ethers.utils.bigNumberify(9).toHexString()];
 
   const channel: Channel = { channelType: participantB.address, nonce: 0, participants }; // just use any valid address
   const defaults = { channel, allocation, destination: participants };
-  const commitment: Commitment = ConsensusApp.appCommitment({ ...defaults, turnNum: 6, commitmentCount: 0, consensusCounter: 1, proposedAllocation, proposedDestination, });
+  const commitment: Commitment = ConsensusApp.appCommitment({
+    ...defaults,
+    turnNum: 6,
+    updateType: UpdateType.Consensus,
+    commitmentCount: 0,
+    furtherVotesRequired: 1,
+    proposedAllocation,
+    proposedDestination,
+  });
 
   it('works', async () => {
     await setupContracts();
-    const consensusCommitmentAttrs = await consensusCommitment.fromFrameworkCommitment(asEthersObject(commitment));
+    const consensusCommitmentAttrs = await consensusCommitment.fromFrameworkCommitment(
+      asEthersObject(commitment),
+    );
 
-    expect(consensusCommitmentAttrs).toMatchObject({
-      consensusCounter: 1,
-      // currentAllocation: allocation, // TODO: Figure out how to compare BigNumber and Uint256
+    const consensusCommitmentObject = convertToConsensusCommitmentObject(consensusCommitmentAttrs);
+    expect(consensusCommitmentObject).toMatchObject({
+      furtherVotesRequired: 1,
+      currentAllocation: allocation,
       currentDestination: participants,
-      // proposedAllocation,
+      proposedAllocation,
       proposedDestination,
+      updateType: UpdateType.Consensus,
     });
   });
 });
+
+// TODO: Will this ever be needed outside of this test?
+// Normally we just want to convert to AppAttrs
+function convertToConsensusCommitmentObject(consensusCommitmentArgs) {
+  const SolidityConsensusCommitmentType = {
+    ConsensusCommitmentStruct: {
+      furtherVotesRequired: 'uint32',
+      currentAllocation: 'uint256[]',
+      currentDestination: 'address[]',
+      proposedAllocation: 'uint256[]',
+      proposedDestination: 'address[]',
+      updateType: 'uint32',
+    },
+  };
+  return {
+    furtherVotesRequired: parseInt(consensusCommitmentArgs[0], 10),
+    currentAllocation: consensusCommitmentArgs[1].map(bigNumberify).map(bn => bn.toHexString()),
+    currentDestination: consensusCommitmentArgs[2],
+    proposedAllocation: consensusCommitmentArgs[3].map(bigNumberify).map(bn => bn.toHexString()),
+    proposedDestination: consensusCommitmentArgs[4],
+    updateType: parseInt(consensusCommitmentArgs[5], 10),
+  };
+}
