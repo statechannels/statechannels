@@ -31,7 +31,7 @@ contract ConsensusApp {
     }
     if (oldCommitment.updateType == ConsensusCommitment.UpdateType.Proposal) {
       if (newCommitment.updateType == ConsensusCommitment.UpdateType.Proposal) {
-        if (hasFurtherVotesNeededBeenInitialized(newCommitment)){
+        if (hasFurtherVotesNeededBeenInitialized(newCommitment,numParticipants)){
           validatePropose(oldCommitment, newCommitment, numParticipants);
           return true;
         } else {
@@ -60,11 +60,11 @@ contract ConsensusApp {
   ) {
     require(encodeAndHashAllocation(oldCommitment.proposedAllocation) == encodeAndHashAllocation(
       newCommitment.currentAllocation),
-      "ConsensusApp: : 'allocation' must be set to the previous `proposedAllocation`."
+      "ConsensusApp: 'allocation' must be set to the previous `proposedAllocation`."
     ); 
     require(encodeAndHashDestination(oldCommitment.proposedDestination) == encodeAndHashDestination(
       newCommitment.currentDestination),
-      "ConsensusApp:  'destination' must be set to the previous `proposedDestination`"
+      "ConsensusApp: 'destination' must be set to the previous `proposedDestination`"
     );
     _;
   }
@@ -75,11 +75,11 @@ contract ConsensusApp {
   ) {
     require(encodeAndHashAllocation(oldCommitment.currentAllocation) == encodeAndHashAllocation(
       newCommitment.currentAllocation),
-      "ConsensusApp: : 'allocation' must be the same between commitments."
+      "ConsensusApp: 'allocation' must be the same between commitments."
     ); 
     require(encodeAndHashDestination(oldCommitment.currentDestination) == encodeAndHashDestination(
       newCommitment.currentDestination),
-      "ConsensusApp:  'destination' must be the same between commitments."
+      "ConsensusApp: 'destination' must be the same between commitments."
     );
     _;
   }
@@ -90,23 +90,12 @@ contract ConsensusApp {
   ) {
     require(encodeAndHashAllocation(oldCommitment.proposedAllocation) == encodeAndHashAllocation(
       newCommitment.proposedAllocation),
-      "ConsensusApp:  'proposedAllocation' must be the same between commitments."
+      "ConsensusApp: 'proposedAllocation' must be the same between commitments."
     ); 
     require(encodeAndHashDestination(oldCommitment.proposedDestination) == encodeAndHashDestination(
       newCommitment.proposedDestination),
-      "ConsensusApp:  'proposedDestination' must be the same between commitments."
+      "ConsensusApp: 'proposedDestination' must be the same between commitments."
     ); 
-    _;
-  }
-
-  modifier totalAllocationConserved(
-    ConsensusCommitment.ConsensusCommitmentStruct memory oldCommitment,
-    ConsensusCommitment.ConsensusCommitmentStruct memory newCommitment
-  ) {
-    require(sum(newCommitment.proposedAllocation)==sum(
-      oldCommitment.currentAllocation),
-        "ConsensusApp:  allocation must be conserved"
-    );
     _;
   }
 
@@ -116,7 +105,7 @@ contract ConsensusApp {
   ) {
     require(
       commitment.furtherVotesRequired == numParticipants-1,
-      "Consensus App: furtherVotesRequired needs to be initialized to the correct value"
+      "Consensus App: furtherVotesRequired needs to be initialized to the correct value."
     ); 
     _;
   } 
@@ -127,7 +116,7 @@ contract ConsensusApp {
   ) {
     require(
       newCommitment.furtherVotesRequired == oldCommitment.furtherVotesRequired-1,
-      "Consensus App: furtherVotesRequired should be decremented by 1"
+      "Consensus App: furtherVotesRequired should be decremented by 1."
     ); 
     _;
   } 
@@ -196,22 +185,15 @@ contract ConsensusApp {
     ConsensusCommitment.ConsensusCommitmentStruct memory newCommitment
   ) public pure returns (bool) {
     return encodeAndHashAllocation(oldCommitment.proposedAllocation) == encodeAndHashAllocation(newCommitment.currentAllocation) &&
-      encodeAndHashDestination(oldCommitment.proposedDestination) == encodeAndHashDestination(newCommitment.currentDestination);   
+    encodeAndHashDestination(oldCommitment.proposedDestination) == encodeAndHashDestination(newCommitment.currentDestination);   
   }
 
   function hasFurtherVotesNeededBeenInitialized(
-      ConsensusCommitment.ConsensusCommitmentStruct memory commitment
+      ConsensusCommitment.ConsensusCommitmentStruct memory commitment,
+      uint numParticipants
   ) public pure returns (bool)
   {
-    return commitment.furtherVotesRequired == 0;
-  }
-
-  function sum(uint[] memory _array) public pure returns (uint sum_) 
-  {
-    sum_ = 0;
-    for (uint i = 0; i < _array.length; i++) {
-      sum_ += _array[i];
-    }
+    return commitment.furtherVotesRequired == numParticipants-1;
   }
 
   function encodeAndHashAllocation(uint256[] memory allocation) internal pure returns (bytes32) {
