@@ -32,15 +32,7 @@ router.post(`${BASE_URL}`, koaBody(), async ctx => {
     }
   } catch (err) {
     switch (err) {
-      case errors.CHANNEL_EXISTS: {
-        ctx.status = 400;
-        ctx.body = {
-          status: 'error',
-          message: 'Attempted to open existing channel -- use a different nonce',
-        };
-
-        return;
-      }
+      case errors.CHANNEL_EXISTS:
       case errors.COMMITMENT_NOT_SIGNED:
       case errors.CHANNEL_MISSING:
       case errors.COMMITMENT_NOT_SIGNED: {
