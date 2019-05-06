@@ -1,35 +1,30 @@
 import { ethers } from 'ethers';
 import { getNetworkId, getGanacheProvider, expectRevert, delay } from 'magmo-devtools';
-import { Channel, ethereumArgs, toUint256, Commitment } from 'fmg-core';
+import { Channel, ethereumArgs, toUint256 } from 'fmg-core';
 
 import ConsensusAppArtifact from '../build/contracts/ConsensusApp.json';
 
-import { commitments, UpdateType } from '../src/consensus-app';
+import {
+  commitments,
+  propose,
+  initialConsensus,
+  pass,
+  proposeAlternative,
+  vote,
+  ConsensusBaseCommitment,
+  finalVote,
+  veto,
+} from '../src/consensus-app';
 
 jest.setTimeout(20000);
 let consensusApp: ethers.Contract;
 const provider = getGanacheProvider();
-const providerSigner = provider.getSigner();
 
 async function setupContracts() {
   const networkId = await getNetworkId();
   const address = ConsensusAppArtifact.networks[networkId].address;
   const abi = ConsensusAppArtifact.abi;
   consensusApp = await new ethers.Contract(address, abi, provider);
-}
-
-async function invalidTransition(fromCommitment, toCommitment, reason?) {
-  expect.assertions(1);
-  await expectRevert(
-    () => consensusApp.validTransition(ethereumArgs(fromCommitment), ethereumArgs(toCommitment)),
-    reason,
-  );
-}
-
-async function validTransition(fromCommitment, toCommitment) {
-  expect(
-    await consensusApp.validTransition(ethereumArgs(fromCommitment), ethereumArgs(toCommitment)),
-  ).toBe(true);
 }
 
 describe('ConsensusApp', () => {
@@ -47,7 +42,6 @@ describe('ConsensusApp', () => {
     '5e1b32fb763f62e1d19a9c9cd8c5417bd31b7d697ee018a8afe3cac2292fdd3e',
   );
   const participants = [participantA.address, participantB.address, participantC.address];
-  const NUM_PARTICIPANTS = participants.length;
   const proposedDestination = [participantA.address, participantB.address];
 
   const allocation = [toUint256(1), toUint256(2), toUint256(3)];
@@ -64,172 +58,133 @@ describe('ConsensusApp', () => {
     commitmentCount: 0,
   };
 
+  const oneVoteComplete = propose(
+    initialConsensus(defaults),
+    proposedAllocation,
+    proposedDestination,
+  );
+  const twoVotesComplete = vote(
+    propose(initialConsensus(defaults), proposedAllocation, proposedDestination),
+  );
+
   beforeAll(async () => {
     await setupContracts();
   });
 
   describe('the propose transition', async () => {
-    const fromCommitmentArgs = {
-      ...defaults,
-      turnNum: 6,
-      furtherVotesRequired: 0,
-      updateType: UpdateType.Consensus,
-    };
-    const toCommitmentArgs = {
-      ...defaults,
-      allocation,
-      destination: participants,
-      turnNum: 6,
-      furtherVotesRequired: 2,
-      updateType: UpdateType.Proposal,
-    };
-
+    const fromCommitment = initialConsensus(defaults);
+    const toCommitment = propose(fromCommitment, proposedAllocation, proposedDestination);
     it('returns true on a valid transition', async () => {
-      const fromCommitment = commitments.appCommitment(fromCommitmentArgs);
-      const toCommitment = commitments.appCommitment(toCommitmentArgs);
       await validTransition(fromCommitment, toCommitment);
     });
 
-    itRevertsWhenTheBalancesAreChanged(fromCommitmentArgs, toCommitmentArgs);
+    itRevertsWhenTheBalancesAreChanged(fromCommitment, toCommitment);
 
-    itRevertsWhenFurtherVotesRequiredIsNotIntialized(fromCommitmentArgs, toCommitmentArgs);
+    itRevertsWhenFurtherVotesRequiredIsNotIntialized(fromCommitment, toCommitment);
   });
 
   describe('the pass transition', async () => {
-    const fromCommitmentArgs = {
-      ...defaults,
-      turnNum: 6,
-      furtherVotesRequired: 0,
-      updateType: UpdateType.Consensus,
-    };
-    const toCommitmentArgs = {
-      ...defaults,
-      turnNum: 6,
-      furtherVotesRequired: 0,
-      updateType: UpdateType.Consensus,
-    };
+    const fromCommitment = initialConsensus(defaults);
+    const toCommitment = pass(fromCommitment);
 
     it('returns true on a valid transition', async () => {
-      const fromCommitment = commitments.appCommitment(fromCommitmentArgs);
-      const toCommitment = commitments.appCommitment(toCommitmentArgs);
       await validTransition(fromCommitment, toCommitment);
     });
 
-    itRevertsWhenTheBalancesAreChanged(fromCommitmentArgs, toCommitmentArgs);
-    itRevertsWhenTheProposalsAreChanged(fromCommitmentArgs, toCommitmentArgs);
+    itRevertsWhenTheBalancesAreChanged(fromCommitment, toCommitment);
+    itRevertsWhenTheProposalsAreChanged(fromCommitment, toCommitment);
   });
 
   describe('the propose alternative transition', async () => {
-    const fromCommitmentArgs = {
-      ...defaults,
-      turnNum: 6,
-      furtherVotesRequired: 1,
-      updateType: UpdateType.Proposal,
-    };
-    const toCommitmentArgs = {
-      ...defaults,
-      turnNum: 6,
-      furtherVotesRequired: 2,
-      updateType: UpdateType.Proposal,
-    };
+    const fromCommitment = oneVoteComplete;
+
+    const alternativeProposedDestination = [participantA.address];
+    const alternativeProposedAllocation = [toUint256(6)];
+
+    const toCommitment = proposeAlternative(
+      fromCommitment,
+      alternativeProposedAllocation,
+      alternativeProposedDestination,
+    );
 
     it('returns true on a valid transition', async () => {
-      const fromCommitment = commitments.appCommitment(fromCommitmentArgs);
-      const toCommitment = commitments.appCommitment(toCommitmentArgs);
       await validTransition(fromCommitment, toCommitment);
     });
 
     it('reverts when the furtherVotesRequired is not re-initialized', async () => {
-      const fromCommitment = commitments.appCommitment({ ...fromCommitmentArgs });
-      const toCommitment = commitments.appCommitment({
-        ...toCommitmentArgs,
+      await invalidTransition(fromCommitment, {
+        ...toCommitment,
         furtherVotesRequired: 1,
       });
-      await invalidTransition(fromCommitment, toCommitment);
     });
-    itRevertsWhenTheBalancesAreChanged(fromCommitmentArgs, toCommitmentArgs);
+    itRevertsWhenTheBalancesAreChanged(fromCommitment, toCommitment);
   });
 
   describe('the vote transition', async () => {
-    const fromCommitmentArgs = {
-      ...defaults,
-      turnNum: 6,
-      furtherVotesRequired: 2,
-      updateType: UpdateType.Proposal,
-    };
-    const toCommitmentArgs = {
-      ...defaults,
-      turnNum: 6,
-      furtherVotesRequired: 1,
-      updateType: UpdateType.Proposal,
-    };
+    const fromCommitment = oneVoteComplete;
+    const toCommitment = vote(fromCommitment);
 
     it('returns true on a valid transition', async () => {
-      const fromCommitment = commitments.appCommitment(fromCommitmentArgs);
-      const toCommitment = commitments.appCommitment(toCommitmentArgs);
       await validTransition(fromCommitment, toCommitment);
     });
 
-    itRevertsWhenFurtherVotesRequiredIsNotDecremented(fromCommitmentArgs, toCommitmentArgs);
-    itRevertsWhenTheBalancesAreChanged(fromCommitmentArgs, toCommitmentArgs);
-    itRevertsWhenTheProposalsAreChanged(fromCommitmentArgs, toCommitmentArgs);
+    itRevertsWhenFurtherVotesRequiredIsNotDecremented(fromCommitment, toCommitment);
+    itRevertsWhenTheBalancesAreChanged(fromCommitment, toCommitment);
+    itRevertsWhenTheProposalsAreChanged(fromCommitment, toCommitment);
   });
 
   describe('the final vote transition', async () => {
-    const fromCommitmentArgs = {
-      ...defaults,
-      turnNum: 6,
-      furtherVotesRequired: 1,
-      updateType: UpdateType.Proposal,
-    };
-    const toCommitmentArgs = {
-      ...defaults,
-      turnNum: 6,
-      furtherVotesRequired: 0,
-      proposedAllocation: [],
-      proposedDestination: [],
-      allocation: proposedAllocation,
-      destination: proposedDestination,
-      updateType: UpdateType.Consensus,
-    };
+    const fromCommitment = twoVotesComplete;
+    const toCommitment = finalVote(fromCommitment);
 
     it('returns true on a valid transition', async () => {
-      const fromCommitment = commitments.appCommitment(fromCommitmentArgs);
-      const toCommitment = commitments.appCommitment(toCommitmentArgs);
       await validTransition(fromCommitment, toCommitment);
     });
 
-    itRevertsForAnInvalidConsensusState(fromCommitmentArgs, toCommitmentArgs);
-    itRevertsWhenTheBalancesAreNotUpdated(fromCommitmentArgs, toCommitmentArgs);
+    itRevertsForAnInvalidConsensusState(fromCommitment, toCommitment);
+    itRevertsWhenTheBalancesAreNotUpdated(fromCommitment, toCommitment);
   });
 
   describe('the veto transition', async () => {
-    const fromCommitmentArgs = {
-      ...defaults,
-      turnNum: 6,
-      furtherVotesRequired: 2,
-      updateType: UpdateType.Proposal,
-    };
-    const toCommitmentArgs = {
-      ...defaults,
-      turnNum: 6,
-      proposedAllocation: [],
-      proposedDestination: [],
-      furtherVotesRequired: 3,
-      updateType: UpdateType.Consensus,
-    };
+    const fromCommitment = oneVoteComplete;
+
+    const toCommitment = veto(fromCommitment);
 
     it('returns true on a valid transition', async () => {
-      const fromCommitment = commitments.appCommitment(fromCommitmentArgs);
-      const toCommitment = commitments.appCommitment(toCommitmentArgs);
       await validTransition(fromCommitment, toCommitment);
     });
 
-    itRevertsWhenTheBalancesAreChanged(fromCommitmentArgs, toCommitmentArgs);
-    itRevertsForAnInvalidConsensusState(fromCommitmentArgs, toCommitmentArgs);
+    itRevertsWhenTheBalancesAreChanged(fromCommitment, toCommitment);
+    itRevertsForAnInvalidConsensusState(fromCommitment, toCommitment);
   });
 
   // Helper functions
+
+  async function invalidTransition(
+    fromConsensusCommitment: ConsensusBaseCommitment,
+    toConsensusCommitment: ConsensusBaseCommitment,
+    reason?,
+  ) {
+    expect.assertions(1);
+    const fromCommitment = commitments.appCommitment(fromConsensusCommitment);
+    const toCommitment = commitments.appCommitment(toConsensusCommitment);
+    await expectRevert(
+      () => consensusApp.validTransition(ethereumArgs(fromCommitment), ethereumArgs(toCommitment)),
+      reason,
+    );
+  }
+
+  async function validTransition(
+    fromConsensusCommitment: ConsensusBaseCommitment,
+    toConsensusCommitment: ConsensusBaseCommitment,
+  ) {
+    const fromCommitment = commitments.appCommitment(fromConsensusCommitment);
+    const toCommitment = commitments.appCommitment(toConsensusCommitment);
+    expect(
+      await consensusApp.validTransition(ethereumArgs(fromCommitment), ethereumArgs(toCommitment)),
+    ).toBe(true);
+  }
+
   function itRevertsForAnInvalidConsensusState(fromCommitmentArgs, toCommitmentArgs) {
     it('reverts when the proposedAllocation is not empty', async () => {
       const fromCommitment = commitments.appCommitment({ ...fromCommitmentArgs });
@@ -263,13 +218,12 @@ describe('ConsensusApp', () => {
 
   function itRevertsWhenFurtherVotesRequiredIsNotIntialized(fromCommitmentArgs, toCommitmentArgs) {
     it('reverts when further votes requires is not initialized properly', async () => {
-      const fromCommitment = commitments.appCommitment({ ...fromCommitmentArgs });
-      const toCommitment = commitments.appCommitment({
+      const toCommitment = {
         ...toCommitmentArgs,
         furtherVotesRequired: 0,
-      });
+      };
       await invalidTransition(
-        fromCommitment,
+        fromCommitmentArgs,
         toCommitment,
         'Consensus App: furtherVotesRequired needs to be initialized to the correct value.',
       );
@@ -278,13 +232,12 @@ describe('ConsensusApp', () => {
 
   function itRevertsWhenFurtherVotesRequiredIsNotDecremented(fromCommitmentArgs, toCommitmentArgs) {
     it('reverts when further votes requires is not decremented properly', async () => {
-      const fromCommitment = commitments.appCommitment({ ...fromCommitmentArgs });
-      const toCommitment = commitments.appCommitment({
+      const toCommitment = {
         ...toCommitmentArgs,
         furtherVotesRequired: 0,
-      });
+      };
       await invalidTransition(
-        fromCommitment,
+        fromCommitmentArgs,
         toCommitment,
         'Consensus App: furtherVotesRequired should be decremented by 1',
       );
@@ -293,52 +246,44 @@ describe('ConsensusApp', () => {
 
   function itRevertsWhenTheBalancesAreNotUpdated(fromCommitmentArgs, toCommitmentArgs) {
     it('reverts when the allocation is not updated', async () => {
-      const fromCommitment = commitments.appCommitment({ ...fromCommitmentArgs });
-
-      const toCommitmentDifferentAllocation = commitments.appCommitment({
+      const toCommitmentDifferentAllocation = {
         ...toCommitmentArgs,
         allocation,
-      });
+      };
 
-      await invalidTransition(fromCommitment, toCommitmentDifferentAllocation);
+      await invalidTransition(fromCommitmentArgs, toCommitmentDifferentAllocation);
     });
     it('reverts when the destination is not updated', async () => {
-      const fromCommitment = commitments.appCommitment({ ...fromCommitmentArgs });
-
-      const toCommitmentDifferentDestination = commitments.appCommitment({
+      const toCommitmentDifferentDestination = {
         ...toCommitmentArgs,
         destination: participants,
-      });
+      };
 
-      await invalidTransition(fromCommitment, toCommitmentDifferentDestination);
+      await invalidTransition(fromCommitmentArgs, toCommitmentDifferentDestination);
     });
   }
 
   function itRevertsWhenTheBalancesAreChanged(fromCommitmentArgs, toCommitmentArgs) {
     it('reverts when the allocation is changed', async () => {
-      const fromCommitment = commitments.appCommitment({ ...fromCommitmentArgs });
-
-      const toCommitmentDifferentAllocation = commitments.appCommitment({
+      const toCommitmentDifferentAllocation = {
         ...toCommitmentArgs,
         allocation: proposedAllocation,
-      });
+      };
 
       await invalidTransition(
-        fromCommitment,
+        fromCommitmentArgs,
         toCommitmentDifferentAllocation,
         "ConsensusApp: 'allocation' must be the same between commitments.",
       );
     });
     it('reverts when the destination is changed', async () => {
-      const fromCommitment = commitments.appCommitment({ ...fromCommitmentArgs });
-
-      const toCommitmentDifferentDestination = commitments.appCommitment({
+      const toCommitmentDifferentDestination = {
         ...toCommitmentArgs,
         destination: proposedDestination,
-      });
+      };
 
       await invalidTransition(
-        fromCommitment,
+        fromCommitmentArgs,
         toCommitmentDifferentDestination,
         "ConsensusApp: 'destination' must be the same between commitments.",
       );
@@ -347,29 +292,25 @@ describe('ConsensusApp', () => {
 
   function itRevertsWhenTheProposalsAreChanged(fromCommitmentArgs, toCommitmentArgs) {
     it('reverts when the proposedAllocation is changed', async () => {
-      const fromCommitment = commitments.appCommitment({ ...fromCommitmentArgs });
-
-      const toCommitmentDifferentAllocation = commitments.appCommitment({
+      const toCommitmentDifferentAllocation = {
         ...toCommitmentArgs,
         proposedAllocation: allocation,
-      });
+      };
 
       await invalidTransition(
-        fromCommitment,
+        fromCommitmentArgs,
         toCommitmentDifferentAllocation,
         "ConsensusApp: 'proposedAllocation' must be the same between commitments.",
       );
     });
     it('reverts when the proposedDestination is changed', async () => {
-      const fromCommitment = commitments.appCommitment({ ...fromCommitmentArgs });
-
-      const toCommitmentDifferentDestination = commitments.appCommitment({
+      const toCommitmentDifferentDestination = {
         ...toCommitmentArgs,
         proposedDestination: participants,
-      });
+      };
 
       await invalidTransition(
-        fromCommitment,
+        fromCommitmentArgs,
         toCommitmentDifferentDestination,
         "ConsensusApp: 'proposedDestination' must be the same between commitments.",
       );
