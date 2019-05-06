@@ -31,7 +31,7 @@ contract ConsensusApp {
     }
     if (oldCommitment.updateType == ConsensusCommitment.UpdateType.Proposal) {
       if (newCommitment.updateType == ConsensusCommitment.UpdateType.Proposal) {
-        if (hasFurtherVotesNeededBeenInitialized(newCommitment,numParticipants)){
+        if (hasFurtherVotesNeededBeenInitialized(newCommitment, numParticipants)){
           validatePropose(oldCommitment, newCommitment, numParticipants);
           return true;
         } else {
@@ -40,7 +40,7 @@ contract ConsensusApp {
         }
       }
       if (newCommitment.updateType == ConsensusCommitment.UpdateType.Consensus) {
-        if (haveBalancesBeenUpdate(oldCommitment, newCommitment)){
+        if (haveBalancesBeenUpdated(oldCommitment, newCommitment)) {
           validateFinalVote(oldCommitment, newCommitment);
           return true;
         } else {
@@ -181,7 +181,7 @@ contract ConsensusApp {
 
 // helpers
 
-  function haveBalancesBeenUpdate(
+  function haveBalancesBeenUpdated(
     ConsensusCommitment.ConsensusCommitmentStruct memory oldCommitment,
     ConsensusCommitment.ConsensusCommitmentStruct memory newCommitment
   ) public pure returns (bool) {
