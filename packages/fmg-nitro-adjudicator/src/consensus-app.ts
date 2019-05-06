@@ -80,7 +80,7 @@ export function appAttributes(
 
 const SolidityConsensusCommitmentType = {
   ConsensusCommitmentStruct: {
-    voteNum: 'uint32',
+    furtherVotesRequired: 'uint32',
     proposedAllocation: 'uint256[]',
     proposedDestination: 'address[]',
     updateType: 'uint32',
