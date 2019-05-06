@@ -9,7 +9,7 @@ On our [website](https://magmo.com) you will find links to our whitepapers and c
 This repository contains (i) a state channel framework capable of running 3rd-party
 'applications' that conform to a simple state-machine interface and (ii) an extension to allow for large-scale state-channel networks.
 
-# ForceMove and the simple-adjudicator
+# ForceMove
 
 The ForceMove framework takes a pragmatic approach to state channels directly funded by on-chain deposits: sacrificing generality of the supported applications,
 for simplicity in the on-chain and off-chain logic. In particular, the framework can't (yet) support
@@ -19,19 +19,6 @@ a state channel sports betting game, where bets have to be made by a deadline an
 is determined through an oracle feed.
 
 A full description of the framework and it's capabilities can be found in our [whitepaper](https://magmo.com/force-move-games.pdf).
-
-The framework separates the core behaviour of the protocol from the implementation. We currently
-provide one implementation (the simple adjudicator). You can find more about working with the
-framework using the simple adjudicator in the [readme](./packages/fmg-simple-adjudicator).
-
-The simple-adjudicator contract in this respository currently supports a single 2-player game, but that's mostly
-due to solidity challenges and time constraints - the framework itself extends naturally to
-n-player games.
-
-This repository contains the logic
-for a few example applications (a [payment channel](./packages/fmg-payments) and the game of
-[rock-paper-scissors](./packages/fmg-rock-paper-scissors)) to demonstrate how to build on top
-of the framework. You may also find more advanced, fully-functioning example applications in our [Apps monorepo](https://github.com/magmo/apps), including Tic Tac Toe and our Channel Wallet.
 
 # Nitro and the nitro-adjudicator
 
@@ -45,13 +32,11 @@ The nitro-adjudicator supports an arbitrary number of state channels, and introd
 
 This repository is split into packages, the first two of which are published as independent node modules.
 
-| Package                                                         | Description                                                                         |
-| --------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
-| [`fmg-core`](/packages/fmg-core)                                | Contracts and js libraries for the protocols' rules and states                      |
-| [`fmg-simple-adjudicator`](./packages/fmg-simple-adjudicator)   | Implementation of on-chain adjudicator capable of supporting the ForceMove protocol |
-| [`fmg-nitro-adjudicator`](./packages/fmg-nitro-adjudicator)     | Implementation of on-chain adjudicator capable of supporting the Nitro protocol     |
-| [`fmg-rock-paper-scissors`](./packages/fmg-rock-paper-scissors) | Example: 2-player game built on the framework                                       |
-| [`fmg-payments`](./packages/fmg-payments)                       | Example: payment channel built on the framework                                     |
+| Package                                                     | Description                                                                     |
+| ----------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| [`fmg-core`](/packages/fmg-core)                            | Contracts and js libraries for the protocols' rules and states                  |
+| [`fmg-nitro-adjudicator`](./packages/fmg-nitro-adjudicator) | Implementation of on-chain adjudicator capable of supporting the Nitro protocol |
+| [`fmg-payments`](./packages/fmg-payments)                   | Example: payment channel built on the framework                                 |
 
 ### TODO
 
