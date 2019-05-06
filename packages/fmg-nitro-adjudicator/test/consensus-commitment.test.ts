@@ -4,7 +4,8 @@ import { getNetworkId, getGanacheProvider } from 'magmo-devtools';
 import { Channel, asEthersObject, Commitment } from 'fmg-core';
 import TestConsensusCommitmentArtifact from '../build/contracts/TestConsensusCommitment.json';
 
-import { commitments as ConsensusApp, UpdateType } from '../src/consensus-app';
+import { commitments as ConsensusApp, UpdateType, appAttributes } from '../src/consensus-app';
+import { bigNumberify } from 'ethers/utils';
 
 jest.setTimeout(20000);
 let consensusCommitment: ethers.Contract;
@@ -52,12 +53,37 @@ describe('ConsensusCommitment', () => {
       asEthersObject(commitment),
     );
 
-    expect(consensusCommitmentAttrs).toMatchObject({
-      voteNum: 1,
-      // currentAllocation: allocation, // TODO: Figure out how to compare BigNumber and Uint256
+    const consensusCommitmentObject = convertToConsensusCommitmentObject(consensusCommitmentAttrs);
+    expect(consensusCommitmentObject).toMatchObject({
+      furtherVotesRequired: 1,
+      currentAllocation: allocation,
       currentDestination: participants,
-      // proposedAllocation,
+      proposedAllocation,
       proposedDestination,
+      updateType: UpdateType.Consensus,
     });
   });
 });
+
+// TODO: Will this ever be needed outside of this test?
+// Normally we just want to convert to AppAttrs
+function convertToConsensusCommitmentObject(consensusCommitmentArgs) {
+  const SolidityConsensusCommitmentType = {
+    ConsensusCommitmentStruct: {
+      furtherVotesRequired: 'uint32',
+      currentAllocation: 'uint256[]',
+      currentDestination: 'address[]',
+      proposedAllocation: 'uint256[]',
+      proposedDestination: 'address[]',
+      updateType: 'uint32',
+    },
+  };
+  return {
+    furtherVotesRequired: parseInt(consensusCommitmentArgs[0], 10),
+    currentAllocation: consensusCommitmentArgs[1].map(bigNumberify).map(bn => bn.toHexString()),
+    currentDestination: consensusCommitmentArgs[2],
+    proposedAllocation: consensusCommitmentArgs[3].map(bigNumberify).map(bn => bn.toHexString()),
+    proposedDestination: consensusCommitmentArgs[4],
+    updateType: parseInt(consensusCommitmentArgs[5], 10),
+  };
+}
