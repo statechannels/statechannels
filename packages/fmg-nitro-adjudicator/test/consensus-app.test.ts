@@ -1,11 +1,7 @@
-import { ContractFactory, ethers } from 'ethers';
-import linker from 'solc/linker';
+import { ethers } from 'ethers';
 import { getNetworkId, getGanacheProvider, expectRevert, delay } from 'magmo-devtools';
 import { Channel, ethereumArgs, toUint256 } from 'fmg-core';
 
-import CommitmentArtifact from '../build/contracts/Commitment.json';
-import RulesArtifact from '../build/contracts/Rules.json';
-import ConsensusCommitmentArtifact from '../build/contracts/ConsensusCommitment.json';
 import ConsensusAppArtifact from '../build/contracts/ConsensusApp.json';
 
 import {
@@ -22,19 +18,9 @@ const providerSigner = provider.getSigner();
 
 async function setupContracts() {
   const networkId = await getNetworkId();
-
-  ConsensusCommitmentArtifact.bytecode = linker.linkBytecode(ConsensusCommitmentArtifact.bytecode, {
-    Commitment: CommitmentArtifact.networks[networkId].address,
-  });
-
-  ConsensusAppArtifact.bytecode = linker.linkBytecode(ConsensusAppArtifact.bytecode, {
-    Commitment: CommitmentArtifact.networks[networkId].address,
-    Rules: RulesArtifact.networks[networkId].address,
-    ConsensusCommitment: ConsensusCommitmentArtifact.networks[networkId].address,
-  });
-
-  consensusApp = await ContractFactory.fromSolidity(ConsensusAppArtifact, providerSigner).deploy();
-  await consensusApp.deployed();
+  const address = ConsensusAppArtifact.networks[networkId].address;
+  const abi = ConsensusAppArtifact.abi;
+  consensusApp = await new ethers.Contract(address, abi, provider);
 }
 
 async function invalidTransition(fromCommitment, toCommitment, reason?) {
@@ -91,12 +77,12 @@ describe('ConsensusApp', () => {
   //   const fromCommitment = commitments.appCommitment({
   //     ...defaults,
   //     turnNum: 6,
-  //     voteNum: 0,
+  //     furtherVotesRequired: 0,
   //   });
   //   const toCommitment = commitments.appCommitment({
   //     ...defaults,
   //     turnNum: 6,
-  //     voteNum: 2,
+  //     furtherVotesRequired: 2,
   //   });
   //   invalidTransition(
   //     fromCommitment,
@@ -109,16 +95,18 @@ describe('ConsensusApp', () => {
     const fromCommitment = commitments.appCommitment({
       ...defaults,
       turnNum: 6,
-      voteNum: NUM_PARTICIPANTS - 1,
-      updateType: UpdateType.Motion,
+      furtherVotesRequired: 1,
+      updateType: UpdateType.Proposal,
     });
     const toCommitmentArgs = {
       ...defaults,
       allocation: proposedAllocation,
       destination: proposedDestination,
       turnNum: 6,
-      voteNum: 0,
-      updateType: UpdateType.Accord,
+      furtherVotesRequired: 0,
+      updateType: UpdateType.Consensus,
+      proposedDestination: [],
+      proposedAllocation: [],
     };
 
     it('returns true when the current balances have properly been set', async () => {
@@ -126,16 +114,18 @@ describe('ConsensusApp', () => {
       validTransition(fromCommitment, toCommitment);
     });
 
-    it('reverts when the voteNum is not reset', async () => {
+    it('reverts when the proposals are not reset', async () => {
       const toCommitment = commitments.appCommitment({
         ...toCommitmentArgs,
-        voteNum: 1,
+        furtherVotesRequired: 0,
+        proposedDestination: participants,
+        proposedAllocation: allocation,
       });
 
       invalidTransition(
         fromCommitment,
         toCommitment,
-        'ConsensusApp: To veto or make new Accord, numVotes must be 0',
+        "ConsensusApp: 'proposedAllocation' must be reset during consensus.",
       );
     });
   });
@@ -170,11 +160,11 @@ describe('ConsensusApp', () => {
   // describe('when the consensus round is ongoing and the counter was not reset', () => {
   //   const fromCommitment = commitments.appCommitment({
   //     ...defaults,
-  //     voteNum: 0,
+  //     furtherVotesRequired: 0,
   //   });
   //   const toCommitmentArgs = {
   //     ...defaults,
-  //     voteNum: 1,
+  //     furtherVotesRequired: 1,
   //   };
   //   it("returns true when the consensus round is ongoing and the proposed balances haven't changed", async () => {
   //     const toCommitment = commitments.appCommitment(toCommitmentArgs);
@@ -238,11 +228,11 @@ describe('ConsensusApp', () => {
   // describe('when the consensus round is ongoing and the counter was reset', () => {
   //   const fromCommitment = commitments.appCommitment({
   //     ...defaults,
-  //     voteNum: 1,
+  //     furtherVotesRequired: 1,
   //   });
   //   const toCommitmentArgs = {
   //     ...defaults,
-  //     voteNum: 0,
+  //     furtherVotesRequired: 0,
   //   };
   //   it('returns true when the consensus round is reset before the end of the round', async () => {
   //     const toCommitment = commitments.appCommitment(toCommitmentArgs);
@@ -258,7 +248,7 @@ describe('ConsensusApp', () => {
   //     invalidTransition(
   //       fromCommitment,
   //       toCommitment,
-  //       'CountingApp: currentAllocations must be equal when resetting the voteNum before the end of the round',
+  //       'CountingApp: currentAllocations must be equal when resetting the furtherVotesRequired before the end of the round',
   //     );
   //   });
   //   it('reverts when the currentDestination changes', async () => {
@@ -271,7 +261,7 @@ describe('ConsensusApp', () => {
   //     invalidTransition(
   //       fromCommitment,
   //       toCommitment,
-  //       'CountingApp: currentDestinations must be equal when resetting the voteNum before the end of the round',
+  //       'CountingApp: currentDestinations must be equal when resetting the furtherVotesRequired before the end of the round',
   //     );
   //   });
   // });
@@ -280,7 +270,7 @@ describe('ConsensusApp', () => {
   //   it('works', async () => {
   //     const c = commitments.appCommitment({
   //       ...defaults,
-  //       voteNum: 1,
+  //       furtherVotesRequired: 1,
   //     });
 
   //     expect(c).toMatchObject(appAttributesFromBytes(bytesFromAppAttributes(c)));

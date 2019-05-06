@@ -84,8 +84,8 @@ contract ConsensusApp {
    } 
 
    modifier validConsensusState(ConsensusCommitment.ConsensusCommitmentStruct memory commitment) {
-   require(commitment.proposedAllocation.length==0,"ConsensusApp:  'proposedAllocation' must be empty during consensus."); 
-    require(commitment.proposedDestination.length==0,"ConsensusApp:  'proposedDestination' must be empty during consensus."); 
+   require(commitment.proposedAllocation.length==0,"ConsensusApp: 'proposedAllocation' must be reset during consensus."); 
+    require(commitment.proposedDestination.length==0,"ConsensusApp: 'proposedDestination' must be reset during consensus."); 
     _;
    } 
   
