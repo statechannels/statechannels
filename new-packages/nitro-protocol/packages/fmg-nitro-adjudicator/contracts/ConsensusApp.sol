@@ -58,12 +58,12 @@ contract ConsensusApp {
     ConsensusCommitment.ConsensusCommitmentStruct memory oldCommitment,
     ConsensusCommitment.ConsensusCommitmentStruct memory newCommitment
   ) {
-    require(encodeAndHashAllocation(oldCommitment.proposedAllocation) == encodeAndHashAllocation(
-      newCommitment.currentAllocation),
+    require(
+      encodeAndHashAllocation(oldCommitment.proposedAllocation) == encodeAndHashAllocation(newCommitment.currentAllocation),
       "ConsensusApp: 'allocation' must be set to the previous `proposedAllocation`."
     ); 
-    require(encodeAndHashDestination(oldCommitment.proposedDestination) == encodeAndHashDestination(
-      newCommitment.currentDestination),
+    require(
+      encodeAndHashDestination(oldCommitment.proposedDestination) == encodeAndHashDestination(newCommitment.currentDestination),
       "ConsensusApp: 'destination' must be set to the previous `proposedDestination`"
     );
     _;
@@ -73,12 +73,12 @@ contract ConsensusApp {
     ConsensusCommitment.ConsensusCommitmentStruct memory oldCommitment,
     ConsensusCommitment.ConsensusCommitmentStruct memory newCommitment
   ) {
-    require(encodeAndHashAllocation(oldCommitment.currentAllocation) == encodeAndHashAllocation(
-      newCommitment.currentAllocation),
+    require(
+      encodeAndHashAllocation(oldCommitment.currentAllocation) == encodeAndHashAllocation(newCommitment.currentAllocation),
       "ConsensusApp: 'allocation' must be the same between commitments."
     ); 
-    require(encodeAndHashDestination(oldCommitment.currentDestination) == encodeAndHashDestination(
-      newCommitment.currentDestination),
+    require(
+      encodeAndHashDestination(oldCommitment.currentDestination) == encodeAndHashDestination(newCommitment.currentDestination),
       "ConsensusApp: 'destination' must be the same between commitments."
     );
     _;
@@ -88,12 +88,12 @@ contract ConsensusApp {
     ConsensusCommitment.ConsensusCommitmentStruct memory oldCommitment,
     ConsensusCommitment.ConsensusCommitmentStruct memory newCommitment
   ) {
-    require(encodeAndHashAllocation(oldCommitment.proposedAllocation) == encodeAndHashAllocation(
-      newCommitment.proposedAllocation),
+    require(
+      encodeAndHashAllocation(oldCommitment.proposedAllocation) == encodeAndHashAllocation(newCommitment.proposedAllocation),
       "ConsensusApp: 'proposedAllocation' must be the same between commitments."
     ); 
-    require(encodeAndHashDestination(oldCommitment.proposedDestination) == encodeAndHashDestination(
-      newCommitment.proposedDestination),
+    require(
+      encodeAndHashDestination(oldCommitment.proposedDestination) == encodeAndHashDestination(newCommitment.proposedDestination),
       "ConsensusApp: 'proposedDestination' must be the same between commitments."
     ); 
     _;
@@ -104,7 +104,7 @@ contract ConsensusApp {
     uint numParticipants
   ) {
     require(
-      commitment.furtherVotesRequired == numParticipants-1,
+      commitment.furtherVotesRequired == numParticipants - 1,
       "Consensus App: furtherVotesRequired needs to be initialized to the correct value."
     ); 
     _;
@@ -115,19 +115,19 @@ contract ConsensusApp {
     ConsensusCommitment.ConsensusCommitmentStruct memory newCommitment
   ) {
     require(
-      newCommitment.furtherVotesRequired == oldCommitment.furtherVotesRequired-1,
+      newCommitment.furtherVotesRequired == oldCommitment.furtherVotesRequired - 1,
       "Consensus App: furtherVotesRequired should be decremented by 1."
     ); 
     _;
   } 
 
   modifier validConsensusState(ConsensusCommitment.ConsensusCommitmentStruct memory commitment) {
-  require(
-    commitment.proposedAllocation.length==0,
-    "ConsensusApp: 'proposedAllocation' must be reset during consensus."
-    ); 
     require(
-      commitment.proposedDestination.length==0,
+      commitment.proposedAllocation.length == 0,
+      "ConsensusApp: 'proposedAllocation' must be reset during consensus."
+      ); 
+    require(
+      commitment.proposedDestination.length == 0,
       "ConsensusApp: 'proposedDestination' must be reset during consensus."
     ); 
     _;
@@ -145,10 +145,11 @@ contract ConsensusApp {
 
   function validatePropose(
     ConsensusCommitment.ConsensusCommitmentStruct memory oldCommitment,
-    ConsensusCommitment.ConsensusCommitmentStruct memory newCommitment, uint numParticipants
+    ConsensusCommitment.ConsensusCommitmentStruct memory newCommitment,
+    uint numParticipants
   ) private pure
     balancesUnchanged(oldCommitment, newCommitment)
-    furtherVotesRequiredInitialized(newCommitment,numParticipants)
+    furtherVotesRequiredInitialized(newCommitment, numParticipants)
   { }
 
   function validateFinalVote(
@@ -193,7 +194,7 @@ contract ConsensusApp {
       uint numParticipants
   ) public pure returns (bool)
   {
-    return commitment.furtherVotesRequired == numParticipants-1;
+    return commitment.furtherVotesRequired == numParticipants - 1;
   }
 
   function encodeAndHashAllocation(uint256[] memory allocation) internal pure returns (bytes32) {
