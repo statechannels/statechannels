@@ -1,22 +1,25 @@
 import * as koaBody from 'koa-body';
 import * as Router from 'koa-router';
 
-import { ethers } from 'ethers';
-import { Signature } from 'fmg-core';
-import { errors } from '../../wallet';
-import { updateRPSChannel } from '../services/rpsChannelManager';
-export const BASE_URL = `/api/v1/rps_channels`;
+import { appAttributesFromBytes, bytesFromAppAttributes } from 'fmg-nitro-adjudicator';
+import Wallet, { errors } from '../../../wallet';
+export const BASE_URL = `/api/v1/ledger_channels`;
 
 const router = new Router();
+
+const wallet = new Wallet(x => bytesFromAppAttributes);
 
 router.post(`${BASE_URL}`, koaBody(), async ctx => {
   try {
     let body;
     const { commitment: theirCommitment, signature: theirSignature } = ctx.request.body;
 
-    const { commitment, signature } = await updateRPSChannel(
-      theirCommitment,
-      (ethers.utils.splitSignature(theirSignature) as unknown) as Signature,
+    const { commitment, signature } = await wallet.updateLedgerChannel(
+      {
+        ...theirCommitment,
+        appAttributes: appAttributesFromBytes(theirCommitment.appAttributes),
+      },
+      theirSignature,
     );
     body = { status: 'success', commitment, signature };
 
@@ -50,4 +53,4 @@ router.post(`${BASE_URL}`, koaBody(), async ctx => {
   }
 });
 
-export const rpsChannelRoutes = router.routes();
+export const ledgerChannelRoutes = router.routes();
