@@ -156,8 +156,8 @@ contract ConsensusApp {
     ConsensusCommitment.ConsensusCommitmentStruct memory oldCommitment,
     ConsensusCommitment.ConsensusCommitmentStruct memory newCommitment
   ) private pure
-      validConsensusState(newCommitment)
-      balancesUpdated(oldCommitment, newCommitment)
+    validConsensusState(newCommitment)
+    balancesUpdated(oldCommitment, newCommitment)
   { }
     
   function validateVeto(
