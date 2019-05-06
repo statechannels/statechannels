@@ -1,4 +1,4 @@
-pragma solidity ^0.5.0;
+pragma solidity ^0.5.2;
 pragma experimental ABIEncoderV2;
 import "fmg-core/contracts/Commitment.sol";
 import "fmg-core/contracts/Rules.sol";
