@@ -5,7 +5,7 @@ import Wallet from '../../wallet';
 export const BASE_URL = `/api/v1/rps_games`;
 import { Address, Uint256 } from 'fmg-core';
 import { HUB_ADDRESS, NAME, STAKE } from '../../constants';
-import * as artifact from 'magmo-common-data/prebuilt-contracts/RockPaperScissorsGame.json';
+import * as artifact from 'magmo-wallet-common/prebuilt-contracts/RockPaperScissorsGame.json';
 
 const router = new Router();
 

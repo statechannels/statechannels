@@ -1,0 +1,8 @@
+{
+  "name": "magmo-wallet-common",
+  "version": "0.0.0",
+  "description": "Modules and data shared betweeen implementations the Magmo wallet",
+  "main": "index.js",
+  "license": "MIT",
+  "private": false
+}
