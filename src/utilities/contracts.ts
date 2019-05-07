@@ -8,6 +8,12 @@ const rulesJson = 'Rules.json';
 const nitroAdjudicatorJson = 'NitroAdjudicator.json';
 const rpsGameJson = 'RockPaperScissorsGame.json';
 
+interface Artifact {
+  abi: any;
+  contractName: string;
+  networks: { [key: string]: { address: string } };
+}
+
 let commitmentArtifact: Artifact = require(path.join(commonDataPrefix, commitmentJson));
 let rulesArtifact: Artifact = require(path.join(commonDataPrefix, rulesJson));
 let nitroAdjudicatorArtifact: Artifact = require(path.join(commonDataPrefix, nitroAdjudicatorJson));
@@ -19,11 +25,4 @@ if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'development') {
   nitroAdjudicatorArtifact = require(path.join(devPathPrefix, nitroAdjudicatorJson));
 }
 
-interface Artifact {
-  abi: any;
-  contractName: string;
-  networks: { [key: string]: { address: string } };
-}
-
-// todo: should define type
 export { commitmentArtifact, rulesArtifact, nitroAdjudicatorArtifact, rpsGameArtifact };

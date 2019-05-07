@@ -1,9 +1,9 @@
 import { ethers } from 'ethers';
 import { bigNumberify } from 'ethers/utils';
 import { channelID } from 'fmg-core/lib/channel';
+import { listen } from '..';
 import AllocatorChannel from '../../models/allocatorChannel';
 import { channel, depositContract } from './utils';
-import { listen } from '..';
 
 jest.setTimeout(60000);
 const channelId = channelID(channel);
@@ -28,8 +28,7 @@ describe('adjudicator listener', () => {
       const postEventHoldings = await getHoldings();
 
       const eventDeposit = bigNumberify(postEventHoldings).sub(bigNumberify(preEventHoldings));
-      // todo: this should be 5
-      expect(eventDeposit.toNumber()).toBeGreaterThan(1);
+      expect(eventDeposit.toNumber()).toBeGreaterThanOrEqual(5);
       done();
     };
 

@@ -15,7 +15,6 @@ const nitroContractAddress =
 
 async function sendTransaction(provider, tx) {
   const signer = provider.getSigner();
-  // todo: failing here when running ci
   return await signer.sendTransaction({
     ...tx,
     to: nitroContractAddress,

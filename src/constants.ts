@@ -24,7 +24,7 @@ export const UNKNOWN_RULES_ADDRESS = '0x92b5b042047731FF882423cB555554F11F632Bd6
 
 // TODO: These should be in the seed file, but they got exported as undefined for some reason
 export const FUNDED_CHANNEL_NONCE = 3;
-export const FUNDED_CHANNEL_HOLDINGS = '0x03';
+export const FUNDED_CHANNEL_HOLDINGS = '0x00';
 
 export const FUNDED_RPS_CHANNEL_NONCE = 33;
 export const FUNDED_RPS_CHANNEL_HOLDINGS = '0x03';
