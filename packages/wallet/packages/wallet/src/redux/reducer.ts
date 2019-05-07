@@ -118,9 +118,9 @@ function updatedState(
   return newState;
 }
 
-function getProcessId(action: NewProcessAction): string {
+export function getProcessId(action: NewProcessAction): string {
   if ('channelId' in action) {
-    return action.channelId;
+    return `${action.protocol}-${action.channelId}`;
   }
   return APPLICATION_PROCESS_ID;
 }
