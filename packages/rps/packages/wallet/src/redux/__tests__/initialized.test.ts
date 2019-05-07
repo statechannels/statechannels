@@ -1,4 +1,4 @@
-import { walletReducer } from '../reducer';
+import { walletReducer, getProcessId } from '../reducer';
 
 import * as states from './../state';
 import * as actions from './../actions';
@@ -19,9 +19,8 @@ const defaults = {
 const initializedState = states.initialized({ ...defaults });
 
 describe('when a NewProcessAction arrives', () => {
-  const processId = channelId;
-
   const action = fundingRequested(channelId, PlayerIndex.A);
+  const processId = getProcessId(action);
   const initialize = jest.fn(() => ({
     protocolState: 'protocolState',
     sharedData: { prop: 'value' },
