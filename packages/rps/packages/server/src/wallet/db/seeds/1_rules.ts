@@ -4,7 +4,7 @@ import Rule from '../../models/rule';
 import knex from '../connection';
 Model.knex(knex);
 
-import * as RPS from '../../../contracts/prebuilt_contracts/RockPaperScissorsGame.json';
+import * as RPS from 'magmo-common-data/prebuilt-contracts/RockPaperScissorsGame.json';
 
 export function seed() {
   // Deletes ALL existing entries
