@@ -1,7 +1,7 @@
 import { ethers } from 'ethers';
 import { bigNumberify } from 'ethers/utils';
 import { Channel } from 'fmg-core';
-import * as NitroAdjudicatorArtifact from '../../../../build/contracts/NitroAdjudicator.json';
+import * as contracts from '../../../utilities/contracts';
 import { DUMMY_RULES_ADDRESS, FUNDED_CHANNEL_NONCE, PARTICIPANTS } from '../../../constants';
 
 export const channel: Channel = {
@@ -10,7 +10,8 @@ export const channel: Channel = {
   participants: PARTICIPANTS,
 };
 
-const nitroContractAddress = NitroAdjudicatorArtifact.networks[process.env.NETWORK_ID].address;
+const nitroContractAddress =
+  contracts.nitroAdjudicatorArtifact.networks[process.env.NETWORK_ID].address;
 
 async function sendTransaction(provider, tx) {
   const signer = provider.getSigner();
@@ -22,7 +23,7 @@ async function sendTransaction(provider, tx) {
 }
 
 function getAdjudicatorInterface(): ethers.utils.Interface {
-  return new ethers.utils.Interface(NitroAdjudicatorArtifact.abi);
+  return new ethers.utils.Interface(contracts.nitroAdjudicatorArtifact.abi);
 }
 
 function createDepositTransaction(destination: string, DepositLevel: string) {

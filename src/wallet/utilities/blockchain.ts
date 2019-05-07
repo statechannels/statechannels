@@ -1,6 +1,4 @@
-import * as CommitmentArtifact from 'magmo-wallet-common/prebuilt-contracts/Commitment.json';
-import * as nitroAdjudicatorArtifact from 'magmo-wallet-common/prebuilt-contracts/NitroAdjudicator.json';
-import * as RulesArtifact from 'magmo-wallet-common/prebuilt-contracts/Rules.json';
+import * as contracts from '../../utilities/contracts';
 
 import { ContractFactory, ethers, providers } from 'ethers';
 import { linkedByteCode } from 'magmo-devtools';
@@ -10,15 +8,15 @@ const provider = new providers.JsonRpcProvider(process.env.JSON_RPS_ENDPOINT);
 const walletWithProvider = new ethers.Wallet(HUB_SIGNER_PRIVATE_KEY, provider);
 
 export async function nitroAdjudicator() {
-  return setupContract(nitroAdjudicatorArtifact);
+  return setupContract(contracts.nitroAdjudicatorArtifact);
 }
 
 async function setupContract(artifact: any) {
   Object.defineProperty(artifact, 'bytecode', {
-    value: linkedByteCode(artifact, CommitmentArtifact, process.env.NETWORK_ID),
+    value: linkedByteCode(artifact, contracts.commitmentArtifact, process.env.NETWORK_ID),
   });
   Object.defineProperty(artifact, 'bytecode', {
-    value: linkedByteCode(artifact, RulesArtifact, process.env.NETWORK_ID),
+    value: linkedByteCode(artifact, contracts.rulesArtifact, process.env.NETWORK_ID),
   });
 
   let nitroFactory;

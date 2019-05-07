@@ -1,11 +1,11 @@
+import { Address, Uint256 } from 'fmg-core';
 import * as koaBody from 'koa-body';
 import * as Router from 'koa-router';
-
-import Wallet from '../../wallet';
-export const BASE_URL = `/api/v1/rps_games`;
-import { Address, Uint256 } from 'fmg-core';
 import { HUB_ADDRESS, NAME, STAKE } from '../../constants';
-import * as artifact from 'magmo-wallet-common/prebuilt-contracts/RockPaperScissorsGame.json';
+import * as contracts from '../../utilities/contracts';
+import Wallet from '../../wallet';
+
+export const BASE_URL = `/api/v1/rps_games`;
 
 const router = new Router();
 
@@ -18,7 +18,7 @@ interface Game {
 router.get(`${BASE_URL}`, koaBody(), async ctx => {
   try {
     const applications = await new Wallet('').getApplications();
-    const { address } = applications.find(a => a.name === artifact.contractName);
+    const { address } = applications.find(a => a.name === contracts.rpsGameArtifact.contractName);
 
     const games: Game[] = [
       {
