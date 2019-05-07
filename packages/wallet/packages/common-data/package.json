@@ -1,8 +1,0 @@
-{
-  "name": "magmo-common-data",
-  "version": "0.0.1",
-  "description": "Data shared betweeen implementations the Magmo protocol",
-  "main": "index.js",
-  "license": "MIT",
-  "private": false
-}
