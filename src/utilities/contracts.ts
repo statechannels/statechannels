@@ -1,6 +1,6 @@
 import * as path from 'path';
 
-const commonDataPrefix = 'magmo-common-data/prebuilt-contracts';
+const commonDataPrefix = 'magmo-wallet-common/prebuilt-contracts';
 const devPathPrefix = '../../build/contracts';
 
 const commitmentJson = 'Commitment.json';
