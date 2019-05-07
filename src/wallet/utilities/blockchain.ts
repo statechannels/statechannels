@@ -1,6 +1,6 @@
-import * as CommitmentArtifact from 'magmo-common-data/prebuilt-contracts/Commitment.json';
-import * as nitroAdjudicatorArtifact from 'magmo-common-data/prebuilt-contracts/NitroAdjudicator.json';
-import * as RulesArtifact from 'magmo-common-data/prebuilt-contracts/Rules.json';
+import * as CommitmentArtifact from 'magmo-wallet-common/prebuilt-contracts/Commitment.json';
+import * as nitroAdjudicatorArtifact from 'magmo-wallet-common/prebuilt-contracts/NitroAdjudicator.json';
+import * as RulesArtifact from 'magmo-wallet-common/prebuilt-contracts/Rules.json';
 
 import { ContractFactory, ethers, providers } from 'ethers';
 import { linkedByteCode } from 'magmo-devtools';
