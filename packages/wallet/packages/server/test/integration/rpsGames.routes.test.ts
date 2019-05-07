@@ -3,7 +3,7 @@ process.env.NODE_ENV = 'test';
 import * as supertest from 'supertest';
 import app from '../../src/app/app';
 import { HUB_ADDRESS, NAME, STAKE } from '../../src/constants';
-import * as rpsArtifact from '../../src/contracts/prebuilt_contracts/RockPaperScissorsGame.json';
+import * as rpsArtifact from 'magmo-common-data/prebuilt-contracts/RockPaperScissorsGame.json';
 
 const BASE_URL = '/api/v1/rps_games';
 
