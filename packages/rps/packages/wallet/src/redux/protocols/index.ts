@@ -1,6 +1,6 @@
 import { SharedData } from '../state';
 import { ChallengingState } from './challenging/states';
-import { ConcludingState } from './concluding/states';
+import { ConcludingState } from './concluding/instigator/states';
 import { DirectFundingState } from './direct-funding/state';
 import { FundingState } from './funding/states';
 import { IndirectFundingState } from './indirect-funding/state';

@@ -1,8 +1,8 @@
 import * as scenarios from './scenarios';
 import { concludingReducer, initialize, ReturnVal } from '../reducer';
 import { ConcludingStateType, FailureReason } from '../states';
-import { itSendsThisMessage } from '../../../__tests__/helpers';
-import { sendConcludeChannel } from '../../../../communication';
+import { itSendsThisMessage } from '../../../../__tests__/helpers';
+import { sendConcludeChannel } from '../../../../../communication';
 
 describe('[ Happy path ]', () => {
   const scenario = scenarios.happyPath;
