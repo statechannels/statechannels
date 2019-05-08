@@ -3,10 +3,10 @@ import React from 'react';
 import Modal from 'react-modal';
 import { Provider } from 'react-redux';
 import { Concluding } from '..';
-import { fakeStore } from '../../../../__stories__/index';
-import StatusBarLayout from '../../../../components/status-bar-layout';
+import { fakeStore } from '../../../../../__stories__/index';
+import StatusBarLayout from '../../../../../components/status-bar-layout';
 import * as scenarios from './scenarios';
-import { isTerminal } from '../../responding/state';
+import { isTerminal } from '../../../responding/state';
 
 const render = container => () => {
   // todo: rework this modal stuff
@@ -26,11 +26,10 @@ const render = container => () => {
 
 // Convention is to add all scenarios here, and allow the
 // addStories function to govern what ends up being shown.
-addStories(scenarios.happyPath, 'Concluding / Happy Path');
-addStories(scenarios.channelDoesntExist, 'Concluding / Channel doesnt exist');
-addStories(scenarios.concludingNotPossible, 'Concluding / Concluding impossible');
-addStories(scenarios.concludingCancelled, 'Concluding / Concluding cancelled');
-addStories(scenarios.defundingFailed, 'Concluding / Defund failed');
+addStories(scenarios.happyPath, 'Concluding / Instigator / Happy Path');
+addStories(scenarios.channelDoesntExist, 'Concluding / Instigator / Channel doesnt exist');
+addStories(scenarios.concludingNotPossible, 'Concluding / Instigator / Concluding impossible');
+addStories(scenarios.defundingFailed, 'Concluding / Instigator / Defund failed');
 
 function addStories(scenario, chapter) {
   Object.keys(scenario.states).forEach(key => {

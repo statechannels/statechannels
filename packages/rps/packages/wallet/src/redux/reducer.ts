@@ -7,7 +7,7 @@ import { ProtocolState } from './protocols';
 import { isNewProcessAction, isProtocolAction, NewProcessAction } from './protocols/actions';
 import * as applicationProtocol from './protocols/application';
 import * as challengeProtocol from './protocols/challenging';
-import * as concludeProtocol from './protocols/concluding';
+import * as concludeProtocol from './protocols/concluding/instigator';
 import * as fundProtocol from './protocols/funding';
 import * as challengeResponseProtocol from './protocols/responding';
 import * as states from './state';
