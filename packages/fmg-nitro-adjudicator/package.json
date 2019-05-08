@@ -1,6 +1,6 @@
 {
   "name": "fmg-nitro-adjudicator",
-  "version": "0.0.12",
+  "version": "0.0.13",
   "main": "./lib/index.js",
   "repository": "https://github.com/magmo/nitro-adjudicator.git",
   "author": "Andrew Stewart <andrew.gord.stewart@gmail.com>",
@@ -27,13 +27,13 @@
     "dotenv": "^6.1.0",
     "ganache-cli": "6.1.8",
     "jest": "^23.6.0",
+    "jest-gas-reporter": "0.0.1",
     "magmo-devtools": "git+https://github.com/magmo/devtools.git#v0.1.14",
     "truffle": "^5.0.0-beta.2",
     "ts-jest": "^23.10.5",
     "tslint": "^5.11.0",
     "tslint-config-prettier": "^1.17.0",
-    "typescript": "^3.2.1",
-    "jest-gas-reporter": "0.0.1"
+    "typescript": "^3.2.1"
   },
   "jest": {
     "collectCoverageFrom": [
