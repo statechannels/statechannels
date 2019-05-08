@@ -8,8 +8,8 @@ import { getLastMessage } from '../../../../state';
 describe('happy-path scenario', () => {
   const scenario = scenarios.happyPath;
   describe('initializing', () => {
-    const { channelId, store } = scenario.initialParams;
-    const initialState = initialize(channelId, store);
+    const { channelId, store, processId } = scenario.initialParams;
+    const initialState = initialize(processId, channelId, store);
 
     itTransitionsTo(initialState, 'BWaitForPreFundSetup0');
   });

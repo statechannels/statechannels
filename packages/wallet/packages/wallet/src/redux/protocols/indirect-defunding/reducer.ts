@@ -1,5 +1,5 @@
 import { ProtocolStateWithSharedData } from '..';
-import { SharedData, setChannelStore, queueMessage } from '../../state';
+import { SharedData, setChannelStore } from '../../state';
 import * as states from './state';
 import { IndirectDefundingAction } from './actions';
 import { COMMITMENT_RECEIVED } from '../../actions';
@@ -7,10 +7,7 @@ import { Commitment } from 'fmg-core/lib/commitment';
 import * as helpers from '../reducer-helpers';
 import { getChannelState } from '../../selectors';
 import { unreachable } from '../../../utils/reducer-utils';
-import { bytesFromAppAttributes } from 'fmg-nitro-adjudicator';
-import { PlayerIndex } from '../../types';
-import { checkAndStore, signAndStore } from '../../channel-store/reducer';
-import { sendCommitmentReceived } from '../../../communication';
+import { checkAndStore } from '../../channel-store/reducer';
 
 export const initialize = (
   processId: string,
@@ -25,16 +22,17 @@ export const initialize = (
       sharedData,
     };
   }
-  let newSharedData = { ...sharedData };
-  if (helpers.isFirstPlayer(channelId, sharedData)) {
-    newSharedData = craftAndSendLegerUpdate(
-      newSharedData,
-      processId,
-      channelId,
-      proposedAllocation,
-      proposedDestination,
-    );
-  }
+  const newSharedData = { ...sharedData };
+  // TODO: update to latest consensus game
+  // if (helpers.isFirstPlayer(channelId, sharedData)) {
+  //   newSharedData = craftAndSendLegerUpdate(
+  //     newSharedData,
+  //     processId,
+  //     channelId,
+  //     proposedAllocation,
+  //     proposedDestination,
+  //   );
+  // }
   return {
     protocolState: states.waitForLedgerUpdate({
       processId,
@@ -91,34 +89,36 @@ const waitForLedgerUpdateReducer = (
     return { protocolState, sharedData };
   }
   const { commitment, signature } = action.signedCommitment;
-  let newSharedData = receiveLedgerCommitment(sharedData, commitment, signature);
+  const newSharedData = receiveLedgerCommitment(sharedData, commitment, signature);
   if (!validTransition(newSharedData, protocolState.channelId, commitment)) {
     return {
       protocolState: states.failure('Received Invalid Commitment'),
       sharedData: newSharedData,
     };
   }
-  const { processId, channelId, proposedAllocation, proposedDestination } = protocolState;
+  // const { processId, channelId, proposedAllocation, proposedDestination } = protocolState;
   if (helpers.isFirstPlayer(protocolState.channelId, newSharedData)) {
-    newSharedData = craftFinalLedgerUpdate(
-      newSharedData,
-      processId,
-      channelId,
-      proposedAllocation,
-      proposedDestination,
-    );
+    // TODO: Needs to be updated to the new consensus game
+    // newSharedData = craftFinalLedgerUpdate(
+    //   newSharedData,
+    //   processId,
+    //   channelId,
+    //   proposedAllocation,
+    //   proposedDestination,
+    // );
     return {
       protocolState: states.success(),
       sharedData: newSharedData,
     };
   } else {
-    newSharedData = craftAndSendLegerUpdate(
-      newSharedData,
-      processId,
-      channelId,
-      proposedAllocation,
-      proposedDestination,
-    );
+    // TODO: This needs to be updated to the new consensus game
+    // newSharedData = craftAndSendLegerUpdate(
+    //   newSharedData,
+    //   processId,
+    //   channelId,
+    //   proposedAllocation,
+    //   proposedDestination,
+    // );
     return {
       protocolState: states.waitForFinalLedgerUpdate(protocolState),
       sharedData: newSharedData,
@@ -146,91 +146,90 @@ const validTransition = (
 ): boolean => {
   return getChannelState(sharedData, channelId).lastCommitment.commitment === commitment;
 };
+// TODO: Update to latest consensus game
+// const craftAndSendLegerUpdate = (
+//   sharedData: SharedData,
+//   processId: string,
+//   channelId: string,
+//   proposedAllocation: string[],
+//   proposedDestination: string[],
+// ): SharedData => {
+//   const channelState = getChannelState(sharedData, channelId);
+//   const appAttributes = bytesFromAppAttributes({
+//     consensusCounter: channelState.ourIndex,
+//     proposedAllocation,
+//     proposedDestination,
+//   });
+//   const lastCommitment = channelState.lastCommitment.commitment;
 
-const craftAndSendLegerUpdate = (
-  sharedData: SharedData,
-  processId: string,
-  channelId: string,
-  proposedAllocation: string[],
-  proposedDestination: string[],
-): SharedData => {
-  const channelState = getChannelState(sharedData, channelId);
-  const appAttributes = bytesFromAppAttributes({
-    consensusCounter: channelState.ourIndex,
-    proposedAllocation,
-    proposedDestination,
-  });
-  const lastCommitment = channelState.lastCommitment.commitment;
+//   const newCommitment: Commitment = {
+//     ...lastCommitment,
+//     commitmentCount: channelState.ourIndex,
+//     turnNum: lastCommitment.turnNum + 1,
+//     appAttributes,
+//   };
 
-  const newCommitment: Commitment = {
-    ...lastCommitment,
-    commitmentCount: channelState.ourIndex,
-    turnNum: lastCommitment.turnNum + 1,
-    appAttributes,
-  };
+//   return receiveAndSendUpdateCommitment(
+//     sharedData,
+//     processId,
+//     channelId,
+//     newCommitment,
+//     channelState.ourIndex,
+//   );
+// };
 
-  return receiveAndSendUpdateCommitment(
-    sharedData,
-    processId,
-    channelId,
-    newCommitment,
-    channelState.ourIndex,
-  );
-};
+// const craftFinalLedgerUpdate = (
+//   sharedData: SharedData,
+//   processId: string,
+//   channelId: string,
+//   proposedAllocation: string[],
+//   proposedDestination: string[],
+// ): SharedData => {
+//   const channelState = getChannelState(sharedData, channelId);
+//   const appAttributes = bytesFromAppAttributes({
+//     consensusCounter: 0,
+//     proposedAllocation,
+//     proposedDestination,
+//   });
+//   const lastCommitment = channelState.lastCommitment.commitment;
 
-const craftFinalLedgerUpdate = (
-  sharedData: SharedData,
-  processId: string,
-  channelId: string,
-  proposedAllocation: string[],
-  proposedDestination: string[],
-): SharedData => {
-  const channelState = getChannelState(sharedData, channelId);
-  const appAttributes = bytesFromAppAttributes({
-    consensusCounter: 0,
-    proposedAllocation,
-    proposedDestination,
-  });
-  const lastCommitment = channelState.lastCommitment.commitment;
+//   const newCommitment: Commitment = {
+//     ...lastCommitment,
+//     commitmentCount: 0,
+//     turnNum: lastCommitment.turnNum + 1,
+//     appAttributes,
+//     allocation: proposedAllocation,
+//     destination: proposedDestination,
+//   };
 
-  const newCommitment: Commitment = {
-    ...lastCommitment,
-    commitmentCount: 0,
-    turnNum: lastCommitment.turnNum + 1,
-    appAttributes,
-    allocation: proposedAllocation,
-    destination: proposedDestination,
-  };
+//   return receiveAndSendUpdateCommitment(
+//     sharedData,
+//     processId,
+//     channelId,
+//     newCommitment,
+//     PlayerIndex.A,
+//   );
+// };
+// const receiveAndSendUpdateCommitment = (
+//   sharedData: SharedData,
+//   processId: string,
+//   channelId: string,
+//   commitment: Commitment,
+//   ourIndex: PlayerIndex,
+// ) => {
+//   const channelState = getChannelState(sharedData, channelId);
+//   const result = signAndStore(sharedData.channelStore, commitment);
+//   if (result.isSuccess) {
+//     const newSharedData = setChannelStore(sharedData, result.store);
+//     const message = helpers.createCommitmentMessageRelay(
+//       processId,
+//       channelState.participants[ourIndex],
+//       commitment,
+//       result.signedCommitment.signature,
+//     );
 
-  return receiveAndSendUpdateCommitment(
-    sharedData,
-    processId,
-    channelId,
-    newCommitment,
-    PlayerIndex.A,
-  );
-};
+//     return queueMessage(newSharedData, message);
+//   }
 
-const receiveAndSendUpdateCommitment = (
-  sharedData: SharedData,
-  processId: string,
-  channelId: string,
-  commitment: Commitment,
-  ourIndex: PlayerIndex,
-) => {
-  const channelState = getChannelState(sharedData, channelId);
-  const result = signAndStore(sharedData.channelStore, commitment);
-  if (result.isSuccess) {
-    const newSharedData = setChannelStore(sharedData, result.store);
-    const message = sendCommitmentReceived(
-      processId,
-      channelState.participants[ourIndex],
-      commitment,
-      result.signedCommitment.signature,
-    );
-
-    return queueMessage(newSharedData, message);
-  }
-
-  return sharedData;
-};
+//   return sharedData;
+// };

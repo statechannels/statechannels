@@ -10,13 +10,14 @@ import {
   checkAndStore,
   signAndStore,
 } from '../../../state';
-import { IndirectFundingState, failure, success, aWaitForPostFundSetup1 } from '../state';
+import { IndirectFundingState, failure, success } from '../state';
 import { ProtocolStateWithSharedData } from '../..';
 import { bytesFromAppAttributes } from 'fmg-nitro-adjudicator';
-import { CommitmentType, Commitment, getChannelId } from '../../../../domain';
+import { CommitmentType, Commitment, getChannelId, nextSetupCommitment } from '../../../../domain';
 import { Channel } from 'fmg-core/lib/channel';
 import { CONSENSUS_LIBRARY_ADDRESS } from '../../../../constants';
 import { getChannel, theirAddress } from '../../../channel-store';
+import { sendCommitmentReceived } from '../../../../communication';
 import { DirectFundingAction } from '../../direct-funding';
 import { directFundingRequested } from '../../direct-funding/actions';
 import {
@@ -27,12 +28,18 @@ import {
 } from '../../direct-funding/state';
 import { directFundingStateReducer } from '../../direct-funding/reducer';
 import { addHex } from '../../../../utils/hex-utils';
-import { sendCommitmentReceived } from '../../../../communication';
+import { UpdateType } from 'fmg-nitro-adjudicator/lib/consensus-app';
+import { proposeNewConsensus } from '../../../../domain/two-player-consensus-game';
+import { unreachable } from '../../../../utils/reducer-utils';
 
 type ReturnVal = ProtocolStateWithSharedData<IndirectFundingState>;
 type IDFAction = actions.indirectFunding.Action;
 
-export function initialize(channelId: string, sharedData: SharedData): ReturnVal {
+export function initialize(
+  processId: string,
+  channelId: string,
+  sharedData: SharedData,
+): ReturnVal {
   const channel = getChannel(sharedData.channelStore, channelId);
   if (!channel) {
     throw new Error(`Could not find existing application channel ${channelId}`);
@@ -58,7 +65,7 @@ export function initialize(channelId: string, sharedData: SharedData): ReturnVal
   // just need to put our message in the outbox
   const messageRelay = sendCommitmentReceived(
     theirAddress(channel),
-    'processId', // TODO don't use dummy values
+    processId,
     signResult.signedCommitment.commitment,
     signResult.signedCommitment.signature,
   );
@@ -67,6 +74,7 @@ export function initialize(channelId: string, sharedData: SharedData): ReturnVal
   const protocolState = states.aWaitForPreFundSetup1({
     channelId,
     ledgerId,
+    processId,
   });
   return { protocolState, sharedData };
 }
@@ -86,8 +94,73 @@ export function playerAReducer(
     case 'AWaitForPostFundSetup1':
       return handleWaitForPostFundSetup(protocolState, sharedData, action);
     default:
-      return { protocolState, sharedData };
+      return unreachable(protocolState);
   }
+}
+
+function handleWaitForPostFundSetup(
+  protocolState: states.AWaitForPostFundSetup1,
+  sharedData: SharedData,
+  action: IDFAction | DirectFundingAction,
+): ReturnVal {
+  if (action.type !== actions.COMMITMENT_RECEIVED) {
+    throw new Error('Incorrect action');
+  }
+  const checkResult = checkAndStore(sharedData, action.signedCommitment);
+  if (!checkResult.isSuccess) {
+    throw new Error('Indirect funding protocol, unable to validate or store commitment');
+  }
+  sharedData = checkResult.store;
+
+  const newProtocolState = success();
+  const newReturnVal = { protocolState: newProtocolState, sharedData };
+  return newReturnVal;
+}
+
+function handleWaitForLedgerUpdate(
+  protocolState: states.AWaitForLedgerUpdate1,
+  sharedData: SharedData,
+  action: IDFAction | DirectFundingAction,
+): ReturnVal {
+  const unchangedState = { protocolState, sharedData };
+  if (action.type !== actions.COMMITMENT_RECEIVED) {
+    throw new Error('Incorrect action');
+  }
+  const checkResult = checkAndStore(sharedData, action.signedCommitment);
+  if (!checkResult.isSuccess) {
+    throw new Error('Indirect funding protocol, unable to validate or store commitment');
+  }
+  sharedData = checkResult.store;
+
+  // We can now create a post fund commitment for the app
+  const appChannel = getChannel(sharedData.channelStore, protocolState.channelId);
+  if (!appChannel) {
+    throw new Error(`Could not find app channel for id ${protocolState.channelId}`);
+  }
+  const theirAppCommitment = appChannel.lastCommitment.commitment;
+
+  const ourAppCommitment = nextSetupCommitment(theirAppCommitment);
+  if (ourAppCommitment === 'NotASetupCommitment') {
+    throw new Error('Not a Setup commitment');
+  }
+  const signResult = signAndStore(sharedData, ourAppCommitment);
+  if (!signResult.isSuccess) {
+    return unchangedState;
+  }
+  sharedData = signResult.store;
+
+  // just need to put our message in the outbox
+  const messageRelay = sendCommitmentReceived(
+    theirAddress(appChannel),
+    protocolState.processId,
+    signResult.signedCommitment.commitment,
+    signResult.signedCommitment.signature,
+  );
+  sharedData = queueMessage(sharedData, messageRelay);
+
+  const newProtocolState = states.aWaitForPostFundSetup1(protocolState);
+  const newReturnVal = { protocolState: newProtocolState, sharedData };
+  return newReturnVal;
 }
 
 function handleWaitForPreFundSetup(
@@ -115,14 +188,17 @@ function handleWaitForPreFundSetup(
   // Do we really need to do that constantly or is it for debugging mostly?
   const theirCommitment = action.signedCommitment.commitment;
   const ledgerId = getChannelId(theirCommitment);
+
+  const total = theirCommitment.allocation.reduce(addHex);
+  const ourAmount = theirCommitment.allocation[0];
   // update the state
   const directFundingAction = directFundingRequested(
-    'processId',
+    protocolState.processId,
     ledgerId,
-    '0',
-    '0', // TODO don't use dummy values
-    '0',
-    1,
+    '0x0',
+    total,
+    ourAmount,
+    0,
   );
   const directFundingState = initialDirectFundingState(directFundingAction, sharedData);
   const newProtocolState = states.aWaitForDirectFunding({
@@ -130,6 +206,7 @@ function handleWaitForPreFundSetup(
     ledgerId,
     directFundingState: directFundingState.protocolState,
   });
+  sharedData = directFundingState.sharedData;
 
   return { protocolState: newProtocolState, sharedData };
 }
@@ -160,11 +237,10 @@ function handleWaitForDirectFunding(
     if (!channel) {
       throw new Error(`Could not find channel for id ${newProtocolState.ledgerId}`);
     }
-    const ourCommitment = createInitialLedgerUpdateCommitment(
-      protocolState.channelId,
-      channel.lastCommitment.commitment,
-    );
 
+    const theirCommitment = channel.lastCommitment.commitment;
+    const total = theirCommitment.allocation.reduce(addHex);
+    const ourCommitment = proposeNewConsensus(theirCommitment, [total], [protocolState.channelId]);
     const signResult = signAndStore(sharedData, ourCommitment);
     if (!signResult.isSuccess) {
       return { protocolState: newProtocolState, sharedData };
@@ -173,7 +249,7 @@ function handleWaitForDirectFunding(
 
     const messageRelay = sendCommitmentReceived(
       theirAddress(channel),
-      'processId', // TODO don't use dummy values
+      protocolState.processId,
       signResult.signedCommitment.commitment,
       signResult.signedCommitment.signature,
     );
@@ -185,126 +261,12 @@ function handleWaitForDirectFunding(
   return { protocolState, sharedData };
 }
 
-function handleWaitForLedgerUpdate(
-  protocolState: states.AWaitForLedgerUpdate1,
-  sharedData: SharedData,
-  action: IDFAction,
-): ReturnVal {
-  const unchangedState = { protocolState, sharedData };
-  if (action.type !== actions.COMMITMENT_RECEIVED) {
-    throw new Error('Incorrect action');
-  }
-  const checkResult = checkAndStore(sharedData, action.signedCommitment);
-  if (!checkResult.isSuccess) {
-    throw new Error('Indirect funding protocol, unable to validate or store commitment');
-  }
-  sharedData = checkResult.store;
-
-  const theirCommitment = action.signedCommitment.commitment;
-  // TODO: We need to validate the proposed allocation and destination
-  const ledgerId = getChannelId(theirCommitment);
-  let channel = getChannel(sharedData.channelStore, ledgerId);
-  if (!channel || channel.libraryAddress !== CONSENSUS_LIBRARY_ADDRESS) {
-    // todo: this could be more robust somehow.
-    // Maybe we should generate what we were expecting and compare.
-    throw new Error('Bad channel');
-  }
-
-  // are we happy that we have the ledger update?
-  // if so, we need to craft a post fund setup for the application channel
-
-  // TODO we need the channel information to be passed down from the parent protocol
-  const nonce = 0;
-  const appChannel: Channel = {
-    nonce,
-    participants: theirCommitment.destination,
-    channelType: '0x0',
-  };
-  const ourCommitment: Commitment = {
-    channel: appChannel,
-    commitmentType: CommitmentType.PostFundSetup,
-    turnNum: 3,
-    commitmentCount: 0,
-    allocation: ['0', '0'],
-    destination: theirCommitment.destination,
-    appAttributes: '',
-  };
-
-  const signResult = signAndStore(sharedData, ourCommitment);
-  if (!signResult.isSuccess) {
-    return unchangedState;
-    // TODO throw error here?
-  }
-  sharedData = signResult.store;
-
-  // just need to put our message in the outbox
-  const messageRelay = sendCommitmentReceived(
-    theirAddress(channel),
-    'processId', // TODO don't use dummy values
-    signResult.signedCommitment.commitment,
-    signResult.signedCommitment.signature,
-  );
-  sharedData = queueMessage(sharedData, messageRelay);
-  channel = getChannel(sharedData.channelStore, ledgerId); // refresh channel
-
-  const newProtocolState = aWaitForPostFundSetup1({
-    ...protocolState,
-  });
-  return { protocolState: newProtocolState, sharedData };
-}
-
-function createInitialLedgerUpdateCommitment(
-  channelIdToFund: string,
-  commitment: Commitment,
-): Commitment {
-  const numParticipants = commitment.channel.participants.length;
-  const turnNum = commitment.turnNum + 1;
-  const expectedTurnNum = numParticipants * 2;
-  if (turnNum !== expectedTurnNum) {
-    throw new Error(`Expected a turn number ${expectedTurnNum} received ${turnNum}`);
-  }
-  const total = commitment.allocation.reduce(addHex);
-  const appAttributes = {
-    proposedAllocation: [total],
-    proposedDestination: [channelIdToFund],
-    consensusCounter: 1,
-  };
-  return {
-    ...commitment,
-    turnNum,
-    commitmentCount: 0,
-    commitmentType: CommitmentType.App,
-    appAttributes: bytesFromAppAttributes(appAttributes),
-  };
-}
-
-function handleWaitForPostFundSetup(
-  protocolState: states.AWaitForPostFundSetup1,
-  sharedData: SharedData,
-  action: IDFAction,
-): ReturnVal {
-  if (action.type !== actions.COMMITMENT_RECEIVED) {
-    throw new Error('Incorrect action');
-  }
-  const checkResult = checkAndStore(sharedData, action.signedCommitment);
-  if (!checkResult.isSuccess) {
-    throw new Error('Indirect funding protocol, unable to validate or store commitment');
-  }
-  sharedData = checkResult.store;
-
-  // are we happy that we have the PostFundSetup?
-  // if so, we can exit to the parent protocol with Success
-
-  const newProtocolState = success();
-
-  return { protocolState: newProtocolState, sharedData };
-}
-
 function createInitialSetupCommitment(allocation: string[], destination: string[]): Commitment {
   const appAttributes = {
-    proposedAllocation: allocation,
-    proposedDestination: destination,
-    consensusCounter: 0,
+    proposedAllocation: [],
+    proposedDestination: [],
+    furtherVotesRequired: 0,
+    updateType: UpdateType.Consensus,
   };
   // TODO: We'll run into collisions if we reuse the same nonce
   const nonce = 0;

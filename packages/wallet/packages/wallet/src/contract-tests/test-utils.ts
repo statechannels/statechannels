@@ -42,7 +42,7 @@ export async function depositContract(
   participant: string,
   amount = defaultDepositAmount,
 ) {
-  const deployTransaction = createDepositTransaction(participant, amount);
+  const deployTransaction = createDepositTransaction(participant, amount, '0x0');
   const transactionReceipt = await sendTransaction(provider, deployTransaction);
   await transactionReceipt.wait();
 }

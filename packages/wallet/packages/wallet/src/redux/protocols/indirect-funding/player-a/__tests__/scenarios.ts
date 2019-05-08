@@ -52,7 +52,7 @@ const ledger5 = ledgerCommitment({ turnNum: 5, balances: fiveToApp });
 
 // Channels
 
-const props = { channelId, ledgerId };
+const props = { channelId, ledgerId, processId };
 
 // ------
 // States
@@ -102,7 +102,12 @@ const ledgerUpdate1Received = globalActions.commitmentReceived(processId, ledger
 const postFund1Received = globalActions.commitmentReceived(processId, app3);
 
 export const happyPath = {
-  initialParams: { store: waitForPreFundL1.store, channelId, reply: ledger0 },
+  initialParams: {
+    store: waitForPreFundL1.store,
+    channelId,
+    reply: ledger0,
+    processId: 'processId',
+  },
   waitForPreFundL1: { state: waitForPreFundL1, action: preFundL1Received },
   waitForDirectFunding: { state: waitForDirectFunding, action: successTriggerA, reply: ledger4 },
   waitForLedgerUpdate1: {

@@ -4,17 +4,17 @@ import { PlayerIndex } from '../redux/types';
 import { Channel } from 'fmg-core';
 import { SignedCommitment } from '../domain';
 import { ChannelState } from '../redux/channel-store';
+import { UpdateType } from 'fmg-nitro-adjudicator/lib/consensus-app';
 
 export const hasConsensusBeenReached = (
   lastCommitment: Commitment,
   penultimateCommitment: Commitment,
 ): boolean => {
-  const numOfPlayers = lastCommitment.channel.participants.length;
   const lastAppAttributes = appAttributesFromBytes(lastCommitment.appAttributes);
   const penultimateAppAttributes = appAttributesFromBytes(penultimateCommitment.appAttributes);
 
   if (
-    lastAppAttributes.consensusCounter === numOfPlayers - 1 &&
+    lastAppAttributes.furtherVotesRequired === 0 &&
     lastCommitment.allocation === penultimateAppAttributes.proposedAllocation &&
     lastCommitment.destination === penultimateAppAttributes.proposedDestination
   ) {
@@ -25,34 +25,6 @@ export const hasConsensusBeenReached = (
 };
 
 // Commitment composers
-
-export const composeLedgerUpdateCommitment = (
-  channel: Channel,
-  turnNum: number,
-  ourIndex: PlayerIndex,
-  proposedAllocation: string[],
-  proposedDestination: string[],
-  allocation: string[],
-  destination: string[],
-  privateKey: string,
-) => {
-  const appAttributes = bytesFromAppAttributes({
-    proposedAllocation,
-    proposedDestination,
-    consensusCounter: ourIndex,
-  });
-  const commitment: Commitment = {
-    channel,
-    commitmentType: CommitmentType.App,
-    turnNum,
-    commitmentCount: ourIndex,
-    allocation,
-    destination,
-    appAttributes,
-  };
-
-  return signCommitment2(commitment, privateKey);
-};
 
 export const composePostFundCommitment = (
   lastCommitment: Commitment,
@@ -87,7 +59,8 @@ export const composePreFundCommitment = (
   const appAttributes = bytesFromAppAttributes({
     proposedAllocation: allocation,
     proposedDestination: destination,
-    consensusCounter: 0,
+    furtherVotesRequired: 0,
+    updateType: UpdateType.Consensus,
   });
   const commitment: Commitment = {
     channel,

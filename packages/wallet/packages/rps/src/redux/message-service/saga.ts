@@ -68,8 +68,6 @@ export function* sendWalletMessageSaga() {
     } else {
       yield call(reduxSagaFirebase.database.create, `/messages/${to.toLowerCase()}`, messageToSend);
     }
-    yield call(reduxSagaFirebase.database.create, `/messages/${to.toLowerCase()}`, messageToSend);
-    break;
   }
 }
 

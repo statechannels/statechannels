@@ -24,7 +24,7 @@ import {
   bWaitForLedgerUpdate0,
   bWaitForPostFundSetup0,
 } from './state';
-import { getChannelId, nextSetupCommitment, nextLedgerUpdateCommitment } from '../../../../domain';
+import { getChannelId, nextSetupCommitment } from '../../../../domain';
 import { CONSENSUS_LIBRARY_ADDRESS } from '../../../../constants';
 import { theirAddress } from '../../../../redux/channel-store';
 import { initialDirectFundingState } from '../../direct-funding/state';
@@ -33,14 +33,20 @@ import { directFundingRequested } from '../../direct-funding/actions';
 import { DirectFundingAction } from '../../direct-funding';
 import { directFundingStateReducer } from '../../direct-funding/reducer';
 import { isSuccess, isFailure } from '../../direct-funding/state';
+import { acceptConsensus } from '../../../../domain/two-player-consensus-game';
 import { sendCommitmentReceived } from '../../../../communication';
+import { addHex } from '../../../../utils/hex-utils';
 
 type ReturnVal = ProtocolStateWithSharedData<IndirectFundingState>;
 type IDFAction = actions.indirectFunding.Action;
 
-export function initialize(channelId: string, sharedData: SharedData): ReturnVal {
+export function initialize(
+  processId: string,
+  channelId: string,
+  sharedData: SharedData,
+): ReturnVal {
   // todo: check that channel exists?
-  return { protocolState: states.bWaitForPreFundSetup0({ channelId }), sharedData };
+  return { protocolState: states.bWaitForPreFundSetup0({ processId, channelId }), sharedData };
 }
 
 export function playerBReducer(
@@ -117,20 +123,23 @@ function handleWaitForPreFundSetup(
   // just need to put our message in the outbox
   const messageRelay = sendCommitmentReceived(
     theirAddress(channel),
-    'processId', // TODO don't use dummy values
+    protocolState.processId,
     signResult.signedCommitment.commitment,
     signResult.signedCommitment.signature,
   );
   sharedData = queueMessage(sharedData, messageRelay);
   channel = getChannel(sharedData, ledgerId); // refresh channel
 
+  const total = theirCommitment.allocation.reduce(addHex);
+  const theirAmount = theirCommitment.allocation[0];
+  const ourAmount = theirCommitment.allocation[1];
   // update the state
   const directFundingAction = directFundingRequested(
-    'processId',
+    protocolState.processId,
     ledgerId,
-    '0',
-    '0', // TODO don't use dummy values
-    '0',
+    theirAmount,
+    total,
+    ourAmount,
     1,
   );
   const directFundingState = initialDirectFundingState(directFundingAction, sharedData);
@@ -139,7 +148,7 @@ function handleWaitForPreFundSetup(
     ledgerId,
     directFundingState: directFundingState.protocolState,
   });
-
+  sharedData = directFundingState.sharedData;
   return { protocolState: newProtocolState, sharedData };
 }
 
@@ -199,10 +208,8 @@ function handleWaitForLedgerUpdate(
   // are we happy that we have the ledger update?
   // if so, we need to craft our reply
 
-  const ourCommitment = nextLedgerUpdateCommitment(theirCommitment);
-  if (ourCommitment === 'NotAnUpdateCommitment') {
-    throw new Error('Not a ledger update commitment');
-  }
+  const ourCommitment = acceptConsensus(theirCommitment);
+
   const signResult = signAndStore(sharedData, ourCommitment);
   if (!signResult.isSuccess) {
     return unchangedState;
@@ -212,7 +219,7 @@ function handleWaitForLedgerUpdate(
   // just need to put our message in the outbox
   const messageRelay = sendCommitmentReceived(
     theirAddress(channel),
-    'processId', // TODO don't use dummy values
+    protocolState.processId,
     signResult.signedCommitment.commitment,
     signResult.signedCommitment.signature,
   );
@@ -263,7 +270,7 @@ export function handleWaitForPostFundSetup(
   // just need to put our message in the outbox
   const messageRelay = sendCommitmentReceived(
     theirAddress(channel),
-    'processId', // TODO don't use dummy values
+    protocolState.processId,
     signResult.signedCommitment.commitment,
     signResult.signedCommitment.signature,
   );

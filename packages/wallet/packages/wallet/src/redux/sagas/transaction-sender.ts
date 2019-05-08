@@ -14,7 +14,7 @@ export function* transactionSender(transaction: QueuedTransaction) {
   let transactionResult: TransactionResponse;
   try {
     transactionResult = yield call([signer, signer.sendTransaction], {
-      ...transaction,
+      ...transaction.transactionRequest,
       to: ADJUDICATOR_ADDRESS,
     });
   } catch (err) {

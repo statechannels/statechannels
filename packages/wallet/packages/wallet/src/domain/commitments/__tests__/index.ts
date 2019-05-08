@@ -3,6 +3,7 @@ import { bigNumberify } from 'ethers/utils';
 import { channelID } from 'fmg-core/lib/channel';
 import { CONSENSUS_LIBRARY_ADDRESS } from '../../../constants';
 import { bytesFromAppAttributes } from 'fmg-nitro-adjudicator';
+import { UpdateType } from 'fmg-nitro-adjudicator/lib/consensus-app';
 
 export const asPrivateKey = '0xf2f48ee19680706196e2e339e5da3491186e0c4c5030670656b0e0164837257d';
 export const asAddress = '0x5409ED021D9299bf6814279A6A1411A7e866A631';
@@ -47,6 +48,8 @@ const twoThree = [
   { address: bsAddress, wei: bigNumberify(3).toHexString() },
 ];
 
+const blankBalance: Balance[] = [];
+
 interface AppCommitmentParams {
   turnNum: number;
   isFinal?: boolean;
@@ -77,13 +80,18 @@ export function appCommitment(params: AppCommitmentParams): SignedCommitment {
   return signCommitment2(commitment, privateKey);
 }
 
-function ledgerAppAttributes(consensusCounter, balances: Balance[] = twoThree) {
-  const proposedAllocation = balances.map(b => b.wei);
-  const proposedDestination = balances.map(b => b.address);
+function ledgerAppAttributes(
+  furtherVotesRequired,
+  updateType: UpdateType,
+  proposedBalances: Balance[],
+) {
+  const proposedAllocation = proposedBalances.map(b => b.wei);
+  const proposedDestination = proposedBalances.map(b => b.address);
   return bytesFromAppAttributes({
     proposedAllocation,
     proposedDestination,
-    consensusCounter,
+    furtherVotesRequired,
+    updateType,
   });
 }
 
@@ -106,12 +114,20 @@ export function ledgerCommitment(params: LedgerCommitmentParams): SignedCommitme
   const turnNum = params.turnNum;
   const isFinal = params.isFinal || false;
   const balances = params.balances || twoThree;
-  const proposedBalances = params.proposedBalances || balances;
-  const consensusCounter = JSON.stringify(balances) === JSON.stringify(proposedBalances) ? 0 : 1;
+  let proposedBalances = params.proposedBalances || blankBalance;
+  let furtherVotesRequired = 0;
+  let updateType = UpdateType.Consensus;
+  if (params.proposedBalances) {
+    furtherVotesRequired = 1;
+    updateType = UpdateType.Proposal;
+    proposedBalances = params.proposedBalances;
+  }
   const allocation = balances.map(b => b.wei);
   const destination = balances.map(b => b.address);
   const { commitmentCount, commitmentType } = typeAndCount(turnNum, isFinal);
-  const appAttributes = ledgerAppAttributes(consensusCounter, proposedBalances);
+
+  const appAttributes = ledgerAppAttributes(furtherVotesRequired, updateType, proposedBalances);
+
   const commitment = {
     channel: ledgerChannel,
     commitmentCount,
