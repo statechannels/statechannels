@@ -182,6 +182,7 @@ const notSafeToDepositReducer: DFReducer = (
         const depositTransaction = createDepositTransaction(
           state.channelId,
           state.requestedYourContribution,
+          state.safeToDepositLevel,
         );
 
         const {

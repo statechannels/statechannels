@@ -77,7 +77,7 @@ describe('transactions', () => {
   });
 
   it('should deposit into the contract', async () => {
-    const depositTransaction = createDepositTransaction(participantA.address, '0x5');
+    const depositTransaction = createDepositTransaction(participantA.address, '0x5', '0x0');
     await testTransactionSender(depositTransaction);
   });
 

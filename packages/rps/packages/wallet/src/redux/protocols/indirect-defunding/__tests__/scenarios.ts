@@ -28,9 +28,9 @@ const baseChannelStatus: ChannelState = {
   channelNonce: 0,
   funded: true,
   ourIndex: 0,
-  turnNum: ledgerCommitments.ledgerUpdate3.turnNum,
-  lastCommitment: { commitment: ledgerCommitments.ledgerUpdate3, signature: '0x0' },
-  penultimateCommitment: { commitment: ledgerCommitments.ledgerUpdate2, signature: '0x0' },
+  turnNum: ledgerCommitments.ledgerUpdate1.turnNum,
+  lastCommitment: { commitment: ledgerCommitments.ledgerUpdate1, signature: '0x0' },
+  penultimateCommitment: { commitment: ledgerCommitments.ledgerUpdate0, signature: '0x0' },
 };
 
 const playerAStartChannelState: ChannelStore = {
@@ -118,20 +118,20 @@ const notDefundableSharedData: SharedData = {
 const {
   allocation: proposedAllocation,
   destination: proposedDestination,
-} = ledgerCommitments.ledgerDefundUpdate2;
+} = ledgerCommitments.ledgerDefundUpdate1;
 
 // Actions
 const playerACommitmentReceived = actions.commitmentReceived(
   processId,
-  signedLedgerCommitments.signedLedgerCommitment9,
+  signedLedgerCommitments.signedLedgerCommitment7,
 );
 const playerBFirstCommitmentReceived = actions.commitmentReceived(
   processId,
-  signedLedgerCommitments.signedLedgerCommitment8,
+  signedLedgerCommitments.signedLedgerCommitment6,
 );
 const playerBFinalCommitmentReceived = actions.commitmentReceived(
   processId,
-  signedLedgerCommitments.signedLedgerCommitment10,
+  signedLedgerCommitments.signedLedgerCommitment6,
 );
 
 const invalidCommitmentReceived = actions.commitmentReceived(
@@ -162,7 +162,7 @@ export const playerAHappyPath = {
   proposedAllocation,
   proposedDestination,
   firstUpdateCommitment: ledgerCommitments.ledgerDefundUpdate0,
-  secondUpdateCommitment: ledgerCommitments.ledgerDefundUpdate2,
+  // secondUpdateCommitment: ledgerCommitments.ledgerDefundUpdate2,
   states: {
     waitForLedgerUpdate,
   },

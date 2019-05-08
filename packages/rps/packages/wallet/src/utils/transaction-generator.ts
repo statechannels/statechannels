@@ -165,11 +165,15 @@ export function createTransferAndWithdrawTransaction(
   };
 }
 
-export function createDepositTransaction(destination: string, DepositLevel: string) {
+export function createDepositTransaction(
+  destination: string,
+  depositAmount: string,
+  expectedHeld: string,
+) {
   const adjudicatorInterface = getAdjudicatorInterface();
-  const data = adjudicatorInterface.functions.deposit.encode([destination]);
+  const data = adjudicatorInterface.functions.deposit.encode([destination, expectedHeld]);
   return {
-    value: DepositLevel,
+    value: depositAmount,
     data,
   };
 }

@@ -119,6 +119,7 @@ function strategyApproved(
 
   const channelState = selectors.getChannelState(sharedData, state.targetChannelId);
   const { protocolState: fundingState, sharedData: newSharedData } = initializeIndirectFunding(
+    processId,
     channelState,
     sharedData,
   );
