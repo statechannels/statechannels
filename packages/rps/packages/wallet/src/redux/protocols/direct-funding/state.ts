@@ -159,7 +159,11 @@ export function initialDirectFundingState(
   }
 
   if (alreadySafeToDeposit) {
-    const depositTransaction = createDepositTransaction(action.channelId, action.requiredDeposit);
+    const depositTransaction = createDepositTransaction(
+      action.channelId,
+      action.requiredDeposit,
+      action.safeToDepositLevel,
+    );
     const { storage: newSharedData, state: transactionSubmissionState } = initTransactionState(
       depositTransaction,
       action.processId,

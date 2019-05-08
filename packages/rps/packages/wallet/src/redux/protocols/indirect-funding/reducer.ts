@@ -11,15 +11,19 @@ import { NonTerminalIndirectFundingState, IndirectFundingState } from './state';
 
 type ReturnVal = ProtocolStateWithSharedData<IndirectFundingState>;
 
-export function initialize(channel: ChannelState, sharedData: SharedData): ReturnVal {
+export function initialize(
+  processId: string,
+  channel: ChannelState,
+  sharedData: SharedData,
+): ReturnVal {
   // todo: would be nice to avoid casting here
   const ourIndex: PlayerIndex = channel.ourIndex;
 
   switch (ourIndex) {
     case PlayerIndex.A:
-      return initializeA(channel.channelId, sharedData);
+      return initializeA(processId, channel.channelId, sharedData);
     case PlayerIndex.B:
-      return initializeB(channel.channelId, sharedData);
+      return initializeB(processId, channel.channelId, sharedData);
     default:
       return unreachable(ourIndex);
   }

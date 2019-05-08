@@ -1,10 +1,9 @@
 import { Channel, CommitmentType, Commitment } from 'fmg-core';
 import { channelID } from 'fmg-core/lib/channel';
 import { bigNumberify } from 'ethers/utils';
-import { bytesFromAppAttributes } from 'fmg-nitro-adjudicator';
 
-import { addHex } from '../../utils/hex-utils';
 import { signCommitment2 } from '../../domain';
+import { ledgerCommitment } from '../../domain/commitments/__tests__';
 
 export const libraryAddress = '0x' + '1'.repeat(40);
 export const ledgerLibraryAddress = '0x' + '2'.repeat(40);
@@ -65,106 +64,46 @@ export const signedCommitment52 = signCommitment2(concludeCommitment2, bsPrivate
 
 // Ledger channel commitments
 
-const ledgerAppAttributes = (
-  consensusCounter,
-  proposedAllocation: string[] = twoThree,
-  proposedDestination: string[] = participants,
-) => {
-  return bytesFromAppAttributes({
-    proposedAllocation,
-    proposedDestination,
-    consensusCounter,
-  });
-};
-const LEDGER_CHANNEL_NONCE = 0;
-export const ledgerChannel: Channel = {
-  nonce: LEDGER_CHANNEL_NONCE,
-  channelType: ledgerLibraryAddress,
-  participants,
-};
-const ledgerChannelAttrs = {
-  channel: ledgerChannel,
-  appAttributes: ledgerAppAttributes(0),
-  allocation: twoThree,
-  destination: participants,
-};
+const twoThreeBalances = [
+  { address: asAddress, wei: bigNumberify(2).toHexString() },
+  { address: bsAddress, wei: bigNumberify(3).toHexString() },
+];
 
-const allocatesToChannel = [twoThree.reduce(addHex, '0x0')];
-const destinationChannel = [channelId];
-
-const updatedLedgerChannelAttrs = consensusCounter => ({
-  channel: ledgerChannel,
-  appAttributes: ledgerAppAttributes(consensusCounter, allocatesToChannel, destinationChannel),
-  allocation: twoThree,
-  destination: participants,
-});
-
-const allocatesToChannelAttrs = {
-  channel: ledgerChannel,
-  appAttributes: ledgerAppAttributes(0, allocatesToChannel, [channelId]),
-  allocation: allocatesToChannel,
-  destination: destinationChannel,
-};
-
-export const ledgerId = channelID(ledgerChannel);
-
-export const ledgerCommitments = {
-  preFundCommitment0: {
-    ...ledgerChannelAttrs,
-    commitmentCount: 0,
-    commitmentType: CommitmentType.PreFundSetup,
-    turnNum: 0,
-  },
-  preFundCommitment1: {
-    ...ledgerChannelAttrs,
-    commitmentCount: 1,
-    commitmentType: CommitmentType.PreFundSetup,
-    turnNum: 1,
-  },
-  postFundCommitment0: {
-    ...ledgerChannelAttrs,
-    commitmentCount: 0,
-    commitmentType: CommitmentType.PostFundSetup,
-    turnNum: 2,
-  },
-  postFundCommitment1: {
-    ...ledgerChannelAttrs,
-    commitmentCount: 0,
-    commitmentType: CommitmentType.PostFundSetup,
-    turnNum: 3,
-  },
-  ledgerUpdate0: {
-    ...updatedLedgerChannelAttrs(0),
-    commitmentCount: 0,
-    commitmentType: CommitmentType.App,
-    turnNum: 4,
-  },
-  ledgerUpdate1: {
-    ...updatedLedgerChannelAttrs(1),
-    commitmentCount: 1,
-    commitmentType: CommitmentType.App,
-    turnNum: 5,
-  },
-  ledgerUpdate2: {
-    ...allocatesToChannelAttrs,
-    commitmentCount: 0,
-    commitmentType: CommitmentType.App,
-    turnNum: 6,
-  },
-  ledgerUpdate3: {
-    ...allocatesToChannelAttrs,
-    appAttributes: ledgerAppAttributes(1, allocatesToChannel, [channelId]),
-    commitmentCount: 0,
-    commitmentType: CommitmentType.App,
-    turnNum: 7,
-  },
-};
+const fiveToAppBalances = [{ address: channelId, wei: bigNumberify(5).toHexString() }];
 
 export const signedLedgerCommitments = {
-  signedLedgerCommitment0: signCommitment2(ledgerCommitments.preFundCommitment0, asPrivateKey),
-  signedLedgerCommitment1: signCommitment2(ledgerCommitments.preFundCommitment1, bsPrivateKey),
-  signedLedgerCommitment2: signCommitment2(ledgerCommitments.postFundCommitment0, asPrivateKey),
-  signedLedgerCommitment3: signCommitment2(ledgerCommitments.postFundCommitment1, bsPrivateKey),
-  signedLedgerCommitment4: signCommitment2(ledgerCommitments.ledgerUpdate0, asPrivateKey),
-  signedLedgerCommitment5: signCommitment2(ledgerCommitments.ledgerUpdate1, bsPrivateKey),
+  signedLedgerCommitment0: ledgerCommitment({
+    turnNum: 0,
+    balances: twoThreeBalances,
+  }),
+  signedLedgerCommitment1: ledgerCommitment({
+    turnNum: 1,
+    balances: twoThreeBalances,
+  }),
+  signedLedgerCommitment2: ledgerCommitment({
+    turnNum: 2,
+    balances: twoThreeBalances,
+  }),
+  signedLedgerCommitment3: ledgerCommitment({
+    turnNum: 3,
+    balances: twoThreeBalances,
+  }),
+  signedLedgerCommitment4: ledgerCommitment({
+    turnNum: 4,
+    balances: twoThreeBalances,
+    proposedBalances: fiveToAppBalances,
+  }),
+  signedLedgerCommitment5: ledgerCommitment({
+    turnNum: 5,
+    balances: fiveToAppBalances,
+  }),
+  signedLedgerCommitment6: ledgerCommitment({
+    turnNum: 6,
+    proposedBalances: twoThreeBalances,
+    balances: fiveToAppBalances,
+  }),
+  signedLedgerCommitment7: ledgerCommitment({
+    turnNum: 7,
+    balances: twoThreeBalances,
+  }),
 };
