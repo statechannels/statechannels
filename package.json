@@ -5,7 +5,7 @@
   "description": "nitro hub prototype",
   "main": "lib/index.js",
   "scripts": {
-    "splice-networks": "bin/splice-networks.sh",
+    "copy-client-contracts": "bin/copy-client-contracts.sh",
     "db:drop": "dropdb server_wallet_${NODE_ENV}",
     "db:create": "createdb server_wallet_${NODE_ENV}",
     "db:migrate": "npx knex migrate:latest",
