@@ -4,27 +4,27 @@ import {
   preFailureState,
   successTrigger,
   failureTrigger,
-} from '../../defunding/__tests__';
+} from '../../../defunding/__tests__';
 import * as actions from '../actions';
-import * as channelScenarios from '../../../__tests__/test-scenarios';
+import * as channelScenarios from '../../../../__tests__/test-scenarios';
 import { CommitmentType, Commitment } from 'fmg-core';
 
 // -----------------
 // Channel Scenarios
 // -----------------
-const { channelId, asAddress: address, asPrivateKey: privateKey } = channelScenarios;
-import { ChannelState } from '../../../channel-store';
-import { setChannel, EMPTY_SHARED_DATA } from '../../../state';
-import { channelFromCommitments } from '../../../channel-store/channel-state/__tests__';
+const { channelId, bsAddress: address, bsPrivateKey: privateKey } = channelScenarios;
+import { ChannelState } from '../../../../channel-store';
+import { setChannel, EMPTY_SHARED_DATA } from '../../../../state';
+import { channelFromCommitments } from '../../../../channel-store/channel-state/__tests__';
 
-const { signedCommitment19, signedCommitment20, signedCommitment21 } = channelScenarios;
+const { signedCommitment20, signedCommitment21, signedCommitment22 } = channelScenarios;
 const theirTurn = channelFromCommitments(
-  signedCommitment19,
   signedCommitment20,
+  signedCommitment21,
   address,
   privateKey,
 );
-const ourTurn = channelFromCommitments(signedCommitment20, signedCommitment21, address, privateKey);
+const ourTurn = channelFromCommitments(signedCommitment21, signedCommitment22, address, privateKey);
 
 const concludeCommitment: Commitment = {
   ...signedCommitment21.commitment,
@@ -32,7 +32,7 @@ const concludeCommitment: Commitment = {
   commitmentCount: 0,
   commitmentType: CommitmentType.Conclude,
   appAttributes: '0x0',
-  turnNum: 22,
+  turnNum: 23,
 };
 
 // --------
@@ -47,8 +47,7 @@ const defaults = { processId, channelId };
 // States
 // ------
 const approveConcluding = states.approveConcluding(defaults);
-const waitForOpponentConclude = states.waitForOpponentConclude(defaults);
-const acknowledgeConcludeReceived = states.acknowledgeConcludeReceived(defaults);
+const decideDefund = states.decideDefund(defaults);
 const waitForDefund = states.waitForDefund({ ...defaults, defundingState: preSuccessState });
 const waitForDefund2 = states.waitForDefund({ ...defaults, defundingState: preFailureState });
 const acknowledgeSuccess = states.acknowledgeSuccess(defaults);
@@ -58,10 +57,8 @@ const success = states.success();
 // Actions
 // -------
 const concludeSent = actions.concludeSent(processId);
-const concludeReceived = actions.concludeReceived(processId);
 const defundChosen = actions.defundChosen(processId);
 const concludingImpossibleAcknowledged = actions.acknowledged(processId);
-const cancelled = actions.cancelled(processId);
 const acknowledged = actions.acknowledged(processId);
 
 // -------
@@ -72,15 +69,13 @@ export const happyPath = {
   storage: storage(ourTurn),
   states: {
     approveConcluding,
-    waitForOpponentConclude,
-    acknowledgeConcludeReceived,
+    decideDefund,
     waitForDefund,
     acknowledgeSuccess,
     success,
   },
   actions: {
     concludeSent,
-    concludeReceived,
     defundChosen,
     successTrigger,
     acknowledged,
@@ -112,18 +107,6 @@ export const concludingNotPossible = {
   actions: {
     concludingImpossibleAcknowledged,
     acknowledged,
-  },
-};
-
-export const concludingCancelled = {
-  ...defaults,
-  storage: storage(ourTurn),
-  states: {
-    approveConcluding,
-    failure: states.failure({ reason: 'ConcludeCancelled' }),
-  },
-  actions: {
-    cancelled,
   },
 };
 

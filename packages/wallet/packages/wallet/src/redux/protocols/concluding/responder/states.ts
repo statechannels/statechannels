@@ -1,25 +1,20 @@
-import { Constructor } from '../../utils';
-import { DefundingState } from '../defunding';
+import { Constructor } from '../../../utils';
+import { DefundingState } from '../../defunding';
 export type ConcludingState = NonTerminalState | PreTerminalState | TerminalState;
 export type ConcludingStateType = ConcludingState['type'];
 
 export type NonTerminalState =
   | ApproveConcluding
-  | WaitForOpponentConclude
-  | AcknowledgeConcludeReceived
+  | DecideDefund
+  | WaitForDefund
   | AcknowledgeFailure
-  | AcknowledgeSuccess
-  | WaitForDefund;
+  | AcknowledgeSuccess;
 
 export type PreTerminalState = AcknowledgeSuccess | AcknowledgeFailure;
 
 export type TerminalState = Success | Failure;
 
-export type FailureReason =
-  | 'NotYourTurn'
-  | 'ChannelDoesntExist'
-  | 'ConcludeCancelled'
-  | 'DefundFailed';
+export type FailureReason = 'NotYourTurn' | 'ChannelDoesntExist' | 'DefundFailed';
 
 export interface AcknowledgeSuccess {
   type: 'AcknowledgeSuccess';
@@ -38,14 +33,8 @@ export interface ApproveConcluding {
   channelId: string;
 }
 
-export interface WaitForOpponentConclude {
-  type: 'WaitForOpponentConclude';
-  processId: string;
-  channelId: string;
-}
-
-export interface AcknowledgeConcludeReceived {
-  type: 'AcknowledgeConcludeReceived';
+export interface DecideDefund {
+  type: 'DecideDefund';
   processId: string;
   channelId: string;
 }
@@ -91,14 +80,9 @@ export const approveConcluding: Constructor<ApproveConcluding> = p => {
   return { type: 'ApproveConcluding', processId, channelId };
 };
 
-export const waitForOpponentConclude: Constructor<WaitForOpponentConclude> = p => {
+export const decideDefund: Constructor<DecideDefund> = p => {
   const { processId, channelId } = p;
-  return { type: 'WaitForOpponentConclude', processId, channelId };
-};
-
-export const acknowledgeConcludeReceived: Constructor<AcknowledgeConcludeReceived> = p => {
-  const { processId, channelId } = p;
-  return { type: 'AcknowledgeConcludeReceived', processId, channelId };
+  return { type: 'DecideDefund', processId, channelId };
 };
 
 export const acknowledgeSuccess: Constructor<AcknowledgeSuccess> = p => {
