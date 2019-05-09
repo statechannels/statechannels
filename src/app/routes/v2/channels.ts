@@ -1,6 +1,7 @@
 import * as koaBody from 'koa-body';
 import * as Router from 'koa-router';
 
+import { RelayableAction } from 'magmo-wallet';
 import { errors } from '../../../wallet';
 import { getProcess } from '../../../wallet/db/queries/walletProcess';
 export const BASE_URL = `/api/v2/channels`;
@@ -51,7 +52,7 @@ router.post(`${BASE_URL}`, koaBody(), async ctx => {
 
 export const rpsChannelRoutes = router.routes();
 
-async function isNewProcessAction(action): Promise<boolean> {
+async function isNewProcessAction(action: RelayableAction): Promise<boolean> {
   if (action.type === 'WALLET.FUNDING.STRATEGY_PROPOSED' || opensAppChannel(action)) {
     const { processId } = action;
     const process = await getProcess(processId);
@@ -64,7 +65,7 @@ async function isNewProcessAction(action): Promise<boolean> {
   }
 }
 
-async function isProtocolAction(action): Promise<boolean> {
+async function isProtocolAction(action: RelayableAction): Promise<boolean> {
   if (
     action.type === 'WALLET.CONCLUDING.CONCLUDE_CHANNEL' ||
     (action.type === 'WALLET.COMMON.COMMITMENT_RECEIVED' && !opensAppChannel(action))
@@ -84,13 +85,13 @@ async function routeToProtocolReducer(action) {
   return true;
 }
 
-async function routeToNewProcessInitializer(action) {
+async function routeToNewProcessInitializer(action: RelayableAction) {
   switch (action.type) {
     case 'WALLET.COMMON.COMMITMENT_RECEIVED':
     case 'WALLET.CONCLUDING.CONCLUDE_CHANNEL':
   }
 }
 
-function opensAppChannel(action): boolean {
+function opensAppChannel(action: RelayableAction): boolean {
   return true;
 }
