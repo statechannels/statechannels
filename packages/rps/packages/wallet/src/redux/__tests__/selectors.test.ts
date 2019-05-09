@@ -1,29 +1,38 @@
 import * as walletStates from '../state';
 import * as selectors from '../selectors';
-import { WalletProtocol } from '../types';
 
 describe('getAdjudicatorWatcherProcessesForChannel', () => {
   const createWatcherState = (
     processIds: string[],
     channelId?: string,
   ): walletStates.Initialized => {
-    const processStore: walletStates.ProcessStore = {};
-    const channelsToMonitor = channelId ? [channelId] : [];
-    for (const processId of processIds) {
-      processStore[processId] = {
-        protocolState: {},
-        processId,
-        channelsToMonitor,
-        protocol: WalletProtocol.TransactionSubmission,
-      };
-    }
+    const channelSubscriptions: walletStates.ChannelSubscriptions = {};
+    processIds.forEach(processId => {
+      if (channelId) {
+        channelSubscriptions[processId] = [channelId];
+      } else {
+        channelSubscriptions[processId] = [];
+      }
+    });
     return walletStates.initialized({
       ...walletStates.EMPTY_SHARED_DATA,
       uid: '',
-      processStore,
+      processStore: {},
       adjudicatorStore: {},
+      channelSubscriptions,
     });
   };
+
+  it('should return an empty array when channelSubscriptions is empty', () => {
+    const state = walletStates.initialized({
+      ...walletStates.EMPTY_SHARED_DATA,
+      uid: '',
+      processStore: {},
+      adjudicatorStore: {},
+      channelSubscriptions: {},
+    });
+    expect(selectors.getAdjudicatorWatcherProcessesForChannel(state, '0x0')).toEqual([]);
+  });
 
   it('should return an array of processIds that are registered for a channel', () => {
     const processIds = ['p1', 'p2'];
