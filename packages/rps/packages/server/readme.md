@@ -31,16 +31,18 @@ $ curl -X POST -H "Content-Type: application/json" -H "Accept:application/json" 
 $ curl -X POST -H "Content-Type: application/json" -H "Accept:application/json" -d "$(cat samples/update_channel.rps.json)" http://localhost:3002/api/v1/rps_channels
 ```
 
-### Playing against the server
+### Interacting with the server from a browser
 
-To play against the server from the client, the server's prebuilt contracts will need
-to know the addresses of the deployed contracts on the local ganache network shared between this app and the client app.
+To play against the server from the browser client, the server and the browser need to:
 
-In addition to the above development setup, after deploying wallet contracts to your local ganache server, add the wallet artifact's network data to this project's prebuilt contracts:
+- Point to the same local Ganache server.
+- Point to the same contract addresses on Ganache.
+
+In addition to the above development setup, after deploying wallet contracts to your local ganache server, copy the browser wallet built artifacts to this project:
 
 ```
-chmod +x bin/splice-networks.sh
-PATH_TO_WALLET_CONTRACTS=${PATH_TO_WALLET_PROJECT}/build/contracts yarn splice-networks
+chmod +x bin/copy-client-contracts.sh
+./bin/copy-client-contracts.sh
 ```
 
 You will also need to make sure that the server's address has funds. You can find the server address in [constants.ts](https://github.com/magmo/node-bot/blob/master/src/constants.ts)
