@@ -4,6 +4,8 @@ import * as fundingStates from './funding/states';
 import React from 'react';
 import { Funding } from './funding/container';
 import { connect } from 'react-redux';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faSpinner } from '@fortawesome/free-solid-svg-icons';
 
 interface Props {
   protocolState: ProtocolState;
@@ -18,7 +20,12 @@ class ProtocolContainer extends PureComponent<Props> {
     if (fundingStates.isFundingState(protocolState) && !fundingStates.isTerminal(protocolState)) {
       return <Funding state={protocolState} />;
     } else {
-      return <div>TODO</div>;
+      // TODO: We need a placeholder screen here when transitioning back to the app from a success state
+      return (
+        <div>
+          <FontAwesomeIcon icon={faSpinner} pulse={true} size="lg" />
+        </div>
+      );
     }
   }
 }

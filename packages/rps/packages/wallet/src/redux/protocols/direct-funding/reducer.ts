@@ -64,6 +64,7 @@ const fundingReceiveEventReducer: DFReducer = (
   if (protocolState.ourIndex === PlayerIndex.A) {
     const sharedDataWithOwnCommitment = createAndSendPostFundCommitment(
       sharedData,
+      protocolState.processId,
       protocolState.channelId,
     );
     return {
@@ -83,6 +84,7 @@ const fundingReceiveEventReducer: DFReducer = (
   ) {
     const sharedDataWithOwnCommitment = createAndSendPostFundCommitment(
       sharedData,
+      protocolState.processId,
       protocolState.channelId,
     );
     return {
@@ -149,6 +151,7 @@ const commitmentReceivedReducer: DFReducer = (
     const sharedDataWithReceivedCommitment = setChannelStore(sharedData, checkResult.store);
     const sharedDataWithOwnCommitment = createAndSendPostFundCommitment(
       sharedDataWithReceivedCommitment,
+      protocolState.processId,
       protocolState.channelId,
     );
     return {
@@ -256,7 +259,11 @@ const channelFundedReducer: DFReducer = (
 };
 
 // Helpers
-const createAndSendPostFundCommitment = (sharedData: SharedData, channelId: string): SharedData => {
+const createAndSendPostFundCommitment = (
+  sharedData: SharedData,
+  processId: string,
+  channelId: string,
+): SharedData => {
   const channelState = selectors.getOpenedChannelState(sharedData, channelId);
 
   const commitment = composePostFundCommitment(
@@ -269,7 +276,7 @@ const createAndSendPostFundCommitment = (sharedData: SharedData, channelId: stri
     const sharedDataWithOwnCommitment = setChannelStore(sharedData, signResult.store);
     const messageRelay = sendCommitmentReceived(
       theirAddress(channelState),
-      channelId,
+      processId,
       signResult.signedCommitment.commitment,
       signResult.signedCommitment.signature,
     );

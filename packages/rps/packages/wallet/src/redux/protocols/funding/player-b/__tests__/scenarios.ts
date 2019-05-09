@@ -55,7 +55,7 @@ const waitForFunding = {
 };
 const waitForSuccessConfirmation = {
   state: states.waitForSuccessConfirmation(props),
-  store: EMPTY_SHARED_DATA,
+  store: indirectFundingTests.successState.store,
 };
 const success = states.success();
 const failure = states.failure('User refused');
