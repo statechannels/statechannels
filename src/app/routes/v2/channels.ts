@@ -10,6 +10,8 @@ const router = new Router();
 
 router.post(`${BASE_URL}`, koaBody(), async ctx => {
   try {
+    console.log(ctx.request.body);
+
     let body;
     const { data: action } = ctx.request.body;
     if (await isNewProcessAction(action)) {
@@ -50,7 +52,7 @@ router.post(`${BASE_URL}`, koaBody(), async ctx => {
   }
 });
 
-export const rpsChannelRoutes = router.routes();
+export const channelRoutes = router.routes();
 
 async function isNewProcessAction(action: RelayableAction): Promise<boolean> {
   if (action.type === 'WALLET.FUNDING.STRATEGY_PROPOSED' || opensAppChannel(action)) {
