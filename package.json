@@ -16,7 +16,7 @@
     "test:ci": "run-s contracts:clear prettier:check 'test:chain --all --ci' test:server",
     "watch-server": "nodemon --watch 'src/**/*' -e ts,tsx --exec ts-node ./src/app/server.ts",
     "build": "tsc && npx tsc knexfile.ts",
-    "start": "run-s start:server start-adjudicator-watcher",
+    "start": "run-s start:server",
     "start:server": "node ./lib/app/server.js",
     "start:adjudicator-watcher": "node lib/wallet/adjudicator-watcher/index.js",
     "prestart": "npm run db:rollback && npm run db:migrate && npm run db:seed",
