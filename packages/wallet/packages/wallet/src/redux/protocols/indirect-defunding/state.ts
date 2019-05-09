@@ -7,21 +7,11 @@ export const SUCCESS = 'Success';
 
 export type FailureReason = 'Received Invalid Commitment' | 'Channel Not Closed';
 
-export type IndirectDefundingState =
-  | WaitForLedgerUpdate
-  | WaitForFinalLedgerUpdate
-  | Success
-  | Failure;
+export type IndirectDefundingState = WaitForLedgerUpdate | Success | Failure;
 export interface WaitForLedgerUpdate {
   type: typeof WAIT_FOR_LEDGER_UPDATE;
   processId: string;
-  channelId: string;
-  proposedAllocation: string[];
-  proposedDestination: string[];
-}
-export interface WaitForFinalLedgerUpdate {
-  type: typeof WAIT_FOR_FINAL_LEDGER_UPDATE;
-  processId: string;
+  ledgerId: string;
   channelId: string;
   proposedAllocation: string[];
   proposedDestination: string[];
@@ -50,23 +40,11 @@ export function isTerminal(state: IndirectDefundingState): state is Failure | Su
 export function waitForLedgerUpdate(
   properties: Properties<WaitForLedgerUpdate>,
 ): WaitForLedgerUpdate {
-  const { processId, channelId, proposedAllocation, proposedDestination } = properties;
+  const { processId, ledgerId, channelId, proposedAllocation, proposedDestination } = properties;
   return {
     type: WAIT_FOR_LEDGER_UPDATE,
     processId,
-    channelId,
-    proposedAllocation,
-    proposedDestination,
-  };
-}
-
-export function waitForFinalLedgerUpdate(
-  properties: Properties<WaitForFinalLedgerUpdate>,
-): WaitForFinalLedgerUpdate {
-  const { processId, channelId, proposedAllocation, proposedDestination } = properties;
-  return {
-    type: WAIT_FOR_FINAL_LEDGER_UPDATE,
-    processId,
+    ledgerId,
     channelId,
     proposedAllocation,
     proposedDestination,
