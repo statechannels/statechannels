@@ -6,7 +6,7 @@ import { ChannelState, ChannelStore } from '../../../channel-store';
 import * as testScenarios from '../../../__tests__/test-scenarios';
 import { Wallet } from 'ethers';
 import { EMPTY_SHARED_DATA, SharedData } from '../../../state';
-import web3Utils from 'web3-utils';
+import * as web3Utils from 'web3-utils';
 
 // ---------
 // Test data
