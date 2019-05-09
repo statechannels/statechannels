@@ -3,7 +3,7 @@ import { bigNumberify } from 'ethers/utils';
 import { channelID } from 'fmg-core/lib/channel';
 import { listen } from '..';
 import AllocatorChannel from '../../models/allocatorChannel';
-import { channel, depositContract } from './utils';
+import { channel, depositIntoContract } from './utils';
 
 jest.setTimeout(60000);
 const channelId = channelID(channel);
@@ -27,13 +27,13 @@ describe('adjudicator listener', () => {
     const eventCallback = async eventType => {
       const postEventHoldings = await getHoldings();
 
-      const eventDeposit = bigNumberify(postEventHoldings).sub(bigNumberify(preEventHoldings));
-      expect(eventDeposit.toNumber()).toBeGreaterThanOrEqual(5);
+      const depositedAmount = bigNumberify(postEventHoldings).sub(bigNumberify(preEventHoldings));
+      expect(depositedAmount.toNumber()).toBeGreaterThanOrEqual(5);
       done();
     };
 
     removeListeners = await listen(eventCallback);
-    await depositContract(provider, channelId);
+    await depositIntoContract(provider, channelId);
   });
 });
 

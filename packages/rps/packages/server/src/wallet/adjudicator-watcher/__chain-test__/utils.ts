@@ -34,7 +34,7 @@ function createDepositTransaction(destination: string, DepositLevel: string) {
   };
 }
 
-export async function depositContract(
+export async function depositIntoContract(
   provider: ethers.providers.JsonRpcProvider,
   participant: string,
   amount = bigNumberify(5).toHexString(),
