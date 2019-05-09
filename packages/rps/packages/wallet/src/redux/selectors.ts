@@ -25,12 +25,8 @@ export const getAdjudicatorWatcherProcessesForChannel = (
 ): string[] => {
   const processIds: string[] = [];
 
-  if (!state.processStore) {
-    return processIds;
-  }
-  for (const processId of Object.keys(state.processStore)) {
-    const { channelsToMonitor } = state.processStore[processId];
-
+  for (const processId of Object.keys(state.channelSubscriptions)) {
+    const channelsToMonitor = state.channelSubscriptions[processId];
     if (channelsToMonitor.indexOf(channelId) > -1) {
       processIds.push(processId);
     }

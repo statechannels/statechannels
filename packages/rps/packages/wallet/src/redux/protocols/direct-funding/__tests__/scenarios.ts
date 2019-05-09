@@ -32,6 +32,7 @@ const constructWalletState = (
       fundingState: {},
       channelStore: channelState,
       adjudicatorState: {},
+      channelSubscriptions: {},
     },
   };
 };
