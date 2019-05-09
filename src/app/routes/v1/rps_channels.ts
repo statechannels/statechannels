@@ -10,6 +10,10 @@ export const BASE_URL = `/api/v1/rps_channels`;
 const router = new Router();
 
 router.post(`${BASE_URL}`, koaBody(), async ctx => {
+  ctx = await handleGameRequest(ctx);
+});
+
+export async function handleGameRequest(ctx) {
   try {
     let body;
     const { commitment: theirCommitment, signature: theirSignature } = ctx.request.body;
@@ -35,19 +39,20 @@ router.post(`${BASE_URL}`, koaBody(), async ctx => {
       case errors.CHANNEL_EXISTS:
       case errors.COMMITMENT_NOT_SIGNED:
       case errors.CHANNEL_MISSING:
-      case errors.COMMITMENT_NOT_SIGNED: {
-        ctx.status = 400;
-        ctx.body = {
-          status: 'error',
-          message: err.message,
-        };
-
-        return;
-      }
+      case errors.COMMITMENT_NOT_SIGNED:
+        {
+          ctx.status = 400;
+          ctx.body = {
+            status: 'error',
+            message: err.message,
+          };
+        }
+        break;
       default:
         throw err;
     }
   }
-});
+  return ctx;
+}
 
 export const rpsChannelRoutes = router.routes();
