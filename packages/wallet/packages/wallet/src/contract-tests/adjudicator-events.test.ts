@@ -11,21 +11,23 @@ import {
   getChannelId,
   defaultDepositAmount,
 } from './test-utils';
-import { ProcessStore } from '../redux/state';
-import { WalletProtocol } from '../redux/types';
-
+import * as walletStates from '../redux/state';
 jest.setTimeout(60000);
 
-const createWatcherState = (processId: string, ...channelIds: string[]) => {
-  const processStore: ProcessStore = {
-    [processId]: {
-      protocolState: {},
-      processId,
-      channelsToMonitor: channelIds,
-      protocol: WalletProtocol.TransactionSubmission,
-    },
-  };
-  return { processStore };
+const createWatcherState = (
+  processId: string,
+  ...channelIds: string[]
+): walletStates.Initialized => {
+  const channelSubscriptions: walletStates.ChannelSubscriptions = {};
+  channelSubscriptions[processId] = channelIds;
+
+  return walletStates.initialized({
+    ...walletStates.EMPTY_SHARED_DATA,
+    uid: '',
+    processStore: {},
+    adjudicatorStore: {},
+    channelSubscriptions,
+  });
 };
 
 describe('adjudicator listener', () => {
@@ -50,7 +52,14 @@ describe('adjudicator listener', () => {
 
   it('should not handle an event when no process has registered', async () => {
     const channelId = await getChannelId(provider, getNextNonce(), participantA, participantB);
-    const sagaTester = new SagaTester({});
+    const initialState = walletStates.initialized({
+      ...walletStates.EMPTY_SHARED_DATA,
+      uid: '',
+      processStore: {},
+      adjudicatorStore: {},
+      channelSubscriptions: {},
+    });
+    const sagaTester = new SagaTester({ initialState });
 
     sagaTester.start(adjudicatorWatcher, provider);
     await depositContract(provider, channelId);

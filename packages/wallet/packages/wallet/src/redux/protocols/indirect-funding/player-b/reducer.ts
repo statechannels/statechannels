@@ -12,6 +12,7 @@ import {
   queueMessage,
   checkAndInitialize,
   getAddressAndPrivateKey,
+  registerChannelToMonitor,
 } from '../../../state';
 import { IndirectFundingState, failure, success } from '../state';
 import { unreachable } from '../../../../utils/reducer-utils';
@@ -119,6 +120,8 @@ function handleWaitForPreFundSetup(
     return unchangedState;
   }
   sharedData = signResult.store;
+
+  sharedData = registerChannelToMonitor(sharedData, protocolState.processId, ledgerId);
 
   // just need to put our message in the outbox
   const messageRelay = sendCommitmentReceived(
