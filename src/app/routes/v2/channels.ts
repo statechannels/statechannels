@@ -3,7 +3,9 @@ import * as Router from 'koa-router';
 
 import { RelayableAction } from 'magmo-wallet';
 import { getProcess } from '../../../wallet/db/queries/walletProcess';
-import { handleGameRequest } from '../v1/rps_channels';
+import { handleGameRequest } from '../../handlers/handle-game-request';
+import { handleNewProcessAction } from '../../handlers/handle-new-process-action';
+import { handleOngoingProcessAction } from '../../handlers/handle-ongoing-process-action';
 export const BASE_URL = `/api/v2/channels`;
 
 const router = new Router();
@@ -51,17 +53,6 @@ async function isProtocolAction(action: RelayableAction): Promise<boolean> {
   }
 
   return false;
-}
-
-async function handleOngoingProcessAction(action) {
-  return true;
-}
-
-async function handleNewProcessAction(action: RelayableAction) {
-  switch (action.type) {
-    case 'WALLET.COMMON.COMMITMENT_RECEIVED':
-    case 'WALLET.CONCLUDING.CONCLUDE_CHANNEL':
-  }
 }
 
 function opensAppChannel(action: RelayableAction): boolean {
