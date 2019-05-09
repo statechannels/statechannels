@@ -3,6 +3,7 @@ import { Address, CommitmentType, Signature, Uint256, Uint32 } from 'fmg-core';
 import { AppCommitment, CommitmentString } from '../../../types';
 import errors from '../../errors';
 import AllocatorChannel from '../../models/allocatorChannel';
+import { channelID } from 'fmg-core/lib/channel';
 
 export interface CreateAllocatorChannelParams {
   commitment: CommitmentString;
@@ -24,9 +25,10 @@ async function updateAllocatorChannel(
 ) {
   const { channel } = theirCommitment;
   const { channelType: rules_address, nonce, participants } = channel;
+  const channelId = channelID(channel);
 
   const allocator_channel = await AllocatorChannel.query()
-    .where({ nonce, rules_address })
+    .where({ channel_id: channelId })
     .select('id')
     .first();
 
@@ -58,6 +60,7 @@ async function updateAllocatorChannel(
   const commitments = [commitment(theirCommitment), commitment(hubCommitment)];
 
   interface Upsert {
+    channel_id: string;
     commitments: any[];
     rules_address: Address;
     nonce: Uint32;
@@ -65,7 +68,7 @@ async function updateAllocatorChannel(
     id?: number;
     participants?: any[];
   }
-  let upserts: Upsert = { commitments, rules_address, nonce };
+  let upserts: Upsert = { channel_id: channelId, commitments, rules_address, nonce };
 
   // For now, we just _assume_ that the channel is fully funded
   const holdings = allocations(theirCommitment)

@@ -21,6 +21,11 @@ import {
   ONGOING_APP_CHANNEL_HOLDINGS,
   ONGOING_APP_CHANNEL_NONCE,
   PARTICIPANT_ADDRESS,
+  DUMMY_RULES_FUNDED_NONCE_CHANNEL_ID,
+  DUMMY_RULES_BEGINNING_APP_CHANNEL_NONCE_CHANNEL_ID,
+  DUMMY_RULES_ONGOING_APP_CHANNEL_NONCE_CHANNEL_ID,
+  DUMMY_RULES_FUNDED_RPS_CHANNEL_NONCE_CHANNEL_ID,
+  DUMMY_RULES_BEGINNING_RPS_APP_CHANNEL_NONCE_CHANNEL_ID,
 } from '../../../constants';
 import AllocatorChannel from '../../models/allocatorChannel';
 import knex from '../connection';
@@ -59,6 +64,7 @@ function pre_fund_setup(turn_number: number) {
 }
 
 const funded_channel = {
+  channel_id: DUMMY_RULES_FUNDED_NONCE_CHANNEL_ID,
   rules_address: DUMMY_RULES_ADDRESS,
   nonce: FUNDED_CHANNEL_NONCE,
   holdings: FUNDED_CHANNEL_HOLDINGS,
@@ -77,6 +83,7 @@ function post_fund_setup(turn_number: number) {
 }
 
 const beginning_app_phase_channel = {
+  channel_id: DUMMY_RULES_BEGINNING_APP_CHANNEL_NONCE_CHANNEL_ID,
   rules_address: DUMMY_RULES_ADDRESS,
   nonce: BEGINNING_APP_CHANNEL_NONCE,
   holdings: BEGINNING_APP_CHANNEL_HOLDINGS,
@@ -95,6 +102,7 @@ function app(turn_number: number) {
 }
 
 const ongoing_app_phase_channel = {
+  channel_id: DUMMY_RULES_ONGOING_APP_CHANNEL_NONCE_CHANNEL_ID,
   rules_address: DUMMY_RULES_ADDRESS,
   nonce: ONGOING_APP_CHANNEL_NONCE,
   holdings: ONGOING_APP_CHANNEL_HOLDINGS,
@@ -128,6 +136,7 @@ function rps_pre_fund_setup(turn_number: number) {
 }
 
 const funded_rps_channel = {
+  channel_id: DUMMY_RULES_FUNDED_RPS_CHANNEL_NONCE_CHANNEL_ID,
   rules_address: DUMMY_RULES_ADDRESS,
   nonce: FUNDED_RPS_CHANNEL_NONCE,
   holdings: FUNDED_RPS_CHANNEL_HOLDINGS,
@@ -146,6 +155,7 @@ function rps_post_fund_setup(turn_number: number) {
 }
 
 const beginning_app_phase_rps_channel = {
+  channel_id: DUMMY_RULES_BEGINNING_RPS_APP_CHANNEL_NONCE_CHANNEL_ID,
   rules_address: DUMMY_RULES_ADDRESS,
   nonce: BEGINNING_RPS_APP_CHANNEL_NONCE,
   holdings: BEGINNING_APP_CHANNEL_HOLDINGS,
