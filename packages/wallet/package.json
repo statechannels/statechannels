@@ -1,9 +1,7 @@
 {
-  "dependencies": {
-    "lerna": "^3.10.1"
-  },
   "name": "apps",
   "license": "MIT",
+  "private": true,
   "scripts": {
     "test:ci": "test:ci",
     "build": "build",
@@ -17,5 +15,11 @@
     "packages/rps/node_modules",
     "packages/tictactoe/node_modules",
     "packages/wallet-common/node_modules"
-  ]
+  ],
+  "workspaces": [
+    "packages/*"
+  ],
+  "dependencies": {
+    "lerna": "^3.10.1"
+  }
 }
