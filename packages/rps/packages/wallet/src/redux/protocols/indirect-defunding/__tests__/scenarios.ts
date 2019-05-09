@@ -1,255 +1,118 @@
-import * as states from '../state';
-import * as testScenarios from '../../../__tests__/test-scenarios';
-
-import { EMPTY_SHARED_DATA, SharedData } from '../../../state';
-import * as actions from '../../../actions';
-import { AdjudicatorState } from '../../../adjudicator-state/state';
-import { ChannelState, ChannelStore } from '../../../channel-store';
-
-// Various state properties
-const processId = 'processid.123';
-const {
-  asAddress: address,
-  asPrivateKey: privateKey,
-  participants,
-  ledgerCommitments,
+import {
+  appCommitment,
+  ledgerCommitment,
+  asAddress,
+  bsAddress,
+  asPrivateKey,
   ledgerId,
-  ledgerLibraryAddress,
-  signedLedgerCommitments,
-} = testScenarios;
-
-const channelId = ledgerId;
-const baseChannelStatus: ChannelState = {
-  address,
-  privateKey,
   channelId,
-  libraryAddress: ledgerLibraryAddress,
-  participants,
-  channelNonce: 0,
-  funded: true,
-  ourIndex: 0,
-  turnNum: ledgerCommitments.ledgerUpdate1.turnNum,
-  lastCommitment: { commitment: ledgerCommitments.ledgerUpdate1, signature: '0x0' },
-  penultimateCommitment: { commitment: ledgerCommitments.ledgerUpdate0, signature: '0x0' },
+} from '../../../../domain/commitments/__tests__';
+import { bigNumberify } from 'ethers/utils/bignumber';
+import { waitForLedgerUpdate } from '../state';
+import { setChannels, EMPTY_SHARED_DATA } from '../../../state';
+import { channelFromCommitments } from '../../../channel-store/channel-state/__tests__';
+import { bsPrivateKey } from '../../../../communication/__tests__/commitments';
+import * as globalActions from '../../../actions';
+
+const processId = 'processId';
+
+const twoThree = [
+  { address: asAddress, wei: bigNumberify(2).toHexString() },
+  { address: bsAddress, wei: bigNumberify(3).toHexString() },
+];
+
+const fiveToApp = [{ address: channelId, wei: bigNumberify(5).toHexString() }];
+
+const props = {
+  channelId,
+  ledgerId,
+  processId,
+  proposedAllocation: twoThree.map(a => a.wei),
+  proposedDestination: twoThree.map(a => a.address),
 };
 
-const playerAStartChannelState: ChannelStore = {
-  [channelId]: baseChannelStatus,
+// -----------
+// Commitments
+// -----------
+
+const app9 = appCommitment({ turnNum: 9, balances: twoThree, isFinal: false });
+const app10 = appCommitment({ turnNum: 10, balances: twoThree, isFinal: true });
+const app11 = appCommitment({ turnNum: 11, balances: twoThree, isFinal: true });
+
+const ledger4 = ledgerCommitment({ turnNum: 4, balances: twoThree, proposedBalances: fiveToApp });
+const ledger5 = ledgerCommitment({ turnNum: 5, balances: fiveToApp });
+const ledger6 = ledgerCommitment({ turnNum: 6, balances: fiveToApp, proposedBalances: twoThree });
+const ledger7 = ledgerCommitment({ turnNum: 7, balances: twoThree });
+
+// -----------
+// States
+// -----------
+const initialStore = setChannels(EMPTY_SHARED_DATA, [
+  channelFromCommitments(app10, app11, asAddress, asPrivateKey),
+  channelFromCommitments(ledger4, ledger5, asAddress, asPrivateKey),
+]);
+
+const notDefundableInitialStore = setChannels(EMPTY_SHARED_DATA, [
+  channelFromCommitments(app9, app10, asAddress, asPrivateKey),
+  channelFromCommitments(ledger4, ledger5, asAddress, asPrivateKey),
+]);
+
+const playerAWaitForUpdate = {
+  state: waitForLedgerUpdate(props),
+  store: setChannels(EMPTY_SHARED_DATA, [
+    channelFromCommitments(app10, app11, asAddress, asPrivateKey),
+    channelFromCommitments(ledger5, ledger6, asAddress, asPrivateKey),
+  ]),
 };
 
-const playerAWaitForCommitmentChannelState: ChannelStore = {
-  [channelId]: {
-    ...baseChannelStatus,
-    lastCommitment: { commitment: ledgerCommitments.ledgerDefundUpdate1, signature: '0x0' },
-    penultimateCommitment: {
-      commitment: ledgerCommitments.ledgerDefundUpdate0,
-      signature: '0x0',
-    },
-    turnNum: ledgerCommitments.ledgerDefundUpdate1.turnNum,
-  },
+const playerBWaitForUpdate = {
+  state: waitForLedgerUpdate(props),
+  store: setChannels(EMPTY_SHARED_DATA, [
+    channelFromCommitments(app10, app11, bsAddress, bsPrivateKey),
+    channelFromCommitments(ledger4, ledger5, bsAddress, bsPrivateKey),
+  ]),
 };
 
-const playerBStartChannelState: ChannelStore = {
-  [channelId]: {
-    ...baseChannelStatus,
-    ourIndex: 1,
-  },
-};
-
-const playerBWaitForFinalCommitmentChannelState: ChannelStore = {
-  [channelId]: {
-    ...baseChannelStatus,
-    ourIndex: 1,
-    lastCommitment: { commitment: ledgerCommitments.ledgerDefundUpdate1, signature: '0x0' },
-    penultimateCommitment: {
-      commitment: ledgerCommitments.ledgerDefundUpdate0,
-      signature: '0x0',
-    },
-    turnNum: ledgerCommitments.ledgerDefundUpdate1.turnNum,
-  },
-};
-
-const adjudicatorState: AdjudicatorState = {
-  [channelId]: {
-    finalized: true,
-    channelId,
-    balance: '0x0',
-  },
-};
-
-const notClosedAdjudicatorState: AdjudicatorState = {
-  [channelId]: {
-    finalized: false,
-    channelId,
-    balance: '0x0',
-  },
-};
-
-const playerAStartSharedData: SharedData = {
-  ...EMPTY_SHARED_DATA,
-  adjudicatorState,
-  channelStore: playerAStartChannelState,
-};
-
-const playerAWaitForUpdateSharedData: SharedData = {
-  ...EMPTY_SHARED_DATA,
-  adjudicatorState,
-  channelStore: playerAWaitForCommitmentChannelState,
-};
-
-const playerBStartSharedData: SharedData = {
-  ...EMPTY_SHARED_DATA,
-  adjudicatorState,
-  channelStore: playerBStartChannelState,
-};
-
-const playerBWaitForFinalUpdateSharedData = {
-  ...EMPTY_SHARED_DATA,
-  adjudicatorState,
-  channelStore: playerBWaitForFinalCommitmentChannelState,
-};
-
-const notDefundableSharedData: SharedData = {
-  ...EMPTY_SHARED_DATA,
-  adjudicatorState: notClosedAdjudicatorState,
-  channelStore: playerAStartChannelState,
-};
-
-const {
-  allocation: proposedAllocation,
-  destination: proposedDestination,
-} = ledgerCommitments.ledgerDefundUpdate1;
-
+// -----------
 // Actions
-const playerACommitmentReceived = actions.commitmentReceived(
-  processId,
-  signedLedgerCommitments.signedLedgerCommitment7,
-);
-const playerBFirstCommitmentReceived = actions.commitmentReceived(
-  processId,
-  signedLedgerCommitments.signedLedgerCommitment6,
-);
-const playerBFinalCommitmentReceived = actions.commitmentReceived(
-  processId,
-  signedLedgerCommitments.signedLedgerCommitment6,
-);
-
-const invalidCommitmentReceived = actions.commitmentReceived(
-  processId,
-  signedLedgerCommitments.signedLedgerCommitment0,
-);
-
-// Indirect Defunding States
-const waitForLedgerUpdate = states.waitForLedgerUpdate({
-  processId,
-  channelId,
-  proposedAllocation,
-  proposedDestination,
-});
-const waitForFinalLedgerUpdate = states.waitForFinalLedgerUpdate({
-  processId,
-  channelId,
-  proposedAllocation,
-  proposedDestination,
-});
-const notDefundableFailure = states.failure('Channel Not Closed');
-const invalidCommitmentFailure = states.failure('Received Invalid Commitment');
-
+// -----------
+const ledgerUpdate0Received = globalActions.commitmentReceived(processId, ledger6);
+const ledgerUpdate1Received = globalActions.commitmentReceived(processId, ledger7);
+const invalidLedgerUpdateReceived = globalActions.commitmentReceived(processId, ledger5);
+// -----------
 // Scenarios
+// -----------
 export const playerAHappyPath = {
-  processId,
-  channelId,
-  proposedAllocation,
-  proposedDestination,
-  firstUpdateCommitment: ledgerCommitments.ledgerDefundUpdate0,
-  // secondUpdateCommitment: ledgerCommitments.ledgerDefundUpdate2,
-  states: {
-    waitForLedgerUpdate,
+  initialParams: {
+    store: initialStore,
+    ...props,
+    reply: ledger6,
   },
-  actions: {
-    commitmentReceived: playerACommitmentReceived,
-  },
-  sharedData: {
-    initializingSharedData: playerAStartSharedData,
-    waitForLedgerUpdateSharedData: playerAWaitForUpdateSharedData,
-  },
+  waitForLedgerUpdate: { state: playerAWaitForUpdate, action: ledgerUpdate1Received },
+};
+
+export const playerAInvalidCommitment = {
+  waitForLedgerUpdate: { state: playerAWaitForUpdate, action: invalidLedgerUpdateReceived },
+};
+export const playerBInvalidCommitment = {
+  waitForLedgerUpdate: { state: playerBWaitForUpdate, action: invalidLedgerUpdateReceived },
 };
 
 export const playerBHappyPath = {
-  processId,
-  channelId,
-  proposedAllocation,
-  proposedDestination,
-  updateCommitment: ledgerCommitments.ledgerDefundUpdate1,
-
-  states: {
-    waitForLedgerUpdate,
-    waitForFinalLedgerUpdate,
+  initialParams: {
+    store: initialStore,
+    ...props,
   },
-  actions: {
-    firstCommitmentReceived: playerBFirstCommitmentReceived,
-    finalCommitmentReceived: playerBFinalCommitmentReceived,
-  },
-  sharedData: {
-    initializingSharedData: playerBStartSharedData,
-    waitForFinalUpdateSharedData: playerBWaitForFinalUpdateSharedData,
+  waitForLedgerUpdate: {
+    state: playerBWaitForUpdate,
+    action: ledgerUpdate0Received,
+    reply: ledger7,
   },
 };
 
 export const notDefundable = {
-  processId,
-  channelId,
-  proposedAllocation,
-  proposedDestination,
-  sharedData: notDefundableSharedData,
-  states: {
-    failure: notDefundableFailure,
-  },
-};
-
-export const playerAInvalidCommitment = {
-  processId,
-  channelId,
-  proposedAllocation,
-  proposedDestination,
-  sharedData: playerAStartSharedData,
-  states: {
-    waitForLedgerUpdate,
-    failure: invalidCommitmentFailure,
-  },
-  actions: {
-    commitmentReceived: invalidCommitmentReceived,
-  },
-};
-
-export const playerBInvalidFirstCommitment = {
-  processId,
-  channelId,
-  proposedAllocation,
-  proposedDestination,
-  sharedData: playerBStartSharedData,
-  states: {
-    waitForLedgerUpdate,
-    failure: invalidCommitmentFailure,
-  },
-  actions: {
-    firstCommitmentReceived: invalidCommitmentReceived,
-  },
-};
-
-export const playerBInvalidFinalCommitment = {
-  processId,
-  channelId,
-  proposedAllocation,
-  proposedDestination,
-  sharedData: playerBStartSharedData,
-  states: {
-    waitForLedgerUpdate,
-    waitForFinalLedgerUpdate,
-    failure: invalidCommitmentFailure,
-  },
-  actions: {
-    firstCommitmentReceived: playerBFirstCommitmentReceived,
-    finalCommitmentReceived: invalidCommitmentReceived,
+  initialParams: {
+    store: notDefundableInitialStore,
+    ...props,
   },
 };
