@@ -9,7 +9,7 @@ import { SharedData, queueMessage } from '../../../state';
 import { ProtocolStateWithSharedData } from '../..';
 import { unreachable } from '../../../../utils/reducer-utils';
 import { PlayerIndex } from '../../../types';
-import { showWallet } from '../../reducer-helpers';
+import { showWallet, hideWallet, sendFundingComplete } from '../../reducer-helpers';
 import { fundingFailure } from 'magmo-wallet-client';
 import { sendStrategyProposed } from '../../../../communication';
 import {
@@ -151,7 +151,8 @@ function fundingSuccessAcknowledged(
   if (state.type !== states.WAIT_FOR_SUCCESS_CONFIRMATION) {
     return { protocolState: state, sharedData };
   }
-  return { protocolState: states.success(), sharedData };
+  const updatedSharedData = sendFundingComplete(sharedData, state.targetChannelId);
+  return { protocolState: states.success(), sharedData: hideWallet(updatedSharedData) };
 }
 
 function cancelled(state: states.FundingState, sharedData: SharedData, action: actions.Cancelled) {

@@ -38,10 +38,12 @@ export interface WaitForStrategyApproval extends BaseState {
 export interface WaitForFunding extends BaseState {
   type: typeof WAIT_FOR_FUNDING;
   fundingState: NonTerminalIndirectFundingState;
+  targetChannelId: string;
 }
 
 export interface WaitForSuccessConfirmation extends BaseState {
   type: typeof WAIT_FOR_SUCCESS_CONFIRMATION;
+  targetChannelId: string;
 }
 
 export interface Failure {
@@ -92,15 +94,15 @@ export function waitForStrategyApproval(p: P<WaitForStrategyApproval>): WaitForS
 }
 
 export function waitForFunding(p: P<WaitForFunding>): WaitForFunding {
-  const { processId, opponentAddress, fundingState } = p;
-  return { type: WAIT_FOR_FUNDING, processId, opponentAddress, fundingState };
+  const { processId, opponentAddress, fundingState, targetChannelId } = p;
+  return { type: WAIT_FOR_FUNDING, processId, opponentAddress, fundingState, targetChannelId };
 }
 
 export function waitForSuccessConfirmation(
   p: P<WaitForSuccessConfirmation>,
 ): WaitForSuccessConfirmation {
-  const { processId, opponentAddress } = p;
-  return { type: WAIT_FOR_SUCCESS_CONFIRMATION, processId, opponentAddress };
+  const { processId, opponentAddress, targetChannelId } = p;
+  return { type: WAIT_FOR_SUCCESS_CONFIRMATION, processId, opponentAddress, targetChannelId };
 }
 
 export function success(): Success {
