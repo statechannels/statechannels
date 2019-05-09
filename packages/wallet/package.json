@@ -6,6 +6,16 @@
   "license": "MIT",
   "scripts": {
     "test:ci": "test:ci",
-    "build": "build"
-  }
+    "build": "build",
+    "heroku-postbuild": "npx lerna bootstrap"
+  },
+  "cacheDirectories": [
+    "node_modules",
+    "packages/wallet/node_modules",
+    "packages/server/node_modules",
+    "packages/magmo-wallet-client/node_modules",
+    "packages/rps/node_modules",
+    "packages/tictactoe/node_modules",
+    "packages/wallet-common/node_modules"
+  ]
 }

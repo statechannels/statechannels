@@ -3,7 +3,7 @@ process.env.NODE_ENV = 'test';
 import * as supertest from 'supertest';
 import app from '../../src/app/app';
 import { HUB_ADDRESS, NAME, STAKE } from '../../src/constants';
-import * as rpsArtifact from 'magmo-wallet-common/prebuilt-contracts/RockPaperScissorsGame.json';
+import * as contracts from '../../src/utilities/contracts';
 
 const BASE_URL = '/api/v1/rps_games';
 
@@ -17,7 +17,7 @@ describe('routes : rps_channels', () => {
         address: HUB_ADDRESS,
         games: [
           {
-            rules_address: rpsArtifact.networks['3'].address,
+            rules_address: contracts.rpsGameArtifact.networks['3'].address,
             stake: STAKE,
             name: NAME,
           },

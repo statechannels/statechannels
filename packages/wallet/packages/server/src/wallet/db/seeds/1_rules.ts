@@ -4,7 +4,7 @@ import Rule from '../../models/rule';
 import knex from '../connection';
 Model.knex(knex);
 
-import * as RPS from 'magmo-wallet-common/prebuilt-contracts/RockPaperScissorsGame.json';
+import * as contracts from '../../../utilities/contracts';
 
 export function seed() {
   // Deletes ALL existing entries
@@ -17,8 +17,8 @@ export function seed() {
           name: "DUMMY GAME -- DON't PLAY",
         },
         {
-          address: RPS.networks['3'].address,
-          name: RPS.contractName,
+          address: contracts.rpsGameArtifact.networks['3'].address,
+          name: contracts.rpsGameArtifact.contractName,
         },
       ]);
     });

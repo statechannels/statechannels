@@ -24,7 +24,7 @@ export const UNKNOWN_RULES_ADDRESS = '0x92b5b042047731FF882423cB555554F11F632Bd6
 
 // TODO: These should be in the seed file, but they got exported as undefined for some reason
 export const FUNDED_CHANNEL_NONCE = 3;
-export const FUNDED_CHANNEL_HOLDINGS = '0x03';
+export const FUNDED_CHANNEL_HOLDINGS = '0x00';
 
 export const FUNDED_RPS_CHANNEL_NONCE = 33;
 export const FUNDED_RPS_CHANNEL_HOLDINGS = '0x03';
@@ -45,6 +45,16 @@ export const SEEDED_PARTICIPANTS = SEEDED_CHANNELS * 2;
 // just choose big numbers that won't be hit in seeding
 export const NONCE = 1000;
 export const RPS_NONCE = 22222;
+
+export const DUMMY_RULES_FUNDED_NONCE_CHANNEL_ID = '0xA401D66E18BD3918dAC8FAdc6F744219432eB150';
+export const DUMMY_RULES_BEGINNING_APP_CHANNEL_NONCE_CHANNEL_ID =
+  '0xAB3085EF30eb526C3388D886c066714DF16Fd79D';
+export const DUMMY_RULES_ONGOING_APP_CHANNEL_NONCE_CHANNEL_ID =
+  '0x04935CE33a179bF43125C9C23ee64F3b749E6246';
+export const DUMMY_RULES_FUNDED_RPS_CHANNEL_NONCE_CHANNEL_ID =
+  '0xe18f12dF62979893E7B5a7914dFb3d8694258ae0';
+export const DUMMY_RULES_BEGINNING_RPS_APP_CHANNEL_NONCE_CHANNEL_ID =
+  '0x52F42dE3f25051e31DF70199182A622f59a2072c';
 
 export const STAKE: Uint256 = ethers.utils.parseEther('0.01').toHexString();
 export const ALLOCATION: Uint256[] = ['0x05', '0x05'];

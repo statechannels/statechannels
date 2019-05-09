@@ -14,6 +14,7 @@ exports.up = (knex: Knex) => {
         .notNullable()
         .unique();
       table.text('holdings').notNullable(); // has to store a uint256
+      table.string('channel_id').notNullable();
 
       // NOTE: uniqueness on the nonce ensures unique channel ids
     })
