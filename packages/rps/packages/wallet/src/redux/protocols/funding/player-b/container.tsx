@@ -22,7 +22,7 @@ interface Props {
 
 class FundingContainer extends PureComponent<Props> {
   render() {
-    const { state, strategyApproved, cancelled } = this.props;
+    const { state, strategyApproved, cancelled, fundingSuccessAcknowledged } = this.props;
     const { processId } = state;
 
     switch (state.type) {
@@ -41,7 +41,7 @@ class FundingContainer extends PureComponent<Props> {
         return (
           <AcknowledgeX
             title="Channel funded!"
-            action={() => actions.fundingSuccessAcknowledged(processId)}
+            action={() => fundingSuccessAcknowledged(processId)}
             description="You have successfully funded your channel"
             actionTitle="Ok!"
           />

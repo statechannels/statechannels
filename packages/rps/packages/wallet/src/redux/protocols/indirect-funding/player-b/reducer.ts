@@ -37,6 +37,7 @@ import { isSuccess, isFailure } from '../../direct-funding/state';
 import { acceptConsensus } from '../../../../domain/two-player-consensus-game';
 import { sendCommitmentReceived } from '../../../../communication';
 import { addHex } from '../../../../utils/hex-utils';
+import { isTransactionAction } from '../../../actions';
 
 type ReturnVal = ProtocolStateWithSharedData<IndirectFundingState>;
 type IDFAction = actions.indirectFunding.Action;
@@ -76,7 +77,7 @@ function handleWaitForPreFundSetup(
 ): ReturnVal {
   const unchangedState = { protocolState, sharedData };
   if (action.type !== actions.COMMITMENT_RECEIVED) {
-    throw new Error('Incorrect action');
+    throw new Error(`Incorrect action ${action.type}`);
   }
   const addressAndPrivateKey = getAddressAndPrivateKey(sharedData, protocolState.channelId);
   if (!addressAndPrivateKey) {
@@ -173,7 +174,7 @@ function handleWaitForDirectFunding(
   // Update direct funding state on our protocol state
   const newDirectFundingState = protocolStateWithSharedData.protocolState;
   const newProtocolState = { ...protocolState, directFundingState: newDirectFundingState };
-
+  sharedData = protocolStateWithSharedData.sharedData;
   if (isSuccess(newDirectFundingState)) {
     return { protocolState: bWaitForLedgerUpdate0(newProtocolState), sharedData };
   } else if (isFailure(newDirectFundingState)) {
@@ -189,8 +190,14 @@ function handleWaitForLedgerUpdate(
   action: IDFAction | DirectFundingAction,
 ): ReturnVal {
   const unchangedState = { protocolState, sharedData };
+  if (isTransactionAction(action)) {
+    console.warn(
+      `Ignoring transaction action ${action.type} since direct funding has been completed already.`,
+    );
+    return unchangedState;
+  }
   if (action.type !== actions.COMMITMENT_RECEIVED) {
-    throw new Error('Incorrect action');
+    throw new Error(`Incorrect action ${action.type}`);
   }
   const checkResult = checkAndStore(sharedData, action.signedCommitment);
   if (!checkResult.isSuccess) {
@@ -244,7 +251,7 @@ export function handleWaitForPostFundSetup(
   // We should probably refactor and clean this up
   const unchangedState = { protocolState, sharedData };
   if (action.type !== actions.COMMITMENT_RECEIVED) {
-    throw new Error('Incorrect action');
+    throw new Error(`Incorrect action ${action.type}`);
   }
   const checkResult = checkAndStore(sharedData, action.signedCommitment);
   if (!checkResult.isSuccess) {

@@ -1,9 +1,9 @@
-import { SIGNATURE_SUCCESS, VALIDATION_SUCCESS } from 'magmo-wallet-client';
+import { SIGNATURE_SUCCESS, VALIDATION_SUCCESS, fundingSuccess } from 'magmo-wallet-client';
 import * as actions from '../actions';
 import { channelStoreReducer } from '../channel-store/reducer';
 import { accumulateSideEffects } from '../outbox';
 import { SideEffects } from '../outbox/state';
-import { SharedData } from '../state';
+import { SharedData, queueMessage } from '../state';
 import * as selectors from '../selectors';
 import { PlayerIndex } from '../types';
 import { CommitmentType } from 'fmg-core/lib/commitment';
@@ -41,6 +41,22 @@ export const filterOutSignatureMessages = (sideEffects?: SideEffects): SideEffec
   }
   return sideEffects;
 };
+
+export function sendFundingComplete(sharedData: SharedData, appChannelId: string) {
+  const channelState = selectors.getOpenedChannelState(sharedData, appChannelId);
+  const lastCommitment = channelState.lastCommitment.commitment;
+  if (
+    lastCommitment.commitmentType !== CommitmentType.PostFundSetup ||
+    lastCommitment.turnNum !== 3
+  ) {
+    throw new Error(
+      `Expected a post fund setup B commitment. Instead received ${JSON.stringify(
+        lastCommitment,
+      )}.`,
+    );
+  }
+  return queueMessage(sharedData, fundingSuccess(appChannelId, lastCommitment));
+}
 
 export function showWallet(sharedData: SharedData): SharedData {
   const newSharedData = { ...sharedData };

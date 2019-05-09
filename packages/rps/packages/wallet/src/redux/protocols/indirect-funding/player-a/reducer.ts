@@ -32,6 +32,7 @@ import { addHex } from '../../../../utils/hex-utils';
 import { UpdateType } from 'fmg-nitro-adjudicator/lib/consensus-app';
 import { proposeNewConsensus } from '../../../../domain/two-player-consensus-game';
 import { unreachable } from '../../../../utils/reducer-utils';
+import { isTransactionAction } from '../../../actions';
 
 type ReturnVal = ProtocolStateWithSharedData<IndirectFundingState>;
 type IDFAction = actions.indirectFunding.Action;
@@ -105,7 +106,7 @@ function handleWaitForPostFundSetup(
   action: IDFAction | DirectFundingAction,
 ): ReturnVal {
   if (action.type !== actions.COMMITMENT_RECEIVED) {
-    throw new Error('Incorrect action');
+    throw new Error(`Incorrect action ${action.type}`);
   }
   const checkResult = checkAndStore(sharedData, action.signedCommitment);
   if (!checkResult.isSuccess) {
@@ -124,8 +125,14 @@ function handleWaitForLedgerUpdate(
   action: IDFAction | DirectFundingAction,
 ): ReturnVal {
   const unchangedState = { protocolState, sharedData };
+  if (isTransactionAction(action)) {
+    console.warn(
+      `Ignoring transaction action ${action.type} since direct funding has been completed already.`,
+    );
+    return unchangedState;
+  }
   if (action.type !== actions.COMMITMENT_RECEIVED) {
-    throw new Error('Incorrect action');
+    throw new Error(`Incorrect action ${action.type}`);
   }
   const checkResult = checkAndStore(sharedData, action.signedCommitment);
   if (!checkResult.isSuccess) {
@@ -170,7 +177,7 @@ function handleWaitForPreFundSetup(
   action: IDFAction | DirectFundingAction,
 ): ReturnVal {
   if (action.type !== actions.COMMITMENT_RECEIVED) {
-    throw new Error('Incorrect action');
+    throw new Error(`Incorrect action ${action.type}`);
   }
   const addressAndPrivateKey = getAddressAndPrivateKey(sharedData, protocolState.channelId);
   if (!addressAndPrivateKey) {

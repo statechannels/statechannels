@@ -2,8 +2,9 @@ import * as scenarios from './scenarios';
 import * as states from '../states';
 import { fundingReducer as reducer } from '../reducer';
 import { ProtocolStateWithSharedData } from '../../..';
-import { itSendsThisMessage } from '../../../../__tests__/helpers';
+import { itSendsThisMessage, itSendsThisDisplayEventType } from '../../../../__tests__/helpers';
 import { sendStrategyApproved } from '../../../../../communication';
+import { FUNDING_SUCCESS, HIDE_WALLET } from 'magmo-wallet-client';
 
 function whenIn(state) {
   return `when in ${state}`;
@@ -44,6 +45,8 @@ describe('happyPath', () => {
     const result = reducer(state, store, action);
 
     itTransitionsTo(result, states.SUCCESS);
+    itSendsThisMessage(result, FUNDING_SUCCESS);
+    itSendsThisDisplayEventType(result, HIDE_WALLET);
   });
 });
 
