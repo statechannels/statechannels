@@ -1,3 +1,5 @@
-// Set options as a parameter, environment variable, or rc file.
+import * as communication from './src/communication';
+import { RelayableAction } from './src/communication';
+import { unreachable } from './src/utils/reducer-utils';
 
-export {};
+export { communication, RelayableAction, unreachable };

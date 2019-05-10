@@ -1,7 +1,7 @@
 import { accumulateSideEffects } from '../redux/outbox';
-import { SideEffects } from 'src/redux/outbox/state';
-import { WalletAction } from 'src/redux/actions';
-import { StateWithSideEffects } from 'src/redux/utils';
+import { SideEffects } from '../redux/outbox/state';
+import { WalletAction } from '../redux/actions';
+import { StateWithSideEffects } from '../redux/utils';
 
 export function unreachable(x: never) {
   return x;

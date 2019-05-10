@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "baseUrl": ".",
-    "outDir": "build/dist",
+    "outDir": "lib",
     "module": "commonjs",
     "target": "es2015",
     "lib": ["es6", "dom"],
@@ -16,11 +16,12 @@
     "noUnusedLocals": true,
     "allowSyntheticDefaultImports": true,
     "resolveJsonModule": true,
-    "esModuleInterop": true,
+    "esModuleInterop": true
   },
   "exclude": [
     "node_modules",
     "build",
+    "lib",
     "scripts",
     "acceptance-tests",
     "webpack",

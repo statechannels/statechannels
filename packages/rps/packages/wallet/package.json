@@ -1,16 +1,17 @@
 {
-  "name": "wallet",
+  "name": "magmo-wallet",
   "version": "0.1.0",
   "license": "MIT",
   "private": true,
-  "main": "index.js",
-  "module": "src/index.js",
+  "main": "lib/index.js",
   "resolutions": {
     "firebase/**/grpc": "^1.16.1"
   },
   "scripts": {
     "start": "npm run clearContracts && node scripts/start.js",
-    "build": "npm run clearContracts && node scripts/build.js",
+    "build": "run-s clearContracts build:typescript build:webpack",
+    "build:typescript": "npx tsc",
+    "build:webpack": "node scripts/build.js",
     "test": "run-s prettier:check 'test:app --all'",
     "test:ci": "DEV_GANACHE_PORT=8503  run-s clearContracts prettier:check build 'test:contracts --all --ci' 'test:app --all --ci --runInBand'",
     "test:app": "npx run-jest -c ./config/jest/jest.config.js",
