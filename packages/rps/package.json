@@ -2,6 +2,7 @@
   "name": "apps",
   "license": "MIT",
   "private": true,
+  "npmClient": "yarn",
   "scripts": {
     "test:ci": "test:ci",
     "build": "build",

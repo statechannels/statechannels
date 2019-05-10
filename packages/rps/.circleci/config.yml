@@ -24,7 +24,7 @@ jobs:
     steps:
       - checkout
 
-      - run: yarn install && npx lerna bootstrap
+      - run: npx lerna bootstrap
 
       - run:
           name: Waiting for Postgres to be ready
