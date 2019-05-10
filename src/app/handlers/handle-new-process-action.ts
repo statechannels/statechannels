@@ -1,9 +1,9 @@
-import { isRelayableAction } from 'magmo-wallet/src/communication';
-import { unreachable } from 'magmo-wallet/src/utils/reducer-utils';
+import { communication } from 'magmo-wallet';
+import { unreachable } from 'magmo-wallet';
 
 export async function handleNewProcessAction(ctx) {
   const { data: action } = ctx.request.body;
-  if (!isRelayableAction(action)) {
+  if (!communication.isRelayableAction(action)) {
     throw new Error(`Action ${action.type} is not valid`);
   }
 
