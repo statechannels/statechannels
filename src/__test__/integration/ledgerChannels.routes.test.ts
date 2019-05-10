@@ -1,11 +1,11 @@
 import * as supertest from 'supertest';
-import app from '../../src/app/app';
+import app from '../../app/app';
 import {
   invalid_open_channel_params,
   open_channel_params,
   pre_fund_setup_1_response,
-} from '../../src/test/test_data';
-import errors from '../../src/wallet/errors';
+} from '../../test/test_data';
+import errors from '../../wallet/errors';
 
 const BASE_URL = '/api/v1/ledger_channels';
 
