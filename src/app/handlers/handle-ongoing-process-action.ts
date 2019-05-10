@@ -1,3 +1,3 @@
-export async function handleOngoingProcessAction(action) {
-  return true;
+export async function handleOngoingProcessAction(ctx) {
+  return ctx;
 }

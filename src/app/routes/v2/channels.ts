@@ -17,9 +17,9 @@ router.post(`${BASE_URL}`, koaBody(), async ctx => {
   } else {
     const { data: action } = ctx.request.body;
     if (await isNewProcessAction(action)) {
-      return await handleNewProcessAction(action);
+      return await handleNewProcessAction(ctx);
     } else if (await isProtocolAction(action)) {
-      return await handleOngoingProcessAction(action);
+      return await handleOngoingProcessAction(ctx);
     }
   }
 });
