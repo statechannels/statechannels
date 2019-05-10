@@ -18,6 +18,28 @@ export const channelId = channelID(channel);
 
 export const twoThree = [bigNumberify(2).toHexString(), bigNumberify(3).toHexString()];
 
+export const preFundCommitment0: Commitment = {
+  channel,
+  commitmentCount: 0,
+  commitmentType: CommitmentType.PreFundSetup,
+  appAttributes: '0x0',
+  turnNum: 2,
+  allocation: twoThree,
+  destination: participants,
+};
+export const signedCommitment0 = signCommitment2(preFundCommitment0, asPrivateKey);
+
+export const preFundCommitment1: Commitment = {
+  channel,
+  commitmentCount: 1,
+  commitmentType: CommitmentType.PreFundSetup,
+  appAttributes: '0x0',
+  turnNum: 3,
+  allocation: twoThree,
+  destination: participants,
+};
+export const signedCommitment1 = signCommitment2(preFundCommitment1, bsPrivateKey);
+
 export const postFundCommitment0: Commitment = {
   channel,
   commitmentCount: 0,

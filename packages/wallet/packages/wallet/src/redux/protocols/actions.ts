@@ -52,6 +52,7 @@ export type NewProcessAction =
   | ConcludeRequested
   | CreateChallengeRequested
   | RespondToChallengeRequested;
+
 export function isNewProcessAction(action: WalletAction): action is NewProcessAction {
   return (
     action.type === INITIALIZE_CHANNEL ||
