@@ -25,6 +25,7 @@ jobs:
       - checkout
 
       - run: npx lerna bootstrap
+      - run: npx lerna run prepare
 
       - run:
           name: Waiting for Postgres to be ready
