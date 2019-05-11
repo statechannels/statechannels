@@ -21,6 +21,7 @@ export const itIncreasesTurnNumBy = (
       return fail('turnNum does not exist on one of the states');
     }
     expect(newState.gameState.turnNum).toEqual(oldState.gameState.turnNum + increase);
+    return;
   });
 };
 
@@ -80,6 +81,7 @@ export const itFullySwingsTheBalancesToA = (
     expect(Number(newState.gameState.balances[1])).toEqual(
       Number(oldState.gameState.balances[1]) - 2 * Number(stake),
     );
+    return;
   });
 };
 
@@ -124,6 +126,7 @@ export const itPreservesOnScreenBalances = (oldState: JointState, newState: Join
     expect(Number(newState.gameState.onScreenBalances[1])).toEqual(
       Number(oldState.gameState.onScreenBalances[1]),
     );
+    return;
   });
 };
 
