@@ -6,7 +6,7 @@
   "scripts": {
     "test:ci": "test:ci",
     "build": "build",
-    "heroku-postbuild": "npx lerna bootstrap"
+    "heroku-postbuild": "npx lerna run prepare"
   },
   "cacheDirectories": [
     "node_modules",
