@@ -9,10 +9,10 @@
       "type": "node",
       "request": "launch",
       "args": [
-        "scripts/test.js",
+        "node_modules/.bin/jest",
         "--runInBand",
-        "--no-cache",
-        "--env=jsdom"
+        "--env=jsdom",
+        "--config=${workspaceRoot}/config/jest/jest.config.js"
       ],
       "cwd": "${workspaceRoot}",
       "protocol": "inspector",
@@ -27,6 +27,40 @@
         "node_modules/.bin/jest",
         "--runInBand",
         "--env=jsdom",
+        "--config=${workspaceRoot}/config/jest/jest.config.js",
+        "${relativeFile}"
+      ],
+      "cwd": "${workspaceRoot}",
+      "protocol": "inspector",
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen"
+    },
+    {
+      "name": "Jest All Contracts",
+      "type": "node",
+      "request": "launch",
+      "args": [
+        "node_modules/.bin/jest",
+        "--runInBand",
+        "--env=jsdom",
+        "--config=${workspaceRoot}/config/jest/jest.contracts.config.js"
+      ],
+      "cwd": "${workspaceRoot}",
+      "protocol": "inspector",
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      // Contract tests seem to take a bit longer to init so we up the timeoutyarn r
+      "timeout": 60000
+    },
+    {
+      "name": "Jest Current Contract",
+      "type": "node",
+      "request": "launch",
+      "args": [
+        "node_modules/.bin/jest",
+        "--runInBand",
+        "--env=jsdom",
+        "--config=${workspaceRoot}/config/jest/jest.contracts.config.js",
         "${relativeFile}"
       ],
       "cwd": "${workspaceRoot}",
