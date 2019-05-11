@@ -18,6 +18,7 @@ export const itIncreasesTurnNumBy = (
       return fail('turnNum does not exist on one of the states');
     }
     expect(newState.gameState.turnNum).toEqual(oldState.gameState.turnNum + increase);
+    return;
   });
 };
 
