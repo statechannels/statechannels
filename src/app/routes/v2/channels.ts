@@ -27,7 +27,7 @@ router.post(`${BASE_URL}`, koaBody(), async ctx => {
 export const channelRoutes = router.routes();
 
 async function isNewProcessAction(action: RelayableAction): Promise<boolean> {
-  if (action.type === 'WALLET.FUNDING.STRATEGY_PROPOSED' || opensAppChannel(action)) {
+  if (action.type === 'WALLET.CONCLUDING.CONCLUDE_CHANNEL' || opensAppChannel(action)) {
     const { processId } = action;
     const process = await getProcess(processId);
     if (process) {
@@ -41,7 +41,7 @@ async function isNewProcessAction(action: RelayableAction): Promise<boolean> {
 
 async function isProtocolAction(action: RelayableAction): Promise<boolean> {
   if (
-    action.type === 'WALLET.CONCLUDING.CONCLUDE_CHANNEL' ||
+    action.type === 'WALLET.FUNDING.STRATEGY_PROPOSED' ||
     (action.type === 'WALLET.COMMON.COMMITMENT_RECEIVED' && !opensAppChannel(action))
   ) {
     const { processId } = action;
@@ -56,5 +56,5 @@ async function isProtocolAction(action: RelayableAction): Promise<boolean> {
 }
 
 function opensAppChannel(action: RelayableAction): boolean {
-  return true;
+  return false;
 }
