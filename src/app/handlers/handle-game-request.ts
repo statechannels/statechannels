@@ -1,6 +1,8 @@
 import { ethers } from 'ethers';
 import { Signature } from 'fmg-core';
+import { getChannelId, getProcessId, WalletProtocol } from 'magmo-wallet';
 import { errors } from '../../wallet';
+import { startFundingProcess } from '../../wallet/db/queries/walletProcess';
 import { updateRPSChannel } from '../services/rpsChannelManager';
 export async function handleGameRequest(ctx) {
   try {
@@ -10,6 +12,11 @@ export async function handleGameRequest(ctx) {
       theirCommitment,
       (ethers.utils.splitSignature(theirSignature) as unknown) as Signature,
     );
+    if (commitment.turnNum === 0) {
+      const theirAddress = commitment.channel.participants[0];
+      const processId = `${WalletProtocol.Funding}-${getChannelId(commitment)}`;
+      await startFundingProcess({ processId, theirAddress });
+    }
     body = { status: 'success', commitment, signature };
     if (body.commitment) {
       ctx.status = 201;
