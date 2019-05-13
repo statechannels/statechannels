@@ -10,6 +10,7 @@ exports.up = (knex: Knex) => {
       .unique();
     table.string('protocol').notNullable();
     table.string('their_address').notNullable();
+    table.json('state');
   });
 };
 
