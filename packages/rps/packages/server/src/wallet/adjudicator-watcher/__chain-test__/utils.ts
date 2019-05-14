@@ -10,6 +10,8 @@ export const channel: Channel = {
   participants: PARTICIPANTS,
 };
 
+console.log(`NODE_ENV: ${process.env.NODE_ENV}`);
+console.log(`SERVER_NETWORK_ID: ${process.env.SERVER_NETWORK_ID}`);
 const nitroContractAddress =
   contracts.nitroAdjudicatorArtifact.networks[process.env.SERVER_NETWORK_ID].address;
 
