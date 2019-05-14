@@ -1,7 +1,4 @@
-import { config as dotenvConfig } from 'dotenv';
 import * as Knex from 'knex';
-
-dotenvConfig();
 
 const environment = process.env.NODE_ENV || 'development';
 // tslint:disable-next-line:no-var-requires

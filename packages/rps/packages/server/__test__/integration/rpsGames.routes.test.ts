@@ -1,5 +1,3 @@
-process.env.NODE_ENV = 'test';
-
 import * as supertest from 'supertest';
 import app from '../../src/app/app';
 import { HUB_ADDRESS, NAME, STAKE } from '../../src/constants';
