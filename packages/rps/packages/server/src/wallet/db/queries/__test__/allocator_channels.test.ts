@@ -15,8 +15,6 @@ import knex from '../../connection';
 import { constructors as seedDataConstructors, seeds } from '../../seeds/2_allocator_channels_seed';
 import { queries } from '../allocator_channels';
 
-process.env.NODE_ENV = 'test';
-
 describe('updateAllocatorChannel', () => {
   describe('when theirCommitment is a PreFundSetup', () => {
     it("works when the channel doesn't exist", async () => {

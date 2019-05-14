@@ -28,8 +28,6 @@ import {
 } from '../rps-commitment';
 import * as RPSChannelManager from '../rpsChannelManager';
 
-process.env.NODE_ENV = 'test';
-
 const base = {
   channel: default_channel,
   stake: STAKE,

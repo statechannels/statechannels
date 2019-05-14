@@ -2,7 +2,6 @@ import { DUMMY_RULES_ADDRESS } from '../../src/constants';
 import { Blockchain } from '../../src/wallet/services/blockchain';
 import { nitroAdjudicator } from '../../src/wallet/utilities/blockchain';
 
-process.env.NODE_ENV = 'test';
 jest.setTimeout(30000);
 
 let nitro: any;

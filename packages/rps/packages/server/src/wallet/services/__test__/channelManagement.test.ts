@@ -7,8 +7,6 @@ import AllocatorChannel from '../../models/allocatorChannel';
 import * as ChannelManagement from '../channelManagement';
 import { asCoreCommitment, LedgerCommitment } from '../ledger-commitment';
 
-process.env.NODE_ENV = 'test';
-
 let pre_fund_setup_0: LedgerCommitment;
 let pre_fund_setup_1: LedgerCommitment;
 let post_fund_setup_0: LedgerCommitment;

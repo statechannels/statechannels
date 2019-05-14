@@ -1,8 +1,8 @@
 import { ethers } from 'ethers';
 import { bigNumberify } from 'ethers/utils';
 import { Channel } from 'fmg-core';
-import * as contracts from '../../../utilities/contracts';
 import { DUMMY_RULES_ADDRESS, FUNDED_CHANNEL_NONCE, PARTICIPANTS } from '../../../constants';
+import * as contracts from '../../../utilities/contracts';
 
 export const channel: Channel = {
   channelType: DUMMY_RULES_ADDRESS,
@@ -11,7 +11,7 @@ export const channel: Channel = {
 };
 
 const nitroContractAddress =
-  contracts.nitroAdjudicatorArtifact.networks[process.env.NETWORK_ID].address;
+  contracts.nitroAdjudicatorArtifact.networks[process.env.SERVER_NETWORK_ID].address;
 
 async function sendTransaction(provider, tx) {
   const signer = provider.getSigner();

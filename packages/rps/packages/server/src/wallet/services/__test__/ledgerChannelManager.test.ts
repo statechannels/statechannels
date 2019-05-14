@@ -18,8 +18,6 @@ import * as ChannelManagement from '../channelManagement';
 import { asCoreCommitment, LedgerCommitment } from '../ledger-commitment';
 import * as LedgerChannelManager from '../ledgerChannelManager';
 
-process.env.NODE_ENV = 'test';
-
 let pre_fund_setup_0: LedgerCommitment;
 let post_fund_setup_0: LedgerCommitment;
 let app_0: LedgerCommitment;
