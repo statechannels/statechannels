@@ -14,11 +14,11 @@ export async function handleOngoingProcessAction(ctx) {
       return ctx;
     case 'WALLET.COMMON.COMMITMENT_RECEIVED': {
       const { processId } = action;
-      const process = await getProcess(processId);
-      if (!process) {
+      const walletProcess = await getProcess(processId);
+      if (!walletProcess) {
         throw errors.processMissing(processId);
       }
-      const { their_address: theirAddress } = process;
+      const { their_address: theirAddress } = walletProcess;
       const { commitment: theirCommitment, signature: theirSignature } = action.signedCommitment;
 
       const { commitment, signature } = await updateLedgerChannel(
