@@ -12,7 +12,8 @@ export async function handleGameRequest(ctx) {
       theirCommitment,
       (ethers.utils.splitSignature(theirSignature) as unknown) as Signature,
     );
-    if (commitment.turnNum === 0) {
+
+    if (commitment.turnNum <= 1) {
       const theirAddress = commitment.channel.participants[0];
       const processId = `${WalletProtocol.Funding}-${getChannelId(commitment)}`;
       await startFundingProcess({ processId, theirAddress });
