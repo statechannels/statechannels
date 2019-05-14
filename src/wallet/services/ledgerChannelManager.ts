@@ -45,7 +45,7 @@ export function nextCommitment(theirCommitment: LedgerCommitment): LedgerCommitm
     commitmentCount: 0,
     appAttributes: {
       ...theirCommitment.appAttributes,
-      consensusCounter: theirCommitment.appAttributes.consensusCounter + 1,
+      furtherVotesRequired: theirCommitment.appAttributes.furtherVotesRequired - 1,
     },
   };
 }

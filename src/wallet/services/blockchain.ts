@@ -7,7 +7,7 @@ export class Blockchain {
   static async fund(channelID: Address, value: Uint256): Promise<Uint256> {
     await Blockchain.attachNitro();
 
-    const tx = await Blockchain.nitro.deposit(channelID, { value });
+    const tx = await Blockchain.nitro.deposit(channelID, 0, { value });
     await tx.wait();
 
     return (await Blockchain.nitro.holdings(channelID)).toString();
