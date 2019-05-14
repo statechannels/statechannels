@@ -5,7 +5,9 @@ import LedgerCommitment from '../models/allocatorChannelCommitment';
 import { Commitment, CommitmentType, mover, recover, sign, Signature, toHex } from 'fmg-core';
 import { AppAttrSanitizer, AppCommitment } from '../../types';
 export function validSignature(commitment: Commitment, signature: Signature): boolean {
-  return recover(toHex(commitment), signature) === mover(commitment);
+  console.warn('Signature not validated');
+  return commitment && signature && true;
+  // return recover(toHex(commitment), signature) === mover(commitment);
 }
 
 export async function formResponse(

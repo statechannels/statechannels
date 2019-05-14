@@ -26,9 +26,9 @@ export async function updateRPSChannel(
   theirCommitment: Commitment,
   theirSignature: Signature,
 ): Promise<ChannelResponse> {
-  // if (!wallet.validSignature(theirCommitment, theirSignature)) {
-  //   throw errors.COMMITMENT_NOT_SIGNED;
-  // }
+  if (!wallet.validSignature(theirCommitment, theirSignature)) {
+    throw errors.COMMITMENT_NOT_SIGNED;
+  }
 
   if (!(await valuePreserved(theirCommitment))) {
     throw errors.VALUE_LOST;
