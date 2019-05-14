@@ -3,8 +3,6 @@ import { constructors as testDataConstructors, funded_channel } from '../../test
 import AllocatorChannel from '../models/allocatorChannel';
 import { LedgerCommitment } from '../services/ledger-commitment';
 
-process.env.NODE_ENV = 'test';
-
 let pre_fund_setup_0: LedgerCommitment;
 
 beforeEach(() => {

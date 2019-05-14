@@ -1,5 +1,3 @@
-process.env.NODE_ENV = 'test';
-
 import * as supertest from 'supertest';
 import app from '../../src/app/app';
 import {
@@ -21,9 +19,7 @@ describe('routes : ledger_channels', () => {
 
         expect(response.status).toEqual(400);
         expect(response.body.status).toEqual('error');
-        expect(response.body.message).toEqual(
-          errors.COMMITMENT_NOT_SIGNED.message,
-        );
+        expect(response.body.message).toEqual(errors.COMMITMENT_NOT_SIGNED.message);
       });
     });
 
