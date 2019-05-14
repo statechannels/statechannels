@@ -6,7 +6,7 @@ import * as scenarios from './scenarios';
 import * as transactionSubmissionStates from '../../transaction-submission/states';
 import { ProtocolStateWithSharedData } from '../..';
 import { bigNumberify } from 'ethers/utils';
-import { expectThisCommitmentSent } from '../../../__tests__/helpers';
+import { expectThisCommitmentSent, itStoresThisCommitment } from '../../../__tests__/helpers';
 
 const { channelId } = globalTestScenarios;
 
@@ -178,6 +178,7 @@ describe(startingIn(states.WAIT_FOR_FUNDING_AND_POST_FUND_SETUP), () => {
 
     describe('Player B: channel is not funded', () => {
       const state = scenarios.bEachDepositsInSequenceHappyStates.waitForFundingAndPostFundSetup;
+      const incomingCommitment = scenarios.actions.postFundSetup0.signedCommitment;
       const updatedState = directFundingStateReducer(
         state.protocolState,
         state.sharedData,
@@ -189,6 +190,8 @@ describe(startingIn(states.WAIT_FOR_FUNDING_AND_POST_FUND_SETUP), () => {
         expect(protocolState.channelFunded).toBeFalsy();
         expect(protocolState.postFundSetupReceived).toBeTruthy();
       }
+
+      itStoresThisCommitment(updatedState.sharedData, incomingCommitment);
     });
 
     describe('Player A: channel is funded', () => {

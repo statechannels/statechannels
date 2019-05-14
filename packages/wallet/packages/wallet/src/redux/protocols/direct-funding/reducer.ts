@@ -5,7 +5,7 @@ import { createDepositTransaction } from '../../../utils/transaction-generator';
 import * as actions from '../../actions';
 import { ProtocolReducer, ProtocolStateWithSharedData } from '../../protocols';
 import * as selectors from '../../selectors';
-import { SharedData, setChannelStore, queueMessage } from '../../state';
+import { SharedData, setChannelStore, queueMessage, checkAndStore } from '../../state';
 import { PlayerIndex } from '../../types';
 import { isTransactionAction } from '../transaction-submission/actions';
 import {
@@ -159,13 +159,19 @@ const commitmentReceivedReducer: DFReducer = (
       sharedData: sharedDataWithOwnCommitment,
     };
   } else {
+    const checkResult = checkAndStore(sharedData, action.signedCommitment);
+    if (!checkResult.isSuccess) {
+      throw new Error(
+        'Direct funding protocol, commitmentReceivedReducer: unable to validate commitment',
+      );
+    }
     return {
       protocolState: states.waitForFundingAndPostFundSetup({
         ...protocolState,
         channelFunded: false,
         postFundSetupReceived: true,
       }),
-      sharedData,
+      sharedData: checkResult.store,
     };
   }
 };
