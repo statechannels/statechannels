@@ -1,6 +1,10 @@
+import { ethers } from 'ethers';
+import { Signature } from 'fmg-core';
+import { appAttributesFromBytes } from 'fmg-nitro-adjudicator';
 import { communication, RelayableAction } from 'magmo-wallet';
 import { errors } from '../../wallet';
 import { getProcess } from '../../wallet/db/queries/walletProcess';
+import { updateLedgerChannel } from '../../wallet/services';
 
 export async function handleOngoingProcessAction(ctx) {
   const action: RelayableAction = ctx.request.body;
@@ -14,6 +18,23 @@ export async function handleOngoingProcessAction(ctx) {
       if (!process) {
         throw errors.processMissing(processId);
       }
+      const { their_address: theirAddress } = process;
+      const { commitment: theirCommitment, signature: theirSignature } = action.signedCommitment;
+
+      const { commitment, signature } = await updateLedgerChannel(
+        {
+          ...theirCommitment,
+          appAttributes: appAttributesFromBytes(theirCommitment.appAttributes),
+        },
+        (ethers.utils.splitSignature(theirSignature) as unknown) as Signature,
+      );
+      ctx.body = communication.sendCommitmentReceived(
+        theirAddress,
+        processId,
+        commitment,
+        (signature as unknown) as string,
+      );
+
       return ctx;
     }
     case 'WALLET.FUNDING.STRATEGY_PROPOSED': {
