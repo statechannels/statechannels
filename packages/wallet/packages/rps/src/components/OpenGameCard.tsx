@@ -2,7 +2,7 @@ import React from 'react';
 import { Commitment } from 'fmg-core';
 import { Button } from 'reactstrap';
 
-import web3Utils from 'web3-utils';
+import * as web3Utils from 'web3-utils';
 import { OpenGame } from '../redux/open-games/state';
 import { bigNumberify } from 'ethers/utils';
 

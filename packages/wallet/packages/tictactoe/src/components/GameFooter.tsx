@@ -5,7 +5,7 @@ import Navbar from 'reactstrap/lib/Navbar';
 import { YourMarker, TheirMarker } from './Marker';
 import { Marker } from '../core';
 import hexToBN from '../utils/hexToBN';
-import web3Utils from 'web3-utils';
+import * as web3Utils from 'web3-utils';
 import { RulesModal } from './RulesModal';
 
 interface Props {

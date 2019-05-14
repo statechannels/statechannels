@@ -3,7 +3,7 @@ import { State } from 'fmg-core';
 import { Button } from 'reactstrap';
 
 import BN from 'bn.js';
-import web3Utils from 'web3-utils';
+import * as web3Utils from 'web3-utils';
 import { OpenGame } from '../redux/open-games/state';
 import hexToBN from '../utils/hexToBN';
 import bnToHex from '../utils/bnToHex';
