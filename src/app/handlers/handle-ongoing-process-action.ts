@@ -1,11 +1,11 @@
-import { communication } from 'magmo-wallet';
+import { communication, RelayableAction } from 'magmo-wallet';
 import { errors } from '../../wallet';
 import { getProcess } from '../../wallet/db/queries/walletProcess';
 
 export async function handleOngoingProcessAction(ctx) {
-  const action = ctx.request.body;
+  const action: RelayableAction = ctx.request.body;
   switch (action.type) {
-    case 'WALLET.CONCLUDING.CONCLUDE_CHANNEL':
+    case 'WALLET.NEW_PROCESS.CONCLUDE_INSTIGATED':
     case 'WALLET.FUNDING.STRATEGY_APPROVED':
       return ctx;
     case 'WALLET.COMMON.COMMITMENT_RECEIVED': {
