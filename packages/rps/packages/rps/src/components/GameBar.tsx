@@ -1,6 +1,6 @@
 import React from 'react';
 
-import web3Utils from 'web3-utils';
+import * as web3Utils from 'web3-utils';
 
 import { Navbar } from 'reactstrap';
 import { bigNumberify } from 'ethers/utils';
