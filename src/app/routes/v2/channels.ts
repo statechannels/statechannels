@@ -1,9 +1,8 @@
 import * as koaBody from 'koa-body';
 import * as Router from 'koa-router';
 
-import { RelayableAction } from 'magmo-wallet';
+import { getProcessId, RelayableAction } from 'magmo-wallet';
 import { getProcess } from '../../../wallet/db/queries/walletProcess';
-import WalletProcess from '../../../wallet/models/WalletProcess';
 import { handleGameRequest } from '../../handlers/handle-game-request';
 import { handleNewProcessAction } from '../../handlers/handle-new-process-action';
 import { handleOngoingProcessAction } from '../../handlers/handle-ongoing-process-action';
@@ -29,8 +28,8 @@ router.post(`${BASE_URL}`, koaBody(), async ctx => {
 export const channelRoutes = router.routes();
 
 async function isNewProcessAction(action: RelayableAction): Promise<boolean> {
-  if (action.type === 'WALLET.NEW_PROCESS.CONCLUDE_INSTIGATED' || opensAppChannel(action)) {
-    const { processId } = action;
+  if (action.type === 'WALLET.NEW_PROCESS.CONCLUDE_INSTIGATED') {
+    const processId = getProcessId(action);
     const process = await getProcess(processId);
     if (process) {
       throw new Error(`Process ${processId} is already running.`);
