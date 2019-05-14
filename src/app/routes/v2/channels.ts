@@ -3,6 +3,7 @@ import * as Router from 'koa-router';
 
 import { RelayableAction } from 'magmo-wallet';
 import { getProcess } from '../../../wallet/db/queries/walletProcess';
+import WalletProcess from '../../../wallet/models/WalletProcess';
 import { handleGameRequest } from '../../handlers/handle-game-request';
 import { handleNewProcessAction } from '../../handlers/handle-new-process-action';
 import { handleOngoingProcessAction } from '../../handlers/handle-ongoing-process-action';
@@ -15,7 +16,8 @@ router.post(`${BASE_URL}`, koaBody(), async ctx => {
   if (queue === 'GAME_ENGINE') {
     return await handleGameRequest(ctx);
   } else {
-    const { data: action } = ctx.request.body;
+    const action = ctx.request.body;
+
     if (await isNewProcessAction(action)) {
       return await handleNewProcessAction(ctx);
     } else if (await isProtocolAction(action)) {

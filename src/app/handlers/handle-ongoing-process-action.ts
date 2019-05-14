@@ -3,7 +3,7 @@ import { errors } from '../../wallet';
 import { getProcess } from '../../wallet/db/queries/walletProcess';
 
 export async function handleOngoingProcessAction(ctx) {
-  const { data: action } = ctx.request.body;
+  const action = ctx.request.body;
   switch (action.type) {
     case 'WALLET.COMMON.COMMITMENT_RECEIVED':
     case 'WALLET.CONCLUDING.CONCLUDE_CHANNEL':
