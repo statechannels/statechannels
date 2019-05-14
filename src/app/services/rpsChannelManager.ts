@@ -4,10 +4,7 @@ import Wallet from '../../wallet';
 import AllocatorChannel from '../../wallet/models/allocatorChannel';
 
 import { delay } from 'bluebird';
-import { channelID } from 'fmg-core/lib/channel';
-import { HUB_ADDRESS } from '../../constants';
 import AllocatorChannelCommitment from '../../wallet/models/allocatorChannelCommitment';
-import { Blockchain } from '../../wallet/services/blockchain';
 import {
   defaultAppAttrs,
   fromCoreCommitment,
@@ -77,12 +74,6 @@ export async function updateRPSChannel(
 
 async function openChannel(theirCommitment: Commitment) {
   const ourCommitment = await nextCommitment(fromCoreCommitment(theirCommitment));
-
-  if (process.env.NODE_ENV !== 'test') {
-    // TODO: Figure out how to test this.
-    const funding = theirCommitment.allocation[theirCommitment.destination.indexOf(HUB_ADDRESS)];
-    Blockchain.fund(channelID(theirCommitment.channel), funding);
-  }
 
   const allocator_channel = await wallet.updateChannel(
     fromCoreCommitment(theirCommitment),
