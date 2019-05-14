@@ -1,5 +1,3 @@
-process.env.NODE_ENV = 'test';
-
 import * as request from 'supertest';
 import app from '../../src/app/app';
 
