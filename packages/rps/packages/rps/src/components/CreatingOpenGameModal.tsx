@@ -3,7 +3,7 @@ import React from 'react';
 
 import { Button, Modal, ModalHeader, ModalBody } from 'reactstrap';
 
-import web3Utils from 'web3-utils';
+import * as web3Utils from 'web3-utils';
 
 interface Props {
   visible: boolean;
