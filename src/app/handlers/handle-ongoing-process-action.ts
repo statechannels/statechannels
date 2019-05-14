@@ -1,10 +1,13 @@
 import { ethers } from 'ethers';
 import { Signature } from 'fmg-core';
+import { channelID } from 'fmg-core/lib/channel';
 import { appAttributesFromBytes } from 'fmg-nitro-adjudicator';
 import { communication, RelayableAction } from 'magmo-wallet';
+import { HUB_ADDRESS } from '../../constants';
 import { errors } from '../../wallet';
 import { getProcess } from '../../wallet/db/queries/walletProcess';
 import { updateLedgerChannel } from '../../wallet/services';
+import { Blockchain } from '../../wallet/services/blockchain';
 
 export async function handleOngoingProcessAction(ctx) {
   const action: RelayableAction = ctx.request.body;
@@ -34,6 +37,15 @@ export async function handleOngoingProcessAction(ctx) {
         commitment,
         (signature as unknown) as string,
       );
+
+      if (process.env.NODE_ENV !== 'test') {
+        // TODO: Figure out how to test this.
+        const funding =
+          theirCommitment.allocation[theirCommitment.destination.indexOf(HUB_ADDRESS)];
+
+        const funded = await Blockchain.fund(channelID(theirCommitment.channel), funding);
+        console.log(`Channel funded with amount ${funded}`);
+      }
 
       return ctx;
     }
