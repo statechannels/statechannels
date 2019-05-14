@@ -64,7 +64,7 @@ const receiveOurInvalidCommitment = actions.ownCommitmentReceived(
   signedCommitment20.commitment,
 );
 
-const closeRequested = actions.closeRequested(APPLICATION_PROCESS_ID);
+const concludeRequested = actions.concludeRequested(APPLICATION_PROCESS_ID);
 // -------
 // Scenarios
 // -------
@@ -95,7 +95,7 @@ export const receivingACloseRequest = {
     success,
   },
   actions: {
-    closeRequested,
+    concludeRequested,
   },
 };
 

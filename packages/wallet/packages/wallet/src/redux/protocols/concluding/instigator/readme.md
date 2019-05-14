@@ -21,18 +21,18 @@ The protocol is implemented with the following state machine
 ```mermaid
 graph TD
   S((Start)) --> E{Channel Exists?}
-  E --> |No| AF(AcknowledgeFailure)
+  E --> |No| AF(InstigatorAcknowledgeFailure)
   AF -->|ACKNOWLEDGED| F((Failure))
   E --> |Yes| MT{My turn?}
-  MT  --> |Yes| CC(ApproveConcluding)
-  MT  --> |No| AF(AcknowledgeFailure)
+  MT  --> |Yes| CC(InstigatorApproveConcluding)
+  MT  --> |No| AF(InstigatorAcknowledgeFailure)
   CC  --> |CONCLUDING.CANCELLED| F
-  CC  --> |CONCLUDE.SENT| WOC(WaitForOpponentConclude)
-  WOC --> |CONCLUDE.RECEIVED| ACR(AcknowledgeConcludeReceived)
-  ACR --> |DEFUND.CHOSEN| D(WaitForDefund)
-  D   --> |defunding protocol succeeded| AS(AcknowledgeSuccess)
+  CC  --> |CONCLUDE.SENT| WOC(InstigatorWaitForOpponentConclude)
+  WOC --> |CONCLUDE.RECEIVED| ACR(InstigatorAcknowledgeConcludeReceived)
+  ACR --> |DEFUND.CHOSEN| D(InstigatorWaitForDefund)
+  D   --> |defunding protocol succeeded| AS(InstigatorAcknowledgeSuccess)
   AS -->  |ACKNOWLEDGED| SS((Success))
-  D   --> |defunding protocol failed| AF(AcknowledgeFailure)
+  D   --> |defunding protocol failed| AF(InstigatorAcknowledgeFailure)
   style S  fill:#efdd20
   style E  fill:#efdd20
   style MT fill:#efdd20
@@ -45,11 +45,11 @@ graph TD
 
 We will use the following scenarios for testing:
 
-1. **Happy path**: `ApproveConcluding` -> `WaitForOpponentConclude` -> `AcknowledgeChannelConcluded` -> `WaitForDefund` -> `AcknowledgeSuccess` -> `Success`
-2. **Channel doesnt exist** `AcknowledgeFailure` -> `Failure`
-3. **Concluding not possible**: `AcknowledgeFailure` -> `Failure`
-4. **Concluding cancelled** `ApproveConcluding` -> `Failure`
-5. **Defund failed** `WaitForDefund` -> `AcknowledgeFailure` -> `Failure`
+1. **Happy path**: `InstigatorApproveConcluding` -> `InstigatorWaitForOpponentConclude` -> `InstigatorAcknowledgeChannelConcluded` -> `InstigatorWaitForDefund` -> `InstigatorAcknowledgeSuccess` -> `Success`
+2. **Channel doesnt exist** `InstigatorAcknowledgeFailure` -> `Failure`
+3. **Concluding not possible**: `InstigatorAcknowledgeFailure` -> `Failure`
+4. **Concluding cancelled** `InstigatorApproveConcluding` -> `Failure` (note lack of acknowledgement screen)
+5. **Defund failed** `InstigatorWaitForDefund` -> `InstigatorAcknowledgeFailure` -> `Failure`
 
 # Terminology
 

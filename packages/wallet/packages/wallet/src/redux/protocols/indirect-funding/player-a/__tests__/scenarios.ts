@@ -116,6 +116,7 @@ export const happyPath = {
     channelId,
     reply: ledger0,
     processId: 'processId',
+    ledgerId,
   },
   waitForPreFundL1: { state: waitForPreFundL1, action: preFundL1Received },
   waitForDirectFunding: { state: waitForDirectFunding, action: successTriggerA, reply: ledger4 },

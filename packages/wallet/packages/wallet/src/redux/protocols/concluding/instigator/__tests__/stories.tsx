@@ -6,7 +6,6 @@ import { Concluding } from '..';
 import { fakeStore } from '../../../../../__stories__/index';
 import StatusBarLayout from '../../../../../components/status-bar-layout';
 import * as scenarios from './scenarios';
-import { isTerminal } from '../../../responding/state';
 
 const render = container => () => {
   // todo: rework this modal stuff
@@ -29,12 +28,12 @@ const render = container => () => {
 addStories(scenarios.happyPath, 'Concluding / Instigator / Happy Path');
 addStories(scenarios.channelDoesntExist, 'Concluding / Instigator / Channel doesnt exist');
 addStories(scenarios.concludingNotPossible, 'Concluding / Instigator / Concluding impossible');
-addStories(scenarios.defundingFailed, 'Concluding / Instigator / Defund failed');
+addStories(scenarios.defundFailed, 'Concluding / Instigator / Defund failed');
 
 function addStories(scenario, chapter) {
-  Object.keys(scenario.states).forEach(key => {
-    if (!isTerminal(scenario.states[key])) {
-      storiesOf(chapter, module).add(key, render(<Concluding state={scenario.states[key]} />));
+  Object.keys(scenario).forEach(key => {
+    if (scenario[key].state) {
+      storiesOf(chapter, module).add(key, render(<Concluding state={scenario[key].state} />));
     }
   });
 }

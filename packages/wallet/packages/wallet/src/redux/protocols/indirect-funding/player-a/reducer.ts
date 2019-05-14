@@ -33,6 +33,7 @@ import { UpdateType } from 'fmg-nitro-adjudicator/lib/consensus-app';
 import { proposeNewConsensus } from '../../../../domain/two-player-consensus-game';
 import { unreachable } from '../../../../utils/reducer-utils';
 import { isTransactionAction } from '../../../actions';
+import { ChannelFundingState } from '../../../state';
 
 type ReturnVal = ProtocolStateWithSharedData<IndirectFundingState>;
 type IDFAction = actions.indirectFunding.Action;
@@ -114,6 +115,13 @@ function handleWaitForPostFundSetup(
   }
   sharedData = checkResult.store;
 
+  // update fundingState
+  const fundingState: ChannelFundingState = {
+    directlyFunded: false,
+    fundingChannel: protocolState.ledgerId,
+  };
+
+  sharedData.fundingState[protocolState.channelId] = fundingState;
   const newProtocolState = success();
   const newReturnVal = { protocolState: newProtocolState, sharedData };
   return newReturnVal;

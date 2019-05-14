@@ -17,8 +17,8 @@ sequenceDiagram
   participant I as I's wallet
   participant R as R's wallet
   Note  over I, R: Exchange Concludes
-  I->>R: Conclude for L
-  R->>I: Conclude for L
+  I->>R: Conclude
+  R->>I: Conclude
   Note  over I, R: Defund L (sub-protocol)
 
 ```

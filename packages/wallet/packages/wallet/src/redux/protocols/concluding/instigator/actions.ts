@@ -1,31 +1,29 @@
+import { WalletAction, CommitmentReceived, COMMITMENT_RECEIVED } from '../../../actions';
+
 export type ConcludingAction =
   | Cancelled
-  | ConcludeSent
-  | ConcludeReceived
+  | ConcludeApproved
+  | CommitmentReceived
   | DefundChosen
-  | Acknowledged;
+  | Acknowledged
+  | CommitmentReceived;
 export interface Cancelled {
-  type: 'CONCLUDING.CANCELLED';
+  type: 'WALLET.CONCLUDING.INSTIGATOR.CONCLUDING_CANCELLED';
   processId: string;
 }
-
-export interface ConcludeSent {
-  type: 'CONCLUDE.SENT';
-  processId: string;
-}
-
-export interface ConcludeReceived {
-  type: 'CONCLUDE.RECEIVED';
+// TODO: This should probably be called ApproveConclude.
+export interface ConcludeApproved {
+  type: 'WALLET.CONCLUDING.INSTIGATOR.CONCLUDE_APPROVED';
   processId: string;
 }
 
 export interface DefundChosen {
-  type: 'DEFUND.CHOSEN';
+  type: 'WALLET.CONCLUDING.INSTIGATOR.DEFUND_CHOSEN';
   processId: string;
 }
 
 export interface Acknowledged {
-  type: 'ACKNOWLEDGED';
+  type: 'WALLET.CONCLUDING.INSTIGATOR.ACKNOWLEDGED';
   processId: string;
 }
 
@@ -34,26 +32,37 @@ export interface Acknowledged {
 // --------
 
 export const cancelled = (processId: string): Cancelled => ({
-  type: 'CONCLUDING.CANCELLED',
+  type: 'WALLET.CONCLUDING.INSTIGATOR.CONCLUDING_CANCELLED',
   processId,
 });
 
-export const concludeSent = (processId: string): ConcludeSent => ({
-  type: 'CONCLUDE.SENT',
-  processId,
-});
-
-export const concludeReceived = (processId: string): ConcludeReceived => ({
-  type: 'CONCLUDE.RECEIVED',
+export const concludeApproved = (processId: string): ConcludeApproved => ({
+  type: 'WALLET.CONCLUDING.INSTIGATOR.CONCLUDE_APPROVED',
   processId,
 });
 
 export const defundChosen = (processId: string): DefundChosen => ({
-  type: 'DEFUND.CHOSEN',
+  type: 'WALLET.CONCLUDING.INSTIGATOR.DEFUND_CHOSEN',
   processId,
 });
 
 export const acknowledged = (processId: string): Acknowledged => ({
-  type: 'ACKNOWLEDGED',
+  type: 'WALLET.CONCLUDING.INSTIGATOR.ACKNOWLEDGED',
   processId,
 });
+
+// --------
+// Helpers
+// --------
+
+export const isConcludingAction = (action: WalletAction): action is ConcludingAction => {
+  if (action.type === COMMITMENT_RECEIVED) {
+    return true;
+  }
+  return (
+    action.type === 'WALLET.CONCLUDING.INSTIGATOR.CONCLUDING_CANCELLED' ||
+    action.type === 'WALLET.CONCLUDING.INSTIGATOR.CONCLUDE_APPROVED' ||
+    action.type === 'WALLET.CONCLUDING.INSTIGATOR.DEFUND_CHOSEN' ||
+    action.type === 'WALLET.CONCLUDING.INSTIGATOR.ACKNOWLEDGED'
+  );
+};

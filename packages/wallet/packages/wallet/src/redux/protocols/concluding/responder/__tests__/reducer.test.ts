@@ -1,138 +1,183 @@
 import * as scenarios from './scenarios';
-import { concludingReducer, initialize, ReturnVal } from '../reducer';
-import { ConcludingStateType, FailureReason } from '../states';
-import { itSendsThisMessage } from '../../../../__tests__/helpers';
-import { sendConcludeChannel } from '../../../../../communication';
+import { responderConcludingReducer, initialize, ReturnVal } from '../reducer';
+import { ResponderConcludingStateType } from '../states';
+import {
+  expectThisCommitmentSent,
+  itSendsThisMessage,
+  itSendsThisDisplayEventType,
+} from '../../../../__tests__/helpers';
+import { FailureReason } from '../../state';
+import { HIDE_WALLET, CONCLUDE_FAILURE, OPPONENT_CONCLUDED } from 'magmo-wallet-client';
+import { SharedData, getLastMessage } from '../../../../state';
+import { SignedCommitment } from '../../../../../domain';
 
 describe('[ Happy path ]', () => {
   const scenario = scenarios.happyPath;
-  const { channelId, processId, storage } = scenario;
+  const { processId } = scenario;
 
   describe('when initializing', () => {
-    const result = initialize(channelId, processId, storage);
+    const { commitment, store } = scenario.initialize;
+    const result = initialize(commitment, processId, store);
 
-    itTransitionsTo(result, 'ApproveConcluding');
+    itTransitionsTo(result, 'ResponderApproveConcluding');
   });
   describe('when in ApproveConcluding', () => {
-    const state = scenario.states.approveConcluding;
-    const action = scenario.actions.concludeSent;
-    const result = concludingReducer(state, storage, action);
-    itSendsThisMessage(
-      result,
-      sendConcludeChannel(
-        expect.any(String),
-        expect.any(String),
-        scenario.commitments.concludeCommitment,
-        expect.any(String),
-      ),
-    );
-    itTransitionsTo(result, 'DecideDefund');
+    const { state, store, action, reply } = scenario.approveConcluding;
+    const result = responderConcludingReducer(state, store, action);
+
+    expectThisCommitmentSent(result.sharedData, reply);
+    itTransitionsTo(result, 'ResponderDecideDefund');
   });
 
   describe('when in DecideDefund', () => {
-    const state = scenario.states.decideDefund;
-    const action = scenario.actions.defundChosen;
-    const result = concludingReducer(state, storage, action);
+    const { state, store, action } = scenario.decideDefund;
+    const result = responderConcludingReducer(state, store, action);
 
-    itTransitionsTo(result, 'WaitForDefund');
+    itTransitionsTo(result, 'ResponderWaitForDefund');
   });
 
   describe('when in WaitForDefund', () => {
-    const state = scenario.states.waitForDefund;
-    const action = scenario.actions.successTrigger;
-    const result = concludingReducer(state, storage, action);
+    const { state, store, action } = scenario.waitForDefund;
+    const result = responderConcludingReducer(state, store, action);
 
-    itTransitionsTo(result, 'AcknowledgeSuccess');
+    itTransitionsTo(result, 'ResponderAcknowledgeSuccess');
   });
 
   describe('when in AcknowledgeSuccess', () => {
-    const state = scenario.states.acknowledgeSuccess;
-    const action = scenario.actions.acknowledged;
-    const result = concludingReducer(state, storage, action);
+    const { state, store, action } = scenario.acknowledgeSuccess;
+    const result = responderConcludingReducer(state, store, action);
 
     itTransitionsTo(result, 'Success');
+    itSendsThisMessage(result.sharedData, OPPONENT_CONCLUDED);
+    itSendsThisDisplayEventType(result.sharedData, HIDE_WALLET);
+  });
+});
+
+describe('[ Happy path (alternative) ]', () => {
+  const scenario = scenarios.happyPathAlternative;
+
+  describe('when in DecideDefund', () => {
+    const { state, store, action, reply } = scenario.decideDefund;
+    const result = responderConcludingReducer(state, store, action);
+
+    itTransitionsTo(result, 'ResponderWaitForDefund');
+    it(`initializes defundingState`, () => {
+      expect(result.protocolState).toHaveProperty('defundingState');
+    });
+
+    it(`initializes indirectDefundingState`, () => {
+      expect(result.protocolState).toHaveProperty('defundingState.indirectDefundingState');
+    });
+
+    it(`transitions indirectDefundingState to WaitForConclude`, () => {
+      expect(result.protocolState).toHaveProperty(
+        'defundingState.indirectDefundingState.type',
+        'WaitForConclude',
+      );
+    });
+    itSendsMessage(result.sharedData, reply);
   });
 });
 
 describe('[ Channel doesnt exist ]', () => {
   const scenario = scenarios.channelDoesntExist;
-  const { processId, storage } = scenario;
+  const { processId } = scenario;
 
   describe('when initializing', () => {
-    const result = initialize('NotInitializedChannelId', processId, storage);
+    const { commitment, store } = scenario.initialize;
+    const result = initialize(commitment, processId, store);
 
     itTransitionsToAcknowledgeFailure(result, 'ChannelDoesntExist');
   });
 
   describe('when in AcknowledgeFailure', () => {
-    const state = scenario.states.acknowledgeFailure;
-    const action = scenario.actions.acknowledged;
-    const result = concludingReducer(state, storage, action);
+    const { state, action, store } = scenario.acknowledgeFailure;
+    const result = responderConcludingReducer(state, store, action);
 
     itTransitionsToFailure(result, 'ChannelDoesntExist');
+    itSendsThisMessage(result.sharedData, CONCLUDE_FAILURE);
+    itSendsThisDisplayEventType(result.sharedData, HIDE_WALLET);
   });
 });
 
 describe('[ Concluding Not Possible ]', () => {
   const scenario = scenarios.concludingNotPossible;
-  const { channelId, processId, storage } = scenario;
+  const { processId } = scenario;
 
   describe('when initializing', () => {
-    const result = initialize(channelId, processId, storage);
+    const { commitment, store } = scenario.initialize;
+    const result = initialize(commitment, processId, store);
 
     itTransitionsToAcknowledgeFailure(result, 'NotYourTurn');
   });
 
   describe('when in AcknowledgeFailure', () => {
-    const state = scenario.states.acknowledgeFailure;
-    const action = scenario.actions.acknowledged;
-    const result = concludingReducer(state, storage, action);
+    const { state, action, store } = scenario.acknowledgeFailure;
+    const result = responderConcludingReducer(state, store, action);
 
     itTransitionsToFailure(result, 'NotYourTurn');
+    itSendsThisMessage(result.sharedData, CONCLUDE_FAILURE);
+    itSendsThisDisplayEventType(result.sharedData, HIDE_WALLET);
   });
 });
 
-describe('[ Defunding Failed ]', () => {
-  const scenario = scenarios.defundingFailed;
-  const { storage } = scenario;
+describe('[ Defund failed ]', () => {
+  const scenario = scenarios.defundFailed;
 
   describe('when in WaitForDefund', () => {
-    const state = scenario.states.waitForDefund2;
-    const action = scenario.actions.failureTrigger;
-    const result = concludingReducer(state, storage, action);
+    const { state, action, store } = scenario.waitForDefund;
+    const result = responderConcludingReducer(state, store, action);
 
     itTransitionsToAcknowledgeFailure(result, 'DefundFailed');
   });
 
   describe('when in AcknowledgeFailure', () => {
-    const state = scenario.states.acknowledgeFailure;
-    const action = scenario.actions.acknowledged;
-    const result = concludingReducer(state, storage, action);
+    const { state, action, store } = scenario.acknowledgeFailure;
+    const result = responderConcludingReducer(state, store, action);
 
     itTransitionsToFailure(result, 'DefundFailed');
+    itSendsThisMessage(result.sharedData, CONCLUDE_FAILURE);
+    itSendsThisDisplayEventType(result.sharedData, HIDE_WALLET);
   });
 });
 
-function itTransitionsTo(result: ReturnVal, type: ConcludingStateType) {
+function itTransitionsTo(result: ReturnVal, type: ResponderConcludingStateType) {
   it(`transitions to ${type}`, () => {
-    expect(result.state.type).toEqual(type);
+    expect(result.protocolState.type).toEqual(type);
   });
 }
 
 function itTransitionsToFailure(result: ReturnVal, reason: FailureReason) {
   it(`transitions to Failure with reason ${reason}`, () => {
-    expect(result.state.type).toEqual('Failure');
-    if (result.state.type === 'Failure') {
-      expect(result.state.reason).toEqual(reason);
+    expect(result.protocolState.type).toEqual('Failure');
+    if (result.protocolState.type === 'Failure') {
+      expect(result.protocolState.reason).toEqual(reason);
     }
   });
 }
 
 function itTransitionsToAcknowledgeFailure(result: ReturnVal, reason: FailureReason) {
   it(`transitions to AcknowledgeFailure with reason ${reason}`, () => {
-    expect(result.state.type).toEqual('AcknowledgeFailure');
-    if (result.state.type === 'AcknowledgeFailure') {
-      expect(result.state.reason).toEqual(reason);
+    expect(result.protocolState.type).toEqual('ResponderAcknowledgeFailure');
+    if (result.protocolState.type === 'ResponderAcknowledgeFailure') {
+      expect(result.protocolState.reason).toEqual(reason);
+    }
+  });
+}
+
+function itSendsMessage(sharedData: SharedData, message: SignedCommitment) {
+  it('sends a message', () => {
+    const lastMessage = getLastMessage(sharedData);
+    if (lastMessage && 'messagePayload' in lastMessage) {
+      const dataPayload = lastMessage.messagePayload;
+      // This is yuk. The data in a message is currently of 'any' type..
+      if (!('signedCommitment' in dataPayload)) {
+        fail('No signedCommitment in the last message.');
+      }
+      const { commitment, signature } = dataPayload.signedCommitment;
+      expect({ commitment, signature }).toEqual(message);
+    } else {
+      fail('No messages in the outbox.');
     }
   });
 }

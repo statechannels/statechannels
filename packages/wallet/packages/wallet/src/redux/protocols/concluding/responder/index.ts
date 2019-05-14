@@ -1,2 +1,2 @@
 export { Concluding } from './container';
-export { initialize } from './reducer';
+export { initialize, responderConcludingReducer as reducer } from './reducer';

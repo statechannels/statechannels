@@ -9,7 +9,7 @@ import store from './redux/store';
 import WalletContainer from './containers/wallet';
 render(
   <Provider store={store}>
-    <WalletContainer />
+    <WalletContainer position="center" />
   </Provider>,
   document.getElementById('root'),
 );

@@ -2,11 +2,14 @@
 
 The purpose of this protocol is handle de-funding a channel that has been indirectly funded.
 
+The protocol exchanges updates to allocate funds back to the player and conclude commitments to close the channel.
+
 It covers:
 
 - Checking that a channel is closed (either finalized on chain or a conclusion proof exists)
 - Crafting a ledger update that allocates the funds to the players.
 - Waiting for a ledger response from the opponent.
+- Crafting a conclude commitment to close the ledger channel.
 
 ## State machine
 
@@ -14,24 +17,42 @@ It covers:
 
 ```mermaid
 graph TD
+linkStyle default interpolate basis
   St((start))-->DF{Defundable?}
   DF --> |No| F((Failure))
-  DF -->|Yes|SC0[SendLedgerUpdate]
+  DF -->|Yes|SC0[SendLedgerUpdate0]
   SC0-->WFU(WaitForLedgerUpdate)
-  WFU --> |"CommitmentReceived(Accept)"|Su[Success]
+  WFU --> |"CommitmentReceived(Accept)"|SCo0[SendConclude0]
   WFU --> |"CommitmentReceived(Reject)"| F
+  SCo0 -->WFC(WaitForConclude)
+  WFC --> |"CommitmentReceived(Accept)"|Su((success))
+  WFC --> |"CommitmentReceived(Reject)"| F
+
+  style St  fill:#efdd20
+  style DF  fill:#efdd20
+  style Su fill:#58ef21
+  style F  fill:#f45941
 ```
 
 ### Player B State machine
 
 ```mermaid
 graph TD
+linkStyle default interpolate basis
   St((start))-->DF{Defundable?}
   DF --> |No| F((Failure))
   DF --> |Yes| WFU(WaitForLedgerUpdate)
   WFU-->|"CommitmentReceived(Accept)"|SC1[SendLedgerUpdate1]
   WFU --> |"CommitmentReceived(Reject)"| F
-  SC1-->S((success))
+  SC1-->WFC(WaitForConclude)
+  WFC --> |"CommitmentReceived(Accept)"|SCo1[SendConclude1]
+  SCo1-->Su((success))
+  WFC --> |"CommitmentReceived(Reject)"| F
+
+  style St  fill:#efdd20
+  style DF  fill:#efdd20
+  style Su fill:#58ef21
+  style F  fill:#f45941
 
 ```
 

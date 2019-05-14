@@ -66,11 +66,18 @@ const expectSideEffect = (
   expectation(item);
 };
 
-export const expectThisCommitmentSent = (state: SideEffectState, c: Partial<Commitment>) => {
+export const expectThisMessageAndCommitmentSent = (
+  state: SideEffectState,
+  c: Partial<Commitment>,
+  messageType: string,
+) => {
   expectSideEffect('messageOutbox', state, item => {
-    expect(item.messagePayload.data.type).toEqual(COMMITMENT_RECEIVED);
-    expect(item.messagePayload.data.signedCommitment.commitment).toMatchObject(c);
+    expect(item.messagePayload.type).toEqual(messageType);
+    expect(item.messagePayload.signedCommitment.commitment).toMatchObject(c);
   });
+};
+export const expectThisCommitmentSent = (state: SideEffectState, c: Partial<Commitment>) => {
+  expectThisMessageAndCommitmentSent(state, c, COMMITMENT_RECEIVED);
 };
 
 export const itSendsATransaction = (state: SideEffectState) => {

@@ -1,5 +1,4 @@
 import { Commitment } from 'fmg-core';
-import { WalletMessagePayload } from './wallet-types';
 
 export enum PlayerIndex {
   'A' = 0,
@@ -93,7 +92,8 @@ export const respondToChallenge = (commitment: Commitment) => ({
 export type RespondToChallenge = ReturnType<typeof respondToChallenge>;
 
 export const CONCLUDE_CHANNEL_REQUEST = 'WALLET.CHANNEL.REQUEST.CONCLUDE';
-export const concludeChannelRequest = () => ({
+export const concludeChannelRequest = (channelId: string) => ({
+  channelId,
   type: CONCLUDE_CHANNEL_REQUEST as typeof CONCLUDE_CHANNEL_REQUEST,
 });
 export type ConcludeChannelRequest = ReturnType<typeof concludeChannelRequest>;
@@ -106,7 +106,7 @@ export type ConcludeChannelRequest = ReturnType<typeof concludeChannelRequest>;
 // wallet meant for wallet-to-wallet communication (e.g. communicating the address of the
 // adjudicator).
 export const RECEIVE_MESSAGE = 'WALLET.MESSAGING.RECEIVE_MESSAGE';
-export const receiveMessage = (messagePayload: WalletMessagePayload) => ({
+export const receiveMessage = (messagePayload: any) => ({
   type: RECEIVE_MESSAGE,
   messagePayload,
 });

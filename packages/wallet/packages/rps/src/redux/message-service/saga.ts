@@ -72,9 +72,9 @@ export function* sendWalletMessageSaga() {
 }
 
 export function* exitGameSaga() {
-  const closeGameChannel = createWalletEventChannel([Wallet.CLOSE_SUCCESS]);
+  const opponentConcludedChannel = createWalletEventChannel([Wallet.OPPONENT_CONCLUDED]);
   while (true) {
-    yield take(closeGameChannel);
+    yield take(opponentConcludedChannel);
     yield put(gameActions.exitToLobby());
   }
 }
@@ -264,7 +264,7 @@ function* handleWalletMessage(walletMessage: WalletRequest, state: gameStates.Pl
         Wallet.CONCLUDE_SUCCESS,
         Wallet.CONCLUDE_FAILURE,
       ]);
-      Wallet.startConcludingGame(WALLET_IFRAME_ID);
+      Wallet.startConcludingGame(WALLET_IFRAME_ID, channelId);
       const concludeResponse = yield take(conclusionChannel);
       if (concludeResponse.type === Wallet.CONCLUDE_SUCCESS) {
         yield put(gameActions.messageSent());
