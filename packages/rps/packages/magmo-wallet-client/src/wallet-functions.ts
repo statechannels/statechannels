@@ -22,7 +22,6 @@ import {
   initializeChannelRequest,
 } from './wallet-instructions';
 import { Commitment } from 'fmg-core';
-import { WalletMessagePayload } from './wallet-types';
 
 /**
  * Creates an iframe element for the wallet to be embedded in the page. The wallet iframe will hide itself and only show when interaction with the wallet is necessary.
@@ -190,7 +189,7 @@ export async function signCommitment(iFrameId: string, commitment: Commitment): 
  * @param iFrameId The id of the embedded wallet iframe.
  * @param walletMessage The message to send to the wallet that was received from the opponent's wallet.
  */
-export function relayMessage(iFrameId: string, messagePayload: WalletMessagePayload) {
+export function relayMessage(iFrameId: string, messagePayload: any) {
   const iFrame = document.getElementById(iFrameId) as HTMLIFrameElement;
   const message = receiveMessage(messagePayload);
   iFrame.contentWindow.postMessage(message, '*');
@@ -201,9 +200,9 @@ export function relayMessage(iFrameId: string, messagePayload: WalletMessagePayl
  * using the [[WalletEventListener]] during the conclusion process.
  * @param iFrameId The id of the embedded wallet iframe.
  */
-export function startConcludingGame(iFrameId: string): void {
+export function startConcludingGame(iFrameId: string, channelId: string): void {
   const iFrame = document.getElementById(iFrameId) as HTMLIFrameElement;
-  const message = concludeChannelRequest();
+  const message = concludeChannelRequest(channelId);
   iFrame.contentWindow.postMessage(message, '*');
 }
 

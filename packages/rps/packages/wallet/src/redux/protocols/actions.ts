@@ -1,6 +1,6 @@
 import { ProtocolAction, WalletAction } from '../actions';
 import { PlayerIndex, WalletProtocol } from '../types';
-import { Commitment } from '../../domain';
+import { Commitment, SignedCommitment } from '../../domain';
 export { BaseProcessAction } from '../../communication';
 
 export const INITIALIZE_CHANNEL = 'WALLET.NEW_PROCESS.INITIALIZE_CHANNEL';
@@ -23,10 +23,18 @@ export const CONCLUDE_REQUESTED = 'WALLET.NEW_PROCESS.CONCLUDE_REQUESTED';
 export const concludeRequested = (channelId: string) => ({
   type: CONCLUDE_REQUESTED as typeof CONCLUDE_REQUESTED,
   channelId,
-  // TODO: Resolve inconsistent naming scheme: conclude vs closing
-  protocol: WalletProtocol.Closing,
+  protocol: WalletProtocol.Concluding,
 });
 export type ConcludeRequested = ReturnType<typeof concludeRequested>;
+
+export const CONCLUDE_INSTIGATED = 'WALLET.NEW_PROCESS.CONCLUDE_INSTIGATED';
+export const concludeInstigated = (signedCommitment: SignedCommitment, channelId: string) => ({
+  type: CONCLUDE_INSTIGATED as typeof CONCLUDE_INSTIGATED,
+  signedCommitment,
+  protocol: WalletProtocol.Concluding,
+  channelId,
+});
+export type ConcludeInstigated = ReturnType<typeof concludeInstigated>;
 
 export const CREATE_CHALLENGE_REQUESTED = 'WALLET.NEW_PROCESS.CREATE_CHALLENGE_REQUESTED';
 export const createChallengeRequested = (channelId: string, commitment: Commitment) => ({
@@ -50,6 +58,7 @@ export type NewProcessAction =
   | InitializeChannel
   | FundingRequested
   | ConcludeRequested
+  | ConcludeInstigated
   | CreateChallengeRequested
   | RespondToChallengeRequested;
 
@@ -58,6 +67,7 @@ export function isNewProcessAction(action: WalletAction): action is NewProcessAc
     action.type === INITIALIZE_CHANNEL ||
     action.type === FUNDING_REQUESTED ||
     action.type === CONCLUDE_REQUESTED ||
+    action.type === CONCLUDE_INSTIGATED ||
     action.type === CREATE_CHALLENGE_REQUESTED ||
     action.type === RESPOND_TO_CHALLENGE_REQUESTED
   );

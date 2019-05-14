@@ -9,6 +9,8 @@ import * as selectors from '../../selectors';
 import { proposeNewConsensus, acceptConsensus } from '../../../domain/two-player-consensus-game';
 import { sendCommitmentReceived } from '../../../communication';
 import { theirAddress } from '../../channel-store';
+import { composeConcludeCommitment } from '../../../utils/commitment-utils';
+import { CommitmentReceived } from '../../actions';
 
 export const initialize = (
   processId: string,
@@ -17,6 +19,7 @@ export const initialize = (
   proposedAllocation: string[],
   proposedDestination: string[],
   sharedData: SharedData,
+  action?: CommitmentReceived,
 ): ProtocolStateWithSharedData<states.IndirectDefundingState> => {
   if (!helpers.channelIsClosed(channelId, sharedData)) {
     return {
@@ -48,14 +51,21 @@ export const initialize = (
     );
     newSharedData = queueMessage(newSharedData, messageRelay);
   }
+
+  const protocolState = states.waitForLedgerUpdate({
+    processId,
+    ledgerId,
+    channelId,
+    proposedAllocation,
+    proposedDestination,
+  });
+
+  if (!helpers.isFirstPlayer && action) {
+    // are we second player?
+    return waitForLedgerUpdateReducer(protocolState, sharedData, action);
+  }
   return {
-    protocolState: states.waitForLedgerUpdate({
-      processId,
-      ledgerId,
-      channelId,
-      proposedAllocation,
-      proposedDestination,
-    }),
+    protocolState,
     sharedData: newSharedData,
   };
 };
@@ -68,12 +78,45 @@ export const indirectDefundingReducer = (
   switch (protocolState.type) {
     case states.WAIT_FOR_LEDGER_UPDATE:
       return waitForLedgerUpdateReducer(protocolState, sharedData, action);
+    case states.WAIT_FOR_CONCLUDE:
+      return waitForConcludeReducer(protocolState, sharedData, action);
     case states.SUCCESS:
     case states.FAILURE:
       return { protocolState, sharedData };
     default:
       return unreachable(protocolState);
   }
+};
+
+const waitForConcludeReducer = (
+  protocolState: states.WaitForConclude,
+  sharedData: SharedData,
+  action: IndirectDefundingAction,
+): ProtocolStateWithSharedData<states.IndirectDefundingState> => {
+  if (action.type !== COMMITMENT_RECEIVED) {
+    throw new Error(`Invalid action ${action.type}`);
+  }
+
+  let newSharedData = { ...sharedData };
+
+  const checkResult = checkAndStore(newSharedData, action.signedCommitment);
+  if (!checkResult.isSuccess) {
+    return { protocolState: states.failure('Received Invalid Commitment'), sharedData };
+  }
+  newSharedData = checkResult.store;
+
+  if (!helpers.isFirstPlayer(protocolState.ledgerId, sharedData)) {
+    newSharedData = createAndSendConcludeCommitment(
+      newSharedData,
+      protocolState.processId,
+      protocolState.ledgerId,
+    );
+  }
+
+  return {
+    protocolState: states.success(),
+    sharedData: newSharedData,
+  };
 };
 
 const waitForLedgerUpdateReducer = (
@@ -114,6 +157,37 @@ const waitForLedgerUpdateReducer = (
       signResult.signedCommitment.signature,
     );
     newSharedData = queueMessage(newSharedData, messageRelay);
+  } else {
+    newSharedData = createAndSendConcludeCommitment(
+      newSharedData,
+      protocolState.processId,
+      protocolState.ledgerId,
+    );
   }
-  return { protocolState: states.success(), sharedData: newSharedData };
+  return { protocolState: states.waitForConclude(protocolState), sharedData: newSharedData };
+};
+
+// Helpers
+
+const createAndSendConcludeCommitment = (
+  sharedData: SharedData,
+  processId: string,
+  channelId: string,
+): SharedData => {
+  const channelState = selectors.getOpenedChannelState(sharedData, channelId);
+
+  const commitment = composeConcludeCommitment(channelState);
+
+  const signResult = signAndStore(sharedData, commitment);
+  if (!signResult.isSuccess) {
+    throw new Error(`Could not sign commitment due to  ${signResult.reason}`);
+  }
+
+  const messageRelay = sendCommitmentReceived(
+    theirAddress(channelState),
+    processId,
+    signResult.signedCommitment.commitment,
+    signResult.signedCommitment.signature,
+  );
+  return queueMessage(signResult.store, messageRelay);
 };

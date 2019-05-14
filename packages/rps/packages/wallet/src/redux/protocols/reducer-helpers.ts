@@ -74,6 +74,33 @@ export function hideWallet(sharedData: SharedData): SharedData {
   return newSharedData;
 }
 
+export function sendConcludeSuccess(sharedData: SharedData): SharedData {
+  const newSharedData = { ...sharedData };
+  newSharedData.outboxState = accumulateSideEffects(newSharedData.outboxState, {
+    messageOutbox: magmoWalletClient.concludeSuccess(),
+  });
+  return newSharedData;
+}
+
+export function sendOpponentConcluded(sharedData: SharedData): SharedData {
+  const newSharedData = { ...sharedData };
+  newSharedData.outboxState = accumulateSideEffects(newSharedData.outboxState, {
+    messageOutbox: magmoWalletClient.opponentConcluded(),
+  });
+  return newSharedData;
+}
+
+export function sendConcludeFailure(
+  sharedData: SharedData,
+  reason: 'Other' | 'UserDeclined',
+): SharedData {
+  const newSharedData = { ...sharedData };
+  newSharedData.outboxState = accumulateSideEffects(newSharedData.outboxState, {
+    messageOutbox: magmoWalletClient.concludeFailure(reason),
+  });
+  return newSharedData;
+}
+
 export const channelIsClosed = (channelId: string, sharedData: SharedData): boolean => {
   return (
     channelHasConclusionProof(channelId, sharedData) ||
@@ -101,6 +128,18 @@ export const isChannelDirectlyFunded = (channelId: string, sharedData: SharedDat
     throw new Error(`No funding state for ${channelId}. Cannot determine funding type.`);
   }
   return channelFundingState.directlyFunded;
+};
+
+export const getFundingChannelId = (channelId: string, sharedData: SharedData): string => {
+  const channelFundingState = selectors.getChannelFundingState(sharedData, channelId);
+  if (!channelFundingState) {
+    throw new Error(`No funding state for ${channelId}. Cannot determine funding type.`);
+  }
+
+  if (!channelFundingState.fundingChannel) {
+    throw new Error('No funding channel id defined.');
+  }
+  return channelFundingState.fundingChannel;
 };
 
 export const isFirstPlayer = (channelId: string, sharedData: SharedData) => {

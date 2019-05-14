@@ -2,10 +2,10 @@ import { storiesOf } from '@storybook/react';
 import React from 'react';
 import Modal from 'react-modal';
 import { Provider } from 'react-redux';
-import { Concluding } from '..';
-import { fakeStore } from '../../../../../__stories__/index';
-import StatusBarLayout from '../../../../../components/status-bar-layout';
+import { fakeStore } from '../../../../__stories__/index';
+import StatusBarLayout from '../../../../components/status-bar-layout';
 import * as scenarios from './scenarios';
+import { IndirectDefunding } from '../container';
 
 const render = container => () => {
   // todo: rework this modal stuff
@@ -25,15 +25,15 @@ const render = container => () => {
 
 // Convention is to add all scenarios here, and allow the
 // addStories function to govern what ends up being shown.
-addStories(scenarios.happyPath, 'Concluding / Responder / Happy Path');
-addStories(scenarios.channelDoesntExist, 'Concluding / Responder / Channel doesnt exist');
-addStories(scenarios.concludingNotPossible, 'Concluding / Responder / Concluding impossible');
-addStories(scenarios.defundFailed, 'Concluding / Responder / Defund failed');
+addStories(scenarios.playerAHappyPath, 'Indirect Defunding / PlayerA / Happy Path');
 
 function addStories(scenario, chapter) {
   Object.keys(scenario).forEach(key => {
     if (scenario[key].state) {
-      storiesOf(chapter, module).add(key, render(<Concluding state={scenario[key].state} />));
+      storiesOf(chapter, module).add(
+        key,
+        render(<IndirectDefunding state={scenario[key].state.state} />),
+      );
     }
   });
 }

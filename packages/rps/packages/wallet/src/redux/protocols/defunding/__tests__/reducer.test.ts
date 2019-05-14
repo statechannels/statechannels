@@ -56,33 +56,36 @@ describe('channel not closed', () => {
     itTransitionsToFailure(result, scenario.failure);
   });
 });
-// TODO: These tests rely on ledger de-funding being completed
-// describe('indirectly funded happy path', () => {
-//   const scenario = scenarios.indirectlyFundingChannelHappyPath;
-//   const { processId, channelId, sharedData } = scenario;
 
-//   describe('when initializing', () => {
-//     const result = initialize(processId, channelId, sharedData);
-//     itTransitionsTo(result, states.WAIT_FOR_LEDGER_DEFUNDING);
-//   });
-//   describe(`when in ${states.WAIT_FOR_LEDGER_DEFUNDING}`, () => {
-//     const state = scenario.waitForLedgerDefunding;
-//     const action = scenario.ledgerDefundingSuccessAction;
-//     const result = defundingReducer(state, sharedData, action);
+describe('indirectly funded happy path', () => {
+  const scenario = scenarios.indirectlyFundingChannelHappyPath;
 
-//     itTransitionsTo(result, states.SUCCESS);
-//   });
-// });
+  describe('when initializing', () => {
+    const { processId, channelId, store } = scenario.initialize;
+    const result = initialize(processId, channelId, store);
+    itTransitionsTo(result, states.WAIT_FOR_INDIRECT_DEFUNDING);
+  });
+  describe(`when in ${states.WAIT_FOR_INDIRECT_DEFUNDING}`, () => {
+    const { state, action, store } = scenario.waitForLedgerDefunding;
+    const result = defundingReducer(state, store, action);
 
-// describe('indirectly funded failure', () => {
-//   const scenario = scenarios.indirectlyFundingFailure;
-//   const { sharedData } = scenario;
+    itTransitionsTo(result, states.WAIT_FOR_WITHDRAWAL);
+  });
+  describe(`when in ${states.WAIT_FOR_WITHDRAWAL}`, () => {
+    const { state, action, store } = scenario.waitForWithdrawal;
+    const result = defundingReducer(state, store, action);
 
-//   describe(`when in ${states.WAIT_FOR_LEDGER_DEFUNDING}`, () => {
-//     const state = scenario.waitForLedgerDefunding;
-//     const action = scenario.ledgerDefundingFailureAction;
-//     const result = defundingReducer(state, sharedData, action);
+    itTransitionsTo(result, states.SUCCESS);
+  });
+});
 
-//     itTransitionsToFailure(result, scenario.failure);
-//   });
-// });
+describe('indirectly funded failure', () => {
+  const scenario = scenarios.indirectlyFundingFailure;
+
+  describe(`when in ${states.WAIT_FOR_INDIRECT_DEFUNDING}`, () => {
+    const { state, action, store } = scenario.waitForLedgerDefunding;
+    const result = defundingReducer(state, store, action);
+
+    itTransitionsToFailure(result, states.failure('Ledger De-funding Failure'));
+  });
+});

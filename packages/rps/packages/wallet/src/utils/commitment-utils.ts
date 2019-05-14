@@ -74,17 +74,24 @@ export const composePreFundCommitment = (
   return signCommitment2(commitment, privateKey);
 };
 
+export const EMPTY_APP_ATTRIBUTES = bytesFromAppAttributes({
+  furtherVotesRequired: 0,
+  updateType: 0,
+  proposedAllocation: [],
+  proposedDestination: [],
+});
+
 export const composeConcludeCommitment = (channelState: ChannelState) => {
   const commitmentCount =
     channelState.lastCommitment.commitment.commitmentType === CommitmentType.Conclude ? 1 : 0;
 
   const concludeCommitment: Commitment = {
     ...channelState.lastCommitment.commitment,
-    appAttributes: '0x0',
+    appAttributes: EMPTY_APP_ATTRIBUTES,
     commitmentType: CommitmentType.Conclude,
     turnNum: channelState.lastCommitment.commitment.turnNum + 1,
     commitmentCount,
   };
 
-  return signCommitment2(concludeCommitment, channelState.privateKey);
+  return concludeCommitment;
 };

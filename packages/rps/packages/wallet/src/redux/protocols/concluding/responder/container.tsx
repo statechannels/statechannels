@@ -1,11 +1,11 @@
 import React from 'react';
 import { PureComponent } from 'react';
 import { connect } from 'react-redux';
-import { NonTerminalState as NonTerminalConcludingState } from './states';
+import { ResponderNonTerminalState as NonTerminalConcludingState } from './states';
 import { unreachable } from '../../../../utils/reducer-utils';
 import ApproveConcluding from './components/approve-concluding';
 import ApproveDefunding from './components/approve-defunding';
-import WaitForDefunding from './components/wait-for-defunding';
+import { Defunding } from '../../defunding/container';
 import * as actions from './actions';
 import Acknowledge from '../../shared-components/acknowledge';
 
@@ -21,7 +21,7 @@ class ConcludingContainer extends PureComponent<Props> {
     const { state, approve, defund, acknowledge } = this.props;
     const processId = state.processId;
     switch (state.type) {
-      case 'AcknowledgeSuccess':
+      case 'ResponderAcknowledgeSuccess':
         return (
           <Acknowledge
             title="Concluding Succesful"
@@ -29,7 +29,7 @@ class ConcludingContainer extends PureComponent<Props> {
             acknowledge={() => acknowledge(state.processId)}
           />
         );
-      case 'AcknowledgeFailure':
+      case 'ResponderAcknowledgeFailure':
         return (
           <Acknowledge
             title="Concluding Failed"
@@ -37,11 +37,11 @@ class ConcludingContainer extends PureComponent<Props> {
             acknowledge={() => acknowledge(state.processId)}
           />
         );
-      case 'DecideDefund':
+      case 'ResponderDecideDefund':
         return <ApproveDefunding approve={() => defund(processId)} />;
-      case 'WaitForDefund':
-        return <WaitForDefunding />;
-      case 'ApproveConcluding':
+      case 'ResponderWaitForDefund':
+        return <Defunding state={state.defundingState} />;
+      case 'ResponderApproveConcluding':
         return <ApproveConcluding approve={() => approve(processId)} />;
       default:
         return unreachable(state);
@@ -50,7 +50,7 @@ class ConcludingContainer extends PureComponent<Props> {
 }
 
 const mapDispatchToProps = {
-  approve: actions.concludeSent,
+  approve: actions.concludeApproved,
   defund: actions.defundChosen,
   acknowledge: actions.acknowledged,
 };

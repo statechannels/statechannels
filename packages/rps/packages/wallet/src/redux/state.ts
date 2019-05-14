@@ -186,6 +186,14 @@ export function setChannelStore(state: SharedData, channelStore: ChannelStore): 
   return { ...state, channelStore };
 }
 
+export function setFundingState(
+  state: SharedData,
+  channelId: string,
+  fundingState: ChannelFundingState,
+) {
+  return { ...state, fundingState: { ...state.fundingState, [channelId]: fundingState } };
+}
+
 export function getLastMessage(state: SharedData): WalletEvent | undefined {
   return getLastMessageFromOutbox(state.outboxState);
 }

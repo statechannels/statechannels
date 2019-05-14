@@ -96,7 +96,7 @@ describe('receiving a close request', () => {
 
   describe(whenIn(states.ONGOING), () => {
     const state = scenario.states.ongoing;
-    const action = scenario.actions.closeRequested;
+    const action = scenario.actions.concludeRequested;
     const result = applicationReducer(state, sharedData, action);
 
     itTransitionsTo(result, states.SUCCESS);

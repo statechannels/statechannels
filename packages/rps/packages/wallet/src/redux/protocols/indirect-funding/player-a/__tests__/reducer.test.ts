@@ -40,6 +40,11 @@ describe('happy-path scenario', () => {
     const { state, action } = scenario.waitForPostFund1;
     const updatedState = playerAReducer(state.state, state.store, action);
 
+    itUpdatesFundingState(
+      updatedState,
+      scenario.initialParams.channelId,
+      scenario.initialParams.ledgerId,
+    );
     itTransitionsTo(updatedState, 'Success');
   });
 });
@@ -69,7 +74,7 @@ function itSendsMessage(state: ReturnVal, message: SignedCommitment) {
   it('sends a message', () => {
     const lastMessage = getLastMessage(state.sharedData);
     if (lastMessage && 'messagePayload' in lastMessage) {
-      const dataPayload = lastMessage.messagePayload.data;
+      const dataPayload = lastMessage.messagePayload;
       // This is yuk. The data in a message is currently of 'any' type..
       if (!('signedCommitment' in dataPayload)) {
         fail('No signedCommitment in the last message.');
@@ -78,6 +83,21 @@ function itSendsMessage(state: ReturnVal, message: SignedCommitment) {
       expect({ commitment, signature }).toEqual(message);
     } else {
       fail('No messages in the outbox.');
+    }
+  });
+}
+
+function itUpdatesFundingState(state: ReturnVal, channelId: string, fundingChannelId?: string) {
+  it(`Updates the funding state to reflect ${channelId} funded by ${fundingChannelId}`, () => {
+    if (!state.sharedData.fundingState[channelId]) {
+      fail(`No entry for ${channelId} in fundingState`);
+    } else {
+      if (!fundingChannelId) {
+        expect(state.sharedData.fundingState[channelId].directlyFunded).toBeTruthy();
+      } else {
+        expect(state.sharedData.fundingState[channelId].directlyFunded).toBeFalsy();
+        expect(state.sharedData.fundingState[channelId].fundingChannel).toEqual(fundingChannelId);
+      }
     }
   });
 }

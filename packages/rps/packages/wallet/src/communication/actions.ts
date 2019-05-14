@@ -1,6 +1,7 @@
-import { Commitment, SignedCommitment } from '../domain';
+import { SignedCommitment } from '../domain';
 import { WalletAction } from '../redux/actions';
 import { FundingStrategy } from './index';
+import { CONCLUDE_INSTIGATED, ConcludeInstigated } from '../redux/protocols/actions';
 
 export interface BaseProcessAction {
   processId: string;
@@ -31,24 +32,6 @@ export const strategyApproved = (processId: string): StrategyApproved => ({
   processId,
 });
 
-// CONCLUDING
-export const CONCLUDE_CHANNEL = 'WALLET.CONCLUDING.CONCLUDE_CHANNEL';
-export interface ConcludeChannel extends BaseProcessAction {
-  type: typeof CONCLUDE_CHANNEL;
-  commitment: Commitment;
-  signature: string;
-}
-export const concludeChannel = (
-  processId: string,
-  commitment: Commitment,
-  signature: string,
-): ConcludeChannel => ({
-  type: CONCLUDE_CHANNEL,
-  processId,
-  commitment,
-  signature,
-});
-
 // COMMON
 export const COMMITMENT_RECEIVED = 'WALLET.COMMON.COMMITMENT_RECEIVED';
 export const commitmentReceived = (processId: string, signedCommitment: SignedCommitment) => ({
@@ -61,14 +44,14 @@ export type CommitmentReceived = ReturnType<typeof commitmentReceived>;
 export type RelayableAction =
   | StrategyProposed
   | StrategyApproved
-  | ConcludeChannel
+  | ConcludeInstigated
   | CommitmentReceived;
 
 export function isRelayableAction(action: WalletAction): action is RelayableAction {
   return (
     action.type === STRATEGY_PROPOSED ||
     action.type === STRATEGY_APPROVED ||
-    action.type === CONCLUDE_CHANNEL ||
+    action.type === CONCLUDE_INSTIGATED ||
     action.type === COMMITMENT_RECEIVED
   );
 }
