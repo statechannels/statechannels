@@ -9,7 +9,7 @@ export async function handleNewProcessAction(ctx) {
 
   switch (action.type) {
     case 'WALLET.COMMON.COMMITMENT_RECEIVED':
-    case 'WALLET.CONCLUDING.CONCLUDE_CHANNEL':
+    case 'WALLET.NEW_PROCESS.CONCLUDE_INSTIGATED':
     case 'WALLET.FUNDING.STRATEGY_PROPOSED':
     case 'WALLET.FUNDING.STRATEGY_APPROVED':
       return ctx;
