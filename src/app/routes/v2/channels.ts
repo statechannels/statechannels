@@ -27,7 +27,7 @@ router.post(`${BASE_URL}`, koaBody(), async ctx => {
 export const channelRoutes = router.routes();
 
 async function isNewProcessAction(action: RelayableAction): Promise<boolean> {
-  if (action.type === 'WALLET.CONCLUDING.CONCLUDE_CHANNEL' || opensAppChannel(action)) {
+  if (action.type === 'WALLET.NEW_PROCESS.CONCLUDE_INSTIGATED' || opensAppChannel(action)) {
     const { processId } = action;
     const process = await getProcess(processId);
     if (process) {
