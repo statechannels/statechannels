@@ -1,6 +1,6 @@
-import { ChannelState } from '../channel-store';
+import { ChannelState, ChannelStore } from '../channel-store';
 import { StateWithSideEffects } from '../utils';
-import { Commitment } from '../../domain';
+import { Commitment, SignedCommitment, getChannelId } from '../../domain';
 import { QueuedTransaction, OutboxState } from '../outbox/state';
 import { SharedData } from '../state';
 import { ProtocolStateWithSharedData } from '../protocols';
@@ -117,5 +117,16 @@ export const itIncreasesTurnNumBy = (
     } else {
       expect(newState.state.turnNum).toEqual(oldState.turnNum + increase);
     }
+  });
+};
+
+export const itStoresThisCommitment = (
+  state: { channelStore: ChannelStore },
+  signedCommitment: SignedCommitment,
+) => {
+  it('stores the commitment in the channel state', () => {
+    const channelId = getChannelId(signedCommitment.commitment);
+    const channelState = state.channelStore[channelId];
+    expect(channelState.lastCommitment).toMatchObject(signedCommitment);
   });
 };
