@@ -1,126 +1,108 @@
 import { Constructor } from '../../../utils';
 import { DefundingState } from '../../defunding';
-export type ConcludingState = NonTerminalState | PreTerminalState | TerminalState;
-export type ConcludingStateType = ConcludingState['type'];
+export type InstigatorConcludingState =
+  | InstigatorNonTerminalState
+  | InstigatorPreTerminalState
+  | TerminalState;
+export type InstigatorConcludingStateType = InstigatorConcludingState['type'];
+import { ProtocolState } from '../..';
+import { FailureReason, TerminalState } from '../state';
 
-export type NonTerminalState =
-  | ApproveConcluding
-  | WaitForOpponentConclude
-  | AcknowledgeConcludeReceived
-  | AcknowledgeFailure
-  | AcknowledgeSuccess
-  | WaitForDefund;
+export type InstigatorNonTerminalState =
+  | InstigatorApproveConcluding
+  | InstigatorWaitForOpponentConclude
+  | InstigatorAcknowledgeConcludeReceived
+  | InstigatorAcknowledgeFailure
+  | InstigatorAcknowledgeSuccess
+  | InstigatorWaitForDefund;
 
-export type PreTerminalState = AcknowledgeSuccess | AcknowledgeFailure;
+export type InstigatorPreTerminalState =
+  | InstigatorAcknowledgeSuccess
+  | InstigatorAcknowledgeFailure;
 
-export type TerminalState = Success | Failure;
-
-export type FailureReason =
-  | 'NotYourTurn'
-  | 'ChannelDoesntExist'
-  | 'ConcludeCancelled'
-  | 'DefundFailed';
-
-export interface AcknowledgeSuccess {
-  type: 'AcknowledgeSuccess';
+export interface InstigatorAcknowledgeSuccess {
+  type: 'InstigatorAcknowledgeSuccess';
   processId: string;
   channelId: string;
 }
-export interface AcknowledgeFailure {
-  type: 'AcknowledgeFailure';
+export interface InstigatorAcknowledgeFailure {
+  type: 'InstigatorAcknowledgeFailure';
   reason: FailureReason;
   processId: string;
   channelId: string;
 }
-export interface ApproveConcluding {
-  type: 'ApproveConcluding';
+export interface InstigatorApproveConcluding {
+  type: 'InstigatorApproveConcluding';
   processId: string;
   channelId: string;
 }
 
-export interface WaitForOpponentConclude {
-  type: 'WaitForOpponentConclude';
+export interface InstigatorWaitForOpponentConclude {
+  type: 'InstigatorWaitForOpponentConclude';
   processId: string;
   channelId: string;
 }
 
-export interface AcknowledgeConcludeReceived {
-  type: 'AcknowledgeConcludeReceived';
+export interface InstigatorAcknowledgeConcludeReceived {
+  type: 'InstigatorAcknowledgeConcludeReceived';
   processId: string;
   channelId: string;
 }
 
-export interface WaitForDefund {
-  type: 'WaitForDefund';
+export interface InstigatorWaitForDefund {
+  type: 'InstigatorWaitForDefund';
   processId: string;
   channelId: string;
   defundingState: DefundingState;
 }
 
-export interface Failure {
-  type: 'Failure';
-  reason: FailureReason;
-}
-
-export interface Success {
-  type: 'Success';
-}
-
-// -------
-// Helpers
-// -------
-
-export function isTerminal(state: ConcludingState): state is Failure | Success {
-  return state.type === 'Failure' || state.type === 'Success';
-}
-
-export function isSuccess(state: ConcludingState): state is Success {
-  return state.type === 'Success';
-}
-
-export function isFailure(state: ConcludingState): state is Failure {
-  return state.type === 'Failure';
+export function isConcludingInstigatorState(
+  state: ProtocolState,
+): state is InstigatorConcludingState {
+  return (
+    state.type === 'InstigatorAcknowledgeSuccess' ||
+    state.type === 'InstigatorAcknowledgeFailure' ||
+    state.type === 'InstigatorApproveConcluding' ||
+    state.type === 'InstigatorWaitForOpponentConclude' ||
+    state.type === 'InstigatorAcknowledgeConcludeReceived' ||
+    state.type === 'InstigatorWaitForDefund'
+  );
 }
 
 // ------------
 // Constructors
 // ------------
 
-export const approveConcluding: Constructor<ApproveConcluding> = p => {
+export const instigatorApproveConcluding: Constructor<InstigatorApproveConcluding> = p => {
   const { processId, channelId } = p;
-  return { type: 'ApproveConcluding', processId, channelId };
+  return { type: 'InstigatorApproveConcluding', processId, channelId };
 };
 
-export const waitForOpponentConclude: Constructor<WaitForOpponentConclude> = p => {
+export const instigatorWaitForOpponentConclude: Constructor<
+  InstigatorWaitForOpponentConclude
+> = p => {
   const { processId, channelId } = p;
-  return { type: 'WaitForOpponentConclude', processId, channelId };
+  return { type: 'InstigatorWaitForOpponentConclude', processId, channelId };
 };
 
-export const acknowledgeConcludeReceived: Constructor<AcknowledgeConcludeReceived> = p => {
+export const instigatorAcknowledgeConcludeReceived: Constructor<
+  InstigatorAcknowledgeConcludeReceived
+> = p => {
   const { processId, channelId } = p;
-  return { type: 'AcknowledgeConcludeReceived', processId, channelId };
+  return { type: 'InstigatorAcknowledgeConcludeReceived', processId, channelId };
 };
 
-export const acknowledgeSuccess: Constructor<AcknowledgeSuccess> = p => {
+export const instigatorAcknowledgeSuccess: Constructor<InstigatorAcknowledgeSuccess> = p => {
   const { processId, channelId } = p;
-  return { type: 'AcknowledgeSuccess', processId, channelId };
+  return { type: 'InstigatorAcknowledgeSuccess', processId, channelId };
 };
 
-export const acknowledgeFailure: Constructor<AcknowledgeFailure> = p => {
+export const instigatorAcknowledgeFailure: Constructor<InstigatorAcknowledgeFailure> = p => {
   const { processId, channelId, reason } = p;
-  return { type: 'AcknowledgeFailure', processId, channelId, reason };
+  return { type: 'InstigatorAcknowledgeFailure', processId, channelId, reason };
 };
 
-export const waitForDefund: Constructor<WaitForDefund> = p => {
+export const instigatorWaitForDefund: Constructor<InstigatorWaitForDefund> = p => {
   const { processId, channelId, defundingState } = p;
-  return { type: 'WaitForDefund', processId, channelId, defundingState };
-};
-
-export function success(): Success {
-  return { type: 'Success' };
-}
-
-export const failure: Constructor<Failure> = p => {
-  const { reason } = p;
-  return { type: 'Failure', reason };
+  return { type: 'InstigatorWaitForDefund', processId, channelId, defundingState };
 };

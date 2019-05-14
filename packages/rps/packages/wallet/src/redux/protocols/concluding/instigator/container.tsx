@@ -1,12 +1,12 @@
 import React from 'react';
 import { PureComponent } from 'react';
 import { connect } from 'react-redux';
-import { NonTerminalState as NonTerminalConcludingState } from './states';
+import { InstigatorNonTerminalState as NonTerminalConcludingState } from './states';
 import { unreachable } from '../../../../utils/reducer-utils';
 import ApproveConcluding from './components/approve-concluding';
 import ApproveDefunding from './components/approve-defunding';
 import WaitForOpponentConclude from './components/wait-for-opponent-conclude';
-import WaitForDefunding from './components/wait-for-defunding';
+import { Defunding } from '../../defunding/container';
 import * as actions from './actions';
 import Acknowledge from '../../shared-components/acknowledge';
 
@@ -23,7 +23,7 @@ class ConcludingContainer extends PureComponent<Props> {
     const { state, deny, approve, defund, acknowledge } = this.props;
     const processId = state.processId;
     switch (state.type) {
-      case 'AcknowledgeSuccess':
+      case 'InstigatorAcknowledgeSuccess':
         return (
           <Acknowledge
             title="Concluding Succesful"
@@ -31,7 +31,7 @@ class ConcludingContainer extends PureComponent<Props> {
             acknowledge={() => acknowledge(state.processId)}
           />
         );
-      case 'AcknowledgeFailure':
+      case 'InstigatorAcknowledgeFailure':
         return (
           <Acknowledge
             title="Concluding Failed"
@@ -39,13 +39,13 @@ class ConcludingContainer extends PureComponent<Props> {
             acknowledge={() => acknowledge(state.processId)}
           />
         );
-      case 'WaitForOpponentConclude':
+      case 'InstigatorWaitForOpponentConclude':
         return <WaitForOpponentConclude />;
-      case 'AcknowledgeConcludeReceived':
+      case 'InstigatorAcknowledgeConcludeReceived':
         return <ApproveDefunding approve={() => defund(processId)} />;
-      case 'WaitForDefund':
-        return <WaitForDefunding />;
-      case 'ApproveConcluding':
+      case 'InstigatorWaitForDefund':
+        return <Defunding state={state.defundingState} />;
+      case 'InstigatorApproveConcluding':
         return (
           <ApproveConcluding deny={() => deny(processId)} approve={() => approve(processId)} />
         );
@@ -56,7 +56,7 @@ class ConcludingContainer extends PureComponent<Props> {
 }
 
 const mapDispatchToProps = {
-  approve: actions.concludeSent,
+  approve: actions.concludeApproved,
   deny: actions.cancelled,
   defund: actions.defundChosen,
   acknowledge: actions.acknowledged,

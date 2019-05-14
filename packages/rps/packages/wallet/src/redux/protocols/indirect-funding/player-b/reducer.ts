@@ -38,6 +38,7 @@ import { acceptConsensus } from '../../../../domain/two-player-consensus-game';
 import { sendCommitmentReceived } from '../../../../communication';
 import { addHex } from '../../../../utils/hex-utils';
 import { isTransactionAction } from '../../../actions';
+import { ChannelFundingState } from '../../../state';
 
 type ReturnVal = ProtocolStateWithSharedData<IndirectFundingState>;
 type IDFAction = actions.indirectFunding.Action;
@@ -286,6 +287,14 @@ export function handleWaitForPostFundSetup(
   );
   sharedData = queueMessage(sharedData, messageRelay);
   channel = getChannel(sharedData, appId); // refresh channel
+
+  // update fundingState
+  const fundingState: ChannelFundingState = {
+    directlyFunded: false,
+    fundingChannel: protocolState.ledgerId,
+  };
+
+  sharedData.fundingState[protocolState.channelId] = fundingState;
 
   const newProtocolState = success();
   const newReturnVal = { protocolState: newProtocolState, sharedData };

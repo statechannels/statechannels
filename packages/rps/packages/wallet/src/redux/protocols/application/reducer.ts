@@ -54,7 +54,7 @@ export function applicationReducer(
       return opponentCommitmentReceivedReducer(protocolState, sharedData, action);
     case actions.OWN_COMMITMENT_RECEIVED:
       return ownCommitmentReceivedReducer(protocolState, sharedData, action);
-    case actions.CLOSE_REQUESTED:
+    case actions.CONCLUDE_REQUESTED:
       return { sharedData, protocolState: states.success() };
     default:
       return unreachable(action);

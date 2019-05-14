@@ -22,19 +22,22 @@ export const opponentCommitmentReceived = (
 });
 export type OpponentCommitmentReceived = ReturnType<typeof opponentCommitmentReceived>;
 
-export const CLOSE_REQUESTED = 'CLOSE_REQUESTED';
-export const closeRequested = (processId: string) => ({
-  type: CLOSE_REQUESTED as typeof CLOSE_REQUESTED,
+export const CONCLUDE_REQUESTED = 'CONCLUDE_REQUESTED';
+export const concludeRequested = (processId: string) => ({
+  type: CONCLUDE_REQUESTED as typeof CONCLUDE_REQUESTED,
   processId,
 });
-export type CloseRequested = ReturnType<typeof closeRequested>;
+export type ConcludeRequested = ReturnType<typeof concludeRequested>;
 
-export type ApplicationAction = OpponentCommitmentReceived | OwnCommitmentReceived | CloseRequested;
+export type ApplicationAction =
+  | OpponentCommitmentReceived
+  | OwnCommitmentReceived
+  | ConcludeRequested;
 
 export function isApplicationAction(action: ProtocolAction): action is ApplicationAction {
   return (
     action.type === OPPONENT_COMMITMENT_RECEIVED ||
     action.type === OWN_COMMITMENT_RECEIVED ||
-    action.type === CLOSE_REQUESTED
+    action.type === CONCLUDE_REQUESTED
   );
 }

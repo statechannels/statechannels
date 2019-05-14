@@ -5,6 +5,7 @@ import * as actions from '../actions';
 import { eventChannel } from 'redux-saga';
 import * as application from '../protocols/application/reducer';
 import { isRelayableAction } from '../../communication';
+import { getProcessId } from '../reducer';
 
 export function* messageListener() {
   const postMessageEventChannel = eventChannel(emitter => {
@@ -27,7 +28,7 @@ export function* messageListener() {
         break;
       case incoming.CONCLUDE_CHANNEL_REQUEST:
         yield put(actions.protocol.concludeRequested(action.channelId));
-        yield put(actions.application.closeRequested(application.APPLICATION_PROCESS_ID));
+        yield put(actions.application.concludeRequested(getProcessId(action)));
         break;
       case incoming.CREATE_CHALLENGE_REQUEST:
         yield put(actions.protocol.createChallengeRequested(action.channelId, action.commitment));
@@ -71,9 +72,7 @@ export function* messageListener() {
 }
 
 function handleIncomingMessage(action: incoming.ReceiveMessage) {
-  const { messagePayload } = action as incoming.ReceiveMessage;
-
-  const { data } = messagePayload;
+  const data = action.messagePayload;
 
   if ('type' in data && isRelayableAction(data)) {
     return data;

@@ -1,19 +1,13 @@
-import { Commitment } from '../domain';
+import { Commitment, SignedCommitment } from '../domain';
 import { messageRelayRequested } from 'magmo-wallet-client';
-import {
-  RelayableAction,
-  strategyProposed,
-  strategyApproved,
-  concludeChannel,
-  commitmentReceived,
-} from './actions';
+import { RelayableAction, strategyProposed, strategyApproved, commitmentReceived } from './actions';
+import { concludeInstigated } from '../redux/protocols/actions';
 export * from './actions';
 
 export type FundingStrategy = 'IndirectFundingStrategy';
 
 function sendMessage(to: string, message: RelayableAction) {
-  const { processId } = message;
-  return messageRelayRequested(to, { processId, data: message });
+  return messageRelayRequested(to, message);
 }
 
 export function sendStrategyProposed(to: string, processId: string, strategy: FundingStrategy) {
@@ -24,8 +18,8 @@ export function sendStrategyApproved(to: string, processId: string) {
   return sendMessage(to, strategyApproved(processId));
 }
 
-export function sendConcludeChannel(to: string, processId, commitment, signature) {
-  return sendMessage(to, concludeChannel(processId, commitment, signature));
+export function sendConcludeInstigated(to: string, channelId, signedCommitment: SignedCommitment) {
+  return sendMessage(to, concludeInstigated(signedCommitment, channelId));
 }
 
 export const sendCommitmentReceived = (
@@ -34,9 +28,6 @@ export const sendCommitmentReceived = (
   commitment: Commitment,
   signature: string,
 ) => {
-  const payload = {
-    processId,
-    data: commitmentReceived(processId, { commitment, signature }),
-  };
+  const payload = commitmentReceived(processId, { commitment, signature });
   return messageRelayRequested(to, payload);
 };

@@ -8,8 +8,8 @@ import {
   channelId,
 } from '../../../../domain/commitments/__tests__';
 import { bigNumberify } from 'ethers/utils/bignumber';
-import { waitForLedgerUpdate } from '../state';
-import { setChannels, EMPTY_SHARED_DATA } from '../../../state';
+import { waitForLedgerUpdate, waitForConclude } from '../state';
+import { setChannels, EMPTY_SHARED_DATA, SharedData } from '../../../state';
 import { channelFromCommitments } from '../../../channel-store/channel-state/__tests__';
 import { bsPrivateKey } from '../../../../communication/__tests__/commitments';
 import * as globalActions from '../../../actions';
@@ -36,48 +36,91 @@ const props = {
 // -----------
 
 const app9 = appCommitment({ turnNum: 9, balances: twoThree, isFinal: false });
-const app10 = appCommitment({ turnNum: 10, balances: twoThree, isFinal: true });
-const app11 = appCommitment({ turnNum: 11, balances: twoThree, isFinal: true });
+export const app10 = appCommitment({ turnNum: 10, balances: twoThree, isFinal: true });
+export const app11 = appCommitment({ turnNum: 11, balances: twoThree, isFinal: true });
 
-const ledger4 = ledgerCommitment({ turnNum: 4, balances: twoThree, proposedBalances: fiveToApp });
-const ledger5 = ledgerCommitment({ turnNum: 5, balances: fiveToApp });
+export const ledger4 = ledgerCommitment({
+  turnNum: 4,
+  balances: twoThree,
+  proposedBalances: fiveToApp,
+});
+export const ledger5 = ledgerCommitment({ turnNum: 5, balances: fiveToApp });
 const ledger6 = ledgerCommitment({ turnNum: 6, balances: fiveToApp, proposedBalances: twoThree });
-const ledger7 = ledgerCommitment({ turnNum: 7, balances: twoThree });
+export const ledger7 = ledgerCommitment({ turnNum: 7, balances: twoThree });
+const ledger8 = ledgerCommitment({ turnNum: 8, balances: twoThree, isFinal: true });
+const ledger9 = ledgerCommitment({ turnNum: 9, balances: twoThree, isFinal: true });
 
 // -----------
 // States
 // -----------
-const initialStore = setChannels(EMPTY_SHARED_DATA, [
-  channelFromCommitments(app10, app11, asAddress, asPrivateKey),
-  channelFromCommitments(ledger4, ledger5, asAddress, asPrivateKey),
-]);
 
-const notDefundableInitialStore = setChannels(EMPTY_SHARED_DATA, [
-  channelFromCommitments(app9, app10, asAddress, asPrivateKey),
-  channelFromCommitments(ledger4, ledger5, asAddress, asPrivateKey),
-]);
+export const setFundingState = (sharedData: SharedData): SharedData => {
+  return {
+    ...sharedData,
+    fundingState: { [channelId]: { directlyFunded: false, fundingChannel: ledgerId } },
+  };
+};
+const initialStore = setFundingState(
+  setChannels(EMPTY_SHARED_DATA, [
+    channelFromCommitments(app10, app11, asAddress, asPrivateKey),
+    channelFromCommitments(ledger4, ledger5, asAddress, asPrivateKey),
+  ]),
+);
+
+const notDefundableInitialStore = setFundingState(
+  setChannels(EMPTY_SHARED_DATA, [
+    channelFromCommitments(app9, app10, asAddress, asPrivateKey),
+    channelFromCommitments(ledger4, ledger5, asAddress, asPrivateKey),
+  ]),
+);
 
 const playerAWaitForUpdate = {
   state: waitForLedgerUpdate(props),
-  store: setChannels(EMPTY_SHARED_DATA, [
-    channelFromCommitments(app10, app11, asAddress, asPrivateKey),
-    channelFromCommitments(ledger5, ledger6, asAddress, asPrivateKey),
-  ]),
+  store: setFundingState(
+    setChannels(EMPTY_SHARED_DATA, [
+      channelFromCommitments(app10, app11, asAddress, asPrivateKey),
+      channelFromCommitments(ledger5, ledger6, asAddress, asPrivateKey),
+    ]),
+  ),
+};
+
+const playerAWaitForConclude = {
+  state: waitForConclude(props),
+  store: setFundingState(
+    setChannels(EMPTY_SHARED_DATA, [
+      channelFromCommitments(app10, app11, asAddress, asPrivateKey),
+      channelFromCommitments(ledger7, ledger8, asAddress, asPrivateKey),
+    ]),
+  ),
 };
 
 const playerBWaitForUpdate = {
   state: waitForLedgerUpdate(props),
-  store: setChannels(EMPTY_SHARED_DATA, [
-    channelFromCommitments(app10, app11, bsAddress, bsPrivateKey),
-    channelFromCommitments(ledger4, ledger5, bsAddress, bsPrivateKey),
-  ]),
+  store: setFundingState(
+    setChannels(EMPTY_SHARED_DATA, [
+      channelFromCommitments(app10, app11, bsAddress, bsPrivateKey),
+      channelFromCommitments(ledger4, ledger5, bsAddress, bsPrivateKey),
+    ]),
+  ),
+};
+
+const playerBWaitForConclude = {
+  state: waitForConclude(props),
+  store: setFundingState(
+    setChannels(EMPTY_SHARED_DATA, [
+      channelFromCommitments(app10, app11, bsAddress, bsPrivateKey),
+      channelFromCommitments(ledger6, ledger7, bsAddress, bsPrivateKey),
+    ]),
+  ),
 };
 
 // -----------
 // Actions
 // -----------
-const ledgerUpdate0Received = globalActions.commitmentReceived(processId, ledger6);
+export const ledgerUpdate0Received = globalActions.commitmentReceived(processId, ledger6);
 const ledgerUpdate1Received = globalActions.commitmentReceived(processId, ledger7);
+const conclude0Received = globalActions.commitmentReceived(processId, ledger8);
+const conclude1Received = globalActions.commitmentReceived(processId, ledger9);
 const invalidLedgerUpdateReceived = globalActions.commitmentReceived(processId, ledger5);
 // -----------
 // Scenarios
@@ -88,7 +131,15 @@ export const playerAHappyPath = {
     ...props,
     reply: ledger6,
   },
-  waitForLedgerUpdate: { state: playerAWaitForUpdate, action: ledgerUpdate1Received },
+  waitForLedgerUpdate: {
+    state: playerAWaitForUpdate,
+    action: ledgerUpdate1Received,
+    reply: ledger8,
+  },
+  waitForConclude: {
+    state: playerAWaitForConclude,
+    action: conclude1Received,
+  },
 };
 
 export const playerAInvalidCommitment = {
@@ -107,6 +158,11 @@ export const playerBHappyPath = {
     state: playerBWaitForUpdate,
     action: ledgerUpdate0Received,
     reply: ledger7,
+  },
+  waitForConclude: {
+    state: playerBWaitForConclude,
+    action: conclude0Received,
+    reply: ledger9,
   },
 };
 

@@ -102,6 +102,28 @@ interface Fail = {
 
 Note that we are composing these processes at the code level rather than at the service level: all the data for the transaction state machine is stored inside the withdrawal state machine.
 
+### Conventions
+
+When writing protocol state machine diagrams, we use the following conventions:
+
+```mermaid
+  graph TD
+  St((Start))-->L
+  L{Flow Logic} --> NT1(Non-Terminal States)
+  NT1 -->|ACTION| C
+  C(Call child reducer) -->|child return status| NT2
+  NT2(More Non-Terminal States) --> |SUCCESS_TRIGGER| Su
+  Su((Success))
+  NT2(More Non-Terminal States) --> |FAILURE_TRIGGER| F
+  F((Failure))
+
+  style St  fill:#efdd20
+  style L fill:#efdd20
+  style C stroke:#333,stroke-width:4px
+  style Su fill:#58ef21
+  style F  fill:#f45941
+```
+
 ## Processes
 
 Processes are responsible for running protocol. Each process has a single top-level protocol, which will then embed further protocols as above.
