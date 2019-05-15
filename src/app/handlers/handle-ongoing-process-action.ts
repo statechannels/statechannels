@@ -8,6 +8,7 @@ import { errors } from '../../wallet';
 import { getProcess } from '../../wallet/db/queries/walletProcess';
 import { updateLedgerChannel } from '../../wallet/services';
 import { Blockchain } from '../../wallet/services/blockchain';
+import { updateRPSChannel } from '../services/rpsChannelManager';
 
 export async function handleOngoingProcessAction(ctx) {
   const action: RelayableAction = ctx.request.body;
@@ -23,13 +24,30 @@ export async function handleOngoingProcessAction(ctx) {
       }
       const { theirAddress } = walletProcess;
       const { commitment: theirCommitment, signature: theirSignature } = action.signedCommitment;
+      const splitSignature = (ethers.utils.splitSignature(theirSignature) as unknown) as Signature;
+
+      const channelId = channelID(theirCommitment.channel);
+
+      if (channelId === walletProcess.appChannelId) {
+        const { commitment: ourCommitment, signature: ourSignature } = await updateRPSChannel(
+          theirCommitment,
+          splitSignature,
+        );
+        ctx.body = communication.sendCommitmentReceived(
+          theirAddress,
+          processId,
+          ourCommitment,
+          (ourSignature as unknown) as string,
+        );
+        return ctx;
+      }
 
       const { commitment, signature } = await updateLedgerChannel(
         {
           ...theirCommitment,
           appAttributes: appAttributesFromBytes(theirCommitment.appAttributes),
         },
-        (ethers.utils.splitSignature(theirSignature) as unknown) as Signature,
+        splitSignature,
       );
       ctx.body = communication.sendCommitmentReceived(
         theirAddress,
