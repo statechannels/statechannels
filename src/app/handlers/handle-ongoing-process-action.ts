@@ -21,7 +21,7 @@ export async function handleOngoingProcessAction(ctx) {
       if (!walletProcess) {
         throw errors.processMissing(processId);
       }
-      const { their_address: theirAddress } = walletProcess;
+      const { theirAddress } = walletProcess;
       const { commitment: theirCommitment, signature: theirSignature } = action.signedCommitment;
 
       const { commitment, signature } = await updateLedgerChannel(
@@ -60,7 +60,7 @@ export async function handleOngoingProcessAction(ctx) {
         throw errors.processMissing(processId);
       }
 
-      const { their_address: theirAddress } = process;
+      const { theirAddress } = process;
       ctx.body = communication.sendStrategyApproved(theirAddress, processId);
       ctx.status = 200;
 
