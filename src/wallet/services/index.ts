@@ -20,4 +20,5 @@ export interface ChannelResponse {
 
 export const updateLedgerChannel: (c: LedgerCommitment, s: Signature) => Promise<ChannelResponse> =
   LedgerChannelManager.updateLedgerChannel;
-export const fund: (id: Address, amount: Uint256) => Promise<Uint256> = Blockchain.fund;
+export const fund: (id: Address, expectedHeld: Uint256, amount: Uint256) => Promise<Uint256> =
+  Blockchain.fund;

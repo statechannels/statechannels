@@ -40,12 +40,14 @@ export async function handleOngoingProcessAction(ctx) {
 
       if (process.env.NODE_ENV !== 'test') {
         // TODO: Figure out how to test this.
+        const expectedHeld =
+          theirCommitment.allocation[1 - theirCommitment.destination.indexOf(HUB_ADDRESS)];
         const funding =
           theirCommitment.allocation[theirCommitment.destination.indexOf(HUB_ADDRESS)];
 
         setTimeout(async () => {
           // For the moment, we delay the deposit to give the user a chance to deposit.
-          await Blockchain.fund(channelID(theirCommitment.channel), funding);
+          await Blockchain.fund(channelID(theirCommitment.channel), expectedHeld, funding);
         }, 4000);
       }
 
