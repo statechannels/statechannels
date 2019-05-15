@@ -11,4 +11,8 @@ export default class WalletProcess extends Model {
   static get columnNameMappers() {
     return snakeCaseMappers();
   }
+
+  get appChannelId() {
+    return this.processId.split('-')[1];
+  }
 }
