@@ -11,7 +11,7 @@ export const channel: Channel = {
 };
 
 const nitroContractAddress =
-  contracts.nitroAdjudicatorArtifact.networks[process.env.SERVER_NETWORK_ID].address;
+  contracts.nitroAdjudicatorArtifact.networks[process.env.CHAIN_NETWORK_ID].address;
 
 async function sendTransaction(provider, tx) {
   const signer = provider.getSigner();
