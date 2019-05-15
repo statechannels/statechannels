@@ -246,7 +246,7 @@ contract NitroAdjudicator {
     );
     event Concluded(address channelId);
     event Refuted(address channelId, Commitment.CommitmentStruct refutation);
-    event RespondedWithMove(address channelId, Commitment.CommitmentStruct response);
+    event RespondedWithMove(address channelId, Commitment.CommitmentStruct response, uint8 v, bytes32 r, bytes32 ss);
     event RespondedWithAlternativeMove(Commitment.CommitmentStruct alternativeResponse);
     event Deposited(address destination, uint256 amountDeposited, uint256 destinationHoldings);
     // **********************
@@ -370,7 +370,7 @@ contract NitroAdjudicator {
             "RespondWithMove: must be a valid response"
         );
 
-        emit RespondedWithMove(channel, responseCommitment);
+        emit RespondedWithMove(channel, responseCommitment, signature.v, signature.r, signature.s);
 
         Outcome memory updatedOutcome = Outcome(
             outcomes[channel].destination,
