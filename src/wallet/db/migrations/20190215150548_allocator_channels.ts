@@ -11,12 +11,11 @@ exports.up = (knex: Knex) => {
       table
         .integer('nonce')
         .unsigned()
-        .notNullable()
-        .unique();
+        .notNullable();
       table.text('holdings').notNullable(); // has to store a uint256
       table.string('channel_id').notNullable();
-
-      // NOTE: uniqueness on the nonce ensures unique channel ids
+      // TODO: Store participants on this table as an array, and add
+      // uniqueness on [nonce, participants]
     })
     .then(() => {
       return addBytesCheck(knex, TABLE_NAME, 'holdings');
