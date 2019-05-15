@@ -4,7 +4,12 @@ import * as actions from './actions';
 import { accumulateSideEffects } from './outbox';
 import { clearOutbox } from './outbox/reducer';
 import { ProtocolState } from './protocols';
-import { isNewProcessAction, isProtocolAction, NewProcessAction } from './protocols/actions';
+import {
+  isNewProcessAction,
+  isProtocolAction,
+  NewProcessAction,
+  INITIALIZE_CHANNEL,
+} from './protocols/actions';
 import * as applicationProtocol from './protocols/application';
 import * as challengeProtocol from './protocols/challenging';
 import * as concludingProtocol from './protocols/concluding';
@@ -14,6 +19,8 @@ import * as states from './state';
 import { WalletProtocol } from './types';
 import { APPLICATION_PROCESS_ID } from './protocols/application/reducer';
 import { adjudicatorStateReducer } from './adjudicator-state/reducer';
+import { CONCLUDE_INSTIGATED, isStartProcessAction } from '../communication';
+import { communication } from '../..';
 
 const initialState = states.waitForLogin();
 
@@ -130,10 +137,14 @@ function updatedState(
 }
 
 export function getProcessId(action: NewProcessAction): string {
-  if ('channelId' in action) {
+  if (isStartProcessAction(action)) {
+    return communication.getProcessId(action);
+  } else if (action.type === INITIALIZE_CHANNEL) {
+    return APPLICATION_PROCESS_ID;
+  } else if ('channelId' in action) {
     return `${action.protocol}-${action.channelId}`;
   }
-  return APPLICATION_PROCESS_ID;
+  throw new Error('Invalid action');
 }
 
 function initializeNewProtocol(
@@ -156,7 +167,7 @@ function initializeNewProtocol(
       );
       return { protocolState, sharedData };
     }
-    case actions.protocol.CONCLUDE_INSTIGATED: {
+    case CONCLUDE_INSTIGATED: {
       const { signedCommitment } = action;
       const { protocolState, sharedData } = concludingProtocol.initializeResponderState(
         signedCommitment,

@@ -1,5 +1,5 @@
 import { messageRelayRequested } from 'magmo-wallet-client';
-import { strategyProposed, strategyApproved } from '..';
+import { strategyProposed, strategyApproved, sendConcludeInstigated } from '..';
 import { commitmentReceived } from '../../redux/actions';
 import {
   signedCommitment0,
@@ -9,6 +9,7 @@ import {
   signedCommitment51,
   signedCommitment52,
   signedLedgerCommitments,
+  channelId as appChannelId,
 } from './commitments';
 const {
   signedLedgerCommitment0,
@@ -88,7 +89,7 @@ const respondToAppPostFundSetup = messageRelayRequested(asAddress, {
 
 const concludeGame = messageRelayRequested(bsAddress, {
   processId: concludeProcessId,
-  data: commitmentReceived(fundingProcessId, signedCommitment51),
+  data: sendConcludeInstigated(bsAddress, appChannelId, signedCommitment51),
 });
 
 const respondToConclude = messageRelayRequested(asAddress, {

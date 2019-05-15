@@ -1,7 +1,7 @@
 import { SignedCommitment } from '../domain';
 import { WalletAction } from '../redux/actions';
 import { FundingStrategy } from './index';
-import { CONCLUDE_INSTIGATED, ConcludeInstigated } from '../redux/protocols/actions';
+import { WalletProtocol } from '../redux/types';
 
 export interface BaseProcessAction {
   processId: string;
@@ -31,6 +31,15 @@ export const strategyApproved = (processId: string): StrategyApproved => ({
   type: STRATEGY_APPROVED,
   processId,
 });
+
+export const CONCLUDE_INSTIGATED = 'WALLET.NEW_PROCESS.CONCLUDE_INSTIGATED';
+export const concludeInstigated = (signedCommitment: SignedCommitment, channelId: string) => ({
+  type: CONCLUDE_INSTIGATED as typeof CONCLUDE_INSTIGATED,
+  signedCommitment,
+  protocol: WalletProtocol.Concluding,
+  channelId,
+});
+export type ConcludeInstigated = ReturnType<typeof concludeInstigated>;
 
 // COMMON
 export const COMMITMENT_RECEIVED = 'WALLET.COMMON.COMMITMENT_RECEIVED';
