@@ -43,8 +43,10 @@ export async function handleOngoingProcessAction(ctx) {
         const funding =
           theirCommitment.allocation[theirCommitment.destination.indexOf(HUB_ADDRESS)];
 
-        const funded = await Blockchain.fund(channelID(theirCommitment.channel), funding);
-        console.log(`Channel funded with amount ${funded}`);
+        setTimeout(async () => {
+          // For the moment, we delay the deposit to give the user a chance to deposit.
+          await Blockchain.fund(channelID(theirCommitment.channel), funding);
+        }, 4000);
       }
 
       return ctx;
