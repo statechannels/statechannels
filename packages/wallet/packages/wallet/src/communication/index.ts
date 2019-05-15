@@ -1,7 +1,14 @@
 import { Commitment, SignedCommitment } from '../domain';
 import { messageRelayRequested } from 'magmo-wallet-client';
-import { RelayableAction, strategyProposed, strategyApproved, commitmentReceived } from './actions';
-import { concludeInstigated } from '../redux/protocols/actions';
+import {
+  RelayableAction,
+  strategyProposed,
+  strategyApproved,
+  commitmentReceived,
+  concludeInstigated,
+  ConcludeInstigated,
+  CONCLUDE_INSTIGATED,
+} from './actions';
 export * from './actions';
 
 export type FundingStrategy = 'IndirectFundingStrategy';
@@ -31,3 +38,12 @@ export const sendCommitmentReceived = (
   const payload = commitmentReceived(processId, { commitment, signature });
   return messageRelayRequested(to, payload);
 };
+
+export type StartProcessAction = ConcludeInstigated;
+export function isStartProcessAction(a: { type: string }): a is StartProcessAction {
+  return a.type === CONCLUDE_INSTIGATED;
+}
+
+export function getProcessId(action: StartProcessAction) {
+  return `${action.protocol}-${action.channelId}`;
+}

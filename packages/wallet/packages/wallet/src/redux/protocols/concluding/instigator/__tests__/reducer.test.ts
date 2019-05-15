@@ -4,13 +4,13 @@ import { InstigatorConcludingStateType } from '../states';
 import { FailureReason } from '../../state';
 import { SharedData } from '../../../../state';
 import { Commitment } from '../../../../../domain';
-import { CONCLUDE_INSTIGATED } from '../../../actions';
 import {
   expectThisMessageAndCommitmentSent,
   itSendsThisMessage,
   itSendsThisDisplayEventType,
 } from '../../../../__tests__/helpers';
 import { HIDE_WALLET, CONCLUDE_SUCCESS, CONCLUDE_FAILURE } from 'magmo-wallet-client';
+import { CONCLUDE_INSTIGATED } from '../../../../../communication';
 
 describe('[ Happy path ]', () => {
   const scenario = scenarios.happyPath;
