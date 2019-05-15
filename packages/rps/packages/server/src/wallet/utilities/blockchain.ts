@@ -13,7 +13,7 @@ const neworkIdToRpcEndpoint = networkId => {
   }
 };
 
-const rpcEndpoint = neworkIdToRpcEndpoint(process.env.SERVER_NETWORK_ID);
+const rpcEndpoint = neworkIdToRpcEndpoint(process.env.CHAIN_NETWORK_ID);
 const provider = new providers.JsonRpcProvider(rpcEndpoint);
 const walletWithProvider = new ethers.Wallet(HUB_SIGNER_PRIVATE_KEY, provider);
 
@@ -23,10 +23,10 @@ export async function nitroAdjudicator() {
 
 async function setupContract(artifact: any) {
   Object.defineProperty(artifact, 'bytecode', {
-    value: linkedByteCode(artifact, contracts.commitmentArtifact, process.env.SERVER_NETWORK_ID),
+    value: linkedByteCode(artifact, contracts.commitmentArtifact, process.env.CHAIN_NETWORK_ID),
   });
   Object.defineProperty(artifact, 'bytecode', {
-    value: linkedByteCode(artifact, contracts.rulesArtifact, process.env.SERVER_NETWORK_ID),
+    value: linkedByteCode(artifact, contracts.rulesArtifact, process.env.CHAIN_NETWORK_ID),
   });
 
   let nitroFactory;
@@ -34,13 +34,13 @@ async function setupContract(artifact: any) {
     nitroFactory = await ContractFactory.fromSolidity(artifact, walletWithProvider);
   } catch (err) {
     if (err.message.match('bytecode must be a valid hex string')) {
-      throw new Error(`Contract not deployed on network ${process.env.SERVER_NETWORK_ID}`);
+      throw new Error(`Contract not deployed on network ${process.env.CHAIN_NETWORK_ID}`);
     }
 
     throw err;
   }
   const contract = await nitroFactory.attach(
-    artifact.networks[process.env.SERVER_NETWORK_ID].address,
+    artifact.networks[process.env.CHAIN_NETWORK_ID].address,
   );
 
   return contract;
