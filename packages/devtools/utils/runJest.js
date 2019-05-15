@@ -31,7 +31,6 @@ module.exports = {
     }
 
     // TODO: Figure figure out how jest parses out CLI arguments into a config object
-    console.log(`Running: ${project}`);
     return jest.runCLI(
       {
         runInBand,
