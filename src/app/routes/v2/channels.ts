@@ -29,11 +29,6 @@ export const channelRoutes = router.routes();
 
 async function isNewProcessAction(action: RelayableAction): Promise<boolean> {
   if (action.type === 'WALLET.NEW_PROCESS.CONCLUDE_INSTIGATED') {
-    const processId = getProcessId(action);
-    const process = await getProcess(processId);
-    if (process) {
-      throw new Error(`Process ${processId} is already running.`);
-    }
     return true;
   } else {
     return false;
