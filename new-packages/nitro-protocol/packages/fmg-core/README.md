@@ -12,10 +12,11 @@ Libraries are meant to be included in contracts, and not called externally.
 For reference, see [some remarks](https://github.com/ethereum/solidity/issues/3409#issuecomment-359169193) by the Solidity team.
 
 In spite of this, Solidity compiles library contracts that return structs, and produces a proper abi for external/pure functions. (It does not, however, produce a proper abi when an enum is used in a library.)
+
 ```
 struct Foo {
-    uint bar;
-    uint baz;
+    uint256 bar;
+    uint256 baz;
 }
 // an invalid function in a library. Solidity produces the correct abi
 function(Foo memory foo) public pure return s(uint, uint) {
@@ -24,7 +25,7 @@ function(Foo memory foo) public pure return s(uint, uint) {
 
 contract SampleContract {
     enum Foo {Bar, Baz};
-    // an invalid function in a library. Solidity produces the incorrect abi, which has 
+    // an invalid function in a library. Solidity produces the incorrect abi, which has
     // the type "SampleContract.Foo" as the type of the input `foo`.
     function(Foo foo) public pure returns (uint8) {
         return uint8(foo);
@@ -34,4 +35,3 @@ contract SampleContract {
 
 However, external calls to these functions raise a runtime error.
 Therefore, to test a library `SomeLibrary` function `foo`, we define a test contract that imports `Library.sol`, and delegates `foo` to `Library`.
-
