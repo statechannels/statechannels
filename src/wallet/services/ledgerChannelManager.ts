@@ -1,4 +1,5 @@
 import { CommitmentType, Signature } from 'fmg-core';
+import { channelID } from 'fmg-core/lib/channel';
 import { bytesFromAppAttributes } from 'fmg-nitro-adjudicator';
 import { ChannelResponse } from '.';
 import { queries } from '../db/queries/allocator_channels';
@@ -56,8 +57,10 @@ export async function valuePreserved(theirCommitment: any): Promise<boolean> {
 
 export async function validTransition(theirCommitment: LedgerCommitment): Promise<boolean> {
   const { channel } = theirCommitment;
+  const channel_id = channelID(channel);
+
   const allocator_channel = await AllocatorChannel.query()
-    .where({ rules_address: channel.channelType, nonce: channel.nonce })
+    .where({ channel_id })
     .select('id')
     .first();
 
