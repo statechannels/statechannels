@@ -67,7 +67,7 @@ export async function validTransition(theirCommitment: LedgerCommitment): Promis
 
   const currentCommitment = await AllocatorChannelCommitment.query()
     .where({ allocator_channel_id: allocator_channel.id })
-    .orderBy('id', 'desc')
+    .orderBy('turn_number', 'desc')
     .select()
     .first();
 
