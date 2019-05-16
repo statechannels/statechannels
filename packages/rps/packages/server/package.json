@@ -38,7 +38,7 @@
     "koa-body": "^4.0.8",
     "koa-router": "^7.4.0",
     "magmo-wallet-common": "^0.0.0",
-    "magmo-devtools": "git+https://github.com/magmo/devtools.git#v0.1.13",
+    "magmo-devtools": "git+https://github.com/magmo/devtools.git#v0.1.18",
     "objection": "^1.6.0",
     "pg": "^7.1.2"
   },
