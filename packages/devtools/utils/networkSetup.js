@@ -1,5 +1,5 @@
-const { dotEnv } = require("../config/env.js");
-dotEnv();
+const { configureEnvVariables } = require("../config/env.js");
+configureEnvVariables();
 
 const privateKeyWithEth =
   "0xf2f48ee19680706196e2e339e5da3491186e0c4c5030670656b0e0164837257d";
