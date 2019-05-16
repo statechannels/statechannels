@@ -1,3 +1,3 @@
-import { AppAttributes } from "./consensus-app";
+import { AppAttributes } from './consensus-app';
 export { AppAttributes };
-export { bytesFromAppAttributes, appAttributesFromBytes } from "./consensus-app";
+export { bytesFromAppAttributes, appAttributesFromBytes, UpdateType } from './consensus-app';
