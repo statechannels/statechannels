@@ -54,4 +54,6 @@ export async function listen(eventCallback?: EventCallback) {
   };
 }
 
-listen();
+if (require.main === module) {
+  listen();
+}
