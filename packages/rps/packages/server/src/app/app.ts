@@ -1,7 +1,5 @@
 import * as cors from '@koa/cors';
 import * as Koa from 'koa';
-
-// import { config } from './config';
 import { logger } from './logging';
 import { indexRoutes } from './routes/index';
 import { ledgerChannelRoutes } from './routes/ledger_channels';
