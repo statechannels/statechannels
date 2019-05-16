@@ -1,4 +1,4 @@
-import { WalletProtocol } from 'magmo-wallet';
+import { ConcludeInstigated, getProcessId, WalletProtocol } from 'magmo-wallet';
 import WalletProcess from '../../models/WalletProcess';
 
 export const queries = {
@@ -19,6 +19,26 @@ export async function startFundingProcess({
   theirAddress: string;
 }) {
   return WalletProcess.fromJson({ processId, theirAddress, protocol: WalletProtocol.Funding })
+    .$query()
+    .insert()
+    .first();
+}
+
+export async function startConcludeProcess({
+  action,
+  theirAddress,
+}: {
+  action: ConcludeInstigated;
+  theirAddress: string;
+}) {
+  const processId = getProcessId(action);
+  const walletProcess = await getProcess(processId);
+  if (walletProcess) {
+    console.warn(`Process ${processId} already running`);
+    return walletProcess;
+  }
+
+  return WalletProcess.fromJson({ processId, theirAddress, protocol: WalletProtocol.Concluding })
     .$query()
     .insert()
     .first();
