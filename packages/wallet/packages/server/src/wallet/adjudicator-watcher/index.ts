@@ -33,15 +33,18 @@ async function onDeposit(channelId, amountDeposited, destinationHoldings) {
     .patch({ holdings: destinationHoldings.toHexString() });
 }
 
-export async function listen(eventCallback?: EventCallback) {
+export async function listen() {
   Model.knex(knex);
   const adjudicator: ethers.Contract = await nitroAdjudicator();
   const depositedFilter = adjudicator.filters.Deposited();
   adjudicator.on(depositedFilter, async (channelId, amountDeposited, destinationHoldings) => {
     await onDeposit(channelId, amountDeposited, destinationHoldings);
-    if (eventCallback) {
-      eventCallback(EventType.Deposited);
-    }
+    process.send({
+      eventType: EventType.Deposited,
+      channelId,
+      amountDeposited,
+      destinationHoldings,
+    });
   });
   const challengeCreatedFilter = adjudicator.filters.ChallengeCreated();
   adjudicator.on(challengeCreatedFilter, (channelId, commitment, finalizedAt) => {
