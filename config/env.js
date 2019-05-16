@@ -1,7 +1,7 @@
 "use strict";
 
 module.exports = {
-  dotEnv: function() {
+  configureEnvVariables: function() {
     const fs = require("fs");
 
     const NODE_ENV = process.env.NODE_ENV;
