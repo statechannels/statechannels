@@ -8,7 +8,7 @@ export {
   ethereumArgs,
   asEthersObject,
 } from './commitment';
-export { Channel } from './channel';
+export { Channel, channelID } from './channel';
 export {
   toUint256,
   sign,
@@ -21,16 +21,7 @@ export {
 import * as CountingApp from './test-app/counting-app';
 export { CountingApp };
 
-export {
-  Signature,
-  Address,
-  Uint256,
-  Uint32,
-  Uint8,
-  Bytes32,
-  Bytes,
-  Byte,
-} from './types';
+export { Signature, Address, Uint256, Uint32, Uint8, Bytes32, Bytes, Byte } from './types';
 export {
   CountingCommitment,
   SolidityCountingCommitmentType,
