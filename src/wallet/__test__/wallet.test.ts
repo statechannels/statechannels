@@ -1,6 +1,6 @@
 import Wallet from '..';
-import { constructors as testDataConstructors, funded_channel } from '../../test/test_data';
-import AllocatorChannel from '../models/allocatorChannel';
+import { constructors as testDataConstructors, funded_channel_id } from '../../test/test_data';
+import { getWithCommitments } from '../db/queries/allocator_channels';
 import { LedgerCommitment } from '../services/ledger-commitment';
 
 let pre_fund_setup_0: LedgerCommitment;
@@ -19,13 +19,9 @@ describe('sanitize', () => {
 describe('formResponse', () => {
   it('sanitizes application attributes with the sanitize method it was passed', async () => {
     const wallet = new Wallet(() => '0xf00d');
-    const channel = await AllocatorChannel.query()
-      .where({
-        nonce: funded_channel.nonce,
-      })
-      .select('id')
-      .first();
-    const response = await wallet.formResponse(channel.id);
+    const channel = await getWithCommitments(funded_channel_id);
+    const commitment = channel.commitments[1];
+    const response = await wallet.formResponse(commitment);
     expect(response.commitment.appAttributes).toEqual('0xf00d');
   });
 });

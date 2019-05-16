@@ -69,7 +69,7 @@ export async function updateRPSChannel(
     fromCoreCommitment(theirCommitment),
     ourCommitment,
   );
-  return wallet.formResponse(allocator_channel.id);
+  return wallet.formResponse(allocator_channel.commitments[1]);
 }
 
 async function openChannel(theirCommitment: Commitment) {
@@ -80,7 +80,7 @@ async function openChannel(theirCommitment: Commitment) {
     ourCommitment,
   );
 
-  return await wallet.formResponse(allocator_channel.id);
+  return await wallet.formResponse(allocator_channel.commitments[1]);
 }
 
 interface Opts {

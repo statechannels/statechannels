@@ -1,4 +1,5 @@
 import { Channel, Commitment, CommitmentType, sign, toHex } from 'fmg-core';
+import { channelID } from 'fmg-core/lib/channel';
 import { bytesFromAppAttributes } from 'fmg-nitro-adjudicator';
 import { UpdateType } from 'fmg-nitro-adjudicator/lib/consensus-app';
 import {
@@ -27,6 +28,7 @@ export const funded_channel: Channel = {
   participants: PARTICIPANTS,
   nonce: FUNDED_CHANNEL_NONCE,
 };
+export const funded_channel_id = channelID(funded_channel);
 
 export const beginning_app_phase_channel: Channel = {
   channelType: DUMMY_RULES_ADDRESS,

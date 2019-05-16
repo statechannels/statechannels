@@ -31,7 +31,7 @@ export async function updateLedgerChannel(
   const ourCommitment = nextCommitment(theirCommitment);
 
   const allocator_channel = await queries.updateAllocatorChannel(theirCommitment, ourCommitment);
-  return ChannelManagement.formResponse(allocator_channel.id, bytesFromAppAttributes);
+  return ChannelManagement.formResponse(allocator_channel.commitments[1], bytesFromAppAttributes);
 }
 
 export function nextCommitment(theirCommitment: LedgerCommitment): LedgerCommitment {

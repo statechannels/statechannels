@@ -4,6 +4,7 @@ import { queries } from './db/queries/allocator_channels';
 import { formResponse, nextCommitment, validSignature } from './services/channelManagement';
 
 import errors from './errors';
+import AllocatorChannelCommitment from './models/allocatorChannelCommitment';
 import { getApplications } from './services/applicationManager';
 import { updateLedgerChannel } from './services/ledgerChannelManager';
 export { errors };
@@ -20,5 +21,6 @@ export default class Wallet {
     this.sanitize = sanitizeAppAttrs;
   }
 
-  formResponse = channel_id => formResponse(channel_id, this.sanitize);
+  formResponse = (commitment: AllocatorChannelCommitment) =>
+    formResponse(commitment, this.sanitize);
 }

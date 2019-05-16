@@ -1,7 +1,12 @@
 import { Bytes, sign, Signature, toHex } from 'fmg-core';
 import { bytesFromAppAttributes } from 'fmg-nitro-adjudicator';
 import { HUB_PRIVATE_KEY } from '../../../constants';
-import { constructors as testDataConstructors, funded_channel } from '../../../test/test_data';
+import {
+  constructors as testDataConstructors,
+  funded_channel,
+  funded_channel_id,
+} from '../../../test/test_data';
+import { getWithCommitments } from '../../db/queries/allocator_channels';
 import { seeds } from '../../db/seeds/2_allocator_channels_seed';
 import AllocatorChannel from '../../models/allocatorChannel';
 import * as ChannelManagement from '../channelManagement';
@@ -60,16 +65,14 @@ describe.skip('channelFunded', () => {
 
 describe('formResponse', () => {
   it('returns a signed core commitment', async () => {
-    const { rules_address, nonce } = seeds.funded_channel;
-    const channel = await AllocatorChannel.query()
-      .where({ rules_address, nonce })
-      .eager('commitments')
-      .first();
+    const channel = await getWithCommitments(funded_channel_id);
     pre_fund_setup_1.channel = funded_channel;
 
     hubSignature = signAppCommitment(pre_fund_setup_1, HUB_PRIVATE_KEY);
 
-    expect(await ChannelManagement.formResponse(channel.id, bytesFromAppAttributes)).toMatchObject({
+    expect(
+      await ChannelManagement.formResponse(channel.commitments[1], bytesFromAppAttributes),
+    ).toMatchObject({
       commitment: asCoreCommitment(pre_fund_setup_1),
       signature: hubSignature,
     });
