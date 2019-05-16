@@ -21,7 +21,7 @@ $ yarn install
 $ NODE_ENV=development yarn db:create
 $ NODE_ENV=development yarn db:migrate
 $ NODE_ENV=development yarn db:seed
-$ yarn watch-server (will rebuild app on file change)
+$ yarn server:watch (will rebuild app on file change)
 
 // Opening a channel using data from `test_data.ts` and `rps_test_data.ts`
 
@@ -37,13 +37,6 @@ To play against the server from the browser client, the server and the browser n
 
 - Point to the same local Ganache server.
 - Point to the same contract addresses on Ganache.
-
-In addition to the above development setup, after deploying wallet contracts to your local ganache server, copy the browser wallet built artifacts to this project:
-
-```
-chmod +x bin/copy-client-contracts.sh
-./bin/copy-client-contracts.sh
-```
 
 You will also need to make sure that the server's address has funds. You can find the server address in [constants.ts](https://github.com/magmo/node-bot/blob/master/src/constants.ts)
 
