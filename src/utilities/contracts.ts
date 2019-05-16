@@ -17,7 +17,7 @@ interface Artifact {
 let commitmentArtifact: Artifact = require(path.join(commonDataPrefix, commitmentJson));
 let rulesArtifact: Artifact = require(path.join(commonDataPrefix, rulesJson));
 let nitroAdjudicatorArtifact: Artifact = require(path.join(commonDataPrefix, nitroAdjudicatorJson));
-let rpsGameArtifact: Artifact = require(path.join(commonDataPrefix, rpsGameJson));
+const rpsGameArtifact: Artifact = require(path.join(commonDataPrefix, rpsGameJson));
 
 if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'development') {
   commitmentArtifact = require(path.join(devPathPrefix, commitmentJson));
