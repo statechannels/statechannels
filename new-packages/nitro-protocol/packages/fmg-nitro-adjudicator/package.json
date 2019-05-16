@@ -1,6 +1,6 @@
 {
   "name": "fmg-nitro-adjudicator",
-  "version": "0.0.15",
+  "version": "0.0.16",
   "main": "./lib/index.js",
   "repository": "https://github.com/magmo/nitro-adjudicator.git",
   "author": "Andrew Stewart <andrew.gord.stewart@gmail.com>",
@@ -16,7 +16,7 @@
   },
   "dependencies": {
     "ethers": "^4.0.26",
-    "fmg-core": "^0.5.7",
+    "fmg-core": "^0.5.8",
     "openzeppelin-solidity": "2.1.3",
     "web3": "1.0.0-beta.37"
   },
