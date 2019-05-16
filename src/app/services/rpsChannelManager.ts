@@ -4,6 +4,7 @@ import Wallet from '../../wallet';
 import AllocatorChannel from '../../wallet/models/allocatorChannel';
 
 import { delay } from 'bluebird';
+import { channelID } from 'fmg-core/lib/channel';
 import AllocatorChannelCommitment from '../../wallet/models/allocatorChannelCommitment';
 import {
   defaultAppAttrs,
@@ -138,8 +139,9 @@ export async function valuePreserved(theirCommitment: any): Promise<boolean> {
 
 export async function validTransition(theirCommitment: Commitment): Promise<boolean> {
   const { channel } = theirCommitment;
+  const channel_id = channelID(channel);
   const allocator_channel = await AllocatorChannel.query()
-    .where({ rules_address: channel.channelType, nonce: channel.nonce })
+    .where({ channel_id })
     .select('id')
     .first();
 
