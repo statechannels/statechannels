@@ -1,5 +1,6 @@
 import { Channel, Commitment, CommitmentType, sign, toHex } from 'fmg-core';
 import { bytesFromAppAttributes } from 'fmg-nitro-adjudicator';
+import { UpdateType } from 'fmg-nitro-adjudicator/lib/consensus-app';
 import {
   ALLOCATION,
   BEGINNING_APP_CHANNEL_NONCE,
@@ -44,9 +45,10 @@ const app_attrs = (
   proposedAllocation = ALLOCATION,
   proposedDestination = DESTINATION,
 ) => ({
-  consensusCounter: n % 2,
+  furtherVotesRequired: 2 - (n % 2),
   proposedAllocation,
   proposedDestination,
+  updateType: UpdateType.Consensus,
 });
 
 const base = {

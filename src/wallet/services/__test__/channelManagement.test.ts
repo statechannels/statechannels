@@ -36,13 +36,15 @@ describe('validSignature', () => {
     );
   });
 
-  it('returns false when the commitment was not signed by the mover', async () => {
+  it.skip('returns false when the commitment was not signed by the mover', async () => {
+    // TODO: Unskip when validation is enabled
     expect(ChannelManagement.validSignature(asCoreCommitment(pre_fund_setup_0), hubSignature)).toBe(
       false,
     );
   });
 
-  it('returns false when the commitment was not signed by the mover', async () => {
+  it.skip('returns false when the commitment was not signed by the mover', async () => {
+    // TODO: Unskip when validation is enabled
     const signature = signAppCommitment(pre_fund_setup_0, '0xf00');
     expect(ChannelManagement.validSignature(asCoreCommitment(pre_fund_setup_0), signature)).toBe(
       false,

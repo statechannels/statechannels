@@ -1,4 +1,5 @@
 import { CommitmentType, toUint256 } from 'fmg-core';
+import { UpdateType } from 'fmg-nitro-adjudicator/lib/consensus-app';
 import { Model } from 'objection';
 import {
   PositionType,
@@ -48,9 +49,10 @@ const allocations = () => [allocationByPriority(0), allocationByPriority(1)];
 // ***************
 
 const ledger_app_attrs = (n: number) => ({
-  consensusCounter: n,
+  furtherVotesRequired: n,
   proposedAllocation: ALLOCATION,
   proposedDestination: DESTINATION,
+  updateType: UpdateType.Consensus,
 });
 
 function pre_fund_setup(turn_number: number) {
@@ -59,7 +61,7 @@ function pre_fund_setup(turn_number: number) {
     commitment_type: CommitmentType.PreFundSetup,
     commitment_count: turn_number,
     allocations: allocations(),
-    app_attrs: ledger_app_attrs(0),
+    app_attrs: ledger_app_attrs(2),
   };
 }
 
@@ -78,7 +80,7 @@ function post_fund_setup(turn_number: number) {
     commitment_type: CommitmentType.PostFundSetup,
     commitment_count: turn_number % funded_channel.participants.length,
     allocations: allocations(),
-    app_attrs: ledger_app_attrs(0),
+    app_attrs: ledger_app_attrs(2),
   };
 }
 
