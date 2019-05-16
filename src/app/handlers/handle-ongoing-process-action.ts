@@ -2,7 +2,7 @@ import { ethers } from 'ethers';
 import { Signature } from 'fmg-core';
 import { channelID } from 'fmg-core/lib/channel';
 import { appAttributesFromBytes } from 'fmg-nitro-adjudicator';
-import { communication, RelayableAction } from 'magmo-wallet';
+import { CommitmentReceived, communication, RelayableAction, StrategyProposed } from 'magmo-wallet';
 import { HUB_ADDRESS } from '../../constants';
 import { errors } from '../../wallet';
 import { getProcess } from '../../wallet/db/queries/walletProcess';
@@ -16,73 +16,80 @@ export async function handleOngoingProcessAction(ctx) {
     case 'WALLET.NEW_PROCESS.CONCLUDE_INSTIGATED':
     case 'WALLET.FUNDING.STRATEGY_APPROVED':
       return ctx;
-    case 'WALLET.COMMON.COMMITMENT_RECEIVED': {
-      const { processId } = action;
-      const walletProcess = await getProcess(processId);
-      if (!walletProcess) {
-        throw errors.processMissing(processId);
-      }
-      const { theirAddress } = walletProcess;
-      const { commitment: theirCommitment, signature: theirSignature } = action.signedCommitment;
-      const splitSignature = (ethers.utils.splitSignature(theirSignature) as unknown) as Signature;
+    case 'WALLET.COMMON.COMMITMENT_RECEIVED':
+      return handleCommitmentReceived(ctx, action);
+    case 'WALLET.FUNDING.STRATEGY_PROPOSED':
+      return handleStrategyProposed(ctx, action);
+  }
+}
 
-      const channelId = channelID(theirCommitment.channel);
+async function handleStrategyProposed(ctx, action: StrategyProposed) {
+  const { processId } = action;
+  const process = await getProcess(processId);
+  if (!process) {
+    throw errors.processMissing(processId);
+  }
 
-      if (channelId === walletProcess.appChannelId) {
-        const { commitment: ourCommitment, signature: ourSignature } = await updateRPSChannel(
-          theirCommitment,
-          splitSignature,
-        );
-        ctx.body = communication.sendCommitmentReceived(
-          theirAddress,
-          processId,
-          ourCommitment,
-          (ourSignature as unknown) as string,
-        );
-        return ctx;
-      }
+  const { theirAddress } = process;
+  ctx.body = communication.sendStrategyApproved(theirAddress, processId);
+  ctx.status = 200;
 
-      const { commitment, signature } = await updateLedgerChannel(
-        {
-          ...theirCommitment,
-          appAttributes: appAttributesFromBytes(theirCommitment.appAttributes),
-        },
+  return ctx;
+}
+
+async function handleCommitmentReceived(ctx, action: CommitmentReceived) {
+  {
+    const { processId } = action;
+    const walletProcess = await getProcess(processId);
+    if (!walletProcess) {
+      throw errors.processMissing(processId);
+    }
+    const { theirAddress } = walletProcess;
+    const { commitment: theirCommitment, signature: theirSignature } = action.signedCommitment;
+    const splitSignature = (ethers.utils.splitSignature(theirSignature) as unknown) as Signature;
+
+    const channelId = channelID(theirCommitment.channel);
+
+    if (channelId === walletProcess.appChannelId) {
+      const { commitment: ourCommitment, signature: ourSignature } = await updateRPSChannel(
+        theirCommitment,
         splitSignature,
       );
       ctx.body = communication.sendCommitmentReceived(
         theirAddress,
         processId,
-        commitment,
-        (signature as unknown) as string,
+        ourCommitment,
+        (ourSignature as unknown) as string,
       );
-
-      if (process.env.NODE_ENV !== 'test') {
-        // TODO: Figure out how to test this.
-        const expectedHeld =
-          theirCommitment.allocation[1 - theirCommitment.destination.indexOf(HUB_ADDRESS)];
-        const funding =
-          theirCommitment.allocation[theirCommitment.destination.indexOf(HUB_ADDRESS)];
-
-        setTimeout(async () => {
-          // For the moment, we delay the deposit to give the user a chance to deposit.
-          await Blockchain.fund(channelID(theirCommitment.channel), expectedHeld, funding);
-        }, 4000);
-      }
-
       return ctx;
     }
-    case 'WALLET.FUNDING.STRATEGY_PROPOSED': {
-      const { processId } = action;
-      const process = await getProcess(processId);
-      if (!process) {
-        throw errors.processMissing(processId);
-      }
 
-      const { theirAddress } = process;
-      ctx.body = communication.sendStrategyApproved(theirAddress, processId);
-      ctx.status = 200;
+    const { commitment, signature } = await updateLedgerChannel(
+      {
+        ...theirCommitment,
+        appAttributes: appAttributesFromBytes(theirCommitment.appAttributes),
+      },
+      splitSignature,
+    );
+    ctx.body = communication.sendCommitmentReceived(
+      theirAddress,
+      processId,
+      commitment,
+      (signature as unknown) as string,
+    );
 
-      return ctx;
+    if (process.env.NODE_ENV !== 'test') {
+      // TODO: Figure out how to test this.
+      const expectedHeld =
+        theirCommitment.allocation[1 - theirCommitment.destination.indexOf(HUB_ADDRESS)];
+      const funding = theirCommitment.allocation[theirCommitment.destination.indexOf(HUB_ADDRESS)];
+
+      setTimeout(async () => {
+        // For the moment, we delay the deposit to give the user a chance to deposit.
+        await Blockchain.fund(channelID(theirCommitment.channel), expectedHeld, funding);
+      }, 4000);
     }
+
+    return ctx;
   }
 }
