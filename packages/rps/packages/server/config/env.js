@@ -2,9 +2,9 @@
 
 const fs = require('fs');
 const path = require('path');
-const { dotEnv } = require('magmo-devtools');
+const { configureEnvVariables } = require('magmo-devtools');
 
-dotEnv();
+configureEnvVariables();
 
 // We support resolving modules according to `NODE_PATH`.
 // This lets you use absolute paths in imports inside large monorepos:
