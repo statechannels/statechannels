@@ -13,15 +13,17 @@
     "build:typescript": "npx tsc",
     "build:webpack": "node scripts/build.js",
     "test": "run-s prettier:check 'test:app --all'",
-    "test:ci": "DEV_GANACHE_PORT=8503  run-s clearContracts prettier:check build 'test:contracts --all --ci' 'test:app --all --ci --runInBand'",
+    "test:ci": "DEV_GANACHE_PORT=8503 run-s prettier:check test:ci:contracts test:ci:app build",
+    "test:ci:contracts": "yarn test:contracts --all --ci",
+    "test:ci:app": "yarn test:app --all --ci --runInBand",
     "test:app": "npx run-jest -c ./config/jest/jest.config.js",
+    "test:contracts": "npx ganache-then-jest -c ./config/jest/jest.contracts.config.js --runInBand",
     "prettier:check": "npx prettier --check 'src/**/*.{ts,tsx}'",
     "prettier:write": "npx prettier --write 'src/**/*.{ts,tsx}'",
     "deployContracts": "npx deploy-contracts",
     "ganache:start": "npx start-ganache",
     "postinstall": "rm -f node_modules/web3/index.d.ts",
     "storybook": "start-storybook -p 9001 -c .storybook",
-    "test:contracts": "npx ganache-then-jest -c ./config/jest/jest.contracts.config.js --runInBand",
     "clearContracts": "rm -rf ./build/contracts"
   },
   "dependencies": {
@@ -30,7 +32,6 @@
     "@fortawesome/free-regular-svg-icons": "^5.7.1",
     "@fortawesome/free-solid-svg-icons": "^5.3.1",
     "@fortawesome/react-fontawesome": "^0.1.3",
-
     "@types/node": "^10.5.4",
     "@types/prop-types": "^15.5.4",
     "@types/react": "^16.4.7",
