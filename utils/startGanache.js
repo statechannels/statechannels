@@ -1,9 +1,9 @@
 const Logger = require("./logger.js").Logger;
-const { dotEnv } = require("../config/env.js");
+const { configureEnvVariables } = require("../config/env.js");
 
 module.exports = {
   startGanache: function(argv) {
-    dotEnv();
+    configureEnvVariables();
     let verbose = argv.v;
     let deterministic = argv.d;
     let network_id =

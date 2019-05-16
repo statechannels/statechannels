@@ -15,7 +15,7 @@ const {
 } = require("./utils/networkSetup");
 
 const { parseContractAddress, parseABI } = require("./utils/artifactParsers");
-const { dotEnv } = require("./config/env.js");
+const { configureEnvVariables } = require("./config/env.js");
 
 module.exports = {
   startGanache,
@@ -34,5 +34,5 @@ module.exports = {
   getNetworkName,
   parseContractAddress,
   parseABI,
-  dotEnv
+  configureEnvVariables
 };

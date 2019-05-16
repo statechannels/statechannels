@@ -1,10 +1,10 @@
 const Logger = require("./logger.js").Logger;
 const { getNetworkName } = require("./networkSetup.js");
-const { dotEnv } = require("../config/env.js");
+const { configureEnvVariables } = require("../config/env.js");
 
 module.exports = {
   deployContracts: function() {
-    dotEnv();
+    configureEnvVariables();
     const path = require("path");
     const { spawn } = require("child_process");
     let targetNetwork = "development";
