@@ -5,6 +5,7 @@ import { appAttributesFromBytes } from 'fmg-nitro-adjudicator';
 import { CommitmentReceived, communication, RelayableAction, StrategyProposed } from 'magmo-wallet';
 import { HUB_ADDRESS } from '../../constants';
 import { errors } from '../../wallet';
+import { getCurrentCommitment } from '../../wallet/db/queries/getCurrentCommitment';
 import { getProcess } from '../../wallet/db/queries/walletProcess';
 import { updateLedgerChannel } from '../../wallet/services';
 import { Blockchain } from '../../wallet/services/blockchain';
@@ -64,7 +65,9 @@ async function handleCommitmentReceived(ctx, action: CommitmentReceived) {
       return ctx;
     }
 
+    const currentCommitment = await getCurrentCommitment(theirCommitment);
     const { commitment, signature } = await updateLedgerChannel(
+      currentCommitment,
       {
         ...theirCommitment,
         appAttributes: appAttributesFromBytes(theirCommitment.appAttributes),

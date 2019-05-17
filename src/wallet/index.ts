@@ -5,13 +5,14 @@ import { formResponse, nextCommitment, validSignature } from './services/channel
 
 import errors from './errors';
 import { getApplications } from './services/applicationManager';
-import { updateLedgerChannel } from './services/ledgerChannelManager';
+import { openLedgerChannel, updateLedgerChannel } from './services/ledgerChannelManager';
 export { errors };
 
 export default class Wallet {
   sanitize: (appAttrs: any) => Bytes;
   validSignature = validSignature;
   updateChannel = queries.updateAllocatorChannel;
+  openLedgerChannel = openLedgerChannel;
   updateLedgerChannel = updateLedgerChannel;
   nextCommitment = nextCommitment;
   getApplications = getApplications;

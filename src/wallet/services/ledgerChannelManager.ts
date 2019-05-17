@@ -1,15 +1,14 @@
 import { CommitmentType, Signature } from 'fmg-core';
-import { channelID } from 'fmg-core/lib/channel';
 import { SignedCommitment } from '.';
 import { queries } from '../db/queries/allocator_channels';
 import errors from '../errors';
-import AllocatorChannel from '../models/allocatorChannel';
 import AllocatorChannelCommitment from '../models/allocatorChannelCommitment';
 import * as ChannelManagement from './channelManagement';
 import { asCoreCommitment, asLedgerCommitment, LedgerCommitment } from './ledger-commitment';
 
 // TODO: This should be extracted into a hub app?
 export async function updateLedgerChannel(
+  currentCommitment: AllocatorChannelCommitment,
   theirCommitment: LedgerCommitment,
   theirSignature: Signature,
 ): Promise<SignedCommitment> {
@@ -17,35 +16,29 @@ export async function updateLedgerChannel(
     throw errors.COMMITMENT_NOT_SIGNED;
   }
 
-  const { channel } = theirCommitment;
-  const channel_id = channelID(channel);
-  if (theirCommitment.turnNum > 0) {
-    const allocatorChannel = await AllocatorChannel.query()
-      .where({ channel_id })
-      .select('id')
-      .first();
+  if (!valuePreserved(currentCommitment, theirCommitment)) {
+    throw errors.VALUE_LOST;
+  }
 
-    if (!allocatorChannel) {
-      console.warn(channel_id);
-      throw errors.CHANNEL_MISSING;
-    }
+  if (
+    theirCommitment.commitmentType !== CommitmentType.PreFundSetup &&
+    !validTransition(asLedgerCommitment(currentCommitment), theirCommitment)
+  ) {
+    throw errors.INVALID_TRANSITION;
+  }
 
-    const currentCommitment = await AllocatorChannelCommitment.query()
-      .where({ allocatorChannelId: allocatorChannel.id })
-      .orderBy('turn_number', 'desc')
-      .select()
-      .first();
+  const ourCommitment = nextCommitment(theirCommitment);
 
-    if (!valuePreserved(currentCommitment, theirCommitment)) {
-      throw errors.VALUE_LOST;
-    }
+  await queries.updateAllocatorChannel(theirCommitment, ourCommitment);
+  return ChannelManagement.formResponse(asCoreCommitment(ourCommitment));
+}
 
-    if (
-      theirCommitment.commitmentType !== CommitmentType.PreFundSetup &&
-      !validTransition(asLedgerCommitment(currentCommitment), theirCommitment)
-    ) {
-      throw errors.INVALID_TRANSITION;
-    }
+export async function openLedgerChannel(
+  theirCommitment: LedgerCommitment,
+  theirSignature: Signature,
+): Promise<SignedCommitment> {
+  if (!ChannelManagement.validSignature(asCoreCommitment(theirCommitment), theirSignature)) {
+    throw errors.COMMITMENT_NOT_SIGNED;
   }
 
   const ourCommitment = nextCommitment(theirCommitment);

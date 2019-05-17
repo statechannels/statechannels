@@ -1,8 +1,11 @@
 import * as koaBody from 'koa-body';
 import * as Router from 'koa-router';
 
+import { channelID } from 'fmg-core';
 import { appAttributesFromBytes, bytesFromAppAttributes } from 'fmg-nitro-adjudicator';
 import Wallet, { errors } from '../../../wallet';
+import AllocatorChannel from '../../../wallet/models/allocatorChannel';
+import AllocatorChannelCommitment from '../../../wallet/models/allocatorChannelCommitment';
 export const BASE_URL = `/api/v1/ledger_channels`;
 
 const router = new Router();
@@ -14,14 +17,27 @@ router.post(`${BASE_URL}`, koaBody(), async ctx => {
     let body;
     const { commitment: theirCommitment, signature: theirSignature } = ctx.request.body;
 
-    const { commitment, signature } = await wallet.updateLedgerChannel(
-      {
-        ...theirCommitment,
-        appAttributes: appAttributesFromBytes(theirCommitment.appAttributes),
-      },
-      theirSignature,
-    );
-    body = { status: 'success', commitment, signature };
+    if (theirCommitment.turnNum == 0) {
+      const { commitment, signature } = await wallet.openLedgerChannel(
+        {
+          ...theirCommitment,
+          appAttributes: appAttributesFromBytes(theirCommitment.appAttributes),
+        },
+        theirSignature,
+      );
+      body = { status: 'success', commitment, signature };
+    } else {
+      const currentCommitment = await getCurrentCommitment(theirCommitment);
+      const { commitment, signature } = await wallet.updateLedgerChannel(
+        currentCommitment,
+        {
+          ...theirCommitment,
+          appAttributes: appAttributesFromBytes(theirCommitment.appAttributes),
+        },
+        theirSignature,
+      );
+      body = { status: 'success', commitment, signature };
+    }
 
     if (body.commitment) {
       ctx.status = 201;
@@ -54,3 +70,21 @@ router.post(`${BASE_URL}`, koaBody(), async ctx => {
 });
 
 export const ledgerChannelRoutes = router.routes();
+async function getCurrentCommitment(theirCommitment: any) {
+  const { channel } = theirCommitment;
+  const channel_id = channelID(channel);
+  const allocatorChannel = await AllocatorChannel.query()
+    .where({ channel_id })
+    .select('id')
+    .first();
+  if (!allocatorChannel) {
+    console.warn(channel_id);
+    throw errors.CHANNEL_MISSING;
+  }
+  const currentCommitment = await AllocatorChannelCommitment.query()
+    .where({ allocatorChannelId: allocatorChannel.id })
+    .orderBy('turn_number', 'desc')
+    .select()
+    .first();
+  return currentCommitment;
+}
