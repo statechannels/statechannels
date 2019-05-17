@@ -12,23 +12,7 @@ export async function updateLedgerChannel(
   theirCommitment: LedgerCommitment,
   theirSignature: Signature,
 ): Promise<SignedCommitment> {
-  if (!ChannelManagement.validSignature(asCoreCommitment(theirCommitment), theirSignature)) {
-    throw errors.COMMITMENT_NOT_SIGNED;
-  }
-
-  if (!valuePreserved(currentCommitment, theirCommitment)) {
-    throw errors.VALUE_LOST;
-  }
-
-  if (
-    theirCommitment.commitmentType !== CommitmentType.PreFundSetup &&
-    !validTransition(asLedgerCommitment(currentCommitment), theirCommitment)
-  ) {
-    throw errors.INVALID_TRANSITION;
-  }
-
-  const ourCommitment = nextCommitment(theirCommitment);
-
+  const ourCommitment = nextCommitment(theirCommitment, theirSignature, currentCommitment);
   await queries.updateAllocatorChannel(theirCommitment, ourCommitment);
   return ChannelManagement.formResponse(asCoreCommitment(ourCommitment));
 }
@@ -37,17 +21,33 @@ export async function openLedgerChannel(
   theirCommitment: LedgerCommitment,
   theirSignature: Signature,
 ): Promise<SignedCommitment> {
-  if (!ChannelManagement.validSignature(asCoreCommitment(theirCommitment), theirSignature)) {
-    throw errors.COMMITMENT_NOT_SIGNED;
-  }
-
-  const ourCommitment = nextCommitment(theirCommitment);
-
+  const ourCommitment = nextCommitment(theirCommitment, theirSignature);
   await queries.updateAllocatorChannel(theirCommitment, ourCommitment);
   return ChannelManagement.formResponse(asCoreCommitment(ourCommitment));
 }
 
-export function nextCommitment(theirCommitment: LedgerCommitment): LedgerCommitment {
+export function nextCommitment(
+  theirCommitment: LedgerCommitment,
+  theirSignature: Signature,
+  currentCommitment?: AllocatorChannelCommitment,
+): LedgerCommitment {
+  if (!ChannelManagement.validSignature(asCoreCommitment(theirCommitment), theirSignature)) {
+    throw errors.COMMITMENT_NOT_SIGNED;
+  }
+
+  if (theirCommitment.turnNum > 0) {
+    if (!valuePreserved(currentCommitment, theirCommitment)) {
+      throw errors.VALUE_LOST;
+    }
+
+    if (
+      theirCommitment.commitmentType !== CommitmentType.PreFundSetup &&
+      !validTransition(asLedgerCommitment(currentCommitment), theirCommitment)
+    ) {
+      throw errors.INVALID_TRANSITION;
+    }
+  }
+
   if (theirCommitment.commitmentType !== CommitmentType.App) {
     return ChannelManagement.nextCommitment(theirCommitment);
   }
