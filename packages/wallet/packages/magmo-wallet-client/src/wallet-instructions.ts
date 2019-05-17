@@ -79,8 +79,9 @@ export type WithdrawalRequest = ReturnType<typeof withdrawalRequest>;
 // =========
 
 export const CREATE_CHALLENGE_REQUEST = 'WALLET.CHALLENGE.CREATE';
-export const createChallenge = () => ({
+export const createChallenge = (channelId: string) => ({
   type: CREATE_CHALLENGE_REQUEST as typeof CREATE_CHALLENGE_REQUEST,
+  channelId,
 });
 export type CreateChallengeRequest = ReturnType<typeof createChallenge>;
 

@@ -83,7 +83,7 @@ export const standard = {
   propose: commitmentHelper.proposeFromSalt({
     ...baseWithBuyIn,
     turnNum: 4,
-    allocation: fourSix,
+    allocation: fiveFive,
     aWeapon,
     salt,
   }),

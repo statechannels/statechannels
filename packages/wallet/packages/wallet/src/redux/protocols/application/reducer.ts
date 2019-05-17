@@ -112,7 +112,7 @@ const updateProtocolState = (
   action: actions.OwnCommitmentReceived | actions.OpponentCommitmentReceived,
 ): states.ApplicationState => {
   let channelId;
-  if (protocolState.type === 'AddressKnown') {
+  if (protocolState.type === 'Application.AddressKnown') {
     channelId = channelID(action.commitment.channel);
   } else {
     channelId = protocolState.channelId;

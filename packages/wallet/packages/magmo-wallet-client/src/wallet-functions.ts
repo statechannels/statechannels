@@ -243,9 +243,9 @@ export function startFunding(
  * [[WalletEventListener]] during the challenge process.
  * @param iFrameId The id of the embedded wallet iframe.
  */
-export function startChallenge(iFrameId: string) {
+export function startChallenge(iFrameId: string, channelId: string) {
   const iFrame = document.getElementById(iFrameId) as HTMLIFrameElement;
-  const message = createChallenge();
+  const message = createChallenge(channelId);
   iFrame.contentWindow.postMessage(message, '*');
 }
 

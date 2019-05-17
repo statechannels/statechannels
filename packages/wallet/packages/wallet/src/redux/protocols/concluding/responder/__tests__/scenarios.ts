@@ -67,19 +67,19 @@ const defaults = { processId, channelId };
 // ------
 // States
 // ------
-const approveConcluding = states.responderApproveConcluding(defaults);
-const decideDefund = states.responderDecideDefund(defaults);
+const approveConcluding = states.approveConcluding(defaults);
+const decideDefund = states.decideDefund(defaults);
 
-const waitForDefund = states.responderWaitForDefund({
+const waitForDefund = states.waitForDefund({
   ...defaults,
   defundingState: preSuccessState,
 });
 
-const waitForDefundPreFailure = states.responderWaitForDefund({
+const waitForDefundPreFailure = states.waitForDefund({
   ...defaults,
   defundingState: preFailureState,
 });
-const acknowledgeSuccess = states.responderAcknowledgeSuccess(defaults);
+const acknowledgeSuccess = states.acknowledgeSuccess(defaults);
 
 // -------
 // Actions
@@ -129,7 +129,7 @@ export const channelDoesntExist = {
   ...defaults,
   initialize: { channelId, store: setChannels(EMPTY_SHARED_DATA, []), commitment: app52 },
   acknowledgeFailure: {
-    state: states.responderAcknowledgeFailure({ ...defaults, reason: 'ChannelDoesntExist' }),
+    state: states.acknowledgeFailure({ ...defaults, reason: 'ChannelDoesntExist' }),
     store: initialStore,
     action: acknowledged,
   },
@@ -139,7 +139,7 @@ export const concludingNotPossible = {
   ...defaults,
   initialize: { store: initialStoreYourTurn, commitment: app53 },
   acknowledgeFailure: {
-    state: states.responderAcknowledgeFailure({ ...defaults, reason: 'NotYourTurn' }),
+    state: states.acknowledgeFailure({ ...defaults, reason: 'NotYourTurn' }),
     store: initialStore,
     action: acknowledged,
   },
@@ -153,7 +153,7 @@ export const defundFailed = {
     action: failureTrigger,
   },
   acknowledgeFailure: {
-    state: states.responderAcknowledgeFailure({ ...defaults, reason: 'DefundFailed' }),
+    state: states.acknowledgeFailure({ ...defaults, reason: 'DefundFailed' }),
     store: initialStore,
     action: acknowledged,
   },

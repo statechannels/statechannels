@@ -333,8 +333,9 @@ export const CHALLENGE_RESPONSE_REQUESTED = 'WALLET.CHALLENGING.CHALLENGE_RESPON
 /**
  * @ignore
  */
-export const challengeResponseRequested = () => ({
+export const challengeResponseRequested = (channelId: string) => ({
   type: CHALLENGE_RESPONSE_REQUESTED as typeof CHALLENGE_RESPONSE_REQUESTED,
+  channelId,
 });
 /**
  * The event emitted when a response to a challenge is requested from the application.

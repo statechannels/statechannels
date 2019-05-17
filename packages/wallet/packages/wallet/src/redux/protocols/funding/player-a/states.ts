@@ -12,12 +12,12 @@ export type OngoingFundingState =
 export type TerminalFundingState = Success | Failure;
 export type FundingState = OngoingFundingState | TerminalFundingState;
 
-export const WAIT_FOR_STRATEGY_CHOICE = 'WaitForStrategyChoice';
-export const WAIT_FOR_STRATEGY_RESPONSE = 'WaitForStrategyResponse';
-export const WAIT_FOR_FUNDING = 'WaitForFunding';
-export const WAIT_FOR_SUCCESS_CONFIRMATION = 'WaitForSuccessConfirmation';
-export const FAILURE = 'Failure';
-export const SUCCESS = 'Success';
+export const WAIT_FOR_STRATEGY_CHOICE = 'IndirectFunding.PlayerA.WaitForStrategyChoice';
+export const WAIT_FOR_STRATEGY_RESPONSE = 'IndirectFunding.PlayerA.WaitForStrategyResponse';
+export const WAIT_FOR_FUNDING = 'IndirectFunding.PlayerA.WaitForFunding';
+export const WAIT_FOR_SUCCESS_CONFIRMATION = 'IndirectFunding.PlayerA.WaitForSuccessConfirmation';
+export const FAILURE = 'IndirectFunding.PlayerA.Failure';
+export const SUCCESS = 'IndirectFunding.PlayerA.Success';
 
 interface BaseState {
   processId: string;

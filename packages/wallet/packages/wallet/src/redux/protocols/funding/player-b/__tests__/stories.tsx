@@ -32,7 +32,7 @@ addStories(scenarios.cancelledByOpponent, 'Funding / Player B / Cancelled by opp
 function addStories(scenario, chapter) {
   Object.keys(scenario.states).forEach(key => {
     if (!isTerminal(scenario.states[key])) {
-      storiesOf(chapter, module).add(key, render(<Funding state={scenario.states[key]} />));
+      storiesOf(chapter, module).add(key, render(<Funding state={scenario.states[key].state} />));
     }
   });
 }

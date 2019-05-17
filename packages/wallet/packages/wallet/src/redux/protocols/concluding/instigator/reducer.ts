@@ -112,7 +112,7 @@ function handleDefundingAction(
   sharedData: Storage,
   action: DefundingAction,
 ): ReturnVal {
-  if (protocolState.type !== 'InstigatorWaitForDefund') {
+  if (protocolState.type !== 'ConcludingInstigator.WaitForDefund') {
     return { protocolState, sharedData };
   }
   const defundingState1 = protocolState.defundingState;
@@ -131,7 +131,7 @@ function handleDefundingAction(
 }
 
 function concludingCancelled(protocolState: NonTerminalCState, sharedData: Storage): ReturnVal {
-  if (protocolState.type !== 'InstigatorApproveConcluding') {
+  if (protocolState.type !== 'ConcludingInstigator.ApproveConcluding') {
     return { protocolState, sharedData };
   }
   return {
@@ -141,7 +141,7 @@ function concludingCancelled(protocolState: NonTerminalCState, sharedData: Stora
 }
 
 function concludeApproved(protocolState: NonTerminalCState, sharedData: Storage): ReturnVal {
-  if (protocolState.type !== 'InstigatorApproveConcluding') {
+  if (protocolState.type !== 'ConcludingInstigator.ApproveConcluding') {
     return { protocolState, sharedData };
   }
 
@@ -167,7 +167,7 @@ function concludeReceived(
   protocolState: NonTerminalCState,
   sharedData: Storage,
 ): ReturnVal {
-  if (protocolState.type !== 'InstigatorWaitForOpponentConclude') {
+  if (protocolState.type !== 'ConcludingInstigator.WaitForOpponentConclude') {
     return { protocolState, sharedData };
   }
   const { signedCommitment } = action;
@@ -184,7 +184,7 @@ function concludeReceived(
 }
 
 function defundChosen(protocolState: NonTerminalCState, sharedData: Storage): ReturnVal {
-  if (protocolState.type !== 'InstigatorAcknowledgeConcludeReceived') {
+  if (protocolState.type !== 'ConcludingInstigator.AcknowledgeConcludeReceived') {
     return { protocolState, sharedData };
   }
   // initialize defunding state machine
@@ -204,9 +204,9 @@ function defundChosen(protocolState: NonTerminalCState, sharedData: Storage): Re
 
 function acknowledged(protocolState: CState, sharedData: Storage): ReturnVal {
   switch (protocolState.type) {
-    case 'InstigatorAcknowledgeSuccess':
+    case 'ConcludingInstigator.AcknowledgeSuccess':
       return { protocolState: success(), sharedData: sendConcludeSuccess(hideWallet(sharedData)) };
-    case 'InstigatorAcknowledgeFailure':
+    case 'ConcludingInstigator.AcknowledgeFailure':
       return {
         protocolState: failure({ reason: protocolState.reason }),
         sharedData: sendConcludeFailure(hideWallet(sharedData), 'Other'),

@@ -173,7 +173,7 @@ export async function respondWithMove(
   const respondWithMoveTransaction = createRespondWithMoveTransaction(toCommitment, toSig);
   const transactionReceipt = await sendTransaction(provider, respondWithMoveTransaction);
   await transactionReceipt.wait();
-  return toCommitment;
+  return { toCommitment, toSig };
 }
 
 export async function refuteChallenge(

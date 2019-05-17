@@ -9,6 +9,7 @@ import { PlayerIndex } from '../types';
 import { CommitmentType } from 'fmg-core/lib/commitment';
 import * as magmoWalletClient from 'magmo-wallet-client';
 import { ChannelState } from '../channel-store';
+import { Commitment } from '../../domain';
 
 export const updateChannelState = (
   sharedData: SharedData,
@@ -78,6 +79,7 @@ export function sendConcludeSuccess(sharedData: SharedData): SharedData {
   const newSharedData = { ...sharedData };
   newSharedData.outboxState = accumulateSideEffects(newSharedData.outboxState, {
     messageOutbox: magmoWalletClient.concludeSuccess(),
+    // TODO could rename this helper function, as it covers both ways of finalizing a channel
   });
   return newSharedData;
 }
@@ -86,6 +88,35 @@ export function sendOpponentConcluded(sharedData: SharedData): SharedData {
   const newSharedData = { ...sharedData };
   newSharedData.outboxState = accumulateSideEffects(newSharedData.outboxState, {
     messageOutbox: magmoWalletClient.opponentConcluded(),
+    // TODO could rename this helper function, as it covers both ways of finalizing a channel
+  });
+  return newSharedData;
+}
+
+export function sendChallengeResponseRequested(
+  sharedData: SharedData,
+  channelId: string,
+): SharedData {
+  const newSharedData = { ...sharedData };
+  newSharedData.outboxState = accumulateSideEffects(newSharedData.outboxState, {
+    messageOutbox: magmoWalletClient.challengeResponseRequested(channelId),
+  });
+  return newSharedData;
+}
+
+export function sendChallengeCommitmentReceived(sharedData: SharedData, commitment: Commitment) {
+  const newSharedData = { ...sharedData };
+  newSharedData.outboxState = accumulateSideEffects(newSharedData.outboxState, {
+    messageOutbox: magmoWalletClient.challengeCommitmentReceived(commitment),
+  });
+  return newSharedData;
+}
+
+// TODO 'Complete' here means the challenge was successfully responded to
+export function sendChallengeComplete(sharedData: SharedData) {
+  const newSharedData = { ...sharedData };
+  newSharedData.outboxState = accumulateSideEffects(newSharedData.outboxState, {
+    messageOutbox: magmoWalletClient.challengeComplete(),
   });
   return newSharedData;
 }

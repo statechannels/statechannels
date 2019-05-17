@@ -23,13 +23,14 @@ linkStyle default interpolate basis
   WP-->|Withdrawal protocol failure|F((failure))
   LDP-->|Indirect de-funding protocol failure|F((failure))
 
-  style S  fill:#efdd20
-  style ICC  fill:#efdd20
-  style ID fill:#efdd20
-  style Su fill:#58ef21
-  style F  fill:#f45941
-  style WP stroke:#333,stroke-width:4px
-  style LDP stroke:#333,stroke-width:4px
+  classDef logic fill:#efdd20;
+  classDef Success fill:#58ef21;
+  classDef Failure fill:#f45941;
+  classDef WaitForChildProtocol stroke:#333,stroke-width:4px,color:#ffff,fill:#333;
+  class S,ICC,ID logic;
+  class Su Success;
+  class F Failure;
+  class WP,LDP WaitForChildProtocol;
 ```
 
 ## Notes

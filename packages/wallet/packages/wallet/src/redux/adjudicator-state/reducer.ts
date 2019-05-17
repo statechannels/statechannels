@@ -24,6 +24,9 @@ export const adjudicatorStateReducer = (
       return challengeRespondedReducer(state, action);
     case actions.CHALLENGE_CREATED_EVENT:
       return challengeCreatedEventReducer(state, action);
+    case actions.CHALLENGE_EXPIRY_SET_EVENT:
+      // We already handle this in the challenge created event
+      return state;
     default:
       return unreachable(action);
   }

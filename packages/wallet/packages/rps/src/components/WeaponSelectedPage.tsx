@@ -26,7 +26,7 @@ export default class WeaponSelectedPage extends React.PureComponent<Props> {
           </p>
 
           <div>
-            <WeaponBadge move={yourWeapon} />`
+            <WeaponBadge move={yourWeapon} />
           </div>
           <p>{message}</p>
         </div>

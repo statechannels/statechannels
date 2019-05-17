@@ -66,7 +66,7 @@ describe('adjudicator state reducer', () => {
     const state = {
       [channelId]: createChallengeState(channelId, 123),
     };
-    const action = actions.respondWithMoveEvent('0x0', channelId, gameCommitment1);
+    const action = actions.respondWithMoveEvent('0x0', channelId, gameCommitment1, '0xSignature');
     const updatedState = adjudicatorStateReducer(state, action);
 
     it('clears the challenge', () => {

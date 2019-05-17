@@ -33,12 +33,14 @@ linkStyle default interpolate basis
   D   --> |defunding protocol succeeded| AS(ResponderAcknowledgeSuccess)
   AS -->  |ACKNOWLEDGED| SS((Success))
   D   --> |defunding protocol failed| AF(ResponderAcknowledgeFailure)
-  style S  fill:#efdd20
-  style E  fill:#efdd20
-  style MT fill:#efdd20
-  style SS fill:#58ef21
-  style F  fill:#f45941
-  style D stroke:#333,stroke-width:4px
+  classDef logic fill:#efdd20;
+  classDef Success fill:#58ef21;
+  classDef Failure fill:#f45941;
+  classDef WaitForChildProtocol stroke:#333,stroke-width:4px,color:#ffff,fill:#333;
+  class S,E,MT logic;
+  class SS Success;
+  class F Failure;
+  class D WaitForChildProtocol;
 ```
 
 ## Scenarios

@@ -1,10 +1,10 @@
 import { SharedData } from '../state';
-import { ChallengingState } from './challenging/states';
+import { ChallengerState } from './dispute/challenger/states';
 
 import { DirectFundingState } from './direct-funding/state';
 import { FundingState } from './funding/states';
 import { IndirectFundingState } from './indirect-funding/state';
-import { RespondingState } from './responding/state';
+import { ResponderState } from './dispute/responder/state';
 import { WithdrawalState } from './withdrawing/states';
 import { ApplicationState } from './application/states';
 import { IndirectDefundingState } from './indirect-defunding/state';
@@ -16,10 +16,10 @@ export type ProtocolState =
   | IndirectFundingState
   | DirectFundingState
   | WithdrawalState
-  | RespondingState
+  | ResponderState
   | FundingState
   | DefundingState
-  | ChallengingState
+  | ChallengerState
   | ConcludingState
   | IndirectDefundingState;
 

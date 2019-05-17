@@ -6,7 +6,7 @@ interface Props {
 
 export default class WaitForResponseOrTimeout extends React.PureComponent<Props> {
   render() {
-    const expiryDate = new Date(this.props.expirationTime * 1000)
+    const expiryDate = new Date(this.props.expirationTime)
       .toLocaleTimeString()
       .replace(/:\d\d /, ' ');
     return (
