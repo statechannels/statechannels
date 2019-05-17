@@ -6,7 +6,7 @@ import errors from '../errors';
 import AllocatorChannel from '../models/allocatorChannel';
 import AllocatorChannelCommitment from '../models/allocatorChannelCommitment';
 import * as ChannelManagement from './channelManagement';
-import { asCoreCommitment, LedgerCommitment } from './ledger-commitment';
+import { asCoreCommitment, asLedgerCommitment, LedgerCommitment } from './ledger-commitment';
 
 // TODO: This should be extracted into a hub app?
 export async function updateLedgerChannel(
@@ -17,15 +17,35 @@ export async function updateLedgerChannel(
     throw errors.COMMITMENT_NOT_SIGNED;
   }
 
-  if (!(await valuePreserved(theirCommitment))) {
-    throw errors.VALUE_LOST;
-  }
+  const { channel } = theirCommitment;
+  const channel_id = channelID(channel);
+  if (theirCommitment.turnNum > 0) {
+    const allocatorChannel = await AllocatorChannel.query()
+      .where({ channel_id })
+      .select('id')
+      .first();
 
-  if (
-    theirCommitment.commitmentType !== CommitmentType.PreFundSetup &&
-    !(await validTransition(theirCommitment))
-  ) {
-    throw errors.INVALID_TRANSITION;
+    if (!allocatorChannel) {
+      console.warn(channel_id);
+      throw errors.CHANNEL_MISSING;
+    }
+
+    const currentCommitment = await AllocatorChannelCommitment.query()
+      .where({ allocatorChannelId: allocatorChannel.id })
+      .orderBy('turn_number', 'desc')
+      .select()
+      .first();
+
+    if (!(await valuePreserved(theirCommitment))) {
+      throw errors.VALUE_LOST;
+    }
+
+    if (
+      theirCommitment.commitmentType !== CommitmentType.PreFundSetup &&
+      !validTransition(asLedgerCommitment(currentCommitment), theirCommitment)
+    ) {
+      throw errors.INVALID_TRANSITION;
+    }
   }
 
   const ourCommitment = nextCommitment(theirCommitment);
@@ -54,24 +74,9 @@ export async function valuePreserved(theirCommitment: any): Promise<boolean> {
   return theirCommitment && true;
 }
 
-export async function validTransition(theirCommitment: LedgerCommitment): Promise<boolean> {
-  const { channel } = theirCommitment;
-  const channel_id = channelID(channel);
-
-  const allocator_channel = await AllocatorChannel.query()
-    .where({ channel_id })
-    .select('id')
-    .first();
-
-  if (!allocator_channel) {
-    throw errors.CHANNEL_MISSING;
-  }
-
-  const currentCommitment = await AllocatorChannelCommitment.query()
-    .where({ allocator_channel_id: allocator_channel.id })
-    .orderBy('turn_number', 'desc')
-    .select()
-    .first();
-
-  return theirCommitment.turnNum === currentCommitment.turnNumber + 1;
+export function validTransition(
+  currentCommitment: LedgerCommitment,
+  theirCommitment: LedgerCommitment,
+): boolean {
+  return theirCommitment.turnNum === currentCommitment.turnNum + 1;
 }
