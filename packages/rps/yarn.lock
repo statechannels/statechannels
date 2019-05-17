@@ -7689,6 +7689,11 @@ dotenv-expand@4.2.0, dotenv-expand@^4.2.0:
   resolved "https://registry.yarnpkg.com/dotenv-expand/-/dotenv-expand-4.2.0.tgz#def1f1ca5d6059d24a766e587942c21106ce1275"
   integrity sha1-3vHxyl1gWdJKdm5YeULCEQbOEnU=
 
+dotenv-expand@^5.1.0:
+  version "5.1.0"
+  resolved "https://registry.yarnpkg.com/dotenv-expand/-/dotenv-expand-5.1.0.tgz#3fbaf020bfd794884072ea26b1e9791d45a629f0"
+  integrity sha512-YXQl1DSa4/PQyRfgrv6aoNjhasp/p4qs9FjJ4q4cQk+8m4r6k4ZSiEyytKG8f8W9gi8WsQtIObNmKd+tMzNTmA==
+
 dotenv-webpack@^1.5.7:
   version "1.7.0"
   resolved "https://registry.yarnpkg.com/dotenv-webpack/-/dotenv-webpack-1.7.0.tgz#4384d8c57ee6f405c296278c14a9f9167856d3a1"
@@ -13095,17 +13100,6 @@ ltgt@~2.1.1:
     ethers "^4.0.15"
     yargs "^12.0.5"
 
-"magmo-devtools@git+https://github.com/magmo/devtools.git#v0.1.13":
-  version "0.1.13"
-  resolved "git+https://github.com/magmo/devtools.git#650f698f2468ae76020e1466b9686939aa018c4e"
-  dependencies:
-    chai "^4.2.0"
-    detect-port "^1.3.0"
-    dotenv "^6.1.0"
-    ethers "^4.0.15"
-    solc "^0.5.4"
-    yargs "^12.0.5"
-
 "magmo-devtools@git+https://github.com/magmo/devtools.git#v0.1.15":
   version "0.1.15"
   resolved "git+https://github.com/magmo/devtools.git#c131266b5f34661b0a685ae1fece7c3c6aa3b805"
@@ -13114,6 +13108,19 @@ ltgt@~2.1.1:
     detect-port "^1.3.0"
     dotenv "^6.1.0"
     ethers "^4.0.15"
+    solc "^0.5.4"
+    yargs "^12.0.5"
+
+"magmo-devtools@git+https://github.com/magmo/devtools.git#v0.1.18":
+  version "0.1.17"
+  resolved "git+https://github.com/magmo/devtools.git#1d5ff7546ba82991b3cee84b2b38404155016092"
+  dependencies:
+    chai "^4.2.0"
+    detect-port "^1.3.0"
+    dotenv "^6.1.0"
+    dotenv-expand "^5.1.0"
+    ethers "^4.0.15"
+    jest "^24.0.6"
     solc "^0.5.4"
     yargs "^12.0.5"
 
