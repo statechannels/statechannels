@@ -36,7 +36,7 @@ export async function updateLedgerChannel(
       .select()
       .first();
 
-    if (!(await valuePreserved(theirCommitment))) {
+    if (!valuePreserved(currentCommitment, theirCommitment)) {
       throw errors.VALUE_LOST;
     }
 
@@ -70,8 +70,8 @@ export function nextCommitment(theirCommitment: LedgerCommitment): LedgerCommitm
   };
 }
 
-export async function valuePreserved(theirCommitment: any): Promise<boolean> {
-  return theirCommitment && true;
+export function valuePreserved(currentCommitment: any, theirCommitment: any): boolean {
+  return currentCommitment && theirCommitment && true;
 }
 
 export function validTransition(
