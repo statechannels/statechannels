@@ -21,3 +21,9 @@ export function isTerminal(
     (playerB.isFundingState(state) && playerB.isTerminal(state))
   );
 }
+
+export function isNonTerminalFundingState(
+  state: ProtocolState,
+): state is playerA.OngoingFundingState | playerB.OngoingFundingState {
+  return isFundingState(state) && !isTerminal(state);
+}

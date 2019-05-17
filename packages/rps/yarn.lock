@@ -2848,6 +2848,11 @@
     "@types/koa-compose" "*"
     "@types/node" "*"
 
+"@types/lodash@4.14.129":
+  version "4.14.129"
+  resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.14.129.tgz#9aaca391db126802482655c48dd79a814488202f"
+  integrity sha512-oYaV0eSlnOacOr7i4X1FFdH8ttSlb57gu3I9MuStIv2CYkISEY84dNHYsC3bF6sNH7qYcu1BtVrCtQ8Q4KPTfQ==
+
 "@types/mime@*":
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/@types/mime/-/mime-2.0.1.tgz#dc488842312a7f075149312905b5e3c0b054c79d"
@@ -9190,10 +9195,10 @@ fmg-core@^0.5.6:
     web3-utils "1.0.0-beta.37"
     websocket "^1.0.28"
 
-fmg-nitro-adjudicator@0.0.13:
-  version "0.0.13"
-  resolved "https://registry.yarnpkg.com/fmg-nitro-adjudicator/-/fmg-nitro-adjudicator-0.0.13.tgz#b08392447e8cf9a4bc24c67994d7226faf697046"
-  integrity sha512-TY7OhRb4xd2alhMBrnPg8IReFXWVgajjt661DLnE2ENKlK/4fLAqzU8Uw3VadmG3rNU3sJ0QF5g7ssaTtNLe7A==
+fmg-nitro-adjudicator@0.0.14:
+  version "0.0.14"
+  resolved "https://registry.yarnpkg.com/fmg-nitro-adjudicator/-/fmg-nitro-adjudicator-0.0.14.tgz#5fd5fdff86615539c02396b6ad9c1a9c6383294d"
+  integrity sha512-ZWDlCxje6Y4SBr6EQOqq9GrrNHL3sV5LPcMWHGdARRHNwQAfPOtNFIq7qUaXaSM9fe2MN4wiEmggrIZq6wfB0w==
   dependencies:
     ethers "^4.0.26"
     fmg-core "^0.5.6"

@@ -19,28 +19,28 @@ describe('[ Happy path ]', () => {
     const { commitment, store } = scenario.initialize;
     const result = initialize(commitment, processId, store);
 
-    itTransitionsTo(result, 'ResponderApproveConcluding');
+    itTransitionsTo(result, 'ConcludingResponder.ApproveConcluding');
   });
   describe('when in ApproveConcluding', () => {
     const { state, store, action, reply } = scenario.approveConcluding;
     const result = responderConcludingReducer(state, store, action);
 
     expectThisCommitmentSent(result.sharedData, reply);
-    itTransitionsTo(result, 'ResponderDecideDefund');
+    itTransitionsTo(result, 'ConcludingResponder.DecideDefund');
   });
 
   describe('when in DecideDefund', () => {
     const { state, store, action } = scenario.decideDefund;
     const result = responderConcludingReducer(state, store, action);
 
-    itTransitionsTo(result, 'ResponderWaitForDefund');
+    itTransitionsTo(result, 'ConcludingResponder.WaitForDefund');
   });
 
   describe('when in WaitForDefund', () => {
     const { state, store, action } = scenario.waitForDefund;
     const result = responderConcludingReducer(state, store, action);
 
-    itTransitionsTo(result, 'ResponderAcknowledgeSuccess');
+    itTransitionsTo(result, 'ConcludingResponder.AcknowledgeSuccess');
   });
 
   describe('when in AcknowledgeSuccess', () => {
@@ -60,7 +60,7 @@ describe('[ Happy path (alternative) ]', () => {
     const { state, store, action, reply } = scenario.decideDefund;
     const result = responderConcludingReducer(state, store, action);
 
-    itTransitionsTo(result, 'ResponderWaitForDefund');
+    itTransitionsTo(result, 'ConcludingResponder.WaitForDefund');
     it(`initializes defundingState`, () => {
       expect(result.protocolState).toHaveProperty('defundingState');
     });
@@ -158,8 +158,8 @@ function itTransitionsToFailure(result: ReturnVal, reason: FailureReason) {
 
 function itTransitionsToAcknowledgeFailure(result: ReturnVal, reason: FailureReason) {
   it(`transitions to AcknowledgeFailure with reason ${reason}`, () => {
-    expect(result.protocolState.type).toEqual('ResponderAcknowledgeFailure');
-    if (result.protocolState.type === 'ResponderAcknowledgeFailure') {
+    expect(result.protocolState.type).toEqual('ConcludingResponder.AcknowledgeFailure');
+    if (result.protocolState.type === 'ConcludingResponder.AcknowledgeFailure') {
       expect(result.protocolState.reason).toEqual(reason);
     }
   });

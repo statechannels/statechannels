@@ -2,10 +2,10 @@ import { storiesOf } from '@storybook/react';
 import React from 'react';
 import Modal from 'react-modal';
 import { Provider } from 'react-redux';
-import { fakeStore } from '../../../../__stories__/index';
-import StatusBarLayout from '../../../../components/status-bar-layout';
+import { fakeStore } from '../../../../../__stories__/index';
+import StatusBarLayout from '../../../../../components/status-bar-layout';
 import * as scenarios from './scenarios';
-import { Responding } from '../container';
+import { Responder } from '../container';
 
 const render = container => () => {
   // todo: rework this modal stuff
@@ -45,11 +45,6 @@ const requireResponseHappyPathStories = {
   Success: scenarios.requireResponseHappyPath.success,
 };
 
-const userDeclinesStories = {
-  WaitForApproval: scenarios.userDeclines.waitForApproval,
-  Failure: scenarios.userDeclines.failure,
-};
-
 const transactionFailureStories = {
   WaitForApproval: scenarios.transactionFails.waitForApproval,
   WaitForTransaction: scenarios.transactionFails.waitForTransaction,
@@ -60,11 +55,10 @@ addStories(respondWithExistingMoveHappyPathStories, 'Responding / Respond with E
 addStories(requireResponseHappyPathStories, 'Responding / Requires new Response');
 addStories(refuteHappyPathStories, 'Responding / Refute challenge');
 addStories(transactionFailureStories, 'Responding / Transaction fails');
-addStories(userDeclinesStories, 'Responding / User rejects responding ');
 
 function addStories(collection, chapter) {
   Object.keys(collection).map(storyName => {
     const state = collection[storyName];
-    storiesOf(chapter, module).add(storyName, render(<Responding state={state} />));
+    storiesOf(chapter, module).add(storyName, render(<Responder state={state} />));
   });
 }

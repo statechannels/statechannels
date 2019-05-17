@@ -2,7 +2,7 @@ import * as channel from './channel-store/actions';
 import * as directFunding from './protocols/direct-funding/actions';
 import * as indirectFunding from './protocols/indirect-funding/actions';
 import * as protocol from './protocols/actions';
-import * as challenging from './protocols/challenging/actions';
+import * as challenging from './protocols/dispute/challenger/actions';
 import * as application from './protocols/application/actions';
 import { FundingAction } from './protocols/funding/actions';
 import { Commitment } from '../domain';
@@ -17,10 +17,11 @@ import {
   isTransactionAction as isTA,
 } from './protocols/transaction-submission/actions';
 import { WithdrawalAction } from './protocols/withdrawing/actions';
-import { RespondingAction } from './protocols/responding/actions';
+import { ResponderAction } from './protocols/dispute/responder/actions';
 import { DefundingAction } from './protocols/defunding/actions';
 import { ConcludingAction as ConcludingActionInstigator } from './protocols/concluding/instigator/actions';
 import { ConcludingAction as ConcludingActionResponder } from './protocols/concluding/responder/actions';
+import { WalletProtocol } from './types';
 export * from './protocols/transaction-submission/actions';
 export { COMMITMENT_RECEIVED, CommitmentReceived, commitmentReceived };
 
@@ -76,11 +77,25 @@ export const messageReceived = (processId: string, data: Message) => ({
 });
 export type MessageReceived = ReturnType<typeof messageReceived>;
 
+export const CHALLENGE_EXPIRY_SET_EVENT = 'WALLET.ADJUDICATOR.CHALLENGE_EXPIRY_TIME_SET';
+export const challengeExpirySetEvent = (
+  processId: string,
+  channelId: string,
+  expiryTime: number,
+) => ({
+  processId,
+  channelId,
+  expiryTime,
+  type: CHALLENGE_EXPIRY_SET_EVENT as typeof CHALLENGE_EXPIRY_SET_EVENT,
+});
+export type ChallengeExpirySetEvent = ReturnType<typeof challengeExpirySetEvent>;
+
 export const CHALLENGE_CREATED_EVENT = 'WALLET.ADJUDICATOR.CHALLENGE_CREATED_EVENT';
 export const challengeCreatedEvent = (channelId: string, commitment: Commitment, finalizedAt) => ({
   channelId,
   commitment,
   finalizedAt,
+  protocol: WalletProtocol.Dispute,
   type: CHALLENGE_CREATED_EVENT as typeof CHALLENGE_CREATED_EVENT,
 });
 export type ChallengeCreatedEvent = ReturnType<typeof challengeCreatedEvent>;
@@ -107,10 +122,16 @@ export const refutedEvent = (
 export type RefutedEvent = ReturnType<typeof refutedEvent>;
 
 export const RESPOND_WITH_MOVE_EVENT = 'WALLET.ADJUDICATOR.RESPOND_WITH_MOVE_EVENT';
-export const respondWithMoveEvent = (processId: string, channelId: string, responseCommitment) => ({
+export const respondWithMoveEvent = (
+  processId: string,
+  channelId: string,
+  responseCommitment: Commitment,
+  responseSignature: string,
+) => ({
   processId,
   channelId,
   responseCommitment,
+  responseSignature,
   type: RESPOND_WITH_MOVE_EVENT as typeof RESPOND_WITH_MOVE_EVENT,
 });
 export type RespondWithMoveEvent = ReturnType<typeof respondWithMoveEvent>;
@@ -144,18 +165,20 @@ export type AdjudicatorEventAction =
   | RefutedEvent
   | RespondWithMoveEvent
   | FundingReceivedEvent
-  | ChallengeExpiredEvent;
+  | ChallengeExpiredEvent
+  | ChallengeExpirySetEvent;
 
 export type CommonAction = MessageReceived | CommitmentReceived | AdjudicatorEventAction;
 export type ProtocolAction =
   | CommonAction
   | FundingAction
   | TransactionAction
-  | challenging.ChallengingAction
+  | challenging.ChallengerAction
+  | ResponderAction
   | directFunding.FundingAction
   | indirectFunding.Action
   | WithdrawalAction
-  | RespondingAction
+  | ResponderAction
   | application.ApplicationAction
   | DefundingAction
   | ConcludingActionInstigator
@@ -209,6 +232,8 @@ export function isAdjudicatorEventAction(action: WalletAction): action is Adjudi
     action.type === REFUTED_EVENT ||
     action.type === RESPOND_WITH_MOVE_EVENT ||
     action.type === FUNDING_RECEIVED_EVENT ||
-    action.type === CHALLENGE_EXPIRED_EVENT
+    action.type === CHALLENGE_EXPIRED_EVENT ||
+    action.type === CHALLENGE_CREATED_EVENT ||
+    action.type === CHALLENGE_EXPIRY_SET_EVENT
   );
 }

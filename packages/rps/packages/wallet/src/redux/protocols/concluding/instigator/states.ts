@@ -9,48 +9,46 @@ import { ProtocolState } from '../..';
 import { FailureReason, TerminalState } from '../state';
 
 export type InstigatorNonTerminalState =
-  | InstigatorApproveConcluding
-  | InstigatorWaitForOpponentConclude
-  | InstigatorAcknowledgeConcludeReceived
-  | InstigatorAcknowledgeFailure
-  | InstigatorAcknowledgeSuccess
-  | InstigatorWaitForDefund;
+  | ApproveConcluding
+  | WaitForOpponentConclude
+  | AcknowledgeConcludeReceived
+  | AcknowledgeFailure
+  | AcknowledgeSuccess
+  | WaitForDefund;
 
-export type InstigatorPreTerminalState =
-  | InstigatorAcknowledgeSuccess
-  | InstigatorAcknowledgeFailure;
+export type InstigatorPreTerminalState = AcknowledgeSuccess | AcknowledgeFailure;
 
-export interface InstigatorAcknowledgeSuccess {
-  type: 'InstigatorAcknowledgeSuccess';
+export interface AcknowledgeSuccess {
+  type: 'ConcludingInstigator.AcknowledgeSuccess';
   processId: string;
   channelId: string;
 }
-export interface InstigatorAcknowledgeFailure {
-  type: 'InstigatorAcknowledgeFailure';
+export interface AcknowledgeFailure {
+  type: 'ConcludingInstigator.AcknowledgeFailure';
   reason: FailureReason;
   processId: string;
   channelId: string;
 }
-export interface InstigatorApproveConcluding {
-  type: 'InstigatorApproveConcluding';
+export interface ApproveConcluding {
+  type: 'ConcludingInstigator.ApproveConcluding';
   processId: string;
   channelId: string;
 }
 
-export interface InstigatorWaitForOpponentConclude {
-  type: 'InstigatorWaitForOpponentConclude';
+export interface WaitForOpponentConclude {
+  type: 'ConcludingInstigator.WaitForOpponentConclude';
   processId: string;
   channelId: string;
 }
 
-export interface InstigatorAcknowledgeConcludeReceived {
-  type: 'InstigatorAcknowledgeConcludeReceived';
+export interface AcknowledgeConcludeReceived {
+  type: 'ConcludingInstigator.AcknowledgeConcludeReceived';
   processId: string;
   channelId: string;
 }
 
-export interface InstigatorWaitForDefund {
-  type: 'InstigatorWaitForDefund';
+export interface WaitForDefund {
+  type: 'ConcludingInstigator.WaitForDefund';
   processId: string;
   channelId: string;
   defundingState: DefundingState;
@@ -60,12 +58,12 @@ export function isConcludingInstigatorState(
   state: ProtocolState,
 ): state is InstigatorConcludingState {
   return (
-    state.type === 'InstigatorAcknowledgeSuccess' ||
-    state.type === 'InstigatorAcknowledgeFailure' ||
-    state.type === 'InstigatorApproveConcluding' ||
-    state.type === 'InstigatorWaitForOpponentConclude' ||
-    state.type === 'InstigatorAcknowledgeConcludeReceived' ||
-    state.type === 'InstigatorWaitForDefund'
+    state.type === 'ConcludingInstigator.AcknowledgeSuccess' ||
+    state.type === 'ConcludingInstigator.AcknowledgeFailure' ||
+    state.type === 'ConcludingInstigator.ApproveConcluding' ||
+    state.type === 'ConcludingInstigator.WaitForOpponentConclude' ||
+    state.type === 'ConcludingInstigator.AcknowledgeConcludeReceived' ||
+    state.type === 'ConcludingInstigator.WaitForDefund'
   );
 }
 
@@ -73,36 +71,34 @@ export function isConcludingInstigatorState(
 // Constructors
 // ------------
 
-export const instigatorApproveConcluding: Constructor<InstigatorApproveConcluding> = p => {
+export const instigatorApproveConcluding: Constructor<ApproveConcluding> = p => {
   const { processId, channelId } = p;
-  return { type: 'InstigatorApproveConcluding', processId, channelId };
+  return { type: 'ConcludingInstigator.ApproveConcluding', processId, channelId };
 };
 
-export const instigatorWaitForOpponentConclude: Constructor<
-  InstigatorWaitForOpponentConclude
-> = p => {
+export const instigatorWaitForOpponentConclude: Constructor<WaitForOpponentConclude> = p => {
   const { processId, channelId } = p;
-  return { type: 'InstigatorWaitForOpponentConclude', processId, channelId };
+  return { type: 'ConcludingInstigator.WaitForOpponentConclude', processId, channelId };
 };
 
 export const instigatorAcknowledgeConcludeReceived: Constructor<
-  InstigatorAcknowledgeConcludeReceived
+  AcknowledgeConcludeReceived
 > = p => {
   const { processId, channelId } = p;
-  return { type: 'InstigatorAcknowledgeConcludeReceived', processId, channelId };
+  return { type: 'ConcludingInstigator.AcknowledgeConcludeReceived', processId, channelId };
 };
 
-export const instigatorAcknowledgeSuccess: Constructor<InstigatorAcknowledgeSuccess> = p => {
+export const instigatorAcknowledgeSuccess: Constructor<AcknowledgeSuccess> = p => {
   const { processId, channelId } = p;
-  return { type: 'InstigatorAcknowledgeSuccess', processId, channelId };
+  return { type: 'ConcludingInstigator.AcknowledgeSuccess', processId, channelId };
 };
 
-export const instigatorAcknowledgeFailure: Constructor<InstigatorAcknowledgeFailure> = p => {
+export const instigatorAcknowledgeFailure: Constructor<AcknowledgeFailure> = p => {
   const { processId, channelId, reason } = p;
-  return { type: 'InstigatorAcknowledgeFailure', processId, channelId, reason };
+  return { type: 'ConcludingInstigator.AcknowledgeFailure', processId, channelId, reason };
 };
 
-export const instigatorWaitForDefund: Constructor<InstigatorWaitForDefund> = p => {
+export const instigatorWaitForDefund: Constructor<WaitForDefund> = p => {
   const { processId, channelId, defundingState } = p;
-  return { type: 'InstigatorWaitForDefund', processId, channelId, defundingState };
+  return { type: 'ConcludingInstigator.WaitForDefund', processId, channelId, defundingState };
 };

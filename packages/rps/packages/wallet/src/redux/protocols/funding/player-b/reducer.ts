@@ -68,7 +68,7 @@ function handleIndirectFundingAction(
   sharedData: SharedData,
   action: IndirectFundingAction,
 ): ProtocolStateWithSharedData<states.FundingState> {
-  if (protocolState.type !== 'WaitForFunding') {
+  if (protocolState.type !== states.WAIT_FOR_FUNDING) {
     console.error(
       `Funding reducer received indirect funding action ${action.type} but is currently in state ${
         protocolState.type

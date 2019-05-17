@@ -1,4 +1,4 @@
-export const ADDRESS_KNOWN = 'AddressKnown';
+export const ADDRESS_KNOWN = 'Application.AddressKnown';
 export interface AddressKnown {
   type: typeof ADDRESS_KNOWN;
   address: string;
@@ -8,7 +8,7 @@ export function addressKnown(address: string, privateKey: string): AddressKnown 
   return { type: ADDRESS_KNOWN, address, privateKey };
 }
 
-export const ONGOING = 'Ongoing';
+export const ONGOING = 'Application.Ongoing';
 export interface Ongoing {
   type: typeof ONGOING;
   channelId: string;
@@ -16,7 +16,7 @@ export interface Ongoing {
 export function ongoing(channelId: string): Ongoing {
   return { type: ONGOING, channelId };
 }
-export const SUCCESS = 'Success';
+export const SUCCESS = 'Application.Success';
 export interface Success {
   type: typeof SUCCESS;
 }

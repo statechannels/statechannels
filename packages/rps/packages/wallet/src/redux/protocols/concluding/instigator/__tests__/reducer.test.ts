@@ -19,35 +19,35 @@ describe('[ Happy path ]', () => {
   describe('when initializing', () => {
     const { store } = scenario.initialize;
     const result = initialize(channelId, processId, store);
-    itTransitionsTo(result, 'InstigatorApproveConcluding');
+    itTransitionsTo(result, 'ConcludingInstigator.ApproveConcluding');
   });
   describe('when in ApproveConcluding', () => {
     const { state, action, store, reply } = scenario.approveConcluding;
     const result = instigatorConcludingReducer(state, store, action);
 
     itSendsConcludeInstigated(result.sharedData, reply);
-    itTransitionsTo(result, 'InstigatorWaitForOpponentConclude');
+    itTransitionsTo(result, 'ConcludingInstigator.WaitForOpponentConclude');
   });
 
   describe('when in WaitForOpponentConclude', () => {
     const { state, action, store } = scenario.waitforOpponentConclude;
     const result = instigatorConcludingReducer(state, store, action);
 
-    itTransitionsTo(result, 'InstigatorAcknowledgeConcludeReceived');
+    itTransitionsTo(result, 'ConcludingInstigator.AcknowledgeConcludeReceived');
   });
 
   describe('when in AcknowledgeConcludeReceived', () => {
     const { state, action, store } = scenario.acknowledgeConcludeReceived;
     const result = instigatorConcludingReducer(state, store, action);
 
-    itTransitionsTo(result, 'InstigatorWaitForDefund');
+    itTransitionsTo(result, 'ConcludingInstigator.WaitForDefund');
   });
 
   describe('when in WaitForDefund', () => {
     const { state, action, store } = scenario.waitForDefund;
     const result = instigatorConcludingReducer(state, store, action);
 
-    itTransitionsTo(result, 'InstigatorAcknowledgeSuccess');
+    itTransitionsTo(result, 'ConcludingInstigator.AcknowledgeSuccess');
   });
 
   describe('when in AcknowledgeSuccess', () => {
@@ -161,8 +161,8 @@ function itTransitionsToFailure(result: ReturnVal, reason: FailureReason) {
 
 function itTransitionsToAcknowledgeFailure(result: ReturnVal, reason: FailureReason) {
   it(`transitions to AcknowledgeFailure with reason ${reason}`, () => {
-    expect(result.protocolState.type).toEqual('InstigatorAcknowledgeFailure');
-    if (result.protocolState.type === 'InstigatorAcknowledgeFailure') {
+    expect(result.protocolState.type).toEqual('ConcludingInstigator.AcknowledgeFailure');
+    if (result.protocolState.type === 'ConcludingInstigator.AcknowledgeFailure') {
       expect(result.protocolState.reason).toEqual(reason);
     }
   });

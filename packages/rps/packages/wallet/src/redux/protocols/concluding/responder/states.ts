@@ -18,30 +18,30 @@ export type ResponderNonTerminalState =
 export type ResponderPreTerminalState = ResponderAcknowledgeSuccess | ResponderAcknowledgeFailure;
 
 export interface ResponderAcknowledgeSuccess {
-  type: 'ResponderAcknowledgeSuccess';
+  type: 'ConcludingResponder.AcknowledgeSuccess';
   processId: string;
   channelId: string;
 }
 export interface ResponderAcknowledgeFailure {
-  type: 'ResponderAcknowledgeFailure';
+  type: 'ConcludingResponder.AcknowledgeFailure';
   reason: FailureReason;
   processId: string;
   channelId: string;
 }
 export interface ResponderApproveConcluding {
-  type: 'ResponderApproveConcluding';
+  type: 'ConcludingResponder.ApproveConcluding';
   processId: string;
   channelId: string;
 }
 
 export interface ResponderDecideDefund {
-  type: 'ResponderDecideDefund';
+  type: 'ConcludingResponder.DecideDefund';
   processId: string;
   channelId: string;
 }
 
 export interface ResponderWaitForDefund {
-  type: 'ResponderWaitForDefund';
+  type: 'ConcludingResponder.WaitForDefund';
   processId: string;
   channelId: string;
   defundingState: DefundingState;
@@ -51,11 +51,11 @@ export function isConcludingResponderState(
   state: ProtocolState,
 ): state is ResponderConcludingState {
   return (
-    state.type === 'ResponderAcknowledgeSuccess' ||
-    state.type === 'ResponderAcknowledgeFailure' ||
-    state.type === 'ResponderApproveConcluding' ||
-    state.type === 'ResponderDecideDefund' ||
-    state.type === 'ResponderWaitForDefund'
+    state.type === 'ConcludingResponder.AcknowledgeSuccess' ||
+    state.type === 'ConcludingResponder.AcknowledgeFailure' ||
+    state.type === 'ConcludingResponder.ApproveConcluding' ||
+    state.type === 'ConcludingResponder.DecideDefund' ||
+    state.type === 'ConcludingResponder.WaitForDefund'
   );
 }
 
@@ -63,27 +63,27 @@ export function isConcludingResponderState(
 // Constructors
 // ------------
 
-export const responderApproveConcluding: Constructor<ResponderApproveConcluding> = p => {
+export const approveConcluding: Constructor<ResponderApproveConcluding> = p => {
   const { processId, channelId } = p;
-  return { type: 'ResponderApproveConcluding', processId, channelId };
+  return { type: 'ConcludingResponder.ApproveConcluding', processId, channelId };
 };
 
-export const responderDecideDefund: Constructor<ResponderDecideDefund> = p => {
+export const decideDefund: Constructor<ResponderDecideDefund> = p => {
   const { processId, channelId } = p;
-  return { type: 'ResponderDecideDefund', processId, channelId };
+  return { type: 'ConcludingResponder.DecideDefund', processId, channelId };
 };
 
-export const responderAcknowledgeSuccess: Constructor<ResponderAcknowledgeSuccess> = p => {
+export const acknowledgeSuccess: Constructor<ResponderAcknowledgeSuccess> = p => {
   const { processId, channelId } = p;
-  return { type: 'ResponderAcknowledgeSuccess', processId, channelId };
+  return { type: 'ConcludingResponder.AcknowledgeSuccess', processId, channelId };
 };
 
-export const responderAcknowledgeFailure: Constructor<ResponderAcknowledgeFailure> = p => {
+export const acknowledgeFailure: Constructor<ResponderAcknowledgeFailure> = p => {
   const { processId, channelId, reason } = p;
-  return { type: 'ResponderAcknowledgeFailure', processId, channelId, reason };
+  return { type: 'ConcludingResponder.AcknowledgeFailure', processId, channelId, reason };
 };
 
-export const responderWaitForDefund: Constructor<ResponderWaitForDefund> = p => {
+export const waitForDefund: Constructor<ResponderWaitForDefund> = p => {
   const { processId, channelId, defundingState } = p;
-  return { type: 'ResponderWaitForDefund', processId, channelId, defundingState };
+  return { type: 'ConcludingResponder.WaitForDefund', processId, channelId, defundingState };
 };

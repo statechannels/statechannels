@@ -12,11 +12,13 @@ import { getProvider, isDevelopmentNetwork } from '../../utils/contract-utils';
 import { displaySender } from './display-sender';
 import { ganacheMiner } from './ganache-miner';
 import { WALLET_INITIALIZED } from '../state';
+import { challengeResponseInitiator } from './challenge-response-initiator';
 
 export function* sagaManager(): IterableIterator<any> {
   let adjudicatorWatcherProcess;
   let challengeWatcherProcess;
   let ganacheMinerProcess;
+  let challengeResponseInitiatorProcess;
 
   // always want the message listenter to be running
   yield fork(messageListener);
@@ -41,6 +43,9 @@ export function* sagaManager(): IterableIterator<any> {
       if (isDevelopmentNetwork() && !ganacheMinerProcess) {
         ganacheMinerProcess = yield fork(ganacheMiner);
       }
+      if (!challengeResponseInitiatorProcess) {
+        challengeResponseInitiatorProcess = yield fork(challengeResponseInitiator);
+      }
     } else {
       if (challengeWatcherProcess) {
         yield cancel(challengeWatcherProcess);
@@ -53,6 +58,10 @@ export function* sagaManager(): IterableIterator<any> {
       if (adjudicatorWatcherProcess) {
         yield cancel(adjudicatorWatcherProcess);
         adjudicatorWatcherProcess = undefined;
+      }
+      if (challengeResponseInitiatorProcess) {
+        yield cancel(challengeResponseInitiatorProcess);
+        challengeResponseInitiatorProcess = undefined;
       }
     }
 
