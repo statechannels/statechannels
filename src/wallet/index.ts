@@ -1,5 +1,5 @@
-export { ChannelResponse } from './services';
 import { Bytes } from 'fmg-core';
+export { SignedCommitment } from './services';
 import { queries } from './db/queries/allocator_channels';
 import { formResponse, nextCommitment, validSignature } from './services/channelManagement';
 

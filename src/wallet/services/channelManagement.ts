@@ -1,4 +1,4 @@
-import { ChannelResponse } from '.';
+import { SignedCommitment } from '.';
 import { HUB_PRIVATE_KEY } from '../../constants';
 
 import { Commitment, CommitmentType, sign, Signature } from 'fmg-core';
@@ -13,7 +13,7 @@ export function validSignature(commitment: Commitment, signature: Signature): bo
 export function formResponse(
   commitment: AllocatorChannelCommitment,
   sanitize: AppAttrSanitizer,
-): ChannelResponse {
+): SignedCommitment {
   const signature = sign(commitment.toHex(sanitize), HUB_PRIVATE_KEY);
 
   return { commitment: commitment.asCoreCommitment(sanitize), signature };

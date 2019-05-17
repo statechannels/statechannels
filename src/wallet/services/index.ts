@@ -13,12 +13,12 @@ export interface IAllocatorChannelCommitment extends Commitment {
   allocator_channel_id: number;
 }
 
-export interface ChannelResponse {
+export interface SignedCommitment {
   commitment: Commitment;
   signature: Signature;
 }
 
-export const updateLedgerChannel: (c: LedgerCommitment, s: Signature) => Promise<ChannelResponse> =
+export const updateLedgerChannel: (c: LedgerCommitment, s: Signature) => Promise<SignedCommitment> =
   LedgerChannelManager.updateLedgerChannel;
 export const fund: (id: Address, expectedHeld: Uint256, amount: Uint256) => Promise<Uint256> =
   Blockchain.fund;

@@ -1,7 +1,7 @@
 import { CommitmentType, Signature } from 'fmg-core';
 import { channelID } from 'fmg-core/lib/channel';
 import { bytesFromAppAttributes } from 'fmg-nitro-adjudicator';
-import { ChannelResponse } from '.';
+import { SignedCommitment } from '.';
 import { queries } from '../db/queries/allocator_channels';
 import errors from '../errors';
 import AllocatorChannel from '../models/allocatorChannel';
@@ -13,7 +13,7 @@ import { asCoreCommitment, LedgerCommitment } from './ledger-commitment';
 export async function updateLedgerChannel(
   theirCommitment: LedgerCommitment,
   theirSignature: Signature,
-): Promise<ChannelResponse> {
+): Promise<SignedCommitment> {
   if (!ChannelManagement.validSignature(asCoreCommitment(theirCommitment), theirSignature)) {
     throw errors.COMMITMENT_NOT_SIGNED;
   }

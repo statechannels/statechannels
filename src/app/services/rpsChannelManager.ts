@@ -1,5 +1,5 @@
 import { Commitment, CommitmentType, Signature } from 'fmg-core';
-import { ChannelResponse, errors } from '../../wallet';
+import { errors, SignedCommitment } from '../../wallet';
 import Wallet from '../../wallet';
 import AllocatorChannel from '../../wallet/models/allocatorChannel';
 
@@ -23,7 +23,7 @@ const wallet = new Wallet(sanitize);
 export async function updateRPSChannel(
   theirCommitment: Commitment,
   theirSignature: Signature,
-): Promise<ChannelResponse> {
+): Promise<SignedCommitment> {
   if (!wallet.validSignature(theirCommitment, theirSignature)) {
     throw errors.COMMITMENT_NOT_SIGNED;
   }
