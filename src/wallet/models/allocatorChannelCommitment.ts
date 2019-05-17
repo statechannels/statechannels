@@ -1,5 +1,5 @@
 import { Address, Bytes, Commitment, CommitmentType, toHex, Uint256, Uint32 } from 'fmg-core';
-import { Model } from 'objection';
+import { Model, snakeCaseMappers } from 'objection';
 import { AppAttrSanitizer } from '../../types';
 import Allocation from './allocation';
 import AllocatorChannel from './allocatorChannel';
@@ -25,12 +25,17 @@ export default class AllocatorChannelCommitment extends Model {
       },
     },
   };
+
+  static get columnNameMappers() {
+    return snakeCaseMappers();
+  }
+
   readonly id!: number;
-  allocator_channel!: AllocatorChannel;
-  allocator_channel_id!: number;
-  turn_number!: Uint32;
-  commitment_type!: CommitmentType;
-  commitment_count!: Uint32;
+  allocatorChannel!: AllocatorChannel;
+  allocatorChannelId!: number;
+  turnNumber!: Uint32;
+  commitmentType!: CommitmentType;
+  commitmentCount!: Uint32;
   allocations!: Allocation[];
   app_attrs!: any;
 
@@ -40,10 +45,10 @@ export default class AllocatorChannelCommitment extends Model {
 
   asCoreCommitment(sanitize: AppAttrSanitizer): Commitment {
     return {
-      commitmentType: this.commitment_type,
-      commitmentCount: this.commitment_count,
-      turnNum: this.turn_number,
-      channel: this.allocator_channel.asCoreChannel,
+      commitmentType: this.commitmentType,
+      commitmentCount: this.commitmentCount,
+      turnNum: this.turnNumber,
+      channel: this.allocatorChannel.asCoreChannel,
       allocation: this.allocations.sort(priority).map(amount),
       destination: this.allocations.sort(priority).map(destination),
       appAttributes: sanitize(this.app_attrs),

@@ -73,5 +73,5 @@ export async function validTransition(theirCommitment: LedgerCommitment): Promis
     .select()
     .first();
 
-  return theirCommitment.turnNum === currentCommitment.turn_number + 1;
+  return theirCommitment.turnNum === currentCommitment.turnNumber + 1;
 }

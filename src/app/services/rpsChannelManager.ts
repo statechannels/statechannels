@@ -150,5 +150,5 @@ export async function validTransition(theirCommitment: Commitment): Promise<bool
     .select()
     .first();
 
-  return theirCommitment.turnNum === currentCommitment.turn_number + 1;
+  return theirCommitment.turnNum === currentCommitment.turnNumber + 1;
 }
