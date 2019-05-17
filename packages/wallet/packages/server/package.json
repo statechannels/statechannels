@@ -12,7 +12,7 @@
     "db:seed": "npx knex seed:run",
     "server:test": "npx jest --runInBand -c ./config/jest/jest.config.js",
     "adjudicator-watcher:test": "npx ganache-then-jest --runInBand -c ./config/jest/jest.chain.config.js",
-    "test:ci": "run-s contracts:clear prettier:check 'adjudicator-watcher:test --all --ci' server:test",
+    "test:ci": "run-s contracts:clear prettier:check build 'adjudicator-watcher:test --all --ci' server:test",
     "server:watch": "nodemon --watch 'src/**/*' -e ts,tsx --exec ts-node ./src/app/server.ts",
     "build": "tsc && npx tsc knexfile.ts",
     "start": "run-s server:start",
