@@ -7,8 +7,6 @@ import {
   funded_channel_id,
 } from '../../../test/test_data';
 import { getWithCommitments } from '../../db/queries/allocator_channels';
-import { seeds } from '../../db/seeds/2_allocator_channels_seed';
-import AllocatorChannel from '../../models/allocatorChannel';
 import * as ChannelManagement from '../channelManagement';
 import { asCoreCommitment, LedgerCommitment } from '../ledger-commitment';
 
@@ -70,9 +68,7 @@ describe('formResponse', () => {
 
     hubSignature = signAppCommitment(pre_fund_setup_1, HUB_PRIVATE_KEY);
 
-    expect(
-      await ChannelManagement.formResponse(channel.commitments[1], bytesFromAppAttributes),
-    ).toMatchObject({
+    expect(await ChannelManagement.formResponse(asCoreCommitment(pre_fund_setup_1))).toMatchObject({
       commitment: asCoreCommitment(pre_fund_setup_1),
       signature: hubSignature,
     });

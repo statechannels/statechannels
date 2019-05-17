@@ -1,22 +1,19 @@
 import { SignedCommitment } from '.';
 import { HUB_PRIVATE_KEY } from '../../constants';
 
-import { Commitment, CommitmentType, sign, Signature } from 'fmg-core';
-import { AppAttrSanitizer, AppCommitment } from '../../types';
-import AllocatorChannelCommitment from '../models/allocatorChannelCommitment';
+import { Commitment, CommitmentType, sign, Signature, toHex } from 'fmg-core';
+import { AppCommitment } from '../../types';
+
 export function validSignature(commitment: Commitment, signature: Signature): boolean {
   console.warn('Signature not validated');
   return commitment && signature && true;
   // return recover(toHex(commitment), signature) === mover(commitment);
 }
 
-export function formResponse(
-  commitment: AllocatorChannelCommitment,
-  sanitize: AppAttrSanitizer,
-): SignedCommitment {
-  const signature = sign(commitment.toHex(sanitize), HUB_PRIVATE_KEY);
+export function formResponse(commitment: Commitment): SignedCommitment {
+  const signature = sign(toHex(commitment), HUB_PRIVATE_KEY);
 
-  return { commitment: commitment.asCoreCommitment(sanitize), signature };
+  return { commitment, signature };
 }
 
 export function nextCommitment(theirCommitment: AppCommitment): AppCommitment {

@@ -1,10 +1,9 @@
-import { Bytes } from 'fmg-core';
+import { Bytes, Commitment } from 'fmg-core';
 export { SignedCommitment } from './services';
 import { queries } from './db/queries/allocator_channels';
 import { formResponse, nextCommitment, validSignature } from './services/channelManagement';
 
 import errors from './errors';
-import AllocatorChannelCommitment from './models/allocatorChannelCommitment';
 import { getApplications } from './services/applicationManager';
 import { updateLedgerChannel } from './services/ledgerChannelManager';
 export { errors };
@@ -21,6 +20,5 @@ export default class Wallet {
     this.sanitize = sanitizeAppAttrs;
   }
 
-  formResponse = (commitment: AllocatorChannelCommitment) =>
-    formResponse(commitment, this.sanitize);
+  formResponse = (commitment: Commitment) => formResponse(commitment);
 }

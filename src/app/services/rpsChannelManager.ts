@@ -7,6 +7,7 @@ import { delay } from 'bluebird';
 import { channelID } from 'fmg-core/lib/channel';
 import AllocatorChannelCommitment from '../../wallet/models/allocatorChannelCommitment';
 import {
+  asCoreCommitment,
   defaultAppAttrs,
   fromCoreCommitment,
   generateSalt,
@@ -66,22 +67,16 @@ export async function updateRPSChannel(
     ourWeapon,
   });
 
-  const allocator_channel = await wallet.updateChannel(
-    fromCoreCommitment(theirCommitment),
-    ourCommitment,
-  );
-  return wallet.formResponse(allocator_channel.commitments[1]);
+  await wallet.updateChannel(fromCoreCommitment(theirCommitment), ourCommitment);
+  return wallet.formResponse(asCoreCommitment(ourCommitment));
 }
 
 async function openChannel(theirCommitment: Commitment) {
   const ourCommitment = await nextCommitment(fromCoreCommitment(theirCommitment));
 
-  const allocator_channel = await wallet.updateChannel(
-    fromCoreCommitment(theirCommitment),
-    ourCommitment,
-  );
+  await wallet.updateChannel(fromCoreCommitment(theirCommitment), ourCommitment);
 
-  return await wallet.formResponse(allocator_channel.commitments[1]);
+  return await wallet.formResponse(asCoreCommitment(ourCommitment));
 }
 
 interface Opts {

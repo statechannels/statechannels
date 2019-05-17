@@ -1,6 +1,5 @@
 import { CommitmentType, Signature } from 'fmg-core';
 import { channelID } from 'fmg-core/lib/channel';
-import { bytesFromAppAttributes } from 'fmg-nitro-adjudicator';
 import { SignedCommitment } from '.';
 import { queries } from '../db/queries/allocator_channels';
 import errors from '../errors';
@@ -31,8 +30,8 @@ export async function updateLedgerChannel(
 
   const ourCommitment = nextCommitment(theirCommitment);
 
-  const allocator_channel = await queries.updateAllocatorChannel(theirCommitment, ourCommitment);
-  return ChannelManagement.formResponse(allocator_channel.commitments[1], bytesFromAppAttributes);
+  await queries.updateAllocatorChannel(theirCommitment, ourCommitment);
+  return ChannelManagement.formResponse(asCoreCommitment(ourCommitment));
 }
 
 export function nextCommitment(theirCommitment: LedgerCommitment): LedgerCommitment {
