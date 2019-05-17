@@ -11,10 +11,13 @@ import {
   INITIALIZE_CHANNEL,
 } from './protocols/actions';
 import * as applicationProtocol from './protocols/application';
-import * as challengeProtocol from './protocols/challenging';
+import {
+  challengingReducer,
+  initializeChallengerState,
+  initializeResponderState,
+} from './protocols/dispute/reducer';
 import * as concludingProtocol from './protocols/concluding';
 import * as fundProtocol from './protocols/funding';
-import * as challengeResponseProtocol from './protocols/responding';
 import * as states from './state';
 import { WalletProtocol } from './types';
 import { APPLICATION_PROCESS_ID } from './protocols/application/reducer';
@@ -59,7 +62,7 @@ export function initializedReducer(
     return routeToProtocolReducer(newState, action);
   }
 
-  return state;
+  return newState;
 }
 
 function updateSharedData(
@@ -101,6 +104,12 @@ function routeToProtocolReducer(
           action,
         );
         return updatedState(state, appSharedData, processState, appProtocolState);
+      case WalletProtocol.Dispute:
+        const {
+          protocolState: challengingProtocolState,
+          sharedData: challengingSharedData,
+        } = challengingReducer(processState.protocolState, states.sharedData(state), action);
+        return updatedState(state, challengingSharedData, processState, challengingProtocolState);
 
       case WalletProtocol.Concluding:
         const {
@@ -178,17 +187,23 @@ function initializeNewProtocol(
     }
     case actions.protocol.CREATE_CHALLENGE_REQUESTED: {
       const { channelId } = action;
-      const { state: protocolState, storage: sharedData } = challengeProtocol.initialize(
+      const { protocolState, sharedData } = initializeChallengerState(
         channelId,
         processId,
         incomingSharedData,
       );
       return { protocolState, sharedData };
     }
-    case actions.protocol.RESPOND_TO_CHALLENGE_REQUESTED:
-      return challengeResponseProtocol.initialize(processId, incomingSharedData, action.commitment);
+    case actions.protocol.CHALLENGE_CREATED:
+      return initializeResponderState(
+        processId,
+        action.channelId,
+        incomingSharedData,
+        action.commitment,
+      );
     case actions.protocol.INITIALIZE_CHANNEL:
       return applicationProtocol.initialize(incomingSharedData);
+
     default:
       return unreachable(action);
   }

@@ -114,10 +114,24 @@ describe('adjudicator listener', () => {
 
     const sagaTester = new SagaTester({ initialState: createWatcherState(processId, channelId) });
     sagaTester.start(adjudicatorWatcher, provider);
+    await createChallenge(provider, channelNonce, participantA, participantB);
+    await sagaTester.waitFor(actions.CHALLENGE_EXPIRY_SET_EVENT);
+
+    const action: actions.ChallengeExpirySetEvent = sagaTester.getLatestCalledAction();
+    expect(action.expiryTime).toBeGreaterThan(startTimestamp);
+  });
+
+  it('should handle a challengeCreated event', async () => {
+    const startTimestamp = Date.now();
+    const channelNonce = getNextNonce();
+
+    const processId = ethers.Wallet.createRandom().address;
+
+    const sagaTester = new SagaTester({ initialState: createWatcherState(processId) });
+    sagaTester.start(adjudicatorWatcher, provider);
 
     const challengeState = await createChallenge(
       provider,
-
       channelNonce,
       participantA,
       participantB,
@@ -126,7 +140,8 @@ describe('adjudicator listener', () => {
     await sagaTester.waitFor(actions.CHALLENGE_CREATED_EVENT);
 
     const action: actions.ChallengeCreatedEvent = sagaTester.getLatestCalledAction();
-    expect(action.finalizedAt * 1000).toBeGreaterThan(startTimestamp);
+
+    expect(action.finalizedAt).toBeGreaterThan(startTimestamp);
     expect(action.commitment).toEqual(challengeState);
   });
 
@@ -177,16 +192,13 @@ describe('adjudicator listener', () => {
     const sagaTester = new SagaTester({ initialState: createWatcherState(processId, channelId) });
     sagaTester.start(adjudicatorWatcher, provider);
 
-    const responseCommitment = await respondWithMove(
-      provider,
-      channelNonce,
-      participantA,
-      participantB,
-    );
+    const response = await respondWithMove(provider, channelNonce, participantA, participantB);
 
     await sagaTester.waitFor(actions.RESPOND_WITH_MOVE_EVENT);
 
     const action: actions.RespondWithMoveEvent = sagaTester.getLatestCalledAction();
-    expect(action).toEqual(actions.respondWithMoveEvent(processId, channelId, responseCommitment));
+    expect(action).toEqual(
+      actions.respondWithMoveEvent(processId, channelId, response.toCommitment, response.toSig),
+    );
   });
 });

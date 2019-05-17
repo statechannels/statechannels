@@ -44,5 +44,5 @@ function challengeIsExpired(state: AdjudicatorState, channelId: string, blockTim
   if (!channelState) {
     return false;
   }
-  return channelState.challenge && channelState.challenge.expiresAt <= blockTimestamp;
+  return channelState.challenge && channelState.challenge.expiresAt <= blockTimestamp * 1000;
 }

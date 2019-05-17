@@ -42,7 +42,9 @@ function* dispatchEventAction(event: AdjudicatorEvent) {
     case AdjudicatorEventType.ChallengeCreated:
       const { channelId } = event;
       const { commitment, finalizedAt } = event.eventArgs;
-      yield put(actions.challengeCreatedEvent(channelId, fromParameters(commitment), finalizedAt));
+      yield put(
+        actions.challengeCreatedEvent(channelId, fromParameters(commitment), finalizedAt * 1000),
+      );
       break;
   }
 }
@@ -50,6 +52,10 @@ function* dispatchEventAction(event: AdjudicatorEvent) {
 function* dispatchProcessEventAction(event: AdjudicatorEvent, processId: string) {
   const { channelId } = event;
   switch (event.eventType) {
+    case AdjudicatorEventType.ChallengeCreated:
+      const { finalizedAt } = event.eventArgs;
+      yield put(actions.challengeExpirySetEvent(processId, channelId, finalizedAt * 1000));
+      break;
     case AdjudicatorEventType.Concluded:
       yield put(actions.concludedEvent(processId, channelId));
       break;
@@ -59,11 +65,19 @@ function* dispatchProcessEventAction(event: AdjudicatorEvent, processId: string)
       );
       break;
     case AdjudicatorEventType.RespondWithMove:
+      const { v, r, s } = event.eventArgs;
+      const signature = ethers.utils.joinSignature({
+        v,
+        r,
+        s,
+      });
+
       yield put(
         actions.respondWithMoveEvent(
           processId,
           channelId,
           fromParameters(event.eventArgs.response),
+          signature,
         ),
       );
       break;
@@ -103,10 +117,10 @@ function* createAdjudicatorEventChannel(provider) {
     adjudicator.on(refutedFilter, (channelId, refutation) => {
       emitter({ eventType: AdjudicatorEventType.Refuted, eventArgs: { refutation }, channelId });
     });
-    adjudicator.on(respondWithMoveFilter, (channelId, response) => {
+    adjudicator.on(respondWithMoveFilter, (channelId, response, v, r, s) => {
       emitter({
         eventType: AdjudicatorEventType.RespondWithMove,
-        eventArgs: { response },
+        eventArgs: { response, v, r, s },
         channelId,
       });
     });

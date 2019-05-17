@@ -6,6 +6,9 @@ import { eventChannel } from 'redux-saga';
 import * as application from '../protocols/application/reducer';
 import { isRelayableAction } from '../../communication';
 import { getProcessId } from '../reducer';
+import { responseProvided } from '../protocols/dispute/responder/actions';
+import { WalletProtocol } from '../types';
+import { getChannelId } from '../../domain';
 
 export function* messageListener() {
   const postMessageEventChannel = eventChannel(emitter => {
@@ -36,11 +39,6 @@ export function* messageListener() {
       case incoming.FUNDING_REQUEST:
         yield put(actions.protocol.fundingRequested(action.channelId, action.playerIndex));
         break;
-      case incoming.RESPOND_TO_CHALLENGE:
-        yield put(
-          actions.protocol.respondToChallengeRequested(action.channelId, action.commitment),
-        );
-        break;
 
       // Events that do not need a new process
       case incoming.INITIALIZE_REQUEST:
@@ -62,6 +60,12 @@ export function* messageListener() {
             action.signature,
           ),
         );
+        break;
+      case incoming.RESPOND_TO_CHALLENGE:
+        // TODO: This probably should be in a function
+        const channelId = getChannelId(action.commitment);
+        const processId = `${WalletProtocol.Dispute}-${channelId}`;
+        yield put(responseProvided(processId, action.commitment));
         break;
       case incoming.RECEIVE_MESSAGE:
         yield put(handleIncomingMessage(action));
