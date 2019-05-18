@@ -33,6 +33,7 @@ async function onDeposit(channelId, amountDeposited, destinationHoldings) {
 }
 
 export async function listen() {
+  console.log('adjudicator-watcher: listen');
   Model.knex(knex);
   const adjudicator: ethers.Contract = await nitroAdjudicator();
   const depositedFilter = adjudicator.filters.Deposited();
