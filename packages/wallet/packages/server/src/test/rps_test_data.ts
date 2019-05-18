@@ -6,7 +6,6 @@ import {
   CommitmentType,
   sign,
   toHex,
-  toUint256,
   Uint256,
 } from 'fmg-core';
 import {

@@ -1,10 +1,9 @@
-import { Commitment, CommitmentType, Signature, Uint256 } from 'fmg-core';
+import { Commitment, CommitmentType, Signature } from 'fmg-core';
 import { ChannelResponse, errors } from '../../wallet';
 import Wallet from '../../wallet';
 import AllocatorChannel from '../../wallet/models/allocatorChannel';
 
 import { delay } from 'bluebird';
-import { ethers } from 'ethers';
 import { channelID } from 'fmg-core/lib/channel';
 import { HUB_ADDRESS } from '../../constants';
 import AllocatorChannelCommitment from '../../wallet/models/allocatorChannelCommitment';
@@ -76,13 +75,6 @@ export async function updateRPSChannel(
   return wallet.formResponse(allocator_channel.id);
 }
 
-function add(a: Uint256, b: Uint256): Uint256 {
-  return ethers.utils
-    .bigNumberify(a)
-    .add(ethers.utils.bigNumberify(b))
-    .toHexString();
-}
-
 async function openChannel(theirCommitment: Commitment) {
   const ourCommitment = await nextCommitment(fromCoreCommitment(theirCommitment));
 
@@ -98,10 +90,6 @@ async function openChannel(theirCommitment: Commitment) {
   );
 
   return await wallet.formResponse(allocator_channel.id);
-}
-
-function randomWeapon(): Weapon {
-  return Math.floor(Math.random() * 4 + 1);
 }
 
 interface Opts {

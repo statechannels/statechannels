@@ -13,7 +13,6 @@ enum EventType {
   Deposited,
   ChallengeCreated,
 }
-type EventCallback = (eventType: EventType) => void;
 
 async function onDeposit(channelId, amountDeposited, destinationHoldings) {
   console.log(`Deposit detected  with ${amountDeposited} ${destinationHoldings} ${channelId}`);
