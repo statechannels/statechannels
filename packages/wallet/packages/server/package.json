@@ -18,7 +18,7 @@
     "start": "run-s server:start",
     "server:start": "node ./lib/app/server.js",
     "adjudicator-watcher:start": "node lib/wallet/adjudicator-watcher/index.js",
-    "prestart": "npm run db:rollback && npm run db:migrate && npm run db:seed",
+    "prestart": "yarn build && npm run db:rollback && npm run db:migrate && npm run db:seed",
     "prettier:check": "npx prettier --check 'src/**/*.{ts,tsx}'",
     "prettier:write": "npx prettier --write 'src/**/*.{ts,tsx}'",
     "postinstall": "npm run build",
