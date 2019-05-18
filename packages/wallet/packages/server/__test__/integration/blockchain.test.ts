@@ -23,7 +23,7 @@ describe.skip('holdings', () => {
   it('works', async () => {
     const address = DUMMY_RULES_ADDRESS; // just needs to be a valid address
     const oldBalance = await nitro.holdings(address);
-    const tx = await Blockchain.fund(address, '0x05');
+    await Blockchain.fund(address, '0x05');
     expect(await nitro.holdings(address)).toMatchObject(oldBalance.add('0x05'));
   });
 });
