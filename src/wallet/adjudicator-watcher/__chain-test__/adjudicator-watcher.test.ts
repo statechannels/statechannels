@@ -23,6 +23,10 @@ describe('adjudicator listener', () => {
 
   it('should handle a funds received event when channel is in the database', async done => {
     const preEventHoldings = await getHoldings();
+
+    // We have to reference the compiled JS file instead of the TS source file
+    // https://github.com/facebook/jest/issues/5274
+    // https://github.com/facebook/jest/issues/8236
     const adjudicatorWatcher = fork('lib/wallet/adjudicator-watcher');
 
     killSubprocess = () => {
