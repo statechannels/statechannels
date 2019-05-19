@@ -13,9 +13,11 @@
   "author": "Tom Close",
   "license": "MIT",
   "dependencies": {
-    "fmg-core": "^0.0.6",
+    "fmg-core": "^0.5.8",
     "sha3": "^1.2.2",
-    "web3-utils": "^1.0.0-beta.30"
+    "truffle": "^5.0.0-beta.2",
+    "web3-utils": "^1.0.0-beta.30",
+    "web3": "1.0.0-beta.37"
   },
   "devDependencies": {
     "esm": "^3.0.52"
