@@ -74,6 +74,7 @@ async function handleCommitmentReceived(ctx, action: CommitmentReceived) {
       splitSignature,
       currentCommitment,
     );
+    ctx.status = 201;
     ctx.body = communication.sendCommitmentReceived(
       theirAddress,
       processId,
