@@ -9,7 +9,7 @@ module.exports = {
   getGanacheProvider: function() {
     const ethers = require("ethers");
     return new ethers.providers.JsonRpcProvider(
-      `http://${process.env.DEV_GANACHE_HOST}:${process.env.DEV_GANACHE_PORT}`
+      `http://${process.env.GANACHE_HOST}:${process.env.GANACHE_PORT}`
     );
   },
   getPrivateKeyWithEth: function() {
@@ -18,14 +18,14 @@ module.exports = {
   getWalletWithEthAndProvider: function() {
     const ethers = require("ethers");
     const ganacheProvider = new ethers.providers.JsonRpcProvider(
-      `http://${process.env.DEV_GANACHE_HOST}:${process.env.DEV_GANACHE_PORT}`
+      `http://${process.env.GANACHE_HOST}:${process.env.GANACHE_PORT}`
     );
     return new ethers.Wallet(privateKeyWithEth, ganacheProvider);
   },
   getNetworkId: async () => {
     const ethers = require("ethers");
     const ganacheProvider = new ethers.providers.JsonRpcProvider(
-      `http://${process.env.DEV_GANACHE_HOST}:${process.env.DEV_GANACHE_PORT}`
+      `http://${process.env.GANACHE_HOST}:${process.env.GANACHE_PORT}`
     );
     return (await ganacheProvider.getNetwork()).chainId;
   },

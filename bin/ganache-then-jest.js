@@ -6,8 +6,8 @@ process.env.BABEL_ENV = "test";
 process.env.NODE_ENV = "test";
 process.env.PUBLIC_URL = "";
 
-if (!process.env.DEV_GANACHE_PORT) {
-  process.env.DEV_GANACHE_PORT = 8545;
+if (!process.env.GANACHE_PORT) {
+  process.env.GANACHE_PORT = 8545;
 }
 
 process.on("unhandledRejection", err => {
@@ -18,7 +18,7 @@ const { runJest } = require("../utils/runJest");
 const { deployContracts } = require("../utils/deployContracts");
 const { startGanache } = require("../utils/startGanache");
 let argv = require("yargs").argv;
-console.log(`Using port ${process.env.DEV_GANACHE_PORT} for Ganache.`);
+console.log(`Using port ${process.env.GANACHE_PORT} for Ganache.`);
 startGanache(argv).then(() => {
   deployContracts().then(() => {
     runJest().then(output => {
