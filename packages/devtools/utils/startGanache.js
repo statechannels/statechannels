@@ -6,13 +6,10 @@ module.exports = {
     configureEnvVariables();
     let verbose = argv.v;
     let deterministic = argv.d;
-    let network_id =
-      argv.i ||
-      process.env.DEV_GANACHE_NETWORK_ID ||
-      process.env.TARGET_NETWORK_ID;
+    let network_id = argv.i || process.env.GANACHE_NETWORK_ID;
     let blockTime = argv.b || process.env.GANACHE_BLOCK_TIME;
 
-    process.env.DEV_GANACHE_PORT = process.env.DEV_GANACHE_PORT || 8545;
+    process.env.GANACHE_PORT = process.env.GANACHE_PORT || 8545;
     //Default accounts to seed so we can have accounts with 1M ether for testing
     var accounts = [
       {
@@ -32,22 +29,22 @@ module.exports = {
       }
     ];
     var ganache = require("ganache-cli");
-    Logger.log(`Starting ganache on port ${process.env.DEV_GANACHE_PORT}`);
+    Logger.log(`Starting ganache on port ${process.env.GANACHE_PORT}`);
 
     const detect = require("detect-port");
-    return detect(process.env.DEV_GANACHE_PORT)
+    return detect(process.env.GANACHE_PORT)
       .then(_port => {
-        const portInUse = _port != process.env.DEV_GANACHE_PORT;
+        const portInUse = _port != process.env.GANACHE_PORT;
         if (portInUse) {
           Logger.log(
             `Port ${
-              process.env.DEV_GANACHE_PORT
+              process.env.GANACHE_PORT
             } in use. Assuming a ganache instance on that port.`
           );
           return Promise.resolve();
         } else {
           var ganacheServer = ganache.server({
-            port: process.env.DEV_GANACHE_PORT,
+            port: process.env.GANACHE_PORT,
             network_id: network_id,
             accounts,
             logger: Logger,
@@ -58,7 +55,7 @@ module.exports = {
 
           const { promisify } = require("util");
           const listenAsync = promisify(ganacheServer.listen);
-          return listenAsync(process.env.DEV_GANACHE_PORT);
+          return listenAsync(process.env.GANACHE_PORT);
         }
       })
       .catch(err => {
