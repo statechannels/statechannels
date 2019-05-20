@@ -8,10 +8,10 @@ module.exports = {
     const path = require("path");
     const { spawn } = require("child_process");
     let targetNetwork = "development";
-    if (!process.env.TARGET_NETWORK && !!process.env.CHAIN_NETWORK_ID) {
+    if (!process.env.CHAIN_NETWORK && !!process.env.CHAIN_NETWORK_ID) {
       targetNetwork = getNetworkName(parseInt(process.env.CHAIN_NETWORK_ID));
-    } else if (!!process.env.TARGET_NETWORK) {
-      targetNetwork = process.env.TARGET_NETWORK;
+    } else if (!!process.env.CHAIN_NETWORK) {
+      targetNetwork = process.env.CHAIN_NETWORK;
     }
     process.env.GANACHE_HOST = process.env.GANACHE_HOST || "127.0.0.1";
     process.env.GANACHE_PORT = process.env.GANACHE_PORT || 8545;
