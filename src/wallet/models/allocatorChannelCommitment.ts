@@ -37,7 +37,7 @@ export default class AllocatorChannelCommitment extends Model {
   commitmentType!: CommitmentType;
   commitmentCount!: Uint32;
   allocations!: Allocation[];
-  app_attrs!: any;
+  appAttrs!: any;
 
   toHex(sanitize: AppAttrSanitizer): Bytes {
     return toHex(this.asCoreCommitment(sanitize));
@@ -51,7 +51,7 @@ export default class AllocatorChannelCommitment extends Model {
       channel: this.allocatorChannel.asCoreChannel,
       allocation: this.allocations.sort(priority).map(amount),
       destination: this.allocations.sort(priority).map(destination),
-      appAttributes: sanitize(this.app_attrs),
+      appAttributes: sanitize(this.appAttrs),
     };
   }
 }

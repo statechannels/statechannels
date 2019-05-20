@@ -1,4 +1,4 @@
-import { CommitmentType, Signature } from 'fmg-core';
+import { channelID, CommitmentType, Signature } from 'fmg-core';
 import { SignedCommitment } from '.';
 import { queries } from '../db/queries/allocator_channels';
 import errors from '../errors';
@@ -8,20 +8,11 @@ import { asCoreCommitment, asLedgerCommitment, LedgerCommitment } from './ledger
 
 // TODO: This should be extracted into a hub app?
 export async function updateLedgerChannel(
-  currentCommitment: AllocatorChannelCommitment,
   theirCommitment: LedgerCommitment,
   theirSignature: Signature,
+  currentCommitment?: AllocatorChannelCommitment,
 ): Promise<SignedCommitment> {
   const ourCommitment = nextCommitment(theirCommitment, theirSignature, currentCommitment);
-  await queries.updateAllocatorChannel(theirCommitment, ourCommitment);
-  return ChannelManagement.formResponse(asCoreCommitment(ourCommitment));
-}
-
-export async function openLedgerChannel(
-  theirCommitment: LedgerCommitment,
-  theirSignature: Signature,
-): Promise<SignedCommitment> {
-  const ourCommitment = nextCommitment(theirCommitment, theirSignature);
   await queries.updateAllocatorChannel(theirCommitment, ourCommitment);
   return ChannelManagement.formResponse(asCoreCommitment(ourCommitment));
 }

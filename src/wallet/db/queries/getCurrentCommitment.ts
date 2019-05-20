@@ -1,7 +1,6 @@
 import { channelID, Commitment } from 'fmg-core';
-import { errors } from '../../../wallet';
-import AllocatorChannel from '../../../wallet/models/allocatorChannel';
-import AllocatorChannelCommitment from '../../../wallet/models/allocatorChannelCommitment';
+import AllocatorChannel from '../../models/allocatorChannel';
+import AllocatorChannelCommitment from '../../models/allocatorChannelCommitment';
 
 export async function getCurrentCommitment(theirCommitment: Commitment) {
   const { channel } = theirCommitment;
@@ -11,12 +10,14 @@ export async function getCurrentCommitment(theirCommitment: Commitment) {
     .select('id')
     .first();
   if (!allocatorChannel) {
-    throw errors.CHANNEL_MISSING;
+    return;
   }
   const currentCommitment = await AllocatorChannelCommitment.query()
-    .where({ allocatorChannelId: allocatorChannel.id })
+    .where({ allocator_channel_id: allocatorChannel.id })
     .orderBy('turn_number', 'desc')
+    .eager('allocator_channel.[participants]')
     .select()
     .first();
+
   return currentCommitment;
 }

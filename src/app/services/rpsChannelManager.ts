@@ -58,7 +58,7 @@ export async function updateRPSChannel(
     .eager('commitments')
     .first();
 
-  const ourLastPosition = existingChannel.commitments[1].app_attrs;
+  const ourLastPosition = existingChannel.commitments[1].appAttrs;
   // TODO: How can we test the manager, while having a randomized play strategy?
   const ourWeapon = Weapon.Rock;
 

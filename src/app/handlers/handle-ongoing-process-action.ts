@@ -67,12 +67,12 @@ async function handleCommitmentReceived(ctx, action: CommitmentReceived) {
 
     const currentCommitment = await getCurrentCommitment(theirCommitment);
     const { commitment, signature } = await updateLedgerChannel(
-      currentCommitment,
       {
         ...theirCommitment,
         appAttributes: appAttributesFromBytes(theirCommitment.appAttributes),
       },
       splitSignature,
+      currentCommitment,
     );
     ctx.body = communication.sendCommitmentReceived(
       theirAddress,
