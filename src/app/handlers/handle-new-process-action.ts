@@ -31,7 +31,7 @@ async function handleConcludeInstigated(ctx, action: ConcludeInstigated) {
   const splitSignature = (ethers.utils.splitSignature(theirSignature) as unknown) as Signature;
   const { commitment, signature } = await updateRPSChannel(theirCommitment, splitSignature);
 
-  ctx.status = 400;
+  ctx.status = 201;
   ctx.body = communication.sendCommitmentReceived(
     theirAddress,
     walletProcess.processId,
