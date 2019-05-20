@@ -8,7 +8,7 @@ export default class AllocatorChannelCommitment extends Model {
   static tableName = 'allocator_channel_commitments';
 
   static relationMappings = {
-    allocator_channel: {
+    allocatorChannel: {
       relation: Model.BelongsToOneRelation,
       modelClass: `${__dirname}/allocatorChannel`,
       join: {

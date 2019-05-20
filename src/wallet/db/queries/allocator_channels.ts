@@ -94,7 +94,7 @@ async function updateAllocatorChannel(
   }
 
   return AllocatorChannel.query()
-    .eager('[commitments.[allocations,allocator_channel.[participants]],participants]')
+    .eager('[commitments.[allocations,allocatorChannel.[participants]],participants]')
     .upsertGraphAndFetch(upserts);
 }
 
@@ -103,6 +103,6 @@ export async function getWithCommitments(channel_id: string) {
     .where({
       channel_id,
     })
-    .eager('[commitments.[allocator_channel.[participants],allocations]]')
+    .eager('[commitments.[allocatorChannel.[participants],allocations]]')
     .first();
 }
