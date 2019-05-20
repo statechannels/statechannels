@@ -82,7 +82,7 @@ async function handleCommitmentReceived(ctx, action: CommitmentReceived) {
       (signature as unknown) as string,
     );
 
-    if (process.env.NODE_ENV !== 'test') {
+    if (process.env.NODE_ENV !== 'test' && theirCommitment.turnNum === 0) {
       // TODO: Figure out how to test this.
       const expectedHeld =
         theirCommitment.allocation[1 - theirCommitment.destination.indexOf(HUB_ADDRESS)];
