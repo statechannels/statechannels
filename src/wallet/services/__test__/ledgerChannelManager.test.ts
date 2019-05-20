@@ -207,6 +207,7 @@ describe.skip('channelFunded', () => {
 
 describe('nextCommitment', () => {
   it('works on app commitments', () => {
-    expect(LedgerChannelManager.nextCommitment(app_0)).toMatchObject(app_1);
+    theirSignature = signAppCommitment(app_0, PARTICIPANT_PRIVATE_KEY);
+    expect(LedgerChannelManager.nextCommitment(app_0, theirSignature)).toMatchObject(app_1);
   });
 });

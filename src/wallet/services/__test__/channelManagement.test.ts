@@ -1,12 +1,6 @@
 import { Bytes, sign, Signature, toHex } from 'fmg-core';
-import { bytesFromAppAttributes } from 'fmg-nitro-adjudicator';
 import { HUB_PRIVATE_KEY } from '../../../constants';
-import {
-  constructors as testDataConstructors,
-  funded_channel,
-  funded_channel_id,
-} from '../../../test/test_data';
-import { getWithCommitments } from '../../db/queries/allocator_channels';
+import { constructors as testDataConstructors, funded_channel } from '../../../test/test_data';
 import * as ChannelManagement from '../channelManagement';
 import { asCoreCommitment, LedgerCommitment } from '../ledger-commitment';
 
@@ -63,7 +57,6 @@ describe.skip('channelFunded', () => {
 
 describe('formResponse', () => {
   it('returns a signed core commitment', async () => {
-    const channel = await getWithCommitments(funded_channel_id);
     pre_fund_setup_1.channel = funded_channel;
 
     hubSignature = signAppCommitment(pre_fund_setup_1, HUB_PRIVATE_KEY);

@@ -1,5 +1,4 @@
 import { fork } from 'child_process';
-import { ethers } from 'ethers';
 import { bigNumberify } from 'ethers/utils';
 import { channelID } from 'fmg-core';
 import { funded_channel } from '../../../test/test_data';
@@ -18,10 +17,6 @@ async function getHoldings() {
 }
 
 describe('adjudicator listener', () => {
-  const provider: ethers.providers.JsonRpcProvider = new ethers.providers.JsonRpcProvider(
-    `http://localhost:${process.env.DEV_GANACHE_PORT}`,
-  );
-
   it('should handle a funds received event when channel is in the database', async done => {
     const preEventHoldings = await getHoldings();
 
