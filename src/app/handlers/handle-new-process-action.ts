@@ -2,7 +2,7 @@ import { ethers } from 'ethers';
 import { Signature } from 'fmg-core';
 import { communication, ConcludeInstigated } from 'magmo-wallet';
 import { unreachable } from 'magmo-wallet';
-import { getProcess, startConcludeProcess } from '../../wallet/db/queries/walletProcess';
+import { startConcludeProcess } from '../../wallet/db/queries/walletProcess';
 import { updateRPSChannel } from '../services/rpsChannelManager';
 
 export async function handleNewProcessAction(ctx) {

@@ -1,4 +1,4 @@
-import { channelID, CommitmentType, Signature } from 'fmg-core';
+import { CommitmentType, Signature } from 'fmg-core';
 import { SignedCommitment } from '.';
 import { queries } from '../db/queries/allocator_channels';
 import errors from '../errors';

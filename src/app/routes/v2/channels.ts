@@ -1,7 +1,7 @@
 import * as koaBody from 'koa-body';
 import * as Router from 'koa-router';
 
-import { getProcessId, RelayableAction } from 'magmo-wallet';
+import { RelayableAction } from 'magmo-wallet';
 import { getProcess } from '../../../wallet/db/queries/walletProcess';
 import { handleGameRequest } from '../../handlers/handle-game-request';
 import { handleNewProcessAction } from '../../handlers/handle-new-process-action';
