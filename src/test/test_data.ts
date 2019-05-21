@@ -149,9 +149,9 @@ export const invalid_open_channel_params = {
 export const created_pre_fund_setup_1 = {
   id: expect.any(Number),
   allocator_channel_id: expect.any(Number),
-  turn_number: 1,
-  commitment_count: 1,
-  commitment_type: CommitmentType.PreFundSetup,
+  turnNumber: 1,
+  commitmentCount: 1,
+  commitmentType: CommitmentType.PreFundSetup,
   allocation: ALLOCATION,
   destination: DESTINATION,
   appAttributes: app_attrs(1),
@@ -162,5 +162,5 @@ export const participants = [{ address: PARTICIPANT_ADDRESS }, { address: HUB_AD
 export const created_channel = {
   id: expect.any(Number),
   participants,
-  rules_address: DUMMY_RULES_ADDRESS,
+  rulesAddress: DUMMY_RULES_ADDRESS,
 };
