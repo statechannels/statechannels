@@ -1,18 +1,22 @@
 import { Address, Channel, Uint256, Uint32 } from 'fmg-core';
-import { Model } from 'objection';
+import { Model, snakeCaseMappers } from 'objection';
 import AllocatorChannelParticipant from './allocator_channel_participant';
 import LedgerCommitment from './allocatorChannelCommitment';
 
 export default class AllocatorChannel extends Model {
   get asCoreChannel(): Channel {
     return {
-      channelType: this.rules_address,
+      channelType: this.rulesAddress,
       nonce: this.nonce,
       participants: this.participants.map(p => p.address),
     };
   }
 
   static tableName = 'allocator_channels';
+
+  static get columnNameMappers() {
+    return snakeCaseMappers();
+  }
 
   static relationMappings = {
     participants: {
@@ -32,11 +36,12 @@ export default class AllocatorChannel extends Model {
       },
     },
   };
+
   readonly id!: number;
-  channel_id: String;
+  channeId: string;
   holdings!: Uint256;
   nonce: Uint32;
   participants: AllocatorChannelParticipant[];
   commitments: LedgerCommitment[];
-  rules_address: Address;
+  rulesAddress: Address;
 }

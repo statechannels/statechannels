@@ -11,6 +11,13 @@ import {
 } from './actions';
 export * from './actions';
 
+export const enum WalletProtocol {
+  Application = 'Application',
+  Funding = 'Funding',
+  Dispute = 'Dispute',
+  Concluding = 'Concluding',
+}
+
 export type FundingStrategy = 'IndirectFundingStrategy';
 
 function sendMessage(to: string, message: RelayableAction) {

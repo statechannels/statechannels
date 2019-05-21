@@ -4,10 +4,9 @@ import * as incoming from 'magmo-wallet-client/lib/wallet-instructions';
 import * as actions from '../actions';
 import { eventChannel } from 'redux-saga';
 import * as application from '../protocols/application/reducer';
-import { isRelayableAction } from '../../communication';
+import { isRelayableAction, WalletProtocol } from '../../communication';
 import { getProcessId } from '../reducer';
 import { responseProvided } from '../protocols/dispute/responder/actions';
-import { WalletProtocol } from '../types';
 import { getChannelId } from '../../domain';
 
 export function* messageListener() {

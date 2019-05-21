@@ -32,23 +32,23 @@ jobs:
             - v2-dependencies-
       - restore_cache:
           keys:
-            - v2-dependencies-{{ checksum "packages/rps/package.json" }}
+            - v2-dependencies-rps-{{ checksum "yarn.lock" }}
             - v2-dependencies-rps
       - restore_cache:
           keys:
-            - v2-dependencies-{{ checksum "packages/tictactoe/package.json" }}
+            - v2-dependencies-tictactoe-{{ checksum "yarn.lock" }}
             - v2-dependencies-tictactoe
       - restore_cache:
           keys:
-            - v2-dependencies-{{ checksum "packages/server/package.json" }}
+            - v2-dependencies-server-{{ checksum "yarn.lock" }}
             - v2-dependencies-server
       - restore_cache:
           keys:
-            - v2-dependencies-{{ checksum "packages/wallet/package.json" }}
+            - v2-dependencies-wallet-{{ checksum "yarn.lock" }}
             - v2-dependencies-wallet
       - restore_cache:
           keys:
-            - v2-dependencies-{{ checksum "packages/magmo-wallet-client/package.json" }}
+            - v2-dependencies-magmo-wallet-client-{{ checksum "yarn.lock" }}
             - v2-dependencies-magmo-wallet-client
 
       - run: yarn install
@@ -61,24 +61,24 @@ jobs:
       - save_cache:
           paths:
             - packages/rps/node_modules
-          key: v2-dependencies-{{ checksum "packages/rps/package.json" }}
+          key: v2-dependencies-rps-{{ checksum "yarn.lock" }}
       - save_cache:
           paths:
             - packages/tictactoe/node_modules
-          key: v2-dependencies-{{ checksum "packages/tictactoe/package.json" }}
+          key: v2-dependencies-tictactoe-{{ checksum "yarn.lock" }}
       - save_cache:
           paths:
             - packages/server/node_modules
-          key: v2-dependencies-{{ checksum "packages/server/package.json" }}
+          key: v2-dependencies-server-{{ checksum "yarn.lock" }}
 
       - save_cache:
           paths:
             - packages/wallet/node_modules
-          key: v2-dependencies-{{ checksum "packages/wallet/package.json" }}
+          key: v2-dependencies-wallet-{{ checksum "yarn.lock" }}
       - save_cache:
           paths:
             - packages/magmo-wallet-client/node_modules
-          key: v2-dependencies-{{ checksum "packages/magmo-wallet-client/package.json" }}
+          key: v2-dependencies-magmo-wallet-client-{{ checksum "yarn.lock" }}
 
       - run:
           name: Waiting for Postgres to be ready

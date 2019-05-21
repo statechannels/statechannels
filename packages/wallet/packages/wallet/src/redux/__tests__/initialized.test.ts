@@ -3,10 +3,11 @@ import { walletReducer, getProcessId } from '../reducer';
 import * as states from './../state';
 import * as actions from './../actions';
 import * as scenarios from './test-scenarios';
-import { PlayerIndex, WalletProtocol } from '../types';
+import { PlayerIndex } from '../types';
 import * as fundProtocol from '../protocols/funding';
 import { fundingRequested } from '../protocols/actions';
 import * as adjudicatorState from '../adjudicator-state/reducer';
+import { WalletProtocol } from '../../communication';
 const { channelId } = scenarios;
 
 const defaults = {

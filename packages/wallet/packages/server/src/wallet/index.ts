@@ -1,5 +1,5 @@
-export { ChannelResponse } from './services';
-import { Bytes } from 'fmg-core';
+import { Bytes, Commitment } from 'fmg-core';
+export { SignedCommitment } from './services';
 import { queries } from './db/queries/allocator_channels';
 import { formResponse, nextCommitment, validSignature } from './services/channelManagement';
 
@@ -20,5 +20,5 @@ export default class Wallet {
     this.sanitize = sanitizeAppAttrs;
   }
 
-  formResponse = channel_id => formResponse(channel_id, this.sanitize);
+  formResponse = (commitment: Commitment) => formResponse(commitment);
 }

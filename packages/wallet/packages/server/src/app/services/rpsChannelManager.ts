@@ -1,14 +1,13 @@
 import { Commitment, CommitmentType, Signature } from 'fmg-core';
-import { ChannelResponse, errors } from '../../wallet';
+import { errors, SignedCommitment } from '../../wallet';
 import Wallet from '../../wallet';
 import AllocatorChannel from '../../wallet/models/allocatorChannel';
 
 import { delay } from 'bluebird';
 import { channelID } from 'fmg-core/lib/channel';
-import { HUB_ADDRESS } from '../../constants';
 import AllocatorChannelCommitment from '../../wallet/models/allocatorChannelCommitment';
-import { Blockchain } from '../../wallet/services/blockchain';
 import {
+  asCoreCommitment,
   defaultAppAttrs,
   fromCoreCommitment,
   generateSalt,
@@ -25,10 +24,10 @@ const wallet = new Wallet(sanitize);
 export async function updateRPSChannel(
   theirCommitment: Commitment,
   theirSignature: Signature,
-): Promise<ChannelResponse> {
-  // if (!wallet.validSignature(theirCommitment, theirSignature)) {
-  //   throw errors.COMMITMENT_NOT_SIGNED;
-  // }
+): Promise<SignedCommitment> {
+  if (!wallet.validSignature(theirCommitment, theirSignature)) {
+    throw errors.COMMITMENT_NOT_SIGNED;
+  }
 
   if (!(await valuePreserved(theirCommitment))) {
     throw errors.VALUE_LOST;
@@ -59,7 +58,7 @@ export async function updateRPSChannel(
     .eager('commitments')
     .first();
 
-  const ourLastPosition = existingChannel.commitments[1].app_attrs;
+  const ourLastPosition = existingChannel.commitments[1].appAttrs;
   // TODO: How can we test the manager, while having a randomized play strategy?
   const ourWeapon = Weapon.Rock;
 
@@ -68,28 +67,16 @@ export async function updateRPSChannel(
     ourWeapon,
   });
 
-  const allocator_channel = await wallet.updateChannel(
-    fromCoreCommitment(theirCommitment),
-    ourCommitment,
-  );
-  return wallet.formResponse(allocator_channel.id);
+  await wallet.updateChannel(fromCoreCommitment(theirCommitment), ourCommitment);
+  return wallet.formResponse(asCoreCommitment(ourCommitment));
 }
 
 async function openChannel(theirCommitment: Commitment) {
   const ourCommitment = await nextCommitment(fromCoreCommitment(theirCommitment));
 
-  if (process.env.NODE_ENV !== 'test') {
-    // TODO: Figure out how to test this.
-    const funding = theirCommitment.allocation[theirCommitment.destination.indexOf(HUB_ADDRESS)];
-    Blockchain.fund(channelID(theirCommitment.channel), funding);
-  }
+  await wallet.updateChannel(fromCoreCommitment(theirCommitment), ourCommitment);
 
-  const allocator_channel = await wallet.updateChannel(
-    fromCoreCommitment(theirCommitment),
-    ourCommitment,
-  );
-
-  return await wallet.formResponse(allocator_channel.id);
+  return await wallet.formResponse(asCoreCommitment(ourCommitment));
 }
 
 interface Opts {
@@ -147,8 +134,9 @@ export async function valuePreserved(theirCommitment: any): Promise<boolean> {
 
 export async function validTransition(theirCommitment: Commitment): Promise<boolean> {
   const { channel } = theirCommitment;
+  const channel_id = channelID(channel);
   const allocator_channel = await AllocatorChannel.query()
-    .where({ rules_address: channel.channelType, nonce: channel.nonce })
+    .where({ channel_id })
     .select('id')
     .first();
 
@@ -162,5 +150,5 @@ export async function validTransition(theirCommitment: Commitment): Promise<bool
     .select()
     .first();
 
-  return theirCommitment.turnNum === currentCommitment.turn_number + 1;
+  return theirCommitment.turnNum === currentCommitment.turnNumber + 1;
 }

@@ -4,7 +4,7 @@ const root = resolve(__dirname, '../../');
 module.exports = {
   rootDir: root,
   collectCoverageFrom: ['src/**/*.{js,jsx,ts,tsx}'],
-  setupFiles: [],
+  setupFiles: ['./config/env.js'],
   setupFilesAfterEnv: ['./src/config/knexSetupTeardown.ts'],
   testMatch: ['<rootDir>/**/__test__/**/?(*.)(spec|test).ts'],
   testEnvironment: 'node',

@@ -27,8 +27,8 @@ export function getConsensusContractAddress(): string {
 }
 
 export function getNetworkId(): number {
-  if (!!process.env.TARGET_NETWORK_ID) {
-    return parseInt(process.env.TARGET_NETWORK_ID, 10);
+  if (!!process.env.CHAIN_NETWORK_ID) {
+    return parseInt(process.env.CHAIN_NETWORK_ID, 10);
   } else {
     throw new Error('There is no target network ID specified.');
   }

@@ -1,7 +1,7 @@
 import { ProtocolAction, WalletAction } from '../actions';
-import { PlayerIndex, WalletProtocol } from '../types';
+import { PlayerIndex } from '../types';
 import { Commitment } from '../../domain';
-import { ConcludeInstigated, CONCLUDE_INSTIGATED } from '../../communication';
+import { ConcludeInstigated, CONCLUDE_INSTIGATED, WalletProtocol } from '../../communication';
 export { BaseProcessAction } from '../../communication';
 
 export const INITIALIZE_CHANNEL = 'WALLET.NEW_PROCESS.INITIALIZE_CHANNEL';

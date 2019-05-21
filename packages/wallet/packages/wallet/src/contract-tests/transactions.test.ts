@@ -1,6 +1,7 @@
 import { ethers } from 'ethers';
 
 import { put } from 'redux-saga/effects';
+import { getGanacheProvider } from 'magmo-devtools';
 
 import {
   transactionConfirmed,
@@ -34,9 +35,7 @@ describe('transactions', () => {
   let networkId;
   let libraryAddress;
   let nonce = 5;
-  const provider: ethers.providers.JsonRpcProvider = new ethers.providers.JsonRpcProvider(
-    `http://localhost:${process.env.DEV_GANACHE_PORT}`,
-  );
+  const provider: ethers.providers.JsonRpcProvider = getGanacheProvider();
 
   const participantA = ethers.Wallet.createRandom();
   const participantB = ethers.Wallet.createRandom();

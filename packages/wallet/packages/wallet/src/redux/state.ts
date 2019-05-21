@@ -23,9 +23,9 @@ import * as indirectFunding from './protocols/indirect-funding/state';
 import { accumulateSideEffects } from './outbox';
 import { WalletEvent } from 'magmo-wallet-client';
 import { TransactionRequest } from 'ethers/providers';
-import { WalletProtocol } from './types';
 import { AdjudicatorState } from './adjudicator-state/state';
 import { SignedCommitment, Commitment } from '../domain';
+import { WalletProtocol } from '../communication';
 
 export type WalletState = WaitForLogin | MetaMaskError | Initialized;
 

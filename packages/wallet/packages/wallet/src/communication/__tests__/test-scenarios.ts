@@ -23,19 +23,18 @@ const {
 export const asAddress = '0x5409ED021D9299bf6814279A6A1411A7e866A631';
 export const bsAddress = '0x6Ecbe1DB9EF729CBe972C83Fb886247691Fb6beb';
 
-const applicationProcessId = 'Application';
 const fundingProcessId = 'Funding';
 const concludeProcessId = 'Conclude';
 
-const sendAppPrefundSetup = messageRelayRequested(bsAddress, {
-  processId: applicationProcessId,
-  data: commitmentReceived(fundingProcessId, signedCommitment0),
-});
+const sendAppPrefundSetup = {
+  ...signedCommitment0,
+  queue: 'GAME_ENGINE',
+};
 
-const respondToAppPreFundSetup = messageRelayRequested(asAddress, {
-  processId: applicationProcessId,
-  data: commitmentReceived(fundingProcessId, signedCommitment1),
-});
+const respondToAppPreFundSetup = {
+  ...signedCommitment1,
+  queue: 'GAME_ENGINE',
+};
 
 const indirectStrategyChosen = messageRelayRequested(bsAddress, {
   processId: fundingProcessId,

@@ -61,7 +61,7 @@ export function* sendWalletMessageSaga() {
 
         // Since the response is returned straight away, we have to relay the commitment
         // immediately
-        Wallet.relayMessage(WALLET_IFRAME_ID, response.data);
+        Wallet.relayMessage(WALLET_IFRAME_ID, response.messagePayload);
       } catch (err) {
         console.error(err);
       }
@@ -352,7 +352,7 @@ function* receiveCommitmentSaga(message: AppMessage) {
 }
 
 async function postData(data = {}) {
-  const response = await fetch(`${process.env.BOT_URL}/api/v1/rps_channels`, {
+  const response = await fetch(`${process.env.BOT_URL}/api/v2/channels`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

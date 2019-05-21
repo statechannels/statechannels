@@ -1,9 +1,9 @@
 import { ethers } from 'ethers';
 import { Address, CommitmentType, Signature, Uint256, Uint32 } from 'fmg-core';
+import { channelID } from 'fmg-core/lib/channel';
 import { AppCommitment, CommitmentString } from '../../../types';
 import errors from '../../errors';
 import AllocatorChannel from '../../models/allocatorChannel';
-import { channelID } from 'fmg-core/lib/channel';
 
 export interface CreateAllocatorChannelParams {
   commitment: CommitmentString;
@@ -94,6 +94,15 @@ async function updateAllocatorChannel(
   }
 
   return AllocatorChannel.query()
-    .eager('[commitments.[allocations],participants]')
+    .eager('[commitments.[allocations,allocatorChannel.[participants]],participants]')
     .upsertGraphAndFetch(upserts);
+}
+
+export async function getWithCommitments(channel_id: string) {
+  return await AllocatorChannel.query()
+    .where({
+      channel_id,
+    })
+    .eager('[commitments.[allocatorChannel.[participants],allocations]]')
+    .first();
 }
