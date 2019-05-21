@@ -2,7 +2,12 @@ import { ethers } from 'ethers';
 import { Signature } from 'fmg-core';
 import { channelID } from 'fmg-core/lib/channel';
 import { appAttributesFromBytes } from 'fmg-nitro-adjudicator';
-import { CommitmentReceived, communication, RelayableAction, StrategyProposed } from 'magmo-wallet';
+import {
+  CommitmentReceived,
+  RelayableAction,
+  StrategyProposed,
+} from 'magmo-wallet/lib/src/communication';
+import * as communication from 'magmo-wallet/lib/src/communication';
 import { HUB_ADDRESS } from '../../constants';
 import { errors } from '../../wallet';
 import { getCurrentCommitment } from '../../wallet/db/queries/getCurrentCommitment';

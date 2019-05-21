@@ -1,4 +1,8 @@
-import { ConcludeInstigated, getProcessId, WalletProtocol } from 'magmo-wallet';
+import {
+  ConcludeInstigated,
+  getProcessId,
+  WalletProtocol,
+} from 'magmo-wallet/lib/src/communication';
 import WalletProcess from '../../models/WalletProcess';
 
 export const queries = {
