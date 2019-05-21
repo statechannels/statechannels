@@ -12,7 +12,7 @@
     "db:migrate": "npx knex migrate:latest",
     "db:rollback": "npx knex migrate:rollback",
     "db:seed": "npx knex seed:run",
-    "ci:test": "GANACHE_PORT=8505 run-s contracts:clear prettier:check chain:ci:test server:test",
+    "test:ci": "GANACHE_PORT=8505 run-s contracts:clear prettier:check chain:ci:test server:test",
     "chain:ci:test": "yarn chain:test --all --ci",
     "chain:test": "npx ganache-then-jest --runInBand -c ./config/jest/jest.chain.config.js",
     "adjudicator-watcher:start": "node lib/wallet/adjudicator-watcher/index.js",
