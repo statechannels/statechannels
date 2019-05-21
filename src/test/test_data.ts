@@ -146,10 +146,9 @@ export const invalid_open_channel_params = {
   signature: sign(toHex(commitment), '0xf00'),
 };
 
-export const created_pre_fund_setup_1 = {
-  id: expect.any(Number),
-  allocator_channel_id: expect.any(Number),
-  turnNumber: 1,
+export const created_pre_fund_setup_1: LedgerCommitment = {
+  channel: default_channel,
+  turnNum: 1,
   commitmentCount: 1,
   commitmentType: CommitmentType.PreFundSetup,
   allocation: ALLOCATION,
