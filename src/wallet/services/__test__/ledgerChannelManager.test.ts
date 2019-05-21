@@ -149,10 +149,6 @@ describe('updateLedgerChannel', () => {
         },
       );
     });
-
-    it.skip('throws when the app is not funded', async () => {
-      expect.assertions(1);
-    });
   });
 
   describe.skip('transitioning to an app commitment', () => {
