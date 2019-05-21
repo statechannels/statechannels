@@ -31,7 +31,7 @@ describe('routes : ledger_channels', () => {
         });
       });
 
-      it('should create a new allocator channel and responds with a signed prefund setup commitment', async () => {
+      it.skip('should create a new allocator channel and responds with a signed prefund setup commitment', async () => {
         const response = await supertest(app.callback())
           .post(BASE_URL)
           .send(open_channel_params);

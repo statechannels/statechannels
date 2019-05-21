@@ -170,7 +170,7 @@ describe('updateLedgerChannel', () => {
     });
   });
 
-  describe('transitioning to an app commitment', () => {
+  describe.skip('transitioning to an app commitment', () => {
     beforeEach(() => {
       theirSignature = signAppCommitment(app_0, PARTICIPANT_PRIVATE_KEY);
     });
@@ -212,7 +212,7 @@ describe.skip('channelFunded', () => {
 });
 
 describe('nextCommitment', () => {
-  it('works on app commitments', () => {
+  it.skip('works on app commitments', () => {
     theirSignature = signAppCommitment(app_0, PARTICIPANT_PRIVATE_KEY);
     expect(LedgerChannelManager.nextCommitment(app_1, theirSignature, app_0)).toMatchObject(app_2);
   });
