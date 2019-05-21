@@ -1,4 +1,5 @@
 import { CommitmentType, toUint256 } from 'fmg-core';
+import { UpdateType } from 'fmg-nitro-adjudicator/lib/consensus-app';
 import { Model } from 'objection';
 import {
   PositionType,
@@ -13,6 +14,11 @@ import {
   BEGINNING_RPS_APP_CHANNEL_NONCE,
   DESTINATION,
   DUMMY_RULES_ADDRESS,
+  DUMMY_RULES_BEGINNING_APP_CHANNEL_NONCE_CHANNEL_ID,
+  DUMMY_RULES_BEGINNING_RPS_APP_CHANNEL_NONCE_CHANNEL_ID,
+  DUMMY_RULES_FUNDED_NONCE_CHANNEL_ID,
+  DUMMY_RULES_FUNDED_RPS_CHANNEL_NONCE_CHANNEL_ID,
+  DUMMY_RULES_ONGOING_APP_CHANNEL_NONCE_CHANNEL_ID,
   FUNDED_CHANNEL_HOLDINGS,
   FUNDED_CHANNEL_NONCE,
   FUNDED_RPS_CHANNEL_HOLDINGS,
@@ -21,11 +27,6 @@ import {
   ONGOING_APP_CHANNEL_HOLDINGS,
   ONGOING_APP_CHANNEL_NONCE,
   PARTICIPANT_ADDRESS,
-  DUMMY_RULES_FUNDED_NONCE_CHANNEL_ID,
-  DUMMY_RULES_BEGINNING_APP_CHANNEL_NONCE_CHANNEL_ID,
-  DUMMY_RULES_ONGOING_APP_CHANNEL_NONCE_CHANNEL_ID,
-  DUMMY_RULES_FUNDED_RPS_CHANNEL_NONCE_CHANNEL_ID,
-  DUMMY_RULES_BEGINNING_RPS_APP_CHANNEL_NONCE_CHANNEL_ID,
 } from '../../../constants';
 import AllocatorChannel from '../../models/allocatorChannel';
 import knex from '../connection';
@@ -47,38 +48,39 @@ const allocations = () => [allocationByPriority(0), allocationByPriority(1)];
 // Ledger channels
 // ***************
 
-const ledger_app_attrs = (n: number) => ({
-  consensusCounter: n,
+const ledger_appAttrs = (n: number) => ({
+  furtherVotesRequired: n,
   proposedAllocation: ALLOCATION,
   proposedDestination: DESTINATION,
+  updateType: UpdateType.Consensus,
 });
 
-function pre_fund_setup(turn_number: number) {
+function pre_fund_setup(turnNumber: number) {
   return {
-    turn_number,
-    commitment_type: CommitmentType.PreFundSetup,
-    commitment_count: turn_number,
+    turnNumber,
+    commitmentType: CommitmentType.PreFundSetup,
+    commitmentCount: turnNumber,
     allocations: allocations(),
-    app_attrs: ledger_app_attrs(0),
+    appAttrs: ledger_appAttrs(2),
   };
 }
 
 const funded_channel = {
-  channel_id: DUMMY_RULES_FUNDED_NONCE_CHANNEL_ID,
-  rules_address: DUMMY_RULES_ADDRESS,
+  channelId: DUMMY_RULES_FUNDED_NONCE_CHANNEL_ID,
+  rulesAddress: DUMMY_RULES_ADDRESS,
   nonce: FUNDED_CHANNEL_NONCE,
   holdings: FUNDED_CHANNEL_HOLDINGS,
   commitments: [pre_fund_setup(0), pre_fund_setup(1)],
   participants,
 };
 
-function post_fund_setup(turn_number: number) {
+function post_fund_setup(turnNumber: number) {
   return {
-    turn_number,
-    commitment_type: CommitmentType.PostFundSetup,
-    commitment_count: turn_number % funded_channel.participants.length,
+    turnNumber,
+    commitmentType: CommitmentType.PostFundSetup,
+    commitmentCount: turnNumber % funded_channel.participants.length,
     allocations: allocations(),
-    app_attrs: ledger_app_attrs(0),
+    appAttrs: ledger_appAttrs(2),
   };
 }
 
@@ -91,13 +93,13 @@ const beginning_app_phase_channel = {
   participants,
 };
 
-function app(turn_number: number) {
+function app(turnNumber: number) {
   return {
-    turn_number,
-    commitment_type: CommitmentType.PostFundSetup,
-    commitment_count: turn_number % funded_channel.participants.length,
+    turnNumber,
+    commitmentType: CommitmentType.PostFundSetup,
+    commitmentCount: turnNumber % funded_channel.participants.length,
     allocations: allocations(),
-    app_attrs: ledger_app_attrs(turn_number % participants.length),
+    appAttrs: ledger_appAttrs(turnNumber % participants.length),
   };
 }
 
@@ -114,7 +116,7 @@ const ongoing_app_phase_channel = {
 // RPS channels
 // ************
 
-function rps_app_attrs(n: number): RPSAppAttributes {
+function rps_appAttrs(n: number): RPSAppAttributes {
   return {
     stake: toUint256(10),
     positionType: PositionType.Resting,
@@ -125,32 +127,32 @@ function rps_app_attrs(n: number): RPSAppAttributes {
   };
 }
 
-function rps_pre_fund_setup(turn_number: number) {
+function rps_pre_fund_setup(turnNumber: number) {
   return {
-    turn_number,
-    commitment_type: CommitmentType.PreFundSetup,
-    commitment_count: turn_number,
+    turnNumber,
+    commitmentType: CommitmentType.PreFundSetup,
+    commitmentCount: turnNumber,
     allocations: allocations(),
-    app_attrs: rps_app_attrs(0),
+    appAttrs: rps_appAttrs(0),
   };
 }
 
 const funded_rps_channel = {
-  channel_id: DUMMY_RULES_FUNDED_RPS_CHANNEL_NONCE_CHANNEL_ID,
-  rules_address: DUMMY_RULES_ADDRESS,
+  channelId: DUMMY_RULES_FUNDED_RPS_CHANNEL_NONCE_CHANNEL_ID,
+  rulesAddress: DUMMY_RULES_ADDRESS,
   nonce: FUNDED_RPS_CHANNEL_NONCE,
   holdings: FUNDED_RPS_CHANNEL_HOLDINGS,
   commitments: [rps_pre_fund_setup(0), rps_pre_fund_setup(1)],
   participants,
 };
 
-function rps_post_fund_setup(turn_number: number) {
+function rps_post_fund_setup(turnNumber: number) {
   return {
-    turn_number,
-    commitment_type: CommitmentType.PostFundSetup,
-    commitment_count: turn_number % funded_channel.participants.length,
+    turnNumber,
+    commitmentType: CommitmentType.PostFundSetup,
+    commitmentCount: turnNumber % funded_channel.participants.length,
     allocations: allocations(),
-    app_attrs: rps_app_attrs(0),
+    appAttrs: rps_appAttrs(0),
   };
 }
 

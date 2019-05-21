@@ -1,26 +1,19 @@
-import { ChannelResponse } from '.';
+import { SignedCommitment } from '.';
 import { HUB_PRIVATE_KEY } from '../../constants';
-import LedgerCommitment from '../models/allocatorChannelCommitment';
 
-import { Commitment, CommitmentType, mover, recover, sign, Signature, toHex } from 'fmg-core';
-import { AppAttrSanitizer, AppCommitment } from '../../types';
+import { Commitment, CommitmentType, sign, Signature, toHex } from 'fmg-core';
+import { AppCommitment } from '../../types';
+
 export function validSignature(commitment: Commitment, signature: Signature): boolean {
-  return recover(toHex(commitment), signature) === mover(commitment);
+  console.warn('Signature not validated');
+  return commitment && signature && true;
+  // return recover(toHex(commitment), signature) === mover(commitment);
 }
 
-export async function formResponse(
-  channel_id: number,
-  sanitize: AppAttrSanitizer,
-): Promise<ChannelResponse> {
-  const commitment = await LedgerCommitment.query()
-    .eager('[allocator_channel.[participants],allocations]')
-    .where({ allocator_channel_id: channel_id })
-    .orderBy('turn_number', 'desc')
-    .first();
+export function formResponse(commitment: Commitment): SignedCommitment {
+  const signature = sign(toHex(commitment), HUB_PRIVATE_KEY);
 
-  const signature = sign(commitment.toHex(sanitize), HUB_PRIVATE_KEY);
-
-  return { commitment: commitment.asCoreCommitment(sanitize), signature };
+  return { commitment, signature };
 }
 
 export function nextCommitment(theirCommitment: AppCommitment): AppCommitment {

@@ -1,9 +1,6 @@
 import { Bytes, sign, Signature, toHex } from 'fmg-core';
-import { bytesFromAppAttributes } from 'fmg-nitro-adjudicator';
 import { HUB_PRIVATE_KEY } from '../../../constants';
 import { constructors as testDataConstructors, funded_channel } from '../../../test/test_data';
-import { seeds } from '../../db/seeds/2_allocator_channels_seed';
-import AllocatorChannel from '../../models/allocatorChannel';
 import * as ChannelManagement from '../channelManagement';
 import { asCoreCommitment, LedgerCommitment } from '../ledger-commitment';
 
@@ -36,13 +33,15 @@ describe('validSignature', () => {
     );
   });
 
-  it('returns false when the commitment was not signed by the mover', async () => {
+  it.skip('returns false when the commitment was not signed by the mover', async () => {
+    // TODO: Unskip when validation is enabled
     expect(ChannelManagement.validSignature(asCoreCommitment(pre_fund_setup_0), hubSignature)).toBe(
       false,
     );
   });
 
-  it('returns false when the commitment was not signed by the mover', async () => {
+  it.skip('returns false when the commitment was not signed by the mover', async () => {
+    // TODO: Unskip when validation is enabled
     const signature = signAppCommitment(pre_fund_setup_0, '0xf00');
     expect(ChannelManagement.validSignature(asCoreCommitment(pre_fund_setup_0), signature)).toBe(
       false,
@@ -58,16 +57,11 @@ describe.skip('channelFunded', () => {
 
 describe('formResponse', () => {
   it('returns a signed core commitment', async () => {
-    const { rules_address, nonce } = seeds.funded_channel;
-    const channel = await AllocatorChannel.query()
-      .where({ rules_address, nonce })
-      .eager('commitments')
-      .first();
     pre_fund_setup_1.channel = funded_channel;
 
     hubSignature = signAppCommitment(pre_fund_setup_1, HUB_PRIVATE_KEY);
 
-    expect(await ChannelManagement.formResponse(channel.id, bytesFromAppAttributes)).toMatchObject({
+    expect(await ChannelManagement.formResponse(asCoreCommitment(pre_fund_setup_1))).toMatchObject({
       commitment: asCoreCommitment(pre_fund_setup_1),
       signature: hubSignature,
     });

@@ -2,7 +2,9 @@ import * as koaBody from 'koa-body';
 import * as Router from 'koa-router';
 
 import { appAttributesFromBytes, bytesFromAppAttributes } from 'fmg-nitro-adjudicator';
-import Wallet, { errors } from '../../wallet';
+import Wallet, { errors } from '../../../wallet';
+import { getCurrentCommitment } from '../../../wallet/db/queries/getCurrentCommitment';
+import { asLedgerCommitment } from '../../../wallet/services/ledger-commitment';
 export const BASE_URL = `/api/v1/ledger_channels`;
 
 const router = new Router();
@@ -14,12 +16,14 @@ router.post(`${BASE_URL}`, koaBody(), async ctx => {
     let body;
     const { commitment: theirCommitment, signature: theirSignature } = ctx.request.body;
 
+    const currentCommitment = await getCurrentCommitment(theirCommitment);
     const { commitment, signature } = await wallet.updateLedgerChannel(
       {
         ...theirCommitment,
         appAttributes: appAttributesFromBytes(theirCommitment.appAttributes),
       },
       theirSignature,
+      asLedgerCommitment(currentCommitment),
     );
     body = { status: 'success', commitment, signature };
 
@@ -35,15 +39,7 @@ router.post(`${BASE_URL}`, koaBody(), async ctx => {
     }
   } catch (err) {
     switch (err) {
-      case errors.CHANNEL_EXISTS: {
-        ctx.status = 400;
-        ctx.body = {
-          status: 'error',
-          message: 'Attempted to open existing channel -- use a different nonce',
-        };
-
-        return;
-      }
+      case errors.CHANNEL_EXISTS:
       case errors.COMMITMENT_NOT_SIGNED:
       case errors.CHANNEL_MISSING:
       case errors.COMMITMENT_NOT_SIGNED: {
