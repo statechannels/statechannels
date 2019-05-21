@@ -151,7 +151,7 @@ describe('updateLedgerChannel', () => {
     });
   });
 
-  describe.skip('transitioning to an app commitment', () => {
+  describe('transitioning to an app commitment', () => {
     beforeEach(() => {
       theirSignature = signAppCommitment(app_0, PARTICIPANT_PRIVATE_KEY);
     });
