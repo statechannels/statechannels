@@ -1,12 +1,12 @@
 import { fork } from 'child_process';
-import { ethers } from 'ethers';
 import { bigNumberify } from 'ethers/utils';
-import { channelID } from 'fmg-core/lib/channel';
+import { channelID } from 'fmg-core';
+import { funded_channel } from '../../../test/test_data';
 import AllocatorChannel from '../../models/allocatorChannel';
-import { channel, depositIntoContract } from './utils';
+import { Blockchain } from '../../services/blockchain';
 
 jest.setTimeout(60000);
-const channelId = channelID(channel);
+const channelId = channelID(funded_channel);
 let killSubprocess = null;
 
 async function getHoldings() {
@@ -17,10 +17,6 @@ async function getHoldings() {
 }
 
 describe('adjudicator listener', () => {
-  const provider: ethers.providers.JsonRpcProvider = new ethers.providers.JsonRpcProvider(
-    `http://localhost:${process.env.DEV_GANACHE_PORT}`,
-  );
-
   it('should handle a funds received event when channel is in the database', async done => {
     const preEventHoldings = await getHoldings();
 
@@ -41,7 +37,7 @@ describe('adjudicator listener', () => {
       done();
     });
 
-    await depositIntoContract(provider, channelId);
+    await Blockchain.fund(channelId, '0x0', bigNumberify(5).toHexString());
   });
 });
 

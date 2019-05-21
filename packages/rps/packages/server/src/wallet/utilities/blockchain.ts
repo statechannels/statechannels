@@ -9,7 +9,7 @@ const neworkIdToRpcEndpoint = networkId => {
     return process.env.INFURA_JSON_RPC_ENDPOINT;
   } else {
     // Assuming Ganache
-    return process.env.DEV_GANACHE_JSON_RPC_ENDPOINT;
+    return process.env.GANACHE_JSON_RPC_ENDPOINT;
   }
 };
 

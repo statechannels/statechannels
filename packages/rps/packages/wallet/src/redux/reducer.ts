@@ -19,11 +19,10 @@ import {
 import * as concludingProtocol from './protocols/concluding';
 import * as fundProtocol from './protocols/funding';
 import * as states from './state';
-import { WalletProtocol } from './types';
 import { APPLICATION_PROCESS_ID } from './protocols/application/reducer';
 import { adjudicatorStateReducer } from './adjudicator-state/reducer';
-import { CONCLUDE_INSTIGATED, isStartProcessAction } from '../communication';
-import { communication } from '../..';
+import { CONCLUDE_INSTIGATED, isStartProcessAction, WalletProtocol } from '../communication';
+import * as communication from '../communication';
 
 const initialState = states.waitForLogin();
 

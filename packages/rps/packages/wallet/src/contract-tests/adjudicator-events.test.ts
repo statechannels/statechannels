@@ -12,6 +12,7 @@ import {
   defaultDepositAmount,
 } from './test-utils';
 import * as walletStates from '../redux/state';
+import { getGanacheProvider } from 'magmo-devtools';
 jest.setTimeout(60000);
 
 const createWatcherState = (
@@ -31,9 +32,7 @@ const createWatcherState = (
 };
 
 describe('adjudicator listener', () => {
-  const provider: ethers.providers.JsonRpcProvider = new ethers.providers.JsonRpcProvider(
-    `http://localhost:${process.env.DEV_GANACHE_PORT}`,
-  );
+  const provider: ethers.providers.JsonRpcProvider = getGanacheProvider();
 
   const participantA = ethers.Wallet.createRandom();
   const participantB = ethers.Wallet.createRandom();

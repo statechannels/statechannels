@@ -1,7 +1,7 @@
 import * as supertest from 'supertest';
-import app from '../../src/app/app';
-import { HUB_ADDRESS, NAME, STAKE } from '../../src/constants';
-import * as contracts from '../../src/utilities/contracts';
+import app from '../../app/app';
+import { HUB_ADDRESS, NAME, STAKE } from '../../constants';
+import * as contracts from '../../utilities/contracts';
 
 const BASE_URL = '/api/v1/rps_games';
 

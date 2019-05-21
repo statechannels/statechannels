@@ -1,10 +1,10 @@
 import { Address, Uint256 } from 'fmg-core';
 import * as koaBody from 'koa-body';
 import * as Router from 'koa-router';
-import { HUB_ADDRESS, NAME, STAKE } from '../../constants';
-import * as contracts from '../../utilities/contracts';
-import Wallet from '../../wallet';
+import { HUB_ADDRESS, NAME, STAKE } from '../../../constants';
+import * as contracts from '../../../utilities/contracts';
 
+import Wallet from '../../../wallet';
 export const BASE_URL = `/api/v1/rps_games`;
 
 const router = new Router();

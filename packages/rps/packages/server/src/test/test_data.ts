@@ -1,5 +1,7 @@
 import { Channel, Commitment, CommitmentType, sign, toHex } from 'fmg-core';
+import { channelID } from 'fmg-core/lib/channel';
 import { bytesFromAppAttributes } from 'fmg-nitro-adjudicator';
+import { UpdateType } from 'fmg-nitro-adjudicator/lib/consensus-app';
 import {
   ALLOCATION,
   BEGINNING_APP_CHANNEL_NONCE,
@@ -26,6 +28,7 @@ export const funded_channel: Channel = {
   participants: PARTICIPANTS,
   nonce: FUNDED_CHANNEL_NONCE,
 };
+export const funded_channel_id = channelID(funded_channel);
 
 export const beginning_app_phase_channel: Channel = {
   channelType: DUMMY_RULES_ADDRESS,
@@ -44,9 +47,10 @@ const app_attrs = (
   proposedAllocation = ALLOCATION,
   proposedDestination = DESTINATION,
 ) => ({
-  consensusCounter: n % 2,
+  furtherVotesRequired: 2 - (n % 2),
   proposedAllocation,
   proposedDestination,
+  updateType: UpdateType.Consensus,
 });
 
 const base = {
@@ -142,12 +146,11 @@ export const invalid_open_channel_params = {
   signature: sign(toHex(commitment), '0xf00'),
 };
 
-export const created_pre_fund_setup_1 = {
-  id: expect.any(Number),
-  allocator_channel_id: expect.any(Number),
-  turn_number: 1,
-  commitment_count: 1,
-  commitment_type: CommitmentType.PreFundSetup,
+export const created_pre_fund_setup_1: LedgerCommitment = {
+  channel: default_channel,
+  turnNum: 1,
+  commitmentCount: 1,
+  commitmentType: CommitmentType.PreFundSetup,
   allocation: ALLOCATION,
   destination: DESTINATION,
   appAttributes: app_attrs(1),
@@ -158,5 +161,5 @@ export const participants = [{ address: PARTICIPANT_ADDRESS }, { address: HUB_AD
 export const created_channel = {
   id: expect.any(Number),
   participants,
-  rules_address: DUMMY_RULES_ADDRESS,
+  rulesAddress: DUMMY_RULES_ADDRESS,
 };

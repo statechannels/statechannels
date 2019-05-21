@@ -1,10 +1,7 @@
 import { CommitmentType, Signature } from 'fmg-core';
-import { bytesFromAppAttributes } from 'fmg-nitro-adjudicator';
-import { ChannelResponse } from '.';
+import { SignedCommitment } from '.';
 import { queries } from '../db/queries/allocator_channels';
 import errors from '../errors';
-import AllocatorChannel from '../models/allocatorChannel';
-import AllocatorChannelCommitment from '../models/allocatorChannelCommitment';
 import * as ChannelManagement from './channelManagement';
 import { asCoreCommitment, LedgerCommitment } from './ledger-commitment';
 
@@ -12,29 +9,35 @@ import { asCoreCommitment, LedgerCommitment } from './ledger-commitment';
 export async function updateLedgerChannel(
   theirCommitment: LedgerCommitment,
   theirSignature: Signature,
-): Promise<ChannelResponse> {
+  currentCommitment?: LedgerCommitment,
+): Promise<SignedCommitment> {
+  const ourCommitment = nextCommitment(theirCommitment, theirSignature, currentCommitment);
+  await queries.updateAllocatorChannel(theirCommitment, ourCommitment);
+  return ChannelManagement.formResponse(asCoreCommitment(ourCommitment));
+}
+
+export function nextCommitment(
+  theirCommitment: LedgerCommitment,
+  theirSignature: Signature,
+  currentCommitment?: LedgerCommitment,
+): LedgerCommitment {
   if (!ChannelManagement.validSignature(asCoreCommitment(theirCommitment), theirSignature)) {
     throw errors.COMMITMENT_NOT_SIGNED;
   }
 
-  if (!(await valuePreserved(theirCommitment))) {
-    throw errors.VALUE_LOST;
+  if (theirCommitment.turnNum > 0) {
+    if (!valuePreserved(currentCommitment, theirCommitment)) {
+      throw errors.VALUE_LOST;
+    }
+
+    if (
+      theirCommitment.commitmentType !== CommitmentType.PreFundSetup &&
+      !validTransition(currentCommitment, theirCommitment)
+    ) {
+      throw errors.INVALID_TRANSITION;
+    }
   }
 
-  if (
-    theirCommitment.commitmentType !== CommitmentType.PreFundSetup &&
-    !(await validTransition(theirCommitment))
-  ) {
-    throw errors.INVALID_TRANSITION;
-  }
-
-  const ourCommitment = nextCommitment(theirCommitment);
-
-  const allocator_channel = await queries.updateAllocatorChannel(theirCommitment, ourCommitment);
-  return ChannelManagement.formResponse(allocator_channel.id, bytesFromAppAttributes);
-}
-
-export function nextCommitment(theirCommitment: LedgerCommitment): LedgerCommitment {
   if (theirCommitment.commitmentType !== CommitmentType.App) {
     return ChannelManagement.nextCommitment(theirCommitment);
   }
@@ -45,31 +48,18 @@ export function nextCommitment(theirCommitment: LedgerCommitment): LedgerCommitm
     commitmentCount: 0,
     appAttributes: {
       ...theirCommitment.appAttributes,
-      consensusCounter: theirCommitment.appAttributes.consensusCounter + 1,
+      furtherVotesRequired: theirCommitment.appAttributes.furtherVotesRequired - 1,
     },
   };
 }
 
-export async function valuePreserved(theirCommitment: any): Promise<boolean> {
-  return theirCommitment && true;
+export function valuePreserved(currentCommitment: any, theirCommitment: any): boolean {
+  return currentCommitment && theirCommitment && true;
 }
 
-export async function validTransition(theirCommitment: LedgerCommitment): Promise<boolean> {
-  const { channel } = theirCommitment;
-  const allocator_channel = await AllocatorChannel.query()
-    .where({ rules_address: channel.channelType, nonce: channel.nonce })
-    .select('id')
-    .first();
-
-  if (!allocator_channel) {
-    throw errors.CHANNEL_MISSING;
-  }
-
-  const currentCommitment = await AllocatorChannelCommitment.query()
-    .where({ allocator_channel_id: allocator_channel.id })
-    .orderBy('id', 'desc')
-    .select()
-    .first();
-
-  return theirCommitment.turnNum === currentCommitment.turn_number + 1;
+export function validTransition(
+  currentCommitment: LedgerCommitment,
+  theirCommitment: LedgerCommitment,
+): boolean {
+  return theirCommitment.turnNum === currentCommitment.turnNum + 1;
 }
