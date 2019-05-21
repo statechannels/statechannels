@@ -2,15 +2,14 @@ import { CommitmentType, Signature } from 'fmg-core';
 import { SignedCommitment } from '.';
 import { queries } from '../db/queries/allocator_channels';
 import errors from '../errors';
-import AllocatorChannelCommitment from '../models/allocatorChannelCommitment';
 import * as ChannelManagement from './channelManagement';
-import { asCoreCommitment, asLedgerCommitment, LedgerCommitment } from './ledger-commitment';
+import { asCoreCommitment, LedgerCommitment } from './ledger-commitment';
 
 // TODO: This should be extracted into a hub app?
 export async function updateLedgerChannel(
   theirCommitment: LedgerCommitment,
   theirSignature: Signature,
-  currentCommitment?: AllocatorChannelCommitment,
+  currentCommitment?: LedgerCommitment,
 ): Promise<SignedCommitment> {
   const ourCommitment = nextCommitment(theirCommitment, theirSignature, currentCommitment);
   await queries.updateAllocatorChannel(theirCommitment, ourCommitment);
@@ -20,7 +19,7 @@ export async function updateLedgerChannel(
 export function nextCommitment(
   theirCommitment: LedgerCommitment,
   theirSignature: Signature,
-  currentCommitment?: AllocatorChannelCommitment,
+  currentCommitment?: LedgerCommitment,
 ): LedgerCommitment {
   if (!ChannelManagement.validSignature(asCoreCommitment(theirCommitment), theirSignature)) {
     throw errors.COMMITMENT_NOT_SIGNED;
@@ -33,7 +32,7 @@ export function nextCommitment(
 
     if (
       theirCommitment.commitmentType !== CommitmentType.PreFundSetup &&
-      !validTransition(asLedgerCommitment(currentCommitment), theirCommitment)
+      !validTransition(currentCommitment, theirCommitment)
     ) {
       throw errors.INVALID_TRANSITION;
     }

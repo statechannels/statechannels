@@ -1,5 +1,4 @@
 import { Address, Channel, Commitment, Signature, Uint256, Uint32 } from 'fmg-core';
-import AllocatorChannelCommitment from '../models/allocatorChannelCommitment';
 import { Blockchain } from './blockchain';
 import { LedgerCommitment } from './ledger-commitment';
 import * as LedgerChannelManager from './ledgerChannelManager';
@@ -22,7 +21,7 @@ export interface SignedCommitment {
 export const updateLedgerChannel: (
   theirC: LedgerCommitment,
   s: Signature,
-  currentC?: AllocatorChannelCommitment,
+  currentC?: LedgerCommitment,
 ) => Promise<SignedCommitment> = LedgerChannelManager.updateLedgerChannel;
 export const fund: (id: Address, expectedHeld: Uint256, amount: Uint256) => Promise<Uint256> =
   Blockchain.fund;
