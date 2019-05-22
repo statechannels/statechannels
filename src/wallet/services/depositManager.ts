@@ -16,7 +16,7 @@ export async function onDepositEvent(
     .findOne({
       channel_id,
     })
-    .eager('[commitments, commitments.allocations, participants]');
+    .eager('[commitments.[allocations], participants]');
 
   if (!allocatorChannel) {
     console.log(`Allocator channel ${channelId} not in database`);
