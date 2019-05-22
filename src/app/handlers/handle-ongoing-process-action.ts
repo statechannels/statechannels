@@ -78,7 +78,7 @@ async function handleCommitmentReceived(ctx, action: CommitmentReceived) {
         appAttributes: appAttributesFromBytes(theirCommitment.appAttributes),
       },
       splitSignature,
-      asLedgerCommitment(currentCommitment),
+      currentCommitment && asLedgerCommitment(currentCommitment),
     );
     ctx.status = 201;
     ctx.body = communication.sendCommitmentReceived(
