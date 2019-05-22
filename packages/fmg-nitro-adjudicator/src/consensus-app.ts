@@ -36,12 +36,10 @@ export interface ProposalCommitment extends ConsensusBaseCommitment {
   commitmentType: CommitmentType.App;
   appAttributes: ProposalAppAttrs;
 }
-
 export interface ConsensusReachedCommitment extends ConsensusBaseCommitment {
   commitmentType: CommitmentType.App;
   appAttributes: ConsensusAppAttrs;
 }
-
 export interface PreFundSetupCommitment extends ConsensusBaseCommitment {
   commitmentType: CommitmentType.PreFundSetup;
 }
@@ -58,6 +56,17 @@ export type ConsensusCommitment =
   | AppCommitment
   | PostFundSetupCommitment
   | ConcludeCommitment;
+
+// Type guards
+export function isProposal(c: ConsensusBaseCommitment): c is ProposalCommitment {
+  return c.appAttributes.updateType === UpdateType.Proposal;
+}
+export function isConsensusReached(c: ConsensusBaseCommitment): c is ConsensusReachedCommitment {
+  return c.appAttributes.updateType === UpdateType.Consensus;
+}
+export function isAppCommitment(c: ConsensusBaseCommitment): c is AppCommitment {
+  return isProposal(c) || isConsensusReached(c);
+}
 
 export function appAttributes(ethersAppAttrs: [string, string[], string[], string]): AppAttributes {
   return {
