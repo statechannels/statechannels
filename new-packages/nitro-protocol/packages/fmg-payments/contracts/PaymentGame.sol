@@ -1,7 +1,7 @@
 pragma solidity ^0.5.2;
 pragma experimental ABIEncoderV2;
 
-import "./Commitment.sol";
+import "fmg-core/contracts/Commitment.sol";
 import "./PaymentState.sol";
 
 contract PaymentGame {
