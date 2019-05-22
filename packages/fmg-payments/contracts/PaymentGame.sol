@@ -1,13 +1,13 @@
-pragma solidity ^0.4.18;
+pragma solidity ^0.5.2;
+pragma experimental ABIEncoderV2;
 
-import "fmg-core/contracts/State.sol";
+import "fmg-core/contracts/Commitment.sol";
 import "./PaymentState.sol";
 
 contract PaymentGame {
-    using State for bytes;
-    using PaymentState for bytes;
-
-    function validTransition(bytes _old, bytes _new) public pure returns (bool) {
+    using Commitment for Commitment.CommitmentStruct;
+    using PaymentState for Commitment.CommitmentStruct;
+    function validTransition(Commitment.CommitmentStruct memory _old, Commitment.CommitmentStruct memory _new) public pure returns (bool) {
 
         // conserve total balance
         require(_old.aBal() + _old.bBal() == _new.aBal() + _new.bBal());

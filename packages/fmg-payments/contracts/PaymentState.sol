@@ -1,6 +1,7 @@
-pragma solidity ^0.4.18;
+pragma solidity ^0.5.2;
+pragma experimental ABIEncoderV2;
 
-import "fmg-core/contracts/State.sol";
+import "./Commitment.sol";
 
 library PaymentState {
 
@@ -12,11 +13,15 @@ library PaymentState {
     // resolution in the common state gives us all
     // we need!
 
-    function aBal(bytes _state) public pure returns (uint256) {
-        return State.resolution(_state)[0];
+    function aBal(Commitment.CommitmentStruct memory _state) public pure returns (uint256) {
+        return _state.allocation[0];
     }
 
-    function bBal(bytes _state) public pure returns (uint256 _bBal) {
-        return State.resolution(_state)[1];
+    function bBal(Commitment.CommitmentStruct memory _state) public pure returns (uint256 _bBal) {
+        return _state.allocation[1];
+    }
+
+    function indexOfMover(Commitment.CommitmentStruct memory _state) public pure returns (uint8) {
+        return uint8(_state.turnNum % 2);
     }
 }
