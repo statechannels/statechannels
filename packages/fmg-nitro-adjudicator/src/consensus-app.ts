@@ -38,7 +38,24 @@ export interface ConsensusReachedCommitment extends ConsensusBaseCommitment {
   updateType: UpdateType.Consensus;
 }
 
-function preFundSetupCommitment(opts: ConsensusBaseCommitment) {
+export interface PreFundSetupCommitment extends ConsensusBaseCommitment {
+  commitmentType: CommitmentType.PreFundSetup;
+}
+export interface PostFundSetupCommitment extends ConsensusBaseCommitment {
+  commitmentType: CommitmentType.PostFundSetup;
+}
+export type AppCommitment = ProposalCommitment | ConsensusReachedCommitment;
+export interface ConcludeCommitment extends ConsensusBaseCommitment {
+  commitmentType: CommitmentType.Conclude;
+}
+
+export type ConsensusCommitment =
+  | PreFundSetupCommitment
+  | AppCommitment
+  | PostFundSetupCommitment
+  | ConcludeCommitment;
+
+function preFundSetupCommitment(opts: ConsensusBaseCommitment): Commitment {
   return {
     ...opts,
     commitmentType: CommitmentType.PreFundSetup,
@@ -46,7 +63,7 @@ function preFundSetupCommitment(opts: ConsensusBaseCommitment) {
   };
 }
 
-function postFundSetupCommitment(opts: ConsensusBaseCommitment) {
+function postFundSetupCommitment(opts: ConsensusBaseCommitment): Commitment {
   return {
     ...opts,
     commitmentType: CommitmentType.PostFundSetup,
@@ -54,7 +71,7 @@ function postFundSetupCommitment(opts: ConsensusBaseCommitment) {
   };
 }
 
-function appCommitment(opts: ConsensusBaseCommitment) {
+function appCommitment(opts: ConsensusBaseCommitment): Commitment {
   return {
     ...opts,
     commitmentType: CommitmentType.App,
@@ -62,7 +79,7 @@ function appCommitment(opts: ConsensusBaseCommitment) {
   };
 }
 
-function concludeCommitment(opts: ConsensusBaseCommitment) {
+function concludeCommitment(opts: ConsensusBaseCommitment): Commitment {
   return {
     ...opts,
     commitmentType: CommitmentType.Conclude,
