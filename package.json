@@ -20,7 +20,7 @@
     "server:start": "node ./lib/app/server.js",
     "server:test": "npx jest --runInBand -c ./config/jest/jest.config.js",
     "server:watch": "nodemon --watch 'src/**/*' -e ts,tsx --exec ts-node ./src/app/server.ts",
-    "build": "npx tsc && npx tsc knexfile.ts",
+    "build": "npx tsc",
     "prepare": "yarn build",
     "start": "run-s server:start",
     "prestart": "yarn build && npm run db:rollback && npm run db:migrate && npm run db:seed",
