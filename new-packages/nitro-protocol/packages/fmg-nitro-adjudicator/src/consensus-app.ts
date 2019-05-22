@@ -68,7 +68,9 @@ export function isAppCommitment(c: ConsensusBaseCommitment): c is AppCommitment 
   return isProposal(c) || isConsensusReached(c);
 }
 
-export function appAttributes(ethersAppAttrs: [string, string[], string[], string]): AppAttributes {
+export function appAttributes(
+  ethersAppAttrs: [string, string[], string[], string],
+): ConsensusAppAttrs | ProposalAppAttrs {
   return {
     furtherVotesRequired: parseInt(ethersAppAttrs[0], 10),
     proposedAllocation: ethersAppAttrs[1].map(bigNumberify).map(bn => bn.toHexString()),
@@ -95,7 +97,7 @@ export function bytesFromAppAttributes(appAttrs: AppAttributes): Bytes {
   ]);
 }
 
-export function appAttributesFromBytes(appAttrs: Bytes): AppAttributes {
+export function appAttributesFromBytes(appAttrs: Bytes): ConsensusAppAttrs | ProposalAppAttrs {
   return appAttributes(abi.decodeParameter(SolidityConsensusCommitmentType, appAttrs));
 }
 
