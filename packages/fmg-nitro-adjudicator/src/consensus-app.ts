@@ -209,3 +209,10 @@ export function proposeAlternative(
     },
   };
 }
+
+export function validTransition(
+  fromCommitment: AppCommitment,
+  toCommitment: AppCommitment,
+): boolean {
+  return !!fromCommitment && !!toCommitment;
+}
