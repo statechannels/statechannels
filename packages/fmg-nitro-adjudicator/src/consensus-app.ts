@@ -176,6 +176,7 @@ export function finalVote(commitment: ProposalCommitment): ConsensusReachedCommi
       updateType: UpdateType.Consensus,
       proposedAllocation: [],
       proposedDestination: [],
+      furtherVotesRequired: 0,
     },
   };
 }
