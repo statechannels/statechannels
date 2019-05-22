@@ -94,14 +94,12 @@ export const commitments = {
   concludeCommitment,
 };
 
-export function appAttributes(
-  consensusCommitmentArgs: [string, string[], string[], string],
-): AppAttributes {
+export function appAttributes(ethersAppAttrs: [string, string[], string[], string]): AppAttributes {
   return {
-    furtherVotesRequired: parseInt(consensusCommitmentArgs[0], 10),
-    proposedAllocation: consensusCommitmentArgs[1].map(bigNumberify).map(bn => bn.toHexString()),
-    proposedDestination: consensusCommitmentArgs[2],
-    updateType: parseInt(consensusCommitmentArgs[3], 10),
+    furtherVotesRequired: parseInt(ethersAppAttrs[0], 10),
+    proposedAllocation: ethersAppAttrs[1].map(bigNumberify).map(bn => bn.toHexString()),
+    proposedDestination: ethersAppAttrs[2],
+    updateType: parseInt(ethersAppAttrs[3], 10),
   };
 }
 
