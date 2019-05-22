@@ -55,45 +55,6 @@ export type ConsensusCommitment =
   | PostFundSetupCommitment
   | ConcludeCommitment;
 
-function preFundSetupCommitment(opts: ConsensusBaseCommitment): Commitment {
-  return {
-    ...opts,
-    commitmentType: CommitmentType.PreFundSetup,
-    appAttributes: bytesFromAppAttributes(opts),
-  };
-}
-
-function postFundSetupCommitment(opts: ConsensusBaseCommitment): Commitment {
-  return {
-    ...opts,
-    commitmentType: CommitmentType.PostFundSetup,
-    appAttributes: bytesFromAppAttributes(opts),
-  };
-}
-
-function appCommitment(opts: ConsensusBaseCommitment): Commitment {
-  return {
-    ...opts,
-    commitmentType: CommitmentType.App,
-    appAttributes: bytesFromAppAttributes(opts),
-  };
-}
-
-function concludeCommitment(opts: ConsensusBaseCommitment): Commitment {
-  return {
-    ...opts,
-    commitmentType: CommitmentType.Conclude,
-    appAttributes: bytesFromAppAttributes(opts),
-  };
-}
-
-export const commitments = {
-  preFundSetupCommitment,
-  postFundSetupCommitment,
-  appCommitment,
-  concludeCommitment,
-};
-
 export function appAttributes(ethersAppAttrs: [string, string[], string[], string]): AppAttributes {
   return {
     furtherVotesRequired: parseInt(ethersAppAttrs[0], 10),
