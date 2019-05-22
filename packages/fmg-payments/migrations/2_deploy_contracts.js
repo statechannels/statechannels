@@ -1,13 +1,13 @@
 var PaymentGame = artifacts.require("./PaymentGame.sol");
 var PaymentState = artifacts.require("./PaymentState.sol");
-var State = artifacts.require("fmg-core/contracts/State.sol");
+var Commitment = artifacts.require("fmg-core/contracts/Commitment.sol");
 
 module.exports = function(deployer) {
-  deployer.deploy(State);
+  deployer.deploy(Commitment);
 
-  deployer.link(State, PaymentState);
+  deployer.link(Commitment, PaymentState);
   deployer.deploy(PaymentState);
   deployer.link(PaymentState, PaymentGame);
-  deployer.link(State, PaymentGame);
+  deployer.link(Commitment, PaymentGame);
   deployer.deploy(PaymentGame);
 };
