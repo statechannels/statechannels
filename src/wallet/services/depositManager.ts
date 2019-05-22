@@ -9,8 +9,6 @@ export async function onDepositEvent(
   amountDeposited: BigNumber,
   destinationHoldings: BigNumber,
 ) {
-  // TODO: holdings for the channel should be updated.
-
   // todo: to avoid manual case conversions, we can switch to knexSnakeCaseMappers.
   // https://vincit.github.io/objection.js/recipes/snake-case-to-camel-case-conversion.html#snake-case-to-camel-case-conversion
   const channel_id = channelId;
@@ -19,6 +17,16 @@ export async function onDepositEvent(
       channel_id,
     })
     .eager('[commitments, commitments.allocations, participants]');
+
+  if (!allocatorChannel) {
+    console.log(`Allocator channel ${channelId} not in database`);
+    return;
+  }
+
+  await AllocatorChannel.query()
+    .findById(allocatorChannel.id)
+    .patch({ holdings: destinationHoldings.toHexString() });
+
   const commitments = allocatorChannel.commitments;
   const latestCommitment = commitments.reduce((prevCommitment, currentCommitment) => {
     return prevCommitment.turnNumber > currentCommitment.turnNumber
