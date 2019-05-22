@@ -1,6 +1,6 @@
 import { ethers } from 'ethers';
 import { getNetworkId, getGanacheProvider, expectRevert, delay } from 'magmo-devtools';
-import { Channel, ethereumArgs, toUint256, Commitment, CommitmentType } from 'fmg-core';
+import { Channel, ethereumArgs, toUint256, CommitmentType } from 'fmg-core';
 
 import ConsensusAppArtifact from '../build/contracts/ConsensusApp.json';
 
