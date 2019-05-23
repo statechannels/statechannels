@@ -1,5 +1,5 @@
 import { ethers } from 'ethers';
-import { Channel, toUint256, CommitmentType } from 'fmg-core';
+import { Channel, toUint256, CommitmentType, Commitment } from 'fmg-core';
 
 import {
   propose,
@@ -43,6 +43,10 @@ describe('ConsensusApp', () => {
     commitmentCount: 0,
   };
 
+  function copy(c) {
+    return JSON.parse(JSON.stringify(c));
+  }
+
   const oneVoteComplete = propose(
     initialConsensus(defaults),
     proposedAllocation,
@@ -54,7 +58,7 @@ describe('ConsensusApp', () => {
 
   describe('the propose transition', async () => {
     const fromCommitment = initialConsensus(defaults);
-    const toCommitment = propose(fromCommitment, proposedAllocation, proposedDestination);
+    const toCommitment = propose(copy(fromCommitment), proposedAllocation, proposedDestination);
     it('returns true on a valid transition', async () => {
       expectValidTransition(fromCommitment, toCommitment);
     });
@@ -65,7 +69,7 @@ describe('ConsensusApp', () => {
 
   describe('the pass transition', async () => {
     const fromCommitment = initialConsensus(defaults);
-    const toCommitment = pass(fromCommitment);
+    const toCommitment = pass(copy(fromCommitment));
 
     it('returns true on a valid transition', async () => {
       expectValidTransition(fromCommitment, toCommitment);
@@ -82,7 +86,7 @@ describe('ConsensusApp', () => {
     const alternativeProposedAllocation = [toUint256(6)];
 
     const toCommitment = proposeAlternative(
-      fromCommitment,
+      copy(fromCommitment),
       alternativeProposedAllocation,
       alternativeProposedDestination,
     );
@@ -99,7 +103,7 @@ describe('ConsensusApp', () => {
 
   describe('the vote transition', async () => {
     const fromCommitment = oneVoteComplete;
-    const toCommitment = vote(fromCommitment);
+    const toCommitment = vote(copy(fromCommitment));
 
     itReturnsTrueOnAValidTransition(fromCommitment, toCommitment);
     itThrowsWhenFurtherVotesRequiredIsNotDecremented(fromCommitment, toCommitment);
@@ -109,7 +113,7 @@ describe('ConsensusApp', () => {
 
   describe('the final vote transition', async () => {
     const fromCommitment = twoVotesComplete;
-    const toCommitment = finalVote(fromCommitment);
+    const toCommitment = finalVote(copy(fromCommitment));
 
     itReturnsTrueOnAValidTransition(fromCommitment, toCommitment);
     itThrowsForAnInvalidConsensusState(fromCommitment, toCommitment);
@@ -119,7 +123,7 @@ describe('ConsensusApp', () => {
   describe('the veto transition', async () => {
     const fromCommitment = oneVoteComplete;
 
-    const toCommitment = veto(fromCommitment);
+    const toCommitment = veto(copy(fromCommitment));
 
     itReturnsTrueOnAValidTransition(fromCommitment, toCommitment);
     itThrowsWhenTheBalancesAreChanged(fromCommitment, toCommitment);
@@ -175,7 +179,7 @@ describe('ConsensusApp', () => {
   function itReturnsTrueOnAValidTransition(fromCommitmentArgs, toCommitmentArgs) {
     it('returns true when the commitment is valid', async () => {
       const fromCommitment = appCommitment(fromCommitmentArgs);
-      const toCommitment = appCommitment(toCommitmentArgs);
+      const toCommitment = appCommitment(copy(toCommitmentArgs));
 
       expectValidTransition(fromCommitment, toCommitment);
     });
@@ -185,7 +189,7 @@ describe('ConsensusApp', () => {
     it('throws when the proposedAllocation is not empty', async () => {
       const fromCommitment = appCommitment(fromCommitmentArgs);
 
-      const toCommitmentAllocation = appCommitment(toCommitmentArgs, {
+      const toCommitmentAllocation = appCommitment(copy(toCommitmentArgs), {
         proposedAllocation: allocation,
       });
 
@@ -199,7 +203,7 @@ describe('ConsensusApp', () => {
     it('throws when the proposedDestination is not empty', async () => {
       const fromCommitment = appCommitment(fromCommitmentArgs);
 
-      const toCommitmentAllocation = appCommitment(toCommitmentArgs, {
+      const toCommitmentAllocation = appCommitment(copy(toCommitmentArgs), {
         proposedDestination: participants,
       });
 
@@ -213,7 +217,7 @@ describe('ConsensusApp', () => {
 
   function itThrowsWhenFurtherVotesRequiredIsNotIntialized(fromCommitmentArgs, toCommitmentArgs) {
     it('throws when further votes requires is not initialized properly', async () => {
-      const toCommitment = appCommitment(toCommitmentArgs, { furtherVotesRequired: 0 });
+      const toCommitment = appCommitment(copy(toCommitmentArgs), { furtherVotesRequired: 0 });
       expectInvalidTransition(
         fromCommitmentArgs,
         toCommitment,
@@ -224,7 +228,7 @@ describe('ConsensusApp', () => {
 
   function itThrowsWhenFurtherVotesRequiredIsNotDecremented(fromCommitmentArgs, toCommitmentArgs) {
     it('throws when further votes requires is not decremented properly', async () => {
-      const toCommitment = appCommitment(toCommitmentArgs, { furtherVotesRequired: 0 });
+      const toCommitment = appCommitment(copy(toCommitmentArgs), { furtherVotesRequired: 0 });
       expectInvalidTransition(
         fromCommitmentArgs,
         toCommitment,
@@ -279,7 +283,7 @@ describe('ConsensusApp', () => {
 
   function itThrowsWhenTheProposalsAreChanged(fromCommitmentArgs, toCommitmentArgs) {
     it('throws when the proposedAllocation is changed', async () => {
-      const toCommitmentDifferentAllocation = appCommitment(toCommitmentArgs, {
+      const toCommitmentDifferentAllocation = appCommitment(copy(toCommitmentArgs), {
         proposedAllocation: allocation,
       });
 
@@ -290,7 +294,7 @@ describe('ConsensusApp', () => {
       );
     });
     it('throws when the proposedDestination is changed', async () => {
-      const toCommitmentDifferentDestination = appCommitment(toCommitmentArgs, {
+      const toCommitmentDifferentDestination = appCommitment(copy(toCommitmentArgs), {
         proposedDestination: participants,
       });
 
