@@ -305,7 +305,7 @@ describe('ConsensusApp', () => {
 
   function itRevertsWhenFurtherVotesRequiredIsNotIntialized(fromCommitmentArgs, toCommitmentArgs) {
     it('reverts when further votes requires is not initialized properly', async () => {
-      const toCommitment = appCommitment(toCommitmentArgs, { furtherVotesRequired: 0 });
+      const toCommitment = appCommitment(toCommitmentArgs, { furtherVotesRequired: 1 });
       await invalidTransition(
         fromCommitmentArgs,
         toCommitment,

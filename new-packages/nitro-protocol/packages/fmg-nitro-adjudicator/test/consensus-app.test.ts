@@ -278,7 +278,7 @@ describe('ConsensusApp', () => {
 
   function itThrowsWhenFurtherVotesRequiredIsNotIntialized(fromCommitmentArgs, toCommitmentArgs) {
     it('throws when further votes requires is not initialized properly', async () => {
-      const toCommitment = appCommitment(copy(toCommitmentArgs), { furtherVotesRequired: 0 });
+      const toCommitment = appCommitment(copy(toCommitmentArgs), { furtherVotesRequired: 1 });
       expectInvalidTransition(
         fromCommitmentArgs,
         toCommitment,
