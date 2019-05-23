@@ -56,6 +56,18 @@ describe('ConsensusApp', () => {
     propose(initialConsensus(defaults), proposedAllocation, proposedDestination),
   );
 
+  describe('validConsensusCommitment', () => {
+    const fromCommitment = oneVoteComplete;
+    const toCommitment = finalVote(fromCommitment);
+    itThrowsForAnInvalidConsensusState(fromCommitment, toCommitment);
+  });
+
+  describe('validProposeCommitment', () => {
+    const fromCommitment = initialConsensus(defaults);
+    const toCommitment = propose(fromCommitment, proposedAllocation, proposedDestination);
+    itThrowsForAnInvalidProposeCommitment(fromCommitment, toCommitment);
+  });
+
   describe('the propose transition', async () => {
     const fromCommitment = initialConsensus(defaults);
     const toCommitment = propose(copy(fromCommitment), proposedAllocation, proposedDestination);
@@ -186,6 +198,20 @@ describe('ConsensusApp', () => {
   }
 
   function itThrowsForAnInvalidConsensusState(fromCommitmentArgs, toCommitmentArgs) {
+    it('throws when the furtherVotesRequired is not zero', async () => {
+      const fromCommitment = appCommitment(fromCommitmentArgs);
+
+      const toCommitmentAllocation = appCommitment(toCommitmentArgs, {
+        furtherVotesRequired: 1,
+      });
+
+      expectInvalidTransition(
+        fromCommitment,
+        toCommitmentAllocation,
+        "ConsensusApp: 'furtherVotesRequired' must be 0 during consensus.",
+      );
+    });
+
     it('throws when the proposedAllocation is not empty', async () => {
       const fromCommitment = appCommitment(fromCommitmentArgs);
 
@@ -211,6 +237,51 @@ describe('ConsensusApp', () => {
         fromCommitment,
         toCommitmentAllocation,
         "ConsensusApp: 'proposedDestination' must be reset during consensus.",
+      );
+    });
+  }
+
+  function itThrowsForAnInvalidProposeCommitment(fromCommitmentArgs, toCommitmentArgs) {
+    it('throws when the furtherVotesRequired is zero', async () => {
+      const fromCommitment = appCommitment(fromCommitmentArgs);
+
+      const toCommitmentAllocation = appCommitment(toCommitmentArgs, {
+        furtherVotesRequired: 0,
+      });
+
+      expectInvalidTransition(
+        fromCommitment,
+        toCommitmentAllocation,
+        "ConsensusApp: 'furtherVotesRequired' must not be 0 during propose.",
+      );
+    });
+
+    it('throws when the proposedAllocation is empty', async () => {
+      const fromCommitment = appCommitment(fromCommitmentArgs);
+
+      const toCommitmentAllocation = appCommitment(toCommitmentArgs, {
+        proposedAllocation: [],
+      });
+
+      expectInvalidTransition(
+        fromCommitment,
+        toCommitmentAllocation,
+        "ConsensusApp: 'proposedAllocation' must not be empty during propose.",
+      );
+    });
+
+    it('throws when the proposedDestination and proposedAllocation are not the same length', async () => {
+      const fromCommitment = appCommitment(fromCommitmentArgs);
+
+      const toCommitmentAllocation = appCommitment(toCommitmentArgs, {
+        proposedAllocation,
+        proposedDestination: participants,
+      });
+
+      expectInvalidTransition(
+        fromCommitment,
+        toCommitmentAllocation,
+        "ConsensusApp: 'proposedDestination' and 'proposedAllocation' must be the same length during propose.",
       );
     });
   }
