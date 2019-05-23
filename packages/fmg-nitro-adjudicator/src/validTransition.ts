@@ -145,7 +145,7 @@ function furtherVotesRequiredDecremented(
 
 function validConsensusCommitment(commitment: AppCommitment) {
   if (commitment.appAttributes.furtherVotesRequired !== 0) {
-    throw new Error("ConsensusApp: 'furtherVotesRequired' must be zero during consensus.");
+    throw new Error("ConsensusApp: 'furtherVotesRequired' must be 0 during consensus.");
   }
 
   if (!(commitment.appAttributes.proposedAllocation.length === 0)) {
