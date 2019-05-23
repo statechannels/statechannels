@@ -159,15 +159,28 @@ describe('PaymentApp', () => {
       it("transitions correctly on Player A's turn", () => {
         const previousCommitment = PaymentApp.postFundSetupCommitment({
           ...defaultCommitmentArgs,
-          turnNum: 4,
+          turnNum: 5,
           commitmentCount: 1,
         });
-        const commitment = PaymentApp.pay(previousCommitment, '0x1');
+        const commitment = PaymentApp.pay(previousCommitment, '0x1', PaymentApp.PlayerIndex.A);
         expect(commitment).toMatchObject({
           commitmentType: CommitmentType.App,
           commitmentCount: 0,
-          turnNum: 5,
-          allocation: ['0x06', '0x04'],
+          turnNum: 6,
+          allocation: ['0x04', '0x06'],
+        });
+      });
+      it("creates a replace commitment when it is player A's turn and they pay", () => {
+        const previousCommitment = PaymentApp.appCommitment({
+          ...defaultCommitmentArgs,
+          turnNum: 4,
+        });
+        const commitment = PaymentApp.pay(previousCommitment, '0x1', PaymentApp.PlayerIndex.A);
+        expect(commitment).toMatchObject({
+          commitmentType: CommitmentType.App,
+          commitmentCount: 0,
+          turnNum: 4,
+          allocation: ['0x04', '0x06'],
         });
       });
       it("transitions correctly on Player B's turn", () => {
@@ -176,7 +189,20 @@ describe('PaymentApp', () => {
           turnNum: 4,
           commitmentCount: 1,
         });
-        const commitment = PaymentApp.pay(previousCommitment, '0x1');
+        const commitment = PaymentApp.pay(previousCommitment, '0x1', PaymentApp.PlayerIndex.B);
+        expect(commitment).toMatchObject({
+          commitmentType: CommitmentType.App,
+          commitmentCount: 0,
+          turnNum: 5,
+          allocation: ['0x06', '0x04'],
+        });
+      });
+      it("creates a replace commitment when it is player B's turn and they pay", () => {
+        const previousCommitment = PaymentApp.appCommitment({
+          ...defaultCommitmentArgs,
+          turnNum: 5,
+        });
+        const commitment = PaymentApp.pay(previousCommitment, '0x1', PaymentApp.PlayerIndex.B);
         expect(commitment).toMatchObject({
           commitmentType: CommitmentType.App,
           commitmentCount: 0,
