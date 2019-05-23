@@ -109,6 +109,14 @@ export function asCoreCommitment(c: ConsensusCommitment): Commitment {
 }
 
 // Transition helper functions
+
+const consensusAtts: () => ConsensusAppAttrs = () => ({
+  proposedAllocation: [],
+  proposedDestination: [],
+  updateType: UpdateType.Consensus,
+  furtherVotesRequired: 0,
+});
+
 export function initialConsensus(c: {
   channel: Channel;
   turnNum: number;
@@ -119,12 +127,7 @@ export function initialConsensus(c: {
   return {
     ...c,
     commitmentType: CommitmentType.App,
-    appAttributes: {
-      proposedAllocation: [],
-      proposedDestination: [],
-      updateType: UpdateType.Consensus,
-      furtherVotesRequired: 0,
-    },
+    appAttributes: consensusAtts(),
   };
 }
 export function propose(
@@ -149,10 +152,7 @@ export function pass(commitment: ConsensusReachedCommitment): ConsensusReachedCo
   return {
     ...commitment,
     turnNum: commitment.turnNum + 1,
-    appAttributes: {
-      ...commitment.appAttributes,
-      updateType: UpdateType.Consensus,
-    },
+    appAttributes: consensusAtts(),
   };
 }
 
@@ -173,13 +173,7 @@ export function finalVote(commitment: ProposalCommitment): ConsensusReachedCommi
     turnNum: commitment.turnNum + 1,
     allocation: commitment.appAttributes.proposedAllocation,
     destination: commitment.appAttributes.proposedDestination,
-    appAttributes: {
-      ...commitment.appAttributes,
-      updateType: UpdateType.Consensus,
-      proposedAllocation: [],
-      proposedDestination: [],
-      furtherVotesRequired: 0,
-    },
+    appAttributes: consensusAtts(),
   };
 }
 
@@ -187,12 +181,7 @@ export function veto(commitment: ProposalCommitment): ConsensusReachedCommitment
   return {
     ...commitment,
     turnNum: commitment.turnNum + 1,
-    appAttributes: {
-      ...commitment.appAttributes,
-      updateType: UpdateType.Consensus,
-      proposedAllocation: [],
-      proposedDestination: [],
-    },
+    appAttributes: consensusAtts(),
   };
 }
 
@@ -201,12 +190,14 @@ export function proposeAlternative(
   proposedAllocation: Uint256[],
   proposedDestination: Address[],
 ): ProposalCommitment {
+  const numParticipants = commitment.channel.participants.length;
+
   return {
     ...commitment,
     turnNum: commitment.turnNum + 1,
     appAttributes: {
-      ...commitment.appAttributes,
       updateType: UpdateType.Proposal,
+      furtherVotesRequired: numParticipants - 1,
       proposedAllocation,
       proposedDestination,
     },
