@@ -1,6 +1,14 @@
-import { AppCommitment, isConsensusReached, isProposal } from './consensus-app';
+import { AppCommitment, isConsensusReached, isProposal, UpdateType } from './consensus-app';
 export function validTransition(fromCommitment: AppCommitment, toCommitment: AppCommitment): true {
-  // State; machine; transition; identifier;
+  // Commitment validation
+
+  if (toCommitment.appAttributes.updateType === UpdateType.Proposal) {
+    validProposeCommitment(toCommitment);
+  } else if (toCommitment.appAttributes.updateType === UpdateType.Consensus) {
+    validConsensusCommitment(toCommitment);
+  }
+
+  // State machine transition identifier
   if (isConsensusReached(fromCommitment)) {
     if (isProposal(toCommitment)) {
       validatePropose(fromCommitment, toCommitment);
@@ -35,21 +43,17 @@ export function validTransition(fromCommitment: AppCommitment, toCommitment: App
 }
 
 function validatePass(fromCommitment: AppCommitment, toCommitment: AppCommitment) {
-  validProposeCommitment(toCommitment);
   balancesUnchanged(fromCommitment, toCommitment);
   proposalsUnchanged(fromCommitment, toCommitment);
 }
 function validatePropose(fromCommitment: AppCommitment, toCommitment: AppCommitment) {
-  validProposeCommitment(toCommitment);
   balancesUnchanged(fromCommitment, toCommitment);
   furtherVotesRequiredInitialized(toCommitment);
 }
 function validateFinalVote(fromCommitment: AppCommitment, toCommitment: AppCommitment) {
-  validConsensusCommitment(toCommitment);
   balancesUpdated(fromCommitment, toCommitment);
 }
 function validateVeto(fromCommitment: AppCommitment, toCommitment: AppCommitment) {
-  validConsensusCommitment(toCommitment);
   balancesUnchanged(fromCommitment, toCommitment);
 }
 function validateVote(fromCommitment: AppCommitment, toCommitment: AppCommitment) {
