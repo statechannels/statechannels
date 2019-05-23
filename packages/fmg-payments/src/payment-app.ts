@@ -11,6 +11,12 @@ export interface PaymentCommitmentArgs {
   turnNum: number;
   commitmentCount: number;
 }
+
+export enum PlayerIndex {
+  A = 0,
+  B = 1,
+}
+
 function fromPaymentCommitmentArgs(paymentArgs: PaymentCommitmentArgs) {
   const {
     turnNum,
@@ -94,9 +100,15 @@ export function postFundSetup(commitment: Commitment): Commitment {
     commitmentCount,
   };
 }
-export function pay(commitment: Commitment, amount: string): Commitment {
-  const theirIndex = commitment.turnNum % 2;
-  const ourIndex = 1 - theirIndex;
+export function pay(commitment: Commitment, amount: string, ourIndex: PlayerIndex): Commitment {
+  const ourTurnOnExistingCommitment = commitment.turnNum % 2 === ourIndex;
+
+  // If it was already our turn we send out a replacement commitment
+  // The other player will always want to accept the replacement commitment
+  // since it result in a larger allocation for them
+  const turnNum = ourTurnOnExistingCommitment ? commitment.turnNum : commitment.turnNum + 1;
+  const theirIndex = 1 - ourIndex;
+
   const ourAllocation = commitment.allocation[ourIndex];
   const theirAllocation = commitment.allocation[theirIndex];
 
@@ -114,7 +126,7 @@ export function pay(commitment: Commitment, amount: string): Commitment {
   return {
     ...commitment,
     commitmentType: CommitmentType.App,
-    turnNum: commitment.turnNum + 1,
+    turnNum,
     allocation: updatedAllocation,
     commitmentCount: 0,
   };
