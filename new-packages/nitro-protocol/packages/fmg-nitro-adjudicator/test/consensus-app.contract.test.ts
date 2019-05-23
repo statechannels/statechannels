@@ -319,6 +319,7 @@ describe('ConsensusApp', () => {
       const toCommitment = appCommitment(toCommitmentArgs, {
         furtherVotesRequired: fromCommitmentArgs.appAttributes.furtherVotesRequired,
       });
+
       await invalidTransition(
         fromCommitmentArgs,
         toCommitment,

@@ -158,15 +158,22 @@ function validConsensusCommitment(commitment: AppCommitment) {
 }
 
 function validProposeCommitment(commitment: AppCommitment) {
-  if (commitment.appAttributes.furtherVotesRequired !== 0) {
-    throw new Error("ConsensusApp: 'furtherVotesRequired' must be zero during consensus.");
+  if (commitment.appAttributes.furtherVotesRequired === 0) {
+    throw new Error("ConsensusApp: 'furtherVotesRequired' must not be 0 during propose.");
   }
 
-  if (!(commitment.appAttributes.proposedAllocation.length === 0)) {
-    throw new Error("ConsensusApp: 'proposedAllocation' must be reset during consensus.");
+  if (!(commitment.appAttributes.proposedAllocation.length !== 0)) {
+    throw new Error("ConsensusApp: 'proposedAllocation' must not be reset during propose.");
   }
 
-  if (!(commitment.appAttributes.proposedDestination.length === 0)) {
-    throw new Error("ConsensusApp: 'proposedDestination' must be reset during consensus.");
+  if (
+    !(
+      commitment.appAttributes.proposedDestination.length ===
+      commitment.appAttributes.proposedAllocation.length
+    )
+  ) {
+    throw new Error(
+      "ConsensusApp: 'proposedDestination' and 'proposedAllocation' must be the same length during propose.",
+    );
   }
 }

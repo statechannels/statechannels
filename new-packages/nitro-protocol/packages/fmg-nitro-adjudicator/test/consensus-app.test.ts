@@ -104,7 +104,7 @@ describe('ConsensusApp', () => {
   });
 
   describe('the vote transition', async () => {
-    const fromCommitment = oneVoteComplete;
+    const fromCommitment = twoVotesComplete;
     const toCommitment = vote(copy(fromCommitment));
 
     itReturnsTrueOnAValidTransition(fromCommitment, toCommitment);
@@ -202,7 +202,7 @@ describe('ConsensusApp', () => {
       );
     });
 
-    it('throws when the proposedAllocation is not empty', async () => {
+    it('throws when the proposedAllocation is not reset', async () => {
       const fromCommitment = appCommitment(fromCommitmentArgs);
 
       const toCommitmentAllocation = appCommitment(copy(toCommitmentArgs), {
@@ -216,7 +216,7 @@ describe('ConsensusApp', () => {
       );
     });
 
-    it('throws when the proposedDestination is not empty', async () => {
+    it('throws when the proposedDestination and proposedAllocation are not the same length', async () => {
       const fromCommitment = appCommitment(fromCommitmentArgs);
 
       const toCommitmentAllocation = appCommitment(copy(toCommitmentArgs), {
@@ -246,7 +246,7 @@ describe('ConsensusApp', () => {
       );
     });
 
-    it('throws when the proposedAllocation is empty', async () => {
+    it('throws when the proposedAllocation is reset', async () => {
       const fromCommitment = appCommitment(fromCommitmentArgs);
 
       const toCommitmentAllocation = appCommitment(toCommitmentArgs, {
@@ -256,7 +256,7 @@ describe('ConsensusApp', () => {
       expectInvalidTransition(
         fromCommitment,
         toCommitmentAllocation,
-        "ConsensusApp: 'proposedAllocation' must not be empty during propose.",
+        "ConsensusApp: 'proposedAllocation' must not be reset during propose.",
       );
     });
 
@@ -289,7 +289,10 @@ describe('ConsensusApp', () => {
 
   function itThrowsWhenFurtherVotesRequiredIsNotDecremented(fromCommitmentArgs, toCommitmentArgs) {
     it('throws when further votes requires is not decremented properly', async () => {
-      const toCommitment = appCommitment(copy(toCommitmentArgs), { furtherVotesRequired: 0 });
+      const toCommitment = appCommitment(copy(toCommitmentArgs), {
+        furtherVotesRequired: fromCommitmentArgs.appAttributes.furtherVotesRequired,
+      });
+
       expectInvalidTransition(
         fromCommitmentArgs,
         toCommitment,
