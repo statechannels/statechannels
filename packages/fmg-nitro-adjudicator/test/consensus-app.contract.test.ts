@@ -8,7 +8,6 @@ import {
   propose,
   initialConsensus,
   pass,
-  proposeAlternative,
   vote,
   ConsensusBaseCommitment,
   finalVote,
@@ -120,28 +119,6 @@ describe('ConsensusApp', () => {
 
     itRevertsWhenTheBalancesAreChanged(fromCommitment, toCommitment);
     itRevertsWhenTheProposalsAreChanged(fromCommitment, toCommitment);
-  });
-
-  describe('the propose alternative transition', async () => {
-    const fromCommitment = oneVoteComplete;
-
-    const alternativeProposedDestination = [participantA.address];
-    const alternativeProposedAllocation = [toUint256(6)];
-
-    const toCommitment = proposeAlternative(
-      fromCommitment,
-      alternativeProposedAllocation,
-      alternativeProposedDestination,
-    );
-
-    itReturnsTrueOnAValidTransition(fromCommitment, toCommitment);
-    it('reverts when the furtherVotesRequired is not re-initialized', async () => {
-      await invalidTransition(fromCommitment, {
-        ...toCommitment,
-        appAttributes: { ...toCommitment.appAttributes, furtherVotesRequired: 1 },
-      });
-    });
-    itRevertsWhenTheBalancesAreChanged(fromCommitment, toCommitment);
   });
 
   describe('the vote transition', async () => {

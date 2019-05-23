@@ -192,24 +192,3 @@ export function veto(commitment: ProposalCommitment): ConsensusReachedCommitment
     appAttributes: consensusAtts(),
   };
 }
-
-export function proposeAlternative(
-  commitment: ProposalCommitment,
-  proposedAllocation: Uint256[],
-  proposedDestination: Address[],
-): ProposalCommitment {
-  const numParticipants = commitment.channel.participants.length;
-
-  return {
-    ...commitment,
-    turnNum: commitment.turnNum + 1,
-    appAttributes: {
-      updateType: UpdateType.Proposal,
-      furtherVotesRequired: numParticipants - 1,
-      proposedAllocation,
-      proposedDestination,
-    },
-  };
-}
-
-export { validTransition } from './validTransition';
