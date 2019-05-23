@@ -18,6 +18,11 @@ contract ConsensusApp {
     uint numParticipants = _old.participants.length;
 
     // Commitment validations
+    if (oldCommitment.updateType == ConsensusCommitment.UpdateType.Proposal) {
+      validateProposeCommitment(oldCommitment);
+    } else if (oldCommitment.updateType == ConsensusCommitment.UpdateType.Consensus) {
+      validateConsensusCommitment(oldCommitment);
+    }
     if (newCommitment.updateType == ConsensusCommitment.UpdateType.Proposal) {
       validateProposeCommitment(newCommitment);
     } else if (newCommitment.updateType == ConsensusCommitment.UpdateType.Consensus) {
