@@ -130,7 +130,7 @@ contract ConsensusApp {
 
   // Commitment validations
 
-  function validConsensusState(
+  function validateConsensusCommitment(
     ConsensusCommitment.ConsensusCommitmentStruct memory commitment
   ) private pure {
     require(
@@ -146,7 +146,8 @@ contract ConsensusApp {
       "ConsensusApp: 'proposedDestination' must be reset during consensus."
     ); 
   } 
-  function validProposeState(
+
+  function validateProposeCommitment(
     ConsensusCommitment.ConsensusCommitmentStruct memory commitment
   ) private pure {
     require(
