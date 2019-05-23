@@ -123,6 +123,10 @@ contract ConsensusApp {
 
   modifier validConsensusState(ConsensusCommitment.ConsensusCommitmentStruct memory commitment) {
     require(
+      commitment.furtherVotesRequired == 0,
+      "ConsensusApp: 'furtherVotesRequired' must be 0 during consensus."
+      ); 
+    require(
       commitment.proposedAllocation.length == 0,
       "ConsensusApp: 'proposedAllocation' must be reset during consensus."
       ); 
