@@ -2,6 +2,11 @@ import { AppCommitment, isConsensusReached, isProposal, UpdateType } from './con
 export function validTransition(fromCommitment: AppCommitment, toCommitment: AppCommitment): true {
   // Commitment validation
 
+  if (fromCommitment.appAttributes.updateType === UpdateType.Proposal) {
+    validProposeCommitment(fromCommitment);
+  } else if (fromCommitment.appAttributes.updateType === UpdateType.Consensus) {
+    validConsensusCommitment(fromCommitment);
+  }
   if (toCommitment.appAttributes.updateType === UpdateType.Proposal) {
     validProposeCommitment(toCommitment);
   } else if (toCommitment.appAttributes.updateType === UpdateType.Consensus) {
