@@ -55,11 +55,16 @@ function validateVote(fromCommitment: AppCommitment, toCommitment: AppCommitment
   proposalsUnchanged(fromCommitment, toCommitment);
   furtherVotesRequiredDecremented(fromCommitment, toCommitment);
 }
+
 // helpers
+function areEqual(left: string[], right: string[]) {
+  // This is safe, as stringify behaves well on a flat array of strings
+  return JSON.stringify(left) === JSON.stringify(right);
+}
 function haveBalancesBeenUpdated(fromCommitment: AppCommitment, toCommitment: AppCommitment) {
   return (
-    fromCommitment.appAttributes.proposedAllocation === toCommitment.allocation &&
-    fromCommitment.appAttributes.proposedDestination === toCommitment.destination
+    areEqual(fromCommitment.appAttributes.proposedAllocation, toCommitment.allocation) &&
+    areEqual(fromCommitment.appAttributes.proposedDestination, toCommitment.destination)
   );
 }
 function hasFurtherVotesNeededBeenInitialized(commitment: AppCommitment): boolean {
@@ -67,40 +72,39 @@ function hasFurtherVotesNeededBeenInitialized(commitment: AppCommitment): boolea
   return commitment.appAttributes.furtherVotesRequired === numParticipants - 1;
 }
 
-// modifiers
 function balancesUpdated(fromCommitment: AppCommitment, toCommitment: AppCommitment) {
-  if (!(fromCommitment.appAttributes.proposedAllocation === toCommitment.allocation)) {
+  if (!areEqual(fromCommitment.appAttributes.proposedAllocation, toCommitment.allocation)) {
     throw new Error("ConsensusApp: 'allocation' must be set to the previous `proposedAllocation`.");
   }
 
-  if (!(fromCommitment.appAttributes.proposedDestination === toCommitment.destination)) {
+  if (!areEqual(fromCommitment.appAttributes.proposedDestination, toCommitment.destination)) {
     throw new Error(
       "ConsensusApp: 'destination' must be set to the previous `proposedDestination`",
     );
   }
 }
 function balancesUnchanged(fromCommitment: AppCommitment, toCommitment: AppCommitment) {
-  if (!(fromCommitment.allocation === toCommitment.allocation)) {
+  if (!areEqual(fromCommitment.allocation, toCommitment.allocation)) {
     throw new Error("ConsensusApp: 'allocation' must be the same between commitments.");
   }
 
-  if (!(fromCommitment.destination === toCommitment.destination)) {
+  if (!areEqual(fromCommitment.destination, toCommitment.destination)) {
     throw new Error("ConsensusApp: 'destination' must be the same between commitments.");
   }
 }
 function proposalsUnchanged(fromCommitment: AppCommitment, toCommitment: AppCommitment) {
   if (
-    !(
-      fromCommitment.appAttributes.proposedAllocation ===
-      toCommitment.appAttributes.proposedAllocation
+    !areEqual(
+      fromCommitment.appAttributes.proposedAllocation,
+      toCommitment.appAttributes.proposedAllocation,
     )
   ) {
     throw new Error("ConsensusApp: 'proposedAllocation' must be the same between commitments.");
   }
   if (
-    !(
-      fromCommitment.appAttributes.proposedDestination ===
-      toCommitment.appAttributes.proposedDestination
+    !areEqual(
+      fromCommitment.appAttributes.proposedDestination,
+      toCommitment.appAttributes.proposedDestination,
     )
   ) {
     throw new Error("ConsensusApp: 'proposedDestination' must be the same between commitments.");
