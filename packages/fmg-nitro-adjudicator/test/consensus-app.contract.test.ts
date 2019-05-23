@@ -118,7 +118,7 @@ describe('ConsensusApp', () => {
     });
 
     itRevertsWhenTheBalancesAreChanged(fromCommitment, toCommitment);
-    itRevertsWhenTheProposalsAreChanged(fromCommitment, toCommitment);
+    itRevertsForAnInvalidConsensusCommitment(fromCommitment, toCommitment);
   });
 
   describe('the vote transition', async () => {

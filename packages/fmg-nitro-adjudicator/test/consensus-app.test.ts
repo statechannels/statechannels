@@ -100,7 +100,7 @@ describe('ConsensusApp', () => {
     });
 
     itThrowsWhenTheBalancesAreChanged(fromCommitment, toCommitment);
-    itThrowsWhenTheProposalsAreChanged(fromCommitment, toCommitment);
+    itThrowsForAnInvalidConsensusState(fromCommitment, toCommitment);
   });
 
   describe('the vote transition', async () => {
