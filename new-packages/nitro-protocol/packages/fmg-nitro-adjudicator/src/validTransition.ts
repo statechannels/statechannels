@@ -35,10 +35,12 @@ export function validTransition(fromCommitment: AppCommitment, toCommitment: App
 }
 
 function validatePass(fromCommitment: AppCommitment, toCommitment: AppCommitment) {
+  validProposeCommitment(toCommitment);
   balancesUnchanged(fromCommitment, toCommitment);
   proposalsUnchanged(fromCommitment, toCommitment);
 }
 function validatePropose(fromCommitment: AppCommitment, toCommitment: AppCommitment) {
+  validProposeCommitment(toCommitment);
   balancesUnchanged(fromCommitment, toCommitment);
   furtherVotesRequiredInitialized(toCommitment);
 }
@@ -133,6 +135,20 @@ function furtherVotesRequiredDecremented(
 }
 
 function validConsensusCommitment(commitment: AppCommitment) {
+  if (commitment.appAttributes.furtherVotesRequired !== 0) {
+    throw new Error("ConsensusApp: 'furtherVotesRequired' must be zero during consensus.");
+  }
+
+  if (!(commitment.appAttributes.proposedAllocation.length === 0)) {
+    throw new Error("ConsensusApp: 'proposedAllocation' must be reset during consensus.");
+  }
+
+  if (!(commitment.appAttributes.proposedDestination.length === 0)) {
+    throw new Error("ConsensusApp: 'proposedDestination' must be reset during consensus.");
+  }
+}
+
+function validProposeCommitment(commitment: AppCommitment) {
   if (commitment.appAttributes.furtherVotesRequired !== 0) {
     throw new Error("ConsensusApp: 'furtherVotesRequired' must be zero during consensus.");
   }
