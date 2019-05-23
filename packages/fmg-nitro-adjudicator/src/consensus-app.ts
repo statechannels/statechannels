@@ -212,3 +212,5 @@ export function proposeAlternative(
     },
   };
 }
+
+export { validTransition } from './validTransition';
