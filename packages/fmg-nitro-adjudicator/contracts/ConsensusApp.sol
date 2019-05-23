@@ -136,6 +136,21 @@ contract ConsensusApp {
     ); 
     _;
   } 
+  modifier validProposeState(ConsensusCommitment.ConsensusCommitmentStruct memory commitment) {
+    require(
+      commitment.furtherVotesRequired != 0,
+      "ConsensusApp: 'furtherVotesRequired' must not be 0 during propose."
+      ); 
+    require(
+      commitment.proposedAllocation.length > 0,
+      "ConsensusApp: 'proposedAllocation' must not be empty during propose."
+      ); 
+    require(
+      commitment.proposedDestination.length == commitment.proposedAllocation.length,
+      "ConsensusApp: 'proposedDestination' and 'proposedAllocation' must be the same length during propose."
+    ); 
+    _;
+  } 
 
 // transition validations
 
@@ -145,6 +160,7 @@ contract ConsensusApp {
   ) private pure
     balancesUnchanged(oldCommitment, newCommitment)
     proposalsUnchanged(oldCommitment, newCommitment)
+    validProposeState(newCommitment)
   { }
 
   function validatePropose(
@@ -154,6 +170,7 @@ contract ConsensusApp {
   ) private pure
     balancesUnchanged(oldCommitment, newCommitment)
     furtherVotesRequiredInitialized(newCommitment, numParticipants)
+    validProposeState(newCommitment)
   { }
 
   function validateFinalVote(
