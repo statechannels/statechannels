@@ -157,6 +157,10 @@ export function pass(commitment: ConsensusReachedCommitment): ConsensusReachedCo
 }
 
 export function vote(commitment: ProposalCommitment): ProposalCommitment {
+  if (commitment.appAttributes.furtherVotesRequired <= 1) {
+    throw new Error('Invalid input -- furtherVotesRequired must be greater than 1');
+  }
+
   return {
     ...commitment,
     turnNum: commitment.turnNum + 1,
@@ -168,6 +172,10 @@ export function vote(commitment: ProposalCommitment): ProposalCommitment {
 }
 
 export function finalVote(commitment: ProposalCommitment): ConsensusReachedCommitment {
+  if (commitment.appAttributes.furtherVotesRequired !== 1) {
+    throw new Error('Invalid input -- furtherVotesRequired must be 1');
+  }
+
   return {
     ...commitment,
     turnNum: commitment.turnNum + 1,
