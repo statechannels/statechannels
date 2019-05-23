@@ -17,7 +17,14 @@ contract ConsensusApp {
 
     uint numParticipants = _old.participants.length;
 
-    // State machine transition identifier
+    // Commitment validations
+    if (newCommitment.updateType == ConsensusCommitment.UpdateType.Proposal) {
+      validateProposeCommitment(newCommitment);
+    } else if (newCommitment.updateType == ConsensusCommitment.UpdateType.Consensus) {
+      validateConsensusCommitment(newCommitment);
+    }
+
+    // State machine transition validations
 
     if (oldCommitment.updateType == ConsensusCommitment.UpdateType.Consensus) {
       if (newCommitment.updateType == ConsensusCommitment.UpdateType.Proposal) {
@@ -121,7 +128,11 @@ contract ConsensusApp {
     _;
   } 
 
-  modifier validConsensusState(ConsensusCommitment.ConsensusCommitmentStruct memory commitment) {
+  // Commitment validations
+
+  function validConsensusState(
+    ConsensusCommitment.ConsensusCommitmentStruct memory commitment
+  ) private pure {
     require(
       commitment.furtherVotesRequired == 0,
       "ConsensusApp: 'furtherVotesRequired' must be 0 during consensus."
@@ -134,9 +145,10 @@ contract ConsensusApp {
       commitment.proposedDestination.length == 0,
       "ConsensusApp: 'proposedDestination' must be reset during consensus."
     ); 
-    _;
   } 
-  modifier validProposeState(ConsensusCommitment.ConsensusCommitmentStruct memory commitment) {
+  function validProposeState(
+    ConsensusCommitment.ConsensusCommitmentStruct memory commitment
+  ) private pure {
     require(
       commitment.furtherVotesRequired != 0,
       "ConsensusApp: 'furtherVotesRequired' must not be 0 during propose."
@@ -149,10 +161,9 @@ contract ConsensusApp {
       commitment.proposedDestination.length == commitment.proposedAllocation.length,
       "ConsensusApp: 'proposedDestination' and 'proposedAllocation' must be the same length during propose."
     ); 
-    _;
   } 
 
-// transition validations
+// Transition validations
 
   function validatePass(
     ConsensusCommitment.ConsensusCommitmentStruct memory oldCommitment,
@@ -160,7 +171,6 @@ contract ConsensusApp {
   ) private pure
     balancesUnchanged(oldCommitment, newCommitment)
     proposalsUnchanged(oldCommitment, newCommitment)
-    validProposeState(newCommitment)
   { }
 
   function validatePropose(
@@ -170,14 +180,12 @@ contract ConsensusApp {
   ) private pure
     balancesUnchanged(oldCommitment, newCommitment)
     furtherVotesRequiredInitialized(newCommitment, numParticipants)
-    validProposeState(newCommitment)
   { }
 
   function validateFinalVote(
     ConsensusCommitment.ConsensusCommitmentStruct memory oldCommitment,
     ConsensusCommitment.ConsensusCommitmentStruct memory newCommitment
   ) private pure
-    validConsensusState(newCommitment)
     balancesUpdated(oldCommitment, newCommitment)
   { }
     
@@ -186,7 +194,6 @@ contract ConsensusApp {
     ConsensusCommitment.ConsensusCommitmentStruct memory newCommitment
   ) private pure
     balancesUnchanged(oldCommitment, newCommitment)
-    validConsensusState(newCommitment)
   { }
 
   function validateVote(
