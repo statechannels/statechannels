@@ -26,11 +26,21 @@ describe('ConsensusApp', () => {
   const participantC = new ethers.Wallet(
     '5e1b32fb763f62e1d19a9c9cd8c5417bd31b7d697ee018a8afe3cac2292fdd3e',
   );
-  const participants = [participantA.address, participantB.address, participantC.address];
+  const participantD = new ethers.Wallet(
+    '0cd211e36788b51c08ec3c622266e0eaddb6a1a028a8fbdd60797c6adf7a3392',
+  );
+  const participants = [
+    participantA.address,
+    participantB.address,
+    participantC.address,
+    participantD.address,
+  ];
   const proposedDestination = [participantA.address, participantB.address];
 
-  const allocation = [toUint256(1), toUint256(2), toUint256(3)];
-  const proposedAllocation = [toUint256(4), toUint256(2)];
+  const allocation = [toUint256(1), toUint256(2), toUint256(3), toUint256(4)];
+  const proposedAllocation = [toUint256(6), toUint256(4)];
+  const alternativeProposedDestination = [participantB.address, participantC.address];
+  const alternativeProposedAllocation = [toUint256(4), toUint256(6)];
 
   const channel: Channel = { channelType: participantB.address, nonce: 0, participants }; // just use any valid address
   const defaults = {
@@ -55,9 +65,12 @@ describe('ConsensusApp', () => {
   const twoVotesComplete = vote(
     propose(initialConsensus(defaults), proposedAllocation, proposedDestination),
   );
+  const threeVotesComplete = vote(
+    vote(propose(initialConsensus(defaults), proposedAllocation, proposedDestination)),
+  );
 
   describe('validConsensusCommitment', () => {
-    const fromCommitment = oneVoteComplete;
+    const fromCommitment = threeVotesComplete;
     const toCommitment = finalVote(fromCommitment);
     itThrowsForAnInvalidConsensusState(fromCommitment, toCommitment);
   });
@@ -355,7 +368,7 @@ describe('ConsensusApp', () => {
   function itThrowsWhenTheProposalsAreChanged(fromCommitmentArgs, toCommitmentArgs) {
     it('throws when the proposedAllocation is changed', async () => {
       const toCommitmentDifferentAllocation = appCommitment(copy(toCommitmentArgs), {
-        proposedAllocation: allocation,
+        proposedAllocation: alternativeProposedAllocation,
       });
 
       expectInvalidTransition(
@@ -366,7 +379,7 @@ describe('ConsensusApp', () => {
     });
     it('throws when the proposedDestination is changed', async () => {
       const toCommitmentDifferentDestination = appCommitment(copy(toCommitmentArgs), {
-        proposedDestination: participants,
+        proposedDestination: alternativeProposedDestination,
       });
 
       expectInvalidTransition(
