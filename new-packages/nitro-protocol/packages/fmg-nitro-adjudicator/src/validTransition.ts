@@ -43,12 +43,12 @@ function validatePropose(fromCommitment: AppCommitment, toCommitment: AppCommitm
   furtherVotesRequiredInitialized(toCommitment);
 }
 function validateFinalVote(fromCommitment: AppCommitment, toCommitment: AppCommitment) {
-  validConsensusState(toCommitment);
+  validConsensusCommitment(toCommitment);
   balancesUpdated(fromCommitment, toCommitment);
 }
 function validateVeto(fromCommitment: AppCommitment, toCommitment: AppCommitment) {
+  validConsensusCommitment(toCommitment);
   balancesUnchanged(fromCommitment, toCommitment);
-  validConsensusState(toCommitment);
 }
 function validateVote(fromCommitment: AppCommitment, toCommitment: AppCommitment) {
   balancesUnchanged(fromCommitment, toCommitment);
@@ -131,7 +131,12 @@ function furtherVotesRequiredDecremented(
     throw new Error('Consensus App: furtherVotesRequired should be decremented by 1.');
   }
 }
-function validConsensusState(commitment: AppCommitment) {
+
+function validConsensusCommitment(commitment: AppCommitment) {
+  if (commitment.appAttributes.furtherVotesRequired !== 0) {
+    throw new Error("ConsensusApp: 'furtherVotesRequired' must be zero during consensus.");
+  }
+
   if (!(commitment.appAttributes.proposedAllocation.length === 0)) {
     throw new Error("ConsensusApp: 'proposedAllocation' must be reset during consensus.");
   }
