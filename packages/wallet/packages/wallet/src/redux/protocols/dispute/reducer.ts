@@ -13,10 +13,11 @@ import { isChallengerAction } from './challenger/actions';
 export const initializeResponderState = (
   processId: string,
   channelId: string,
+  expiryTime: number,
   sharedData: SharedData,
   challengeCommitment: Commitment,
 ): ProtocolStateWithSharedData<DisputeState> => {
-  return responderInitialize(processId, channelId, sharedData, challengeCommitment);
+  return responderInitialize(processId, channelId, expiryTime, sharedData, challengeCommitment);
 };
 
 export const initializeChallengerState = (

@@ -37,11 +37,17 @@ import {
 export const initialize = (
   processId: string,
   channelId: string,
+  expiryTime: number,
   sharedData: SharedData,
   challengeCommitment: Commitment,
 ): ProtocolStateWithSharedData<states.ResponderState> => {
   return {
-    protocolState: states.waitForApproval({ processId, channelId, challengeCommitment }),
+    protocolState: states.waitForApproval({
+      processId,
+      channelId,
+      challengeCommitment,
+      expiryTime,
+    }),
     sharedData: showWallet(
       registerChannelToMonitor(
         sendChallengeResponseRequested(sharedData, channelId),

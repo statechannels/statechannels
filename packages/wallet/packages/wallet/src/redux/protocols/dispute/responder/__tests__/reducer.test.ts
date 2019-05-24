@@ -70,8 +70,8 @@ describe('RESPOND WITH EXISTING MOVE HAPPY-PATH', () => {
   const { sharedData, processId, channelId } = scenario;
 
   describe('when initializing', () => {
-    const { challengeCommitment } = scenario;
-    const result = initialize(processId, channelId, sharedData, challengeCommitment);
+    const { challengeCommitment, expiryTime } = scenario;
+    const result = initialize(processId, channelId, expiryTime, sharedData, challengeCommitment);
 
     itTransitionsTo(result, 'Responding.WaitForApproval');
     itSendsThisDisplayEventType(result.sharedData, SHOW_WALLET);
@@ -106,8 +106,8 @@ describe('REFUTE HAPPY-PATH ', () => {
   const { sharedData, processId, channelId } = scenario;
 
   describe('when initializing', () => {
-    const { challengeCommitment } = scenario;
-    const result = initialize(processId, channelId, sharedData, challengeCommitment);
+    const { challengeCommitment, expiryTime } = scenario;
+    const result = initialize(processId, channelId, expiryTime, sharedData, challengeCommitment);
 
     itTransitionsTo(result, 'Responding.WaitForApproval');
     itSetsChallengeCommitment(result, scenario.challengeCommitment);
@@ -139,10 +139,16 @@ describe('REFUTE HAPPY-PATH ', () => {
 
 describe('REQUIRE RESPONSE HAPPY-PATH ', () => {
   const scenario = scenarios.requireResponseHappyPath;
-  const { sharedData, processId, channelId } = scenario;
+  const { sharedData, processId, channelId, expiryTime } = scenario;
 
   describe('when initializing', () => {
-    const result = initialize(processId, channelId, sharedData, scenario.challengeCommitment);
+    const result = initialize(
+      processId,
+      channelId,
+      expiryTime,
+      sharedData,
+      scenario.challengeCommitment,
+    );
     itTransitionsTo(result, 'Responding.WaitForApproval');
     itSetsChallengeCommitment(result, scenario.challengeCommitment);
   });
