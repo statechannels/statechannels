@@ -4,6 +4,15 @@ import { HUB_ADDRESS } from '../../constants';
 import AllocatorChannel from '../models/allocatorChannel';
 import { Blockchain } from './blockchain';
 
+/* todo:
+ * Current logic of the deposit manager:
+ * When a deposit even arrives, if the adjudicator requires additional funding, fully fund the adjudicator.
+ *
+ * Correct logic:
+ * When a deposit event arrives, check to see if the adjudicator has sufficient funds for the hub to safely deposit.
+ * If so, only deposit hub's share.
+ */
+
 export async function onDepositEvent(
   channelId: Address,
   amountDeposited: BigNumber,
