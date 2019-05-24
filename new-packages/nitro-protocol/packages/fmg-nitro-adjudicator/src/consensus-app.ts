@@ -192,3 +192,5 @@ export function veto(commitment: ProposalCommitment): ConsensusReachedCommitment
     appAttributes: consensusAtts(),
   };
 }
+
+export { validTransition } from './validTransition';
