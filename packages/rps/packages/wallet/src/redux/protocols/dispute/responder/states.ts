@@ -17,6 +17,7 @@ export interface WaitForApproval {
   processId: string;
   channelId: string;
   challengeCommitment: Commitment;
+  expiryTime: number;
 }
 
 export interface WaitForTransaction {
