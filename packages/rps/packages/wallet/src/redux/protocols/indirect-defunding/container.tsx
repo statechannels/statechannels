@@ -1,4 +1,4 @@
-import * as states from './state';
+import * as states from './states';
 import { PureComponent } from 'react';
 import React from 'react';
 import Failure from '../shared-components/failure';
@@ -16,13 +16,13 @@ class IndirectDefundingContainer extends PureComponent<Props> {
   render() {
     const { state } = this.props;
     switch (state.type) {
-      case states.WAIT_FOR_LEDGER_UPDATE:
+      case 'IndirectDefunding.WaitForLedgerUpdate':
         return <WaitForLedgerUpdate ledgerId={state.ledgerId} />;
-      case states.WAIT_FOR_CONCLUDE:
+      case 'IndirectDefunding.WaitForConclude':
         return <WaitForLedgerConclude ledgerId={state.ledgerId} />;
-      case states.FAILURE:
+      case 'IndirectDefunding.Failure':
         return <Failure name="indirect-de-funding" reason={state.reason} />;
-      case states.SUCCESS:
+      case 'IndirectDefunding.Success':
         return <Success name="indirect-de-funding" />;
       default:
         return unreachable(state);

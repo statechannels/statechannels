@@ -76,62 +76,65 @@ const props = {
 const waitForApproval = states.waitForApproval(props);
 const waitForTransaction = states.waitForTransaction(props);
 const waitForAcknowledgement = states.waitForAcknowledgement(props);
-const success = states.success();
-const transactionFailure = states.failure(states.FailureReason.TransactionFailure);
-const userRejectedFailure = states.failure(states.FailureReason.UserRejected);
-const channelNotClosedFailure = states.failure(states.FailureReason.ChannelNotClosed);
+const success = states.success({});
+const transactionFailure = states.failure({ reason: states.FailureReason.TransactionFailure });
+const userRejectedFailure = states.failure({ reason: states.FailureReason.UserRejected });
+const channelNotClosedFailure = states.failure({ reason: states.FailureReason.ChannelNotClosed });
 
 // -------
 // Actions
 // -------
 
-const approved = actions.withdrawalApproved(processId, channelId);
-const rejected = actions.withdrawalRejected(processId);
-const successAcknowledged = actions.withdrawalSuccessAcknowledged(processId);
-const transactionConfirmed = transactionActions.transactionConfirmed(processId);
-const transactionFailed = transactionActions.transactionFailed(processId);
+const approved = actions.withdrawalApproved({ processId, withdrawalAddress });
+const rejected = actions.withdrawalRejected({ processId });
+const successAcknowledged = actions.withdrawalSuccessAcknowledged({ processId });
+const transactionConfirmed = transactionActions.transactionConfirmed({ processId });
+const transactionFailed = transactionActions.transactionFailed({ processId });
 
 // ---------
 // Scenarios
 // ---------
 export const happyPath = {
   ...props,
-  // States
-  waitForApproval,
-  waitForTransaction,
-  waitForAcknowledgement,
+  waitForApproval: {
+    state: waitForApproval,
+    action: approved,
+  },
+  waitForTransaction: {
+    state: waitForTransaction,
+    action: transactionConfirmed,
+  },
+  waitForAcknowledgement: {
+    state: waitForAcknowledgement,
+    action: successAcknowledged,
+  },
   success,
-  // Actions
-  approved,
-  transactionConfirmed,
-  successAcknowledged,
 };
 
 export const withdrawalRejected = {
   ...props,
-  // States
-  waitForApproval,
+  waitForApproval: {
+    state: waitForApproval,
+    action: rejected,
+  },
   failure: userRejectedFailure,
-  // Actions
-  rejected,
 };
 
 export const failedTransaction = {
   ...props,
-  // States
-  waitForApproval,
-  waitForTransaction,
+  waitForApproval: {
+    state: waitForApproval,
+    action: approved,
+  },
+  waitForTransaction: {
+    state: waitForTransaction,
+    action: transactionFailed,
+  },
   failure: transactionFailure,
-  // Actions
-  approved,
-  transactionFailed,
 };
 
 export const channelNotClosed = {
   ...props,
   sharedData: { ...EMPTY_SHARED_DATA, channelStore: notClosedChannelState },
-  // States
   failure: channelNotClosedFailure,
-  // Actions
-  approved,
 };

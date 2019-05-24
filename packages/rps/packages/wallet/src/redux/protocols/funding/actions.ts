@@ -4,7 +4,17 @@ import {
   isIndirectFundingAction,
   Action as IndirectFundingAction,
 } from '../indirect-funding/actions';
+// -------
+// Actions
+// -------
 
+// --------
+// Constructors
+// --------
+
+// --------
+// Unions and Guards
+// --------
 type EmbeddedAction = IndirectFundingAction;
 const isEmbeddedAction = isIndirectFundingAction;
 
@@ -12,21 +22,21 @@ export type FundingAction = playerA.FundingAction | playerB.FundingAction | Embe
 
 export function isPlayerAFundingAction(action: FundingAction): action is playerA.FundingAction {
   return (
-    action.type === playerA.CANCELLED ||
-    action.type === playerA.FUNDING_SUCCESS_ACKNOWLEDGED ||
-    action.type === playerA.STRATEGY_APPROVED ||
-    action.type === playerA.STRATEGY_CHOSEN ||
-    action.type === playerA.STRATEGY_REJECTED ||
+    action.type === 'WALLET.FUNDING.PLAYER_A.CANCELLED' ||
+    action.type === 'WALLET.FUNDING.PLAYER_A.FUNDING_SUCCESS_ACKNOWLEDGED' ||
+    action.type === 'WALLET.FUNDING.STRATEGY_APPROVED' ||
+    action.type === 'WALLET.FUNDING.PLAYER_A.STRATEGY_CHOSEN' ||
+    action.type === 'WALLET.FUNDING.PLAYER_A.STRATEGY_REJECTED' ||
     isEmbeddedAction(action)
   );
 }
 export function isPlayerBFundingAction(action: FundingAction): action is playerB.FundingAction {
   return (
-    action.type === playerB.CANCELLED ||
-    action.type === playerB.FUNDING_SUCCESS_ACKNOWLEDGED ||
-    action.type === playerB.STRATEGY_APPROVED ||
-    action.type === playerB.STRATEGY_PROPOSED ||
-    action.type === playerB.STRATEGY_REJECTED ||
+    action.type === 'WALLET.FUNDING.PLAYER_B.CANCELLED' ||
+    action.type === 'WALLET.FUNDING.PLAYER_B.FUNDING_SUCCESS_ACKNOWLEDGED' ||
+    action.type === 'WALLET.FUNDING.PLAYER_B.STRATEGY_APPROVED' ||
+    action.type === 'WALLET.FUNDING.STRATEGY_PROPOSED' ||
+    action.type === 'WALLET.FUNDING.PLAYER_B.STRATEGY_REJECTED' ||
     isEmbeddedAction(action)
   );
 }

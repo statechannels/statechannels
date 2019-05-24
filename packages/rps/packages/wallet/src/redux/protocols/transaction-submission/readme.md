@@ -19,7 +19,8 @@ Out of scope (for the time being):
 The protocol is implemented with the following state machine
 
 ```mermaid
-graph LR
+graph TD
+linkStyle default interpolate basis
   S((start)) --> WFSE(WaitForSend)
   WFSE --> |Sent| WFS(WaitForSubmission)
   WFS --> |Submitted| WFC(WaitForConfirmation)
@@ -28,6 +29,14 @@ graph LR
   AR --> |RetryDenied| F((failure))
   WFC --> |Confirmed| SS((success))
   WFC --> |Failed| F
+
+  classDef logic fill:#efdd20;
+  classDef Success fill:#58ef21;
+  classDef Failure fill:#f45941;
+  classDef WaitForChildProtocol stroke:#333,stroke-width:4px,color:#ffff,fill:#333;
+  class S logic;
+  class SS Success;
+  class F Failure;
 ```
 
 Notes:

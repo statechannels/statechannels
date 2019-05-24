@@ -4,7 +4,7 @@ import {
   isTerminal as isResponderTerminal,
   isResponderState,
   NonTerminalResponderState,
-} from './responder/state';
+} from './responder/states';
 import {
   ChallengerState,
   TerminalChallengerState,

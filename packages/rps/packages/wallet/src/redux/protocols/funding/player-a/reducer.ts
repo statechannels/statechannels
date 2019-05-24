@@ -16,7 +16,7 @@ import {
   indirectFundingReducer,
   initialize as initializeIndirectFunding,
 } from '../../indirect-funding/reducer';
-import * as indirectFundingStates from '../../indirect-funding/state';
+import * as indirectFundingStates from '../../indirect-funding/states';
 import * as selectors from '../../../selectors';
 import { Properties } from '../../../utils';
 type EmbeddedAction = IndirectFundingAction;
@@ -47,15 +47,15 @@ export function fundingReducer(
   }
 
   switch (action.type) {
-    case actions.STRATEGY_CHOSEN:
+    case 'WALLET.FUNDING.PLAYER_A.STRATEGY_CHOSEN':
       return strategyChosen(state, sharedData, action);
-    case actions.STRATEGY_APPROVED:
+    case 'WALLET.FUNDING.STRATEGY_APPROVED':
       return strategyApproved(state, sharedData, action);
-    case actions.STRATEGY_REJECTED:
+    case 'WALLET.FUNDING.PLAYER_A.STRATEGY_REJECTED':
       return strategyRejected(state, sharedData, action);
-    case actions.FUNDING_SUCCESS_ACKNOWLEDGED:
+    case 'WALLET.FUNDING.PLAYER_A.FUNDING_SUCCESS_ACKNOWLEDGED':
       return fundingSuccessAcknowledged(state, sharedData, action);
-    case actions.CANCELLED:
+    case 'WALLET.FUNDING.PLAYER_A.CANCELLED':
       return cancelled(state, sharedData, action);
     default:
       return unreachable(action);
@@ -67,7 +67,7 @@ function handleIndirectFundingAction(
   sharedData: SharedData,
   action: IndirectFundingAction,
 ): ProtocolStateWithSharedData<states.FundingState> {
-  if (protocolState.type !== states.WAIT_FOR_FUNDING) {
+  if (protocolState.type !== 'Funding.PlayerA.WaitForFunding') {
     console.error(
       `Funding reducer received indirect funding action ${action.type} but is currently in state ${
         protocolState.type
@@ -96,7 +96,7 @@ function strategyChosen(
   sharedData: SharedData,
   action: actions.StrategyChosen,
 ) {
-  if (state.type !== states.WAIT_FOR_STRATEGY_CHOICE) {
+  if (state.type !== 'Funding.PlayerA.WaitForStrategyChoice') {
     return { protocolState: state, sharedData };
   }
   const { processId, opponentAddress } = state;
@@ -113,7 +113,7 @@ function strategyApproved(
   sharedData: SharedData,
   action: actions.StrategyApproved,
 ) {
-  if (state.type !== states.WAIT_FOR_STRATEGY_RESPONSE) {
+  if (state.type !== 'Funding.PlayerA.WaitForStrategyResponse') {
     return { protocolState: state, sharedData };
   }
   const channelState = selectors.getChannelState(sharedData, state.targetChannelId);
@@ -137,7 +137,7 @@ function strategyRejected(
   sharedData: SharedData,
   action: actions.StrategyRejected,
 ) {
-  if (state.type !== states.WAIT_FOR_STRATEGY_RESPONSE) {
+  if (state.type !== 'Funding.PlayerA.WaitForStrategyResponse') {
     return { protocolState: state, sharedData };
   }
   return { protocolState: states.waitForStrategyChoice(state), sharedData };
@@ -148,17 +148,17 @@ function fundingSuccessAcknowledged(
   sharedData: SharedData,
   action: actions.FundingSuccessAcknowledged,
 ) {
-  if (state.type !== states.WAIT_FOR_SUCCESS_CONFIRMATION) {
+  if (state.type !== 'Funding.PlayerA.WaitForSuccessConfirmation') {
     return { protocolState: state, sharedData };
   }
   const updatedSharedData = sendFundingComplete(sharedData, state.targetChannelId);
-  return { protocolState: states.success(), sharedData: hideWallet(updatedSharedData) };
+  return { protocolState: states.success({}), sharedData: hideWallet(updatedSharedData) };
 }
 
 function cancelled(state: states.FundingState, sharedData: SharedData, action: actions.Cancelled) {
   if (
-    state.type !== states.WAIT_FOR_STRATEGY_CHOICE &&
-    state.type !== states.WAIT_FOR_STRATEGY_RESPONSE
+    state.type !== 'Funding.PlayerA.WaitForStrategyChoice' &&
+    state.type !== 'Funding.PlayerA.WaitForStrategyResponse'
   ) {
     return { protocolState: state, sharedData };
   }
@@ -167,7 +167,7 @@ function cancelled(state: states.FundingState, sharedData: SharedData, action: a
       const { targetChannelId } = state;
       const message = fundingFailure(targetChannelId, 'FundingDeclined');
       return {
-        protocolState: states.failure('User refused'),
+        protocolState: states.failure({ reason: 'User refused' }),
         sharedData: queueMessage(sharedData, message),
       };
     }
@@ -175,7 +175,7 @@ function cancelled(state: states.FundingState, sharedData: SharedData, action: a
       const { targetChannelId } = state;
       const message = fundingFailure(targetChannelId, 'FundingDeclined');
       return {
-        protocolState: states.failure('Opponent refused'),
+        protocolState: states.failure({ reason: 'Opponent refused' }),
         sharedData: queueMessage(sharedData, message),
       };
     }
@@ -189,7 +189,7 @@ function handleFundingComplete(
   fundingState: indirectFundingStates.IndirectFundingState,
   sharedData: SharedData,
 ) {
-  if (fundingState.type === 'Success') {
+  if (fundingState.type === 'IndirectFunding.Success') {
     return {
       protocolState: states.waitForSuccessConfirmation(protocolState),
       sharedData,
@@ -197,7 +197,7 @@ function handleFundingComplete(
   } else {
     // TODO: Indirect funding should return a proper error to pass to our failure state
     return {
-      protocolState: states.failure('Indirect Funding Failure'),
+      protocolState: states.failure({ reason: 'Indirect Funding Failure' }),
       sharedData,
     };
   }

@@ -11,9 +11,9 @@ import Acknowledge from '../../shared-components/acknowledge';
 
 interface Props {
   state: NonTerminalConcludingState;
-  approve: (processId: string) => void;
-  defund: (processId: string) => void;
-  acknowledge: (processId: string) => void;
+  approve: typeof actions.concludeApproved;
+  defund: typeof actions.defundChosen;
+  acknowledge: typeof actions.acknowledged;
 }
 
 class ConcludingContainer extends PureComponent<Props> {
@@ -26,7 +26,7 @@ class ConcludingContainer extends PureComponent<Props> {
           <Acknowledge
             title="Concluding Succesful"
             description="Your channel was closed and defunded."
-            acknowledge={() => acknowledge(state.processId)}
+            acknowledge={() => acknowledge({ processId })}
           />
         );
       case 'ConcludingResponder.AcknowledgeFailure':
@@ -34,15 +34,15 @@ class ConcludingContainer extends PureComponent<Props> {
           <Acknowledge
             title="Concluding Failed"
             description={state.reason}
-            acknowledge={() => acknowledge(state.processId)}
+            acknowledge={() => acknowledge({ processId })}
           />
         );
       case 'ConcludingResponder.DecideDefund':
-        return <ApproveDefunding approve={() => defund(processId)} />;
+        return <ApproveDefunding approve={() => defund({ processId })} />;
       case 'ConcludingResponder.WaitForDefund':
         return <Defunding state={state.defundingState} />;
       case 'ConcludingResponder.ApproveConcluding':
-        return <ApproveConcluding approve={() => approve(processId)} />;
+        return <ApproveConcluding approve={() => approve({ processId })} />;
       default:
         return unreachable(state);
     }

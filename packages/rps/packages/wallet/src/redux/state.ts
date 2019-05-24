@@ -19,7 +19,7 @@ import {
   SignFailureReason,
 } from './channel-store';
 import { Properties } from './utils';
-import * as indirectFunding from './protocols/indirect-funding/state';
+import * as indirectFunding from './protocols/indirect-funding/states';
 import { accumulateSideEffects } from './outbox';
 import { WalletEvent } from 'magmo-wallet-client';
 import { TransactionRequest } from 'ethers/providers';

@@ -10,6 +10,10 @@ type SideEffectState =
   | StateWithSideEffects<any>
   | { outboxState: OutboxState }
   | { sharedData: SharedData };
+
+export function describeScenarioStep(scenarioStep, fn) {
+  return describe(`${scenarioStep.state.type} + \n    ${scenarioStep.action.type} =>`, fn);
+}
 export const itSendsAMessage = (state: SideEffectState) => {
   it(`sends a message`, () => {
     expectSideEffect('messageOutbox', state, item => expect(item).toEqual(expect.anything()));

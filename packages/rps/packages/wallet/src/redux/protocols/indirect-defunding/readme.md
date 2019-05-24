@@ -28,10 +28,14 @@ linkStyle default interpolate basis
   WFC --> |"CommitmentReceived(Accept)"|Su((success))
   WFC --> |"CommitmentReceived(Reject)"| F
 
-  style St  fill:#efdd20
-  style DF  fill:#efdd20
-  style Su fill:#58ef21
-  style F  fill:#f45941
+  classDef logic fill:#efdd20;
+  classDef Success fill:#58ef21;
+  classDef Failure fill:#f45941;
+  classDef NotAState stroke:#333,stroke-width:4px,color:#ffff,fill:#aaaaaa;
+  class St,DF logic;
+  class Su Success;
+  class F Failure;
+  class SC0,SCo0 NotAState
 ```
 
 ### Player B State machine
@@ -49,10 +53,14 @@ linkStyle default interpolate basis
   SCo1-->Su((success))
   WFC --> |"CommitmentReceived(Reject)"| F
 
-  style St  fill:#efdd20
-  style DF  fill:#efdd20
-  style Su fill:#58ef21
-  style F  fill:#f45941
+  classDef logic fill:#efdd20;
+  classDef Success fill:#58ef21;
+  classDef Failure fill:#f45941;
+  classDef NotAState stroke:#333,stroke-width:4px,color:#ffff,fill:#aaaaaa;
+  class St,DF logic;
+  class Su Success;
+  class F Failure;
+  class SC1,SCo1 NotAState
 
 ```
 

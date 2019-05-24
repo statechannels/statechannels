@@ -20,7 +20,7 @@ const defaults = {
 const initializedState = states.initialized({ ...defaults });
 
 describe('when a NewProcessAction arrives', () => {
-  const action = fundingRequested(channelId, PlayerIndex.A);
+  const action = fundingRequested({ channelId, playerIndex: PlayerIndex.A });
   const processId = getProcessId(action);
   const initialize = jest.fn(() => ({
     protocolState: 'protocolState',
@@ -46,7 +46,7 @@ describe('when a NewProcessAction arrives', () => {
 });
 
 describe('when a ProcessAction arrives', () => {
-  const processId = channelId;
+  const processId = '0xprocessId';
   const protocolState = {};
   const processState: states.ProcessState = {
     processId,
@@ -56,7 +56,11 @@ describe('when a ProcessAction arrives', () => {
   };
   const state = { ...initializedState, processStore: { [processId]: processState } };
 
-  const action = actions.indirectFunding.playerA.strategyApproved(channelId, '0xf00');
+  const action = actions.indirectFunding.playerA.strategyApproved({
+    channelId,
+    processId: '0xprocessId',
+    consensusLibrary: '0xf00',
+  });
   const indirectFundingReducer = jest.fn(() => ({
     protocolState: 'protocolState',
     sharedData: 'sharedData ',

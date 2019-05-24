@@ -12,10 +12,14 @@
     WFDF -->|Failure| F((Failure))
     WFLU0 --> |CommitmentReceived| WFPoF0(BWaitForPostFundSetup0)
     WFPoF0 --> |CommitmentReceived| S((Success))
-  style St  fill:#efdd20
-  style S fill:#58ef21
-  style F  fill:#f45941
-  style WFDF stroke:#333,stroke-width:4px
+  classDef logic fill:#efdd20;
+  classDef Success fill:#58ef21;
+  classDef Failure fill:#f45941;
+  classDef WaitForChildProtocol stroke:#333,stroke-width:4px,color:#ffff,fill:#333;
+  class St logic;
+  class S Success;
+  class F Failure;
+  class WFDF WaitForChildProtocol;
 ```
 
 ### Scenarios

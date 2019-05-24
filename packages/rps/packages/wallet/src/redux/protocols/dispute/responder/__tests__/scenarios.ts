@@ -1,4 +1,4 @@
-import * as states from '../state';
+import * as states from '../states';
 import * as actions from '../actions';
 import * as testScenarios from '../../../../__tests__/test-scenarios';
 import * as transactionScenarios from '../../../transaction-submission/__tests__';
@@ -8,10 +8,8 @@ import { ChannelState, ChannelStore } from '../../../../channel-store';
 import * as transactionActions from '../../../transaction-submission/actions';
 import { challengeExpiredEvent } from '../../../../actions';
 import {
-  preSuccessState as defundingPreSuccessState,
-  successTrigger as defundingSuccessTrigger,
-  preFailureState as defundingPreFailureState,
-  failureTrigger as defundingFailureTrigger,
+  preSuccess as defundingPreSuccess,
+  preFailure as defundingPreFailure,
 } from '../../../defunding/__tests__';
 
 // ---------
@@ -60,152 +58,182 @@ const refuteChannelState = {
 const transactionSubmissionState = transactionScenarios.preSuccessState;
 const processId = 'process-id.123';
 const sharedData: SharedData = { ...EMPTY_SHARED_DATA, channelStore };
-const props = { processId, transactionSubmissionState, sharedData, channelId };
+const defaults = { processId, transactionSubmissionState, sharedData, channelId };
 
 // ------
 // States
 // ------
 const waitForApprovalRefute = states.waitForApproval({
-  ...props,
+  ...defaults,
   challengeCommitment: gameCommitment1,
 });
 const waitForApprovalRespond = states.waitForApproval({
-  ...props,
+  ...defaults,
   challengeCommitment: gameCommitment1,
 });
 const waitForApprovalRequiresResponse = states.waitForApproval({
-  ...props,
+  ...defaults,
   challengeCommitment: gameCommitment3,
 });
-const waitForTransaction = states.waitForTransaction(props);
-const waitForAcknowledgement = states.waitForAcknowledgement(props);
-const waitForResponse = states.waitForResponse(props);
-const success = states.success();
-const transactionFailedFailure = states.failure(states.FailureReason.TransactionFailure);
-const transactionConfirmed = transactionActions.transactionConfirmed(processId);
-const transactionFailed = transactionActions.transactionFailed(processId);
-const acknowledgeTimeout = states.acknowledgeTimeout(props);
+const waitForTransaction = states.waitForTransaction(defaults);
+const waitForAcknowledgement = states.waitForAcknowledgement(defaults);
+const waitForResponse = states.waitForResponse(defaults);
+const transactionFailedFailure = states.failure({
+  reason: states.FailureReason.TransactionFailure,
+});
+const transactionConfirmed = transactionActions.transactionConfirmed({ processId });
+const transactionFailed = transactionActions.transactionFailed({ processId });
+const acknowledgeTimeout = states.acknowledgeTimeout(defaults);
 const waitForDefund1 = states.waitForDefund({
-  ...props,
-  defundingState: defundingPreSuccessState,
+  ...defaults,
+  defundingState: defundingPreSuccess.state,
 });
 const waitForDefund2 = states.waitForDefund({
-  ...props,
-  defundingState: defundingPreFailureState,
+  ...defaults,
+  defundingState: defundingPreFailure.state,
 });
-const acknowledgeDefundingSuccess = states.acknowledgeDefundingSuccess({ ...props });
-const acknowledgeClosedButNotDefunded = states.acknowledgeClosedButNotDefunded({ ...props });
+const acknowledgeDefundingSuccess = states.acknowledgeDefundingSuccess({ ...defaults });
+const acknowledgeClosedButNotDefunded = states.acknowledgeClosedButNotDefunded({ ...defaults });
 // ------
 // Actions
 // ------
-const approve = actions.respondApproved(processId);
-const acknowledge = actions.respondSuccessAcknowledged(processId);
-const responseProvided = actions.responseProvided(processId, testScenarios.gameCommitment3);
-const defundChosen = actions.defundChosen(processId);
-const acknowledged = actions.acknowledged(processId);
+const approve = actions.respondApproved({ processId });
+const acknowledge = actions.respondSuccessAcknowledged({ processId });
+const responseProvided = actions.responseProvided({
+  processId,
+  commitment: testScenarios.gameCommitment3,
+});
+const defundChosen = actions.defundChosen({ processId });
+const acknowledged = actions.acknowledged({ processId });
 const challengeTimedOut = challengeExpiredEvent(processId, channelId, 1000);
 
 // ---------
 // Scenarios
 // ---------
 export const respondWithExistingCommitmentHappyPath = {
-  ...props,
+  ...defaults,
   challengeCommitment: gameCommitment1,
-  responseCommitment: gameCommitment2,
-  // States
-  waitForApproval: waitForApprovalRespond,
-  waitForTransaction,
-  waitForAcknowledgement,
-  success,
-  // Actions
-  approve,
-  transactionConfirmed,
-  acknowledge,
+  waitForApproval: {
+    state: waitForApprovalRespond,
+    action: approve,
+    responseCommitment: gameCommitment2,
+  },
+  waitForTransaction: {
+    state: waitForTransaction,
+    action: transactionConfirmed,
+  },
+  waitForAcknowledgement: {
+    state: waitForAcknowledgement,
+    action: acknowledge,
+  },
 };
 
 export const refuteHappyPath = {
-  ...props,
-  sharedData: { ...props.sharedData, channelStore: refuteChannelState },
+  ...defaults,
+  sharedData: { ...defaults.sharedData, channelStore: refuteChannelState },
   challengeCommitment: gameCommitment1,
-  refuteCommitment: gameCommitment3,
-  // States
-  waitForApproval: waitForApprovalRefute,
-  waitForTransaction,
-  waitForAcknowledgement,
-  success,
-  // Actions
-  approve,
-  transactionConfirmed,
-  acknowledge,
+  waitForApproval: {
+    state: waitForApprovalRefute,
+    action: approve,
+    refuteCommitment: gameCommitment3,
+  },
+  waitForTransaction: {
+    state: waitForTransaction,
+    action: transactionConfirmed,
+  },
+  waitForAcknowledgement: {
+    state: waitForAcknowledgement,
+    action: acknowledge,
+  },
 };
 
 export const requireResponseHappyPath = {
-  ...props,
+  ...defaults,
   challengeCommitment: gameCommitment2,
-  responseCommitment: gameCommitment3,
-  // States
-  waitForApproval: waitForApprovalRequiresResponse,
-  waitForResponse,
-  waitForTransaction,
-  waitForAcknowledgement,
-  success,
-  // Actions
-  approve,
-  responseProvided,
-  transactionConfirmed,
-  acknowledge,
+  waitForApprovalRequiresResponse: {
+    state: waitForApprovalRequiresResponse,
+    action: approve,
+  },
+  waitForResponse: {
+    state: waitForResponse,
+    action: responseProvided,
+    responseCommitment: gameCommitment3,
+  },
+  waitForTransaction: {
+    state: waitForTransaction,
+    action: transactionConfirmed,
+  },
+  waitForAcknowledgement: {
+    state: waitForAcknowledgement,
+    action: acknowledge,
+  },
 };
 
 export const transactionFails = {
-  ...props,
-  // States
-  waitForApproval: waitForApprovalRespond,
-  waitForTransaction,
+  ...defaults,
+  waitForApproval: {
+    state: waitForApprovalRespond,
+    action: approve,
+  },
+  waitForTransaction: {
+    state: waitForTransaction,
+    action: transactionFailed,
+  },
   failure: transactionFailedFailure,
-  // Actions
-  approve,
-  transactionFailed,
 };
 
 export const challengeExpiresChannelDefunded = {
-  ...props,
-  // States
-  waitForResponse,
-  acknowledgeTimeout,
-  waitForDefund1,
-  acknowledgeDefundingSuccess,
-  // Actions
-  challengeTimedOut,
-  defundChosen,
-  defundingSuccessTrigger,
-  acknowledged,
+  ...defaults,
+  waitForResponse: {
+    state: waitForResponse,
+    action: challengeTimedOut,
+  },
+  acknowledgeTimeout: {
+    state: acknowledgeTimeout,
+    action: defundChosen,
+  },
+  waitForDefund1: {
+    state: waitForDefund1,
+    action: defundingPreSuccess.action,
+  },
+  acknowledgeDefundingSuccess: {
+    state: acknowledgeDefundingSuccess,
+    action: acknowledged,
+  },
 };
 
 export const challengeExpiresButChannelNotDefunded = {
-  ...props,
-  // States
-  waitForDefund2,
-  acknowledgeClosedButNotDefunded,
-  // Actions
-  defundingFailureTrigger,
-  acknowledged,
+  ...defaults,
+  waitForDefund2: {
+    state: waitForDefund2,
+    action: defundingPreFailure.action,
+  },
+  acknowledgeClosedButNotDefunded: {
+    state: acknowledgeClosedButNotDefunded,
+    action: acknowledged,
+  },
 };
 
 export const challengeExpiresDuringWaitForTransaction = {
-  ...props,
-  waitForTransaction,
-  challengeTimedOut,
+  ...defaults,
+  waitForTransaction: {
+    state: waitForTransaction,
+    action: challengeTimedOut,
+  },
 };
 
 export const challengeExpiresDuringWaitForApproval = {
-  ...props,
-  waitForApproval: waitForApprovalRespond,
-  challengeTimedOut,
+  ...defaults,
+  waitForApprovalRespond: {
+    state: waitForApprovalRespond,
+    action: challengeTimedOut,
+  },
 };
 
 export const defundActionComesDuringAcknowledgeTimeout = {
-  ...props,
-  acknowledgeTimeout,
-
-  defundingSuccessTrigger,
+  ...defaults,
+  acknowledgeTimeout: {
+    state: acknowledgeTimeout,
+    action: defundingPreSuccess.action,
+  },
 };

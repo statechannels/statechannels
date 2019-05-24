@@ -23,16 +23,16 @@ graph TD
 linkStyle default interpolate basis
   S((Start)) --> E{Channel Exists?}
   E --> |No| AF(InstigatorAcknowledgeFailure)
-  AF -->|ACKNOWLEDGED| F((Failure))
+  AF -->|WALLET.CONCLUDING.INSTIGATOR.ACKNOWLEDGED| F((Failure))
   E --> |Yes| MT{My turn?}
   MT  --> |Yes| CC(InstigatorApproveConcluding)
   MT  --> |No| AF(InstigatorAcknowledgeFailure)
-  CC  --> |CONCLUDING.CANCELLED| F
-  CC  --> |CONCLUDE.SENT| WOC(InstigatorWaitForOpponentConclude)
+  CC  --> |WALLET.CONCLUDING.INSTIGATOR.CONCLUDING_CANCELLED| F
+  CC  --> |WALLET.CONCLUDING.INSTIGATOR.CONCLUDE_APPROVED| WOC(InstigatorWaitForOpponentConclude)
   WOC --> |CONCLUDE.RECEIVED| ACR(InstigatorAcknowledgeConcludeReceived)
-  ACR --> |DEFUND.CHOSEN| D(InstigatorWaitForDefund)
+  ACR --> |WALLET.CONCLUDING.INSTIGATOR.DEFUND_CHOSEN| D(InstigatorWaitForDefund)
   D   --> |defunding protocol succeeded| AS(InstigatorAcknowledgeSuccess)
-  AS -->  |ACKNOWLEDGED| SS((Success))
+  AS -->  |WALLET.CONCLUDING.INSTIGATOR.ACKNOWLEDGED| SS((Success))
   D   --> |defunding protocol failed| AF(InstigatorAcknowledgeFailure)
   classDef logic fill:#efdd20;
   classDef Success fill:#58ef21;

@@ -5,7 +5,12 @@ import * as playerA from './player-a/states';
 import * as playerB from './player-b/states';
 import { ProtocolState } from '..';
 
+// -------
+// Unions and Guards
+// -------
+
 export type FundingState = PlayerAFundingState | PlayerBFundingState;
+export type FundingStateType = FundingState['type'];
 
 export { playerA, playerB };
 

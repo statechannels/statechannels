@@ -1,15 +1,7 @@
-import {
-  aEachDepositsInSequenceHappyStates,
-  actions,
-  bEachDepositsInSequenceHappyStates,
-  transactionFails,
-} from './scenarios';
+import { aHappyPath, bHappyPath, transactionFails } from './scenarios';
 
-export const preSuccessStateA = aEachDepositsInSequenceHappyStates.waitForPostFundSetup;
-export const successTriggerA = actions.postFundSetup1;
+export const preSuccessA = aHappyPath.waitForPostFundSetup;
 
-export const preSuccessStateB = bEachDepositsInSequenceHappyStates.waitForPostFundSetup;
-export const successTriggerB = actions.postFundSetup0;
+export const preSuccessB = bHappyPath.waitForPostFundSetup;
 
-export const preFailureState = transactionFails.waitForDepositTransaction;
-export const failureTrigger = transactionFails.failureTrigger;
+export const preFailure = transactionFails.waitForDepositTransaction;

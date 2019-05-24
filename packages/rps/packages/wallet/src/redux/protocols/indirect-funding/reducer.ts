@@ -6,8 +6,8 @@ import { playerAReducer, initialize as initializeA } from './player-a/reducer';
 import { playerBReducer, initialize as initializeB } from './player-b/reducer';
 import { SharedData } from '../../state';
 import { ChannelState } from '../../channel-store';
-import { isPlayerAState } from './player-a/state';
-import { NonTerminalIndirectFundingState, IndirectFundingState } from './state';
+import { isPlayerAState } from './player-a/states';
+import { NonTerminalIndirectFundingState, IndirectFundingState } from './states';
 
 type ReturnVal = ProtocolStateWithSharedData<IndirectFundingState>;
 

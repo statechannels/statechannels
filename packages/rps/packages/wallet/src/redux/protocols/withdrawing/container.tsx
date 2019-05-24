@@ -9,12 +9,13 @@ import WaitForApproval from './components/wait-for-approval';
 import Failure from '../shared-components/failure';
 import Success from '../shared-components/success';
 import Acknowledge from '../shared-components/acknowledge';
+import { ActionConstructor } from '../../utils';
 
 interface Props {
   state: states.WithdrawalState;
-  withdrawalApproved: (processId: string, withdrawalAddress: string) => void;
-  withdrawalRejected: (processId: string) => void;
-  withdrawalSuccessAcknowledged: (processId: string) => void;
+  withdrawalApproved: ActionConstructor<actions.WithdrawalApproved>;
+  withdrawalRejected: ActionConstructor<actions.WithdrawalRejected>;
+  withdrawalSuccessAcknowledged: ActionConstructor<actions.WithdrawalSuccessAcknowledged>;
 }
 
 class WithdrawalContainer extends PureComponent<Props> {
@@ -26,32 +27,34 @@ class WithdrawalContainer extends PureComponent<Props> {
       withdrawalSuccessAcknowledged,
     } = this.props;
     switch (state.type) {
-      case states.WAIT_FOR_APPROVAL:
+      case 'Withdrawing.WaitforApproval':
         return (
           <WaitForApproval
             withdrawalAmount={state.withdrawalAmount}
-            approve={address => withdrawalApproved(state.processId, address)}
-            deny={() => withdrawalRejected(state.processId)}
+            approve={withdrawalAddress =>
+              withdrawalApproved({ processId: state.processId, withdrawalAddress })
+            }
+            deny={() => withdrawalRejected({ processId: state.processId })}
           />
         );
-      case states.WAIT_FOR_TRANSACTION:
+      case 'Withdrawing.WaitForTransaction':
         return (
           <TransactionSubmission
             state={state.transactionSubmissionState}
             transactionName="Withdraw"
           />
         );
-      case states.WAIT_FOR_ACKNOWLEDGEMENT:
+      case 'Withdrawing.WaitForAcknowledgement':
         return (
           <Acknowledge
             title="Withdraw Complete"
             description="You have successfully withdrawn your funds."
-            acknowledge={() => withdrawalSuccessAcknowledged(state.processId)}
+            acknowledge={() => withdrawalSuccessAcknowledged({ processId: state.processId })}
           />
         );
-      case states.FAILURE:
+      case 'Withdrawing.Failure':
         return <Failure name="withdraw" reason={state.reason} />;
-      case states.SUCCESS:
+      case 'Withdrawing.Success':
         return <Success name="withdraw" />;
       default:
         return unreachable(state);

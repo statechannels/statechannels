@@ -1,7 +1,7 @@
 import React from 'react';
 import { Checklist, MessagesForStep, messagesForStep } from '../../../../../components/checklist';
 import { unreachable } from '../../../../../utils/reducer-utils';
-import { PlayerAState } from '../state';
+import { PlayerAState } from '../states';
 
 interface Props {
   indirectFundingStateA: PlayerAState;
@@ -16,13 +16,13 @@ export enum Step {
 
 const fundingStepByState = (state: PlayerAState): Step => {
   switch (state.type) {
-    case 'AWaitForPreFundSetup1':
+    case 'IndirectFunding.AWaitForPreFundSetup1':
       return Step.AWaitForPreFundSetup1;
-    case 'AWaitForDirectFunding':
+    case 'IndirectFunding.AWaitForDirectFunding':
       return Step.AWaitForDirectFunding;
-    case 'AWaitForLedgerUpdate1':
+    case 'IndirectFunding.AWaitForLedgerUpdate1':
       return Step.AWaitForLedgerUpdate1;
-    case 'AWaitForPostFundSetup1':
+    case 'IndirectFunding.AWaitForPostFundSetup1':
       return Step.AWaitForPostFundSetup1;
     default:
       return unreachable(state);
