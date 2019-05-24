@@ -1,4 +1,4 @@
-import { AppCommitment, isConsensusReached, isProposal, UpdateType } from './consensus-app';
+import { AppCommitment, isConsensusReached, isProposal, UpdateType } from '.';
 export function validTransition(fromCommitment: AppCommitment, toCommitment: AppCommitment): true {
   // Commitment validation
 
