@@ -17,7 +17,19 @@ contract ConsensusApp {
 
     uint numParticipants = _old.participants.length;
 
-    // State machine transition identifier
+    // Commitment validations
+    if (oldCommitment.updateType == ConsensusCommitment.UpdateType.Proposal) {
+      validateProposeCommitment(oldCommitment);
+    } else if (oldCommitment.updateType == ConsensusCommitment.UpdateType.Consensus) {
+      validateConsensusCommitment(oldCommitment);
+    }
+    if (newCommitment.updateType == ConsensusCommitment.UpdateType.Proposal) {
+      validateProposeCommitment(newCommitment);
+    } else if (newCommitment.updateType == ConsensusCommitment.UpdateType.Consensus) {
+      validateConsensusCommitment(newCommitment);
+    }
+
+    // State machine transition validations
 
     if (oldCommitment.updateType == ConsensusCommitment.UpdateType.Consensus) {
       if (newCommitment.updateType == ConsensusCommitment.UpdateType.Proposal) {
@@ -121,7 +133,15 @@ contract ConsensusApp {
     _;
   } 
 
-  modifier validConsensusState(ConsensusCommitment.ConsensusCommitmentStruct memory commitment) {
+  // Commitment validations
+
+  function validateConsensusCommitment(
+    ConsensusCommitment.ConsensusCommitmentStruct memory commitment
+  ) private pure {
+    require(
+      commitment.furtherVotesRequired == 0,
+      "ConsensusApp: 'furtherVotesRequired' must be 0 during consensus."
+      ); 
     require(
       commitment.proposedAllocation.length == 0,
       "ConsensusApp: 'proposedAllocation' must be reset during consensus."
@@ -130,10 +150,26 @@ contract ConsensusApp {
       commitment.proposedDestination.length == 0,
       "ConsensusApp: 'proposedDestination' must be reset during consensus."
     ); 
-    _;
   } 
 
-// transition validations
+  function validateProposeCommitment(
+    ConsensusCommitment.ConsensusCommitmentStruct memory commitment
+  ) private pure {
+    require(
+      commitment.furtherVotesRequired != 0,
+      "ConsensusApp: 'furtherVotesRequired' must not be 0 during propose."
+      ); 
+    require(
+      commitment.proposedAllocation.length > 0,
+      "ConsensusApp: 'proposedAllocation' must not be empty during propose."
+      ); 
+    require(
+      commitment.proposedDestination.length == commitment.proposedAllocation.length,
+      "ConsensusApp: 'proposedDestination' and 'proposedAllocation' must be the same length during propose."
+    ); 
+  } 
+
+// Transition validations
 
   function validatePass(
     ConsensusCommitment.ConsensusCommitmentStruct memory oldCommitment,
@@ -156,7 +192,6 @@ contract ConsensusApp {
     ConsensusCommitment.ConsensusCommitmentStruct memory oldCommitment,
     ConsensusCommitment.ConsensusCommitmentStruct memory newCommitment
   ) private pure
-    validConsensusState(newCommitment)
     balancesUpdated(oldCommitment, newCommitment)
   { }
     
@@ -165,7 +200,6 @@ contract ConsensusApp {
     ConsensusCommitment.ConsensusCommitmentStruct memory newCommitment
   ) private pure
     balancesUnchanged(oldCommitment, newCommitment)
-    validConsensusState(newCommitment)
   { }
 
   function validateVote(

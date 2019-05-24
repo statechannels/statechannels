@@ -1,10 +1,9 @@
-import { ContractFactory, ethers } from 'ethers';
-import linker from 'solc/linker';
+import { ethers } from 'ethers';
 import { getNetworkId, getGanacheProvider } from 'magmo-devtools';
-import { Channel, asEthersObject, Commitment } from 'fmg-core';
+import { Channel, asEthersObject, Commitment, CommitmentType } from 'fmg-core';
 import TestConsensusCommitmentArtifact from '../build/contracts/TestConsensusCommitment.json';
 
-import { commitments as ConsensusApp, UpdateType, appAttributes } from '../src/consensus-app';
+import { UpdateType, initialConsensus, asCoreCommitment, propose } from '../src/consensus-app';
 import { bigNumberify } from 'ethers/utils';
 
 jest.setTimeout(20000);
@@ -37,15 +36,24 @@ describe('ConsensusCommitment', () => {
 
   const channel: Channel = { channelType: participantB.address, nonce: 0, participants }; // just use any valid address
   const defaults = { channel, allocation, destination: participants };
-  const commitment: Commitment = ConsensusApp.appCommitment({
-    ...defaults,
-    turnNum: 6,
-    updateType: UpdateType.Consensus,
-    commitmentCount: 0,
-    furtherVotesRequired: 1,
-    proposedAllocation,
-    proposedDestination,
-  });
+  const commitment: Commitment = asCoreCommitment(
+    propose(
+      {
+        ...defaults,
+        turnNum: 6,
+        commitmentCount: 0,
+        commitmentType: CommitmentType.App,
+        appAttributes: {
+          proposedAllocation,
+          proposedDestination,
+          furtherVotesRequired: 0,
+          updateType: UpdateType.Consensus,
+        },
+      },
+      proposedAllocation,
+      proposedDestination,
+    ),
+  );
 
   it('works', async () => {
     await setupContracts();
@@ -60,7 +68,7 @@ describe('ConsensusCommitment', () => {
       currentDestination: participants,
       proposedAllocation,
       proposedDestination,
-      updateType: UpdateType.Consensus,
+      updateType: UpdateType.Proposal,
     });
   });
 });
@@ -68,16 +76,6 @@ describe('ConsensusCommitment', () => {
 // TODO: Will this ever be needed outside of this test?
 // Normally we just want to convert to AppAttrs
 function convertToConsensusCommitmentObject(consensusCommitmentArgs) {
-  const SolidityConsensusCommitmentType = {
-    ConsensusCommitmentStruct: {
-      furtherVotesRequired: 'uint32',
-      currentAllocation: 'uint256[]',
-      currentDestination: 'address[]',
-      proposedAllocation: 'uint256[]',
-      proposedDestination: 'address[]',
-      updateType: 'uint32',
-    },
-  };
   return {
     furtherVotesRequired: parseInt(consensusCommitmentArgs[0], 10),
     currentAllocation: consensusCommitmentArgs[1].map(bigNumberify).map(bn => bn.toHexString()),

@@ -5,9 +5,8 @@ import {
   Address,
   Bytes,
   BaseCommitment,
-  ethereumArgs,
-  Commitment,
   Channel,
+  Commitment,
 } from 'fmg-core';
 import abi from 'web3-eth-abi';
 import { bigNumberify } from 'ethers/utils';
@@ -22,69 +21,61 @@ export interface AppAttributes {
   proposedDestination: Address[];
   updateType: UpdateType;
 }
-
-export interface ConsensusBaseCommitment extends BaseCommitment {
-  furtherVotesRequired: Uint32;
-  proposedAllocation: Uint256[];
-  proposedDestination: Address[];
-  updateType: UpdateType;
-}
-
-export interface ProposalCommitment extends ConsensusBaseCommitment {
+export interface ProposalAppAttrs extends AppAttributes {
   updateType: UpdateType.Proposal;
 }
-
-export interface ConsensusReachedCommitment extends ConsensusBaseCommitment {
+export interface ConsensusAppAttrs extends AppAttributes {
   updateType: UpdateType.Consensus;
 }
 
-function preFundSetupCommitment(opts: ConsensusBaseCommitment) {
-  return {
-    ...opts,
-    commitmentType: CommitmentType.PreFundSetup,
-    appAttributes: bytesFromAppAttributes(opts),
-  };
+export interface ConsensusBaseCommitment extends BaseCommitment {
+  appAttributes: AppAttributes;
 }
 
-function postFundSetupCommitment(opts: ConsensusBaseCommitment) {
-  return {
-    ...opts,
-    commitmentType: CommitmentType.PostFundSetup,
-    appAttributes: bytesFromAppAttributes(opts),
-  };
+export interface ProposalCommitment extends ConsensusBaseCommitment {
+  commitmentType: CommitmentType.App;
+  appAttributes: ProposalAppAttrs;
+}
+export interface ConsensusReachedCommitment extends ConsensusBaseCommitment {
+  commitmentType: CommitmentType.App;
+  appAttributes: ConsensusAppAttrs;
+}
+export interface PreFundSetupCommitment extends ConsensusBaseCommitment {
+  commitmentType: CommitmentType.PreFundSetup;
+}
+export interface PostFundSetupCommitment extends ConsensusBaseCommitment {
+  commitmentType: CommitmentType.PostFundSetup;
+}
+export type AppCommitment = ProposalCommitment | ConsensusReachedCommitment;
+export interface ConcludeCommitment extends ConsensusBaseCommitment {
+  commitmentType: CommitmentType.Conclude;
 }
 
-function appCommitment(opts: ConsensusBaseCommitment) {
-  return {
-    ...opts,
-    commitmentType: CommitmentType.App,
-    appAttributes: bytesFromAppAttributes(opts),
-  };
-}
+export type ConsensusCommitment =
+  | PreFundSetupCommitment
+  | AppCommitment
+  | PostFundSetupCommitment
+  | ConcludeCommitment;
 
-function concludeCommitment(opts: ConsensusBaseCommitment) {
-  return {
-    ...opts,
-    commitmentType: CommitmentType.Conclude,
-    appAttributes: bytesFromAppAttributes(opts),
-  };
+// Type guards
+export function isProposal(c: ConsensusBaseCommitment): c is ProposalCommitment {
+  return c.appAttributes.updateType === UpdateType.Proposal;
 }
-
-export const commitments = {
-  preFundSetupCommitment,
-  postFundSetupCommitment,
-  appCommitment,
-  concludeCommitment,
-};
+export function isConsensusReached(c: ConsensusBaseCommitment): c is ConsensusReachedCommitment {
+  return c.appAttributes.updateType === UpdateType.Consensus;
+}
+export function isAppCommitment(c: ConsensusBaseCommitment): c is AppCommitment {
+  return isProposal(c) || isConsensusReached(c);
+}
 
 export function appAttributes(
-  consensusCommitmentArgs: [string, string[], string[], string],
-): AppAttributes {
+  ethersAppAttrs: [string, string[], string[], string],
+): ConsensusAppAttrs | ProposalAppAttrs {
   return {
-    furtherVotesRequired: parseInt(consensusCommitmentArgs[0], 10),
-    proposedAllocation: consensusCommitmentArgs[1].map(bigNumberify).map(bn => bn.toHexString()),
-    proposedDestination: consensusCommitmentArgs[2],
-    updateType: parseInt(consensusCommitmentArgs[3], 10),
+    furtherVotesRequired: parseInt(ethersAppAttrs[0], 10),
+    proposedAllocation: ethersAppAttrs[1].map(bigNumberify).map(bn => bn.toHexString()),
+    proposedDestination: ethersAppAttrs[2],
+    updateType: parseInt(ethersAppAttrs[3], 10),
   };
 }
 
@@ -106,12 +97,27 @@ export function bytesFromAppAttributes(appAttrs: AppAttributes): Bytes {
   ]);
 }
 
-export function appAttributesFromBytes(appAttrs: Bytes): AppAttributes {
+export function appAttributesFromBytes(appAttrs: Bytes): ConsensusAppAttrs | ProposalAppAttrs {
   return appAttributes(abi.decodeParameter(SolidityConsensusCommitmentType, appAttrs));
 }
 
+export function asCoreCommitment(c: ConsensusCommitment): Commitment {
+  return {
+    ...c,
+    appAttributes: bytesFromAppAttributes(c.appAttributes),
+  };
+}
+
 // Transition helper functions
-export function initialConsensus(opts: {
+
+const consensusAtts: () => ConsensusAppAttrs = () => ({
+  proposedAllocation: [],
+  proposedDestination: [],
+  updateType: UpdateType.Consensus,
+  furtherVotesRequired: 0,
+});
+
+export function initialConsensus(c: {
   channel: Channel;
   turnNum: number;
   allocation: string[];
@@ -119,11 +125,9 @@ export function initialConsensus(opts: {
   commitmentCount: number;
 }): ConsensusReachedCommitment {
   return {
-    ...opts,
-    proposedAllocation: [],
-    proposedDestination: [],
-    updateType: UpdateType.Consensus,
-    furtherVotesRequired: 0,
+    ...c,
+    commitmentType: CommitmentType.App,
+    appAttributes: consensusAtts(),
   };
 }
 export function propose(
@@ -135,10 +139,12 @@ export function propose(
   return {
     ...commitment,
     turnNum: commitment.turnNum + 1,
-    proposedAllocation,
-    proposedDestination,
-    updateType: UpdateType.Proposal,
-    furtherVotesRequired: numParticipants - 1,
+    appAttributes: {
+      proposedAllocation,
+      proposedDestination,
+      updateType: UpdateType.Proposal,
+      furtherVotesRequired: numParticipants - 1,
+    },
   };
 }
 
@@ -146,27 +152,36 @@ export function pass(commitment: ConsensusReachedCommitment): ConsensusReachedCo
   return {
     ...commitment,
     turnNum: commitment.turnNum + 1,
-    updateType: UpdateType.Consensus,
+    appAttributes: consensusAtts(),
   };
 }
 
 export function vote(commitment: ProposalCommitment): ProposalCommitment {
+  if (commitment.appAttributes.furtherVotesRequired <= 1) {
+    throw new Error('Invalid input -- furtherVotesRequired must be greater than 1');
+  }
+
   return {
     ...commitment,
     turnNum: commitment.turnNum + 1,
-    furtherVotesRequired: commitment.furtherVotesRequired - 1,
+    appAttributes: {
+      ...commitment.appAttributes,
+      furtherVotesRequired: commitment.appAttributes.furtherVotesRequired - 1,
+    },
   };
 }
 
 export function finalVote(commitment: ProposalCommitment): ConsensusReachedCommitment {
+  if (commitment.appAttributes.furtherVotesRequired !== 1) {
+    throw new Error('Invalid input -- furtherVotesRequired must be 1');
+  }
+
   return {
     ...commitment,
     turnNum: commitment.turnNum + 1,
-    updateType: UpdateType.Consensus,
-    allocation: commitment.proposedAllocation,
-    destination: commitment.proposedDestination,
-    proposedAllocation: [],
-    proposedDestination: [],
+    allocation: commitment.appAttributes.proposedAllocation,
+    destination: commitment.appAttributes.proposedDestination,
+    appAttributes: consensusAtts(),
   };
 }
 
@@ -174,22 +189,6 @@ export function veto(commitment: ProposalCommitment): ConsensusReachedCommitment
   return {
     ...commitment,
     turnNum: commitment.turnNum + 1,
-    updateType: UpdateType.Consensus,
-    proposedAllocation: [],
-    proposedDestination: [],
-  };
-}
-
-export function proposeAlternative(
-  commitment: ProposalCommitment,
-  proposedAllocation: Uint256[],
-  proposedDestination: Address[],
-): ProposalCommitment {
-  return {
-    ...commitment,
-    turnNum: commitment.turnNum + 1,
-    proposedAllocation,
-    proposedDestination,
-    updateType: UpdateType.Proposal,
+    appAttributes: consensusAtts(),
   };
 }
