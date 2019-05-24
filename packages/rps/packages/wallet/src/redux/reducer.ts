@@ -192,6 +192,7 @@ function initializeNewProtocol(
       return initializeResponderState(
         processId,
         action.channelId,
+        action.expiresAt,
         incomingSharedData,
         action.commitment,
       );
