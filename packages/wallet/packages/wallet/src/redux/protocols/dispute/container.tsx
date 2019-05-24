@@ -2,7 +2,7 @@ import { PureComponent } from 'react';
 import { isChallengerState, NonTerminalChallengerState } from './challenger/states';
 import React from 'react';
 import { Challenger } from './challenger/container';
-import { NonTerminalResponderState } from './responder/state';
+import { NonTerminalResponderState } from './responder/states';
 import { Responder } from './responder/container';
 import { connect } from 'react-redux';
 

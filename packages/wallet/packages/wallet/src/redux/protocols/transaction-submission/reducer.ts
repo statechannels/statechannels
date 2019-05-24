@@ -1,13 +1,4 @@
-import {
-  TransactionAction,
-  TRANSACTION_SENT,
-  TRANSACTION_SUBMISSION_FAILED,
-  TRANSACTION_SUBMITTED,
-  TRANSACTION_CONFIRMED,
-  TRANSACTION_FAILED,
-  TRANSACTION_RETRY_APPROVED,
-  TRANSACTION_RETRY_DENIED,
-} from './actions';
+import { TransactionAction } from './actions';
 import {
   TransactionSubmissionState as TSState,
   NonTerminalTransactionSubmissionState as NonTerminalTSState,
@@ -35,19 +26,19 @@ export function transactionReducer(
   action: TransactionAction,
 ): ReturnVal {
   switch (action.type) {
-    case TRANSACTION_SENT:
+    case 'WALLET.TRANSACTION_SUBMISSION.TRANSACTION_SENT':
       return transactionSent(state, storage);
-    case TRANSACTION_SUBMISSION_FAILED:
+    case 'WALLET.TRANSACTION_SUBMISSION.TRANSACTION_SUBMISSION_FAILED':
       return transactionSubmissionFailed(state, storage);
-    case TRANSACTION_SUBMITTED:
+    case 'WALLET.TRANSACTION_SUBMISSION.TRANSACTION_SUBMITTED':
       return transactionSubmitted(state, storage, action.transactionHash);
-    case TRANSACTION_CONFIRMED:
+    case 'WALLET.TRANSACTION_SUBMISSION.TRANSACTION_CONFIRMED':
       return transactionConfirmed(state, storage);
-    case TRANSACTION_RETRY_APPROVED:
+    case 'WALLET.TRANSACTION_SUBMISSION.TRANSACTION_RETRY_APPROVED':
       return transactionRetryApproved(state, storage);
-    case TRANSACTION_RETRY_DENIED:
+    case 'WALLET.TRANSACTION_SUBMISSION.TRANSACTION_RETRY_DENIED':
       return transactionRetryDenied(state, storage);
-    case TRANSACTION_FAILED:
+    case 'WALLET.TRANSACTION_SUBMISSION.TRANSACTION_FAILED':
       return transactionFailed(state, storage);
     default:
       return unreachable(action);
@@ -57,21 +48,22 @@ export function transactionReducer(
 export function initialize(
   transaction: TransactionRequest,
   processId: string,
+  channelId: string,
   storage: Storage,
 ): { state: NonTerminalTSState; storage: SharedData } {
   storage = queueTransaction(storage, transaction, processId);
-  return { state: waitForSend({ transaction, processId }), storage };
+  return { state: waitForSend({ transaction, processId, channelId }), storage };
 }
 
 function transactionSent(state: TSState, storage: Storage): ReturnVal {
-  if (state.type !== 'WaitForSend') {
+  if (state.type !== 'TransactionSubmission.WaitForSend') {
     return { state, storage };
   }
   return { state: waitForSubmission(state), storage };
 }
 
 function transactionSubmissionFailed(state: TSState, storage: Storage): ReturnVal {
-  if (state.type !== 'WaitForSubmission') {
+  if (state.type !== 'TransactionSubmission.WaitForSubmission') {
     return { state, storage };
   }
   return { state: approveRetry(state), storage };
@@ -83,8 +75,8 @@ function transactionSubmitted(
   transactionHash: string,
 ): ReturnVal {
   switch (state.type) {
-    case 'WaitForSubmission':
-    case 'WaitForSend': // just in case we didn't hear the TRANSACTION_SENT
+    case 'TransactionSubmission.WaitForSubmission':
+    case 'TransactionSubmission.WaitForSend': // just in case we didn't hear the TRANSACTION_SENT
       return { state: waitForConfirmation({ ...state, transactionHash }), storage };
     default:
       return { state, storage };
@@ -93,22 +85,22 @@ function transactionSubmitted(
 
 function transactionConfirmed(state: NonTerminalTSState, storage: Storage): ReturnVal {
   switch (state.type) {
-    case 'WaitForConfirmation':
-    case 'WaitForSubmission': // in case we didn't hear the TRANSACTION_SUBMITTED
-    case 'WaitForSend': // in case we didn't hear the TRANSACTION_SENT
-      return { state: success(), storage };
+    case 'TransactionSubmission.WaitForConfirmation':
+    case 'TransactionSubmission.WaitForSubmission': // in case we didn't hear the TRANSACTION_SUBMITTED
+    case 'TransactionSubmission.WaitForSend': // in case we didn't hear the TRANSACTION_SENT
+      return { state: success({}), storage };
     default:
       return { state, storage };
   }
 }
 
 function transactionRetryApproved(state: NonTerminalTSState, storage: Storage): ReturnVal {
-  if (state.type !== 'ApproveRetry') {
+  if (state.type !== 'TransactionSubmission.ApproveRetry') {
     return { state, storage };
   }
-  const { transaction, processId } = state;
+  const { transaction, processId, channelId } = state;
   storage = queueTransaction(storage, transaction, processId);
-  return { state: waitForSend({ transaction, processId }), storage };
+  return { state: waitForSend({ transaction, processId, channelId }), storage };
 }
 
 function transactionRetryDenied(state: NonTerminalTSState, storage: Storage): ReturnVal {

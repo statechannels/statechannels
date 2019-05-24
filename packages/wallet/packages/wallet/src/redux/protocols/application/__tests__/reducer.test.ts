@@ -1,7 +1,7 @@
 import * as scenarios from './scenarios';
 import * as states from '../states';
 import { ProtocolStateWithSharedData } from '../..';
-import { itSendsThisMessage } from '../../../__tests__/helpers';
+import { itSendsThisMessage, describeScenarioStep } from '../../../__tests__/helpers';
 import { initialize, applicationReducer } from '../reducer';
 import {
   VALIDATION_SUCCESS,
@@ -14,98 +14,91 @@ function whenIn(state) {
   return `when in ${state}`;
 }
 
-describe('initializing the application', () => {
+describe('when initializing', () => {
   const scenario = scenarios.initializingApplication;
-  const result = initialize(scenario.storage);
-  itTransitionsTo(result, states.ADDRESS_KNOWN);
+  const result = initialize(scenario.initialize.sharedData);
+  itTransitionsTo(result, 'Application.AddressKnown');
 });
 
 describe('starting the application', () => {
   const scenario = scenarios.startingApplication;
-  const sharedData = scenario.storage;
 
-  describe(whenIn(states.ADDRESS_KNOWN), () => {
-    const state = scenario.states.addressKnown;
-    const action = scenario.actions.receivePreFundSetup;
+  describeScenarioStep(scenario.addressKnown, () => {
+    const { state, sharedData, action } = scenario.addressKnown;
+
     const result = applicationReducer(state, sharedData, action);
 
-    itTransitionsTo(result, states.ONGOING);
+    itTransitionsTo(result, 'Application.Ongoing');
     itSendsThisMessage(result, SIGNATURE_SUCCESS);
   });
 });
 
 describe('signing a commitment', () => {
   const scenario = scenarios.receivingOurCommitment;
-  const sharedData = scenario.storage;
 
-  describe(whenIn(states.ONGOING), () => {
-    const state = scenario.states.ongoing;
-    const action = scenario.actions.receiveOurCommitment;
+  describeScenarioStep(scenario.ongoing, () => {
+    const { state, sharedData, action } = scenario.ongoing;
     const result = applicationReducer(state, sharedData, action);
 
-    itTransitionsTo(result, states.ONGOING);
+    itTransitionsTo(result, 'Application.Ongoing');
     itSendsThisMessage(result, SIGNATURE_SUCCESS);
   });
 });
 
 describe('signing an invalid commitment', () => {
   const scenario = scenarios.receivingOurInvalidCommitment;
-  const sharedData = scenario.storage;
 
-  describe(whenIn(states.ONGOING), () => {
-    const state = scenario.states.ongoing;
-    const action = scenario.actions.receiveOurInvalidCommitment;
+  describeScenarioStep(scenario.ongoing, () => {
+    const { state, sharedData, action } = scenario.ongoing;
+
     const result = applicationReducer(state, sharedData, action);
 
-    itTransitionsTo(result, states.ONGOING);
+    itTransitionsTo(result, 'Application.Ongoing');
     itSendsThisMessage(result, SIGNATURE_FAILURE);
   });
 });
 
 describe('validating a commitment', () => {
   const scenario = scenarios.receivingTheirCommitment;
-  const sharedData = scenario.storage;
 
-  describe(whenIn(states.ONGOING), () => {
-    const state = scenario.states.ongoing;
-    const action = scenario.actions.receiveTheirCommitment;
+  describe(whenIn('Application.Ongoing'), () => {
+    const { state, sharedData, action } = scenario.ongoing;
+
     const result = applicationReducer(state, sharedData, action);
 
-    itTransitionsTo(result, states.ONGOING);
+    itTransitionsTo(result, 'Application.Ongoing');
     itSendsThisMessage(result, VALIDATION_SUCCESS);
   });
 });
 
 describe('validating an invalid commitment', () => {
   const scenario = scenarios.receivingTheirInvalidCommitment;
-  const sharedData = scenario.storage;
 
-  describe(whenIn(states.ONGOING), () => {
-    const state = scenario.states.ongoing;
-    const action = scenario.actions.receiveTheirInvalidCommitment;
+  describeScenarioStep(scenario.ongoing, () => {
+    const { state, sharedData, action } = scenario.ongoing;
+
     const result = applicationReducer(state, sharedData, action);
 
-    itTransitionsTo(result, states.ONGOING);
+    itTransitionsTo(result, 'Application.Ongoing');
     itSendsThisMessage(result, VALIDATION_FAILURE);
   });
 });
 
 describe('receiving a close request', () => {
   const scenario = scenarios.receivingACloseRequest;
-  const sharedData = scenario.storage;
 
-  describe(whenIn(states.ONGOING), () => {
-    const state = scenario.states.ongoing;
-    const action = scenario.actions.concludeRequested;
+  describeScenarioStep(scenario.ongoing, () => {
+    const { state, sharedData, action } = scenario.ongoing;
+
     const result = applicationReducer(state, sharedData, action);
 
-    itTransitionsTo(result, states.SUCCESS);
+    itTransitionsTo(result, 'Application.Success');
   });
 });
 
 function itTransitionsTo(
   result: ProtocolStateWithSharedData<states.ApplicationState>,
-  type: string,
+  type: states.ApplicationStateType,
 ) {
   it(`transitions to ${type}`, () => {
     expect(result.protocolState.type).toEqual(type);

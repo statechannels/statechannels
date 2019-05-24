@@ -2,6 +2,18 @@ import { WalletAction } from '../../actions';
 import { WithdrawalAction, isWithdrawalAction } from '../withdrawing/actions';
 import { IndirectDefundingAction, isIndirectDefundingAction } from '../indirect-defunding/actions';
 
+// -------
+// Actions
+// -------
+
+// -------
+// Constructors
+// -------
+
+// -------
+// Unions and Guards
+// -------
+
 // TODO: Replace once ledger defunding actions are defined
 export type DefundingAction = WithdrawalAction | IndirectDefundingAction;
 

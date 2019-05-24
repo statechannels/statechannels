@@ -3,6 +3,7 @@ import { withdrawalReducer as reducer, initialize } from '../reducer';
 import * as states from '../states';
 import * as TransactionGenerator from '../../../../utils/transaction-generator';
 import { SharedData } from '../../../state';
+import { describeScenarioStep } from '../../../__tests__/helpers';
 
 // Mocks
 const mockTransaction = { to: '0xabc' };
@@ -20,7 +21,10 @@ const itTransitionsToFailure = (
     expect(result.protocolState).toMatchObject(failure);
   });
 };
-const itTransitionsTo = (result: { protocolState: states.WithdrawalState }, type: string) => {
+const itTransitionsTo = (
+  result: { protocolState: states.WithdrawalState },
+  type: states.WithdrawalStateType,
+) => {
   it(`transitions to ${type}`, () => {
     expect(result.protocolState.type).toEqual(type);
   });
@@ -36,7 +40,7 @@ const itSendsConcludeAndWithdrawTransaction = (result: { sharedData: SharedData 
 };
 
 // Scenario tests
-describe('happy-path scenario', () => {
+describe('HAPPY PATH', () => {
   const scenario = scenarios.happyPath;
   const { sharedData } = scenario;
 
@@ -44,42 +48,38 @@ describe('happy-path scenario', () => {
     const { processId, withdrawalAmount, channelId } = scenario;
     const result = initialize(withdrawalAmount, channelId, processId, sharedData);
 
-    itTransitionsTo(result, states.WAIT_FOR_APPROVAL);
+    itTransitionsTo(result, 'Withdrawing.WaitforApproval');
   });
 
-  describe(`when in ${states.WAIT_FOR_APPROVAL}`, () => {
-    const state = scenario.waitForApproval;
-    const action = scenario.approved;
+  describeScenarioStep(scenario.waitForApproval, () => {
+    const { state, action } = scenario.waitForApproval;
     const result = reducer(state, sharedData, action);
 
-    itTransitionsTo(result, states.WAIT_FOR_TRANSACTION);
+    itTransitionsTo(result, 'Withdrawing.WaitForTransaction');
     itSendsConcludeAndWithdrawTransaction(result);
   });
 
-  describe(`when in ${states.WAIT_FOR_TRANSACTION}`, () => {
-    const state = scenario.waitForTransaction;
-    const action = scenario.transactionConfirmed;
+  describeScenarioStep(scenario.waitForTransaction, () => {
+    const { state, action } = scenario.waitForTransaction;
     const result = reducer(state, sharedData, action);
 
-    itTransitionsTo(result, states.WAIT_FOR_ACKNOWLEDGEMENT);
+    itTransitionsTo(result, 'Withdrawing.WaitForAcknowledgement');
   });
 
-  describe(`when in ${states.WAIT_FOR_ACKNOWLEDGEMENT}`, () => {
-    const state = scenario.waitForAcknowledgement;
-    const action = scenario.successAcknowledged;
+  describeScenarioStep(scenario.waitForAcknowledgement, () => {
+    const { state, action } = scenario.waitForAcknowledgement;
     const result = reducer(state, sharedData, action);
 
-    itTransitionsTo(result, states.SUCCESS);
+    itTransitionsTo(result, 'Withdrawing.Success');
   });
 });
 
-describe('withdrawal rejected scenario', () => {
+describe('WITHDRAWAL REJECTED', () => {
   const scenario = scenarios.withdrawalRejected;
   const { sharedData } = scenario;
 
-  describe(`when in ${states.WAIT_FOR_APPROVAL}`, () => {
-    const state = scenario.waitForApproval;
-    const action = scenario.rejected;
+  describeScenarioStep(scenario.waitForApproval, () => {
+    const { state, action } = scenario.waitForApproval;
     const result = reducer(state, sharedData, action);
 
     itTransitionsToFailure(result, scenario.failure);
@@ -90,15 +90,14 @@ describe('transaction failed scenario', () => {
   const scenario = scenarios.failedTransaction;
   const { sharedData } = scenario;
 
-  describe(`when in ${states.WAIT_FOR_TRANSACTION}`, () => {
-    const state = scenario.waitForTransaction;
-    const action = scenario.transactionFailed;
+  describeScenarioStep(scenario.waitForTransaction, () => {
+    const { state, action } = scenario.waitForTransaction;
     const result = reducer(state, sharedData, action);
     itTransitionsToFailure(result, scenario.failure);
   });
 });
 
-describe('channel not closed scenario', () => {
+describe('CHANNEL NOT CLOSED', () => {
   const scenario = scenarios.channelNotClosed;
   const { sharedData } = scenario;
 

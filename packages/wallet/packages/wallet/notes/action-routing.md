@@ -1,5 +1,7 @@
 # Action Routing
 
+**[Home](./index.md)**
+
 ## The Action Routing Problem
 
 If we have multiple protocols running in the wallet simultaneously, we need a way of identifying

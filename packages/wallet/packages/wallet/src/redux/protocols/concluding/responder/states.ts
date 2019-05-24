@@ -1,4 +1,4 @@
-import { Constructor } from '../../../utils';
+import { StateConstructor } from '../../../utils';
 import { DefundingState } from '../../defunding';
 export type ResponderConcludingState =
   | ResponderNonTerminalState
@@ -6,17 +6,11 @@ export type ResponderConcludingState =
   | TerminalState;
 export type ResponderConcludingStateType = ResponderConcludingState['type'];
 import { ProtocolState } from '../..';
-import { TerminalState, FailureReason } from '../state';
+import { TerminalState, FailureReason } from '../states';
 
-export type ResponderNonTerminalState =
-  | ResponderApproveConcluding
-  | ResponderDecideDefund
-  | ResponderWaitForDefund
-  | ResponderAcknowledgeFailure
-  | ResponderAcknowledgeSuccess;
-
-export type ResponderPreTerminalState = ResponderAcknowledgeSuccess | ResponderAcknowledgeFailure;
-
+// -------
+// States
+// -------
 export interface ResponderAcknowledgeSuccess {
   type: 'ConcludingResponder.AcknowledgeSuccess';
   processId: string;
@@ -63,27 +57,35 @@ export function isConcludingResponderState(
 // Constructors
 // ------------
 
-export const approveConcluding: Constructor<ResponderApproveConcluding> = p => {
-  const { processId, channelId } = p;
-  return { type: 'ConcludingResponder.ApproveConcluding', processId, channelId };
+export const approveConcluding: StateConstructor<ResponderApproveConcluding> = p => {
+  return { ...p, type: 'ConcludingResponder.ApproveConcluding' };
 };
 
-export const decideDefund: Constructor<ResponderDecideDefund> = p => {
-  const { processId, channelId } = p;
-  return { type: 'ConcludingResponder.DecideDefund', processId, channelId };
+export const decideDefund: StateConstructor<ResponderDecideDefund> = p => {
+  return { ...p, type: 'ConcludingResponder.DecideDefund' };
 };
 
-export const acknowledgeSuccess: Constructor<ResponderAcknowledgeSuccess> = p => {
-  const { processId, channelId } = p;
-  return { type: 'ConcludingResponder.AcknowledgeSuccess', processId, channelId };
+export const acknowledgeSuccess: StateConstructor<ResponderAcknowledgeSuccess> = p => {
+  return { ...p, type: 'ConcludingResponder.AcknowledgeSuccess' };
 };
 
-export const acknowledgeFailure: Constructor<ResponderAcknowledgeFailure> = p => {
-  const { processId, channelId, reason } = p;
-  return { type: 'ConcludingResponder.AcknowledgeFailure', processId, channelId, reason };
+export const acknowledgeFailure: StateConstructor<ResponderAcknowledgeFailure> = p => {
+  return { ...p, type: 'ConcludingResponder.AcknowledgeFailure' };
 };
 
-export const waitForDefund: Constructor<ResponderWaitForDefund> = p => {
-  const { processId, channelId, defundingState } = p;
-  return { type: 'ConcludingResponder.WaitForDefund', processId, channelId, defundingState };
+export const waitForDefund: StateConstructor<ResponderWaitForDefund> = p => {
+  return { ...p, type: 'ConcludingResponder.WaitForDefund' };
 };
+
+// -------
+// Unions and Guards
+// -------
+
+export type ResponderNonTerminalState =
+  | ResponderApproveConcluding
+  | ResponderDecideDefund
+  | ResponderWaitForDefund
+  | ResponderAcknowledgeFailure
+  | ResponderAcknowledgeSuccess;
+
+export type ResponderPreTerminalState = ResponderAcknowledgeSuccess | ResponderAcknowledgeFailure;

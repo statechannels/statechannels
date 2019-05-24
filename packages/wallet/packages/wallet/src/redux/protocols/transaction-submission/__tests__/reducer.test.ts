@@ -1,41 +1,39 @@
 import * as scenarios from './scenarios';
 import { transactionReducer as reducer, initialize, ReturnVal } from '../reducer';
 import { TransactionRequest } from 'ethers/providers';
+import * as states from '../states';
 
 describe('happy-path scenario', () => {
   const scenario = scenarios.happyPath;
   const storage = scenario.sharedData;
 
   describe('when initializing', () => {
-    const { transaction, processId } = scenario;
-    const result = initialize(transaction, processId, storage);
+    const { transaction, processId, channelId } = scenario;
+    const result = initialize(transaction, processId, channelId, storage);
 
-    itTransitionsTo(result, 'WaitForSend');
+    itTransitionsTo(result, 'TransactionSubmission.WaitForSend');
     itQueuesATransaction(result, transaction, processId);
   });
 
   describe('when in WaitForSend', () => {
-    const state = scenario.waitForSend;
-    const action = scenario.sent;
+    const { state, action } = scenario.waitForSend;
     const result = reducer(state, storage, action);
 
-    itTransitionsTo(result, 'WaitForSubmission');
+    itTransitionsTo(result, 'TransactionSubmission.WaitForSubmission');
   });
 
   describe('when in WaitForSubmission', () => {
-    const state = scenario.waitForSubmission;
-    const action = scenario.submitted;
+    const { state, action } = scenario.waitForSubmission;
     const result = reducer(state, storage, action);
 
-    itTransitionsTo(result, 'WaitForConfirmation');
+    itTransitionsTo(result, 'TransactionSubmission.WaitForConfirmation');
   });
 
   describe('when in WaitForConfirmation', () => {
-    const state = scenario.waitForConfirmation;
-    const action = scenario.confirmed;
+    const { state, action } = scenario.waitForConfirmation;
     const result = reducer(state, storage, action);
 
-    itTransitionsTo(result, 'Success');
+    itTransitionsTo(result, 'TransactionSubmission.Success');
   });
 });
 
@@ -44,20 +42,18 @@ describe('retry-and-approve scenario', () => {
   const storage = scenario.sharedData;
 
   describe('when in WaitForSubmission', () => {
-    const state = scenario.waitForSubmission;
-    const action = scenario.submissionFailed;
+    const { state, action } = scenario.waitForSubmission;
     const result = reducer(state, storage, action);
 
-    itTransitionsTo(result, 'ApproveRetry');
+    itTransitionsTo(result, 'TransactionSubmission.ApproveRetry');
   });
 
   describe('when in ApproveRetry', () => {
-    const state = scenario.approveRetry;
-    const action = scenario.retryApproved;
+    const { state, action } = scenario.approveRetry;
     const result = reducer(state, storage, action);
     const { transaction, processId } = scenario;
 
-    itTransitionsTo(result, 'WaitForSend');
+    itTransitionsTo(result, 'TransactionSubmission.WaitForSend');
     itQueuesATransaction(result, transaction, processId);
 
     // it increases the retry count
@@ -69,19 +65,17 @@ describe('retry-and-deny scenario', () => {
   const storage = scenario.sharedData;
 
   describe('when in WaitForSubmission', () => {
-    const state = scenario.waitForSubmission;
-    const action = scenario.submissionFailed;
+    const { state, action } = scenario.waitForSubmission;
     const result = reducer(state, storage, action);
 
-    itTransitionsTo(result, 'ApproveRetry');
+    itTransitionsTo(result, 'TransactionSubmission.ApproveRetry');
   });
 
   describe('when in ApproveRetry', () => {
-    const state = scenario.approveRetry;
-    const action = scenario.retryDenied;
+    const { state, action } = scenario.approveRetry;
     const result = reducer(state, storage, action);
 
-    itTransitionsTo(result, 'Failure');
+    itTransitionsTo(result, 'TransactionSubmission.Failure');
     // it sets the failure reason to ...
   });
 });
@@ -91,16 +85,15 @@ describe('transaction-failed scenario', () => {
   const storage = scenario.sharedData;
 
   describe('when in ApproveRetry', () => {
-    const state = scenario.waitForConfirmation;
-    const action = scenario.failed;
+    const { state, action } = scenario.waitForConfirmation;
     const result = reducer(state, storage, action);
 
-    itTransitionsTo(result, 'Failure');
+    itTransitionsTo(result, 'TransactionSubmission.Failure');
     // it sets the failure reason to ...
   });
 });
 
-function itTransitionsTo(result: ReturnVal, type: string) {
+function itTransitionsTo(result: ReturnVal, type: states.TransactionSubmissionStateType) {
   it(`transitions to ${type}`, () => {
     expect(result.state.type).toEqual(type);
   });

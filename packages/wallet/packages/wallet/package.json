@@ -21,8 +21,8 @@
     "test:contracts": "npx ganache-then-jest -c ./config/jest/jest.contracts.config.js --runInBand",
     "prettier:check": "npx prettier --check 'src/**/*.{ts,tsx}'",
     "prettier:write": "npx prettier --write 'src/**/*.{ts,tsx}'",
-    "deployContracts": "npx deploy-contracts",
-    "ganache:start": "npx start-ganache",
+    "deployContracts": "NODE_ENV=development npx deploy-contracts",
+    "ganache:start": "NODE_ENV=development npx start-ganache",
     "postinstall": "rm -f node_modules/web3/index.d.ts",
     "storybook": "start-storybook -p 9001 -c .storybook",
     "clearContracts": "rm -rf ./build/contracts"

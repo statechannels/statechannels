@@ -1,48 +1,49 @@
-import { Constructor } from '../../utils';
+import { StateConstructor } from '../../utils';
 import { TransactionRequest } from 'ethers/providers';
+import { ProtocolState } from '..';
 
-export type TransactionSubmissionState = NonTerminalTransactionSubmissionState | Success | Failure;
-
-export type NonTerminalTransactionSubmissionState =
-  | WaitForSend
-  | WaitForSubmission
-  | WaitForConfirmation
-  | ApproveRetry;
+// -------
+// States
+// -------
 
 export type FailureReason = 'TransactionFailed' | 'UserDeclinedRetry';
 
 export interface WaitForSend {
-  type: 'WaitForSend';
+  type: 'TransactionSubmission.WaitForSend';
   transaction: TransactionRequest;
   processId: string;
+  channelId: string;
 }
 
 export interface WaitForSubmission {
-  type: 'WaitForSubmission';
+  type: 'TransactionSubmission.WaitForSubmission';
   transaction: TransactionRequest;
   processId: string;
+  channelId: string;
 }
 
 export interface WaitForConfirmation {
-  type: 'WaitForConfirmation';
+  type: 'TransactionSubmission.WaitForConfirmation';
   transaction: TransactionRequest;
   transactionHash: string;
   processId: string;
+  channelId: string;
 }
 
 export interface ApproveRetry {
-  type: 'ApproveRetry';
+  type: 'TransactionSubmission.ApproveRetry';
   transaction: TransactionRequest;
   processId: string;
+  channelId: string;
 }
 
 export interface Failure {
-  type: 'Failure';
+  type: 'TransactionSubmission.Failure';
   reason: FailureReason;
 }
 
 export interface Success {
-  type: 'Success';
+  type: 'TransactionSubmission.Success';
 }
 
 // -------
@@ -50,45 +51,70 @@ export interface Success {
 // -------
 
 export function isTerminal(state: TransactionSubmissionState): state is Failure | Success {
-  return state.type === 'Failure' || state.type === 'Success';
+  return (
+    state.type === 'TransactionSubmission.Failure' || state.type === 'TransactionSubmission.Success'
+  );
 }
 
 export function isSuccess(state: TransactionSubmissionState): state is Success {
-  return state.type === 'Success';
+  return state.type === 'TransactionSubmission.Success';
 }
 
 export function isFailure(state: TransactionSubmissionState): state is Failure {
-  return state.type === 'Failure';
+  return state.type === 'TransactionSubmission.Failure';
 }
 
 // ------------
 // Constructors
 // ------------
 
-export const waitForSend: Constructor<WaitForSend> = p => {
-  const { transaction, processId } = p;
-  return { type: 'WaitForSend', transaction, processId };
+export const waitForSend: StateConstructor<WaitForSend> = p => {
+  return { ...p, type: 'TransactionSubmission.WaitForSend' };
 };
 
-export const waitForSubmission: Constructor<WaitForSubmission> = p => {
-  const { transaction, processId } = p;
-  return { type: 'WaitForSubmission', transaction, processId };
+export const waitForSubmission: StateConstructor<WaitForSubmission> = p => {
+  return { ...p, type: 'TransactionSubmission.WaitForSubmission' };
 };
 
-export const approveRetry: Constructor<ApproveRetry> = p => {
-  const { transaction, processId } = p;
-  return { type: 'ApproveRetry', transaction, processId };
+export const approveRetry: StateConstructor<ApproveRetry> = p => {
+  return { ...p, type: 'TransactionSubmission.ApproveRetry' };
 };
 
-export const waitForConfirmation: Constructor<WaitForConfirmation> = p => {
-  const { transaction, transactionHash, processId } = p;
-  return { type: 'WaitForConfirmation', transaction, transactionHash, processId };
+export const waitForConfirmation: StateConstructor<WaitForConfirmation> = p => {
+  return {
+    ...p,
+    type: 'TransactionSubmission.WaitForConfirmation',
+  };
 };
 
-export function success(): Success {
-  return { type: 'Success' };
+export function success({}): Success {
+  return { type: 'TransactionSubmission.Success' };
 }
 
 export function failure(reason: FailureReason): Failure {
-  return { type: 'Failure', reason };
+  return { type: 'TransactionSubmission.Failure', reason };
+}
+
+// -------
+// Unions and Guards
+// -------
+
+export type TransactionSubmissionState = NonTerminalTransactionSubmissionState | Success | Failure;
+export type TransactionSubmissionStateType = TransactionSubmissionState['type'];
+
+export type NonTerminalTransactionSubmissionState =
+  | WaitForSend
+  | WaitForSubmission
+  | WaitForConfirmation
+  | ApproveRetry;
+
+export function isTransactionSubmissionState(
+  state: ProtocolState,
+): state is TransactionSubmissionState {
+  return (
+    state.type === 'TransactionSubmission.WaitForSend' ||
+    state.type === 'TransactionSubmission.WaitForSubmission' ||
+    state.type === 'TransactionSubmission.WaitForConfirmation' ||
+    state.type === 'TransactionSubmission.ApproveRetry'
+  );
 }

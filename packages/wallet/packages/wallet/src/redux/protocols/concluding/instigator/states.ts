@@ -1,4 +1,4 @@
-import { Constructor } from '../../../utils';
+import { StateConstructor } from '../../../utils';
 import { DefundingState } from '../../defunding';
 export type InstigatorConcludingState =
   | InstigatorNonTerminalState
@@ -6,18 +6,11 @@ export type InstigatorConcludingState =
   | TerminalState;
 export type InstigatorConcludingStateType = InstigatorConcludingState['type'];
 import { ProtocolState } from '../..';
-import { FailureReason, TerminalState } from '../state';
+import { FailureReason, TerminalState } from '../states';
 
-export type InstigatorNonTerminalState =
-  | ApproveConcluding
-  | WaitForOpponentConclude
-  | AcknowledgeConcludeReceived
-  | AcknowledgeFailure
-  | AcknowledgeSuccess
-  | WaitForDefund;
-
-export type InstigatorPreTerminalState = AcknowledgeSuccess | AcknowledgeFailure;
-
+// -------
+// States
+// -------
 export interface AcknowledgeSuccess {
   type: 'ConcludingInstigator.AcknowledgeSuccess';
   processId: string;
@@ -54,6 +47,49 @@ export interface WaitForDefund {
   defundingState: DefundingState;
 }
 
+// ------------
+// Constructors
+// ------------
+
+export const instigatorApproveConcluding: StateConstructor<ApproveConcluding> = p => {
+  return { ...p, type: 'ConcludingInstigator.ApproveConcluding' };
+};
+
+export const instigatorWaitForOpponentConclude: StateConstructor<WaitForOpponentConclude> = p => {
+  return { ...p, type: 'ConcludingInstigator.WaitForOpponentConclude' };
+};
+
+export const instigatorAcknowledgeConcludeReceived: StateConstructor<
+  AcknowledgeConcludeReceived
+> = p => {
+  return { ...p, type: 'ConcludingInstigator.AcknowledgeConcludeReceived' };
+};
+
+export const instigatorAcknowledgeSuccess: StateConstructor<AcknowledgeSuccess> = p => {
+  return { ...p, type: 'ConcludingInstigator.AcknowledgeSuccess' };
+};
+
+export const instigatorAcknowledgeFailure: StateConstructor<AcknowledgeFailure> = p => {
+  return { ...p, type: 'ConcludingInstigator.AcknowledgeFailure' };
+};
+
+export const instigatorWaitForDefund: StateConstructor<WaitForDefund> = p => {
+  return { ...p, type: 'ConcludingInstigator.WaitForDefund' };
+};
+
+// -------
+// Unions and Guards
+// -------
+export type InstigatorNonTerminalState =
+  | ApproveConcluding
+  | WaitForOpponentConclude
+  | AcknowledgeConcludeReceived
+  | AcknowledgeFailure
+  | AcknowledgeSuccess
+  | WaitForDefund;
+
+export type InstigatorPreTerminalState = AcknowledgeSuccess | AcknowledgeFailure;
+
 export function isConcludingInstigatorState(
   state: ProtocolState,
 ): state is InstigatorConcludingState {
@@ -66,39 +102,3 @@ export function isConcludingInstigatorState(
     state.type === 'ConcludingInstigator.WaitForDefund'
   );
 }
-
-// ------------
-// Constructors
-// ------------
-
-export const instigatorApproveConcluding: Constructor<ApproveConcluding> = p => {
-  const { processId, channelId } = p;
-  return { type: 'ConcludingInstigator.ApproveConcluding', processId, channelId };
-};
-
-export const instigatorWaitForOpponentConclude: Constructor<WaitForOpponentConclude> = p => {
-  const { processId, channelId } = p;
-  return { type: 'ConcludingInstigator.WaitForOpponentConclude', processId, channelId };
-};
-
-export const instigatorAcknowledgeConcludeReceived: Constructor<
-  AcknowledgeConcludeReceived
-> = p => {
-  const { processId, channelId } = p;
-  return { type: 'ConcludingInstigator.AcknowledgeConcludeReceived', processId, channelId };
-};
-
-export const instigatorAcknowledgeSuccess: Constructor<AcknowledgeSuccess> = p => {
-  const { processId, channelId } = p;
-  return { type: 'ConcludingInstigator.AcknowledgeSuccess', processId, channelId };
-};
-
-export const instigatorAcknowledgeFailure: Constructor<AcknowledgeFailure> = p => {
-  const { processId, channelId, reason } = p;
-  return { type: 'ConcludingInstigator.AcknowledgeFailure', processId, channelId, reason };
-};
-
-export const instigatorWaitForDefund: Constructor<WaitForDefund> = p => {
-  const { processId, channelId, defundingState } = p;
-  return { type: 'ConcludingInstigator.WaitForDefund', processId, channelId, defundingState };
-};

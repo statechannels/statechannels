@@ -12,19 +12,23 @@ linkStyle default interpolate basis
     ST((Start))-->NSD(NotSafeToDeposit)
     NSD-->|FUNDING_RECEIVED|WFDT(WaitForDepositTransaction)
     ST-->WFDT
-    WFDT-->|TRANSACTION_SUCCESS|WFFCPF(WaitForFundingConfirmationAndPostFund)
+    WFDT-->|TransactionSubmission succeeded|WFFCPF(WaitForFundingConfirmationAndPostFund)
     WFDT-->|FUNDING_RECEIVED|WFFCPF
     WFDT-->|COMMITMENT_RECEIVED|WFFCPF
-    WFDT-->|TRANSACTION_FAILURE|F((Failure))
+    WFDT-->|TransactionSubmission failed|F((Failure))
     WFFCPF-->|FUNDING_RECEIVED|WFFCPF
     WFFCPF-->|COMMITMENT_RECEIVED|WFFCPF
     WFFCPF-->|FUNDING_RECEIVED + COMMITMENT_RECEIVED|CF((ChannelFunded))
     ST-->WFFCPF
 
-    style ST  fill:#efdd20
-    style CF fill:#58ef21
-    style F  fill:#f45941
-
+  classDef logic fill:#efdd20;
+  classDef Success fill:#58ef21;
+  classDef Failure fill:#f45941;
+  classDef WaitForChildProtocol stroke:#333,stroke-width:4px,color:#ffff,fill:#333;
+  class ST logic;
+  class CF Success;
+  class F Failure;
+  class WFDT WaitForChildProtocol;
 ```
 
 ## Not covered by protocol for now

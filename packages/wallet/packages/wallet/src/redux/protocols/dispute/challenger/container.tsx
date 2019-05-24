@@ -9,15 +9,16 @@ import { TransactionSubmission } from '../../transaction-submission';
 import Acknowledge from '../../shared-components/acknowledge';
 import WaitForResponseOrTimeout from './components/wait-for-response-or-timeout';
 import { Defunding } from '../../defunding/container';
+import { ActionDispatcher } from '../../../utils';
 
 interface Props {
   state: NonTerminalChallengerState;
-  approve: (processId: string) => void;
-  deny: (processId: string) => void;
-  failureAcknowledged: (processId: string) => void;
-  responseAcknowledged: (processId: string) => void;
-  acknowledged: (processId: string) => void;
-  defundChosen: (processId: string) => void;
+  approve: ActionDispatcher<actions.ChallengeApproved>;
+  deny: ActionDispatcher<actions.ChallengeDenied>;
+  failureAcknowledged: ActionDispatcher<actions.ChallengeFailureAcknowledged>;
+  responseAcknowledged: ActionDispatcher<actions.ChallengeResponseAcknowledged>;
+  acknowledged: ActionDispatcher<actions.ChallengeResponseAcknowledged>;
+  defundChosen: ActionDispatcher<actions.DefundChosen>;
 }
 
 class ChallengerContainer extends PureComponent<Props> {
@@ -34,7 +35,12 @@ class ChallengerContainer extends PureComponent<Props> {
     const processId = state.processId;
     switch (state.type) {
       case 'Challenging.ApproveChallenge':
-        return <ApproveChallenge deny={() => deny(processId)} approve={() => approve(processId)} />;
+        return (
+          <ApproveChallenge
+            deny={() => deny({ processId })}
+            approve={() => approve({ processId })}
+          />
+        );
       case 'Challenging.WaitForTransaction':
         return (
           <TransactionSubmission transactionName="challenge" state={state.transactionSubmission} />
@@ -47,7 +53,7 @@ class ChallengerContainer extends PureComponent<Props> {
           <Acknowledge
             title="Opponent responded!"
             description="Your opponent responded to your challenge. You can now continue with your application."
-            acknowledge={() => responseAcknowledged(processId)}
+            acknowledge={() => responseAcknowledged({ processId })}
           />
         );
       case 'Challenging.AcknowledgeTimeout':
@@ -55,7 +61,7 @@ class ChallengerContainer extends PureComponent<Props> {
           <Acknowledge
             title="Challenge timed out!"
             description="The challenge timed out. You can now reclaim your funds."
-            acknowledge={() => defundChosen(processId)}
+            acknowledge={() => defundChosen({ processId })}
           />
         );
       case 'Challenging.AcknowledgeFailure':
@@ -65,7 +71,7 @@ class ChallengerContainer extends PureComponent<Props> {
           <Acknowledge
             title="Challenge not possible"
             description={description}
-            acknowledge={() => failureAcknowledged(processId)}
+            acknowledge={() => failureAcknowledged({ processId })}
           />
         );
       case 'Challenging.WaitForDefund':
@@ -75,7 +81,7 @@ class ChallengerContainer extends PureComponent<Props> {
           <Acknowledge
             title="Defunding failed!"
             description="The channel was closed but not defunded."
-            acknowledge={() => acknowledged(processId)}
+            acknowledge={() => acknowledged({ processId })}
           />
         );
       case 'Challenging.AcknowledgeSuccess':
@@ -83,7 +89,7 @@ class ChallengerContainer extends PureComponent<Props> {
           <Acknowledge
             title="Success!"
             description="The channel was closed and defunded."
-            acknowledge={() => acknowledged(processId)}
+            acknowledge={() => acknowledged({ processId })}
           />
         );
       default:

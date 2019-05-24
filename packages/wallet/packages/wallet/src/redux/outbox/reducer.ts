@@ -9,7 +9,7 @@ export function clearOutbox(state: OutboxState, action: actions.WalletAction): O
   if (action.type === actions.DISPLAY_MESSAGE_SENT) {
     nextOutbox.displayOutbox = nextOutbox.displayOutbox.slice(1);
   }
-  if (action.type === actions.TRANSACTION_SENT) {
+  if (action.type === 'WALLET.TRANSACTION_SUBMISSION.TRANSACTION_SENT') {
     // TODO: Should this be a channel message?
     nextOutbox.transactionOutbox = nextOutbox.transactionOutbox.slice(1);
   }

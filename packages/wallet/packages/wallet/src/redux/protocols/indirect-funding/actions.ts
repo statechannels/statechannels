@@ -3,6 +3,18 @@ import * as playerB from './player-b/actions';
 import { CommonAction, WalletAction, isCommonAction } from '../../actions';
 import { isDirectFundingAction } from '../direct-funding/actions';
 
+// -------
+// Actions
+// -------
+
+// --------
+// Constructors
+// --------
+
+// --------
+// Unions and Guards
+// --------
+
 export { playerA, playerB };
 export type ProcessAction = playerA.Action | playerB.Action;
 export type Action = ProcessAction | CommonAction;

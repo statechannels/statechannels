@@ -12,14 +12,15 @@ import ChooseStrategy from '../../../../components/funding/choose-strategy';
 import WaitForOtherPlayer from '../../../../components/wait-for-other-player';
 import AcknowledgeX from '../../../../components/acknowledge-x';
 import { IndirectFunding } from '../../indirect-funding/container';
+import { ActionDispatcher } from '../../../utils';
 
 interface Props {
   state: states.OngoingFundingState;
-  strategyChosen: (processId: string, strategy: FundingStrategy) => void;
-  strategyApproved: (processId: string, strategy: FundingStrategy) => void;
-  strategyRejected: (processId: string) => void;
-  fundingSuccessAcknowledged: (processId: string) => void;
-  cancelled: (processId: string, by: PlayerIndex) => void;
+  strategyChosen: ActionDispatcher<actions.StrategyChosen>;
+  strategyApproved: (processId: string) => void;
+  strategyRejected: ActionDispatcher<actions.StrategyRejected>;
+  fundingSuccessAcknowledged: ActionDispatcher<actions.FundingSuccessAcknowledged>;
+  cancelled: ActionDispatcher<actions.Cancelled>;
 }
 
 class FundingContainer extends PureComponent<Props> {
@@ -28,22 +29,22 @@ class FundingContainer extends PureComponent<Props> {
     const { processId } = state;
 
     switch (state.type) {
-      case states.WAIT_FOR_STRATEGY_CHOICE:
+      case 'Funding.PlayerA.WaitForStrategyChoice':
         return (
           <ChooseStrategy
-            strategyChosen={(strategy: FundingStrategy) => strategyChosen(processId, strategy)}
-            cancelled={() => cancelled(processId, PlayerIndex.B)}
+            strategyChosen={(strategy: FundingStrategy) => strategyChosen({ processId, strategy })}
+            cancelled={() => cancelled({ processId, by: PlayerIndex.B })}
           />
         );
-      case states.WAIT_FOR_STRATEGY_RESPONSE:
+      case 'Funding.PlayerA.WaitForStrategyResponse':
         return <WaitForOtherPlayer name={'strategy response'} />;
-      case states.WAIT_FOR_FUNDING:
+      case 'Funding.PlayerA.WaitForFunding':
         return <IndirectFunding state={state.fundingState} />;
-      case states.WAIT_FOR_SUCCESS_CONFIRMATION:
+      case 'Funding.PlayerA.WaitForSuccessConfirmation':
         return (
           <AcknowledgeX
             title="Channel funded!"
-            action={() => fundingSuccessAcknowledged(processId)}
+            action={() => fundingSuccessAcknowledged({ processId })}
             description="You have successfully funded your channel"
             actionTitle="Ok!"
           />

@@ -17,7 +17,7 @@ export function* challengeResponseInitiator() {
     const ourCommitment = commitment.turnNum % numParticipants !== channelState.ourIndex;
 
     if (ourCommitment) {
-      yield put(challengeCreated(commitment, finalizedAt, channelId));
+      yield put(challengeCreated({ commitment, expiresAt: finalizedAt, channelId }));
     }
   }
 }

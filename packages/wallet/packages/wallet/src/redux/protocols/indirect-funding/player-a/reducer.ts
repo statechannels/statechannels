@@ -1,4 +1,4 @@
-import * as states from './state';
+import * as states from './states';
 
 import * as actions from '../../../actions';
 
@@ -11,7 +11,7 @@ import {
   signAndStore,
   registerChannelToMonitor,
 } from '../../../state';
-import { IndirectFundingState, failure, success } from '../state';
+import { IndirectFundingState, failure, success } from '../states';
 import { ProtocolStateWithSharedData } from '../..';
 import { bytesFromAppAttributes } from 'fmg-nitro-adjudicator';
 import { CommitmentType, Commitment, getChannelId, nextSetupCommitment } from '../../../../domain';
@@ -21,13 +21,11 @@ import { getChannel, theirAddress } from '../../../channel-store';
 import { sendCommitmentReceived } from '../../../../communication';
 import { DirectFundingAction } from '../../direct-funding';
 import { directFundingRequested } from '../../direct-funding/actions';
+import { isSuccess, isFailure, isTerminal } from '../../direct-funding/states';
 import {
-  initialDirectFundingState,
-  isSuccess,
-  isFailure,
-  isTerminal,
-} from '../../direct-funding/state';
-import { directFundingStateReducer } from '../../direct-funding/reducer';
+  directFundingStateReducer,
+  initialize as initializeDirectFunding,
+} from '../../direct-funding/reducer';
 import { addHex } from '../../../../utils/hex-utils';
 import { UpdateType } from 'fmg-nitro-adjudicator/lib/consensus-app';
 import { proposeNewConsensus } from '../../../../domain/two-player-consensus-game';
@@ -88,13 +86,13 @@ export function playerAReducer(
   action: actions.indirectFunding.Action,
 ): ReturnVal {
   switch (protocolState.type) {
-    case 'AWaitForPreFundSetup1':
+    case 'IndirectFunding.AWaitForPreFundSetup1':
       return handleWaitForPreFundSetup(protocolState, sharedData, action);
-    case 'AWaitForDirectFunding':
+    case 'IndirectFunding.AWaitForDirectFunding':
       return handleWaitForDirectFunding(protocolState, sharedData, action);
-    case 'AWaitForLedgerUpdate1':
+    case 'IndirectFunding.AWaitForLedgerUpdate1':
       return handleWaitForLedgerUpdate(protocolState, sharedData, action);
-    case 'AWaitForPostFundSetup1':
+    case 'IndirectFunding.AWaitForPostFundSetup1':
       return handleWaitForPostFundSetup(protocolState, sharedData, action);
     default:
       return unreachable(protocolState);
@@ -106,7 +104,7 @@ function handleWaitForPostFundSetup(
   sharedData: SharedData,
   action: IDFAction | DirectFundingAction,
 ): ReturnVal {
-  if (action.type !== actions.COMMITMENT_RECEIVED) {
+  if (action.type !== 'WALLET.COMMON.COMMITMENT_RECEIVED') {
     throw new Error(`Incorrect action ${action.type}`);
   }
   const checkResult = checkAndStore(sharedData, action.signedCommitment);
@@ -122,7 +120,7 @@ function handleWaitForPostFundSetup(
   };
 
   sharedData.fundingState[protocolState.channelId] = fundingState;
-  const newProtocolState = success();
+  const newProtocolState = success({});
   const newReturnVal = { protocolState: newProtocolState, sharedData };
   return newReturnVal;
 }
@@ -139,7 +137,7 @@ function handleWaitForLedgerUpdate(
     );
     return unchangedState;
   }
-  if (action.type !== actions.COMMITMENT_RECEIVED) {
+  if (action.type !== 'WALLET.COMMON.COMMITMENT_RECEIVED') {
     throw new Error(`Incorrect action ${action.type}`);
   }
   const checkResult = checkAndStore(sharedData, action.signedCommitment);
@@ -184,7 +182,7 @@ function handleWaitForPreFundSetup(
   sharedData: SharedData,
   action: IDFAction | DirectFundingAction,
 ): ReturnVal {
-  if (action.type !== actions.COMMITMENT_RECEIVED) {
+  if (action.type !== 'WALLET.COMMON.COMMITMENT_RECEIVED') {
     throw new Error(`Incorrect action ${action.type}`);
   }
   const addressAndPrivateKey = getAddressAndPrivateKey(sharedData, protocolState.channelId);
@@ -208,15 +206,15 @@ function handleWaitForPreFundSetup(
   const total = theirCommitment.allocation.reduce(addHex);
   const ourAmount = theirCommitment.allocation[0];
   // update the state
-  const directFundingAction = directFundingRequested(
-    protocolState.processId,
-    ledgerId,
-    '0x0',
-    total,
-    ourAmount,
-    0,
-  );
-  const directFundingState = initialDirectFundingState(directFundingAction, sharedData);
+  const directFundingAction = directFundingRequested({
+    processId: protocolState.processId,
+    channelId: ledgerId,
+    safeToDepositLevel: '0x0',
+    totalFundingRequired: total,
+    requiredDeposit: ourAmount,
+    ourIndex: 0,
+  });
+  const directFundingState = initializeDirectFunding(directFundingAction, sharedData);
   const newProtocolState = states.aWaitForDirectFunding({
     ...protocolState,
     ledgerId,
@@ -246,7 +244,7 @@ function handleWaitForDirectFunding(
     return { protocolState: newProtocolState, sharedData };
   }
   if (isFailure(newDirectFundingState)) {
-    return { protocolState: failure(), sharedData };
+    return { protocolState: failure({}), sharedData };
   }
   if (isSuccess(newDirectFundingState)) {
     const channel = getChannel(sharedData.channelStore, newProtocolState.ledgerId);

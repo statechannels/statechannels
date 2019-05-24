@@ -1,5 +1,6 @@
 import * as walletStates from '../redux/state';
 import * as scenarios from '../redux/__tests__/test-scenarios';
+import * as states from '../redux/state';
 
 const {
   channelId,
@@ -36,3 +37,16 @@ export const dummyWaitForMetaMask: walletStates.WalletState = walletStates.metaM
   ...dummyWaitForLogin,
 });
 //
+
+////////////////////////////
+// WALLET INITIALIZED //
+////////////////////////////
+
+const defaults = {
+  ...states.EMPTY_SHARED_DATA,
+  uid: 'uid',
+  processStore: {},
+  adjudicatorStore: {},
+};
+
+export const initializedState = states.initialized({ ...defaults });

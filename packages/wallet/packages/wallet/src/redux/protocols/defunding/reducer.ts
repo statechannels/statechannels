@@ -7,14 +7,13 @@ import { withdrawalReducer, initialize as withdrawalInitialize } from './../with
 import * as selectors from '../../selectors';
 import * as actions from './actions';
 import { isWithdrawalAction } from '../withdrawing/actions';
-import { SUCCESS, FAILURE } from '../withdrawing/states';
 import { unreachable } from '../../../utils/reducer-utils';
 import {
   indirectDefundingReducer,
   initialize as indirectDefundingInitialize,
 } from '../indirect-defunding/reducer';
 import { isIndirectDefundingAction } from '../indirect-defunding/actions';
-import * as indirectDefundingStates from '../indirect-defunding/state';
+import * as indirectDefundingStates from '../indirect-defunding/states';
 import { CommitmentReceived } from 'src/communication';
 
 export const initialize = (
@@ -24,7 +23,7 @@ export const initialize = (
   action?: CommitmentReceived,
 ): ProtocolStateWithSharedData<states.DefundingState> => {
   if (!helpers.channelIsClosed(channelId, sharedData)) {
-    return { protocolState: states.failure('Channel Not Closed'), sharedData };
+    return { protocolState: states.failure({ reason: 'Channel Not Closed' }), sharedData };
   }
   if (helpers.isChannelDirectlyFunded(channelId, sharedData)) {
     return createWaitForWithdrawal(sharedData, processId, channelId);
@@ -62,12 +61,12 @@ export const defundingReducer = (
   action: DefundingAction,
 ): ProtocolStateWithSharedData<states.DefundingState> => {
   switch (protocolState.type) {
-    case states.WAIT_FOR_WITHDRAWAL:
+    case 'Defunding.WaitForWithdrawal':
       return waitForWithdrawalReducer(protocolState, sharedData, action);
-    case states.WAIT_FOR_INDIRECT_DEFUNDING:
+    case 'Defunding.WaitForIndirectDefunding':
       return waitForIndirectDefundingReducer(protocolState, sharedData, action);
-    case states.FAILURE:
-    case states.SUCCESS:
+    case 'Defunding.Failure':
+    case 'Defunding.Success':
       return { protocolState, sharedData };
     default:
       return unreachable(protocolState);
@@ -88,7 +87,7 @@ const waitForIndirectDefundingReducer = (
     protocolState: updatedIndirectDefundingState,
   } = indirectDefundingReducer(protocolState.indirectDefundingState, sharedData, action);
   if (indirectDefundingStates.isTerminal(updatedIndirectDefundingState)) {
-    if (updatedIndirectDefundingState.type === SUCCESS) {
+    if (updatedIndirectDefundingState.type === 'IndirectDefunding.Success') {
       const fundingChannelId = helpers.getFundingChannelId(
         protocolState.channelId,
         updatedSharedData,
@@ -96,7 +95,7 @@ const waitForIndirectDefundingReducer = (
       return createWaitForWithdrawal(updatedSharedData, protocolState.processId, fundingChannelId);
     } else {
       return {
-        protocolState: states.failure('Ledger De-funding Failure'),
+        protocolState: states.failure({ reason: 'Ledger De-funding Failure' }),
         sharedData: updatedSharedData,
       };
     }
@@ -124,14 +123,14 @@ const waitForWithdrawalReducer = (
     sharedData,
     action,
   );
-  if (newWithdrawalState.type === SUCCESS) {
+  if (newWithdrawalState.type === 'Withdrawing.Success') {
     return {
-      protocolState: states.success(),
+      protocolState: states.success({}),
       sharedData: newSharedData,
     };
-  } else if (newWithdrawalState.type === FAILURE) {
+  } else if (newWithdrawalState.type === 'Withdrawing.Failure') {
     return {
-      protocolState: states.failure('Withdrawal Failure'),
+      protocolState: states.failure({ reason: 'Withdrawal Failure' }),
       sharedData: newSharedData,
     };
   } else {

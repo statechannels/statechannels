@@ -8,7 +8,7 @@ import {
   channelId,
 } from '../../../../domain/commitments/__tests__';
 import { bigNumberify } from 'ethers/utils/bignumber';
-import { waitForLedgerUpdate, waitForConclude } from '../state';
+import { waitForLedgerUpdate, waitForConclude } from '../states';
 import { setChannels, EMPTY_SHARED_DATA, SharedData } from '../../../state';
 import { channelFromCommitments } from '../../../channel-store/channel-state/__tests__';
 import { bsPrivateKey } from '../../../../communication/__tests__/commitments';

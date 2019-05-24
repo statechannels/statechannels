@@ -3,24 +3,24 @@ import { connect } from 'react-redux';
 import * as actions from '../../../redux/actions';
 import { unreachable } from '../../../utils/reducer-utils';
 import { FundingStep } from './components/funding-step';
-import * as directFundingStates from './state';
+import * as directFundingStates from './states';
 import { TransactionSubmission } from '../../protocols/transaction-submission/container';
-import { WalletProtocol } from '../../../communication';
+import { ActionDispatcher } from '../../utils';
 
 interface Props {
-  directFundingState: directFundingStates.DirectFundingState;
-  transactionRetryApprovedAction: (channelId: string, protocol: WalletProtocol) => void;
+  state: directFundingStates.DirectFundingState;
+  transactionRetryApprovedAction: ActionDispatcher<actions.TransactionRetryApproved>;
 }
 
 class DirectFundingContainer extends PureComponent<Props> {
   render() {
-    const { directFundingState } = this.props;
+    const { state: directFundingState } = this.props;
     switch (directFundingState.type) {
-      case directFundingStates.NOT_SAFE_TO_DEPOSIT:
-      case directFundingStates.WAIT_FOR_FUNDING_AND_POST_FUND_SETUP:
-      case directFundingStates.FUNDING_SUCCESS:
+      case 'DirectFunding.NotSafeToDeposit':
+      case 'DirectFunding.WaitForFundingAndPostFundSetup':
+      case 'DirectFunding.FundingSuccess':
         return <FundingStep directFundingState={directFundingState} />;
-      case directFundingStates.WAIT_FOR_DEPOSIT_TRANSACTION:
+      case 'DirectFunding.WaitForDepositTransaction':
         return (
           // TODO: how should we populate the transaction name?
           <TransactionSubmission
@@ -28,7 +28,7 @@ class DirectFundingContainer extends PureComponent<Props> {
             transactionName={'direct deposit'}
           />
         );
-      case directFundingStates.FUNDING_FAILURE:
+      case 'DirectFunding.FundingFailure':
         // todo: restrict the container to non-terminal states
         return <div>This shouldn't ever get shown.</div>;
       default:

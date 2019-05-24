@@ -14,7 +14,7 @@ import {
   failure,
   waitForDefund,
   acknowledgeSuccess,
-  AcknowledgeClosedButNotDefunded,
+  acknowledgeClosedButNotDefunded,
   WaitForDefund,
 } from './states';
 import { initialize as initializeDefunding, defundingReducer } from '../../defunding/reducer';
@@ -80,9 +80,9 @@ export function challengerReducer(
   }
 
   switch (action.type) {
-    case actions.CHALLENGE_APPROVED:
+    case 'WALLET.CHALLENGING.CHALLENGER.CHALLENGE_APPROVED':
       return challengeApproved(state, sharedData);
-    case actions.CHALLENGE_DENIED:
+    case 'WALLET.CHALLENGING.CHALLENGER.CHALLENGE_DENIED':
       return challengeDenied(state, sharedData);
     case RESPOND_WITH_MOVE_EVENT:
       return challengeResponseReceived(
@@ -97,13 +97,13 @@ export function challengerReducer(
       return challengeTimedOut(state, sharedData);
     case CHALLENGE_EXPIRY_SET_EVENT:
       return handleChallengeCreatedEvent(state, sharedData, action.expiryTime);
-    case actions.CHALLENGE_RESPONSE_ACKNOWLEDGED:
+    case 'WALLET.CHALLENGING.CHALLENGER.CHALLENGE_RESPONSE_ACKNOWLEDGED':
       return challengeResponseAcknowledged(state, sharedData);
-    case actions.CHALLENGE_FAILURE_ACKNOWLEDGED:
+    case 'WALLET.CHALLENGING.CHALLENGER.CHALLENGE_FAILURE_ACKNOWLEDGED':
       return challengeFailureAcknowledged(state, sharedData);
-    case actions.DEFUND_CHOSEN:
+    case 'WALLET.CHALLENGING.CHALLENGER.DEFUND_CHOSEN':
       return defundChosen(state, sharedData);
-    case actions.ACKNOWLEDGED:
+    case 'WALLET.CHALLENGING.CHALLENGER.ACKNOWLEDGED':
       return acknowledged(state, sharedData);
     default:
       return unreachable(action);
@@ -205,7 +205,7 @@ function handleDefundingAction(
   if (isDefundingSuccess(defundingState)) {
     state = acknowledgeSuccess({ ...state });
   } else if (isDefundingFailure(defundingState)) {
-    state = AcknowledgeClosedButNotDefunded(state);
+    state = acknowledgeClosedButNotDefunded(state);
   } else {
     // update the transaction state
     state = { ...state, defundingState };
@@ -244,7 +244,12 @@ function challengeApproved(state: NonTerminalCState, sharedData: SharedData): Re
     toSignature,
   );
   // initialize transaction state machine
-  const returnVal = initializeTransaction(transactionRequest, state.processId, sharedData);
+  const returnVal = initializeTransaction(
+    transactionRequest,
+    state.processId,
+    state.channelId,
+    sharedData,
+  );
   const transactionSubmission = returnVal.state;
 
   // transition to wait for transaction
@@ -312,7 +317,7 @@ function challengeResponseAcknowledged(
     return { state, sharedData };
   }
   sharedData = sendChallengeComplete(hideWallet(sharedData));
-  return { state: successOpen(), sharedData };
+  return { state: successOpen({}), sharedData };
 }
 
 function challengeFailureAcknowledged(state: NonTerminalCState, sharedData: SharedData): ReturnVal {
@@ -332,14 +337,14 @@ function defundChosen(state: NonTerminalCState, sharedData: SharedData) {
 function acknowledged(state: NonTerminalCState, sharedData: SharedData) {
   if (state.type === 'Challenging.AcknowledgeClosedButNotDefunded') {
     return {
-      state: successClosedButNotDefunded(),
+      state: successClosedButNotDefunded({}),
       sharedData: sendConcludeSuccess(hideWallet(sharedData)),
     };
     // From the point of view of the app, it is as if we have concluded
   }
   if (state.type === 'Challenging.AcknowledgeSuccess') {
     return {
-      state: successClosedAndDefunded(),
+      state: successClosedAndDefunded({}),
       sharedData: sendConcludeSuccess(hideWallet(sharedData)),
     };
     // From the point of view of the app, it is as if we have concluded

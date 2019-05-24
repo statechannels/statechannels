@@ -18,7 +18,6 @@ import {
   signAndInitialize,
   signAndStore,
 } from '../../channel-store/reducer';
-import { ADDRESS_KNOWN } from './states';
 import { Commitment } from '../../../domain';
 import { ProtocolAction } from '../../actions';
 
@@ -33,7 +32,7 @@ export function initialize(
   const { privateKey, address } = ethers.Wallet.createRandom();
   const newSharedData = queueMessage(sharedData, channelInitializationSuccess(address));
   return {
-    protocolState: states.addressKnown(address, privateKey),
+    protocolState: states.addressKnown({ address, privateKey }),
     sharedData: newSharedData,
   };
 }
@@ -50,12 +49,12 @@ export function applicationReducer(
     return { protocolState, sharedData };
   }
   switch (action.type) {
-    case actions.OPPONENT_COMMITMENT_RECEIVED:
+    case 'WALLET.APPLICATION.OPPONENT_COMMITMENT_RECEIVED':
       return opponentCommitmentReceivedReducer(protocolState, sharedData, action);
-    case actions.OWN_COMMITMENT_RECEIVED:
+    case 'WALLET.APPLICATION.OWN_COMMITMENT_RECEIVED':
       return ownCommitmentReceivedReducer(protocolState, sharedData, action);
-    case actions.CONCLUDE_REQUESTED:
-      return { sharedData, protocolState: states.success() };
+    case 'WALLET.APPLICATION.CONCLUDE_REQUESTED':
+      return { sharedData, protocolState: states.success({}) };
     default:
       return unreachable(action);
   }
@@ -126,7 +125,7 @@ const validateAndUpdate = (
   state: states.ApplicationState,
   sharedData: SharedData,
 ) => {
-  if (state.type === ADDRESS_KNOWN) {
+  if (state.type === 'Application.AddressKnown') {
     return checkAndInitialize(
       sharedData.channelStore,
       { commitment, signature },
@@ -143,7 +142,7 @@ const signAndUpdate = (
   state: states.ApplicationState,
   sharedData: SharedData,
 ) => {
-  if (state.type === ADDRESS_KNOWN) {
+  if (state.type === 'Application.AddressKnown') {
     return signAndInitialize(sharedData.channelStore, commitment, state.address, state.privateKey);
   } else {
     return signAndStore(sharedData.channelStore, commitment);

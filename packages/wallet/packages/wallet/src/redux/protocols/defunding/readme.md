@@ -19,9 +19,9 @@ linkStyle default interpolate basis
   ID-->|Yes|WP(Wait for Withdrawal)
   ID -->|No|LDP(Wait for Indirect De-funding)
   LDP-->|Indirect de-funding protocol success|WP(Wait for Withdrawal)
-  WP-->|Withdrawal protocol success|Su((success))
-  WP-->|Withdrawal protocol failure|F((failure))
-  LDP-->|Indirect de-funding protocol failure|F((failure))
+  WP-->|Withdrawal protocol success|Su((Success))
+  WP-->|Withdrawal protocol failure|F((Failure))
+  LDP-->|Indirect de-funding protocol failure|F
 
   classDef logic fill:#efdd20;
   classDef Success fill:#58ef21;

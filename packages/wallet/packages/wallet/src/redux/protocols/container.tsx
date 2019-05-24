@@ -2,7 +2,7 @@ import { PureComponent } from 'react';
 import { ProtocolState } from '.';
 import * as fundingStates from './funding/states';
 import * as DisputeStates from './dispute/state';
-import * as concludingStates from './concluding/state';
+import * as concludingStates from './concluding/states';
 import React from 'react';
 import { Funding } from './funding/container';
 import { Concluding } from './concluding/container';

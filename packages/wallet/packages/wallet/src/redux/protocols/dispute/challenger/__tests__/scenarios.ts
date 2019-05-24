@@ -14,10 +14,8 @@ import {
   challengeExpirySetEvent,
 } from '../../../../actions';
 import {
-  preSuccessState as defundingPreSuccessState,
-  successTrigger as defundingSuccessTrigger,
-  preFailureState as defundingPreFailureState,
-  failureTrigger as defundingFailureTrigger,
+  preSuccess as defundingPreSuccess,
+  preFailure as defundingPreFailure,
 } from '../../../defunding/__tests__';
 
 type Reason = states.FailureReason;
@@ -68,24 +66,23 @@ const waitForTransactionFailure = states.waitForTransaction({
 const waitForResponseOrTimeout = states.waitForResponseOrTimeout({ ...defaults, expiryTime: 0 });
 const acknowledgeTimeout = states.acknowledgeTimeout(defaults);
 const acknowledgeResponse = states.acknowledgeResponse(defaults);
-const successOpen = states.successOpen();
 const acknowledge = (reason: Reason) => states.acknowledgeFailure({ ...defaults, reason });
 const waitForDefund1 = states.waitForDefund({
   ...defaults,
-  defundingState: defundingPreSuccessState,
+  defundingState: defundingPreSuccess.state,
 });
 const waitForDefund2 = states.waitForDefund({
   ...defaults,
-  defundingState: defundingPreFailureState,
+  defundingState: defundingPreFailure.state,
 });
 const acknowledgeSuccess = states.acknowledgeSuccess({ ...defaults });
-const acknowledgeClosedButNotDefunded = states.AcknowledgeClosedButNotDefunded({ ...defaults });
+const acknowledgeClosedButNotDefunded = states.acknowledgeClosedButNotDefunded({ ...defaults });
 
 // -------
 // Actions
 // -------
-const challengeApproved = actions.challengeApproved(processId);
-const challengeDenied = actions.challengeDenied(processId);
+const challengeApproved = actions.challengeApproved({ processId });
+const challengeDenied = actions.challengeDenied({ processId });
 const challengeTimedOut = challengeExpiredEvent(processId, channelId, 1000);
 const transactionSuccessTrigger = tsScenarios.successTrigger;
 const transactionFailureTrigger = tsScenarios.failureTrigger;
@@ -95,11 +92,11 @@ const responseReceived = respondWithMoveEvent(
   signedCommitment21.commitment,
   signedCommitment21.signature,
 );
-const responseAcknowledged = actions.challengeResponseAcknowledged(processId);
-const failureAcknowledged = actions.challengeFailureAcknowledged(processId);
+const responseAcknowledged = actions.challengeResponseAcknowledged({ processId });
+const failureAcknowledged = actions.challengeFailureAcknowledged({ processId });
 const challengeExpirySet = challengeExpirySetEvent(processId, channelId, 1234);
-const defundChosen = actions.defundChosen(processId);
-const acknowledged = actions.acknowledged(processId);
+const defundChosen = actions.defundChosen({ processId });
+const acknowledged = actions.acknowledged({ processId });
 // -------
 // Scenarios
 // -------
@@ -116,16 +113,13 @@ export const opponentResponds = {
   },
   waitForResponseOrTimeout: {
     state: waitForResponseOrTimeout,
-    action1: challengeExpirySet,
+    action: challengeExpirySet,
     action2: responseReceived,
     commitment: signedCommitment21,
   },
   acknowledgeResponse: {
     state: acknowledgeResponse,
     action: responseAcknowledged,
-  },
-  successOpen: {
-    state: successOpen,
   },
 };
 
@@ -142,7 +136,7 @@ export const challengeTimesOutAndIsDefunded = {
   },
   challengerWaitForDefund: {
     state: waitForDefund1,
-    action: defundingSuccessTrigger,
+    action: defundingPreSuccess.action,
   },
   acknowledgeSuccess: {
     state: acknowledgeSuccess,
@@ -154,7 +148,7 @@ export const challengeTimesOutAndIsNotDefunded = {
   ...defaults,
   challengerWaitForDefund: {
     state: waitForDefund2,
-    action: defundingFailureTrigger,
+    action: defundingPreFailure.action,
   },
   acknowledgeClosedButNotDefunded: {
     state: acknowledgeClosedButNotDefunded,
@@ -228,8 +222,9 @@ export const transactionFails = {
 
 export const defundActionComesDuringAcknowledgeTimeout = {
   ...defaults,
-  sharedData: sharedData(ourTurn),
-  acknowledgeTimeout,
-
-  defundingSuccessTrigger,
+  acknowledgeTimeout: {
+    state: acknowledgeTimeout,
+    sharedData: sharedData(ourTurn),
+    action: defundingPreSuccess.action,
+  },
 };

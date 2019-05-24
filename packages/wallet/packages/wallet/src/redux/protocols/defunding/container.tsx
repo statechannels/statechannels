@@ -15,13 +15,13 @@ class DefundingContainer extends PureComponent<Props> {
   render() {
     const { state } = this.props;
     switch (state.type) {
-      case states.WAIT_FOR_WITHDRAWAL:
+      case 'Defunding.WaitForWithdrawal':
         return <Withdrawal state={state.withdrawalState} />;
-      case states.WAIT_FOR_INDIRECT_DEFUNDING:
+      case 'Defunding.WaitForIndirectDefunding':
         return <IndirectDefunding state={state.indirectDefundingState} />;
-      case states.FAILURE:
+      case 'Defunding.Failure':
         return <Failure name="de-funding" reason={state.reason} />;
-      case states.SUCCESS:
+      case 'Defunding.Success':
         return <Success name="de-funding" />;
     }
   }

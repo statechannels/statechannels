@@ -1,33 +1,61 @@
 import { Commitment } from '../../../domain';
 import { ProtocolAction } from '../../actions';
+import { ActionConstructor } from '../../utils';
 
-export const OWN_COMMITMENT_RECEIVED = 'WALLET.APPLICATION.OWN_COMMITMENT_RECEIVED';
-export const ownCommitmentReceived = (processId: string, commitment: Commitment) => ({
-  type: OWN_COMMITMENT_RECEIVED as typeof OWN_COMMITMENT_RECEIVED,
-  processId,
-  commitment,
-});
-export type OwnCommitmentReceived = ReturnType<typeof ownCommitmentReceived>;
+// -------
+// Actions
+// -------
+export interface OwnCommitmentReceived {
+  type: 'WALLET.APPLICATION.OWN_COMMITMENT_RECEIVED';
+  processId: string;
+  commitment: Commitment;
+}
 
-export const OPPONENT_COMMITMENT_RECEIVED = 'WALLET.APPLICATION.OPPONENT_COMMITMENT_RECEIVED';
-export const opponentCommitmentReceived = (
-  processId: string,
-  commitment: Commitment,
-  signature: string,
-) => ({
-  type: OPPONENT_COMMITMENT_RECEIVED as typeof OPPONENT_COMMITMENT_RECEIVED,
-  processId,
-  commitment,
-  signature,
-});
-export type OpponentCommitmentReceived = ReturnType<typeof opponentCommitmentReceived>;
+export interface OpponentCommitmentReceived {
+  type: 'WALLET.APPLICATION.OPPONENT_COMMITMENT_RECEIVED';
+  processId: string;
+  commitment: Commitment;
+  signature: string;
+}
+export interface ConcludeRequested {
+  type: 'WALLET.APPLICATION.CONCLUDE_REQUESTED';
+  processId: string;
+}
 
-export const CONCLUDE_REQUESTED = 'CONCLUDE_REQUESTED';
-export const concludeRequested = (processId: string) => ({
-  type: CONCLUDE_REQUESTED as typeof CONCLUDE_REQUESTED,
-  processId,
-});
-export type ConcludeRequested = ReturnType<typeof concludeRequested>;
+// -------
+// Constructors
+// -------
+
+export const ownCommitmentReceived: ActionConstructor<OwnCommitmentReceived> = p => {
+  const { processId, commitment } = p;
+  return {
+    type: 'WALLET.APPLICATION.OWN_COMMITMENT_RECEIVED',
+    processId,
+    commitment,
+  };
+};
+
+export const opponentCommitmentReceived: ActionConstructor<OpponentCommitmentReceived> = p => {
+  const { processId, commitment, signature } = p;
+  return {
+    type: 'WALLET.APPLICATION.OPPONENT_COMMITMENT_RECEIVED',
+    processId,
+    commitment,
+    signature,
+  };
+};
+
+export const concludeRequested: ActionConstructor<ConcludeRequested> = p => {
+  const { processId } = p;
+  return {
+    type: 'WALLET.APPLICATION.CONCLUDE_REQUESTED',
+    processId,
+  };
+};
+
+// -------
+// Unions and Guards
+// -------
 
 export type ApplicationAction =
   | OpponentCommitmentReceived
@@ -36,8 +64,8 @@ export type ApplicationAction =
 
 export function isApplicationAction(action: ProtocolAction): action is ApplicationAction {
   return (
-    action.type === OPPONENT_COMMITMENT_RECEIVED ||
-    action.type === OWN_COMMITMENT_RECEIVED ||
-    action.type === CONCLUDE_REQUESTED
+    action.type === 'WALLET.APPLICATION.OPPONENT_COMMITMENT_RECEIVED' ||
+    action.type === 'WALLET.APPLICATION.OWN_COMMITMENT_RECEIVED' ||
+    action.type === 'WALLET.APPLICATION.CONCLUDE_REQUESTED'
   );
 }

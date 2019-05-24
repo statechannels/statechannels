@@ -1,6 +1,5 @@
 import { ProtocolStateWithSharedData } from '..';
 import * as states from './states';
-import * as actions from './actions';
 import { WithdrawalAction } from './actions';
 import * as selectors from '../../selectors';
 import { CommitmentType } from '../../../domain';
@@ -31,7 +30,7 @@ export const initialize = (
 ): ProtocolStateWithSharedData<states.WithdrawalState> => {
   if (!channelIsClosed(channelId, sharedData)) {
     return {
-      protocolState: states.failure(states.FailureReason.ChannelNotClosed),
+      protocolState: states.failure({ reason: states.FailureReason.ChannelNotClosed }),
       sharedData,
     };
   }
@@ -47,14 +46,14 @@ export const withdrawalReducer = (
   action: WithdrawalAction,
 ): ProtocolStateWithSharedData<states.WithdrawalState> => {
   switch (protocolState.type) {
-    case states.WAIT_FOR_APPROVAL:
+    case 'Withdrawing.WaitforApproval':
       return waitForApprovalReducer(protocolState, sharedData, action);
-    case states.WAIT_FOR_TRANSACTION:
+    case 'Withdrawing.WaitForTransaction':
       return waitForTransactionReducer(protocolState, sharedData, action);
-    case states.WAIT_FOR_ACKNOWLEDGEMENT:
+    case 'Withdrawing.WaitForAcknowledgement':
       return waitForAcknowledgementReducer(protocolState, sharedData, action);
-    case states.FAILURE:
-    case states.SUCCESS:
+    case 'Withdrawing.Failure':
+    case 'Withdrawing.Success':
       return { protocolState, sharedData };
     default:
       return unreachable(protocolState);
@@ -65,8 +64,8 @@ const waitForAcknowledgementReducer = (
   sharedData: SharedData,
   action: WithdrawalAction,
 ): ProtocolStateWithSharedData<states.WithdrawalState> => {
-  if (action.type === actions.WITHDRAWAL_SUCCESS_ACKNOWLEDGED) {
-    return { protocolState: states.success(), sharedData };
+  if (action.type === 'WALLET.WITHDRAWING.WITHDRAWAL_SUCCESS_ACKNOWLEDGED') {
+    return { protocolState: states.success({}), sharedData };
   }
   return { protocolState, sharedData };
 };
@@ -99,7 +98,7 @@ const waitForApprovalReducer = (
   action: WithdrawalAction,
 ): ProtocolStateWithSharedData<states.WithdrawalState> => {
   switch (action.type) {
-    case actions.WITHDRAWAL_APPROVED:
+    case 'WALLET.WITHDRAWING.WITHDRAWAL_APPROVED':
       const { channelId, withdrawalAmount, processId } = protocolState;
       const { withdrawalAddress } = action;
       const transaction = createConcludeAndWithTransaction(
@@ -111,6 +110,7 @@ const waitForApprovalReducer = (
       const { storage: newSharedData, state: transactionSubmissionState } = initTransactionState(
         transaction,
         processId,
+        channelId,
         sharedData,
       );
 
@@ -122,9 +122,9 @@ const waitForApprovalReducer = (
         }),
         sharedData: newSharedData,
       };
-    case actions.WITHDRAWAL_REJECTED:
+    case 'WALLET.WITHDRAWING.WITHDRAWAL_REJECTED':
       return {
-        protocolState: states.failure(states.FailureReason.UserRejected),
+        protocolState: states.failure({ reason: states.FailureReason.UserRejected }),
         sharedData,
       };
     default:
@@ -144,7 +144,7 @@ const handleTransactionSubmissionComplete = (
     };
   } else {
     return {
-      protocolState: states.failure(states.FailureReason.TransactionFailure),
+      protocolState: states.failure({ reason: states.FailureReason.TransactionFailure }),
       sharedData,
     };
   }

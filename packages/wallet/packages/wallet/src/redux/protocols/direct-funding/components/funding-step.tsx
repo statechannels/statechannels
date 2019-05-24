@@ -1,7 +1,7 @@
 import React from 'react';
 import { Checklist, MessagesForStep, messagesForStep } from '../../../../components/checklist';
 import { unreachable } from '../../../../utils/reducer-utils';
-import * as directFundingState from '../state';
+import * as directFundingState from '../states';
 
 interface Props {
   directFundingState: directFundingState.DirectFundingState;
@@ -17,15 +17,15 @@ export enum Step {
 
 const fundingStepByState = (state: directFundingState.DirectFundingState): Step => {
   switch (state.type) {
-    case directFundingState.NOT_SAFE_TO_DEPOSIT:
+    case 'DirectFunding.NotSafeToDeposit':
       return Step.NOT_SAFE_TO_DEPOSIT;
-    case directFundingState.WAIT_FOR_DEPOSIT_TRANSACTION:
+    case 'DirectFunding.WaitForDepositTransaction':
       return Step.WAIT_FOR_DEPOSIT_TRANSACTION;
-    case directFundingState.WAIT_FOR_FUNDING_AND_POST_FUND_SETUP:
+    case 'DirectFunding.WaitForFundingAndPostFundSetup':
       return Step.WAITING_FOR_FUNDING_CONFIRMATION;
-    case directFundingState.FUNDING_SUCCESS:
+    case 'DirectFunding.FundingSuccess':
       return Step.CHANNEL_FUNDED;
-    case directFundingState.FUNDING_FAILURE:
+    case 'DirectFunding.FundingFailure':
       // todo: restrict this to non-terminal states
       return Step.FUNDING_FAILED;
     default:

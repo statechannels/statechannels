@@ -13,12 +13,76 @@ import {
   transactionReducer,
 } from '../transaction-submission/reducer';
 import { isTerminal, isSuccess } from '../transaction-submission/states';
-import * as states from './state';
+import * as states from './states';
 import { theirAddress } from '../../channel-store';
 import * as channelStoreReducer from '../../channel-store/reducer';
 import { sendCommitmentReceived } from '../../../communication';
+import { DirectFundingRequested } from './actions';
 
 type DFReducer = ProtocolReducer<states.DirectFundingState>;
+
+export function initialize(
+  action: DirectFundingRequested,
+  sharedData: SharedData,
+): ProtocolStateWithSharedData<states.DirectFundingState> {
+  const { safeToDepositLevel, totalFundingRequired, requiredDeposit, channelId, ourIndex } = action;
+
+  const alreadySafeToDeposit = bigNumberify(safeToDepositLevel).eq('0x');
+  const alreadyFunded = bigNumberify(totalFundingRequired).eq('0x');
+
+  if (alreadyFunded) {
+    return {
+      protocolState: states.fundingSuccess({
+        processId: action.processId,
+        totalFundingRequired,
+        requiredDeposit,
+        channelId,
+        ourIndex,
+        safeToDepositLevel,
+      }),
+      sharedData,
+    };
+  }
+
+  if (alreadySafeToDeposit) {
+    const depositTransaction = createDepositTransaction(
+      action.channelId,
+      action.requiredDeposit,
+      action.safeToDepositLevel,
+    );
+    const { storage: newSharedData, state: transactionSubmissionState } = initTransactionState(
+      depositTransaction,
+      action.processId,
+      action.channelId,
+      sharedData,
+    );
+
+    return {
+      protocolState: states.waitForDepositTransaction({
+        processId: action.processId,
+        totalFundingRequired,
+        requiredDeposit,
+        channelId,
+        ourIndex,
+        safeToDepositLevel,
+        transactionSubmissionState,
+      }),
+      sharedData: newSharedData,
+    };
+  }
+
+  return {
+    protocolState: states.notSafeToDeposit({
+      processId: action.processId,
+      totalFundingRequired,
+      requiredDeposit,
+      channelId,
+      ourIndex,
+      safeToDepositLevel,
+    }),
+    sharedData,
+  };
+}
 
 export const directFundingStateReducer: DFReducer = (
   state: states.DirectFundingState,
@@ -26,25 +90,25 @@ export const directFundingStateReducer: DFReducer = (
   action: actions.WalletAction,
 ): ProtocolStateWithSharedData<states.DirectFundingState> => {
   if (action.type === actions.FUNDING_RECEIVED_EVENT && action.channelId === state.channelId) {
-    if (bigNumberify(action.totalForDestination).gte(state.requestedTotalFunds)) {
+    if (bigNumberify(action.totalForDestination).gte(state.totalFundingRequired)) {
       return fundingReceiveEventReducer(state, sharedData, action);
     }
   }
 
-  if (action.type === actions.COMMITMENT_RECEIVED) {
+  if (action.type === 'WALLET.COMMON.COMMITMENT_RECEIVED') {
     return commitmentReceivedReducer(state, sharedData, action);
   }
 
   switch (state.type) {
-    case states.NOT_SAFE_TO_DEPOSIT:
+    case 'DirectFunding.NotSafeToDeposit':
       return notSafeToDepositReducer(state, sharedData, action);
-    case states.WAIT_FOR_DEPOSIT_TRANSACTION:
+    case 'DirectFunding.WaitForDepositTransaction':
       return waitForDepositTransactionReducer(state, sharedData, action);
-    case states.WAIT_FOR_FUNDING_AND_POST_FUND_SETUP:
+    case 'DirectFunding.WaitForFundingAndPostFundSetup':
       return waitForFundingAndPostFundSetupReducer(state, sharedData, action);
-    case states.FUNDING_SUCCESS:
+    case 'DirectFunding.FundingSuccess':
       return channelFundedReducer(state, sharedData, action);
-    case states.FUNDING_FAILURE:
+    case 'DirectFunding.FundingFailure':
       // todo: restrict the reducer to only accept non-terminal states
       return { protocolState: state, sharedData };
     default:
@@ -79,7 +143,7 @@ const fundingReceiveEventReducer: DFReducer = (
 
   // Player B case
   if (
-    protocolState.type === states.WAIT_FOR_FUNDING_AND_POST_FUND_SETUP &&
+    protocolState.type === 'DirectFunding.WaitForFundingAndPostFundSetup' &&
     protocolState.postFundSetupReceived
   ) {
     const sharedDataWithOwnCommitment = createAndSendPostFundCommitment(
@@ -109,7 +173,7 @@ const commitmentReceivedReducer: DFReducer = (
 ): ProtocolStateWithSharedData<states.DirectFundingState> => {
   if (protocolState.ourIndex === PlayerIndex.A) {
     if (
-      protocolState.type === states.WAIT_FOR_FUNDING_AND_POST_FUND_SETUP &&
+      protocolState.type === 'DirectFunding.WaitForFundingAndPostFundSetup' &&
       protocolState.channelFunded
     ) {
       const checkResult = channelStoreReducer.checkAndStore(
@@ -135,7 +199,7 @@ const commitmentReceivedReducer: DFReducer = (
 
   // Player B logic
   if (
-    protocolState.type === states.WAIT_FOR_FUNDING_AND_POST_FUND_SETUP &&
+    protocolState.type === 'DirectFunding.WaitForFundingAndPostFundSetup' &&
     protocolState.channelFunded
   ) {
     const checkResult = channelStoreReducer.checkAndStore(
@@ -190,14 +254,14 @@ const notSafeToDepositReducer: DFReducer = (
       ) {
         const depositTransaction = createDepositTransaction(
           state.channelId,
-          state.requestedYourContribution,
+          state.requiredDeposit,
           state.safeToDepositLevel,
         );
 
         const {
           storage: sharedDataWithTransactionState,
           state: transactionSubmissionState,
-        } = initTransactionState(depositTransaction, state.processId, sharedData);
+        } = initTransactionState(depositTransaction, state.processId, state.channelId, sharedData);
         return {
           protocolState: states.waitForDepositTransaction({ ...state, transactionSubmissionState }),
           sharedData: sharedDataWithTransactionState,
@@ -256,7 +320,7 @@ const channelFundedReducer: DFReducer = (
   action: actions.WalletAction,
 ): ProtocolStateWithSharedData<states.DirectFundingState> => {
   if (action.type === actions.FUNDING_RECEIVED_EVENT) {
-    if (bigNumberify(action.totalForDestination).lt(state.requestedTotalFunds)) {
+    if (bigNumberify(action.totalForDestination).lt(state.totalFundingRequired)) {
       // TODO: Deal with chain re-orgs that de-fund the channel here
       return { protocolState: state, sharedData };
     }

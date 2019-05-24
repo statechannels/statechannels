@@ -8,6 +8,10 @@ It is used by our games, and is responsible for signing, verifying and storing s
 
 ![splash](./screens.png 'screens')
 
-## To run and/or develop the wallet on your machine
+## To run the wallet on your machine
 
 Please see the instructions at the [top level](https://github.com/magmo/apps) of this repository.
+
+## Developer information
+
+See the [magmo wallet developer docs.](./notes/index.md)

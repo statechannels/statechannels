@@ -34,9 +34,9 @@ import {
 import { ProtocolAction } from '../../../../redux/actions';
 import { isConcludingAction } from './actions';
 import { getChannelId, SignedCommitment } from '../../../../domain';
-import { failure, success } from '../state';
+import { failure, success } from '../states';
 import { ProtocolStateWithSharedData } from '../..';
-import { waitForLedgerUpdate } from '../../indirect-defunding/state';
+import { waitForLedgerUpdate } from '../../indirect-defunding/states';
 import { waitForLedgerDefunding } from '../../defunding/states';
 import { indirectDefundingReducer } from '../../indirect-defunding/reducer';
 
@@ -212,7 +212,7 @@ function acknowledged(protocolState: CState, sharedData: Storage): ReturnVal {
   switch (protocolState.type) {
     case 'ConcludingResponder.AcknowledgeSuccess':
       return {
-        protocolState: success(),
+        protocolState: success({}),
         sharedData: sendOpponentConcluded(hideWallet(sharedData)),
       };
     case 'ConcludingResponder.AcknowledgeFailure':

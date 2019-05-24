@@ -24,21 +24,21 @@ linkStyle default interpolate basis
   S((start)) --> CE{Can<br/>challenge?}
   CE --> |Yes| WFA(ApproveChallenge)
   WFA --> |CommitmentArrives| AF
-  WFA --> |ChallengeApproved| WFT(WaitForTransaction)
+  WFA --> |WALLET.CHALLENGING.CHALLENGER.CHALLENGE_APPROVED| WFT(WaitForTransaction)
   CE --> |No| AF
-  WFA --> |ChallengeDenied| AF(AcknowledgeFailure)
-  AF --> |FailureAcknowledged| F((Failure))
+  WFA --> |WALLET.CHALLENGING.CHALLENGER.CHALLENGE_DENIED| AF(AcknowledgeFailure)
+  AF --> |WALLET.CHALLENGING.CHALLENGER.CHALLENGE_FAILURE_ACKNOWLEDGED| F((Failure))
   WFT --> |TransactionSuccess| WFRT(WaitForResponseOrTimeout)
   WFT --> |TransactionFailure| AF
   WFRT --> |CHALLENGE_EXPIRED| AT(AcknowledgeTimeout)
   WFRT -->|ChallengeExpirySetEvent| WFRT
-  AT --> |DefundChosen| D(WaitForDefund)
+  AT --> |WALLET.CHALLENGING.CHALLENGER.DEFUND_CHOSEN| D(WaitForDefund)
   D   --> |defunding protocol succeeded| AS(AcknowledgeSuccess)
   D   --> |defunding protocol failed| ACBND(AcknowledgeClosedButNotDefunded)
-  ACBND -->|Acknowledged| SCBND((ClosedButNotDefunded))
-  AS -->|Acknowledged| SCD((ClosedAndDefunded))
+  ACBND -->|WALLET.CHALLENGING.CHALLENGER.ACKNOWLEDGED| SCBND((ClosedButNotDefunded))
+  AS -->|WALLET.CHALLENGING.CHALLENGER.ACKNOWLEDGED| SCD((ClosedAndDefunded))
   WFRT --> |ChallengeResponseReceived| AR(AcknowledgeResponse)
-  AR --> |ResponseAcknowledged| SP((Open))
+  AR --> |WALLET.CHALLENGING.CHALLENGER.CHALLENGE_RESPONSE_ACKNOWLEDGED| SP((Open))
   classDef logic fill:#efdd20;
   classDef Success fill:#58ef21;
   classDef Failure fill:#f45941;

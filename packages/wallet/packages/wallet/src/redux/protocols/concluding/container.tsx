@@ -1,4 +1,4 @@
-import * as states from './state';
+import * as states from './states';
 import { PureComponent } from 'react';
 import React from 'react';
 import * as concludingInstigatorStates from './instigator/states';

@@ -38,84 +38,95 @@ const props = {
 // ----
 // States
 // ------
-const waitForStrategyChoice = {
-  state: states.waitForStrategyChoice(props),
-  store: EMPTY_SHARED_DATA,
-};
-const waitForStrategyResponse = {
-  state: states.waitForStrategyResponse(props),
-  store: indirectFundingTests.preSuccessState.store,
-};
-const waitForFunding = {
-  state: states.waitForFunding({
-    ...props,
-    fundingState: indirectFundingTests.preSuccessState.state,
-  }),
-  store: indirectFundingTests.preSuccessState.store,
-};
+const waitForStrategyChoice = states.waitForStrategyChoice(props);
 
-const waitForSuccessConfirmation = {
-  state: states.waitForSuccessConfirmation(props),
-  store: indirectFundingTests.successState.store,
-};
-const success = states.success();
-const failure = states.failure('User refused');
-const failure2 = states.failure('Opponent refused');
+const waitForStrategyResponse = states.waitForStrategyResponse(props);
+const waitForFunding = states.waitForFunding({
+  ...props,
+  fundingState: indirectFundingTests.preSuccessState.state,
+});
 
+const waitForSuccessConfirmation = states.waitForSuccessConfirmation(props);
+
+// -------
+// Shared Data
+// -------
+
+const emptySharedData = EMPTY_SHARED_DATA;
+const preSuccessSharedData = indirectFundingTests.preSuccessState.store;
+const successSharedData = indirectFundingTests.successState.store;
 // -------
 // Actions
 // -------
-const strategyChosen = actions.strategyChosen(processId, strategy);
+const strategyChosen = actions.strategyChosen({ processId, strategy });
 const strategyApproved = actions.strategyApproved(processId);
-const successConfirmed = actions.fundingSuccessAcknowledged(processId);
+const successConfirmed = actions.fundingSuccessAcknowledged({ processId });
 const fundingSuccess = indirectFundingTests.successTrigger;
-const strategyRejected = actions.strategyRejected(processId);
-const cancelledByA = actions.cancelled(processId, PlayerIndex.A);
-const cancelledByB = actions.cancelled(processId, PlayerIndex.B);
+const strategyRejected = actions.strategyRejected({ processId });
+const cancelledByA = actions.cancelled({ processId, by: PlayerIndex.A });
+const cancelledByB = actions.cancelled({ processId, by: PlayerIndex.B });
 
 // ---------
 // Scenarios
 // ---------
 export const happyPath = {
   ...props,
-  states: {
-    waitForStrategyChoice,
-    waitForStrategyResponse,
-    waitForFunding,
-    waitForSuccessConfirmation,
-    success,
+  waitForStrategyChoice: {
+    state: waitForStrategyChoice,
+    sharedData: emptySharedData,
+    action: strategyChosen,
   },
-  actions: {
-    strategyChosen,
-    strategyApproved,
-    fundingSuccess,
-    successConfirmed,
+  waitForStrategyResponse: {
+    state: waitForStrategyResponse,
+    sharedData: preSuccessSharedData,
+    action: strategyApproved,
+  },
+  waitForFunding: {
+    state: waitForFunding,
+    sharedData: preSuccessSharedData,
+    action: fundingSuccess,
+  },
+  waitForSuccessConfirmation: {
+    state: waitForSuccessConfirmation,
+    sharedData: successSharedData,
+    action: successConfirmed,
   },
 };
 
 export const rejectedStrategy = {
   ...props,
-  states: {
-    waitForStrategyResponse,
-    waitForStrategyChoice,
+
+  waitForStrategyResponse: {
+    state: waitForStrategyResponse,
+    sharedData: preSuccessSharedData,
+    action: strategyRejected,
   },
-  actions: { strategyRejected },
 };
 
 export const cancelledByUser = {
   ...props,
-  states: { waitForStrategyChoice, waitForStrategyResponse, failure },
-  actions: { cancelledByA },
+  waitForStrategyChoice: {
+    state: waitForStrategyChoice,
+    sharedData: emptySharedData,
+    action: cancelledByA,
+  },
+  waitForStrategyResponse: {
+    state: waitForStrategyResponse,
+    sharedData: preSuccessSharedData,
+    action: cancelledByA,
+  },
 };
 
 export const cancelledByOpponent = {
   ...props,
-  states: {
-    waitForStrategyChoice,
-    waitForStrategyResponse,
-    failure2,
+  waitForStrategyChoice: {
+    state: waitForStrategyChoice,
+    sharedData: emptySharedData,
+    action: cancelledByB,
   },
-  actions: {
-    cancelledByB,
+  waitForStrategyResponse: {
+    state: waitForStrategyResponse,
+    sharedData: preSuccessSharedData,
+    action: cancelledByB,
   },
 };
