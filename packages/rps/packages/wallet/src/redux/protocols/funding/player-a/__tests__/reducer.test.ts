@@ -2,49 +2,50 @@ import * as scenarios from './scenarios';
 import * as states from '../states';
 import { fundingReducer as reducer } from '../reducer';
 import { ProtocolStateWithSharedData } from '../../..';
-import { itSendsThisMessage, itSendsThisDisplayEventType } from '../../../../__tests__/helpers';
+import {
+  itSendsThisMessage,
+  itSendsThisDisplayEventType,
+  describeScenarioStep,
+} from '../../../../__tests__/helpers';
 import { sendStrategyProposed } from '../../../../../communication';
 import { FUNDING_SUCCESS, HIDE_WALLET } from 'magmo-wallet-client';
-
-function whenIn(state) {
-  return `when in ${state}`;
-}
+import { FundingStateType } from '../../states';
 
 describe('happyPath', () => {
   const scenario = scenarios.happyPath;
 
-  describe(whenIn(states.WAIT_FOR_STRATEGY_CHOICE), () => {
-    const { state, store } = scenario.states.waitForStrategyChoice;
-    const action = scenario.actions.strategyChosen;
-    const result = reducer(state, store, action);
+  describeScenarioStep(scenario.waitForStrategyChoice, () => {
+    const { state, sharedData, action } = scenario.waitForStrategyChoice;
 
-    itTransitionsTo(result, states.WAIT_FOR_STRATEGY_RESPONSE);
+    const result = reducer(state, sharedData, action);
+
+    itTransitionsTo(result, 'Funding.PlayerA.WaitForStrategyResponse');
     const { processId, strategy, opponentAddress } = scenario;
     itSendsThisMessage(result, sendStrategyProposed(opponentAddress, processId, strategy));
   });
 
-  describe(whenIn(states.WAIT_FOR_STRATEGY_RESPONSE), () => {
-    const { state, store } = scenario.states.waitForStrategyResponse;
-    const action = scenario.actions.strategyApproved;
-    const result = reducer(state, store, action);
+  describeScenarioStep(scenario.waitForStrategyResponse, () => {
+    const { state, sharedData, action } = scenario.waitForStrategyResponse;
 
-    itTransitionsTo(result, states.WAIT_FOR_FUNDING);
+    const result = reducer(state, sharedData, action);
+
+    itTransitionsTo(result, 'Funding.PlayerA.WaitForFunding');
   });
 
-  describe(whenIn(states.WAIT_FOR_FUNDING), () => {
-    const { state, store } = scenario.states.waitForFunding;
-    const action = scenario.actions.fundingSuccess;
-    const result = reducer(state, store, action);
+  describeScenarioStep(scenario.waitForFunding, () => {
+    const { state, sharedData, action } = scenario.waitForFunding;
 
-    itTransitionsTo(result, states.WAIT_FOR_SUCCESS_CONFIRMATION);
+    const result = reducer(state, sharedData, action);
+
+    itTransitionsTo(result, 'Funding.PlayerA.WaitForSuccessConfirmation');
   });
 
-  describe(whenIn(states.WAIT_FOR_SUCCESS_CONFIRMATION), () => {
-    const { state, store } = scenario.states.waitForSuccessConfirmation;
-    const action = scenario.actions.successConfirmed;
-    const result = reducer(state, store, action);
+  describeScenarioStep(scenario.waitForSuccessConfirmation, () => {
+    const { state, sharedData, action } = scenario.waitForSuccessConfirmation;
 
-    itTransitionsTo(result, states.SUCCESS);
+    const result = reducer(state, sharedData, action);
+
+    itTransitionsTo(result, 'Funding.PlayerA.Success');
     itSendsThisMessage(result, FUNDING_SUCCESS);
     itSendsThisDisplayEventType(result, HIDE_WALLET);
   });
@@ -53,59 +54,62 @@ describe('happyPath', () => {
 describe('When a strategy is rejected', () => {
   const scenario = scenarios.rejectedStrategy;
 
-  describe(whenIn(states.WAIT_FOR_STRATEGY_RESPONSE), () => {
-    const { state, store } = scenario.states.waitForStrategyResponse;
-    const action = scenario.actions.strategyRejected;
-    const result = reducer(state, store, action);
+  describeScenarioStep(scenario.waitForStrategyResponse, () => {
+    const { state, sharedData, action } = scenario.waitForStrategyResponse;
 
-    itTransitionsTo(result, states.WAIT_FOR_STRATEGY_CHOICE);
+    const result = reducer(state, sharedData, action);
+
+    itTransitionsTo(result, 'Funding.PlayerA.WaitForStrategyChoice');
   });
 });
 
 describe('when cancelled by the opponent', () => {
   const scenario = scenarios.cancelledByOpponent;
 
-  describe(whenIn(states.WAIT_FOR_STRATEGY_CHOICE), () => {
-    const { state, store } = scenario.states.waitForStrategyChoice;
-    const action = scenario.actions.cancelledByB;
-    const result = reducer(state, store, action);
+  describeScenarioStep(scenario.waitForStrategyChoice, () => {
+    const { state, sharedData, action } = scenario.waitForStrategyChoice;
 
-    itTransitionsTo(result, states.FAILURE);
+    const result = reducer(state, sharedData, action);
+
+    itTransitionsTo(result, 'Funding.PlayerA.Failure');
     itSendsThisMessage(result, 'WALLET.FUNDING.FAILURE');
   });
 
-  describe(whenIn(states.WAIT_FOR_STRATEGY_RESPONSE), () => {
-    const { state, store } = scenario.states.waitForStrategyResponse;
-    const action = scenario.actions.cancelledByB;
-    const result = reducer(state, store, action);
+  describeScenarioStep(scenario.waitForStrategyResponse, () => {
+    const { state, sharedData, action } = scenario.waitForStrategyResponse;
 
-    itTransitionsTo(result, states.FAILURE);
+    const result = reducer(state, sharedData, action);
+
+    itTransitionsTo(result, 'Funding.PlayerA.Failure');
     itSendsThisMessage(result, 'WALLET.FUNDING.FAILURE');
   });
 });
 
 describe('when cancelled by the user', () => {
   const scenario = scenarios.cancelledByUser;
-  describe(whenIn(states.WAIT_FOR_STRATEGY_CHOICE), () => {
-    const { state, store } = scenario.states.waitForStrategyChoice;
-    const action = scenario.actions.cancelledByA;
-    const result = reducer(state, store, action);
+  describeScenarioStep(scenario.waitForStrategyChoice, () => {
+    const { state, sharedData, action } = scenario.waitForStrategyChoice;
 
-    itTransitionsTo(result, states.FAILURE);
+    const result = reducer(state, sharedData, action);
+
+    itTransitionsTo(result, 'Funding.PlayerA.Failure');
     itSendsThisMessage(result, 'WALLET.FUNDING.FAILURE');
   });
 
-  describe(whenIn(states.WAIT_FOR_STRATEGY_RESPONSE), () => {
-    const { state, store } = scenario.states.waitForStrategyResponse;
-    const action = scenario.actions.cancelledByA;
-    const result = reducer(state, store, action);
+  describeScenarioStep(scenario.waitForStrategyResponse, () => {
+    const { state, sharedData, action } = scenario.waitForStrategyResponse;
 
-    itTransitionsTo(result, states.FAILURE);
+    const result = reducer(state, sharedData, action);
+
+    itTransitionsTo(result, 'Funding.PlayerA.Failure');
     itSendsThisMessage(result, 'WALLET.FUNDING.FAILURE');
   });
 });
 
-function itTransitionsTo(result: ProtocolStateWithSharedData<states.FundingState>, type: string) {
+function itTransitionsTo(
+  result: ProtocolStateWithSharedData<states.FundingState>,
+  type: FundingStateType,
+) {
   it(`transitions to ${type}`, () => {
     expect(result.protocolState.type).toEqual(type);
   });

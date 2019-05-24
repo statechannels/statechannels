@@ -1,17 +1,45 @@
 import { storiesOf } from '@storybook/react';
 import React from 'react';
 import { Provider } from 'react-redux';
-import WalletContainer from '../containers/wallet';
 import '../index.scss';
 import { dummyWaitForLogin, dummyWaitForMetaMask } from './dummy-wallet-states';
-
+import WalletContainer from '../containers/wallet';
+import { initializedState } from './dummy-wallet-states';
+import { ProtocolState } from '../redux/protocols';
+import { nestProtocolState } from './nesters';
 const walletStateRender = state => () => {
+  console.log(state);
   return (
     <Provider store={fakeStore(state)}>
       <WalletContainer position="center" />
     </Provider>
   );
 };
+
+export const protocolStateRender = (protocolState: ProtocolState) => {
+  const walletState = {
+    ...initializedState,
+    processStore: {
+      dummyProcessId: {
+        processId: 'dummyProcessId',
+        protocol: 0, // at the moment this is not used by containers
+        protocolState: nestProtocolState(protocolState),
+        channelsToMonitor: [],
+      },
+    },
+    currentProcessId: 'dummyProcessId',
+  };
+
+  return walletStateRender(walletState);
+};
+
+export function addStoriesFromScenario(scenario, chapter) {
+  Object.keys(scenario).forEach(key => {
+    if (scenario[key].state) {
+      storiesOf(chapter, module).add(key, protocolStateRender(scenario[key].state));
+    }
+  });
+}
 
 const WalletScreensNotInitialized = {
   WaitForLogIn: dummyWaitForLogin,

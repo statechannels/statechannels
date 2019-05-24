@@ -12,10 +12,10 @@ import Acknowledge from '../../shared-components/acknowledge';
 
 interface Props {
   state: NonTerminalConcludingState;
-  approve: (processId: string) => void;
-  deny: (processId: string) => void;
-  defund: (processId: string) => void;
-  acknowledge: (processId: string) => void;
+  approve: typeof actions.concludeApproved;
+  deny: typeof actions.cancelled;
+  defund: typeof actions.defundChosen;
+  acknowledge: typeof actions.acknowledged;
 }
 
 class ConcludingContainer extends PureComponent<Props> {
@@ -28,7 +28,7 @@ class ConcludingContainer extends PureComponent<Props> {
           <Acknowledge
             title="Concluding Succesful"
             description="Your channel was closed and defunded."
-            acknowledge={() => acknowledge(state.processId)}
+            acknowledge={() => acknowledge({ processId })}
           />
         );
       case 'ConcludingInstigator.AcknowledgeFailure':
@@ -36,18 +36,21 @@ class ConcludingContainer extends PureComponent<Props> {
           <Acknowledge
             title="Concluding Failed"
             description={state.reason}
-            acknowledge={() => acknowledge(state.processId)}
+            acknowledge={() => acknowledge({ processId })}
           />
         );
       case 'ConcludingInstigator.WaitForOpponentConclude':
         return <WaitForOpponentConclude />;
       case 'ConcludingInstigator.AcknowledgeConcludeReceived':
-        return <ApproveDefunding approve={() => defund(processId)} />;
+        return <ApproveDefunding approve={() => defund({ processId })} />;
       case 'ConcludingInstigator.WaitForDefund':
         return <Defunding state={state.defundingState} />;
       case 'ConcludingInstigator.ApproveConcluding':
         return (
-          <ApproveConcluding deny={() => deny(processId)} approve={() => approve(processId)} />
+          <ApproveConcluding
+            deny={() => deny({ processId })}
+            approve={() => approve({ processId })}
+          />
         );
       default:
         return unreachable(state);

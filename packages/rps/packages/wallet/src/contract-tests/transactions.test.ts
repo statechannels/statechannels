@@ -3,12 +3,7 @@ import { ethers } from 'ethers';
 import { put } from 'redux-saga/effects';
 import { getGanacheProvider } from 'magmo-devtools';
 
-import {
-  transactionConfirmed,
-  transactionFinalized,
-  transactionSent,
-  transactionSubmitted,
-} from '../redux/actions';
+import { transactionConfirmed, transactionSent, transactionSubmitted } from '../redux/actions';
 import { transactionSender } from '../redux/sagas/transaction-sender';
 import { signCommitment, signVerificationData } from '../domain';
 import { getLibraryAddress, createChallenge, concludeGame } from './test-utils';
@@ -50,22 +45,23 @@ describe('transactions', () => {
     const queuedTransaction = { transactionRequest: transactionToSend, processId };
     const saga = transactionSender(queuedTransaction);
     saga.next();
-    expect(saga.next(provider).value).toEqual(put(transactionSent(processId)));
+    expect(saga.next(provider).value).toEqual(put(transactionSent({ processId })));
     saga.next();
     const signer = provider.getSigner();
     transactionToSend = { ...transactionToSend, to: ADJUDICATOR_ADDRESS };
     const transactionReceipt = await signer.sendTransaction(transactionToSend);
 
     expect(saga.next(transactionReceipt).value).toEqual(
-      put(transactionSubmitted(processId, transactionReceipt.hash || '')),
+      put(transactionSubmitted({ processId, transactionHash: transactionReceipt.hash || '' })),
     );
     const confirmedTransaction = await transactionReceipt.wait();
     saga.next();
     expect(saga.next(confirmedTransaction).value).toEqual(
-      put(transactionConfirmed(processId, confirmedTransaction.contractAddress)),
+      put(
+        transactionConfirmed({ processId, contractAddress: confirmedTransaction.contractAddress }),
+      ),
     );
 
-    expect(saga.next().value).toEqual(put(transactionFinalized(processId)));
     expect(saga.next().done).toBe(true);
   }
 

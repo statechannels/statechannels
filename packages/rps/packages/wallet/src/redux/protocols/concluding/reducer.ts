@@ -2,7 +2,7 @@ import { ResponderNonTerminalState } from './responder/states';
 import { InstigatorNonTerminalState, isConcludingInstigatorState } from './instigator/states';
 import { SharedData } from '../../state';
 import { ProtocolAction } from '../../actions';
-import { ConcludingState } from './state';
+import { ConcludingState } from './states';
 import {
   instigatorConcludingReducer,
   initialize as initializeInstigator,

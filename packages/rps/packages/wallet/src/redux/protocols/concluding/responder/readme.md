@@ -23,15 +23,15 @@ graph TD
 linkStyle default interpolate basis
   S((Start)) --> E{Channel Exists?}
   E --> |No| AF(ResponderAcknowledgeFailure)
-  AF -->|ACKNOWLEDGED| F((ResponderFailure))
+  AF -->|WALLET.CONCLUDING.RESPONDER.ACKNOWLEDGED| F((Failure))
   E --> |Yes| MT{My turn?}
   MT  --> |Yes| CC(ResponderApproveConcluding)
   MT  --> |No| AF(ResponderAcknowledgeFailure)
-  CC  --> |CONCLUDE.APPROVED| DD(ResponderDecideDefund)
-  DD --> |DEFUND.CHOSEN| D(ResponderWaitForDefund)
+  CC  --> |WALLET.CONCLUDING.RESPONDER.CONCLUDE.APPROVED| DD(ResponderDecideDefund)
+  DD --> |WALLET.CONCLUDING.RESPONDER.DEFUND.CHOSEN| D(ResponderWaitForDefund)
   DD --> |COMMITMENT_RECEIVED| D(ResponderWaitForDefund)
   D   --> |defunding protocol succeeded| AS(ResponderAcknowledgeSuccess)
-  AS -->  |ACKNOWLEDGED| SS((Success))
+  AS -->  |WALLET.CONCLUDING.RESPONDER.ACKNOWLEDGED| SS((Success))
   D   --> |defunding protocol failed| AF(ResponderAcknowledgeFailure)
   classDef logic fill:#efdd20;
   classDef Success fill:#58ef21;

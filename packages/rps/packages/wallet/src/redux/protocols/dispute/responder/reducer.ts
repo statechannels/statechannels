@@ -1,6 +1,6 @@
 import { Commitment } from '../../../../domain';
 import { ProtocolStateWithSharedData } from '../..';
-import * as states from './state';
+import * as states from './states';
 import * as actions from './actions';
 import { unreachable } from '../../../../utils/reducer-utils';
 import * as selectors from '../../../selectors';
@@ -62,33 +62,33 @@ export const responderReducer = (
     return { protocolState, sharedData };
   }
   switch (protocolState.type) {
-    case states.WAIT_FOR_APPROVAL:
+    case 'Responding.WaitForApproval':
       return waitForApprovalReducer(protocolState, sharedData, action);
-    case states.WAIT_FOR_ACKNOWLEDGEMENT:
+    case 'Responding.WaitForAcknowledgement':
       return waitForAcknowledgementReducer(protocolState, sharedData, action);
-    case states.WAIT_FOR_RESPONSE:
+    case 'Responding.WaitForResponse':
       return waitForResponseReducer(protocolState, sharedData, action);
-    case states.WAIT_FOR_TRANSACTION:
+    case 'Responding.WaitForTransaction':
       return waitForTransactionReducer(protocolState, sharedData, action);
-    case states.ACKNOWLEDGE_TIMEOUT:
+    case 'Responding.AcknowledgeTimeout':
       if (isDefundingAction(action)) {
         return handleDefundingAction(protocolState, sharedData, action);
       }
       return acknowledgeTimeoutReducer(protocolState, sharedData, action);
-    case states.WAIT_FOR_DEFUND:
+    case 'Responding.WaitForDefund':
       if (isDefundingAction(action)) {
         return handleDefundingAction(protocolState, sharedData, action);
       } else {
         return { protocolState, sharedData };
       }
-    case states.ACKNOWLEDGE_DEFUNDING_SUCCESS:
+    case 'Responding.AcknowledgeDefundingSuccess':
       return acknowledgeDefundingSuccessReducer(protocolState, sharedData, action);
-    case states.ACKNOWLEDGE_CLOSED_BUT_NOT_DEFUNDED:
+    case 'Responding.AcknowledgeClosedButNotDefunded':
       return acknowledgeClosedButNotDefundedReducer(protocolState, sharedData, action);
-    case states.CLOSED_AND_DEFUNDED:
-    case states.CLOSED_BUT_NOT_DEFUNDED:
-    case states.SUCCESS:
-    case states.FAILURE:
+    case 'Responding.ClosedButNotDefunded':
+    case 'Responding.ClosedAndDefunded':
+    case 'Responding.Success':
+    case 'Responding.Failure':
       return { protocolState, sharedData };
     default:
       return unreachable(protocolState);
@@ -101,15 +101,15 @@ function handleDefundingAction(
   action: DefundingAction,
 ): ProtocolStateWithSharedData<states.ResponderState> {
   if (
-    protocolState.type !== states.WAIT_FOR_DEFUND &&
-    protocolState.type !== states.ACKNOWLEDGE_TIMEOUT
+    protocolState.type !== 'Responding.WaitForDefund' &&
+    protocolState.type !== 'Responding.AcknowledgeTimeout'
   ) {
     return { protocolState, sharedData };
   }
 
   // If we received a defunding action before we acknowledge the timeout
   // we transition right into defunding
-  if (protocolState.type === states.ACKNOWLEDGE_TIMEOUT) {
+  if (protocolState.type === 'Responding.AcknowledgeTimeout') {
     const updatedState = transitionToWaitForDefunding(protocolState, sharedData);
     protocolState = updatedState.protocolState;
     sharedData = updatedState.sharedData;
@@ -160,7 +160,7 @@ const waitForResponseReducer = (
   action: actions.ResponderAction,
 ): ProtocolStateWithSharedData<states.ResponderState> => {
   switch (action.type) {
-    case actions.RESPONSE_PROVIDED:
+    case 'WALLET.CHALLENGING.RESPONDER.RESPONSE_PROVIDED':
       const { commitment } = action;
       const signResult = signAndStore(sharedData, commitment);
       if (!signResult.isSuccess) {
@@ -188,9 +188,9 @@ const waitForAcknowledgementReducer = (
   action: actions.ResponderAction,
 ): ProtocolStateWithSharedData<states.ResponderState> => {
   switch (action.type) {
-    case actions.RESPOND_SUCCESS_ACKNOWLEDGED:
+    case 'WALLET.CHALLENGING.RESPONDER.RESPOND_SUCCESS_ACKNOWLEDGED':
       return {
-        protocolState: states.success(),
+        protocolState: states.success({}),
         sharedData: sendChallengeComplete(hideWallet(sharedData)),
       };
     default:
@@ -204,7 +204,7 @@ const waitForApprovalReducer = (
   action: actions.ResponderAction,
 ): ProtocolStateWithSharedData<states.ResponderState> => {
   switch (action.type) {
-    case actions.RESPOND_APPROVED:
+    case 'WALLET.CHALLENGING.RESPONDER.RESPOND_APPROVED':
       const { challengeCommitment, processId } = protocolState;
       if (!canRespondWithExistingCommitment(protocolState.challengeCommitment, sharedData)) {
         return {
@@ -233,7 +233,7 @@ function acknowledgeTimeoutReducer(
   sharedData: SharedData,
   action: actions.ResponderAction,
 ): ProtocolStateWithSharedData<states.ResponderState> {
-  if (action.type !== 'WALLET.RESPOND.DEFUND_CHOSEN') {
+  if (action.type !== 'WALLET.CHALLENGING.RESPONDER.DEFUND_CHOSEN') {
     return { protocolState, sharedData };
   }
   return transitionToWaitForDefunding(protocolState, sharedData);
@@ -244,11 +244,11 @@ function acknowledgeDefundingSuccessReducer(
   sharedData: SharedData,
   action: actions.ResponderAction,
 ): ProtocolStateWithSharedData<states.ResponderState> {
-  if (action.type !== 'WALLET.RESPOND.ACKNOWLEDGED') {
+  if (action.type !== 'WALLET.CHALLENGING.RESPONDER.ACKNOWLEDGED') {
     return { protocolState, sharedData };
   }
   return {
-    protocolState: states.closedAndDefunded(),
+    protocolState: states.closedAndDefunded({}),
     sharedData: sendOpponentConcluded(hideWallet(sharedData)),
   };
   // From the point of view of the app, it is as if we have concluded
@@ -259,11 +259,11 @@ function acknowledgeClosedButNotDefundedReducer(
   sharedData: SharedData,
   action: actions.ResponderAction,
 ): ProtocolStateWithSharedData<states.ResponderState> {
-  if (action.type !== 'WALLET.RESPOND.ACKNOWLEDGED') {
+  if (action.type !== 'WALLET.CHALLENGING.RESPONDER.ACKNOWLEDGED') {
     return { protocolState, sharedData };
   }
   return {
-    protocolState: states.closedButNotDefunded(),
+    protocolState: states.closedButNotDefunded({}),
     sharedData: sendOpponentConcluded(hideWallet(sharedData)),
   };
   // From the point of view of the app, it is as if we have concluded
@@ -281,7 +281,7 @@ const handleTransactionSubmissionComplete = (
     };
   } else {
     return {
-      protocolState: states.failure(states.FailureReason.TransactionFailure),
+      protocolState: states.failure({ reason: states.FailureReason.TransactionFailure }),
       sharedData,
     };
   }
@@ -292,10 +292,11 @@ const transitionToWaitForTransaction = (
   protocolState: states.WaitForResponse | states.WaitForApproval,
   sharedData: SharedData,
 ) => {
-  const { processId } = protocolState;
+  const { processId, channelId } = protocolState;
   const { storage: newSharedData, state: transactionSubmissionState } = initTransactionState(
     transaction,
     processId,
+    channelId,
     sharedData,
   );
   const newProtocolState = states.waitForTransaction({

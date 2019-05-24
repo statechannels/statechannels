@@ -1,35 +1,41 @@
 import * as actions from '../../actions';
+import { ActionConstructor } from '../../utils';
 
-export const DIRECT_FUNDING_REQUESTED = 'WALLET.INTERNAL.FUNDING.DIRECT_FUNDING_REQUESTED';
-export const directFundingRequested = (
-  processId,
-  channelId: string,
-  safeToDepositLevel: string,
-  totalFundingRequired: string,
-  requiredDeposit: string,
-  ourIndex: number,
-) => ({
-  type: DIRECT_FUNDING_REQUESTED as typeof DIRECT_FUNDING_REQUESTED,
-  processId,
-  channelId,
-  totalFundingRequired,
-  safeToDepositLevel,
-  requiredDeposit,
-  ourIndex,
-});
-export type DirectFundingRequested = ReturnType<typeof directFundingRequested>;
-
-export function isDirectFundingAction(action: actions.WalletAction): action is FundingAction {
-  return (
-    action.type === 'WALLET.ADJUDICATOR.FUNDING_RECEIVED_EVENT' ||
-    action.type === DIRECT_FUNDING_REQUESTED ||
-    action.type === 'WALLET.COMMON.COMMITMENT_RECEIVED' ||
-    actions.isTransactionAction(action)
-  );
+// -------
+// Actions
+// -------
+export interface DirectFundingRequested {
+  type: 'WALLET.DIRECT_FUNDING.DIRECT_FUNDING_REQUESTED';
+  processId;
+  channelId;
+  totalFundingRequired;
+  safeToDepositLevel;
+  requiredDeposit;
+  ourIndex;
 }
+
+// -------
+// Constructors
+// -------
+export const directFundingRequested: ActionConstructor<DirectFundingRequested> = p => ({
+  ...p,
+  type: 'WALLET.DIRECT_FUNDING.DIRECT_FUNDING_REQUESTED',
+});
+// -------
+// Unions and Guards
+// -------
 
 export type FundingAction =
   | DirectFundingRequested
   | actions.CommitmentReceived
   | actions.FundingReceivedEvent
   | actions.TransactionAction;
+
+export function isDirectFundingAction(action: actions.WalletAction): action is FundingAction {
+  return (
+    action.type === 'WALLET.ADJUDICATOR.FUNDING_RECEIVED_EVENT' ||
+    action.type === 'WALLET.DIRECT_FUNDING.DIRECT_FUNDING_REQUESTED' ||
+    action.type === 'WALLET.COMMON.COMMITMENT_RECEIVED' ||
+    actions.isTransactionAction(action)
+  );
+}

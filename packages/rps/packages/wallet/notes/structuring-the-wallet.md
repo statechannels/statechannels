@@ -1,5 +1,7 @@
 # Wallet Architecture
 
+**[Home](./index.md)**
+
 The wallet needs to be able to run many different protocols, potentially simultaneously.
 For example, the wallet might need to be funding channel C1 with opponent A at the same time
 as responding to a challenge on channel C2.
@@ -32,13 +34,21 @@ In the wallet, we represent this structure by embedding state machines inside ea
 For example, the state machine for submitting a transaction to the blockchain is as follows:
 
 ```mermaid
-graph LR
+graph TD
   S((start)) --> WFS(WAIT_FOR_SUBMISSION)
   WFS --> |Receive transaction receipt| WFC(WAIT_FOR_CONFIRMATION)
   WFC --> |Receive confirmation| SUCCESS((Success))
   WFC --> |Tranaction failed| TA(TRY_AGAIN?)
   TA --> |Yes| WFS
   TA --> |No| FAIL((Fail))
+  classDef logic fill:#efdd20;
+  classDef Success fill:#58ef21;
+  classDef Failure fill:#f45941;
+  classDef WaitForChildProtocol stroke:#333,stroke-width:4px,color:#ffff,fill:#333;
+  class S logic
+  class SUCCESS Success;
+  class FAIL Failure;
+  class WFS,WFC WaitForChildProtocol;
 ```
 
 This might have the following states:
@@ -71,11 +81,19 @@ interface Fail = {
 Suppose we then want to write a state machine for the withdrawal procedure:
 
 ```mermaid
-graph LR
+graph TD
   S((start)) --> WFA(WAIT_FOR_DESTINATION)
   WFA --> |Destination chosen| WFT(WAIT_FOR_TRANSACTION)
   WFT --> |Transaction success| SUCCESS((Success))
   WFT --> |Transaction fail| FAIL((Fail))
+  classDef logic fill:#efdd20;
+  classDef Success fill:#58ef21;
+  classDef Failure fill:#f45941;
+  classDef WaitForChildProtocol stroke:#333,stroke-width:4px,color:#ffff,fill:#333;
+  class S logic
+  class SUCCESS Success;
+  class FAIL Failure;
+  class WFT WaitForChildProtocol;
 ```
 
 The states here would be built _using the `TransactionState` above_:
@@ -101,28 +119,6 @@ interface Fail = {
 ```
 
 Note that we are composing these processes at the code level rather than at the service level: all the data for the transaction state machine is stored inside the withdrawal state machine.
-
-### Conventions
-
-When writing protocol state machine diagrams, we use the following conventions:
-
-```mermaid
-  graph TD
-  St((Start))-->L
-  L{Flow Logic} --> NT1(Non-Terminal States)
-  NT1 -->|ACTION| C
-  C(Call child reducer) -->|child return status| NT2
-  NT2(More Non-Terminal States) --> |SUCCESS_TRIGGER| Su
-  Su((Success))
-  NT2(More Non-Terminal States) --> |FAILURE_TRIGGER| F
-  F((Failure))
-
-  style St  fill:#efdd20
-  style L fill:#efdd20
-  style C stroke:#333,stroke-width:4px
-  style Su fill:#58ef21
-  style F  fill:#f45941
-```
 
 ## Processes
 

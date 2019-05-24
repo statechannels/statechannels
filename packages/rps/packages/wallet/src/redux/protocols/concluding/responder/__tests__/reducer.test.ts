@@ -5,8 +5,9 @@ import {
   expectThisCommitmentSent,
   itSendsThisMessage,
   itSendsThisDisplayEventType,
+  describeScenarioStep,
 } from '../../../../__tests__/helpers';
-import { FailureReason } from '../../state';
+import { FailureReason } from '../../states';
 import { HIDE_WALLET, CONCLUDE_FAILURE, OPPONENT_CONCLUDED } from 'magmo-wallet-client';
 import { SharedData, getLastMessage } from '../../../../state';
 import { SignedCommitment } from '../../../../../domain';
@@ -16,38 +17,38 @@ describe('[ Happy path ]', () => {
   const { processId } = scenario;
 
   describe('when initializing', () => {
-    const { commitment, store } = scenario.initialize;
-    const result = initialize(commitment, processId, store);
+    const { commitment, sharedData } = scenario.initialize;
+    const result = initialize(commitment, processId, sharedData);
 
     itTransitionsTo(result, 'ConcludingResponder.ApproveConcluding');
   });
-  describe('when in ApproveConcluding', () => {
-    const { state, store, action, reply } = scenario.approveConcluding;
-    const result = responderConcludingReducer(state, store, action);
+  describeScenarioStep(scenario.approveConcluding, () => {
+    const { state, sharedData, action, reply } = scenario.approveConcluding;
+    const result = responderConcludingReducer(state, sharedData, action);
 
     expectThisCommitmentSent(result.sharedData, reply);
     itTransitionsTo(result, 'ConcludingResponder.DecideDefund');
   });
 
-  describe('when in DecideDefund', () => {
-    const { state, store, action } = scenario.decideDefund;
-    const result = responderConcludingReducer(state, store, action);
+  describeScenarioStep(scenario.decideDefund, () => {
+    const { state, sharedData, action } = scenario.decideDefund;
+    const result = responderConcludingReducer(state, sharedData, action);
 
     itTransitionsTo(result, 'ConcludingResponder.WaitForDefund');
   });
 
-  describe('when in WaitForDefund', () => {
-    const { state, store, action } = scenario.waitForDefund;
-    const result = responderConcludingReducer(state, store, action);
+  describeScenarioStep(scenario.waitForDefund, () => {
+    const { state, sharedData, action } = scenario.waitForDefund;
+    const result = responderConcludingReducer(state, sharedData, action);
 
     itTransitionsTo(result, 'ConcludingResponder.AcknowledgeSuccess');
   });
 
-  describe('when in AcknowledgeSuccess', () => {
-    const { state, store, action } = scenario.acknowledgeSuccess;
-    const result = responderConcludingReducer(state, store, action);
+  describeScenarioStep(scenario.acknowledgeSuccess, () => {
+    const { state, sharedData, action } = scenario.acknowledgeSuccess;
+    const result = responderConcludingReducer(state, sharedData, action);
 
-    itTransitionsTo(result, 'Success');
+    itTransitionsTo(result, 'Concluding.Success');
     itSendsThisMessage(result.sharedData, OPPONENT_CONCLUDED);
     itSendsThisDisplayEventType(result.sharedData, HIDE_WALLET);
   });
@@ -56,9 +57,9 @@ describe('[ Happy path ]', () => {
 describe('[ Happy path (alternative) ]', () => {
   const scenario = scenarios.happyPathAlternative;
 
-  describe('when in DecideDefund', () => {
-    const { state, store, action, reply } = scenario.decideDefund;
-    const result = responderConcludingReducer(state, store, action);
+  describeScenarioStep(scenario.decideDefund, () => {
+    const { state, sharedData, action, reply } = scenario.decideDefund;
+    const result = responderConcludingReducer(state, sharedData, action);
 
     itTransitionsTo(result, 'ConcludingResponder.WaitForDefund');
     it(`initializes defundingState`, () => {
@@ -72,7 +73,7 @@ describe('[ Happy path (alternative) ]', () => {
     it(`transitions indirectDefundingState to WaitForConclude`, () => {
       expect(result.protocolState).toHaveProperty(
         'defundingState.indirectDefundingState.type',
-        'WaitForConclude',
+        'IndirectDefunding.WaitForConclude',
       );
     });
     itSendsMessage(result.sharedData, reply);
@@ -84,15 +85,15 @@ describe('[ Channel doesnt exist ]', () => {
   const { processId } = scenario;
 
   describe('when initializing', () => {
-    const { commitment, store } = scenario.initialize;
-    const result = initialize(commitment, processId, store);
+    const { commitment, sharedData } = scenario.initialize;
+    const result = initialize(commitment, processId, sharedData);
 
     itTransitionsToAcknowledgeFailure(result, 'ChannelDoesntExist');
   });
 
-  describe('when in AcknowledgeFailure', () => {
-    const { state, action, store } = scenario.acknowledgeFailure;
-    const result = responderConcludingReducer(state, store, action);
+  describeScenarioStep(scenario.acknowledgeFailure, () => {
+    const { state, action, sharedData } = scenario.acknowledgeFailure;
+    const result = responderConcludingReducer(state, sharedData, action);
 
     itTransitionsToFailure(result, 'ChannelDoesntExist');
     itSendsThisMessage(result.sharedData, CONCLUDE_FAILURE);
@@ -105,15 +106,15 @@ describe('[ Concluding Not Possible ]', () => {
   const { processId } = scenario;
 
   describe('when initializing', () => {
-    const { commitment, store } = scenario.initialize;
-    const result = initialize(commitment, processId, store);
+    const { commitment, sharedData } = scenario.initialize;
+    const result = initialize(commitment, processId, sharedData);
 
     itTransitionsToAcknowledgeFailure(result, 'NotYourTurn');
   });
 
-  describe('when in AcknowledgeFailure', () => {
-    const { state, action, store } = scenario.acknowledgeFailure;
-    const result = responderConcludingReducer(state, store, action);
+  describeScenarioStep(scenario.acknowledgeFailure, () => {
+    const { state, action, sharedData } = scenario.acknowledgeFailure;
+    const result = responderConcludingReducer(state, sharedData, action);
 
     itTransitionsToFailure(result, 'NotYourTurn');
     itSendsThisMessage(result.sharedData, CONCLUDE_FAILURE);
@@ -124,16 +125,16 @@ describe('[ Concluding Not Possible ]', () => {
 describe('[ Defund failed ]', () => {
   const scenario = scenarios.defundFailed;
 
-  describe('when in WaitForDefund', () => {
-    const { state, action, store } = scenario.waitForDefund;
-    const result = responderConcludingReducer(state, store, action);
+  describeScenarioStep(scenario.waitForDefund, () => {
+    const { state, action, sharedData } = scenario.waitForDefund;
+    const result = responderConcludingReducer(state, sharedData, action);
 
     itTransitionsToAcknowledgeFailure(result, 'DefundFailed');
   });
 
-  describe('when in AcknowledgeFailure', () => {
-    const { state, action, store } = scenario.acknowledgeFailure;
-    const result = responderConcludingReducer(state, store, action);
+  describeScenarioStep(scenario.acknowledgeFailure, () => {
+    const { state, action, sharedData } = scenario.acknowledgeFailure;
+    const result = responderConcludingReducer(state, sharedData, action);
 
     itTransitionsToFailure(result, 'DefundFailed');
     itSendsThisMessage(result.sharedData, CONCLUDE_FAILURE);
@@ -149,8 +150,8 @@ function itTransitionsTo(result: ReturnVal, type: ResponderConcludingStateType) 
 
 function itTransitionsToFailure(result: ReturnVal, reason: FailureReason) {
   it(`transitions to Failure with reason ${reason}`, () => {
-    expect(result.protocolState.type).toEqual('Failure');
-    if (result.protocolState.type === 'Failure') {
+    expect(result.protocolState.type).toEqual('Concluding.Failure');
+    if (result.protocolState.type === 'Concluding.Failure') {
       expect(result.protocolState.reason).toEqual(reason);
     }
   });

@@ -57,12 +57,12 @@ const directlyFundedFundingState: FundingState = {
 const waitForWithdrawal = states.waitForWithdrawal({
   processId,
   channelId,
-  withdrawalState: withdrawalScenarios.happyPath.waitForAcknowledgement,
+  withdrawalState: withdrawalScenarios.happyPath.waitForAcknowledgement.state,
 });
 const waitForWithdrawalFailure = states.waitForWithdrawal({
   processId,
   channelId,
-  withdrawalState: withdrawalScenarios.withdrawalRejected.waitForApproval,
+  withdrawalState: withdrawalScenarios.withdrawalRejected.waitForApproval.state,
 });
 
 const waitForLedgerDefunding = states.waitForLedgerDefunding({
@@ -76,38 +76,45 @@ const waitForLedgerFailure = states.waitForLedgerDefunding({
   channelId,
   indirectDefundingState: indirectDefunding.preFailureState.state,
 });
-const success = states.success();
-const channelNotClosedFailure = states.failure('Channel Not Closed');
-const withdrawalFailure = states.failure('Withdrawal Failure');
+
+const channelNotClosedFailure = states.failure({ reason: 'Channel Not Closed' });
 
 export const directlyFundingChannelHappyPath = {
   processId,
   channelId,
-  // States
-  waitForWithdrawal,
-  success,
-  // actions
-  withdrawalSuccessAction: withdrawalScenarios.happyPath.successAcknowledged,
-  // Shared data
-  sharedData: {
-    ...EMPTY_SHARED_DATA,
-    fundingState: directlyFundedFundingState,
-    channelStore,
+  initialize: {
+    processId,
+    channelId,
+    sharedData: {
+      ...EMPTY_SHARED_DATA,
+      fundingState: directlyFundedFundingState,
+      channelStore,
+    },
+  },
+
+  waitForWithdrawal: {
+    state: waitForWithdrawal,
+    action: withdrawalScenarios.happyPath.waitForAcknowledgement.action,
+    sharedData: {
+      ...EMPTY_SHARED_DATA,
+      fundingState: directlyFundedFundingState,
+      channelStore,
+    },
   },
 };
 
 export const indirectlyFundingChannelHappyPath = {
-  initialize: { processId, channelId, store: indirectDefunding.initialStore },
+  initialize: { processId, channelId, sharedData: indirectDefunding.initialStore },
   // States
   waitForLedgerDefunding: {
     state: waitForLedgerDefunding,
     action: indirectDefunding.successTrigger,
-    store: indirectDefunding.preSuccessState.store,
+    sharedData: indirectDefunding.preSuccessState.store,
   },
   waitForWithdrawal: {
     state: waitForWithdrawal,
-    action: withdrawalScenarios.happyPath.successAcknowledged,
-    store: {
+    action: withdrawalScenarios.happyPath.waitForAcknowledgement.action,
+    sharedData: {
       ...EMPTY_SHARED_DATA,
       fundingState: directlyFundedFundingState,
       channelStore,
@@ -133,15 +140,14 @@ export const directlyFundingFailure = {
   processId,
   channelId,
   // States
-  waitForWithdrawal: waitForWithdrawalFailure,
-  failure: withdrawalFailure,
-  // actions
-  withdrawalFailureAction: withdrawalScenarios.withdrawalRejected.rejected,
-  // shared data
-  sharedData: {
-    ...EMPTY_SHARED_DATA,
-    fundingState: directlyFundedFundingState,
-    channelStore,
+  waitForWithdrawal: {
+    state: waitForWithdrawalFailure,
+    action: withdrawalScenarios.withdrawalRejected.waitForApproval.action,
+    sharedData: {
+      ...EMPTY_SHARED_DATA,
+      fundingState: directlyFundedFundingState,
+      channelStore,
+    },
   },
 };
 
@@ -152,6 +158,6 @@ export const indirectlyFundingFailure = {
   waitForLedgerDefunding: {
     state: waitForLedgerFailure,
     action: indirectDefunding.failureTrigger,
-    store: indirectDefunding.preFailureState.store,
+    sharedData: indirectDefunding.preFailureState.store,
   },
 };

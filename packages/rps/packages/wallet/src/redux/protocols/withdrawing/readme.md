@@ -20,7 +20,8 @@ Out of scope (for the time being):
 The protocol is implemented with the following state machine
 
 ```mermaid
-graph LR
+graph TD
+linkStyle default interpolate basis
   St((start)) --> F((failure))
   St((start)) --> WFAp(WaitForApproval)
   WFAp --> |Approved| WFT(WaitForTransaction)
@@ -28,6 +29,15 @@ graph LR
   WFT --> |TransactionFailed| F((failure))
   WFAk --> |SuccessAcknowledged| S((success))
   WFAp --> |Rejected| F((failure))
+
+  classDef logic fill:#efdd20;
+  classDef Success fill:#58ef21;
+  classDef Failure fill:#f45941;
+  classDef WaitForChildProtocol stroke:#333,stroke-width:4px,color:#ffff,fill:#333;
+  class St logic;
+  class S Success;
+  class F Failure;
+  class WFT WaitForChildProtocol;
 ```
 
 Notes:

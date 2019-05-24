@@ -33,12 +33,8 @@ import {
 } from '../../reducer-helpers';
 import { ProtocolAction } from '../../../../redux/actions';
 import { theirAddress } from '../../../channel-store';
-import {
-  sendConcludeInstigated,
-  COMMITMENT_RECEIVED,
-  CommitmentReceived,
-} from '../../../../communication';
-import { failure, success } from '../state';
+import { sendConcludeInstigated, CommitmentReceived } from '../../../../communication';
+import { failure, success } from '../states';
 import { getChannelId } from '../../../../domain';
 import { ProtocolStateWithSharedData } from '../..';
 
@@ -53,7 +49,7 @@ export function instigatorConcludingReducer(
   // TODO: Since a commitment received could be a defundingAction OR
   // a concludingAction we need to check if its the action we're interested in
   // This is a bit awkward, probably a better way of handling this?
-  if (action.type === COMMITMENT_RECEIVED) {
+  if (action.type === 'WALLET.COMMON.COMMITMENT_RECEIVED') {
     const channelId = getChannelId(action.signedCommitment.commitment);
     if (channelId === protocolState.channelId) {
       return concludeReceived(action, protocolState, sharedData);
@@ -205,7 +201,10 @@ function defundChosen(protocolState: NonTerminalCState, sharedData: Storage): Re
 function acknowledged(protocolState: CState, sharedData: Storage): ReturnVal {
   switch (protocolState.type) {
     case 'ConcludingInstigator.AcknowledgeSuccess':
-      return { protocolState: success(), sharedData: sendConcludeSuccess(hideWallet(sharedData)) };
+      return {
+        protocolState: success({}),
+        sharedData: sendConcludeSuccess(hideWallet(sharedData)),
+      };
     case 'ConcludingInstigator.AcknowledgeFailure':
       return {
         protocolState: failure({ reason: protocolState.reason }),
