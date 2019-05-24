@@ -1,5 +1,5 @@
 import { ethers } from 'ethers';
-import { Channel, toUint256, CommitmentType, Commitment } from 'fmg-core';
+import { Channel, toUint256, CommitmentType } from 'fmg-core';
 
 import {
   propose,
@@ -13,7 +13,7 @@ import {
   UpdateType,
   AppAttributes,
 } from '../src/consensus-app';
-import { validTransition } from '../src/validTransition';
+import { validTransition } from '../src/consensus-app';
 
 describe('ConsensusApp', () => {
   const participantA = new ethers.Wallet(
