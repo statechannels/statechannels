@@ -7,19 +7,62 @@
     "test": "test"
   },
   "scripts": {
-    "test": "node -r esm ./node_modules/.bin/truffle test"
+    "prepare": "yarn build ",
+    "test": "npx ganache-then-jest",
+    "test:ci": "yarn clearContracts && npx ganache-then-jest",
+    "deploy": "yarn clearContracts && npx deploy-contracts",
+    "build:typescript": "tslint --project . && tsc",
+    "clearContracts": "rm -rf build/contracts",
+    "build": "yarn clearContracts && npx truffle build && yarn build:typescript"
   },
   "repository": "https://github.com/magmo/force-move-games/tree/master/packages/fmg-payments",
   "author": "Tom Close",
   "license": "MIT",
   "dependencies": {
+    "ethers": "^4.0.26",
     "fmg-core": "^0.5.8",
-    "sha3": "^1.2.2",
-    "truffle": "^5.0.0-beta.2",
-    "web3-utils": "^1.0.0-beta.30",
     "web3": "1.0.0-beta.37"
   },
   "devDependencies": {
-    "esm": "^3.0.52"
+    "@types/jest": "^23.3.10",
+    "@types/node": "^10.12.10",
+    "@types/web3": "^1.0.12",
+    "dotenv": "^6.1.0",
+    "ganache-cli": "6.1.8",
+    "jest": "^23.6.0",
+    "jest-gas-reporter": "0.0.1",
+    "magmo-devtools": "git+https://github.com/magmo/devtools.git#v0.1.14",
+    "truffle": "^5.0.0-beta.2",
+    "ts-jest": "^23.10.5",
+    "tslint": "^5.11.0",
+    "tslint-config-prettier": "^1.17.0",
+    "typescript": "^3.2.1"
+  },
+  "jest": {
+    "collectCoverageFrom": [
+      "src/**/*.{js,jsx,ts,tsx}"
+    ],
+    "testMatch": [
+      "<rootDir>/test/**/?(*.)(spec|test).(t)s?(x)"
+    ],
+    "testPathIgnorePatterns": [
+      "/node_modules/"
+    ],
+    "testEnvironment": "node",
+    "testURL": "http://localhost",
+    "transformIgnorePatterns": [
+      "[/\\\\](node_modules|scripts)[/\\\\].+\\.(js|jsx|mjs)$"
+    ],
+    "globals": {
+      "ts-jest": {
+        "tsConfig": "./tsconfig.json"
+      }
+    },
+    "preset": "ts-jest"
+  },
+  "prettier": {
+    "printWidth": 100,
+    "singleQuote": true,
+    "trailingComma": "all"
   }
 }
