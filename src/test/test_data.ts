@@ -1,7 +1,7 @@
 import { Channel, Commitment, CommitmentType, sign, toHex } from 'fmg-core';
 import { channelID } from 'fmg-core/lib/channel';
 import { bytesFromAppAttributes } from 'fmg-nitro-adjudicator';
-import { UpdateType } from 'fmg-nitro-adjudicator/lib/consensus-app';
+import { AppCommitment, UpdateType } from 'fmg-nitro-adjudicator/lib/consensus-app';
 import {
   ALLOCATION,
   BEGINNING_APP_CHANNEL_NONCE,
@@ -80,12 +80,12 @@ function post_fund_setup(turnNum: number): LedgerCommitment {
   };
 }
 
-function app(turnNum: number, channel: Channel): LedgerCommitment {
+function app(turnNum: number, channel: Channel): AppCommitment {
   return {
     ...base,
     channel,
     turnNum,
-    appAttributes: app_attrs(turnNum % channel.participants.length),
+    appAttributes: app_attrs(turnNum % channel.participants.length) as any,
     commitmentCount: 0,
     commitmentType: CommitmentType.App,
   };
