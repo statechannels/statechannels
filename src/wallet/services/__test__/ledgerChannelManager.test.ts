@@ -15,7 +15,7 @@ import {
 } from '../../../test/test_data';
 import errors from '../../errors';
 import * as ChannelManagement from '../channelManagement';
-import { asCoreCommitment, LedgerCommitment } from '../ledger-commitment';
+import { asConsensusCommitment, asCoreCommitment, LedgerCommitment } from '../ledger-commitment';
 import * as LedgerChannelManager from '../ledgerChannelManager';
 
 let pre_fund_setup_0: LedgerCommitment;
@@ -160,6 +160,7 @@ describe('updateLedgerChannel', () => {
       const { commitment, signature } = await LedgerChannelManager.updateLedgerChannel(
         app_0,
         theirSignature,
+        asConsensusCommitment(post_fund_setup_1_response),
       );
       expect(commitment).toMatchObject(app_1_response);
 

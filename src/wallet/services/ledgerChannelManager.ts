@@ -75,7 +75,7 @@ function voteRequired(c: LedgerCommitment): c is ProposalCommitment {
 }
 
 export function valuePreserved(currentCommitment: any, theirCommitment: any): boolean {
-  return currentCommitment && theirCommitment && true;
+  return currentCommitment || (theirCommitment && true);
 }
 
 export function validTransition(
