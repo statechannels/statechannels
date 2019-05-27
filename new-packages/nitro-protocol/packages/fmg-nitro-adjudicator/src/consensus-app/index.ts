@@ -117,6 +117,14 @@ const consensusAtts: () => ConsensusAppAttrs = () => ({
   furtherVotesRequired: 0,
 });
 
+function nextAppCommitment(c: AppCommitment): AppCommitment {
+  return {
+    ...c,
+    turnNum: c.turnNum + 1,
+    commitmentCount: 0,
+  };
+}
+
 export function initialConsensus(c: {
   channel: Channel;
   turnNum: number;
@@ -137,8 +145,7 @@ export function propose(
 ): ProposalCommitment {
   const numParticipants = commitment.channel.participants.length;
   return {
-    ...commitment,
-    turnNum: commitment.turnNum + 1,
+    ...nextAppCommitment(commitment),
     appAttributes: {
       proposedAllocation,
       proposedDestination,
@@ -150,8 +157,7 @@ export function propose(
 
 export function pass(commitment: ConsensusReachedCommitment): ConsensusReachedCommitment {
   return {
-    ...commitment,
-    turnNum: commitment.turnNum + 1,
+    ...nextAppCommitment(commitment),
     appAttributes: consensusAtts(),
   };
 }
@@ -162,8 +168,7 @@ export function vote(commitment: ProposalCommitment): ProposalCommitment {
   }
 
   return {
-    ...commitment,
-    turnNum: commitment.turnNum + 1,
+    ...nextAppCommitment(commitment),
     appAttributes: {
       ...commitment.appAttributes,
       furtherVotesRequired: commitment.appAttributes.furtherVotesRequired - 1,
@@ -177,8 +182,7 @@ export function finalVote(commitment: ProposalCommitment): ConsensusReachedCommi
   }
 
   return {
-    ...commitment,
-    turnNum: commitment.turnNum + 1,
+    ...nextAppCommitment(commitment),
     allocation: commitment.appAttributes.proposedAllocation,
     destination: commitment.appAttributes.proposedDestination,
     appAttributes: consensusAtts(),
@@ -187,8 +191,9 @@ export function finalVote(commitment: ProposalCommitment): ConsensusReachedCommi
 
 export function veto(commitment: ProposalCommitment): ConsensusReachedCommitment {
   return {
-    ...commitment,
-    turnNum: commitment.turnNum + 1,
+    ...nextAppCommitment(commitment),
     appAttributes: consensusAtts(),
   };
 }
+
+export { validTransition } from './validTransition';
