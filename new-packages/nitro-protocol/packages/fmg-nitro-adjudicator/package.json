@@ -1,6 +1,6 @@
 {
   "name": "fmg-nitro-adjudicator",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "main": "./lib/index.js",
   "repository": "https://github.com/magmo/nitro-adjudicator.git",
   "author": "Andrew Stewart <andrew.gord.stewart@gmail.com>",
