@@ -1,5 +1,6 @@
 import { bigNumberify } from 'ethers/utils';
 import { Address, Uint256 } from 'fmg-core';
+import { addHex } from 'magmo-wallet';
 import { HUB_ADDRESS } from '../../constants';
 import AllocatorChannel from '../models/allocatorChannel';
 import { Blockchain } from './blockchain';
@@ -51,12 +52,7 @@ export async function onDepositEvent(
 
   const totalNeededInAdjudicator = latestCommitment.allocations
     .map(allocation => allocation.amount)
-    .reduce((accumulator, currentAmount) => {
-      const sumSoFar = bigNumberify(accumulator);
-      const toAdd = bigNumberify(currentAmount);
-      const sum = sumSoFar.add(toAdd);
-      return sum.toHexString();
-    });
+    .reduce(addHex);
 
   const channelNeedsMoreFunds = bigNumberify(totalNeededInAdjudicator).gt(bigNumberify(holdings));
 
