@@ -34,7 +34,7 @@
     "dotenv": "^6.2.0",
     "dotenv-expand": "^4.2.0",
     "fmg-core": "0.5.8",
-    "fmg-nitro-adjudicator": "0.0.16",
+    "fmg-nitro-adjudicator": "0.1.2",
     "knex": "^0.13.0",
     "koa": "^2.7.0",
     "koa-body": "^4.0.8",

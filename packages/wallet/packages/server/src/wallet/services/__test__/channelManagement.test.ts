@@ -49,12 +49,6 @@ describe('validSignature', () => {
   });
 });
 
-describe.skip('channelFunded', () => {
-  it('works', () => {
-    expect.assertions(1);
-  });
-});
-
 describe('formResponse', () => {
   it('returns a signed core commitment', async () => {
     pre_fund_setup_1.channel = funded_channel;

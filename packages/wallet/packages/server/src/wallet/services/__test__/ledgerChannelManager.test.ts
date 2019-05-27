@@ -4,7 +4,6 @@ import {
   FUNDED_CHANNEL_NONCE,
   PARTICIPANT_PRIVATE_KEY,
   PARTICIPANTS,
-  UNKNOWN_RULES_ADDRESS,
 } from '../../../constants';
 import {
   app_1_response,
@@ -16,7 +15,7 @@ import {
 } from '../../../test/test_data';
 import errors from '../../errors';
 import * as ChannelManagement from '../channelManagement';
-import { asCoreCommitment, LedgerCommitment } from '../ledger-commitment';
+import { asConsensusCommitment, asCoreCommitment, LedgerCommitment } from '../ledger-commitment';
 import * as LedgerChannelManager from '../ledgerChannelManager';
 
 let pre_fund_setup_0: LedgerCommitment;
@@ -53,20 +52,6 @@ describe('updateLedgerChannel', () => {
       );
       expect(commitment).toMatchObject(pre_fund_setup_1_response);
       expect(ChannelManagement.validSignature(commitment, signature)).toBe(true);
-    });
-
-    it.skip('throws when the rules are not known', async () => {
-      // Foreign key constraint was dropped
-      expect.assertions(1);
-
-      const unknown_rules = { ...pre_fund_setup_0 };
-      unknown_rules.channel.channelType = UNKNOWN_RULES_ADDRESS;
-      const signature = signAppCommitment(unknown_rules, PARTICIPANT_PRIVATE_KEY);
-      await LedgerChannelManager.updateLedgerChannel(unknown_rules, signature).catch(err => {
-        expect(err.message).toMatch(
-          'insert or update on table "allocator_channels" violates foreign key constraint "allocator_channels_rules_address_foreign"',
-        );
-      });
     });
 
     it.skip('throws when the commitment is incorrectly signed', async () => {
@@ -164,13 +149,9 @@ describe('updateLedgerChannel', () => {
         },
       );
     });
-
-    it.skip('throws when the app is not funded', async () => {
-      expect.assertions(1);
-    });
   });
 
-  describe.skip('transitioning to an app commitment', () => {
+  describe('transitioning to an app commitment', () => {
     beforeEach(() => {
       theirSignature = signAppCommitment(app_0, PARTICIPANT_PRIVATE_KEY);
     });
@@ -179,6 +160,7 @@ describe('updateLedgerChannel', () => {
       const { commitment, signature } = await LedgerChannelManager.updateLedgerChannel(
         app_0,
         theirSignature,
+        asConsensusCommitment(post_fund_setup_1_response),
       );
       expect(commitment).toMatchObject(app_1_response);
 

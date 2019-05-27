@@ -1,4 +1,13 @@
 import { CommitmentType, Signature } from 'fmg-core';
+import {
+  finalVote,
+  isConsensusReached,
+  pass,
+  ProposalCommitment,
+  UpdateType,
+  vote,
+} from 'fmg-nitro-adjudicator/lib/consensus-app';
+import { unreachable } from 'magmo-wallet';
 import { SignedCommitment } from '.';
 import { queries } from '../db/queries/allocator_channels';
 import errors from '../errors';
@@ -39,22 +48,34 @@ export function nextCommitment(
   }
 
   if (theirCommitment.commitmentType !== CommitmentType.App) {
-    return ChannelManagement.nextCommitment(theirCommitment);
+    return ChannelManagement.nextCommitment(theirCommitment) as LedgerCommitment;
   }
 
-  return {
-    ...theirCommitment,
-    turnNum: theirCommitment.turnNum + 1,
-    commitmentCount: 0,
-    appAttributes: {
-      ...theirCommitment.appAttributes,
-      furtherVotesRequired: theirCommitment.appAttributes.furtherVotesRequired - 1,
-    },
-  };
+  if (finalVoteRequired(theirCommitment)) {
+    return finalVote(theirCommitment);
+  } else if (voteRequired(theirCommitment)) {
+    return vote(theirCommitment);
+  } else if (isConsensusReached(theirCommitment)) {
+    return pass(theirCommitment);
+  } else {
+    return unreachable(theirCommitment);
+  }
+}
+
+function finalVoteRequired(c: LedgerCommitment): c is ProposalCommitment {
+  return (
+    c.appAttributes.updateType === UpdateType.Proposal && c.appAttributes.furtherVotesRequired === 1
+  );
+}
+
+function voteRequired(c: LedgerCommitment): c is ProposalCommitment {
+  return (
+    c.appAttributes.updateType === UpdateType.Proposal && c.appAttributes.furtherVotesRequired > 1
+  );
 }
 
 export function valuePreserved(currentCommitment: any, theirCommitment: any): boolean {
-  return currentCommitment && theirCommitment && true;
+  return currentCommitment || (theirCommitment && true);
 }
 
 export function validTransition(
