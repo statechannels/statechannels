@@ -1,7 +1,7 @@
 import { Channel, Commitment, CommitmentType, sign, toHex } from 'fmg-core';
 import { channelID } from 'fmg-core/lib/channel';
 import { bytesFromAppAttributes } from 'fmg-nitro-adjudicator';
-import { UpdateType } from 'fmg-nitro-adjudicator/lib/consensus-app';
+import { AppCommitment, UpdateType } from 'fmg-nitro-adjudicator/lib/consensus-app';
 import {
   ALLOCATION,
   BEGINNING_APP_CHANNEL_NONCE,
@@ -42,14 +42,10 @@ export const ongoing_app_phase_channel: Channel = {
   nonce: ONGOING_APP_CHANNEL_NONCE,
 };
 
-const app_attrs = (
-  n: number,
-  proposedAllocation = ALLOCATION,
-  proposedDestination = DESTINATION,
-) => ({
-  furtherVotesRequired: 2 - (n % 2),
-  proposedAllocation,
-  proposedDestination,
+const consensus_app_attrs = (n: number) => ({
+  furtherVotesRequired: n,
+  proposedAllocation: [],
+  proposedDestination: [],
   updateType: UpdateType.Consensus,
 });
 
@@ -63,7 +59,7 @@ function pre_fund_setup(turnNum: number): LedgerCommitment {
     ...base,
     channel: { ...default_channel },
     turnNum,
-    appAttributes: app_attrs(0),
+    appAttributes: consensus_app_attrs(0),
     commitmentCount: turnNum,
     commitmentType: CommitmentType.PreFundSetup,
   };
@@ -74,18 +70,18 @@ function post_fund_setup(turnNum: number): LedgerCommitment {
     ...base,
     channel: { ...funded_channel },
     turnNum,
-    appAttributes: app_attrs(0),
+    appAttributes: consensus_app_attrs(0),
     commitmentCount: turnNum % funded_channel.participants.length,
     commitmentType: CommitmentType.PostFundSetup,
   };
 }
 
-function app(turnNum: number, channel: Channel): LedgerCommitment {
+function app(turnNum: number, channel: Channel): AppCommitment {
   return {
     ...base,
     channel,
     turnNum,
-    appAttributes: app_attrs(turnNum % channel.participants.length),
+    appAttributes: consensus_app_attrs(turnNum % channel.participants.length) as any,
     commitmentCount: 0,
     commitmentType: CommitmentType.App,
   };
@@ -110,7 +106,7 @@ const base_response = {
 export const pre_fund_setup_1_response: Commitment = {
   ...base_response,
   turnNum: 1,
-  appAttributes: bytesFromAppAttributes(app_attrs(0)),
+  appAttributes: bytesFromAppAttributes(consensus_app_attrs(0)),
   commitmentCount: 1,
   commitmentType: CommitmentType.PreFundSetup,
 };
@@ -118,7 +114,7 @@ export const pre_fund_setup_1_response: Commitment = {
 export const post_fund_setup_1_response: Commitment = {
   ...base_response,
   turnNum: 3,
-  appAttributes: bytesFromAppAttributes(app_attrs(0)),
+  appAttributes: bytesFromAppAttributes(consensus_app_attrs(0)),
   commitmentCount: 1,
   channel: funded_channel,
   commitmentType: CommitmentType.PostFundSetup,
@@ -127,7 +123,7 @@ export const post_fund_setup_1_response: Commitment = {
 export const app_1_response: Commitment = {
   ...base_response,
   turnNum: 5,
-  appAttributes: bytesFromAppAttributes(app_attrs(1)),
+  appAttributes: bytesFromAppAttributes(consensus_app_attrs(0)),
   commitmentCount: 0,
   channel: beginning_app_phase_channel,
   commitmentType: CommitmentType.App,
@@ -153,7 +149,7 @@ export const created_pre_fund_setup_1: LedgerCommitment = {
   commitmentType: CommitmentType.PreFundSetup,
   allocation: ALLOCATION,
   destination: DESTINATION,
-  appAttributes: app_attrs(1),
+  appAttributes: consensus_app_attrs(1),
 };
 
 export const participants = [{ address: PARTICIPANT_ADDRESS }, { address: HUB_ADDRESS }];

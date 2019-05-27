@@ -44,10 +44,7 @@ async function updateAllocatorChannel(
     amount: c.allocation[priority],
   });
 
-  const allocations = (c: AppCommitment) => [
-    allocationByPriority(0, c),
-    allocationByPriority(1, c),
-  ];
+  const allocations = (c: AppCommitment) => c.allocation.map((_, i) => allocationByPriority(i, c));
 
   const commitment = (c: AppCommitment) => ({
     turn_number: c.turnNum,

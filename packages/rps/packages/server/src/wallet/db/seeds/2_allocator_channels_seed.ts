@@ -50,8 +50,8 @@ const allocations = () => [allocationByPriority(0), allocationByPriority(1)];
 
 const ledger_appAttrs = (n: number) => ({
   furtherVotesRequired: n,
-  proposedAllocation: ALLOCATION,
-  proposedDestination: DESTINATION,
+  proposedAllocation: [],
+  proposedDestination: [],
   updateType: UpdateType.Consensus,
 });
 
@@ -80,7 +80,7 @@ function post_fund_setup(turnNumber: number) {
     commitmentType: CommitmentType.PostFundSetup,
     commitmentCount: turnNumber % funded_channel.participants.length,
     allocations: allocations(),
-    appAttrs: ledger_appAttrs(2),
+    appAttrs: ledger_appAttrs(0),
   };
 }
 
