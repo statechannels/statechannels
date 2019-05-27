@@ -1,5 +1,5 @@
 import { ethers } from 'ethers';
-import { BigNumber } from 'ethers/utils';
+import { Uint256 } from 'fmg-core';
 import { nitroAdjudicator } from '../utilities/blockchain';
 
 /**
@@ -15,8 +15,8 @@ export enum AdjudicaorWatcherEventType {
 export interface AdjudicatorWatcherEvent {
   eventType: AdjudicaorWatcherEventType;
   channelId: string;
-  amountDeposited: BigNumber;
-  destinationHoldings: BigNumber;
+  amountDeposited: Uint256;
+  destinationHoldings: Uint256;
 }
 
 export async function listen() {
@@ -27,8 +27,8 @@ export async function listen() {
     process.send({
       eventType: AdjudicaorWatcherEventType.Deposited,
       channelId,
-      amountDeposited,
-      destinationHoldings,
+      amountDeposited: amountDeposited.toHexString(),
+      destinationHoldings: destinationHoldings.toHexString(),
     });
   });
   const challengeCreatedFilter = adjudicator.filters.ChallengeCreated();

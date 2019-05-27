@@ -24,6 +24,8 @@ async function fundFunction(
 }
 const mockBlockchainFund = jest.fn().mockImplementation(fundFunction);
 Blockchain.fund = mockBlockchainFund;
+const amountDeposited = bigNumberify(5).toHexString();
+const destinationHoldings = bigNumberify(10).toHexString();
 
 beforeEach(() => {
   mockBlockchainFund.mockClear();
@@ -31,24 +33,18 @@ beforeEach(() => {
 
 describe('deposit manager', () => {
   it('should not deposit, adjudicator fully funded', async () => {
-    const amountDeposited = bigNumberify(5);
-    const destinationHoldings = bigNumberify(10);
-
     await onDepositEvent(channelId, amountDeposited, destinationHoldings);
 
     const postEventHoldings = await getHoldings();
-    expect(postEventHoldings).toMatch(destinationHoldings.toHexString());
+    expect(postEventHoldings).toMatch(destinationHoldings);
     expect(mockBlockchainFund).toBeCalledTimes(0);
   });
 
   it('should deposit, adjudicator not fully funded', async () => {
-    const amountDeposited = bigNumberify(5);
-    const destinationHoldings = bigNumberify(5);
-
     await onDepositEvent(channelId, amountDeposited, destinationHoldings);
 
     const postEventHoldings = await getHoldings();
-    expect(postEventHoldings).toMatch(destinationHoldings.toHexString());
+    expect(postEventHoldings).toMatch(destinationHoldings);
     expect(mockBlockchainFund).toBeCalledWith(channelId, '0x05', '0x05');
   });
 });

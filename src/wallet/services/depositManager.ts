@@ -1,5 +1,5 @@
-import { BigNumber, bigNumberify } from 'ethers/utils';
-import { Address } from 'fmg-core';
+import { bigNumberify } from 'ethers/utils';
+import { Address, Uint256 } from 'fmg-core';
 import { HUB_ADDRESS } from '../../constants';
 import AllocatorChannel from '../models/allocatorChannel';
 import { Blockchain } from './blockchain';
@@ -15,8 +15,8 @@ import { Blockchain } from './blockchain';
 
 export async function onDepositEvent(
   channelId: Address,
-  amountDeposited: BigNumber,
-  destinationHoldings: BigNumber,
+  amountDeposited: Uint256,
+  destinationHoldings: Uint256,
 ) {
   // todo: to avoid manual case conversions, we can switch to knexSnakeCaseMappers.
   // https://vincit.github.io/objection.js/recipes/snake-case-to-camel-case-conversion.html#snake-case-to-camel-case-conversion
@@ -27,6 +27,8 @@ export async function onDepositEvent(
     })
     .eager('[commitments.[allocations], participants]');
 
+  const holdings = destinationHoldings;
+
   if (!allocatorChannel) {
     console.log(`Allocator channel ${channelId} not in database`);
     return;
@@ -34,7 +36,7 @@ export async function onDepositEvent(
 
   await AllocatorChannel.query()
     .findById(allocatorChannel.id)
-    .patch({ holdings: destinationHoldings.toHexString() });
+    .patch({ holdings });
 
   const commitments = allocatorChannel.commitments;
   const latestCommitment = commitments.reduce((prevCommitment, currentCommitment) => {
@@ -56,17 +58,11 @@ export async function onDepositEvent(
       return sum.toHexString();
     });
 
-  const channelNeedsMoreFunds = bigNumberify(totalNeededInAdjudicator).gt(
-    bigNumberify(destinationHoldings),
-  );
+  const channelNeedsMoreFunds = bigNumberify(totalNeededInAdjudicator).gt(bigNumberify(holdings));
 
   if (channelNeedsMoreFunds) {
     const allocationNeededFromHub = latestCommitment.allocations[hubParticipatIndex];
-    await Blockchain.fund(
-      channelId,
-      destinationHoldings.toHexString(),
-      allocationNeededFromHub.amount,
-    );
+    await Blockchain.fund(channelId, holdings, allocationNeededFromHub.amount);
   } else {
     console.log('Channel is fully funded');
   }
