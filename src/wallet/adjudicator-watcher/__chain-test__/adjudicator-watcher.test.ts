@@ -8,7 +8,7 @@ import { Blockchain } from '../../services/blockchain';
 jest.setTimeout(20000);
 const channelId = channelID(funded_channel);
 let killSubprocess = null;
-const five = bigNumberify(5);
+const five = bigNumberify(5).toHexString();
 
 describe('adjudicator listener', () => {
   it('should handle a funds received event when channel is in the database', async done => {
