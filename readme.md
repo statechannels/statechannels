@@ -35,8 +35,8 @@ $ curl -X POST -H "Content-Type: application/json" -H "Accept:application/json" 
 
 To play against the server from the browser client, the server and the browser need to:
 
-- Point to the same local Ganache server.
-- Point to the same contract addresses on Ganache.
+- Point to the same local Ganache server. Configure your `.env.*.local` files accordingly.
+- Point to the same contract addresses on Ganache. For now, run something like `cp ../wallet/build/contracts/* build/contracts/` after deploying the contracts from the wallet.
 
 You will also need to make sure that the server's address has funds. You can find the server address in [constants.ts](https://github.com/magmo/node-bot/blob/master/src/constants.ts)
 
