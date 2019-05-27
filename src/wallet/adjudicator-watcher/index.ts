@@ -7,13 +7,13 @@ import { nitroAdjudicator } from '../utilities/blockchain';
  * - wire up then other events.
  */
 
-export enum AdjudicaorWatcherEventType {
+export enum AdjudicatorWatcherEventType {
   Deposited,
   ChallengeCreated,
 }
 
 export interface AdjudicatorWatcherEvent {
-  eventType: AdjudicaorWatcherEventType;
+  eventType: AdjudicatorWatcherEventType;
   channelId: string;
   amountDeposited: Uint256;
   destinationHoldings: Uint256;
@@ -25,7 +25,7 @@ export async function listen() {
   const depositedFilter = adjudicator.filters.Deposited();
   adjudicator.on(depositedFilter, async (channelId, amountDeposited, destinationHoldings) => {
     process.send({
-      eventType: AdjudicaorWatcherEventType.Deposited,
+      eventType: AdjudicatorWatcherEventType.Deposited,
       channelId,
       amountDeposited: amountDeposited.toHexString(),
       destinationHoldings: destinationHoldings.toHexString(),

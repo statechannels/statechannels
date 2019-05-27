@@ -1,7 +1,10 @@
 import { fork } from 'child_process';
 import { unreachable } from 'magmo-wallet';
 import { Model } from 'objection';
-import { AdjudicaorWatcherEventType, AdjudicatorWatcherEvent } from '../wallet/adjudicator-watcher';
+import {
+  AdjudicatorWatcherEventType,
+  AdjudicatorWatcherEvent,
+} from '../wallet/adjudicator-watcher';
 import knex from '../wallet/db/connection';
 import { onDepositEvent } from '../wallet/services/depositManager';
 import app from './app';
@@ -18,10 +21,10 @@ const adjudicatorWatcher = fork(`${__dirname}/../wallet/adjudicator-watcher`);
 adjudicatorWatcher.on('message', (message: AdjudicatorWatcherEvent) => {
   console.log(`Parent received message: ${message}`);
   switch (message.eventType) {
-    case AdjudicaorWatcherEventType.Deposited:
+    case AdjudicatorWatcherEventType.Deposited:
       onDepositEvent(message.channelId, message.amountDeposited, message.destinationHoldings);
       break;
-    case AdjudicaorWatcherEventType.ChallengeCreated:
+    case AdjudicatorWatcherEventType.ChallengeCreated:
       return;
     default:
       unreachable(message.eventType);
