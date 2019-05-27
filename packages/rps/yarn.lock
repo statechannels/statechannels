@@ -9195,10 +9195,10 @@ fmg-core@0.5.8, fmg-core@^0.5.8:
     web3-utils "1.0.0-beta.37"
     websocket "^1.0.28"
 
-fmg-nitro-adjudicator@0.0.16:
-  version "0.0.16"
-  resolved "https://registry.yarnpkg.com/fmg-nitro-adjudicator/-/fmg-nitro-adjudicator-0.0.16.tgz#3c2f65afd74df104b4e84fdc61bab01a84e5835e"
-  integrity sha512-SVJk15jiuNwqVDypAIB1OngYNZyKIyOuNqVm6DA0vymq0oItk3d5Mpij3UrXezh61oORCt8IfuDKQ+fLhJpZXg==
+fmg-nitro-adjudicator@0.1.2:
+  version "0.1.2"
+  resolved "https://registry.yarnpkg.com/fmg-nitro-adjudicator/-/fmg-nitro-adjudicator-0.1.2.tgz#47cabbea9e80867d01bc88478a08a7d46d724ded"
+  integrity sha512-qjLmi6gOn0rJq7r4rTMpzi1LYepTyyHfg3atoDZ4NRgVKFI/5G77ka7ZHfwukCCCNJlMsqY+EefwVw5z7c4xeQ==
   dependencies:
     ethers "^4.0.26"
     fmg-core "^0.5.8"

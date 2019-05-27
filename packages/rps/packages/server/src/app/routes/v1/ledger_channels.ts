@@ -4,7 +4,7 @@ import * as Router from 'koa-router';
 import { appAttributesFromBytes, bytesFromAppAttributes } from 'fmg-nitro-adjudicator';
 import Wallet, { errors } from '../../../wallet';
 import { getCurrentCommitment } from '../../../wallet/db/queries/getCurrentCommitment';
-import { asLedgerCommitment } from '../../../wallet/services/ledger-commitment';
+import { asConsensusCommitment } from '../../../wallet/services/ledger-commitment';
 export const BASE_URL = `/api/v1/ledger_channels`;
 
 const router = new Router();
@@ -23,7 +23,7 @@ router.post(`${BASE_URL}`, koaBody(), async ctx => {
         appAttributes: appAttributesFromBytes(theirCommitment.appAttributes),
       },
       theirSignature,
-      asLedgerCommitment(currentCommitment),
+      asConsensusCommitment(currentCommitment),
     );
     body = { status: 'success', commitment, signature };
 

@@ -1,7 +1,6 @@
 import { ethers } from 'ethers';
 import { Signature } from 'fmg-core';
 import { channelID } from 'fmg-core/lib/channel';
-import { appAttributesFromBytes } from 'fmg-nitro-adjudicator';
 import {
   CommitmentReceived,
   RelayableAction,
@@ -14,7 +13,7 @@ import { getCurrentCommitment } from '../../wallet/db/queries/getCurrentCommitme
 import { getProcess } from '../../wallet/db/queries/walletProcess';
 import { updateLedgerChannel } from '../../wallet/services';
 import { Blockchain } from '../../wallet/services/blockchain';
-import { asLedgerCommitment } from '../../wallet/services/ledger-commitment';
+import { asConsensusCommitment } from '../../wallet/services/ledger-commitment';
 import { updateRPSChannel } from '../services/rpsChannelManager';
 
 export async function handleOngoingProcessAction(ctx) {
@@ -73,12 +72,9 @@ async function handleCommitmentReceived(ctx, action: CommitmentReceived) {
 
     const currentCommitment = await getCurrentCommitment(theirCommitment);
     const { commitment, signature } = await updateLedgerChannel(
-      {
-        ...theirCommitment,
-        appAttributes: appAttributesFromBytes(theirCommitment.appAttributes),
-      },
+      asConsensusCommitment(theirCommitment),
       splitSignature,
-      asLedgerCommitment(currentCommitment),
+      currentCommitment && asConsensusCommitment(currentCommitment),
     );
     ctx.status = 201;
     ctx.body = communication.sendCommitmentReceived(
