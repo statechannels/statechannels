@@ -72,6 +72,52 @@ describe('ConsensusApp', () => {
   const threeVotesComplete = vote(twoVotesComplete);
   const fourVotesComplete = finalVote(threeVotesComplete);
 
+  describe('the propose transition', async () => {
+    const fromCommitment = initialConsensus(defaults);
+    const toCommitment = propose(copy(fromCommitment), proposedAllocation, proposedDestination);
+    const validator = validatePropose;
+    it('returns true on a valid transition', async () => {
+      expectValidTransition(fromCommitment, toCommitment, validator);
+    });
+
+    itThrowsWhenTheBalancesAreChanged(fromCommitment, toCommitment, validator);
+  });
+
+  describe('the pass transition', async () => {
+    const fromCommitment = initialConsensus(defaults);
+    const toCommitment = pass(copy(fromCommitment));
+
+    it('returns true on a valid transition', async () => {
+      expectValidTransition(fromCommitment, toCommitment, validatePass);
+    });
+
+    itThrowsWhenTheBalancesAreChanged(fromCommitment, toCommitment, validatePass);
+  });
+
+  describe('the vote transition', async () => {
+    const fromCommitment = twoVotesComplete;
+    const toCommitment = vote(copy(fromCommitment));
+
+    itReturnsTrueOnAValidTransition(fromCommitment, toCommitment, validateVote);
+    itThrowsWhenTheBalancesAreChanged(fromCommitment, toCommitment, validateVote);
+    itThrowsWhenTheProposalsAreChanged(fromCommitment, toCommitment, validateVote);
+  });
+
+  describe('the final vote transition', async () => {
+    const fromCommitment = twoVotesComplete;
+    const toCommitment = finalVote(copy(fromCommitment));
+
+    itReturnsTrueOnAValidTransition(fromCommitment, toCommitment, validateFinalVote);
+    itThrowsWhenTheBalancesAreNotUpdated(fromCommitment, toCommitment, validateFinalVote);
+  });
+
+  describe('the veto transition', async () => {
+    const fromCommitment = oneVoteComplete;
+    const toCommitment = veto(copy(fromCommitment));
+
+    itReturnsTrueOnAValidTransition(fromCommitment, toCommitment, validateVeto);
+  });
+
   describe('validateConsensusCommitment', () => {
     const toCommitmentArgs = fourVotesComplete;
     const validator = validateConsensusCommitment;
@@ -135,52 +181,6 @@ describe('ConsensusApp', () => {
         "ConsensusApp: 'proposedDestination' and 'proposedAllocation' must be the same length during propose.",
       );
     });
-  });
-
-  describe('the propose transition', async () => {
-    const fromCommitment = initialConsensus(defaults);
-    const toCommitment = propose(copy(fromCommitment), proposedAllocation, proposedDestination);
-    const validator = validatePropose;
-    it('returns true on a valid transition', async () => {
-      expectValidTransition(fromCommitment, toCommitment, validator);
-    });
-
-    itThrowsWhenTheBalancesAreChanged(fromCommitment, toCommitment, validator);
-  });
-
-  describe('the pass transition', async () => {
-    const fromCommitment = initialConsensus(defaults);
-    const toCommitment = pass(copy(fromCommitment));
-
-    it('returns true on a valid transition', async () => {
-      expectValidTransition(fromCommitment, toCommitment, validatePass);
-    });
-
-    itThrowsWhenTheBalancesAreChanged(fromCommitment, toCommitment, validatePass);
-  });
-
-  describe('the vote transition', async () => {
-    const fromCommitment = twoVotesComplete;
-    const toCommitment = vote(copy(fromCommitment));
-
-    itReturnsTrueOnAValidTransition(fromCommitment, toCommitment, validateVote);
-    itThrowsWhenTheBalancesAreChanged(fromCommitment, toCommitment, validateVote);
-    itThrowsWhenTheProposalsAreChanged(fromCommitment, toCommitment, validateVote);
-  });
-
-  describe('the final vote transition', async () => {
-    const fromCommitment = twoVotesComplete;
-    const toCommitment = finalVote(copy(fromCommitment));
-
-    itReturnsTrueOnAValidTransition(fromCommitment, toCommitment, validateFinalVote);
-    itThrowsWhenTheBalancesAreNotUpdated(fromCommitment, toCommitment, validateFinalVote);
-  });
-
-  describe('the veto transition', async () => {
-    const fromCommitment = oneVoteComplete;
-    const toCommitment = veto(copy(fromCommitment));
-
-    itReturnsTrueOnAValidTransition(fromCommitment, toCommitment, validateVeto);
   });
 
   // Helper functions
