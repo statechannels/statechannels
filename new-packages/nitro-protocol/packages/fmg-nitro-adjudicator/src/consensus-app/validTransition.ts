@@ -24,7 +24,10 @@ export function validTransition(oldCommitment: AppCommitment, newCommitment: App
   throw new Error('ConsensusApp: No valid transition found for commitments');
 }
 
-function validatePropose(oldCommitment: AppCommitment, newCommitment: AppCommitment): boolean {
+export function validatePropose(
+  oldCommitment: AppCommitment,
+  newCommitment: AppCommitment,
+): boolean {
   if (furtherVotesRequiredInitialized(newCommitment)) {
     balancesUnchanged(oldCommitment, newCommitment);
     return true;
@@ -33,7 +36,7 @@ function validatePropose(oldCommitment: AppCommitment, newCommitment: AppCommitm
   }
 }
 
-function validateVote(oldCommitment: AppCommitment, newCommitment: AppCommitment): boolean {
+export function validateVote(oldCommitment: AppCommitment, newCommitment: AppCommitment): boolean {
   if (
     oldCommitment.appAttributes.furtherVotesRequired > 1 &&
     furtherVotesRequiredDecremented(oldCommitment, newCommitment)
@@ -46,7 +49,10 @@ function validateVote(oldCommitment: AppCommitment, newCommitment: AppCommitment
   }
 }
 
-function validateFinalVote(oldCommitment: AppCommitment, newCommitment: AppCommitment): boolean {
+export function validateFinalVote(
+  oldCommitment: AppCommitment,
+  newCommitment: AppCommitment,
+): boolean {
   if (
     oldCommitment.appAttributes.furtherVotesRequired === 1 &&
     newCommitment.appAttributes.furtherVotesRequired === 0 &&
@@ -58,7 +64,7 @@ function validateFinalVote(oldCommitment: AppCommitment, newCommitment: AppCommi
   }
 }
 
-function validateVeto(oldCommitment: AppCommitment, newCommitment: AppCommitment): boolean {
+export function validateVeto(oldCommitment: AppCommitment, newCommitment: AppCommitment): boolean {
   if (
     oldCommitment.appAttributes.furtherVotesRequired > 0 &&
     newCommitment.appAttributes.furtherVotesRequired === 0 &&
@@ -70,7 +76,7 @@ function validateVeto(oldCommitment: AppCommitment, newCommitment: AppCommitment
   }
 }
 
-function validatePass(oldCommitment: AppCommitment, newCommitment: AppCommitment): boolean {
+export function validatePass(oldCommitment: AppCommitment, newCommitment: AppCommitment): boolean {
   if (
     oldCommitment.appAttributes.furtherVotesRequired === 0 &&
     newCommitment.appAttributes.furtherVotesRequired === 0
@@ -94,11 +100,7 @@ function validateBalancesUnchanged(oldCommitment: AppCommitment, newCommitment: 
   }
 }
 
-function validateConsensusCommitment(commitment: AppCommitment) {
-  if (commitment.appAttributes.furtherVotesRequired !== 0) {
-    throw new Error("ConsensusApp: 'furtherVotesRequired' must be 0 during consensus.");
-  }
-
+export function validateConsensusCommitment(commitment: AppCommitment) {
   if (!(commitment.appAttributes.proposedAllocation.length === 0)) {
     throw new Error("ConsensusApp: 'proposedAllocation' must be reset during consensus.");
   }
@@ -108,11 +110,7 @@ function validateConsensusCommitment(commitment: AppCommitment) {
   }
 }
 
-function validateProposeCommitment(commitment: AppCommitment) {
-  if (commitment.appAttributes.furtherVotesRequired === 0) {
-    throw new Error("ConsensusApp: 'furtherVotesRequired' must not be 0 during propose.");
-  }
-
+export function validateProposeCommitment(commitment: AppCommitment) {
   if (!(commitment.appAttributes.proposedAllocation.length !== 0)) {
     throw new Error("ConsensusApp: 'proposedAllocation' must not be reset during propose.");
   }
