@@ -14,77 +14,116 @@ contract ConsensusApp {
 
     ConsensusCommitment.ConsensusCommitmentStruct memory oldCommitment = ConsensusCommitment.fromFrameworkCommitment(_old);
     ConsensusCommitment.ConsensusCommitmentStruct memory newCommitment = ConsensusCommitment.fromFrameworkCommitment(_new);
-
     uint numParticipants = _old.participants.length;
 
-    // Commitment validations
-    if (oldCommitment.updateType == ConsensusCommitment.UpdateType.Proposal) {
-      validateProposeCommitment(oldCommitment);
-    } else if (oldCommitment.updateType == ConsensusCommitment.UpdateType.Consensus) {
-      validateConsensusCommitment(oldCommitment);
-    }
-    if (newCommitment.updateType == ConsensusCommitment.UpdateType.Proposal) {
-      validateProposeCommitment(newCommitment);
-    } else if (newCommitment.updateType == ConsensusCommitment.UpdateType.Consensus) {
-      validateConsensusCommitment(newCommitment);
-    }
+    // The first action that's identified in the list either returns `true`,
+    // short-circuiting the `||`, or it reverts the transaction
+    return validatePropose(oldCommitment, newCommitment, numParticipants)   ||
+           validateVote(oldCommitment, newCommitment) ||
+           validateVeto(oldCommitment, newCommitment) ||
+           validatePass(oldCommitment, newCommitment) ||
+           validateFinalVote(oldCommitment, newCommitment) ||
+           invalidTransition();
+  }
 
-    // State machine transition validations
-
-    if (oldCommitment.updateType == ConsensusCommitment.UpdateType.Consensus) {
-      if (newCommitment.updateType == ConsensusCommitment.UpdateType.Proposal) {
-        validatePropose(oldCommitment, newCommitment, numParticipants);
-        return true;
-      }
-      if (newCommitment.updateType == ConsensusCommitment.UpdateType.Consensus) {
-        validatePass(oldCommitment, newCommitment);
-        return true;
-      }
-    }
-    if (oldCommitment.updateType == ConsensusCommitment.UpdateType.Proposal) {
-      if (newCommitment.updateType == ConsensusCommitment.UpdateType.Proposal) {
-        if (hasFurtherVotesNeededBeenInitialized(newCommitment, numParticipants)){
-          validatePropose(oldCommitment, newCommitment, numParticipants);
-          return true;
-        } else {
-          validateVote(oldCommitment, newCommitment);
-          return true;
-        }
-      }
-      if (newCommitment.updateType == ConsensusCommitment.UpdateType.Consensus) {
-        if (haveBalancesBeenUpdated(oldCommitment, newCommitment)) {
-          validateFinalVote(oldCommitment, newCommitment);
-          return true;
-        } else {
-          validateVeto(oldCommitment, newCommitment);
-          return true;
-        }
-      }
-    }
-
+  function invalidTransition() private pure returns (bool) {
     revert("ConsensusApp: No valid transition found for commitments");
   }
 
-  // modifiers
-  modifier balancesUpdated(
+  // Transition validations
+
+  function validatePropose(
     ConsensusCommitment.ConsensusCommitmentStruct memory oldCommitment,
-    ConsensusCommitment.ConsensusCommitmentStruct memory newCommitment
-  ) {
-    require(
-      encodeAndHashAllocation(oldCommitment.proposedAllocation) == encodeAndHashAllocation(newCommitment.currentAllocation),
-      "ConsensusApp: 'allocation' must be set to the previous `proposedAllocation`."
-    ); 
-    require(
-      encodeAndHashDestination(oldCommitment.proposedDestination) == encodeAndHashDestination(newCommitment.currentDestination),
-      "ConsensusApp: 'destination' must be set to the previous `proposedDestination`"
-    );
-    _;
+    ConsensusCommitment.ConsensusCommitmentStruct memory newCommitment,
+    uint numParticipants
+  ) private pure returns (bool)
+  {
+    if (
+      furtherVotesRequiredInitialized(newCommitment, numParticipants)
+    ) {
+      validateProposeCommitment(newCommitment);
+      balancesUnchanged(oldCommitment, newCommitment);
+      return true;
+    } else {
+      return false;
+    }
   }
 
-  modifier balancesUnchanged(
+  function validateVote(
     ConsensusCommitment.ConsensusCommitmentStruct memory oldCommitment,
     ConsensusCommitment.ConsensusCommitmentStruct memory newCommitment
-  ) {
+  ) private pure returns (bool)
+  {
+    if (
+      oldCommitment.furtherVotesRequired > 1 &&
+      furtherVotesRequiredDecremented(oldCommitment, newCommitment)
+    ) {
+      validateProposeCommitment(newCommitment);
+      validateBalancesUnchanged(oldCommitment, newCommitment);
+      proposalsUnchanged(oldCommitment, newCommitment);
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  function validateFinalVote(
+    ConsensusCommitment.ConsensusCommitmentStruct memory oldCommitment,
+    ConsensusCommitment.ConsensusCommitmentStruct memory newCommitment
+  ) private pure returns (bool)
+  {
+    if (
+      oldCommitment.furtherVotesRequired == 1 &&
+      newCommitment.furtherVotesRequired == 0 &&
+      balancesUpdated(oldCommitment, newCommitment)
+    ) {
+      validateConsensusCommitment(newCommitment);
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  function validateVeto(
+    ConsensusCommitment.ConsensusCommitmentStruct memory oldCommitment,
+    ConsensusCommitment.ConsensusCommitmentStruct memory newCommitment
+  ) private pure returns (bool)
+  {
+    if (
+      oldCommitment.furtherVotesRequired > 0 &&
+      newCommitment.furtherVotesRequired == 0 &&
+      balancesUnchanged(oldCommitment, newCommitment)
+    ) {
+      validateConsensusCommitment(newCommitment);
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  function validatePass(
+    ConsensusCommitment.ConsensusCommitmentStruct memory oldCommitment,
+    ConsensusCommitment.ConsensusCommitmentStruct memory newCommitment
+  ) private pure returns (bool)
+  {
+    if (
+      oldCommitment.furtherVotesRequired == 0 &&
+      newCommitment.furtherVotesRequired == 0
+    ) {
+      validateConsensusCommitment(newCommitment);
+      validateBalancesUnchanged(oldCommitment, newCommitment);
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  // Helper validators
+
+  function validateBalancesUnchanged(
+    ConsensusCommitment.ConsensusCommitmentStruct memory oldCommitment,
+    ConsensusCommitment.ConsensusCommitmentStruct memory newCommitment
+  ) private pure {
     require(
       encodeAndHashAllocation(oldCommitment.currentAllocation) == encodeAndHashAllocation(newCommitment.currentAllocation),
       "ConsensusApp: 'allocation' must be the same between commitments."
@@ -93,47 +132,7 @@ contract ConsensusApp {
       encodeAndHashDestination(oldCommitment.currentDestination) == encodeAndHashDestination(newCommitment.currentDestination),
       "ConsensusApp: 'destination' must be the same between commitments."
     );
-    _;
   }
-
-  modifier proposalsUnchanged(
-    ConsensusCommitment.ConsensusCommitmentStruct memory oldCommitment,
-    ConsensusCommitment.ConsensusCommitmentStruct memory newCommitment
-  ) {
-    require(
-      encodeAndHashAllocation(oldCommitment.proposedAllocation) == encodeAndHashAllocation(newCommitment.proposedAllocation),
-      "ConsensusApp: 'proposedAllocation' must be the same between commitments."
-    ); 
-    require(
-      encodeAndHashDestination(oldCommitment.proposedDestination) == encodeAndHashDestination(newCommitment.proposedDestination),
-      "ConsensusApp: 'proposedDestination' must be the same between commitments."
-    ); 
-    _;
-  }
-
-  modifier furtherVotesRequiredInitialized(
-    ConsensusCommitment.ConsensusCommitmentStruct memory commitment,
-    uint numParticipants
-  ) {
-    require(
-      commitment.furtherVotesRequired == numParticipants - 1,
-      "Consensus App: furtherVotesRequired needs to be initialized to the correct value."
-    ); 
-    _;
-  } 
-
-  modifier furtherVotesRequiredDecremented(
-    ConsensusCommitment.ConsensusCommitmentStruct memory oldCommitment,
-    ConsensusCommitment.ConsensusCommitmentStruct memory newCommitment
-  ) {
-    require(
-      newCommitment.furtherVotesRequired == oldCommitment.furtherVotesRequired - 1,
-      "Consensus App: furtherVotesRequired should be decremented by 1."
-    ); 
-    _;
-  } 
-
-  // Commitment validations
 
   function validateConsensusCommitment(
     ConsensusCommitment.ConsensusCommitmentStruct memory commitment
@@ -169,67 +168,65 @@ contract ConsensusApp {
     ); 
   } 
 
-// Transition validations
+  // Booleans
 
-  function validatePass(
-    ConsensusCommitment.ConsensusCommitmentStruct memory oldCommitment,
-    ConsensusCommitment.ConsensusCommitmentStruct memory newCommitment
-  ) private pure
-    balancesUnchanged(oldCommitment, newCommitment)
-    proposalsUnchanged(oldCommitment, newCommitment)
-  { }
-
-  function validatePropose(
-    ConsensusCommitment.ConsensusCommitmentStruct memory oldCommitment,
-    ConsensusCommitment.ConsensusCommitmentStruct memory newCommitment,
+  function furtherVotesRequiredInitialized(
+    ConsensusCommitment.ConsensusCommitmentStruct memory commitment,
     uint numParticipants
-  ) private pure
-    balancesUnchanged(oldCommitment, newCommitment)
-    furtherVotesRequiredInitialized(newCommitment, numParticipants)
-  { }
+  ) private pure returns (bool) {
+    return(
+      commitment.furtherVotesRequired == numParticipants - 1
+    ); 
+  } 
 
-  function validateFinalVote(
+  function furtherVotesRequiredDecremented(
     ConsensusCommitment.ConsensusCommitmentStruct memory oldCommitment,
     ConsensusCommitment.ConsensusCommitmentStruct memory newCommitment
-  ) private pure
-    balancesUpdated(oldCommitment, newCommitment)
-  { }
-    
-  function validateVeto(
-    ConsensusCommitment.ConsensusCommitmentStruct memory oldCommitment,
-    ConsensusCommitment.ConsensusCommitmentStruct memory newCommitment
-  ) private pure
-    balancesUnchanged(oldCommitment, newCommitment)
-  { }
+  ) private pure returns (bool) {
+    return(
+      newCommitment.furtherVotesRequired == oldCommitment.furtherVotesRequired - 1
+    ); 
+  } 
 
-  function validateVote(
-    ConsensusCommitment.ConsensusCommitmentStruct memory oldCommitment,
-    ConsensusCommitment.ConsensusCommitmentStruct memory newCommitment
-  ) private pure
-    balancesUnchanged(oldCommitment, newCommitment)
-    proposalsUnchanged(oldCommitment, newCommitment)
-    furtherVotesRequiredDecremented(oldCommitment, newCommitment)
-  { }
-
- 
-
-// helpers
-
-  function haveBalancesBeenUpdated(
+  function balancesUpdated(
     ConsensusCommitment.ConsensusCommitmentStruct memory oldCommitment,
     ConsensusCommitment.ConsensusCommitmentStruct memory newCommitment
   ) public pure returns (bool) {
-    return encodeAndHashAllocation(oldCommitment.proposedAllocation) == encodeAndHashAllocation(newCommitment.currentAllocation) &&
-    encodeAndHashDestination(oldCommitment.proposedDestination) == encodeAndHashDestination(newCommitment.currentDestination);   
+    return (
+      encodeAndHashAllocation(oldCommitment.proposedAllocation) == encodeAndHashAllocation(newCommitment.currentAllocation) &&
+      encodeAndHashDestination(oldCommitment.proposedDestination) == encodeAndHashDestination(newCommitment.currentDestination)
+    );
   }
+
+  function balancesUnchanged(
+    ConsensusCommitment.ConsensusCommitmentStruct memory oldCommitment,
+    ConsensusCommitment.ConsensusCommitmentStruct memory newCommitment
+  ) private pure returns (bool) {
+    return (
+      encodeAndHashAllocation(oldCommitment.currentAllocation) == encodeAndHashAllocation(newCommitment.currentAllocation) &&
+      encodeAndHashDestination(oldCommitment.currentDestination) == encodeAndHashDestination(newCommitment.currentDestination)
+    );
+  }
+
+  function proposalsUnchanged(
+    ConsensusCommitment.ConsensusCommitmentStruct memory oldCommitment,
+    ConsensusCommitment.ConsensusCommitmentStruct memory newCommitment
+  ) private pure returns (bool) {
+    return (
+      encodeAndHashAllocation(oldCommitment.proposedAllocation) == encodeAndHashAllocation(newCommitment.proposedAllocation) &&
+      encodeAndHashDestination(oldCommitment.proposedDestination) == encodeAndHashDestination(newCommitment.proposedDestination)
+    ); 
+  }
+
 
   function hasFurtherVotesNeededBeenInitialized(
       ConsensusCommitment.ConsensusCommitmentStruct memory commitment,
       uint numParticipants
-  ) public pure returns (bool)
-  {
+  ) public pure returns (bool) {
     return commitment.furtherVotesRequired == numParticipants - 1;
   }
+
+  // helpers
 
   function encodeAndHashAllocation(uint256[] memory allocation) internal pure returns (bytes32) {
     return keccak256(abi.encode(allocation));
