@@ -2,8 +2,8 @@ import { fork } from 'child_process';
 import { unreachable } from 'magmo-wallet';
 import { Model } from 'objection';
 import {
-  AdjudicatorWatcherEventType,
   AdjudicatorWatcherEvent,
+  AdjudicatorWatcherEventType,
 } from '../wallet/adjudicator-watcher';
 import knex from '../wallet/db/connection';
 import { onDepositEvent } from '../wallet/services/depositManager';
