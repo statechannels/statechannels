@@ -14,7 +14,6 @@ import {
   veto,
   AppCommitment,
   asCoreCommitment,
-  UpdateType,
   AppAttributes,
 } from '../src/consensus-app';
 
@@ -153,28 +152,14 @@ describe('ConsensusApp', () => {
     c: ConsensusBaseCommitment,
     attrs?: Partial<AppAttributes>,
   ): AppCommitment {
-    switch (c.appAttributes.updateType) {
-      case UpdateType.Proposal:
-        return {
-          ...c,
-          commitmentType: CommitmentType.App,
-          appAttributes: {
-            ...c.appAttributes,
-            ...attrs,
-            updateType: UpdateType.Proposal,
-          },
-        };
-      case UpdateType.Consensus:
-        return {
-          ...c,
-          commitmentType: CommitmentType.App,
-          appAttributes: {
-            ...c.appAttributes,
-            ...attrs,
-            updateType: UpdateType.Consensus,
-          },
-        };
-    }
+    return {
+      ...c,
+      commitmentType: CommitmentType.App,
+      appAttributes: {
+        ...c.appAttributes,
+        ...attrs,
+      },
+    };
   }
 
   async function invalidTransition(
