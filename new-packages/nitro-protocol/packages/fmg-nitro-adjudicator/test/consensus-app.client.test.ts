@@ -76,8 +76,10 @@ describe('ConsensusApp', () => {
     const validator = validatePropose;
     const fromCommitment = initialConsensus(defaults);
     const toCommitment = propose(copy(fromCommitment), proposedAllocation, proposedDestination);
+    const invalidToCommitment = appCommitment(toCommitment, { furtherVotesRequired: 0 });
 
     itReturnsTrueOnAValidTransition(fromCommitment, toCommitment, validator);
+    itReturnsFalseWhenActionDoesNotMatch(fromCommitment, invalidToCommitment, validator, 'propose');
     itThrowsWhenTheBalancesAreChanged(fromCommitment, toCommitment, validator);
   });
 
@@ -85,8 +87,10 @@ describe('ConsensusApp', () => {
     const validator = validatePass;
     const fromCommitment = initialConsensus(defaults);
     const toCommitment = pass(copy(fromCommitment));
+    const invalidToCommitment = appCommitment(toCommitment, { furtherVotesRequired: 1 });
 
     itReturnsTrueOnAValidTransition(fromCommitment, toCommitment, validator);
+    itReturnsFalseWhenActionDoesNotMatch(fromCommitment, invalidToCommitment, validator, 'pass');
     itThrowsWhenTheBalancesAreChanged(fromCommitment, toCommitment, validator);
   });
 
@@ -94,8 +98,10 @@ describe('ConsensusApp', () => {
     const validator = validateVote;
     const fromCommitment = twoVotesComplete;
     const toCommitment = vote(copy(fromCommitment));
+    const invalidToCommitment = appCommitment(toCommitment, { furtherVotesRequired: 0 });
 
     itReturnsTrueOnAValidTransition(fromCommitment, toCommitment, validator);
+    itReturnsFalseWhenActionDoesNotMatch(fromCommitment, invalidToCommitment, validator, 'vote');
     itThrowsWhenTheBalancesAreChanged(fromCommitment, toCommitment, validator);
     itThrowsWhenTheProposalsAreChanged(fromCommitment, toCommitment, validator);
   });
@@ -104,8 +110,15 @@ describe('ConsensusApp', () => {
     const validator = validateFinalVote;
     const fromCommitment = twoVotesComplete;
     const toCommitment = finalVote(copy(fromCommitment));
+    const invalidToCommitment = appCommitment(toCommitment, { furtherVotesRequired: 1 });
 
     itReturnsTrueOnAValidTransition(fromCommitment, toCommitment, validator);
+    itReturnsFalseWhenActionDoesNotMatch(
+      fromCommitment,
+      invalidToCommitment,
+      validator,
+      'finalVote',
+    );
     itThrowsWhenTheBalancesAreNotUpdated(fromCommitment, toCommitment, validator);
   });
 
@@ -113,8 +126,10 @@ describe('ConsensusApp', () => {
     const validator = validateVeto;
     const fromCommitment = oneVoteComplete;
     const toCommitment = veto(copy(fromCommitment));
+    const invalidToCommitment = appCommitment(toCommitment, { furtherVotesRequired: 1 });
 
     itReturnsTrueOnAValidTransition(fromCommitment, toCommitment, validator);
+    itReturnsFalseWhenActionDoesNotMatch(fromCommitment, invalidToCommitment, validator, 'veto');
   });
 
   describe('validateConsensusCommitment', () => {
@@ -247,6 +262,20 @@ describe('ConsensusApp', () => {
       const toCommitment = appCommitment(copy(toCommitmentArgs));
 
       expectValidTransition(fromCommitment, toCommitment, validator);
+    });
+  }
+
+  function itReturnsFalseWhenActionDoesNotMatch(
+    fromCommitmentArgs,
+    toCommitmentArgs,
+    validator: TransitionValidator,
+    action,
+  ) {
+    it(`returns false if the action is not a ${action} action`, async () => {
+      const fromCommitment = appCommitment(fromCommitmentArgs);
+      const toCommitment = appCommitment(copy(toCommitmentArgs));
+
+      expect(validator(fromCommitment, toCommitment)).toBe(false);
     });
   }
 
