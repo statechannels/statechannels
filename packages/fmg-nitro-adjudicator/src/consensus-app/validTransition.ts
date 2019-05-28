@@ -42,7 +42,7 @@ export function validateVote(oldCommitment: AppCommitment, newCommitment: AppCom
     furtherVotesRequiredDecremented(oldCommitment, newCommitment)
   ) {
     validateBalancesUnchanged(oldCommitment, newCommitment);
-    proposalsUnchanged(oldCommitment, newCommitment);
+    validateProposalsUnchanged(oldCommitment, newCommitment);
     return true;
   } else {
     return false;
@@ -131,6 +131,26 @@ export function validateProposeCommitment(commitment: AppCommitment): boolean {
   return true;
 }
 
+function validateProposalsUnchanged(oldCommitment: AppCommitment, newCommitment: AppCommitment) {
+  if (
+    !areEqual(
+      oldCommitment.appAttributes.proposedAllocation,
+      newCommitment.appAttributes.proposedAllocation,
+    )
+  ) {
+    throw new Error("ConsensusApp: 'proposedAllocation' must be the same between commitments.");
+  }
+
+  if (
+    !areEqual(
+      oldCommitment.appAttributes.proposedDestination,
+      newCommitment.appAttributes.proposedDestination,
+    )
+  ) {
+    throw new Error("ConsensusApp: 'proposedDestination' must be the same between commitments.");
+  }
+}
+
 // boolean helpers
 function areEqual(left: string[], right: string[]) {
   // This is safe, as stringify behaves well on a flat array of strings
@@ -148,19 +168,6 @@ function balancesUnchanged(oldCommitment: AppCommitment, newCommitment: AppCommi
   return (
     areEqual(oldCommitment.allocation, newCommitment.allocation) &&
     areEqual(oldCommitment.destination, newCommitment.destination)
-  );
-}
-
-function proposalsUnchanged(oldCommitment: AppCommitment, newCommitment: AppCommitment): boolean {
-  return (
-    areEqual(
-      oldCommitment.appAttributes.proposedAllocation,
-      newCommitment.appAttributes.proposedAllocation,
-    ) &&
-    areEqual(
-      oldCommitment.appAttributes.proposedDestination,
-      newCommitment.appAttributes.proposedDestination,
-    )
   );
 }
 
