@@ -6,8 +6,6 @@ import "fmg-core/contracts/Commitment.sol";
 library ConsensusCommitment {
     using Commitment for Commitment.CommitmentStruct;
     
-    enum UpdateType { Consensus, Proposal }
-
     struct AppAttributes {
         uint32 furtherVotesRequired;
         uint256[] proposedAllocation;
@@ -34,7 +32,7 @@ library ConsensusCommitment {
             frameworkCommitment.allocation,
             frameworkCommitment.destination,
             appAttributes.proposedAllocation,
-            appAttributes.proposedDestination,
+            appAttributes.proposedDestination
         );
     }
 }
