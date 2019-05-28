@@ -29,7 +29,7 @@ export function validatePropose(
   newCommitment: AppCommitment,
 ): boolean {
   if (furtherVotesRequiredInitialized(newCommitment)) {
-    balancesUnchanged(oldCommitment, newCommitment);
+    validateBalancesUnchanged(oldCommitment, newCommitment);
     return true;
   } else {
     return false;

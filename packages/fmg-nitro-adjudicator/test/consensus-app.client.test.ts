@@ -134,15 +134,15 @@ describe('ConsensusApp', () => {
     });
   });
 
-  describe('the propose transition', async () => {
+  describe.only('the propose transition', async () => {
     const fromCommitment = initialConsensus(defaults);
     const toCommitment = propose(copy(fromCommitment), proposedAllocation, proposedDestination);
+    const validator = validatePropose;
     it('returns true on a valid transition', async () => {
-      expectValidTransition(fromCommitment, toCommitment, validatePropose);
+      expectValidTransition(fromCommitment, toCommitment, validator);
     });
 
-    itThrowsWhenTheBalancesAreChanged(fromCommitment, toCommitment);
-    itThrowsWhenFurtherVotesRequiredIsNotIntialized(fromCommitment, toCommitment);
+    itThrowsWhenTheBalancesAreChanged(fromCommitment, toCommitment, validator);
   });
 
   describe('the pass transition', async () => {
@@ -153,7 +153,7 @@ describe('ConsensusApp', () => {
       expectValidTransition(fromCommitment, toCommitment, validatePass);
     });
 
-    itThrowsWhenTheBalancesAreChanged(fromCommitment, toCommitment);
+    // itThrowsWhenTheBalancesAreChanged(fromCommitment, toCommitment);
   });
 
   describe('the vote transition', async () => {
@@ -161,9 +161,9 @@ describe('ConsensusApp', () => {
     const toCommitment = vote(copy(fromCommitment));
 
     // itReturnsTrueOnAValidTransition(fromCommitment, toCommitment);
-    itThrowsWhenFurtherVotesRequiredIsNotDecremented(fromCommitment, toCommitment);
-    itThrowsWhenTheBalancesAreChanged(fromCommitment, toCommitment);
-    itThrowsWhenTheProposalsAreChanged(fromCommitment, toCommitment);
+    // itThrowsWhenFurtherVotesRequiredIsNotDecremented(fromCommitment, toCommitment);
+    // itThrowsWhenTheBalancesAreChanged(fromCommitment, toCommitment);
+    // itThrowsWhenTheProposalsAreChanged(fromCommitment, toCommitment);
   });
 
   describe('the final vote transition', async () => {
@@ -171,7 +171,7 @@ describe('ConsensusApp', () => {
     const toCommitment = finalVote(copy(fromCommitment));
 
     // itReturnsTrueOnAValidTransition(fromCommitment, toCommitment);
-    itThrowsWhenTheBalancesAreNotUpdated(fromCommitment, toCommitment);
+    // itThrowsWhenTheBalancesAreNotUpdated(fromCommitment, toCommitment);
   });
 
   describe('the veto transition', async () => {
@@ -180,7 +180,7 @@ describe('ConsensusApp', () => {
     const toCommitment = veto(copy(fromCommitment));
 
     // itReturnsTrueOnAValidTransition(fromCommitment, toCommitment);
-    itThrowsWhenTheBalancesAreChanged(fromCommitment, toCommitment);
+    // itThrowsWhenTheBalancesAreChanged(fromCommitment, toCommitment);
   });
 
   // Helper functions
@@ -251,15 +251,20 @@ describe('ConsensusApp', () => {
     });
   }
 
-  function itThrowsWhenFurtherVotesRequiredIsNotIntialized(fromCommitmentArgs, toCommitmentArgs) {
-    // it('throws when further votes requires is not initialized properly', async () => {
-    //   const toCommitment = appCommitment(copy(toCommitmentArgs), { furtherVotesRequired: 1 });
-    //   expectInvalidTransition(
-    //     fromCommitmentArgs,
-    //     toCommitment,
-    //     'Consensus App: furtherVotesRequired needs to be initialized to the correct value.',
-    //   );
-    // });
+  function itThrowsWhenFurtherVotesRequiredIsNotIntialized(
+    fromCommitmentArgs,
+    toCommitmentArgs,
+    validator: TransitionValidator,
+  ) {
+    it('throws when further votes requires is not initialized properly', async () => {
+      const toCommitment = appCommitment(copy(toCommitmentArgs), { furtherVotesRequired: 1 });
+      expectInvalidTransition(
+        fromCommitmentArgs,
+        toCommitment,
+        validator,
+        'Consensus App: furtherVotesRequired needs to be initialized to the correct value.',
+      );
+    });
   }
 
   function itThrowsWhenFurtherVotesRequiredIsNotDecremented(fromCommitmentArgs, toCommitmentArgs) {
@@ -292,29 +297,31 @@ describe('ConsensusApp', () => {
     // });
   }
 
-  function itThrowsWhenTheBalancesAreChanged(fromCommitmentArgs, toCommitmentArgs) {
-    // it('throws when the allocation is changed', async () => {
-    //   const toCommitmentDifferentAllocation = appCommitment({
-    //     ...toCommitmentArgs,
-    //     allocation: proposedAllocation,
-    //   });
-    //   expectInvalidTransition(
-    //     fromCommitmentArgs,
-    //     toCommitmentDifferentAllocation,
-    //     "ConsensusApp: 'allocation' must be the same between ",
-    //   );
-    // });
-    // it('throws when the destination is changed', async () => {
-    //   const toCommitmentDifferentDestination = appCommitment({
-    //     ...toCommitmentArgs,
-    //     destination: proposedDestination,
-    //   });
-    //   expectInvalidTransition(
-    //     fromCommitmentArgs,
-    //     toCommitmentDifferentDestination,
-    //     "ConsensusApp: 'destination' must be the same between ",
-    //   );
-    // });
+  function itThrowsWhenTheBalancesAreChanged(fromCommitmentArgs, toCommitmentArgs, validator) {
+    it('throws when the allocation is changed', async () => {
+      const toCommitmentDifferentAllocation = appCommitment({
+        ...toCommitmentArgs,
+        allocation: proposedAllocation,
+      });
+      expectInvalidTransition(
+        fromCommitmentArgs,
+        toCommitmentDifferentAllocation,
+        validator,
+        "ConsensusApp: 'allocation' must be the same between ",
+      );
+    });
+    it('throws when the destination is changed', async () => {
+      const toCommitmentDifferentDestination = appCommitment({
+        ...toCommitmentArgs,
+        destination: proposedDestination,
+      });
+      expectInvalidTransition(
+        fromCommitmentArgs,
+        toCommitmentDifferentDestination,
+        validator,
+        "ConsensusApp: 'destination' must be the same between ",
+      );
+    });
   }
 
   function itThrowsWhenTheProposalsAreChanged(fromCommitmentArgs, toCommitmentArgs) {
