@@ -26,7 +26,7 @@ contract ConsensusApp {
            invalidTransition();
   }
 
-  function invalidTransition() private pure returns (bool) {
+  function invalidTransition() internal pure returns (bool) {
     revert("ConsensusApp: No valid transition found for commitments");
   }
 
@@ -36,7 +36,7 @@ contract ConsensusApp {
     ConsensusCommitment.ConsensusCommitmentStruct memory oldCommitment,
     ConsensusCommitment.ConsensusCommitmentStruct memory newCommitment,
     uint numParticipants
-  ) private pure returns (bool)
+  ) internal pure returns (bool)
   {
     if (
       furtherVotesRequiredInitialized(newCommitment, numParticipants)
@@ -52,7 +52,7 @@ contract ConsensusApp {
   function validateVote(
     ConsensusCommitment.ConsensusCommitmentStruct memory oldCommitment,
     ConsensusCommitment.ConsensusCommitmentStruct memory newCommitment
-  ) private pure returns (bool)
+  ) internal pure returns (bool)
   {
     if (
       oldCommitment.furtherVotesRequired > 1 &&
@@ -70,7 +70,7 @@ contract ConsensusApp {
   function validateFinalVote(
     ConsensusCommitment.ConsensusCommitmentStruct memory oldCommitment,
     ConsensusCommitment.ConsensusCommitmentStruct memory newCommitment
-  ) private pure returns (bool)
+  ) internal pure returns (bool)
   {
     if (
       oldCommitment.furtherVotesRequired == 1 &&
@@ -87,7 +87,7 @@ contract ConsensusApp {
   function validateVeto(
     ConsensusCommitment.ConsensusCommitmentStruct memory oldCommitment,
     ConsensusCommitment.ConsensusCommitmentStruct memory newCommitment
-  ) private pure returns (bool)
+  ) internal pure returns (bool)
   {
     if (
       oldCommitment.furtherVotesRequired > 0 &&
@@ -104,7 +104,7 @@ contract ConsensusApp {
   function validatePass(
     ConsensusCommitment.ConsensusCommitmentStruct memory oldCommitment,
     ConsensusCommitment.ConsensusCommitmentStruct memory newCommitment
-  ) private pure returns (bool)
+  ) internal pure returns (bool)
   {
     if (
       oldCommitment.furtherVotesRequired == 0 &&
