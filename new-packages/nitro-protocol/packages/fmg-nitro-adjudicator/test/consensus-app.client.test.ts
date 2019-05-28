@@ -145,7 +145,7 @@ describe('ConsensusApp', () => {
     itThrowsWhenTheBalancesAreChanged(fromCommitment, toCommitment, validator);
   });
 
-  describe('the pass transition', async () => {
+  describe.only('the pass transition', async () => {
     const fromCommitment = initialConsensus(defaults);
     const toCommitment = pass(copy(fromCommitment));
 
@@ -153,7 +153,7 @@ describe('ConsensusApp', () => {
       expectValidTransition(fromCommitment, toCommitment, validatePass);
     });
 
-    // itThrowsWhenTheBalancesAreChanged(fromCommitment, toCommitment);
+    itThrowsWhenTheBalancesAreChanged(fromCommitment, toCommitment, validatePass);
   });
 
   describe('the vote transition', async () => {
