@@ -1,7 +1,5 @@
 import { ethers } from 'ethers';
-import { Model } from 'objection';
-import knex from '../db/connection';
-import AllocatorChannel from '../models/allocatorChannel';
+import { Uint256 } from 'fmg-core';
 import { nitroAdjudicator } from '../utilities/blockchain';
 
 /**
@@ -9,41 +7,28 @@ import { nitroAdjudicator } from '../utilities/blockchain';
  * - wire up then other events.
  */
 
-enum EventType {
+export enum AdjudicatorWatcherEventType {
   Deposited,
   ChallengeCreated,
 }
 
-async function onDeposit(channelId, amountDeposited, destinationHoldings) {
-  console.log(`Deposit detected  with ${amountDeposited} ${destinationHoldings} ${channelId}`);
-
-  const allocatorChannel = await AllocatorChannel.query()
-    .where('channel_id', channelId)
-    .select('id')
-    .first();
-
-  if (!allocatorChannel) {
-    console.log(`Allocator channel ${channelId} not in database`);
-    return;
-  }
-
-  await AllocatorChannel.query()
-    .findById(allocatorChannel.id)
-    .patch({ holdings: destinationHoldings.toHexString() });
+export interface AdjudicatorWatcherEvent {
+  eventType: AdjudicatorWatcherEventType;
+  channelId: string;
+  amountDeposited: Uint256;
+  destinationHoldings: Uint256;
 }
 
 export async function listen() {
   console.log('adjudicator-watcher: listen');
-  Model.knex(knex);
   const adjudicator: ethers.Contract = await nitroAdjudicator();
   const depositedFilter = adjudicator.filters.Deposited();
   adjudicator.on(depositedFilter, async (channelId, amountDeposited, destinationHoldings) => {
-    await onDeposit(channelId, amountDeposited, destinationHoldings);
     process.send({
-      eventType: EventType.Deposited,
+      eventType: AdjudicatorWatcherEventType.Deposited,
       channelId,
-      amountDeposited,
-      destinationHoldings,
+      amountDeposited: amountDeposited.toHexString(),
+      destinationHoldings: destinationHoldings.toHexString(),
     });
   });
   const challengeCreatedFilter = adjudicator.filters.ChallengeCreated();
