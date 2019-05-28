@@ -1,45 +1,45 @@
 import { AppCommitment, isConsensusReached, isProposal, UpdateType } from '.';
-export function validTransition(fromCommitment: AppCommitment, toCommitment: AppCommitment): true {
+export function validTransition(oldCommitment: AppCommitment, newCommitment: AppCommitment): true {
   // Commitment validation
 
-  if (fromCommitment.appAttributes.updateType === UpdateType.Proposal) {
-    validProposeCommitment(fromCommitment);
-  } else if (fromCommitment.appAttributes.updateType === UpdateType.Consensus) {
-    validConsensusCommitment(fromCommitment);
+  if (oldCommitment.appAttributes.updateType === UpdateType.Proposal) {
+    validProposeCommitment(oldCommitment);
+  } else if (oldCommitment.appAttributes.updateType === UpdateType.Consensus) {
+    validConsensusCommitment(oldCommitment);
   }
-  if (toCommitment.appAttributes.updateType === UpdateType.Proposal) {
-    validProposeCommitment(toCommitment);
-  } else if (toCommitment.appAttributes.updateType === UpdateType.Consensus) {
-    validConsensusCommitment(toCommitment);
+  if (newCommitment.appAttributes.updateType === UpdateType.Proposal) {
+    validProposeCommitment(newCommitment);
+  } else if (newCommitment.appAttributes.updateType === UpdateType.Consensus) {
+    validConsensusCommitment(newCommitment);
   }
 
   // State machine transition identifier
-  if (isConsensusReached(fromCommitment)) {
-    if (isProposal(toCommitment)) {
-      validatePropose(fromCommitment, toCommitment);
+  if (isConsensusReached(oldCommitment)) {
+    if (isProposal(newCommitment)) {
+      validatePropose(oldCommitment, newCommitment);
       return true;
     }
-    if (isConsensusReached(toCommitment)) {
-      validatePass(fromCommitment, toCommitment);
+    if (isConsensusReached(newCommitment)) {
+      validatePass(oldCommitment, newCommitment);
       return true;
     }
   }
-  if (isProposal(fromCommitment)) {
-    if (isProposal(toCommitment)) {
-      if (hasFurtherVotesNeededBeenInitialized(toCommitment)) {
-        validatePropose(fromCommitment, toCommitment);
+  if (isProposal(oldCommitment)) {
+    if (isProposal(newCommitment)) {
+      if (hasFurtherVotesNeededBeenInitialized(newCommitment)) {
+        validatePropose(oldCommitment, newCommitment);
         return true;
       } else {
-        validateVote(fromCommitment, toCommitment);
+        validateVote(oldCommitment, newCommitment);
         return true;
       }
     }
-    if (isConsensusReached(toCommitment)) {
-      if (haveBalancesBeenUpdated(fromCommitment, toCommitment)) {
-        validateFinalVote(fromCommitment, toCommitment);
+    if (isConsensusReached(newCommitment)) {
+      if (haveBalancesBeenUpdated(oldCommitment, newCommitment)) {
+        validateFinalVote(oldCommitment, newCommitment);
         return true;
       } else {
-        validateVeto(fromCommitment, toCommitment);
+        validateVeto(oldCommitment, newCommitment);
         return true;
       }
     }
@@ -47,24 +47,24 @@ export function validTransition(fromCommitment: AppCommitment, toCommitment: App
   throw new Error('ConsensusApp: No valid transition found for commitments');
 }
 
-function validatePass(fromCommitment: AppCommitment, toCommitment: AppCommitment) {
-  balancesUnchanged(fromCommitment, toCommitment);
-  proposalsUnchanged(fromCommitment, toCommitment);
+function validatePass(oldCommitment: AppCommitment, newCommitment: AppCommitment) {
+  balancesUnchanged(oldCommitment, newCommitment);
+  proposalsUnchanged(oldCommitment, newCommitment);
 }
-function validatePropose(fromCommitment: AppCommitment, toCommitment: AppCommitment) {
-  balancesUnchanged(fromCommitment, toCommitment);
-  furtherVotesRequiredInitialized(toCommitment);
+function validatePropose(oldCommitment: AppCommitment, newCommitment: AppCommitment) {
+  balancesUnchanged(oldCommitment, newCommitment);
+  furtherVotesRequiredInitialized(newCommitment);
 }
-function validateFinalVote(fromCommitment: AppCommitment, toCommitment: AppCommitment) {
-  balancesUpdated(fromCommitment, toCommitment);
+function validateFinalVote(oldCommitment: AppCommitment, newCommitment: AppCommitment) {
+  balancesUpdated(oldCommitment, newCommitment);
 }
-function validateVeto(fromCommitment: AppCommitment, toCommitment: AppCommitment) {
-  balancesUnchanged(fromCommitment, toCommitment);
+function validateVeto(oldCommitment: AppCommitment, newCommitment: AppCommitment) {
+  balancesUnchanged(oldCommitment, newCommitment);
 }
-function validateVote(fromCommitment: AppCommitment, toCommitment: AppCommitment) {
-  balancesUnchanged(fromCommitment, toCommitment);
-  proposalsUnchanged(fromCommitment, toCommitment);
-  furtherVotesRequiredDecremented(fromCommitment, toCommitment);
+function validateVote(oldCommitment: AppCommitment, newCommitment: AppCommitment) {
+  balancesUnchanged(oldCommitment, newCommitment);
+  proposalsUnchanged(oldCommitment, newCommitment);
+  furtherVotesRequiredDecremented(oldCommitment, newCommitment);
 }
 
 // helpers
@@ -72,10 +72,10 @@ function areEqual(left: string[], right: string[]) {
   // This is safe, as stringify behaves well on a flat array of strings
   return JSON.stringify(left) === JSON.stringify(right);
 }
-function haveBalancesBeenUpdated(fromCommitment: AppCommitment, toCommitment: AppCommitment) {
+function haveBalancesBeenUpdated(oldCommitment: AppCommitment, newCommitment: AppCommitment) {
   return (
-    areEqual(fromCommitment.appAttributes.proposedAllocation, toCommitment.allocation) &&
-    areEqual(fromCommitment.appAttributes.proposedDestination, toCommitment.destination)
+    areEqual(oldCommitment.appAttributes.proposedAllocation, newCommitment.allocation) &&
+    areEqual(oldCommitment.appAttributes.proposedDestination, newCommitment.destination)
   );
 }
 function hasFurtherVotesNeededBeenInitialized(commitment: AppCommitment): boolean {
@@ -83,39 +83,39 @@ function hasFurtherVotesNeededBeenInitialized(commitment: AppCommitment): boolea
   return commitment.appAttributes.furtherVotesRequired === numParticipants - 1;
 }
 
-function balancesUpdated(fromCommitment: AppCommitment, toCommitment: AppCommitment) {
-  if (!areEqual(fromCommitment.appAttributes.proposedAllocation, toCommitment.allocation)) {
+function balancesUpdated(oldCommitment: AppCommitment, newCommitment: AppCommitment) {
+  if (!areEqual(oldCommitment.appAttributes.proposedAllocation, newCommitment.allocation)) {
     throw new Error("ConsensusApp: 'allocation' must be set to the previous `proposedAllocation`.");
   }
 
-  if (!areEqual(fromCommitment.appAttributes.proposedDestination, toCommitment.destination)) {
+  if (!areEqual(oldCommitment.appAttributes.proposedDestination, newCommitment.destination)) {
     throw new Error(
       "ConsensusApp: 'destination' must be set to the previous `proposedDestination`",
     );
   }
 }
-function balancesUnchanged(fromCommitment: AppCommitment, toCommitment: AppCommitment) {
-  if (!areEqual(fromCommitment.allocation, toCommitment.allocation)) {
+function balancesUnchanged(oldCommitment: AppCommitment, newCommitment: AppCommitment) {
+  if (!areEqual(oldCommitment.allocation, newCommitment.allocation)) {
     throw new Error("ConsensusApp: 'allocation' must be the same between commitments.");
   }
 
-  if (!areEqual(fromCommitment.destination, toCommitment.destination)) {
+  if (!areEqual(oldCommitment.destination, newCommitment.destination)) {
     throw new Error("ConsensusApp: 'destination' must be the same between commitments.");
   }
 }
-function proposalsUnchanged(fromCommitment: AppCommitment, toCommitment: AppCommitment) {
+function proposalsUnchanged(oldCommitment: AppCommitment, newCommitment: AppCommitment) {
   if (
     !areEqual(
-      fromCommitment.appAttributes.proposedAllocation,
-      toCommitment.appAttributes.proposedAllocation,
+      oldCommitment.appAttributes.proposedAllocation,
+      newCommitment.appAttributes.proposedAllocation,
     )
   ) {
     throw new Error("ConsensusApp: 'proposedAllocation' must be the same between commitments.");
   }
   if (
     !areEqual(
-      fromCommitment.appAttributes.proposedDestination,
-      toCommitment.appAttributes.proposedDestination,
+      oldCommitment.appAttributes.proposedDestination,
+      newCommitment.appAttributes.proposedDestination,
     )
   ) {
     throw new Error("ConsensusApp: 'proposedDestination' must be the same between commitments.");
@@ -130,13 +130,13 @@ function furtherVotesRequiredInitialized(commitment: AppCommitment) {
   }
 }
 function furtherVotesRequiredDecremented(
-  fromCommitment: AppCommitment,
-  toCommitment: AppCommitment,
+  oldCommitment: AppCommitment,
+  newCommitment: AppCommitment,
 ) {
   if (
     !(
-      toCommitment.appAttributes.furtherVotesRequired ===
-      fromCommitment.appAttributes.furtherVotesRequired - 1
+      newCommitment.appAttributes.furtherVotesRequired ===
+      oldCommitment.appAttributes.furtherVotesRequired - 1
     )
   ) {
     throw new Error('Consensus App: furtherVotesRequired should be decremented by 1.');
