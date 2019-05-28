@@ -18,6 +18,7 @@ import {
   validateConsensusCommitment,
   validateProposeCommitment,
   validateVote,
+  validateFinalVote,
 } from '../src/consensus-app/validTransition';
 
 describe('ConsensusApp', () => {
@@ -166,12 +167,12 @@ describe('ConsensusApp', () => {
     itThrowsWhenTheProposalsAreChanged(fromCommitment, toCommitment, validateVote);
   });
 
-  describe('the final vote transition', async () => {
+  describe.only('the final vote transition', async () => {
     const fromCommitment = twoVotesComplete;
     const toCommitment = finalVote(copy(fromCommitment));
 
-    // itReturnsTrueOnAValidTransition(fromCommitment, toCommitment);
-    // itThrowsWhenTheBalancesAreNotUpdated(fromCommitment, toCommitment);
+    itReturnsTrueOnAValidTransition(fromCommitment, toCommitment, validateFinalVote);
+    itThrowsWhenTheBalancesAreNotUpdated(fromCommitment, toCommitment, validateFinalVote);
   });
 
   describe('the veto transition', async () => {
@@ -285,21 +286,25 @@ describe('ConsensusApp', () => {
     });
   }
 
-  function itThrowsWhenTheBalancesAreNotUpdated(fromCommitmentArgs, toCommitmentArgs) {
-    // it('throws when the allocation is not updated', async () => {
-    //   const toCommitmentDifferentAllocation = appCommitment({
-    //     ...toCommitmentArgs,
-    //     allocation,
-    //   });
-    //   expectInvalidTransition(fromCommitmentArgs, toCommitmentDifferentAllocation);
-    // });
-    // it('throws when the destination is not updated', async () => {
-    //   const toCommitmentDifferentDestination = appCommitment({
-    //     ...toCommitmentArgs,
-    //     destination: participants,
-    //   });
-    //   expectInvalidTransition(fromCommitmentArgs, toCommitmentDifferentDestination);
-    // });
+  function itThrowsWhenTheBalancesAreNotUpdated(
+    fromCommitmentArgs,
+    toCommitmentArgs,
+    validator: TransitionValidator,
+  ) {
+    it('throws when the allocation is not updated', async () => {
+      const toCommitmentDifferentAllocation = appCommitment({
+        ...toCommitmentArgs,
+        allocation,
+      });
+      expectInvalidTransition(fromCommitmentArgs, toCommitmentDifferentAllocation, validator);
+    });
+    it('throws when the destination is not updated', async () => {
+      const toCommitmentDifferentDestination = appCommitment({
+        ...toCommitmentArgs,
+        destination: participants,
+      });
+      expectInvalidTransition(fromCommitmentArgs, toCommitmentDifferentDestination, validator);
+    });
   }
 
   function itThrowsWhenTheBalancesAreChanged(fromCommitmentArgs, toCommitmentArgs, validator) {
