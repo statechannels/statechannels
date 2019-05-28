@@ -16,6 +16,18 @@ contract ConsensusApp {
     ConsensusCommitment.ConsensusCommitmentStruct memory newCommitment = ConsensusCommitment.fromFrameworkCommitment(_new);
     uint numParticipants = _old.participants.length;
 
+    if (oldCommitment.furtherVotesRequired == 0) {
+      validateConsensusCommitment(oldCommitment);
+    } else {
+      validateProposeCommitment(oldCommitment);
+    }
+
+    if (newCommitment.furtherVotesRequired == 0) {
+      validateConsensusCommitment(newCommitment);
+    } else {
+      validateProposeCommitment(newCommitment);
+    }
+
     // The first action that's identified in the list either returns `true`,
     // short-circuiting the `||`, or it reverts the transaction
     return validatePropose(oldCommitment, newCommitment, numParticipants)   ||
@@ -41,7 +53,6 @@ contract ConsensusApp {
     if (
       furtherVotesRequiredInitialized(newCommitment, numParticipants)
     ) {
-      validateProposeCommitment(newCommitment);
       balancesUnchanged(oldCommitment, newCommitment);
       return true;
     } else {
@@ -58,7 +69,6 @@ contract ConsensusApp {
       oldCommitment.furtherVotesRequired > 1 &&
       furtherVotesRequiredDecremented(oldCommitment, newCommitment)
     ) {
-      validateProposeCommitment(newCommitment);
       validateBalancesUnchanged(oldCommitment, newCommitment);
       proposalsUnchanged(oldCommitment, newCommitment);
       return true;
@@ -77,7 +87,6 @@ contract ConsensusApp {
       newCommitment.furtherVotesRequired == 0 &&
       balancesUpdated(oldCommitment, newCommitment)
     ) {
-      validateConsensusCommitment(newCommitment);
       return true;
     } else {
       return false;
@@ -94,7 +103,6 @@ contract ConsensusApp {
       newCommitment.furtherVotesRequired == 0 &&
       balancesUnchanged(oldCommitment, newCommitment)
     ) {
-      validateConsensusCommitment(newCommitment);
       return true;
     } else {
       return false;
@@ -110,7 +118,6 @@ contract ConsensusApp {
       oldCommitment.furtherVotesRequired == 0 &&
       newCommitment.furtherVotesRequired == 0
     ) {
-      validateConsensusCommitment(newCommitment);
       validateBalancesUnchanged(oldCommitment, newCommitment);
       return true;
     } else {
