@@ -12,7 +12,6 @@ library ConsensusCommitment {
         uint32 furtherVotesRequired;
         uint256[] proposedAllocation;
         address[] proposedDestination;
-        UpdateType updateType;
     }
 
     struct ConsensusCommitmentStruct {
@@ -21,7 +20,6 @@ library ConsensusCommitment {
         address[] currentDestination;
         uint256[] proposedAllocation;
         address[] proposedDestination;
-        UpdateType updateType;
     }
 
     function getAppAttributesFromFrameworkCommitment(Commitment.CommitmentStruct memory frameworkCommitment) public pure returns(AppAttributes memory) {
@@ -37,7 +35,6 @@ library ConsensusCommitment {
             frameworkCommitment.destination,
             appAttributes.proposedAllocation,
             appAttributes.proposedDestination,
-            appAttributes.updateType
         );
     }
 }
