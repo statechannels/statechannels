@@ -71,6 +71,12 @@ describe('ConsensusApp', () => {
 
   describe.only('validateConsensusCommitment', () => {
     const toCommitmentArgs = fourVotesComplete;
+    const validator = validateConsensusCommitment;
+
+    it('returns true when given a valid consensus commitment', () => {
+      expectValidCommitment(toCommitmentArgs, validator);
+    });
+
     it('throws when the proposedAllocation is not reset', async () => {
       const toCommitmentAllocation = appCommitment(copy(toCommitmentArgs), {
         proposedAllocation: allocation,
@@ -78,7 +84,7 @@ describe('ConsensusApp', () => {
 
       expectInvalidCommitment(
         toCommitmentAllocation,
-        validateConsensusCommitment,
+        validator,
         "ConsensusApp: 'proposedAllocation' must be reset during consensus.",
       );
     });
@@ -90,16 +96,42 @@ describe('ConsensusApp', () => {
 
       expectInvalidCommitment(
         toCommitmentAllocation,
-        validateConsensusCommitment,
+        validator,
         "ConsensusApp: 'proposedDestination' must be reset during consensus.",
       );
     });
   });
 
-  describe('validateProposeCommitment', () => {
+  describe.only('validateProposeCommitment', () => {
     const fromCommitment = initialConsensus(defaults);
     const toCommitment = propose(fromCommitment, proposedAllocation, proposedDestination);
-    itThrowsForAnInvalidProposeCommitment(fromCommitment, toCommitment, validateProposeCommitment);
+    const validator = validateProposeCommitment;
+
+    it('returns true when given a valid consensus commitment', () => {
+      expectValidCommitment(toCommitment, validator);
+    });
+
+    it('throws when the proposedAllocation is reset', async () => {
+      const toCommitmentAllocation = appCommitment(toCommitment, {
+        proposedAllocation: [],
+      });
+      expectInvalidCommitment(
+        toCommitmentAllocation,
+        validator,
+        "ConsensusApp: 'proposedAllocation' must not be reset during propose.",
+      );
+    });
+    it('throws when the proposedDestination and proposedAllocation are not the same length', async () => {
+      const toCommitmentAllocation = appCommitment(toCommitment, {
+        proposedAllocation,
+        proposedDestination: participants,
+      });
+      expectInvalidCommitment(
+        toCommitmentAllocation,
+        validator,
+        "ConsensusApp: 'proposedDestination' and 'proposedAllocation' must be the same length during propose.",
+      );
+    });
   });
 
   describe('the propose transition', async () => {
@@ -217,43 +249,6 @@ describe('ConsensusApp', () => {
 
       expectValidTransition(fromCommitment, toCommitment, validator);
     });
-  }
-
-  function itThrowsForAnInvalidProposeCommitment(fromCommitmentArgs, toCommitmentArgs, validator) {
-    // it('throws when the furtherVotesRequired is zero', async () => {
-    //   const fromCommitment = appCommitment(fromCommitmentArgs);
-    //   const toCommitmentAllocation = appCommitment(toCommitmentArgs, {
-    //     furtherVotesRequired: 0,
-    //   });
-    //   expectInvalidTransition(
-    //     fromCommitment,
-    //     toCommitmentAllocation,
-    //     "ConsensusApp: 'furtherVotesRequired' must not be 0 during propose.",
-    //   );
-    // });
-    // it('throws when the proposedAllocation is reset', async () => {
-    //   const fromCommitment = appCommitment(fromCommitmentArgs);
-    //   const toCommitmentAllocation = appCommitment(toCommitmentArgs, {
-    //     proposedAllocation: [],
-    //   });
-    //   expectInvalidTransition(
-    //     fromCommitment,
-    //     toCommitmentAllocation,
-    //     "ConsensusApp: 'proposedAllocation' must not be reset during propose.",
-    //   );
-    // });
-    // it('throws when the proposedDestination and proposedAllocation are not the same length', async () => {
-    //   const fromCommitment = appCommitment(fromCommitmentArgs);
-    //   const toCommitmentAllocation = appCommitment(toCommitmentArgs, {
-    //     proposedAllocation,
-    //     proposedDestination: participants,
-    //   });
-    //   expectInvalidTransition(
-    //     fromCommitment,
-    //     toCommitmentAllocation,
-    //     "ConsensusApp: 'proposedDestination' and 'proposedAllocation' must be the same length during propose.",
-    //   );
-    // });
   }
 
   function itThrowsWhenFurtherVotesRequiredIsNotIntialized(fromCommitmentArgs, toCommitmentArgs) {
