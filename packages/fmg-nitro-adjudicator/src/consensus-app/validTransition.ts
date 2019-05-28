@@ -100,7 +100,7 @@ function validateBalancesUnchanged(oldCommitment: AppCommitment, newCommitment: 
   }
 }
 
-export function validateConsensusCommitment(commitment: AppCommitment) {
+export function validateConsensusCommitment(commitment: AppCommitment): boolean {
   if (!(commitment.appAttributes.proposedAllocation.length === 0)) {
     throw new Error("ConsensusApp: 'proposedAllocation' must be reset during consensus.");
   }
@@ -108,9 +108,11 @@ export function validateConsensusCommitment(commitment: AppCommitment) {
   if (!(commitment.appAttributes.proposedDestination.length === 0)) {
     throw new Error("ConsensusApp: 'proposedDestination' must be reset during consensus.");
   }
+
+  return true;
 }
 
-export function validateProposeCommitment(commitment: AppCommitment) {
+export function validateProposeCommitment(commitment: AppCommitment): boolean {
   if (!(commitment.appAttributes.proposedAllocation.length !== 0)) {
     throw new Error("ConsensusApp: 'proposedAllocation' must not be reset during propose.");
   }
@@ -125,6 +127,8 @@ export function validateProposeCommitment(commitment: AppCommitment) {
       "ConsensusApp: 'proposedDestination' and 'proposedAllocation' must be the same length during propose.",
     );
   }
+
+  return true;
 }
 
 // boolean helpers
