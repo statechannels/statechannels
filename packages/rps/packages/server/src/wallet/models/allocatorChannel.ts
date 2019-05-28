@@ -38,7 +38,7 @@ export default class AllocatorChannel extends Model {
   };
 
   readonly id!: number;
-  channeId: string;
+  channelId: string;
   holdings!: Uint256;
   nonce: Uint32;
   participants: AllocatorChannelParticipant[];
