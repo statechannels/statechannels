@@ -19,6 +19,7 @@ import {
   validateProposeCommitment,
   validateVote,
   validateFinalVote,
+  validateVeto,
 } from '../src/consensus-app/validTransition';
 
 describe('ConsensusApp', () => {
@@ -71,7 +72,7 @@ describe('ConsensusApp', () => {
   const threeVotesComplete = vote(twoVotesComplete);
   const fourVotesComplete = finalVote(threeVotesComplete);
 
-  describe.only('validateConsensusCommitment', () => {
+  describe('validateConsensusCommitment', () => {
     const toCommitmentArgs = fourVotesComplete;
     const validator = validateConsensusCommitment;
 
@@ -104,7 +105,7 @@ describe('ConsensusApp', () => {
     });
   });
 
-  describe.only('validateProposeCommitment', () => {
+  describe('validateProposeCommitment', () => {
     const fromCommitment = initialConsensus(defaults);
     const toCommitment = propose(fromCommitment, proposedAllocation, proposedDestination);
     const validator = validateProposeCommitment;
@@ -136,7 +137,7 @@ describe('ConsensusApp', () => {
     });
   });
 
-  describe.only('the propose transition', async () => {
+  describe('the propose transition', async () => {
     const fromCommitment = initialConsensus(defaults);
     const toCommitment = propose(copy(fromCommitment), proposedAllocation, proposedDestination);
     const validator = validatePropose;
@@ -147,7 +148,7 @@ describe('ConsensusApp', () => {
     itThrowsWhenTheBalancesAreChanged(fromCommitment, toCommitment, validator);
   });
 
-  describe.only('the pass transition', async () => {
+  describe('the pass transition', async () => {
     const fromCommitment = initialConsensus(defaults);
     const toCommitment = pass(copy(fromCommitment));
 
@@ -158,7 +159,7 @@ describe('ConsensusApp', () => {
     itThrowsWhenTheBalancesAreChanged(fromCommitment, toCommitment, validatePass);
   });
 
-  describe.only('the vote transition', async () => {
+  describe('the vote transition', async () => {
     const fromCommitment = twoVotesComplete;
     const toCommitment = vote(copy(fromCommitment));
 
@@ -167,7 +168,7 @@ describe('ConsensusApp', () => {
     itThrowsWhenTheProposalsAreChanged(fromCommitment, toCommitment, validateVote);
   });
 
-  describe.only('the final vote transition', async () => {
+  describe('the final vote transition', async () => {
     const fromCommitment = twoVotesComplete;
     const toCommitment = finalVote(copy(fromCommitment));
 
@@ -177,11 +178,9 @@ describe('ConsensusApp', () => {
 
   describe('the veto transition', async () => {
     const fromCommitment = oneVoteComplete;
-
     const toCommitment = veto(copy(fromCommitment));
 
-    // itReturnsTrueOnAValidTransition(fromCommitment, toCommitment);
-    // itThrowsWhenTheBalancesAreChanged(fromCommitment, toCommitment);
+    itReturnsTrueOnAValidTransition(fromCommitment, toCommitment, validateVeto);
   });
 
   // Helper functions
