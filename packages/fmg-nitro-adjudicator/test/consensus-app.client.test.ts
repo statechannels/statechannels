@@ -250,40 +250,6 @@ describe('ConsensusApp', () => {
     });
   }
 
-  function itThrowsWhenFurtherVotesRequiredIsNotIntialized(
-    fromCommitmentArgs,
-    toCommitmentArgs,
-    validator: TransitionValidator,
-  ) {
-    it('throws when further votes requires is not initialized properly', async () => {
-      const toCommitment = appCommitment(copy(toCommitmentArgs), { furtherVotesRequired: 1 });
-      expectInvalidTransition(
-        fromCommitmentArgs,
-        toCommitment,
-        validator,
-        'Consensus App: furtherVotesRequired needs to be initialized to the correct value.',
-      );
-    });
-  }
-
-  function itThrowsWhenFurtherVotesRequiredIsNotDecremented(
-    fromCommitmentArgs,
-    toCommitmentArgs,
-    validator: TransitionValidator,
-  ) {
-    it('throws when further votes requires is not decremented properly', async () => {
-      const toCommitment = appCommitment(copy(toCommitmentArgs), {
-        furtherVotesRequired: fromCommitmentArgs.appAttributes.furtherVotesRequired,
-      });
-      expectInvalidTransition(
-        fromCommitmentArgs,
-        toCommitment,
-        validator,
-        'Consensus App: furtherVotesRequired should be decremented by 1',
-      );
-    });
-  }
-
   function itThrowsWhenTheBalancesAreNotUpdated(
     fromCommitmentArgs,
     toCommitmentArgs,
