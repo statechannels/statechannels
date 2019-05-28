@@ -1,5 +1,17 @@
 import { AppCommitment } from '.';
 export function validTransition(oldCommitment: AppCommitment, newCommitment: AppCommitment): true {
+  if (oldCommitment.appAttributes.furtherVotesRequired === 0) {
+    validateConsensusCommitment(oldCommitment);
+  } else {
+    validateProposeCommitment(oldCommitment);
+  }
+
+  if (newCommitment.appAttributes.furtherVotesRequired === 0) {
+    validateConsensusCommitment(newCommitment);
+  } else {
+    validateProposeCommitment(newCommitment);
+  }
+
   if (
     validatePropose(oldCommitment, newCommitment) ||
     validateVote(oldCommitment, newCommitment) ||
@@ -14,7 +26,6 @@ export function validTransition(oldCommitment: AppCommitment, newCommitment: App
 
 function validatePropose(oldCommitment: AppCommitment, newCommitment: AppCommitment): boolean {
   if (furtherVotesRequiredInitialized(newCommitment)) {
-    validateProposeCommitment(newCommitment);
     balancesUnchanged(oldCommitment, newCommitment);
     return true;
   } else {
@@ -27,7 +38,6 @@ function validateVote(oldCommitment: AppCommitment, newCommitment: AppCommitment
     oldCommitment.appAttributes.furtherVotesRequired > 1 &&
     furtherVotesRequiredDecremented(oldCommitment, newCommitment)
   ) {
-    validateProposeCommitment(newCommitment);
     validateBalancesUnchanged(oldCommitment, newCommitment);
     proposalsUnchanged(oldCommitment, newCommitment);
     return true;
@@ -42,7 +52,6 @@ function validateFinalVote(oldCommitment: AppCommitment, newCommitment: AppCommi
     newCommitment.appAttributes.furtherVotesRequired === 0 &&
     balancesUpdated(oldCommitment, newCommitment)
   ) {
-    validateConsensusCommitment(newCommitment);
     return true;
   } else {
     return false;
@@ -55,7 +64,6 @@ function validateVeto(oldCommitment: AppCommitment, newCommitment: AppCommitment
     newCommitment.appAttributes.furtherVotesRequired === 0 &&
     balancesUnchanged(oldCommitment, newCommitment)
   ) {
-    validateConsensusCommitment(newCommitment);
     return true;
   } else {
     return false;
@@ -67,7 +75,6 @@ function validatePass(oldCommitment: AppCommitment, newCommitment: AppCommitment
     oldCommitment.appAttributes.furtherVotesRequired === 0 &&
     newCommitment.appAttributes.furtherVotesRequired === 0
   ) {
-    validateConsensusCommitment(newCommitment);
     validateBalancesUnchanged(oldCommitment, newCommitment);
     return true;
   } else {
