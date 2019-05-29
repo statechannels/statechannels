@@ -46,4 +46,16 @@ contract TestConsensusApp is ConsensusApp {
   ) public pure returns (bool) {
     return validatePass(oldCommitment, newCommitment);
   }
+
+  function validateConsensusCommitmentPub(
+    ConsensusCommitment.ConsensusCommitmentStruct memory commitment
+  ) public pure {
+    validateConsensusCommitment(commitment);
+  } 
+  function validateProposeCommitmentPub(
+    ConsensusCommitment.ConsensusCommitmentStruct memory commitment
+  ) public pure {
+    validateProposeCommitment(commitment);
+  } 
+
 }

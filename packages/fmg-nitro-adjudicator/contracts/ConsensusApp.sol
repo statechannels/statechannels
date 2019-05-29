@@ -157,7 +157,7 @@ contract ConsensusApp {
 
   function validateConsensusCommitment(
     ConsensusCommitment.ConsensusCommitmentStruct memory commitment
-  ) private pure {
+  ) internal pure {
     require(
       commitment.furtherVotesRequired == 0,
       "ConsensusApp: 'furtherVotesRequired' must be 0 during consensus."
@@ -174,7 +174,7 @@ contract ConsensusApp {
 
   function validateProposeCommitment(
     ConsensusCommitment.ConsensusCommitmentStruct memory commitment
-  ) private pure {
+  ) internal pure {
     require(
       commitment.furtherVotesRequired != 0,
       "ConsensusApp: 'furtherVotesRequired' must not be 0 during propose."
