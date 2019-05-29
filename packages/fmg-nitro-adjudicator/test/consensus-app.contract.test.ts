@@ -124,12 +124,12 @@ describe('ConsensusApp', () => {
     // itRevertsWhenTheBalancesAreNotUpdated(fromCommitment, toCommitment);
   });
 
-  describe('the veto transition', async () => {
+  describe.only('the veto transition', async () => {
+    const validator: TransitionValidator = 'validateVeto';
     const fromCommitment = oneVoteComplete;
     const toCommitment = veto(fromCommitment);
 
-    // itReturnsTrueOnAValidTransition(fromCommitment, toCommitment);
-    // itRevertsWhenTheBalancesAreChanged(fromCommitment, toCommitment);
+    itReturnsTrueOnAValidTransition(fromCommitment, toCommitment, validator);
   });
 
   describe('validConsensusCommitment', () => {
