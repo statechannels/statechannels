@@ -5,6 +5,13 @@ import { IndirectFundingState } from '../../states';
 import { SignedCommitment } from '../../../../../domain';
 import { getLastMessage } from '../../../../state';
 import { describeScenarioStep } from '../../../../__tests__/helpers';
+import * as selectors from '../../../../selectors';
+
+// Mocks
+const getNextNonceMock = jest.fn().mockReturnValue(0);
+Object.defineProperty(selectors, 'getNextNonce', {
+  value: getNextNonceMock,
+});
 
 describe('happy-path scenario', () => {
   const scenario = scenarios.happyPath;

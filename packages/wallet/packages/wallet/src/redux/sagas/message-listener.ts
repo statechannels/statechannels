@@ -24,9 +24,7 @@ export function* messageListener() {
     const action = messageEvent.data;
     switch (messageEvent.data.type) {
       // Events that need a new process
-      case incoming.INITIALIZE_CHANNEL_REQUEST:
-        yield put(actions.protocol.initializeChannel({}));
-        break;
+
       case incoming.CONCLUDE_CHANNEL_REQUEST:
         yield put(actions.protocol.concludeRequested({ channelId: action.channelId }));
         yield put(
@@ -55,6 +53,11 @@ export function* messageListener() {
         yield put(actions.loggedIn(action.userId));
         break;
       case incoming.SIGN_COMMITMENT_REQUEST:
+        if (action.commitment.turnNum === 0) {
+          yield put(
+            actions.protocol.initializeChannel({ channelId: getChannelId(action.commitment) }),
+          );
+        }
         yield put(
           actions.application.ownCommitmentReceived({
             processId: application.APPLICATION_PROCESS_ID,
@@ -63,6 +66,11 @@ export function* messageListener() {
         );
         break;
       case incoming.VALIDATE_COMMITMENT_REQUEST:
+        if (action.commitment.turnNum === 0) {
+          yield put(
+            actions.protocol.initializeChannel({ channelId: getChannelId(action.commitment) }),
+          );
+        }
         yield put(
           actions.application.opponentCommitmentReceived({
             processId: application.APPLICATION_PROCESS_ID,

@@ -2,11 +2,8 @@ import { SharedData, queueMessage } from '../../state';
 import * as states from './states';
 import * as actions from './actions';
 import { ProtocolStateWithSharedData } from '..';
-import * as ethers from 'ethers';
 import { unreachable } from '../../../utils/reducer-utils';
-import { channelID } from 'fmg-core/lib/channel';
 import {
-  channelInitializationSuccess,
   validationSuccess,
   signatureSuccess,
   signatureFailure,
@@ -28,12 +25,13 @@ export const APPLICATION_PROCESS_ID = 'Application';
 
 export function initialize(
   sharedData: SharedData,
+  channelId: string,
+  address: string,
+  privateKey: string,
 ): ProtocolStateWithSharedData<states.ApplicationState> {
-  const { privateKey, address } = ethers.Wallet.createRandom();
-  const newSharedData = queueMessage(sharedData, channelInitializationSuccess(address));
   return {
-    protocolState: states.addressKnown({ address, privateKey }),
-    sharedData: newSharedData,
+    protocolState: states.waitForFirstCommitment({ channelId, privateKey, address }),
+    sharedData,
   };
 }
 
@@ -78,7 +76,7 @@ function ownCommitmentReceivedReducer(
         updatedSharedData,
         signatureSuccess(signResult.signedCommitment.signature),
       ),
-      protocolState: updateProtocolState(protocolState, action),
+      protocolState: states.ongoing(protocolState),
     };
   }
 }
@@ -101,23 +99,10 @@ function opponentCommitmentReceivedReducer(
     const updatedSharedData = { ...sharedData, channelStore: validateResult.store };
     return {
       sharedData: queueMessage(updatedSharedData, validationSuccess()),
-      protocolState: updateProtocolState(protocolState, action),
+      protocolState: states.ongoing(protocolState),
     };
   }
 }
-
-const updateProtocolState = (
-  protocolState: states.NonTerminalApplicationState,
-  action: actions.OwnCommitmentReceived | actions.OpponentCommitmentReceived,
-): states.ApplicationState => {
-  let channelId;
-  if (protocolState.type === 'Application.AddressKnown') {
-    channelId = channelID(action.commitment.channel);
-  } else {
-    channelId = protocolState.channelId;
-  }
-  return states.ongoing(channelId);
-};
 
 const validateAndUpdate = (
   commitment: Commitment,
@@ -125,7 +110,7 @@ const validateAndUpdate = (
   state: states.ApplicationState,
   sharedData: SharedData,
 ) => {
-  if (state.type === 'Application.AddressKnown') {
+  if (state.type === 'Application.WaitForFirstCommitment') {
     return checkAndInitialize(
       sharedData.channelStore,
       { commitment, signature },
@@ -142,7 +127,7 @@ const signAndUpdate = (
   state: states.ApplicationState,
   sharedData: SharedData,
 ) => {
-  if (state.type === 'Application.AddressKnown') {
+  if (state.type === 'Application.WaitForFirstCommitment') {
     return signAndInitialize(sharedData.channelStore, commitment, state.address, state.privateKey);
   } else {
     return signAndStore(sharedData.channelStore, commitment);

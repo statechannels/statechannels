@@ -11,6 +11,7 @@ export { BaseProcessAction } from '../../communication';
 export interface InitializeChannel {
   type: 'WALLET.NEW_PROCESS.INITIALIZE_CHANNEL';
   protocol: WalletProtocol.Application;
+  channelId: string;
 }
 export interface FundingRequested {
   type: 'WALLET.NEW_PROCESS.FUNDING_REQUESTED';
@@ -45,6 +46,7 @@ export interface ChallengeCreated {
 export const initializeChannel: ActionConstructor<InitializeChannel> = p => ({
   type: 'WALLET.NEW_PROCESS.INITIALIZE_CHANNEL',
   protocol: WalletProtocol.Application,
+  ...p,
 });
 
 export const fundingRequested: ActionConstructor<FundingRequested> = p => ({

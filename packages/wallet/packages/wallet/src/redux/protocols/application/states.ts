@@ -3,8 +3,9 @@ import { StateConstructor } from '../../utils';
 // -------
 // States
 // -------
-export interface AddressKnown {
-  type: 'Application.AddressKnown';
+export interface WaitForFirstCommitment {
+  type: 'Application.WaitForFirstCommitment';
+  channelId: string;
   address: string;
   privateKey: string;
 }
@@ -12,6 +13,8 @@ export interface AddressKnown {
 export interface Ongoing {
   type: 'Application.Ongoing';
   channelId: string;
+  address: string;
+  privateKey: string;
 }
 
 export interface Success {
@@ -21,9 +24,8 @@ export interface Success {
 // -------
 // Constructors
 // -------
-
-export const addressKnown: StateConstructor<AddressKnown> = p => {
-  return { ...p, type: 'Application.AddressKnown' };
+export const waitForFirstCommitment: StateConstructor<WaitForFirstCommitment> = p => {
+  return { ...p, type: 'Application.WaitForFirstCommitment' };
 };
 
 export const ongoing: StateConstructor<Ongoing> = p => {
@@ -38,8 +40,8 @@ export const success: StateConstructor<Success> = p => {
 // Unions and Guards
 // -------
 
-export type ApplicationState = AddressKnown | Ongoing | Success;
-export type NonTerminalApplicationState = AddressKnown | Ongoing;
+export type ApplicationState = WaitForFirstCommitment | Ongoing | Success;
+export type NonTerminalApplicationState = WaitForFirstCommitment | Ongoing;
 export type ApplicationStateType = ApplicationState['type'];
 
 export function isTerminal(state: ApplicationState): state is Success {

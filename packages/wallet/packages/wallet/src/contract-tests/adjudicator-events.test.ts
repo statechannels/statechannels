@@ -28,6 +28,8 @@ const createWatcherState = (
     processStore: {},
     adjudicatorStore: {},
     channelSubscriptions,
+    address: '',
+    privateKey: '',
   });
 };
 
@@ -57,6 +59,8 @@ describe('adjudicator listener', () => {
       processStore: {},
       adjudicatorStore: {},
       channelSubscriptions: {},
+      privateKey: '',
+      address: '',
     });
     const sagaTester = new SagaTester({ initialState });
 

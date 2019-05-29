@@ -146,8 +146,9 @@ export const INITIALIZATION_FAILURE = 'WALLET.INITIALIZATION.FAILURE';
 /**
  * @ignore
  */
-export const initializationSuccess = () => ({
+export const initializationSuccess = (address: string) => ({
   type: INITIALIZATION_SUCCESS as typeof INITIALIZATION_SUCCESS,
+  address,
 });
 /**
  * @ignore
@@ -160,38 +161,6 @@ export const initializationFailure = (message: string) => ({
  * @ignore
  */
 export type InitializationSuccess = ReturnType<typeof initializationSuccess>;
-
-// CHANNEL INITIALIZATION
-// =====
-// INITIALIZATION
-// ==============
-/**
- * @ignore
- */
-export const CHANNEL_INITIALIZATION_SUCCESS = 'WALLET.CHANNEL_INITIALIZATION.SUCCESS';
-/**
- * @ignore
- */
-export const CHANNEL_INITIALIZATION_FAILURE = 'WALLET.CHANNEL_INITIALIZATION.FAILURE';
-
-/**
- * @ignore
- */
-export const channelInitializationSuccess = (address: string) => ({
-  type: CHANNEL_INITIALIZATION_SUCCESS as typeof CHANNEL_INITIALIZATION_SUCCESS,
-  address,
-});
-/**
- * @ignore
- */
-export const channelInitializationFailure = (message: string) => ({
-  type: CHANNEL_INITIALIZATION_FAILURE as typeof CHANNEL_INITIALIZATION_FAILURE,
-  message,
-});
-/**
- * @ignore
- */
-export type ChannelInitializationSuccess = ReturnType<typeof channelInitializationSuccess>;
 
 // CONCLUDE
 // ==============
@@ -388,7 +357,6 @@ export type WalletEvent =
   | ChallengeComplete
   | ChallengeRejected
   | ChallengeResponseRequested
-  | ChannelInitializationSuccess
   | OpponentConcluded
   | ConcludeFailure
   | ConcludeSuccess
