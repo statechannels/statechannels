@@ -75,15 +75,55 @@ describe('ConsensusApp', () => {
     proposedAllocation,
     proposedDestination,
   );
-  const twoVotesComplete = vote(
-    propose(initialConsensus(defaults), proposedAllocation, proposedDestination),
-  );
-  const threeVotesComplete = vote(
-    vote(propose(initialConsensus(defaults), proposedAllocation, proposedDestination)),
-  );
+  const twoVotesComplete = vote(oneVoteComplete);
+  const threeVotesComplete = vote(twoVotesComplete);
+  const fourVotesComplete = finalVote(threeVotesComplete);
 
   beforeAll(async () => {
     await setupContracts();
+  });
+
+  describe('validTransition', () => {
+    const fromCommitment = initialConsensus(defaults);
+    const toCommitment = initialConsensus(defaults);
+    const consensusCommitment = appCommitment(fourVotesComplete, {
+      proposedAllocation: allocation,
+    });
+    const proposalCommitment = appCommitment(threeVotesComplete, {
+      proposedAllocation: [],
+    });
+
+    it('calls the consensus commitment validator on the new commitment', async () => {
+      await invalidTransition(
+        fromCommitment,
+        consensusCommitment,
+        "ConsensusApp: 'proposedAllocation' must be reset during consensus.",
+      );
+    });
+
+    it('calls the propose commitment validators on the new commitment', async () => {
+      await invalidTransition(
+        fromCommitment,
+        proposalCommitment,
+        "ConsensusApp: 'proposedAllocation' must not be empty during propose.",
+      );
+    });
+
+    it('calls the consensus commitment validator on the new commitment', async () => {
+      await invalidTransition(
+        consensusCommitment,
+        toCommitment,
+        "ConsensusApp: 'proposedAllocation' must be reset during consensus.",
+      );
+    });
+
+    it('calls the propose commitment validator on the new commitment', async () => {
+      await invalidTransition(
+        proposalCommitment,
+        toCommitment,
+        "ConsensusApp: 'proposedAllocation' must not be empty during propose.",
+      );
+    });
   });
 
   describe('the propose transition', async () => {

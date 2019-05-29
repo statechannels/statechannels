@@ -68,6 +68,45 @@ describe('ConsensusApp', () => {
   const threeVotesComplete = vote(twoVotesComplete);
   const fourVotesComplete = finalVote(threeVotesComplete);
 
+  describe('validTransition', () => {
+    const fromCommitment = initialConsensus(defaults);
+    const consensusCommitment = appCommitment(copy(fourVotesComplete), {
+      proposedAllocation: allocation,
+    });
+    const proposalCommitment = appCommitment(copy(threeVotesComplete), {
+      proposedAllocation: [],
+    });
+    const toCommitment = initialConsensus(defaults);
+
+    it('calls commitment validators on the new commitment', async () => {
+      expectInvalidCommitment(
+        consensusCommitment,
+        () => validTransition(fromCommitment, consensusCommitment),
+        "ConsensusApp: 'proposedAllocation' must be reset during consensus.",
+      );
+
+      expectInvalidCommitment(
+        proposalCommitment,
+        () => validTransition(fromCommitment, proposalCommitment),
+        "ConsensusApp: 'proposedAllocation' must not be reset during propose.",
+      );
+    });
+
+    it('calls commitment validators on the new commitment', async () => {
+      expectInvalidCommitment(
+        consensusCommitment,
+        () => validTransition(consensusCommitment, toCommitment),
+        "ConsensusApp: 'proposedAllocation' must be reset during consensus.",
+      );
+
+      expectInvalidCommitment(
+        proposalCommitment,
+        () => validTransition(proposalCommitment, toCommitment),
+        "ConsensusApp: 'proposedAllocation' must not be reset during propose.",
+      );
+    });
+  });
+
   describe('the propose transition', async () => {
     const fromCommitment = initialConsensus(defaults);
     const toCommitment = propose(copy(fromCommitment), proposedAllocation, proposedDestination);
@@ -129,12 +168,12 @@ describe('ConsensusApp', () => {
     });
 
     it('throws when the proposedDestination and proposedAllocation are not the same length', async () => {
-      const toCommitmentAllocation = appCommitment(copy(toCommitmentArgs), {
+      const toCommitmentDestination = appCommitment(copy(toCommitmentArgs), {
         proposedDestination: participants,
       });
 
       expectInvalidCommitment(
-        toCommitmentAllocation,
+        toCommitmentDestination,
         validator,
         "ConsensusApp: 'proposedDestination' must be reset during consensus.",
       );
