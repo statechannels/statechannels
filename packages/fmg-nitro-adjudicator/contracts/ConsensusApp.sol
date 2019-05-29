@@ -212,7 +212,7 @@ contract ConsensusApp {
   function balancesUpdated(
     ConsensusCommitment.ConsensusCommitmentStruct memory oldCommitment,
     ConsensusCommitment.ConsensusCommitmentStruct memory newCommitment
-  ) public pure returns (bool) {
+  ) private pure returns (bool) {
     return (
       encodeAndHashAllocation(oldCommitment.proposedAllocation) == encodeAndHashAllocation(newCommitment.currentAllocation) &&
       encodeAndHashDestination(oldCommitment.proposedDestination) == encodeAndHashDestination(newCommitment.currentDestination)
