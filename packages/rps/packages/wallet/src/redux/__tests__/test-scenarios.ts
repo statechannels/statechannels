@@ -31,6 +31,8 @@ export const initializedState: states.Initialized = {
   type: states.WALLET_INITIALIZED,
   uid: 'uid',
   processStore: {},
+  address: 'address',
+  privateKey: 'privateKey',
 };
 
 export const mockTransactionOutboxItem = {

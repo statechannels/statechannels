@@ -3,7 +3,7 @@ import { call, fork, put, take, takeEvery, cps, all } from 'redux-saga/effects';
 import * as loginActions from './actions';
 import { reduxSagaFirebase } from '../../gateways/firebase';
 import metamaskSaga from '../metamask/saga';
-import { initializeWallet, initializeChannel } from 'magmo-wallet-client';
+import { initializeWallet } from 'magmo-wallet-client';
 import RPSGameArtifact from '../../../build/contracts/RockPaperScissorsGame.json';
 import { WALLET_IFRAME_ID } from '../../constants';
 
@@ -44,8 +44,7 @@ function* loginStatusWatcherSaga() {
           ),
         );
       } else {
-        yield initializeWallet(WALLET_IFRAME_ID, user.uid);
-        const walletAddress = yield initializeChannel(WALLET_IFRAME_ID);
+        const walletAddress = yield initializeWallet(WALLET_IFRAME_ID, user.uid);
         yield put(loginActions.initializeWalletSuccess(walletAddress));
         yield put(loginActions.loginSuccess(user, libraryAddress));
       }

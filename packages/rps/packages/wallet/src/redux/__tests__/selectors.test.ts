@@ -1,5 +1,7 @@
 import * as walletStates from '../state';
 import * as selectors from '../selectors';
+import { ChannelState } from '../channel-store';
+import { Commitment } from '../../domain';
 
 describe('getAdjudicatorWatcherProcessesForChannel', () => {
   const createWatcherState = (
@@ -20,6 +22,8 @@ describe('getAdjudicatorWatcherProcessesForChannel', () => {
       processStore: {},
       adjudicatorStore: {},
       channelSubscriptions,
+      address: 'address',
+      privateKey: 'privateKey',
     });
   };
 
@@ -30,6 +34,8 @@ describe('getAdjudicatorWatcherProcessesForChannel', () => {
       processStore: {},
       adjudicatorStore: {},
       channelSubscriptions: {},
+      address: 'address',
+      privateKey: 'privateKey',
     });
     expect(selectors.getAdjudicatorWatcherProcessesForChannel(state, '0x0')).toEqual([]);
   });
@@ -56,5 +62,53 @@ describe('getAdjudicatorWatcherProcessesForChannel', () => {
   it('should return an empty array when no channels are monitored', () => {
     const state = createWatcherState(['p1', 'p2']);
     expect(selectors.getAdjudicatorWatcherProcessesForChannel(state, '0x1')).toEqual([]);
+  });
+});
+
+describe('getNextNonce', () => {
+  const defaultChannelState: ChannelState = {
+    channelId: '0x0',
+    libraryAddress: '0x0',
+    ourIndex: 0,
+    participants: ['0x0', '0x0'],
+    channelNonce: 0,
+    funded: false,
+    address: 'address',
+    privateKey: 'privateKey',
+    lastCommitment: { commitment: {} as Commitment, signature: 'signature' },
+    penultimateCommitment: { commitment: {} as Commitment, signature: 'signature' },
+    turnNum: 0,
+  };
+  const state = {
+    ...walletStates.EMPTY_SHARED_DATA,
+    channelStore: {
+      ['0x1']: {
+        ...defaultChannelState,
+        libraryAddress: '0x1',
+        channelNonce: 0,
+      },
+      ['0x2']: {
+        ...defaultChannelState,
+        libraryAddress: '0x1',
+        channelNonce: 1,
+      },
+      ['0x3']: {
+        ...defaultChannelState,
+        libraryAddress: '0x2',
+        channelNonce: 2,
+      },
+    },
+  };
+
+  it('gets the next nonce when multiple matching channels exist', () => {
+    expect(selectors.getNextNonce(state, '0x1')).toEqual(2);
+  });
+
+  it('returns 0 when no matching channels exist', () => {
+    expect(selectors.getNextNonce(state, '0x3')).toEqual(0);
+  });
+
+  it('returns the next nonce when one matching channel exists', () => {
+    expect(selectors.getNextNonce(state, '0x2')).toEqual(3);
   });
 });
