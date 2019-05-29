@@ -86,7 +86,7 @@ describe('ConsensusApp', () => {
     await setupContracts();
   });
 
-  describe.only('the propose transition', async () => {
+  describe('the propose transition', async () => {
     const validator: TransitionValidator = 'validatePropose';
 
     const fromCommitment = initialConsensus(defaults);
@@ -96,7 +96,7 @@ describe('ConsensusApp', () => {
     itRevertsWhenTheBalancesAreChanged(fromCommitment, toCommitment, validator);
   });
 
-  describe.only('the pass transition', async () => {
+  describe('the pass transition', async () => {
     const validator: TransitionValidator = 'validatePass';
     const fromCommitment = initialConsensus(defaults);
     const toCommitment = pass(fromCommitment);
@@ -105,7 +105,7 @@ describe('ConsensusApp', () => {
     itRevertsWhenTheBalancesAreChanged(fromCommitment, toCommitment, validator);
   });
 
-  describe.only('the vote transition', async () => {
+  describe('the vote transition', async () => {
     const validator: TransitionValidator = 'validateVote';
     const fromCommitment = twoVotesComplete;
     const toCommitment = vote(fromCommitment);
@@ -115,7 +115,7 @@ describe('ConsensusApp', () => {
     itRevertsWhenTheProposalsAreChanged(fromCommitment, toCommitment, validator);
   });
 
-  describe.only('the final vote transition', async () => {
+  describe('the final vote transition', async () => {
     const validator: TransitionValidator = 'validateFinalVote';
     const fromCommitment = threeVotesComplete;
     const toCommitment = finalVote(fromCommitment);
@@ -124,7 +124,7 @@ describe('ConsensusApp', () => {
     // itRevertsWhenTheBalancesAreNotUpdated(fromCommitment, toCommitment);
   });
 
-  describe.only('the veto transition', async () => {
+  describe('the veto transition', async () => {
     const validator: TransitionValidator = 'validateVeto';
     const fromCommitment = oneVoteComplete;
     const toCommitment = veto(fromCommitment);
@@ -132,7 +132,7 @@ describe('ConsensusApp', () => {
     itReturnsTrueOnAValidTransition(fromCommitment, toCommitment, validator);
   });
 
-  describe.only('validConsensusCommitment', () => {
+  describe('validConsensusCommitment', () => {
     const validatorName = 'validateConsensusCommitment';
     const commitmentArgs = finalVote(threeVotesComplete);
 
@@ -173,10 +173,50 @@ describe('ConsensusApp', () => {
     });
   });
 
-  describe('validProposeCommitment', () => {
-    const fromCommitment = initialConsensus(defaults);
-    const toCommitment = propose(fromCommitment, proposedAllocation, proposedDestination);
-    // itRevertsForAnInvalidProposeCommitment(fromCommitment, toCommitment);
+  describe('validateProposeCommitment', () => {
+    const validatorName: CommitmentValidator = 'validateProposeCommitment';
+    const commitmentArgs = propose(
+      initialConsensus(defaults),
+      proposedAllocation,
+      proposedDestination,
+    );
+
+    it('reverts when the furtherVotesRequired is zero', async () => {
+      const commitmentAllocation = appCommitment(commitmentArgs, {
+        furtherVotesRequired: 0,
+      });
+
+      await invalidCommitment(
+        commitmentAllocation,
+        validatorName,
+        "ConsensusApp: 'furtherVotesRequired' must not be 0 during propose.",
+      );
+    });
+
+    it('reverts when the proposedAllocation is empty', async () => {
+      const commitmentAllocation = appCommitment(commitmentArgs, {
+        proposedAllocation: [],
+      });
+
+      await invalidCommitment(
+        commitmentAllocation,
+        validatorName,
+        "ConsensusApp: 'proposedAllocation' must not be empty during propose.",
+      );
+    });
+
+    it('reverts when the proposedDestination and proposedAllocation are not the same length', async () => {
+      const commitmentAllocation = appCommitment(commitmentArgs, {
+        proposedAllocation,
+        proposedDestination: participants,
+      });
+
+      await invalidCommitment(
+        commitmentAllocation,
+        validatorName,
+        "ConsensusApp: 'proposedDestination' and 'proposedAllocation' must be the same length during propose.",
+      );
+    });
   });
 
   // Helper functions
@@ -289,48 +329,6 @@ describe('ConsensusApp', () => {
   ) {
     it('returns true on a valid transition', async () => {
       await getTransitionValidator(validatorName)(fromCommitment, toCommitment);
-    });
-  }
-
-  function itRevertsForAnInvalidProposeCommitment(
-    commitmentArgs,
-    validatorName: CommitmentValidator,
-  ) {
-    it('reverts when the furtherVotesRequired is zero', async () => {
-      const commitmentAllocation = appCommitment(commitmentArgs, {
-        furtherVotesRequired: 0,
-      });
-
-      await invalidCommitment(
-        commitmentAllocation,
-        validatorName,
-        "ConsensusApp: 'furtherVotesRequired' must not be 0 during propose.",
-      );
-    });
-
-    it('reverts when the proposedAllocation is empty', async () => {
-      const commitmentAllocation = appCommitment(commitmentArgs, {
-        proposedAllocation: [],
-      });
-
-      await invalidCommitment(
-        commitmentAllocation,
-        validatorName,
-        "ConsensusApp: 'proposedAllocation' must not be empty during propose.",
-      );
-    });
-
-    it('reverts when the proposedDestination and proposedAllocation are not the same length', async () => {
-      const commitmentAllocation = appCommitment(commitmentArgs, {
-        proposedAllocation,
-        proposedDestination: participants,
-      });
-
-      await invalidCommitment(
-        commitmentAllocation,
-        validatorName,
-        "ConsensusApp: 'proposedDestination' and 'proposedAllocation' must be the same length during propose.",
-      );
     });
   }
 
