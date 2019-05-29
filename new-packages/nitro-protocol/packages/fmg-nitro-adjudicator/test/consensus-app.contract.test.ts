@@ -87,7 +87,7 @@ describe('ConsensusApp', () => {
   });
 
   describe.only('the propose transition', async () => {
-    const validator = 'validatePropose';
+    const validator: TransitionValidator = 'validatePropose';
 
     const fromCommitment = initialConsensus(defaults);
     const toCommitment = propose(fromCommitment, proposedAllocation, proposedDestination);
@@ -97,7 +97,7 @@ describe('ConsensusApp', () => {
   });
 
   describe.only('the pass transition', async () => {
-    const validator = 'validatePass';
+    const validator: TransitionValidator = 'validatePass';
     const fromCommitment = initialConsensus(defaults);
     const toCommitment = pass(fromCommitment);
 
@@ -105,14 +105,14 @@ describe('ConsensusApp', () => {
     itRevertsWhenTheBalancesAreChanged(fromCommitment, toCommitment, validator);
   });
 
-  describe('the vote transition', async () => {
+  describe.only('the vote transition', async () => {
+    const validator: TransitionValidator = 'validateVote';
     const fromCommitment = twoVotesComplete;
     const toCommitment = vote(fromCommitment);
 
-    // itReturnsTrueOnAValidTransition(fromCommitment, toCommitment);
-    // itRevertsWhenFurtherVotesRequiredIsNotDecremented(fromCommitment, toCommitment);
-    // itRevertsWhenTheBalancesAreChanged(fromCommitment, toCommitment);
-    // itRevertsWhenTheProposalsAreChanged(fromCommitment, toCommitment);
+    itReturnsTrueOnAValidTransition(fromCommitment, toCommitment, validator);
+    itRevertsWhenTheBalancesAreChanged(fromCommitment, toCommitment, validator);
+    itRevertsWhenTheProposalsAreChanged(fromCommitment, toCommitment, validator);
   });
 
   describe('the final vote transition', async () => {
