@@ -53,7 +53,7 @@ contract ConsensusApp {
     if (
       furtherVotesRequiredInitialized(newCommitment, numParticipants)
     ) {
-      balancesUnchanged(oldCommitment, newCommitment);
+      validateBalancesUnchanged(oldCommitment, newCommitment);
       return true;
     } else {
       return false;
