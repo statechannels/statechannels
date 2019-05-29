@@ -13,13 +13,9 @@ import {
   AppAttributes,
 } from '../src/consensus-app';
 import {
-  validatePropose,
-  validatePass,
   validateConsensusCommitment,
   validateProposeCommitment,
-  validateVote,
-  validateFinalVote,
-  validateVeto,
+  validTransition,
 } from '../src/consensus-app/validTransition';
 
 describe('ConsensusApp', () => {
@@ -73,48 +69,43 @@ describe('ConsensusApp', () => {
   const fourVotesComplete = finalVote(threeVotesComplete);
 
   describe('the propose transition', async () => {
-    const validator = validatePropose;
     const fromCommitment = initialConsensus(defaults);
     const toCommitment = propose(copy(fromCommitment), proposedAllocation, proposedDestination);
 
-    itReturnsTrueOnAValidTransition(fromCommitment, toCommitment, validator);
-    itThrowsWhenTheBalancesAreChanged(fromCommitment, toCommitment, validator);
+    itReturnsTrueOnAValidTransition(fromCommitment, toCommitment);
+    itThrowsWhenTheBalancesAreChanged(fromCommitment, toCommitment);
   });
 
   describe('the pass transition', async () => {
-    const validator = validatePass;
     const fromCommitment = initialConsensus(defaults);
     const toCommitment = pass(copy(fromCommitment));
 
-    itReturnsTrueOnAValidTransition(fromCommitment, toCommitment, validator);
-    itThrowsWhenTheBalancesAreChanged(fromCommitment, toCommitment, validator);
+    itReturnsTrueOnAValidTransition(fromCommitment, toCommitment);
+    itThrowsWhenTheBalancesAreChanged(fromCommitment, toCommitment);
   });
 
   describe('the vote transition', async () => {
-    const validator = validateVote;
     const fromCommitment = twoVotesComplete;
     const toCommitment = vote(copy(fromCommitment));
 
-    itReturnsTrueOnAValidTransition(fromCommitment, toCommitment, validator);
-    itThrowsWhenTheBalancesAreChanged(fromCommitment, toCommitment, validator);
-    itThrowsWhenTheProposalsAreChanged(fromCommitment, toCommitment, validator);
+    itReturnsTrueOnAValidTransition(fromCommitment, toCommitment);
+    itThrowsWhenTheBalancesAreChanged(fromCommitment, toCommitment);
+    itThrowsWhenTheProposalsAreChanged(fromCommitment, toCommitment);
   });
 
   describe('the final vote transition', async () => {
-    const validator = validateFinalVote;
     const fromCommitment = twoVotesComplete;
     const toCommitment = finalVote(copy(fromCommitment));
 
-    itReturnsTrueOnAValidTransition(fromCommitment, toCommitment, validator);
-    itThrowsWhenTheBalancesAreNotUpdated(fromCommitment, toCommitment, validator);
+    itReturnsTrueOnAValidTransition(fromCommitment, toCommitment);
+    itThrowsWhenTheBalancesAreNotUpdated(fromCommitment, toCommitment);
   });
 
   describe('the veto transition', async () => {
-    const validator = validateVeto;
     const fromCommitment = oneVoteComplete;
     const toCommitment = veto(copy(fromCommitment));
 
-    itReturnsTrueOnAValidTransition(fromCommitment, toCommitment, validator);
+    itReturnsTrueOnAValidTransition(fromCommitment, toCommitment);
   });
 
   describe('validateConsensusCommitment', () => {
@@ -198,26 +189,20 @@ describe('ConsensusApp', () => {
     };
   }
 
-  type TransitionValidator = (c1: AppCommitment, c2: AppCommitment) => any;
   function expectInvalidTransition(
     fromCommitment: AppCommitment,
     toCommitment: AppCommitment,
-    validator: TransitionValidator,
     error?,
   ) {
     if (error) {
-      expect(() => validator(fromCommitment, toCommitment)).toThrowError(error);
+      expect(() => validTransition(fromCommitment, toCommitment)).toThrowError(error);
     } else {
-      expect(() => validator(fromCommitment, toCommitment)).toThrowError();
+      expect(() => validTransition(fromCommitment, toCommitment)).toThrowError();
     }
   }
 
-  function expectValidTransition(
-    fromCommitment: AppCommitment,
-    toCommitment: AppCommitment,
-    validator: TransitionValidator,
-  ) {
-    expect(validator(fromCommitment, toCommitment)).toBe(true);
+  function expectValidTransition(fromCommitment: AppCommitment, toCommitment: AppCommitment) {
+    expect(validTransition(fromCommitment, toCommitment)).toBe(true);
   }
 
   type CommitmentValidator = (c: AppCommitment) => any;
@@ -237,41 +222,33 @@ describe('ConsensusApp', () => {
     expect(validator(commitment)).toBe(true);
   }
 
-  function itReturnsTrueOnAValidTransition(
-    fromCommitmentArgs,
-    toCommitmentArgs,
-    validator: TransitionValidator,
-  ) {
+  function itReturnsTrueOnAValidTransition(fromCommitmentArgs, toCommitmentArgs) {
     it('returns true when the commitment is valid', async () => {
       const fromCommitment = appCommitment(fromCommitmentArgs);
       const toCommitment = appCommitment(copy(toCommitmentArgs));
 
-      expectValidTransition(fromCommitment, toCommitment, validator);
+      expectValidTransition(fromCommitment, toCommitment);
     });
   }
 
-  function itThrowsWhenTheBalancesAreNotUpdated(
-    fromCommitmentArgs,
-    toCommitmentArgs,
-    validator: TransitionValidator,
-  ) {
+  function itThrowsWhenTheBalancesAreNotUpdated(fromCommitmentArgs, toCommitmentArgs) {
     it('throws when the allocation is not updated', async () => {
       const toCommitmentDifferentAllocation = appCommitment({
         ...toCommitmentArgs,
         allocation,
       });
-      expectInvalidTransition(fromCommitmentArgs, toCommitmentDifferentAllocation, validator);
+      expectInvalidTransition(fromCommitmentArgs, toCommitmentDifferentAllocation);
     });
     it('throws when the destination is not updated', async () => {
       const toCommitmentDifferentDestination = appCommitment({
         ...toCommitmentArgs,
         destination: participants,
       });
-      expectInvalidTransition(fromCommitmentArgs, toCommitmentDifferentDestination, validator);
+      expectInvalidTransition(fromCommitmentArgs, toCommitmentDifferentDestination);
     });
   }
 
-  function itThrowsWhenTheBalancesAreChanged(fromCommitmentArgs, toCommitmentArgs, validator) {
+  function itThrowsWhenTheBalancesAreChanged(fromCommitmentArgs, toCommitmentArgs) {
     it('throws when the allocation is changed', async () => {
       const toCommitmentDifferentAllocation = appCommitment({
         ...toCommitmentArgs,
@@ -280,7 +257,6 @@ describe('ConsensusApp', () => {
       expectInvalidTransition(
         fromCommitmentArgs,
         toCommitmentDifferentAllocation,
-        validator,
         "ConsensusApp: 'allocation' must be the same between ",
       );
     });
@@ -292,17 +268,12 @@ describe('ConsensusApp', () => {
       expectInvalidTransition(
         fromCommitmentArgs,
         toCommitmentDifferentDestination,
-        validator,
         "ConsensusApp: 'destination' must be the same between ",
       );
     });
   }
 
-  function itThrowsWhenTheProposalsAreChanged(
-    fromCommitmentArgs,
-    toCommitmentArgs,
-    validator: TransitionValidator,
-  ) {
+  function itThrowsWhenTheProposalsAreChanged(fromCommitmentArgs, toCommitmentArgs) {
     it('throws when the proposedAllocation is changed', async () => {
       const toCommitmentDifferentAllocation = appCommitment(copy(toCommitmentArgs), {
         proposedAllocation: alternativeProposedAllocation,
@@ -310,7 +281,6 @@ describe('ConsensusApp', () => {
       expectInvalidTransition(
         fromCommitmentArgs,
         toCommitmentDifferentAllocation,
-        validator,
         "ConsensusApp: 'proposedAllocation' must be the same between ",
       );
     });
@@ -321,7 +291,6 @@ describe('ConsensusApp', () => {
       expectInvalidTransition(
         fromCommitmentArgs,
         toCommitmentDifferentDestination,
-        validator,
         "ConsensusApp: 'proposedDestination' must be the same between ",
       );
     });
