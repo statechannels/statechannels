@@ -12,11 +12,7 @@ import {
   AppCommitment,
   AppAttributes,
 } from '../src/consensus-app';
-import {
-  validateConsensusCommitment,
-  validateProposeCommitment,
-  validTransition,
-} from '../src/consensus-app/validTransition';
+import { validTransition } from '../src/consensus-app/validTransition';
 
 describe('ConsensusApp', () => {
   const participantA = new ethers.Wallet(
