@@ -70,7 +70,7 @@ contract ConsensusApp {
       furtherVotesRequiredDecremented(oldCommitment, newCommitment)
     ) {
       validateBalancesUnchanged(oldCommitment, newCommitment);
-      proposalsUnchanged(oldCommitment, newCommitment);
+      validateProposalsUnchanged(oldCommitment, newCommitment);
       return true;
     } else {
       return false;
@@ -138,6 +138,20 @@ contract ConsensusApp {
     require(
       encodeAndHashDestination(oldCommitment.currentDestination) == encodeAndHashDestination(newCommitment.currentDestination),
       "ConsensusApp: 'destination' must be the same between commitments."
+    );
+  }
+
+  function validateProposalsUnchanged(
+    ConsensusCommitment.ConsensusCommitmentStruct memory oldCommitment,
+    ConsensusCommitment.ConsensusCommitmentStruct memory newCommitment
+  ) private pure {
+    require(
+      encodeAndHashAllocation(oldCommitment.proposedAllocation) == encodeAndHashAllocation(newCommitment.proposedAllocation),
+      "ConsensusApp: 'proposedAllocation' must be the same between commitments."
+    ); 
+    require(
+      encodeAndHashDestination(oldCommitment.proposedDestination) == encodeAndHashDestination(newCommitment.proposedDestination),
+      "ConsensusApp: 'proposedDestination' must be the same between commitments."
     );
   }
 
@@ -214,17 +228,6 @@ contract ConsensusApp {
       encodeAndHashDestination(oldCommitment.currentDestination) == encodeAndHashDestination(newCommitment.currentDestination)
     );
   }
-
-  function proposalsUnchanged(
-    ConsensusCommitment.ConsensusCommitmentStruct memory oldCommitment,
-    ConsensusCommitment.ConsensusCommitmentStruct memory newCommitment
-  ) private pure returns (bool) {
-    return (
-      encodeAndHashAllocation(oldCommitment.proposedAllocation) == encodeAndHashAllocation(newCommitment.proposedAllocation) &&
-      encodeAndHashDestination(oldCommitment.proposedDestination) == encodeAndHashDestination(newCommitment.proposedDestination)
-    ); 
-  }
-
 
   function hasFurtherVotesNeededBeenInitialized(
       ConsensusCommitment.ConsensusCommitmentStruct memory commitment,
