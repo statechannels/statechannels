@@ -28,13 +28,11 @@ contract ConsensusApp {
       validateProposeCommitment(newCommitment);
     }
 
-    // The first action that's identified in the list either returns `true`,
-    // short-circuiting the `||`, or it reverts the transaction
-    return validatePropose(oldCommitment, newCommitment, numParticipants)   ||
-           validateVote(oldCommitment, newCommitment) ||
-           validateVeto(oldCommitment, newCommitment) ||
-           validatePass(oldCommitment, newCommitment) ||
-           validateFinalVote(oldCommitment, newCommitment) ||
+    return validPropose(oldCommitment, newCommitment, numParticipants)   ||
+           validVote(oldCommitment, newCommitment) ||
+           validVeto(oldCommitment, newCommitment) ||
+           validPass(oldCommitment, newCommitment) ||
+           validFinalVote(oldCommitment, newCommitment) ||
            invalidTransition();
   }
 
@@ -44,7 +42,7 @@ contract ConsensusApp {
 
   // Transition validations
 
-  function validatePropose(
+  function validPropose(
     ConsensusCommitment.ConsensusCommitmentStruct memory oldCommitment,
     ConsensusCommitment.ConsensusCommitmentStruct memory newCommitment,
     uint numParticipants
@@ -60,7 +58,7 @@ contract ConsensusApp {
     }
   }
 
-  function validateVote(
+  function validVote(
     ConsensusCommitment.ConsensusCommitmentStruct memory oldCommitment,
     ConsensusCommitment.ConsensusCommitmentStruct memory newCommitment
   ) internal pure returns (bool)
@@ -77,7 +75,7 @@ contract ConsensusApp {
     }
   }
 
-  function validateFinalVote(
+  function validFinalVote(
     ConsensusCommitment.ConsensusCommitmentStruct memory oldCommitment,
     ConsensusCommitment.ConsensusCommitmentStruct memory newCommitment
   ) internal pure returns (bool)
@@ -93,7 +91,7 @@ contract ConsensusApp {
     }
   }
 
-  function validateVeto(
+  function validVeto(
     ConsensusCommitment.ConsensusCommitmentStruct memory oldCommitment,
     ConsensusCommitment.ConsensusCommitmentStruct memory newCommitment
   ) internal pure returns (bool)
@@ -109,7 +107,7 @@ contract ConsensusApp {
     }
   }
 
-  function validatePass(
+  function validPass(
     ConsensusCommitment.ConsensusCommitmentStruct memory oldCommitment,
     ConsensusCommitment.ConsensusCommitmentStruct memory newCommitment
   ) internal pure returns (bool)

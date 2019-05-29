@@ -13,21 +13,18 @@ export function validTransition(oldCommitment: AppCommitment, newCommitment: App
   }
 
   if (
-    validatePropose(oldCommitment, newCommitment) ||
-    validateVote(oldCommitment, newCommitment) ||
-    validateVeto(oldCommitment, newCommitment) ||
-    validatePass(oldCommitment, newCommitment) ||
-    validateFinalVote(oldCommitment, newCommitment)
+    validPropose(oldCommitment, newCommitment) ||
+    validVote(oldCommitment, newCommitment) ||
+    validVeto(oldCommitment, newCommitment) ||
+    validPass(oldCommitment, newCommitment) ||
+    validFinalVote(oldCommitment, newCommitment)
   ) {
     return true;
   }
   throw new Error('ConsensusApp: No valid transition found for commitments');
 }
 
-export function validatePropose(
-  oldCommitment: AppCommitment,
-  newCommitment: AppCommitment,
-): boolean {
+export function validPropose(oldCommitment: AppCommitment, newCommitment: AppCommitment): boolean {
   if (furtherVotesRequiredInitialized(newCommitment)) {
     validateBalancesUnchanged(oldCommitment, newCommitment);
     return true;
@@ -36,7 +33,7 @@ export function validatePropose(
   }
 }
 
-export function validateVote(oldCommitment: AppCommitment, newCommitment: AppCommitment): boolean {
+export function validVote(oldCommitment: AppCommitment, newCommitment: AppCommitment): boolean {
   if (
     oldCommitment.appAttributes.furtherVotesRequired > 1 &&
     furtherVotesRequiredDecremented(oldCommitment, newCommitment)
@@ -49,7 +46,7 @@ export function validateVote(oldCommitment: AppCommitment, newCommitment: AppCom
   }
 }
 
-export function validateFinalVote(
+export function validFinalVote(
   oldCommitment: AppCommitment,
   newCommitment: AppCommitment,
 ): boolean {
@@ -64,7 +61,7 @@ export function validateFinalVote(
   }
 }
 
-export function validateVeto(oldCommitment: AppCommitment, newCommitment: AppCommitment): boolean {
+export function validVeto(oldCommitment: AppCommitment, newCommitment: AppCommitment): boolean {
   if (
     oldCommitment.appAttributes.furtherVotesRequired > 0 &&
     newCommitment.appAttributes.furtherVotesRequired === 0 &&
@@ -76,7 +73,7 @@ export function validateVeto(oldCommitment: AppCommitment, newCommitment: AppCom
   }
 }
 
-export function validatePass(oldCommitment: AppCommitment, newCommitment: AppCommitment): boolean {
+export function validPass(oldCommitment: AppCommitment, newCommitment: AppCommitment): boolean {
   if (
     oldCommitment.appAttributes.furtherVotesRequired === 0 &&
     newCommitment.appAttributes.furtherVotesRequired === 0
