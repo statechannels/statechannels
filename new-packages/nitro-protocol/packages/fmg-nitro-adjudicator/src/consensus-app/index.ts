@@ -68,6 +68,27 @@ const SolidityAppAttributesType = {
   },
 };
 
+const SolidityConsensusCommitmentType = {
+  ConsensusCommitmentStruct: {
+    furtherVotesRequired: 'uint32',
+    currentAllocation: 'uint256[]',
+    currentDestination: 'address[]',
+    proposedAllocation: 'uint256[]',
+    proposedDestination: 'address[]',
+  },
+};
+type TSConsensusCommitment = [number, Uint256[], Address[], Uint256[], Address[]];
+
+export function consensusCommitmentArgs(commitment: ConsensusCommitment): TSConsensusCommitment {
+  return [
+    commitment.appAttributes.furtherVotesRequired,
+    commitment.allocation,
+    commitment.destination,
+    commitment.appAttributes.proposedAllocation,
+    commitment.appAttributes.proposedDestination,
+  ];
+}
+
 export function bytesFromAppAttributes(appAttrs: AppAttributes): Bytes {
   return abi.encodeParameter(SolidityAppAttributesType, [
     appAttrs.furtherVotesRequired,
