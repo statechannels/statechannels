@@ -18,6 +18,7 @@ import { APPLICATION_PROCESS_ID } from './protocols/application/reducer';
 import { adjudicatorStateReducer } from './adjudicator-state/reducer';
 import { CONCLUDE_INSTIGATED, isStartProcessAction, WalletProtocol } from '../communication';
 import * as communication from '../communication';
+import { ethers } from 'ethers';
 
 const initialState = states.waitForLogin();
 
@@ -197,7 +198,12 @@ function initializeNewProtocol(
         action.commitment,
       );
     case 'WALLET.NEW_PROCESS.INITIALIZE_CHANNEL':
-      return applicationProtocol.initialize(incomingSharedData);
+      return applicationProtocol.initialize(
+        incomingSharedData,
+        action.channelId,
+        state.address,
+        state.privateKey,
+      );
 
     default:
       return unreachable(action);
@@ -219,14 +225,17 @@ const waitForLoginReducer = (
 ): states.WalletState => {
   switch (action.type) {
     case actions.LOGGED_IN:
+      const { privateKey, address } = ethers.Wallet.createRandom();
       return states.initialized({
         ...state,
         uid: action.uid,
         outboxState: accumulateSideEffects(state.outboxState, {
-          messageOutbox: [initializationSuccess()],
+          messageOutbox: [initializationSuccess(address)],
         }),
         processStore: {},
         adjudicatorStore: {},
+        privateKey,
+        address,
       });
     default:
       return state;

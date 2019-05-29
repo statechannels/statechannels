@@ -33,13 +33,13 @@ const ourTurn = channelFromCommitments(signedCommitment20, signedCommitment21, a
 const processId = 'processId';
 const storage = (channelState: ChannelState) => setChannel(EMPTY_SHARED_DATA, channelState);
 
-const defaults = { processId, channelId };
+const defaults = { processId, channelId, address, privateKey };
 
 // ------
 // States
 // ------
-const addressKnown = states.addressKnown({ address, privateKey });
-const ongoing = states.ongoing({ channelId });
+const addressKnown = states.waitForFirstCommitment({ channelId, address, privateKey });
+const ongoing = states.ongoing({ channelId, address, privateKey });
 
 // -------
 // Actions

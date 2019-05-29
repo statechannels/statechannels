@@ -12,12 +12,6 @@ export const initializeRequest = userId => ({
 });
 export type InitializeRequest = ReturnType<typeof initializeRequest>;
 
-export const INITIALIZE_CHANNEL_REQUEST = 'WALLET.INITIALIZE_CHANNEL_REQUEST';
-export const initializeChannelRequest = () => ({
-  type: INITIALIZE_CHANNEL_REQUEST as typeof INITIALIZE_CHANNEL_REQUEST,
-});
-export type InitializeChannelRequest = ReturnType<typeof initializeChannelRequest>;
-
 // FUNDING
 // =======
 

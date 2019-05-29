@@ -16,8 +16,13 @@ function whenIn(state) {
 
 describe('when initializing', () => {
   const scenario = scenarios.initializingApplication;
-  const result = initialize(scenario.initialize.sharedData);
-  itTransitionsTo(result, 'Application.AddressKnown');
+  const result = initialize(
+    scenario.initialize.sharedData,
+    scenario.channelId,
+    scenario.address,
+    scenario.privateKey,
+  );
+  itTransitionsTo(result, 'Application.WaitForFirstCommitment');
 });
 
 describe('starting the application', () => {

@@ -66,6 +66,8 @@ export interface Initialized extends SharedData {
   processStore: ProcessStore;
   currentProcessId?: string;
   activeAppChannelId?: string;
+  address: string;
+  privateKey: string;
 }
 
 // TODO: Once these are fleshed out they should be moved to their own file.
@@ -145,12 +147,10 @@ export function metaMaskError(params: Properties<MetaMaskError>): MetaMaskError 
   return { ...sharedData(params), type: METAMASK_ERROR };
 }
 export function initialized(params: Properties<Initialized>): Initialized {
-  const { uid, processStore } = params;
   return {
+    ...params,
     ...sharedData(params),
     type: WALLET_INITIALIZED,
-    uid,
-    processStore,
   };
 }
 
