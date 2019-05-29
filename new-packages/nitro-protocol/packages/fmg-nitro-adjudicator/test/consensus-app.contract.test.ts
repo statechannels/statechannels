@@ -132,10 +132,45 @@ describe('ConsensusApp', () => {
     itReturnsTrueOnAValidTransition(fromCommitment, toCommitment, validator);
   });
 
-  describe('validConsensusCommitment', () => {
-    const fromCommitment = threeVotesComplete;
-    const toCommitment = finalVote(fromCommitment);
-    // itRevertsForAnInvalidConsensusCommitment(fromCommitment, toCommitment);
+  describe.only('validConsensusCommitment', () => {
+    const validatorName = 'validateConsensusCommitment';
+    const commitmentArgs = finalVote(threeVotesComplete);
+
+    it('reverts when the furtherVotesRequired is not zero', async () => {
+      const commitmentAllocation = appCommitment(commitmentArgs, {
+        furtherVotesRequired: 1,
+      });
+
+      await invalidCommitment(
+        commitmentAllocation,
+        validatorName,
+        "ConsensusApp: 'furtherVotesRequired' must be 0 during consensus.",
+      );
+    });
+
+    it('reverts when the proposedAllocation is not empty', async () => {
+      const commitmentAllocation = appCommitment(commitmentArgs, {
+        proposedAllocation: allocation,
+      });
+
+      await invalidCommitment(
+        commitmentAllocation,
+        validatorName,
+        "ConsensusApp: 'proposedAllocation' must be reset during consensus.",
+      );
+    });
+
+    it('reverts when the proposedDestination is not empty', async () => {
+      const commitmentAllocation = appCommitment(commitmentArgs, {
+        proposedDestination: participants,
+      });
+
+      await invalidCommitment(
+        commitmentAllocation,
+        validatorName,
+        "ConsensusApp: 'proposedDestination' must be reset during consensus.",
+      );
+    });
   });
 
   describe('validProposeCommitment', () => {
@@ -254,47 +289,6 @@ describe('ConsensusApp', () => {
   ) {
     it('returns true on a valid transition', async () => {
       await getTransitionValidator(validatorName)(fromCommitment, toCommitment);
-    });
-  }
-
-  function itRevertsForAnInvalidConsensusCommitment(
-    commitmentArgs,
-    validatorName: CommitmentValidator,
-  ) {
-    it('reverts when the furtherVotesRequired is not zero', async () => {
-      const commitmentAllocation = appCommitment(commitmentArgs, {
-        furtherVotesRequired: 1,
-      });
-
-      await invalidCommitment(
-        commitmentAllocation,
-        validatorName,
-        "ConsensusApp: 'furtherVotesRequired' must be 0 during consensus.",
-      );
-    });
-
-    it('reverts when the proposedAllocation is not empty', async () => {
-      const commitmentAllocation = appCommitment(commitmentArgs, {
-        proposedAllocation: allocation,
-      });
-
-      await invalidCommitment(
-        commitmentAllocation,
-        validatorName,
-        "ConsensusApp: 'proposedAllocation' must be reset during consensus.",
-      );
-    });
-
-    it('reverts when the proposedDestination is not empty', async () => {
-      const commitmentAllocation = appCommitment(commitmentArgs, {
-        proposedDestination: participants,
-      });
-
-      await invalidCommitment(
-        commitmentAllocation,
-        validatorName,
-        "ConsensusApp: 'proposedDestination' must be reset during consensus.",
-      );
     });
   }
 
