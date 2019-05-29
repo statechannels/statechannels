@@ -1,6 +1,6 @@
 import { bigNumberify } from 'ethers/utils';
 import { Address, Uint256 } from 'fmg-core';
-import { addHex } from '@magmo/magmo-wallet';
+import { addHex } from 'magmo-wallet';
 import { HUB_ADDRESS } from '../../constants';
 import AllocatorChannel from '../models/allocatorChannel';
 import { Blockchain } from './blockchain';

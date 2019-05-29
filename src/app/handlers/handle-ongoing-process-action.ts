@@ -1,12 +1,12 @@
 import { ethers } from 'ethers';
 import { Signature } from 'fmg-core';
 import { channelID } from 'fmg-core/lib/channel';
-import * as communication from '@magmo/magmo-wallet/lib/src/communication';
+import * as communication from 'magmo-wallet/lib/src/communication';
 import {
   CommitmentReceived,
   RelayableAction,
   StrategyProposed,
-} from '@magmo/magmo-wallet/lib/src/communication';
+} from 'magmo-wallet/lib/src/communication';
 import { errors } from '../../wallet';
 import { getCurrentCommitment } from '../../wallet/db/queries/getCurrentCommitment';
 import { getProcess } from '../../wallet/db/queries/walletProcess';
