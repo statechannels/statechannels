@@ -1,5 +1,5 @@
 import { fork } from 'child_process';
-import { unreachable } from 'magmo-wallet';
+import { unreachable } from '@magmo/magmo-wallet';
 import { Model } from 'objection';
 import {
   AdjudicatorWatcherEvent,

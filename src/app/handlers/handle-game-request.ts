@@ -1,7 +1,7 @@
 import { ethers } from 'ethers';
 import { Signature } from 'fmg-core';
 import { channelID } from 'fmg-core/lib/channel';
-import { WalletProtocol } from 'magmo-wallet/lib/src/communication';
+import { WalletProtocol } from '@magmo/magmo-wallet/lib/src/communication';
 import { errors } from '../../wallet';
 import { startFundingProcess } from '../../wallet/db/queries/walletProcess';
 import { updateRPSChannel } from '../services/rpsChannelManager';

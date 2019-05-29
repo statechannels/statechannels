@@ -1,7 +1,7 @@
 import { Commitment, CommitmentType } from 'fmg-core';
 import { appAttributesFromBytes, bytesFromAppAttributes } from 'fmg-nitro-adjudicator';
 import { ConsensusCommitment, UpdateType } from 'fmg-nitro-adjudicator/lib/consensus-app';
-import { unreachable } from 'magmo-wallet';
+import { unreachable } from '@magmo/magmo-wallet';
 import AllocatorChannelCommitment from '../models/allocatorChannelCommitment';
 
 export type LedgerCommitment = ConsensusCommitment;

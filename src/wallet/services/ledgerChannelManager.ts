@@ -7,7 +7,7 @@ import {
   UpdateType,
   vote,
 } from 'fmg-nitro-adjudicator/lib/consensus-app';
-import { unreachable } from 'magmo-wallet';
+import { unreachable } from '@magmo/magmo-wallet';
 import { SignedCommitment } from '.';
 import { queries } from '../db/queries/allocator_channels';
 import errors from '../errors';

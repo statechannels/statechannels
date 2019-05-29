@@ -1,8 +1,8 @@
 import { ethers } from 'ethers';
 import { Signature } from 'fmg-core';
-import { unreachable } from 'magmo-wallet';
-import * as communication from 'magmo-wallet/lib/src/communication';
-import { ConcludeInstigated } from 'magmo-wallet/lib/src/communication';
+import { unreachable } from '@magmo/magmo-wallet';
+import * as communication from '@magmo/magmo-wallet/lib/src/communication';
+import { ConcludeInstigated } from '@magmo/magmo-wallet/lib/src/communication';
 import { startConcludeProcess } from '../../wallet/db/queries/walletProcess';
 import { updateRPSChannel } from '../services/rpsChannelManager';
 
