@@ -113,15 +113,13 @@ export function validateConsensusCommitment(commitment: AppCommitment): boolean 
 }
 
 export function validateProposeCommitment(commitment: AppCommitment): boolean {
-  if (!(commitment.appAttributes.proposedAllocation.length !== 0)) {
+  if (commitment.appAttributes.proposedAllocation.length === 0) {
     throw new Error("ConsensusApp: 'proposedAllocation' must not be reset during propose.");
   }
 
   if (
-    !(
-      commitment.appAttributes.proposedDestination.length ===
-      commitment.appAttributes.proposedAllocation.length
-    )
+    commitment.appAttributes.proposedDestination.length !==
+    commitment.appAttributes.proposedAllocation.length
   ) {
     throw new Error(
       "ConsensusApp: 'proposedDestination' and 'proposedAllocation' must be the same length during propose.",

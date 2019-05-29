@@ -181,7 +181,7 @@ contract ConsensusApp {
       ); 
     require(
       commitment.proposedAllocation.length > 0,
-      "ConsensusApp: 'proposedAllocation' must not be empty during propose."
+      "ConsensusApp: 'proposedAllocation' must not be reset during propose."
       ); 
     require(
       commitment.proposedDestination.length == commitment.proposedAllocation.length,

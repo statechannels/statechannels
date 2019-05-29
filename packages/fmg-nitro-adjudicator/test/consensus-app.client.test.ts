@@ -70,38 +70,58 @@ describe('ConsensusApp', () => {
 
   describe('validTransition', () => {
     const fromCommitment = initialConsensus(defaults);
-    const consensusCommitment = appCommitment(copy(fourVotesComplete), {
+    const toCommitment = initialConsensus(defaults);
+    const consensusCommitmentAllocation = appCommitment(copy(fourVotesComplete), {
       proposedAllocation: allocation,
     });
-    const proposalCommitment = appCommitment(copy(threeVotesComplete), {
+    const consensusCommitmentDestination = appCommitment(copy(fourVotesComplete), {
+      proposedDestination: participants,
+    });
+    const proposeCommitmentAllocation = appCommitment(copy(threeVotesComplete), {
       proposedAllocation: [],
     });
-    const toCommitment = initialConsensus(defaults);
+    const proposeCommitmentDestination = appCommitment(copy(threeVotesComplete), {
+      proposedDestination: [],
+    });
 
-    it('calls commitment validators on the new commitment', async () => {
-      expectInvalidCommitment(
-        consensusCommitment,
-        () => validTransition(fromCommitment, consensusCommitment),
+    it('calls the consensus commitment validator on the new commitment', async () => {
+      expectInvalidTransition(
+        fromCommitment,
+        consensusCommitmentAllocation,
         "ConsensusApp: 'proposedAllocation' must be reset during consensus.",
       );
 
-      expectInvalidCommitment(
-        proposalCommitment,
-        () => validTransition(fromCommitment, proposalCommitment),
-        "ConsensusApp: 'proposedAllocation' must not be reset during propose.",
+      expectInvalidTransition(
+        fromCommitment,
+        consensusCommitmentDestination,
+        "ConsensusApp: 'proposedDestination' must be reset during consensus.",
       );
     });
 
-    it('calls commitment validators on the new commitment', async () => {
-      expectInvalidCommitment(
-        consensusCommitment,
-        () => validTransition(consensusCommitment, toCommitment),
+    it('calls the propose commitment validator on the new commitment', async () => {
+      expectInvalidTransition(
+        fromCommitment,
+        proposeCommitmentAllocation,
+        "ConsensusApp: 'proposedAllocation' must not be reset during propose.",
+      );
+
+      expectInvalidTransition(
+        fromCommitment,
+        proposeCommitmentDestination,
+        "ConsensusApp: 'proposedDestination' and 'proposedAllocation' must be the same length during propose.",
+      );
+    });
+
+    it('calls the consensus commitment validator on the old commitment', async () => {
+      expectInvalidTransition(
+        consensusCommitmentAllocation,
+        toCommitment,
         "ConsensusApp: 'proposedAllocation' must be reset during consensus.",
       );
 
-      expectInvalidCommitment(
-        proposalCommitment,
-        () => validTransition(proposalCommitment, toCommitment),
+      expectInvalidTransition(
+        proposeCommitmentAllocation,
+        toCommitment,
         "ConsensusApp: 'proposedAllocation' must not be reset during propose.",
       );
     });
@@ -147,71 +167,6 @@ describe('ConsensusApp', () => {
     itReturnsTrueOnAValidTransition(fromCommitment, toCommitment);
   });
 
-  describe('validateConsensusCommitment', () => {
-    const toCommitmentArgs = fourVotesComplete;
-    const validator = validateConsensusCommitment;
-
-    it('returns true when given a valid consensus commitment', () => {
-      expectValidCommitment(toCommitmentArgs, validator);
-    });
-
-    it('throws when the proposedAllocation is not reset', async () => {
-      const toCommitmentAllocation = appCommitment(copy(toCommitmentArgs), {
-        proposedAllocation: allocation,
-      });
-
-      expectInvalidCommitment(
-        toCommitmentAllocation,
-        validator,
-        "ConsensusApp: 'proposedAllocation' must be reset during consensus.",
-      );
-    });
-
-    it('throws when the proposedDestination and proposedAllocation are not the same length', async () => {
-      const toCommitmentDestination = appCommitment(copy(toCommitmentArgs), {
-        proposedDestination: participants,
-      });
-
-      expectInvalidCommitment(
-        toCommitmentDestination,
-        validator,
-        "ConsensusApp: 'proposedDestination' must be reset during consensus.",
-      );
-    });
-  });
-
-  describe('validateProposeCommitment', () => {
-    const fromCommitment = initialConsensus(defaults);
-    const toCommitment = propose(fromCommitment, proposedAllocation, proposedDestination);
-    const validator = validateProposeCommitment;
-
-    it('returns true when given a valid consensus commitment', () => {
-      expectValidCommitment(toCommitment, validator);
-    });
-
-    it('throws when the proposedAllocation is reset', async () => {
-      const toCommitmentAllocation = appCommitment(toCommitment, {
-        proposedAllocation: [],
-      });
-      expectInvalidCommitment(
-        toCommitmentAllocation,
-        validator,
-        "ConsensusApp: 'proposedAllocation' must not be reset during propose.",
-      );
-    });
-    it('throws when the proposedDestination and proposedAllocation are not the same length', async () => {
-      const toCommitmentAllocation = appCommitment(toCommitment, {
-        proposedAllocation,
-        proposedDestination: participants,
-      });
-      expectInvalidCommitment(
-        toCommitmentAllocation,
-        validator,
-        "ConsensusApp: 'proposedDestination' and 'proposedAllocation' must be the same length during propose.",
-      );
-    });
-  });
-
   // Helper functions
 
   function appCommitment(
@@ -242,23 +197,6 @@ describe('ConsensusApp', () => {
 
   function expectValidTransition(fromCommitment: AppCommitment, toCommitment: AppCommitment) {
     expect(validTransition(fromCommitment, toCommitment)).toBe(true);
-  }
-
-  type CommitmentValidator = (c: AppCommitment) => any;
-  function expectInvalidCommitment(
-    commitment: AppCommitment,
-    validator: CommitmentValidator,
-    error?,
-  ) {
-    if (error) {
-      expect(() => validator(commitment)).toThrowError(error);
-    } else {
-      expect(() => validator(commitment)).toThrowError();
-    }
-  }
-
-  function expectValidCommitment(commitment: AppCommitment, validator: CommitmentValidator) {
-    expect(validator(commitment)).toBe(true);
   }
 
   function itReturnsTrueOnAValidTransition(fromCommitmentArgs, toCommitmentArgs) {
