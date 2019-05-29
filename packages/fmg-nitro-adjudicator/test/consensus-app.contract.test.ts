@@ -115,11 +115,12 @@ describe('ConsensusApp', () => {
     itRevertsWhenTheProposalsAreChanged(fromCommitment, toCommitment, validator);
   });
 
-  describe('the final vote transition', async () => {
+  describe.only('the final vote transition', async () => {
+    const validator: TransitionValidator = 'validateFinalVote';
     const fromCommitment = threeVotesComplete;
     const toCommitment = finalVote(fromCommitment);
 
-    // itReturnsTrueOnAValidTransition(fromCommitment, toCommitment);
+    itReturnsTrueOnAValidTransition(fromCommitment, toCommitment, validator);
     // itRevertsWhenTheBalancesAreNotUpdated(fromCommitment, toCommitment);
   });
 
