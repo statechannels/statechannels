@@ -60,8 +60,8 @@ export function appAttributes(ethersAppAttrs: SolidityAppAttributes): AppAttribu
   };
 }
 
-const SolidityConsensusCommitmentType = {
-  ConsensusCommitmentStruct: {
+const SolidityAppAttributesType = {
+  AppAttributes: {
     furtherVotesRequired: 'uint32',
     proposedAllocation: 'uint256[]',
     proposedDestination: 'address[]',
@@ -69,7 +69,7 @@ const SolidityConsensusCommitmentType = {
 };
 
 export function bytesFromAppAttributes(appAttrs: AppAttributes): Bytes {
-  return abi.encodeParameter(SolidityConsensusCommitmentType, [
+  return abi.encodeParameter(SolidityAppAttributesType, [
     appAttrs.furtherVotesRequired,
     appAttrs.proposedAllocation,
     appAttrs.proposedDestination,
@@ -77,7 +77,7 @@ export function bytesFromAppAttributes(appAttrs: AppAttributes): Bytes {
 }
 
 export function appAttributesFromBytes(appAttrs: Bytes): AppAttributes {
-  return appAttributes(abi.decodeParameter(SolidityConsensusCommitmentType, appAttrs));
+  return appAttributes(abi.decodeParameter(SolidityAppAttributesType, appAttrs));
 }
 
 export function asCoreCommitment(c: ConsensusCommitment): Commitment {
