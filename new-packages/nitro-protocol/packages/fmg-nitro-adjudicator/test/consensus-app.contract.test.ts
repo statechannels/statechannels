@@ -2,7 +2,7 @@ import { ethers } from 'ethers';
 import { getNetworkId, getGanacheProvider, expectRevert, delay } from 'magmo-devtools';
 import { Channel, ethereumArgs, toUint256, CommitmentType } from 'fmg-core';
 
-import TestConsensusAppArtifact from '../build/contracts/TestConsensusApp.json';
+import ConsensusAppArtifact from '../build/contracts/ConsensusApp.json';
 
 import {
   propose,
@@ -15,7 +15,6 @@ import {
   AppCommitment,
   asCoreCommitment,
   AppAttributes,
-  consensusCommitmentArgs,
 } from '../src/consensus-app';
 
 jest.setTimeout(20000);
@@ -24,8 +23,8 @@ const provider = getGanacheProvider();
 
 async function setupContracts() {
   const networkId = await getNetworkId();
-  const address = TestConsensusAppArtifact.networks[networkId].address;
-  const abi = TestConsensusAppArtifact.abi;
+  const address = ConsensusAppArtifact.networks[networkId].address;
+  const abi = ConsensusAppArtifact.abi;
   consensusApp = await new ethers.Contract(address, abi, provider);
 }
 
@@ -86,42 +85,58 @@ describe('ConsensusApp', () => {
   describe('validTransition', () => {
     const fromCommitment = initialConsensus(defaults);
     const toCommitment = initialConsensus(defaults);
-    const consensusCommitment = appCommitment(fourVotesComplete, {
+    const consensusCommitmentAllocation = appCommitment(fourVotesComplete, {
       proposedAllocation: allocation,
     });
-    const proposalCommitment = appCommitment(threeVotesComplete, {
+    const consensusCommitmentDestination = appCommitment(fourVotesComplete, {
+      proposedDestination: participants,
+    });
+    const proposeCommitmentAllocation = appCommitment(threeVotesComplete, {
       proposedAllocation: [],
     });
-
-    it('calls the consensus commitment validator on the new commitment', async () => {
-      await invalidTransition(
-        fromCommitment,
-        consensusCommitment,
-        "ConsensusApp: 'proposedAllocation' must be reset during consensus.",
-      );
-    });
-
-    it('calls the propose commitment validators on the new commitment', async () => {
-      await invalidTransition(
-        fromCommitment,
-        proposalCommitment,
-        "ConsensusApp: 'proposedAllocation' must not be empty during propose.",
-      );
+    const proposeCommitmentDestination = appCommitment(threeVotesComplete, {
+      proposedDestination: [],
     });
 
     it('calls the consensus commitment validator on the new commitment', async () => {
       await invalidTransition(
-        consensusCommitment,
-        toCommitment,
+        fromCommitment,
+        consensusCommitmentAllocation,
         "ConsensusApp: 'proposedAllocation' must be reset during consensus.",
+      );
+
+      await invalidTransition(
+        fromCommitment,
+        consensusCommitmentDestination,
+        "ConsensusApp: 'proposedDestination' must be reset during consensus.",
       );
     });
 
     it('calls the propose commitment validator on the new commitment', async () => {
       await invalidTransition(
-        proposalCommitment,
+        fromCommitment,
+        proposeCommitmentAllocation,
+        "ConsensusApp: 'proposedAllocation' must not be reset during propose.",
+      );
+
+      await invalidTransition(
+        fromCommitment,
+        proposeCommitmentDestination,
+        "ConsensusApp: 'proposedDestination' and 'proposedAllocation' must be the same length during propose.",
+      );
+    });
+
+    it('calls the consensus commitment validator on the old commitment', async () => {
+      await invalidTransition(
+        consensusCommitmentAllocation,
         toCommitment,
-        "ConsensusApp: 'proposedAllocation' must not be empty during propose.",
+        "ConsensusApp: 'proposedAllocation' must be reset during consensus.",
+      );
+
+      await invalidTransition(
+        proposeCommitmentAllocation,
+        toCommitment,
+        "ConsensusApp: 'proposedAllocation' must not be reset during propose.",
       );
     });
   });
@@ -166,93 +181,6 @@ describe('ConsensusApp', () => {
     itReturnsTrueOnAValidTransition(fromCommitment, toCommitment);
   });
 
-  describe('validConsensusCommitment', () => {
-    const validatorName = 'validateConsensusCommitment';
-    const commitmentArgs = finalVote(threeVotesComplete);
-
-    it('reverts when the furtherVotesRequired is not zero', async () => {
-      const commitmentAllocation = appCommitment(commitmentArgs, {
-        furtherVotesRequired: 1,
-      });
-
-      await invalidCommitment(
-        commitmentAllocation,
-        validatorName,
-        "ConsensusApp: 'furtherVotesRequired' must be 0 during consensus.",
-      );
-    });
-
-    it('reverts when the proposedAllocation is not empty', async () => {
-      const commitmentAllocation = appCommitment(commitmentArgs, {
-        proposedAllocation: allocation,
-      });
-
-      await invalidCommitment(
-        commitmentAllocation,
-        validatorName,
-        "ConsensusApp: 'proposedAllocation' must be reset during consensus.",
-      );
-    });
-
-    it('reverts when the proposedDestination is not empty', async () => {
-      const commitmentAllocation = appCommitment(commitmentArgs, {
-        proposedDestination: participants,
-      });
-
-      await invalidCommitment(
-        commitmentAllocation,
-        validatorName,
-        "ConsensusApp: 'proposedDestination' must be reset during consensus.",
-      );
-    });
-  });
-
-  describe('validateProposeCommitment', () => {
-    const validatorName: CommitmentValidator = 'validateProposeCommitment';
-    const commitmentArgs = propose(
-      initialConsensus(defaults),
-      proposedAllocation,
-      proposedDestination,
-    );
-
-    it('reverts when the furtherVotesRequired is zero', async () => {
-      const commitmentAllocation = appCommitment(commitmentArgs, {
-        furtherVotesRequired: 0,
-      });
-
-      await invalidCommitment(
-        commitmentAllocation,
-        validatorName,
-        "ConsensusApp: 'furtherVotesRequired' must not be 0 during propose.",
-      );
-    });
-
-    it('reverts when the proposedAllocation is empty', async () => {
-      const commitmentAllocation = appCommitment(commitmentArgs, {
-        proposedAllocation: [],
-      });
-
-      await invalidCommitment(
-        commitmentAllocation,
-        validatorName,
-        "ConsensusApp: 'proposedAllocation' must not be empty during propose.",
-      );
-    });
-
-    it('reverts when the proposedDestination and proposedAllocation are not the same length', async () => {
-      const commitmentAllocation = appCommitment(commitmentArgs, {
-        proposedAllocation,
-        proposedDestination: participants,
-      });
-
-      await invalidCommitment(
-        commitmentAllocation,
-        validatorName,
-        "ConsensusApp: 'proposedDestination' and 'proposedAllocation' must be the same length during propose.",
-      );
-    });
-  });
-
   // Helper functions
 
   function appCommitment(
@@ -269,18 +197,11 @@ describe('ConsensusApp', () => {
     };
   }
 
-  type CommitmentValidator = 'validateProposeCommitment' | 'validateConsensusCommitment';
-
-  function getCommitmentValidator(validatorName: CommitmentValidator): (c) => any {
-    return c => consensusApp[`${validatorName}Pub`](consensusCommitmentArgs(c));
-  }
-
   async function invalidTransition(
     fromConsensusCommitment: ConsensusBaseCommitment,
     toConsensusCommitment: ConsensusBaseCommitment,
     reason?,
   ) {
-    expect.assertions(1);
     const fromCommitment = appCommitment(fromConsensusCommitment);
     const toCommitment = appCommitment(toConsensusCommitment);
     await expectRevert(
@@ -291,16 +212,6 @@ describe('ConsensusApp', () => {
         ),
       reason,
     );
-  }
-
-  async function invalidCommitment(
-    consensusCommitment: ConsensusBaseCommitment,
-    validatorName: CommitmentValidator,
-    reason?,
-  ) {
-    expect.assertions(1);
-    const commitment = appCommitment(consensusCommitment);
-    await expectRevert(async () => await getCommitmentValidator(validatorName)(commitment), reason);
   }
 
   async function validTransition(
@@ -315,25 +226,6 @@ describe('ConsensusApp', () => {
         ethereumArgs(asCoreCommitment(toCommitment)),
       ),
     ).toBe(true);
-  }
-
-  async function expectInvalidCommitment(
-    commitment: AppCommitment,
-    validatorName: CommitmentValidator,
-    reason?,
-  ) {
-    if (reason) {
-      expectRevert(async () => await getCommitmentValidator(validatorName)(commitment), reason);
-    } else {
-      expectRevert(async () => await getCommitmentValidator(validatorName)(commitment));
-    }
-  }
-
-  async function expectValidCommitment(
-    commitment: AppCommitment,
-    validatorName: CommitmentValidator,
-  ) {
-    expect(await getCommitmentValidator(validatorName)(commitment)).toBe(true);
   }
 
   function itReturnsTrueOnAValidTransition(fromCommitment, toCommitment) {
