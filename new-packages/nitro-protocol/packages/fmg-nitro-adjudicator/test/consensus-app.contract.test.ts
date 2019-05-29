@@ -96,7 +96,7 @@ describe('ConsensusApp', () => {
     itRevertsWhenTheBalancesAreChanged(fromCommitment, toCommitment, validator);
   });
 
-  describe('the pass transition', async () => {
+  describe.only('the pass transition', async () => {
     const validator = 'validatePass';
     const fromCommitment = initialConsensus(defaults);
     const toCommitment = pass(fromCommitment);
