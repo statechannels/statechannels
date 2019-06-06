@@ -11,7 +11,7 @@ let killSubprocess = null;
 const five = bigNumberify(5).toHexString();
 
 describe('adjudicator listener', () => {
-  it('should handle a funds received event when channel is in the database', async done => {
+  it('should handle a funds received event when channel is in the database', done => {
     // We have to reference the compiled JS file instead of the TS source file
     // https://github.com/facebook/jest/issues/5274
     // https://github.com/facebook/jest/issues/8236
@@ -28,7 +28,7 @@ describe('adjudicator listener', () => {
       done();
     });
 
-    await Blockchain.fund(channelId, '0x0', '0x5');
+    Blockchain.fund(channelId, '0x0', '0x5');
   });
 });
 
