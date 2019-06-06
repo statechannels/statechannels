@@ -1,10 +1,7 @@
 import * as states from './states';
 import * as actions from './actions';
 
-import {
-  Action as IndirectFundingAction,
-  isIndirectFundingAction,
-} from '../../indirect-funding/actions';
+import { IndirectFundingAction, isIndirectFundingAction } from '../../indirect-funding/actions';
 import { SharedData, queueMessage } from '../../../state';
 import { ProtocolStateWithSharedData } from '../..';
 import { unreachable } from '../../../../utils/reducer-utils';

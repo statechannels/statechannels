@@ -1,162 +1,183 @@
 import * as channel from './channel-store/actions';
 import * as directFunding from './protocols/direct-funding/actions';
 import * as indirectFunding from './protocols/indirect-funding/actions';
-import * as protocol from './protocols/actions';
-import * as challenging from './protocols/dispute/challenger/actions';
 import * as application from './protocols/application/actions';
-import { FundingAction } from './protocols/funding/actions';
-import { Commitment } from '../domain';
-import {
-  COMMITMENT_RECEIVED,
-  CommitmentReceived,
-  commitmentReceived,
-  RelayableAction,
-} from '../communication';
+import * as protocol from './protocols/actions';
+import { FundingAction, isFundingAction } from './protocols/funding/actions';
+import { CommitmentReceived, commitmentReceived, RelayableAction } from '../communication';
 import {
   TransactionAction as TA,
   isTransactionAction as isTA,
 } from './protocols/transaction-submission/actions';
-import { WithdrawalAction } from './protocols/withdrawing/actions';
-import { ResponderAction } from './protocols/dispute/responder/actions';
-import { DefundingAction } from './protocols/defunding/actions';
-import { ConcludingAction as ConcludingActionInstigator } from './protocols/concluding/instigator/actions';
-import { ConcludingAction as ConcludingActionResponder } from './protocols/concluding/responder/actions';
+import { DisputeAction, isDisputeAction } from './protocols/dispute';
+import { ConcludingAction, isConcludingAction } from './protocols/concluding';
+import { ApplicationAction } from './protocols/application/actions';
+import { ActionConstructor } from './utils';
+import { Commitment } from '../domain';
+
 export * from './protocols/transaction-submission/actions';
-export { COMMITMENT_RECEIVED, CommitmentReceived, commitmentReceived };
+export { CommitmentReceived, commitmentReceived };
 
 export type TransactionAction = TA;
 export const isTransactionAction = isTA;
 
-export const LOGGED_IN = 'WALLET.LOGGED_IN';
-export const loggedIn = (uid: string) => ({
-  type: LOGGED_IN as typeof LOGGED_IN,
-  uid,
-});
-export type LoggedIn = ReturnType<typeof loggedIn>;
+// -------
+// Actions
+// -------
+export interface LoggedIn {
+  type: 'WALLET.LOGGED_IN';
+  uid: string;
+}
 
-export const ADJUDICATOR_KNOWN = 'WALLET.ADJUDICATOR_KNOWN';
-export const adjudicatorKnown = (networkId: string, adjudicator: string) => ({
-  type: ADJUDICATOR_KNOWN as typeof ADJUDICATOR_KNOWN,
-  networkId,
-  adjudicator,
-});
-export type AdjudicatorKnown = ReturnType<typeof adjudicatorKnown>;
+export interface AdjudicatorKnown {
+  type: 'WALLET.ADJUDICATOR_KNOWN';
+  networkId: string;
+  adjudicator: string;
+}
 
-export const MESSAGE_SENT = 'WALLET.MESSAGE_SENT';
-export const messageSent = () => ({
-  type: MESSAGE_SENT as typeof MESSAGE_SENT,
-});
-export type MessageSent = ReturnType<typeof messageSent>;
+export interface MessageSent {
+  type: 'WALLET.MESSAGE_SENT';
+}
 
-export const DISPLAY_MESSAGE_SENT = 'WALLET.DISPLAY_MESSAGE_SENT';
-export const displayMessageSent = () => ({
-  type: DISPLAY_MESSAGE_SENT as typeof DISPLAY_MESSAGE_SENT,
-});
-export type DisplayMessageSent = ReturnType<typeof displayMessageSent>;
+export interface DisplayMessageSent {
+  type: 'WALLET.DISPLAY_MESSAGE_SENT';
+}
 
-export const BLOCK_MINED = 'BLOCK_MINED';
-export const blockMined = (block: { timestamp: number; number: number }) => ({
-  type: BLOCK_MINED as typeof BLOCK_MINED,
-  block,
-});
-export type BlockMined = ReturnType<typeof blockMined>;
+export interface BlockMined {
+  type: 'BLOCK_MINED';
+  block: { timestamp: number; number: number };
+}
 
-export const METAMASK_LOAD_ERROR = 'METAMASK_LOAD_ERROR';
-export const metamaskLoadError = () => ({
-  type: METAMASK_LOAD_ERROR as typeof METAMASK_LOAD_ERROR,
-});
-export type MetamaskLoadError = ReturnType<typeof metamaskLoadError>;
+export interface MetamaskLoadError {
+  type: 'METAMASK_LOAD_ERROR';
+}
 
 export type Message = 'FundingDeclined';
-export const MESSAGE_RECEIVED = 'WALLET.COMMON.MESSAGE_RECEIVED';
-export const messageReceived = (processId: string, data: Message) => ({
-  type: MESSAGE_RECEIVED as typeof MESSAGE_RECEIVED,
-  processId,
-  data,
-});
-export type MessageReceived = ReturnType<typeof messageReceived>;
 
-export const CHALLENGE_EXPIRY_SET_EVENT = 'WALLET.ADJUDICATOR.CHALLENGE_EXPIRY_TIME_SET';
-export const challengeExpirySetEvent = (
-  processId: string,
-  channelId: string,
-  expiryTime: number,
-) => ({
-  processId,
-  channelId,
-  expiryTime,
-  type: CHALLENGE_EXPIRY_SET_EVENT as typeof CHALLENGE_EXPIRY_SET_EVENT,
-});
-export type ChallengeExpirySetEvent = ReturnType<typeof challengeExpirySetEvent>;
+export interface MessageReceived {
+  type: 'WALLET.COMMON.MESSAGE_RECEIVED';
+  processId: string;
+  data: Message;
+}
 
-export const CHALLENGE_CREATED_EVENT = 'WALLET.ADJUDICATOR.CHALLENGE_CREATED_EVENT';
-export const challengeCreatedEvent = (channelId: string, commitment: Commitment, finalizedAt) => ({
-  channelId,
-  commitment,
-  finalizedAt,
-  type: CHALLENGE_CREATED_EVENT as typeof CHALLENGE_CREATED_EVENT,
-});
-export type ChallengeCreatedEvent = ReturnType<typeof challengeCreatedEvent>;
+export interface ChallengeExpirySetEvent {
+  type: 'WALLET.ADJUDICATOR.CHALLENGE_EXPIRY_TIME_SET';
+  processId: string;
+  channelId: string;
+  expiryTime;
+}
 
-export const CONCLUDED_EVENT = 'WALLET.ADJUDICATOR.CONCLUDED_EVENT';
-export const concludedEvent = (processId: string, channelId: string) => ({
-  processId,
-  channelId,
-  type: CONCLUDED_EVENT as typeof CONCLUDED_EVENT,
-});
-export type ConcludedEvent = ReturnType<typeof concludedEvent>;
+export interface ChallengeCreatedEvent {
+  type: 'WALLET.ADJUDICATOR.CHALLENGE_CREATED_EVENT';
+  channelId: string;
+  commitment: Commitment;
+  finalizedAt: number;
+}
 
-export const REFUTED_EVENT = 'WALLET.ADJUDICATOR.REFUTED_EVENT';
-export const refutedEvent = (
-  processId: string,
-  channelId: string,
-  refuteCommitment: Commitment,
-) => ({
-  processId,
-  channelId,
-  refuteCommitment,
-  type: REFUTED_EVENT as typeof REFUTED_EVENT,
-});
-export type RefutedEvent = ReturnType<typeof refutedEvent>;
+export interface ConcludedEvent {
+  channelId: string;
+  type: 'WALLET.ADJUDICATOR.CONCLUDED_EVENT';
+}
 
-export const RESPOND_WITH_MOVE_EVENT = 'WALLET.ADJUDICATOR.RESPOND_WITH_MOVE_EVENT';
-export const respondWithMoveEvent = (
-  processId: string,
-  channelId: string,
-  responseCommitment: Commitment,
-  responseSignature: string,
-) => ({
-  processId,
-  channelId,
-  responseCommitment,
-  responseSignature,
-  type: RESPOND_WITH_MOVE_EVENT as typeof RESPOND_WITH_MOVE_EVENT,
-});
-export type RespondWithMoveEvent = ReturnType<typeof respondWithMoveEvent>;
+export interface RefutedEvent {
+  type: 'WALLET.ADJUDICATOR.REFUTED_EVENT';
+  processId: string;
+  channelId: string;
+  refuteCommitment: Commitment;
+}
 
-export const FUNDING_RECEIVED_EVENT = 'WALLET.ADJUDICATOR.FUNDING_RECEIVED_EVENT';
-export const fundingReceivedEvent = (
-  processId: string,
-  channelId: string,
-  amount: string,
-  totalForDestination: string,
-) => ({
-  processId,
-  channelId,
-  amount,
-  totalForDestination,
-  type: FUNDING_RECEIVED_EVENT as typeof FUNDING_RECEIVED_EVENT,
-});
-export type FundingReceivedEvent = ReturnType<typeof fundingReceivedEvent>;
+export interface RespondWithMoveEvent {
+  processId: string;
+  channelId: string;
+  responseCommitment: Commitment;
+  responseSignature: string;
+  type: 'WALLET.ADJUDICATOR.RESPOND_WITH_MOVE_EVENT';
+}
 
-export const CHALLENGE_EXPIRED_EVENT = 'WALLET.ADJUDICATOR.CHALLENGE_EXPIRED';
-export const challengeExpiredEvent = (processId: string, channelId: string, timestamp: number) => ({
-  processId,
-  channelId,
-  timestamp,
-  type: CHALLENGE_EXPIRED_EVENT as typeof CHALLENGE_EXPIRED_EVENT,
+export interface FundingReceivedEvent {
+  type: 'WALLET.ADJUDICATOR.FUNDING_RECEIVED_EVENT';
+  processId: string;
+  channelId: string;
+  amount: string;
+  totalForDestination: string;
+}
+
+export interface ChallengeExpiredEvent {
+  type: 'WALLET.ADJUDICATOR.CHALLENGE_EXPIRED';
+  processId: string;
+  channelId: string;
+  timestamp: number;
+}
+
+// -------
+// Constructors
+// -------
+
+export const loggedIn: ActionConstructor<LoggedIn> = p => ({ ...p, type: 'WALLET.LOGGED_IN' });
+
+export const adjudicatorKnown: ActionConstructor<AdjudicatorKnown> = p => ({
+  ...p,
+  type: 'WALLET.ADJUDICATOR_KNOWN',
 });
-export type ChallengeExpiredEvent = ReturnType<typeof challengeExpiredEvent>;
+
+export const messageSent: ActionConstructor<MessageSent> = p => ({
+  ...p,
+  type: 'WALLET.MESSAGE_SENT',
+});
+
+export const displayMessageSent: ActionConstructor<DisplayMessageSent> = p => ({
+  ...p,
+  type: 'WALLET.DISPLAY_MESSAGE_SENT',
+});
+
+export const blockMined: ActionConstructor<BlockMined> = p => ({ ...p, type: 'BLOCK_MINED' });
+
+export const metamaskLoadError: ActionConstructor<MetamaskLoadError> = p => ({
+  ...p,
+  type: 'METAMASK_LOAD_ERROR',
+});
+
+export const messageReceived: ActionConstructor<MessageReceived> = p => ({
+  ...p,
+  type: 'WALLET.COMMON.MESSAGE_RECEIVED',
+});
+
+export const challengeExpirySetEvent: ActionConstructor<ChallengeExpirySetEvent> = p => ({
+  ...p,
+  type: 'WALLET.ADJUDICATOR.CHALLENGE_EXPIRY_TIME_SET',
+});
+
+export const challengeCreatedEvent: ActionConstructor<ChallengeCreatedEvent> = p => ({
+  ...p,
+  type: 'WALLET.ADJUDICATOR.CHALLENGE_CREATED_EVENT',
+});
+
+export const concludedEvent: ActionConstructor<ConcludedEvent> = p => ({
+  ...p,
+  type: 'WALLET.ADJUDICATOR.CONCLUDED_EVENT',
+});
+
+export const refutedEvent: ActionConstructor<RefutedEvent> = p => ({
+  ...p,
+  type: 'WALLET.ADJUDICATOR.REFUTED_EVENT',
+});
+
+export const respondWithMoveEvent: ActionConstructor<RespondWithMoveEvent> = p => ({
+  ...p,
+  type: 'WALLET.ADJUDICATOR.RESPOND_WITH_MOVE_EVENT',
+});
+export const fundingReceivedEvent: ActionConstructor<FundingReceivedEvent> = p => ({
+  ...p,
+  type: 'WALLET.ADJUDICATOR.FUNDING_RECEIVED_EVENT',
+});
+export const challengeExpiredEvent: ActionConstructor<ChallengeExpiredEvent> = p => ({
+  ...p,
+  type: 'WALLET.ADJUDICATOR.CHALLENGE_EXPIRED',
+});
+
+// -------
+// Unions and Guards
+// -------
 
 export type AdjudicatorEventAction =
   | ConcludedEvent
@@ -164,26 +185,27 @@ export type AdjudicatorEventAction =
   | RespondWithMoveEvent
   | FundingReceivedEvent
   | ChallengeExpiredEvent
+  | ChallengeCreatedEvent
   | ChallengeExpirySetEvent;
 
-export type CommonAction = MessageReceived | CommitmentReceived | AdjudicatorEventAction;
+export type CommonAction = MessageReceived | CommitmentReceived;
+
 export type ProtocolAction =
-  | CommonAction
-  | FundingAction
-  | TransactionAction
-  | challenging.ChallengerAction
-  | ResponderAction
-  | directFunding.FundingAction
-  | indirectFunding.Action
-  | WithdrawalAction
-  | ResponderAction
-  | application.ApplicationAction
-  | DefundingAction
-  | ConcludingActionInstigator
-  | ConcludingActionResponder;
+  // only list top level protocol actions
+  FundingAction | DisputeAction | ApplicationAction | ConcludingAction;
+
+export function isProtocolAction(action: WalletAction): action is ProtocolAction {
+  return (
+    isFundingAction(action) ||
+    isDisputeAction(action) ||
+    application.isApplicationAction(action) ||
+    isConcludingAction(action)
+  );
+}
 
 export type WalletAction =
   | AdjudicatorKnown
+  | AdjudicatorEventAction
   | BlockMined
   | DisplayMessageSent
   | LoggedIn
@@ -192,30 +214,16 @@ export type WalletAction =
   | ProtocolAction
   | protocol.NewProcessAction
   | channel.ChannelAction
-  | ChallengeCreatedEvent
   | RelayableAction;
 
-function isCommonAction(action: WalletAction): action is CommonAction {
+export function isCommonAction(action: WalletAction): action is CommonAction {
   return (
-    [
-      MESSAGE_RECEIVED,
-      COMMITMENT_RECEIVED,
-      CHALLENGE_CREATED_EVENT,
-      CONCLUDED_EVENT,
-      REFUTED_EVENT,
-      RESPOND_WITH_MOVE_EVENT,
-      FUNDING_RECEIVED_EVENT,
-    ].indexOf(action.type) >= 0
+    ['WALLET.COMMON.MESSAGE_RECEIVED', 'WALLET.COMMON.COMMITMENT_RECEIVED'].indexOf(action.type) >=
+    0
   );
 }
-export {
-  channel,
-  directFunding as funding,
-  indirectFunding,
-  protocol,
-  isCommonAction,
-  application,
-};
+
+export { channel, directFunding as funding, indirectFunding, protocol, application };
 
 // These are any actions that update shared data directly without any protocol
 export type SharedDataUpdateAction = AdjudicatorEventAction;
@@ -226,12 +234,12 @@ export function isSharedDataUpdateAction(action: WalletAction): action is Shared
 
 export function isAdjudicatorEventAction(action: WalletAction): action is AdjudicatorEventAction {
   return (
-    action.type === CONCLUDED_EVENT ||
-    action.type === REFUTED_EVENT ||
-    action.type === RESPOND_WITH_MOVE_EVENT ||
-    action.type === FUNDING_RECEIVED_EVENT ||
-    action.type === CHALLENGE_EXPIRED_EVENT ||
-    action.type === CHALLENGE_CREATED_EVENT ||
-    action.type === CHALLENGE_EXPIRY_SET_EVENT
+    action.type === 'WALLET.ADJUDICATOR.CONCLUDED_EVENT' ||
+    action.type === 'WALLET.ADJUDICATOR.REFUTED_EVENT' ||
+    action.type === 'WALLET.ADJUDICATOR.RESPOND_WITH_MOVE_EVENT' ||
+    action.type === 'WALLET.ADJUDICATOR.FUNDING_RECEIVED_EVENT' ||
+    action.type === 'WALLET.ADJUDICATOR.CHALLENGE_EXPIRED' ||
+    action.type === 'WALLET.ADJUDICATOR.CHALLENGE_CREATED_EVENT' ||
+    action.type === 'WALLET.ADJUDICATOR.CHALLENGE_EXPIRY_TIME_SET'
   );
 }

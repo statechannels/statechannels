@@ -89,7 +89,10 @@ export const directFundingStateReducer: DFReducer = (
   sharedData: SharedData,
   action: actions.WalletAction,
 ): ProtocolStateWithSharedData<states.DirectFundingState> => {
-  if (action.type === actions.FUNDING_RECEIVED_EVENT && action.channelId === state.channelId) {
+  if (
+    action.type === 'WALLET.ADJUDICATOR.FUNDING_RECEIVED_EVENT' &&
+    action.channelId === state.channelId
+  ) {
     if (bigNumberify(action.totalForDestination).gte(state.totalFundingRequired)) {
       return fundingReceiveEventReducer(state, sharedData, action);
     }
@@ -247,7 +250,7 @@ const notSafeToDepositReducer: DFReducer = (
   action: actions.WalletAction,
 ): ProtocolStateWithSharedData<states.DirectFundingState> => {
   switch (action.type) {
-    case actions.FUNDING_RECEIVED_EVENT:
+    case 'WALLET.ADJUDICATOR.FUNDING_RECEIVED_EVENT':
       if (
         action.channelId === state.channelId &&
         bigNumberify(action.totalForDestination).gte(state.safeToDepositLevel)
@@ -319,7 +322,7 @@ const channelFundedReducer: DFReducer = (
   sharedData: SharedData,
   action: actions.WalletAction,
 ): ProtocolStateWithSharedData<states.DirectFundingState> => {
-  if (action.type === actions.FUNDING_RECEIVED_EVENT) {
+  if (action.type === 'WALLET.ADJUDICATOR.FUNDING_RECEIVED_EVENT') {
     if (bigNumberify(action.totalForDestination).lt(state.totalFundingRequired)) {
       // TODO: Deal with chain re-orgs that de-fund the channel here
       return { protocolState: state, sharedData };

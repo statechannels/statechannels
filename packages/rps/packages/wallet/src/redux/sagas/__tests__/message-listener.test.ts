@@ -17,7 +17,7 @@ describe('message listener', () => {
     const output = saga.next({ data: incoming.initializeRequest('abc123') }).value;
     saga.next(); // the take
 
-    expect(output).toEqual(put(actions.loggedIn('abc123')));
+    expect(output).toEqual(put(actions.loggedIn({ uid: 'abc123' })));
   });
 
   // TODO: these tests need to be updated once message listening is updated with commitments

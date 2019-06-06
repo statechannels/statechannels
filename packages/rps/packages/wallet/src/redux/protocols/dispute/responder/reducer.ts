@@ -26,7 +26,7 @@ import {
   sendChallengeComplete,
   sendOpponentConcluded,
 } from '../../reducer-helpers';
-import { ProtocolAction, CHALLENGE_EXPIRED_EVENT } from '../../../actions';
+import { ProtocolAction } from '../../../actions';
 import * as _ from 'lodash';
 import { isDefundingAction, DefundingAction } from '../../defunding/actions';
 import { initialize as initializeDefunding, defundingReducer } from '../../defunding/reducer';
@@ -140,7 +140,7 @@ const waitForTransactionReducer = (
   sharedData: SharedData,
   action: actions.ResponderAction,
 ): ProtocolStateWithSharedData<states.ResponderState> => {
-  if (action.type === CHALLENGE_EXPIRED_EVENT) {
+  if (action.type === 'WALLET.ADJUDICATOR.CHALLENGE_EXPIRED') {
     return { protocolState: states.acknowledgeTimeout({ ...protocolState }), sharedData };
   }
   if (!isTransactionAction(action)) {
@@ -166,7 +166,7 @@ const waitForResponseReducer = (
   action: actions.ResponderAction,
 ): ProtocolStateWithSharedData<states.ResponderState> => {
   switch (action.type) {
-    case 'WALLET.CHALLENGING.RESPONDER.RESPONSE_PROVIDED':
+    case 'WALLET.DISPUTE.RESPONDER.RESPONSE_PROVIDED':
       const { commitment } = action;
       const signResult = signAndStore(sharedData, commitment);
       if (!signResult.isSuccess) {
@@ -177,7 +177,7 @@ const waitForResponseReducer = (
         signResult.signedCommitment.signature,
       );
       return transitionToWaitForTransaction(transaction, protocolState, signResult.store);
-    case CHALLENGE_EXPIRED_EVENT:
+    case 'WALLET.ADJUDICATOR.CHALLENGE_EXPIRED':
       return {
         protocolState: states.acknowledgeTimeout({ ...protocolState }),
         sharedData: showWallet(sharedData),
@@ -194,7 +194,7 @@ const waitForAcknowledgementReducer = (
   action: actions.ResponderAction,
 ): ProtocolStateWithSharedData<states.ResponderState> => {
   switch (action.type) {
-    case 'WALLET.CHALLENGING.RESPONDER.RESPOND_SUCCESS_ACKNOWLEDGED':
+    case 'WALLET.DISPUTE.RESPONDER.RESPOND_SUCCESS_ACKNOWLEDGED':
       return {
         protocolState: states.success({}),
         sharedData: sendChallengeComplete(hideWallet(sharedData)),
@@ -210,7 +210,7 @@ const waitForApprovalReducer = (
   action: actions.ResponderAction,
 ): ProtocolStateWithSharedData<states.ResponderState> => {
   switch (action.type) {
-    case 'WALLET.CHALLENGING.RESPONDER.RESPOND_APPROVED':
+    case 'WALLET.DISPUTE.RESPONDER.RESPOND_APPROVED':
       const { challengeCommitment, processId } = protocolState;
       if (!canRespondWithExistingCommitment(protocolState.challengeCommitment, sharedData)) {
         return {
@@ -226,7 +226,7 @@ const waitForApprovalReducer = (
 
         return transitionToWaitForTransaction(transaction, protocolState, sharedData);
       }
-    case CHALLENGE_EXPIRED_EVENT:
+    case 'WALLET.ADJUDICATOR.CHALLENGE_EXPIRED':
       return { protocolState: states.acknowledgeTimeout({ ...protocolState }), sharedData };
 
     default:
@@ -239,7 +239,7 @@ function acknowledgeTimeoutReducer(
   sharedData: SharedData,
   action: actions.ResponderAction,
 ): ProtocolStateWithSharedData<states.ResponderState> {
-  if (action.type !== 'WALLET.CHALLENGING.RESPONDER.DEFUND_CHOSEN') {
+  if (action.type !== 'WALLET.DISPUTE.RESPONDER.DEFUND_CHOSEN') {
     return { protocolState, sharedData };
   }
   return transitionToWaitForDefunding(protocolState, sharedData);
@@ -250,7 +250,7 @@ function acknowledgeDefundingSuccessReducer(
   sharedData: SharedData,
   action: actions.ResponderAction,
 ): ProtocolStateWithSharedData<states.ResponderState> {
-  if (action.type !== 'WALLET.CHALLENGING.RESPONDER.ACKNOWLEDGED') {
+  if (action.type !== 'WALLET.DISPUTE.RESPONDER.ACKNOWLEDGED') {
     return { protocolState, sharedData };
   }
   return {
@@ -265,7 +265,7 @@ function acknowledgeClosedButNotDefundedReducer(
   sharedData: SharedData,
   action: actions.ResponderAction,
 ): ProtocolStateWithSharedData<states.ResponderState> {
-  if (action.type !== 'WALLET.CHALLENGING.RESPONDER.ACKNOWLEDGED') {
+  if (action.type !== 'WALLET.DISPUTE.RESPONDER.ACKNOWLEDGED') {
     return { protocolState, sharedData };
   }
   return {

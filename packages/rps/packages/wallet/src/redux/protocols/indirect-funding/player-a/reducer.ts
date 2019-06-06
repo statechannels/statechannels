@@ -1,7 +1,4 @@
 import * as states from './states';
-
-import * as actions from '../../../actions';
-
 import {
   SharedData,
   signAndInitialize,
@@ -32,10 +29,11 @@ import { proposeNewConsensus } from '../../../../domain/two-player-consensus-gam
 import { unreachable } from '../../../../utils/reducer-utils';
 import { isTransactionAction } from '../../../actions';
 import { ChannelFundingState } from '../../../state';
+import { IndirectFundingAction } from '../actions';
 import * as selectors from '../../../selectors';
 
 type ReturnVal = ProtocolStateWithSharedData<IndirectFundingState>;
-type IDFAction = actions.indirectFunding.Action;
+type IDFAction = IndirectFundingAction;
 
 export function initialize(
   processId: string,
@@ -84,7 +82,7 @@ export function initialize(
 export function playerAReducer(
   protocolState: states.PlayerAState,
   sharedData: SharedData,
-  action: actions.indirectFunding.Action,
+  action: IndirectFundingAction,
 ): ReturnVal {
   switch (protocolState.type) {
     case 'IndirectFunding.AWaitForPreFundSetup1':

@@ -67,7 +67,7 @@ describe('adjudicator listener', () => {
     sagaTester.start(adjudicatorWatcher, provider);
     await depositContract(provider, channelId);
 
-    expect(sagaTester.numCalled(actions.FUNDING_RECEIVED_EVENT)).toEqual(0);
+    expect(sagaTester.numCalled('WALLET.ADJUDICATOR.FUNDING_RECEIVED_EVENT')).toEqual(0);
   });
 
   it('should ignore events for other channels', async () => {
@@ -84,7 +84,7 @@ describe('adjudicator listener', () => {
     sagaTester.start(adjudicatorWatcher, provider);
 
     await depositContract(provider, channelIdToIgnore);
-    expect(sagaTester.numCalled(actions.FUNDING_RECEIVED_EVENT)).toEqual(0);
+    expect(sagaTester.numCalled('WALLET.ADJUDICATOR.FUNDING_RECEIVED_EVENT')).toEqual(0);
   });
 
   it('should handle a funds received event when registered for that channel', async () => {
@@ -96,16 +96,16 @@ describe('adjudicator listener', () => {
     sagaTester.start(adjudicatorWatcher, provider);
 
     await depositContract(provider, channelId);
-    await sagaTester.waitFor(actions.FUNDING_RECEIVED_EVENT);
+    await sagaTester.waitFor('WALLET.ADJUDICATOR.FUNDING_RECEIVED_EVENT');
 
     const action: actions.FundingReceivedEvent = sagaTester.getLatestCalledAction();
     expect(action).toEqual(
-      actions.fundingReceivedEvent(
+      actions.fundingReceivedEvent({
         processId,
         channelId,
-        defaultDepositAmount,
-        defaultDepositAmount,
-      ),
+        amount: defaultDepositAmount,
+        totalForDestination: defaultDepositAmount,
+      }),
     );
   });
 
@@ -118,7 +118,7 @@ describe('adjudicator listener', () => {
     const sagaTester = new SagaTester({ initialState: createWatcherState(processId, channelId) });
     sagaTester.start(adjudicatorWatcher, provider);
     await createChallenge(provider, channelNonce, participantA, participantB);
-    await sagaTester.waitFor(actions.CHALLENGE_EXPIRY_SET_EVENT);
+    await sagaTester.waitFor('WALLET.ADJUDICATOR.CHALLENGE_EXPIRY_TIME_SET');
 
     const action: actions.ChallengeExpirySetEvent = sagaTester.getLatestCalledAction();
     expect(action.expiryTime).toBeGreaterThan(startTimestamp);
@@ -140,7 +140,7 @@ describe('adjudicator listener', () => {
       participantB,
     );
 
-    await sagaTester.waitFor(actions.CHALLENGE_CREATED_EVENT);
+    await sagaTester.waitFor('WALLET.ADJUDICATOR.CHALLENGE_CREATED_EVENT');
 
     const action: actions.ChallengeCreatedEvent = sagaTester.getLatestCalledAction();
 
@@ -157,10 +157,10 @@ describe('adjudicator listener', () => {
 
     await concludeGame(provider, channelNonce, participantA, participantB);
 
-    await sagaTester.waitFor(actions.CONCLUDED_EVENT);
+    await sagaTester.waitFor('WALLET.ADJUDICATOR.CONCLUDED_EVENT');
     const action: actions.ConcludedEvent = sagaTester.getLatestCalledAction();
 
-    expect(action).toEqual(actions.concludedEvent(processId, channelId));
+    expect(action).toEqual(actions.concludedEvent({ channelId }));
   });
 
   it('should handle a refute event when registered for that channel', async () => {
@@ -179,10 +179,10 @@ describe('adjudicator listener', () => {
       participantB,
     );
 
-    await sagaTester.waitFor(actions.REFUTED_EVENT);
+    await sagaTester.waitFor('WALLET.ADJUDICATOR.REFUTED_EVENT');
 
     const action: actions.RefutedEvent = sagaTester.getLatestCalledAction();
-    expect(action).toEqual(actions.refutedEvent(processId, channelId, refuteCommitment));
+    expect(action).toEqual(actions.refutedEvent({ processId, channelId, refuteCommitment }));
   });
 
   it('should handle a respondWithMove event when registered for that channel', async () => {
@@ -197,11 +197,16 @@ describe('adjudicator listener', () => {
 
     const response = await respondWithMove(provider, channelNonce, participantA, participantB);
 
-    await sagaTester.waitFor(actions.RESPOND_WITH_MOVE_EVENT);
+    await sagaTester.waitFor('WALLET.ADJUDICATOR.RESPOND_WITH_MOVE_EVENT');
 
     const action: actions.RespondWithMoveEvent = sagaTester.getLatestCalledAction();
     expect(action).toEqual(
-      actions.respondWithMoveEvent(processId, channelId, response.toCommitment, response.toSig),
+      actions.respondWithMoveEvent({
+        processId,
+        channelId,
+        responseCommitment: response.toCommitment,
+        responseSignature: response.toSig,
+      }),
     );
   });
 });

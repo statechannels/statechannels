@@ -5,5 +5,5 @@ export function* messageSender(message) {
   window.parent.postMessage(message, '*');
 
   yield put(message);
-  yield put(messageSent());
+  yield put(messageSent({}));
 }

@@ -7,7 +7,6 @@ import {
   commitmentReceived,
   concludeInstigated,
   ConcludeInstigated,
-  CONCLUDE_INSTIGATED,
 } from './actions';
 export * from './actions';
 
@@ -25,15 +24,15 @@ function sendMessage(to: string, message: RelayableAction) {
 }
 
 export function sendStrategyProposed(to: string, processId: string, strategy: FundingStrategy) {
-  return sendMessage(to, strategyProposed(processId, strategy));
+  return sendMessage(to, strategyProposed({ processId, strategy }));
 }
 
 export function sendStrategyApproved(to: string, processId: string) {
-  return sendMessage(to, strategyApproved(processId));
+  return sendMessage(to, strategyApproved({ processId }));
 }
 
 export function sendConcludeInstigated(to: string, channelId, signedCommitment: SignedCommitment) {
-  return sendMessage(to, concludeInstigated(signedCommitment, channelId));
+  return sendMessage(to, concludeInstigated({ signedCommitment, channelId }));
 }
 
 export const sendCommitmentReceived = (
@@ -42,13 +41,13 @@ export const sendCommitmentReceived = (
   commitment: Commitment,
   signature: string,
 ) => {
-  const payload = commitmentReceived(processId, { commitment, signature });
+  const payload = commitmentReceived({ processId, signedCommitment: { commitment, signature } });
   return messageRelayRequested(to, payload);
 };
 
 export type StartProcessAction = ConcludeInstigated;
 export function isStartProcessAction(a: { type: string }): a is StartProcessAction {
-  return a.type === CONCLUDE_INSTIGATED;
+  return a.type === 'WALLET.NEW_PROCESS.CONCLUDE_INSTIGATED';
 }
 
 export function getProcessId(action: StartProcessAction) {

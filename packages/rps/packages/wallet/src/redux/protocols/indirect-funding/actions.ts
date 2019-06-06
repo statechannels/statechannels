@@ -17,9 +17,9 @@ import { isDirectFundingAction } from '../direct-funding/actions';
 
 export { playerA, playerB };
 export type ProcessAction = playerA.Action | playerB.Action;
-export type Action = ProcessAction | CommonAction;
+export type IndirectFundingAction = ProcessAction | CommonAction;
 
-export function isIndirectFundingAction(action: WalletAction): action is Action {
+export function isIndirectFundingAction(action: WalletAction): action is IndirectFundingAction {
   return (
     isCommonAction(action) ||
     isDirectFundingAction(action) ||

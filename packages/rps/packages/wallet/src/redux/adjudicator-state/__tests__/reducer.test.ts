@@ -20,11 +20,11 @@ describe('adjudicator state reducer', () => {
   const state = {};
   describe('when a challenge created event is received', () => {
     const expiryTime = 1234;
-    const action = actions.challengeCreatedEvent(
+    const action = actions.challengeCreatedEvent({
       channelId,
-      testScenarios.gameCommitment1,
-      expiryTime,
-    );
+      commitment: testScenarios.gameCommitment1,
+      finalizedAt: expiryTime,
+    });
     const updatedState = adjudicatorStateReducer(state, action);
     it('sets a challenge', () => {
       expect(updatedState[channelId].challenge).toEqual({
@@ -38,7 +38,7 @@ describe('adjudicator state reducer', () => {
     const state = {
       [channelId]: createChallengeState(channelId, 123),
     };
-    const action = actions.challengeExpiredEvent('0x0', channelId, 1);
+    const action = actions.challengeExpiredEvent({ processId: '0x0', channelId, timestamp: 1 });
     const updatedState = adjudicatorStateReducer(state, action);
 
     it('clears the challenge', () => {
@@ -54,7 +54,11 @@ describe('adjudicator state reducer', () => {
     const state = {
       [channelId]: createChallengeState(channelId, 123),
     };
-    const action = actions.refutedEvent('0x0', channelId, gameCommitment1);
+    const action = actions.refutedEvent({
+      processId: '0x0',
+      channelId,
+      refuteCommitment: gameCommitment1,
+    });
     const updatedState = adjudicatorStateReducer(state, action);
 
     it('clears the challenge', () => {
@@ -66,7 +70,12 @@ describe('adjudicator state reducer', () => {
     const state = {
       [channelId]: createChallengeState(channelId, 123),
     };
-    const action = actions.respondWithMoveEvent('0x0', channelId, gameCommitment1, '0xSignature');
+    const action = actions.respondWithMoveEvent({
+      processId: '0x0',
+      channelId,
+      responseCommitment: gameCommitment1,
+      responseSignature: '0xSignature',
+    });
     const updatedState = adjudicatorStateReducer(state, action);
 
     it('clears the challenge', () => {
@@ -76,7 +85,7 @@ describe('adjudicator state reducer', () => {
 
   describe('when a concluded event arrives', () => {
     const state = {};
-    const action = actions.concludedEvent('0x0', channelId);
+    const action = actions.concludedEvent({ channelId });
     const updatedState = adjudicatorStateReducer(state, action);
 
     it('marks a channel as finalized', () => {

@@ -32,7 +32,7 @@ import {
   sendOpponentConcluded,
 } from '../../reducer-helpers';
 import { ProtocolAction } from '../../../../redux/actions';
-import { isConcludingAction } from './actions';
+import { isConcludingResponderAction } from './actions';
 import { getChannelId, SignedCommitment } from '../../../../domain';
 import { failure, success } from '../states';
 import { ProtocolStateWithSharedData } from '../..';
@@ -52,7 +52,7 @@ export function responderConcludingReducer(
     return handleDefundingAction(protocolState, sharedData, action);
   } // COMMITMENT_RECEIVED is a defunding action
 
-  if (!isConcludingAction(action)) {
+  if (!isConcludingResponderAction(action)) {
     return { protocolState, sharedData };
   }
 

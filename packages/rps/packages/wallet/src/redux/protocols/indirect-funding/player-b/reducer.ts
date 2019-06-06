@@ -1,8 +1,5 @@
 import * as states from '../states';
 import { PlayerBState } from '../states';
-
-import * as actions from '../../../actions';
-
 import { ProtocolStateWithSharedData } from '../../';
 import {
   SharedData,
@@ -41,9 +38,10 @@ import { sendCommitmentReceived } from '../../../../communication';
 import { addHex } from '../../../../utils/hex-utils';
 import { isTransactionAction } from '../../../actions';
 import { ChannelFundingState } from '../../../state';
+import { IndirectFundingAction } from '../actions';
 
 type ReturnVal = ProtocolStateWithSharedData<IndirectFundingState>;
-type IDFAction = actions.indirectFunding.Action;
+type IDFAction = IndirectFundingAction;
 
 export function initialize(
   processId: string,
