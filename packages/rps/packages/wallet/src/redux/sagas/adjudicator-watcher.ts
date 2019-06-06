@@ -42,8 +42,13 @@ function* dispatchEventAction(event: AdjudicatorEvent) {
     case AdjudicatorEventType.ChallengeCreated:
       const { channelId } = event;
       const { commitment, finalizedAt } = event.eventArgs;
+      const altFinalizedAt = finalizedAt * 1000;
       yield put(
-        actions.challengeCreatedEvent(channelId, fromParameters(commitment), finalizedAt * 1000),
+        actions.challengeCreatedEvent({
+          channelId,
+          commitment: fromParameters(commitment),
+          finalizedAt: altFinalizedAt,
+        }),
       );
       break;
   }
@@ -54,14 +59,20 @@ function* dispatchProcessEventAction(event: AdjudicatorEvent, processId: string)
   switch (event.eventType) {
     case AdjudicatorEventType.ChallengeCreated:
       const { finalizedAt } = event.eventArgs;
-      yield put(actions.challengeExpirySetEvent(processId, channelId, finalizedAt * 1000));
+      yield put(
+        actions.challengeExpirySetEvent({ processId, channelId, expiryTime: finalizedAt * 1000 }),
+      );
       break;
     case AdjudicatorEventType.Concluded:
-      yield put(actions.concludedEvent(processId, channelId));
+      yield put(actions.concludedEvent({ channelId }));
       break;
     case AdjudicatorEventType.Refuted:
       yield put(
-        actions.refutedEvent(processId, channelId, fromParameters(event.eventArgs.refutation)),
+        actions.refutedEvent({
+          processId,
+          channelId,
+          refuteCommitment: fromParameters(event.eventArgs.refutation),
+        }),
       );
       break;
     case AdjudicatorEventType.RespondWithMove:
@@ -73,22 +84,22 @@ function* dispatchProcessEventAction(event: AdjudicatorEvent, processId: string)
       });
 
       yield put(
-        actions.respondWithMoveEvent(
+        actions.respondWithMoveEvent({
           processId,
           channelId,
-          fromParameters(event.eventArgs.response),
-          signature,
-        ),
+          responseCommitment: fromParameters(event.eventArgs.response),
+          responseSignature: signature,
+        }),
       );
       break;
     case AdjudicatorEventType.Deposited:
       yield put(
-        actions.fundingReceivedEvent(
+        actions.fundingReceivedEvent({
           processId,
           channelId,
-          event.eventArgs.amountDeposited.toHexString(),
-          event.eventArgs.destinationHoldings.toHexString(),
-        ),
+          amount: event.eventArgs.amountDeposited.toHexString(),
+          totalForDestination: event.eventArgs.destinationHoldings.toHexString(),
+        }),
       );
       break;
   }

@@ -21,21 +21,21 @@ graph TD
 linkStyle default interpolate basis
   St((start)) --> WFAp(WaitForApproval)
   WFAp-->|CHALLENGE_EXPIRED| AT(AcknowledgeTimeOut)
-  WFAp--> |WALLET.CHALLENGING.RESPONDER.RESPOND_APPROVED| HC{Commitment<br/>exists?}
+  WFAp--> |WALLET.DISPUTE.RESPONDER.RESPOND_APPROVED| HC{Commitment<br/>exists?}
   HC --> |Yes| WFT(WaitForTransaction)
   HC --> |No| WFR(WaitForResponse)
   WFR -->|ChallengeExpirySetEvent| WFR
-  WFR -->|WALLET.CHALLENGING.RESPONDER.RESPONSE_PROVIDED| WFT(WaitForTransaction)
+  WFR -->|WALLET.DISPUTE.RESPONDER.RESPONSE_PROVIDED| WFT(WaitForTransaction)
   WFR -->|CHALLENGE_EXPIRED| AT(AcknowledgeTimeOut)
   AT -->|DEFUND_CHOSEN| WFD(WaitForDefund)
   WFD --> |defunding protocol succeeded| AS(AcknowledgeDefundingSuccess)
   WFD --> |defunding protocol failed| ACBND(AcknowledgeClosedButNotDefunded)
   WFT --> |TransactionSubmitted| WFAc(WaitForAcknowledgement)
   WFT-->|CHALLENGE_EXPIRED| AT(AcknowledgeTimeOut)
-  WFAc-->|WALLET.CHALLENGING.RESPONDER.RESPOND_SUCCESS_ACKNOWLEDGED| S((success))
+  WFAc-->|WALLET.DISPUTE.RESPONDER.RESPOND_SUCCESS_ACKNOWLEDGED| S((success))
   WFT --> |TransactionFailed| F((failure))
-  ACBND -->|WALLET.CHALLENGING.RESPONDER.ACKNOWLEDGED| FCBND((ClosedButNotDefunded))
-  AS -->|WALLET.CHALLENGING.RESPONDER.ACKNOWLEDGED| FCD((ClosedAndDefunded))
+  ACBND -->|WALLET.DISPUTE.RESPONDER.ACKNOWLEDGED| FCBND((ClosedButNotDefunded))
+  AS -->|WALLET.DISPUTE.RESPONDER.ACKNOWLEDGED| FCD((ClosedAndDefunded))
   classDef logic fill:#efdd20;
   classDef Success fill:#58ef21;
   classDef Failure fill:#f45941;

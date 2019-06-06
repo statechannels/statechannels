@@ -1,4 +1,3 @@
-import * as actions from '../../actions';
 import { unreachable } from '../../../utils/reducer-utils';
 import { PlayerIndex } from '../../types';
 import { ProtocolStateWithSharedData } from '../';
@@ -8,6 +7,7 @@ import { SharedData } from '../../state';
 import { ChannelState } from '../../channel-store';
 import { isPlayerAState } from './player-a/states';
 import { NonTerminalIndirectFundingState, IndirectFundingState } from './states';
+import { IndirectFundingAction } from './actions';
 
 type ReturnVal = ProtocolStateWithSharedData<IndirectFundingState>;
 
@@ -32,7 +32,7 @@ export function initialize(
 export const indirectFundingReducer = (
   protocolState: NonTerminalIndirectFundingState,
   sharedData: SharedData,
-  action: actions.indirectFunding.Action,
+  action: IndirectFundingAction,
 ): ReturnVal => {
   if (isPlayerAState(protocolState)) {
     return playerAReducer(protocolState, sharedData, action);

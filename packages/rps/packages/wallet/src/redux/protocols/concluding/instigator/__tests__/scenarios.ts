@@ -74,7 +74,7 @@ const secondConcludeReceived = setFundingState(secondConcludeReceivedChannelStat
 // -------
 const concludeSent = actions.concludeApproved({ processId });
 const acknowledged = actions.acknowledged({ processId });
-const commitmentReceivedAction = commitmentReceived(processId, app53);
+const commitmentReceivedAction = commitmentReceived({ processId, signedCommitment: app53 });
 const defundChosen = actions.defundChosen({ processId });
 const cancelled = actions.cancelled({ processId });
 

@@ -1,8 +1,8 @@
-import { ProtocolAction, WalletAction } from '../actions';
 import { PlayerIndex } from '../types';
 import { Commitment } from '../../domain';
 import { ActionConstructor } from '../utils';
 import { ConcludeInstigated, WalletProtocol } from '../../communication';
+import { WalletAction } from '../actions';
 export { BaseProcessAction } from '../../communication';
 
 // -------
@@ -94,8 +94,4 @@ export function isNewProcessAction(action: WalletAction): action is NewProcessAc
     action.type === 'WALLET.NEW_PROCESS.CREATE_CHALLENGE_REQUESTED' ||
     action.type === 'WALLET.NEW_PROCESS.CHALLENGE_CREATED'
   );
-}
-
-export function isProtocolAction(action: WalletAction): action is ProtocolAction {
-  return 'processId' in action;
 }
