@@ -36,6 +36,8 @@ describe('challenge-watcher', () => {
     const processId = 'abc';
     const result = saga.next([processId]).value;
 
-    expect(result).toEqual(put(actions.challengeExpiredEvent(processId, channelId, 2)));
+    expect(result).toEqual(
+      put(actions.challengeExpiredEvent({ processId, channelId, timestamp: 2 })),
+    );
   });
 });

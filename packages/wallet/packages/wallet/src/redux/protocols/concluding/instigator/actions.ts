@@ -1,5 +1,6 @@
-import { WalletAction, CommitmentReceived } from '../../../actions';
+import { WalletAction, CommitmentReceived, isCommonAction } from '../../../actions';
 import { ActionConstructor } from '../../../utils';
+import { DefundingAction, isDefundingAction } from '../../defunding/actions';
 
 // -------
 // Actions
@@ -51,17 +52,20 @@ export const acknowledged: ActionConstructor<Acknowledged> = p => ({
 // Unions and Guards
 // -------
 
-export type ConcludingAction =
+export type ConcludingInstigatorAction =
+  | DefundingAction
   | Cancelled
   | ConcludeApproved
-  | CommitmentReceived
   | DefundChosen
   | Acknowledged
   | CommitmentReceived;
 
-export const isConcludingAction = (action: WalletAction): action is ConcludingAction => {
+export const isConcludingInstigatorAction = (
+  action: WalletAction,
+): action is ConcludingInstigatorAction => {
   return (
-    action.type === 'WALLET.COMMON.COMMITMENT_RECEIVED' ||
+    isDefundingAction(action) ||
+    isCommonAction(action) ||
     action.type === 'WALLET.CONCLUDING.INSTIGATOR.CONCLUDING_CANCELLED' ||
     action.type === 'WALLET.CONCLUDING.INSTIGATOR.CONCLUDE_APPROVED' ||
     action.type === 'WALLET.CONCLUDING.INSTIGATOR.DEFUND_CHOSEN' ||

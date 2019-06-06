@@ -66,26 +66,26 @@ const defaultsForB: states.DirectFundingState = {
 // actions
 const aInitializeAction = directFundingRequested({ ...defaultsForA });
 const bInitializeAction = directFundingRequested({ ...defaultsForB });
-const aFundingReceivedEvent = globalActions.fundingReceivedEvent(
+const aFundingReceivedEvent = globalActions.fundingReceivedEvent({
   processId,
   channelId,
-  YOUR_DEPOSIT_A,
-  YOUR_DEPOSIT_A,
-);
-const bFundingReceivedEvent = globalActions.fundingReceivedEvent(
+  amount: YOUR_DEPOSIT_A,
+  totalForDestination: YOUR_DEPOSIT_A,
+});
+const bFundingReceivedEvent = globalActions.fundingReceivedEvent({
   processId,
   channelId,
-  YOUR_DEPOSIT_B,
-  TOTAL_REQUIRED,
-);
-const postFundSetup0 = globalActions.commitmentReceived(
-  channelId,
-  globalTestScenarios.signedCommitment2,
-);
-const postFundSetup1 = globalActions.commitmentReceived(
-  channelId,
-  globalTestScenarios.signedCommitment3,
-);
+  amount: YOUR_DEPOSIT_B,
+  totalForDestination: TOTAL_REQUIRED,
+});
+const postFundSetup0 = globalActions.commitmentReceived({
+  processId: channelId,
+  signedCommitment: globalTestScenarios.signedCommitment2,
+});
+const postFundSetup1 = globalActions.commitmentReceived({
+  processId: channelId,
+  signedCommitment: globalTestScenarios.signedCommitment3,
+});
 
 export const aHappyPath = {
   initialize: { sharedData: aHasBothPrefundsSharedData, action: aInitializeAction },

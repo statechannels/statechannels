@@ -83,18 +83,18 @@ const acknowledgeClosedButNotDefunded = states.acknowledgeClosedButNotDefunded({
 // -------
 const challengeApproved = actions.challengeApproved({ processId });
 const challengeDenied = actions.challengeDenied({ processId });
-const challengeTimedOut = challengeExpiredEvent(processId, channelId, 1000);
+const challengeTimedOut = challengeExpiredEvent({ processId, channelId, timestamp: 1000 });
 const transactionSuccessTrigger = tsScenarios.successTrigger;
 const transactionFailureTrigger = tsScenarios.failureTrigger;
-const responseReceived = respondWithMoveEvent(
+const responseReceived = respondWithMoveEvent({
   processId,
   channelId,
-  signedCommitment21.commitment,
-  signedCommitment21.signature,
-);
+  responseCommitment: signedCommitment21.commitment,
+  responseSignature: signedCommitment21.signature,
+});
 const responseAcknowledged = actions.challengeResponseAcknowledged({ processId });
 const failureAcknowledged = actions.challengeFailureAcknowledged({ processId });
-const challengeExpirySet = challengeExpirySetEvent(processId, channelId, 1234);
+const challengeExpirySet = challengeExpirySetEvent({ processId, channelId, expiryTime: 1234 });
 const defundChosen = actions.defundChosen({ processId });
 const acknowledged = actions.acknowledged({ processId });
 // -------

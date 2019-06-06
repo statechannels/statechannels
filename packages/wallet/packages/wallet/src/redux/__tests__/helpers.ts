@@ -4,7 +4,6 @@ import { Commitment, SignedCommitment, getChannelId } from '../../domain';
 import { QueuedTransaction, OutboxState } from '../outbox/state';
 import { SharedData } from '../state';
 import { ProtocolStateWithSharedData } from '../protocols';
-import { COMMITMENT_RECEIVED } from '../actions';
 
 type SideEffectState =
   | StateWithSideEffects<any>
@@ -81,7 +80,7 @@ export const expectThisMessageAndCommitmentSent = (
   });
 };
 export const expectThisCommitmentSent = (state: SideEffectState, c: Partial<Commitment>) => {
-  expectThisMessageAndCommitmentSent(state, c, COMMITMENT_RECEIVED);
+  expectThisMessageAndCommitmentSent(state, c, 'WALLET.COMMON.COMMITMENT_RECEIVED');
 };
 
 export const itSendsATransaction = (state: SideEffectState) => {

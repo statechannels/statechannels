@@ -17,7 +17,7 @@ import { ActionDispatcher } from '../../../utils';
 interface Props {
   state: states.OngoingFundingState;
   strategyChosen: ActionDispatcher<actions.StrategyChosen>;
-  strategyApproved: (processId: string) => void;
+  strategyApproved: typeof actions.strategyApproved;
   strategyRejected: ActionDispatcher<actions.StrategyRejected>;
   fundingSuccessAcknowledged: ActionDispatcher<actions.FundingSuccessAcknowledged>;
   cancelled: ActionDispatcher<actions.Cancelled>;

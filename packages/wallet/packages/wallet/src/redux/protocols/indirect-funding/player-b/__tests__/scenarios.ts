@@ -105,9 +105,15 @@ export const successState = {
 // -------
 // Actions
 // -------
-const preFundSetup0Received = globalActions.commitmentReceived(processId, ledger0);
-const ledgerUpdate0Received = globalActions.commitmentReceived(processId, ledger4);
-const postFund0Received = globalActions.commitmentReceived(processId, app2);
+const preFundSetup0Received = globalActions.commitmentReceived({
+  processId,
+  signedCommitment: ledger0,
+});
+const ledgerUpdate0Received = globalActions.commitmentReceived({
+  processId,
+  signedCommitment: ledger4,
+});
+const postFund0Received = globalActions.commitmentReceived({ processId, signedCommitment: app2 });
 
 export const happyPath = {
   initialParams: {

@@ -25,13 +25,13 @@ export const directFundingRequested: ActionConstructor<DirectFundingRequested> =
 // Unions and Guards
 // -------
 
-export type FundingAction =
+export type DirectFundingAction =
   | DirectFundingRequested
   | actions.CommitmentReceived
   | actions.FundingReceivedEvent
   | actions.TransactionAction;
 
-export function isDirectFundingAction(action: actions.WalletAction): action is FundingAction {
+export function isDirectFundingAction(action: actions.WalletAction): action is DirectFundingAction {
   return (
     action.type === 'WALLET.ADJUDICATOR.FUNDING_RECEIVED_EVENT' ||
     action.type === 'WALLET.DIRECT_FUNDING.DIRECT_FUNDING_REQUESTED' ||

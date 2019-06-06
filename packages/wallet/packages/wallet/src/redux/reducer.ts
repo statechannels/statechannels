@@ -4,7 +4,7 @@ import * as actions from './actions';
 import { accumulateSideEffects } from './outbox';
 import { clearOutbox } from './outbox/reducer';
 import { ProtocolState } from './protocols';
-import { isNewProcessAction, isProtocolAction, NewProcessAction } from './protocols/actions';
+import { isNewProcessAction, NewProcessAction } from './protocols/actions';
 import * as applicationProtocol from './protocols/application';
 import {
   challengingReducer,
@@ -16,7 +16,7 @@ import * as fundProtocol from './protocols/funding';
 import * as states from './state';
 import { APPLICATION_PROCESS_ID } from './protocols/application/reducer';
 import { adjudicatorStateReducer } from './adjudicator-state/reducer';
-import { CONCLUDE_INSTIGATED, isStartProcessAction, WalletProtocol } from '../communication';
+import { isStartProcessAction, WalletProtocol } from '../communication';
 import * as communication from '../communication';
 import { ethers } from 'ethers';
 
@@ -53,7 +53,7 @@ export function initializedReducer(
 
   if (isNewProcessAction(action)) {
     return routeToNewProcessInitializer(newState, action);
-  } else if (isProtocolAction(action)) {
+  } else if (actions.isProtocolAction(action)) {
     return routeToProtocolReducer(newState, action);
   }
 
@@ -153,7 +153,7 @@ export function getProcessId(action: NewProcessAction): string {
 
 function initializeNewProtocol(
   state: states.Initialized,
-  action: actions.protocol.NewProcessAction,
+  action: NewProcessAction,
 ): { protocolState: ProtocolState; sharedData: states.SharedData } {
   const processId = getProcessId(action);
   const incomingSharedData = states.sharedData(state);
@@ -171,7 +171,7 @@ function initializeNewProtocol(
       );
       return { protocolState, sharedData };
     }
-    case CONCLUDE_INSTIGATED: {
+    case 'WALLET.NEW_PROCESS.CONCLUDE_INSTIGATED': {
       const { signedCommitment } = action;
       const { protocolState, sharedData } = concludingProtocol.initializeResponderState(
         signedCommitment,
@@ -212,7 +212,7 @@ function initializeNewProtocol(
 
 function routeToNewProcessInitializer(
   state: states.Initialized,
-  action: actions.protocol.NewProcessAction,
+  action: NewProcessAction,
 ): states.Initialized {
   const processId = getProcessId(action);
   const { protocolState, sharedData } = initializeNewProtocol(state, action);
@@ -224,7 +224,7 @@ const waitForLoginReducer = (
   action: actions.WalletAction,
 ): states.WalletState => {
   switch (action.type) {
-    case actions.LOGGED_IN:
+    case 'WALLET.LOGGED_IN':
       const { privateKey, address } = ethers.Wallet.createRandom();
       return states.initialized({
         ...state,

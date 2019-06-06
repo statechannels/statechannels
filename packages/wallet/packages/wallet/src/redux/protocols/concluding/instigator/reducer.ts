@@ -20,7 +20,6 @@ import {
 import { composeConcludeCommitment } from '../../../../utils/commitment-utils';
 import { ourTurn } from '../../../channel-store';
 import { DefundingAction, isDefundingAction } from '../../defunding/actions';
-import { isConcludingAction } from './actions';
 import { initialize as initializeDefunding, defundingReducer } from '../../defunding/reducer';
 import { isSuccess, isFailure } from '../../defunding/states';
 import * as channelStoreReducer from '../../../channel-store/reducer';
@@ -37,6 +36,7 @@ import { sendConcludeInstigated, CommitmentReceived } from '../../../../communic
 import { failure, success } from '../states';
 import { getChannelId } from '../../../../domain';
 import { ProtocolStateWithSharedData } from '../..';
+import { isConcludingInstigatorAction } from './actions';
 
 export type ReturnVal = ProtocolStateWithSharedData<states.InstigatorConcludingState>;
 export type Storage = SharedData;
@@ -59,7 +59,7 @@ export function instigatorConcludingReducer(
     return handleDefundingAction(protocolState, sharedData, action);
   }
 
-  if (!isConcludingAction(action)) {
+  if (!isConcludingInstigatorAction(action)) {
     return { protocolState, sharedData };
   }
 

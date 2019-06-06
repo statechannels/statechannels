@@ -17,6 +17,8 @@
 - [transaction-submission](../src/redux/protocols/transaction-submission/readme.md)
 - [withdrawing](../src/redux/protocols/withdrawing/readme.md)
 
+<a name="hierarchy"></a>
+
 ## Protocol Hierarchy
 
 ```mermaid

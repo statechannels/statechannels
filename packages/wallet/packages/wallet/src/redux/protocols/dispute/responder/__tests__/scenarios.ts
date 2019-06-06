@@ -105,7 +105,7 @@ const responseProvided = actions.responseProvided({
 });
 const defundChosen = actions.defundChosen({ processId });
 const acknowledged = actions.acknowledged({ processId });
-const challengeTimedOut = challengeExpiredEvent(processId, channelId, 1000);
+const challengeTimedOut = challengeExpiredEvent({ processId, channelId, timestamp: 1000 });
 
 // ---------
 // Scenarios

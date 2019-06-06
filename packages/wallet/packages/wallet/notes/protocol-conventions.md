@@ -67,7 +67,7 @@ Constructor functions should be typed as `StateConstructor<InterfaceName>` by us
 
 <a name="actions"></a>
 
-Define an interface and constructor function for each action in the state machine diagram. For a protocol named `protocol`, the `type` property should be a string formatted as `WALLET.PROTOCOL.ACTION_TYPE`. Also define `ProtocolAction`, `NonTerminalProtocolAction` and `ProtocolAction` types as well as an `isProtocolAction` type guard.
+Define an interface and constructor function for each action in the state machine diagram. For a protocol named `my-protocol`, the `type` property should be a string formatted as `WALLET.MY_PROTOCOL.ACTION_TYPE`. Pre-existing actions (e.g. from the communication module), may be imported if required. Also define the exported `NonTerminalMyProtocolAction` and `MyProtocolAction` union types as well as an `isMyProtocolAction` type guard. If a top level protocol, add `MyProtocolAction` to the `ProtocolAction` union (and make a corresponding change to the type guard). Otherwise, add `MyProtocolAction` to the `ParentProtocolAction` union (and it will thereby be included as a `ProtocolAction`). See the [Protocol Hierachy Diagram](./actions.md#hierarchy).
 
 Actions should have a `processId` property.
 

@@ -1,5 +1,5 @@
 import { Commitment } from '../../../domain';
-import { ProtocolAction } from '../../actions';
+import { WalletAction } from '../../actions';
 import { ActionConstructor } from '../../utils';
 
 // -------
@@ -62,7 +62,7 @@ export type ApplicationAction =
   | OwnCommitmentReceived
   | ConcludeRequested;
 
-export function isApplicationAction(action: ProtocolAction): action is ApplicationAction {
+export function isApplicationAction(action: WalletAction): action is ApplicationAction {
   return (
     action.type === 'WALLET.APPLICATION.OPPONENT_COMMITMENT_RECEIVED' ||
     action.type === 'WALLET.APPLICATION.OWN_COMMITMENT_RECEIVED' ||

@@ -6,7 +6,7 @@ import { initialize as initializeA, fundingReducer as playerAReducer } from './p
 import { initialize as initializeB, fundingReducer as playerBReducer } from './player-b/reducer';
 import { PlayerIndex } from '../../types';
 import { unreachable } from '../../../utils/reducer-utils';
-import { Action as IndirectFundingAction } from '../indirect-funding/actions';
+import { IndirectFundingAction } from '../indirect-funding/actions';
 import * as playerAStates from './player-a/states';
 import * as selectors from '../../selectors';
 import { getOpponentAddress } from '../reducer-helpers';

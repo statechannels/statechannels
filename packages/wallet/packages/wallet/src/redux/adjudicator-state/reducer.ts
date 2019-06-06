@@ -13,18 +13,18 @@ export const adjudicatorStateReducer = (
   action: actions.AdjudicatorEventAction | actions.ChallengeCreatedEvent,
 ): AdjudicatorState => {
   switch (action.type) {
-    case actions.CHALLENGE_EXPIRED_EVENT:
+    case 'WALLET.ADJUDICATOR.CHALLENGE_EXPIRED':
       return challengeExpiredReducer(state, action);
-    case actions.FUNDING_RECEIVED_EVENT:
+    case 'WALLET.ADJUDICATOR.FUNDING_RECEIVED_EVENT':
       return fundingReceivedEventReducer(state, action);
-    case actions.CONCLUDED_EVENT:
+    case 'WALLET.ADJUDICATOR.CONCLUDED_EVENT':
       return concludedEventReducer(state, action);
-    case actions.REFUTED_EVENT:
-    case actions.RESPOND_WITH_MOVE_EVENT:
+    case 'WALLET.ADJUDICATOR.REFUTED_EVENT':
+    case 'WALLET.ADJUDICATOR.RESPOND_WITH_MOVE_EVENT':
       return challengeRespondedReducer(state, action);
-    case actions.CHALLENGE_CREATED_EVENT:
+    case 'WALLET.ADJUDICATOR.CHALLENGE_CREATED_EVENT':
       return challengeCreatedEventReducer(state, action);
-    case actions.CHALLENGE_EXPIRY_SET_EVENT:
+    case 'WALLET.ADJUDICATOR.CHALLENGE_EXPIRY_TIME_SET':
       // We already handle this in the challenge created event
       return state;
     default:

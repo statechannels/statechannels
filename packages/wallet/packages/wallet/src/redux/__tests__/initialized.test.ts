@@ -2,6 +2,7 @@ import { walletReducer, getProcessId } from '../reducer';
 
 import * as states from './../state';
 import * as actions from './../actions';
+import * as IndirectFundingActions from './../protocols/indirect-funding/actions';
 import * as scenarios from './test-scenarios';
 import { PlayerIndex } from '../types';
 import * as fundProtocol from '../protocols/funding';
@@ -58,7 +59,7 @@ describe('when a ProcessAction arrives', () => {
   };
   const state = { ...initializedState, processStore: { [processId]: processState } };
 
-  const action = actions.indirectFunding.playerA.strategyApproved({
+  const action = IndirectFundingActions.playerA.strategyApproved({
     channelId,
     processId: '0xprocessId',
     consensusLibrary: '0xf00',
@@ -85,7 +86,11 @@ describe('when a updateSharedData action arrives', () => {
   const reducer = jest.fn(() => ({}));
   Object.defineProperty(adjudicatorState, 'adjudicatorStateReducer', { value: reducer });
 
-  const action = actions.challengeExpiredEvent('123', '123', 1);
+  const action = actions.challengeExpiredEvent({
+    processId: '123',
+    channelId: '123',
+    timestamp: 1,
+  });
   const state = { ...initializedState, adjudicatorState: {} };
   walletReducer(initializedState, action);
 

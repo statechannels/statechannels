@@ -57,7 +57,7 @@ const successSharedData = indirectFundingTests.successState.store;
 // -------
 // Actions
 // -------
-const strategyProposed = actions.strategyProposed(processId, strategy);
+const strategyProposed = actions.strategyProposed({ processId, strategy });
 const strategyApproved = actions.strategyApproved({ processId, strategy });
 const successConfirmed = actions.fundingSuccessAcknowledged({ processId });
 const fundingSuccess = indirectFundingTests.successTrigger;

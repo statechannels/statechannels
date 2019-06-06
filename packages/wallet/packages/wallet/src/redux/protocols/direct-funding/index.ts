@@ -1,3 +1,1 @@
-import { FundingAction } from './actions';
-
-export type DirectFundingAction = FundingAction;
+export { DirectFundingAction } from './actions';

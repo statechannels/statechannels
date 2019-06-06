@@ -14,7 +14,7 @@ import {
 } from '../indirect-defunding/reducer';
 import { isIndirectDefundingAction } from '../indirect-defunding/actions';
 import * as indirectDefundingStates from '../indirect-defunding/states';
-import { CommitmentReceived } from 'src/communication';
+import { CommitmentReceived } from '../../../communication';
 
 export const initialize = (
   processId: string,

@@ -22,13 +22,13 @@ describe('when a side effect occured', () => {
   };
 
   it('clears the first element of the displayOutbox', () => {
-    const action = actions.displayMessageSent();
+    const action = actions.displayMessageSent({});
     const updatedState = clearOutbox(state, action);
     expect(updatedState.displayOutbox).toMatchObject(displayOutbox.slice(1));
   });
 
   it('clears the first element of the messageOutbox', () => {
-    const action = actions.messageSent();
+    const action = actions.messageSent({});
     const updatedState = clearOutbox(state, action);
     expect(updatedState.messageOutbox).toMatchObject(messageOutbox.slice(1));
   });

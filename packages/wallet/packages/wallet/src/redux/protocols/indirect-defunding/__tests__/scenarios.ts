@@ -117,11 +117,26 @@ const playerBWaitForConclude = {
 // -----------
 // Actions
 // -----------
-export const ledgerUpdate0Received = globalActions.commitmentReceived(processId, ledger6);
-const ledgerUpdate1Received = globalActions.commitmentReceived(processId, ledger7);
-const conclude0Received = globalActions.commitmentReceived(processId, ledger8);
-const conclude1Received = globalActions.commitmentReceived(processId, ledger9);
-const invalidLedgerUpdateReceived = globalActions.commitmentReceived(processId, ledger5);
+export const ledgerUpdate0Received = globalActions.commitmentReceived({
+  processId,
+  signedCommitment: ledger6,
+});
+const ledgerUpdate1Received = globalActions.commitmentReceived({
+  processId,
+  signedCommitment: ledger7,
+});
+const conclude0Received = globalActions.commitmentReceived({
+  processId,
+  signedCommitment: ledger8,
+});
+const conclude1Received = globalActions.commitmentReceived({
+  processId,
+  signedCommitment: ledger9,
+});
+const invalidLedgerUpdateReceived = globalActions.commitmentReceived({
+  processId,
+  signedCommitment: ledger5,
+});
 // -----------
 // Scenarios
 // -----------

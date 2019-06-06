@@ -38,52 +38,70 @@ const respondToAppPreFundSetup = {
 
 const indirectStrategyChosen = messageRelayRequested(bsAddress, {
   processId: fundingProcessId,
-  data: strategyProposed(fundingProcessId, 'IndirectFundingStrategy'),
+  data: strategyProposed({ processId: fundingProcessId, strategy: 'IndirectFundingStrategy' }),
 });
 
 const indirectStrategyApproved = messageRelayRequested(asAddress, {
   processId: fundingProcessId,
-  data: strategyApproved(fundingProcessId),
+  data: strategyApproved({ processId: fundingProcessId }),
 });
 
 const sendLedgerPrefundSetup = messageRelayRequested(bsAddress, {
   processId: fundingProcessId,
-  data: commitmentReceived(fundingProcessId, signedLedgerCommitment0),
+  data: commitmentReceived({
+    processId: fundingProcessId,
+    signedCommitment: signedLedgerCommitment0,
+  }),
 });
 
 const respondToLedgerPreFundSetup = messageRelayRequested(asAddress, {
   processId: fundingProcessId,
-  data: commitmentReceived(fundingProcessId, signedLedgerCommitment1),
+  data: commitmentReceived({
+    processId: fundingProcessId,
+    signedCommitment: signedLedgerCommitment1,
+  }),
 });
 
 const sendLedgerPostfundSetup = messageRelayRequested(bsAddress, {
   processId: fundingProcessId,
-  data: commitmentReceived(fundingProcessId, signedLedgerCommitment2),
+  data: commitmentReceived({
+    processId: fundingProcessId,
+    signedCommitment: signedLedgerCommitment2,
+  }),
 });
 
 const respondToLedgerPostFundSetup = messageRelayRequested(asAddress, {
   processId: fundingProcessId,
-  data: commitmentReceived(fundingProcessId, signedLedgerCommitment3),
+  data: commitmentReceived({
+    processId: fundingProcessId,
+    signedCommitment: signedLedgerCommitment3,
+  }),
 });
 
 const sendLedgerUpdate = messageRelayRequested(bsAddress, {
   processId: fundingProcessId,
-  data: commitmentReceived(fundingProcessId, signedLedgerCommitment4),
+  data: commitmentReceived({
+    processId: fundingProcessId,
+    signedCommitment: signedLedgerCommitment4,
+  }),
 });
 
 const respondToLedgerUpdate = messageRelayRequested(asAddress, {
   processId: fundingProcessId,
-  data: commitmentReceived(fundingProcessId, signedLedgerCommitment5),
+  data: commitmentReceived({
+    processId: fundingProcessId,
+    signedCommitment: signedLedgerCommitment5,
+  }),
 });
 
 const sendAppPostFundSetup = messageRelayRequested(bsAddress, {
   processId: fundingProcessId,
-  data: commitmentReceived(fundingProcessId, signedCommitment2),
+  data: commitmentReceived({ processId: fundingProcessId, signedCommitment: signedCommitment2 }),
 });
 
 const respondToAppPostFundSetup = messageRelayRequested(asAddress, {
   processId: fundingProcessId,
-  data: commitmentReceived(fundingProcessId, signedCommitment3),
+  data: commitmentReceived({ processId: fundingProcessId, signedCommitment: signedCommitment3 }),
 });
 
 const concludeGame = messageRelayRequested(bsAddress, {
@@ -93,7 +111,7 @@ const concludeGame = messageRelayRequested(bsAddress, {
 
 const respondToConclude = messageRelayRequested(asAddress, {
   processId: concludeProcessId,
-  data: commitmentReceived(fundingProcessId, signedCommitment52),
+  data: commitmentReceived({ processId: fundingProcessId, signedCommitment: signedCommitment52 }),
 });
 
 export default {

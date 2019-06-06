@@ -7,7 +7,7 @@ describe('when in WaitForLogin', () => {
   const state = states.waitForLogin();
 
   describe('when the player logs in', () => {
-    const action = actions.loggedIn('uid');
+    const action = actions.loggedIn({ uid: 'uid' });
     const updatedState = walletReducer(state, action);
 
     it('transitions to WALLET_INITIALIZED', async () => {
