@@ -11,94 +11,94 @@ import {
 import abi from 'web3-eth-abi';
 import { bigNumberify } from 'ethers/utils';
 
-export enum UpdateType {
-  Consensus,
-  Proposal,
-}
 export interface AppAttributes {
   furtherVotesRequired: Uint32;
   proposedAllocation: Uint256[];
   proposedDestination: Address[];
-  updateType: UpdateType;
 }
-export interface ProposalAppAttrs extends AppAttributes {
-  updateType: UpdateType.Proposal;
-}
-export interface ConsensusAppAttrs extends AppAttributes {
-  updateType: UpdateType.Consensus;
-}
-
 export interface ConsensusBaseCommitment extends BaseCommitment {
   appAttributes: AppAttributes;
 }
 
-export interface ProposalCommitment extends ConsensusBaseCommitment {
-  commitmentType: CommitmentType.App;
-  appAttributes: ProposalAppAttrs;
-}
-export interface ConsensusReachedCommitment extends ConsensusBaseCommitment {
-  commitmentType: CommitmentType.App;
-  appAttributes: ConsensusAppAttrs;
-}
 export interface PreFundSetupCommitment extends ConsensusBaseCommitment {
   commitmentType: CommitmentType.PreFundSetup;
 }
 export interface PostFundSetupCommitment extends ConsensusBaseCommitment {
   commitmentType: CommitmentType.PostFundSetup;
 }
-export type AppCommitment = ProposalCommitment | ConsensusReachedCommitment;
+export interface AppCommitment extends ConsensusBaseCommitment {
+  commitmentType: CommitmentType.App;
+}
 export interface ConcludeCommitment extends ConsensusBaseCommitment {
   commitmentType: CommitmentType.Conclude;
 }
 
 export type ConsensusCommitment =
   | PreFundSetupCommitment
-  | AppCommitment
   | PostFundSetupCommitment
+  | AppCommitment
   | ConcludeCommitment;
 
 // Type guards
-export function isProposal(c: ConsensusBaseCommitment): c is ProposalCommitment {
-  return c.appAttributes.updateType === UpdateType.Proposal;
-}
-export function isConsensusReached(c: ConsensusBaseCommitment): c is ConsensusReachedCommitment {
-  return c.appAttributes.updateType === UpdateType.Consensus;
-}
-export function isAppCommitment(c: ConsensusBaseCommitment): c is AppCommitment {
-  return isProposal(c) || isConsensusReached(c);
+export function isAppCommitment(c: ConsensusCommitment): c is AppCommitment {
+  return c.commitmentType === CommitmentType.App;
 }
 
-export function appAttributes(
-  ethersAppAttrs: [string, string[], string[], string],
-): ConsensusAppAttrs | ProposalAppAttrs {
+export function isProposal(c: ConsensusBaseCommitment) {
+  return c.appAttributes.furtherVotesRequired > 0;
+}
+export function isConsensusReached(c: ConsensusBaseCommitment) {
+  return c.appAttributes.furtherVotesRequired === 0;
+}
+
+type SolidityAppAttributes = [string, string[], string[]];
+export function appAttributes(ethersAppAttrs: SolidityAppAttributes): AppAttributes {
   return {
     furtherVotesRequired: parseInt(ethersAppAttrs[0], 10),
     proposedAllocation: ethersAppAttrs[1].map(bigNumberify).map(bn => bn.toHexString()),
     proposedDestination: ethersAppAttrs[2],
-    updateType: parseInt(ethersAppAttrs[3], 10),
   };
 }
+
+const SolidityAppAttributesType = {
+  AppAttributes: {
+    furtherVotesRequired: 'uint32',
+    proposedAllocation: 'uint256[]',
+    proposedDestination: 'address[]',
+  },
+};
 
 const SolidityConsensusCommitmentType = {
   ConsensusCommitmentStruct: {
     furtherVotesRequired: 'uint32',
+    currentAllocation: 'uint256[]',
+    currentDestination: 'address[]',
     proposedAllocation: 'uint256[]',
     proposedDestination: 'address[]',
-    updateType: 'uint32',
   },
 };
+type TSConsensusCommitment = [number, Uint256[], Address[], Uint256[], Address[]];
+
+export function consensusCommitmentArgs(commitment: ConsensusCommitment): TSConsensusCommitment {
+  return [
+    commitment.appAttributes.furtherVotesRequired,
+    commitment.allocation,
+    commitment.destination,
+    commitment.appAttributes.proposedAllocation,
+    commitment.appAttributes.proposedDestination,
+  ];
+}
 
 export function bytesFromAppAttributes(appAttrs: AppAttributes): Bytes {
-  return abi.encodeParameter(SolidityConsensusCommitmentType, [
+  return abi.encodeParameter(SolidityAppAttributesType, [
     appAttrs.furtherVotesRequired,
     appAttrs.proposedAllocation,
     appAttrs.proposedDestination,
-    appAttrs.updateType,
   ]);
 }
 
-export function appAttributesFromBytes(appAttrs: Bytes): ConsensusAppAttrs | ProposalAppAttrs {
-  return appAttributes(abi.decodeParameter(SolidityConsensusCommitmentType, appAttrs));
+export function appAttributesFromBytes(appAttrs: Bytes): AppAttributes {
+  return appAttributes(abi.decodeParameter(SolidityAppAttributesType, appAttrs));
 }
 
 export function asCoreCommitment(c: ConsensusCommitment): Commitment {
@@ -110,10 +110,9 @@ export function asCoreCommitment(c: ConsensusCommitment): Commitment {
 
 // Transition helper functions
 
-const consensusAtts: () => ConsensusAppAttrs = () => ({
+const consensusAtts: () => AppAttributes = () => ({
   proposedAllocation: [],
   proposedDestination: [],
-  updateType: UpdateType.Consensus,
   furtherVotesRequired: 0,
 });
 
@@ -131,7 +130,7 @@ export function initialConsensus(c: {
   allocation: string[];
   destination: string[];
   commitmentCount: number;
-}): ConsensusReachedCommitment {
+}): AppCommitment {
   return {
     ...c,
     commitmentType: CommitmentType.App,
@@ -139,30 +138,29 @@ export function initialConsensus(c: {
   };
 }
 export function propose(
-  commitment: ConsensusReachedCommitment,
+  commitment: AppCommitment,
   proposedAllocation: Uint256[],
   proposedDestination: Address[],
-): ProposalCommitment {
+): AppCommitment {
   const numParticipants = commitment.channel.participants.length;
   return {
     ...nextAppCommitment(commitment),
     appAttributes: {
       proposedAllocation,
       proposedDestination,
-      updateType: UpdateType.Proposal,
       furtherVotesRequired: numParticipants - 1,
     },
   };
 }
 
-export function pass(commitment: ConsensusReachedCommitment): ConsensusReachedCommitment {
+export function pass(commitment: AppCommitment): AppCommitment {
   return {
     ...nextAppCommitment(commitment),
     appAttributes: consensusAtts(),
   };
 }
 
-export function vote(commitment: ProposalCommitment): ProposalCommitment {
+export function vote(commitment: AppCommitment): AppCommitment {
   if (commitment.appAttributes.furtherVotesRequired <= 1) {
     throw new Error('Invalid input -- furtherVotesRequired must be greater than 1');
   }
@@ -176,7 +174,7 @@ export function vote(commitment: ProposalCommitment): ProposalCommitment {
   };
 }
 
-export function finalVote(commitment: ProposalCommitment): ConsensusReachedCommitment {
+export function finalVote(commitment: AppCommitment): AppCommitment {
   if (commitment.appAttributes.furtherVotesRequired !== 1) {
     throw new Error('Invalid input -- furtherVotesRequired must be 1');
   }
@@ -189,7 +187,7 @@ export function finalVote(commitment: ProposalCommitment): ConsensusReachedCommi
   };
 }
 
-export function veto(commitment: ProposalCommitment): ConsensusReachedCommitment {
+export function veto(commitment: AppCommitment): AppCommitment {
   return {
     ...nextAppCommitment(commitment),
     appAttributes: consensusAtts(),

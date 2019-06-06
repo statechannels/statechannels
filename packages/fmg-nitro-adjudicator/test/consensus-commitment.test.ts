@@ -3,7 +3,7 @@ import { getNetworkId, getGanacheProvider } from 'magmo-devtools';
 import { Channel, asEthersObject, Commitment, CommitmentType } from 'fmg-core';
 import TestConsensusCommitmentArtifact from '../build/contracts/TestConsensusCommitment.json';
 
-import { UpdateType, initialConsensus, asCoreCommitment, propose } from '../src/consensus-app';
+import { asCoreCommitment, propose } from '../src/consensus-app';
 import { bigNumberify } from 'ethers/utils';
 
 jest.setTimeout(20000);
@@ -47,7 +47,6 @@ describe('ConsensusCommitment', () => {
           proposedAllocation,
           proposedDestination,
           furtherVotesRequired: 0,
-          updateType: UpdateType.Consensus,
         },
       },
       proposedAllocation,
@@ -68,7 +67,6 @@ describe('ConsensusCommitment', () => {
       currentDestination: participants,
       proposedAllocation,
       proposedDestination,
-      updateType: UpdateType.Proposal,
     });
   });
 });
@@ -82,6 +80,5 @@ function convertToConsensusCommitmentObject(consensusCommitmentArgs) {
     currentDestination: consensusCommitmentArgs[2],
     proposedAllocation: consensusCommitmentArgs[3].map(bigNumberify).map(bn => bn.toHexString()),
     proposedDestination: consensusCommitmentArgs[4],
-    updateType: parseInt(consensusCommitmentArgs[5], 10),
   };
 }
