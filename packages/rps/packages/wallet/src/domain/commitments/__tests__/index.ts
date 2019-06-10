@@ -4,7 +4,6 @@ import { channelID } from 'fmg-core/lib/channel';
 import { CONSENSUS_LIBRARY_ADDRESS } from '../../../constants';
 import { bytesFromAppAttributes } from 'fmg-nitro-adjudicator';
 import { UpdateType } from 'fmg-nitro-adjudicator/lib/consensus-app';
-import { EMPTY_APP_ATTRIBUTES } from '../../../utils/commitment-utils';
 
 export const asPrivateKey = '0xf2f48ee19680706196e2e339e5da3491186e0c4c5030670656b0e0164837257d';
 export const asAddress = '0x5409ED021D9299bf6814279A6A1411A7e866A631';
@@ -58,6 +57,12 @@ interface AppCommitmentParams {
   appAttributes?: string;
 }
 
+const EMPTY_APP_ATTRIBUTES = bytesFromAppAttributes({
+  furtherVotesRequired: 0,
+  updateType: 0,
+  proposedAllocation: [],
+  proposedDestination: [],
+});
 export function appCommitment(params: AppCommitmentParams): SignedCommitment {
   const turnNum = params.turnNum;
   const balances = params.balances || twoThree;
