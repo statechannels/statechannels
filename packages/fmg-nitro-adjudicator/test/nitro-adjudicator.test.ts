@@ -1084,7 +1084,7 @@ describe('nitroAdjudicator', () => {
         };
       });
 
-      it.only('works when the conclusion proof is valid', async () => {
+      it('works when the conclusion proof is valid', async () => {
         const {
           destination: startDestination,
           allocation: startAllocation,
@@ -1117,7 +1117,7 @@ describe('nitroAdjudicator', () => {
         // TODO: figure out how to test finalizedAt
       });
 
-      it.only('works when destination =/= participants', async () => {
+      it('works when destination =/= participants', async () => {
         const channelAlt = {
           ...channel,
         };
