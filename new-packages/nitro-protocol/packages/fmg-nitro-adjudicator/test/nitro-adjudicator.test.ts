@@ -17,7 +17,8 @@ import { getCountingApp } from './CountingApp';
 import { channelID as getChannelID } from 'fmg-core/lib/channel';
 import { asCoreCommitment } from 'fmg-core/lib/test-app/counting-app';
 import { CountingCommitment } from 'fmg-core/src/test-app/counting-app';
-import { fromParameters } from 'fmg-core/lib/commitment';
+import { fromParameters, CommitmentType } from 'fmg-core/lib/commitment';
+import { Commitment as CoreCommitment } from 'fmg-core/src/commitment';
 
 jest.setTimeout(20000);
 let nitro: ethers.Contract;
@@ -127,7 +128,9 @@ describe('nitroAdjudicator', () => {
   let commitment2;
   let commitment3;
   let commitment4;
+  let commitment4alt: CoreCommitment;
   let commitment5;
+  let commitment5alt: CoreCommitment;
 
   let commitment1alt;
   let commitment2alt;
@@ -1081,7 +1084,7 @@ describe('nitroAdjudicator', () => {
         };
       });
 
-      it('works when the conclusion proof is valid', async () => {
+      it.only('works when the conclusion proof is valid', async () => {
         const {
           destination: startDestination,
           allocation: startAllocation,
@@ -1106,12 +1109,64 @@ describe('nitroAdjudicator', () => {
           challengeCommitment,
         } = await nitro.getOutcome(getChannelID(channel));
 
-        expect(endDestination).toEqual([alice.address, bob.address]);
+        expect(endDestination).toEqual(conclusionProof.penultimateCommitment.destination);
         expect(endAllocation.map(a => a.toHexString())).toEqual(allocation);
         expect(asEthersObject(fromParameters(challengeCommitment))).toMatchObject(
           conclusionProof.penultimateCommitment,
         );
         // TODO: figure out how to test finalizedAt
+      });
+
+      it.only('works when destination =/= participants', async () => {
+        const channelAlt = {
+          ...channel,
+        };
+        commitment4alt = {
+          channel: channelAlt,
+          turnNum: 10,
+          allocation: [ethers.utils.parseUnits('10', 'wei').toHexString()],
+          destination: ['0xcC8Ddb252cd77F1e67f82C50dBD268eaDC9ECE68'], // an application channel
+          commitmentCount: 0,
+          commitmentType: CommitmentType.App,
+          appAttributes: '0x00',
+        };
+        commitment5alt = { ...commitment4alt, turnNum: 11 };
+        const { r: r2, s: s2, v: v2 } = sign(toHex(commitment4alt), alice.privateKey);
+        const { r: r3, s: s3, v: v3 } = sign(toHex(commitment5alt), bob.privateKey);
+        const conclusionProofAlt = {
+          penultimateCommitment: asEthersObject(commitment4alt),
+          ultimateCommitment: asEthersObject(commitment5alt),
+          penultimateSignature: { v: v2, r: r2, s: s2 },
+          ultimateSignature: { v: v3, r: r3, s: s3 },
+        };
+        const {
+          destination: startDestination,
+          allocation: startAllocation,
+          challengeCommitment: startCommitment,
+          finalizedAt,
+          guaranteedChannel,
+        } = await nitro.getOutcome(getChannelID(channel));
+        expect({
+          destination: startDestination,
+          allocation: startAllocation,
+          challengeCommitment: startCommitment,
+          finalizedAt,
+          guaranteedChannel,
+        }).toMatchObject(nullOutcome);
+
+        const tx = await nitro.conclude(conclusionProofAlt);
+        await tx.wait();
+
+        const {
+          destination: endDestination,
+          allocation: endAllocation,
+          challengeCommitment,
+        } = await nitro.getOutcome(getChannelID(channel));
+        expect(endDestination).toEqual(conclusionProofAlt.penultimateCommitment.destination);
+        expect(endAllocation.map(a => a.toHexString())).toEqual(commitment4alt.allocation);
+        expect(asEthersObject(fromParameters(challengeCommitment))).toMatchObject(
+          conclusionProofAlt.penultimateCommitment,
+        );
       });
 
       it('reverts if it has already been concluded', async () => {
