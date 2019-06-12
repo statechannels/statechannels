@@ -450,7 +450,7 @@ contract NitroAdjudicator {
         );
 
         outcomes[channelId] = Outcome(
-            proof.penultimateCommitment.participants,
+            proof.penultimateCommitment.destination,
             now,
             proof.penultimateCommitment,
             outcomes[channelId].guaranteedChannel,
