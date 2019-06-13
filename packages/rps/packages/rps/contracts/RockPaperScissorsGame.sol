@@ -16,7 +16,21 @@ contract RockPaperScissorsGame {
     // Reveal -> Start
     //
 
-    function validTransition(Commitment.CommitmentStruct memory _old, Commitment.CommitmentStruct memory _new) public pure returns (bool) {
+    modifier destinationUnchanged(Commitment.CommitmentStruct memory _old, Commitment.CommitmentStruct memory _new) {
+        address[] memory oldDestination = _old.destination;
+        address[] memory newDestination = _new.destination;
+        require(
+            keccak256(abi.encodePacked(oldDestination)) ==
+            keccak256(abi.encodePacked(newDestination)),
+            "The destination field must not change");
+        _;
+    }
+
+    function validTransition(Commitment.CommitmentStruct memory _old, Commitment.CommitmentStruct memory _new)
+    public
+    destinationUnchanged(_old,_new)
+    pure
+    returns (bool) {
         RockPaperScissorsCommitment.RPSCommitmentStruct memory oldCommitment = RockPaperScissorsCommitment.fromFrameworkCommitment(_old);
         RockPaperScissorsCommitment.RPSCommitmentStruct memory newCommitment = RockPaperScissorsCommitment.fromFrameworkCommitment(_new);
 

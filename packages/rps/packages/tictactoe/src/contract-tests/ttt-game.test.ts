@@ -91,4 +91,18 @@ describe('TicTacToeGame', () => {
       'Could not match to a valid transition.',
     );
   });
+
+  // use this test if running on Nitro adjudicator
+  it.skip('disallows transitions where destination changes', async () => {
+    const coreCommitment1 = { ...playing1 };
+    const coreCommitment2 = {
+      ...playing2,
+      destination: ['0x6Ecbe1DB9EF729CBe972C83Fb886247691Fb6beb'],
+    };
+    expect.assertions(1);
+    await expectRevert(
+      () => tttContract.validTransition(encode(coreCommitment1), encode(coreCommitment2)),
+      'The destination field must not change',
+    );
+  });
 });
