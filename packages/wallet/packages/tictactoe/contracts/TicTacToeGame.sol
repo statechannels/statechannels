@@ -32,7 +32,16 @@ contract TicTacToeGame {
     //
     // PlayAgainMeSecond -> XPlaying
 
-    function validTransition(bytes _old, bytes _new) public pure returns (bool) {
+    modifier destinationUnchanged(bytes _old, bytes _new) {
+// If running on Nitro Adjudicator, this modifier should be filled out accordingly
+        _;
+    }
+
+    function validTransition(bytes _old, bytes _new)
+    public
+    destinationUnchanged(_old,_new)
+    pure
+    returns (bool) {
         if (_old.positionType() == TicTacToeState.PositionType.XPlaying) {
 
             if (_new.positionType() == TicTacToeState.PositionType.OPlaying) {

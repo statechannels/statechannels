@@ -103,6 +103,23 @@ describe('Rock paper Scissors', () => {
     );
   });
 
+  it('disallows transitions where destination changes', async () => {
+    const coreCommitment1 = asCoreCommitment({ ...propose });
+    const coreCommitment2 = asCoreCommitment({
+      ...accept,
+      destination: ['0x6Ecbe1DB9EF729CBe972C83Fb886247691Fb6beb'],
+    });
+    expect.assertions(1);
+    await expectRevert(
+      () =>
+        rpsContract.validTransition(
+          asEthersObject(coreCommitment1),
+          asEthersObject(coreCommitment2),
+        ),
+      'The destination field must not change',
+    );
+  });
+
   it('disallows a stake that the players cannot afford', async () => {
     const coreCommitment1 = asCoreCommitment(postFundSetupB2);
     const coreCommitment2 = asCoreCommitment(propose3);
