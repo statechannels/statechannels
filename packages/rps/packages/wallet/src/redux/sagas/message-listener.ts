@@ -50,7 +50,7 @@ export function* messageListener() {
 
       // Events that do not need a new process
       case incoming.INITIALIZE_REQUEST:
-        yield put(actions.loggedIn(action.userId));
+        yield put(actions.loggedIn({ uid: action.userId }));
         break;
       case incoming.SIGN_COMMITMENT_REQUEST:
         if (action.commitment.turnNum === 0) {
