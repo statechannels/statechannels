@@ -5,7 +5,7 @@ import { IndirectFundingAction, isIndirectFundingAction } from '../../indirect-f
 import { SharedData, queueMessage } from '../../../state';
 import { ProtocolStateWithSharedData } from '../..';
 import { unreachable } from '../../../../utils/reducer-utils';
-import { PlayerIndex } from '../../../types';
+import { TwoPartyPlayerIndex } from '../../../types';
 import { showWallet, hideWallet, sendFundingComplete } from '../../reducer-helpers';
 import { fundingFailure } from 'magmo-wallet-client';
 import { sendStrategyProposed } from '../../../../communication';
@@ -160,7 +160,7 @@ function cancelled(state: states.FundingState, sharedData: SharedData, action: a
     return { protocolState: state, sharedData };
   }
   switch (action.by) {
-    case PlayerIndex.A: {
+    case TwoPartyPlayerIndex.A: {
       const { targetChannelId } = state;
       const message = fundingFailure(targetChannelId, 'FundingDeclined');
       return {
@@ -168,7 +168,7 @@ function cancelled(state: states.FundingState, sharedData: SharedData, action: a
         sharedData: queueMessage(sharedData, message),
       };
     }
-    case PlayerIndex.B: {
+    case TwoPartyPlayerIndex.B: {
       const { targetChannelId } = state;
       const message = fundingFailure(targetChannelId, 'FundingDeclined');
       return {

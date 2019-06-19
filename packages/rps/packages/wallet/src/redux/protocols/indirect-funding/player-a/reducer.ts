@@ -14,7 +14,7 @@ import { bytesFromAppAttributes } from 'fmg-nitro-adjudicator';
 import { CommitmentType, Commitment, getChannelId, nextSetupCommitment } from '../../../../domain';
 import { Channel } from 'fmg-core/lib/channel';
 import { CONSENSUS_LIBRARY_ADDRESS } from '../../../../constants';
-import { getChannel, theirAddress } from '../../../channel-store';
+import { getChannel, theirAddress, getLastCommitment } from '../../../channel-store';
 import { sendCommitmentReceived } from '../../../../communication';
 import { DirectFundingAction } from '../../direct-funding';
 import { directFundingRequested } from '../../direct-funding/actions';
@@ -45,7 +45,7 @@ export function initialize(
     throw new Error(`Could not find existing application channel ${channelId}`);
   }
   // TODO: Should we have to pull these of the commitment or should they just be arguments to initialize?
-  const { allocation, destination } = channel.lastCommitment.commitment;
+  const { allocation, destination } = getLastCommitment(channel);
   const ourCommitment = createInitialSetupCommitment(sharedData, allocation, destination);
 
   const addressAndPrivateKey = getAddressAndPrivateKey(sharedData, channelId);
@@ -150,7 +150,7 @@ function handleWaitForLedgerUpdate(
   if (!appChannel) {
     throw new Error(`Could not find app channel for id ${protocolState.channelId}`);
   }
-  const theirAppCommitment = appChannel.lastCommitment.commitment;
+  const theirAppCommitment = getLastCommitment(appChannel);
 
   const ourAppCommitment = nextSetupCommitment(theirAppCommitment);
   if (ourAppCommitment === 'NotASetupCommitment') {
@@ -251,7 +251,7 @@ function handleWaitForDirectFunding(
       throw new Error(`Could not find channel for id ${newProtocolState.ledgerId}`);
     }
 
-    const theirCommitment = channel.lastCommitment.commitment;
+    const theirCommitment = getLastCommitment(channel);
     const total = theirCommitment.allocation.reduce(addHex);
     const ourCommitment = proposeNewConsensus(theirCommitment, [total], [protocolState.channelId]);
     const signResult = signAndStore(sharedData, ourCommitment);

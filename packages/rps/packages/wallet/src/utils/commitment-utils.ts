@@ -1,7 +1,7 @@
 import { Commitment, CommitmentType } from '../domain';
 import { appAttributesFromBytes } from 'fmg-nitro-adjudicator';
-import { PlayerIndex } from '../redux/types';
-import { ChannelState } from '../redux/channel-store';
+import { TwoPartyPlayerIndex } from '../redux/types';
+import { ChannelState, getLastCommitment } from '../redux/channel-store';
 
 export const hasConsensusBeenReached = (
   lastCommitment: Commitment,
@@ -25,7 +25,7 @@ export const hasConsensusBeenReached = (
 
 export const composePostFundCommitment = (
   lastCommitment: Commitment,
-  ourIndex: PlayerIndex,
+  ourIndex: TwoPartyPlayerIndex,
 ): Commitment => {
   const {
     channel,
@@ -49,12 +49,12 @@ export const composePostFundCommitment = (
 
 export const composeConcludeCommitment = (channelState: ChannelState) => {
   const commitmentCount =
-    channelState.lastCommitment.commitment.commitmentType === CommitmentType.Conclude ? 1 : 0;
+    getLastCommitment(channelState).commitmentType === CommitmentType.Conclude ? 1 : 0;
 
   const concludeCommitment: Commitment = {
-    ...channelState.lastCommitment.commitment,
+    ...getLastCommitment(channelState),
     commitmentType: CommitmentType.Conclude,
-    turnNum: channelState.lastCommitment.commitment.turnNum + 1,
+    turnNum: getLastCommitment(channelState).turnNum + 1,
     commitmentCount,
   };
 

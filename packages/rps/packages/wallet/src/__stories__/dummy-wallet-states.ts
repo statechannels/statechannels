@@ -18,8 +18,10 @@ export const defaultParams = {
   libraryAddress,
   participants,
   uid: 'uid',
-  lastCommitment: { commitment: preFundCommitment2, signature: 'fake-sig' },
-  penultimateCommitment: { commitment: preFundCommitment1, signature: 'fake-sig' },
+  commitments: [
+    { commitment: preFundCommitment1, signature: 'fake-sig' },
+    { commitment: preFundCommitment2, signature: 'fake-sig' },
+  ],
   turnNum: preFundCommitment2.turnNum,
   networkId: 3,
   challengeExpiry: 0,

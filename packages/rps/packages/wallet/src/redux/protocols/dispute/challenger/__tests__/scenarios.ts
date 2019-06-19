@@ -4,10 +4,7 @@ import * as tsScenarios from '../../../transaction-submission/__tests__';
 import { setChannel, EMPTY_SHARED_DATA } from '../../../../state';
 import { ChannelState } from '../../../../channel-store';
 import * as channelScenarios from '../../../../__tests__/test-scenarios';
-import {
-  channelFromCommitments,
-  partiallyOpenChannelFromCommitment,
-} from '../../../../channel-store/channel-state/__tests__';
+import { channelFromCommitments } from '../../../../channel-store/channel-state/__tests__';
 import {
   challengeExpiredEvent,
   respondWithMoveEvent,
@@ -32,14 +29,17 @@ const {
   signedCommitment21,
 } = channelScenarios;
 
-const partiallyOpen = partiallyOpenChannelFromCommitment(signedCommitment0, address, privateKey);
+const partiallyOpen = channelFromCommitments([signedCommitment0], address, privateKey);
 const theirTurn = channelFromCommitments(
-  signedCommitment19,
-  signedCommitment20,
+  [signedCommitment19, signedCommitment20],
   address,
   privateKey,
 );
-const ourTurn = channelFromCommitments(signedCommitment20, signedCommitment21, address, privateKey);
+const ourTurn = channelFromCommitments(
+  [signedCommitment20, signedCommitment21],
+  address,
+  privateKey,
+);
 
 // --------
 // Defaults
@@ -111,10 +111,14 @@ export const opponentResponds = {
     action: transactionSuccessTrigger,
     action2: challengeExpirySet,
   },
-  waitForResponseOrTimeout: {
+  waitForResponseOrTimeoutReceiveResponse: {
+    state: waitForResponseOrTimeout,
+    action: responseReceived,
+    commitment: signedCommitment21,
+  },
+  waitForResponseOrTimeoutExpirySet: {
     state: waitForResponseOrTimeout,
     action: challengeExpirySet,
-    action2: responseReceived,
     commitment: signedCommitment21,
   },
   acknowledgeResponse: {

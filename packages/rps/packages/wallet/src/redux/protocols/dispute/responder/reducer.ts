@@ -5,7 +5,7 @@ import * as actions from './actions';
 import { unreachable } from '../../../../utils/reducer-utils';
 import * as selectors from '../../../selectors';
 import * as TransactionGenerator from '../../../../utils/transaction-generator';
-import { PlayerIndex } from '../../../types';
+import { TwoPartyPlayerIndex } from '../../../types';
 import { TransactionRequest } from 'ethers/providers';
 import {
   initialize as initTransactionState,
@@ -34,6 +34,7 @@ import {
   isSuccess as isDefundingSuccess,
   isFailure as isDefundingFailure,
 } from '../../defunding/states';
+
 export const initialize = (
   processId: string,
   channelId: string,
@@ -355,10 +356,12 @@ const getStoredCommitments = (
 } => {
   const channelId = channelID(challengeCommitment.channel);
   const channelState = selectors.getOpenedChannelState(sharedData, channelId);
-  const lastCommitment = channelState.lastCommitment.commitment;
-  const penultimateCommitment = channelState.penultimateCommitment.commitment;
-  const lastSignature = channelState.lastCommitment.signature;
-  const penultimateSignature = channelState.penultimateCommitment.signature;
+  const [penultimateSignedCommitment, lastSignedCommitment] = channelState.commitments;
+  const { signature: lastSignature, commitment: lastCommitment } = lastSignedCommitment;
+  const {
+    signature: penultimateSignature,
+    commitment: penultimateCommitment,
+  } = penultimateSignedCommitment;
   return { lastCommitment, penultimateCommitment, lastSignature, penultimateSignature };
 };
 
@@ -403,7 +406,7 @@ const canRefuteWithCommitment = (commitment: Commitment, challengeCommitment: Co
   );
 };
 
-const mover = (commitment: Commitment): PlayerIndex => {
+const mover = (commitment: Commitment): TwoPartyPlayerIndex => {
   return commitment.turnNum % 2;
 };
 

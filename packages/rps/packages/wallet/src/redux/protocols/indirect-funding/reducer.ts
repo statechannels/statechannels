@@ -1,5 +1,5 @@
 import { unreachable } from '../../../utils/reducer-utils';
-import { PlayerIndex } from '../../types';
+import { TwoPartyPlayerIndex } from '../../types';
 import { ProtocolStateWithSharedData } from '../';
 import { playerAReducer, initialize as initializeA } from './player-a/reducer';
 import { playerBReducer, initialize as initializeB } from './player-b/reducer';
@@ -17,12 +17,12 @@ export function initialize(
   sharedData: SharedData,
 ): ReturnVal {
   // todo: would be nice to avoid casting here
-  const ourIndex: PlayerIndex = channel.ourIndex;
+  const ourIndex: TwoPartyPlayerIndex = channel.ourIndex;
 
   switch (ourIndex) {
-    case PlayerIndex.A:
+    case TwoPartyPlayerIndex.A:
       return initializeA(processId, channel.channelId, sharedData);
-    case PlayerIndex.B:
+    case TwoPartyPlayerIndex.B:
       return initializeB(processId, channel.channelId, sharedData);
     default:
       return unreachable(ourIndex);

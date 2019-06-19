@@ -7,7 +7,7 @@ import { unreachable } from '../../../utils/reducer-utils';
 import * as selectors from '../../selectors';
 import { proposeNewConsensus, acceptConsensus } from '../../../domain/two-player-consensus-game';
 import { sendCommitmentReceived } from '../../../communication';
-import { theirAddress } from '../../channel-store';
+import { theirAddress, getLastCommitment } from '../../channel-store';
 import { composeConcludeCommitment } from '../../../utils/commitment-utils';
 import { CommitmentReceived } from '../../actions';
 
@@ -30,7 +30,7 @@ export const initialize = (
   if (helpers.isFirstPlayer(ledgerId, sharedData)) {
     const ledgerChannel = selectors.getChannelState(sharedData, ledgerId);
 
-    const theirCommitment = ledgerChannel.lastCommitment.commitment;
+    const theirCommitment = getLastCommitment(ledgerChannel);
     const ourCommitment = proposeNewConsensus(
       theirCommitment,
       proposedAllocation,
