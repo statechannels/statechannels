@@ -137,6 +137,7 @@ export const itStoresThisCommitment = (
   it('stores the commitment in the channel state', () => {
     const channelId = getChannelId(signedCommitment.commitment);
     const channelState = state.channelStore[channelId];
-    expect(channelState.lastCommitment).toMatchObject(signedCommitment);
+    const lastSignedCommitment = channelState.commitments.slice(-1)[0];
+    expect(lastSignedCommitment).toMatchObject(signedCommitment);
   });
 };

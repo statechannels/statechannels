@@ -30,7 +30,7 @@ export const signCommitment = (commitment: Commitment, privateKey: string) => {
 
 export const signData = (data: string, privateKey: string) => {
   const signature = sign(data, privateKey) as any;
-  return signature.signature;
+  return signature.signature as string;
 };
 
 export const signVerificationData = (

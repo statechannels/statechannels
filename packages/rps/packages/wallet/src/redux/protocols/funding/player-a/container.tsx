@@ -6,7 +6,7 @@ import * as actions from './actions';
 import * as states from './states';
 
 import { unreachable } from '../../../../utils/reducer-utils';
-import { PlayerIndex } from '../../../types';
+import { TwoPartyPlayerIndex } from '../../../types';
 import { FundingStrategy } from '..';
 import ChooseStrategy from '../../../../components/funding/choose-strategy';
 import WaitForOtherPlayer from '../../../../components/wait-for-other-player';
@@ -33,7 +33,7 @@ class FundingContainer extends PureComponent<Props> {
         return (
           <ChooseStrategy
             strategyChosen={(strategy: FundingStrategy) => strategyChosen({ processId, strategy })}
-            cancelled={() => cancelled({ processId, by: PlayerIndex.B })}
+            cancelled={() => cancelled({ processId, by: TwoPartyPlayerIndex.B })}
           />
         );
       case 'Funding.PlayerA.WaitForStrategyResponse':

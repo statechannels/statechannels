@@ -52,8 +52,8 @@ describe('OPPONENT RESPONDS', () => {
     itTransitionsTo(result, 'Challenging.WaitForResponseOrTimeout');
   });
 
-  describeScenarioStep(scenario.waitForResponseOrTimeout, () => {
-    const { state, action: action1 } = scenario.waitForResponseOrTimeout;
+  describeScenarioStep(scenario.waitForResponseOrTimeoutExpirySet, () => {
+    const { state, action: action1 } = scenario.waitForResponseOrTimeoutExpirySet;
     const result = challengerReducer(state, sharedData, action1);
 
     itTransitionsTo(result, 'Challenging.WaitForResponseOrTimeout');
@@ -61,9 +61,9 @@ describe('OPPONENT RESPONDS', () => {
       expect((result.state as WaitForResponseOrTimeout).expiryTime).toEqual(action1.expiryTime);
     });
   });
-  describeScenarioStep(scenario.waitForResponseOrTimeout, () => {
-    const { state, action2, commitment } = scenario.waitForResponseOrTimeout;
-    const result = challengerReducer(state, sharedData, action2);
+  describeScenarioStep(scenario.waitForResponseOrTimeoutReceiveResponse, () => {
+    const { state, action, commitment } = scenario.waitForResponseOrTimeoutReceiveResponse;
+    const result = challengerReducer(state, sharedData, action);
 
     itSendsThisMessage(result.sharedData, CHALLENGE_COMMITMENT_RECEIVED);
     itStoresThisCommitment(result.sharedData, commitment);

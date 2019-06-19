@@ -55,45 +55,45 @@ const props = { channelId, ledgerId, processId };
 const waitForPreFundL1 = {
   state: aWaitForPreFundSetup1(props),
   store: setChannels(EMPTY_SHARED_DATA, [
-    channelFromCommitments(app0, app1, asAddress, asPrivateKey),
-    channelFromCommitments(undefined, ledger0, asAddress, asPrivateKey),
+    channelFromCommitments([app0, app1], asAddress, asPrivateKey),
+    channelFromCommitments([ledger0], asAddress, asPrivateKey),
   ]),
 };
 const waitForDirectFunding = {
   state: aWaitForDirectFunding({ ...props, directFundingState: preSuccessA.state }), //
   store: setChannels(preSuccessB.sharedData, [
-    channelFromCommitments(app1, app2, asAddress, asPrivateKey),
-    channelFromCommitments(ledger2, ledger3, asAddress, asPrivateKey),
+    channelFromCommitments([app1, app2], asAddress, asPrivateKey),
+    channelFromCommitments([ledger2, ledger3], asAddress, asPrivateKey),
   ]),
 };
 const waitForLedgerUpdate1 = {
   state: aWaitForLedgerUpdate1(props),
   store: setChannels(EMPTY_SHARED_DATA, [
-    channelFromCommitments(app0, app1, asAddress, asPrivateKey),
-    channelFromCommitments(ledger3, ledger4, asAddress, asPrivateKey),
+    channelFromCommitments([app0, app1], asAddress, asPrivateKey),
+    channelFromCommitments([ledger3, ledger4], asAddress, asPrivateKey),
   ]),
 };
 const waitForPostFund1 = {
   state: aWaitForPostFundSetup1(props),
   store: setChannels(EMPTY_SHARED_DATA, [
-    channelFromCommitments(app1, app2, asAddress, asPrivateKey),
-    channelFromCommitments(ledger4, ledger5, asAddress, asPrivateKey),
+    channelFromCommitments([app1, app2], asAddress, asPrivateKey),
+    channelFromCommitments([ledger4, ledger5], asAddress, asPrivateKey),
   ]),
 };
 
 export const successState = {
   state: success({}),
   store: setChannels(EMPTY_SHARED_DATA, [
-    channelFromCommitments(app2, app3, asAddress, asPrivateKey),
-    channelFromCommitments(ledger4, ledger5, asAddress, asPrivateKey),
+    channelFromCommitments([app2, app3], asAddress, asPrivateKey),
+    channelFromCommitments([ledger4, ledger5], asAddress, asPrivateKey),
   ]),
 };
 
 const waitForDirectFundingFailure = {
   state: aWaitForDirectFunding({ ...props, directFundingState: preFailure.state }), //
   store: setChannels(preFailure.sharedData, [
-    channelFromCommitments(app0, app1, asAddress, asPrivateKey),
-    channelFromCommitments(ledger0, ledger1, asAddress, asPrivateKey),
+    channelFromCommitments([app0, app1], asAddress, asPrivateKey),
+    channelFromCommitments([ledger0, ledger1], asAddress, asPrivateKey),
   ]),
 };
 

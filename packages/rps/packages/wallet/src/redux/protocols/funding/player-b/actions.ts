@@ -1,5 +1,5 @@
 import { BaseProcessAction } from '../../actions';
-import { PlayerIndex } from '../../../types';
+import { TwoPartyPlayerIndex } from '../../../types';
 import { FundingStrategy } from '..';
 import { strategyProposed, StrategyProposed } from '../../../../communication';
 export { strategyProposed, StrategyProposed };
@@ -24,7 +24,7 @@ export interface StrategyRejected extends BaseProcessAction {
 
 export interface Cancelled extends BaseProcessAction {
   type: 'WALLET.FUNDING.PLAYER_B.CANCELLED';
-  by: PlayerIndex;
+  by: TwoPartyPlayerIndex;
 }
 
 // --------

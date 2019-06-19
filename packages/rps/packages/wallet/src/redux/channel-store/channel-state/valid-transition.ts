@@ -1,4 +1,4 @@
-import { ChannelState } from './states';
+import { ChannelState, getLastCommitment } from './states';
 import { Commitment, getChannelId, fromCoreCommitment } from '../../../domain';
 import { isAppCommitment } from 'fmg-nitro-adjudicator/lib/consensus-app';
 import { validTransition as validConsensusTransition } from 'fmg-nitro-adjudicator/lib/consensus-app';
@@ -25,7 +25,7 @@ function validAppTransition(c1: Commitment, c2: Commitment): boolean {
 }
 
 export function validTransition(state: ChannelState, commitment: Commitment): boolean {
-  const { commitment: lastCommitment } = state.lastCommitment;
+  const lastCommitment = getLastCommitment(state);
 
   return (
     commitment.turnNum === state.turnNum + 1 &&
