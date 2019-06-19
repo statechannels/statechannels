@@ -1,9 +1,7 @@
 import { addHex } from '../../../../utils/hex-utils';
 import * as globalActions from '../../../actions';
 
-import * as globalTestScenarios from '../../../__tests__/test-scenarios';
 import * as scenarios from '../../../__tests__/test-scenarios';
-import * as testScenarios from '../../../__tests__/test-scenarios';
 import * as transactionSubmissionScenarios from '../../transaction-submission/__tests__';
 import * as states from '../states';
 import { channelFromCommitments } from '../../../channel-store/channel-state/__tests__';
@@ -20,28 +18,28 @@ const processId = `processId.${channelId}`;
 // shared data
 const aHasBothPrefundsSharedData = setChannels(EMPTY_SHARED_DATA, [
   channelFromCommitments(
-    testScenarios.signedCommitment0,
-    testScenarios.signedCommitment1,
-    globalTestScenarios.asAddress,
-    globalTestScenarios.asPrivateKey,
+    scenarios.signedCommitment0,
+    scenarios.signedCommitment1,
+    scenarios.asAddress,
+    scenarios.asPrivateKey,
   ),
 ]);
 
 const bHasBothPrefundsSharedData = setChannels(EMPTY_SHARED_DATA, [
   channelFromCommitments(
-    testScenarios.signedCommitment0,
-    testScenarios.signedCommitment1,
-    globalTestScenarios.bsAddress,
-    globalTestScenarios.bsPrivateKey,
+    scenarios.signedCommitment0,
+    scenarios.signedCommitment1,
+    scenarios.bsAddress,
+    scenarios.bsPrivateKey,
   ),
 ]);
 
 const aHasPostFund0SharedData = setChannels(EMPTY_SHARED_DATA, [
   channelFromCommitments(
-    testScenarios.signedCommitment1,
-    testScenarios.signedCommitment2,
-    globalTestScenarios.bsAddress,
-    globalTestScenarios.bsPrivateKey,
+    scenarios.signedCommitment1,
+    scenarios.signedCommitment2,
+    scenarios.bsAddress,
+    scenarios.bsPrivateKey,
   ),
 ]);
 
@@ -80,11 +78,11 @@ const bFundingReceivedEvent = globalActions.fundingReceivedEvent({
 });
 const postFundSetup0 = globalActions.commitmentReceived({
   processId: channelId,
-  signedCommitment: globalTestScenarios.signedCommitment2,
+  signedCommitment: scenarios.signedCommitment2,
 });
 const postFundSetup1 = globalActions.commitmentReceived({
   processId: channelId,
-  signedCommitment: globalTestScenarios.signedCommitment3,
+  signedCommitment: scenarios.signedCommitment3,
 });
 
 export const aHappyPath = {

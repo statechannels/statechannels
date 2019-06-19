@@ -50,6 +50,26 @@ export const concludeInstigated: ActionConstructor<ConcludeInstigated> = p => ({
   protocol: WalletProtocol.Concluding,
 });
 
+// ADVANCE CHANNEL
+
+// -------
+// Actions
+// -------
+
+export interface RoundReceived extends BaseProcessAction {
+  type: 'WALLET.ADVANCE_CHANNEL.ROUND_RECEIVED';
+  signedCommitments: SignedCommitment[];
+}
+
+// -------
+// Constructors
+// -------
+
+export const roundReceived: ActionConstructor<RoundReceived> = p => ({
+  ...p,
+  type: 'WALLET.ADVANCE_CHANNEL.ROUND_RECEIVED',
+});
+
 // COMMON
 
 // -------
@@ -78,7 +98,8 @@ export type RelayableAction =
   | StrategyProposed
   | StrategyApproved
   | ConcludeInstigated
-  | CommitmentReceived;
+  | CommitmentReceived
+  | RoundReceived;
 
 export function isRelayableAction(action: WalletAction): action is RelayableAction {
   return (
