@@ -16,7 +16,7 @@ export async function handleNewProcessAction(ctx) {
     case 'WALLET.COMMON.COMMITMENT_RECEIVED':
     case 'WALLET.FUNDING.STRATEGY_PROPOSED':
     case 'WALLET.FUNDING.STRATEGY_APPROVED':
-    case 'WALLET.ADVANCE_CHANNEL.ROUND_RECEIVED':
+    case 'WALLET.ADVANCE_CHANNEL.COMMITMENTS_RECEIVED':
       return ctx;
     case 'WALLET.NEW_PROCESS.CONCLUDE_INSTIGATED':
       return handleConcludeInstigated(ctx, action);
