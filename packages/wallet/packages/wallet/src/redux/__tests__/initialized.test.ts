@@ -4,7 +4,7 @@ import * as states from './../state';
 import * as actions from './../actions';
 import * as IndirectFundingActions from './../protocols/indirect-funding/actions';
 import * as scenarios from './test-scenarios';
-import { PlayerIndex } from '../types';
+import { TwoPartyPlayerIndex } from '../types';
 import * as fundProtocol from '../protocols/funding';
 import { fundingRequested } from '../protocols/actions';
 import * as adjudicatorState from '../adjudicator-state/reducer';
@@ -23,7 +23,7 @@ const defaults = {
 const initializedState = states.initialized({ ...defaults });
 
 describe('when a NewProcessAction arrives', () => {
-  const action = fundingRequested({ channelId, playerIndex: PlayerIndex.A });
+  const action = fundingRequested({ channelId, playerIndex: TwoPartyPlayerIndex.A });
   const processId = getProcessId(action);
   const initialize = jest.fn(() => ({
     protocolState: 'protocolState',

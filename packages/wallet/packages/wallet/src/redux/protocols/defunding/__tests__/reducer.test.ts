@@ -55,7 +55,6 @@ describe('channel not closed', () => {
   const { sharedData, processId, channelId } = scenario;
   describe('when initializing', () => {
     const result = initialize(processId, channelId, sharedData);
-
     itTransitionsToFailure(result, scenario.failure);
   });
 });

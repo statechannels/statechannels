@@ -62,15 +62,15 @@ export const setFundingState = (sharedData: SharedData): SharedData => {
 };
 const initialStore = setFundingState(
   setChannels(EMPTY_SHARED_DATA, [
-    channelFromCommitments(app10, app11, asAddress, asPrivateKey),
-    channelFromCommitments(ledger4, ledger5, asAddress, asPrivateKey),
+    channelFromCommitments([app10, app11], asAddress, asPrivateKey),
+    channelFromCommitments([ledger4, ledger5], asAddress, asPrivateKey),
   ]),
 );
 
 const notDefundableInitialStore = setFundingState(
   setChannels(EMPTY_SHARED_DATA, [
-    channelFromCommitments(app9, app10, asAddress, asPrivateKey),
-    channelFromCommitments(ledger4, ledger5, asAddress, asPrivateKey),
+    channelFromCommitments([app9, app10], asAddress, asPrivateKey),
+    channelFromCommitments([ledger4, ledger5], asAddress, asPrivateKey),
   ]),
 );
 
@@ -78,8 +78,8 @@ const playerAWaitForUpdate = {
   state: waitForLedgerUpdate(props),
   store: setFundingState(
     setChannels(EMPTY_SHARED_DATA, [
-      channelFromCommitments(app10, app11, asAddress, asPrivateKey),
-      channelFromCommitments(ledger5, ledger6, asAddress, asPrivateKey),
+      channelFromCommitments([app10, app11], asAddress, asPrivateKey),
+      channelFromCommitments([ledger5, ledger6], asAddress, asPrivateKey),
     ]),
   ),
 };
@@ -88,8 +88,8 @@ const playerAWaitForConclude = {
   state: waitForConclude(props),
   store: setFundingState(
     setChannels(EMPTY_SHARED_DATA, [
-      channelFromCommitments(app10, app11, asAddress, asPrivateKey),
-      channelFromCommitments(ledger7, ledger8, asAddress, asPrivateKey),
+      channelFromCommitments([app10, app11], asAddress, asPrivateKey),
+      channelFromCommitments([ledger7, ledger8], asAddress, asPrivateKey),
     ]),
   ),
 };
@@ -98,8 +98,8 @@ const playerBWaitForUpdate = {
   state: waitForLedgerUpdate(props),
   store: setFundingState(
     setChannels(EMPTY_SHARED_DATA, [
-      channelFromCommitments(app10, app11, bsAddress, bsPrivateKey),
-      channelFromCommitments(ledger4, ledger5, bsAddress, bsPrivateKey),
+      channelFromCommitments([app10, app11], bsAddress, bsPrivateKey),
+      channelFromCommitments([ledger4, ledger5], bsAddress, bsPrivateKey),
     ]),
   ),
 };
@@ -108,8 +108,8 @@ const playerBWaitForConclude = {
   state: waitForConclude(props),
   store: setFundingState(
     setChannels(EMPTY_SHARED_DATA, [
-      channelFromCommitments(app10, app11, bsAddress, bsPrivateKey),
-      channelFromCommitments(ledger6, ledger7, bsAddress, bsPrivateKey),
+      channelFromCommitments([app10, app11], bsAddress, bsPrivateKey),
+      channelFromCommitments([ledger6, ledger7], bsAddress, bsPrivateKey),
     ]),
   ),
 };

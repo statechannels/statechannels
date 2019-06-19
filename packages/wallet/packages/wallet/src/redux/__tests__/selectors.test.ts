@@ -75,8 +75,10 @@ describe('getNextNonce', () => {
     funded: false,
     address: 'address',
     privateKey: 'privateKey',
-    lastCommitment: { commitment: {} as Commitment, signature: 'signature' },
-    penultimateCommitment: { commitment: {} as Commitment, signature: 'signature' },
+    commitments: [
+      { commitment: {} as Commitment, signature: 'signature' },
+      { commitment: {} as Commitment, signature: 'signature' },
+    ],
     turnNum: 0,
   };
   const state = {

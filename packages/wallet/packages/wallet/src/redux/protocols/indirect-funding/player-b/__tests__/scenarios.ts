@@ -61,44 +61,44 @@ const props = { channelId, ledgerId, processId };
 const waitForPreFundSetup0 = {
   state: bWaitForPreFundSetup0(props),
   store: setChannels(EMPTY_SHARED_DATA, [
-    channelFromCommitments(app0, app1, bsAddress, bsPrivateKey),
+    channelFromCommitments([app0, app1], bsAddress, bsPrivateKey),
   ]),
 };
 const waitForDirectFunding = {
   state: bWaitForDirectFunding({ ...props, directFundingState: preSuccessB.state }), //
   store: setChannels(preSuccessB.sharedData, [
-    channelFromCommitments(app0, app1, bsAddress, bsPrivateKey),
-    channelFromCommitments(ledger0, ledger1, bsAddress, bsPrivateKey),
+    channelFromCommitments([app0, app1], bsAddress, bsPrivateKey),
+    channelFromCommitments([ledger0, ledger1], bsAddress, bsPrivateKey),
   ]),
 };
 const waitForLedgerUpdate0 = {
   state: bWaitForLedgerUpdate0(props),
   store: setChannels(EMPTY_SHARED_DATA, [
-    channelFromCommitments(app0, app1, bsAddress, bsPrivateKey),
-    channelFromCommitments(ledger2, ledger3, bsAddress, bsPrivateKey),
+    channelFromCommitments([app0, app1], bsAddress, bsPrivateKey),
+    channelFromCommitments([ledger2, ledger3], bsAddress, bsPrivateKey),
   ]),
 };
 const waitForPostFund0 = {
   state: bWaitForPostFundSetup0(props),
   store: setChannels(EMPTY_SHARED_DATA, [
-    channelFromCommitments(app0, app1, bsAddress, bsPrivateKey),
-    channelFromCommitments(ledger4, ledger5, bsAddress, bsPrivateKey),
+    channelFromCommitments([app0, app1], bsAddress, bsPrivateKey),
+    channelFromCommitments([ledger4, ledger5], bsAddress, bsPrivateKey),
   ]),
 };
 
 const waitForDirectFundingFailure = {
   state: bWaitForDirectFunding({ ...props, directFundingState: preFailure.state }), //
   store: setChannels(preFailure.sharedData, [
-    channelFromCommitments(app0, app1, bsAddress, bsPrivateKey),
-    channelFromCommitments(ledger0, ledger1, bsAddress, bsPrivateKey),
+    channelFromCommitments([app0, app1], bsAddress, bsPrivateKey),
+    channelFromCommitments([ledger0, ledger1], bsAddress, bsPrivateKey),
   ]),
 };
 
 export const successState = {
   state: success({}),
   store: setChannels(EMPTY_SHARED_DATA, [
-    channelFromCommitments(app2, app3, asAddress, bsPrivateKey),
-    channelFromCommitments(ledger4, ledger5, asAddress, bsPrivateKey),
+    channelFromCommitments([app2, app3], asAddress, bsPrivateKey),
+    channelFromCommitments([ledger4, ledger5], asAddress, bsPrivateKey),
   ]),
 };
 

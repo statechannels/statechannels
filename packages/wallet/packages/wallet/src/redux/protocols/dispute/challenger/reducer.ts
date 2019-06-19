@@ -228,8 +228,9 @@ function challengeApproved(state: NonTerminalCState, sharedData: SharedData): Re
 
   // else if we don't have the last two states
   // make challenge transaction
-  const { commitment: fromPosition, signature: fromSignature } = channelState.penultimateCommitment;
-  const { commitment: toPosition, signature: toSignature } = channelState.lastCommitment;
+  const [penultimateCommitment, lastCommitment] = channelState.commitments;
+  const { commitment: fromPosition, signature: fromSignature } = penultimateCommitment;
+  const { commitment: toPosition, signature: toSignature } = lastCommitment;
   const transactionRequest = createForceMoveTransaction(
     fromPosition,
     toPosition,

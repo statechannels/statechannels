@@ -20,12 +20,15 @@ const {
   preFundCommitment0,
 } = channelScenarios;
 const theirTurn = channelFromCommitments(
-  signedCommitment19,
-  signedCommitment20,
+  [signedCommitment19, signedCommitment20],
   address,
   privateKey,
 );
-const ourTurn = channelFromCommitments(signedCommitment20, signedCommitment21, address, privateKey);
+const ourTurn = channelFromCommitments(
+  [signedCommitment20, signedCommitment21],
+  address,
+  privateKey,
+);
 
 // --------
 // Defaults

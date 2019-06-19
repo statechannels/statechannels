@@ -18,8 +18,7 @@ const processId = `processId.${channelId}`;
 // shared data
 const aHasBothPrefundsSharedData = setChannels(EMPTY_SHARED_DATA, [
   channelFromCommitments(
-    scenarios.signedCommitment0,
-    scenarios.signedCommitment1,
+    [scenarios.signedCommitment0, scenarios.signedCommitment1],
     scenarios.asAddress,
     scenarios.asPrivateKey,
   ),
@@ -27,8 +26,7 @@ const aHasBothPrefundsSharedData = setChannels(EMPTY_SHARED_DATA, [
 
 const bHasBothPrefundsSharedData = setChannels(EMPTY_SHARED_DATA, [
   channelFromCommitments(
-    scenarios.signedCommitment0,
-    scenarios.signedCommitment1,
+    [scenarios.signedCommitment0, scenarios.signedCommitment1],
     scenarios.bsAddress,
     scenarios.bsPrivateKey,
   ),
@@ -36,8 +34,7 @@ const bHasBothPrefundsSharedData = setChannels(EMPTY_SHARED_DATA, [
 
 const aHasPostFund0SharedData = setChannels(EMPTY_SHARED_DATA, [
   channelFromCommitments(
-    scenarios.signedCommitment1,
-    scenarios.signedCommitment2,
+    [scenarios.signedCommitment1, scenarios.signedCommitment2],
     scenarios.bsAddress,
     scenarios.bsPrivateKey,
   ),

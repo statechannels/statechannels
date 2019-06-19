@@ -1,8 +1,8 @@
-import { SignedCommitment, getChannelId } from '../../../domain';
+import { SignedCommitment, getChannelId, Commitment } from '../../../domain';
 
-export type ChannelState = PartiallyOpenChannelState | OpenChannelState;
+export type Commitments = SignedCommitment[];
 
-export interface PartiallyOpenChannelState {
+export interface ChannelState {
   address: string;
   privateKey: string;
   channelId: string;
@@ -11,12 +11,18 @@ export interface PartiallyOpenChannelState {
   participants: [string, string];
   channelNonce: number;
   turnNum: number;
-  lastCommitment: SignedCommitment;
+  commitments: Commitments;
   funded: boolean;
 }
 
-export interface OpenChannelState extends PartiallyOpenChannelState {
-  penultimateCommitment: SignedCommitment;
+export type OpenChannelState = ChannelState;
+
+export function getLastCommitment(state: ChannelState): Commitment {
+  return state.commitments.slice(-1)[0].commitment;
+}
+
+export function getPenultimateCommitment(state: ChannelState): Commitment {
+  return state.commitments.slice(-2)[0].commitment;
 }
 
 // -------
@@ -27,7 +33,7 @@ export function initializeChannel(
   signedCommitment: SignedCommitment,
   address: string,
   privateKey: string,
-): PartiallyOpenChannelState {
+): ChannelState {
   const { commitment } = signedCommitment;
   const { turnNum, channel } = commitment;
   const ourIndex = commitment.destination.indexOf(address);
@@ -42,7 +48,7 @@ export function initializeChannel(
     channelNonce: channel.nonce,
     channelId,
     funded: false,
-    lastCommitment: signedCommitment,
+    commitments: [signedCommitment],
   };
 }
 
@@ -51,10 +57,11 @@ export function pushCommitment(
   state: ChannelState,
   signedCommitment: SignedCommitment,
 ): ChannelState {
-  const penultimateCommitment = state.lastCommitment;
-  const lastCommitment = signedCommitment;
+  const commitments = [...state.commitments];
+  commitments.shift();
+  commitments.push(signedCommitment);
   const turnNum = signedCommitment.commitment.turnNum;
-  return { ...state, penultimateCommitment, lastCommitment, turnNum };
+  return { ...state, commitments, turnNum };
 }
 
 export function ourTurn(state: ChannelState) {
@@ -64,7 +71,7 @@ export function ourTurn(state: ChannelState) {
 }
 
 export function isFullyOpen(state: ChannelState): state is OpenChannelState {
-  return 'penultimateCommitment' in state;
+  return state.participants.length === state.commitments.length;
 }
 
 export function theirAddress(state: ChannelState): string {

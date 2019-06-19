@@ -15,6 +15,7 @@ import {
 import { isIndirectDefundingAction } from '../indirect-defunding/actions';
 import * as indirectDefundingStates from '../indirect-defunding/states';
 import { CommitmentReceived } from '../../../communication';
+import { getLastCommitment } from '../../channel-store';
 
 export const initialize = (
   processId: string,
@@ -33,8 +34,8 @@ export const initialize = (
     if (!channel) {
       throw new Error(`Channel does not exist with id ${channelId}`);
     }
-    const proposedAllocation = channel.lastCommitment.commitment.allocation;
-    const proposedDestination = channel.lastCommitment.commitment.destination;
+    const proposedAllocation = getLastCommitment(channel).allocation;
+    const proposedDestination = getLastCommitment(channel).destination;
     const indirectDefundingState = indirectDefundingInitialize(
       processId,
       channelId,
@@ -164,5 +165,5 @@ const createWaitForWithdrawal = (sharedData: SharedData, processId: string, chan
 };
 const getWithdrawalAmount = (sharedData: SharedData, channelId: string) => {
   const channelState = selectors.getChannelState(sharedData, channelId);
-  return channelState.lastCommitment.commitment.allocation[channelState.ourIndex];
+  return getLastCommitment(channelState).allocation[channelState.ourIndex];
 };

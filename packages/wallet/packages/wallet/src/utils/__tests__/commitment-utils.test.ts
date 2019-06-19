@@ -10,7 +10,7 @@ describe('composeConcludeCommitment', () => {
   const app12 = appCommitment({ turnNum: 11, balances: [], isFinal: true });
 
   it('should create a correct conclude commitment from an app commitment', () => {
-    const channelState = channelFromCommitments(app10, app11, asAddress, asPrivateKey);
+    const channelState = channelFromCommitments([app10, app11], asAddress, asPrivateKey);
     const concludeCommitment = composeConcludeCommitment(channelState);
     expect(concludeCommitment).toMatchObject({
       ...app11.commitment,
@@ -20,7 +20,7 @@ describe('composeConcludeCommitment', () => {
     });
   });
   it('should create a correct conclude commitment from a conclude commitment', () => {
-    const channelState = channelFromCommitments(app11, app12, asAddress, asPrivateKey);
+    const channelState = channelFromCommitments([app11, app12], asAddress, asPrivateKey);
     const concludeCommitment = composeConcludeCommitment(channelState);
     expect(concludeCommitment).toMatchObject({
       ...app11.commitment,

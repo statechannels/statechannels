@@ -44,16 +44,16 @@ const defaults = { processId, channelId };
 // SharedData
 // ------
 const initialStore = setChannels(EMPTY_SHARED_DATA, [
-  channelFromCommitments(app50, app51, bsAddress, bsPrivateKey),
+  channelFromCommitments([app50, app51], bsAddress, bsPrivateKey),
 ]);
 const initialStoreYourTurn = setChannels(EMPTY_SHARED_DATA, [
-  channelFromCommitments(app51, app52, bsAddress, bsPrivateKey),
+  channelFromCommitments([app51, app52], bsAddress, bsPrivateKey),
 ]);
 const firstConcludeReceivedChannelState = setChannels(EMPTY_SHARED_DATA, [
-  channelFromCommitments(app51, app52, bsAddress, bsPrivateKey),
+  channelFromCommitments([app51, app52], bsAddress, bsPrivateKey),
 ]);
 const secondConcludeReceivedChannelState = setChannels(EMPTY_SHARED_DATA, [
-  channelFromCommitments(app52, app53, bsAddress, bsPrivateKey),
+  channelFromCommitments([app52, app53], bsAddress, bsPrivateKey),
 ]);
 
 const firstConcludeReceived = setFundingState(firstConcludeReceivedChannelState, channelId, {
@@ -119,8 +119,8 @@ export const happyPathAlternative = {
     state: decideDefund,
     sharedData: setFundingStateAlt(
       setChannels(EMPTY_SHARED_DATA, [
-        channelFromCommitments(app10, app11, bsAddress, bsPrivateKey),
-        channelFromCommitments(ledger4, ledger5, bsAddress, bsPrivateKey),
+        channelFromCommitments([app10, app11], bsAddress, bsPrivateKey),
+        channelFromCommitments([ledger4, ledger5], bsAddress, bsPrivateKey),
       ]),
     ),
     action: ledgerUpdate0Received,

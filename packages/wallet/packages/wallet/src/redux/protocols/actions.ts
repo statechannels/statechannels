@@ -1,4 +1,4 @@
-import { PlayerIndex } from '../types';
+import { TwoPartyPlayerIndex } from '../types';
 import { Commitment } from '../../domain';
 import { ActionConstructor } from '../utils';
 import { ConcludeInstigated, WalletProtocol } from '../../communication';
@@ -16,7 +16,7 @@ export interface InitializeChannel {
 export interface FundingRequested {
   type: 'WALLET.NEW_PROCESS.FUNDING_REQUESTED';
   channelId: string;
-  playerIndex: PlayerIndex;
+  playerIndex: TwoPartyPlayerIndex;
   protocol: WalletProtocol.Funding;
 }
 

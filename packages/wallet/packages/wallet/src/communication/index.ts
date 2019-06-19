@@ -7,7 +7,7 @@ import {
   commitmentReceived,
   concludeInstigated,
   ConcludeInstigated,
-  roundReceived,
+  commitmentsReceived,
 } from './actions';
 export * from './actions';
 
@@ -46,12 +46,12 @@ export const sendCommitmentReceived = (
   return messageRelayRequested(to, payload);
 };
 
-export const sendRoundReceived = (
+export const sendCommitmentsReceived = (
   to: string,
   processId: string,
   signedCommitments: SignedCommitment[],
 ) => {
-  const payload = roundReceived({ processId, signedCommitments });
+  const payload = commitmentsReceived({ processId, signedCommitments });
   return messageRelayRequested(to, payload);
 };
 

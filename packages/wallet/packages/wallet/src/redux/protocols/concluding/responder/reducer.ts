@@ -17,7 +17,7 @@ import {
   checkAndStore,
 } from '../../../state';
 import { composeConcludeCommitment } from '../../../../utils/commitment-utils';
-import { ourTurn } from '../../../channel-store';
+import { ourTurn, getLastCommitment } from '../../../channel-store';
 import { DefundingAction, isDefundingAction } from '../../defunding/actions';
 import { initialize as initializeDefunding, defundingReducer } from '../../defunding/reducer';
 import { isSuccess, isFailure } from '../../defunding/states';
@@ -126,8 +126,8 @@ function handleDefundingAction(
       processId,
       ledgerId: getChannelId(action.signedCommitment.commitment),
       channelId: protocolState.channelId,
-      proposedAllocation: channel.lastCommitment.commitment.allocation,
-      proposedDestination: channel.lastCommitment.commitment.destination,
+      proposedAllocation: getLastCommitment(channel).allocation,
+      proposedDestination: getLastCommitment(channel).destination,
     });
     const postActionIndirectDefundingState = indirectDefundingReducer(
       preActionIndirectDefundingState,

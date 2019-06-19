@@ -6,7 +6,7 @@ import * as actions from './actions';
 import * as states from './states';
 
 import { unreachable } from '../../../../utils/reducer-utils';
-import { PlayerIndex } from '../../../types';
+import { TwoPartyPlayerIndex } from '../../../types';
 import ApproveStrategy from '../../../../components/funding/approve-strategy';
 import WaitForOtherPlayer from '../../../../components/wait-for-other-player';
 import AcknowledgeX from '../../../../components/acknowledge-x';
@@ -35,7 +35,7 @@ class FundingContainer extends PureComponent<Props> {
             strategyChosen={(strategy: FundingStrategy) =>
               strategyApproved({ processId, strategy })
             }
-            cancelled={() => cancelled({ processId, by: PlayerIndex.B })}
+            cancelled={() => cancelled({ processId, by: TwoPartyPlayerIndex.B })}
           />
         );
       case 'Funding.PlayerB.WaitForFunding':

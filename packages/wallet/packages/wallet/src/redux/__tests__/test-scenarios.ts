@@ -15,10 +15,19 @@ export const asPrivateKey = '0xf2f48ee19680706196e2e339e5da3491186e0c4c503067065
 export const asAddress = '0x5409ED021D9299bf6814279A6A1411A7e866A631';
 export const bsPrivateKey = '0x5d862464fe9303452126c8bc94274b8c5f9874cbd219789b3eb2128075a76f72';
 export const bsAddress = '0x6Ecbe1DB9EF729CBe972C83Fb886247691Fb6beb';
+export const hubPrivateKey = '0xce442e75dd539bd632aca84efa0b7de5c5b48aa4bbf028c8a6c17b2e7a16446e';
+export const hubAddress = '0xAbcdE1140bA6aE8e702b78f63A4eA1D1553144a1';
 export const participants: [string, string] = [asAddress, bsAddress];
+export const threeParticipants: [string, string, string] = [asAddress, bsAddress, hubAddress];
 export const channel: Channel = { channelType: libraryAddress, nonce: channelNonce, participants };
+export const jointChannel: Channel = {
+  channelType: libraryAddress,
+  nonce: channelNonce,
+  participants: threeParticipants,
+};
 
 export const channelId = channelID(channel);
+export const jointChannelId = channelID(jointChannel);
 
 export const fundingState = {
   fundingType: 'FUNDING_TYPE.UNKNOWN' as 'FUNDING_TYPE.UNKNOWN',
@@ -26,6 +35,11 @@ export const fundingState = {
 };
 
 export const twoThree = [bigNumberify(2).toHexString(), bigNumberify(3).toHexString()];
+export const oneTwoThree = [
+  bigNumberify(1).toHexString(),
+  bigNumberify(2).toHexString(),
+  bigNumberify(3).toHexString(),
+];
 export const initializedState: states.Initialized = {
   ...states.EMPTY_SHARED_DATA,
   type: states.WALLET_INITIALIZED,
@@ -175,7 +189,7 @@ const initializedChannel: ChannelState = {
   funded: false,
   address: asAddress,
   privateKey: asPrivateKey,
-  lastCommitment: { commitment: preFundCommitment0, signature: 'signature' },
+  commitments: [{ commitment: preFundCommitment0, signature: 'signature' }],
   turnNum: 0,
 };
 
@@ -286,5 +300,96 @@ export const signedLedgerCommitments = {
   signedLedgerCommitment7: {
     commitment: ledgerCommitments.ledgerDefundUpdate1,
     signature: signCommitment(ledgerCommitments.ledgerDefundUpdate1, bsPrivateKey),
+  },
+};
+
+// Joint ledger commitments
+const JOINT_LEDGER_CHANNEL_NONCE = 0;
+export const jointLedgerChannel: Channel = {
+  nonce: JOINT_LEDGER_CHANNEL_NONCE,
+  channelType: ledgerLibraryAddress,
+  participants: threeParticipants,
+};
+
+const initialJointConsensusCommitment = initialConsensus({
+  channel: jointLedgerChannel,
+  allocation: oneTwoThree,
+  destination: threeParticipants,
+  commitmentCount: 0,
+  turnNum: 4,
+});
+
+export const jointLedgerId = channelID(jointLedgerChannel);
+
+export const jointLedgerCommitments = {
+  preFundCommitment0: {
+    ...initialJointConsensusCommitment,
+    appAttributes: bytesFromAppAttributes(initialJointConsensusCommitment.appAttributes),
+    commitmentCount: 0,
+    commitmentType: CommitmentType.PreFundSetup,
+    turnNum: 0,
+  },
+  preFundCommitment1: {
+    ...initialJointConsensusCommitment,
+    appAttributes: bytesFromAppAttributes(initialJointConsensusCommitment.appAttributes),
+    commitmentCount: 1,
+    commitmentType: CommitmentType.PreFundSetup,
+    turnNum: 1,
+  },
+  preFundCommitment2: {
+    ...initialJointConsensusCommitment,
+    appAttributes: bytesFromAppAttributes(initialJointConsensusCommitment.appAttributes),
+    commitmentCount: 2,
+    commitmentType: CommitmentType.PreFundSetup,
+    turnNum: 2,
+  },
+  postFundCommitment0: {
+    ...initialJointConsensusCommitment,
+    appAttributes: bytesFromAppAttributes(initialJointConsensusCommitment.appAttributes),
+    commitmentCount: 0,
+    commitmentType: CommitmentType.PostFundSetup,
+    turnNum: 3,
+  },
+  postFundCommitment1: {
+    ...initialJointConsensusCommitment,
+    appAttributes: bytesFromAppAttributes(initialJointConsensusCommitment.appAttributes),
+    commitmentCount: 1,
+    commitmentType: CommitmentType.PostFundSetup,
+    turnNum: 4,
+  },
+  postFundCommitment2: {
+    ...initialJointConsensusCommitment,
+    appAttributes: bytesFromAppAttributes(initialJointConsensusCommitment.appAttributes),
+    commitmentCount: 1,
+    commitmentType: CommitmentType.PostFundSetup,
+    turnNum: 5,
+  },
+};
+
+let commitment: Commitment;
+export const signedJointLedgerCommitments = {
+  signedCommitment0: {
+    commitment: commitment = jointLedgerCommitments.preFundCommitment0,
+    signature: signCommitment(commitment, asPrivateKey),
+  },
+  signedCommitment1: {
+    commitment: commitment = jointLedgerCommitments.preFundCommitment1,
+    signature: signCommitment(commitment, bsPrivateKey),
+  },
+  signedCommitment2: {
+    commitment: commitment = jointLedgerCommitments.postFundCommitment0,
+    signature: signCommitment(commitment, hubPrivateKey),
+  },
+  signedCommitment3: {
+    commitment: commitment = jointLedgerCommitments.postFundCommitment1,
+    signature: signCommitment(commitment, asPrivateKey),
+  },
+  signedCommitment4: {
+    commitment: commitment = jointLedgerCommitments.postFundCommitment1,
+    signature: signCommitment(commitment, bsPrivateKey),
+  },
+  signedCommitment5: {
+    commitment: commitment = jointLedgerCommitments.postFundCommitment1,
+    signature: signCommitment(commitment, hubPrivateKey),
   },
 };
