@@ -5,6 +5,7 @@ import { EMPTY_SHARED_DATA, setChannels } from '../../../state';
 import { channelFromCommitments } from '../../../channel-store/channel-state/__tests__';
 import * as scenarios from '../../../__tests__/test-scenarios';
 import { commitmentsReceived } from '../../../../communication';
+import { CommitmentType } from '../../../../domain';
 
 // ---------
 // Test data
@@ -18,9 +19,9 @@ const {
   hubAddress,
   hubPrivateKey,
   signedJointLedgerCommitments,
-  threeParticipants,
-  oneTwoThree,
-  ledgerLibraryAddress,
+  threeParticipants: destination,
+  oneTwoThree: allocation,
+  ledgerLibraryAddress: channelType,
   jointLedgerId: channelId,
 } = scenarios;
 const {
@@ -31,9 +32,18 @@ const {
   signedCommitment4,
   signedCommitment5,
 } = signedJointLedgerCommitments;
+const appAttributes = signedCommitment0.commitment.appAttributes;
+
+const initializeArgs = {
+  allocation,
+  destination,
+  channelType,
+  appAttributes,
+  processId,
+};
 
 const props = {
-  processId,
+  ...initializeArgs,
   channelId,
 };
 
@@ -45,11 +55,13 @@ const propsA = {
 const propsB = {
   ...props,
   ourIndex: ThreePartyPlayerIndex.B,
+  privateKey: bsPrivateKey,
 };
 
 const propsHub = {
   ...props,
   ourIndex: ThreePartyPlayerIndex.Hub,
+  privateKey: hubPrivateKey,
 };
 
 const commitments0 = [signedCommitment0];
@@ -62,12 +74,32 @@ const commitments5 = [signedCommitment3, signedCommitment4, signedCommitment5];
 // ----
 // States
 // ------
-const commitmentSentA = states.commitmentSent(propsA);
+const commitmentSentA = states.commitmentSent({
+  ...propsA,
+  commitmentType: CommitmentType.PreFundSetup,
+});
 
-const notSafeToSendB = states.notSafeToSend(propsB);
-const commitmentSentB = states.commitmentSent(propsB);
+const channelUnknownB = states.channelUnknown({
+  ...propsB,
+  commitmentType: CommitmentType.PreFundSetup,
+});
+const notSafeToSendB = states.notSafeToSend({
+  ...propsB,
+  commitmentType: CommitmentType.PreFundSetup,
+});
+const commitmentSentB = states.commitmentSent({
+  ...propsB,
+  commitmentType: CommitmentType.PreFundSetup,
+});
 
-const notSafeToSendHub = states.notSafeToSend(propsHub);
+const channelUnknownHub = states.channelUnknown({
+  ...propsHub,
+  commitmentType: CommitmentType.PreFundSetup,
+});
+const notSafeToSendHub = states.notSafeToSend({
+  ...propsHub,
+  commitmentType: CommitmentType.PreFundSetup,
+});
 
 // -------
 // Shared Data
@@ -131,25 +163,35 @@ const receivePostFundSetupFromHub = commitmentsReceived({
 // ---------
 // Scenarios
 // ---------
-const args = {
-  ourIndex: 0,
-  allocation: oneTwoThree,
-  destination: threeParticipants,
-  channelType: ledgerLibraryAddress,
-  appAttributes: scenarios.jointLedgerCommitments.postFundCommitment0.appAttributes,
+const argsA = {
+  ...initializeArgs,
   address: asAddress,
   privateKey: asPrivateKey,
+  ourIndex: 0,
+};
+
+const argsB = {
+  ...initializeArgs,
+  address: bsAddress,
+  privateKey: bsPrivateKey,
+  ourIndex: 1,
+};
+
+const argsHub = {
+  ...initializeArgs,
+  address: hubAddress,
+  privateKey: hubPrivateKey,
+  ourIndex: 2,
 };
 
 export const newChannelAsA = {
   ...propsA,
   initialize: {
-    args,
+    args: { ...argsA, commitmentType: CommitmentType.PreFundSetup },
     sharedData: emptySharedData,
     commitments: commitments0,
   },
   receiveFromB: {
-    args,
     state: commitmentSentA,
     sharedData: aSentPreFundCommitment,
     action: receivePreFundSetupFromB,
@@ -166,7 +208,7 @@ export const newChannelAsA = {
 export const existingChannelAsA = {
   ...propsA,
   initialize: {
-    args,
+    args: argsA,
     sharedData: aSentPostFundCommitment,
     commitment: signedCommitment3,
   },
@@ -185,24 +227,27 @@ export const existingChannelAsA = {
 export const newChannelAsB = {
   ...propsB,
   initialize: {
+    args: { ...argsB, commitmentType: CommitmentType.PreFundSetup },
     sharedData: emptySharedData,
   },
   receiveFromA: {
-    state: notSafeToSendB,
+    state: channelUnknownB,
     sharedData: emptySharedData,
     action: receivePreFundSetupFromA,
-    commitment: signedCommitment1,
+    commitments: commitments1,
   },
   receiveFromHub: {
     state: commitmentSentB,
     sharedData: bSentPreFundCommitment,
     action: receivePreFundSetupFromHub,
+    commitments: commitments2,
   },
 };
 
 export const existingChannelAsB = {
   ...propsB,
   initialize: {
+    args: argsB,
     sharedData: bReceivedPreFundSetup,
   },
   receiveFromA: {
@@ -221,13 +266,14 @@ export const existingChannelAsB = {
 export const newChannelAsHub = {
   ...propsHub,
   initialize: {
+    args: { ...argsHub, commitmentType: CommitmentType.PreFundSetup },
     sharedData: emptySharedData,
   },
   receiveFromB: {
-    state: notSafeToSendHub,
+    state: channelUnknownHub,
     sharedData: emptySharedData,
     action: receivePreFundSetupFromB,
-    commitment: signedCommitment2,
+    commitments: commitments2,
   },
 };
 

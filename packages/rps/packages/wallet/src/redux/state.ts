@@ -198,26 +198,21 @@ export function getLastMessage(state: SharedData): WalletEvent | undefined {
   return getLastMessageFromOutbox(state.outboxState);
 }
 
-export function getAddressAndPrivateKey(
-  state: SharedData,
-  channelId: string,
-): { address: string; privateKey: string } | undefined {
+export function getPrivatekey(state: SharedData, channelId: string): string | undefined {
   const channel = getChannel(state, channelId);
   if (!channel) {
     return undefined;
   } else {
-    const { address, privateKey } = channel;
-    return { address, privateKey };
+    return channel.privateKey;
   }
 }
 
 export function signAndInitialize(
   state: SharedData,
   commitment: Commitment,
-  address: string,
   privateKey: string,
 ): SignResult {
-  const result = signAndInitializeChannelStore(state.channelStore, commitment, address, privateKey);
+  const result = signAndInitializeChannelStore(state.channelStore, commitment, privateKey);
   if (result.isSuccess) {
     return { ...result, store: setChannelStore(state, result.store) };
   } else {
@@ -228,15 +223,9 @@ export function signAndInitialize(
 export function checkAndInitialize(
   state: SharedData,
   signedCommitment: SignedCommitment,
-  address: string,
   privateKey: string,
 ): CheckResult {
-  const result = checkAndInitializeChannelStore(
-    state.channelStore,
-    signedCommitment,
-    address,
-    privateKey,
-  );
+  const result = checkAndInitializeChannelStore(state.channelStore, signedCommitment, privateKey);
   if (result.isSuccess) {
     return { ...result, store: setChannelStore(state, result.store) };
   } else {
