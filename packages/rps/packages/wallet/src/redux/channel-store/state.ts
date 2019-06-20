@@ -17,8 +17,12 @@ export function setChannel(store: ChannelStore, channel: ChannelState): ChannelS
   return { ...store, [channelId]: channel };
 }
 
-export function getChannel(store: ChannelStore, channelId: string): ChannelState | undefined {
-  return store[channelId];
+export function getChannel(store: ChannelStore, channelId: string): ChannelState {
+  const channel = store[channelId];
+  if (!channel) {
+    throw new Error(`Channel ${channelId} not found`);
+  }
+  return channel;
 }
 
 export function setChannels(store: ChannelStore, channels: ChannelState[]): ChannelStore {

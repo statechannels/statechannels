@@ -60,7 +60,6 @@ type SignResult = SignSuccess | SignFailure;
 export function signAndInitialize(
   store: ChannelStore,
   commitment: Commitment,
-  address: string,
   privateKey: string,
 ): SignResult {
   const signedCommitment = signCommitment2(commitment, privateKey);
@@ -70,7 +69,7 @@ export function signAndInitialize(
   if (signedCommitment.commitment.turnNum !== 0) {
     return { isSuccess: false, reason: 'ChannelDoesntExist' };
   }
-  const channel = initializeChannel(signedCommitment, address, privateKey);
+  const channel = initializeChannel(signedCommitment, privateKey);
   store = setChannel(store, channel);
 
   return { isSuccess: true, signedCommitment, store };
@@ -79,7 +78,6 @@ export function signAndInitialize(
 export function checkAndInitialize(
   store: ChannelStore,
   signedCommitment: SignedCommitment,
-  address: string,
   privateKey: string,
 ): CheckResult {
   if (signedCommitment.commitment.turnNum !== 0) {
@@ -88,7 +86,7 @@ export function checkAndInitialize(
   if (!hasValidSignature(signedCommitment)) {
     return { isSuccess: false };
   }
-  const channel = initializeChannel(signedCommitment, address, privateKey);
+  const channel = initializeChannel(signedCommitment, privateKey);
   store = setChannel(store, channel);
 
   return { isSuccess: true, store };
@@ -99,9 +97,6 @@ export function checkAndInitialize(
 export function signAndStore(store: ChannelStore, commitment: Commitment): SignResult {
   const channelId = getChannelId(commitment);
   let channel = getChannel(store, channelId);
-  if (!channel) {
-    return { isSuccess: false, reason: 'ChannelDoesntExist' };
-  }
   const signedCommitment = signCommitment2(commitment, channel.privateKey);
 
   // this next check is weird. It'll check whether it was our turn.
@@ -144,11 +139,6 @@ export function checkAndStore(
   const commitment = signedCommitment.commitment;
   const channelId = getChannelId(commitment);
   let channel = getChannel(store, channelId);
-
-  if (!channel) {
-    console.log('Cannot store commitment: no channel');
-    return { isSuccess: false };
-  }
 
   if (!isSafeTransition(store, channel, commitment)) {
     console.log('Failed to verify a safe transition');
