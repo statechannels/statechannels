@@ -79,8 +79,34 @@ export const expectThisMessageAndCommitmentSent = (
     expect(item.messagePayload.signedCommitment.commitment).toMatchObject(c);
   });
 };
+
+export const expectThisMessageAndTheseCommitmentsSent = (
+  state: SideEffectState,
+  commitments: PartialCommitments,
+  messageType: string,
+) => {
+  expectSideEffect('messageOutbox', state, item => {
+    expect(item.messagePayload.type).toEqual(messageType);
+    expect(item.messagePayload.signedCommitments).toMatchObject(
+      commitments.map(({ commitment }) => ({ commitment })), // This has the effect of ignoring the signature
+    );
+  });
+};
+
 export const expectThisCommitmentSent = (state: SideEffectState, c: Partial<Commitment>) => {
   expectThisMessageAndCommitmentSent(state, c, 'WALLET.COMMON.COMMITMENT_RECEIVED');
+};
+type PartialCommitments = Array<{ commitment: Partial<Commitment> }>;
+
+export const expectTheseCommitmentsSent = (
+  state: SideEffectState,
+  commitments: PartialCommitments,
+) => {
+  expectThisMessageAndTheseCommitmentsSent(
+    state,
+    commitments,
+    'WALLET.ADVANCE_CHANNEL.COMMITMENTS_RECEIVED',
+  );
 };
 
 export const itSendsATransaction = (state: SideEffectState) => {
@@ -139,5 +165,12 @@ export const itStoresThisCommitment = (
     const channelState = state.channelStore[channelId];
     const lastSignedCommitment = channelState.commitments.slice(-1)[0];
     expect(lastSignedCommitment).toMatchObject(signedCommitment);
+  });
+};
+
+export const itRegistersThisChannel = (state: SharedData, channelId: string, processId: string) => {
+  it('subscribes to channel events in the channel subscriptions', () => {
+    const subscriptionState = state.channelSubscriptions[processId];
+    expect(subscriptionState).toContain(channelId);
   });
 };

@@ -20,17 +20,9 @@ export function signCommitment2(commitment: Commitment, privateKey: string): Sig
   return { commitment, signature: signCommitmentUtil(commitment, privateKey) };
 }
 
-function getTurnTaker(commitment: Commitment): string {
-  const { turnNum, channel } = commitment;
-  const participants = channel.participants;
-  const numParticipants = participants.length;
-  return participants[turnNum % numParticipants];
-}
-
 export function hasValidSignature(signedCommitment: SignedCommitment): boolean {
   const { commitment, signature } = signedCommitment;
-  const address = getTurnTaker(commitment);
-  return validCommitmentSignature(commitment, signature, address);
+  return validCommitmentSignature(commitment, signature);
 }
 
 export function getChannelId(commitment: Commitment): string {

@@ -37,7 +37,7 @@ export interface Failure extends BaseState {
 // Constructors
 // ------------
 
-export const baseDirectFundingState: StateConstructor<BaseState> = params => {
+const base: StateConstructor<BaseState> = params => {
   const { processId, channelId, ourIndex } = params;
   return {
     processId,
@@ -48,7 +48,7 @@ export const baseDirectFundingState: StateConstructor<BaseState> = params => {
 
 export const notSafeToSend: StateConstructor<NotSafeToSend> = params => {
   return {
-    ...baseDirectFundingState(params),
+    ...base(params),
     type: 'AdvanceChannel.NotSafeToSend',
   };
 };
@@ -56,7 +56,7 @@ export const notSafeToSend: StateConstructor<NotSafeToSend> = params => {
 export const commitmentSent: StateConstructor<CommitmentSent> = params => {
   const { transactionSubmissionState } = params;
   return {
-    ...baseDirectFundingState(params),
+    ...base(params),
     type: 'AdvanceChannel.CommitmentSent',
     transactionSubmissionState,
   };
@@ -64,14 +64,14 @@ export const commitmentSent: StateConstructor<CommitmentSent> = params => {
 
 export const success: StateConstructor<Success> = params => {
   return {
-    ...baseDirectFundingState(params),
+    ...base(params),
     type: 'AdvanceChannel.Success',
   };
 };
 
 export const failure: StateConstructor<Failure> = params => {
   return {
-    ...baseDirectFundingState(params),
+    ...base(params),
     type: 'AdvanceChannel.Failure',
   };
 };
@@ -80,9 +80,9 @@ export const failure: StateConstructor<Failure> = params => {
 // Unions and Guards
 // -------
 
-export type NonTerminalDirectFundingState = NotSafeToSend | CommitmentSent;
+export type NonTerminalAdvanceChannelState = NotSafeToSend | CommitmentSent;
 
-export type AdvanceChannelState = NonTerminalDirectFundingState | Success | Failure;
+export type AdvanceChannelState = NonTerminalAdvanceChannelState | Success | Failure;
 
 export type AdvanceChannelStateType = AdvanceChannelState['type'];
 
