@@ -88,7 +88,12 @@ export const expectThisMessageAndTheseCommitmentsSent = (
   expectSideEffect('messageOutbox', state, item => {
     expect(item.messagePayload.type).toEqual(messageType);
     expect(item.messagePayload.signedCommitments).toMatchObject(
-      commitments.map(({ commitment }) => ({ commitment })), // This has the effect of ignoring the signature
+      // If the user passes a signature, we should match against it. Otherwise,
+      // the signature should be present, but we don't care what its value is
+      commitments.map(({ commitment, signature }) => ({
+        commitment,
+        signature: signature || expect.any(String),
+      })),
     );
   });
 };
@@ -96,7 +101,7 @@ export const expectThisMessageAndTheseCommitmentsSent = (
 export const expectThisCommitmentSent = (state: SideEffectState, c: Partial<Commitment>) => {
   expectThisMessageAndCommitmentSent(state, c, 'WALLET.COMMON.COMMITMENT_RECEIVED');
 };
-type PartialCommitments = Array<{ commitment: Partial<Commitment> }>;
+type PartialCommitments = Array<{ commitment: Partial<Commitment>; signature?: string }>;
 
 export const expectTheseCommitmentsSent = (
   state: SideEffectState,

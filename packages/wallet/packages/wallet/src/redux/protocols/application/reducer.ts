@@ -111,12 +111,7 @@ const validateAndUpdate = (
   sharedData: SharedData,
 ) => {
   if (state.type === 'Application.WaitForFirstCommitment') {
-    return checkAndInitialize(
-      sharedData.channelStore,
-      { commitment, signature },
-      state.address,
-      state.privateKey,
-    );
+    return checkAndInitialize(sharedData.channelStore, { commitment, signature }, state.privateKey);
   } else {
     return checkAndStore(sharedData.channelStore, { commitment, signature });
   }
@@ -128,7 +123,7 @@ const signAndUpdate = (
   sharedData: SharedData,
 ) => {
   if (state.type === 'Application.WaitForFirstCommitment') {
-    return signAndInitialize(sharedData.channelStore, commitment, state.address, state.privateKey);
+    return signAndInitialize(sharedData.channelStore, commitment, state.privateKey);
   } else {
     return signAndStore(sharedData.channelStore, commitment);
   }

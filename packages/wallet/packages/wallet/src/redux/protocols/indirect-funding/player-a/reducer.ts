@@ -2,7 +2,7 @@ import * as states from './states';
 import {
   SharedData,
   signAndInitialize,
-  getAddressAndPrivateKey,
+  getPrivatekey,
   queueMessage,
   checkAndStore,
   signAndStore,
@@ -48,13 +48,12 @@ export function initialize(
   const { allocation, destination } = getLastCommitment(channel);
   const ourCommitment = createInitialSetupCommitment(sharedData, allocation, destination);
 
-  const addressAndPrivateKey = getAddressAndPrivateKey(sharedData, channelId);
-  if (!addressAndPrivateKey) {
-    throw new Error(`Could not find address and private key for existing channel ${channelId}`);
+  const privateKey = getPrivatekey(sharedData, channelId);
+  if (!privateKey) {
+    throw new Error(`Could not find private key for existing channel ${channelId}`);
   }
 
-  const { address, privateKey } = addressAndPrivateKey;
-  const signResult = signAndInitialize(sharedData, ourCommitment, address, privateKey);
+  const signResult = signAndInitialize(sharedData, ourCommitment, privateKey);
   if (!signResult.isSuccess) {
     throw new Error('Could not store new ledger channel commitment.');
   }
@@ -183,12 +182,6 @@ function handleWaitForPreFundSetup(
 ): ReturnVal {
   if (action.type !== 'WALLET.COMMON.COMMITMENT_RECEIVED') {
     throw new Error(`Incorrect action ${action.type}`);
-  }
-  const addressAndPrivateKey = getAddressAndPrivateKey(sharedData, protocolState.channelId);
-  if (!addressAndPrivateKey) {
-    throw new Error(
-      `Could not find address and private key for existing channel ${protocolState.channelId}`,
-    );
   }
 
   const checkResult = checkAndStore(sharedData, action.signedCommitment);

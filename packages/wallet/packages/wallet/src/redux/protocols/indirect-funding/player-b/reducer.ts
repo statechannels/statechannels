@@ -8,7 +8,7 @@ import {
   signAndStore,
   queueMessage,
   checkAndInitialize,
-  getAddressAndPrivateKey,
+  getPrivatekey,
   registerChannelToMonitor,
 } from '../../../state';
 import { IndirectFundingState, failure, success } from '../states';
@@ -80,19 +80,12 @@ function handleWaitForPreFundSetup(
   if (action.type !== 'WALLET.COMMON.COMMITMENT_RECEIVED') {
     throw new Error(`Incorrect action ${action.type}`);
   }
-  const addressAndPrivateKey = getAddressAndPrivateKey(sharedData, protocolState.channelId);
-  if (!addressAndPrivateKey) {
-    throw new Error(
-      `Could not find address and private key for existing channel ${protocolState.channelId}`,
-    );
+  const privateKey = getPrivatekey(sharedData, protocolState.channelId);
+  if (!privateKey) {
+    throw new Error(`Could not find private key for existing channel ${protocolState.channelId}`);
   }
 
-  const checkResult = checkAndInitialize(
-    sharedData,
-    action.signedCommitment,
-    addressAndPrivateKey.address,
-    addressAndPrivateKey.privateKey,
-  );
+  const checkResult = checkAndInitialize(sharedData, action.signedCommitment, privateKey);
   if (!checkResult.isSuccess) {
     throw new Error('Indirect funding protocol, unable to validate or store commitment');
   }

@@ -43,7 +43,7 @@ describe('sending preFundSetup as A', () => {
 
     itTransitionsTo(protocolState, 'AdvanceChannel.CommitmentSent');
     itSendsNoMessage(result);
-    itStoresThisCommitment(result, commitments[0]);
+    itStoresThisCommitment(result, commitments[1]);
   });
 
   describe('when receiving prefund commitments from the hub', () => {
@@ -53,5 +53,71 @@ describe('sending preFundSetup as A', () => {
 
     itTransitionsTo(protocolState, 'AdvanceChannel.Success');
     itStoresThisCommitment(result, commitments[2]);
+    itSendsNoMessage(result);
+  });
+});
+
+describe('sending preFundSetup as B', () => {
+  const scenario = scenarios.newChannelAsB;
+  const { processId, channelId } = scenario;
+
+  describe('when initializing', () => {
+    const { sharedData, args } = scenario.initialize;
+    const { protocolState, sharedData: result } = initialize(
+      processId,
+      sharedData,
+      CommitmentType.PreFundSetup,
+      args,
+    );
+
+    itTransitionsTo(protocolState, 'AdvanceChannel.ChannelUnknown');
+    itSendsNoMessage(result);
+  });
+
+  describe('when receiving prefund commitments from A', () => {
+    const { state, sharedData, action, commitments } = scenario.receiveFromA;
+    const { protocolState, sharedData: result } = reducer(state, sharedData, action);
+
+    itTransitionsTo(protocolState, 'AdvanceChannel.CommitmentSent');
+    itStoresThisCommitment(result, commitments[1]);
+    expectTheseCommitmentsSent(result, commitments);
+    itRegistersThisChannel(result, channelId, processId);
+  });
+
+  describe('when receiving prefund commitments from the hub', () => {
+    const { state, sharedData, action, commitments } = scenario.receiveFromHub;
+    const { protocolState, sharedData: result } = reducer(state, sharedData, action);
+
+    itTransitionsTo(protocolState, 'AdvanceChannel.Success');
+    itStoresThisCommitment(result, commitments[2]);
+    itSendsNoMessage(result);
+  });
+});
+
+describe('sending preFundSetup as Hub', () => {
+  const scenario = scenarios.newChannelAsHub;
+  const { processId, channelId } = scenario;
+
+  describe('when initializing', () => {
+    const { sharedData, args } = scenario.initialize;
+    const { protocolState, sharedData: result } = initialize(
+      processId,
+      sharedData,
+      CommitmentType.PreFundSetup,
+      args,
+    );
+
+    itTransitionsTo(protocolState, 'AdvanceChannel.ChannelUnknown');
+    itSendsNoMessage(result);
+  });
+
+  describe('when receiving prefund commitments from B', () => {
+    const { state, sharedData, action, commitments } = scenario.receiveFromB;
+    const { protocolState, sharedData: result } = reducer(state, sharedData, action);
+
+    itTransitionsTo(protocolState, 'AdvanceChannel.Success');
+    itStoresThisCommitment(result, commitments[2]);
+    expectTheseCommitmentsSent(result, commitments);
+    itRegistersThisChannel(result, channelId, processId);
   });
 });

@@ -1,12 +1,13 @@
-### Advancing the stage a channel
+### Advancing the stage of a channel
 
 The `AdvanceStage` protocol accepts two mandatory inputs and one optional input:
 
-- `channelId: String`
+- `processId: String`
+- `sharedData: Storage`
 - `commitmentType: CommitmentType`
-- `startingOpts?`: the data needed to construct the first commitment. Required when the channel does not yet exist.
+- `args?`: the data needed to initialize the state. When the channel doesn't exist, this is the data needed to initialize the channel. When the channel does exist, it is just the channel id.
 
-It returns success when a state channel has been progressed to the next stage
+It returns success when the latest commitment on the channel is at least the commitment type given.
 
 It can be used in any stage where the application attributes cannot change -- in other words, any stage other than the application stage.
 
@@ -47,19 +48,24 @@ It can also happen if the `commitmentType` is incompatible with the latest commi
 ```mermaid
 graph TD
 linkStyle default interpolate basis
-  St((start)) --> NSTS(NotSafeToSend)
-  NSTS -->|CommitmentReceived| NSTS
-  NSTS -->|CommitmentReceived| CS(CommitmentSent)
-  NSTS -->|CommitmentReceived| S
-  St((start)) --> F((Failure))
-  CS --> |CommitmentReceived| CS
-  CS --> |CommitmentReceived| S((Success))
+  St((start)) --> ICO{Is Channel Open}
+  ICO --> |Yes| NSTS(NotSafeToSend)
+  ICO --> |No| FP{First participant?}
+  FP --> |Yes|CS(CommitmentSent)
+  FP --> |No| CU(ChannelUnknown)
+  RC   -->|No| CS
+  CS   -->|CommitmentReceived| RC
+  CU   -->|CommitmentReceived| RC{Round Complete?}
+  NSTS -->|CommitmentReceived| STS{Safe to send?}
+  STS -->|YES| RC
+  STS -->|NO| NSTS
+  RC   -->|Yes| S((Success))
 
   classDef logic fill:#efdd20;
   classDef Success fill:#58ef21;
   classDef Failure fill:#f45941;
 
-  class St logic;
+  class St,STS,FP,ICO,RC logic;
   class S Success;
   class F Failure;
 ```
