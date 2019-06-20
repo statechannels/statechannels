@@ -1,5 +1,10 @@
-import { ChannelState, getLastCommitment } from './states';
-import { Commitment, getChannelId, fromCoreCommitment } from '../../../domain';
+import { ChannelState, getLastCommitment, Commitments } from './states';
+import {
+  Commitment,
+  getChannelId,
+  fromCoreCommitment,
+  validCommitmentSignature,
+} from '../../../domain';
 import { isAppCommitment } from 'fmg-nitro-adjudicator/lib/consensus-app';
 import { validTransition as validConsensusTransition } from 'fmg-nitro-adjudicator/lib/consensus-app';
 import { getConsensusContractAddress } from '../../../utils/contract-utils';
@@ -36,4 +41,34 @@ export function validTransition(state: ChannelState, commitment: Commitment): bo
     getChannelId(commitment) === state.channelId &&
     validAppTransition(lastCommitment, commitment)
   );
+}
+
+export function validCommitmentTransition(first: Commitment, second: Commitment): boolean {
+  return (
+    second.turnNum === first.turnNum + 1 &&
+    getChannelId(first) === getChannelId(second) &&
+    validAppTransition(first, second)
+  );
+}
+
+export function validTransitions(commitments: Commitments): boolean {
+  const validSignatures = commitments.reduce((_, c) => {
+    if (!validCommitmentSignature(c.commitment, c.signature)) {
+      return false;
+    }
+    return true;
+  }, true);
+  if (!validSignatures) {
+    return false;
+  }
+
+  for (let i = 0; i < commitments.length - 1; i += 1) {
+    const first = commitments[i];
+    const second = commitments[i + 1];
+    if (!validCommitmentTransition(first.commitment, second.commitment)) {
+      return false;
+    }
+  }
+
+  return true;
 }

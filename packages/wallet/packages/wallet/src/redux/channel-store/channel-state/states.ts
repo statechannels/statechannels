@@ -79,3 +79,12 @@ export function theirAddress(state: ChannelState): string {
   const theirIndex = 1 - ourIndex; // todo: only two player channels
   return participants[theirIndex];
 }
+
+export function nextParticipant(participants, ourIndex: number): string {
+  if (ourIndex >= participants.length || ourIndex < 0) {
+    throw new Error(`Invalid index: ${ourIndex} must be between 0 and ${participants.length}`);
+  }
+
+  const theirIndex = (ourIndex + 1) % participants.length;
+  return participants[theirIndex];
+}

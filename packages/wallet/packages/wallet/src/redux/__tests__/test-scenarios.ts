@@ -99,7 +99,7 @@ export const postFundCommitment1: Commitment = {
 export const signedCommitment3 = signCommitment2(postFundCommitment1, bsPrivateKey);
 export const gameCommitment1: Commitment = {
   channel,
-  commitmentCount: 2,
+  commitmentCount: 0,
   commitmentType: CommitmentType.App,
   appAttributes: '0x0',
   turnNum: 19,
@@ -377,11 +377,11 @@ export const signedJointLedgerCommitments = {
     signature: signCommitment(commitment, bsPrivateKey),
   },
   signedCommitment2: {
-    commitment: commitment = jointLedgerCommitments.postFundCommitment0,
+    commitment: commitment = jointLedgerCommitments.preFundCommitment2,
     signature: signCommitment(commitment, hubPrivateKey),
   },
   signedCommitment3: {
-    commitment: commitment = jointLedgerCommitments.postFundCommitment1,
+    commitment: commitment = jointLedgerCommitments.postFundCommitment0,
     signature: signCommitment(commitment, asPrivateKey),
   },
   signedCommitment4: {
@@ -389,7 +389,7 @@ export const signedJointLedgerCommitments = {
     signature: signCommitment(commitment, bsPrivateKey),
   },
   signedCommitment5: {
-    commitment: commitment = jointLedgerCommitments.postFundCommitment1,
+    commitment: commitment = jointLedgerCommitments.postFundCommitment2,
     signature: signCommitment(commitment, hubPrivateKey),
   },
 };
