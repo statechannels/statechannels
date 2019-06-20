@@ -9,19 +9,14 @@ import {
 
 describe('signing and validating commitments', () => {
   let commitmentSignature;
-  it('should sign a commitment', () => {
-    commitmentSignature = signCommitment(scenarios.gameCommitment1, scenarios.asPrivateKey);
-  });
+
   it('should return true when a signature is valid', () => {
-    expect(
-      validCommitmentSignature(scenarios.gameCommitment1, commitmentSignature, scenarios.asAddress),
-    ).toBe(true);
+    commitmentSignature = signCommitment(scenarios.gameCommitment1, scenarios.bsPrivateKey);
+    expect(validCommitmentSignature(scenarios.gameCommitment1, commitmentSignature)).toBe(true);
   });
 
   it('should return false when a signature is invalid', () => {
-    expect(validCommitmentSignature(scenarios.gameCommitment1, '0x0', scenarios.asAddress)).toBe(
-      false,
-    );
+    expect(validCommitmentSignature(scenarios.gameCommitment1, '0x0')).toBe(false);
   });
 });
 

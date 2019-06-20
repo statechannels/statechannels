@@ -107,6 +107,7 @@ export function isRelayableAction(action: WalletAction): action is RelayableActi
     action.type === 'WALLET.FUNDING.STRATEGY_PROPOSED' ||
     action.type === 'WALLET.FUNDING.STRATEGY_APPROVED' ||
     action.type === 'WALLET.NEW_PROCESS.CONCLUDE_INSTIGATED' ||
-    action.type === 'WALLET.COMMON.COMMITMENT_RECEIVED'
+    action.type === 'WALLET.COMMON.COMMITMENT_RECEIVED' ||
+    action.type === 'WALLET.ADVANCE_CHANNEL.COMMITMENTS_RECEIVED'
   );
 }
