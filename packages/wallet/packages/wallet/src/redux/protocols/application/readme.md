@@ -19,8 +19,8 @@ linkStyle default interpolate basis
   S((start)) --> AK(AddressKnown)
   AK-->|WALLET.APPLICATION.COMMITMENT_RECEIVED|O(Ongoing)
   O-->|WALLET.APPLICATION.COMMITMENT_RECEIVED|O(Ongoing)
-  AK-->|WALLET.APPLICATION.CONCLUDE_REQUESTED|Su((success))
-  O-->|WALLET.APPLICATION.CONCLUDE_REQUESTED|Su((success))
+  AK-->|WALLET.APPLICATION.CONCLUDED|Su((success))
+  O-->|WALLET.APPLICATION.CONCLUDED|Su((success))
   classDef logic fill:#efdd20;
   classDef Success fill:#58ef21;
   classDef Failure fill:#f45941;
@@ -34,5 +34,5 @@ linkStyle default interpolate basis
 Notes:
 
 - `COMMITMENT_RECEIVED` is shorthand for either `OWN_COMMITMENT_RECEIVED` or `OPPONENT_COMMITMENT_RECEIVED`
-- `CONCLUDE_REQUESTED` should get triggered when a conclude is requested. This means that the application protocol no longer needs to listen for commitments from the app.
+- `CONCLUDED` should get triggered when a conclude is requested _and then sent from the wallet_. This means that the application protocol no longer needs to listen for commitments from the app. In particular, if the conclude is requested and then cancelled, `CONCLUDED` will not be triggered.
 - The application protocol is responsible for sending out signature and validation messages.

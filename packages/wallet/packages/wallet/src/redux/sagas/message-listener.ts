@@ -7,6 +7,7 @@ import * as application from '../protocols/application/reducer';
 import { isRelayableAction, WalletProtocol } from '../../communication';
 import { responseProvided } from '../protocols/dispute/responder/actions';
 import { getChannelId } from '../../domain';
+import { concluded } from '../protocols/application/actions';
 
 export function* messageListener() {
   const postMessageEventChannel = eventChannel(emitter => {
@@ -27,9 +28,6 @@ export function* messageListener() {
 
       case incoming.CONCLUDE_CHANNEL_REQUEST:
         yield put(actions.protocol.concludeRequested({ channelId: action.channelId }));
-        yield put(
-          actions.application.concludeRequested({ processId: application.APPLICATION_PROCESS_ID }),
-        );
         break;
       case incoming.CREATE_CHALLENGE_REQUEST:
         yield put(
@@ -87,6 +85,9 @@ export function* messageListener() {
         break;
       case incoming.RECEIVE_MESSAGE:
         yield put(handleIncomingMessage(action));
+        if (handleIncomingMessage(action).type === 'WALLET.NEW_PROCESS.CONCLUDE_INSTIGATED') {
+          yield put(concluded({ processId: application.APPLICATION_PROCESS_ID }));
+        }
         break;
       default:
     }
