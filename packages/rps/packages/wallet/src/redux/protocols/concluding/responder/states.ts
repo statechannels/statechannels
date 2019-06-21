@@ -7,6 +7,7 @@ export type ResponderConcludingState =
 export type ResponderConcludingStateType = ResponderConcludingState['type'];
 import { ProtocolState } from '../..';
 import { TerminalState, FailureReason } from '../states';
+import { ConsensusUpdateState } from '../../consensus-update/states';
 
 // -------
 // States
@@ -32,6 +33,7 @@ export interface ResponderDecideDefund {
   type: 'ConcludingResponder.DecideDefund';
   processId: string;
   channelId: string;
+  opponentHasSelected: boolean;
 }
 
 export interface ResponderWaitForDefund {
@@ -39,6 +41,17 @@ export interface ResponderWaitForDefund {
   processId: string;
   channelId: string;
   defundingState: DefundingState;
+}
+export interface ResponderWaitForOpponentSelection {
+  type: 'ConcludingResponder.WaitForOpponentSelection';
+  processId: string;
+  channelId: string;
+}
+export interface ResponderWaitForLedgerUpdate {
+  type: 'ConcludingResponder.WaitForLedgerUpdate';
+  processId: string;
+  channelId: string;
+  consensusUpdateState: ConsensusUpdateState;
 }
 
 export function isConcludingResponderState(
@@ -49,7 +62,9 @@ export function isConcludingResponderState(
     state.type === 'ConcludingResponder.AcknowledgeFailure' ||
     state.type === 'ConcludingResponder.ApproveConcluding' ||
     state.type === 'ConcludingResponder.DecideDefund' ||
-    state.type === 'ConcludingResponder.WaitForDefund'
+    state.type === 'ConcludingResponder.WaitForDefund' ||
+    state.type === 'ConcludingResponder.WaitForLedgerUpdate' ||
+    state.type === 'ConcludingResponder.WaitForOpponentSelection'
   );
 }
 
@@ -76,7 +91,12 @@ export const acknowledgeFailure: StateConstructor<ResponderAcknowledgeFailure> =
 export const waitForDefund: StateConstructor<ResponderWaitForDefund> = p => {
   return { ...p, type: 'ConcludingResponder.WaitForDefund' };
 };
-
+export const waitForLedgerUpdate: StateConstructor<ResponderWaitForLedgerUpdate> = p => {
+  return { ...p, type: 'ConcludingResponder.WaitForLedgerUpdate' };
+};
+export const waitForOpponentSelection: StateConstructor<ResponderWaitForOpponentSelection> = p => {
+  return { ...p, type: 'ConcludingResponder.WaitForOpponentSelection' };
+};
 // -------
 // Unions and Guards
 // -------
@@ -86,6 +106,8 @@ export type ResponderNonTerminalState =
   | ResponderDecideDefund
   | ResponderWaitForDefund
   | ResponderAcknowledgeFailure
-  | ResponderAcknowledgeSuccess;
+  | ResponderAcknowledgeSuccess
+  | ResponderWaitForLedgerUpdate
+  | ResponderWaitForOpponentSelection;
 
 export type ResponderPreTerminalState = ResponderAcknowledgeSuccess | ResponderAcknowledgeFailure;

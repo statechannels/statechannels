@@ -25,6 +25,7 @@ const defaultsForA: states.DirectFundingState = {
   ourIndex: 0,
   safeToDepositLevel: '0x',
   type: 'DirectFunding.NotSafeToDeposit',
+  exchangePostFundSetups: true,
   postFundSetupState: { ...advanceChannelScenarios.preSuccessState, ourIndex: 0 },
 };
 
@@ -83,6 +84,30 @@ export const aHappyPath = {
   },
 };
 
+export const aNoPostFundSetupHappyPath = {
+  initialize: { sharedData: sharedData(), action: aInitializeAction },
+  waitForDepositTransaction: {
+    state: states.waitForDepositTransaction({
+      ...defaultsForA,
+      exchangePostFundSetups: false,
+      transactionSubmissionState: transactionSubmissionScenarios.preSuccessState,
+    }),
+    sharedData: sharedData(),
+    action: transactionSubmissionScenarios.successTrigger,
+  },
+
+  waitForFundingAndPostFundSetup: {
+    state: states.waitForFundingAndPostFundSetup({
+      ...defaultsForA,
+      channelFunded: false,
+      postFundSetupReceived: false,
+      exchangePostFundSetups: false,
+    }),
+    sharedData: sharedData(),
+    action: bFundingReceivedEvent,
+  },
+};
+
 export const bHappyPath = {
   initialize: { sharedData: sharedData(), action: bInitializeAction },
   notSafeToDeposit: {
@@ -113,6 +138,34 @@ export const bHappyPath = {
     }),
     sharedData: sharedData(),
     action: advanceChannelScenarios.successTrigger,
+  },
+};
+
+export const bNoPostFundSetupsHappyPath = {
+  initialize: { sharedData: sharedData(), action: bInitializeAction },
+  notSafeToDeposit: {
+    state: states.notSafeToDeposit({ ...defaultsForB, exchangePostFundSetups: false }),
+    action: aFundingReceivedEvent,
+    sharedData: sharedData(),
+  },
+  waitForDepositTransaction: {
+    state: states.waitForDepositTransaction({
+      ...defaultsForB,
+      exchangePostFundSetups: false,
+      transactionSubmissionState: transactionSubmissionScenarios.preSuccessState,
+    }),
+    sharedData: sharedData(),
+    action: transactionSubmissionScenarios.successTrigger,
+  },
+  waitForFundingAndPostFundSetup: {
+    state: states.waitForFundingAndPostFundSetup({
+      ...defaultsForB,
+      exchangePostFundSetups: false,
+      channelFunded: false,
+      postFundSetupReceived: false,
+    }),
+    sharedData: sharedData(),
+    action: bFundingReceivedEvent,
   },
 };
 

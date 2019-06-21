@@ -13,6 +13,8 @@ import WaitForOtherPlayer from '../../../../components/wait-for-other-player';
 import AcknowledgeX from '../../../../components/acknowledge-x';
 import { IndirectFunding } from '../../indirect-funding/container';
 import { ActionDispatcher } from '../../../utils';
+import { isIndirectFundingState } from '../../indirect-funding/states';
+import { ExistingChannelFunding } from '../../existing-channel-funding/container';
 
 interface Props {
   state: states.OngoingFundingState;
@@ -39,7 +41,11 @@ class FundingContainer extends PureComponent<Props> {
       case 'Funding.PlayerA.WaitForStrategyResponse':
         return <WaitForOtherPlayer name={'strategy response'} />;
       case 'Funding.PlayerA.WaitForFunding':
-        return <IndirectFunding state={state.fundingState} />;
+        if (isIndirectFundingState(state.fundingState)) {
+          return <IndirectFunding state={state.fundingState} />;
+        } else {
+          return <ExistingChannelFunding state={state.fundingState} />;
+        }
       case 'Funding.PlayerA.WaitForSuccessConfirmation':
         return (
           <AcknowledgeX

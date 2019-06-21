@@ -7,6 +7,7 @@ export type InstigatorConcludingState =
 export type InstigatorConcludingStateType = InstigatorConcludingState['type'];
 import { ProtocolState } from '../..';
 import { FailureReason, TerminalState } from '../states';
+import { ConsensusUpdateState } from '../../consensus-update/states';
 
 // -------
 // States
@@ -38,6 +39,7 @@ export interface AcknowledgeConcludeReceived {
   type: 'ConcludingInstigator.AcknowledgeConcludeReceived';
   processId: string;
   channelId: string;
+  opponentSelectedKeepLedgerChannel: boolean;
 }
 
 export interface WaitForDefund {
@@ -47,6 +49,17 @@ export interface WaitForDefund {
   defundingState: DefundingState;
 }
 
+export interface WaitForLedgerUpdate {
+  type: 'ConcludingInstigator.WaitForLedgerUpdate';
+  processId: string;
+  channelId: string;
+  consensusUpdateState: ConsensusUpdateState;
+}
+export interface WaitForOpponentSelection {
+  type: 'ConcludingInstigator.WaitForOpponentSelection';
+  processId: string;
+  channelId: string;
+}
 // ------------
 // Constructors
 // ------------
@@ -77,6 +90,14 @@ export const instigatorWaitForDefund: StateConstructor<WaitForDefund> = p => {
   return { ...p, type: 'ConcludingInstigator.WaitForDefund' };
 };
 
+export const instigatorWaitForLedgerUpdate: StateConstructor<WaitForLedgerUpdate> = p => {
+  return { ...p, type: 'ConcludingInstigator.WaitForLedgerUpdate' };
+};
+
+export const instigatorWaitForOpponentSelection: StateConstructor<WaitForOpponentSelection> = p => {
+  return { ...p, type: 'ConcludingInstigator.WaitForOpponentSelection' };
+};
+
 // -------
 // Unions and Guards
 // -------
@@ -86,7 +107,9 @@ export type InstigatorNonTerminalState =
   | AcknowledgeConcludeReceived
   | AcknowledgeFailure
   | AcknowledgeSuccess
-  | WaitForDefund;
+  | WaitForDefund
+  | WaitForLedgerUpdate
+  | WaitForOpponentSelection;
 
 export type InstigatorPreTerminalState = AcknowledgeSuccess | AcknowledgeFailure;
 
@@ -99,6 +122,8 @@ export function isConcludingInstigatorState(
     state.type === 'ConcludingInstigator.ApproveConcluding' ||
     state.type === 'ConcludingInstigator.WaitForOpponentConclude' ||
     state.type === 'ConcludingInstigator.AcknowledgeConcludeReceived' ||
-    state.type === 'ConcludingInstigator.WaitForDefund'
+    state.type === 'ConcludingInstigator.WaitForDefund' ||
+    state.type === 'ConcludingInstigator.WaitForLedgerUpdate' ||
+    state.type === 'ConcludingInstigator.WaitForOpponentSelection'
   );
 }
