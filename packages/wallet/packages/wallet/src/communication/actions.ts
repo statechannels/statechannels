@@ -24,6 +24,9 @@ export interface StrategyApproved extends BaseProcessAction {
   type: 'WALLET.FUNDING.STRATEGY_APPROVED';
 }
 
+export interface KeepLedgerChannelApproved extends BaseProcessAction {
+  type: 'WALLET.CONCLUDING.KEEP_LEDGER_CHANNEL_APPROVED';
+}
 export interface ConcludeInstigated {
   type: 'WALLET.NEW_PROCESS.CONCLUDE_INSTIGATED';
   signedCommitment: SignedCommitment;
@@ -49,6 +52,11 @@ export const concludeInstigated: ActionConstructor<ConcludeInstigated> = p => ({
   ...p,
   type: 'WALLET.NEW_PROCESS.CONCLUDE_INSTIGATED',
   protocol: WalletProtocol.Concluding,
+});
+
+export const keepLedgerChannelApproved: ActionConstructor<KeepLedgerChannelApproved> = p => ({
+  ...p,
+  type: 'WALLET.CONCLUDING.KEEP_LEDGER_CHANNEL_APPROVED',
 });
 
 // ADVANCE CHANNEL
@@ -80,6 +88,7 @@ export const commitmentsReceived: ActionConstructor<CommitmentsReceived> = p => 
 export interface CommitmentReceived extends BaseProcessAction {
   type: 'WALLET.COMMON.COMMITMENT_RECEIVED';
   signedCommitment: SignedCommitment;
+  protocolLocator?: string;
 }
 
 // -------
@@ -100,6 +109,7 @@ export type RelayableAction =
   | StrategyApproved
   | ConcludeInstigated
   | CommitmentReceived
+  | KeepLedgerChannelApproved
   | CommitmentsReceived;
 
 export function isRelayableAction(action: WalletAction): action is RelayableAction {
@@ -108,6 +118,7 @@ export function isRelayableAction(action: WalletAction): action is RelayableActi
     action.type === 'WALLET.FUNDING.STRATEGY_APPROVED' ||
     action.type === 'WALLET.NEW_PROCESS.CONCLUDE_INSTIGATED' ||
     action.type === 'WALLET.COMMON.COMMITMENT_RECEIVED' ||
+    action.type === 'WALLET.CONCLUDING.KEEP_LEDGER_CHANNEL_APPROVED' ||
     action.type === 'WALLET.ADVANCE_CHANNEL.COMMITMENTS_RECEIVED'
   );
 }

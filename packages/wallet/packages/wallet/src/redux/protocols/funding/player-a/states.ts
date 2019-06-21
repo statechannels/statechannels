@@ -2,6 +2,7 @@ import { ProtocolState } from '../..';
 import { FundingStrategy } from '..';
 import { NonTerminalIndirectFundingState } from '../../indirect-funding/states';
 import { StateConstructor } from '../../../utils';
+import { ExistingChannelFundingState } from '../../existing-channel-funding/states';
 
 // -------
 // States
@@ -9,6 +10,7 @@ import { StateConstructor } from '../../../utils';
 interface BaseState {
   processId: string;
   opponentAddress: string;
+  ourAddress: string;
 }
 
 export interface WaitForStrategyChoice extends BaseState {
@@ -27,7 +29,7 @@ export interface WaitForFunding extends BaseState {
   targetChannelId: string;
   // TODO: Currently we are limited to indirect funding
   // In the future this could support other funding states
-  fundingState: NonTerminalIndirectFundingState;
+  fundingState: NonTerminalIndirectFundingState | ExistingChannelFundingState;
 }
 
 export interface WaitForSuccessConfirmation extends BaseState {

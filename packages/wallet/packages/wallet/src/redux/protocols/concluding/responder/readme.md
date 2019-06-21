@@ -29,10 +29,15 @@ linkStyle default interpolate basis
   MT  --> |No| AF(ResponderAcknowledgeFailure)
   CC  --> |WALLET.CONCLUDING.RESPONDER.CONCLUDE.APPROVED| DD(ResponderDecideDefund)
   DD --> |WALLET.CONCLUDING.RESPONDER.DEFUND.CHOSEN| D(ResponderWaitForDefund)
+  DD --> |WALLET.CONCLUDING.RESPONDER.KEEP_OPEN.CHOSEN| WO(WaitForOpponentDecision)
   DD --> |COMMITMENT_RECEIVED| D(ResponderWaitForDefund)
-  D   --> |defunding protocol succeeded| AS(ResponderAcknowledgeSuccess)
+  WO --> |COMMITMENT_RECEIVED| D(ResponderWaitForDefund)
+  WO -->|WALLET.CONCLUDING.KEEP_OPEN_SELECTED|CU(WaitForLedgerUpdate)
+  CU -->|COMMITMENT_RECEIVED|CU
+  CU --> |consensus update protocol succeeded|AS
+  D  --> |defunding protocol succeeded| AS(ResponderAcknowledgeSuccess)
   AS -->  |WALLET.CONCLUDING.RESPONDER.ACKNOWLEDGED| SS((Success))
-  D   --> |defunding protocol failed| AF(ResponderAcknowledgeFailure)
+  D  --> |defunding protocol failed| AF(ResponderAcknowledgeFailure)
   classDef logic fill:#efdd20;
   classDef Success fill:#58ef21;
   classDef Failure fill:#f45941;
@@ -40,7 +45,7 @@ linkStyle default interpolate basis
   class S,E,MT logic;
   class SS Success;
   class F Failure;
-  class D WaitForChildProtocol;
+  class D,CU WaitForChildProtocol;
 ```
 
 ## Scenarios

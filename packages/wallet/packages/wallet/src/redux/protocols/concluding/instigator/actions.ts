@@ -1,6 +1,7 @@
 import { WalletAction, CommitmentReceived, isCommonAction } from '../../../actions';
 import { ActionConstructor } from '../../../utils';
 import { DefundingAction, isDefundingAction } from '../../defunding/actions';
+import { KeepLedgerChannelApproved } from '../../../../communication';
 
 // -------
 // Actions
@@ -16,6 +17,11 @@ export interface ConcludeApproved {
 
 export interface DefundChosen {
   type: 'WALLET.CONCLUDING.INSTIGATOR.DEFUND_CHOSEN';
+  processId: string;
+}
+
+export interface KeepOpenChosen {
+  type: 'WALLET.CONCLUDING.INSTIGATOR.KEEP_OPEN_CHOSEN';
   processId: string;
 }
 
@@ -43,6 +49,11 @@ export const defundChosen: ActionConstructor<DefundChosen> = p => ({
   type: 'WALLET.CONCLUDING.INSTIGATOR.DEFUND_CHOSEN',
 });
 
+export const keepOpenChosen: ActionConstructor<KeepOpenChosen> = p => ({
+  ...p,
+  type: 'WALLET.CONCLUDING.INSTIGATOR.KEEP_OPEN_CHOSEN',
+});
+
 export const acknowledged: ActionConstructor<Acknowledged> = p => ({
   ...p,
   type: 'WALLET.CONCLUDING.INSTIGATOR.ACKNOWLEDGED',
@@ -57,8 +68,10 @@ export type ConcludingInstigatorAction =
   | Cancelled
   | ConcludeApproved
   | DefundChosen
+  | KeepOpenChosen
   | Acknowledged
-  | CommitmentReceived;
+  | CommitmentReceived
+  | KeepLedgerChannelApproved;
 
 export const isConcludingInstigatorAction = (
   action: WalletAction,
@@ -66,9 +79,11 @@ export const isConcludingInstigatorAction = (
   return (
     isDefundingAction(action) ||
     isCommonAction(action) ||
+    action.type === 'WALLET.CONCLUDING.KEEP_LEDGER_CHANNEL_APPROVED' ||
     action.type === 'WALLET.CONCLUDING.INSTIGATOR.CONCLUDING_CANCELLED' ||
     action.type === 'WALLET.CONCLUDING.INSTIGATOR.CONCLUDE_APPROVED' ||
     action.type === 'WALLET.CONCLUDING.INSTIGATOR.DEFUND_CHOSEN' ||
+    action.type === 'WALLET.CONCLUDING.INSTIGATOR.KEEP_OPEN_CHOSEN' ||
     action.type === 'WALLET.CONCLUDING.INSTIGATOR.ACKNOWLEDGED'
   );
 };

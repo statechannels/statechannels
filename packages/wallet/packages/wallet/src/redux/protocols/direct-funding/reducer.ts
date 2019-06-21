@@ -17,7 +17,7 @@ import { CommitmentType } from '../../../domain';
 import { clearedToSend } from '../advance-channel/actions';
 
 type DFReducer = ProtocolReducer<states.DirectFundingState>;
-
+export const DIRECT_FUNDING_PROTOCOL_LOCATOR = 'DirectFunding';
 export function initialize(
   action: DirectFundingRequested,
   sharedData: SharedData,
@@ -29,6 +29,7 @@ export function initialize(
     channelId,
     ourIndex,
     processId,
+    exchangePostFundSetups,
   } = action;
 
   const alreadySafeToDeposit = bigNumberify(safeToDepositLevel).eq('0x');
@@ -44,7 +45,7 @@ export function initialize(
     ourIndex,
     processId,
     commitmentType,
-    clearedToSend: alreadyFunded,
+    clearedToSend: alreadyFunded && exchangePostFundSetups,
   });
   sharedData = newSharedData;
 
@@ -57,6 +58,7 @@ export function initialize(
         channelId,
         ourIndex,
         safeToDepositLevel,
+        exchangePostFundSetups,
         postFundSetupState,
       }),
       sharedData,
@@ -85,6 +87,7 @@ export function initialize(
         ourIndex,
         safeToDepositLevel,
         transactionSubmissionState,
+        exchangePostFundSetups,
         postFundSetupState,
       }),
       sharedData: newStorage,
@@ -99,6 +102,7 @@ export function initialize(
       channelId,
       ourIndex,
       safeToDepositLevel,
+      exchangePostFundSetups,
       postFundSetupState,
     }),
     sharedData,
@@ -145,6 +149,14 @@ const commitmentsReceivedReducer: DFReducer = (
   sharedData: SharedData,
   action: actions.FundingReceivedEvent,
 ): ProtocolStateWithSharedData<states.DirectFundingState> => {
+  if (!protocolState.exchangePostFundSetups) {
+    console.warn(
+      `Direct Funding reducer received ${
+        action.type
+      } even though 'exchangePostFundSetups' is set to false.`,
+    );
+    return { protocolState, sharedData };
+  }
   const {
     protocolState: postFundSetupState,
     sharedData: newSharedData,
@@ -192,8 +204,15 @@ const fundingConfirmedReducer: DFReducer = (
 ): ProtocolStateWithSharedData<states.DirectFundingState> => {
   // TODO[Channel state side effect]: update funding level for the channel.
 
-  // If we are player A, the channel is now funded, so we should send the PostFundSetup
+  // If we are not exchanging post fund setups we can return success now that we're funded
+  if (!protocolState.exchangePostFundSetups) {
+    return {
+      protocolState: states.fundingSuccess(protocolState),
+      sharedData,
+    };
+  }
 
+  // If we are exchanging post fund setups we alert the advanceChannelReducer that it is clearedToSend
   const {
     protocolState: postFundSetupState,
     sharedData: newSharedData,

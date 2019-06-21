@@ -11,8 +11,48 @@ import { sendStrategyApproved } from '../../../../../communication';
 import { FUNDING_SUCCESS, HIDE_WALLET } from 'magmo-wallet-client';
 import { FundingStateType } from '../../states';
 
-describe('HAPPY PATH', () => {
-  const scenario = scenarios.happyPath;
+describe('new ledger channel happy path', () => {
+  const scenario = scenarios.newChannelHappyPath;
+
+  describeScenarioStep(scenario.waitForStrategyProposal, () => {
+    const { state, sharedData, action } = scenario.waitForStrategyProposal;
+
+    const result = reducer(state, sharedData, action);
+
+    itTransitionsTo(result, 'Funding.PlayerB.WaitForStrategyApproval');
+  });
+
+  describeScenarioStep(scenario.waitForStrategyApproval, () => {
+    const { state, sharedData, action } = scenario.waitForStrategyApproval;
+
+    const result = reducer(state, sharedData, action);
+
+    itTransitionsTo(result, 'Funding.PlayerB.WaitForFunding');
+
+    const { processId, opponentAddress } = scenario;
+    itSendsThisMessage(result, sendStrategyApproved(opponentAddress, processId));
+  });
+
+  describeScenarioStep(scenario.waitForFunding, () => {
+    const { state, sharedData, action } = scenario.waitForFunding;
+
+    const result = reducer(state, sharedData, action);
+    itTransitionsTo(result, 'Funding.PlayerB.WaitForSuccessConfirmation');
+  });
+
+  describeScenarioStep(scenario.waitForSuccessConfirmation, () => {
+    const { state, sharedData, action } = scenario.waitForSuccessConfirmation;
+
+    const result = reducer(state, sharedData, action);
+
+    itTransitionsTo(result, 'Funding.PlayerB.Success');
+    itSendsThisMessage(result, FUNDING_SUCCESS);
+    itSendsThisDisplayEventType(result, HIDE_WALLET);
+  });
+});
+
+describe('existing ledger channel happy path', () => {
+  const scenario = scenarios.existingChannelHappyPath;
 
   describeScenarioStep(scenario.waitForStrategyProposal, () => {
     const { state, sharedData, action } = scenario.waitForStrategyProposal;

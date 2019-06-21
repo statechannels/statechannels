@@ -1,17 +1,20 @@
 import * as actions from '../../actions';
 import { ActionConstructor } from '../../utils';
+import { TwoPartyPlayerIndex } from '../../types';
+import { DIRECT_FUNDING_PROTOCOL_LOCATOR } from './reducer';
 
 // -------
 // Actions
 // -------
 export interface DirectFundingRequested {
   type: 'WALLET.DIRECT_FUNDING.DIRECT_FUNDING_REQUESTED';
-  processId;
-  channelId;
-  totalFundingRequired;
-  safeToDepositLevel;
-  requiredDeposit;
-  ourIndex;
+  processId: string;
+  channelId: string;
+  totalFundingRequired: string;
+  safeToDepositLevel: string;
+  requiredDeposit: string;
+  ourIndex: TwoPartyPlayerIndex;
+  exchangePostFundSetups: boolean;
 }
 
 // -------
@@ -36,6 +39,8 @@ export function isDirectFundingAction(action: actions.WalletAction): action is D
   return (
     action.type === 'WALLET.ADJUDICATOR.FUNDING_RECEIVED_EVENT' ||
     action.type === 'WALLET.DIRECT_FUNDING.DIRECT_FUNDING_REQUESTED' ||
+    (action.type === 'WALLET.COMMON.COMMITMENT_RECEIVED' &&
+      action.protocolLocator === DIRECT_FUNDING_PROTOCOL_LOCATOR) ||
     actions.advanceChannel.isAdvanceChannelAction(action) ||
     actions.isTransactionAction(action)
   );

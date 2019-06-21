@@ -66,7 +66,11 @@ export function* sendWalletMessageSaga() {
         console.error(err);
       }
     } else {
-      yield call(reduxSagaFirebase.database.create, `/messages/${to.toLowerCase()}`, messageToSend);
+      yield call(
+        reduxSagaFirebase.database.create,
+        `/messages/${to.toLowerCase()}`,
+        sanitizeMessageForFirebase(messageToSend),
+      );
     }
   }
 }
@@ -127,7 +131,7 @@ export function* sendMessagesSaga() {
         yield call(
           reduxSagaFirebase.database.create,
           `/messages/${opponentAddress.toLowerCase()}`,
-          toSend,
+          sanitizeMessageForFirebase(toSend),
         );
         yield put(gameActions.messageSent());
       }
@@ -389,4 +393,8 @@ function* signMessage(commitment: Commitment) {
       throw new Error(err.error);
     }
   }
+}
+
+function sanitizeMessageForFirebase(message) {
+  return JSON.parse(JSON.stringify(message));
 }

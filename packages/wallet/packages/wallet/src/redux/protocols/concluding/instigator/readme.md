@@ -34,6 +34,12 @@ linkStyle default interpolate basis
   D   --> |defunding protocol succeeded| AS(InstigatorAcknowledgeSuccess)
   AS -->  |WALLET.CONCLUDING.INSTIGATOR.ACKNOWLEDGED| SS((Success))
   D   --> |defunding protocol failed| AF(InstigatorAcknowledgeFailure)
+  ACR --> |COMMITMENT_RECEIVED| D(ResponderWaitForDefund)
+  ACR --> |WALLET.CONCLUDING.RESPONDER.KEEP_OPEN.CHOSEN| WO(WaitForOpponentDecision)
+  WO --> |COMMITMENT_RECEIVED| D(ResponderWaitForDefund)
+  WO -->|WALLET.CONCLUDING.KEEP_OPEN_SELECTED|CU(WaitForLedgerUpdate)
+  CU -->|COMMITMENT_RECEIVED|CU
+  CU --> |consensus update protocol succeeded|AS
   classDef logic fill:#efdd20;
   classDef Success fill:#58ef21;
   classDef Failure fill:#f45941;

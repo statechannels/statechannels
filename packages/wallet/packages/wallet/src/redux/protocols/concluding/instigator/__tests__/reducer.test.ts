@@ -9,6 +9,7 @@ import {
   itSendsThisMessage,
   itSendsThisDisplayEventType,
   describeScenarioStep,
+  expectThisMessage,
 } from '../../../../__tests__/helpers';
 import { HIDE_WALLET, CONCLUDE_SUCCESS, CONCLUDE_FAILURE } from 'magmo-wallet-client';
 
@@ -45,6 +46,60 @@ describe('[ Happy path ]', () => {
 
   describeScenarioStep(scenario.waitForDefund, () => {
     const { state, action, sharedData } = scenario.waitForDefund;
+    const result = instigatorConcludingReducer(state, sharedData, action);
+
+    itTransitionsTo(result, 'ConcludingInstigator.AcknowledgeSuccess');
+  });
+
+  describeScenarioStep(scenario.acknowledgeSuccess, () => {
+    const { state, action, sharedData } = scenario.acknowledgeSuccess;
+    const result = instigatorConcludingReducer(state, sharedData, action);
+
+    itTransitionsTo(result, 'Concluding.Success');
+    itSendsThisMessage(result.sharedData, CONCLUDE_SUCCESS);
+    itSendsThisDisplayEventType(result.sharedData, HIDE_WALLET);
+  });
+});
+
+describe('[ No Defunding Happy path ]', () => {
+  const scenario = scenarios.noDefundingHappyPath;
+  const { channelId, processId } = scenario;
+
+  describe('when initializing', () => {
+    const { sharedData } = scenario.initialize;
+    const result = initialize(channelId, processId, sharedData);
+    itTransitionsTo(result, 'ConcludingInstigator.ApproveConcluding');
+  });
+  describeScenarioStep(scenario.approveConcluding, () => {
+    const { state, action, sharedData, reply } = scenario.approveConcluding;
+    const result = instigatorConcludingReducer(state, sharedData, action);
+
+    itSendsConcludeInstigated(result.sharedData, reply);
+    itTransitionsTo(result, 'ConcludingInstigator.WaitForOpponentConclude');
+  });
+
+  describeScenarioStep(scenario.waitforOpponentConclude, () => {
+    const { state, action, sharedData } = scenario.waitforOpponentConclude;
+    const result = instigatorConcludingReducer(state, sharedData, action);
+
+    itTransitionsTo(result, 'ConcludingInstigator.AcknowledgeConcludeReceived');
+  });
+
+  describeScenarioStep(scenario.acknowledgeConcludeReceived, () => {
+    const { state, action, sharedData } = scenario.acknowledgeConcludeReceived;
+    const result = instigatorConcludingReducer(state, sharedData, action);
+    expectThisMessage(result.sharedData, 'WALLET.CONCLUDING.KEEP_LEDGER_CHANNEL_APPROVED');
+    itTransitionsTo(result, 'ConcludingInstigator.WaitForOpponentSelection');
+  });
+  describeScenarioStep(scenario.waitForOpponentResponse, () => {
+    const { state, action, sharedData } = scenario.waitForOpponentResponse;
+    const result = instigatorConcludingReducer(state, sharedData, action);
+
+    itTransitionsTo(result, 'ConcludingInstigator.WaitForLedgerUpdate');
+  });
+
+  describeScenarioStep(scenario.waitForLedgerUpdate, () => {
+    const { state, action, sharedData } = scenario.waitForLedgerUpdate;
     const result = instigatorConcludingReducer(state, sharedData, action);
 
     itTransitionsTo(result, 'ConcludingInstigator.AcknowledgeSuccess');

@@ -7,6 +7,7 @@ import {
   commitmentReceived,
   concludeInstigated,
   ConcludeInstigated,
+  keepLedgerChannelApproved,
   commitmentsReceived,
 } from './actions';
 export * from './actions';
@@ -18,7 +19,7 @@ export const enum WalletProtocol {
   Concluding = 'Concluding',
 }
 
-export type FundingStrategy = 'IndirectFundingStrategy';
+export type FundingStrategy = 'IndirectFundingStrategy' | 'ExistingChannelStrategy';
 
 function sendMessage(to: string, message: RelayableAction) {
   return messageRelayRequested(to, message);
@@ -36,13 +37,22 @@ export function sendConcludeInstigated(to: string, channelId, signedCommitment: 
   return sendMessage(to, concludeInstigated({ signedCommitment, channelId }));
 }
 
+export function sendKeepLedgerChannelApproved(to: string, processId: string) {
+  return sendMessage(to, keepLedgerChannelApproved({ processId }));
+}
+
 export const sendCommitmentReceived = (
   to: string,
   processId: string,
   commitment: Commitment,
   signature: string,
+  protocolLocator?: string,
 ) => {
-  const payload = commitmentReceived({ processId, signedCommitment: { commitment, signature } });
+  const payload = commitmentReceived({
+    processId,
+    signedCommitment: { commitment, signature },
+    protocolLocator,
+  });
   return messageRelayRequested(to, payload);
 };
 

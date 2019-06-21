@@ -8,8 +8,12 @@ export {
 import { ConcludingInstigatorAction, isConcludingInstigatorAction } from './instigator/actions';
 import { ConcludingResponderAction, isConcludingResponderAction } from './responder/actions';
 import { WalletAction } from '../../../redux/actions';
+import { ConsensusUpdateAction } from '../consensus-update/actions';
 
-export type ConcludingAction = ConcludingInstigatorAction | ConcludingResponderAction;
+export type ConcludingAction =
+  | ConcludingInstigatorAction
+  | ConcludingResponderAction
+  | ConsensusUpdateAction;
 
 export function isConcludingAction(action: WalletAction): action is ConcludingAction {
   return isConcludingInstigatorAction(action) || isConcludingResponderAction(action);

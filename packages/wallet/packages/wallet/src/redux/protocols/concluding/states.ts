@@ -43,7 +43,8 @@ export type FailureReason =
   | 'NotYourTurn'
   | 'ChannelDoesntExist'
   | 'ConcludeCancelled'
-  | 'DefundFailed';
+  | 'DefundFailed'
+  | 'LedgerUpdateFailed';
 
 export function isConcludingState(state: ProtocolState): state is ConcludingState {
   return isConcludingInstigatorState(state) || isConcludingResponderState(state);

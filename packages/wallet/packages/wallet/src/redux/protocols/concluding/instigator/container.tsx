@@ -9,18 +9,21 @@ import WaitForOpponentConclude from './components/wait-for-opponent-conclude';
 import { Defunding } from '../../defunding/container';
 import * as actions from './actions';
 import Acknowledge from '../../shared-components/acknowledge';
+import { ConsensusUpdate } from '../../consensus-update/container';
+import WaitForOpponentDecision from './components/wait-for-opponent-decision';
 
 interface Props {
   state: NonTerminalConcludingState;
   approve: typeof actions.concludeApproved;
   deny: typeof actions.cancelled;
   defund: typeof actions.defundChosen;
+  keepOpen: typeof actions.keepOpenChosen;
   acknowledge: typeof actions.acknowledged;
 }
 
 class ConcludingContainer extends PureComponent<Props> {
   render() {
-    const { state, deny, approve, defund, acknowledge } = this.props;
+    const { state, deny, approve, defund, keepOpen, acknowledge } = this.props;
     const processId = state.processId;
     switch (state.type) {
       case 'ConcludingInstigator.AcknowledgeSuccess':
@@ -42,7 +45,12 @@ class ConcludingContainer extends PureComponent<Props> {
       case 'ConcludingInstigator.WaitForOpponentConclude':
         return <WaitForOpponentConclude />;
       case 'ConcludingInstigator.AcknowledgeConcludeReceived':
-        return <ApproveDefunding approve={() => defund({ processId })} />;
+        return (
+          <ApproveDefunding
+            approve={() => defund({ processId })}
+            keepOpen={() => keepOpen({ processId })}
+          />
+        );
       case 'ConcludingInstigator.WaitForDefund':
         return <Defunding state={state.defundingState} />;
       case 'ConcludingInstigator.ApproveConcluding':
@@ -52,6 +60,10 @@ class ConcludingContainer extends PureComponent<Props> {
             approve={() => approve({ processId })}
           />
         );
+      case 'ConcludingInstigator.WaitForLedgerUpdate':
+        return <ConsensusUpdate state={state.consensusUpdateState} />;
+      case 'ConcludingInstigator.WaitForOpponentSelection':
+        return <WaitForOpponentDecision />;
       default:
         return unreachable(state);
     }
@@ -63,6 +75,7 @@ const mapDispatchToProps = {
   deny: actions.cancelled,
   defund: actions.defundChosen,
   acknowledge: actions.acknowledged,
+  keepOpen: actions.keepOpenChosen,
 };
 
 export const Concluding = connect(

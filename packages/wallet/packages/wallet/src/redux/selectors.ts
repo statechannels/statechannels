@@ -2,6 +2,7 @@ import { OpenChannelState, ChannelState, isFullyOpen } from './channel-store';
 import * as walletStates from './state';
 import { SharedData, FundingState } from './state';
 import { WalletProtocol } from '../communication';
+import { CONSENSUS_LIBRARY_ADDRESS } from '../constants';
 
 export const getOpenedChannelState = (state: SharedData, channelId: string): OpenChannelState => {
   const channelStatus = getChannelState(state, channelId);
@@ -19,6 +20,23 @@ export const getChannelState = (state: SharedData, channelId: string): ChannelSt
   return channelStatus;
 };
 
+export const getExistingLedgerChannelForParticipants = (
+  state: SharedData,
+  playerA: string,
+  playerB: string,
+): ChannelState | undefined => {
+  for (const existingChannelId of Object.keys(state.channelStore)) {
+    const channel = state.channelStore[existingChannelId];
+    if (
+      channel.libraryAddress === CONSENSUS_LIBRARY_ADDRESS &&
+      channel.participants.indexOf(playerA) > -1 &&
+      channel.participants.indexOf(playerB) > -1
+    ) {
+      return channel;
+    }
+  }
+  return undefined;
+};
 export const getAdjudicatorWatcherProcessesForChannel = (
   state: walletStates.Initialized,
   channelId: string,
