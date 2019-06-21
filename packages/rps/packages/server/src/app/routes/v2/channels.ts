@@ -38,7 +38,8 @@ function isNewProcessAction(action: RelayableAction): boolean {
 async function isProtocolAction(action: RelayableAction): Promise<boolean> {
   if (
     action.type === 'WALLET.FUNDING.STRATEGY_PROPOSED' ||
-    (action.type === 'WALLET.COMMON.COMMITMENT_RECEIVED' && !opensAppChannel(action))
+    (action.type === 'WALLET.COMMON.COMMITMENT_RECEIVED' && !opensAppChannel(action)) ||
+    (action.type === 'WALLET.ADVANCE_CHANNEL.COMMITMENTS_RECEIVED' && !opensAppChannel(action))
   ) {
     const { processId } = action;
     const process = await getProcess(processId);
