@@ -1,12 +1,14 @@
 import { ethers } from 'ethers';
 import { Signature } from 'fmg-core';
 import { channelID } from 'fmg-core/lib/channel';
-import * as communication from 'magmo-wallet/lib/src/communication';
+import { unreachable } from 'magmo-wallet';
 import {
   CommitmentReceived,
+  CommitmentsReceived,
   RelayableAction,
   StrategyProposed,
 } from 'magmo-wallet/lib/src/communication';
+import * as communication from 'magmo-wallet/lib/src/communication';
 import { errors } from '../../wallet';
 import { getCurrentCommitment } from '../../wallet/db/queries/getCurrentCommitment';
 import { getProcess } from '../../wallet/db/queries/walletProcess';
@@ -22,8 +24,12 @@ export async function handleOngoingProcessAction(ctx) {
       return ctx;
     case 'WALLET.COMMON.COMMITMENT_RECEIVED':
       return handleCommitmentReceived(ctx, action);
+    case 'WALLET.ADVANCE_CHANNEL.COMMITMENTS_RECEIVED':
+      return handleCommitmentsReceived({ ctx, action });
     case 'WALLET.FUNDING.STRATEGY_PROPOSED':
       return handleStrategyProposed(ctx, action);
+    default:
+      return unreachable(action);
   }
 }
 
@@ -81,6 +87,50 @@ async function handleCommitmentReceived(ctx, action: CommitmentReceived) {
       commitment,
       (signature as unknown) as string,
     );
+
+    return ctx;
+  }
+}
+
+async function handleCommitmentsReceived({ ctx, action }: { ctx; action: CommitmentsReceived }) {
+  {
+    const { processId } = action;
+    const walletProcess = await getProcess(processId);
+    if (!walletProcess) {
+      throw errors.processMissing(processId);
+    }
+    const { theirAddress } = walletProcess;
+    // For the time being, just assume a two-party channel and proceed as normal.
+    const { commitment: theirCommitment, signature: theirSignature } = action.signedCommitments[1];
+    const splitSignature = (ethers.utils.splitSignature(theirSignature) as unknown) as Signature;
+
+    const channelId = channelID(theirCommitment.channel);
+
+    if (channelId === walletProcess.appChannelId) {
+      const { commitment: ourCommitment, signature: ourSignature } = await updateRPSChannel(
+        theirCommitment,
+        splitSignature,
+      );
+      ctx.body = communication.sendCommitmentReceived(
+        theirAddress,
+        processId,
+        ourCommitment,
+        (ourSignature as unknown) as string,
+      );
+      return ctx;
+    }
+
+    const currentCommitment = await getCurrentCommitment(theirCommitment);
+    const { commitment, signature } = await updateLedgerChannel(
+      asConsensusCommitment(theirCommitment),
+      splitSignature,
+      currentCommitment && asConsensusCommitment(currentCommitment),
+    );
+    ctx.status = 201;
+    ctx.body = communication.sendCommitmentsReceived(theirAddress, processId, [
+      { commitment: theirCommitment, signature: theirSignature },
+      { commitment, signature: (signature as unknown) as string },
+    ]);
 
     return ctx;
   }
