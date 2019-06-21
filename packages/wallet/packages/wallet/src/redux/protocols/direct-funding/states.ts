@@ -1,6 +1,7 @@
 import { NonTerminalTransactionSubmissionState } from '../transaction-submission/states';
 import { Properties, StateConstructor } from '../../utils';
 import { ProtocolState } from '..';
+import { AdvanceChannelState } from '../advance-channel';
 
 // -------
 // States
@@ -19,6 +20,7 @@ export type ChannelFundingStatus =
 export const DIRECT_FUNDING = 'FUNDING_TYPE.DIRECT';
 
 export interface BaseDirectFundingState {
+  postFundSetupState: AdvanceChannelState;
   processId: string;
   safeToDepositLevel: string;
   type: ChannelFundingStatus;
@@ -39,7 +41,6 @@ export interface WaitForDepositTransaction extends BaseDirectFundingState {
 export interface WaitForFundingAndPostFundSetup extends BaseDirectFundingState {
   type: 'DirectFunding.WaitForFundingAndPostFundSetup';
   channelFunded: boolean;
-  postFundSetupReceived: boolean;
 }
 export interface FundingSuccess extends BaseDirectFundingState {
   type: 'DirectFunding.FundingSuccess';
@@ -62,6 +63,7 @@ export const baseDirectFundingState: StateConstructor<BaseDirectFundingState> = 
     ourIndex,
     safeToDepositLevel,
     type: channelFundingStatus,
+    postFundSetupState,
   } = params;
   return {
     processId,
@@ -71,6 +73,7 @@ export const baseDirectFundingState: StateConstructor<BaseDirectFundingState> = 
     ourIndex,
     safeToDepositLevel,
     type: channelFundingStatus,
+    postFundSetupState,
   };
 };
 
@@ -97,7 +100,6 @@ export const waitForFundingAndPostFundSetup: StateConstructor<
   return {
     ...baseDirectFundingState(params),
     channelFunded: params.channelFunded,
-    postFundSetupReceived: params.postFundSetupReceived,
     type: 'DirectFunding.WaitForFundingAndPostFundSetup',
   };
 };

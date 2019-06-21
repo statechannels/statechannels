@@ -3,6 +3,7 @@ import * as directFunding from './protocols/direct-funding/actions';
 import * as indirectFunding from './protocols/indirect-funding/actions';
 import * as application from './protocols/application/actions';
 import * as protocol from './protocols/actions';
+import * as advanceChannel from './protocols/advance-channel';
 import { FundingAction, isFundingAction } from './protocols/funding/actions';
 import { CommitmentReceived, commitmentReceived, RelayableAction } from '../communication';
 import {
@@ -225,7 +226,14 @@ export function isCommonAction(action: WalletAction): action is CommonAction {
   );
 }
 
-export { channel, directFunding as funding, indirectFunding, protocol, application };
+export {
+  channel,
+  directFunding as funding,
+  indirectFunding,
+  protocol,
+  application,
+  advanceChannel,
+};
 
 // These are any actions that update shared data directly without any protocol
 export type SharedDataUpdateAction = AdjudicatorEventAction;

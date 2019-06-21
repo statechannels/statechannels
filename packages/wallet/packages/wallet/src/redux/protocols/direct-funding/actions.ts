@@ -29,13 +29,14 @@ export type DirectFundingAction =
   | DirectFundingRequested
   | actions.CommitmentReceived
   | actions.FundingReceivedEvent
+  | actions.advanceChannel.AdvanceChannelAction
   | actions.TransactionAction;
 
 export function isDirectFundingAction(action: actions.WalletAction): action is DirectFundingAction {
   return (
     action.type === 'WALLET.ADJUDICATOR.FUNDING_RECEIVED_EVENT' ||
     action.type === 'WALLET.DIRECT_FUNDING.DIRECT_FUNDING_REQUESTED' ||
-    action.type === 'WALLET.COMMON.COMMITMENT_RECEIVED' ||
+    actions.advanceChannel.isAdvanceChannelAction(action) ||
     actions.isTransactionAction(action)
   );
 }
