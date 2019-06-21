@@ -7,6 +7,7 @@ import {
   signAndInitialize,
   checkAndInitialize,
   signAndStore,
+  getCommitments,
 } from '../../state';
 import { ProtocolStateWithSharedData, ProtocolReducer } from '..';
 import { CommitmentType, Commitment, getChannelId, nextSetupCommitment } from '../../../domain';
@@ -44,7 +45,7 @@ export function initialize(
       throw new Error('Must receive OngoingChannelArgs');
     }
 
-    throw new Error('Unimplemented');
+    return initializeWithExistingChannel(processId, sharedData, args);
   }
 }
 
@@ -74,10 +75,7 @@ export const reducer: ProtocolReducer<states.AdvanceChannelState> = (
 };
 
 type NewChannelArgs = Properties<states.ChannelUnknown>;
-
-interface OngoingChannelArgs {
-  channelId: string;
-}
+type OngoingChannelArgs = Properties<states.NotSafeToSend>;
 
 function isNewChannelArgs(args: NewChannelArgs | OngoingChannelArgs): args is NewChannelArgs {
   if ('privateKey' in args) {
@@ -149,22 +147,57 @@ function initializeWithNewChannel(
   }
 }
 
-const channelUnknownReducer: ProtocolReducer<states.AdvanceChannelState> = (
-  protocolState: states.ChannelUnknown,
-  sharedData,
-  action: CommitmentsReceived,
-) => {
-  const { ourIndex, privateKey, commitmentType } = protocolState;
-  const channelId = getChannelId(action.signedCommitments[0].commitment);
+function initializeWithExistingChannel(
+  processId,
+  sharedData: Storage,
+  initializeChannelArgs: OngoingChannelArgs,
+) {
+  const { channelId, ourIndex } = initializeChannelArgs;
+  const channel = getChannel(sharedData.channelStore, channelId);
+  if (isSafeToSend({ sharedData, ourIndex })) {
+    const lastCommitment = getLastCommitment(channel);
+    const ourCommitment = nextSetupCommitment(lastCommitment);
+    if (ourCommitment === 'NotASetupCommitment') {
+      // We will have to refactor `nextSetupCommitment` to allow it to construct
+      // conclude commitments
+      throw new Error('lastCommitment was not a setup commitment');
+    }
+    const signResult = signAndStore(sharedData, ourCommitment);
+    if (!signResult.isSuccess) {
+      throw new Error('Could not store new ledger channel commitment.');
+    }
+    sharedData = signResult.store;
 
-  const checkResult = checkAndInitialize(sharedData, action.signedCommitments[0], privateKey);
-  if (!checkResult.isSuccess) {
-    throw new Error('Could not initialize channel');
+    // Send commitments to next participant
+    const messageRelay = sendCommitmentsReceived(
+      nextParticipant(channel.participants, ourIndex),
+      processId,
+      getCommitments(sharedData, channelId),
+    );
+    sharedData = queueMessage(sharedData, messageRelay);
+
+    const protocolState = states.commitmentSent({
+      ...initializeChannelArgs,
+      processId,
+      channelId,
+    });
+    return {
+      protocolState,
+      sharedData,
+    };
+  } else {
+    return { protocolState: states.notSafeToSend(initializeChannelArgs), sharedData };
   }
-  sharedData = checkResult.store;
-  sharedData = checkCommitments(sharedData, 0, action.signedCommitments);
-  let channel = getChannel(sharedData.channelStore, channelId);
+}
 
+function attemptToAdvanceChannel(
+  sharedData: SharedData,
+  protocolState: states.NonTerminalAdvanceChannelState,
+  channelId: string,
+): { sharedData: SharedData; protocolState: states.AdvanceChannelState } {
+  const { ourIndex, commitmentType } = protocolState;
+
+  let channel = getChannel(sharedData.channelStore, channelId);
   if (isSafeToSend({ sharedData, ourIndex, channelId })) {
     // First, update the store with our response
     const theirCommitment = getLastCommitment(channel);
@@ -178,9 +211,6 @@ const channelUnknownReducer: ProtocolReducer<states.AdvanceChannelState> = (
       throw new Error(`Could not sign result: ${signResult.reason}`);
     }
     sharedData = signResult.store;
-
-    // Then, register to monitor the channel
-    sharedData = registerChannelToMonitor(sharedData, protocolState.processId, channelId);
 
     // Finally, send the commitments to the next participant
     channel = getChannel(sharedData.channelStore, channelId);
@@ -201,6 +231,33 @@ const channelUnknownReducer: ProtocolReducer<states.AdvanceChannelState> = (
   } else {
     return { protocolState, sharedData };
   }
+}
+
+const channelUnknownReducer: ProtocolReducer<states.AdvanceChannelState> = (
+  protocolState: states.ChannelUnknown,
+  sharedData,
+  action: CommitmentsReceived,
+) => {
+  const { privateKey } = protocolState;
+  const channelId = getChannelId(action.signedCommitments[0].commitment);
+  const checkResult = checkAndInitialize(sharedData, action.signedCommitments[0], privateKey);
+  if (!checkResult.isSuccess) {
+    throw new Error('Could not initialize channel');
+  }
+  sharedData = checkResult.store;
+  sharedData = checkCommitments(sharedData, 0, action.signedCommitments);
+
+  const result = attemptToAdvanceChannel(sharedData, protocolState, channelId);
+  sharedData = result.sharedData;
+  const nextProtocolState = result.protocolState; // The type might have changed, so we can't overwrite protocolState
+  if (
+    nextProtocolState.type === 'AdvanceChannel.CommitmentSent' ||
+    nextProtocolState.type === 'AdvanceChannel.Success'
+  ) {
+    sharedData = registerChannelToMonitor(sharedData, protocolState.processId, channelId);
+  }
+
+  return { protocolState: nextProtocolState, sharedData };
 };
 
 function checkCommitments(
@@ -225,21 +282,17 @@ function checkCommitments(
   return sharedData;
 }
 
-const notSafeToSendReducer: ProtocolReducer<states.NonTerminalAdvanceChannelState> = (
+const notSafeToSendReducer: ProtocolReducer<states.AdvanceChannelState> = (
   protocolState: states.NotSafeToSend,
   sharedData,
   action: CommitmentsReceived,
 ) => {
-  const { ourIndex, channelId } = protocolState;
+  const { channelId } = protocolState;
 
   const channel = getChannel(sharedData.channelStore, channelId);
   sharedData = checkCommitments(sharedData, channel.turnNum, action.signedCommitments);
 
-  if (isSafeToSend({ sharedData, ourIndex, channelId })) {
-    return { protocolState: states.commitmentSent({ ...protocolState, channelId }), sharedData };
-  } else {
-    return { protocolState, sharedData };
-  }
+  return attemptToAdvanceChannel(sharedData, protocolState, channelId);
 };
 
 const commitmentSentReducer: ProtocolReducer<states.AdvanceChannelState> = (
@@ -279,13 +332,16 @@ function isSafeToSend({
     return ourIndex === 0;
   }
 
-  return true;
+  const channel = getChannel(sharedData.channelStore, channelId);
+  const numParticipants = channel.participants.length;
+  return channel.turnNum % numParticipants === (ourIndex - 1) % numParticipants;
 }
 
 function channelAdvanced(channel: ChannelState, commitmentType: CommitmentType): boolean {
   const lastCommitment = getLastCommitment(channel);
   return (
-    lastCommitment.commitmentType >= commitmentType &&
-    lastCommitment.commitmentCount === channel.participants.length - 1
+    (lastCommitment.commitmentType === commitmentType &&
+      lastCommitment.commitmentCount === channel.participants.length - 1) ||
+    lastCommitment.commitmentType > commitmentType
   );
 }
