@@ -1,4 +1,4 @@
-import { SharedData, queueMessage } from '../../state';
+import { SharedData, queueMessage, registerChannelToMonitor } from '../../state';
 import * as states from './states';
 import * as actions from './actions';
 import { ProtocolStateWithSharedData } from '..';
@@ -31,7 +31,7 @@ export function initialize(
 ): ProtocolStateWithSharedData<states.ApplicationState> {
   return {
     protocolState: states.waitForFirstCommitment({ channelId, privateKey, address }),
-    sharedData,
+    sharedData: registerChannelToMonitor(sharedData, APPLICATION_PROCESS_ID, channelId),
   };
 }
 
@@ -51,7 +51,7 @@ export function applicationReducer(
       return opponentCommitmentReceivedReducer(protocolState, sharedData, action);
     case 'WALLET.APPLICATION.OWN_COMMITMENT_RECEIVED':
       return ownCommitmentReceivedReducer(protocolState, sharedData, action);
-    case 'WALLET.APPLICATION.CONCLUDE_REQUESTED':
+    case 'WALLET.APPLICATION.CONCLUDED':
       return { sharedData, protocolState: states.success({}) };
     default:
       return unreachable(action);

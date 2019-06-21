@@ -270,6 +270,7 @@ function* handleWalletMessage(walletMessage: WalletRequest, state: gameStates.Pl
         yield put(gameActions.messageSent());
         yield put(gameActions.exitToLobby());
       } else {
+        yield put(gameActions.messageSent());
         if (concludeResponse.reason !== 'UserDeclined') {
           throw new Error(concludeResponse.error);
         }

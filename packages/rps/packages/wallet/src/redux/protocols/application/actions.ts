@@ -17,8 +17,8 @@ export interface OpponentCommitmentReceived {
   commitment: Commitment;
   signature: string;
 }
-export interface ConcludeRequested {
-  type: 'WALLET.APPLICATION.CONCLUDE_REQUESTED';
+export interface Concluded {
+  type: 'WALLET.APPLICATION.CONCLUDED';
   processId: string;
 }
 
@@ -45,10 +45,10 @@ export const opponentCommitmentReceived: ActionConstructor<OpponentCommitmentRec
   };
 };
 
-export const concludeRequested: ActionConstructor<ConcludeRequested> = p => {
+export const concluded: ActionConstructor<Concluded> = p => {
   const { processId } = p;
   return {
-    type: 'WALLET.APPLICATION.CONCLUDE_REQUESTED',
+    type: 'WALLET.APPLICATION.CONCLUDED',
     processId,
   };
 };
@@ -57,15 +57,12 @@ export const concludeRequested: ActionConstructor<ConcludeRequested> = p => {
 // Unions and Guards
 // -------
 
-export type ApplicationAction =
-  | OpponentCommitmentReceived
-  | OwnCommitmentReceived
-  | ConcludeRequested;
+export type ApplicationAction = OpponentCommitmentReceived | OwnCommitmentReceived | Concluded;
 
 export function isApplicationAction(action: WalletAction): action is ApplicationAction {
   return (
     action.type === 'WALLET.APPLICATION.OPPONENT_COMMITMENT_RECEIVED' ||
     action.type === 'WALLET.APPLICATION.OWN_COMMITMENT_RECEIVED' ||
-    action.type === 'WALLET.APPLICATION.CONCLUDE_REQUESTED'
+    action.type === 'WALLET.APPLICATION.CONCLUDED'
   );
 }
