@@ -69,6 +69,11 @@ const expectSideEffect = (
   expectation(item);
 };
 
+export const expectThisMessage = (state: SideEffectState, messageType: string) => {
+  expectSideEffect('messageOutbox', state, item => {
+    expect(item.messagePayload.type).toEqual(messageType);
+  });
+};
 export const expectThisMessageAndCommitmentSent = (
   state: SideEffectState,
   c: Partial<Commitment>,

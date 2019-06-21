@@ -179,6 +179,13 @@ export function getChannel(state: SharedData, channelId: string): ChannelState |
   return state.channelStore[channelId];
 }
 
+export function getExistingChannel(state: SharedData, channelId: string) {
+  if (!state.channelStore[channelId]) {
+    throw new Error(`Channel ${channelId} not found`);
+  }
+  return state.channelStore[channelId];
+}
+
 export function queueMessage(state: SharedData, message: WalletEvent): SharedData {
   return { ...state, outboxState: queueMessageOutbox(state.outboxState, message) };
 }

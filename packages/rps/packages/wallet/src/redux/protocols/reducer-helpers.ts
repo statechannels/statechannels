@@ -3,12 +3,12 @@ import * as actions from '../actions';
 import { channelStoreReducer } from '../channel-store/reducer';
 import { accumulateSideEffects } from '../outbox';
 import { SideEffects } from '../outbox/state';
-import { SharedData, queueMessage } from '../state';
+import { SharedData, queueMessage, getExistingChannel } from '../state';
 import * as selectors from '../selectors';
 import { TwoPartyPlayerIndex } from '../types';
 import { CommitmentType } from 'fmg-core/lib/commitment';
 import * as magmoWalletClient from 'magmo-wallet-client';
-import { ChannelState, getLastCommitment } from '../channel-store';
+import { getLastCommitment } from '../channel-store';
 import { Commitment } from '../../domain';
 
 export const updateChannelState = (
@@ -173,8 +173,24 @@ export const isFirstPlayer = (channelId: string, sharedData: SharedData) => {
   return channelState.ourIndex === TwoPartyPlayerIndex.A;
 };
 
-export function getOpponentAddress(channelState: ChannelState, playerIndex: TwoPartyPlayerIndex) {
-  const { participants } = channelState;
-  const opponentAddress = participants[(playerIndex + 1) % participants.length];
+export function getOpponentAddress(channelId: string, sharedData: SharedData) {
+  const channel = getExistingChannel(sharedData, channelId);
+
+  const { participants } = channel;
+  const opponentAddress = participants[(channel.ourIndex + 1) % participants.length];
   return opponentAddress;
+}
+
+export function getOurAddress(channelId: string, sharedData: SharedData) {
+  const channel = getExistingChannel(sharedData, channelId);
+  return channel.participants[channel.ourIndex];
+}
+
+export function getLatestCommitment(channelId: string, sharedData: SharedData) {
+  const channel = getExistingChannel(sharedData, channelId);
+  return getLastCommitment(channel);
+}
+
+export function getNumberOfParticipants(commitment: Commitment): number {
+  return commitment.channel.participants.length;
 }

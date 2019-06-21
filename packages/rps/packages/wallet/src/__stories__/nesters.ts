@@ -95,6 +95,7 @@ function nestInFunding(protocolState: NonTerminalIndirectFundingState) {
     fundingState: protocolState,
     targetChannelId: 'dummy',
     opponentAddress: 'dummy',
+    ourAddress: 'dummy',
   });
 }
 
