@@ -123,6 +123,9 @@ const hubSentPreFundCommitment = setChannels(EMPTY_SHARED_DATA, [
   channelFromCommitments(commitments2, hubAddress, hubPrivateKey),
 ]);
 
+const aReceivedPrefundSetup = setChannels(EMPTY_SHARED_DATA, [
+  channelFromCommitments(commitments2, asAddress, asPrivateKey),
+]);
 const aSentPostFundCommitment = setChannels(EMPTY_SHARED_DATA, [
   channelFromCommitments(commitments3, asAddress, asPrivateKey),
 ]);
@@ -163,31 +166,44 @@ const receivePostFundSetupFromHub = commitmentsReceived({
 // ---------
 // Scenarios
 // ---------
-const argsA = {
+const initializeArgsA = {
   ...initializeArgs,
   address: asAddress,
   privateKey: asPrivateKey,
   ourIndex: 0,
+  commitmentType: CommitmentType.PreFundSetup,
 };
 
-const argsB = {
+const initializeArgsB = {
   ...initializeArgs,
   address: bsAddress,
   privateKey: bsPrivateKey,
   ourIndex: 1,
+  commitmentType: CommitmentType.PreFundSetup,
 };
 
-const argsHub = {
+const initializeArgsHub = {
   ...initializeArgs,
   address: hubAddress,
   privateKey: hubPrivateKey,
   ourIndex: 2,
+  commitmentType: CommitmentType.PreFundSetup,
 };
+
+const existingArgs = {
+  channelId,
+  processId,
+  commitmentType: CommitmentType.PostFundSetup,
+};
+
+const existingArgsA = { ...existingArgs, ourIndex: 0 };
+const existingArgsB = { ...existingArgs, ourIndex: 1 };
+const existingArgsHub = { ...existingArgs, ourIndex: 2 };
 
 export const newChannelAsA = {
   ...propsA,
   initialize: {
-    args: { ...argsA, commitmentType: CommitmentType.PreFundSetup },
+    args: initializeArgsA,
     sharedData: emptySharedData,
     commitments: commitments0,
   },
@@ -207,27 +223,30 @@ export const newChannelAsA = {
 
 export const existingChannelAsA = {
   ...propsA,
+  commitmentType: CommitmentType.PostFundSetup,
   initialize: {
-    args: argsA,
-    sharedData: aSentPostFundCommitment,
-    commitment: signedCommitment3,
+    args: existingArgsA,
+    sharedData: aReceivedPrefundSetup,
+    commitments: commitments3,
   },
   receiveFromB: {
-    state: commitmentSentA,
+    state: { ...commitmentSentA, commitmentType: CommitmentType.PostFundSetup },
     sharedData: aSentPostFundCommitment,
     action: receivePostFundSetupFromB,
+    commitments: commitments4,
   },
   receiveFromHub: {
-    state: commitmentSentA,
+    state: { ...commitmentSentA, commitmentType: CommitmentType.PostFundSetup },
     sharedData: aSentPostFundCommitment,
     action: receivePostFundSetupFromHub,
+    commitments: commitments5,
   },
 };
 
 export const newChannelAsB = {
   ...propsB,
   initialize: {
-    args: { ...argsB, commitmentType: CommitmentType.PreFundSetup },
+    args: initializeArgsB,
     sharedData: emptySharedData,
   },
   receiveFromA: {
@@ -246,28 +265,37 @@ export const newChannelAsB = {
 
 export const existingChannelAsB = {
   ...propsB,
+  commitmentType: CommitmentType.PostFundSetup,
   initialize: {
-    args: argsB,
+    args: existingArgsB,
     sharedData: bReceivedPreFundSetup,
+    commitments: commitments2,
   },
   receiveFromA: {
-    state: notSafeToSendB,
+    state: { ...notSafeToSendB, commitmentType: CommitmentType.PostFundSetup },
     sharedData: bSentPreFundCommitment,
     action: receivePostFundSetupFromA,
-    commitment: signedCommitment4,
+    commitments: commitments4,
   },
   receiveFromHub: {
-    state: commitmentSentB,
+    state: { ...commitmentSentB, commitmentType: CommitmentType.PostFundSetup },
     sharedData: bSentPostFundSetupCommitment,
-    action: receivePostFundSetupFromA,
+    action: receivePostFundSetupFromHub,
+    commitments: commitments5,
   },
 };
 
 export const newChannelAsHub = {
   ...propsHub,
   initialize: {
-    args: { ...argsHub, commitmentType: CommitmentType.PreFundSetup },
+    args: initializeArgsHub,
     sharedData: emptySharedData,
+  },
+  receiveFromA: {
+    state: channelUnknownHub,
+    sharedData: emptySharedData,
+    action: receivePreFundSetupFromA,
+    commitments: commitments0,
   },
   receiveFromB: {
     state: channelUnknownHub,
@@ -279,13 +307,16 @@ export const newChannelAsHub = {
 
 export const existingChannelAsHub = {
   ...propsHub,
+  commitmentType: CommitmentType.PostFundSetup,
   initialize: {
+    args: existingArgsHub,
     sharedData: hubSentPreFundCommitment,
+    commitments: commitments2,
   },
   receiveFromB: {
-    state: notSafeToSendHub,
+    state: { ...notSafeToSendHub, commitmentType: CommitmentType.PostFundSetup },
     sharedData: hubSentPreFundCommitment,
     action: receivePostFundSetupFromB,
-    commitment: signedCommitment5,
+    commitments: commitments5,
   },
 };

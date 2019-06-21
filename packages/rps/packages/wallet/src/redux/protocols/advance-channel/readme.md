@@ -43,13 +43,19 @@ It can also happen if the `commitmentType` is incompatible with the latest commi
 
 - To simplify the communication assumptions in a channel with an arbitrary number of participants, each participant sends a valid round of commitments only to the next participant.
 
+## Open questions
+
+- What should cause the protocol to fail?
+
 ## State machine diagram
 
 ```mermaid
 graph TD
 linkStyle default interpolate basis
   St((start)) --> ICO{Is Channel Open}
-  ICO --> |Yes| NSTS(NotSafeToSend)
+  ICO --> |Yes| STSCO{Safe to send?}
+  STSCO --> |Yes| CS
+  STSCO --> |No| NSTS(NotSafeToSend)
   ICO --> |No| FP{First participant?}
   FP --> |Yes|CS(CommitmentSent)
   FP --> |No| CU(ChannelUnknown)
@@ -65,7 +71,7 @@ linkStyle default interpolate basis
   classDef Success fill:#58ef21;
   classDef Failure fill:#f45941;
 
-  class St,STS,FP,ICO,RC logic;
+  class St,STS,STSCO,FP,ICO,RC logic;
   class S Success;
   class F Failure;
 ```

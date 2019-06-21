@@ -360,7 +360,7 @@ export const jointLedgerCommitments = {
   postFundCommitment2: {
     ...initialJointConsensusCommitment,
     appAttributes: bytesFromAppAttributes(initialJointConsensusCommitment.appAttributes),
-    commitmentCount: 1,
+    commitmentCount: 2,
     commitmentType: CommitmentType.PostFundSetup,
     turnNum: 5,
   },

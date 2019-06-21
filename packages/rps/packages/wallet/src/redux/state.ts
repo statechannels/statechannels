@@ -17,6 +17,7 @@ import {
   signAndInitialize as signAndInitializeChannelStore,
   emptyChannelStore,
   SignFailureReason,
+  Commitments,
 } from './channel-store';
 import { Properties } from './utils';
 import * as indirectFunding from './protocols/indirect-funding/states';
@@ -278,6 +279,14 @@ export function queueTransaction(
     ...state,
     outboxState: queueTransactionOutbox(state.outboxState, transaction, processId),
   };
+}
+
+export function getCommitments(store: SharedData, channelId: string): Commitments {
+  const channel = getChannel(store, channelId);
+  if (!channel) {
+    throw new Error('Channel missing');
+  }
+  return channel.commitments;
 }
 
 export { indirectFunding };
