@@ -1,12 +1,13 @@
 import { ethers } from 'ethers';
 import { Signature } from 'fmg-core';
 import { channelID } from 'fmg-core/lib/channel';
-import * as communication from 'magmo-wallet/lib/src/communication';
+import { unreachable } from 'magmo-wallet';
 import {
   CommitmentReceived,
   RelayableAction,
   StrategyProposed,
 } from 'magmo-wallet/lib/src/communication';
+import * as communication from 'magmo-wallet/lib/src/communication';
 import { errors } from '../../wallet';
 import { getCurrentCommitment } from '../../wallet/db/queries/getCurrentCommitment';
 import { getProcess } from '../../wallet/db/queries/walletProcess';
@@ -24,6 +25,8 @@ export async function handleOngoingProcessAction(ctx) {
       return handleCommitmentReceived(ctx, action);
     case 'WALLET.FUNDING.STRATEGY_PROPOSED':
       return handleStrategyProposed(ctx, action);
+    default:
+      return unreachable(action);
   }
 }
 
