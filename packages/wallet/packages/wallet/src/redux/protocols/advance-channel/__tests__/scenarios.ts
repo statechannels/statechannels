@@ -6,6 +6,7 @@ import { channelFromCommitments } from '../../../channel-store/channel-state/__t
 import * as scenarios from '../../../__tests__/test-scenarios';
 import { commitmentsReceived } from '../../../../communication';
 import { CommitmentType } from '../../../../domain';
+import { clearedToSend } from '../actions';
 
 // ---------
 // Test data
@@ -40,6 +41,7 @@ const initializeArgs = {
   channelType,
   appAttributes,
   processId,
+  clearedToSend: true,
 };
 
 const props = {
@@ -74,6 +76,10 @@ const commitments5 = [signedCommitment3, signedCommitment4, signedCommitment5];
 // ----
 // States
 // ------
+const notSafeToSendA = states.notSafeToSend({
+  ...propsA,
+  commitmentType: CommitmentType.PostFundSetup,
+});
 const commitmentSentA = states.commitmentSent({
   ...propsA,
   commitmentType: CommitmentType.PreFundSetup,
@@ -163,6 +169,9 @@ const receivePostFundSetupFromHub = commitmentsReceived({
   processId,
   signedCommitments: commitments5,
 });
+const clearSending = clearedToSend({
+  processId,
+});
 // ---------
 // Scenarios
 // ---------
@@ -191,6 +200,7 @@ const initializeArgsHub = {
 };
 
 const existingArgs = {
+  clearedToSend: true,
   channelId,
   processId,
   commitmentType: CommitmentType.PostFundSetup,
@@ -318,5 +328,54 @@ export const existingChannelAsHub = {
     sharedData: hubSentPreFundCommitment,
     action: receivePostFundSetupFromB,
     commitments: commitments5,
+  },
+};
+
+export const notClearedToSend = {
+  ...propsA,
+  commitmentType: CommitmentType.PostFundSetup,
+  initialize: {
+    args: { ...existingArgsA, clearedToSend: false },
+    sharedData: aReceivedPrefundSetup,
+    commitments: commitments2,
+  },
+  clearedToSend: {
+    state: {
+      ...notSafeToSendA,
+      commitmentType: CommitmentType.PostFundSetup,
+      clearedToSend: false,
+    },
+    sharedData: aReceivedPrefundSetup,
+    action: clearSending,
+    commitments: commitments3,
+  },
+  clearedToSendButUnsafe: {
+    state: {
+      ...notSafeToSendB,
+      commitmentType: CommitmentType.PostFundSetup,
+      clearedToSend: false,
+    },
+    sharedData: bSentPreFundCommitment,
+    action: clearSending,
+    commitments: commitments1,
+  },
+  clearedToSendButChannelUnknown: {
+    state: {
+      ...channelUnknownB,
+      commitmentType: CommitmentType.PreFundSetup,
+      clearedToSend: false,
+    },
+    sharedData: emptySharedData,
+    action: clearSending,
+  },
+  clearedToSendAndAlreadySent: {
+    state: {
+      ...commitmentSentB,
+      commitmentType: CommitmentType.PreFundSetup,
+      clearedToSend: true,
+    },
+    sharedData: bSentPreFundCommitment,
+    action: clearSending,
+    commitments: commitments1,
   },
 };
