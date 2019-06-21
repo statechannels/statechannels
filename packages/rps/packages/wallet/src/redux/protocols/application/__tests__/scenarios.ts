@@ -73,7 +73,7 @@ const receiveOurInvalidCommitment = actions.ownCommitmentReceived({
   commitment: signedCommitment20.commitment,
 });
 
-const concludeRequested = actions.concludeRequested({ processId: APPLICATION_PROCESS_ID });
+const concluded = actions.concluded({ processId: APPLICATION_PROCESS_ID });
 
 // -------
 // SharedData
@@ -104,7 +104,7 @@ export const receivingACloseRequest = {
   ongoing: {
     state: ongoing,
     sharedData: ourTurnSharedData,
-    action: concludeRequested,
+    action: concluded,
   },
 };
 
