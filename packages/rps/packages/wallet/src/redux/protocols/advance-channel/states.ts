@@ -22,11 +22,13 @@ export interface ChannelUnknown extends BaseState {
   channelType: string;
   appAttributes: string;
   privateKey: string;
+  clearedToSend: boolean;
 }
 
 export interface NotSafeToSend extends BaseState {
   type: 'AdvanceChannel.NotSafeToSend';
   channelId: string;
+  clearedToSend: boolean;
 }
 
 export interface CommitmentSent extends BaseState {
@@ -57,7 +59,7 @@ const base: StateConstructor<BaseState> = params => {
 };
 
 export const channelUnknown: StateConstructor<ChannelUnknown> = params => {
-  const { privateKey, allocation, destination, channelType, appAttributes } = params;
+  const { privateKey, allocation, destination, channelType, appAttributes, clearedToSend } = params;
   return {
     ...base(params),
     type: 'AdvanceChannel.ChannelUnknown',
@@ -66,6 +68,7 @@ export const channelUnknown: StateConstructor<ChannelUnknown> = params => {
     destination,
     channelType,
     appAttributes,
+    clearedToSend,
   };
 };
 
@@ -74,6 +77,7 @@ export const notSafeToSend: StateConstructor<NotSafeToSend> = params => {
     ...base(params),
     type: 'AdvanceChannel.NotSafeToSend',
     channelId: params.channelId,
+    clearedToSend: params.clearedToSend,
   };
 };
 

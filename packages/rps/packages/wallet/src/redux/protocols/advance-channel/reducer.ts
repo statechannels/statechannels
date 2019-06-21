@@ -59,6 +59,10 @@ export const reducer: ProtocolReducer<states.AdvanceChannelState> = (
     return { protocolState, sharedData };
   }
 
+  if (action.type === 'WALLET.ADVANCE_CHANNEL.CLEARED_TO_SEND') {
+    return clearedToSendReducer(protocolState, sharedData);
+  }
+
   switch (protocolState.type) {
     case 'AdvanceChannel.ChannelUnknown': {
       return channelUnknownReducer(protocolState, sharedData, action);
@@ -73,6 +77,24 @@ export const reducer: ProtocolReducer<states.AdvanceChannelState> = (
       return unreachable(protocolState);
   }
 };
+
+function clearedToSendReducer(protocolState: states.AdvanceChannelState, sharedData: SharedData) {
+  if (protocolState.type === 'AdvanceChannel.NotSafeToSend') {
+    protocolState = { ...protocolState, clearedToSend: true };
+    if (protocolState.type === 'AdvanceChannel.NotSafeToSend') {
+      return attemptToAdvanceChannel(sharedData, protocolState, protocolState.channelId);
+    } else {
+      return { sharedData, protocolState };
+    }
+  } else if (protocolState.type === 'AdvanceChannel.ChannelUnknown') {
+    return {
+      sharedData,
+      protocolState: states.channelUnknown({ ...protocolState, clearedToSend: true }),
+    };
+  } else {
+    return { protocolState, sharedData };
+  }
+}
 
 type NewChannelArgs = Properties<states.ChannelUnknown>;
 type OngoingChannelArgs = Properties<states.NotSafeToSend>;
@@ -89,9 +111,16 @@ function initializeWithNewChannel(
   sharedData: Storage,
   initializeChannelArgs: NewChannelArgs,
 ) {
-  const { channelType, destination, appAttributes, allocation, ourIndex } = initializeChannelArgs;
+  const {
+    channelType,
+    destination,
+    appAttributes,
+    allocation,
+    ourIndex,
+    clearedToSend,
+  } = initializeChannelArgs;
 
-  if (isSafeToSend({ sharedData, ourIndex })) {
+  if (isSafeToSend({ sharedData, ourIndex, clearedToSend })) {
     // Initialize the channel in the store
     const nonce = selectors.getNextNonce(sharedData, channelType);
     const participants = destination;
@@ -152,9 +181,9 @@ function initializeWithExistingChannel(
   sharedData: Storage,
   initializeChannelArgs: OngoingChannelArgs,
 ) {
-  const { channelId, ourIndex } = initializeChannelArgs;
+  const { channelId, ourIndex, clearedToSend } = initializeChannelArgs;
   const channel = getChannel(sharedData.channelStore, channelId);
-  if (isSafeToSend({ sharedData, ourIndex })) {
+  if (isSafeToSend({ sharedData, ourIndex, clearedToSend })) {
     const lastCommitment = getLastCommitment(channel);
     const ourCommitment = nextSetupCommitment(lastCommitment);
     if (ourCommitment === 'NotASetupCommitment') {
@@ -192,13 +221,13 @@ function initializeWithExistingChannel(
 
 function attemptToAdvanceChannel(
   sharedData: SharedData,
-  protocolState: states.NonTerminalAdvanceChannelState,
+  protocolState: states.ChannelUnknown | states.NotSafeToSend,
   channelId: string,
 ): { sharedData: SharedData; protocolState: states.AdvanceChannelState } {
-  const { ourIndex, commitmentType } = protocolState;
+  const { ourIndex, commitmentType, clearedToSend } = protocolState;
 
   let channel = getChannel(sharedData.channelStore, channelId);
-  if (isSafeToSend({ sharedData, ourIndex, channelId })) {
+  if (isSafeToSend({ sharedData, ourIndex, channelId, clearedToSend })) {
     // First, update the store with our response
     const theirCommitment = getLastCommitment(channel);
     const ourCommitment = nextSetupCommitment(theirCommitment);
@@ -233,7 +262,7 @@ function attemptToAdvanceChannel(
   }
 }
 
-const channelUnknownReducer: ProtocolReducer<states.AdvanceChannelState> = (
+const channelUnknownReducer = (
   protocolState: states.ChannelUnknown,
   sharedData,
   action: CommitmentsReceived,
@@ -282,7 +311,7 @@ function checkCommitments(
   return sharedData;
 }
 
-const notSafeToSendReducer: ProtocolReducer<states.AdvanceChannelState> = (
+const notSafeToSendReducer = (
   protocolState: states.NotSafeToSend,
   sharedData,
   action: CommitmentsReceived,
@@ -295,7 +324,7 @@ const notSafeToSendReducer: ProtocolReducer<states.AdvanceChannelState> = (
   return attemptToAdvanceChannel(sharedData, protocolState, channelId);
 };
 
-const commitmentSentReducer: ProtocolReducer<states.AdvanceChannelState> = (
+const commitmentSentReducer = (
   protocolState: states.CommitmentSent,
   sharedData,
   action: CommitmentsReceived,
@@ -317,11 +346,17 @@ function isSafeToSend({
   sharedData,
   channelId,
   ourIndex,
+  clearedToSend,
 }: {
   sharedData: SharedData;
   ourIndex: number;
   channelId?: string;
+  clearedToSend: boolean;
 }): boolean {
+  if (!clearedToSend) {
+    return false;
+  }
+
   // The possibilities are:
   // A. The channel is not in storage and our index is 0.
   // B. The channel is not in storage and our index is not 0.
@@ -334,7 +369,7 @@ function isSafeToSend({
 
   const channel = getChannel(sharedData.channelStore, channelId);
   const numParticipants = channel.participants.length;
-  return channel.turnNum % numParticipants === (ourIndex - 1) % numParticipants;
+  return (channel.turnNum + 1) % numParticipants === ourIndex;
 }
 
 function channelAdvanced(channel: ChannelState, commitmentType: CommitmentType): boolean {

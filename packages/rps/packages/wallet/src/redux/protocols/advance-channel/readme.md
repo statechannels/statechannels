@@ -57,14 +57,16 @@ linkStyle default interpolate basis
   STSCO --> |Yes| CS
   STSCO --> |No| NSTS(NotSafeToSend)
   ICO --> |No| FP{First participant?}
-  FP --> |Yes|CS(CommitmentSent)
+  FP --> |Yes|STS
   FP --> |No| CU(ChannelUnknown)
-  RC   -->|No| CS
-  CS   -->|CommitmentReceived| RC
-  CU   -->|CommitmentReceived| RC{Round Complete?}
+  CS   -->|CommitmentReceived| RC{Round Complete?}
   NSTS -->|CommitmentReceived| STS{Safe to send?}
+  CU   -->|CommitmentReceived| STS
+  CU   -->|ClearedToSend| STS
+  NSTS -->|ClearedToSend| STS
   STS -->|YES| RC
   STS -->|NO| NSTS
+  RC   -->|No| CS(CommitmentSent)
   RC   -->|Yes| S((Success))
 
   classDef logic fill:#efdd20;
