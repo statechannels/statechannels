@@ -1,7 +1,6 @@
 import { SharedData, getChannel } from '../../state';
 import { ProtocolStateWithSharedData } from '..';
 import * as states from './states';
-import { DefundingAction } from './actions';
 import * as helpers from '../reducer-helpers';
 import { withdrawalReducer, initialize as withdrawalInitialize } from './../withdrawing/reducer';
 import * as selectors from '../../selectors';
@@ -16,6 +15,7 @@ import { isIndirectDefundingAction } from '../indirect-defunding/actions';
 import * as indirectDefundingStates from '../indirect-defunding/states';
 import { CommitmentReceived } from '../../../communication';
 import { getLastCommitment } from '../../channel-store';
+import { ProtocolAction } from '../../../redux/actions';
 
 export const initialize = (
   processId: string,
@@ -59,8 +59,12 @@ export const initialize = (
 export const defundingReducer = (
   protocolState: states.DefundingState,
   sharedData: SharedData,
-  action: DefundingAction,
+  action: ProtocolAction,
 ): ProtocolStateWithSharedData<states.DefundingState> => {
+  if (!actions.isDefundingAction(action)) {
+    console.warn(`Defunding reducer received non-defunding action ${action.type}.`);
+    return { protocolState, sharedData };
+  }
   switch (protocolState.type) {
     case 'Defunding.WaitForWithdrawal':
       return waitForWithdrawalReducer(protocolState, sharedData, action);
@@ -127,7 +131,7 @@ const waitForWithdrawalReducer = (
   if (newWithdrawalState.type === 'Withdrawing.Success') {
     return {
       protocolState: states.success({}),
-      sharedData: newSharedData,
+      sharedData: helpers.hideWallet(newSharedData),
     };
   } else if (newWithdrawalState.type === 'Withdrawing.Failure') {
     return {

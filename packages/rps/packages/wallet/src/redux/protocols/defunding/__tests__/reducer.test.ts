@@ -1,7 +1,8 @@
 import * as states from '../states';
 import { initialize, defundingReducer } from '../reducer';
 import * as scenarios from './scenarios';
-import { describeScenarioStep } from '../../../__tests__/helpers';
+import { describeScenarioStep, itSendsThisDisplayEventType } from '../../../__tests__/helpers';
+import { HIDE_WALLET } from 'magmo-wallet-client';
 
 const itTransitionsTo = (
   result: { protocolState: states.DefundingState },
@@ -35,6 +36,7 @@ describe('directly funded happy path', () => {
     const result = defundingReducer(state, sharedData, action);
 
     itTransitionsTo(result, 'Defunding.Success');
+    itSendsThisDisplayEventType(result.sharedData, HIDE_WALLET);
   });
 });
 
@@ -78,6 +80,7 @@ describe('indirectly funded happy path', () => {
     const result = defundingReducer(state, sharedData, action);
 
     itTransitionsTo(result, 'Defunding.Success');
+    itSendsThisDisplayEventType(result.sharedData, HIDE_WALLET);
   });
 });
 

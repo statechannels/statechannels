@@ -1,4 +1,4 @@
-export { initialize, defundingReducer } from './reducer';
+export { initialize, defundingReducer as reducer } from './reducer';
 
 export { Defunding } from './container';
 

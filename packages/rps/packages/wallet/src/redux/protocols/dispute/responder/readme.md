@@ -27,15 +27,12 @@ linkStyle default interpolate basis
   WFR -->|ChallengeExpirySetEvent| WFR
   WFR -->|WALLET.DISPUTE.RESPONDER.RESPONSE_PROVIDED| WFT(WaitForTransaction)
   WFR -->|CHALLENGE_EXPIRED| AT(AcknowledgeTimeOut)
-  AT -->|DEFUND_CHOSEN| WFD(WaitForDefund)
-  WFD --> |defunding protocol succeeded| AS(AcknowledgeDefundingSuccess)
-  WFD --> |defunding protocol failed| ACBND(AcknowledgeClosedButNotDefunded)
+  AT -->|WALLET.DISPUTE.RESPONDER.ACKNOWLEDGE| F
   WFT --> |TransactionSubmitted| WFAc(WaitForAcknowledgement)
   WFT-->|CHALLENGE_EXPIRED| AT(AcknowledgeTimeOut)
-  WFAc-->|WALLET.DISPUTE.RESPONDER.RESPOND_SUCCESS_ACKNOWLEDGED| S((success))
+  WFAc-->|WALLET.DISPUTE.RESPONDER.ACKNOWLEDGED| S((success))
   WFT --> |TransactionFailed| F((failure))
-  ACBND -->|WALLET.DISPUTE.RESPONDER.ACKNOWLEDGED| FCBND((ClosedButNotDefunded))
-  AS -->|WALLET.DISPUTE.RESPONDER.ACKNOWLEDGED| FCD((ClosedAndDefunded))
+
   classDef logic fill:#efdd20;
   classDef Success fill:#58ef21;
   classDef Failure fill:#f45941;
@@ -75,13 +72,7 @@ Notes:
    - `WaitForApproval`
    - `WaitForTransaction`
    - `Failure`
-5. **Challenge expires and channel defunded:**
+5. **Challenge expires:**
    - `WaitForResponse`
    - `AcknowledgeTimeout`
-   - `WaitForDefund`
-   - `AcknowledgeDefundingSuccess`
-   - `ClosedAndDefunded`
-6. **Challenge expires and channel NOT defunded:**
-   - `WaitForDefund`
-   - `AcknowledgeClosedButNotDefunded`
-   - `ClosedButNotDefunded`
+   - `Failure`

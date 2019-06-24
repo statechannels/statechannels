@@ -7,11 +7,7 @@ addStories(
 );
 addStories(scenarios.requireResponseHappyPath, 'Responding / Requires new Response');
 addStories(scenarios.refuteHappyPath, 'Responding / Refute challenge');
-addStories(scenarios.challengeExpiresChannelDefunded, 'Responding / Challenge Expires (Defunded)');
-addStories(
-  scenarios.challengeExpiresButChannelNotDefunded,
-  'Responding / Challenge Expires (NOT Defunded)',
-);
+addStories(scenarios.challengeExpires, 'Responding / Challenge Expires');
 addStories(
   scenarios.challengeExpiresDuringWaitForTransaction,
   'Responding / Challenge Expires during WaitForTransaction',
@@ -19,8 +15,4 @@ addStories(
 addStories(
   scenarios.challengeExpiresDuringWaitForApproval,
   'Responding / Challenge Expires during WaitForApproval',
-);
-addStories(
-  scenarios.defundActionComesDuringAcknowledgeTimeout,
-  'Responding / Challenge Expires during AcknowledgeTimeout',
 );

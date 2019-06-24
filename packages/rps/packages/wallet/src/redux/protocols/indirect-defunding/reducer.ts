@@ -10,6 +10,8 @@ import { sendCommitmentReceived } from '../../../communication';
 import { theirAddress, getLastCommitment } from '../../channel-store';
 import { composeConcludeCommitment } from '../../../utils/commitment-utils';
 import { CommitmentReceived } from '../../actions';
+import { messageRelayRequested } from 'magmo-wallet-client';
+import { defundRequested } from '../actions';
 
 export const initialize = (
   processId: string,
@@ -45,13 +47,27 @@ export const initialize = (
     }
     newSharedData = signResult.store;
 
-    const messageRelay = sendCommitmentReceived(
+    // send a request for opponent to start new defunding process first, because they may not yet have done so
+    const actionToRelay = defundRequested({
+      processId: sharedData.currentProcessId || '', // wish to terminate existing process in opponent's wallet
+      channelId,
+    });
+
+    const defundRequestedMessageRelay = messageRelayRequested(
+      theirAddress(ledgerChannel),
+      actionToRelay,
+    );
+
+    const commitmentReceivedMessageRelay = sendCommitmentReceived(
       theirAddress(ledgerChannel),
       processId,
       signResult.signedCommitment.commitment,
       signResult.signedCommitment.signature,
     );
-    newSharedData = queueMessage(newSharedData, messageRelay);
+    newSharedData = queueMessage(
+      queueMessage(newSharedData, defundRequestedMessageRelay),
+      commitmentReceivedMessageRelay,
+    );
   }
 
   const protocolState = states.waitForLedgerUpdate({

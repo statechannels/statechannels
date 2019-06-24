@@ -48,6 +48,7 @@ export interface SharedData {
   adjudicatorState: AdjudicatorState;
   fundingState: FundingState;
   activeAppChannelId?: string;
+  currentProcessId?: string;
 }
 
 export interface ChannelSubscriptions {
@@ -65,7 +66,6 @@ export interface Initialized extends SharedData {
   type: typeof WALLET_INITIALIZED;
   uid: string;
   processStore: ProcessStore;
-  currentProcessId?: string;
   activeAppChannelId?: string;
   address: string;
   privateKey: string;
