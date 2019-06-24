@@ -13,48 +13,41 @@ module.exports = {
 // - overwrite artifact with a copy where only certain fields have been selected
 // - save this file to the appPreBuiltContractArtifactsPath directory
 
-function deployContractsToTestnets(buildContractsPath, appPreBuiltContractArtifactsPath) {
+const deployToTestnet = async target => {
+  process.env.TARGET_NETWORK = target;
+  await deployContracts();
+};
+
+async function deployContractsToTestnets(buildContractsPath, appPreBuiltContractArtifactsPath) {
   fs.emptyDirSync(buildContractsPath, '');
-  process.env.TARGET_NETWORK = 'ropsten';
-  console.log('deploying to ropsten');
-  deployContracts()
-    .then(() => {
-      process.env.TARGET_NETWORK = 'kovan';
-      console.log('deploying to kovan');
-      return deployContracts();
-    })
-    .then(() => {
-      process.env.TARGET_NETWORK = 'rinkeby';
-      console.log('deploying to rinkeby');
-      return deployContracts();
-    })
-    .then(() => {
-      fs.readdir(buildContractsPath, function(err, artifacts) {
-        for (var i = 0; i < artifacts.length; i++) {
-          fs.readJson(path.join(buildContractsPath, artifacts[i]))
-            .then(artifact => {
-              const strippedArtifact = {
-                contractName: artifact.contractName,
-                abi: artifact.abi,
-                bytecode: artifact.bytecode,
-                networks: artifact.networks
-              };
+  try {
+    const ropsten = deployToTestnet('ropsten');
+    const kovan = deployToTestnet('kovan');
+    const rinkeby = deployToTestnet('rinkeby');
 
-              let data = JSON.stringify(strippedArtifact, null, 2);
+    const _ = await Promise.all([ropsten, kovan, rinkeby]);
+    return fs.readdir(buildContractsPath, function(err, artifacts) {
+      for (var i = 0; i < artifacts.length; i++) {
+        fs.readJson(path.join(buildContractsPath, artifacts[i])).then(artifact => {
+          const strippedArtifact = {
+            contractName: artifact.contractName,
+            abi: artifact.abi,
+            bytecode: artifact.bytecode,
+            networks: artifact.networks
+          };
 
-              fs.outputFile(path.format({ dir: appPreBuiltContractArtifactsPath, name: artifact.contractName, ext: '.json' }), data, err => {
-                if (err) {
-                  throw err;
-                }
-              });
+          let data = JSON.stringify(strippedArtifact, null, 2);
 
-              console.log('Saved ' + artifact.contractName);
-            })
-            .catch(err => {
-              console.error(err);
-            });
-        }
-      });
-    })
-    .catch(error => console.log(error));
+          fs.outputFile(path.format({ dir: appPreBuiltContractArtifactsPath, name: artifact.contractName, ext: '.json' }), data, err => {
+            if (err) {
+              throw err;
+            }
+          });
+          console.log('Saved ' + artifact.contractName);
+        });
+      }
+    });
+  } catch (err) {
+    console.log(err);
+  }
 }
