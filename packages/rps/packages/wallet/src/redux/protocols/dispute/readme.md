@@ -23,8 +23,4 @@ sequenceDiagram
   R-->>A: response tx
   A-->>C: response event
   A-->>R: response event
-  Note  over C, R: Defund? (sub-protocol)
-
 ```
-
-Note: If Respond? then !Defund.

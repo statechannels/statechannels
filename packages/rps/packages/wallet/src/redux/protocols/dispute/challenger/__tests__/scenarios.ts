@@ -10,11 +10,7 @@ import {
   respondWithMoveEvent,
   challengeExpirySetEvent,
 } from '../../../../actions';
-import {
-  preSuccess as defundingPreSuccess,
-  preFailure as defundingPreFailure,
-} from '../../../defunding/__tests__';
-
+import { defundRequested } from '../../../../../redux/protocols/actions';
 type Reason = states.FailureReason;
 
 // -----------------
@@ -66,17 +62,7 @@ const waitForTransactionFailure = states.waitForTransaction({
 const waitForResponseOrTimeout = states.waitForResponseOrTimeout({ ...defaults, expiryTime: 0 });
 const acknowledgeTimeout = states.acknowledgeTimeout(defaults);
 const acknowledgeResponse = states.acknowledgeResponse(defaults);
-const acknowledge = (reason: Reason) => states.acknowledgeFailure({ ...defaults, reason });
-const waitForDefund1 = states.waitForDefund({
-  ...defaults,
-  defundingState: defundingPreSuccess.state,
-});
-const waitForDefund2 = states.waitForDefund({
-  ...defaults,
-  defundingState: defundingPreFailure.state,
-});
-const acknowledgeSuccess = states.acknowledgeSuccess({ ...defaults });
-const acknowledgeClosedButNotDefunded = states.acknowledgeClosedButNotDefunded({ ...defaults });
+const acknowledgeFailure = (reason: Reason) => states.acknowledgeFailure({ ...defaults, reason });
 
 // -------
 // Actions
@@ -92,11 +78,9 @@ const responseReceived = respondWithMoveEvent({
   responseCommitment: signedCommitment21.commitment,
   responseSignature: signedCommitment21.signature,
 });
-const responseAcknowledged = actions.challengeResponseAcknowledged({ processId });
-const failureAcknowledged = actions.challengeFailureAcknowledged({ processId });
 const challengeExpirySet = challengeExpirySetEvent({ processId, channelId, expiryTime: 1234 });
-const defundChosen = actions.defundChosen({ processId });
 const acknowledged = actions.acknowledged({ processId });
+
 // -------
 // Scenarios
 // -------
@@ -123,39 +107,26 @@ export const opponentResponds = {
   },
   acknowledgeResponse: {
     state: acknowledgeResponse,
-    action: responseAcknowledged,
+    action: acknowledged,
   },
 };
 
-// Todo: need to figure out how a `ChallengeTimedOut` action should be triggered
 export const challengeTimesOutAndIsDefunded = {
   ...defaults,
   waitForResponseOrTimeout: {
     state: waitForResponseOrTimeout,
     action: challengeTimedOut,
   },
-  acknowledgeTimeout: {
+  defund: {
     state: acknowledgeTimeout,
-    action: defundChosen,
-  },
-  challengerWaitForDefund: {
-    state: waitForDefund1,
-    action: defundingPreSuccess.action,
-  },
-  acknowledgeSuccess: {
-    state: acknowledgeSuccess,
-    action: acknowledged,
+    action: defundRequested({ ...defaults }),
   },
 };
 
 export const challengeTimesOutAndIsNotDefunded = {
   ...defaults,
-  challengerWaitForDefund: {
-    state: waitForDefund2,
-    action: defundingPreFailure.action,
-  },
-  acknowledgeClosedButNotDefunded: {
-    state: acknowledgeClosedButNotDefunded,
+  acknowledgeTimeout: {
+    state: acknowledgeTimeout,
     action: acknowledged,
   },
 };
@@ -164,8 +135,8 @@ export const channelDoesntExist = {
   ...defaults,
   sharedData: EMPTY_SHARED_DATA,
   acknowledgeFailure: {
-    state: acknowledge('ChannelDoesntExist'),
-    action: failureAcknowledged,
+    state: acknowledgeFailure('ChannelDoesntExist'),
+    action: acknowledged,
   },
 };
 
@@ -173,8 +144,8 @@ export const channelNotFullyOpen = {
   ...defaults,
   sharedData: sharedData(partiallyOpen),
   acknowledgeFailure: {
-    state: acknowledge('NotFullyOpen'),
-    action: failureAcknowledged,
+    state: acknowledgeFailure('NotFullyOpen'),
+    action: acknowledged,
   },
 };
 
@@ -182,8 +153,8 @@ export const alreadyHaveLatest = {
   ...defaults,
   sharedData: sharedData(ourTurn),
   acknowledgeFailure: {
-    state: acknowledge('AlreadyHaveLatest'),
-    action: failureAcknowledged,
+    state: acknowledgeFailure('AlreadyHaveLatest'),
+    action: acknowledged,
   },
 };
 
@@ -194,8 +165,8 @@ export const userDeclinesChallenge = {
     action: challengeDenied,
   },
   acknowledgeFailure: {
-    state: acknowledge('DeclinedByUser'),
-    action: failureAcknowledged,
+    state: acknowledgeFailure('DeclinedByUser'),
+    action: acknowledged,
   },
 };
 
@@ -207,8 +178,8 @@ export const receiveCommitmentWhileApproving = {
     action: challengeApproved,
   },
   acknowledgeFailure: {
-    state: acknowledge('LatestWhileApproving'),
-    action: failureAcknowledged,
+    state: acknowledgeFailure('LatestWhileApproving'),
+    action: acknowledged,
   },
 };
 
@@ -219,16 +190,7 @@ export const transactionFails = {
     action: transactionFailureTrigger,
   },
   acknowledgeFailure: {
-    state: acknowledge('TransactionFailed'),
-    action: failureAcknowledged,
-  },
-};
-
-export const defundActionComesDuringAcknowledgeTimeout = {
-  ...defaults,
-  acknowledgeTimeout: {
-    state: acknowledgeTimeout,
-    sharedData: sharedData(ourTurn),
-    action: defundingPreSuccess.action,
+    state: acknowledgeFailure('TransactionFailed'),
+    action: acknowledged,
   },
 };

@@ -194,8 +194,8 @@ describe('TRANSACTION FAILED ', () => {
   });
 });
 
-describe('CHALLENGE EXPIRES --> DEFUNDED', () => {
-  const scenario = scenarios.challengeExpiresChannelDefunded;
+describe('CHALLENGE EXPIRES AND CHANNEL not DEFUNDED', () => {
+  const scenario = scenarios.challengeExpires;
   const { sharedData } = scenario;
 
   describeScenarioStep(scenario.waitForResponse, () => {
@@ -203,41 +203,25 @@ describe('CHALLENGE EXPIRES --> DEFUNDED', () => {
     const result = responderReducer(state, sharedData, action);
     itTransitionsTo(result, 'Responding.AcknowledgeTimeout');
     itSendsThisDisplayEventType(result.sharedData, SHOW_WALLET);
+    itSendsThisMessage(result.sharedData, 'WALLET.CONCLUDE.OPPONENT');
   });
 
   describeScenarioStep(scenario.acknowledgeTimeout, () => {
     const { state, action } = scenario.acknowledgeTimeout;
     const result = responderReducer(state, sharedData, action);
-    itTransitionsTo(result, 'Responding.WaitForDefund');
-  });
-
-  describeScenarioStep(scenario.waitForDefund1, () => {
-    const { state, action } = scenario.waitForDefund1;
-    const result = responderReducer(state, sharedData, action);
-    itTransitionsTo(result, 'Responding.AcknowledgeDefundingSuccess');
-  });
-
-  describeScenarioStep(scenario.acknowledgeDefundingSuccess, () => {
-    const { state, action } = scenario.acknowledgeDefundingSuccess;
-    const result = responderReducer(state, sharedData, action);
-    itTransitionsTo(result, 'Responding.ClosedAndDefunded');
+    itTransitionsTo(result, 'Responding.Failure');
+    itSendsThisDisplayEventType(result.sharedData, HIDE_WALLET);
   });
 });
 
-describe('CHALLENGE EXPIRES --> not DEFUNDED', () => {
-  const scenario = scenarios.challengeExpiresButChannelNotDefunded;
+describe('CHALLENGE EXPIRES AND CHANNEL DEFUNDED', () => {
+  const scenario = scenarios.challengeExpiresAndDefund;
   const { sharedData } = scenario;
 
-  describeScenarioStep(scenario.waitForDefund2, () => {
-    const { state, action } = scenario.waitForDefund2;
+  describeScenarioStep(scenario.defund, () => {
+    const { state, action } = scenario.defund;
     const result = responderReducer(state, sharedData, action);
-    itTransitionsTo(result, 'Responding.AcknowledgeClosedButNotDefunded');
-  });
-
-  describeScenarioStep(scenario.acknowledgeClosedButNotDefunded, () => {
-    const { state, action } = scenario.acknowledgeClosedButNotDefunded;
-    const result = responderReducer(state, sharedData, action);
-    itTransitionsTo(result, 'Responding.ClosedButNotDefunded');
+    itTransitionsTo(result, 'Responding.Failure');
   });
 });
 
@@ -249,6 +233,7 @@ describe('CHALLENGE EXPIRES when in WaitForTransaction', () => {
     const { state, action } = scenario.waitForTransaction;
     const result = responderReducer(state, sharedData, action);
     itTransitionsTo(result, 'Responding.AcknowledgeTimeout');
+    itSendsThisMessage(result.sharedData, 'WALLET.CONCLUDE.OPPONENT');
   });
 });
 
@@ -260,18 +245,6 @@ describe('CHALLENGE EXPIRES when in WaitForApproval', () => {
     const { state, action } = scenario.waitForApprovalRespond;
     const result = responderReducer(state, sharedData, action);
     itTransitionsTo(result, 'Responding.AcknowledgeTimeout');
-  });
-});
-
-describe('DEFUND ACTION arrives in ACKNOWLEDGE_TIMEOUT', () => {
-  const scenario = scenarios.defundActionComesDuringAcknowledgeTimeout;
-  const { sharedData } = scenario;
-
-  describeScenarioStep(scenario.acknowledgeTimeout, () => {
-    const { state, action } = scenario.acknowledgeTimeout;
-
-    const result = responderReducer(state, sharedData, action);
-    // TODO: Is this the correct state?
-    itTransitionsTo(result, 'Responding.AcknowledgeClosedButNotDefunded');
+    itSendsThisMessage(result.sharedData, 'WALLET.CONCLUDE.OPPONENT');
   });
 });

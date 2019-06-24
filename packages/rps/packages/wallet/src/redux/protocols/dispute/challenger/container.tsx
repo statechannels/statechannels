@@ -8,30 +8,21 @@ import ApproveChallenge from './components/approve-challenge';
 import { TransactionSubmission } from '../../transaction-submission';
 import Acknowledge from '../../shared-components/acknowledge';
 import WaitForResponseOrTimeout from './components/wait-for-response-or-timeout';
-import { Defunding } from '../../defunding/container';
 import { ActionDispatcher } from '../../../utils';
+import DefundOrNot from './components/defund-or-not';
+import { DefundRequested, defundRequested } from '../../actions';
 
 interface Props {
   state: NonTerminalChallengerState;
   approve: ActionDispatcher<actions.ChallengeApproved>;
   deny: ActionDispatcher<actions.ChallengeDenied>;
-  failureAcknowledged: ActionDispatcher<actions.ChallengeFailureAcknowledged>;
-  responseAcknowledged: ActionDispatcher<actions.ChallengeResponseAcknowledged>;
-  acknowledged: ActionDispatcher<actions.ChallengeResponseAcknowledged>;
-  defundChosen: ActionDispatcher<actions.DefundChosen>;
+  acknowledged: ActionDispatcher<actions.Acknowledged>;
+  defund: ActionDispatcher<DefundRequested>;
 }
 
 class ChallengerContainer extends PureComponent<Props> {
   render() {
-    const {
-      state,
-      deny,
-      approve,
-      failureAcknowledged,
-      responseAcknowledged,
-      acknowledged,
-      defundChosen,
-    } = this.props;
+    const { state, deny, approve, acknowledged, defund } = this.props;
     const processId = state.processId;
     switch (state.type) {
       case 'Challenging.ApproveChallenge':
@@ -53,15 +44,15 @@ class ChallengerContainer extends PureComponent<Props> {
           <Acknowledge
             title="Opponent responded!"
             description="Your opponent responded to your challenge. You can now continue with your application."
-            acknowledge={() => responseAcknowledged({ processId })}
+            acknowledge={() => acknowledged({ processId })}
           />
         );
       case 'Challenging.AcknowledgeTimeout':
         return (
-          <Acknowledge
-            title="Challenge timed out!"
-            description="The challenge timed out. You can now reclaim your funds."
-            acknowledge={() => defundChosen({ processId })}
+          <DefundOrNot
+            approve={() => defund({ channelId: state.channelId, processId })}
+            deny={() => acknowledged({ processId })}
+            channelId={state.channelId}
           />
         );
       case 'Challenging.AcknowledgeFailure':
@@ -71,24 +62,6 @@ class ChallengerContainer extends PureComponent<Props> {
           <Acknowledge
             title="Challenge not possible"
             description={description}
-            acknowledge={() => failureAcknowledged({ processId })}
-          />
-        );
-      case 'Challenging.WaitForDefund':
-        return <Defunding state={state.defundingState} />;
-      case 'Challenging.AcknowledgeClosedButNotDefunded':
-        return (
-          <Acknowledge
-            title="Defunding failed!"
-            description="The channel was closed but not defunded."
-            acknowledge={() => acknowledged({ processId })}
-          />
-        );
-      case 'Challenging.AcknowledgeSuccess':
-        return (
-          <Acknowledge
-            title="Success!"
-            description="The channel was closed and defunded."
             acknowledge={() => acknowledged({ processId })}
           />
         );
@@ -120,10 +93,8 @@ function describeFailure(reason: FailureReason): string {
 const mapDispatchToProps = {
   approve: actions.challengeApproved,
   deny: actions.challengeDenied,
-  failureAcknowledged: actions.challengeFailureAcknowledged,
-  responseAcknowledged: actions.challengeResponseAcknowledged,
   acknowledged: actions.acknowledged,
-  defundChosen: actions.defundChosen,
+  defund: defundRequested, // TODO in future we should split this action into two distinct actions, so that protocol action and new process action unions remain disjoint.
 };
 
 export const Challenger = connect(
