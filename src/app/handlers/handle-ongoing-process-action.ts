@@ -22,6 +22,7 @@ export async function handleOngoingProcessAction(ctx) {
     case 'WALLET.NEW_PROCESS.CONCLUDE_INSTIGATED':
     case 'WALLET.FUNDING.STRATEGY_APPROVED':
     case 'WALLET.CONCLUDING.KEEP_LEDGER_CHANNEL_APPROVED':
+    case 'WALLET.NEW_PROCESS.DEFUND_REQUESTED':
       return ctx;
     case 'WALLET.COMMON.COMMITMENT_RECEIVED':
       return handleCommitmentReceived(ctx, action);
