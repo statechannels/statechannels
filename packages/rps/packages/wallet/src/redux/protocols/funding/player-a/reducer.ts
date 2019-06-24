@@ -23,7 +23,6 @@ import {
   isExistingChannelFundingAction,
 } from '../../existing-channel-funding';
 import * as existingChannelFundingStates from '../../existing-channel-funding/states';
-import { addHex } from '../../../../utils/hex-utils';
 import { CommitmentType } from 'fmg-core';
 import { getLastCommitment } from '../../../channel-store';
 
@@ -207,7 +206,7 @@ function strategyApproved(
         }.`,
       );
     }
-    const total = getLastCommitment(channelState).allocation.reduce(addHex);
+
     const {
       protocolState: fundingState,
       sharedData: newSharedData,
@@ -215,7 +214,6 @@ function strategyApproved(
       state.processId,
       channelState.channelId,
       existingLedgerChannel.channelId,
-      total,
       sharedData,
     );
 

@@ -13,7 +13,6 @@ export interface WaitForLedgerTopUp {
   ledgerTopUpState: any;
   channelId: string;
   ledgerId: string;
-  proposedAmount: string;
 }
 
 export interface WaitForPostFundSetup {
@@ -21,7 +20,6 @@ export interface WaitForPostFundSetup {
   processId: string;
   channelId: string;
   ledgerId: string;
-  proposedAmount: string;
 }
 
 export interface WaitForLedgerUpdate {
@@ -29,7 +27,6 @@ export interface WaitForLedgerUpdate {
   processId: string;
   channelId: string;
   ledgerId: string;
-  proposedAmount: string;
 }
 
 export interface Failure {

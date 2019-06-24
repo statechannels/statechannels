@@ -18,27 +18,30 @@ import { sendCommitmentReceived } from '../../../communication';
 import { CommitmentType } from 'fmg-core';
 import { initialize as initializeLedgerTopUp, ledgerTopUpReducer } from '../ledger-top-up/reducer';
 import { isLedgerTopUpAction } from '../ledger-top-up/actions';
+import { addHex } from '../../../utils/hex-utils';
 export const EXISTING_CHANNEL_FUNDING_PROTOCOL_LOCATOR = 'ExistingChannelFunding';
+
 export const initialize = (
   processId: string,
   channelId: string,
   ledgerId: string,
-  proposedTotal: string,
   sharedData: SharedData,
 ): ProtocolStateWithSharedData<states.ExistingChannelFundingState> => {
   const ledgerChannel = selectors.getChannelState(sharedData, ledgerId);
   const theirCommitment = getLastCommitment(ledgerChannel);
-  if (ledgerChannelNeedsTopUp(theirCommitment, proposedTotal)) {
-    const amountRequiredFromEachParticipant = bigNumberify(proposedTotal)
-      .div(theirCommitment.channel.participants.length)
-      .toHexString();
 
+  const {
+    allocation: proposedAllocation,
+    destination: proposedDestination,
+  } = helpers.getLatestCommitment(channelId, sharedData);
+
+  if (ledgerChannelNeedsTopUp(theirCommitment, proposedAllocation, proposedDestination)) {
     const { protocolState: ledgerTopUpState, sharedData: newSharedData } = initializeLedgerTopUp(
       processId,
       channelId,
       ledgerId,
-      [amountRequiredFromEachParticipant, amountRequiredFromEachParticipant],
-      theirCommitment.destination,
+      proposedAllocation,
+      proposedDestination,
       sharedData,
     );
     return {
@@ -47,22 +50,17 @@ export const initialize = (
         processId,
         channelId,
         ledgerId,
-        proposedAmount: proposedTotal,
       }),
       sharedData: newSharedData,
     };
   }
 
   if (helpers.isFirstPlayer(ledgerId, sharedData)) {
-    const { proposedAllocation, proposedDestination } = craftNewAllocationAndDestination(
-      theirCommitment,
-      proposedTotal,
-      channelId,
-    );
+    const appFunding = craftAppFunding(sharedData, channelId);
     const ourCommitment = proposeNewConsensus(
       theirCommitment,
-      proposedAllocation,
-      proposedDestination,
+      appFunding.proposedAllocation,
+      appFunding.proposedDestination,
     );
     const signResult = signAndStore(sharedData, ourCommitment);
     if (!signResult.isSuccess) {
@@ -87,7 +85,6 @@ export const initialize = (
     processId,
     ledgerId,
     channelId,
-    proposedAmount: proposedTotal,
   });
 
   return { protocolState, sharedData };
@@ -130,24 +127,23 @@ const waitForLedgerTopUpReducer = (
       sharedData,
     };
   } else if (ledgerTopUpState.type === 'LedgerTopUp.Success') {
-    const { ledgerId, proposedAmount, channelId, processId } = protocolState;
+    const { ledgerId, processId } = protocolState;
     const ledgerChannel = selectors.getChannelState(sharedData, ledgerId);
     const theirCommitment = getLastCommitment(ledgerChannel);
+
     if (helpers.isFirstPlayer(ledgerId, sharedData)) {
-      const { proposedAllocation, proposedDestination } = craftNewAllocationAndDestination(
-        theirCommitment,
-        proposedAmount,
-        channelId,
-      );
+      const appFunding = craftAppFunding(sharedData, protocolState.channelId);
       const ourCommitment = proposeNewConsensus(
         theirCommitment,
-        proposedAllocation,
-        proposedDestination,
+        appFunding.proposedAllocation,
+        appFunding.proposedDestination,
       );
       const signResult = signAndStore(sharedData, ourCommitment);
       if (!signResult.isSuccess) {
         return {
-          protocolState: states.failure({ reason: 'ReceivedInvalidCommitment' }),
+          protocolState: states.failure({
+            reason: 'ReceivedInvalidCommitment',
+          }),
           sharedData,
         };
       }
@@ -271,46 +267,36 @@ const waitForLedgerUpdateReducer = (
   return { protocolState: states.waitForPostFundSetup(protocolState), sharedData: newSharedData };
 };
 
-function craftNewAllocationAndDestination(
+function ledgerChannelNeedsTopUp(
   latestCommitment: Commitment,
-  proposedAmount: string,
-  channelId: string,
-): { proposedAllocation: string[]; proposedDestination: string[] } {
-  const numParticipants = helpers.getNumberOfParticipants(latestCommitment);
-  const amountRequiredFromEachParticipant = bigNumberify(proposedAmount).div(numParticipants);
-
-  const proposedAllocation: string[] = [];
-  const proposedDestination: string[] = [];
-
-  for (let i = 0; i < latestCommitment.allocation.length; i++) {
-    const allocation = latestCommitment.allocation[i];
-
-    const newAmount = bigNumberify(allocation).sub(amountRequiredFromEachParticipant);
-
-    if (newAmount.gt('0x0')) {
-      proposedAllocation.push(newAmount.toHexString());
-      proposedDestination.push(latestCommitment.destination[i]);
-    }
-  }
-
-  proposedAllocation.push(proposedAmount);
-  proposedDestination.push(channelId);
-
-  return { proposedAllocation, proposedDestination };
-}
-
-function ledgerChannelNeedsTopUp(latestCommitment: Commitment, proposedAmount: string) {
+  proposedAllocation: string[],
+  proposedDestination: string[],
+) {
   if (latestCommitment.commitmentType !== CommitmentType.App) {
     throw new Error('Ledger channel is already closed.');
   }
-  const numParticipants = helpers.getNumberOfParticipants(latestCommitment);
-  const amountRequiredFromEachParticipant = bigNumberify(proposedAmount).div(numParticipants);
-
-  return !latestCommitment.allocation.every(a =>
-    bigNumberify(a).gte(amountRequiredFromEachParticipant),
-  );
+  // We assume that destination/allocation are the same length and destination contains the same addresses
+  // Otherwise we shouldn't be in this protocol at all
+  for (let i = 0; i < proposedDestination.length; i++) {
+    const address = proposedDestination[i];
+    const existingIndex = latestCommitment.destination.indexOf(address);
+    if (bigNumberify(latestCommitment.allocation[existingIndex]).lt(proposedAllocation[i])) {
+      return true;
+    }
+  }
+  return false;
 }
-
+function craftAppFunding(
+  sharedData: SharedData,
+  appChannelId: string,
+): { proposedAllocation: string[]; proposedDestination: string[] } {
+  const commitment = helpers.getLatestCommitment(appChannelId, sharedData);
+  const total = commitment.allocation.reduce(addHex);
+  return {
+    proposedAllocation: [total],
+    proposedDestination: [appChannelId],
+  };
+}
 function craftAndSendAppPostFundCommitment(
   sharedData: SharedData,
   appChannelId: string,
