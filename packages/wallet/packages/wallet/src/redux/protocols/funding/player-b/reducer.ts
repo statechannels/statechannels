@@ -23,8 +23,6 @@ import {
   initializeExistingChannelFunding,
 } from '../../existing-channel-funding';
 import * as existingChannelFundingStates from '../../existing-channel-funding/states';
-
-import { addHex } from '../../../../utils/hex-utils';
 import { CommitmentType } from 'fmg-core';
 import { getLastCommitment } from '../../../channel-store';
 type EmbeddedAction = IndirectFundingAction;
@@ -60,11 +58,11 @@ export function fundingReducer(
     case 'WALLET.FUNDING.STRATEGY_PROPOSED':
       return strategyProposed(state, sharedData, action);
     case 'WALLET.FUNDING.PLAYER_B.STRATEGY_APPROVED':
-      return strategyApproved(state, sharedData, action);
+      return strategyApproved(state, sharedData);
     case 'WALLET.FUNDING.PLAYER_B.STRATEGY_REJECTED':
-      return strategyRejected(state, sharedData, action);
+      return strategyRejected(state, sharedData);
     case 'WALLET.FUNDING.PLAYER_B.FUNDING_SUCCESS_ACKNOWLEDGED':
-      return fundingSuccessAcknowledged(state, sharedData, action);
+      return fundingSuccessAcknowledged(state, sharedData);
     case 'WALLET.FUNDING.PLAYER_B.CANCELLED':
       return cancelled(state, sharedData, action);
     default:
@@ -165,11 +163,7 @@ function strategyProposed(
   return { protocolState: states.waitForStrategyApproval({ ...state, strategy }), sharedData };
 }
 
-function strategyApproved(
-  state: states.FundingState,
-  sharedData: SharedData,
-  action: actions.StrategyApproved,
-) {
+function strategyApproved(state: states.FundingState, sharedData: SharedData) {
   if (state.type !== 'Funding.PlayerB.WaitForStrategyApproval') {
     return { protocolState: state, sharedData };
   }
@@ -195,7 +189,7 @@ function strategyApproved(
         }.`,
       );
     }
-    const total = getLastCommitment(channelState).allocation.reduce(addHex);
+
     const {
       protocolState: fundingState,
       sharedData: newSharedData,
@@ -203,7 +197,6 @@ function strategyApproved(
       state.processId,
       channelState.channelId,
       existingLedgerChannel.channelId,
-      total,
       sharedData,
     );
 
@@ -232,11 +225,7 @@ function strategyApproved(
   }
 }
 
-function strategyRejected(
-  state: states.FundingState,
-  sharedData: SharedData,
-  action: actions.StrategyRejected,
-) {
+function strategyRejected(state: states.FundingState, sharedData: SharedData) {
   if (state.type !== 'Funding.PlayerB.WaitForStrategyApproval') {
     return { protocolState: state, sharedData };
   }
@@ -247,11 +236,7 @@ function strategyRejected(
   };
 }
 
-function fundingSuccessAcknowledged(
-  state: states.FundingState,
-  sharedData: SharedData,
-  action: actions.FundingSuccessAcknowledged,
-) {
+function fundingSuccessAcknowledged(state: states.FundingState, sharedData: SharedData) {
   if (state.type !== 'Funding.PlayerB.WaitForSuccessConfirmation') {
     return { protocolState: state, sharedData };
   }
