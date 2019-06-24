@@ -5,6 +5,14 @@ module.exports = {
   preDeployContracts
 };
 
+// This function will:
+// - clear the buildContractsPath directory
+// - set TARGET_NETWORK environment variable to a testnet
+// - call deployContracts()
+// - repeat for 3 testets
+// - overwrite artifact with a copy where only certain fields have been selected
+// - save this file to the appPreBuiltContractArtifactsPath directory
+
 function preDeployContracts(buildContractsPath, appPreBuiltContractArtifactsPath) {
   fs.emptyDirSync(buildContractsPath, '');
   process.env.TARGET_NETWORK = 'ropsten';
@@ -21,9 +29,9 @@ function preDeployContracts(buildContractsPath, appPreBuiltContractArtifactsPath
       return deployContracts();
     })
     .then(() => {
-      fs.readdir(buildContractsPath + '/', function(err, artifacts) {
+      fs.readdir(buildContractsPath, function(err, artifacts) {
         for (var i = 0; i < artifacts.length; i++) {
-          fs.readJson(buildContractsPath + '/' + artifacts[i])
+          fs.readJson(path.join(buildContractsPath, artifacts[i]))
             .then(artifact => {
               const strippedArtifact = {
                 contractName: artifact.contractName,
@@ -34,7 +42,7 @@ function preDeployContracts(buildContractsPath, appPreBuiltContractArtifactsPath
 
               let data = JSON.stringify(strippedArtifact, null, 2);
 
-              fs.outputFile(appPreBuiltContractArtifactsPath + '/' + artifact.contractName + '.json', data, err => {
+              fs.outputFile(path.join(appPreBuiltContractArtifactsPath, artifact.contractName, '.json'), data, err => {
                 if (err) {
                   throw err;
                 }
