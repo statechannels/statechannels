@@ -1,20 +1,31 @@
-const defaultMatcher = function (event) { return true };
+const _ = require("lodash");
+
 module.exports = {
-    expectEvent: function (contract, filter) {
-        const emitterWitness = jest.fn();
-        const eventPromise = new Promise((resolve, reject) => {
-            contract.on(filter, function () {
-                const event = arguments[arguments.length - 1];
-                emitterWitness();
-                resolve(event);
-            });
-    
-            // After 10s, we throw a timeout error
-            setTimeout(() => {
-                reject(new Error('timeout while waiting for event'));
-            }, 10000);
-        });
-    
-        return { emitterWitness, eventPromise };
-      }
-}
+  expectEvent: async function(
+    txOrTxResult,
+    expectedEventName,
+    expectedEventArgs = {}
+  ) {
+    // Usage:
+    // Pass a transaction result, in which case await is unnecessary
+    // expectEvent(txResult, 'EventName', { argName: value })
+    // OR
+    // pass a transaction object
+    // await expectEvent(await someContract.someFunction(), 'EventName', { argName: value })
+
+    let txResult = txOrTxResult;
+    if (txOrTxResult.wait) {
+      // in this case, we were passed the result of `await someContract.someFunction(args)`,
+      // which is the transasction got sent off, but hasn't yet been confirmed.
+      txResult = await txOrTxResult.wait();
+    }
+    const events = txResult.events;
+    const matchingEvents = events.filter(event => {
+      return (
+        event.event === expectedEventName &&
+        _.isMatch(event.args, expectedEventArgs)
+      );
+    });
+    expect(matchingEvents.length).toBeGreaterThan(0);
+  }
+};
