@@ -42,7 +42,7 @@ function deployContractsToTestnets(buildContractsPath, appPreBuiltContractArtifa
 
               let data = JSON.stringify(strippedArtifact, null, 2);
 
-              fs.outputFile(path.join(appPreBuiltContractArtifactsPath, artifact.contractName, '.json'), data, err => {
+              fs.outputFile(path.format({ dir: appPreBuiltContractArtifactsPath, name: artifact.contractName, ext: '.json' }), data, err => {
                 if (err) {
                   throw err;
                 }
