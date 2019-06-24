@@ -26,7 +26,7 @@ export async function handleOngoingProcessAction(ctx) {
       return ctx;
     case 'WALLET.COMMON.COMMITMENT_RECEIVED':
       return handleCommitmentReceived(ctx, action);
-    case 'WALLET.ADVANCE_CHANNEL.COMMITMENTS_RECEIVED':
+    case 'WALLET.COMMON.COMMITMENTS_RECEIVED':
       return handleCommitmentsReceived({ ctx, action });
     case 'WALLET.FUNDING.STRATEGY_PROPOSED':
       return handleStrategyProposed(ctx, action);
