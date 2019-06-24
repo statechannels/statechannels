@@ -2,7 +2,7 @@ const { deployContracts } = require('./deployContracts');
 const fs = require('fs-extra');
 
 module.exports = {
-  preDeployContracts
+  deployContractsToTestnets
 };
 
 // This function will:
@@ -13,7 +13,7 @@ module.exports = {
 // - overwrite artifact with a copy where only certain fields have been selected
 // - save this file to the appPreBuiltContractArtifactsPath directory
 
-function preDeployContracts(buildContractsPath, appPreBuiltContractArtifactsPath) {
+function deployContractsToTestnets(buildContractsPath, appPreBuiltContractArtifactsPath) {
   fs.emptyDirSync(buildContractsPath, '');
   process.env.TARGET_NETWORK = 'ropsten';
   console.log('deploying to ropsten');
