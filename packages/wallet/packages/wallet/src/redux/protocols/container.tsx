@@ -10,6 +10,8 @@ import { connect } from 'react-redux';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSpinner } from '@fortawesome/free-solid-svg-icons';
 import { Challenging } from './dispute/container';
+import { isDefundingState } from './defunding/states';
+import { Defunding } from './defunding';
 
 interface Props {
   protocolState: ProtocolState;
@@ -27,6 +29,8 @@ class ProtocolContainer extends PureComponent<Props> {
       return <Challenging state={protocolState} />;
     } else if (concludingStates.isConcludingState(protocolState)) {
       return <Concluding state={protocolState} />;
+    } else if (isDefundingState(protocolState)) {
+      return <Defunding state={protocolState} />;
     } else {
       return (
         <div>

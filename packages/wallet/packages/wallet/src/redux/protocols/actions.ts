@@ -40,6 +40,13 @@ export interface ChallengeCreated {
   channelId: string;
   protocol: WalletProtocol.Dispute;
 }
+
+export interface DefundRequested {
+  type: 'WALLET.NEW_PROCESS.DEFUND_REQUESTED';
+  processId: string; // to allow existing protocol reducer to terminate by consuming this action
+  channelId: string;
+  protocol: WalletProtocol.Defunding;
+}
 // -------
 // Constructors
 // -------
@@ -73,6 +80,12 @@ export const challengeCreated: ActionConstructor<ChallengeCreated> = p => ({
   protocol: WalletProtocol.Dispute,
 });
 
+export const defundRequested: ActionConstructor<DefundRequested> = p => ({
+  ...p,
+  type: 'WALLET.NEW_PROCESS.DEFUND_REQUESTED',
+  protocol: WalletProtocol.Defunding,
+});
+
 // -------
 // Types and Guards
 // -------
@@ -83,7 +96,8 @@ export type NewProcessAction =
   | ConcludeRequested
   | ConcludeInstigated
   | CreateChallengeRequested
-  | ChallengeCreated;
+  | ChallengeCreated
+  | DefundRequested;
 
 export function isNewProcessAction(action: WalletAction): action is NewProcessAction {
   return (
@@ -92,6 +106,7 @@ export function isNewProcessAction(action: WalletAction): action is NewProcessAc
     action.type === 'WALLET.NEW_PROCESS.CONCLUDE_REQUESTED' ||
     action.type === 'WALLET.NEW_PROCESS.CONCLUDE_INSTIGATED' ||
     action.type === 'WALLET.NEW_PROCESS.CREATE_CHALLENGE_REQUESTED' ||
-    action.type === 'WALLET.NEW_PROCESS.CHALLENGE_CREATED'
+    action.type === 'WALLET.NEW_PROCESS.CHALLENGE_CREATED' ||
+    action.type === 'WALLET.NEW_PROCESS.DEFUND_REQUESTED'
   );
 }

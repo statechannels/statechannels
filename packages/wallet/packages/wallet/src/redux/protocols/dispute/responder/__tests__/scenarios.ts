@@ -7,10 +7,6 @@ import { EMPTY_SHARED_DATA, SharedData } from '../../../../state';
 import { ChannelState, ChannelStore } from '../../../../channel-store';
 import * as transactionActions from '../../../transaction-submission/actions';
 import { challengeExpiredEvent } from '../../../../actions';
-import {
-  preSuccess as defundingPreSuccess,
-  preFailure as defundingPreFailure,
-} from '../../../defunding/__tests__';
 
 // ---------
 // Test data
@@ -88,26 +84,15 @@ const transactionFailedFailure = states.failure({
 const transactionConfirmed = transactionActions.transactionConfirmed({ processId });
 const transactionFailed = transactionActions.transactionFailed({ processId });
 const acknowledgeTimeout = states.acknowledgeTimeout(defaults);
-const waitForDefund1 = states.waitForDefund({
-  ...defaults,
-  defundingState: defundingPreSuccess.state,
-});
-const waitForDefund2 = states.waitForDefund({
-  ...defaults,
-  defundingState: defundingPreFailure.state,
-});
-const acknowledgeDefundingSuccess = states.acknowledgeDefundingSuccess({ ...defaults });
-const acknowledgeClosedButNotDefunded = states.acknowledgeClosedButNotDefunded({ ...defaults });
+
 // ------
 // Actions
 // ------
 const approve = actions.respondApproved({ processId });
-const acknowledge = actions.respondSuccessAcknowledged({ processId });
 const responseProvided = actions.responseProvided({
   processId,
   commitment: testScenarios.gameCommitment3,
 });
-const defundChosen = actions.defundChosen({ processId });
 const acknowledged = actions.acknowledged({ processId });
 const challengeTimedOut = challengeExpiredEvent({ processId, channelId, timestamp: 1000 });
 
@@ -128,7 +113,7 @@ export const respondWithExistingCommitmentHappyPath = {
   },
   waitForAcknowledgement: {
     state: waitForAcknowledgement,
-    action: acknowledge,
+    action: acknowledged,
   },
 };
 
@@ -147,7 +132,7 @@ export const refuteHappyPath = {
   },
   waitForAcknowledgement: {
     state: waitForAcknowledgement,
-    action: acknowledge,
+    action: acknowledged,
   },
 };
 
@@ -169,7 +154,7 @@ export const requireResponseHappyPath = {
   },
   waitForAcknowledgement: {
     state: waitForAcknowledgement,
-    action: acknowledge,
+    action: acknowledged,
   },
 };
 
@@ -186,7 +171,7 @@ export const transactionFails = {
   failure: transactionFailedFailure,
 };
 
-export const challengeExpiresChannelDefunded = {
+export const challengeExpires = {
   ...defaults,
   waitForResponse: {
     state: waitForResponse,
@@ -194,26 +179,14 @@ export const challengeExpiresChannelDefunded = {
   },
   acknowledgeTimeout: {
     state: acknowledgeTimeout,
-    action: defundChosen,
-  },
-  waitForDefund1: {
-    state: waitForDefund1,
-    action: defundingPreSuccess.action,
-  },
-  acknowledgeDefundingSuccess: {
-    state: acknowledgeDefundingSuccess,
     action: acknowledged,
   },
 };
 
-export const challengeExpiresButChannelNotDefunded = {
+export const challengeExpiresAndDefund = {
   ...defaults,
-  waitForDefund2: {
-    state: waitForDefund2,
-    action: defundingPreFailure.action,
-  },
-  acknowledgeClosedButNotDefunded: {
-    state: acknowledgeClosedButNotDefunded,
+  defund: {
+    state: acknowledgeTimeout,
     action: acknowledged,
   },
 };
@@ -231,13 +204,5 @@ export const challengeExpiresDuringWaitForApproval = {
   waitForApprovalRespond: {
     state: waitForApprovalRespond,
     action: challengeTimedOut,
-  },
-};
-
-export const defundActionComesDuringAcknowledgeTimeout = {
-  ...defaults,
-  acknowledgeTimeout: {
-    state: acknowledgeTimeout,
-    action: defundingPreSuccess.action,
   },
 };

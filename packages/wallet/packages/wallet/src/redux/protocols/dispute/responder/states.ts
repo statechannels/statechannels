@@ -1,7 +1,6 @@
 import { NonTerminalTransactionSubmissionState as NonTerminalTSState } from '../../transaction-submission/states';
 import { Commitment } from '../../../../domain';
 import { ProtocolState } from '../..';
-import { DefundingState } from '../../defunding';
 import { StateConstructor } from '../../../utils';
 
 // -------
@@ -10,6 +9,7 @@ import { StateConstructor } from '../../../utils';
 
 export const enum FailureReason {
   TransactionFailure = 'Transaction failed',
+  TimeOut = 'Challenge timed out',
 }
 
 export interface WaitForApproval {
@@ -44,35 +44,9 @@ export interface AcknowledgeTimeout {
   channelId: string;
 }
 
-export interface WaitForDefund {
-  type: 'Responding.WaitForDefund';
-  processId: string;
-  defundingState: DefundingState;
-  channelId: string;
-}
-
-export interface AcknowledgeDefundingSuccess {
-  type: 'Responding.AcknowledgeDefundingSuccess';
-  processId: string;
-  channelId: string;
-}
-
-export interface AcknowledgeClosedButNotDefunded {
-  type: 'Responding.AcknowledgeClosedButNotDefunded';
-  processId: string;
-  channelId: string;
-}
 export interface Failure {
   type: 'Responding.Failure';
-  reason: string;
-}
-
-export interface ClosedAndDefunded {
-  type: 'Responding.ClosedAndDefunded';
-}
-
-export interface ClosedButNotDefunded {
-  type: 'Responding.ClosedButNotDefunded';
+  reason: FailureReason;
 }
 
 export interface Success {
@@ -106,20 +80,6 @@ export const acknowledgeTimeout: StateConstructor<AcknowledgeTimeout> = p => {
   return { ...p, type: 'Responding.AcknowledgeTimeout' };
 };
 
-export const waitForDefund: StateConstructor<WaitForDefund> = p => {
-  return { ...p, type: 'Responding.WaitForDefund' };
-};
-
-export const acknowledgeDefundingSuccess: StateConstructor<AcknowledgeDefundingSuccess> = p => {
-  return { ...p, type: 'Responding.AcknowledgeDefundingSuccess' };
-};
-
-export const acknowledgeClosedButNotDefunded: StateConstructor<
-  AcknowledgeClosedButNotDefunded
-> = p => {
-  return { ...p, type: 'Responding.AcknowledgeClosedButNotDefunded' };
-};
-
 export const success: StateConstructor<Success> = p => {
   return { ...p, type: 'Responding.Success' };
 };
@@ -128,22 +88,10 @@ export const failure: StateConstructor<Failure> = p => {
   return { ...p, type: 'Responding.Failure' };
 };
 
-export const closedAndDefunded: StateConstructor<ClosedAndDefunded> = p => {
-  return { ...p, type: 'Responding.ClosedAndDefunded' };
-};
-export const closedButNotDefunded: StateConstructor<ClosedButNotDefunded> = p => {
-  return { ...p, type: 'Responding.ClosedButNotDefunded' };
-};
-
 // -------
 // Unions and Guards
 // -------
-export type ResponderState =
-  | NonTerminalResponderState
-  | Success
-  | ClosedAndDefunded
-  | ClosedButNotDefunded
-  | Failure;
+export type ResponderState = NonTerminalResponderState | Success | Failure;
 
 export type ResponderStateType = ResponderState['type'];
 
@@ -152,12 +100,9 @@ export type NonTerminalResponderState =
   | WaitForTransaction
   | WaitForAcknowledgement
   | WaitForResponse
-  | AcknowledgeTimeout
-  | WaitForDefund
-  | AcknowledgeDefundingSuccess
-  | AcknowledgeClosedButNotDefunded;
+  | AcknowledgeTimeout;
 
-export type TerminalResponderState = ClosedAndDefunded | ClosedButNotDefunded | Success;
+export type TerminalResponderState = Failure | Success;
 export function isResponderState(state: ProtocolState): state is ResponderState {
   return (
     state.type === 'Responding.WaitForApproval' ||
@@ -165,12 +110,7 @@ export function isResponderState(state: ProtocolState): state is ResponderState 
     state.type === 'Responding.WaitForAcknowledgement' ||
     state.type === 'Responding.WaitForResponse' ||
     state.type === 'Responding.AcknowledgeTimeout' ||
-    state.type === 'Responding.WaitForDefund' ||
-    state.type === 'Responding.AcknowledgeDefundingSuccess' ||
-    state.type === 'Responding.AcknowledgeClosedButNotDefunded' ||
     state.type === 'Responding.Failure' ||
-    state.type === 'Responding.ClosedAndDefunded' ||
-    state.type === 'Responding.ClosedButNotDefunded' ||
     state.type === 'Responding.Success'
   );
 }
@@ -182,10 +122,5 @@ export function isNonTerminalResponderState(
 }
 
 export function isTerminal(state: ResponderState): state is TerminalResponderState {
-  return (
-    state.type === 'Responding.ClosedAndDefunded' ||
-    state.type === 'Responding.Failure' ||
-    state.type === 'Responding.Success' ||
-    state.type === 'Responding.ClosedButNotDefunded'
-  );
+  return state.type === 'Responding.Failure' || state.type === 'Responding.Success';
 }

@@ -80,7 +80,7 @@ describe('OPPONENT RESPONDS', () => {
   });
 });
 
-describe('CHALLENGE TIMES OUT AND IS DEFUNDED ', () => {
+describe('CHALLENGE TIMES OUT AND IS DEFUNDED', () => {
   const scenario = scenarios.challengeTimesOutAndIsDefunded;
   const { sharedData } = scenario;
 
@@ -90,44 +90,24 @@ describe('CHALLENGE TIMES OUT AND IS DEFUNDED ', () => {
     itTransitionsTo(result, 'Challenging.AcknowledgeTimeout');
   });
 
+  describeScenarioStep(scenario.defund, () => {
+    const { state, action } = scenario.defund;
+    const result = challengerReducer(state, sharedData, action);
+
+    itTransitionsTo(result, 'Challenging.SuccessClosed');
+  });
+});
+
+describe('CHALLENGE TIMES OUT AND IS not DEFUNDED', () => {
+  const scenario = scenarios.challengeTimesOutAndIsNotDefunded;
+  const { sharedData } = scenario;
+
   describeScenarioStep(scenario.acknowledgeTimeout, () => {
     const { state, action } = scenario.acknowledgeTimeout;
     const result = challengerReducer(state, sharedData, action);
 
-    itTransitionsTo(result, 'Challenging.WaitForDefund');
-  });
-
-  describeScenarioStep(scenario.challengerWaitForDefund, () => {
-    const { state, action } = scenario.challengerWaitForDefund;
-    const result = challengerReducer(state, sharedData, action);
-
-    itTransitionsTo(result, 'Challenging.AcknowledgeSuccess');
-  });
-
-  describeScenarioStep(scenario.acknowledgeSuccess, () => {
-    const { state, action } = scenario.acknowledgeSuccess;
-    const result = challengerReducer(state, sharedData, action);
-
-    itTransitionsTo(result, 'Challenging.SuccessClosedAndDefunded');
-  });
-});
-
-describe('CHALLENGE TIMES OUT AND IS not DEFUNDED ', () => {
-  const scenario = scenarios.challengeTimesOutAndIsNotDefunded;
-  const { sharedData } = scenario;
-
-  describeScenarioStep(scenario.challengerWaitForDefund, () => {
-    const { state, action } = scenario.challengerWaitForDefund;
-    const result = challengerReducer(state, sharedData, action);
-
-    itTransitionsTo(result, 'Challenging.AcknowledgeClosedButNotDefunded');
-  });
-
-  describeScenarioStep(scenario.acknowledgeClosedButNotDefunded, () => {
-    const { state, action } = scenario.acknowledgeClosedButNotDefunded;
-    const result = challengerReducer(state, sharedData, action);
-
-    itTransitionsTo(result, 'Challenging.SuccessClosedButNotDefunded');
+    itTransitionsTo(result, 'Challenging.SuccessClosed');
+    itSendsThisDisplayEventType(result.sharedData, HIDE_WALLET);
   });
 });
 
@@ -252,18 +232,6 @@ describe('TRANSACTION FAILS  ', () => {
 
     itTransitionsTo(result, 'Challenging.Failure');
     itHasFailureReason(result, 'TransactionFailed');
-  });
-});
-
-describe('DEFUND ACTION arrives in ACKNOWLEDGE_TIMEOUT', () => {
-  const scenario = scenarios.defundActionComesDuringAcknowledgeTimeout;
-
-  describeScenarioStep(scenario.acknowledgeTimeout, () => {
-    const { state, sharedData, action } = scenario.acknowledgeTimeout;
-
-    const result = challengerReducer(state, sharedData, action);
-    // TODO: Is this the correct state?
-    itTransitionsTo(result, 'Challenging.AcknowledgeClosedButNotDefunded');
   });
 });
 

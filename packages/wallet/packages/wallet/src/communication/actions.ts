@@ -4,6 +4,7 @@ import { FundingStrategy } from './index';
 import { WalletProtocol } from '.';
 import { ActionConstructor } from '../redux/utils';
 import { Commitments } from '../redux/channel-store';
+import { DefundRequested } from '../redux/protocols/actions';
 
 export interface BaseProcessAction {
   processId: string;
@@ -109,8 +110,9 @@ export type RelayableAction =
   | StrategyApproved
   | ConcludeInstigated
   | CommitmentReceived
-  | KeepLedgerChannelApproved
-  | CommitmentsReceived;
+  | CommitmentsReceived
+  | DefundRequested
+  | KeepLedgerChannelApproved;
 
 export function isRelayableAction(action: WalletAction): action is RelayableAction {
   return (
@@ -118,6 +120,7 @@ export function isRelayableAction(action: WalletAction): action is RelayableActi
     action.type === 'WALLET.FUNDING.STRATEGY_APPROVED' ||
     action.type === 'WALLET.NEW_PROCESS.CONCLUDE_INSTIGATED' ||
     action.type === 'WALLET.COMMON.COMMITMENT_RECEIVED' ||
+    action.type === 'WALLET.NEW_PROCESS.DEFUND_REQUESTED' ||
     action.type === 'WALLET.CONCLUDING.KEEP_LEDGER_CHANNEL_APPROVED' ||
     action.type === 'WALLET.ADVANCE_CHANNEL.COMMITMENTS_RECEIVED'
   );

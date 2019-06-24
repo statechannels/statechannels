@@ -1,4 +1,4 @@
-import { BaseProcessAction } from '../../actions';
+import { BaseProcessAction, DefundRequested } from '../../actions';
 import { Commitment } from '../../../../domain';
 import { TransactionAction } from '../../transaction-submission/actions';
 import {
@@ -7,7 +7,6 @@ import {
   ChallengeExpirySetEvent,
   WalletAction,
 } from '../../../actions';
-import { isDefundingAction, DefundingAction } from '../../defunding/actions';
 import { ActionConstructor } from '../../../utils';
 
 // -------
@@ -24,16 +23,6 @@ export interface ResponseProvided extends BaseProcessAction {
   processId: string;
   commitment: Commitment;
 }
-
-export interface RespondSuccessAcknowledged extends BaseProcessAction {
-  type: 'WALLET.DISPUTE.RESPONDER.RESPOND_SUCCESS_ACKNOWLEDGED';
-  processId: string;
-}
-
-export interface DefundChosen extends BaseProcessAction {
-  type: 'WALLET.DISPUTE.RESPONDER.DEFUND_CHOSEN';
-  processId: string;
-}
 export interface Acknowledged extends BaseProcessAction {
   type: 'WALLET.DISPUTE.RESPONDER.ACKNOWLEDGED';
   processId: string;
@@ -48,19 +37,9 @@ export const respondApproved: ActionConstructor<RespondApproved> = p => ({
   type: 'WALLET.DISPUTE.RESPONDER.RESPOND_APPROVED',
 });
 
-export const respondSuccessAcknowledged: ActionConstructor<RespondSuccessAcknowledged> = p => ({
-  ...p,
-  type: 'WALLET.DISPUTE.RESPONDER.RESPOND_SUCCESS_ACKNOWLEDGED',
-});
-
 export const responseProvided: ActionConstructor<ResponseProvided> = p => ({
   ...p,
   type: 'WALLET.DISPUTE.RESPONDER.RESPONSE_PROVIDED',
-});
-
-export const defundChosen: ActionConstructor<DefundChosen> = p => ({
-  ...p,
-  type: 'WALLET.DISPUTE.RESPONDER.DEFUND_CHOSEN',
 });
 
 export const acknowledged: ActionConstructor<Acknowledged> = p => ({
@@ -74,25 +53,21 @@ export const acknowledged: ActionConstructor<Acknowledged> = p => ({
 
 export type ResponderAction =
   | TransactionAction
-  | DefundingAction
   | RespondApproved
   | ResponseProvided
-  | RespondSuccessAcknowledged
   | ChallengeExpiredEvent
   | ChallengeExpirySetEvent
-  | DefundChosen
-  | Acknowledged;
+  | Acknowledged
+  | DefundRequested;
 
 export function isResponderAction(action: WalletAction): action is ResponderAction {
   return (
     isTransactionAction(action) ||
-    isDefundingAction(action) ||
     action.type === 'WALLET.DISPUTE.RESPONDER.RESPOND_APPROVED' ||
     action.type === 'WALLET.DISPUTE.RESPONDER.RESPONSE_PROVIDED' ||
-    action.type === 'WALLET.DISPUTE.RESPONDER.RESPOND_SUCCESS_ACKNOWLEDGED' ||
     action.type === 'WALLET.ADJUDICATOR.CHALLENGE_EXPIRY_TIME_SET' ||
     action.type === 'WALLET.ADJUDICATOR.CHALLENGE_EXPIRED' ||
-    action.type === 'WALLET.DISPUTE.RESPONDER.DEFUND_CHOSEN' ||
-    action.type === 'WALLET.DISPUTE.RESPONDER.ACKNOWLEDGED'
+    action.type === 'WALLET.DISPUTE.RESPONDER.ACKNOWLEDGED' ||
+    action.type === 'WALLET.NEW_PROCESS.DEFUND_REQUESTED' // TODO in future this should be a new and distinct action that is not a new process Action
   );
 }

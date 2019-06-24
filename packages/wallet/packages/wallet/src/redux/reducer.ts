@@ -6,6 +6,7 @@ import { clearOutbox } from './outbox/reducer';
 import { ProtocolState } from './protocols';
 import { isNewProcessAction, NewProcessAction } from './protocols/actions';
 import * as applicationProtocol from './protocols/application';
+import * as defundingProtocol from './protocols/defunding';
 import {
   challengingReducer,
   initializeChallengerState,
@@ -51,6 +52,13 @@ export function initializedReducer(
     newState = updateSharedData(newState, action);
   }
 
+  //
+  // if the action is both a protocol action and a new process action (e.g. action terminates current process and starts new one)
+  // this is probably not what we want to do long term (instead, dispatch two separate actions)
+  if (isNewProcessAction(action) && actions.isProtocolAction(action)) {
+    return routeToNewProcessInitializer(routeToProtocolReducer(newState, action), action);
+  }
+  //
   if (isNewProcessAction(action)) {
     return routeToNewProcessInitializer(newState, action);
   } else if (actions.isProtocolAction(action)) {
@@ -88,7 +96,12 @@ function routeToProtocolReducer(
           action,
         );
         return updatedState(state, sharedData, processState, protocolState);
-
+      case WalletProtocol.Defunding:
+        const {
+          protocolState: defundingProtocolState,
+          sharedData: defundingSharedData,
+        } = defundingProtocol.reducer(processState.protocolState, states.sharedData(state), action);
+        return updatedState(state, defundingSharedData, processState, defundingProtocolState);
       case WalletProtocol.Application:
         const {
           protocolState: appProtocolState,
@@ -157,6 +170,7 @@ function initializeNewProtocol(
 ): { protocolState: ProtocolState; sharedData: states.SharedData } {
   const processId = getProcessId(action);
   const incomingSharedData = states.sharedData(state);
+  // TODO do not reinitialise an existing process
   switch (action.type) {
     case 'WALLET.NEW_PROCESS.FUNDING_REQUESTED': {
       const { channelId } = action;
@@ -204,7 +218,8 @@ function initializeNewProtocol(
         state.address,
         state.privateKey,
       );
-
+    case 'WALLET.NEW_PROCESS.DEFUND_REQUESTED':
+      return defundingProtocol.initialize(processId, action.channelId, incomingSharedData);
     default:
       return unreachable(action);
   }

@@ -1,6 +1,5 @@
 import { NonTerminalTransactionSubmissionState } from '../../transaction-submission';
 import { ProtocolState } from '../..';
-import { DefundingState } from '../../defunding';
 import { StateConstructor } from '../../../utils';
 
 // -------
@@ -54,13 +53,6 @@ export interface AcknowledgeResponse {
   channelId: string;
 }
 
-export interface WaitForDefund {
-  type: 'Challenging.WaitForDefund';
-  processId: string;
-  channelId: string;
-  defundingState: DefundingState;
-}
-
 export interface AcknowledgeClosedButNotDefunded {
   type: 'Challenging.AcknowledgeClosedButNotDefunded';
   processId: string;
@@ -81,12 +73,8 @@ export interface SuccessOpen {
   type: 'Challenging.SuccessOpen';
 }
 
-export interface SuccessClosedAndDefunded {
-  type: 'Challenging.SuccessClosedAndDefunded';
-}
-
-export interface SuccessClosedButNotDefunded {
-  type: 'Challenging.SuccessClosedButNotDefunded';
+export interface SuccessClosed {
+  type: 'Challenging.SuccessClosed';
 }
 
 // ------------
@@ -132,10 +120,6 @@ export const acknowledgeFailure: StateConstructor<AcknowledgeFailure> = p => {
   return { ...base(p), reason: p.reason, type: 'Challenging.AcknowledgeFailure' };
 };
 
-export const waitForDefund: StateConstructor<WaitForDefund> = p => {
-  return { ...base(p), defundingState: p.defundingState, type: 'Challenging.WaitForDefund' };
-};
-
 export const acknowledgeClosedButNotDefunded: StateConstructor<
   AcknowledgeClosedButNotDefunded
 > = p => {
@@ -150,16 +134,12 @@ export const failure: StateConstructor<Failure> = p => {
   return { reason: p.reason, type: 'Challenging.Failure' };
 };
 
-export const successClosedAndDefunded: StateConstructor<SuccessClosedAndDefunded> = p => {
-  return { type: 'Challenging.SuccessClosedAndDefunded' };
-};
-
-export const successClosedButNotDefunded: StateConstructor<SuccessClosedButNotDefunded> = p => {
-  return { type: 'Challenging.SuccessClosedButNotDefunded' };
-};
-
 export const successOpen: StateConstructor<SuccessOpen> = p => {
   return { type: 'Challenging.SuccessOpen' };
+};
+
+export const successClosed: StateConstructor<SuccessClosed> = p => {
+  return { ...p, type: 'Challenging.SuccessClosed' };
 };
 
 // -------
@@ -175,16 +155,9 @@ export type NonTerminalChallengerState =
   | WaitForResponseOrTimeout
   | AcknowledgeTimeout
   | AcknowledgeResponse
-  | AcknowledgeFailure
-  | WaitForDefund
-  | AcknowledgeClosedButNotDefunded
-  | AcknowledgeSuccess;
+  | AcknowledgeFailure;
 
-export type TerminalChallengerState =
-  | SuccessOpen
-  | SuccessClosedAndDefunded
-  | SuccessClosedButNotDefunded
-  | Failure;
+export type TerminalChallengerState = SuccessOpen | SuccessClosed | Failure;
 
 export function isNonTerminalChallengerState(
   state: ProtocolState,
@@ -202,11 +175,7 @@ export function isChallengerState(state: ProtocolState): state is ChallengerStat
     state.type === 'Challenging.AcknowledgeResponse' ||
     state.type === 'Challenging.Failure' ||
     state.type === 'Challenging.SuccessOpen' ||
-    state.type === 'Challenging.SuccessClosedAndDefunded' ||
-    state.type === 'Challenging.SuccessClosedButNotDefunded' ||
-    state.type === 'Challenging.WaitForDefund' ||
-    state.type === 'Challenging.AcknowledgeSuccess' ||
-    state.type === 'Challenging.AcknowledgeClosedButNotDefunded'
+    state.type === 'Challenging.SuccessClosed'
   );
 }
 
@@ -214,8 +183,7 @@ export function isTerminal(state: ChallengerState): state is TerminalChallengerS
   return (
     state.type === 'Challenging.Failure' ||
     state.type === 'Challenging.SuccessOpen' ||
-    state.type === 'Challenging.SuccessClosedAndDefunded' ||
-    state.type === 'Challenging.SuccessClosedButNotDefunded'
+    state.type === 'Challenging.SuccessClosed'
   );
 }
 
