@@ -25,7 +25,7 @@ import {
 } from '../../direct-funding/reducer';
 import { addHex } from '../../../../utils/hex-utils';
 import { UpdateType } from 'fmg-nitro-adjudicator/lib/consensus-app';
-import { proposeNewConsensus } from '../../../../domain/two-player-consensus-game';
+import { proposeNewConsensus } from '../../../../domain/consensus-app';
 import { unreachable } from '../../../../utils/reducer-utils';
 import { isTransactionAction } from '../../../actions';
 import { ChannelFundingState } from '../../../state';

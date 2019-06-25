@@ -2,79 +2,202 @@ import * as scenarios from './scenarios';
 import { initialize, consensusUpdateReducer } from '../reducer';
 import * as states from '../states';
 import { ProtocolStateWithSharedData } from '../..';
-import { describeScenarioStep } from '../../../__tests__/helpers';
+import {
+  describeScenarioStep,
+  expectTheseCommitmentsSent,
+  itSendsNoMessage,
+} from '../../../__tests__/helpers';
 
-describe('Player A Happy Path', () => {
-  const scenario = scenarios.aHappyPath;
-  describe('when initializing', () => {
-    const {
-      processId,
-      channelId,
-      proposedAllocation,
-      proposedDestination,
-      sharedData,
-    } = scenario.initialize;
-    const result = initialize(
-      processId,
-      channelId,
-      proposedAllocation,
-      proposedDestination,
-      sharedData,
-    );
-
-    itTransitionsTo(result, 'ConsensusUpdate.WaitForUpdate');
+describe('Two Players', () => {
+  describe('Player A Happy Path', () => {
+    const scenario = scenarios.twoPlayerAHappyPath;
+    describe('when initializing', () => {
+      const {
+        processId,
+        channelId,
+        proposedAllocation,
+        proposedDestination,
+        sharedData,
+      } = scenario.initialize;
+      const result = initialize(
+        processId,
+        channelId,
+        proposedAllocation,
+        proposedDestination,
+        sharedData,
+      );
+      expectTheseCommitmentsSent(result, scenario.initialize.reply);
+      itTransitionsTo(result, 'ConsensusUpdate.WaitForUpdate');
+    });
+    describeScenarioStep(scenario.waitForUpdate, () => {
+      const { sharedData, action, state } = scenario.waitForUpdate;
+      const result = consensusUpdateReducer(state, sharedData, action);
+      itTransitionsTo(result, 'ConsensusUpdate.Success');
+      itSendsNoMessage(result);
+    });
   });
-  describeScenarioStep(scenario.waitForUpdate, () => {
-    const { sharedData, action, state } = scenario.waitForUpdate;
-    const result = consensusUpdateReducer(state, sharedData, action);
-    itTransitionsTo(result, 'ConsensusUpdate.Success');
+
+  describe('Player B Happy Path', () => {
+    const scenario = scenarios.twoPlayerBHappyPath;
+    describe('when initializing', () => {
+      const {
+        processId,
+        channelId,
+        proposedAllocation,
+        proposedDestination,
+        sharedData,
+      } = scenario.initialize;
+      const result = initialize(
+        processId,
+        channelId,
+        proposedAllocation,
+        proposedDestination,
+        sharedData,
+      );
+
+      itTransitionsTo(result, 'ConsensusUpdate.WaitForUpdate');
+      itSendsNoMessage(result);
+    });
+    describeScenarioStep(scenario.waitForUpdate, () => {
+      const { sharedData, action, state, reply } = scenario.waitForUpdate;
+      const result = consensusUpdateReducer(state, sharedData, action);
+      itTransitionsTo(result, 'ConsensusUpdate.Success');
+      expectTheseCommitmentsSent(result, reply);
+    });
+  });
+
+  describe('Player A Invalid Commitment', () => {
+    const scenario = scenarios.twoPlayerACommitmentRejected;
+
+    describeScenarioStep(scenario.waitForUpdate, () => {
+      const { sharedData, action, state } = scenario.waitForUpdate;
+      const result = consensusUpdateReducer(state, sharedData, action);
+      itTransitionsTo(result, 'ConsensusUpdate.Failure');
+      itSendsNoMessage(result);
+    });
+  });
+
+  describe('Player B Invalid Commitment', () => {
+    const scenario = scenarios.twoPlayerBCommitmentRejected;
+
+    describeScenarioStep(scenario.waitForUpdate, () => {
+      const { sharedData, action, state } = scenario.waitForUpdate;
+      const result = consensusUpdateReducer(state, sharedData, action);
+      itTransitionsTo(result, 'ConsensusUpdate.Failure');
+      itSendsNoMessage(result);
+    });
   });
 });
 
-describe('Player B Happy Path', () => {
-  const scenario = scenarios.aHappyPath;
-  describe('when initializing', () => {
-    const {
-      processId,
-      channelId,
-      proposedAllocation,
-      proposedDestination,
-      sharedData,
-    } = scenario.initialize;
-    const result = initialize(
-      processId,
-      channelId,
-      proposedAllocation,
-      proposedDestination,
-      sharedData,
-    );
+describe('Three Players', () => {
+  describe('Player A Happy Path', () => {
+    const scenario = scenarios.threePlayerAHappyPath;
+    describe('when initializing', () => {
+      const {
+        processId,
+        channelId,
+        proposedAllocation,
+        proposedDestination,
+        sharedData,
+      } = scenario.initialize;
+      const result = initialize(
+        processId,
+        channelId,
+        proposedAllocation,
+        proposedDestination,
+        sharedData,
+      );
 
-    itTransitionsTo(result, 'ConsensusUpdate.WaitForUpdate');
+      itTransitionsTo(result, 'ConsensusUpdate.WaitForUpdate');
+      expectTheseCommitmentsSent(result, scenario.initialize.reply);
+    });
+
+    describe("when receiving Player B's update", () => {
+      const { sharedData, action, state } = scenario.waitForPlayerBUpdate;
+      const result = consensusUpdateReducer(state, sharedData, action);
+      itTransitionsTo(result, 'ConsensusUpdate.WaitForUpdate');
+      itSendsNoMessage(result);
+    });
+
+    describe("when receiving hub's update", () => {
+      const { sharedData, action, state } = scenario.waitForHubUpdate;
+      const result = consensusUpdateReducer(state, sharedData, action);
+      itTransitionsTo(result, 'ConsensusUpdate.Success');
+      itSendsNoMessage(result);
+    });
   });
-  describeScenarioStep(scenario.waitForUpdate, () => {
-    const { sharedData, action, state } = scenario.waitForUpdate;
-    const result = consensusUpdateReducer(state, sharedData, action);
-    itTransitionsTo(result, 'ConsensusUpdate.Success');
+
+  describe('Player B Happy Path', () => {
+    const scenario = scenarios.threePlayerBHappyPath;
+    describe('when initializing', () => {
+      const {
+        processId,
+        channelId,
+        proposedAllocation,
+        proposedDestination,
+        sharedData,
+      } = scenario.initialize;
+      const result = initialize(
+        processId,
+        channelId,
+        proposedAllocation,
+        proposedDestination,
+        sharedData,
+      );
+
+      itTransitionsTo(result, 'ConsensusUpdate.WaitForUpdate');
+      itSendsNoMessage(result);
+    });
+
+    describe("when receiving Player A's update", () => {
+      const { sharedData, action, state, reply } = scenario.waitForPlayerAUpdate;
+      const result = consensusUpdateReducer(state, sharedData, action);
+      itTransitionsTo(result, 'ConsensusUpdate.WaitForUpdate');
+      expectTheseCommitmentsSent(result, reply);
+    });
+
+    describe("when receiving hub's update", () => {
+      const { sharedData, action, state } = scenario.waitForHubUpdate;
+      const result = consensusUpdateReducer(state, sharedData, action);
+      itTransitionsTo(result, 'ConsensusUpdate.Success');
+      itSendsNoMessage(result);
+    });
   });
-});
 
-describe('Player A Invalid Commitment', () => {
-  const scenario = scenarios.aCommitmentRejected;
+  describe('Hub Happy Path', () => {
+    const scenario = scenarios.threePlayerHubHappyPath;
+    describe('when initializing', () => {
+      const {
+        processId,
+        channelId,
+        proposedAllocation,
+        proposedDestination,
+        sharedData,
+      } = scenario.initialize;
+      const result = initialize(
+        processId,
+        channelId,
+        proposedAllocation,
+        proposedDestination,
+        sharedData,
+      );
 
-  describeScenarioStep(scenario.waitForUpdate, () => {
-    const { sharedData, action, state } = scenario.waitForUpdate;
-    const result = consensusUpdateReducer(state, sharedData, action);
-    itTransitionsTo(result, 'ConsensusUpdate.Failure');
-  });
-});
+      itTransitionsTo(result, 'ConsensusUpdate.WaitForUpdate');
+    });
 
-describe('Player B Invalid Commitment', () => {
-  const scenario = scenarios.bCommitmentRejected;
+    describe("when receiving Player A's update", () => {
+      const { sharedData, action, state } = scenario.waitForPlayerAUpdate;
+      const result = consensusUpdateReducer(state, sharedData, action);
+      itTransitionsTo(result, 'ConsensusUpdate.WaitForUpdate');
+      itSendsNoMessage(result);
+    });
 
-  describeScenarioStep(scenario.waitForUpdate, () => {
-    const { sharedData, action, state } = scenario.waitForUpdate;
-    const result = consensusUpdateReducer(state, sharedData, action);
-    itTransitionsTo(result, 'ConsensusUpdate.Failure');
+    describe("when receiving Player B's update", () => {
+      const { sharedData, action, state, reply } = scenario.waitForPlayerBUpdate;
+      const result = consensusUpdateReducer(state, sharedData, action);
+      expectTheseCommitmentsSent(result, reply);
+      itTransitionsTo(result, 'ConsensusUpdate.Success');
+    });
   });
 });
 

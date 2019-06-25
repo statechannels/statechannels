@@ -10,12 +10,27 @@ import {
   isConsensusReached,
   ProposalAppAttrs,
   ConsensusAppAttrs,
+  vote,
+  UpdateType,
 } from 'fmg-nitro-adjudicator/lib/consensus-app';
 import { Commitment } from 'fmg-core';
 import { CommitmentType } from '../commitments';
 /////////////
 // Helpers //
 /////////////
+
+export function consensusHasBeenReached(commitment: Commitment): boolean {
+  const consensusCommitment = fromCoreCommitment(commitment);
+  return consensusCommitment.appAttributes.updateType === UpdateType.Consensus;
+}
+
+export function voteForConsensus(commitment: Commitment): Commitment {
+  const fromCommitment = fromCoreCommitment(commitment);
+  if (!isProposal(fromCommitment)) {
+    throw new Error('The received commitment was not a ledger proposal');
+  }
+  return asCoreCommitment(vote(fromCommitment));
+}
 
 export function acceptConsensus(commitment: Commitment): Commitment {
   const fromCommitment = fromCoreCommitment(commitment);

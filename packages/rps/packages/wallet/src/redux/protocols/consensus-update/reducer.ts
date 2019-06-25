@@ -1,14 +1,20 @@
-import { SharedData, getChannel, signAndStore, queueMessage, checkAndStore } from '../../state';
+import { SharedData, signAndStore, getExistingChannel } from '../../state';
 import * as states from './states';
 import { ProtocolStateWithSharedData } from '..';
-import { ConsensusUpdateAction } from './actions';
+import { ConsensusUpdateAction, isConsensusUpdateAction } from './actions';
 import * as helpers from '../reducer-helpers';
-import { theirAddress, getLastCommitment } from '../../channel-store';
-import { proposeNewConsensus, acceptConsensus } from '../../../domain/two-player-consensus-game';
-import { sendCommitmentReceived } from '../../../communication';
+import {
+  proposeNewConsensus,
+  acceptConsensus,
+  voteForConsensus,
+  consensusHasBeenReached,
+} from '../../../domain/consensus-app';
 import { Commitment } from '../../../domain';
 import { appAttributesFromBytes } from 'fmg-nitro-adjudicator';
+import { eqHexArray } from '../../../utils/hex-utils';
+
 export const CONSENSUS_UPDATE_PROTOCOL_LOCATOR = 'ConsensusUpdate';
+
 export const initialize = (
   processId: string,
   channelId: string,
@@ -16,7 +22,7 @@ export const initialize = (
   proposedDestination: string[],
   sharedData: SharedData,
 ): ProtocolStateWithSharedData<states.ConsensusUpdateState> => {
-  const lastCommitment = getLatestCommitment(sharedData, channelId);
+  const lastCommitment = helpers.getLatestCommitment(channelId, sharedData);
 
   if (helpers.isFirstPlayer(channelId, sharedData)) {
     const ourCommitment = proposeNewConsensus(
@@ -26,18 +32,21 @@ export const initialize = (
     );
     const signResult = signAndStore(sharedData, ourCommitment);
     if (!signResult.isSuccess) {
-      return { protocolState: states.failure({ reason: 'Signature Failure' }), sharedData };
+      return {
+        protocolState: states.failure({
+          reason: 'Signature Failure',
+        }),
+        sharedData,
+      };
     }
     sharedData = signResult.store;
 
-    const messageRelay = sendCommitmentReceived(
-      getOpponentAddress(sharedData, channelId),
+    sharedData = helpers.sendCommitments(
+      sharedData,
       processId,
-      signResult.signedCommitment.commitment,
-      signResult.signedCommitment.signature,
+      channelId,
       CONSENSUS_UPDATE_PROTOCOL_LOCATOR,
     );
-    sharedData = queueMessage(sharedData, messageRelay);
   }
 
   return {
@@ -56,75 +65,80 @@ export const consensusUpdateReducer = (
   sharedData: SharedData,
   action: ConsensusUpdateAction,
 ): ProtocolStateWithSharedData<states.ConsensusUpdateState> => {
-  if (action.type !== 'WALLET.COMMON.COMMITMENT_RECEIVED') {
-    console.warn(
-      `Ledger Top Up Protocol expected COMMITMENT_RECEIVED received ${action.type} instead.`,
-    );
+  if (!isConsensusUpdateAction(action)) {
+    console.warn(`Consensus Update received non Consensus Update action ${action}`);
     return { protocolState, sharedData };
   }
   if (protocolState.type !== 'ConsensusUpdate.WaitForUpdate') {
     console.warn(`Consensus update reducer was called with terminal state ${protocolState.type}`);
     return { protocolState, sharedData };
   }
+  const { channelId, processId } = protocolState;
 
-  const checkResult = checkAndStore(sharedData, action.signedCommitment);
-
-  if (!checkResult.isSuccess) {
+  try {
+    const { turnNum } = getExistingChannel(sharedData, channelId);
+    sharedData = helpers.checkCommitments(sharedData, turnNum, action.signedCommitments);
+  } catch (err) {
     return {
-      protocolState: states.failure({ reason: 'Received Invalid Commitment' }),
+      protocolState: states.failure({ reason: `UnableToValidate: ${err.message}` }),
       sharedData,
     };
   }
-  sharedData = checkResult.store;
 
-  // Accept consensus if player B
-  if (!helpers.isFirstPlayer(protocolState.channelId, sharedData)) {
-    if (
-      !proposalCommitmentHasExpectedValues(
-        action.signedCommitment.commitment,
-        protocolState.proposedAllocation,
-        protocolState.proposedDestination,
-      )
-    ) {
+  const { proposedAllocation, proposedDestination } = protocolState;
+  let latestCommitment = helpers.getLatestCommitment(channelId, sharedData);
+  if (consensusReached(latestCommitment, proposedAllocation, proposedDestination)) {
+    return { protocolState: states.success({}), sharedData };
+  }
+
+  if (
+    !proposalCommitmentHasExpectedValues(latestCommitment, proposedAllocation, proposedDestination)
+  ) {
+    return {
+      protocolState: states.failure({ reason: 'Proposal does not match expected values.' }),
+      sharedData,
+    };
+  }
+
+  if (helpers.ourTurn(sharedData, channelId)) {
+    const ourCommitment = helpers.isLastPlayer(channelId, sharedData)
+      ? acceptConsensus(latestCommitment)
+      : voteForConsensus(latestCommitment);
+
+    const signResult = signAndStore(sharedData, ourCommitment);
+    if (!signResult.isSuccess) {
       return {
-        protocolState: states.failure({ reason: 'Proposal does not match expected values.' }),
+        protocolState: states.failure({ reason: 'Signature Failure' }),
         sharedData,
       };
     }
-    const ourCommitment = acceptConsensus(action.signedCommitment.commitment);
-    const signResult = signAndStore(sharedData, ourCommitment);
-    if (!signResult.isSuccess) {
-      return { protocolState: states.failure({ reason: 'Signature Failure' }), sharedData };
-    }
     sharedData = signResult.store;
-
-    const messageRelay = sendCommitmentReceived(
-      getOpponentAddress(sharedData, protocolState.channelId),
-      protocolState.processId,
-      signResult.signedCommitment.commitment,
-      signResult.signedCommitment.signature,
+    sharedData = helpers.sendCommitments(
+      sharedData,
+      processId,
+      channelId,
       CONSENSUS_UPDATE_PROTOCOL_LOCATOR,
     );
-    sharedData = queueMessage(sharedData, messageRelay);
   }
-  return { protocolState: states.success({}), sharedData };
+
+  latestCommitment = helpers.getLatestCommitment(channelId, sharedData);
+  // If we are the last player we would be the one reaching consensus so we check again
+  if (consensusReached(latestCommitment, proposedAllocation, proposedDestination)) {
+    return { protocolState: states.success({}), sharedData };
+  }
+  return { protocolState: states.waitForUpdate(protocolState), sharedData };
 };
 
-function getOpponentAddress(sharedData: SharedData, channelId: string) {
-  const channel = getChannel(sharedData, channelId);
-  if (!channel) {
-    throw new Error(`Could not find channel for id ${channelId}`);
-  }
-
-  return theirAddress(channel);
-}
-function getLatestCommitment(sharedData: SharedData, channelId: string) {
-  const channel = getChannel(sharedData, channelId);
-  if (!channel) {
-    throw new Error(`Could not find channel for id ${channelId}`);
-  }
-
-  return getLastCommitment(channel);
+function consensusReached(
+  commitment: Commitment,
+  expectedAllocation: string[],
+  expectedDestination: string[],
+) {
+  return (
+    consensusHasBeenReached(commitment) &&
+    eqHexArray(commitment.allocation, expectedAllocation) &&
+    eqHexArray(commitment.destination, expectedDestination)
+  );
 }
 
 function proposalCommitmentHasExpectedValues(
@@ -135,20 +149,8 @@ function proposalCommitmentHasExpectedValues(
   const { proposedAllocation, proposedDestination } = appAttributesFromBytes(
     commitment.appAttributes,
   );
-  if (
-    proposedAllocation.length !== expectedAllocation.length ||
-    proposedDestination.length !== expectedDestination.length
-  ) {
-    return false;
-  }
-
-  for (let i = 0; i < proposedAllocation.length; i++) {
-    if (
-      proposedAllocation[i] !== expectedAllocation[i] ||
-      proposedDestination[i] !== expectedDestination[i]
-    ) {
-      return false;
-    }
-  }
-  return true;
+  return (
+    eqHexArray(proposedAllocation, expectedAllocation) &&
+    eqHexArray(proposedDestination, expectedDestination)
+  );
 }

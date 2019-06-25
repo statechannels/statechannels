@@ -17,7 +17,7 @@ import {
   app11,
   setFundingState as setFundingStateAlt,
 } from '../../../indirect-defunding/__tests__/scenarios';
-import { preSuccessB, preSuccessA } from '../../../consensus-update/__tests__';
+import { twoPlayerPreSuccessA, twoPlayerPreSuccessB } from '../../../consensus-update/__tests__';
 import { keepLedgerChannelApproved } from '../../../../../communication';
 
 // -----------------
@@ -94,7 +94,7 @@ const waitForDefundPreFailure = states.waitForDefund({
 const acknowledgeSuccess = states.acknowledgeSuccess(defaults);
 const waitForLedgerUpdate = states.waitForLedgerUpdate({
   ...defaults,
-  consensusUpdateState: preSuccessB.state,
+  consensusUpdateState: twoPlayerPreSuccessB.state,
 });
 const waitForOpponentResponse = states.waitForOpponentSelection(defaults);
 // -------
@@ -151,8 +151,8 @@ export const noDefundingHappyPath = {
   },
   waitForLedgerUpdate: {
     state: waitForLedgerUpdate,
-    sharedData: preSuccessA.sharedData,
-    action: preSuccessA.action,
+    sharedData: twoPlayerPreSuccessA.sharedData,
+    action: twoPlayerPreSuccessA.action,
   },
   acknowledgeSuccess: {
     state: acknowledgeSuccess,

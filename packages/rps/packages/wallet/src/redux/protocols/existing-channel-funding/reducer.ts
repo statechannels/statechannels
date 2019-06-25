@@ -10,7 +10,7 @@ import { ProtocolStateWithSharedData } from '..';
 import { ExistingChannelFundingAction } from './actions';
 import * as helpers from '../reducer-helpers';
 import * as selectors from '../../selectors';
-import { proposeNewConsensus, acceptConsensus } from '../../../domain/two-player-consensus-game';
+import { proposeNewConsensus, acceptConsensus } from '../../../domain/consensus-app';
 import { theirAddress, getLastCommitment } from '../../channel-store';
 import { Commitment, nextSetupCommitment } from '../../../domain';
 import { bigNumberify } from 'ethers/utils';

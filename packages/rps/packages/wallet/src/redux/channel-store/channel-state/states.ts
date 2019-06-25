@@ -72,7 +72,8 @@ export function pushCommitment(
 export function ourTurn(state: ChannelState) {
   const { turnNum, participants, ourIndex } = state;
   const numParticipants = participants.length;
-  return turnNum % numParticipants !== ourIndex;
+
+  return (turnNum + 1) % numParticipants === ourIndex;
 }
 
 export function isFullyOpen(state: ChannelState): state is OpenChannelState {
