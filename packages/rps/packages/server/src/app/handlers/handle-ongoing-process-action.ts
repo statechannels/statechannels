@@ -26,7 +26,7 @@ export async function handleOngoingProcessAction(ctx) {
       return ctx;
     case 'WALLET.COMMON.COMMITMENT_RECEIVED':
       return handleCommitmentReceived(ctx, action);
-    case 'WALLET.ADVANCE_CHANNEL.COMMITMENTS_RECEIVED':
+    case 'WALLET.COMMON.COMMITMENTS_RECEIVED':
       return handleCommitmentsReceived({ ctx, action });
     case 'WALLET.FUNDING.STRATEGY_PROPOSED':
       return handleStrategyProposed(ctx, action);
@@ -129,10 +129,15 @@ async function handleCommitmentsReceived({ ctx, action }: { ctx; action: Commitm
       currentCommitment && asConsensusCommitment(currentCommitment),
     );
     ctx.status = 201;
-    ctx.body = communication.sendCommitmentsReceived(theirAddress, processId, [
-      { commitment: theirCommitment, signature: theirSignature },
-      { commitment, signature: (signature as unknown) as string },
-    ]);
+    ctx.body = communication.sendCommitmentsReceived(
+      theirAddress,
+      processId,
+      [
+        { commitment: theirCommitment, signature: theirSignature },
+        { commitment, signature: (signature as unknown) as string },
+      ],
+      action.protocolLocator,
+    );
 
     return ctx;
   }

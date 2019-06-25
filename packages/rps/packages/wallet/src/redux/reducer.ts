@@ -52,13 +52,13 @@ export function initializedReducer(
     newState = updateSharedData(newState, action);
   }
 
-  //
-  // if the action is both a protocol action and a new process action (e.g. action terminates current process and starts new one)
-  // this is probably not what we want to do long term (instead, dispatch two separate actions)
+  // If the action is both a protocol action and a new process action, apply both.
+  // (e.g. action terminates current process and starts new one)
+  // We probably don't want to do this long term, but instead, dispatch two separate actions
   if (isNewProcessAction(action) && actions.isProtocolAction(action)) {
     return routeToNewProcessInitializer(routeToProtocolReducer(newState, action), action);
   }
-  //
+
   if (isNewProcessAction(action)) {
     return routeToNewProcessInitializer(newState, action);
   } else if (actions.isProtocolAction(action)) {

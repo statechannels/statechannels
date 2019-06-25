@@ -115,7 +115,7 @@ export const expectTheseCommitmentsSent = (
   expectThisMessageAndTheseCommitmentsSent(
     state,
     commitments,
-    'WALLET.ADVANCE_CHANNEL.COMMITMENTS_RECEIVED',
+    'WALLET.COMMON.COMMITMENTS_RECEIVED',
   );
 };
 
