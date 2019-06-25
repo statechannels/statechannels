@@ -12,6 +12,7 @@ interface BaseState {
   processId: string;
   ourIndex: number;
   commitmentType: CommitmentType;
+  protocolLocator: string;
 }
 
 export interface ChannelUnknown extends BaseState {
@@ -49,12 +50,13 @@ export interface Failure {
 // ------------
 
 const base: StateConstructor<BaseState> = params => {
-  const { processId, channelId, ourIndex, commitmentType } = params;
+  const { processId, channelId, ourIndex, commitmentType, protocolLocator } = params;
   return {
     processId,
     channelId,
     ourIndex,
     commitmentType,
+    protocolLocator,
   };
 };
 

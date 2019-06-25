@@ -7,6 +7,7 @@ import * as scenarios from '../../../__tests__/test-scenarios';
 import { commitmentsReceived } from '../../../../communication';
 import { CommitmentType } from '../../../../domain';
 import { clearedToSend } from '../actions';
+import { ADVANCE_CHANNEL_PROTOCOL_LOCATOR } from '..';
 
 // ---------
 // Test data
@@ -42,6 +43,7 @@ const initializeArgs = {
   appAttributes,
   processId,
   clearedToSend: true,
+  protocolLocator: ADVANCE_CHANNEL_PROTOCOL_LOCATOR,
 };
 
 const props = {
@@ -144,33 +146,39 @@ const bSentPostFundSetupCommitment = setChannels(EMPTY_SHARED_DATA, [
 // Actions
 // -------
 
-const receivePreFundSetupFromA = commitmentsReceived({
+const args = {
   processId,
+  protocolLocator: 'AdvancedChannel',
+};
+
+const receivePreFundSetupFromA = commitmentsReceived({
+  ...args,
   signedCommitments: commitments0,
 });
 const receivePreFundSetupFromB = commitmentsReceived({
-  processId,
+  ...args,
   signedCommitments: commitments1,
 });
 const receivePreFundSetupFromHub = commitmentsReceived({
-  processId,
+  ...args,
   signedCommitments: commitments2,
 });
 
 const receivePostFundSetupFromA = commitmentsReceived({
-  processId,
+  ...args,
   signedCommitments: commitments3,
 });
 const receivePostFundSetupFromB = commitmentsReceived({
-  processId,
+  ...args,
   signedCommitments: commitments4,
 });
 const receivePostFundSetupFromHub = commitmentsReceived({
-  processId,
+  ...args,
   signedCommitments: commitments5,
 });
 const clearSending = clearedToSend({
   processId,
+  protocolLocator: 'locator',
 });
 // ---------
 // Scenarios
@@ -204,6 +212,7 @@ const existingArgs = {
   channelId,
   processId,
   commitmentType: CommitmentType.PostFundSetup,
+  protocolLocator: ADVANCE_CHANNEL_PROTOCOL_LOCATOR,
 };
 
 const existingArgsA = { ...existingArgs, ourIndex: 0 };

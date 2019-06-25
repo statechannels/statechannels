@@ -55,7 +55,7 @@ export const reducer: ProtocolReducer<states.AdvanceChannelState> = (
   action: WalletAction,
 ) => {
   if (!isAdvanceChannelAction(action)) {
-    console.error('Invalid action: expected WALLET.ADVANCE_CHANNEL.COMMITMENTS_RECEIVED');
+    console.error('Invalid action: expected WALLET.COMMON.COMMITMENTS_RECEIVED');
     return { protocolState, sharedData };
   }
 
@@ -118,6 +118,7 @@ function initializeWithNewChannel(
     allocation,
     ourIndex,
     clearedToSend,
+    protocolLocator,
   } = initializeChannelArgs;
 
   if (isSafeToSend({ sharedData, ourIndex, clearedToSend })) {
@@ -154,6 +155,7 @@ function initializeWithNewChannel(
       nextParticipant(participants, ourIndex),
       processId,
       [signResult.signedCommitment],
+      protocolLocator,
     );
     sharedData = queueMessage(sharedData, messageRelay);
 
@@ -181,7 +183,7 @@ function initializeWithExistingChannel(
   sharedData: Storage,
   initializeChannelArgs: OngoingChannelArgs,
 ) {
-  const { channelId, ourIndex, clearedToSend } = initializeChannelArgs;
+  const { channelId, ourIndex, clearedToSend, protocolLocator } = initializeChannelArgs;
   const channel = getChannel(sharedData.channelStore, channelId);
   if (isSafeToSend({ sharedData, ourIndex, clearedToSend })) {
     const lastCommitment = getLastCommitment(channel);
@@ -202,6 +204,7 @@ function initializeWithExistingChannel(
       nextParticipant(channel.participants, ourIndex),
       processId,
       getCommitments(sharedData, channelId),
+      protocolLocator,
     );
     sharedData = queueMessage(sharedData, messageRelay);
 
@@ -224,7 +227,7 @@ function attemptToAdvanceChannel(
   protocolState: states.ChannelUnknown | states.NotSafeToSend,
   channelId: string,
 ): { sharedData: SharedData; protocolState: states.AdvanceChannelState } {
-  const { ourIndex, commitmentType, clearedToSend } = protocolState;
+  const { ourIndex, commitmentType, clearedToSend, protocolLocator } = protocolState;
 
   let channel = getChannel(sharedData.channelStore, channelId);
   if (isSafeToSend({ sharedData, ourIndex, channelId, clearedToSend })) {
@@ -248,6 +251,7 @@ function attemptToAdvanceChannel(
       nextParticipant(participants, ourIndex),
       protocolState.processId,
       channel.commitments,
+      protocolLocator,
     );
 
     sharedData = queueMessage(sharedData, messageRelay);
