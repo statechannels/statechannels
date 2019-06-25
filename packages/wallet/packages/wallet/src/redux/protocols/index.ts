@@ -44,3 +44,7 @@ export interface ProtocolStateWithSharedData<T extends ProtocolState> {
   protocolState: T;
   sharedData: SharedData;
 }
+
+export function makeLocator(...args: string[]) {
+  return args.join('-');
+}
