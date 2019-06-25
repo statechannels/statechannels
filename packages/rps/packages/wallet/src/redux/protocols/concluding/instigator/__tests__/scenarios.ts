@@ -13,7 +13,7 @@ import {
 } from '../../../../../domain/commitments/__tests__';
 import { bigNumberify } from 'ethers/utils';
 import { commitmentReceived } from '../../../../actions';
-import { preSuccessA } from '../../../consensus-update/__tests__';
+import { twoPlayerPreSuccessA } from '../../../consensus-update/__tests__';
 import { keepLedgerChannelApproved } from '../../../../../communication';
 
 // -----------------
@@ -60,7 +60,7 @@ const acknowledgeConcludeReceived = states.instigatorAcknowledgeConcludeReceived
 });
 const waitForLedgerUpdate = states.instigatorWaitForLedgerUpdate({
   ...defaults,
-  consensusUpdateState: preSuccessA.state,
+  consensusUpdateState: twoPlayerPreSuccessA.state,
 });
 const waitForOpponentResponse = states.instigatorWaitForOpponentSelection(defaults);
 // -------
@@ -118,7 +118,7 @@ export const happyPath = {
     action: concludeSent,
     reply: app52.commitment,
   },
-  waitforOpponentConclude: {
+  waitForOpponentConclude: {
     state: waitforOpponentConclude,
     sharedData: firstConcludeReceived,
     action: commitmentReceivedAction,
@@ -166,8 +166,8 @@ export const noDefundingHappyPath = {
   },
   waitForLedgerUpdate: {
     state: waitForLedgerUpdate,
-    sharedData: preSuccessA.sharedData,
-    action: preSuccessA.action,
+    sharedData: twoPlayerPreSuccessA.sharedData,
+    action: twoPlayerPreSuccessA.action,
   },
   acknowledgeSuccess: {
     state: acknowledgeSuccess,
