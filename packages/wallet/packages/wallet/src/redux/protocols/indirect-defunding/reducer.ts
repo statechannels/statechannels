@@ -5,7 +5,7 @@ import { IndirectDefundingAction } from './actions';
 import * as helpers from '../reducer-helpers';
 import { unreachable } from '../../../utils/reducer-utils';
 import * as selectors from '../../selectors';
-import { proposeNewConsensus, acceptConsensus } from '../../../domain/two-player-consensus-game';
+import { proposeNewConsensus, acceptConsensus } from '../../../domain/consensus-app';
 import { sendCommitmentReceived } from '../../../communication';
 import { theirAddress, getLastCommitment } from '../../channel-store';
 import { composeConcludeCommitment } from '../../../utils/commitment-utils';

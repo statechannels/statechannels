@@ -30,8 +30,8 @@ describe('[ Happy path ]', () => {
     itTransitionsTo(result, 'ConcludingInstigator.WaitForOpponentConclude');
   });
 
-  describeScenarioStep(scenario.waitforOpponentConclude, () => {
-    const { state, action, sharedData } = scenario.waitforOpponentConclude;
+  describeScenarioStep(scenario.waitForOpponentConclude, () => {
+    const { state, action, sharedData } = scenario.waitForOpponentConclude;
     const result = instigatorConcludingReducer(state, sharedData, action);
 
     itTransitionsTo(result, 'ConcludingInstigator.AcknowledgeConcludeReceived');

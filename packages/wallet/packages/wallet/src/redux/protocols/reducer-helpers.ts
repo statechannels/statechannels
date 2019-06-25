@@ -3,14 +3,15 @@ import * as actions from '../actions';
 import { channelStoreReducer } from '../channel-store/reducer';
 import { accumulateSideEffects } from '../outbox';
 import { SideEffects } from '../outbox/state';
-import { SharedData, queueMessage, getExistingChannel } from '../state';
+import { SharedData, queueMessage, getExistingChannel, checkAndStore } from '../state';
 import * as selectors from '../selectors';
 import { TwoPartyPlayerIndex } from '../types';
 import { CommitmentType } from 'fmg-core/lib/commitment';
 import * as magmoWalletClient from 'magmo-wallet-client';
-import { getLastCommitment } from '../channel-store';
+import { getLastCommitment, nextParticipant, Commitments } from '../channel-store';
 import { Commitment } from '../../domain';
-
+import { sendCommitmentsReceived } from '../../communication';
+import { ourTurn as ourTurnOnChannel } from '../channel-store';
 export const updateChannelState = (
   sharedData: SharedData,
   channelAction: actions.channel.ChannelAction,
@@ -86,6 +87,45 @@ export function sendOpponentConcluded(sharedData: SharedData): SharedData {
     // TODO could rename this helper function, as it covers both ways of finalizing a channel
   });
   return newSharedData;
+}
+
+export function sendCommitments(
+  sharedData: SharedData,
+  processId: string,
+  channelId: string,
+  protocolLocator: string,
+): SharedData {
+  const channel = getExistingChannel(sharedData, channelId);
+  const { participants, ourIndex } = channel;
+  const messageRelay = sendCommitmentsReceived(
+    nextParticipant(participants, ourIndex),
+    processId,
+    channel.commitments,
+    protocolLocator,
+  );
+  return queueMessage(sharedData, messageRelay);
+}
+
+export function checkCommitments(
+  sharedData: SharedData,
+  turnNum: number,
+  commitments: Commitments,
+): SharedData {
+  // We don't bother checking "stale" commitments -- those whose turnNum does not
+  // exceed the current turnNum.
+
+  commitments
+    .filter(signedCommitment => signedCommitment.commitment.turnNum > turnNum)
+    .map(signedCommitment => {
+      const result = checkAndStore(sharedData, signedCommitment);
+      if (result.isSuccess) {
+        sharedData = result.store;
+      } else {
+        throw new Error('Unable to validate commitment');
+      }
+    });
+
+  return sharedData;
 }
 
 export function sendChallengeResponseRequested(
@@ -173,6 +213,11 @@ export const isFirstPlayer = (channelId: string, sharedData: SharedData) => {
   return channelState.ourIndex === TwoPartyPlayerIndex.A;
 };
 
+export const isLastPlayer = (channelId: string, sharedData: SharedData) => {
+  const channelState = selectors.getChannelState(sharedData, channelId);
+  return channelState.ourIndex === channelState.participants.length - 1;
+};
+
 export function getOpponentAddress(channelId: string, sharedData: SharedData) {
   const channel = getExistingChannel(sharedData, channelId);
 
@@ -193,4 +238,9 @@ export function getLatestCommitment(channelId: string, sharedData: SharedData) {
 
 export function getNumberOfParticipants(commitment: Commitment): number {
   return commitment.channel.participants.length;
+}
+
+export function ourTurn(sharedData: SharedData, channelId: string) {
+  const channel = getExistingChannel(sharedData, channelId);
+  return ourTurnOnChannel(channel);
 }

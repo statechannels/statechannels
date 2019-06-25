@@ -33,7 +33,7 @@ import {
   initialize as initializeDirectFunding,
 } from '../../direct-funding/reducer';
 import { isSuccess, isFailure } from '../../direct-funding/states';
-import { acceptConsensus } from '../../../../domain/two-player-consensus-game';
+import { acceptConsensus } from '../../../../domain/consensus-app';
 import { sendCommitmentReceived } from '../../../../communication';
 import { addHex } from '../../../../utils/hex-utils';
 import { isTransactionAction } from '../../../actions';

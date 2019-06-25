@@ -1,4 +1,14 @@
-import { aHappyPath, bHappyPath } from './scenarios';
+import {
+  twoPlayerAHappyPath,
+  twoPlayerBHappyPath,
+  threePlayerAHappyPath,
+  threePlayerBHappyPath,
+  threePlayerHubHappyPath,
+} from './scenarios';
 
-export const preSuccessA = aHappyPath.waitForUpdate;
-export const preSuccessB = bHappyPath.waitForUpdate;
+export const twoPlayerPreSuccessA = twoPlayerAHappyPath.waitForUpdate;
+export const twoPlayerPreSuccessB = twoPlayerBHappyPath.waitForUpdate;
+
+export const threePlayerPreSuccessA = threePlayerAHappyPath.waitForHubUpdate;
+export const threePlayerPreSuccessB = threePlayerBHappyPath.waitForHubUpdate;
+export const threePlayerPreSuccessHub = threePlayerHubHappyPath.waitForPlayerBUpdate;
