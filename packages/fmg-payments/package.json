@@ -9,7 +9,7 @@
   "scripts": {
     "prepare": "yarn build ",
     "test": "npx ganache-then-jest",
-    "test:ci": "yarn clearContracts && npx ganache-then-jest",
+    "test:ci": "yarn prettier:check && yarn clearContracts && npx ganache-then-jest",
     "deploy": "yarn clearContracts && npx deploy-contracts",
     "build:typescript": "tslint --project . && tsc",
     "clearContracts": "rm -rf build/contracts",
