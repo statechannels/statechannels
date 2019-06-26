@@ -28,6 +28,11 @@ export const isTransactionAction = isTA;
 // -------
 // Actions
 // -------
+
+export interface MultipleWalletActions {
+  type: 'WALLET.MULTIPLE_ACTIONS';
+  actions: WalletAction[];
+}
 export interface LoggedIn {
   type: 'WALLET.LOGGED_IN';
   uid: string;
@@ -116,6 +121,11 @@ export interface ChallengeExpiredEvent {
 // -------
 // Constructors
 // -------
+
+export const multipleWalletActions: ActionConstructor<MultipleWalletActions> = p => ({
+  ...p,
+  type: 'WALLET.MULTIPLE_ACTIONS',
+});
 
 export const loggedIn: ActionConstructor<LoggedIn> = p => ({ ...p, type: 'WALLET.LOGGED_IN' });
 

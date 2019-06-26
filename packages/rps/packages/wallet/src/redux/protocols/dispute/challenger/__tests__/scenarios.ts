@@ -10,7 +10,6 @@ import {
   respondWithMoveEvent,
   challengeExpirySetEvent,
 } from '../../../../actions';
-import { defundRequested } from '../../../../../redux/protocols/actions';
 type Reason = states.FailureReason;
 
 // -----------------
@@ -119,7 +118,7 @@ export const challengeTimesOutAndIsDefunded = {
   },
   defund: {
     state: acknowledgeTimeout,
-    action: defundRequested({ ...defaults }),
+    action: actions.exitChallenge({ ...defaults }),
   },
 };
 
