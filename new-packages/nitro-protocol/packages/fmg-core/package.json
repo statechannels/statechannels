@@ -12,7 +12,9 @@
     "prepare": "yarn build",
     "test": "jest",
     "test:ci": "npx ganache-then-jest",
-    "build": "tslint --project . && tsc"
+    "build": "tslint --project . && tsc",
+    "prettier:check": "npx prettier --check 'src/**/*.{ts,tsx}'",
+    "prettier:write": "npx prettier --write 'src/**/*.{ts,tsx}'"
   },
   "repository": "https://github.com/magmo/force-move-games/tree/master/packages/fmg-core",
   "author": "Tom Close",

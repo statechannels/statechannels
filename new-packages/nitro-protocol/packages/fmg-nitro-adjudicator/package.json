@@ -14,7 +14,9 @@
     "build:truffle": "npx truffle build",
     "clearContracts": "rm -rf build/contracts",
     "clearLib": "rm -rf lib",
-    "build": "run-s clearContracts clearLib build:truffle build:typescript"
+    "build": "run-s clearContracts clearLib build:truffle build:typescript",
+    "prettier:check": "npx prettier --check 'src/**/*.{ts,tsx}'",
+    "prettier:write": "npx prettier --write 'src/**/*.{ts,tsx}'"
   },
   "dependencies": {
     "ethers": "^4.0.26",
