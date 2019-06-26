@@ -10,10 +10,14 @@ export interface QueuedTransaction {
   transactionRequest: TransactionRequest;
   processId: string;
 }
+export type DisplayOutbox = DisplayAction[];
+export type MessageOutbox = WalletEvent[];
+export type TransactionOutbox = QueuedTransaction[];
+
 export interface OutboxState {
-  displayOutbox: DisplayAction[];
-  messageOutbox: WalletEvent[];
-  transactionOutbox: QueuedTransaction[];
+  displayOutbox: DisplayOutbox;
+  messageOutbox: MessageOutbox;
+  transactionOutbox: TransactionOutbox;
 }
 
 export type SideEffects = {

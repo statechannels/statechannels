@@ -1,7 +1,7 @@
 import { ChannelState, ChannelStore } from '../channel-store';
 import { StateWithSideEffects } from '../utils';
 import { Commitment, SignedCommitment, getChannelId } from '../../domain';
-import { QueuedTransaction, OutboxState } from '../outbox/state';
+import { QueuedTransaction, OutboxState, MessageOutbox } from '../outbox/state';
 import { SharedData } from '../state';
 import { ProtocolStateWithSharedData } from '../protocols';
 
@@ -11,8 +11,13 @@ type SideEffectState =
   | { sharedData: SharedData };
 
 export function describeScenarioStep(scenarioStep, fn) {
-  return describe(`${scenarioStep.state.type} + \n    ${scenarioStep.action.type} =>`, fn);
+  return describe(scenarioStepDescription(scenarioStep), fn);
 }
+
+export function scenarioStepDescription(scenarioStep) {
+  return `${scenarioStep.state.type} + \n    ${scenarioStep.action.type} =>`;
+}
+
 export const itSendsAMessage = (state: SideEffectState) => {
   it(`sends a message`, () => {
     expectSideEffect('messageOutbox', state, item => expect(item).toEqual(expect.anything()));
@@ -74,50 +79,122 @@ export const expectThisMessage = (state: SideEffectState, messageType: string) =
     expect(item.messagePayload.type).toEqual(messageType);
   });
 };
-export const expectThisMessageAndCommitmentSent = (
-  state: SideEffectState,
-  c: Partial<Commitment>,
-  messageType: string,
-) => {
-  expectSideEffect('messageOutbox', state, item => {
-    expect(item.messagePayload.type).toEqual(messageType);
-    expect(item.messagePayload.signedCommitment.commitment).toMatchObject(c);
-  });
-};
 
-export const expectThisMessageAndTheseCommitmentsSent = (
-  state: SideEffectState,
-  commitments: PartialCommitments,
-  messageType: string,
-) => {
-  expectSideEffect('messageOutbox', state, item => {
-    expect(item.messagePayload.type).toEqual(messageType);
-    expect(item.messagePayload.signedCommitments).toMatchObject(
-      // If the user passes a signature, we should match against it. Otherwise,
-      // the signature should be present, but we don't care what its value is
-      commitments.map(({ commitment, signature }) => ({
-        commitment,
-        signature: signature || expect.any(String),
-      })),
-    );
-  });
-};
-
-export const expectThisCommitmentSent = (state: SideEffectState, c: Partial<Commitment>) => {
-  expectThisMessageAndCommitmentSent(state, c, 'WALLET.COMMON.COMMITMENT_RECEIVED');
-};
 type PartialCommitments = Array<{ commitment: Partial<Commitment>; signature?: string }>;
+
+function transformCommitmentToMatcher(sc: { commitment: Partial<Commitment>; signature?: string }) {
+  if (sc.signature) {
+    return expect.objectContaining({
+      commitment: expect.objectContaining(sc.commitment),
+      signature: sc.signature,
+    });
+  } else {
+    return expect.objectContaining({ commitment: expect.objectContaining(sc.commitment) });
+  }
+}
+
+export const expectThisCommitmentSent = (
+  state: SideEffectState,
+  commitment: Partial<Commitment>,
+  type = 'WALLET.COMMON.COMMITMENT_RECEIVED',
+  idx = 0,
+) => {
+  const messageOutbox = getOutboxState(state, 'messageOutbox');
+
+  try {
+    // Passes when at least one message matches
+    // In the case of multiple messages queued, this approach does not care about
+    // their order, which is beneficial.
+    // However, the diffs produced by jest are unreadable, so when this expectation fails,
+    // we catch the error below
+    expect(messageOutbox).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          messagePayload: expect.objectContaining({
+            signedCommitment: transformCommitmentToMatcher({ commitment }),
+          }),
+        }),
+      ]),
+    );
+  } catch (err) {
+    if ('matcherResult' in err) {
+      // In this case, we've caught a jest expectation error.
+      // We try to help the developer by using expect(foo).toMatchObject(bar)
+      // The errors are much more useful in this case, but will be deceiving in the case when
+      // multiple messages are queued.
+
+      // To help with debugging, you can change the idx variable when running tests to 'search'
+      // for the correct commitment
+
+      console.warn(`Message not found: inspecting mismatched message in position ${idx}`);
+      expect(messageOutbox[idx]).toMatchObject({
+        messagePayload: {
+          type,
+          signedCommitment: { commitment },
+        },
+      });
+    } else {
+      throw err;
+    }
+  }
+};
 
 export const expectTheseCommitmentsSent = (
   state: SideEffectState,
   commitments: PartialCommitments,
+  type = 'WALLET.COMMON.COMMITMENTS_RECEIVED',
+  idx = 0,
 ) => {
-  expectThisMessageAndTheseCommitmentsSent(
-    state,
-    commitments,
-    'WALLET.COMMON.COMMITMENTS_RECEIVED',
-  );
+  const messageOutbox = getOutboxState(state, 'messageOutbox');
+
+  try {
+    // Passes when at least one message matches
+    // In the case of multiple messages queued, this approach does not care about
+    // their order, which is beneficial.
+    // However, the diffs produced by jest are unreadable, so when this expectation fails,
+    // we catch the error below
+    expect(messageOutbox).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          messagePayload: expect.objectContaining({
+            signedCommitments: commitments.map(transformCommitmentToMatcher),
+          }),
+        }),
+      ]),
+    );
+  } catch (err) {
+    if ('matcherResult' in err) {
+      // In this case, we've caught a jest expectation error.
+      // We try to help the developer by using expect(foo).toMatchObject(bar)
+      // The errors are much more useful in this case, but will be deceiving in the case when
+      // multiple messages are queued.
+
+      // To help with debugging, you can change the idx variable when running tests to 'search'
+      // for the correct commitment
+      console.warn(`Message not found: inspecting mismatched message in position ${idx}`);
+      expect(messageOutbox[idx]).toMatchObject({
+        messagePayload: {
+          type,
+          signedCommitments: commitments,
+        },
+      });
+    } else {
+      throw err;
+    }
+  }
 };
+
+function getOutboxState(state: SideEffectState, outboxBranch: 'messageOutbox'): MessageOutbox {
+  if ('sideEffects' in state && state.sideEffects && state.sideEffects[outboxBranch]) {
+    return state.sideEffects[outboxBranch] as MessageOutbox;
+  } else if ('outboxState' in state) {
+    return state.outboxState[outboxBranch];
+  } else if ('sharedData' in state) {
+    return state.sharedData.outboxState[outboxBranch];
+  }
+
+  throw new Error('Invalid state');
+}
 
 export const itSendsATransaction = (state: SideEffectState) => {
   it(`sends a transaction`, () => {

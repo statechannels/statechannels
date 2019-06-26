@@ -10,7 +10,6 @@ export function clearOutbox(state: OutboxState, action: actions.WalletAction): O
     nextOutbox.displayOutbox = nextOutbox.displayOutbox.slice(1);
   }
   if (action.type === 'WALLET.TRANSACTION_SUBMISSION.TRANSACTION_SENT') {
-    // TODO: Should this be a channel message?
     nextOutbox.transactionOutbox = nextOutbox.transactionOutbox.slice(1);
   }
 
