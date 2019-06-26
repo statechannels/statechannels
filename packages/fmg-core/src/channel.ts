@@ -5,6 +5,7 @@ export interface Channel {
   channelType: Address;
   nonce: Uint32;
   participants: Address[];
+  guaranteedChannel: Address;
 }
 
 export function channelID(channel: Channel) {
@@ -14,6 +15,7 @@ export function channelID(channel: Channel) {
       { type: 'address', value: channel.channelType },
       { type: 'uint32', value: channel.nonce },
       { type: 'address[]', value: channel.participants },
+      { type: 'address', value: channel.guaranteedChannel },
     ).slice(26);
   return toChecksumAddress(lowercaseID);
 }
