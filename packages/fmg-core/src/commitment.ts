@@ -4,16 +4,16 @@ import { Uint32, Uint256, Address, Bytes } from './types';
 import { bigNumberify } from 'ethers/utils';
 
 const SolidityCommitmentType = {
-  "CommitmentStruct": {
-    "channelType": "address",
-    "nonce": "uint32",
-    "participants": "address[]",
-    "commitmentType": "uint8",
-    "turnNum": "uint32",
-    "commitmentCount": "uint32",
-    "destination": "address[]",
-    "allocation": "uint256[]",
-    "appAttributes": "bytes",
+  CommitmentStruct: {
+    channelType: 'address',
+    nonce: 'uint32',
+    participants: 'address[]',
+    commitmentType: 'uint8',
+    turnNum: 'uint32',
+    commitmentCount: 'uint32',
+    destination: 'address[]',
+    allocation: 'uint256[]',
+    appAttributes: 'bytes',
   },
 };
 
@@ -57,7 +57,9 @@ export function fromParameters(parameters: any[]): Commitment {
 }
 
 export function mover(commitment: Commitment) {
-  return commitment.channel.participants[commitment.turnNum % commitment.channel.participants.length];
+  return commitment.channel.participants[
+    commitment.turnNum % commitment.channel.participants.length
+  ];
 }
 
 export function ethereumArgs(commitment: Commitment) {
