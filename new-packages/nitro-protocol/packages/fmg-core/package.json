@@ -11,7 +11,7 @@
   "scripts": {
     "prepare": "yarn build",
     "test": "jest",
-    "test:ci": "npx ganache-then-jest",
+    "test:ci": "yarn prettier:check && npx ganache-then-jest",
     "build": "tslint --project . && tsc",
     "prettier:check": "npx prettier --check 'src/**/*.{ts,tsx}'",
     "prettier:write": "npx prettier --write 'src/**/*.{ts,tsx}'"
