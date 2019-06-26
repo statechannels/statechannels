@@ -1,6 +1,7 @@
 import { applyMiddleware, compose, createStore } from 'redux';
 import { fork } from 'redux-saga/effects';
 import createSagaMiddleware from 'redux-saga';
+
 const sagaMiddleware = createSagaMiddleware();
 
 import { walletReducer } from './reducer';

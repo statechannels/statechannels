@@ -1,4 +1,4 @@
-import { BaseProcessAction, DefundRequested } from '../../actions';
+import { BaseProcessAction } from '../../actions';
 import { Commitment } from '../../../../domain';
 import { TransactionAction } from '../../transaction-submission/actions';
 import {
@@ -23,6 +23,11 @@ export interface ResponseProvided extends BaseProcessAction {
   processId: string;
   commitment: Commitment;
 }
+
+export interface ExitChallenge {
+  type: 'WALLET.DISPUTE.CHALLENGER.EXIT_CHALLENGE';
+  processId: string;
+}
 export interface Acknowledged extends BaseProcessAction {
   type: 'WALLET.DISPUTE.RESPONDER.ACKNOWLEDGED';
   processId: string;
@@ -42,6 +47,11 @@ export const responseProvided: ActionConstructor<ResponseProvided> = p => ({
   type: 'WALLET.DISPUTE.RESPONDER.RESPONSE_PROVIDED',
 });
 
+export const exitChallenge: ActionConstructor<ExitChallenge> = p => ({
+  ...p,
+  type: 'WALLET.DISPUTE.CHALLENGER.EXIT_CHALLENGE',
+});
+
 export const acknowledged: ActionConstructor<Acknowledged> = p => ({
   ...p,
   type: 'WALLET.DISPUTE.RESPONDER.ACKNOWLEDGED',
@@ -58,7 +68,7 @@ export type ResponderAction =
   | ChallengeExpiredEvent
   | ChallengeExpirySetEvent
   | Acknowledged
-  | DefundRequested;
+  | ExitChallenge;
 
 export function isResponderAction(action: WalletAction): action is ResponderAction {
   return (
@@ -68,6 +78,6 @@ export function isResponderAction(action: WalletAction): action is ResponderActi
     action.type === 'WALLET.ADJUDICATOR.CHALLENGE_EXPIRY_TIME_SET' ||
     action.type === 'WALLET.ADJUDICATOR.CHALLENGE_EXPIRED' ||
     action.type === 'WALLET.DISPUTE.RESPONDER.ACKNOWLEDGED' ||
-    action.type === 'WALLET.NEW_PROCESS.DEFUND_REQUESTED' // TODO in future this should be a new and distinct action that is not a new process Action
+    action.type === 'WALLET.DISPUTE.CHALLENGER.EXIT_CHALLENGE'
   );
 }
