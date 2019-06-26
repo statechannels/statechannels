@@ -13,7 +13,9 @@
     "deploy": "yarn clearContracts && npx deploy-contracts",
     "build:typescript": "tslint --project . && tsc",
     "clearContracts": "rm -rf build/contracts",
-    "build": "yarn clearContracts && npx truffle build && yarn build:typescript"
+    "build": "yarn clearContracts && npx truffle build && yarn build:typescript",
+    "prettier:check": "npx prettier --check 'src/**/*.{ts,tsx}'",
+    "prettier:write": "npx prettier --write 'src/**/*.{ts,tsx}'"
   },
   "repository": "https://github.com/magmo/force-move-games/tree/master/packages/fmg-payments",
   "author": "Tom Close",
