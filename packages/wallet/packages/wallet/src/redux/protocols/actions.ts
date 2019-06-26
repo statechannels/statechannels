@@ -43,7 +43,6 @@ export interface ChallengeCreated {
 
 export interface DefundRequested {
   type: 'WALLET.NEW_PROCESS.DEFUND_REQUESTED';
-  processId: string; // to allow existing protocol reducer to terminate by consuming this action
   channelId: string;
   protocol: WalletProtocol.Defunding;
 }

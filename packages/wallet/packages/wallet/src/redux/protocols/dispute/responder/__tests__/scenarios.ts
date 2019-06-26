@@ -187,7 +187,7 @@ export const challengeExpiresAndDefund = {
   ...defaults,
   defund: {
     state: acknowledgeTimeout,
-    action: acknowledged,
+    action: actions.exitChallenge({ ...defaults }),
   },
 };
 

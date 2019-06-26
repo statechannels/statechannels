@@ -196,7 +196,7 @@ function acknowledgeTimeoutReducer(
       sharedData: hideWallet(sharedData),
     };
   }
-  if (action.type === 'WALLET.NEW_PROCESS.DEFUND_REQUESTED') {
+  if (action.type === 'WALLET.DISPUTE.CHALLENGER.EXIT_CHALLENGE') {
     return {
       protocolState: states.failure({ reason: states.FailureReason.TimeOut }),
       sharedData,

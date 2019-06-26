@@ -7,7 +7,6 @@ import {
 } from '../../../actions';
 import { isTransactionAction, TransactionAction } from '../../transaction-submission/actions';
 import { ActionConstructor } from '../../../utils';
-import { DefundRequested } from '../../actions';
 
 // -------
 // Actions
@@ -20,6 +19,11 @@ export interface ChallengeApproved {
 
 export interface ChallengeDenied {
   type: 'WALLET.DISPUTE.CHALLENGER.CHALLENGE_DENIED';
+  processId: string;
+}
+
+export interface ExitChallenge {
+  type: 'WALLET.DISPUTE.CHALLENGER.EXIT_CHALLENGE';
   processId: string;
 }
 
@@ -42,6 +46,11 @@ export const challengeDenied: ActionConstructor<ChallengeDenied> = p => ({
   type: 'WALLET.DISPUTE.CHALLENGER.CHALLENGE_DENIED',
 });
 
+export const exitChallenge: ActionConstructor<ExitChallenge> = p => ({
+  ...p,
+  type: 'WALLET.DISPUTE.CHALLENGER.EXIT_CHALLENGE',
+});
+
 export const acknowledged: ActionConstructor<Acknowledged> = p => ({
   ...p,
   type: 'WALLET.DISPUTE.CHALLENGER.ACKNOWLEDGED',
@@ -60,7 +69,7 @@ export type ChallengerAction =
   | ChallengeExpiredEvent
   | ChallengeExpirySetEvent
   | Acknowledged
-  | DefundRequested;
+  | ExitChallenge;
 
 export function isChallengerAction(action: WalletAction): action is ChallengerAction {
   return (
@@ -72,6 +81,6 @@ export function isChallengerAction(action: WalletAction): action is ChallengerAc
     action.type === 'WALLET.ADJUDICATOR.REFUTED_EVENT' ||
     action.type === 'WALLET.ADJUDICATOR.CHALLENGE_EXPIRY_TIME_SET' ||
     action.type === 'WALLET.DISPUTE.CHALLENGER.ACKNOWLEDGED' ||
-    action.type === 'WALLET.NEW_PROCESS.DEFUND_REQUESTED' // TODO in future this should be a new and distinct action that is not a new process Action
+    action.type === 'WALLET.DISPUTE.CHALLENGER.EXIT_CHALLENGE'
   );
 }

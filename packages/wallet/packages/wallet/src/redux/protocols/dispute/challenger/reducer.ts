@@ -87,7 +87,7 @@ export function challengerReducer(
         default:
           return { state, sharedData };
       }
-    case 'WALLET.NEW_PROCESS.DEFUND_REQUESTED':
+    case 'WALLET.DISPUTE.CHALLENGER.EXIT_CHALLENGE':
       return {
         state: successClosed({}),
         sharedData,
