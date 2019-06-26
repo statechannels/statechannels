@@ -148,6 +148,15 @@ library Rules {
         Commitment.CommitmentStruct memory _fromCommitment,
         Commitment.CommitmentStruct memory _toCommitment
     ) public pure returns (bool) {
+        require(
+            Commitment.allocationsEqual(_fromCommitment, _toCommitment),
+            "Invalid transition from PreFundSetup: allocations must be equal"
+        );
+        require(
+            Commitment.destinationsEqual(_fromCommitment, _toCommitment),
+            "Invalid transition from PreFundSetup: destinations must be equal"
+        );
+
         if (_fromCommitment.commitmentCount == _fromCommitment.participants.length - 1) {
             // there are two options from the final PreFundSetup Commitment
             // 1. PreFundSetup -> PostFundSetup transition
@@ -161,26 +170,10 @@ library Rules {
                     Commitment.appAttributesEqual(_fromCommitment, _toCommitment),
                     "Invalid transition from PreFundSetup: appAttributes must be equal"
                 );
-                require(
-                    Commitment.allocationsEqual(_fromCommitment, _toCommitment),
-                    "Invalid transition from PreFundSetup: allocations must be equal"
-                );
-                require(
-                    Commitment.destinationsEqual(_fromCommitment, _toCommitment),
-                    "Invalid transition from PreFundSetup: destinations must be equal"
-                );
             } else {
                 require(
                     _toCommitment.isConclude(),
                     "Invalid transition from PreFundSetup: commitmentType must be Conclude"
-                );
-                require(
-                    Commitment.allocationsEqual(_fromCommitment, _toCommitment),
-                    "Invalid transition from PreFundSetup: allocations must be equal"
-                );
-                require(
-                    Commitment.destinationsEqual(_fromCommitment, _toCommitment),
-                    "Invalid transition from PreFundSetup: destinations must be equal"
                 );
                 
             }
@@ -198,14 +191,6 @@ library Rules {
                 _toCommitment.commitmentCount == _fromCommitment.commitmentCount + 1,
                 "Invalid transition from PreFundSetup: commitmentCount must increase by 1"
             );
-            require(
-                Commitment.allocationsEqual(_fromCommitment, _toCommitment),
-                "Invalid transition from PreFundSetup: allocations must be equal"
-            );
-            require(
-                Commitment.destinationsEqual(_fromCommitment, _toCommitment),
-                "Invalid transition from PreFundSetup: destinations must be equal"
-            );
         }
         return true;
     }
@@ -214,6 +199,15 @@ library Rules {
         Commitment.CommitmentStruct memory  _fromCommitment,
         Commitment.CommitmentStruct memory _toCommitment
     ) public pure returns (bool) {
+        require(
+            Commitment.allocationsEqual(_fromCommitment, _toCommitment),
+            "Invalid transition from PostFundSetup: allocations must be equal"
+        );
+        require(
+            Commitment.destinationsEqual(_fromCommitment, _toCommitment),
+            "Invalid transition from PostFundSetup: destinations must be equal"
+        );
+
         if (_fromCommitment.commitmentCount == _fromCommitment.participants.length - 1) {
             if (_toCommitment.isApp()) {
                 require(
@@ -225,16 +219,6 @@ library Rules {
                     _toCommitment.isConclude(),
                     "Invalid transition from PostFundSetup: commitmentType must be Conclude"
                 );
-
-                require(
-                    Commitment.allocationsEqual(_fromCommitment, _toCommitment),
-                    "Invalid transition from PostFundSetup: allocations must be equal"
-                );
-                require(
-                    Commitment.destinationsEqual(_fromCommitment, _toCommitment),
-                    "Invalid transition from PostFundSetup: destinations must be equal"
-                );
-
                 require(
                     _toCommitment.commitmentCount == 0,
                     "Invalid transition from PostFundSetup: commitmentCount must be reset when transitioning to Conclude"
@@ -254,27 +238,11 @@ library Rules {
                     _toCommitment.commitmentCount == _fromCommitment.commitmentCount + 1,
                     "Invalid transition from PostFundSetup: commitmentCount must increase by 1"
                 );
-                require(
-                    Commitment.allocationsEqual(_fromCommitment, _toCommitment),
-                    "Invalid transition from PostFundSetup: allocations must be equal"
-                );
-                require(
-                    Commitment.destinationsEqual(_fromCommitment, _toCommitment),
-                    "Invalid transition from PostFundSetup: destinations must be equal"
-                );
             } else {
                 // PostFundSetup -> Conclude
                 require(
                     _toCommitment.isConclude(),
                     "Invalid transition from PostFundSetup: commitmentType must be Conclude"
-                );
-                require(
-                    Commitment.allocationsEqual(_fromCommitment, _toCommitment),
-                    "Invalid transition from PostFundSetup: allocations must be equal"
-                );
-                require(
-                    Commitment.destinationsEqual(_fromCommitment, _toCommitment),
-                    "Invalid transition from PostFundSetup: destinations must be equal"
                 );
             }
         }
