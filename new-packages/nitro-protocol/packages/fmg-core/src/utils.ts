@@ -31,12 +31,12 @@ export class SolidityParameter {
 export type SignableData = string | SolidityParameter | SolidityParameter[];
 
 export function sign(data: SignableData, privateKey): Signature {
-  return (new Web3Accounts('')).sign(hash(data), privateKey);
+  return new Web3Accounts('').sign(hash(data), privateKey);
 }
 
 export function recover(data: SignableData, signature: Signature): string {
   const { v, r, s } = signature;
-  return (new Web3Accounts('')).recover(hash(data), v, r, s);
+  return new Web3Accounts('').recover(hash(data), v, r, s);
 }
 
 function hash(data: SignableData): string {
