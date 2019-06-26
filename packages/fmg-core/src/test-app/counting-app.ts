@@ -15,8 +15,8 @@ export interface CountingCommitment extends CountingBaseCommitment {
 }
 
 export const SolidityCountingCommitmentType = {
-  "CountingCommitmentStruct": {
-    "appCounter": "uint256",
+  CountingCommitmentStruct: {
+    appCounter: 'uint256',
   },
 };
 
@@ -24,14 +24,16 @@ export const createCommitment = {
   preFundSetup: function preFundSetupCommitment(opts: CountingBaseCommitment): CountingCommitment {
     return { ...opts, commitmentType: CommitmentType.PreFundSetup };
   },
-  postFundSetup: function postFundSetupCommitment(opts: CountingBaseCommitment): CountingCommitment {
+  postFundSetup: function postFundSetupCommitment(
+    opts: CountingBaseCommitment,
+  ): CountingCommitment {
     return { ...opts, commitmentType: CommitmentType.PostFundSetup };
   },
   app: function appCommitment(opts: CountingBaseCommitment): CountingCommitment {
     return { ...opts, commitmentType: CommitmentType.App, commitmentCount: 0 };
   },
   conclude: function concludeCommitment(opts: CountingBaseCommitment): CountingCommitment {
-    return { ...opts, commitmentType: CommitmentType.Conclude, };
+    return { ...opts, commitmentType: CommitmentType.Conclude };
   },
 };
 

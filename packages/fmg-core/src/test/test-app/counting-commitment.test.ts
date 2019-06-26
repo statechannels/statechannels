@@ -1,7 +1,7 @@
 import linker from 'solc/linker';
 
 import { Channel } from '../../';
-import { ethers, ContractFactory, } from 'ethers';
+import { ethers, ContractFactory } from 'ethers';
 
 import CommitmentArtifact from '../../../build/contracts/Commitment.json';
 
@@ -25,15 +25,24 @@ describe('CountingCommitment', () => {
       Commitment: CommitmentArtifact.networks[networkId].address,
     });
 
-    TestCountingCommitmentArtifact.bytecode = linker.linkBytecode(TestCountingCommitmentArtifact.bytecode, {
-      CountingCommitment: CountingCommitmentArtifact.networks[networkId].address,
-    });
+    TestCountingCommitmentArtifact.bytecode = linker.linkBytecode(
+      TestCountingCommitmentArtifact.bytecode,
+      {
+        CountingCommitment: CountingCommitmentArtifact.networks[networkId].address,
+      },
+    );
 
-    TestCountingCommitmentArtifact.bytecode = linker.linkBytecode(TestCountingCommitmentArtifact.bytecode, {
-      Commitment: CommitmentArtifact.networks[networkId].address,
-    });
+    TestCountingCommitmentArtifact.bytecode = linker.linkBytecode(
+      TestCountingCommitmentArtifact.bytecode,
+      {
+        Commitment: CommitmentArtifact.networks[networkId].address,
+      },
+    );
 
-    testCountingCommitment = await ContractFactory.fromSolidity(TestCountingCommitmentArtifact, signer).deploy();
+    testCountingCommitment = await ContractFactory.fromSolidity(
+      TestCountingCommitmentArtifact,
+      signer,
+    ).deploy();
 
     // Contract setup --------------------------------------------------------------------------
 
@@ -44,7 +53,6 @@ describe('CountingCommitment', () => {
       '6370fd033278c143179d81c5526140625662b8daa446c22ee2d73db3707e620c',
     );
     const participants = [participantA.address, participantB.address];
-
 
     const channel: Channel = { channelType: participantB.address, nonce: 0, participants }; // just use any valid address
 
@@ -65,7 +73,9 @@ describe('CountingCommitment', () => {
 
   it('converts a framework Commitment into a counting Commitment', async () => {
     const coreCommitment: Commitment = asCoreCommitment(commitment);
-    const countingCommitmentArgs = await testCountingCommitment.fromFrameworkCommitment(ethereumArgs(coreCommitment));
+    const countingCommitmentArgs = await testCountingCommitment.fromFrameworkCommitment(
+      ethereumArgs(coreCommitment),
+    );
     const { appCounter } = countingCommitmentArgs;
     expect(appCounter).toEqual(new BigNumber(1));
   });

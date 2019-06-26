@@ -11,7 +11,6 @@ import CountingAppArtifact from '../../../build/contracts/CountingApp.json';
 import { createCommitment, CountingCommitment, args } from '../../test-app/counting-app';
 import { BigNumber } from 'ethers/utils';
 
-
 const provider = new ethers.providers.JsonRpcProvider('http://localhost:8545');
 const signer = provider.getSigner();
 
@@ -44,7 +43,6 @@ describe('CountingApp', () => {
     );
     const participants = [participantA.address, participantB.address];
 
-
     const channel: Channel = { channelType: app.address, nonce: 0, participants };
     const numberToHexString = (value: number): string => {
       return utils.bigNumberify(value).toHexString();
@@ -55,11 +53,18 @@ describe('CountingApp', () => {
       destination: [participantA.address, participantB.address],
     };
 
-
-
-
-    commitment0 = createCommitment.app({ ...defaults, turnNum: 6, appCounter: new BigNumber(1).toHexString(), commitmentCount: 1 });
-    commitment1 = createCommitment.app({ ...defaults, turnNum: 7, appCounter: new BigNumber(2).toHexString(), commitmentCount: 2 });
+    commitment0 = createCommitment.app({
+      ...defaults,
+      turnNum: 6,
+      appCounter: new BigNumber(1).toHexString(),
+      commitmentCount: 1,
+    });
+    commitment1 = createCommitment.app({
+      ...defaults,
+      turnNum: 7,
+      appCounter: new BigNumber(2).toHexString(),
+      commitmentCount: 2,
+    });
 
     commitmentBalChange = createCommitment.app({
       ...defaults,
@@ -80,6 +85,9 @@ describe('CountingApp', () => {
 
   it("doesn't allow transitions if totals don't match", async () => {
     expect.assertions(1);
-    await expectRevert(() => app.validTransition(args(commitment0), args(commitmentBalChange)), "CountingApp: allocations must be equal");
+    await expectRevert(
+      () => app.validTransition(args(commitment0), args(commitmentBalChange)),
+      'CountingApp: allocations must be equal',
+    );
   });
 });
