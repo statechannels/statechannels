@@ -9,11 +9,13 @@
   "scripts": {
     "prepare": "yarn build ",
     "test": "npx ganache-then-jest",
-    "test:ci": "yarn build && npx ganache-then-jest",
+    "test:ci": "yarn prettier:check && yarn clearContracts && yarn test",
     "deploy": "yarn clearContracts && npx deploy-contracts",
     "build:typescript": "tslint --project . && tsc",
     "clearContracts": "rm -rf build/contracts",
-    "build": "yarn clearContracts && npx truffle build && yarn build:typescript"
+    "build": "yarn clearContracts && npx truffle build && yarn build:typescript",
+    "prettier:check": "npx prettier --check '{src,test}/**/*.{ts,tsx}'",
+    "prettier:write": "npx prettier --write '{src,test}/**/*.{ts,tsx}'"
   },
   "repository": "https://github.com/magmo/force-move-games/tree/master/packages/fmg-payments",
   "author": "Tom Close",
@@ -32,6 +34,7 @@
     "jest": "^23.6.0",
     "jest-gas-reporter": "0.0.1",
     "magmo-devtools": "git+https://github.com/magmo/devtools.git#v0.1.14",
+    "prettier": "^1.18.2",
     "truffle": "^5.0.0-beta.2",
     "ts-jest": "^23.10.5",
     "tslint": "^5.11.0",

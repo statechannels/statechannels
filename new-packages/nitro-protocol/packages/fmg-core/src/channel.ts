@@ -8,10 +8,12 @@ export interface Channel {
 }
 
 export function channelID(channel: Channel) {
-  const lowercaseID = "0x" + soliditySha3(
-    { type: 'address', value: channel.channelType },
-    { type: 'uint32', value: channel.nonce },
-    { type: 'address[]', value: channel.participants },
-  ).slice(26);
+  const lowercaseID =
+    '0x' +
+    soliditySha3(
+      { type: 'address', value: channel.channelType },
+      { type: 'uint32', value: channel.nonce },
+      { type: 'address[]', value: channel.participants },
+    ).slice(26);
   return toChecksumAddress(lowercaseID);
 }
