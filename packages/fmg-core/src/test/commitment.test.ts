@@ -1,4 +1,4 @@
-import { Channel, } from '../channel';
+import { Channel } from '../channel';
 import { Commitment, CommitmentType, toHex, fromHex, mover } from '../commitment';
 
 import { BigNumber } from 'ethers/utils';
@@ -6,7 +6,6 @@ import { Uint32 } from '../types';
 import { Wallet } from 'ethers';
 
 describe('Commitment', () => {
-
   const nonce = 12;
   const turnNum: Uint32 = 15;
 
