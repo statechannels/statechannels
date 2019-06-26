@@ -13,6 +13,7 @@ import TestRulesArtifact from '../../../build/contracts/TestRules.json';
 
 import CountingCommitmentArtifact from '../../../build/contracts/CountingCommitment.json';
 import CountingAppArtifact from '../../../build/contracts/CountingApp.json';
+import { AddressZero } from 'ethers/constants';
 
 const provider = new ethers.providers.JsonRpcProvider('http://localhost:8545');
 const signer = provider.getSigner();
@@ -66,7 +67,8 @@ describe('Rules', () => {
       CountingAppArtifact.networks[networkId].address,
     );
 
-    otherChannel = { channelType: appContract.address, nonce: 1, participants };
+    const guaranteedChannel = AddressZero;
+    otherChannel = { channelType: appContract.address, nonce: 1, participants, guaranteedChannel };
 
     RulesArtifact.bytecode = linker.linkBytecode(RulesArtifact.bytecode, {
       Commitment: CommitmentArtifact.networks[networkId].address,
@@ -81,7 +83,7 @@ describe('Rules', () => {
     testFramework = await ContractFactory.fromSolidity(TestRulesArtifact, signer).deploy();
     // Contract setup --------------------------------------------------------------------------
 
-    channel = { channelType: appContract.address, nonce: 0, participants };
+    channel = { channelType: appContract.address, nonce: 0, participants, guaranteedChannel };
     defaults = { channel, allocation, destination, appCounter: 0 };
   });
 
@@ -147,6 +149,7 @@ describe('Rules', () => {
         commitmentCountMustIncrement('PreFundSetup'),
       );
     });
+
     it('rejects a transition where the app attributes changes', async () => {
       toCommitment.appCounter = 45;
       expect.assertions(1);

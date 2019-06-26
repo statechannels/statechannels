@@ -8,6 +8,7 @@ library Commitment {
         address channelType;
         uint32 nonce;
         address[] participants;
+        address guaranteedChannel;
         uint8 commitmentType;
         uint32 turnNum;
         uint32 commitmentCount;
@@ -34,7 +35,12 @@ library Commitment {
 
     function channelId(CommitmentStruct memory _commitment) public pure returns (address) {
         bytes32 h = keccak256(
-            abi.encodePacked(_commitment.channelType, _commitment.nonce, _commitment.participants)
+            abi.encodePacked(
+                _commitment.channelType,
+                _commitment.nonce,
+                _commitment.participants,
+                _commitment.guaranteedChannel
+            )
         );
         address addr;
         assembly {

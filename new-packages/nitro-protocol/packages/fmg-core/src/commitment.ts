@@ -8,6 +8,7 @@ const SolidityCommitmentType = {
     channelType: 'address',
     nonce: 'uint32',
     participants: 'address[]',
+    guaranteedChannel: 'address',
     commitmentType: 'uint8',
     turnNum: 'uint32',
     commitmentCount: 'uint32',
@@ -40,19 +41,24 @@ export function fromHex(commitment: string): Commitment {
 }
 
 export function fromParameters(parameters: any[]): Commitment {
+  let idx = -1;
+  // Incrementing the idx variable works as long as the parameters are parsed in the
+  // same order as the commitment struct defines them
   const channel = {
-    channelType: parameters[0],
-    nonce: Number.parseInt(parameters[1], 10),
-    participants: parameters[2],
+    channelType: parameters[(idx += 1)],
+    nonce: Number.parseInt(parameters[(idx += 1)], 10),
+    participants: parameters[(idx += 1)],
+    guaranteedChannel: parameters[(idx += 1)],
   };
+
   return {
     channel,
-    commitmentType: Number.parseInt(parameters[3], 10) as CommitmentType,
-    turnNum: Number.parseInt(parameters[4], 10),
-    commitmentCount: Number.parseInt(parameters[5], 10),
-    destination: parameters[6],
-    allocation: parameters[7].map(a => bigNumberify(a).toHexString()),
-    appAttributes: parameters[8],
+    commitmentType: Number.parseInt(parameters[(idx += 1)], 10) as CommitmentType,
+    turnNum: Number.parseInt(parameters[(idx += 1)], 10),
+    commitmentCount: Number.parseInt(parameters[(idx += 1)], 10),
+    destination: parameters[(idx += 1)],
+    allocation: parameters[(idx += 1)].map(a => bigNumberify(a).toHexString()),
+    appAttributes: parameters[(idx += 1)],
   };
 }
 
@@ -67,6 +73,7 @@ export function ethereumArgs(commitment: Commitment) {
     commitment.channel.channelType,
     commitment.channel.nonce,
     commitment.channel.participants,
+    commitment.channel.guaranteedChannel,
     commitment.commitmentType,
     commitment.turnNum,
     commitment.commitmentCount,
@@ -81,6 +88,7 @@ export function asEthersObject(commitment: Commitment) {
     channelType: commitment.channel.channelType,
     nonce: commitment.channel.nonce,
     participants: commitment.channel.participants,
+    guaranteedChannel: commitment.channel.guaranteedChannel,
     commitmentType: commitment.commitmentType,
     turnNum: commitment.turnNum,
     commitmentCount: commitment.commitmentCount,

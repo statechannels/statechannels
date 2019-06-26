@@ -19,10 +19,11 @@ describe('Commitment', () => {
     '6370fd033278c143179d81c5526140625662b8daa446c22ee2d73db3707e620c',
   );
   const participants = [participantA.address, participantB.address];
+  const guaranteedChannel = participantA.address;
   const allocation = [new BigNumber(5).toHexString(), new BigNumber(4).toHexString()];
 
   const destination = [participantA.address, participantB.address];
-  const channel: Channel = { channelType, nonce, participants };
+  const channel: Channel = { channelType, nonce, participants, guaranteedChannel };
   const commitmentType = CommitmentType.PreFundSetup;
   const commitment: Commitment = {
     channel,
