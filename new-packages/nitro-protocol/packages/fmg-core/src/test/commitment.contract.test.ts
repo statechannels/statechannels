@@ -18,7 +18,6 @@ const provider = new ethers.providers.JsonRpcProvider('http://localhost:8545');
 const signer = provider.getSigner();
 
 describe('Commitment', () => {
-
   let commitmentLib;
   let testCommitmentLib;
   const nonce = 12;
@@ -55,7 +54,9 @@ describe('Commitment', () => {
     const factory = ContractFactory.fromSolidity(CommitmentArtifact, signer);
     commitmentLib = await factory.attach(CommitmentArtifact.networks[networkId].address);
 
-    TestCommitmentArtifact.bytecode = linker.linkBytecode(TestCommitmentArtifact.bytecode, { "Commitment": CommitmentArtifact.networks[networkId].address });
+    TestCommitmentArtifact.bytecode = linker.linkBytecode(TestCommitmentArtifact.bytecode, {
+      Commitment: CommitmentArtifact.networks[networkId].address,
+    });
     testCommitmentLib = await ContractFactory.fromSolidity(TestCommitmentArtifact, signer).deploy();
   });
 
@@ -90,14 +91,18 @@ describe('Commitment', () => {
     // needs to be signed by 1 as it's their move
     const { r, s, v } = sign(toHex(commitment), participantB.privateKey);
 
-    expect(await testCommitmentLib.requireSignature(asEthersObject(commitment), v, r, s)).toBeTruthy();
+    expect(
+      await testCommitmentLib.requireSignature(asEthersObject(commitment), v, r, s),
+    ).toBeTruthy();
   });
 
   it('will revert if the wrong party signed', async () => {
     // needs to be signed by 1 as it's their move
     const { v, r, s } = sign(toHex(commitment), participantA.privateKey);
     expect.assertions(1);
-    await expectRevert(() => testCommitmentLib.requireSignature(asEthersObject(commitment), v, r, s));
+    await expectRevert(() =>
+      testCommitmentLib.requireSignature(asEthersObject(commitment), v, r, s),
+    );
   });
 
   it('can check if the Commitment is fully signed', async () => {
@@ -105,18 +110,41 @@ describe('Commitment', () => {
     const { r: r1, s: s1, v: v1 } = sign(toHex(commitment), participantB.privateKey);
 
     expect(
-      await testCommitmentLib.requireFullySigned(asEthersObject(commitment), [v0, v1], [r0, r1], [s0, s1]),
+      await testCommitmentLib.requireFullySigned(
+        asEthersObject(commitment),
+        [v0, v1],
+        [r0, r1],
+        [s0, s1],
+      ),
     ).toBeTruthy();
   });
 
   it('can test if the appAttributes are equal', async () => {
-    const countingCommitment1: CountingCommitment = { channel, destination, allocation, turnNum, appCounter: new BigNumber(0).toHexString(), commitmentCount: 0, commitmentType: CommitmentType.PreFundSetup };
-    const countingCommitment2: CountingCommitment = { channel, destination, allocation, turnNum, appCounter: new BigNumber(1).toHexString(), commitmentCount: 0, commitmentType: CommitmentType.PostFundSetup };
+    const countingCommitment1: CountingCommitment = {
+      channel,
+      destination,
+      allocation,
+      turnNum,
+      appCounter: new BigNumber(0).toHexString(),
+      commitmentCount: 0,
+      commitmentType: CommitmentType.PreFundSetup,
+    };
+    const countingCommitment2: CountingCommitment = {
+      channel,
+      destination,
+      allocation,
+      turnNum,
+      appCounter: new BigNumber(1).toHexString(),
+      commitmentCount: 0,
+      commitmentType: CommitmentType.PostFundSetup,
+    };
 
     const commitment1 = asCoreCommitment(countingCommitment1);
     const commitment2 = asCoreCommitment(countingCommitment2);
 
     expect.assertions(1);
-    await expectRevert(() => commitmentLib.appAttributesEqual(asEthersObject(commitment1), asEthersObject(commitment2)));
+    await expectRevert(() =>
+      commitmentLib.appAttributesEqual(asEthersObject(commitment1), asEthersObject(commitment2)),
+    );
   });
 });
