@@ -32,6 +32,7 @@
     "jest-gas-reporter": "0.0.1",
     "magmo-devtools": "git+https://github.com/magmo/devtools.git#v0.1.14",
     "npm-run-all": "^4.1.5",
+    "prettier": "^1.18.2",
     "truffle": "^5.0.0-beta.2",
     "ts-jest": "^23.10.5",
     "tslint": "^5.11.0",
