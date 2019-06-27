@@ -6,6 +6,7 @@ import "./ForceMoveApp.sol";
 
 library Rules {
     using Commitment for Commitment.CommitmentStruct;
+    address private constant zeroAddress = address(0);
     struct Challenge {
         address channelId;
         Commitment.CommitmentStruct commitment;
@@ -131,6 +132,12 @@ library Rules {
             "Invalid transition: turnNum must increase by 1"
         );
 
+        // The invariance of the channelId guarantees that the guaranteedChannel is the
+        // same in both commitments, so the same check will be performed for
+        // the _from and the _to commitment
+        validateCommitment(_fromCommitment);
+        validateCommitment(_toCommitment);
+
         if (_fromCommitment.isPreFundSetup()) {
             return validTransitionFromPreFundSetup(_fromCommitment, _toCommitment);
         } else if (_fromCommitment.isPostFundSetup()) {
@@ -142,6 +149,20 @@ library Rules {
         }
 
         return true;
+    }
+
+    function validateCommitment(Commitment.CommitmentStruct memory commitment) private pure {
+        if (commitment.guaranteedChannel == zeroAddress) {
+            require(
+                commitment.allocation.length > 0,
+                "Invalid transition: allocation must not be empty in ledger channel."
+            );
+        } else {
+            require(
+                commitment.allocation.length == 0,
+                "Invalid transition: allocation must be empty in guarantor channel."
+            );
+        }
     }
 
     function validTransitionFromPreFundSetup(

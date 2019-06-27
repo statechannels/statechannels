@@ -290,21 +290,6 @@ contract NitroAdjudicator {
         require(
             Rules.validTransition(agreedCommitment, challengeCommitment)
         );
-        if (guaranteedChannel == zeroAddress) {
-            // If the guaranteeChannel is the zeroAddress, this outcome
-            // is an allocation
-            require(
-                agreedCommitment.allocation.length > 0,
-                "ForceMove: allocation outcome must have resolution"
-            );
-        } else {
-            // The non-zeroness of guaranteeChannel indicates that this outcome
-            // is a guarantee
-            require(
-                challengeCommitment.allocation.length == 0,
-                "ForceMove: guarantee outcome cannot have allocation"
-            );
-        }
 
         address channelId = agreedCommitment.channelId();
 
