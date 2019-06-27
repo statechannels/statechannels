@@ -627,22 +627,37 @@ describe('nitroAdjudicator', () => {
           'Transfer: outcome must be present',
         );
       });
+
+      it('reverts when the channel is a guarantor channel', async () => {
+        expect.assertions(expectedAssertions);
+        const guarantee = {
+          destination: [bob.address, alice.address],
+          allocation: [],
+          finalizedAt: ethers.utils.bigNumberify(1),
+          challengeCommitment: getEthersObjectForCommitment(guarantorCommitment),
+        };
+        await (await nitro.setOutcome(guarantor.address, guarantee)).wait();
+        await expectRevert(
+          () => nitro.transfer(guarantor.address, alice.address, allocation[0]),
+          'Transfer: channel must be a ledger channel',
+        );
+      });
     });
 
     describe('claim', () => {
-      const finalizedAt = 1;
+      const finalizedAt = ethers.utils.bigNumberify(1);
       it('works', async () => {
         const recipient = bob.address;
         const guarantee = {
           destination: [bob.address, alice.address],
           allocation: [],
-          finalizedAt: ethers.utils.bigNumberify(finalizedAt),
+          finalizedAt,
           challengeCommitment: getEthersObjectForCommitment(guarantorCommitment),
         };
         const allocationOutcome = {
           destination: [alice.address, bob.address],
           allocation,
-          finalizedAt: ethers.utils.bigNumberify(finalizedAt),
+          finalizedAt,
           challengeCommitment: getEthersObjectForCommitment(guarantorCommitment),
         };
         await (await nitro.setOutcome(guarantor.address, guarantee)).wait();
