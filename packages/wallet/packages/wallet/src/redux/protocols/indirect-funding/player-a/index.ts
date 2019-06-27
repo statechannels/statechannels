@@ -1,1 +1,0 @@
-export { IndirectFunding } from './container';
