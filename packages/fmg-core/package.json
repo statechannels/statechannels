@@ -1,6 +1,6 @@
 {
   "name": "fmg-core",
-  "version": "0.5.8",
+  "version": "0.5.9",
   "description": "Force-move games core",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
