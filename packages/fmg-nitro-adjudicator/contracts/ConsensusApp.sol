@@ -178,8 +178,8 @@ contract ConsensusApp {
       "ConsensusApp: 'furtherVotesRequired' must not be 0 during propose."
       );
     require(
-      commitment.proposedAllocation.length > 0,
-      "ConsensusApp: 'proposedAllocation' must not be reset during propose."
+      commitment.proposedDestination.length > 0,
+      "ConsensusApp: 'proposedDestination' must not be reset during propose."
       );
     require(
       commitment.proposedDestination.length == commitment.proposedAllocation.length,
