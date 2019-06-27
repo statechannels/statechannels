@@ -25,9 +25,9 @@ describe('message listener', () => {
 
   // todo: is OWN_POSITION_RECEIVED actually easier to think about than SIGNATURE_REQUEST?
   it('converts SIGNATURE_REQUEST into OWN_POSITION_RECEIVED', () => {
-    const output = saga.next({ data: incoming.signCommitmentRequest(scenarios.gameCommitment1) })
-      .value;
-    saga.next(); // the take
+    saga.next({ data: incoming.signCommitmentRequest(scenarios.gameCommitment1) });
+
+    const output = saga.next().value; // the take
 
     expect(output).toEqual(
       put(
@@ -37,13 +37,14 @@ describe('message listener', () => {
         }),
       ),
     );
+    saga.next();
   });
 
   it('converts VALIDATION_REQUEST into OPPONENT_POSITION_RECEIVED', () => {
-    const output = saga.next({
+    saga.next({
       data: incoming.validateCommitmentRequest(scenarios.gameCommitment1, 'signature'),
-    }).value;
-    saga.next(); // the take
+    });
+    const output = saga.next().value; // the take
 
     expect(output).toEqual(
       put(
@@ -54,5 +55,6 @@ describe('message listener', () => {
         }),
       ),
     );
+    saga.next();
   });
 });
