@@ -1,7 +1,10 @@
 import * as koaBody from 'koa-body';
 import * as Router from 'koa-router';
 
-import { appAttributesFromBytes, bytesFromAppAttributes } from 'fmg-nitro-adjudicator';
+import {
+  appAttributesFromBytes,
+  bytesFromAppAttributes,
+} from 'fmg-nitro-adjudicator/lib/consensus-app';
 import Wallet, { errors } from '../../../wallet';
 import { getCurrentCommitment } from '../../../wallet/db/queries/getCurrentCommitment';
 import { asConsensusCommitment } from '../../../wallet/services/ledger-commitment';

@@ -1,10 +1,9 @@
 import { CommitmentType, Signature } from 'fmg-core';
 import {
+  AppCommitment,
   finalVote,
   isConsensusReached,
   pass,
-  ProposalCommitment,
-  UpdateType,
   vote,
 } from 'fmg-nitro-adjudicator/lib/consensus-app';
 import { unreachable } from 'magmo-wallet';
@@ -62,16 +61,12 @@ export function nextCommitment(
   }
 }
 
-function finalVoteRequired(c: LedgerCommitment): c is ProposalCommitment {
-  return (
-    c.appAttributes.updateType === UpdateType.Proposal && c.appAttributes.furtherVotesRequired === 1
-  );
+function finalVoteRequired(c: LedgerCommitment): c is AppCommitment {
+  return c.appAttributes.furtherVotesRequired === 1;
 }
 
-function voteRequired(c: LedgerCommitment): c is ProposalCommitment {
-  return (
-    c.appAttributes.updateType === UpdateType.Proposal && c.appAttributes.furtherVotesRequired > 1
-  );
+function voteRequired(c: LedgerCommitment): c is AppCommitment {
+  return c.appAttributes.furtherVotesRequired > 1;
 }
 
 export function valuePreserved(currentCommitment: any, theirCommitment: any): boolean {
