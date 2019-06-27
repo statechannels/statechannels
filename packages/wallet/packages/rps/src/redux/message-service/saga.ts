@@ -55,23 +55,11 @@ export function* sendWalletMessageSaga() {
     const { messagePayload, to } = messageRelayRequest;
     const messageToSend: WalletMessage = { payload: messagePayload, queue: Queue.WALLET };
 
-    if (process.env.NODE_ENV === 'development' && to === process.env.SERVER_WALLET_ADDRESS) {
-      try {
-        const response = yield call(postData, { ...messagePayload });
-
-        // Since the response is returned straight away, we have to relay the commitment
-        // immediately
-        Wallet.relayMessage(WALLET_IFRAME_ID, response.messagePayload);
-      } catch (err) {
-        console.error(err);
-      }
-    } else {
-      yield call(
-        reduxSagaFirebase.database.create,
-        `/messages/${to.toLowerCase()}`,
-        sanitizeMessageForFirebase(messageToSend),
-      );
-    }
+    yield fork(
+      reduxSagaFirebase.database.create,
+      `/messages/${to.toLowerCase()}`,
+      sanitizeMessageForFirebase(messageToSend),
+    );
   }
 }
 
