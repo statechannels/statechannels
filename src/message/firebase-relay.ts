@@ -25,12 +25,9 @@ const config = {
   messagingSenderId: '913007764573',
 };
 
-export function initFirebase() {
-  return firebaseApp.initializeApp(config);
-}
+const firebase = firebaseApp.initializeApp(config);
 
 function listenForHubMessages() {
-  const firebase = initFirebase();
   const ref = firebase.database().ref(`/messages/${HUB_ADDRESS.toLowerCase()}/`);
 
   ref.on('child_added', snapshot => {
@@ -39,6 +36,15 @@ function listenForHubMessages() {
     postData({ ...value.payload, queue: value.queue });
     ref.child(key).remove();
   });
+}
+
+export function sendToOpponent(to, payload) {
+  const fbPayload = { payload, queue: 'WALLET' };
+  const sanitizedPayload = JSON.parse(JSON.stringify(fbPayload));
+  firebase
+    .database()
+    .ref(`/messages/${to.toLowerCase()}/`)
+    .push(sanitizedPayload);
 }
 
 if (require.main === module) {
