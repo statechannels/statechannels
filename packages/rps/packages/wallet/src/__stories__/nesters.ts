@@ -25,13 +25,13 @@ import {
 import {
   isTerminal as idFIsTerminal,
   aWaitForDirectFunding,
-  NonTerminalIndirectFundingState,
-} from '../redux/protocols/indirect-funding/states';
+  NonTerminalNewLedgerFundingState,
+} from '../redux/protocols/new-ledger-funding/states';
 
 import { isIndirectDefundingState } from '../redux/protocols/indirect-defunding/states';
 import { isTransactionSubmissionState } from '../redux/protocols/transaction-submission/states';
 import { isWithdrawalState } from '../redux/protocols/withdrawing/states';
-import { isIndirectFundingState } from '../redux/protocols/indirect-funding/states';
+import { isNewLedgerFundingState } from '../redux/protocols/new-ledger-funding/states';
 
 import { isDirectFundingState } from '../redux/protocols/direct-funding/states';
 import { waitForTransaction } from '../redux/protocols/dispute/challenger/states';
@@ -58,12 +58,12 @@ export function nestProtocolState(protocolState: ProtocolState): ProtocolState {
     return nestInConcluding(protocolState);
   }
 
-  if (isIndirectFundingState(protocolState) && !idFIsTerminal(protocolState)) {
+  if (isNewLedgerFundingState(protocolState) && !idFIsTerminal(protocolState)) {
     return nestInFunding(protocolState);
   }
 
   if (isDirectFundingState(protocolState) && !DFIsTerminal(protocolState)) {
-    return nestInFunding(nestInIndirectFunding(protocolState));
+    return nestInFunding(nestInNewLedgerFunding(protocolState));
   }
   return protocolState;
 }
@@ -79,7 +79,7 @@ function nestInDispute(transactionSubmissionState: NonTerminalTransactionSubmiss
   });
 }
 
-function nestInIndirectFunding(directFundingState: NonTerminalDirectFundingState) {
+function nestInNewLedgerFunding(directFundingState: NonTerminalDirectFundingState) {
   return aWaitForDirectFunding({
     ...directFundingState,
     directFundingState,
@@ -89,7 +89,7 @@ function nestInIndirectFunding(directFundingState: NonTerminalDirectFundingState
   });
 }
 
-function nestInFunding(protocolState: NonTerminalIndirectFundingState) {
+function nestInFunding(protocolState: NonTerminalNewLedgerFundingState) {
   return waitForFunding({
     ...protocolState,
     fundingState: protocolState,

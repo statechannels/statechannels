@@ -1,7 +1,7 @@
 import * as states from './states';
 import * as actions from './actions';
 
-import { IndirectFundingAction, isIndirectFundingAction } from '../../indirect-funding/actions';
+import { NewLedgerFundingAction, isNewLedgerFundingAction } from '../../new-ledger-funding/actions';
 import { SharedData, queueMessage } from '../../../state';
 import { ProtocolStateWithSharedData } from '../..';
 import { unreachable } from '../../../../utils/reducer-utils';
@@ -10,23 +10,23 @@ import { showWallet, hideWallet, sendFundingComplete } from '../../reducer-helpe
 import { fundingFailure } from 'magmo-wallet-client';
 import { sendStrategyProposed } from '../../../../communication';
 import {
-  indirectFundingReducer,
-  initialize as initializeIndirectFunding,
-} from '../../indirect-funding/reducer';
-import * as indirectFundingStates from '../../indirect-funding/states';
+  newLedgerFundingReducer,
+  initialize as initializeNewLedgerFunding,
+} from '../../new-ledger-funding/reducer';
+import * as newLedgerFundingStates from '../../new-ledger-funding/states';
 import * as selectors from '../../../selectors';
 import { Properties } from '../../../utils';
 import {
-  initializeExistingChannelFunding,
-  existingChannelFundingReducer,
-  ExistingChannelFundingAction,
-  isExistingChannelFundingAction,
-} from '../../existing-channel-funding';
-import * as existingChannelFundingStates from '../../existing-channel-funding/states';
+  initializeExistingLedgerFunding,
+  existingLedgerFundingReducer,
+  ExistingLedgerFundingAction,
+  isExistingLedgerFundingAction,
+} from '../../existing-ledger-funding';
+import * as existingLedgerFundingStates from '../../existing-ledger-funding/states';
 import { CommitmentType } from 'fmg-core';
 import { getLastCommitment } from '../../../channel-store';
 
-type EmbeddedAction = IndirectFundingAction;
+type EmbeddedAction = NewLedgerFundingAction;
 
 export function initialize(
   sharedData: SharedData,
@@ -51,7 +51,7 @@ export function fundingReducer(
   sharedData: SharedData,
   action: actions.FundingAction | EmbeddedAction,
 ): ProtocolStateWithSharedData<states.FundingState> {
-  if (isIndirectFundingAction(action) || isExistingChannelFundingAction(action)) {
+  if (isNewLedgerFundingAction(action) || isExistingLedgerFundingAction(action)) {
     return handleFundingAction(state, sharedData, action);
   }
 
@@ -74,7 +74,7 @@ export function fundingReducer(
 function handleFundingAction(
   protocolState: states.FundingState,
   sharedData: SharedData,
-  action: IndirectFundingAction,
+  action: NewLedgerFundingAction,
 ): ProtocolStateWithSharedData<states.FundingState> {
   if (protocolState.type !== 'Funding.PlayerA.WaitForFunding') {
     console.warn(
@@ -86,21 +86,21 @@ function handleFundingAction(
   }
 
   if (
-    isExistingChannelFundingAction(action) &&
-    existingChannelFundingStates.isExistingChannelFundingState(protocolState.fundingState)
+    isExistingLedgerFundingAction(action) &&
+    existingLedgerFundingStates.isExistingLedgerFundingState(protocolState.fundingState)
   ) {
-    return handleExistingChannelFundingAction(protocolState, sharedData, action);
+    return handleExistingLedgerFundingAction(protocolState, sharedData, action);
   } else {
-    return handleIndirectFundingAction(protocolState, sharedData, action);
+    return handleNewLedgerFundingAction(protocolState, sharedData, action);
   }
 }
 
-function handleExistingChannelFundingAction(
+function handleExistingLedgerFundingAction(
   protocolState: states.WaitForFunding,
   sharedData: SharedData,
-  action: ExistingChannelFundingAction,
+  action: ExistingLedgerFundingAction,
 ): ProtocolStateWithSharedData<states.FundingState> {
-  if (!existingChannelFundingStates.isExistingChannelFundingState(protocolState.fundingState)) {
+  if (!existingLedgerFundingStates.isExistingLedgerFundingState(protocolState.fundingState)) {
     console.error(
       `Funding reducer received indirect funding action ${
         action.type
@@ -111,9 +111,9 @@ function handleExistingChannelFundingAction(
   const {
     protocolState: updatedFundingState,
     sharedData: updatedSharedData,
-  } = existingChannelFundingReducer(protocolState.fundingState, sharedData, action);
+  } = existingLedgerFundingReducer(protocolState.fundingState, sharedData, action);
 
-  if (!existingChannelFundingStates.isTerminal(updatedFundingState)) {
+  if (!existingLedgerFundingStates.isTerminal(updatedFundingState)) {
     return {
       protocolState: states.waitForFunding({ ...protocolState, fundingState: updatedFundingState }),
       sharedData: updatedSharedData,
@@ -123,12 +123,12 @@ function handleExistingChannelFundingAction(
   }
 }
 
-function handleIndirectFundingAction(
+function handleNewLedgerFundingAction(
   protocolState: states.WaitForFunding,
   sharedData: SharedData,
-  action: IndirectFundingAction,
+  action: NewLedgerFundingAction,
 ): ProtocolStateWithSharedData<states.FundingState> {
-  if (!indirectFundingStates.isIndirectFundingState(protocolState.fundingState)) {
+  if (!newLedgerFundingStates.isNewLedgerFundingState(protocolState.fundingState)) {
     console.error(
       `Funding reducer received indirect funding action ${
         action.type
@@ -139,9 +139,9 @@ function handleIndirectFundingAction(
   const {
     protocolState: updatedFundingState,
     sharedData: updatedSharedData,
-  } = indirectFundingReducer(protocolState.fundingState, sharedData, action);
+  } = newLedgerFundingReducer(protocolState.fundingState, sharedData, action);
 
-  if (!indirectFundingStates.isTerminal(updatedFundingState)) {
+  if (!newLedgerFundingStates.isTerminal(updatedFundingState)) {
     return {
       protocolState: states.waitForFunding({ ...protocolState, fundingState: updatedFundingState }),
       sharedData: updatedSharedData,
@@ -171,7 +171,7 @@ function strategyChosen(
     existingLedgerChannel &&
     getLastCommitment(existingLedgerChannel).commitmentType === CommitmentType.App
   ) {
-    strategy = 'ExistingChannelStrategy';
+    strategy = 'ExistingLedgerFundingStrategy';
   }
   const message = sendStrategyProposed(opponentAddress, processId, strategy);
   return {
@@ -190,7 +190,7 @@ function strategyApproved(
   }
   const channelState = selectors.getChannelState(sharedData, state.targetChannelId);
 
-  if (state.strategy === 'ExistingChannelStrategy') {
+  if (state.strategy === 'ExistingLedgerFundingStrategy') {
     const existingLedgerChannel = selectors.getExistingLedgerChannelForParticipants(
       sharedData,
       state.ourAddress,
@@ -210,14 +210,14 @@ function strategyApproved(
     const {
       protocolState: fundingState,
       sharedData: newSharedData,
-    } = initializeExistingChannelFunding(
+    } = initializeExistingLedgerFunding(
       state.processId,
       channelState.channelId,
       existingLedgerChannel.channelId,
       sharedData,
     );
 
-    if (existingChannelFundingStates.isTerminal(fundingState)) {
+    if (existingLedgerFundingStates.isTerminal(fundingState)) {
       console.error('Indirect funding strate initialized to terminal state.');
       return handleFundingComplete(state, fundingState, newSharedData);
     }
@@ -226,12 +226,12 @@ function strategyApproved(
       sharedData: newSharedData,
     };
   } else {
-    const { protocolState: fundingState, sharedData: newSharedData } = initializeIndirectFunding(
+    const { protocolState: fundingState, sharedData: newSharedData } = initializeNewLedgerFunding(
       state.processId,
       channelState,
       sharedData,
     );
-    if (indirectFundingStates.isTerminal(fundingState)) {
+    if (newLedgerFundingStates.isTerminal(fundingState)) {
       console.error('Indirect funding strate initialized to terminal state.');
       return handleFundingComplete(state, fundingState, newSharedData);
     }
@@ -297,13 +297,13 @@ function cancelled(state: states.FundingState, sharedData: SharedData, action: a
 function handleFundingComplete(
   protocolState: Properties<states.WaitForSuccessConfirmation>,
   fundingState:
-    | indirectFundingStates.IndirectFundingState
-    | existingChannelFundingStates.ExistingChannelFundingState,
+    | newLedgerFundingStates.NewLedgerFundingState
+    | existingLedgerFundingStates.ExistingLedgerFundingState,
   sharedData: SharedData,
 ) {
   if (
-    fundingState.type === 'IndirectFunding.Success' ||
-    fundingState.type === 'ExistingChannelFunding.Success'
+    fundingState.type === 'NewLedgerFunding.Success' ||
+    fundingState.type === 'ExistingLedgerFunding.Success'
   ) {
     return {
       protocolState: states.waitForSuccessConfirmation(protocolState),

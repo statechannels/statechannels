@@ -2,7 +2,7 @@ import { walletReducer, getProcessId } from '../reducer';
 
 import * as states from './../state';
 import * as actions from './../actions';
-import * as IndirectFundingActions from './../protocols/indirect-funding/actions';
+import * as NewLedgerFundingActions from '../protocols/new-ledger-funding/actions';
 import * as scenarios from './test-scenarios';
 import { TwoPartyPlayerIndex } from '../types';
 import * as fundProtocol from '../protocols/funding';
@@ -59,22 +59,22 @@ describe('when a ProcessAction arrives', () => {
   };
   const state = { ...initializedState, processStore: { [processId]: processState } };
 
-  const action = IndirectFundingActions.playerA.strategyApproved({
+  const action = NewLedgerFundingActions.playerA.strategyApproved({
     channelId,
     processId: '0xprocessId',
     consensusLibrary: '0xf00',
   });
-  const indirectFundingReducer = jest.fn(() => ({
+  const newLedgerFundingReducer = jest.fn(() => ({
     protocolState: 'protocolState',
     sharedData: 'sharedData ',
   }));
   Object.defineProperty(fundProtocol, 'reducer', {
-    value: indirectFundingReducer,
+    value: newLedgerFundingReducer,
   });
 
   walletReducer(state, action);
   it('calls the correct reducer', () => {
-    expect(indirectFundingReducer).toHaveBeenCalledWith(
+    expect(newLedgerFundingReducer).toHaveBeenCalledWith(
       protocolState,
       states.EMPTY_SHARED_DATA,
       action,

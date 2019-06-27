@@ -4,8 +4,8 @@ import { TwoPartyPlayerIndex } from '../../../../types';
 
 import { EMPTY_SHARED_DATA, setChannels } from '../../../../state';
 import { FundingStrategy } from '../..';
-import * as indirectFundingTests from '../../../indirect-funding/player-a/__tests__';
-import * as existingChannelTests from '../../../existing-channel-funding/__tests__';
+import * as newLedgerFundingTests from '../../../new-ledger-funding/player-a/__tests__';
+import * as existingLedgerFundingTests from '../../../existing-ledger-funding/__tests__';
 import {
   channelId,
   bsAddress,
@@ -34,8 +34,8 @@ import { bigNumberify } from 'ethers/utils';
 // Test data
 // ---------
 const processId = 'process-id.123';
-const strategy: FundingStrategy = 'IndirectFundingStrategy';
-const existingChannelStrategy: FundingStrategy = 'ExistingChannelStrategy';
+const strategy: FundingStrategy = 'NewLedgerFundingStrategy';
+const existingChannelStrategy: FundingStrategy = 'ExistingLedgerFundingStrategy';
 const targetChannelId = channelId;
 const opponentAddress = bsAddress;
 const ourAddress = asAddress;
@@ -56,11 +56,11 @@ const waitForStrategyChoice = states.waitForStrategyChoice(props);
 const waitForStrategyResponse = states.waitForStrategyResponse(props);
 const waitForIndirectFunding = states.waitForFunding({
   ...props,
-  fundingState: indirectFundingTests.preSuccessState.state,
+  fundingState: newLedgerFundingTests.preSuccessState.state,
 });
 const waitForExistingChannelFunding = states.waitForFunding({
   ...props,
-  fundingState: existingChannelTests.preSuccess.state,
+  fundingState: existingLedgerFundingTests.preSuccess.state,
 });
 const waitForSuccessConfirmation = states.waitForSuccessConfirmation(props);
 
@@ -78,8 +78,8 @@ const app1 = appCommitment({ turnNum: 1, balances: twoTwo });
 // -------
 
 const emptySharedData = EMPTY_SHARED_DATA;
-const preSuccessSharedData = indirectFundingTests.preSuccessState.store;
-const successSharedData = indirectFundingTests.successState.store;
+const preSuccessSharedData = newLedgerFundingTests.preSuccessState.store;
+const successSharedData = newLedgerFundingTests.successState.store;
 const existingLedgerInitialSharedData = setChannels(EMPTY_SHARED_DATA, [
   channelFromCommitments([ledger4, ledger5], asAddress, asPrivateKey),
   channelFromCommitments([app0, app1], asAddress, asPrivateKey),
@@ -90,7 +90,7 @@ const existingLedgerInitialSharedData = setChannels(EMPTY_SHARED_DATA, [
 const strategyChosen = actions.strategyChosen({ processId, strategy });
 const strategyApproved = actions.strategyApproved({ processId });
 const successConfirmed = actions.fundingSuccessAcknowledged({ processId });
-const fundingSuccess = indirectFundingTests.successTrigger;
+const fundingSuccess = newLedgerFundingTests.successTrigger;
 const strategyRejected = actions.strategyRejected({ processId });
 const cancelledByA = actions.cancelled({ processId, by: TwoPartyPlayerIndex.A });
 const cancelledByB = actions.cancelled({ processId, by: TwoPartyPlayerIndex.B });
@@ -137,8 +137,8 @@ export const existingChannelHappyPath = {
   },
   waitForFunding: {
     state: waitForExistingChannelFunding,
-    sharedData: existingChannelTests.preSuccess.sharedData,
-    action: existingChannelTests.preSuccess.action,
+    sharedData: existingLedgerFundingTests.preSuccess.sharedData,
+    action: existingLedgerFundingTests.preSuccess.action,
   },
   waitForSuccessConfirmation: {
     state: waitForSuccessConfirmation,

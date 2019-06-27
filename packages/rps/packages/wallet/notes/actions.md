@@ -80,7 +80,7 @@ FundingAction --> WALLET.FUNDING.PLAYER_B.FUNDING_SUCCESS_ACKNOWLEDGED
 FundingAction --> WALLET.FUNDING.PLAYER_B.STRATEGY_APPROVED
 FundingAction --> WALLET.FUNDING.STRATEGY_PROPOSED
 FundingAction --> WALLET.FUNDING.PLAYER_B.STRATEGY_REJECTED
-FundingAction --> IndirectFundingAction
+FundingAction --> NewLedgerFundingAction
 end
 
 subgraph TransactionAction
@@ -127,11 +127,11 @@ DirectFundingAction --> WALLET.COMMON.COMMITMENT_RECEIVED
 DirectFundingAction --> TransactionAction
 end
 
-subgraph IndirectFundingAction
-IndirectFundingAction --> CommonAction
-IndirectFundingAction --> DirectFundingAction
-IndirectFundingAction --> WALLET.INDIRECT_FUNDING.PLAYER_A.STRATEGY_APPROVED
-IndirectFundingAction --> WALLET.INDIRECT_FUNDING.PLAYER_A.ALLOCATION_CHANGED
+subgraph NewLedgerFundingAction
+NewLedgerFundingAction --> CommonAction
+NewLedgerFundingAction --> DirectFundingAction
+NewLedgerFundingAction --> WALLET.NEW_LEDGER_FUNDING.PLAYER_A.STRATEGY_APPROVED
+NewLedgerFundingAction --> WALLET.NEW_LEDGER_FUNDING.PLAYER_A.ALLOCATION_CHANGED
 end
 
 subgraph WithdrawalAction
