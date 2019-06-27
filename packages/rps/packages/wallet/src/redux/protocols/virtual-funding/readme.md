@@ -11,9 +11,9 @@ ledger channels L0, L1, respectively.
 
 ### Decisions
 
-1. Each participant only sends commitments to the next participant. This makes communication predictable in a 3-way channel. (This decision will actually apply to the `PrepareChannel` and `ReachConsensus` protocols, and not directly to the virtual funding protocol)
+1. Each participant only sends commitments to the next participant. This makes communication predictable in a 3-way channel. (This decision will actually apply to the `AdvanceChannel` and `UpdateConsensus` protocols, and not directly to the virtual funding protocol)
 
-2. The post-fund-setup phase is redundant when preparing G or J -- as consensus channels, allocations cannot change until a full round anyway. Therefore, we progress G and J straight to application phase phase. This decision will actually apply to the `PrepareChannel` protocol, and not directly to the virtual funding protocol. However, this precludes the need to further update these channels after the indirect-funding step.
+2. The post-fund-setup phase is redundant when preparing G or J -- as consensus channels, allocations cannot change until a full round anyway. Therefore, we progress G and J straight to application phase phase. This decision will actually apply to the `AdvanceChannel` protocol, and not directly to the virtual funding protocol. However, this precludes the need to further update these channels after the indirect-funding step.
 
 ## The Protocols
 
@@ -68,22 +68,18 @@ sequenceDiagram
 
 ## State machine diagram
 
-In the following diagram, to move from `WaitForChannelPreparation`, the protocol needs to receive the `Prepared` success message from both `PrepareChannel(J)` and `PrepareChannel(G)`.
+In the following diagram, to move from `WaitForChannelPreparation`, the protocol needs to receive the `Prepared` success message from both `AdvanceChannel(J)` and `AdvanceChannel(G)`.
 
 ```mermaid
 graph TD
 linkStyle default interpolate basis
-  St((start)) --> F((failure))
-  St((start)) --> WFAp(WaitForApproval)
-  WFAp --> |Approved| WFOC("WaitForChannelPreparation: #60;PrepareChannel(J), PrepareChannel(G)#62;")
+  St((start)) --> WFOC("WaitForChannelPreparation: #60;AdvanceChannel(J), AdvanceChannel(G)#62;")
 
   WFOC --> |"Prepared(first)"| WFOC
   WFOC --> |"Prepared(second)"| WFGF("WaitForGuarantorFunding: IndirectFunding(G)")
 
-  WFGF --> |GuarantorFunded| WFAF("WaitForApplicationFunding: ReachConsensus(J)")
-  WFAF --> |ApplicationFunded| WFSA(WaitForSuccessAcknowledgement)
-  WFSA --> |SuccessAcknowledged| S((success))
-  WFAp --> |Rejected| F((failure))
+  WFGF --> |GuarantorFunded| WFAF("WaitForApplicationFunding: UpdateConsensus(J)")
+  WFAF --> |ApplicationFunded| S((success))
 
   classDef logic fill:#efdd20;
   classDef Success fill:#58ef21;
@@ -92,9 +88,5 @@ linkStyle default interpolate basis
   class St logic;
   class S Success;
   class F Failure;
-  class Fi WaitForChildProtocol
-  class WFOC WaitForChildProtocol
-  class WFJ WaitForChildProtocol
-  class WFAF WaitForChildProtocol
-  class WFGF WaitForChildProtocol
+  class WFAp,Fi,WFOC,WFJ,WFAF,WFGF WaitForChildProtocol
 ```

@@ -206,10 +206,10 @@ export function getLastMessage(state: SharedData): WalletEvent | undefined {
   return getLastMessageFromOutbox(state.outboxState);
 }
 
-export function getPrivatekey(state: SharedData, channelId: string): string | undefined {
+export function getPrivatekey(state: SharedData, channelId: string): string {
   const channel = getChannel(state, channelId);
   if (!channel) {
-    return undefined;
+    throw new Error(`Channel ${channelId} missing`);
   } else {
     return channel.privateKey;
   }
