@@ -2,6 +2,7 @@ import { ethers } from 'ethers';
 
 import NitroAdjudicatorArtifact from '../../build/contracts/NitroAdjudicator.json';
 import ConsensusAppArtifact from '../../build/contracts/ConsensusApp.json';
+import { asEthersObject, Commitment } from 'fmg-core';
 
 export async function getProvider(): Promise<ethers.providers.Web3Provider> {
   return await new ethers.providers.Web3Provider(web3.currentProvider);
@@ -61,4 +62,24 @@ export async function getAdjudicatorOutcome(provider, channelId) {
   const contract = await getAdjudicatorContract(provider);
   const outcomeForChannel = await contract.outcomes(channelId);
   return outcomeForChannel;
+}
+
+export async function validateTransition(
+  fromCommitment: Commitment,
+  toCommitment: Commitment,
+): Promise<boolean> {
+  const provider = await getProvider();
+  const contract = await getAdjudicatorContract(provider);
+  try {
+    return await contract.validTransition(
+      asEthersObject(fromCommitment),
+      asEthersObject(toCommitment),
+    );
+  } catch (error) {
+    if (error.message === 'Internal JSON-RPC error.') {
+      // Require statements cause a generic JSON-RPC error, so we just catch anything and return false
+      return Promise.resolve(false);
+    }
+  }
+  return Promise.resolve(true);
 }

@@ -1,8 +1,9 @@
-import { OpenChannelState, ChannelState, isFullyOpen } from './channel-store';
+import { OpenChannelState, ChannelState, isFullyOpen, getLastCommitment } from './channel-store';
 import * as walletStates from './state';
 import { SharedData, FundingState } from './state';
 import { WalletProtocol } from '../communication';
 import { CONSENSUS_LIBRARY_ADDRESS } from '../constants';
+import { Commitment } from '../domain';
 
 export const getOpenedChannelState = (state: SharedData, channelId: string): OpenChannelState => {
   const channelStatus = getChannelState(state, channelId);
@@ -12,12 +13,24 @@ export const getOpenedChannelState = (state: SharedData, channelId: string): Ope
   return channelStatus;
 };
 
+export const doesACommitmentExistForChannel = (state: SharedData, channelId: string): boolean => {
+  return (
+    state.channelStore[channelId] !== undefined &&
+    state.channelStore[channelId].commitments.length > 0
+  );
+};
+
 export const getChannelState = (state: SharedData, channelId: string): ChannelState => {
   const channelStatus = state.channelStore[channelId];
   if (!channelStatus) {
     throw new Error(`Could not find any initialized channel state for channel ${channelId}.`);
   }
   return channelStatus;
+};
+
+export const getLastCommitmentForChannel = (state: SharedData, channelId: string): Commitment => {
+  const channelState = getChannelState(state, channelId);
+  return getLastCommitment(channelState);
 };
 
 export const getExistingLedgerChannelForParticipants = (
