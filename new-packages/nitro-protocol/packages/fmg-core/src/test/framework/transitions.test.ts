@@ -91,6 +91,61 @@ describe('Rules', () => {
     return await testFramework.validTransition(args(commitment1), args(commitment2));
   };
 
+  describe('ledger channels', () => {
+    beforeEach(() => {
+      fromCommitment = createCommitment.preFundSetup({
+        ...defaults,
+        turnNum: 0,
+        commitmentCount: 0,
+      });
+      toCommitment = createCommitment.preFundSetup({ ...defaults, turnNum: 1, commitmentCount: 1 });
+    });
+
+    it("rejects a transition where the destination and the allocation don't match in the fromCommitment", async () => {
+      fromCommitment.destination = fromCommitment.destination.slice(1);
+      expect.assertions(1);
+      await expectRevert(() => validTransition(fromCommitment, toCommitment));
+    });
+
+    it('rejects a transition where the allocation is empty', async () => {
+      fromCommitment.destination = fromCommitment.destination.slice(1);
+      expect.assertions(1);
+      await expectRevert(() => validTransition(fromCommitment, toCommitment));
+    });
+
+    it("rejects a transition where the destination and the allocation don't match in the toCommitment", async () => {
+      toCommitment.destination = toCommitment.destination.slice(1);
+      expect.assertions(1);
+      await expectRevert(() => validTransition(fromCommitment, toCommitment));
+    });
+  });
+
+  describe('guarantor channels', () => {
+    beforeEach(() => {
+      fromCommitment = createCommitment.preFundSetup({
+        ...defaults,
+        channel: { ...channel, guaranteedChannel: participantA.address },
+        allocation: [],
+        turnNum: 0,
+        commitmentCount: 0,
+      });
+      toCommitment = createCommitment.preFundSetup({
+        ...fromCommitment,
+        turnNum: 1,
+        commitmentCount: 1,
+      });
+    });
+
+    it('allows a valid transition when the allocations are empty in a guarantor channel', async () => {
+      fromCommitment.allocation = [];
+      toCommitment.allocation = [];
+      fromCommitment.channel.guaranteedChannel = participantA.address;
+      toCommitment.channel.guaranteedChannel = participantA.address;
+
+      expect(await validTransition(fromCommitment, toCommitment)).toEqual(true);
+    });
+  });
+
   describe('preFundSetup -> preFundSetup', () => {
     beforeEach(() => {
       fromCommitment = createCommitment.preFundSetup({
