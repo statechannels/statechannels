@@ -193,5 +193,3 @@ export function veto(commitment: AppCommitment): AppCommitment {
     appAttributes: consensusAtts(),
   };
 }
-
-export { validTransition } from './validTransition';
