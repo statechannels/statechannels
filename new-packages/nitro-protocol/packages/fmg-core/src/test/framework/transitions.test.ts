@@ -136,13 +136,25 @@ describe('Rules', () => {
       });
     });
 
-    it('allows a valid transition when the allocations are empty in a guarantor channel', async () => {
+    it('allows a valid transition when the allocations are empty', async () => {
       fromCommitment.allocation = [];
       toCommitment.allocation = [];
       fromCommitment.channel.guaranteedChannel = participantA.address;
       toCommitment.channel.guaranteedChannel = participantA.address;
 
       expect(await validTransition(fromCommitment, toCommitment)).toEqual(true);
+    });
+
+    it('rejects a transition when the allocations are not empty', async () => {
+      fromCommitment.allocation = [];
+      toCommitment.allocation = ['0x00'];
+      fromCommitment.channel.guaranteedChannel = participantA.address;
+      toCommitment.channel.guaranteedChannel = participantA.address;
+
+      await expectRevert(
+        () => validTransition(fromCommitment, toCommitment),
+        'Invalid transition: allocation must be empty in guarantor channel.',
+      );
     });
   });
 
