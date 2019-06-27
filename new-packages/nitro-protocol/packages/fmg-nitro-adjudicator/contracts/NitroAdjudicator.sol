@@ -127,6 +127,10 @@ contract NitroAdjudicator {
 
     function transfer(address channel, address destination, uint amount) public {
         require(
+            outcomes[channel].challengeCommitment.guaranteedChannel == zeroAddress,
+            "Transfer: channel must be a ledger channel"
+        );
+        require(
             outcomes[channel].finalizedAt <= now,
             "Transfer: outcome must be final"
         );
@@ -154,6 +158,7 @@ contract NitroAdjudicator {
             guarantee.challengeCommitment.guaranteedChannel != zeroAddress,
             "Claim: a guarantee channel is required"
         );
+
         require(
             isChannelClosed(guarantor),
             "Claim: channel must be closed"
