@@ -344,8 +344,6 @@ contract NitroAdjudicator {
         );
     }
 
-    uint t = block.timestamp;
-
     function refute(Commitment.CommitmentStruct memory refutationCommitment, Signature memory signature) public {
         address channel = refutationCommitment.channelId();
         require(
