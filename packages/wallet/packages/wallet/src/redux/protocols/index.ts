@@ -15,10 +15,12 @@ import { ExistingChannelFundingState } from './existing-channel-funding/states';
 import { LedgerTopUpState } from './ledger-top-up/states';
 import { ConsensusUpdateState } from './consensus-update/states';
 import { AdvanceChannelState } from './advance-channel';
+import { VirtualFundingState } from './virtual-funding/states';
 
 export type ProtocolState =
   | ApplicationState
   | IndirectFundingState
+  | VirtualFundingState
   | DirectFundingState
   | WithdrawalState
   | ResponderState

@@ -49,7 +49,7 @@ interface Balance {
   wei: string;
 }
 
-const twoThree = [
+export const twoThree = [
   { address: asAddress, wei: bigNumberify(2).toHexString() },
   { address: bsAddress, wei: bigNumberify(3).toHexString() },
 ];

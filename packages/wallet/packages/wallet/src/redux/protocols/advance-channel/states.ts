@@ -84,11 +84,10 @@ export const notSafeToSend: StateConstructor<NotSafeToSend> = params => {
 };
 
 export const commitmentSent: StateConstructor<CommitmentSent> = params => {
-  const { transactionSubmissionState, channelId } = params;
+  const { channelId } = params;
   return {
     ...base(params),
     type: 'AdvanceChannel.CommitmentSent',
-    transactionSubmissionState,
     channelId,
   };
 };

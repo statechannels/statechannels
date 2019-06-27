@@ -28,7 +28,7 @@ export function initialize(
   processId: string,
   sharedData: Storage,
   commitmentType: CommitmentType,
-  args: NewChannelArgs | OngoingChannelArgs,
+  args: OngoingChannelArgs | NewChannelArgs,
 ): ReturnVal {
   if (commitmentType === CommitmentType.PreFundSetup) {
     if (!isNewChannelArgs(args)) {
@@ -94,7 +94,7 @@ function clearedToSendReducer(protocolState: states.AdvanceChannelState, sharedD
 type NewChannelArgs = Properties<states.ChannelUnknown>;
 type OngoingChannelArgs = Properties<states.NotSafeToSend>;
 
-function isNewChannelArgs(args: NewChannelArgs | OngoingChannelArgs): args is NewChannelArgs {
+function isNewChannelArgs(args: OngoingChannelArgs | NewChannelArgs): args is NewChannelArgs {
   if ('privateKey' in args) {
     return true;
   }
