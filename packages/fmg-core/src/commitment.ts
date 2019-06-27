@@ -2,6 +2,7 @@ import { Channel } from './channel';
 import abi from 'web3-eth-abi';
 import { Uint32, Uint256, Address, Bytes } from './types';
 import { bigNumberify } from 'ethers/utils';
+import { ADDRESS_ZERO } from '.';
 
 const SolidityCommitmentType = {
   CommitmentStruct: {
@@ -73,7 +74,7 @@ export function ethereumArgs(commitment: Commitment) {
     commitment.channel.channelType,
     commitment.channel.nonce,
     commitment.channel.participants,
-    commitment.channel.guaranteedChannel,
+    commitment.channel.guaranteedChannel || ADDRESS_ZERO,
     commitment.commitmentType,
     commitment.turnNum,
     commitment.commitmentCount,
@@ -88,7 +89,7 @@ export function asEthersObject(commitment: Commitment) {
     channelType: commitment.channel.channelType,
     nonce: commitment.channel.nonce,
     participants: commitment.channel.participants,
-    guaranteedChannel: commitment.channel.guaranteedChannel,
+    guaranteedChannel: commitment.channel.guaranteedChannel || ADDRESS_ZERO,
     commitmentType: commitment.commitmentType,
     turnNum: commitment.turnNum,
     commitmentCount: commitment.commitmentCount,
