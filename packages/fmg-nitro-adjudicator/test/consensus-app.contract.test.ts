@@ -62,7 +62,7 @@ describe('ConsensusApp', () => {
     channelType: participantB.address,
     nonce: 0,
     participants,
-  }; // just use any valid address
+  };
   const defaults = {
     channel,
     allocation,
@@ -96,7 +96,7 @@ describe('ConsensusApp', () => {
       proposedDestination: participants,
     });
     const proposeCommitmentAllocation = appCommitment(threeVotesComplete, {
-      proposedAllocation: [],
+      proposedAllocation: allocation.slice(1),
     });
     const proposeCommitmentDestination = appCommitment(threeVotesComplete, {
       proposedDestination: [],
@@ -119,14 +119,14 @@ describe('ConsensusApp', () => {
     it('calls the propose commitment validator on the new commitment', async () => {
       await invalidTransition(
         fromCommitment,
-        proposeCommitmentAllocation,
-        "ConsensusApp: 'proposedAllocation' must not be reset during propose.",
+        proposeCommitmentDestination,
+        "ConsensusApp: 'proposedDestination' must not be reset during propose.",
       );
 
       await invalidTransition(
         fromCommitment,
-        proposeCommitmentDestination,
-        "ConsensusApp: 'proposedDestination' and 'proposedAllocation' must be the same length during propose.",
+        proposeCommitmentAllocation,
+        'ConsensusApp: Outcome must be valid during propose',
       );
     });
 
@@ -138,9 +138,9 @@ describe('ConsensusApp', () => {
       );
 
       await invalidTransition(
-        proposeCommitmentAllocation,
+        proposeCommitmentDestination,
         toCommitment,
-        "ConsensusApp: 'proposedAllocation' must not be reset during propose.",
+        "ConsensusApp: 'proposedDestination' must not be reset during propose.",
       );
     });
   });
