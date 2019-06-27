@@ -184,7 +184,7 @@ contract ConsensusApp {
     require(
       commitment.proposedAllocation.length == 0 || // in case it's a guarantor channel
       commitment.proposedAllocation.length == commitment.proposedDestination.length,
-      "ConsensusApp: 'proposedDestination' and 'proposedAllocation' must be the same length during propose."
+      "ConsensusApp: Outcome must be valid during propose"
     );
   }
 

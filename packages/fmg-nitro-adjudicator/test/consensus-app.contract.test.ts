@@ -126,7 +126,7 @@ describe('ConsensusApp', () => {
       await invalidTransition(
         fromCommitment,
         proposeCommitmentAllocation,
-        "ConsensusApp: 'proposedDestination' and 'proposedAllocation' must be the same length during propose.",
+        'ConsensusApp: Outcome must be valid during propose',
       );
     });
 
