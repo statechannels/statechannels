@@ -53,8 +53,14 @@ describe('CountingCommitment', () => {
       '6370fd033278c143179d81c5526140625662b8daa446c22ee2d73db3707e620c',
     );
     const participants = [participantA.address, participantB.address];
+    const guaranteedChannel = participantA.address;
 
-    const channel: Channel = { channelType: participantB.address, nonce: 0, participants }; // just use any valid address
+    const channel: Channel = {
+      channelType: participantB.address,
+      nonce: 0,
+      participants,
+      guaranteedChannel,
+    }; // just use any valid address
 
     const defaults = {
       channel,
