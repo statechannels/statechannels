@@ -1,6 +1,6 @@
 {
   "name": "fmg-payments",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "Force-move game payment channel",
   "directories": {
     "doc": "docs",
@@ -22,7 +22,7 @@
   "license": "MIT",
   "dependencies": {
     "ethers": "^4.0.26",
-    "fmg-core": "^0.5.8",
+    "fmg-core": "^0.5.9",
     "web3": "1.0.0-beta.37"
   },
   "devDependencies": {
