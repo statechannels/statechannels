@@ -58,7 +58,11 @@ describe('ConsensusApp', () => {
   const alternativeProposedDestination = [participantB.address, participantC.address];
   const alternativeProposedAllocation = [toUint256(4), toUint256(6)];
 
-  const channel: Channel = { channelType: participantB.address, nonce: 0, participants }; // just use any valid address
+  const channel: Channel = {
+    channelType: participantB.address,
+    nonce: 0,
+    participants,
+  }; // just use any valid address
   const defaults = {
     channel,
     allocation,
