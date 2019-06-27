@@ -1,4 +1,4 @@
-import { fork, take, select, cancel, call, apply, put } from 'redux-saga/effects';
+import { fork, take, select, cancel, call, apply } from 'redux-saga/effects';
 
 export const getGameState = (storeObj: any) => storeObj.game.gameState;
 // export const getWalletAddress = (storeObj: any) => storeObj.wallet.address;
@@ -86,25 +86,6 @@ const openGameTransformer = dict => {
 };
 
 function* openGameSyncer() {
-  if (process.env.NODE_ENV === 'development' && process.env.BOT_URL) {
-    try {
-      // If the bot url is configured, try to fetch from the local server wallet
-      // Assumes the server is running locally at the configured url
-      const response = yield fetch(`${process.env.BOT_URL}/api/v1/rps_games`).then(r => r.json());
-      yield put(
-        actions.syncOpenGames(response.games.map(g => ({ ...g, address: response.address }))),
-      );
-    } catch (err) {
-      if (
-        err.message === 'Failed to fetch' ||
-        err.message === 'NetworkError when attempting to fetch resource.'
-      ) {
-        console.log(`WARNING: server wallet not running at ${process.env.BOT_URL}`);
-      } else {
-        throw err;
-      }
-    }
-  }
   yield fork(
     reduxSagaFirebase.database.sync,
     'challenges',
