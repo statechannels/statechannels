@@ -34,7 +34,11 @@ describe('ConsensusCommitment', () => {
   ];
   const proposedAllocation = [ethers.utils.bigNumberify(9).toHexString()];
 
-  const channel: Channel = { channelType: participantB.address, nonce: 0, participants }; // just use any valid address
+  const channel: Channel = {
+    channelType: participantB.address,
+    nonce: 0,
+    participants,
+  };
   const defaults = { channel, allocation, destination: participants };
   const commitment: Commitment = asCoreCommitment(
     propose(

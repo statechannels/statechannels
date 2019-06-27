@@ -27,7 +27,6 @@ contract NitroAdjudicator {
 
         // exactly one of the following two should be non-null
         // guarantee channels
-        address guaranteedChannel; // should be zero address in allocation channels
         uint[] allocation;         // should be zero length in guarantee channels
     }
 
@@ -139,7 +138,7 @@ contract NitroAdjudicator {
     function claim(address guarantor, address recipient, uint amount) public {
         Outcome memory guarantee = outcomes[guarantor];
         require(
-            guarantee.guaranteedChannel != zeroAddress,
+            guarantee.challengeCommitment.guaranteedChannel != zeroAddress,
             "Claim: a guarantee channel is required"
         );
         require(
@@ -148,11 +147,18 @@ contract NitroAdjudicator {
         );
 
         uint funding = holdings[guarantor];
-        Outcome memory reprioritizedOutcome = reprioritize(outcomes[guarantee.guaranteedChannel], guarantee);
+        Outcome memory reprioritizedOutcome = reprioritize(
+            outcomes[guarantee.challengeCommitment.guaranteedChannel],
+            guarantee
+        );
         if (affords(recipient, reprioritizedOutcome, funding) >= amount) {
-            outcomes[guarantee.guaranteedChannel] = reduce(outcomes[guarantee.guaranteedChannel], recipient, amount);
+            outcomes[guarantee.challengeCommitment.guaranteedChannel] = reduce(
+                outcomes[guarantee.challengeCommitment.guaranteedChannel],
+                recipient,
+                amount
+            );
             holdings[guarantor] = holdings[guarantor].sub(amount);
-            holdings[recipient] =  holdings[recipient].add(amount);
+            holdings[recipient] = holdings[recipient].add(amount);
         } else {
             revert('Claim: guarantor must be sufficiently funded');
         }
@@ -162,9 +168,12 @@ contract NitroAdjudicator {
     // Eth Management Logic
     // ********************
 
-    function reprioritize(Outcome memory allocation, Outcome memory guarantee) internal pure returns (Outcome memory) {
+    function reprioritize(
+        Outcome memory allocation,
+        Outcome memory guarantee
+    ) internal pure returns (Outcome memory) {
         require(
-            guarantee.guaranteedChannel != address(0),
+            guarantee.challengeCommitment.guaranteedChannel != address(0),
             "Claim: a guarantee channel is required"
         );
         address[] memory newDestination = new address[](guarantee.destination.length);
@@ -183,16 +192,20 @@ contract NitroAdjudicator {
             newDestination,
             allocation.finalizedAt,
             allocation.challengeCommitment,
-            zeroAddress,
             newAllocation
         );
     }
 
-    function affords(address recipient, Outcome memory outcome, uint funding) internal pure returns (uint256) {
+    function affords(
+        address recipient,
+        Outcome memory outcome,
+        uint funding
+    ) internal pure returns (uint256) {
         uint result = 0;
+        uint remainingFunding = funding;
 
         for (uint i = 0; i < outcome.destination.length; i++) {
-            if (funding <= 0) {
+            if (remainingFunding <= 0) {
                 break;
             }
 
@@ -200,28 +213,33 @@ contract NitroAdjudicator {
                 // It is technically allowed for a recipient to be listed in the
                 // outcome multiple times, so we must iterate through the entire
                 // array.
-                result =result.add(min(outcome.allocation[i], funding));
+                result = result.add(min(outcome.allocation[i], remainingFunding));
             }
-            if (funding > outcome.allocation[i]){
-                funding = funding.sub(outcome.allocation[i]);
+            if (remainingFunding > outcome.allocation[i]){
+                remainingFunding = remainingFunding.sub(outcome.allocation[i]);
             }else{
-                funding = 0;
+                remainingFunding = 0;
             }
         }
 
         return result;
     }
 
-    function reduce(Outcome memory outcome, address recipient, uint amount) internal pure returns (Outcome memory) { 
+    function reduce(
+        Outcome memory outcome,
+        address recipient,
+        uint amount
+    ) internal pure returns (Outcome memory) {
         uint256[] memory updatedAllocation = outcome.allocation;
         uint256 reduction = 0;
+        uint remainingAmount = amount;
         for (uint i = 0; i < outcome.destination.length; i++) {
             if (outcome.destination[i] == recipient) {
                 // It is technically allowed for a recipient to be listed in the
                 // outcome multiple times, so we must iterate through the entire
                 // array.
-                reduction = reduction.add(min(outcome.allocation[i], amount));
-                amount = amount.sub(reduction);
+                reduction = reduction.add(min(outcome.allocation[i], remainingAmount));
+                remainingAmount = remainingAmount.sub(reduction);
                 updatedAllocation[i] = updatedAllocation[i].sub(reduction);
             }
         }
@@ -229,8 +247,7 @@ contract NitroAdjudicator {
         return Outcome(
             outcome.destination,
             outcome.finalizedAt,
-            outcome.challengeCommitment, // Once the outcome is finalized, 
-            zeroAddress,
+            outcome.challengeCommitment, // Once the outcome is finalized,
             updatedAllocation
         );
     }
@@ -272,7 +289,6 @@ contract NitroAdjudicator {
     function forceMove(
         Commitment.CommitmentStruct memory agreedCommitment,
         Commitment.CommitmentStruct memory challengeCommitment,
-        address guaranteedChannel,
         Signature[] memory signatures
     ) public {
         require(
@@ -297,7 +313,6 @@ contract NitroAdjudicator {
             challengeCommitment.participants,
             now + CHALLENGE_DURATION,
             challengeCommitment,
-            guaranteedChannel,
             challengeCommitment.allocation
         );
 
@@ -332,7 +347,6 @@ contract NitroAdjudicator {
             outcomes[channel].destination,
             0,
             refutationCommitment,
-            outcomes[channel].guaranteedChannel,
             refutationCommitment.allocation
         );
         outcomes[channel] = updatedOutcome;
@@ -361,7 +375,6 @@ contract NitroAdjudicator {
             outcomes[channel].destination,
             0,
             responseCommitment,
-            outcomes[channel].guaranteedChannel,
             responseCommitment.allocation
         );
         outcomes[channel] = updatedOutcome;
@@ -417,7 +430,6 @@ contract NitroAdjudicator {
             outcomes[channel].destination,
             0,
             _responseCommitment,
-            outcomes[channel].guaranteedChannel,
             _responseCommitment.allocation
         );
         outcomes[channel] = updatedOutcome;
@@ -438,7 +450,6 @@ contract NitroAdjudicator {
             proof.penultimateCommitment.destination,
             now,
             proof.penultimateCommitment,
-            outcomes[channelId].guaranteedChannel,
             proof.penultimateCommitment.allocation
         );
         emit Concluded(channelId);
