@@ -86,12 +86,25 @@ contract NitroAdjudicator {
         emit Deposited(destination, amountDeposited, holdings[destination]);
     }
 
-    function transferAndWithdraw(address channel, address participant, address payable destination, uint amount, uint8 _v, bytes32 _r, bytes32 _s) public payable {
+    function transferAndWithdraw(address channel,
+        address participant,
+        address payable destination,
+        uint amount,
+        uint8 _v,
+        bytes32 _r,
+        bytes32 _s
+    ) public payable {
         transfer(channel, participant, amount);
         withdraw(participant, destination, amount, _v, _r ,_s);
     }
 
-    function withdraw(address participant, address payable destination, uint amount, uint8 _v, bytes32 _r, bytes32 _s) public payable {
+    function withdraw(address participant,
+        address payable destination,
+        uint amount,
+        uint8 _v,
+        bytes32 _r,
+        bytes32 _s
+    ) public payable {
         require(
             holdings[participant] >= amount,
             "Withdraw: overdrawn"
@@ -274,12 +287,19 @@ contract NitroAdjudicator {
         _conclude(proof);
     }
 
-    function concludeAndWithdraw(ConclusionProof memory proof,address participant, address payable destination, uint amount, uint8 _v, bytes32 _r, bytes32 _s) public{
+    function concludeAndWithdraw(ConclusionProof memory proof,
+        address participant,
+        address payable destination,
+        uint amount,
+        uint8 _v,
+        bytes32 _r,
+        bytes32 _s
+    ) public{
         address channelId = proof.penultimateCommitment.channelId();
         if (outcomes[channelId].finalizedAt > now || outcomes[channelId].finalizedAt == 0){
         _conclude(proof);
-        }else{
-            require(keccak256(abi.encode(proof.penultimateCommitment)) ==   keccak256(abi.encode( outcomes[channelId].challengeCommitment)),
+        } else {
+            require(keccak256(abi.encode(proof.penultimateCommitment)) == keccak256(abi.encode(outcomes[channelId].challengeCommitment)),
             "concludeAndWithdraw: channel already concluded with a different proof");
         }
         transfer(channelId,participant, amount);
@@ -304,7 +324,8 @@ contract NitroAdjudicator {
             "ForceMove: challengeCommitment not authorized"
         );
         require(
-            Rules.validTransition(agreedCommitment, challengeCommitment)
+            Rules.validTransition(agreedCommitment, challengeCommitment),
+            "ForceMove: Invalid transition"
         );
 
         address channelId = agreedCommitment.channelId();
