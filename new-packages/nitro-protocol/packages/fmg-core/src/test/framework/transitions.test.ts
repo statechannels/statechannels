@@ -13,6 +13,7 @@ import TestRulesArtifact from '../../../build/contracts/TestRules.json';
 
 import CountingCommitmentArtifact from '../../../build/contracts/CountingCommitment.json';
 import CountingAppArtifact from '../../../build/contracts/CountingApp.json';
+import { AddressZero } from 'ethers/constants';
 
 const provider = new ethers.providers.JsonRpcProvider('http://localhost:8545');
 const signer = provider.getSigner();
@@ -66,7 +67,8 @@ describe('Rules', () => {
       CountingAppArtifact.networks[networkId].address,
     );
 
-    otherChannel = { channelType: appContract.address, nonce: 1, participants };
+    const guaranteedChannel = AddressZero;
+    otherChannel = { channelType: appContract.address, nonce: 1, participants, guaranteedChannel };
 
     RulesArtifact.bytecode = linker.linkBytecode(RulesArtifact.bytecode, {
       Commitment: CommitmentArtifact.networks[networkId].address,
@@ -81,13 +83,80 @@ describe('Rules', () => {
     testFramework = await ContractFactory.fromSolidity(TestRulesArtifact, signer).deploy();
     // Contract setup --------------------------------------------------------------------------
 
-    channel = { channelType: appContract.address, nonce: 0, participants };
+    channel = { channelType: appContract.address, nonce: 0, participants, guaranteedChannel };
     defaults = { channel, allocation, destination, appCounter: 0 };
   });
 
   const validTransition = async (commitment1, commitment2) => {
     return await testFramework.validTransition(args(commitment1), args(commitment2));
   };
+
+  describe('ledger channels', () => {
+    beforeEach(() => {
+      fromCommitment = createCommitment.preFundSetup({
+        ...defaults,
+        turnNum: 0,
+        commitmentCount: 0,
+      });
+      toCommitment = createCommitment.preFundSetup({ ...defaults, turnNum: 1, commitmentCount: 1 });
+    });
+
+    it("rejects a transition where the destination and the allocation don't match in the fromCommitment", async () => {
+      fromCommitment.destination = fromCommitment.destination.slice(1);
+      expect.assertions(1);
+      await expectRevert(() => validTransition(fromCommitment, toCommitment));
+    });
+
+    it('rejects a transition where the allocation is empty', async () => {
+      fromCommitment.destination = fromCommitment.destination.slice(1);
+      expect.assertions(1);
+      await expectRevert(() => validTransition(fromCommitment, toCommitment));
+    });
+
+    it("rejects a transition where the destination and the allocation don't match in the toCommitment", async () => {
+      toCommitment.destination = toCommitment.destination.slice(1);
+      expect.assertions(1);
+      await expectRevert(() => validTransition(fromCommitment, toCommitment));
+    });
+  });
+
+  describe('guarantor channels', () => {
+    beforeEach(() => {
+      fromCommitment = createCommitment.preFundSetup({
+        ...defaults,
+        channel: { ...channel, guaranteedChannel: participantA.address },
+        allocation: [],
+        turnNum: 0,
+        commitmentCount: 0,
+      });
+      toCommitment = createCommitment.preFundSetup({
+        ...fromCommitment,
+        turnNum: 1,
+        commitmentCount: 1,
+      });
+    });
+
+    it('allows a valid transition when the allocations are empty', async () => {
+      fromCommitment.allocation = [];
+      toCommitment.allocation = [];
+      fromCommitment.channel.guaranteedChannel = participantA.address;
+      toCommitment.channel.guaranteedChannel = participantA.address;
+
+      expect(await validTransition(fromCommitment, toCommitment)).toEqual(true);
+    });
+
+    it('rejects a transition when the allocations are not empty', async () => {
+      fromCommitment.allocation = [];
+      toCommitment.allocation = ['0x00'];
+      fromCommitment.channel.guaranteedChannel = participantA.address;
+      toCommitment.channel.guaranteedChannel = participantA.address;
+
+      await expectRevert(
+        () => validTransition(fromCommitment, toCommitment),
+        'Invalid transition: allocation must be empty in guarantor channel.',
+      );
+    });
+  });
 
   describe('preFundSetup -> preFundSetup', () => {
     beforeEach(() => {
@@ -147,6 +216,7 @@ describe('Rules', () => {
         commitmentCountMustIncrement('PreFundSetup'),
       );
     });
+
     it('rejects a transition where the app attributes changes', async () => {
       toCommitment.appCounter = 45;
       expect.assertions(1);

@@ -42,8 +42,14 @@ describe('CountingApp', () => {
       '6370fd033278c143179d81c5526140625662b8daa446c22ee2d73db3707e620c',
     );
     const participants = [participantA.address, participantB.address];
+    const guaranteedChannel = participantA.address;
 
-    const channel: Channel = { channelType: app.address, nonce: 0, participants };
+    const channel: Channel = {
+      channelType: app.address,
+      nonce: 0,
+      participants,
+      guaranteedChannel,
+    };
     const numberToHexString = (value: number): string => {
       return utils.bigNumberify(value).toHexString();
     };
