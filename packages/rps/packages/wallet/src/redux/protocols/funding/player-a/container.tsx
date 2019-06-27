@@ -11,10 +11,10 @@ import { FundingStrategy } from '..';
 import ChooseStrategy from '../../../../components/funding/choose-strategy';
 import WaitForOtherPlayer from '../../../../components/wait-for-other-player';
 import AcknowledgeX from '../../../../components/acknowledge-x';
-import { IndirectFunding } from '../../indirect-funding/container';
+import { NewLedgerFunding } from '../../new-ledger-funding/container';
 import { ActionDispatcher } from '../../../utils';
-import { isIndirectFundingState } from '../../indirect-funding/states';
-import { ExistingChannelFunding } from '../../existing-channel-funding/container';
+import { isNewLedgerFundingState } from '../../new-ledger-funding/states';
+import { ExistingLedgerFunding } from '../../existing-ledger-funding/container';
 
 interface Props {
   state: states.OngoingFundingState;
@@ -41,10 +41,10 @@ class FundingContainer extends PureComponent<Props> {
       case 'Funding.PlayerA.WaitForStrategyResponse':
         return <WaitForOtherPlayer name={'strategy response'} />;
       case 'Funding.PlayerA.WaitForFunding':
-        if (isIndirectFundingState(state.fundingState)) {
-          return <IndirectFunding state={state.fundingState} />;
+        if (isNewLedgerFundingState(state.fundingState)) {
+          return <NewLedgerFunding state={state.fundingState} />;
         } else {
-          return <ExistingChannelFunding state={state.fundingState} />;
+          return <ExistingLedgerFunding state={state.fundingState} />;
         }
       case 'Funding.PlayerA.WaitForSuccessConfirmation':
         return (

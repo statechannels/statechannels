@@ -1,6 +1,6 @@
 import * as playerA from './player-a/actions';
 import * as playerB from './player-b/actions';
-import { isIndirectFundingAction, IndirectFundingAction } from '../indirect-funding/actions';
+import { isNewLedgerFundingAction, NewLedgerFundingAction } from '../new-ledger-funding/actions';
 import { WalletAction } from '../../../redux/actions';
 // -------
 // Actions
@@ -13,8 +13,8 @@ import { WalletAction } from '../../../redux/actions';
 // --------
 // Unions and Guards
 // --------
-type EmbeddedAction = IndirectFundingAction;
-const isEmbeddedAction = isIndirectFundingAction;
+type EmbeddedAction = NewLedgerFundingAction;
+const isEmbeddedAction = isNewLedgerFundingAction;
 
 export type FundingAction = playerA.FundingAction | playerB.FundingAction | EmbeddedAction;
 
