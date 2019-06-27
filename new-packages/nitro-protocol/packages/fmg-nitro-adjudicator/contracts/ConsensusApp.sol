@@ -132,7 +132,7 @@ contract ConsensusApp {
     require(
       encodeAndHashAllocation(oldCommitment.currentAllocation) == encodeAndHashAllocation(newCommitment.currentAllocation),
       "ConsensusApp: 'allocation' must be the same between commitments."
-    ); 
+    );
     require(
       encodeAndHashDestination(oldCommitment.currentDestination) == encodeAndHashDestination(newCommitment.currentDestination),
       "ConsensusApp: 'destination' must be the same between commitments."
@@ -146,7 +146,7 @@ contract ConsensusApp {
     require(
       encodeAndHashAllocation(oldCommitment.proposedAllocation) == encodeAndHashAllocation(newCommitment.proposedAllocation),
       "ConsensusApp: 'proposedAllocation' must be the same between commitments."
-    ); 
+    );
     require(
       encodeAndHashDestination(oldCommitment.proposedDestination) == encodeAndHashDestination(newCommitment.proposedDestination),
       "ConsensusApp: 'proposedDestination' must be the same between commitments."
@@ -159,16 +159,16 @@ contract ConsensusApp {
     require(
       commitment.furtherVotesRequired == 0,
       "ConsensusApp: 'furtherVotesRequired' must be 0 during consensus."
-      ); 
+      );
     require(
       commitment.proposedAllocation.length == 0,
       "ConsensusApp: 'proposedAllocation' must be reset during consensus."
-      ); 
+      );
     require(
       commitment.proposedDestination.length == 0,
       "ConsensusApp: 'proposedDestination' must be reset during consensus."
-    ); 
-  } 
+    );
+  }
 
   function validateProposeCommitment(
     ConsensusCommitment.ConsensusCommitmentStruct memory commitment
@@ -176,16 +176,16 @@ contract ConsensusApp {
     require(
       commitment.furtherVotesRequired != 0,
       "ConsensusApp: 'furtherVotesRequired' must not be 0 during propose."
-      ); 
+      );
     require(
       commitment.proposedAllocation.length > 0,
       "ConsensusApp: 'proposedAllocation' must not be reset during propose."
-      ); 
+      );
     require(
       commitment.proposedDestination.length == commitment.proposedAllocation.length,
       "ConsensusApp: 'proposedDestination' and 'proposedAllocation' must be the same length during propose."
-    ); 
-  } 
+    );
+  }
 
   // Booleans
 
@@ -195,8 +195,8 @@ contract ConsensusApp {
   ) private pure returns (bool) {
     return(
       commitment.furtherVotesRequired == numParticipants - 1
-    ); 
-  } 
+    );
+  }
 
   function furtherVotesRequiredDecremented(
     ConsensusCommitment.ConsensusCommitmentStruct memory oldCommitment,
@@ -204,8 +204,8 @@ contract ConsensusApp {
   ) private pure returns (bool) {
     return(
       newCommitment.furtherVotesRequired == oldCommitment.furtherVotesRequired - 1
-    ); 
-  } 
+    );
+  }
 
   function balancesUpdated(
     ConsensusCommitment.ConsensusCommitmentStruct memory oldCommitment,
