@@ -219,6 +219,19 @@ const existingArgsA = { ...existingArgs, ourIndex: 0 };
 const existingArgsB = { ...existingArgs, ourIndex: 1 };
 const existingArgsHub = { ...existingArgs, ourIndex: 2 };
 
+export const preSuccess = {
+  ...propsA,
+  state: commitmentSentA,
+  sharedData: aSentPreFundCommitment,
+  trigger: receivePreFundSetupFromHub,
+};
+
+export const success = {
+  ...propsA,
+  state: states.success({}),
+  sharedData: aReceivedPrefundSetup,
+};
+
 export const newChannelAsA = {
   ...propsA,
   initialize: {

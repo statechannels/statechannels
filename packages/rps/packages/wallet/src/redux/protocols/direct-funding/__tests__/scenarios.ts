@@ -26,7 +26,7 @@ const defaultsForA: states.DirectFundingState = {
   safeToDepositLevel: '0x',
   type: 'DirectFunding.NotSafeToDeposit',
   exchangePostFundSetups: true,
-  postFundSetupState: { ...advanceChannelScenarios.preSuccessState, ourIndex: 0 },
+  postFundSetupState: { ...advanceChannelScenarios.preSuccess.state, ourIndex: 0 },
 };
 
 const defaultsForB: states.DirectFundingState = {
@@ -34,7 +34,7 @@ const defaultsForB: states.DirectFundingState = {
   requiredDeposit: YOUR_DEPOSIT_B,
   ourIndex: 1,
   safeToDepositLevel: YOUR_DEPOSIT_A,
-  postFundSetupState: { ...advanceChannelScenarios.preSuccessState, ourIndex: 1 },
+  postFundSetupState: { ...advanceChannelScenarios.preSuccess.state, ourIndex: 1 },
 };
 
 // actions
@@ -53,7 +53,7 @@ const bFundingReceivedEvent = globalActions.fundingReceivedEvent({
   totalForDestination: TOTAL_REQUIRED,
 });
 
-const sharedData = () => ({ ...advanceChannelScenarios.initialStore });
+const sharedData = () => ({ ...advanceChannelScenarios.preSuccess.sharedData });
 
 export const aHappyPath = {
   initialize: { sharedData: sharedData(), action: aInitializeAction },
@@ -80,7 +80,7 @@ export const aHappyPath = {
       channelFunded: true,
     }),
     sharedData: sharedData(),
-    action: advanceChannelScenarios.successTrigger,
+    action: advanceChannelScenarios.preSuccess.trigger,
   },
 };
 
@@ -137,7 +137,7 @@ export const bHappyPath = {
       channelFunded: true,
     }),
     sharedData: sharedData(),
-    action: advanceChannelScenarios.successTrigger,
+    action: advanceChannelScenarios.preSuccess.trigger,
   },
 };
 
