@@ -119,13 +119,13 @@ describe('ConsensusApp', () => {
     it('calls the propose commitment validator on the new commitment', async () => {
       await invalidTransition(
         fromCommitment,
-        proposeCommitmentAllocation,
-        "ConsensusApp: 'proposedAllocation' must not be reset during propose.",
+        proposeCommitmentDestination,
+        "ConsensusApp: 'proposedDestination' must not be reset during propose.",
       );
 
       await invalidTransition(
         fromCommitment,
-        proposeCommitmentDestination,
+        proposeCommitmentAllocation,
         "ConsensusApp: 'proposedDestination' and 'proposedAllocation' must be the same length during propose.",
       );
     });
@@ -138,9 +138,9 @@ describe('ConsensusApp', () => {
       );
 
       await invalidTransition(
-        proposeCommitmentAllocation,
+        proposeCommitmentDestination,
         toCommitment,
-        "ConsensusApp: 'proposedAllocation' must not be reset during propose.",
+        "ConsensusApp: 'proposedDestination' must not be reset during propose.",
       );
     });
   });
