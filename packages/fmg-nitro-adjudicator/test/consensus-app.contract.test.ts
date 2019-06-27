@@ -62,7 +62,7 @@ describe('ConsensusApp', () => {
     channelType: participantB.address,
     nonce: 0,
     participants,
-  }; // just use any valid address
+  };
   const defaults = {
     channel,
     allocation,
@@ -96,7 +96,7 @@ describe('ConsensusApp', () => {
       proposedDestination: participants,
     });
     const proposeCommitmentAllocation = appCommitment(threeVotesComplete, {
-      proposedAllocation: [],
+      proposedAllocation: allocation.slice(1),
     });
     const proposeCommitmentDestination = appCommitment(threeVotesComplete, {
       proposedDestination: [],

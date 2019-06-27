@@ -182,7 +182,8 @@ contract ConsensusApp {
       "ConsensusApp: 'proposedDestination' must not be reset during propose."
       );
     require(
-      commitment.proposedDestination.length == commitment.proposedAllocation.length,
+      commitment.proposedAllocation.length == 0 || // in case it's a guarantor channel
+      commitment.proposedAllocation.length == commitment.proposedDestination.length,
       "ConsensusApp: 'proposedDestination' and 'proposedAllocation' must be the same length during propose."
     );
   }
