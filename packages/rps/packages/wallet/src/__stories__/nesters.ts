@@ -1,10 +1,4 @@
-import { instigatorWaitForDefund } from '../redux/protocols/concluding/states';
-import {
-  isDefundingState,
-  NonTerminalDefundingState,
-  waitForWithdrawal,
-  waitForLedgerDefunding,
-} from '../redux/protocols/defunding/states';
+import { waitForWithdrawal, waitForLedgerDefunding } from '../redux/protocols/defunding/states';
 import {
   isTerminal as iddfIsTerminal,
   NonTerminalIndirectDefundingState,
@@ -17,7 +11,6 @@ import {
   isTerminal as wIsTerminal,
   NonTerminalWithdrawalState,
 } from '../redux/protocols/withdrawing/states';
-import { isTerminal as dFIsTerminal } from '../redux/protocols/defunding/states';
 import {
   isTerminal as DFIsTerminal,
   NonTerminalDirectFundingState,
@@ -51,11 +44,7 @@ export function nestProtocolState(protocolState: ProtocolState): ProtocolState {
     (isIndirectDefundingState(protocolState) && !iddfIsTerminal(protocolState)) ||
     (isWithdrawalState(protocolState) && !wIsTerminal(protocolState))
   ) {
-    return nestInConcluding(nestInDefunding(protocolState));
-  }
-
-  if (isDefundingState(protocolState) && !dFIsTerminal(protocolState)) {
-    return nestInConcluding(protocolState);
+    return nestInDefunding(protocolState);
   }
 
   if (isNewLedgerFundingState(protocolState) && !idFIsTerminal(protocolState)) {
@@ -66,10 +55,6 @@ export function nestProtocolState(protocolState: ProtocolState): ProtocolState {
     return nestInFunding(nestInNewLedgerFunding(protocolState));
   }
   return protocolState;
-}
-
-function nestInConcluding(defundingState: NonTerminalDefundingState) {
-  return instigatorWaitForDefund({ ...defundingState, defundingState });
 }
 
 function nestInDispute(transactionSubmissionState: NonTerminalTransactionSubmissionState) {

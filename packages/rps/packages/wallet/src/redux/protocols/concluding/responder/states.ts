@@ -1,5 +1,4 @@
 import { StateConstructor } from '../../../utils';
-import { DefundingState } from '../../defunding';
 export type ResponderConcludingState =
   | ResponderNonTerminalState
   | ResponderPreTerminalState
@@ -36,12 +35,6 @@ export interface ResponderDecideDefund {
   opponentHasSelected: boolean;
 }
 
-export interface ResponderWaitForDefund {
-  type: 'ConcludingResponder.WaitForDefund';
-  processId: string;
-  channelId: string;
-  defundingState: DefundingState;
-}
 export interface ResponderWaitForOpponentSelection {
   type: 'ConcludingResponder.WaitForOpponentSelection';
   processId: string;
@@ -62,7 +55,6 @@ export function isConcludingResponderState(
     state.type === 'ConcludingResponder.AcknowledgeFailure' ||
     state.type === 'ConcludingResponder.ApproveConcluding' ||
     state.type === 'ConcludingResponder.DecideDefund' ||
-    state.type === 'ConcludingResponder.WaitForDefund' ||
     state.type === 'ConcludingResponder.WaitForLedgerUpdate' ||
     state.type === 'ConcludingResponder.WaitForOpponentSelection'
   );
@@ -88,9 +80,6 @@ export const acknowledgeFailure: StateConstructor<ResponderAcknowledgeFailure> =
   return { ...p, type: 'ConcludingResponder.AcknowledgeFailure' };
 };
 
-export const waitForDefund: StateConstructor<ResponderWaitForDefund> = p => {
-  return { ...p, type: 'ConcludingResponder.WaitForDefund' };
-};
 export const waitForLedgerUpdate: StateConstructor<ResponderWaitForLedgerUpdate> = p => {
   return { ...p, type: 'ConcludingResponder.WaitForLedgerUpdate' };
 };
@@ -104,7 +93,6 @@ export const waitForOpponentSelection: StateConstructor<ResponderWaitForOpponent
 export type ResponderNonTerminalState =
   | ResponderApproveConcluding
   | ResponderDecideDefund
-  | ResponderWaitForDefund
   | ResponderAcknowledgeFailure
   | ResponderAcknowledgeSuccess
   | ResponderWaitForLedgerUpdate

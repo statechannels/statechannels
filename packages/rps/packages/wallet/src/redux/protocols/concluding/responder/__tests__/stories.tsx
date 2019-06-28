@@ -4,4 +4,3 @@ import { addStoriesFromScenario as addStories } from '../../../../../__stories__
 addStories(scenarios.happyPath, 'Concluding / Responder / Happy Path');
 addStories(scenarios.channelDoesntExist, 'Concluding / Responder / Channel doesnt exist');
 addStories(scenarios.concludingNotPossible, 'Concluding / Responder / Concluding impossible');
-addStories(scenarios.defundFailed, 'Concluding / Responder / Defund failed');
