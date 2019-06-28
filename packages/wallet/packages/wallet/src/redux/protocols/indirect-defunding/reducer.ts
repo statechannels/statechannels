@@ -6,7 +6,11 @@ import * as helpers from '../reducer-helpers';
 import { unreachable } from '../../../utils/reducer-utils';
 import * as selectors from '../../selectors';
 import { proposeNewConsensus, acceptConsensus } from '../../../domain/consensus-app';
-import { sendCommitmentReceived } from '../../../communication';
+import {
+  sendCommitmentReceived,
+  multipleRelayableActions,
+  commitmentReceived,
+} from '../../../communication';
 import { theirAddress, getLastCommitment } from '../../channel-store';
 import { composeConcludeCommitment } from '../../../utils/commitment-utils';
 import { CommitmentReceived } from '../../actions';
@@ -47,26 +51,25 @@ export const initialize = (
     }
     newSharedData = signResult.store;
 
-    // send a request for opponent to start new defunding process first, because they may not yet have done so
-    const actionToRelay = defundRequested({
-      channelId,
+    const actionToRelay = multipleRelayableActions({
+      actions: [
+        // send a request for opponent to start new defunding process first, because they may not yet have done so
+        defundRequested({
+          channelId,
+        }),
+        commitmentReceived({
+          processId,
+          signedCommitment: {
+            commitment: signResult.signedCommitment.commitment,
+            signature: signResult.signedCommitment.signature,
+          },
+        }),
+      ],
     });
 
-    const defundRequestedMessageRelay = messageRelayRequested(
-      theirAddress(ledgerChannel),
-      actionToRelay,
-    );
+    const messageRelay = messageRelayRequested(theirAddress(ledgerChannel), actionToRelay);
 
-    const commitmentReceivedMessageRelay = sendCommitmentReceived(
-      theirAddress(ledgerChannel),
-      processId,
-      signResult.signedCommitment.commitment,
-      signResult.signedCommitment.signature,
-    );
-    newSharedData = queueMessage(
-      queueMessage(newSharedData, defundRequestedMessageRelay),
-      commitmentReceivedMessageRelay,
-    );
+    newSharedData = queueMessage(newSharedData, messageRelay);
   }
 
   const protocolState = states.waitForLedgerUpdate({
