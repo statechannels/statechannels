@@ -1,4 +1,4 @@
-### Advancing the stage of a channel
+# Advancing the stage of a channel
 
 The `AdvanceStage` protocol accepts two mandatory inputs and one optional input:
 

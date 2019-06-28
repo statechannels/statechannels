@@ -16,8 +16,8 @@ The indirect funding protocol involves two parties: player A and player B.
 Player A is identified by being the first participant in the `participants` array in
 the application channel X that is to be funded.
 
-We therefore split the overall new-ledger-funding protocol into two sub-protocols: the
-[player-a-indirect-funding protocol](./player-a) and the [player-b-indirect-funding protocol](./player-b).
+We therefore split the overall indirect-funding protocol into two sub-protocols: the
+[player-a-indirect-funding protocol](./player-a/readme.md) and the [player-b-indirect-funding protocol](./player-b/readme.md).
 
 The two protocols interact through the following messages:
 

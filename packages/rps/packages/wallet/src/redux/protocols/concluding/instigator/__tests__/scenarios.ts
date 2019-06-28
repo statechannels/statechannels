@@ -1,6 +1,5 @@
 import * as states from '../../states';
 
-import { preSuccess, preFailure } from '../../../defunding/__tests__';
 import * as actions from '../actions';
 import * as channelScenarios from '../../../../__tests__/test-scenarios';
 import { EMPTY_SHARED_DATA, setChannels, setFundingState } from '../../../../state';
@@ -43,14 +42,6 @@ const defaults = { processId, channelId };
 // States
 // ------
 const approveConcluding = states.instigatorApproveConcluding(defaults);
-const waitForDefund = states.instigatorWaitForDefund({
-  ...defaults,
-  defundingState: preSuccess.state,
-});
-const waitForDefundPreFailure = states.instigatorWaitForDefund({
-  ...defaults,
-  defundingState: preFailure.state,
-});
 
 const acknowledgeSuccess = states.instigatorAcknowledgeSuccess(defaults);
 const waitforOpponentConclude = states.instigatorWaitForOpponentConclude(defaults);
@@ -128,16 +119,6 @@ export const happyPath = {
     sharedData: secondConcludeReceived,
     action: defundChosen,
   },
-  waitForDefund: {
-    state: waitForDefund,
-    sharedData: secondConcludeReceived,
-    action: preSuccess.action,
-  },
-  acknowledgeSuccess: {
-    state: acknowledgeSuccess,
-    sharedData: secondConcludeReceived,
-    action: acknowledged,
-  },
 };
 
 export const noDefundingHappyPath = {
@@ -206,20 +187,6 @@ export const concludingCancelled = {
   },
   acknowledgeFailure: {
     state: states.instigatorAcknowledgeFailure({ ...defaults, reason: 'ConcludeCancelled' }),
-    sharedData: initialStore,
-    action: acknowledged,
-  },
-};
-
-export const defundFailed = {
-  ...defaults,
-  waitForDefund: {
-    state: waitForDefundPreFailure,
-    sharedData: initialStore,
-    action: preFailure.action,
-  },
-  acknowledgeFailure: {
-    state: states.instigatorAcknowledgeFailure({ ...defaults, reason: 'DefundFailed' }),
     sharedData: initialStore,
     action: acknowledged,
   },
