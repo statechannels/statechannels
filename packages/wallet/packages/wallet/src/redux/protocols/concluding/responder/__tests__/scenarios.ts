@@ -1,6 +1,4 @@
 import * as states from '../../states';
-
-import { preSuccess, preFailure } from '../../../defunding/__tests__';
 import * as actions from '../actions';
 import * as channelScenarios from '../../../../__tests__/test-scenarios';
 import { EMPTY_SHARED_DATA, setChannels, setFundingState } from '../../../../state';
@@ -82,15 +80,6 @@ const indirectFundedSecondConcludeReceived = {
 const approveConcluding = states.approveConcluding(defaults);
 const decideDefund = states.decideDefund({ ...defaults, opponentHasSelected: false });
 
-const waitForDefund = states.waitForDefund({
-  ...defaults,
-  defundingState: preSuccess.state,
-});
-
-const waitForDefundPreFailure = states.waitForDefund({
-  ...defaults,
-  defundingState: preFailure.state,
-});
 const acknowledgeSuccess = states.acknowledgeSuccess(defaults);
 const waitForLedgerUpdate = states.waitForLedgerUpdate({
   ...defaults,
@@ -119,16 +108,6 @@ export const happyPath = {
     reply: app53.commitment,
   },
   decideDefund: { state: decideDefund, sharedData: secondConcludeReceived, action: defundChosen },
-  waitForDefund: {
-    state: waitForDefund,
-    sharedData: secondConcludeReceived,
-    action: preSuccess.action,
-  },
-  acknowledgeSuccess: {
-    state: acknowledgeSuccess,
-    sharedData: secondConcludeReceived,
-    action: acknowledged,
-  },
 };
 export const noDefundingHappyPath = {
   ...defaults,
@@ -192,20 +171,6 @@ export const concludingNotPossible = {
   initialize: { sharedData: initialStoreYourTurn, commitment: app53 },
   acknowledgeFailure: {
     state: states.acknowledgeFailure({ ...defaults, reason: 'NotYourTurn' }),
-    sharedData: initialStore,
-    action: acknowledged,
-  },
-};
-
-export const defundFailed = {
-  ...defaults,
-  waitForDefund: {
-    state: waitForDefundPreFailure,
-    sharedData: initialStore,
-    action: preFailure.action,
-  },
-  acknowledgeFailure: {
-    state: states.acknowledgeFailure({ ...defaults, reason: 'DefundFailed' }),
     sharedData: initialStore,
     action: acknowledged,
   },

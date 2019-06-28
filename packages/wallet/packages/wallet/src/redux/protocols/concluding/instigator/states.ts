@@ -1,5 +1,4 @@
 import { StateConstructor } from '../../../utils';
-import { DefundingState } from '../../defunding';
 export type InstigatorConcludingState =
   | InstigatorNonTerminalState
   | InstigatorPreTerminalState
@@ -41,14 +40,6 @@ export interface AcknowledgeConcludeReceived {
   channelId: string;
   opponentSelectedKeepLedgerChannel: boolean;
 }
-
-export interface WaitForDefund {
-  type: 'ConcludingInstigator.WaitForDefund';
-  processId: string;
-  channelId: string;
-  defundingState: DefundingState;
-}
-
 export interface WaitForLedgerUpdate {
   type: 'ConcludingInstigator.WaitForLedgerUpdate';
   processId: string;
@@ -86,10 +77,6 @@ export const instigatorAcknowledgeFailure: StateConstructor<AcknowledgeFailure> 
   return { ...p, type: 'ConcludingInstigator.AcknowledgeFailure' };
 };
 
-export const instigatorWaitForDefund: StateConstructor<WaitForDefund> = p => {
-  return { ...p, type: 'ConcludingInstigator.WaitForDefund' };
-};
-
 export const instigatorWaitForLedgerUpdate: StateConstructor<WaitForLedgerUpdate> = p => {
   return { ...p, type: 'ConcludingInstigator.WaitForLedgerUpdate' };
 };
@@ -107,7 +94,6 @@ export type InstigatorNonTerminalState =
   | AcknowledgeConcludeReceived
   | AcknowledgeFailure
   | AcknowledgeSuccess
-  | WaitForDefund
   | WaitForLedgerUpdate
   | WaitForOpponentSelection;
 
@@ -122,7 +108,6 @@ export function isConcludingInstigatorState(
     state.type === 'ConcludingInstigator.ApproveConcluding' ||
     state.type === 'ConcludingInstigator.WaitForOpponentConclude' ||
     state.type === 'ConcludingInstigator.AcknowledgeConcludeReceived' ||
-    state.type === 'ConcludingInstigator.WaitForDefund' ||
     state.type === 'ConcludingInstigator.WaitForLedgerUpdate' ||
     state.type === 'ConcludingInstigator.WaitForOpponentSelection'
   );

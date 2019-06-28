@@ -27,6 +27,7 @@ describe('[ Happy path ]', () => {
     const result = instigatorConcludingReducer(state, sharedData, action);
 
     itSendsConcludeInstigated(result.sharedData, reply);
+    itSendsThisMessage(result.sharedData, CONCLUDE_SUCCESS, 1);
     itTransitionsTo(result, 'ConcludingInstigator.WaitForOpponentConclude');
   });
 
@@ -41,23 +42,7 @@ describe('[ Happy path ]', () => {
     const { state, action, sharedData } = scenario.acknowledgeConcludeReceived;
     const result = instigatorConcludingReducer(state, sharedData, action);
 
-    itTransitionsTo(result, 'ConcludingInstigator.WaitForDefund');
-  });
-
-  describeScenarioStep(scenario.waitForDefund, () => {
-    const { state, action, sharedData } = scenario.waitForDefund;
-    const result = instigatorConcludingReducer(state, sharedData, action);
-
-    itTransitionsTo(result, 'ConcludingInstigator.AcknowledgeSuccess');
-  });
-
-  describeScenarioStep(scenario.acknowledgeSuccess, () => {
-    const { state, action, sharedData } = scenario.acknowledgeSuccess;
-    const result = instigatorConcludingReducer(state, sharedData, action);
-
     itTransitionsTo(result, 'Concluding.Success');
-    itSendsThisMessage(result.sharedData, CONCLUDE_SUCCESS);
-    itSendsThisDisplayEventType(result.sharedData, HIDE_WALLET);
   });
 });
 
@@ -110,7 +95,6 @@ describe('[ No Defunding Happy path ]', () => {
     const result = instigatorConcludingReducer(state, sharedData, action);
 
     itTransitionsTo(result, 'Concluding.Success');
-    itSendsThisMessage(result.sharedData, CONCLUDE_SUCCESS);
     itSendsThisDisplayEventType(result.sharedData, HIDE_WALLET);
   });
 });
@@ -166,26 +150,6 @@ describe('[ Concluding Cancelled ]', () => {
 
     itTransitionsToFailure(result, 'ConcludeCancelled');
     itSendsThisDisplayEventType(result, HIDE_WALLET);
-  });
-});
-
-describe('[ Defund failed ]', () => {
-  const scenario = scenarios.defundFailed;
-
-  describeScenarioStep(scenario.waitForDefund, () => {
-    const { state, action, sharedData } = scenario.waitForDefund;
-    const result = instigatorConcludingReducer(state, sharedData, action);
-
-    itTransitionsToAcknowledgeFailure(result, 'DefundFailed');
-  });
-
-  describeScenarioStep(scenario.acknowledgeFailure, () => {
-    const { state, action, sharedData } = scenario.acknowledgeFailure;
-    const result = instigatorConcludingReducer(state, sharedData, action);
-
-    itTransitionsToFailure(result, 'DefundFailed');
-    itSendsThisMessage(result.sharedData, CONCLUDE_FAILURE);
-    itSendsThisDisplayEventType(result.sharedData, HIDE_WALLET);
   });
 });
 

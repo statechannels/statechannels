@@ -1,6 +1,6 @@
 # Concluding Protocol (Responder)
 
-The purpose of this protocol is to respond to the instigation of a concluding a channel, i.e. your opponent's move to a conclude state.
+The purpose of this protocol is to respond to the instigation of a concluding a channel, i.e. your opponent's transmission of a conclude commitment.
 
 It covers:
 
@@ -12,7 +12,6 @@ It covers:
 Out of scope (for the time being):
 
 - Allowing responder to not conclude
-- Allowing the user to not choose to not defund
 
 ## State machine
 
@@ -28,16 +27,12 @@ linkStyle default interpolate basis
   MT  --> |Yes| CC(ResponderApproveConcluding)
   MT  --> |No| AF(ResponderAcknowledgeFailure)
   CC  --> |WALLET.CONCLUDING.RESPONDER.CONCLUDE.APPROVED| DD(ResponderDecideDefund)
-  DD --> |WALLET.CONCLUDING.RESPONDER.DEFUND.CHOSEN| D(ResponderWaitForDefund)
+  DD --> |WALLET.CONCLUDING.RESPONDER.DEFUND.CHOSEN| SS
   DD --> |WALLET.CONCLUDING.RESPONDER.KEEP_OPEN.CHOSEN| WO(WaitForOpponentDecision)
-  DD --> |COMMITMENT_RECEIVED| D(ResponderWaitForDefund)
-  WO --> |COMMITMENT_RECEIVED| D(ResponderWaitForDefund)
   WO -->|WALLET.CONCLUDING.KEEP_OPEN_SELECTED|CU(WaitForLedgerUpdate)
   CU -->|COMMITMENT_RECEIVED|CU
-  CU --> |consensus update protocol succeeded|AS
-  D  --> |defunding protocol succeeded| AS(ResponderAcknowledgeSuccess)
+  CU --> |consensus update protocol succeeded|AS(AcknowledgeSuccess)
   AS -->  |WALLET.CONCLUDING.RESPONDER.ACKNOWLEDGED| SS((Success))
-  D  --> |defunding protocol failed| AF(ResponderAcknowledgeFailure)
   classDef logic fill:#efdd20;
   classDef Success fill:#58ef21;
   classDef Failure fill:#f45941;
@@ -52,17 +47,7 @@ linkStyle default interpolate basis
 
 We will use the following scenarios for testing:
 
-1. **Happy path**: `ResponderApproveConcluding` -> `ResponderDecideDefund` -> `ResponderWaitForDefund` -> `ResponderAcknowledgeSuccess` -> `ResponderSuccess`
-2. **Happy path (alternative)**
-   As 1 but commitment received and handled by _this_ reducer
-3. **Channel doesnt exist** `ResponderAcknowledgeFailure` -> `ResponderFailure`
-4. **Concluding not possible**: `ResponderAcknowledgeFailure` -> `ResponderFailure`
-5. **Defund failed** `ResponderWaitForDefund` -> `ResponderAcknowledgeFailure` -> `ResponderFailure`
-
-# Terminology
-
-Use "Conclude" / "Concluding" everywhere, here. In an application, you might choose to Resign, or you (or an opponent) might run out of funds. In these cases, according to the wallet you are concluding the channel.
-
-For now we will avoid "Resigning", "Closing" and so on.
-
-We will also include the `Defunding` protocol as an optional subprotocol of `Concluding`. If `Defunding` fails, `Concluding` will still be considered to have also failed.
+1. **Happy path**: `ResponderApproveConcluding` -> `ResponderDecideDefund` -> `ResponderSuccess`
+2. **Channel doesnt exist** `ResponderAcknowledgeFailure` -> `ResponderFailure`
+3. **Concluding not possible**: `ResponderAcknowledgeFailure` -> `ResponderFailure`
+4. **Defund failed** `ResponderWaitForDefund` -> `ResponderAcknowledgeFailure` -> `ResponderFailure`

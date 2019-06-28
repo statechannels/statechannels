@@ -4,8 +4,6 @@ import {
   InstigatorNonTerminalState as NonTerminalCState,
   instigatorApproveConcluding,
   instigatorWaitForOpponentConclude,
-  instigatorWaitForDefund,
-  instigatorAcknowledgeSuccess,
   instigatorAcknowledgeFailure,
   instigatorAcknowledgeConcludeReceived,
 } from './states';
@@ -19,9 +17,6 @@ import {
 } from '../../../state';
 import { composeConcludeCommitment } from '../../../../utils/commitment-utils';
 import { ourTurn, getLastCommitment } from '../../../channel-store';
-import { DefundingAction, isDefundingAction } from '../../defunding/actions';
-import { initialize as initializeDefunding, defundingReducer } from '../../defunding/reducer';
-import { isSuccess, isFailure } from '../../defunding/states';
 import * as channelStoreReducer from '../../../channel-store/reducer';
 import * as selectors from '../../../selectors';
 import {
@@ -38,7 +33,6 @@ import {
   sendKeepLedgerChannelApproved,
 } from '../../../../communication';
 import { failure, success } from '../states';
-import { getChannelId } from '../../../../domain';
 import { ProtocolStateWithSharedData } from '../..';
 import { isConcludingInstigatorAction } from './actions';
 import {
@@ -55,20 +49,11 @@ export function instigatorConcludingReducer(
   sharedData: SharedData,
   action: ProtocolAction,
 ): ReturnVal {
-  // TODO: Since a commitment received could be a defundingAction OR
-  // a concludingAction we need to check if its the action we're interested in
-  // This is a bit awkward, probably a better way of handling this?
   if (action.type === 'WALLET.COMMON.COMMITMENT_RECEIVED') {
-    const channelId = getChannelId(action.signedCommitment.commitment);
-    if (channelId === protocolState.channelId) {
-      return concludeReceived(action, protocolState, sharedData);
-    }
+    return concludeReceived(action, protocolState, sharedData);
   }
   if (isConsensusUpdateAction(action)) {
     return handleLedgerUpdateAction(protocolState, sharedData, action);
-  }
-  if (isDefundingAction(action)) {
-    return handleDefundingAction(protocolState, sharedData, action);
   }
 
   if (!isConcludingInstigatorAction(action)) {
@@ -188,29 +173,6 @@ function handleLedgerUpdateAction(
   }
 }
 
-function handleDefundingAction(
-  protocolState: NonTerminalCState,
-  sharedData: Storage,
-  action: DefundingAction,
-): ReturnVal {
-  if (protocolState.type !== 'ConcludingInstigator.WaitForDefund') {
-    return { protocolState, sharedData };
-  }
-  const defundingState1 = protocolState.defundingState;
-
-  const protocolStateWithSharedData = defundingReducer(defundingState1, sharedData, action);
-  const updatedDefundingState = protocolStateWithSharedData.protocolState;
-  sharedData = protocolStateWithSharedData.sharedData;
-  if (isSuccess(updatedDefundingState)) {
-    protocolState = instigatorAcknowledgeSuccess(protocolState);
-  } else if (isFailure(updatedDefundingState)) {
-    protocolState = instigatorAcknowledgeFailure({ ...protocolState, reason: 'DefundFailed' });
-  } else {
-    protocolState = { ...protocolState, defundingState: updatedDefundingState };
-  }
-  return { protocolState, sharedData };
-}
-
 function concludingCancelled(protocolState: NonTerminalCState, sharedData: Storage): ReturnVal {
   if (protocolState.type !== 'ConcludingInstigator.ApproveConcluding') {
     return { protocolState, sharedData };
@@ -236,7 +198,7 @@ function concludeApproved(protocolState: NonTerminalCState, sharedData: Storage)
 
     return {
       protocolState: instigatorWaitForOpponentConclude({ ...protocolState }),
-      sharedData: sharedDataWithOwnCommitment,
+      sharedData: sendConcludeSuccess(sharedDataWithOwnCommitment),
     };
   } else {
     return { protocolState, sharedData };
@@ -315,17 +277,8 @@ function defundChosen(protocolState: NonTerminalCState, sharedData: Storage): Re
   if (protocolState.type !== 'ConcludingInstigator.AcknowledgeConcludeReceived') {
     return { protocolState, sharedData };
   }
-  // initialize defunding state machine
-
-  const protocolStateWithSharedData = initializeDefunding(
-    protocolState.processId,
-    protocolState.channelId,
-    sharedData,
-  );
-  const defundingState = protocolStateWithSharedData.protocolState;
-  sharedData = protocolStateWithSharedData.sharedData;
   return {
-    protocolState: instigatorWaitForDefund({ ...protocolState, defundingState }),
+    protocolState: success({}),
     sharedData,
   };
 }
@@ -335,7 +288,7 @@ function acknowledged(protocolState: CState, sharedData: Storage): ReturnVal {
     case 'ConcludingInstigator.AcknowledgeSuccess':
       return {
         protocolState: success({}),
-        sharedData: sendConcludeSuccess(hideWallet(sharedData)),
+        sharedData: hideWallet(sharedData),
       };
     case 'ConcludingInstigator.AcknowledgeFailure':
       return {

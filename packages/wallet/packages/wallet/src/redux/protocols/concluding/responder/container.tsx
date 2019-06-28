@@ -5,16 +5,17 @@ import { ResponderNonTerminalState as NonTerminalConcludingState } from './state
 import { unreachable } from '../../../../utils/reducer-utils';
 import ApproveConcluding from './components/approve-concluding';
 import ApproveDefunding from './components/approve-defunding';
-import { Defunding } from '../../defunding/container';
 import * as actions from './actions';
 import Acknowledge from '../../shared-components/acknowledge';
 import { ConsensusUpdate } from '../../consensus-update/container';
 import WaitForOpponentDecision from './components/wait-for-opponent-decision';
+import { defundRequested } from '../../actions';
+import { multipleWalletActions } from '../../../../redux/actions';
 
 interface Props {
   state: NonTerminalConcludingState;
   approve: typeof actions.concludeApproved;
-  defund: typeof actions.defundChosen;
+  defund: typeof defundRequestedAndDefundChosen;
   keepOpen: typeof actions.keepOpenChosen;
   acknowledge: typeof actions.acknowledged;
 }
@@ -43,12 +44,10 @@ class ConcludingContainer extends PureComponent<Props> {
       case 'ConcludingResponder.DecideDefund':
         return (
           <ApproveDefunding
-            approve={() => defund({ processId })}
+            approve={() => defund(processId, state.channelId)}
             keepOpen={() => keepOpen({ processId })}
           />
         );
-      case 'ConcludingResponder.WaitForDefund':
-        return <Defunding state={state.defundingState} />;
       case 'ConcludingResponder.ApproveConcluding':
         return <ApproveConcluding approve={() => approve({ processId })} />;
       case 'ConcludingResponder.WaitForLedgerUpdate':
@@ -61,9 +60,15 @@ class ConcludingContainer extends PureComponent<Props> {
   }
 }
 
+function defundRequestedAndDefundChosen(processId, channelId) {
+  return multipleWalletActions({
+    actions: [actions.defundChosen({ processId }), defundRequested({ channelId })],
+  });
+}
+
 const mapDispatchToProps = {
   approve: actions.concludeApproved,
-  defund: actions.defundChosen,
+  defund: defundRequestedAndDefundChosen,
   acknowledge: actions.acknowledged,
   keepOpen: actions.keepOpenChosen,
 };
