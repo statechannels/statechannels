@@ -6,6 +6,16 @@ import { ActionConstructor } from '../redux/utils';
 import { Commitments } from '../redux/channel-store';
 import { DefundRequested } from '../redux/protocols/actions';
 
+export interface MultipleRelayableActions {
+  type: 'WALLET.MULTIPLE_RELAYABLE_ACTIONS';
+  actions: RelayableAction[];
+}
+
+export const multipleRelayableActions: ActionConstructor<MultipleRelayableActions> = p => ({
+  ...p,
+  type: 'WALLET.MULTIPLE_RELAYABLE_ACTIONS',
+});
+
 export interface BaseProcessAction {
   processId: string;
   type: string;
@@ -16,6 +26,7 @@ export interface BaseProcessAction {
 // -------
 // Actions
 // -------
+
 export interface StrategyProposed extends BaseProcessAction {
   type: 'WALLET.FUNDING.STRATEGY_PROPOSED';
   strategy: FundingStrategy;
@@ -107,7 +118,8 @@ export type RelayableAction =
   | CommitmentReceived
   | CommitmentsReceived
   | DefundRequested
-  | KeepLedgerChannelApproved;
+  | KeepLedgerChannelApproved
+  | MultipleRelayableActions;
 
 export function isRelayableAction(action: WalletAction): action is RelayableAction {
   return (
@@ -117,6 +129,7 @@ export function isRelayableAction(action: WalletAction): action is RelayableActi
     action.type === 'WALLET.COMMON.COMMITMENT_RECEIVED' ||
     action.type === 'WALLET.NEW_PROCESS.DEFUND_REQUESTED' ||
     action.type === 'WALLET.CONCLUDING.KEEP_LEDGER_CHANNEL_APPROVED' ||
-    action.type === 'WALLET.COMMON.COMMITMENTS_RECEIVED'
+    action.type === 'WALLET.COMMON.COMMITMENTS_RECEIVED' ||
+    action.type === 'WALLET.MULTIPLE_RELAYABLE_ACTIONS'
   );
 }

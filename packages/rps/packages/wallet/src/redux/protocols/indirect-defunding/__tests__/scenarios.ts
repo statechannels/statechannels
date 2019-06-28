@@ -13,6 +13,7 @@ import { setChannels, EMPTY_SHARED_DATA, SharedData } from '../../../state';
 import { channelFromCommitments } from '../../../channel-store/channel-state/__tests__';
 import { bsPrivateKey } from '../../../../communication/__tests__/commitments';
 import * as globalActions from '../../../actions';
+import { defundRequested } from '../../actions';
 
 const processId = 'processId';
 
@@ -144,7 +145,12 @@ export const playerAHappyPath = {
   initialParams: {
     store: initialStore,
     ...props,
-    reply: ledger6,
+    relayActions: [
+      defundRequested({
+        channelId,
+      }),
+      globalActions.commitmentReceived({ processId, signedCommitment: ledger6 }),
+    ],
   },
   waitForLedgerUpdate: {
     state: playerAWaitForUpdate,

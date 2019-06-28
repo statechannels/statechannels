@@ -15,7 +15,9 @@ describe('multiple action dispatcher', () => {
   });
 
   it('waits for multiple actions to arrive', () => {
-    expect(saga.next().value).toEqual(take('WALLET.MULTIPLE_ACTIONS'));
+    expect(saga.next().value).toEqual(
+      take(['WALLET.MULTIPLE_ACTIONS', 'WALLET.MULTIPLE_RELAYABLE_ACTIONS']),
+    );
   });
 
   it('puts the actions in order', () => {

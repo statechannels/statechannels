@@ -4,6 +4,7 @@ import { ProtocolStateWithSharedData } from '../..';
 import { getLastMessage } from '../../../state';
 import { SignedCommitment } from '../../../../domain';
 import { initialize, indirectDefundingReducer } from '../reducer';
+import { itRelaysTheseActions } from '../../../__tests__/helpers';
 
 describe('player A happy path', () => {
   const scenario = scenarios.playerAHappyPath;
@@ -14,6 +15,7 @@ describe('player A happy path', () => {
     store,
     proposedAllocation,
     proposedDestination,
+    relayActions,
   } = scenario.initialParams;
 
   describe('when initializing', () => {
@@ -26,7 +28,7 @@ describe('player A happy path', () => {
       store,
     );
     itTransitionsTo(result, 'IndirectDefunding.WaitForLedgerUpdate');
-    itSendsMessage(result, scenario.initialParams.reply);
+    itRelaysTheseActions(result, relayActions);
   });
 
   describe('when in WaitForLedgerUpdate', () => {
