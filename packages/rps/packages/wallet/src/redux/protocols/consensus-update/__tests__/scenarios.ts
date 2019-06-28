@@ -7,8 +7,7 @@ import {
   ledgerId,
   threeWayLedgerCommitment,
   threeWayLedgerId,
-  hubAddress,
-  hubPrivateKey,
+  addressAndPrivateKeyLookup,
 } from '../../../../domain/commitments/__tests__';
 import { bigNumberify } from 'ethers/utils';
 import { setChannels, EMPTY_SHARED_DATA } from '../../../state';
@@ -71,12 +70,6 @@ const threePlayerLedger11 = threeWayLedgerCommitment({
   turnNum: 11,
   balances: oneOneFour,
 });
-
-const addressAndPrivateKeyLookup = {
-  [ThreePartyPlayerIndex.A]: { address: asAddress, privateKey: asPrivateKey },
-  [ThreePartyPlayerIndex.B]: { address: bsAddress, privateKey: bsPrivateKey },
-  [ThreePartyPlayerIndex.Hub]: { address: hubAddress, privateKey: hubPrivateKey },
-};
 
 // ------
 // SharedData

@@ -7,6 +7,7 @@ import {
   checkAndStore,
   signAndStore,
   registerChannelToMonitor,
+  setFundingState,
 } from '../../../state';
 import { NewLedgerFundingState, failure, success } from '../states';
 import { ProtocolStateWithSharedData } from '../..';
@@ -117,7 +118,7 @@ function handleWaitForPostFundSetup(
     fundingChannel: protocolState.ledgerId,
   };
 
-  sharedData.fundingState[protocolState.channelId] = fundingState;
+  sharedData = setFundingState(sharedData, protocolState.channelId, fundingState);
   const newProtocolState = success({});
   const newReturnVal = { protocolState: newProtocolState, sharedData };
   return newReturnVal;

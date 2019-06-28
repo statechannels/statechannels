@@ -2,7 +2,7 @@ import {
   AdjudicatorState,
   clearChallenge,
   markAsFinalized,
-  addToBalance,
+  setBalance,
   setChallenge,
 } from './state';
 import * as actions from '../actions';
@@ -57,7 +57,7 @@ const fundingReceivedEventReducer = (
   action: actions.FundingReceivedEvent,
 ) => {
   const { channelId } = action;
-  return addToBalance(state, channelId, action.amount);
+  return setBalance(state, channelId, action.totalForDestination);
 };
 
 const challengeExpiredReducer = (

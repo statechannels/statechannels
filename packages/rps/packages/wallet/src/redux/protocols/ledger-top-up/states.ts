@@ -1,31 +1,47 @@
 import { DirectFundingState } from '../direct-funding/states';
 import { StateConstructor } from '../../utils';
+import { ConsensusUpdateState } from '../consensus-update';
 
-export interface WaitForDirectFunding {
-  type: 'LedgerTopUp.WaitForDirectFunding';
+export interface WaitForDirectFundingForA {
+  type: 'LedgerTopUp.WaitForDirectFundingForA';
   channelId: string;
   ledgerId: string;
   processId: string;
   proposedAllocation: string[];
   proposedDestination: string[];
+  originalAllocation: string[];
   directFundingState: DirectFundingState;
 }
 
-export interface WaitForPreTopUpLedgerUpdate {
-  type: 'LedgerTopUp.WaitForPreTopUpLedgerUpdate';
+export interface WaitForDirectFundingForB {
+  type: 'LedgerTopUp.WaitForDirectFundingForB';
   channelId: string;
   ledgerId: string;
   processId: string;
   proposedAllocation: string[];
   proposedDestination: string[];
+  originalAllocation: string[];
+  directFundingState: DirectFundingState;
 }
-export interface WaitForPostTopUpLedgerUpdate {
-  type: 'LedgerTopUp.WaitForPostTopUpLedgerUpdate';
+export interface SwitchOrderAndAddATopUpUpdate {
+  type: 'LedgerTopUp.SwitchOrderAndAddATopUpUpdate';
   channelId: string;
   ledgerId: string;
   processId: string;
   proposedAllocation: string[];
   proposedDestination: string[];
+  originalAllocation: string[];
+  consensusUpdateState: ConsensusUpdateState;
+}
+export interface RestoreOrderAndAddBTopUpUpdate {
+  type: 'LedgerTopUp.RestoreOrderAndAddBTopUpUpdate';
+  channelId: string;
+  ledgerId: string;
+  processId: string;
+  proposedAllocation: string[];
+  proposedDestination: string[];
+  originalAllocation: string[];
+  consensusUpdateState: ConsensusUpdateState;
 }
 
 export interface Failure {
@@ -36,25 +52,23 @@ export interface Failure {
 export interface Success {
   type: 'LedgerTopUp.Success';
 }
-export const waitForDirectFunding: StateConstructor<WaitForDirectFunding> = p => {
-  return {
-    ...p,
-    type: 'LedgerTopUp.WaitForDirectFunding',
-  };
+
+export const waitForDirectFundingForA: StateConstructor<WaitForDirectFundingForA> = p => {
+  return { ...p, type: 'LedgerTopUp.WaitForDirectFundingForA' };
 };
 
-export const waitForPreTopUpLedgerUpdate: StateConstructor<WaitForPreTopUpLedgerUpdate> = p => {
-  return {
-    ...p,
-    type: 'LedgerTopUp.WaitForPreTopUpLedgerUpdate',
-  };
+export const waitForDirectFundingForB: StateConstructor<WaitForDirectFundingForB> = p => {
+  return { ...p, type: 'LedgerTopUp.WaitForDirectFundingForB' };
 };
 
-export const waitForPostTopUpLedgerUpdate: StateConstructor<WaitForPostTopUpLedgerUpdate> = p => {
-  return {
-    ...p,
-    type: 'LedgerTopUp.WaitForPostTopUpLedgerUpdate',
-  };
+export const switchOrderAndAddATopUpUpdate: StateConstructor<SwitchOrderAndAddATopUpUpdate> = p => {
+  return { ...p, type: 'LedgerTopUp.SwitchOrderAndAddATopUpUpdate' };
+};
+
+export const restoreOrderAndAddBTopUpUpdate: StateConstructor<
+  RestoreOrderAndAddBTopUpUpdate
+> = p => {
+  return { ...p, type: 'LedgerTopUp.RestoreOrderAndAddBTopUpUpdate' };
 };
 export const success: StateConstructor<Success> = p => {
   return { ...p, type: 'LedgerTopUp.Success' };
@@ -65,9 +79,10 @@ export const failure: StateConstructor<Failure> = p => {
 };
 
 export type LedgerTopUpState =
-  | WaitForPreTopUpLedgerUpdate
-  | WaitForPostTopUpLedgerUpdate
-  | WaitForDirectFunding
+  | WaitForDirectFundingForA
+  | WaitForDirectFundingForB
+  | SwitchOrderAndAddATopUpUpdate
+  | RestoreOrderAndAddBTopUpUpdate
   | Success
   | Failure;
 

@@ -1,27 +1,22 @@
-import {
-  SharedData,
-  signAndStore,
-  queueMessage,
-  checkAndStore,
-  registerChannelToMonitor,
-  getExistingChannel,
-} from '../../state';
+import { SharedData, registerChannelToMonitor } from '../../state';
 import * as states from './states';
 import { ProtocolStateWithSharedData, ProtocolReducer } from '..';
 import * as helpers from '../reducer-helpers';
-import { proposeNewConsensus, acceptConsensus } from '../../../domain';
 import { TwoPartyPlayerIndex } from '../../types';
-import { bigNumberify } from 'ethers/utils';
-import { theirAddress, getLastCommitment } from '../../channel-store';
-import { sendCommitmentReceived } from '../../../communication';
 import {
   initialize as initializeDirectFunding,
   directFundingStateReducer,
 } from '../direct-funding/reducer';
 import { LedgerTopUpAction } from './actions';
-import { directFundingRequested } from '../direct-funding/actions';
-import { isTerminal, isFailure, isSuccess } from '../direct-funding/states';
-import { addHex } from '../../../utils/hex-utils';
+import { directFundingRequested, isDirectFundingAction } from '../direct-funding/actions';
+import { addHex, subHex } from '../../../utils/hex-utils';
+import {
+  initializeConsensusUpdate,
+  isConsensusUpdateAction,
+  consensusUpdateReducer,
+} from '../consensus-update';
+import { bigNumberify } from 'ethers/utils';
+import { PlayerIndex } from 'magmo-wallet-client/lib/wallet-instructions';
 export const LEDGER_TOP_UP_PROTOCOL_LOCATOR = 'LedgerTopUp';
 export function initialize(
   processId: string,
@@ -29,46 +24,239 @@ export function initialize(
   ledgerId: string,
   proposedAllocation: string[],
   proposedDestination: string[],
+  originalAllocation: string[],
   sharedData: SharedData,
 ): ProtocolStateWithSharedData<states.LedgerTopUpState> {
-  const lastCommitment = helpers.getLatestCommitment(ledgerId, sharedData);
+  sharedData = registerChannelToMonitor(sharedData, processId, ledgerId);
+  const { consensusUpdateState, sharedData: newSharedData } = initializeConsensusState(
+    TwoPartyPlayerIndex.A,
+    processId,
+    ledgerId,
+    proposedAllocation,
+    proposedDestination,
+    originalAllocation,
 
-  const newProtocolState = states.waitForPreTopUpLedgerUpdate({
+    sharedData,
+  );
+  const newProtocolState = states.switchOrderAndAddATopUpUpdate({
     processId,
     ledgerId,
     channelId,
     proposedAllocation,
     proposedDestination,
+    consensusUpdateState,
+    originalAllocation,
   });
-
-  if (helpers.isFirstPlayer(ledgerId, sharedData)) {
-    const newAllocation = [
-      ...lastCommitment.allocation,
-      ...calculateTopUpAllocation(proposedAllocation, lastCommitment.allocation),
-    ];
-    const newDestination = [...lastCommitment.destination, ...proposedDestination];
-    const ourCommitment = proposeNewConsensus(lastCommitment, newAllocation, newDestination);
-    const signResult = signAndStore(sharedData, ourCommitment);
-    if (!signResult.isSuccess) {
-      return { protocolState: newProtocolState, sharedData };
-    }
-    sharedData = signResult.store;
-
-    const messageRelay = sendCommitmentReceived(
-      helpers.getOpponentAddress(ledgerId, sharedData),
-      processId,
-      signResult.signedCommitment.commitment,
-      signResult.signedCommitment.signature,
-      LEDGER_TOP_UP_PROTOCOL_LOCATOR,
-    );
-    sharedData = queueMessage(sharedData, messageRelay);
-  }
-  sharedData = registerChannelToMonitor(sharedData, processId, ledgerId);
-  return {
-    protocolState: newProtocolState,
-    sharedData,
-  };
+  return { protocolState: newProtocolState, sharedData: newSharedData };
 }
+
+const restoreOrderAndAddBTopUpUpdateReducer: ProtocolReducer<states.LedgerTopUpState> = (
+  protocolState: states.SwitchOrderAndAddATopUpUpdate,
+  sharedData: SharedData,
+  action: LedgerTopUpAction,
+): ProtocolStateWithSharedData<states.LedgerTopUpState> => {
+  if (!isConsensusUpdateAction(action)) {
+    console.warn(`Received non consensus update action in ${protocolState.type} state.`);
+    return { protocolState, sharedData };
+  }
+  const {
+    protocolState: consensusUpdateState,
+    sharedData: consensusUpdateSharedData,
+  } = consensusUpdateReducer(protocolState.consensusUpdateState, sharedData, action);
+  sharedData = consensusUpdateSharedData;
+  const { processId, proposedAllocation, ledgerId, originalAllocation } = protocolState;
+
+  if (consensusUpdateState.type === 'ConsensusUpdate.Failure') {
+    return {
+      protocolState: states.failure({ reason: 'ConsensusUpdateFailure' }),
+      sharedData: consensusUpdateSharedData,
+    };
+  } else if (consensusUpdateState.type === 'ConsensusUpdate.Success') {
+    // If player B already has enough funds then skip to success
+    if (bigNumberify(originalAllocation[PlayerIndex.B]).gte(proposedAllocation[PlayerIndex.B])) {
+      return { protocolState: states.success({}), sharedData: consensusUpdateSharedData };
+    }
+    const {
+      directFundingState,
+      sharedData: directFundingSharedData,
+    } = initializeDirectFundingState(
+      TwoPartyPlayerIndex.B,
+      processId,
+      ledgerId,
+      proposedAllocation,
+      originalAllocation,
+      sharedData,
+    );
+
+    return {
+      protocolState: states.waitForDirectFundingForB({ ...protocolState, directFundingState }),
+      sharedData: directFundingSharedData,
+    };
+  } else {
+    return {
+      protocolState: states.restoreOrderAndAddBTopUpUpdate({
+        ...protocolState,
+        consensusUpdateState,
+      }),
+      sharedData,
+    };
+  }
+};
+const switchOrderAndAddATopUpUpdateReducer: ProtocolReducer<states.LedgerTopUpState> = (
+  protocolState: states.SwitchOrderAndAddATopUpUpdate,
+  sharedData: SharedData,
+  action: LedgerTopUpAction,
+): ProtocolStateWithSharedData<states.LedgerTopUpState> => {
+  if (!isConsensusUpdateAction(action)) {
+    console.warn(`Received non consensus update action in ${protocolState.type} state.`);
+    return { protocolState, sharedData };
+  }
+  const {
+    protocolState: consensusUpdateState,
+    sharedData: consensusUpdateSharedData,
+  } = consensusUpdateReducer(protocolState.consensusUpdateState, sharedData, action);
+  sharedData = consensusUpdateSharedData;
+
+  const {
+    processId,
+    ledgerId,
+    originalAllocation,
+    proposedAllocation,
+    proposedDestination,
+  } = protocolState;
+  const lastCommitment = helpers.getLatestCommitment(protocolState.ledgerId, sharedData);
+
+  if (consensusUpdateState.type === 'ConsensusUpdate.Failure') {
+    return {
+      protocolState: states.failure({ reason: 'ConsensusUpdateFailure' }),
+      sharedData: consensusUpdateSharedData,
+    };
+  } else if (consensusUpdateState.type === 'ConsensusUpdate.Success') {
+    // If player A already has enough funds we skip straight to the next ledger update step
+    if (
+      bigNumberify(originalAllocation[TwoPartyPlayerIndex.A]).gte(
+        proposedAllocation[TwoPartyPlayerIndex.A],
+      )
+    ) {
+      const {
+        consensusUpdateState: consensusUpdateStateForB,
+        sharedData: newSharedData,
+      } = initializeConsensusState(
+        TwoPartyPlayerIndex.B,
+        processId,
+        ledgerId,
+        proposedAllocation,
+        proposedDestination,
+        lastCommitment.allocation,
+        consensusUpdateSharedData,
+      );
+
+      return {
+        protocolState: states.restoreOrderAndAddBTopUpUpdate({
+          ...protocolState,
+          consensusUpdateState: consensusUpdateStateForB,
+        }),
+        sharedData: newSharedData,
+      };
+    }
+
+    const {
+      directFundingState,
+      sharedData: directFundingSharedData,
+    } = initializeDirectFundingState(
+      TwoPartyPlayerIndex.A,
+      processId,
+      ledgerId,
+      proposedAllocation,
+      originalAllocation,
+      sharedData,
+    );
+
+    return {
+      protocolState: states.waitForDirectFundingForA({ ...protocolState, directFundingState }),
+      sharedData: directFundingSharedData,
+    };
+  } else {
+    return {
+      protocolState: states.switchOrderAndAddATopUpUpdate({
+        ...protocolState,
+        consensusUpdateState,
+      }),
+      sharedData,
+    };
+  }
+};
+const waitForDirectFundingForAReducer: ProtocolReducer<states.LedgerTopUpState> = (
+  protocolState: states.WaitForDirectFundingForA,
+  sharedData: SharedData,
+  action: LedgerTopUpAction,
+): ProtocolStateWithSharedData<states.LedgerTopUpState> => {
+  if (!isDirectFundingAction(action)) {
+    console.warn(`Received non direct funding action in ${protocolState.type} state.`);
+    return { protocolState, sharedData };
+  }
+
+  const {
+    protocolState: directFundingState,
+    sharedData: directFundingSharedData,
+  } = directFundingStateReducer(protocolState.directFundingState, sharedData, action);
+
+  sharedData = directFundingSharedData;
+
+  const lastCommitment = helpers.getLatestCommitment(protocolState.ledgerId, sharedData);
+  const { ledgerId, processId, proposedAllocation, proposedDestination } = protocolState;
+
+  if (directFundingState.type === 'DirectFunding.FundingFailure') {
+    return { protocolState: states.failure({ reason: 'DirectFundingFailure' }), sharedData };
+  } else if (directFundingState.type === 'DirectFunding.FundingSuccess') {
+    const { consensusUpdateState, sharedData: newSharedData } = initializeConsensusState(
+      TwoPartyPlayerIndex.B,
+      processId,
+      ledgerId,
+      proposedAllocation,
+      proposedDestination,
+      lastCommitment.allocation,
+      sharedData,
+    );
+
+    const newProtocolState = states.restoreOrderAndAddBTopUpUpdate({
+      ...protocolState,
+      consensusUpdateState,
+    });
+    return {
+      protocolState: newProtocolState,
+      sharedData: newSharedData,
+    };
+  } else {
+    return { protocolState: { ...protocolState, directFundingState }, sharedData };
+  }
+};
+
+const waitForDirectFundingForBReducer: ProtocolReducer<states.LedgerTopUpState> = (
+  protocolState: states.WaitForDirectFundingForB,
+  sharedData: SharedData,
+  action: LedgerTopUpAction,
+): ProtocolStateWithSharedData<states.LedgerTopUpState> => {
+  if (!isDirectFundingAction(action)) {
+    console.warn(`Received non direct funding action in ${protocolState.type} state.`);
+    return { protocolState, sharedData };
+  }
+
+  const {
+    protocolState: directFundingState,
+    sharedData: directFundingSharedData,
+  } = directFundingStateReducer(protocolState.directFundingState, sharedData, action);
+
+  sharedData = directFundingSharedData;
+
+  if (directFundingState.type === 'DirectFunding.FundingFailure') {
+    return { protocolState: states.failure({ reason: 'DirectFundingFailure' }), sharedData };
+  } else if (directFundingState.type === 'DirectFunding.FundingSuccess') {
+    return { protocolState: states.success({}), sharedData };
+  } else {
+    return { protocolState: { ...protocolState, directFundingState }, sharedData };
+  }
+};
 
 export const ledgerTopUpReducer: ProtocolReducer<states.LedgerTopUpState> = (
   protocolState: states.LedgerTopUpState,
@@ -76,196 +264,112 @@ export const ledgerTopUpReducer: ProtocolReducer<states.LedgerTopUpState> = (
   action: LedgerTopUpAction,
 ): ProtocolStateWithSharedData<states.LedgerTopUpState> => {
   switch (protocolState.type) {
-    case 'LedgerTopUp.WaitForPreTopUpLedgerUpdate':
-      return waitForPreTopUpLedgerUpdateReducer(protocolState, sharedData, action);
-    case 'LedgerTopUp.WaitForDirectFunding':
-      return waitForDirectFundingReducer(protocolState, sharedData, action);
-    case 'LedgerTopUp.WaitForPostTopUpLedgerUpdate':
-      return waitForPostTopUpLedgerUpdateReducer(protocolState, sharedData, action);
+    case 'LedgerTopUp.SwitchOrderAndAddATopUpUpdate':
+      return switchOrderAndAddATopUpUpdateReducer(protocolState, sharedData, action);
+    case 'LedgerTopUp.WaitForDirectFundingForA':
+      return waitForDirectFundingForAReducer(protocolState, sharedData, action);
+    case 'LedgerTopUp.RestoreOrderAndAddBTopUpUpdate':
+      return restoreOrderAndAddBTopUpUpdateReducer(protocolState, sharedData, action);
+    case 'LedgerTopUp.WaitForDirectFundingForB':
+      return waitForDirectFundingForBReducer(protocolState, sharedData, action);
     default:
       return { protocolState, sharedData };
   }
 };
 
-const waitForPreTopUpLedgerUpdateReducer: ProtocolReducer<states.LedgerTopUpState> = (
-  protocolState: states.WaitForPreTopUpLedgerUpdate,
+function initializeDirectFundingState(
+  playerFor: TwoPartyPlayerIndex,
+  processId: string,
+  ledgerId: string,
+  proposedAllocation: string[],
+  originalAllocation: string[],
   sharedData: SharedData,
-  action: LedgerTopUpAction,
-): ProtocolStateWithSharedData<states.LedgerTopUpState> => {
-  if (action.type !== 'WALLET.COMMON.COMMITMENT_RECEIVED') {
-    console.warn(
-      `Ledger Top Up Protocol expected COMMITMENT_RECEIVED received ${action.type} instead.`,
+) {
+  const isFirstPlayer = helpers.isFirstPlayer(ledgerId, sharedData);
+
+  let requiredDeposit = '0x0';
+
+  if (playerFor === TwoPartyPlayerIndex.A && isFirstPlayer) {
+    requiredDeposit = subHex(
+      proposedAllocation[TwoPartyPlayerIndex.A],
+      originalAllocation[TwoPartyPlayerIndex.A],
     );
-    return { protocolState, sharedData };
-  }
-
-  const checkResult = checkAndStore(sharedData, action.signedCommitment);
-
-  if (!checkResult.isSuccess) {
-    return {
-      protocolState: states.failure({ reason: 'Received Invalid Commitment' }),
-      sharedData,
-    };
-  }
-  sharedData = checkResult.store;
-  const isFirstPlayer = helpers.isFirstPlayer(protocolState.ledgerId, sharedData);
-  // Accept consensus if player B
-  if (!isFirstPlayer) {
-    const ourCommitment = acceptConsensus(action.signedCommitment.commitment);
-    const signResult = signAndStore(sharedData, ourCommitment);
-    if (!signResult.isSuccess) {
-      return { protocolState: states.failure({ reason: 'Signature Failure' }), sharedData };
-    }
-    sharedData = signResult.store;
-
-    const messageRelay = sendCommitmentReceived(
-      helpers.getOpponentAddress(protocolState.ledgerId, sharedData),
-      protocolState.processId,
-      signResult.signedCommitment.commitment,
-      signResult.signedCommitment.signature,
-      LEDGER_TOP_UP_PROTOCOL_LOCATOR,
+  } else if (playerFor === TwoPartyPlayerIndex.B && !isFirstPlayer) {
+    requiredDeposit = subHex(
+      proposedAllocation[TwoPartyPlayerIndex.B],
+      originalAllocation[TwoPartyPlayerIndex.B],
     );
-    sharedData = queueMessage(sharedData, messageRelay);
   }
 
-  // Create direct funding state
-  const lastCommitment = helpers.getLatestCommitment(protocolState.ledgerId, sharedData);
+  let totalFundingRequired = '0x0';
+  if (playerFor === TwoPartyPlayerIndex.A) {
+    totalFundingRequired = addHex(
+      proposedAllocation[TwoPartyPlayerIndex.A],
+      originalAllocation[TwoPartyPlayerIndex.B],
+    );
+  } else if (playerFor === TwoPartyPlayerIndex.B) {
+    totalFundingRequired = proposedAllocation.reduce(addHex);
+  }
+
   const directFundingAction = directFundingRequested({
-    processId: protocolState.processId,
-    channelId: protocolState.ledgerId,
-    safeToDepositLevel: isFirstPlayer ? '0x0' : lastCommitment.allocation[2],
-    requiredDeposit: isFirstPlayer ? lastCommitment.allocation[2] : lastCommitment.allocation[3],
-    totalFundingRequired: calculateTotalTopUp(lastCommitment.allocation),
+    processId,
+    channelId: ledgerId,
+    safeToDepositLevel: '0x0', // Since we only have one player depositing we can always deposit right away
+    requiredDeposit,
+    totalFundingRequired,
     ourIndex: isFirstPlayer ? TwoPartyPlayerIndex.A : TwoPartyPlayerIndex.B,
     exchangePostFundSetups: false,
   });
+
   const { protocolState: directFundingState, sharedData: newSharedData } = initializeDirectFunding(
     directFundingAction,
     sharedData,
   );
-
-  return {
-    protocolState: states.waitForDirectFunding({ ...protocolState, directFundingState }),
-    sharedData: newSharedData,
-  };
-};
-
-const waitForDirectFundingReducer: ProtocolReducer<states.LedgerTopUpState> = (
-  protocolState: states.WaitForDirectFunding,
-  sharedData: SharedData,
-  action: LedgerTopUpAction,
-): ProtocolStateWithSharedData<states.LedgerTopUpState> => {
-  const existingDirectFundingState = protocolState.directFundingState;
-  const protocolStateWithSharedData = directFundingStateReducer(
-    existingDirectFundingState,
-    sharedData,
-    action,
-  );
-  const newDirectFundingState = protocolStateWithSharedData.protocolState;
-  const newProtocolState = { ...protocolState, directFundingState: newDirectFundingState };
-  sharedData = protocolStateWithSharedData.sharedData;
-
-  if (!isTerminal(newDirectFundingState)) {
-    return { protocolState: newProtocolState, sharedData };
-  }
-  if (isFailure(newDirectFundingState)) {
-    return { protocolState: states.failure({ reason: 'Direct Funding Failure' }), sharedData };
-  }
-  if (isSuccess(newDirectFundingState)) {
-    const channel = getExistingChannel(sharedData, newProtocolState.ledgerId);
-
-    if (helpers.isFirstPlayer(protocolState.ledgerId, sharedData)) {
-      const theirCommitment = getLastCommitment(channel);
-      const { allocation: oldAllocation, destination: oldDestination } = theirCommitment;
-      const newAllocation = [
-        addHex(oldAllocation[0], oldAllocation[2]),
-        addHex(oldAllocation[1], oldAllocation[3]),
-      ];
-      const newDestination = [oldDestination[0], oldDestination[1]];
-      const ourCommitment = proposeNewConsensus(theirCommitment, newAllocation, newDestination);
-      const signResult = signAndStore(sharedData, ourCommitment);
-      if (!signResult.isSuccess) {
-        return { protocolState: newProtocolState, sharedData };
-      }
-      sharedData = signResult.store;
-
-      const messageRelay = sendCommitmentReceived(
-        theirAddress(channel),
-        protocolState.processId,
-        signResult.signedCommitment.commitment,
-        signResult.signedCommitment.signature,
-        LEDGER_TOP_UP_PROTOCOL_LOCATOR,
-      );
-      sharedData = queueMessage(sharedData, messageRelay);
-    }
-    return { protocolState: states.waitForPostTopUpLedgerUpdate(protocolState), sharedData };
-  }
-
-  return { protocolState, sharedData };
-};
-
-const waitForPostTopUpLedgerUpdateReducer: ProtocolReducer<states.LedgerTopUpState> = (
-  protocolState: states.WaitForPostTopUpLedgerUpdate,
-  sharedData: SharedData,
-  action: LedgerTopUpAction,
-): ProtocolStateWithSharedData<states.LedgerTopUpState> => {
-  if (action.type !== 'WALLET.COMMON.COMMITMENT_RECEIVED') {
-    console.warn(
-      `Ledger Top Up Protocol expected COMMITMENT_RECEIVED received ${action.type} instead.`,
-    );
-    return { protocolState, sharedData };
-  }
-
-  const checkResult = checkAndStore(sharedData, action.signedCommitment);
-
-  if (!checkResult.isSuccess) {
-    return {
-      protocolState: states.failure({ reason: 'Received Invalid Commitment' }),
-      sharedData,
-    };
-  }
-  sharedData = checkResult.store;
-  const isFirstPlayer = helpers.isFirstPlayer(protocolState.ledgerId, sharedData);
-  // Accept consensus if player B
-  if (!isFirstPlayer) {
-    const ourCommitment = acceptConsensus(action.signedCommitment.commitment);
-    const signResult = signAndStore(sharedData, ourCommitment);
-    if (!signResult.isSuccess) {
-      return { protocolState: states.failure({ reason: 'Signature Failure' }), sharedData };
-    }
-    sharedData = signResult.store;
-
-    const messageRelay = sendCommitmentReceived(
-      helpers.getOpponentAddress(protocolState.ledgerId, sharedData),
-      protocolState.processId,
-      signResult.signedCommitment.commitment,
-      signResult.signedCommitment.signature,
-      LEDGER_TOP_UP_PROTOCOL_LOCATOR,
-    );
-    sharedData = queueMessage(sharedData, messageRelay);
-  }
-
-  return { protocolState: states.success({}), sharedData };
-};
-
-function calculateTotalTopUp(allocation: string[]): string {
-  return bigNumberify(allocation[2])
-    .add(allocation[3])
-    .toHexString();
+  return { directFundingState, sharedData: newSharedData };
 }
 
-function calculateTopUpAllocation(
+function initializeConsensusState(
+  playerFor: TwoPartyPlayerIndex,
+  processId: string,
+  ledgerId: string,
   proposedAllocation: string[],
+  proposedDestination: string[],
   currentAllocation: string[],
-): string[] {
-  const newAllocation: string[] = [];
-  for (let i = 0; i < currentAllocation.length; i++) {
-    const currentFunds = bigNumberify(currentAllocation[i]);
-    const proposedFunds = bigNumberify(proposedAllocation[i]);
-    const topUp = currentFunds.gte(proposedFunds)
-      ? '0x0'
-      : proposedFunds.sub(currentFunds).toHexString();
-    newAllocation[i] = topUp;
+
+  sharedData: SharedData,
+) {
+  let newAllocation;
+  let newDestination;
+  // For player A we want to move their top-upped deposit to the end and leave player B's as is
+  if (playerFor === TwoPartyPlayerIndex.A) {
+    const currentAllocationForA = currentAllocation[TwoPartyPlayerIndex.A];
+    const proposedAllocationForA = proposedAllocation[TwoPartyPlayerIndex.A];
+
+    const newAllocationForA = bigNumberify(currentAllocationForA).gte(proposedAllocationForA)
+      ? currentAllocationForA
+      : proposedAllocationForA;
+
+    newAllocation = [currentAllocation[TwoPartyPlayerIndex.B], newAllocationForA];
+    newDestination = [
+      proposedDestination[TwoPartyPlayerIndex.B],
+      proposedDestination[TwoPartyPlayerIndex.A],
+    ];
+  } else {
+    // When we're handling this for player B the allocation has already been flipped, so our current value is first in the allocation
+    const currentAllocationForB = currentAllocation[0];
+    const currentAllocationForA = currentAllocation[1];
+    const proposedAllocationForB = proposedAllocation[TwoPartyPlayerIndex.B];
+
+    const newAllocationForB = bigNumberify(currentAllocationForB).gte(proposedAllocationForB)
+      ? currentAllocationForB
+      : proposedAllocationForB;
+    // For Player B we're restoring the original order of [A,B]
+    newAllocation = [currentAllocationForA, newAllocationForB];
+    newDestination = proposedDestination;
   }
-  return newAllocation;
+  const {
+    protocolState: consensusUpdateState,
+    sharedData: newSharedData,
+  } = initializeConsensusUpdate(processId, ledgerId, newAllocation, newDestination, sharedData);
+  return { consensusUpdateState, sharedData: newSharedData };
 }
