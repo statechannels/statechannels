@@ -11,7 +11,7 @@ export const BASE_URL = `/api/v2/channels`;
 
 const router = new Router();
 
-function sendViaFirebase(ctx) {
+export function sendViaFirebase(ctx) {
   // Executed after all other middleware
   const status = ctx.status;
   if (status === 200 || status === 201) {
