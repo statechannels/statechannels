@@ -11,6 +11,11 @@ import { ChannelState } from '../../../channel-store';
 import { setChannel, EMPTY_SHARED_DATA } from '../../../state';
 import { channelFromCommitments } from '../../../channel-store/channel-state/__tests__';
 import { APPLICATION_PROCESS_ID } from '../reducer';
+import {
+  challengerPreSuccessOpenState,
+  terminatingAction,
+  challengerPreSuccessClosedState,
+} from '../../dispute/challenger';
 
 const {
   signedCommitment19,
@@ -43,6 +48,18 @@ const defaults = { processId, channelId, address, privateKey };
 // ------
 const addressKnown = states.waitForFirstCommitment({ channelId, address, privateKey });
 const ongoing = states.ongoing({ channelId, address, privateKey });
+const waitForDispute1 = states.waitForDispute({
+  channelId,
+  address,
+  privateKey,
+  disputeState: challengerPreSuccessOpenState,
+});
+const waitForDispute2 = states.waitForDispute({
+  channelId,
+  address,
+  privateKey,
+  disputeState: challengerPreSuccessClosedState,
+});
 
 // -------
 // Actions
@@ -74,6 +91,17 @@ const receiveOurInvalidCommitment = actions.ownCommitmentReceived({
 });
 
 const concluded = actions.concluded({ processId: APPLICATION_PROCESS_ID });
+
+const challengeRequested = actions.challengeRequested({ processId, channelId, commitment });
+
+const challengeDetected = actions.challengeDetected({
+  processId,
+  channelId,
+  commitment,
+  expiresAt: 999,
+});
+
+const disputeTerminated = { ...terminatingAction };
 
 // -------
 // SharedData
@@ -141,5 +169,38 @@ export const receivingOurInvalidCommitment = {
     state: ongoing,
     sharedData: ourTurnSharedData,
     action: receiveOurInvalidCommitment,
+  },
+};
+
+export const challengeWasRequested = {
+  ...defaults,
+  ongoing: {
+    state: ongoing,
+    sharedData: ourTurnSharedData,
+    action: challengeRequested,
+  },
+};
+export const challengeWasDetected = {
+  ...defaults,
+  ongoing: {
+    state: ongoing,
+    sharedData: ourTurnSharedData,
+    action: challengeDetected,
+  },
+};
+export const challengeRespondedTo = {
+  ...defaults,
+  waitForDispute: {
+    state: waitForDispute1,
+    sharedData: ourTurnSharedData,
+    action: disputeTerminated,
+  },
+};
+export const challengeExpired = {
+  ...defaults,
+  waitForDispute: {
+    state: waitForDispute2,
+    sharedData: ourTurnSharedData,
+    action: disputeTerminated,
   },
 };

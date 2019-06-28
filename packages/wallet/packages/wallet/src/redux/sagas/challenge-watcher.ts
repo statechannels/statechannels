@@ -4,7 +4,6 @@ import { take, select, put } from 'redux-saga/effects';
 import { AdjudicatorState, getAdjudicatorChannelState } from '../adjudicator-state/state';
 import { getProvider } from '../../utils/contract-utils';
 import { eventChannel } from 'redux-saga';
-import { concluded } from '../protocols/application/actions';
 
 export function* challengeWatcher() {
   const provider = yield getProvider();
@@ -24,7 +23,6 @@ export function* challengeWatcher() {
           yield put(
             actions.challengeExpiredEvent({ processId, channelId, timestamp: block.timestamp }),
           );
-          yield put(concluded({ processId }));
         }
       }
     }
