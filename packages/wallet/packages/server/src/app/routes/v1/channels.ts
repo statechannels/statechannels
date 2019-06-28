@@ -2,7 +2,7 @@ import * as koaBody from 'koa-body';
 import * as Router from 'koa-router';
 
 import { RelayableAction } from 'magmo-wallet/lib/src/communication';
-import { send } from '../../../message/firebase-relay';
+import { sendToFirebase } from '../../../message/firebase-relay';
 import { getProcess } from '../../../wallet/db/queries/walletProcess';
 import { handleGameRequest } from '../../handlers/handle-game-request';
 import { handleNewProcessAction } from '../../handlers/handle-new-process-action';
@@ -17,7 +17,7 @@ export function sendViaFirebaseToApplication(ctx) {
     const to = ctx.body.commitment.channel.participants[0];
     const messagePayload = ctx.body;
     if (to && messagePayload) {
-      send(to, { ...messagePayload, queue: 'GAME_ENGINE' });
+      sendToFirebase(to, { ...messagePayload, queue: 'GAME_ENGINE' });
     }
   }
 }
@@ -28,7 +28,7 @@ export function sendViaFirebaseToWallet(ctx) {
     const to = ctx.body.to;
     const payload = ctx.body.messagePayload;
     if (to && payload) {
-      send(to, { payload, queue: 'WALLET' });
+      sendToFirebase(to, { payload, queue: 'WALLET' });
     }
   }
 }
