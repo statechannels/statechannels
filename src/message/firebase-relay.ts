@@ -26,25 +26,23 @@ const config = {
 };
 
 const firebase = firebaseApp.initializeApp(config);
+const messagesRef = firebase.database().ref('messages');
 
 function listenForHubMessages() {
-  const ref = firebase.database().ref(`/messages/${HUB_ADDRESS.toLowerCase()}/`);
+  const hubRef = messagesRef.child(HUB_ADDRESS.toLowerCase());
 
-  ref.on('child_added', snapshot => {
+  hubRef.on('child_added', snapshot => {
     const key = snapshot.key;
     const value = snapshot.val();
     postData({ ...value.payload, queue: value.queue });
-    ref.child(key).remove();
+    hubRef.child(key).remove();
   });
 }
 
-export function sendToOpponent(to, payload) {
+export function send(to, payload) {
   const fbPayload = { payload, queue: 'WALLET' };
   const sanitizedPayload = JSON.parse(JSON.stringify(fbPayload));
-  firebase
-    .database()
-    .ref(`/messages/${to.toLowerCase()}/`)
-    .push(sanitizedPayload);
+  messagesRef.child(to.toLowerCase()).push(sanitizedPayload);
 }
 
 if (require.main === module) {
