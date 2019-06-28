@@ -6,7 +6,7 @@ import '../../config/env';
 import { HUB_ADDRESS } from '../constants';
 
 async function postData(data = {}) {
-  const response = await fetch(`${process.env.SERVER_URL}/api/v2/channels`, {
+  const response = await fetch(`${process.env.SERVER_URL}/api/v1/channels`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -45,14 +45,20 @@ function listenForHubMessages() {
   hubRef.on('child_added', snapshot => {
     const key = snapshot.key;
     const value = snapshot.val();
-    postData({ ...value.payload, queue: value.queue });
+    const queue = value.queue;
+    if (queue === 'GAME_ENGINE') {
+      postData(value);
+    } else if (queue === 'WALLET') {
+      postData({ ...value.payload, queue: value.queue });
+    } else {
+      throw new Error('Unknown queue');
+    }
     hubRef.child(key).remove();
   });
 }
 
 export function send(to, payload) {
-  const fbPayload = { payload, queue: 'WALLET' };
-  const sanitizedPayload = JSON.parse(JSON.stringify(fbPayload));
+  const sanitizedPayload = JSON.parse(JSON.stringify(payload));
   getMessagesRef()
     .child(to.toLowerCase())
     .push(sanitizedPayload);
