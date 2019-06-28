@@ -5,7 +5,7 @@ import { WalletAction, advanceChannel } from '../../actions';
 import { isVirtualFundingAction } from './actions';
 import { unreachable } from '../../../utils/reducer-utils';
 import { CommitmentType } from '../../../domain';
-import { bytesFromAppAttributes, UpdateType } from 'fmg-nitro-adjudicator';
+import { bytesFromAppAttributes } from 'fmg-nitro-adjudicator/lib/consensus-app';
 import { CONSENSUS_LIBRARY_ADDRESS } from '../../../constants';
 
 type ReturnVal = ProtocolStateWithSharedData<states.VirtualFundingState>;
@@ -31,7 +31,6 @@ export function initialize(sharedData: SharedData, args: InitializationArgs): Re
         proposedAllocation: allocation,
         proposedDestination: destination,
         furtherVotesRequired: 0,
-        updateType: UpdateType.Consensus,
       }),
     };
   }

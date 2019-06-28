@@ -1,5 +1,5 @@
 import { Commitment, CommitmentType } from '../domain';
-import { appAttributesFromBytes } from 'fmg-nitro-adjudicator';
+import { appAttributesFromBytes } from 'fmg-nitro-adjudicator/lib/consensus-app';
 import { TwoPartyPlayerIndex } from '../redux/types';
 import { ChannelState, getLastCommitment } from '../redux/channel-store';
 
