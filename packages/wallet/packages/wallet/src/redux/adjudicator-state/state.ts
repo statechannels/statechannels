@@ -1,5 +1,4 @@
 import { Commitment } from '../../domain';
-import { bigNumberify } from 'ethers/utils';
 
 export interface AdjudicatorState {
   [channelId: string]: AdjudicatorChannelState;
@@ -69,15 +68,13 @@ export function markAsFinalized(
   return setAdjudicatorChannelState(adjudicatorState, newChannelState);
 }
 
-export function addToBalance(
+export function setBalance(
   adjudicatorState: AdjudicatorState,
   channelId: string,
-  amount: string,
+  balance: string,
 ): AdjudicatorState {
   const channelState = getOrCreateAdjudicatorChannelState(adjudicatorState, channelId);
-  const newBalance = bigNumberify(channelState.balance)
-    .add(amount)
-    .toHexString();
-  const newChannelState = { ...channelState, balance: newBalance };
+
+  const newChannelState = { ...channelState, balance };
   return setAdjudicatorChannelState(adjudicatorState, newChannelState);
 }

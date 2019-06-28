@@ -59,6 +59,12 @@ const twoThreeTwo = [
   { address: hubAddress, wei: bigNumberify(2).toHexString() },
 ];
 
+export const addressAndPrivateKeyLookup = {
+  [ThreePartyPlayerIndex.A]: { address: asAddress, privateKey: asPrivateKey },
+  [ThreePartyPlayerIndex.B]: { address: bsAddress, privateKey: bsPrivateKey },
+  [ThreePartyPlayerIndex.Hub]: { address: hubAddress, privateKey: hubPrivateKey },
+};
+
 const blankBalance: Balance[] = [];
 
 interface AppCommitmentParams {

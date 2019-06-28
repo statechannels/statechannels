@@ -40,20 +40,27 @@ graph TD
 
     C{Concluding}-->CU(ConsensusUpdate)
 
-    idF --> dF(DirectFunding)
+    idF -->  ECF(ExistingChannelFunding)
+    idF --> NLC(NewLedgerChannel)
+
+    NLC --> CU(ConsensusUpdate)
+
+    ECF --> LTU(LedgerTopUp)
+    ECF --> CU(ConsensusUpdate)
+    LTU --> CU(ConsensusUpdate)
 
     Df{Defunding}-->idDf(IndirectDefunding)
     Df-->W(Withdrawing)
 
-    dF-->TS(TransactionSubmission)
+    Df-->TS(TransactionSubmission)
 
     W-->TS
 
     AC(AdvanceChannel)
-    ECF(ExistingChannelFunding)
+
     LTU(LedgerTopUp)
-    NLC(NewLedgerChannel)
-    PC(PrepareChannel)
+
+
     VF(VirtualFunding)
 
     classDef TopLevelProtocol stroke:#333,stroke-width:4px,color:#ffff,fill:#333;
@@ -61,7 +68,7 @@ graph TD
     classDef OrphanProtocol stroke:#333,stroke-width:4px,fill:#0000;
 
     class A,F,C,Df TopLevelProtocol
-    class AC,ECF,LTU,NLC,PC,VF OrphanProtocol
+    class AC,PC,VF OrphanProtocol
 
 
 ```
