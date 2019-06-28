@@ -17,6 +17,7 @@
     "chain:test": "npx ganache-then-jest --runInBand -c ./config/jest/jest.chain.config.js",
     "adjudicator-watcher:start": "node lib/wallet/adjudicator-watcher/index.js",
     "adjudicator-watcher:test": "npx ganache-then-jest --runInBand -c ./config/jest/jest.chain.config.js",
+    "firebase-relay:start:dev": "ts-node src/message/firebase-relay",
     "server:start": "node ./lib/app/server.js",
     "server:test": "npx jest --runInBand -c ./config/jest/jest.config.js",
     "server:watch": "nodemon --watch 'src/**/*' -e ts,tsx --exec ts-node ./src/app/server.ts",
