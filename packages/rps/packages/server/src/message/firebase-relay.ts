@@ -46,5 +46,6 @@ export function send(to, payload) {
 }
 
 if (require.main === module) {
+  console.log('Listening to firebase for hub messages');
   listenForHubMessages();
 }
