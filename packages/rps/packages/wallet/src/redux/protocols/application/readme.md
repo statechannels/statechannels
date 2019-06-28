@@ -17,10 +17,13 @@ The protocol is implemented with the following state machine.
 graph TD
 linkStyle default interpolate basis
   S((start)) --> AK(AddressKnown)
-  AK-->|WALLET.APPLICATION.COMMITMENT_RECEIVED|O(Ongoing)
-  O-->|WALLET.APPLICATION.COMMITMENT_RECEIVED|O(Ongoing)
-  AK-->|WALLET.APPLICATION.CONCLUDED|Su((success))
-  O-->|WALLET.APPLICATION.CONCLUDED|Su((success))
+  AK-->|COMMITMENT_RECEIVED|O(Ongoing)
+  O-->|COMMITMENT_RECEIVED|O(Ongoing)
+  AK-->|CONCLUDED|Su((success))
+  O-->|CONCLUDED|Su((success))
+  O-->|CHALLENGE_REQUESTED/DETECTED|WFD(WaitForDispute)
+  WFD-->|Response|O
+  WFD-->|Expiry|Su
   classDef logic fill:#efdd20;
   classDef Success fill:#58ef21;
   classDef Failure fill:#f45941;
@@ -28,11 +31,37 @@ linkStyle default interpolate basis
   class S logic;
   class Su Success;
   class F Failure;
-  class C WaitForChildProtocol;
+  class WFD WaitForChildProtocol;
 ```
 
 Notes:
 
+- All action typestrings have had the `WALLET.APPLICATION` prefix suppressed in the above diagram
 - `COMMITMENT_RECEIVED` is shorthand for either `OWN_COMMITMENT_RECEIVED` or `OPPONENT_COMMITMENT_RECEIVED`
 - `CONCLUDED` should get triggered when a conclude is requested _and then sent from the wallet_. This means that the application protocol no longer needs to listen for commitments from the app. In particular, if the conclude is requested and then cancelled, `CONCLUDED` will not be triggered.
 - The application protocol is responsible for sending out signature and validation messages.
+
+## Scenarios
+
+1. **Initializing Application**
+   - `.`--> `WaitForFirstCommitment`
+2. **Starting Application**
+   - `WaitForFirstCommitment` --> `Ongoing`
+3. **Receiving a close request**
+   - `Ongoing` --> `Success`
+4. **Receiving our commitment**
+   - `Ongoing` --> `Ongoing`
+5. **Receiving their commitment**
+   - `Ongoing` --> `Ongoing`
+6. **Receiving their invalid commitment**
+   - `Ongoing` --> `Ongoing`
+7. **Receiving our invalid commitment**
+   - `Ongoing` --> `Ongoing`
+8. **Challenge was requested**
+   - `Ongoing` --> `WaitForDispute`
+9. **Challenge was detected**
+   - `Ongoing` --> `WaitForDispute`
+10. **Challenge responded to**
+    - `WaitForDispute` --> `Ongoing`
+11. **Challenge expired**
+    - `WaitForDispute` --> `Success`

@@ -1,6 +1,7 @@
 import { Commitment } from '../../../domain';
 import { WalletAction } from '../../actions';
 import { ActionConstructor } from '../../utils';
+import { DisputeAction, isDisputeAction } from '../dispute';
 
 // -------
 // Actions
@@ -16,6 +17,21 @@ export interface OpponentCommitmentReceived {
   processId: string;
   commitment: Commitment;
   signature: string;
+}
+
+export interface ChallengeRequested {
+  type: 'WALLET.APPLICATION.CHALLENGE_REQUESTED';
+  commitment: Commitment;
+  processId: string;
+  channelId: string;
+}
+
+export interface ChallengeDetected {
+  type: 'WALLET.APPLICATION.CHALLENGE_DETECTED';
+  processId: string;
+  channelId: string;
+  expiresAt: number;
+  commitment: Commitment;
 }
 export interface Concluded {
   type: 'WALLET.APPLICATION.CONCLUDED';
@@ -45,6 +61,16 @@ export const opponentCommitmentReceived: ActionConstructor<OpponentCommitmentRec
   };
 };
 
+export const challengeRequested: ActionConstructor<ChallengeRequested> = p => ({
+  ...p,
+  type: 'WALLET.APPLICATION.CHALLENGE_REQUESTED',
+});
+
+export const challengeDetected: ActionConstructor<ChallengeDetected> = p => ({
+  ...p,
+  type: 'WALLET.APPLICATION.CHALLENGE_DETECTED',
+});
+
 export const concluded: ActionConstructor<Concluded> = p => {
   const { processId } = p;
   return {
@@ -57,12 +83,21 @@ export const concluded: ActionConstructor<Concluded> = p => {
 // Unions and Guards
 // -------
 
-export type ApplicationAction = OpponentCommitmentReceived | OwnCommitmentReceived | Concluded;
+export type ApplicationAction =
+  | OpponentCommitmentReceived
+  | OwnCommitmentReceived
+  | ChallengeDetected
+  | ChallengeRequested
+  | Concluded
+  | DisputeAction;
 
 export function isApplicationAction(action: WalletAction): action is ApplicationAction {
   return (
+    isDisputeAction(action) ||
     action.type === 'WALLET.APPLICATION.OPPONENT_COMMITMENT_RECEIVED' ||
     action.type === 'WALLET.APPLICATION.OWN_COMMITMENT_RECEIVED' ||
+    action.type === 'WALLET.APPLICATION.CHALLENGE_DETECTED' ||
+    action.type === 'WALLET.APPLICATION.CHALLENGE_REQUESTED' ||
     action.type === 'WALLET.APPLICATION.CONCLUDED'
   );
 }

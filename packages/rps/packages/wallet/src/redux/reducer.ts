@@ -7,11 +7,7 @@ import { ProtocolState } from './protocols';
 import { isNewProcessAction, NewProcessAction } from './protocols/actions';
 import * as applicationProtocol from './protocols/application';
 import * as defundingProtocol from './protocols/defunding';
-import {
-  challengingReducer,
-  initializeChallengerState,
-  initializeResponderState,
-} from './protocols/dispute/reducer';
+import { disputeReducer } from './protocols/dispute/reducer';
 import * as concludingProtocol from './protocols/concluding';
 import * as fundProtocol from './protocols/funding';
 import * as states from './state';
@@ -109,7 +105,7 @@ function routeToProtocolReducer(
         const {
           protocolState: challengingProtocolState,
           sharedData: challengingSharedData,
-        } = challengingReducer(processState.protocolState, states.sharedData(state), action);
+        } = disputeReducer(processState.protocolState, states.sharedData(state), action);
         return updatedState(state, challengingSharedData, processState, challengingProtocolState);
 
       case WalletProtocol.Concluding:
@@ -187,23 +183,6 @@ function initializeNewProtocol(
       );
       return { protocolState, sharedData };
     }
-    case 'WALLET.NEW_PROCESS.CREATE_CHALLENGE_REQUESTED': {
-      const { channelId } = action;
-      const { protocolState, sharedData } = initializeChallengerState(
-        channelId,
-        processId,
-        incomingSharedData,
-      );
-      return { protocolState, sharedData };
-    }
-    case 'WALLET.NEW_PROCESS.CHALLENGE_CREATED':
-      return initializeResponderState(
-        processId,
-        action.channelId,
-        action.expiresAt,
-        incomingSharedData,
-        action.commitment,
-      );
     case 'WALLET.NEW_PROCESS.INITIALIZE_CHANNEL':
       return applicationProtocol.initialize(
         incomingSharedData,
