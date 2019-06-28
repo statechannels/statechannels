@@ -5,6 +5,11 @@ export function addHex(a: string, b: string): string {
     .add(bigNumberify(b))
     .toHexString();
 }
+export function subHex(a: string, b: string): string {
+  return bigNumberify(a)
+    .sub(bigNumberify(b))
+    .toHexString();
+}
 
 export function eqHex(a: string, b: string) {
   return bigNumberify(a).eq(b);

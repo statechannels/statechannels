@@ -6,6 +6,7 @@ import * as transactionSubmissionScenarios from '../../transaction-submission/__
 import * as advanceChannelScenarios from '../../advance-channel/__tests__';
 import * as states from '../states';
 import { directFundingRequested } from '../actions';
+import { SharedData } from '../../../state';
 
 const { jointLedgerId: channelId, twoThree } = scenarios;
 
@@ -39,6 +40,17 @@ const defaultsForB: states.DirectFundingState = {
 
 // actions
 const aInitializeAction = directFundingRequested({ ...defaultsForA });
+const aInitializeWithNoDeposit = directFundingRequested({
+  ...defaultsForA,
+  exchangePostFundSetups: false,
+  requiredDeposit: '0x0',
+});
+
+const aInitializeWithRequiredDeposit = directFundingRequested({
+  ...defaultsForA,
+  exchangePostFundSetups: false,
+  requiredDeposit: '0x5',
+});
 const bInitializeAction = directFundingRequested({ ...defaultsForB });
 const aFundingReceivedEvent = globalActions.fundingReceivedEvent({
   processId,
@@ -55,6 +67,10 @@ const bFundingReceivedEvent = globalActions.fundingReceivedEvent({
 
 const sharedData = () => ({ ...advanceChannelScenarios.preSuccess.sharedData });
 
+const adjudicatorStateSharedData: SharedData = {
+  ...sharedData(),
+  adjudicatorState: { [channelId]: { channelId, balance: '0x5', finalized: false } },
+};
 export const aHappyPath = {
   initialize: { sharedData: sharedData(), action: aInitializeAction },
   waitForDepositTransaction: {
@@ -167,6 +183,13 @@ export const bNoPostFundSetupsHappyPath = {
     sharedData: sharedData(),
     action: bFundingReceivedEvent,
   },
+};
+
+export const depositNotRequired = {
+  initialize: { action: aInitializeWithNoDeposit, sharedData: sharedData() },
+};
+export const existingOnChainDeposit = {
+  initialize: { action: aInitializeWithRequiredDeposit, sharedData: adjudicatorStateSharedData },
 };
 
 export const transactionFails = {
