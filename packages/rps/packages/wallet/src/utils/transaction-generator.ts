@@ -3,7 +3,6 @@ import { getAdjudicatorInterface } from './contract-utils';
 import { splitSignature } from 'ethers/utils';
 import { Commitment } from '../domain';
 import { asEthersObject } from 'fmg-core';
-const ZERO_ADDRESS = '0x' + '0'.repeat(40);
 
 export function createForceMoveTransaction(
   fromState: Commitment,
@@ -19,7 +18,6 @@ export function createForceMoveTransaction(
   const data = adjudicatorInterface.functions.forceMove.encode([
     asEthersObject(fromState),
     asEthersObject(toState),
-    ZERO_ADDRESS,
     [splitFromSignature, splitToSignature],
   ]);
   return {

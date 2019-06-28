@@ -2,8 +2,7 @@ import { SignedCommitment, signCommitment2, CommitmentType } from '..';
 import { bigNumberify } from 'ethers/utils';
 import { channelID } from 'fmg-core/lib/channel';
 import { CONSENSUS_LIBRARY_ADDRESS } from '../../../constants';
-import { bytesFromAppAttributes } from 'fmg-nitro-adjudicator';
-import { UpdateType } from 'fmg-nitro-adjudicator/lib/consensus-app';
+import { bytesFromAppAttributes } from 'fmg-nitro-adjudicator/lib/consensus-app';
 import { ThreePartyPlayerIndex } from '../../../redux/types';
 
 export const asPrivateKey = '0xf2f48ee19680706196e2e339e5da3491186e0c4c5030670656b0e0164837257d';
@@ -76,7 +75,6 @@ interface AppCommitmentParams {
 
 const EMPTY_APP_ATTRIBUTES = bytesFromAppAttributes({
   furtherVotesRequired: 0,
-  updateType: 0,
   proposedAllocation: [],
   proposedDestination: [],
 });
@@ -103,18 +101,13 @@ export function appCommitment(params: AppCommitmentParams): SignedCommitment {
   return signCommitment2(commitment, privateKey);
 }
 
-function ledgerAppAttributes(
-  furtherVotesRequired,
-  updateType: UpdateType,
-  proposedBalances: Balance[],
-) {
+function ledgerAppAttributes(furtherVotesRequired, proposedBalances: Balance[]) {
   const proposedAllocation = proposedBalances.map(b => b.wei);
   const proposedDestination = proposedBalances.map(b => b.address);
   return bytesFromAppAttributes({
     proposedAllocation,
     proposedDestination,
     furtherVotesRequired,
-    updateType,
   });
 }
 
@@ -150,10 +143,8 @@ export function threeWayLedgerCommitment(params: ThreeWayLedgerCommitmentParams)
   const balances = params.balances || twoThreeTwo;
   let proposedBalances = params.proposedBalances || blankBalance;
   let furtherVotesRequired = 0;
-  let updateType = UpdateType.Consensus;
   if (params.proposedBalances) {
     furtherVotesRequired = params.isVote ? 1 : 2;
-    updateType = UpdateType.Proposal;
     proposedBalances = params.proposedBalances;
   }
 
@@ -161,7 +152,7 @@ export function threeWayLedgerCommitment(params: ThreeWayLedgerCommitmentParams)
   const destination = balances.map(b => b.address);
   const { commitmentCount, commitmentType } = typeAndCount(turnNum, isFinal);
 
-  const appAttributes = ledgerAppAttributes(furtherVotesRequired, updateType, proposedBalances);
+  const appAttributes = ledgerAppAttributes(furtherVotesRequired, proposedBalances);
   const commitment = {
     channel: threeWayLedgerChannel,
     commitmentCount,
@@ -188,17 +179,15 @@ export function ledgerCommitment(params: LedgerCommitmentParams): SignedCommitme
   const balances = params.balances || twoThree;
   let proposedBalances = params.proposedBalances || blankBalance;
   let furtherVotesRequired = 0;
-  let updateType = UpdateType.Consensus;
   if (params.proposedBalances) {
     furtherVotesRequired = 1;
-    updateType = UpdateType.Proposal;
     proposedBalances = params.proposedBalances;
   }
   const allocation = balances.map(b => b.wei);
   const destination = balances.map(b => b.address);
   const { commitmentCount, commitmentType } = typeAndCount(turnNum, isFinal);
 
-  const appAttributes = ledgerAppAttributes(furtherVotesRequired, updateType, proposedBalances);
+  const appAttributes = ledgerAppAttributes(furtherVotesRequired, proposedBalances);
 
   const commitment = {
     channel: ledgerChannel,

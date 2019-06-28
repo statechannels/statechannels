@@ -10,7 +10,7 @@ import {
   consensusHasBeenReached,
 } from '../../../domain/consensus-app';
 import { Commitment } from '../../../domain';
-import { appAttributesFromBytes } from 'fmg-nitro-adjudicator';
+import { appAttributesFromBytes } from 'fmg-nitro-adjudicator/lib/consensus-app';
 import { eqHexArray } from '../../../utils/hex-utils';
 
 export const CONSENSUS_UPDATE_PROTOCOL_LOCATOR = 'ConsensusUpdate';
