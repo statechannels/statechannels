@@ -9181,10 +9181,10 @@ fmg-core@0.5.6:
     web3-utils "1.0.0-beta.37"
     websocket "^1.0.28"
 
-fmg-core@0.5.8, fmg-core@^0.5.8:
-  version "0.5.8"
-  resolved "https://registry.yarnpkg.com/fmg-core/-/fmg-core-0.5.8.tgz#3a183297d1b2a2f7de70721ac02ae40b30eb0033"
-  integrity sha512-TRee/KSMg/45WKibOrV2iuJuLrqV8fBpZnj5YU2ns9EoR6XV1jtn0h1yiyxhtUJiWvkQEE3oowuJ/yUoqgKmSA==
+fmg-core@0.5.9, fmg-core@^0.5.9:
+  version "0.5.9"
+  resolved "https://registry.yarnpkg.com/fmg-core/-/fmg-core-0.5.9.tgz#9feee0ce880d2cb6d59985116d01acc9eab90a95"
+  integrity sha512-YpEPex8mqzRZFMFXl4HdBxQIWY+gOePROQ1OwBMBZKSECOv+OfKAiVYay6CRJKHBK47e1GExCV5kDch0VMzkHw==
   dependencies:
     bn.js "^4.11.8"
     ethers "^4.0.26"
@@ -9195,13 +9195,13 @@ fmg-core@0.5.8, fmg-core@^0.5.8:
     web3-utils "1.0.0-beta.37"
     websocket "^1.0.28"
 
-fmg-nitro-adjudicator@0.1.2:
-  version "0.1.2"
-  resolved "https://registry.yarnpkg.com/fmg-nitro-adjudicator/-/fmg-nitro-adjudicator-0.1.2.tgz#47cabbea9e80867d01bc88478a08a7d46d724ded"
-  integrity sha512-qjLmi6gOn0rJq7r4rTMpzi1LYepTyyHfg3atoDZ4NRgVKFI/5G77ka7ZHfwukCCCNJlMsqY+EefwVw5z7c4xeQ==
+fmg-nitro-adjudicator@0.1.4:
+  version "0.1.4"
+  resolved "https://registry.yarnpkg.com/fmg-nitro-adjudicator/-/fmg-nitro-adjudicator-0.1.4.tgz#296f8fed642200d2f88a64093115a728ab274288"
+  integrity sha512-wSxntkV2rqbT7hoYVDLF/qT/j/8eAQ0lD0V4nGUC9D+rNPPmqr+2htqc79SUmn/D2ZxTftRKXw5oI6BeWztuDw==
   dependencies:
     ethers "^4.0.26"
-    fmg-core "^0.5.8"
+    fmg-core "^0.5.9"
     openzeppelin-solidity "2.1.3"
     web3 "1.0.0-beta.37"
 

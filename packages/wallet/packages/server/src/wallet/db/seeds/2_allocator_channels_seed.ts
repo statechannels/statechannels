@@ -1,5 +1,4 @@
 import { CommitmentType, toUint256 } from 'fmg-core';
-import { UpdateType } from 'fmg-nitro-adjudicator/lib/consensus-app';
 import { Model } from 'objection';
 import {
   PositionType,
@@ -52,7 +51,6 @@ const ledger_appAttrs = (n: number) => ({
   furtherVotesRequired: n,
   proposedAllocation: [],
   proposedDestination: [],
-  updateType: UpdateType.Consensus,
 });
 
 function pre_fund_setup(turnNumber: number) {

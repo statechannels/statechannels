@@ -1,7 +1,9 @@
 import { Commitment, CommitmentType } from 'fmg-core';
-import { appAttributesFromBytes, bytesFromAppAttributes } from 'fmg-nitro-adjudicator';
-import { ConsensusCommitment, UpdateType } from 'fmg-nitro-adjudicator/lib/consensus-app';
-import { unreachable } from 'magmo-wallet';
+import {
+  appAttributesFromBytes,
+  bytesFromAppAttributes,
+} from 'fmg-nitro-adjudicator/lib/consensus-app';
+import { ConsensusCommitment } from 'fmg-nitro-adjudicator/lib/consensus-app';
 import AllocatorChannelCommitment from '../models/allocatorChannelCommitment';
 
 export type LedgerCommitment = ConsensusCommitment;
@@ -41,23 +43,18 @@ export function asConsensusCommitment(
       };
     case CommitmentType.App:
       const appAttributes = appAttributesFromBytes(commitment.appAttributes);
-      switch (appAttributes.updateType) {
-        case UpdateType.Consensus: {
-          return {
-            ...commitment,
-            commitmentType,
-            appAttributes,
-          };
-        }
-        case UpdateType.Proposal: {
-          return {
-            ...commitment,
-            commitmentType,
-            appAttributes,
-          };
-        }
-        default:
-          return unreachable(appAttributes);
+      if (appAttributes.furtherVotesRequired === 0) {
+        return {
+          ...commitment,
+          commitmentType,
+          appAttributes,
+        };
+      } else {
+        return {
+          ...commitment,
+          commitmentType,
+          appAttributes,
+        };
       }
     case CommitmentType.Conclude:
       return {

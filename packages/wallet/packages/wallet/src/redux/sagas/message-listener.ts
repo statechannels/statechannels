@@ -9,9 +9,9 @@ import { responseProvided } from '../protocols/dispute/responder/actions';
 import { getChannelId, Commitment, SignedCommitment } from '../../domain';
 import * as selectors from '../selectors';
 import * as contractUtils from '../../utils/contract-utils';
-import { appAttributesFromBytes } from 'fmg-nitro-adjudicator';
 import { concluded, challengeRequested } from '../protocols/application/actions';
 
+import { appAttributesFromBytes } from 'fmg-nitro-adjudicator/lib/consensus-app';
 export function* messageListener() {
   const postMessageEventChannel = eventChannel(emitter => {
     window.addEventListener('message', (event: MessageEvent) => {

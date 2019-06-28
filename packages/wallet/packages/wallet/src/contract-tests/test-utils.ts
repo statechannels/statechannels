@@ -10,8 +10,9 @@ import {
 import { signCommitment } from '../domain';
 import testGameArtifact from '../../build/contracts/TestGame.json';
 import { bigNumberify } from 'ethers/utils';
-import { channelID } from 'fmg-core/lib/channel';
+import { channelID, Channel } from 'fmg-core/lib/channel';
 import { ADJUDICATOR_ADDRESS } from '../constants';
+import { ADDRESS_ZERO } from 'fmg-core';
 export function getLibraryAddress(networkId) {
   return testGameArtifact.networks[networkId].address;
 }
@@ -56,10 +57,11 @@ export async function createChallenge(
   const network = await provider.getNetwork();
   const networkId = network.chainId;
   const libraryAddress = getLibraryAddress(networkId);
-  const channel = {
+  const channel: Channel = {
     channelType: libraryAddress,
     nonce: channelNonce,
     participants: [participantA.address, participantB.address],
+    guaranteedChannel: ADDRESS_ZERO,
   };
 
   const fromCommitment: Commitment = {
@@ -104,10 +106,11 @@ export async function concludeGame(
   const network = await provider.getNetwork();
   const networkId = network.chainId;
   const libraryAddress = getLibraryAddress(networkId);
-  const channel = {
+  const channel: Channel = {
     channelType: libraryAddress,
     nonce: channelNonce,
     participants: [participantA.address, participantB.address],
+    guaranteedChannel: ADDRESS_ZERO,
   };
 
   const fromCommitment: Commitment = {
@@ -152,10 +155,11 @@ export async function respondWithMove(
   const network = await provider.getNetwork();
   const networkId = network.chainId;
   const libraryAddress = getLibraryAddress(networkId);
-  const channel = {
+  const channel: Channel = {
     channelType: libraryAddress,
     nonce: channelNonce,
     participants: [participantA.address, participantB.address],
+    guaranteedChannel: ADDRESS_ZERO,
   };
 
   const toCommitment: Commitment = {
@@ -185,10 +189,11 @@ export async function refuteChallenge(
   const network = await provider.getNetwork();
   const networkId = network.chainId;
   const libraryAddress = getLibraryAddress(networkId);
-  const channel = {
+  const channel: Channel = {
     channelType: libraryAddress,
     nonce: channelNonce,
     participants: [participantA.address, participantB.address],
+    guaranteedChannel: ADDRESS_ZERO,
   };
 
   const toCommitment: Commitment = {
