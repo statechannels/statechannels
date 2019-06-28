@@ -1,4 +1,6 @@
 import { StateConstructor } from '../../utils';
+import { DisputeState } from '../dispute/state';
+import { ProtocolState } from '..';
 
 // -------
 // States
@@ -15,6 +17,14 @@ export interface Ongoing {
   channelId: string;
   address: string;
   privateKey: string;
+}
+
+export interface WaitForDispute {
+  type: 'Application.WaitForDispute';
+  channelId: string;
+  address: string;
+  privateKey: string;
+  disputeState: DisputeState;
 }
 
 export interface Success {
@@ -36,14 +46,26 @@ export const success: StateConstructor<Success> = p => {
   return { ...p, type: 'Application.Success' };
 };
 
+export const waitForDispute: StateConstructor<WaitForDispute> = p => {
+  return { ...p, type: 'Application.WaitForDispute' };
+};
+
 // -------
 // Unions and Guards
 // -------
 
-export type ApplicationState = WaitForFirstCommitment | Ongoing | Success;
-export type NonTerminalApplicationState = WaitForFirstCommitment | Ongoing;
+export type ApplicationState = WaitForFirstCommitment | Ongoing | WaitForDispute | Success;
+export type NonTerminalApplicationState = WaitForFirstCommitment | WaitForDispute | Ongoing;
 export type ApplicationStateType = ApplicationState['type'];
 
 export function isTerminal(state: ApplicationState): state is Success {
   return state.type === 'Application.Success';
+}
+
+export function isApplicationState(state: ProtocolState): state is ApplicationState {
+  return (
+    state.type === 'Application.WaitForDispute' ||
+    state.type === 'Application.Ongoing' ||
+    state.type === 'Application.WaitForFirstCommitment'
+  );
 }

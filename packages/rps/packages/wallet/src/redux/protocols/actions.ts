@@ -1,5 +1,4 @@
 import { TwoPartyPlayerIndex } from '../types';
-import { Commitment } from '../../domain';
 import { ActionConstructor } from '../utils';
 import { ConcludeInstigated, WalletProtocol } from '../../communication';
 import { WalletAction } from '../actions';
@@ -24,21 +23,6 @@ export interface ConcludeRequested {
   type: 'WALLET.NEW_PROCESS.CONCLUDE_REQUESTED';
   channelId: string;
   protocol: WalletProtocol.Concluding;
-}
-
-export interface CreateChallengeRequested {
-  type: 'WALLET.NEW_PROCESS.CREATE_CHALLENGE_REQUESTED';
-  channelId: string;
-  commitment: Commitment;
-  protocol: WalletProtocol.Dispute;
-}
-
-export interface ChallengeCreated {
-  type: 'WALLET.NEW_PROCESS.CHALLENGE_CREATED';
-  commitment: Commitment;
-  expiresAt: number;
-  channelId: string;
-  protocol: WalletProtocol.Dispute;
 }
 
 export interface DefundRequested {
@@ -67,18 +51,6 @@ export const concludeRequested: ActionConstructor<ConcludeRequested> = p => ({
   protocol: WalletProtocol.Concluding,
 });
 
-export const createChallengeRequested: ActionConstructor<CreateChallengeRequested> = p => ({
-  ...p,
-  type: 'WALLET.NEW_PROCESS.CREATE_CHALLENGE_REQUESTED',
-  protocol: WalletProtocol.Dispute,
-});
-
-export const challengeCreated: ActionConstructor<ChallengeCreated> = p => ({
-  ...p,
-  type: 'WALLET.NEW_PROCESS.CHALLENGE_CREATED',
-  protocol: WalletProtocol.Dispute,
-});
-
 export const defundRequested: ActionConstructor<DefundRequested> = p => ({
   ...p,
   type: 'WALLET.NEW_PROCESS.DEFUND_REQUESTED',
@@ -94,8 +66,6 @@ export type NewProcessAction =
   | FundingRequested
   | ConcludeRequested
   | ConcludeInstigated
-  | CreateChallengeRequested
-  | ChallengeCreated
   | DefundRequested;
 
 export function isNewProcessAction(action: WalletAction): action is NewProcessAction {
@@ -104,8 +74,6 @@ export function isNewProcessAction(action: WalletAction): action is NewProcessAc
     action.type === 'WALLET.NEW_PROCESS.FUNDING_REQUESTED' ||
     action.type === 'WALLET.NEW_PROCESS.CONCLUDE_REQUESTED' ||
     action.type === 'WALLET.NEW_PROCESS.CONCLUDE_INSTIGATED' ||
-    action.type === 'WALLET.NEW_PROCESS.CREATE_CHALLENGE_REQUESTED' ||
-    action.type === 'WALLET.NEW_PROCESS.CHALLENGE_CREATED' ||
     action.type === 'WALLET.NEW_PROCESS.DEFUND_REQUESTED'
   );
 }

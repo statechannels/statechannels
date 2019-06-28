@@ -59,8 +59,8 @@ const waitForTransactionFailure = states.waitForTransaction({
   transactionSubmission: tsPreFailure,
 });
 const waitForResponseOrTimeout = states.waitForResponseOrTimeout({ ...defaults, expiryTime: 0 });
-const acknowledgeTimeout = states.acknowledgeTimeout(defaults);
-const acknowledgeResponse = states.acknowledgeResponse(defaults);
+export const acknowledgeTimeout = states.acknowledgeTimeout(defaults);
+export const acknowledgeResponse = states.acknowledgeResponse(defaults);
 const acknowledgeFailure = (reason: Reason) => states.acknowledgeFailure({ ...defaults, reason });
 
 // -------
@@ -78,7 +78,7 @@ const responseReceived = respondWithMoveEvent({
   responseSignature: signedCommitment21.signature,
 });
 const challengeExpirySet = challengeExpirySetEvent({ processId, channelId, expiryTime: 1234 });
-const acknowledged = actions.acknowledged({ processId });
+export const acknowledged = actions.acknowledged({ processId });
 
 // -------
 // Scenarios

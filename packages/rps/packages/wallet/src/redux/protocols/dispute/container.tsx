@@ -20,4 +20,4 @@ class DisputeContainer extends PureComponent<Props> {
   }
 }
 
-export const Challenging = connect(() => ({}))(DisputeContainer);
+export const Dispute = connect(() => ({}))(DisputeContainer);

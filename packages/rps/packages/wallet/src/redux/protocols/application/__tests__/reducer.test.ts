@@ -101,6 +101,54 @@ describe('receiving a close request', () => {
   });
 });
 
+describe('a challenge was requested', () => {
+  const scenario = scenarios.challengeWasRequested;
+
+  describeScenarioStep(scenario.ongoing, () => {
+    const { state, sharedData, action } = scenario.ongoing;
+
+    const result = applicationReducer(state, sharedData, action);
+
+    itTransitionsTo(result, 'Application.WaitForDispute');
+  });
+});
+
+describe('a challenge was detected', () => {
+  const scenario = scenarios.challengeWasDetected;
+
+  describeScenarioStep(scenario.ongoing, () => {
+    const { state, sharedData, action } = scenario.ongoing;
+
+    const result = applicationReducer(state, sharedData, action);
+
+    itTransitionsTo(result, 'Application.WaitForDispute');
+  });
+});
+
+describe('a challenge was responded to', () => {
+  const scenario = scenarios.challengeRespondedTo;
+
+  describeScenarioStep(scenario.waitForDispute, () => {
+    const { state, sharedData, action } = scenario.waitForDispute;
+
+    const result = applicationReducer(state, sharedData, action);
+
+    itTransitionsTo(result, 'Application.Ongoing');
+  });
+});
+
+describe('a challenge expired', () => {
+  const scenario = scenarios.challengeExpired;
+
+  describeScenarioStep(scenario.waitForDispute, () => {
+    const { state, sharedData, action } = scenario.waitForDispute;
+
+    const result = applicationReducer(state, sharedData, action);
+
+    itTransitionsTo(result, 'Application.Success');
+  });
+});
+
 function itTransitionsTo(
   result: ProtocolStateWithSharedData<states.ApplicationState>,
   type: states.ApplicationStateType,

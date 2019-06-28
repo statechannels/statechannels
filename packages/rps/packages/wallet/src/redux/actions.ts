@@ -10,7 +10,6 @@ import {
   TransactionAction as TA,
   isTransactionAction as isTA,
 } from './protocols/transaction-submission/actions';
-import { DisputeAction, isDisputeAction } from './protocols/dispute';
 
 import { ConcludingAction, isConcludingAction } from './protocols/concluding';
 import { ApplicationAction } from './protocols/application/actions';
@@ -206,12 +205,11 @@ export type CommonAction = MessageReceived | CommitmentReceived;
 
 export type ProtocolAction =
   // only list top level protocol actions
-  FundingAction | DisputeAction | DefundingAction | ApplicationAction | ConcludingAction;
+  FundingAction | DefundingAction | ApplicationAction | ConcludingAction;
 
 export function isProtocolAction(action: WalletAction): action is ProtocolAction {
   return (
     isFundingAction(action) ||
-    isDisputeAction(action) ||
     application.isApplicationAction(action) ||
     isConcludingAction(action) ||
     isDefundingAction(action)
