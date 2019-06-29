@@ -11,10 +11,8 @@ import ApproveStrategy from '../../../../components/funding/approve-strategy';
 import WaitForOtherPlayer from '../../../../components/wait-for-other-player';
 import AcknowledgeX from '../../../../components/acknowledge-x';
 import { FundingStrategy } from '..';
-import { NewLedgerFunding } from '../../new-ledger-funding/container';
 import { ActionDispatcher } from '../../../utils';
-import { isNewLedgerFundingState } from '../../new-ledger-funding/states';
-import { ExistingLedgerFunding } from '../../existing-ledger-funding/container';
+import { IndirectFunding } from '../../indirect-funding/container';
 interface Props {
   state: states.OngoingFundingState;
   strategyApproved: ActionDispatcher<actions.StrategyApproved>;
@@ -41,11 +39,7 @@ class FundingContainer extends PureComponent<Props> {
           />
         );
       case 'Funding.PlayerB.WaitForFunding':
-        if (isNewLedgerFundingState(state.fundingState)) {
-          return <NewLedgerFunding state={state.fundingState} />;
-        } else {
-          return <ExistingLedgerFunding state={state.fundingState} />;
-        }
+        return <IndirectFunding state={state.fundingState} />;
       case 'Funding.PlayerB.WaitForSuccessConfirmation':
         return (
           <AcknowledgeX

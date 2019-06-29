@@ -20,7 +20,7 @@ export const enum WalletProtocol {
   Concluding = 'Concluding',
 }
 
-export type FundingStrategy = 'NewLedgerFundingStrategy' | 'ExistingLedgerFundingStrategy';
+export type FundingStrategy = 'IndirectFundingStrategy';
 
 function sendMessage(to: string, message: RelayableAction) {
   return messageRelayRequested(to, message);

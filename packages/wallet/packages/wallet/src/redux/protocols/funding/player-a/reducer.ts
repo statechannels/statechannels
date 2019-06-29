@@ -1,7 +1,6 @@
 import * as states from './states';
 import * as actions from './actions';
 
-import { NewLedgerFundingAction, isNewLedgerFundingAction } from '../../new-ledger-funding/actions';
 import { SharedData, queueMessage } from '../../../state';
 import { ProtocolStateWithSharedData } from '../..';
 import { unreachable } from '../../../../utils/reducer-utils';
@@ -9,24 +8,17 @@ import { TwoPartyPlayerIndex } from '../../../types';
 import { showWallet, hideWallet, sendFundingComplete } from '../../reducer-helpers';
 import { fundingFailure } from 'magmo-wallet-client';
 import { sendStrategyProposed } from '../../../../communication';
-import {
-  newLedgerFundingReducer,
-  initialize as initializeNewLedgerFunding,
-} from '../../new-ledger-funding/reducer';
-import * as newLedgerFundingStates from '../../new-ledger-funding/states';
-import * as selectors from '../../../selectors';
+
+import * as indirectFundingStates from '../../indirect-funding/states';
 import { Properties } from '../../../utils';
 import {
-  initializeExistingLedgerFunding,
-  existingLedgerFundingReducer,
-  ExistingLedgerFundingAction,
-  isExistingLedgerFundingAction,
-} from '../../existing-ledger-funding';
-import * as existingLedgerFundingStates from '../../existing-ledger-funding/states';
-import { CommitmentType } from 'fmg-core';
-import { getLastCommitment } from '../../../channel-store';
+  indirectFundingReducer,
+  initializeIndirectFunding,
+  isIndirectFundingAction,
+  IndirectFundingAction,
+} from '../../indirect-funding';
 
-type EmbeddedAction = NewLedgerFundingAction;
+type EmbeddedAction = IndirectFundingAction;
 
 export function initialize(
   sharedData: SharedData,
@@ -51,7 +43,7 @@ export function fundingReducer(
   sharedData: SharedData,
   action: actions.FundingAction | EmbeddedAction,
 ): ProtocolStateWithSharedData<states.FundingState> {
-  if (isNewLedgerFundingAction(action) || isExistingLedgerFundingAction(action)) {
+  if (isIndirectFundingAction(action)) {
     return handleFundingAction(state, sharedData, action);
   }
 
@@ -59,11 +51,11 @@ export function fundingReducer(
     case 'WALLET.FUNDING.PLAYER_A.STRATEGY_CHOSEN':
       return strategyChosen(state, sharedData, action);
     case 'WALLET.FUNDING.STRATEGY_APPROVED':
-      return strategyApproved(state, sharedData, action);
+      return strategyApproved(state, sharedData);
     case 'WALLET.FUNDING.PLAYER_A.STRATEGY_REJECTED':
-      return strategyRejected(state, sharedData, action);
+      return strategyRejected(state, sharedData);
     case 'WALLET.FUNDING.PLAYER_A.FUNDING_SUCCESS_ACKNOWLEDGED':
-      return fundingSuccessAcknowledged(state, sharedData, action);
+      return fundingSuccessAcknowledged(state, sharedData);
     case 'WALLET.FUNDING.PLAYER_A.CANCELLED':
       return cancelled(state, sharedData, action);
     default:
@@ -74,7 +66,7 @@ export function fundingReducer(
 function handleFundingAction(
   protocolState: states.FundingState,
   sharedData: SharedData,
-  action: NewLedgerFundingAction,
+  action: IndirectFundingAction,
 ): ProtocolStateWithSharedData<states.FundingState> {
   if (protocolState.type !== 'Funding.PlayerA.WaitForFunding') {
     console.warn(
@@ -85,72 +77,23 @@ function handleFundingAction(
     return { protocolState, sharedData };
   }
 
-  if (
-    isExistingLedgerFundingAction(action) &&
-    existingLedgerFundingStates.isExistingLedgerFundingState(protocolState.fundingState)
-  ) {
-    return handleExistingLedgerFundingAction(protocolState, sharedData, action);
-  } else {
-    return handleNewLedgerFundingAction(protocolState, sharedData, action);
-  }
-}
-
-function handleExistingLedgerFundingAction(
-  protocolState: states.WaitForFunding,
-  sharedData: SharedData,
-  action: ExistingLedgerFundingAction,
-): ProtocolStateWithSharedData<states.FundingState> {
-  if (!existingLedgerFundingStates.isExistingLedgerFundingState(protocolState.fundingState)) {
-    console.error(
-      `Funding reducer received indirect funding action ${
-        action.type
-      } but is currently in funding state ${protocolState.fundingState.type}`,
-    );
-    return { protocolState, sharedData };
-  }
   const {
     protocolState: updatedFundingState,
     sharedData: updatedSharedData,
-  } = existingLedgerFundingReducer(protocolState.fundingState, sharedData, action);
+  } = indirectFundingReducer(protocolState.fundingState, sharedData, action);
 
-  if (!existingLedgerFundingStates.isTerminal(updatedFundingState)) {
+  if (!indirectFundingStates.isTerminal(updatedFundingState)) {
     return {
-      protocolState: states.waitForFunding({ ...protocolState, fundingState: updatedFundingState }),
+      protocolState: states.waitForFunding({
+        ...protocolState,
+        fundingState: updatedFundingState,
+      }),
       sharedData: updatedSharedData,
     };
   } else {
     return handleFundingComplete(protocolState, updatedFundingState, updatedSharedData);
   }
 }
-
-function handleNewLedgerFundingAction(
-  protocolState: states.WaitForFunding,
-  sharedData: SharedData,
-  action: NewLedgerFundingAction,
-): ProtocolStateWithSharedData<states.FundingState> {
-  if (!newLedgerFundingStates.isNewLedgerFundingState(protocolState.fundingState)) {
-    console.error(
-      `Funding reducer received indirect funding action ${
-        action.type
-      } but is currently in funding state ${protocolState.fundingState.type}`,
-    );
-    return { protocolState, sharedData };
-  }
-  const {
-    protocolState: updatedFundingState,
-    sharedData: updatedSharedData,
-  } = newLedgerFundingReducer(protocolState.fundingState, sharedData, action);
-
-  if (!newLedgerFundingStates.isTerminal(updatedFundingState)) {
-    return {
-      protocolState: states.waitForFunding({ ...protocolState, fundingState: updatedFundingState }),
-      sharedData: updatedSharedData,
-    };
-  } else {
-    return handleFundingComplete(protocolState, updatedFundingState, updatedSharedData);
-  }
-}
-
 function strategyChosen(
   state: states.FundingState,
   sharedData: SharedData,
@@ -160,19 +103,8 @@ function strategyChosen(
     return { protocolState: state, sharedData };
   }
   const { processId, opponentAddress } = state;
-  let { strategy } = action;
-  const existingLedgerChannel = selectors.getExistingLedgerChannelForParticipants(
-    sharedData,
-    state.ourAddress,
-    state.opponentAddress,
-  );
-  // TODO: We probably want to let the user select this
-  if (
-    existingLedgerChannel &&
-    getLastCommitment(existingLedgerChannel).commitmentType === CommitmentType.App
-  ) {
-    strategy = 'ExistingLedgerFundingStrategy';
-  }
+  const { strategy } = action;
+
   const message = sendStrategyProposed(opponentAddress, processId, strategy);
   return {
     protocolState: states.waitForStrategyResponse({ ...state, strategy }),
@@ -180,84 +112,34 @@ function strategyChosen(
   };
 }
 
-function strategyApproved(
-  state: states.FundingState,
-  sharedData: SharedData,
-  action: actions.StrategyApproved,
-) {
+function strategyApproved(state: states.FundingState, sharedData: SharedData) {
   if (state.type !== 'Funding.PlayerA.WaitForStrategyResponse') {
     return { protocolState: state, sharedData };
   }
-  const channelState = selectors.getChannelState(sharedData, state.targetChannelId);
 
-  if (state.strategy === 'ExistingLedgerFundingStrategy') {
-    const existingLedgerChannel = selectors.getExistingLedgerChannelForParticipants(
-      sharedData,
-      state.ourAddress,
-      state.opponentAddress,
-    );
-    if (
-      !existingLedgerChannel ||
-      getLastCommitment(existingLedgerChannel).commitmentType !== CommitmentType.App
-    ) {
-      throw new Error(
-        `Could not find open existing ledger channel with participants ${state.ourAddress} and ${
-          state.opponentAddress
-        }.`,
-      );
-    }
-
-    const {
-      protocolState: fundingState,
-      sharedData: newSharedData,
-    } = initializeExistingLedgerFunding(
-      state.processId,
-      channelState.channelId,
-      existingLedgerChannel.channelId,
-      sharedData,
-    );
-
-    if (existingLedgerFundingStates.isTerminal(fundingState)) {
-      console.error('Indirect funding strate initialized to terminal state.');
-      return handleFundingComplete(state, fundingState, newSharedData);
-    }
-    return {
-      protocolState: states.waitForFunding({ ...state, fundingState }),
-      sharedData: newSharedData,
-    };
-  } else {
-    const { protocolState: fundingState, sharedData: newSharedData } = initializeNewLedgerFunding(
-      state.processId,
-      channelState,
-      sharedData,
-    );
-    if (newLedgerFundingStates.isTerminal(fundingState)) {
-      console.error('Indirect funding strate initialized to terminal state.');
-      return handleFundingComplete(state, fundingState, newSharedData);
-    }
-    return {
-      protocolState: states.waitForFunding({ ...state, fundingState }),
-      sharedData: newSharedData,
-    };
+  const { protocolState: fundingState, sharedData: newSharedData } = initializeIndirectFunding(
+    state.processId,
+    state.targetChannelId,
+    sharedData,
+  );
+  if (indirectFundingStates.isTerminal(fundingState)) {
+    console.error('Indirect funding strate initialized to terminal state.');
+    return handleFundingComplete(state, fundingState, newSharedData);
   }
+  return {
+    protocolState: states.waitForFunding({ ...state, fundingState }),
+    sharedData: newSharedData,
+  };
 }
 
-function strategyRejected(
-  state: states.FundingState,
-  sharedData: SharedData,
-  action: actions.StrategyRejected,
-) {
+function strategyRejected(state: states.FundingState, sharedData: SharedData) {
   if (state.type !== 'Funding.PlayerA.WaitForStrategyResponse') {
     return { protocolState: state, sharedData };
   }
   return { protocolState: states.waitForStrategyChoice(state), sharedData };
 }
 
-function fundingSuccessAcknowledged(
-  state: states.FundingState,
-  sharedData: SharedData,
-  action: actions.FundingSuccessAcknowledged,
-) {
+function fundingSuccessAcknowledged(state: states.FundingState, sharedData: SharedData) {
   if (state.type !== 'Funding.PlayerA.WaitForSuccessConfirmation') {
     return { protocolState: state, sharedData };
   }
@@ -296,15 +178,10 @@ function cancelled(state: states.FundingState, sharedData: SharedData, action: a
 
 function handleFundingComplete(
   protocolState: Properties<states.WaitForSuccessConfirmation>,
-  fundingState:
-    | newLedgerFundingStates.NewLedgerFundingState
-    | existingLedgerFundingStates.ExistingLedgerFundingState,
+  fundingState: indirectFundingStates.IndirectFundingState,
   sharedData: SharedData,
 ) {
-  if (
-    fundingState.type === 'NewLedgerFunding.Success' ||
-    fundingState.type === 'ExistingLedgerFunding.Success'
-  ) {
+  if (fundingState.type === 'IndirectFunding.Success') {
     return {
       protocolState: states.waitForSuccessConfirmation(protocolState),
       sharedData,

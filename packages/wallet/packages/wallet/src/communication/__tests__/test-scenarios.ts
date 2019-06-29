@@ -38,7 +38,7 @@ const respondToAppPreFundSetup = {
 
 const indirectStrategyChosen = messageRelayRequested(bsAddress, {
   processId: fundingProcessId,
-  data: strategyProposed({ processId: fundingProcessId, strategy: 'NewLedgerFundingStrategy' }),
+  data: strategyProposed({ processId: fundingProcessId, strategy: 'IndirectFundingStrategy' }),
 });
 
 const indirectStrategyApproved = messageRelayRequested(asAddress, {

@@ -66,13 +66,11 @@ export const success: StateConstructor<Success> = p => {
 export const failure: StateConstructor<Failure> = p => {
   return { ...p, type: 'ExistingLedgerFunding.Failure' };
 };
-
-export type ExistingLedgerFundingState =
+export type NonTerminalExistingLedgerFundingState =
   | WaitForLedgerTopUp
   | WaitForLedgerUpdate
-  | WaitForPostFundSetup
-  | Success
-  | Failure;
+  | WaitForPostFundSetup;
+export type ExistingLedgerFundingState = NonTerminalExistingLedgerFundingState | Success | Failure;
 
 export function isExistingLedgerFundingState(
   state: ProtocolState,

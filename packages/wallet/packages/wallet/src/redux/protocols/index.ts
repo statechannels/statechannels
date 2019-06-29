@@ -16,6 +16,7 @@ import { LedgerTopUpState } from './ledger-top-up/states';
 import { ConsensusUpdateState } from './consensus-update/states';
 import { AdvanceChannelState } from './advance-channel';
 import { VirtualFundingState } from './virtual-funding/states';
+import { IndirectFundingState } from './indirect-funding/states';
 
 export type ProtocolState =
   | ApplicationState
@@ -34,7 +35,8 @@ export type ProtocolState =
   | LedgerTopUpState
   | ConsensusUpdateState
   | TransactionSubmissionState
-  | AdvanceChannelState;
+  | AdvanceChannelState
+  | IndirectFundingState;
 
 export type ProtocolReducer<T extends ProtocolState> = (
   protocolState: T,
