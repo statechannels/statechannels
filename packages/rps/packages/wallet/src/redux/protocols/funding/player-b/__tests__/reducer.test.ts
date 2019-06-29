@@ -11,8 +11,8 @@ import { sendStrategyApproved } from '../../../../../communication';
 import { FUNDING_SUCCESS, HIDE_WALLET } from 'magmo-wallet-client';
 import { FundingStateType } from '../../states';
 
-describe('new ledger channel happy path', () => {
-  const scenario = scenarios.newChannelHappyPath;
+describe('happy path', () => {
+  const scenario = scenarios.happyPath;
 
   describeScenarioStep(scenario.waitForStrategyProposal, () => {
     const { state, sharedData, action } = scenario.waitForStrategyProposal;
@@ -30,47 +30,7 @@ describe('new ledger channel happy path', () => {
     itTransitionsTo(result, 'Funding.PlayerB.WaitForFunding');
 
     const { processId, opponentAddress } = scenario;
-    itSendsThisMessage(result, sendStrategyApproved(opponentAddress, processId));
-  });
-
-  describeScenarioStep(scenario.waitForFunding, () => {
-    const { state, sharedData, action } = scenario.waitForFunding;
-
-    const result = reducer(state, sharedData, action);
-    itTransitionsTo(result, 'Funding.PlayerB.WaitForSuccessConfirmation');
-  });
-
-  describeScenarioStep(scenario.waitForSuccessConfirmation, () => {
-    const { state, sharedData, action } = scenario.waitForSuccessConfirmation;
-
-    const result = reducer(state, sharedData, action);
-
-    itTransitionsTo(result, 'Funding.PlayerB.Success');
-    itSendsThisMessage(result, FUNDING_SUCCESS);
-    itSendsThisDisplayEventType(result, HIDE_WALLET);
-  });
-});
-
-describe('existing ledger channel happy path', () => {
-  const scenario = scenarios.existingChannelHappyPath;
-
-  describeScenarioStep(scenario.waitForStrategyProposal, () => {
-    const { state, sharedData, action } = scenario.waitForStrategyProposal;
-
-    const result = reducer(state, sharedData, action);
-
-    itTransitionsTo(result, 'Funding.PlayerB.WaitForStrategyApproval');
-  });
-
-  describeScenarioStep(scenario.waitForStrategyApproval, () => {
-    const { state, sharedData, action } = scenario.waitForStrategyApproval;
-
-    const result = reducer(state, sharedData, action);
-
-    itTransitionsTo(result, 'Funding.PlayerB.WaitForFunding');
-
-    const { processId, opponentAddress } = scenario;
-    itSendsThisMessage(result, sendStrategyApproved(opponentAddress, processId));
+    itSendsThisMessage(result, sendStrategyApproved(opponentAddress, processId), 1);
   });
 
   describeScenarioStep(scenario.waitForFunding, () => {

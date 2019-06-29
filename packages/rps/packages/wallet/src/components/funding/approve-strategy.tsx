@@ -16,7 +16,7 @@ export default class ApproveStrategy extends React.PureComponent<Props> {
         description="Do you want to fund this state channel with a re-usable ledger channel?"
         yesMessage="Fund Channel"
         noMessage="Cancel"
-        approvalAction={() => strategyChosen('NewLedgerFundingStrategy')}
+        approvalAction={() => strategyChosen('IndirectFundingStrategy')}
         rejectionAction={cancelled}
       >
         <React.Fragment>This site wants you to fund a new state channel.</React.Fragment>

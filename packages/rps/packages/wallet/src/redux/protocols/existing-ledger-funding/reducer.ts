@@ -291,7 +291,10 @@ function ledgerChannelNeedsTopUp(
   for (let i = 0; i < proposedDestination.length; i++) {
     const address = proposedDestination[i];
     const existingIndex = latestCommitment.destination.indexOf(address);
-    if (bigNumberify(latestCommitment.allocation[existingIndex]).lt(proposedAllocation[i])) {
+    if (
+      existingIndex > -1 &&
+      bigNumberify(latestCommitment.allocation[existingIndex]).lt(proposedAllocation[i])
+    ) {
       return true;
     }
   }
