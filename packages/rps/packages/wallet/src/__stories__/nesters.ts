@@ -30,6 +30,16 @@ import { isDirectFundingState } from '../redux/protocols/direct-funding/states';
 import { waitForTransaction } from '../redux/protocols/dispute/challenger/states';
 import { waitForFunding } from '../redux/protocols/funding/player-b/states';
 import { ProtocolState } from '../redux/protocols';
+import { NonTerminalIndirectFundingState } from '../redux/protocols/indirect-funding';
+import { NonTerminalExistingLedgerFundingState } from '../redux/protocols/existing-ledger-funding';
+import {
+  waitForNewLedgerFunding,
+  waitForExistingLedgerFunding,
+} from '../redux/protocols/indirect-funding/states';
+import {
+  isExistingLedgerFundingState,
+  isTerminal as isExistingLedgerFundingTerminal,
+} from '../redux/protocols/existing-ledger-funding/states';
 
 // -------
 // Nester
@@ -48,11 +58,17 @@ export function nestProtocolState(protocolState: ProtocolState): ProtocolState {
   }
 
   if (isNewLedgerFundingState(protocolState) && !idFIsTerminal(protocolState)) {
-    return nestInFunding(protocolState);
+    return nestInFunding(nestInIndirectFunding(protocolState));
+  }
+  if (
+    isExistingLedgerFundingState(protocolState) &&
+    !isExistingLedgerFundingTerminal(protocolState)
+  ) {
+    return nestInFunding(nestInIndirectFunding(protocolState));
   }
 
   if (isDirectFundingState(protocolState) && !DFIsTerminal(protocolState)) {
-    return nestInFunding(nestInNewLedgerFunding(protocolState));
+    return nestInFunding(nestInIndirectFunding(nestInNewLedgerFunding(protocolState)));
   }
   return protocolState;
 }
@@ -74,7 +90,7 @@ function nestInNewLedgerFunding(directFundingState: NonTerminalDirectFundingStat
   });
 }
 
-function nestInFunding(protocolState: NonTerminalNewLedgerFundingState) {
+function nestInFunding(protocolState: NonTerminalIndirectFundingState) {
   return waitForFunding({
     ...protocolState,
     fundingState: protocolState,
@@ -82,6 +98,19 @@ function nestInFunding(protocolState: NonTerminalNewLedgerFundingState) {
     opponentAddress: 'dummy',
     ourAddress: 'dummy',
   });
+}
+
+function nestInIndirectFunding(
+  protocolState: NonTerminalNewLedgerFundingState | NonTerminalExistingLedgerFundingState,
+) {
+  if (isNewLedgerFundingState(protocolState)) {
+    return waitForNewLedgerFunding({ ...protocolState, newLedgerFundingState: protocolState });
+  } else {
+    return waitForExistingLedgerFunding({
+      ...protocolState,
+      existingLedgerFundingState: protocolState,
+    });
+  }
 }
 
 function nestInDefunding(

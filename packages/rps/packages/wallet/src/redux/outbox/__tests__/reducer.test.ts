@@ -10,7 +10,7 @@ const { mockTransactionOutboxItem } = scenarios;
 
 describe('when a side effect occured', () => {
   const processId = '0x0';
-  const sendMessageA = sendStrategyProposed('0xa00', processId, 'NewLedgerFundingStrategy');
+  const sendMessageA = sendStrategyProposed('0xa00', processId, 'IndirectFundingStrategy');
   const sendMessageB = sendStrategyApproved('0xb00', processId);
   const displayOutbox = [outgoing.hideWallet(), outgoing.showWallet()];
   const transactionOutbox = [mockTransactionOutboxItem, mockTransactionOutboxItem];
