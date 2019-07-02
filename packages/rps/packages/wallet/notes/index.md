@@ -58,7 +58,9 @@ graph TD
 
     AC(AdvanceChannel)
 
-    LTU(LedgerTopUp)
+    LTU-->DF(DirectFunding)
+
+    DF-->TS
 
 
     VF(VirtualFunding)

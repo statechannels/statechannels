@@ -210,7 +210,7 @@ function createWalletEventChannel(walletEventTypes: Wallet.WalletEventType[]) {
     return () => {
       listener.unSubscribeAll();
     };
-  });
+  }, buffers.fixed(10));
 }
 
 function* handleWalletMessage(walletMessage: WalletRequest, state: gameStates.PlayingState) {
