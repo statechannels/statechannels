@@ -39,6 +39,7 @@ export interface CommitmentSent extends BaseState {
 
 export interface Success {
   type: 'AdvanceChannel.Success';
+  commitmentType: CommitmentType;
 }
 
 export interface Failure {
@@ -95,6 +96,7 @@ export const commitmentSent: StateConstructor<CommitmentSent> = params => {
 export const success: StateConstructor<Success> = params => {
   return {
     type: 'AdvanceChannel.Success',
+    commitmentType: params.commitmentType,
   };
 };
 
