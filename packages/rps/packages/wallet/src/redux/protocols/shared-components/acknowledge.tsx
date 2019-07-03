@@ -12,7 +12,7 @@ export default class Acknowledge extends React.PureComponent<Props> {
     const { acknowledge, title, description } = this.props;
     return (
       <Fragment>
-        <h1>{title}</h1>
+        <h2>{title}</h2>
         <p>{description}</p>
         <Button onClick={acknowledge}>Ok</Button>
       </Fragment>

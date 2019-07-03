@@ -48,7 +48,7 @@ export default class WaitForApproval extends React.PureComponent<Props, State> {
     const formattedAmount = `${ethers.utils.formatEther(withdrawalAmount)} ETH`;
     return (
       <Fragment>
-        <h1>Withdrawal Requested</h1>
+        <h2>Withdrawal Requested</h2>
         <div>
           <p>Do you wish to withdraw {formattedAmount} from this channel?</p>
           <p>{formattedAmount} will be sent to your current metamask account:</p>

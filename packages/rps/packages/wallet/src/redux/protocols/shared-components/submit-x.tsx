@@ -1,4 +1,4 @@
-import React, { Fragment } from 'react';
+import React from 'react';
 
 interface Props {
   name: string;
@@ -8,10 +8,10 @@ export default class SubmitX extends React.PureComponent<Props> {
   render() {
     const { name } = this.props;
     return (
-      <Fragment>
-        <h1>Sending your {name}</h1>
+      <div>
+        <h2>Sending your {name}</h2>
         <p>Please confirm the transaction in MetaMask.</p>
-      </Fragment>
+      </div>
     );
   }
 }
