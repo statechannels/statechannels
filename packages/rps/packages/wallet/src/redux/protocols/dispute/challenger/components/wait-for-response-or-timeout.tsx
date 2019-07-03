@@ -11,7 +11,7 @@ export default class WaitForResponseOrTimeout extends React.PureComponent<Props>
       .replace(/:\d\d /, ' ');
     return (
       <Fragment>
-        <h1>Waiting for your opponent to respond!</h1>
+        <h2>Waiting for your opponent to respond!</h2>
         <p>
           If they don't respond by {expiryDate}, the channel will be closed and you can withdraw
           your funds.

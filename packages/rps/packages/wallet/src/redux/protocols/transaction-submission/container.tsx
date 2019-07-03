@@ -3,12 +3,13 @@ import { PureComponent } from 'react';
 import { connect } from 'react-redux';
 import { NonTerminalTransactionSubmissionState } from './states';
 import { unreachable } from '../../../utils/reducer-utils';
-import WaitForConfirmation from './components/wait-for-confirmation';
-import WaitForSubmission from './components/wait-for-submission';
+
 import { NETWORK_ID } from '../../../constants';
-import ApproveRetry from './components/approve-retry';
 import * as actions from './actions';
 import { ActionConstructor } from '../../utils';
+import SubmitX from '../shared-components/submit-x';
+import WaitForXConfirmation from '../shared-components/wait-for-x-confirmation';
+import ApproveX from '../shared-components/approve-x';
 
 interface Props {
   state: NonTerminalTransactionSubmissionState;
@@ -23,22 +24,29 @@ class TransactionSubmissionContainer extends PureComponent<Props> {
     switch (state.type) {
       case 'TransactionSubmission.WaitForSend':
       case 'TransactionSubmission.WaitForSubmission':
-        return <WaitForSubmission name={transactionName} />;
+        return <SubmitX name={transactionName} />;
       case 'TransactionSubmission.WaitForConfirmation':
         return (
-          <WaitForConfirmation
+          <WaitForXConfirmation
             name={transactionName}
-            transactionId={state.transactionHash}
+            transactionID={state.transactionHash}
             networkId={NETWORK_ID}
           />
         );
       case 'TransactionSubmission.ApproveRetry':
         const { processId } = state;
         return (
-          <ApproveRetry
-            name={transactionName}
-            approve={() => transactionRetryApproved({ processId })}
-            deny={() => transactionRetryDenied({ processId })}
+          <ApproveX
+            title={'Transaction Failed'}
+            description={
+              'The ' +
+              transactionName +
+              ' transaction was not submitted to the network. Hit retry to try again.'
+            }
+            approvalAction={() => transactionRetryApproved({ processId })}
+            yesMessage={'Retry'}
+            rejectionAction={() => transactionRetryDenied({ processId })}
+            noMessage={'Cancel'}
           />
         );
       default:

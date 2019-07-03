@@ -1,5 +1,5 @@
 import React from 'react';
-import { Checklist, MessagesForStep, messagesForStep } from '../../../../../components/checklist';
+import { Checklist, MessagesForStep, messagesForStep } from '../../../shared-components/checklist';
 import { unreachable } from '../../../../../utils/reducer-utils';
 import { PlayerAState } from '../states';
 

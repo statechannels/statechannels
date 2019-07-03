@@ -13,7 +13,7 @@ export default class WaitForApproval extends React.PureComponent<Props> {
       .replace(/:\d\d /, ' ');
     return (
       <Fragment>
-        <h1>Challenge Detected</h1>
+        <h2>Challenge Detected</h2>
         <div>
           <p>You have been challenged! </p>
           <p> If you don't respond by {expiryDate}, the channel will be closed.</p>

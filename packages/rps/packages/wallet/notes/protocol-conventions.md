@@ -84,7 +84,7 @@ Constructor functions should be typed as `StateConstructor<InterfaceName>` by us
 
 <a name="actions"></a>
 
-Define an interface and constructor function for each action in the state machine diagram. For a protocol named `my-protocol`, the `type` property should be a string formatted as `WALLET.MY_PROTOCOL.ACTION_TYPE`. Pre-existing actions (e.g. from the communication module), may be imported if required. Also define the exported `NonTerminalMyProtocolAction` and `MyProtocolAction` union types as well as an `isMyProtocolAction` type guard. If a top level protocol, add `MyProtocolAction` to the `ProtocolAction` union (and make a corresponding change to the type guard). Otherwise, add `MyProtocolAction` to the `ParentProtocolAction` union (and it will thereby be included as a `ProtocolAction`). See the [Protocol Hierachy Diagram](./actions.md#hierarchy).
+Define an interface and constructor function for each action in the state machine diagram. For a protocol named `my-protocol`, the `type` property should be a string formatted as `WALLET.MY_PROTOCOL.ACTION_TYPE`. Pre-existing actions (e.g. from the communication module), may be imported if required. Also define the exported `NonTerminalMyProtocolAction` and `MyProtocolAction` union types as well as an `isMyProtocolAction` type guard. If a top level protocol, add `MyProtocolAction` to the `ProtocolAction` union (and make a corresponding change to the type guard). Otherwise, add `MyProtocolAction` to the `ParentProtocolAction` union (and it will thereby be included as a `ProtocolAction`). See the [Protocol Hierachy Diagram](./index.md#hierarchy).
 
 Actions should have a `processId` property.
 
@@ -94,7 +94,7 @@ Constructor functions should be typed as `ActionConstructor<InterfaceName>` by u
 
 ## Reducer
 
-Should define an `initialize` function as well as a `protocolReducer` function, each returning type `{protocolState, sharedData}`. The main reducer function accepts `{protocolState, sharedData, action}` and should feature an exhaustive switch, either on the states or the actions of that protocol, which then calls subreducers. Helper functions should be imported from and not replicated.
+Should define an `initialize` function as well as a `protocolReducer` function, each returning type `{protocolState, sharedData}`. The main reducer function accepts `{protocolState, sharedData, action}` and should feature an exhaustive switch, either on the states or the actions of that protocol, which then calls subreducers. Helper functions should be imported and not replicated.
 
 <a name="reducer"></a>
 
@@ -112,6 +112,8 @@ This file should export:
 
 <a name="container"></a>
 An exhasutive switch on state type, returning a suitable UI component. When waiting for a child protocol, display the child container.
+
+Try and reuse components in `/src/redux/protocols/shared-components` as far as possible.
 
 ## Scenarios
 

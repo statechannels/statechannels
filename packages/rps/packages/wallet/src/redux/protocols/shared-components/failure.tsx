@@ -12,7 +12,7 @@ export default class Failure extends React.PureComponent<Props> {
     const { name, reason } = this.props;
     return (
       <Fragment>
-        <h1>The {name} process failed</h1>
+        <h2>The {name} process failed</h2>
         <p>The {name} process failed due to:</p>
         <p>{reason}</p>
         <p>You should be redirected shortly.</p>
