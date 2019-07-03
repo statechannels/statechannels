@@ -13,7 +13,7 @@
 - [defunding](../src/redux/protocols/defunding/readme.md)
 - [direct-funding](../src/redux/protocols/direct-funding/readme.md)
 - [dispute](../src/redux/protocols/dispute/readme.md)
-- [existing-channel-funding](../src/redux/protocols/existing-channel-funding/readme.md)
+- [existing-ledger-funding](../src/redux/protocols/existing-ledger-funding/readme.md)
 - [funding](../src/redux/protocols/funding/readme.md)
 - [indirect-defunding](../src/redux/protocols/indirect-defunding/readme.md)
 - [indirect-funding](../src/redux/protocols/indirect-funding/readme.md)
@@ -40,7 +40,7 @@ graph TD
 
     C{Concluding}-->CU(ConsensusUpdate)
 
-    idF -->  ECF(ExistingChannelFunding)
+    idF -->  ELF(ExistingLedgerFunding)
     idF --> NLC(NewLedgerChannel)
 
     NLC --> CU(ConsensusUpdate)

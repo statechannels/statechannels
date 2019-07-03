@@ -62,3 +62,14 @@
 .fa-ul > li {
   padding: 0.7em 1em;
 }
+
+.channel-address {
+  max-width: 100px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.channel-address:hover {
+  overflow: visible;
+}
