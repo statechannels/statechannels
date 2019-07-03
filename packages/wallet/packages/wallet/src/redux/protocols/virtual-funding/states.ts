@@ -1,6 +1,7 @@
 import { ProtocolState } from '..';
 import { StateConstructor } from '../../utils';
 import { AdvanceChannelState } from '../advance-channel';
+import { ConsensusUpdateState } from '../consensus-update';
 
 // -------
 // States
@@ -20,19 +21,26 @@ export type SubstateDescriptor =
   | typeof INDIRECT_GUARANTOR_FUNDING_DESCRIPTOR
   | typeof INDIRECT_APPLICATION_FUNDING_DESCRIPTOR;
 
-export interface WaitForChannelPreparation extends Base {
-  type: 'VirtualFunding.WaitForChannelPreparation';
+export interface WaitForJointChannel extends Base {
+  type: 'VirtualFunding.WaitForJointChannel';
   [JOINT_CHANNEL_DESCRIPTOR]: AdvanceChannelState;
+}
+
+export interface WaitForGuarantorChannel extends Base {
+  type: 'VirtualFunding.WaitForGuarantorChannel';
   [GUARANTOR_CHANNEL_DESCRIPTOR]: AdvanceChannelState;
 }
+
 export interface WaitForGuarantorFunding extends Base {
   type: 'VirtualFunding.WaitForGuarantorFunding';
-  [INDIRECT_GUARANTOR_FUNDING_DESCRIPTOR]: 'UpdateConsensusState<G>';
+  [INDIRECT_GUARANTOR_FUNDING_DESCRIPTOR]: ConsensusUpdateState;
 }
+
 export interface WaitForApplicationFunding extends Base {
   type: 'VirtualFunding.WaitForApplicationFunding';
-  [INDIRECT_APPLICATION_FUNDING_DESCRIPTOR]: 'UpdateConsensusState<J>';
+  [INDIRECT_APPLICATION_FUNDING_DESCRIPTOR]: ConsensusUpdateState;
 }
+
 export interface Success {
   type: 'VirtualFunding.Success';
 }
@@ -45,8 +53,11 @@ export interface Failure {
 // Constructors
 // ------------
 
-export const waitForChannelPreparation: StateConstructor<WaitForChannelPreparation> = p => {
-  return { type: 'VirtualFunding.WaitForChannelPreparation', ...p };
+export const waitForJointChannel: StateConstructor<WaitForJointChannel> = p => {
+  return { type: 'VirtualFunding.WaitForJointChannel', ...p };
+};
+export const waitForGuarantorChannel: StateConstructor<WaitForGuarantorChannel> = p => {
+  return { type: 'VirtualFunding.WaitForGuarantorChannel', ...p };
 };
 export const waitForGuarantorFunding: StateConstructor<WaitForGuarantorFunding> = p => {
   return { type: 'VirtualFunding.WaitForGuarantorFunding', ...p };
@@ -68,7 +79,8 @@ export const failure: StateConstructor<Failure> = _ => {
 // -------
 
 export type NonTerminalVirtualFundingState =
-  | WaitForChannelPreparation
+  | WaitForJointChannel
+  | WaitForGuarantorChannel
   | WaitForGuarantorFunding
   | WaitForApplicationFunding;
 
@@ -77,7 +89,8 @@ export type VirtualFundingStateType = VirtualFundingState['type'];
 
 export function isVirtualFundingState(state: ProtocolState): state is VirtualFundingState {
   return (
-    state.type === 'VirtualFunding.WaitForChannelPreparation' ||
+    state.type === 'VirtualFunding.WaitForJointChannel' ||
+    state.type === 'VirtualFunding.WaitForGuarantorChannel' ||
     state.type === 'VirtualFunding.WaitForGuarantorFunding' ||
     state.type === 'VirtualFunding.WaitForApplicationFunding' ||
     state.type === 'VirtualFunding.Failure' ||

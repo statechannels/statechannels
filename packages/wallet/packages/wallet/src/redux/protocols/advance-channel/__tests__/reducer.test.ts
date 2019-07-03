@@ -3,7 +3,7 @@ import { initialize, reducer } from '../reducer';
 import * as scenarios from './scenarios';
 import { CommitmentType } from '../../../../domain';
 import {
-  expectTheseCommitmentsSent,
+  itSendsTheseCommitments,
   itStoresThisCommitment,
   itRegistersThisChannel,
   itSendsNoMessage,
@@ -32,7 +32,7 @@ describe('sending preFundSetup as A', () => {
     );
 
     itTransitionsTo(protocolState, 'AdvanceChannel.CommitmentSent');
-    expectTheseCommitmentsSent(result, commitments);
+    itSendsTheseCommitments(result, commitments);
     itStoresThisCommitment(result, commitments[0]);
     itRegistersThisChannel(result, channelId, processId);
   });
@@ -80,7 +80,7 @@ describe('sending preFundSetup as B', () => {
 
     itTransitionsTo(protocolState, 'AdvanceChannel.CommitmentSent');
     itStoresThisCommitment(result, commitments[1]);
-    expectTheseCommitmentsSent(result, commitments);
+    itSendsTheseCommitments(result, commitments);
     itRegistersThisChannel(result, channelId, processId);
   });
 
@@ -126,7 +126,7 @@ describe('sending preFundSetup as Hub', () => {
 
     itTransitionsTo(protocolState, 'AdvanceChannel.Success');
     itStoresThisCommitment(result, commitments[2]);
-    expectTheseCommitmentsSent(result, commitments);
+    itSendsTheseCommitments(result, commitments);
     itRegistersThisChannel(result, channelId, processId);
   });
 });
@@ -145,7 +145,7 @@ describe('sending postFundSetup as A', () => {
     );
 
     itTransitionsTo(protocolState, 'AdvanceChannel.CommitmentSent');
-    expectTheseCommitmentsSent(result, commitments);
+    itSendsTheseCommitments(result, commitments);
     itStoresThisCommitment(result, commitments[2]);
   });
 
@@ -191,7 +191,7 @@ describe('sending postFundSetup as B', () => {
     const { protocolState, sharedData: result } = reducer(state, sharedData, action);
 
     itTransitionsTo(protocolState, 'AdvanceChannel.CommitmentSent');
-    expectTheseCommitmentsSent(result, commitments);
+    itSendsTheseCommitments(result, commitments);
     itStoresThisCommitment(result, commitments[2]);
   });
 
@@ -231,7 +231,7 @@ describe('sending postFundSetup as Hub', () => {
 
     itTransitionsTo(protocolState, 'AdvanceChannel.Success');
     itStoresThisCommitment(result, commitments[2]);
-    expectTheseCommitmentsSent(result, commitments);
+    itSendsTheseCommitments(result, commitments);
   });
 });
 
@@ -260,7 +260,7 @@ describe('when not cleared to send', () => {
 
     itTransitionsTo(protocolState, 'AdvanceChannel.CommitmentSent');
     itStoresThisCommitment(result, commitments[2]);
-    expectTheseCommitmentsSent(result, commitments);
+    itSendsTheseCommitments(result, commitments);
   });
 
   describe('when cleared to send, and it is unsafe to send', () => {

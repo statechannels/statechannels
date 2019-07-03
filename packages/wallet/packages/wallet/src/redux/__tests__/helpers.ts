@@ -140,7 +140,7 @@ export const expectThisCommitmentSent = (
   }
 };
 
-export const expectTheseCommitmentsSent = (
+export const itSendsTheseCommitments = (
   state: SideEffectState,
   commitments: PartialCommitments,
   type = 'WALLET.COMMON.COMMITMENTS_RECEIVED',
@@ -148,41 +148,43 @@ export const expectTheseCommitmentsSent = (
 ) => {
   const messageOutbox = getOutboxState(state, 'messageOutbox');
 
-  try {
-    // Passes when at least one message matches
-    // In the case of multiple messages queued, this approach does not care about
-    // their order, which is beneficial.
-    // However, the diffs produced by jest are unreadable, so when this expectation fails,
-    // we catch the error below
-    expect(messageOutbox).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          messagePayload: expect.objectContaining({
-            signedCommitments: commitments.map(transformCommitmentToMatcher),
+  it('sends commitments', () => {
+    try {
+      // Passes when at least one message matches
+      // In the case of multiple messages queued, this approach does not care about
+      // their order, which is beneficial.
+      // However, the diffs produced by jest are unreadable, so when this expectation fails,
+      // we catch the error below
+      expect(messageOutbox).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            messagePayload: expect.objectContaining({
+              signedCommitments: commitments.map(transformCommitmentToMatcher),
+            }),
           }),
-        }),
-      ]),
-    );
-  } catch (err) {
-    if ('matcherResult' in err) {
-      // In this case, we've caught a jest expectation error.
-      // We try to help the developer by using expect(foo).toMatchObject(bar)
-      // The errors are much more useful in this case, but will be deceiving in the case when
-      // multiple messages are queued.
+        ]),
+      );
+    } catch (err) {
+      if ('matcherResult' in err) {
+        // In this case, we've caught a jest expectation error.
+        // We try to help the developer by using expect(foo).toMatchObject(bar)
+        // The errors are much more useful in this case, but will be deceiving in the case when
+        // multiple messages are queued.
 
-      // To help with debugging, you can change the idx variable when running tests to 'search'
-      // for the correct commitment
-      console.warn(`Message not found: inspecting mismatched message in position ${idx}`);
-      expect(messageOutbox[idx]).toMatchObject({
-        messagePayload: {
-          type,
-          signedCommitments: commitments,
-        },
-      });
-    } else {
-      throw err;
+        // To help with debugging, you can change the idx variable when running tests to 'search'
+        // for the correct commitment
+        console.warn(`Message not found: inspecting mismatched message in position ${idx}`);
+        expect(messageOutbox[idx]).toMatchObject({
+          messagePayload: {
+            type,
+            signedCommitments: commitments,
+          },
+        });
+      } else {
+        throw err;
+      }
     }
-  }
+  });
 };
 
 function getOutboxState(state: SideEffectState, outboxBranch: 'messageOutbox'): MessageOutbox {

@@ -29,20 +29,20 @@ sequenceDiagram
   participant H as Hub
   participant 1 as 1's wallet
 
-  Note over 0, H: Prepare G0, covering [0, H]
-  0->>H: (actions omitted)
-  H->>0: (actions omitted)
-
-  Note over 1, H: Prepare G1, covering [1, H]
-  1->>H: (actions omitted)
-  H->>1: (actions omitted)
-
   Note over 0, 1: Prepare J, allocating to 0, 1 and H
   Note over 1, H: Prepare J, allocating to 0, 1 and H
   Note over H, 0: Prepare J, allocating to 0, 1 and H
   0->>H: (actions omitted)
   1->>H: (actions omitted)
   H->>0: (actions omitted)
+  H->>1: (actions omitted)
+
+  Note over 0, H: Prepare G0, covering [0, H]
+  0->>H: (actions omitted)
+  H->>0: (actions omitted)
+
+  Note over 1, H: Prepare G1, covering [1, H]
+  1->>H: (actions omitted)
   H->>1: (actions omitted)
 
   Note  over 0, H: Fund G0
@@ -68,15 +68,13 @@ sequenceDiagram
 
 ## State machine diagram
 
-In the following diagram, to move from `WaitForChannelPreparation`, the protocol needs to receive the `Prepared` success message from both `AdvanceChannel(J)` and `AdvanceChannel(G)`.
-
 ```mermaid
 graph TD
 linkStyle default interpolate basis
-  St((start)) --> WFOC("WaitForChannelPreparation: #60;AdvanceChannel(J), AdvanceChannel(G)#62;")
+  St((start)) --> WFJ("WaitForJoint: AdvanceChannel(J)")
+  WFJ --> |Prepared| WFG("WaitForGuarantor: AdvanceChannel(G)")
 
-  WFOC --> |"Prepared(first)"| WFOC
-  WFOC --> |"Prepared(second)"| WFGF("WaitForGuarantorFunding: IndirectFunding(G)")
+  WFG --> |"Prepared"| WFGF("WaitForGuarantorFunding: IndirectFunding(G)")
 
   WFGF --> |GuarantorFunded| WFAF("WaitForApplicationFunding: UpdateConsensus(J)")
   WFAF --> |ApplicationFunded| S((success))
@@ -88,5 +86,5 @@ linkStyle default interpolate basis
   class St logic;
   class S Success;
   class F Failure;
-  class WFAp,Fi,WFOC,WFJ,WFAF,WFGF WaitForChildProtocol
+  class WFAp,Fi,WFG,WFJ,WFAF,WFGF WaitForChildProtocol
 ```

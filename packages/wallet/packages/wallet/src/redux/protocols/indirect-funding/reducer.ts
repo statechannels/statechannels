@@ -17,6 +17,7 @@ import {
   newLedgerFundingReducer,
 } from '../new-ledger-funding';
 import { IndirectFundingAction } from './actions';
+
 export function initialize(
   processId: string,
   channelId: string,
