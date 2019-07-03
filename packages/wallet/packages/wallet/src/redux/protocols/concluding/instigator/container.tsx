@@ -3,15 +3,13 @@ import { PureComponent } from 'react';
 import { connect } from 'react-redux';
 import { InstigatorNonTerminalState as NonTerminalConcludingState } from './states';
 import { unreachable } from '../../../../utils/reducer-utils';
-import ApproveConcluding from './components/approve-concluding';
-import ApproveDefunding from './components/approve-defunding';
-import WaitForOpponentConclude from './components/wait-for-opponent-conclude';
 import * as actions from './actions';
 import Acknowledge from '../../shared-components/acknowledge';
 import { ConsensusUpdate } from '../../consensus-update/container';
-import WaitForOpponentDecision from './components/wait-for-opponent-decision';
 import { defundRequested } from '../../actions';
 import { multipleWalletActions } from '../../../../redux/actions';
+import ApproveX from '../../shared-components/approve-x';
+import WaitForOtherPlayer from '../../shared-components/wait-for-other-player';
 
 interface Props {
   state: NonTerminalConcludingState;
@@ -44,25 +42,38 @@ class ConcludingContainer extends PureComponent<Props> {
           />
         );
       case 'ConcludingInstigator.WaitForOpponentConclude':
-        return <WaitForOpponentConclude />;
+        return <WaitForOtherPlayer actionDescriptor={'conclude'} channelId={state.channelId} />;
       case 'ConcludingInstigator.AcknowledgeConcludeReceived':
         return (
-          <ApproveDefunding
-            approve={() => defund(processId, state.channelId)}
-            keepOpen={() => keepOpen({ processId })}
+          <ApproveX
+            title={'Channel concluded'}
+            description={'Do you want to keep your ledger channel open, or defund it?'}
+            yesMessage={'Keep open'}
+            noMessage={'Defund'}
+            rejectionAction={() => defund(processId, state.channelId)}
+            approvalAction={() => keepOpen({ processId })}
           />
         );
       case 'ConcludingInstigator.ApproveConcluding':
         return (
-          <ApproveConcluding
-            deny={() => deny({ processId })}
-            approve={() => approve({ processId })}
+          <ApproveX
+            title={'Approve concluding this channel'}
+            description={'Do you want to conclude this channel? This action is not reversible'}
+            yesMessage={'Conclude'}
+            noMessage={'Cancel'}
+            rejectionAction={() => deny({ processId })}
+            approvalAction={() => approve({ processId })}
           />
         );
       case 'ConcludingInstigator.WaitForLedgerUpdate':
         return <ConsensusUpdate state={state.consensusUpdateState} />;
       case 'ConcludingInstigator.WaitForOpponentSelection':
-        return <WaitForOpponentDecision />;
+        return (
+          <WaitForOtherPlayer
+            actionDescriptor={'decision about defunding the ledger channel'}
+            channelId={state.channelId}
+          />
+        );
       default:
         return unreachable(state);
     }

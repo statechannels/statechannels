@@ -4,14 +4,13 @@ import { connect } from 'react-redux';
 import { NonTerminalChallengerState, FailureReason } from './states';
 import { unreachable } from '../../../../utils/reducer-utils';
 import * as actions from './actions';
-import ApproveChallenge from './components/approve-challenge';
 import { TransactionSubmission } from '../../transaction-submission';
 import Acknowledge from '../../shared-components/acknowledge';
 import WaitForResponseOrTimeout from './components/wait-for-response-or-timeout';
 import { ActionDispatcher } from '../../../utils';
-import DefundOrNot from './components/defund-or-not';
 import { defundRequested } from '../../actions';
 import { multipleWalletActions } from '../../../../redux/actions';
+import ApproveX from '../../shared-components/approve-x';
 
 interface Props {
   state: NonTerminalChallengerState;
@@ -28,9 +27,15 @@ class ChallengerContainer extends PureComponent<Props> {
     switch (state.type) {
       case 'Challenging.ApproveChallenge':
         return (
-          <ApproveChallenge
-            deny={() => deny({ processId })}
-            approve={() => approve({ processId })}
+          <ApproveX
+            title={'Approve challenge'}
+            description={
+              'Did you want to launch a challenge on the blockchain? Launching a challenge will take time and cost a small amount but will allow you to reclaim your funds if there is no response from your opponent.'
+            }
+            noMessage={'Deny'}
+            rejectionAction={() => deny({ processId })}
+            yesMessage={'Approve'}
+            approvalAction={() => approve({ processId })}
           />
         );
       case 'Challenging.WaitForTransaction':
@@ -50,10 +55,20 @@ class ChallengerContainer extends PureComponent<Props> {
         );
       case 'Challenging.AcknowledgeTimeout':
         return (
-          <DefundOrNot
-            approve={() => defund(processId, state.channelId)}
-            deny={() => acknowledged({ processId })}
-            channelId={state.channelId}
+          <ApproveX
+            title={'Challenge timed out!'}
+            children={
+              <div>
+                The challenge timed out. Channel
+                <div className="channel-address">{state.channelId}</div>
+                is now finalized -- would you like to defund it?
+              </div>
+            }
+            description={''}
+            yesMessage={'Defund'}
+            approvalAction={() => defund(processId, state.channelId)}
+            noMessage={'No'}
+            rejectionAction={() => acknowledged({ processId })}
           />
         );
       case 'Challenging.AcknowledgeFailure':

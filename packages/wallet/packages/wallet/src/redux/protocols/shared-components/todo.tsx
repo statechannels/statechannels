@@ -8,7 +8,7 @@ export default class Todo extends React.PureComponent<Props> {
   render() {
     return (
       <div>
-        <h1>TODO: Screen not implemented!</h1>
+        <h2>TODO: Screen not implemented!</h2>
         <p>
           Screen has not yet been built for the <strong>{this.props.stateType}</strong>!
         </p>

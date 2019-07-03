@@ -9,9 +9,9 @@ import { TransactionSubmission } from '../../transaction-submission/container';
 
 import { connect } from 'react-redux';
 import { ActionDispatcher } from '../../../utils';
-import DefundOrNot from '../challenger/components/defund-or-not';
 import { defundRequested } from '../../actions';
 import { multipleWalletActions } from '../../../../redux/actions';
+import ApproveX from '../../shared-components/approve-x';
 
 interface Props {
   state: states.NonTerminalResponderState;
@@ -52,10 +52,20 @@ class ResponderContainer extends PureComponent<Props> {
         );
       case 'Responding.AcknowledgeTimeout':
         return (
-          <DefundOrNot
-            approve={() => defund(processId, state.channelId)}
-            deny={() => acknowledged({ processId })}
-            channelId={state.channelId}
+          <ApproveX
+            title={'Challenge timed out!'}
+            children={
+              <div>
+                The challenge timed out. Channel
+                <div className="channel-address">{state.channelId}</div>
+                is now finalized -- would you like to defund it?
+              </div>
+            }
+            description={''}
+            yesMessage={'Defund'}
+            approvalAction={() => defund(processId, state.channelId)}
+            noMessage={'No'}
+            rejectionAction={() => acknowledged({ processId })}
           />
         );
       default:

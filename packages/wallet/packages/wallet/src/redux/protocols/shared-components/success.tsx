@@ -11,7 +11,7 @@ export default class Success extends React.PureComponent<Props> {
     const { name } = this.props;
     return (
       <Fragment>
-        <h1>Success!</h1>
+        <h2>Success!</h2>
         <p>Your {name} was successful.</p>
         <p>You should be redirected shortly.</p>
       </Fragment>

@@ -4,19 +4,23 @@ import { Dispute } from '../../container';
 
 addStories(
   scenarios.respondWithExistingCommitmentHappyPath,
-  'Responding / Respond with Existing Move',
+  'Dispute Responder / Respond with Existing Move',
   Dispute,
 );
-addStories(scenarios.requireResponseHappyPath, 'Responding / Requires new Response', Dispute);
-addStories(scenarios.refuteHappyPath, 'Responding / Refute challenge', Dispute);
-addStories(scenarios.challengeExpires, 'Responding / Challenge Expires', Dispute);
+addStories(
+  scenarios.requireResponseHappyPath,
+  'Dispute Responder / Requires new Response',
+  Dispute,
+);
+addStories(scenarios.refuteHappyPath, 'Dispute Responder / Refute challenge', Dispute);
+addStories(scenarios.challengeExpires, 'Dispute Responder / Challenge Expires', Dispute);
 addStories(
   scenarios.challengeExpiresDuringWaitForTransaction,
-  'Responding / Challenge Expires during WaitForTransaction',
+  'Dispute Responder / Challenge Expires during WaitForTransaction',
   Dispute,
 );
 addStories(
   scenarios.challengeExpiresDuringWaitForApproval,
-  'Responding / Challenge Expires during WaitForApproval',
+  'Dispute Responder / Challenge Expires during WaitForApproval',
   Dispute,
 );

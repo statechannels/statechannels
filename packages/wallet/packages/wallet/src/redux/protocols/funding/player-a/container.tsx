@@ -7,12 +7,11 @@ import * as states from './states';
 
 import { unreachable } from '../../../../utils/reducer-utils';
 import { TwoPartyPlayerIndex } from '../../../types';
-import { FundingStrategy } from '..';
-import ChooseStrategy from '../../../../components/funding/choose-strategy';
-import WaitForOtherPlayer from '../../../../components/wait-for-other-player';
-import AcknowledgeX from '../../../../components/acknowledge-x';
+import WaitForOtherPlayer from '../../shared-components/wait-for-other-player';
+import AcknowledgeX from '../../shared-components/acknowledge-x';
 import { ActionDispatcher } from '../../../utils';
 import { IndirectFunding } from '../../indirect-funding/container';
+import ApproveX from '../../shared-components/approve-x';
 
 interface Props {
   state: states.OngoingFundingState;
@@ -31,13 +30,41 @@ class FundingContainer extends PureComponent<Props> {
     switch (state.type) {
       case 'Funding.PlayerA.WaitForStrategyChoice':
         return (
-          <ChooseStrategy
-            strategyChosen={(strategy: FundingStrategy) => strategyChosen({ processId, strategy })}
-            cancelled={() => cancelled({ processId, by: TwoPartyPlayerIndex.B })}
-          />
+          <ApproveX
+            title="Funding channel"
+            description="Do you want to fund this state channel with a re-usable ledger channel?"
+            yesMessage="Fund Channel"
+            noMessage="Cancel"
+            approvalAction={() =>
+              strategyChosen({ processId, strategy: 'IndirectFundingStrategy' })
+            }
+            rejectionAction={() => cancelled({ processId, by: TwoPartyPlayerIndex.B })}
+          >
+            <React.Fragment>
+              This site wants you to open a new state channel.
+              {/* <br /> // TODO: modify funding protocol state to store the data necessary to render this
+              <br />
+              <div className="row">
+                <div className="col-sm-6">
+                  <h3>{web3Utils.fromWei(requestedTotalFunds, 'ether')} ETH</h3>
+                  <div>Total</div>
+                </div>
+                <div className="col-sm-6">
+                  <h3>{web3Utils.fromWei(requestedYourContribution, 'ether')} ETH</h3>
+                  <div>Your deposit</div>
+                </div>
+              </div>
+              <br /> */}
+            </React.Fragment>
+          </ApproveX>
         );
       case 'Funding.PlayerA.WaitForStrategyResponse':
-        return <WaitForOtherPlayer name={'strategy response'} />;
+        return (
+          <WaitForOtherPlayer
+            actionDescriptor={'strategy response'}
+            channelId={state.targetChannelId}
+          />
+        );
       case 'Funding.PlayerA.WaitForFunding':
         return <IndirectFunding state={state.fundingState} />;
       case 'Funding.PlayerA.WaitForSuccessConfirmation':
