@@ -14,6 +14,7 @@ import { channelFromCommitments } from '../../../channel-store/channel-state/__t
 import * as states from '../states';
 import * as globalActions from '../../../actions';
 import { EXISTING_LEDGER_FUNDING_PROTOCOL_LOCATOR } from '../reducer';
+import { playerAHappyPath } from '../../ledger-top-up/__tests__/scenarios';
 
 const processId = 'processId';
 
@@ -220,6 +221,12 @@ export const playerATopUpNeeded = {
   initialize: {
     sharedData: initialPlayerATopUpNeededSharedData,
     ...props,
+  },
+  waitForLedgerTopUp: {
+    state: states.waitForLedgerTopUp({
+      ...props,
+      ledgerTopUpState: playerAHappyPath.switchOrderAndAddATopUpUpdate.state,
+    }),
   },
 };
 
