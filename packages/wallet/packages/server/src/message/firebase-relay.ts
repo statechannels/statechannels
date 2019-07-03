@@ -1,6 +1,5 @@
-import * as firebaseApp from 'firebase/app';
+import * as firebase from 'firebase';
 
-import 'firebase/database';
 import * as fetch from 'node-fetch';
 import '../../config/env';
 import { HUB_ADDRESS } from '../constants';
@@ -14,18 +13,18 @@ const config = {
   messagingSenderId: '913007764573',
 };
 
-let firebase;
-function getFirebaseInstance() {
-  if (firebase) {
-    return firebase;
+let firebaseApp: firebase.app.App;
+function getFirebaseApp() {
+  if (firebaseApp) {
+    return firebaseApp;
   }
-  firebase = firebaseApp.initializeApp(config);
-  return firebase;
+  firebaseApp = firebase.initializeApp(config);
+  return firebaseApp;
 }
 
 function getMessagesRef() {
-  getFirebaseInstance();
-  return firebase.database().ref('messages');
+  const firebaseAppInsance = getFirebaseApp();
+  return firebaseAppInsance.database().ref('messages');
 }
 
 async function postToHub(data = {}) {
