@@ -3,7 +3,7 @@ import { initialize, reducer } from '../reducer';
 import * as scenarios from './scenarios';
 import {
   scenarioStepDescription,
-  expectTheseCommitmentsSent,
+  itSendsTheseCommitments,
   itSendsNoMessage,
 } from '../../../__tests__/helpers';
 import { success, preSuccess } from '../../advance-channel/__tests__';
@@ -35,44 +35,26 @@ describe('happyPath', () => {
     const { sharedData, args } = scenario.initialize;
     const { protocolState, sharedData: result } = initialize(sharedData, args);
 
-    itTransitionsTo(protocolState, 'VirtualFunding.WaitForChannelPreparation');
-
-    expectTheseCommitmentsSent(result, [{ commitment: { turnNum: 0, allocation: oneTwoThree } }]);
-    expectTheseCommitmentsSent(result, [{ commitment: { turnNum: 0, allocation: [] } }]);
+    itTransitionsTo(protocolState, 'VirtualFunding.WaitForJointChannel');
+    itSendsTheseCommitments(result, [{ commitment: { turnNum: 0, allocation: oneTwoThree } }]);
   });
 
-  describe(scenarioStepDescription(scenario.openGFirst), () => {
-    const { state, sharedData, action } = scenario.openGFirst;
+  describe(scenarioStepDescription(scenario.openG), () => {
+    const { state, sharedData, action } = scenario.openG;
     const { protocolState, sharedData: result } = reducer(state, sharedData, action);
 
-    itTransitionsTo(protocolState, 'VirtualFunding.WaitForChannelPreparation');
+    itTransitionsTo(protocolState, 'VirtualFunding.WaitForGuarantorChannel');
     itTransitionsSubstateTo(protocolState, 'guarantorChannel', success.state.type);
     itTransitionsSubstateTo(protocolState, 'jointChannel', preSuccess.state.type);
     itSendsNoMessage(result);
   });
 
-  describe(scenarioStepDescription(scenario.openJFirst), () => {
-    const { state, sharedData, action } = scenario.openJFirst;
+  describe(scenarioStepDescription(scenario.openJ), () => {
+    const { state, sharedData, action } = scenario.openJ;
     const { protocolState } = reducer(state, sharedData, action);
 
-    itTransitionsTo(protocolState, 'VirtualFunding.WaitForChannelPreparation');
+    itTransitionsTo(protocolState, 'VirtualFunding.WaitForGuarantorFunding');
     itTransitionsSubstateTo(protocolState, 'jointChannel', success.state.type);
     itTransitionsSubstateTo(protocolState, 'guarantorChannel', preSuccess.state.type);
-  });
-
-  describe(scenarioStepDescription(scenario.openGSecond), () => {
-    const { state, sharedData, action } = scenario.openGSecond;
-    const { protocolState } = reducer(state, sharedData, action);
-
-    itTransitionsTo(protocolState, 'VirtualFunding.WaitForGuarantorFunding');
-    itTransitionsSubstateTo(protocolState, 'indirectGuarantorFunding', 'NotImplemented');
-  });
-
-  describe(scenarioStepDescription(scenario.openJSecond), () => {
-    const { state, sharedData, action } = scenario.openJSecond;
-    const { protocolState } = reducer(state, sharedData, action);
-
-    itTransitionsTo(protocolState, 'VirtualFunding.WaitForGuarantorFunding');
-    itTransitionsSubstateTo(protocolState, 'indirectGuarantorFunding', 'NotImplemented');
   });
 });

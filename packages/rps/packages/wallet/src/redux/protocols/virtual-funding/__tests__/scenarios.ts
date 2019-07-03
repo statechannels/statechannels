@@ -53,22 +53,14 @@ const props = {
 // ------
 
 const scenarioStates = {
-  waitForChannelPreparation: states.waitForChannelPreparation({
+  waitForJointChannel: states.waitForJointChannel({
     ...props,
     [states.JOINT_CHANNEL_DESCRIPTOR]: preSuccess.state,
-    [states.GUARANTOR_CHANNEL_DESCRIPTOR]: preSuccess.state,
   }),
 
-  waitForChannelPreparationJ: states.waitForChannelPreparation({
+  waitForGuarantorChannel: states.waitForGuarantorChannel({
     ...props,
-    [states.JOINT_CHANNEL_DESCRIPTOR]: preSuccess.state,
     [states.GUARANTOR_CHANNEL_DESCRIPTOR]: success.state,
-  }),
-
-  waitForChannelPreparationG: states.waitForChannelPreparation({
-    ...props,
-    [states.JOINT_CHANNEL_DESCRIPTOR]: success.state,
-    [states.GUARANTOR_CHANNEL_DESCRIPTOR]: preSuccess.state,
   }),
 };
 
@@ -90,23 +82,13 @@ export const happyPath = {
     args: initializeArgs,
     sharedData: setChannel(EMPTY_SHARED_DATA, appChannel),
   },
-  openJFirst: {
-    state: scenarioStates.waitForChannelPreparation,
+  openJ: {
+    state: scenarioStates.waitForJointChannel,
     action: { ...preSuccess.trigger, protocolLocator: states.JOINT_CHANNEL_DESCRIPTOR },
     sharedData: preSuccess.sharedData,
   },
-  openGFirst: {
-    state: scenarioStates.waitForChannelPreparation,
-    action: { ...preSuccess.trigger, protocolLocator: states.GUARANTOR_CHANNEL_DESCRIPTOR },
-    sharedData: preSuccess.sharedData,
-  },
-  openJSecond: {
-    state: scenarioStates.waitForChannelPreparationJ,
-    action: { ...preSuccess.trigger, protocolLocator: states.JOINT_CHANNEL_DESCRIPTOR },
-    sharedData: preSuccess.sharedData,
-  },
-  openGSecond: {
-    state: scenarioStates.waitForChannelPreparationG,
+  openG: {
+    state: scenarioStates.waitForGuarantorChannel,
     action: { ...preSuccess.trigger, protocolLocator: states.GUARANTOR_CHANNEL_DESCRIPTOR },
     sharedData: preSuccess.sharedData,
   },
