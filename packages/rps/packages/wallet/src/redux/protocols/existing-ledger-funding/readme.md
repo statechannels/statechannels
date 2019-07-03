@@ -29,10 +29,12 @@ Currently we assume a Ledger Top-up protocol handles both the cases where a curr
   classDef Success fill:#58ef21;
   classDef Failure fill:#f45941;
   classDef WaitForChildProtocol stroke:#333,stroke-width:4px,color:#ffff,fill:#333;
+  classDef NotAState stroke:#333,stroke-width:4px,fill:#0000;
   class St,L logic;
   class Su Success;
   class F Failure;
   class LT WaitForChildProtocol;
+  class SC0,SP0 NotAState
 ```
 
 ### Player B State Machine
@@ -54,10 +56,12 @@ Currently we assume a Ledger Top-up protocol handles both the cases where a curr
   classDef Success fill:#58ef21;
   classDef Failure fill:#f45941;
   classDef WaitForChildProtocol stroke:#333,stroke-width:4px,color:#ffff,fill:#333;
+  classDef NotAState stroke:#333,stroke-width:4px,fill:#0000;
   class St,L logic;
   class Su Success;
   class F Failure;
   class LT WaitForChildProtocol;
+  class SC1,SP1 NotAState
 ```
 
 ### Scenarios:
