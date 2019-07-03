@@ -4,7 +4,7 @@ import * as states from '../states';
 import { ProtocolStateWithSharedData } from '../..';
 import {
   describeScenarioStep,
-  expectTheseCommitmentsSent,
+  itSendsTheseCommitments,
   itSendsNoMessage,
 } from '../../../__tests__/helpers';
 
@@ -26,7 +26,7 @@ describe('Two Players', () => {
         proposedDestination,
         sharedData,
       );
-      expectTheseCommitmentsSent(result, scenario.initialize.reply);
+      itSendsTheseCommitments(result, scenario.initialize.reply);
       itTransitionsTo(result, 'ConsensusUpdate.WaitForUpdate');
     });
     describeScenarioStep(scenario.waitForUpdate, () => {
@@ -62,7 +62,7 @@ describe('Two Players', () => {
       const { sharedData, action, state, reply } = scenario.waitForUpdate;
       const result = consensusUpdateReducer(state, sharedData, action);
       itTransitionsTo(result, 'ConsensusUpdate.Success');
-      expectTheseCommitmentsSent(result, reply);
+      itSendsTheseCommitments(result, reply);
     });
   });
 
@@ -109,7 +109,7 @@ describe('Three Players', () => {
       );
 
       itTransitionsTo(result, 'ConsensusUpdate.WaitForUpdate');
-      expectTheseCommitmentsSent(result, scenario.initialize.reply);
+      itSendsTheseCommitments(result, scenario.initialize.reply);
     });
 
     describe("when receiving Player B's update", () => {
@@ -153,7 +153,7 @@ describe('Three Players', () => {
       const { sharedData, action, state, reply } = scenario.waitForPlayerAUpdate;
       const result = consensusUpdateReducer(state, sharedData, action);
       itTransitionsTo(result, 'ConsensusUpdate.WaitForUpdate');
-      expectTheseCommitmentsSent(result, reply);
+      itSendsTheseCommitments(result, reply);
     });
 
     describe("when receiving hub's update", () => {
@@ -195,7 +195,7 @@ describe('Three Players', () => {
     describe("when receiving Player B's update", () => {
       const { sharedData, action, state, reply } = scenario.waitForPlayerBUpdate;
       const result = consensusUpdateReducer(state, sharedData, action);
-      expectTheseCommitmentsSent(result, reply);
+      itSendsTheseCommitments(result, reply);
       itTransitionsTo(result, 'ConsensusUpdate.Success');
     });
   });
