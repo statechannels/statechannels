@@ -42,7 +42,7 @@ contract NitroAdjudicator {
         Signature ultimateSignature;
     }
 
-    mapping(address => uint) public holdings;
+    mapping(address => mapping(address => uint)) public holdings;
     mapping(address => Outcome) public outcomes;
     address private constant zeroAddress = address(0);
 
@@ -53,37 +53,41 @@ contract NitroAdjudicator {
     // Eth Management
     // **************
 
-    function deposit(address destination, uint expectedHeld) public payable {
-        uint amount = msg.value;
-        uint amountDeposited;
 
+function deposit(address destination, uint expectedHeld,
+ uint amount, address token) public payable {
+       if (address = 0) {
+        require(msg.value == amount, "Insufficient ETH for ETH deposit");
+        } else {require(token.transferFrom(msg.sender,self,amount), 'Could not deposit ERC20s');}
+
+        uint amountDeposited;
         // This protects against a directly funded channel being defunded due to chain re-orgs,
         // and allow a wallet implementation to ensure the safety of deposits.
         require(
-            holdings[destination] >= expectedHeld,
-            "Deposit: holdings[destination] is less than expected"
+            holdings[destination][token] >= expectedHeld,
+            "Deposit: holdings[destination][token] is less than expected"
         );
-
 
         // If I expect there to be 10 eth and deposit 2, my goal was to get the
         // balance to 12 eth.
         // In case some arbitrary person deposited 1 eth before I noticed, making the
         // holdings 11 eth, I should be refunded 1 eth.
-        if (holdings[destination] == expectedHeld) {
+        if (holdings[destination][token] == expectedHeld) {
             amountDeposited = amount;
-        } else if (holdings[destination] < expectedHeld.add(amount)) {
+        } else if (holdings[destination][token] < expectedHeld.add(amount)) {
             amountDeposited = expectedHeld.add(amount).sub(holdings[destination]);
         } else {
             amountDeposited = 0;
         }
-
-        holdings[destination] = holdings[destination].add(amountDeposited);
+        holdings[destination][token] = holdings[destination][token].add(amountDeposited);
         if (amountDeposited < amount) {
             // refund whatever wasn't deposited.
-            msg.sender.transfer(amount - amountDeposited);
+            if (address == 0) {
+              msg.sender.transfer(amount - amountDeposited);
+          }
+            else {token.transferFrom(self, msg.sender, amount - amountDeposited);}
         }
-
-        emit Deposited(destination, amountDeposited, holdings[destination]);
+        emit Deposited(destination, amountDeposited, token, holdings[destination][token]);
     }
 
     function transferAndWithdraw(address channel,
@@ -101,12 +105,13 @@ contract NitroAdjudicator {
     function withdraw(address participant,
         address payable destination,
         uint amount,
+        address token,
         uint8 _v,
         bytes32 _r,
         bytes32 _s
     ) public payable {
         require(
-            holdings[participant] >= amount,
+            holdings[participant][token] >= amount,
             "Withdraw: overdrawn"
         );
         Authorization memory authorization = Authorization(
@@ -121,8 +126,10 @@ contract NitroAdjudicator {
             "Withdraw: not authorized by participant"
         );
 
-        holdings[participant] = holdings[participant].sub(amount);
-        destination.transfer(amount);
+        holdings[participant][token] = holdings[participant][token].sub(amount);
+        if (token == 0) {destination.transfer(amount);}
+        else {token.transfer(destination,amount);}
+
     }
 
     function transfer(address channel, address destination, uint amount) public {

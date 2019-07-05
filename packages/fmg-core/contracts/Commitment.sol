@@ -14,6 +14,7 @@ library Commitment {
         uint32 commitmentCount;
         address[] destination;
         uint256[] allocation;
+        address[] token;
         bytes appAttributes;
     }
 
