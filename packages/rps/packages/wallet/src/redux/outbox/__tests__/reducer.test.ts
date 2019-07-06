@@ -2,11 +2,14 @@ import { clearOutbox } from '../reducer';
 
 import * as actions from '../../actions';
 import * as outgoing from 'magmo-wallet-client/lib/wallet-events';
-import * as scenarios from '../../__tests__/test-scenarios';
 import { OutboxState } from '../state';
 import { sendStrategyApproved, sendStrategyProposed } from '../../../communication';
 
-const { mockTransactionOutboxItem } = scenarios;
+const mockTransactionOutboxItem = {
+  transactionRequest: { to: '0xabc' },
+  processId: 'processid',
+  requestId: 'requestId',
+};
 
 describe('when a side effect occured', () => {
   const processId = '0x0';

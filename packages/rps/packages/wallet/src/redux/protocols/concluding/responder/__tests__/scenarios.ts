@@ -1,6 +1,6 @@
 import * as states from '../../states';
 import * as actions from '../actions';
-import * as channelScenarios from '../../../../__tests__/test-scenarios';
+import * as testScenarios from '../../../../../domain/commitments/__tests__';
 import { EMPTY_SHARED_DATA, setChannels, setFundingState } from '../../../../state';
 import { channelFromCommitments } from '../../../../channel-store/channel-state/__tests__';
 import { appCommitment, ledgerId } from '../../../../../domain/commitments/__tests__';
@@ -21,7 +21,7 @@ import { keepLedgerChannelApproved } from '../../../../../communication';
 // -----------------
 // Channel Scenarios
 // -----------------
-const { channelId, bsAddress, asAddress } = channelScenarios;
+const { channelId, bsAddress, asAddress } = testScenarios;
 
 const twoThree = [
   { address: asAddress, wei: bigNumberify(2).toHexString() },

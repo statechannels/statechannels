@@ -3,26 +3,23 @@ import * as actions from '../actions';
 import * as tsScenarios from '../../../transaction-submission/__tests__';
 import { setChannel, EMPTY_SHARED_DATA } from '../../../../state';
 import { ChannelState } from '../../../../channel-store';
-import * as channelScenarios from '../../../../__tests__/test-scenarios';
 import { channelFromCommitments } from '../../../../channel-store/channel-state/__tests__';
 import {
   challengeExpiredEvent,
   respondWithMoveEvent,
   challengeExpirySetEvent,
 } from '../../../../actions';
+import * as testScenarios from '../../../../../domain/commitments/__tests__';
 type Reason = states.FailureReason;
 
 // -----------------
 // Channel Scenarios
 // -----------------
-const { channelId, asAddress: address, asPrivateKey: privateKey } = channelScenarios;
-
-const {
-  signedCommitment0,
-  signedCommitment19,
-  signedCommitment20,
-  signedCommitment21,
-} = channelScenarios;
+const { channelId, asAddress: address, asPrivateKey: privateKey } = testScenarios;
+const signedCommitment0 = testScenarios.appCommitment({ turnNum: 0 });
+const signedCommitment19 = testScenarios.appCommitment({ turnNum: 19 });
+const signedCommitment20 = testScenarios.appCommitment({ turnNum: 20 });
+const signedCommitment21 = testScenarios.appCommitment({ turnNum: 21 });
 
 const partiallyOpen = channelFromCommitments([signedCommitment0], address, privateKey);
 const theirTurn = channelFromCommitments(

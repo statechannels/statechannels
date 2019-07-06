@@ -1,4 +1,3 @@
-import * as scenarios from '../../redux/__tests__/test-scenarios';
 import {
   signCommitment,
   signData,
@@ -6,17 +5,25 @@ import {
   validCommitmentSignature,
   signVerificationData,
 } from '../../domain';
+import {
+  appCommitment,
+  bsPrivateKey,
+  asPrivateKey,
+  asAddress,
+} from '../../domain/commitments/__tests__';
 
 describe('signing and validating commitments', () => {
   let commitmentSignature;
 
   it('should return true when a signature is valid', () => {
-    commitmentSignature = signCommitment(scenarios.gameCommitment1, scenarios.bsPrivateKey);
-    expect(validCommitmentSignature(scenarios.gameCommitment1, commitmentSignature)).toBe(true);
+    commitmentSignature = signCommitment(appCommitment({ turnNum: 19 }).commitment, bsPrivateKey);
+    expect(
+      validCommitmentSignature(appCommitment({ turnNum: 19 }).commitment, commitmentSignature),
+    ).toBe(true);
   });
 
   it('should return false when a signature is invalid', () => {
-    expect(validCommitmentSignature(scenarios.gameCommitment1, '0x0')).toBe(false);
+    expect(validCommitmentSignature(appCommitment({ turnNum: 19 }).commitment, '0x0')).toBe(false);
   });
 });
 
@@ -24,14 +31,14 @@ describe('signing and validating arbitrary data', () => {
   const data = 'Some stuff to sign';
   let dataSignature;
   it('should sign some data', () => {
-    dataSignature = signData(data, scenarios.asPrivateKey);
+    dataSignature = signData(data, asPrivateKey);
   });
   it('should return true when a signature is valid', () => {
-    expect(validSignature(data, dataSignature, scenarios.asAddress)).toBe(true);
+    expect(validSignature(data, dataSignature, asAddress)).toBe(true);
   });
 
   it('should return false when a signature is invalid', () => {
-    expect(validSignature(data, '0x0', scenarios.asAddress)).toBe(false);
+    expect(validSignature(data, '0x0', asAddress)).toBe(false);
   });
 });
 

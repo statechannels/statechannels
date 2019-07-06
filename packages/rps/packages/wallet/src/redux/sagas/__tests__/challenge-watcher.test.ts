@@ -1,9 +1,9 @@
 import { challengeWatcher } from '../challenge-watcher';
 import { channel } from 'redux-saga';
-import { channelId, gameCommitment2 } from '../../__tests__/test-scenarios';
 import { AdjudicatorState } from '../../adjudicator-state/state';
 import * as actions from '../../actions';
 import { put } from 'redux-saga/effects';
+import { channelId, appCommitment } from '../../../domain/commitments/__tests__';
 
 describe('challenge-watcher', () => {
   it('dispatches a challenge expired action for an expired challenge on a channel', () => {
@@ -28,7 +28,7 @@ describe('challenge-watcher', () => {
         finalized: false,
         channelId,
         balance: '0x0',
-        challenge: { expiresAt: 1, challengeCommitment: gameCommitment2 },
+        challenge: { expiresAt: 1, challengeCommitment: appCommitment({ turnNum: 20 }).commitment },
       },
     };
     // Select adjudicator state
