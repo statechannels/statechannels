@@ -1,16 +1,10 @@
 import * as walletStates from '../redux/state';
-import * as scenarios from '../redux/__tests__/test-scenarios';
+import * as scenarios from '../domain/commitments/__tests__';
 import * as states from '../redux/state';
 
-const {
-  channelId,
-  channelNonce,
-  libraryAddress,
-  participants,
-  preFundCommitment0: preFundCommitment1,
-  preFundCommitment1: preFundCommitment2,
-} = scenarios;
-
+const { channelId, channelNonce, libraryAddress, participants } = scenarios;
+const preFundCommitment1 = scenarios.appCommitment({ turnNum: 0 }).commitment;
+const preFundCommitment2 = scenarios.appCommitment({ turnNum: 1 }).commitment;
 export const defaultParams = {
   adjudicator: 'adj-address',
   channelId,

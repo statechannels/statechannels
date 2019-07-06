@@ -1,10 +1,9 @@
-import { appCommitment } from '../../domain/commitments/__tests__';
+import { appCommitment, asAddress, asPrivateKey } from '../../domain/commitments/__tests__';
 import { channelFromCommitments } from '../../redux/channel-store/channel-state/__tests__';
-import * as channelScenarios from '../../redux/__tests__/test-scenarios';
+
 import { composeConcludeCommitment } from '../commitment-utils';
 import { CommitmentType } from 'fmg-core';
 describe('composeConcludeCommitment', () => {
-  const { asPrivateKey, asAddress } = channelScenarios;
   const app10 = appCommitment({ turnNum: 10, balances: [] });
   const app11 = appCommitment({ turnNum: 11, balances: [] });
   const app12 = appCommitment({ turnNum: 11, balances: [], isFinal: true });

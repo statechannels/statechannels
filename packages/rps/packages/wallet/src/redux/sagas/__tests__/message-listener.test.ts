@@ -4,8 +4,8 @@ import * as incoming from 'magmo-wallet-client/lib/wallet-instructions';
 import { messageListener } from '../message-listener';
 import * as actions from '../../actions';
 import { channel } from 'redux-saga';
-import * as scenarios from '../../__tests__/test-scenarios';
 import { APPLICATION_PROCESS_ID } from '../../../redux/protocols/application/reducer';
+import { appCommitment } from '../../../domain/commitments/__tests__';
 
 describe('message listener', () => {
   const saga = messageListener();
@@ -25,7 +25,7 @@ describe('message listener', () => {
 
   // todo: is OWN_POSITION_RECEIVED actually easier to think about than SIGNATURE_REQUEST?
   it('converts SIGNATURE_REQUEST into OWN_POSITION_RECEIVED', () => {
-    saga.next({ data: incoming.signCommitmentRequest(scenarios.gameCommitment1) });
+    saga.next({ data: incoming.signCommitmentRequest(appCommitment({ turnNum: 19 }).commitment) });
 
     const output = saga.next().value; // the take
 
@@ -33,7 +33,7 @@ describe('message listener', () => {
       put(
         actions.application.ownCommitmentReceived({
           processId: APPLICATION_PROCESS_ID,
-          commitment: scenarios.gameCommitment1,
+          commitment: appCommitment({ turnNum: 19 }).commitment,
         }),
       ),
     );
@@ -42,7 +42,10 @@ describe('message listener', () => {
 
   it('converts VALIDATION_REQUEST into OPPONENT_POSITION_RECEIVED', () => {
     saga.next({
-      data: incoming.validateCommitmentRequest(scenarios.gameCommitment1, 'signature'),
+      data: incoming.validateCommitmentRequest(
+        appCommitment({ turnNum: 19 }).commitment,
+        'signature',
+      ),
     });
     const output = saga.next().value; // the take
 
@@ -50,7 +53,7 @@ describe('message listener', () => {
       put(
         actions.application.opponentCommitmentReceived({
           processId: APPLICATION_PROCESS_ID,
-          commitment: scenarios.gameCommitment1,
+          commitment: appCommitment({ turnNum: 19 }).commitment,
           signature: 'signature',
         }),
       ),

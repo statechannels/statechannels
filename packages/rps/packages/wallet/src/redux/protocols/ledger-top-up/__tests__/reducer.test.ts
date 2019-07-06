@@ -3,7 +3,7 @@ import { initialize, ledgerTopUpReducer } from '../reducer';
 import { LedgerTopUpState, LedgerTopUpStateType } from '../states';
 import { ProtocolStateWithSharedData } from '../..';
 import { describeScenarioStep } from '../../../__tests__/helpers';
-import { bsAddress, asAddress } from '../../../__tests__/test-scenarios';
+import { bsAddress, asAddress } from '../../../../domain/commitments/__tests__';
 
 describe('player A happy path', () => {
   const scenario = scenarios.playerAHappyPath;
