@@ -1,12 +1,12 @@
 import * as states from '../states';
-import * as channelScenarios from '../../../__tests__/test-scenarios';
+import * as testScenarios from '../../../../domain/commitments/__tests__';
 
 import * as actions from '../actions';
 
 // -----------------
 // Channel Scenarios
 // -----------------
-const { channelId, asAddress: address, asPrivateKey: privateKey } = channelScenarios;
+const { channelId, asAddress: address, asPrivateKey: privateKey } = testScenarios;
 import { ChannelState } from '../../../channel-store';
 import { setChannel, EMPTY_SHARED_DATA } from '../../../state';
 import { channelFromCommitments } from '../../../channel-store/channel-state/__tests__';
@@ -17,13 +17,12 @@ import {
   challengerPreSuccessClosedState,
 } from '../../dispute/challenger';
 
-const {
-  signedCommitment19,
-  signedCommitment20,
-  signedCommitment21,
-  signedCommitment22,
-  preFundCommitment0,
-} = channelScenarios;
+const signedCommitment19 = testScenarios.appCommitment({ turnNum: 19 });
+const signedCommitment20 = testScenarios.appCommitment({ turnNum: 20 });
+const signedCommitment21 = testScenarios.appCommitment({ turnNum: 21 });
+const signedCommitment22 = testScenarios.appCommitment({ turnNum: 22 });
+const preFundCommitment0 = testScenarios.appCommitment({ turnNum: 0 }).commitment;
+
 const theirTurn = channelFromCommitments(
   [signedCommitment19, signedCommitment20],
   address,

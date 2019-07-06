@@ -1,18 +1,18 @@
 import { addHex } from '../../../../utils/hex-utils';
 import * as globalActions from '../../../actions';
 
-import * as scenarios from '../../../__tests__/test-scenarios';
+import * as scenarios from '../../../../domain/commitments/__tests__';
 import * as transactionSubmissionScenarios from '../../transaction-submission/__tests__';
 import * as advanceChannelScenarios from '../../advance-channel/__tests__';
 import * as states from '../states';
 import { directFundingRequested } from '../actions';
 import { SharedData } from '../../../state';
 
-const { jointLedgerId: channelId, twoThree } = scenarios;
+const { threeWayLedgerId: channelId, twoThree } = scenarios;
 
-export const YOUR_DEPOSIT_A = twoThree[0];
-export const YOUR_DEPOSIT_B = twoThree[1];
-export const TOTAL_REQUIRED = twoThree.reduce(addHex);
+export const YOUR_DEPOSIT_A = twoThree[0].wei;
+export const YOUR_DEPOSIT_B = twoThree[1].wei;
+export const TOTAL_REQUIRED = addHex(twoThree[0].wei, twoThree[1].wei);
 const processId = `processId.${channelId}`;
 
 // shared data

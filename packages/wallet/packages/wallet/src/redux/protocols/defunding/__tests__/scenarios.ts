@@ -1,6 +1,6 @@
 import * as states from '../states';
 import * as withdrawalScenarios from '../../withdrawing/__tests__/scenarios';
-import * as testScenarios from '../../../__tests__/test-scenarios';
+import * as testScenarios from '../../../../domain/commitments/__tests__';
 import { ChannelState, ChannelStore } from '../../../channel-store';
 import { EMPTY_SHARED_DATA, FundingState } from '../../../state';
 import * as indirectDefunding from '../../indirect-defunding/__tests__';
@@ -13,11 +13,11 @@ const {
   libraryAddress,
   participants,
   channelNonce,
-  concludeCommitment1,
-  concludeCommitment2,
-  gameCommitment1,
-  gameCommitment2,
 } = testScenarios;
+const gameCommitment1 = testScenarios.appCommitment({ turnNum: 19 }).commitment;
+const gameCommitment2 = testScenarios.appCommitment({ turnNum: 20 }).commitment;
+const concludeCommitment1 = testScenarios.appCommitment({ turnNum: 51, isFinal: true }).commitment;
+const concludeCommitment2 = testScenarios.appCommitment({ turnNum: 52, isFinal: true }).commitment;
 
 const channelStatus: ChannelState = {
   address,

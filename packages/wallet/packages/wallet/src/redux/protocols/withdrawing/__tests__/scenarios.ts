@@ -3,10 +3,11 @@ import * as actions from '../actions';
 import * as transactionActions from '../../transaction-submission/actions';
 import * as transactionScenarios from '../../transaction-submission/__tests__';
 import { ChannelState, ChannelStore } from '../../../channel-store';
-import * as testScenarios from '../../../__tests__/test-scenarios';
+
 import { Wallet } from 'ethers';
 import { EMPTY_SHARED_DATA, SharedData } from '../../../state';
 import * as web3Utils from 'web3-utils';
+import * as testScenarios from '../../../../domain/commitments/__tests__';
 
 // ---------
 // Test data
@@ -19,11 +20,12 @@ const {
   libraryAddress,
   participants,
   channelNonce,
-  concludeCommitment1,
-  concludeCommitment2,
-  gameCommitment1,
-  gameCommitment2,
 } = testScenarios;
+
+const gameCommitment1 = testScenarios.appCommitment({ turnNum: 19 }).commitment;
+const gameCommitment2 = testScenarios.appCommitment({ turnNum: 20 }).commitment;
+const concludeCommitment1 = testScenarios.appCommitment({ turnNum: 51, isFinal: true }).commitment;
+const concludeCommitment2 = testScenarios.appCommitment({ turnNum: 52, isFinal: true }).commitment;
 
 const channelStatus: ChannelState = {
   address,

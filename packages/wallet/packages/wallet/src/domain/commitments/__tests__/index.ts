@@ -34,7 +34,7 @@ function typeAndCount(
     commitmentCount = turnNum;
     commitmentType = CommitmentType.PreFundSetup;
   } else if (turnNum < 2 * numParticipants) {
-    commitmentCount = turnNum - 2;
+    commitmentCount = turnNum - numParticipants;
     commitmentType = CommitmentType.PostFundSetup;
   } else {
     commitmentType = CommitmentType.App;
@@ -150,7 +150,7 @@ export function threeWayLedgerCommitment(params: ThreeWayLedgerCommitmentParams)
 
   const allocation = balances.map(b => b.wei);
   const destination = balances.map(b => b.address);
-  const { commitmentCount, commitmentType } = typeAndCount(turnNum, isFinal);
+  const { commitmentCount, commitmentType } = typeAndCount(turnNum, isFinal, 3);
 
   const appAttributes = ledgerAppAttributes(furtherVotesRequired, proposedBalances);
   const commitment = {
