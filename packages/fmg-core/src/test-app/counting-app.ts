@@ -53,6 +53,7 @@ export function asCoreCommitment(commitment: CountingCommitment): Commitment {
     allocation,
     destination,
     commitmentCount,
+    token,
     appCounter,
   } = commitment;
 
@@ -63,6 +64,7 @@ export function asCoreCommitment(commitment: CountingCommitment): Commitment {
     allocation,
     destination,
     commitmentCount,
+    token,
     appAttributes: appAttributesFromCommitment({ appCounter }),
   };
 }

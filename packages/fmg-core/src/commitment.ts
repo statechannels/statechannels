@@ -15,6 +15,7 @@ const SolidityCommitmentType = {
     commitmentCount: 'uint32',
     destination: 'address[]',
     allocation: 'uint256[]',
+    token: 'address[]',
     appAttributes: 'bytes',
   },
 };
@@ -25,6 +26,7 @@ export interface BaseCommitment {
   allocation: Uint256[];
   destination: Address[];
   commitmentCount: Uint32;
+  token: Address[];
 }
 
 export interface Commitment extends BaseCommitment {
@@ -59,6 +61,7 @@ export function fromParameters(parameters: any[]): Commitment {
     commitmentCount: Number.parseInt(parameters[(idx += 1)], 10),
     destination: parameters[(idx += 1)],
     allocation: parameters[(idx += 1)].map(a => bigNumberify(a).toHexString()),
+    token: parameters[(idx += 1)],
     appAttributes: parameters[(idx += 1)],
   };
 }
@@ -80,6 +83,7 @@ export function ethereumArgs(commitment: Commitment) {
     commitment.commitmentCount,
     commitment.destination,
     commitment.allocation,
+    commitment.token,
     commitment.appAttributes,
   ];
 }
@@ -95,6 +99,7 @@ export function asEthersObject(commitment: Commitment) {
     commitmentCount: commitment.commitmentCount,
     destination: commitment.destination,
     allocation: commitment.allocation,
+    token: commitment.token,
     appAttributes: commitment.appAttributes,
   };
 }

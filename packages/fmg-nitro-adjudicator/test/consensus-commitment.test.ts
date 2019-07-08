@@ -5,6 +5,7 @@ import TestConsensusCommitmentArtifact from '../build/contracts/TestConsensusCom
 
 import { asCoreCommitment, propose } from '../src/consensus-app';
 import { bigNumberify } from 'ethers/utils';
+import { AddressZero } from 'ethers/constants';
 
 jest.setTimeout(20000);
 let consensusCommitment: ethers.Contract;
@@ -39,7 +40,12 @@ describe('ConsensusCommitment', () => {
     nonce: 0,
     participants,
   };
-  const defaults = { channel, allocation, destination: participants };
+  const defaults = {
+    channel,
+    allocation,
+    destination: participants,
+    token: [AddressZero, AddressZero],
+  };
   const commitment: Commitment = asCoreCommitment(
     propose(
       {

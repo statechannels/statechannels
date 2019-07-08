@@ -16,6 +16,7 @@ import {
   asCoreCommitment,
   AppAttributes,
 } from '../src/consensus-app';
+import { AddressZero } from 'ethers/constants';
 
 jest.setTimeout(20000);
 let consensusApp: ethers.Contract;
@@ -70,6 +71,7 @@ describe('ConsensusApp', () => {
     turnNum: 6,
     proposedDestination,
     proposedAllocation,
+    token: [AddressZero, AddressZero],
     commitmentCount: 0,
   };
 

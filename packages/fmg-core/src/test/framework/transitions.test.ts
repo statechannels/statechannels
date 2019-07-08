@@ -84,7 +84,13 @@ describe('Rules', () => {
     // Contract setup --------------------------------------------------------------------------
 
     channel = { channelType: appContract.address, nonce: 0, participants, guaranteedChannel };
-    defaults = { channel, allocation, destination, appCounter: 0 };
+    defaults = {
+      channel,
+      allocation,
+      destination,
+      appCounter: 0,
+      token: [AddressZero, AddressZero],
+    };
   });
 
   const validTransition = async (commitment1, commitment2) => {

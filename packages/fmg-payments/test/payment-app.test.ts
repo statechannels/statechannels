@@ -3,6 +3,7 @@ import { ethers } from 'ethers';
 import { getNetworkId, getGanacheProvider, expectRevert, delay } from 'magmo-devtools';
 import { Commitment, ethereumArgs, CommitmentType } from 'fmg-core';
 import * as PaymentApp from '../src/payment-app';
+import { AddressZero } from 'ethers/constants';
 
 jest.setTimeout(20000);
 let paymentApp: ethers.Contract;
@@ -17,6 +18,7 @@ const defaultCommitmentArgs: PaymentApp.PaymentCommitmentArgs = {
   bsAddress,
   asBalance: '0x5',
   bsBalance: '0x5',
+  token: [AddressZero, AddressZero],
   turnNum: 5,
   commitmentCount: 0,
 };
@@ -130,6 +132,7 @@ describe('PaymentApp', () => {
           defaultCommitmentArgs.bsAddress,
           defaultCommitmentArgs.asBalance,
           defaultCommitmentArgs.bsBalance,
+          defaultCommitmentArgs.token,
         );
         expect(commitment).toMatchObject({
           allocation: [defaultCommitmentArgs.asBalance, defaultCommitmentArgs.bsBalance],
