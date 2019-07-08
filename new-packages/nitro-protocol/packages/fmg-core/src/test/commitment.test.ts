@@ -3,7 +3,7 @@ import { Commitment, CommitmentType, toHex, fromHex, mover } from '../commitment
 
 import { BigNumber } from 'ethers/utils';
 import { Uint32 } from '../types';
-import { Wallet } from 'ethers';
+import { Wallet, constants } from 'ethers';
 
 describe('Commitment', () => {
   const nonce = 12;
@@ -32,6 +32,7 @@ describe('Commitment', () => {
     allocation,
     destination,
     commitmentCount: 0,
+    token: [constants.AddressZero, constants.AddressZero], // implying ETH
     appAttributes: '0x',
   };
 

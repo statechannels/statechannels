@@ -129,6 +129,7 @@ export function initialConsensus(c: {
   turnNum: number;
   allocation: string[];
   destination: string[];
+  token: string[];
   commitmentCount: number;
 }): AppCommitment {
   return {

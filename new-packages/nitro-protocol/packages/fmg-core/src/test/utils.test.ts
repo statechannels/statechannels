@@ -4,6 +4,7 @@ import { Commitment, CommitmentType, toHex } from '../commitment';
 import { BigNumber } from 'ethers/utils';
 import { Uint32 } from '../types';
 import { Wallet } from 'ethers';
+import { AddressZero } from 'ethers/constants';
 import { sign, recover } from '../utils';
 
 describe('Commitment', () => {
@@ -34,6 +35,7 @@ describe('Commitment', () => {
     allocation,
     destination,
     commitmentCount: 0,
+    token: [AddressZero, AddressZero],
     appAttributes: '0x',
   };
 

@@ -12,6 +12,7 @@ import CommitmentArtifact from '../../build/contracts/Commitment.json';
 import TestCommitmentArtifact from '../../build/contracts/TestCommitment.json';
 import { CountingCommitment, asCoreCommitment } from '../test-app/counting-app';
 import { BigNumber } from 'ethers/utils';
+import { AddressZero } from 'ethers/constants';
 import { Uint32 } from '../types';
 
 const provider = new ethers.providers.JsonRpcProvider('http://localhost:8545');
@@ -34,7 +35,7 @@ describe('Commitment', () => {
   );
   const participants = [participantA.address, participantB.address];
   const allocation = [new BigNumber(5).toHexString(), new BigNumber(4).toHexString()];
-
+  const token = [AddressZero, AddressZero]; // Implying ETH
   const destination = [participantA.address, participantB.address];
   const guaranteedChannel = participantA.address;
   const channel: Channel = { channelType, nonce, participants, guaranteedChannel };
@@ -46,6 +47,7 @@ describe('Commitment', () => {
     allocation,
     destination,
     commitmentCount: 0,
+    token,
     appAttributes: '0x',
   };
 
@@ -125,6 +127,7 @@ describe('Commitment', () => {
       channel,
       destination,
       allocation,
+      token,
       turnNum,
       appCounter: new BigNumber(0).toHexString(),
       commitmentCount: 0,
@@ -134,6 +137,7 @@ describe('Commitment', () => {
       channel,
       destination,
       allocation,
+      token,
       turnNum,
       appCounter: new BigNumber(1).toHexString(),
       commitmentCount: 0,

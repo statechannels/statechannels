@@ -10,6 +10,7 @@ import TestCountingCommitmentArtifact from '../../../build/contracts/TestCountin
 import { CommitmentType, Commitment, ethereumArgs } from '../../commitment';
 import { CountingCommitment, asCoreCommitment } from '../../test-app/counting-app';
 import { BigNumber } from 'ethers/utils';
+import { AddressZero } from 'ethers/constants';
 
 const provider = new ethers.providers.JsonRpcProvider('http://localhost:8545');
 const signer = provider.getSigner();
@@ -66,6 +67,7 @@ describe('CountingCommitment', () => {
       channel,
       allocation: [new BigNumber(5).toHexString(), new BigNumber(4).toHexString()],
       destination: [participantA.address, participantB.address],
+      token: [AddressZero, AddressZero], // Implying ETH
     };
 
     commitment = {

@@ -8,6 +8,7 @@ export interface PaymentCommitmentArgs {
   bsAddress: string;
   asBalance: string;
   bsBalance: string;
+  token: string[];
   turnNum: number;
   commitmentCount: number;
 }
@@ -17,7 +18,7 @@ export enum PlayerIndex {
   B = 1,
 }
 
-function fromPaymentCommitmentArgs(paymentArgs: PaymentCommitmentArgs) {
+function fromPaymentCommitmentArgs(paymentArgs: PaymentCommitmentArgs): Commitment {
   const {
     turnNum,
     asAddress,
@@ -26,6 +27,7 @@ function fromPaymentCommitmentArgs(paymentArgs: PaymentCommitmentArgs) {
     libraryAddress,
     asBalance,
     bsBalance,
+    token,
     commitmentCount,
   } = paymentArgs;
 
@@ -38,6 +40,7 @@ function fromPaymentCommitmentArgs(paymentArgs: PaymentCommitmentArgs) {
     channel,
     allocation: [asBalance, bsBalance],
     destination: [asAddress, bsAddress],
+    token,
     commitmentCount,
     commitmentType: CommitmentType.App,
     appAttributes: '0x0',
@@ -69,6 +72,7 @@ export function initialPreFundSetup(
   bsAddress: string,
   asBalance: string,
   bsBalance: string,
+  token,
 ): Commitment {
   return preFundSetupCommitment({
     libraryAddress,
@@ -77,6 +81,7 @@ export function initialPreFundSetup(
     bsAddress,
     asBalance,
     bsBalance,
+    token,
     turnNum: 0,
     commitmentCount: 0,
   });
