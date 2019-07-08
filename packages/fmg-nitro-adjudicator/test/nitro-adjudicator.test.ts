@@ -19,6 +19,7 @@ import { asCoreCommitment } from 'fmg-core/lib/test-app/counting-app';
 import { CountingCommitment } from 'fmg-core/src/test-app/counting-app';
 import { fromParameters, CommitmentType } from 'fmg-core/lib/commitment';
 import { Commitment as CoreCommitment } from 'fmg-core/src/commitment';
+import { AddressZero } from 'ethers/constants';
 
 jest.setTimeout(20000);
 let nitro: ethers.Contract;
@@ -39,7 +40,7 @@ function depositTo(
   value: ethers.utils.BigNumberish = DEPOSIT_AMOUNT,
   expectedHeld = 0,
 ): Promise<any> {
-  return nitro.deposit(destination, expectedHeld, { value });
+  return nitro.deposit(destination, expectedHeld, { value }, AddressZero);
 }
 
 async function withdraw(
@@ -58,31 +59,41 @@ async function withdraw(
   ]);
 
   const sig = sign(authorization, signer.privateKey);
-  return nitro.withdraw(participant.address, destination, amount, sig.v, sig.r, sig.s, {
-    gasLimit: 3000000,
-  });
+  return nitro.withdraw(
+    participant.address,
+    destination,
+    amount,
+    AddressZero,
+    sig.v,
+    sig.r,
+    sig.s,
+    {
+      gasLimit: 3000000,
+    },
+  );
 }
 
 async function setupContracts() {
   const networkId = await getNetworkId();
-
   testNitroAdjudicatorArtifact.bytecode = linkedByteCode(
     testNitroAdjudicatorArtifact,
     CommitmentArtifact,
     networkId,
   );
+  RulesArtifact.bytecode = linkedByteCode(RulesArtifact, CommitmentArtifact, networkId);
+
   testNitroAdjudicatorArtifact.bytecode = linkedByteCode(
     testNitroAdjudicatorArtifact,
     RulesArtifact,
     networkId,
   );
-
   const nitroFactory = await ContractFactory.fromSolidity(
     testNitroAdjudicatorArtifact,
     providerSigner,
   );
   const deployTran = await nitroFactory.getDeployTransaction();
   const estimate = await provider.estimateGas(deployTran);
+  // console.log(estimate);
   nitro = await nitroFactory.deploy();
   await nitro.deployed();
   const unwrap = ({ challengeCommitment, finalizedAt }) => ({
@@ -167,6 +178,7 @@ describe('nitroAdjudicator', () => {
       appCounter: new BigNumber(0).toHexString(),
       destination,
       allocation,
+      token: [AddressZero, AddressZero],
       commitmentCount: 1,
     };
 
@@ -236,6 +248,9 @@ describe('nitroAdjudicator', () => {
 
   describe('Eth management', () => {
     describe('deposit', () => {
+      it.only('does nothing', async () => {
+        console.log('did nothing');
+      });
       it('works', async () => {
         const channelID = getChannelID(ledgerChannel);
         await depositTo(channelID);
@@ -1133,6 +1148,7 @@ describe('nitroAdjudicator', () => {
           turnNum: 10,
           allocation: [ethers.utils.parseUnits('10', 'wei').toHexString()],
           destination: ['0xcC8Ddb252cd77F1e67f82C50dBD268eaDC9ECE68'], // an application channel
+          token: [AddressZero, AddressZero],
           commitmentCount: 0,
           commitmentType: CommitmentType.App,
           appAttributes: '0x00',
