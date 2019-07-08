@@ -3,6 +3,7 @@ pragma experimental ABIEncoderV2;
 import "fmg-core/contracts/Commitment.sol";
 import "fmg-core/contracts/Rules.sol";
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
+import "openzeppelin-solidity/contracts/token/ERC20/ERC20.sol";
 
 contract NitroAdjudicator {
     using Commitment for Commitment.CommitmentStruct;
@@ -28,6 +29,8 @@ contract NitroAdjudicator {
         // exactly one of the following two should be non-null
         // guarantee channels
         uint[] allocation;         // should be zero length in guarantee channels
+
+        address[] token;
     }
 
     struct Signature {
@@ -50,15 +53,19 @@ contract NitroAdjudicator {
     uint constant CHALLENGE_DURATION = 5 minutes;
 
     // **************
-    // Eth Management
+    // ETH and Token Management
     // **************
 
 
 function deposit(address destination, uint expectedHeld,
  uint amount, address token) public payable {
-       if (address = 0) {
+       if (token == address(0)) {
         require(msg.value == amount, "Insufficient ETH for ETH deposit");
-        } else {require(token.transferFrom(msg.sender,self,amount), 'Could not deposit ERC20s');}
+        } else {
+            ERC20 _token;
+            _token = ERC20(token);
+            require(_token.transferFrom(msg.sender,address(this),amount), 'Could not deposit ERC20s');
+            }
 
         uint amountDeposited;
         // This protects against a directly funded channel being defunded due to chain re-orgs,
@@ -68,38 +75,43 @@ function deposit(address destination, uint expectedHeld,
             "Deposit: holdings[destination][token] is less than expected"
         );
 
-        // If I expect there to be 10 eth and deposit 2, my goal was to get the
-        // balance to 12 eth.
+        // If I expect there to be 10 and deposit 2, my goal was to get the
+        // balance to 12.
         // In case some arbitrary person deposited 1 eth before I noticed, making the
-        // holdings 11 eth, I should be refunded 1 eth.
+        // holdings 11, I should be refunded 1.
         if (holdings[destination][token] == expectedHeld) {
             amountDeposited = amount;
         } else if (holdings[destination][token] < expectedHeld.add(amount)) {
-            amountDeposited = expectedHeld.add(amount).sub(holdings[destination]);
+            amountDeposited = expectedHeld.add(amount).sub(holdings[destination][token]);
         } else {
             amountDeposited = 0;
         }
         holdings[destination][token] = holdings[destination][token].add(amountDeposited);
         if (amountDeposited < amount) {
             // refund whatever wasn't deposited.
-            if (address == 0) {
+            if (token == address(0)) {
               msg.sender.transfer(amount - amountDeposited);
           }
-            else {token.transferFrom(self, msg.sender, amount - amountDeposited);}
+            else {
+                ERC20 _token;
+                _token = ERC20(token);
+                _token.transferFrom(address(this), msg.sender, amount - amountDeposited);
+                }
         }
-        emit Deposited(destination, amountDeposited, token, holdings[destination][token]);
+        emit Deposited(destination, amountDeposited, holdings[destination][token]);
     }
 
     function transferAndWithdraw(address channel,
         address participant,
         address payable destination,
         uint amount,
+        address token,
         uint8 _v,
         bytes32 _r,
         bytes32 _s
     ) public payable {
-        transfer(channel, participant, amount);
-        withdraw(participant, destination, amount, _v, _r ,_s);
+        transfer(channel, participant, amount, token);
+        withdraw(participant, destination, amount, token, _v, _r ,_s);
     }
 
     function withdraw(address participant,
@@ -127,12 +139,17 @@ function deposit(address destination, uint expectedHeld,
         );
 
         holdings[participant][token] = holdings[participant][token].sub(amount);
-        if (token == 0) {destination.transfer(amount);}
-        else {token.transfer(destination,amount);}
+        // Decrease holdings before calling to token contract (protect against reentrancy)
+        if (token == address(0)) {destination.transfer(amount);}
+        else {
+            ERC20 _token;
+            _token = ERC20(token);
+            _token.transfer(destination,amount);
+            }
 
     }
 
-    function transfer(address channel, address destination, uint amount) public {
+    function transfer(address channel, address destination, uint amount, address token) public {
         require(
             outcomes[channel].challengeCommitment.guaranteedChannel == zeroAddress,
             "Transfer: channel must be a ledger channel"
@@ -146,20 +163,20 @@ function deposit(address destination, uint expectedHeld,
             "Transfer: outcome must be present"
         );
 
-        uint channelAffordsForDestination = affords(destination, outcomes[channel], holdings[channel]);
+        uint channelAffordsForDestination = affords(destination, outcomes[channel], holdings[channel][token]);
 
         require(
             amount <= channelAffordsForDestination,
             "Transfer: channel cannot afford the requested transfer amount"
         );
 
-        holdings[destination] = holdings[destination] + amount;
-        holdings[channel] = holdings[channel] - amount;
+        holdings[destination][token] = holdings[destination][token] + amount;
+        holdings[channel][token] = holdings[channel][token] - amount;
 
-        outcomes[channel] = reduce(outcomes[channel], destination, amount);
+        outcomes[channel] = reduce(outcomes[channel], destination, amount, token);
     }
 
-    function claim(address guarantor, address recipient, uint amount) public {
+    function claim(address guarantor, address recipient, uint amount, address token) public {
         Outcome memory guarantee = outcomes[guarantor];
         require(
             guarantee.challengeCommitment.guaranteedChannel != zeroAddress,
@@ -171,7 +188,7 @@ function deposit(address destination, uint expectedHeld,
             "Claim: channel must be closed"
         );
 
-        uint funding = holdings[guarantor];
+        uint funding = holdings[guarantor][token];
         Outcome memory reprioritizedOutcome = reprioritize(
             outcomes[guarantee.challengeCommitment.guaranteedChannel],
             guarantee
@@ -180,17 +197,18 @@ function deposit(address destination, uint expectedHeld,
             outcomes[guarantee.challengeCommitment.guaranteedChannel] = reduce(
                 outcomes[guarantee.challengeCommitment.guaranteedChannel],
                 recipient,
-                amount
+                amount,
+                token
             );
-            holdings[guarantor] = holdings[guarantor].sub(amount);
-            holdings[recipient] = holdings[recipient].add(amount);
+            holdings[guarantor][token] = holdings[guarantor][token].sub(amount);
+            holdings[recipient][token] = holdings[recipient][token].add(amount);
         } else {
             revert('Claim: guarantor must be sufficiently funded');
         }
     }
 
     // ********************
-    // Eth Management Logic
+    // ETH and Token Management Logic
     // ********************
 
     function reprioritize(
@@ -217,7 +235,8 @@ function deposit(address destination, uint expectedHeld,
             newDestination,
             allocation.finalizedAt,
             allocation.challengeCommitment,
-            newAllocation
+            newAllocation,
+            allocation.token
         );
     }
 
@@ -253,8 +272,10 @@ function deposit(address destination, uint expectedHeld,
     function reduce(
         Outcome memory outcome,
         address recipient,
-        uint amount
+        uint amount,
+        address token
     ) internal pure returns (Outcome memory) {
+        // TODO only reduce entries corresponding to token argument
         uint256[] memory updatedAllocation = outcome.allocation;
         uint256 reduction = 0;
         uint remainingAmount = amount;
@@ -273,7 +294,8 @@ function deposit(address destination, uint expectedHeld,
             outcome.destination,
             outcome.finalizedAt,
             outcome.challengeCommitment, // Once the outcome is finalized,
-            updatedAllocation
+            updatedAllocation,
+            outcome.token
         );
     }
 
@@ -303,6 +325,7 @@ function deposit(address destination, uint expectedHeld,
         address participant,
         address payable destination,
         uint amount,
+        address token,
         uint8 _v,
         bytes32 _r,
         bytes32 _s
@@ -314,8 +337,8 @@ function deposit(address destination, uint expectedHeld,
             require(keccak256(abi.encode(proof.penultimateCommitment)) == keccak256(abi.encode(outcomes[channelId].challengeCommitment)),
             "concludeAndWithdraw: channel already concluded with a different proof");
         }
-        transfer(channelId,participant, amount);
-        withdraw(participant,destination, amount, _v,_r,_s);
+        transfer(channelId,participant, amount, token);
+        withdraw(participant,destination, amount, token, _v,_r,_s);
     }
 
     function forceMove(
@@ -346,7 +369,8 @@ function deposit(address destination, uint expectedHeld,
             challengeCommitment.participants,
             now + CHALLENGE_DURATION,
             challengeCommitment,
-            challengeCommitment.allocation
+            challengeCommitment.allocation,
+            challengeCommitment.token
         );
 
         emit ChallengeCreated(
@@ -378,7 +402,8 @@ function deposit(address destination, uint expectedHeld,
             outcomes[channel].destination,
             0,
             refutationCommitment,
-            refutationCommitment.allocation
+            refutationCommitment.allocation,
+            refutationCommitment.token
         );
         outcomes[channel] = updatedOutcome;
     }
@@ -406,7 +431,8 @@ function deposit(address destination, uint expectedHeld,
             outcomes[channel].destination,
             0,
             responseCommitment,
-            responseCommitment.allocation
+            responseCommitment.allocation,
+            responseCommitment.token
         );
         outcomes[channel] = updatedOutcome;
     }
@@ -461,7 +487,8 @@ function deposit(address destination, uint expectedHeld,
             outcomes[channel].destination,
             0,
             _responseCommitment,
-            _responseCommitment.allocation
+            _responseCommitment.allocation,
+            _responseCommitment.token
         );
         outcomes[channel] = updatedOutcome;
     }
@@ -481,7 +508,8 @@ function deposit(address destination, uint expectedHeld,
             proof.penultimateCommitment.destination,
             now,
             proof.penultimateCommitment,
-            proof.penultimateCommitment.allocation
+            proof.penultimateCommitment.allocation,
+            proof.penultimateCommitment.token
         );
         emit Concluded(channelId);
     }
