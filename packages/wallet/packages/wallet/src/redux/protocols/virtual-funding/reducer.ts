@@ -7,6 +7,9 @@ import { unreachable } from '../../../utils/reducer-utils';
 import { CommitmentType } from '../../../domain';
 import { bytesFromAppAttributes } from 'fmg-nitro-adjudicator/lib/consensus-app';
 import { CONSENSUS_LIBRARY_ADDRESS } from '../../../constants';
+import { advanceChannelReducer } from '../advance-channel';
+import { ethers } from 'ethers';
+import { addHex } from '../../../utils/hex-utils';
 
 type ReturnVal = ProtocolStateWithSharedData<states.VirtualFundingState>;
 
@@ -14,26 +17,22 @@ interface InitializationArgs {
   ourIndex: number;
   targetChannelId: string;
   processId: string;
+  hubAddress: string;
   startingAllocation: string[];
   startingDestination: string[];
 }
 
 export function initialize(sharedData: SharedData, args: InitializationArgs): ReturnVal {
-  const { ourIndex, processId, targetChannelId, startingAllocation, startingDestination } = args;
+  const {
+    ourIndex,
+    processId,
+    targetChannelId,
+    startingAllocation,
+    startingDestination,
+    hubAddress,
+  } = args;
   const privateKey = getPrivatekey(sharedData, targetChannelId);
   const channelType = CONSENSUS_LIBRARY_ADDRESS;
-
-  function channelSpecificArgs(allocation, destination) {
-    return {
-      allocation,
-      destination,
-      appAttributes: bytesFromAppAttributes({
-        proposedAllocation: allocation,
-        proposedDestination: destination,
-        furtherVotesRequired: 0,
-      }),
-    };
-  }
 
   const initializationArgs = {
     privateKey,
@@ -43,13 +42,16 @@ export function initialize(sharedData: SharedData, args: InitializationArgs): Re
     clearedToSend: true,
     processId,
     protocolLocator: states.GUARANTOR_CHANNEL_DESCRIPTOR,
+    participants: [...startingDestination, hubAddress],
   };
 
+  const jointAllocation = [...startingAllocation, startingAllocation.reduce(addHex)];
+  const jointDestination = [...startingDestination, hubAddress];
   const jointChannelInitialized = advanceChannel.initializeAdvanceChannel(
     processId,
     sharedData,
     CommitmentType.PreFundSetup,
-    { ...initializationArgs, ...channelSpecificArgs(startingAllocation, startingDestination) },
+    { ...initializationArgs, ...channelSpecificArgs(jointAllocation, jointDestination) },
   );
 
   return {
@@ -57,6 +59,8 @@ export function initialize(sharedData: SharedData, args: InitializationArgs): Re
       processId,
       [states.JOINT_CHANNEL_DESCRIPTOR]: jointChannelInitialized.protocolState,
       targetChannelId,
+      startingAllocation,
+      startingDestination,
     }),
     sharedData: jointChannelInitialized.sharedData,
   };
@@ -91,11 +95,82 @@ export const reducer: ProtocolReducer<states.VirtualFundingState> = (
 };
 
 function waitForJointChannelReducer(
-  protocolState: states.VirtualFundingState,
+  protocolState: states.WaitForJointChannel,
   sharedData: SharedData,
   action: WalletAction,
 ) {
-  // Unimplemented
+  const { processId } = protocolState;
+  if (
+    action.type === 'WALLET.COMMON.COMMITMENTS_RECEIVED' &&
+    action.protocolLocator === states.JOINT_CHANNEL_DESCRIPTOR
+  ) {
+    const result = advanceChannelReducer(
+      protocolState[states.JOINT_CHANNEL_DESCRIPTOR],
+      sharedData,
+      action,
+    );
+
+    if (advanceChannel.isSuccess(result.protocolState)) {
+      const { ourIndex, channelId: jointChannelId } = result.protocolState;
+      switch (result.protocolState.commitmentType) {
+        case CommitmentType.PreFundSetup:
+          const jointChannelResult = advanceChannel.initializeAdvanceChannel(
+            processId,
+            result.sharedData,
+            CommitmentType.PostFundSetup,
+            {
+              clearedToSend: true,
+              commitmentType: CommitmentType.PostFundSetup,
+              processId,
+              protocolLocator: states.JOINT_CHANNEL_DESCRIPTOR,
+              channelId: jointChannelId,
+              ourIndex,
+            },
+          );
+
+          return {
+            protocolState: {
+              ...protocolState,
+              [states.JOINT_CHANNEL_DESCRIPTOR]: jointChannelResult.protocolState,
+            },
+            sharedData: jointChannelResult.sharedData,
+          };
+        case CommitmentType.PostFundSetup:
+          const { targetChannelId } = protocolState;
+          const privateKey = getPrivatekey(sharedData, targetChannelId);
+          const ourAddress = new ethers.Wallet(privateKey).address;
+          const channelType = CONSENSUS_LIBRARY_ADDRESS;
+          const hubAddress = channelType; // TODO: Replace with proper address
+          const destination = [targetChannelId, ourAddress, hubAddress];
+          const guarantorChannelResult = advanceChannel.initializeAdvanceChannel(
+            processId,
+            result.sharedData,
+            CommitmentType.PreFundSetup,
+            {
+              clearedToSend: true,
+              commitmentType: CommitmentType.PreFundSetup,
+              processId,
+              protocolLocator: states.GUARANTOR_CHANNEL_DESCRIPTOR,
+              ourIndex,
+              privateKey,
+              channelType,
+              participants: [ourAddress, hubAddress],
+              ...channelSpecificArgs([], destination),
+            },
+          );
+          return {
+            protocolState: states.waitForGuarantorChannel({
+              ...protocolState,
+              [states.GUARANTOR_CHANNEL_DESCRIPTOR]: guarantorChannelResult.protocolState,
+            }),
+            sharedData: guarantorChannelResult.sharedData,
+          };
+        case CommitmentType.App:
+        case CommitmentType.Conclude:
+          throw new Error('Unimplemented');
+      }
+    }
+  }
   return { protocolState, sharedData };
 }
 
@@ -124,4 +199,19 @@ function waitForApplicationFundingReducer(
 ) {
   // Unimplemented
   return { protocolState, sharedData };
+}
+
+function channelSpecificArgs(
+  allocation: string[],
+  destination: string[],
+): { allocation: string[]; destination: string[]; appAttributes: string } {
+  return {
+    allocation,
+    destination,
+    appAttributes: bytesFromAppAttributes({
+      proposedAllocation: allocation,
+      proposedDestination: destination,
+      furtherVotesRequired: 0,
+    }),
+  };
 }

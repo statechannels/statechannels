@@ -114,12 +114,12 @@ function initializeWithNewChannel(
     ourIndex,
     clearedToSend,
     protocolLocator,
+    participants,
   } = initializeChannelArgs;
 
   if (isSafeToSend({ sharedData, ourIndex, clearedToSend })) {
     // Initialize the channel in the store
     const nonce = selectors.getNextNonce(sharedData, channelType);
-    const participants = destination;
     const channel: Channel = {
       nonce,
       participants,
@@ -231,7 +231,7 @@ function attemptToAdvanceChannel(
     sharedData = helpers.sendCommitments(sharedData, processId, channelId, protocolLocator);
     channel = getExistingChannel(sharedData, channelId);
     if (channelAdvanced(channel, commitmentType)) {
-      return { protocolState: states.success(protocolState), sharedData };
+      return { protocolState: states.success({ ...protocolState, channelId }), sharedData };
     } else {
       return { protocolState: states.commitmentSent({ ...protocolState, channelId }), sharedData };
     }

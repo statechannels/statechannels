@@ -20,6 +20,7 @@ export interface ChannelUnknown extends BaseState {
   ourIndex: number;
   allocation: string[];
   destination: string[];
+  participants: string[];
   channelType: string;
   appAttributes: string;
   privateKey: string;
@@ -40,6 +41,8 @@ export interface CommitmentSent extends BaseState {
 export interface Success {
   type: 'AdvanceChannel.Success';
   commitmentType: CommitmentType;
+  channelId: string;
+  ourIndex: number;
 }
 
 export interface Failure {
@@ -62,13 +65,22 @@ const base: StateConstructor<BaseState> = params => {
 };
 
 export const channelUnknown: StateConstructor<ChannelUnknown> = params => {
-  const { privateKey, allocation, destination, channelType, appAttributes, clearedToSend } = params;
+  const {
+    privateKey,
+    allocation,
+    destination,
+    participants,
+    channelType,
+    appAttributes,
+    clearedToSend,
+  } = params;
   return {
     ...base(params),
     type: 'AdvanceChannel.ChannelUnknown',
     privateKey,
     allocation,
     destination,
+    participants,
     channelType,
     appAttributes,
     clearedToSend,
@@ -94,9 +106,12 @@ export const commitmentSent: StateConstructor<CommitmentSent> = params => {
 };
 
 export const success: StateConstructor<Success> = params => {
+  const { commitmentType, channelId, ourIndex } = params;
   return {
     type: 'AdvanceChannel.Success',
-    commitmentType: params.commitmentType,
+    commitmentType,
+    channelId,
+    ourIndex,
   };
 };
 
