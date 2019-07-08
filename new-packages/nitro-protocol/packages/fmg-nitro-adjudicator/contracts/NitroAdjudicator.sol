@@ -1,9 +1,9 @@
 pragma solidity ^0.5.2;
 pragma experimental ABIEncoderV2;
+import "openzeppelin-solidity/contracts/math/SafeMath.sol";
+import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 import "fmg-core/contracts/Commitment.sol";
 import "fmg-core/contracts/Rules.sol";
-import "openzeppelin-solidity/contracts/math/SafeMath.sol";
-import "openzeppelin-solidity/contracts/token/ERC20/ERC20.sol";
 
 contract NitroAdjudicator {
     using Commitment for Commitment.CommitmentStruct;
@@ -62,8 +62,7 @@ function deposit(address destination, uint expectedHeld,
        if (token == address(0)) {
         require(msg.value == amount, "Insufficient ETH for ETH deposit");
         } else {
-            ERC20 _token;
-            _token = ERC20(token);
+            IERC20 _token = IERC20(token);
             require(_token.transferFrom(msg.sender,address(this),amount), 'Could not deposit ERC20s');
             }
 
@@ -93,8 +92,7 @@ function deposit(address destination, uint expectedHeld,
               msg.sender.transfer(amount - amountDeposited);
           }
             else {
-                ERC20 _token;
-                _token = ERC20(token);
+                IERC20 _token = IERC20(token);
                 _token.transferFrom(address(this), msg.sender, amount - amountDeposited);
                 }
         }
@@ -142,8 +140,7 @@ function deposit(address destination, uint expectedHeld,
         // Decrease holdings before calling to token contract (protect against reentrancy)
         if (token == address(0)) {destination.transfer(amount);}
         else {
-            ERC20 _token;
-            _token = ERC20(token);
+            IERC20 _token = IERC20(token);
             _token.transfer(destination,amount);
             }
 
