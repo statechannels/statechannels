@@ -8,21 +8,14 @@ import { CommitmentType } from '../../../domain';
 import { bytesFromAppAttributes } from 'fmg-nitro-adjudicator/lib/consensus-app';
 import { CONSENSUS_LIBRARY_ADDRESS } from '../../../constants';
 import { advanceChannelReducer } from '../advance-channel';
+import * as consensusUpdate from '../consensus-update';
+import * as indirectFunding from '../indirect-funding';
 import { ethers } from 'ethers';
 import { addHex } from '../../../utils/hex-utils';
 
 type ReturnVal = ProtocolStateWithSharedData<states.VirtualFundingState>;
 
-interface InitializationArgs {
-  ourIndex: number;
-  targetChannelId: string;
-  processId: string;
-  hubAddress: string;
-  startingAllocation: string[];
-  startingDestination: string[];
-}
-
-export function initialize(sharedData: SharedData, args: InitializationArgs): ReturnVal {
+export function initialize(sharedData: SharedData, args: states.InitializationArgs): ReturnVal {
   const {
     ourIndex,
     processId,
@@ -57,10 +50,12 @@ export function initialize(sharedData: SharedData, args: InitializationArgs): Re
   return {
     protocolState: states.waitForJointChannel({
       processId,
-      [states.JOINT_CHANNEL_DESCRIPTOR]: jointChannelInitialized.protocolState,
+      jointChannel: jointChannelInitialized.protocolState,
       targetChannelId,
       startingAllocation,
       startingDestination,
+      ourIndex,
+      hubAddress,
     }),
     sharedData: jointChannelInitialized.sharedData,
   };
@@ -99,19 +94,15 @@ function waitForJointChannelReducer(
   sharedData: SharedData,
   action: WalletAction,
 ) {
-  const { processId } = protocolState;
+  const { processId, hubAddress, ourIndex } = protocolState;
   if (
     action.type === 'WALLET.COMMON.COMMITMENTS_RECEIVED' &&
     action.protocolLocator === states.JOINT_CHANNEL_DESCRIPTOR
   ) {
-    const result = advanceChannelReducer(
-      protocolState[states.JOINT_CHANNEL_DESCRIPTOR],
-      sharedData,
-      action,
-    );
+    const result = advanceChannelReducer(protocolState.jointChannel, sharedData, action);
 
     if (advanceChannel.isSuccess(result.protocolState)) {
-      const { ourIndex, channelId: jointChannelId } = result.protocolState;
+      const { channelId: jointChannelId } = result.protocolState;
       switch (result.protocolState.commitmentType) {
         case CommitmentType.PreFundSetup:
           const jointChannelResult = advanceChannel.initializeAdvanceChannel(
@@ -131,7 +122,7 @@ function waitForJointChannelReducer(
           return {
             protocolState: {
               ...protocolState,
-              [states.JOINT_CHANNEL_DESCRIPTOR]: jointChannelResult.protocolState,
+              jointChannel: jointChannelResult.protocolState,
             },
             sharedData: jointChannelResult.sharedData,
           };
@@ -140,7 +131,6 @@ function waitForJointChannelReducer(
           const privateKey = getPrivatekey(sharedData, targetChannelId);
           const ourAddress = new ethers.Wallet(privateKey).address;
           const channelType = CONSENSUS_LIBRARY_ADDRESS;
-          const hubAddress = channelType; // TODO: Replace with proper address
           const destination = [targetChannelId, ourAddress, hubAddress];
           const guarantorChannelResult = advanceChannel.initializeAdvanceChannel(
             processId,
@@ -161,43 +151,198 @@ function waitForJointChannelReducer(
           return {
             protocolState: states.waitForGuarantorChannel({
               ...protocolState,
-              [states.GUARANTOR_CHANNEL_DESCRIPTOR]: guarantorChannelResult.protocolState,
+              guarantorChannel: guarantorChannelResult.protocolState,
+              jointChannelId,
             }),
             sharedData: guarantorChannelResult.sharedData,
           };
-        case CommitmentType.App:
-        case CommitmentType.Conclude:
-          throw new Error('Unimplemented');
+        default:
+          return {
+            protocolState: states.waitForJointChannel({
+              ...protocolState,
+              jointChannel: result.protocolState,
+            }),
+            sharedData: result.sharedData,
+          };
       }
+    } else {
+      return {
+        protocolState: states.waitForJointChannel({
+          ...protocolState,
+          jointChannel: result.protocolState,
+        }),
+        sharedData: result.sharedData,
+      };
     }
   }
   return { protocolState, sharedData };
 }
 
 function waitForGuarantorChannelReducer(
-  protocolState: states.VirtualFundingState,
+  protocolState: states.WaitForGuarantorChannel,
   sharedData: SharedData,
   action: WalletAction,
 ) {
-  // Unimplemented
+  const { processId, ourIndex } = protocolState;
+  if (
+    action.type === 'WALLET.COMMON.COMMITMENTS_RECEIVED' &&
+    action.protocolLocator.indexOf(states.GUARANTOR_CHANNEL_DESCRIPTOR) === 0
+  ) {
+    const result = advanceChannelReducer(protocolState.guarantorChannel, sharedData, action);
+    if (advanceChannel.isSuccess(result.protocolState)) {
+      const { channelId: guarantorChannelId } = result.protocolState;
+      switch (result.protocolState.commitmentType) {
+        case CommitmentType.PreFundSetup:
+          const guarantorChannelResult = advanceChannel.initializeAdvanceChannel(
+            processId,
+            result.sharedData,
+            CommitmentType.PostFundSetup,
+            {
+              clearedToSend: true,
+              commitmentType: CommitmentType.PostFundSetup,
+              processId,
+              protocolLocator: states.GUARANTOR_CHANNEL_DESCRIPTOR,
+              channelId: guarantorChannelId,
+              ourIndex,
+            },
+          );
+          return {
+            protocolState: {
+              ...protocolState,
+              jointChannel: guarantorChannelResult.protocolState,
+            },
+            sharedData: guarantorChannelResult.sharedData,
+          };
+
+        case CommitmentType.PostFundSetup:
+          const indirectFundingResult = indirectFunding.initializeIndirectFunding(
+            processId,
+            result.protocolState.channelId,
+            result.sharedData,
+          );
+          return {
+            protocolState: states.waitForGuarantorFunding({
+              ...protocolState,
+              indirectGuarantorFunding: indirectFundingResult.protocolState,
+            }),
+            sharedData: indirectFundingResult.sharedData,
+          };
+
+        default:
+          return {
+            protocolState: states.waitForGuarantorChannel({
+              ...protocolState,
+              guarantorChannel: result.protocolState,
+            }),
+            sharedData: result.sharedData,
+          };
+      }
+    } else {
+      return {
+        protocolState: states.waitForGuarantorChannel({
+          ...protocolState,
+          guarantorChannel: result.protocolState,
+        }),
+        sharedData: result.sharedData,
+      };
+    }
+  }
   return { protocolState, sharedData };
 }
 
 function waitForGuarantorFundingReducer(
-  protocolState: states.VirtualFundingState,
+  protocolState: states.WaitForGuarantorFunding,
   sharedData: SharedData,
   action: WalletAction,
 ) {
-  // Unimplemented
+  const { processId, jointChannelId, startingAllocation, targetChannelId } = protocolState;
+  if (
+    action.type === 'WALLET.COMMON.COMMITMENT_RECEIVED' &&
+    action.protocolLocator &&
+    action.protocolLocator.indexOf(states.INDIRECT_GUARANTOR_FUNDING_DESCRIPTOR) === 0
+  ) {
+    const result = indirectFunding.indirectFundingReducer(
+      protocolState.indirectGuarantorFunding,
+      sharedData,
+      action,
+    );
+    if (indirectFunding.isTerminal(result.protocolState)) {
+      switch (result.protocolState.type) {
+        case 'IndirectFunding.Success':
+          const proposedAllocation = [startingAllocation.reduce(addHex)];
+          const proposedDestination = [targetChannelId];
+
+          const applicationFundingResult = consensusUpdate.initializeConsensusUpdate(
+            processId,
+            jointChannelId,
+            proposedAllocation,
+            proposedDestination,
+            result.sharedData,
+          );
+          return {
+            protocolState: states.waitForApplicationFunding({
+              ...protocolState,
+              indirectApplicationFunding: applicationFundingResult.protocolState,
+            }),
+            sharedData: applicationFundingResult.sharedData,
+          };
+        case 'IndirectFunding.Failure':
+          throw new Error(`Indirect funding failed: ${result.protocolState.reason}`);
+
+        default:
+          return unreachable(result.protocolState);
+      }
+    } else {
+      return {
+        protocolState: states.waitForGuarantorFunding({
+          ...protocolState,
+          indirectGuarantorFunding: result.protocolState,
+        }),
+        sharedData: result.sharedData,
+      };
+    }
+  }
   return { protocolState, sharedData };
 }
 
 function waitForApplicationFundingReducer(
-  protocolState: states.VirtualFundingState,
+  protocolState: states.WaitForApplicationFunding,
   sharedData: SharedData,
   action: WalletAction,
 ) {
-  // Unimplemented
+  if (
+    action.type === 'WALLET.COMMON.COMMITMENTS_RECEIVED' &&
+    action.protocolLocator &&
+    action.protocolLocator.indexOf(states.INDIRECT_APPLICATION_FUNDING_DESCRIPTOR) === 0
+  ) {
+    const result = consensusUpdate.consensusUpdateReducer(
+      protocolState.indirectApplicationFunding,
+      sharedData,
+      action,
+    );
+    if (consensusUpdate.isTerminal(result.protocolState)) {
+      switch (result.protocolState.type) {
+        case 'ConsensusUpdate.Success':
+          return {
+            protocolState: states.success(protocolState),
+            sharedData: result.sharedData,
+          };
+        case 'ConsensusUpdate.Failure':
+          throw new Error(`Indirect funding failed: ${result.protocolState.reason}`);
+
+        default:
+          return unreachable(result.protocolState);
+      }
+    } else {
+      return {
+        protocolState: states.waitForApplicationFunding({
+          ...protocolState,
+          indirectApplicationFunding: result.protocolState,
+        }),
+        sharedData: result.sharedData,
+      };
+    }
+  }
   return { protocolState, sharedData };
 }
 

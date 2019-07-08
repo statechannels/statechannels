@@ -38,7 +38,10 @@ const props = {
 const setFundingState = (sharedData: SharedData): SharedData => {
   return {
     ...sharedData,
-    fundingState: { [channelId]: { directlyFunded: false, fundingChannel: ledgerId } },
+    fundingState: {
+      [channelId]: { directlyFunded: false, fundingChannel: ledgerId },
+      [ledgerId]: { directlyFunded: true },
+    },
   };
 };
 
@@ -59,6 +62,7 @@ const app3 = appCommitment({ turnNum: 3, balances: oneThree });
 // -----------
 // Shared Data
 // -----------
+
 const initialPlayerALedgerSharedData = setFundingState(
   setChannels(EMPTY_SHARED_DATA, [
     channelFromCommitments([ledger4, ledger5], asAddress, asPrivateKey),

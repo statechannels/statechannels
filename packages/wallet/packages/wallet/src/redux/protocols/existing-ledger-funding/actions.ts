@@ -9,7 +9,8 @@ export function isExistingLedgerFundingAction(
 ): action is ExistingLedgerFundingAction {
   return (
     (action.type === 'WALLET.COMMON.COMMITMENT_RECEIVED' &&
-      action.protocolLocator === EXISTING_LEDGER_FUNDING_PROTOCOL_LOCATOR) ||
+      action.protocolLocator &&
+      action.protocolLocator.indexOf(EXISTING_LEDGER_FUNDING_PROTOCOL_LOCATOR) >= 0) ||
     isLedgerTopUpAction(action)
   );
 }
