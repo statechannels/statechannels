@@ -1,7 +1,7 @@
 pragma solidity ^0.5.2;
 pragma experimental ABIEncoderV2;
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
-import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
+// import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 import "fmg-core/contracts/Commitment.sol";
 import "fmg-core/contracts/Rules.sol";
 
@@ -62,8 +62,8 @@ function deposit(address destination, uint expectedHeld,
        if (token == address(0)) {
         require(msg.value == amount, "Insufficient ETH for ETH deposit");
         } else {
-            IERC20 _token = IERC20(token);
-            require(_token.transferFrom(msg.sender,address(this),amount), 'Could not deposit ERC20s');
+            // IERC20 _token = IERC20(token);
+            // require(token.transferFrom(msg.sender,address(this),amount), 'Could not deposit ERC20s');
             }
 
         uint amountDeposited;
@@ -92,8 +92,8 @@ function deposit(address destination, uint expectedHeld,
               msg.sender.transfer(amount - amountDeposited);
           }
             else {
-                IERC20 _token = IERC20(token);
-                _token.transferFrom(address(this), msg.sender, amount - amountDeposited);
+                // IERC20 _token = IERC20(token);
+                // token.transferFrom(address(this), msg.sender, amount - amountDeposited);
                 }
         }
         emit Deposited(destination, amountDeposited, holdings[destination][token]);
@@ -140,8 +140,8 @@ function deposit(address destination, uint expectedHeld,
         // Decrease holdings before calling to token contract (protect against reentrancy)
         if (token == address(0)) {destination.transfer(amount);}
         else {
-            IERC20 _token = IERC20(token);
-            _token.transfer(destination,amount);
+            // IERC20 _token = IERC20(token);
+            // token.transfer(destination,amount);
             }
 
     }
