@@ -5,7 +5,7 @@ import { FailureReason } from '../../states';
 import { SharedData } from '../../../../state';
 import { Commitment } from '../../../../../domain';
 import {
-  expectThisCommitmentSent,
+  itSendsThisCommitment,
   itSendsThisMessage,
   itSendsThisDisplayEventType,
   describeScenarioStep,
@@ -158,9 +158,7 @@ describe('[ Concluding Cancelled ]', () => {
 /////////////
 
 function itSendsConcludeInstigated(sharedData: SharedData, commitment: Commitment) {
-  it('sends a conclude instigated message with the correct commitment', () => {
-    expectThisCommitmentSent(sharedData, commitment, 'WALLET.NEW_PROCESS.CONCLUDE_INSTIGATED');
-  });
+  itSendsThisCommitment(sharedData, commitment, 'WALLET.NEW_PROCESS.CONCLUDE_INSTIGATED');
 }
 
 function itTransitionsTo(result: ReturnVal, type: InstigatorConcludingStateType) {

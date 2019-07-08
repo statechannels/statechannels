@@ -2,7 +2,7 @@ import * as scenarios from './scenarios';
 import { responderConcludingReducer, initialize, ReturnVal } from '../reducer';
 import { ResponderConcludingStateType } from '../states';
 import {
-  expectThisCommitmentSent,
+  itSendsThisCommitment,
   itSendsThisMessage,
   itSendsThisDisplayEventType,
   describeScenarioStep,
@@ -26,7 +26,7 @@ describe('[ Happy path ]', () => {
     const { state, sharedData, action, reply } = scenario.approveConcluding;
     const result = responderConcludingReducer(state, sharedData, action);
 
-    expectThisCommitmentSent(result.sharedData, reply);
+    itSendsThisCommitment(result.sharedData, reply);
     itTransitionsTo(result, 'ConcludingResponder.DecideDefund');
   });
 
@@ -52,7 +52,7 @@ describe('[ Happy path No Defunding]', () => {
     const { state, sharedData, action, reply } = scenario.approveConcluding;
     const result = responderConcludingReducer(state, sharedData, action);
 
-    expectThisCommitmentSent(result.sharedData, reply);
+    itSendsThisCommitment(result.sharedData, reply);
     itTransitionsTo(result, 'ConcludingResponder.DecideDefund');
   });
 

@@ -23,7 +23,7 @@ export function initialize(
   channelId: string,
   sharedData: SharedData,
 ): ProtocolStateWithSharedData<IndirectFundingState> {
-  const existingLedgerChannel = selectors.getExistingLedgerChannelForParticipants(
+  const existingLedgerChannel = selectors.getFundedLedgerChannelForParticipants(
     sharedData,
     helpers.getOurAddress(channelId, sharedData),
     helpers.getOpponentAddress(channelId, sharedData),

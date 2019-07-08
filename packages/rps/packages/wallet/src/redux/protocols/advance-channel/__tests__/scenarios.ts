@@ -249,7 +249,6 @@ export const preFund = {
     state: states.success({
       commitmentType: CommitmentType.PreFundSetup,
       channelId,
-      ourIndex: PlayerIndex.A,
     }),
     sharedData: aReceivedPrefundSetup,
   },
@@ -266,7 +265,6 @@ export const postFund = {
     state: states.success({
       commitmentType: CommitmentType.PreFundSetup,
       channelId,
-      ourIndex: PlayerIndex.A,
     }),
     sharedData: aReceivedPrefundSetup,
   },
