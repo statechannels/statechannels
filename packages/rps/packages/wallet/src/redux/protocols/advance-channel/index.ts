@@ -1,4 +1,4 @@
-export { AdvanceChannelState } from './states';
+export { AdvanceChannelState, isSuccess } from './states';
 export { AdvanceChannelAction, isAdvanceChannelAction } from './actions';
 export {
   initialize as initializeAdvanceChannel,

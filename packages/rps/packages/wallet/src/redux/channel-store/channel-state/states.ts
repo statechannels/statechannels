@@ -37,7 +37,7 @@ export function initializeChannel(
   const { commitment } = signedCommitment;
   const { turnNum, channel } = commitment;
   const address = new ethers.Wallet(privateKey).address;
-  const ourIndex = commitment.destination.indexOf(address);
+  const ourIndex = commitment.channel.participants.indexOf(address);
   const channelId = getChannelId(commitment);
   return {
     address,

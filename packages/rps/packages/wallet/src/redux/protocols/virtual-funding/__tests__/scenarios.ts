@@ -3,11 +3,10 @@ import * as states from '../states';
 import { EMPTY_SHARED_DATA, setChannel } from '../../../state';
 import * as scenarios from '../../../../domain/commitments/__tests__';
 import { CommitmentType } from '../../../../domain';
-import { preSuccess, success } from '../../advance-channel/__tests__';
+import { preFund, postFund } from '../../advance-channel/__tests__';
 import { channelFromCommitments } from '../../../channel-store/channel-state/__tests__';
 import { appCommitment, twoThree } from '../../../../domain/commitments/__tests__';
 import { CONSENSUS_LIBRARY_ADDRESS } from '../../../../constants';
-import { bigNumberify } from 'ethers/utils/bignumber';
 
 // ---------
 // Test data
@@ -22,17 +21,18 @@ const app0 = appCommitment({ turnNum: 0, balances: twoThree });
 const app1 = appCommitment({ turnNum: 1, balances: twoThree });
 const appChannel = channelFromCommitments([app0, app1], asAddress, asPrivateKey);
 const targetChannelId = appChannel.channelId;
-const allocation = [
-  bigNumberify(1).toHexString(),
-  bigNumberify(2).toHexString(),
-  bigNumberify(3).toHexString(),
-];
+const hubAddress = destination[2];
 
 // To properly test the embedded advanceChannel protocols, it's useful to be playerA
 // to make sure that the commitments get sent.
+
+const startingAllocation = app0.commitment.allocation;
+const startingDestination = app0.commitment.destination;
+
 const initializeArgs = {
-  startingAllocation: allocation,
-  startingDestination: destination,
+  startingAllocation,
+  startingDestination,
+  participants: destination,
   channelType,
   appAttributes,
   processId,
@@ -42,11 +42,15 @@ const initializeArgs = {
   ourIndex: 0,
   commitmentType: CommitmentType.PreFundSetup,
   targetChannelId,
+  hubAddress,
 };
 
 const props = {
   targetChannelId,
   processId,
+  startingAllocation,
+  startingDestination,
+  hubAddress,
 };
 
 // ----
@@ -54,14 +58,21 @@ const props = {
 // ------
 
 const scenarioStates = {
-  waitForJointChannel: states.waitForJointChannel({
+  waitForJointChannel1: states.waitForJointChannel({
     ...props,
-    [states.JOINT_CHANNEL_DESCRIPTOR]: preSuccess.state,
+    [states.JOINT_CHANNEL_DESCRIPTOR]: preFund.preSuccess.state,
+  }),
+  waitForJointChannel2: states.waitForJointChannel({
+    ...props,
+    [states.JOINT_CHANNEL_DESCRIPTOR]: {
+      ...preFund.preSuccess.state,
+      commitmentType: CommitmentType.PostFundSetup,
+    },
   }),
 
   waitForGuarantorChannel: states.waitForGuarantorChannel({
     ...props,
-    [states.GUARANTOR_CHANNEL_DESCRIPTOR]: success.state,
+    [states.GUARANTOR_CHANNEL_DESCRIPTOR]: preFund.success.state,
   }),
 };
 
@@ -84,13 +95,26 @@ export const happyPath = {
     sharedData: setChannel(EMPTY_SHARED_DATA, appChannel),
   },
   openJ: {
-    state: scenarioStates.waitForJointChannel,
-    action: { ...preSuccess.trigger, protocolLocator: states.JOINT_CHANNEL_DESCRIPTOR },
-    sharedData: preSuccess.sharedData,
+    state: scenarioStates.waitForJointChannel1,
+    action: { ...preFund.preSuccess.trigger, protocolLocator: states.JOINT_CHANNEL_DESCRIPTOR },
+    sharedData: setChannel(preFund.preSuccess.sharedData, appChannel),
+  },
+  prepareJ: {
+    state: scenarioStates.waitForJointChannel2,
+    action: { ...postFund.preSuccess.trigger, protocolLocator: states.JOINT_CHANNEL_DESCRIPTOR },
+    sharedData: setChannel(postFund.preSuccess.sharedData, appChannel),
   },
   openG: {
     state: scenarioStates.waitForGuarantorChannel,
-    action: { ...preSuccess.trigger, protocolLocator: states.GUARANTOR_CHANNEL_DESCRIPTOR },
-    sharedData: preSuccess.sharedData,
+    action: { ...preFund.preSuccess.trigger, protocolLocator: states.GUARANTOR_CHANNEL_DESCRIPTOR },
+    sharedData: setChannel(preFund.preSuccess.sharedData, appChannel),
+  },
+  prepareG: {
+    state: scenarioStates.waitForGuarantorChannel,
+    action: {
+      ...postFund.preSuccess.trigger,
+      protocolLocator: states.GUARANTOR_CHANNEL_DESCRIPTOR,
+    },
+    sharedData: setChannel(postFund.preSuccess.sharedData, appChannel),
   },
 };
