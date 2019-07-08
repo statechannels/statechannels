@@ -15,8 +15,8 @@ contract TestNitroAdjudicator is NitroAdjudicator {
         return affords(recipient, allocation, funding);
     }
 
-    function reducePub(Outcome memory allocation, address recipient, uint amount) public pure returns (Outcome memory) {
-        return reduce(allocation, recipient, amount);
+    function reducePub(Outcome memory allocation, address recipient, uint amount, address token) public pure returns (Outcome memory) {
+        return reduce(allocation, recipient, amount, token);
     }
 
     // ****************
