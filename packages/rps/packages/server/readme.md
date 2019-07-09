@@ -35,6 +35,7 @@ $ curl -X POST -H "Content-Type: application/json" -H "Accept:application/json" 
 
 To play against the server from the browser client, the server and the browser need to:
 
+- Share the state-channel address of the server/hub. A good way to do so is to create a `.env.development.local` in the monorepo root with HUB_ADDRESS and HUB_PRIVATE_KEY defined.
 - Point to the same local Ganache server. Configure your `.env.*.local` files accordingly.
 - Point to the same contract addresses on Ganache. For now, run something like `cp ../wallet/build/contracts/* build/contracts/` after deploying the contracts from the wallet.
 - The server relies on transpiled wallet code. If there are transpile errors when building the server, try transpiling the wallet package by running `npx tsc` in `packages/wallet`.
