@@ -12,7 +12,7 @@
     "start": "node scripts/start.js",
     "build": "node scripts/build.js",
     "test": "run-s prettier:check test:contracts 'test:app --all'",
-    "test:ci": "DEV_GANACHE_PORT=8502 run-s prettier:check test:ci:app test:ci:contracts build",
+    "test:ci": "GANACHE_PORT=8502 run-s prettier:check test:ci:app test:ci:contracts build",
     "test:ci:contracts": "yarn test:contracts --all --ci",
     "test:ci:app": "yarn test:app --all --ci --runInBand",
     "prettier:check": "npx prettier --check 'src/**/*.{ts,tsx}'",
@@ -146,7 +146,9 @@
     "setupFiles": [
       "<rootDir>/config/polyfills.js"
     ],
-    "setupTestFrameworkScriptFile": "<rootDir>/src/setupTests.ts",
+    "setupFilesAfterEnv": [
+      "<rootDir>/src/setupTests.ts"
+    ],
     "testMatch": [
       "<rootDir>/src/**/?(*.)(spec|test).(j|t)s?(x)"
     ],
