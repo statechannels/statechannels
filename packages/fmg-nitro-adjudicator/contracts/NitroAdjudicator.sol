@@ -59,7 +59,7 @@ contract NitroAdjudicator {
 
 function deposit(address destination, uint expectedHeld,
  uint amount, address token) public payable {
-       if (token == address(0)) {
+       if (token == zeroAddress) {
         require(msg.value == amount, "Insufficient ETH for ETH deposit");
         } else {
             // IERC20 _token = IERC20(token);
@@ -88,7 +88,7 @@ function deposit(address destination, uint expectedHeld,
         holdings[destination][token] = holdings[destination][token].add(amountDeposited);
         if (amountDeposited < amount) {
             // refund whatever wasn't deposited.
-            if (token == address(0)) {
+            if (token == zeroAddress) {
               msg.sender.transfer(amount - amountDeposited);
           }
             else {
@@ -138,7 +138,7 @@ function deposit(address destination, uint expectedHeld,
 
         holdings[participant][token] = holdings[participant][token].sub(amount);
         // Decrease holdings before calling to token contract (protect against reentrancy)
-        if (token == address(0)) {destination.transfer(amount);}
+        if (token == zeroAddress) {destination.transfer(amount);}
         else {
             // IERC20 _token = IERC20(token);
             // token.transfer(destination,amount);
@@ -213,7 +213,7 @@ function deposit(address destination, uint expectedHeld,
         Outcome memory guarantee
     ) internal pure returns (Outcome memory) {
         require(
-            guarantee.challengeCommitment.guaranteedChannel != address(0),
+            guarantee.challengeCommitment.guaranteedChannel != zeroAddress,
             "Claim: a guarantee channel is required"
         );
         address[] memory newDestination = new address[](guarantee.destination.length);
