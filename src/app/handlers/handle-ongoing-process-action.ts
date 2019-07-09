@@ -135,7 +135,11 @@ async function handleCommitmentsReceived({ ctx, action }: { ctx; action: Commitm
       ledgerCommitment: asConsensusCommitment(signedCommitment.commitment),
       signature: signedCommitment.signature,
     }));
-    const { commitment, signature } = await updateLedgerChannel(ledgerCommitmentRound);
+    const currentCommitment = await getCurrentCommitment(lastCommitment);
+    const { commitment, signature } = await updateLedgerChannel(
+      ledgerCommitmentRound,
+      currentCommitment && asConsensusCommitment(currentCommitment),
+    );
     ctx.status = 201;
 
     // todo: properly compose a round of commitments
