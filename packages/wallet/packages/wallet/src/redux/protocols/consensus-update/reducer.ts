@@ -1,7 +1,7 @@
 import { SharedData, signAndStore, getExistingChannel } from '../../state';
 import * as states from './states';
 import { ProtocolStateWithSharedData } from '..';
-import { ConsensusUpdateAction, isConsensusUpdateAction } from './actions';
+import { ConsensusUpdateAction, isConsensusUpdateAction, ClearedToSend } from './actions';
 import * as helpers from '../reducer-helpers';
 import {
   proposeNewConsensus,
@@ -12,41 +12,34 @@ import {
 import { Commitment } from '../../../domain';
 import { appAttributesFromBytes } from 'fmg-nitro-adjudicator/lib/consensus-app';
 import { eqHexArray } from '../../../utils/hex-utils';
+import { CommitmentsReceived } from '../../../communication';
 
 export const CONSENSUS_UPDATE_PROTOCOL_LOCATOR = 'ConsensusUpdate';
 
 export const initialize = (
   processId: string,
   channelId: string,
+  clearedToSend: boolean,
   proposedAllocation: string[],
   proposedDestination: string[],
   sharedData: SharedData,
 ): ProtocolStateWithSharedData<states.ConsensusUpdateState> => {
-  const lastCommitment = helpers.getLatestCommitment(channelId, sharedData);
-
-  if (helpers.isFirstPlayer(channelId, sharedData)) {
-    const ourCommitment = proposeNewConsensus(
-      lastCommitment,
-      proposedAllocation,
-      proposedDestination,
-    );
-    const signResult = signAndStore(sharedData, ourCommitment);
-    if (!signResult.isSuccess) {
+  const sendUpdate = helpers.isFirstPlayer(channelId, sharedData) && clearedToSend;
+  if (sendUpdate) {
+    try {
+      sharedData = sendProposal(
+        processId,
+        channelId,
+        proposedAllocation,
+        proposedDestination,
+        sharedData,
+      );
+    } catch (error) {
       return {
-        protocolState: states.failure({
-          reason: 'Signature Failure',
-        }),
+        protocolState: states.failure({ reason: error.message }),
         sharedData,
       };
     }
-    sharedData = signResult.store;
-
-    sharedData = helpers.sendCommitments(
-      sharedData,
-      processId,
-      channelId,
-      CONSENSUS_UPDATE_PROTOCOL_LOCATOR,
-    );
   }
 
   return {
@@ -55,25 +48,65 @@ export const initialize = (
       channelId,
       proposedAllocation,
       proposedDestination,
+      clearedToSend,
+      updateSent: sendUpdate,
     }),
     sharedData,
   };
 };
-
-export const consensusUpdateReducer = (
+const handleClearedToSend = (
   protocolState: states.ConsensusUpdateState,
   sharedData: SharedData,
-  action: ConsensusUpdateAction,
+  action: ClearedToSend,
 ): ProtocolStateWithSharedData<states.ConsensusUpdateState> => {
-  if (!isConsensusUpdateAction(action)) {
-    console.warn(`Consensus Update received non Consensus Update action ${action}`);
-    return { protocolState, sharedData };
-  }
   if (protocolState.type !== 'ConsensusUpdate.WaitForUpdate') {
     console.warn(`Consensus update reducer was called with terminal state ${protocolState.type}`);
     return { protocolState, sharedData };
   }
-  const { channelId, processId } = protocolState;
+  const { processId, channelId, proposedAllocation, proposedDestination } = protocolState;
+  let updateSent = protocolState.updateSent;
+  const shouldUpdateBeSent = !updateSent && helpers.ourTurn(sharedData, channelId);
+  if (shouldUpdateBeSent) {
+    try {
+      if (helpers.isFirstPlayer(channelId, sharedData)) {
+        sharedData = sendProposal(
+          processId,
+          channelId,
+          proposedAllocation,
+          proposedDestination,
+          sharedData,
+        );
+      } else {
+        sharedData = sendAcceptConsensus(processId, channelId, sharedData);
+      }
+      updateSent = true;
+    } catch (error) {
+      return {
+        protocolState: states.failure({ reason: error.message }),
+        sharedData,
+      };
+    }
+  }
+  const latestCommitment = helpers.getLatestCommitment(channelId, sharedData);
+  // If we are the last player we would be the one reaching consensus so we check again
+  if (consensusReached(latestCommitment, proposedAllocation, proposedDestination)) {
+    return { protocolState: states.success({}), sharedData };
+  }
+  return {
+    protocolState: states.waitForUpdate({ ...protocolState, updateSent, clearedToSend: true }),
+    sharedData,
+  };
+};
+const handleCommitmentReceived = (
+  protocolState: states.ConsensusUpdateState,
+  sharedData: SharedData,
+  action: CommitmentsReceived,
+): ProtocolStateWithSharedData<states.ConsensusUpdateState> => {
+  if (protocolState.type !== 'ConsensusUpdate.WaitForUpdate') {
+    console.warn(`Consensus update reducer was called with terminal state ${protocolState.type}`);
+    return { protocolState, sharedData };
+  }
+  const { channelId, processId, clearedToSend } = protocolState;
 
   try {
     const { turnNum } = getExistingChannel(sharedData, channelId);
@@ -99,26 +132,17 @@ export const consensusUpdateReducer = (
       sharedData,
     };
   }
-
-  if (helpers.ourTurn(sharedData, channelId)) {
-    const ourCommitment = helpers.isLastPlayer(channelId, sharedData)
-      ? acceptConsensus(latestCommitment)
-      : voteForConsensus(latestCommitment);
-
-    const signResult = signAndStore(sharedData, ourCommitment);
-    if (!signResult.isSuccess) {
+  let updateSent = protocolState.updateSent;
+  if (helpers.ourTurn(sharedData, channelId) && clearedToSend) {
+    try {
+      sharedData = sendAcceptConsensus(processId, channelId, sharedData);
+      updateSent = true;
+    } catch (error) {
       return {
-        protocolState: states.failure({ reason: 'Signature Failure' }),
+        protocolState: states.failure({ reason: error.message }),
         sharedData,
       };
     }
-    sharedData = signResult.store;
-    sharedData = helpers.sendCommitments(
-      sharedData,
-      processId,
-      channelId,
-      CONSENSUS_UPDATE_PROTOCOL_LOCATOR,
-    );
   }
 
   latestCommitment = helpers.getLatestCommitment(channelId, sharedData);
@@ -126,14 +150,30 @@ export const consensusUpdateReducer = (
   if (consensusReached(latestCommitment, proposedAllocation, proposedDestination)) {
     return { protocolState: states.success({}), sharedData };
   }
-  return { protocolState: states.waitForUpdate(protocolState), sharedData };
+  return { protocolState: states.waitForUpdate({ ...protocolState, updateSent }), sharedData };
+};
+
+export const consensusUpdateReducer = (
+  protocolState: states.ConsensusUpdateState,
+  sharedData: SharedData,
+  action: ConsensusUpdateAction,
+): ProtocolStateWithSharedData<states.ConsensusUpdateState> => {
+  if (!isConsensusUpdateAction(action)) {
+    console.warn(`Consensus Update received non Consensus Update action ${action}`);
+    return { protocolState, sharedData };
+  }
+  if (action.type === 'WALLET.COMMON.COMMITMENTS_RECEIVED') {
+    return handleCommitmentReceived(protocolState, sharedData, action);
+  } else {
+    return handleClearedToSend(protocolState, sharedData, action);
+  }
 };
 
 function consensusReached(
   commitment: Commitment,
   expectedAllocation: string[],
   expectedDestination: string[],
-) {
+): boolean {
   return (
     consensusHasBeenReached(commitment) &&
     eqHexArray(commitment.allocation, expectedAllocation) &&
@@ -153,4 +193,55 @@ function proposalCommitmentHasExpectedValues(
     eqHexArray(proposedAllocation, expectedAllocation) &&
     eqHexArray(proposedDestination, expectedDestination)
   );
+}
+function sendAcceptConsensus(
+  processId: string,
+  channelId: string,
+  sharedData: SharedData,
+): SharedData {
+  const lastCommitment = helpers.getLatestCommitment(channelId, sharedData);
+  const ourCommitment = helpers.isLastPlayer(channelId, sharedData)
+    ? acceptConsensus(lastCommitment)
+    : voteForConsensus(lastCommitment);
+
+  const signResult = signAndStore(sharedData, ourCommitment);
+  if (!signResult.isSuccess) {
+    throw new Error('Signature Failure');
+  }
+  sharedData = signResult.store;
+  sharedData = helpers.sendCommitments(
+    sharedData,
+    processId,
+    channelId,
+    CONSENSUS_UPDATE_PROTOCOL_LOCATOR,
+  );
+  return sharedData;
+}
+
+function sendProposal(
+  processId: string,
+  channelId: string,
+  proposedAllocation: string[],
+  proposedDestination: string[],
+  sharedData: SharedData,
+): SharedData {
+  const lastCommitment = helpers.getLatestCommitment(channelId, sharedData);
+  const ourCommitment = proposeNewConsensus(
+    lastCommitment,
+    proposedAllocation,
+    proposedDestination,
+  );
+  const signResult = signAndStore(sharedData, ourCommitment);
+  if (!signResult.isSuccess) {
+    throw new Error('SignatureFailure');
+  }
+  sharedData = signResult.store;
+
+  sharedData = helpers.sendCommitments(
+    sharedData,
+    processId,
+    channelId,
+    CONSENSUS_UPDATE_PROTOCOL_LOCATOR,
+  );
+  return sharedData;
 }

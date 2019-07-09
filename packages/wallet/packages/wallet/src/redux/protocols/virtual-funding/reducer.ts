@@ -275,6 +275,7 @@ function waitForGuarantorFundingReducer(
           const applicationFundingResult = consensusUpdate.initializeConsensusUpdate(
             processId,
             jointChannelId,
+            true,
             proposedAllocation,
             proposedDestination,
             result.sharedData,
