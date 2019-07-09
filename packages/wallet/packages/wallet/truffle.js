@@ -1,5 +1,6 @@
 var HDWalletProvider = require('truffle-hdwallet-provider');
-require('dotenv').config();
+const { configureEnvVariables } = require('magmo-devtools');
+configureEnvVariables();
 
 // We only want this loaded in a test environment
 // so we can load and parse this file from the app

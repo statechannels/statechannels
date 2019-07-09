@@ -68,7 +68,6 @@ module.exports = {
   appPreBuiltContractArtifacts: resolveApp('contracts/pre-built-artifacts'),
   appContracts: resolveApp('contracts'),
   buildContracts: resolveApp('build/contracts'),
-  dotenv: resolveApp('.env'),
   appPath: resolveApp('.'),
   appBuild: resolveApp('build'),
   appPublic: resolveApp('public'),
