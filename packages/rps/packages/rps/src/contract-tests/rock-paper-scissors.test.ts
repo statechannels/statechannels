@@ -12,7 +12,7 @@ jest.setTimeout(20000);
 describe('Rock paper Scissors', () => {
   let networkId;
   const provider = new ethers.providers.JsonRpcProvider(
-    `http://localhost:${process.env.DEV_GANACHE_PORT}`,
+    `http://localhost:${process.env.GANACHE_PORT}`,
   );
   let rpsContract;
 
