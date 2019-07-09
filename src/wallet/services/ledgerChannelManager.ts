@@ -7,14 +7,35 @@ import {
   vote,
 } from 'fmg-nitro-adjudicator/lib/consensus-app';
 import { unreachable } from 'magmo-wallet';
-import { SignedCommitment } from '.';
+import { SignedCommitment, SignedLedgerCommitment } from '.';
 import { queries } from '../db/queries/allocator_channels';
 import errors from '../errors';
 import * as ChannelManagement from './channelManagement';
 import { asCoreCommitment, LedgerCommitment } from './ledger-commitment';
 
-// TODO: This should be extracted into a hub app?
 export async function updateLedgerChannel(
+  commitmentRound: SignedLedgerCommitment[],
+  currentCommitment?: LedgerCommitment,
+): Promise<SignedCommitment> {
+  // Assume that CommitmentsReceived are sorted from earlest to latest
+  let commitmentsToApply = commitmentRound;
+  if (currentCommitment) {
+    commitmentsToApply = commitmentRound.filter(
+      signedCommitment => signedCommitment.ledgerCommitment.turnNum > currentCommitment.turnNum,
+    );
+  }
+
+  // todo: apply each commitment instead of just the last one
+  const lastCommitmentInRound = commitmentsToApply.slice(-1)[0];
+  return await updateLedgerChannelWithCommitment(
+    lastCommitmentInRound.ledgerCommitment,
+    lastCommitmentInRound.signature,
+    currentCommitment,
+  );
+}
+
+// TODO: This should be extracted into a hub app?
+export async function updateLedgerChannelWithCommitment(
   theirCommitment: LedgerCommitment,
   theirSignature: Signature,
   currentCommitment?: LedgerCommitment,

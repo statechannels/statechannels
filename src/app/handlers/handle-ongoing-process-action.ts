@@ -1,7 +1,7 @@
 import { ethers } from 'ethers';
 import { Signature } from 'fmg-core';
 import { channelID } from 'fmg-core/lib/channel';
-import { unreachable } from 'magmo-wallet';
+import { SignedCommitment as ClientSignedCommitment, unreachable } from 'magmo-wallet';
 import {
   CommitmentReceived,
   CommitmentsReceived,
@@ -11,9 +11,11 @@ import {
 import * as communication from 'magmo-wallet/lib/src/communication';
 import { errors } from '../../wallet';
 import { getCurrentCommitment } from '../../wallet/db/queries/getCurrentCommitment';
+
 import { getProcess } from '../../wallet/db/queries/walletProcess';
-import { updateLedgerChannel } from '../../wallet/services';
+import { SignedCommitment, updateLedgerChannel } from '../../wallet/services';
 import { asConsensusCommitment } from '../../wallet/services/ledger-commitment';
+
 import { updateRPSChannel } from '../services/rpsChannelManager';
 
 export async function handleOngoingProcessAction(ctx) {
@@ -58,6 +60,7 @@ async function handleCommitmentReceived(ctx, action: CommitmentReceived) {
       throw errors.processMissing(processId);
     }
     const { theirAddress } = walletProcess;
+
     const { commitment: theirCommitment, signature: theirSignature } = action.signedCommitment;
     const splitSignature = (ethers.utils.splitSignature(theirSignature) as unknown) as Signature;
 
@@ -79,8 +82,7 @@ async function handleCommitmentReceived(ctx, action: CommitmentReceived) {
 
     const currentCommitment = await getCurrentCommitment(theirCommitment);
     const { commitment, signature } = await updateLedgerChannel(
-      asConsensusCommitment(theirCommitment),
-      splitSignature,
+      [{ ledgerCommitment: asConsensusCommitment(theirCommitment), signature: splitSignature }],
       currentCommitment && asConsensusCommitment(currentCommitment),
     );
     ctx.status = 201;
@@ -103,16 +105,22 @@ async function handleCommitmentsReceived({ ctx, action }: { ctx; action: Commitm
       throw errors.processMissing(processId);
     }
     const { theirAddress } = walletProcess;
-    // For the time being, just assume a two-party channel and proceed as normal.
-    const { commitment: theirCommitment, signature: theirSignature } = action.signedCommitments[1];
-    const splitSignature = (ethers.utils.splitSignature(theirSignature) as unknown) as Signature;
+    const commitmentRound: SignedCommitment[] = action.signedCommitments.map(
+      clientCommitmentToServerCommitment,
+    );
 
-    const channelId = channelID(theirCommitment.channel);
+    // For the time being, just assume a two-party channel and proceed as normal.
+    const {
+      commitment: lastCommitment,
+      signature: lastCommitmentSignature,
+    } = commitmentRound.slice(-1)[0];
+
+    const channelId = channelID(lastCommitment.channel);
 
     if (channelId === walletProcess.appChannelId) {
       const { commitment: ourCommitment, signature: ourSignature } = await updateRPSChannel(
-        theirCommitment,
-        splitSignature,
+        lastCommitment,
+        lastCommitmentSignature,
       );
       ctx.body = communication.sendCommitmentReceived(
         theirAddress,
@@ -123,18 +131,18 @@ async function handleCommitmentsReceived({ ctx, action }: { ctx; action: Commitm
       return ctx;
     }
 
-    const currentCommitment = await getCurrentCommitment(theirCommitment);
-    const { commitment, signature } = await updateLedgerChannel(
-      asConsensusCommitment(theirCommitment),
-      splitSignature,
-      currentCommitment && asConsensusCommitment(currentCommitment),
-    );
+    const ledgerCommitmentRound = commitmentRound.map(signedCommitment => ({
+      ledgerCommitment: asConsensusCommitment(signedCommitment.commitment),
+      signature: signedCommitment.signature,
+    }));
+    const { commitment, signature } = await updateLedgerChannel(ledgerCommitmentRound);
     ctx.status = 201;
+    // todo: properly compose a round of commitments
     ctx.body = communication.sendCommitmentsReceived(
       theirAddress,
       processId,
       [
-        { commitment: theirCommitment, signature: theirSignature },
+        { commitment: lastCommitment, signature: action.signedCommitments[0].signature },
         { commitment, signature: (signature as unknown) as string },
       ],
       action.protocolLocator,
@@ -142,4 +150,10 @@ async function handleCommitmentsReceived({ ctx, action }: { ctx; action: Commitm
 
     return ctx;
   }
+}
+
+function clientCommitmentToServerCommitment(signedCommitment: ClientSignedCommitment) {
+  const { commitment, signature: stringSignature } = signedCommitment;
+  const splitSignature = (ethers.utils.splitSignature(stringSignature) as unknown) as Signature;
+  return { commitment, signature: splitSignature };
 }
