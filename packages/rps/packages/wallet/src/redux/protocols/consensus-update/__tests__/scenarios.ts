@@ -16,6 +16,7 @@ import * as states from '../states';
 import { CONSENSUS_UPDATE_PROTOCOL_LOCATOR } from '../reducer';
 import { commitmentsReceived } from '../../../../communication';
 import { ThreePartyPlayerIndex } from '../../../types';
+import { clearedToSend } from '../actions';
 
 const twoThree = [
   { address: asAddress, wei: bigNumberify(2).toHexString() },
@@ -122,19 +123,29 @@ const processId = 'process-id.123';
 // ------
 // States
 // ------
-const twoPlayerWaitForUpdate = states.waitForUpdate({
-  channelId: ledgerId,
-  processId,
-  proposedAllocation,
-  proposedDestination,
-});
+// tslint:disable-next-line: no-shadowed-variable
+const twoPlayerWaitForUpdate = (clearedToSend: boolean, updateSent: boolean) => {
+  return states.waitForUpdate({
+    channelId: ledgerId,
+    processId,
+    proposedAllocation,
+    proposedDestination,
+    clearedToSend,
+    updateSent,
+  });
+};
 
-const threePlayerWaitForUpdate = states.waitForUpdate({
-  channelId: threeWayLedgerId,
-  processId,
-  proposedAllocation: threePlayerProposedAllocation,
-  proposedDestination: threePlayerProposedDestination,
-});
+// tslint:disable-next-line: no-shadowed-variable
+const threePlayerWaitForUpdate = (clearedToSend, updateSent) => {
+  return states.waitForUpdate({
+    channelId: threeWayLedgerId,
+    processId,
+    proposedAllocation: threePlayerProposedAllocation,
+    proposedDestination: threePlayerProposedDestination,
+    clearedToSend,
+    updateSent,
+  });
+};
 
 // ------
 // Actions
@@ -144,7 +155,7 @@ const twoPlayerUpdate0Received = commitmentsReceived({
   signedCommitments: [ledger6],
   protocolLocator: CONSENSUS_UPDATE_PROTOCOL_LOCATOR,
 });
-const twoPLayerUpdate1Received = commitmentsReceived({
+const twoPlayerUpdate1Received = commitmentsReceived({
   processId,
   signedCommitments: [ledger6, ledger7],
   protocolLocator: CONSENSUS_UPDATE_PROTOCOL_LOCATOR,
@@ -171,7 +182,10 @@ const threePlayerUpdate2Received = commitmentsReceived({
   signedCommitments: [threePlayerLedger9, threePlayerLedger10, threePlayerLedger11],
   protocolLocator: CONSENSUS_UPDATE_PROTOCOL_LOCATOR,
 });
-
+const clearedToSendAction = clearedToSend({
+  processId,
+  protocolLocator: CONSENSUS_UPDATE_PROTOCOL_LOCATOR,
+});
 export const twoPlayerAHappyPath = {
   initialize: {
     channelId: ledgerId,
@@ -180,11 +194,12 @@ export const twoPlayerAHappyPath = {
     processId,
     sharedData: twoPlayerAInitialSharedData,
     reply: [ledger5, ledger6],
+    clearedToSend: true,
   },
   waitForUpdate: {
-    state: twoPlayerWaitForUpdate,
+    state: twoPlayerWaitForUpdate(true, true),
     sharedData: twoPlayerAUpdate0ReceivedSharedData,
-    action: twoPLayerUpdate1Received,
+    action: twoPlayerUpdate1Received,
   },
 };
 
@@ -194,10 +209,11 @@ export const twoPlayerBHappyPath = {
     channelId: ledgerId,
     proposedAllocation,
     proposedDestination,
+    clearedToSend: true,
     sharedData: twoPlayerBInitialSharedData,
   },
   waitForUpdate: {
-    state: twoPlayerWaitForUpdate,
+    state: twoPlayerWaitForUpdate(true, false),
     sharedData: twoPlayerBInitialSharedData,
     action: twoPlayerUpdate0Received,
     reply: [ledger6, ledger7],
@@ -206,7 +222,7 @@ export const twoPlayerBHappyPath = {
 
 export const twoPlayerACommitmentRejected = {
   waitForUpdate: {
-    state: twoPlayerWaitForUpdate,
+    state: twoPlayerWaitForUpdate(true, true),
     sharedData: twoPlayerAUpdate0ReceivedSharedData,
     action: twoPlayerInvalidUpdateReceived,
   },
@@ -214,7 +230,7 @@ export const twoPlayerACommitmentRejected = {
 
 export const twoPlayerBCommitmentRejected = {
   waitForUpdate: {
-    state: twoPlayerWaitForUpdate,
+    state: twoPlayerWaitForUpdate(true, false),
     sharedData: twoPlayerBInitialSharedData,
     action: twoPlayerInvalidUpdateReceived,
   },
@@ -226,16 +242,17 @@ export const threePlayerAHappyPath = {
     processId,
     proposedAllocation: threePlayerProposedAllocation,
     proposedDestination: threePlayerProposedDestination,
+    clearedToSend: true,
     sharedData: threePlayerInitialSharedData(ThreePartyPlayerIndex.A),
     reply: [threePlayerLedger7, threePlayerLedger8, threePlayerLedger9],
   },
   waitForPlayerBUpdate: {
-    state: threePlayerWaitForUpdate,
+    state: threePlayerWaitForUpdate(true, true),
     sharedData: threePlayerFirstUpdateSharedData(ThreePartyPlayerIndex.A),
     action: threePlayerUpdate1Received,
   },
   waitForHubUpdate: {
-    state: threePlayerWaitForUpdate,
+    state: threePlayerWaitForUpdate(true, true),
     sharedData: threePlayerSecondUpdateSharedData(ThreePartyPlayerIndex.A),
     action: threePlayerUpdate2Received,
   },
@@ -247,16 +264,17 @@ export const threePlayerBHappyPath = {
     processId,
     proposedAllocation: threePlayerProposedAllocation,
     proposedDestination: threePlayerProposedDestination,
+    clearedToSend: true,
     sharedData: threePlayerInitialSharedData(ThreePartyPlayerIndex.B),
   },
   waitForPlayerAUpdate: {
-    state: threePlayerWaitForUpdate,
+    state: threePlayerWaitForUpdate(true, false),
     sharedData: threePlayerInitialSharedData(ThreePartyPlayerIndex.B),
     action: threePlayerUpdate0Received,
     reply: [threePlayerLedger8, threePlayerLedger9, threePlayerLedger10],
   },
   waitForHubUpdate: {
-    state: threePlayerWaitForUpdate,
+    state: threePlayerWaitForUpdate(true, true),
     sharedData: threePlayerSecondUpdateSharedData(ThreePartyPlayerIndex.B),
     action: threePlayerUpdate2Received,
   },
@@ -268,17 +286,84 @@ export const threePlayerHubHappyPath = {
     processId,
     proposedAllocation: threePlayerProposedAllocation,
     proposedDestination: threePlayerProposedDestination,
+    clearedToSend: true,
     sharedData: threePlayerInitialSharedData(ThreePartyPlayerIndex.Hub),
   },
   waitForPlayerAUpdate: {
-    state: threePlayerWaitForUpdate,
+    state: threePlayerWaitForUpdate(true, false),
     sharedData: threePlayerInitialSharedData(ThreePartyPlayerIndex.Hub),
     action: threePlayerUpdate0Received,
   },
   waitForPlayerBUpdate: {
-    state: threePlayerWaitForUpdate,
+    state: threePlayerWaitForUpdate(true, false),
     sharedData: threePlayerFirstUpdateSharedData(ThreePartyPlayerIndex.Hub),
     action: threePlayerUpdate1Received,
+    reply: [threePlayerLedger9, threePlayerLedger10, threePlayerLedger11],
+  },
+};
+
+export const threePlayerANotClearedToSend = {
+  initialize: {
+    channelId: threeWayLedgerId,
+    processId,
+    proposedAllocation: threePlayerProposedAllocation,
+    proposedDestination: threePlayerProposedDestination,
+    clearedToSend: false,
+    sharedData: threePlayerInitialSharedData(ThreePartyPlayerIndex.A),
+  },
+  waitForUpdateAndClearedToSend: {
+    state: threePlayerWaitForUpdate(false, false),
+    sharedData: threePlayerInitialSharedData(ThreePartyPlayerIndex.A),
+    action: clearedToSendAction,
+    reply: [threePlayerLedger7, threePlayerLedger8, threePlayerLedger9],
+  },
+};
+
+export const threePlayerBNotClearedToSend = {
+  initialize: {
+    channelId: threeWayLedgerId,
+    processId,
+    proposedAllocation: threePlayerProposedAllocation,
+    proposedDestination: threePlayerProposedDestination,
+    clearedToSend: false,
+    sharedData: threePlayerInitialSharedData(ThreePartyPlayerIndex.B),
+  },
+  waitForUpdateAndClearedToSend: {
+    state: threePlayerWaitForUpdate(false, false),
+    sharedData: threePlayerInitialSharedData(ThreePartyPlayerIndex.B),
+    action: clearedToSendAction,
+  },
+  waitForPlayerAUpdate: {
+    state: threePlayerWaitForUpdate(true, false),
+    sharedData: threePlayerInitialSharedData(ThreePartyPlayerIndex.B),
+    action: threePlayerUpdate0Received,
+    reply: [threePlayerLedger8, threePlayerLedger9, threePlayerLedger10],
+  },
+};
+
+export const threePlayerHubNotClearedToSend = {
+  initialize: {
+    channelId: threeWayLedgerId,
+    processId,
+    proposedAllocation: threePlayerProposedAllocation,
+    proposedDestination: threePlayerProposedDestination,
+    clearedToSend: false,
+    sharedData: threePlayerInitialSharedData(ThreePartyPlayerIndex.Hub),
+  },
+  waitForPlayerAUpdate: {
+    state: threePlayerWaitForUpdate(false, false),
+    sharedData: threePlayerInitialSharedData(ThreePartyPlayerIndex.Hub),
+    action: threePlayerUpdate0Received,
+  },
+  waitForPlayerBUpdate: {
+    state: threePlayerWaitForUpdate(false, false),
+    sharedData: threePlayerFirstUpdateSharedData(ThreePartyPlayerIndex.Hub),
+    action: threePlayerUpdate1Received,
+  },
+  waitForClearedToSend: {
+    state: threePlayerWaitForUpdate(false, false),
+    action: clearedToSendAction,
+    sharedData: threePlayerSecondUpdateSharedData(ThreePartyPlayerIndex.Hub),
     reply: [threePlayerLedger9, threePlayerLedger10, threePlayerLedger11],
   },
 };
