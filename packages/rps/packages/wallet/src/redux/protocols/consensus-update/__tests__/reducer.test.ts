@@ -15,6 +15,7 @@ describe('Two Players', () => {
       const {
         processId,
         channelId,
+        clearedToSend,
         proposedAllocation,
         proposedDestination,
         sharedData,
@@ -22,6 +23,7 @@ describe('Two Players', () => {
       const result = initialize(
         processId,
         channelId,
+        clearedToSend,
         proposedAllocation,
         proposedDestination,
         sharedData,
@@ -43,6 +45,7 @@ describe('Two Players', () => {
       const {
         processId,
         channelId,
+        clearedToSend,
         proposedAllocation,
         proposedDestination,
         sharedData,
@@ -50,6 +53,7 @@ describe('Two Players', () => {
       const result = initialize(
         processId,
         channelId,
+        clearedToSend,
         proposedAllocation,
         proposedDestination,
         sharedData,
@@ -96,6 +100,7 @@ describe('Three Players', () => {
       const {
         processId,
         channelId,
+        clearedToSend,
         proposedAllocation,
         proposedDestination,
         sharedData,
@@ -103,6 +108,7 @@ describe('Three Players', () => {
       const result = initialize(
         processId,
         channelId,
+        clearedToSend,
         proposedAllocation,
         proposedDestination,
         sharedData,
@@ -127,12 +133,13 @@ describe('Three Players', () => {
     });
   });
 
-  describe('Player B Happy Path', () => {
-    const scenario = scenarios.threePlayerBHappyPath;
+  describe('Player A waiting for Cleared To Send', () => {
+    const scenario = scenarios.threePlayerANotClearedToSend;
     describe('when initializing', () => {
       const {
         processId,
         channelId,
+        clearedToSend,
         proposedAllocation,
         proposedDestination,
         sharedData,
@@ -140,6 +147,39 @@ describe('Three Players', () => {
       const result = initialize(
         processId,
         channelId,
+        clearedToSend,
+        proposedAllocation,
+        proposedDestination,
+        sharedData,
+      );
+
+      itTransitionsTo(result, 'ConsensusUpdate.WaitForUpdate');
+    });
+
+    describe('when receiving Cleared To Send', () => {
+      const { sharedData, action, state } = scenario.waitForUpdateAndClearedToSend;
+      const result = consensusUpdateReducer(state, sharedData, action);
+      itTransitionsTo(result, 'ConsensusUpdate.WaitForUpdate');
+      itSendsTheseCommitments(result, scenario.waitForUpdateAndClearedToSend.reply);
+      itSetsClearedToSendAndUpdateSent(result, true, true);
+    });
+  });
+
+  describe('Player B Happy Path', () => {
+    const scenario = scenarios.threePlayerBHappyPath;
+    describe('when initializing', () => {
+      const {
+        processId,
+        channelId,
+        clearedToSend,
+        proposedAllocation,
+        proposedDestination,
+        sharedData,
+      } = scenario.initialize;
+      const result = initialize(
+        processId,
+        channelId,
+        clearedToSend,
         proposedAllocation,
         proposedDestination,
         sharedData,
@@ -164,12 +204,13 @@ describe('Three Players', () => {
     });
   });
 
-  describe('Hub Happy Path', () => {
-    const scenario = scenarios.threePlayerHubHappyPath;
+  describe('Player B waiting for Cleared To send', () => {
+    const scenario = scenarios.threePlayerBNotClearedToSend;
     describe('when initializing', () => {
       const {
         processId,
         channelId,
+        clearedToSend,
         proposedAllocation,
         proposedDestination,
         sharedData,
@@ -177,6 +218,49 @@ describe('Three Players', () => {
       const result = initialize(
         processId,
         channelId,
+        clearedToSend,
+        proposedAllocation,
+        proposedDestination,
+        sharedData,
+      );
+
+      itTransitionsTo(result, 'ConsensusUpdate.WaitForUpdate');
+      itSetsClearedToSendAndUpdateSent(result, false, false);
+      itSendsNoMessage(result);
+    });
+
+    describe('when receiving cleared to Send', () => {
+      const { sharedData, action, state } = scenario.waitForUpdateAndClearedToSend;
+      const result = consensusUpdateReducer(state, sharedData, action);
+      itTransitionsTo(result, 'ConsensusUpdate.WaitForUpdate');
+      itSendsNoMessage(result);
+      itSetsClearedToSendAndUpdateSent(result, true, false);
+    });
+
+    describe("when receiving player A's update", () => {
+      const { sharedData, action, state, reply } = scenario.waitForPlayerAUpdate;
+      const result = consensusUpdateReducer(state, sharedData, action);
+      itTransitionsTo(result, 'ConsensusUpdate.WaitForUpdate');
+      itSendsTheseCommitments(result, reply);
+      itSetsClearedToSendAndUpdateSent(result, true, true);
+    });
+  });
+
+  describe('Hub Happy Path', () => {
+    const scenario = scenarios.threePlayerHubHappyPath;
+    describe('when initializing', () => {
+      const {
+        processId,
+        channelId,
+        clearedToSend,
+        proposedAllocation,
+        proposedDestination,
+        sharedData,
+      } = scenario.initialize;
+      const result = initialize(
+        processId,
+        channelId,
+        clearedToSend,
         proposedAllocation,
         proposedDestination,
         sharedData,
@@ -199,8 +283,69 @@ describe('Three Players', () => {
       itTransitionsTo(result, 'ConsensusUpdate.Success');
     });
   });
+
+  describe('Hub waiting for Cleared To Send', () => {
+    const scenario = scenarios.threePlayerHubNotClearedToSend;
+    describe('when initializing', () => {
+      const {
+        processId,
+        channelId,
+        clearedToSend,
+        proposedAllocation,
+        proposedDestination,
+        sharedData,
+      } = scenario.initialize;
+      const result = initialize(
+        processId,
+        channelId,
+        clearedToSend,
+        proposedAllocation,
+        proposedDestination,
+        sharedData,
+      );
+
+      itTransitionsTo(result, 'ConsensusUpdate.WaitForUpdate');
+      itSetsClearedToSendAndUpdateSent(result, false, false);
+      itSendsNoMessage(result);
+    });
+
+    describe("when receiving Player A's update", () => {
+      const { sharedData, action, state } = scenario.waitForPlayerAUpdate;
+      const result = consensusUpdateReducer(state, sharedData, action);
+      itTransitionsTo(result, 'ConsensusUpdate.WaitForUpdate');
+      itSetsClearedToSendAndUpdateSent(result, false, false);
+      itSendsNoMessage(result);
+    });
+
+    describe("when receiving Player B's update", () => {
+      const { sharedData, action, state } = scenario.waitForPlayerBUpdate;
+      const result = consensusUpdateReducer(state, sharedData, action);
+      itSendsNoMessage(result);
+      itSetsClearedToSendAndUpdateSent(result, false, false);
+      itTransitionsTo(result, 'ConsensusUpdate.WaitForUpdate');
+    });
+    describe('when receiving cleared to send', () => {
+      const { sharedData, action, state, reply } = scenario.waitForClearedToSend;
+      const result = consensusUpdateReducer(state, sharedData, action);
+      itSendsTheseCommitments(result, reply);
+      itTransitionsTo(result, 'ConsensusUpdate.Success');
+    });
+  });
 });
 
+function itSetsClearedToSendAndUpdateSent(
+  result: ProtocolStateWithSharedData<states.ConsensusUpdateState>,
+  clearedToSend: boolean,
+  updateSent: boolean,
+) {
+  it('sets clearedToSend correctly', () => {
+    expect((result.protocolState as states.WaitForUpdate).clearedToSend).toBe(clearedToSend);
+  });
+
+  it('sets updateSent correctly', () => {
+    expect((result.protocolState as states.WaitForUpdate).updateSent).toBe(updateSent);
+  });
+}
 function itTransitionsTo(
   result: ProtocolStateWithSharedData<states.ConsensusUpdateState>,
   type: states.ConsensusUpdateStateType,

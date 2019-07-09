@@ -184,6 +184,7 @@ function keepOpenChosen(protocolState: NonTerminalCState, sharedData: Storage): 
     } = initializeConsensusUpdate(
       protocolState.processId,
       ledgerId,
+      true, // TODO: Use cleared to send in concluding protocol
       latestCommitment.allocation,
       latestCommitment.destination,
       sharedData,
@@ -247,6 +248,7 @@ function keepLedgerChannelApproved(protocolState: CState, sharedData: Storage) {
       } = initializeConsensusUpdate(
         protocolState.processId,
         ledgerId,
+        true, // TODO: Use cleared to send in concluding protocol
         latestCommitment.allocation,
         latestCommitment.destination,
         sharedData,

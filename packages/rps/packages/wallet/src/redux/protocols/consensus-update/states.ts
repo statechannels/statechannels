@@ -10,6 +10,8 @@ export interface WaitForUpdate {
   proposedDestination: string[];
   channelId: string;
   processId: string;
+  clearedToSend: boolean;
+  updateSent: boolean;
 }
 
 export interface Failure {
