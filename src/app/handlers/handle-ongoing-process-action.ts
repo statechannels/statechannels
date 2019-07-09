@@ -137,12 +137,13 @@ async function handleCommitmentsReceived({ ctx, action }: { ctx; action: Commitm
     }));
     const { commitment, signature } = await updateLedgerChannel(ledgerCommitmentRound);
     ctx.status = 201;
+
     // todo: properly compose a round of commitments
     ctx.body = communication.sendCommitmentsReceived(
       theirAddress,
       processId,
       [
-        { commitment: lastCommitment, signature: action.signedCommitments[0].signature },
+        { commitment: lastCommitment, signature: lastCommitmentSignature.signature },
         { commitment, signature: (signature as unknown) as string },
       ],
       action.protocolLocator,
