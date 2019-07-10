@@ -22,6 +22,7 @@
     "ordered-imports": false,
     "jsx-no-lambda": false,
     "interface-name": false,
+    "prefer-for-of": false,
     "trailing-comma": [
       true,
       {
