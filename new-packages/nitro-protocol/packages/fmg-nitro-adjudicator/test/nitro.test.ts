@@ -423,17 +423,17 @@ describe('Nitro (ERC20 deposit and withdrawal)', () => {
       await expect(receipt2.status).toEqual(1);
     });
 
-    // it('Updates holdings', async () => {
-    //   const allocatedAmount = await nitro.holdings(randomAddress, erc20Address);
-    //   await expect(Number(allocatedAmount)).toEqual(ERC20_DEPOSIT_AMOUNT);
-    // });
+    it('Updates holdings', async () => {
+      const allocatedAmount = await nitro.holdings(randomAddress, erc20Address);
+      await expect(Number(allocatedAmount)).toEqual(ERC20_DEPOSIT_AMOUNT);
+    });
 
-    // it('Fires a deposited event', async () => {
-    //   await expectEvent(receipt2, 'Deposited', {
-    //     destination: randomAddress,
-    //     amountDeposited: bigNumberify(DEPOSIT_AMOUNT),
-    //   });
-    // });
+    it('Fires a deposited event', async () => {
+      await expectEvent(receipt2, 'Deposited', {
+        destination: randomAddress,
+        amountDeposited: bigNumberify(ERC20_DEPOSIT_AMOUNT),
+      });
+    });
   });
 
   //   describe('Depositing ETH (msg.value = amount, expectedHeld > holdings)', () => {
