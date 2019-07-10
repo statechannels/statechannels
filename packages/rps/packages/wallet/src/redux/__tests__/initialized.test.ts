@@ -2,13 +2,12 @@ import { walletReducer, getProcessId } from '../reducer';
 
 import * as states from './../state';
 import * as actions from './../actions';
-import * as NewLedgerFundingActions from '../protocols/new-ledger-funding/actions';
 
 import { TwoPartyPlayerIndex } from '../types';
 import * as fundProtocol from '../protocols/funding';
 import { fundingRequested } from '../protocols/actions';
 import * as adjudicatorState from '../adjudicator-state/reducer';
-import { WalletProtocol } from '../../communication';
+import { WalletProtocol, strategyApproved } from '../../communication';
 import { channelId } from '../../domain/commitments/__tests__';
 const defaults = {
   ...states.EMPTY_SHARED_DATA,
@@ -58,10 +57,8 @@ describe('when a ProcessAction arrives', () => {
   };
   const state = { ...initializedState, processStore: { [processId]: processState } };
 
-  const action = NewLedgerFundingActions.playerA.strategyApproved({
-    channelId,
+  const action = strategyApproved({
     processId: '0xprocessId',
-    consensusLibrary: '0xf00',
   });
   const newLedgerFundingReducer = jest.fn(() => ({
     protocolState: 'protocolState',

@@ -1,21 +1,26 @@
 import * as states from './states';
 import { PureComponent } from 'react';
 import React from 'react';
-import { NewLedgerFunding as PlayerANewLedgerFunding } from './player-a';
-import { NewLedgerFunding as PlayerBNewLedgerFunding } from './player-b';
+
 import { connect } from 'react-redux';
+import { FundingStep } from './components/funding-step';
+import { unreachable } from '../../../utils/reducer-utils';
 
 interface Props {
-  state: states.PlayerAState | states.PlayerBState;
+  state: states.NonTerminalNewLedgerFundingState;
 }
 
 class NewLedgerFundingContainer extends PureComponent<Props> {
   render() {
     const { state } = this.props;
-    if (states.isPlayerAState(state)) {
-      return <PlayerANewLedgerFunding state={state} />;
-    } else {
-      return <PlayerBNewLedgerFunding state={state} />;
+    switch (state.type) {
+      case 'NewLedgerFunding.WaitForPreFundSetup':
+      case 'NewLedgerFunding.WaitForDirectFunding':
+      case 'NewLedgerFunding.WaitForPostFundSetup':
+      case 'NewLedgerFunding.WaitForLedgerUpdate':
+        return <FundingStep newLedgerFundingState={state} />;
+      default:
+        return unreachable(state);
     }
   }
 }

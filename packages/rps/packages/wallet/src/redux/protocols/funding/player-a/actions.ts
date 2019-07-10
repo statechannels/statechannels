@@ -4,6 +4,7 @@ import { FundingStrategy } from '../../../../communication';
 import { strategyApproved, StrategyApproved } from '../../../../communication';
 export { strategyApproved, StrategyApproved };
 import { ActionConstructor } from '../../../utils';
+import { AdvanceChannelAction } from '../../advance-channel';
 
 // -------
 // Actions
@@ -60,4 +61,5 @@ export type FundingAction =
   | StrategyApproved
   | FundingSuccessAcknowledged
   | StrategyRejected
-  | Cancelled;
+  | Cancelled
+  | AdvanceChannelAction;

@@ -2,6 +2,7 @@ import { ProtocolState } from '../..';
 import { FundingStrategy } from '..';
 import { StateConstructor } from '../../../utils';
 import { NonTerminalIndirectFundingState } from '../../indirect-funding';
+import { AdvanceChannelState } from '../../advance-channel';
 
 // -------
 // States
@@ -29,11 +30,19 @@ export interface WaitForFunding extends BaseState {
   // TODO: Currently we are limited to indirect funding
   // In the future this could support other funding states
   fundingState: NonTerminalIndirectFundingState;
+  // PostFundSetup state is initialized early to handle post fund setups that arrive before funding is done
+  postFundSetupState: AdvanceChannelState;
 }
 
 export interface WaitForSuccessConfirmation extends BaseState {
   type: 'Funding.PlayerA.WaitForSuccessConfirmation';
   targetChannelId: string;
+}
+
+export interface WaitForPostFundSetup extends BaseState {
+  type: 'Funding.PlayerA.WaitForPostFundSetup';
+  targetChannelId: string;
+  postFundSetupState: AdvanceChannelState;
 }
 
 export interface Failure {
@@ -77,6 +86,10 @@ export const waitForSuccessConfirmation: StateConstructor<WaitForSuccessConfirma
   };
 };
 
+export const waitForPostFundSetup: StateConstructor<WaitForPostFundSetup> = p => {
+  return { ...p, type: 'Funding.PlayerA.WaitForPostFundSetup' };
+};
+
 export const success: StateConstructor<Success> = p => {
   return { ...p, type: 'Funding.PlayerA.Success' };
 };
@@ -93,7 +106,8 @@ export type OngoingFundingState =
   | WaitForStrategyChoice
   | WaitForStrategyResponse
   | WaitForFunding
-  | WaitForSuccessConfirmation;
+  | WaitForSuccessConfirmation
+  | WaitForPostFundSetup;
 
 export type TerminalFundingState = Success | Failure;
 export type FundingState = OngoingFundingState | TerminalFundingState;
@@ -104,6 +118,7 @@ export function isFundingState(state: ProtocolState): state is FundingState {
     state.type === 'Funding.PlayerA.WaitForStrategyChoice' ||
     state.type === 'Funding.PlayerA.WaitForStrategyResponse' ||
     state.type === 'Funding.PlayerA.WaitForSuccessConfirmation' ||
+    state.type === 'Funding.PlayerA.WaitForPostFundSetup' ||
     state.type === 'Funding.PlayerA.Success' ||
     state.type === 'Funding.PlayerA.Failure'
   );

@@ -207,7 +207,13 @@ export const getFundingChannelId = (channelId: string, sharedData: SharedData): 
   }
   return channelFundingState.fundingChannel;
 };
-
+export const getTwoPlayerIndex = (
+  channelId: string,
+  sharedData: SharedData,
+): TwoPartyPlayerIndex => {
+  const channelState = selectors.getChannelState(sharedData, channelId);
+  return channelState.participants.indexOf(channelState.address);
+};
 export const isFirstPlayer = (channelId: string, sharedData: SharedData) => {
   const channelState = selectors.getChannelState(sharedData, channelId);
   return channelState.ourIndex === TwoPartyPlayerIndex.A;

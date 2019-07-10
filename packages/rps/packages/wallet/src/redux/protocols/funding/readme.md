@@ -28,7 +28,10 @@ linkStyle default interpolate basis
   WFSC --> |WALLET.FUNDING.PLAYER_A.STRATEGY_CHOSEN| WFSR(WaitForStrategyResponse)
   WFSR --> |WALLET.FUNDING.STRATEGY_APPROVED| WFF(WaitForFunding)
   WFF --> |FundingStrategyAction| WFF
-  WFF --> |FundingStrategyAction| WFSConf(WaitForSuccessConfirmation)
+  WFF --> |FundingStrategyAction| WFAC(WaitForPostFundSetup)
+
+  WFAC-->|AdvanceChannelAction|WFAC
+  WFAC-->|AdvanceChannelSuccess|WFSConf(WaitForSuccessConfirmation)
 
   WFSConf --> |WALLET.FUNDING.PLAYER_A.FUNDING_SUCCESS_ACKNOWLEDGED| SS((success))
 
@@ -45,7 +48,7 @@ linkStyle default interpolate basis
   class S logic;
   class SS Success;
   class F Failure;
-  class WFF WaitForChildProtocol;
+  class WFF,WFAC WaitForChildProtocol;
 ```
 
 ### Player B
@@ -59,7 +62,10 @@ linkStyle default interpolate basis
 
   WFSA --> |WALLET.FUNDING.PLAYER_B.STRATEGY_APPROVED| WFF(WaitForFunding)
   WFF --> |FundingStrategyAction| WFF
-  WFF --> |FundingStrategyAction| WFSC(WaitForSuccessConfirmation)
+  WFF --> |FundingStrategyAction| WFAC(WaitForPostFundSetup)
+
+  WFAC-->|AdvanceChannelAction|WFAC
+  WFAC-->|AdvhanceChannelSuccess|WFSC(WaitForSuccessConfirmation)
 
   WFSC --> |WALLET.FUNDING.PLAYER_B.FUNDING_SUCCESS_ACKNOWLEDGED| SS((success))
 
@@ -77,7 +83,7 @@ linkStyle default interpolate basis
   class S logic;
   class SS Success;
   class F Failure;
-  class WFF WaitForChildProtocol;
+  class WFF,WFAC WaitForChildProtocol;
 ```
 
 Note: `WaitForFunding` should be `WaitForIndirectFunding`, since that is the child reducer currently being called. In future, the direct funding protocol may be called instead (optionally).
