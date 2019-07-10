@@ -1,11 +1,11 @@
 import { Commitment, CommitmentType, sign, Signature, toHex } from 'fmg-core';
 import {
-  ALLOCATION,
-  DESTINATION,
+  ALLOCATION_2,
+  DESTINATION_2,
   DUMMY_RULES_ADDRESS,
   FUNDED_CHANNEL_NONCE,
-  PARTICIPANT_PRIVATE_KEY,
-  PARTICIPANTS,
+  PARTICIPANT_1_PRIVATE_KEY,
+  PARTICIPANTS_2,
   STAKE,
 } from '../../../constants';
 import {
@@ -31,8 +31,8 @@ const base = {
   channel: default_channel,
   stake: STAKE,
   turnNum: 0,
-  allocation: ALLOCATION,
-  destination: DESTINATION,
+  allocation: ALLOCATION_2,
+  destination: DESTINATION_2,
   commitmentCount: 0,
   commitmentType: CommitmentType.PreFundSetup,
 };
@@ -142,7 +142,7 @@ describe('nextCommitment', () => {
 let theirSignature: Signature;
 describe('updateRPSChannel', () => {
   beforeEach(() => {
-    theirSignature = sign(toHex(pre_fund_setup_0), PARTICIPANT_PRIVATE_KEY);
+    theirSignature = sign(toHex(pre_fund_setup_0), PARTICIPANT_1_PRIVATE_KEY);
   });
 
   describe('opening a channel', () => {
@@ -174,9 +174,9 @@ describe('updateRPSChannel', () => {
       pre_fund_setup_0.channel = {
         channelType: DUMMY_RULES_ADDRESS,
         nonce: FUNDED_CHANNEL_NONCE,
-        participants: PARTICIPANTS,
+        participants: PARTICIPANTS_2,
       };
-      theirSignature = sign(toHex(pre_fund_setup_0), PARTICIPANT_PRIVATE_KEY);
+      theirSignature = sign(toHex(pre_fund_setup_0), PARTICIPANT_1_PRIVATE_KEY);
 
       await RPSChannelManager.updateRPSChannel(pre_fund_setup_0, theirSignature).catch(
         (err: Error) => {
@@ -188,7 +188,7 @@ describe('updateRPSChannel', () => {
 
   describe('transitioning to a postFundSetup commitment', () => {
     beforeEach(() => {
-      theirSignature = sign(toHex(post_fund_setup_0), PARTICIPANT_PRIVATE_KEY);
+      theirSignature = sign(toHex(post_fund_setup_0), PARTICIPANT_1_PRIVATE_KEY);
     });
 
     it('should return an allocator channel and a signed commitment', async () => {
@@ -215,7 +215,7 @@ describe('updateRPSChannel', () => {
     it('throws when the transition is invalid', async () => {
       expect.assertions(1);
       post_fund_setup_0.turnNum = 0;
-      theirSignature = sign(toHex(post_fund_setup_0), PARTICIPANT_PRIVATE_KEY);
+      theirSignature = sign(toHex(post_fund_setup_0), PARTICIPANT_1_PRIVATE_KEY);
 
       await RPSChannelManager.updateRPSChannel(post_fund_setup_0, theirSignature).catch(err => {
         expect(err).toMatchObject(errors.INVALID_TRANSITION);
@@ -229,7 +229,7 @@ describe('updateRPSChannel', () => {
         ...post_fund_setup_0.channel,
         nonce: 999,
       };
-      theirSignature = sign(toHex(post_fund_setup_0), PARTICIPANT_PRIVATE_KEY);
+      theirSignature = sign(toHex(post_fund_setup_0), PARTICIPANT_1_PRIVATE_KEY);
 
       await RPSChannelManager.updateRPSChannel(post_fund_setup_0, theirSignature).catch(err => {
         expect(err).toMatchObject(errors.CHANNEL_MISSING);
@@ -242,7 +242,7 @@ describe('updateRPSChannel', () => {
     it('works as player B', async () => {
       {
         theirCommitment = asCoreCommitment(sanitize(propose));
-        theirSignature = sign(toHex(theirCommitment), PARTICIPANT_PRIVATE_KEY);
+        theirSignature = sign(toHex(theirCommitment), PARTICIPANT_1_PRIVATE_KEY);
         const { commitment, signature } = await RPSChannelManager.updateRPSChannel(
           theirCommitment,
           theirSignature,
@@ -252,7 +252,7 @@ describe('updateRPSChannel', () => {
       }
       {
         theirCommitment = asCoreCommitment(sanitize(reveal));
-        theirSignature = sign(toHex(theirCommitment), PARTICIPANT_PRIVATE_KEY);
+        theirSignature = sign(toHex(theirCommitment), PARTICIPANT_1_PRIVATE_KEY);
 
         const { commitment, signature } = await RPSChannelManager.updateRPSChannel(
           theirCommitment,

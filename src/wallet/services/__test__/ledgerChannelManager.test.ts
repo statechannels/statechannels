@@ -2,8 +2,9 @@ import { Bytes, sign, Signature, toHex } from 'fmg-core';
 import {
   DUMMY_RULES_ADDRESS,
   FUNDED_CHANNEL_NONCE,
-  PARTICIPANT_PRIVATE_KEY,
-  PARTICIPANTS,
+  PARTICIPANT_1_PRIVATE_KEY,
+  PARTICIPANT_2_PRIVATE_KEY,
+  PARTICIPANTS_2,
 } from '../../../constants';
 import {
   app_1_response,
@@ -12,12 +13,14 @@ import {
   created_pre_fund_setup_1,
   post_fund_setup_1_response,
   pre_fund_setup_1_response,
+  pre_fund_setup_3_2_response,
 } from '../../../test/test_data';
 import errors from '../../errors';
 import * as ChannelManagement from '../channelManagement';
 import { asConsensusCommitment, asCoreCommitment, LedgerCommitment } from '../ledger-commitment';
 import * as LedgerChannelManager from '../ledgerChannelManager';
 
+// 2 participant channel
 let pre_fund_setup_0: LedgerCommitment;
 let post_fund_setup_0: LedgerCommitment;
 let app_0: LedgerCommitment;
@@ -25,14 +28,19 @@ let app_1: LedgerCommitment;
 let app_2: LedgerCommitment;
 let theirSignature: Signature;
 
+// 3 participant channel
+let pre_fund_setup_3_0: LedgerCommitment;
+let pre_fund_setup_3_1: LedgerCommitment;
+
 beforeEach(() => {
   pre_fund_setup_0 = testDataConstructors.pre_fund_setup(0);
-
   post_fund_setup_0 = testDataConstructors.post_fund_setup(2);
-
   app_0 = testDataConstructors.app(4, beginning_app_phase_channel);
   app_1 = testDataConstructors.app(5, beginning_app_phase_channel);
   app_2 = testDataConstructors.app(6, beginning_app_phase_channel);
+
+  pre_fund_setup_3_0 = testDataConstructors.pre_fund_setup_3(0);
+  pre_fund_setup_3_1 = testDataConstructors.pre_fund_setup_3(1);
 });
 
 function signAppCommitment(c: LedgerCommitment, k: Bytes): Signature {
@@ -42,7 +50,7 @@ function signAppCommitment(c: LedgerCommitment, k: Bytes): Signature {
 describe('updateLedgerChannel', () => {
   describe('opening a channel', () => {
     beforeEach(() => {
-      theirSignature = signAppCommitment(pre_fund_setup_0, PARTICIPANT_PRIVATE_KEY);
+      theirSignature = signAppCommitment(pre_fund_setup_0, PARTICIPANT_1_PRIVATE_KEY);
     });
 
     it('should return an allocator channel and a signed commitment', async () => {
@@ -50,6 +58,21 @@ describe('updateLedgerChannel', () => {
         { ledgerCommitment: pre_fund_setup_0, signature: theirSignature },
       ]);
       expect(commitment).toMatchObject(pre_fund_setup_1_response);
+      expect(ChannelManagement.validSignature(commitment, signature)).toBe(true);
+    });
+
+    it('on valid round received -- should return an allocator channel and a signed commitment', async () => {
+      const { commitment, signature } = await LedgerChannelManager.updateLedgerChannel([
+        {
+          ledgerCommitment: pre_fund_setup_3_0,
+          signature: signAppCommitment(pre_fund_setup_3_0, PARTICIPANT_1_PRIVATE_KEY),
+        },
+        {
+          ledgerCommitment: pre_fund_setup_3_1,
+          signature: signAppCommitment(pre_fund_setup_3_1, PARTICIPANT_2_PRIVATE_KEY),
+        },
+      ]);
+      expect(commitment).toMatchObject(pre_fund_setup_3_2_response);
       expect(ChannelManagement.validSignature(commitment, signature)).toBe(true);
     });
 
@@ -74,9 +97,9 @@ describe('updateLedgerChannel', () => {
       pre_fund_setup_0.channel = {
         channelType: DUMMY_RULES_ADDRESS,
         nonce: FUNDED_CHANNEL_NONCE,
-        participants: PARTICIPANTS,
+        participants: PARTICIPANTS_2,
       };
-      theirSignature = signAppCommitment(pre_fund_setup_0, PARTICIPANT_PRIVATE_KEY);
+      theirSignature = signAppCommitment(pre_fund_setup_0, PARTICIPANT_1_PRIVATE_KEY);
 
       await LedgerChannelManager.updateLedgerChannel([
         {
@@ -88,12 +111,27 @@ describe('updateLedgerChannel', () => {
       });
     });
   });
+
   describe('transitioning to a postFundSetup commitment', () => {
     beforeEach(() => {
-      theirSignature = signAppCommitment(post_fund_setup_0, PARTICIPANT_PRIVATE_KEY);
+      theirSignature = signAppCommitment(post_fund_setup_0, PARTICIPANT_1_PRIVATE_KEY);
     });
 
     it('should return an allocator channel and a signed commitment', async () => {
+      const { commitment, signature } = await LedgerChannelManager.updateLedgerChannel(
+        [
+          {
+            ledgerCommitment: post_fund_setup_0,
+            signature: theirSignature,
+          },
+        ],
+        created_pre_fund_setup_1,
+      );
+      expect(commitment).toMatchObject(post_fund_setup_1_response);
+      expect(ChannelManagement.validSignature(commitment, signature)).toBe(true);
+    });
+
+    it('on valid round received -- should return an allocator channel and a signed commitment', async () => {
       const { commitment, signature } = await LedgerChannelManager.updateLedgerChannel(
         [
           {
@@ -124,7 +162,7 @@ describe('updateLedgerChannel', () => {
 
     it('throws when the transition is invalid', async () => {
       expect.assertions(1);
-      theirSignature = signAppCommitment(created_pre_fund_setup_1, PARTICIPANT_PRIVATE_KEY);
+      theirSignature = signAppCommitment(created_pre_fund_setup_1, PARTICIPANT_1_PRIVATE_KEY);
 
       await LedgerChannelManager.updateLedgerChannel(
         [
@@ -149,7 +187,7 @@ describe('updateLedgerChannel', () => {
         ...post_fund_setup_0.channel,
         nonce: 999,
       };
-      theirSignature = signAppCommitment(post_fund_setup_0, PARTICIPANT_PRIVATE_KEY);
+      theirSignature = signAppCommitment(post_fund_setup_0, PARTICIPANT_1_PRIVATE_KEY);
 
       await LedgerChannelManager.updateLedgerChannel(
         [
@@ -180,7 +218,7 @@ describe('updateLedgerChannel', () => {
 
   describe('transitioning to an app commitment', () => {
     beforeEach(() => {
-      theirSignature = signAppCommitment(app_0, PARTICIPANT_PRIVATE_KEY);
+      theirSignature = signAppCommitment(app_0, PARTICIPANT_1_PRIVATE_KEY);
     });
 
     it('should return an allocator channel and a signed commitment', async () => {
@@ -226,7 +264,7 @@ describe.skip('channelFunded', () => {
 
 describe('nextCommitment', () => {
   it.skip('works on app commitments', () => {
-    theirSignature = signAppCommitment(app_0, PARTICIPANT_PRIVATE_KEY);
+    theirSignature = signAppCommitment(app_0, PARTICIPANT_1_PRIVATE_KEY);
     expect(LedgerChannelManager.nextCommitment(app_1, theirSignature, app_0)).toMatchObject(app_2);
   });
 });

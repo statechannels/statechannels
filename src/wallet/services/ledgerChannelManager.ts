@@ -17,13 +17,15 @@ export async function updateLedgerChannel(
   commitmentRound: SignedLedgerCommitment[],
   currentCommitment?: LedgerCommitment,
 ): Promise<SignedCommitment> {
-  // Assume that CommitmentsReceived are sorted from earlest to latest
   let commitmentsToApply = commitmentRound;
   if (currentCommitment) {
     commitmentsToApply = commitmentRound.filter(
       signedCommitment => signedCommitment.ledgerCommitment.turnNum > currentCommitment.turnNum,
     );
   }
+  commitmentsToApply.sort((a, b) => {
+    return a.ledgerCommitment.turnNum - b.ledgerCommitment.turnNum;
+  });
 
   // todo: apply each commitment instead of just the last one
   const lastCommitmentInRound = commitmentsToApply.slice(-1)[0];

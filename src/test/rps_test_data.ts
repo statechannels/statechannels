@@ -19,13 +19,13 @@ import {
   Weapon,
 } from '../app/services/rps-commitment';
 import {
-  ALLOCATION,
+  ALLOCATION_2,
   BEGINNING_RPS_APP_CHANNEL_NONCE,
-  DESTINATION,
+  DESTINATION_2,
   DUMMY_RULES_ADDRESS,
   FUNDED_RPS_CHANNEL_NONCE,
-  PARTICIPANT_PRIVATE_KEY,
-  PARTICIPANTS,
+  PARTICIPANT_1_PRIVATE_KEY,
+  PARTICIPANTS_2,
   STAKE,
 } from '../constants';
 import { default_channel } from './test_data';
@@ -213,10 +213,10 @@ export const base_rps_commitment: BaseWithStake = {
   channel: {
     nonce: expect.any(Number),
     channelType: DUMMY_RULES_ADDRESS,
-    participants: PARTICIPANTS,
+    participants: PARTICIPANTS_2,
   },
-  allocation: ALLOCATION,
-  destination: DESTINATION,
+  allocation: ALLOCATION_2,
+  destination: DESTINATION_2,
   turnNum: 0,
   commitmentCount: 0,
   commitmentType: 0,
@@ -228,7 +228,7 @@ const open_channel_commitment = asCoreCommitment(
 );
 export const open_channel_params = {
   commitment: open_channel_commitment,
-  signature: sign(toHex(open_channel_commitment), PARTICIPANT_PRIVATE_KEY),
+  signature: sign(toHex(open_channel_commitment), PARTICIPANT_1_PRIVATE_KEY),
 };
 
 export const invalid_open_channel_params = {
@@ -247,7 +247,7 @@ export const pre_fund_setup_1_response = {
 export const funded_rps_channel: Channel = {
   channelType: DUMMY_RULES_ADDRESS,
   nonce: FUNDED_RPS_CHANNEL_NONCE,
-  participants: PARTICIPANTS,
+  participants: PARTICIPANTS_2,
 };
 
 const update_channel_commitment = asCoreCommitment(
@@ -260,7 +260,7 @@ const update_channel_commitment = asCoreCommitment(
 
 export const update_channel_params = {
   commitment: update_channel_commitment,
-  signature: sign(toHex(update_channel_commitment), PARTICIPANT_PRIVATE_KEY),
+  signature: sign(toHex(update_channel_commitment), PARTICIPANT_1_PRIVATE_KEY),
 };
 
 export const post_fund_setup_1_response = {
@@ -274,7 +274,7 @@ export const post_fund_setup_1_response = {
 export const beginning_app_phase_rps_channel: Channel = {
   channelType: DUMMY_RULES_ADDRESS,
   nonce: BEGINNING_RPS_APP_CHANNEL_NONCE,
-  participants: PARTICIPANTS,
+  participants: PARTICIPANTS_2,
 };
 
 export function app_response(app_attrs: RPSAppAttributes): Commitment {

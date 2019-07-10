@@ -7,11 +7,11 @@ import {
   zeroBytes32,
 } from '../../../app/services/rps-commitment';
 import {
-  ALLOCATION,
+  ALLOCATION_2,
   BEGINNING_APP_CHANNEL_HOLDINGS,
   BEGINNING_APP_CHANNEL_NONCE,
   BEGINNING_RPS_APP_CHANNEL_NONCE,
-  DESTINATION,
+  DESTINATION_2,
   DUMMY_RULES_ADDRESS,
   DUMMY_RULES_BEGINNING_APP_CHANNEL_NONCE_CHANNEL_ID,
   DUMMY_RULES_BEGINNING_RPS_APP_CHANNEL_NONCE_CHANNEL_ID,
@@ -25,21 +25,21 @@ import {
   HUB_ADDRESS,
   ONGOING_APP_CHANNEL_HOLDINGS,
   ONGOING_APP_CHANNEL_NONCE,
-  PARTICIPANT_ADDRESS,
+  PARTICIPANT_1_ADDRESS,
 } from '../../../constants';
 import AllocatorChannel from '../../models/allocatorChannel';
 import knex from '../connection';
 Model.knex(knex);
 
 const participants = [
-  { address: PARTICIPANT_ADDRESS, priority: 0 },
+  { address: PARTICIPANT_1_ADDRESS, priority: 0 },
   { address: HUB_ADDRESS, priority: 1 },
 ];
 
 const allocationByPriority = (priority: number) => ({
   priority,
-  destination: DESTINATION[priority],
-  amount: ALLOCATION[priority],
+  destination: DESTINATION_2[priority],
+  amount: ALLOCATION_2[priority],
 });
 
 const allocations = () => [allocationByPriority(0), allocationByPriority(1)];
