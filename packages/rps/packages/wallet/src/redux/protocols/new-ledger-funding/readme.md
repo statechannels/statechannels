@@ -7,19 +7,11 @@ The new ledger funding protocol coordinates the process of funding an applicatio
 
 Out of scope (for now):
 
-- Using an existing ledger channel if one is available
 - Handling the case where an opponent stalls mid-protocol
 
 ## The Protocol
 
-The indirect funding protocol involves two parties: player A and player B.
-Player A is identified by being the first participant in the `participants` array in
-the application channel X that is to be funded.
-
-We therefore split the overall indirect-funding protocol into two sub-protocols: the
-[player-a-indirect-funding protocol](./player-a/readme.md) and the [player-b-indirect-funding protocol](./player-b/readme.md).
-
-The two protocols interact through the following messages:
+The protocol interacts between client wallets through the following messages:
 
 ```mermaid
 sequenceDiagram
@@ -37,3 +29,35 @@ sequenceDiagram
   A->>B: PostFund0 for X
   B->>A: PostFund1 for X
 ```
+
+### State Machine
+
+```mermaid
+  graph TD
+  linkStyle default interpolate basis
+    St((start)) --> WFPrF1(WaitForPreFundL1)
+    WFPrF1 -->|ReceiveCommitment| WFDF(WaitForDirectFunding)
+    WFDF -->|FundingAction| WFDF
+    WFDF -->|Success| WFPoF1(WaitForPostFundSetup1)
+    WFDF -->|Failure| F((Failure))
+    WFPoF1 --> |AdvanceChannelAction| WFPoF1(WaitForPostFundSetup1)
+    WFPoF1 --> |AdvanceChannelSuccess|WFL1(WaitForLedgerUpdate1)
+    WFL1 --> |ConsensusUpdateAction|WFL1
+    WFL1 --> |ConsensusUpdateSuccess| S((sucess))
+  classDef logic fill:#efdd20;
+  classDef Success fill:#58ef21;
+  classDef Failure fill:#f45941;
+  classDef WaitForChildProtocol stroke:#333,stroke-width:4px,color:#ffff,fill:#333;
+  class St logic;
+  class S Success;
+  class F Failure;
+  class WFDF,WFPoF1,WFL1 WaitForChildProtocol;
+
+```
+
+### Scenarios
+
+We will use the following two scenarios in tests:
+
+1. **Happy path**: `WaitForPreFundL1` -> `WaitForDirectFunding` -> `WaitForLedgerUpdate1` -> `WaitForPostFund1` -> `Success`
+2. **Ledger funding fails**: `WaitForDirectFunding` -> `Failure`

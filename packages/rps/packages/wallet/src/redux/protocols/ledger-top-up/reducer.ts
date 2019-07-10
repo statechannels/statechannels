@@ -318,7 +318,6 @@ function initializeDirectFundingState(
     requiredDeposit,
     totalFundingRequired,
     ourIndex: isFirstPlayer ? TwoPartyPlayerIndex.A : TwoPartyPlayerIndex.B,
-    exchangePostFundSetups: false,
   });
 
   const { protocolState: directFundingState, sharedData: newSharedData } = initializeDirectFunding(

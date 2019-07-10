@@ -26,8 +26,6 @@ const defaultsForA: states.DirectFundingState = {
   ourIndex: 0,
   safeToDepositLevel: '0x',
   type: 'DirectFunding.NotSafeToDeposit',
-  exchangePostFundSetups: true,
-  postFundSetupState: { ...advanceChannelScenarios.preSuccess.state, ourIndex: 0 },
 };
 
 const defaultsForB: states.DirectFundingState = {
@@ -35,20 +33,19 @@ const defaultsForB: states.DirectFundingState = {
   requiredDeposit: YOUR_DEPOSIT_B,
   ourIndex: 1,
   safeToDepositLevel: YOUR_DEPOSIT_A,
-  postFundSetupState: { ...advanceChannelScenarios.preSuccess.state, ourIndex: 1 },
 };
 
 // actions
 const aInitializeAction = directFundingRequested({ ...defaultsForA });
 const aInitializeWithNoDeposit = directFundingRequested({
   ...defaultsForA,
-  exchangePostFundSetups: false,
+
   requiredDeposit: '0x0',
 });
 
 const aInitializeWithRequiredDeposit = directFundingRequested({
   ...defaultsForA,
-  exchangePostFundSetups: false,
+
   requiredDeposit: '0x5',
 });
 const bInitializeAction = directFundingRequested({ ...defaultsForB });
@@ -82,42 +79,10 @@ export const aHappyPath = {
     action: transactionSubmissionScenarios.successTrigger,
   },
 
-  waitForFundingAndPostFundSetup: {
-    state: states.waitForFundingAndPostFundSetup({
+  waitForFunding: {
+    state: states.waitForFunding({
       ...defaultsForA,
       channelFunded: false,
-    }),
-    sharedData: sharedData(),
-    action: aFundingReceivedEvent,
-  },
-  waitForPostFundSetup: {
-    state: states.waitForFundingAndPostFundSetup({
-      ...defaultsForA,
-      channelFunded: true,
-    }),
-    sharedData: sharedData(),
-    action: advanceChannelScenarios.preSuccess.trigger,
-  },
-};
-
-export const aNoPostFundSetupHappyPath = {
-  initialize: { sharedData: sharedData(), action: aInitializeAction },
-  waitForDepositTransaction: {
-    state: states.waitForDepositTransaction({
-      ...defaultsForA,
-      exchangePostFundSetups: false,
-      transactionSubmissionState: transactionSubmissionScenarios.preSuccessState,
-    }),
-    sharedData: sharedData(),
-    action: transactionSubmissionScenarios.successTrigger,
-  },
-
-  waitForFundingAndPostFundSetup: {
-    state: states.waitForFundingAndPostFundSetup({
-      ...defaultsForA,
-      channelFunded: false,
-      postFundSetupReceived: false,
-      exchangePostFundSetups: false,
     }),
     sharedData: sharedData(),
     action: bFundingReceivedEvent,
@@ -139,46 +104,10 @@ export const bHappyPath = {
     sharedData: sharedData(),
     action: transactionSubmissionScenarios.successTrigger,
   },
-  waitForFundingAndPostFundSetup: {
-    state: states.waitForFundingAndPostFundSetup({
+  waitForFunding: {
+    state: states.waitForFunding({
       ...defaultsForB,
       channelFunded: false,
-    }),
-    sharedData: sharedData(),
-    action: bFundingReceivedEvent,
-  },
-  waitForPostFundSetup: {
-    state: states.waitForFundingAndPostFundSetup({
-      ...defaultsForB,
-      channelFunded: true,
-    }),
-    sharedData: sharedData(),
-    action: advanceChannelScenarios.preSuccess.trigger,
-  },
-};
-
-export const bNoPostFundSetupsHappyPath = {
-  initialize: { sharedData: sharedData(), action: bInitializeAction },
-  notSafeToDeposit: {
-    state: states.notSafeToDeposit({ ...defaultsForB, exchangePostFundSetups: false }),
-    action: aFundingReceivedEvent,
-    sharedData: sharedData(),
-  },
-  waitForDepositTransaction: {
-    state: states.waitForDepositTransaction({
-      ...defaultsForB,
-      exchangePostFundSetups: false,
-      transactionSubmissionState: transactionSubmissionScenarios.preSuccessState,
-    }),
-    sharedData: sharedData(),
-    action: transactionSubmissionScenarios.successTrigger,
-  },
-  waitForFundingAndPostFundSetup: {
-    state: states.waitForFundingAndPostFundSetup({
-      ...defaultsForB,
-      exchangePostFundSetups: false,
-      channelFunded: false,
-      postFundSetupReceived: false,
     }),
     sharedData: sharedData(),
     action: bFundingReceivedEvent,

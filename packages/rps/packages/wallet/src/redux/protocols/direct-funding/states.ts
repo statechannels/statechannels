@@ -2,7 +2,6 @@ import { NonTerminalTransactionSubmissionState } from '../transaction-submission
 import { Properties, StateConstructor } from '../../utils';
 import { ProtocolState } from '..';
 import { TwoPartyPlayerIndex } from '../../types';
-import { AdvanceChannelState } from '../advance-channel';
 
 // -------
 // States
@@ -13,7 +12,7 @@ import { AdvanceChannelState } from '../advance-channel';
 export type ChannelFundingStatus =
   | 'DirectFunding.NotSafeToDeposit'
   | 'DirectFunding.WaitForDepositTransaction'
-  | 'DirectFunding.WaitForFundingAndPostFundSetup'
+  | 'DirectFunding.WaitForFunding'
   | 'DirectFunding.WaitForDepositTransaction'
   | 'DirectFunding.FundingSuccess'
   | 'DirectFunding.FundingFailure';
@@ -21,7 +20,6 @@ export type ChannelFundingStatus =
 export const DIRECT_FUNDING = 'FUNDING_TYPE.DIRECT';
 
 export interface BaseDirectFundingState {
-  postFundSetupState: AdvanceChannelState;
   processId: string;
   safeToDepositLevel: string;
   type: ChannelFundingStatus;
@@ -29,7 +27,6 @@ export interface BaseDirectFundingState {
   requiredDeposit: string;
   channelId: string;
   ourIndex: TwoPartyPlayerIndex;
-  exchangePostFundSetups: boolean;
 }
 
 export interface NotSafeToDeposit extends BaseDirectFundingState {
@@ -40,9 +37,8 @@ export interface WaitForDepositTransaction extends BaseDirectFundingState {
   type: 'DirectFunding.WaitForDepositTransaction';
   transactionSubmissionState: NonTerminalTransactionSubmissionState;
 }
-export interface WaitForFundingAndPostFundSetup extends BaseDirectFundingState {
-  type: 'DirectFunding.WaitForFundingAndPostFundSetup';
-  channelFunded: boolean;
+export interface WaitForFunding extends BaseDirectFundingState {
+  type: 'DirectFunding.WaitForFunding';
 }
 export interface FundingSuccess extends BaseDirectFundingState {
   type: 'DirectFunding.FundingSuccess';
@@ -65,8 +61,6 @@ export const baseDirectFundingState: StateConstructor<BaseDirectFundingState> = 
     ourIndex,
     safeToDepositLevel,
     type: channelFundingStatus,
-    exchangePostFundSetups,
-    postFundSetupState,
   } = params;
   return {
     processId,
@@ -76,8 +70,6 @@ export const baseDirectFundingState: StateConstructor<BaseDirectFundingState> = 
     ourIndex,
     safeToDepositLevel,
     type: channelFundingStatus,
-    exchangePostFundSetups,
-    postFundSetupState,
   };
 };
 
@@ -98,13 +90,11 @@ export function waitForDepositTransaction(
     transactionSubmissionState,
   };
 }
-export const waitForFundingAndPostFundSetup: StateConstructor<
-  WaitForFundingAndPostFundSetup
-> = params => {
+export const waitForFunding: StateConstructor<WaitForFunding> = params => {
   return {
     ...baseDirectFundingState(params),
     channelFunded: params.channelFunded,
-    type: 'DirectFunding.WaitForFundingAndPostFundSetup',
+    type: 'DirectFunding.WaitForFunding',
   };
 };
 
@@ -129,7 +119,7 @@ export const fundingFailure: StateConstructor<FundingFailure> = params => {
 export type NonTerminalDirectFundingState =
   | NotSafeToDeposit
   | WaitForDepositTransaction
-  | WaitForFundingAndPostFundSetup;
+  | WaitForFunding;
 
 export type DirectFundingState = NonTerminalDirectFundingState | FundingSuccess | FundingFailure;
 
@@ -145,7 +135,7 @@ export function isDirectFundingState(state: ProtocolState): state is DirectFundi
   return (
     state.type === 'DirectFunding.NotSafeToDeposit' ||
     state.type === 'DirectFunding.WaitForDepositTransaction' ||
-    state.type === 'DirectFunding.WaitForFundingAndPostFundSetup' ||
+    state.type === 'DirectFunding.WaitForFunding' ||
     state.type === 'DirectFunding.FundingFailure' ||
     state.type === 'DirectFunding.FundingSuccess'
   );

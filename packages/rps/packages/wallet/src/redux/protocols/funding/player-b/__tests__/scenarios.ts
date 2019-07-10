@@ -8,6 +8,7 @@ import { channelId, asAddress, appCommitment } from '../../../../../domain/commi
 import { bsAddress, bsPrivateKey } from '../../../../../communication/__tests__/commitments';
 import { channelFromCommitments } from '../../../../channel-store/channel-state/__tests__';
 import { preSuccess as indirectFundingPreSuccess } from '../../../indirect-funding/__tests__';
+import { preSuccess as advanceChannelPreSuccess } from '../../../advance-channel/__tests__';
 import { bigNumberify } from 'ethers/utils';
 
 // To test all paths through the state machine we will use 4 different scenarios:
@@ -49,15 +50,20 @@ const waitForIndirectStrategyApproval = states.waitForStrategyApproval(props);
 const waitForIndirectFunding = states.waitForFunding({
   ...props,
   fundingState: indirectFundingPreSuccess.state,
+  postFundSetupState: advanceChannelPreSuccess.state,
 });
 
 const waitForSuccessConfirmation = states.waitForSuccessConfirmation(props);
-
+const waitForPostFundSetup = states.waitForPostFundSetup({
+  ...props,
+  postFundSetupState: advanceChannelPreSuccess.state,
+});
 const twoTwo = [
   { address: asAddress, wei: bigNumberify(2).toHexString() },
   { address: bsAddress, wei: bigNumberify(2).toHexString() },
 ];
-
+const app0 = appCommitment({ turnNum: 0, balances: twoTwo });
+const app1 = appCommitment({ turnNum: 1, balances: twoTwo });
 const app2 = appCommitment({ turnNum: 2, balances: twoTwo });
 const app3 = appCommitment({ turnNum: 3, balances: twoTwo });
 // ------
@@ -66,6 +72,9 @@ const app3 = appCommitment({ turnNum: 3, balances: twoTwo });
 
 const successSharedData = setChannels(EMPTY_SHARED_DATA, [
   channelFromCommitments([app2, app3], bsAddress, bsPrivateKey),
+]);
+const preFundSharedData = setChannels(EMPTY_SHARED_DATA, [
+  channelFromCommitments([app0, app1], bsAddress, bsPrivateKey),
 ]);
 // -------
 // Actions
@@ -91,13 +100,18 @@ export const happyPath = {
   },
   waitForStrategyApproval: {
     state: waitForIndirectStrategyApproval,
-    sharedData: indirectFundingPreSuccess.sharedData,
+    sharedData: preFundSharedData,
     action: indirectStrategyApproved,
   },
   waitForFunding: {
     state: waitForIndirectFunding,
     sharedData: indirectFundingPreSuccess.sharedData,
     action: fundingSuccess,
+  },
+  waitForPostFundSetup: {
+    state: waitForPostFundSetup,
+    sharedData: advanceChannelPreSuccess.sharedData,
+    action: advanceChannelPreSuccess.trigger,
   },
   waitForSuccessConfirmation: {
     state: waitForSuccessConfirmation,

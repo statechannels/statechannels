@@ -1,5 +1,5 @@
 import * as scenarios from './scenarios';
-import { addStoriesFromScenario as addStories } from '../../../../../__stories__';
+import { addStoriesFromScenario as addStories } from '../../../../__stories__';
 import { NewLedgerFunding } from '../container';
 
 function flattenScenario(scenario) {

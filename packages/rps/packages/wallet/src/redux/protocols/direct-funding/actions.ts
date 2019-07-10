@@ -14,7 +14,6 @@ export interface DirectFundingRequested {
   safeToDepositLevel: string;
   requiredDeposit: string;
   ourIndex: TwoPartyPlayerIndex;
-  exchangePostFundSetups: boolean;
 }
 
 // -------

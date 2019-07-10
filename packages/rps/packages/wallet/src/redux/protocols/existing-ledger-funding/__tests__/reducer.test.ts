@@ -20,12 +20,6 @@ describe('player A happy path', () => {
   describeScenarioStep(scenario.waitForLedgerUpdate, () => {
     const { state, action, sharedData } = scenario.waitForLedgerUpdate;
     const updatedState = existingLedgerFundingReducer(state, sharedData, action);
-    itTransitionsTo(updatedState, 'ExistingLedgerFunding.WaitForPostFundSetup');
-  });
-
-  describeScenarioStep(scenario.waitForPostFundSetup, () => {
-    const { state, action, sharedData } = scenario.waitForPostFundSetup;
-    const updatedState = existingLedgerFundingReducer(state, sharedData, action);
     itTransitionsTo(updatedState, 'ExistingLedgerFunding.Success');
   });
 });
@@ -43,13 +37,6 @@ describe('player B happy path', () => {
   describeScenarioStep(scenario.waitForLedgerUpdate, () => {
     const { state, action, sharedData, reply } = scenario.waitForLedgerUpdate;
     const updatedState = existingLedgerFundingReducer(state, sharedData, action);
-    itTransitionsTo(updatedState, 'ExistingLedgerFunding.WaitForPostFundSetup');
-    itSendsMessage(updatedState, reply);
-  });
-
-  describeScenarioStep(scenario.waitForPostFundSetup, () => {
-    const { state, action, sharedData, reply } = scenario.waitForPostFundSetup;
-    const updatedState = existingLedgerFundingReducer(state, sharedData, action);
     itTransitionsTo(updatedState, 'ExistingLedgerFunding.Success');
     itSendsMessage(updatedState, reply);
   });
@@ -58,15 +45,6 @@ describe('player B happy path', () => {
 describe('player A invalid ledger commitment', () => {
   const scenario = scenarios.playerAInvalidUpdateCommitment;
   describe('when in WaitForLedgerUpdate', () => {
-    const { state, action, sharedData } = scenario.waitForLedgerUpdate;
-    const updatedState = existingLedgerFundingReducer(state, sharedData, action);
-    itTransitionsTo(updatedState, 'ExistingLedgerFunding.Failure');
-  });
-});
-
-describe('player A invalid post fund commitment', () => {
-  const scenario = scenarios.playerAInvalidUpdateCommitment;
-  describe('when in WaitForPostFundSetup', () => {
     const { state, action, sharedData } = scenario.waitForLedgerUpdate;
     const updatedState = existingLedgerFundingReducer(state, sharedData, action);
     itTransitionsTo(updatedState, 'ExistingLedgerFunding.Failure');
@@ -87,15 +65,6 @@ describe('player B invalid ledger update commitment', () => {
   const scenario = scenarios.playerBInvalidUpdateCommitment;
   describe('when in WaitForLedgerUpdate', () => {
     const { state, action, sharedData } = scenario.waitForLedgerUpdate;
-    const updatedState = existingLedgerFundingReducer(state, sharedData, action);
-    itTransitionsTo(updatedState, 'ExistingLedgerFunding.Failure');
-  });
-});
-
-describe('player B invalid post fund commitment', () => {
-  const scenario = scenarios.playerBInvalidPostFundCommitment;
-  describe('when in WaitForPostFundSetup', () => {
-    const { state, action, sharedData } = scenario.waitForPostFundSetup;
     const updatedState = existingLedgerFundingReducer(state, sharedData, action);
     itTransitionsTo(updatedState, 'ExistingLedgerFunding.Failure');
   });

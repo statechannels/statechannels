@@ -1,1 +1,0 @@
-export { NewLedgerFunding } from './container';

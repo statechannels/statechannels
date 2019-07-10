@@ -1,15 +1,6 @@
-import {
-  aHappyPath,
-  bHappyPath,
-  transactionFails,
-  aNoPostFundSetupHappyPath,
-  bNoPostFundSetupsHappyPath,
-} from './scenarios';
+import { aHappyPath, bHappyPath, transactionFails } from './scenarios';
 
-export const preSuccessA = aHappyPath.waitForPostFundSetup;
-export const noPostFundSetupsPreSuccessA = aNoPostFundSetupHappyPath.waitForFundingAndPostFundSetup;
+export const preSuccessA = aHappyPath.waitForFunding;
+export const preSuccessB = bHappyPath.waitForFunding;
 
-export const preSuccessB = bHappyPath.waitForPostFundSetup;
-export const noPostFundSetupsPreSuccessB =
-  bNoPostFundSetupsHappyPath.waitForFundingAndPostFundSetup;
 export const preFailure = transactionFails.waitForDepositTransaction;

@@ -1,10 +1,10 @@
 import React from 'react';
-import { Checklist, MessagesForStep, messagesForStep } from '../../../shared-components/checklist';
-import { unreachable } from '../../../../../utils/reducer-utils';
-import { PlayerAState } from '../states';
+import { Checklist, MessagesForStep, messagesForStep } from '../../shared-components/checklist';
+import { NonTerminalNewLedgerFundingState } from '../states';
+import { unreachable } from '../../../../utils/reducer-utils';
 
 interface Props {
-  newLedgerFundingStateA: PlayerAState;
+  newLedgerFundingState: NonTerminalNewLedgerFundingState;
 }
 
 export enum Step {
@@ -14,15 +14,15 @@ export enum Step {
   AWaitForPostFundSetup1,
 }
 
-const fundingStepByState = (state: PlayerAState): Step => {
+const fundingStepByState = (state: NonTerminalNewLedgerFundingState): Step => {
   switch (state.type) {
-    case 'NewLedgerFunding.AWaitForPreFundSetup1':
+    case 'NewLedgerFunding.WaitForPreFundSetup':
       return Step.AWaitForPreFundSetup1;
-    case 'NewLedgerFunding.AWaitForDirectFunding':
+    case 'NewLedgerFunding.WaitForDirectFunding':
       return Step.AWaitForDirectFunding;
-    case 'NewLedgerFunding.AWaitForLedgerUpdate1':
+    case 'NewLedgerFunding.WaitForLedgerUpdate':
       return Step.AWaitForLedgerUpdate1;
-    case 'NewLedgerFunding.AWaitForPostFundSetup1':
+    case 'NewLedgerFunding.WaitForPostFundSetup':
       return Step.AWaitForPostFundSetup1;
     default:
       return unreachable(state);
@@ -54,7 +54,7 @@ const messagesForStepList: MessagesForStep[] = [
 
 export class FundingStep extends React.PureComponent<Props> {
   render() {
-    const fundingState = this.props.newLedgerFundingStateA;
+    const fundingState = this.props.newLedgerFundingState;
     const currentStep = fundingStepByState(fundingState);
 
     return (

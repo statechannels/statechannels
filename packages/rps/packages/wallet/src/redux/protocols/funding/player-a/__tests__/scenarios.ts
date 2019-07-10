@@ -12,6 +12,7 @@ import {
   asPrivateKey,
 } from '../../../../../domain/commitments/__tests__';
 import { preSuccess as indirectFundingPreSuccess } from '../../../indirect-funding/__tests__';
+import { preSuccess as advanceChannelPreSuccess } from '../../../advance-channel/__tests__';
 import { bigNumberify } from 'ethers/utils';
 import { channelFromCommitments } from '../../../../channel-store/channel-state/__tests__';
 
@@ -48,10 +49,15 @@ const oneThree = [
   { address: asAddress, wei: bigNumberify(1).toHexString() },
   { address: bsAddress, wei: bigNumberify(3).toHexString() },
 ];
+const app0 = appCommitment({ turnNum: 0, balances: oneThree });
+const app1 = appCommitment({ turnNum: 1, balances: oneThree });
 const app2 = appCommitment({ turnNum: 2, balances: oneThree });
 const app3 = appCommitment({ turnNum: 3, balances: oneThree });
 const successSharedData = setChannels(EMPTY_SHARED_DATA, [
   channelFromCommitments([app2, app3], asAddress, asPrivateKey),
+]);
+const preFundSharedData = setChannels(EMPTY_SHARED_DATA, [
+  channelFromCommitments([app0, app1], asAddress, asPrivateKey),
 ]);
 // ----
 // States
@@ -62,8 +68,12 @@ const waitForStrategyResponse = states.waitForStrategyResponse(props);
 const waitForIndirectFunding = states.waitForFunding({
   ...props,
   fundingState: indirectFundingPreSuccess.state,
+  postFundSetupState: advanceChannelPreSuccess.state,
 });
-
+const waitForPostFundSetup = states.waitForPostFundSetup({
+  ...props,
+  postFundSetupState: advanceChannelPreSuccess.state,
+});
 const waitForSuccessConfirmation = states.waitForSuccessConfirmation(props);
 
 // -------
@@ -89,13 +99,18 @@ export const happyPath = {
   },
   waitForStrategyResponse: {
     state: waitForStrategyResponse,
-    sharedData: indirectFundingPreSuccess.sharedData,
+    sharedData: preFundSharedData,
     action: strategyApproved,
   },
   waitForFunding: {
     state: waitForIndirectFunding,
     sharedData: indirectFundingPreSuccess.sharedData,
     action: fundingSuccess,
+  },
+  waitForPostFundSetup: {
+    state: waitForPostFundSetup,
+    sharedData: advanceChannelPreSuccess.sharedData,
+    action: advanceChannelPreSuccess.trigger,
   },
   waitForSuccessConfirmation: {
     state: waitForSuccessConfirmation,
