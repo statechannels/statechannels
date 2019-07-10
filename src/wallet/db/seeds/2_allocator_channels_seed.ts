@@ -7,25 +7,30 @@ import {
   zeroBytes32,
 } from '../../../app/services/rps-commitment';
 import {
-  ALLOCATION_2,
+  ALLOCATION,
+  ALLOCATION_3,
   BEGINNING_APP_CHANNEL_HOLDINGS,
   BEGINNING_APP_CHANNEL_NONCE,
   BEGINNING_RPS_APP_CHANNEL_NONCE,
-  DESTINATION_2,
+  DESTINATION,
+  DESTINATION_3,
   DUMMY_RULES_ADDRESS,
   DUMMY_RULES_BEGINNING_APP_CHANNEL_NONCE_CHANNEL_ID,
   DUMMY_RULES_BEGINNING_RPS_APP_CHANNEL_NONCE_CHANNEL_ID,
   DUMMY_RULES_FUNDED_NONCE_CHANNEL_ID,
+  DUMMY_RULES_FUNDED_NONCE_CHANNEL_ID_3,
   DUMMY_RULES_FUNDED_RPS_CHANNEL_NONCE_CHANNEL_ID,
   DUMMY_RULES_ONGOING_APP_CHANNEL_NONCE_CHANNEL_ID,
   FUNDED_CHANNEL_HOLDINGS,
   FUNDED_CHANNEL_NONCE,
+  FUNDED_CHANNEL_NONCE_3,
   FUNDED_RPS_CHANNEL_HOLDINGS,
   FUNDED_RPS_CHANNEL_NONCE,
   HUB_ADDRESS,
   ONGOING_APP_CHANNEL_HOLDINGS,
   ONGOING_APP_CHANNEL_NONCE,
   PARTICIPANT_1_ADDRESS,
+  PARTICIPANT_2_ADDRESS,
 } from '../../../constants';
 import AllocatorChannel from '../../models/allocatorChannel';
 import knex from '../connection';
@@ -36,13 +41,30 @@ const participants = [
   { address: HUB_ADDRESS, priority: 1 },
 ];
 
+const participants_3 = [
+  { address: PARTICIPANT_1_ADDRESS, priority: 0 },
+  { address: PARTICIPANT_2_ADDRESS, priority: 1 },
+  { address: HUB_ADDRESS, priority: 2 },
+];
+
 const allocationByPriority = (priority: number) => ({
   priority,
-  destination: DESTINATION_2[priority],
-  amount: ALLOCATION_2[priority],
+  destination: DESTINATION[priority],
+  amount: ALLOCATION[priority],
+});
+
+const allocationByPriority_3 = (priority: number) => ({
+  priority,
+  destination: DESTINATION_3[priority],
+  amount: ALLOCATION_3[priority],
 });
 
 const allocations = () => [allocationByPriority(0), allocationByPriority(1)];
+const allocations_3 = () => [
+  allocationByPriority_3(0),
+  allocationByPriority_3(1),
+  allocationByPriority_3(2),
+];
 // ***************
 // Ledger channels
 // ***************
@@ -63,6 +85,16 @@ function pre_fund_setup(turnNumber: number) {
   };
 }
 
+function pre_fund_setup_3(turnNumber: number) {
+  return {
+    turnNumber,
+    commitmentType: CommitmentType.PreFundSetup,
+    commitmentCount: turnNumber,
+    allocations: allocations_3(),
+    appAttrs: ledger_appAttrs(3),
+  };
+}
+
 const funded_channel = {
   channelId: DUMMY_RULES_FUNDED_NONCE_CHANNEL_ID,
   rulesAddress: DUMMY_RULES_ADDRESS,
@@ -70,6 +102,15 @@ const funded_channel = {
   holdings: FUNDED_CHANNEL_HOLDINGS,
   commitments: [pre_fund_setup(0), pre_fund_setup(1)],
   participants,
+};
+
+const funded_channel_3 = {
+  channelId: DUMMY_RULES_FUNDED_NONCE_CHANNEL_ID_3,
+  rulesAddress: DUMMY_RULES_ADDRESS,
+  nonce: FUNDED_CHANNEL_NONCE_3,
+  holdings: FUNDED_CHANNEL_HOLDINGS,
+  commitments: [pre_fund_setup_3(0), pre_fund_setup_3(1), pre_fund_setup_3(2)],
+  participants: participants_3,
 };
 
 function post_fund_setup(turnNumber: number) {
@@ -169,6 +210,7 @@ const beginning_app_phase_rps_channel = {
 
 export const seeds = {
   funded_channel,
+  funded_channel_3,
   beginning_app_phase_channel,
   ongoing_app_phase_channel,
   funded_rps_channel,

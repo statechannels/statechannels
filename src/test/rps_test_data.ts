@@ -19,13 +19,13 @@ import {
   Weapon,
 } from '../app/services/rps-commitment';
 import {
-  ALLOCATION_2,
+  ALLOCATION,
   BEGINNING_RPS_APP_CHANNEL_NONCE,
-  DESTINATION_2,
+  DESTINATION,
   DUMMY_RULES_ADDRESS,
   FUNDED_RPS_CHANNEL_NONCE,
   PARTICIPANT_1_PRIVATE_KEY,
-  PARTICIPANTS_2,
+  PARTICIPANTS,
   STAKE,
 } from '../constants';
 import { default_channel } from './test_data';
@@ -213,10 +213,10 @@ export const base_rps_commitment: BaseWithStake = {
   channel: {
     nonce: expect.any(Number),
     channelType: DUMMY_RULES_ADDRESS,
-    participants: PARTICIPANTS_2,
+    participants: PARTICIPANTS,
   },
-  allocation: ALLOCATION_2,
-  destination: DESTINATION_2,
+  allocation: ALLOCATION,
+  destination: DESTINATION,
   turnNum: 0,
   commitmentCount: 0,
   commitmentType: 0,
@@ -247,7 +247,7 @@ export const pre_fund_setup_1_response = {
 export const funded_rps_channel: Channel = {
   channelType: DUMMY_RULES_ADDRESS,
   nonce: FUNDED_RPS_CHANNEL_NONCE,
-  participants: PARTICIPANTS_2,
+  participants: PARTICIPANTS,
 };
 
 const update_channel_commitment = asCoreCommitment(
@@ -274,7 +274,7 @@ export const post_fund_setup_1_response = {
 export const beginning_app_phase_rps_channel: Channel = {
   channelType: DUMMY_RULES_ADDRESS,
   nonce: BEGINNING_RPS_APP_CHANNEL_NONCE,
-  participants: PARTICIPANTS_2,
+  participants: PARTICIPANTS,
 };
 
 export function app_response(app_attrs: RPSAppAttributes): Commitment {

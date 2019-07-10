@@ -1,11 +1,11 @@
 import { Commitment, CommitmentType, sign, Signature, toHex } from 'fmg-core';
 import {
-  ALLOCATION_2,
-  DESTINATION_2,
+  ALLOCATION,
+  DESTINATION,
   DUMMY_RULES_ADDRESS,
   FUNDED_CHANNEL_NONCE,
   PARTICIPANT_1_PRIVATE_KEY,
-  PARTICIPANTS_2,
+  PARTICIPANTS,
   STAKE,
 } from '../../../constants';
 import {
@@ -31,8 +31,8 @@ const base = {
   channel: default_channel,
   stake: STAKE,
   turnNum: 0,
-  allocation: ALLOCATION_2,
-  destination: DESTINATION_2,
+  allocation: ALLOCATION,
+  destination: DESTINATION,
   commitmentCount: 0,
   commitmentType: CommitmentType.PreFundSetup,
 };
@@ -174,7 +174,7 @@ describe('updateRPSChannel', () => {
       pre_fund_setup_0.channel = {
         channelType: DUMMY_RULES_ADDRESS,
         nonce: FUNDED_CHANNEL_NONCE,
-        participants: PARTICIPANTS_2,
+        participants: PARTICIPANTS,
       };
       theirSignature = sign(toHex(pre_fund_setup_0), PARTICIPANT_1_PRIVATE_KEY);
 

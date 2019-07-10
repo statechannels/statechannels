@@ -67,14 +67,14 @@ export async function updateRPSChannel(
     ourWeapon,
   });
 
-  await wallet.updateChannel(fromCoreCommitment(theirCommitment), ourCommitment);
+  await wallet.updateChannel([fromCoreCommitment(theirCommitment)], ourCommitment);
   return wallet.formResponse(asCoreCommitment(ourCommitment));
 }
 
 async function openChannel(theirCommitment: Commitment) {
   const ourCommitment = await nextCommitment(fromCoreCommitment(theirCommitment));
 
-  await wallet.updateChannel(fromCoreCommitment(theirCommitment), ourCommitment);
+  await wallet.updateChannel([fromCoreCommitment(theirCommitment)], ourCommitment);
 
   return await wallet.formResponse(asCoreCommitment(ourCommitment));
 }
