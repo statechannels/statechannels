@@ -1,9 +1,19 @@
 pragma solidity ^0.5.2;
 pragma experimental ABIEncoderV2;
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
-// import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 import "fmg-core/contracts/Commitment.sol";
 import "fmg-core/contracts/Rules.sol";
+
+contract IERC20 {
+    function totalSupply() public view returns (uint);
+    function balanceOf(address tokenOwner) public view returns (uint balance);
+    function allowance(address tokenOwner, address spender) public view returns (uint remaining);
+    function transfer(address to, uint tokens) public returns (bool success);
+    function approve(address spender, uint tokens) public returns (bool success);
+    function transferFrom(address from, address to, uint tokens) public returns (bool success);
+    event Transfer(address indexed from, address indexed to, uint tokens);
+    event Approval(address indexed tokenOwner, address indexed spender, uint tokens);
+}
 
 contract NitroAdjudicator {
     using Commitment for Commitment.CommitmentStruct;
@@ -62,8 +72,8 @@ function deposit(address destination, uint expectedHeld,
        if (token == zeroAddress) {
         require(msg.value == amount, "Insufficient ETH for ETH deposit");
         } else {
-            // IERC20 _token = IERC20(token);
-            // require(token.transferFrom(msg.sender,address(this),amount), 'Could not deposit ERC20s');
+            IERC20 _token = IERC20(token);
+            require(_token.transferFrom(msg.sender,address(this),amount), 'Could not deposit ERC20s');
             }
 
         uint amountDeposited;
@@ -92,8 +102,8 @@ function deposit(address destination, uint expectedHeld,
               msg.sender.transfer(amount - amountDeposited);
           }
             else {
-                // IERC20 _token = IERC20(token);
-                // token.transferFrom(address(this), msg.sender, amount - amountDeposited);
+                IERC20 _token = IERC20(token);
+                _token.transferFrom(address(this), msg.sender, amount - amountDeposited);
                 }
         }
         emit Deposited(destination, amountDeposited, holdings[destination][token]);
@@ -140,8 +150,8 @@ function deposit(address destination, uint expectedHeld,
         // Decrease holdings before calling to token contract (protect against reentrancy)
         if (token == zeroAddress) {destination.transfer(amount);}
         else {
-            // IERC20 _token = IERC20(token);
-            // token.transfer(destination,amount);
+            IERC20 _token = IERC20(token);
+            _token.transfer(destination,amount);
             }
 
     }
@@ -314,202 +324,202 @@ function deposit(address destination, uint expectedHeld,
     // ForceMove Protocol API
     // **********************
 
-    function conclude(ConclusionProof memory proof) public {
-        _conclude(proof);
-    }
+    // function conclude(ConclusionProof memory proof) public {
+    //     _conclude(proof);
+    // }
 
-    function concludeAndWithdraw(ConclusionProof memory proof,
-        address participant,
-        address payable destination,
-        uint amount,
-        address token,
-        uint8 _v,
-        bytes32 _r,
-        bytes32 _s
-    ) public{
-        address channelId = proof.penultimateCommitment.channelId();
-        if (outcomes[channelId].finalizedAt > now || outcomes[channelId].finalizedAt == 0){
-        _conclude(proof);
-        } else {
-            require(keccak256(abi.encode(proof.penultimateCommitment)) == keccak256(abi.encode(outcomes[channelId].challengeCommitment)),
-            "concludeAndWithdraw: channel already concluded with a different proof");
-        }
-        transfer(channelId,participant, amount, token);
-        withdraw(participant,destination, amount, token, _v,_r,_s);
-    }
+    // function concludeAndWithdraw(ConclusionProof memory proof,
+    //     address participant,
+    //     address payable destination,
+    //     uint amount,
+    //     address token,
+    //     uint8 _v,
+    //     bytes32 _r,
+    //     bytes32 _s
+    // ) public{
+    //     address channelId = proof.penultimateCommitment.channelId();
+    //     if (outcomes[channelId].finalizedAt > now || outcomes[channelId].finalizedAt == 0){
+    //     _conclude(proof);
+    //     } else {
+    //         require(keccak256(abi.encode(proof.penultimateCommitment)) == keccak256(abi.encode(outcomes[channelId].challengeCommitment)),
+    //         "concludeAndWithdraw: channel already concluded with a different proof");
+    //     }
+    //     transfer(channelId,participant, amount, token);
+    //     withdraw(participant,destination, amount, token, _v,_r,_s);
+    // }
 
-    function forceMove(
-        Commitment.CommitmentStruct memory agreedCommitment,
-        Commitment.CommitmentStruct memory challengeCommitment,
-        Signature[] memory signatures
-    ) public {
-        require(
-            !isChannelClosed(agreedCommitment.channelId()),
-            "ForceMove: channel must be open"
-        );
-        require(
-            moveAuthorized(agreedCommitment, signatures[0]),
-            "ForceMove: agreedCommitment not authorized"
-        );
-        require(
-            moveAuthorized(challengeCommitment, signatures[1]),
-            "ForceMove: challengeCommitment not authorized"
-        );
-        require(
-            Rules.validTransition(agreedCommitment, challengeCommitment),
-            "ForceMove: Invalid transition"
-        );
+    // function forceMove(
+    //     Commitment.CommitmentStruct memory agreedCommitment,
+    //     Commitment.CommitmentStruct memory challengeCommitment,
+    //     Signature[] memory signatures
+    // ) public {
+    //     require(
+    //         !isChannelClosed(agreedCommitment.channelId()),
+    //         "ForceMove: channel must be open"
+    //     );
+    //     require(
+    //         moveAuthorized(agreedCommitment, signatures[0]),
+    //         "ForceMove: agreedCommitment not authorized"
+    //     );
+    //     require(
+    //         moveAuthorized(challengeCommitment, signatures[1]),
+    //         "ForceMove: challengeCommitment not authorized"
+    //     );
+    //     require(
+    //         Rules.validTransition(agreedCommitment, challengeCommitment),
+    //         "ForceMove: Invalid transition"
+    //     );
 
-        address channelId = agreedCommitment.channelId();
+    //     address channelId = agreedCommitment.channelId();
 
-        outcomes[channelId] = Outcome(
-            challengeCommitment.participants,
-            now + CHALLENGE_DURATION,
-            challengeCommitment,
-            challengeCommitment.allocation,
-            challengeCommitment.token
-        );
+    //     outcomes[channelId] = Outcome(
+    //         challengeCommitment.participants,
+    //         now + CHALLENGE_DURATION,
+    //         challengeCommitment,
+    //         challengeCommitment.allocation,
+    //         challengeCommitment.token
+    //     );
 
-        emit ChallengeCreated(
-            channelId,
-            challengeCommitment,
-            now + CHALLENGE_DURATION
-        );
-    }
+    //     emit ChallengeCreated(
+    //         channelId,
+    //         challengeCommitment,
+    //         now + CHALLENGE_DURATION
+    //     );
+    // }
 
-    function refute(Commitment.CommitmentStruct memory refutationCommitment, Signature memory signature) public {
-        address channel = refutationCommitment.channelId();
-        require(
-            !isChannelClosed(channel),
-            "Refute: channel must be open"
-        );
+    // function refute(Commitment.CommitmentStruct memory refutationCommitment, Signature memory signature) public {
+    //     address channel = refutationCommitment.channelId();
+    //     require(
+    //         !isChannelClosed(channel),
+    //         "Refute: channel must be open"
+    //     );
 
-        require(
-            moveAuthorized(refutationCommitment, signature),
-            "Refute: move must be authorized"
-        );
+    //     require(
+    //         moveAuthorized(refutationCommitment, signature),
+    //         "Refute: move must be authorized"
+    //     );
 
-        require(
-            Rules.validRefute(outcomes[channel].challengeCommitment, refutationCommitment, signature.v, signature.r, signature.s),
-            "Refute: must be a valid refute"
-        );
+    //     require(
+    //         Rules.validRefute(outcomes[channel].challengeCommitment, refutationCommitment, signature.v, signature.r, signature.s),
+    //         "Refute: must be a valid refute"
+    //     );
 
-        emit Refuted(channel, refutationCommitment);
-        Outcome memory updatedOutcome = Outcome(
-            outcomes[channel].destination,
-            0,
-            refutationCommitment,
-            refutationCommitment.allocation,
-            refutationCommitment.token
-        );
-        outcomes[channel] = updatedOutcome;
-    }
+    //     emit Refuted(channel, refutationCommitment);
+    //     Outcome memory updatedOutcome = Outcome(
+    //         outcomes[channel].destination,
+    //         0,
+    //         refutationCommitment,
+    //         refutationCommitment.allocation,
+    //         refutationCommitment.token
+    //     );
+    //     outcomes[channel] = updatedOutcome;
+    // }
 
-    function respondWithMove(Commitment.CommitmentStruct memory responseCommitment, Signature memory signature) public {
-        address channel = responseCommitment.channelId();
-        require(
-            !isChannelClosed(channel),
-            "RespondWithMove: channel must be open"
-        );
+    // function respondWithMove(Commitment.CommitmentStruct memory responseCommitment, Signature memory signature) public {
+    //     address channel = responseCommitment.channelId();
+    //     require(
+    //         !isChannelClosed(channel),
+    //         "RespondWithMove: channel must be open"
+    //     );
 
-        require(
-            moveAuthorized(responseCommitment, signature),
-            "RespondWithMove: move must be authorized"
-        );
+    //     require(
+    //         moveAuthorized(responseCommitment, signature),
+    //         "RespondWithMove: move must be authorized"
+    //     );
 
-        require(
-            Rules.validRespondWithMove(outcomes[channel].challengeCommitment, responseCommitment, signature.v, signature.r, signature.s),
-            "RespondWithMove: must be a valid response"
-        );
+    //     require(
+    //         Rules.validRespondWithMove(outcomes[channel].challengeCommitment, responseCommitment, signature.v, signature.r, signature.s),
+    //         "RespondWithMove: must be a valid response"
+    //     );
 
-        emit RespondedWithMove(channel, responseCommitment, signature.v, signature.r, signature.s);
+    //     emit RespondedWithMove(channel, responseCommitment, signature.v, signature.r, signature.s);
 
-        Outcome memory updatedOutcome = Outcome(
-            outcomes[channel].destination,
-            0,
-            responseCommitment,
-            responseCommitment.allocation,
-            responseCommitment.token
-        );
-        outcomes[channel] = updatedOutcome;
-    }
+    //     Outcome memory updatedOutcome = Outcome(
+    //         outcomes[channel].destination,
+    //         0,
+    //         responseCommitment,
+    //         responseCommitment.allocation,
+    //         responseCommitment.token
+    //     );
+    //     outcomes[channel] = updatedOutcome;
+    // }
 
-    function alternativeRespondWithMove(
-        Commitment.CommitmentStruct memory _alternativeCommitment,
-        Commitment.CommitmentStruct memory _responseCommitment,
-        Signature memory _alternativeSignature,
-        Signature memory _responseSignature
-    )
-      public
-    {
-        address channel = _responseCommitment.channelId();
-        require(
-            !isChannelClosed(channel),
-            "AlternativeRespondWithMove: channel must be open"
-        );
+    // function alternativeRespondWithMove(
+    //     Commitment.CommitmentStruct memory _alternativeCommitment,
+    //     Commitment.CommitmentStruct memory _responseCommitment,
+    //     Signature memory _alternativeSignature,
+    //     Signature memory _responseSignature
+    // )
+    //   public
+    // {
+    //     address channel = _responseCommitment.channelId();
+    //     require(
+    //         !isChannelClosed(channel),
+    //         "AlternativeRespondWithMove: channel must be open"
+    //     );
 
-        require(
-            moveAuthorized(_responseCommitment, _responseSignature),
-            "AlternativeRespondWithMove: move must be authorized"
-        );
+    //     require(
+    //         moveAuthorized(_responseCommitment, _responseSignature),
+    //         "AlternativeRespondWithMove: move must be authorized"
+    //     );
 
-        uint8[] memory v = new uint8[](2);
-        v[0] = _alternativeSignature.v;
-        v[1] = _responseSignature.v;
+    //     uint8[] memory v = new uint8[](2);
+    //     v[0] = _alternativeSignature.v;
+    //     v[1] = _responseSignature.v;
 
-        bytes32[] memory r = new bytes32[](2);
-        r[0] = _alternativeSignature.r;
-        r[1] = _responseSignature.r;
+    //     bytes32[] memory r = new bytes32[](2);
+    //     r[0] = _alternativeSignature.r;
+    //     r[1] = _responseSignature.r;
 
-        bytes32[] memory s = new bytes32[](2);
-        s[0] = _alternativeSignature.s;
-        s[1] = _responseSignature.s;
+    //     bytes32[] memory s = new bytes32[](2);
+    //     s[0] = _alternativeSignature.s;
+    //     s[1] = _responseSignature.s;
 
 
-        require(
-            Rules.validAlternativeRespondWithMove(
-                outcomes[channel].challengeCommitment,
-                _alternativeCommitment,
-                _responseCommitment,
-                v,
-                r,
-                s
-            ),
-            "RespondWithMove: must be a valid response"
-        );
+    //     require(
+    //         Rules.validAlternativeRespondWithMove(
+    //             outcomes[channel].challengeCommitment,
+    //             _alternativeCommitment,
+    //             _responseCommitment,
+    //             v,
+    //             r,
+    //             s
+    //         ),
+    //         "RespondWithMove: must be a valid response"
+    //     );
 
-        emit RespondedWithAlternativeMove(_responseCommitment);
+    //     emit RespondedWithAlternativeMove(_responseCommitment);
 
-        Outcome memory updatedOutcome = Outcome(
-            outcomes[channel].destination,
-            0,
-            _responseCommitment,
-            _responseCommitment.allocation,
-            _responseCommitment.token
-        );
-        outcomes[channel] = updatedOutcome;
-    }
+    //     Outcome memory updatedOutcome = Outcome(
+    //         outcomes[channel].destination,
+    //         0,
+    //         _responseCommitment,
+    //         _responseCommitment.allocation,
+    //         _responseCommitment.token
+    //     );
+    //     outcomes[channel] = updatedOutcome;
+    // }
 
-    // ************************
-    // ForceMove Protocol Logic
-    // ************************
+    // // ************************
+    // // ForceMove Protocol Logic
+    // // ************************
 
-    function _conclude(ConclusionProof memory proof) internal {
-        address channelId = proof.penultimateCommitment.channelId();
-        require(
-            (outcomes[channelId].finalizedAt > now || outcomes[channelId].finalizedAt == 0),
-            "Conclude: channel must not be finalized"
-        );
+    // function _conclude(ConclusionProof memory proof) internal {
+    //     address channelId = proof.penultimateCommitment.channelId();
+    //     require(
+    //         (outcomes[channelId].finalizedAt > now || outcomes[channelId].finalizedAt == 0),
+    //         "Conclude: channel must not be finalized"
+    //     );
 
-        outcomes[channelId] = Outcome(
-            proof.penultimateCommitment.destination,
-            now,
-            proof.penultimateCommitment,
-            proof.penultimateCommitment.allocation,
-            proof.penultimateCommitment.token
-        );
-        emit Concluded(channelId);
-    }
+    //     outcomes[channelId] = Outcome(
+    //         proof.penultimateCommitment.destination,
+    //         now,
+    //         proof.penultimateCommitment,
+    //         proof.penultimateCommitment.allocation,
+    //         proof.penultimateCommitment.token
+    //     );
+    //     emit Concluded(channelId);
+    // }
 
     // ****************
     // Helper functions
