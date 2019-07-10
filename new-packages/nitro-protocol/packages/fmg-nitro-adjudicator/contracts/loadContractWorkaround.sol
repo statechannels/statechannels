@@ -9,3 +9,4 @@ import "fmg-core/contracts/Rules.sol";
 import "fmg-core/contracts/Commitment.sol";
 import "fmg-core/contracts/test-app/CountingApp.sol";
 import "fmg-core/contracts/test-app/CountingCommitment.sol";
+import "openzeppelin-solidity/contracts/token/ERC20/ERC20.sol";
