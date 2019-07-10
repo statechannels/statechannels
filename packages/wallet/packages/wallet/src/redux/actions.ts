@@ -228,7 +228,8 @@ export type WalletAction =
   | ProtocolAction
   | protocol.NewProcessAction
   | channel.ChannelAction
-  | RelayableAction;
+  | RelayableAction
+  | MessageReceived;
 
 export function isCommonAction(action: WalletAction): action is CommonAction {
   return (

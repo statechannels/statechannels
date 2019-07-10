@@ -17,43 +17,15 @@ describe('Player A Happy path', () => {
   describeScenarioStep(scenario.waitForDepositTransaction, () => {
     const { action, state, sharedData } = scenario.waitForDepositTransaction;
     const updatedState = directFundingStateReducer(state, sharedData, action);
-    itTransitionsTo(updatedState, 'DirectFunding.WaitForFundingAndPostFundSetup');
+    itTransitionsTo(updatedState, 'DirectFunding.WaitForFunding');
   });
 
-  describeScenarioStep(scenario.waitForFundingAndPostFundSetup, () => {
-    const { action, state, sharedData } = scenario.waitForFundingAndPostFundSetup;
-    const updatedState = directFundingStateReducer(state, sharedData, action);
-    itTransitionsTo(updatedState, 'DirectFunding.WaitForFundingAndPostFundSetup');
-  });
-
-  describeScenarioStep(scenario.waitForPostFundSetup, () => {
-    const { action, state, sharedData } = scenario.waitForPostFundSetup;
+  describeScenarioStep(scenario.waitForFunding, () => {
+    const { action, state, sharedData } = scenario.waitForFunding;
     const updatedState = directFundingStateReducer(state, sharedData, action);
     itTransitionsTo(updatedState, 'DirectFunding.FundingSuccess');
   });
 });
-describe('Player A Happy Path With No Post Fund Setup Exchange', () => {
-  const scenario = scenarios.aNoPostFundSetupHappyPath;
-  describe('when initializing', () => {
-    const { action, sharedData } = scenario.initialize;
-    const updatedState = initialize(action, sharedData);
-    itTransitionsTo(updatedState, 'DirectFunding.WaitForDepositTransaction');
-    itSendsATransaction(updatedState);
-  });
-
-  describeScenarioStep(scenario.waitForDepositTransaction, () => {
-    const { action, state, sharedData } = scenario.waitForDepositTransaction;
-    const updatedState = directFundingStateReducer(state, sharedData, action);
-    itTransitionsTo(updatedState, 'DirectFunding.WaitForFundingAndPostFundSetup');
-  });
-
-  describeScenarioStep(scenario.waitForFundingAndPostFundSetup, () => {
-    const { action, state, sharedData } = scenario.waitForFundingAndPostFundSetup;
-    const updatedState = directFundingStateReducer(state, sharedData, action);
-    itTransitionsTo(updatedState, 'DirectFunding.FundingSuccess');
-  });
-});
-
 describe('Player B Happy path', () => {
   const scenario = scenarios.bHappyPath;
   describe('when initializing', () => {
@@ -71,49 +43,11 @@ describe('Player B Happy path', () => {
   describeScenarioStep(scenario.waitForDepositTransaction, () => {
     const { action, state, sharedData } = scenario.waitForDepositTransaction;
     const updatedState = directFundingStateReducer(state, sharedData, action);
-    itTransitionsTo(updatedState, 'DirectFunding.WaitForFundingAndPostFundSetup');
+    itTransitionsTo(updatedState, 'DirectFunding.WaitForFunding');
   });
 
-  describeScenarioStep(scenario.waitForFundingAndPostFundSetup, () => {
-    const { action, state, sharedData } = scenario.waitForFundingAndPostFundSetup;
-    const updatedState = directFundingStateReducer(state, sharedData, action);
-    itTransitionsTo(updatedState, 'DirectFunding.WaitForFundingAndPostFundSetup');
-    it('marks funding as received', () => {
-      expect(
-        (updatedState.protocolState as states.WaitForFundingAndPostFundSetup).channelFunded,
-      ).toEqual(true);
-    });
-  });
-
-  describeScenarioStep(scenario.waitForPostFundSetup, () => {
-    const { action, state, sharedData } = scenario.waitForPostFundSetup;
-    const updatedState = directFundingStateReducer(state, sharedData, action);
-    itTransitionsTo(updatedState, 'DirectFunding.FundingSuccess');
-  });
-});
-
-describe('Player B Happy Path With No Post Fund Setup Exchange', () => {
-  const scenario = scenarios.bNoPostFundSetupsHappyPath;
-  describe('when initializing', () => {
-    const { action, sharedData } = scenario.initialize;
-    const updatedState = initialize(action, sharedData);
-    itTransitionsTo(updatedState, 'DirectFunding.NotSafeToDeposit');
-  });
-  describeScenarioStep(scenario.notSafeToDeposit, () => {
-    const { action, state, sharedData } = scenario.notSafeToDeposit;
-    const updatedState = directFundingStateReducer(state, sharedData, action);
-    itTransitionsTo(updatedState, 'DirectFunding.WaitForDepositTransaction');
-    itSendsATransaction(updatedState);
-  });
-
-  describeScenarioStep(scenario.waitForDepositTransaction, () => {
-    const { action, state, sharedData } = scenario.waitForDepositTransaction;
-    const updatedState = directFundingStateReducer(state, sharedData, action);
-    itTransitionsTo(updatedState, 'DirectFunding.WaitForFundingAndPostFundSetup');
-  });
-
-  describeScenarioStep(scenario.waitForFundingAndPostFundSetup, () => {
-    const { action, state, sharedData } = scenario.waitForFundingAndPostFundSetup;
+  describeScenarioStep(scenario.waitForFunding, () => {
+    const { action, state, sharedData } = scenario.waitForFunding;
     const updatedState = directFundingStateReducer(state, sharedData, action);
     itTransitionsTo(updatedState, 'DirectFunding.FundingSuccess');
   });
@@ -124,7 +58,7 @@ describe('Player A No Deposit Required', () => {
   describe('when initializing', () => {
     const { action, sharedData } = scenario.initialize;
     const updatedState = initialize(action, sharedData);
-    itTransitionsTo(updatedState, 'DirectFunding.WaitForFundingAndPostFundSetup');
+    itTransitionsTo(updatedState, 'DirectFunding.WaitForFunding');
   });
 });
 

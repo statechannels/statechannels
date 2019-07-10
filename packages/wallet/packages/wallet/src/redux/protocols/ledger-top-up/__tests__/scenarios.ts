@@ -1,9 +1,6 @@
 import { bigNumberify } from 'ethers/utils';
 import * as states from '../states';
-import {
-  noPostFundSetupsPreSuccessA,
-  noPostFundSetupsPreSuccessB,
-} from '../../direct-funding/__tests__';
+import { preSuccessA, preSuccessB } from '../../direct-funding/__tests__';
 import {
   channelId,
   ledgerId,
@@ -73,7 +70,7 @@ const switchOrderAndAddATopUpUpdate = props =>
 const waitForDirectFundingForA = props =>
   states.waitForDirectFundingForA({
     ...props,
-    directFundingState: noPostFundSetupsPreSuccessA.state,
+    directFundingState: preSuccessA.state,
   });
 const restoreOrderAndAddBTopUpUpdate = props =>
   states.restoreOrderAndAddBTopUpUpdate({
@@ -83,7 +80,7 @@ const restoreOrderAndAddBTopUpUpdate = props =>
 const waitForDirectFundingForB = props =>
   states.waitForDirectFundingForB({
     ...props,
-    directFundingState: noPostFundSetupsPreSuccessA.state,
+    directFundingState: preSuccessA.state,
   });
 
 // ------
@@ -92,8 +89,8 @@ const waitForDirectFundingForB = props =>
 
 const playerAConsensusUpdateSuccess = twoPlayerPreSuccessA.action;
 const playerBConsensusUpdateSuccess = twoPlayerPreSuccessB.action;
-const playerAFundingSuccess = noPostFundSetupsPreSuccessA.action;
-const playerBFundingSuccess = noPostFundSetupsPreSuccessB.action;
+const playerAFundingSuccess = preSuccessA.action;
+const playerBFundingSuccess = preSuccessB.action;
 
 // ------
 // Shared Data
@@ -105,9 +102,7 @@ const consensusSharedData = (ourIndex: TwoPartyPlayerIndex) => {
 };
 const fundingSharedData = (ourIndex: TwoPartyPlayerIndex, latestCommitment: SignedCommitment) => {
   return setChannels(
-    ourIndex === TwoPartyPlayerIndex.A
-      ? noPostFundSetupsPreSuccessA.sharedData
-      : noPostFundSetupsPreSuccessB.sharedData,
+    ourIndex === TwoPartyPlayerIndex.A ? preSuccessA.sharedData : preSuccessB.sharedData,
     [
       channelFromCommitments(
         [latestCommitment],

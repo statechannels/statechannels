@@ -1,9 +1,9 @@
 import { WalletAction } from '../../actions';
-import { NewLedgerFundingAction, isNewLedgerFundingAction } from '../new-ledger-funding/actions';
 import { AdvanceChannelAction, isAdvanceChannelAction } from '../advance-channel';
+import { isIndirectFundingAction, IndirectFundingAction } from '../indirect-funding';
 
-export type VirtualFundingAction = NewLedgerFundingAction | AdvanceChannelAction; // | ConsensusReachedAction
+export type VirtualFundingAction = IndirectFundingAction | AdvanceChannelAction; // | ConsensusReachedAction
 
 export function isVirtualFundingAction(action: WalletAction): action is VirtualFundingAction {
-  return isNewLedgerFundingAction(action) || isAdvanceChannelAction(action);
+  return isIndirectFundingAction(action) || isAdvanceChannelAction(action);
 }

@@ -2,7 +2,7 @@ import { bigNumberify } from 'ethers/utils';
 import { unreachable } from '../../../utils/reducer-utils';
 import { createDepositTransaction } from '../../../utils/transaction-generator';
 import * as actions from '../../actions';
-import { ProtocolReducer, ProtocolStateWithSharedData, makeLocator } from '../../protocols';
+import { ProtocolReducer, ProtocolStateWithSharedData } from '../../protocols';
 import { SharedData } from '../../state';
 import { isTransactionAction } from '../transaction-submission/actions';
 import {
@@ -11,18 +11,11 @@ import {
 } from '../transaction-submission/reducer';
 import { isTerminal, isSuccess } from '../transaction-submission/states';
 import * as states from './states';
-import * as advanceChannel from '../advance-channel';
 import { DirectFundingRequested } from './actions';
-import { CommitmentType } from '../../../domain';
-import { clearedToSend } from '../advance-channel/actions';
 import * as selectors from '../../selectors';
 export const DIRECT_FUNDING_PROTOCOL_LOCATOR = 'DirectFunding';
 
 type DFReducer = ProtocolReducer<states.DirectFundingState>;
-const ADVANCE_CHANNEL_PROTOCOL_LOCATOR = makeLocator(
-  DIRECT_FUNDING_PROTOCOL_LOCATOR,
-  advanceChannel.ADVANCE_CHANNEL_PROTOCOL_LOCATOR,
-);
 
 export function initialize(
   action: DirectFundingRequested,
@@ -35,27 +28,12 @@ export function initialize(
     channelId,
     ourIndex,
     processId,
-    exchangePostFundSetups,
   } = action;
 
   const existingChannelFunding = selectors.getAdjudicatorChannelBalance(sharedData, channelId);
   const alreadySafeToDeposit = bigNumberify(existingChannelFunding).gte(safeToDepositLevel);
   const alreadyFunded = bigNumberify(totalFundingRequired).eq('0x');
   const depositNotRequired = bigNumberify(requiredDeposit).eq('0x');
-  const commitmentType = CommitmentType.PostFundSetup;
-
-  const {
-    protocolState: postFundSetupState,
-    sharedData: newSharedData,
-  } = advanceChannel.initializeAdvanceChannel(processId, sharedData, commitmentType, {
-    channelId,
-    ourIndex,
-    processId,
-    commitmentType,
-    clearedToSend: (alreadyFunded || depositNotRequired) && exchangePostFundSetups,
-    protocolLocator: ADVANCE_CHANNEL_PROTOCOL_LOCATOR,
-  });
-  sharedData = newSharedData;
 
   if (alreadyFunded) {
     return {
@@ -66,23 +44,20 @@ export function initialize(
         channelId,
         ourIndex,
         safeToDepositLevel,
-        exchangePostFundSetups,
-        postFundSetupState,
       }),
       sharedData,
     };
   }
   if (depositNotRequired) {
     return {
-      protocolState: states.waitForFundingAndPostFundSetup({
+      protocolState: states.waitForFunding({
         processId,
         totalFundingRequired,
         requiredDeposit,
         channelId,
         ourIndex,
         safeToDepositLevel,
-        exchangePostFundSetups,
-        postFundSetupState,
+
         channelFunded: false,
         postFundSetupReceived: false,
       }),
@@ -112,8 +87,6 @@ export function initialize(
         ourIndex,
         safeToDepositLevel,
         transactionSubmissionState,
-        exchangePostFundSetups,
-        postFundSetupState,
       }),
       sharedData: newStorage,
     };
@@ -127,8 +100,6 @@ export function initialize(
       channelId,
       ourIndex,
       safeToDepositLevel,
-      exchangePostFundSetups,
-      postFundSetupState,
     }),
     sharedData,
   };
@@ -148,17 +119,13 @@ export const directFundingStateReducer: DFReducer = (
     }
   }
 
-  if (advanceChannel.isAdvanceChannelAction(action)) {
-    return commitmentsReceivedReducer(state, sharedData, action);
-  }
-
   switch (state.type) {
     case 'DirectFunding.NotSafeToDeposit':
       return notSafeToDepositReducer(state, sharedData, action);
     case 'DirectFunding.WaitForDepositTransaction':
       return waitForDepositTransactionReducer(state, sharedData, action);
-    case 'DirectFunding.WaitForFundingAndPostFundSetup':
-      return waitForFundingAndPostFundSetupReducer(state, sharedData, action);
+    case 'DirectFunding.WaitForFunding':
+      return waitForFundingReducer(state, sharedData, action);
     case 'DirectFunding.FundingSuccess':
       return channelFundedReducer(state, sharedData, action);
     case 'DirectFunding.FundingFailure':
@@ -169,102 +136,17 @@ export const directFundingStateReducer: DFReducer = (
   }
 };
 
-const commitmentsReceivedReducer: DFReducer = (
-  protocolState: states.DirectFundingState,
-  sharedData: SharedData,
-  action: actions.FundingReceivedEvent,
-): ProtocolStateWithSharedData<states.DirectFundingState> => {
-  if (!protocolState.exchangePostFundSetups) {
-    console.warn(
-      `Direct Funding reducer received ${
-        action.type
-      } even though 'exchangePostFundSetups' is set to false.`,
-    );
-    return { protocolState, sharedData };
-  }
-  const {
-    protocolState: postFundSetupState,
-    sharedData: newSharedData,
-  } = advanceChannel.advanceChannelReducer(protocolState.postFundSetupState, sharedData, action);
-
-  if (postFundSetupState.type === 'AdvanceChannel.Success' && channelIsFunded(protocolState)) {
-    return {
-      protocolState: states.fundingSuccess({ ...protocolState, postFundSetupState }),
-      sharedData: newSharedData,
-    };
-  } else if (channelIsFunded(protocolState)) {
-    return {
-      protocolState: states.waitForFundingAndPostFundSetup({
-        ...protocolState,
-        postFundSetupState,
-        channelFunded: true,
-      }),
-      sharedData: newSharedData,
-    };
-  } else {
-    return {
-      protocolState: states.waitForFundingAndPostFundSetup({
-        ...protocolState,
-        postFundSetupState,
-        channelFunded: false,
-      }),
-      sharedData: newSharedData,
-    };
-  }
-};
-
-function channelIsFunded(protocolState: states.DirectFundingState) {
-  if ('channelFunded' in protocolState) {
-    return protocolState.channelFunded;
-  }
-
-  return false;
-}
-
 // Action reducers
 const fundingConfirmedReducer: DFReducer = (
   protocolState: states.DirectFundingState,
   sharedData: SharedData,
-  action: actions.FundingReceivedEvent,
 ): ProtocolStateWithSharedData<states.DirectFundingState> => {
   // TODO[Channel state side effect]: update funding level for the channel.
 
-  // If we are not exchanging post fund setups we can return success now that we're funded
-  if (!protocolState.exchangePostFundSetups) {
-    return {
-      protocolState: states.fundingSuccess(protocolState),
-      sharedData,
-    };
-  }
-
-  // If we are exchanging post fund setups we alert the advanceChannelReducer that it is clearedToSend
-  const {
-    protocolState: postFundSetupState,
-    sharedData: newSharedData,
-  } = advanceChannel.advanceChannelReducer(
-    protocolState.postFundSetupState,
+  return {
+    protocolState: states.fundingSuccess(protocolState),
     sharedData,
-    clearedToSend({
-      processId: action.processId,
-      protocolLocator: ADVANCE_CHANNEL_PROTOCOL_LOCATOR,
-    }),
-  );
-
-  if (postFundSetupState.type === 'AdvanceChannel.Success') {
-    return {
-      protocolState: states.fundingSuccess({ ...protocolState, postFundSetupState }),
-      sharedData: newSharedData,
-    };
-  } else {
-    return {
-      protocolState: states.waitForFundingAndPostFundSetup({
-        ...protocolState,
-        postFundSetupState,
-        channelFunded: true,
-      }),
-      sharedData: newSharedData,
-    };
-  }
+  };
 };
 
 // State reducers
@@ -325,7 +207,7 @@ const waitForDepositTransactionReducer: DFReducer = (
   } else {
     if (isSuccess(newTransactionState)) {
       return {
-        protocolState: states.waitForFundingAndPostFundSetup({
+        protocolState: states.waitForFunding({
           ...protocolState,
           channelFunded: false,
           postFundSetupReceived: false,
@@ -338,10 +220,9 @@ const waitForDepositTransactionReducer: DFReducer = (
   }
 };
 
-const waitForFundingAndPostFundSetupReducer: DFReducer = (
-  protocolState: states.WaitForFundingAndPostFundSetup,
+const waitForFundingReducer: DFReducer = (
+  protocolState: states.WaitForFunding,
   sharedData: SharedData,
-  action: actions.WalletAction,
 ): ProtocolStateWithSharedData<states.DirectFundingState> => {
   return { protocolState, sharedData };
 };

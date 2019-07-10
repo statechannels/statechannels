@@ -16,7 +16,17 @@ import {
   initializeIndirectFunding,
 } from '../../indirect-funding';
 import * as indirectFundingStates from '../../indirect-funding/states';
-type EmbeddedAction = IndirectFundingAction;
+import {
+  AdvanceChannelAction,
+  advanceChannelReducer,
+  isAdvanceChannelAction,
+  ADVANCE_CHANNEL_PROTOCOL_LOCATOR,
+  initializeAdvanceChannel,
+} from '../../advance-channel';
+import * as advanceChannelStates from '../../advance-channel/states';
+import { CommitmentType } from '../../../../domain';
+import { clearedToSend } from '../../advance-channel/actions';
+type EmbeddedAction = IndirectFundingAction | AdvanceChannelAction;
 
 export function initialize(
   sharedData: SharedData,
@@ -41,7 +51,12 @@ export function fundingReducer(
   sharedData: SharedData,
   action: actions.FundingAction | EmbeddedAction,
 ): ProtocolStateWithSharedData<states.FundingState> {
-  if (isIndirectFundingAction(action)) {
+  if (
+    isAdvanceChannelAction(action) &&
+    action.protocolLocator === ADVANCE_CHANNEL_PROTOCOL_LOCATOR
+  ) {
+    return handleAdvanceChannelAction(state, sharedData, action);
+  } else if (isIndirectFundingAction(action)) {
     return handleFundingAction(state, sharedData, action);
   }
 
@@ -61,6 +76,40 @@ export function fundingReducer(
   }
 }
 
+function handleAdvanceChannelAction(
+  protocolState: states.FundingState,
+  sharedData: SharedData,
+  action: AdvanceChannelAction,
+): ProtocolStateWithSharedData<states.FundingState> {
+  if (
+    protocolState.type !== 'Funding.PlayerB.WaitForPostFundSetup' &&
+    protocolState.type !== 'Funding.PlayerB.WaitForFunding'
+  ) {
+    console.warn(
+      `Funding reducer received advance channel action ${action.type} but is currently in state ${
+        protocolState.type
+      }`,
+    );
+    return { protocolState, sharedData };
+  }
+  const result = advanceChannelReducer(protocolState.postFundSetupState, sharedData, action);
+  if (!advanceChannelStates.isTerminal(result.protocolState)) {
+    return {
+      protocolState: { ...protocolState, postFundSetupState: result.protocolState },
+      sharedData: result.sharedData,
+    };
+  } else if (result.protocolState.type === 'AdvanceChannel.Failure') {
+    return {
+      protocolState: states.failure({ reason: 'AdvanceChannelFailure' }),
+      sharedData: result.sharedData,
+    };
+  } else {
+    return {
+      protocolState: states.waitForSuccessConfirmation(protocolState),
+      sharedData: result.sharedData,
+    };
+  }
+}
 function handleFundingAction(
   protocolState: states.FundingState,
   sharedData: SharedData,
@@ -116,13 +165,31 @@ function strategyApproved(state: states.FundingState, sharedData: SharedData) {
     targetChannelId,
     sharedData,
   );
+
+  const advanceChannelResult = initializeAdvanceChannel(
+    processId,
+    newSharedData,
+    CommitmentType.PostFundSetup,
+    {
+      channelId: targetChannelId,
+      ourIndex: TwoPartyPlayerIndex.B,
+      processId,
+      commitmentType: CommitmentType.PostFundSetup,
+      clearedToSend: false,
+      protocolLocator: ADVANCE_CHANNEL_PROTOCOL_LOCATOR,
+    },
+  );
   if (indirectFundingStates.isTerminal(fundingState)) {
     console.error('Indirect funding strate initialized to terminal state.');
     return handleFundingComplete(state, fundingState, newSharedData);
   }
   return {
-    protocolState: states.waitForFunding({ ...state, fundingState }),
-    sharedData: queueMessage(newSharedData, message),
+    protocolState: states.waitForFunding({
+      ...state,
+      fundingState,
+      postFundSetupState: advanceChannelResult.protocolState,
+    }),
+    sharedData: queueMessage(advanceChannelResult.sharedData, message),
   };
 }
 
@@ -180,9 +247,21 @@ function handleFundingComplete(
   sharedData: SharedData,
 ) {
   if (fundingState.type === 'IndirectFunding.Success') {
-    return {
-      protocolState: states.waitForSuccessConfirmation(protocolState),
+    // When funding is complete we alert the advance channel protocol that we are now cleared to exchange post fund setups
+    const result = advanceChannelReducer(
+      protocolState.postFundSetupState,
       sharedData,
+      clearedToSend({
+        processId: protocolState.processId,
+        protocolLocator: ADVANCE_CHANNEL_PROTOCOL_LOCATOR,
+      }),
+    );
+    return {
+      protocolState: states.waitForPostFundSetup({
+        ...protocolState,
+        postFundSetupState: result.protocolState,
+      }),
+      sharedData: result.sharedData,
     };
   } else {
     // TODO: Indirect funding should return a proper error to pass to our failure state

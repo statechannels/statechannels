@@ -159,7 +159,7 @@ const bSentPostFundSetupCommitment = setChannels(EMPTY_SHARED_DATA, [
 
 const args = {
   processId,
-  protocolLocator: 'AdvancedChannel',
+  protocolLocator: ADVANCE_CHANNEL_PROTOCOL_LOCATOR,
 };
 
 const receivePreFundSetupFromA = commitmentsReceived({

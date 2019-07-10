@@ -21,7 +21,7 @@ const fundingStepByState = (state: directFundingState.DirectFundingState): Step 
       return Step.NOT_SAFE_TO_DEPOSIT;
     case 'DirectFunding.WaitForDepositTransaction':
       return Step.WAIT_FOR_DEPOSIT_TRANSACTION;
-    case 'DirectFunding.WaitForFundingAndPostFundSetup':
+    case 'DirectFunding.WaitForFunding':
       return Step.WAITING_FOR_FUNDING_CONFIRMATION;
     case 'DirectFunding.FundingSuccess':
       return Step.CHANNEL_FUNDED;

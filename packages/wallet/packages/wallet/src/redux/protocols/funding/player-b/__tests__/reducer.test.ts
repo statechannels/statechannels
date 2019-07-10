@@ -30,16 +30,21 @@ describe('happy path', () => {
     itTransitionsTo(result, 'Funding.PlayerB.WaitForFunding');
 
     const { processId, opponentAddress } = scenario;
-    itSendsThisMessage(result, sendStrategyApproved(opponentAddress, processId), 1);
+    itSendsThisMessage(result, sendStrategyApproved(opponentAddress, processId));
   });
 
   describeScenarioStep(scenario.waitForFunding, () => {
     const { state, sharedData, action } = scenario.waitForFunding;
 
     const result = reducer(state, sharedData, action);
+    itTransitionsTo(result, 'Funding.PlayerB.WaitForPostFundSetup');
+  });
+  describeScenarioStep(scenario.waitForPostFundSetup, () => {
+    const { state, sharedData, action } = scenario.waitForPostFundSetup;
+
+    const result = reducer(state, sharedData, action);
     itTransitionsTo(result, 'Funding.PlayerB.WaitForSuccessConfirmation');
   });
-
   describeScenarioStep(scenario.waitForSuccessConfirmation, () => {
     const { state, sharedData, action } = scenario.waitForSuccessConfirmation;
 
