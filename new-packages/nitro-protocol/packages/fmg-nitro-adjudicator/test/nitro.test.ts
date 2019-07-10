@@ -9,7 +9,7 @@ import { Commitment as CoreCommitment } from 'fmg-core/src/commitment';
 
 jest.setTimeout(20000);
 
-const DEPOSIT_AMOUNT = ethers.utils.parseEther('1'); //
+const DEPOSIT_AMOUNT = ethers.utils.parseEther('0.001'); //
 
 describe('Nitro', () => {
   let networkId;
@@ -188,7 +188,7 @@ describe('Nitro', () => {
         value: DEPOSIT_AMOUNT.mul(2),
       });
       await tx1.wait();
-      balanceBefore = signer1.getBalance();
+      balanceBefore = await signer1.getBalance();
       tx2 = await nitro.deposit(randomAddress, 0, DEPOSIT_AMOUNT, AddressZero, {
         value: DEPOSIT_AMOUNT,
       });
@@ -201,7 +201,42 @@ describe('Nitro', () => {
       });
     });
     it('Refunds entire deposit', async () => {
-      expect(signer1.getBalance()).toEqual(balanceBefore);
+      expect(await signer1.getBalance()).toEqual(balanceBefore); // TODO handle gas fees
+    });
+  });
+
+  describe('Depositing ETH (msg.value = amount,  amount < holdings < amount + expectedHeld)', () => {
+    let tx1;
+    let tx2;
+    let receipt;
+    let balanceBefore;
+    const randomAddress = ethers.Wallet.createRandom().address;
+
+    beforeAll(async () => {
+      tx1 = await nitro.deposit(randomAddress, 0, DEPOSIT_AMOUNT.mul(11), AddressZero, {
+        value: DEPOSIT_AMOUNT.mul(11),
+      });
+      await tx1.wait();
+      balanceBefore = await signer1.getBalance();
+      tx2 = await nitro.deposit(
+        randomAddress,
+        DEPOSIT_AMOUNT.mul(10),
+        DEPOSIT_AMOUNT.mul(2),
+        AddressZero,
+        {
+          value: DEPOSIT_AMOUNT.mul(2),
+        },
+      );
+      receipt = await tx2.wait();
+    });
+    it('Emits Deposit event (partial) ', async () => {
+      await expectEvent(receipt, 'Deposited', {
+        destination: randomAddress,
+        amountDeposited: DEPOSIT_AMOUNT.mul(1),
+      });
+    });
+    it('Partial refund', async () => {
+      expect(await signer1.getBalance()).toEqual(balanceBefore.sub(DEPOSIT_AMOUNT)); // TODO handle gas fees
     });
   });
 });
