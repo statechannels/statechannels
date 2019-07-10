@@ -1,15 +1,47 @@
 import * as ethers from 'ethers';
 import NitroArtifact from '../build/contracts/NitroAdjudicator.json';
 import { AddressZero } from 'ethers/constants';
-import { Channel, CountingApp } from 'fmg-core';
+import { sign, Channel, CountingApp } from 'fmg-core';
 import { BigNumber, bigNumberify } from 'ethers/utils';
 import { channelID as getChannelID } from 'fmg-core/lib/channel';
-import { expectEvent, expectRevert } from 'magmo-devtools';
+import { expectEvent, expectRevert, Address } from 'magmo-devtools';
 import { Commitment as CoreCommitment } from 'fmg-core/src/commitment';
 
 jest.setTimeout(20000);
+let nitro: ethers.Contract;
+const DEPOSIT_AMOUNT = ethers.utils.parseEther('0.01'); //
+const abiCoder = new ethers.utils.AbiCoder();
+const AUTH_TYPES = ['address', 'address', 'uint256', 'address'];
 
-const DEPOSIT_AMOUNT = ethers.utils.parseEther('0.001'); //
+async function withdraw(
+  participant,
+  destination: Address,
+  signer = participant,
+  amount: ethers.utils.BigNumberish = DEPOSIT_AMOUNT,
+  senderAddr = null,
+): Promise<any> {
+  senderAddr = senderAddr || (await nitro.signer.getAddress());
+  const authorization = abiCoder.encode(AUTH_TYPES, [
+    participant.address,
+    destination,
+    amount,
+    senderAddr,
+  ]);
+
+  const sig = sign(authorization, signer.privateKey);
+  return nitro.withdraw(
+    participant.address,
+    destination,
+    amount,
+    AddressZero,
+    sig.v,
+    sig.r,
+    sig.s,
+    {
+      gasLimit: 3000000,
+    },
+  );
+}
 
 describe('Nitro', () => {
   let networkId;
@@ -17,7 +49,6 @@ describe('Nitro', () => {
     `http://localhost:${process.env.DEV_GANACHE_PORT}`,
   );
   const signer1 = provider.getSigner(1);
-  let nitro;
   const aBal = ethers.utils.parseUnits('6', 'wei').toHexString();
   const bBal = ethers.utils.parseUnits('4', 'wei').toHexString();
   const allocation = [aBal, bBal];
@@ -132,7 +163,7 @@ describe('Nitro', () => {
     });
   });
 
-  // Function tests
+  // ETH management
   // ========================
 
   describe('Depositing ETH (msg.value = amount , expectedHeld = 0)', () => {
@@ -147,7 +178,7 @@ describe('Nitro', () => {
       receipt = await tx.wait();
     });
 
-    it('Accepts transaction', async () => {
+    it('Transaction succeeds', async () => {
       expect(receipt.status).toEqual(1);
     });
 
@@ -201,7 +232,7 @@ describe('Nitro', () => {
       });
     });
     it('Refunds entire deposit', async () => {
-      expect(await signer1.getBalance()).toEqual(balanceBefore); // TODO handle gas fees
+      await expect(await signer1.getBalance()).toEqual(balanceBefore); // TODO handle gas fees
     });
   });
 
@@ -236,7 +267,78 @@ describe('Nitro', () => {
       });
     });
     it('Partial refund', async () => {
-      expect(await signer1.getBalance()).toEqual(balanceBefore.sub(DEPOSIT_AMOUNT)); // TODO handle gas fees
+      await expect(await signer1.getBalance()).toEqual(balanceBefore.sub(DEPOSIT_AMOUNT)); // TODO handle gas fees (recover from receipt?)
+    });
+  });
+
+  describe('Withdrawing ETH (signer = participant, holdings[participant][0x] = 2 * amount)', () => {
+    let tx1;
+    let tx2;
+    let receipt;
+    let beforeBalance;
+    let allocatedAtStart;
+    const WITHDRAWAL_AMOUNT = DEPOSIT_AMOUNT;
+
+    beforeAll(async () => {
+      tx1 = await nitro.deposit(alice.address, 0, DEPOSIT_AMOUNT.mul(2), AddressZero, {
+        value: DEPOSIT_AMOUNT.mul(2),
+      });
+      await tx1.wait();
+      allocatedAtStart = await nitro.holdings(alice.address, AddressZero);
+      beforeBalance = await provider.getBalance(aliceDest.address);
+      tx2 = await withdraw(alice, aliceDest.address, alice, WITHDRAWAL_AMOUNT);
+      receipt = await tx2.wait();
+    });
+
+    it('Transaction succeeds', async () => {
+      await expect(receipt.status).toEqual(1);
+    });
+
+    it('Destination balance increases', async () => {
+      await expect(await provider.getBalance(aliceDest.address)).toEqual(
+        beforeBalance.add(WITHDRAWAL_AMOUNT),
+      );
+    });
+
+    it('holdings[participant][0x] decreases', async () => {
+      await expect(await nitro.holdings(alice.address, AddressZero)).toEqual(
+        allocatedAtStart.sub(WITHDRAWAL_AMOUNT),
+      );
+    });
+  });
+
+  describe('Withdrawing ETH (signer =/= partcipant, holdings[participant][0x] = amount)', () => {
+    let tx1;
+    let tx2;
+    let beforeBalance;
+    let allocatedAtStart;
+    const WITHDRAWAL_AMOUNT = DEPOSIT_AMOUNT;
+
+    beforeAll(async () => {
+      tx1 = await nitro.deposit(alice.address, 0, DEPOSIT_AMOUNT.mul(2), AddressZero, {
+        value: DEPOSIT_AMOUNT.mul(2),
+      });
+      await tx1.wait();
+      allocatedAtStart = await nitro.holdings(alice.address, AddressZero);
+      beforeBalance = await provider.getBalance(aliceDest.address);
+      tx2 = withdraw(alice, aliceDest.address, bob, WITHDRAWAL_AMOUNT);
+    });
+
+    it('Reverts', async () => {
+      await expectRevert(() => tx2, 'Withdraw: not authorized by participant');
+    });
+  });
+
+  describe('Withdrawing ETH (signer = partcipant, holdings[participant][0x] < amount)', () => {
+    let tx2;
+    const WITHDRAWAL_AMOUNT = DEPOSIT_AMOUNT;
+
+    beforeAll(async () => {
+      tx2 = withdraw(bob, aliceDest.address, bob, WITHDRAWAL_AMOUNT);
+    });
+
+    it('Reverts', async () => {
+      await expectRevert(() => tx2, 'Withdraw: overdrawn');
     });
   });
 });
