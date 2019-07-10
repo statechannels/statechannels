@@ -65,7 +65,7 @@ export function initialize(
     CommitmentType.PreFundSetup,
     {
       ...initializationArgs,
-      ...channelSpecificArgs(allocation, destination),
+      ...channelSpecificArgs(allocation, destination, participants.length),
     },
   );
   sharedData = advanceChannelResult.sharedData;
@@ -103,7 +103,21 @@ function handleWaitForPostFundSetup(
   sharedData: SharedData,
   action: IDFAction | DirectFundingAction,
 ): ReturnVal {
-  if (
+  if (isConsensusUpdateAction(action)) {
+    const consensusUpdateResult = consensusUpdateReducer(
+      protocolState.consensusUpdateState,
+      sharedData,
+      action,
+    );
+    sharedData = consensusUpdateResult.sharedData;
+    return {
+      protocolState: {
+        ...protocolState,
+        consensusUpdateState: consensusUpdateResult.protocolState,
+      },
+      sharedData,
+    };
+  } else if (
     isAdvanceChannelAction(action) &&
     // TODO: Remove this check once the protocol-locator has been properly implemented.
     action.protocolLocator === NEW_LEDGER_FUNDING_PROTOCOL_LOCATOR
@@ -144,20 +158,6 @@ function handleWaitForPostFundSetup(
         sharedData,
       };
     }
-  } else if (isConsensusUpdateAction(action)) {
-    const consensusUpdateResult = consensusUpdateReducer(
-      protocolState.consensusUpdateState,
-      sharedData,
-      action,
-    );
-    sharedData = consensusUpdateResult.sharedData;
-    return {
-      protocolState: {
-        ...protocolState,
-        consensusUpdateState: consensusUpdateResult.protocolState,
-      },
-      sharedData,
-    };
   } else {
     console.warn(
       `Expected a Consensus Update action or Advance Channel action received ${
@@ -369,6 +369,7 @@ function handleWaitForDirectFunding(
 function channelSpecificArgs(
   allocation: string[],
   destination: string[],
+  numberOfParticipants: number,
 ): { allocation: string[]; destination: string[]; appAttributes: string } {
   return {
     allocation,
@@ -376,7 +377,7 @@ function channelSpecificArgs(
     appAttributes: bytesFromAppAttributes({
       proposedAllocation: allocation,
       proposedDestination: destination,
-      furtherVotesRequired: 0,
+      furtherVotesRequired: numberOfParticipants - 1,
     }),
   };
 }

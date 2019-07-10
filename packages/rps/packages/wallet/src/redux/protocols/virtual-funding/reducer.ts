@@ -47,7 +47,7 @@ export function initialize(sharedData: SharedData, args: states.InitializationAr
     CommitmentType.PreFundSetup,
     {
       ...initializationArgs,
-      ...channelSpecificArgs(jointAllocation, jointDestination),
+      ...channelSpecificArgs(jointAllocation, jointDestination, participants.length),
     },
   );
 
@@ -149,7 +149,7 @@ function waitForJointChannelReducer(
               privateKey,
               channelType,
               participants: [ourAddress, hubAddress],
-              ...channelSpecificArgs([], destination),
+              ...channelSpecificArgs([], destination, participants.length),
             },
           );
           return {
@@ -354,6 +354,7 @@ function waitForApplicationFundingReducer(
 function channelSpecificArgs(
   allocation: string[],
   destination: string[],
+  numberOfParticipants: number,
 ): { allocation: string[]; destination: string[]; appAttributes: string } {
   return {
     allocation,
@@ -361,7 +362,7 @@ function channelSpecificArgs(
     appAttributes: bytesFromAppAttributes({
       proposedAllocation: allocation,
       proposedDestination: destination,
-      furtherVotesRequired: 0,
+      furtherVotesRequired: numberOfParticipants - 1,
     }),
   };
 }
