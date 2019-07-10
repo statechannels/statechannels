@@ -13,7 +13,7 @@ import { BigNumber, bigNumberify } from 'ethers/utils';
 import CommitmentArtifact from '../build/contracts/Commitment.json';
 import RulesArtifact from '../build/contracts/Rules.json';
 import testNitroAdjudicatorArtifact from '../build/contracts/TestNitroAdjudicator.json';
-import { getCountingApp } from './CountingApp';
+// import { getCountingApp } from './CountingApp';
 import { channelID as getChannelID } from 'fmg-core/lib/channel';
 import { asCoreCommitment } from 'fmg-core/lib/test-app/counting-app';
 import { CountingCommitment } from 'fmg-core/src/test-app/counting-app';
@@ -80,7 +80,6 @@ async function setupContracts() {
     CommitmentArtifact,
     networkId,
   );
-  RulesArtifact.bytecode = linkedByteCode(RulesArtifact, CommitmentArtifact, networkId);
 
   testNitroAdjudicatorArtifact.bytecode = linkedByteCode(
     testNitroAdjudicatorArtifact,
@@ -93,7 +92,7 @@ async function setupContracts() {
   );
   const deployTran = await nitroFactory.getDeployTransaction();
   const estimate = await provider.estimateGas(deployTran);
-  // console.log(estimate);
+  console.log(estimate);
   nitro = await nitroFactory.deploy();
   await nitro.deployed();
   const unwrap = ({ challengeCommitment, finalizedAt }) => ({
@@ -147,7 +146,7 @@ describe('nitroAdjudicator', () => {
   let commitment2alt;
   let conclusionProof;
 
-  let CountingAppContract;
+  // let CountingAppContract;
 
   beforeAll(async () => {
     await setupContracts();
@@ -157,13 +156,13 @@ describe('nitroAdjudicator', () => {
     bob = new ethers.Wallet('0xdf02719c4df8b9b8ac7f551fcb5d9ef48fa27eef7a66453879f4d8fdc6e78fb1');
     guarantor = ethers.Wallet.createRandom();
     aliceDest = ethers.Wallet.createRandom();
-    CountingAppContract = await getCountingApp();
+    // CountingAppContract = await getCountingApp();
 
     const participants = [alice.address, bob.address];
     const destination = [alice.address, bob.address];
 
     ledgerChannel = {
-      channelType: CountingAppContract.address,
+      channelType: '0xaaa',
       nonce: 0,
       participants,
     };
@@ -248,10 +247,10 @@ describe('nitroAdjudicator', () => {
 
   describe('Eth management', () => {
     describe('deposit', () => {
-      it('works', async () => {
+      it.only('works', async () => {
         const channelID = getChannelID(ledgerChannel);
         await depositTo(channelID);
-        const allocatedAmount = await nitro.holdings(channelID);
+        const allocatedAmount = await nitro.holdings(channelID, AddressZero);
 
         expect(allocatedAmount).toEqual(DEPOSIT_AMOUNT);
       });
