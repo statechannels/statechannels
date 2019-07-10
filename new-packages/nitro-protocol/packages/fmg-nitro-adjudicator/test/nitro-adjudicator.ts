@@ -263,7 +263,7 @@ describe('nitroAdjudicator', () => {
         });
       });
 
-      it('reverts when holdings is less than or equal to the expected level', async () => {
+      it('reverts when holdings is less than the expected level', async () => {
         const channelID = getChannelID(ledgerChannel);
         await expectRevert(
           () => depositTo(channelID, 10, 5),
