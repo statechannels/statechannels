@@ -11,7 +11,7 @@ import { Commitment as CoreCommitment } from 'fmg-core/src/commitment';
 jest.setTimeout(20000);
 let nitro: ethers.Contract;
 const DEPOSIT_AMOUNT = ethers.utils.parseEther('0.01'); //
-const ERC20_DEPOSIT_AMOUNT = 1; //
+const ERC20_DEPOSIT_AMOUNT = 5; //
 const abiCoder = new ethers.utils.AbiCoder();
 const AUTH_TYPES = ['address', 'address', 'uint256', 'address'];
 
@@ -45,12 +45,13 @@ async function withdraw(
   );
 }
 
+const provider = new ethers.providers.JsonRpcProvider(
+  `http://localhost:${process.env.DEV_GANACHE_PORT}`,
+);
+const signer1 = provider.getSigner(1);
+
 describe('Nitro (ETH deposit and withdrawal)', () => {
   let networkId;
-  const provider = new ethers.providers.JsonRpcProvider(
-    `http://localhost:${process.env.DEV_GANACHE_PORT}`,
-  );
-  const signer1 = provider.getSigner(1);
 
   const alice = new ethers.Wallet(
     '0x5d862464fe9303452126c8bc94274b8c5f9874cbd219789b3eb2128075a76f72',
@@ -367,10 +368,10 @@ let erc20;
 let erc20Address;
 let nitroAddress;
 describe('Nitro (ERC20 deposit and withdrawal)', () => {
-  const provider = new ethers.providers.JsonRpcProvider(
-    `http://localhost:${process.env.DEV_GANACHE_PORT}`,
-  );
-  const signer1 = provider.getSigner(1);
+  //   const provider = new ethers.providers.JsonRpcProvider(
+  //     `http://localhost:${process.env.DEV_GANACHE_PORT}`,
+  //   );
+  //   const signer1 = provider.getSigner(1);
   beforeAll(async () => {
     const networkId = (await provider.getNetwork()).chainId;
     erc20Address = ERC20Artifact.networks[networkId].address;
@@ -381,6 +382,7 @@ describe('Nitro (ERC20 deposit and withdrawal)', () => {
   describe('Depositing ERC20 (expectedHeld = 0)', () => {
     let tx1;
     let tx2;
+    let balance;
     let receipt1;
     let receipt2;
     let winner;
@@ -388,6 +390,11 @@ describe('Nitro (ERC20 deposit and withdrawal)', () => {
 
     beforeAll(async () => {
       winner = await signer1.getAddress();
+    });
+
+    it('msg.sender has enough ERC20 tokens', async () => {
+      balance = Number(await erc20.balanceOf(winner));
+      await expect(balance).toBeGreaterThanOrEqual(ERC20_DEPOSIT_AMOUNT);
     });
 
     it('ERC20 approve transaction succeeds', async () => {
