@@ -133,22 +133,38 @@ describe('updateLedgerChannel', () => {
       expect(ChannelManagement.validSignature(commitment, signature)).toBe(true);
     });
 
-    it('on valid round received -- should return an allocator channel and a signed commitment', async () => {
-      const { commitment, signature } = await LedgerChannelManager.updateLedgerChannel(
-        [
-          {
-            ledgerCommitment: post_fund_setup_3_0,
-            signature: signAppCommitment(post_fund_setup_3_0, PARTICIPANT_1_PRIVATE_KEY),
-          },
-          {
-            ledgerCommitment: post_fund_setup_3_1,
-            signature: signAppCommitment(post_fund_setup_3_1, PARTICIPANT_2_PRIVATE_KEY),
-          },
-        ],
-        created_pre_fund_setup_3_2,
-      );
-      expect(commitment).toMatchObject(post_fund_setup_3_2_response);
-      expect(ChannelManagement.validSignature(commitment, signature)).toBe(true);
+    describe('round of commitments', () => {
+      it('on valid round received -- should return an allocator channel and a signed commitment', async () => {
+        const { commitment, signature } = await LedgerChannelManager.updateLedgerChannel(
+          [
+            {
+              ledgerCommitment: post_fund_setup_3_0,
+              signature: signAppCommitment(post_fund_setup_3_0, PARTICIPANT_1_PRIVATE_KEY),
+            },
+            {
+              ledgerCommitment: post_fund_setup_3_1,
+              signature: signAppCommitment(post_fund_setup_3_1, PARTICIPANT_2_PRIVATE_KEY),
+            },
+          ],
+          created_pre_fund_setup_3_2,
+        );
+        expect(commitment).toMatchObject(post_fund_setup_3_2_response);
+        expect(ChannelManagement.validSignature(commitment, signature)).toBe(true);
+      });
+
+      it('on valid round received -- not our turn', async () => {
+        await LedgerChannelManager.updateLedgerChannel(
+          [
+            {
+              ledgerCommitment: post_fund_setup_3_0,
+              signature: signAppCommitment(post_fund_setup_3_0, PARTICIPANT_1_PRIVATE_KEY),
+            },
+          ],
+          created_pre_fund_setup_3_2,
+        ).catch((err: Error) => {
+          expect(err).toMatchObject(errors.NOT_OUR_TURN);
+        });
+      });
     });
 
     it.skip('throws when the commitment is incorrectly signed', async () => {

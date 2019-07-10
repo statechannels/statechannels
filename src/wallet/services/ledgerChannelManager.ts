@@ -8,6 +8,7 @@ import {
 } from 'fmg-nitro-adjudicator/lib/consensus-app';
 import { unreachable } from 'magmo-wallet';
 import { SignedCommitment, SignedLedgerCommitment } from '.';
+import { HUB_ADDRESS } from '../../constants';
 import { queries } from '../db/queries/allocator_channels';
 import errors from '../errors';
 import * as ChannelManagement from './channelManagement';
@@ -69,8 +70,16 @@ function shouldAcceptCommitment(
 }
 
 export function nextCommitment(commitmentRound: SignedLedgerCommitment[]): LedgerCommitment {
-  // todo: check that it is our turn
+  // Check that it is our turn
   const lastCommitmnent = commitmentRound.slice(-1)[0].ledgerCommitment;
+  const participants = lastCommitmnent.channel.participants;
+  const ourIndex = participants.indexOf(HUB_ADDRESS);
+  const lastTurn = lastCommitmnent.turnNum;
+  const numParticipants = participants.length;
+  if ((lastTurn + 1) % numParticipants !== ourIndex) {
+    throw errors.NOT_OUR_TURN;
+  }
+
   if (lastCommitmnent.commitmentType !== CommitmentType.App) {
     return ChannelManagement.nextCommitment(lastCommitmnent) as LedgerCommitment;
   }
