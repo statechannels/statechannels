@@ -536,7 +536,7 @@ describe('Nitro (ERC20 deposit and withdrawal)', () => {
     });
   });
 
-  describe('Withdrawing ERC20 (signer = participant, holdings[participant][erc20] = 2 * amount)', () => {
+  describe('Withdrawing ERC20 (signer = participant, holdings[participant][erc20] > 2 * amount)', () => {
     let tx1;
     let tx2;
     let receipt;
@@ -554,8 +554,6 @@ describe('Nitro (ERC20 deposit and withdrawal)', () => {
       await tx0.wait();
       const amountHeld = Number(await nitro.holdings(alice.address, erc20Address));
       tx1 = await nitro.deposit(alice.address, amountHeld, ERC20_DEPOSIT_AMOUNT * 2, erc20Address);
-      // const receipt0 = await tx1.wait();
-      // await expect(receipt0.status).toEqual(1);
       await tx1.wait();
       allocatedAtStart = Number(await nitro.holdings(alice.address, erc20Address));
       beforeBalance = Number(await erc20.balanceOf(aliceDest.address));
@@ -563,7 +561,14 @@ describe('Nitro (ERC20 deposit and withdrawal)', () => {
     });
 
     it('Transaction succeeds', async () => {
-      tx2 = await withdraw(alice, aliceDest.address, alice, ERC20_WITHDRAWAL_AMOUNT, erc20Address);
+      tx2 = await withdraw(
+        alice,
+        aliceDest.address,
+        alice,
+        ERC20_WITHDRAWAL_AMOUNT,
+        null,
+        erc20Address,
+      );
       receipt = await tx2.wait();
       await expect(receipt.status).toEqual(1);
     });
@@ -575,7 +580,7 @@ describe('Nitro (ERC20 deposit and withdrawal)', () => {
     });
 
     it('holdings[participant][0x] decreases', async () => {
-      await expect(await nitro.holdings(alice.address, erc20Address)).toEqual(
+      await expect(Number(await nitro.holdings(alice.address, erc20Address))).toEqual(
         allocatedAtStart - ERC20_WITHDRAWAL_AMOUNT,
       );
     });
