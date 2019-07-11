@@ -27,7 +27,7 @@ import {
   PARTICIPANT_1_PRIVATE_KEY,
   PARTICIPANTS,
   STAKE,
-} from '../test-constants';
+} from './test-constants';
 import { default_channel } from './test_data';
 
 // Commitment Constructors

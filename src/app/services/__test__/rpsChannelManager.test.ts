@@ -1,5 +1,12 @@
 import { Commitment, CommitmentType, sign, Signature, toHex } from 'fmg-core';
 import {
+  app_response,
+  beginning_app_phase_rps_channel,
+  constructors,
+  funded_rps_channel,
+  pre_fund_setup_1_response,
+} from '../../../test/rps_test_data';
+import {
   ALLOCATION,
   DESTINATION,
   DUMMY_RULES_ADDRESS,
@@ -7,14 +14,7 @@ import {
   PARTICIPANT_1_PRIVATE_KEY,
   PARTICIPANTS,
   STAKE,
-} from '../../../test-constants';
-import {
-  app_response,
-  beginning_app_phase_rps_channel,
-  constructors,
-  funded_rps_channel,
-  pre_fund_setup_1_response,
-} from '../../../test/rps_test_data';
+} from '../../../test/test-constants';
 import { default_channel } from '../../../test/test_data';
 import { errors } from '../../../wallet';
 import { validSignature } from '../../../wallet/services/channelManagement';

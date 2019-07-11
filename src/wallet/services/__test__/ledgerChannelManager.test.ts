@@ -5,7 +5,7 @@ import {
   PARTICIPANT_1_PRIVATE_KEY,
   PARTICIPANT_2_PRIVATE_KEY,
   PARTICIPANTS,
-} from '../../../test-constants';
+} from '../../../test/test-constants';
 import {
   app_1_response,
   beginning_app_phase_channel,

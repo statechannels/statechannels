@@ -2,6 +2,7 @@ import { Channel, channelID, Commitment, CommitmentType, sign, toHex } from 'fmg
 import { bytesFromAppAttributes } from 'fmg-nitro-adjudicator/lib/consensus-app';
 import { AppCommitment } from 'fmg-nitro-adjudicator/lib/consensus-app';
 import { HUB_ADDRESS } from '../constants';
+import { asCoreCommitment, LedgerCommitment } from '../wallet/services/ledger-commitment';
 import {
   ALLOCATION,
   ALLOCATION_3,
@@ -17,8 +18,7 @@ import {
   PARTICIPANT_1_PRIVATE_KEY,
   PARTICIPANTS,
   PARTICIPANTS_3,
-} from '../test-constants';
-import { asCoreCommitment, LedgerCommitment } from '../wallet/services/ledger-commitment';
+} from './test-constants';
 
 export const default_channel: Channel = {
   channelType: DUMMY_RULES_ADDRESS,

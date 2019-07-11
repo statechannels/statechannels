@@ -31,7 +31,7 @@ import {
   ONGOING_APP_CHANNEL_NONCE,
   PARTICIPANT_1_ADDRESS,
   PARTICIPANT_2_ADDRESS,
-} from '../../../test-constants';
+} from '../../../test/test-constants';
 import AllocatorChannel from '../../models/allocatorChannel';
 import knex from '../connection';
 Model.knex(knex);
