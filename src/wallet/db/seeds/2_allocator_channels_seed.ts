@@ -204,17 +204,39 @@ const beginning_app_phase_rps_channel = {
   participants,
 };
 
-// *******
-// Exports
-// *******
-
-export const seeds = {
+const two_participant_channel_seeds = {
   funded_channel,
-  funded_channel_3,
   beginning_app_phase_channel,
   ongoing_app_phase_channel,
   funded_rps_channel,
   beginning_app_phase_rps_channel,
+};
+
+const three_participant_channel_seeds = { funded_channel_3 };
+
+const SEEDED_CHANNELS_2 = Object.keys(two_participant_channel_seeds).length;
+const SEEDED_CHANNELS_3 = Object.keys(three_participant_channel_seeds).length;
+
+const SEEDED_COMMITMENTS_2 = SEEDED_CHANNELS_2 * 2;
+const SEEDED_COMMITMENTS_3 = SEEDED_CHANNELS_3 * 3;
+
+const SEEDED_ALLOCATIONS_2 = SEEDED_COMMITMENTS_2 * 2;
+const SEEDED_ALLOCATIONS_3 = SEEDED_COMMITMENTS_3 * 3;
+
+const SEEDED_PARTICIPANTS_2 = SEEDED_CHANNELS_2 * 2;
+const SEEDED_PARTICIPANTS_3 = SEEDED_CHANNELS_3 * 3;
+
+// *******
+// Exports
+// *******
+export const SEEDED_CHANNELS = SEEDED_CHANNELS_2 + SEEDED_CHANNELS_3;
+export const SEEDED_COMMITMENTS = SEEDED_COMMITMENTS_2 + SEEDED_COMMITMENTS_3;
+export const SEEDED_ALLOCATIONS = SEEDED_ALLOCATIONS_2 + SEEDED_ALLOCATIONS_3;
+export const SEEDED_PARTICIPANTS = SEEDED_PARTICIPANTS_2 + SEEDED_PARTICIPANTS_3;
+
+export const seeds = {
+  ...two_participant_channel_seeds,
+  ...three_participant_channel_seeds,
 };
 
 export function seed() {
