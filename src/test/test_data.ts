@@ -1,5 +1,4 @@
-import { Channel, Commitment, CommitmentType, sign, toHex } from 'fmg-core';
-import { channelID } from 'fmg-core/lib/channel';
+import { Channel, channelID, Commitment, CommitmentType, sign, toHex } from 'fmg-core';
 import { bytesFromAppAttributes } from 'fmg-nitro-adjudicator/lib/consensus-app';
 import { AppCommitment } from 'fmg-nitro-adjudicator/lib/consensus-app';
 import { HUB_ADDRESS } from '../constants';

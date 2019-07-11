@@ -1,7 +1,7 @@
 import { ethers } from 'ethers';
-import { Signature } from 'fmg-core';
-import { channelID } from 'fmg-core/lib/channel';
+import { channelID, Signature } from 'fmg-core';
 import { SignedCommitment as ClientSignedCommitment, unreachable } from 'magmo-wallet';
+
 import {
   CommitmentReceived,
   CommitmentsReceived,
