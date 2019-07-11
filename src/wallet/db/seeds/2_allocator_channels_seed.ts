@@ -6,6 +6,7 @@ import {
   Weapon,
   zeroBytes32,
 } from '../../../app/services/rps-commitment';
+import { HUB_ADDRESS } from '../../../constants';
 import {
   ALLOCATION,
   ALLOCATION_3,
@@ -26,12 +27,11 @@ import {
   FUNDED_CHANNEL_NONCE_3,
   FUNDED_RPS_CHANNEL_HOLDINGS,
   FUNDED_RPS_CHANNEL_NONCE,
-  HUB_ADDRESS,
   ONGOING_APP_CHANNEL_HOLDINGS,
   ONGOING_APP_CHANNEL_NONCE,
   PARTICIPANT_1_ADDRESS,
   PARTICIPANT_2_ADDRESS,
-} from '../../../constants';
+} from '../../../test-constants';
 import AllocatorChannel from '../../models/allocatorChannel';
 import knex from '../connection';
 Model.knex(knex);

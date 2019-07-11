@@ -4,7 +4,7 @@ import {
   SEEDED_CHANNELS,
   SEEDED_COMMITMENTS,
   SEEDED_PARTICIPANTS,
-} from '../../../../constants';
+} from '../../../../test-constants';
 import {
   constructors as testDataConstructors,
   created_channel,

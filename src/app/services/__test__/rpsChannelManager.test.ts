@@ -7,7 +7,7 @@ import {
   PARTICIPANT_1_PRIVATE_KEY,
   PARTICIPANTS,
   STAKE,
-} from '../../../constants';
+} from '../../../test-constants';
 import {
   app_response,
   beginning_app_phase_rps_channel,
