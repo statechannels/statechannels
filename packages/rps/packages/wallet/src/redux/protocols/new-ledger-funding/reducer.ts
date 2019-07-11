@@ -35,7 +35,6 @@ import {
 } from '../advance-channel';
 import { getLatestCommitment, isFirstPlayer, getTwoPlayerIndex } from '../reducer-helpers';
 import { CONSENSUS_UPDATE_PROTOCOL_LOCATOR } from '../consensus-update/reducer';
-import { participants } from '../../../communication/__tests__/commitments';
 
 type ReturnVal = ProtocolStateWithSharedData<NewLedgerFundingState>;
 type IDFAction = NewLedgerFundingAction;
@@ -65,7 +64,7 @@ export function initialize(
     CommitmentType.PreFundSetup,
     {
       ...initializationArgs,
-      ...channelSpecificArgs(allocation, destination, participants.length),
+      ...channelSpecificArgs(allocation, destination),
     },
   );
   sharedData = advanceChannelResult.sharedData;
@@ -369,7 +368,6 @@ function handleWaitForDirectFunding(
 function channelSpecificArgs(
   allocation: string[],
   destination: string[],
-  numberOfParticipants: number,
 ): { allocation: string[]; destination: string[]; appAttributes: string } {
   return {
     allocation,
@@ -377,7 +375,7 @@ function channelSpecificArgs(
     appAttributes: bytesFromAppAttributes({
       proposedAllocation: allocation,
       proposedDestination: destination,
-      furtherVotesRequired: numberOfParticipants - 1,
+      furtherVotesRequired: 0,
     }),
   };
 }
