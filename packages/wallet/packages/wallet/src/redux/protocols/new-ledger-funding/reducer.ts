@@ -337,6 +337,7 @@ function handleWaitForDirectFunding(
         protocolLocator: NEW_LEDGER_FUNDING_PROTOCOL_LOCATOR,
       }),
     );
+
     sharedData = advanceChannelResult.sharedData;
     const latestCommitment = getLatestCommitment(ledgerId, sharedData);
     const proposedAllocation = [latestCommitment.allocation.reduce(addHex)];
@@ -350,15 +351,32 @@ function handleWaitForDirectFunding(
       sharedData,
     );
     sharedData = consensusUpdateResult.sharedData;
+    // We can skip directly to the ledger update if the post fund setup exchange is already done
 
-    return {
-      protocolState: states.waitForPostFundSetup({
-        ...protocolState,
-        postFundSetupState: advanceChannelResult.protocolState,
-        consensusUpdateState: consensusUpdateResult.protocolState,
-      }),
-      sharedData,
-    };
+    if (advanceChannelResult.protocolState.type === 'AdvanceChannel.Success') {
+      return {
+        protocolState: states.waitForLedgerUpdate({
+          ...protocolState,
+          postFundSetupState: advanceChannelResult.protocolState,
+          consensusUpdateState: consensusUpdateResult.protocolState,
+        }),
+        sharedData,
+      };
+    } else if (advanceChannelResult.protocolState.type === 'AdvanceChannel.Failure') {
+      return {
+        protocolState: states.failure({ reason: 'AdvanceChannelFailure' }),
+        sharedData,
+      };
+    } else {
+      return {
+        protocolState: states.waitForPostFundSetup({
+          ...protocolState,
+          postFundSetupState: advanceChannelResult.protocolState,
+          consensusUpdateState: consensusUpdateResult.protocolState,
+        }),
+        sharedData,
+      };
+    }
   }
 
   return { protocolState, sharedData };
