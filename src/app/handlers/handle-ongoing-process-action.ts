@@ -16,6 +16,7 @@ import { getProcess } from '../../wallet/db/queries/walletProcess';
 import { SignedCommitment, updateLedgerChannel } from '../../wallet/services';
 import { asConsensusCommitment } from '../../wallet/services/ledger-commitment';
 
+import { HUB_ADDRESS } from '../../constants';
 import { updateRPSChannel } from '../services/rpsChannelManager';
 
 export async function handleOngoingProcessAction(ctx) {
@@ -104,7 +105,6 @@ async function handleCommitmentsReceived({ ctx, action }: { ctx; action: Commitm
     if (!walletProcess) {
       throw errors.processMissing(processId);
     }
-    const { theirAddress } = walletProcess;
     const commitmentRound: SignedCommitment[] = action.signedCommitments.map(
       clientCommitmentToServerCommitment,
     );
@@ -116,6 +116,9 @@ async function handleCommitmentsReceived({ ctx, action }: { ctx; action: Commitm
     } = commitmentRound.slice(-1)[0];
 
     const channelId = channelID(lastCommitment.channel);
+    const participants = lastCommitment.channel.participants;
+    const ourIndex = participants.indexOf(HUB_ADDRESS);
+    const nextParticipant = participants[(ourIndex + 1) % participants.length];
 
     if (channelId === walletProcess.appChannelId) {
       const { commitment: ourCommitment, signature: ourSignature } = await updateRPSChannel(
@@ -123,7 +126,7 @@ async function handleCommitmentsReceived({ ctx, action }: { ctx; action: Commitm
         lastCommitmentSignature,
       );
       ctx.body = communication.sendCommitmentReceived(
-        theirAddress,
+        nextParticipant,
         processId,
         ourCommitment,
         (ourSignature as unknown) as string,
@@ -144,7 +147,7 @@ async function handleCommitmentsReceived({ ctx, action }: { ctx; action: Commitm
 
     // todo: properly compose a round of commitments
     ctx.body = communication.sendCommitmentsReceived(
-      theirAddress,
+      nextParticipant,
       processId,
       [
         { commitment: lastCommitment, signature: lastCommitmentSignature.signature },
