@@ -172,18 +172,22 @@ describe('Nitro (ETH deposit and withdrawal)', () => {
 
   describe('Depositing ETH (msg.value = amount , expectedHeld = 0)', () => {
     let tx;
+    // let tx2;
     let receipt;
+    // let receipt2;
     const randomAddress = ethers.Wallet.createRandom().address;
 
-    beforeAll(async () => {
+    it('Transaction succeeds', async () => {
       tx = await nitro.deposit(randomAddress, 0, DEPOSIT_AMOUNT, AddressZero, {
         value: DEPOSIT_AMOUNT,
       });
       receipt = await tx.wait();
-    });
-
-    it('Transaction succeeds', async () => {
+      // tx2 = await nitro.deposit(randomAddress, 0, DEPOSIT_AMOUNT, AddressZero, {
+      //   value: DEPOSIT_AMOUNT,
+      // });
+      // receipt2 = await tx2.wait();
       await expect(receipt.status).toEqual(1);
+      // await expect(receipt2.status).toEqual(1);
     });
 
     it('Updates holdings', async () => {
@@ -439,7 +443,7 @@ describe('Nitro (ERC20 deposit and withdrawal)', () => {
     });
   });
 
-  describe('Depositing ERC20 (msg.value = amount, expectedHeld > holdings)', () => {
+  describe('Depositing ERC20 (expectedHeld > holdings)', () => {
     let tx2;
     let winner;
     const randomAddress = ethers.Wallet.createRandom().address;
@@ -468,11 +472,28 @@ describe('Nitro (ERC20 deposit and withdrawal)', () => {
       await erc20.approve(nitroAddress, ERC20_DEPOSIT_AMOUNT * 3);
       tx1 = await nitro.deposit(randomAddress, 0, ERC20_DEPOSIT_AMOUNT * 2, erc20Address);
       await tx1.wait();
+
       balanceBefore = await erc20.balanceOf(winner);
-      tx2 = await nitro.deposit(randomAddress, 0, 0, erc20Address); // TODO deposit more than 0 (not sure why it is reverting in that case)
-      receipt = await tx2.wait();
     });
+
+    it('Nitro holds ERC20s for destination', async () => {
+      const holdings = Number(await nitro.holdings(randomAddress, erc20Address));
+      await expect(holdings).toEqual(ERC20_DEPOSIT_AMOUNT * 2);
+    });
+
+    it('Nitro has sufficient ERC20 allowance for another deposit', async () => {
+      const allowance = Number(await erc20.allowance(winner, nitroAddress));
+      await expect(allowance).toBeGreaterThanOrEqual(ERC20_DEPOSIT_AMOUNT);
+    });
+
+    it('msg.sender has sufficient ERC20 balance for another deposit', async () => {
+      const balance = Number(await erc20.balanceOf(winner));
+      await expect(balance).toBeGreaterThanOrEqual(ERC20_DEPOSIT_AMOUNT);
+    });
+
     it('Nitro deposit Transaction succeeds', async () => {
+      tx2 = await nitro.deposit(randomAddress, 0, ERC20_DEPOSIT_AMOUNT, erc20Address); // TODO deposit more than 0 (not sure why it is reverting in that case)
+      receipt = await tx2.wait();
       await expect(receipt.status).toEqual(1);
     });
     it('Emits Deposit of 0 event ', async () => {
@@ -481,7 +502,7 @@ describe('Nitro (ERC20 deposit and withdrawal)', () => {
         amountDeposited: bigNumberify(0),
       });
     });
-    it('Refunds entire deposit', async () => {
+    it('ERC20 Balance unchanged', async () => {
       await expect(await erc20.balanceOf(winner)).toEqual(balanceBefore);
     });
   });
