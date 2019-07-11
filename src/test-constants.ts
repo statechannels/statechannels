@@ -13,7 +13,6 @@ export const PARTICIPANT_2_ADDRESS = '0xd274673B5128F7E745Dc4ee16799721D2D835f1A
 export const DUMMY_RULES_ADDRESS = '0xabcd10b5ea16F12f5bEFc45d511978CFF2780568';
 export const UNKNOWN_RULES_ADDRESS = '0x92b5b042047731FF882423cB555554F11F632Bd6';
 
-// TODO: These should be in the seed file, but they got exported as undefined for some reason
 export const FUNDED_CHANNEL_NONCE = 3;
 export const FUNDED_CHANNEL_NONCE_3 = 33;
 export const FUNDED_CHANNEL_HOLDINGS = '0x00';
@@ -29,6 +28,7 @@ export const ONGOING_APP_CHANNEL_NONCE = 5;
 export const ONGOING_RPS_APP_CHANNEL_NONCE = 55;
 export const ONGOING_APP_CHANNEL_HOLDINGS = '0x08';
 
+// todo: should the number of seeded channels, commitments, allocations, and participants be computed?
 const SEEDED_CHANNELS_2 = 5;
 const SEEDED_CHANNELS_3 = 1;
 export const SEEDED_CHANNELS = SEEDED_CHANNELS_2 + SEEDED_CHANNELS_3;
