@@ -7,7 +7,7 @@ import {
   pre_fund_setup_1_response,
 } from '../../../test/rps_test_data';
 import {
-  ALLOCATION,
+  allocation,
   DESTINATION,
   DUMMY_RULES_ADDRESS,
   FUNDED_CHANNEL_NONCE,
@@ -31,7 +31,7 @@ const base = {
   channel: default_channel,
   stake: STAKE,
   turnNum: 0,
-  allocation: ALLOCATION,
+  allocation: allocation(2),
   destination: DESTINATION,
   commitmentCount: 0,
   commitmentType: CommitmentType.PreFundSetup,

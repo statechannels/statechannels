@@ -69,14 +69,15 @@ export const DUMMY_RULES_BEGINNING_RPS_APP_CHANNEL_NONCE_CHANNEL_ID = channelID(
 });
 
 export const STAKE: Uint256 = ethers.utils.parseEther('0.01').toHexString();
-export const ALLOCATION: Uint256[] = ['0x05', '0x05'];
 export const DESTINATION: Address[] = [PARTICIPANT_1_ADDRESS, HUB_ADDRESS];
 export const PARTICIPANTS: Address[] = [PARTICIPANT_1_ADDRESS, HUB_ADDRESS];
 
-export const ALLOCATION_3: Uint256[] = ['0x05', '0x05', '0x05'];
 export const DESTINATION_3: Address[] = [PARTICIPANT_1_ADDRESS, PARTICIPANT_2_ADDRESS, HUB_ADDRESS];
 export const PARTICIPANTS_3: Address[] = [
   PARTICIPANT_1_ADDRESS,
   PARTICIPANT_2_ADDRESS,
   HUB_ADDRESS,
 ];
+
+const ALLOCATION: Uint256[] = ['0x05', '0x05', '0x05'];
+export const allocation = (numParticipants: number) => ALLOCATION.slice(0, numParticipants);

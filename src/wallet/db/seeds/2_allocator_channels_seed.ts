@@ -8,8 +8,7 @@ import {
 } from '../../../app/services/rps-commitment';
 import { HUB_ADDRESS } from '../../../constants';
 import {
-  ALLOCATION,
-  ALLOCATION_3,
+  allocation,
   BEGINNING_APP_CHANNEL_HOLDINGS,
   BEGINNING_APP_CHANNEL_NONCE,
   BEGINNING_RPS_APP_CHANNEL_NONCE,
@@ -50,13 +49,13 @@ const participants_3 = [
 const allocationByPriority = (priority: number) => ({
   priority,
   destination: DESTINATION[priority],
-  amount: ALLOCATION[priority],
+  amount: allocation(2)[priority],
 });
 
 const allocationByPriority_3 = (priority: number) => ({
   priority,
   destination: DESTINATION_3[priority],
-  amount: ALLOCATION_3[priority],
+  amount: allocation(3)[priority],
 });
 
 const allocations = () => [allocationByPriority(0), allocationByPriority(1)];
