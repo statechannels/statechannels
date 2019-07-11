@@ -403,14 +403,17 @@ describe('Nitro (ERC20 deposit and withdrawal)', () => {
       await expect(receipt1.status).toEqual(1);
     });
 
-    // it.skip('ERC20 emits an approval event', async () => {
-    //   // not sure why this doesn't work
-    //   await expectEvent(receipt1, 'Approval', {
-    //     owner: winner,
-    //     spender: nitroAddress,
-    //     value: ERC20_DEPOSIT_AMOUNT,
-    //   });
-    // });
+    it('ERC20 emits an approval event', async () => {
+      // TODO: magmo-devtools.expectEvent does not work here
+      const filter = {
+        address: erc20Address,
+        fromBlock: receipt1.blockNumber,
+        toBlock: receipt1.blockNumber,
+        topics: [erc20.interface.events.Approval.topic],
+      };
+      const logs = await provider.getLogs(filter);
+      await expect(Number(logs[0].data)).toEqual(ERC20_DEPOSIT_AMOUNT);
+    });
 
     it('ERC20 allowance for nitro updated', async () => {
       const allowance = Number(await erc20.allowance(winner, nitroAddress));
@@ -436,83 +439,87 @@ describe('Nitro (ERC20 deposit and withdrawal)', () => {
     });
   });
 
-  //   describe('Depositing ETH (msg.value = amount, expectedHeld > holdings)', () => {
-  //     let tx;
-  //     const randomAddress = ethers.Wallet.createRandom().address;
+  describe('Depositing ERC20 (msg.value = amount, expectedHeld > holdings)', () => {
+    let tx2;
+    let winner;
+    const randomAddress = ethers.Wallet.createRandom().address;
 
-  //     it('Reverts', async () => {
-  //       tx = nitro.deposit(randomAddress, 10, DEPOSIT_AMOUNT, AddressZero, {
-  //         value: DEPOSIT_AMOUNT,
-  //       });
-  //       await expectRevert(() => tx, 'Deposit: holdings[destination][token] is less than expected');
-  //     });
-  //   });
+    beforeAll(async () => {
+      winner = await signer1.getAddress();
+      await erc20.approve(nitroAddress, ERC20_DEPOSIT_AMOUNT);
+    });
 
-  //   describe('Depositing ETH (msg.value = amount, expectedHeld + amount < holdings)', () => {
-  //     let tx1;
-  //     let tx2;
-  //     let receipt;
-  //     let balanceBefore;
-  //     const randomAddress = ethers.Wallet.createRandom().address;
+    it('Nitro deposit transaction reverts', async () => {
+      tx2 = nitro.deposit(randomAddress, 10, ERC20_DEPOSIT_AMOUNT, erc20Address);
+      await expectRevert(() => tx2, 'Deposit: holdings[destination][token] is less than expected');
+    });
+  });
 
-  //     beforeAll(async () => {
-  //       tx1 = await nitro.deposit(randomAddress, 0, DEPOSIT_AMOUNT.mul(2), AddressZero, {
-  //         value: DEPOSIT_AMOUNT.mul(2),
-  //       });
-  //       await tx1.wait();
-  //       balanceBefore = await signer1.getBalance();
-  //       tx2 = await nitro.deposit(randomAddress, 0, DEPOSIT_AMOUNT, AddressZero, {
-  //         value: DEPOSIT_AMOUNT,
-  //       });
-  //       receipt = await tx2.wait();
-  //     });
-  //     it('Emits Deposit of 0 event ', async () => {
-  //       await expectEvent(receipt, 'Deposited', {
-  //         destination: randomAddress,
-  //         amountDeposited: bigNumberify(0),
-  //       });
-  //     });
-  //     it('Refunds entire deposit', async () => {
-  //       await expect(await signer1.getBalance()).toEqual(balanceBefore); // TODO handle gas fees
-  //     });
-  //   });
+  describe('Depositing ERC20 (expectedHeld + amount < holdings)', () => {
+    let tx1;
+    let tx2;
+    let receipt;
+    let balanceBefore;
+    let winner;
+    const randomAddress = ethers.Wallet.createRandom().address;
 
-  //   describe('Depositing ETH (msg.value = amount,  amount < holdings < amount + expectedHeld)', () => {
-  //     let tx1;
-  //     let tx2;
-  //     let receipt;
-  //     let balanceBefore;
-  //     const randomAddress = ethers.Wallet.createRandom().address;
+    beforeAll(async () => {
+      winner = await signer1.getAddress();
+      await erc20.approve(nitroAddress, ERC20_DEPOSIT_AMOUNT * 3);
+      tx1 = await nitro.deposit(randomAddress, 0, ERC20_DEPOSIT_AMOUNT * 2, erc20Address);
+      await tx1.wait();
+      balanceBefore = await erc20.balanceOf(winner);
+      tx2 = await nitro.deposit(randomAddress, 0, 0, erc20Address); // TODO deposit more than 0 (not sure why it is reverting in that case)
+      receipt = await tx2.wait();
+    });
+    it('Nitro deposit Transaction succeeds', async () => {
+      await expect(receipt.status).toEqual(1);
+    });
+    it('Emits Deposit of 0 event ', async () => {
+      await expectEvent(receipt, 'Deposited', {
+        destination: randomAddress,
+        amountDeposited: bigNumberify(0),
+      });
+    });
+    it('Refunds entire deposit', async () => {
+      await expect(await erc20.balanceOf(winner)).toEqual(balanceBefore);
+    });
+  });
 
-  //     beforeAll(async () => {
-  //       tx1 = await nitro.deposit(randomAddress, 0, DEPOSIT_AMOUNT.mul(11), AddressZero, {
-  //         value: DEPOSIT_AMOUNT.mul(11),
-  //       });
-  //       await tx1.wait();
-  //       balanceBefore = await signer1.getBalance();
-  //       tx2 = await nitro.deposit(
-  //         randomAddress,
-  //         DEPOSIT_AMOUNT.mul(10),
-  //         DEPOSIT_AMOUNT.mul(2),
-  //         AddressZero,
-  //         {
-  //           value: DEPOSIT_AMOUNT.mul(2),
-  //         },
-  //       );
-  //       receipt = await tx2.wait();
-  //     });
-  //     it('Emits Deposit event (partial) ', async () => {
-  //       await expectEvent(receipt, 'Deposited', {
-  //         destination: randomAddress,
-  //         amountDeposited: DEPOSIT_AMOUNT.mul(1),
-  //       });
-  //     });
-  //     it('Partial refund', async () => {
-  //       await expect(Number(await signer1.getBalance())).toBeGreaterThan(
-  //         Number(balanceBefore.sub(DEPOSIT_AMOUNT.mul(2))),
-  //       ); // TODO compute precisely, taking actual gas fees into account
-  //     });
-  //   });
+  describe('Depositing ERC20 (amount < holdings < amount + expectedHeld)', () => {
+    let tx1;
+    let tx2;
+    let receipt;
+    let balanceBefore;
+    let winner;
+    const randomAddress = ethers.Wallet.createRandom().address;
+
+    beforeAll(async () => {
+      winner = await signer1.getAddress();
+      await erc20.approve(nitroAddress, ERC20_DEPOSIT_AMOUNT * 11);
+      tx1 = await nitro.deposit(randomAddress, 0, ERC20_DEPOSIT_AMOUNT * 11, erc20Address);
+      await tx1.wait();
+      balanceBefore = Number(await erc20.balanceOf(winner));
+      tx2 = await nitro.deposit(
+        randomAddress,
+        ERC20_DEPOSIT_AMOUNT * 10,
+        ERC20_DEPOSIT_AMOUNT * 2,
+        erc20Address,
+      );
+      receipt = await tx2.wait();
+    });
+    it('Emits Deposit event (partial) ', async () => {
+      await expectEvent(receipt, 'Deposited', {
+        destination: randomAddress,
+        amountDeposited: ERC20_DEPOSIT_AMOUNT * 1,
+      });
+    });
+    it('Partial refund', async () => {
+      await expect(Number(await erc20.balanceOf(winner))).toEqual(
+        Number(balanceBefore - ERC20_DEPOSIT_AMOUNT * 2),
+      );
+    });
+  });
 
   //   describe('Withdrawing ETH (signer = participant, holdings[participant][0x] = 2 * amount)', () => {
   //     let tx1;
