@@ -1,4 +1,4 @@
-import { fork, take, call, put, select, actionChannel } from 'redux-saga/effects';
+import { fork, take, call, put, select, actionChannel, takeEvery } from 'redux-saga/effects';
 import { buffers, eventChannel } from 'redux-saga';
 import { reduxSagaFirebase } from '../../gateways/firebase';
 
@@ -49,20 +49,18 @@ type Message = AppMessage | WalletMessage;
 
 export function* sendWalletMessageSaga() {
   const sendMessageChannel = createWalletEventChannel([Wallet.MESSAGE_RELAY_REQUESTED]);
-  while (true) {
-    const messageRelayRequest: MessageRelayRequested = yield take(sendMessageChannel);
-
-    const { messagePayload, to } = messageRelayRequest;
-    const messageToSend: WalletMessage = { payload: messagePayload, queue: Queue.WALLET };
-
-    yield fork(
-      reduxSagaFirebase.database.create,
-      `/messages/${to.toLowerCase()}`,
-      sanitizeMessageForFirebase(messageToSend),
-    );
-  }
+  yield takeEvery(sendMessageChannel, handleSendingWalletMessage);
 }
+function* handleSendingWalletMessage(messageRelayRequest: MessageRelayRequested) {
+  const { messagePayload, to } = messageRelayRequest;
+  const messageToSend: WalletMessage = { payload: messagePayload, queue: Queue.WALLET };
 
+  yield fork(
+    reduxSagaFirebase.database.create,
+    `/messages/${to.toLowerCase()}`,
+    sanitizeMessageForFirebase(messageToSend),
+  );
+}
 export function* exitGameSaga() {
   const opponentConcludedChannel = createWalletEventChannel([Wallet.OPPONENT_CONCLUDED]);
   while (true) {
