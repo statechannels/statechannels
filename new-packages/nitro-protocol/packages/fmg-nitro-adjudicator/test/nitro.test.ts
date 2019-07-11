@@ -536,24 +536,19 @@ describe('Nitro (ERC20 deposit and withdrawal)', () => {
     });
   });
 
-  describe('Withdrawing ERC20 (signer = participant, holdings[participant][erc20] > 2 * amount)', () => {
+  describe('Withdrawing ERC20 (signer = participant, holdings[participant][erc20] >  amount)', () => {
     let tx1;
     let tx2;
     let receipt;
     let beforeBalance;
     let allocatedAtStart;
-    let winner;
     const ERC20_WITHDRAWAL_AMOUNT = ERC20_DEPOSIT_AMOUNT;
 
-    beforeAll(async () => {
-      winner = await signer0.getAddress();
-    });
-
     it('Nitro holds ERC20s for participant', async () => {
-      const tx0 = await erc20.approve(nitroAddress, ERC20_DEPOSIT_AMOUNT * 2);
+      const tx0 = await erc20.approve(nitroAddress, ERC20_WITHDRAWAL_AMOUNT);
       await tx0.wait();
       const amountHeld = Number(await nitro.holdings(alice.address, erc20Address));
-      tx1 = await nitro.deposit(alice.address, amountHeld, ERC20_DEPOSIT_AMOUNT * 2, erc20Address);
+      tx1 = await nitro.deposit(alice.address, amountHeld, ERC20_WITHDRAWAL_AMOUNT, erc20Address);
       await tx1.wait();
       allocatedAtStart = Number(await nitro.holdings(alice.address, erc20Address));
       beforeBalance = Number(await erc20.balanceOf(aliceDest.address));
@@ -584,52 +579,52 @@ describe('Nitro (ERC20 deposit and withdrawal)', () => {
         allocatedAtStart - ERC20_WITHDRAWAL_AMOUNT,
       );
     });
-    //   describe('Withdrawing ETH (signer =/= partcipant, holdings[participant][0x] = amount)', () => {
-    //     let tx1;
-    //     let tx2;
-    //     let beforeBalance;
-    //     let allocatedAtStart;
-    //     const WITHDRAWAL_AMOUNT = DEPOSIT_AMOUNT;
+  });
 
-    //     beforeAll(async () => {
-    //       tx1 = await nitro.deposit(alice.address, 0, DEPOSIT_AMOUNT.mul(2), AddressZero, {
-    //         value: DEPOSIT_AMOUNT.mul(2),
-    //       });
-    //       await tx1.wait();
-    //       allocatedAtStart = await nitro.holdings(alice.address, AddressZero);
-    //       beforeBalance = await provider.getBalance(aliceDest.address);
-    //       tx2 = withdraw(alice, aliceDest.address, bob, WITHDRAWAL_AMOUNT);
-    //     });
+  describe('Withdrawing ERC20 (signer =/= partcipant, holdings[participant][erc20] > amount)', () => {
+    let tx1;
+    let tx2;
+    let beforeBalance;
+    let allocatedAtStart;
+    const ERC20_WITHDRAWAL_AMOUNT = ERC20_DEPOSIT_AMOUNT;
 
-    //     it('Reverts', async () => {
-    //       await expectRevert(() => tx2, 'Withdraw: not authorized by participant');
-    //     });
-    //   });
+    it('Nitro holds ERC20s for participant', async () => {
+      const tx0 = await erc20.approve(nitroAddress, ERC20_WITHDRAWAL_AMOUNT);
+      await tx0.wait();
+      const amountHeld = Number(await nitro.holdings(alice.address, erc20Address));
+      tx1 = await nitro.deposit(alice.address, amountHeld, ERC20_WITHDRAWAL_AMOUNT, erc20Address);
+      await tx1.wait();
+      allocatedAtStart = Number(await nitro.holdings(alice.address, erc20Address));
+      beforeBalance = Number(await erc20.balanceOf(aliceDest.address));
+      await expect(allocatedAtStart).toBeGreaterThanOrEqual(ERC20_WITHDRAWAL_AMOUNT);
+    });
 
-    //   describe('Withdrawing ETH (signer = partcipant, holdings[participant][0x] < amount)', () => {
-    //     let tx2;
-    //     const WITHDRAWAL_AMOUNT = DEPOSIT_AMOUNT;
+    it('Reverts', async () => {
+      tx2 = withdraw(alice, aliceDest.address, bob, ERC20_WITHDRAWAL_AMOUNT, null, erc20Address);
+      await expectRevert(() => tx2, 'Withdraw: not authorized by participant');
+    });
+  });
 
-    //     beforeAll(async () => {
-    //       tx2 = withdraw(bob, aliceDest.address, bob, WITHDRAWAL_AMOUNT);
-    //     });
+  describe('Withdrawing ETH (signer = partcipant, holdings[participant][0x] < amount)', () => {
+    let tx1;
+    let tx2;
+    let beforeBalance;
+    let allocatedAtStart;
+    const ERC20_WITHDRAWAL_AMOUNT = ERC20_DEPOSIT_AMOUNT;
 
-    //     it('Reverts', async () => {
-    //       await expectRevert(() => tx2, 'Withdraw: overdrawn');
-    //     });
-    //   });
+    it('Nitro holds insufficient ERC20s for participant', async () => {
+      const tx0 = await erc20.approve(nitroAddress, ERC20_WITHDRAWAL_AMOUNT);
+      await tx0.wait();
+      const amountHeld = Number(await nitro.holdings(alice.address, erc20Address));
+      tx1 = await nitro.deposit(alice.address, amountHeld, ERC20_WITHDRAWAL_AMOUNT, erc20Address);
+      await tx1.wait();
+      allocatedAtStart = Number(await nitro.holdings(alice.address, erc20Address));
+      await expect(allocatedAtStart).toBeGreaterThanOrEqual(ERC20_WITHDRAWAL_AMOUNT);
+    });
 
-    //   describe('Withdrawing ETH (signer = partcipant, holdings[participant][0x] > amount)', () => {
-    //     let tx2;
-    //     const WITHDRAWAL_AMOUNT = DEPOSIT_AMOUNT;
-
-    //     beforeAll(async () => {
-    //       tx2 = withdraw(bob, aliceDest.address, bob, WITHDRAWAL_AMOUNT);
-    //     });
-
-    //     it('Reverts', async () => {
-    //       await expectRevert(() => tx2, 'Withdraw: overdrawn');
-    //     });
-    //   });
+    it('Reverts', async () => {
+      tx2 = withdraw(alice, aliceDest.address, alice, allocatedAtStart + 1, null, erc20Address);
+      await expectRevert(() => tx2, 'Withdraw: overdrawn');
+    });
   });
 });
