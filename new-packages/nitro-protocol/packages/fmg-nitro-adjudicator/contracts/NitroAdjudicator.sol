@@ -99,11 +99,12 @@ function deposit(address destination, uint expectedHeld,
         if (amountDeposited < amount) {
             // refund whatever wasn't deposited.
             if (token == zeroAddress) {
-              msg.sender.transfer(amount - amountDeposited);
+              msg.sender.transfer(amount - amountDeposited); // TODO use safeMath here
           }
             else {
                 IERC20 _token = IERC20(token);
-                _token.transferFrom(address(this), msg.sender, amount - amountDeposited);
+                _token.transfer(msg.sender, amount - amountDeposited); // TODO use safeMath here
+                // TODO compute amountDeposited *before* calling into erc20 contract, so we only need 1 call not 2
                 }
         }
         emit Deposited(destination, amountDeposited, holdings[destination][token]);
