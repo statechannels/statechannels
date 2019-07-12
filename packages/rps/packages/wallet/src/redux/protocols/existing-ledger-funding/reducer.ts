@@ -26,23 +26,20 @@ export const initialize = (
   processId: string,
   channelId: string,
   ledgerId: string,
+  targetAllocation: string[],
+  targetDestination: string[],
   sharedData: SharedData,
 ): ProtocolStateWithSharedData<states.ExistingLedgerFundingState> => {
   const ledgerChannel = selectors.getChannelState(sharedData, ledgerId);
   const theirCommitment = getLastCommitment(ledgerChannel);
 
-  const {
-    allocation: proposedAllocation,
-    destination: proposedDestination,
-  } = helpers.getLatestCommitment(channelId, sharedData);
-
-  if (ledgerChannelNeedsTopUp(theirCommitment, proposedAllocation, proposedDestination)) {
+  if (ledgerChannelNeedsTopUp(theirCommitment, targetAllocation, targetDestination)) {
     const { protocolState: ledgerTopUpState, sharedData: newSharedData } = initializeLedgerTopUp(
       processId,
       channelId,
       ledgerId,
-      proposedAllocation,
-      proposedDestination,
+      targetAllocation,
+      targetDestination,
       theirCommitment.allocation,
       sharedData,
     );
@@ -52,6 +49,8 @@ export const initialize = (
         processId,
         channelId,
         ledgerId,
+        targetAllocation,
+        targetDestination,
       }),
       sharedData: newSharedData,
     };
@@ -87,6 +86,8 @@ export const initialize = (
     processId,
     ledgerId,
     channelId,
+    targetAllocation,
+    targetDestination,
   });
 
   return { protocolState, sharedData };

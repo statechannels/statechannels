@@ -42,6 +42,8 @@ export const NEW_LEDGER_FUNDING_PROTOCOL_LOCATOR = 'NewLedgerFunding';
 export function initialize(
   processId: string,
   channelId: string,
+  targetAllocation: string[],
+  targetDestination: string[],
   sharedData: SharedData,
 ): ReturnVal {
   const privateKey = getPrivatekey(sharedData, channelId);

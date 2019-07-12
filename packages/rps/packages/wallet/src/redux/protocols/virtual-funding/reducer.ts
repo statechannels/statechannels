@@ -12,6 +12,7 @@ import * as consensusUpdate from '../consensus-update';
 import * as indirectFunding from '../indirect-funding';
 import { ethers } from 'ethers';
 import { addHex } from '../../../utils/hex-utils';
+import { getLatestCommitment } from '../reducer-helpers';
 
 type ReturnVal = ProtocolStateWithSharedData<states.VirtualFundingState>;
 
@@ -194,6 +195,7 @@ function waitForGuarantorChannelReducer(
     const result = advanceChannelReducer(protocolState.guarantorChannel, sharedData, action);
     if (advanceChannel.isSuccess(result.protocolState)) {
       const { channelId: guarantorChannelId } = result.protocolState;
+
       switch (result.protocolState.commitmentType) {
         case CommitmentType.PreFundSetup:
           const guarantorChannelResult = advanceChannel.initializeAdvanceChannel(
@@ -218,9 +220,12 @@ function waitForGuarantorChannelReducer(
           };
 
         case CommitmentType.PostFundSetup:
+          const latestCommitment = getLatestCommitment(guarantorChannelId, sharedData);
           const indirectFundingResult = indirectFunding.initializeIndirectFunding(
             processId,
             result.protocolState.channelId,
+            latestCommitment.allocation,
+            latestCommitment.destination,
             result.sharedData,
           );
           return {
