@@ -9,6 +9,7 @@ import { expectEvent, expectRevert } from 'magmo-devtools';
 import { asCoreCommitment } from 'fmg-core/lib/test-app/counting-app';
 import { Commitment as CoreCommitment } from 'fmg-core/src/commitment';
 import { CountingCommitment } from 'fmg-core/src/test-app/counting-app';
+import { fromParameters, CommitmentType } from 'fmg-core/lib/commitment';
 
 jest.setTimeout(20000);
 let nitro: ethers.Contract;
@@ -56,8 +57,9 @@ const allocation = [aBal, bBal];
 const differentAllocation = [bBal, aBal];
 const participants = [alice.address, bob.address];
 const destination = [alice.address, bob.address];
+
 const ledgerChannel: Channel = {
-  channelType: '0xd115bffabbdd893a6f7cea402e7338643ced44a6',
+  channelType: '0xD115BFFAbbdd893A6f7ceA402e7338643Ced44a6',
   nonce: 0,
   participants,
 };
@@ -67,6 +69,15 @@ const guarantorChannel = {
 };
 const getEthersObjectForCommitment = (commitment: CountingCommitment) => {
   return asEthersObject(asCoreCommitment(commitment));
+};
+const getOutcomeFromParameters = (parameters: any[]) => {
+  const outcome = {
+    destination: parameters[0],
+    finalizedAt: ethers.utils.bigNumberify(parameters[1]),
+    challengeCommitment: asEthersObject(fromParameters(parameters[2])),
+    allocation: parameters[3].map(a => a.toHexString()),
+  };
+  return outcome;
 };
 
 const defaults = {
@@ -397,6 +408,86 @@ describe('Nitro (ETH management)', () => {
       );
     });
   });
+
+  describe('Claiming ETH from a Guarantor', () => {
+    const finalizedAt = ethers.utils.bigNumberify(1);
+    let recipient;
+    const claimAmount = 2;
+    let expectedOutcome;
+    let startBal;
+    let startBalRecipient;
+
+    beforeAll(async () => {
+      recipient = bob.address;
+      const guarantee = {
+        destination: [bob.address, alice.address],
+        allocation: [],
+        finalizedAt,
+        challengeCommitment: getEthersObjectForCommitment(guarantorCommitment),
+        token: [AddressZero, AddressZero],
+      };
+      const allocationOutcome = {
+        destination: [alice.address, bob.address],
+        allocation,
+        finalizedAt,
+        challengeCommitment: getEthersObjectForCommitment(guarantorCommitment),
+        token: [AddressZero, AddressZero],
+      };
+      await (await nitro.setOutcome(guarantor.address, guarantee)).wait();
+      await (await nitro.setOutcome(getChannelID(ledgerChannel), allocationOutcome)).wait();
+
+      // TODO reinstate these ?
+      // expect(
+      //   getOutcomeFromParameters(await nitro.getOutcome(getChannelID(ledgerChannel))),
+      // ).toMatchObject(allocationOutcome);
+      // expect(getOutcomeFromParameters(await nitro.getOutcome(guarantor.address))).toMatchObject(
+      //   guarantee,
+      // );
+
+      startBal = 5;
+      await (await nitro.deposit(guarantor.address, 0, startBal, AddressZero, {
+        value: startBal,
+      })).wait();
+
+      // Other tests may have deposited into guarantor.address, but we
+      // ensure that the guarantor has at least 5 in holdings
+      startBal = await nitro.holdings(guarantor.address, AddressZero);
+      startBalRecipient = (await nitro.holdings(recipient, AddressZero)).toNumber();
+      const bAllocation = bigNumberify(bBal)
+        .sub(claimAmount)
+        .toHexString();
+      const allocationAfterClaim = [aBal, bAllocation];
+      expectedOutcome = {
+        destination: [alice.address, bob.address],
+        allocation: allocationAfterClaim,
+        finalizedAt: ethers.utils.bigNumberify(finalizedAt),
+        challengeCommitment: getEthersObjectForCommitment(guarantorCommitment),
+      };
+    });
+
+    it('Nitro.claim tx succeeds', async () => {
+      const tx1 = await nitro.claim(guarantor.address, recipient, claimAmount, AddressZero);
+      const receipt1 = await tx1.wait();
+      await expect(receipt1.status).toEqual(1);
+    });
+
+    it('New outcome registered', async () => {
+      const newOutcome = await nitro.getOutcome(getChannelID(ledgerChannel));
+      expect(getOutcomeFromParameters(newOutcome)).toMatchObject(expectedOutcome);
+    });
+
+    it('holdings[gurantor][0x] decreases', async () => {
+      expect(Number(await nitro.holdings(guarantor.address, AddressZero))).toEqual(
+        startBal - claimAmount,
+      );
+    });
+
+    it('holdings[recipient][0x] decreases', async () => {
+      expect(Number(await nitro.holdings(recipient, AddressZero))).toEqual(
+        startBalRecipient + claimAmount,
+      );
+    });
+  });
 });
 
 // ERC20 management
@@ -719,15 +810,94 @@ describe('Nitro (ERC20 management)', () => {
       await expect(receipt1.status).toEqual(1);
     });
 
-    it('holdings[to][0x] increases', async () => {
+    it('holdings[to][erc20] increases', async () => {
       expect(await nitro.holdings(alice.address, erc20Address)).toEqual(
         allocatedToAlice.add(allocation[0]),
       );
     });
 
-    it('holdings[from][0x] decreases', async () => {
+    it('holdings[from][erc20] decreases', async () => {
       expect(await nitro.holdings(getChannelID(ledgerChannel), erc20Address)).toEqual(
         allocatedToChannel.sub(allocation[0]),
+      );
+    });
+  });
+
+  describe('Claiming ERC20 from a Guarantor', () => {
+    const finalizedAt = ethers.utils.bigNumberify(1);
+    let recipient;
+    const claimAmount = 2;
+    let expectedOutcome;
+    let startBal;
+    let startBalRecipient;
+
+    beforeAll(async () => {
+      recipient = bob.address;
+      const guarantee = {
+        destination: [bob.address, alice.address],
+        allocation: [],
+        finalizedAt,
+        challengeCommitment: getEthersObjectForCommitment(guarantorCommitment),
+        token: [erc20Address, erc20Address],
+      };
+      const allocationOutcome = {
+        destination: [alice.address, bob.address],
+        allocation,
+        finalizedAt,
+        challengeCommitment: getEthersObjectForCommitment(guarantorCommitment),
+        token: [erc20Address, erc20Address],
+      };
+      await (await nitro.setOutcome(guarantor.address, guarantee)).wait();
+      await (await nitro.setOutcome(getChannelID(ledgerChannel), allocationOutcome)).wait();
+
+      // TODO reinstate these ?
+      // expect(
+      //   getOutcomeFromParameters(await nitro.getOutcome(getChannelID(ledgerChannel))),
+      // ).toMatchObject(allocationOutcome);
+      // expect(getOutcomeFromParameters(await nitro.getOutcome(guarantor.address))).toMatchObject(
+      //   guarantee,
+      // );
+
+      startBal = 5;
+      await (await erc20.approve(nitroAddress, startBal)).wait();
+      await (await nitro.deposit(guarantor.address, 0, startBal, erc20Address)).wait();
+
+      // Other tests may have deposited into guarantor.address, but we
+      // ensure that the guarantor has at least 5 in holdings
+      startBal = await nitro.holdings(guarantor.address, erc20Address);
+      startBalRecipient = (await nitro.holdings(recipient, erc20Address)).toNumber();
+      const bAllocation = bigNumberify(bBal)
+        .sub(claimAmount)
+        .toHexString();
+      const allocationAfterClaim = [aBal, bAllocation];
+      expectedOutcome = {
+        destination: [alice.address, bob.address],
+        allocation: allocationAfterClaim,
+        finalizedAt: ethers.utils.bigNumberify(finalizedAt),
+        challengeCommitment: getEthersObjectForCommitment(guarantorCommitment),
+      };
+    });
+
+    it('Nitro.claim tx succeeds', async () => {
+      const tx1 = await nitro.claim(guarantor.address, recipient, claimAmount, erc20Address);
+      const receipt1 = await tx1.wait();
+      await expect(receipt1.status).toEqual(1);
+    });
+
+    it('New outcome registered', async () => {
+      const newOutcome = await nitro.getOutcome(getChannelID(ledgerChannel));
+      expect(getOutcomeFromParameters(newOutcome)).toMatchObject(expectedOutcome);
+    });
+
+    it('holdings[gurantor][erc20] decreases', async () => {
+      expect(Number(await nitro.holdings(guarantor.address, erc20Address))).toEqual(
+        startBal - claimAmount,
+      );
+    });
+
+    it('holdings[recipient][erc20] decreases', async () => {
+      expect(Number(await nitro.holdings(recipient, erc20Address))).toEqual(
+        startBalRecipient + claimAmount,
       );
     });
   });
