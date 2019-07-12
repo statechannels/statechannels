@@ -19,15 +19,15 @@ import {
   Weapon,
 } from '../app/services/rps-commitment';
 import {
-  ALLOCATION,
+  allocation as constAllocation,
   BEGINNING_RPS_APP_CHANNEL_NONCE,
   DESTINATION,
   DUMMY_RULES_ADDRESS,
   FUNDED_RPS_CHANNEL_NONCE,
-  PARTICIPANT_PRIVATE_KEY,
+  PARTICIPANT_1_PRIVATE_KEY,
   PARTICIPANTS,
   STAKE,
-} from '../constants';
+} from './test-constants';
 import { default_channel } from './test_data';
 
 // Commitment Constructors
@@ -215,7 +215,7 @@ export const base_rps_commitment: BaseWithStake = {
     channelType: DUMMY_RULES_ADDRESS,
     participants: PARTICIPANTS,
   },
-  allocation: ALLOCATION,
+  allocation: constAllocation(2),
   destination: DESTINATION,
   turnNum: 0,
   commitmentCount: 0,
@@ -228,7 +228,7 @@ const open_channel_commitment = asCoreCommitment(
 );
 export const open_channel_params = {
   commitment: open_channel_commitment,
-  signature: sign(toHex(open_channel_commitment), PARTICIPANT_PRIVATE_KEY),
+  signature: sign(toHex(open_channel_commitment), PARTICIPANT_1_PRIVATE_KEY),
 };
 
 export const invalid_open_channel_params = {
@@ -260,7 +260,7 @@ const update_channel_commitment = asCoreCommitment(
 
 export const update_channel_params = {
   commitment: update_channel_commitment,
-  signature: sign(toHex(update_channel_commitment), PARTICIPANT_PRIVATE_KEY),
+  signature: sign(toHex(update_channel_commitment), PARTICIPANT_1_PRIVATE_KEY),
 };
 
 export const post_fund_setup_1_response = {
