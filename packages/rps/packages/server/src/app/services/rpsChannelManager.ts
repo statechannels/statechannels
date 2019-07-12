@@ -1,10 +1,9 @@
-import { Commitment, CommitmentType, Signature } from 'fmg-core';
+import { channelID, Commitment, CommitmentType, Signature } from 'fmg-core';
 import { errors, SignedCommitment } from '../../wallet';
 import Wallet from '../../wallet';
 import AllocatorChannel from '../../wallet/models/allocatorChannel';
 
 import { delay } from 'bluebird';
-import { channelID } from 'fmg-core/lib/channel';
 import AllocatorChannelCommitment from '../../wallet/models/allocatorChannelCommitment';
 import {
   asCoreCommitment,
@@ -67,14 +66,14 @@ export async function updateRPSChannel(
     ourWeapon,
   });
 
-  await wallet.updateChannel(fromCoreCommitment(theirCommitment), ourCommitment);
+  await wallet.updateChannel([fromCoreCommitment(theirCommitment)], ourCommitment);
   return wallet.formResponse(asCoreCommitment(ourCommitment));
 }
 
 async function openChannel(theirCommitment: Commitment) {
   const ourCommitment = await nextCommitment(fromCoreCommitment(theirCommitment));
 
-  await wallet.updateChannel(fromCoreCommitment(theirCommitment), ourCommitment);
+  await wallet.updateChannel([fromCoreCommitment(theirCommitment)], ourCommitment);
 
   return await wallet.formResponse(asCoreCommitment(ourCommitment));
 }

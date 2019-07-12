@@ -1,4 +1,4 @@
-import { CommitmentType, Signature } from 'fmg-core';
+import { CommitmentType } from 'fmg-core';
 import {
   AppCommitment,
   finalVote,
@@ -7,57 +7,91 @@ import {
   vote,
 } from 'fmg-nitro-adjudicator/lib/consensus-app';
 import { unreachable } from 'magmo-wallet';
-import { SignedCommitment } from '.';
+import { SignedCommitment, SignedLedgerCommitment } from '.';
+import { HUB_ADDRESS } from '../../constants';
 import { queries } from '../db/queries/allocator_channels';
 import errors from '../errors';
 import * as ChannelManagement from './channelManagement';
 import { asCoreCommitment, LedgerCommitment } from './ledger-commitment';
 
-// TODO: This should be extracted into a hub app?
 export async function updateLedgerChannel(
-  theirCommitment: LedgerCommitment,
-  theirSignature: Signature,
-  currentCommitment?: LedgerCommitment,
+  commitmentRound: SignedLedgerCommitment[],
+  lastStoredCommitment?: LedgerCommitment,
 ): Promise<SignedCommitment> {
-  const ourCommitment = nextCommitment(theirCommitment, theirSignature, currentCommitment);
-  await queries.updateAllocatorChannel(theirCommitment, ourCommitment);
+  let commitmentsToApply = commitmentRound;
+  if (lastStoredCommitment) {
+    commitmentsToApply = commitmentRound.filter(
+      signedCommitment => signedCommitment.ledgerCommitment.turnNum > lastStoredCommitment.turnNum,
+    );
+  }
+  commitmentsToApply.sort((a, b) => {
+    return a.ledgerCommitment.turnNum - b.ledgerCommitment.turnNum;
+  });
+
+  let lastValidCommitment = lastStoredCommitment;
+  for (const commitmentToApply of commitmentsToApply) {
+    if (!shouldAcceptCommitment(commitmentToApply, lastValidCommitment)) {
+      throw errors.INVALID_COMMITMENT_UNKNOWN_REASON;
+    }
+    lastValidCommitment = commitmentToApply.ledgerCommitment;
+  }
+
+  const ourCommitment = nextCommitment(commitmentsToApply);
+  const commitmentToStore = commitmentsToApply.map(
+    signedCommitment => signedCommitment.ledgerCommitment,
+  );
+  // todo: signatures need to be stored alongside commitments
+  await queries.updateAllocatorChannel(commitmentToStore, ourCommitment);
   return ChannelManagement.formResponse(asCoreCommitment(ourCommitment));
 }
 
-export function nextCommitment(
-  theirCommitment: LedgerCommitment,
-  theirSignature: Signature,
-  currentCommitment?: LedgerCommitment,
-): LedgerCommitment {
-  if (!ChannelManagement.validSignature(asCoreCommitment(theirCommitment), theirSignature)) {
+function shouldAcceptCommitment(
+  signedCommitment: SignedLedgerCommitment,
+  previousCommitment?: LedgerCommitment,
+) {
+  const { ledgerCommitment: commitment, signature } = signedCommitment;
+  if (!ChannelManagement.validSignature(asCoreCommitment(commitment), signature)) {
     throw errors.COMMITMENT_NOT_SIGNED;
   }
 
-  if (theirCommitment.turnNum > 0) {
-    if (!valuePreserved(currentCommitment, theirCommitment)) {
+  if (commitment.turnNum > 0) {
+    if (!valuePreserved(previousCommitment, commitment)) {
       throw errors.VALUE_LOST;
     }
 
     if (
-      theirCommitment.commitmentType !== CommitmentType.PreFundSetup &&
-      !validTransition(currentCommitment, theirCommitment)
+      commitment.commitmentType !== CommitmentType.PreFundSetup &&
+      !validTransition(previousCommitment, commitment)
     ) {
       throw errors.INVALID_TRANSITION;
     }
   }
+  return true;
+}
 
-  if (theirCommitment.commitmentType !== CommitmentType.App) {
-    return ChannelManagement.nextCommitment(theirCommitment) as LedgerCommitment;
+export function nextCommitment(commitmentRound: SignedLedgerCommitment[]): LedgerCommitment {
+  // Check that it is our turn
+  const lastCommitmnent = commitmentRound.slice(-1)[0].ledgerCommitment;
+  const participants = lastCommitmnent.channel.participants;
+  const ourIndex = participants.indexOf(HUB_ADDRESS);
+  const lastTurn = lastCommitmnent.turnNum;
+  const numParticipants = participants.length;
+  if ((lastTurn + 1) % numParticipants !== ourIndex) {
+    throw errors.NOT_OUR_TURN;
   }
 
-  if (finalVoteRequired(theirCommitment)) {
-    return finalVote(theirCommitment);
-  } else if (voteRequired(theirCommitment)) {
-    return vote(theirCommitment);
-  } else if (isConsensusReached(theirCommitment)) {
-    return pass(theirCommitment);
+  if (lastCommitmnent.commitmentType !== CommitmentType.App) {
+    return ChannelManagement.nextCommitment(lastCommitmnent) as LedgerCommitment;
+  }
+
+  if (finalVoteRequired(lastCommitmnent)) {
+    return finalVote(lastCommitmnent);
+  } else if (voteRequired(lastCommitmnent)) {
+    return vote(lastCommitmnent);
+  } else if (isConsensusReached(lastCommitmnent)) {
+    return pass(lastCommitmnent);
   } else {
-    return unreachable(theirCommitment);
+    return unreachable(lastCommitmnent);
   }
 }
 
