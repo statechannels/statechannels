@@ -1,5 +1,5 @@
 import { Model } from 'objection';
-import { DUMMY_RULES_ADDRESS } from '../../../constants';
+import { DUMMY_RULES_ADDRESS } from '../../../test/test-constants';
 import Rule from '../../models/rule';
 import knex from '../connection';
 Model.knex(knex);

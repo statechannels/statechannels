@@ -1,6 +1,6 @@
 import { bigNumberify } from 'ethers/utils';
 import { Address, Uint256 } from 'fmg-core';
-import { DUMMY_RULES_BEGINNING_APP_CHANNEL_NONCE_CHANNEL_ID } from '../../constants';
+import { DUMMY_RULES_BEGINNING_APP_CHANNEL_NONCE_CHANNEL_ID } from '../../test/test-constants';
 import AllocatorChannel from '../models/allocatorChannel';
 import { Blockchain } from '../services/blockchain';
 import { onDepositEvent } from '../services/depositManager';
