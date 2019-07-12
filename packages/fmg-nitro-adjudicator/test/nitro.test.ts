@@ -1,12 +1,12 @@
 import * as ethers from 'ethers';
-import NitroArtifact from '../build/contracts/NitroAdjudicator.json';
+import NitroArtifact from '../build/contracts/TestNitroAdjudicator.json';
 import ERC20Artifact from '../build/contracts/testERC20.json';
 import { AddressZero } from 'ethers/constants';
 import { sign, Channel, CountingApp, Address } from 'fmg-core';
-import { BigNumber, bigNumberify } from 'ethers/utils';
-import { channelID as getChannelID } from 'fmg-core/lib/channel';
+import { bigNumberify } from 'ethers/utils';
+// import { channelID as getChannelID } from 'fmg-core/lib/channel';
 import { expectEvent, expectRevert } from 'magmo-devtools';
-import { Commitment as CoreCommitment } from 'fmg-core/src/commitment';
+// import { Commitment as CoreCommitment } from 'fmg-core/src/commitment';
 
 jest.setTimeout(20000);
 let nitro: ethers.Contract;
@@ -430,7 +430,7 @@ describe('Nitro (ERC20 deposit and withdrawal)', () => {
     });
     it.skip('Emits Deposit event (partial) ', async () => {
       // several events being emitted?
-      console.log(receipt);
+      // console.log(receipt);
       await expectEvent(receipt, 'Deposited', {
         destination: randomAddress,
         amountDeposited: 1,
