@@ -2,11 +2,13 @@ import * as ethers from 'ethers';
 import NitroArtifact from '../build/contracts/TestNitroAdjudicator.json';
 import ERC20Artifact from '../build/contracts/testERC20.json';
 import { AddressZero } from 'ethers/constants';
-import { sign, Channel, CountingApp, Address } from 'fmg-core';
-import { bigNumberify } from 'ethers/utils';
-// import { channelID as getChannelID } from 'fmg-core/lib/channel';
+import { sign, Channel, CountingApp, Address, asEthersObject } from 'fmg-core';
+import { BigNumber, bigNumberify } from 'ethers/utils';
+import { channelID as getChannelID } from 'fmg-core/lib/channel';
 import { expectEvent, expectRevert } from 'magmo-devtools';
-// import { Commitment as CoreCommitment } from 'fmg-core/src/commitment';
+import { asCoreCommitment } from 'fmg-core/lib/test-app/counting-app';
+import { Commitment as CoreCommitment } from 'fmg-core/src/commitment';
+import { CountingCommitment } from 'fmg-core/src/test-app/counting-app';
 
 jest.setTimeout(20000);
 let nitro: ethers.Contract;
@@ -52,8 +54,86 @@ const aBal = ethers.utils.parseUnits('6', 'wei').toHexString();
 const bBal = ethers.utils.parseUnits('4', 'wei').toHexString();
 const allocation = [aBal, bBal];
 const differentAllocation = [bBal, aBal];
-let ledgerChannel: Channel;
-describe('Nitro (ETH deposit and withdrawal)', () => {
+const participants = [alice.address, bob.address];
+const destination = [alice.address, bob.address];
+const ledgerChannel: Channel = {
+  channelType: '0xd115bffabbdd893a6f7cea402e7338643ced44a6',
+  nonce: 0,
+  participants,
+};
+const guarantorChannel = {
+  ...ledgerChannel,
+  guaranteedChannel: getChannelID(ledgerChannel),
+};
+const getEthersObjectForCommitment = (commitment: CountingCommitment) => {
+  return asEthersObject(asCoreCommitment(commitment));
+};
+
+const defaults = {
+  channel: ledgerChannel,
+  appCounter: new BigNumber(0).toHexString(),
+  destination,
+  allocation,
+  token: [AddressZero, AddressZero],
+  commitmentCount: 1,
+};
+
+const guarantorDefaults = {
+  ...defaults,
+  channel: guarantorChannel,
+};
+
+const commitment0 = CountingApp.createCommitment.app({
+  ...defaults,
+  appCounter: new BigNumber(1).toHexString(),
+  turnNum: 6,
+});
+const commitment1 = CountingApp.createCommitment.app({
+  ...defaults,
+  turnNum: 7,
+  appCounter: new BigNumber(2).toHexString(),
+});
+const commitment2 = CountingApp.createCommitment.app({
+  ...defaults,
+  turnNum: 8,
+  appCounter: new BigNumber(3).toHexString(),
+});
+const commitment3 = CountingApp.createCommitment.app({
+  ...defaults,
+  turnNum: 9,
+  appCounter: new BigNumber(4).toHexString(),
+});
+const commitment4 = CountingApp.createCommitment.conclude({
+  ...defaults,
+  turnNum: 10,
+  appCounter: new BigNumber(5).toHexString(),
+});
+const commitment5 = CountingApp.createCommitment.conclude({
+  ...defaults,
+  turnNum: 11,
+  appCounter: new BigNumber(6).toHexString(),
+});
+const commitment1alt = CountingApp.createCommitment.app({
+  ...defaults,
+  channel: ledgerChannel,
+  allocation: differentAllocation,
+  turnNum: 7,
+  appCounter: new BigNumber(2).toHexString(),
+});
+const commitment2alt = CountingApp.createCommitment.app({
+  ...defaults,
+  channel: ledgerChannel,
+  allocation: differentAllocation,
+  turnNum: 8,
+  appCounter: new BigNumber(3).toHexString(),
+});
+const guarantorCommitment = CountingApp.createCommitment.app({
+  ...guarantorDefaults,
+  appCounter: new BigNumber(1).toHexString(),
+  turnNum: 6,
+});
+
+describe('Nitro (ETH management)', () => {
   let networkId;
 
   // ETH management
@@ -63,16 +143,6 @@ describe('Nitro (ETH deposit and withdrawal)', () => {
     networkId = (await provider.getNetwork()).chainId;
     const libraryAddress = NitroArtifact.networks[networkId].address;
     nitro = new ethers.Contract(libraryAddress, NitroArtifact.abi, signer0);
-
-    // alice and bob are both funded by startGanache in magmo devtools.
-
-    // const destination = [alice.address, bob.address];
-    const participants = [alice.address, bob.address];
-    ledgerChannel = {
-      channelType: '0xd115bffabbdd893a6f7cea402e7338643ced44a6',
-      nonce: 0,
-      participants,
-    };
   });
 
   describe('Depositing ETH (msg.value = amount , expectedHeld = 0)', () => {
@@ -262,6 +332,71 @@ describe('Nitro (ETH deposit and withdrawal)', () => {
       await expectRevert(() => tx2, 'Withdraw: overdrawn');
     });
   });
+
+  describe('Transferring ETH (outcome = final, holdings[fromChannel] > outcomes[fromChannel].destination', () => {
+    let allocatedToChannel;
+    let allocatedToAlice;
+    beforeAll(async () => {
+      const amountHeldAgainstLedgerChannel = await nitro.holdings(
+        getChannelID(ledgerChannel),
+        AddressZero,
+      );
+      await nitro.deposit(
+        getChannelID(ledgerChannel),
+        amountHeldAgainstLedgerChannel,
+        DEPOSIT_AMOUNT,
+        AddressZero,
+        { value: DEPOSIT_AMOUNT },
+      );
+      const amountHeldAgainstGuarantorChannel = await nitro.holdings(
+        guarantor.address,
+        AddressZero,
+      );
+      await nitro.deposit(
+        guarantor.address,
+        amountHeldAgainstGuarantorChannel,
+        DEPOSIT_AMOUNT,
+        AddressZero,
+        { value: DEPOSIT_AMOUNT },
+      );
+
+      const allocationOutcome = {
+        destination: [alice.address, bob.address],
+        allocation,
+        finalizedAt: ethers.utils.bigNumberify(1),
+        challengeCommitment: getEthersObjectForCommitment(commitment0),
+        token: [AddressZero, AddressZero],
+      };
+      const tx = await nitro.setOutcome(getChannelID(ledgerChannel), allocationOutcome);
+      await tx.wait();
+
+      allocatedToChannel = await nitro.holdings(getChannelID(ledgerChannel), AddressZero);
+      allocatedToAlice = await nitro.holdings(alice.address, AddressZero);
+    });
+
+    it('Nitro.transfer tx succeeds', async () => {
+      const tx1 = await nitro.transfer(
+        getChannelID(ledgerChannel),
+        alice.address,
+        allocation[0],
+        AddressZero,
+      );
+      const receipt1 = await tx1.wait();
+      await expect(receipt1.status).toEqual(1);
+    });
+
+    it('holdings[to][0x] increases', async () => {
+      expect(await nitro.holdings(alice.address, AddressZero)).toEqual(
+        allocatedToAlice.add(allocation[0]),
+      );
+    });
+
+    it('holdings[from][0x] decreases', async () => {
+      expect(await nitro.holdings(getChannelID(ledgerChannel), AddressZero)).toEqual(
+        allocatedToChannel.sub(allocation[0]),
+      );
+    });
+  });
 });
 
 // ERC20 management
@@ -269,7 +404,7 @@ describe('Nitro (ETH deposit and withdrawal)', () => {
 let erc20;
 let erc20Address;
 let nitroAddress;
-describe('Nitro (ERC20 deposit and withdrawal)', () => {
+describe('Nitro (ERC20 management)', () => {
   beforeAll(async () => {
     const networkId = (await provider.getNetwork()).chainId;
     erc20Address = ERC20Artifact.networks[networkId].address;
@@ -510,7 +645,7 @@ describe('Nitro (ERC20 deposit and withdrawal)', () => {
     });
   });
 
-  describe('Withdrawing ETH (signer = partcipant, holdings[participant][0x] < amount)', () => {
+  describe('Withdrawing ERC20 (signer = partcipant, holdings[participant][erc20] < amount)', () => {
     let tx1;
     let tx2;
     let allocatedAtStart;
@@ -529,6 +664,71 @@ describe('Nitro (ERC20 deposit and withdrawal)', () => {
     it('Reverts', async () => {
       tx2 = withdraw(alice, aliceDest.address, alice, allocatedAtStart + 1, null, erc20Address);
       await expectRevert(() => tx2, 'Withdraw: overdrawn');
+    });
+  });
+
+  describe('Transferring ERC20 (outcome = final, holdings[fromChannel] > outcomes[fromChannel].destination', () => {
+    let allocatedToChannel;
+    let allocatedToAlice;
+    beforeAll(async () => {
+      const tx0 = await erc20.approve(nitroAddress, ERC20_DEPOSIT_AMOUNT * 2);
+      await tx0.wait();
+      const amountHeldAgainstLedgerChannel = await nitro.holdings(
+        getChannelID(ledgerChannel),
+        erc20Address,
+      );
+      await nitro.deposit(
+        getChannelID(ledgerChannel),
+        amountHeldAgainstLedgerChannel,
+        ERC20_DEPOSIT_AMOUNT,
+        erc20Address,
+      );
+      const amountHeldAgainstGuarantorChannel = await nitro.holdings(
+        guarantor.address,
+        erc20Address,
+      );
+      await nitro.deposit(
+        guarantor.address,
+        amountHeldAgainstGuarantorChannel,
+        ERC20_DEPOSIT_AMOUNT,
+        erc20Address,
+      );
+
+      const allocationOutcome = {
+        destination: [alice.address, bob.address],
+        allocation,
+        finalizedAt: ethers.utils.bigNumberify(1),
+        challengeCommitment: getEthersObjectForCommitment(commitment0),
+        token: [erc20Address, erc20Address],
+      };
+      const tx = await nitro.setOutcome(getChannelID(ledgerChannel), allocationOutcome);
+      await tx.wait();
+
+      allocatedToChannel = await nitro.holdings(getChannelID(ledgerChannel), erc20Address);
+      allocatedToAlice = await nitro.holdings(alice.address, erc20Address);
+    });
+
+    it('Nitro.transfer tx succeeds', async () => {
+      const tx1 = await nitro.transfer(
+        getChannelID(ledgerChannel),
+        alice.address,
+        allocation[0],
+        erc20Address,
+      );
+      const receipt1 = await tx1.wait();
+      await expect(receipt1.status).toEqual(1);
+    });
+
+    it('holdings[to][0x] increases', async () => {
+      expect(await nitro.holdings(alice.address, erc20Address)).toEqual(
+        allocatedToAlice.add(allocation[0]),
+      );
+    });
+
+    it('holdings[from][0x] decreases', async () => {
+      expect(await nitro.holdings(getChannelID(ledgerChannel), erc20Address)).toEqual(
+        allocatedToChannel.sub(allocation[0]),
+      );
     });
   });
 });
