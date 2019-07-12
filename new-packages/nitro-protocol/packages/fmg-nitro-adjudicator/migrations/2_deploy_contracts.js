@@ -4,8 +4,7 @@ var CountingCommitment = artifacts.require('CountingCommitment');
 var CountingApp = artifacts.require('CountingApp');
 var ConsensusCommitment = artifacts.require('ConsensusCommitment');
 var ConsensusApp = artifacts.require('ConsensusApp');
-var TestNitroAdjudicator = artifacts.require('TestNitroAdjudicator');
-var testERC20 = artifacts.require('testERC20');
+var NitroVault = artifacts.require('NitroVault');
 
 module.exports = function(deployer) {
   deployer.deploy(Commitment);
@@ -29,9 +28,7 @@ module.exports = function(deployer) {
   deployer.link(ConsensusCommitment, ConsensusApp);
   deployer.deploy(ConsensusApp);
 
-  deployer.link(Commitment, TestNitroAdjudicator);
-  deployer.link(Rules, TestNitroAdjudicator);
-  deployer.deploy(TestNitroAdjudicator);
-
-  deployer.deploy(testERC20);
+  deployer.link(Commitment, NitroVault);
+  deployer.link(Rules, NitroVault);
+  deployer.deploy(NitroVault);
 };

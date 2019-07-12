@@ -1,5 +1,5 @@
 import * as ethers from 'ethers';
-import NitroArtifact from '../build/contracts/TestNitroAdjudicator.json';
+import NitroVaultArtifact from '../build/contracts/TestNitroVault.json';
 import ERC20Artifact from '../build/contracts/testERC20.json';
 import { AddressZero } from 'ethers/constants';
 import { sign, Channel, CountingApp, Address, asEthersObject } from 'fmg-core';
@@ -153,8 +153,8 @@ describe('Nitro (ETH management)', () => {
 
   beforeAll(async () => {
     networkId = (await provider.getNetwork()).chainId;
-    const libraryAddress = NitroArtifact.networks[networkId].address;
-    nitro = new ethers.Contract(libraryAddress, NitroArtifact.abi, signer0);
+    const libraryAddress = NitroVaultArtifact.networks[networkId].address;
+    nitro = new ethers.Contract(libraryAddress, NitroVaultArtifact.abi, signer0);
   });
 
   describe('Depositing ETH (msg.value = amount , expectedHeld = 0)', () => {

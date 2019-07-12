@@ -7,18 +7,7 @@ import "../NitroAdjudicator.sol";
 contract TestNitroAdjudicator is NitroAdjudicator {
     using Commitment for Commitment.CommitmentStruct;
 
-    function reprioritizePub(Outcome memory allocation, Outcome memory guarantee) public pure returns (Outcome memory) {
-        return reprioritize(allocation, guarantee);
-    }
-
-    function affordsPub(address recipient, Outcome memory allocation, uint funding) public pure returns (uint256) {
-        return affords(recipient, allocation, funding);
-    }
-
-    function reducePub(Outcome memory allocation, address recipient, uint amount, address token) public pure returns (Outcome memory) {
-        return reduce(allocation, recipient, amount, token);
-    }
-
+  
     // ****************
     // Helper functions
     // ****************
