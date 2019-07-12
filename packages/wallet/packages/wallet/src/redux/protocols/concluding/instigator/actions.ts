@@ -1,6 +1,5 @@
 import { WalletAction, CommitmentReceived, isCommonAction } from '../../../actions';
 import { ActionConstructor } from '../../../utils';
-import { KeepLedgerChannelApproved } from '../../../../communication';
 
 // -------
 // Actions
@@ -68,15 +67,13 @@ export type ConcludingInstigatorAction =
   | DefundChosen
   | KeepOpenChosen
   | Acknowledged
-  | CommitmentReceived
-  | KeepLedgerChannelApproved;
+  | CommitmentReceived;
 
 export const isConcludingInstigatorAction = (
   action: WalletAction,
 ): action is ConcludingInstigatorAction => {
   return (
     isCommonAction(action) ||
-    action.type === 'WALLET.CONCLUDING.KEEP_LEDGER_CHANNEL_APPROVED' ||
     action.type === 'WALLET.CONCLUDING.INSTIGATOR.CONCLUDING_CANCELLED' ||
     action.type === 'WALLET.CONCLUDING.INSTIGATOR.CONCLUDE_APPROVED' ||
     action.type === 'WALLET.CONCLUDING.INSTIGATOR.DEFUND_CHOSEN' ||

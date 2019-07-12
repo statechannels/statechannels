@@ -5,7 +5,6 @@ import {
   instigatorApproveConcluding,
   instigatorWaitForOpponentConclude,
   instigatorAcknowledgeFailure,
-  instigatorAcknowledgeConcludeReceived,
 } from './states';
 import { unreachable } from '../../../../utils/reducer-utils';
 import {
@@ -16,7 +15,7 @@ import {
   checkAndStore,
 } from '../../../state';
 import { composeConcludeCommitment } from '../../../../utils/commitment-utils';
-import { ourTurn, getLastCommitment } from '../../../channel-store';
+import { ourTurn } from '../../../channel-store';
 import * as channelStoreReducer from '../../../channel-store/reducer';
 import * as selectors from '../../../selectors';
 import {
@@ -27,20 +26,21 @@ import {
 } from '../../reducer-helpers';
 import { ProtocolAction } from '../../../../redux/actions';
 import { theirAddress } from '../../../channel-store';
-import {
-  sendConcludeInstigated,
-  CommitmentReceived,
-  sendKeepLedgerChannelApproved,
-} from '../../../../communication';
+import { sendConcludeInstigated, CommitmentReceived } from '../../../../communication';
 import { failure, success } from '../states';
 import { ProtocolStateWithSharedData } from '../..';
 import { isConcludingInstigatorAction } from './actions';
 import {
   initialize as consensusUpdateInitialize,
   consensusUpdateReducer,
+  CONSENSUS_UPDATE_PROTOCOL_LOCATOR,
 } from '../../consensus-update/reducer';
 import * as helpers from '../../reducer-helpers';
-import { ConsensusUpdateAction, isConsensusUpdateAction } from '../../consensus-update/actions';
+import {
+  ConsensusUpdateAction,
+  isConsensusUpdateAction,
+  clearedToSend,
+} from '../../consensus-update/actions';
 export type ReturnVal = ProtocolStateWithSharedData<states.InstigatorConcludingState>;
 export type Storage = SharedData;
 
@@ -61,8 +61,6 @@ export function instigatorConcludingReducer(
   }
 
   switch (action.type) {
-    case 'WALLET.CONCLUDING.KEEP_LEDGER_CHANNEL_APPROVED':
-      return keepLedgerChannelApproved(protocolState, sharedData);
     case 'WALLET.CONCLUDING.INSTIGATOR.CONCLUDING_CANCELLED':
       return concludingCancelled(protocolState, sharedData);
     case 'WALLET.CONCLUDING.INSTIGATOR.CONCLUDE_APPROVED':
@@ -103,48 +101,20 @@ export function initialize(channelId: string, processId: string, sharedData: Sto
     };
   }
 }
-function keepLedgerChannelApproved(protocolState: CState, sharedData: Storage) {
-  switch (protocolState.type) {
-    case 'ConcludingInstigator.AcknowledgeConcludeReceived':
-      return {
-        protocolState: { ...protocolState, opponentSelectedKeepLedgerChannel: true },
-        sharedData,
-      };
-    case 'ConcludingInstigator.WaitForOpponentSelection':
-      const ledgerId = helpers.getFundingChannelId(protocolState.channelId, sharedData);
-      const appChannel = getChannel(sharedData, protocolState.channelId);
-      if (!appChannel) {
-        throw new Error(`Could not find channel ${protocolState.channelId}`);
-      }
-      const latestCommitment = getLastCommitment(appChannel);
-      const {
-        protocolState: consensusUpdateState,
-        sharedData: newSharedData,
-      } = consensusUpdateInitialize(
-        protocolState.processId,
-        ledgerId,
-        true, // TODO: Make use of cleared to send in concluding protocol
-        latestCommitment.allocation,
-        latestCommitment.destination,
-        sharedData,
-      );
-      return {
-        protocolState: states.instigatorWaitForLedgerUpdate({
-          ...protocolState,
-          consensusUpdateState,
-        }),
-        sharedData: newSharedData,
-      };
-  }
-  return { protocolState, sharedData };
-}
+
 function handleLedgerUpdateAction(
   protocolState: NonTerminalCState,
   sharedData: Storage,
   action: ConsensusUpdateAction,
 ): ReturnVal {
-  if (protocolState.type !== 'ConcludingInstigator.WaitForLedgerUpdate') {
+  if (
+    protocolState.type !== 'ConcludingInstigator.WaitForLedgerUpdate' &&
+    protocolState.type !== 'ConcludingInstigator.AcknowledgeConcludeReceived'
+  ) {
     return { protocolState, sharedData };
+  }
+  if (!protocolState.consensusUpdateState) {
+    throw new Error('Expected Consensus State to be defined.');
   }
   const {
     protocolState: updatedConsensusUpdateState,
@@ -219,57 +189,72 @@ function concludeReceived(
   if (!checkResult.isSuccess) {
     throw new Error('Concluding instigator protocol, unable to validate or store commitment');
   }
-  const updatedStorage = checkResult.store;
 
-  return {
-    protocolState: instigatorAcknowledgeConcludeReceived({
-      ...protocolState,
-      opponentSelectedKeepLedgerChannel: false,
-    }),
-    sharedData: updatedStorage,
-  };
+  sharedData = checkResult.store;
+  const fundingState = selectors.getChannelFundingState(sharedData, protocolState.channelId);
+  if (fundingState && !fundingState.directlyFunded) {
+    const latestCommitment = helpers.getLatestCommitment(protocolState.channelId, sharedData);
+    const ledgerId = helpers.getFundingChannelId(protocolState.channelId, sharedData);
+
+    const consensusUpdateResult = consensusUpdateInitialize(
+      protocolState.processId,
+      ledgerId,
+      false,
+      latestCommitment.allocation,
+      latestCommitment.destination,
+      sharedData,
+    );
+    sharedData = consensusUpdateResult.sharedData;
+    return {
+      protocolState: states.instigatorAcknowledgeConcludeReceived({
+        ...protocolState,
+        consensusUpdateState: consensusUpdateResult.protocolState,
+      }),
+      sharedData,
+    };
+  } else {
+    return {
+      protocolState: states.instigatorAcknowledgeConcludeReceived(protocolState),
+      sharedData,
+    };
+  }
 }
 
 function keepOpenChosen(protocolState: NonTerminalCState, sharedData: Storage): ReturnVal {
   if (protocolState.type !== 'ConcludingInstigator.AcknowledgeConcludeReceived') {
     return { protocolState, sharedData };
   }
-
-  const appChannel = getChannel(sharedData, protocolState.channelId);
-  if (!appChannel) {
-    throw new Error(`Could not find channel ${protocolState.channelId}`);
+  if (!protocolState.consensusUpdateState) {
+    throw new Error('Expected Consenus state to be defined.');
   }
-
-  sharedData = queueMessage(
+  const consensusUpdateResult = consensusUpdateReducer(
+    protocolState.consensusUpdateState,
     sharedData,
-    sendKeepLedgerChannelApproved(theirAddress(appChannel), protocolState.processId),
+    clearedToSend({
+      protocolLocator: CONSENSUS_UPDATE_PROTOCOL_LOCATOR,
+      processId: protocolState.processId,
+    }),
   );
-
-  if (protocolState.opponentSelectedKeepLedgerChannel) {
-    const ledgerId = helpers.getFundingChannelId(protocolState.channelId, sharedData);
-
-    const latestCommitment = getLastCommitment(appChannel);
-    const {
-      protocolState: consensusUpdateState,
-      sharedData: newSharedData,
-    } = consensusUpdateInitialize(
-      protocolState.processId,
-      ledgerId,
-      true, // TODO: Make use of cleared to send in concluding protocol
-      latestCommitment.allocation,
-      latestCommitment.destination,
-      sharedData,
-    );
+  sharedData = consensusUpdateResult.sharedData;
+  if (consensusUpdateResult.protocolState.type === 'ConsensusUpdate.Success') {
     return {
-      protocolState: states.instigatorWaitForLedgerUpdate({
+      protocolState: states.instigatorAcknowledgeSuccess(protocolState),
+      sharedData,
+    };
+  } else if (consensusUpdateResult.protocolState.type === 'ConsensusUpdate.Failure') {
+    return {
+      protocolState: states.instigatorAcknowledgeFailure({
         ...protocolState,
-        consensusUpdateState,
+        reason: 'LedgerUpdateFailed',
       }),
-      sharedData: newSharedData,
+      sharedData,
     };
   } else {
     return {
-      protocolState: states.instigatorWaitForOpponentSelection(protocolState),
+      protocolState: states.instigatorWaitForLedgerUpdate({
+        ...protocolState,
+        consensusUpdateState: consensusUpdateResult.protocolState,
+      }),
       sharedData,
     };
   }

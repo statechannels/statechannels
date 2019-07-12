@@ -15,11 +15,11 @@ import {
   checkAndStore,
 } from '../../../state';
 import { composeConcludeCommitment } from '../../../../utils/commitment-utils';
-import { ourTurn, getLastCommitment } from '../../../channel-store';
+import { ourTurn } from '../../../channel-store';
 import * as selectors from '../../../selectors';
 import * as channelStoreReducer from '../../../channel-store/reducer';
 import { theirAddress } from '../../../channel-store';
-import { sendCommitmentReceived, sendKeepLedgerChannelApproved } from '../../../../communication';
+import { sendCommitmentReceived } from '../../../../communication';
 import {
   showWallet,
   hideWallet,
@@ -33,7 +33,12 @@ import { failure, success } from '../states';
 import { ProtocolStateWithSharedData } from '../..';
 import * as helpers from '../../reducer-helpers';
 import { initializeConsensusUpdate, consensusUpdateReducer } from '../../consensus-update/';
-import { ConsensusUpdateAction, isConsensusUpdateAction } from '../../consensus-update/actions';
+import {
+  ConsensusUpdateAction,
+  isConsensusUpdateAction,
+  clearedToSend,
+} from '../../consensus-update/actions';
+import { CONSENSUS_UPDATE_PROTOCOL_LOCATOR } from '../../consensus-update/reducer';
 export type ReturnVal = ProtocolStateWithSharedData<states.ResponderConcludingState>;
 export type Storage = SharedData;
 
@@ -50,8 +55,6 @@ export function responderConcludingReducer(
   }
 
   switch (action.type) {
-    case 'WALLET.CONCLUDING.KEEP_LEDGER_CHANNEL_APPROVED':
-      return keepLedgerChannelApproved(protocolState, sharedData);
     case 'WALLET.CONCLUDING.RESPONDER.CONCLUDE_APPROVED':
       return concludeApproved(protocolState, sharedData);
     case 'WALLET.CONCLUDING.RESPONDER.DEFUND_CHOSEN':
@@ -108,8 +111,14 @@ function handleLedgerUpdateAction(
   sharedData: Storage,
   action: ConsensusUpdateAction,
 ): ReturnVal {
-  if (protocolState.type !== 'ConcludingResponder.WaitForLedgerUpdate') {
+  if (
+    protocolState.type !== 'ConcludingResponder.WaitForLedgerUpdate' &&
+    protocolState.type !== 'ConcludingResponder.DecideDefund'
+  ) {
     return { protocolState, sharedData };
+  }
+  if (!protocolState.consensusUpdateState) {
+    throw new Error('Expected Consensus State to be defined.');
   }
   const { protocolState: consensusUpdateState, sharedData: newSharedData } = consensusUpdateReducer(
     protocolState.consensusUpdateState,
@@ -131,10 +140,10 @@ function handleLedgerUpdateAction(
     };
   } else {
     return {
-      protocolState: states.waitForLedgerUpdate({
+      protocolState: {
         ...protocolState,
         consensusUpdateState,
-      }),
+      },
       sharedData: newSharedData,
     };
   }
@@ -145,60 +154,76 @@ function concludeApproved(protocolState: NonTerminalCState, sharedData: Storage)
     return { protocolState, sharedData };
   }
 
-  const channelState = getChannel(sharedData, protocolState.channelId);
-
-  if (channelState) {
-    const sharedDataWithOwnCommitment = createAndSendConcludeCommitment(
+  sharedData = createAndSendConcludeCommitment(
+    sharedData,
+    protocolState.processId,
+    protocolState.channelId,
+  );
+  const { processId, channelId } = protocolState;
+  const fundingState = selectors.getChannelFundingState(sharedData, protocolState.channelId);
+  if (fundingState && !fundingState.directlyFunded) {
+    const ledgerId = helpers.getFundingChannelId(protocolState.channelId, sharedData);
+    const lastestCommitment = helpers.getLatestCommitment(channelId, sharedData);
+    const consensusUpdateResult = initializeConsensusUpdate(
+      processId,
+      ledgerId,
+      false,
+      lastestCommitment.allocation,
+      lastestCommitment.destination,
       sharedData,
-      protocolState.processId,
-      protocolState.channelId,
     );
+    sharedData = consensusUpdateResult.sharedData;
     return {
-      protocolState: decideDefund({ ...protocolState, opponentHasSelected: false }),
-      sharedData: sharedDataWithOwnCommitment,
+      protocolState: decideDefund({
+        ...protocolState,
+        consensusUpdateState: consensusUpdateResult.protocolState,
+      }),
+      sharedData,
     };
-  } else {
-    return { protocolState, sharedData };
   }
+
+  return {
+    protocolState: states.decideDefund({
+      ...protocolState,
+    }),
+    sharedData,
+  };
 }
 
 function keepOpenChosen(protocolState: NonTerminalCState, sharedData: Storage): ReturnVal {
   if (protocolState.type !== 'ConcludingResponder.DecideDefund') {
     return { protocolState, sharedData };
   }
-  const ledgerId = helpers.getFundingChannelId(protocolState.channelId, sharedData);
-  const appChannel = getChannel(sharedData, protocolState.channelId);
-  if (!appChannel) {
-    throw new Error(`Could not find channel ${protocolState.channelId}`);
+  if (!protocolState.consensusUpdateState) {
+    throw new Error('Expected Consensus State to be defined.');
   }
-  sharedData = queueMessage(
+  const consensusUpdateResult = consensusUpdateReducer(
+    protocolState.consensusUpdateState,
     sharedData,
-    sendKeepLedgerChannelApproved(theirAddress(appChannel), protocolState.processId),
+    clearedToSend({
+      protocolLocator: CONSENSUS_UPDATE_PROTOCOL_LOCATOR,
+      processId: protocolState.processId,
+    }),
   );
-
-  if (protocolState.opponentHasSelected) {
-    const latestCommitment = getLastCommitment(appChannel);
-    const {
-      protocolState: consensusUpdateState,
-      sharedData: newSharedData,
-    } = initializeConsensusUpdate(
-      protocolState.processId,
-      ledgerId,
-      true, // TODO: Use cleared to send in concluding protocol
-      latestCommitment.allocation,
-      latestCommitment.destination,
+  sharedData = consensusUpdateResult.sharedData;
+  if (consensusUpdateResult.protocolState.type === 'ConsensusUpdate.Success') {
+    return {
+      protocolState: states.acknowledgeSuccess(protocolState),
       sharedData,
-    );
-    return {
-      protocolState: states.waitForLedgerUpdate({ ...protocolState, consensusUpdateState }),
-      sharedData: newSharedData,
     };
-  } else {
+  } else if (consensusUpdateResult.protocolState.type === 'ConsensusUpdate.Failure') {
     return {
-      protocolState: states.waitForOpponentSelection(protocolState),
+      protocolState: states.acknowledgeFailure({ ...protocolState, reason: 'LedgerUpdateFailed' }),
       sharedData,
     };
   }
+  return {
+    protocolState: states.waitForLedgerUpdate({
+      ...protocolState,
+      consensusUpdateState: consensusUpdateResult.protocolState,
+    }),
+    sharedData,
+  };
 }
 
 function defundChosen(protocolState: NonTerminalCState, sharedData: Storage): ReturnVal {
@@ -228,39 +253,6 @@ function acknowledged(protocolState: CState, sharedData: Storage): ReturnVal {
       return { protocolState, sharedData };
   }
 }
-function keepLedgerChannelApproved(protocolState: CState, sharedData: Storage) {
-  switch (protocolState.type) {
-    case 'ConcludingResponder.DecideDefund':
-      return {
-        protocolState: { ...protocolState, opponentSelectedKeepLedgerChannel: true },
-        sharedData,
-      };
-    case 'ConcludingResponder.WaitForOpponentSelection':
-      const ledgerId = helpers.getFundingChannelId(protocolState.channelId, sharedData);
-      const appChannel = getChannel(sharedData, protocolState.channelId);
-      if (!appChannel) {
-        throw new Error(`Could not find channel ${protocolState.channelId}`);
-      }
-      const latestCommitment = getLastCommitment(appChannel);
-      const {
-        protocolState: consensusUpdateState,
-        sharedData: newSharedData,
-      } = initializeConsensusUpdate(
-        protocolState.processId,
-        ledgerId,
-        true, // TODO: Use cleared to send in concluding protocol
-        latestCommitment.allocation,
-        latestCommitment.destination,
-        sharedData,
-      );
-      return {
-        protocolState: states.waitForLedgerUpdate({ ...protocolState, consensusUpdateState }),
-        sharedData: newSharedData,
-      };
-  }
-  return { protocolState, sharedData };
-}
-
 //  Helpers
 const createAndSendConcludeCommitment = (
   sharedData: SharedData,

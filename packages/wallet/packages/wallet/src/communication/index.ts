@@ -7,7 +7,6 @@ import {
   commitmentReceived,
   concludeInstigated,
   ConcludeInstigated,
-  keepLedgerChannelApproved,
   commitmentsReceived,
 } from './actions';
 export * from './actions';
@@ -36,10 +35,6 @@ export function sendStrategyApproved(to: string, processId: string) {
 
 export function sendConcludeInstigated(to: string, channelId, signedCommitment: SignedCommitment) {
   return sendMessage(to, concludeInstigated({ signedCommitment, channelId }));
-}
-
-export function sendKeepLedgerChannelApproved(to: string, processId: string) {
-  return sendMessage(to, keepLedgerChannelApproved({ processId }));
 }
 
 export const sendCommitmentReceived = (

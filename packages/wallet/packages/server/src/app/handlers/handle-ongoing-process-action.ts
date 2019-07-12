@@ -24,7 +24,6 @@ export async function handleOngoingProcessAction(ctx) {
   switch (action.type) {
     case 'WALLET.NEW_PROCESS.CONCLUDE_INSTIGATED':
     case 'WALLET.FUNDING.STRATEGY_APPROVED':
-    case 'WALLET.CONCLUDING.KEEP_LEDGER_CHANNEL_APPROVED':
     case 'WALLET.NEW_PROCESS.DEFUND_REQUESTED':
     case 'WALLET.MULTIPLE_RELAYABLE_ACTIONS':
       return ctx;

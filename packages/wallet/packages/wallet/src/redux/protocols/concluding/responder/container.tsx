@@ -9,7 +9,6 @@ import { ConsensusUpdate } from '../../consensus-update/container';
 import { defundRequested } from '../../actions';
 import { multipleWalletActions } from '../../../../redux/actions';
 import ApproveX from '../../shared-components/approve-x';
-import WaitForOtherPlayer from '../../shared-components/wait-for-other-player';
 
 interface Props {
   state: NonTerminalConcludingState;
@@ -66,13 +65,7 @@ class ConcludingContainer extends PureComponent<Props> {
         );
       case 'ConcludingResponder.WaitForLedgerUpdate':
         return <ConsensusUpdate state={state.consensusUpdateState} />;
-      case 'ConcludingResponder.WaitForOpponentSelection':
-        return (
-          <WaitForOtherPlayer
-            actionDescriptor={'decision about defunding'}
-            channelId={state.channelId}
-          />
-        );
+
       default:
         return unreachable(state);
     }
