@@ -1,10 +1,10 @@
-var Commitment = artifacts.require('./Commitment.sol');
-var Rules = artifacts.require('./Rules.sol');
-var CountingCommitment = artifacts.require('./CountingCommitment.sol');
-var CountingApp = artifacts.require('./CountingApp.sol');
-var ConsensusCommitment = artifacts.require('./ConsensusCommitment.sol');
-var ConsensusApp = artifacts.require('./ConsensusApp.sol');
-var NitroAdjudicator = artifacts.require('./NitroAdjudicator.sol');
+var Commitment = artifacts.require('Commitment');
+var Rules = artifacts.require('Rules');
+var CountingCommitment = artifacts.require('CountingCommitment');
+var CountingApp = artifacts.require('CountingApp');
+var ConsensusCommitment = artifacts.require('ConsensusCommitment');
+var ConsensusApp = artifacts.require('ConsensusApp');
+var TestNitroAdjudicator = artifacts.require('TestNitroAdjudicator');
 var testERC20 = artifacts.require('testERC20');
 
 module.exports = function(deployer) {
@@ -29,9 +29,9 @@ module.exports = function(deployer) {
   deployer.link(ConsensusCommitment, ConsensusApp);
   deployer.deploy(ConsensusApp);
 
-  deployer.link(Commitment, NitroAdjudicator);
-  deployer.link(Rules, NitroAdjudicator);
-  deployer.deploy(NitroAdjudicator);
+  deployer.link(Commitment, TestNitroAdjudicator);
+  deployer.link(Rules, TestNitroAdjudicator);
+  deployer.deploy(TestNitroAdjudicator);
 
   deployer.deploy(testERC20);
 };
