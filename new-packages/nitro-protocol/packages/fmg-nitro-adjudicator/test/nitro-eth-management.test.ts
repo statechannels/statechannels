@@ -560,7 +560,7 @@ describe('Nitro (ETH management)', () => {
     });
   });
 
-  describe('Using setOutcome test method', () => {
+  describe('Using setOutcome public test method (from wrapper)', () => {
     const allocationOutcome = {
       destination: [alice.address, bob.address],
       allocation,
@@ -577,6 +577,43 @@ describe('Nitro (ETH management)', () => {
     it('sets outcome', async () => {
       const setOutcome = await nitro.getOutcome(getChannelID(ledgerChannel));
       expect(getOutcomeFromParameters(setOutcome)).toMatchObject(allocationOutcome);
+    });
+  });
+  describe('Using affords public test method (from wrapper)', () => {
+    const outcome = {
+      destination: [alice.address, bob.address],
+      allocation,
+      finalizedAt: ethers.utils.bigNumberify(0),
+      challengeCommitment: getEthersObjectForCommitment(commitment0),
+      token: [AddressZero, AddressZero],
+    };
+    it('returns funding when funding is less than the amount allocated to the recipient in the outcome', async () => {
+      const recipient = alice.address;
+      const funding = ethers.utils.bigNumberify(2);
+      expect(await nitro.affordsPub(recipient, outcome, funding)).toEqual(funding);
+    });
+
+    it('returns funding when funding is equal to the amount allocated to the recipient in the outcome', async () => {
+      const recipient = alice.address;
+      const funding = aBal;
+      expect((await nitro.affordsPub(recipient, outcome, funding)).toHexString()).toEqual(funding);
+    });
+
+    it('returns the allocated amount when funding is greater than the amount allocated to the recipient in the outcome', async () => {
+      const recipient = alice.address;
+      const funding = bigNumberify(aBal)
+        .add(1)
+        .toHexString();
+      expect((await nitro.affordsPub(recipient, outcome, funding)).toHexString()).toEqual(aBal);
+    });
+
+    it('returns zero when recipient is not a participant', async () => {
+      const recipient = aliceDest.address;
+      const funding = bigNumberify(aBal)
+        .add(1)
+        .toHexString();
+      const zero = ethers.utils.bigNumberify(0);
+      expect(await nitro.affordsPub(recipient, outcome, funding)).toEqual(zero);
     });
   });
 });

@@ -795,7 +795,7 @@ describe('nitroAdjudicator', () => {
         expect(await nitro.affordsPub(recipient, outcome, funding)).toEqual(funding);
       });
 
-      it('returns funding when funding is equal to than the amount allocated to the recipient in the outcome', async () => {
+      it('returns funding when funding is equal to the amount allocated to the recipient in the outcome', async () => {
         const recipient = alice.address;
         const outcome = {
           destination: [alice.address, bob.address],
