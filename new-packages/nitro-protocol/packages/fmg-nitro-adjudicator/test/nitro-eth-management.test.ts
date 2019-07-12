@@ -76,6 +76,7 @@ const getOutcomeFromParameters = (parameters: any[]) => {
     finalizedAt: ethers.utils.bigNumberify(parameters[1]),
     challengeCommitment: asEthersObject(fromParameters(parameters[2])),
     allocation: parameters[3].map(a => a.toHexString()),
+    token: parameters[4],
   };
   return outcome;
 };
@@ -556,6 +557,26 @@ describe('Nitro (ETH management)', () => {
       expect(Number(await nitro.holdings(recipient, AddressZero))).toEqual(
         startBalRecipient + claimAmount,
       );
+    });
+  });
+
+  describe('Using setOutcome test method', () => {
+    const allocationOutcome = {
+      destination: [alice.address, bob.address],
+      allocation,
+      finalizedAt: ethers.utils.bigNumberify(0),
+      challengeCommitment: getEthersObjectForCommitment(commitment0),
+      token: [AddressZero, AddressZero],
+    };
+
+    it('tx succeeds', async () => {
+      const tx = await nitro.setOutcome(getChannelID(ledgerChannel), allocationOutcome);
+      const receipt = await tx.wait();
+      expect(receipt.status).toEqual(1);
+    });
+    it('sets outcome', async () => {
+      const setOutcome = await nitro.getOutcome(getChannelID(ledgerChannel));
+      expect(getOutcomeFromParameters(setOutcome)).toMatchObject(allocationOutcome);
     });
   });
 });
