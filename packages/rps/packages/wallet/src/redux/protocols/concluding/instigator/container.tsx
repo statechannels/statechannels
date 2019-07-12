@@ -67,13 +67,6 @@ class ConcludingContainer extends PureComponent<Props> {
         );
       case 'ConcludingInstigator.WaitForLedgerUpdate':
         return <ConsensusUpdate state={state.consensusUpdateState} />;
-      case 'ConcludingInstigator.WaitForOpponentSelection':
-        return (
-          <WaitForOtherPlayer
-            actionDescriptor={'decision about defunding the ledger channel'}
-            channelId={state.channelId}
-          />
-        );
       default:
         return unreachable(state);
     }

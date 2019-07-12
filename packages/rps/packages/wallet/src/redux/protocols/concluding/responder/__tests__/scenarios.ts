@@ -16,7 +16,6 @@ import {
   setFundingState as setFundingStateAlt,
 } from '../../../indirect-defunding/__tests__/scenarios';
 import { twoPlayerPreSuccessA, twoPlayerPreSuccessB } from '../../../consensus-update/__tests__';
-import { keepLedgerChannelApproved } from '../../../../../communication';
 
 // -----------------
 // Channel Scenarios
@@ -78,14 +77,17 @@ const indirectFundedSecondConcludeReceived = {
 // States
 // ------
 const approveConcluding = states.approveConcluding(defaults);
-const decideDefund = states.decideDefund({ ...defaults, opponentHasSelected: false });
+const decideDefund = states.decideDefund({
+  ...defaults,
+  consensusUpdateState: twoPlayerPreSuccessB.state,
+});
 
 const acknowledgeSuccess = states.acknowledgeSuccess(defaults);
 const waitForLedgerUpdate = states.waitForLedgerUpdate({
   ...defaults,
   consensusUpdateState: twoPlayerPreSuccessB.state,
 });
-const waitForOpponentResponse = states.waitForOpponentSelection(defaults);
+
 // -------
 // Actions
 // -------
@@ -93,7 +95,6 @@ const concludeSent = actions.concludeApproved({ processId });
 const defundChosen = actions.defundChosen({ processId });
 const acknowledged = actions.acknowledged({ processId });
 const keepOpenChosen = actions.keepOpenChosen({ processId });
-const opponentSelectedKeepOpen = keepLedgerChannelApproved({ processId });
 
 // -------
 // Scenarios
@@ -122,11 +123,6 @@ export const noDefundingHappyPath = {
     state: decideDefund,
     sharedData: indirectFundedSecondConcludeReceived,
     action: keepOpenChosen,
-  },
-  waitForOpponentResponse: {
-    state: waitForOpponentResponse,
-    sharedData: indirectFundedSecondConcludeReceived,
-    action: opponentSelectedKeepOpen,
   },
   waitForLedgerUpdate: {
     state: waitForLedgerUpdate,
