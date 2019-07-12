@@ -4,32 +4,8 @@ import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "fmg-core/contracts/Commitment.sol";
 import "fmg-core/contracts/Rules.sol";
 
-contract IERC20 {
-    function totalSupply() public view returns (uint);
-    function balanceOf(address tokenOwner) public view returns (uint balance);
-    function allowance(address tokenOwner, address spender) public view returns (uint remaining);
-    function transfer(address to, uint tokens) public returns (bool success);
-    function approve(address spender, uint tokens) public returns (bool success);
-    function transferFrom(address from, address to, uint tokens) public returns (bool success);
-    event Transfer(address indexed from, address indexed to, uint tokens);
-    event Approval(address indexed tokenOwner, address indexed spender, uint tokens);
-}
-
 contract NitroAdjudicator {
     using Commitment for Commitment.CommitmentStruct;
-    using SafeMath for uint;
-
-    struct Authorization {
-        // Prevents replay attacks:
-        // It's required that the participant signs the message, meaning only
-        // the participant can authorize a withdrawal.
-        // Moreover, the participant should sign the address that they wish
-        // to send the transaction from, preventing any replay attack.
-        address participant; // the account used to sign commitment transitions
-        address destination; // either an account or a channel
-        uint amount;
-        address sender; // the account used to sign transactions
-    }
 
     struct Outcome {
         address[] destination;
@@ -55,257 +31,12 @@ contract NitroAdjudicator {
         Signature ultimateSignature;
     }
 
-    mapping(address => mapping(address => uint)) public holdings;
+
     mapping(address => Outcome) public outcomes;
-    address private constant zeroAddress = address(0);
 
     // TODO: Challenge duration should depend on the channel
     uint constant CHALLENGE_DURATION = 5 minutes;
 
-    // **************
-    // ETH and Token Management
-    // **************
-
-
-function deposit(address destination, uint expectedHeld,
- uint amount, address token) public payable {
-       if (token == zeroAddress) {
-        require(msg.value == amount, "Insufficient ETH for ETH deposit");
-        } else {
-            IERC20 _token = IERC20(token);
-            require(_token.transferFrom(msg.sender,address(this),amount), 'Could not deposit ERC20s');
-            }
-
-        uint amountDeposited;
-        // This protects against a directly funded channel being defunded due to chain re-orgs,
-        // and allow a wallet implementation to ensure the safety of deposits.
-        require(
-            holdings[destination][token] >= expectedHeld,
-            "Deposit: holdings[destination][token] is less than expected"
-        );
-
-        // If I expect there to be 10 and deposit 2, my goal was to get the
-        // balance to 12.
-        // In case some arbitrary person deposited 1 eth before I noticed, making the
-        // holdings 11, I should be refunded 1.
-        if (holdings[destination][token] == expectedHeld) {
-            amountDeposited = amount;
-        } else if (holdings[destination][token] < expectedHeld.add(amount)) {
-            amountDeposited = expectedHeld.add(amount).sub(holdings[destination][token]);
-        } else {
-            amountDeposited = 0;
-        }
-        holdings[destination][token] = holdings[destination][token].add(amountDeposited);
-        if (amountDeposited < amount) {
-            // refund whatever wasn't deposited.
-            if (token == zeroAddress) {
-              msg.sender.transfer(amount - amountDeposited); // TODO use safeMath here
-          }
-            else {
-                IERC20 _token = IERC20(token);
-                _token.transfer(msg.sender, amount - amountDeposited); // TODO use safeMath here
-                // TODO compute amountDeposited *before* calling into erc20 contract, so we only need 1 call not 2
-                }
-        }
-        emit Deposited(destination, amountDeposited, holdings[destination][token]);
-    }
-
-    function transferAndWithdraw(address channel,
-        address participant,
-        address payable destination,
-        uint amount,
-        address token,
-        uint8 _v,
-        bytes32 _r,
-        bytes32 _s
-    ) public payable {
-        transfer(channel, participant, amount, token);
-        withdraw(participant, destination, amount, token, _v, _r ,_s);
-    }
-
-    function withdraw(address participant,
-        address payable destination,
-        uint amount,
-        address token,
-        uint8 _v,
-        bytes32 _r,
-        bytes32 _s
-    ) public payable {
-        require(
-            holdings[participant][token] >= amount,
-            "Withdraw: overdrawn"
-        );
-        Authorization memory authorization = Authorization(
-            participant,
-            destination,
-            amount,
-            msg.sender
-        );
-
-        require(
-            recoverSigner(abi.encode(authorization), _v, _r, _s) == participant,
-            "Withdraw: not authorized by participant"
-        );
-
-        holdings[participant][token] = holdings[participant][token].sub(amount);
-        // Decrease holdings before calling to token contract (protect against reentrancy)
-        if (token == zeroAddress) {destination.transfer(amount);}
-        else {
-            IERC20 _token = IERC20(token);
-            _token.transfer(destination,amount);
-            }
-
-    }
-
-    function transfer(address channel, address destination, uint amount, address token) public {
-        require(
-            outcomes[channel].challengeCommitment.guaranteedChannel == zeroAddress,
-            "Transfer: channel must be a ledger channel"
-        );
-        require(
-            outcomes[channel].finalizedAt <= now,
-            "Transfer: outcome must be final"
-        );
-        require(
-            outcomes[channel].finalizedAt > 0,
-            "Transfer: outcome must be present"
-        );
-
-        uint channelAffordsForDestination = affords(destination, outcomes[channel], holdings[channel][token]);
-
-        require(
-            amount <= channelAffordsForDestination,
-            "Transfer: channel cannot afford the requested transfer amount"
-        );
-
-        holdings[destination][token] = holdings[destination][token] + amount;
-        holdings[channel][token] = holdings[channel][token] - amount;
-
-        outcomes[channel] = reduce(outcomes[channel], destination, amount, token);
-    }
-
-    function claim(address guarantor, address recipient, uint amount, address token) public {
-        Outcome memory guarantee = outcomes[guarantor];
-        require(
-            guarantee.challengeCommitment.guaranteedChannel != zeroAddress,
-            "Claim: a guarantee channel is required"
-        );
-
-        require(
-            isChannelClosed(guarantor),
-            "Claim: channel must be closed"
-        );
-
-        uint funding = holdings[guarantor][token];
-        Outcome memory reprioritizedOutcome = reprioritize(
-            outcomes[guarantee.challengeCommitment.guaranteedChannel],
-            guarantee
-        );
-        if (affords(recipient, reprioritizedOutcome, funding) >= amount) {
-            outcomes[guarantee.challengeCommitment.guaranteedChannel] = reduce(
-                outcomes[guarantee.challengeCommitment.guaranteedChannel],
-                recipient,
-                amount,
-                token
-            );
-            holdings[guarantor][token] = holdings[guarantor][token].sub(amount);
-            holdings[recipient][token] = holdings[recipient][token].add(amount);
-        } else {
-            revert('Claim: guarantor must be sufficiently funded');
-        }
-    }
-
-    // ********************
-    // ETH and Token Management Logic
-    // ********************
-
-    function reprioritize(
-        Outcome memory allocation,
-        Outcome memory guarantee
-    ) internal pure returns (Outcome memory) {
-        require(
-            guarantee.challengeCommitment.guaranteedChannel != zeroAddress,
-            "Claim: a guarantee channel is required"
-        );
-        address[] memory newDestination = new address[](guarantee.destination.length);
-        uint[] memory newAllocation = new uint[](guarantee.destination.length);
-        for (uint aIdx = 0; aIdx < allocation.destination.length; aIdx++) {
-            for (uint gIdx = 0; gIdx < guarantee.destination.length; gIdx++) {
-                if (guarantee.destination[gIdx] == allocation.destination[aIdx]) {
-                    newDestination[gIdx] = allocation.destination[aIdx];
-                    newAllocation[gIdx] = allocation.allocation[aIdx];
-                    break;
-                }
-            }
-        }
-
-        return Outcome(
-            newDestination,
-            allocation.finalizedAt,
-            allocation.challengeCommitment,
-            newAllocation,
-            allocation.token
-        );
-    }
-
-    function affords(
-        address recipient,
-        Outcome memory outcome,
-        uint funding
-    ) internal pure returns (uint256) {
-        uint result = 0;
-        uint remainingFunding = funding;
-
-        for (uint i = 0; i < outcome.destination.length; i++) {
-            if (remainingFunding <= 0) {
-                break;
-            }
-
-            if (outcome.destination[i] == recipient) {
-                // It is technically allowed for a recipient to be listed in the
-                // outcome multiple times, so we must iterate through the entire
-                // array.
-                result = result.add(min(outcome.allocation[i], remainingFunding));
-            }
-            if (remainingFunding > outcome.allocation[i]){
-                remainingFunding = remainingFunding.sub(outcome.allocation[i]);
-            }else{
-                remainingFunding = 0;
-            }
-        }
-
-        return result;
-    }
-
-    function reduce(
-        Outcome memory outcome,
-        address recipient,
-        uint amount,
-        address token
-    ) internal pure returns (Outcome memory) {
-        // TODO only reduce entries corresponding to token argument
-        uint256[] memory updatedAllocation = outcome.allocation;
-        uint256 reduction = 0;
-        uint remainingAmount = amount;
-        for (uint i = 0; i < outcome.destination.length; i++) {
-            if (outcome.destination[i] == recipient) {
-                // It is technically allowed for a recipient to be listed in the
-                // outcome multiple times, so we must iterate through the entire
-                // array.
-                reduction = reduction.add(min(outcome.allocation[i], remainingAmount));
-                remainingAmount = remainingAmount.sub(reduction);
-                updatedAllocation[i] = updatedAllocation[i].sub(reduction);
-            }
-        }
-
-        return Outcome(
-            outcome.destination,
-            outcome.finalizedAt,
-            outcome.challengeCommitment, // Once the outcome is finalized,
-            updatedAllocation,
-            outcome.token
-        );
-    }
 
     // ****************
     // ForceMove Events
@@ -320,15 +51,16 @@ function deposit(address destination, uint expectedHeld,
     event Refuted(address channelId, Commitment.CommitmentStruct refutation);
     event RespondedWithMove(address channelId, Commitment.CommitmentStruct response, uint8 v, bytes32 r, bytes32 ss);
     event RespondedWithAlternativeMove(Commitment.CommitmentStruct alternativeResponse);
-    event Deposited(address destination, uint256 amountDeposited, uint256 destinationHoldings);
+
     // **********************
     // ForceMove Protocol API
     // **********************
 
-    // function conclude(ConclusionProof memory proof) public {
-    //     _conclude(proof);
-    // }
+    function conclude(ConclusionProof memory proof) public {
+        _conclude(proof);
+    }
 
+    // TODO this function should be moved to NitroVault
     // function concludeAndWithdraw(ConclusionProof memory proof,
     //     address participant,
     //     address payable destination,
@@ -349,178 +81,178 @@ function deposit(address destination, uint expectedHeld,
     //     withdraw(participant,destination, amount, token, _v,_r,_s);
     // }
 
-    // function forceMove(
-    //     Commitment.CommitmentStruct memory agreedCommitment,
-    //     Commitment.CommitmentStruct memory challengeCommitment,
-    //     Signature[] memory signatures
-    // ) public {
-    //     require(
-    //         !isChannelClosed(agreedCommitment.channelId()),
-    //         "ForceMove: channel must be open"
-    //     );
-    //     require(
-    //         moveAuthorized(agreedCommitment, signatures[0]),
-    //         "ForceMove: agreedCommitment not authorized"
-    //     );
-    //     require(
-    //         moveAuthorized(challengeCommitment, signatures[1]),
-    //         "ForceMove: challengeCommitment not authorized"
-    //     );
-    //     require(
-    //         Rules.validTransition(agreedCommitment, challengeCommitment),
-    //         "ForceMove: Invalid transition"
-    //     );
+    function forceMove(
+        Commitment.CommitmentStruct memory agreedCommitment,
+        Commitment.CommitmentStruct memory challengeCommitment,
+        Signature[] memory signatures
+    ) public {
+        require(
+            !isChannelClosed(agreedCommitment.channelId()),
+            "ForceMove: channel must be open"
+        );
+        require(
+            moveAuthorized(agreedCommitment, signatures[0]),
+            "ForceMove: agreedCommitment not authorized"
+        );
+        require(
+            moveAuthorized(challengeCommitment, signatures[1]),
+            "ForceMove: challengeCommitment not authorized"
+        );
+        require(
+            Rules.validTransition(agreedCommitment, challengeCommitment),
+            "ForceMove: Invalid transition"
+        );
 
-    //     address channelId = agreedCommitment.channelId();
+        address channelId = agreedCommitment.channelId();
 
-    //     outcomes[channelId] = Outcome(
-    //         challengeCommitment.participants,
-    //         now + CHALLENGE_DURATION,
-    //         challengeCommitment,
-    //         challengeCommitment.allocation,
-    //         challengeCommitment.token
-    //     );
+        outcomes[channelId] = Outcome(
+            challengeCommitment.participants,
+            now + CHALLENGE_DURATION,
+            challengeCommitment,
+            challengeCommitment.allocation,
+            challengeCommitment.token
+        );
 
-    //     emit ChallengeCreated(
-    //         channelId,
-    //         challengeCommitment,
-    //         now + CHALLENGE_DURATION
-    //     );
-    // }
+        emit ChallengeCreated(
+            channelId,
+            challengeCommitment,
+            now + CHALLENGE_DURATION
+        );
+    }
 
-    // function refute(Commitment.CommitmentStruct memory refutationCommitment, Signature memory signature) public {
-    //     address channel = refutationCommitment.channelId();
-    //     require(
-    //         !isChannelClosed(channel),
-    //         "Refute: channel must be open"
-    //     );
+    function refute(Commitment.CommitmentStruct memory refutationCommitment, Signature memory signature) public {
+        address channel = refutationCommitment.channelId();
+        require(
+            !isChannelClosed(channel),
+            "Refute: channel must be open"
+        );
 
-    //     require(
-    //         moveAuthorized(refutationCommitment, signature),
-    //         "Refute: move must be authorized"
-    //     );
+        require(
+            moveAuthorized(refutationCommitment, signature),
+            "Refute: move must be authorized"
+        );
 
-    //     require(
-    //         Rules.validRefute(outcomes[channel].challengeCommitment, refutationCommitment, signature.v, signature.r, signature.s),
-    //         "Refute: must be a valid refute"
-    //     );
+        require(
+            Rules.validRefute(outcomes[channel].challengeCommitment, refutationCommitment, signature.v, signature.r, signature.s),
+            "Refute: must be a valid refute"
+        );
 
-    //     emit Refuted(channel, refutationCommitment);
-    //     Outcome memory updatedOutcome = Outcome(
-    //         outcomes[channel].destination,
-    //         0,
-    //         refutationCommitment,
-    //         refutationCommitment.allocation,
-    //         refutationCommitment.token
-    //     );
-    //     outcomes[channel] = updatedOutcome;
-    // }
+        emit Refuted(channel, refutationCommitment);
+        Outcome memory updatedOutcome = Outcome(
+            outcomes[channel].destination,
+            0,
+            refutationCommitment,
+            refutationCommitment.allocation,
+            refutationCommitment.token
+        );
+        outcomes[channel] = updatedOutcome;
+    }
 
-    // function respondWithMove(Commitment.CommitmentStruct memory responseCommitment, Signature memory signature) public {
-    //     address channel = responseCommitment.channelId();
-    //     require(
-    //         !isChannelClosed(channel),
-    //         "RespondWithMove: channel must be open"
-    //     );
+    function respondWithMove(Commitment.CommitmentStruct memory responseCommitment, Signature memory signature) public {
+        address channel = responseCommitment.channelId();
+        require(
+            !isChannelClosed(channel),
+            "RespondWithMove: channel must be open"
+        );
 
-    //     require(
-    //         moveAuthorized(responseCommitment, signature),
-    //         "RespondWithMove: move must be authorized"
-    //     );
+        require(
+            moveAuthorized(responseCommitment, signature),
+            "RespondWithMove: move must be authorized"
+        );
 
-    //     require(
-    //         Rules.validRespondWithMove(outcomes[channel].challengeCommitment, responseCommitment, signature.v, signature.r, signature.s),
-    //         "RespondWithMove: must be a valid response"
-    //     );
+        require(
+            Rules.validRespondWithMove(outcomes[channel].challengeCommitment, responseCommitment, signature.v, signature.r, signature.s),
+            "RespondWithMove: must be a valid response"
+        );
 
-    //     emit RespondedWithMove(channel, responseCommitment, signature.v, signature.r, signature.s);
+        emit RespondedWithMove(channel, responseCommitment, signature.v, signature.r, signature.s);
 
-    //     Outcome memory updatedOutcome = Outcome(
-    //         outcomes[channel].destination,
-    //         0,
-    //         responseCommitment,
-    //         responseCommitment.allocation,
-    //         responseCommitment.token
-    //     );
-    //     outcomes[channel] = updatedOutcome;
-    // }
+        Outcome memory updatedOutcome = Outcome(
+            outcomes[channel].destination,
+            0,
+            responseCommitment,
+            responseCommitment.allocation,
+            responseCommitment.token
+        );
+        outcomes[channel] = updatedOutcome;
+    }
 
-    // function alternativeRespondWithMove(
-    //     Commitment.CommitmentStruct memory _alternativeCommitment,
-    //     Commitment.CommitmentStruct memory _responseCommitment,
-    //     Signature memory _alternativeSignature,
-    //     Signature memory _responseSignature
-    // )
-    //   public
-    // {
-    //     address channel = _responseCommitment.channelId();
-    //     require(
-    //         !isChannelClosed(channel),
-    //         "AlternativeRespondWithMove: channel must be open"
-    //     );
+    function alternativeRespondWithMove(
+        Commitment.CommitmentStruct memory _alternativeCommitment,
+        Commitment.CommitmentStruct memory _responseCommitment,
+        Signature memory _alternativeSignature,
+        Signature memory _responseSignature
+    )
+      public
+    {
+        address channel = _responseCommitment.channelId();
+        require(
+            !isChannelClosed(channel),
+            "AlternativeRespondWithMove: channel must be open"
+        );
 
-    //     require(
-    //         moveAuthorized(_responseCommitment, _responseSignature),
-    //         "AlternativeRespondWithMove: move must be authorized"
-    //     );
+        require(
+            moveAuthorized(_responseCommitment, _responseSignature),
+            "AlternativeRespondWithMove: move must be authorized"
+        );
 
-    //     uint8[] memory v = new uint8[](2);
-    //     v[0] = _alternativeSignature.v;
-    //     v[1] = _responseSignature.v;
+        uint8[] memory v = new uint8[](2);
+        v[0] = _alternativeSignature.v;
+        v[1] = _responseSignature.v;
 
-    //     bytes32[] memory r = new bytes32[](2);
-    //     r[0] = _alternativeSignature.r;
-    //     r[1] = _responseSignature.r;
+        bytes32[] memory r = new bytes32[](2);
+        r[0] = _alternativeSignature.r;
+        r[1] = _responseSignature.r;
 
-    //     bytes32[] memory s = new bytes32[](2);
-    //     s[0] = _alternativeSignature.s;
-    //     s[1] = _responseSignature.s;
+        bytes32[] memory s = new bytes32[](2);
+        s[0] = _alternativeSignature.s;
+        s[1] = _responseSignature.s;
 
 
-    //     require(
-    //         Rules.validAlternativeRespondWithMove(
-    //             outcomes[channel].challengeCommitment,
-    //             _alternativeCommitment,
-    //             _responseCommitment,
-    //             v,
-    //             r,
-    //             s
-    //         ),
-    //         "RespondWithMove: must be a valid response"
-    //     );
+        require(
+            Rules.validAlternativeRespondWithMove(
+                outcomes[channel].challengeCommitment,
+                _alternativeCommitment,
+                _responseCommitment,
+                v,
+                r,
+                s
+            ),
+            "RespondWithMove: must be a valid response"
+        );
 
-    //     emit RespondedWithAlternativeMove(_responseCommitment);
+        emit RespondedWithAlternativeMove(_responseCommitment);
 
-    //     Outcome memory updatedOutcome = Outcome(
-    //         outcomes[channel].destination,
-    //         0,
-    //         _responseCommitment,
-    //         _responseCommitment.allocation,
-    //         _responseCommitment.token
-    //     );
-    //     outcomes[channel] = updatedOutcome;
-    // }
+        Outcome memory updatedOutcome = Outcome(
+            outcomes[channel].destination,
+            0,
+            _responseCommitment,
+            _responseCommitment.allocation,
+            _responseCommitment.token
+        );
+        outcomes[channel] = updatedOutcome;
+    }
 
-    // // ************************
-    // // ForceMove Protocol Logic
-    // // ************************
+    // ************************
+    // ForceMove Protocol Logic
+    // ************************
 
-    // function _conclude(ConclusionProof memory proof) internal {
-    //     address channelId = proof.penultimateCommitment.channelId();
-    //     require(
-    //         (outcomes[channelId].finalizedAt > now || outcomes[channelId].finalizedAt == 0),
-    //         "Conclude: channel must not be finalized"
-    //     );
+    function _conclude(ConclusionProof memory proof) internal {
+        address channelId = proof.penultimateCommitment.channelId();
+        require(
+            (outcomes[channelId].finalizedAt > now || outcomes[channelId].finalizedAt == 0),
+            "Conclude: channel must not be finalized"
+        );
 
-    //     outcomes[channelId] = Outcome(
-    //         proof.penultimateCommitment.destination,
-    //         now,
-    //         proof.penultimateCommitment,
-    //         proof.penultimateCommitment.allocation,
-    //         proof.penultimateCommitment.token
-    //     );
-    //     emit Concluded(channelId);
-    // }
+        outcomes[channelId] = Outcome(
+            proof.penultimateCommitment.destination,
+            now,
+            proof.penultimateCommitment,
+            proof.penultimateCommitment.allocation,
+            proof.penultimateCommitment.token
+        );
+        emit Concluded(channelId);
+    }
 
     // ****************
     // Helper functions
