@@ -56,21 +56,6 @@ let ledgerChannel: Channel;
 describe('Nitro (ETH deposit and withdrawal)', () => {
   let networkId;
 
-  //   let guarantor: ethers.Wallet;
-  //   let commitment0;
-  //   let commitment1;
-  //   let commitment2;
-  //   let commitment3;
-  //   let commitment4;
-  //   let commitment4alt: CoreCommitment;
-  //   let commitment5;
-  //   let commitment5alt: CoreCommitment;
-  //   let guarantorCommitment;
-
-  //   let commitment1alt;
-  //   let commitment2alt;
-  //   let conclusionProof;
-
   // ETH management
   // ========================
 
@@ -88,82 +73,11 @@ describe('Nitro (ETH deposit and withdrawal)', () => {
       nonce: 0,
       participants,
     };
-
-    // guarantorChannel = {
-    //   ...ledgerChannel,
-    //   guaranteedChannel: getChannelID(ledgerChannel),
-    // };
-
-    // const defaults = {
-    //   channel: ledgerChannel,
-    //   appCounter: new BigNumber(0).toHexString(),
-    //   destination,
-    //   allocation,
-    //   token: [AddressZero, AddressZero],
-    //   commitmentCount: 1,
-    // };
-
-    // const guarantorDefaults = {
-    //   ...defaults,
-    //   channel: guarantorChannel,
-    // };
-
-    // commitment0 = CountingApp.createCommitment.app({
-    //   ...defaults,
-    //   appCounter: new BigNumber(1).toHexString(),
-    //   turnNum: 6,
-    // });
-    // commitment1 = CountingApp.createCommitment.app({
-    //   ...defaults,
-    //   turnNum: 7,
-    //   appCounter: new BigNumber(2).toHexString(),
-    // });
-    // commitment2 = CountingApp.createCommitment.app({
-    //   ...defaults,
-    //   turnNum: 8,
-    //   appCounter: new BigNumber(3).toHexString(),
-    // });
-    // commitment3 = CountingApp.createCommitment.app({
-    //   ...defaults,
-    //   turnNum: 9,
-    //   appCounter: new BigNumber(4).toHexString(),
-    // });
-    // commitment4 = CountingApp.createCommitment.conclude({
-    //   ...defaults,
-    //   turnNum: 10,
-    //   appCounter: new BigNumber(5).toHexString(),
-    // });
-    // commitment5 = CountingApp.createCommitment.conclude({
-    //   ...defaults,
-    //   turnNum: 11,
-    //   appCounter: new BigNumber(6).toHexString(),
-    // });
-    // commitment1alt = CountingApp.createCommitment.app({
-    //   ...defaults,
-    //   channel: ledgerChannel,
-    //   allocation: differentAllocation,
-    //   turnNum: 7,
-    //   appCounter: new BigNumber(2).toHexString(),
-    // });
-    // commitment2alt = CountingApp.createCommitment.app({
-    //   ...defaults,
-    //   channel: ledgerChannel,
-    //   allocation: differentAllocation,
-    //   turnNum: 8,
-    //   appCounter: new BigNumber(3).toHexString(),
-    // });
-    // guarantorCommitment = CountingApp.createCommitment.app({
-    //   ...guarantorDefaults,
-    //   appCounter: new BigNumber(1).toHexString(),
-    //   turnNum: 6,
-    // });
   });
 
   describe('Depositing ETH (msg.value = amount , expectedHeld = 0)', () => {
     let tx;
-    // let tx2;
     let receipt;
-    // let receipt2;
     const randomAddress = ethers.Wallet.createRandom().address;
 
     it('Transaction succeeds', async () => {
@@ -171,12 +85,7 @@ describe('Nitro (ETH deposit and withdrawal)', () => {
         value: DEPOSIT_AMOUNT,
       });
       receipt = await tx.wait();
-      // tx2 = await nitro.deposit(randomAddress, 0, DEPOSIT_AMOUNT, AddressZero, {
-      //   value: DEPOSIT_AMOUNT,
-      // });
-      // receipt2 = await tx2.wait();
       await expect(receipt.status).toEqual(1);
-      // await expect(receipt2.status).toEqual(1);
     });
 
     it('Updates holdings', async () => {
@@ -361,10 +270,6 @@ let erc20;
 let erc20Address;
 let nitroAddress;
 describe('Nitro (ERC20 deposit and withdrawal)', () => {
-  //   const provider = new ethers.providers.JsonRpcProvider(
-  //     `http://localhost:${process.env.DEV_GANACHE_PORT}`,
-  //   );
-  //   const signer0 = provider.getSigner(1);
   beforeAll(async () => {
     const networkId = (await provider.getNetwork()).chainId;
     erc20Address = ERC20Artifact.networks[networkId].address;
@@ -608,7 +513,6 @@ describe('Nitro (ERC20 deposit and withdrawal)', () => {
   describe('Withdrawing ETH (signer = partcipant, holdings[participant][0x] < amount)', () => {
     let tx1;
     let tx2;
-    let beforeBalance;
     let allocatedAtStart;
     const ERC20_WITHDRAWAL_AMOUNT = ERC20_DEPOSIT_AMOUNT;
 
