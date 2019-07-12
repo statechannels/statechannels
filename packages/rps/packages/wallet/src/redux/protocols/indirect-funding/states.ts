@@ -7,6 +7,8 @@ export interface WaitForNewLedgerFunding {
   processId: string;
   newLedgerFundingState: NonTerminalNewLedgerFundingState;
   channelId: string;
+  targetAllocation: string[];
+  targetDestination: string[];
 }
 
 export interface WaitForExistingLedgerFunding {
@@ -15,6 +17,8 @@ export interface WaitForExistingLedgerFunding {
   existingLedgerFundingState: NonTerminalExistingLedgerFundingState;
   channelId: string;
   ledgerId: string;
+  targetAllocation: string[];
+  targetDestination: string[];
 }
 
 export interface Failure {
