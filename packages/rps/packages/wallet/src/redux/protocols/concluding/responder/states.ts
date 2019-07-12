@@ -32,14 +32,9 @@ export interface ResponderDecideDefund {
   type: 'ConcludingResponder.DecideDefund';
   processId: string;
   channelId: string;
-  opponentHasSelected: boolean;
+  consensusUpdateState?: ConsensusUpdateState;
 }
 
-export interface ResponderWaitForOpponentSelection {
-  type: 'ConcludingResponder.WaitForOpponentSelection';
-  processId: string;
-  channelId: string;
-}
 export interface ResponderWaitForLedgerUpdate {
   type: 'ConcludingResponder.WaitForLedgerUpdate';
   processId: string;
@@ -55,8 +50,7 @@ export function isConcludingResponderState(
     state.type === 'ConcludingResponder.AcknowledgeFailure' ||
     state.type === 'ConcludingResponder.ApproveConcluding' ||
     state.type === 'ConcludingResponder.DecideDefund' ||
-    state.type === 'ConcludingResponder.WaitForLedgerUpdate' ||
-    state.type === 'ConcludingResponder.WaitForOpponentSelection'
+    state.type === 'ConcludingResponder.WaitForLedgerUpdate'
   );
 }
 
@@ -83,9 +77,7 @@ export const acknowledgeFailure: StateConstructor<ResponderAcknowledgeFailure> =
 export const waitForLedgerUpdate: StateConstructor<ResponderWaitForLedgerUpdate> = p => {
   return { ...p, type: 'ConcludingResponder.WaitForLedgerUpdate' };
 };
-export const waitForOpponentSelection: StateConstructor<ResponderWaitForOpponentSelection> = p => {
-  return { ...p, type: 'ConcludingResponder.WaitForOpponentSelection' };
-};
+
 // -------
 // Unions and Guards
 // -------
@@ -95,7 +87,6 @@ export type ResponderNonTerminalState =
   | ResponderDecideDefund
   | ResponderAcknowledgeFailure
   | ResponderAcknowledgeSuccess
-  | ResponderWaitForLedgerUpdate
-  | ResponderWaitForOpponentSelection;
+  | ResponderWaitForLedgerUpdate;
 
 export type ResponderPreTerminalState = ResponderAcknowledgeSuccess | ResponderAcknowledgeFailure;

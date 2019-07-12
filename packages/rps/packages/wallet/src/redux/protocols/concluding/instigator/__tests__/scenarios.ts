@@ -13,7 +13,6 @@ import {
 import { bigNumberify } from 'ethers/utils';
 import { commitmentReceived } from '../../../../actions';
 import { twoPlayerPreSuccessA } from '../../../consensus-update/__tests__';
-import { keepLedgerChannelApproved } from '../../../../../communication';
 
 // -----------------
 // Channel Scenarios
@@ -47,13 +46,13 @@ const acknowledgeSuccess = states.instigatorAcknowledgeSuccess(defaults);
 const waitforOpponentConclude = states.instigatorWaitForOpponentConclude(defaults);
 const acknowledgeConcludeReceived = states.instigatorAcknowledgeConcludeReceived({
   ...defaults,
-  opponentSelectedKeepLedgerChannel: false,
+  consensusUpdateState: twoPlayerPreSuccessA.state,
 });
 const waitForLedgerUpdate = states.instigatorWaitForLedgerUpdate({
   ...defaults,
   consensusUpdateState: twoPlayerPreSuccessA.state,
 });
-const waitForOpponentResponse = states.instigatorWaitForOpponentSelection(defaults);
+
 // -------
 // Shared Data
 // -------
@@ -95,7 +94,6 @@ const commitmentReceivedAction = commitmentReceived({ processId, signedCommitmen
 const defundChosen = actions.defundChosen({ processId });
 const keepOpenChosen = actions.keepOpenChosen({ processId });
 const cancelled = actions.cancelled({ processId });
-const opponentSelectedKeepOpen = keepLedgerChannelApproved({ processId });
 
 // -------
 // Scenarios
@@ -140,11 +138,7 @@ export const noDefundingHappyPath = {
     sharedData: indirectFundedSecondConcludeReceived,
     action: keepOpenChosen,
   },
-  waitForOpponentResponse: {
-    state: waitForOpponentResponse,
-    sharedData: indirectFundedSecondConcludeReceived,
-    action: opponentSelectedKeepOpen,
-  },
+
   waitForLedgerUpdate: {
     state: waitForLedgerUpdate,
     sharedData: twoPlayerPreSuccessA.sharedData,
