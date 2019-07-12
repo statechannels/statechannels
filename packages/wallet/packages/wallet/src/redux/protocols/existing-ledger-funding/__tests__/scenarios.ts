@@ -33,6 +33,8 @@ const props = {
   channelId,
   ledgerId,
   processId,
+  targetAllocation: oneThree.map(o => o.wei),
+  targetDestination: oneThree.map(o => o.address),
 };
 
 const setFundingState = (sharedData: SharedData): SharedData => {

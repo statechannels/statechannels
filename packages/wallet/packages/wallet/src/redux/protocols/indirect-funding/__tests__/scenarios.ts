@@ -18,12 +18,18 @@ import {
 } from '../../new-ledger-funding/__tests__';
 
 const processId = 'processId';
-const props = { ledgerId, channelId, processId };
+
 const oneThree = [
   { address: asAddress, wei: bigNumberify(1).toHexString() },
   { address: bsAddress, wei: bigNumberify(3).toHexString() },
 ];
-
+const props = {
+  ledgerId,
+  channelId,
+  processId,
+  targetAllocation: oneThree.map(o => o.wei),
+  targetDestination: oneThree.map(o => o.address),
+};
 const ledger4 = ledgerCommitment({ turnNum: 4, balances: oneThree });
 const ledger5 = ledgerCommitment({ turnNum: 5, balances: oneThree });
 const app0 = appCommitment({ turnNum: 0, balances: oneThree });

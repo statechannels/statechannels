@@ -21,6 +21,8 @@ import { IndirectFundingAction } from './actions';
 export function initialize(
   processId: string,
   channelId: string,
+  targetAllocation: string[],
+  targetDestination: string[],
   sharedData: SharedData,
 ): ProtocolStateWithSharedData<IndirectFundingState> {
   const existingLedgerChannel = selectors.getFundedLedgerChannelForParticipants(
@@ -38,7 +40,14 @@ export function initialize(
     const {
       protocolState: existingLedgerFundingState,
       sharedData: newSharedData,
-    } = initializeExistingLedgerFunding(processId, channelId, ledgerId, sharedData);
+    } = initializeExistingLedgerFunding(
+      processId,
+      channelId,
+      ledgerId,
+      targetAllocation,
+      targetDestination,
+      sharedData,
+    );
 
     if (existingLedgerFundingState.type === 'ExistingLedgerFunding.Success') {
       return { protocolState: states.success({}), sharedData: newSharedData };
@@ -57,6 +66,8 @@ export function initialize(
         channelId,
         ledgerId,
         existingLedgerFundingState,
+        targetAllocation,
+        targetDestination,
       }),
       sharedData: newSharedData,
     };
@@ -64,7 +75,13 @@ export function initialize(
     const {
       protocolState: newLedgerFundingState,
       sharedData: newSharedData,
-    } = initializeNewLedgerFunding(processId, channelId, sharedData);
+    } = initializeNewLedgerFunding(
+      processId,
+      channelId,
+      targetAllocation,
+      targetDestination,
+      sharedData,
+    );
 
     if (newLedgerFundingState.type === 'NewLedgerFunding.Success') {
       return { protocolState: states.success({}), sharedData: newSharedData };
@@ -80,6 +97,8 @@ export function initialize(
         processId,
         channelId,
         newLedgerFundingState,
+        targetAllocation,
+        targetDestination,
       }),
       sharedData: newSharedData,
     };
