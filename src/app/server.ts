@@ -17,7 +17,14 @@ const server = app.listen(config.port).on('error', err => {
 });
 
 console.log('Application started. Listening on port:' + config.port);
-const adjudicatorWatcher = fork(`${__dirname}/../wallet/adjudicator-watcher`);
+
+// A forked process inherits execArgv from the parent
+// --inspect-brk is present when the process is launched via vs code debug
+// The debug port cannot be used for both the parent process and the adjudicator-watcher child process.
+const forkExecArgv = process.execArgv.filter(arg => !arg.includes('--inspect-brk'));
+const adjudicatorWatcher = fork(`${__dirname}/../wallet/adjudicator-watcher`, [], {
+  execArgv: forkExecArgv,
+});
 adjudicatorWatcher.on('message', (message: AdjudicatorWatcherEvent) => {
   console.log(`Parent received message: ${message}`);
   switch (message.eventType) {
