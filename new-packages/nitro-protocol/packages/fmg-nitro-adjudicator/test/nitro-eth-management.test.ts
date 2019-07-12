@@ -560,7 +560,7 @@ describe('Nitro (ETH management)', () => {
     });
   });
 
-  describe('Using setOutcome public test method (from wrapper)', () => {
+  describe('Using `setOutcome` public test method (from wrapper)', () => {
     const allocationOutcome = {
       destination: [alice.address, bob.address],
       allocation,
@@ -579,7 +579,7 @@ describe('Nitro (ETH management)', () => {
       expect(getOutcomeFromParameters(setOutcome)).toMatchObject(allocationOutcome);
     });
   });
-  describe('Using affords public test method (from wrapper)', () => {
+  describe('Using `affords` public test method (from wrapper)', () => {
     const outcome = {
       destination: [alice.address, bob.address],
       allocation,
@@ -614,6 +614,100 @@ describe('Nitro (ETH management)', () => {
         .toHexString();
       const zero = ethers.utils.bigNumberify(0);
       expect(await nitro.affordsPub(recipient, outcome, funding)).toEqual(zero);
+    });
+  });
+
+  describe('Using `reduce` public test method (from wrapper)', () => {
+    const outcome = {
+      destination: [alice.address, bob.address],
+      allocation,
+      finalizedAt: ethers.utils.bigNumberify(0),
+      challengeCommitment: getEthersObjectForCommitment(commitment0),
+      token: [AddressZero, AddressZero],
+    };
+    const reduceAmount = 2;
+    const expectedBAllocation = bigNumberify(bBal)
+      .sub(reduceAmount)
+      .toHexString();
+    const allocationAfterReduce = [aBal, expectedBAllocation];
+
+    const expectedOutcome = {
+      destination: [alice.address, bob.address],
+      allocation: allocationAfterReduce,
+      finalizedAt: ethers.utils.bigNumberify(0),
+      challengeCommitment: getEthersObjectForCommitment(commitment0),
+      token: [AddressZero, AddressZero],
+    };
+
+    const recipient = bob.address;
+    it('Allocation reduced correctly', async () => {
+      const newOutcome = await nitro.reducePub(outcome, recipient, reduceAmount, AddressZero);
+
+      expect(getOutcomeFromParameters(newOutcome)).toMatchObject(expectedOutcome);
+    });
+  });
+
+  describe('Using `reprioritize` public test method (from wrapper)', () => {
+    it("works when the guarantee destination length matches the allocation outcome's allocation length", async () => {
+      const allocationOutcome = {
+        destination: [alice.address, bob.address],
+        allocation,
+        finalizedAt: ethers.utils.bigNumberify(0),
+        challengeCommitment: getEthersObjectForCommitment(commitment0),
+        token: [AddressZero, AddressZero],
+      };
+
+      const guarantee = {
+        destination: [bob.address, alice.address],
+        allocation: [],
+        finalizedAt: ethers.utils.bigNumberify(0),
+        challengeCommitment: getEthersObjectForCommitment(guarantorCommitment),
+        guaranteedChannel: getChannelID(ledgerChannel),
+        token: [AddressZero, AddressZero],
+      };
+
+      const expectedOutcome = {
+        destination: [bob.address, alice.address],
+        allocation: differentAllocation,
+        finalizedAt: ethers.utils.bigNumberify(0),
+        challengeCommitment: getEthersObjectForCommitment(commitment0),
+        token: [AddressZero, AddressZero],
+      };
+
+      const newOutcome = await nitro.reprioritizePub(allocationOutcome, guarantee);
+
+      expect(getOutcomeFromParameters(newOutcome)).toMatchObject(expectedOutcome);
+    });
+
+    it("works when the guarantee destination length is less than the allocation outcome's allocation length", async () => {
+      const allocationOutcome = {
+        destination: [alice.address, bob.address],
+        allocation,
+        finalizedAt: ethers.utils.bigNumberify(0),
+        challengeCommitment: getEthersObjectForCommitment(commitment0),
+        token: [AddressZero, AddressZero],
+      };
+
+      const guarantee = {
+        destination: [bob.address],
+        allocation: [],
+        finalizedAt: ethers.utils.bigNumberify(0),
+        challengeCommitment: getEthersObjectForCommitment(guarantorCommitment),
+        guaranteedChannel: getChannelID(ledgerChannel),
+        token: [AddressZero, AddressZero],
+      };
+
+      const expectedOutcome = {
+        destination: [bob.address],
+        allocation: [bBal],
+        finalizedAt: ethers.utils.bigNumberify(0),
+        challengeCommitment: getEthersObjectForCommitment(commitment0),
+        token: [AddressZero, AddressZero],
+      };
+
+      const newOutcome = await nitro.reprioritizePub(allocationOutcome, guarantee);
+
+      expect(getOutcomeFromParameters(newOutcome)).toMatchObject(expectedOutcome);
     });
   });
 });
