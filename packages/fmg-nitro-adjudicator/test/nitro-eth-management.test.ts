@@ -275,11 +275,11 @@ describe('Nitro (ETH management)', () => {
       await tx1.wait();
       allocatedAtStart = await nitro.holdings(alice.address, AddressZero);
       beforeBalance = await provider.getBalance(aliceDest.address);
-      tx2 = await withdraw(alice, aliceDest.address, alice, WITHDRAWAL_AMOUNT);
-      receipt = await tx2.wait();
     });
 
     it('Transaction succeeds', async () => {
+      tx2 = await withdraw(alice, aliceDest.address, alice, WITHDRAWAL_AMOUNT);
+      receipt = await tx2.wait();
       await expect(receipt.status).toEqual(1);
     });
 
@@ -406,6 +406,76 @@ describe('Nitro (ETH management)', () => {
       expect(await nitro.holdings(getChannelID(ledgerChannel), AddressZero)).toEqual(
         allocatedToChannel.sub(allocation[0]),
       );
+    });
+  });
+
+  describe('Transfer and withdraw ETH (outcome = final, holdings[fromChannel] > outcomes[fromChannel].destination', () => {
+    let allocatedToChannel;
+    let allocatedToAlice;
+    let amountHeldAgainstLedgerChannel;
+    let startBal;
+
+    beforeAll(async () => {
+      startBal = await provider.getBalance(aliceDest.address);
+      amountHeldAgainstLedgerChannel = await nitro.holdings(
+        getChannelID(ledgerChannel),
+        AddressZero,
+      );
+      await nitro.deposit(
+        getChannelID(ledgerChannel),
+        amountHeldAgainstLedgerChannel,
+        DEPOSIT_AMOUNT,
+        AddressZero,
+        { value: DEPOSIT_AMOUNT },
+      );
+
+      const allocationOutcome = {
+        destination: [alice.address, bob.address],
+        allocation,
+        finalizedAt: ethers.utils.bigNumberify(1),
+        challengeCommitment: getEthersObjectForCommitment(commitment0),
+        token: [AddressZero, AddressZero],
+      };
+      const tx = await nitro.setOutcome(getChannelID(ledgerChannel), allocationOutcome);
+      await tx.wait();
+
+      allocatedToChannel = await nitro.holdings(getChannelID(ledgerChannel), AddressZero);
+      allocatedToAlice = await nitro.holdings(alice.address, AddressZero);
+    });
+
+    it('Nitro.transferAndWithdraw tx succeeds', async () => {
+      const authorization = abiCoder.encode(AUTH_TYPES, [
+        alice.address,
+        aliceDest.address,
+        aBal,
+        await signer0.getAddress(),
+      ]);
+      const sig = sign(authorization, alice.privateKey);
+      const tx1 = await nitro.transferAndWithdraw(
+        getChannelID(ledgerChannel),
+        alice.address,
+        aliceDest.address,
+        allocation[0],
+        AddressZero,
+        sig.v,
+        sig.r,
+        sig.s,
+        { gasLimit: 3000000 },
+      );
+      const receipt1 = await tx1.wait();
+      await expect(receipt1.status).toEqual(1);
+    });
+
+    it('EOA account balance increases', async () => {
+      const expectedBalance = startBal.add(allocation[0]);
+      const currentBalance = await provider.getBalance(aliceDest.address);
+      expect(currentBalance.eq(expectedBalance)).toBe(true);
+    });
+
+    it('holdings[channel][0x] decreases', async () => {
+      const currentChannelHolding = await nitro.holdings(getChannelID(ledgerChannel), AddressZero);
+      const expectedChannelHolding = allocatedToChannel.sub(allocation[0]);
+      expect(currentChannelHolding).toEqual(expectedChannelHolding);
     });
   });
 
