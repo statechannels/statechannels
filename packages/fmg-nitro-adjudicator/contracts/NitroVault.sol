@@ -19,8 +19,11 @@ contract IERC20 { // ERC20 Interface
 contract NitroVault {
     using Commitment for Commitment.CommitmentStruct;
     using SafeMath for uint;
+    NitroAdjudicator Adjudicator;
 
-
+    constructor(address _NitroAdjudicatorAddress) public {
+        Adjudicator = NitroAdjudicator(_NitroAdjudicatorAddress);
+    }
 
     struct Authorization {
         // Prevents replay attacks:
@@ -47,11 +50,7 @@ contract NitroVault {
     }
 
     mapping(address => mapping(address => uint)) public holdings;
-    mapping(address => NitroAdjudicator.Outcome) public outcomes;
     address private constant zeroAddress = address(0);
-
-    // TODO: Challenge duration should depend on the channel
-    uint constant CHALLENGE_DURATION = 5 minutes;
 
     // **************
     // ETH and Token Management
@@ -148,21 +147,22 @@ function deposit(address destination, uint expectedHeld,
 
     }
 
+
     function transfer(address channel, address destination, uint amount, address token) public {
         require(
-            outcomes[channel].challengeCommitment.guaranteedChannel == zeroAddress,
+            Adjudicator.outcomes[channel].challengeCommitment.guaranteedChannel == zeroAddress,
             "Transfer: channel must be a ledger channel"
         );
         require(
-            outcomes[channel].finalizedAt <= now,
+            Adjudicator.outcomes[channel].finalizedAt <= now,
             "Transfer: outcome must be final"
         );
         require(
-            outcomes[channel].finalizedAt > 0,
+            Adjudicator.outcomes[channel].finalizedAt > 0,
             "Transfer: outcome must be present"
         );
 
-        uint channelAffordsForDestination = affords(destination, outcomes[channel], holdings[channel][token]);
+        uint channelAffordsForDestination = affords(destination, Adjudicator.outcomes[channel], holdings[channel][token]);
 
         require(
             amount <= channelAffordsForDestination,
@@ -172,11 +172,11 @@ function deposit(address destination, uint expectedHeld,
         holdings[destination][token] = holdings[destination][token] + amount;
         holdings[channel][token] = holdings[channel][token] - amount;
 
-        outcomes[channel] = reduce(outcomes[channel], destination, amount, token);
+        Adjudicator.outcomes[channel] = reduce(Adjudicator.outcomes[channel], destination, amount, token);
     }
 
     function claim(address guarantor, address recipient, uint amount, address token) public {
-        NitroAdjudicator.Outcome memory guarantee = outcomes[guarantor];
+        NitroAdjudicator.Outcome memory guarantee = Adjudicator.outcomes[guarantor];
         require(
             guarantee.challengeCommitment.guaranteedChannel != zeroAddress,
             "Claim: a guarantee channel is required"
@@ -189,12 +189,12 @@ function deposit(address destination, uint expectedHeld,
 
         uint funding = holdings[guarantor][token];
         NitroAdjudicator.Outcome memory reprioritizedOutcome = reprioritize(
-            outcomes[guarantee.challengeCommitment.guaranteedChannel],
+            Adjudicator.outcomes[guarantee.challengeCommitment.guaranteedChannel],
             guarantee
         );
         if (affords(recipient, reprioritizedOutcome, funding) >= amount) {
-            outcomes[guarantee.challengeCommitment.guaranteedChannel] = reduce(
-                outcomes[guarantee.challengeCommitment.guaranteedChannel],
+            Adjudicator.outcomes[guarantee.challengeCommitment.guaranteedChannel] = reduce(
+                Adjudicator.outcomes[guarantee.challengeCommitment.guaranteedChannel],
                 recipient,
                 amount,
                 token
@@ -299,22 +299,14 @@ function deposit(address destination, uint expectedHeld,
     }
 
     // ****************
-    // ForceMove Events
+    // Events
     // ****************
+    
 
-    event ChallengeCreated(
-        address channelId,
-        Commitment.CommitmentStruct commitment,
-        uint256 finalizedAt
-    );
-    event Concluded(address channelId);
-    event Refuted(address channelId, Commitment.CommitmentStruct refutation);
-    event RespondedWithMove(address channelId, Commitment.CommitmentStruct response, uint8 v, bytes32 r, bytes32 ss);
-    event RespondedWithAlternativeMove(Commitment.CommitmentStruct alternativeResponse);
     event Deposited(address destination, uint256 amountDeposited, uint256 destinationHoldings);
    
     function isChannelClosed(address channel) internal view returns (bool) {
-        return outcomes[channel].finalizedAt < now && outcomes[channel].finalizedAt > 0;
+        return NitroAdjudicator.outcomes[channel].finalizedAt < now && NitroAdjudicator.outcomes[channel].finalizedAt > 0;
     }
 
     function moveAuthorized(Commitment.CommitmentStruct memory _commitment, Signature memory signature) internal pure returns (bool){
