@@ -158,7 +158,7 @@ describe('Nitro (ETH management)', () => {
     nitroVault = new ethers.Contract(nitroVaultAddress, NitroVaultArtifact.abi, signer0);
     const nitroAdjudicatorAddress = NitroAdjudicatorArtifact.networks[networkId].address;
     nitroAdjudicator = new ethers.Contract(
-      nitroVaultAddress,
+      nitroAdjudicatorAddress,
       NitroAdjudicatorArtifact.abi,
       signer0,
     );
