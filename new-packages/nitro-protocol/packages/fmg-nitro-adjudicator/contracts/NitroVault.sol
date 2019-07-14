@@ -149,16 +149,17 @@ function deposit(address destination, uint expectedHeld,
 
 
     function transfer(address channel, address destination, uint amount, address token) public {
+        (uint256 void, NitroAdjudicator.Outcome memory channelOutcome) = Adjudicator.outcomes(channel);
         require(
-            Adjudicator.outcomes[channel].challengeCommitment.guaranteedChannel == zeroAddress,
+            channelOutcome.challengeCommitment.guaranteedChannel == zeroAddress,
             "Transfer: channel must be a ledger channel"
         );
         require(
-            Adjudicator.outcomes[channel].finalizedAt <= now,
+            channelOutcome.finalizedAt <= now,
             "Transfer: outcome must be final"
         );
         require(
-            Adjudicator.outcomes[channel].finalizedAt > 0,
+            channelOutcome.finalizedAt > 0,
             "Transfer: outcome must be present"
         );
 
