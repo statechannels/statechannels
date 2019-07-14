@@ -32,8 +32,11 @@ contract NitroAdjudicator {
     }
 
 
-    mapping(address => Outcome) public outcomes;
+    mapping(address => Outcome) internal outcomes;
 
+    function getOutcome(address channel) public view returns (Outcome memory) {
+        return outcomes[channel];
+    }
     // TODO: Challenge duration should depend on the channel
     uint constant CHALLENGE_DURATION = 5 minutes;
 

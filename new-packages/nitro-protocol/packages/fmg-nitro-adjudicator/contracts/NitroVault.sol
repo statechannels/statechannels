@@ -149,21 +149,20 @@ function deposit(address destination, uint expectedHeld,
 
 
     function transfer(address channel, address destination, uint amount, address token) public {
-        (uint256 void, NitroAdjudicator.Outcome memory channelOutcome) = Adjudicator.outcomes(channel);
         require(
-            channelOutcome.challengeCommitment.guaranteedChannel == zeroAddress,
+            Adjudicator.getOutcome(channel).challengeCommitment.guaranteedChannel == zeroAddress,
             "Transfer: channel must be a ledger channel"
         );
         require(
-            channelOutcome.finalizedAt <= now,
+            Adjudicator.getOutcome(channel).finalizedAt <= now,
             "Transfer: outcome must be final"
         );
         require(
-            channelOutcome.finalizedAt > 0,
+            Adjudicator.getOutcome(channel).finalizedAt > 0,
             "Transfer: outcome must be present"
         );
 
-        uint channelAffordsForDestination = affords(destination, Adjudicator.outcomes[channel], holdings[channel][token]);
+        uint channelAffordsForDestination = affords(destination, Adjudicator.getOutcome(channel), holdings[channel][token]);
 
         require(
             amount <= channelAffordsForDestination,
@@ -173,11 +172,13 @@ function deposit(address destination, uint expectedHeld,
         holdings[destination][token] = holdings[destination][token] + amount;
         holdings[channel][token] = holdings[channel][token] - amount;
 
-        Adjudicator.outcomes[channel] = reduce(Adjudicator.outcomes[channel], destination, amount, token);
+        // here we want to *set* outcomes, not just *get* outcomes
+        // TODO REINSTATE
+        // Adjudicator.setOutcome(channel) = reduce(Adjudicator.getOutcome(channel), destination, amount, token);
     }
 
     function claim(address guarantor, address recipient, uint amount, address token) public {
-        NitroAdjudicator.Outcome memory guarantee = Adjudicator.outcomes[guarantor];
+        NitroAdjudicator.Outcome memory guarantee = Adjudicator.getOutcome(guarantor);
         require(
             guarantee.challengeCommitment.guaranteedChannel != zeroAddress,
             "Claim: a guarantee channel is required"
@@ -190,16 +191,18 @@ function deposit(address destination, uint expectedHeld,
 
         uint funding = holdings[guarantor][token];
         NitroAdjudicator.Outcome memory reprioritizedOutcome = reprioritize(
-            Adjudicator.outcomes[guarantee.challengeCommitment.guaranteedChannel],
+            Adjudicator.getOutcome(guarantee.challengeCommitment.guaranteedChannel),
             guarantee
         );
         if (affords(recipient, reprioritizedOutcome, funding) >= amount) {
-            Adjudicator.outcomes[guarantee.challengeCommitment.guaranteedChannel] = reduce(
-                Adjudicator.outcomes[guarantee.challengeCommitment.guaranteedChannel],
-                recipient,
-                amount,
-                token
-            );
+                    // here we want to *set* outcomes, not just *get* outcomes
+        // TODO REINSTATE
+            // Adjudicator.setOutcome(guarantee.challengeCommitment.guaranteedChannel) = reduce(
+                // Adjudicator.getOutcome(guarantee.challengeCommitment.guaranteedChannel),
+                // recipient,
+                // amount,
+                // token
+            // );
             holdings[guarantor][token] = holdings[guarantor][token].sub(amount);
             holdings[recipient][token] = holdings[recipient][token].add(amount);
         } else {
@@ -307,7 +310,7 @@ function deposit(address destination, uint expectedHeld,
     event Deposited(address destination, uint256 amountDeposited, uint256 destinationHoldings);
    
     function isChannelClosed(address channel) internal view returns (bool) {
-        return NitroAdjudicator.outcomes[channel].finalizedAt < now && NitroAdjudicator.outcomes[channel].finalizedAt > 0;
+        return Adjudicator.getOutcome(channel).finalizedAt < now && Adjudicator.getOutcome(channel).finalizedAt > 0;
     }
 
     function moveAuthorized(Commitment.CommitmentStruct memory _commitment, Signature memory signature) internal pure returns (bool){
