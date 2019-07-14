@@ -18,8 +18,12 @@ module.exports = function(deployer) {
   deployer.link(Commitment, TestNitroAdjudicator);
   deployer.link(Rules, TestNitroAdjudicator);
   deployer.link(NitroAdjudicator, TestNitroAdjudicator);
-  deployer.deploy(TestNitroAdjudicator);
 
+  deployer.link(Commitment, TestNitroVault);
+  deployer.link(Rules, TestNitroVault);
   deployer.link(NitroVault, TestNitroVault);
-  deployer.deploy(TestNitroVault);
+
+  deployer.deploy(TestNitroAdjudicator).then(function() {
+    return deployer.deploy(TestNitroVault, TestNitroAdjudicator.address);
+  });
 };

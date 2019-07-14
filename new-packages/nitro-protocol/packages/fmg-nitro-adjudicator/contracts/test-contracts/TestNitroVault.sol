@@ -7,6 +7,8 @@ import "../NitroVault.sol";
 contract TestNitroVault is NitroVault {
     using Commitment for Commitment.CommitmentStruct;
 
+    constructor(address _NitroAdjudicatorAddress) NitroVault(_NitroAdjudicatorAddress) public {}
+
     function reprioritizePub(NitroAdjudicator.Outcome memory allocation, NitroAdjudicator.Outcome memory guarantee) public pure returns (NitroAdjudicator.Outcome memory) {
         return reprioritize(allocation, guarantee);
     }
