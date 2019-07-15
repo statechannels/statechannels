@@ -6,14 +6,14 @@ import "fmg-core/contracts/Rules.sol";
 import "./NitroAdjudicator.sol";
 
 contract IERC20 { // ERC20 Interface
-    function totalSupply() public view returns (uint);
-    function balanceOf(address tokenOwner) public view returns (uint balance);
-    function allowance(address tokenOwner, address spender) public view returns (uint remaining);
+    // function totalSupply() public view returns (uint);
+    // function balanceOf(address tokenOwner) public view returns (uint balance);
+    // function allowance(address tokenOwner, address spender) public view returns (uint remaining);
     function transfer(address to, uint tokens) public returns (bool success);
-    function approve(address spender, uint tokens) public returns (bool success);
+    // function approve(address spender, uint tokens) public returns (bool success);
     function transferFrom(address from, address to, uint tokens) public returns (bool success);
-    event Transfer(address indexed from, address indexed to, uint tokens);
-    event Approval(address indexed tokenOwner, address indexed spender, uint tokens);
+    // event Transfer(address indexed from, address indexed to, uint tokens);
+    // event Approval(address indexed tokenOwner, address indexed spender, uint tokens);
 }
 
 contract NitroVault {
@@ -50,6 +50,7 @@ contract NitroVault {
     }
 
     mapping(address => mapping(address => uint)) public holdings;
+    mapping(address => Outcome) internal outcomes;
     address private constant zeroAddress = address(0);
 
     // **************
@@ -150,19 +151,19 @@ function deposit(address destination, uint expectedHeld,
 
     function transfer(address channel, address destination, uint amount, address token) public {
         require(
-            Adjudicator.getOutcome(channel).challengeCommitment.guaranteedChannel == zeroAddress,
+            outcomes[channel].challengeCommitment.guaranteedChannel == zeroAddress,
             "Transfer: channel must be a ledger channel"
         );
         require(
-            Adjudicator.getOutcome(channel).finalizedAt <= now,
+            outcomes[channel].finalizedAt <= now,
             "Transfer: outcome must be final"
         );
         require(
-            Adjudicator.getOutcome(channel).finalizedAt > 0,
+            outcomes[channel].finalizedAt > 0,
             "Transfer: outcome must be present"
         );
 
-        uint channelAffordsForDestination = affords(destination, Adjudicator.getOutcome(channel), holdings[channel][token]);
+        uint channelAffordsForDestination = affords(destination, outcomes[channel], holdings[channel][token]);
 
         require(
             amount <= channelAffordsForDestination,
@@ -174,11 +175,11 @@ function deposit(address destination, uint expectedHeld,
 
         // here we want to *set* outcomes, not just *get* outcomes
         // TODO REINSTATE
-        // Adjudicator.setOutcome(channel) = reduce(Adjudicator.getOutcome(channel), destination, amount, token);
+        // Adjudicator.setOutcome(channel) = reduce(outcomes[channel], destination, amount, token);
     }
 
     function claim(address guarantor, address recipient, uint amount, address token) public {
-        NitroAdjudicator.Outcome memory guarantee = Adjudicator.getOutcome(guarantor);
+        NitroAdjudicator.Outcome memory guarantee = outcomes[guarantor];
         require(
             guarantee.challengeCommitment.guaranteedChannel != zeroAddress,
             "Claim: a guarantee channel is required"
@@ -310,7 +311,7 @@ function deposit(address destination, uint expectedHeld,
     event Deposited(address destination, uint256 amountDeposited, uint256 destinationHoldings);
    
     function isChannelClosed(address channel) internal view returns (bool) {
-        return Adjudicator.getOutcome(channel).finalizedAt < now && Adjudicator.getOutcome(channel).finalizedAt > 0;
+        return outcomes[channel].finalizedAt < now && outcomes[channel].finalizedAt > 0;
     }
 
     function moveAuthorized(Commitment.CommitmentStruct memory _commitment, Signature memory signature) internal pure returns (bool){
