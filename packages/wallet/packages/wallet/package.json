@@ -93,7 +93,7 @@
   "devDependencies": {
     "@babel/runtime": "^7.0.0-beta.53",
     "@storybook/react": "4.1.18",
-    "@types/jest": "^23.3.1",
+    "@types/jest": "^24",
     "@types/storybook__react": "4.0.0",
     "awesome-typescript-loader": "5.2.1",
     "babel-jest": "^23.4.2",
@@ -111,7 +111,7 @@
     "fork-ts-checker-webpack-plugin": "0.4.9",
     "ganache-cli": "^6.3.0",
     "html-webpack-plugin": "4.0.0-beta.5",
-    "jest": "^23.5.0",
+    "jest": "^24.8.0",
     "magmo-devtools": "git+https://github.com/magmo/devtools.git#v0.1.20",
     "node-sass": "^4.9.3",
     "optimize-css-assets-webpack-plugin": "5.0.1",
