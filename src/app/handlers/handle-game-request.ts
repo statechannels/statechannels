@@ -1,6 +1,5 @@
 import { ethers } from 'ethers';
-import { Signature } from 'fmg-core';
-import { channelID } from 'fmg-core/lib/channel';
+import { channelID, Signature } from 'fmg-core';
 import { ProcessProtocol } from 'magmo-wallet/lib/src/communication';
 import { errors } from '../../wallet';
 import { startFundingProcess } from '../../wallet/db/queries/walletProcess';

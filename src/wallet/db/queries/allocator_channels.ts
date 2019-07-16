@@ -1,6 +1,5 @@
 import { ethers } from 'ethers';
-import { Address, CommitmentType, Signature, Uint256, Uint32 } from 'fmg-core';
-import { channelID } from 'fmg-core/lib/channel';
+import { Address, channelID, CommitmentType, Signature, Uint256, Uint32 } from 'fmg-core';
 import { AppCommitment, CommitmentString } from '../../../types';
 import errors from '../../errors';
 import AllocatorChannel from '../../models/allocatorChannel';
@@ -20,10 +19,11 @@ export const queries = {
 };
 
 async function updateAllocatorChannel(
-  theirCommitment: AppCommitment,
+  commitmentRound: AppCommitment[],
   hubCommitment: AppCommitment,
 ) {
-  const { channel } = theirCommitment;
+  const firstCommitment = commitmentRound[0];
+  const { channel } = firstCommitment;
   const { channelType: rules_address, nonce, participants } = channel;
   const channelId = channelID(channel);
 
@@ -32,9 +32,9 @@ async function updateAllocatorChannel(
     .select('id')
     .first();
 
-  if (allocator_channel && theirCommitment.commitmentType === CommitmentType.PreFundSetup) {
+  if (allocator_channel && firstCommitment.commitmentType === CommitmentType.PreFundSetup) {
     throw errors.CHANNEL_EXISTS;
-  } else if (!allocator_channel && theirCommitment.commitmentType !== CommitmentType.PreFundSetup) {
+  } else if (!allocator_channel && firstCommitment.commitmentType !== CommitmentType.PreFundSetup) {
     throw errors.CHANNEL_MISSING;
   }
 
@@ -54,7 +54,7 @@ async function updateAllocatorChannel(
     app_attrs: c.appAttributes,
   });
 
-  const commitments = [commitment(theirCommitment), commitment(hubCommitment)];
+  const commitments = [...commitmentRound.map(c => commitment(c)), commitment(hubCommitment)];
 
   interface Upsert {
     channel_id: string;
@@ -68,7 +68,7 @@ async function updateAllocatorChannel(
   let upserts: Upsert = { channel_id: channelId, commitments, rules_address, nonce };
 
   // For now, we just _assume_ that the channel is fully funded
-  const holdings = allocations(theirCommitment)
+  const holdings = allocations(hubCommitment)
     .map(x => x.amount)
     .reduce((a, b) =>
       ethers.utils

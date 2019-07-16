@@ -1,7 +1,7 @@
 import { ethers } from 'ethers';
-import { Signature } from 'fmg-core';
-import { channelID } from 'fmg-core/lib/channel';
-import { unreachable } from 'magmo-wallet';
+import { channelID, Signature } from 'fmg-core';
+import { SignedCommitment as ClientSignedCommitment, unreachable } from 'magmo-wallet';
+
 import {
   CommitmentReceived,
   CommitmentsReceived,
@@ -11,9 +11,12 @@ import {
 import * as communication from 'magmo-wallet/lib/src/communication';
 import { errors } from '../../wallet';
 import { getCurrentCommitment } from '../../wallet/db/queries/getCurrentCommitment';
+
 import { getProcess } from '../../wallet/db/queries/walletProcess';
-import { updateLedgerChannel } from '../../wallet/services';
+import { SignedCommitment, updateLedgerChannel } from '../../wallet/services';
 import { asConsensusCommitment } from '../../wallet/services/ledger-commitment';
+
+import { HUB_ADDRESS } from '../../constants';
 import { updateRPSChannel } from '../services/rpsChannelManager';
 
 export async function handleOngoingProcessAction(ctx) {
@@ -21,7 +24,6 @@ export async function handleOngoingProcessAction(ctx) {
   switch (action.type) {
     case 'WALLET.NEW_PROCESS.CONCLUDE_INSTIGATED':
     case 'WALLET.FUNDING.STRATEGY_APPROVED':
-    case 'WALLET.CONCLUDING.KEEP_LEDGER_CHANNEL_APPROVED':
     case 'WALLET.NEW_PROCESS.DEFUND_REQUESTED':
     case 'WALLET.MULTIPLE_RELAYABLE_ACTIONS':
       return ctx;
@@ -58,6 +60,7 @@ async function handleCommitmentReceived(ctx, action: CommitmentReceived) {
       throw errors.processMissing(processId);
     }
     const { theirAddress } = walletProcess;
+
     const { commitment: theirCommitment, signature: theirSignature } = action.signedCommitment;
     const splitSignature = (ethers.utils.splitSignature(theirSignature) as unknown) as Signature;
 
@@ -79,8 +82,7 @@ async function handleCommitmentReceived(ctx, action: CommitmentReceived) {
 
     const currentCommitment = await getCurrentCommitment(theirCommitment);
     const { commitment, signature } = await updateLedgerChannel(
-      asConsensusCommitment(theirCommitment),
-      splitSignature,
+      [{ ledgerCommitment: asConsensusCommitment(theirCommitment), signature: splitSignature }],
       currentCommitment && asConsensusCommitment(currentCommitment),
     );
     ctx.status = 201;
@@ -102,20 +104,28 @@ async function handleCommitmentsReceived({ ctx, action }: { ctx; action: Commitm
     if (!walletProcess) {
       throw errors.processMissing(processId);
     }
-    const { theirAddress } = walletProcess;
-    // For the time being, just assume a two-party channel and proceed as normal.
-    const { commitment: theirCommitment, signature: theirSignature } = action.signedCommitments[1];
-    const splitSignature = (ethers.utils.splitSignature(theirSignature) as unknown) as Signature;
+    const commitmentRound: SignedCommitment[] = action.signedCommitments.map(
+      clientCommitmentToServerCommitment,
+    );
 
-    const channelId = channelID(theirCommitment.channel);
+    // For the time being, just assume a two-party channel and proceed as normal.
+    const {
+      commitment: lastCommitment,
+      signature: lastCommitmentSignature,
+    } = commitmentRound.slice(-1)[0];
+
+    const channelId = channelID(lastCommitment.channel);
+    const participants = lastCommitment.channel.participants;
+    const ourIndex = participants.indexOf(HUB_ADDRESS);
+    const nextParticipant = participants[(ourIndex + 1) % participants.length];
 
     if (channelId === walletProcess.appChannelId) {
       const { commitment: ourCommitment, signature: ourSignature } = await updateRPSChannel(
-        theirCommitment,
-        splitSignature,
+        lastCommitment,
+        lastCommitmentSignature,
       );
       ctx.body = communication.sendCommitmentReceived(
-        theirAddress,
+        nextParticipant,
         processId,
         ourCommitment,
         (ourSignature as unknown) as string,
@@ -123,18 +133,23 @@ async function handleCommitmentsReceived({ ctx, action }: { ctx; action: Commitm
       return ctx;
     }
 
-    const currentCommitment = await getCurrentCommitment(theirCommitment);
+    const ledgerCommitmentRound = commitmentRound.map(signedCommitment => ({
+      ledgerCommitment: asConsensusCommitment(signedCommitment.commitment),
+      signature: signedCommitment.signature,
+    }));
+    const currentCommitment = await getCurrentCommitment(lastCommitment);
     const { commitment, signature } = await updateLedgerChannel(
-      asConsensusCommitment(theirCommitment),
-      splitSignature,
+      ledgerCommitmentRound,
       currentCommitment && asConsensusCommitment(currentCommitment),
     );
     ctx.status = 201;
+
+    // todo: properly compose a round of commitments
     ctx.body = communication.sendCommitmentsReceived(
-      theirAddress,
+      nextParticipant,
       processId,
       [
-        { commitment: theirCommitment, signature: theirSignature },
+        { commitment: lastCommitment, signature: lastCommitmentSignature.signature },
         { commitment, signature: (signature as unknown) as string },
       ],
       action.protocolLocator,
@@ -142,4 +157,10 @@ async function handleCommitmentsReceived({ ctx, action }: { ctx; action: Commitm
 
     return ctx;
   }
+}
+
+function clientCommitmentToServerCommitment(signedCommitment: ClientSignedCommitment) {
+  const { commitment, signature: stringSignature } = signedCommitment;
+  const splitSignature = (ethers.utils.splitSignature(stringSignature) as unknown) as Signature;
+  return { commitment, signature: splitSignature };
 }

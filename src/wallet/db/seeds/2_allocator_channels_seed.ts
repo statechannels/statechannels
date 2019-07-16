@@ -6,43 +6,64 @@ import {
   Weapon,
   zeroBytes32,
 } from '../../../app/services/rps-commitment';
+import { HUB_ADDRESS } from '../../../constants';
 import {
-  ALLOCATION,
+  allocation,
   BEGINNING_APP_CHANNEL_HOLDINGS,
   BEGINNING_APP_CHANNEL_NONCE,
   BEGINNING_RPS_APP_CHANNEL_NONCE,
   DESTINATION,
+  DESTINATION_3,
   DUMMY_RULES_ADDRESS,
   DUMMY_RULES_BEGINNING_APP_CHANNEL_NONCE_CHANNEL_ID,
   DUMMY_RULES_BEGINNING_RPS_APP_CHANNEL_NONCE_CHANNEL_ID,
   DUMMY_RULES_FUNDED_NONCE_CHANNEL_ID,
+  DUMMY_RULES_FUNDED_NONCE_CHANNEL_ID_3,
   DUMMY_RULES_FUNDED_RPS_CHANNEL_NONCE_CHANNEL_ID,
   DUMMY_RULES_ONGOING_APP_CHANNEL_NONCE_CHANNEL_ID,
   FUNDED_CHANNEL_HOLDINGS,
   FUNDED_CHANNEL_NONCE,
+  FUNDED_CHANNEL_NONCE_3,
   FUNDED_RPS_CHANNEL_HOLDINGS,
   FUNDED_RPS_CHANNEL_NONCE,
-  HUB_ADDRESS,
   ONGOING_APP_CHANNEL_HOLDINGS,
   ONGOING_APP_CHANNEL_NONCE,
-  PARTICIPANT_ADDRESS,
-} from '../../../constants';
+  PARTICIPANT_1_ADDRESS,
+  PARTICIPANT_2_ADDRESS,
+} from '../../../test/test-constants';
 import AllocatorChannel from '../../models/allocatorChannel';
 import knex from '../connection';
 Model.knex(knex);
 
 const participants = [
-  { address: PARTICIPANT_ADDRESS, priority: 0 },
+  { address: PARTICIPANT_1_ADDRESS, priority: 0 },
   { address: HUB_ADDRESS, priority: 1 },
+];
+
+const participants_3 = [
+  { address: PARTICIPANT_1_ADDRESS, priority: 0 },
+  { address: PARTICIPANT_2_ADDRESS, priority: 1 },
+  { address: HUB_ADDRESS, priority: 2 },
 ];
 
 const allocationByPriority = (priority: number) => ({
   priority,
   destination: DESTINATION[priority],
-  amount: ALLOCATION[priority],
+  amount: allocation(2)[priority],
+});
+
+const allocationByPriority_3 = (priority: number) => ({
+  priority,
+  destination: DESTINATION_3[priority],
+  amount: allocation(3)[priority],
 });
 
 const allocations = () => [allocationByPriority(0), allocationByPriority(1)];
+const allocations_3 = () => [
+  allocationByPriority_3(0),
+  allocationByPriority_3(1),
+  allocationByPriority_3(2),
+];
 // ***************
 // Ledger channels
 // ***************
@@ -63,6 +84,16 @@ function pre_fund_setup(turnNumber: number) {
   };
 }
 
+function pre_fund_setup_3(turnNumber: number) {
+  return {
+    turnNumber,
+    commitmentType: CommitmentType.PreFundSetup,
+    commitmentCount: turnNumber,
+    allocations: allocations_3(),
+    appAttrs: ledger_appAttrs(3),
+  };
+}
+
 const funded_channel = {
   channelId: DUMMY_RULES_FUNDED_NONCE_CHANNEL_ID,
   rulesAddress: DUMMY_RULES_ADDRESS,
@@ -70,6 +101,15 @@ const funded_channel = {
   holdings: FUNDED_CHANNEL_HOLDINGS,
   commitments: [pre_fund_setup(0), pre_fund_setup(1)],
   participants,
+};
+
+const funded_channel_3 = {
+  channelId: DUMMY_RULES_FUNDED_NONCE_CHANNEL_ID_3,
+  rulesAddress: DUMMY_RULES_ADDRESS,
+  nonce: FUNDED_CHANNEL_NONCE_3,
+  holdings: FUNDED_CHANNEL_HOLDINGS,
+  commitments: [pre_fund_setup_3(0), pre_fund_setup_3(1), pre_fund_setup_3(2)],
+  participants: participants_3,
 };
 
 function post_fund_setup(turnNumber: number) {
@@ -163,16 +203,39 @@ const beginning_app_phase_rps_channel = {
   participants,
 };
 
-// *******
-// Exports
-// *******
-
-export const seeds = {
+const two_participant_channel_seeds = {
   funded_channel,
   beginning_app_phase_channel,
   ongoing_app_phase_channel,
   funded_rps_channel,
   beginning_app_phase_rps_channel,
+};
+
+const three_participant_channel_seeds = { funded_channel_3 };
+
+const SEEDED_CHANNELS_2 = Object.keys(two_participant_channel_seeds).length;
+const SEEDED_CHANNELS_3 = Object.keys(three_participant_channel_seeds).length;
+
+const SEEDED_COMMITMENTS_2 = SEEDED_CHANNELS_2 * 2;
+const SEEDED_COMMITMENTS_3 = SEEDED_CHANNELS_3 * 3;
+
+const SEEDED_ALLOCATIONS_2 = SEEDED_COMMITMENTS_2 * 2;
+const SEEDED_ALLOCATIONS_3 = SEEDED_COMMITMENTS_3 * 3;
+
+const SEEDED_PARTICIPANTS_2 = SEEDED_CHANNELS_2 * 2;
+const SEEDED_PARTICIPANTS_3 = SEEDED_CHANNELS_3 * 3;
+
+// *******
+// Exports
+// *******
+export const SEEDED_CHANNELS = SEEDED_CHANNELS_2 + SEEDED_CHANNELS_3;
+export const SEEDED_COMMITMENTS = SEEDED_COMMITMENTS_2 + SEEDED_COMMITMENTS_3;
+export const SEEDED_ALLOCATIONS = SEEDED_ALLOCATIONS_2 + SEEDED_ALLOCATIONS_3;
+export const SEEDED_PARTICIPANTS = SEEDED_PARTICIPANTS_2 + SEEDED_PARTICIPANTS_3;
+
+export const seeds = {
+  ...two_participant_channel_seeds,
+  ...three_participant_channel_seeds,
 };
 
 export function seed() {
