@@ -2,7 +2,7 @@ import * as states from './states';
 import * as actions from './actions';
 
 import { SharedData, queueMessage } from '../../../state';
-import { ProtocolStateWithSharedData } from '../..';
+import { ProtocolStateWithSharedData, makeLocator, EMPTY_LOCATOR } from '../..';
 import { unreachable } from '../../../../utils/reducer-utils';
 import { TwoPartyPlayerIndex } from '../../../types';
 import {
@@ -12,11 +12,9 @@ import {
   getLatestCommitment,
 } from '../../reducer-helpers';
 import { fundingFailure } from 'magmo-wallet-client';
-import { sendStrategyApproved } from '../../../../communication';
-import { Properties } from '../../../utils';
+import { sendStrategyApproved, EmbeddedProtocol } from '../../../../communication';
 import {
   IndirectFundingAction,
-  isIndirectFundingAction,
   indirectFundingReducer,
   initializeIndirectFunding,
 } from '../../indirect-funding';
@@ -24,13 +22,13 @@ import * as indirectFundingStates from '../../indirect-funding/states';
 import {
   AdvanceChannelAction,
   advanceChannelReducer,
-  isAdvanceChannelAction,
-  ADVANCE_CHANNEL_PROTOCOL_LOCATOR,
   initializeAdvanceChannel,
 } from '../../advance-channel';
 import * as advanceChannelStates from '../../advance-channel/states';
 import { CommitmentType } from '../../../../domain';
-import { clearedToSend } from '../../advance-channel/actions';
+import { clearedToSend, routesToAdvanceChannel } from '../../advance-channel/actions';
+import { ADVANCE_CHANNEL_PROTOCOL_LOCATOR } from '../../advance-channel/reducer';
+import { routesToIndirectFunding } from '../../indirect-funding/actions';
 type EmbeddedAction = IndirectFundingAction | AdvanceChannelAction;
 
 export function initialize(
@@ -56,12 +54,9 @@ export function fundingReducer(
   sharedData: SharedData,
   action: actions.FundingAction | EmbeddedAction,
 ): ProtocolStateWithSharedData<states.FundingState> {
-  if (
-    isAdvanceChannelAction(action) &&
-    action.protocolLocator === ADVANCE_CHANNEL_PROTOCOL_LOCATOR
-  ) {
+  if (routesToAdvanceChannel(action, EMPTY_LOCATOR)) {
     return handleAdvanceChannelAction(state, sharedData, action);
-  } else if (isIndirectFundingAction(action)) {
+  } else if (routesToIndirectFunding(action, EMPTY_LOCATOR)) {
     return handleFundingAction(state, sharedData, action);
   }
 
@@ -97,6 +92,7 @@ function handleAdvanceChannelAction(
     );
     return { protocolState, sharedData };
   }
+
   const result = advanceChannelReducer(protocolState.postFundSetupState, sharedData, action);
   if (!advanceChannelStates.isTerminal(result.protocolState)) {
     return {
@@ -171,6 +167,7 @@ function strategyApproved(state: states.FundingState, sharedData: SharedData) {
     latestCommitment.allocation,
     latestCommitment.destination,
     sharedData,
+    makeLocator(EmbeddedProtocol.IndirectFunding),
   );
 
   const advanceChannelResult = initializeAdvanceChannel(
@@ -183,12 +180,14 @@ function strategyApproved(state: states.FundingState, sharedData: SharedData) {
       processId,
       commitmentType: CommitmentType.PostFundSetup,
       clearedToSend: false,
-      protocolLocator: ADVANCE_CHANNEL_PROTOCOL_LOCATOR,
+      protocolLocator: makeLocator(ADVANCE_CHANNEL_PROTOCOL_LOCATOR),
     },
   );
-  if (indirectFundingStates.isTerminal(fundingState)) {
-    console.error('Indirect funding strate initialized to terminal state.');
-    return handleFundingComplete(state, fundingState, newSharedData);
+  if (fundingState.type === 'IndirectFunding.Failure') {
+    return {
+      protocolState: states.failure(fundingState),
+      sharedData,
+    };
   }
   return {
     protocolState: states.waitForFunding({
@@ -249,7 +248,7 @@ function cancelled(state: states.FundingState, sharedData: SharedData, action: a
 }
 
 function handleFundingComplete(
-  protocolState: Properties<states.WaitForSuccessConfirmation>,
+  protocolState: states.WaitForFunding,
   fundingState: indirectFundingStates.IndirectFundingState,
   sharedData: SharedData,
 ) {
@@ -260,7 +259,7 @@ function handleFundingComplete(
       sharedData,
       clearedToSend({
         processId: protocolState.processId,
-        protocolLocator: ADVANCE_CHANNEL_PROTOCOL_LOCATOR,
+        protocolLocator: makeLocator(ADVANCE_CHANNEL_PROTOCOL_LOCATOR),
       }),
     );
     return {

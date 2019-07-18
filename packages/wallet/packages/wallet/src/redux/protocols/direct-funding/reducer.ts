@@ -13,7 +13,6 @@ import { isTerminal, isSuccess } from '../transaction-submission/states';
 import * as states from './states';
 import { DirectFundingRequested } from './actions';
 import * as selectors from '../../selectors';
-export const DIRECT_FUNDING_PROTOCOL_LOCATOR = 'DirectFunding';
 
 type DFReducer = ProtocolReducer<states.DirectFundingState>;
 
@@ -57,9 +56,6 @@ export function initialize(
         channelId,
         ourIndex,
         safeToDepositLevel,
-
-        channelFunded: false,
-        postFundSetupReceived: false,
       }),
       sharedData,
     };
@@ -207,11 +203,7 @@ const waitForDepositTransactionReducer: DFReducer = (
   } else {
     if (isSuccess(newTransactionState)) {
       return {
-        protocolState: states.waitForFunding({
-          ...protocolState,
-          channelFunded: false,
-          postFundSetupReceived: false,
-        }),
+        protocolState: states.waitForFunding(protocolState),
         sharedData,
       };
     } else {

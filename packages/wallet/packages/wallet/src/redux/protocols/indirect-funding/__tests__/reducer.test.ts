@@ -13,6 +13,7 @@ describe('existing ledger funding happy path', () => {
       targetAllocation,
       targetDestination,
       sharedData,
+      protocolLocator,
     } = scenario.initialize;
     const result = initialize(
       processId,
@@ -20,6 +21,7 @@ describe('existing ledger funding happy path', () => {
       targetAllocation,
       targetDestination,
       sharedData,
+      protocolLocator,
     );
     itTransitionsTo(result.protocolState, 'IndirectFunding.WaitForExistingLedgerFunding');
   });
@@ -40,6 +42,7 @@ describe('new ledger funding happy path', () => {
       targetAllocation,
       targetDestination,
       sharedData,
+      protocolLocator,
     } = scenario.initialize;
     const result = initialize(
       processId,
@@ -47,9 +50,11 @@ describe('new ledger funding happy path', () => {
       targetAllocation,
       targetDestination,
       sharedData,
+      protocolLocator,
     );
     itTransitionsTo(result.protocolState, 'IndirectFunding.WaitForNewLedgerFunding');
   });
+
   describeScenarioStep(scenario.waitForNewLedgerFunding, () => {
     const { state, sharedData, action } = scenario.waitForNewLedgerFunding;
     const result = indirectFundingReducer(state, sharedData, action);

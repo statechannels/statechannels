@@ -2,7 +2,7 @@ import * as states from './states';
 import * as actions from './actions';
 
 import { SharedData, queueMessage } from '../../../state';
-import { ProtocolStateWithSharedData } from '../..';
+import { ProtocolStateWithSharedData, makeLocator, EMPTY_LOCATOR } from '../..';
 import { unreachable } from '../../../../utils/reducer-utils';
 import { TwoPartyPlayerIndex } from '../../../types';
 import {
@@ -12,26 +12,24 @@ import {
   getLatestCommitment,
 } from '../../reducer-helpers';
 import { fundingFailure } from 'magmo-wallet-client';
-import { sendStrategyProposed } from '../../../../communication';
+import { sendStrategyProposed, EmbeddedProtocol } from '../../../../communication';
 
 import * as indirectFundingStates from '../../indirect-funding/states';
-import { Properties } from '../../../utils';
 import {
   indirectFundingReducer,
   initializeIndirectFunding,
-  isIndirectFundingAction,
   IndirectFundingAction,
 } from '../../indirect-funding';
 import {
-  isAdvanceChannelAction,
   AdvanceChannelAction,
   advanceChannelReducer,
   initializeAdvanceChannel,
-  ADVANCE_CHANNEL_PROTOCOL_LOCATOR,
 } from '../../advance-channel';
 import * as advanceChannelStates from '../../advance-channel/states';
-import { clearedToSend } from '../../advance-channel/actions';
+import { clearedToSend, routesToAdvanceChannel } from '../../advance-channel/actions';
 import { CommitmentType } from '../../../../domain';
+import { ADVANCE_CHANNEL_PROTOCOL_LOCATOR } from '../../advance-channel/reducer';
+import { routesToIndirectFunding } from '../../indirect-funding/actions';
 
 type EmbeddedAction = IndirectFundingAction | AdvanceChannelAction;
 
@@ -58,13 +56,9 @@ export function fundingReducer(
   sharedData: SharedData,
   action: actions.FundingAction | EmbeddedAction,
 ): ProtocolStateWithSharedData<states.FundingState> {
-  if (
-    isAdvanceChannelAction(action) &&
-    // TODO: Remove this check once protocol-locator updates have been made
-    action.protocolLocator === ADVANCE_CHANNEL_PROTOCOL_LOCATOR
-  ) {
+  if (routesToAdvanceChannel(action, EMPTY_LOCATOR)) {
     return handleAdvanceChannelAction(state, sharedData, action);
-  } else if (isIndirectFundingAction(action)) {
+  } else if (routesToIndirectFunding(action, EMPTY_LOCATOR)) {
     return handleFundingAction(state, sharedData, action);
   }
 
@@ -168,7 +162,10 @@ function strategyChosen(
   };
 }
 
-function strategyApproved(state: states.FundingState, sharedData: SharedData) {
+function strategyApproved(
+  state: states.FundingState,
+  sharedData: SharedData,
+): ProtocolStateWithSharedData<states.FundingState> {
   if (state.type !== 'Funding.PlayerA.WaitForStrategyResponse') {
     return { protocolState: state, sharedData };
   }
@@ -179,10 +176,13 @@ function strategyApproved(state: states.FundingState, sharedData: SharedData) {
     latestCommitment.allocation,
     latestCommitment.destination,
     sharedData,
+    makeLocator(EmbeddedProtocol.IndirectFunding),
   );
-  if (indirectFundingStates.isTerminal(fundingState)) {
-    console.error('Indirect funding strate initialized to terminal state.');
-    return handleFundingComplete(state, fundingState, newSharedData);
+  if (fundingState.type === 'IndirectFunding.Failure') {
+    return {
+      protocolState: states.failure(fundingState),
+      sharedData,
+    };
   }
   const { processId, targetChannelId } = state;
   const advanceChannelResult = initializeAdvanceChannel(
@@ -253,7 +253,7 @@ function cancelled(state: states.FundingState, sharedData: SharedData, action: a
 }
 
 function handleFundingComplete(
-  protocolState: Properties<states.WaitForSuccessConfirmation>,
+  protocolState: states.WaitForFunding,
   fundingState: indirectFundingStates.IndirectFundingState,
   sharedData: SharedData,
 ) {

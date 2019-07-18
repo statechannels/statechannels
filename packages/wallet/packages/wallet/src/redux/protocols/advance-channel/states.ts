@@ -1,6 +1,7 @@
 import { StateConstructor } from '../../utils';
 import { ProtocolState } from '..';
 import { CommitmentType } from '../../../domain';
+import { ProtocolLocator } from '../../../communication';
 
 // -------
 // States
@@ -12,7 +13,7 @@ interface BaseState {
   processId: string;
   ourIndex: number;
   commitmentType: CommitmentType;
-  protocolLocator: string;
+  protocolLocator: ProtocolLocator;
 }
 
 export interface ChannelUnknown extends BaseState {
@@ -53,10 +54,9 @@ export interface Failure {
 // ------------
 
 const base: StateConstructor<BaseState> = params => {
-  const { processId, channelId, ourIndex, commitmentType, protocolLocator } = params;
+  const { processId, ourIndex, commitmentType, protocolLocator } = params;
   return {
     processId,
-    channelId,
     ourIndex,
     commitmentType,
     protocolLocator,

@@ -50,6 +50,15 @@ export type NonTerminalIndirectFundingState =
 export type TerminalIndirectFundingState = Success | Failure;
 export type IndirectFundingState = NonTerminalIndirectFundingState | TerminalIndirectFundingState;
 export type IndirectFundingStateType = IndirectFundingState['type'];
+
 export function isTerminal(state: IndirectFundingState): state is TerminalIndirectFundingState {
-  return state.type === 'IndirectFunding.Failure' || state.type === 'IndirectFunding.Success';
+  return !![isSuccess, isFailure].find(g => g(state));
+}
+
+export function isSuccess(state: IndirectFundingState): state is Success {
+  return state.type === 'IndirectFunding.Success';
+}
+
+export function isFailure(state: IndirectFundingState): state is Failure {
+  return state.type === 'IndirectFunding.Failure';
 }

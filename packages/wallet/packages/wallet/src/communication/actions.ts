@@ -1,7 +1,7 @@
 import { SignedCommitment } from '../domain';
 import { WalletAction } from '../redux/actions';
-import { FundingStrategy } from './index';
-import { WalletProtocol } from '.';
+import { FundingStrategy, ProtocolLocator, EmbeddedProtocol } from './index';
+import { ProcessProtocol } from '.';
 import { ActionConstructor } from '../redux/utils';
 import { Commitments } from '../redux/channel-store';
 import { DefundRequested } from '../redux/protocols/actions';
@@ -38,7 +38,7 @@ export interface StrategyApproved extends BaseProcessAction {
 export interface ConcludeInstigated {
   type: 'WALLET.NEW_PROCESS.CONCLUDE_INSTIGATED';
   signedCommitment: SignedCommitment;
-  protocol: WalletProtocol.Concluding;
+  protocol: ProcessProtocol.Concluding;
   channelId: string;
 }
 
@@ -59,7 +59,7 @@ export const strategyApproved: ActionConstructor<StrategyApproved> = p => ({
 export const concludeInstigated: ActionConstructor<ConcludeInstigated> = p => ({
   ...p,
   type: 'WALLET.NEW_PROCESS.CONCLUDE_INSTIGATED',
-  protocol: WalletProtocol.Concluding,
+  protocol: ProcessProtocol.Concluding,
 });
 
 // COMMON
@@ -75,12 +75,12 @@ export const concludeInstigated: ActionConstructor<ConcludeInstigated> = p => ({
 export interface CommitmentReceived extends BaseProcessAction {
   type: 'WALLET.COMMON.COMMITMENT_RECEIVED';
   signedCommitment: SignedCommitment;
-  protocolLocator?: string;
+  protocolLocator: ProtocolLocator;
 }
 
 export interface CommitmentsReceived extends BaseProcessAction {
   type: 'WALLET.COMMON.COMMITMENTS_RECEIVED';
-  protocolLocator: string;
+  protocolLocator: ProtocolLocator;
   signedCommitments: Commitments;
 }
 
@@ -121,4 +121,40 @@ export function isRelayableAction(action: WalletAction): action is RelayableActi
     action.type === 'WALLET.COMMON.COMMITMENTS_RECEIVED' ||
     action.type === 'WALLET.MULTIPLE_RELAYABLE_ACTIONS'
   );
+}
+
+export type CommonAction = CommitmentReceived | CommitmentsReceived;
+export function isCommonAction(
+  action: WalletAction,
+  protocol?: EmbeddedProtocol,
+): action is CommonAction {
+  return (
+    (action.type === 'WALLET.COMMON.COMMITMENTS_RECEIVED' ||
+      action.type === 'WALLET.COMMON.COMMITMENT_RECEIVED') &&
+    // When passed a protocol, check that it's got the protocol in the protocol locator
+    (!protocol || action.protocolLocator.indexOf(protocol) >= 0)
+  );
+}
+
+export function routesToProtocol(
+  action: WalletAction,
+  protocolLocator: ProtocolLocator,
+  descriptor: EmbeddedProtocol,
+): boolean {
+  if ('protocolLocator' in action) {
+    return action.protocolLocator.indexOf(descriptor) === protocolLocator.length;
+  } else {
+    return true;
+  }
+}
+
+export function routerFactory<T extends WalletAction>(
+  typeGuard: (action: WalletAction) => action is T,
+  protocol: EmbeddedProtocol,
+): (action: WalletAction, protocolLocator: ProtocolLocator) => action is T {
+  function router(action: WalletAction, protocolLocator: ProtocolLocator): action is T {
+    return typeGuard(action) && routesToProtocol(action, protocolLocator, protocol);
+  }
+
+  return router;
 }

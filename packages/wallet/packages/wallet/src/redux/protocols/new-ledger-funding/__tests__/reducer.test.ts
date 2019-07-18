@@ -21,6 +21,7 @@ describe('happy-path scenario', () => {
       processId,
       targetAllocation,
       targetDestination,
+      protocolLocator,
     } = scenario.initialParams;
     const initialState = initialize(
       processId,
@@ -28,6 +29,7 @@ describe('happy-path scenario', () => {
       targetAllocation,
       targetDestination,
       store,
+      protocolLocator,
     );
 
     itTransitionsTo(initialState, 'NewLedgerFunding.WaitForPreFundSetup');

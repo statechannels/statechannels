@@ -3,13 +3,14 @@ import * as actions from '../actions';
 import { TwoPartyPlayerIndex } from '../../../../types';
 
 import { EMPTY_SHARED_DATA, setChannels } from '../../../../state';
-import { FundingStrategy } from '../../../../../communication';
+import { FundingStrategy, EmbeddedProtocol } from '../../../../../communication';
 import { channelId, asAddress, appCommitment } from '../../../../../domain/commitments/__tests__';
 import { bsAddress, bsPrivateKey } from '../../../../../communication/__tests__/commitments';
 import { channelFromCommitments } from '../../../../channel-store/channel-state/__tests__';
 import { preSuccess as indirectFundingPreSuccess } from '../../../indirect-funding/__tests__';
 import { preSuccess as advanceChannelPreSuccess } from '../../../advance-channel/__tests__';
 import { bigNumberify } from 'ethers/utils';
+import { prependToLocator } from '../../..';
 
 // To test all paths through the state machine we will use 4 different scenarios:
 //
@@ -83,7 +84,10 @@ const indirectStrategyProposed = actions.strategyProposed({ processId, strategy 
 const indirectStrategyApproved = actions.strategyApproved({ processId, strategy });
 
 const successConfirmed = actions.fundingSuccessAcknowledged({ processId });
-const fundingSuccess = indirectFundingPreSuccess.action;
+const fundingSuccess = prependToLocator(
+  indirectFundingPreSuccess.action,
+  EmbeddedProtocol.IndirectFunding,
+);
 const strategyRejected = actions.strategyRejected({ processId });
 const cancelledByB = actions.cancelled({ processId, by: TwoPartyPlayerIndex.B });
 const cancelledByA = actions.cancelled({ processId, by: TwoPartyPlayerIndex.A });

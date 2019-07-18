@@ -62,12 +62,6 @@ export interface MetamaskLoadError {
 
 export type Message = 'FundingDeclined';
 
-export interface MessageReceived {
-  type: 'WALLET.COMMON.MESSAGE_RECEIVED';
-  processId: string;
-  data: Message;
-}
-
 export interface ChallengeExpirySetEvent {
   type: 'WALLET.ADJUDICATOR.CHALLENGE_EXPIRY_TIME_SET';
   processId: string;
@@ -150,11 +144,6 @@ export const metamaskLoadError: ActionConstructor<MetamaskLoadError> = p => ({
   type: 'METAMASK_LOAD_ERROR',
 });
 
-export const messageReceived: ActionConstructor<MessageReceived> = p => ({
-  ...p,
-  type: 'WALLET.COMMON.MESSAGE_RECEIVED',
-});
-
 export const challengeExpirySetEvent: ActionConstructor<ChallengeExpirySetEvent> = p => ({
   ...p,
   type: 'WALLET.ADJUDICATOR.CHALLENGE_EXPIRY_TIME_SET',
@@ -201,8 +190,6 @@ export type AdjudicatorEventAction =
   | ChallengeCreatedEvent
   | ChallengeExpirySetEvent;
 
-export type CommonAction = MessageReceived | CommitmentReceived;
-
 export type ProtocolAction =
   // only list top level protocol actions
   FundingAction | DefundingAction | ApplicationAction | ConcludingAction;
@@ -228,15 +215,7 @@ export type WalletAction =
   | ProtocolAction
   | protocol.NewProcessAction
   | channel.ChannelAction
-  | RelayableAction
-  | MessageReceived;
-
-export function isCommonAction(action: WalletAction): action is CommonAction {
-  return (
-    ['WALLET.COMMON.MESSAGE_RECEIVED', 'WALLET.COMMON.COMMITMENT_RECEIVED'].indexOf(action.type) >=
-    0
-  );
-}
+  | RelayableAction;
 
 export {
   channel,

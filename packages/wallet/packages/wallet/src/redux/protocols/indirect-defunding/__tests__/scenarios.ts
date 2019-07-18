@@ -16,6 +16,7 @@ import * as globalActions from '../../../actions';
 import { defundRequested } from '../../actions';
 
 const processId = 'processId';
+const protocolLocator = [];
 
 const twoThree = [
   { address: asAddress, wei: bigNumberify(2).toHexString() },
@@ -121,22 +122,27 @@ const playerBWaitForConclude = {
 export const ledgerUpdate0Received = globalActions.commitmentReceived({
   processId,
   signedCommitment: ledger6,
+  protocolLocator,
 });
 const ledgerUpdate1Received = globalActions.commitmentReceived({
   processId,
   signedCommitment: ledger7,
+  protocolLocator,
 });
 const conclude0Received = globalActions.commitmentReceived({
   processId,
   signedCommitment: ledger8,
+  protocolLocator,
 });
 const conclude1Received = globalActions.commitmentReceived({
   processId,
   signedCommitment: ledger9,
+  protocolLocator,
 });
 const invalidLedgerUpdateReceived = globalActions.commitmentReceived({
   processId,
   signedCommitment: ledger5,
+  protocolLocator,
 });
 // -----------
 // Scenarios
@@ -149,7 +155,7 @@ export const playerAHappyPath = {
       defundRequested({
         channelId,
       }),
-      globalActions.commitmentReceived({ processId, signedCommitment: ledger6 }),
+      globalActions.commitmentReceived({ processId, signedCommitment: ledger6, protocolLocator }),
     ],
   },
   waitForLedgerUpdate: {

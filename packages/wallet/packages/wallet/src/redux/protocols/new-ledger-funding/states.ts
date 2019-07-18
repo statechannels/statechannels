@@ -3,6 +3,7 @@ import { StateConstructor } from '../../utils';
 import { DirectFundingState } from '../direct-funding/states';
 import { AdvanceChannelState } from '../advance-channel';
 import { ConsensusUpdateState } from '../consensus-update';
+import { ProtocolLocator } from '../../../communication';
 
 // -------
 // States
@@ -16,34 +17,32 @@ export interface Failure {
   type: 'NewLedgerFunding.Failure';
 }
 
-export interface WaitForPreFundSetup {
-  type: 'NewLedgerFunding.WaitForPreFundSetup';
+interface Base {
   channelId: string;
   processId: string;
+  protocolLocator: ProtocolLocator;
+}
+
+export interface WaitForPreFundSetup extends Base {
+  type: 'NewLedgerFunding.WaitForPreFundSetup';
   preFundSetupState: AdvanceChannelState;
 }
 
-export interface WaitForDirectFunding {
+export interface WaitForDirectFunding extends Base {
   type: 'NewLedgerFunding.WaitForDirectFunding';
-  channelId: string;
   ledgerId: string;
-  processId: string;
   directFundingState: DirectFundingState;
   postFundSetupState: AdvanceChannelState;
 }
-export interface WaitForPostFundSetup {
+export interface WaitForPostFundSetup extends Base {
   type: 'NewLedgerFunding.WaitForPostFundSetup';
-  channelId: string;
   ledgerId: string;
-  processId: string;
   postFundSetupState: AdvanceChannelState;
   consensusUpdateState: ConsensusUpdateState;
 }
-export interface WaitForLedgerUpdate {
+export interface WaitForLedgerUpdate extends Base {
   type: 'NewLedgerFunding.WaitForLedgerUpdate';
-  channelId: string;
   ledgerId: string;
-  processId: string;
   consensusUpdateState: ConsensusUpdateState;
 }
 // ------------
@@ -100,6 +99,14 @@ export function isNewLedgerFundingState(state: ProtocolState): state is NewLedge
   );
 }
 
+export function isSuccess(state: NewLedgerFundingState): state is Success {
+  return state.type === 'NewLedgerFunding.Success';
+}
+
+export function isFailure(state: NewLedgerFundingState): state is Failure {
+  return state.type === 'NewLedgerFunding.Failure';
+}
+
 export function isTerminal(state: NewLedgerFundingState): state is Failure | Success {
-  return state.type === 'NewLedgerFunding.Failure' || state.type === 'NewLedgerFunding.Success';
+  return isSuccess(state) || isFailure(state);
 }

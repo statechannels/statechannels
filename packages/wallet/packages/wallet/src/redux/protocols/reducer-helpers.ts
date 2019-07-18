@@ -10,7 +10,7 @@ import { CommitmentType } from 'fmg-core/lib/commitment';
 import * as magmoWalletClient from 'magmo-wallet-client';
 import { getLastCommitment, nextParticipant, Commitments } from '../channel-store';
 import { Commitment } from '../../domain';
-import { sendCommitmentsReceived } from '../../communication';
+import { sendCommitmentsReceived, ProtocolLocator } from '../../communication';
 import { ourTurn as ourTurnOnChannel } from '../channel-store';
 export const updateChannelState = (
   sharedData: SharedData,
@@ -93,7 +93,7 @@ export function sendCommitments(
   sharedData: SharedData,
   processId: string,
   channelId: string,
-  protocolLocator: string,
+  protocolLocator: ProtocolLocator,
 ): SharedData {
   const channel = getExistingChannel(sharedData, channelId);
   const { participants, ourIndex } = channel;

@@ -22,7 +22,6 @@ export const DIRECT_FUNDING = 'FUNDING_TYPE.DIRECT';
 export interface BaseDirectFundingState {
   processId: string;
   safeToDepositLevel: string;
-  type: ChannelFundingStatus;
   totalFundingRequired: string;
   requiredDeposit: string;
   channelId: string;
@@ -60,7 +59,6 @@ export const baseDirectFundingState: StateConstructor<BaseDirectFundingState> = 
     channelId,
     ourIndex,
     safeToDepositLevel,
-    type: channelFundingStatus,
   } = params;
   return {
     processId,
@@ -69,7 +67,6 @@ export const baseDirectFundingState: StateConstructor<BaseDirectFundingState> = 
     channelId,
     ourIndex,
     safeToDepositLevel,
-    type: channelFundingStatus,
   };
 };
 
@@ -93,7 +90,6 @@ export function waitForDepositTransaction(
 export const waitForFunding: StateConstructor<WaitForFunding> = params => {
   return {
     ...baseDirectFundingState(params),
-    channelFunded: params.channelFunded,
     type: 'DirectFunding.WaitForFunding',
   };
 };

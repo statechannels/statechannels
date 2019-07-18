@@ -34,7 +34,6 @@ describe('happy path', () => {
 
   describeScenarioStep(scenario.waitForFunding, () => {
     const { state, sharedData, action } = scenario.waitForFunding;
-
     const result = reducer(state, sharedData, action);
 
     itTransitionsTo(result, 'Funding.PlayerA.WaitForPostFundSetup');
@@ -42,7 +41,6 @@ describe('happy path', () => {
 
   describeScenarioStep(scenario.waitForPostFundSetup, () => {
     const { state, sharedData, action } = scenario.waitForPostFundSetup;
-
     const result = reducer(state, sharedData, action);
 
     itTransitionsTo(result, 'Funding.PlayerA.WaitForSuccessConfirmation');

@@ -16,6 +16,9 @@ import {
   preSuccessState as newLedgerPreSuccess,
   successTrigger as newLedgerFundingSuccessTrigger,
 } from '../../new-ledger-funding/__tests__';
+import { INDIRECT_FUNDING_PROTOCOL_LOCATOR } from '../reducer';
+import { prependToLocator } from '../..';
+import { EmbeddedProtocol } from '../../../../communication';
 
 const processId = 'processId';
 
@@ -29,6 +32,7 @@ const props = {
   processId,
   targetAllocation: oneThree.map(o => o.wei),
   targetDestination: oneThree.map(o => o.address),
+  protocolLocator: INDIRECT_FUNDING_PROTOCOL_LOCATOR,
 };
 const ledger4 = ledgerCommitment({ turnNum: 4, balances: oneThree });
 const ledger5 = ledgerCommitment({ turnNum: 5, balances: oneThree });
@@ -63,7 +67,7 @@ export const newLedgerFundingHappyPath = {
   initialize: { ...props, sharedData: newLedgerFundingSharedData },
   waitForNewLedgerFunding: {
     state: waitForNewLedgerFunding,
-    action: newLedgerFundingSuccessTrigger,
+    action: prependToLocator(newLedgerFundingSuccessTrigger, EmbeddedProtocol.NewLedgerFunding),
     sharedData: newLedgerPreSuccess.sharedData,
   },
 };

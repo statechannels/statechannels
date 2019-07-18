@@ -1,5 +1,6 @@
-import { WalletAction, isCommonAction } from '../../../actions';
+import { WalletAction } from '../../../actions';
 import { ActionConstructor } from '../../../utils';
+import { isCommonAction } from '../../../../communication';
 
 // -------
 // Actions

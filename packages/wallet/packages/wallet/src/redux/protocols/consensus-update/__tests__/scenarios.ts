@@ -150,41 +150,42 @@ const threePlayerWaitForUpdate = (clearedToSend, updateSent) => {
 // ------
 // Actions
 // ------
+const protocolLocator = CONSENSUS_UPDATE_PROTOCOL_LOCATOR;
 const twoPlayerUpdate0Received = commitmentsReceived({
   processId,
   signedCommitments: [ledger6],
-  protocolLocator: CONSENSUS_UPDATE_PROTOCOL_LOCATOR,
+  protocolLocator,
 });
 const twoPlayerUpdate1Received = commitmentsReceived({
   processId,
   signedCommitments: [ledger6, ledger7],
-  protocolLocator: CONSENSUS_UPDATE_PROTOCOL_LOCATOR,
+  protocolLocator,
 });
 const twoPlayerInvalidUpdateReceived = commitmentsReceived({
   processId,
   signedCommitments: [ledger20],
-  protocolLocator: CONSENSUS_UPDATE_PROTOCOL_LOCATOR,
+  protocolLocator,
 });
 
 const threePlayerUpdate0Received = commitmentsReceived({
   processId,
   signedCommitments: [threePlayerLedger7, threePlayerLedger8, threePlayerLedger9],
-  protocolLocator: CONSENSUS_UPDATE_PROTOCOL_LOCATOR,
+  protocolLocator,
 });
 const threePlayerUpdate1Received = commitmentsReceived({
   processId,
   signedCommitments: [threePlayerLedger8, threePlayerLedger9, threePlayerLedger10],
-  protocolLocator: CONSENSUS_UPDATE_PROTOCOL_LOCATOR,
+  protocolLocator,
 });
 
 const threePlayerUpdate2Received = commitmentsReceived({
   processId,
   signedCommitments: [threePlayerLedger9, threePlayerLedger10, threePlayerLedger11],
-  protocolLocator: CONSENSUS_UPDATE_PROTOCOL_LOCATOR,
+  protocolLocator,
 });
 const clearedToSendAction = clearedToSend({
   processId,
-  protocolLocator: CONSENSUS_UPDATE_PROTOCOL_LOCATOR,
+  protocolLocator,
 });
 export const twoPlayerAHappyPath = {
   initialize: {

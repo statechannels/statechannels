@@ -90,7 +90,11 @@ const indirectFundedSecondConcludeReceived = {
 // -------
 const concludeSent = actions.concludeApproved({ processId });
 const acknowledged = actions.acknowledged({ processId });
-const commitmentReceivedAction = commitmentReceived({ processId, signedCommitment: app53 });
+const commitmentReceivedAction = commitmentReceived({
+  processId,
+  signedCommitment: app53,
+  protocolLocator: [],
+});
 const defundChosen = actions.defundChosen({ processId });
 const keepOpenChosen = actions.keepOpenChosen({ processId });
 const cancelled = actions.cancelled({ processId });
