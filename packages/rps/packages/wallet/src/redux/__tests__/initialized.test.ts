@@ -7,7 +7,7 @@ import { TwoPartyPlayerIndex } from '../types';
 import * as fundProtocol from '../protocols/funding';
 import { fundingRequested } from '../protocols/actions';
 import * as adjudicatorState from '../adjudicator-state/reducer';
-import { WalletProtocol, strategyApproved } from '../../communication';
+import { ProcessProtocol, strategyApproved } from '../../communication';
 import { channelId } from '../../domain/commitments/__tests__';
 const defaults = {
   ...states.EMPTY_SHARED_DATA,
@@ -51,7 +51,7 @@ describe('when a ProcessAction arrives', () => {
   const protocolState = {};
   const processState: states.ProcessState = {
     processId,
-    protocol: WalletProtocol.Funding,
+    protocol: ProcessProtocol.Funding,
     channelsToMonitor: [],
     protocolState,
   };

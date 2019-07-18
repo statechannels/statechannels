@@ -10,8 +10,9 @@ import { channelFromCommitments } from '../../../channel-store/channel-state/__t
 import { appCommitment, twoThree } from '../../../../domain/commitments/__tests__';
 import { CONSENSUS_LIBRARY_ADDRESS } from '../../../../constants';
 import { PlayerIndex } from 'magmo-wallet-client/lib/wallet-instructions';
-import { EXISTING_LEDGER_FUNDING_PROTOCOL_LOCATOR } from '../../existing-ledger-funding/reducer';
-import { CONSENSUS_UPDATE_PROTOCOL_LOCATOR } from '../../consensus-update/reducer';
+import { makeLocator, prependToLocator } from '../..';
+import { EmbeddedProtocol } from '../../../../communication';
+import { ADVANCE_CHANNEL_PROTOCOL_LOCATOR } from '../../advance-channel/reducer';
 
 // ---------
 // Test data
@@ -48,6 +49,7 @@ const initializeArgs = {
   commitmentType: CommitmentType.PreFundSetup,
   targetChannelId,
   hubAddress,
+  protocolLocator: makeLocator(EmbeddedProtocol.VirtualFunding, ADVANCE_CHANNEL_PROTOCOL_LOCATOR),
 };
 
 const props = {
@@ -57,7 +59,7 @@ const props = {
   startingDestination,
   hubAddress,
   ourIndex: PlayerIndex.A,
-  jointChannelId,
+  protocolLocator: makeLocator(EmbeddedProtocol.VirtualFunding),
   ourAddress: asAddress,
 };
 
@@ -81,14 +83,17 @@ const scenarioStates = {
   waitForGuarantorChannel1: states.waitForGuarantorChannel({
     ...props,
     guarantorChannel: preFund.preSuccess.state,
+    jointChannelId,
   }),
   waitForGuarantorChannel2: states.waitForGuarantorChannel({
     ...props,
     guarantorChannel: postFund.preSuccess.state,
+    jointChannelId,
   }),
   waitForGuarantorFunding: states.waitForGuarantorFunding({
     ...props,
     indirectGuarantorFunding: indirectFundingPreSuccess.state,
+    jointChannelId,
   }),
   waitForApplicationFunding: states.waitForApplicationFunding({
     ...props,
@@ -116,47 +121,37 @@ export const happyPath = {
   },
   openJ: {
     state: scenarioStates.waitForJointChannel1,
-    action: { ...preFund.preSuccess.trigger, protocolLocator: states.JOINT_CHANNEL_DESCRIPTOR },
+    action: prependToLocator(preFund.preSuccess.trigger, EmbeddedProtocol.VirtualFunding),
     sharedData: setChannel(preFund.preSuccess.sharedData, appChannel),
   },
   prepareJ: {
     state: scenarioStates.waitForJointChannel2,
-    action: { ...postFund.preSuccess.trigger, protocolLocator: states.JOINT_CHANNEL_DESCRIPTOR },
+    action: prependToLocator(postFund.preSuccess.trigger, EmbeddedProtocol.VirtualFunding),
     sharedData: setChannel(postFund.preSuccess.sharedData, appChannel),
     jointChannelId,
   },
   openG: {
     state: scenarioStates.waitForGuarantorChannel1,
-    action: { ...preFund.preSuccess.trigger, protocolLocator: states.GUARANTOR_CHANNEL_DESCRIPTOR },
+    action: prependToLocator(preFund.preSuccess.trigger, EmbeddedProtocol.VirtualFunding),
     sharedData: setChannel(preFund.preSuccess.sharedData, appChannel),
   },
   prepareG: {
     state: scenarioStates.waitForGuarantorChannel2,
-    action: {
-      ...postFund.preSuccess.trigger,
-      protocolLocator: states.GUARANTOR_CHANNEL_DESCRIPTOR,
-    },
+    action: prependToLocator(postFund.preSuccess.trigger, EmbeddedProtocol.VirtualFunding),
     sharedData: setChannel(postFund.preSuccess.sharedData, appChannel),
   },
   fundG: {
     appChannelId: appChannel.channelId,
     state: scenarioStates.waitForGuarantorFunding,
-    action: {
-      ...indirectFundingPreSuccess.action,
-      protocolLocator: `${
-        states.INDIRECT_GUARANTOR_FUNDING_DESCRIPTOR
-      }/${EXISTING_LEDGER_FUNDING_PROTOCOL_LOCATOR}`,
-    },
+    action: prependToLocator(indirectFundingPreSuccess.action, [
+      EmbeddedProtocol.VirtualFunding,
+      EmbeddedProtocol.IndirectFunding,
+    ]),
     sharedData: indirectFundingPreSuccess.sharedData,
   },
   fundApp: {
     state: scenarioStates.waitForApplicationFunding,
-    action: {
-      ...consensusUpdatePreSuccess.action,
-      protocolLocator: `${
-        states.INDIRECT_APPLICATION_FUNDING_DESCRIPTOR
-      }/${CONSENSUS_UPDATE_PROTOCOL_LOCATOR}`,
-    },
+    action: prependToLocator(consensusUpdatePreSuccess.action, EmbeddedProtocol.VirtualFunding),
     sharedData: consensusUpdatePreSuccess.sharedData,
   },
 };

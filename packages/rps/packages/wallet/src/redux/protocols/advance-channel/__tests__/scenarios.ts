@@ -4,12 +4,12 @@ import { ThreePartyPlayerIndex as PlayerIndex } from '../../../types';
 import { EMPTY_SHARED_DATA, setChannels } from '../../../state';
 import { channelFromCommitments } from '../../../channel-store/channel-state/__tests__';
 import * as scenarios from '../../../../domain/commitments/__tests__';
-import { commitmentsReceived } from '../../../../communication';
+import { commitmentsReceived, EmbeddedProtocol } from '../../../../communication';
 import { CommitmentType } from '../../../../domain';
 import { clearedToSend } from '../actions';
-import { ADVANCE_CHANNEL_PROTOCOL_LOCATOR } from '..';
 import { bigNumberify } from 'ethers/utils';
 import { CONSENSUS_LIBRARY_ADDRESS } from '../../../../constants';
+import { makeLocator } from '../..';
 
 // ---------
 // Test data
@@ -50,7 +50,7 @@ const initializeArgs = {
   appAttributes,
   processId,
   clearedToSend: true,
-  protocolLocator: ADVANCE_CHANNEL_PROTOCOL_LOCATOR,
+  protocolLocator: makeLocator(EmbeddedProtocol.AdvanceChannel),
 };
 
 const props = {
@@ -159,7 +159,7 @@ const bSentPostFundSetupCommitment = setChannels(EMPTY_SHARED_DATA, [
 
 const args = {
   processId,
-  protocolLocator: ADVANCE_CHANNEL_PROTOCOL_LOCATOR,
+  protocolLocator: makeLocator(EmbeddedProtocol.AdvanceChannel),
 };
 
 const receivePreFundSetupFromA = commitmentsReceived({
@@ -189,7 +189,7 @@ const receivePostFundSetupFromHub = commitmentsReceived({
 });
 const clearSending = clearedToSend({
   processId,
-  protocolLocator: 'locator',
+  protocolLocator: [],
 });
 // ---------
 // Scenarios
@@ -223,7 +223,7 @@ const existingArgs = {
   channelId,
   processId,
   commitmentType: CommitmentType.PostFundSetup,
-  protocolLocator: ADVANCE_CHANNEL_PROTOCOL_LOCATOR,
+  protocolLocator: makeLocator(EmbeddedProtocol.AdvanceChannel),
 };
 
 const existingArgsA = { ...existingArgs, ourIndex: PlayerIndex.A };

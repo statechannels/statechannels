@@ -20,12 +20,8 @@ const itTransitionsTo = (
   });
 };
 
-const itTransitionsSubstateTo = (
-  result: any,
-  substate: states.SubstateDescriptor,
-  type: string,
-) => {
-  it(`transitions to ${type}`, () => {
+const itTransitionsSubstateTo = (result: any, substate: string, type: string) => {
+  it(`transitions ${substate} to ${type}`, () => {
     expect(result[substate].type).toEqual(type);
   });
 };
@@ -46,7 +42,7 @@ describe('happyPath', () => {
     itSendsTheseCommitments(result, [{ commitment: { turnNum: 0, allocation } }]);
   });
 
-  describe(scenarioStepDescription(scenario.openJ), () => {
+  describe('openJ', () => {
     const { state, sharedData, action } = scenario.openJ;
     const { protocolState, sharedData: result } = reducer(state, sharedData, action);
 

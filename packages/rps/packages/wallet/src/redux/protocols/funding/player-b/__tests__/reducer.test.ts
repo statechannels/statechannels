@@ -13,10 +13,10 @@ import { FundingStateType } from '../../states';
 
 describe('happy path', () => {
   const scenario = scenarios.happyPath;
+  const { processId, opponentAddress } = scenario;
 
   describeScenarioStep(scenario.waitForStrategyProposal, () => {
     const { state, sharedData, action } = scenario.waitForStrategyProposal;
-
     const result = reducer(state, sharedData, action);
 
     itTransitionsTo(result, 'Funding.PlayerB.WaitForStrategyApproval');
@@ -24,27 +24,26 @@ describe('happy path', () => {
 
   describeScenarioStep(scenario.waitForStrategyApproval, () => {
     const { state, sharedData, action } = scenario.waitForStrategyApproval;
-
     const result = reducer(state, sharedData, action);
 
     itTransitionsTo(result, 'Funding.PlayerB.WaitForFunding');
-
-    const { processId, opponentAddress } = scenario;
     itSendsThisMessage(result, sendStrategyApproved(opponentAddress, processId));
   });
 
   describeScenarioStep(scenario.waitForFunding, () => {
     const { state, sharedData, action } = scenario.waitForFunding;
-
     const result = reducer(state, sharedData, action);
+
     itTransitionsTo(result, 'Funding.PlayerB.WaitForPostFundSetup');
   });
+
   describeScenarioStep(scenario.waitForPostFundSetup, () => {
     const { state, sharedData, action } = scenario.waitForPostFundSetup;
 
     const result = reducer(state, sharedData, action);
     itTransitionsTo(result, 'Funding.PlayerB.WaitForSuccessConfirmation');
   });
+
   describeScenarioStep(scenario.waitForSuccessConfirmation, () => {
     const { state, sharedData, action } = scenario.waitForSuccessConfirmation;
 
@@ -61,7 +60,6 @@ describe('When a strategy is rejected', () => {
 
   describeScenarioStep(scenario.waitForStrategyApproval, () => {
     const { state, sharedData, action } = scenario.waitForStrategyApproval;
-
     const result = reducer(state, sharedData, action);
 
     itTransitionsTo(result, 'Funding.PlayerB.WaitForStrategyProposal');
@@ -73,7 +71,6 @@ describe('when cancelled by the opponent', () => {
 
   describeScenarioStep(scenario.waitForStrategyProposal, () => {
     const { state, sharedData, action } = scenario.waitForStrategyProposal;
-
     const result = reducer(state, sharedData, action);
 
     itTransitionsTo(result, 'Funding.PlayerB.Failure');
@@ -82,7 +79,6 @@ describe('when cancelled by the opponent', () => {
 
   describeScenarioStep(scenario.waitForStrategyApproval, () => {
     const { state, sharedData, action } = scenario.waitForStrategyApproval;
-
     const result = reducer(state, sharedData, action);
 
     itTransitionsTo(result, 'Funding.PlayerB.Failure');
@@ -95,7 +91,6 @@ describe('when cancelled by the user', () => {
 
   describeScenarioStep(scenario.waitForStrategyProposal, () => {
     const { state, sharedData, action } = scenario.waitForStrategyProposal;
-
     const result = reducer(state, sharedData, action);
 
     itTransitionsTo(result, 'Funding.PlayerB.Failure');

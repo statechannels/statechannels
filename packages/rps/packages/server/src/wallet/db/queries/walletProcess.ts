@@ -1,7 +1,7 @@
 import {
   ConcludeInstigated,
   getProcessId,
-  WalletProtocol,
+  ProcessProtocol,
 } from 'magmo-wallet/lib/src/communication';
 import WalletProcess from '../../models/WalletProcess';
 
@@ -22,7 +22,7 @@ export async function startFundingProcess({
   processId: string;
   theirAddress: string;
 }) {
-  return WalletProcess.fromJson({ processId, theirAddress, protocol: WalletProtocol.Funding })
+  return WalletProcess.fromJson({ processId, theirAddress, protocol: ProcessProtocol.Funding })
     .$query()
     .insert()
     .first();
@@ -42,7 +42,7 @@ export async function startConcludeProcess({
     return walletProcess;
   }
 
-  return WalletProcess.fromJson({ processId, theirAddress, protocol: WalletProtocol.Concluding })
+  return WalletProcess.fromJson({ processId, theirAddress, protocol: ProcessProtocol.Concluding })
     .$query()
     .insert()
     .first();

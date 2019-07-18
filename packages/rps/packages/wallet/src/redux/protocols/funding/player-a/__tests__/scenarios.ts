@@ -15,6 +15,8 @@ import { preSuccess as indirectFundingPreSuccess } from '../../../indirect-fundi
 import { preSuccess as advanceChannelPreSuccess } from '../../../advance-channel/__tests__';
 import { bigNumberify } from 'ethers/utils';
 import { channelFromCommitments } from '../../../../channel-store/channel-state/__tests__';
+import { prependToLocator } from '../../..';
+import { EmbeddedProtocol } from '../../../../../communication';
 
 // To test all paths through the state machine we will use 4 different scenarios:
 //
@@ -82,7 +84,10 @@ const waitForSuccessConfirmation = states.waitForSuccessConfirmation(props);
 const strategyChosen = actions.strategyChosen({ processId, strategy });
 const strategyApproved = actions.strategyApproved({ processId });
 const successConfirmed = actions.fundingSuccessAcknowledged({ processId });
-const fundingSuccess = indirectFundingPreSuccess.action;
+const fundingSuccess = prependToLocator(
+  indirectFundingPreSuccess.action,
+  EmbeddedProtocol.IndirectFunding,
+);
 const strategyRejected = actions.strategyRejected({ processId });
 const cancelledByA = actions.cancelled({ processId, by: TwoPartyPlayerIndex.A });
 const cancelledByB = actions.cancelled({ processId, by: TwoPartyPlayerIndex.B });
