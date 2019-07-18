@@ -1,20 +1,20 @@
 import { Commitment, CommitmentType, sign, Signature, toHex } from 'fmg-core';
 import {
-  ALLOCATION,
-  DESTINATION,
-  DUMMY_RULES_ADDRESS,
-  FUNDED_CHANNEL_NONCE,
-  PARTICIPANT_1_PRIVATE_KEY,
-  PARTICIPANTS,
-  STAKE,
-} from '../../../constants';
-import {
   app_response,
   beginning_app_phase_rps_channel,
   constructors,
   funded_rps_channel,
   pre_fund_setup_1_response,
 } from '../../../test/rps_test_data';
+import {
+  allocation,
+  DESTINATION,
+  DUMMY_RULES_ADDRESS,
+  FUNDED_CHANNEL_NONCE,
+  PARTICIPANT_1_PRIVATE_KEY,
+  PARTICIPANTS,
+  STAKE,
+} from '../../../test/test-constants';
 import { default_channel } from '../../../test/test_data';
 import { errors } from '../../../wallet';
 import { validSignature } from '../../../wallet/services/channelManagement';
@@ -31,7 +31,7 @@ const base = {
   channel: default_channel,
   stake: STAKE,
   turnNum: 0,
-  allocation: ALLOCATION,
+  allocation: allocation(2),
   destination: DESTINATION,
   commitmentCount: 0,
   commitmentType: CommitmentType.PreFundSetup,

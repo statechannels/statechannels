@@ -1,6 +1,5 @@
 import { ethers } from 'ethers';
-import { Address, CommitmentType, Signature, Uint256, Uint32 } from 'fmg-core';
-import { channelID } from 'fmg-core/lib/channel';
+import { Address, channelID, CommitmentType, Signature, Uint256, Uint32 } from 'fmg-core';
 import { AppCommitment, CommitmentString } from '../../../types';
 import errors from '../../errors';
 import AllocatorChannel from '../../models/allocatorChannel';

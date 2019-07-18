@@ -1,25 +1,23 @@
-import { Channel, Commitment, CommitmentType, sign, toHex } from 'fmg-core';
-import { channelID } from 'fmg-core/lib/channel';
+import { Channel, channelID, Commitment, CommitmentType, sign, toHex } from 'fmg-core';
 import { bytesFromAppAttributes } from 'fmg-nitro-adjudicator/lib/consensus-app';
 import { AppCommitment } from 'fmg-nitro-adjudicator/lib/consensus-app';
+import { HUB_ADDRESS } from '../constants';
+import { asCoreCommitment, LedgerCommitment } from '../wallet/services/ledger-commitment';
 import {
-  ALLOCATION,
-  ALLOCATION_3,
+  allocation,
   BEGINNING_APP_CHANNEL_NONCE,
   DESTINATION,
   DESTINATION_3,
   DUMMY_RULES_ADDRESS,
   FUNDED_CHANNEL_NONCE,
   FUNDED_CHANNEL_NONCE_3,
-  HUB_ADDRESS,
   NONCE,
   ONGOING_APP_CHANNEL_NONCE,
   PARTICIPANT_1_ADDRESS,
   PARTICIPANT_1_PRIVATE_KEY,
   PARTICIPANTS,
   PARTICIPANTS_3,
-} from '../constants';
-import { asCoreCommitment, LedgerCommitment } from '../wallet/services/ledger-commitment';
+} from './test-constants';
 
 export const default_channel: Channel = {
   channelType: DUMMY_RULES_ADDRESS,
@@ -66,12 +64,12 @@ const consensus_app_attrs = (n: number) => ({
 });
 
 const base = {
-  allocation: ALLOCATION,
+  allocation: allocation(2),
   destination: DESTINATION,
 };
 
 const base_3 = {
-  allocation: ALLOCATION_3,
+  allocation: allocation(3),
   destination: DESTINATION_3,
 };
 
@@ -144,7 +142,7 @@ const base_response = {
     channelType: DUMMY_RULES_ADDRESS,
     participants: PARTICIPANTS,
   },
-  allocation: ALLOCATION,
+  allocation: allocation(2),
   destination: DESTINATION,
 };
 
@@ -154,7 +152,7 @@ const base_response_3 = {
     channelType: DUMMY_RULES_ADDRESS,
     participants: PARTICIPANTS_3,
   },
-  allocation: ALLOCATION_3,
+  allocation: allocation(3),
   destination: DESTINATION_3,
 };
 
@@ -219,7 +217,7 @@ export const created_pre_fund_setup_1: LedgerCommitment = {
   turnNum: 1,
   commitmentCount: 1,
   commitmentType: CommitmentType.PreFundSetup,
-  allocation: ALLOCATION,
+  allocation: allocation(2),
   destination: DESTINATION,
   appAttributes: consensus_app_attrs(1),
 };
@@ -229,7 +227,7 @@ export const created_pre_fund_setup_3_2: LedgerCommitment = {
   turnNum: 2,
   commitmentCount: 2,
   commitmentType: CommitmentType.PreFundSetup,
-  allocation: ALLOCATION_3,
+  allocation: allocation(3),
   destination: DESTINATION_3,
   appAttributes: consensus_app_attrs(2),
 };

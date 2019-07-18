@@ -1,18 +1,19 @@
 import { errors } from '../../..';
 import {
-  SEEDED_ALLOCATIONS,
-  SEEDED_CHANNELS,
-  SEEDED_COMMITMENTS,
-  SEEDED_PARTICIPANTS,
-} from '../../../../constants';
-import {
   constructors as testDataConstructors,
   created_channel,
   funded_channel,
 } from '../../../../test/test_data';
 import AllocatorChannel from '../../../models/allocatorChannel';
 import knex from '../../connection';
-import { constructors as seedDataConstructors, seeds } from '../../seeds/2_allocator_channels_seed';
+import {
+  constructors as seedDataConstructors,
+  SEEDED_ALLOCATIONS,
+  SEEDED_CHANNELS,
+  SEEDED_COMMITMENTS,
+  SEEDED_PARTICIPANTS,
+  seeds,
+} from '../../seeds/2_allocator_channels_seed';
 import { queries } from '../allocator_channels';
 
 describe('updateAllocatorChannel', () => {

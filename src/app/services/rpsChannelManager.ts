@@ -1,10 +1,9 @@
-import { Commitment, CommitmentType, Signature } from 'fmg-core';
+import { channelID, Commitment, CommitmentType, Signature } from 'fmg-core';
 import { errors, SignedCommitment } from '../../wallet';
 import Wallet from '../../wallet';
 import AllocatorChannel from '../../wallet/models/allocatorChannel';
 
 import { delay } from 'bluebird';
-import { channelID } from 'fmg-core/lib/channel';
 import AllocatorChannelCommitment from '../../wallet/models/allocatorChannelCommitment';
 import {
   asCoreCommitment,

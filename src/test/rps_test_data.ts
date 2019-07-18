@@ -19,7 +19,7 @@ import {
   Weapon,
 } from '../app/services/rps-commitment';
 import {
-  ALLOCATION,
+  allocation as constAllocation,
   BEGINNING_RPS_APP_CHANNEL_NONCE,
   DESTINATION,
   DUMMY_RULES_ADDRESS,
@@ -27,7 +27,7 @@ import {
   PARTICIPANT_1_PRIVATE_KEY,
   PARTICIPANTS,
   STAKE,
-} from '../constants';
+} from './test-constants';
 import { default_channel } from './test_data';
 
 // Commitment Constructors
@@ -215,7 +215,7 @@ export const base_rps_commitment: BaseWithStake = {
     channelType: DUMMY_RULES_ADDRESS,
     participants: PARTICIPANTS,
   },
-  allocation: ALLOCATION,
+  allocation: constAllocation(2),
   destination: DESTINATION,
   turnNum: 0,
   commitmentCount: 0,

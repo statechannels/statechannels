@@ -1,7 +1,6 @@
 import { ethers } from 'ethers';
-import { Signature } from 'fmg-core';
-import { channelID } from 'fmg-core/lib/channel';
-import { WalletProtocol } from 'magmo-wallet/lib/src/communication';
+import { channelID, Signature } from 'fmg-core';
+import { ProcessProtocol } from 'magmo-wallet/lib/src/communication';
 import { errors } from '../../wallet';
 import { startFundingProcess } from '../../wallet/db/queries/walletProcess';
 import { updateRPSChannel } from '../services/rpsChannelManager';
@@ -16,7 +15,7 @@ export async function handleGameRequest(ctx) {
 
     if (commitment.turnNum <= 1) {
       const theirAddress = commitment.channel.participants[0];
-      const processId = `${WalletProtocol.Funding}-${channelID(commitment.channel)}`;
+      const processId = `${ProcessProtocol.Funding}-${channelID(commitment.channel)}`;
       await startFundingProcess({ processId, theirAddress });
     }
     body = { status: 'success', commitment, signature };
