@@ -1,7 +1,7 @@
 import { OpenChannelState, ChannelState, isFullyOpen, getLastCommitment } from './channel-store';
 import * as walletStates from './state';
 import { SharedData, FundingState } from './state';
-import { WalletProtocol } from '../communication';
+import { ProcessProtocol } from '../communication';
 import { CONSENSUS_LIBRARY_ADDRESS } from '../constants';
 import { Commitment } from '../domain';
 
@@ -97,7 +97,7 @@ export const getChannelFundingState = (
 export const getProtocolForProcessId = (
   state: walletStates.Initialized,
   processId: string,
-): WalletProtocol => {
+): ProcessProtocol => {
   if (state.processStore[processId]) {
     throw new Error(`No process state for process Id`);
   } else {

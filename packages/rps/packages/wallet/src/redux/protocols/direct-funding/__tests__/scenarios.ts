@@ -80,10 +80,7 @@ export const aHappyPath = {
   },
 
   waitForFunding: {
-    state: states.waitForFunding({
-      ...defaultsForA,
-      channelFunded: false,
-    }),
+    state: states.waitForFunding(defaultsForA),
     sharedData: sharedData(),
     action: bFundingReceivedEvent,
   },
@@ -105,10 +102,7 @@ export const bHappyPath = {
     action: transactionSubmissionScenarios.successTrigger,
   },
   waitForFunding: {
-    state: states.waitForFunding({
-      ...defaultsForB,
-      channelFunded: false,
-    }),
+    state: states.waitForFunding(defaultsForB),
     sharedData: sharedData(),
     action: bFundingReceivedEvent,
   },

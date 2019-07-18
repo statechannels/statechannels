@@ -1,9 +1,7 @@
 import { SideEffects } from './outbox/state';
 
 // Constructs a type that must include all properties of T apart from 'type', 'stage', and 'player'
-export type Properties<T> = Pick<T, Exclude<keyof T, 'type' | 'stage' | 'player'>> & {
-  [x: string]: any;
-};
+export type Properties<T> = Pick<T, Exclude<keyof T, 'type' | 'stage' | 'player'>>;
 
 // Constructs the type of our state constructors
 //

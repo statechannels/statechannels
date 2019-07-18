@@ -26,7 +26,7 @@ import { WalletEvent } from 'magmo-wallet-client';
 import { TransactionRequest } from 'ethers/providers';
 import { AdjudicatorState } from './adjudicator-state/state';
 import { SignedCommitment, Commitment } from '../domain';
-import { WalletProtocol } from '../communication';
+import { ProcessProtocol } from '../communication';
 
 export type WalletState = WaitForLogin | MetaMaskError | Initialized;
 
@@ -96,7 +96,7 @@ export interface ProcessStore {
 }
 export interface ProcessState {
   processId: string;
-  protocol: WalletProtocol;
+  protocol: ProcessProtocol;
   protocolState: any;
   channelsToMonitor: string[];
 }

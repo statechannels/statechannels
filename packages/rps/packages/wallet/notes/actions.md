@@ -65,8 +65,8 @@ RelayableAction --> WALLET.COMMON.COMMITMENT_RECEIVED
 end
 
 subgraph CommonAction
-CommonAction --> WALLET.COMMON.MESSAGE_RECEIVED
 CommonAction --> WALLET.COMMON.COMMITMENT_RECEIVED
+CommonAction --> WALLET.COMMON.COMMITMENTS_RECEIVED
 end
 
 subgraph FundingAction

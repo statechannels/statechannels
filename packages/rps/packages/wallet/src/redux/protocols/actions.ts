@@ -1,6 +1,6 @@
 import { TwoPartyPlayerIndex } from '../types';
 import { ActionConstructor } from '../utils';
-import { ConcludeInstigated, WalletProtocol } from '../../communication';
+import { ConcludeInstigated, ProcessProtocol } from '../../communication';
 import { WalletAction } from '../actions';
 export { BaseProcessAction } from '../../communication';
 
@@ -9,52 +9,52 @@ export { BaseProcessAction } from '../../communication';
 // -------
 export interface InitializeChannel {
   type: 'WALLET.NEW_PROCESS.INITIALIZE_CHANNEL';
-  protocol: WalletProtocol.Application;
+  protocol: ProcessProtocol.Application;
   channelId: string;
 }
 export interface FundingRequested {
   type: 'WALLET.NEW_PROCESS.FUNDING_REQUESTED';
   channelId: string;
   playerIndex: TwoPartyPlayerIndex;
-  protocol: WalletProtocol.Funding;
+  protocol: ProcessProtocol.Funding;
 }
 
 export interface ConcludeRequested {
   type: 'WALLET.NEW_PROCESS.CONCLUDE_REQUESTED';
   channelId: string;
-  protocol: WalletProtocol.Concluding;
+  protocol: ProcessProtocol.Concluding;
 }
 
 export interface DefundRequested {
   type: 'WALLET.NEW_PROCESS.DEFUND_REQUESTED';
   channelId: string;
-  protocol: WalletProtocol.Defunding;
+  protocol: ProcessProtocol.Defunding;
 }
 // -------
 // Constructors
 // -------
 export const initializeChannel: ActionConstructor<InitializeChannel> = p => ({
   type: 'WALLET.NEW_PROCESS.INITIALIZE_CHANNEL',
-  protocol: WalletProtocol.Application,
+  protocol: ProcessProtocol.Application,
   ...p,
 });
 
 export const fundingRequested: ActionConstructor<FundingRequested> = p => ({
   ...p,
   type: 'WALLET.NEW_PROCESS.FUNDING_REQUESTED',
-  protocol: WalletProtocol.Funding,
+  protocol: ProcessProtocol.Funding,
 });
 
 export const concludeRequested: ActionConstructor<ConcludeRequested> = p => ({
   ...p,
   type: 'WALLET.NEW_PROCESS.CONCLUDE_REQUESTED',
-  protocol: WalletProtocol.Concluding,
+  protocol: ProcessProtocol.Concluding,
 });
 
 export const defundRequested: ActionConstructor<DefundRequested> = p => ({
   ...p,
   type: 'WALLET.NEW_PROCESS.DEFUND_REQUESTED',
-  protocol: WalletProtocol.Defunding,
+  protocol: ProcessProtocol.Defunding,
 });
 
 // -------
