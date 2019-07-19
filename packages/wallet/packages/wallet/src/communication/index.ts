@@ -27,7 +27,7 @@ export const enum EmbeddedProtocol {
   IndirectDefunding = 'IndirectDefunding',
   IndirectFunding = 'IndirectFunding',
   LedgerTopUp = 'LedgerTopUp',
-  NewLedgerFunding = 'NewLedgerFunding',
+  NewLedgerChannel = 'NewLedgerChannel',
   VirtualFunding = 'VirtualFunding',
 }
 

@@ -1,4 +1,4 @@
-import { NewLedgerFundingAction, isNewLedgerFundingAction } from '../new-ledger-funding/actions';
+import { NewLedgerChannelAction, isNewLedgerChannelAction } from '../new-ledger-channel/actions';
 import {
   ExistingLedgerFundingAction,
   isExistingLedgerFundingAction,
@@ -6,10 +6,10 @@ import {
 import { WalletAction } from '../../actions';
 import { EmbeddedProtocol, routerFactory } from '../../../communication';
 
-export type IndirectFundingAction = NewLedgerFundingAction | ExistingLedgerFundingAction;
+export type IndirectFundingAction = NewLedgerChannelAction | ExistingLedgerFundingAction;
 
 export const isIndirectFundingAction = (action: WalletAction): action is IndirectFundingAction => {
-  return isNewLedgerFundingAction(action) || isExistingLedgerFundingAction(action);
+  return isNewLedgerChannelAction(action) || isExistingLedgerFundingAction(action);
 };
 
 export const routesToIndirectFunding = routerFactory(

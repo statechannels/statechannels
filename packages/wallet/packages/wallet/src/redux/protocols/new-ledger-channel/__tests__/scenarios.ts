@@ -7,7 +7,6 @@ import {
   preFailure as DFPreFailure,
   preSuccessA as DFPreSuccessA,
 } from '../../direct-funding/__tests__';
-import { twoPlayerPreSuccessA as CUPreSuccessA } from '../../consensus-update/__tests__/index';
 import { preSuccess as ACPreSuccess } from '../../advance-channel/__tests__/index';
 import {
   appCommitment,
@@ -59,14 +58,8 @@ const waitForDirectFunding = states.waitForDirectFunding({
   postFundSetupState: ACPreSuccess.state,
 });
 
-const waitForLedgerUpdate1 = states.waitForLedgerUpdate({
-  ...props,
-  consensusUpdateState: CUPreSuccessA.state,
-});
-
 const waitForPostFund1 = states.waitForPostFundSetup({
   ...props,
-  consensusUpdateState: CUPreSuccessA.state,
   postFundSetupState: ACPreSuccess.state,
 });
 const waitForPreFundSetupSharedData = _.merge(
@@ -118,11 +111,6 @@ export const happyPath = {
     state: waitForPostFund1,
     sharedData: waitForPostFundSharedData,
     action: prependToLocator(ACPreSuccess.trigger, protocolLocator),
-  },
-  waitForLedgerUpdate1: {
-    state: waitForLedgerUpdate1,
-    sharedData: CUPreSuccessA.sharedData,
-    action: CUPreSuccessA.action,
   },
 };
 

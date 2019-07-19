@@ -25,15 +25,10 @@ describe('existing ledger funding happy path', () => {
     );
     itTransitionsTo(result.protocolState, 'IndirectFunding.WaitForExistingLedgerFunding');
   });
-  describeScenarioStep(scenario.waitForExistingLedgerFunding, () => {
-    const { state, sharedData, action } = scenario.waitForExistingLedgerFunding;
-    const result = indirectFundingReducer(state, sharedData, action);
-    itTransitionsTo(result.protocolState, 'IndirectFunding.Success');
-  });
 });
 
 describe('new ledger funding happy path', () => {
-  const scenario = scenarios.newLedgerFundingHappyPath;
+  const scenario = scenarios.newLedgerChannelHappyPath;
 
   describe('when initializing', () => {
     const {
@@ -52,11 +47,17 @@ describe('new ledger funding happy path', () => {
       sharedData,
       protocolLocator,
     );
-    itTransitionsTo(result.protocolState, 'IndirectFunding.WaitForNewLedgerFunding');
+    itTransitionsTo(result.protocolState, 'IndirectFunding.WaitForNewLedgerChannel');
   });
 
-  describeScenarioStep(scenario.waitForNewLedgerFunding, () => {
-    const { state, sharedData, action } = scenario.waitForNewLedgerFunding;
+  describeScenarioStep(scenario.waitForNewLedgerChannel, () => {
+    const { state, sharedData, action } = scenario.waitForNewLedgerChannel;
+    const result = indirectFundingReducer(state, sharedData, action);
+    itTransitionsTo(result.protocolState, 'IndirectFunding.WaitForExistingLedgerFunding');
+  });
+
+  describeScenarioStep(scenario.waitForExistingLedgerFunding, () => {
+    const { state, sharedData, action } = scenario.waitForExistingLedgerFunding;
     const result = indirectFundingReducer(state, sharedData, action);
     itTransitionsTo(result.protocolState, 'IndirectFunding.Success');
   });

@@ -1,24 +1,22 @@
 import { NonTerminalExistingLedgerFundingState } from '../existing-ledger-funding';
 import { StateConstructor } from '../../utils';
-import { NonTerminalNewLedgerFundingState } from '../new-ledger-funding/states';
+import { NonTerminalNewLedgerChannelState } from '../new-ledger-channel/states';
 
-export interface WaitForNewLedgerFunding {
-  type: 'IndirectFunding.WaitForNewLedgerFunding';
+interface Base {
   processId: string;
-  newLedgerFundingState: NonTerminalNewLedgerFundingState;
   channelId: string;
   targetAllocation: string[];
   targetDestination: string[];
 }
+export interface WaitForNewLedgerChannel extends Base {
+  type: 'IndirectFunding.WaitForNewLedgerChannel';
+  newLedgerChannel: NonTerminalNewLedgerChannelState;
+}
 
-export interface WaitForExistingLedgerFunding {
+export interface WaitForExistingLedgerFunding extends Base {
   type: 'IndirectFunding.WaitForExistingLedgerFunding';
-  processId: string;
   existingLedgerFundingState: NonTerminalExistingLedgerFundingState;
-  channelId: string;
   ledgerId: string;
-  targetAllocation: string[];
-  targetDestination: string[];
 }
 
 export interface Failure {
@@ -30,8 +28,8 @@ export interface Success {
   type: 'IndirectFunding.Success';
 }
 
-export const waitForNewLedgerFunding: StateConstructor<WaitForNewLedgerFunding> = p => {
-  return { ...p, type: 'IndirectFunding.WaitForNewLedgerFunding' };
+export const waitForNewLedgerChannel: StateConstructor<WaitForNewLedgerChannel> = p => {
+  return { ...p, type: 'IndirectFunding.WaitForNewLedgerChannel' };
 };
 export const waitForExistingLedgerFunding: StateConstructor<WaitForExistingLedgerFunding> = p => {
   return { ...p, type: 'IndirectFunding.WaitForExistingLedgerFunding' };
@@ -46,7 +44,7 @@ export const failure: StateConstructor<Failure> = p => {
 };
 export type NonTerminalIndirectFundingState =
   | WaitForExistingLedgerFunding
-  | WaitForNewLedgerFunding;
+  | WaitForNewLedgerChannel;
 export type TerminalIndirectFundingState = Success | Failure;
 export type IndirectFundingState = NonTerminalIndirectFundingState | TerminalIndirectFundingState;
 export type IndirectFundingStateType = IndirectFundingState['type'];

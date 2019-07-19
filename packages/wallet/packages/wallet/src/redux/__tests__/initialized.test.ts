@@ -60,17 +60,17 @@ describe('when a ProcessAction arrives', () => {
   const action = strategyApproved({
     processId: '0xprocessId',
   });
-  const newLedgerFundingReducer = jest.fn(() => ({
+  const NewLedgerChannelReducer = jest.fn(() => ({
     protocolState: 'protocolState',
     sharedData: 'sharedData ',
   }));
   Object.defineProperty(fundProtocol, 'reducer', {
-    value: newLedgerFundingReducer,
+    value: NewLedgerChannelReducer,
   });
 
   walletReducer(state, action);
   it('calls the correct reducer', () => {
-    expect(newLedgerFundingReducer).toHaveBeenCalledWith(
+    expect(NewLedgerChannelReducer).toHaveBeenCalledWith(
       protocolState,
       states.EMPTY_SHARED_DATA,
       action,

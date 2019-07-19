@@ -15,16 +15,16 @@ import { AdvanceChannelAction, isAdvanceChannelAction } from '../advance-channel
 // Unions and Guards
 // --------
 
-export type NewLedgerFundingAction = AdvanceChannelAction | DirectFundingAction;
-export function isNewLedgerFundingAction(action: WalletAction): action is NewLedgerFundingAction {
+export type NewLedgerChannelAction = AdvanceChannelAction | DirectFundingAction;
+export function isNewLedgerChannelAction(action: WalletAction): action is NewLedgerChannelAction {
   return (
-    isCommonAction(action, EmbeddedProtocol.NewLedgerFunding) ||
+    isCommonAction(action, EmbeddedProtocol.NewLedgerChannel) ||
     isDirectFundingAction(action) ||
     isAdvanceChannelAction(action)
   );
 }
 
-export const routesToNewLedgerFunding = routerFactory(
-  isNewLedgerFundingAction,
-  EmbeddedProtocol.NewLedgerFunding,
+export const routesToNewLedgerChannel = routerFactory(
+  isNewLedgerChannelAction,
+  EmbeddedProtocol.NewLedgerChannel,
 );
