@@ -12,7 +12,7 @@ import {
 import { Commitment } from '../../../domain';
 import { appAttributesFromBytes } from 'fmg-nitro-adjudicator/lib/consensus-app';
 import { eqHexArray } from '../../../utils/hex-utils';
-import { CommitmentsReceived, EmbeddedProtocol } from '../../../communication';
+import { CommitmentsReceived, EmbeddedProtocol, ProtocolLocator } from '../../../communication';
 import { WalletAction } from '../../actions';
 import { unreachable } from '../../../utils/reducer-utils';
 
@@ -24,6 +24,7 @@ export const initialize = (
   clearedToSend: boolean,
   proposedAllocation: string[],
   proposedDestination: string[],
+  protocolLocator: ProtocolLocator,
   sharedData: SharedData,
 ): ProtocolStateWithSharedData<states.ConsensusUpdateState> => {
   const sendUpdate = helpers.isFirstPlayer(channelId, sharedData) && clearedToSend;
@@ -34,6 +35,7 @@ export const initialize = (
         channelId,
         proposedAllocation,
         proposedDestination,
+        protocolLocator,
         sharedData,
       );
     } catch (error) {
@@ -52,6 +54,7 @@ export const initialize = (
       proposedDestination,
       clearedToSend,
       updateSent: sendUpdate,
+      protocolLocator,
     }),
     sharedData,
   };
@@ -76,10 +79,16 @@ const handleClearedToSend = (
           channelId,
           proposedAllocation,
           proposedDestination,
+          protocolState.protocolLocator,
           sharedData,
         );
       } else {
-        sharedData = sendAcceptConsensus(processId, channelId, sharedData);
+        sharedData = sendAcceptConsensus(
+          processId,
+          channelId,
+          protocolState.protocolLocator,
+          sharedData,
+        );
       }
       updateSent = true;
     } catch (error) {
@@ -137,7 +146,12 @@ const handleCommitmentReceived = (
   let updateSent = protocolState.updateSent;
   if (helpers.ourTurn(sharedData, channelId) && clearedToSend) {
     try {
-      sharedData = sendAcceptConsensus(processId, channelId, sharedData);
+      sharedData = sendAcceptConsensus(
+        processId,
+        channelId,
+        protocolState.protocolLocator,
+        sharedData,
+      );
       updateSent = true;
     } catch (error) {
       return {
@@ -202,6 +216,7 @@ function proposalCommitmentHasExpectedValues(
 function sendAcceptConsensus(
   processId: string,
   channelId: string,
+  protocolLocator: ProtocolLocator,
   sharedData: SharedData,
 ): SharedData {
   const lastCommitment = helpers.getLatestCommitment(channelId, sharedData);
@@ -214,12 +229,7 @@ function sendAcceptConsensus(
     throw new Error('Signature Failure');
   }
   sharedData = signResult.store;
-  sharedData = helpers.sendCommitments(
-    sharedData,
-    processId,
-    channelId,
-    CONSENSUS_UPDATE_PROTOCOL_LOCATOR,
-  );
+  sharedData = helpers.sendCommitments(sharedData, processId, channelId, protocolLocator);
   return sharedData;
 }
 
@@ -228,6 +238,7 @@ function sendProposal(
   channelId: string,
   proposedAllocation: string[],
   proposedDestination: string[],
+  protocolLocator: ProtocolLocator,
   sharedData: SharedData,
 ): SharedData {
   const lastCommitment = helpers.getLatestCommitment(channelId, sharedData);
@@ -242,11 +253,6 @@ function sendProposal(
   }
   sharedData = signResult.store;
 
-  sharedData = helpers.sendCommitments(
-    sharedData,
-    processId,
-    channelId,
-    CONSENSUS_UPDATE_PROTOCOL_LOCATOR,
-  );
+  sharedData = helpers.sendCommitments(sharedData, processId, channelId, protocolLocator);
   return sharedData;
 }

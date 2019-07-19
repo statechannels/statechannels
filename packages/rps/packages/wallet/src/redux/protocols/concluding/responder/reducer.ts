@@ -170,6 +170,7 @@ function concludeApproved(protocolState: NonTerminalCState, sharedData: Storage)
       false,
       lastestCommitment.allocation,
       lastestCommitment.destination,
+      CONSENSUS_UPDATE_PROTOCOL_LOCATOR,
       sharedData,
     );
     sharedData = consensusUpdateResult.sharedData;

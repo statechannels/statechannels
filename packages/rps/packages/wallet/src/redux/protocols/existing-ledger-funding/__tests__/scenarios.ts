@@ -17,7 +17,6 @@ import { EXISTING_LEDGER_FUNDING_PROTOCOL_LOCATOR } from '../reducer';
 import { playerAHappyPath } from '../../ledger-top-up/__tests__/scenarios';
 
 const processId = 'processId';
-
 const oneThree = [
   { address: asAddress, wei: bigNumberify(1).toHexString() },
   { address: bsAddress, wei: bigNumberify(3).toHexString() },
@@ -35,6 +34,7 @@ const props = {
   processId,
   targetAllocation: oneThree.map(o => o.wei),
   targetDestination: oneThree.map(o => o.address),
+  protocolLocator: EXISTING_LEDGER_FUNDING_PROTOCOL_LOCATOR,
 };
 
 const setFundingState = (sharedData: SharedData): SharedData => {

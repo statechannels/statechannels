@@ -15,9 +15,13 @@ import { proposeNewConsensus, acceptConsensus } from '../../../domain/consensus-
 import { theirAddress, getLastCommitment } from '../../channel-store';
 import { Commitment } from '../../../domain';
 import { bigNumberify } from 'ethers/utils';
-import { sendCommitmentReceived, EmbeddedProtocol } from '../../../communication';
+import { sendCommitmentReceived, EmbeddedProtocol, ProtocolLocator } from '../../../communication';
 import { CommitmentType } from 'fmg-core';
-import { initialize as initializeLedgerTopUp, ledgerTopUpReducer } from '../ledger-top-up/reducer';
+import {
+  initialize as initializeLedgerTopUp,
+  ledgerTopUpReducer,
+  LEDGER_TOP_UP_PROTOCOL_LOCATOR,
+} from '../ledger-top-up/reducer';
 import { isLedgerTopUpAction } from '../ledger-top-up/actions';
 import { addHex } from '../../../utils/hex-utils';
 export const EXISTING_LEDGER_FUNDING_PROTOCOL_LOCATOR = makeLocator(
@@ -30,6 +34,7 @@ export const initialize = (
   ledgerId: string,
   targetAllocation: string[],
   targetDestination: string[],
+  protocolLocator: ProtocolLocator,
   sharedData: SharedData,
 ): ProtocolStateWithSharedData<states.NonTerminalExistingLedgerFundingState | states.Failure> => {
   const ledgerChannel = selectors.getChannelState(sharedData, ledgerId);
@@ -43,6 +48,7 @@ export const initialize = (
       targetAllocation,
       targetDestination,
       theirCommitment.allocation,
+      makeLocator(protocolLocator, LEDGER_TOP_UP_PROTOCOL_LOCATOR),
       sharedData,
     );
     return {
@@ -53,6 +59,7 @@ export const initialize = (
         ledgerId,
         targetAllocation,
         targetDestination,
+        protocolLocator,
       }),
       sharedData: newSharedData,
     };
@@ -79,7 +86,7 @@ export const initialize = (
       processId,
       signResult.signedCommitment.commitment,
       signResult.signedCommitment.signature,
-      EXISTING_LEDGER_FUNDING_PROTOCOL_LOCATOR,
+      makeLocator(protocolLocator, EXISTING_LEDGER_FUNDING_PROTOCOL_LOCATOR),
     );
     sharedData = queueMessage(sharedData, messageRelay);
   }
@@ -90,6 +97,7 @@ export const initialize = (
     channelId,
     targetAllocation,
     targetDestination,
+    protocolLocator,
   });
 
   return { protocolState, sharedData };
@@ -157,7 +165,7 @@ const waitForLedgerTopUpReducer = (
         processId,
         signResult.signedCommitment.commitment,
         signResult.signedCommitment.signature,
-        EXISTING_LEDGER_FUNDING_PROTOCOL_LOCATOR,
+        makeLocator(protocolState.protocolLocator, EmbeddedProtocol.ExistingLedgerFunding),
       );
       sharedData = queueMessage(sharedData, messageRelay);
     }
@@ -211,7 +219,7 @@ const waitForLedgerUpdateReducer = (
       processId,
       signResult.signedCommitment.commitment,
       signResult.signedCommitment.signature,
-      EXISTING_LEDGER_FUNDING_PROTOCOL_LOCATOR,
+      makeLocator(protocolState.protocolLocator, EXISTING_LEDGER_FUNDING_PROTOCOL_LOCATOR),
     );
     newSharedData = queueMessage(newSharedData, messageRelay);
   }
@@ -230,7 +238,10 @@ function ledgerChannelNeedsTopUp(
   proposedAllocation: string[],
   proposedDestination: string[],
 ) {
-  if (latestCommitment.commitmentType !== CommitmentType.App) {
+  if (
+    latestCommitment.commitmentType !== CommitmentType.App &&
+    latestCommitment.commitmentType !== CommitmentType.PostFundSetup
+  ) {
     throw new Error('Ledger channel is already closed.');
   }
   // We assume that destination/allocation are the same length and destination contains the same addresses
