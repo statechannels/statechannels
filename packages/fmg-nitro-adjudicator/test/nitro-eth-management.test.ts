@@ -1,6 +1,6 @@
 import * as ethers from 'ethers';
 import NitroVaultArtifact from '../build/contracts/TestNitroVault.json';
-import NitroAdjudicatorArtifact from '../build/contracts/TestNitroAdjudicator.json';
+import NitroLibraryArtifact from '../build/contracts/NitroLibrary2.json';
 import ERC20Artifact from '../build/contracts/testERC20.json';
 import { AddressZero } from 'ethers/constants';
 import { sign, Channel, CountingApp, Address, asEthersObject } from 'fmg-core';
@@ -14,7 +14,7 @@ import { fromParameters, CommitmentType } from 'fmg-core/lib/commitment';
 
 jest.setTimeout(20000);
 let nitroVault: ethers.Contract;
-let nitroAdjudicator: ethers.Contract;
+let nitroLibrary: ethers.Contract;
 const DEPOSIT_AMOUNT = ethers.utils.parseEther('0.01'); //
 const abiCoder = new ethers.utils.AbiCoder();
 const AUTH_TYPES = ['address', 'address', 'uint256', 'address'];
@@ -156,12 +156,8 @@ describe('Nitro (ETH management)', () => {
     networkId = (await provider.getNetwork()).chainId;
     const nitroVaultAddress = NitroVaultArtifact.networks[networkId].address;
     nitroVault = new ethers.Contract(nitroVaultAddress, NitroVaultArtifact.abi, signer0);
-    const nitroAdjudicatorAddress = NitroAdjudicatorArtifact.networks[networkId].address;
-    nitroAdjudicator = new ethers.Contract(
-      nitroAdjudicatorAddress,
-      NitroAdjudicatorArtifact.abi,
-      signer0,
-    );
+    const nitroLibraryAddress = NitroLibraryArtifact.networks[networkId].address;
+    nitroLibrary = new ethers.Contract(nitroLibraryAddress, NitroLibraryArtifact.abi, signer0);
   });
 
   describe('Depositing ETH (msg.value = amount , expectedHeld = 0)', () => {
@@ -386,7 +382,7 @@ describe('Nitro (ETH management)', () => {
         challengeCommitment: getEthersObjectForCommitment(commitment0),
         token: [AddressZero, AddressZero],
       };
-      const tx = await nitroAdjudicator.setOutcome(getChannelID(ledgerChannel), allocationOutcome);
+      const tx = await nitroVault.setOutcome(getChannelID(ledgerChannel), allocationOutcome);
       await tx.wait();
 
       allocatedToChannel = await nitroVault.holdings(getChannelID(ledgerChannel), AddressZero);
@@ -444,7 +440,7 @@ describe('Nitro (ETH management)', () => {
         challengeCommitment: getEthersObjectForCommitment(commitment0),
         token: [AddressZero, AddressZero],
       };
-      const tx = await nitroAdjudicator.setOutcome(getChannelID(ledgerChannel), allocationOutcome);
+      const tx = await nitroVault.setOutcome(getChannelID(ledgerChannel), allocationOutcome);
       await tx.wait();
 
       allocatedToChannel = await nitroVault.holdings(getChannelID(ledgerChannel), AddressZero);
@@ -493,7 +489,7 @@ describe('Nitro (ETH management)', () => {
   describe('Claiming ETH from a Guarantor', () => {
     const finalizedAt = ethers.utils.bigNumberify(1);
     let recipient;
-    const claimAmount = 2;
+    const claimAmount = ethers.utils.parseUnits('1', 'wei').toHexString();
     let expectedOutcome;
     let startBal;
     let startBalRecipient;
@@ -514,11 +510,8 @@ describe('Nitro (ETH management)', () => {
         challengeCommitment: getEthersObjectForCommitment(guarantorCommitment),
         token: [AddressZero, AddressZero],
       };
-      await (await nitroAdjudicator.setOutcome(guarantor.address, guarantee)).wait();
-      await (await nitroAdjudicator.setOutcome(
-        getChannelID(ledgerChannel),
-        allocationOutcome,
-      )).wait();
+      await (await nitroVault.setOutcome(guarantor.address, guarantee)).wait();
+      await (await nitroVault.setOutcome(getChannelID(ledgerChannel), allocationOutcome)).wait();
 
       // TODO reinstate these ?
       // expect(
@@ -528,15 +521,21 @@ describe('Nitro (ETH management)', () => {
       //   guarantee,
       // );
 
-      startBal = 5;
-      await (await nitroVault.deposit(guarantor.address, 0, startBal, AddressZero, {
-        value: startBal,
-      })).wait();
-
       // Other tests may have deposited into guarantor.address, but we
-      // ensure that the guarantor has at least 5 in holdings
+      // ensure that the guarantor has at least claimAmount in holdings
+      const amountHeldAgainstGuarantor = await nitroVault.holdings(guarantor.address, AddressZero);
+      await (await nitroVault.deposit(
+        guarantor.address,
+        amountHeldAgainstGuarantor,
+        claimAmount,
+        AddressZero,
+        {
+          value: claimAmount,
+        },
+      )).wait();
+
       startBal = await nitroVault.holdings(guarantor.address, AddressZero);
-      startBalRecipient = (await nitroVault.holdings(recipient, AddressZero)).toNumber();
+      startBalRecipient = await nitroVault.holdings(recipient, AddressZero);
       const bAllocation = bigNumberify(bBal)
         .sub(claimAmount)
         .toHexString();
@@ -560,20 +559,20 @@ describe('Nitro (ETH management)', () => {
       expect(getOutcomeFromParameters(newOutcome)).toMatchObject(expectedOutcome);
     });
 
-    it('holdings[gurantor][0x] decreases', async () => {
-      expect(Number(await nitroVault.holdings(guarantor.address, AddressZero))).toEqual(
-        startBal - claimAmount,
+    it('holdings[guarantor][0x] decreases', async () => {
+      expect(await nitroVault.holdings(guarantor.address, AddressZero)).toEqual(
+        startBal.sub(claimAmount),
       );
     });
 
-    it('holdings[recipient][0x] decreases', async () => {
-      expect(Number(await nitroVault.holdings(recipient, AddressZero))).toEqual(
-        startBalRecipient + claimAmount,
+    it('holdings[recipient][0x] increases', async () => {
+      expect(await nitroVault.holdings(recipient, AddressZero)).toEqual(
+        startBalRecipient.add(claimAmount),
       );
     });
   });
 
-  describe('Using `setOutcome` public test method (from wrapper)', () => {
+  describe('Using `setOutcome` public method', () => {
     const allocationOutcome = {
       destination: [alice.address, bob.address],
       allocation,
@@ -583,7 +582,7 @@ describe('Nitro (ETH management)', () => {
     };
 
     it('tx succeeds', async () => {
-      const tx = await nitroAdjudicator.setOutcome(getChannelID(ledgerChannel), allocationOutcome);
+      const tx = await nitroVault.setOutcome(getChannelID(ledgerChannel), allocationOutcome);
       const receipt = await tx.wait();
       expect(receipt.status).toEqual(1);
     });
@@ -592,7 +591,7 @@ describe('Nitro (ETH management)', () => {
       expect(getOutcomeFromParameters(setOutcome)).toMatchObject(allocationOutcome);
     });
   });
-  describe('Using `affords` public test method (from wrapper)', () => {
+  describe('Using `affords` public method', () => {
     const outcome = {
       destination: [alice.address, bob.address],
       allocation,
@@ -603,13 +602,13 @@ describe('Nitro (ETH management)', () => {
     it('returns funding when funding is less than the amount allocated to the recipient in the outcome', async () => {
       const recipient = alice.address;
       const funding = ethers.utils.bigNumberify(2);
-      expect(await nitroVault.affordsPub(recipient, outcome, funding)).toEqual(funding);
+      expect(await nitroLibrary.affords(recipient, outcome, funding)).toEqual(funding);
     });
 
     it('returns funding when funding is equal to the amount allocated to the recipient in the outcome', async () => {
       const recipient = alice.address;
       const funding = aBal;
-      expect((await nitroVault.affordsPub(recipient, outcome, funding)).toHexString()).toEqual(
+      expect((await nitroLibrary.affords(recipient, outcome, funding)).toHexString()).toEqual(
         funding,
       );
     });
@@ -619,9 +618,7 @@ describe('Nitro (ETH management)', () => {
       const funding = bigNumberify(aBal)
         .add(1)
         .toHexString();
-      expect((await nitroVault.affordsPub(recipient, outcome, funding)).toHexString()).toEqual(
-        aBal,
-      );
+      expect((await nitroLibrary.affords(recipient, outcome, funding)).toHexString()).toEqual(aBal);
     });
 
     it('returns zero when recipient is not a participant', async () => {
@@ -630,11 +627,11 @@ describe('Nitro (ETH management)', () => {
         .add(1)
         .toHexString();
       const zero = ethers.utils.bigNumberify(0);
-      expect(await nitroVault.affordsPub(recipient, outcome, funding)).toEqual(zero);
+      expect(await nitroLibrary.affords(recipient, outcome, funding)).toEqual(zero);
     });
   });
 
-  describe('Using `reduce` public test method (from wrapper)', () => {
+  describe('Using `reduce` public method', () => {
     const outcome = {
       destination: [alice.address, bob.address],
       allocation,
@@ -658,13 +655,13 @@ describe('Nitro (ETH management)', () => {
 
     const recipient = bob.address;
     it('Allocation reduced correctly', async () => {
-      const newOutcome = await nitroVault.reducePub(outcome, recipient, reduceAmount, AddressZero);
+      const newOutcome = await nitroLibrary.reduce(outcome, recipient, reduceAmount, AddressZero);
 
       expect(getOutcomeFromParameters(newOutcome)).toMatchObject(expectedOutcome);
     });
   });
 
-  describe('Using `reprioritize` public test method (from wrapper)', () => {
+  describe('Using `reprioritize` public method', () => {
     it("works when the guarantee destination length matches the allocation outcome's allocation length", async () => {
       const allocationOutcome = {
         destination: [alice.address, bob.address],
@@ -691,8 +688,7 @@ describe('Nitro (ETH management)', () => {
         token: [AddressZero, AddressZero],
       };
 
-      const newOutcome = await nitroVault.reprioritizePub(allocationOutcome, guarantee);
-
+      const newOutcome = await nitroLibrary.reprioritize(allocationOutcome, guarantee);
       expect(getOutcomeFromParameters(newOutcome)).toMatchObject(expectedOutcome);
     });
 
@@ -722,7 +718,7 @@ describe('Nitro (ETH management)', () => {
         token: [AddressZero, AddressZero],
       };
 
-      const newOutcome = await nitroVault.reprioritizePub(allocationOutcome, guarantee);
+      const newOutcome = await nitroLibrary.reprioritize(allocationOutcome, guarantee);
 
       expect(getOutcomeFromParameters(newOutcome)).toMatchObject(expectedOutcome);
     });
