@@ -45,7 +45,7 @@ export interface WaitForPostFundSetup extends Base {
 // ------------
 
 export const success: StateConstructor<Success> = p => {
-  return { type: 'NewLedgerChannel.Success', ledgerId: p.ledgerId };
+  return { type: 'NewLedgerChannel.Success', ...p };
 };
 
 export const failure: StateConstructor<Failure> = p => {

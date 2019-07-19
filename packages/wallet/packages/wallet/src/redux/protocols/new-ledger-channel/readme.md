@@ -1,8 +1,6 @@
-# New Ledger Funding
+# New Ledger Channel
 
-The new ledger funding protocol coordinates the process of funding an application channel, X, via a ledger channel, L.
-
-- Opening + funding the ledger channel
+The new ledger channel protocol coordinates the process of opening + funding a new ledger channel.
 
 Out of scope (for now):
 

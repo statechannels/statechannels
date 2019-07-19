@@ -15,9 +15,9 @@ Currently we assume a Ledger Top-up protocol handles both the cases where a curr
   linkStyle default interpolate basis
   St((Start))-->L
   L{Does Player channel have enough funds?}-->|No|LT(WaitForLedgerTopup)
-  L{Does Existing channel has enough funds?}-->|Yes|SC0[SendLedgerUpdate0]
-  LT-->|LedgerChannelToppedUp|SC0[SendLedgerUpdate0]
-  SC0-->WC(WaitForLedgerUpdate)
+  L{Does Existing channel has enough funds?}-->|Yes|SLU[SendLedgerUpdate]
+  LT-->|LedgerChannelToppedUp|SLU
+  SLU-->WC(WaitForLedgerUpdate)
   WC-->|"CommitmentReceived(Reject)"|F((failure))
   WC-->|"CommitmentReceived(Accept)"|Su((success))
   classDef logic fill:#efdd20;
@@ -29,7 +29,7 @@ Currently we assume a Ledger Top-up protocol handles both the cases where a curr
   class Su Success;
   class F Failure;
   class LT WaitForChildProtocol;
-  class SC0,SP0 NotAState
+  class SLU NotAState
 ```
 
 ### Scenarios:
