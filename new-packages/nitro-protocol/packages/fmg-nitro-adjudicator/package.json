@@ -7,7 +7,7 @@
   "license": "MIT",
   "scripts": {
     "prepare": "yarn build",
-    "test": "jest",
+    "test": "jest --runInBand",
     "test:ci": "yarn prettier:check && yarn clearContracts && npx ganache-then-jest",
     "deploy": "yarn clearContracts && npx truffle migrate",
     "build:typescript": "tslint --project . && tsc",
