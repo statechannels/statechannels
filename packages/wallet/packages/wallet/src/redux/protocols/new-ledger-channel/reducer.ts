@@ -1,6 +1,6 @@
 import * as states from './states';
 import { NewLedgerChannelState, failure } from './states';
-import { SharedData, getPrivatekey } from '../../state';
+import { SharedData, getPrivatekey, ChannelFundingState, setFundingState } from '../../state';
 import { ProtocolStateWithSharedData, makeLocator } from '..';
 import { bytesFromAppAttributes } from 'fmg-nitro-adjudicator/lib/consensus-app';
 import { CommitmentType } from '../../../domain';
@@ -112,6 +112,11 @@ function handleWaitForPostFundSetup(
       case 'AdvanceChannel.Failure':
         return { protocolState: failure({}), sharedData };
       case 'AdvanceChannel.Success':
+        sharedData = updateFundingState(
+          sharedData,
+          protocolState.channelId,
+          protocolState.ledgerId,
+        );
         return {
           protocolState: states.success({
             ledgerId: protocolState.ledgerId,
@@ -262,6 +267,7 @@ function handleWaitForDirectFunding(
     sharedData = advanceChannelResult.sharedData;
 
     if (advanceChannelResult.protocolState.type === 'AdvanceChannel.Success') {
+      sharedData = updateFundingState(sharedData, protocolState.channelId, protocolState.ledgerId);
       return {
         protocolState: states.success({ ledgerId: advanceChannelResult.protocolState.channelId }),
         sharedData,
@@ -299,4 +305,17 @@ function channelSpecificArgs(
       furtherVotesRequired: 0,
     }),
   };
+}
+
+function updateFundingState(sharedData: SharedData, appChannelId: string, ledgerId: string) {
+  const channelFundingState: ChannelFundingState = {
+    directlyFunded: false,
+    fundingChannel: ledgerId,
+  };
+  const ledgerFundingState: ChannelFundingState = {
+    directlyFunded: true,
+  };
+  sharedData = setFundingState(sharedData, appChannelId, channelFundingState);
+  sharedData = setFundingState(sharedData, ledgerId, ledgerFundingState);
+  return sharedData;
 }

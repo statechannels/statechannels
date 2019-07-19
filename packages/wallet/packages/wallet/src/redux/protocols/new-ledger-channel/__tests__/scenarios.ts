@@ -1,7 +1,7 @@
 import { bigNumberify } from 'ethers/utils';
 import * as states from '../states';
 import { channelFromCommitments } from '../../../channel-store/channel-state/__tests__';
-import { EMPTY_SHARED_DATA, setChannels } from '../../../state';
+import { EMPTY_SHARED_DATA, setChannels, SharedData } from '../../../state';
 
 import {
   preFailure as DFPreFailure,
@@ -39,6 +39,16 @@ const app3 = appCommitment({ turnNum: 3, balances: twoThree });
 const ledger4 = ledgerCommitment({ turnNum: 4, balances: twoThree, proposedBalances: fiveToApp });
 const ledger5 = ledgerCommitment({ turnNum: 5, balances: fiveToApp });
 
+const setFundingState = (sharedData: SharedData): SharedData => {
+  return {
+    ...sharedData,
+    fundingState: {
+      [channelId]: { directlyFunded: false, fundingChannel: ledgerId },
+      [ledgerId]: { directlyFunded: true },
+    },
+  };
+};
+
 // Channels
 
 const protocolLocator = NEW_LEDGER_FUNDING_PROTOCOL_LOCATOR;
@@ -72,10 +82,12 @@ const waitForPreFundSetupSharedData = _.merge(
 const waitForPostFundSharedData = _.merge(ACPreSuccess.sharedData);
 export const successState = {
   state: success({}),
-  store: setChannels(EMPTY_SHARED_DATA, [
-    channelFromCommitments([app2, app3], asAddress, asPrivateKey),
-    channelFromCommitments([ledger4, ledger5], asAddress, asPrivateKey),
-  ]),
+  store: setFundingState(
+    setChannels(EMPTY_SHARED_DATA, [
+      channelFromCommitments([app2, app3], asAddress, asPrivateKey),
+      channelFromCommitments([ledger4, ledger5], asAddress, asPrivateKey),
+    ]),
+  ),
 };
 
 const waitForDirectFundingFailure = states.waitForDirectFunding({

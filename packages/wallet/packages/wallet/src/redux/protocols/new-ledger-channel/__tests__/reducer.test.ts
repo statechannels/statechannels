@@ -44,6 +44,16 @@ describe('happy-path scenario', () => {
     const updatedState = NewLedgerChannelReducer(state, sharedData, action);
 
     itTransitionsTo(updatedState, 'NewLedgerChannel.Success');
+    it('correctly sets the funding state', () => {
+      expect(updatedState.sharedData.fundingState[state.channelId]).toMatchObject({
+        directlyFunded: false,
+        fundingChannel: state.ledgerId,
+      });
+
+      expect(updatedState.sharedData.fundingState[state.ledgerId]).toMatchObject({
+        directlyFunded: true,
+      });
+    });
   });
 });
 
