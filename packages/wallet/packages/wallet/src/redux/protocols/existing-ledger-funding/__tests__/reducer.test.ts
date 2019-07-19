@@ -16,6 +16,7 @@ describe('player A happy path', () => {
       ledgerId,
       targetAllocation,
       targetDestination,
+      protocolLocator,
       sharedData,
     } = scenario.initialize;
 
@@ -25,6 +26,7 @@ describe('player A happy path', () => {
       ledgerId,
       targetAllocation,
       targetDestination,
+      protocolLocator,
       sharedData,
     );
     itTransitionsTo(result, 'ExistingLedgerFunding.WaitForLedgerUpdate');
@@ -48,6 +50,7 @@ describe('player B happy path', () => {
       ledgerId,
       targetAllocation,
       targetDestination,
+      protocolLocator,
       sharedData,
     } = scenario.initialize;
 
@@ -57,6 +60,7 @@ describe('player B happy path', () => {
       ledgerId,
       targetAllocation,
       targetDestination,
+      protocolLocator,
       sharedData,
     );
     itTransitionsTo(result, 'ExistingLedgerFunding.WaitForLedgerUpdate');
@@ -88,6 +92,7 @@ describe('player A top up needed', () => {
       ledgerId,
       targetAllocation,
       targetDestination,
+      protocolLocator,
       sharedData,
     } = scenario.initialize;
 
@@ -97,6 +102,7 @@ describe('player A top up needed', () => {
       ledgerId,
       targetAllocation,
       targetDestination,
+      protocolLocator,
       sharedData,
     );
     itTransitionsTo(result, 'ExistingLedgerFunding.WaitForLedgerTopUp');
@@ -121,6 +127,7 @@ describe('player B top up needed', () => {
       ledgerId,
       targetAllocation,
       targetDestination,
+      protocolLocator,
       sharedData,
     } = scenario.initialize;
 
@@ -130,6 +137,7 @@ describe('player B top up needed', () => {
       ledgerId,
       targetAllocation,
       targetDestination,
+      protocolLocator,
       sharedData,
     );
     itTransitionsTo(result, 'ExistingLedgerFunding.WaitForLedgerTopUp');

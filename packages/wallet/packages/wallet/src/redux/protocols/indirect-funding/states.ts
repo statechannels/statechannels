@@ -1,12 +1,14 @@
 import { NonTerminalExistingLedgerFundingState } from '../existing-ledger-funding';
 import { StateConstructor } from '../../utils';
 import { NonTerminalNewLedgerChannelState } from '../new-ledger-channel/states';
+import { ProtocolLocator } from '../../../communication';
 
 interface Base {
   processId: string;
   channelId: string;
   targetAllocation: string[];
   targetDestination: string[];
+  protocolLocator: ProtocolLocator;
 }
 export interface WaitForNewLedgerChannel extends Base {
   type: 'IndirectFunding.WaitForNewLedgerChannel';

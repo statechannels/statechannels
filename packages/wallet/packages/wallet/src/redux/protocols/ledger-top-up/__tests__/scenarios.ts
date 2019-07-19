@@ -14,7 +14,10 @@ import { twoPlayerPreSuccessA, twoPlayerPreSuccessB } from '../../consensus-upda
 import { setChannels } from '../../../state';
 import { channelFromCommitments } from '../../../channel-store/channel-state/__tests__';
 import { SignedCommitment } from '../../../../domain';
+import { makeLocator } from '../..';
+import { EmbeddedProtocol } from '../../../../communication';
 
+const protocolLocator = makeLocator(EmbeddedProtocol.LedgerTopUp);
 // ---------
 // Test data
 // ---------
@@ -45,6 +48,7 @@ const defaultProps = {
   proposedAllocation: fourFive.map(a => a.wei),
   originalAllocation: twoThree.map(a => a.wei),
   proposedDestination: fourFive.map(a => a.address),
+  protocolLocator,
 };
 
 const oneOverFundedOneUnderFundedProps = {
@@ -54,6 +58,7 @@ const oneOverFundedOneUnderFundedProps = {
   proposedAllocation: fourTwo.map(a => a.wei),
   originalAllocation: twoThree.map(a => a.wei),
   proposedDestination: fourTwo.map(a => a.address),
+  protocolLocator,
 };
 
 const ledgerTwoThree = ledgerCommitment({ turnNum: 5, balances: twoThree });

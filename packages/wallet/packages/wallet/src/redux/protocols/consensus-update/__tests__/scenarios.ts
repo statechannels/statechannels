@@ -18,6 +18,8 @@ import { commitmentsReceived } from '../../../../communication';
 import { ThreePartyPlayerIndex } from '../../../types';
 import { clearedToSend } from '../actions';
 
+const protocolLocator = CONSENSUS_UPDATE_PROTOCOL_LOCATOR;
+
 const twoThree = [
   { address: asAddress, wei: bigNumberify(2).toHexString() },
   { address: bsAddress, wei: bigNumberify(3).toHexString() },
@@ -132,6 +134,7 @@ const twoPlayerWaitForUpdate = (clearedToSend: boolean, updateSent: boolean) => 
     proposedDestination,
     clearedToSend,
     updateSent,
+    protocolLocator,
   });
 };
 
@@ -144,13 +147,14 @@ const threePlayerWaitForUpdate = (clearedToSend, updateSent) => {
     proposedDestination: threePlayerProposedDestination,
     clearedToSend,
     updateSent,
+    protocolLocator,
   });
 };
 
 // ------
 // Actions
 // ------
-const protocolLocator = CONSENSUS_UPDATE_PROTOCOL_LOCATOR;
+
 const twoPlayerUpdate0Received = commitmentsReceived({
   processId,
   signedCommitments: [ledger6],
@@ -196,6 +200,7 @@ export const twoPlayerAHappyPath = {
     sharedData: twoPlayerAInitialSharedData,
     reply: [ledger5, ledger6],
     clearedToSend: true,
+    protocolLocator,
   },
   waitForUpdate: {
     state: twoPlayerWaitForUpdate(true, true),
@@ -211,6 +216,7 @@ export const twoPlayerBHappyPath = {
     proposedAllocation,
     proposedDestination,
     clearedToSend: true,
+    protocolLocator,
     sharedData: twoPlayerBInitialSharedData,
   },
   waitForUpdate: {
@@ -244,6 +250,7 @@ export const threePlayerAHappyPath = {
     proposedAllocation: threePlayerProposedAllocation,
     proposedDestination: threePlayerProposedDestination,
     clearedToSend: true,
+    protocolLocator,
     sharedData: threePlayerInitialSharedData(ThreePartyPlayerIndex.A),
     reply: [threePlayerLedger7, threePlayerLedger8, threePlayerLedger9],
   },
@@ -266,6 +273,7 @@ export const threePlayerBHappyPath = {
     proposedAllocation: threePlayerProposedAllocation,
     proposedDestination: threePlayerProposedDestination,
     clearedToSend: true,
+    protocolLocator,
     sharedData: threePlayerInitialSharedData(ThreePartyPlayerIndex.B),
   },
   waitForPlayerAUpdate: {
@@ -288,6 +296,7 @@ export const threePlayerHubHappyPath = {
     proposedAllocation: threePlayerProposedAllocation,
     proposedDestination: threePlayerProposedDestination,
     clearedToSend: true,
+    protocolLocator,
     sharedData: threePlayerInitialSharedData(ThreePartyPlayerIndex.Hub),
   },
   waitForPlayerAUpdate: {
@@ -310,6 +319,7 @@ export const threePlayerANotClearedToSend = {
     proposedAllocation: threePlayerProposedAllocation,
     proposedDestination: threePlayerProposedDestination,
     clearedToSend: false,
+    protocolLocator,
     sharedData: threePlayerInitialSharedData(ThreePartyPlayerIndex.A),
   },
   waitForUpdateAndClearedToSend: {
@@ -327,6 +337,7 @@ export const threePlayerBNotClearedToSend = {
     proposedAllocation: threePlayerProposedAllocation,
     proposedDestination: threePlayerProposedDestination,
     clearedToSend: false,
+    protocolLocator,
     sharedData: threePlayerInitialSharedData(ThreePartyPlayerIndex.B),
   },
   waitForUpdateAndClearedToSend: {
@@ -349,6 +360,7 @@ export const threePlayerHubNotClearedToSend = {
     proposedAllocation: threePlayerProposedAllocation,
     proposedDestination: threePlayerProposedDestination,
     clearedToSend: false,
+    protocolLocator,
     sharedData: threePlayerInitialSharedData(ThreePartyPlayerIndex.Hub),
   },
   waitForPlayerAUpdate: {

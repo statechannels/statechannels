@@ -1,6 +1,6 @@
 import { SharedData, registerChannelToMonitor } from '../../state';
 import * as states from './states';
-import { ProtocolStateWithSharedData, ProtocolReducer } from '..';
+import { ProtocolStateWithSharedData, ProtocolReducer, makeLocator } from '..';
 import * as helpers from '../reducer-helpers';
 import { TwoPartyPlayerIndex } from '../../types';
 import {
@@ -17,7 +17,8 @@ import {
 } from '../consensus-update';
 import { bigNumberify } from 'ethers/utils';
 import { PlayerIndex } from 'magmo-wallet-client/lib/wallet-instructions';
-export const LEDGER_TOP_UP_PROTOCOL_LOCATOR = 'LedgerTopUp';
+import { ProtocolLocator, EmbeddedProtocol } from '../../../communication';
+export const LEDGER_TOP_UP_PROTOCOL_LOCATOR = makeLocator(EmbeddedProtocol.LedgerTopUp);
 export function initialize(
   processId: string,
   channelId: string,
@@ -25,6 +26,7 @@ export function initialize(
   proposedAllocation: string[],
   proposedDestination: string[],
   originalAllocation: string[],
+  protocolLocator: ProtocolLocator,
   sharedData: SharedData,
 ): ProtocolStateWithSharedData<states.LedgerTopUpState> {
   sharedData = registerChannelToMonitor(sharedData, processId, ledgerId);
@@ -35,7 +37,7 @@ export function initialize(
     proposedAllocation,
     proposedDestination,
     originalAllocation,
-
+    protocolLocator,
     sharedData,
   );
   const newProtocolState = states.switchOrderAndAddATopUpUpdate({
@@ -46,6 +48,7 @@ export function initialize(
     proposedDestination,
     consensusUpdateState,
     originalAllocation,
+    protocolLocator,
   });
   return { protocolState: newProtocolState, sharedData: newSharedData };
 }
@@ -148,6 +151,7 @@ const switchOrderAndAddATopUpUpdateReducer: ProtocolReducer<states.LedgerTopUpSt
         proposedAllocation,
         proposedDestination,
         lastCommitment.allocation,
+        protocolState.protocolLocator,
         consensusUpdateSharedData,
       );
 
@@ -216,6 +220,7 @@ const waitForDirectFundingForAReducer: ProtocolReducer<states.LedgerTopUpState> 
       proposedAllocation,
       proposedDestination,
       lastCommitment.allocation,
+      protocolState.protocolLocator,
       sharedData,
     );
 
@@ -334,7 +339,7 @@ function initializeConsensusState(
   proposedAllocation: string[],
   proposedDestination: string[],
   currentAllocation: string[],
-
+  protocolLocator: ProtocolLocator,
   sharedData: SharedData,
 ) {
   let newAllocation;
@@ -375,6 +380,7 @@ function initializeConsensusState(
     true,
     newAllocation,
     newDestination,
+    makeLocator(protocolLocator, EmbeddedProtocol.LedgerTopUp),
     sharedData,
   );
   return { consensusUpdateState, sharedData: newSharedData };

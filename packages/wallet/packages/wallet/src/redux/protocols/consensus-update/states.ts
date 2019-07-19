@@ -1,5 +1,6 @@
 import { StateConstructor } from '../../utils';
 import { ProtocolState } from '..';
+import { ProtocolLocator } from '../../../communication';
 
 export type ConsensusUpdateState = WaitForUpdate | Failure | Success;
 export type ConsensusUpdateStateType = ConsensusUpdateState['type'];
@@ -12,6 +13,7 @@ export interface WaitForUpdate {
   processId: string;
   clearedToSend: boolean;
   updateSent: boolean;
+  protocolLocator: ProtocolLocator;
 }
 
 export interface Failure {
