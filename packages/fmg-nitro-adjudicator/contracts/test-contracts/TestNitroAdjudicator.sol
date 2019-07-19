@@ -2,12 +2,12 @@ pragma solidity ^0.5.2;
 pragma experimental ABIEncoderV2;
 import "fmg-core/contracts/Commitment.sol";
 import "fmg-core/contracts/Rules.sol";
-import "../NitroVault.sol";
+import "../NitroAdjudicator.sol";
 
-contract TestNitroVault is NitroVault {
+contract TestNitroAdjudicator is NitroAdjudicator {
     using Commitment for Commitment.CommitmentStruct;
     
-    constructor(address _NitroLibraryAddress) NitroVault(_NitroLibraryAddress) public {}  
+    constructor(address _NitroLibraryAddress) NitroAdjudicator(_NitroLibraryAddress) public {}  
     // ****************
     // Helper functions
     // ****************

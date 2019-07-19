@@ -50,7 +50,7 @@ contract NitroLibrary {
     ) public pure returns (Outcome memory);
 }
 
-contract NitroVault {
+contract NitroAdjudicator {
     using Commitment for Commitment.CommitmentStruct;
     using SafeMath for uint;
     NitroLibrary Library;

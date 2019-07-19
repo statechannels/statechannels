@@ -12,7 +12,7 @@ import { sign, Channel, CountingApp, toHex, asEthersObject, Address } from 'fmg-
 import { BigNumber, bigNumberify } from 'ethers/utils';
 import CommitmentArtifact from '../build/contracts/Commitment.json';
 import RulesArtifact from '../build/contracts/Rules.json';
-import NitroVaultArtifact from '../build/contracts/TestNitroVault.json';
+import NitroAdjudicatorArtifact from '../build/contracts/TestNitroAdjudicator.json';
 import CountingAppArtifact from '../build/contracts/CountingApp.json';
 import { channelID as getChannelID } from 'fmg-core/lib/channel';
 import { asCoreCommitment } from 'fmg-core/lib/test-app/counting-app';
@@ -43,8 +43,8 @@ async function setupContracts() {
   let networkId;
 
   networkId = (await provider.getNetwork()).chainId;
-  const nitroVaultAddress = NitroVaultArtifact.networks[networkId].address;
-  nitro = new ethers.Contract(nitroVaultAddress, NitroVaultArtifact.abi, signer0);
+  const NitroAdjudicatorAddress = NitroAdjudicatorArtifact.networks[networkId].address;
+  nitro = new ethers.Contract(NitroAdjudicatorAddress, NitroAdjudicatorArtifact.abi, signer0);
   countingAppAddress = CountingAppArtifact.networks[networkId].address;
 
   const unwrap = ({ challengeCommitment, finalizedAt }) => ({
