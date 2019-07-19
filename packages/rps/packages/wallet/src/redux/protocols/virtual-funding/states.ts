@@ -2,7 +2,7 @@ import { ProtocolState } from '..';
 import { StateConstructor } from '../../utils';
 import { AdvanceChannelState } from '../advance-channel';
 import { ConsensusUpdateState } from '../consensus-update';
-import { IndirectFundingState } from '../indirect-funding';
+import { NonTerminalIndirectFundingState } from '../indirect-funding';
 import { ProtocolLocator } from '../../../communication';
 
 // -------
@@ -33,7 +33,7 @@ export interface WaitForGuarantorChannel extends Base {
 
 export interface WaitForGuarantorFunding extends Base {
   type: 'VirtualFunding.WaitForGuarantorFunding';
-  indirectGuarantorFunding: IndirectFundingState;
+  indirectGuarantorFunding: NonTerminalIndirectFundingState;
   jointChannelId: string;
 }
 

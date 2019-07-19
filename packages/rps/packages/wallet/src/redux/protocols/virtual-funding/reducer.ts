@@ -232,13 +232,21 @@ function waitForGuarantorChannelReducer(
             result.sharedData,
             makeLocator(protocolState.protocolLocator, EmbeddedProtocol.IndirectFunding),
           );
-          return {
-            protocolState: states.waitForGuarantorFunding({
-              ...protocolState,
-              indirectGuarantorFunding: indirectFundingResult.protocolState,
-            }),
-            sharedData: indirectFundingResult.sharedData,
-          };
+          switch (indirectFundingResult.protocolState.type) {
+            case 'IndirectFunding.Failure':
+              return {
+                protocolState: states.failure({}),
+                sharedData: indirectFundingResult.sharedData,
+              };
+            default:
+              return {
+                protocolState: states.waitForGuarantorFunding({
+                  ...protocolState,
+                  indirectGuarantorFunding: indirectFundingResult.protocolState,
+                }),
+                sharedData: indirectFundingResult.sharedData,
+              };
+          }
 
         default:
           return {

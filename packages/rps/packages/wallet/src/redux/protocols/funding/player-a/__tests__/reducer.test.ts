@@ -16,7 +16,6 @@ describe('happy path', () => {
 
   describeScenarioStep(scenario.waitForStrategyChoice, () => {
     const { state, sharedData, action } = scenario.waitForStrategyChoice;
-
     const result = reducer(state, sharedData, action);
 
     itTransitionsTo(result, 'Funding.PlayerA.WaitForStrategyResponse');
@@ -26,7 +25,6 @@ describe('happy path', () => {
 
   describeScenarioStep(scenario.waitForStrategyResponse, () => {
     const { state, sharedData, action } = scenario.waitForStrategyResponse;
-
     const result = reducer(state, sharedData, action);
 
     itTransitionsTo(result, 'Funding.PlayerA.WaitForFunding');
@@ -48,7 +46,6 @@ describe('happy path', () => {
 
   describeScenarioStep(scenario.waitForSuccessConfirmation, () => {
     const { state, sharedData, action } = scenario.waitForSuccessConfirmation;
-
     const result = reducer(state, sharedData, action);
 
     itTransitionsTo(result, 'Funding.PlayerA.Success');
@@ -62,7 +59,6 @@ describe('When a strategy is rejected', () => {
 
   describeScenarioStep(scenario.waitForStrategyResponse, () => {
     const { state, sharedData, action } = scenario.waitForStrategyResponse;
-
     const result = reducer(state, sharedData, action);
 
     itTransitionsTo(result, 'Funding.PlayerA.WaitForStrategyChoice');
@@ -74,7 +70,6 @@ describe('when cancelled by the opponent', () => {
 
   describeScenarioStep(scenario.waitForStrategyChoice, () => {
     const { state, sharedData, action } = scenario.waitForStrategyChoice;
-
     const result = reducer(state, sharedData, action);
 
     itTransitionsTo(result, 'Funding.PlayerA.Failure');
@@ -83,7 +78,6 @@ describe('when cancelled by the opponent', () => {
 
   describeScenarioStep(scenario.waitForStrategyResponse, () => {
     const { state, sharedData, action } = scenario.waitForStrategyResponse;
-
     const result = reducer(state, sharedData, action);
 
     itTransitionsTo(result, 'Funding.PlayerA.Failure');
@@ -95,7 +89,6 @@ describe('when cancelled by the user', () => {
   const scenario = scenarios.cancelledByUser;
   describeScenarioStep(scenario.waitForStrategyChoice, () => {
     const { state, sharedData, action } = scenario.waitForStrategyChoice;
-
     const result = reducer(state, sharedData, action);
 
     itTransitionsTo(result, 'Funding.PlayerA.Failure');
@@ -104,7 +97,6 @@ describe('when cancelled by the user', () => {
 
   describeScenarioStep(scenario.waitForStrategyResponse, () => {
     const { state, sharedData, action } = scenario.waitForStrategyResponse;
-
     const result = reducer(state, sharedData, action);
 
     itTransitionsTo(result, 'Funding.PlayerA.Failure');

@@ -6,7 +6,7 @@ import { initialize as initializeA, fundingReducer as playerAReducer } from './p
 import { initialize as initializeB, fundingReducer as playerBReducer } from './player-b/reducer';
 import { TwoPartyPlayerIndex } from '../../types';
 import { unreachable } from '../../../utils/reducer-utils';
-import { NewLedgerFundingAction } from '../new-ledger-funding/actions';
+import { NewLedgerChannelAction } from '../new-ledger-channel/actions';
 import * as playerAStates from './player-a/states';
 import { getOpponentAddress, getOurAddress } from '../reducer-helpers';
 
@@ -31,7 +31,7 @@ export function initialize(
 export const fundingReducer: ProtocolReducer<states.FundingState> = (
   protocolState: states.FundingState,
   sharedData: SharedData,
-  action: actions.FundingAction | NewLedgerFundingAction,
+  action: actions.FundingAction | NewLedgerChannelAction,
 ): ProtocolStateWithSharedData<states.FundingState> => {
   if (playerAStates.isFundingState(protocolState)) {
     if (!actions.isPlayerAFundingAction(action)) {

@@ -102,7 +102,7 @@ describe('happyPath', () => {
     itTransitionsSubstateTo(
       protocolState,
       'indirectGuarantorFunding',
-      'IndirectFunding.WaitForNewLedgerFunding',
+      'IndirectFunding.WaitForNewLedgerChannel',
     );
     // While this channel should have two participants, the test scenarios currently
     // create a guarantor channel that has three participants.
