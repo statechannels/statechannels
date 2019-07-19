@@ -545,6 +545,7 @@ describe('Nitro (ETH management)', () => {
         allocation: allocationAfterClaim,
         finalizedAt: ethers.utils.bigNumberify(finalizedAt),
         challengeCommitment: getEthersObjectForCommitment(guarantorCommitment),
+        token: [AddressZero, AddressZero],
       };
     });
 
