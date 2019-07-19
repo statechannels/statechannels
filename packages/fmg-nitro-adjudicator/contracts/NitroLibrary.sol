@@ -4,7 +4,7 @@ import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "fmg-core/contracts/Commitment.sol";
 import "fmg-core/contracts/Rules.sol";
 
-contract NitroLibrary2 {
+contract NitroLibrary {
     using Commitment for Commitment.CommitmentStruct;
     using SafeMath for uint;
     

@@ -5,7 +5,7 @@ const TestConsensusCommitment = artifacts.require('./test-contracts/TestConsensu
 const testERC20 = artifacts.require('testERC20');
 const NitroAdjudicator = artifacts.require('NitroAdjudicator');
 const TestNitroAdjudicator = artifacts.require('TestNitroAdjudicator');
-const NitroLibrary = artifacts.require('NitroLibrary2');
+const NitroLibrary = artifacts.require('NitroLibrary');
 const CountingApp = artifacts.require('CountingApp');
 const CountingCommitment = artifacts.require('CountingCommitment');
 

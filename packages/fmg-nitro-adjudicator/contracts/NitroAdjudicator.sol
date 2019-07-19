@@ -4,12 +4,12 @@ import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "fmg-core/contracts/Commitment.sol";
 import "fmg-core/contracts/Rules.sol";
 
-contract IERC20 { // The parts of the ERC20 Interface that we need
+contract IERC20 { // Abstraction of the parts of the ERC20 Interface that we need
     function transfer(address to, uint tokens) public returns (bool success);
     function transferFrom(address from, address to, uint tokens) public returns (bool success);
 }
 
-contract NitroLibrary {
+contract INitroLibrary { // Abstraction of the NitroLibrary contract
 
     struct Outcome {
     address[] destination;
@@ -53,10 +53,10 @@ contract NitroLibrary {
 contract NitroAdjudicator {
     using Commitment for Commitment.CommitmentStruct;
     using SafeMath for uint;
-    NitroLibrary Library;
+    INitroLibrary Library; // Abs
 
     constructor(address _NitroLibraryAddress) public {
-        Library = NitroLibrary(_NitroLibraryAddress);
+        Library = INitroLibrary(_NitroLibraryAddress); // Abs
     }
 
     // TODO: Challenge duration should depend on the channel
@@ -76,13 +76,13 @@ contract NitroAdjudicator {
 
     struct ConclusionProof {
         Commitment.CommitmentStruct penultimateCommitment;
-        NitroLibrary.Signature penultimateSignature;
+        INitroLibrary.Signature penultimateSignature; // Abs
         Commitment.CommitmentStruct ultimateCommitment;
-        NitroLibrary.Signature ultimateSignature;
+        INitroLibrary.Signature ultimateSignature; // Abs
     }
 
     mapping(address => mapping(address => uint)) public holdings;
-    mapping(address => NitroLibrary.Outcome) public outcomes;
+    mapping(address => INitroLibrary.Outcome) public outcomes; // Abs
     address private constant zeroAddress = address(0);
 
     // **************
@@ -228,7 +228,7 @@ function deposit(address destination, uint expectedHeld,
     }
 
     function claim(address guarantor, address recipient, uint amount, address token) public {
-        NitroLibrary.Outcome memory guarantee = outcomes[guarantor];
+        INitroLibrary.Outcome memory guarantee = outcomes[guarantor]; // Abs
         require(
             guarantee.challengeCommitment.guaranteedChannel != zeroAddress,
             "Claim: a guarantee channel is required"
@@ -240,7 +240,7 @@ function deposit(address destination, uint expectedHeld,
         );
 
         uint funding = holdings[guarantor][token];
-        NitroLibrary.Outcome memory reprioritizedOutcome = Library.reprioritize(
+        INitroLibrary.Outcome memory reprioritizedOutcome = Library.reprioritize( // Abs
             outcomes[guarantee.challengeCommitment.guaranteedChannel],
             guarantee
         );
@@ -273,7 +273,7 @@ function deposit(address destination, uint expectedHeld,
     function forceMove(
         Commitment.CommitmentStruct memory agreedCommitment,
         Commitment.CommitmentStruct memory challengeCommitment,
-        NitroLibrary.Signature[] memory signatures
+        INitroLibrary.Signature[] memory signatures // Abs
     ) public {
         require(
             !isChannelClosed(agreedCommitment.channelId()),
@@ -294,7 +294,7 @@ function deposit(address destination, uint expectedHeld,
 
         address channelId = agreedCommitment.channelId();
 
-        outcomes[channelId] = NitroLibrary.Outcome(
+        outcomes[channelId] = INitroLibrary.Outcome( // Abs
             challengeCommitment.participants,
             now + CHALLENGE_DURATION,
             challengeCommitment,
@@ -309,7 +309,7 @@ function deposit(address destination, uint expectedHeld,
         );
     }
 
-    function refute(Commitment.CommitmentStruct memory refutationCommitment, NitroLibrary.Signature memory signature) public {
+    function refute(Commitment.CommitmentStruct memory refutationCommitment, INitroLibrary.Signature memory signature) public { // Abs
         address channel = refutationCommitment.channelId();
         require(
             !isChannelClosed(channel),
@@ -327,7 +327,7 @@ function deposit(address destination, uint expectedHeld,
         );
 
         emit Refuted(channel, refutationCommitment);
-        NitroLibrary.Outcome memory updatedOutcome = NitroLibrary.Outcome(
+        INitroLibrary.Outcome memory updatedOutcome = INitroLibrary.Outcome( // Abs
             outcomes[channel].destination,
             0,
             refutationCommitment,
@@ -337,7 +337,7 @@ function deposit(address destination, uint expectedHeld,
         outcomes[channel] = updatedOutcome;
     }
 
-    function respondWithMove(Commitment.CommitmentStruct memory responseCommitment, NitroLibrary.Signature memory signature) public {
+    function respondWithMove(Commitment.CommitmentStruct memory responseCommitment, INitroLibrary.Signature memory signature) public { // Abs
         address channel = responseCommitment.channelId();
         require(
             !isChannelClosed(channel),
@@ -356,7 +356,7 @@ function deposit(address destination, uint expectedHeld,
 
         emit RespondedWithMove(channel, responseCommitment, signature.v, signature.r, signature.s);
 
-        NitroLibrary.Outcome memory updatedOutcome = NitroLibrary.Outcome(
+        INitroLibrary.Outcome memory updatedOutcome = INitroLibrary.Outcome( // Abs
             outcomes[channel].destination,
             0,
             responseCommitment,
@@ -369,8 +369,8 @@ function deposit(address destination, uint expectedHeld,
     function alternativeRespondWithMove(
         Commitment.CommitmentStruct memory _alternativeCommitment,
         Commitment.CommitmentStruct memory _responseCommitment,
-        NitroLibrary.Signature memory _alternativeSignature,
-        NitroLibrary.Signature memory _responseSignature
+        INitroLibrary.Signature memory _alternativeSignature, // Abs
+        INitroLibrary.Signature memory _responseSignature // Abs
     )
       public
     {
@@ -412,7 +412,7 @@ function deposit(address destination, uint expectedHeld,
 
         emit RespondedWithAlternativeMove(_responseCommitment);
 
-        NitroLibrary.Outcome memory updatedOutcome = NitroLibrary.Outcome(
+        INitroLibrary.Outcome memory updatedOutcome = INitroLibrary.Outcome( // Abs
             outcomes[channel].destination,
             0,
             _responseCommitment,
@@ -433,7 +433,7 @@ function deposit(address destination, uint expectedHeld,
             "Conclude: channel must not be finalized"
         );
 
-        outcomes[channelId] = NitroLibrary.Outcome(
+        outcomes[channelId] = INitroLibrary.Outcome( // Abs
             proof.penultimateCommitment.destination,
             now,
             proof.penultimateCommitment,

@@ -1,6 +1,6 @@
 import * as ethers from 'ethers';
 import NitroAdjudicatorArtifact from '../build/contracts/TestNitroAdjudicator.json';
-import NitroLibraryArtifact from '../build/contracts/NitroLibrary2.json';
+import NitroLibraryArtifact from '../build/contracts/NitroLibrary.json';
 import ERC20Artifact from '../build/contracts/testERC20.json';
 import { AddressZero } from 'ethers/constants';
 import { sign, Channel, CountingApp, Address, asEthersObject } from 'fmg-core';
