@@ -32,11 +32,11 @@ contract TestNitroAdjudicator is NitroAdjudicator {
         return outcomes[channel].finalizedAt > 0 && outcomes[channel].finalizedAt < now;
     }
 
-    function setOutcome(address channel, NitroLibrary.Outcome memory outcome) public {
+    function setOutcome(address channel, INitroLibrary.Outcome memory outcome) public {
         outcomes[channel] = outcome;
     }
 
-    function getOutcome(address channel) public view returns (NitroLibrary.Outcome memory) {
+    function getOutcome(address channel) public view returns (INitroLibrary.Outcome memory) {
         return outcomes[channel];
     }
 
