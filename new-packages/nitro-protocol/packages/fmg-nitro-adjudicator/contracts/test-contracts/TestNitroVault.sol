@@ -6,27 +6,38 @@ import "../NitroVault.sol";
 
 contract TestNitroVault is NitroVault {
     using Commitment for Commitment.CommitmentStruct;
-
-    constructor(address _NitroAdjudicatorAddress) NitroVault(_NitroAdjudicatorAddress) public {}
-
-    function reprioritizePub(NitroAdjudicator.Outcome memory allocation, NitroAdjudicator.Outcome memory guarantee) public pure returns (NitroAdjudicator.Outcome memory) {
-        return reprioritize(allocation, guarantee);
-    }
-
-    function affordsPub(address recipient, NitroAdjudicator.Outcome memory allocation, uint funding) public pure returns (uint256) {
-        return affords(recipient, allocation, funding);
-    }
-
-    function reducePub(NitroAdjudicator.Outcome memory allocation, address recipient, uint amount, address token) public pure returns (NitroAdjudicator.Outcome memory) {
-        return reduce(allocation, recipient, amount, token);
-    }
-
+    
+    constructor(address _NitroLibraryAddress) NitroVault(_NitroLibraryAddress) public {}  
     // ****************
     // Helper functions
     // ****************
 
     function isChannelClosedPub(address channel) public view returns (bool) {
         return isChannelClosed(channel);
+    }
+
+    // *********************************
+    // Test helper functions
+    // *********************************
+
+    function isChallengeOngoing(address channel) public view returns (bool) {
+        return outcomes[channel].finalizedAt > now;
+    }
+
+    function channelId(Commitment.CommitmentStruct memory commitment) public pure returns (address) {
+        return commitment.channelId();
+    }
+
+    function outcomeFinal(address channel) public view returns (bool) {
+        return outcomes[channel].finalizedAt > 0 && outcomes[channel].finalizedAt < now;
+    }
+
+    function setOutcome(address channel, NitroLibrary.Outcome memory outcome) public {
+        outcomes[channel] = outcome;
+    }
+
+    function getOutcome(address channel) public view returns (NitroLibrary.Outcome memory) {
+        return outcomes[channel];
     }
 
 }

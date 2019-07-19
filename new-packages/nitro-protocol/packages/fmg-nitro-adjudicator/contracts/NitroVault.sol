@@ -3,27 +3,64 @@ pragma experimental ABIEncoderV2;
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "fmg-core/contracts/Commitment.sol";
 import "fmg-core/contracts/Rules.sol";
-import "./NitroAdjudicator.sol";
 
-contract IERC20 { // ERC20 Interface
-    // function totalSupply() public view returns (uint);
-    // function balanceOf(address tokenOwner) public view returns (uint balance);
-    // function allowance(address tokenOwner, address spender) public view returns (uint remaining);
+contract IERC20 { // The parts of the ERC20 Interface that we need
     function transfer(address to, uint tokens) public returns (bool success);
-    // function approve(address spender, uint tokens) public returns (bool success);
     function transferFrom(address from, address to, uint tokens) public returns (bool success);
-    // event Transfer(address indexed from, address indexed to, uint tokens);
-    // event Approval(address indexed tokenOwner, address indexed spender, uint tokens);
+}
+
+contract NitroLibrary {
+
+    struct Outcome {
+    address[] destination;
+    uint256 finalizedAt;
+    Commitment.CommitmentStruct challengeCommitment;
+    // exactly one of the following two should be non-null
+    // guarantee channels
+    uint[] allocation;         // should be zero length in guarantee channels
+    address[] token;
+    }
+
+    struct Signature {
+    uint8 v;
+    bytes32 r;
+    bytes32 s;
+    }
+
+    function recoverSigner(bytes calldata _d, uint8 _v, bytes32 _r, bytes32 _s) external pure returns(address);
+
+    function affords(
+        address recipient,
+        Outcome calldata outcome,
+        uint funding
+    ) external pure returns (uint256);
+
+    function reprioritize(
+        Outcome calldata allocation,
+        Outcome calldata guarantee
+    ) external pure returns (Outcome memory);
+
+    function moveAuthorized(Commitment.CommitmentStruct calldata _commitment, Signature calldata signature) external pure returns (bool);
+
+        function reduce(
+        Outcome memory outcome,
+        address recipient,
+        uint amount,
+        address token
+    ) public pure returns (Outcome memory);
 }
 
 contract NitroVault {
     using Commitment for Commitment.CommitmentStruct;
     using SafeMath for uint;
-    NitroAdjudicator Adjudicator;
+    NitroLibrary Library;
 
-    constructor(address _NitroAdjudicatorAddress) public {
-        Adjudicator = NitroAdjudicator(_NitroAdjudicatorAddress);
+    constructor(address _NitroLibraryAddress) public {
+        Library = NitroLibrary(_NitroLibraryAddress);
     }
+
+    // TODO: Challenge duration should depend on the channel
+    uint constant CHALLENGE_DURATION = 5 minutes;
 
     struct Authorization {
         // Prevents replay attacks:
@@ -37,20 +74,15 @@ contract NitroVault {
         address sender; // the account used to sign transactions
     }
 
-    struct Signature {
-        uint8 v;
-        bytes32 r;
-        bytes32 s;
-    }
     struct ConclusionProof {
         Commitment.CommitmentStruct penultimateCommitment;
-        Signature penultimateSignature;
+        NitroLibrary.Signature penultimateSignature;
         Commitment.CommitmentStruct ultimateCommitment;
-        Signature ultimateSignature;
+        NitroLibrary.Signature ultimateSignature;
     }
 
     mapping(address => mapping(address => uint)) public holdings;
-    mapping(address => Outcome) internal outcomes;
+    mapping(address => NitroLibrary.Outcome) public outcomes;
     address private constant zeroAddress = address(0);
 
     // **************
@@ -134,7 +166,7 @@ function deposit(address destination, uint expectedHeld,
         );
 
         require(
-            recoverSigner(abi.encode(authorization), _v, _r, _s) == participant,
+            Library.recoverSigner(abi.encode(authorization), _v, _r, _s) == participant,
             "Withdraw: not authorized by participant"
         );
 
@@ -163,7 +195,7 @@ function deposit(address destination, uint expectedHeld,
             "Transfer: outcome must be present"
         );
 
-        uint channelAffordsForDestination = affords(destination, outcomes[channel], holdings[channel][token]);
+        uint channelAffordsForDestination = Library.affords(destination, outcomes[channel], holdings[channel][token]);
 
         require(
             amount <= channelAffordsForDestination,
@@ -172,14 +204,31 @@ function deposit(address destination, uint expectedHeld,
 
         holdings[destination][token] = holdings[destination][token] + amount;
         holdings[channel][token] = holdings[channel][token] - amount;
+    }
 
-        // here we want to *set* outcomes, not just *get* outcomes
-        // TODO REINSTATE
-        // Adjudicator.setOutcome(channel) = reduce(outcomes[channel], destination, amount, token);
+
+    function concludeAndWithdraw(ConclusionProof memory proof,
+        address participant,
+        address payable destination,
+        uint amount,
+        address token,
+        uint8 _v,
+        bytes32 _r,
+        bytes32 _s
+    ) public{
+        address channelId = proof.penultimateCommitment.channelId();
+        if (outcomes[channelId].finalizedAt > now || outcomes[channelId].finalizedAt == 0){
+        _conclude(proof);
+        } else {
+            require(keccak256(abi.encode(proof.penultimateCommitment)) == keccak256(abi.encode(outcomes[channelId].challengeCommitment)),
+            "concludeAndWithdraw: channel already concluded with a different proof");
+        }
+        transfer(channelId,participant, amount, token);
+        withdraw(participant,destination, amount, token, _v,_r,_s);
     }
 
     function claim(address guarantor, address recipient, uint amount, address token) public {
-        NitroAdjudicator.Outcome memory guarantee = outcomes[guarantor];
+        NitroLibrary.Outcome memory guarantee = outcomes[guarantor];
         require(
             guarantee.challengeCommitment.guaranteedChannel != zeroAddress,
             "Claim: a guarantee channel is required"
@@ -191,19 +240,17 @@ function deposit(address destination, uint expectedHeld,
         );
 
         uint funding = holdings[guarantor][token];
-        NitroAdjudicator.Outcome memory reprioritizedOutcome = reprioritize(
-            Adjudicator.getOutcome(guarantee.challengeCommitment.guaranteedChannel),
+        NitroLibrary.Outcome memory reprioritizedOutcome = Library.reprioritize(
+            outcomes[guarantee.challengeCommitment.guaranteedChannel],
             guarantee
         );
-        if (affords(recipient, reprioritizedOutcome, funding) >= amount) {
-                    // here we want to *set* outcomes, not just *get* outcomes
-        // TODO REINSTATE
-            // Adjudicator.setOutcome(guarantee.challengeCommitment.guaranteedChannel) = reduce(
-                // Adjudicator.getOutcome(guarantee.challengeCommitment.guaranteedChannel),
-                // recipient,
-                // amount,
-                // token
-            // );
+        if (Library.affords(recipient, reprioritizedOutcome, funding) >= amount) {
+            outcomes[guarantee.challengeCommitment.guaranteedChannel] = Library.reduce(
+                outcomes[guarantee.challengeCommitment.guaranteedChannel],
+                recipient,
+                amount,
+                token
+            );
             holdings[guarantor][token] = holdings[guarantor][token].sub(amount);
             holdings[recipient][token] = holdings[recipient][token].add(amount);
         } else {
@@ -211,134 +258,207 @@ function deposit(address destination, uint expectedHeld,
         }
     }
 
-    // ********************
-    // ETH and Token Management Logic
-    // ********************
 
-    function reprioritize(
-        NitroAdjudicator.Outcome memory allocation,
-        NitroAdjudicator.Outcome memory guarantee
-    ) internal pure returns (NitroAdjudicator.Outcome memory) {
+
+    // **********************
+    // ForceMove Protocol API
+    // **********************
+
+    function conclude(ConclusionProof memory proof) public {
+        _conclude(proof);
+    }
+
+
+
+    function forceMove(
+        Commitment.CommitmentStruct memory agreedCommitment,
+        Commitment.CommitmentStruct memory challengeCommitment,
+        NitroLibrary.Signature[] memory signatures
+    ) public {
         require(
-            guarantee.challengeCommitment.guaranteedChannel != zeroAddress,
-            "Claim: a guarantee channel is required"
+            !isChannelClosed(agreedCommitment.channelId()),
+            "ForceMove: channel must be open"
         );
-        address[] memory newDestination = new address[](guarantee.destination.length);
-        uint[] memory newAllocation = new uint[](guarantee.destination.length);
-        for (uint aIdx = 0; aIdx < allocation.destination.length; aIdx++) {
-            for (uint gIdx = 0; gIdx < guarantee.destination.length; gIdx++) {
-                if (guarantee.destination[gIdx] == allocation.destination[aIdx]) {
-                    newDestination[gIdx] = allocation.destination[aIdx];
-                    newAllocation[gIdx] = allocation.allocation[aIdx];
-                    break;
-                }
-            }
-        }
+        require(
+            Library.moveAuthorized(agreedCommitment, signatures[0]),
+            "ForceMove: agreedCommitment not authorized"
+        );
+        require(
+            Library.moveAuthorized(challengeCommitment, signatures[1]),
+            "ForceMove: challengeCommitment not authorized"
+        );
+        require(
+            Rules.validTransition(agreedCommitment, challengeCommitment),
+            "ForceMove: Invalid transition"
+        );
 
-        return NitroAdjudicator.Outcome(
-            newDestination,
-            allocation.finalizedAt,
-            allocation.challengeCommitment,
-            newAllocation,
-            allocation.token
+        address channelId = agreedCommitment.channelId();
+
+        outcomes[channelId] = NitroLibrary.Outcome(
+            challengeCommitment.participants,
+            now + CHALLENGE_DURATION,
+            challengeCommitment,
+            challengeCommitment.allocation,
+            challengeCommitment.token
+        );
+
+        emit ChallengeCreated(
+            channelId,
+            challengeCommitment,
+            now + CHALLENGE_DURATION
         );
     }
 
-    function affords(
-        address recipient,
-        NitroAdjudicator.Outcome memory outcome,
-        uint funding
-    ) internal pure returns (uint256) {
-        uint result = 0;
-        uint remainingFunding = funding;
+    function refute(Commitment.CommitmentStruct memory refutationCommitment, NitroLibrary.Signature memory signature) public {
+        address channel = refutationCommitment.channelId();
+        require(
+            !isChannelClosed(channel),
+            "Refute: channel must be open"
+        );
 
-        for (uint i = 0; i < outcome.destination.length; i++) {
-            if (remainingFunding <= 0) {
-                break;
-            }
+        require(
+            Library.moveAuthorized(refutationCommitment, signature),
+            "Refute: move must be authorized"
+        );
 
-            if (outcome.destination[i] == recipient) {
-                // It is technically allowed for a recipient to be listed in the
-                // outcome multiple times, so we must iterate through the entire
-                // array.
-                result = result.add(min(outcome.allocation[i], remainingFunding));
-            }
-            if (remainingFunding > outcome.allocation[i]){
-                remainingFunding = remainingFunding.sub(outcome.allocation[i]);
-            }else{
-                remainingFunding = 0;
-            }
-        }
+        require(
+            Rules.validRefute(outcomes[channel].challengeCommitment, refutationCommitment, signature.v, signature.r, signature.s),
+            "Refute: must be a valid refute"
+        );
 
-        return result;
+        emit Refuted(channel, refutationCommitment);
+        NitroLibrary.Outcome memory updatedOutcome = NitroLibrary.Outcome(
+            outcomes[channel].destination,
+            0,
+            refutationCommitment,
+            refutationCommitment.allocation,
+            refutationCommitment.token
+        );
+        outcomes[channel] = updatedOutcome;
     }
 
-    function reduce(
-        NitroAdjudicator.Outcome memory outcome,
-        address recipient,
-        uint amount,
-        address token
-    ) internal pure returns (NitroAdjudicator.Outcome memory) {
-        // TODO only reduce entries corresponding to token argument
-        uint256[] memory updatedAllocation = outcome.allocation;
-        uint256 reduction = 0;
-        uint remainingAmount = amount;
-        for (uint i = 0; i < outcome.destination.length; i++) {
-            if (outcome.destination[i] == recipient) {
-                // It is technically allowed for a recipient to be listed in the
-                // outcome multiple times, so we must iterate through the entire
-                // array.
-                reduction = reduction.add(min(outcome.allocation[i], remainingAmount));
-                remainingAmount = remainingAmount.sub(reduction);
-                updatedAllocation[i] = updatedAllocation[i].sub(reduction);
-            }
-        }
-
-        return NitroAdjudicator.Outcome(
-            outcome.destination,
-            outcome.finalizedAt,
-            outcome.challengeCommitment, // Once the outcome is finalized,
-            updatedAllocation,
-            outcome.token
+    function respondWithMove(Commitment.CommitmentStruct memory responseCommitment, NitroLibrary.Signature memory signature) public {
+        address channel = responseCommitment.channelId();
+        require(
+            !isChannelClosed(channel),
+            "RespondWithMove: channel must be open"
         );
+
+        require(
+            Library.moveAuthorized(responseCommitment, signature),
+            "RespondWithMove: move must be authorized"
+        );
+
+        require(
+            Rules.validRespondWithMove(outcomes[channel].challengeCommitment, responseCommitment, signature.v, signature.r, signature.s),
+            "RespondWithMove: must be a valid response"
+        );
+
+        emit RespondedWithMove(channel, responseCommitment, signature.v, signature.r, signature.s);
+
+        NitroLibrary.Outcome memory updatedOutcome = NitroLibrary.Outcome(
+            outcomes[channel].destination,
+            0,
+            responseCommitment,
+            responseCommitment.allocation,
+            responseCommitment.token
+        );
+        outcomes[channel] = updatedOutcome;
+    }
+
+    function alternativeRespondWithMove(
+        Commitment.CommitmentStruct memory _alternativeCommitment,
+        Commitment.CommitmentStruct memory _responseCommitment,
+        NitroLibrary.Signature memory _alternativeSignature,
+        NitroLibrary.Signature memory _responseSignature
+    )
+      public
+    {
+        address channel = _responseCommitment.channelId();
+        require(
+            !isChannelClosed(channel),
+            "AlternativeRespondWithMove: channel must be open"
+        );
+
+        require(
+            Library.moveAuthorized(_responseCommitment, _responseSignature),
+            "AlternativeRespondWithMove: move must be authorized"
+        );
+
+        uint8[] memory v = new uint8[](2);
+        v[0] = _alternativeSignature.v;
+        v[1] = _responseSignature.v;
+
+        bytes32[] memory r = new bytes32[](2);
+        r[0] = _alternativeSignature.r;
+        r[1] = _responseSignature.r;
+
+        bytes32[] memory s = new bytes32[](2);
+        s[0] = _alternativeSignature.s;
+        s[1] = _responseSignature.s;
+
+
+        require(
+            Rules.validAlternativeRespondWithMove(
+                outcomes[channel].challengeCommitment,
+                _alternativeCommitment,
+                _responseCommitment,
+                v,
+                r,
+                s
+            ),
+            "RespondWithMove: must be a valid response"
+        );
+
+        emit RespondedWithAlternativeMove(_responseCommitment);
+
+        NitroLibrary.Outcome memory updatedOutcome = NitroLibrary.Outcome(
+            outcomes[channel].destination,
+            0,
+            _responseCommitment,
+            _responseCommitment.allocation,
+            _responseCommitment.token
+        );
+        outcomes[channel] = updatedOutcome;
+    }
+
+    // ************************
+    // ForceMove Protocol Logic
+    // ************************
+
+    function _conclude(ConclusionProof memory proof) internal {
+        address channelId = proof.penultimateCommitment.channelId();
+        require(
+            (outcomes[channelId].finalizedAt > now || outcomes[channelId].finalizedAt == 0),
+            "Conclude: channel must not be finalized"
+        );
+
+        outcomes[channelId] = NitroLibrary.Outcome(
+            proof.penultimateCommitment.destination,
+            now,
+            proof.penultimateCommitment,
+            proof.penultimateCommitment.allocation,
+            proof.penultimateCommitment.token
+        );
+        emit Concluded(channelId);
+    }
+
+    function isChannelClosed(address channel) internal view returns (bool) {
+        return outcomes[channel].finalizedAt < now && outcomes[channel].finalizedAt > 0;
     }
 
     // ****************
     // Events
     // ****************
-    
-
     event Deposited(address destination, uint256 amountDeposited, uint256 destinationHoldings);
-   
-    function isChannelClosed(address channel) internal view returns (bool) {
-        return outcomes[channel].finalizedAt < now && outcomes[channel].finalizedAt > 0;
-    }
 
-    function moveAuthorized(Commitment.CommitmentStruct memory _commitment, Signature memory signature) internal pure returns (bool){
-        return _commitment.mover() == recoverSigner(
-            abi.encode(_commitment),
-            signature.v,
-            signature.r,
-            signature.s
-        );
-    }
-
-    function recoverSigner(bytes memory _d, uint8 _v, bytes32 _r, bytes32 _s) internal pure returns(address) {
-        bytes memory prefix = "\x19Ethereum Signed Message:\n32";
-        bytes32 h = keccak256(_d);
-
-        bytes32 prefixedHash = keccak256(abi.encodePacked(prefix, h));
-
-        address a = ecrecover(prefixedHash, _v, _r, _s);
-
-        return(a);
-    }
-
-    function min(uint a, uint b) internal pure returns (uint) {
-        if (a <= b) {
-            return a;
-        }
-
-        return b;
-    }
+    event ChallengeCreated(
+        address channelId,
+        Commitment.CommitmentStruct commitment,
+        uint256 finalizedAt
+    );
+    event Concluded(address channelId);
+    event Refuted(address channelId, Commitment.CommitmentStruct refutation);
+    event RespondedWithMove(address channelId, Commitment.CommitmentStruct response, uint8 v, bytes32 r, bytes32 ss);
+    event RespondedWithAlternativeMove(Commitment.CommitmentStruct alternativeResponse);
 }
