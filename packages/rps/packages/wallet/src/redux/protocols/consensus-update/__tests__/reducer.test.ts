@@ -18,6 +18,7 @@ describe('Two Players', () => {
         clearedToSend,
         proposedAllocation,
         proposedDestination,
+        protocolLocator,
         sharedData,
       } = scenario.initialize;
       const result = initialize(
@@ -26,6 +27,7 @@ describe('Two Players', () => {
         clearedToSend,
         proposedAllocation,
         proposedDestination,
+        protocolLocator,
         sharedData,
       );
       itSendsTheseCommitments(result, scenario.initialize.reply);
@@ -48,6 +50,7 @@ describe('Two Players', () => {
         clearedToSend,
         proposedAllocation,
         proposedDestination,
+        protocolLocator,
         sharedData,
       } = scenario.initialize;
       const result = initialize(
@@ -56,6 +59,7 @@ describe('Two Players', () => {
         clearedToSend,
         proposedAllocation,
         proposedDestination,
+        protocolLocator,
         sharedData,
       );
 
@@ -103,6 +107,7 @@ describe('Three Players', () => {
         clearedToSend,
         proposedAllocation,
         proposedDestination,
+        protocolLocator,
         sharedData,
       } = scenario.initialize;
       const result = initialize(
@@ -111,6 +116,7 @@ describe('Three Players', () => {
         clearedToSend,
         proposedAllocation,
         proposedDestination,
+        protocolLocator,
         sharedData,
       );
 
@@ -142,6 +148,7 @@ describe('Three Players', () => {
         clearedToSend,
         proposedAllocation,
         proposedDestination,
+        protocolLocator,
         sharedData,
       } = scenario.initialize;
       const result = initialize(
@@ -150,6 +157,7 @@ describe('Three Players', () => {
         clearedToSend,
         proposedAllocation,
         proposedDestination,
+        protocolLocator,
         sharedData,
       );
 
@@ -174,6 +182,7 @@ describe('Three Players', () => {
         clearedToSend,
         proposedAllocation,
         proposedDestination,
+        protocolLocator,
         sharedData,
       } = scenario.initialize;
       const result = initialize(
@@ -182,6 +191,7 @@ describe('Three Players', () => {
         clearedToSend,
         proposedAllocation,
         proposedDestination,
+        protocolLocator,
         sharedData,
       );
 
@@ -213,6 +223,7 @@ describe('Three Players', () => {
         clearedToSend,
         proposedAllocation,
         proposedDestination,
+        protocolLocator,
         sharedData,
       } = scenario.initialize;
       const result = initialize(
@@ -221,6 +232,7 @@ describe('Three Players', () => {
         clearedToSend,
         proposedAllocation,
         proposedDestination,
+        protocolLocator,
         sharedData,
       );
 
@@ -255,6 +267,7 @@ describe('Three Players', () => {
         clearedToSend,
         proposedAllocation,
         proposedDestination,
+        protocolLocator,
         sharedData,
       } = scenario.initialize;
       const result = initialize(
@@ -263,6 +276,7 @@ describe('Three Players', () => {
         clearedToSend,
         proposedAllocation,
         proposedDestination,
+        protocolLocator,
         sharedData,
       );
 
@@ -293,6 +307,7 @@ describe('Three Players', () => {
         clearedToSend,
         proposedAllocation,
         proposedDestination,
+        protocolLocator,
         sharedData,
       } = scenario.initialize;
       const result = initialize(
@@ -301,6 +316,7 @@ describe('Three Players', () => {
         clearedToSend,
         proposedAllocation,
         proposedDestination,
+        protocolLocator,
         sharedData,
       );
 

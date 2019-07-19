@@ -17,6 +17,7 @@ describe('player A happy path', () => {
       proposedAllocation,
       proposedDestination,
       originalAllocation,
+      protocolLocator,
     } = scenario.initialize;
     const initialState = initialize(
       processId,
@@ -25,6 +26,7 @@ describe('player A happy path', () => {
       proposedAllocation,
       proposedDestination,
       originalAllocation,
+      protocolLocator,
       sharedData,
     );
     it('requests the correct allocation/destination updates', () => {
@@ -80,6 +82,7 @@ describe('player B happy path', () => {
       proposedAllocation,
       proposedDestination,
       originalAllocation,
+      protocolLocator,
     } = scenario.initialize;
     const initialState = initialize(
       processId,
@@ -88,6 +91,7 @@ describe('player B happy path', () => {
       proposedAllocation,
       proposedDestination,
       originalAllocation,
+      protocolLocator,
       sharedData,
     );
 
@@ -144,6 +148,7 @@ describe('player A one user needs top up', () => {
       proposedAllocation,
       proposedDestination,
       originalAllocation,
+      protocolLocator,
     } = scenario.initialize;
     const initialState = initialize(
       processId,
@@ -152,6 +157,7 @@ describe('player A one user needs top up', () => {
       proposedAllocation,
       proposedDestination,
       originalAllocation,
+      protocolLocator,
       sharedData,
     );
 
@@ -199,6 +205,7 @@ describe('player B one user needs top up', () => {
       proposedAllocation,
       proposedDestination,
       originalAllocation,
+      protocolLocator,
     } = scenario.initialize;
     const initialState = initialize(
       processId,
@@ -207,6 +214,7 @@ describe('player B one user needs top up', () => {
       proposedAllocation,
       proposedDestination,
       originalAllocation,
+      protocolLocator,
       sharedData,
     );
 

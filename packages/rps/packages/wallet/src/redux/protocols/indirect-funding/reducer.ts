@@ -15,6 +15,7 @@ import { unreachable } from '../../../utils/reducer-utils';
 import { WalletAction } from '../../actions';
 import { ProtocolLocator, EmbeddedProtocol } from '../../../communication';
 import * as newLedgerChannel from '../new-ledger-channel';
+import { EXISTING_LEDGER_FUNDING_PROTOCOL_LOCATOR } from '../existing-ledger-funding/reducer';
 
 export const INDIRECT_FUNDING_PROTOCOL_LOCATOR = makeLocator(EmbeddedProtocol.IndirectFunding);
 
@@ -38,6 +39,7 @@ export function initialize(
       channelId,
       targetAllocation,
       targetDestination,
+      protocolLocator,
       sharedData,
       existingLedgerChannel,
     });
@@ -66,6 +68,7 @@ export function initialize(
         newLedgerChannel: newLedgerChannelState,
         targetAllocation,
         targetDestination,
+        protocolLocator,
       }),
       sharedData: newSharedData,
     };
@@ -110,13 +113,14 @@ function waitForNewLedgerChannelReducer(
       };
     case 'NewLedgerChannel.Success':
       const { ledgerId } = newLedgerChannelState;
-      const { channelId } = protocolState;
-      const existingLedgerChannel = selectors.getChannelState(sharedData, ledgerId);
+      const { channelId, protocolLocator } = protocolState;
+      const existingLedgerChannel = selectors.getChannelState(newSharedData, ledgerId);
       return fundWithExistingLedgerChannel({
         ...protocolState,
         channelId,
-        sharedData,
+        sharedData: newSharedData,
         existingLedgerChannel,
+        protocolLocator,
       });
     default:
       return {
@@ -170,6 +174,7 @@ function fundWithExistingLedgerChannel({
   targetDestination,
   sharedData,
   existingLedgerChannel,
+  protocolLocator,
 }: {
   processId: string;
   channelId: string;
@@ -177,6 +182,7 @@ function fundWithExistingLedgerChannel({
   targetDestination: string[];
   sharedData: SharedData;
   existingLedgerChannel: ChannelState;
+  protocolLocator: ProtocolLocator;
 }): ProtocolStateWithSharedData<states.NonTerminalIndirectFundingState | states.Failure> {
   const ledgerId = existingLedgerChannel.channelId;
   const {
@@ -188,6 +194,7 @@ function fundWithExistingLedgerChannel({
     ledgerId,
     targetAllocation,
     targetDestination,
+    makeLocator(protocolLocator, EXISTING_LEDGER_FUNDING_PROTOCOL_LOCATOR),
     sharedData,
   );
 
@@ -208,6 +215,7 @@ function fundWithExistingLedgerChannel({
       existingLedgerFundingState,
       targetAllocation,
       targetDestination,
+      protocolLocator,
     }),
     sharedData: newSharedData,
   };
