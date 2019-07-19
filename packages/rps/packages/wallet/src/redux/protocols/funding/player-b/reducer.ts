@@ -183,20 +183,25 @@ function strategyApproved(state: states.FundingState, sharedData: SharedData) {
       protocolLocator: makeLocator(ADVANCE_CHANNEL_PROTOCOL_LOCATOR),
     },
   );
-  if (fundingState.type === 'IndirectFunding.Failure') {
-    return {
-      protocolState: states.failure(fundingState),
-      sharedData,
-    };
+  switch (fundingState.type) {
+    case 'IndirectFunding.Failure':
+      return {
+        protocolState: states.failure(fundingState),
+        sharedData,
+      };
+    case 'IndirectFunding.WaitForNewLedgerChannel':
+    case 'IndirectFunding.WaitForExistingLedgerFunding':
+      return {
+        protocolState: states.waitForFunding({
+          ...state,
+          fundingState,
+          postFundSetupState: advanceChannelResult.protocolState,
+        }),
+        sharedData: queueMessage(advanceChannelResult.sharedData, message),
+      };
+    default:
+      return unreachable(fundingState);
   }
-  return {
-    protocolState: states.waitForFunding({
-      ...state,
-      fundingState,
-      postFundSetupState: advanceChannelResult.protocolState,
-    }),
-    sharedData: queueMessage(advanceChannelResult.sharedData, message),
-  };
 }
 
 function strategyRejected(state: states.FundingState, sharedData: SharedData) {

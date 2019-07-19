@@ -20,7 +20,7 @@ import {
   Commitments,
 } from './channel-store';
 import { Properties } from './utils';
-import * as newLedgerFunding from './protocols/new-ledger-funding/states';
+import * as NewLedgerChannel from './protocols/new-ledger-channel/states';
 import { accumulateSideEffects } from './outbox';
 import { WalletEvent } from 'magmo-wallet-client';
 import { TransactionRequest } from 'ethers/providers';
@@ -296,4 +296,4 @@ export function getCommitments(store: SharedData, channelId: string): Commitment
   return channel.commitments;
 }
 
-export { newLedgerFunding };
+export { NewLedgerChannel };
