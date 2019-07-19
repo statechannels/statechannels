@@ -260,7 +260,6 @@ function handleWaitForDirectFunding(
     );
 
     sharedData = advanceChannelResult.sharedData;
-    // We can skip directly to the ledger update if the post fund setup exchange is already done
 
     if (advanceChannelResult.protocolState.type === 'AdvanceChannel.Success') {
       return {

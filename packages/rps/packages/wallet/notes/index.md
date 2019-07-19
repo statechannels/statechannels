@@ -43,10 +43,9 @@ graph TD
     idF -->  ELF(ExistingLedgerFunding)
     idF --> NLC(NewLedgerChannel)
 
-    NLC --> CU(ConsensusUpdate)
-
-    ECF --> LTU(LedgerTopUp)
-    ECF --> CU(ConsensusUpdate)
+    NLC --> AC(AdvanceChannel)
+    NLC --> DF
+    ELF --> LTU(LedgerTopUp)
     LTU --> CU(ConsensusUpdate)
 
     Df{Defunding}-->idDf(IndirectDefunding)
@@ -70,7 +69,7 @@ graph TD
     classDef OrphanProtocol stroke:#333,stroke-width:4px,fill:#0000;
 
     class A,F,C,Df TopLevelProtocol
-    class AC,PC,VF OrphanProtocol
+    class VF OrphanProtocol
 
 
 ```

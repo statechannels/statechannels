@@ -27,3 +27,14 @@ The purpose of this protocol is to indirectly fund a channel using a ledger chan
   class WFNLC,WFLF WaitForChildProtocol;
   class SC0,SP0 NotAState
 ```
+
+## Scenarios
+
+1. **Existing Ledger Funding Happy Path**
+   - Start
+   - WaitForExistingLedgerFunding
+2. **New Ledger Funding Happy Path**
+   - Start
+   - WaitForNewLedgerChannel
+   - WaitForExistingLedgerFunding
+   - Success
