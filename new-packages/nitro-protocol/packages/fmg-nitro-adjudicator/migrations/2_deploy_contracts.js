@@ -4,7 +4,7 @@ const CountingCommitment = artifacts.require('CountingCommitment');
 const CountingApp = artifacts.require('CountingApp');
 const ConsensusCommitment = artifacts.require('ConsensusCommitment');
 const ConsensusApp = artifacts.require('ConsensusApp');
-const NitroLibrary2 = artifacts.require('NitroLibrary2');
+const NitroLibrary = artifacts.require('NitroLibrary');
 const NitroAdjudicator = artifacts.require('NitroAdjudicator');
 
 module.exports = function(deployer) {
@@ -29,11 +29,11 @@ module.exports = function(deployer) {
   deployer.link(ConsensusCommitment, ConsensusApp);
   deployer.deploy(ConsensusApp);
 
-  deployer.link(Commitment, NitroLibrary2);
-  deployer.link(Rules, NitroLibrary2);
+  deployer.link(Commitment, NitroLibrary);
+  deployer.link(Rules, NitroLibrary);
   deployer.link(Commitment, NitroAdjudicator);
   deployer.link(Rules, NitroAdjudicator);
-  deployer.deploy(NitroLibrary2).then(function() {
-    return deployer.deploy(NitroAdjudicator, NitroLibrary2.address);
+  deployer.deploy(NitroLibrary).then(function() {
+    return deployer.deploy(NitroAdjudicator, NitroLibrary.address);
   });
 };
