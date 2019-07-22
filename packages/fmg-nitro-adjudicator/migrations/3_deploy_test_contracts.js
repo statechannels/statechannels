@@ -2,7 +2,7 @@ const Commitment = artifacts.require('./Commitment.sol');
 const Rules = artifacts.require('Rules');
 const ConsensusCommitment = artifacts.require('./ConsensusCommitment.sol');
 const TestConsensusCommitment = artifacts.require('./test-contracts/TestConsensusCommitment.sol');
-const testERC20 = artifacts.require('testERC20');
+const TestERC20 = artifacts.require('TestERC20');
 const NitroAdjudicator = artifacts.require('NitroAdjudicator');
 const TestNitroAdjudicator = artifacts.require('TestNitroAdjudicator');
 const NitroLibrary = artifacts.require('NitroLibrary');
@@ -14,7 +14,7 @@ module.exports = function(deployer) {
   deployer.link(ConsensusCommitment, TestConsensusCommitment);
   deployer.deploy(TestConsensusCommitment);
 
-  deployer.deploy(testERC20);
+  deployer.deploy(TestERC20);
 
   deployer.link(Commitment, TestNitroAdjudicator);
   deployer.link(Rules, TestNitroAdjudicator);
