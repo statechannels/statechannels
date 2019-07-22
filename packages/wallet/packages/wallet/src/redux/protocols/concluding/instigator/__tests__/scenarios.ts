@@ -12,7 +12,7 @@ import {
 } from '../../../../../domain/commitments/__tests__';
 import { bigNumberify } from 'ethers/utils';
 import { commitmentReceived } from '../../../../actions';
-import { twoPlayerPreSuccessA } from '../../../consensus-update/__tests__';
+import { twoPlayerPreSuccessA, twoPlayerPreSuccessB } from '../../../consensus-update/__tests__';
 
 // -----------------
 // Channel Scenarios
@@ -43,7 +43,7 @@ const defaults = { processId, channelId };
 const approveConcluding = states.instigatorApproveConcluding(defaults);
 
 const acknowledgeSuccess = states.instigatorAcknowledgeSuccess(defaults);
-const waitforOpponentConclude = states.instigatorWaitForOpponentConclude(defaults);
+const waitForOpponentConclude = states.instigatorWaitForOpponentConclude(defaults);
 const acknowledgeConcludeReceived = states.instigatorAcknowledgeConcludeReceived({
   ...defaults,
   consensusUpdateState: twoPlayerPreSuccessA.state,
@@ -112,7 +112,7 @@ export const happyPath = {
     reply: app52.commitment,
   },
   waitForOpponentConclude: {
-    state: waitforOpponentConclude,
+    state: waitForOpponentConclude,
     sharedData: firstConcludeReceived,
     action: commitmentReceivedAction,
   },
@@ -133,7 +133,7 @@ export const noDefundingHappyPath = {
     reply: app52.commitment,
   },
   waitforOpponentConclude: {
-    state: waitforOpponentConclude,
+    state: waitForOpponentConclude,
     sharedData: firstConcludeReceived,
     action: commitmentReceivedAction,
   },
@@ -152,6 +152,13 @@ export const noDefundingHappyPath = {
     state: acknowledgeSuccess,
     sharedData: secondConcludeReceived,
     action: acknowledged,
+  },
+};
+export const consensusUpdateReceivedEarly = {
+  acknowledgeConcludeReceived: {
+    state: acknowledgeConcludeReceived,
+    sharedData: indirectFundedSecondConcludeReceived,
+    action: twoPlayerPreSuccessB.action,
   },
 };
 
