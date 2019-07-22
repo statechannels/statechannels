@@ -5,7 +5,7 @@ import { accumulateSideEffects } from '../outbox';
 import { SideEffects } from '../outbox/state';
 import { SharedData, queueMessage, getExistingChannel, checkAndStore } from '../state';
 import * as selectors from '../selectors';
-import { TwoPartyPlayerIndex } from '../types';
+import { TwoPartyPlayerIndex, ThreePartyPlayerIndex } from '../types';
 import { CommitmentType } from 'fmg-core/lib/commitment';
 import * as magmoWalletClient from 'magmo-wallet-client';
 import { getLastCommitment, nextParticipant, Commitments } from '../channel-store';
@@ -223,6 +223,36 @@ export const isLastPlayer = (channelId: string, sharedData: SharedData) => {
   const channelState = selectors.getChannelState(sharedData, channelId);
   return channelState.ourIndex === channelState.participants.length - 1;
 };
+
+export function isSafeToSend({
+  sharedData,
+  channelId,
+  ourIndex,
+  clearedToSend,
+}: {
+  sharedData: SharedData;
+  ourIndex: TwoPartyPlayerIndex | ThreePartyPlayerIndex;
+  channelId?: string;
+  clearedToSend: boolean;
+}): boolean {
+  if (!clearedToSend) {
+    return false;
+  }
+
+  // The possibilities are:
+  // A. The channel is not in storage and our index is 0.
+  // B. The channel is not in storage and our index is not 0.
+  // C. The channel is in storage and it's our turn
+  // D. The channel is in storage and it's not our turn
+
+  if (!channelId) {
+    return ourIndex === 0;
+  }
+
+  const channel = selectors.getChannelState(sharedData, channelId);
+  const numParticipants = channel.participants.length;
+  return (channel.turnNum + 1) % numParticipants === ourIndex;
+}
 
 export function getOpponentAddress(channelId: string, sharedData: SharedData) {
   const channel = getExistingChannel(sharedData, channelId);

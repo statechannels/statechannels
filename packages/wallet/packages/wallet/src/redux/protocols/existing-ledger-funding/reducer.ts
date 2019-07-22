@@ -50,15 +50,15 @@ export const initialize = (
 
   const appFunding = craftAppFunding(sharedData, channelId);
   let consensusUpdateState: ConsensusUpdateState;
-  ({ sharedData, protocolState: consensusUpdateState } = initializeConsensusUpdate(
+  ({ sharedData, protocolState: consensusUpdateState } = initializeConsensusUpdate({
     processId,
-    ledgerId,
-    false,
-    appFunding.proposedAllocation,
-    appFunding.proposedDestination,
-    makeLocator(protocolLocator, CONSENSUS_UPDATE_PROTOCOL_LOCATOR),
+    channelId: ledgerId,
+    clearedToSend: false,
+    proposedAllocation: appFunding.proposedAllocation,
+    proposedDestination: appFunding.proposedDestination,
+    protocolLocator: makeLocator(protocolLocator, CONSENSUS_UPDATE_PROTOCOL_LOCATOR),
     sharedData,
-  ));
+  }));
 
   if (ledgerChannelNeedsTopUp(theirCommitment, targetAllocation, targetDestination)) {
     let ledgerTopUpState: LedgerTopUpState;

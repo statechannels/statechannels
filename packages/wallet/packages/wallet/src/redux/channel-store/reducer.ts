@@ -105,8 +105,7 @@ export function signAndStore(store: ChannelStore, commitment: Commitment): SignR
     return { isSuccess: false, reason: 'NotOurTurn' };
   }
 
-  // store if safe
-  if (!isSafeTransition(store, channel, commitment)) {
+  if (!isSafeTransition(channel, commitment)) {
     return { isSuccess: false, reason: 'TransitionUnsafe' };
   }
 
@@ -140,7 +139,7 @@ export function checkAndStore(
   const channelId = getChannelId(commitment);
   let channel = getChannel(store, channelId);
 
-  if (!isSafeTransition(store, channel, commitment)) {
+  if (!isSafeTransition(channel, commitment)) {
     console.log('Failed to verify a safe transition');
     return { isSuccess: false };
   }
@@ -153,10 +152,6 @@ export function checkAndStore(
 
 // Currently just checks for validTransition
 // In the future might check things like value preservation in the network.
-function isSafeTransition(
-  store: ChannelStore,
-  channel: ChannelState,
-  commitment: Commitment,
-): boolean {
+function isSafeTransition(channel: ChannelState, commitment: Commitment): boolean {
   return validTransition(channel, commitment);
 }

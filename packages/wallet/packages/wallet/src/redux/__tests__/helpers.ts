@@ -11,9 +11,15 @@ type SideEffectState =
   | { outboxState: OutboxState }
   | { sharedData: SharedData };
 
-export function describeScenarioStep(scenarioStep, fn) {
+const describeScenarioStep = (scenarioStep, fn) => {
   return describe(scenarioStepDescription(scenarioStep), fn);
-}
+};
+
+describeScenarioStep.only = (scenarioStep, fn) => {
+  return describe.only(scenarioStepDescription(scenarioStep), fn);
+};
+
+export { describeScenarioStep };
 
 export function scenarioStepDescription(scenarioStep) {
   return `${scenarioStep.state.type} + \n    ${scenarioStep.action.type} =>`;
