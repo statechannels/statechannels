@@ -1,17 +1,7 @@
-import { ContractFactory, ethers } from 'ethers';
-import {
-  linkedByteCode,
-  expectRevert,
-  getNetworkId,
-  getGanacheProvider,
-  expectEvent,
-  increaseTime,
-  DURATION,
-} from 'magmo-devtools';
-import { sign, Channel, CountingApp, toHex, asEthersObject, Address } from 'fmg-core';
-import { BigNumber, bigNumberify } from 'ethers/utils';
-import CommitmentArtifact from '../build/contracts/Commitment.json';
-import RulesArtifact from '../build/contracts/Rules.json';
+import { ethers } from 'ethers';
+import { expectRevert, expectEvent, increaseTime, DURATION } from 'magmo-devtools';
+import { sign, Channel, CountingApp, toHex, asEthersObject } from 'fmg-core';
+import { BigNumber } from 'ethers/utils';
 import NitroAdjudicatorArtifact from '../build/contracts/TestNitroAdjudicator.json';
 import CountingAppArtifact from '../build/contracts/CountingApp.json';
 import { channelID as getChannelID } from 'fmg-core/lib/channel';
@@ -24,20 +14,11 @@ import { AddressZero } from 'ethers/constants';
 jest.setTimeout(20000);
 let nitro: ethers.Contract;
 let countingAppAddress;
-const abiCoder = new ethers.utils.AbiCoder();
 const provider = new ethers.providers.JsonRpcProvider(
   `http://localhost:${process.env.DEV_GANACHE_PORT}`,
 );
-
 const signer0 = provider.getSigner(0);
-
-const DEPOSIT_AMOUNT = ethers.utils.parseEther('100'); //
-const SMALL_WITHDRAW_AMOUNT = ethers.utils.parseEther('10');
-const EPSILON = ethers.utils.parseEther('0.01');
-const ZERO_ADDRESS = ethers.constants.AddressZero;
-
 let nullOutcome: {} | any[];
-const AUTH_TYPES = ['address', 'address', 'uint256', 'address'];
 
 async function setupContracts() {
   let networkId;
@@ -73,9 +54,7 @@ describe('ForceMove methods', () => {
   let ledgerChannel: Channel;
   let guarantorChannel: Channel;
   let alice: ethers.Wallet;
-  let aliceDest: ethers.Wallet;
   let bob: ethers.Wallet;
-  let guarantor: ethers.Wallet;
   let commitment0;
   let commitment1;
   let commitment2;
@@ -84,7 +63,6 @@ describe('ForceMove methods', () => {
   let commitment4alt: CoreCommitment;
   let commitment5;
   let commitment5alt: CoreCommitment;
-  let guarantorCommitment;
 
   let commitment1alt;
   let commitment2alt;
@@ -96,8 +74,6 @@ describe('ForceMove methods', () => {
     // alice and bob are both funded by startGanache in magmo devtools.
     alice = new ethers.Wallet('0x5d862464fe9303452126c8bc94274b8c5f9874cbd219789b3eb2128075a76f72');
     bob = new ethers.Wallet('0xdf02719c4df8b9b8ac7f551fcb5d9ef48fa27eef7a66453879f4d8fdc6e78fb1');
-    guarantor = ethers.Wallet.createRandom();
-    aliceDest = ethers.Wallet.createRandom();
 
     const participants = [alice.address, bob.address];
     const destination = [alice.address, bob.address];
@@ -120,11 +96,6 @@ describe('ForceMove methods', () => {
       allocation,
       token: [AddressZero, AddressZero],
       commitmentCount: 1,
-    };
-
-    const guarantorDefaults = {
-      ...defaults,
-      channel: guarantorChannel,
     };
 
     commitment0 = CountingApp.createCommitment.app({
@@ -170,11 +141,6 @@ describe('ForceMove methods', () => {
       allocation: differentAllocation,
       turnNum: 8,
       appCounter: new BigNumber(3).toHexString(),
-    });
-    guarantorCommitment = CountingApp.createCommitment.app({
-      ...guarantorDefaults,
-      appCounter: new BigNumber(1).toHexString(),
-      turnNum: 6,
     });
   });
 
