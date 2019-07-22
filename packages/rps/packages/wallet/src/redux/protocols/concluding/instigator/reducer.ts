@@ -138,10 +138,10 @@ function handleLedgerUpdateAction(
     };
   } else {
     return {
-      protocolState: states.instigatorWaitForLedgerUpdate({
+      protocolState: {
         ...protocolState,
         consensusUpdateState: updatedConsensusUpdateState,
-      }),
+      },
       sharedData: newSharedData,
     };
   }

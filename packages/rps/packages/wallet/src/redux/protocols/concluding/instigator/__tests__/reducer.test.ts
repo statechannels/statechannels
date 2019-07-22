@@ -92,6 +92,17 @@ describe('[ No Defunding Happy path ]', () => {
   });
 });
 
+describe('[ Consensus Commitment Received Early ]', () => {
+  const scenario = scenarios.consensusUpdateReceivedEarly;
+
+  describeScenarioStep(scenario.acknowledgeConcludeReceived, () => {
+    const { state, action, sharedData } = scenario.acknowledgeConcludeReceived;
+    const result = instigatorConcludingReducer(state, sharedData, action);
+
+    itTransitionsTo(result, 'ConcludingInstigator.AcknowledgeConcludeReceived');
+  });
+});
+
 describe('[ Channel doesnt exist ]', () => {
   const scenario = scenarios.channelDoesntExist;
   const { channelId, processId } = scenario;
