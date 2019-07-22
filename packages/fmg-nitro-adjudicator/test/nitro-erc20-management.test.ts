@@ -257,6 +257,7 @@ describe('Nitro (ERC20 management)', () => {
     let receipt;
     let balanceBefore;
     let erc20Holder;
+    let amountHeld;
     const randomAddress = ethers.Wallet.createRandom().address;
 
     beforeAll(async () => {
@@ -269,7 +270,7 @@ describe('Nitro (ERC20 management)', () => {
     });
 
     it('Nitro deposit Transaction succeeds', async () => {
-      const amountHeld = Number(await NitroAdjudicator.holdings(randomAddress, erc20Address));
+      amountHeld = Number(await NitroAdjudicator.holdings(randomAddress, erc20Address));
       await erc20.approve(NitroAdjudicatorAddress, amountHeld - 1);
       receipt = await (await NitroAdjudicator.deposit(
         randomAddress,
@@ -279,13 +280,19 @@ describe('Nitro (ERC20 management)', () => {
       )).wait();
       await expect(receipt.status).toEqual(1);
     });
-    it.skip('Emits Deposit event (partial) ', async () => {
-      // several events being emitted?
-      // console.log(receipt);
-      await expectEvent(receipt, 'Deposited', {
-        destination: randomAddress,
-        amountDeposited: 1,
-      });
+    it('Emits Deposit event (partial) ', async () => {
+      const filter = {
+        address: NitroAdjudicatorAddress,
+        fromBlock: receipt.blockNumber,
+        toBlock: receipt.blockNumber,
+        topics: [NitroAdjudicator.interface.events.Deposited.topic],
+      };
+      const logs = await provider.getLogs(filter);
+      const data = abiCoder.encode(
+        ['address', 'uint256', 'uint256'],
+        [randomAddress, 1, amountHeld + 1],
+      );
+      await expect(logs[0].data).toEqual(data);
     });
     it('Partial refund', async () => {
       await expect(Number(await erc20.balanceOf(erc20Holder))).toEqual(Number(balanceBefore - 1));
