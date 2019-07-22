@@ -34,7 +34,7 @@ graph TD
 
     A{Application}--> D
     F{Funding}--> idF(IndirectFunding)
-
+    F --> AC(AdvanceChannel)
     D(Dispute)--> TS
 
 
@@ -45,8 +45,11 @@ graph TD
 
     NLC --> AC(AdvanceChannel)
     NLC --> DF
+    NLC --> CU(ConsensusUpdate)
+
     ELF --> LTU(LedgerTopUp)
-    LTU --> CU(ConsensusUpdate)
+    ELF --> CU
+    LTU --> CU
 
     Df{Defunding}-->idDf(IndirectDefunding)
     Df-->W(Withdrawing)
