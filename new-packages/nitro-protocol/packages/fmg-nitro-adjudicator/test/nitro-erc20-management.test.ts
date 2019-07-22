@@ -60,8 +60,8 @@ const alice = new ethers.Wallet(
 const bob = new ethers.Wallet('0xdf02719c4df8b9b8ac7f551fcb5d9ef48fa27eef7a66453879f4d8fdc6e78fb1');
 const guarantor = ethers.Wallet.createRandom();
 const aliceDest = ethers.Wallet.createRandom();
-const aBal = ethers.utils.parseUnits('6', 'wei').toHexString();
-const bBal = ethers.utils.parseUnits('4', 'wei').toHexString();
+const aBal = '0x06';
+const bBal = '0x04';
 const allocation = [aBal, bBal];
 const differentAllocation = [bBal, aBal];
 const participants = [alice.address, bob.address];
@@ -444,29 +444,30 @@ describe('Nitro (ERC20 management)', () => {
   describe('Transferring ERC20 (outcome = final, holdings[fromChannel] > outcomes[fromChannel].destination', () => {
     let allocatedToChannel;
     let allocatedToAlice;
+    const transferAmount = Number(allocation[0]);
     beforeAll(async () => {
-      const tx0 = await erc20.approve(NitroAdjudicatorAddress, ERC20_DEPOSIT_AMOUNT * 2);
+      const tx0 = await erc20.approve(NitroAdjudicatorAddress, transferAmount * 2);
       await tx0.wait();
       const amountHeldAgainstLedgerChannel = await NitroAdjudicator.holdings(
         getChannelID(ledgerChannel),
         erc20Address,
       );
-      await NitroAdjudicator.deposit(
+      await (await NitroAdjudicator.deposit(
         getChannelID(ledgerChannel),
         amountHeldAgainstLedgerChannel,
-        ERC20_DEPOSIT_AMOUNT,
+        transferAmount,
         erc20Address,
-      );
+      )).wait();
       const amountHeldAgainstGuarantorChannel = await NitroAdjudicator.holdings(
         guarantor.address,
         erc20Address,
       );
-      await NitroAdjudicator.deposit(
+      await (await NitroAdjudicator.deposit(
         guarantor.address,
         amountHeldAgainstGuarantorChannel,
-        ERC20_DEPOSIT_AMOUNT,
+        transferAmount,
         erc20Address,
-      );
+      )).wait();
 
       const allocationOutcome = {
         destination: [alice.address, bob.address],
@@ -475,8 +476,10 @@ describe('Nitro (ERC20 management)', () => {
         challengeCommitment: getEthersObjectForCommitment(commitment0),
         token: [erc20Address, erc20Address],
       };
-      const tx = await NitroAdjudicator.setOutcome(getChannelID(ledgerChannel), allocationOutcome);
-      await tx.wait();
+      await (await NitroAdjudicator.setOutcome(
+        getChannelID(ledgerChannel),
+        allocationOutcome,
+      )).wait();
 
       allocatedToChannel = await NitroAdjudicator.holdings(
         getChannelID(ledgerChannel),
@@ -489,7 +492,7 @@ describe('Nitro (ERC20 management)', () => {
       const tx1 = await NitroAdjudicator.transfer(
         getChannelID(ledgerChannel),
         alice.address,
-        allocation[0],
+        transferAmount,
         erc20Address,
       );
       const receipt1 = await tx1.wait();
@@ -498,7 +501,7 @@ describe('Nitro (ERC20 management)', () => {
 
     it('holdings[to][erc20] increases', async () => {
       expect(await NitroAdjudicator.holdings(alice.address, erc20Address)).toEqual(
-        allocatedToAlice.add(allocation[0]),
+        allocatedToAlice.add(transferAmount),
       );
     });
 
