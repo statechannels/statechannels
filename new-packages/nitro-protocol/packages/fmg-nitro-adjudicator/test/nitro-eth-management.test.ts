@@ -199,7 +199,6 @@ describe('Nitro (ETH management)', () => {
     it('Refunds entire deposit', async () => {
       const gasCost = await tx.gasPrice.mul(receipt.cumulativeGasUsed);
       const balanceAfter = await signer1.getBalance();
-      console.log(balanceAfter, balanceBefore.sub(gasCost));
       await expect(balanceAfter.eq(balanceBefore.sub(gasCost))).toBe(true);
     });
   });
