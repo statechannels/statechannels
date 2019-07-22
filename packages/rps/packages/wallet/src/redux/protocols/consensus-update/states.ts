@@ -2,24 +2,39 @@ import { StateConstructor } from '../../utils';
 import { ProtocolState } from '..';
 import { ProtocolLocator } from '../../../communication';
 
-export type ConsensusUpdateState = WaitForUpdate | TerminalConsensusUpdateState;
+export type NonTerminalConsensusUpdateState = NotSafeToSend | CommitmentSent;
+export type ConsensusUpdateState = NonTerminalConsensusUpdateState | Failure | Success;
 export type TerminalConsensusUpdateState = Failure | Success;
 export type ConsensusUpdateStateType = ConsensusUpdateState['type'];
 
-export interface WaitForUpdate {
-  type: 'ConsensusUpdate.WaitForUpdate';
+interface Base {
   proposedAllocation: string[];
   proposedDestination: string[];
   channelId: string;
   processId: string;
-  clearedToSend: boolean;
-  updateSent: boolean;
   protocolLocator: ProtocolLocator;
 }
 
+export interface NotSafeToSend extends Base {
+  type: 'ConsensusUpdate.NotSafeToSend';
+  clearedToSend: boolean;
+}
+
+export interface CommitmentSent extends Base {
+  type: 'ConsensusUpdate.CommitmentSent';
+}
+
+export enum FailureReason {
+  Error = 'Error',
+  UnableToValidate = 'Unable to validate',
+  InvalidTurnNumReceive = 'Invalid turn number received',
+  ConsensusNotReached = 'Consensus not reached when in CommitmentSent',
+  ProposalDoesNotMatch = 'Proposal does not match expected values.',
+}
 export interface Failure {
   type: 'ConsensusUpdate.Failure';
-  reason: string;
+  reason: FailureReason;
+  error?: string;
 }
 
 export interface Success {
@@ -38,12 +53,20 @@ export const failure: StateConstructor<Failure> = p => {
   return { ...p, type: 'ConsensusUpdate.Failure' };
 };
 
-export const waitForUpdate: StateConstructor<WaitForUpdate> = p => {
-  return { ...p, type: 'ConsensusUpdate.WaitForUpdate' };
+export const notSafeToSend: StateConstructor<NotSafeToSend> = p => {
+  return { ...p, type: 'ConsensusUpdate.NotSafeToSend' };
+};
+
+export const commitmentSent: StateConstructor<CommitmentSent> = p => {
+  return { ...p, type: 'ConsensusUpdate.CommitmentSent' };
 };
 
 export function isConsensusUpdateState(state: ProtocolState): state is ConsensusUpdateState {
-  return state.type === 'ConsensusUpdate.WaitForUpdate' || isTerminal(state);
+  return (
+    state.type === 'ConsensusUpdate.NotSafeToSend' ||
+    state.type === 'ConsensusUpdate.CommitmentSent' ||
+    isTerminal(state)
+  );
 }
 
 export function isTerminal(state: ProtocolState): state is Failure | Success {

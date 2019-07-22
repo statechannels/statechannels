@@ -76,7 +76,7 @@ const notDefundableInitialStore = setFundingState(
   ]),
 );
 
-const playerAWaitForUpdate = {
+const playerACommitmentSent = {
   state: waitForLedgerUpdate(props),
   store: setFundingState(
     setChannels(EMPTY_SHARED_DATA, [
@@ -96,7 +96,7 @@ const playerAWaitForConclude = {
   ),
 };
 
-const playerBWaitForUpdate = {
+const playerBCommitmentSent = {
   state: waitForLedgerUpdate(props),
   store: setFundingState(
     setChannels(EMPTY_SHARED_DATA, [
@@ -159,7 +159,7 @@ export const playerAHappyPath = {
     ],
   },
   waitForLedgerUpdate: {
-    state: playerAWaitForUpdate,
+    state: playerACommitmentSent,
     action: ledgerUpdate1Received,
     reply: ledger8,
   },
@@ -170,10 +170,10 @@ export const playerAHappyPath = {
 };
 
 export const playerAInvalidCommitment = {
-  waitForLedgerUpdate: { state: playerAWaitForUpdate, action: invalidLedgerUpdateReceived },
+  waitForLedgerUpdate: { state: playerACommitmentSent, action: invalidLedgerUpdateReceived },
 };
 export const playerBInvalidCommitment = {
-  waitForLedgerUpdate: { state: playerBWaitForUpdate, action: invalidLedgerUpdateReceived },
+  waitForLedgerUpdate: { state: playerBCommitmentSent, action: invalidLedgerUpdateReceived },
 };
 
 export const playerBHappyPath = {
@@ -182,7 +182,7 @@ export const playerBHappyPath = {
     ...props,
   },
   waitForLedgerUpdate: {
-    state: playerBWaitForUpdate,
+    state: playerBCommitmentSent,
     action: ledgerUpdate0Received,
     reply: ledger7,
   },

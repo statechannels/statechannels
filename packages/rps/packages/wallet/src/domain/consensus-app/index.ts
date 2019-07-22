@@ -5,7 +5,6 @@ import {
   finalVote,
   propose,
   isProposal,
-  isConsensusReached,
   vote,
   ConsensusCommitment,
   AppAttributes,
@@ -45,9 +44,6 @@ export function proposeNewConsensus(
   proposedDestination: string[],
 ): Commitment {
   const fromCommitment = fromCoreCommitment(commitment);
-  if (!isConsensusReached(fromCommitment)) {
-    throw new Error('The received commitment was not a ledger consensus');
-  }
   const proposeCommitment = propose(
     fromCommitment as AppCommitment,
     proposedAllocation,

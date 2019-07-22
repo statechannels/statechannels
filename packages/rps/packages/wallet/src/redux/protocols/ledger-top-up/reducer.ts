@@ -382,14 +382,14 @@ function initializeConsensusState(
   const {
     protocolState: consensusUpdateState,
     sharedData: newSharedData,
-  } = initializeConsensusUpdate(
+  } = initializeConsensusUpdate({
     processId,
-    ledgerId,
-    canSend,
-    newAllocation,
-    newDestination,
-    makeLocator(protocolLocator, CONSENSUS_UPDATE_PROTOCOL_LOCATOR),
+    channelId: ledgerId,
+    clearedToSend: true,
+    proposedAllocation: newAllocation,
+    proposedDestination: newDestination,
+    protocolLocator: makeLocator(protocolLocator, CONSENSUS_UPDATE_PROTOCOL_LOCATOR),
     sharedData,
-  );
+  });
   return { consensusUpdateState, sharedData: newSharedData };
 }
