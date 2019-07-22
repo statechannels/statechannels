@@ -2,7 +2,8 @@ import { StateConstructor } from '../../utils';
 import { ProtocolState } from '..';
 import { ProtocolLocator } from '../../../communication';
 
-export type ConsensusUpdateState = WaitForUpdate | Failure | Success;
+export type ConsensusUpdateState = WaitForUpdate | TerminalConsensusUpdateState;
+export type TerminalConsensusUpdateState = Failure | Success;
 export type ConsensusUpdateStateType = ConsensusUpdateState['type'];
 
 export interface WaitForUpdate {

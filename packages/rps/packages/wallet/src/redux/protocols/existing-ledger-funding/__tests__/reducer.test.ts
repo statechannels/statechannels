@@ -2,9 +2,7 @@ import * as scenarios from './scenarios';
 import { initialize, existingLedgerFundingReducer } from '../reducer';
 import * as states from '../states';
 import { ProtocolStateWithSharedData } from '../..';
-import { getLastMessage } from '../../../state';
-import { SignedCommitment } from '../../../../domain';
-import { describeScenarioStep } from '../../../__tests__/helpers';
+import { describeScenarioStep, itSendsTheseCommitments } from '../../../__tests__/helpers';
 
 describe('player A happy path', () => {
   const scenario = scenarios.playerAFullyFundedHappyPath;
@@ -18,6 +16,7 @@ describe('player A happy path', () => {
       targetDestination,
       protocolLocator,
       sharedData,
+      reply,
     } = scenario.initialize;
 
     const result = initialize(
@@ -30,7 +29,7 @@ describe('player A happy path', () => {
       sharedData,
     );
     itTransitionsTo(result, 'ExistingLedgerFunding.WaitForLedgerUpdate');
-    itSendsMessage(result, scenario.initialize.reply);
+    itSendsTheseCommitments(result, reply);
   });
 
   describeScenarioStep(scenario.waitForLedgerUpdate, () => {
@@ -69,8 +68,8 @@ describe('player B happy path', () => {
   describeScenarioStep(scenario.waitForLedgerUpdate, () => {
     const { state, action, sharedData, reply } = scenario.waitForLedgerUpdate;
     const updatedState = existingLedgerFundingReducer(state, sharedData, action);
+    itSendsTheseCommitments(updatedState, reply);
     itTransitionsTo(updatedState, 'ExistingLedgerFunding.Success');
-    itSendsMessage(updatedState, reply);
   });
 });
 
@@ -148,22 +147,5 @@ type ReturnVal = ProtocolStateWithSharedData<states.ExistingLedgerFundingState>;
 function itTransitionsTo(state: ReturnVal, type: states.ExistingLedgerFundingState['type']) {
   it(`transitions protocol state to ${type}`, () => {
     expect(state.protocolState.type).toEqual(type);
-  });
-}
-
-function itSendsMessage(state: ReturnVal, message: SignedCommitment) {
-  it('sends a message', () => {
-    const lastMessage = getLastMessage(state.sharedData);
-    if (lastMessage && 'messagePayload' in lastMessage) {
-      const dataPayload = lastMessage.messagePayload;
-      // This is yuk. The data in a message is currently of 'any' type..
-      if (!('signedCommitment' in dataPayload)) {
-        fail('No signedCommitment in the last message.');
-      }
-      const { commitment, signature } = dataPayload.signedCommitment;
-      expect({ commitment, signature }).toEqual(message);
-    } else {
-      fail('No messages in the outbox.');
-    }
   });
 }
