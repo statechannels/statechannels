@@ -67,7 +67,7 @@ const participants = [alice.address, bob.address];
 const destination = [alice.address, bob.address];
 
 const ledgerChannel: Channel = {
-  channelType: '0xD115BFFAbbdd893A6f7ceA402e7338643Ced44a6',
+  channelType: '0x57153E563526c1ce131E6af71ffFDA2C3A50b980',
   nonce: 0,
   participants,
 };
