@@ -51,7 +51,7 @@ async function withdraw(
 const provider = new ethers.providers.JsonRpcProvider(
   `http://localhost:${process.env.DEV_GANACHE_PORT}`,
 );
-const signer0 = provider.getSigner(0);
+const signer1 = provider.getSigner(1);
 
 const alice = new ethers.Wallet(
   '0x5d862464fe9303452126c8bc94274b8c5f9874cbd219789b3eb2128075a76f72',
@@ -127,10 +127,10 @@ describe('Nitro (ETH management)', () => {
     nitroAdjudicator = new ethers.Contract(
       NitroAdjudicatorAddress,
       NitroAdjudicatorArtifact.abi,
-      signer0,
+      signer1,
     );
     const nitroLibraryAddress = NitroLibraryArtifact.networks[networkId].address;
-    nitroLibrary = new ethers.Contract(nitroLibraryAddress, NitroLibraryArtifact.abi, signer0);
+    nitroLibrary = new ethers.Contract(nitroLibraryAddress, NitroLibraryArtifact.abi, signer1);
   });
 
   describe('Depositing ETH (msg.value = amount , expectedHeld = 0)', () => {
@@ -184,7 +184,7 @@ describe('Nitro (ETH management)', () => {
       await (await nitroAdjudicator.deposit(randomAddress, 0, DEPOSIT_AMOUNT.mul(2), AddressZero, {
         value: DEPOSIT_AMOUNT.mul(2),
       })).wait();
-      balanceBefore = await signer0.getBalance();
+      balanceBefore = await signer1.getBalance();
       tx = await nitroAdjudicator.deposit(randomAddress, 0, DEPOSIT_AMOUNT, AddressZero, {
         value: DEPOSIT_AMOUNT,
       });
@@ -197,9 +197,10 @@ describe('Nitro (ETH management)', () => {
       });
     });
     it('Refunds entire deposit', async () => {
-      const gasCost = tx.gasPrice.mul(receipt.cumulativeGasUsed);
-      const balanceAfter = await signer0.getBalance();
-      await expect(balanceAfter.gte(balanceBefore.sub(gasCost))).toBe(true);
+      const gasCost = await tx.gasPrice.mul(receipt.cumulativeGasUsed);
+      const balanceAfter = await signer1.getBalance();
+      console.log(balanceAfter, balanceBefore.sub(gasCost));
+      await expect(balanceAfter.eq(balanceBefore.sub(gasCost))).toBe(true);
     });
   });
 
@@ -212,7 +213,7 @@ describe('Nitro (ETH management)', () => {
       await (await nitroAdjudicator.deposit(randomAddress, 0, DEPOSIT_AMOUNT.mul(11), AddressZero, {
         value: DEPOSIT_AMOUNT.mul(11),
       })).wait();
-      balanceBefore = await signer0.getBalance();
+      balanceBefore = await signer1.getBalance();
       receipt = await (await nitroAdjudicator.deposit(
         randomAddress,
         DEPOSIT_AMOUNT.mul(10),
@@ -230,7 +231,7 @@ describe('Nitro (ETH management)', () => {
       });
     });
     it('Partial refund', async () => {
-      await expect(Number(await signer0.getBalance())).toBeGreaterThan(
+      await expect(Number(await signer1.getBalance())).toBeGreaterThan(
         Number(balanceBefore.sub(DEPOSIT_AMOUNT.mul(2))),
       ); // TODO compute precisely, taking actual gas fees into account
     });
@@ -414,7 +415,7 @@ describe('Nitro (ETH management)', () => {
         alice.address,
         aliceDest.address,
         aBal,
-        await signer0.getAddress(),
+        await signer1.getAddress(),
       ]);
       const sig = sign(authorization, alice.privateKey);
       const tx1 = await nitroAdjudicator.transferAndWithdraw(
