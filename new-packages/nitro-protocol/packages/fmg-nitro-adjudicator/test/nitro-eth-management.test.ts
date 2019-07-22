@@ -175,8 +175,9 @@ describe('Nitro (ETH management)', () => {
   });
 
   describe('Depositing ETH (msg.value = amount, expectedHeld + amount < holdings)', () => {
+    let tx;
     let receipt;
-    let balanceBefore;
+    let balanceBefore: BigNumber;
     const randomAddress = ethers.Wallet.createRandom().address;
 
     beforeAll(async () => {
@@ -184,15 +185,10 @@ describe('Nitro (ETH management)', () => {
         value: DEPOSIT_AMOUNT.mul(2),
       })).wait();
       balanceBefore = await signer0.getBalance();
-      receipt = await (await nitroAdjudicator.deposit(
-        randomAddress,
-        0,
-        DEPOSIT_AMOUNT,
-        AddressZero,
-        {
-          value: DEPOSIT_AMOUNT,
-        },
-      )).wait();
+      tx = await nitroAdjudicator.deposit(randomAddress, 0, DEPOSIT_AMOUNT, AddressZero, {
+        value: DEPOSIT_AMOUNT,
+      });
+      receipt = await tx.wait();
     });
     it('Emits Deposit of 0 event ', async () => {
       await expectEvent(receipt, 'Deposited', {
@@ -201,7 +197,9 @@ describe('Nitro (ETH management)', () => {
       });
     });
     it('Refunds entire deposit', async () => {
-      await expect(await signer0.getBalance()).toEqual(balanceBefore); // TODO handle gas fees
+      const gasCost = tx.gasPrice.mul(receipt.cumulativeGasUsed);
+      const balanceAfter = await signer0.getBalance();
+      await expect(balanceAfter.gte(balanceBefore.sub(gasCost))).toBe(true);
     });
   });
 
