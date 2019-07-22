@@ -450,15 +450,15 @@ describe('Nitro (ERC20 management)', () => {
     });
 
     it('holdings[to][erc20] increases', async () => {
-      expect(await nitroAdjudicator.holdings(alice.address, erc20Address)).toEqual(
+      await expect(await nitroAdjudicator.holdings(alice.address, erc20Address)).toEqual(
         allocatedToAlice.add(transferAmount),
       );
     });
 
     it('holdings[from][erc20] decreases', async () => {
-      expect(await nitroAdjudicator.holdings(getChannelID(ledgerChannel), erc20Address)).toEqual(
-        allocatedToChannel.sub(allocation[0]),
-      );
+      await expect(
+        await nitroAdjudicator.holdings(getChannelID(ledgerChannel), erc20Address),
+      ).toEqual(allocatedToChannel.sub(allocation[0]));
     });
   });
 
@@ -525,17 +525,17 @@ describe('Nitro (ERC20 management)', () => {
 
     it('New outcome registered', async () => {
       const newOutcome = await nitroAdjudicator.getOutcome(getChannelID(ledgerChannel));
-      expect(getOutcomeFromParameters(newOutcome)).toMatchObject(expectedOutcome);
+      await expect(getOutcomeFromParameters(newOutcome)).toMatchObject(expectedOutcome);
     });
 
     it('holdings[gurantor][erc20] decreases', async () => {
-      expect(Number(await nitroAdjudicator.holdings(guarantor.address, erc20Address))).toEqual(
-        startBal - claimAmount,
-      );
+      await expect(
+        Number(await nitroAdjudicator.holdings(guarantor.address, erc20Address)),
+      ).toEqual(startBal - claimAmount);
     });
 
     it('holdings[recipient][erc20] decreases', async () => {
-      expect(Number(await nitroAdjudicator.holdings(recipient, erc20Address))).toEqual(
+      await expect(Number(await nitroAdjudicator.holdings(recipient, erc20Address))).toEqual(
         startBalRecipient + claimAmount,
       );
     });
