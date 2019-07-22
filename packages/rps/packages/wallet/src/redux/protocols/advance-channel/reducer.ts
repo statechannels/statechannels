@@ -120,7 +120,7 @@ function initializeWithNewChannel(
     participants,
   } = initializeChannelArgs;
 
-  if (isSafeToSend({ sharedData, ourIndex, clearedToSend })) {
+  if (helpers.isSafeToSend({ sharedData, ourIndex, clearedToSend })) {
     // Initialize the channel in the store
     const nonce = selectors.getNextNonce(sharedData, channelType);
     const channel: Channel = {
@@ -176,7 +176,7 @@ function initializeWithExistingChannel(
 ) {
   const { channelId, ourIndex, clearedToSend, protocolLocator } = initializeChannelArgs;
   const channel = getChannel(sharedData.channelStore, channelId);
-  if (isSafeToSend({ sharedData, ourIndex, clearedToSend })) {
+  if (helpers.isSafeToSend({ sharedData, ourIndex, clearedToSend })) {
     const lastCommitment = getLastCommitment(channel);
     const ourCommitment = nextSetupCommitment(lastCommitment);
     if (ourCommitment === 'NotASetupCommitment') {
@@ -214,7 +214,7 @@ function attemptToAdvanceChannel(
   const { ourIndex, commitmentType, clearedToSend, protocolLocator, processId } = protocolState;
 
   let channel = getChannel(sharedData.channelStore, channelId);
-  if (isSafeToSend({ sharedData, ourIndex, channelId, clearedToSend })) {
+  if (helpers.isSafeToSend({ sharedData, ourIndex, channelId, clearedToSend })) {
     // First, update the store with our response
     const theirCommitment = getLastCommitment(channel);
     const ourCommitment = nextSetupCommitment(theirCommitment);
@@ -300,36 +300,6 @@ const commitmentSentReducer = (
 
   return { protocolState, sharedData };
 };
-
-function isSafeToSend({
-  sharedData,
-  channelId,
-  ourIndex,
-  clearedToSend,
-}: {
-  sharedData: SharedData;
-  ourIndex: number;
-  channelId?: string;
-  clearedToSend: boolean;
-}): boolean {
-  if (!clearedToSend) {
-    return false;
-  }
-
-  // The possibilities are:
-  // A. The channel is not in storage and our index is 0.
-  // B. The channel is not in storage and our index is not 0.
-  // C. The channel is in storage and it's our turn
-  // D. The channel is in storage and it's not our turn
-
-  if (!channelId) {
-    return ourIndex === 0;
-  }
-
-  const channel = getChannel(sharedData.channelStore, channelId);
-  const numParticipants = channel.participants.length;
-  return (channel.turnNum + 1) % numParticipants === ourIndex;
-}
 
 function channelAdvanced(channel: ChannelState, commitmentType: CommitmentType): boolean {
   const lastCommitment = getLastCommitment(channel);

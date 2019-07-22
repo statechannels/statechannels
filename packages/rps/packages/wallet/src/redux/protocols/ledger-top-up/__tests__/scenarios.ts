@@ -67,21 +67,25 @@ const ledgerThreeFourFlipped = ledgerCommitment({ turnNum: 5, balances: threeFou
 // ------
 // States
 // ------
-const switchOrderAndAddATopUpUpdate = props =>
+const consensusStates = {
+  [TwoPartyPlayerIndex.A]: twoPlayerPreSuccessA.state,
+  [TwoPartyPlayerIndex.B]: twoPlayerPreSuccessB.state,
+};
+const switchOrderAndAddATopUpUpdate = (props, ourIndex: TwoPartyPlayerIndex) =>
   states.switchOrderAndAddATopUpUpdate({
     ...props,
-    consensusUpdateState: twoPlayerPreSuccessA.state,
+    consensusUpdateState: consensusStates[ourIndex],
   });
-const waitForDirectFundingForA = props =>
+const waitForDirectFundingForA = (props, ourIndex: TwoPartyPlayerIndex) =>
   states.waitForDirectFundingForA({
     ...props,
     directFundingState: preSuccessA.state,
-    consensusUpdateState: twoPlayerPreSuccessA.state,
+    consensusUpdateState: consensusStates[ourIndex],
   });
-const restoreOrderAndAddBTopUpUpdate = props =>
+const restoreOrderAndAddBTopUpUpdate = (props, ourIndex: TwoPartyPlayerIndex) =>
   states.restoreOrderAndAddBTopUpUpdate({
     ...props,
-    consensusUpdateState: twoPlayerPreSuccessA.state,
+    consensusUpdateState: consensusStates[ourIndex],
   });
 const waitForDirectFundingForB = props =>
   states.waitForDirectFundingForB({
@@ -129,17 +133,17 @@ export const playerAHappyPath = {
   },
 
   switchOrderAndAddATopUpUpdate: {
-    state: switchOrderAndAddATopUpUpdate(defaultProps),
+    state: switchOrderAndAddATopUpUpdate(defaultProps, TwoPartyPlayerIndex.A),
     sharedData: consensusSharedData(TwoPartyPlayerIndex.A),
     action: playerAConsensusUpdateSuccess,
   },
   waitForDirectFundingForA: {
-    state: waitForDirectFundingForA(defaultProps),
+    state: waitForDirectFundingForA(defaultProps, TwoPartyPlayerIndex.A),
     sharedData: fundingSharedData(TwoPartyPlayerIndex.A, ledgerThreeFourFlipped),
     action: playerAFundingSuccess,
   },
   restoreOrderAndAddBTopUpUpdate: {
-    state: restoreOrderAndAddBTopUpUpdate(defaultProps),
+    state: restoreOrderAndAddBTopUpUpdate(defaultProps, TwoPartyPlayerIndex.A),
     sharedData: consensusSharedData(TwoPartyPlayerIndex.A),
     action: playerAConsensusUpdateSuccess,
   },
@@ -155,19 +159,18 @@ export const playerBHappyPath = {
     ...defaultProps,
     sharedData: fundingSharedData(TwoPartyPlayerIndex.B, ledgerTwoThree),
   },
-
   switchOrderAndAddATopUpUpdate: {
-    state: switchOrderAndAddATopUpUpdate(defaultProps),
+    state: switchOrderAndAddATopUpUpdate(defaultProps, TwoPartyPlayerIndex.B),
     sharedData: consensusSharedData(TwoPartyPlayerIndex.B),
     action: playerBConsensusUpdateSuccess,
   },
   waitForDirectFundingForA: {
-    state: waitForDirectFundingForA(defaultProps),
+    state: waitForDirectFundingForA(defaultProps, TwoPartyPlayerIndex.B),
     sharedData: fundingSharedData(TwoPartyPlayerIndex.B, ledgerThreeFourFlipped),
     action: playerBFundingSuccess,
   },
   restoreOrderAndAddBTopUpUpdate: {
-    state: restoreOrderAndAddBTopUpUpdate(defaultProps),
+    state: restoreOrderAndAddBTopUpUpdate(defaultProps, TwoPartyPlayerIndex.B),
     sharedData: consensusSharedData(TwoPartyPlayerIndex.B),
     action: playerBConsensusUpdateSuccess,
   },
@@ -185,17 +188,17 @@ export const playerAOneUserNeedsTopUp = {
   },
 
   switchOrderAndAddATopUpUpdate: {
-    state: switchOrderAndAddATopUpUpdate(oneOverFundedOneUnderFundedProps),
+    state: switchOrderAndAddATopUpUpdate(oneOverFundedOneUnderFundedProps, TwoPartyPlayerIndex.B),
     sharedData: consensusSharedData(TwoPartyPlayerIndex.A),
     action: playerAConsensusUpdateSuccess,
   },
   waitForDirectFundingForA: {
-    state: waitForDirectFundingForA(oneOverFundedOneUnderFundedProps),
+    state: waitForDirectFundingForA(oneOverFundedOneUnderFundedProps, TwoPartyPlayerIndex.B),
     sharedData: fundingSharedData(TwoPartyPlayerIndex.A, ledgerThreeFourFlipped),
     action: playerAFundingSuccess,
   },
   restoreOrderAndAddBTopUpUpdate: {
-    state: restoreOrderAndAddBTopUpUpdate(oneOverFundedOneUnderFundedProps),
+    state: restoreOrderAndAddBTopUpUpdate(oneOverFundedOneUnderFundedProps, TwoPartyPlayerIndex.B),
     sharedData: consensusSharedData(TwoPartyPlayerIndex.A),
     action: playerAConsensusUpdateSuccess,
   },
@@ -208,17 +211,17 @@ export const playerBOneUserNeedsTopUp = {
   },
 
   switchOrderAndAddATopUpUpdate: {
-    state: switchOrderAndAddATopUpUpdate(oneOverFundedOneUnderFundedProps),
+    state: switchOrderAndAddATopUpUpdate(oneOverFundedOneUnderFundedProps, TwoPartyPlayerIndex.B),
     sharedData: consensusSharedData(TwoPartyPlayerIndex.B),
     action: playerAConsensusUpdateSuccess,
   },
   waitForDirectFundingForA: {
-    state: waitForDirectFundingForA(oneOverFundedOneUnderFundedProps),
+    state: waitForDirectFundingForA(oneOverFundedOneUnderFundedProps, TwoPartyPlayerIndex.B),
     sharedData: fundingSharedData(TwoPartyPlayerIndex.B, ledgerThreeFourFlipped),
     action: playerAFundingSuccess,
   },
   restoreOrderAndAddBTopUpUpdate: {
-    state: restoreOrderAndAddBTopUpUpdate(oneOverFundedOneUnderFundedProps),
+    state: restoreOrderAndAddBTopUpUpdate(oneOverFundedOneUnderFundedProps, TwoPartyPlayerIndex.B),
     sharedData: consensusSharedData(TwoPartyPlayerIndex.B),
     action: playerAConsensusUpdateSuccess,
   },

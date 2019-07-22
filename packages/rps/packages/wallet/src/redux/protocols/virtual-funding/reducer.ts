@@ -295,15 +295,18 @@ function waitForGuarantorFundingReducer(
           const proposedAllocation = [startingAllocation.reduce(addHex)];
           const proposedDestination = [targetChannelId];
 
-          const applicationFundingResult = consensusUpdate.initializeConsensusUpdate(
+          const applicationFundingResult = consensusUpdate.initializeConsensusUpdate({
             processId,
-            jointChannelId,
-            true,
+            channelId: jointChannelId,
+            clearedToSend: true,
             proposedAllocation,
             proposedDestination,
-            makeLocator(protocolState.protocolLocator, CONSENSUS_UPDATE_PROTOCOL_LOCATOR),
-            result.sharedData,
-          );
+            protocolLocator: makeLocator(
+              protocolState.protocolLocator,
+              CONSENSUS_UPDATE_PROTOCOL_LOCATOR,
+            ),
+            sharedData: result.sharedData,
+          });
           return {
             protocolState: states.waitForApplicationFunding({
               ...protocolState,

@@ -78,7 +78,7 @@ describe('player A invalid ledger commitment', () => {
   describe('when in WaitForLedgerUpdate', () => {
     const { state, action, sharedData } = scenario.waitForLedgerUpdate;
     const updatedState = existingLedgerFundingReducer(state, sharedData, action);
-    itTransitionsTo(updatedState, 'ExistingLedgerFunding.Failure');
+    itTransitionsTo(updatedState, 'ExistingLedgerFunding.WaitForLedgerUpdate');
   });
 });
 
@@ -113,7 +113,7 @@ describe('player B invalid ledger update commitment', () => {
   describe('when in WaitForLedgerUpdate', () => {
     const { state, action, sharedData } = scenario.waitForLedgerUpdate;
     const updatedState = existingLedgerFundingReducer(state, sharedData, action);
-    itTransitionsTo(updatedState, 'ExistingLedgerFunding.Failure');
+    itTransitionsTo(updatedState, 'ExistingLedgerFunding.WaitForLedgerUpdate');
   });
 });
 

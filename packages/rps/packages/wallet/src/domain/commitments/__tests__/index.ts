@@ -3,7 +3,7 @@ import { bigNumberify } from 'ethers/utils';
 import { channelID } from 'fmg-core/lib/channel';
 import { CONSENSUS_LIBRARY_ADDRESS } from '../../../constants';
 import { bytesFromAppAttributes } from 'fmg-nitro-adjudicator/lib/consensus-app';
-import { ThreePartyPlayerIndex } from '../../../redux/types';
+import { ThreePartyPlayerIndex, TwoPartyPlayerIndex } from '../../../redux/types';
 
 export const asPrivateKey = '0xf2f48ee19680706196e2e339e5da3491186e0c4c5030670656b0e0164837257d';
 export const asAddress = '0x5409ED021D9299bf6814279A6A1411A7e866A631';
@@ -58,7 +58,11 @@ const twoThreeTwo = [
   { address: hubAddress, wei: bigNumberify(2).toHexString() },
 ];
 
-export const addressAndPrivateKeyLookup = {
+export const addressAndPrivateKeyLookup: {
+  [idx in TwoPartyPlayerIndex | ThreePartyPlayerIndex]: { address: string; privateKey: string }
+} = {
+  [TwoPartyPlayerIndex.A]: { address: asAddress, privateKey: asPrivateKey },
+  [TwoPartyPlayerIndex.B]: { address: bsAddress, privateKey: bsPrivateKey },
   [ThreePartyPlayerIndex.A]: { address: asAddress, privateKey: asPrivateKey },
   [ThreePartyPlayerIndex.B]: { address: bsAddress, privateKey: bsPrivateKey },
   [ThreePartyPlayerIndex.Hub]: { address: hubAddress, privateKey: hubPrivateKey },
