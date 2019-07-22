@@ -12,10 +12,17 @@ import { bigNumberify } from 'ethers/utils/bignumber';
 import { SharedData, EMPTY_SHARED_DATA, setChannels } from '../../../state';
 import { channelFromCommitments } from '../../../channel-store/channel-state/__tests__';
 import * as states from '../states';
-import * as globalActions from '../../../actions';
+
 import { EXISTING_LEDGER_FUNDING_PROTOCOL_LOCATOR } from '../reducer';
 import { playerAHappyPath } from '../../ledger-top-up/__tests__/scenarios';
-
+import {
+  twoPlayerPreSuccessA as consensusUpdatePreSuccessA,
+  twoPlayerPreSuccessB as consensusUpdatePreSuccessB,
+  twoPlayerReplyB,
+} from '../../consensus-update/__tests__/';
+import { makeLocator, prependToLocator } from '../..';
+import { CONSENSUS_UPDATE_PROTOCOL_LOCATOR } from '../../consensus-update/reducer';
+import { commitmentsReceived } from '../../../../communication';
 const processId = 'processId';
 const oneThree = [
   { address: asAddress, wei: bigNumberify(1).toHexString() },
@@ -37,6 +44,16 @@ const props = {
   protocolLocator: EXISTING_LEDGER_FUNDING_PROTOCOL_LOCATOR,
 };
 
+const propsA = {
+  ...props,
+  consensusUpdateState: consensusUpdatePreSuccessA.state,
+};
+
+const propsB = {
+  ...props,
+  consensusUpdateState: consensusUpdatePreSuccessB.state,
+};
+
 const setFundingState = (sharedData: SharedData): SharedData => {
   return {
     ...sharedData,
@@ -53,13 +70,11 @@ const setFundingState = (sharedData: SharedData): SharedData => {
 const ledger4 = ledgerCommitment({ turnNum: 4, balances: oneThree });
 const ledger5 = ledgerCommitment({ turnNum: 5, balances: oneThree });
 const ledger6 = ledgerCommitment({ turnNum: 6, balances: oneThree, proposedBalances: fourToApp });
-const ledger7 = ledgerCommitment({ turnNum: 7, balances: fourToApp });
 const topUpLedger4 = ledgerCommitment({ turnNum: 4, balances: oneOne });
 const topUpLedger5 = ledgerCommitment({ turnNum: 5, balances: oneOne });
 
 const app0 = appCommitment({ turnNum: 0, balances: oneThree });
 const app1 = appCommitment({ turnNum: 1, balances: oneThree });
-const app3 = appCommitment({ turnNum: 3, balances: oneThree });
 // -----------
 // Shared Data
 // -----------
@@ -102,38 +117,31 @@ const initialPlayerBTopUpNeededSharedData = setFundingState(
 // -----------
 // States
 // -----------
-const waitForLedgerUpdate = states.waitForLedgerUpdate(props);
-// -----------
-// Actions
-// -----------
-const ledgerUpdate0Received = globalActions.commitmentReceived({
-  processId,
-  signedCommitment: ledger6,
-  protocolLocator: EXISTING_LEDGER_FUNDING_PROTOCOL_LOCATOR,
-});
-const ledgerUpdate1Received = globalActions.commitmentReceived({
-  processId,
-  signedCommitment: ledger7,
-  protocolLocator: EXISTING_LEDGER_FUNDING_PROTOCOL_LOCATOR,
-});
+const waitForLedgerUpdateForA = states.waitForLedgerUpdate(propsA);
+const waitForLedgerUpdateForB = states.waitForLedgerUpdate(propsB);
 
-const invalidLedgerUpdateReceived = globalActions.commitmentReceived({
+const invalidLedgerUpdateReceived = commitmentsReceived({
   processId,
-  signedCommitment: ledger5,
-  protocolLocator: EXISTING_LEDGER_FUNDING_PROTOCOL_LOCATOR,
+  signedCommitments: [ledger5],
+  protocolLocator: makeLocator(
+    EXISTING_LEDGER_FUNDING_PROTOCOL_LOCATOR,
+    CONSENSUS_UPDATE_PROTOCOL_LOCATOR,
+  ),
 });
 
 export const playerAFullyFundedHappyPath = {
   initialize: {
     sharedData: initialPlayerALedgerSharedData,
     ...props,
-    reply: ledger6,
+    reply: [ledger5, ledger6],
   },
   waitForLedgerUpdate: {
-    state: waitForLedgerUpdate,
-    sharedData: playerAFirstCommitmentReceived,
-    action: ledgerUpdate1Received,
-    reply: app3,
+    state: waitForLedgerUpdateForA,
+    sharedData: consensusUpdatePreSuccessA.sharedData,
+    action: prependToLocator(
+      consensusUpdatePreSuccessA.action,
+      EXISTING_LEDGER_FUNDING_PROTOCOL_LOCATOR,
+    ),
   },
 };
 
@@ -143,16 +151,19 @@ export const playerBFullyFundedHappyPath = {
     ...props,
   },
   waitForLedgerUpdate: {
-    state: waitForLedgerUpdate,
-    sharedData: initialPlayerBLedgerSharedData,
-    action: ledgerUpdate0Received,
-    reply: ledger7,
+    state: waitForLedgerUpdateForB,
+    sharedData: consensusUpdatePreSuccessB.sharedData,
+    action: prependToLocator(
+      consensusUpdatePreSuccessB.action,
+      EXISTING_LEDGER_FUNDING_PROTOCOL_LOCATOR,
+    ),
+    reply: twoPlayerReplyB,
   },
 };
 
 export const playerAInvalidUpdateCommitment = {
   waitForLedgerUpdate: {
-    state: waitForLedgerUpdate,
+    state: waitForLedgerUpdateForA,
     sharedData: playerAFirstCommitmentReceived,
     action: invalidLedgerUpdateReceived,
   },
@@ -160,7 +171,7 @@ export const playerAInvalidUpdateCommitment = {
 
 export const playerBInvalidUpdateCommitment = {
   waitForLedgerUpdate: {
-    state: waitForLedgerUpdate,
+    state: waitForLedgerUpdateForB,
     sharedData: initialPlayerBLedgerSharedData,
     action: invalidLedgerUpdateReceived,
   },
@@ -175,6 +186,7 @@ export const playerATopUpNeeded = {
     state: states.waitForLedgerTopUp({
       ...props,
       ledgerTopUpState: playerAHappyPath.switchOrderAndAddATopUpUpdate.state,
+      consensusUpdateState: consensusUpdatePreSuccessA.state,
     }),
   },
 };

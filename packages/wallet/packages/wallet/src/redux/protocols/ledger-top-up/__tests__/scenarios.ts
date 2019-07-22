@@ -76,6 +76,7 @@ const waitForDirectFundingForA = props =>
   states.waitForDirectFundingForA({
     ...props,
     directFundingState: preSuccessA.state,
+    consensusUpdateState: twoPlayerPreSuccessA.state,
   });
 const restoreOrderAndAddBTopUpUpdate = props =>
   states.restoreOrderAndAddBTopUpUpdate({

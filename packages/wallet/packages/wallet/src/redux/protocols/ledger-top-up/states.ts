@@ -13,6 +13,7 @@ export interface WaitForDirectFundingForA {
   originalAllocation: string[];
   protocolLocator: ProtocolLocator;
   directFundingState: DirectFundingState;
+  consensusUpdateState: ConsensusUpdateState;
 }
 
 export interface WaitForDirectFundingForB {

@@ -4,11 +4,12 @@ import * as selectors from '../../selectors';
 import * as helpers from '../reducer-helpers';
 import { getLastCommitment, ChannelState } from '../../channel-store/channel-state';
 import { CommitmentType } from 'fmg-core';
+import { isExistingLedgerFundingAction } from '../existing-ledger-funding';
+// TODO: Why does importing the reducer from the index result in test failures in grand parent protocols?
 import {
-  initializeExistingLedgerFunding,
-  isExistingLedgerFundingAction,
+  initialize as initializeExistingLedgerFunding,
   existingLedgerFundingReducer,
-} from '../existing-ledger-funding';
+} from '../existing-ledger-funding/reducer';
 import * as states from './states';
 import { isNewLedgerChannelAction, NewLedgerChannelReducer } from '../new-ledger-channel';
 import { unreachable } from '../../../utils/reducer-utils';
