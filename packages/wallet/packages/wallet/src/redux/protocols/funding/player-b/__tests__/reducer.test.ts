@@ -27,7 +27,11 @@ describe('happy path', () => {
     const result = reducer(state, sharedData, action);
 
     itTransitionsTo(result, 'Funding.PlayerB.WaitForFunding');
-    itSendsThisMessage(result, sendStrategyApproved(opponentAddress, processId));
+
+    itSendsThisMessage(
+      result,
+      sendStrategyApproved(opponentAddress, processId, 'IndirectFundingStrategy'),
+    );
   });
 
   describeScenarioStep(scenario.waitForFunding, () => {

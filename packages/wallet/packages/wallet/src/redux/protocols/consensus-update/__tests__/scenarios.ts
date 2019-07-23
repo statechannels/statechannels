@@ -11,14 +11,13 @@ import { bigNumberify } from 'ethers/utils';
 import { setChannels, EMPTY_SHARED_DATA } from '../../../state';
 import { channelFromCommitments } from '../../../channel-store/channel-state/__tests__';
 import * as states from '../states';
-import { CONSENSUS_UPDATE_PROTOCOL_LOCATOR } from '../reducer';
 import { commitmentsReceived } from '../../../../communication';
 import { ThreePartyPlayerIndex, TwoPartyPlayerIndex } from '../../../types';
 import { clearedToSend } from '../actions';
 import { SignedCommitment } from '../../../../domain';
 import { unreachable } from '../../../../utils/reducer-utils';
 
-const protocolLocator = CONSENSUS_UPDATE_PROTOCOL_LOCATOR;
+const protocolLocator = [];
 
 const twoThree = [
   { address: asAddress, wei: bigNumberify(2).toHexString() },

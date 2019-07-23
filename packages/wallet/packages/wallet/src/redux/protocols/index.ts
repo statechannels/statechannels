@@ -56,12 +56,12 @@ export function makeLocator(...args: Array<ProtocolLocator | EmbeddedProtocol>):
 }
 export const EMPTY_LOCATOR: ProtocolLocator = makeLocator();
 
-export function prependToLocator<T extends WalletAction & { protocolLocator: ProtocolLocator }>(
-  action: T,
-  protocol: ProtocolLocator | EmbeddedProtocol,
-): T {
+export function prependToLocator<
+  State extends { protocolLocator: ProtocolLocator },
+  T extends (WalletAction | State) & { protocolLocator: ProtocolLocator }
+>(actionOrState: T, protocol: ProtocolLocator | EmbeddedProtocol): T {
   return {
-    ...action,
-    protocolLocator: makeLocator(protocol, action.protocolLocator),
+    ...actionOrState,
+    protocolLocator: makeLocator(protocol, actionOrState.protocolLocator),
   };
 }

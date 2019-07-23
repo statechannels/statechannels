@@ -11,27 +11,30 @@ import { sendStrategyProposed } from '../../../../../communication';
 import { FUNDING_SUCCESS, HIDE_WALLET } from 'magmo-wallet-client';
 import { FundingStateType } from '../../states';
 
-describe('happy path', () => {
-  const scenario = scenarios.happyPath;
+describe('indirect strategy chosen', () => {
+  const scenario = scenarios.indirectStrategyChosen;
 
   describeScenarioStep(scenario.waitForStrategyChoice, () => {
     const { state, sharedData, action } = scenario.waitForStrategyChoice;
     const result = reducer(state, sharedData, action);
 
     itTransitionsTo(result, 'Funding.PlayerA.WaitForStrategyResponse');
-    const { processId, strategy, opponentAddress } = scenario;
-    itSendsThisMessage(result, sendStrategyProposed(opponentAddress, processId, strategy));
+    const { processId, opponentAddress } = scenario;
+    itSendsThisMessage(
+      result,
+      sendStrategyProposed(opponentAddress, processId, 'IndirectFundingStrategy'),
+    );
   });
 
   describeScenarioStep(scenario.waitForStrategyResponse, () => {
     const { state, sharedData, action } = scenario.waitForStrategyResponse;
     const result = reducer(state, sharedData, action);
 
-    itTransitionsTo(result, 'Funding.PlayerA.WaitForFunding');
+    itTransitionsTo(result, 'Funding.PlayerA.WaitForIndirectFunding');
   });
 
-  describeScenarioStep(scenario.waitForFunding, () => {
-    const { state, sharedData, action } = scenario.waitForFunding;
+  describeScenarioStep(scenario.waitForIndirectFunding, () => {
+    const { state, sharedData, action } = scenario.waitForIndirectFunding;
     const result = reducer(state, sharedData, action);
 
     itTransitionsTo(result, 'Funding.PlayerA.WaitForPostFundSetup');
@@ -51,6 +54,36 @@ describe('happy path', () => {
     itTransitionsTo(result, 'Funding.PlayerA.Success');
     itSendsThisMessage(result, FUNDING_SUCCESS);
     itSendsThisDisplayEventType(result, HIDE_WALLET);
+  });
+});
+
+describe('virtual strategy chosen', () => {
+  const scenario = scenarios.virtualStrategyChosen;
+
+  describeScenarioStep(scenario.waitForStrategyChoice, () => {
+    const { state, sharedData, action } = scenario.waitForStrategyChoice;
+    const result = reducer(state, sharedData, action);
+
+    itTransitionsTo(result, 'Funding.PlayerA.WaitForStrategyResponse');
+    const { processId, opponentAddress } = scenario;
+    itSendsThisMessage(
+      result,
+      sendStrategyProposed(opponentAddress, processId, 'VirtualFundingStrategy'),
+    );
+  });
+
+  describeScenarioStep(scenario.waitForStrategyResponse, () => {
+    const { state, sharedData, action } = scenario.waitForStrategyResponse;
+    const result = reducer(state, sharedData, action);
+
+    itTransitionsTo(result, 'Funding.PlayerA.WaitForVirtualFunding');
+  });
+
+  describeScenarioStep(scenario.waitForVirtualFunding, () => {
+    const { state, sharedData, action } = scenario.waitForVirtualFunding;
+    const result = reducer(state, sharedData, action);
+
+    itTransitionsTo(result, 'Funding.PlayerA.WaitForPostFundSetup');
   });
 });
 

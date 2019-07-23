@@ -7,19 +7,19 @@ import {
   signAndStore,
   getExistingChannel,
 } from '../../state';
-import { ProtocolStateWithSharedData, ProtocolReducer, makeLocator } from '..';
+import { ProtocolStateWithSharedData, ProtocolReducer } from '..';
 import { CommitmentType, Commitment, getChannelId, nextSetupCommitment } from '../../../domain';
 import { getChannel, getLastCommitment, ChannelState } from '../../channel-store';
 import { WalletAction } from '../../actions';
 import * as selectors from '../../selectors';
-import { CommitmentsReceived, EmbeddedProtocol } from '../../../communication';
+import { CommitmentsReceived } from '../../../communication';
 import { Channel } from 'fmg-core';
 import { isAdvanceChannelAction } from './actions';
 import { unreachable } from '../../../utils/reducer-utils';
 import { Properties } from '../../utils';
 import * as helpers from '../reducer-helpers';
 
-export const ADVANCE_CHANNEL_PROTOCOL_LOCATOR = makeLocator(EmbeddedProtocol.AdvanceChannel);
+export { ADVANCE_CHANNEL_PROTOCOL_LOCATOR } from '../../../communication/protocol-locator';
 
 type ReturnVal = ProtocolStateWithSharedData<states.AdvanceChannelState>;
 type Storage = SharedData;

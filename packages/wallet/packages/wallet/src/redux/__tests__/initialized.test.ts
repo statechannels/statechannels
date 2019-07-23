@@ -59,6 +59,7 @@ describe('when a ProcessAction arrives', () => {
 
   const action = strategyApproved({
     processId: '0xprocessId',
+    strategy: 'IndirectFundingStrategy',
   });
   const NewLedgerChannelReducer = jest.fn(() => ({
     protocolState: 'protocolState',
