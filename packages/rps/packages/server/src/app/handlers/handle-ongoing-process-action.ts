@@ -23,7 +23,7 @@ export async function handleOngoingProcessAction(ctx) {
   const action: RelayableAction = ctx.request.body;
   switch (action.type) {
     case 'WALLET.NEW_PROCESS.CONCLUDE_INSTIGATED':
-    case 'WALLET.FUNDING.STRATEGY_APPROVED':
+    case 'WALLET.FUNDING_STRATEGY_NEGOTIATION.STRATEGY_APPROVED':
     case 'WALLET.NEW_PROCESS.DEFUND_REQUESTED':
     case 'WALLET.MULTIPLE_RELAYABLE_ACTIONS':
       return ctx;
@@ -31,7 +31,7 @@ export async function handleOngoingProcessAction(ctx) {
       return handleCommitmentReceived(ctx, action);
     case 'WALLET.COMMON.COMMITMENTS_RECEIVED':
       return handleCommitmentsReceived({ ctx, action });
-    case 'WALLET.FUNDING.STRATEGY_PROPOSED':
+    case 'WALLET.FUNDING_STRATEGY_NEGOTIATION.STRATEGY_PROPOSED':
       return handleStrategyProposed(ctx, action);
     default:
       return unreachable(action);

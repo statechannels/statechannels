@@ -1,50 +1,49 @@
-import * as playerA from './player-a/actions';
-import * as playerB from './player-b/actions';
-import { isNewLedgerChannelAction, NewLedgerChannelAction } from '../new-ledger-channel/actions';
-import { WalletAction } from '../../../redux/actions';
+import { BaseProcessAction } from '../actions';
+import { strategyApproved, StrategyApproved } from '../../../communication';
+export { strategyApproved, StrategyApproved };
+import { ActionConstructor } from '../../utils';
+import { AdvanceChannelAction, isAdvanceChannelAction } from '../advance-channel';
+import { WalletAction } from '../../actions';
+import { VirtualFundingAction, isVirtualFundingAction } from '../virtual-funding';
+import { IndirectFundingAction, isIndirectFundingAction } from '../indirect-funding';
 import {
-  ExistingLedgerFundingAction,
-  isExistingLedgerFundingAction,
-} from '../existing-ledger-funding';
+  FundingStrategyNegotiationAction,
+  isFundingStrategyNegotiationAction,
+} from '../funding-strategy-negotiation';
+
 // -------
 // Actions
 // -------
+
+export interface FundingSuccessAcknowledged extends BaseProcessAction {
+  type: 'WALLET.FUNDING.FUNDING_SUCCESS_ACKNOWLEDGED';
+}
 
 // --------
 // Constructors
 // --------
 
-// --------
+export const fundingSuccessAcknowledged: ActionConstructor<FundingSuccessAcknowledged> = p => ({
+  ...p,
+  type: 'WALLET.FUNDING.FUNDING_SUCCESS_ACKNOWLEDGED',
+});
+
+// -------
 // Unions and Guards
-// --------
-type EmbeddedAction = NewLedgerChannelAction | ExistingLedgerFundingAction;
-const isEmbeddedAction = a => {
-  return isNewLedgerChannelAction(a) || isExistingLedgerFundingAction(a);
-};
-
-export type FundingAction = playerA.FundingAction | playerB.FundingAction | EmbeddedAction;
-
-export function isPlayerAFundingAction(action: WalletAction): action is playerA.FundingAction {
-  return (
-    action.type === 'WALLET.FUNDING.PLAYER_A.CANCELLED' ||
-    action.type === 'WALLET.FUNDING.PLAYER_A.FUNDING_SUCCESS_ACKNOWLEDGED' ||
-    action.type === 'WALLET.FUNDING.STRATEGY_APPROVED' ||
-    action.type === 'WALLET.FUNDING.PLAYER_A.STRATEGY_CHOSEN' ||
-    action.type === 'WALLET.FUNDING.PLAYER_A.STRATEGY_REJECTED' ||
-    isEmbeddedAction(action)
-  );
-}
-export function isPlayerBFundingAction(action: WalletAction): action is playerB.FundingAction {
-  return (
-    action.type === 'WALLET.FUNDING.PLAYER_B.CANCELLED' ||
-    action.type === 'WALLET.FUNDING.PLAYER_B.FUNDING_SUCCESS_ACKNOWLEDGED' ||
-    action.type === 'WALLET.FUNDING.PLAYER_B.STRATEGY_APPROVED' ||
-    action.type === 'WALLET.FUNDING.STRATEGY_PROPOSED' ||
-    action.type === 'WALLET.FUNDING.PLAYER_B.STRATEGY_REJECTED' ||
-    isEmbeddedAction(action)
-  );
-}
-
+// -------
 export function isFundingAction(action: WalletAction): action is FundingAction {
-  return isPlayerAFundingAction(action) || isPlayerBFundingAction(action);
+  return (
+    action.type === 'WALLET.FUNDING.FUNDING_SUCCESS_ACKNOWLEDGED' ||
+    isAdvanceChannelAction(action) ||
+    isVirtualFundingAction(action) ||
+    isIndirectFundingAction(action) ||
+    isFundingStrategyNegotiationAction(action)
+  );
 }
+
+export type FundingAction =
+  | FundingSuccessAcknowledged
+  | AdvanceChannelAction
+  | VirtualFundingAction
+  | IndirectFundingAction
+  | FundingStrategyNegotiationAction;

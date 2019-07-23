@@ -66,7 +66,7 @@ function isNewProcessAction(action: RelayableAction): boolean {
 
 async function isProtocolAction(action: RelayableAction): Promise<boolean> {
   if (
-    action.type === 'WALLET.FUNDING.STRATEGY_PROPOSED' ||
+    action.type === 'WALLET.FUNDING_STRATEGY_NEGOTIATION.STRATEGY_PROPOSED' ||
     (action.type === 'WALLET.COMMON.COMMITMENT_RECEIVED' && !opensAppChannel(action)) ||
     (action.type === 'WALLET.COMMON.COMMITMENTS_RECEIVED' && !opensAppChannel(action))
   ) {

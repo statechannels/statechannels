@@ -23,7 +23,10 @@ class ProtocolContainer extends PureComponent<Props> {
     // if we can figure out a way to do it.
     // Maybe every state has a protocol type on it?
     const { protocolState } = this.props;
-    if (fundingStates.isNonTerminalFundingState(protocolState)) {
+    if (
+      fundingStates.isFundingState(protocolState) &&
+      fundingStates.isOngoingFundingState(protocolState)
+    ) {
       return <Funding state={protocolState} />;
     } else if (ApplicationStates.isApplicationState(protocolState)) {
       return <Application state={protocolState} />;
