@@ -7,7 +7,7 @@ import * as selectors from '../../selectors';
 import { getLastCommitment } from '../../channel-store';
 import { Commitment } from '../../../domain';
 import { bigNumberify } from 'ethers/utils';
-import { EmbeddedProtocol, ProtocolLocator } from '../../../communication';
+import { ProtocolLocator } from '../../../communication';
 import { CommitmentType } from 'fmg-core';
 import {
   initialize as initializeLedgerTopUp,
@@ -32,9 +32,7 @@ import {
   ConsensusUpdateState,
 } from '../consensus-update/states';
 import { LedgerTopUpState } from '../ledger-top-up/states';
-export const EXISTING_LEDGER_FUNDING_PROTOCOL_LOCATOR = makeLocator(
-  EmbeddedProtocol.ExistingLedgerFunding,
-);
+export { EXISTING_LEDGER_FUNDING_PROTOCOL_LOCATOR } from '../../../communication/protocol-locator';
 
 export const initialize = (
   processId: string,

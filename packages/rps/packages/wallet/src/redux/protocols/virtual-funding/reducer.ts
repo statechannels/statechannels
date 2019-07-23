@@ -2,7 +2,7 @@ import * as states from './states';
 import { SharedData, getPrivatekey } from '../../state';
 import { ProtocolStateWithSharedData, ProtocolReducer, makeLocator } from '..';
 import { WalletAction, advanceChannel } from '../../actions';
-import { isVirtualFundingAction } from './actions';
+import { VirtualFundingAction } from './actions';
 import { unreachable } from '../../../utils/reducer-utils';
 import { CommitmentType } from '../../../domain';
 import { bytesFromAppAttributes } from 'fmg-nitro-adjudicator/lib/consensus-app';
@@ -22,9 +22,10 @@ export const VIRTUAL_FUNDING_PROTOCOL_LOCATOR = 'VirtualFunding';
 import { getLatestCommitment } from '../reducer-helpers';
 import { CONSENSUS_UPDATE_PROTOCOL_LOCATOR } from '../consensus-update/reducer';
 
-type ReturnVal = ProtocolStateWithSharedData<states.VirtualFundingState>;
-
-export function initialize(sharedData: SharedData, args: states.InitializationArgs): ReturnVal {
+export function initialize(
+  sharedData: SharedData,
+  args: states.InitializationArgs,
+): ProtocolStateWithSharedData<states.NonTerminalVirtualFundingState> {
   const {
     ourIndex,
     processId,
@@ -78,13 +79,8 @@ export function initialize(sharedData: SharedData, args: states.InitializationAr
 export const reducer: ProtocolReducer<states.VirtualFundingState> = (
   protocolState: states.NonTerminalVirtualFundingState,
   sharedData: SharedData,
-  action: WalletAction,
+  action: VirtualFundingAction,
 ) => {
-  if (!isVirtualFundingAction(action)) {
-    console.error('Invalid action: expected WALLET.COMMON.COMMITMENTS_RECEIVED');
-    return { protocolState, sharedData };
-  }
-
   switch (protocolState.type) {
     case 'VirtualFunding.WaitForJointChannel': {
       return waitForJointChannelReducer(protocolState, sharedData, action);

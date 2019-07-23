@@ -32,7 +32,7 @@ export const enum EmbeddedProtocol {
 }
 
 export type ProtocolLocator = EmbeddedProtocol[];
-export type FundingStrategy = 'IndirectFundingStrategy';
+export type FundingStrategy = 'IndirectFundingStrategy' | 'VirtualFundingStrategy';
 
 function sendMessage(to: string, message: RelayableAction) {
   return messageRelayRequested(to, message);
@@ -42,8 +42,8 @@ export function sendStrategyProposed(to: string, processId: string, strategy: Fu
   return sendMessage(to, strategyProposed({ processId, strategy }));
 }
 
-export function sendStrategyApproved(to: string, processId: string) {
-  return sendMessage(to, strategyApproved({ processId }));
+export function sendStrategyApproved(to: string, processId: string, strategy: FundingStrategy) {
+  return sendMessage(to, strategyApproved({ processId, strategy }));
 }
 
 export function sendConcludeInstigated(to: string, channelId, signedCommitment: SignedCommitment) {

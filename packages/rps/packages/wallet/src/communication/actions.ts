@@ -34,6 +34,7 @@ export interface StrategyProposed extends BaseProcessAction {
 
 export interface StrategyApproved extends BaseProcessAction {
   type: 'WALLET.FUNDING.STRATEGY_APPROVED';
+  strategy: FundingStrategy;
 }
 export interface ConcludeInstigated {
   type: 'WALLET.NEW_PROCESS.CONCLUDE_INSTIGATED';
