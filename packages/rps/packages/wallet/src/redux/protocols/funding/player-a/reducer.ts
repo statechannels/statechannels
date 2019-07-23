@@ -211,31 +211,26 @@ function strategyApproved(
 
   const { processId, targetChannelId, ourAddress } = state;
   let advanceChannelState: advanceChannelStates.AdvanceChannelState;
-  ({ protocolState: advanceChannelState, sharedData } = initializeAdvanceChannel(
+  ({ protocolState: advanceChannelState, sharedData } = initializeAdvanceChannel(sharedData, {
+    channelId: targetChannelId,
+    ourIndex: TwoPartyPlayerIndex.A,
     processId,
-    sharedData,
-    CommitmentType.PostFundSetup,
-    {
-      channelId: targetChannelId,
-      ourIndex: TwoPartyPlayerIndex.A,
-      processId,
-      commitmentType: CommitmentType.PostFundSetup,
-      clearedToSend: false,
-      protocolLocator: ADVANCE_CHANNEL_PROTOCOL_LOCATOR,
-    },
-  ));
+    commitmentType: CommitmentType.PostFundSetup,
+    clearedToSend: false,
+    protocolLocator: ADVANCE_CHANNEL_PROTOCOL_LOCATOR,
+  }));
 
   switch (action.strategy) {
     case 'IndirectFundingStrategy': {
       const latestCommitment = getLatestCommitment(state.targetChannelId, sharedData);
-      const { protocolState: fundingState, sharedData: newSharedData } = initializeIndirectFunding(
-        state.processId,
-        state.targetChannelId,
-        latestCommitment.allocation,
-        latestCommitment.destination,
+      const { protocolState: fundingState, sharedData: newSharedData } = initializeIndirectFunding({
+        processId: state.processId,
+        channelId: state.targetChannelId,
+        targetAllocation: latestCommitment.allocation,
+        targetDestination: latestCommitment.destination,
         sharedData,
-        makeLocator(EmbeddedProtocol.IndirectFunding),
-      );
+        protocolLocator: makeLocator(EmbeddedProtocol.IndirectFunding),
+      });
       if (fundingState.type === 'IndirectFunding.Failure') {
         return {
           protocolState: states.failure(fundingState),

@@ -20,14 +20,21 @@ import { EXISTING_LEDGER_FUNDING_PROTOCOL_LOCATOR } from '../existing-ledger-fun
 
 export const INDIRECT_FUNDING_PROTOCOL_LOCATOR = makeLocator(EmbeddedProtocol.IndirectFunding);
 
-export function initialize(
-  processId: string,
-  channelId: string,
-  targetAllocation: string[],
-  targetDestination: string[],
-  sharedData: SharedData,
-  protocolLocator: ProtocolLocator,
-): ProtocolStateWithSharedData<states.NonTerminalIndirectFundingState | states.Failure> {
+export function initialize({
+  processId,
+  channelId,
+  targetAllocation,
+  targetDestination,
+  sharedData,
+  protocolLocator,
+}: {
+  processId: string;
+  channelId: string;
+  targetAllocation: string[];
+  targetDestination: string[];
+  sharedData: SharedData;
+  protocolLocator: ProtocolLocator;
+}): ProtocolStateWithSharedData<states.NonTerminalIndirectFundingState | states.Failure> {
   const existingLedgerChannel = selectors.getFundedLedgerChannelForParticipants(
     sharedData,
     helpers.getOurAddress(channelId, sharedData),
@@ -189,15 +196,15 @@ function fundWithExistingLedgerChannel({
   const {
     protocolState: existingLedgerFundingState,
     sharedData: newSharedData,
-  } = initializeExistingLedgerFunding(
+  } = initializeExistingLedgerFunding({
     processId,
     channelId,
     ledgerId,
     targetAllocation,
     targetDestination,
-    makeLocator(protocolLocator, EXISTING_LEDGER_FUNDING_PROTOCOL_LOCATOR),
+    protocolLocator: makeLocator(protocolLocator, EXISTING_LEDGER_FUNDING_PROTOCOL_LOCATOR),
     sharedData,
-  );
+  });
 
   switch (existingLedgerFundingState.type) {
     case 'ExistingLedgerFunding.Failure':

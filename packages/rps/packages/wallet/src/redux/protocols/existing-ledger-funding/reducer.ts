@@ -34,15 +34,23 @@ import {
 import { LedgerTopUpState } from '../ledger-top-up/states';
 export { EXISTING_LEDGER_FUNDING_PROTOCOL_LOCATOR } from '../../../communication/protocol-locator';
 
-export const initialize = (
-  processId: string,
-  channelId: string,
-  ledgerId: string,
-  targetAllocation: string[],
-  targetDestination: string[],
-  protocolLocator: ProtocolLocator,
-  sharedData: SharedData,
-): ProtocolStateWithSharedData<states.NonTerminalExistingLedgerFundingState | states.Failure> => {
+export const initialize = ({
+  processId,
+  channelId,
+  ledgerId,
+  targetAllocation,
+  targetDestination,
+  protocolLocator,
+  sharedData,
+}: {
+  processId: string;
+  channelId: string;
+  ledgerId: string;
+  targetAllocation: string[];
+  targetDestination: string[];
+  protocolLocator: ProtocolLocator;
+  sharedData: SharedData;
+}): ProtocolStateWithSharedData<states.NonTerminalExistingLedgerFundingState | states.Failure> => {
   const ledgerChannel = selectors.getChannelState(sharedData, ledgerId);
   const theirCommitment = getLastCommitment(ledgerChannel);
 
@@ -60,16 +68,16 @@ export const initialize = (
 
   if (ledgerChannelNeedsTopUp(theirCommitment, targetAllocation, targetDestination)) {
     let ledgerTopUpState: LedgerTopUpState;
-    ({ protocolState: ledgerTopUpState, sharedData } = initializeLedgerTopUp(
+    ({ protocolState: ledgerTopUpState, sharedData } = initializeLedgerTopUp({
       processId,
       channelId,
       ledgerId,
-      targetAllocation,
-      targetDestination,
-      theirCommitment.allocation,
-      makeLocator(protocolLocator, LEDGER_TOP_UP_PROTOCOL_LOCATOR),
+      proposedAllocation: targetAllocation,
+      proposedDestination: targetDestination,
+      originalAllocation: theirCommitment.allocation,
+      protocolLocator: makeLocator(protocolLocator, LEDGER_TOP_UP_PROTOCOL_LOCATOR),
       sharedData,
-    ));
+    }));
 
     return {
       protocolState: states.waitForLedgerTopUp({

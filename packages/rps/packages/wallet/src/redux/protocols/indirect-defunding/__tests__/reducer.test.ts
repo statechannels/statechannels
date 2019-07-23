@@ -8,25 +8,10 @@ import { itRelaysTheseActions } from '../../../__tests__/helpers';
 
 describe('player A happy path', () => {
   const scenario = scenarios.playerAHappyPath;
-  const {
-    processId,
-    channelId,
-    ledgerId,
-    store,
-    proposedAllocation,
-    proposedDestination,
-    relayActions,
-  } = scenario.initialParams;
+  const { relayActions } = scenario.initialParams;
 
   describe('when initializing', () => {
-    const result = initialize(
-      processId,
-      channelId,
-      ledgerId,
-      proposedAllocation,
-      proposedDestination,
-      store,
-    );
+    const result = initialize(scenario.initialParams);
     itTransitionsTo(result, 'IndirectDefunding.WaitForLedgerUpdate');
     itRelaysTheseActions(result, relayActions);
   });
@@ -56,24 +41,9 @@ describe('player A invalid commitment', () => {
 
 describe('player B happy path', () => {
   const scenario = scenarios.playerBHappyPath;
-  const {
-    processId,
-    channelId,
-    ledgerId,
-    store,
-    proposedAllocation,
-    proposedDestination,
-  } = scenario.initialParams;
 
   describe('when initializing', () => {
-    const result = initialize(
-      processId,
-      channelId,
-      ledgerId,
-      proposedAllocation,
-      proposedDestination,
-      store,
-    );
+    const result = initialize(scenario.initialParams);
     itTransitionsTo(result, 'IndirectDefunding.WaitForLedgerUpdate');
   });
 
@@ -104,23 +74,8 @@ describe('player B invalid commitment', () => {
 
 describe('not defundable', () => {
   const scenario = scenarios.notDefundable;
-  const {
-    processId,
-    channelId,
-    ledgerId,
-    store,
-    proposedAllocation,
-    proposedDestination,
-  } = scenario.initialParams;
   describe('when initializing', () => {
-    const result = initialize(
-      processId,
-      channelId,
-      ledgerId,
-      proposedAllocation,
-      proposedDestination,
-      store,
-    );
+    const result = initialize(scenario.initialParams);
     itTransitionsTo(result, 'IndirectDefunding.Failure');
   });
 });
