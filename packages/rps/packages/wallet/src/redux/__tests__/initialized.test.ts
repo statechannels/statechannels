@@ -27,16 +27,11 @@ describe('when a NewProcessAction arrives', () => {
     protocolState: 'protocolState',
     sharedData: { prop: 'value' },
   }));
-  Object.defineProperty(fundProtocol, 'initialize', { value: initialize });
+  Object.defineProperty(fundProtocol, 'initializeFunding', { value: initialize });
 
   const updatedState = walletReducer(initializedState, action);
   it('calls initialize', () => {
-    expect(initialize).toHaveBeenCalledWith(
-      states.EMPTY_SHARED_DATA,
-      action.channelId,
-      processId,
-      action.playerIndex,
-    );
+    expect(initialize).toHaveBeenCalledWith(states.EMPTY_SHARED_DATA, processId, action.channelId);
   });
 
   it('stores the process in the process store', () => {
@@ -65,7 +60,7 @@ describe('when a ProcessAction arrives', () => {
     protocolState: 'protocolState',
     sharedData: 'sharedData ',
   }));
-  Object.defineProperty(fundProtocol, 'reducer', {
+  Object.defineProperty(fundProtocol, 'fundingReducer', {
     value: NewLedgerChannelReducer,
   });
 

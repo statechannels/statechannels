@@ -7,32 +7,29 @@ import * as states from './states';
 import { unreachable } from '../../../../utils/reducer-utils';
 import { TwoPartyPlayerIndex } from '../../../types';
 import WaitForOtherPlayer from '../../shared-components/wait-for-other-player';
-import AcknowledgeX from '../../shared-components/acknowledge-x';
 import { ActionDispatcher } from '../../../utils';
-import { IndirectFunding } from '../../indirect-funding/container';
 import ApproveX from '../../shared-components/approve-x';
 interface Props {
-  state: states.OngoingFundingState;
+  state: states.OngoingFundingStrategyNegotiationState;
   strategyApproved: ActionDispatcher<actions.StrategyApproved>;
   strategyRejected: ActionDispatcher<actions.StrategyRejected>;
-  fundingSuccessAcknowledged: ActionDispatcher<actions.FundingSuccessAcknowledged>;
   cancelled: ActionDispatcher<actions.Cancelled>;
 }
 
-class FundingContainer extends PureComponent<Props> {
+class FundingStrategyNegotiationContainer extends PureComponent<Props> {
   render() {
-    const { state, strategyApproved, cancelled, fundingSuccessAcknowledged } = this.props;
+    const { state, strategyApproved, cancelled } = this.props;
     const { processId } = state;
 
     switch (state.type) {
-      case 'Funding.PlayerB.WaitForStrategyProposal':
+      case 'FundingStrategyNegotiation.PlayerB.WaitForStrategyProposal':
         return (
           <WaitForOtherPlayer
             actionDescriptor={'strategy choice'}
             channelId={state.targetChannelId}
           />
         );
-      case 'Funding.PlayerB.WaitForStrategyApproval':
+      case 'FundingStrategyNegotiation.PlayerB.WaitForStrategyApproval':
         return (
           <ApproveX
             title="Funding channel"
@@ -62,24 +59,7 @@ class FundingContainer extends PureComponent<Props> {
             </React.Fragment>
           </ApproveX>
         );
-      case 'Funding.PlayerB.WaitForFunding':
-        return <IndirectFunding state={state.fundingState} />;
-      case 'Funding.PlayerB.WaitForSuccessConfirmation':
-        return (
-          <AcknowledgeX
-            title="Channel funded!"
-            action={() => fundingSuccessAcknowledged({ processId })}
-            description="You have successfully funded your channel"
-            actionTitle="Ok!"
-          />
-        );
-      case 'Funding.PlayerB.WaitForPostFundSetup':
-        return (
-          <WaitForOtherPlayer
-            actionDescriptor={'post funding confirmation'}
-            channelId={state.targetChannelId}
-          />
-        );
+
       default:
         return unreachable(state);
     }
@@ -90,11 +70,10 @@ const mapDispatchToProps = {
   strategyChosen: actions.strategyProposed,
   strategyApproved: actions.strategyApproved,
   strategyRejected: actions.strategyRejected,
-  fundingSuccessAcknowledged: actions.fundingSuccessAcknowledged,
   cancelled: actions.cancelled,
 };
 
-export const Funding = connect(
+export const FundingStrategyNegotiation = connect(
   () => ({}),
   mapDispatchToProps,
-)(FundingContainer);
+)(FundingStrategyNegotiationContainer);
