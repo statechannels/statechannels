@@ -10,26 +10,7 @@ describe('player A happy path', () => {
   const scenario = scenarios.playerAHappyPath;
 
   describe('when initializing', () => {
-    const {
-      channelId,
-      sharedData,
-      processId,
-      ledgerId,
-      proposedAllocation,
-      proposedDestination,
-      originalAllocation,
-      protocolLocator,
-    } = scenario.initialize;
-    const initialState = initialize(
-      processId,
-      channelId,
-      ledgerId,
-      proposedAllocation,
-      proposedDestination,
-      originalAllocation,
-      protocolLocator,
-      sharedData,
-    );
+    const initialState = initialize(scenario.initialize);
     it('requests the correct allocation/destination updates', () => {
       const consensusUpdate = getProposedConsensus(initialState.protocolState);
       expect(consensusUpdate.proposedAllocation).toEqual(['0x03', '0x04']);
@@ -75,26 +56,7 @@ describe('player A happy path', () => {
 describe('player B happy path', () => {
   const scenario = scenarios.playerBHappyPath;
   describe('when initializing', () => {
-    const {
-      channelId,
-      sharedData,
-      processId,
-      ledgerId,
-      proposedAllocation,
-      proposedDestination,
-      originalAllocation,
-      protocolLocator,
-    } = scenario.initialize;
-    const initialState = initialize(
-      processId,
-      channelId,
-      ledgerId,
-      proposedAllocation,
-      proposedDestination,
-      originalAllocation,
-      protocolLocator,
-      sharedData,
-    );
+    const initialState = initialize(scenario.initialize);
 
     itTransitionsTo(initialState, 'LedgerTopUp.SwitchOrderAndAddATopUpUpdate');
     it('requests the correct allocation/destination updates', () => {
@@ -144,26 +106,7 @@ describe('player B happy path', () => {
 describe('player A one user needs top up', () => {
   const scenario = scenarios.playerAOneUserNeedsTopUp;
   describe('when initializing', () => {
-    const {
-      channelId,
-      sharedData,
-      processId,
-      ledgerId,
-      proposedAllocation,
-      proposedDestination,
-      originalAllocation,
-      protocolLocator,
-    } = scenario.initialize;
-    const initialState = initialize(
-      processId,
-      channelId,
-      ledgerId,
-      proposedAllocation,
-      proposedDestination,
-      originalAllocation,
-      protocolLocator,
-      sharedData,
-    );
+    const initialState = initialize(scenario.initialize);
 
     itTransitionsTo(initialState, 'LedgerTopUp.SwitchOrderAndAddATopUpUpdate');
     it('requests the correct allocation/destination updates', () => {
@@ -202,26 +145,7 @@ describe('player A one user needs top up', () => {
 describe('player B one user needs top up', () => {
   const scenario = scenarios.playerBOneUserNeedsTopUp;
   describe('when initializing', () => {
-    const {
-      channelId,
-      sharedData,
-      processId,
-      ledgerId,
-      proposedAllocation,
-      proposedDestination,
-      originalAllocation,
-      protocolLocator,
-    } = scenario.initialize;
-    const initialState = initialize(
-      processId,
-      channelId,
-      ledgerId,
-      proposedAllocation,
-      proposedDestination,
-      originalAllocation,
-      protocolLocator,
-      sharedData,
-    );
+    const initialState = initialize(scenario.initialize);
 
     itTransitionsTo(initialState, 'LedgerTopUp.SwitchOrderAndAddATopUpUpdate');
     it('requests the correct allocation/destination updates', () => {

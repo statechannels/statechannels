@@ -1,7 +1,6 @@
 import * as states from '../states';
 import { initialize, reducer } from '../reducer';
 import * as scenarios from './scenarios';
-import { CommitmentType } from '../../../../domain';
 import {
   itSendsTheseCommitments,
   itStoresThisCommitment,
@@ -24,12 +23,7 @@ describe('sending preFundSetup as A', () => {
 
   describe('when initializing', () => {
     const { sharedData, commitments, args } = scenario.initialize;
-    const { protocolState, sharedData: result } = initialize(
-      processId,
-      sharedData,
-      CommitmentType.PreFundSetup,
-      args,
-    );
+    const { protocolState, sharedData: result } = initialize(sharedData, args);
 
     itTransitionsTo(protocolState, 'AdvanceChannel.CommitmentSent');
     itSendsTheseCommitments(result, commitments);
@@ -63,12 +57,7 @@ describe('sending preFundSetup as B', () => {
 
   describe('when initializing', () => {
     const { sharedData, args } = scenario.initialize;
-    const { protocolState, sharedData: result } = initialize(
-      processId,
-      sharedData,
-      CommitmentType.PreFundSetup,
-      args,
-    );
+    const { protocolState, sharedData: result } = initialize(sharedData, args);
 
     itTransitionsTo(protocolState, 'AdvanceChannel.ChannelUnknown');
     itSendsNoMessage(result);
@@ -100,12 +89,7 @@ describe('sending preFundSetup as Hub', () => {
 
   describe('when initializing', () => {
     const { sharedData, args } = scenario.initialize;
-    const { protocolState, sharedData: result } = initialize(
-      processId,
-      sharedData,
-      CommitmentType.PreFundSetup,
-      args,
-    );
+    const { protocolState, sharedData: result } = initialize(sharedData, args);
 
     itTransitionsTo(protocolState, 'AdvanceChannel.ChannelUnknown');
     itSendsNoMessage(result);
@@ -133,16 +117,10 @@ describe('sending preFundSetup as Hub', () => {
 
 describe('sending postFundSetup as A', () => {
   const scenario = scenarios.existingChannelAsA;
-  const { processId, commitmentType } = scenario;
 
   describe('when initializing', () => {
     const { sharedData, commitments, args } = scenario.initialize;
-    const { protocolState, sharedData: result } = initialize(
-      processId,
-      sharedData,
-      commitmentType,
-      args,
-    );
+    const { protocolState, sharedData: result } = initialize(sharedData, args);
 
     itTransitionsTo(protocolState, 'AdvanceChannel.CommitmentSent');
     itSendsTheseCommitments(result, commitments);
@@ -170,16 +148,10 @@ describe('sending postFundSetup as A', () => {
 
 describe('sending postFundSetup as B', () => {
   const scenario = scenarios.existingChannelAsB;
-  const { processId, commitmentType } = scenario;
 
   describe('when initializing', () => {
     const { sharedData, commitments, args } = scenario.initialize;
-    const { protocolState, sharedData: result } = initialize(
-      processId,
-      sharedData,
-      commitmentType,
-      args,
-    );
+    const { protocolState, sharedData: result } = initialize(sharedData, args);
 
     itTransitionsTo(protocolState, 'AdvanceChannel.NotSafeToSend');
     itSendsNoMessage(result);
@@ -208,16 +180,10 @@ describe('sending postFundSetup as B', () => {
 
 describe('sending postFundSetup as Hub', () => {
   const scenario = scenarios.existingChannelAsHub;
-  const { processId, commitmentType } = scenario;
 
   describe('when initializing', () => {
     const { sharedData, commitments, args } = scenario.initialize;
-    const { protocolState, sharedData: result } = initialize(
-      processId,
-      sharedData,
-      commitmentType,
-      args,
-    );
+    const { protocolState, sharedData: result } = initialize(sharedData, args);
 
     itTransitionsTo(protocolState, 'AdvanceChannel.NotSafeToSend');
     itSendsNoMessage(result);
@@ -237,16 +203,10 @@ describe('sending postFundSetup as Hub', () => {
 
 describe('when not cleared to send', () => {
   const scenario = scenarios.notClearedToSend;
-  const { processId, commitmentType } = scenario;
 
   describe('when initializing', () => {
     const { sharedData, commitments, args } = scenario.initialize;
-    const { protocolState, sharedData: result } = initialize(
-      processId,
-      sharedData,
-      commitmentType,
-      args,
-    );
+    const { protocolState, sharedData: result } = initialize(sharedData, args);
 
     itTransitionsTo(protocolState, 'AdvanceChannel.NotSafeToSend');
     itSendsNoMessage(result);

@@ -168,28 +168,23 @@ function strategyApproved(
   const message = sendStrategyApproved(opponentAddress, processId, strategy);
   const latestCommitment = getLatestCommitment(targetChannelId, sharedData);
 
-  const { protocolState: fundingState, sharedData: newSharedData } = initializeIndirectFunding(
+  const { protocolState: fundingState, sharedData: newSharedData } = initializeIndirectFunding({
     processId,
-    targetChannelId,
-    latestCommitment.allocation,
-    latestCommitment.destination,
+    channelId: targetChannelId,
+    targetAllocation: latestCommitment.allocation,
+    targetDestination: latestCommitment.destination,
     sharedData,
-    makeLocator(EmbeddedProtocol.IndirectFunding),
-  );
+    protocolLocator: makeLocator(EmbeddedProtocol.IndirectFunding),
+  });
 
-  const advanceChannelResult = initializeAdvanceChannel(
+  const advanceChannelResult = initializeAdvanceChannel(newSharedData, {
+    channelId: targetChannelId,
+    ourIndex: TwoPartyPlayerIndex.B,
     processId,
-    newSharedData,
-    CommitmentType.PostFundSetup,
-    {
-      channelId: targetChannelId,
-      ourIndex: TwoPartyPlayerIndex.B,
-      processId,
-      commitmentType: CommitmentType.PostFundSetup,
-      clearedToSend: false,
-      protocolLocator: makeLocator(ADVANCE_CHANNEL_PROTOCOL_LOCATOR),
-    },
-  );
+    commitmentType: CommitmentType.PostFundSetup,
+    clearedToSend: false,
+    protocolLocator: makeLocator(ADVANCE_CHANNEL_PROTOCOL_LOCATOR),
+  });
   switch (fundingState.type) {
     case 'IndirectFunding.Failure':
       return {

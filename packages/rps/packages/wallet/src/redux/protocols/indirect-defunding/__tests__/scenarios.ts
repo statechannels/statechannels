@@ -149,7 +149,7 @@ const invalidLedgerUpdateReceived = globalActions.commitmentReceived({
 // -----------
 export const playerAHappyPath = {
   initialParams: {
-    store: initialStore,
+    sharedData: initialStore,
     ...props,
     relayActions: [
       defundRequested({
@@ -178,7 +178,7 @@ export const playerBInvalidCommitment = {
 
 export const playerBHappyPath = {
   initialParams: {
-    store: initialStore,
+    sharedData: initialStore,
     ...props,
   },
   waitForLedgerUpdate: {
@@ -195,7 +195,7 @@ export const playerBHappyPath = {
 
 export const notDefundable = {
   initialParams: {
-    store: notDefundableInitialStore,
+    sharedData: notDefundableInitialStore,
     ...props,
   },
 };
