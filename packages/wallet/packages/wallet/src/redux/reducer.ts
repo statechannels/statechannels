@@ -78,7 +78,7 @@ function routeToProtocolReducer(
   } else {
     switch (processState.protocol) {
       case ProcessProtocol.Funding:
-        const { protocolState, sharedData } = fundProtocol.reducer(
+        const { protocolState, sharedData } = fundProtocol.fundingReducer(
           processState.protocolState,
           states.sharedData(state),
           action,
@@ -152,7 +152,7 @@ function initializeNewProtocol(
   switch (action.type) {
     case 'WALLET.NEW_PROCESS.FUNDING_REQUESTED': {
       const { channelId } = action;
-      return fundProtocol.initialize(incomingSharedData, channelId, processId, action.playerIndex);
+      return fundProtocol.initializeFunding(incomingSharedData, processId, channelId);
     }
     case 'WALLET.NEW_PROCESS.CONCLUDE_REQUESTED': {
       const { channelId } = action;

@@ -1,61 +1,56 @@
 import * as scenarios from './scenarios';
 import * as states from '../states';
-import { fundingReducer as reducer } from '../reducer';
+import { fundingStrategyNegotiationReducer as reducer } from '../reducer';
 import { ProtocolStateWithSharedData } from '../../..';
-import {
-  itSendsThisMessage,
-  itSendsThisDisplayEventType,
-  describeScenarioStep,
-} from '../../../../__tests__/helpers';
+import { itSendsThisMessage, describeScenarioStep } from '../../../../__tests__/helpers';
 import { sendStrategyApproved } from '../../../../../communication';
-import { FUNDING_SUCCESS, HIDE_WALLET } from 'magmo-wallet-client';
-import { FundingStateType } from '../../states';
+import { FundingStrategyNegotiationStateType } from '../../states';
 
-describe('happy path', () => {
-  const scenario = scenarios.happyPath;
+describe('indirect funding strategy chosen', () => {
+  const scenario = scenarios.indirectStrategyChosen;
   const { processId, opponentAddress } = scenario;
 
   describeScenarioStep(scenario.waitForStrategyProposal, () => {
     const { state, sharedData, action } = scenario.waitForStrategyProposal;
     const result = reducer(state, sharedData, action);
 
-    itTransitionsTo(result, 'Funding.PlayerB.WaitForStrategyApproval');
+    itTransitionsTo(result, 'FundingStrategyNegotiation.PlayerB.WaitForStrategyApproval');
   });
 
   describeScenarioStep(scenario.waitForStrategyApproval, () => {
     const { state, sharedData, action } = scenario.waitForStrategyApproval;
     const result = reducer(state, sharedData, action);
 
-    itTransitionsTo(result, 'Funding.PlayerB.WaitForFunding');
+    itTransitionsTo(result, 'FundingStrategyNegotiation.PlayerB.Success');
 
     itSendsThisMessage(
       result,
       sendStrategyApproved(opponentAddress, processId, 'IndirectFundingStrategy'),
     );
   });
+});
 
-  describeScenarioStep(scenario.waitForFunding, () => {
-    const { state, sharedData, action } = scenario.waitForFunding;
+describe('virtual funding strategy chosen', () => {
+  const scenario = scenarios.virtualStrategyChosen;
+  const { processId, opponentAddress } = scenario;
+
+  describeScenarioStep(scenario.waitForStrategyProposal, () => {
+    const { state, sharedData, action } = scenario.waitForStrategyProposal;
     const result = reducer(state, sharedData, action);
 
-    itTransitionsTo(result, 'Funding.PlayerB.WaitForPostFundSetup');
+    itTransitionsTo(result, 'FundingStrategyNegotiation.PlayerB.WaitForStrategyApproval');
   });
 
-  describeScenarioStep(scenario.waitForPostFundSetup, () => {
-    const { state, sharedData, action } = scenario.waitForPostFundSetup;
-
-    const result = reducer(state, sharedData, action);
-    itTransitionsTo(result, 'Funding.PlayerB.WaitForSuccessConfirmation');
-  });
-
-  describeScenarioStep(scenario.waitForSuccessConfirmation, () => {
-    const { state, sharedData, action } = scenario.waitForSuccessConfirmation;
-
+  describeScenarioStep(scenario.waitForStrategyApproval, () => {
+    const { state, sharedData, action } = scenario.waitForStrategyApproval;
     const result = reducer(state, sharedData, action);
 
-    itTransitionsTo(result, 'Funding.PlayerB.Success');
-    itSendsThisMessage(result, FUNDING_SUCCESS);
-    itSendsThisDisplayEventType(result, HIDE_WALLET);
+    itTransitionsTo(result, 'FundingStrategyNegotiation.PlayerB.Success');
+
+    itSendsThisMessage(
+      result,
+      sendStrategyApproved(opponentAddress, processId, 'VirtualFundingStrategy'),
+    );
   });
 });
 
@@ -66,7 +61,7 @@ describe('When a strategy is rejected', () => {
     const { state, sharedData, action } = scenario.waitForStrategyApproval;
     const result = reducer(state, sharedData, action);
 
-    itTransitionsTo(result, 'Funding.PlayerB.WaitForStrategyProposal');
+    itTransitionsTo(result, 'FundingStrategyNegotiation.PlayerB.WaitForStrategyProposal');
   });
 });
 
@@ -77,16 +72,14 @@ describe('when cancelled by the opponent', () => {
     const { state, sharedData, action } = scenario.waitForStrategyProposal;
     const result = reducer(state, sharedData, action);
 
-    itTransitionsTo(result, 'Funding.PlayerB.Failure');
-    itSendsThisMessage(result, 'WALLET.FUNDING.FAILURE');
+    itTransitionsTo(result, 'FundingStrategyNegotiation.PlayerB.Failure');
   });
 
   describeScenarioStep(scenario.waitForStrategyApproval, () => {
     const { state, sharedData, action } = scenario.waitForStrategyApproval;
     const result = reducer(state, sharedData, action);
 
-    itTransitionsTo(result, 'Funding.PlayerB.Failure');
-    itSendsThisMessage(result, 'WALLET.FUNDING.FAILURE');
+    itTransitionsTo(result, 'FundingStrategyNegotiation.PlayerB.Failure');
   });
 });
 
@@ -97,8 +90,7 @@ describe('when cancelled by the user', () => {
     const { state, sharedData, action } = scenario.waitForStrategyProposal;
     const result = reducer(state, sharedData, action);
 
-    itTransitionsTo(result, 'Funding.PlayerB.Failure');
-    itSendsThisMessage(result, 'WALLET.FUNDING.FAILURE');
+    itTransitionsTo(result, 'FundingStrategyNegotiation.PlayerB.Failure');
   });
 
   describeScenarioStep(scenario.waitForStrategyApproval, () => {
@@ -106,14 +98,13 @@ describe('when cancelled by the user', () => {
 
     const result = reducer(state, sharedData, action);
 
-    itTransitionsTo(result, 'Funding.PlayerB.Failure');
-    itSendsThisMessage(result, 'WALLET.FUNDING.FAILURE');
+    itTransitionsTo(result, 'FundingStrategyNegotiation.PlayerB.Failure');
   });
 });
 
 function itTransitionsTo(
-  result: ProtocolStateWithSharedData<states.FundingState>,
-  type: FundingStateType,
+  result: ProtocolStateWithSharedData<states.FundingStrategyNegotiationState>,
+  type: FundingStrategyNegotiationStateType,
 ) {
   it(`transitions to ${type}`, () => {
     expect(result.protocolState.type).toEqual(type);

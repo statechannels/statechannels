@@ -29,6 +29,7 @@ export const enum EmbeddedProtocol {
   LedgerTopUp = 'LedgerTopUp',
   NewLedgerChannel = 'NewLedgerChannel',
   VirtualFunding = 'VirtualFunding',
+  FundingStrategyNegotiation = 'FundingStrategyNegotiation',
 }
 
 export type ProtocolLocator = EmbeddedProtocol[];

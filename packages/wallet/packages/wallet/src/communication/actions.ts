@@ -28,12 +28,12 @@ export interface BaseProcessAction {
 // -------
 
 export interface StrategyProposed extends BaseProcessAction {
-  type: 'WALLET.FUNDING.STRATEGY_PROPOSED';
+  type: 'WALLET.FUNDING_STRATEGY_NEGOTIATION.STRATEGY_PROPOSED';
   strategy: FundingStrategy;
 }
 
 export interface StrategyApproved extends BaseProcessAction {
-  type: 'WALLET.FUNDING.STRATEGY_APPROVED';
+  type: 'WALLET.FUNDING_STRATEGY_NEGOTIATION.STRATEGY_APPROVED';
   strategy: FundingStrategy;
 }
 export interface ConcludeInstigated {
@@ -49,12 +49,12 @@ export interface ConcludeInstigated {
 
 export const strategyProposed: ActionConstructor<StrategyProposed> = p => ({
   ...p,
-  type: 'WALLET.FUNDING.STRATEGY_PROPOSED',
+  type: 'WALLET.FUNDING_STRATEGY_NEGOTIATION.STRATEGY_PROPOSED',
 });
 
 export const strategyApproved: ActionConstructor<StrategyApproved> = p => ({
   ...p,
-  type: 'WALLET.FUNDING.STRATEGY_APPROVED',
+  type: 'WALLET.FUNDING_STRATEGY_NEGOTIATION.STRATEGY_APPROVED',
 });
 
 export const concludeInstigated: ActionConstructor<ConcludeInstigated> = p => ({
@@ -114,8 +114,8 @@ export type RelayableAction =
 
 export function isRelayableAction(action: WalletAction): action is RelayableAction {
   return (
-    action.type === 'WALLET.FUNDING.STRATEGY_PROPOSED' ||
-    action.type === 'WALLET.FUNDING.STRATEGY_APPROVED' ||
+    action.type === 'WALLET.FUNDING_STRATEGY_NEGOTIATION.STRATEGY_PROPOSED' ||
+    action.type === 'WALLET.FUNDING_STRATEGY_NEGOTIATION.STRATEGY_APPROVED' ||
     action.type === 'WALLET.NEW_PROCESS.CONCLUDE_INSTIGATED' ||
     action.type === 'WALLET.COMMON.COMMITMENT_RECEIVED' ||
     action.type === 'WALLET.NEW_PROCESS.DEFUND_REQUESTED' ||
