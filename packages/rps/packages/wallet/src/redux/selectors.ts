@@ -123,3 +123,7 @@ export const getNextNonce = (
   }
   return highestNonce + 1;
 };
+
+export const getChannelIds = (state: SharedData): string[] => {
+  return Object.keys(state.channelStore);
+};
