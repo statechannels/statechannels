@@ -15,6 +15,9 @@ import { WALLET_INITIALIZED } from '../state';
 import { challengeResponseInitiator } from './challenge-response-initiator';
 import { multipleActionDispatcher } from './multiple-action-dispatcher';
 
+import { adjudicatorStateUpdater } from './adjudicator-state-updater';
+import { isLoadAction } from '../actions';
+
 export function* sagaManager(): IterableIterator<any> {
   let adjudicatorWatcherProcess;
   let challengeWatcherProcess;
@@ -30,7 +33,11 @@ export function* sagaManager(): IterableIterator<any> {
   const channel = yield actionChannel('*');
 
   while (true) {
-    yield take(channel);
+    const action = yield take(channel);
+    // If it is a load action we update the adjudicator state with the latest on chain info
+    if (isLoadAction(action)) {
+      yield fork(adjudicatorStateUpdater);
+    }
 
     const state: WalletState = yield select((walletState: WalletState) => walletState);
 

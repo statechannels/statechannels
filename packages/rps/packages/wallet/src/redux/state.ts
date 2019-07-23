@@ -56,6 +56,8 @@ export interface ChannelSubscriptions {
 }
 export interface WaitForLogin extends SharedData {
   type: typeof WAIT_FOR_LOGIN;
+  address?: string;
+  privateKey?: string;
 }
 
 export interface MetaMaskError extends SharedData {
