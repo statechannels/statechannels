@@ -201,7 +201,10 @@ const waitForLoginReducer = (
 ): states.WalletState => {
   switch (action.type) {
     case 'WALLET.LOGGED_IN':
-      const { privateKey, address } = ethers.Wallet.createRandom();
+      let { address, privateKey } = state;
+      if (!address || !privateKey) {
+        ({ privateKey, address } = ethers.Wallet.createRandom());
+      }
       return states.initialized({
         ...state,
         uid: action.uid,
