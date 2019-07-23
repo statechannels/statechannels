@@ -36,7 +36,7 @@ export const initialize = (
     }
     const proposedAllocation = getLastCommitment(channel).allocation;
     const proposedDestination = getLastCommitment(channel).destination;
-    const indirectDefundingState = indirectDefundingInitialize(
+    const indirectDefundingState = indirectDefundingInitialize({
       processId,
       channelId,
       ledgerId,
@@ -44,7 +44,7 @@ export const initialize = (
       proposedDestination,
       sharedData,
       action,
-    );
+    });
 
     const protocolState = states.waitForLedgerDefunding({
       processId,

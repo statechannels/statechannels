@@ -25,11 +25,10 @@ type ReturnVal = ProtocolStateWithSharedData<states.AdvanceChannelState>;
 type Storage = SharedData;
 
 export function initialize(
-  processId: string,
   sharedData: Storage,
-  commitmentType: CommitmentType,
   args: OngoingChannelArgs | NewChannelArgs,
 ): ReturnVal {
+  const { commitmentType, processId } = args;
   if (commitmentType === CommitmentType.PreFundSetup) {
     if (!isNewChannelArgs(args)) {
       throw new Error('Must receive NewChannelArgs');

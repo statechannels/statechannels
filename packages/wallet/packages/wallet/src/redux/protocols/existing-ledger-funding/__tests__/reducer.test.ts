@@ -8,28 +8,9 @@ describe('player A happy path', () => {
   const scenario = scenarios.playerAFullyFundedHappyPath;
 
   describe('when initializing', () => {
-    const {
-      processId,
-      channelId,
-      ledgerId,
-      targetAllocation,
-      targetDestination,
-      protocolLocator,
-      sharedData,
-      reply,
-    } = scenario.initialize;
-
-    const result = initialize(
-      processId,
-      channelId,
-      ledgerId,
-      targetAllocation,
-      targetDestination,
-      protocolLocator,
-      sharedData,
-    );
+    const result = initialize(scenario.initialize);
     itTransitionsTo(result, 'ExistingLedgerFunding.WaitForLedgerUpdate');
-    itSendsTheseCommitments(result, reply);
+    itSendsTheseCommitments(result, scenario.initialize.reply);
   });
 
   describeScenarioStep(scenario.waitForLedgerUpdate, () => {
@@ -43,25 +24,7 @@ describe('player B happy path', () => {
   const scenario = scenarios.playerBFullyFundedHappyPath;
 
   describe('when initializing', () => {
-    const {
-      processId,
-      channelId,
-      ledgerId,
-      targetAllocation,
-      targetDestination,
-      protocolLocator,
-      sharedData,
-    } = scenario.initialize;
-
-    const result = initialize(
-      processId,
-      channelId,
-      ledgerId,
-      targetAllocation,
-      targetDestination,
-      protocolLocator,
-      sharedData,
-    );
+    const result = initialize(scenario.initialize);
     itTransitionsTo(result, 'ExistingLedgerFunding.WaitForLedgerUpdate');
   });
 
@@ -85,25 +48,7 @@ describe('player A invalid ledger commitment', () => {
 describe('player A top up needed', () => {
   const scenario = scenarios.playerATopUpNeeded;
   describe('when initializing', () => {
-    const {
-      processId,
-      channelId,
-      ledgerId,
-      targetAllocation,
-      targetDestination,
-      protocolLocator,
-      sharedData,
-    } = scenario.initialize;
-
-    const result = initialize(
-      processId,
-      channelId,
-      ledgerId,
-      targetAllocation,
-      targetDestination,
-      protocolLocator,
-      sharedData,
-    );
+    const result = initialize(scenario.initialize);
     itTransitionsTo(result, 'ExistingLedgerFunding.WaitForLedgerTopUp');
   });
 });
@@ -120,25 +65,7 @@ describe('player B invalid ledger update commitment', () => {
 describe('player B top up needed', () => {
   const scenario = scenarios.playerATopUpNeeded;
   describe('when initializing', () => {
-    const {
-      processId,
-      channelId,
-      ledgerId,
-      targetAllocation,
-      targetDestination,
-      protocolLocator,
-      sharedData,
-    } = scenario.initialize;
-
-    const result = initialize(
-      processId,
-      channelId,
-      ledgerId,
-      targetAllocation,
-      targetDestination,
-      protocolLocator,
-      sharedData,
-    );
+    const result = initialize(scenario.initialize);
     itTransitionsTo(result, 'ExistingLedgerFunding.WaitForLedgerTopUp');
   });
 });

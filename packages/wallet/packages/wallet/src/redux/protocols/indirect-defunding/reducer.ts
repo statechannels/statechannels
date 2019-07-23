@@ -17,15 +17,23 @@ import { CommitmentReceived } from '../../actions';
 import { messageRelayRequested } from 'magmo-wallet-client';
 import { defundRequested } from '../actions';
 
-export const initialize = (
-  processId: string,
-  channelId: string,
-  ledgerId: string,
-  proposedAllocation: string[],
-  proposedDestination: string[],
-  sharedData: SharedData,
-  action?: CommitmentReceived,
-): ProtocolStateWithSharedData<states.IndirectDefundingState> => {
+export const initialize = ({
+  processId,
+  channelId,
+  ledgerId,
+  proposedAllocation,
+  proposedDestination,
+  sharedData,
+  action,
+}: {
+  processId: string;
+  channelId: string;
+  ledgerId: string;
+  proposedAllocation: string[];
+  proposedDestination: string[];
+  sharedData: SharedData;
+  action?: CommitmentReceived;
+}): ProtocolStateWithSharedData<states.IndirectDefundingState> => {
   if (!helpers.channelIsClosed(channelId, sharedData)) {
     return {
       protocolState: states.failure({ reason: 'Channel Not Closed' }),

@@ -51,15 +51,10 @@ export function initialize(
 
   const jointAllocation = [...startingAllocation, startingAllocation.reduce(addHex)];
   const jointDestination = [...startingDestination, hubAddress];
-  const jointChannelInitialized = advanceChannel.initializeAdvanceChannel(
-    processId,
-    sharedData,
-    CommitmentType.PreFundSetup,
-    {
-      ...initializationArgs,
-      ...channelSpecificArgs(jointAllocation, jointDestination),
-    },
-  );
+  const jointChannelInitialized = advanceChannel.initializeAdvanceChannel(sharedData, {
+    ...initializationArgs,
+    ...channelSpecificArgs(jointAllocation, jointDestination),
+  });
 
   return {
     protocolState: states.waitForJointChannel({
@@ -112,19 +107,14 @@ function waitForJointChannelReducer(
       const { channelId: jointChannelId } = result.protocolState;
       switch (result.protocolState.commitmentType) {
         case CommitmentType.PreFundSetup:
-          const jointChannelResult = advanceChannel.initializeAdvanceChannel(
+          const jointChannelResult = advanceChannel.initializeAdvanceChannel(result.sharedData, {
+            clearedToSend: true,
+            commitmentType: CommitmentType.PostFundSetup,
             processId,
-            result.sharedData,
-            CommitmentType.PostFundSetup,
-            {
-              clearedToSend: true,
-              commitmentType: CommitmentType.PostFundSetup,
-              processId,
-              protocolLocator: ADVANCE_CHANNEL_PROTOCOL_LOCATOR,
-              channelId: jointChannelId,
-              ourIndex,
-            },
-          );
+            protocolLocator: ADVANCE_CHANNEL_PROTOCOL_LOCATOR,
+            channelId: jointChannelId,
+            ourIndex,
+          });
 
           return {
             protocolState: {
@@ -140,9 +130,7 @@ function waitForJointChannelReducer(
           const channelType = CONSENSUS_LIBRARY_ADDRESS;
           const destination = [targetChannelId, ourAddress, hubAddress];
           const guarantorChannelResult = advanceChannel.initializeAdvanceChannel(
-            processId,
             result.sharedData,
-            CommitmentType.PreFundSetup,
             {
               clearedToSend: true,
               commitmentType: CommitmentType.PreFundSetup,
@@ -199,9 +187,7 @@ function waitForGuarantorChannelReducer(
       switch (result.protocolState.commitmentType) {
         case CommitmentType.PreFundSetup:
           const guarantorChannelResult = advanceChannel.initializeAdvanceChannel(
-            processId,
             result.sharedData,
-            CommitmentType.PostFundSetup,
             {
               clearedToSend: true,
               commitmentType: CommitmentType.PostFundSetup,
@@ -221,14 +207,17 @@ function waitForGuarantorChannelReducer(
 
         case CommitmentType.PostFundSetup:
           const latestCommitment = getLatestCommitment(guarantorChannelId, sharedData);
-          const indirectFundingResult = indirectFunding.initializeIndirectFunding(
+          const indirectFundingResult = indirectFunding.initializeIndirectFunding({
             processId,
-            result.protocolState.channelId,
-            latestCommitment.allocation,
-            latestCommitment.destination,
-            result.sharedData,
-            makeLocator(protocolState.protocolLocator, EmbeddedProtocol.IndirectFunding),
-          );
+            channelId: result.protocolState.channelId,
+            targetAllocation: latestCommitment.allocation,
+            targetDestination: latestCommitment.destination,
+            sharedData: result.sharedData,
+            protocolLocator: makeLocator(
+              protocolState.protocolLocator,
+              EmbeddedProtocol.IndirectFunding,
+            ),
+          });
           switch (indirectFundingResult.protocolState.type) {
             case 'IndirectFunding.Failure':
               return {

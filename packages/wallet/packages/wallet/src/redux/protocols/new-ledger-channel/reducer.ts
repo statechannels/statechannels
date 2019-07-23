@@ -54,15 +54,10 @@ export function initialize(
     participants: channel.participants,
   };
 
-  const advanceChannelResult = initializeAdvanceChannel(
-    processId,
-    sharedData,
-    CommitmentType.PreFundSetup,
-    {
-      ...initializationArgs,
-      ...channelSpecificArgs(allocation, destination),
-    },
-  );
+  const advanceChannelResult = initializeAdvanceChannel(sharedData, {
+    ...initializationArgs,
+    ...channelSpecificArgs(allocation, destination),
+  });
   sharedData = advanceChannelResult.sharedData;
 
   const protocolState = states.waitForPreFundSetup({
@@ -181,22 +176,17 @@ function handleWaitForPreFundSetup(
       const directFundingState = initializeDirectFunding(directFundingAction, sharedData);
       sharedData = directFundingState.sharedData;
 
-      const advanceChannelResult = initializeAdvanceChannel(
-        protocolState.processId,
-        directFundingState.sharedData,
-        CommitmentType.PostFundSetup,
-        {
-          channelId: ledgerId,
-          ourIndex,
-          processId: protocolState.processId,
-          commitmentType: CommitmentType.PostFundSetup,
-          clearedToSend: false,
-          protocolLocator: makeLocator(
-            protocolState.protocolLocator,
-            ADVANCE_CHANNEL_PROTOCOL_LOCATOR,
-          ),
-        },
-      );
+      const advanceChannelResult = initializeAdvanceChannel(directFundingState.sharedData, {
+        channelId: ledgerId,
+        ourIndex,
+        processId: protocolState.processId,
+        commitmentType: CommitmentType.PostFundSetup,
+        clearedToSend: false,
+        protocolLocator: makeLocator(
+          protocolState.protocolLocator,
+          ADVANCE_CHANNEL_PROTOCOL_LOCATOR,
+        ),
+      });
       sharedData = advanceChannelResult.sharedData;
       const newProtocolState = states.waitForDirectFunding({
         ...protocolState,
