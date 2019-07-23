@@ -199,27 +199,29 @@ function fundWithExistingLedgerChannel({
     sharedData,
   );
 
-  if (existingLedgerFundingState.type === 'ExistingLedgerFunding.Failure') {
-    return {
-      protocolState: states.failure({
-        reason: 'ExistingLedgerFunding Failure',
-      }),
-      sharedData: newSharedData,
-    };
+  switch (existingLedgerFundingState.type) {
+    case 'ExistingLedgerFunding.Failure':
+      return {
+        protocolState: states.failure(existingLedgerFundingState),
+        sharedData: newSharedData,
+      };
+    case 'ExistingLedgerFunding.WaitForLedgerTopUp':
+    case 'ExistingLedgerFunding.WaitForLedgerUpdate':
+      return {
+        protocolState: states.waitForExistingLedgerFunding({
+          processId,
+          channelId,
+          ledgerId,
+          existingLedgerFundingState,
+          targetAllocation,
+          targetDestination,
+          protocolLocator,
+        }),
+        sharedData: newSharedData,
+      };
+    default:
+      return unreachable(existingLedgerFundingState);
   }
-
-  return {
-    protocolState: states.waitForExistingLedgerFunding({
-      processId,
-      channelId,
-      ledgerId,
-      existingLedgerFundingState,
-      targetAllocation,
-      targetDestination,
-      protocolLocator,
-    }),
-    sharedData: newSharedData,
-  };
 }
 
 function ledgerChannelIsReady(

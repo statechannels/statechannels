@@ -32,12 +32,10 @@ class FundingContainer extends PureComponent<Props> {
         return (
           <ApproveX
             title="Funding channel"
-            description="Do you want to fund this state channel with a re-usable ledger channel?"
+            description="Do you want to fund this state channel with a virtual channel?"
             yesMessage="Fund Channel"
             noMessage="Cancel"
-            approvalAction={() =>
-              strategyChosen({ processId, strategy: 'IndirectFundingStrategy' })
-            }
+            approvalAction={() => strategyChosen({ processId, strategy: 'VirtualFundingStrategy' })}
             rejectionAction={() => cancelled({ processId, by: TwoPartyPlayerIndex.B })}
           >
             <React.Fragment>
@@ -65,8 +63,10 @@ class FundingContainer extends PureComponent<Props> {
             channelId={state.targetChannelId}
           />
         );
-      case 'Funding.PlayerA.WaitForFunding':
+      case 'Funding.PlayerA.WaitForIndirectFunding':
         return <IndirectFunding state={state.fundingState} />;
+      case 'Funding.PlayerA.WaitForVirtualFunding':
+        throw new Error('Unimplemented');
       case 'Funding.PlayerA.WaitForSuccessConfirmation':
         return (
           <AcknowledgeX

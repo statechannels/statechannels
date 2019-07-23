@@ -39,14 +39,14 @@ export async function handleOngoingProcessAction(ctx) {
 }
 
 async function handleStrategyProposed(ctx, action: StrategyProposed) {
-  const { processId } = action;
+  const { processId, strategy } = action;
   const process = await getProcess(processId);
   if (!process) {
     throw errors.processMissing(processId);
   }
 
   const { theirAddress } = process;
-  ctx.body = communication.sendStrategyApproved(theirAddress, processId);
+  ctx.body = communication.sendStrategyApproved(theirAddress, processId, strategy);
   ctx.status = 200;
 
   return ctx;

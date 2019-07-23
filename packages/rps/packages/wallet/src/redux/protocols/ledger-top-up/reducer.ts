@@ -18,11 +18,11 @@ import {
 } from '../consensus-update';
 import { bigNumberify } from 'ethers/utils';
 import { PlayerIndex } from 'magmo-wallet-client/lib/wallet-instructions';
-import { ProtocolLocator, EmbeddedProtocol } from '../../../communication';
+import { ProtocolLocator } from '../../../communication';
 import { CONSENSUS_UPDATE_PROTOCOL_LOCATOR } from '../consensus-update/reducer';
 import { DirectFundingState } from '../direct-funding/states';
 import { clearedToSend } from '../consensus-update/actions';
-export const LEDGER_TOP_UP_PROTOCOL_LOCATOR = makeLocator(EmbeddedProtocol.LedgerTopUp);
+export { LEDGER_TOP_UP_PROTOCOL_LOCATOR } from '../../../communication/protocol-locator';
 export function initialize(
   processId: string,
   channelId: string,

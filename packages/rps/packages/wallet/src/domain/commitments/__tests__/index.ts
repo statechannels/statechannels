@@ -4,6 +4,7 @@ import { channelID } from 'fmg-core/lib/channel';
 import { CONSENSUS_LIBRARY_ADDRESS } from '../../../constants';
 import { bytesFromAppAttributes } from 'fmg-nitro-adjudicator/lib/consensus-app';
 import { ThreePartyPlayerIndex, TwoPartyPlayerIndex } from '../../../redux/types';
+import { unreachable } from '../../../utils/reducer-utils';
 
 export const asPrivateKey = '0xf2f48ee19680706196e2e339e5da3491186e0c4c5030670656b0e0164837257d';
 export const asAddress = '0x5409ED021D9299bf6814279A6A1411A7e866A631';
@@ -167,13 +168,16 @@ export function threeWayLedgerCommitment(params: ThreeWayLedgerCommitmentParams)
     destination,
   };
 
-  switch (turnNum % 3) {
+  const idx: ThreePartyPlayerIndex = turnNum % 3;
+  switch (idx) {
     case ThreePartyPlayerIndex.A:
       return signCommitment2(commitment, asPrivateKey);
     case ThreePartyPlayerIndex.B:
       return signCommitment2(commitment, bsPrivateKey);
-    default:
+    case ThreePartyPlayerIndex.Hub:
       return signCommitment2(commitment, hubPrivateKey);
+    default:
+      return unreachable(idx);
   }
 }
 
