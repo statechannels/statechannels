@@ -1,0 +1,8 @@
+{
+  "docs": {
+    "Nitro specification": ["introduction", "commitment-format", "transition-rules", "challenge-and-response", "redistribution-of-assets", "value-calculations", "auxiliary-protocols"]
+  },
+  "docs-other": {
+    "First Category": ["doc4", "doc5"]
+  }
+}
