@@ -36,7 +36,7 @@
     "dotenv-expand": "^4.2.0",
     "firebase": "^6.2.3",
     "fmg-core": "0.5.9",
-    "fmg-nitro-adjudicator": "0.1.4",
+    "fmg-nitro-adjudicator": "0.1.5",
     "knex": "^0.13.0",
     "koa": "^2.7.0",
     "koa-body": "^4.0.8",
