@@ -60,7 +60,6 @@ class HomeSplash extends React.Component {
 
     return (
       <SplashContainer>
-        <Logo img_src={`${baseUrl}img/undraw_goals_w8tw.svg`} />
         <div className="inner">
           <ProjectTitle siteConfig={siteConfig} />
           <PromoSection>
@@ -96,11 +95,14 @@ class Index extends React.Component {
       <Block id="try">
         {[
           {
-            content: 'To make your landing page more attractive, use illustrations! Check out ' + '[**unDraw**](https://undraw.co/) which provides you with customizable illustrations which are free to use. ' + 'The illustrations you see on this page are from unDraw.',
+            content:
+              'To make your landing page more attractive, use illustrations! Check out ' +
+              '[**unDraw**](https://undraw.co/) which provides you with customizable illustrations which are free to use. ' +
+              'The illustrations you see on this page are from unDraw.',
             image: `${baseUrl}img/undraw_code_review.svg`,
             imageAlign: 'left',
-            title: 'Wonderful SVG Illustrations'
-          }
+            title: 'Wonderful SVG Illustrations',
+          },
         ]}
       </Block>
     );
@@ -112,8 +114,8 @@ class Index extends React.Component {
             content: 'This is another description of how this project is useful',
             image: `${baseUrl}img/undraw_note_list.svg`,
             imageAlign: 'right',
-            title: 'Description'
-          }
+            title: 'Description',
+          },
         ]}
       </Block>
     );
@@ -125,8 +127,8 @@ class Index extends React.Component {
             content: 'Each new Docusaurus project has **randomly-generated** theme colors.',
             image: `${baseUrl}img/undraw_youtube_tutorial.svg`,
             imageAlign: 'right',
-            title: 'Randomly Generated Theme Colors'
-          }
+            title: 'Randomly Generated Theme Colors',
+          },
         ]}
       </Block>
     );
@@ -138,14 +140,14 @@ class Index extends React.Component {
             content: 'This is the content of my feature',
             image: `${baseUrl}img/undraw_react.svg`,
             imageAlign: 'top',
-            title: 'Feature One'
+            title: 'Feature One',
           },
           {
             content: 'The content of my second feature',
             image: `${baseUrl}img/undraw_operating_system.svg`,
             imageAlign: 'top',
-            title: 'Feature Two'
-          }
+            title: 'Feature Two',
+          },
         ]}
       </Block>
     );
@@ -183,12 +185,12 @@ class Index extends React.Component {
       <div>
         <HomeSplash siteConfig={siteConfig} language={language} />
         <div className="mainContainer">
-          <Features />
-          <FeatureCallout />
-          <LearnHow />
-          <TryOut />
-          <Description />
-          <Showcase />
+          {/* <Features /> */}
+          {/* <FeatureCallout /> */}
+          {/* <LearnHow /> */}
+          {/* <TryOut /> */}
+          {/* <Description /> */}
+          {/* <Showcase /> */}
         </div>
       </div>
     );
