@@ -1,7 +1,8 @@
 import * as firebase from 'firebase';
 
-import * as fetch from 'node-fetch';
 import '../../config/env';
+import { handleAppMessage } from '../app/handlers/handle-app-message';
+import { handleWalletMessage } from '../app/handlers/handle-wallet-message';
 import { HUB_ADDRESS } from '../constants';
 
 const config = {
@@ -27,31 +28,29 @@ function getMessagesRef() {
   return firebaseAppInsance.database().ref('messages');
 }
 
-async function postToHub(data = {}) {
-  const response = await fetch(`${process.env.SERVER_URL}/api/v1/channels`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(data),
-  });
-  return await response.json(); // parses response to JSON
-}
-
 function listenToFirebase() {
   const hubRef = getMessagesRef().child(HUB_ADDRESS.toLowerCase());
 
-  hubRef.on('child_added', snapshot => {
+  hubRef.on('child_added', async snapshot => {
     const key = snapshot.key;
     const value = snapshot.val();
     const queue = value.queue;
     if (queue === 'GAME_ENGINE') {
-      postToHub(value);
+      const outgoingMessage = await handleAppMessage(value);
+      if (outgoingMessage) {
+        // We assume we are always player B
+        const to = outgoingMessage.commitment.channel.participants[0];
+        sendToFirebase(to, outgoingMessage);
+      }
     } else if (queue === 'WALLET') {
-      postToHub({ ...value.payload, queue: value.queue });
+      const outgoingMessage = await handleWalletMessage({ ...value.payload });
+      if (outgoingMessage) {
+        sendToFirebase(outgoingMessage.to, outgoingMessage);
+      }
     } else {
       throw new Error('Unknown queue');
     }
+
     hubRef.child(key).remove();
   });
 }
