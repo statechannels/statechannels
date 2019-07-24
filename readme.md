@@ -1,3 +1,7 @@
+<h1 align="center">
+<div><img src="website/static/img/favicon.ico"> </div>
+Nitro Protocol
+</h1>
 This repository contains the smart contracts that define a state channel framework capable of running 3rd-party
 'applications' that conform to a simple state-machine interface, and allow for large-scale state-channel networks. There is also a documentation website and helper functions written in TypeScript.
 
@@ -29,3 +33,11 @@ To get started:
 1. Download the repo and `cd` into the directory.
 2. Run `yarn install`.
 3. Run `yarn test`.
+
+## Documentation website
+
+1. Run `cd website`
+2. Run `yarn install`
+3. Run `yarn start`
+
+See https://docusaurus.io/docs/en/installation for more information.
