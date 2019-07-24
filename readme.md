@@ -31,8 +31,19 @@ We use [truffle](http://truffleframework.com/) for smart contract development.
 To get started:
 
 1. Download the repo and `cd` into the directory.
-2. Run `yarn install`.
-3. Run `yarn test`.
+2. Make a `.env` file from the `.env.example`, like this:
+
+```
+DEFAULT_GAS=6721975
+DEFAULT_GAS_PRICE=20000000000
+DEV_GANACHE_HOST=127.0.0.1
+DEV_GANACHE_PORT=8545
+ENABLE_SOLC_OPTIMIZER=TRUE
+SOLC_VERSION=0.5.2
+```
+
+3. Run `yarn install`.
+4. Run `yarn test`.
 
 ## Documentation website
 

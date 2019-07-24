@@ -27,7 +27,7 @@
     "test": "yarn prettier:check && yarn clearContracts && npx ganache-then-jest",
     "deploy": "yarn clearContracts && npx truffle migrate",
     "build:typescript": "tslint --project . && tsc",
-    "build:truffle": "npx truffle build",
+    "build:truffle": "npx truffle compile",
     "clearContracts": "rm -rf build/contracts",
     "clearLib": "rm -rf lib",
     "build": "run-s clearContracts clearLib build:truffle build:typescript",
