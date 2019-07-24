@@ -1,9 +1,15 @@
 import * as firebase from 'firebase';
 
+import { Model } from 'objection';
 import '../../config/env';
 import { handleAppMessage } from '../app/handlers/handle-app-message';
 import { handleWalletMessage } from '../app/handlers/handle-wallet-message';
 import { HUB_ADDRESS } from '../constants';
+import knex from '../wallet/db/connection';
+
+// TODO: Currently the firebaseRelay is all that is needed to respond to the app
+// If the REST endpoint is not being used it should probably be removed
+Model.knex(knex);
 
 const config = {
   apiKey: process.env.FIREBASE_API_KEY,
