@@ -10,7 +10,6 @@ import { TwoPartyPlayerIndex } from '../../../types';
 import WaitForOtherPlayer from '../../shared-components/wait-for-other-player';
 import { ActionDispatcher } from '../../../utils';
 import ApproveX from '../../shared-components/approve-x';
-
 interface Props {
   state: states.OngoingFundingStrategyNegotiationState;
   strategyChosen: ActionDispatcher<actions.StrategyChosen>;
@@ -60,7 +59,6 @@ class FundingStrategyNegotiationContainer extends PureComponent<Props> {
             channelId={state.targetChannelId}
           />
         );
-
       default:
         return unreachable(state);
     }
