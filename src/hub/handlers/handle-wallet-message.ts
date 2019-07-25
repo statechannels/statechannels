@@ -28,8 +28,14 @@ export async function handleWalletMessage(
 }
 // TODO: We should define types for NewProcessAction and ProtocolAction
 
-function isNewProcessAction(action: RelayableAction): action is ConcludeInstigated {
-  return action.type === 'WALLET.NEW_PROCESS.CONCLUDE_INSTIGATED';
+function isNewProcessAction(
+  action: RelayableAction,
+): action is ConcludeInstigated | CommitmentsReceived {
+  return (
+    action.type === 'WALLET.NEW_PROCESS.CONCLUDE_INSTIGATED' ||
+    (action.type === 'WALLET.COMMON.COMMITMENTS_RECEIVED' &&
+      action.signedCommitments.some(s => s.commitment.turnNum === 0))
+  );
 }
 
 function isProtocolAction(
