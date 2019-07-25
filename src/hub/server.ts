@@ -22,11 +22,17 @@ const firebaseRelay = fork(`${__dirname}/../message/firebase-relay`, [], {
 });
 firebaseRelay.on('message', (message: RelayableAction) => {
   console.log(`Parent process received message from firebase": ${JSON.stringify(message)}`);
-  const outgoingMessage = handleWalletMessage(message);
-  if (outgoingMessage) {
-    console.log(`Parent process sending message to firebase${JSON.stringify(outgoingMessage)}`);
-    firebaseRelay.send(outgoingMessage);
-  }
+
+  handleWalletMessage(message)
+    .then(outgoingMessage => {
+      if (outgoingMessage) {
+        console.log(
+          `Parent process sending message to firebase: ${JSON.stringify(outgoingMessage)}`,
+        );
+        firebaseRelay.send(outgoingMessage);
+      }
+    })
+    .catch(reason => console.error(reason));
 });
 console.log('Firebase relay sub-process started');
 
