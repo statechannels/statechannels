@@ -54,19 +54,6 @@
       "env": {
         "NODE_ENV": "development"
       }
-    },
-    {
-      "type": "node",
-      "request": "launch",
-      "name": "Launch Message Relay",
-      "cwd": "${workspaceRoot}",
-      "protocol": "inspector",
-      "internalConsoleOptions": "neverOpen",
-      "runtimeArgs": ["-r", "ts-node/register"],
-      "args": ["${workspaceFolder}/src/message/firebase-relay.ts"],
-      "env": {
-        "NODE_ENV": "development"
-      }
     }
   ]
 }
