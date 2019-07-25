@@ -50,10 +50,11 @@
       "protocol": "inspector",
       "internalConsoleOptions": "neverOpen",
       "runtimeArgs": ["-r", "ts-node/register"],
-      "args": ["${workspaceFolder}/src/app/server.ts"],
+      "args": ["${workspaceFolder}/src/hub/server.ts"],
       "env": {
         "NODE_ENV": "development"
-      }
+      },
+      "skipFiles": ["<node_internals>/**/*.js"]
     }
   ]
 }
