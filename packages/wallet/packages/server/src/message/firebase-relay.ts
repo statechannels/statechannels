@@ -1,6 +1,6 @@
 import * as firebase from 'firebase';
 
-import * as fetch from 'node-fetch';
+import { MessageRelayRequested } from 'magmo-wallet-client';
 import '../../config/env';
 import { HUB_ADDRESS } from '../constants';
 
@@ -27,43 +27,37 @@ function getMessagesRef() {
   return firebaseAppInsance.database().ref('messages');
 }
 
-async function postToHub(data = {}) {
-  const response = await fetch(`${process.env.SERVER_URL}/api/v1/channels`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(data),
-  });
-  return await response.json(); // parses response to JSON
-}
-
-function listenToFirebase() {
+export async function listen() {
   const hubRef = getMessagesRef().child(HUB_ADDRESS.toLowerCase());
 
-  hubRef.on('child_added', snapshot => {
+  hubRef.on('child_added', async snapshot => {
     const key = snapshot.key;
     const value = snapshot.val();
     const queue = value.queue;
     if (queue === 'GAME_ENGINE') {
-      postToHub(value);
+      throw new Error(
+        `The hub does not support handling application commitments. Received ${JSON.stringify(
+          value,
+        )}`,
+      );
     } else if (queue === 'WALLET') {
-      postToHub({ ...value.payload, queue: value.queue });
+      process.send({ ...value.payload });
     } else {
       throw new Error('Unknown queue');
     }
+
     hubRef.child(key).remove();
   });
 }
 
-export function sendToFirebase(destination, payload) {
-  const sanitizedPayload = JSON.parse(JSON.stringify(payload));
+export function send(message: MessageRelayRequested) {
+  const sanitizedPayload = JSON.parse(JSON.stringify(message.messagePayload));
   getMessagesRef()
-    .child(destination.toLowerCase())
+    .child(message.to.toLowerCase())
     .push(sanitizedPayload);
 }
 
 if (require.main === module) {
   console.log('Listening to firebase for hub messages');
-  listenToFirebase();
+  listen();
 }

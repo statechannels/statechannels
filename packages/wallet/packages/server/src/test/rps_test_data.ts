@@ -17,7 +17,7 @@ import {
   RPSCommitment,
   sanitize,
   Weapon,
-} from '../app/services/rps-commitment';
+} from '../hub/services/rps-commitment';
 import {
   allocation as constAllocation,
   BEGINNING_RPS_APP_CHANNEL_NONCE,
