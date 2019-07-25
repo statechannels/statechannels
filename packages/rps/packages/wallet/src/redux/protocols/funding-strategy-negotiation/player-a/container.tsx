@@ -32,7 +32,7 @@ class FundingStrategyNegotiationContainer extends PureComponent<Props> {
             yesMessage="Fund Channel"
             noMessage="Cancel"
             approvalAction={() => strategyChosen({ processId, strategy: 'VirtualFundingStrategy' })}
-            rejectionAction={() => cancelled({ processId, by: TwoPartyPlayerIndex.B })}
+            rejectionAction={() => cancelled({ processId, by: TwoPartyPlayerIndex.A })}
           >
             <React.Fragment>
               This site wants you to open a new state channel.
