@@ -1,5 +1,5 @@
 import * as supertest from 'supertest';
-import app from '../../app/app';
+import app from '../../hub/app';
 import {
   invalid_open_channel_params,
   open_channel_params,

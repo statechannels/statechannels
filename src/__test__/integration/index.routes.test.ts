@@ -1,5 +1,5 @@
 import * as request from 'supertest';
-import app from '../../app/app';
+import app from '../../hub/app';
 
 describe('routes: index', () => {
   test('should respond as expected', async () => {

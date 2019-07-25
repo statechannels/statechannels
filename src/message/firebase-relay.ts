@@ -2,9 +2,9 @@ import * as firebase from 'firebase';
 
 import { Model } from 'objection';
 import '../../config/env';
-import { handleAppMessage } from '../app/handlers/handle-app-message';
-import { handleWalletMessage } from '../app/handlers/handle-wallet-message';
 import { HUB_ADDRESS } from '../constants';
+import { handleAppMessage } from '../hub/handlers/handle-app-message';
+import { handleWalletMessage } from '../hub/handlers/handle-wallet-message';
 import knex from '../wallet/db/connection';
 
 // TODO: Currently the firebaseRelay is all that is needed to respond to the app

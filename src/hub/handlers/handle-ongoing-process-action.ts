@@ -16,7 +16,7 @@ import { getProcess } from '../../wallet/db/queries/walletProcess';
 import { SignedCommitment, updateLedgerChannel } from '../../wallet/services';
 import { asConsensusCommitment } from '../../wallet/services/ledger-commitment';
 
-import { MessageRelayRequested } from '../../../../magmo-wallet-client/lib';
+import { MessageRelayRequested } from 'magmo-wallet-client';
 import { HUB_ADDRESS } from '../../constants';
 import { updateRPSChannel } from '../services/rpsChannelManager';
 

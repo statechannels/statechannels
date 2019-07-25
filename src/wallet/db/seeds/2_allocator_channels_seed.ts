@@ -1,12 +1,12 @@
 import { CommitmentType, toUint256 } from 'fmg-core';
 import { Model } from 'objection';
+import { HUB_ADDRESS } from '../../../constants';
 import {
   PositionType,
   RPSAppAttributes,
   Weapon,
   zeroBytes32,
-} from '../../../app/services/rps-commitment';
-import { HUB_ADDRESS } from '../../../constants';
+} from '../../../hub/services/rps-commitment';
 import {
   allocation,
   BEGINNING_APP_CHANNEL_HOLDINGS,

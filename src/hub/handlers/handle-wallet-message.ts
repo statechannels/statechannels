@@ -1,5 +1,5 @@
 import { RelayableAction } from 'magmo-wallet/lib/src/communication';
-import { MessageRelayRequested } from '../../../../magmo-wallet-client/lib';
+import { MessageRelayRequested } from 'magmo-wallet-client';
 import { getProcess } from '../../wallet/db/queries/walletProcess';
 import { handleNewProcessAction } from './handle-new-process-action';
 import { handleOngoingProcessAction } from './handle-ongoing-process-action';
