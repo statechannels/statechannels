@@ -138,8 +138,7 @@ async function handleCommitmentsReceived(action: CommitmentsReceived) {
       ledgerCommitmentRound,
       currentCommitment && asConsensusCommitment(currentCommitment),
     );
-    return;
-    communication.sendCommitmentsReceived(
+    return communication.sendCommitmentsReceived(
       nextParticipant,
       processId,
       [...incomingCommitments, { commitment, signature: (signature as unknown) as string }],
