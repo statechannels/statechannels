@@ -37,7 +37,7 @@ class FundingStrategyNegotiationContainer extends PureComponent<Props> {
             yesMessage="Fund Channel"
             noMessage="Cancel"
             approvalAction={() =>
-              strategyApproved({ processId, strategy: 'IndirectFundingStrategy' })
+              strategyApproved({ processId, strategy: 'VirtualFundingStrategy' })
             }
             rejectionAction={() => cancelled({ processId, by: TwoPartyPlayerIndex.B })}
           >
