@@ -5,7 +5,6 @@ import { SignedCommitment as ClientSignedCommitment, unreachable } from 'magmo-w
 import {
   CommitmentReceived,
   CommitmentsReceived,
-  RelayableAction,
   StrategyProposed,
 } from 'magmo-wallet/lib/src/communication';
 import * as communication from 'magmo-wallet/lib/src/communication';
@@ -21,14 +20,9 @@ import { HUB_ADDRESS } from '../../constants';
 import { updateRPSChannel } from '../services/rpsChannelManager';
 
 export async function handleOngoingProcessAction(
-  action: RelayableAction,
+  action: StrategyProposed | CommitmentReceived | CommitmentsReceived,
 ): Promise<MessageRelayRequested | undefined> {
   switch (action.type) {
-    case 'WALLET.NEW_PROCESS.CONCLUDE_INSTIGATED':
-    case 'WALLET.FUNDING_STRATEGY_NEGOTIATION.STRATEGY_APPROVED':
-    case 'WALLET.NEW_PROCESS.DEFUND_REQUESTED':
-    case 'WALLET.MULTIPLE_RELAYABLE_ACTIONS':
-      return undefined;
     case 'WALLET.COMMON.COMMITMENT_RECEIVED':
       return handleCommitmentReceived(action);
     case 'WALLET.COMMON.COMMITMENTS_RECEIVED':
