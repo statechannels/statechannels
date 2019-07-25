@@ -74,12 +74,14 @@ export async function validateTransition(
     return await contract.validTransition(
       asEthersObject(fromCommitment),
       asEthersObject(toCommitment),
+      [], // unused argument -- see nitro contract
     );
   } catch (error) {
     if (error.message === 'Internal JSON-RPC error.') {
       // Require statements cause a generic JSON-RPC error, so we just catch anything and return false
       return Promise.resolve(false);
+    } else {
+      throw error;
     }
   }
-  return Promise.resolve(true);
 }
