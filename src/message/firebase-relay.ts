@@ -1,15 +1,8 @@
 import * as firebase from 'firebase';
 
-import { Model } from 'objection';
+import { MessageRelayRequested } from 'magmo-wallet-client';
 import '../../config/env';
 import { HUB_ADDRESS } from '../constants';
-import { handleAppMessage } from '../hub/handlers/handle-app-message';
-import { handleWalletMessage } from '../hub/handlers/handle-wallet-message';
-import knex from '../wallet/db/connection';
-
-// TODO: Currently the firebaseRelay is all that is needed to respond to the app
-// If the REST endpoint is not being used it should probably be removed
-Model.knex(knex);
 
 const config = {
   apiKey: process.env.FIREBASE_API_KEY,
@@ -34,7 +27,7 @@ function getMessagesRef() {
   return firebaseAppInsance.database().ref('messages');
 }
 
-function listenToFirebase() {
+export async function listen() {
   const hubRef = getMessagesRef().child(HUB_ADDRESS.toLowerCase());
 
   hubRef.on('child_added', async snapshot => {
@@ -42,17 +35,13 @@ function listenToFirebase() {
     const value = snapshot.val();
     const queue = value.queue;
     if (queue === 'GAME_ENGINE') {
-      const outgoingMessage = await handleAppMessage(value);
-      if (outgoingMessage) {
-        // We assume we are always player B
-        const to = outgoingMessage.commitment.channel.participants[0];
-        sendToFirebase(to, outgoingMessage);
-      }
+      throw new Error(
+        `The hub does not support handling application commitments. Received ${JSON.stringify(
+          value,
+        )}`,
+      );
     } else if (queue === 'WALLET') {
-      const outgoingMessage = await handleWalletMessage({ ...value.payload });
-      if (outgoingMessage) {
-        sendToFirebase(outgoingMessage.to, outgoingMessage);
-      }
+      process.send({ ...value.payload });
     } else {
       throw new Error('Unknown queue');
     }
@@ -61,14 +50,14 @@ function listenToFirebase() {
   });
 }
 
-export function sendToFirebase(destination, payload) {
-  const sanitizedPayload = JSON.parse(JSON.stringify(payload));
+export function send(message: MessageRelayRequested) {
+  const sanitizedPayload = JSON.parse(JSON.stringify(message.messagePayload));
   getMessagesRef()
-    .child(destination.toLowerCase())
+    .child(message.to.toLowerCase())
     .push(sanitizedPayload);
 }
 
 if (require.main === module) {
   console.log('Listening to firebase for hub messages');
-  listenToFirebase();
+  listen();
 }

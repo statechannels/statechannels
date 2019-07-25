@@ -1,9 +1,9 @@
 import { ethers } from 'ethers';
 import { Signature } from 'fmg-core';
 import { unreachable } from 'magmo-wallet';
+import { MessageRelayRequested } from 'magmo-wallet-client';
 import * as communication from 'magmo-wallet/lib/src/communication';
 import { ConcludeInstigated, RelayableAction } from 'magmo-wallet/lib/src/communication';
-import { MessageRelayRequested } from 'magmo-wallet-client';
 import { startConcludeProcess } from '../../wallet/db/queries/walletProcess';
 import { updateRPSChannel } from '../services/rpsChannelManager';
 
