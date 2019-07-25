@@ -5,7 +5,6 @@ import { SignedCommitment as ClientSignedCommitment, unreachable } from 'magmo-w
 import {
   CommitmentReceived,
   CommitmentsReceived,
-  RelayableAction,
   StrategyProposed,
 } from 'magmo-wallet/lib/src/communication';
 import * as communication from 'magmo-wallet/lib/src/communication';
@@ -16,29 +15,26 @@ import { getProcess } from '../../wallet/db/queries/walletProcess';
 import { SignedCommitment, updateLedgerChannel } from '../../wallet/services';
 import { asConsensusCommitment } from '../../wallet/services/ledger-commitment';
 
+import { MessageRelayRequested } from 'magmo-wallet-client';
 import { HUB_ADDRESS } from '../../constants';
 import { updateRPSChannel } from '../services/rpsChannelManager';
 
-export async function handleOngoingProcessAction(ctx) {
-  const action: RelayableAction = ctx.request.body;
+export async function handleOngoingProcessAction(
+  action: StrategyProposed | CommitmentReceived | CommitmentsReceived,
+): Promise<MessageRelayRequested | undefined> {
   switch (action.type) {
-    case 'WALLET.NEW_PROCESS.CONCLUDE_INSTIGATED':
-    case 'WALLET.FUNDING_STRATEGY_NEGOTIATION.STRATEGY_APPROVED':
-    case 'WALLET.NEW_PROCESS.DEFUND_REQUESTED':
-    case 'WALLET.MULTIPLE_RELAYABLE_ACTIONS':
-      return ctx;
     case 'WALLET.COMMON.COMMITMENT_RECEIVED':
-      return handleCommitmentReceived(ctx, action);
+      return handleCommitmentReceived(action);
     case 'WALLET.COMMON.COMMITMENTS_RECEIVED':
-      return handleCommitmentsReceived({ ctx, action });
+      return handleCommitmentsReceived(action);
     case 'WALLET.FUNDING_STRATEGY_NEGOTIATION.STRATEGY_PROPOSED':
-      return handleStrategyProposed(ctx, action);
+      return handleStrategyProposed(action);
     default:
       return unreachable(action);
   }
 }
 
-async function handleStrategyProposed(ctx, action: StrategyProposed) {
+async function handleStrategyProposed(action: StrategyProposed) {
   const { processId, strategy } = action;
   const process = await getProcess(processId);
   if (!process) {
@@ -46,13 +42,10 @@ async function handleStrategyProposed(ctx, action: StrategyProposed) {
   }
 
   const { theirAddress } = process;
-  ctx.body = communication.sendStrategyApproved(theirAddress, processId, strategy);
-  ctx.status = 200;
-
-  return ctx;
+  return communication.sendStrategyApproved(theirAddress, processId, strategy);
 }
 
-async function handleCommitmentReceived(ctx, action: CommitmentReceived) {
+async function handleCommitmentReceived(action: CommitmentReceived) {
   {
     const { processId } = action;
     const walletProcess = await getProcess(processId);
@@ -71,13 +64,12 @@ async function handleCommitmentReceived(ctx, action: CommitmentReceived) {
         theirCommitment,
         splitSignature,
       );
-      ctx.body = communication.sendCommitmentReceived(
+      return communication.sendCommitmentReceived(
         theirAddress,
         processId,
         ourCommitment,
         (ourSignature as unknown) as string,
       );
-      return ctx;
     }
 
     const currentCommitment = await getCurrentCommitment(theirCommitment);
@@ -85,19 +77,16 @@ async function handleCommitmentReceived(ctx, action: CommitmentReceived) {
       [{ ledgerCommitment: asConsensusCommitment(theirCommitment), signature: splitSignature }],
       currentCommitment && asConsensusCommitment(currentCommitment),
     );
-    ctx.status = 201;
-    ctx.body = communication.sendCommitmentReceived(
+    return communication.sendCommitmentReceived(
       theirAddress,
       processId,
       commitment,
       (signature as unknown) as string,
     );
-
-    return ctx;
   }
 }
 
-async function handleCommitmentsReceived({ ctx, action }: { ctx; action: CommitmentsReceived }) {
+async function handleCommitmentsReceived(action: CommitmentsReceived) {
   {
     const { processId } = action;
     const walletProcess = await getProcess(processId);
@@ -126,13 +115,12 @@ async function handleCommitmentsReceived({ ctx, action }: { ctx; action: Commitm
         lastCommitment,
         lastCommitmentSignature,
       );
-      ctx.body = communication.sendCommitmentReceived(
+      return communication.sendCommitmentReceived(
         nextParticipant,
         processId,
         ourCommitment,
         (ourSignature as unknown) as string,
       );
-      return ctx;
     }
 
     const ledgerCommitmentRound = commitmentRound.map(signedCommitment => ({
@@ -144,16 +132,12 @@ async function handleCommitmentsReceived({ ctx, action }: { ctx; action: Commitm
       ledgerCommitmentRound,
       currentCommitment && asConsensusCommitment(currentCommitment),
     );
-    ctx.status = 201;
-
-    ctx.body = communication.sendCommitmentsReceived(
+    return communication.sendCommitmentsReceived(
       nextParticipant,
       processId,
       [...incomingCommitments, { commitment, signature: (signature as unknown) as string }],
       action.protocolLocator,
     );
-
-    return ctx;
   }
 }
 
