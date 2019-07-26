@@ -13,7 +13,7 @@ export async function getCurrentCommitment(theirCommitment: Commitment) {
     return;
   }
   const currentCommitment = await AllocatorChannelCommitment.query()
-    .where({ allocator_channel_id: allocatorChannel.id })
+    .where({ channel_id: allocatorChannel.id })
     .orderBy('turn_number', 'desc')
     .eager('[allocatorChannel.[participants],allocations]')
     .select()

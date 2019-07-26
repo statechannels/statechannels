@@ -11,7 +11,7 @@ export default class Allocation extends Model {
       modelClass: LedgerCommitment,
       join: {
         from: 'allocations.allocator_channel_commitment_id',
-        to: 'allocator_channel_commitments.id',
+        to: 'channel_commitments.id',
       },
     },
   };

@@ -4,7 +4,7 @@ import { AppAttrSanitizer } from '../../types';
 import Allocation from './allocation';
 import AllocatorChannel from './allocatorChannel';
 
-export default class AllocatorChannelCommitment extends Model {
+export default class ChannelCommitment extends Model {
   static tableName = 'channel_commitments';
 
   static relationMappings = {
@@ -21,7 +21,7 @@ export default class AllocatorChannelCommitment extends Model {
       modelClass: `${__dirname}/allocation`,
       join: {
         from: 'channel_commitments.id',
-        to: 'allocations.channel_commitment_id',
+        to: 'allocations.channel_id',
       },
     },
   };

@@ -134,17 +134,17 @@ export async function valuePreserved(theirCommitment: any): Promise<boolean> {
 export async function validTransition(theirCommitment: Commitment): Promise<boolean> {
   const { channel } = theirCommitment;
   const channel_id = channelID(channel);
-  const allocator_channel = await AllocatorChannel.query()
+  const allocatorChannel = await AllocatorChannel.query()
     .where({ channel_id })
     .select('id')
     .first();
 
-  if (!allocator_channel) {
+  if (!allocatorChannel) {
     throw errors.CHANNEL_MISSING;
   }
 
   const currentCommitment = await AllocatorChannelCommitment.query()
-    .where({ allocator_channel_id: allocator_channel.id })
+    .where({ channel_id: allocatorChannel.id })
     .orderBy('id', 'desc')
     .select()
     .first();

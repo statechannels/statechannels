@@ -26,14 +26,14 @@ describe('updateAllocatorChannel', () => {
       expect.assertions(5);
 
       expect(allocator_channel).toMatchObject(created_channel);
-      expect((await knex('allocator_channels').select('*')).length).toEqual(SEEDED_CHANNELS + 1);
-      expect((await knex('allocator_channel_commitments').select('*')).length).toEqual(
+      expect((await knex('channels').select('*')).length).toEqual(SEEDED_CHANNELS + 1);
+      expect((await knex('channel_commitments').select('*')).length).toEqual(
         SEEDED_COMMITMENTS + 2,
       );
 
       expect((await knex('allocations').select('*')).length).toEqual(SEEDED_ALLOCATIONS + 4);
 
-      expect((await knex('allocator_channel_participants').select('*')).length).toEqual(
+      expect((await knex('channel_participants').select('*')).length).toEqual(
         SEEDED_PARTICIPANTS + 2,
       );
     });
@@ -72,18 +72,16 @@ describe('updateAllocatorChannel', () => {
         ],
       });
 
-      expect((await knex('allocator_channels').select('*')).length).toEqual(SEEDED_CHANNELS);
+      expect((await knex('channels').select('*')).length).toEqual(SEEDED_CHANNELS);
       expect(
-        (await knex('allocator_channel_commitments')
-          .where({ allocator_channel_id: updated_allocator_channel.id })
+        (await knex('channel_commitments')
+          .where({ channel_id: updated_allocator_channel.id })
           .select('*')).length,
       ).toEqual(2);
 
       expect((await knex('allocations').select('*')).length).toEqual(SEEDED_ALLOCATIONS);
 
-      expect((await knex('allocator_channel_participants').select('*')).length).toEqual(
-        SEEDED_PARTICIPANTS,
-      );
+      expect((await knex('channel_participants').select('*')).length).toEqual(SEEDED_PARTICIPANTS);
     });
     it("throws when the channel doesn't exist and the commitment is not PreFundSetup", async () => {
       expect.assertions(1);

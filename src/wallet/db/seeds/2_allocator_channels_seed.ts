@@ -239,7 +239,7 @@ export const seeds = {
 };
 
 export function seed() {
-  return knex('allocator_channels')
+  return knex('channels')
     .del()
     .then(() => {
       return AllocatorChannel.query().insertGraph(Object.values(seeds));

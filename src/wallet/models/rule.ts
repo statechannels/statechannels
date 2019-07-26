@@ -11,7 +11,7 @@ export default class Rule extends Model {
       relation: Model.HasManyRelation,
       modelClass: AllocatorChannel,
       join: {
-        to: 'allocator_channels.rule_id',
+        to: 'channels.rule_id',
         from: 'rules.id',
       },
     },

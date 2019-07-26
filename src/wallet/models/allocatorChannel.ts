@@ -12,7 +12,7 @@ export default class AllocatorChannel extends Model {
     };
   }
 
-  static tableName = 'allocator_channels';
+  static tableName = 'channels';
 
   static get columnNameMappers() {
     return snakeCaseMappers();
@@ -23,16 +23,16 @@ export default class AllocatorChannel extends Model {
       relation: Model.HasManyRelation,
       modelClass: AllocatorChannelParticipant,
       join: {
-        from: 'allocator_channels.id',
-        to: 'allocator_channel_participants.allocator_channel_id',
+        from: 'channels.id',
+        to: 'channel_participants.channel_id',
       },
     },
     commitments: {
       relation: Model.HasManyRelation,
       modelClass: LedgerCommitment,
       join: {
-        from: 'allocator_channels.id',
-        to: 'allocator_channel_commitments.allocator_channel_id',
+        from: 'channels.id',
+        to: 'channel_commitments.channel_id',
       },
     },
   };
