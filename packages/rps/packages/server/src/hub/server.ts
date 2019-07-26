@@ -21,13 +21,15 @@ const firebaseRelay = fork(`${__dirname}/../message/firebase-relay`, [], {
   execArgv: forkExecArgv,
 });
 firebaseRelay.on('message', (message: RelayableAction) => {
-  console.log(`Parent process received message from firebase": ${JSON.stringify(message)}`);
+  console.log(
+    `Parent process received message from firebase": ${JSON.stringify(message, null, 1)}`,
+  );
 
   handleWalletMessage(message)
     .then(outgoingMessage => {
       if (outgoingMessage) {
         console.log(
-          `Parent process sending message to firebase: ${JSON.stringify(outgoingMessage)}`,
+          `Parent process sending message to firebase: ${JSON.stringify(outgoingMessage, null, 1)}`,
         );
         firebaseRelay.send(outgoingMessage);
       }
@@ -41,7 +43,9 @@ const adjudicatorWatcher = fork(`${__dirname}/../wallet/adjudicator-watcher`, []
 });
 
 adjudicatorWatcher.on('message', (message: AdjudicatorWatcherEvent) => {
-  console.log(`Parent process received adjudicator watcher message: ${JSON.stringify(message)}`);
+  console.log(
+    `Parent process received adjudicator watcher message: ${JSON.stringify(message, null, 1)}`,
+  );
   switch (message.eventType) {
     case AdjudicatorWatcherEventType.Deposited:
       onDepositEvent(message.channelId, message.amountDeposited, message.destinationHoldings);
