@@ -27,7 +27,7 @@ function getMessagesRef() {
   return firebaseAppInsance.database().ref('messages');
 }
 
-export async function listen() {
+async function listen() {
   const hubRef = getMessagesRef().child(HUB_ADDRESS.toLowerCase());
 
   hubRef.on('child_added', async snapshot => {
@@ -50,12 +50,12 @@ export async function listen() {
   });
 }
 
-export function send(message: MessageRelayRequested) {
+process.on('message', (message: MessageRelayRequested) => {
   const sanitizedPayload = JSON.parse(JSON.stringify(message.messagePayload));
   getMessagesRef()
     .child(message.to.toLowerCase())
-    .push(sanitizedPayload);
-}
+    .push({ payload: sanitizedPayload, queue: 'WALLET' });
+});
 
 if (require.main === module) {
   console.log('Listening to firebase for hub messages');
