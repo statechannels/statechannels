@@ -1,4 +1,5 @@
 import { ethers } from 'ethers';
+import { bigNumberify } from 'ethers/utils';
 import { Address, channelID, CommitmentType, Signature, Uint256, Uint32 } from 'fmg-core';
 import { AppCommitment, CommitmentString } from '../../../types';
 import errors from '../../errors';
@@ -24,17 +25,14 @@ async function updateChannel(commitmentRound: AppCommitment[], hubCommitment: Ap
   const { channelType: rules_address, nonce, participants } = channel;
   const channelId = channelID(channel);
 
-  const channelQueryResult = await Channel.query()
+  const storedChannel = await Channel.query()
     .where({ channel_id: channelId })
     .select('id')
     .first();
 
-  if (channelQueryResult && firstCommitment.commitmentType === CommitmentType.PreFundSetup) {
+  if (storedChannel && firstCommitment.commitmentType === CommitmentType.PreFundSetup) {
     throw errors.CHANNEL_EXISTS;
-  } else if (
-    !channelQueryResult &&
-    firstCommitment.commitmentType !== CommitmentType.PreFundSetup
-  ) {
+  } else if (!storedChannel && firstCommitment.commitmentType !== CommitmentType.PreFundSetup) {
     throw errors.CHANNEL_MISSING;
   }
 
@@ -44,7 +42,8 @@ async function updateChannel(commitmentRound: AppCommitment[], hubCommitment: Ap
     amount: c.allocation[priority],
   });
 
-  const allocations = (c: AppCommitment) => c.allocation.map((_, i) => allocationByPriority(i, c));
+  const allocations = (c: AppCommitment) =>
+    !c.channel.guaranteedChannel ? c.allocation.map((_, i) => allocationByPriority(i, c)) : [];
 
   const commitment = (c: AppCommitment) => ({
     turn_number: c.turnNum,
@@ -55,6 +54,7 @@ async function updateChannel(commitmentRound: AppCommitment[], hubCommitment: Ap
   });
 
   const commitments = [...commitmentRound.map(c => commitment(c)), commitment(hubCommitment)];
+  const guaranteedChannel = commitmentRound.map(c => c.channel.guaranteedChannel)[0];
 
   interface Upsert {
     channel_id: string;
@@ -64,21 +64,30 @@ async function updateChannel(commitmentRound: AppCommitment[], hubCommitment: Ap
     holdings?: Uint256;
     id?: number;
     participants?: any[];
+    guaranteedChannel: string;
   }
-  let upserts: Upsert = { channel_id: channelId, commitments, rules_address, nonce };
+  let upserts: Upsert = {
+    channel_id: channelId,
+    commitments,
+    rules_address,
+    nonce,
+    guaranteedChannel,
+  };
 
-  // For now, we just _assume_ that the channel is fully funded
-  const holdings = allocations(hubCommitment)
-    .map(x => x.amount)
-    .reduce((a, b) =>
+  // TODO: We are currently using the allocations to set the funding amount
+  // This assumes that the channel is funded and DOES NOT work for guarantor channels
+  const hubAllocationAmounts = allocations(hubCommitment).map(x => x.amount);
+  let holdings = bigNumberify(0).toHexString();
+  if (hubAllocationAmounts.length > 0) {
+    holdings = hubAllocationAmounts.reduce((a, b) =>
       ethers.utils
         .bigNumberify(a)
         .add(ethers.utils.bigNumberify(b))
         .toHexString(),
     );
-
-  if (channelQueryResult) {
-    upserts = { ...upserts, id: channelQueryResult.id };
+  }
+  if (storedChannel) {
+    upserts = { ...upserts, id: storedChannel.id };
   } else {
     upserts = {
       ...upserts,

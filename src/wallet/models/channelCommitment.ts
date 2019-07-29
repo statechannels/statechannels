@@ -36,7 +36,7 @@ export default class ChannelCommitment extends Model {
   turnNumber!: Uint32;
   commitmentType!: CommitmentType;
   commitmentCount!: Uint32;
-  allocations!: Allocation[];
+  allocations: Allocation[];
   appAttrs!: any;
 
   toHex(sanitize: AppAttrSanitizer): Bytes {
