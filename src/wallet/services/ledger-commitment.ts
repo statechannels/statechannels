@@ -4,7 +4,7 @@ import {
   bytesFromAppAttributes,
 } from 'fmg-nitro-adjudicator/lib/consensus-app';
 import { ConsensusCommitment } from 'fmg-nitro-adjudicator/lib/consensus-app';
-import AllocatorChannelCommitment from '../models/allocatorChannelCommitment';
+import ChannelCommitment from '../models/channelCommitment';
 
 export type LedgerCommitment = ConsensusCommitment;
 
@@ -15,11 +15,9 @@ export function asCoreCommitment(commitment: LedgerCommitment) {
   };
 }
 
-export function asConsensusCommitment(
-  c: AllocatorChannelCommitment | Commitment,
-): ConsensusCommitment {
+export function asConsensusCommitment(c: ChannelCommitment | Commitment): ConsensusCommitment {
   let commitment: Commitment;
-  if ('allocatorChannelId' in c) {
+  if ('channelId' in c) {
     commitment = c.asCoreCommitment(bytesFromAppAttributes);
   } else {
     commitment = c;

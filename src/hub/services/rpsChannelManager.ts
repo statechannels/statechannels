@@ -1,10 +1,10 @@
 import { channelID, Commitment, CommitmentType, Signature } from 'fmg-core';
 import { errors, SignedCommitment } from '../../wallet';
 import Wallet from '../../wallet';
-import AllocatorChannel from '../../wallet/models/allocatorChannel';
+import Channel from '../../wallet/models/channel';
 
 import { delay } from 'bluebird';
-import AllocatorChannelCommitment from '../../wallet/models/allocatorChannelCommitment';
+import ChannelCommitment from '../../wallet/models/channelCommitment';
 import {
   asCoreCommitment,
   defaultAppAttrs,
@@ -49,7 +49,7 @@ export async function updateRPSChannel(
   }
 
   const { channelType: rules_address, nonce } = theirCommitment.channel;
-  const existingChannel = await AllocatorChannel.query()
+  const existingChannel = await Channel.query()
     .where({
       rules_address,
       nonce,
@@ -132,19 +132,19 @@ export async function valuePreserved(theirCommitment: any): Promise<boolean> {
 }
 
 export async function validTransition(theirCommitment: Commitment): Promise<boolean> {
-  const { channel } = theirCommitment;
-  const channel_id = channelID(channel);
-  const allocatorChannel = await AllocatorChannel.query()
+  const { channel: commitmentChannel } = theirCommitment;
+  const channel_id = channelID(commitmentChannel);
+  const channel = await Channel.query()
     .where({ channel_id })
     .select('id')
     .first();
 
-  if (!allocatorChannel) {
+  if (!channel) {
     throw errors.CHANNEL_MISSING;
   }
 
-  const currentCommitment = await AllocatorChannelCommitment.query()
-    .where({ channel_id: allocatorChannel.id })
+  const currentCommitment = await ChannelCommitment.query()
+    .where({ channel_id: channel.id })
     .orderBy('id', 'desc')
     .select()
     .first();

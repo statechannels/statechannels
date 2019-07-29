@@ -1,21 +1,21 @@
 import { channelID, Commitment } from 'fmg-core';
-import AllocatorChannel from '../../models/allocatorChannel';
-import AllocatorChannelCommitment from '../../models/allocatorChannelCommitment';
+import Channel from '../../models/channel';
+import ChannelCommitment from '../../models/channelCommitment';
 
 export async function getCurrentCommitment(theirCommitment: Commitment) {
-  const { channel } = theirCommitment;
-  const channel_id = channelID(channel);
-  const allocatorChannel = await AllocatorChannel.query()
+  const { channel: commitmentChannel } = theirCommitment;
+  const channel_id = channelID(commitmentChannel);
+  const channel = await Channel.query()
     .where({ channel_id })
     .select('id')
     .first();
-  if (!allocatorChannel) {
+  if (!channel) {
     return;
   }
-  const currentCommitment = await AllocatorChannelCommitment.query()
-    .where({ channel_id: allocatorChannel.id })
+  const currentCommitment = await ChannelCommitment.query()
+    .where({ channel_id: channel.id })
     .orderBy('turn_number', 'desc')
-    .eager('[allocatorChannel.[participants],allocations]')
+    .eager('[channel.[participants],allocations]')
     .select()
     .first();
 

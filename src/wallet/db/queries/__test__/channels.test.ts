@@ -4,7 +4,7 @@ import {
   created_channel,
   funded_channel,
 } from '../../../../test/test_data';
-import AllocatorChannel from '../../../models/allocatorChannel';
+import Channel from '../../../models/channel';
 import knex from '../../connection';
 import {
   constructors as seedDataConstructors,
@@ -14,12 +14,12 @@ import {
   SEEDED_PARTICIPANTS,
   seeds,
 } from '../../seeds/2_allocator_channels_seed';
-import { queries } from '../allocator_channels';
+import { queries } from '../channels';
 
-describe('updateAllocatorChannel', () => {
+describe('updateChannel', () => {
   describe('when theirCommitment is a PreFundSetup', () => {
     it("works when the channel doesn't exist", async () => {
-      const allocator_channel = await queries.updateAllocatorChannel(
+      const allocator_channel = await queries.updateChannel(
         [testDataConstructors.pre_fund_setup(0)],
         testDataConstructors.pre_fund_setup(1),
       );
@@ -43,7 +43,7 @@ describe('updateAllocatorChannel', () => {
       theirCommitment.channel = funded_channel;
       const hubCommitment = testDataConstructors.pre_fund_setup(1);
       expect.assertions(1);
-      await queries.updateAllocatorChannel([theirCommitment], hubCommitment).catch(err => {
+      await queries.updateChannel([theirCommitment], hubCommitment).catch(err => {
         expect(err).toMatchObject(errors.CHANNEL_EXISTS);
       });
     });
@@ -52,14 +52,14 @@ describe('updateAllocatorChannel', () => {
   describe('when theirCommitment is not a PreFundSetup', () => {
     it('works when the channel exists', async () => {
       const { nonce, channelType } = testDataConstructors.post_fund_setup(2).channel;
-      const existing_allocator_channel = await AllocatorChannel.query()
+      const existing_allocator_channel = await Channel.query()
         .where({ nonce, rules_address: channelType })
         .eager('[commitments.[allocations],participants]')
         .first();
 
       expect(existing_allocator_channel).toMatchObject(seeds.funded_channel);
 
-      const updated_allocator_channel = await queries.updateAllocatorChannel(
+      const updated_allocator_channel = await queries.updateChannel(
         [testDataConstructors.post_fund_setup(2)],
         testDataConstructors.post_fund_setup(3),
       );
@@ -89,7 +89,7 @@ describe('updateAllocatorChannel', () => {
       theirCommitment.channel = { ...funded_channel, nonce: 1234 };
       const hubCommitment = testDataConstructors.post_fund_setup(1);
       expect.assertions(1);
-      await queries.updateAllocatorChannel([theirCommitment], hubCommitment).catch(err => {
+      await queries.updateChannel([theirCommitment], hubCommitment).catch(err => {
         expect(err).toMatchObject(errors.CHANNEL_MISSING);
       });
     });

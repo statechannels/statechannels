@@ -2,39 +2,39 @@ import { ethers } from 'ethers';
 import { Address, channelID, CommitmentType, Signature, Uint256, Uint32 } from 'fmg-core';
 import { AppCommitment, CommitmentString } from '../../../types';
 import errors from '../../errors';
-import AllocatorChannel from '../../models/allocatorChannel';
+import Channel from '../../models/channel';
 
-export interface CreateAllocatorChannelParams {
+export interface CreateChannelParams {
   commitment: CommitmentString;
   signature: Signature;
 }
-export interface IAllocatorChannel {
+export interface IChannel {
   channelId: Address;
   channelType: Address;
   nonce_id: number;
 }
 
 export const queries = {
-  updateAllocatorChannel,
+  updateChannel,
 };
 
-async function updateAllocatorChannel(
-  commitmentRound: AppCommitment[],
-  hubCommitment: AppCommitment,
-) {
+async function updateChannel(commitmentRound: AppCommitment[], hubCommitment: AppCommitment) {
   const firstCommitment = commitmentRound[0];
   const { channel } = firstCommitment;
   const { channelType: rules_address, nonce, participants } = channel;
   const channelId = channelID(channel);
 
-  const allocator_channel = await AllocatorChannel.query()
+  const channelQueryResult = await Channel.query()
     .where({ channel_id: channelId })
     .select('id')
     .first();
 
-  if (allocator_channel && firstCommitment.commitmentType === CommitmentType.PreFundSetup) {
+  if (channelQueryResult && firstCommitment.commitmentType === CommitmentType.PreFundSetup) {
     throw errors.CHANNEL_EXISTS;
-  } else if (!allocator_channel && firstCommitment.commitmentType !== CommitmentType.PreFundSetup) {
+  } else if (
+    !channelQueryResult &&
+    firstCommitment.commitmentType !== CommitmentType.PreFundSetup
+  ) {
     throw errors.CHANNEL_MISSING;
   }
 
@@ -77,8 +77,8 @@ async function updateAllocatorChannel(
         .toHexString(),
     );
 
-  if (allocator_channel) {
-    upserts = { ...upserts, id: allocator_channel.id };
+  if (channelQueryResult) {
+    upserts = { ...upserts, id: channelQueryResult.id };
   } else {
     upserts = {
       ...upserts,
@@ -90,16 +90,16 @@ async function updateAllocatorChannel(
     };
   }
 
-  return AllocatorChannel.query()
-    .eager('[commitments.[allocations,allocatorChannel.[participants]],participants]')
+  return Channel.query()
+    .eager('[commitments.[allocations,channel.[participants]],participants]')
     .upsertGraphAndFetch(upserts);
 }
 
 export async function getWithCommitments(channel_id: string) {
-  return await AllocatorChannel.query()
+  return await Channel.query()
     .where({
       channel_id,
     })
-    .eager('[commitments.[allocatorChannel.[participants],allocations]]')
+    .eager('[commitments.[channel.[participants],allocations]]')
     .first();
 }

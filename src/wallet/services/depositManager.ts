@@ -2,7 +2,7 @@ import { bigNumberify } from 'ethers/utils';
 import { Address, Uint256 } from 'fmg-core';
 import { addHex } from 'magmo-wallet';
 import { HUB_ADDRESS } from '../../constants';
-import AllocatorChannel from '../models/allocatorChannel';
+import Channel from '../models/channel';
 import { Blockchain } from './blockchain';
 
 /* todo:
@@ -22,7 +22,7 @@ export async function onDepositEvent(
   // todo: to avoid manual case conversions, we can switch to knexSnakeCaseMappers.
   // https://vincit.github.io/objection.js/recipes/snake-case-to-camel-case-conversion.html#snake-case-to-camel-case-conversion
   const channel_id = channelId;
-  const allocatorChannel = await AllocatorChannel.query()
+  const channel = await Channel.query()
     .findOne({
       channel_id,
     })
@@ -30,23 +30,23 @@ export async function onDepositEvent(
 
   const holdings = destinationHoldings;
 
-  if (!allocatorChannel) {
+  if (!channel) {
     console.log(`Allocator channel ${channelId} not in database`);
     return;
   }
 
-  await AllocatorChannel.query()
-    .findById(allocatorChannel.id)
+  await Channel.query()
+    .findById(channel.id)
     .patch({ holdings });
 
-  const commitments = allocatorChannel.commitments;
+  const commitments = channel.commitments;
   const latestCommitment = commitments.reduce((prevCommitment, currentCommitment) => {
     return prevCommitment.turnNumber > currentCommitment.turnNumber
       ? prevCommitment
       : currentCommitment;
   });
 
-  const hubParticipatIndex = allocatorChannel.participants
+  const hubParticipatIndex = channel.participants
     .map(participant => participant.address)
     .indexOf(HUB_ADDRESS);
 

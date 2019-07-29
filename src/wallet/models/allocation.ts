@@ -1,6 +1,6 @@
 import { Address, Uint256, Uint32 } from 'fmg-core';
 import { Model } from 'objection';
-import LedgerCommitment from './allocatorChannelCommitment';
+import LedgerCommitment from './channelCommitment';
 
 export default class Allocation extends Model {
   static tableName = 'allocations';

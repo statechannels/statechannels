@@ -2,15 +2,15 @@ import { Address, Bytes, Commitment, CommitmentType, toHex, Uint256, Uint32 } fr
 import { Model, snakeCaseMappers } from 'objection';
 import { AppAttrSanitizer } from '../../types';
 import Allocation from './allocation';
-import AllocatorChannel from './allocatorChannel';
+import Channel from './channel';
 
-export default class AllocatorChannelCommitment extends Model {
+export default class ChannelCommitment extends Model {
   static tableName = 'channel_commitments';
 
   static relationMappings = {
-    allocatorChannel: {
+    channel: {
       relation: Model.BelongsToOneRelation,
-      modelClass: `${__dirname}/allocatorChannel`,
+      modelClass: `${__dirname}/channel`,
       join: {
         from: 'channel_commitments.channel_id',
         to: 'channels.id',
@@ -31,8 +31,8 @@ export default class AllocatorChannelCommitment extends Model {
   }
 
   readonly id!: number;
-  allocatorChannel!: AllocatorChannel;
-  allocatorChannelId!: number;
+  channel!: Channel;
+  channelId!: number;
   turnNumber!: Uint32;
   commitmentType!: CommitmentType;
   commitmentCount!: Uint32;
@@ -48,7 +48,7 @@ export default class AllocatorChannelCommitment extends Model {
       commitmentType: this.commitmentType,
       commitmentCount: this.commitmentCount,
       turnNum: this.turnNumber,
-      channel: this.allocatorChannel.asCoreChannel,
+      channel: this.channel.asCoreChannel,
       allocation: this.allocations.sort(priority).map(amount),
       destination: this.allocations.sort(priority).map(destination),
       appAttributes: sanitize(this.appAttrs),

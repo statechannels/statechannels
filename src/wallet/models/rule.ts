@@ -1,6 +1,6 @@
 import { Address } from 'fmg-core';
 import { Model } from 'objection';
-import AllocatorChannel from './allocatorChannel';
+import Channel from './channel';
 
 export default class Rule extends Model {
   static tableName = 'rules';
@@ -9,7 +9,7 @@ export default class Rule extends Model {
   static relationMappings = {
     channels: {
       relation: Model.HasManyRelation,
-      modelClass: AllocatorChannel,
+      modelClass: Channel,
       join: {
         to: 'channels.rule_id',
         from: 'rules.id',
