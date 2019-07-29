@@ -41,7 +41,8 @@ async function listen() {
         )}`,
       );
     } else if (queue === 'WALLET') {
-      process.send({ ...value.payload });
+      initializeCommitmentArraysFromFirebase(value.payload);
+      process.send(value.payload);
     } else {
       throw new Error('Unknown queue');
     }
@@ -60,4 +61,19 @@ process.on('message', (message: MessageRelayRequested) => {
 if (require.main === module) {
   console.log('Listening to firebase for hub messages');
   listen();
+}
+
+function initializeCommitmentArraysFromFirebase(payload) {
+  const arraysToInitialize = ['allocation'];
+  for (const arrayToInitialize of arraysToInitialize) {
+    if ('commitment' in payload && !payload.commitment[arrayToInitialize]) {
+      payload.commitment[arrayToInitialize] = [];
+    }
+  }
+
+  for (const property of Object.keys(payload)) {
+    if (typeof payload[property] === 'object') {
+      initializeCommitmentArraysFromFirebase(payload[property]);
+    }
+  }
 }
