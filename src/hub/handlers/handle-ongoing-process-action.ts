@@ -21,7 +21,7 @@ import { updateRPSChannel } from '../services/rpsChannelManager';
 
 export async function handleOngoingProcessAction(
   action: StrategyProposed | CommitmentReceived | CommitmentsReceived,
-): Promise<MessageRelayRequested | undefined> {
+): Promise<MessageRelayRequested[]> {
   switch (action.type) {
     case 'WALLET.COMMON.COMMITMENT_RECEIVED':
       return handleCommitmentReceived(action);
@@ -42,7 +42,7 @@ async function handleStrategyProposed(action: StrategyProposed) {
   }
 
   const { theirAddress } = process;
-  return communication.sendStrategyApproved(theirAddress, processId, strategy);
+  return [communication.sendStrategyApproved(theirAddress, processId, strategy)];
 }
 
 async function handleCommitmentReceived(action: CommitmentReceived) {
@@ -64,12 +64,14 @@ async function handleCommitmentReceived(action: CommitmentReceived) {
         theirCommitment,
         splitSignature,
       );
-      return communication.sendCommitmentReceived(
-        theirAddress,
-        processId,
-        ourCommitment,
-        (ourSignature as unknown) as string,
-      );
+      return [
+        communication.sendCommitmentReceived(
+          theirAddress,
+          processId,
+          ourCommitment,
+          (ourSignature as unknown) as string,
+        ),
+      ];
     }
 
     const currentCommitment = await getCurrentCommitment(theirCommitment);
@@ -77,12 +79,14 @@ async function handleCommitmentReceived(action: CommitmentReceived) {
       [{ ledgerCommitment: asConsensusCommitment(theirCommitment), signature: splitSignature }],
       currentCommitment && asConsensusCommitment(currentCommitment),
     );
-    return communication.sendCommitmentReceived(
-      theirAddress,
-      processId,
-      commitment,
-      (signature as unknown) as string,
-    );
+    return [
+      communication.sendCommitmentReceived(
+        theirAddress,
+        processId,
+        commitment,
+        (signature as unknown) as string,
+      ),
+    ];
   }
 }
 
@@ -115,12 +119,14 @@ async function handleCommitmentsReceived(action: CommitmentsReceived) {
         lastCommitment,
         lastCommitmentSignature,
       );
-      return communication.sendCommitmentReceived(
-        nextParticipant,
-        processId,
-        ourCommitment,
-        (ourSignature as unknown) as string,
-      );
+      return [
+        communication.sendCommitmentReceived(
+          nextParticipant,
+          processId,
+          ourCommitment,
+          (ourSignature as unknown) as string,
+        ),
+      ];
     }
 
     const ledgerCommitmentRound = commitmentRound.map(signedCommitment => ({
@@ -132,12 +138,19 @@ async function handleCommitmentsReceived(action: CommitmentsReceived) {
       ledgerCommitmentRound,
       currentCommitment && asConsensusCommitment(currentCommitment),
     );
-    return communication.sendCommitmentsReceived(
-      nextParticipant,
-      processId,
-      [...incomingCommitments, { commitment, signature: (signature as unknown) as string }],
-      action.protocolLocator,
-    );
+    const response = [];
+    const otherParticipants = participants.filter(p => participants.indexOf(p) !== ourIndex);
+    for (const participant of otherParticipants) {
+      response.push(
+        communication.sendCommitmentsReceived(
+          participant,
+          processId,
+          [...incomingCommitments, { commitment, signature: (signature as unknown) as string }],
+          action.protocolLocator,
+        ),
+      );
+    }
+    return response;
   }
 }
 
