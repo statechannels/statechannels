@@ -32,6 +32,7 @@
   },
   "dependencies": {
     "@koa/cors": "2",
+    "async-lock": "1.2.2",
     "dotenv": "^6.2.0",
     "dotenv-expand": "^4.2.0",
     "firebase": "^6.2.3",
@@ -48,6 +49,7 @@
     "pg": "^7.1.2"
   },
   "devDependencies": {
+    "@types/async-lock": "1.1.1",
     "@types/config": "^0.0.34",
     "@types/dotenv": "^6.1.0",
     "@types/jest": "^24.0.6",
