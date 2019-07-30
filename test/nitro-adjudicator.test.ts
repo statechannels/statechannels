@@ -177,7 +177,7 @@ describe('ForceMove methods', () => {
       expect(await nitro.isChannelClosedPub(getChannelID(ledgerChannel))).toBe(false);
     });
 
-    describe.only('conclude', () => {
+    describe('conclude', () => {
       beforeEach(() => {
         const { r: r0, s: s0, v: v0 } = sign(getHexForCommitment(commitment4), alice.privateKey);
         const { r: r1, s: s1, v: v1 } = sign(getHexForCommitment(commitment5), bob.privateKey);
@@ -390,6 +390,7 @@ describe('ForceMove methods', () => {
           allocation,
           finalizedAt: ethers.utils.bigNumberify(1),
           challengeCommitment: getEthersObjectForCommitment(commitment0),
+          token: [AddressZero, AddressZero],
         };
         await (await nitro.setOutcome(getChannelID(ledgerChannel), allocationOutcome)).wait();
         expectedAssertions += 1;
