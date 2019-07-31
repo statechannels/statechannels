@@ -5,7 +5,13 @@ import { ethers, ContractFactory } from 'ethers';
 import OutcomeArtifact from '../build/contracts/Outcome.json';
 // @ts-ignore
 import TestOutcomeArtifact from '../build/contracts/TestOutcome.json';
-import { makeAllocation, ETH, encodeAllocation } from '../src/outcome';
+import {
+  makeAllocation,
+  ETH,
+  encodeAllocation,
+  makeGuarantee,
+  encodeGuarantee,
+} from '../src/outcome';
 import { bigNumberify } from 'ethers/utils';
 
 const provider = new ethers.providers.JsonRpcProvider('http://localhost:8545');
@@ -44,7 +50,7 @@ describe('Outcome', () => {
   });
 
   describe('toTokenOutcome', () => {
-    it('parses bytes', async () => {
+    it('parses an allocation', async () => {
       const asAddress = '0x5409ED021D9299bf6814279A6A1411A7e866A631';
 
       const allocation = makeAllocation([[asAddress, 5, ETH]]);
@@ -60,6 +66,25 @@ describe('Outcome', () => {
 
       expect(parsedAllocation[0].destination).toEqual(asAddress);
       expect(parsedAllocation[0].amount).toEqual(bigNumberify(5));
+    });
+
+    it('parses a guarantee', async () => {
+      const asAddress = '0x5409ED021D9299bf6814279A6A1411A7e866A631';
+      const bsAddress = '0x6Ecbe1DB9EF729CBe972C83Fb886247691Fb6beb';
+
+      const guarantee = makeGuarantee(asAddress, [[ETH, [bsAddress]]]);
+      const bytes = encodeGuarantee(guarantee);
+
+      const result = await testOutcomeLib.toTokenOutcome(bytes);
+      expect(result[0].token).toEqual(ETH);
+      const typedOutcome = await testOutcomeLib.toTypedOutcome(result[0].typedOutcome);
+
+      expect(await testOutcomeLib.isGuarantee(typedOutcome)).toBe(true);
+
+      const parsedGuarantee = await testOutcomeLib.toGuarantee(typedOutcome.data);
+
+      expect(parsedGuarantee.guaranteedChannelId).toEqual(asAddress);
+      expect(parsedGuarantee.destinations).toEqual([bsAddress]);
     });
   });
 });
