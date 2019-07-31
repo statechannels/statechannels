@@ -68,27 +68,77 @@ export function makeAllocation(transfers: TokenTransfer[]): AllocationOutcome {
   };
 }
 
-export const outcomeSolidity = 'tuple(address token, bytes typedOutcome)[]';
-export const typedOutcomeSolidity = 'tuple(uint8 outcomeType, bytes data)';
+const tokenOutcomeSolidity = 'tuple(address token, bytes typedOutcome)[]';
+const typedOutcomeSolidity = 'tuple(uint8 outcomeType, bytes data)';
 
 export function encodeAllocation(allocation: AllocationOutcome): string {
   return defaultAbiCoder.encode(
-    [outcomeSolidity],
+    [tokenOutcomeSolidity],
     [
-      allocation.tokenAllocations.reduce((out, { token, proposedTransfers }) => {
-        return out.concat({
+      allocation.tokenAllocations.map(({ token, proposedTransfers }) => {
+        return {
           token,
           typedOutcome: defaultAbiCoder.encode(
             [typedOutcomeSolidity],
             [[ALLOCATION, encodeTransfers(proposedTransfers)]],
           ),
-        });
-      }, []),
+        };
+      }),
     ],
   );
 }
 
-export function encodeTransfers(transfers: Transfer[]): string {
+function encodeTransfers(transfers: Transfer[]): string {
   const allocationDataSolidity = 'tuple(address destination, uint256 amount)[]';
   return defaultAbiCoder.encode([allocationDataSolidity], [transfers]);
+}
+
+type TokenGuaranteeParam = [Address, Address[]]; // token address, priorities
+
+export function makeGuarantee(
+  guaranteedChannelAddress: Address,
+  guarantees: TokenGuaranteeParam[],
+): GuaranteeOutcome {
+  return {
+    type: GUARANTEE,
+    guaranteedChannelAddress,
+    tokenGuarantees: guarantees.map(([token, prioritizedAddresses]) => ({
+      token,
+      prioritizedAddresses,
+    })),
+  };
+}
+
+const guaranteeDataSolidity = 'tuple(address guaranteedChannelId, address[] destinations)';
+export function encodeGuarantee(guarantee: GuaranteeOutcome): string {
+  return defaultAbiCoder.encode(
+    [tokenOutcomeSolidity],
+    [
+      guarantee.tokenGuarantees.map(({ token, prioritizedAddresses }) => {
+        return {
+          token,
+          typedOutcome: defaultAbiCoder.encode(
+            [typedOutcomeSolidity],
+            [
+              [
+                GUARANTEE,
+                encodePriorities(guarantee.guaranteedChannelAddress, prioritizedAddresses),
+              ],
+            ],
+          ),
+        };
+        //
+      }),
+    ],
+  );
+}
+
+function encodePriorities(
+  guaranteedChannelAddress: Address,
+  prioritizedAddresses: Address[],
+): string {
+  return defaultAbiCoder.encode(
+    [guaranteeDataSolidity],
+    [[guaranteedChannelAddress, prioritizedAddresses]],
+  );
 }
