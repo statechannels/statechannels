@@ -1,11 +1,12 @@
 import linker from 'solc/linker';
-import { ethers, ContractFactory, Wallet } from 'ethers';
+import { ethers, ContractFactory } from 'ethers';
 
 // @ts-ignore
 import OutcomeArtifact from '../build/contracts/Outcome.json';
 // @ts-ignore
 import TestOutcomeArtifact from '../build/contracts/TestOutcome.json';
-import { ADDRESS_ZERO } from '../src/index.js';
+import { makeAllocation, ETH, encodeAllocation } from '../src/outcome';
+import { bigNumberify } from 'ethers/utils';
 
 const provider = new ethers.providers.JsonRpcProvider('http://localhost:8545');
 const signer = provider.getSigner();
@@ -44,16 +45,21 @@ describe('Outcome', () => {
 
   describe('toTokenOutcome', () => {
     it('parses bytes', async () => {
-      // TODO: tidy by extracting helpers to an outcome lib file
-      const address = new Wallet('6cbed15c793ce57650b9877cf6fa156fbef513c4e6134f022a85b1ffdd59b2a1')
-        .address;
+      const asAddress = '0x5409ED021D9299bf6814279A6A1411A7e866A631';
 
-      const bytes = ethers.utils.defaultAbiCoder.encode(
-        ['tuple(address token, bytes typedOutcome)[]'],
-        [[{ token: address, typedOutcome: '0xb' }, { token: address, typedOutcome: '0xc' }]],
-      );
+      const allocation = makeAllocation([[asAddress, 5, ETH]]);
+      const bytes = encodeAllocation(allocation);
 
       const result = await testOutcomeLib.toTokenOutcome(bytes);
+      expect(result[0].token).toEqual(ETH);
+      const typedOutcome = await testOutcomeLib.toTypedOutcome(result[0].typedOutcome);
+
+      expect(await testOutcomeLib.isAllocation(typedOutcome)).toBe(true);
+
+      const parsedAllocation = await testOutcomeLib.toAllocation(typedOutcome.data);
+
+      expect(parsedAllocation[0].destination).toEqual(asAddress);
+      expect(parsedAllocation[0].amount).toEqual(bigNumberify(5));
     });
   });
 });
