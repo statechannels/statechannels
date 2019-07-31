@@ -1,4 +1,5 @@
 const Commitment = artifacts.require('Commitment');
+const Outcome = artifacts.require('Outcome');
 const Rules = artifacts.require('Rules');
 const CountingCommitment = artifacts.require('CountingCommitment');
 const CountingApp = artifacts.require('CountingApp');
@@ -11,6 +12,7 @@ const NitroAdjudicator = artifacts.require('NitroAdjudicator');
 
 module.exports = function(deployer) {
   deployer.deploy(Commitment);
+  deployer.deploy(Outcome);
 
   deployer.link(Commitment, Rules);
   deployer.deploy(Rules);
