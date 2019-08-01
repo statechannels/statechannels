@@ -4,7 +4,9 @@ import { eventChannel } from 'redux-saga';
 import * as actions from '../actions';
 import { ethers } from 'ethers';
 import { fromParameters } from 'fmg-core/lib/commitment';
-import { getAdjudicatorWatcherProcessesForChannel } from '../selectors';
+import { getAdjudicatorWatcherSubscribersForChannel } from '../selectors';
+import { ChannelSubscriber } from '../state';
+import { ProtocolLocator } from '../../communication';
 
 enum AdjudicatorEventType {
   ChallengeCreated,
@@ -25,14 +27,14 @@ export function* adjudicatorWatcher(provider) {
   while (true) {
     const event: AdjudicatorEvent = yield take(adjudicatorEventChannel);
 
-    const processIdsToAlert = yield select(
-      getAdjudicatorWatcherProcessesForChannel,
+    const channelSubscribers: ChannelSubscriber[] = yield select(
+      getAdjudicatorWatcherSubscribersForChannel,
       event.channelId,
     );
 
     yield dispatchEventAction(event);
-    for (const processId of processIdsToAlert) {
-      yield dispatchProcessEventAction(event, processId);
+    for (const subscriber of channelSubscribers) {
+      yield dispatchProcessEventAction(event, subscriber.processId, subscriber.protocolLocator);
     }
   }
 }
@@ -54,13 +56,22 @@ function* dispatchEventAction(event: AdjudicatorEvent) {
   }
 }
 
-function* dispatchProcessEventAction(event: AdjudicatorEvent, processId: string) {
+function* dispatchProcessEventAction(
+  event: AdjudicatorEvent,
+  processId: string,
+  protocolLocator: ProtocolLocator,
+) {
   const { channelId } = event;
   switch (event.eventType) {
     case AdjudicatorEventType.ChallengeCreated:
       const { finalizedAt } = event.eventArgs;
       yield put(
-        actions.challengeExpirySetEvent({ processId, channelId, expiryTime: finalizedAt * 1000 }),
+        actions.challengeExpirySetEvent({
+          processId,
+          protocolLocator,
+          channelId,
+          expiryTime: finalizedAt * 1000,
+        }),
       );
       break;
     case AdjudicatorEventType.Concluded:
@@ -70,6 +81,7 @@ function* dispatchProcessEventAction(event: AdjudicatorEvent, processId: string)
       yield put(
         actions.refutedEvent({
           processId,
+          protocolLocator,
           channelId,
           refuteCommitment: fromParameters(event.eventArgs.refutation),
         }),
@@ -86,6 +98,7 @@ function* dispatchProcessEventAction(event: AdjudicatorEvent, processId: string)
       yield put(
         actions.respondWithMoveEvent({
           processId,
+          protocolLocator,
           channelId,
           responseCommitment: fromParameters(event.eventArgs.response),
           responseSignature: signature,
@@ -96,6 +109,7 @@ function* dispatchProcessEventAction(event: AdjudicatorEvent, processId: string)
       yield put(
         actions.fundingReceivedEvent({
           processId,
+          protocolLocator,
           channelId,
           amount: event.eventArgs.amountDeposited.toHexString(),
           totalForDestination: event.eventArgs.destinationHoldings.toHexString(),

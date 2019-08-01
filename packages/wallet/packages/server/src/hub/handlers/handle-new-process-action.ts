@@ -11,7 +11,7 @@ import * as ongoing from './handle-ongoing-process-action';
 
 export async function handleNewProcessAction(
   action: ConcludeInstigated | CommitmentsReceived,
-): Promise<MessageRelayRequested | undefined> {
+): Promise<MessageRelayRequested[]> {
   switch (action.type) {
     case 'WALLET.COMMON.COMMITMENTS_RECEIVED':
       return handleCommitmentsReceived(action);
@@ -24,7 +24,7 @@ export async function handleNewProcessAction(
 
 async function handleCommitmentsReceived(
   action: CommitmentsReceived,
-): Promise<MessageRelayRequested> {
+): Promise<MessageRelayRequested[]> {
   const { processId, signedCommitments } = action;
   const { participants } = signedCommitments[0].commitment.channel;
   const ourIndex = participants.indexOf(HUB_ADDRESS);
@@ -35,17 +35,19 @@ async function handleCommitmentsReceived(
 
 async function handleConcludeInstigated(
   action: ConcludeInstigated,
-): Promise<MessageRelayRequested> {
+): Promise<MessageRelayRequested[]> {
   const { commitment: theirCommitment, signature: theirSignature } = action.signedCommitment;
   const theirAddress = theirCommitment.channel.participants[0];
   const walletProcess = await startConcludeProcess({ action, theirAddress });
 
   const splitSignature = (ethers.utils.splitSignature(theirSignature) as unknown) as Signature;
   const { commitment, signature } = await updateRPSChannel(theirCommitment, splitSignature);
-  return communication.sendCommitmentReceived(
-    theirAddress,
-    walletProcess.processId,
-    commitment,
-    (signature as unknown) as string,
-  );
+  return [
+    communication.sendCommitmentReceived(
+      theirAddress,
+      walletProcess.processId,
+      commitment,
+      (signature as unknown) as string,
+    ),
+  ];
 }

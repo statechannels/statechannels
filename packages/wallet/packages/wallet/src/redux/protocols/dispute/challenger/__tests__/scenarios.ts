@@ -65,16 +65,27 @@ const acknowledgeFailure = (reason: Reason) => states.acknowledgeFailure({ ...de
 // -------
 const challengeApproved = actions.challengeApproved({ processId });
 const challengeDenied = actions.challengeDenied({ processId });
-const challengeTimedOut = challengeExpiredEvent({ processId, channelId, timestamp: 1000 });
+const challengeTimedOut = challengeExpiredEvent({
+  processId,
+  protocolLocator: [],
+  channelId,
+  timestamp: 1000,
+});
 const transactionSuccessTrigger = tsScenarios.successTrigger;
 const transactionFailureTrigger = tsScenarios.failureTrigger;
 const responseReceived = respondWithMoveEvent({
   processId,
+  protocolLocator: [],
   channelId,
   responseCommitment: signedCommitment21.commitment,
   responseSignature: signedCommitment21.signature,
 });
-const challengeExpirySet = challengeExpirySetEvent({ processId, channelId, expiryTime: 1234 });
+const challengeExpirySet = challengeExpirySetEvent({
+  processId,
+  protocolLocator: [],
+  channelId,
+  expiryTime: 1234,
+});
 export const acknowledged = actions.acknowledged({ processId });
 
 // -------

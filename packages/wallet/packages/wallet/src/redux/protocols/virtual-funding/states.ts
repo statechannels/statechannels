@@ -34,6 +34,7 @@ export interface WaitForGuarantorChannel extends Base {
 export interface WaitForGuarantorFunding extends Base {
   type: 'VirtualFunding.WaitForGuarantorFunding';
   indirectGuarantorFunding: NonTerminalIndirectFundingState;
+  indirectApplicationFunding: ConsensusUpdateState;
   jointChannelId: string;
 }
 

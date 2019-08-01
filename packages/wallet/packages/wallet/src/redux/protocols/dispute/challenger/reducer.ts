@@ -123,7 +123,12 @@ export function initialize(
       sharedData: showWallet(sharedData),
     };
   }
-  sharedData = registerChannelToMonitor(sharedData, processId, channelId);
+  sharedData = registerChannelToMonitor(
+    sharedData,
+    processId,
+    channelId,
+    [], // TODO: Be passed a proper protocolLocator
+  );
   return { state: approveChallenge({ channelId, processId }), sharedData: showWallet(sharedData) };
 }
 

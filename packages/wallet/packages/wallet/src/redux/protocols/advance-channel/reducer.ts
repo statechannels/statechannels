@@ -147,7 +147,7 @@ function initializeWithNewChannel(
 
     // Register channel to monitor
     const channelId = getChannelId(ourCommitment);
-    sharedData = registerChannelToMonitor(sharedData, processId, channelId);
+    sharedData = registerChannelToMonitor(sharedData, processId, channelId, protocolLocator);
 
     // Send commitments to next participant
     sharedData = helpers.sendCommitments(sharedData, processId, channelId, protocolLocator);
@@ -265,7 +265,12 @@ const channelUnknownReducer = (
     nextProtocolState.type === 'AdvanceChannel.CommitmentSent' ||
     nextProtocolState.type === 'AdvanceChannel.Success'
   ) {
-    sharedData = registerChannelToMonitor(sharedData, protocolState.processId, channelId);
+    sharedData = registerChannelToMonitor(
+      sharedData,
+      protocolState.processId,
+      channelId,
+      protocolState.protocolLocator,
+    );
   }
 
   return { protocolState: nextProtocolState, sharedData };

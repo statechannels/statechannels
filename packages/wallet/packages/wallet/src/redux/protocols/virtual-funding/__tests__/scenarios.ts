@@ -13,6 +13,7 @@ import { PlayerIndex } from 'magmo-wallet-client/lib/wallet-instructions';
 import { prependToLocator } from '../..';
 import { EmbeddedProtocol } from '../../../../communication';
 import { ADVANCE_CHANNEL_PROTOCOL_LOCATOR } from '../../advance-channel/reducer';
+import _ from 'lodash';
 
 // ---------
 // Test data
@@ -93,6 +94,7 @@ const scenarioStates = {
   waitForGuarantorFunding: states.waitForGuarantorFunding({
     ...props,
     indirectGuarantorFunding: indirectFundingPreSuccess.state,
+    indirectApplicationFunding: consensusUpdatePreSuccess.state,
     jointChannelId,
   }),
   waitForApplicationFunding: states.waitForApplicationFunding({
@@ -138,7 +140,10 @@ export const happyPath = {
   prepareG: {
     state: scenarioStates.waitForGuarantorChannel2,
     action: postFund.preSuccess.trigger,
-    sharedData: setChannel(postFund.preSuccess.sharedData, appChannel),
+    sharedData: _.merge(
+      indirectFundingPreSuccess.sharedData,
+      setChannel(postFund.preSuccess.sharedData, appChannel),
+    ),
   },
   fundG: {
     appChannelId: appChannel.channelId,

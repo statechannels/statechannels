@@ -37,6 +37,7 @@ describe('adjudicator state reducer', () => {
   describe('when a funding received event is received', () => {
     const action = actions.fundingReceivedEvent({
       processId: 'processId',
+      protocolLocator: [],
       channelId,
       totalForDestination: '0x06',
       amount: '0x5',
@@ -55,7 +56,12 @@ describe('adjudicator state reducer', () => {
     const state = {
       [channelId]: createChallengeState(channelId, 123),
     };
-    const action = actions.challengeExpiredEvent({ processId: '0x0', channelId, timestamp: 1 });
+    const action = actions.challengeExpiredEvent({
+      processId: '0x0',
+      protocolLocator: [],
+      channelId,
+      timestamp: 1,
+    });
     const updatedState = adjudicatorStateReducer(state, action);
 
     it('clears the challenge', () => {
@@ -73,6 +79,7 @@ describe('adjudicator state reducer', () => {
     };
     const action = actions.refutedEvent({
       processId: '0x0',
+      protocolLocator: [],
       channelId,
       refuteCommitment: gameCommitment1,
     });
@@ -89,6 +96,7 @@ describe('adjudicator state reducer', () => {
     };
     const action = actions.respondWithMoveEvent({
       processId: '0x0',
+      protocolLocator: [],
       channelId,
       responseCommitment: gameCommitment1,
       responseSignature: '0xSignature',

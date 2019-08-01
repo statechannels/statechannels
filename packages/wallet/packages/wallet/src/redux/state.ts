@@ -26,7 +26,7 @@ import { WalletEvent } from 'magmo-wallet-client';
 import { TransactionRequest } from 'ethers/providers';
 import { AdjudicatorState } from './adjudicator-state/state';
 import { SignedCommitment, Commitment } from '../domain';
-import { ProcessProtocol } from '../communication';
+import { ProcessProtocol, ProtocolLocator } from '../communication';
 
 export type WalletState = WaitForLogin | MetaMaskError | Initialized;
 
@@ -52,7 +52,11 @@ export interface SharedData {
 }
 
 export interface ChannelSubscriptions {
-  [processId: string]: string[];
+  [channelId: string]: ChannelSubscriber[];
+}
+export interface ChannelSubscriber {
+  protocolLocator: ProtocolLocator;
+  processId: string;
 }
 export interface WaitForLogin extends SharedData {
   type: typeof WAIT_FOR_LOGIN;
@@ -78,19 +82,37 @@ export function registerChannelToMonitor(
   data: SharedData,
   processId: string,
   channelId: string,
+  protocolLocator: ProtocolLocator,
 ): SharedData {
-  const channelsToMonitor = data.channelSubscriptions[processId] || [];
+  const subscribers = data.channelSubscriptions[channelId]
+    ? [...data.channelSubscriptions[channelId]]
+    : [];
+  subscribers.push({ processId, protocolLocator });
   return {
     ...data,
     channelSubscriptions: {
       ...data.channelSubscriptions,
-      [processId]: channelsToMonitor.concat(channelId),
+      [channelId]: subscribers,
     },
   };
 }
 
-export function unregisterAllChannelToMonitor(data: SharedData, processId: string): SharedData {
-  return { ...data, channelSubscriptions: { ...data.channelSubscriptions, [processId]: [] } };
+export function unregisterAllChannelToMonitor(
+  data: SharedData,
+  processId: string,
+  protocolLocator: ProtocolLocator,
+): SharedData {
+  const modifiedSubscriptions = {};
+  for (const channelId of Object.keys(data.channelSubscriptions)) {
+    const subscribers = data.channelSubscriptions[channelId].filter(
+      s => s.processId !== processId && s.protocolLocator !== protocolLocator,
+    );
+    modifiedSubscriptions[channelId] = subscribers;
+  }
+  return {
+    ...data,
+    channelSubscriptions: modifiedSubscriptions,
+  };
 }
 
 export interface ProcessStore {

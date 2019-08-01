@@ -15,11 +15,12 @@ import { addHex } from '../../../utils/hex-utils';
 import { ADVANCE_CHANNEL_PROTOCOL_LOCATOR } from '../advance-channel/reducer';
 import { routesToAdvanceChannel } from '../advance-channel/actions';
 import { routesToIndirectFunding } from '../indirect-funding/actions';
-import { routesToConsensusUpdate } from '../consensus-update/actions';
+import { routesToConsensusUpdate, clearedToSend } from '../consensus-update/actions';
 import { EmbeddedProtocol } from '../../../communication';
 
 export const VIRTUAL_FUNDING_PROTOCOL_LOCATOR = 'VirtualFunding';
 import { CONSENSUS_UPDATE_PROTOCOL_LOCATOR } from '../consensus-update/reducer';
+import { TwoPartyPlayerIndex } from '../../types';
 
 export function initialize(
   sharedData: SharedData,
@@ -135,7 +136,7 @@ function waitForJointChannelReducer(
               commitmentType: CommitmentType.PreFundSetup,
               processId,
               protocolLocator: makeLocator(protocolLocator, ADVANCE_CHANNEL_PROTOCOL_LOCATOR),
-              ourIndex,
+              ourIndex: TwoPartyPlayerIndex.A, // When creating the guarantor channel with the hub we are always the first player
               privateKey,
               channelType,
               participants: [ourAddress, hubAddress],
@@ -194,7 +195,7 @@ function waitForGuarantorChannelReducer(
               processId,
               protocolLocator: makeLocator(protocolLocator, ADVANCE_CHANNEL_PROTOCOL_LOCATOR),
               channelId: guarantorChannelId,
-              ourIndex,
+              ourIndex: TwoPartyPlayerIndex.A, // When creating the guarantor channel with the hub we are always the first player
               guaranteedChannel: protocolState.jointChannelId,
             },
           );
@@ -234,12 +235,33 @@ function waitForGuarantorChannelReducer(
                 sharedData: indirectFundingResult.sharedData,
               };
             default:
+              const { targetChannelId, hubAddress, jointChannelId } = protocolState;
+              // We initialize our joint channel sub-protocol early in case we receive a commitment before we're done funding
+              const proposedAllocation = [
+                startingAllocation.reduce(addHex),
+                startingAllocation.reduce(addHex),
+              ];
+              const proposedDestination = [targetChannelId, hubAddress];
+
+              const applicationFundingResult = consensusUpdate.initializeConsensusUpdate({
+                processId,
+                channelId: jointChannelId,
+                clearedToSend: false,
+                proposedAllocation,
+                proposedDestination,
+                protocolLocator: makeLocator(
+                  protocolState.protocolLocator,
+                  CONSENSUS_UPDATE_PROTOCOL_LOCATOR,
+                ),
+                sharedData: indirectFundingResult.sharedData,
+              });
               return {
                 protocolState: states.waitForGuarantorFunding({
                   ...protocolState,
                   indirectGuarantorFunding: indirectFundingResult.protocolState,
+                  indirectApplicationFunding: applicationFundingResult.protocolState,
                 }),
-                sharedData: indirectFundingResult.sharedData,
+                sharedData: applicationFundingResult.sharedData,
               };
           }
 
@@ -270,13 +292,7 @@ function waitForGuarantorFundingReducer(
   sharedData: SharedData,
   action: WalletAction,
 ) {
-  const {
-    processId,
-    jointChannelId,
-    startingAllocation,
-    targetChannelId,
-    protocolLocator,
-  } = protocolState;
+  const { processId, protocolLocator } = protocolState;
   if (routesToIndirectFunding(action, protocolLocator)) {
     const result = indirectFunding.indirectFundingReducer(
       protocolState.indirectGuarantorFunding,
@@ -286,21 +302,15 @@ function waitForGuarantorFundingReducer(
     if (indirectFunding.isTerminal(result.protocolState)) {
       switch (result.protocolState.type) {
         case 'IndirectFunding.Success':
-          const proposedAllocation = [startingAllocation.reduce(addHex)];
-          const proposedDestination = [targetChannelId];
-
-          const applicationFundingResult = consensusUpdate.initializeConsensusUpdate({
-            processId,
-            channelId: jointChannelId,
-            clearedToSend: true,
-            proposedAllocation,
-            proposedDestination,
-            protocolLocator: makeLocator(
-              protocolState.protocolLocator,
-              CONSENSUS_UPDATE_PROTOCOL_LOCATOR,
-            ),
-            sharedData: result.sharedData,
-          });
+          // Once funding is complete we allow consensusUpdate to send commitments
+          const applicationFundingResult = consensusUpdate.consensusUpdateReducer(
+            protocolState.indirectApplicationFunding,
+            result.sharedData,
+            clearedToSend({
+              processId,
+              protocolLocator: makeLocator(protocolLocator, CONSENSUS_UPDATE_PROTOCOL_LOCATOR),
+            }),
+          );
           return {
             protocolState: states.waitForApplicationFunding({
               ...protocolState,
@@ -318,6 +328,7 @@ function waitForGuarantorFundingReducer(
       return {
         protocolState: states.waitForGuarantorFunding({
           ...protocolState,
+
           indirectGuarantorFunding: result.protocolState,
         }),
         sharedData: result.sharedData,
@@ -372,8 +383,8 @@ function channelSpecificArgs(
     allocation,
     destination,
     appAttributes: bytesFromAppAttributes({
-      proposedAllocation: allocation,
-      proposedDestination: destination,
+      proposedAllocation: [],
+      proposedDestination: [],
       furtherVotesRequired: 0,
     }),
   };
