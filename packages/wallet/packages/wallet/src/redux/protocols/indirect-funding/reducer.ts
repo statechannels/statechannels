@@ -1,7 +1,6 @@
-import { SharedData } from '../../state';
+import { SharedData, getPrivatekey } from '../../state';
 import { ProtocolStateWithSharedData, makeLocator } from '..';
 import * as selectors from '../../selectors';
-import * as helpers from '../reducer-helpers';
 import { getLastCommitment, ChannelState } from '../../channel-store/channel-state';
 import { CommitmentType } from 'fmg-core';
 import { isExistingLedgerFundingAction } from '../existing-ledger-funding';
@@ -17,50 +16,60 @@ import { WalletAction } from '../../actions';
 import { ProtocolLocator, EmbeddedProtocol } from '../../../communication';
 import * as newLedgerChannel from '../new-ledger-channel';
 import { EXISTING_LEDGER_FUNDING_PROTOCOL_LOCATOR } from '../existing-ledger-funding/reducer';
+import { getTwoPlayerIndex } from '../reducer-helpers';
 
 export const INDIRECT_FUNDING_PROTOCOL_LOCATOR = makeLocator(EmbeddedProtocol.IndirectFunding);
 
 export function initialize({
   processId,
   channelId,
-  targetAllocation,
-  targetDestination,
+  startingAllocation,
+  startingDestination,
+  participants,
   sharedData,
   protocolLocator,
 }: {
   processId: string;
   channelId: string;
-  targetAllocation: string[];
-  targetDestination: string[];
+  startingAllocation: string[];
+  startingDestination: string[];
+  participants: string[];
   sharedData: SharedData;
   protocolLocator: ProtocolLocator;
 }): ProtocolStateWithSharedData<states.NonTerminalIndirectFundingState | states.Failure> {
+  // TODO: Should take in an arbitrary list of participants
   const existingLedgerChannel = selectors.getFundedLedgerChannelForParticipants(
     sharedData,
-    helpers.getOurAddress(channelId, sharedData),
-    helpers.getOpponentAddress(channelId, sharedData),
+    participants[0],
+    participants[1],
   );
 
   if (ledgerChannelIsReady(existingLedgerChannel)) {
     return fundWithExistingLedgerChannel({
       processId,
       channelId,
-      targetAllocation,
-      targetDestination,
+      startingAllocation,
+      startingDestination,
       protocolLocator,
       sharedData,
       existingLedgerChannel,
     });
   } else {
+    const ourIndex = getTwoPlayerIndex(channelId, sharedData);
+    const privateKey = getPrivatekey(sharedData, channelId);
     const {
       protocolState: newLedgerChannelState,
       sharedData: newSharedData,
-    } = newLedgerChannel.initializeNewLedgerChannel(
+    } = newLedgerChannel.initializeNewLedgerChannel({
       processId,
-      channelId,
+      privateKey,
+      startingAllocation,
+      startingDestination,
+      participants,
+      ourIndex,
       sharedData,
-      makeLocator(protocolLocator, EmbeddedProtocol.NewLedgerChannel),
-    );
+      protocolLocator: makeLocator(protocolLocator, EmbeddedProtocol.NewLedgerChannel),
+    });
 
     if (newLedgerChannelState.type === 'NewLedgerChannel.Failure') {
       return {
@@ -74,8 +83,8 @@ export function initialize({
         processId,
         channelId,
         newLedgerChannel: newLedgerChannelState,
-        targetAllocation,
-        targetDestination,
+        startingAllocation,
+        startingDestination,
         protocolLocator,
       }),
       sharedData: newSharedData,
@@ -178,16 +187,16 @@ function waitForExistingLedgerFundingReducer(
 function fundWithExistingLedgerChannel({
   processId,
   channelId,
-  targetAllocation,
-  targetDestination,
+  startingAllocation,
+  startingDestination,
   sharedData,
   existingLedgerChannel,
   protocolLocator,
 }: {
   processId: string;
   channelId: string;
-  targetAllocation: string[];
-  targetDestination: string[];
+  startingAllocation: string[];
+  startingDestination: string[];
   sharedData: SharedData;
   existingLedgerChannel: ChannelState;
   protocolLocator: ProtocolLocator;
@@ -200,8 +209,8 @@ function fundWithExistingLedgerChannel({
     processId,
     channelId,
     ledgerId,
-    targetAllocation,
-    targetDestination,
+    startingAllocation,
+    startingDestination,
     protocolLocator: makeLocator(protocolLocator, EXISTING_LEDGER_FUNDING_PROTOCOL_LOCATOR),
     sharedData,
   });
@@ -220,8 +229,8 @@ function fundWithExistingLedgerChannel({
           channelId,
           ledgerId,
           existingLedgerFundingState,
-          targetAllocation,
-          targetDestination,
+          startingAllocation,
+          startingDestination,
           protocolLocator,
         }),
         sharedData: newSharedData,

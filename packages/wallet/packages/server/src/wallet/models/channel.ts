@@ -1,10 +1,10 @@
-import { Address, Channel, Uint256, Uint32 } from 'fmg-core';
+import { Address, Channel as CoreChannel, Uint256, Uint32 } from 'fmg-core';
 import { Model, snakeCaseMappers } from 'objection';
-import AllocatorChannelParticipant from './allocator_channel_participant';
-import LedgerCommitment from './allocatorChannelCommitment';
+import ChannelParticipant from './channelParticipants';
+import LedgerCommitment from './channelCommitment';
 
-export default class AllocatorChannel extends Model {
-  get asCoreChannel(): Channel {
+export default class Channel extends Model {
+  get asCoreChannel(): CoreChannel {
     return {
       channelType: this.rulesAddress,
       nonce: this.nonce,
@@ -12,7 +12,7 @@ export default class AllocatorChannel extends Model {
     };
   }
 
-  static tableName = 'allocator_channels';
+  static tableName = 'channels';
 
   static get columnNameMappers() {
     return snakeCaseMappers();
@@ -21,18 +21,18 @@ export default class AllocatorChannel extends Model {
   static relationMappings = {
     participants: {
       relation: Model.HasManyRelation,
-      modelClass: AllocatorChannelParticipant,
+      modelClass: ChannelParticipant,
       join: {
-        from: 'allocator_channels.id',
-        to: 'allocator_channel_participants.allocator_channel_id',
+        from: 'channels.id',
+        to: 'channel_participants.channel_id',
       },
     },
     commitments: {
       relation: Model.HasManyRelation,
       modelClass: LedgerCommitment,
       join: {
-        from: 'allocator_channels.id',
-        to: 'allocator_channel_commitments.allocator_channel_id',
+        from: 'channels.id',
+        to: 'channel_commitments.channel_id',
       },
     },
   };
@@ -41,7 +41,8 @@ export default class AllocatorChannel extends Model {
   channelId: string;
   holdings!: Uint256;
   nonce: Uint32;
-  participants: AllocatorChannelParticipant[];
+  participants: ChannelParticipant[];
   commitments: LedgerCommitment[];
   rulesAddress: Address;
+  guaranteedChannel: string;
 }

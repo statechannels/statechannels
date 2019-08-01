@@ -13,23 +13,35 @@ import { handleOngoingProcessAction } from './handle-ongoing-process-action';
 export async function handleWalletMessage(
   message: RelayableAction,
 ): Promise<MessageRelayRequested | undefined> {
-  if (isNewProcessAction(message)) {
+  if (isNewProcessAction(message) && (await shouldHandleAsNewProcessAction(message))) {
     return handleNewProcessAction(message);
   } else if (isProtocolAction(message)) {
-    const { processId } = message;
-    const process = await getProcess(processId);
-    if (!process) {
-      throw new Error(`Process ${processId} is not running.`);
-    }
     return handleOngoingProcessAction(message);
   } else {
     return undefined;
   }
 }
+
 // TODO: We should define types for NewProcessAction and ProtocolAction
 
-function isNewProcessAction(action: RelayableAction): action is ConcludeInstigated {
-  return action.type === 'WALLET.NEW_PROCESS.CONCLUDE_INSTIGATED';
+async function shouldHandleAsNewProcessAction(
+  action: ConcludeInstigated | CommitmentsReceived,
+): Promise<boolean> {
+  if (action.type === 'WALLET.NEW_PROCESS.CONCLUDE_INSTIGATED') {
+    return true;
+  }
+  if (action.type === 'WALLET.COMMON.COMMITMENTS_RECEIVED') {
+    return !(await getProcess(action.processId));
+  }
+}
+
+function isNewProcessAction(
+  action: RelayableAction,
+): action is ConcludeInstigated | CommitmentsReceived {
+  return (
+    action.type === 'WALLET.NEW_PROCESS.CONCLUDE_INSTIGATED' ||
+    action.type === 'WALLET.COMMON.COMMITMENTS_RECEIVED'
+  );
 }
 
 function isProtocolAction(

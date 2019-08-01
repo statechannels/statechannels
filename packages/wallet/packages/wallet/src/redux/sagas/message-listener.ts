@@ -152,13 +152,21 @@ function* validateTransition(fromCommitment: Commitment, toCommitment: Commitmen
     const fromAppAttributes = appAttributesFromBytes(fromCommitment.appAttributes);
     const toAppAttributes = appAttributesFromBytes(toCommitment.appAttributes);
     throw new Error(
-      `Invalid transition. From Commitment: ${JSON.stringify({
-        ...fromCommitment,
-        appAttributes: fromAppAttributes,
-      })} To Commitment: ${JSON.stringify({
-        ...toCommitment,
-        appAttributes: toAppAttributes,
-      })}`,
+      `Invalid transition. From Commitment: ${JSON.stringify(
+        {
+          ...fromCommitment,
+          appAttributes: fromAppAttributes,
+        },
+        null,
+        1,
+      )} To Commitment: ${JSON.stringify(
+        {
+          ...toCommitment,
+          appAttributes: toAppAttributes,
+        },
+        null,
+        1,
+      )}`,
     );
   }
 }

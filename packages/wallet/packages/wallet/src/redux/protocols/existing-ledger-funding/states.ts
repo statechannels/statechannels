@@ -16,8 +16,8 @@ export interface WaitForLedgerTopUp {
   ledgerTopUpState: LedgerTopUpState;
   channelId: string;
   ledgerId: string;
-  targetAllocation: string[];
-  targetDestination: string[];
+  startingAllocation: string[];
+  startingDestination: string[];
   protocolLocator: ProtocolLocator;
   consensusUpdateState: ConsensusUpdateState;
 }
@@ -27,8 +27,8 @@ export interface WaitForLedgerUpdate {
   processId: string;
   channelId: string;
   ledgerId: string;
-  targetAllocation: string[];
-  targetDestination: string[];
+  startingAllocation: string[];
+  startingDestination: string[];
   protocolLocator: ProtocolLocator;
   consensusUpdateState: ConsensusUpdateState;
 }

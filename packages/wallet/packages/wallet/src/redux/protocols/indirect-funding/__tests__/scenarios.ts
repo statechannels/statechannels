@@ -29,8 +29,8 @@ const props = {
   ledgerId,
   channelId,
   processId,
-  targetAllocation: oneThree.map(o => o.wei),
-  targetDestination: oneThree.map(o => o.address),
+  startingAllocation: oneThree.map(o => o.wei),
+  startingDestination: oneThree.map(o => o.address),
   protocolLocator: INDIRECT_FUNDING_PROTOCOL_LOCATOR,
 };
 const ledger4 = ledgerCommitment({ turnNum: 4, balances: oneThree });
@@ -54,11 +54,19 @@ const waitForNewLedgerChannel = states.waitForNewLedgerChannel({
 });
 
 export const existingLedgerFundingHappyPath = {
-  initialize: { ...props, sharedData: existingLedgerFundingSharedData },
+  initialize: {
+    ...props,
+    participants: oneThree.map(o => o.address),
+    sharedData: existingLedgerFundingSharedData,
+  },
 };
 
 export const newLedgerChannelHappyPath = {
-  initialize: { ...props, sharedData: NewLedgerChannelSharedData },
+  initialize: {
+    ...props,
+    participants: oneThree.map(o => o.address),
+    sharedData: NewLedgerChannelSharedData,
+  },
   waitForNewLedgerChannel: {
     state: waitForNewLedgerChannel,
     action: NewLedgerChannelSuccessTrigger,

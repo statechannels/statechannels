@@ -6,8 +6,8 @@ import { ProtocolLocator } from '../../../communication';
 interface Base {
   processId: string;
   channelId: string;
-  targetAllocation: string[];
-  targetDestination: string[];
+  startingAllocation: string[];
+  startingDestination: string[];
   protocolLocator: ProtocolLocator;
 }
 export interface WaitForNewLedgerChannel extends Base {

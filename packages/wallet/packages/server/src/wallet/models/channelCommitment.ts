@@ -2,26 +2,26 @@ import { Address, Bytes, Commitment, CommitmentType, toHex, Uint256, Uint32 } fr
 import { Model, snakeCaseMappers } from 'objection';
 import { AppAttrSanitizer } from '../../types';
 import Allocation from './allocation';
-import AllocatorChannel from './allocatorChannel';
+import Channel from './channel';
 
-export default class AllocatorChannelCommitment extends Model {
-  static tableName = 'allocator_channel_commitments';
+export default class ChannelCommitment extends Model {
+  static tableName = 'channel_commitments';
 
   static relationMappings = {
-    allocatorChannel: {
+    channel: {
       relation: Model.BelongsToOneRelation,
-      modelClass: `${__dirname}/allocatorChannel`,
+      modelClass: `${__dirname}/channel`,
       join: {
-        from: 'allocator_channel_commitments.allocator_channel_id',
-        to: 'allocator_channels.id',
+        from: 'channel_commitments.channel_id',
+        to: 'channels.id',
       },
     },
     allocations: {
       relation: Model.HasManyRelation,
       modelClass: `${__dirname}/allocation`,
       join: {
-        from: 'allocator_channel_commitments.id',
-        to: 'allocations.allocator_channel_commitment_id',
+        from: 'channel_commitments.id',
+        to: 'allocations.channel_commitment_id',
       },
     },
   };
@@ -31,12 +31,12 @@ export default class AllocatorChannelCommitment extends Model {
   }
 
   readonly id!: number;
-  allocatorChannel!: AllocatorChannel;
-  allocatorChannelId!: number;
+  channel!: Channel;
+  channelId!: number;
   turnNumber!: Uint32;
   commitmentType!: CommitmentType;
   commitmentCount!: Uint32;
-  allocations!: Allocation[];
+  allocations: Allocation[];
   appAttrs!: any;
 
   toHex(sanitize: AppAttrSanitizer): Bytes {
@@ -48,7 +48,7 @@ export default class AllocatorChannelCommitment extends Model {
       commitmentType: this.commitmentType,
       commitmentCount: this.commitmentCount,
       turnNum: this.turnNumber,
-      channel: this.allocatorChannel.asCoreChannel,
+      channel: this.channel.asCoreChannel,
       allocation: this.allocations.sort(priority).map(amount),
       destination: this.allocations.sort(priority).map(destination),
       appAttributes: sanitize(this.appAttrs),

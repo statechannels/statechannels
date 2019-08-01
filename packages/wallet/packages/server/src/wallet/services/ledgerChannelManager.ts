@@ -9,7 +9,7 @@ import {
 import { unreachable } from 'magmo-wallet';
 import { SignedCommitment, SignedLedgerCommitment } from '.';
 import { HUB_ADDRESS } from '../../constants';
-import { queries } from '../db/queries/allocator_channels';
+import { queries } from '../db/queries/channels';
 import errors from '../errors';
 import * as ChannelManagement from './channelManagement';
 import { asCoreCommitment, LedgerCommitment } from './ledger-commitment';
@@ -41,7 +41,7 @@ export async function updateLedgerChannel(
     signedCommitment => signedCommitment.ledgerCommitment,
   );
   // todo: signatures need to be stored alongside commitments
-  await queries.updateAllocatorChannel(commitmentToStore, ourCommitment);
+  await queries.updateChannel(commitmentToStore, ourCommitment);
   return ChannelManagement.formResponse(asCoreCommitment(ourCommitment));
 }
 

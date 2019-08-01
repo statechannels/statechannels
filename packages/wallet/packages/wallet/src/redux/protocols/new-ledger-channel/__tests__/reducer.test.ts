@@ -5,7 +5,6 @@ import { NewLedgerChannelState } from '../states';
 
 import { describeScenarioStep, itSendsAMessage } from '../../../__tests__/helpers';
 import * as selectors from '../../../selectors';
-import { EmbeddedProtocol } from '../../../../communication';
 
 // Mocks
 const getNextNonceMock = jest.fn().mockReturnValue(0);
@@ -16,10 +15,7 @@ Object.defineProperty(selectors, 'getNextNonce', {
 describe('happy-path scenario', () => {
   const scenario = scenarios.happyPath;
   describe('when initializing', () => {
-    const { channelId, store, processId } = scenario.initialParams;
-    const initialState = initialize(processId, channelId, store, [
-      EmbeddedProtocol.NewLedgerChannel,
-    ]);
+    const initialState = initialize(scenario.initialParams);
 
     itTransitionsTo(initialState, 'NewLedgerChannel.WaitForPreFundSetup');
     itSendsAMessage(initialState);
@@ -44,16 +40,6 @@ describe('happy-path scenario', () => {
     const updatedState = NewLedgerChannelReducer(state, sharedData, action);
 
     itTransitionsTo(updatedState, 'NewLedgerChannel.Success');
-    it('correctly sets the funding state', () => {
-      expect(updatedState.sharedData.fundingState[state.channelId]).toMatchObject({
-        directlyFunded: false,
-        fundingChannel: state.ledgerId,
-      });
-
-      expect(updatedState.sharedData.fundingState[state.ledgerId]).toMatchObject({
-        directlyFunded: true,
-      });
-    });
   });
 });
 

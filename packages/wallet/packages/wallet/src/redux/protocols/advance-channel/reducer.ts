@@ -117,6 +117,7 @@ function initializeWithNewChannel(
     clearedToSend,
     protocolLocator,
     participants,
+    guaranteedChannel,
   } = initializeChannelArgs;
 
   if (helpers.isSafeToSend({ sharedData, ourIndex, clearedToSend })) {
@@ -126,6 +127,7 @@ function initializeWithNewChannel(
       nonce,
       participants,
       channelType,
+      guaranteedChannel,
     };
     const ourCommitment: Commitment = {
       turnNum: 0,
@@ -175,7 +177,7 @@ function initializeWithExistingChannel(
 ) {
   const { channelId, ourIndex, clearedToSend, protocolLocator } = initializeChannelArgs;
   const channel = getChannel(sharedData.channelStore, channelId);
-  if (helpers.isSafeToSend({ sharedData, ourIndex, clearedToSend })) {
+  if (helpers.isSafeToSend({ sharedData, ourIndex, clearedToSend, channelId })) {
     const lastCommitment = getLastCommitment(channel);
     const ourCommitment = nextSetupCommitment(lastCommitment);
     if (ourCommitment === 'NotASetupCommitment') {

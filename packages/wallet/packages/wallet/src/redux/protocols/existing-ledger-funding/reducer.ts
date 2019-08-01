@@ -38,16 +38,16 @@ export const initialize = ({
   processId,
   channelId,
   ledgerId,
-  targetAllocation,
-  targetDestination,
+  startingAllocation,
+  startingDestination,
   protocolLocator,
   sharedData,
 }: {
   processId: string;
   channelId: string;
   ledgerId: string;
-  targetAllocation: string[];
-  targetDestination: string[];
+  startingAllocation: string[];
+  startingDestination: string[];
   protocolLocator: ProtocolLocator;
   sharedData: SharedData;
 }): ProtocolStateWithSharedData<states.NonTerminalExistingLedgerFundingState | states.Failure> => {
@@ -66,14 +66,14 @@ export const initialize = ({
     sharedData,
   }));
 
-  if (ledgerChannelNeedsTopUp(theirCommitment, targetAllocation, targetDestination)) {
+  if (ledgerChannelNeedsTopUp(theirCommitment, startingAllocation, startingDestination)) {
     let ledgerTopUpState: LedgerTopUpState;
     ({ protocolState: ledgerTopUpState, sharedData } = initializeLedgerTopUp({
       processId,
       channelId,
       ledgerId,
-      proposedAllocation: targetAllocation,
-      proposedDestination: targetDestination,
+      proposedAllocation: startingAllocation,
+      proposedDestination: startingDestination,
       originalAllocation: theirCommitment.allocation,
       protocolLocator: makeLocator(protocolLocator, LEDGER_TOP_UP_PROTOCOL_LOCATOR),
       sharedData,
@@ -85,8 +85,8 @@ export const initialize = ({
         processId,
         channelId,
         ledgerId,
-        targetAllocation,
-        targetDestination,
+        startingAllocation,
+        startingDestination,
         protocolLocator,
         consensusUpdateState,
       }),
@@ -107,8 +107,8 @@ export const initialize = ({
       processId,
       ledgerId,
       channelId,
-      targetAllocation,
-      targetDestination,
+      startingAllocation,
+      startingDestination,
       consensusUpdateState,
       protocolLocator,
     }),

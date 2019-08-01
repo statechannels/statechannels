@@ -189,8 +189,9 @@ function handleFundingStrategyNegotiationComplete({
         ({ protocolState: fundingState, sharedData } = initializeIndirectFunding({
           processId,
           channelId: targetChannelId,
-          targetAllocation: latestCommitment.allocation,
-          targetDestination: latestCommitment.destination,
+          startingAllocation: latestCommitment.allocation,
+          startingDestination: latestCommitment.destination,
+          participants: latestCommitment.channel.participants,
           sharedData,
           protocolLocator: makeLocator(EmbeddedProtocol.IndirectFunding),
         }));
