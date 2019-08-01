@@ -1,5 +1,6 @@
 import { ethers } from 'ethers';
 import { Signature } from 'fmg-core';
+import { unreachable } from 'magmo-wallet';
 import { MessageRelayRequested } from 'magmo-wallet-client';
 import * as communication from 'magmo-wallet/lib/src/communication';
 import { CommitmentsReceived, ConcludeInstigated } from 'magmo-wallet/lib/src/communication';
@@ -17,6 +18,7 @@ export async function handleNewProcessAction(
     case 'WALLET.NEW_PROCESS.CONCLUDE_INSTIGATED':
       return handleConcludeInstigated(action);
     default:
+      return unreachable(action);
   }
 }
 
