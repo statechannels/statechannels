@@ -34,10 +34,12 @@ describe('challenge-watcher', () => {
     // Select adjudicator state
     saga.next(adjudicatorState);
     const processId = 'abc';
-    const result = saga.next([processId]).value;
+    const result = saga.next([{ processId, protocolLocator: [] }]).value;
 
     expect(result).toEqual(
-      put(actions.challengeExpiredEvent({ processId, channelId, timestamp: 2 })),
+      put(
+        actions.challengeExpiredEvent({ processId, protocolLocator: [], channelId, timestamp: 2 }),
+      ),
     );
   });
 });

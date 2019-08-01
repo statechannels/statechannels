@@ -26,8 +26,8 @@ firebaseRelay.on('message', (message: RelayableAction) => {
   );
 
   handleWalletMessage(message)
-    .then(outgoingMessage => {
-      if (outgoingMessage) {
+    .then(outgoingMessages => {
+      for (const outgoingMessage of outgoingMessages) {
         console.log(
           `Parent process sending message to firebase: ${JSON.stringify(outgoingMessage, null, 1)}`,
         );

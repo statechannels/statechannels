@@ -2867,6 +2867,11 @@
   dependencies:
     "@types/node" "*"
 
+"@types/async-lock@1.1.1":
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/@types/async-lock/-/async-lock-1.1.1.tgz#81f218213bebcc5f740efe9648272c774a2e4b4b"
+  integrity sha512-TU1X8jmAU2BjwKryBFV/GDezz7Ge0xu9ZuYC7dy6wKj4hnL0JcxeseCOr/G2JkGylff6hdUBrR+Ee5ApAQeU5g==
+
 "@types/babel__core@^7.1.0":
   version "7.1.1"
   resolved "https://registry.yarnpkg.com/@types/babel__core/-/babel__core-7.1.1.tgz#ce9a9e5d92b7031421e1d0d74ae59f572ba48be6"
@@ -4149,6 +4154,11 @@ async-limiter@~1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/async-limiter/-/async-limiter-1.0.0.tgz#78faed8c3d074ab81f22b4e985d79e8738f720f8"
   integrity sha512-jp/uFnooOiO+L211eZOoSyzpOITMXx1rBITauYykG3BRYPu8h0UcxsPNB04RR5vo4Tyz3+ay17tR6JVf9qzYWg==
+
+async-lock@1.2.2:
+  version "1.2.2"
+  resolved "https://registry.yarnpkg.com/async-lock/-/async-lock-1.2.2.tgz#480bd51e4b7ffd4debbd4973763718ec9acb9a9e"
+  integrity sha512-uczz62z2fMWOFbyo6rG4NlV2SdxugJT6sZA2QcfB1XaSjEiOh8CuOb/TttyMnYQCda6nkWecJe465tGQDPJiKw==
 
 async@2.6.1, async@^2.5.0:
   version "2.6.1"

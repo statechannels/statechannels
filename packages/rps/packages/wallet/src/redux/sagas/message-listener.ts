@@ -2,7 +2,7 @@ import { take, put, select } from 'redux-saga/effects';
 import * as incoming from 'magmo-wallet-client/lib/wallet-instructions';
 
 import * as actions from '../actions';
-import { eventChannel } from 'redux-saga';
+import { eventChannel, buffers } from 'redux-saga';
 import * as application from '../protocols/application/reducer';
 import { isRelayableAction } from '../../communication';
 import { responseProvided } from '../protocols/dispute/responder/actions';
@@ -22,7 +22,7 @@ export function* messageListener() {
     return () => {
       /* End channel here*/
     };
-  });
+  }, buffers.fixed(100));
   while (true) {
     const messageEvent = yield take(postMessageEventChannel);
     const action = messageEvent.data;

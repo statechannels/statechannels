@@ -94,7 +94,12 @@ const responseProvided = actions.responseProvided({
   commitment: gameCommitment3,
 });
 const acknowledged = actions.acknowledged({ processId });
-const challengeTimedOut = challengeExpiredEvent({ processId, channelId, timestamp: 1000 });
+const challengeTimedOut = challengeExpiredEvent({
+  processId,
+  protocolLocator: [],
+  channelId,
+  timestamp: 1000,
+});
 
 // ---------
 // Scenarios

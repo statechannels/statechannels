@@ -51,19 +51,15 @@ export const getFundedLedgerChannelForParticipants = (
     );
   });
 };
-export const getAdjudicatorWatcherProcessesForChannel = (
+export const getAdjudicatorWatcherSubscribersForChannel = (
   state: walletStates.Initialized,
   channelId: string,
-): string[] => {
-  const processIds: string[] = [];
-
-  for (const processId of Object.keys(state.channelSubscriptions)) {
-    const channelsToMonitor = state.channelSubscriptions[processId];
-    if (channelsToMonitor.indexOf(channelId) > -1) {
-      processIds.push(processId);
-    }
+): walletStates.ChannelSubscriber[] => {
+  if (state.channelSubscriptions[channelId]) {
+    return state.channelSubscriptions[channelId];
+  } else {
+    return [];
   }
-  return processIds;
 };
 
 export const getAdjudicatorState = (state: SharedData) => {

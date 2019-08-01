@@ -80,6 +80,7 @@ describe('when a updateSharedData action arrives', () => {
 
   const action = actions.challengeExpiredEvent({
     processId: '123',
+    protocolLocator: [],
     channelId: '123',
     timestamp: 1,
   });

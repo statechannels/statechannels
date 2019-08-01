@@ -12,7 +12,7 @@ import { handleOngoingProcessAction } from './handle-ongoing-process-action';
 
 export async function handleWalletMessage(
   message: RelayableAction,
-): Promise<MessageRelayRequested | undefined> {
+): Promise<MessageRelayRequested[]> {
   if (isNewProcessAction(message) && (await shouldHandleAsNewProcessAction(message))) {
     return handleNewProcessAction(message);
   } else if (isProtocolAction(message)) {

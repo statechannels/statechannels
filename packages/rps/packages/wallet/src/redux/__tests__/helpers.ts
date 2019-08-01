@@ -4,7 +4,7 @@ import { Commitment, SignedCommitment, getChannelId } from '../../domain';
 import { QueuedTransaction, OutboxState, MessageOutbox } from '../outbox/state';
 import { SharedData } from '../state';
 import { ProtocolStateWithSharedData } from '../protocols';
-import { RelayableAction } from 'src/communication';
+import { RelayableAction, ProtocolLocator } from 'src/communication';
 
 type SideEffectState =
   | StateWithSideEffects<any>
@@ -277,9 +277,14 @@ export const itStoresThisCommitment = (
   });
 };
 
-export const itRegistersThisChannel = (state: SharedData, channelId: string, processId: string) => {
+export const itRegistersThisChannel = (
+  state: SharedData,
+  channelId: string,
+  processId: string,
+  protocolLocator: ProtocolLocator,
+) => {
   it('subscribes to channel events in the channel subscriptions', () => {
-    const subscriptionState = state.channelSubscriptions[processId];
-    expect(subscriptionState).toContain(channelId);
+    const subscriptionState = state.channelSubscriptions[channelId];
+    expect(subscriptionState).toContainEqual({ protocolLocator, processId });
   });
 };

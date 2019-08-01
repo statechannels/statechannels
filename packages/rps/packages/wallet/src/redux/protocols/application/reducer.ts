@@ -33,7 +33,7 @@ export function initialize(
 ): ProtocolStateWithSharedData<states.ApplicationState> {
   return {
     protocolState: states.waitForFirstCommitment({ channelId, privateKey, address }),
-    sharedData: registerChannelToMonitor(sharedData, APPLICATION_PROCESS_ID, channelId),
+    sharedData: registerChannelToMonitor(sharedData, APPLICATION_PROCESS_ID, channelId, []),
   };
 }
 
