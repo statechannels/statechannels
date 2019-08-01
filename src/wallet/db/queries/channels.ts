@@ -77,15 +77,16 @@ async function updateChannel(commitmentRound: AppCommitment[], hubCommitment: Ap
   // TODO: We are currently using the allocations to set the funding amount
   // This assumes that the channel is funded and DOES NOT work for guarantor channels
   const hubAllocationAmounts = allocations(hubCommitment).map(x => x.amount);
-  let holdings = bigNumberify(0).toHexString();
-  if (hubAllocationAmounts.length > 0) {
-    holdings = hubAllocationAmounts.reduce((a, b) =>
+
+  const holdings = hubAllocationAmounts.reduce(
+    (a, b) =>
       ethers.utils
         .bigNumberify(a)
         .add(ethers.utils.bigNumberify(b))
         .toHexString(),
-    );
-  }
+    bigNumberify(0).toHexString(),
+  );
+
   if (storedChannel) {
     upserts = { ...upserts, id: storedChannel.id };
   } else {
