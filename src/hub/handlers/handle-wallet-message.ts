@@ -27,10 +27,12 @@ export async function handleWalletMessage(
 async function shouldHandleAsNewProcessAction(
   action: ConcludeInstigated | CommitmentsReceived,
 ): Promise<boolean> {
-  if (action.type !== 'WALLET.COMMON.COMMITMENTS_RECEIVED') {
+  if (action.type === 'WALLET.NEW_PROCESS.CONCLUDE_INSTIGATED') {
     return true;
   }
-  return !(await getProcess(action.processId));
+  if (action.type === 'WALLET.COMMON.COMMITMENTS_RECEIVED') {
+    return !(await getProcess(action.processId));
+  }
 }
 
 function isNewProcessAction(
