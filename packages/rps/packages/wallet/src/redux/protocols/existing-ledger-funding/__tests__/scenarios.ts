@@ -38,8 +38,8 @@ const props = {
   channelId,
   ledgerId,
   processId,
-  targetAllocation: oneThree.map(o => o.wei),
-  targetDestination: oneThree.map(o => o.address),
+  startingAllocation: oneThree.map(o => o.wei),
+  startingDestination: oneThree.map(o => o.address),
   protocolLocator: EXISTING_LEDGER_FUNDING_PROTOCOL_LOCATOR,
 };
 

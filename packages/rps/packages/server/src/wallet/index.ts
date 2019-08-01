@@ -1,6 +1,6 @@
 import { Bytes, Commitment } from 'fmg-core';
 export { SignedCommitment } from './services';
-import { queries } from './db/queries/allocator_channels';
+import { queries } from './db/queries/channels';
 import { formResponse, nextCommitment, validSignature } from './services/channelManagement';
 
 import errors from './errors';
@@ -11,7 +11,7 @@ export { errors };
 export default class Wallet {
   sanitize: (appAttrs: any) => Bytes;
   validSignature = validSignature;
-  updateChannel = queries.updateAllocatorChannel;
+  updateChannel = queries.updateChannel;
   updateLedgerChannel = updateLedgerChannel;
   nextCommitment = nextCommitment;
   getApplications = getApplications;
