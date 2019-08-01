@@ -19,7 +19,6 @@ import { routesToConsensusUpdate } from '../consensus-update/actions';
 import { EmbeddedProtocol } from '../../../communication';
 
 export const VIRTUAL_FUNDING_PROTOCOL_LOCATOR = 'VirtualFunding';
-import { getLatestCommitment } from '../reducer-helpers';
 import { CONSENSUS_UPDATE_PROTOCOL_LOCATOR } from '../consensus-update/reducer';
 
 export function initialize(
@@ -99,7 +98,7 @@ function waitForJointChannelReducer(
   sharedData: SharedData,
   action: WalletAction,
 ) {
-  const { processId, hubAddress, ourIndex } = protocolState;
+  const { processId, hubAddress, ourIndex, protocolLocator } = protocolState;
   if (routesToAdvanceChannel(action, protocolState.protocolLocator)) {
     const result = advanceChannelReducer(protocolState.jointChannel, sharedData, action);
 
@@ -111,7 +110,7 @@ function waitForJointChannelReducer(
             clearedToSend: true,
             commitmentType: CommitmentType.PostFundSetup,
             processId,
-            protocolLocator: ADVANCE_CHANNEL_PROTOCOL_LOCATOR,
+            protocolLocator: makeLocator(protocolLocator, ADVANCE_CHANNEL_PROTOCOL_LOCATOR),
             channelId: jointChannelId,
             ourIndex,
           });
@@ -135,11 +134,12 @@ function waitForJointChannelReducer(
               clearedToSend: true,
               commitmentType: CommitmentType.PreFundSetup,
               processId,
-              protocolLocator: ADVANCE_CHANNEL_PROTOCOL_LOCATOR,
+              protocolLocator: makeLocator(protocolLocator, ADVANCE_CHANNEL_PROTOCOL_LOCATOR),
               ourIndex,
               privateKey,
               channelType,
               participants: [ourAddress, hubAddress],
+              guaranteedChannel: jointChannelId,
               ...channelSpecificArgs([], destination),
             },
           );
@@ -178,7 +178,7 @@ function waitForGuarantorChannelReducer(
   sharedData: SharedData,
   action: WalletAction,
 ) {
-  const { processId, ourIndex } = protocolState;
+  const { processId, ourIndex, protocolLocator } = protocolState;
   if (routesToAdvanceChannel(action, protocolState.protocolLocator)) {
     const result = advanceChannelReducer(protocolState.guarantorChannel, sharedData, action);
     if (advanceChannel.isSuccess(result.protocolState)) {
@@ -192,26 +192,35 @@ function waitForGuarantorChannelReducer(
               clearedToSend: true,
               commitmentType: CommitmentType.PostFundSetup,
               processId,
-              protocolLocator: ADVANCE_CHANNEL_PROTOCOL_LOCATOR,
+              protocolLocator: makeLocator(protocolLocator, ADVANCE_CHANNEL_PROTOCOL_LOCATOR),
               channelId: guarantorChannelId,
               ourIndex,
+              guaranteedChannel: protocolState.jointChannelId,
             },
           );
           return {
             protocolState: {
               ...protocolState,
-              jointChannel: guarantorChannelResult.protocolState,
+              guarantorChannel: guarantorChannelResult.protocolState,
             },
             sharedData: guarantorChannelResult.sharedData,
           };
 
         case CommitmentType.PostFundSetup:
-          const latestCommitment = getLatestCommitment(guarantorChannelId, sharedData);
+          const startingAllocation = [
+            protocolState.startingAllocation[ourIndex],
+            protocolState.startingAllocation[ourIndex],
+          ];
+          const startingDestination = [
+            protocolState.startingDestination[ourIndex],
+            protocolState.hubAddress,
+          ];
           const indirectFundingResult = indirectFunding.initializeIndirectFunding({
             processId,
             channelId: result.protocolState.channelId,
-            targetAllocation: latestCommitment.allocation,
-            targetDestination: latestCommitment.destination,
+            startingAllocation,
+            startingDestination,
+            participants: startingDestination,
             sharedData: result.sharedData,
             protocolLocator: makeLocator(
               protocolState.protocolLocator,

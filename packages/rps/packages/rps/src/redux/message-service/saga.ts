@@ -144,7 +144,7 @@ function* receiveFromFirebaseSaga(address) {
   while (true) {
     const message = yield take(channel);
     const value: Message = message.value;
-
+    initializeCommitmentArraysFromFirebase(value);
     const key = message.snapshot.key;
     const { queue } = value;
     if (queue === Queue.GAME_ENGINE) {
@@ -162,6 +162,22 @@ function* receiveFromFirebaseSaga(address) {
     }
 
     yield call(reduxSagaFirebase.database.delete, `/messages/${address}/${key}`);
+  }
+}
+// Since firebase doesn't store empty arrays we need to manually go through and initialize them
+// We take in a list of array properties and recursive down the object setting them to an empty array
+function initializeCommitmentArraysFromFirebase(payload) {
+  const arraysToInitialize = ['allocation'];
+  for (const arrayToInitialize of arraysToInitialize) {
+    if ('commitment' in payload && !payload.commitment[arrayToInitialize]) {
+      payload.commitment[arrayToInitialize] = [];
+    }
+  }
+
+  for (const property of Object.keys(payload)) {
+    if (typeof payload[property] === 'object') {
+      initializeCommitmentArraysFromFirebase(payload[property]);
+    }
   }
 }
 

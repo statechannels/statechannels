@@ -21,6 +21,7 @@ import { success } from '../../indirect-defunding/states';
 import * as _ from 'lodash';
 import { NEW_LEDGER_FUNDING_PROTOCOL_LOCATOR } from '../reducer';
 import { prependToLocator } from '../..';
+import { TwoPartyPlayerIndex } from '../../../types';
 // -----------
 // Commitments
 // -----------
@@ -43,7 +44,6 @@ const setFundingState = (sharedData: SharedData): SharedData => {
   return {
     ...sharedData,
     fundingState: {
-      [channelId]: { directlyFunded: false, fundingChannel: ledgerId },
       [ledgerId]: { directlyFunded: true },
     },
   };
@@ -100,12 +100,14 @@ const waitForDirectFundingFailure = states.waitForDirectFunding({
 // so we just have the one
 export const happyPath = {
   initialParams: {
-    store: ACPreSuccess.sharedData,
-    channelId,
+    sharedData: ACPreSuccess.sharedData,
     processId: 'processId',
     ledgerId,
-    targetAllocation: twoThree.map(t => t.wei),
-    targetDestination: twoThree.map(t => t.address),
+    startingAllocation: twoThree.map(t => t.wei),
+    startingDestination: twoThree.map(t => t.address),
+    privateKey: asPrivateKey,
+    ourIndex: TwoPartyPlayerIndex.A,
+    participants: twoThree.map(t => t.address),
     protocolLocator,
   },
   waitForPreFundL1: {

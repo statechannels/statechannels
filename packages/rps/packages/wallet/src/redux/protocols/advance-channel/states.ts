@@ -26,6 +26,7 @@ export interface ChannelUnknown extends BaseState {
   appAttributes: string;
   privateKey: string;
   clearedToSend: boolean;
+  guaranteedChannel?: string;
 }
 
 export interface NotSafeToSend extends BaseState {

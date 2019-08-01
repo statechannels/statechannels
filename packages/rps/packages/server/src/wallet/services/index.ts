@@ -3,14 +3,14 @@ import { Blockchain } from './blockchain';
 import { LedgerCommitment } from './ledger-commitment';
 import * as LedgerChannelManager from './ledgerChannelManager';
 
-export interface IAllocatorChannel extends Channel {
+export interface IStoredChannel extends Channel {
   id: number;
   holdings: Uint32;
 }
 
-export interface IAllocatorChannelCommitment extends Commitment {
+export interface IChannelCommitment extends Commitment {
   id: number;
-  allocator_channel_id: number;
+  channel_id: number;
 }
 
 export interface SignedCommitment {

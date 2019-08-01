@@ -18,7 +18,6 @@ export interface Failure {
 }
 
 interface Base {
-  channelId: string;
   processId: string;
   protocolLocator: ProtocolLocator;
 }

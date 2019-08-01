@@ -31,7 +31,7 @@ import {
   PARTICIPANT_1_ADDRESS,
   PARTICIPANT_2_ADDRESS,
 } from '../../../test/test-constants';
-import AllocatorChannel from '../../models/allocatorChannel';
+import Channel from '../../models/channel';
 import knex from '../connection';
 Model.knex(knex);
 
@@ -239,10 +239,10 @@ export const seeds = {
 };
 
 export function seed() {
-  return knex('allocator_channels')
+  return knex('channels')
     .del()
     .then(() => {
-      return AllocatorChannel.query().insertGraph(Object.values(seeds));
+      return Channel.query().insertGraph(Object.values(seeds));
     });
 }
 

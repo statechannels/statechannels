@@ -1,14 +1,14 @@
 import { bigNumberify } from 'ethers/utils';
 import { Address, Uint256 } from 'fmg-core';
 import { DUMMY_RULES_BEGINNING_APP_CHANNEL_NONCE_CHANNEL_ID } from '../../test/test-constants';
-import AllocatorChannel from '../models/allocatorChannel';
+import Channel from '../models/channel';
 import { Blockchain } from '../services/blockchain';
 import { onDepositEvent } from '../services/depositManager';
 
 const channelId = DUMMY_RULES_BEGINNING_APP_CHANNEL_NONCE_CHANNEL_ID;
 
 async function getHoldings() {
-  return (await AllocatorChannel.query()
+  return (await Channel.query()
     .where('channel_id', channelId)
     .first()
     .select('holdings')).holdings;
