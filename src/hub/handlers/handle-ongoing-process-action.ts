@@ -138,19 +138,16 @@ async function handleCommitmentsReceived(action: CommitmentsReceived) {
       ledgerCommitmentRound,
       currentCommitment && asConsensusCommitment(currentCommitment),
     );
-    const response = [];
-    const otherParticipants = participants.filter(p => participants.indexOf(p) !== ourIndex);
-    for (const participant of otherParticipants) {
-      response.push(
+    return participants
+      .filter((_, idx) => idx !== ourIndex)
+      .map(p =>
         communication.sendCommitmentsReceived(
-          participant,
+          p,
           processId,
           [...incomingCommitments, { commitment, signature: (signature as unknown) as string }],
           action.protocolLocator,
         ),
       );
-    }
-    return response;
   }
 }
 
