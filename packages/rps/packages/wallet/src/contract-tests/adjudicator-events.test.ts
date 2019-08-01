@@ -20,7 +20,10 @@ const createWatcherState = (
   ...channelIds: string[]
 ): walletStates.Initialized => {
   const channelSubscriptions: walletStates.ChannelSubscriptions = {};
-  channelSubscriptions[processId] = channelIds;
+  for (const channelId of channelIds) {
+    channelSubscriptions[channelId] = channelSubscriptions[channelId] || [];
+    channelSubscriptions[channelId].push({ processId, protocolLocator: [] });
+  }
 
   return walletStates.initialized({
     ...walletStates.EMPTY_SHARED_DATA,
@@ -100,6 +103,7 @@ describe('adjudicator listener', () => {
     expect(action).toEqual(
       actions.fundingReceivedEvent({
         processId,
+        protocolLocator: [],
         channelId,
         amount: defaultDepositAmount,
         totalForDestination: defaultDepositAmount,
@@ -180,7 +184,9 @@ describe('adjudicator listener', () => {
     await sagaTester.waitFor('WALLET.ADJUDICATOR.REFUTED_EVENT');
 
     const action: actions.RefutedEvent = sagaTester.getLatestCalledAction();
-    expect(action).toEqual(actions.refutedEvent({ processId, channelId, refuteCommitment }));
+    expect(action).toEqual(
+      actions.refutedEvent({ processId, protocolLocator: [], channelId, refuteCommitment }),
+    );
   });
 
   it('should handle a respondWithMove event when registered for that channel', async () => {
@@ -201,6 +207,7 @@ describe('adjudicator listener', () => {
     expect(action).toEqual(
       actions.respondWithMoveEvent({
         processId,
+        protocolLocator: [],
         channelId,
         responseCommitment: response.toCommitment,
         responseSignature: response.toSig,

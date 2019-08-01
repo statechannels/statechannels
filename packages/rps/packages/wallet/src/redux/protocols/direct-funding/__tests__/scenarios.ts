@@ -54,12 +54,14 @@ const aFundingReceivedEvent = globalActions.fundingReceivedEvent({
   channelId,
   amount: YOUR_DEPOSIT_A,
   totalForDestination: YOUR_DEPOSIT_A,
+  protocolLocator: [],
 });
 const bFundingReceivedEvent = globalActions.fundingReceivedEvent({
   processId,
   channelId,
   amount: YOUR_DEPOSIT_B,
   totalForDestination: TOTAL_REQUIRED,
+  protocolLocator: [],
 });
 
 const sharedData = () => ({ ...advanceChannelScenarios.preSuccess.sharedData });

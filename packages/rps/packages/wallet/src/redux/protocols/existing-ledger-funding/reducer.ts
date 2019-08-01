@@ -2,7 +2,6 @@ import { SharedData, ChannelFundingState, setFundingState } from '../../state';
 import * as states from './states';
 import { ProtocolStateWithSharedData, makeLocator } from '..';
 import { ExistingLedgerFundingAction } from './actions';
-import * as helpers from '../reducer-helpers';
 import * as selectors from '../../selectors';
 import { getLastCommitment } from '../../channel-store';
 import { Commitment } from '../../../domain';
@@ -54,7 +53,7 @@ export const initialize = ({
   const ledgerChannel = selectors.getChannelState(sharedData, ledgerId);
   const theirCommitment = getLastCommitment(ledgerChannel);
 
-  const appFunding = craftAppFunding(sharedData, channelId);
+  const appFunding = craftAppFunding(channelId, startingAllocation);
   let consensusUpdateState: ConsensusUpdateState;
   ({ sharedData, protocolState: consensusUpdateState } = initializeConsensusUpdate({
     processId,
@@ -265,11 +264,10 @@ function ledgerChannelNeedsTopUp(
 }
 
 function craftAppFunding(
-  sharedData: SharedData,
   appChannelId: string,
+  allocation: string[],
 ): { proposedAllocation: string[]; proposedDestination: string[] } {
-  const commitment = helpers.getLatestCommitment(appChannelId, sharedData);
-  const total = commitment.allocation.reduce(addHex);
+  const total = allocation.reduce(addHex);
   return {
     proposedAllocation: [total],
     proposedDestination: [appChannelId],

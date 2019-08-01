@@ -5,17 +5,13 @@ import { Commitment } from '../../domain';
 
 describe('getAdjudicatorWatcherProcessesForChannel', () => {
   const createWatcherState = (
-    processIds: string[],
-    channelId?: string,
+    channelId: string,
+    subscribers: walletStates.ChannelSubscriber[],
   ): walletStates.Initialized => {
     const channelSubscriptions: walletStates.ChannelSubscriptions = {};
-    processIds.forEach(processId => {
-      if (channelId) {
-        channelSubscriptions[processId] = [channelId];
-      } else {
-        channelSubscriptions[processId] = [];
-      }
-    });
+
+    channelSubscriptions[channelId] = subscribers;
+
     return walletStates.initialized({
       ...walletStates.EMPTY_SHARED_DATA,
       uid: '',
@@ -35,31 +31,33 @@ describe('getAdjudicatorWatcherProcessesForChannel', () => {
       address: 'address',
       privateKey: 'privateKey',
     });
-    expect(selectors.getAdjudicatorWatcherProcessesForChannel(state, '0x0')).toEqual([]);
+    expect(selectors.getAdjudicatorWatcherSubscribersForChannel(state, '0x0')).toEqual([]);
   });
 
-  it('should return an array of processIds that are registered for a channel', () => {
-    const processIds = ['p1', 'p2'];
+  it('should return an array of channel subscribes that are registered for a channel', () => {
+    const subscribers = [
+      { processId: 'p1', protocolLocator: [] },
+      { processId: 'p2', protocolLocator: [] },
+    ];
     const channelId = '0x0';
-    const state = createWatcherState(processIds, channelId);
-    expect(selectors.getAdjudicatorWatcherProcessesForChannel(state, '0x0')).toEqual(processIds);
+    const state = createWatcherState(channelId, subscribers);
+    expect(selectors.getAdjudicatorWatcherSubscribersForChannel(state, '0x0')).toEqual(subscribers);
   });
 
   it('should return an empty array when no processes are registered for the channel', () => {
-    const processIds = ['p1', 'p2'];
+    const subscribers = [
+      { processId: 'p1', protocolLocator: [] },
+      { processId: 'p2', protocolLocator: [] },
+    ];
     const channelId = '0x0';
-    const state = createWatcherState(processIds, channelId);
-    expect(selectors.getAdjudicatorWatcherProcessesForChannel(state, '0x1')).toEqual([]);
+    const state = createWatcherState(channelId, subscribers);
+    expect(selectors.getAdjudicatorWatcherSubscribersForChannel(state, '0x1')).toEqual([]);
   });
 
   it('should return an empty array when the process store is empty', () => {
-    const state = createWatcherState([]);
-    expect(selectors.getAdjudicatorWatcherProcessesForChannel(state, '0x1')).toEqual([]);
-  });
-
-  it('should return an empty array when no channels are monitored', () => {
-    const state = createWatcherState(['p1', 'p2']);
-    expect(selectors.getAdjudicatorWatcherProcessesForChannel(state, '0x1')).toEqual([]);
+    const channelId = '0x1';
+    const state = createWatcherState(channelId, []);
+    expect(selectors.getAdjudicatorWatcherSubscribersForChannel(state, '0x1')).toEqual([]);
   });
 });
 

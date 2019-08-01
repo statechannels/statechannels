@@ -42,7 +42,7 @@ export function initialize({
   protocolLocator: ProtocolLocator;
   sharedData: SharedData;
 }): ProtocolStateWithSharedData<states.LedgerTopUpState> {
-  sharedData = registerChannelToMonitor(sharedData, processId, ledgerId);
+  sharedData = registerChannelToMonitor(sharedData, processId, ledgerId, protocolLocator);
   const { consensusUpdateState, sharedData: newSharedData } = initializeConsensusState(
     TwoPartyPlayerIndex.A,
     processId,

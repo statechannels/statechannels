@@ -5,7 +5,12 @@ import * as application from './protocols/application/actions';
 import * as protocol from './protocols/actions';
 import * as advanceChannel from './protocols/advance-channel';
 import { FundingAction, isFundingAction } from './protocols/funding/actions';
-import { CommitmentReceived, commitmentReceived, RelayableAction } from '../communication';
+import {
+  CommitmentReceived,
+  commitmentReceived,
+  RelayableAction,
+  ProtocolLocator,
+} from '../communication';
 import {
   TransactionAction as TA,
   isTransactionAction as isTA,
@@ -68,6 +73,7 @@ export type Message = 'FundingDeclined';
 export interface ChallengeExpirySetEvent {
   type: 'WALLET.ADJUDICATOR.CHALLENGE_EXPIRY_TIME_SET';
   processId: string;
+  protocolLocator: ProtocolLocator;
   channelId: string;
   expiryTime;
 }
@@ -87,12 +93,14 @@ export interface ConcludedEvent {
 export interface RefutedEvent {
   type: 'WALLET.ADJUDICATOR.REFUTED_EVENT';
   processId: string;
+  protocolLocator: ProtocolLocator;
   channelId: string;
   refuteCommitment: Commitment;
 }
 
 export interface RespondWithMoveEvent {
   processId: string;
+  protocolLocator: ProtocolLocator;
   channelId: string;
   responseCommitment: Commitment;
   responseSignature: string;
@@ -102,6 +110,7 @@ export interface RespondWithMoveEvent {
 export interface FundingReceivedEvent {
   type: 'WALLET.ADJUDICATOR.FUNDING_RECEIVED_EVENT';
   processId: string;
+  protocolLocator: ProtocolLocator;
   channelId: string;
   amount: string;
   totalForDestination: string;
@@ -110,6 +119,7 @@ export interface FundingReceivedEvent {
 export interface ChallengeExpiredEvent {
   type: 'WALLET.ADJUDICATOR.CHALLENGE_EXPIRED';
   processId: string;
+  protocolLocator: ProtocolLocator;
   channelId: string;
   timestamp: number;
 }

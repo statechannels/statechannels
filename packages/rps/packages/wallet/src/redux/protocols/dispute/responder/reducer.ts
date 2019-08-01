@@ -47,6 +47,7 @@ export const initialize = (
         sendChallengeResponseRequested(sharedData, channelId),
         processId,
         channelId,
+        [], // TODO: This should be passed a protocol locator
       ),
     ),
   };

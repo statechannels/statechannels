@@ -28,7 +28,7 @@ describe('sending preFundSetup as A', () => {
     itTransitionsTo(protocolState, 'AdvanceChannel.CommitmentSent');
     itSendsTheseCommitments(result, commitments);
     itStoresThisCommitment(result, commitments[0]);
-    itRegistersThisChannel(result, channelId, processId);
+    itRegistersThisChannel(result, channelId, processId, args.protocolLocator);
   });
 
   describe('when receiving prefund commitments from b', () => {
@@ -70,7 +70,7 @@ describe('sending preFundSetup as B', () => {
     itTransitionsTo(protocolState, 'AdvanceChannel.CommitmentSent');
     itStoresThisCommitment(result, commitments[1]);
     itSendsTheseCommitments(result, commitments);
-    itRegistersThisChannel(result, channelId, processId);
+    itRegistersThisChannel(result, channelId, processId, scenario.protocolLocator);
   });
 
   describe('when receiving prefund commitments from the hub', () => {
@@ -111,7 +111,7 @@ describe('sending preFundSetup as Hub', () => {
     itTransitionsTo(protocolState, 'AdvanceChannel.Success');
     itStoresThisCommitment(result, commitments[2]);
     itSendsTheseCommitments(result, commitments);
-    itRegistersThisChannel(result, channelId, processId);
+    itRegistersThisChannel(result, channelId, processId, scenario.protocolLocator);
   });
 });
 
