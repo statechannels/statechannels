@@ -208,7 +208,7 @@ struct ChannelStorage {
   address challengerAddress;
 }
 
-mapping(address => bytes32) channelStorageHashes;
+mapping(address => bytes32) public channelStorageHashes;
 
 ```
 
@@ -257,14 +257,9 @@ function forceMove(uint turnNumRecord, FixedPart fixedPart, VariableParts[] vari
 ### Internal methods:
 
 ```javascript
-function _isSignedByAnyOf(Signature sig, address[] addresses) returns bool {
+function _isSignedByAnyOf(Signature sig, address[] addresses) internal returns bool {
 
-  bytes32 msgHash;
-  uint8 v;
-  bytes32 r;
-  bytes32 s;
-
-  (msgHash, v, r, s) = sig;
+  (bytes32 msgHash, uint8 v, bytes32 r, bytes32 s) = sig;
 
   signer = ecrecover(msgHash, v, r, s);
   for (i=0; i<adresses.length; i++) {
@@ -273,6 +268,14 @@ function _isSignedByAnyOf(Signature sig, address[] addresses) returns bool {
     }
   }
   return false;
+}
+
+function _validNChain(VariablePart[] variableParts, uint256 newTurnNumRecord, bool[]isFinals) internal returns bool {
+  for(i = 0; i < variableParts.length - 1; i++) {
+    uint256 turnNum = newTurnNumRecord - variableParts.length + i;
+    if(!_validTransition(variableParts[i], isFinals[i], turnNum, variableParts[i+1], isFinals[i+1], turnNum + 1)) {return false;}
+  }
+  return true;
 }
 
 ```
