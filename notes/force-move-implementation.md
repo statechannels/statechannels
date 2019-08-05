@@ -177,7 +177,9 @@ Checking signatures is likely to be a signification part of the logic. Here's a 
 
 ## ForceMove interface
 
-With these considerations in mind, the ForceMove implementation should be something like:
+With these considerations in mind, the ForceMove implementation should be something like the below.
+
+### Types and storage
 
 ```javascript
 
@@ -207,6 +209,13 @@ struct ChannelStorage {
 }
 
 mapping(address => bytes32) channelStorageHashes;
+
+```
+
+### Public methods:
+
+```javascript
+
 
 function forceMove(uint turnNumRecord, FixedPart fixedPart, VariableParts[] variableParts, uint newTurnNumRecord, bool[] isFinals, Signature[] sigs, Signature challengerSig) public returns() {
 
@@ -243,8 +252,12 @@ function forceMove(uint turnNumRecord, FixedPart fixedPart, VariableParts[] vari
 
   channelStorageHashes[channelId] = keccak(channelStorage);
 };
+```
 
-function isSignedByAnyOf(Signature sig, address[] addresses) returns bool {
+### Internal methods:
+
+```javascript
+function _isSignedByAnyOf(Signature sig, address[] addresses) returns bool {
 
   bytes32 msgHash;
   uint8 v;
