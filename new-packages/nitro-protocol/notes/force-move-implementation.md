@@ -27,16 +27,23 @@ struct ChannelStorage {
   address challengerAddress;
 }
 
-mapping(address => ChannelStatus) channelStatuses;
+mapping(address => ChannelStorage) channelStorages;
 ```
 
 `turNumRecord` is the highest turn number that has been established on chain. Established here means being the highest turn number of a valid and visible n-chain (i.e. an ordered list of n states). Valid means each state in the list is a valid transition from its predecessor. Visible means submitted to the chain.
 
-**The key idea of this section is to store a commitment to this data, instead of storing the data itself.** The actual data can then be provided as required to each method, as part of the calldata.
+**The key idea of this section is to store a hash of this data, instead of storing the data itself.** The actual data can then be provided as required to each method, as part of the calldata.
 
-We will replace the naive implementation above with a single commitment to the data:
+Instead of the naive storage implementation above, we can store the hash of the state in the struct, and store the hash of that struct in the mapping:
 
 ```
+struct ChannelStorage {
+  uint256 turnNumRecord;
+  uint256 finalizesAt;
+  bytes32 stateHash;
+  address challengerAddress;
+}
+
 mapping(address => bytes32) channelStorageHashes;
 ```
 
