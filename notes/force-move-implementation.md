@@ -218,7 +218,7 @@ function forceMove(uint turnNumRecord, FixedPart fixedPart, VariableParts[] vari
   // REQUIREMENTS
   // ------------
 
-  require(keccack(channelStorage) == ChannelStorage(turnNumRecord, 0, 0, 0),'Channel not open')
+  require(keccack(ChannelStorage(turnNumRecord, 0, 0, 0)) == channelStorageHashes[channelId],'Channel not open')
   require(_validNChain(variableParts, newTurnNumRecord, isFinals),'Not a valid chain of n commitments');
   require(_validSignatures(channelID, variableParts, newTurnNumRecord, isFinals),'Commitments do not all have valid signatures'); // TurnNum[] turnNums implied as Signature[].length consecutive integers up to and including newTurnNumRecord
   require(newTurnNumRecord > turnNumRecord, 'Stale challenge!')
@@ -243,7 +243,7 @@ function forceMove(uint turnNumRecord, FixedPart fixedPart, VariableParts[] vari
     recoverSigner(challengerSig)
   );
 
-  channelStorage[channelId] = keccak(channelStorage);
+  channelStorageHashes[channelId] = keccak(channelStorage);
 };
 
 ```
