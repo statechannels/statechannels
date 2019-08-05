@@ -130,11 +130,11 @@ From this we can say the following about the way we chose to hash states:
 
 ### Proposal for state hash
 
-The hash of the state that the participants sign should be the hash of the following:
+The data that the participants sign should be the hash of the following:
 
 - TurnNum
 - isFinal
-- ChannelId
+- ChannelId (= fixedPartHash)
   - ChainId
   - Participants
   - ChannelNonce
@@ -142,6 +142,8 @@ The hash of the state that the participants sign should be the hash of the follo
   - AppDefinition
   - OutcomeHash
   - AppData
+
+Where an item has nested children this implies that item is the hash of the children.
 
 **Why include the ChannelId separately?** We have to calculate the `channelId` for every single operation anyway. Given that we have it it's cheaper to hash in the hash, rather than the individual components again.
 
@@ -172,6 +174,79 @@ Checking signatures is likely to be a signification part of the logic. Here's a 
 8. Return true
 
 **Can we optimize this further by changing the way states / sigs are passed in?** For example passing the arrays in last-state-first might help.
+
+## ForceMove interface
+
+With these considerations in mind, the ForceMove implementation should be something like:
+
+```javascript
+
+struct FixedPart {
+ string chainId;
+ address[] participants;
+ uint256 channelNonce;
+}
+
+struct VariablePart {
+  uint256 turnNum;
+  bool isFinal;
+
+}
+
+struct State { // participants sign this
+  uint256 turnNum;
+  bool isFinal;
+  bytes32 channelId;  // keccack(FixedPart)
+  bytes32 variablePartHash; //keccak(VariablePart)
+}
+
+struct ChannelStorage {
+  uint256 turnNumRecord;
+  uint256 finalizesAt;
+  bytes32 stateHash; // keccak(State)
+  address challengerAddress;
+
+}
+
+mapping(address => bytes32) channelStorageHashes;
+
+function forceMove(uint turnNumRecord, FixedPart fixedPart, VariableParts[] variableParts, uint newTurnNumRecord, bool[] isFinals, Signature[] sigs, Signature challengerSig) public returns() {
+
+  address channelID = keccak(fixedPart);
+
+  // ------------
+  // REQUIREMENTS
+  // ------------
+
+  require(keccack(channelStorage) == ChannelStorage(turnNumRecord, 0, 0, 0),'Channel not open')
+  require(_validNChain(variableParts, newTurnNumRecord, isFinals),'Not a valid chain of n commitments');
+  require(_validSignatures(channelID, variableParts, newTurnNumRecord, isFinals),'Commitments do not all have valid signatures'); // TurnNum[] turnNums implied as Signature[].length consecutive integers up to and including newTurnNumRecord
+  require(newTurnNumRecord > turnNumRecord, 'Stale challenge!')
+
+  // TODO checks on challengerSig
+
+  // ------------
+  // EFFECTS
+  // ------------
+
+  State memory state = State(
+    newTurnNumRecord,
+    isFinals[end],
+    channelID,
+    keccak(variableParts[end])
+    );
+
+  ChannelStorage memory channelStorage = ChannelStorage(
+    newTurnNumRecord;
+    now + challengeInterval,
+    keccak(state),
+    recoverSigner(challengerSig)
+  );
+
+  channelStorage[channelId] = keccak(channelStorage);
+};
+
+```
 
 ## Unanswered Questions
 
