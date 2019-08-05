@@ -30,6 +30,8 @@ struct ChannelStorage {
 mapping(address => ChannelStatus) channelStatuses;
 ```
 
+`turNumRecord` is the highest turn number that has been established on chain. Established here means being the highest turn number of a valid and visible n-chain (i.e. an ordered list of n states). Valid means each state in the list is a valid transition from its predecessor. Visible means submitted to the chain.
+
 **The key idea of this section is to store a commitment to this data, instead of storing the data itself.** The actual data can then be provided as required to each method, as part of the calldata.
 
 We will replace the naive implementation above with a single commitment to the data:
@@ -163,10 +165,6 @@ Checking signatures is likely to be a signification part of the logic. Here's a 
 8. Return true
 
 **Can we optimize this further by changing the way states / sigs are passed in?** For example passing the arrays in last-state-first might help.
-
-## Updates call signatures
-
-[TODO] Rewrite the method call signatures to avoid any unnecessary repetition in the data being passed in.
 
 ## Unanswered Questions
 
