@@ -190,7 +190,6 @@ struct FixedPart {
 struct VariablePart {
   uint256 turnNum;
   bool isFinal;
-
 }
 
 struct State { // participants sign this
@@ -205,7 +204,6 @@ struct ChannelStorage {
   uint256 finalizesAt;
   bytes32 stateHash; // keccak(State)
   address challengerAddress;
-
 }
 
 mapping(address => bytes32) channelStorageHashes;
@@ -223,7 +221,7 @@ function forceMove(uint turnNumRecord, FixedPart fixedPart, VariableParts[] vari
   require(_validSignatures(channelID, variableParts, newTurnNumRecord, isFinals),'Commitments do not all have valid signatures'); // TurnNum[] turnNums implied as Signature[].length consecutive integers up to and including newTurnNumRecord
   require(newTurnNumRecord > turnNumRecord, 'Stale challenge!')
 
-  // TODO checks on challengerSig
+  require(_isSignedByAnyOf(challengerSig, participants),'Signature does not correspond to any participant');
 
   // ------------
   // EFFECTS
@@ -245,6 +243,24 @@ function forceMove(uint turnNumRecord, FixedPart fixedPart, VariableParts[] vari
 
   channelStorageHashes[channelId] = keccak(channelStorage);
 };
+
+function isSignedByAnyOf(Signature sig, address[] addresses) returns bool {
+
+  bytes32 msgHash;
+  uint8 v;
+  bytes32 r;
+  bytes32 s;
+
+  (msgHash, v, r, s) = sig;
+
+  signer = ecrecover(msgHash, v, r, s);
+  for (i=0; i<adresses.length; i++) {
+    if (signer=addresses[i]) {
+      return true;
+    }
+  }
+  return false;
+}
 
 ```
 
