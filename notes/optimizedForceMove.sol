@@ -18,7 +18,7 @@ contract optimizedForceMove {
 
     struct VariablePart {
         bytes32 outcomeHash;
-        bytes32 apppData;
+        bytes32 appData;
     }
 
     struct State {
