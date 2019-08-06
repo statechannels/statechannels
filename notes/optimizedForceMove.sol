@@ -3,7 +3,7 @@ pragma experimental ABIEncoderV2;
 
 contract optimizedForceMove {
     struct Signature {
-        bytes32 msgHash;
+        bytes32 msgHash; // TODO probably doesn't belong here
         uint8 v;
         bytes32 r;
         bytes32 s;
