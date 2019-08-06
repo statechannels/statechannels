@@ -31,8 +31,8 @@
     "clearContracts": "rm -rf build/contracts",
     "clearLib": "rm -rf lib",
     "build": "run-s clearContracts clearLib build:truffle build:typescript",
-    "prettier:check": "npx prettier --check '{contracts,src,test}/**/*.{ts,tsx,sol}'",
-    "prettier:write": "npx prettier --write '{contracts,src,test}/**/*.{ts,tsx,sol}'"
+    "prettier:check": "npx prettier --check '{contracts,src,test,notes}/**/*.{ts,tsx,sol}'",
+    "prettier:write": "npx prettier --write '{contracts,src,test,notes}/**/*.{ts,tsx,sol}'"
   },
   "dependencies": {
     "ethers": "^4.0.26",
