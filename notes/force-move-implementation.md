@@ -142,12 +142,12 @@ The data that the participants sign should be the hash of the following:
 
 - TurnNum
 - isFinal
-- ChannelId (= fixedPartHash)
+- AppDefinition
+- ChannelId
   - ChainId
   - Participants
   - ChannelNonce
 - VariablePartHash
-  - AppDefinition
   - OutcomeHash
   - AppData
 
@@ -195,17 +195,19 @@ struct FixedPart {
  string chainId;
  address[] participants;
  uint256 channelNonce;
+ address appDefinition;
 }
 
 struct VariablePart {
-  uint256 turnNum;
-  bool isFinal;
+  bytes outcomeHash;
+  bytes apppData;
 }
 
 struct State { // participants sign this
   uint256 turnNum;
   bool isFinal;
-  bytes32 channelId;  // keccack(FixedPart)
+  address appDefinition;
+  bytes32 channelId;  // keccack(chainId,participants,channelNonce)
   bytes32 variablePartHash; //keccak(VariablePart)
 }
 
@@ -227,15 +229,22 @@ mapping(address => bytes32) public channelStorageHashes;
 
 function forceMove(uint turnNumRecord, FixedPart fixedPart, VariableParts[] variableParts, uint newTurnNumRecord, bool[] isFinals, Signature[] sigs, Signature challengerSig) public returns() {
 
-  address channelID = keccak(fixedPart);
+  (
+  string chainId,
+  address[] participants,
+  uint256 channelNonce,
+  address appDefinition,
+  ) = fixedPart;
+
+  address channelID = keccak(chainId,participants,channelNonce);
 
   // ------------
   // REQUIREMENTS
   // ------------
 
   require(keccack(ChannelStorage(turnNumRecord, 0, 0, 0)) == channelStorageHashes[channelId],'Channel not open')
-  require(_validNChain(variableParts, newTurnNumRecord, isFinals),'Not a valid chain of n commitments');
-  require(_validSignatures(channelID, variableParts, newTurnNumRecord, isFinals),'Commitments do not all have valid signatures'); // TurnNum[] turnNums implied as Signature[].length consecutive integers up to and including newTurnNumRecord
+  require(_validNChain(fixedPart, variableParts, newTurnNumRecord, isFinals),'Not a valid chain of n commitments');
+  require(_validSignatures(channelID, fixedPart, variableParts, newTurnNumRecord, isFinals),'Commitments do not all have valid signatures'); // TurnNum[] turnNums implied as Signature[].length consecutive integers up to and including newTurnNumRecord
   require(newTurnNumRecord > turnNumRecord, 'Stale challenge!')
 
   require(_isSignedByAnyOf(challengerSig, participants),'Signature does not correspond to any participant');
@@ -278,10 +287,10 @@ function _isSignedByAnyOf(Signature sig, address[] addresses) internal returns b
   return false;
 }
 
-function _validNChain(VariablePart[] variableParts, uint256 newTurnNumRecord, bool[]isFinals) internal returns bool {
+function _validNChain(FixedPart fixedPart, VariablePart[] variableParts, uint256 newTurnNumRecord, bool[] isFinals) internal returns bool {
   for(i = 0; i < variableParts.length - 1; i++) {
     uint256 turnNum = newTurnNumRecord - variableParts.length + i;
-    if(!_validTransition(variableParts[i], isFinals[i], turnNum, variableParts[i+1], isFinals[i+1], turnNum + 1)) {return false;}
+    if(!_validTransition(fixedPart, variableParts[i], isFinals[i], turnNum, variableParts[i+1], isFinals[i+1], turnNum + 1)) {return false;}
   }
   return true;
 }
