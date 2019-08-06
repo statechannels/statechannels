@@ -247,7 +247,9 @@ function forceMove(uint turnNumRecord, FixedPart fixedPart, VariableParts[] vari
   require(_validSignatures(channelID, fixedPart, variableParts, newTurnNumRecord, isFinals),'Commitments do not all have valid signatures'); // TurnNum[] turnNums implied as Signature[].length consecutive integers up to and including newTurnNumRecord
   require(newTurnNumRecord > turnNumRecord, 'Stale challenge!')
 
-  require(_isSignedByAnyOf(challengerSig, participants),'Signature does not correspond to any participant');
+  (bytes32 msgHash, uint8 v, bytes32 r, bytes32 s) = challengerSig;
+  address challenger = ecrecover(msgHash, v, r, s);
+  require(_isAParticipant(challenger, participants),'Challenger is not a participant');
 
   // ------------
   // EFFECTS
@@ -264,7 +266,7 @@ function forceMove(uint turnNumRecord, FixedPart fixedPart, VariableParts[] vari
     newTurnNumRecord;
     now + challengeInterval,
     keccak(state),
-    recoverSigner(challengerSig)
+    challenger,
   );
 
   channelStorageHashes[channelId] = keccak(channelStorage);
@@ -274,13 +276,9 @@ function forceMove(uint turnNumRecord, FixedPart fixedPart, VariableParts[] vari
 ### Internal methods:
 
 ```javascript
-function _isSignedByAnyOf(Signature sig, address[] addresses) internal returns bool {
-
-  (bytes32 msgHash, uint8 v, bytes32 r, bytes32 s) = sig;
-
-  signer = ecrecover(msgHash, v, r, s);
-  for (i=0; i<adresses.length; i++) {
-    if (signer=addresses[i]) {
+function _isAParticipant(address suspect, address[] addresses) internal returns bool {
+  for (i = 0; i < adresses.length; i++) {
+    if (suspect == addresses[i]) {
       return true;
     }
   }
