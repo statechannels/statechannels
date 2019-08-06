@@ -30,8 +30,6 @@ struct ChannelStorage {
 mapping(address => ChannelStorage) channelStorages;
 ```
 
-`turNumRecord` is the highest turn number that has been established on chain. Established here means being the highest turn number of a valid and visible n-chain (i.e. an ordered list of n states). Valid means each state in the list is a valid transition from its predecessor. Visible means submitted to the chain.
-
 **The key idea of this section is to store a hash of this data, instead of storing the data itself.** The actual data can then be provided as required to each method, as part of the calldata.
 
 Instead of the naive storage implementation above, we can store the hash of the state in the struct, and store the hash of that struct in the mapping:
@@ -54,6 +52,16 @@ We have two key questions to answer (along with a couple of other minor decision
 
 There are lots of possibilities here. To decide between them we need to examine exactly how the quantities will be used.
 To do this we will look at both what the methods need from the channel storage and what the methods need from the channels passed in.
+
+### `turnNumRecord`
+
+`turNumRecord` is the highest turn number that has been established on chain. Established here means being the turnNum of a state submitted to the chain in a transaction and either
+
+- featuring in a valid n-chain (i.e. an ordered list of n states each signed by their respective participants, and such that each state in the list is a valid transition from its predecessor), or
+
+- being the turn number of a single state signed by all `n` participants.
+
+Note that a new valid n-chain may be implied by a single, signed state that is a validTransition from the final state of a previously established n-chain: and hence the `turnNumRecord` can be incremented by a `respond` transaction.
 
 ### What do the methods need from the channel storage?
 
