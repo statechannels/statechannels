@@ -31,12 +31,13 @@
     "clearContracts": "rm -rf build/contracts",
     "clearLib": "rm -rf lib",
     "build": "run-s clearContracts clearLib build:truffle build:typescript",
-    "prettier:check": "npx prettier --check '{src,test}/**/*.{ts,tsx}'",
-    "prettier:write": "npx prettier --write '{src,test}/**/*.{ts,tsx}'"
+    "prettier:check": "npx prettier --check '{contracts,src,test}/**/*.{ts,tsx,sol}'",
+    "prettier:write": "npx prettier --write '{contracts,src,test}/**/*.{ts,tsx,sol}'"
   },
   "dependencies": {
     "ethers": "^4.0.26",
     "openzeppelin-solidity": "2.1.3",
+    "prettier-plugin-solidity": "^1.0.0-alpha.27",
     "web3": "1.0.0-beta.37"
   },
   "devDependencies": {
