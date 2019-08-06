@@ -199,8 +199,8 @@ struct FixedPart {
 }
 
 struct VariablePart {
-  bytes outcomeHash;
-  bytes apppData;
+  bytes32 outcomeHash;
+  bytes32 apppData;
 }
 
 struct State { // participants sign this
@@ -216,6 +216,7 @@ struct ChannelStorage {
   uint256 finalizesAt;
   bytes32 stateHash; // keccak(State)
   address challengerAddress;
+  bytes32 outcomeHash;
 }
 
 mapping(address => bytes32) public channelStorageHashes;
@@ -243,8 +244,12 @@ function forceMove(uint turnNumRecord, FixedPart fixedPart, VariableParts[] vari
   // ------------
 
   require(keccack(ChannelStorage(turnNumRecord, 0, 0, 0)) == channelStorageHashes[channelId],'Channel not open')
-  require(_validNChain(fixedPart, variableParts, newTurnNumRecord, isFinals),'Not a valid chain of n commitments');
-  require(_validSignatures(channelID, fixedPart, variableParts, newTurnNumRecord, isFinals),'Commitments do not all have valid signatures'); // TurnNum[] turnNums implied as Signature[].length consecutive integers up to and including newTurnNumRecord
+  if (variableParts.length > 1) {
+      require(_validNChain(fixedPart, variableParts, newTurnNumRecord, isFinals, sigs, participants),'Not a valid chain of n commitments');
+    } else {
+      require(_validUnanimousConsensus(fixedPart,variableParts[0], newTurnNumRecord, isFinals[0], sigs, participants), 'Not a valid unaninmous consensus');
+    }
+
   require(newTurnNumRecord > turnNumRecord, 'Stale challenge!')
 
   (bytes32 msgHash, uint8 v, bytes32 r, bytes32 s) = challengerSig;
@@ -285,12 +290,36 @@ function _isAParticipant(address suspect, address[] addresses) internal returns 
   return false;
 }
 
-function _validNChain(FixedPart fixedPart, VariablePart[] variableParts, uint256 newTurnNumRecord, bool[] isFinals) internal returns bool {
-  for(i = 0; i < variableParts.length - 1; i++) {
-    uint256 turnNum = newTurnNumRecord - variableParts.length + i;
-    if(!_validTransition(fixedPart, variableParts[i], isFinals[i], turnNum, variableParts[i+1], isFinals[i+1], turnNum + 1)) {return false;}
+function _validNChain(address channelID, FixedPart fixedPart, VariablePart[] variableParts, uint256 newTurnNumRecord, bool[] isFinals, Signature[] sigs, address[] participants) internal returns bool {
+  uint8 v;
+  bytes32 r;
+  bytes32 s;
+  uint n = participants.length;
+  for(i = 0; i < n; i++) {
+    uint256 turnNum = newTurnNumRecord - n + i;
+    State memory state = State(turnNum, isFinals[i], fixedPart.appDefinition, channelId, variableParts[i]);
+    (v , r , s) = sigs[i];
+    if(_recoverSigner(abi.encode(state), v, r, s)) != participants[turnNum] % n) {return false;} // _recoverSigner is an fmg-core method
+    if(turnNum < n){
+      if(!_validTransition(fixedPart, variableParts[i], isFinals[i], turnNum, variableParts[i+1], isFinals[i+1], turnNum + 1)) {return false;}
+    }
   }
   return true;
+}
+
+function _validUnanimousConsensus(FixedPart fixedpart, VariablePart variablePart, uint256 newTurnNumRecord, bool isFinal, Signature[] sigs, address[] participants) internal returns bool {
+
+  uint8 v;
+  bytes32 r;
+  bytes32 s;
+  uint n = participants.length;
+
+  for(i = 0; i < n; i++) {
+    uint256 turnNum = newTurnNumRecord - n + i;
+    (v , r , s) = sigs[i];
+    State memory state = State(turnNum, isFinal, fixedPart.appDefinition, channelId, variablePart);
+    if(_recoverSigner(abi.encode(state), v, r, s)) != participants[turnNum] % n) {return false;} // _recoverSigner is an fmg-core method
+    }
 }
 
 ```
