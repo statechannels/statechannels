@@ -26,6 +26,23 @@ In a concrete implementation, the parameters might change - for example it can b
 | AppDefinition  | `address`              | on-chain address of library defining custom application rules                                        |
 | AppData        | `bytes`                | application-specific data                                                                            |
 
+## Signatures
+
+Every state has an associated 'mover' - the participant who had the unique ability to progress the channel at the point the state was created.
+The mover can be calculated from the `turnNum` and the `particiants` as follows:
+
+```
+moverAddress = partipants[turnNum % participants.length]
+```
+
+The implication of this formula is that participants take it in turn to update the state of the channel.
+
+As we will see in the method definitions later, in order for the chain to accept a channel state, `s`, that channel state must be _supported_ by `n` signatures (where `n = participants.length`).
+The simplest way for this to accomplish this is to provide a sequence of `n` states terminating is state `s`, where each state is signed by its mover and each consecutive pair of states form a valid transition.
+
+ForceMove also allows an optimization where a state can be supported by `n` signatures on a sequence of `m < n` states, provided each participant has provided a signature on a state later in the sequence than the state for which they were the mover.
+In the extreme, this allows a single state signed by all `n` parties to be accepted by the chain.
+
 ### `turnNumRecord`
 
 `turNumRecord` is the highest turn number that has been established on chain. Established here means being the turnNum of a state submitted to the chain in a transaction and either
