@@ -15,17 +15,16 @@ In a concrete implementation, the parameters might change - for example it can b
 
 ## Off-chain state
 
-| **Field**      | **Data type**                 | **Definition / Explanation**                                                                         |
-| :------------- | :---------------------------- | :--------------------------------------------------------------------------------------------------- |
-| ChainID        | `bytes32`                     | e.g. ropsten / mainnet                                                                               |
-| Participants   | `address[]`                   | addresses of participants. Determines keys used to sign updates                                      |
-| ChannelNonce   | `uint256`                     | unique, to prevent replay attacks                                                                    |
-| TurnNum        | `uint256`                     | turn number                                                                                          |
-| DefaultOutcome | `[address, uint256][]`        | tracks the amounts paid out to each of a list of addresses if the channel is finalized in this state |
-| isFinal        | `boolean`                     |                                                                                                      |
-| AppDefinition  | `address`                     | on-chain address of library defining custom application rules                                        |
-| AppData        | `bytes`                       | application-specific data                                                                            |
-| Signature      | `[uint256, bytes32, bytes32]` | ECDSA signature of commitment \(v, r, s\)                                                            |
+| **Field**      | **Data type**          | **Definition / Explanation**                                                                         |
+| :------------- | :--------------------- | :--------------------------------------------------------------------------------------------------- |
+| ChainID        | `bytes32`              | e.g. ropsten / mainnet                                                                               |
+| Participants   | `address[]`            | addresses of participants. Determines keys used to sign updates                                      |
+| ChannelNonce   | `uint256`              | unique, to prevent replay attacks                                                                    |
+| TurnNum        | `uint256`              | turn number                                                                                          |
+| DefaultOutcome | `[address, uint256][]` | tracks the amounts paid out to each of a list of addresses if the channel is finalized in this state |
+| isFinal        | `boolean`              |                                                                                                      |
+| AppDefinition  | `address`              | on-chain address of library defining custom application rules                                        |
+| AppData        | `bytes`                | application-specific data                                                                            |
 
 ### `turnNumRecord`
 
