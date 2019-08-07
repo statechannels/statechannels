@@ -27,6 +27,16 @@ In a concrete implementation, the parameters might change - for example it can b
 | AppData        | `bytes`                       | application-specific data                                                                            |
 | Signature      | `[uint256, bytes32, bytes32]` | ECDSA signature of commitment \(v, r, s\)                                                            |
 
+### `turnNumRecord`
+
+`turNumRecord` is the highest turn number that has been established on chain. Established here means being the turnNum of a state submitted to the chain in a transaction and either
+
+- featuring in a valid n-chain (i.e. an ordered list of n states each signed by their respective participants, and such that each state in the list is a valid transition from its predecessor), or
+
+- being the turn number of a single state signed by all `n` participants.
+
+Note that a new valid n-chain may be implied by a single, signed state that is a validTransition from the final state of a previously established n-chain: and hence the `turnNumRecord` can be incremented by a `respond` transaction.
+
 ## On-chain state
 
 - `turnNumRecord`
