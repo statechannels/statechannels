@@ -27,14 +27,21 @@ struct ChannelStorage {
   address challengerAddress;
 }
 
-mapping(address => ChannelStatus) channelStatuses;
+mapping(address => ChannelStorage) channelStorages;
 ```
 
-**The key idea of this section is to store a commitment to this data, instead of storing the data itself.** The actual data can then be provided as required to each method, as part of the calldata.
+**The key idea of this section is to store a hash of this data, instead of storing the data itself.** The actual data can then be provided as required to each method, as part of the calldata.
 
-We will replace the naive implementation above with a single commitment to the data:
+Instead of the naive storage implementation above, we can store the hash of the state in the struct, and store the hash of that struct in the mapping:
 
 ```
+struct ChannelStorage {
+  uint256 turnNumRecord;
+  uint256 finalizesAt;
+  bytes32 stateHash;
+  address challengerAddress;
+}
+
 mapping(address => bytes32) channelStorageHashes;
 ```
 
@@ -45,6 +52,16 @@ We have two key questions to answer (along with a couple of other minor decision
 
 There are lots of possibilities here. To decide between them we need to examine exactly how the quantities will be used.
 To do this we will look at both what the methods need from the channel storage and what the methods need from the channels passed in.
+
+### `turnNumRecord`
+
+`turNumRecord` is the highest turn number that has been established on chain. Established here means being the turnNum of a state submitted to the chain in a transaction and either
+
+- featuring in a valid n-chain (i.e. an ordered list of n states each signed by their respective participants, and such that each state in the list is a valid transition from its predecessor), or
+
+- being the turn number of a single state signed by all `n` participants.
+
+Note that a new valid n-chain may be implied by a single, signed state that is a validTransition from the final state of a previously established n-chain: and hence the `turnNumRecord` can be incremented by a `respond` transaction.
 
 ### What do the methods need from the channel storage?
 
@@ -121,18 +138,20 @@ From this we can say the following about the way we chose to hash states:
 
 ### Proposal for state hash
 
-The hash of the state that the participants sign should be the hash of the following:
+The data that the participants sign should be the hash of the following:
 
 - TurnNum
 - isFinal
+- AppDefinition
 - ChannelId
   - ChainId
   - Participants
   - ChannelNonce
 - VariablePartHash
-  - AppDefinition
   - OutcomeHash
   - AppData
+
+Where an item has nested children this implies that item is the hash of the children.
 
 **Why include the ChannelId separately?** We have to calculate the `channelId` for every single operation anyway. Given that we have it it's cheaper to hash in the hash, rather than the individual components again.
 
@@ -164,9 +183,97 @@ Checking signatures is likely to be a signification part of the logic. Here's a 
 
 **Can we optimize this further by changing the way states / sigs are passed in?** For example passing the arrays in last-state-first might help.
 
-## Updates call signatures
+## ForceMove interface
 
-[TODO] Rewrite the method call signatures to avoid any unnecessary repetition in the data being passed in.
+With these considerations in mind, the ForceMove interface should be something like the below. See `.sol` file in this directory for a sketch of the implementation.
+
+### Types and storage
+
+```javascript
+
+    struct Signature {
+        bytes32 msgHash; // TODO probably doesn't belong here
+        uint8 v;
+        bytes32 r;
+        bytes32 s;
+    }
+
+    struct FixedPart {
+        string chainId;
+        address[] participants;
+        uint256 channelNonce;
+        address appDefinition;
+    }
+
+    struct VariablePart {
+        bytes32 outcomeHash;
+        bytes32 apppData;
+    }
+
+    struct State {
+        // participants sign this
+        uint256 turnNum;
+        bool isFinal;
+        address appDefinition;
+        bytes32 channelId; // keccack(chainId,participants,channelNonce)
+        bytes32 variablePartHash; //keccak256(abi.encode(VariablePart))
+    }
+
+    struct ChannelStorage {
+        uint256 turnNumRecord;
+        uint256 finalizesAt;
+        bytes32 stateHash; // keccak256(abi.encode(State))
+        address challengerAddress;
+        bytes32 outcomeHash;
+    }
+
+    mapping(bytes32 => bytes32) public channelStorageHashes;
+
+    uint256 challengeInterval = 1 minutes;
+
+```
+
+### Public methods:
+
+```javascript
+function forceMove(
+        uint256 turnNumRecord,
+        FixedPart memory fixedPart,
+        VariablePart[] memory variableParts,
+        uint256 newTurnNumRecord,
+        bool[] memory isFinals,
+        Signature[] memory sigs,
+        Signature memory challengerSig
+    ) public;
+
+```
+
+### Internal methods:
+
+```javascript
+  function _isAParticipant(address suspect, address[] memory addresses) internal pure returns (bool);
+
+  function _validNChain(
+      bytes32 channelId,
+      FixedPart memory fixedPart,
+      VariablePart[] memory variableParts,
+      uint256 newTurnNumRecord,
+      bool[] memory isFinals,
+      Signature[] memory sigs,
+      address[] memory participants
+  ) internal pure returns (bool);
+
+  function _validUnanimousConsensus(
+      bytes32 channelId,
+      FixedPart memory fixedPart,
+      VariablePart memory variablePart,
+      uint256 newTurnNumRecord,
+      bool isFinal,
+      Signature[] memory sigs,
+      address[] memory participants
+  ) internal pure returns (bool);
+
+```
 
 ## Unanswered Questions
 
