@@ -132,14 +132,15 @@ The data that the participants sign should be the hash of the following:
 
 - TurnNum
 - isFinal
-- AppDefinition
 - ChannelId
   - ChainId
   - Participants
   - ChannelNonce
-- VariablePartHash
-  - OutcomeHash
+- AppPartHash
+  - ChallengeDuration // only ever need this on a ForceMove
+  - AppDefinition
   - AppData
+- OutcomeHash
 
 Where an item has nested children this implies that item is the hash of the children.
 
@@ -193,20 +194,22 @@ With these considerations in mind, the ForceMove interface should be something l
         address[] participants;
         uint256 channelNonce;
         address appDefinition;
+        uint256 challengeDuration;
     }
 
     struct VariablePart {
-        bytes32 outcomeHash;
-        bytes32 apppData;
+        bytes outcome;
+        bytes appData;
     }
+
 
     struct State {
         // participants sign this
         uint256 turnNum;
         bool isFinal;
-        address appDefinition;
         bytes32 channelId; // keccack(chainId,participants,channelNonce)
-        bytes32 variablePartHash; //keccak256(abi.encode(VariablePart))
+        bytes32 appPartHash; // hash(challengeDuration, appDefinition, appData)
+        bytes32 outcomeHash;
     }
 
     struct ChannelStorage {
@@ -229,40 +232,178 @@ With these considerations in mind, the ForceMove interface should be something l
 function forceMove(
         uint256 turnNumRecord,
         FixedPart memory fixedPart,
-        VariablePart[] memory variableParts,
-        uint256 newTurnNumRecord,
-        bool[] memory isFinals,
-        Signature[] memory sigs,
-        Signature memory challengerSig
+        uint256 largestTurnNum,
+        VariablePart[] memory variableParts, // latest state first
+        uint8 isFinalCount, // how many of the states are final
+        Signature[][] memory sigs,
+        Signature memory challengerSig,
+        uint8 challengerIndex,
     ) public;
+* Calculate `channelId` from fixed part
+* If `turnNumRecord == 0`
+  * Check that `channelStorageHashes[channelId] = 0`
+* Else
+  * Calculate `emptyStorageHash = hash(turnNumRecord, 0, 0, 0)`
+  * Check that `channelStorageHashes[channelId] = emptyStorageHash`
+* Let `m = variableParts.length`
+* [Optional] assert `sigs.length == m` // signature algorithm should just break if this isn't the case
+* For `i` in `0 .. (m-1)`:
+  * Let `isFinal = i < isFinalCount`
+  * Let `turnNum = largestTurnNum - i`
+  * Calculate state hash from fixedPart, turnNum, variablePart[i], isFinal
+  * If i == 0
+    * Save outcomeHash for later
+  * Else // i > 0
+    * Ensure app.validTransition(turnNum, variablePart[i], variablePart[i-1])
+    * (Other checks are covered by construction)
+* Check that validSignatures(stateHashes, sigs)
+* Recover challengerAddress from sig and check that `participants[challengerIndex] == challengerAddress`
+* Set channelStorage
+  * `finalizesAt` = now + challengeDuration
+  * outcomeHash, stateHash
+  * turnNumRecord = largestTurnNum
+  * challengerAddress
 
-```
+function respond(
+    uint256 turnNumRecord, // can deduce largestTurnNum from this
+    FixedPart memory fixedPart,
+    bool challengeStateIsFinal,
+    bool responseStateIsFinal,
+    VariablePart memory challengeVariablePart,
+    VariablePart memory responseVariablePart,
+    uint256 finalizesAt,
+    address challengerAddress,
 
-### Internal methods:
+    Signature responderSig,
+)
+* Calculate `channelId` from fixedPart
+* Calculate `challengeStateHash` and `challengeStateOutcome` from fixedPart, challengeVariablePart, turnNumRecord, challengStateIsFinal
+* Calculate `storageHash = hash(turnNumRecord, finalizesAt, challengeStateHash, challengeStateOutcome)`
+* Check that `channelStorageHashes[channelId] == storageHash`
+* Calculate `responseStateHash`
+* Check that recoverSig(resonseStateHash, challengerAddress) gives the mover
+* Check app.validTransition(turnNumRecord + 1, challengeVariablePart, responseVariablePart)
+* Set channelStorage:
+  * turnNumRecord += 1
+  * Everything else 0
 
-```javascript
-  function _isAParticipant(address suspect, address[] memory addresses) internal pure returns (bool);
 
-  function _validNChain(
-      bytes32 channelId,
-      FixedPart memory fixedPart,
-      VariablePart[] memory variableParts,
-      uint256 newTurnNumRecord,
-      bool[] memory isFinals,
-      Signature[] memory sigs,
-      address[] memory participants
-  ) internal pure returns (bool);
+function respondFromAlternative(
+    uint256 turnNumRecord, // can deduce largestTurnNum from this
+    FixedPart memory fixedPart,
+    uint8 isFinalCount, // how many of the states are final
+    VariablePart[] memory variableParts,
+    Signature[][] memory sigs,
+    uint256 finalizesAt,
+    address challengerAddress,
+    bytes32 challengeStateHash,
+    bytes32 challengeOutcomeHash,
+)
+* Calculate `channelId` from fixedPart
+* Calculate `storageHash` from `turnNumRecord`, `finalizesAt`, `challengerAddress`, `challengeStateHash`, `challengeOutcomeHash`
+* Check that `channelStorageHashes[channelId] == storageHash`
+* Let `m = variableParts.length`
+* Let `largestTurnNum = turnNumRecord + 1`
+* For `i` in `0 .. (m-1)`:
+  * Let `isFinal = i < isFinalCount`
+  * Let `turnNum = largestTurnNum - i`
+  * Calculate state hash from fixedPart, turnNum, variablePart[i], isFinal
+  * If i > 0
+    * Ensure app.validTransition(turnNum, variablePart[i], variablePart[i-1])
+    * (Other checks are covered by construction)
+* Check that validSignatures(stateHashes, sigs)
+* Set channelStorage:
+  * turnNumRecord += 1
+  * Everything else 0
 
-  function _validUnanimousConsensus(
-      bytes32 channelId,
-      FixedPart memory fixedPart,
-      VariablePart memory variablePart,
-      uint256 newTurnNumRecord,
-      bool isFinal,
-      Signature[] memory sigs,
-      address[] memory participants
-  ) internal pure returns (bool);
+function refute(
+    FixedPart memory fixedPart, // dont need appDefinition
+    bytes32 appPartHash,
+    bytes32 outcomeHash,
+    uint256 turnNumRecord,
+    uint256 refutationTurnNum,
+    bool refutationIsFinal,
 
+    uint256 finalizesAt,
+    address challengerAddress,
+    bytes32 challengeStateHash,
+    bytes32 challengeOutcomeHash,
+
+    Signature refutationSig,
+)
+* Calculate `channelId` from fixedPart
+* Calculate `stateStorageHash` as `hash(turnNumRecord, finalizesAt, challengeStateHash, challengeOutcomeHash, challengerAddress)`
+* Check that `stateStorageHashes[channelId] == stateStorageHash`
+* Calculate `refutationStateHash` as `hash(refutationTurnNum, refutationIsFinal, channelId, appPartHash)`
+* Check that `refutationTurnNum > turnNumRecord`
+* Check that `recoverSigner(refutationStateHash, refutationSig) == challengerAddress`
+* Set `stateStorageHashes[channelId] = hash(turnNumRecord, 0, 0, 0)`
+
+
+function concludeFromOpen(
+    uint256 turnNumRecord,
+    uint256 largestTurnNum,
+    FixedPart memory fixedPart, // don't need appDefinition
+    bytes32 appPartHash,
+    bytes32 outcomeHash,
+
+    Signature[][] memory sigs,
+)
+* Calculate `channelId` from fixedPart
+* If `turnNumRecord == 0`
+  * Check that `stateStorageHashes[channelId] == 0`
+* Else
+  * Calculate `stateStorageHash` as `hash(turnNumRecord, 0, 0, 0, 0)`
+  * Check that `stateStorageHashes[channelId] == stateStorageHash`
+* Let m = sigs.length
+* For i = 0 up to (m-1):
+  * let turnNum = largestTurnNum - i
+  * let isFinal=true
+  * calculate the stateHash
+  * _by construction, these states are all validTransitions_
+* Check _validSignatures(stateHashes, sigs)
+* Set channelStorage
+  * finalizesAt = time.now
+  * turnNumRecord - doesn't matter (unchanged / 0 / removed)
+  * challengerAddess - empty
+  * outcomeHash - need to pass this in and check it matches state sig
+  * stateHash - empty
+
+
+function concludeFromChallenge(
+    uint256 turnNumRecord,
+    address challengerAddress,
+    uint256 finalizesAt,
+    bytes32 challengeStateHash,
+    bytes32 challengeOutcomeHash,
+
+    uint256 largestTurnNum,
+    FixedPart memory fixedPart, // don't need appDefinition
+    bytes32 appPartHash,
+    bytes32 outcomeHash,
+    // need the outcomeHash (and to verify that the outcomeHash is in the state)
+
+    Signature[][] memory sigs,
+)
+* Calculate `channelId` from fixedPart
+* If `turnNumRecord == 0`
+  * Check that `stateStorageHashes[channelId] == 0`
+* Else
+  * calculate `stateStorageHash` as `hash(turnNumRecord, finalizesAt, challengeStateHash, challengeOutcomeHash, challengerAddress)`
+  * Check that `stateStorageHashes[channelId] == stateStorageHash`
+* Let m = sigs.length
+* For i = 0 up to (m-1):
+  * let turnNum = largestTurnNum - i
+  * let isFinal=true
+  * calculate the stateHash
+  * _by construction, these states are all validTransitions_
+* Check _validSignatures(stateHashes, sigs)
+* Set channelStorage
+  * finalizesAt = time.now
+  * turnNumRecord - doesn't matter (unchanged / 0 / removed)
+  * challengerAddess - empty
+  * outcomeHash - need to pass this in and check it matches state sig
+  * stateHash - empty
 ```
 
 ## Unanswered Questions
