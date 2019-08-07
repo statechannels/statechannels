@@ -1,9 +1,8 @@
 pragma solidity ^0.5.2;
 pragma experimental ABIEncoderV2;
 
-contract optimizedForceMove {
+contract OptimizedForceMove {
     struct Signature {
-        bytes32 msgHash; // TODO probably doesn't belong here
         uint8 v;
         bytes32 r;
         bytes32 s;
