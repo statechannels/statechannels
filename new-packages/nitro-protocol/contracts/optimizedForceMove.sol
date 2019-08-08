@@ -13,20 +13,21 @@ contract OptimizedForceMove {
         address[] participants;
         uint256 channelNonce;
         address appDefinition;
+        uint256 challengeDuration;
     }
 
     struct VariablePart {
-        bytes32 outcomeHash;
-        bytes32 appData;
+        bytes outcome;
+        bytes appData;
     }
 
     struct State {
-        // participants sign this
+        // participants sign the hash of this
         uint256 turnNum;
         bool isFinal;
-        address appDefinition;
         bytes32 channelId; // keccack(chainId,participants,channelNonce)
-        bytes32 variablePartHash; //keccak256(abi.encode(VariablePart))
+        bytes32 appPartHash; //keccak256(abi.encode(VariablePart))
+        bytes32 outcomeHash;
     }
 
     struct ChannelStorage {
@@ -39,102 +40,108 @@ contract OptimizedForceMove {
 
     mapping(bytes32 => bytes32) public channelStorageHashes;
 
-    uint256 challengeInterval = 1 minutes;
-
     // Public methods:
 
     function forceMove(
         uint256 turnNumRecord,
         FixedPart memory fixedPart,
+        uint256 largestTurnNum,
         VariablePart[] memory variableParts,
-        uint256 newTurnNumRecord,
-        bool[] memory isFinals,
-        Signature[] memory sigs,
+        uint8 isFinalCount, // how many of the states are final
+        Signature[][] memory sigs,
         Signature memory challengerSig
     ) public {
-        (string memory chainId, address[] memory participants, uint256 channelNonce, address appDefinition) = (
+        (string memory chainId, address[] memory participants, uint256 channelNonce, address appDefinition, uint256 challengeDuration) = (
             fixedPart.chainId,
             fixedPart.participants,
             fixedPart.channelNonce,
-            fixedPart.appDefinition
+            fixedPart.appDefinition,
+            fixedPart.challengeDuration
         );
 
+        // Calculate channelId from fixed part
         bytes32 channelId = keccak256(abi.encodePacked(chainId, participants, channelNonce));
 
         // ------------
         // REQUIREMENTS
         // ------------
 
-        require(
-            keccak256(abi.encode(ChannelStorage(turnNumRecord, 0, 0, address(0), 0))) ==
-                channelStorageHashes[channelId],
-            'Channel not open'
-        );
+        // Check that the proposed largestTurnNum is larger than the turnNumRecord that is being committed to
+        require(largestTurnNum > turnNumRecord, 'Stale challenge!');
 
-        if (variableParts.length > 1) {
-            require(
-                _validNChain(
-                    channelId,
-                    fixedPart,
-                    variableParts,
-                    newTurnNumRecord,
-                    isFinals,
-                    sigs,
-                    participants
-                ),
-                'Not a valid chain of n commitments'
+        // EITHER there is no information stored against channelId at all (OK)
+        if (channelStorageHashes[channelId] != 0) {
+            // OR there is, in which case we must check the channel is still open and that the committed turnNumRecord is correct
+            bytes32 emptyStorageHash = keccak256(
+                abi.encode(ChannelStorage(turnNumRecord, 0, 0, address(0), 0))
             );
-        } else {
-            require(
-                _validUnanimousConsensus(
-                    channelId,
-                    fixedPart,
-                    variableParts[0],
-                    newTurnNumRecord,
-                    isFinals[0],
-                    sigs,
-                    participants
+            require(emptyStorageHash == channelStorageHashes[channelId], 'Channel closed');
+        }
+
+        uint256 m = variableParts.length;
+        bool isFinal;
+        uint256 turnNum;
+        State memory state;
+        bytes32[] memory stateHashes;
+        for (uint256 i = 0; i < m - 1; i++) {
+            isFinal = i > m - isFinalCount;
+            turnNum = largestTurnNum + i - m;
+            state = State(
+                turnNum,
+                isFinal,
+                channelId,
+                keccak256(
+                    abi.encodePacked(challengeDuration, appDefinition, variableParts[i].appData)
                 ),
-                'Not a valid unaninmous consensus'
+                keccak256(abi.encode(variableParts[i].outcome))
+            );
+            stateHashes[i] = keccak256(abi.encode(state));
+            require(
+                _validTransition(turnNum, variableParts[i], variableParts[i + 1]),
+                'Invalid Transition'
             );
         }
 
-        require(newTurnNumRecord > turnNumRecord, 'Stale challenge!');
+        // check the supplied states are supported by n signatures
+        require(_validSignatures(participants, stateHashes, sigs), 'Invalid signature');
 
-        (bytes32 msgHash, uint8 v, bytes32 r, bytes32 s) = (
-            challengerSig.msgHash,
+        // check that the forceMove is signed by a participant and store their address
+        bytes32 msgHash = keccak256(
+            abi.encode(
+                turnNumRecord,
+                fixedPart,
+                largestTurnNum,
+                variableParts,
+                isFinalCount,
+                sigs,
+                challengerSig
+            )
+        );
+        address challenger = _recoverSigner(
+            msgHash,
             challengerSig.v,
             challengerSig.r,
             challengerSig.s
         );
-        address challenger = ecrecover(msgHash, v, r, s);
-        require(_isAParticipant(challenger, participants), 'Challenger is not a participant');
+        require(_isAddressInArray(challenger, participants), 'Challenger is not a participant');
 
         // ------------
         // EFFECTS
         // ------------
 
-        State memory state = State(
-            newTurnNumRecord,
-            isFinals[isFinals.length],
-            appDefinition,
-            channelId,
-            keccak256(abi.encode(variableParts[variableParts.length]))
-        );
-
         ChannelStorage memory channelStorage = ChannelStorage(
-            newTurnNumRecord,
-            now + challengeInterval,
-            keccak256(abi.encode(state)),
+            largestTurnNum,
+            now + challengeDuration,
+            stateHashes[m],
             challenger,
-            variableParts[variableParts.length].outcomeHash
+            keccak256(abi.encode(variableParts[m].outcome))
         );
 
         channelStorageHashes[channelId] = keccak256(abi.encode(channelStorage));
     }
     // Internal methods:
 
-    function _isAParticipant(address suspect, address[] memory addresses)
+    function _isAddressInArray(address suspect, address[] memory addresses)
         internal
         pure
         returns (bool)
@@ -147,95 +154,22 @@ contract OptimizedForceMove {
         return false;
     }
 
-    function _validNChain(
-        bytes32 channelId,
-        FixedPart memory fixedPart,
-        VariablePart[] memory variableParts,
-        uint256 newTurnNumRecord,
-        bool[] memory isFinals,
-        Signature[] memory sigs,
-        address[] memory participants
-    ) internal pure returns (bool) {
-        uint8 v;
-        bytes32 r;
-        bytes32 s;
-        uint256 n = participants.length;
-        for (uint256 i = 0; i < n; i++) {
-            uint256 turnNum = newTurnNumRecord - n + i;
-            State memory state = State(
-                turnNum,
-                isFinals[i],
-                fixedPart.appDefinition,
-                channelId,
-                keccak256(abi.encode(variableParts[i]))
-            );
-            (v, r, s) = (sigs[i].v, sigs[i].r, sigs[i].s);
-            if (_recoverSigner(abi.encode(state), v, r, s) != participants[turnNum % n]) {
-                return false;
-            } // _recoverSigner is an fmg-core method
-            if (turnNum < n) {
-                if (
-                    !_validTransition(
-                        fixedPart,
-                        variableParts[i],
-                        isFinals[i],
-                        turnNum,
-                        variableParts[i + 1],
-                        isFinals[i + 1],
-                        turnNum + 1
-                    )
-                ) {
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
-
-    function _validUnanimousConsensus(
-        bytes32 channelId,
-        FixedPart memory fixedPart,
-        VariablePart memory variablePart,
-        uint256 newTurnNumRecord,
-        bool isFinal,
-        Signature[] memory sigs,
-        address[] memory participants
-    ) internal pure returns (bool) {
-        uint8 v;
-        bytes32 r;
-        bytes32 s;
-        uint256 n = participants.length;
-
-        for (uint256 i = 0; i < n; i++) {
-            uint256 turnNum = newTurnNumRecord - n + i;
-            (v, r, s) = (sigs[i].v, sigs[i].r, sigs[i].s);
-            State memory state = State(
-                turnNum,
-                isFinal,
-                fixedPart.appDefinition,
-                channelId,
-                keccak256(abi.encode((variablePart)))
-            );
-            if (_recoverSigner(abi.encode(state), v, r, s) != participants[turnNum % n]) {
-                return false;
-            } // _recoverSigner is an fmg-core method
-        }
-    }
-
     // not yet implemented
 
-    function _recoverSigner(bytes memory _d, uint8 _v, bytes32 _r, bytes32 _s)
+    function _recoverSigner(bytes32 _d, uint8 _v, bytes32 _r, bytes32 _s)
         internal
         pure
         returns (address); // abstraction
 
     function _validTransition(
-        FixedPart memory fixedPart,
+        uint256 turnNum,
         VariablePart memory oldVariablePart,
-        bool oldIsFinal,
-        uint256 oldTurnNum,
-        VariablePart memory newVariablePart,
-        bool newIsFinal,
-        uint256 newTurnNum
+        VariablePart memory newVariablePart
+    ) internal pure returns (bool); // abstraction
+
+    function _validSignatures(
+        address[] memory participants,
+        bytes32[] memory stateHashes,
+        Signature[][] memory sigs
     ) internal pure returns (bool); // abstraction
 }
