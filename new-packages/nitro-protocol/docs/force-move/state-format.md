@@ -51,6 +51,8 @@ Since it takes the same format as a participant address, a channel address, may 
 
 ---
 
+TODO: fixed parts vs non-fixed parts
+
 ## Implementation
 
 The data that the participants sign should be the hash of the following:
