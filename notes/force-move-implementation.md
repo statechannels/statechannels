@@ -111,7 +111,7 @@ With these considerations in mind, the ForceMove interface should be something l
 
 
     struct State {
-        // participants sign this
+        // participants sign the hash of this
         uint256 turnNum;
         bool isFinal;
         bytes32 channelId; // keccack(chainId,participants,channelNonce)
@@ -128,8 +128,6 @@ With these considerations in mind, the ForceMove interface should be something l
     }
 
     mapping(bytes32 => bytes32) public channelStorageHashes;
-
-    uint256 challengeInterval = 1 minutes;
 
 ```
 
