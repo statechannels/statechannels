@@ -1,5 +1,5 @@
-import { Commitment, Channel, CommitmentType } from '.';
-import { bigNumberify } from 'ethers/utils';
+import {Commitment, Channel, CommitmentType} from '.';
+import {bigNumberify} from 'ethers/utils';
 
 export interface PaymentCommitmentArgs {
   libraryAddress: string;
@@ -49,7 +49,7 @@ function fromPaymentCommitmentArgs(paymentArgs: PaymentCommitmentArgs): Commitme
 }
 
 export function preFundSetupCommitment(paymentArgs: PaymentCommitmentArgs): Commitment {
-  return { ...fromPaymentCommitmentArgs(paymentArgs), commitmentType: CommitmentType.PreFundSetup };
+  return {...fromPaymentCommitmentArgs(paymentArgs), commitmentType: CommitmentType.PreFundSetup};
 }
 export function postFundSetupCommitment(paymentArgs: PaymentCommitmentArgs): Commitment {
   return {
@@ -58,10 +58,10 @@ export function postFundSetupCommitment(paymentArgs: PaymentCommitmentArgs): Com
   };
 }
 export function appCommitment(paymentArgs: PaymentCommitmentArgs): Commitment {
-  return { ...fromPaymentCommitmentArgs(paymentArgs), commitmentType: CommitmentType.App };
+  return {...fromPaymentCommitmentArgs(paymentArgs), commitmentType: CommitmentType.App};
 }
 export function concludeCommitment(paymentArgs: PaymentCommitmentArgs): Commitment {
-  return { ...fromPaymentCommitmentArgs(paymentArgs), commitmentType: CommitmentType.Conclude };
+  return {...fromPaymentCommitmentArgs(paymentArgs), commitmentType: CommitmentType.Conclude};
 }
 
 // Transition helpers

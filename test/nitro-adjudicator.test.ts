@@ -1,7 +1,7 @@
-import { ethers } from 'ethers';
-import { expectRevert, expectEvent, increaseTime, DURATION } from 'magmo-devtools';
-import { sign, Channel, CountingApp, toHex, asEthersObject } from '../src';
-import { BigNumber } from 'ethers/utils';
+import {ethers} from 'ethers';
+import {expectRevert, expectEvent, increaseTime, DURATION} from 'magmo-devtools';
+import {sign, Channel, CountingApp, toHex, asEthersObject} from '../src';
+import {BigNumber} from 'ethers/utils';
 
 import {
   channelID as getChannelID,
@@ -11,7 +11,7 @@ import {
   CommitmentType,
   Commitment as CoreCommitment,
 } from '../src';
-import { AddressZero } from 'ethers/constants';
+import {AddressZero} from 'ethers/constants';
 
 // @ts-ignore
 import NitroAdjudicatorArtifact from '../build/contracts/TestNitroAdjudicator.json';
@@ -35,14 +35,14 @@ async function setupContracts() {
   nitro = new ethers.Contract(NitroAdjudicatorAddress, NitroAdjudicatorArtifact.abi, signer0);
   countingAppAddress = CountingAppArtifact.networks[networkId].address;
 
-  const unwrap = ({ challengeCommitment, finalizedAt }) => ({
+  const unwrap = ({challengeCommitment, finalizedAt}) => ({
     challengeCommitment,
     finalizedAt,
     allocation: [],
     destination: [],
     token: [],
   });
-  nullOutcome = { ...unwrap(await nitro.outcomes(nitro.address)) };
+  nullOutcome = {...unwrap(await nitro.outcomes(nitro.address))};
 }
 
 const getHexForCommitment = (commitment: CountingCommitment) => {
@@ -179,13 +179,13 @@ describe('ForceMove methods', () => {
 
     describe('conclude', () => {
       beforeEach(() => {
-        const { r: r0, s: s0, v: v0 } = sign(getHexForCommitment(commitment4), alice.privateKey);
-        const { r: r1, s: s1, v: v1 } = sign(getHexForCommitment(commitment5), bob.privateKey);
+        const {r: r0, s: s0, v: v0} = sign(getHexForCommitment(commitment4), alice.privateKey);
+        const {r: r1, s: s1, v: v1} = sign(getHexForCommitment(commitment5), bob.privateKey);
         conclusionProof = {
           penultimateCommitment: getEthersObjectForCommitment(commitment4),
           ultimateCommitment: getEthersObjectForCommitment(commitment5),
-          penultimateSignature: { v: v0, r: r0, s: s0 },
-          ultimateSignature: { v: v1, r: r1, s: s1 },
+          penultimateSignature: {v: v0, r: r0, s: s0},
+          ultimateSignature: {v: v1, r: r1, s: s1},
         };
       });
 
@@ -236,14 +236,14 @@ describe('ForceMove methods', () => {
           commitmentType: CommitmentType.App,
           appAttributes: '0x00',
         };
-        commitment5alt = { ...commitment4alt, turnNum: 11 };
-        const { r: r2, s: s2, v: v2 } = sign(toHex(commitment4alt), alice.privateKey);
-        const { r: r3, s: s3, v: v3 } = sign(toHex(commitment5alt), bob.privateKey);
+        commitment5alt = {...commitment4alt, turnNum: 11};
+        const {r: r2, s: s2, v: v2} = sign(toHex(commitment4alt), alice.privateKey);
+        const {r: r3, s: s3, v: v3} = sign(toHex(commitment5alt), bob.privateKey);
         const conclusionProofAlt = {
           penultimateCommitment: asEthersObject(commitment4alt),
           ultimateCommitment: asEthersObject(commitment5alt),
-          penultimateSignature: { v: v2, r: r2, s: s2 },
-          ultimateSignature: { v: v3, r: r3, s: s3 },
+          penultimateSignature: {v: v2, r: r2, s: s2},
+          ultimateSignature: {v: v3, r: r3, s: s3},
         };
         const {
           destination: startDestination,
@@ -292,15 +292,15 @@ describe('ForceMove methods', () => {
         const agreedCommitment = commitment0;
         const challengeCommitment = commitment1;
 
-        const { r: r0, s: s0, v: v0 } = sign(
+        const {r: r0, s: s0, v: v0} = sign(
           getHexForCommitment(agreedCommitment),
           challengee.privateKey,
         );
-        const { r: r1, s: s1, v: v1 } = sign(
+        const {r: r1, s: s1, v: v1} = sign(
           getHexForCommitment(challengeCommitment),
           challenger.privateKey,
         );
-        const signatures = [{ r: r0, s: s0, v: v0 }, { r: r1, s: s1, v: v1 }];
+        const signatures = [{r: r0, s: s0, v: v0}, {r: r1, s: s1, v: v1}];
 
         expectedAssertions += 1;
         expect(await nitro.outcomeFinal(getChannelID(ledgerChannel))).toBe(false);
@@ -309,7 +309,7 @@ describe('ForceMove methods', () => {
           getEthersObjectForCommitment(challengeCommitment),
           signatures,
         );
-        const { events } = await tx.wait();
+        const {events} = await tx.wait();
 
         expect(await nitro.isChallengeOngoing(getChannelID(ledgerChannel))).toBe(true);
 
@@ -323,15 +323,15 @@ describe('ForceMove methods', () => {
         const agreedCommitment = commitment0;
         const challengeCommitment = commitment3;
 
-        const { r: r0, s: s0, v: v0 } = sign(
+        const {r: r0, s: s0, v: v0} = sign(
           getHexForCommitment(agreedCommitment),
           challengee.privateKey,
         );
-        const { r: r1, s: s1, v: v1 } = sign(
+        const {r: r1, s: s1, v: v1} = sign(
           getHexForCommitment(challengeCommitment),
           challenger.privateKey,
         );
-        const signatures = [{ r: r0, s: s0, v: v0 }, { r: r1, s: s1, v: v1 }];
+        const signatures = [{r: r0, s: s0, v: v0}, {r: r1, s: s1, v: v1}];
 
         expectedAssertions += 1;
         expect(await nitro.outcomeFinal(getChannelID(ledgerChannel))).toBe(false);
@@ -349,15 +349,12 @@ describe('ForceMove methods', () => {
         const agreedCommitment = commitment0;
         const challengeCommitment = commitment1;
 
-        const { r: r0, s: s0, v: v0 } = sign(
+        const {r: r0, s: s0, v: v0} = sign(
           getHexForCommitment(agreedCommitment),
           challengee.privateKey,
         );
-        const { r: r1, s: s1, v: v1 } = sign(
-          getHexForCommitment(commitment3),
-          challenger.privateKey,
-        );
-        const signatures = [{ r: r0, s: s0, v: v0 }, { r: r1, s: s1, v: v1 }];
+        const {r: r1, s: s1, v: v1} = sign(getHexForCommitment(commitment3), challenger.privateKey);
+        const signatures = [{r: r0, s: s0, v: v0}, {r: r1, s: s1, v: v1}];
 
         expectedAssertions += 1;
         expect(await nitro.outcomeFinal(getChannelID(ledgerChannel))).toBe(false);
@@ -375,15 +372,15 @@ describe('ForceMove methods', () => {
         const agreedCommitment = commitment0;
         const challengeCommitment = commitment1;
 
-        const { r: r0, s: s0, v: v0 } = sign(
+        const {r: r0, s: s0, v: v0} = sign(
           getHexForCommitment(agreedCommitment),
           challengee.privateKey,
         );
-        const { r: r1, s: s1, v: v1 } = sign(
+        const {r: r1, s: s1, v: v1} = sign(
           getHexForCommitment(challengeCommitment),
           challenger.privateKey,
         );
-        const signatures = [{ r: r0, s: s0, v: v0 }, { r: r1, s: s1, v: v1 }];
+        const signatures = [{r: r0, s: s0, v: v0}, {r: r1, s: s1, v: v1}];
 
         const allocationOutcome = {
           destination: [alice.address, bob.address],
@@ -434,21 +431,21 @@ describe('ForceMove methods', () => {
         challengeCommitment = commitment1;
         refutationCommitment = commitment3;
 
-        const { r: r0, s: s0, v: v0 } = sign(
+        const {r: r0, s: s0, v: v0} = sign(
           getHexForCommitment(agreedCommitment),
           challengee.privateKey,
         );
-        const { r: r1, s: s1, v: v1 } = sign(
+        const {r: r1, s: s1, v: v1} = sign(
           getHexForCommitment(challengeCommitment),
           challenger.privateKey,
         );
-        signatures = [{ r: r0, s: s0, v: v0 }, { r: r1, s: s1, v: v1 }];
+        signatures = [{r: r0, s: s0, v: v0}, {r: r1, s: s1, v: v1}];
 
-        const { r: r2, s: s2, v: v2 } = sign(
+        const {r: r2, s: s2, v: v2} = sign(
           getHexForCommitment(refutationCommitment),
           challenger.privateKey,
         );
-        refutationSignature = { r: r2, s: s2, v: v2 };
+        refutationSignature = {r: r2, s: s2, v: v2};
       });
 
       it('works', async () => {
@@ -498,11 +495,11 @@ describe('ForceMove methods', () => {
         const invalidRefutationCommitment = commitment3;
         invalidRefutationCommitment.turnNum = agreedCommitment.turnNum - 1;
 
-        const { r: r3, s: s3, v: v3 } = sign(
+        const {r: r3, s: s3, v: v3} = sign(
           getHexForCommitment(invalidRefutationCommitment),
           challenger.privateKey,
         );
-        const invalidRefutationSignature = { r: r3, s: s3, v: v3 };
+        const invalidRefutationSignature = {r: r3, s: s3, v: v3};
 
         expect.assertions(expectedAssertions);
         await expectRevert(
@@ -529,21 +526,21 @@ describe('ForceMove methods', () => {
         challengeCommitment = commitment1;
         responseCommitment = commitment2;
 
-        const { r: r0, s: s0, v: v0 } = sign(
+        const {r: r0, s: s0, v: v0} = sign(
           getHexForCommitment(agreedCommitment),
           challengee.privateKey,
         );
-        const { r: r1, s: s1, v: v1 } = sign(
+        const {r: r1, s: s1, v: v1} = sign(
           getHexForCommitment(challengeCommitment),
           challenger.privateKey,
         );
-        signatures = [{ r: r0, s: s0, v: v0 }, { r: r1, s: s1, v: v1 }];
+        signatures = [{r: r0, s: s0, v: v0}, {r: r1, s: s1, v: v1}];
 
-        const { r: r2, s: s2, v: v2 } = sign(
+        const {r: r2, s: s2, v: v2} = sign(
           getHexForCommitment(responseCommitment),
           challengee.privateKey,
         );
-        responseSignature = { r: r2, s: s2, v: v2 };
+        responseSignature = {r: r2, s: s2, v: v2};
       });
 
       async function runBeforeRespond() {
@@ -612,11 +609,11 @@ describe('ForceMove methods', () => {
 
         const invalidResponseCommitment = commitment3;
 
-        const { r: r3, s: s3, v: v3 } = sign(
+        const {r: r3, s: s3, v: v3} = sign(
           getHexForCommitment(invalidResponseCommitment),
           challenger.privateKey,
         );
-        const invalidResponseSignature = { r: r3, s: s3, v: v3 };
+        const invalidResponseSignature = {r: r3, s: s3, v: v3};
 
         expect.assertions(expectedAssertions);
         await expectRevert(
@@ -646,27 +643,27 @@ describe('ForceMove methods', () => {
         alternativeCommitment = commitment1alt;
         responseCommitment = commitment2alt;
 
-        const { r: r0, s: s0, v: v0 } = sign(
+        const {r: r0, s: s0, v: v0} = sign(
           getHexForCommitment(agreedCommitment),
           challengee.privateKey,
         );
-        const { r: r1, s: s1, v: v1 } = sign(
+        const {r: r1, s: s1, v: v1} = sign(
           getHexForCommitment(challengeCommitment),
           challenger.privateKey,
         );
-        signatures = [{ r: r0, s: s0, v: v0 }, { r: r1, s: s1, v: v1 }];
+        signatures = [{r: r0, s: s0, v: v0}, {r: r1, s: s1, v: v1}];
 
-        const { r: r2, s: s2, v: v2 } = sign(
+        const {r: r2, s: s2, v: v2} = sign(
           getHexForCommitment(alternativeCommitment),
           challenger.privateKey,
         );
-        const { r: r3, s: s3, v: v3 } = sign(
+        const {r: r3, s: s3, v: v3} = sign(
           getHexForCommitment(responseCommitment),
           challengee.privateKey,
         );
 
-        alternativeSignature = { r: r2, s: s2, v: v2 };
-        responseSignature = { r: r3, s: s3, v: v3 };
+        alternativeSignature = {r: r2, s: s2, v: v2};
+        responseSignature = {r: r3, s: s3, v: v3};
       });
 
       async function runBeforeAlternativeRespond() {
@@ -744,11 +741,11 @@ describe('ForceMove methods', () => {
 
         const invalidResponseCommitment = commitment3;
 
-        const { r: r3, s: s3, v: v3 } = sign(
+        const {r: r3, s: s3, v: v3} = sign(
           getHexForCommitment(invalidResponseCommitment),
           challenger.privateKey,
         );
-        const invalidResponseSignature = { r: r3, s: s3, v: v3 };
+        const invalidResponseSignature = {r: r3, s: s3, v: v3};
 
         expect.assertions(expectedAssertions);
         await expectRevert(
@@ -769,16 +766,16 @@ describe('ForceMove methods', () => {
         const invalidAlternativeCommitment = commitment0;
         const invalidResponseCommitment = commitment1;
 
-        const { r: r3, s: s3, v: v3 } = sign(
+        const {r: r3, s: s3, v: v3} = sign(
           getHexForCommitment(invalidAlternativeCommitment),
           challenger.privateKey,
         );
-        const invalidAlternativeSignature = { r: r3, s: s3, v: v3 };
-        const { r: r4, s: s4, v: v4 } = sign(
+        const invalidAlternativeSignature = {r: r3, s: s3, v: v3};
+        const {r: r4, s: s4, v: v4} = sign(
           getHexForCommitment(invalidResponseCommitment),
           challenger.privateKey,
         );
-        const invalidResponseSignature = { r: r4, s: s4, v: v4 };
+        const invalidResponseSignature = {r: r4, s: s4, v: v4};
 
         expect.assertions(expectedAssertions);
         await expectRevert(
