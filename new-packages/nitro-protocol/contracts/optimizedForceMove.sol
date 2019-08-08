@@ -9,7 +9,7 @@ contract OptimizedForceMove {
     }
 
     struct FixedPart {
-        string chainId;
+        uint256 chainId;
         address[] participants;
         uint256 channelNonce;
         address appDefinition;
@@ -51,7 +51,7 @@ contract OptimizedForceMove {
         Signature[][] memory sigs,
         Signature memory challengerSig
     ) public {
-        (string memory chainId, address[] memory participants, uint256 channelNonce, address appDefinition, uint256 challengeDuration) = (
+        (uint256 chainId, address[] memory participants, uint256 channelNonce, address appDefinition, uint256 challengeDuration) = (
             fixedPart.chainId,
             fixedPart.participants,
             fixedPart.channelNonce,
