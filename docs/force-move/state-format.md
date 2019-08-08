@@ -49,10 +49,30 @@ channelId = keccak256(abi.encodePacked(_commitment.channelType, _commitment.nonc
 
 Since it takes the same format as a participant address, a channel address, may be allocated funds by another channel. However, a private key for a channel address is not known to anyone. This means that funds cannot be drawn directly from channel addresses. By choosing a new `ChannelNonce` each time the same participants execute the same application, they can avoid replay attacks.
 
-## Turn taker / mover
+---
 
-Let `n = Participants.length`. Then:
+## Implementation
 
-```javascript
-mover = participants[turnNum % n];
-```
+The data that the participants sign should be the hash of the following:
+
+- TurnNum
+- isFinal
+- ChannelId
+  - ChainId
+  - Participants
+  - ChannelNonce
+- AppPartHash
+  - ChallengeDuration // only ever need this on a ForceMove
+  - AppDefinition
+  - AppData
+- OutcomeHash
+
+Where an item has nested children this implies that item is the hash of the children.
+
+**Why include the ChannelId separately?** We have to calculate the `channelId` for every single operation anyway. Given that we have it it's cheaper to hash in the hash, rather than the individual components again.
+
+**Why not include the `AppDefinition` in the `ChannelId`?** The `AppDefinition` is fixed as part of the transition rules, so it seems like it would make sense to include it in the `ChannelId`. This would rule out participants being able to collaboratively upgrade the app without refunding the channel through.
+
+**Why not hash the `AppDefinition` together with the `ChannelId` into a `FixedPartHash`?** By doing this you perform one extra hash but you have to hash less data in the variable part. This tradeoff makes sense if you're hashing something like >3 variable parts for the same fixed part (based on the relative gas costs). We anticipate that most of the time channels will have 2 participants, so we optimize for this case.
+
+**Why not include `TurnNum` or `isFinal` in the `VariablePartHash`?** Having the `turnNum` and `isFinal` separate makes the `conclude` and `refute` methods more efficient, as they can pass in just the `VariablePartHash` and not the (potentially large) data within it.
