@@ -7,17 +7,17 @@ A specified format of state is vital, since it constitutes much of the interface
 
 In ForceMove, the following fields must be included in state:
 
-| **Field**         | **Data type**          | **Definition / Explanation**                                                                         |
-| :---------------- | :--------------------- | :--------------------------------------------------------------------------------------------------- |
-| ChainID           | `int256`               | e.g. ropsten / mainnet                                                                               |
-| Participants      | `address[]`            | participant addresses                                                                                |
-| ChannelNonce      | `uint256`              | chosen by participants to make ChannelId unique                                                      |
-| ChallengeDuration | `uint256`              | duration of challenge (in ms?)                                                                       |
-| TurnNum           | `uint256`              | turn number                                                                                          |
-| DefaultOutcome    | `[address, uint256][]` | tracks the amounts paid out to each of a list of addresses if the channel is finalized in this state |
-| isFinal           | `boolean`              |                                                                                                      |
-| AppDefinition     | `address`              | on-chain address of library defining custom application rules                                        |
-| AppData           | `bytes`                | application-specific data                                                                            |
+| **Field**         | **Data type** | **Definition / Explanation**                                  |
+| :---------------- | :------------ | :------------------------------------------------------------ |
+| ChainID           | `int256`      | e.g. ropsten / mainnet                                        |
+| Participants      | `address[]`   | participant addresses                                         |
+| ChannelNonce      | `uint256`     | chosen by participants to make ChannelId unique               |
+| ChallengeDuration | `uint256`     | duration of challenge (in ms?)                                |
+| TurnNum           | `uint256`     | turn number                                                   |
+| CurrentOutcome    | `bytes`       | the _outcome_ if the channel were to finalize in this state   |
+| isFinal           | `boolean`     |                                                               |
+| AppDefinition     | `address`     | on-chain address of library defining custom application rules |
+| AppData           | `bytes`       | application-specific data                                     |
 
 Since commitments must ultimately be interpreted by smart contracts, the encoding of these fields must be carefully considered. One could use a custom encoding into, e.g. a concatenated byte string: instead one should use the experimental ABIEncoderV2, which means the commitment format above can be a struct. Currently it looks like this \(approximate equivalence to the above fields is shown in the comments\):
 
