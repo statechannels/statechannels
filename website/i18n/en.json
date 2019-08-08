@@ -13,9 +13,38 @@
         "title": "Challenge & Response",
         "sidebar_label": "Challenge & Response"
       },
-      "commitment-format": {
-        "title": "Commitment Format",
-        "sidebar_label": "Commitment Format"
+      "force-move/channel-storage": {
+        "title": "Channel Storage"
+      },
+      "force-move/conclude": {
+        "title": "Conclude"
+      },
+      "force-move/force-move": {
+        "title": "ForceMove"
+      },
+      "force-move/intro": {
+        "title": "Introduction"
+      },
+      "force-move/overview": {
+        "title": "Overview"
+      },
+      "force-move/refute": {
+        "title": "Refute"
+      },
+      "force-move/respond-from-alternative": {
+        "title": "Respond From Alternative"
+      },
+      "force-move/respond": {
+        "title": "Respond"
+      },
+      "force-move/state-format": {
+        "title": "State Format"
+      },
+      "force-move/transition-rules": {
+        "title": "Transition Rules"
+      },
+      "force-move/valid-signatures": {
+        "title": "Valid Signatures"
       },
       "introduction": {
         "title": "Introduction",
@@ -24,10 +53,6 @@
       "redistribution-of-assets": {
         "title": "Redistribution of Assets",
         "sidebar_label": "Redistribution of Assets"
-      },
-      "transition-rules": {
-        "title": "Transition Rules",
-        "sidebar_label": "Transition Rules"
       },
       "value-calculations": {
         "title": "Value Calculations",
