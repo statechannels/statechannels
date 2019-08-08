@@ -52,6 +52,11 @@ const siteConfig = {
     secondaryColor: '#3a141f',
   },
 
+  markdownPlugins: [
+    // Highlight admonitions.
+    require('remarkable-admonitions')({ icon: 'svg-inline' }),
+  ],
+
   /* Custom fonts for website */
   /*
   fonts: {

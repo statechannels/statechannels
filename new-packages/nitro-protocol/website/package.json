@@ -11,5 +11,7 @@
   "devDependencies": {
     "docusaurus": "^1.11.1"
   },
-  "dependencies": {}
+  "dependencies": {
+    "remarkable-admonitions": "^0.2.1"
+  }
 }
