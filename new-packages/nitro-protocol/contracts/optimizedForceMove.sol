@@ -134,7 +134,11 @@ contract OptimizedForceMove {
     }
     // Internal methods:
 
-    function _isAParticipant(address suspect, address[] memory addresses) internal pure returns (bool) {
+    function _isAParticipant(address suspect, address[] memory addresses)
+        internal
+        pure
+        returns (bool)
+    {
         for (uint256 i = 0; i < addresses.length; i++) {
             if (suspect == addresses[i]) {
                 return true;
