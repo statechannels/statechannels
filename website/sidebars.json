@@ -1,8 +1,26 @@
 {
   "docs": {
-    "Nitro specification": ["introduction", "commitment-format", "transition-rules", "challenge-and-response", "redistribution-of-assets", "value-calculations", "auxiliary-protocols"]
-  },
-  "docs-other": {
-    "First Category": ["doc4", "doc5"]
+    "ForceMove": [
+      "force-move/intro",
+      "force-move/overview",
+      "force-move/state-format",
+      "force-move/transition-rules",
+      "force-move/valid-signatures",
+      "force-move/channel-storage",
+      "force-move/force-move",
+      "force-move/respond",
+      "force-move/respond-from-alternative",
+      "force-move/refute",
+      "force-move/conclude"
+    ],
+
+    "Nitro Protocol": [
+      "introduction",
+      "commitment-format",
+      "challenge-and-response",
+      "redistribution-of-assets",
+      "value-calculations",
+      "auxiliary-protocols"
+    ]
   }
 }

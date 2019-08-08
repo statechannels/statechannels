@@ -3146,6 +3146,10 @@ highlight.js@^9.15.8:
   resolved "https://registry.yarnpkg.com/highlight.js/-/highlight.js-9.15.8.tgz#f344fda123f36f1a65490e932cf90569e4999971"
   integrity sha512-RrapkKQWwE+wKdF73VsOa2RQdIoO3mxwJ4P8mhbI6KYJUraUHRKM5w5zQQKXNk0xNL4UVRdulV9SBJcmzJNzVA==
 
+"highlightjs-solidity@https://github.com/highlightjs/highlightjs-solidity":
+  version "1.0.6"
+  resolved "https://github.com/highlightjs/highlightjs-solidity#f8ea3fbc5d6102911b31644e3aac5a6b0356670f"
+
 hosted-git-info@^2.1.4:
   version "2.7.1"
   resolved "https://registry.yarnpkg.com/hosted-git-info/-/hosted-git-info-2.7.1.tgz#97f236977bd6e125408930ff6de3eec6281ec047"
@@ -5501,6 +5505,11 @@ regjsparser@^0.6.0:
   integrity sha512-RQ7YyokLiQBomUJuUG8iGVvkgOLxwyZM8k6d3q5SAXpg4r5TZJZigKFvC6PpD+qQ98bCDC5YelPeA3EucDoNeQ==
   dependencies:
     jsesc "~0.5.0"
+
+remarkable-admonitions@^0.2.1:
+  version "0.2.1"
+  resolved "https://registry.yarnpkg.com/remarkable-admonitions/-/remarkable-admonitions-0.2.1.tgz#425ceb34e01a1f169048d9687a5c8e16675da26c"
+  integrity sha512-Uqeye087AIuo+BMUwteuG7e3GhoPqeT8aFjD8DaIqjUk2rn+7T7A6xank7fVlU+GHgbjT49DDC13nHLWwdBxRw==
 
 remarkable@^1.7.1:
   version "1.7.1"
