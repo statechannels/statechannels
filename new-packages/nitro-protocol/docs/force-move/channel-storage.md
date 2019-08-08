@@ -54,7 +54,7 @@ mapping(address => ChannelStorage) channelStorages;
 
 Instead of the naive storage implementation above, we can store the hash of the state in the struct, and store the hash of that struct in the mapping:
 
-```
+```solidity
 struct ChannelStorage {
   uint256 turnNumRecord;
   uint256 finalizesAt;

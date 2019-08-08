@@ -5,6 +5,8 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+var hljsDefineSolidity = require('highlightjs-solidity');
+
 // See https://docusaurus.io/docs/site-config for all the possible
 // site configuration options.
 // List of projects/orgs using your project for the users page.
@@ -76,7 +78,11 @@ const siteConfig = {
 
   highlight: {
     // Highlight.js theme to use for syntax highlighting in code blocks.
-    theme: 'default',
+    theme: 'solarized-dark',
+
+    hljs: function(hljs) {
+      return hljsDefineSolidity(hljs);
+    },
   },
 
   // Add custom scripts here that would be placed in <script> tags.

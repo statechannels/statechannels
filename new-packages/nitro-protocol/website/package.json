@@ -12,6 +12,7 @@
     "docusaurus": "^1.11.1"
   },
   "dependencies": {
+    "highlightjs-solidity": "https://github.com/highlightjs/highlightjs-solidity",
     "remarkable-admonitions": "^0.2.1"
   }
 }

@@ -33,7 +33,7 @@ Effects:
 
 ### ConcludeFromOpen
 
-```
+```solidity
 function concludeFromOpen(
     uint256 turnNumRecord,
     uint256 largestTurnNum,
