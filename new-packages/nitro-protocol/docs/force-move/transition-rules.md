@@ -1,7 +1,6 @@
 ---
 id: transition-rules
 title: Transition Rules
-sidebar_label: Transition Rules
 ---
 
 In order to comply with Nitro, participants must take turns to broadcast their commitments. Furthermore, there are strict rules about whether a commitment is valid, based on the previous commitment that has been announced. Beyond conforming to the [commitment format,](commitment-format.md) there are certain relationships that must hold between the commitment in question, and the preciously announced commitment.
@@ -13,8 +12,10 @@ The full rule set is:
 ```javascript
 validTransition(a, b) <=>
   b.turnNum == a.turnNum + 1
+  b.chainId == a.chainId
   b.participants == a.participants
   b.appDefinition == a.appDefinition
+  b.challengeDuration == a.challengeDuration
   a.signer == a.mover
   b.signer == b.mover
   if b.isFinal
