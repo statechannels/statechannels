@@ -166,6 +166,7 @@ contract OptimizedForceMove {
         uint8[] memory whoSignedWhat // whoSignedWhat[i] is the index of the state in stateHashes that was signed by participants[i]
     ) internal pure returns (bool) {
         uint256 nParticipants = participants.length;
+        uint256 nStates = stateHashes.length;
 
         require(
             whoSignedWhat.length == nParticipants,
@@ -173,13 +174,37 @@ contract OptimizedForceMove {
         );
 
         require(
-            _acceptableWhoSignedWhat(whoSignedWhat, largestTurnNum),
+            _acceptableWhoSignedWhat(whoSignedWhat, largestTurnNum, nParticipants, nStates),
             'Unacceptable whoSignedWhat array'
         );
         for (uint256 i = 0; i < nParticipants; i++) {
-            address signer = _recoverSigner(stateHashes[whoSignedWhat[i]], sigs[i].v, sigs[i].r, sigs[i].s);
+            address signer = _recoverSigner(
+                stateHashes[whoSignedWhat[i]],
+                sigs[i].v,
+                sigs[i].r,
+                sigs[i].s
+            );
             if (signer != participants[i]) {
                 return false;
+            }
+        }
+        return true;
+    }
+
+    function _acceptableWhoSignedWhat(
+        uint8[] memory whoSignedWhat,
+        uint256 largestTurnNum,
+        uint256 nParticipants,
+        uint256 nStates
+    ) internal pure returns (bool) {
+        for (uint256 i = 0; i < nParticipants; i++) {
+            uint256 offset = (nParticipants + largestTurnNum - i) % nParticipants;
+            // offset is the difference between the index of the current participant and the index of the participant who owns the largesTurnNum state
+            // the extra nParticipants ensures offset always positive
+            if (offset < nStates) {
+                if (whoSignedWhat[i] < nStates - offset) {
+                    return false;
+                }
             }
         }
         return true;
@@ -198,8 +223,4 @@ contract OptimizedForceMove {
         VariablePart memory newVariablePart
     ) internal pure returns (bool); // abstraction
 
-    function _acceptableWhoSignedWhat(uint8[] memory whoSignedWhat, uint256 largestTurnNum)
-        internal
-        pure
-        returns (bool); // abstraction
 }
