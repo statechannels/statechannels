@@ -132,6 +132,7 @@ export interface FundingState {
 export interface ChannelFundingState {
   directlyFunded: boolean;
   fundingChannel?: string;
+  guarantorChannel?: string;
 }
 
 // ------------
