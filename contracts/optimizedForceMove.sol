@@ -52,16 +52,11 @@ contract OptimizedForceMove {
         uint8[] memory whoSignedWhat,
         Signature memory challengerSig
     ) public {
-        (uint256 chainId, address[] memory participants, uint256 channelNonce, address appDefinition, uint256 challengeDuration) = (
-            fixedPart.chainId,
-            fixedPart.participants,
-            fixedPart.channelNonce,
-            fixedPart.appDefinition,
-            fixedPart.challengeDuration
-        );
-
         // Calculate channelId from fixed part
-        bytes32 channelId = keccak256(abi.encodePacked(chainId, participants, channelNonce));
+        bytes32 channelId = keccak256(
+            abi.encodePacked(fixedPart.chainId, fixedPart.participants, fixedPart.channelNonce)
+        );
+        ChannelStorage memory channelStorage;
 
         // ------------
         // REQUIREMENTS
@@ -73,39 +68,48 @@ contract OptimizedForceMove {
         // EITHER there is no information stored against channelId at all (OK)
         if (channelStorageHashes[channelId] != 0) {
             // OR there is, in which case we must check the channel is still open and that the committed turnNumRecord is correct
-            bytes32 emptyStorageHash = keccak256(
-                abi.encode(ChannelStorage(turnNumRecord, 0, 0, address(0), 0))
+            channelStorage = ChannelStorage(turnNumRecord, 0, 0, address(0), 0);
+            require(
+                keccak256(abi.encode(channelStorage)) == channelStorageHashes[channelId],
+                'Channel closed'
             );
-            require(emptyStorageHash == channelStorageHashes[channelId], 'Channel closed');
         }
 
+        // TODO factor into separate function _validTransitionChain, which returns either false or the stateHashes array
+
         uint256 m = variableParts.length;
-        bool isFinal;
-        uint256 turnNum;
         State memory state;
         bytes32[] memory stateHashes;
         for (uint256 i = 0; i < m - 1; i++) {
-            isFinal = i > m - isFinalCount;
-            turnNum = largestTurnNum + i - m;
             state = State(
-                turnNum,
-                isFinal,
+                largestTurnNum + i - m, // turnNum
+                i > m - isFinalCount, // isFinal
                 channelId,
                 keccak256(
-                    abi.encodePacked(challengeDuration, appDefinition, variableParts[i].appData)
+                    abi.encodePacked(
+                        fixedPart.challengeDuration,
+                        fixedPart.appDefinition,
+                        variableParts[i].appData
+                    )
                 ),
                 keccak256(abi.encode(variableParts[i].outcome))
             );
             stateHashes[i] = keccak256(abi.encode(state));
             require(
-                _validTransition(turnNum, variableParts[i], variableParts[i + 1]),
+                _validTransition(largestTurnNum + i - m, variableParts[i], variableParts[i + 1]),
                 'Invalid Transition'
             );
         }
 
         // check the supplied states are supported by n signatures
         require(
-            _validSignatures(largestTurnNum, participants, stateHashes, sigs, whoSignedWhat),
+            _validSignatures(
+                largestTurnNum,
+                fixedPart.participants,
+                stateHashes,
+                sigs,
+                whoSignedWhat
+            ),
             'Invalid signature'
         );
 
@@ -127,15 +131,18 @@ contract OptimizedForceMove {
             challengerSig.r,
             challengerSig.s
         );
-        require(_isAddressInArray(challenger, participants), 'Challenger is not a participant');
+        require(
+            _isAddressInArray(challenger, fixedPart.participants),
+            'Challenger is not a participant'
+        );
 
         // ------------
         // EFFECTS
         // ------------
 
-        ChannelStorage memory channelStorage = ChannelStorage(
+        channelStorage = ChannelStorage(
             largestTurnNum,
-            now + challengeDuration,
+            now + fixedPart.challengeDuration,
             stateHashes[m],
             challenger,
             keccak256(abi.encode(variableParts[m].outcome))
