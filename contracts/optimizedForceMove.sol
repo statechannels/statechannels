@@ -48,7 +48,8 @@ contract OptimizedForceMove {
         uint256 largestTurnNum,
         VariablePart[] memory variableParts,
         uint8 isFinalCount, // how many of the states are final
-        Signature[][] memory sigs,
+        Signature[] memory sigs,
+        uint8[] memory whoSignedWhat,
         Signature memory challengerSig
     ) public {
         (uint256 chainId, address[] memory participants, uint256 channelNonce, address appDefinition, uint256 challengeDuration) = (
@@ -103,7 +104,10 @@ contract OptimizedForceMove {
         }
 
         // check the supplied states are supported by n signatures
-        require(_validSignatures(participants, stateHashes, sigs), 'Invalid signature');
+        require(
+            _validSignatures(largestTurnNum, participants, stateHashes, sigs, whoSignedWhat),
+            'Invalid signature'
+        );
 
         // check that the forceMove is signed by a participant and store their address
         bytes32 msgHash = keccak256(
@@ -114,7 +118,7 @@ contract OptimizedForceMove {
                 variableParts,
                 isFinalCount,
                 sigs,
-                challengerSig
+                whoSignedWhat
             )
         );
         address challenger = _recoverSigner(
@@ -154,6 +158,33 @@ contract OptimizedForceMove {
         return false;
     }
 
+    function _validSignatures(
+        uint256 largestTurnNum,
+        address[] memory participants,
+        bytes32[] memory stateHashes,
+        Signature[] memory sigs,
+        uint8[] memory whoSignedWhat // whoSignedWhat[i] is the index of the state in stateHashes that was signed by participants[i]
+    ) internal pure returns (bool) {
+        uint256 nParticipants = participants.length;
+
+        require(
+            whoSignedWhat.length == nParticipants,
+            '_validSignatures: whoSignedWhat must be the same length as participants'
+        );
+
+        require(
+            _acceptableWhoSignedWhat(whoSignedWhat, largestTurnNum),
+            'Unacceptable whoSignedWhat array'
+        );
+        for (uint256 i = 0; i < nParticipants; i++) {
+            address signer = _recoverSigner(stateHashes[whoSignedWhat[i]], sigs[i].v, sigs[i].r, sigs[i].s);
+            if (signer != participants[i]) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     // not yet implemented
 
     function _recoverSigner(bytes32 _d, uint8 _v, bytes32 _r, bytes32 _s)
@@ -167,9 +198,8 @@ contract OptimizedForceMove {
         VariablePart memory newVariablePart
     ) internal pure returns (bool); // abstraction
 
-    function _validSignatures(
-        address[] memory participants,
-        bytes32[] memory stateHashes,
-        Signature[][] memory sigs
-    ) internal pure returns (bool); // abstraction
+    function _acceptableWhoSignedWhat(uint8[] memory whoSignedWhat, uint256 largestTurnNum)
+        internal
+        pure
+        returns (bool); // abstraction
 }
