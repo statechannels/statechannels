@@ -125,6 +125,7 @@ interface LedgerCommitmentParams {
 
 interface ThreeWayLedgerCommitmentParams extends LedgerCommitmentParams {
   isVote?: boolean;
+  commitmentCount?: number;
 }
 
 const LEDGER_CHANNEL_NONCE = 0;
@@ -155,12 +156,14 @@ export function threeWayLedgerCommitment(params: ThreeWayLedgerCommitmentParams)
 
   const allocation = balances.map(b => b.wei);
   const destination = balances.map(b => b.address);
+  // TODO: Find a better way of handling the conclude case
+  // For now we'll just accept an argument to override commitmentCount
   const { commitmentCount, commitmentType } = typeAndCount(turnNum, isFinal, 3);
 
   const appAttributes = ledgerAppAttributes(furtherVotesRequired, proposedBalances);
   const commitment = {
     channel: threeWayLedgerChannel,
-    commitmentCount,
+    commitmentCount: params.commitmentCount || commitmentCount,
     commitmentType,
     turnNum,
     appAttributes,

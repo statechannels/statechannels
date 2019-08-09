@@ -39,6 +39,21 @@ const signedCommitment2 = scenarios.threeWayLedgerCommitment({ turnNum: 2 });
 const signedCommitment3 = scenarios.threeWayLedgerCommitment({ turnNum: 3 });
 const signedCommitment4 = scenarios.threeWayLedgerCommitment({ turnNum: 4 });
 const signedCommitment5 = scenarios.threeWayLedgerCommitment({ turnNum: 5 });
+const signedCommitment6 = scenarios.threeWayLedgerCommitment({
+  turnNum: 6,
+  isFinal: true,
+  commitmentCount: 0,
+});
+const signedCommitment7 = scenarios.threeWayLedgerCommitment({
+  turnNum: 7,
+  isFinal: true,
+  commitmentCount: 1,
+});
+const signedCommitment8 = scenarios.threeWayLedgerCommitment({
+  turnNum: 8,
+  isFinal: true,
+  commitmentCount: 2,
+});
 const appAttributes = signedCommitment0.commitment.appAttributes;
 const participants = signedCommitment0.commitment.channel.participants;
 
@@ -81,6 +96,9 @@ const commitments2 = [signedCommitment0, signedCommitment1, signedCommitment2];
 const commitments3 = [signedCommitment1, signedCommitment2, signedCommitment3];
 const commitments4 = [signedCommitment2, signedCommitment3, signedCommitment4];
 const commitments5 = [signedCommitment3, signedCommitment4, signedCommitment5];
+const commitments6 = [signedCommitment4, signedCommitment5, signedCommitment6];
+const commitments7 = [signedCommitment5, signedCommitment6, signedCommitment7];
+const commitments8 = [signedCommitment6, signedCommitment7, signedCommitment8];
 
 // ----
 // States
@@ -92,6 +110,10 @@ const notSafeToSendA = states.notSafeToSend({
 const commitmentSentA = states.commitmentSent({
   ...propsA,
   commitmentType: CommitmentType.PreFundSetup,
+});
+const concludeCommitmentSentA = states.commitmentSent({
+  ...propsA,
+  commitmentType: CommitmentType.Conclude,
 });
 const postFundCommitmentSentA = states.commitmentSent({
   ...propsA,
@@ -153,6 +175,14 @@ const bSentPostFundSetupCommitment = setChannels(EMPTY_SHARED_DATA, [
   channelFromCommitments(commitments4, bsAddress, bsPrivateKey),
 ]);
 
+const aAllPostFundSetupsReceived = setChannels(EMPTY_SHARED_DATA, [
+  channelFromCommitments(commitments5, asAddress, asPrivateKey),
+]);
+
+const aSentConclude = setChannels(EMPTY_SHARED_DATA, [
+  channelFromCommitments(commitments6, asAddress, asPrivateKey),
+]);
+
 // -------
 // Actions
 // -------
@@ -186,6 +216,15 @@ const receivePostFundSetupFromB = commitmentsReceived({
 const receivePostFundSetupFromHub = commitmentsReceived({
   ...args,
   signedCommitments: commitments5,
+});
+
+const receiveConcludeFromB = commitmentsReceived({
+  ...args,
+  signedCommitments: commitments7,
+});
+const receiveConcludeFromHub = commitmentsReceived({
+  ...args,
+  signedCommitments: commitments8,
 });
 const clearSending = clearedToSend({
   processId,
@@ -310,6 +349,28 @@ export const existingChannelAsA = {
     sharedData: aSentPostFundCommitment,
     action: receivePostFundSetupFromHub,
     commitments: commitments5,
+  },
+};
+
+export const concludingA = {
+  ...propsA,
+  commitmentType: CommitmentType.Conclude,
+  initialize: {
+    args: { ...existingArgsA, commitmentType: CommitmentType.Conclude },
+    sharedData: aAllPostFundSetupsReceived,
+    commitments: commitments6,
+  },
+  receiveFromB: {
+    state: concludeCommitmentSentA,
+    sharedData: aSentConclude,
+    action: receiveConcludeFromB,
+    commitments: commitments7,
+  },
+  receiveFromHub: {
+    state: concludeCommitmentSentA,
+    sharedData: aSentConclude,
+    action: receiveConcludeFromHub,
+    commitments: commitments8,
   },
 };
 

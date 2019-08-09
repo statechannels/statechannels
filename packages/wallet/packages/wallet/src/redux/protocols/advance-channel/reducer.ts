@@ -9,7 +9,12 @@ import {
 } from '../../state';
 import { ProtocolStateWithSharedData, ProtocolReducer } from '..';
 import { CommitmentType, Commitment, getChannelId, nextSetupCommitment } from '../../../domain';
-import { getChannel, getLastCommitment, ChannelState } from '../../channel-store';
+import {
+  getChannel,
+  getLastCommitment,
+  ChannelState,
+  getPenultimateCommitment,
+} from '../../channel-store';
 import { WalletAction } from '../../actions';
 import * as selectors from '../../selectors';
 import { CommitmentsReceived } from '../../../communication';
@@ -178,13 +183,8 @@ function initializeWithExistingChannel(
   const { channelId, ourIndex, clearedToSend, protocolLocator } = initializeChannelArgs;
   const channel = getChannel(sharedData.channelStore, channelId);
   if (helpers.isSafeToSend({ sharedData, ourIndex, clearedToSend, channelId })) {
-    const lastCommitment = getLastCommitment(channel);
-    const ourCommitment = nextSetupCommitment(lastCommitment);
-    if (ourCommitment === 'NotASetupCommitment') {
-      // We will have to refactor `nextSetupCommitment` to allow it to construct
-      // conclude commitments
-      throw new Error('lastCommitment was not a setup commitment');
-    }
+    const ourCommitment = nextCommitment(channel, initializeChannelArgs.commitmentType);
+
     const signResult = signAndStore(sharedData, ourCommitment);
     if (!signResult.isSuccess) {
       throw new Error('Could not store new ledger channel commitment.');
@@ -217,11 +217,7 @@ function attemptToAdvanceChannel(
   let channel = getChannel(sharedData.channelStore, channelId);
   if (helpers.isSafeToSend({ sharedData, ourIndex, channelId, clearedToSend })) {
     // First, update the store with our response
-    const theirCommitment = getLastCommitment(channel);
-    const ourCommitment = nextSetupCommitment(theirCommitment);
-    if (ourCommitment === 'NotASetupCommitment') {
-      throw new Error('Not a Setup commitment');
-    }
+    const ourCommitment = nextCommitment(channel, protocolState.commitmentType);
 
     const signResult = signAndStore(sharedData, ourCommitment);
     if (!signResult.isSuccess) {
@@ -314,4 +310,44 @@ function channelAdvanced(channel: ChannelState, commitmentType: CommitmentType):
       lastCommitment.commitmentCount === channel.participants.length - 1) ||
     lastCommitment.commitmentType > commitmentType
   );
+}
+
+function nextCommitment(channel: ChannelState, commitmentType: CommitmentType): Commitment {
+  const lastCommitment = getLastCommitment(channel);
+  const penultimateCommitment =
+    lastCommitment.turnNum > 0 ? getPenultimateCommitment(channel) : undefined;
+  if (commitmentType === CommitmentType.Conclude) {
+    if (!penultimateCommitment) {
+      throw new Error('Attempted to conclude a channel that only contains a setup commitment');
+    }
+    return nextConcludeCommitment(lastCommitment, penultimateCommitment);
+  } else {
+    const next = nextSetupCommitment(lastCommitment);
+    if (next === 'NotASetupCommitment') {
+      throw new Error('lastCommitment was not a setup commitment');
+    }
+    return next;
+  }
+}
+
+function nextConcludeCommitment(
+  lastCommitment: Commitment,
+  penultimateCommitment: Commitment,
+): Commitment {
+  const turnNum = lastCommitment.turnNum + 1;
+  if (
+    lastCommitment.channel.participants.length < 2 ||
+    lastCommitment.channel.participants.length > 3
+  ) {
+    throw new Error('nextConcludeCommitment only handles 2 or 3 players');
+  }
+  let commitmentCount = 0;
+  // If the last 2 commitments are conclude we are the sending the third commitment
+  if (penultimateCommitment.commitmentType === CommitmentType.Conclude) {
+    commitmentCount = 2;
+    // Otherwise we have 1 conclude commitment so we are sending the 2nd
+  } else if (lastCommitment.commitmentType === CommitmentType.Conclude) {
+    commitmentCount = 1;
+  }
+  return { ...lastCommitment, turnNum, commitmentType: CommitmentType.Conclude, commitmentCount };
 }
