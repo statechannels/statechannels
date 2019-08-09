@@ -12,7 +12,7 @@ function flattenScenario(scenario) {
 }
 
 addStories(
-  flattenScenario(scenarios.playerAHappyPath),
+  flattenScenario(scenarios.clearedToSendHappyPath),
   'Indirect Defunding / PlayerA / Happy Path',
   IndirectDefunding,
 );
