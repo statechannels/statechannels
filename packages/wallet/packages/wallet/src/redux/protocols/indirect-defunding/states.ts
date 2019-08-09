@@ -1,5 +1,8 @@
 import { StateConstructor } from '../../utils';
 import { ProtocolState } from '..';
+import { ConsensusUpdateState } from '../consensus-update/states';
+import { ProtocolLocator } from '../../../communication';
+import { AdvanceChannelState } from '../advance-channel';
 // -------
 // States
 // -------
@@ -9,6 +12,8 @@ export interface WaitForConclude {
   processId: string;
   ledgerId: string;
   channelId: string;
+  concluding: AdvanceChannelState;
+  protocolLocator: ProtocolLocator;
 }
 
 export interface WaitForLedgerUpdate {
@@ -16,11 +21,12 @@ export interface WaitForLedgerUpdate {
   processId: string;
   ledgerId: string;
   channelId: string;
-  proposedAllocation: string[];
-  proposedDestination: string[];
+  clearedToProceed: boolean;
+  ledgerUpdate: ConsensusUpdateState;
+  concluding: AdvanceChannelState;
+  protocolLocator: ProtocolLocator;
 }
 
-export type FailureReason = 'Received Invalid Commitment' | 'Channel Not Closed';
 export interface Failure {
   type: 'IndirectDefunding.Failure';
   reason: string;

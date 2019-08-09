@@ -43,4 +43,4 @@ linkStyle default interpolate basis
 2. **Indirect Funded Channel Happy Path** - Start -> Is Channel Closed -> Yes-> Is Direct Channel -> No -> Wait for Indirect de-funding -> Indirect de-funding Protocol Complete -> Wait for Withdrawal->Withdrawal Protocol Complete -> Success
 3. **Channel Not Closed** - Start -> Is Channel Closed -> No -> Failure
 4. **Withdrawal Failure** - Start -> Is Channel Closed -> Yes -> Is Direct Channel -> Yes -> Wait for Withdrawal-> Withdrawal Protocol Failure -> Failure
-5. **Indirect de-funding Failure** - Start -> Is Channel Closed -> Yes-> Is Direct Channel -> No ->Wait for Indirect de-funding->Indirect de-funding Protocol Failure -> Failure
+5. TODO: **Indirect de-funding Failure** - Start -> Is Channel Closed -> Yes-> Is Direct Channel -> No ->Wait for Indirect de-funding->Indirect de-funding Protocol Failure -> Failure

@@ -1,5 +1,5 @@
 import { SharedData, getChannel } from '../../state';
-import { ProtocolStateWithSharedData } from '..';
+import { ProtocolStateWithSharedData, makeLocator } from '..';
 import * as states from './states';
 import * as helpers from '../reducer-helpers';
 import { withdrawalReducer, initialize as withdrawalInitialize } from './../withdrawing/reducer';
@@ -13,7 +13,7 @@ import {
 } from '../indirect-defunding/reducer';
 import { isIndirectDefundingAction } from '../indirect-defunding/actions';
 import * as indirectDefundingStates from '../indirect-defunding/states';
-import { CommitmentReceived } from '../../../communication';
+import { CommitmentReceived, EmbeddedProtocol } from '../../../communication';
 import { getLastCommitment } from '../../channel-store';
 import { ProtocolAction } from '../../../redux/actions';
 
@@ -43,7 +43,8 @@ export const initialize = (
       proposedAllocation,
       proposedDestination,
       sharedData,
-      action,
+      clearedToProceed: true,
+      protocolLocator: makeLocator(EmbeddedProtocol.IndirectDefunding),
     });
 
     const protocolState = states.waitForLedgerDefunding({

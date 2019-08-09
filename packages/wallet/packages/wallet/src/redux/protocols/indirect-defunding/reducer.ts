@@ -1,21 +1,25 @@
-import { ProtocolStateWithSharedData } from '..';
-import { SharedData, signAndStore, queueMessage, checkAndStore } from '../../state';
+import { ProtocolStateWithSharedData, makeLocator } from '..';
+import { SharedData } from '../../state';
 import * as states from './states';
 import { IndirectDefundingAction } from './actions';
 import * as helpers from '../reducer-helpers';
 import { unreachable } from '../../../utils/reducer-utils';
-import * as selectors from '../../selectors';
-import { proposeNewConsensus, acceptConsensus } from '../../../domain/consensus-app';
+import { ProtocolLocator, EmbeddedProtocol } from '../../../communication';
 import {
-  sendCommitmentReceived,
-  multipleRelayableActions,
-  commitmentReceived,
-} from '../../../communication';
-import { theirAddress, getLastCommitment } from '../../channel-store';
-import { composeConcludeCommitment } from '../../../utils/commitment-utils';
-import { CommitmentReceived } from '../../actions';
-import { messageRelayRequested } from 'magmo-wallet-client';
-import { defundRequested } from '../actions';
+  ConsensusUpdateState,
+  initializeConsensusUpdate,
+  consensusUpdateReducer,
+} from '../consensus-update';
+import { routesToAdvanceChannel } from '../advance-channel/actions';
+import { routesToConsensusUpdate } from '../consensus-update/actions';
+import * as consensusUpdateActions from '../consensus-update/actions';
+import * as advanceChannelActions from '../advance-channel/actions';
+import {
+  AdvanceChannelState,
+  initializeAdvanceChannel,
+  advanceChannelReducer,
+} from '../advance-channel';
+import { CommitmentType } from '../../../domain';
 
 export const initialize = ({
   processId,
@@ -24,7 +28,8 @@ export const initialize = ({
   proposedAllocation,
   proposedDestination,
   sharedData,
-  action,
+  clearedToProceed,
+  protocolLocator,
 }: {
   processId: string;
   channelId: string;
@@ -32,70 +37,42 @@ export const initialize = ({
   proposedAllocation: string[];
   proposedDestination: string[];
   sharedData: SharedData;
-  action?: CommitmentReceived;
+  clearedToProceed: boolean;
+  protocolLocator: ProtocolLocator;
 }): ProtocolStateWithSharedData<states.IndirectDefundingState> => {
-  if (!helpers.channelIsClosed(channelId, sharedData)) {
-    return {
-      protocolState: states.failure({ reason: 'Channel Not Closed' }),
-      sharedData,
-    };
-  }
-  let newSharedData = { ...sharedData };
-  if (helpers.isFirstPlayer(ledgerId, sharedData)) {
-    const ledgerChannel = selectors.getChannelState(sharedData, ledgerId);
-
-    const theirCommitment = getLastCommitment(ledgerChannel);
-    const ourCommitment = proposeNewConsensus(
-      theirCommitment,
-      proposedAllocation,
-      proposedDestination,
-    );
-    const signResult = signAndStore(sharedData, ourCommitment);
-    if (!signResult.isSuccess) {
-      return {
-        protocolState: states.failure({ reason: 'Received Invalid Commitment' }),
-        sharedData,
-      };
-    }
-    newSharedData = signResult.store;
-
-    const actionToRelay = multipleRelayableActions({
-      actions: [
-        // send a request for opponent to start new defunding process first, because they may not yet have done so
-        defundRequested({
-          channelId,
-        }),
-        commitmentReceived({
-          processId,
-          signedCommitment: {
-            commitment: signResult.signedCommitment.commitment,
-            signature: signResult.signedCommitment.signature,
-          },
-          protocolLocator: [],
-        }),
-      ],
-    });
-
-    const messageRelay = messageRelayRequested(theirAddress(ledgerChannel), actionToRelay);
-
-    newSharedData = queueMessage(newSharedData, messageRelay);
-  }
-
-  const protocolState = states.waitForLedgerUpdate({
+  let ledgerUpdate: ConsensusUpdateState;
+  ({ protocolState: ledgerUpdate, sharedData } = initializeConsensusUpdate({
     processId,
-    ledgerId,
-    channelId,
     proposedAllocation,
     proposedDestination,
-  });
+    channelId: ledgerId,
+    clearedToSend: clearedToProceed,
+    protocolLocator,
+    sharedData,
+  }));
 
-  if (!helpers.isFirstPlayer && action) {
-    // are we second player?
-    return waitForLedgerUpdateReducer(protocolState, sharedData, action);
-  }
+  let concluding: AdvanceChannelState;
+  const ourIndex = helpers.getTwoPlayerIndex(ledgerId, sharedData);
+  ({ protocolState: concluding, sharedData } = initializeAdvanceChannel(sharedData, {
+    ourIndex,
+    commitmentType: CommitmentType.Conclude,
+    channelId: ledgerId,
+    processId,
+    clearedToSend: false, // We only want to clear this to send after the ledger updating is done
+    protocolLocator: makeLocator(protocolLocator, EmbeddedProtocol.AdvanceChannel),
+  }));
+
   return {
-    protocolState,
-    sharedData: newSharedData,
+    protocolState: states.waitForLedgerUpdate({
+      processId,
+      ledgerId,
+      channelId,
+      clearedToProceed,
+      ledgerUpdate,
+      concluding,
+      protocolLocator,
+    }),
+    sharedData,
   };
 };
 
@@ -104,6 +81,9 @@ export const indirectDefundingReducer = (
   sharedData: SharedData,
   action: IndirectDefundingAction,
 ): ProtocolStateWithSharedData<states.IndirectDefundingState> => {
+  if (action.type === 'WALLET.INDIRECT_DEFUNDING.CLEARED_TO_SEND') {
+    return handleClearedToSend(protocolState, sharedData);
+  }
   switch (protocolState.type) {
     case 'IndirectDefunding.WaitForLedgerUpdate':
       return waitForLedgerUpdateReducer(protocolState, sharedData, action);
@@ -117,35 +97,59 @@ export const indirectDefundingReducer = (
   }
 };
 
+const handleClearedToSend = (
+  protocolState: states.IndirectDefundingState,
+  sharedData: SharedData,
+): ProtocolStateWithSharedData<states.IndirectDefundingState> => {
+  // We only need to send clear to send to the consensus update reducer
+  // as the advance channel only gets cleared to send after this state
+  if (protocolState.type !== 'IndirectDefunding.WaitForLedgerUpdate') {
+    console.warn(`Received ClearedToSend in state ${protocolState.type}`);
+    return {
+      protocolState,
+      sharedData,
+    };
+  }
+  const { processId, protocolLocator } = protocolState;
+  return handleConsensusUpdateAction(
+    protocolState,
+    sharedData,
+    consensusUpdateActions.clearedToSend({
+      processId,
+      protocolLocator: makeLocator(protocolLocator, EmbeddedProtocol.ConsensusUpdate),
+    }),
+  );
+};
+
 const waitForConcludeReducer = (
   protocolState: states.WaitForConclude,
   sharedData: SharedData,
   action: IndirectDefundingAction,
 ): ProtocolStateWithSharedData<states.IndirectDefundingState> => {
-  if (action.type !== 'WALLET.COMMON.COMMITMENT_RECEIVED') {
-    throw new Error(`Invalid action ${action.type}`);
+  if (!routesToAdvanceChannel(action, protocolState.protocolLocator)) {
+    console.warn(`Received non-AdvanceChannel action in state ${protocolState.type}`);
+    return { protocolState, sharedData };
   }
-
-  let newSharedData = { ...sharedData };
-
-  const checkResult = checkAndStore(newSharedData, action.signedCommitment);
-  if (!checkResult.isSuccess) {
-    return { protocolState: states.failure({ reason: 'Received Invalid Commitment' }), sharedData };
+  let concluding: AdvanceChannelState;
+  ({ protocolState: concluding, sharedData } = advanceChannelReducer(
+    protocolState.concluding,
+    sharedData,
+    action,
+  ));
+  switch (concluding.type) {
+    case 'AdvanceChannel.Failure':
+      return { protocolState: states.failure({ reason: 'AdvanceChannel Failure' }), sharedData };
+    case 'AdvanceChannel.Success':
+      return {
+        protocolState: states.success({}),
+        sharedData,
+      };
+    default:
+      return {
+        protocolState: states.waitForConclude({ ...protocolState, concluding }),
+        sharedData,
+      };
   }
-  newSharedData = checkResult.store;
-
-  if (!helpers.isFirstPlayer(protocolState.ledgerId, sharedData)) {
-    newSharedData = createAndSendConcludeCommitment(
-      newSharedData,
-      protocolState.processId,
-      protocolState.ledgerId,
-    );
-  }
-
-  return {
-    protocolState: states.success({}),
-    sharedData: newSharedData,
-  };
 };
 
 const waitForLedgerUpdateReducer = (
@@ -153,70 +157,49 @@ const waitForLedgerUpdateReducer = (
   sharedData: SharedData,
   action: IndirectDefundingAction,
 ): ProtocolStateWithSharedData<states.IndirectDefundingState> => {
-  if (action.type !== 'WALLET.COMMON.COMMITMENT_RECEIVED') {
-    throw new Error(`Invalid action ${action.type}`);
+  if (!routesToConsensusUpdate(action, protocolState.protocolLocator)) {
+    console.warn(`Received non-ConsensusUpdate action in state ${protocolState.type}`);
+    return { protocolState, sharedData };
   }
-
-  let newSharedData = { ...sharedData };
-
-  const checkResult = checkAndStore(newSharedData, action.signedCommitment);
-  if (!checkResult.isSuccess) {
-    return { protocolState: states.failure({ reason: 'Received Invalid Commitment' }), sharedData };
-  }
-  newSharedData = checkResult.store;
-
-  if (!helpers.isFirstPlayer(protocolState.channelId, sharedData)) {
-    const theirCommitment = action.signedCommitment.commitment;
-    const ourCommitment = acceptConsensus(theirCommitment);
-    const signResult = signAndStore(newSharedData, ourCommitment);
-    if (!signResult.isSuccess) {
-      return {
-        protocolState: states.failure({ reason: 'Received Invalid Commitment' }),
-        sharedData: newSharedData,
-      };
-    }
-    newSharedData = signResult.store;
-    const { ledgerId, processId } = protocolState;
-    const ledgerChannel = selectors.getChannelState(newSharedData, ledgerId);
-
-    const messageRelay = sendCommitmentReceived(
-      theirAddress(ledgerChannel),
-      processId,
-      signResult.signedCommitment.commitment,
-      signResult.signedCommitment.signature,
-    );
-    newSharedData = queueMessage(newSharedData, messageRelay);
-  } else {
-    newSharedData = createAndSendConcludeCommitment(
-      newSharedData,
-      protocolState.processId,
-      protocolState.ledgerId,
-    );
-  }
-  return { protocolState: states.waitForConclude(protocolState), sharedData: newSharedData };
+  return handleConsensusUpdateAction(protocolState, sharedData, action);
 };
 
-// Helpers
-
-const createAndSendConcludeCommitment = (
+function handleConsensusUpdateAction(
+  protocolState: states.WaitForLedgerUpdate,
   sharedData: SharedData,
-  processId: string,
-  channelId: string,
-): SharedData => {
-  const channelState = selectors.getOpenedChannelState(sharedData, channelId);
-
-  const commitment = composeConcludeCommitment(channelState);
-
-  const signResult = signAndStore(sharedData, commitment);
-  if (!signResult.isSuccess) {
-    throw new Error(`Could not sign commitment due to  ${signResult.reason}`);
+  action: consensusUpdateActions.ConsensusUpdateAction,
+) {
+  const { processId, protocolLocator } = protocolState;
+  let ledgerUpdate: ConsensusUpdateState;
+  ({ protocolState: ledgerUpdate, sharedData } = consensusUpdateReducer(
+    protocolState.ledgerUpdate,
+    sharedData,
+    action,
+  ));
+  switch (ledgerUpdate.type) {
+    case 'ConsensusUpdate.Failure':
+      return {
+        protocolState: states.failure({ reason: 'Consensus Update Failure' }),
+        sharedData,
+      };
+    case 'ConsensusUpdate.Success':
+      let concluding: AdvanceChannelState;
+      ({ protocolState: concluding, sharedData } = advanceChannelReducer(
+        protocolState.concluding,
+        sharedData,
+        advanceChannelActions.clearedToSend({
+          processId,
+          protocolLocator: makeLocator(protocolLocator, EmbeddedProtocol.AdvanceChannel),
+        }),
+      ));
+      return {
+        protocolState: states.waitForConclude({ ...protocolState, concluding }),
+        sharedData,
+      };
+    default:
+      return {
+        protocolState: { ...protocolState, ledgerUpdate },
+        sharedData,
+      };
   }
-
-  const messageRelay = sendCommitmentReceived(
-    theirAddress(channelState),
-    processId,
-    signResult.signedCommitment.commitment,
-    signResult.signedCommitment.signature,
-  );
-  return queueMessage(signResult.store, messageRelay);
-};
+}
