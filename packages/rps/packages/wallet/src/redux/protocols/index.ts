@@ -20,6 +20,7 @@ import { IndirectFundingState } from './indirect-funding/states';
 import { ProtocolLocator, EmbeddedProtocol } from '../../communication';
 import { WalletAction } from '../actions';
 import { FundingStrategyNegotiationState } from './funding-strategy-negotiation/states';
+import { VirtualDefundingState } from './virtual-defunding/states';
 
 export type ProtocolState =
   | ApplicationState
@@ -40,7 +41,8 @@ export type ProtocolState =
   | TransactionSubmissionState
   | AdvanceChannelState
   | IndirectFundingState
-  | FundingStrategyNegotiationState;
+  | FundingStrategyNegotiationState
+  | VirtualDefundingState;
 
 export type ProtocolReducer<T extends ProtocolState> = (
   protocolState: T,

@@ -1,5 +1,5 @@
 import * as states from './states';
-import { SharedData, getPrivatekey } from '../../state';
+import { SharedData, getPrivatekey, setFundingState } from '../../state';
 import { ProtocolStateWithSharedData, ProtocolReducer, makeLocator } from '..';
 import { WalletAction, advanceChannel } from '../../actions';
 import { VirtualFundingAction } from './actions';
@@ -184,7 +184,15 @@ function waitForGuarantorChannelReducer(
     const result = advanceChannelReducer(protocolState.guarantorChannel, sharedData, action);
     if (advanceChannel.isSuccess(result.protocolState)) {
       const { channelId: guarantorChannelId } = result.protocolState;
-
+      const fundingState = {
+        guarantorChannel: guarantorChannelId,
+        directlyFunded: false,
+      };
+      result.sharedData = setFundingState(
+        result.sharedData,
+        protocolState.jointChannelId,
+        fundingState,
+      );
       switch (result.protocolState.commitmentType) {
         case CommitmentType.PreFundSetup:
           const guarantorChannelResult = advanceChannel.initializeAdvanceChannel(
