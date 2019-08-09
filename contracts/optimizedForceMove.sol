@@ -215,12 +215,17 @@ contract OptimizedForceMove {
     function _recoverSigner(bytes32 _d, uint8 _v, bytes32 _r, bytes32 _s)
         internal
         pure
-        returns (address); // abstraction
+        returns (address)
+    {
+        return address(0); // TODO this is a placeholder implementation
+    }
 
     function _validTransition(
         uint256 turnNum,
         VariablePart memory oldVariablePart,
         VariablePart memory newVariablePart
-    ) internal pure returns (bool); // abstraction
+    ) internal pure returns (bool) {
+        return true;
+    } // TOTO this is a placeholder implementation
 
 }
