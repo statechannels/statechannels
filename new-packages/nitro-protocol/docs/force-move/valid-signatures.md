@@ -48,24 +48,41 @@ So the signatures are valid in this case
 
 ---
 
-## Implemntation
+## Implementation
 
-Checking signatures is likely to be a signification part of the logic. Here's a potential algorithm:
+```solidity
+_validSignatures(
+  address[] participants,
+  bytes32[] stateHashes,
+  uint256 largestTurnNum,
+  uint8[] whoSignedWhat,
+  Signature[] sigs
+)
+```
 
-1. Let `nStates` be the number of states in the `states` array.
-   - Note that we assume that it has already been determined that these states form a chain of valid transitions and therefore must have incrementing turn numbers.
-2. Assume that `Signatures` takes the format of an array of length `nStates` where each element is an array of signatures on the corresponding state i.e. `sigs[i]` is an array of signatures on state `states[i]`.
-   - Note that it's possible for `states[i]` to be empty for some `i`.
-3. Let `nParticipants` be the number of participants.
-   - Note that we should have that `nStates <= nParticipants` and that the total number of signatures provided should be equal to `nParticipants`
-4. Let `hasSigned` be a boolean array of length `m` initialized to `false`.
-5. Let `maxTurnNum = states[states.length - 1].turnNum`.
-6. For `i = nStates - 1; i >= 0; i++`:
-   1. For `j = 0; j < signatures[i].length; j++`:
-      1. Determine that `signatures[i][j]` is a valid signature for some participant on state `states[i]`. Let `p` be the index of this participant in the channel's particpants array.
-      1. Set the bit `hasSigned[(p - maxTurnNum - 1) % n]`.
-   2. Fail unless `hasSigned[i - nStates + nParticipants]` is set.
-7. Fail unless `hasSigned[0..(nParticipants - nStates - 1)]` are all set.
-8. Return true
+Where `whoSignedWhat[i]` is the index of the state in `stateHashes` that was signed by `participant[i]`.
 
-**Can we optimize this further by changing the way states / sigs are passed in?** For example passing the arrays in last-state-first might help.
+2 stages:
+
+1. is `whoSignedWhat` acceptable?
+
+   - Let m be the number of states passed in
+   - Let n be the number of participants
+   - Require the `whoSignedWhat.length == n` // probably covered in accuracy by iterating over `n` ??
+   - For each `participant[i]`:
+     - Calculate `offset = (largestTurnNum - i) % n`
+     - If `offset >= m - 1` then they can sign any state
+     - Else you should have signed state `m - 1 - offset` or higher
+
+2. is `whoSignedWhat` accurate?
+
+   - For each i from `0 .. (n - 1)`:
+     - Does `participants[i] == recoverSigner(stateHashes[whoSignedWhat[i]], sigs[i])`
+
+Example of whether `whoSignedWhat` is acceptable:
+
+- Suppose: m = 2, n = 3, turnNum = 5
+- Checks turn
+- offset = [2, 1, 0]
+- so should have signed [{0, 1}, {0, 1}, {1}]
+- so valid `whoSignedWhat`s are [0, 0, 1], ([1, 1, 1]), [1, 0, 1], [0, 1, 1]
