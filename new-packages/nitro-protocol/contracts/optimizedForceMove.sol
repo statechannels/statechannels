@@ -116,13 +116,9 @@ contract OptimizedForceMove {
         // check that the forceMove is signed by a participant and store their address
         bytes32 msgHash = keccak256(
             abi.encode(
-                turnNumRecord,
-                fixedPart,
                 largestTurnNum,
-                variableParts,
-                isFinalCount,
-                sigs,
-                whoSignedWhat
+                channelId,
+                'forceMove' // Express statement of intent to forceMove this channel at this turnNum
             )
         );
         address challenger = _recoverSigner(
