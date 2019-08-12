@@ -203,7 +203,7 @@ contract OptimizedForceMove {
             uint256 offset = (nParticipants + largestTurnNum - i) % nParticipants;
             // offset is the difference between the index of participant[i] and the index of the participant who owns the largesTurnNum state
             // the additional nParticipants in the dividend ensures offset always positive
-            if (whoSignedWhat[i] + offset < nStates) {
+            if (whoSignedWhat[i] + offset < nStates - 1) {
                 return false;
             }
         }
