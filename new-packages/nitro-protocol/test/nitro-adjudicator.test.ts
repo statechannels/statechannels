@@ -12,7 +12,6 @@ async function setupContracts() {
   let networkId;
   networkId = (await provider.getNetwork()).chainId;
   const contractAddress = optimizedForceMoveArtifact.networks[networkId].address;
-  console.log(contractAddress);
   optimizedForceMove = new ethers.Contract(
     contractAddress,
     optimizedForceMoveArtifact.abi,
@@ -43,19 +42,24 @@ describe('_isAddressInArray', () => {
 });
 
 describe('_acceptableWhoSignedWhat', () => {
-  const whoSignedWhat = [0, 1, 2];
-  const largestTurnNum = 2;
-  const nParticipants = 3;
-  const nStates = 3;
+  let whoSignedWhat;
+  let largestTurnNum;
+  let nParticipants;
+  let nStates;
   it('verifies correct array of who signed what (n states)', async () => {
-    expect(
-      await optimizedForceMove.acceptableWhoSignedWhat(
-        whoSignedWhat,
-        largestTurnNum,
-        nParticipants,
-        nStates,
-      ),
-    ).toBe(true);
+    whoSignedWhat = [0, 1, 2];
+    nParticipants = 3;
+    nStates = 3;
+    for (largestTurnNum = 2; largestTurnNum < 14; largestTurnNum += nParticipants) {
+      expect(
+        await optimizedForceMove.acceptableWhoSignedWhat(
+          whoSignedWhat,
+          largestTurnNum,
+          nParticipants,
+          nStates,
+        ),
+      ).toBe(true);
+    }
   });
   // it('verifies correct array of who signed what (fewer than n states)',
   // });
