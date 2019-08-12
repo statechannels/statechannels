@@ -2,7 +2,7 @@ import {ethers} from 'ethers';
 import {expectRevert} from 'magmo-devtools';
 // @ts-ignore
 import optimizedForceMoveArtifact from '../build/contracts/TESTOptimizedForceMove.json';
-import {splitSignature, solidityKeccak256, formatBytes32String} from 'ethers/utils';
+import {splitSignature} from 'ethers/utils';
 
 let optimizedForceMove: ethers.Contract;
 
@@ -134,5 +134,76 @@ describe('_recoverSigner', () => {
     expect(await optimizedForceMove.recoverSigner(msgHash, sig.v, sig.r, sig.s)).toEqual(
       wallet.address,
     );
+  });
+});
+
+describe('_validSignatures', () => {
+  const participants = [];
+  let stateHash;
+  const stateHashes = [];
+  let wallet;
+  let sig;
+  const sigs = [];
+  let brokenSigs;
+  const whoSignedWhat = [];
+  const largestTurnNum = 2;
+  it('returns true (false) for a correct (incorrect) set of signatures on n states', async () => {
+    for (let i = 0; i < 3; i++) {
+      wallet = ethers.Wallet.createRandom();
+      participants[i] = wallet.address;
+      stateHash = ethers.utils.id('Commitment' + i);
+      stateHashes[i] = stateHash;
+      sig = splitSignature(await wallet.signMessage(ethers.utils.arrayify(stateHash)));
+      sigs[i] = {v: sig.v, r: sig.r, s: sig.s};
+      whoSignedWhat[i] = i;
+    }
+    expect(
+      await optimizedForceMove.validSignatures(
+        largestTurnNum,
+        participants,
+        stateHashes,
+        sigs,
+        whoSignedWhat,
+      ),
+    ).toBe(true);
+    brokenSigs = sigs.reverse();
+    expect(
+      await optimizedForceMove.validSignatures(
+        largestTurnNum,
+        participants,
+        stateHashes,
+        brokenSigs,
+        whoSignedWhat,
+      ),
+    ).toBe(false);
+  });
+  it('returns true (false) for a correct (incorrect) set of signatures on 1 state', async () => {
+    stateHash = ethers.utils.id('Commitment' + largestTurnNum);
+    for (let i = 0; i < 3; i++) {
+      wallet = ethers.Wallet.createRandom();
+      participants[i] = wallet.address;
+      sig = splitSignature(await wallet.signMessage(ethers.utils.arrayify(stateHash)));
+      sigs[i] = {v: sig.v, r: sig.r, s: sig.s};
+      whoSignedWhat[i] = 0;
+    }
+    expect(
+      await optimizedForceMove.validSignatures(
+        largestTurnNum,
+        participants,
+        [stateHash],
+        sigs,
+        whoSignedWhat,
+      ),
+    ).toBe(true);
+    brokenSigs = sigs.reverse();
+    expect(
+      await optimizedForceMove.validSignatures(
+        largestTurnNum,
+        participants,
+        [stateHash],
+        brokenSigs,
+        whoSignedWhat,
+      ),
+    ).toBe(false);
   });
 });
