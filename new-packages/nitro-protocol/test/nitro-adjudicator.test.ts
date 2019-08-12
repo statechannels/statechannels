@@ -2,6 +2,7 @@ import {ethers} from 'ethers';
 import {expectRevert} from 'magmo-devtools';
 // @ts-ignore
 import optimizedForceMoveArtifact from '../build/contracts/TESTOptimizedForceMove.json';
+import {splitSignature, solidityKeccak256, formatBytes32String} from 'ethers/utils';
 
 let optimizedForceMove: ethers.Contract;
 
@@ -119,5 +120,19 @@ describe('_acceptableWhoSignedWhat', () => {
         ),
       ).toBe(false);
     }
+  });
+});
+
+describe('_recoverSigner', () => {
+  // following https://docs.ethers.io/ethers.js/html/cookbook-signing.html
+  const privateKey = '0x0123456789012345678901234567890123456789012345678901234567890123';
+  const wallet = new ethers.Wallet(privateKey);
+  const msgHash = ethers.utils.id('Hello World');
+  const msgHashBytes = ethers.utils.arrayify(msgHash);
+  it('recovers the signer correctly', async () => {
+    const sig = splitSignature(await wallet.signMessage(msgHashBytes));
+    expect(await optimizedForceMove.recoverSigner(msgHash, sig.v, sig.r, sig.s)).toEqual(
+      wallet.address,
+    );
   });
 });

@@ -32,4 +32,12 @@ contract TESTOptimizedForceMove is OptimizedForceMove {
         return _acceptableWhoSignedWhat(whoSignedWhat, largestTurnNum, nParticipants, nStates);
     }
 
+    function recoverSigner(bytes32 _d, uint8 _v, bytes32 _r, bytes32 _s)
+        public
+        pure
+        returns (address)
+    {
+        return _recoverSigner(_d, _v, _r, _s);
+    }
+
 }

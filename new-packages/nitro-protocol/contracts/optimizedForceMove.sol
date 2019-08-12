@@ -210,15 +210,18 @@ contract OptimizedForceMove {
         return true;
     }
 
-    // not yet implemented
-
     function _recoverSigner(bytes32 _d, uint8 _v, bytes32 _r, bytes32 _s)
         internal
         pure
         returns (address)
     {
-        return address(0); // TODO this is a placeholder implementation
+        bytes memory prefix = '\x19Ethereum Signed Message:\n32';
+        bytes32 prefixedHash = keccak256(abi.encodePacked(prefix, _d));
+        address a = ecrecover(prefixedHash, _v, _r, _s);
+        return (a);
     }
+
+    // not yet implemented
 
     function _validTransition(
         uint256 turnNum,
