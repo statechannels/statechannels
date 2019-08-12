@@ -41,3 +41,26 @@ describe('_isAddressInArray', () => {
     expect(await optimizedForceMove.isAddressInArray(suspect, addresses)).toBe(true);
   });
 });
+
+describe('_acceptableWhoSignedWhat', () => {
+  const whoSignedWhat = [0, 1, 2];
+  const largestTurnNum = 2;
+  const nParticipants = 3;
+  const nStates = 3;
+  it('verifies correct array of who signed what (n states)', async () => {
+    expect(
+      await optimizedForceMove.acceptableWhoSignedWhat(
+        whoSignedWhat,
+        largestTurnNum,
+        nParticipants,
+        nStates,
+      ),
+    ).toBe(true);
+  });
+  // it('verifies correct array of who signed what (fewer than n states)',
+  // });
+  // it('verifies correct array of who signed what (1 state)', async () => {
+  // });
+  // it('reverts when the array is not the required length', async () => {
+  // });
+});
