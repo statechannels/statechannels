@@ -172,11 +172,6 @@ contract OptimizedForceMove {
         uint256 nStates = stateHashes.length;
 
         require(
-            whoSignedWhat.length == nParticipants,
-            '_validSignatures: whoSignedWhat must be the same length as participants'
-        );
-
-        require(
             _acceptableWhoSignedWhat(whoSignedWhat, largestTurnNum, nParticipants, nStates),
             'Unacceptable whoSignedWhat array'
         );
@@ -200,14 +195,16 @@ contract OptimizedForceMove {
         uint256 nParticipants,
         uint256 nStates
     ) internal pure returns (bool) {
+        require(
+            whoSignedWhat.length == nParticipants,
+            '_validSignatures: whoSignedWhat must be the same length as participants'
+        );
         for (uint256 i = 0; i < nParticipants; i++) {
             uint256 offset = (nParticipants + largestTurnNum - i) % nParticipants;
-            // offset is the difference between the index of the current participant and the index of the participant who owns the largesTurnNum state
-            // the extra nParticipants ensures offset always positive
-            if (offset < nStates) {
-                if (whoSignedWhat[i] < nStates - offset) {
-                    return false;
-                }
+            // offset is the difference between the index of participant[i] and the index of the participant who owns the largesTurnNum state
+            // the additional nParticipants in the dividend ensures offset always positive
+            if (whoSignedWhat[i] + offset < nStates) {
+                return false;
             }
         }
         return true;
