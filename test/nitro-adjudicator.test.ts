@@ -210,7 +210,7 @@ describe('_validSignatures', () => {
   });
 });
 
-describe.only('forceMove', () => {
+describe('forceMove', () => {
   // construct data for forceMove parameters
   const chainId = 1234;
   const channelNonce = 1;
@@ -240,9 +240,10 @@ describe.only('forceMove', () => {
     ),
   );
   let state;
+  let outcomeHash;
   for (let i = 0; i < 3; i++) {
     const outcome = ethers.utils.id('some outcome data' + i);
-    const outcomeHash = keccak256(defaultAbiCoder.encode(['bytes'], [outcome]));
+    outcomeHash = keccak256(defaultAbiCoder.encode(['bytes'], [outcome]));
     variableParts[i] = {
       outcome,
       appData: ethers.utils.id('some app data' + i),
@@ -303,29 +304,34 @@ describe.only('forceMove', () => {
       sigs,
       whoSignedWhat,
       challengerSig,
-    ); // need a signer to call this
+    );
     await tx.wait();
-    const stateHashesEvent = new Promise((resolve, reject) => {
-      optimizedForceMove.on('StateHashes', (hashes, event) => {
+    const forceMoveEvent = new Promise((resolve, reject) => {
+      optimizedForceMove.on('ForceMove', (cId, expTime, event) => {
         event.removeListener();
-        resolve(hashes);
+        resolve(expTime);
       });
       setTimeout(() => {
         reject(new Error('timeout'));
       }, 60000);
     });
-    expect(await stateHashesEvent).toEqual(stateHashes);
-    // // TODO listen for forceMove EVENT (not yet implemented) and get the channel expiry time from that event
-    // const expectedChannelStorage = {
-    //   largestTurnNum,
-    //   // todo
-    // };
-    // const expectedChannelStorageHash = keccak256(
-    //   defaultAbiCoder.encode(['TODO'], [expectedChannelStorage]),
-    // );
-    // // call out to public mappings and check channelStorageHash against the expected value
-    // expect(await optimizedForceMove.channelStorageHashes(channelId)).toEqual(
-    //   expectedChannelStorageHash,
-    // );
+    const expiryTime = await forceMoveEvent;
+    const expectedChannelStorage = [
+      largestTurnNum,
+      expiryTime,
+      stateHashes[2],
+      participants[2],
+      outcomeHash,
+    ];
+    const expectedChannelStorageHash = keccak256(
+      defaultAbiCoder.encode(
+        ['uint256', 'uint256', 'bytes32', 'address', 'bytes32'],
+        expectedChannelStorage,
+      ),
+    );
+    // call out to public mappings and check channelStorageHash against the expected value
+    expect(await optimizedForceMove.channelStorageHashes(channelId)).toEqual(
+      expectedChannelStorageHash,
+    );
   });
 });
