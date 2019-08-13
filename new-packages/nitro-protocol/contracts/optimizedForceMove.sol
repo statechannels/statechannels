@@ -144,6 +144,8 @@ contract OptimizedForceMove {
             keccak256(abi.encode(variableParts[m].outcome))
         );
 
+        // TODO fire event
+
         channelStorageHashes[channelId] = keccak256(abi.encode(channelStorage));
     }
     // Internal methods:
