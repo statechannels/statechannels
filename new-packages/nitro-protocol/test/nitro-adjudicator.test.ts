@@ -221,11 +221,13 @@ describe('forceMove', () => {
   const variableParts = [, ,];
   const stateHashes = [, ,];
 
+  // populate wallets and participants array
   for (let i = 0; i < 3; i++) {
     wallets[i] = ethers.Wallet.createRandom();
     participants[i] = wallets[i].address;
   }
 
+  // fixedPart
   const fixedPart = {
     chainId,
     participants,
@@ -233,12 +235,19 @@ describe('forceMove', () => {
     appDefinition: AddressZero,
     challengeDuration: 1,
   };
+
+  // channelId
   const channelId = keccak256(
     defaultAbiCoder.encode(
       ['uint256', 'address[]', 'uint256'],
       [chainId, participants, channelNonce],
     ),
   );
+
+  // compute stateHashes for a chain of 3 non-final states with turnNum = [0,1,2]
+  const largestTurnNum = 2;
+  const isFinalCount = 0;
+  const whoSignedWhat = [0, 1, 2];
   let state;
   let outcomeHash;
   for (let i = 0; i < 3; i++) {
@@ -271,18 +280,18 @@ describe('forceMove', () => {
       ),
     );
   }
-  const largestTurnNum = 2;
-  const isFinalCount = 0;
-  const whoSignedWhat = [0, 1, 2];
+
   let challengerSig;
   let sig;
   let tx;
-
   it('accepts a valid forceMove tx and updates channelStorageHashes correctly', async () => {
+    // sign the states
     for (let i = 0; i < 3; i++) {
       sig = await sign(wallets[i], stateHashes[i]);
       sigs[i] = {v: sig.v, r: sig.r, s: sig.s};
     }
+
+    // compute challengerSig
     const msgHash = keccak256(
       defaultAbiCoder.encode(
         ['uint256', 'bytes32', 'string'],
@@ -291,9 +300,11 @@ describe('forceMove', () => {
     );
     const {v, r, s} = await sign(wallets[2], msgHash);
     challengerSig = {v, r, s};
+
     // inspect current channelStorageHashes value
     const currentHash = await optimizedForceMove.channelStorageHashes(channelId);
     expect(currentHash).toEqual(HashZero);
+
     // call forceMove
     tx = await optimizedForceMove.forceMove(
       turnNumRecord,
@@ -305,7 +316,11 @@ describe('forceMove', () => {
       whoSignedWhat,
       challengerSig,
     );
+
+    // wait for tx to be mined
     await tx.wait();
+
+    // catch ForceMove event and peel-off the expiryTime
     const forceMoveEvent = new Promise((resolve, reject) => {
       optimizedForceMove.on('ForceMove', (cId, expTime, event) => {
         event.removeListener();
@@ -316,6 +331,8 @@ describe('forceMove', () => {
       }, 60000);
     });
     const expiryTime = await forceMoveEvent;
+
+    // compute expected ChannelStorageHash
     const expectedChannelStorage = [
       largestTurnNum,
       expiryTime,
@@ -329,7 +346,8 @@ describe('forceMove', () => {
         expectedChannelStorage,
       ),
     );
-    // call out to public mappings and check channelStorageHash against the expected value
+
+    // call out to public mapping and check channelStorageHash against the expected value
     expect(await optimizedForceMove.channelStorageHashes(channelId)).toEqual(
       expectedChannelStorageHash,
     );
