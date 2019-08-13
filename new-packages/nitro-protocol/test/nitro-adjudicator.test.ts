@@ -1,9 +1,9 @@
 import {ethers} from 'ethers';
-import {expectRevert} from 'magmo-devtools';
+import {expectRevert, expectEvent} from 'magmo-devtools';
 // @ts-ignore
 import optimizedForceMoveArtifact from '../build/contracts/TESTOptimizedForceMove.json';
 import {splitSignature, keccak256, defaultAbiCoder, arrayify} from 'ethers/utils';
-import {AddressZero} from 'ethers/constants';
+import {AddressZero, HashZero} from 'ethers/constants';
 
 let optimizedForceMove: ethers.Contract;
 
@@ -18,7 +18,7 @@ async function setupContracts() {
   optimizedForceMove = new ethers.Contract(contractAddress, optimizedForceMoveArtifact.abi, signer);
 }
 
-async function sign(wallet: ethers.Wallet, msgHash: string) {
+async function sign(wallet: ethers.Wallet, msgHash: string | Uint8Array) {
   // msgHash is a hex string
   // returns an object with v, r, and s properties.
   return splitSignature(await wallet.signMessage(arrayify(msgHash)));
@@ -133,7 +133,7 @@ describe('_recoverSigner', () => {
   const msgHash = ethers.utils.id('Hello World');
   const msgHashBytes = arrayify(msgHash);
   it('recovers the signer correctly', async () => {
-    const sig = splitSignature(await wallet.signMessage(msgHashBytes));
+    const sig = await sign(wallet, msgHashBytes);
     expect(await optimizedForceMove.recoverSigner(msgHash, sig.v, sig.r, sig.s)).toEqual(
       wallet.address,
     );
@@ -156,7 +156,7 @@ describe('_validSignatures', () => {
       participants[i] = wallet.address;
       stateHash = ethers.utils.id('Commitment' + i);
       stateHashes[i] = stateHash;
-      sig = splitSignature(await wallet.signMessage(arrayify(stateHash)));
+      sig = await sign(wallet, stateHash);
       sigs[i] = {v: sig.v, r: sig.r, s: sig.s};
       whoSignedWhat[i] = i;
     }
@@ -185,7 +185,7 @@ describe('_validSignatures', () => {
     for (let i = 0; i < 3; i++) {
       wallet = ethers.Wallet.createRandom();
       participants[i] = wallet.address;
-      sig = splitSignature(await wallet.signMessage(ethers.utils.arrayify(stateHash)));
+      sig = await sign(wallet, stateHash);
       sigs[i] = {v: sig.v, r: sig.r, s: sig.s};
       whoSignedWhat[i] = 0;
     }
@@ -211,7 +211,7 @@ describe('_validSignatures', () => {
   });
 });
 
-describe.only('forceMove', () => {
+describe('forceMove', () => {
   // construct data for forceMove parameters
   const chainId = 1234;
   const channelNonce = 1;
@@ -233,7 +233,7 @@ describe.only('forceMove', () => {
   );
   for (let i = 0; i < 3; i++) {
     const outcome = ethers.utils.id('some outcome data' + i);
-    const outcomeHash = keccak256(outcome);
+    const outcomeHash = keccak256(defaultAbiCoder.encode(['bytes'], [outcome]));
     variableParts[i] = {
       outcome,
       appData: ethers.utils.id('some app data' + i),
@@ -264,14 +264,15 @@ describe.only('forceMove', () => {
     appDefinition: AddressZero,
     challengeDuration: 1,
   };
-  const largestTurnNum = 3;
+  const largestTurnNum = 2;
   const isFinalCount = 0;
   const whoSignedWhat = [0, 1, 2];
   let challengerSig;
+  let sig;
 
   it('accepts a valid forceMove tx and updates channelStorageHashes correctly', async () => {
     for (let i = 0; i < 3; i++) {
-      const sig = await sign(wallets[i], stateHashes[i]);
+      sig = await sign(wallets[i], stateHashes[i]);
       sigs[i] = {v: sig.v, r: sig.r, s: sig.s};
     }
     const msgHash = keccak256(
@@ -282,8 +283,10 @@ describe.only('forceMove', () => {
     );
     const {v, r, s} = await sign(wallets[2], msgHash);
     challengerSig = {v, r, s};
-
-    // call  forceMove
+    // inspect current channelStorageHashes value
+    const currentHash = await optimizedForceMove.channelStorageHashes(channelId);
+    expect(currentHash).toEqual(HashZero);
+    // call forceMove
     const tx = await optimizedForceMove.forceMove(
       turnNumRecord,
       fixedPart,
@@ -294,18 +297,28 @@ describe.only('forceMove', () => {
       whoSignedWhat,
       challengerSig,
     ); // need a signer to call this
-    await tx.wait();
-    // TODO listen for forceMove EVENT (not yet implemented) and get the channel expiry time from that event
-    const expectedChannelStorage = {
-      largestTurnNum,
-      // todo
-    };
-    const expectedChannelStorageHash = keccak256(
-      defaultAbiCoder.encode(['TODO'], [expectedChannelStorage]),
-    );
-    // call out to public mappings and check channelStorageHash against the expected value
-    expect(await optimizedForceMove.channelStorageHashes(channelId)).toEqual(
-      expectedChannelStorageHash,
-    );
+    const receipt = await tx.wait();
+    const stateHashEvent = new Promise((resolve, reject) => {
+      optimizedForceMove.on('StateHashes', (hashes, event) => {
+        event.removeListener();
+        resolve(hashes);
+      });
+      setTimeout(() => {
+        reject(new Error('timeout'));
+      }, 60000);
+    });
+    expect(await stateHashEvent).toEqual(stateHashes);
+    // // TODO listen for forceMove EVENT (not yet implemented) and get the channel expiry time from that event
+    // const expectedChannelStorage = {
+    //   largestTurnNum,
+    //   // todo
+    // };
+    // const expectedChannelStorageHash = keccak256(
+    //   defaultAbiCoder.encode(['TODO'], [expectedChannelStorage]),
+    // );
+    // // call out to public mappings and check channelStorageHash against the expected value
+    // expect(await optimizedForceMove.channelStorageHashes(channelId)).toEqual(
+    //   expectedChannelStorageHash,
+    // );
   });
 });
