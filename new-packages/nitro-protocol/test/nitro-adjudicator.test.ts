@@ -6,7 +6,6 @@ import {splitSignature, keccak256, defaultAbiCoder, arrayify} from 'ethers/utils
 import {AddressZero, HashZero} from 'ethers/constants';
 
 let optimizedForceMove: ethers.Contract;
-
 const provider = new ethers.providers.JsonRpcProvider(
   `http://localhost:${process.env.DEV_GANACHE_PORT}`,
 );
@@ -211,7 +210,7 @@ describe('_validSignatures', () => {
   });
 });
 
-describe('forceMove', () => {
+describe.only('forceMove', () => {
   // construct data for forceMove parameters
   const chainId = 1234;
   const channelNonce = 1;
@@ -221,16 +220,26 @@ describe('forceMove', () => {
   const sigs = [, ,];
   const variableParts = [, ,];
   const stateHashes = [, ,];
+
   for (let i = 0; i < 3; i++) {
     wallets[i] = ethers.Wallet.createRandom();
     participants[i] = wallets[i].address;
   }
+
+  const fixedPart = {
+    chainId,
+    participants,
+    channelNonce,
+    appDefinition: AddressZero,
+    challengeDuration: 1,
+  };
   const channelId = keccak256(
     defaultAbiCoder.encode(
       ['uint256', 'address[]', 'uint256'],
       [chainId, participants, channelNonce],
     ),
   );
+  let state;
   for (let i = 0; i < 3; i++) {
     const outcome = ethers.utils.id('some outcome data' + i);
     const outcomeHash = keccak256(defaultAbiCoder.encode(['bytes'], [outcome]));
@@ -238,10 +247,14 @@ describe('forceMove', () => {
       outcome,
       appData: ethers.utils.id('some app data' + i),
     };
+
     const appPartHash = keccak256(
-      defaultAbiCoder.encode(['tuple(bytes outcome, bytes appData)'], [variableParts[i]]),
+      defaultAbiCoder.encode(
+        ['uint256', 'address', 'bytes'],
+        [fixedPart.challengeDuration, fixedPart.appDefinition, variableParts[i].appData],
+      ),
     );
-    const state = {
+    state = {
       turnNum: i,
       isFinal: false,
       channelId,
@@ -257,18 +270,12 @@ describe('forceMove', () => {
       ),
     );
   }
-  const fixedPart = {
-    chainId,
-    participants,
-    channelNonce,
-    appDefinition: AddressZero,
-    challengeDuration: 1,
-  };
   const largestTurnNum = 2;
   const isFinalCount = 0;
   const whoSignedWhat = [0, 1, 2];
   let challengerSig;
   let sig;
+  let tx;
 
   it('accepts a valid forceMove tx and updates channelStorageHashes correctly', async () => {
     for (let i = 0; i < 3; i++) {
@@ -287,7 +294,7 @@ describe('forceMove', () => {
     const currentHash = await optimizedForceMove.channelStorageHashes(channelId);
     expect(currentHash).toEqual(HashZero);
     // call forceMove
-    const tx = await optimizedForceMove.forceMove(
+    tx = await optimizedForceMove.forceMove(
       turnNumRecord,
       fixedPart,
       largestTurnNum,
@@ -297,8 +304,8 @@ describe('forceMove', () => {
       whoSignedWhat,
       challengerSig,
     ); // need a signer to call this
-    const receipt = await tx.wait();
-    const stateHashEvent = new Promise((resolve, reject) => {
+    await tx.wait();
+    const stateHashesEvent = new Promise((resolve, reject) => {
       optimizedForceMove.on('StateHashes', (hashes, event) => {
         event.removeListener();
         resolve(hashes);
@@ -307,7 +314,7 @@ describe('forceMove', () => {
         reject(new Error('timeout'));
       }, 60000);
     });
-    expect(await stateHashEvent).toEqual(stateHashes);
+    expect(await stateHashesEvent).toEqual(stateHashes);
     // // TODO listen for forceMove EVENT (not yet implemented) and get the channel expiry time from that event
     // const expectedChannelStorage = {
     //   largestTurnNum,

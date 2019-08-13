@@ -26,7 +26,13 @@ contract OptimizedForceMove {
         uint256 turnNum;
         bool isFinal;
         bytes32 channelId; // keccack(chainId,participants,channelNonce)
-        bytes32 appPartHash; //keccak256(abi.encode(VariablePart))
+        bytes32 appPartHash;
+        //     keccak256(abi.encode(
+        //         fixedPart.challengeDuration,
+        //         fixedPart.appDefinition,
+        //         variableParts[i].appData
+        //     )
+        // )
         bytes32 outcomeHash;
     }
 
@@ -57,7 +63,7 @@ contract OptimizedForceMove {
             abi.encode(fixedPart.chainId, fixedPart.participants, fixedPart.channelNonce)
         );
         ChannelStorage memory channelStorage;
-
+        emit ChannelId(channelId);
         // ------------
         // REQUIREMENTS
         // ------------
@@ -80,9 +86,9 @@ contract OptimizedForceMove {
         uint256 m = variableParts.length;
         State memory state;
         bytes32[] memory stateHashes = new bytes32[](m);
-        for (uint256 i = 0; i < m - 1; i++) {
+        for (uint256 i = 0; i < m; i++) {
             state = State(
-                largestTurnNum + i - m, // turnNum
+                largestTurnNum + i - m + 1, // turnNum
                 i > m - isFinalCount, // isFinal
                 channelId,
                 keccak256(
@@ -94,61 +100,67 @@ contract OptimizedForceMove {
                 ),
                 keccak256(abi.encode(variableParts[i].outcome))
             );
-            bytes32 stateHash = keccak256(abi.encode(state));
-            stateHashes[i] = stateHash;
-            require(
-                _validTransition(largestTurnNum + i - m, variableParts[i], variableParts[i + 1]),
-                'Invalid Transition'
-            );
+            stateHashes[i] = keccak256(abi.encode(state));
+            if (i + 1 != m) {
+                // no transition from final state
+                require(
+                    _validTransition(
+                        largestTurnNum + i - m + 1,
+                        variableParts[i],
+                        variableParts[i + 1]
+                    ),
+                    'Invalid Transition'
+                );
+            }
         }
         emit StateHashes(stateHashes);
 
-        // // check the supplied states are supported by n signatures
-        // require(
-        //     _validSignatures(
-        //         largestTurnNum,
-        //         fixedPart.participants,
-        //         stateHashes,
-        //         sigs,
-        //         whoSignedWhat
-        //     ),
-        //     'Invalid signatures'
-        // );
+        // check the supplied states are supported by n signatures
+        require(
+            _validSignatures(
+                largestTurnNum,
+                fixedPart.participants,
+                stateHashes,
+                sigs,
+                whoSignedWhat
+            ),
+            'Invalid signatures'
+        );
 
-        // // check that the forceMove is signed by a participant and store their address
-        // bytes32 msgHash = keccak256(
-        //     abi.encode(
-        //         largestTurnNum,
-        //         channelId,
-        //         'forceMove' // Express statement of intent to forceMove this channel to this turnNum
-        //     )
-        // );
-        // address challenger = _recoverSigner(
-        //     msgHash,
-        //     challengerSig.v,
-        //     challengerSig.r,
-        //     challengerSig.s
-        // );
-        // require(
-        //     _isAddressInArray(challenger, fixedPart.participants),
-        //     'Challenger is not a participant'
-        // );
+        // check that the forceMove is signed by a participant and store their address
+        bytes32 msgHash = keccak256(
+            abi.encode(
+                largestTurnNum,
+                channelId,
+                'forceMove' // Express statement of intent to forceMove this channel to this turnNum
+            )
+        );
+        address challenger = _recoverSigner(
+            msgHash,
+            challengerSig.v,
+            challengerSig.r,
+            challengerSig.s
+        );
+        require(
+            _isAddressInArray(challenger, fixedPart.participants),
+            'Challenger is not a participant'
+        );
 
-        // // ------------
-        // // EFFECTS
-        // // ------------
+        // ------------
+        // EFFECTS
+        // ------------
 
-        // channelStorage = ChannelStorage(
-        //     largestTurnNum,
-        //     now + fixedPart.challengeDuration,
-        //     stateHashes[m],
-        //     challenger,
-        //     keccak256(abi.encode(variableParts[m].outcome))
-        // );
+        channelStorage = ChannelStorage(
+            largestTurnNum,
+            now + fixedPart.challengeDuration,
+            stateHashes[m - 1],
+            challenger,
+            keccak256(abi.encode(variableParts[m - 1].outcome))
+        );
 
-        // // TODO fire event
+        // TODO fire event
 
-        // channelStorageHashes[channelId] = keccak256(abi.encode(channelStorage));
+        channelStorageHashes[channelId] = keccak256(abi.encode(channelStorage));
 
     }
     // Internal methods:
@@ -237,5 +249,6 @@ contract OptimizedForceMove {
     } // TOTO this is a placeholder implementation
 
     // events
+    event ChannelId(bytes32 channelId);
     event StateHashes(bytes32[] hashes);
 }
