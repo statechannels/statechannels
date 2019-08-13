@@ -63,7 +63,6 @@ contract OptimizedForceMove {
             abi.encode(fixedPart.chainId, fixedPart.participants, fixedPart.channelNonce)
         );
         ChannelStorage memory channelStorage;
-        emit ChannelId(channelId);
         // ------------
         // REQUIREMENTS
         // ------------
@@ -113,7 +112,6 @@ contract OptimizedForceMove {
                 );
             }
         }
-        emit StateHashes(stateHashes);
 
         // check the supplied states are supported by n signatures
         require(
@@ -158,7 +156,7 @@ contract OptimizedForceMove {
             keccak256(abi.encode(variableParts[m - 1].outcome))
         );
 
-        // TODO fire event
+        emit ForceMove(channelId, now + fixedPart.challengeDuration); // TODO what else should go in here?
 
         channelStorageHashes[channelId] = keccak256(abi.encode(channelStorage));
 
@@ -249,6 +247,5 @@ contract OptimizedForceMove {
     } // TOTO this is a placeholder implementation
 
     // events
-    event ChannelId(bytes32 channelId);
-    event StateHashes(bytes32[] hashes);
+    event ForceMove(bytes32 channelId, uint256 expiryTime);
 }
