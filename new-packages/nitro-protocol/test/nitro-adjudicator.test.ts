@@ -1,31 +1,37 @@
 import {ethers} from 'ethers';
-import {expectRevert, expectEvent} from 'magmo-devtools';
+import {expectRevert} from 'magmo-devtools';
 // @ts-ignore
 import optimizedForceMoveArtifact from '../build/contracts/TESTOptimizedForceMove.json';
+// @ts-ignore
+import trivialAppArtifact from '../build/contracts/TrivialApp.json';
 import {splitSignature, keccak256, defaultAbiCoder, arrayify} from 'ethers/utils';
-import {AddressZero, HashZero} from 'ethers/constants';
+import {HashZero} from 'ethers/constants';
 
+let networkId;
 let optimizedForceMove: ethers.Contract;
 const provider = new ethers.providers.JsonRpcProvider(
   `http://localhost:${process.env.DEV_GANACHE_PORT}`,
 );
 const signer = provider.getSigner(0);
 async function setupContracts() {
-  let networkId;
   networkId = (await provider.getNetwork()).chainId;
-  const contractAddress = optimizedForceMoveArtifact.networks[networkId].address;
-  optimizedForceMove = new ethers.Contract(contractAddress, optimizedForceMoveArtifact.abi, signer);
+  const optimizedForceMoveContractAddress = optimizedForceMoveArtifact.networks[networkId].address;
+  optimizedForceMove = new ethers.Contract(
+    optimizedForceMoveContractAddress,
+    optimizedForceMoveArtifact.abi,
+    signer,
+  );
 }
+
+beforeAll(async () => {
+  await setupContracts();
+});
 
 async function sign(wallet: ethers.Wallet, msgHash: string | Uint8Array) {
   // msgHash is a hex string
   // returns an object with v, r, and s properties.
   return splitSignature(await wallet.signMessage(arrayify(msgHash)));
 }
-
-beforeAll(async () => {
-  await setupContracts();
-});
 
 describe('_isAddressInArray', () => {
   const suspect = ethers.Wallet.createRandom().address;
@@ -227,15 +233,6 @@ describe('forceMove', () => {
     participants[i] = wallets[i].address;
   }
 
-  // fixedPart
-  const fixedPart = {
-    chainId,
-    participants,
-    channelNonce,
-    appDefinition: AddressZero,
-    challengeDuration: 1,
-  };
-
   // channelId
   const channelId = keccak256(
     defaultAbiCoder.encode(
@@ -244,47 +241,56 @@ describe('forceMove', () => {
     ),
   );
 
-  // compute stateHashes for a chain of 3 non-final states with turnNum = [0,1,2]
-  const largestTurnNum = 8;
-  const isFinalCount = 0;
-  const whoSignedWhat = [0, 1, 2];
-  let state;
-  let outcomeHash;
-  for (let i = 0; i < 3; i++) {
-    const outcome = ethers.utils.id('some outcome data' + i);
-    outcomeHash = keccak256(defaultAbiCoder.encode(['bytes'], [outcome]));
-    variableParts[i] = {
-      outcome,
-      appData: ethers.utils.id('some app data' + i),
-    };
-
-    const appPartHash = keccak256(
-      defaultAbiCoder.encode(
-        ['uint256', 'address', 'bytes'],
-        [fixedPart.challengeDuration, fixedPart.appDefinition, variableParts[i].appData],
-      ),
-    );
-    state = {
-      turnNum: i + 6,
-      isFinal: false,
-      channelId,
-      appPartHash,
-      outcomeHash,
-    };
-    stateHashes[i] = keccak256(
-      defaultAbiCoder.encode(
-        [
-          'tuple(uint256 turnNum, bool isFinal, bytes32 channelId, bytes32 appPartHash, bytes32 outcomeHash)',
-        ],
-        [state],
-      ),
-    );
-  }
-
   let challengerSig;
   let sig;
   let tx;
   it('accepts a valid forceMove tx and updates channelStorageHashes correctly', async () => {
+    // fixedPart
+    const fixedPart = {
+      chainId,
+      participants,
+      channelNonce,
+      appDefinition: trivialAppArtifact.networks[networkId].address,
+      challengeDuration: 1,
+    };
+
+    // compute stateHashes for a chain of 3 non-final states with turnNum = [0,1,2]
+    const largestTurnNum = 8;
+    const isFinalCount = 0;
+    const whoSignedWhat = [0, 1, 2];
+    let state;
+    let outcomeHash;
+    for (let i = 0; i < 3; i++) {
+      const outcome = ethers.utils.id('some outcome data' + i);
+      outcomeHash = keccak256(defaultAbiCoder.encode(['bytes'], [outcome]));
+      variableParts[i] = {
+        outcome,
+        appData: ethers.utils.id('some app data' + i),
+      };
+
+      const appPartHash = keccak256(
+        defaultAbiCoder.encode(
+          ['uint256', 'address', 'bytes'],
+          [fixedPart.challengeDuration, fixedPart.appDefinition, variableParts[i].appData],
+        ),
+      );
+      state = {
+        turnNum: i + 6,
+        isFinal: false,
+        channelId,
+        appPartHash,
+        outcomeHash,
+      };
+      stateHashes[i] = keccak256(
+        defaultAbiCoder.encode(
+          [
+            'tuple(uint256 turnNum, bool isFinal, bytes32 channelId, bytes32 appPartHash, bytes32 outcomeHash)',
+          ],
+          [state],
+        ),
+      );
+    }
+
     // sign the states
     for (let i = 0; i < 3; i++) {
       sig = await sign(wallets[i], stateHashes[i]);
