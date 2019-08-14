@@ -8,8 +8,7 @@ import { describeScenarioStep } from '../../../__tests__/helpers';
 describe('Player A Happy path', () => {
   const scenario = scenarios.aHappyPath;
   describe('when initializing', () => {
-    const { action, sharedData } = scenario.initialize;
-    const updatedState = initialize(action, sharedData);
+    const updatedState = initialize(scenario.initialize);
     itTransitionsTo(updatedState, 'DirectFunding.WaitForDepositTransaction');
     itSendsATransaction(updatedState);
   });
@@ -26,11 +25,26 @@ describe('Player A Happy path', () => {
     itTransitionsTo(updatedState, 'DirectFunding.FundingSuccess');
   });
 });
+
+describe('Player A Funding Event Received Early', () => {
+  const scenario = scenarios.fundsReceivedArrivesEarly;
+
+  describeScenarioStep(scenario.waitForDepositTransaction, () => {
+    const { action, state, sharedData } = scenario.waitForDepositTransaction;
+    const updatedState = directFundingStateReducer(state, sharedData, action);
+    itTransitionsTo(updatedState, 'DirectFunding.WaitForDepositTransaction');
+  });
+
+  describeScenarioStep(scenario.waitForDepositTransactionFunded, () => {
+    const { action, state, sharedData } = scenario.waitForDepositTransactionFunded;
+    const updatedState = directFundingStateReducer(state, sharedData, action);
+    itTransitionsTo(updatedState, 'DirectFunding.FundingSuccess');
+  });
+});
 describe('Player B Happy path', () => {
   const scenario = scenarios.bHappyPath;
   describe('when initializing', () => {
-    const { action, sharedData } = scenario.initialize;
-    const updatedState = initialize(action, sharedData);
+    const updatedState = initialize(scenario.initialize);
     itTransitionsTo(updatedState, 'DirectFunding.NotSafeToDeposit');
   });
   describeScenarioStep(scenario.notSafeToDeposit, () => {
@@ -56,8 +70,7 @@ describe('Player B Happy path', () => {
 describe('Player A No Deposit Required', () => {
   const scenario = scenarios.depositNotRequired;
   describe('when initializing', () => {
-    const { action, sharedData } = scenario.initialize;
-    const updatedState = initialize(action, sharedData);
+    const updatedState = initialize(scenario.initialize);
     itTransitionsTo(updatedState, 'DirectFunding.WaitForFunding');
   });
 });
@@ -65,8 +78,7 @@ describe('Player A No Deposit Required', () => {
 describe('Player A channel already has some funds', () => {
   const scenario = scenarios.existingOnChainDeposit;
   describe('when initializing', () => {
-    const { action, sharedData } = scenario.initialize;
-    const updatedState = initialize(action, sharedData);
+    const updatedState = initialize(scenario.initialize);
     itTransitionsTo(updatedState, 'DirectFunding.WaitForDepositTransaction');
   });
 });

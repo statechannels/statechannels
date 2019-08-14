@@ -15,9 +15,12 @@ graph TD
 linkStyle default interpolate basis
   S((start))-->ICC{Is Channel Closed}
   ICC-->|No|F((failure))
-  ICC-->|Yes|ID{Is Direct Channel}
-  ID-->|Yes|WP(Wait for Withdrawal)
-  ID -->|No|LDP(Wait for Indirect De-funding)
+  ICC-->|Yes|ID{Get Funding Type}
+  ID-->|Directly Funded|WP(Wait for Withdrawal)
+  ID -->|Ledger Funding|LDP(Wait for Indirect De-funding)
+  ID -->|Virtual Funding|VD(Wait for Virtual De-funding)
+  VD -->|Virtual Defunding Action|VD
+  VD -->|Virtual Defunding Success|LDP
   LDP-->|Indirect de-funding protocol success|WP(Wait for Withdrawal)
   WP-->|Withdrawal protocol success|Su((Success))
   WP-->|Withdrawal protocol failure|F((Failure))
@@ -30,7 +33,7 @@ linkStyle default interpolate basis
   class S,ICC,ID logic;
   class Su Success;
   class F Failure;
-  class WP,LDP WaitForChildProtocol;
+  class WP,LDP,VD WaitForChildProtocol;
 ```
 
 ## Notes

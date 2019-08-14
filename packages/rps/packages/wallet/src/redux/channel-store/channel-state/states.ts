@@ -9,7 +9,7 @@ export interface ChannelState {
   channelId: string;
   libraryAddress: string;
   ourIndex: number;
-  participants: [string, string];
+  participants: string[];
   channelNonce: number;
   turnNum: number;
   commitments: Commitments;

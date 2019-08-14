@@ -5,6 +5,7 @@ import { QueuedTransaction, OutboxState, MessageOutbox } from '../outbox/state';
 import { SharedData } from '../state';
 import { ProtocolStateWithSharedData } from '../protocols';
 import { RelayableAction, ProtocolLocator } from 'src/communication';
+import _ from 'lodash';
 
 type SideEffectState =
   | StateWithSideEffects<any>
@@ -287,4 +288,11 @@ export const itRegistersThisChannel = (
     const subscriptionState = state.channelSubscriptions[channelId];
     expect(subscriptionState).toContainEqual({ protocolLocator, processId });
   });
+};
+
+export const mergeSharedData = (
+  firstSharedData: SharedData,
+  secondSharedData: SharedData,
+): SharedData => {
+  return _.merge({}, firstSharedData, secondSharedData);
 };

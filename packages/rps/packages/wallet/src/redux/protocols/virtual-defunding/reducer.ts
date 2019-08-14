@@ -8,7 +8,7 @@ import {
   consensusUpdateReducer,
 } from '../consensus-update/reducer';
 import { getChannelFundingState } from '../../selectors';
-import { getLatestCommitment, getTwoPlayerIndex } from '../reducer-helpers';
+import { getLatestCommitment, getTwoPlayerIndex, getFundingChannelId } from '../reducer-helpers';
 import { addHex } from '../../../utils/hex-utils';
 import { VirtualDefundingAction } from './actions';
 import { routesToConsensusUpdate } from '../consensus-update/actions';
@@ -48,7 +48,7 @@ export function initialize({
     proposedDestination,
     sharedData,
   }));
-  const ledgerChannelId = getLedgerChannelId(jointChannelId, sharedData);
+  const ledgerChannelId = getFundingChannelId(targetChannelId, sharedData);
   return {
     protocolState: states.waitForJointChannelUpdate({
       processId,
@@ -164,23 +164,4 @@ function waitForLedgerChannelUpdateReducer(
     }
   }
   return { protocolState, sharedData };
-}
-
-function getLedgerChannelId(jointChannelId: string, sharedData: SharedData): string {
-  const guarantorFundingState = getChannelFundingState(sharedData, jointChannelId);
-  if (!guarantorFundingState || !guarantorFundingState.guarantorChannel) {
-    throw new Error(`No guarantor for joint channel ${jointChannelId}`);
-  }
-  const ledgerFundingState = getChannelFundingState(
-    sharedData,
-    guarantorFundingState.guarantorChannel,
-  );
-  if (!ledgerFundingState || !ledgerFundingState.fundingChannel) {
-    throw new Error(
-      `No ledger funding channel found for guarantor channel ${
-        guarantorFundingState.guarantorChannel
-      }`,
-    );
-  }
-  return ledgerFundingState.fundingChannel;
 }

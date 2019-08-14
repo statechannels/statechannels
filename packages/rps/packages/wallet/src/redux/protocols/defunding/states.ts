@@ -2,6 +2,7 @@ import { WithdrawalState } from '../withdrawing/states';
 import { StateConstructor } from '../../utils';
 import { IndirectDefundingState } from '../indirect-defunding/states';
 import { ProtocolState } from '..';
+import { NonTerminalVirtualDefundingState } from '../virtual-defunding/states';
 
 // -------
 // States
@@ -24,6 +25,16 @@ export interface WaitForIndirectDefunding {
   processId: string;
   indirectDefundingState: IndirectDefundingState;
   channelId;
+  ledgerId: string;
+}
+
+export interface WaitForVirtualDefunding {
+  type: 'Defunding.WaitForVirtualDefunding';
+  processId: string;
+  virtualDefunding: NonTerminalVirtualDefundingState;
+  indirectDefundingState: IndirectDefundingState;
+  channelId: string;
+  ledgerId: string;
 }
 
 export interface Failure {
@@ -47,6 +58,9 @@ export const waitForLedgerDefunding: StateConstructor<WaitForIndirectDefunding> 
   return { ...p, type: 'Defunding.WaitForIndirectDefunding' };
 };
 
+export const waitForVirtualDefunding: StateConstructor<WaitForVirtualDefunding> = p => {
+  return { ...p, type: 'Defunding.WaitForVirtualDefunding' };
+};
 export const success: StateConstructor<Success> = p => {
   return { ...p, type: 'Defunding.Success' };
 };
@@ -59,8 +73,11 @@ export const failure: StateConstructor<Failure> = p => {
 // Unions and Guards
 // -------
 
-export type NonTerminalDefundingState = WaitForWithdrawal | WaitForIndirectDefunding;
-export type DefundingState = WaitForWithdrawal | WaitForIndirectDefunding | Failure | Success;
+export type NonTerminalDefundingState =
+  | WaitForWithdrawal
+  | WaitForIndirectDefunding
+  | WaitForVirtualDefunding;
+export type DefundingState = NonTerminalDefundingState | Failure | Success;
 export type DefundingStateType = DefundingState['type'];
 
 export function isTerminal(state: DefundingState): state is Failure | Success {
@@ -71,6 +88,7 @@ export function isDefundingState(state: ProtocolState): state is DefundingState 
   return (
     state.type === 'Defunding.WaitForWithdrawal' ||
     state.type === 'Defunding.WaitForIndirectDefunding' ||
+    state.type === 'Defunding.WaitForVirtualDefunding' ||
     state.type === 'Defunding.Failure' ||
     state.type === 'Defunding.Success'
   );

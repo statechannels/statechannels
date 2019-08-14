@@ -2,6 +2,7 @@ import { NonTerminalTransactionSubmissionState } from '../transaction-submission
 import { Properties, StateConstructor } from '../../utils';
 import { ProtocolState } from '..';
 import { TwoPartyPlayerIndex } from '../../types';
+import { ProtocolLocator } from '../../../communication';
 
 // -------
 // States
@@ -26,6 +27,7 @@ export interface BaseDirectFundingState {
   requiredDeposit: string;
   channelId: string;
   ourIndex: TwoPartyPlayerIndex;
+  protocolLocator: ProtocolLocator;
 }
 
 export interface NotSafeToDeposit extends BaseDirectFundingState {
@@ -35,6 +37,7 @@ export interface NotSafeToDeposit extends BaseDirectFundingState {
 export interface WaitForDepositTransaction extends BaseDirectFundingState {
   type: 'DirectFunding.WaitForDepositTransaction';
   transactionSubmissionState: NonTerminalTransactionSubmissionState;
+  funded: boolean;
 }
 export interface WaitForFunding extends BaseDirectFundingState {
   type: 'DirectFunding.WaitForFunding';
@@ -52,22 +55,7 @@ export interface FundingFailure extends BaseDirectFundingState {
 // ------------
 
 export const baseDirectFundingState: StateConstructor<BaseDirectFundingState> = params => {
-  const {
-    processId,
-    totalFundingRequired: requestedTotalFunds,
-    requiredDeposit: requestedYourContribution,
-    channelId,
-    ourIndex,
-    safeToDepositLevel,
-  } = params;
-  return {
-    processId,
-    totalFundingRequired: requestedTotalFunds,
-    requiredDeposit: requestedYourContribution,
-    channelId,
-    ourIndex,
-    safeToDepositLevel,
-  };
+  return { ...params };
 };
 
 export const notSafeToDeposit: StateConstructor<NotSafeToDeposit> = params => {
@@ -80,11 +68,10 @@ export const notSafeToDeposit: StateConstructor<NotSafeToDeposit> = params => {
 export function waitForDepositTransaction(
   params: Properties<WaitForDepositTransaction>,
 ): WaitForDepositTransaction {
-  const { transactionSubmissionState } = params;
   return {
     ...baseDirectFundingState(params),
+    ...params,
     type: 'DirectFunding.WaitForDepositTransaction',
-    transactionSubmissionState,
   };
 }
 export const waitForFunding: StateConstructor<WaitForFunding> = params => {

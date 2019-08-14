@@ -5,7 +5,10 @@ import * as scenarios from '../../../../domain/commitments/__tests__';
 import { CommitmentType } from '../../../../domain';
 import { preFund, postFund } from '../../advance-channel/__tests__';
 import { preSuccess as indirectFundingPreSuccess } from '../../indirect-funding/__tests__';
-import { threePlayerPreSuccessA as consensusUpdatePreSuccess } from '../../consensus-update/__tests__';
+import {
+  threePlayerPreSuccessA as consensusUpdatePreSuccess,
+  threePlayerInProgressA as consensusUpdateInProgress,
+} from '../../consensus-update/__tests__';
 import { channelFromCommitments } from '../../../channel-store/channel-state/__tests__';
 import { appCommitment, twoThree } from '../../../../domain/commitments/__tests__';
 import { CONSENSUS_LIBRARY_ADDRESS } from '../../../../constants';
@@ -56,6 +59,7 @@ const initializeArgs = {
 const props = {
   targetChannelId,
   processId,
+  jointChannelId,
   startingAllocation,
   startingDestination,
   hubAddress,
@@ -114,6 +118,20 @@ const scenarioStates = {
 // ---------
 // Scenarios
 // ---------
+
+export const appFundingCommitmentReceivedEarly = {
+  appFundingCommitmentReceivedEarly: {
+    appChannelId: appChannel.channelId,
+    state: scenarioStates.waitForGuarantorFunding,
+    action: consensusUpdateInProgress.action,
+    sharedData: consensusUpdateInProgress.sharedData,
+  },
+  fundingSuccess: {
+    state: scenarioStates.waitForGuarantorFunding,
+    action: prependToLocator(indirectFundingPreSuccess.action, EmbeddedProtocol.IndirectFunding),
+    sharedData: _.merge(consensusUpdatePreSuccess.sharedData, indirectFundingPreSuccess.sharedData),
+  },
+};
 
 export const happyPath = {
   ...props,

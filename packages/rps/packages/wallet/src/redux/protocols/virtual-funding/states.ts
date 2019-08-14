@@ -41,6 +41,7 @@ export interface WaitForGuarantorFunding extends Base {
 export interface WaitForApplicationFunding extends Base {
   type: 'VirtualFunding.WaitForApplicationFunding';
   indirectApplicationFunding: ConsensusUpdateState;
+  jointChannelId: string;
 }
 
 export interface Success {
@@ -49,6 +50,7 @@ export interface Success {
 
 export interface Failure {
   type: 'VirtualFunding.Failure';
+  reason?: string;
 }
 
 // ------------
