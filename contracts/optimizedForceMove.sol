@@ -73,43 +73,52 @@ contract OptimizedForceMove {
         // EITHER there is no information stored against channelId at all (OK)
         if (channelStorageHashes[channelId] != bytes32(0)) {
             // OR there is, in which case we must check the channel is still open and that the committed turnNumRecord is correct
-            channelStorage = ChannelStorage(turnNumRecord, 0, bytes32(0), address(0), bytes32(0));
             require(
-                keccak256(abi.encode(channelStorage)) == channelStorageHashes[channelId],
+                keccak256(
+                        abi.encode(
+                            ChannelStorage(turnNumRecord, 0, bytes32(0), address(0), bytes32(0))
+                        )
+                    ) ==
+                    channelStorageHashes[channelId],
                 'Channel closed'
             );
         }
 
         // TODO factor into separate function _validTransitionChain, which returns either false or the stateHashes array
 
-        uint256 m = variableParts.length;
-        State memory state;
-        bytes32[] memory stateHashes = new bytes32[](m);
-        for (uint256 i = 0; i < m; i++) {
-            state = State(
-                largestTurnNum + i - m + 1, // turnNum
-                i > m - isFinalCount, // isFinal
-                channelId,
-                keccak256(
-                    abi.encode(
-                        fixedPart.challengeDuration,
-                        fixedPart.appDefinition,
-                        variableParts[i].appData
+        bytes32[] memory stateHashes = new bytes32[](variableParts.length);
+        for (uint256 i = 0; i < variableParts.length; i++) {
+            stateHashes[i] = keccak256(
+                abi.encode(
+                    State(
+                        largestTurnNum + i - variableParts.length + 1, // turnNum
+                        i > variableParts.length - isFinalCount, // isFinal
+                        channelId,
+                        keccak256(
+                            abi.encode(
+                                fixedPart.challengeDuration,
+                                fixedPart.appDefinition,
+                                variableParts[i].appData
+                            )
+                        ),
+                        keccak256(abi.encode(variableParts[i].outcome))
                     )
-                ),
-                keccak256(abi.encode(variableParts[i].outcome))
+                )
             );
-            stateHashes[i] = keccak256(abi.encode(state));
-            if (i + 1 != m) {
+            if (i + 1 != variableParts.length) {
                 // no transition from final state
                 require(
                     _validTransition(
-                        largestTurnNum + i - m + 1,
-                        variableParts[i],
-                        variableParts[i + 1]
-                    ),
-                    'Invalid Transition'
-                );
+                        fixedPart.participants.length, // nParticipants
+                        [
+                            i > variableParts.length - isFinalCount,
+                            i + 1 > variableParts.length - isFinalCount
+                        ], // [a.isFinal, b.isFinal]
+                        [variableParts[i], variableParts[i + 1]], // [a,b]
+                        largestTurnNum + i - variableParts.length + 2, // b.turnNum
+                        fixedPart.appDefinition
+                    )
+                ); // reason string not necessary (called function will provide reason for reverting)
             }
         }
 
@@ -151,9 +160,9 @@ contract OptimizedForceMove {
         channelStorage = ChannelStorage(
             largestTurnNum,
             now + fixedPart.challengeDuration,
-            stateHashes[m - 1],
+            stateHashes[variableParts.length - 1],
             challenger,
-            keccak256(abi.encode(variableParts[m - 1].outcome))
+            keccak256(abi.encode(variableParts[variableParts.length - 1].outcome))
         );
 
         emit ForceMove(channelId, now + fixedPart.challengeDuration); // TODO what else should go in here?
@@ -239,12 +248,41 @@ contract OptimizedForceMove {
     // not yet implemented
 
     function _validTransition(
-        uint256 turnNum,
-        VariablePart memory oldVariablePart,
-        VariablePart memory newVariablePart
+        uint256 nParticipants,
+        bool[2] memory isFinalAB, // [a.isFinal, b.isFinal]
+        VariablePart[2] memory ab, // [a,b]
+        uint256 turnNumB,
+        address appDefinition
     ) internal pure returns (bool) {
+        // a prior check on the signatures for the submitted states implies that the following fields are equal for a and b:
+        // chainId, participants, channelNonce, appDefinition, challengeDuration
+        // and that the b.turnNum = a.turnNum + 1
+        if (isFinalAB[1]) {
+            require(
+                keccak256(ab[1].outcome) == keccak256(ab[0].outcome),
+                'InvalidTransitionError: Cannot move to a final state with a different default outcome'
+            );
+        } else {
+            require(
+                !isFinalAB[0],
+                'InvalidTransitionError: Cannot move from a final state to a non final state'
+            );
+            if (turnNumB <= 2 * nParticipants) {
+                require(
+                    keccak256(ab[1].outcome) == keccak256(ab[0].outcome),
+                    'InvalidTransitionError: Cannot change the default outcome during setup phase'
+                );
+                require(
+                    keccak256(ab[1].appData) == keccak256(ab[0].appData),
+                    'InvalidTransitionError: Cannot change the appData during setup phase'
+                );
+            } else {
+                return true; // TODO ->
+                // require(appDefinition.validTransition(a.appData,b.appData)); // reason string not necessary (called function will provide reason for reverting)
+            }
+        }
         return true;
-    } // TOTO this is a placeholder implementation
+    }
 
     // events
     event ForceMove(bytes32 channelId, uint256 expiryTime);
