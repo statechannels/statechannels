@@ -25,6 +25,7 @@ const itTransitionsSubstateTo = (result: any, substate: string, type: string) =>
     expect(result[substate].type).toEqual(type);
   });
 };
+
 const allocation = [
   bigNumberify(2).toHexString(),
   bigNumberify(3).toHexString(),
@@ -137,5 +138,23 @@ describe('happyPath', () => {
 
     itTransitionsTo(protocolState, 'VirtualFunding.Success');
     itSendsNoMessage(result);
+  });
+});
+
+describe('app funding commitment received early', () => {
+  const scenario = scenarios.appFundingCommitmentReceivedEarly;
+
+  describe(scenarioStepDescription(scenario.appFundingCommitmentReceivedEarly), () => {
+    const { state, sharedData, action } = scenario.appFundingCommitmentReceivedEarly;
+    const { protocolState } = reducer(state, sharedData, action);
+
+    itTransitionsTo(protocolState, 'VirtualFunding.WaitForGuarantorFunding');
+  });
+
+  describe(scenarioStepDescription(scenario.fundingSuccess), () => {
+    const { state, sharedData, action } = scenario.fundingSuccess;
+    const { protocolState } = reducer(state, sharedData, action);
+
+    itTransitionsTo(protocolState, 'VirtualFunding.WaitForApplicationFunding');
   });
 });

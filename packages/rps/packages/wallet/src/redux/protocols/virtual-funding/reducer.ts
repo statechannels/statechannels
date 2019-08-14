@@ -301,49 +301,75 @@ function waitForGuarantorFundingReducer(
   action: WalletAction,
 ) {
   const { processId, protocolLocator } = protocolState;
-  if (routesToIndirectFunding(action, protocolLocator)) {
+
+  if (routesToConsensusUpdate(action, protocolLocator)) {
+    let indirectApplicationFunding: consensusUpdate.ConsensusUpdateState;
+    ({
+      protocolState: indirectApplicationFunding,
+      sharedData,
+    } = consensusUpdate.consensusUpdateReducer(
+      protocolState.indirectApplicationFunding,
+      sharedData,
+      action,
+    ));
+    switch (indirectApplicationFunding.type) {
+      // TODO: Properly handle the success case
+      // We don't expect this to ever happen now but we should future-proof it
+      case 'ConsensusUpdate.Success':
+      case 'ConsensusUpdate.Failure':
+        return {
+          protocolState: states.failure({
+            reason: 'Consensus Update failed or succeeded too early',
+          }),
+          sharedData,
+        };
+      default:
+        return { protocolState: { ...protocolState, indirectApplicationFunding }, sharedData };
+    }
+  } else if (routesToIndirectFunding(action, protocolLocator)) {
     const result = indirectFunding.indirectFundingReducer(
       protocolState.indirectGuarantorFunding,
       sharedData,
       action,
     );
-    if (indirectFunding.isTerminal(result.protocolState)) {
-      switch (result.protocolState.type) {
-        case 'IndirectFunding.Success':
-          // Once funding is complete we allow consensusUpdate to send commitments
-          const applicationFundingResult = consensusUpdate.consensusUpdateReducer(
-            protocolState.indirectApplicationFunding,
-            result.sharedData,
-            clearedToSend({
-              processId,
-              protocolLocator: makeLocator(protocolLocator, CONSENSUS_UPDATE_PROTOCOL_LOCATOR),
-            }),
-          );
-          return {
-            protocolState: states.waitForApplicationFunding({
-              ...protocolState,
-              indirectApplicationFunding: applicationFundingResult.protocolState,
-            }),
-            sharedData: applicationFundingResult.sharedData,
-          };
-        case 'IndirectFunding.Failure':
-          throw new Error(`Indirect funding failed: ${result.protocolState.reason}`);
 
-        default:
-          return unreachable(result.protocolState);
-      }
-    } else {
-      return {
-        protocolState: states.waitForGuarantorFunding({
-          ...protocolState,
+    switch (result.protocolState.type) {
+      case 'IndirectFunding.Success':
+        // Once funding is complete we allow consensusUpdate to send commitments
+        const applicationFundingResult = consensusUpdate.consensusUpdateReducer(
+          protocolState.indirectApplicationFunding,
+          result.sharedData,
+          clearedToSend({
+            processId,
+            protocolLocator: makeLocator(protocolLocator, CONSENSUS_UPDATE_PROTOCOL_LOCATOR),
+          }),
+        );
+        return {
+          protocolState: states.waitForApplicationFunding({
+            ...protocolState,
+            indirectApplicationFunding: applicationFundingResult.protocolState,
+          }),
+          sharedData: applicationFundingResult.sharedData,
+        };
+      case 'IndirectFunding.Failure':
+        throw new Error(`Indirect funding failed: ${result.protocolState.reason}`);
 
-          indirectGuarantorFunding: result.protocolState,
-        }),
-        sharedData: result.sharedData,
-      };
+      default:
+        return {
+          protocolState: states.waitForGuarantorFunding({
+            ...protocolState,
+
+            indirectGuarantorFunding: result.protocolState,
+          }),
+          sharedData: result.sharedData,
+        };
     }
+  } else {
+    console.warn(
+      `Expected indirectFunding or consensusUpdate action, received ${action.type} instead`,
+    );
+    return { protocolState, sharedData };
   }
-  return { protocolState, sharedData };
 }
 
 function waitForApplicationFundingReducer(
@@ -360,6 +386,10 @@ function waitForApplicationFundingReducer(
     if (consensusUpdate.isTerminal(result.protocolState)) {
       switch (result.protocolState.type) {
         case 'ConsensusUpdate.Success':
+          result.sharedData = setFundingState(result.sharedData, protocolState.targetChannelId, {
+            directlyFunded: false,
+            fundingChannel: protocolState.jointChannelId,
+          });
           return {
             protocolState: states.success(protocolState),
             sharedData: result.sharedData,

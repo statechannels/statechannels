@@ -8,7 +8,7 @@ import {
   directFundingStateReducer,
 } from '../direct-funding/reducer';
 import { LedgerTopUpAction } from './actions';
-import { directFundingRequested, isDirectFundingAction } from '../direct-funding/actions';
+import { isDirectFundingAction } from '../direct-funding/actions';
 import { addHex, subHex } from '../../../utils/hex-utils';
 import {
   initializeConsensusUpdate,
@@ -18,7 +18,7 @@ import {
 } from '../consensus-update';
 import { bigNumberify } from 'ethers/utils';
 import { PlayerIndex } from 'magmo-wallet-client/lib/wallet-instructions';
-import { ProtocolLocator } from '../../../communication';
+import { ProtocolLocator, EmbeddedProtocol } from '../../../communication';
 import { CONSENSUS_UPDATE_PROTOCOL_LOCATOR } from '../consensus-update/reducer';
 import { DirectFundingState } from '../direct-funding/states';
 import { clearedToSend } from '../consensus-update/actions';
@@ -101,6 +101,7 @@ const restoreOrderAndAddBTopUpUpdateReducer: ProtocolReducer<states.LedgerTopUpS
       ledgerId,
       proposedAllocation,
       originalAllocation,
+      makeLocator(protocolState.protocolLocator, EmbeddedProtocol.DirectFunding),
       sharedData,
     );
 
@@ -180,6 +181,7 @@ const switchOrderAndAddATopUpUpdateReducer: ProtocolReducer<states.LedgerTopUpSt
       ledgerId,
       proposedAllocation,
       originalAllocation,
+      protocolState.protocolLocator,
       sharedData,
     ));
 
@@ -302,6 +304,7 @@ function initializeDirectFundingState(
   ledgerId: string,
   proposedAllocation: string[],
   originalAllocation: string[],
+  protocolLocator: ProtocolLocator,
   sharedData: SharedData,
 ) {
   const isFirstPlayer = helpers.isFirstPlayer(ledgerId, sharedData);
@@ -330,19 +333,16 @@ function initializeDirectFundingState(
     totalFundingRequired = proposedAllocation.reduce(addHex);
   }
 
-  const directFundingAction = directFundingRequested({
+  const { protocolState: directFundingState, sharedData: newSharedData } = initializeDirectFunding({
     processId,
     channelId: ledgerId,
     safeToDepositLevel: '0x0', // Since we only have one player depositing we can always deposit right away
     requiredDeposit,
     totalFundingRequired,
     ourIndex: isFirstPlayer ? TwoPartyPlayerIndex.A : TwoPartyPlayerIndex.B,
-  });
-
-  const { protocolState: directFundingState, sharedData: newSharedData } = initializeDirectFunding(
-    directFundingAction,
     sharedData,
-  );
+    protocolLocator: makeLocator(protocolLocator, EmbeddedProtocol.DirectFunding),
+  });
   return { directFundingState, sharedData: newSharedData };
 }
 

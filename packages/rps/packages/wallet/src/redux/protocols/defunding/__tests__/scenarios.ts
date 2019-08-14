@@ -6,6 +6,11 @@ import { EMPTY_SHARED_DATA, FundingState, setFundingState, setChannels } from '.
 import * as indirectDefunding from '../../indirect-defunding/__tests__';
 import { channelFromCommitments } from '../../../channel-store/channel-state/__tests__';
 import { bigNumberify } from 'ethers/utils';
+import * as virtualDefunding from '../../virtual-defunding/__tests__';
+import _ from 'lodash';
+import { prependToLocator } from '../..';
+import { EmbeddedProtocol } from '../../../../communication';
+import { mergeSharedData } from '../../../__tests__/helpers';
 const processId = 'process-id.123';
 
 const { asAddress, bsAddress, asPrivateKey, channelId } = testScenarios;
@@ -29,7 +34,7 @@ const channelStatus = channelFromCommitments(
 );
 
 const ledgerChannelStatus = channelFromCommitments([ledger4, ledger5], asAddress, asPrivateKey);
-
+const { ledgerId } = testScenarios;
 const channelStore: ChannelStore = {
   [channelId]: channelStatus,
 };
@@ -67,7 +72,25 @@ const waitForWithdrawalFailure = states.waitForWithdrawal({
 const waitForLedgerDefunding = states.waitForLedgerDefunding({
   processId,
   channelId,
-  indirectDefundingState: indirectDefunding.preSuccessState.state,
+  ledgerId,
+  indirectDefundingState: prependToLocator(
+    indirectDefunding.preSuccessState.state,
+    EmbeddedProtocol.IndirectDefunding,
+  ),
+});
+
+const waitForVirtualDefunding = states.waitForVirtualDefunding({
+  processId,
+  channelId,
+  ledgerId,
+  virtualDefunding: prependToLocator(
+    virtualDefunding.preSuccess.state,
+    EmbeddedProtocol.VirtualDefunding,
+  ),
+  indirectDefundingState: prependToLocator(
+    indirectDefunding.preSuccessState.state,
+    EmbeddedProtocol.IndirectDefunding,
+  ),
 });
 
 const channelNotClosedFailure = states.failure({ reason: 'Channel Not Closed' });
@@ -101,23 +124,68 @@ export const indirectlyFundingChannelHappyPath = {
     processId,
     channelId,
     sharedData: setChannels(
-      setFundingState(indirectDefunding.initialStore, channelId, {
-        directlyFunded: false,
-        fundingChannel: testScenarios.ledgerId,
-      }),
+      setFundingState(
+        setFundingState(indirectDefunding.initialStore, channelId, {
+          directlyFunded: false,
+          fundingChannel: testScenarios.ledgerId,
+        }),
+        testScenarios.ledgerId,
+        { directlyFunded: true },
+      ),
       [channelStatus],
     ),
   },
   // States
   waitForLedgerDefunding: {
     state: waitForLedgerDefunding,
-    action: indirectDefunding.successTrigger,
+    action: prependToLocator(indirectDefunding.successTrigger, EmbeddedProtocol.IndirectDefunding),
     sharedData: setChannels(
-      setFundingState(indirectDefunding.preSuccessState.sharedData, channelId, {
-        directlyFunded: false,
-        fundingChannel: testScenarios.ledgerId,
-      }),
+      setFundingState(
+        setFundingState(indirectDefunding.preSuccessState.sharedData, channelId, {
+          directlyFunded: false,
+          fundingChannel: testScenarios.ledgerId,
+        }),
+        testScenarios.ledgerId,
+        { directlyFunded: true },
+      ),
       [channelStatus, ledgerChannelStatus],
+    ),
+  },
+  waitForWithdrawal: {
+    state: waitForWithdrawal,
+    action: withdrawalScenarios.happyPath.waitForAcknowledgement.action,
+    sharedData: {
+      ...EMPTY_SHARED_DATA,
+      fundingState: directlyFundedFundingState,
+      channelStore,
+    },
+  },
+};
+
+export const virtualFundingChannelHappyPath = {
+  initialize: {
+    processId,
+    channelId: virtualDefunding.initial.targetChannelId,
+    sharedData: mergeSharedData(
+      virtualDefunding.preSuccess.sharedData,
+      indirectDefunding.preSuccessState.sharedData,
+    ),
+  },
+  // States
+  waitForVirtualDefunding: {
+    state: waitForVirtualDefunding,
+    action: prependToLocator(virtualDefunding.preSuccess.action, EmbeddedProtocol.VirtualDefunding),
+    sharedData: mergeSharedData(
+      virtualDefunding.preSuccess.sharedData,
+      indirectDefunding.preSuccessState.sharedData,
+    ),
+  },
+  waitForLedgerDefunding: {
+    state: waitForLedgerDefunding,
+    action: prependToLocator(indirectDefunding.successTrigger, EmbeddedProtocol.IndirectDefunding),
+    sharedData: mergeSharedData(
+      indirectDefunding.preSuccessState.sharedData,
+      virtualDefunding.preSuccess.sharedData,
     ),
   },
   waitForWithdrawal: {

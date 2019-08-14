@@ -146,6 +146,7 @@ const createFundingState = sharedData => {
     fundingChannel: ledgerId,
     directlyFunded: false,
   });
+  sharedData = setFundingState(sharedData, ledgerId, { directlyFunded: true });
   return sharedData;
 };
 

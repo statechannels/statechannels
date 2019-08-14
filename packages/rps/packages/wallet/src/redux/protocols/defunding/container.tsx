@@ -6,6 +6,8 @@ import Failure from '../shared-components/failure';
 import Success from '../shared-components/success';
 import { connect } from 'react-redux';
 import { IndirectDefunding } from '../indirect-defunding/container';
+import { unreachable } from '../../../utils/reducer-utils';
+import { VirtualDefunding } from '../virtual-defunding/container';
 
 interface Props {
   state: states.DefundingState;
@@ -23,6 +25,10 @@ class DefundingContainer extends PureComponent<Props> {
         return <Failure name="de-funding" reason={state.reason} />;
       case 'Defunding.Success':
         return <Success name="de-funding" />;
+      case 'Defunding.WaitForVirtualDefunding':
+        return <VirtualDefunding state={state.virtualDefunding} />;
+      default:
+        return unreachable(state);
     }
   }
 }
