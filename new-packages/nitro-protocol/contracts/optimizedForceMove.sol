@@ -168,6 +168,7 @@ contract OptimizedForceMove {
         channelStorageHashes[channelId] = keccak256(abi.encode(channelStorage));
 
     }
+    
     // Internal methods:
 
     function _isAddressInArray(address suspect, address[] memory addresses)
@@ -242,8 +243,6 @@ contract OptimizedForceMove {
         address a = ecrecover(prefixedHash, _v, _r, _s);
         return (a);
     }
-
-    // not yet implemented
 
     function _validTransition(
         uint256 nParticipants,
