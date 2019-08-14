@@ -245,7 +245,7 @@ describe('forceMove', () => {
   );
 
   // compute stateHashes for a chain of 3 non-final states with turnNum = [0,1,2]
-  const largestTurnNum = 2;
+  const largestTurnNum = 8;
   const isFinalCount = 0;
   const whoSignedWhat = [0, 1, 2];
   let state;
@@ -265,7 +265,7 @@ describe('forceMove', () => {
       ),
     );
     state = {
-      turnNum: i,
+      turnNum: i + 6,
       isFinal: false,
       channelId,
       appPartHash,
