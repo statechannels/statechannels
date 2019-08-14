@@ -29,3 +29,5 @@ export const threePlayerPreSuccessHub = prependToScenarioLocator(
   threePlayerHubHappyPath.waitForPlayerBUpdate,
   EmbeddedProtocol.ConsensusUpdate,
 );
+
+export const threePlayerInProgressA = threePlayerHubHappyPath.waitForPlayerAUpdate;

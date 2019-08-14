@@ -40,6 +40,6 @@ export function isIndirectDefundingAction(action: WalletAction): action is Indir
   );
 }
 export const routesToIndirectDefunding = routerFactory(
-  isConsensusUpdateAction,
+  isIndirectDefundingAction,
   EmbeddedProtocol.IndirectDefunding,
 );

@@ -7,7 +7,6 @@ import { CommitmentType } from '../../../domain';
 import { CONSENSUS_LIBRARY_ADDRESS } from '../../../constants';
 import { getChannel } from '../../channel-store';
 import { DirectFundingAction } from '../direct-funding';
-import { directFundingRequested } from '../direct-funding/actions';
 import { isSuccess, isFailure, isTerminal } from '../direct-funding/states';
 import {
   directFundingStateReducer,
@@ -171,15 +170,16 @@ function handleWaitForPreFundSetup(
         : latestCommitment.allocation[1];
       const ourIndex = getTwoPlayerIndex(ledgerId, sharedData);
       // update the state
-      const directFundingAction = directFundingRequested({
+      const directFundingState = initializeDirectFunding({
         processId: protocolState.processId,
         channelId: ledgerId,
         safeToDepositLevel,
         totalFundingRequired: total,
         requiredDeposit,
         ourIndex,
+        sharedData,
+        protocolLocator: makeLocator(protocolState.protocolLocator, EmbeddedProtocol.DirectFunding),
       });
-      const directFundingState = initializeDirectFunding(directFundingAction, sharedData);
       sharedData = directFundingState.sharedData;
 
       const advanceChannelResult = initializeAdvanceChannel(directFundingState.sharedData, {

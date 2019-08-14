@@ -188,25 +188,26 @@ export const channelFinalizedOnChain = (channelId: string, sharedData: SharedDat
   return channelState && channelState.finalized;
 };
 
-export const isChannelDirectlyFunded = (channelId: string, sharedData: SharedData): boolean => {
+export enum FundingType {
+  Virtual,
+  Ledger,
+  Direct,
+}
+export const getChannelFundingType = (channelId: string, sharedData: SharedData): FundingType => {
   const channelFundingState = selectors.getChannelFundingState(sharedData, channelId);
   if (!channelFundingState) {
     throw new Error(`No funding state for ${channelId}. Cannot determine funding type.`);
   }
-  return channelFundingState.directlyFunded;
-};
-
-export const getFundingChannelId = (channelId: string, sharedData: SharedData): string => {
-  const channelFundingState = selectors.getChannelFundingState(sharedData, channelId);
-  if (!channelFundingState) {
-    throw new Error(`No funding state for ${channelId}. Cannot determine funding type.`);
+  if (channelFundingState.directlyFunded) {
+    return FundingType.Direct;
   }
-
   if (!channelFundingState.fundingChannel) {
-    throw new Error('No funding channel id defined.');
+    throw new Error(`Channel ${channelId} is not directly funded but has not fundingChannelId`);
   }
-  return channelFundingState.fundingChannel;
+  const channelState = getExistingChannel(sharedData, channelFundingState.fundingChannel);
+  return channelState.participants.length === 3 ? FundingType.Virtual : FundingType.Ledger;
 };
+
 export const getTwoPlayerIndex = (
   channelId: string,
   sharedData: SharedData,
@@ -279,4 +280,25 @@ export function getNumberOfParticipants(commitment: Commitment): number {
 export function ourTurn(sharedData: SharedData, channelId: string) {
   const channel = getExistingChannel(sharedData, channelId);
   return ourTurnOnChannel(channel);
+}
+
+export function getFundingChannelId(channelId: string, sharedData: SharedData): string {
+  const fundingState = selectors.getChannelFundingState(sharedData, channelId);
+  if (!fundingState) {
+    throw new Error(`No funding state found for ${channelId}`);
+  }
+  if (fundingState.directlyFunded) {
+    return channelId;
+  } else {
+    const channelIdToCheck = !!fundingState.fundingChannel
+      ? fundingState.fundingChannel
+      : fundingState.guarantorChannel;
+    if (!channelIdToCheck) {
+      throw new Error(
+        `Funding state for ${channelId} is not directly funded so it must have aq funding or guarantor channel`,
+      );
+    }
+
+    return getFundingChannelId(channelIdToCheck, sharedData);
+  }
 }
