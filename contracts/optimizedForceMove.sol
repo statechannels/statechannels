@@ -1,6 +1,9 @@
 pragma solidity ^0.5.2;
 pragma experimental ABIEncoderV2;
 
+import './ForceMoveApp.sol';
+import './Format.sol';
+
 contract OptimizedForceMove {
     struct Signature {
         uint8 v;
@@ -14,11 +17,6 @@ contract OptimizedForceMove {
         uint256 channelNonce;
         address appDefinition;
         uint256 challengeDuration;
-    }
-
-    struct VariablePart {
-        bytes outcome;
-        bytes appData;
     }
 
     struct State {
@@ -52,7 +50,7 @@ contract OptimizedForceMove {
         uint256 turnNumRecord,
         FixedPart memory fixedPart,
         uint256 largestTurnNum,
-        VariablePart[] memory variableParts,
+        Format.VariablePart[] memory variableParts,
         uint8 isFinalCount, // how many of the states are final
         Signature[] memory sigs,
         uint8[] memory whoSignedWhat,
@@ -250,7 +248,7 @@ contract OptimizedForceMove {
     function _validTransition(
         uint256 nParticipants,
         bool[2] memory isFinalAB, // [a.isFinal, b.isFinal]
-        VariablePart[2] memory ab, // [a,b]
+        Format.VariablePart[2] memory ab, // [a,b]
         uint256 turnNumB,
         address appDefinition
     ) internal pure returns (bool) {
@@ -277,8 +275,8 @@ contract OptimizedForceMove {
                     'InvalidTransitionError: Cannot change the appData during setup phase'
                 );
             } else {
-                return true; // TODO ->
-                // require(appDefinition.validTransition(a.appData,b.appData)); // reason string not necessary (called function will provide reason for reverting)
+                require(ForceMoveApp(appDefinition).validTransition(ab[0], ab[1]));
+                // reason string not necessary (called function will provide reason for reverting)
             }
         }
         return true;
