@@ -74,7 +74,7 @@ linkStyle default interpolate basis
   St((start)) --> WFJ("WaitForJoint: AdvanceChannel(J)")
   WFJ --> |Prepared| WFG("WaitForGuarantor: AdvanceChannel(G)")
 
-  WFG --> |"Prepared"| WFGF("WaitForGuarantorFunding: IndirectFunding(G)")
+  WFG --> |"Prepared"| WFGF("WaitForGuarantorFunding: LedgerFunding(G)")
 
   WFGF --> |GuarantorFunded| WFAF("WaitForApplicationFunding: UpdateConsensus(J)")
   WFAF --> |ApplicationFunded| S((success))
