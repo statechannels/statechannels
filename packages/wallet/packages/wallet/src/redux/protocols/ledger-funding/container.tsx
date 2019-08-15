@@ -7,13 +7,13 @@ import { ExistingLedgerFunding } from '../existing-ledger-funding/container';
 import { NewLedgerChannel } from '../new-ledger-channel/container';
 
 interface Props {
-  state: states.NonTerminalIndirectFundingState;
+  state: states.NonTerminalLedgerFundingState;
 }
 
-class IndirectFundingContainer extends PureComponent<Props> {
+class LedgerFundingContainer extends PureComponent<Props> {
   render() {
     const { state } = this.props;
-    if (state.type === 'IndirectFunding.WaitForExistingLedgerFunding') {
+    if (state.type === 'LedgerFunding.WaitForExistingLedgerFunding') {
       return <ExistingLedgerFunding state={state.existingLedgerFundingState} />;
     } else {
       return <NewLedgerChannel state={state.newLedgerChannel} />;
@@ -21,4 +21,4 @@ class IndirectFundingContainer extends PureComponent<Props> {
   }
 }
 
-export const IndirectFunding = connect(() => ({}))(IndirectFundingContainer);
+export const LedgerFunding = connect(() => ({}))(LedgerFundingContainer);

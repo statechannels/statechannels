@@ -9,18 +9,18 @@ import {
 } from '../../../__tests__/helpers';
 import { FUNDING_SUCCESS, HIDE_WALLET } from 'magmo-wallet-client';
 
-describe('indirect funding', () => {
-  const scenario = scenarios.indirectFunding;
+describe('ledger funding', () => {
+  const scenario = scenarios.ledgerFunding;
 
   describeScenarioStep(scenario.waitForStrategyNegotiation, () => {
     const { state, sharedData, action } = scenario.waitForStrategyNegotiation;
     const result = reducer(state, sharedData, action);
 
-    itTransitionsTo(result, 'Funding.WaitForIndirectFunding');
+    itTransitionsTo(result, 'Funding.WaitForLedgerFunding');
   });
 
-  describeScenarioStep(scenario.waitForIndirectFunding, () => {
-    const { state, sharedData, action } = scenario.waitForIndirectFunding;
+  describeScenarioStep(scenario.waitForLedgerFunding, () => {
+    const { state, sharedData, action } = scenario.waitForLedgerFunding;
     const result = reducer(state, sharedData, action);
 
     itTransitionsTo(result, 'Funding.WaitForPostFundSetup');

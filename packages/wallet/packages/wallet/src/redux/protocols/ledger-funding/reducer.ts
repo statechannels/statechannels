@@ -18,7 +18,7 @@ import * as newLedgerChannel from '../new-ledger-channel';
 import { EXISTING_LEDGER_FUNDING_PROTOCOL_LOCATOR } from '../existing-ledger-funding/reducer';
 import { getTwoPlayerIndex } from '../reducer-helpers';
 
-export const INDIRECT_FUNDING_PROTOCOL_LOCATOR = makeLocator(EmbeddedProtocol.IndirectFunding);
+export const LEDGER_FUNDING_PROTOCOL_LOCATOR = makeLocator(EmbeddedProtocol.LedgerFunding);
 
 export function initialize({
   processId,
@@ -36,7 +36,7 @@ export function initialize({
   participants: string[];
   sharedData: SharedData;
   protocolLocator: ProtocolLocator;
-}): ProtocolStateWithSharedData<states.NonTerminalIndirectFundingState | states.Failure> {
+}): ProtocolStateWithSharedData<states.NonTerminalLedgerFundingState | states.Failure> {
   // TODO: Should take in an arbitrary list of participants
   const existingLedgerChannel = selectors.getFundedLedgerChannelForParticipants(
     sharedData,
@@ -92,15 +92,15 @@ export function initialize({
   }
 }
 
-export function indirectFundingReducer(
-  protocolState: states.NonTerminalIndirectFundingState,
+export function ledgerFundingReducer(
+  protocolState: states.NonTerminalLedgerFundingState,
   sharedData: SharedData,
   action: WalletAction,
-): ProtocolStateWithSharedData<states.IndirectFundingState> {
+): ProtocolStateWithSharedData<states.LedgerFundingState> {
   switch (protocolState.type) {
-    case 'IndirectFunding.WaitForNewLedgerChannel':
+    case 'LedgerFunding.WaitForNewLedgerChannel':
       return waitForNewLedgerChannelReducer(protocolState, action, sharedData);
-    case 'IndirectFunding.WaitForExistingLedgerFunding':
+    case 'LedgerFunding.WaitForExistingLedgerFunding':
       return waitForExistingLedgerFundingReducer(protocolState, action, sharedData);
 
     default:
@@ -112,7 +112,7 @@ function waitForNewLedgerChannelReducer(
   protocolState: states.WaitForNewLedgerChannel,
   action: WalletAction,
   sharedData: SharedData,
-): ProtocolStateWithSharedData<states.IndirectFundingState> {
+): ProtocolStateWithSharedData<states.LedgerFundingState> {
   if (!isNewLedgerChannelAction(action)) {
     console.warn(`Received ${action} but currently in ${protocolState.type}`);
     return { protocolState, sharedData };
@@ -200,7 +200,7 @@ function fundWithExistingLedgerChannel({
   sharedData: SharedData;
   existingLedgerChannel: ChannelState;
   protocolLocator: ProtocolLocator;
-}): ProtocolStateWithSharedData<states.NonTerminalIndirectFundingState | states.Failure> {
+}): ProtocolStateWithSharedData<states.NonTerminalLedgerFundingState | states.Failure> {
   const ledgerId = existingLedgerChannel.channelId;
   const {
     protocolState: existingLedgerFundingState,

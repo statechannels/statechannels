@@ -5,7 +5,7 @@ import { ActionConstructor } from '../../utils';
 import { AdvanceChannelAction, isAdvanceChannelAction } from '../advance-channel';
 import { WalletAction } from '../../actions';
 import { VirtualFundingAction, isVirtualFundingAction } from '../virtual-funding';
-import { IndirectFundingAction, isIndirectFundingAction } from '../indirect-funding';
+import { LedgerFundingAction, isLedgerFundingAction } from '../ledger-funding';
 import {
   FundingStrategyNegotiationAction,
   isFundingStrategyNegotiationAction,
@@ -36,7 +36,7 @@ export function isFundingAction(action: WalletAction): action is FundingAction {
     action.type === 'WALLET.FUNDING.FUNDING_SUCCESS_ACKNOWLEDGED' ||
     isAdvanceChannelAction(action) ||
     isVirtualFundingAction(action) ||
-    isIndirectFundingAction(action) ||
+    isLedgerFundingAction(action) ||
     isFundingStrategyNegotiationAction(action)
   );
 }
@@ -45,5 +45,5 @@ export type FundingAction =
   | FundingSuccessAcknowledged
   | AdvanceChannelAction
   | VirtualFundingAction
-  | IndirectFundingAction
+  | LedgerFundingAction
   | FundingStrategyNegotiationAction;

@@ -1,6 +1,6 @@
 import * as scenarios from './scenarios';
-import { initialize, indirectFundingReducer } from '../reducer';
-import { IndirectFundingState, IndirectFundingStateType } from '../states';
+import { initialize, ledgerFundingReducer } from '../reducer';
+import { LedgerFundingState, LedgerFundingStateType } from '../states';
 import { describeScenarioStep } from '../../../__tests__/helpers';
 
 describe('existing ledger funding happy path', () => {
@@ -8,7 +8,7 @@ describe('existing ledger funding happy path', () => {
 
   describe('when initializing', () => {
     const result = initialize(scenario.initialize);
-    itTransitionsTo(result.protocolState, 'IndirectFunding.WaitForExistingLedgerFunding');
+    itTransitionsTo(result.protocolState, 'LedgerFunding.WaitForExistingLedgerFunding');
   });
 });
 
@@ -17,23 +17,23 @@ describe('new ledger funding happy path', () => {
 
   describe('when initializing', () => {
     const result = initialize(scenario.initialize);
-    itTransitionsTo(result.protocolState, 'IndirectFunding.WaitForNewLedgerChannel');
+    itTransitionsTo(result.protocolState, 'LedgerFunding.WaitForNewLedgerChannel');
   });
 
   describeScenarioStep(scenario.waitForNewLedgerChannel, () => {
     const { state, sharedData, action } = scenario.waitForNewLedgerChannel;
-    const result = indirectFundingReducer(state, sharedData, action);
-    itTransitionsTo(result.protocolState, 'IndirectFunding.WaitForExistingLedgerFunding');
+    const result = ledgerFundingReducer(state, sharedData, action);
+    itTransitionsTo(result.protocolState, 'LedgerFunding.WaitForExistingLedgerFunding');
   });
 
   describeScenarioStep(scenario.waitForExistingLedgerFunding, () => {
     const { state, sharedData, action } = scenario.waitForExistingLedgerFunding;
-    const result = indirectFundingReducer(state, sharedData, action);
-    itTransitionsTo(result.protocolState, 'IndirectFunding.Success');
+    const result = ledgerFundingReducer(state, sharedData, action);
+    itTransitionsTo(result.protocolState, 'LedgerFunding.Success');
   });
 });
 
-function itTransitionsTo(protocolState: IndirectFundingState, type: IndirectFundingStateType) {
+function itTransitionsTo(protocolState: LedgerFundingState, type: LedgerFundingStateType) {
   it(`transitions to ${type}`, () => {
     expect(protocolState.type).toEqual(type);
   });

@@ -26,11 +26,11 @@ linkStyle default interpolate basis
   WFSN --> |StrategyNegotiationAction| WFSN
   WFSN -->|Failure|F((failure))
   WFSN --> |VirtualStrategySelected| WFVF(WaitForVirtualFunding)
-   WFSN --> |IndirectStrategySelected| WFIF(WaitForIndirectFunding)
+   WFSN --> |IndirectStrategySelected| WFIF(WaitForLedgerFunding)
   WFVF --> |VirtualFundingAction|WFVF
   WFVF -->|Success|WFPS(WaitForPostFundSetup)
   WFVF -->|Failure|F((failure))
-  WFIF --> |IndirectFundingAction|WFIF
+  WFIF --> |LedgerFundingAction|WFIF
   WFIF -->|Success|WFPS(WaitForPostFundSetup)
   WFIF -->|Failure|F((failure))
   WFPS -->|AdvanceChannelAction|WFPS

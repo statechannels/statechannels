@@ -14,12 +14,12 @@ import {
 import { fundingFailure } from 'magmo-wallet-client';
 import { EmbeddedProtocol } from '../../../communication';
 
-import * as indirectFundingStates from '../indirect-funding/states';
+import * as ledgerFundingStates from '../ledger-funding/states';
 import {
-  indirectFundingReducer,
-  initializeIndirectFunding,
-  IndirectFundingAction,
-} from '../indirect-funding';
+  ledgerFundingReducer,
+  initializeLedgerFunding,
+  LedgerFundingAction,
+} from '../ledger-funding';
 import * as virtualFunding from '../virtual-funding';
 import {
   AdvanceChannelAction,
@@ -30,7 +30,7 @@ import * as advanceChannelStates from '../advance-channel/states';
 import { clearedToSend, routesToAdvanceChannel } from '../advance-channel/actions';
 import { CommitmentType } from '../../../domain';
 import { ADVANCE_CHANNEL_PROTOCOL_LOCATOR } from '../advance-channel/reducer';
-import { routesToIndirectFunding } from '../indirect-funding/actions';
+import { routesToLedgerFunding } from '../ledger-funding/actions';
 import { routesToVirtualFunding } from '../virtual-funding/actions';
 import {
   FundingStrategyNegotiationState,
@@ -99,7 +99,7 @@ export function fundingReducer(
 ): ProtocolStateWithSharedData<states.FundingState> {
   if (routesToAdvanceChannel(action, EMPTY_LOCATOR)) {
     return handleAdvanceChannelAction(state, sharedData, action);
-  } else if (routesToIndirectFunding(action, EMPTY_LOCATOR)) {
+  } else if (routesToLedgerFunding(action, EMPTY_LOCATOR)) {
     return handleIndirectFundingAction(state, sharedData, action);
   } else if (routesToVirtualFunding(action, EMPTY_LOCATOR)) {
     return handleVirtualFundingAction(state, sharedData, action);
@@ -185,24 +185,24 @@ function handleFundingStrategyNegotiationComplete({
     switch (fundingStrategyNegotiationState.selectedFundingStrategy) {
       case 'IndirectFundingStrategy': {
         const latestCommitment = getLatestCommitment(targetChannelId, sharedData);
-        let fundingState: indirectFundingStates.IndirectFundingState;
-        ({ protocolState: fundingState, sharedData } = initializeIndirectFunding({
+        let fundingState: ledgerFundingStates.LedgerFundingState;
+        ({ protocolState: fundingState, sharedData } = initializeLedgerFunding({
           processId,
           channelId: targetChannelId,
           startingAllocation: latestCommitment.allocation,
           startingDestination: latestCommitment.destination,
           participants: latestCommitment.channel.participants,
           sharedData,
-          protocolLocator: makeLocator(EmbeddedProtocol.IndirectFunding),
+          protocolLocator: makeLocator(EmbeddedProtocol.LedgerFunding),
         }));
-        if (fundingState.type === 'IndirectFunding.Failure') {
+        if (fundingState.type === 'LedgerFunding.Failure') {
           return {
             protocolState: states.failure(fundingState),
             sharedData,
           };
         }
         return {
-          protocolState: states.waitForIndirectFunding({
+          protocolState: states.waitForLedgerFunding({
             processId,
             targetChannelId,
             ourAddress,
@@ -261,7 +261,7 @@ function handleAdvanceChannelAction(
 ): ProtocolStateWithSharedData<states.FundingState> {
   if (
     protocolState.type !== 'Funding.WaitForPostFundSetup' &&
-    protocolState.type !== 'Funding.WaitForIndirectFunding'
+    protocolState.type !== 'Funding.WaitForLedgerFunding'
   ) {
     console.warn(
       `Funding reducer received advance channel action ${action.type} but is currently in state ${
@@ -292,9 +292,9 @@ function handleAdvanceChannelAction(
 function handleIndirectFundingAction(
   protocolState: states.FundingState,
   sharedData: SharedData,
-  action: IndirectFundingAction,
+  action: LedgerFundingAction,
 ): ProtocolStateWithSharedData<states.FundingState> {
-  if (protocolState.type !== 'Funding.WaitForIndirectFunding') {
+  if (protocolState.type !== 'Funding.WaitForLedgerFunding') {
     console.warn(
       `Funding reducer received indirect funding action ${action.type} but is currently in state ${
         protocolState.type
@@ -306,11 +306,11 @@ function handleIndirectFundingAction(
   const {
     protocolState: updatedFundingState,
     sharedData: updatedSharedData,
-  } = indirectFundingReducer(protocolState.fundingState, sharedData, action);
+  } = ledgerFundingReducer(protocolState.fundingState, sharedData, action);
 
-  if (!indirectFundingStates.isTerminal(updatedFundingState)) {
+  if (!ledgerFundingStates.isTerminal(updatedFundingState)) {
     return {
-      protocolState: states.waitForIndirectFunding({
+      protocolState: states.waitForLedgerFunding({
         ...protocolState,
         fundingState: updatedFundingState,
       }),
@@ -362,12 +362,12 @@ function fundingSuccessAcknowledged(state: states.FundingState, sharedData: Shar
 }
 
 function handleFundingComplete(
-  protocolState: states.WaitForIndirectFunding | states.WaitForVirtualFunding,
-  fundingState: indirectFundingStates.IndirectFundingState | virtualFunding.VirtualFundingState,
+  protocolState: states.WaitForLedgerFunding | states.WaitForVirtualFunding,
+  fundingState: ledgerFundingStates.LedgerFundingState | virtualFunding.VirtualFundingState,
   sharedData: SharedData,
 ) {
   switch (fundingState.type) {
-    case 'IndirectFunding.Success':
+    case 'LedgerFunding.Success':
     case 'VirtualFunding.Success': {
       // When funding is complete we alert the advance channel protocol that we are now cleared to exchange post fund setups
       let postFundSetupState: advanceChannelStates.AdvanceChannelState;

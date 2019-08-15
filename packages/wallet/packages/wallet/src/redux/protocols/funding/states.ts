@@ -1,7 +1,7 @@
 import { ProtocolState } from '..';
 
 import { StateConstructor } from '../../utils';
-import { NonTerminalIndirectFundingState } from '../indirect-funding';
+import { NonTerminalLedgerFundingState } from '../ledger-funding';
 import { AdvanceChannelState } from '../advance-channel';
 import { NonTerminalVirtualFundingState } from '../virtual-funding/states';
 import { OngoingFundingStrategyNegotiationState } from '../funding-strategy-negotiation';
@@ -21,10 +21,10 @@ export interface WaitForStrategyNegotiation extends BaseState {
   fundingStrategyNegotiationState: OngoingFundingStrategyNegotiationState;
 }
 
-export interface WaitForIndirectFunding extends BaseState {
-  type: 'Funding.WaitForIndirectFunding';
+export interface WaitForLedgerFunding extends BaseState {
+  type: 'Funding.WaitForLedgerFunding';
   targetChannelId: string;
-  fundingState: NonTerminalIndirectFundingState;
+  fundingState: NonTerminalLedgerFundingState;
   // PostFundSetup state is initialized early to handle post fund setups that arrive before funding is done
   postFundSetupState: AdvanceChannelState;
 }
@@ -67,10 +67,10 @@ export const waitForStrategyNegotiation: StateConstructor<WaitForStrategyNegotia
   };
 };
 
-export const waitForIndirectFunding: StateConstructor<WaitForIndirectFunding> = p => {
+export const waitForLedgerFunding: StateConstructor<WaitForLedgerFunding> = p => {
   return {
     ...p,
-    type: 'Funding.WaitForIndirectFunding',
+    type: 'Funding.WaitForLedgerFunding',
   };
 };
 
@@ -106,7 +106,7 @@ export const failure: StateConstructor<Failure> = p => {
 
 export type OngoingFundingState =
   | WaitForStrategyNegotiation
-  | WaitForIndirectFunding
+  | WaitForLedgerFunding
   | WaitForVirtualFunding
   | WaitForSuccessConfirmation
   | WaitForPostFundSetup;
@@ -116,7 +116,7 @@ export type FundingState = OngoingFundingState | TerminalFundingState;
 export type FundingStateType = FundingState['type'];
 export function isFundingState(state: ProtocolState): state is FundingState {
   return (
-    state.type === 'Funding.WaitForIndirectFunding' ||
+    state.type === 'Funding.WaitForLedgerFunding' ||
     state.type === 'Funding.WaitForVirtualFunding' ||
     state.type === 'Funding.WaitForStrategyNegotiation' ||
     state.type === 'Funding.WaitForSuccessConfirmation' ||

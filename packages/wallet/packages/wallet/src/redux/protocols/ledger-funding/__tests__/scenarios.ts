@@ -17,7 +17,7 @@ import {
   successTrigger as NewLedgerChannelSuccessTrigger,
   successState as newLedgerSuccess,
 } from '../../new-ledger-channel/__tests__';
-import { INDIRECT_FUNDING_PROTOCOL_LOCATOR } from '../reducer';
+import { LEDGER_FUNDING_PROTOCOL_LOCATOR } from '../reducer';
 
 const processId = 'processId';
 
@@ -31,7 +31,7 @@ const props = {
   processId,
   startingAllocation: oneThree.map(o => o.wei),
   startingDestination: oneThree.map(o => o.address),
-  protocolLocator: INDIRECT_FUNDING_PROTOCOL_LOCATOR,
+  protocolLocator: LEDGER_FUNDING_PROTOCOL_LOCATOR,
 };
 const ledger4 = ledgerCommitment({ turnNum: 4, balances: oneThree });
 const ledger5 = ledgerCommitment({ turnNum: 5, balances: oneThree });

@@ -3,7 +3,7 @@ import { PureComponent } from 'react';
 import React from 'react';
 
 import { connect } from 'react-redux';
-import { IndirectFunding } from '../indirect-funding/container';
+import { LedgerFunding } from '../ledger-funding/container';
 import { ConsensusUpdate } from '../consensus-update/container';
 import { AdvanceChannel } from '../advance-channel/container';
 import { unreachable } from '../../../utils/reducer-utils';
@@ -17,7 +17,7 @@ class VirtualFundingContainer extends PureComponent<Props> {
     const { state } = this.props;
     switch (state.type) {
       case 'VirtualFunding.WaitForGuarantorFunding':
-        return <IndirectFunding state={state.indirectGuarantorFunding} />;
+        return <LedgerFunding state={state.indirectGuarantorFunding} />;
       case 'VirtualFunding.WaitForApplicationFunding':
         return <ConsensusUpdate state={state.indirectApplicationFunding} />;
       case 'VirtualFunding.WaitForGuarantorChannel':

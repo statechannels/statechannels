@@ -33,7 +33,7 @@ graph TD
   linkStyle default interpolate basis
 
     A{Application}--> D
-    F{Funding}--> idF(IndirectFunding)
+    F{Funding}--> idF(LedgerFunding)
     F --> AC(AdvanceChannel)
     D(Dispute)--> TS
 

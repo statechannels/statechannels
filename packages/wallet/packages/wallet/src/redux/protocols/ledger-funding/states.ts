@@ -11,54 +11,52 @@ interface Base {
   protocolLocator: ProtocolLocator;
 }
 export interface WaitForNewLedgerChannel extends Base {
-  type: 'IndirectFunding.WaitForNewLedgerChannel';
+  type: 'LedgerFunding.WaitForNewLedgerChannel';
   newLedgerChannel: NonTerminalNewLedgerChannelState;
 }
 
 export interface WaitForExistingLedgerFunding extends Base {
-  type: 'IndirectFunding.WaitForExistingLedgerFunding';
+  type: 'LedgerFunding.WaitForExistingLedgerFunding';
   existingLedgerFundingState: NonTerminalExistingLedgerFundingState;
   ledgerId: string;
 }
 
 export interface Failure {
-  type: 'IndirectFunding.Failure';
+  type: 'LedgerFunding.Failure';
   reason: string;
 }
 
 export interface Success {
-  type: 'IndirectFunding.Success';
+  type: 'LedgerFunding.Success';
 }
 
 export const waitForNewLedgerChannel: StateConstructor<WaitForNewLedgerChannel> = p => {
-  return { ...p, type: 'IndirectFunding.WaitForNewLedgerChannel' };
+  return { ...p, type: 'LedgerFunding.WaitForNewLedgerChannel' };
 };
 export const waitForExistingLedgerFunding: StateConstructor<WaitForExistingLedgerFunding> = p => {
-  return { ...p, type: 'IndirectFunding.WaitForExistingLedgerFunding' };
+  return { ...p, type: 'LedgerFunding.WaitForExistingLedgerFunding' };
 };
 
 export const success: StateConstructor<Success> = p => {
-  return { ...p, type: 'IndirectFunding.Success' };
+  return { ...p, type: 'LedgerFunding.Success' };
 };
 
 export const failure: StateConstructor<Failure> = p => {
-  return { ...p, type: 'IndirectFunding.Failure' };
+  return { ...p, type: 'LedgerFunding.Failure' };
 };
-export type NonTerminalIndirectFundingState =
-  | WaitForExistingLedgerFunding
-  | WaitForNewLedgerChannel;
-export type TerminalIndirectFundingState = Success | Failure;
-export type IndirectFundingState = NonTerminalIndirectFundingState | TerminalIndirectFundingState;
-export type IndirectFundingStateType = IndirectFundingState['type'];
+export type NonTerminalLedgerFundingState = WaitForExistingLedgerFunding | WaitForNewLedgerChannel;
+export type TerminalLedgerFundingState = Success | Failure;
+export type LedgerFundingState = NonTerminalLedgerFundingState | TerminalLedgerFundingState;
+export type LedgerFundingStateType = LedgerFundingState['type'];
 
-export function isTerminal(state: IndirectFundingState): state is TerminalIndirectFundingState {
+export function isTerminal(state: LedgerFundingState): state is TerminalLedgerFundingState {
   return !![isSuccess, isFailure].find(g => g(state));
 }
 
-export function isSuccess(state: IndirectFundingState): state is Success {
-  return state.type === 'IndirectFunding.Success';
+export function isSuccess(state: LedgerFundingState): state is Success {
+  return state.type === 'LedgerFunding.Success';
 }
 
-export function isFailure(state: IndirectFundingState): state is Failure {
-  return state.type === 'IndirectFunding.Failure';
+export function isFailure(state: LedgerFundingState): state is Failure {
+  return state.type === 'LedgerFunding.Failure';
 }

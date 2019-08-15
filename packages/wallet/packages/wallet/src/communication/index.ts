@@ -25,7 +25,7 @@ export const enum EmbeddedProtocol {
   DirectFunding = 'DirectFunding', // TODO: Post-fund-setup exchange will be removed from direct funding, so this should be removed
   ExistingLedgerFunding = 'ExistingLedgerFunding',
   IndirectDefunding = 'IndirectDefunding',
-  IndirectFunding = 'IndirectFunding',
+  LedgerFunding = 'LedgerFunding',
   LedgerTopUp = 'LedgerTopUp',
   NewLedgerChannel = 'NewLedgerChannel',
   VirtualFunding = 'VirtualFunding',
