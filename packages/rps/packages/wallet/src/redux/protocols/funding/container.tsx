@@ -9,7 +9,7 @@ import { unreachable } from '../../../utils/reducer-utils';
 import WaitForOtherPlayer from '../shared-components/wait-for-other-player';
 import AcknowledgeX from '../shared-components/acknowledge-x';
 import { ActionDispatcher } from '../../utils';
-import { IndirectFunding } from '../indirect-funding/container';
+import { LedgerFunding } from '../ledger-funding/container';
 import { FundingStrategyNegotiation } from '../funding-strategy-negotiation/container';
 import { VirtualFunding } from '../virtual-funding/container';
 
@@ -27,8 +27,8 @@ class FundingContainer extends PureComponent<Props> {
     switch (state.type) {
       case 'Funding.WaitForStrategyNegotiation':
         return <FundingStrategyNegotiation state={state.fundingStrategyNegotiationState} />;
-      case 'Funding.WaitForIndirectFunding':
-        return <IndirectFunding state={state.fundingState} />;
+      case 'Funding.WaitForLedgerFunding':
+        return <LedgerFunding state={state.fundingState} />;
       case 'Funding.WaitForVirtualFunding':
         return <VirtualFunding state={state.fundingState} />;
       case 'Funding.WaitForSuccessConfirmation':

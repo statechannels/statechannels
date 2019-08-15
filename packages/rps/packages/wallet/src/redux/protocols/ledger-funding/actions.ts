@@ -6,13 +6,13 @@ import {
 import { WalletAction } from '../../actions';
 import { EmbeddedProtocol, routerFactory } from '../../../communication';
 
-export type IndirectFundingAction = NewLedgerChannelAction | ExistingLedgerFundingAction;
+export type LedgerFundingAction = NewLedgerChannelAction | ExistingLedgerFundingAction;
 
-export const isIndirectFundingAction = (action: WalletAction): action is IndirectFundingAction => {
+export const isLedgerFundingAction = (action: WalletAction): action is LedgerFundingAction => {
   return isNewLedgerChannelAction(action) || isExistingLedgerFundingAction(action);
 };
 
-export const routesToIndirectFunding = routerFactory(
-  isIndirectFundingAction,
-  EmbeddedProtocol.IndirectFunding,
+export const routesToLedgerFunding = routerFactory(
+  isLedgerFundingAction,
+  EmbeddedProtocol.LedgerFunding,
 );

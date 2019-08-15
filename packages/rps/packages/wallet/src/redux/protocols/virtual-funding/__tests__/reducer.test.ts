@@ -103,7 +103,7 @@ describe('happyPath', () => {
     itTransitionsSubstateTo(
       protocolState,
       'indirectGuarantorFunding',
-      'IndirectFunding.WaitForNewLedgerChannel',
+      'LedgerFunding.WaitForNewLedgerChannel',
     );
 
     itSendsTheseCommitments(result, [

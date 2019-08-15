@@ -9,12 +9,12 @@ import { bytesFromAppAttributes } from 'fmg-nitro-adjudicator/lib/consensus-app'
 import { CONSENSUS_LIBRARY_ADDRESS } from '../../../constants';
 import { advanceChannelReducer } from '../advance-channel';
 import * as consensusUpdate from '../consensus-update';
-import * as indirectFunding from '../indirect-funding';
+import * as ledgerFunding from '../ledger-funding';
 import { ethers } from 'ethers';
 import { addHex } from '../../../utils/hex-utils';
 import { ADVANCE_CHANNEL_PROTOCOL_LOCATOR } from '../advance-channel/reducer';
 import { routesToAdvanceChannel } from '../advance-channel/actions';
-import { routesToIndirectFunding } from '../indirect-funding/actions';
+import { routesToLedgerFunding } from '../ledger-funding/actions';
 import { routesToConsensusUpdate, clearedToSend } from '../consensus-update/actions';
 import { EmbeddedProtocol } from '../../../communication';
 
@@ -224,7 +224,7 @@ function waitForGuarantorChannelReducer(
             protocolState.startingDestination[ourIndex],
             protocolState.hubAddress,
           ];
-          const indirectFundingResult = indirectFunding.initializeIndirectFunding({
+          const ledgerFundingResult = ledgerFunding.initializeLedgerFunding({
             processId,
             channelId: result.protocolState.channelId,
             startingAllocation,
@@ -233,14 +233,14 @@ function waitForGuarantorChannelReducer(
             sharedData: result.sharedData,
             protocolLocator: makeLocator(
               protocolState.protocolLocator,
-              EmbeddedProtocol.IndirectFunding,
+              EmbeddedProtocol.LedgerFunding,
             ),
           });
-          switch (indirectFundingResult.protocolState.type) {
-            case 'IndirectFunding.Failure':
+          switch (ledgerFundingResult.protocolState.type) {
+            case 'LedgerFunding.Failure':
               return {
                 protocolState: states.failure({}),
-                sharedData: indirectFundingResult.sharedData,
+                sharedData: ledgerFundingResult.sharedData,
               };
             default:
               const { targetChannelId, hubAddress, jointChannelId } = protocolState;
@@ -261,12 +261,12 @@ function waitForGuarantorChannelReducer(
                   protocolState.protocolLocator,
                   CONSENSUS_UPDATE_PROTOCOL_LOCATOR,
                 ),
-                sharedData: indirectFundingResult.sharedData,
+                sharedData: ledgerFundingResult.sharedData,
               });
               return {
                 protocolState: states.waitForGuarantorFunding({
                   ...protocolState,
-                  indirectGuarantorFunding: indirectFundingResult.protocolState,
+                  indirectGuarantorFunding: ledgerFundingResult.protocolState,
                   indirectApplicationFunding: applicationFundingResult.protocolState,
                 }),
                 sharedData: applicationFundingResult.sharedData,
@@ -326,15 +326,15 @@ function waitForGuarantorFundingReducer(
       default:
         return { protocolState: { ...protocolState, indirectApplicationFunding }, sharedData };
     }
-  } else if (routesToIndirectFunding(action, protocolLocator)) {
-    const result = indirectFunding.indirectFundingReducer(
+  } else if (routesToLedgerFunding(action, protocolLocator)) {
+    const result = ledgerFunding.ledgerFundingReducer(
       protocolState.indirectGuarantorFunding,
       sharedData,
       action,
     );
 
     switch (result.protocolState.type) {
-      case 'IndirectFunding.Success':
+      case 'LedgerFunding.Success':
         // Once funding is complete we allow consensusUpdate to send commitments
         const applicationFundingResult = consensusUpdate.consensusUpdateReducer(
           protocolState.indirectApplicationFunding,
@@ -351,7 +351,7 @@ function waitForGuarantorFundingReducer(
           }),
           sharedData: applicationFundingResult.sharedData,
         };
-      case 'IndirectFunding.Failure':
+      case 'LedgerFunding.Failure':
         throw new Error(`Indirect funding failed: ${result.protocolState.reason}`);
 
       default:
@@ -366,7 +366,7 @@ function waitForGuarantorFundingReducer(
     }
   } else {
     console.warn(
-      `Expected indirectFunding or consensusUpdate action, received ${action.type} instead`,
+      `Expected ledgerFunding or consensusUpdate action, received ${action.type} instead`,
     );
     return { protocolState, sharedData };
   }

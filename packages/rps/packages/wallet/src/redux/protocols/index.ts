@@ -16,7 +16,7 @@ import { LedgerTopUpState } from './ledger-top-up/states';
 import { ConsensusUpdateState } from './consensus-update/states';
 import { AdvanceChannelState } from './advance-channel';
 import { VirtualFundingState } from './virtual-funding/states';
-import { IndirectFundingState } from './indirect-funding/states';
+import { LedgerFundingState } from './ledger-funding/states';
 import { ProtocolLocator, EmbeddedProtocol } from '../../communication';
 import { WalletAction } from '../actions';
 import { FundingStrategyNegotiationState } from './funding-strategy-negotiation/states';
@@ -40,7 +40,7 @@ export type ProtocolState =
   | ConsensusUpdateState
   | TransactionSubmissionState
   | AdvanceChannelState
-  | IndirectFundingState
+  | LedgerFundingState
   | FundingStrategyNegotiationState
   | VirtualDefundingState;
 

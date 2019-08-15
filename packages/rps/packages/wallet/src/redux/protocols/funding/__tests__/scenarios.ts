@@ -9,7 +9,7 @@ import {
   appCommitment,
   asPrivateKey,
 } from '../../../../domain/commitments/__tests__';
-import { preSuccess as indirectFundingPreSuccess } from '../../indirect-funding/__tests__';
+import { preSuccess as ledgerFundingPreSuccess } from '../../ledger-funding/__tests__';
 import { preSuccess as virtualFundingPreSuccess } from '../../virtual-funding/__tests__';
 import { preSuccess as advanceChannelPreSuccess } from '../../advance-channel/__tests__';
 import { bigNumberify } from 'ethers/utils';
@@ -58,9 +58,9 @@ const waitForVirtualStrategyNegotiation = states.waitForStrategyNegotiation({
   ...props,
   fundingStrategyNegotiationState: virtualNegotiationPreSuccess.state,
 });
-const waitForIndirectFunding = states.waitForIndirectFunding({
+const waitForLedgerFunding = states.waitForLedgerFunding({
   ...props,
-  fundingState: indirectFundingPreSuccess.state,
+  fundingState: ledgerFundingPreSuccess.state,
   postFundSetupState: advanceChannelPreSuccess.state,
 });
 const waitForVirtualFunding = states.waitForVirtualFunding({
@@ -79,26 +79,26 @@ const waitForSuccessConfirmation = states.waitForSuccessConfirmation(props);
 // -------
 
 const successConfirmed = actions.fundingSuccessAcknowledged({ processId });
-const indirectFundingSuccess = prependToLocator(
-  indirectFundingPreSuccess.action,
-  EmbeddedProtocol.IndirectFunding,
+const ledgerFundingSuccess = prependToLocator(
+  ledgerFundingPreSuccess.action,
+  EmbeddedProtocol.LedgerFunding,
 );
 
 // ---------
 // Scenarios
 // ---------
-export const indirectFunding = {
+export const ledgerFunding = {
   ...props,
 
   waitForStrategyNegotiation: {
     state: waitForIndirectStrategyNegotiation,
-    sharedData: setChannels(indirectFundingPreSuccess.sharedData, [appChannelWaitingForFunding]),
+    sharedData: setChannels(ledgerFundingPreSuccess.sharedData, [appChannelWaitingForFunding]),
     action: indirectNegotiationPreSuccess.action,
   },
-  waitForIndirectFunding: {
-    state: waitForIndirectFunding,
-    sharedData: indirectFundingPreSuccess.sharedData,
-    action: indirectFundingSuccess,
+  waitForLedgerFunding: {
+    state: waitForLedgerFunding,
+    sharedData: ledgerFundingPreSuccess.sharedData,
+    action: ledgerFundingSuccess,
   },
   waitForPostFundSetup: {
     state: waitForPostFundSetup,
