@@ -37,7 +37,7 @@ export const failure: StateConstructor<Failure> = p => {
 
 export type ConcludingState = InstigatorConcludingState | ResponderConcludingState;
 
-export type TerminalState = Success | Failure;
+export type TerminalConcludingState = Success | Failure;
 
 export type FailureReason =
   | 'NotYourTurn'
@@ -50,7 +50,7 @@ export function isConcludingState(state: ProtocolState): state is ConcludingStat
   return isConcludingInstigatorState(state) || isConcludingResponderState(state);
 }
 
-export function isTerminal(state: ConcludingState): state is Failure | Success {
+export function isTerminalConcludingState(state: ConcludingState): state is Failure | Success {
   return state.type === 'Concluding.Failure' || state.type === 'Concluding.Success';
 }
 
