@@ -3,7 +3,7 @@ import {expectRevert} from 'magmo-devtools';
 // @ts-ignore
 import optimizedForceMoveArtifact from '../build/contracts/TESTOptimizedForceMove.json';
 // @ts-ignore
-import trivialAppArtifact from '../build/contracts/TrivialApp.json';
+import countingAppArtifact from '../build/contracts/CountingApp.json';
 import {splitSignature, keccak256, defaultAbiCoder, arrayify} from 'ethers/utils';
 import {HashZero} from 'ethers/constants';
 
@@ -252,7 +252,7 @@ describe('forceMove', () => {
       chainId,
       participants,
       channelNonce,
-      appDefinition: trivialAppArtifact.networks[networkId].address,
+      appDefinition: countingAppArtifact.networks[networkId].address,
       challengeDuration: 1,
     };
 
@@ -377,7 +377,7 @@ describe('forceMove', () => {
       chainId,
       participants,
       channelNonce,
-      appDefinition: trivialAppArtifact.networks[networkId].address,
+      appDefinition: countingAppArtifact.networks[networkId].address,
       challengeDuration: 1,
     };
 
