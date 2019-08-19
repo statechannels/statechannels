@@ -168,7 +168,7 @@ contract OptimizedForceMove {
         channelStorageHashes[channelId] = keccak256(abi.encode(channelStorage));
 
     }
-    
+
     // Internal methods:
 
     function _isAddressInArray(address suspect, address[] memory addresses)
