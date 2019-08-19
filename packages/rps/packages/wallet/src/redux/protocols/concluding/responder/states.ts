@@ -2,10 +2,10 @@ import { StateConstructor } from '../../../utils';
 export type ResponderConcludingState =
   | ResponderNonTerminalState
   | ResponderPreTerminalState
-  | TerminalState;
+  | TerminalConcludingState;
 export type ResponderConcludingStateType = ResponderConcludingState['type'];
 import { ProtocolState } from '../..';
-import { TerminalState, FailureReason } from '../states';
+import { TerminalConcludingState, FailureReason } from '../states';
 import { ConsensusUpdateState } from '../../consensus-update/states';
 
 // -------

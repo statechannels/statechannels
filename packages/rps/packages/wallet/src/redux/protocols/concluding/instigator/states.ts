@@ -2,10 +2,10 @@ import { StateConstructor } from '../../../utils';
 export type InstigatorConcludingState =
   | InstigatorNonTerminalState
   | InstigatorPreTerminalState
-  | TerminalState;
+  | TerminalConcludingState;
 export type InstigatorConcludingStateType = InstigatorConcludingState['type'];
 import { ProtocolState } from '../..';
-import { FailureReason, TerminalState } from '../states';
+import { FailureReason, TerminalConcludingState } from '../states';
 import { ConsensusUpdateState } from '../../consensus-update/states';
 
 // -------
