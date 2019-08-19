@@ -265,11 +265,11 @@ describe('forceMove', () => {
     stateHashes = [, ,];
     variableParts = [, ,];
     for (let i = 0; i < 3; i++) {
-      const outcome = ethers.utils.id('some outcome data' + i);
+      const outcome = ethers.utils.id('some outcome data'); // CountingApp demands constant outcome
       outcomeHash = keccak256(defaultAbiCoder.encode(['bytes'], [outcome]));
       variableParts[i] = {
         outcome,
-        appData: ethers.utils.id('some app data' + i),
+        appData: defaultAbiCoder.encode(['uint256'], [i]), // incrementing counter
       };
 
       const appPartHash = keccak256(
