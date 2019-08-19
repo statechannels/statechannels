@@ -219,13 +219,14 @@ describe('_validSignatures', () => {
 describe('forceMove', () => {
   // construct data for forceMove parameters
   const chainId = 1234;
-  const channelNonce = 1;
+  let channelNonce;
+  let channelId;
   const turnNumRecord = 0;
   const wallets = [];
   const participants = ['', '', ''];
   const sigs = [, ,];
-  const variableParts = [, ,];
-  const stateHashes = [, ,];
+  let variableParts;
+  let stateHashes;
 
   // populate wallets and participants array
   for (let i = 0; i < 3; i++) {
@@ -233,18 +234,19 @@ describe('forceMove', () => {
     participants[i] = wallets[i].address;
   }
 
-  // channelId
-  const channelId = keccak256(
-    defaultAbiCoder.encode(
-      ['uint256', 'address[]', 'uint256'],
-      [chainId, participants, channelNonce],
-    ),
-  );
-
   let challengerSig;
   let sig;
   let tx;
-  it('accepts a valid forceMove tx and updates channelStorageHashes correctly', async () => {
+  it('accepts a valid forceMove tx and updates channelStorageHashes correctly (n states)', async () => {
+    // channelId
+    channelNonce = 1;
+    channelId = keccak256(
+      defaultAbiCoder.encode(
+        ['uint256', 'address[]', 'uint256'],
+        [chainId, participants, channelNonce],
+      ),
+    );
+
     // fixedPart
     const fixedPart = {
       chainId,
@@ -254,12 +256,14 @@ describe('forceMove', () => {
       challengeDuration: 1,
     };
 
-    // compute stateHashes for a chain of 3 non-final states with turnNum = [0,1,2]
+    // compute stateHashes for a chain of 3 non-final states with turnNum = [6,7,8]
     const largestTurnNum = 8;
     const isFinalCount = 0;
     const whoSignedWhat = [0, 1, 2];
     let state;
     let outcomeHash;
+    stateHashes = [, ,];
+    variableParts = [, ,];
     for (let i = 0; i < 3; i++) {
       const outcome = ethers.utils.id('some outcome data' + i);
       outcomeHash = keccak256(defaultAbiCoder.encode(['bytes'], [outcome]));
@@ -343,6 +347,131 @@ describe('forceMove', () => {
       largestTurnNum,
       expiryTime,
       stateHashes[2],
+      participants[2],
+      outcomeHash,
+    ];
+    const expectedChannelStorageHash = keccak256(
+      defaultAbiCoder.encode(
+        ['uint256', 'uint256', 'bytes32', 'address', 'bytes32'],
+        expectedChannelStorage,
+      ),
+    );
+
+    // call out to public mapping and check channelStorageHash against the expected value
+    expect(await optimizedForceMove.channelStorageHashes(channelId)).toEqual(
+      expectedChannelStorageHash,
+    );
+  });
+  it('accepts a valid forceMove tx and updates channelStorageHashes correctly (1 state)', async () => {
+    // channelId
+    channelNonce = 2;
+    channelId = keccak256(
+      defaultAbiCoder.encode(
+        ['uint256', 'address[]', 'uint256'],
+        [chainId, participants, channelNonce],
+      ),
+    );
+
+    // fixedPart
+    const fixedPart = {
+      chainId,
+      participants,
+      channelNonce,
+      appDefinition: trivialAppArtifact.networks[networkId].address,
+      challengeDuration: 1,
+    };
+
+    // compute stateHashes for a single non-final state with turnNum = 8
+    const largestTurnNum = 8;
+    const isFinalCount = 0;
+    const whoSignedWhat = [0, 0, 0];
+    let state;
+    let outcomeHash;
+    const outcome = ethers.utils.id('some outcome data');
+    outcomeHash = keccak256(defaultAbiCoder.encode(['bytes'], [outcome]));
+    variableParts = [
+      {
+        outcome,
+        appData: ethers.utils.id('some app data'),
+      },
+    ];
+
+    const appPartHash = keccak256(
+      defaultAbiCoder.encode(
+        ['uint256', 'address', 'bytes'],
+        [fixedPart.challengeDuration, fixedPart.appDefinition, variableParts[0].appData],
+      ),
+    );
+    state = {
+      turnNum: largestTurnNum,
+      isFinal: false,
+      channelId,
+      appPartHash,
+      outcomeHash,
+    };
+    stateHashes = [
+      keccak256(
+        defaultAbiCoder.encode(
+          [
+            'tuple(uint256 turnNum, bool isFinal, bytes32 channelId, bytes32 appPartHash, bytes32 outcomeHash)',
+          ],
+          [state],
+        ),
+      ),
+    ];
+
+    // sign the states
+    for (let i = 0; i < 3; i++) {
+      sig = await sign(wallets[i], stateHashes[0]); // everyone signs the same state
+      sigs[i] = {v: sig.v, r: sig.r, s: sig.s};
+    }
+
+    // compute challengerSig
+    const msgHash = keccak256(
+      defaultAbiCoder.encode(
+        ['uint256', 'bytes32', 'string'],
+        [largestTurnNum, channelId, 'forceMove'],
+      ),
+    );
+    const {v, r, s} = await sign(wallets[2], msgHash);
+    challengerSig = {v, r, s};
+
+    // inspect current channelStorageHashes value
+    const currentHash = await optimizedForceMove.channelStorageHashes(channelId);
+    expect(currentHash).toEqual(HashZero);
+
+    // call forceMove
+    tx = await optimizedForceMove.forceMove(
+      turnNumRecord,
+      fixedPart,
+      largestTurnNum,
+      variableParts,
+      isFinalCount,
+      sigs,
+      whoSignedWhat,
+      challengerSig,
+    );
+
+    // wait for tx to be mined
+    await tx.wait();
+
+    // catch ForceMove event and peel-off the expiryTime
+    const forceMoveEvent = new Promise((resolve, reject) => {
+      optimizedForceMove.on('ForceMove', (cId, expTime, event) => {
+        event.removeListener();
+        resolve(expTime);
+      });
+      setTimeout(() => {
+        reject(new Error('timeout'));
+      }, 60000);
+    });
+    const expiryTime = await forceMoveEvent;
+
+    // compute expected ChannelStorageHash
+    const expectedChannelStorage = [
+      largestTurnNum,
+      expiryTime,
+      stateHashes[0],
       participants[2],
       outcomeHash,
     ];
