@@ -40,4 +40,9 @@ contract TESTOptimizedForceMove is OptimizedForceMove {
         return _recoverSigner(_d, _v, _r, _s);
     }
 
+    // public setter for channelStorage
+
+    function setChannelStorageHash(bytes32 channelId, ChannelStorage memory channelStorage) public {
+        channelStorageHashes[channelId] = keccak256(abi.encode(channelStorage));
+    }
 }
