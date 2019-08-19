@@ -206,7 +206,7 @@ contract OptimizedForceMove {
         bytes32 responseStateHash = keccak256(
             abi.encode(
                 State(
-                    turnNumRecord,
+                    turnNumRecord + 1,
                     isFinalAB[1],
                     channelId,
                     keccak256(
