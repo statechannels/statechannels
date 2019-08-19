@@ -52,7 +52,7 @@ describe('sending preFundSetup as A', () => {
 });
 
 describe('sending conclude as A', () => {
-  const scenario = scenarios.concludingA;
+  const scenario = scenarios.concludingAsA;
 
   describe('when initializing', () => {
     const { sharedData, commitments, args } = scenario.initialize;
@@ -80,6 +80,69 @@ describe('sending conclude as A', () => {
     itTransitionsTo(protocolState, 'AdvanceChannel.Success');
     itStoresThisCommitment(result, commitments[2]);
     itSendsNoMessage(result);
+  });
+});
+
+describe('sending conclude as B', () => {
+  const scenario = scenarios.concludingAsB;
+
+  describe('when initializing', () => {
+    const { sharedData, args } = scenario.initialize;
+    const { protocolState, sharedData: result } = initialize(sharedData, args);
+
+    itTransitionsTo(protocolState, 'AdvanceChannel.NotSafeToSend');
+    itSendsNoMessage(result);
+  });
+
+  describe('when receiving conclude commitments from a', () => {
+    const { commitments, state, sharedData, action } = scenario.receiveFromA;
+    const { protocolState, sharedData: result } = reducer(state, sharedData, action);
+
+    itTransitionsTo(protocolState, 'AdvanceChannel.CommitmentSent');
+
+    itSendsTheseCommitments(result, commitments);
+    itStoresThisCommitment(result, commitments[2]);
+  });
+
+  describe('when receiving conclude commitments from the hub', () => {
+    const { state, sharedData, action, commitments } = scenario.receiveFromHub;
+
+    const { protocolState, sharedData: result } = reducer(state, sharedData, action);
+
+    itTransitionsTo(protocolState, 'AdvanceChannel.Success');
+    itStoresThisCommitment(result, commitments[2]);
+    itSendsNoMessage(result);
+  });
+});
+
+describe('sending conclude as hub', () => {
+  const scenario = scenarios.concludingAsHub;
+
+  describe('when initializing', () => {
+    const { sharedData, args } = scenario.initialize;
+    const { protocolState, sharedData: result } = initialize(sharedData, args);
+
+    itTransitionsTo(protocolState, 'AdvanceChannel.NotSafeToSend');
+    itSendsNoMessage(result);
+  });
+
+  describe('when receiving conclude commitments from a', () => {
+    const { commitments, state, sharedData, action } = scenario.receiveFromA;
+    const { protocolState, sharedData: result } = reducer(state, sharedData, action);
+
+    itTransitionsTo(protocolState, 'AdvanceChannel.NotSafeToSend');
+    itSendsNoMessage(result);
+    itStoresThisCommitment(result, commitments[2]);
+  });
+
+  describe('when receiving conclude commitments from b', () => {
+    const { state, sharedData, action, commitments } = scenario.receiveFromB;
+
+    const { protocolState, sharedData: result } = reducer(state, sharedData, action);
+
+    itTransitionsTo(protocolState, 'AdvanceChannel.Success');
+    itStoresThisCommitment(result, commitments[2]);
+    itSendsTheseCommitments(result, commitments);
   });
 });
 

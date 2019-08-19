@@ -1,7 +1,7 @@
 import * as states from '../states';
 import { ThreePartyPlayerIndex as PlayerIndex } from '../../../types';
 
-import { EMPTY_SHARED_DATA, setChannels } from '../../../state';
+import { EMPTY_SHARED_DATA, setChannels, SharedData } from '../../../state';
 import { channelFromCommitments } from '../../../channel-store/channel-state/__tests__';
 import * as scenarios from '../../../../domain/commitments/__tests__';
 import { commitmentsReceived, EmbeddedProtocol } from '../../../../communication';
@@ -120,6 +120,19 @@ const postFundCommitmentSentA = states.commitmentSent({
   commitmentType: CommitmentType.PostFundSetup,
 });
 
+const waitingForConcludeB = states.notSafeToSend({
+  ...propsB,
+  commitmentType: CommitmentType.Conclude,
+});
+
+const waitForConcludeHub = states.notSafeToSend({
+  ...propsHub,
+  commitmentType: CommitmentType.Conclude,
+});
+const concludeCommitmentSentB = states.commitmentSent({
+  ...propsB,
+  commitmentType: CommitmentType.Conclude,
+});
 const channelUnknownB = states.channelUnknown({
   ...propsB,
   commitmentType: CommitmentType.PreFundSetup,
@@ -175,13 +188,32 @@ const bSentPostFundSetupCommitment = setChannels(EMPTY_SHARED_DATA, [
   channelFromCommitments(commitments4, bsAddress, bsPrivateKey),
 ]);
 
-const aAllPostFundSetupsReceived = setChannels(EMPTY_SHARED_DATA, [
-  channelFromCommitments(commitments5, asAddress, asPrivateKey),
-]);
+const allPostFundSetupsReceived = (playerIndex: PlayerIndex): SharedData => {
+  const { address, privateKey } = scenarios.addressAndPrivateKeyLookup[playerIndex];
+  return setChannels(EMPTY_SHARED_DATA, [
+    channelFromCommitments(commitments5, address, privateKey),
+  ]);
+};
 
-const aSentConclude = setChannels(EMPTY_SHARED_DATA, [
-  channelFromCommitments(commitments6, asAddress, asPrivateKey),
-]);
+const aSentConclude = (playerIndex: PlayerIndex): SharedData => {
+  const { address, privateKey } = scenarios.addressAndPrivateKeyLookup[playerIndex];
+  return setChannels(EMPTY_SHARED_DATA, [
+    channelFromCommitments(commitments6, address, privateKey),
+  ]);
+};
+const bSentConclude = (playerIndex: PlayerIndex): SharedData => {
+  const { address, privateKey } = scenarios.addressAndPrivateKeyLookup[playerIndex];
+  return setChannels(EMPTY_SHARED_DATA, [
+    channelFromCommitments(commitments7, address, privateKey),
+  ]);
+};
+
+const allConcludesReceived = (playerIndex: PlayerIndex): SharedData => {
+  const { address, privateKey } = scenarios.addressAndPrivateKeyLookup[playerIndex];
+  return setChannels(EMPTY_SHARED_DATA, [
+    channelFromCommitments(commitments8, address, privateKey),
+  ]);
+};
 
 // -------
 // Actions
@@ -217,7 +249,10 @@ const receivePostFundSetupFromHub = commitmentsReceived({
   ...args,
   signedCommitments: commitments5,
 });
-
+const receiveConcludeFromA = commitmentsReceived({
+  ...args,
+  signedCommitments: commitments6,
+});
 const receiveConcludeFromB = commitmentsReceived({
   ...args,
   signedCommitments: commitments7,
@@ -308,7 +343,21 @@ export const postFund = {
     sharedData: aReceivedPrefundSetup,
   },
 };
-
+export const conclude = {
+  preSuccess: {
+    state: concludeCommitmentSentA,
+    sharedData: bSentConclude(PlayerIndex.A),
+    trigger: receiveConcludeFromHub,
+  },
+  success: {
+    ...propsA,
+    state: states.success({
+      commitmentType: CommitmentType.Conclude,
+      channelId,
+    }),
+    sharedData: allConcludesReceived,
+  },
+};
 export const newChannelAsA = {
   ...propsA,
   initialize: {
@@ -352,23 +401,23 @@ export const existingChannelAsA = {
   },
 };
 
-export const concludingA = {
+export const concludingAsA = {
   ...propsA,
   commitmentType: CommitmentType.Conclude,
   initialize: {
     args: { ...existingArgsA, commitmentType: CommitmentType.Conclude },
-    sharedData: aAllPostFundSetupsReceived,
+    sharedData: allPostFundSetupsReceived(PlayerIndex.A),
     commitments: commitments6,
   },
   receiveFromB: {
     state: concludeCommitmentSentA,
-    sharedData: aSentConclude,
+    sharedData: aSentConclude(PlayerIndex.A),
     action: receiveConcludeFromB,
     commitments: commitments7,
   },
   receiveFromHub: {
     state: concludeCommitmentSentA,
-    sharedData: aSentConclude,
+    sharedData: bSentConclude(PlayerIndex.A),
     action: receiveConcludeFromHub,
     commitments: commitments8,
   },
@@ -415,6 +464,27 @@ export const existingChannelAsB = {
     commitments: commitments5,
   },
 };
+export const concludingAsB = {
+  ...propsB,
+  commitmentType: CommitmentType.Conclude,
+  initialize: {
+    args: { ...existingArgsB, commitmentType: CommitmentType.Conclude },
+    sharedData: allPostFundSetupsReceived(PlayerIndex.B),
+    commitments: commitments5,
+  },
+  receiveFromA: {
+    state: waitingForConcludeB,
+    sharedData: allPostFundSetupsReceived(PlayerIndex.B),
+    action: receiveConcludeFromA,
+    commitments: commitments7,
+  },
+  receiveFromHub: {
+    state: concludeCommitmentSentB,
+    sharedData: bSentConclude(PlayerIndex.B),
+    action: receiveConcludeFromHub,
+    commitments: commitments8,
+  },
+};
 
 export const newChannelAsHub = {
   ...propsHub,
@@ -449,6 +519,27 @@ export const existingChannelAsHub = {
     sharedData: hubSentPreFundCommitment,
     action: receivePostFundSetupFromB,
     commitments: commitments5,
+  },
+};
+export const concludingAsHub = {
+  ...propsHub,
+  commitmentType: CommitmentType.Conclude,
+  initialize: {
+    args: { ...existingArgsB, commitmentType: CommitmentType.Conclude },
+    sharedData: allPostFundSetupsReceived(PlayerIndex.Hub),
+    commitments: commitments5,
+  },
+  receiveFromA: {
+    state: waitForConcludeHub,
+    sharedData: allPostFundSetupsReceived(PlayerIndex.Hub),
+    action: receiveConcludeFromA,
+    commitments: commitments6,
+  },
+  receiveFromB: {
+    state: waitForConcludeHub,
+    sharedData: aSentConclude(PlayerIndex.Hub),
+    action: receiveConcludeFromB,
+    commitments: commitments8,
   },
 };
 
