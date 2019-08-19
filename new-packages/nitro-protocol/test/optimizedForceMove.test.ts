@@ -4,8 +4,8 @@ import {expectRevert} from 'magmo-devtools';
 import optimizedForceMoveArtifact from '../build/contracts/TESTOptimizedForceMove.json';
 // @ts-ignore
 import countingAppArtifact from '../build/contracts/CountingApp.json';
-import {splitSignature, keccak256, defaultAbiCoder, arrayify} from 'ethers/utils';
-import {HashZero} from 'ethers/constants';
+import {splitSignature, keccak256, defaultAbiCoder, arrayify, hexlify} from 'ethers/utils';
+import {HashZero, AddressZero, MaxUint256} from 'ethers/constants';
 
 let networkId;
 let optimizedForceMove: ethers.Contract;
@@ -23,6 +23,17 @@ async function setupContracts() {
   );
 }
 
+const turnNumRecord = 0;
+const chainId = 1234;
+const participants = ['', '', ''];
+const wallets = new Array(3);
+
+// populate wallets and participants array
+for (let i = 0; i < 3; i++) {
+  wallets[i] = ethers.Wallet.createRandom();
+  participants[i] = wallets[i].address;
+}
+
 beforeAll(async () => {
   await setupContracts();
 });
@@ -34,13 +45,17 @@ async function sign(wallet: ethers.Wallet, msgHash: string | Uint8Array) {
 }
 
 describe('_isAddressInArray', () => {
-  const suspect = ethers.Wallet.createRandom().address;
+  let suspect;
   let addresses;
-  addresses = [
-    ethers.Wallet.createRandom().address,
-    ethers.Wallet.createRandom().address,
-    ethers.Wallet.createRandom().address,
-  ];
+
+  beforeAll(() => {
+    suspect = ethers.Wallet.createRandom().address;
+    addresses = [
+      ethers.Wallet.createRandom().address,
+      ethers.Wallet.createRandom().address,
+      ethers.Wallet.createRandom().address,
+    ];
+  });
 
   it('verifies absence of suspect', async () => {
     expect(await optimizedForceMove.isAddressInArray(suspect, addresses)).toBe(false);
@@ -56,14 +71,13 @@ describe('_isAddressInArray', () => {
 
 describe('_acceptableWhoSignedWhat', () => {
   let whoSignedWhat;
-  let largestTurnNum;
   let nParticipants = 3;
   let nStates;
   it('verifies correct array of who signed what (n states)', async () => {
     whoSignedWhat = [0, 1, 2];
     nParticipants = 3;
     nStates = 3;
-    for (largestTurnNum = 2; largestTurnNum < 14; largestTurnNum += nParticipants) {
+    for (let largestTurnNum = 2; largestTurnNum < 14; largestTurnNum += nParticipants) {
       // TODO is there a more elegant way of robustly testing largestTurnNum? For example, largestTurnNum  = 2 + randomInteger * nParticipants
       expect(
         await optimizedForceMove.acceptableWhoSignedWhat(
@@ -78,7 +92,7 @@ describe('_acceptableWhoSignedWhat', () => {
   it('verifies correct array of who signed what (fewer than n states)', async () => {
     whoSignedWhat = [0, 0, 1];
     nStates = 2;
-    for (largestTurnNum = 2; largestTurnNum < 14; largestTurnNum += nParticipants) {
+    for (let largestTurnNum = 2; largestTurnNum < 14; largestTurnNum += nParticipants) {
       expect(
         await optimizedForceMove.acceptableWhoSignedWhat(
           whoSignedWhat,
@@ -92,7 +106,7 @@ describe('_acceptableWhoSignedWhat', () => {
   it('verifies correct array of who signed what (1 state)', async () => {
     whoSignedWhat = [0, 0, 0];
     nStates = 1;
-    for (largestTurnNum = 2; largestTurnNum < 14; largestTurnNum += nParticipants) {
+    for (let largestTurnNum = 2; largestTurnNum < 14; largestTurnNum += nParticipants) {
       expect(
         await optimizedForceMove.acceptableWhoSignedWhat(
           whoSignedWhat,
@@ -106,7 +120,7 @@ describe('_acceptableWhoSignedWhat', () => {
   it('reverts when the array is not the required length', async () => {
     whoSignedWhat = [0, 0];
     nStates = 1;
-    for (largestTurnNum = 2; largestTurnNum < 14; largestTurnNum += nParticipants) {
+    for (let largestTurnNum = 2; largestTurnNum < 14; largestTurnNum += nParticipants) {
       await expectRevert(
         () =>
           optimizedForceMove.acceptableWhoSignedWhat(
@@ -122,7 +136,7 @@ describe('_acceptableWhoSignedWhat', () => {
   it('returns false when a participant signs a state with an insufficiently large turnNum', async () => {
     whoSignedWhat = [0, 0, 2];
     nStates = 3;
-    for (largestTurnNum = 2; largestTurnNum < 14; largestTurnNum += nParticipants) {
+    for (let largestTurnNum = 2; largestTurnNum < 14; largestTurnNum += nParticipants) {
       expect(
         await optimizedForceMove.acceptableWhoSignedWhat(
           whoSignedWhat,
@@ -136,12 +150,12 @@ describe('_acceptableWhoSignedWhat', () => {
 });
 
 describe('_recoverSigner', () => {
-  // following https://docs.ethers.io/ethers.js/html/cookbook-signing.html
-  const privateKey = '0x0123456789012345678901234567890123456789012345678901234567890123';
-  const wallet = new ethers.Wallet(privateKey);
-  const msgHash = ethers.utils.id('Hello World');
-  const msgHashBytes = arrayify(msgHash);
   it('recovers the signer correctly', async () => {
+    // following https://docs.ethers.io/ethers.js/html/cookbook-signing.html
+    const privateKey = '0x0123456789012345678901234567890123456789012345678901234567890123';
+    const wallet = new ethers.Wallet(privateKey);
+    const msgHash = ethers.utils.id('Hello World');
+    const msgHashBytes = arrayify(msgHash);
     const sig = await sign(wallet, msgHashBytes);
     expect(await optimizedForceMove.recoverSigner(msgHash, sig.v, sig.r, sig.s)).toEqual(
       wallet.address,
@@ -150,19 +164,24 @@ describe('_recoverSigner', () => {
 });
 
 describe('_validSignatures', () => {
-  const participants = [];
-  let stateHash;
-  const stateHashes = [];
-  let wallet;
   let sig;
-  const sigs = [];
-  let brokenSigs;
-  const whoSignedWhat = [];
-  const largestTurnNum = 2;
+  let sigs;
+  let whoSignedWhat;
+  let stateHashes;
+  let addresses;
+  let stateHash;
+  let wallet;
+  beforeEach(() => {
+    sigs = new Array(3);
+    whoSignedWhat = new Array(3);
+    stateHashes = new Array(3);
+    addresses = new Array(3);
+  });
+
   it('returns true (false) for a correct (incorrect) set of signatures on n states', async () => {
     for (let i = 0; i < 3; i++) {
       wallet = ethers.Wallet.createRandom();
-      participants[i] = wallet.address;
+      addresses[i] = wallet.address;
       stateHash = ethers.utils.id('Commitment' + i);
       stateHashes[i] = stateHash;
       sig = await sign(wallet, stateHash);
@@ -170,19 +189,13 @@ describe('_validSignatures', () => {
       whoSignedWhat[i] = i;
     }
     expect(
-      await optimizedForceMove.validSignatures(
-        largestTurnNum,
-        participants,
-        stateHashes,
-        sigs,
-        whoSignedWhat,
-      ),
+      await optimizedForceMove.validSignatures(8, addresses, stateHashes, sigs, whoSignedWhat),
     ).toBe(true);
-    brokenSigs = sigs.reverse();
+    const brokenSigs = sigs.reverse();
     expect(
       await optimizedForceMove.validSignatures(
-        largestTurnNum,
-        participants,
+        8,
+        addresses,
         stateHashes,
         brokenSigs,
         whoSignedWhat,
@@ -190,28 +203,22 @@ describe('_validSignatures', () => {
     ).toBe(false);
   });
   it('returns true (false) for a correct (incorrect) set of signatures on 1 state', async () => {
-    stateHash = ethers.utils.id('Commitment' + largestTurnNum);
+    stateHash = ethers.utils.id('Commitment' + 8);
     for (let i = 0; i < 3; i++) {
       wallet = ethers.Wallet.createRandom();
-      participants[i] = wallet.address;
+      addresses[i] = wallet.address;
       sig = await sign(wallet, stateHash);
       sigs[i] = {v: sig.v, r: sig.r, s: sig.s};
       whoSignedWhat[i] = 0;
     }
     expect(
-      await optimizedForceMove.validSignatures(
-        largestTurnNum,
-        participants,
-        [stateHash],
-        sigs,
-        whoSignedWhat,
-      ),
+      await optimizedForceMove.validSignatures(8, addresses, [stateHash], sigs, whoSignedWhat),
     ).toBe(true);
-    brokenSigs = sigs.reverse();
+    const brokenSigs = sigs.reverse();
     expect(
       await optimizedForceMove.validSignatures(
-        largestTurnNum,
-        participants,
+        8,
+        addresses,
         [stateHash],
         brokenSigs,
         whoSignedWhat,
@@ -231,31 +238,13 @@ describe('_validSignatures', () => {
 // It rejects a forceMove with the states don't form a validTransition chain
 // It rejects a forceMove when one state isn't correctly signed
 
-describe('forceMove', () => {
-  // construct data for forceMove parameters
-  const chainId = 1234;
-  let channelNonce;
-  let channelId;
-  const turnNumRecord = 0;
-  const wallets = [];
-  const participants = ['', '', ''];
-  const sigs = [, ,];
-  let variableParts;
-  let stateHashes;
-
-  // populate wallets and participants array
-  for (let i = 0; i < 3; i++) {
-    wallets[i] = ethers.Wallet.createRandom();
-    participants[i] = wallets[i].address;
-  }
-
-  let challengerSig;
-  let sig;
-  let tx;
-  it('accepts a valid forceMove tx and updates channelStorageHashes correctly (n states)', async () => {
+describe('forceMove (n states)', () => {
+  it('accepts a valid forceMove tx and updates channelStorageHashes correctly', async () => {
+    const sigsN = new Array(3);
+    const stateHashes = new Array(3);
     // channelId
-    channelNonce = 1;
-    channelId = keccak256(
+    const channelNonce = 1;
+    const channelId = keccak256(
       defaultAbiCoder.encode(
         ['uint256', 'address[]', 'uint256'],
         [chainId, participants, channelNonce],
@@ -275,13 +264,10 @@ describe('forceMove', () => {
     const largestTurnNum = 8;
     const isFinalCount = 0;
     const whoSignedWhat = [0, 1, 2];
-    let state;
-    let outcomeHash;
-    stateHashes = [, ,];
-    variableParts = [, ,];
+    const variableParts = new Array(3);
+    const outcome = ethers.utils.id('some outcome data'); // CountingApp demands constant outcome
+    const outcomeHash = keccak256(defaultAbiCoder.encode(['bytes'], [outcome]));
     for (let i = 0; i < 3; i++) {
-      const outcome = ethers.utils.id('some outcome data'); // CountingApp demands constant outcome
-      outcomeHash = keccak256(defaultAbiCoder.encode(['bytes'], [outcome]));
       variableParts[i] = {
         outcome,
         appData: defaultAbiCoder.encode(['uint256'], [i]), // incrementing counter
@@ -293,7 +279,7 @@ describe('forceMove', () => {
           [fixedPart.challengeDuration, fixedPart.appDefinition, variableParts[i].appData],
         ),
       );
-      state = {
+      const state = {
         turnNum: i + 6,
         isFinal: false,
         channelId,
@@ -312,8 +298,8 @@ describe('forceMove', () => {
 
     // sign the states
     for (let i = 0; i < 3; i++) {
-      sig = await sign(wallets[i], stateHashes[i]);
-      sigs[i] = {v: sig.v, r: sig.r, s: sig.s};
+      const sig = await sign(wallets[i], stateHashes[i]);
+      sigsN[i] = {v: sig.v, r: sig.r, s: sig.s};
     }
 
     // compute challengerSig
@@ -323,21 +309,22 @@ describe('forceMove', () => {
         [largestTurnNum, channelId, 'forceMove'],
       ),
     );
-    const {v, r, s} = await sign(wallets[2], msgHash);
-    challengerSig = {v, r, s};
+    const challenger = wallets[2];
+    const {v, r, s} = await sign(challenger, msgHash);
+    const challengerSig = {v, r, s};
 
     // inspect current channelStorageHashes value
     const currentHash = await optimizedForceMove.channelStorageHashes(channelId);
     expect(currentHash).toEqual(HashZero);
 
     // call forceMove
-    tx = await optimizedForceMove.forceMove(
+    const tx = await optimizedForceMove.forceMove(
       turnNumRecord,
       fixedPart,
       largestTurnNum,
       variableParts,
       isFinalCount,
-      sigs,
+      sigsN,
       whoSignedWhat,
       challengerSig,
     );
@@ -347,15 +334,16 @@ describe('forceMove', () => {
 
     // catch ForceMove event and peel-off the expiryTime
     const forceMoveEvent = new Promise((resolve, reject) => {
-      optimizedForceMove.on('ForceMove', (cId, expTime, event) => {
+      optimizedForceMove.on('ForceMove', (cId, expTime, turnNum, challengerAddress, event) => {
         event.removeListener();
-        resolve(expTime);
+        resolve([expTime, turnNum]);
       });
       setTimeout(() => {
         reject(new Error('timeout'));
       }, 60000);
     });
-    const expiryTime = await forceMoveEvent;
+    const expiryTime = (await forceMoveEvent)[0];
+    const newTurnNumRecord = (await forceMoveEvent)[1];
 
     // compute expected ChannelStorageHash
     const expectedChannelStorage = [
@@ -377,10 +365,15 @@ describe('forceMove', () => {
       expectedChannelStorageHash,
     );
   });
-  it('accepts a valid forceMove tx and updates channelStorageHashes correctly (1 state)', async () => {
+});
+
+describe('forceMove (1 state)', () => {
+  it('accepts a valid forceMove tx and updates channelStorageHashes correctly ', async () => {
+    const sigs = [];
+    let stateHashes = [];
     // channelId
-    channelNonce = 2;
-    channelId = keccak256(
+    const channelNonce = 2;
+    const channelId = keccak256(
       defaultAbiCoder.encode(
         ['uint256', 'address[]', 'uint256'],
         [chainId, participants, channelNonce],
@@ -400,11 +393,9 @@ describe('forceMove', () => {
     const largestTurnNum = 8;
     const isFinalCount = 0;
     const whoSignedWhat = [0, 0, 0];
-    let state;
-    let outcomeHash;
     const outcome = ethers.utils.id('some outcome data');
-    outcomeHash = keccak256(defaultAbiCoder.encode(['bytes'], [outcome]));
-    variableParts = [
+    const outcomeHash = keccak256(defaultAbiCoder.encode(['bytes'], [outcome]));
+    const variableParts = [
       {
         outcome,
         appData: ethers.utils.id('some app data'),
@@ -417,7 +408,7 @@ describe('forceMove', () => {
         [fixedPart.challengeDuration, fixedPart.appDefinition, variableParts[0].appData],
       ),
     );
-    state = {
+    const state = {
       turnNum: largestTurnNum,
       isFinal: false,
       channelId,
@@ -437,7 +428,7 @@ describe('forceMove', () => {
 
     // sign the states
     for (let i = 0; i < 3; i++) {
-      sig = await sign(wallets[i], stateHashes[0]); // everyone signs the same state
+      const sig = await sign(wallets[i], stateHashes[0]); // everyone signs the same state
       sigs[i] = {v: sig.v, r: sig.r, s: sig.s};
     }
 
@@ -449,14 +440,14 @@ describe('forceMove', () => {
       ),
     );
     const {v, r, s} = await sign(wallets[2], msgHash);
-    challengerSig = {v, r, s};
+    const challengerSig = {v, r, s};
 
     // inspect current channelStorageHashes value
     const currentHash = await optimizedForceMove.channelStorageHashes(channelId);
     expect(currentHash).toEqual(HashZero);
 
     // call forceMove
-    tx = await optimizedForceMove.forceMove(
+    const tx = await optimizedForceMove.forceMove(
       turnNumRecord,
       fixedPart,
       largestTurnNum,
@@ -472,15 +463,16 @@ describe('forceMove', () => {
 
     // catch ForceMove event and peel-off the expiryTime
     const forceMoveEvent = new Promise((resolve, reject) => {
-      optimizedForceMove.on('ForceMove', (cId, expTime, event) => {
+      optimizedForceMove.on('ForceMove', (cId, expTime, turnNum, challengerAddress, event) => {
         event.removeListener();
-        resolve(expTime);
+        resolve([expTime, turnNum]);
       });
       setTimeout(() => {
         reject(new Error('timeout'));
       }, 60000);
     });
-    const expiryTime = await forceMoveEvent;
+    const expiryTime = (await forceMoveEvent)[0];
+    const newTurnNumRecord = (await forceMoveEvent)[1];
 
     // compute expected ChannelStorageHash
     const expectedChannelStorage = [
