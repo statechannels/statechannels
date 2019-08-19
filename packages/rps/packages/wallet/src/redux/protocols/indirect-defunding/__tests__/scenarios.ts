@@ -23,7 +23,7 @@ const props = {
 };
 
 const ledgerUpdate = ledgerUpdateScenarios.twoPlayerPreSuccessA.state;
-const concluding = advanceChannelScenarios.postFund.preSuccess.state;
+const concluding = advanceChannelScenarios.conclude.preSuccess.state;
 
 // -----------
 // Scenarios
@@ -32,7 +32,7 @@ export const clearedToSendHappyPath = {
   initialParams: {
     sharedData: _.merge(
       ledgerUpdateScenarios.twoPlayerPreSuccessA.sharedData,
-      advanceChannelScenarios.postFund.preSuccess.sharedData,
+      advanceChannelScenarios.conclude.preSuccess.sharedData,
     ),
     ...props,
     clearedToProceed: true,
@@ -49,7 +49,7 @@ export const clearedToSendHappyPath = {
   },
   waitForConclude: {
     state: waitForConclude({ ...props, concluding }),
-    action: advanceChannelScenarios.postFund.preSuccess.trigger,
-    sharedData: advanceChannelScenarios.postFund.preSuccess.sharedData,
+    action: advanceChannelScenarios.conclude.preSuccess.trigger,
+    sharedData: advanceChannelScenarios.conclude.preSuccess.sharedData,
   },
 };
