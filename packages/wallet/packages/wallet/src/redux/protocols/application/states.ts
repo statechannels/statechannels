@@ -54,11 +54,12 @@ export const waitForDispute: StateConstructor<WaitForDispute> = p => {
 // Unions and Guards
 // -------
 
-export type ApplicationState = WaitForFirstCommitment | Ongoing | WaitForDispute | Success;
+export type ApplicationState = TerminalApplicationState | NonTerminalApplicationState;
 export type NonTerminalApplicationState = WaitForFirstCommitment | WaitForDispute | Ongoing;
+export type TerminalApplicationState = Success;
 export type ApplicationStateType = ApplicationState['type'];
 
-export function isTerminal(state: ApplicationState): state is Success {
+export function isTerminalApplicationState(state: ApplicationState): state is Success {
   return state.type === 'Application.Success';
 }
 

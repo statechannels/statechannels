@@ -126,10 +126,10 @@ export function isFundingState(state: ProtocolState): state is FundingState {
   );
 }
 
-export function isTerminal(state: FundingState): state is TerminalFundingState {
+export function isTerminalFundingState(state: FundingState): state is TerminalFundingState {
   return state.type === 'Funding.Failure' || state.type === 'Funding.Success';
 }
 
 export function isOngoingFundingState(state: FundingState): state is OngoingFundingState {
-  return !isTerminal(state);
+  return !isTerminalFundingState(state);
 }

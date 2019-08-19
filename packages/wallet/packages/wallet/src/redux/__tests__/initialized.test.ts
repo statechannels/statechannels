@@ -91,3 +91,34 @@ describe('when a updateSharedData action arrives', () => {
     expect(reducer).toHaveBeenCalledWith(state.adjudicatorState, action);
   });
 });
+
+describe('when a process state is terminal', () => {
+  const processId = '0xprocessId';
+  const protocolState = {};
+  const processState: states.ProcessState = {
+    processId,
+    protocol: ProcessProtocol.Funding,
+    channelsToMonitor: [],
+    protocolState,
+  };
+  const state = { ...initializedState, processStore: { [processId]: processState } };
+  const action = strategyApproved({
+    processId: '0xprocessId',
+    strategy: 'IndirectFundingStrategy',
+  });
+  const reducer = jest.fn(() => ({
+    protocolState: { type: 'Funding.Success' },
+    sharedData: 'sharedData ',
+  }));
+  Object.defineProperty(fundProtocol, 'fundingReducer', {
+    value: reducer,
+  });
+
+  const result = walletReducer(state, action);
+  it('removes the current process id', () => {
+    expect(result.currentProcessId).toBeUndefined();
+  });
+  it('removes the process state', () => {
+    expect(Object.keys((result as states.Initialized).processStore)).not.toContain(processId);
+  });
+});

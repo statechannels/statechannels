@@ -42,7 +42,7 @@ export function applicationReducer(
   sharedData: SharedData,
   action: ProtocolAction,
 ): ProtocolStateWithSharedData<states.ApplicationState> {
-  if (states.isTerminal(protocolState)) {
+  if (states.isTerminalApplicationState(protocolState)) {
     return { protocolState, sharedData };
   }
   if (!actions.isApplicationAction(action)) {

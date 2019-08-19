@@ -18,12 +18,15 @@ class ConcludingContainer extends PureComponent<Props> {
     const { state } = this.props;
     if (
       concludingInstigatorStates.isConcludingInstigatorState(state) &&
-      !states.isTerminal(state)
+      !states.isTerminalConcludingState(state)
     ) {
       return <ConcludingInstigator state={state} />;
     }
 
-    if (concludingResponderStates.isConcludingResponderState(state) && !states.isTerminal(state)) {
+    if (
+      concludingResponderStates.isConcludingResponderState(state) &&
+      !states.isTerminalConcludingState(state)
+    ) {
       return <ConcludingResponder state={state} />;
     }
     // TODO: We need a placeholder screen here when transitioning back to the app from a success state

@@ -27,6 +27,27 @@ import { TransactionRequest } from 'ethers/providers';
 import { AdjudicatorState } from './adjudicator-state/state';
 import { SignedCommitment, Commitment } from '../domain';
 import { ProcessProtocol, ProtocolLocator } from '../communication';
+import {
+  TerminalApplicationState,
+  isTerminalApplicationState,
+  isApplicationState,
+} from './protocols/application/states';
+import {
+  TerminalFundingState,
+  isFundingState,
+  isTerminalFundingState,
+} from './protocols/funding/states';
+import { ProtocolState } from './protocols';
+import {
+  isDefundingState,
+  isTerminalDefundingState,
+  TerminalDefundingState,
+} from './protocols/defunding/states';
+import {
+  TerminalConcludingState,
+  isConcludingState,
+  isTerminalConcludingState,
+} from './protocols/concluding/states';
 
 export type WalletState = WaitForLogin | MetaMaskError | Initialized;
 
@@ -47,7 +68,6 @@ export interface SharedData {
   channelSubscriptions: ChannelSubscriptions;
   adjudicatorState: AdjudicatorState;
   fundingState: FundingState;
-  activeAppChannelId?: string;
   currentProcessId?: string;
 }
 
@@ -72,7 +92,7 @@ export interface Initialized extends SharedData {
   type: typeof WALLET_INITIALIZED;
   uid: string;
   processStore: ProcessStore;
-  activeAppChannelId?: string;
+
   address: string;
   privateKey: string;
 }
@@ -152,7 +172,6 @@ export function sharedData(params: SharedData): SharedData {
     channelStore: channelState,
     adjudicatorState,
     fundingState,
-    activeAppChannelId,
     channelSubscriptions,
   } = params;
   return {
@@ -160,7 +179,6 @@ export function sharedData(params: SharedData): SharedData {
     channelStore: channelState,
     adjudicatorState,
     fundingState,
-    activeAppChannelId,
     channelSubscriptions,
   };
 }
@@ -322,3 +340,18 @@ export function getCommitments(store: SharedData, channelId: string): Commitment
 }
 
 export { NewLedgerChannel };
+
+export function isTerminalProtocolState(
+  protocolState: ProtocolState,
+): protocolState is
+  | TerminalApplicationState
+  | TerminalFundingState
+  | TerminalDefundingState
+  | TerminalConcludingState {
+  return (
+    (isApplicationState(protocolState) && isTerminalApplicationState(protocolState)) ||
+    (isFundingState(protocolState) && isTerminalFundingState(protocolState)) ||
+    (isDefundingState(protocolState) && isTerminalDefundingState(protocolState)) ||
+    (isConcludingState(protocolState) && isTerminalConcludingState(protocolState))
+  );
+}
