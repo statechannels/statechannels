@@ -6,7 +6,6 @@ import './Format.sol';
 
 contract CountingApp is ForceMoveApp {
     struct CountingAppData {
-        bytes outcome;
         uint256 counter;
     }
 
@@ -24,7 +23,7 @@ contract CountingApp is ForceMoveApp {
             'CountingApp: Counter must be incremented'
         );
         require(
-            keccak256(appData(b.appData).outcome) == keccak256(appData(a.appData).outcome),
+            keccak256(b.outcome) == keccak256(a.outcome),
             'CountingApp: Outcome must not change'
         );
         return true;
