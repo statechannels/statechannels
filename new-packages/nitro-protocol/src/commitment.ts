@@ -1,8 +1,8 @@
-import { Channel } from './channel';
+import {Channel} from './channel';
 import abi from 'web3-eth-abi';
-import { Uint32, Uint256, Address, Bytes } from './types';
-import { bigNumberify } from 'ethers/utils';
-import { ADDRESS_ZERO } from '.';
+import {Uint32, Uint256, Address, Bytes} from './types';
+import {bigNumberify} from 'ethers/utils';
+import {ADDRESS_ZERO} from '.';
 
 const SolidityCommitmentType = {
   CommitmentStruct: {

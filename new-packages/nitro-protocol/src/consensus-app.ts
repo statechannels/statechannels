@@ -9,7 +9,7 @@ import {
   Commitment,
 } from '.';
 import abi from 'web3-eth-abi';
-import { bigNumberify } from 'ethers/utils';
+import {bigNumberify} from 'ethers/utils';
 
 export interface AppAttributes {
   furtherVotesRequired: Uint32;

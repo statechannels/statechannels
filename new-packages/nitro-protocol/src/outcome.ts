@@ -1,6 +1,6 @@
-import { Address, Uint256 } from './types';
-import { ADDRESS_ZERO } from '.';
-import { defaultAbiCoder, BigNumberish, bigNumberify } from 'ethers/utils';
+import {Address, Uint256} from './types';
+import {ADDRESS_ZERO} from '.';
+import {defaultAbiCoder, BigNumberish, bigNumberify} from 'ethers/utils';
 
 const ALLOCATION = 0;
 const GUARANTEE = 1;
@@ -53,7 +53,7 @@ export function makeAllocation(transfers: TokenTransfer[]): AllocationOutcome {
   // group by token
   const allocationsByToken = transfers.reduce((grouped, transfer) => {
     const [destination, amount, token] = transfer;
-    const tokenAllocation = grouped[token] || { token, proposedTransfers: [] };
+    const tokenAllocation = grouped[token] || {token, proposedTransfers: []};
     tokenAllocation.proposedTransfers = tokenAllocation.proposedTransfers.concat({
       destination,
       amount: bigNumberify(amount),
@@ -75,7 +75,7 @@ export function encodeAllocation(allocation: AllocationOutcome): string {
   return defaultAbiCoder.encode(
     [tokenOutcomeSolidity],
     [
-      allocation.tokenAllocations.map(({ token, proposedTransfers }) => {
+      allocation.tokenAllocations.map(({token, proposedTransfers}) => {
         return {
           token,
           typedOutcome: defaultAbiCoder.encode(
@@ -114,7 +114,7 @@ export function encodeGuarantee(guarantee: GuaranteeOutcome): string {
   return defaultAbiCoder.encode(
     [tokenOutcomeSolidity],
     [
-      guarantee.tokenGuarantees.map(({ token, prioritizedAddresses }) => {
+      guarantee.tokenGuarantees.map(({token, prioritizedAddresses}) => {
         return {
           token,
           typedOutcome: defaultAbiCoder.encode(
