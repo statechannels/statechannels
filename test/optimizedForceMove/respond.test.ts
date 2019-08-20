@@ -1,4 +1,5 @@
 import {ethers} from 'ethers';
+import {expectRevert} from 'magmo-devtools';
 // @ts-ignore
 import optimizedForceMoveArtifact from '../../build/contracts/TESTOptimizedForceMove.json';
 // @ts-ignore
@@ -34,13 +35,13 @@ beforeAll(async () => {
 
 describe('respond (undefined reason implies tx success and storage updated correctly)', () => {
   it.each`
-    channelNonce | initialChannelStorageHash | turnNumRecord | expired  | isFinalAB         | appDatas  | challenger    | responder     | reasonString
-    ${1}         | ${HashZero}               | ${8}          | ${false} | ${[false, false]} | ${[0, 1]} | ${wallets[2]} | ${wallets[0]} | ${undefined}
+    channelNonce | turnNumRecord | expired  | isFinalAB         | appDatas  | challenger    | responder     | reasonString
+    ${1}         | ${8}          | ${false} | ${[false, false]} | ${[0, 1]} | ${wallets[2]} | ${wallets[0]} | ${undefined}
+    ${2}         | ${8}          | ${true}  | ${[false, false]} | ${[0, 1]} | ${wallets[2]} | ${wallets[0]} | ${'Response too late!'}
   `(
     'tx for channel with channelNonce $channelNonce -> revert reason: $reasonString', // for the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce
     async ({
       channelNonce,
-      initialChannelStorageHash,
       turnNumRecord,
       expired,
       isFinalAB,
@@ -146,30 +147,46 @@ describe('respond (undefined reason implies tx success and storage updated corre
       const signature = await sign(responder, responseStateHash);
       const sig = {v: signature.v, r: signature.r, s: signature.s};
 
-      // call respond
-      const tx2 = await optimizedForceMove.respond(
-        turnNumRecord,
-        expiryTime,
-        challenger.address,
-        isFinalAB,
-        fixedPart,
-        [challengeVariablePart, responseVariablePart],
-        sig,
-      );
+      if (reasonString) {
+        expectRevert(
+          () =>
+            optimizedForceMove.respond(
+              turnNumRecord,
+              expiryTime,
+              challenger.address,
+              isFinalAB,
+              fixedPart,
+              [challengeVariablePart, responseVariablePart],
+              sig,
+            ),
+          'VM Exception while processing transaction: revert ' + reasonString,
+        );
+      } else {
+        // call respond
+        const tx2 = await optimizedForceMove.respond(
+          turnNumRecord,
+          expiryTime,
+          challenger.address,
+          isFinalAB,
+          fixedPart,
+          [challengeVariablePart, responseVariablePart],
+          sig,
+        );
 
-      await tx2.wait();
+        await tx2.wait();
 
-      // compute and check new expected ChannelStorageHash
-      const expectedChannelStorage = [turnNumRecord + 1, 0, HashZero, AddressZero, HashZero];
-      const expectedChannelStorageHash = keccak256(
-        defaultAbiCoder.encode(
-          ['uint256', 'uint256', 'bytes32', 'address', 'bytes32'],
-          expectedChannelStorage,
-        ),
-      );
-      expect(await optimizedForceMove.channelStorageHashes(channelId)).toEqual(
-        expectedChannelStorageHash,
-      );
+        // compute and check new expected ChannelStorageHash
+        const expectedChannelStorage = [turnNumRecord + 1, 0, HashZero, AddressZero, HashZero];
+        const expectedChannelStorageHash = keccak256(
+          defaultAbiCoder.encode(
+            ['uint256', 'uint256', 'bytes32', 'address', 'bytes32'],
+            expectedChannelStorage,
+          ),
+        );
+        expect(await optimizedForceMove.channelStorageHashes(channelId)).toEqual(
+          expectedChannelStorageHash,
+        );
+      }
     },
   );
 });
