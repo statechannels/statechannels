@@ -1,10 +1,11 @@
 import {ethers} from 'ethers';
+import {expectRevert} from 'magmo-devtools';
 // @ts-ignore
 import optimizedForceMoveArtifact from '../../build/contracts/TESTOptimizedForceMove.json';
 // @ts-ignore
 import countingAppArtifact from '../../build/contracts/CountingApp.json';
 import {keccak256, defaultAbiCoder} from 'ethers/utils';
-import {HashZero} from 'ethers/constants';
+import {HashZero, AddressZero} from 'ethers/constants';
 import {setupContracts, sign} from './test-helpers';
 
 const provider = new ethers.providers.JsonRpcProvider(
@@ -13,7 +14,6 @@ const provider = new ethers.providers.JsonRpcProvider(
 let optimizedForceMove: ethers.Contract;
 let networkId;
 
-const turnNumRecord = 0;
 const chainId = 1234;
 const participants = ['', '', ''];
 const wallets = new Array(3);
@@ -28,38 +28,61 @@ for (let i = 0; i < 3; i++) {
   participants[i] = wallets[i].address;
 }
 
+const nonParticipant = ethers.Wallet.createRandom();
+const clearedChallengeHash = keccak256(
+  defaultAbiCoder.encode(
+    ['uint256', 'uint256', 'bytes32', 'address', 'bytes32'],
+    [5, 0, HashZero, AddressZero, HashZero], // turnNum = 5
+  ),
+);
+
+const ongoinghallengeHash = keccak256(
+  defaultAbiCoder.encode(
+    ['uint256', 'uint256', 'bytes32', 'address', 'bytes32'],
+    [5, 9999, HashZero, AddressZero, HashZero], // turnNum = 5, not yet finalized
+  ),
+);
+
 beforeAll(async () => {
   optimizedForceMove = await setupContracts(provider, optimizedForceMoveArtifact);
   networkId = (await provider.getNetwork()).chainId;
   appDefinition = countingAppArtifact.networks[networkId].address; // use a fixed appDefinition in all tests
 });
 
-// TODO extend test coverage to the following scenarios:
+// Scenarios are synonymous with channelNonce:
 
-// It accepts a forceMove for an open channel (first challenge)
-// It accepts a forceMove for an open channel (subsequent challenge, higher turnNum)
-// It rejects a forceMove for an open channel if the turnNum is too small (subsequent challenge, turnNumRecord would decrease)
-// It rejects a forceMove when a challenge is already underway
-// It rejects a forceMove for a finalized channel
-// It rejects a forceMove with an incorrect challengerSig
-// It rejects a forceMove with the states don't form a validTransition chain
-// It rejects a forceMove when one state isn't correctly signed
+// 1. It accepts a forceMove for an open channel (first challenge, n states submitted)
+// 2. It accepts a forceMove for an open channel (first challenge, 1 state submitted)
+// 3. It accepts a forceMove for an open channel (subsequent challenge, higher turnNum)
+// 4. It rejects a forceMove for an open channel if the turnNum is too small (subsequent challenge, turnNumRecord would decrease)
+// 5. It rejects a forceMove when a challenge is already underway (or equivalently, when the channel has been finalized -- the only check is whether a challenge has been instigated without having been cleared)
+// 6. It rejects a forceMove with an incorrect challengerSig
+// 7. It rejects a forceMove with the states don't form a validTransition chain
+// 8. It reverts when an unacceptable whoSignedWhat array is submitted
 
-describe('forceMove (expect tx to succeed and a correct channelStorageHash stored against channelId)', () => {
+describe('forceMove (undefined reason implies tx success and storage updated correctly)', () => {
   it.each`
-    channelNonce | initialChannelStorageHash | largestTurnNum | appDatas     | isFinalCount | whoSignedWhat | challenger
-    ${1}         | ${HashZero}               | ${8}           | ${[0, 1, 2]} | ${0}         | ${[0, 1, 2]}  | ${wallets[2]}
-    ${2}         | ${HashZero}               | ${8}           | ${[2]}       | ${0}         | ${[0, 0, 0]}  | ${wallets[2]}
+    channelNonce | initialChannelStorageHash | turnNumRecord | largestTurnNum | appDatas     | isFinalCount | whoSignedWhat | challenger        | reasonString
+    ${1}         | ${HashZero}               | ${0}          | ${8}           | ${[0, 1, 2]} | ${0}         | ${[0, 1, 2]}  | ${wallets[2]}     | ${undefined}
+    ${2}         | ${HashZero}               | ${0}          | ${8}           | ${[2]}       | ${0}         | ${[0, 0, 0]}  | ${wallets[2]}     | ${undefined}
+    ${3}         | ${clearedChallengeHash}   | ${5}          | ${8}           | ${[2]}       | ${0}         | ${[0, 0, 0]}  | ${wallets[2]}     | ${undefined}
+    ${4}         | ${clearedChallengeHash}   | ${5}          | ${2}           | ${[2]}       | ${0}         | ${[0, 0, 0]}  | ${wallets[2]}     | ${'Stale challenge!'}
+    ${5}         | ${ongoinghallengeHash}    | ${5}          | ${8}           | ${[2]}       | ${0}         | ${[0, 0, 0]}  | ${wallets[2]}     | ${'Channel is not open or turnNum does not match'}
+    ${6}         | ${HashZero}               | ${0}          | ${8}           | ${[0, 1, 2]} | ${0}         | ${[0, 1, 2]}  | ${nonParticipant} | ${'Challenger is not a participant'}
+    ${7}         | ${HashZero}               | ${0}          | ${8}           | ${[0, 1, 1]} | ${0}         | ${[0, 1, 2]}  | ${wallets[2]}     | ${'CountingApp: Counter must be incremented'}
+    ${8}         | ${HashZero}               | ${0}          | ${8}           | ${[0, 1, 2]} | ${0}         | ${[0, 0, 2]}  | ${wallets[2]}     | ${'Unacceptable whoSignedWhat array'}
   `(
-    'tx succeeds and storage updated for channel with channelNonce $channelNonce', // for the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce
+    'tx for channel with channelNonce $channelNonce -> revert reason: $reasonString', // for the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce
     async ({
       channelNonce,
       initialChannelStorageHash,
+      turnNumRecord,
       largestTurnNum,
       appDatas,
       isFinalCount,
       whoSignedWhat,
       challenger,
+      reasonString,
     }) => {
       // compute channelId
       const channelId = keccak256(
@@ -131,53 +154,70 @@ describe('forceMove (expect tx to succeed and a correct channelStorageHash store
         initialChannelStorageHash,
       )).wait();
 
-      // call forceMove
-      const tx = await optimizedForceMove.forceMove(
-        turnNumRecord,
-        fixedPart,
-        largestTurnNum,
-        variableParts,
-        isFinalCount,
-        sigs,
-        whoSignedWhat,
-        challengerSig,
-      );
+      if (reasonString) {
+        expectRevert(
+          () =>
+            optimizedForceMove.forceMove(
+              turnNumRecord,
+              fixedPart,
+              largestTurnNum,
+              variableParts,
+              isFinalCount,
+              sigs,
+              whoSignedWhat,
+              challengerSig,
+            ),
+          'VM Exception while processing transaction: revert ' + reasonString,
+        );
+      } else {
+        // call forceMove
+        const tx = await optimizedForceMove.forceMove(
+          turnNumRecord,
+          fixedPart,
+          largestTurnNum,
+          variableParts,
+          isFinalCount,
+          sigs,
+          whoSignedWhat,
+          challengerSig,
+        );
 
-      // wait for tx to be mined
-      await tx.wait();
+        // wait for tx to be mined
+        await tx.wait();
 
-      // catch ForceMove event and peel-off the expiryTime
-      const forceMoveEvent = new Promise((resolve, reject) => {
-        optimizedForceMove.on('ForceMove', (cId, expTime, turnNum, challengerAddress, event) => {
-          event.removeListener();
-          resolve([expTime, turnNum]);
+        // catch ForceMove event and peel-off the expiryTime
+        const forceMoveEvent = new Promise((resolve, reject) => {
+          optimizedForceMove.on('ForceMove', (cId, expTime, turnNum, challengerAddress, event) => {
+            event.removeListener();
+            resolve([expTime, turnNum]);
+          });
+          setTimeout(() => {
+            reject(new Error('timeout'));
+          }, 60000);
         });
-        setTimeout(() => {
-          reject(new Error('timeout'));
-        }, 60000);
-      });
-      const expiryTime = (await forceMoveEvent)[0];
-      const newTurnNumRecord = (await forceMoveEvent)[1]; // not used here but important for the responder to know
+        const expiryTime = (await forceMoveEvent)[0];
+        const newTurnNumRecord = (await forceMoveEvent)[1]; // not used here but important for the responder to know
 
-      // compute expected ChannelStorageHash
-      const expectedChannelStorage = [
-        largestTurnNum,
-        expiryTime,
-        stateHashes[stateHashes.length - 1],
-        challenger.address,
-        outcomeHash,
-      ];
-      const expectedChannelStorageHash = keccak256(
-        defaultAbiCoder.encode(
-          ['uint256', 'uint256', 'bytes32', 'address', 'bytes32'],
-          expectedChannelStorage,
-        ),
-      );
+        // compute expected ChannelStorageHash
+        const expectedChannelStorage = [
+          largestTurnNum,
+          expiryTime,
+          stateHashes[stateHashes.length - 1],
+          challenger.address,
+          outcomeHash,
+        ];
+        const expectedChannelStorageHash = keccak256(
+          defaultAbiCoder.encode(
+            ['uint256', 'uint256', 'bytes32', 'address', 'bytes32'],
+            expectedChannelStorage,
+          ),
+        );
 
-      // check channelStorageHash against the expected value
-      expect(await optimizedForceMove.channelStorageHashes(channelId)).toEqual(
-        expectedChannelStorageHash,
-      );
+        // check channelStorageHash against the expected value
+        expect(await optimizedForceMove.channelStorageHashes(channelId)).toEqual(
+          expectedChannelStorageHash,
+        );
+      }
     },
   );
 });
