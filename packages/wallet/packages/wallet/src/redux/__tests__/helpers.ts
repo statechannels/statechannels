@@ -4,7 +4,7 @@ import { Commitment, SignedCommitment, getChannelId } from '../../domain';
 import { QueuedTransaction, OutboxState, MessageOutbox } from '../outbox/state';
 import { SharedData } from '../state';
 import { ProtocolStateWithSharedData } from '../protocols';
-import { RelayableAction, ProtocolLocator } from 'src/communication';
+import { ProtocolLocator, RelayableAction } from 'src/communication';
 import _ from 'lodash';
 
 type SideEffectState =
@@ -208,17 +208,17 @@ function getOutboxState(state: SideEffectState, outboxBranch: 'messageOutbox'): 
   throw new Error('Invalid state');
 }
 
-export const expectTheseActionsRelayed = (state: SideEffectState, actions: RelayableAction[]) => {
-  expectSideEffect('messageOutbox', state, item =>
-    expect(item.messagePayload.actions).toEqual(actions),
-  );
-};
-
-export const itRelaysTheseActions = (state: SideEffectState, actions: RelayableAction[]) => {
-  it(`relays the correct actions`, () => {
-    expectTheseActionsRelayed(state, actions);
+export const itRelaysThisAction = (state: SideEffectState, action: RelayableAction, idx = 0) => {
+  it(`relays the correct action`, () => {
+    expectSideEffect(
+      'messageOutbox',
+      state,
+      item => expect(item.messagePayload).toMatchObject(action),
+      idx,
+    );
   });
 };
+
 export const itSendsATransaction = (state: SideEffectState) => {
   it(`sends a transaction`, () => {
     expectSideEffect('transactionOutbox', state, item => expect(item).toBeDefined());

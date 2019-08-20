@@ -25,10 +25,10 @@ export interface ConcludeRequested {
   protocol: ProcessProtocol.Concluding;
 }
 
-export interface DefundRequested {
-  type: 'WALLET.NEW_PROCESS.DEFUND_REQUESTED';
+export interface CloseLedgerChannel {
+  type: 'WALLET.NEW_PROCESS.CLOSE_LEDGER_CHANNEL';
   channelId: string;
-  protocol: ProcessProtocol.Defunding;
+  protocol: ProcessProtocol.CloseLedgerChannel;
 }
 // -------
 // Constructors
@@ -51,12 +51,11 @@ export const concludeRequested: ActionConstructor<ConcludeRequested> = p => ({
   protocol: ProcessProtocol.Concluding,
 });
 
-export const defundRequested: ActionConstructor<DefundRequested> = p => ({
+export const closeLedgerChannel: ActionConstructor<CloseLedgerChannel> = p => ({
   ...p,
-  type: 'WALLET.NEW_PROCESS.DEFUND_REQUESTED',
-  protocol: ProcessProtocol.Defunding,
+  type: 'WALLET.NEW_PROCESS.CLOSE_LEDGER_CHANNEL',
+  protocol: ProcessProtocol.CloseLedgerChannel,
 });
-
 // -------
 // Types and Guards
 // -------
@@ -66,7 +65,7 @@ export type NewProcessAction =
   | FundingRequested
   | ConcludeRequested
   | ConcludeInstigated
-  | DefundRequested;
+  | CloseLedgerChannel;
 
 export function isNewProcessAction(action: WalletAction): action is NewProcessAction {
   return (
@@ -74,6 +73,6 @@ export function isNewProcessAction(action: WalletAction): action is NewProcessAc
     action.type === 'WALLET.NEW_PROCESS.FUNDING_REQUESTED' ||
     action.type === 'WALLET.NEW_PROCESS.CONCLUDE_REQUESTED' ||
     action.type === 'WALLET.NEW_PROCESS.CONCLUDE_INSTIGATED' ||
-    action.type === 'WALLET.NEW_PROCESS.DEFUND_REQUESTED'
+    action.type === 'WALLET.NEW_PROCESS.CLOSE_LEDGER_CHANNEL'
   );
 }

@@ -1,6 +1,6 @@
 import { asAddress, bsAddress, channelId } from '../../../../domain/commitments/__tests__';
 import { bigNumberify } from 'ethers/utils/bignumber';
-import { waitForLedgerUpdate, waitForConclude } from '../states';
+import { waitForLedgerUpdate } from '../states';
 import * as ledgerUpdateScenarios from '../../consensus-update/__tests__';
 import * as advanceChannelScenarios from '../../advance-channel/__tests__';
 import _ from 'lodash';
@@ -23,7 +23,6 @@ const props = {
 };
 
 const ledgerUpdate = ledgerUpdateScenarios.twoPlayerPreSuccessA.state;
-const concluding = advanceChannelScenarios.conclude.preSuccess.state;
 
 // -----------
 // Scenarios
@@ -41,15 +40,10 @@ export const clearedToSendHappyPath = {
     state: waitForLedgerUpdate({
       ...props,
       ledgerUpdate,
-      concluding,
+
       clearedToProceed: true,
     }),
     action: ledgerUpdateScenarios.twoPlayerPreSuccessA.action,
     sharedData: ledgerUpdateScenarios.twoPlayerPreSuccessA.sharedData,
-  },
-  waitForConclude: {
-    state: waitForConclude({ ...props, concluding }),
-    action: advanceChannelScenarios.conclude.preSuccess.trigger,
-    sharedData: advanceChannelScenarios.conclude.preSuccess.sharedData,
   },
 };

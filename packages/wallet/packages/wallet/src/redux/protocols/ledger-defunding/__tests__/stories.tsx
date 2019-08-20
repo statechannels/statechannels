@@ -1,6 +1,6 @@
 import * as scenarios from './scenarios';
 import { addStoriesFromScenario as addStories } from '../../../../__stories__';
-import { IndirectDefunding } from '../container';
+import { LedgerDefunding } from '../container';
 
 function flattenScenario(scenario) {
   Object.keys(scenario).forEach(key => {
@@ -13,6 +13,6 @@ function flattenScenario(scenario) {
 
 addStories(
   flattenScenario(scenarios.clearedToSendHappyPath),
-  'Indirect Defunding / PlayerA / Happy Path',
-  IndirectDefunding,
+  'Ledger Defunding / PlayerA / Happy Path',
+  LedgerDefunding,
 );

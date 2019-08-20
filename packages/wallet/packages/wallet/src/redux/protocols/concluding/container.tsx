@@ -1,41 +1,51 @@
-import * as states from './states';
-import { PureComponent } from 'react';
 import React from 'react';
-import * as concludingInstigatorStates from './instigator/states';
-import * as concludingResponderStates from './responder/states';
+import { PureComponent } from 'react';
 import { connect } from 'react-redux';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { Concluding as ConcludingInstigator } from './instigator/container';
-import { Concluding as ConcludingResponder } from './responder/container';
-import { faSpinner } from '@fortawesome/free-solid-svg-icons';
-
+import { NonTerminalConcludingState } from '.';
+import WaitForOtherPlayer from '../shared-components/wait-for-other-player';
+import { unreachable } from '../../../utils/reducer-utils';
+import ApproveX from '../shared-components/approve-x';
+import * as actions from './actions';
+import { CloseLedgerChannel } from '../close-ledger-channel/container';
 interface Props {
-  state: states.ConcludingState;
+  state: NonTerminalConcludingState;
+  keepOpenSelected: typeof actions.keepOpenSelected;
+  closeSelected: typeof actions.closeSelected;
 }
 
 class ConcludingContainer extends PureComponent<Props> {
   render() {
-    const { state } = this.props;
-    if (
-      concludingInstigatorStates.isConcludingInstigatorState(state) &&
-      !states.isTerminalConcludingState(state)
-    ) {
-      return <ConcludingInstigator state={state} />;
+    const { state, keepOpenSelected, closeSelected } = this.props;
+    switch (state.type) {
+      case 'Concluding.WaitForConclude':
+        return <WaitForOtherPlayer actionDescriptor={'conclude'} channelId={state.channelId} />;
+      case 'Concluding.WaitForDefund':
+        return <WaitForOtherPlayer actionDescriptor={'defund'} channelId={state.channelId} />;
+      case 'Concluding.WaitForLedgerClose':
+        return <CloseLedgerChannel state={state.ledgerClosing} />;
+      case 'Concluding.DecideClosing':
+        const { processId } = state;
+        return (
+          <ApproveX
+            title="Close Channel with Hub?"
+            yesMessage="Close Channel"
+            noMessage="Keep Open"
+            description="Do you want to close your channel with the hub?"
+            approvalAction={() => closeSelected({ processId })}
+            rejectionAction={() => keepOpenSelected({ processId })}
+          />
+        );
+      default:
+        return unreachable(state);
     }
-
-    if (
-      concludingResponderStates.isConcludingResponderState(state) &&
-      !states.isTerminalConcludingState(state)
-    ) {
-      return <ConcludingResponder state={state} />;
-    }
-    // TODO: We need a placeholder screen here when transitioning back to the app from a success state
-    return (
-      <div>
-        <FontAwesomeIcon icon={faSpinner} pulse={true} size="lg" />
-      </div>
-    );
   }
 }
 
-export const Concluding = connect(() => ({}))(ConcludingContainer);
+const mapDispatchToProps = {
+  closeSelected: actions.closeSelected,
+  keepOpenSelected: actions.keepOpenSelected,
+};
+export const Concluding = connect(
+  () => ({}),
+  mapDispatchToProps,
+)(ConcludingContainer);

@@ -4,7 +4,7 @@ import { FundingStrategy, ProtocolLocator, EmbeddedProtocol } from './index';
 import { ProcessProtocol } from '.';
 import { ActionConstructor } from '../redux/utils';
 import { Commitments } from '../redux/channel-store';
-import { DefundRequested } from '../redux/protocols/actions';
+import { CloseLedgerChannel } from '../redux/protocols/actions';
 
 export interface MultipleRelayableActions {
   type: 'WALLET.MULTIPLE_RELAYABLE_ACTIONS';
@@ -38,7 +38,6 @@ export interface StrategyApproved extends BaseProcessAction {
 }
 export interface ConcludeInstigated {
   type: 'WALLET.NEW_PROCESS.CONCLUDE_INSTIGATED';
-  signedCommitment: SignedCommitment;
   protocol: ProcessProtocol.Concluding;
   channelId: string;
 }
@@ -109,8 +108,9 @@ export type RelayableAction =
   | ConcludeInstigated
   | CommitmentReceived
   | CommitmentsReceived
-  | DefundRequested
-  | MultipleRelayableActions;
+  | CloseLedgerChannel
+  | MultipleRelayableActions
+  | ConcludeInstigated;
 
 export function isRelayableAction(action: WalletAction): action is RelayableAction {
   return (
@@ -118,7 +118,7 @@ export function isRelayableAction(action: WalletAction): action is RelayableActi
     action.type === 'WALLET.FUNDING_STRATEGY_NEGOTIATION.STRATEGY_APPROVED' ||
     action.type === 'WALLET.NEW_PROCESS.CONCLUDE_INSTIGATED' ||
     action.type === 'WALLET.COMMON.COMMITMENT_RECEIVED' ||
-    action.type === 'WALLET.NEW_PROCESS.DEFUND_REQUESTED' ||
+    action.type === 'WALLET.NEW_PROCESS.CLOSE_LEDGER_CHANNEL' ||
     action.type === 'WALLET.COMMON.COMMITMENTS_RECEIVED' ||
     action.type === 'WALLET.MULTIPLE_RELAYABLE_ACTIONS'
   );

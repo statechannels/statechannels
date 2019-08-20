@@ -7,7 +7,7 @@ import { NewLedgerChannelState } from './new-ledger-channel/states';
 import { ResponderState } from './dispute/responder/states';
 import { WithdrawalState } from './withdrawing/states';
 import { ApplicationState } from './application/states';
-import { IndirectDefundingState } from './indirect-defunding/states';
+import { LedgerDefundingState } from './ledger-defunding/states';
 import { DefundingState } from './defunding/states';
 import { ConcludingState } from './concluding/states';
 import { TransactionSubmissionState } from './transaction-submission';
@@ -21,6 +21,7 @@ import { ProtocolLocator, EmbeddedProtocol } from '../../communication';
 import { WalletAction } from '../actions';
 import { FundingStrategyNegotiationState } from './funding-strategy-negotiation/states';
 import { VirtualDefundingState } from './virtual-defunding/states';
+import { CloseLedgerChannelState } from './close-ledger-channel/states';
 
 export type ProtocolState =
   | ApplicationState
@@ -33,7 +34,7 @@ export type ProtocolState =
   | DefundingState
   | ChallengerState
   | ConcludingState
-  | IndirectDefundingState
+  | LedgerDefundingState
   | TransactionSubmissionState
   | ExistingLedgerFundingState
   | LedgerTopUpState
@@ -42,7 +43,8 @@ export type ProtocolState =
   | AdvanceChannelState
   | LedgerFundingState
   | FundingStrategyNegotiationState
-  | VirtualDefundingState;
+  | VirtualDefundingState
+  | CloseLedgerChannelState;
 
 export type ProtocolReducer<T extends ProtocolState> = (
   protocolState: T,
@@ -64,6 +66,12 @@ export function prependToLocator<
   State extends { protocolLocator: ProtocolLocator },
   T extends (WalletAction | State) & { protocolLocator: ProtocolLocator }
 >(actionOrState: T, protocol: ProtocolLocator | EmbeddedProtocol): T {
+  // First we update any sub-protocol protocolLocators
+  for (const prop of Object.keys(actionOrState)) {
+    if (typeof actionOrState[prop] === 'object' && 'protocolLocator' in actionOrState[prop]) {
+      actionOrState[prop] = prependToLocator(actionOrState[prop], protocol);
+    }
+  }
   return {
     ...actionOrState,
     protocolLocator: makeLocator(protocol, actionOrState.protocolLocator),

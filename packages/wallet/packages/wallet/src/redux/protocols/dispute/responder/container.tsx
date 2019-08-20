@@ -9,7 +9,7 @@ import { TransactionSubmission } from '../../transaction-submission/container';
 
 import { connect } from 'react-redux';
 import { ActionDispatcher } from '../../../utils';
-import { defundRequested } from '../../actions';
+import { closeLedgerChannel } from '../../actions';
 import { multipleWalletActions } from '../../../../redux/actions';
 import ApproveX from '../../shared-components/approve-x';
 
@@ -18,7 +18,7 @@ interface Props {
   respondApproved: ActionDispatcher<actions.RespondApproved>;
   responseProvided: ActionDispatcher<actions.ResponseProvided>;
   acknowledged: ActionDispatcher<actions.Acknowledged>;
-  defund: typeof defundRequestedAndExitChallenge;
+  defund: typeof closeLedgerChannelAndExitChallenge;
 }
 class ResponderContainer extends PureComponent<Props> {
   render() {
@@ -74,9 +74,9 @@ class ResponderContainer extends PureComponent<Props> {
   }
 }
 
-function defundRequestedAndExitChallenge(processId, channelId) {
+function closeLedgerChannelAndExitChallenge(processId, channelId) {
   return multipleWalletActions({
-    actions: [defundRequested({ channelId }), actions.exitChallenge({ processId })],
+    actions: [closeLedgerChannel({ channelId }), actions.exitChallenge({ processId })],
   });
 }
 
@@ -84,7 +84,7 @@ const mapDispatchToProps = {
   respondApproved: actions.respondApproved,
   responseProvided: actions.responseProvided,
   acknowledged: actions.acknowledged,
-  defund: defundRequestedAndExitChallenge,
+  defund: closeLedgerChannelAndExitChallenge,
 };
 
 export const Responder = connect(

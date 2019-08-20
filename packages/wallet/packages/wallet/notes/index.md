@@ -51,7 +51,7 @@ graph TD
     ELF --> CU
     LTU --> CU
 
-    Df{Defunding}-->idDf(IndirectDefunding)
+    Df{Defunding}-->idDf(ledgerDefunding)
     Df-->W(Withdrawing)
 
     Df-->TS(TransactionSubmission)

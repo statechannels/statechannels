@@ -6,7 +6,6 @@ import { clearOutbox } from './outbox/reducer';
 import { ProtocolState } from './protocols';
 import { isNewProcessAction, NewProcessAction } from './protocols/actions';
 import * as applicationProtocol from './protocols/application';
-import * as defundingProtocol from './protocols/defunding';
 import * as concludingProtocol from './protocols/concluding';
 import * as fundProtocol from './protocols/funding';
 import * as states from './state';
@@ -15,6 +14,7 @@ import { adjudicatorStateReducer } from './adjudicator-state/reducer';
 import { isStartProcessAction, ProcessProtocol } from '../communication';
 import * as communication from '../communication';
 import { ethers } from 'ethers';
+import * as closeLedgerChannelProtocol from './protocols/close-ledger-channel';
 import _ from 'lodash';
 const initialState = states.waitForLogin();
 
@@ -84,18 +84,6 @@ function routeToProtocolReducer(
           action,
         );
         return updatedState(state, sharedData, processState, protocolState, action.processId);
-      case ProcessProtocol.Defunding:
-        const {
-          protocolState: defundingProtocolState,
-          sharedData: defundingSharedData,
-        } = defundingProtocol.reducer(processState.protocolState, states.sharedData(state), action);
-        return updatedState(
-          state,
-          defundingSharedData,
-          processState,
-          defundingProtocolState,
-          action.processId,
-        );
       case ProcessProtocol.Application:
         const {
           protocolState: appProtocolState,
@@ -110,7 +98,7 @@ function routeToProtocolReducer(
         const {
           protocolState: concludingProtocolState,
           sharedData: concludingSharedData,
-        } = concludingProtocol.reducer(
+        } = concludingProtocol.concludingReducer(
           processState.protocolState,
           states.sharedData(state),
           action,
@@ -120,6 +108,23 @@ function routeToProtocolReducer(
           concludingSharedData,
           processState,
           concludingProtocolState,
+          action.processId,
+        );
+
+      case ProcessProtocol.CloseLedgerChannel:
+        const {
+          protocolState: closeLedgerChannelState,
+          sharedData: closeLedgerChannelSharedData,
+        } = closeLedgerChannelProtocol.closeLedgerChannelReducer(
+          processState.protocolState,
+          states.sharedData(state),
+          action,
+        );
+        return updatedState(
+          state,
+          closeLedgerChannelSharedData,
+          processState,
+          closeLedgerChannelState,
           action.processId,
         );
       default:
@@ -173,20 +178,22 @@ function initializeNewProtocol(
     }
     case 'WALLET.NEW_PROCESS.CONCLUDE_REQUESTED': {
       const { channelId } = action;
-      const { protocolState, sharedData } = concludingProtocol.initializeInstigatorState(
+      const { protocolState, sharedData } = concludingProtocol.initialize({
         channelId,
         processId,
-        incomingSharedData,
-      );
+        opponentInstigatedConclude: false,
+        sharedData: incomingSharedData,
+      });
       return { protocolState, sharedData };
     }
     case 'WALLET.NEW_PROCESS.CONCLUDE_INSTIGATED': {
-      const { signedCommitment } = action;
-      const { protocolState, sharedData } = concludingProtocol.initializeResponderState(
-        signedCommitment,
+      const { channelId } = action;
+      const { protocolState, sharedData } = concludingProtocol.initialize({
+        channelId,
         processId,
-        incomingSharedData,
-      );
+        opponentInstigatedConclude: true,
+        sharedData: incomingSharedData,
+      });
       return { protocolState, sharedData };
     }
     case 'WALLET.NEW_PROCESS.INITIALIZE_CHANNEL':
@@ -196,8 +203,12 @@ function initializeNewProtocol(
         state.address,
         state.privateKey,
       );
-    case 'WALLET.NEW_PROCESS.DEFUND_REQUESTED':
-      return defundingProtocol.initialize(processId, action.channelId, incomingSharedData);
+    case 'WALLET.NEW_PROCESS.CLOSE_LEDGER_CHANNEL':
+      return closeLedgerChannelProtocol.initializeCloseLedgerChannel(
+        processId,
+        action.channelId,
+        incomingSharedData,
+      );
     default:
       return unreachable(action);
   }

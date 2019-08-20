@@ -8,7 +8,7 @@ import { TransactionSubmission } from '../../transaction-submission';
 import Acknowledge from '../../shared-components/acknowledge';
 import WaitForResponseOrTimeout from './components/wait-for-response-or-timeout';
 import { ActionDispatcher } from '../../../utils';
-import { defundRequested } from '../../actions';
+import { closeLedgerChannel } from '../../actions';
 import { multipleWalletActions } from '../../../../redux/actions';
 import ApproveX from '../../shared-components/approve-x';
 
@@ -17,7 +17,7 @@ interface Props {
   approve: ActionDispatcher<actions.ChallengeApproved>;
   deny: ActionDispatcher<actions.ChallengeDenied>;
   acknowledged: ActionDispatcher<actions.Acknowledged>;
-  defund: typeof defundRequestedAndExitChallenge;
+  defund: typeof closeLedgerChannelAndExitChallenge;
 }
 
 class ChallengerContainer extends PureComponent<Props> {
@@ -106,9 +106,9 @@ function describeFailure(reason: FailureReason): string {
   }
 }
 
-function defundRequestedAndExitChallenge(processId, channelId) {
+function closeLedgerChannelAndExitChallenge(processId, channelId) {
   return multipleWalletActions({
-    actions: [defundRequested({ channelId }), actions.exitChallenge({ processId })],
+    actions: [closeLedgerChannel({ channelId }), actions.exitChallenge({ processId })],
   });
 }
 
@@ -116,7 +116,7 @@ const mapDispatchToProps = {
   approve: actions.challengeApproved,
   deny: actions.challengeDenied,
   acknowledged: actions.acknowledged,
-  defund: defundRequestedAndExitChallenge,
+  defund: closeLedgerChannelAndExitChallenge,
 };
 
 export const Challenger = connect(
