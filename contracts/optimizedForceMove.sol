@@ -27,7 +27,7 @@ contract OptimizedForceMove {
         //     keccak256(abi.encode(
         //         fixedPart.challengeDuration,
         //         fixedPart.appDefinition,
-        //         variableParts[i].appData
+        //         variablePart.appData
         //     )
         // )
         bytes32 outcomeHash;
@@ -77,7 +77,7 @@ contract OptimizedForceMove {
                         )
                     ) ==
                     channelStorageHashes[channelId],
-                'Channel closed'
+                'Channel is not open or turnNum does not match'
             );
         }
 
