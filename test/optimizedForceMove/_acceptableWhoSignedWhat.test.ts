@@ -23,16 +23,19 @@ beforeAll(async () => {
 });
 
 // TODO use .each to improve readability and reduce boilerplate
-describe('_acceptableWhoSignedWhat', () => {
-  let whoSignedWhat;
-  let nParticipants = 3;
-  let nStates;
-  it('verifies correct array of who signed what (n states)', async () => {
-    whoSignedWhat = [0, 1, 2];
-    nParticipants = 3;
-    nStates = 3;
-    for (let largestTurnNum = 2; largestTurnNum < 14; largestTurnNum += nParticipants) {
-      // TODO is there a more elegant way of robustly testing largestTurnNum? For example, largestTurnNum  = 2 + randomInteger * nParticipants
+describe('_acceptableWhoSignedWhat (expect a boolean)', () => {
+  it.each`
+    whoSignedWhat | largestTurnNum | nParticipants | nStates | expectedResult
+    ${[0, 1, 2]}  | ${2}           | ${3}          | ${3}    | ${true}
+    ${[0, 1, 2]}  | ${5}           | ${3}          | ${3}    | ${true}
+    ${[0, 0, 1]}  | ${2}           | ${3}          | ${2}    | ${true}
+    ${[0, 0, 0]}  | ${2}           | ${3}          | ${1}    | ${true}
+    ${[0, 0, 0]}  | ${8}           | ${3}          | ${1}    | ${true}
+    ${[0, 0, 2]}  | ${2}           | ${3}          | ${3}    | ${false}
+    ${[0, 0, 2]}  | ${11}          | ${3}          | ${3}    | ${false}
+  `(
+    'returns $expectedResult for whoSignedWhat = $whoSignedWhat, largestTurnNum = $largestTurnNum, nParticipants = $nParticipants, nStates = $nStates',
+    async ({whoSignedWhat, largestTurnNum, nParticipants, nStates, expectedResult}) => {
       expect(
         await optimizedForceMove.acceptableWhoSignedWhat(
           whoSignedWhat,
@@ -40,41 +43,18 @@ describe('_acceptableWhoSignedWhat', () => {
           nParticipants,
           nStates,
         ),
-      ).toBe(true);
-    }
-  });
-  it('verifies correct array of who signed what (fewer than n states)', async () => {
-    whoSignedWhat = [0, 0, 1];
-    nStates = 2;
-    for (let largestTurnNum = 2; largestTurnNum < 14; largestTurnNum += nParticipants) {
-      expect(
-        await optimizedForceMove.acceptableWhoSignedWhat(
-          whoSignedWhat,
-          largestTurnNum,
-          nParticipants,
-          nStates,
-        ),
-      ).toBe(true);
-    }
-  });
-  it('verifies correct array of who signed what (1 state)', async () => {
-    whoSignedWhat = [0, 0, 0];
-    nStates = 1;
-    for (let largestTurnNum = 2; largestTurnNum < 14; largestTurnNum += nParticipants) {
-      expect(
-        await optimizedForceMove.acceptableWhoSignedWhat(
-          whoSignedWhat,
-          largestTurnNum,
-          nParticipants,
-          nStates,
-        ),
-      ).toBe(true);
-    }
-  });
-  it('reverts when the array is not the required length', async () => {
-    whoSignedWhat = [0, 0];
-    nStates = 1;
-    for (let largestTurnNum = 2; largestTurnNum < 14; largestTurnNum += nParticipants) {
+      ).toBe(expectedResult);
+    },
+  );
+});
+
+describe('_acceptableWhoSignedWhat (expect revert)', () => {
+  it.each`
+    whoSignedWhat | largestTurnNum | nParticipants | nStates | reasonString
+    ${[0, 0]}     | ${2}           | ${3}          | ${1}    | ${'_validSignatures: whoSignedWhat must be the same length as participants'}
+  `(
+    'reverts for whoSignedWhat = $whoSignedWhat, largestTurnNum = $largestTurnNum, nParticipants = $nParticipants, nStates = $nStates',
+    async ({whoSignedWhat, largestTurnNum, nParticipants, nStates, reasonString}) => {
       await expectRevert(
         () =>
           optimizedForceMove.acceptableWhoSignedWhat(
@@ -83,22 +63,8 @@ describe('_acceptableWhoSignedWhat', () => {
             nParticipants,
             nStates,
           ),
-        '_validSignatures: whoSignedWhat must be the same length as participants',
+        reasonString,
       );
-    }
-  });
-  it('returns false when a participant signs a state with an insufficiently large turnNum', async () => {
-    whoSignedWhat = [0, 0, 2];
-    nStates = 3;
-    for (let largestTurnNum = 2; largestTurnNum < 14; largestTurnNum += nParticipants) {
-      expect(
-        await optimizedForceMove.acceptableWhoSignedWhat(
-          whoSignedWhat,
-          largestTurnNum,
-          nParticipants,
-          nStates,
-        ),
-      ).toBe(false);
-    }
-  });
+    },
+  );
 });
