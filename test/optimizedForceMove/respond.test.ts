@@ -35,14 +35,16 @@ beforeAll(async () => {
 
 describe('respond (undefined reason implies tx success and storage updated correctly)', () => {
   it.each`
-    channelNonce | turnNumRecord | expired  | isFinalAB         | appDatas  | challenger    | responder     | reasonString
-    ${1}         | ${8}          | ${false} | ${[false, false]} | ${[0, 1]} | ${wallets[2]} | ${wallets[0]} | ${undefined}
-    ${2}         | ${8}          | ${true}  | ${[false, false]} | ${[0, 1]} | ${wallets[2]} | ${wallets[0]} | ${'Response too late!'}
+    channelNonce | setTurnNumRecord | declaredTurnNumRecord | expired  | isFinalAB         | appDatas  | challenger    | responder     | reasonString
+    ${1}         | ${8}             | ${8}                  | ${false} | ${[false, false]} | ${[0, 1]} | ${wallets[2]} | ${wallets[0]} | ${undefined}
+    ${2}         | ${8}             | ${8}                  | ${true}  | ${[false, false]} | ${[0, 1]} | ${wallets[2]} | ${wallets[0]} | ${'Response too late!'}
+    ${3}         | ${8}             | ${7}                  | ${true}  | ${[false, false]} | ${[0, 1]} | ${wallets[2]} | ${wallets[0]} | ${'Challenge State does not match stored version'}
   `(
     'tx for channel with channelNonce $channelNonce -> revert reason: $reasonString', // for the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce
     async ({
       channelNonce,
-      turnNumRecord,
+      setTurnNumRecord,
+      declaredTurnNumRecord,
       expired,
       isFinalAB,
       appDatas,
@@ -74,7 +76,7 @@ describe('respond (undefined reason implies tx success and storage updated corre
       );
 
       const challengeState = {
-        turnNum: turnNumRecord,
+        turnNum: setTurnNumRecord,
         isFinal: isFinalAB[0],
         channelId,
         challengeAppPartHash,
@@ -98,7 +100,7 @@ describe('respond (undefined reason implies tx success and storage updated corre
       );
 
       const responseState = {
-        turnNum: turnNumRecord + 1,
+        turnNum: setTurnNumRecord + 1,
         isFinal: isFinalAB[1],
         channelId,
         responseAppPartHash,
@@ -134,7 +136,7 @@ describe('respond (undefined reason implies tx success and storage updated corre
       const challengeExistsHash = keccak256(
         defaultAbiCoder.encode(
           ['uint256', 'uint256', 'bytes32', 'address', 'bytes32'],
-          [turnNumRecord, expiryTime, challengeStateHash, challenger.address, outcomeHash],
+          [setTurnNumRecord, expiryTime, challengeStateHash, challenger.address, outcomeHash],
         ),
       );
 
@@ -151,7 +153,7 @@ describe('respond (undefined reason implies tx success and storage updated corre
         expectRevert(
           () =>
             optimizedForceMove.respond(
-              turnNumRecord,
+              declaredTurnNumRecord,
               expiryTime,
               challenger.address,
               isFinalAB,
@@ -164,7 +166,7 @@ describe('respond (undefined reason implies tx success and storage updated corre
       } else {
         // call respond
         const tx2 = await optimizedForceMove.respond(
-          turnNumRecord,
+          declaredTurnNumRecord,
           expiryTime,
           challenger.address,
           isFinalAB,
@@ -176,7 +178,13 @@ describe('respond (undefined reason implies tx success and storage updated corre
         await tx2.wait();
 
         // compute and check new expected ChannelStorageHash
-        const expectedChannelStorage = [turnNumRecord + 1, 0, HashZero, AddressZero, HashZero];
+        const expectedChannelStorage = [
+          declaredTurnNumRecord + 1,
+          0,
+          HashZero,
+          AddressZero,
+          HashZero,
+        ];
         const expectedChannelStorageHash = keccak256(
           defaultAbiCoder.encode(
             ['uint256', 'uint256', 'bytes32', 'address', 'bytes32'],
