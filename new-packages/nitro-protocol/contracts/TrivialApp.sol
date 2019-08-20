@@ -4,11 +4,12 @@ pragma experimental ABIEncoderV2;
 import './ForceMoveApp.sol';
 
 contract TrivialApp is ForceMoveApp {
-    function validTransition(VariablePart memory a, VariablePart memory b)
-        public
-        pure
-        returns (bool)
-    {
+    function validTransition(
+        VariablePart memory a,
+        VariablePart memory b,
+        uint256 turnNumB,
+        uint256 nParticipants
+    ) public pure returns (bool) {
         return true;
     }
 }

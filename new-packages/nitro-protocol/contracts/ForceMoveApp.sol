@@ -9,8 +9,10 @@ interface ForceMoveApp {
         bytes appData;
     }
 
-    function validTransition(VariablePart calldata a, VariablePart calldata b)
-        external
-        pure
-        returns (bool);
+    function validTransition(
+        VariablePart calldata a,
+        VariablePart calldata b,
+        uint256 turnNumB,
+        uint256 nParticipants
+    ) external pure returns (bool);
 }

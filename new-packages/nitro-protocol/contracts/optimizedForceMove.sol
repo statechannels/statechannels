@@ -273,7 +273,14 @@ contract OptimizedForceMove {
                     'InvalidTransitionError: Cannot change the appData during setup phase'
                 );
             } else {
-                require(ForceMoveApp(appDefinition).validTransition(ab[0], ab[1]));
+                require(
+                    ForceMoveApp(appDefinition).validTransition(
+                        ab[0],
+                        ab[1],
+                        turnNumB,
+                        nParticipants
+                    )
+                );
                 // reason string not necessary (called function will provide reason for reverting)
             }
         }

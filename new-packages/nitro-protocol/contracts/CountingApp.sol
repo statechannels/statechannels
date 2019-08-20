@@ -12,11 +12,12 @@ contract CountingApp is ForceMoveApp {
         return abi.decode(appDataBytes, (CountingAppData));
     }
 
-    function validTransition(VariablePart memory a, VariablePart memory b)
-        public
-        pure
-        returns (bool)
-    {
+    function validTransition(
+        VariablePart memory a,
+        VariablePart memory b,
+        uint256 turnNumB,
+        uint256 nParticipants
+    ) public pure returns (bool) {
         require(
             appData(b.appData).counter == appData(a.appData).counter + 1,
             'CountingApp: Counter must be incremented'
