@@ -2,7 +2,6 @@ pragma solidity ^0.5.2;
 pragma experimental ABIEncoderV2;
 
 import './ForceMoveApp.sol';
-import './Format.sol';
 
 contract OptimizedForceMove {
     struct Signature {
@@ -50,7 +49,7 @@ contract OptimizedForceMove {
         uint256 turnNumRecord,
         FixedPart memory fixedPart,
         uint256 largestTurnNum,
-        Format.VariablePart[] memory variableParts,
+        ForceMoveApp.VariablePart[] memory variableParts,
         uint8 isFinalCount, // how many of the states are final
         Signature[] memory sigs,
         uint8[] memory whoSignedWhat,
@@ -68,7 +67,7 @@ contract OptimizedForceMove {
         // Check that the proposed largestTurnNum is larger than the turnNumRecord that is being committed to
         require(largestTurnNum > turnNumRecord, 'Stale challenge!');
 
-        // EITHER there is no information stored against channelId at all (OK)
+        // EITHER there is no inForceMoveAppion stored against channelId at all (OK)
         if (channelStorageHashes[channelId] != bytes32(0)) {
             // OR there is, in which case we must check the channel is still open and that the committed turnNumRecord is correct
             require(
@@ -247,7 +246,7 @@ contract OptimizedForceMove {
     function _validTransition(
         uint256 nParticipants,
         bool[2] memory isFinalAB, // [a.isFinal, b.isFinal]
-        Format.VariablePart[2] memory ab, // [a,b]
+        ForceMoveApp.VariablePart[2] memory ab, // [a,b]
         uint256 turnNumB,
         address appDefinition
     ) internal pure returns (bool) {

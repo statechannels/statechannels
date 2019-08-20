@@ -2,7 +2,6 @@ pragma solidity ^0.5.2;
 pragma experimental ABIEncoderV2;
 
 import './ForceMoveApp.sol';
-import './Format.sol';
 
 contract CountingApp is ForceMoveApp {
     struct CountingAppData {
@@ -13,7 +12,7 @@ contract CountingApp is ForceMoveApp {
         return abi.decode(appDataBytes, (CountingAppData));
     }
 
-    function validTransition(Format.VariablePart memory a, Format.VariablePart memory b)
+    function validTransition(VariablePart memory a, VariablePart memory b)
         public
         pure
         returns (bool)
