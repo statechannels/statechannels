@@ -149,7 +149,7 @@ end
 
 subgraph DefundingAction
 DefundingAction --> WithdrawalAction
-DefundingAction --> IndirectDefundingAction
+DefundingAction --> LedgerDefundingAction
 end
 
 subgraph ConcludingInstigatorAction

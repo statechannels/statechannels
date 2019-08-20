@@ -30,7 +30,7 @@ class ProtocolContainer extends PureComponent<Props> {
       return <Funding state={protocolState} />;
     } else if (ApplicationStates.isApplicationState(protocolState)) {
       return <Application state={protocolState} />;
-    } else if (concludingStates.isConcludingState(protocolState)) {
+    } else if (concludingStates.isNonTerminalConcludingState(protocolState)) {
       return <Concluding state={protocolState} />;
     } else if (isDefundingState(protocolState)) {
       return <Defunding state={protocolState} />;

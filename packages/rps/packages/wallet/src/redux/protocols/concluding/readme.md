@@ -2,29 +2,34 @@
 
 The concluding protocols coordinate the process of concluding a channel.
 
-## The Protocol
+## Currently Out of Scope
 
-The concluding protocol involves two parties: instigator and responder.
-The instigator is identified by being a participant who has chosen to conclude the channel. The responder is a participant who has received a conclude commitment and responds in kind.
+- Concluding a ledger channel that is between two players. (We could probably generalize the negotiate-funding-strategy protocol for re-use here)
+- Getting user approval. This should be revisited when we think about approval system wide.
+- Concluding out of turn. Currently we only allow a user to initiate a conclude on their turn.
 
-We therefore split the overall indirect-funding protocol into two sub state machines:
-[instigator](./instigator/readme.md) and [responder](./responder/readme.md).
-
-The two state machines interact through the following messages:
+## State Machine
 
 ```mermaid
-sequenceDiagram
-  participant I as I's wallet
-  participant R as R's wallet
-  Note  over I, R: Exchange Concludes
-  I->>R: Conclude
-  R->>I: Conclude
+graph TD
+linkStyle default interpolate basis
+  St((start))-->WFC(WaitForConclude)
+  WFC-->|AdvanceChannelAction|WFC
+  WFC-->|AdvanceChannelSuccess|WFD(WaitForDefund)
+  WFD-->|DefundAction|WFD
+  WFD-->|DefundSuccess|DC(DecideClosing)
+  DC-->|KeepOpen|S((success))
+  DC-->|Close|WFLC(WaitForLedgerChannelClose)
+  WFLC-->|CloseAction|WFLC
+  WFLC-->|CloseSuccess|S
+
+
+  classDef logic fill:#efdd20;
+  classDef Success fill:#58ef21;
+  classDef Failure fill:#f45941;
+  classDef WaitForChildProtocol stroke:#333,stroke-width:4px,color:#ffff,fill:#333;
+  class St,D logic;
+  class S Success;
+  class F Failure;
+  class WFC,WFS,WFD,WFLC WaitForChildProtocol
 ```
-
-# Terminology
-
-Use "Conclude" / "Concluding" everywhere, here. In an application, you might choose to Resign, or you (or an opponent) might run out of funds. In these cases, according to the wallet you are concluding the channel.
-
-For now we will avoid "Resigning", "Closing" and so on.
-
-We will also include the `Defunding` protocol as an optional subprotocol of `Concluding`. If `Defunding` fails, `Concluding` will still be considered to have also failed.

@@ -1,5 +1,3 @@
-import { directlyFundingChannelHappyPath, directlyFundingFailure } from './scenarios';
+import { indirectlyFundingChannelHappyPath } from './scenarios';
 
-export const preSuccess = directlyFundingChannelHappyPath.waitForWithdrawal;
-
-export const preFailure = directlyFundingFailure.waitForWithdrawal;
+export const preSuccess = indirectlyFundingChannelHappyPath.waitForLedgerDefunding;

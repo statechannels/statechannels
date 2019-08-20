@@ -2,15 +2,11 @@
 
 The purpose of this protocol is handle de-funding a channel that has been indirectly funded.
 
-The protocol exchanges updates to allocate funds back to the player and conclude commitments to close the channel.
+The protocol exchanges updates to allocate funds back to the player.
 
 The protocol assumes the application channel is closed and a new ledger consensus does need to be reached.
 
-It covers:
-
-- Updating consensus (using ConsensusUpdate sub-protocol) on the ledger channel to reflect the app channel balance.
-- Concluding the ledger channel (using AdvanceChannel sub-protocol)
-- Crafting a conclude commitment to close the ledger channel.
+It covers updating consensus (using ConsensusUpdate sub-protocol) on the ledger channel to reflect the app channel balance.
 
 ## State machine
 
@@ -20,8 +16,7 @@ linkStyle default interpolate basis
   St((start))-->WFU(WaitForLedgerUpdate)
   WFU-->|ConsensusUpdateAction|WFU
   WFU-->|ConsensusUpdateSuccess|WFC(WaitForConclude)
-  WFC-->|AdvanceChannelAction|WFC
-  WFC-->|AdvanceChannelComplete|Su((success))
+
 
   classDef logic fill:#efdd20;
   classDef Success fill:#58ef21;

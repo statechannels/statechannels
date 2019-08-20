@@ -8,32 +8,30 @@ import { unreachable } from '../../../utils/reducer-utils';
 import WaitForOtherPlayer from '../shared-components/wait-for-other-player';
 
 interface Props {
-  state: states.IndirectDefundingState;
+  state: states.LedgerDefundingState;
 }
 
-class IndirectDefundingContainer extends PureComponent<Props> {
+class LedgerDefundingContainer extends PureComponent<Props> {
   render() {
     const { state } = this.props;
     switch (state.type) {
-      case 'IndirectDefunding.WaitForLedgerUpdate':
+      case 'LedgerDefunding.WaitForLedgerUpdate':
         return (
           <WaitForOtherPlayer
             actionDescriptor={'ledger channel update'}
             channelId={state.ledgerId}
           />
         );
-      case 'IndirectDefunding.WaitForConclude':
-        return <WaitForOtherPlayer actionDescriptor={'conclude'} channelId={state.ledgerId} />;
-      case 'IndirectDefunding.Failure':
-        return <Failure name="indirect-de-funding" reason={state.reason} />;
-      case 'IndirectDefunding.Success':
-        return <Success name="indirect-de-funding" />;
+      case 'LedgerDefunding.Failure':
+        return <Failure name="ledger-de-funding" reason={state.reason} />;
+      case 'LedgerDefunding.Success':
+        return <Success name="ledger-de-funding" />;
       default:
         return unreachable(state);
     }
   }
 }
-export const IndirectDefunding = connect(
+export const LedgerDefunding = connect(
   () => ({}),
   () => ({}),
-)(IndirectDefundingContainer);
+)(LedgerDefundingContainer);

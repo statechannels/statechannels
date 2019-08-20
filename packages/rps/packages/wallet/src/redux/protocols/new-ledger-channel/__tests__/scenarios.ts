@@ -17,7 +17,7 @@ import {
   ledgerId,
   channelId,
 } from '../../../../domain/commitments/__tests__';
-import { success } from '../../indirect-defunding/states';
+import { success } from '../../ledger-defunding/states';
 import * as _ from 'lodash';
 import { NEW_LEDGER_FUNDING_PROTOCOL_LOCATOR } from '../reducer';
 import { prependToLocator } from '../..';
