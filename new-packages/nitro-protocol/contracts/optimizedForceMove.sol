@@ -174,7 +174,7 @@ contract OptimizedForceMove {
         address challenger,
         bool[2] memory isFinalAB,
         FixedPart memory fixedPart,
-        Format.VariablePart[2] memory variablePartAB,
+        ForceMoveApp.VariablePart[2] memory variablePartAB,
         // variablePartAB[0] = challengeVariablePart
         // variablePartAB[1] = responseVariablePart
         Signature memory sig
