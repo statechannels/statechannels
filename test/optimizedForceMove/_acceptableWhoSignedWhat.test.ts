@@ -2,23 +2,12 @@ import {ethers} from 'ethers';
 import {expectRevert} from 'magmo-devtools';
 // @ts-ignore
 import optimizedForceMoveArtifact from '../../build/contracts/TESTOptimizedForceMove.json';
-import {splitSignature, arrayify} from 'ethers/utils';
+import {setupContracts} from './test-helpers';
 
-let networkId;
-let optimizedForceMove: ethers.Contract;
 const provider = new ethers.providers.JsonRpcProvider(
   `http://localhost:${process.env.DEV_GANACHE_PORT}`,
 );
-const signer = provider.getSigner(0);
-async function setupContracts() {
-  networkId = (await provider.getNetwork()).chainId;
-  const optimizedForceMoveContractAddress = optimizedForceMoveArtifact.networks[networkId].address;
-  optimizedForceMove = new ethers.Contract(
-    optimizedForceMoveContractAddress,
-    optimizedForceMoveArtifact.abi,
-    signer,
-  );
-}
+let optimizedForceMove: ethers.Contract;
 
 const participants = ['', '', ''];
 const wallets = new Array(3);
@@ -30,7 +19,7 @@ for (let i = 0; i < 3; i++) {
 }
 
 beforeAll(async () => {
-  await setupContracts();
+  optimizedForceMove = await setupContracts(provider, optimizedForceMoveArtifact);
 });
 
 // TODO use .each to improve readability and reduce boilerplate
