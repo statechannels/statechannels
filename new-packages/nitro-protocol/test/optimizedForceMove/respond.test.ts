@@ -135,7 +135,7 @@ describe('respond', () => {
     );
 
     // call public wrapper to set state (only works on test contract)
-    const tx = await optimizedForceMove.setChannelStorageHash(channelId, expectedChannelStorage);
+    const tx = await optimizedForceMove.setChannelStorage(channelId, expectedChannelStorage);
     await tx.wait();
     expect(await optimizedForceMove.channelStorageHashes(channelId)).toEqual(
       expectedChannelStorageHash,
@@ -161,7 +161,7 @@ describe('respond', () => {
 
     await tx2.wait();
 
-    // compute new expected ChannelStorageHash
+    // compute and check new expected ChannelStorageHash
     expectedChannelStorage = [existingTurnNumRecord + 1, 0, HashZero, AddressZero, HashZero];
     expectedChannelStorageHash = keccak256(
       defaultAbiCoder.encode(

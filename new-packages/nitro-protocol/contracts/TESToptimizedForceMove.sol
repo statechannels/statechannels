@@ -42,7 +42,13 @@ contract TESTOptimizedForceMove is OptimizedForceMove {
 
     // public setter for channelStorage
 
-    function setChannelStorageHash(bytes32 channelId, ChannelStorage memory channelStorage) public {
+    function setChannelStorage(bytes32 channelId, ChannelStorage memory channelStorage) public {
         channelStorageHashes[channelId] = keccak256(abi.encode(channelStorage));
+    }
+
+    // public setter for channelStorage
+
+    function setChannelStorageHash(bytes32 channelId, bytes32 h) public {
+        channelStorageHashes[channelId] = h;
     }
 }
