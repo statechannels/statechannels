@@ -5,6 +5,7 @@ import optimizedForceMoveArtifact from '../../build/contracts/TESTOptimizedForce
 import countingAppArtifact from '../../build/contracts/CountingApp.json';
 import {keccak256, defaultAbiCoder} from 'ethers/utils';
 import {setupContracts, sign} from './test-helpers';
+import {HashZero, AddressZero} from 'ethers/constants';
 
 const provider = new ethers.providers.JsonRpcProvider(
   `http://localhost:${process.env.DEV_GANACHE_PORT}`,
@@ -43,6 +44,9 @@ describe('respond', () => {
     outcome,
     appData: defaultAbiCoder.encode(['uint256'], [2]), // a counter
   };
+
+  let expectedChannelStorage;
+  let expectedChannelStorageHash;
 
   it('accepts a valid respond tx and clears an existing challenge', async () => {
     const blockNumber = await provider.getBlockNumber();
@@ -116,14 +120,14 @@ describe('respond', () => {
     );
 
     // compute expected ChannelStorageHash
-    const expectedChannelStorage = [
+    expectedChannelStorage = [
       existingTurnNumRecord,
       expiryTime,
       challengeStateHash,
       participants[2],
       outcomeHash,
     ];
-    const expectedChannelStorageHash = keccak256(
+    expectedChannelStorageHash = keccak256(
       defaultAbiCoder.encode(
         ['uint256', 'uint256', 'bytes32', 'address', 'bytes32'],
         expectedChannelStorage,
@@ -153,6 +157,20 @@ describe('respond', () => {
       fixedPart,
       [challengeVariablePart, responseVariablePart],
       sig,
+    );
+
+    await tx2.wait();
+
+    // compute new expected ChannelStorageHash
+    expectedChannelStorage = [existingTurnNumRecord + 1, 0, HashZero, AddressZero, HashZero];
+    expectedChannelStorageHash = keccak256(
+      defaultAbiCoder.encode(
+        ['uint256', 'uint256', 'bytes32', 'address', 'bytes32'],
+        expectedChannelStorage,
+      ),
+    );
+    expect(await optimizedForceMove.channelStorageHashes(channelId)).toEqual(
+      expectedChannelStorageHash,
     );
   });
 });
