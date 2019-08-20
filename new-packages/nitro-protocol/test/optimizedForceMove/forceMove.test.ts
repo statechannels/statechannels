@@ -3,24 +3,15 @@ import {ethers} from 'ethers';
 import optimizedForceMoveArtifact from '../../build/contracts/TESTOptimizedForceMove.json';
 // @ts-ignore
 import countingAppArtifact from '../../build/contracts/CountingApp.json';
-import {splitSignature, keccak256, defaultAbiCoder, arrayify, hexlify} from 'ethers/utils';
+import {keccak256, defaultAbiCoder} from 'ethers/utils';
 import {HashZero} from 'ethers/constants';
+import {setupContracts, sign} from './test-helpers';
 
-let networkId;
-let optimizedForceMove: ethers.Contract;
 const provider = new ethers.providers.JsonRpcProvider(
   `http://localhost:${process.env.DEV_GANACHE_PORT}`,
 );
-const signer = provider.getSigner(0);
-async function setupContracts() {
-  networkId = (await provider.getNetwork()).chainId;
-  const optimizedForceMoveContractAddress = optimizedForceMoveArtifact.networks[networkId].address;
-  optimizedForceMove = new ethers.Contract(
-    optimizedForceMoveContractAddress,
-    optimizedForceMoveArtifact.abi,
-    signer,
-  );
-}
+let optimizedForceMove: ethers.Contract;
+let networkId;
 
 const turnNumRecord = 0;
 const chainId = 1234;
@@ -34,14 +25,9 @@ for (let i = 0; i < 3; i++) {
 }
 
 beforeAll(async () => {
-  await setupContracts();
+  optimizedForceMove = await setupContracts(provider, optimizedForceMoveArtifact);
+  networkId = (await provider.getNetwork()).chainId;
 });
-
-async function sign(wallet: ethers.Wallet, msgHash: string | Uint8Array) {
-  // msgHash is a hex string
-  // returns an object with v, r, and s properties.
-  return splitSignature(await wallet.signMessage(arrayify(msgHash)));
-}
 
 // TODO use .each to improve readability and reduce boilerplate
 
