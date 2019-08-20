@@ -51,6 +51,9 @@ describe('_isAddressInArray', () => {
   });
 });
 
+// TODO use .each to improve readability and reduce boilerplate
+// TODO consider separating tests into separate files
+
 describe('_acceptableWhoSignedWhat', () => {
   let whoSignedWhat;
   let largestTurnNum;
@@ -61,6 +64,7 @@ describe('_acceptableWhoSignedWhat', () => {
     nParticipants = 3;
     nStates = 3;
     for (largestTurnNum = 2; largestTurnNum < 14; largestTurnNum += nParticipants) {
+      // TODO is there a more elegant way of robustly testing largestTurnNum? For example, largestTurnNum  = 2 + randomInteger * nParticipants
       expect(
         await optimizedForceMove.acceptableWhoSignedWhat(
           whoSignedWhat,
@@ -215,6 +219,17 @@ describe('_validSignatures', () => {
     ).toBe(false);
   });
 });
+
+// TODO extend test coverage to the following scenarios:
+
+// It accepts a forceMove for an open channel (first challenge)
+// It accepts a forceMove for an open channel (subsequent challenge, higher turnNum)
+// It rejects a forceMove for an open channel if the turnNum is too small (subsequent challenge, turnNumRecord would decrease)
+// It rejects a forceMove when a challenge is already underway
+// It rejects a forceMove for a finalized channel
+// It rejects a forceMove with an incorrect challengerSig
+// It rejects a forceMove with the states don't form a validTransition chain
+// It rejects a forceMove when one state isn't correctly signed
 
 describe('forceMove', () => {
   // construct data for forceMove parameters
