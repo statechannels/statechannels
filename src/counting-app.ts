@@ -1,6 +1,6 @@
 import abi from 'web3-eth-abi';
-import { CommitmentType, Commitment, BaseCommitment, ethereumArgs } from './commitment';
-import { Uint256 } from './types';
+import {CommitmentType, Commitment, BaseCommitment, ethereumArgs} from './commitment';
+import {Uint256} from './types';
 
 export interface AppAttributes {
   appCounter: Uint256;
@@ -22,18 +22,18 @@ export const SolidityCountingCommitmentType = {
 
 export const createCommitment = {
   preFundSetup: function preFundSetupCommitment(opts: CountingBaseCommitment): CountingCommitment {
-    return { ...opts, commitmentType: CommitmentType.PreFundSetup };
+    return {...opts, commitmentType: CommitmentType.PreFundSetup};
   },
   postFundSetup: function postFundSetupCommitment(
     opts: CountingBaseCommitment,
   ): CountingCommitment {
-    return { ...opts, commitmentType: CommitmentType.PostFundSetup };
+    return {...opts, commitmentType: CommitmentType.PostFundSetup};
   },
   app: function appCommitment(opts: CountingBaseCommitment): CountingCommitment {
-    return { ...opts, commitmentType: CommitmentType.App, commitmentCount: 0 };
+    return {...opts, commitmentType: CommitmentType.App, commitmentCount: 0};
   },
   conclude: function concludeCommitment(opts: CountingBaseCommitment): CountingCommitment {
-    return { ...opts, commitmentType: CommitmentType.Conclude };
+    return {...opts, commitmentType: CommitmentType.Conclude};
   },
 };
 
@@ -65,6 +65,6 @@ export function asCoreCommitment(commitment: CountingCommitment): Commitment {
     destination,
     commitmentCount,
     token,
-    appAttributes: appAttributesFromCommitment({ appCounter }),
+    appAttributes: appAttributesFromCommitment({appCounter}),
   };
 }
