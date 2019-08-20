@@ -22,7 +22,6 @@ beforeAll(async () => {
   optimizedForceMove = await setupContracts(provider, optimizedForceMoveArtifact);
 });
 
-// TODO use .each to improve readability and reduce boilerplate
 describe('_acceptableWhoSignedWhat (expect a boolean)', () => {
   it.each`
     whoSignedWhat | largestTurnNum | nParticipants | nStates | expectedResult
