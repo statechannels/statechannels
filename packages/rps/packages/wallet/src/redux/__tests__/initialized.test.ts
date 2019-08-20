@@ -57,7 +57,7 @@ describe('when a ProcessAction arrives', () => {
     strategy: 'IndirectFundingStrategy',
   });
   const NewLedgerChannelReducer = jest.fn(() => ({
-    protocolState: 'protocolState',
+    protocolState: { type: 'StateType' },
     sharedData: 'sharedData ',
   }));
   Object.defineProperty(fundProtocol, 'fundingReducer', {

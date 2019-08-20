@@ -16,14 +16,12 @@ linkStyle default interpolate basis
   S((start))-->ICC{Is Channel Closed}
   ICC-->|No|F((failure))
   ICC-->|Yes|ID{Get Funding Type}
-  ID-->|Directly Funded|WP(Wait for Withdrawal)
+  ID-->|Directly Funded|F((Failure))
   ID -->|Ledger Funding|LDP(Wait for Indirect De-funding)
   ID -->|Virtual Funding|VD(Wait for Virtual De-funding)
   VD -->|Virtual Defunding Action|VD
-  VD -->|Virtual Defunding Success|LDP
-  LDP-->|Indirect de-funding protocol success|WP(Wait for Withdrawal)
-  WP-->|Withdrawal protocol success|Su((Success))
-  WP-->|Withdrawal protocol failure|F((Failure))
+  VD -->|Virtual Defunding Success|Su((success))
+  LDP-->|Indirect de-funding protocol success|Su((Success))
   LDP-->|Indirect de-funding protocol failure|F
 
   classDef logic fill:#efdd20;
@@ -39,11 +37,3 @@ linkStyle default interpolate basis
 ## Notes
 
 - Withdrawal Complete/Failure and Indirect de-funding Complete/Failure are not actions. They are checks on the sub-protocol state to see if success/failure has been reached.
-
-## Scenarios
-
-1. **Directly Funded Channel Happy Path** - Start -> Is Channel Closed -> Yes-> Is Direct Channel -> Yes -> Wait for Withdrawal->Withdrawal Protocol Complete -> Success
-2. **Indirect Funded Channel Happy Path** - Start -> Is Channel Closed -> Yes-> Is Direct Channel -> No -> Wait for Indirect de-funding -> Indirect de-funding Protocol Complete -> Wait for Withdrawal->Withdrawal Protocol Complete -> Success
-3. **Channel Not Closed** - Start -> Is Channel Closed -> No -> Failure
-4. **Withdrawal Failure** - Start -> Is Channel Closed -> Yes -> Is Direct Channel -> Yes -> Wait for Withdrawal-> Withdrawal Protocol Failure -> Failure
-5. TODO: **Indirect de-funding Failure** - Start -> Is Channel Closed -> Yes-> Is Direct Channel -> No ->Wait for Indirect de-funding->Indirect de-funding Protocol Failure -> Failure

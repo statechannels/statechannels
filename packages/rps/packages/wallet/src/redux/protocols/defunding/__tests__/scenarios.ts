@@ -1,14 +1,12 @@
 import * as states from '../states';
-import * as withdrawalScenarios from '../../withdrawing/__tests__/scenarios';
 import * as testScenarios from '../../../../domain/commitments/__tests__';
-import { ChannelState, ChannelStore } from '../../../channel-store';
-import { EMPTY_SHARED_DATA, FundingState, setFundingState, setChannels } from '../../../state';
-import * as indirectDefunding from '../../indirect-defunding/__tests__';
+import { setFundingState, setChannels } from '../../../state';
+import * as ledgerDefunding from '../../ledger-defunding/__tests__';
 import { channelFromCommitments } from '../../../channel-store/channel-state/__tests__';
 import { bigNumberify } from 'ethers/utils';
 import * as virtualDefunding from '../../virtual-defunding/__tests__';
 import _ from 'lodash';
-import { prependToLocator } from '../..';
+import { prependToLocator, makeLocator, EMPTY_LOCATOR } from '../..';
 import { EmbeddedProtocol } from '../../../../communication';
 import { mergeSharedData } from '../../../__tests__/helpers';
 const processId = 'process-id.123';
@@ -20,8 +18,6 @@ const twoThree = [
   { address: bsAddress, wei: bigNumberify(3).toHexString() },
 ];
 
-const gameCommitment1 = testScenarios.appCommitment({ turnNum: 19 }).commitment;
-const gameCommitment2 = testScenarios.appCommitment({ turnNum: 20 }).commitment;
 const concludeCommitment1 = testScenarios.appCommitment({ turnNum: 51, isFinal: true });
 const concludeCommitment2 = testScenarios.appCommitment({ turnNum: 52, isFinal: true });
 const ledger4 = testScenarios.ledgerCommitment({ turnNum: 4, balances: twoThree });
@@ -35,47 +31,15 @@ const channelStatus = channelFromCommitments(
 
 const ledgerChannelStatus = channelFromCommitments([ledger4, ledger5], asAddress, asPrivateKey);
 const { ledgerId } = testScenarios;
-const channelStore: ChannelStore = {
-  [channelId]: channelStatus,
-};
-
-const notClosedChannelStatus: ChannelState = {
-  ...channelStatus,
-  commitments: [
-    { commitment: gameCommitment1, signature: '0x0' },
-    { commitment: gameCommitment2, signature: '0x0' },
-  ],
-  turnNum: gameCommitment2.turnNum,
-};
-
-const notClosedChannelState = {
-  [channelId]: notClosedChannelStatus,
-};
-
-const directlyFundedFundingState: FundingState = {
-  [testScenarios.channelId]: {
-    directlyFunded: true,
-  },
-};
-
-const waitForWithdrawal = states.waitForWithdrawal({
-  processId,
-  channelId,
-  withdrawalState: withdrawalScenarios.happyPath.waitForAcknowledgement.state,
-});
-const waitForWithdrawalFailure = states.waitForWithdrawal({
-  processId,
-  channelId,
-  withdrawalState: withdrawalScenarios.withdrawalRejected.waitForApproval.state,
-});
 
 const waitForLedgerDefunding = states.waitForLedgerDefunding({
   processId,
   channelId,
   ledgerId,
-  indirectDefundingState: prependToLocator(
-    indirectDefunding.preSuccessState.state,
-    EmbeddedProtocol.IndirectDefunding,
+  protocolLocator: EMPTY_LOCATOR,
+  ledgerDefundingState: prependToLocator(
+    ledgerDefunding.preSuccessState.state,
+    EmbeddedProtocol.LedgerDefunding,
   ),
 });
 
@@ -83,49 +47,21 @@ const waitForVirtualDefunding = states.waitForVirtualDefunding({
   processId,
   channelId,
   ledgerId,
+  protocolLocator: EMPTY_LOCATOR,
   virtualDefunding: prependToLocator(
     virtualDefunding.preSuccess.state,
-    EmbeddedProtocol.VirtualDefunding,
-  ),
-  indirectDefundingState: prependToLocator(
-    indirectDefunding.preSuccessState.state,
-    EmbeddedProtocol.IndirectDefunding,
+    makeLocator(EmbeddedProtocol.VirtualDefunding),
   ),
 });
-
-const channelNotClosedFailure = states.failure({ reason: 'Channel Not Closed' });
-
-export const directlyFundingChannelHappyPath = {
-  processId,
-  channelId,
-  initialize: {
-    processId,
-    channelId,
-    sharedData: {
-      ...EMPTY_SHARED_DATA,
-      fundingState: directlyFundedFundingState,
-      channelStore,
-    },
-  },
-
-  waitForWithdrawal: {
-    state: waitForWithdrawal,
-    action: withdrawalScenarios.happyPath.waitForAcknowledgement.action,
-    sharedData: {
-      ...EMPTY_SHARED_DATA,
-      fundingState: directlyFundedFundingState,
-      channelStore,
-    },
-  },
-};
 
 export const indirectlyFundingChannelHappyPath = {
   initialize: {
     processId,
     channelId,
+    protocolLocator: EMPTY_LOCATOR,
     sharedData: setChannels(
       setFundingState(
-        setFundingState(indirectDefunding.initialStore, channelId, {
+        setFundingState(ledgerDefunding.initialStore, channelId, {
           directlyFunded: false,
           fundingChannel: testScenarios.ledgerId,
         }),
@@ -138,10 +74,10 @@ export const indirectlyFundingChannelHappyPath = {
   // States
   waitForLedgerDefunding: {
     state: waitForLedgerDefunding,
-    action: prependToLocator(indirectDefunding.successTrigger, EmbeddedProtocol.IndirectDefunding),
+    action: prependToLocator(ledgerDefunding.successTrigger, EmbeddedProtocol.LedgerDefunding),
     sharedData: setChannels(
       setFundingState(
-        setFundingState(indirectDefunding.preSuccessState.sharedData, channelId, {
+        setFundingState(ledgerDefunding.preSuccessState.sharedData, channelId, {
           directlyFunded: false,
           fundingChannel: testScenarios.ledgerId,
         }),
@@ -151,79 +87,22 @@ export const indirectlyFundingChannelHappyPath = {
       [channelStatus, ledgerChannelStatus],
     ),
   },
-  waitForWithdrawal: {
-    state: waitForWithdrawal,
-    action: withdrawalScenarios.happyPath.waitForAcknowledgement.action,
-    sharedData: {
-      ...EMPTY_SHARED_DATA,
-      fundingState: directlyFundedFundingState,
-      channelStore,
-    },
-  },
 };
 
 export const virtualFundingChannelHappyPath = {
   initialize: {
     processId,
+    protocolLocator: EMPTY_LOCATOR,
     channelId: virtualDefunding.initial.targetChannelId,
     sharedData: mergeSharedData(
       virtualDefunding.preSuccess.sharedData,
-      indirectDefunding.preSuccessState.sharedData,
+      ledgerDefunding.preSuccessState.sharedData,
     ),
   },
   // States
   waitForVirtualDefunding: {
     state: waitForVirtualDefunding,
     action: prependToLocator(virtualDefunding.preSuccess.action, EmbeddedProtocol.VirtualDefunding),
-    sharedData: mergeSharedData(
-      virtualDefunding.preSuccess.sharedData,
-      indirectDefunding.preSuccessState.sharedData,
-    ),
-  },
-  waitForLedgerDefunding: {
-    state: waitForLedgerDefunding,
-    action: prependToLocator(indirectDefunding.successTrigger, EmbeddedProtocol.IndirectDefunding),
-    sharedData: mergeSharedData(
-      indirectDefunding.preSuccessState.sharedData,
-      virtualDefunding.preSuccess.sharedData,
-    ),
-  },
-  waitForWithdrawal: {
-    state: waitForWithdrawal,
-    action: withdrawalScenarios.happyPath.waitForAcknowledgement.action,
-    sharedData: {
-      ...EMPTY_SHARED_DATA,
-      fundingState: directlyFundedFundingState,
-      channelStore,
-    },
-  },
-};
-
-export const channelNotClosed = {
-  processId,
-  channelId,
-  // States
-  waitForWithdrawal,
-  failure: channelNotClosedFailure,
-  // Shared data
-  sharedData: {
-    ...EMPTY_SHARED_DATA,
-    fundingState: directlyFundedFundingState,
-    channelStore: notClosedChannelState,
-  },
-};
-
-export const directlyFundingFailure = {
-  processId,
-  channelId,
-  // States
-  waitForWithdrawal: {
-    state: waitForWithdrawalFailure,
-    action: withdrawalScenarios.withdrawalRejected.waitForApproval.action,
-    sharedData: {
-      ...EMPTY_SHARED_DATA,
-      fundingState: directlyFundedFundingState,
-      channelStore,
-    },
+    sharedData: virtualDefunding.preSuccess.sharedData,
   },
 };

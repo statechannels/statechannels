@@ -12,7 +12,7 @@ import { ActionConstructor } from '../../utils';
 // Actions
 // -------
 export interface ClearedToSend extends BaseProcessAction {
-  type: 'WALLET.INDIRECT_DEFUNDING.CLEARED_TO_SEND';
+  type: 'WALLET.LEDGER_DEFUNDING.CLEARED_TO_SEND';
   protocolLocator: ProtocolLocator;
 }
 
@@ -22,7 +22,7 @@ export interface ClearedToSend extends BaseProcessAction {
 export const clearedToSend: ActionConstructor<ClearedToSend> = p => {
   return {
     ...p,
-    type: 'WALLET.INDIRECT_DEFUNDING.CLEARED_TO_SEND',
+    type: 'WALLET.LEDGER_DEFUNDING.CLEARED_TO_SEND',
   };
 };
 
@@ -30,16 +30,16 @@ export const clearedToSend: ActionConstructor<ClearedToSend> = p => {
 // Unions and Guards
 // --------
 
-export type IndirectDefundingAction = ConsensusUpdateAction | AdvanceChannelAction | ClearedToSend;
+export type LedgerDefundingAction = ConsensusUpdateAction | AdvanceChannelAction | ClearedToSend;
 
-export function isIndirectDefundingAction(action: WalletAction): action is IndirectDefundingAction {
+export function isLedgerDefundingAction(action: WalletAction): action is LedgerDefundingAction {
   return (
-    action.type === 'WALLET.INDIRECT_DEFUNDING.CLEARED_TO_SEND' ||
+    action.type === 'WALLET.LEDGER_DEFUNDING.CLEARED_TO_SEND' ||
     isConsensusUpdateAction(action) ||
     isAdvanceChannelAction(action)
   );
 }
-export const routesToIndirectDefunding = routerFactory(
-  isIndirectDefundingAction,
-  EmbeddedProtocol.IndirectDefunding,
+export const routesToLedgerDefunding = routerFactory(
+  isLedgerDefundingAction,
+  EmbeddedProtocol.LedgerDefunding,
 );

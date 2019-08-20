@@ -1,7 +1,8 @@
 import { WalletAction } from '../../actions';
 import { WithdrawalAction, isWithdrawalAction } from '../withdrawing/actions';
-import { IndirectDefundingAction, isIndirectDefundingAction } from '../indirect-defunding/actions';
+import { LedgerDefundingAction, isLedgerDefundingAction } from '../ledger-defunding/actions';
 import { VirtualDefundingAction, isVirtualDefundingAction } from '../virtual-defunding';
+import { EmbeddedProtocol, routerFactory } from '../../../communication';
 
 // -------
 // Actions
@@ -15,13 +16,14 @@ import { VirtualDefundingAction, isVirtualDefundingAction } from '../virtual-def
 // Unions and Guards
 // -------
 
-// TODO: Replace once ledger defunding actions are defined
-export type DefundingAction = WithdrawalAction | IndirectDefundingAction | VirtualDefundingAction;
+export type DefundingAction = WithdrawalAction | LedgerDefundingAction | VirtualDefundingAction;
 
 export const isDefundingAction = (action: WalletAction): action is DefundingAction => {
   return (
     isWithdrawalAction(action) ||
-    isIndirectDefundingAction(action) ||
+    isLedgerDefundingAction(action) ||
     isVirtualDefundingAction(action)
   );
 };
+
+export const routesToDefunding = routerFactory(isDefundingAction, EmbeddedProtocol.Defunding);
