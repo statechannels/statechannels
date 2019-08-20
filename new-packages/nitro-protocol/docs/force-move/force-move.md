@@ -48,6 +48,7 @@ Effects:
 * Else
   - Calculate `emptyStorageHash = hash(turnNumRecord, 0, 0, 0)`
   - Check that `channelStorageHashes[channelId] = emptyStorageHash`
+  - Check that the `largestTurnNum >= turnNumRecord`
 * Let `m = variableParts.length`
 * [Optional] assert `sigs.length == m` // signature algorithm should just break if this isn't the case
 * For `i` in `0 .. (m-1)`:
