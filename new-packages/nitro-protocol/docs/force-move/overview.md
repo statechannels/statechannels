@@ -3,8 +3,6 @@ id: overview
 title: Overview
 ---
 
-# ForceMove
-
 - Extensible
 - How to update a channel
 - State format
@@ -36,23 +34,3 @@ This is some content.
 ## Concluding
 
 ## Setup Phase and Funding
-
----
-
-Other pages:
-
-- State Format
-  - ChannelId
-  - StateHash
-  - Implementation Notes - optimized hash
-- Transition rules
-  - Including app's validTransition
-- Channel storage
-  - turnNumRecord
-  - Implementation Notes
-- ForceMove
-  - Implementation Notes
-- Respond
-- RespondFromAlternative
-- Refute
-- Conclude
