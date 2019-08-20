@@ -15,6 +15,10 @@ let networkId;
 const chainId = 1234;
 const participants = ['', '', ''];
 const wallets = new Array(3);
+const challengeDuration = 1000;
+const outcome = ethers.utils.id('some outcome data'); // use a fixed outcome for all state updates in all tests
+const outcomeHash = keccak256(defaultAbiCoder.encode(['bytes'], [outcome]));
+let appDefinition;
 
 // populate wallets and participants array
 for (let i = 0; i < 3; i++) {
@@ -25,152 +29,147 @@ for (let i = 0; i < 3; i++) {
 beforeAll(async () => {
   optimizedForceMove = await setupContracts(provider, optimizedForceMoveArtifact);
   networkId = (await provider.getNetwork()).chainId;
+  appDefinition = countingAppArtifact.networks[networkId].address; // use a fixed appDefinition in all tests
 });
 
-describe('respond', () => {
-  const existingTurnNumRecord = 8;
-  const challengeDuration = 1000;
-  const isFinalAB = [false, false];
-  const challenger = participants[existingTurnNumRecord % participants.length];
-
-  const outcome = ethers.utils.id('some outcome data');
-  const outcomeHash = keccak256(defaultAbiCoder.encode(['bytes'], [outcome]));
-
-  const challengeVariablePart = {
-    outcome,
-    appData: defaultAbiCoder.encode(['uint256'], [1]), // a counter
-  };
-  const responseVariablePart = {
-    outcome,
-    appData: defaultAbiCoder.encode(['uint256'], [2]), // a counter
-  };
-
-  let expectedChannelStorage;
-  let expectedChannelStorageHash;
-
-  it('accepts a valid respond tx and clears an existing challenge', async () => {
-    const blockNumber = await provider.getBlockNumber();
-    const blockTimestamp = (await provider.getBlock(blockNumber)).timestamp;
-    const expiryTime = blockTimestamp + challengeDuration;
-
-    // channelId
-    const channelNonce = 1;
-    const channelId = keccak256(
-      defaultAbiCoder.encode(
-        ['uint256', 'address[]', 'uint256'],
-        [chainId, participants, channelNonce],
-      ),
-    );
-
-    // fixedPart
-    const fixedPart = {
-      chainId,
-      participants,
+describe('respond (undefined reason implies tx success and storage updated correctly)', () => {
+  it.each`
+    channelNonce | initialChannelStorageHash | turnNumRecord | expired  | isFinalAB         | appDatas  | challenger    | responder     | reasonString
+    ${1}         | ${HashZero}               | ${8}          | ${false} | ${[false, false]} | ${[0, 1]} | ${wallets[2]} | ${wallets[0]} | ${undefined}
+  `(
+    'tx for channel with channelNonce $channelNonce -> revert reason: $reasonString', // for the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce
+    async ({
       channelNonce,
-      appDefinition: countingAppArtifact.networks[networkId].address,
-      challengeDuration,
-    };
-
-    const challengeAppPartHash = keccak256(
-      defaultAbiCoder.encode(
-        ['uint256', 'address', 'bytes'],
-        [fixedPart.challengeDuration, fixedPart.appDefinition, challengeVariablePart.appData],
-      ),
-    );
-
-    const challengeState = {
-      turnNum: existingTurnNumRecord,
-      isFinal: false,
-      channelId,
-      challengeAppPartHash,
-      outcomeHash,
-    };
-
-    const challengeStateHash = keccak256(
-      defaultAbiCoder.encode(
-        [
-          'tuple(uint256 turnNum, bool isFinal, bytes32 channelId, bytes32 challengeAppPartHash, bytes32 outcomeHash)',
-        ],
-        [challengeState],
-      ),
-    );
-
-    const responseAppPartHash = keccak256(
-      defaultAbiCoder.encode(
-        ['uint256', 'address', 'bytes'],
-        [challengeDuration, fixedPart.appDefinition, responseVariablePart.appData],
-      ),
-    );
-
-    const responseState = {
-      turnNum: existingTurnNumRecord + 1,
-      isFinal: false,
-      channelId,
-      responseAppPartHash,
-      outcomeHash,
-    };
-
-    const responseStateHash = keccak256(
-      defaultAbiCoder.encode(
-        [
-          'tuple(uint256 turnNum, bool isFinal, bytes32 channelId, bytes32 responseAppPartHash, bytes32 outcomeHash)',
-        ],
-        [responseState],
-      ),
-    );
-
-    // compute expected ChannelStorageHash
-    expectedChannelStorage = [
-      existingTurnNumRecord,
-      expiryTime,
-      challengeStateHash,
-      participants[2],
-      outcomeHash,
-    ];
-    expectedChannelStorageHash = keccak256(
-      defaultAbiCoder.encode(
-        ['uint256', 'uint256', 'bytes32', 'address', 'bytes32'],
-        expectedChannelStorage,
-      ),
-    );
-
-    // call public wrapper to set state (only works on test contract)
-    const tx = await optimizedForceMove.setChannelStorage(channelId, expectedChannelStorage);
-    await tx.wait();
-    expect(await optimizedForceMove.channelStorageHashes(channelId)).toEqual(
-      expectedChannelStorageHash,
-    );
-
-    // sign the state
-    const signature = await sign(
-      wallets[(existingTurnNumRecord + 1) % participants.length],
-      responseStateHash,
-    );
-    const sig = {v: signature.v, r: signature.r, s: signature.s};
-
-    // call forceMove
-    const tx2 = await optimizedForceMove.respond(
-      existingTurnNumRecord,
-      expiryTime,
-      challenger,
+      initialChannelStorageHash,
+      turnNumRecord,
+      expired,
       isFinalAB,
-      fixedPart,
-      [challengeVariablePart, responseVariablePart],
-      sig,
-    );
+      appDatas,
+      challenger,
+      responder,
+      reasonString,
+    }) => {
+      // compute channelId
+      const channelId = keccak256(
+        defaultAbiCoder.encode(
+          ['uint256', 'address[]', 'uint256'],
+          [chainId, participants, channelNonce],
+        ),
+      );
+      // fixedPart
+      const fixedPart = {
+        chainId,
+        participants,
+        channelNonce,
+        appDefinition,
+        challengeDuration,
+      };
 
-    await tx2.wait();
+      const challengeAppPartHash = keccak256(
+        defaultAbiCoder.encode(
+          ['uint256', 'address', 'bytes'],
+          [challengeDuration, appDefinition, defaultAbiCoder.encode(['uint256'], [appDatas[0]])],
+        ),
+      );
 
-    // compute and check new expected ChannelStorageHash
-    expectedChannelStorage = [existingTurnNumRecord + 1, 0, HashZero, AddressZero, HashZero];
-    expectedChannelStorageHash = keccak256(
-      defaultAbiCoder.encode(
-        ['uint256', 'uint256', 'bytes32', 'address', 'bytes32'],
-        expectedChannelStorage,
-      ),
-    );
-    expect(await optimizedForceMove.channelStorageHashes(channelId)).toEqual(
-      expectedChannelStorageHash,
-    );
-  });
+      const challengeState = {
+        turnNum: turnNumRecord,
+        isFinal: isFinalAB[0],
+        channelId,
+        challengeAppPartHash,
+        outcomeHash,
+      };
+
+      const challengeStateHash = keccak256(
+        defaultAbiCoder.encode(
+          [
+            'tuple(uint256 turnNum, bool isFinal, bytes32 channelId, bytes32 challengeAppPartHash, bytes32 outcomeHash)',
+          ],
+          [challengeState],
+        ),
+      );
+
+      const responseAppPartHash = keccak256(
+        defaultAbiCoder.encode(
+          ['uint256', 'address', 'bytes'],
+          [challengeDuration, appDefinition, defaultAbiCoder.encode(['uint256'], [appDatas[1]])],
+        ),
+      );
+
+      const responseState = {
+        turnNum: turnNumRecord + 1,
+        isFinal: isFinalAB[1],
+        channelId,
+        responseAppPartHash,
+        outcomeHash,
+      };
+
+      const responseStateHash = keccak256(
+        defaultAbiCoder.encode(
+          [
+            'tuple(uint256 turnNum, bool isFinal, bytes32 channelId, bytes32 responseAppPartHash, bytes32 outcomeHash)',
+          ],
+          [responseState],
+        ),
+      );
+
+      const challengeVariablePart = {
+        outcome,
+        appData: defaultAbiCoder.encode(['uint256'], [appDatas[0]]), // a counter
+      };
+      const responseVariablePart = {
+        outcome,
+        appData: defaultAbiCoder.encode(['uint256'], [appDatas[1]]), // a counter
+      };
+
+      // set expiry time in the future or in the past
+      const blockNumber = await provider.getBlockNumber();
+      const blockTimestamp = (await provider.getBlock(blockNumber)).timestamp;
+      const expiryTime = expired
+        ? blockTimestamp - challengeDuration
+        : blockTimestamp + challengeDuration;
+
+      // compute expected ChannelStorageHash
+      const challengeExistsHash = keccak256(
+        defaultAbiCoder.encode(
+          ['uint256', 'uint256', 'bytes32', 'address', 'bytes32'],
+          [turnNumRecord, expiryTime, challengeStateHash, challenger.address, outcomeHash],
+        ),
+      );
+
+      // call public wrapper to set state (only works on test contract)
+      const tx = await optimizedForceMove.setChannelStorageHash(channelId, challengeExistsHash);
+      await tx.wait();
+      expect(await optimizedForceMove.channelStorageHashes(channelId)).toEqual(challengeExistsHash);
+
+      // sign the state
+      const signature = await sign(responder, responseStateHash);
+      const sig = {v: signature.v, r: signature.r, s: signature.s};
+
+      // call respond
+      const tx2 = await optimizedForceMove.respond(
+        turnNumRecord,
+        expiryTime,
+        challenger.address,
+        isFinalAB,
+        fixedPart,
+        [challengeVariablePart, responseVariablePart],
+        sig,
+      );
+
+      await tx2.wait();
+
+      // compute and check new expected ChannelStorageHash
+      const expectedChannelStorage = [turnNumRecord + 1, 0, HashZero, AddressZero, HashZero];
+      const expectedChannelStorageHash = keccak256(
+        defaultAbiCoder.encode(
+          ['uint256', 'uint256', 'bytes32', 'address', 'bytes32'],
+          expectedChannelStorage,
+        ),
+      );
+      expect(await optimizedForceMove.channelStorageHashes(channelId)).toEqual(
+        expectedChannelStorageHash,
+      );
+    },
+  );
 });
