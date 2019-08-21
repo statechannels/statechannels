@@ -81,7 +81,8 @@
         "tsConfig": "./tsconfig.json"
       }
     },
-    "preset": "ts-jest"
+    "preset": "ts-jest",
+    "setTimeout": 30000
   },
   "prettier": {
     "printWidth": 100,
