@@ -52,21 +52,6 @@ beforeAll(async () => {
   appDefinition = countingAppArtifact.networks[networkId].address; // use a fixed appDefinition in all tests
 });
 
-beforeEach(() => {
-  forceMoveEvent = new Promise((resolve, reject) => {
-    optimizedForceMove.on(
-      'ForceMove(bytes32, uint256, uint256, address)',
-      (cId, expTime, turnNum, challengerAddress, event) => {
-        event.removeListener();
-        resolve([expTime, turnNum]);
-      },
-    );
-    setTimeout(() => {
-      reject(new Error('timeout'));
-    }, 60000);
-  });
-});
-
 // Scenarios are synonymous with channelNonce:
 
 const description1 =
@@ -85,14 +70,14 @@ const description8 = 'It reverts when an unacceptable whoSignedWhat array is sub
 describe('forceMove', () => {
   it.each`
     description     | channelNonce | initialChannelStorageHash | turnNumRecord | largestTurnNum | appDatas     | isFinalCount | whoSignedWhat | challenger        | reasonString
-    ${description1} | ${1}         | ${HashZero}               | ${8}          | ${8}           | ${[0, 1, 2]} | ${0}         | ${[0, 1, 2]}  | ${wallets[2]}     | ${undefined}
-    ${description2} | ${2}         | ${HashZero}               | ${0}          | ${8}           | ${[2]}       | ${0}         | ${[0, 0, 0]}  | ${wallets[2]}     | ${undefined}
-    ${description3} | ${3}         | ${clearedChallengeHash}   | ${5}          | ${8}           | ${[2]}       | ${0}         | ${[0, 0, 0]}  | ${wallets[2]}     | ${undefined}
-    ${description4} | ${4}         | ${clearedChallengeHash}   | ${5}          | ${2}           | ${[2]}       | ${0}         | ${[0, 0, 0]}  | ${wallets[2]}     | ${'Stale challenge!'}
-    ${description5} | ${5}         | ${ongoinghallengeHash}    | ${5}          | ${8}           | ${[2]}       | ${0}         | ${[0, 0, 0]}  | ${wallets[2]}     | ${'Channel is not open or turnNum does not match'}
-    ${description6} | ${6}         | ${HashZero}               | ${0}          | ${8}           | ${[0, 1, 2]} | ${0}         | ${[0, 1, 2]}  | ${nonParticipant} | ${'Challenger is not a participant'}
-    ${description7} | ${7}         | ${HashZero}               | ${0}          | ${8}           | ${[0, 1, 1]} | ${0}         | ${[0, 1, 2]}  | ${wallets[2]}     | ${'CountingApp: Counter must be incremented'}
-    ${description8} | ${8}         | ${HashZero}               | ${0}          | ${8}           | ${[0, 1, 2]} | ${0}         | ${[0, 0, 2]}  | ${wallets[2]}     | ${'Unacceptable whoSignedWhat array'}
+    ${description1} | ${201}       | ${HashZero}               | ${0}          | ${8}           | ${[0, 1, 2]} | ${0}         | ${[0, 1, 2]}  | ${wallets[2]}     | ${undefined}
+    ${description2} | ${202}       | ${HashZero}               | ${0}          | ${8}           | ${[2]}       | ${0}         | ${[0, 0, 0]}  | ${wallets[2]}     | ${undefined}
+    ${description3} | ${203}       | ${clearedChallengeHash}   | ${5}          | ${8}           | ${[2]}       | ${0}         | ${[0, 0, 0]}  | ${wallets[2]}     | ${undefined}
+    ${description4} | ${204}       | ${clearedChallengeHash}   | ${5}          | ${2}           | ${[2]}       | ${0}         | ${[0, 0, 0]}  | ${wallets[2]}     | ${'Stale challenge!'}
+    ${description5} | ${205}       | ${ongoinghallengeHash}    | ${5}          | ${8}           | ${[2]}       | ${0}         | ${[0, 0, 0]}  | ${wallets[2]}     | ${'Channel is not open or turnNum does not match'}
+    ${description6} | ${206}       | ${HashZero}               | ${0}          | ${8}           | ${[0, 1, 2]} | ${0}         | ${[0, 1, 2]}  | ${nonParticipant} | ${'Challenger is not a participant'}
+    ${description7} | ${207}       | ${HashZero}               | ${0}          | ${8}           | ${[0, 1, 1]} | ${0}         | ${[0, 1, 2]}  | ${wallets[2]}     | ${'CountingApp: Counter must be incremented'}
+    ${description8} | ${208}       | ${HashZero}               | ${0}          | ${8}           | ${[0, 1, 2]} | ${0}         | ${[0, 0, 2]}  | ${wallets[2]}     | ${'Unacceptable whoSignedWhat array'}
   `(
     '$description', // for the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce
     async ({
@@ -176,6 +161,23 @@ describe('forceMove', () => {
         initialChannelStorageHash,
       )).wait();
 
+      // match event for this channel only
+      forceMoveEvent = new Promise((resolve, reject) => {
+        optimizedForceMove.on(
+          'ForceMove(bytes32, uint256, uint256, address)',
+          (cId, expTime, turnNum, challengerAddress, event) => {
+            if (cId === channelId) {
+              // match event for this channel only
+              // event.removeListener();
+              resolve([expTime, turnNum]);
+            }
+          },
+        );
+        setTimeout(() => {
+          reject(new Error('timeout'));
+        }, 60000);
+      });
+
       // call forceMove in a slightly different way if expecting a revert
       if (reasonString) {
         expectRevert(
@@ -208,8 +210,8 @@ describe('forceMove', () => {
         await tx.wait();
 
         // catch ForceMove event and peel-off the expiryTime
-        console.warn('waiting for event...');
         const [expiryTime, newTurnNumRecord] = await forceMoveEvent;
+
         // newTurnNumRecord not used here but important for the responder to know
 
         // compute expected ChannelStorageHash
