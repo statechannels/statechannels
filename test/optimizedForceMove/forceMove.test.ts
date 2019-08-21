@@ -8,8 +8,6 @@ import {keccak256, defaultAbiCoder} from 'ethers/utils';
 import {HashZero, AddressZero} from 'ethers/constants';
 import {setupContracts, sign} from './test-helpers';
 
-jest.setTimeout(20000);
-
 const provider = new ethers.providers.JsonRpcProvider(
   `http://localhost:${process.env.DEV_GANACHE_PORT}`,
 );
