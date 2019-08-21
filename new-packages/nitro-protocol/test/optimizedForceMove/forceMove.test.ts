@@ -43,23 +43,38 @@ const ongoinghallengeHash = keccak256(
   ),
 );
 
+// set event listener
+let forceMoveEvent;
+
 beforeAll(async () => {
   optimizedForceMove = await setupContracts(provider, optimizedForceMoveArtifact);
   networkId = (await provider.getNetwork()).chainId;
   appDefinition = countingAppArtifact.networks[networkId].address; // use a fixed appDefinition in all tests
 });
 
+beforeEach(() => {
+  forceMoveEvent = new Promise((resolve, reject) => {
+    optimizedForceMove.on('ForceMove', (cId, expTime, turnNum, challengerAddress, event) => {
+      event.removeListener();
+      resolve([expTime, turnNum]);
+    });
+    setTimeout(() => {
+      reject(new Error('timeout'));
+    }, 60000);
+  });
+});
+
 // Scenarios are synonymous with channelNonce:
 
 const description1 =
-  'It accepts a forceMove for an open channel (first challenge, n states submitted)';
+  'It accepts a forceMove for an open channel (first challenge, n states submitted), and updates storage correctly';
 const description2 =
-  'It accepts a forceMove for an open channel (first challenge, 1 state submitted)';
+  'It accepts a forceMove for an open channel (first challenge, 1 state submitted), and updates storage correctly';
 const description3 =
-  'It accepts a forceMove for an open channel (subsequent challenge, higher turnNum)';
+  'It accepts a forceMove for an open channel (subsequent challenge, higher turnNum), and updates storage correctly';
 const description4 =
-  'It rejects a forceMove for an open channel if the turnNum is too small (subsequent challenge, turnNumRecord would decrease)';
-const description5 = 'It rejects a forceMove when a challenge is underway / finalized';
+  'It reverts a forceMove for an open channel if the turnNum is too small (subsequent challenge, turnNumRecord would decrease)';
+const description5 = 'It reverts a forceMove when a challenge is underway / finalized';
 const description6 = 'It reverts a forceMove with an incorrect challengerSig';
 const description7 = 'It reverts a forceMove with the states do not form a validTransition chain';
 const description8 = 'It reverts when an unacceptable whoSignedWhat array is submitted';
@@ -158,17 +173,6 @@ describe('forceMove', () => {
         initialChannelStorageHash,
       )).wait();
 
-      // set event listener
-      const forceMoveEvent = new Promise((resolve, reject) => {
-        optimizedForceMove.on('ForceMove', (cId, expTime, turnNum, challengerAddress, event) => {
-          event.removeListener();
-          resolve([expTime, turnNum]);
-        });
-        setTimeout(() => {
-          reject(new Error('timeout'));
-        }, 60000);
-      });
-
       // call forceMove in a slightly different way if expecting a revert
       if (reasonString) {
         expectRevert(
@@ -201,8 +205,8 @@ describe('forceMove', () => {
         await tx.wait();
 
         // catch ForceMove event and peel-off the expiryTime
-        const expiryTime = (await forceMoveEvent)[0];
-        const newTurnNumRecord = (await forceMoveEvent)[1]; // not used here but important for the responder to know
+        const [expiryTime, newTurnNumRecord] = await forceMoveEvent;
+        // newTurnNumRecord not used here but important for the responder to know
 
         // compute expected ChannelStorageHash
         const expectedChannelStorage = [
