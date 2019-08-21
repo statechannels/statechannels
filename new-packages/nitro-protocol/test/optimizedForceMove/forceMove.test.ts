@@ -158,6 +158,18 @@ describe('forceMove', () => {
         initialChannelStorageHash,
       )).wait();
 
+      // set event listener
+      const forceMoveEvent = new Promise((resolve, reject) => {
+        optimizedForceMove.on('ForceMove', (cId, expTime, turnNum, challengerAddress, event) => {
+          event.removeListener();
+          resolve([expTime, turnNum]);
+        });
+        setTimeout(() => {
+          reject(new Error('timeout'));
+        }, 60000);
+      });
+
+      // call forceMove in a slightly different way if expecting a revert
       if (reasonString) {
         expectRevert(
           () =>
@@ -174,7 +186,6 @@ describe('forceMove', () => {
           'VM Exception while processing transaction: revert ' + reasonString,
         );
       } else {
-        // call forceMove
         const tx = await optimizedForceMove.forceMove(
           turnNumRecord,
           fixedPart,
@@ -190,15 +201,6 @@ describe('forceMove', () => {
         await tx.wait();
 
         // catch ForceMove event and peel-off the expiryTime
-        const forceMoveEvent = new Promise((resolve, reject) => {
-          optimizedForceMove.on('ForceMove', (cId, expTime, turnNum, challengerAddress, event) => {
-            event.removeListener();
-            resolve([expTime, turnNum]);
-          });
-          setTimeout(() => {
-            reject(new Error('timeout'));
-          }, 60000);
-        });
         const expiryTime = (await forceMoveEvent)[0];
         const newTurnNumRecord = (await forceMoveEvent)[1]; // not used here but important for the responder to know
 
