@@ -65,9 +65,9 @@ contract OptimizedForceMove {
         // ------------
 
         // Check that the proposed largestTurnNum is larger than or equal to the turnNumRecord that is being committed to
-        require(largestTurnNum > turnNumRecord, 'Stale challenge!');
-        
-        // EITHER there is no information stored against channelId at all (OK)
+        require(largestTurnNum >= turnNumRecord, 'Stale challenge!');
+
+        // EITHER there is no inForceMoveAppion stored against channelId at all (OK)
         if (channelStorageHashes[channelId] != bytes32(0)) {
             // OR there is, in which case we must check the channel is still open and that the committed turnNumRecord is correct
             require(
