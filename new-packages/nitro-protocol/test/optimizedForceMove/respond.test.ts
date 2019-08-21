@@ -34,16 +34,25 @@ beforeAll(async () => {
   appDefinition = countingAppArtifact.networks[networkId].address; // use a fixed appDefinition in all tests
 });
 
-describe('respond (undefined reason implies tx success and storage updated correctly)', () => {
+// Scenarios are synonymous with channelNonce:
+
+const description1 = 'It accepts a respond tx for an ongoing challenge';
+const description2 = 'It reverts a respond tx if the challenge has expired';
+const description3 = 'It reverts a respond tx if the declaredTurnNumRecord is incorrect';
+const description4 = 'It reverts a respond tx if it is not signed by the correct participant';
+const description5 =
+  'It reverts a respond tx if the response state is not a validTransition from the challenge state';
+
+describe('respond', () => {
   it.each`
-    channelNonce | setTurnNumRecord | declaredTurnNumRecord | expired  | isFinalAB         | appDatas  | challenger    | responder         | reasonString
-    ${1}         | ${8}             | ${8}                  | ${false} | ${[false, false]} | ${[0, 1]} | ${wallets[2]} | ${wallets[0]}     | ${undefined}
-    ${2}         | ${8}             | ${8}                  | ${true}  | ${[false, false]} | ${[0, 1]} | ${wallets[2]} | ${wallets[0]}     | ${'Response too late!'}
-    ${3}         | ${8}             | ${7}                  | ${false} | ${[false, false]} | ${[0, 1]} | ${wallets[2]} | ${wallets[0]}     | ${'Challenge State does not match stored version'}
-    ${4}         | ${8}             | ${8}                  | ${false} | ${[false, false]} | ${[0, 1]} | ${wallets[2]} | ${nonParticipant} | ${'Response not signed by authorized mover'}
-    ${5}         | ${8}             | ${8}                  | ${false} | ${[false, false]} | ${[0, 0]} | ${wallets[2]} | ${wallets[0]}     | ${'Response is not a valid transition from challenge'}
+    description     | channelNonce | setTurnNumRecord | declaredTurnNumRecord | expired  | isFinalAB         | appDatas  | challenger    | responder         | reasonString
+    ${description1} | ${1}         | ${8}             | ${8}                  | ${false} | ${[false, false]} | ${[0, 1]} | ${wallets[2]} | ${wallets[0]}     | ${undefined}
+    ${description2} | ${2}         | ${8}             | ${8}                  | ${true}  | ${[false, false]} | ${[0, 1]} | ${wallets[2]} | ${wallets[0]}     | ${'Response too late!'}
+    ${description3} | ${3}         | ${8}             | ${7}                  | ${false} | ${[false, false]} | ${[0, 1]} | ${wallets[2]} | ${wallets[0]}     | ${'Challenge State does not match stored version'}
+    ${description4} | ${4}         | ${8}             | ${8}                  | ${false} | ${[false, false]} | ${[0, 1]} | ${wallets[2]} | ${nonParticipant} | ${'Response not signed by authorized mover'}
+    ${description5} | ${5}         | ${8}             | ${8}                  | ${false} | ${[false, false]} | ${[0, 0]} | ${wallets[2]} | ${wallets[0]}     | ${'CountingApp: Counter must be incremented'}
   `(
-    'tx for channel with channelNonce $channelNonce -> revert reason: $reasonString', // for the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce
+    '$description', // for the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce
     async ({
       channelNonce,
       setTurnNumRecord,

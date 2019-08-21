@@ -8,6 +8,8 @@ import {keccak256, defaultAbiCoder} from 'ethers/utils';
 import {HashZero, AddressZero} from 'ethers/constants';
 import {setupContracts, sign} from './test-helpers';
 
+jest.setTimeout(20000);
+
 const provider = new ethers.providers.JsonRpcProvider(
   `http://localhost:${process.env.DEV_GANACHE_PORT}`,
 );
@@ -51,28 +53,32 @@ beforeAll(async () => {
 
 // Scenarios are synonymous with channelNonce:
 
-// 1. It accepts a forceMove for an open channel (first challenge, n states submitted)
-// 2. It accepts a forceMove for an open channel (first challenge, 1 state submitted)
-// 3. It accepts a forceMove for an open channel (subsequent challenge, higher turnNum)
-// 4. It rejects a forceMove for an open channel if the turnNum is too small (subsequent challenge, turnNumRecord would decrease)
-// 5. It rejects a forceMove when a challenge is already underway (or equivalently, when the channel has been finalized -- the only check is whether a challenge has been instigated without having been cleared)
-// 6. It rejects a forceMove with an incorrect challengerSig
-// 7. It rejects a forceMove with the states don't form a validTransition chain
-// 8. It reverts when an unacceptable whoSignedWhat array is submitted
+const description1 =
+  'It accepts a forceMove for an open channel (first challenge, n states submitted)';
+const description2 =
+  'It accepts a forceMove for an open channel (first challenge, 1 state submitted)';
+const description3 =
+  'It accepts a forceMove for an open channel (subsequent challenge, higher turnNum)';
+const description4 =
+  'It rejects a forceMove for an open channel if the turnNum is too small (subsequent challenge, turnNumRecord would decrease)';
+const description5 = 'It rejects a forceMove when a challenge is underway / finalized';
+const description6 = 'It reverts a forceMove with an incorrect challengerSig';
+const description7 = 'It reverts a forceMove with the states do not form a validTransition chain';
+const description8 = 'It reverts when an unacceptable whoSignedWhat array is submitted';
 
-describe('forceMove (undefined reason implies tx success and storage updated correctly)', () => {
+describe('forceMove', () => {
   it.each`
-    channelNonce | initialChannelStorageHash | turnNumRecord | largestTurnNum | appDatas     | isFinalCount | whoSignedWhat | challenger        | reasonString
-    ${1}         | ${HashZero}               | ${0}          | ${8}           | ${[0, 1, 2]} | ${0}         | ${[0, 1, 2]}  | ${wallets[2]}     | ${undefined}
-    ${2}         | ${HashZero}               | ${0}          | ${8}           | ${[2]}       | ${0}         | ${[0, 0, 0]}  | ${wallets[2]}     | ${undefined}
-    ${3}         | ${clearedChallengeHash}   | ${5}          | ${8}           | ${[2]}       | ${0}         | ${[0, 0, 0]}  | ${wallets[2]}     | ${undefined}
-    ${4}         | ${clearedChallengeHash}   | ${5}          | ${2}           | ${[2]}       | ${0}         | ${[0, 0, 0]}  | ${wallets[2]}     | ${'Stale challenge!'}
-    ${5}         | ${ongoinghallengeHash}    | ${5}          | ${8}           | ${[2]}       | ${0}         | ${[0, 0, 0]}  | ${wallets[2]}     | ${'Channel is not open or turnNum does not match'}
-    ${6}         | ${HashZero}               | ${0}          | ${8}           | ${[0, 1, 2]} | ${0}         | ${[0, 1, 2]}  | ${nonParticipant} | ${'Challenger is not a participant'}
-    ${7}         | ${HashZero}               | ${0}          | ${8}           | ${[0, 1, 1]} | ${0}         | ${[0, 1, 2]}  | ${wallets[2]}     | ${'CountingApp: Counter must be incremented'}
-    ${8}         | ${HashZero}               | ${0}          | ${8}           | ${[0, 1, 2]} | ${0}         | ${[0, 0, 2]}  | ${wallets[2]}     | ${'Unacceptable whoSignedWhat array'}
+    description     | channelNonce | initialChannelStorageHash | turnNumRecord | largestTurnNum | appDatas     | isFinalCount | whoSignedWhat | challenger        | reasonString
+    ${description1} | ${1}         | ${HashZero}               | ${0}          | ${8}           | ${[0, 1, 2]} | ${0}         | ${[0, 1, 2]}  | ${wallets[2]}     | ${undefined}
+    ${description2} | ${2}         | ${HashZero}               | ${0}          | ${8}           | ${[2]}       | ${0}         | ${[0, 0, 0]}  | ${wallets[2]}     | ${undefined}
+    ${description3} | ${3}         | ${clearedChallengeHash}   | ${5}          | ${8}           | ${[2]}       | ${0}         | ${[0, 0, 0]}  | ${wallets[2]}     | ${undefined}
+    ${description4} | ${4}         | ${clearedChallengeHash}   | ${5}          | ${2}           | ${[2]}       | ${0}         | ${[0, 0, 0]}  | ${wallets[2]}     | ${'Stale challenge!'}
+    ${description5} | ${5}         | ${ongoinghallengeHash}    | ${5}          | ${8}           | ${[2]}       | ${0}         | ${[0, 0, 0]}  | ${wallets[2]}     | ${'Channel is not open or turnNum does not match'}
+    ${description6} | ${6}         | ${HashZero}               | ${0}          | ${8}           | ${[0, 1, 2]} | ${0}         | ${[0, 1, 2]}  | ${nonParticipant} | ${'Challenger is not a participant'}
+    ${description7} | ${7}         | ${HashZero}               | ${0}          | ${8}           | ${[0, 1, 1]} | ${0}         | ${[0, 1, 2]}  | ${wallets[2]}     | ${'CountingApp: Counter must be incremented'}
+    ${description8} | ${8}         | ${HashZero}               | ${0}          | ${8}           | ${[0, 1, 2]} | ${0}         | ${[0, 0, 2]}  | ${wallets[2]}     | ${'Unacceptable whoSignedWhat array'}
   `(
-    'tx for channel with channelNonce $channelNonce -> revert reason: $reasonString', // for the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce
+    '$description', // for the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce
     async ({
       channelNonce,
       initialChannelStorageHash,
