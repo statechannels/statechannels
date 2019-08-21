@@ -54,10 +54,13 @@ beforeAll(async () => {
 
 beforeEach(() => {
   forceMoveEvent = new Promise((resolve, reject) => {
-    optimizedForceMove.on('ForceMove', (cId, expTime, turnNum, challengerAddress, event) => {
-      event.removeListener();
-      resolve([expTime, turnNum]);
-    });
+    optimizedForceMove.on(
+      'ForceMove(bytes32, uint256, uint256, address)',
+      (cId, expTime, turnNum, challengerAddress, event) => {
+        event.removeListener();
+        resolve([expTime, turnNum]);
+      },
+    );
     setTimeout(() => {
       reject(new Error('timeout'));
     }, 60000);
@@ -205,6 +208,7 @@ describe('forceMove', () => {
         await tx.wait();
 
         // catch ForceMove event and peel-off the expiryTime
+        console.warn('waiting for event...');
         const [expiryTime, newTurnNumRecord] = await forceMoveEvent;
         // newTurnNumRecord not used here but important for the responder to know
 
