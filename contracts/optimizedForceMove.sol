@@ -162,10 +162,112 @@ contract OptimizedForceMove {
             keccak256(abi.encode(variableParts[variableParts.length - 1].outcome))
         );
 
-        emit ForceMove(channelId, now + fixedPart.challengeDuration); // TODO what else should go in here?
+        emit ForceMove(channelId, now + fixedPart.challengeDuration, largestTurnNum, challenger); // TODO what else should go in here?
 
         channelStorageHashes[channelId] = keccak256(abi.encode(channelStorage));
 
+    }
+
+    function respond(
+        uint256 turnNumRecord,
+        uint256 finalizesAt,
+        address challenger,
+        bool[2] memory isFinalAB,
+        FixedPart memory fixedPart,
+        ForceMoveApp.VariablePart[2] memory variablePartAB,
+        // variablePartAB[0] = challengeVariablePart
+        // variablePartAB[1] = responseVariablePart
+        Signature memory sig
+    ) public {
+        // Calculate channelId from fixed part
+        bytes32 channelId = keccak256(
+            abi.encode(fixedPart.chainId, fixedPart.participants, fixedPart.channelNonce)
+        );
+
+        bytes32 challengeOutcomeHash = keccak256(abi.encode(variablePartAB[0].outcome));
+        bytes32 responseOutcomeHash = keccak256(abi.encode(variablePartAB[1].outcome));
+        bytes32 challengeStateHash = keccak256(
+            abi.encode(
+                State(
+                    turnNumRecord,
+                    isFinalAB[0],
+                    channelId,
+                    keccak256(
+                        abi.encode(
+                            fixedPart.challengeDuration,
+                            fixedPart.appDefinition,
+                            variablePartAB[0].appData
+                        )
+                    ),
+                    challengeOutcomeHash
+                )
+            )
+        );
+        bytes32 responseStateHash = keccak256(
+            abi.encode(
+                State(
+                    turnNumRecord + 1,
+                    isFinalAB[1],
+                    channelId,
+                    keccak256(
+                        abi.encode(
+                            fixedPart.challengeDuration,
+                            fixedPart.appDefinition,
+                            variablePartAB[1].appData
+                        )
+                    ),
+                    responseOutcomeHash
+                )
+            )
+        );
+
+        // requirements
+
+        require(now < finalizesAt, 'Response too late!');
+
+        require(
+            keccak256(
+                    abi.encode(
+                        ChannelStorage(
+                            turnNumRecord,
+                            finalizesAt,
+                            challengeStateHash,
+                            challenger,
+                            challengeOutcomeHash
+                        )
+                    )
+                ) ==
+                channelStorageHashes[channelId],
+            'Challenge State does not match stored version'
+        );
+
+        require(
+            _recoverSigner(responseStateHash, sig.v, sig.r, sig.s) ==
+                fixedPart.participants[(turnNumRecord + 1) % fixedPart.participants.length],
+            'Response not signed by authorized mover'
+        );
+
+        require(
+            _validTransition(
+                fixedPart.participants.length,
+                isFinalAB,
+                variablePartAB,
+                turnNumRecord + 1,
+                fixedPart.appDefinition
+            ) // reason string is not required (_validTransition never returns false, only reverts with its own reason)
+        );
+
+        // effects
+
+        // clear the challenge:
+        ChannelStorage memory channelStorage = ChannelStorage(
+            turnNumRecord + 1,
+            0,
+            bytes32(0),
+            address(0),
+            bytes32(0)
+        );
+        channelStorageHashes[channelId] = keccak256(abi.encode(channelStorage));
     }
 
     // Internal methods:
@@ -288,5 +390,10 @@ contract OptimizedForceMove {
     }
 
     // events
-    event ForceMove(bytes32 channelId, uint256 expiryTime);
+    event ForceMove(
+        bytes32 channelId,
+        uint256 expiryTime,
+        uint256 turnNumRecord,
+        address challenger
+    );
 }
