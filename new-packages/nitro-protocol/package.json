@@ -45,7 +45,7 @@
     "@types/node": "^10.12.10",
     "@types/web3": "^1.0.12",
     "dotenv": "^6.1.0",
-    "ganache-cli": "6.1.8",
+    "ganache-cli": "6.6.0",
     "jest": "^23.6.0",
     "jest-gas-reporter": "0.0.1",
     "magmo-devtools": "git+https://github.com/magmo/devtools.git#v0.1.14",
