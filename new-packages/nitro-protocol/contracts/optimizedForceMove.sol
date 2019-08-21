@@ -254,8 +254,7 @@ contract OptimizedForceMove {
                 variablePartAB,
                 turnNumRecord + 1,
                 fixedPart.appDefinition
-            ),
-            'Response is not a valid transition from challenge'
+            ) // reason string is not required (_validTransition never returns false, only reverts with its own reason)
         );
 
         // effects
