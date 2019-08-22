@@ -12,6 +12,7 @@ import * as contractUtils from '../../utils/contract-utils';
 import { concluded, challengeRequested } from '../protocols/application/actions';
 
 import { appAttributesFromBytes } from 'fmg-nitro-adjudicator/lib/consensus-app';
+import { CONSENSUS_LIBRARY_ADDRESS } from '../../constants';
 export function* messageListener() {
   const postMessageEventChannel = eventChannel(emitter => {
     window.addEventListener('message', (event: MessageEvent) => {
@@ -149,8 +150,13 @@ function* validateAgainstLatestCommitment(incomingCommitment: Commitment) {
 function* validateTransition(fromCommitment: Commitment, toCommitment: Commitment) {
   const validTransition = yield contractUtils.validateTransition(fromCommitment, toCommitment);
   if (!validTransition) {
-    const fromAppAttributes = appAttributesFromBytes(fromCommitment.appAttributes);
-    const toAppAttributes = appAttributesFromBytes(toCommitment.appAttributes);
+    const isConsensusChannel = toCommitment.channel.channelType === CONSENSUS_LIBRARY_ADDRESS;
+    const fromAppAttributes = isConsensusChannel
+      ? appAttributesFromBytes(fromCommitment.appAttributes)
+      : fromCommitment.appAttributes;
+    const toAppAttributes = isConsensusChannel
+      ? appAttributesFromBytes(toCommitment.appAttributes)
+      : toCommitment.appAttributes;
     throw new Error(
       `Invalid transition. From Commitment: ${JSON.stringify(
         {
