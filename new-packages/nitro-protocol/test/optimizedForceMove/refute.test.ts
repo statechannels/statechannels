@@ -37,20 +37,21 @@ beforeAll(async () => {
 // Scenarios are synonymous with channelNonce:
 
 const description1 = 'It accepts a refute tx for an ongoing challenge';
-const description2 = 'It reverts a regute tx if the challenge has expired';
+const description2 = 'It reverts a refute tx if the challenge has expired';
 const description3 = 'It reverts a refute tx if the declaredTurnNumRecord is incorrect';
 const description4 =
   'It reverts a refute tx if the refutation state is not signed by the challenger';
 const description5 =
-  'It reverts a refute tx if the refutationTurnNum is not larger than declaredTurnNumRecord'; // TODO
+  'It reverts a refute tx if the refutationTurnNum is not larger than declaredTurnNumRecord';
 
 describe('respond', () => {
   it.each`
     description     | channelNonce | setTurnNumRecord | declaredTurnNumRecord | refutationTurnNum | expired  | isFinalAB         | appDatas  | challenger    | refutationStateSigner | reasonString
-    ${description1} | ${1001}      | ${8}             | ${8}                  | ${99}             | ${false} | ${[false, false]} | ${[0, 1]} | ${wallets[2]} | ${wallets[2]}         | ${undefined}
-    ${description2} | ${1002}      | ${8}             | ${8}                  | ${99}             | ${true}  | ${[false, false]} | ${[0, 1]} | ${wallets[2]} | ${wallets[2]}         | ${'Refute too late!'}
-    ${description3} | ${1003}      | ${8}             | ${7}                  | ${99}             | ${false} | ${[false, false]} | ${[0, 1]} | ${wallets[2]} | ${wallets[2]}         | ${'Challenge State does not match stored version'}
-    ${description4} | ${1004}      | ${8}             | ${8}                  | ${99}             | ${false} | ${[false, false]} | ${[0, 1]} | ${wallets[2]} | ${nonParticipant}     | ${'Refutation state not signed by challenger'}
+    ${description1} | ${1001}      | ${8}             | ${8}                  | ${14}             | ${false} | ${[false, false]} | ${[0, 1]} | ${wallets[2]} | ${wallets[2]}         | ${undefined}
+    ${description2} | ${1002}      | ${8}             | ${8}                  | ${14}             | ${true}  | ${[false, false]} | ${[0, 1]} | ${wallets[2]} | ${wallets[2]}         | ${'Refute too late!'}
+    ${description3} | ${1003}      | ${8}             | ${7}                  | ${14}             | ${false} | ${[false, false]} | ${[0, 1]} | ${wallets[2]} | ${wallets[2]}         | ${'Challenge State does not match stored version'}
+    ${description4} | ${1004}      | ${8}             | ${8}                  | ${14}             | ${false} | ${[false, false]} | ${[0, 1]} | ${wallets[2]} | ${nonParticipant}     | ${'Refutation state not signed by challenger'}
+    ${description5} | ${1001}      | ${8}             | ${8}                  | ${5}              | ${false} | ${[false, false]} | ${[0, 1]} | ${wallets[2]} | ${wallets[2]}         | ${'Refutation state must have a higher turn number'}
   `(
     '$description', // for the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce
     async ({
