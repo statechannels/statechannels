@@ -1,4 +1,4 @@
-pragma solidity ^0.5.2;
+pragma solidity ^0.5.11;
 pragma experimental ABIEncoderV2;
 
 import './ForceMoveApp.sol';
@@ -132,15 +132,15 @@ contract OptimizedForceMove {
         );
 
         // check that the forceMove is signed by a participant and store their address
-        bytes32 msgHash = keccak256(
-            abi.encode(
-                largestTurnNum,
-                channelId,
-                'forceMove' // Express statement of intent to forceMove this channel to this turnNum
-            )
-        );
+
         address challenger = _recoverSigner(
-            msgHash,
+            keccak256(
+                abi.encode(
+                    largestTurnNum,
+                    channelId,
+                    'forceMove' // Express statement of intent to forceMove this channel to this turnNum
+                )
+            ),
             challengerSig.v,
             challengerSig.r,
             challengerSig.s
@@ -162,7 +162,14 @@ contract OptimizedForceMove {
             keccak256(abi.encode(variableParts[variableParts.length - 1].outcome))
         );
 
-        emit ForceMove(channelId, now + fixedPart.challengeDuration, largestTurnNum, challenger); // TODO what else should go in here?
+        emit ForceMove(
+            largestTurnNum,
+            now + fixedPart.challengeDuration,
+            challenger,
+            isFinalCount > 0,
+            fixedPart,
+            variableParts
+        );
 
         channelStorageHashes[channelId] = keccak256(abi.encode(channelStorage));
 
@@ -391,9 +398,12 @@ contract OptimizedForceMove {
 
     // events
     event ForceMove(
-        bytes32 channelId,
-        uint256 expiryTime,
-        uint256 turnNumRecord,
-        address challenger
+        // everything needed to respond or refute
+        uint256 turnNunmRecord,
+        uint256 finalizesAt,
+        address challenger,
+        bool isFinal,
+        FixedPart fixedPart,
+        ForceMoveApp.VariablePart[] variableParts
     );
 }
