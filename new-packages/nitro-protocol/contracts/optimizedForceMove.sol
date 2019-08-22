@@ -277,6 +277,110 @@ contract OptimizedForceMove {
         channelStorageHashes[channelId] = keccak256(abi.encode(channelStorage));
     }
 
+    function refute(
+        uint256 turnNumRecord,
+        uint256 refutationStateTurnNum,
+        uint256 finalizesAt,
+        address challenger,
+        bool[2] memory isFinalAB,
+        FixedPart memory fixedPart,
+        ForceMoveApp.VariablePart[2] memory variablePartAB,
+        // variablePartAB[0] = challengeVariablePart
+        // variablePartAB[1] = refutationVariablePart
+        Signature memory refutationStateSig
+    ) public {
+        // requirements
+
+        require(
+            refutationStateTurnNum > turnNumRecord,
+            'Refutation state must have a higher turn number'
+        );
+        // Calculate channelId from fixed part
+        bytes32 channelId = keccak256(
+            abi.encode(fixedPart.chainId, fixedPart.participants, fixedPart.channelNonce)
+        );
+
+        bytes32 challengeOutcomeHash = keccak256(abi.encode(variablePartAB[0].outcome));
+        bytes32 refutationOutcomeHash = keccak256(abi.encode(variablePartAB[1].outcome));
+        bytes32 challengeStateHash = keccak256(
+            abi.encode(
+                State(
+                    turnNumRecord,
+                    isFinalAB[0],
+                    channelId,
+                    keccak256(
+                        abi.encode(
+                            fixedPart.challengeDuration,
+                            fixedPart.appDefinition,
+                            variablePartAB[0].appData
+                        )
+                    ),
+                    challengeOutcomeHash
+                )
+            )
+        );
+        bytes32 refutationStateHash = keccak256(
+            abi.encode(
+                State(
+                    refutationStateTurnNum,
+                    isFinalAB[1],
+                    channelId,
+                    keccak256(
+                        abi.encode(
+                            fixedPart.challengeDuration,
+                            fixedPart.appDefinition,
+                            variablePartAB[1].appData
+                        )
+                    ),
+                    refutationOutcomeHash
+                )
+            )
+        );
+
+        // requirements
+
+        require(now < finalizesAt, 'Refute too late!');
+
+        require(
+            keccak256(
+                    abi.encode(
+                        ChannelStorage(
+                            turnNumRecord,
+                            finalizesAt,
+                            challengeStateHash,
+                            challenger, // this is a check that the asserted challenger is in fact the challenger
+                            challengeOutcomeHash
+                        )
+                    )
+                ) ==
+                channelStorageHashes[channelId],
+            'Challenge State does not match stored version'
+        );
+
+        require(
+            _recoverSigner(
+                    refutationStateHash,
+                    refutationStateSig.v,
+                    refutationStateSig.r,
+                    refutationStateSig.s
+                ) ==
+                challenger,
+            'Refutation state not signed by challenger'
+        );
+
+        // effects
+
+        // clear the challenge:
+        ChannelStorage memory channelStorage = ChannelStorage(
+            turnNumRecord,
+            0,
+            bytes32(0),
+            address(0),
+            bytes32(0)
+        );
+        channelStorageHashes[channelId] = keccak256(abi.encode(channelStorage));
+    }
+
     // Internal methods:
 
     function _isAddressInArray(address suspect, address[] memory addresses)
