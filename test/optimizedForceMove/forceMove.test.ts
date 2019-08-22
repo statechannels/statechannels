@@ -4,7 +4,7 @@ import {expectRevert} from 'magmo-devtools';
 import optimizedForceMoveArtifact from '../../build/contracts/TESTOptimizedForceMove.json';
 // @ts-ignore
 import countingAppArtifact from '../../build/contracts/CountingApp.json';
-import {keccak256, defaultAbiCoder} from 'ethers/utils';
+import {keccak256, defaultAbiCoder, hexlify} from 'ethers/utils';
 import {HashZero, AddressZero} from 'ethers/constants';
 import {setupContracts, sign} from './test-helpers';
 
@@ -161,15 +161,35 @@ describe('forceMove', () => {
         initialChannelStorageHash,
       )).wait();
 
-      // match event for this channel only
       forceMoveEvent = new Promise((resolve, reject) => {
         optimizedForceMove.on(
-          'ForceMove(bytes32, uint256, uint256, address)',
-          (cId, expTime, turnNum, challengerAddress, event) => {
-            if (cId === channelId) {
+          'ForceMove',
+          (
+            eventTurnNumRecord,
+            eventFinalizesAt,
+            eventChallenger,
+            eventIsFinal,
+            eventFixedPart,
+            eventChallengeVariablePart,
+            event,
+          ) => {
+            const eventChannelId = keccak256(
+              defaultAbiCoder.encode(
+                ['uint256', 'address[]', 'uint256'],
+                [eventFixedPart[0], eventFixedPart[1], eventFixedPart[2]],
+              ),
+            );
+            if (eventChannelId === channelId) {
               // match event for this channel only
               // event.removeListener();
-              resolve([expTime, turnNum]);
+              resolve([
+                eventTurnNumRecord,
+                eventFinalizesAt,
+                eventChallenger,
+                eventIsFinal,
+                eventFixedPart,
+                eventChallengeVariablePart,
+              ]);
             }
           },
         );
@@ -209,15 +229,36 @@ describe('forceMove', () => {
         // wait for tx to be mined
         await tx.wait();
 
-        // catch ForceMove event and peel-off the expiryTime
-        const [expiryTime, newTurnNumRecord] = await forceMoveEvent;
+        // catch ForceMove event
+        const [
+          eventTurnNumRecord,
+          eventFinalizesAt,
+          eventChallenger,
+          eventIsFinal,
+          eventFixedPart,
+          eventVariableParts,
+        ] = await forceMoveEvent;
 
-        // newTurnNumRecord not used here but important for the responder to know
+        // check this information is enough to respond
+        expect(eventTurnNumRecord._hex).toEqual(hexlify(largestTurnNum));
+        expect(eventChallenger).toEqual(challenger.address);
+        expect(eventFixedPart[0]._hex).toEqual(hexlify(fixedPart.chainId));
+        expect(eventFixedPart[1]).toEqual(fixedPart.participants);
+        expect(eventFixedPart[2]._hex).toEqual(hexlify(fixedPart.channelNonce));
+        expect(eventFixedPart[3]).toEqual(fixedPart.appDefinition);
+        expect(eventFixedPart[4]._hex).toEqual(hexlify(fixedPart.challengeDuration));
+        expect(eventIsFinal).toEqual(isFinalCount > 0);
+        expect(eventVariableParts[eventVariableParts.length - 1][0]).toEqual(
+          variableParts[variableParts.length - 1].outcome,
+        );
+        expect(eventVariableParts[eventVariableParts.length - 1][1]).toEqual(
+          variableParts[variableParts.length - 1].appData,
+        );
 
         // compute expected ChannelStorageHash
         const expectedChannelStorage = [
           largestTurnNum,
-          expiryTime,
+          eventFinalizesAt,
           stateHashes[stateHashes.length - 1],
           challenger.address,
           outcomeHash,
