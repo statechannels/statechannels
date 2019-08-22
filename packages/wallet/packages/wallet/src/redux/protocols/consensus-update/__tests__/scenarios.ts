@@ -23,10 +23,8 @@ const twoThree = [
   { address: asAddress, wei: bigNumberify(2).toHexString() },
   { address: bsAddress, wei: bigNumberify(3).toHexString() },
 ];
-const twoThreeOneTwo = [
-  { address: asAddress, wei: bigNumberify(2).toHexString() },
-  { address: bsAddress, wei: bigNumberify(3).toHexString() },
-  { address: asAddress, wei: bigNumberify(1).toHexString() },
+const threeTwo = [
+  { address: asAddress, wei: bigNumberify(3).toHexString() },
   { address: bsAddress, wei: bigNumberify(2).toHexString() },
 ];
 
@@ -43,7 +41,7 @@ const oneOneFour = [
 ];
 // Commitments that have reached consensus
 const balances = twoThree;
-const proposedBalances = twoThreeOneTwo;
+const proposedBalances = threeTwo;
 const ledger4 = ledgerCommitment({ turnNum: 4, balances });
 const ledger5 = ledgerCommitment({ turnNum: 5, balances });
 const ledger6 = ledgerCommitment({ turnNum: 6, balances });
@@ -198,8 +196,8 @@ const twoPlayerNewProposalSharedData = (turnNum: ProposeTurnNum, ourIndex: TwoPa
 // ------
 // States
 // ------
-const proposedAllocation = twoThreeOneTwo.map(b => b.wei);
-const proposedDestination = twoThreeOneTwo.map(b => b.address);
+const proposedAllocation = threeTwo.map(b => b.wei);
+const proposedDestination = threeTwo.map(b => b.address);
 
 const threePlayerProposedAllocation = oneOneFour.map(b => b.wei);
 const threePlayerProposedDestination = oneOneFour.map(b => b.address);

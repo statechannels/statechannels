@@ -1,5 +1,6 @@
 import { SignedCommitment, getChannelId, Commitment } from '../../../domain';
 import { ethers } from 'ethers';
+import { addHex } from '../../../utils/hex-utils';
 
 export type Commitments = SignedCommitment[];
 
@@ -63,6 +64,18 @@ export function pushCommitment(
   if (commitments.length === numParticipants) {
     // We've got a full round of commitments, and should therefore drop the first one
     commitments.shift();
+  }
+
+  if (commitments.length > 0) {
+    const lastStoredCommitment = commitments[commitments.length - 1];
+    const previousAllocationTotal = lastStoredCommitment.commitment.allocation.reduce(
+      addHex,
+      '0x0',
+    );
+    const currentAllocationTotal = signedCommitment.commitment.allocation.reduce(addHex, '0x0');
+    if (previousAllocationTotal !== currentAllocationTotal) {
+      throw new Error(`The allocation total cannot change between commitments`);
+    }
   }
   commitments.push(signedCommitment);
   const turnNum = signedCommitment.commitment.turnNum;
