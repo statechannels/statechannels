@@ -28,12 +28,26 @@ const oneThree = [
   { address: bsAddress, wei: bigNumberify(3).toHexString() },
 ];
 
+const twoTwo = [
+  { address: asAddress, wei: bigNumberify(2).toHexString() },
+  { address: bsAddress, wei: bigNumberify(2).toHexString() },
+];
+
+const fourFour = [
+  { address: asAddress, wei: bigNumberify(4).toHexString() },
+  { address: bsAddress, wei: bigNumberify(4).toHexString() },
+];
 const oneOne = [
   { address: asAddress, wei: bigNumberify(1).toHexString() },
   { address: bsAddress, wei: bigNumberify(1).toHexString() },
 ];
 
 const fourToApp = [{ address: channelId, wei: bigNumberify(4).toHexString() }];
+const fourToAppAndLeftOver = [
+  { address: channelId, wei: bigNumberify(4).toHexString() },
+  { address: asAddress, wei: bigNumberify(2).toHexString() },
+  { address: bsAddress, wei: bigNumberify(2).toHexString() },
+];
 const props = {
   channelId,
   ledgerId,
@@ -69,6 +83,14 @@ const setFundingState = (sharedData: SharedData): SharedData => {
 const ledger4 = ledgerCommitment({ turnNum: 4, balances: oneThree });
 const ledger5 = ledgerCommitment({ turnNum: 5, balances: oneThree });
 const ledger6 = ledgerCommitment({ turnNum: 6, balances: oneThree, proposedBalances: fourToApp });
+
+const ledger4Partial = ledgerCommitment({ turnNum: 4, balances: fourFour });
+const ledger5Partial = ledgerCommitment({ turnNum: 5, balances: fourFour });
+const ledger6Partial = ledgerCommitment({
+  turnNum: 6,
+  balances: fourFour,
+  proposedBalances: fourToAppAndLeftOver,
+});
 const topUpLedger4 = ledgerCommitment({ turnNum: 4, balances: oneOne });
 const topUpLedger5 = ledgerCommitment({ turnNum: 5, balances: oneOne });
 
@@ -81,6 +103,13 @@ const app1 = appCommitment({ turnNum: 1, balances: oneThree });
 const initialPlayerALedgerSharedData = setFundingState(
   setChannels(EMPTY_SHARED_DATA, [
     channelFromCommitments([ledger4, ledger5], asAddress, asPrivateKey),
+    channelFromCommitments([app0, app1], asAddress, asPrivateKey),
+  ]),
+);
+
+const initialPlayerAPartialSharedData = setFundingState(
+  setChannels(EMPTY_SHARED_DATA, [
+    channelFromCommitments([ledger4Partial, ledger5Partial], asAddress, asPrivateKey),
     channelFromCommitments([app0, app1], asAddress, asPrivateKey),
   ]),
 );
@@ -141,6 +170,16 @@ export const playerAFullyFundedHappyPath = {
       consensusUpdatePreSuccessA.action,
       EXISTING_LEDGER_FUNDING_PROTOCOL_LOCATOR,
     ),
+  },
+};
+
+export const partialLedgerChannelUse = {
+  initialize: {
+    sharedData: initialPlayerAPartialSharedData,
+    ...props,
+    startingAllocation: twoTwo.map(o => o.wei),
+    startingDestination: twoTwo.map(o => o.address),
+    reply: [ledger5Partial, ledger6Partial],
   },
 };
 
