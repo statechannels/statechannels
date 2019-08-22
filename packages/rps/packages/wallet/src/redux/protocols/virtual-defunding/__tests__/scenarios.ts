@@ -32,7 +32,7 @@ const oneThreeHub = [
   { address: asAddress, wei: bigNumberify(1).toHexString() },
   { address: hubAddress, wei: bigNumberify(3).toHexString() },
 ];
-const oneThreeFour = [...oneThree, { address: hubAddress, wei: bigNumberify(4).toHexString() }];
+const oneThreeTwo = [...oneThree, { address: hubAddress, wei: bigNumberify(2).toHexString() }];
 
 const app10 = appCommitment({ turnNum: 10, balances: oneThree, isFinal: true });
 const app11 = appCommitment({ turnNum: 11, balances: oneThree, isFinal: true });
@@ -71,15 +71,15 @@ const joint5 = scenarios.threeWayLedgerCommitment({ turnNum: 5, balances: fundin
 const joint6 = scenarios.threeWayLedgerCommitment({
   turnNum: 6,
   balances: fundingApp,
-  proposedBalances: oneThreeFour,
+  proposedBalances: oneThreeTwo,
   isVote: true,
 });
 const joint7 = scenarios.threeWayLedgerCommitment({
   turnNum: 7,
   balances: fundingApp,
-  proposedBalances: oneThreeFour,
+  proposedBalances: oneThreeTwo,
 });
-const joint8 = scenarios.threeWayLedgerCommitment({ turnNum: 8, balances: oneThreeFour });
+const joint8 = scenarios.threeWayLedgerCommitment({ turnNum: 8, balances: oneThreeTwo });
 const jointChannelFundingApp = channelFromCommitments([joint4, joint5], asAddress, asPrivateKey);
 const jointChannelBeforeConsensus = channelFromCommitments(
   [joint6, joint7],
@@ -113,8 +113,8 @@ const waitForJointChannelUpdate = states.waitForJointChannelUpdate({
   jointChannel: consensusStates.commitmentSent({
     processId,
     protocolLocator: makeLocator(EmbeddedProtocol.ConsensusUpdate),
-    proposedAllocation: oneThreeFour.map(i => i.wei),
-    proposedDestination: oneThreeFour.map(i => i.address),
+    proposedAllocation: oneThreeTwo.map(i => i.wei),
+    proposedDestination: oneThreeTwo.map(i => i.address),
     channelId: jointChannelId,
   }),
 });

@@ -70,6 +70,16 @@ describe('player B top up needed', () => {
   });
 });
 
+describe('only using partial amount of ledger funds', () => {
+  const scenario = scenarios.partialLedgerChannelUse;
+
+  describe('when initializing', () => {
+    const result = initialize(scenario.initialize);
+    itTransitionsTo(result, 'ExistingLedgerFunding.WaitForLedgerUpdate');
+    itSendsTheseCommitments(result, scenario.initialize.reply);
+  });
+});
+
 type ReturnVal = ProtocolStateWithSharedData<states.ExistingLedgerFundingState>;
 function itTransitionsTo(state: ReturnVal, type: states.ExistingLedgerFundingState['type']) {
   it(`transitions protocol state to ${type}`, () => {
