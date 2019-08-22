@@ -64,8 +64,8 @@ contract OptimizedForceMove {
         // REQUIREMENTS
         // ------------
 
-        // Check that the proposed largestTurnNum is larger than the turnNumRecord that is being committed to
-        require(largestTurnNum > turnNumRecord, 'Stale challenge!');
+        // Check that the proposed largestTurnNum is larger than or equal to the turnNumRecord that is being committed to
+        require(largestTurnNum >= turnNumRecord, 'Stale challenge!');
 
         // EITHER there is no inForceMoveAppion stored against channelId at all (OK)
         if (channelStorageHashes[channelId] != bytes32(0)) {
