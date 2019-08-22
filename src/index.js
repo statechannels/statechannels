@@ -3,18 +3,25 @@ import ReactDOM from "react-dom";
 import "./styles.css";
 import webtorrent from "./webtorrent-ilp/webtorrent-custom";
 
-const initialState = { working: "Done/Idle", verb: "from", numPeers: 0, downloadSpeed: 0, uploadSpeed: 0 };
+const initialState = { working: "Done/Idle", verb: "from", numPeers: 0, downloadSpeed: 0, uploadSpeed: 0, torrent: null };
 
 const onProgress = (status, setStatus) => (torrent = initialState, action = "Sharing", done = true) => {
-  setStatus({ ...status, working: done ? "Done/Idle" : action, downloadSpeed: torrent.downloadSpeed, uploadSpeed: torrent.uploadSpeed, numPeers: torrent.numPeers })
+  setStatus({ ...status, working: done ? "Done/Idle" : action, downloadSpeed: torrent.downloadSpeed, uploadSpeed: torrent.uploadSpeed, numPeers: torrent.numPeers, torrent })
 }
 
 function upload (client, files, setMagnet, onProgress) {
   client.seed(files, function (torrent) {
     setMagnet(torrent.magnetURI);
-    console.log("Client is seeding ", torrent);
-    torrent.on("wire", () => {
-      console.log('Wire!', arguments)
+    console.log("index Upload Started ", torrent);
+    torrent.on("wire", (wire) => {
+      console.log("index Wire!", wire);
+      wire.on('unchoke', () => {
+        console.log('index upload unchoked', arguments)
+      })
+      wire.on('choke', () => {
+        console.log('index upload choke', arguments)
+        torrent.resume()
+      })
     });
     setInterval(() => onProgress(torrent, "Seeding", false), 1000);
   });
@@ -23,19 +30,45 @@ function upload (client, files, setMagnet, onProgress) {
 function download (client, torrentOrigin, onProgress) {
   var torrentId = torrentOrigin || "https://webtorrent.io/torrents/sintel.torrent";
   client.add(torrentId, function (torrent) {
-    console.log("Client is leeching", torrent);
-    const intervalHandle = setInterval(() => onProgress(torrent, "Leeching", false), 1000);
+    console.log("index Download Started ", torrent);
+    const intervalHandle = setInterval(() => { onProgress(torrent, "Leeching", false) }, 2000);
+    const intervalHandleB = setInterval(() => {
+      console.log('index checking for permission', torrent.wires[0] && !torrent.wires[0].wt_ilp.amForceChoking);
+      if (torrent.wires[0] && torrent.wires[0].wt_ilp.amForceChoking) {
+        torrent.resume();
+      } else if (!torrent.wires[0]) {
+        client.remove(torrentOrigin);
+        clearInterval(intervalHandleB)
+        download(client, torrentOrigin, onProgress);
+      }
+    }, 1000);
+
     torrent.on("done", () => {
+      clearInterval(intervalHandleB)
       clearInterval(intervalHandle);
       onProgress(initialState, "Done/Idle");
       console.log('Done!', "File downloaded: " + torrent.files[0].name)
     });
+
+    torrent.on('ready', function () { console.log('index download ready') })
+    torrent.on('wire', function () { console.log('index download wire') })
+    torrent.on('choke', function () { console.log('index download choke') })
+
+    client.on('ready', function () { console.log('index download ready') })
+    client.on('wire', function () { console.log('index download wire') })
+    client.on('choke', function () { console.log('index download choke') })
   });
 };
 
+function toggleAllLeechers (client, status) {
+  const wires = status.torrent.wires;
+  console.log("index toggleAllLeechers", wires);
+  client.unchokeWire(wires[0]);
+};
+
 function App () {
-  const wt = useContext(WebTorrentContext);
-  const [status, setStatus] = useState({ working: "Done/Idle", verb: "from", numPeers: 0, downloadSpeed: 0, uploadSpeed: 0 });
+  const client = useContext(WebTorrentContext);
+  const [status, setStatus] = useState({ working: "Done/Idle", verb: "from", numPeers: 0, downloadSpeed: 0, uploadSpeed: 0, torrent: undefined });
   const [seedMagnet, setSeedMagnet] = useState("");
   const [leechMagnet, setLeechMagnet] = useState("");
   const { downloadSpeed, uploadSpeed, working, numPeers } = status;
@@ -64,8 +97,8 @@ function App () {
         <h2>Seeder</h2>
         <h5>Select a file to seed</h5>
         <br />
-        <input type="file" name="upload" onChange={(event) => upload(wt, event.target.files, setSeedMagnet, onProgress(status, setStatus))} />
-        <button onClick={() => { console.log('NOT DONE :-P') }}>STOP</button>
+        <input type="file" name="upload" onChange={(event) => upload(client, event.target.files, setSeedMagnet, onProgress(status, setStatus))} />
+        <button onClick={() => { toggleAllLeechers(client, status) }}>TOGGLE</button>
         {seedMagnet ? (
           <p>
             <h3>Share this to share the file</h3>
@@ -80,7 +113,7 @@ function App () {
         <h5>Insert a magnet URI to download</h5>
         <br />
         <input type="text" name="download" onChange={(event) => setLeechMagnet(event.target.value)} />
-        <button onClick={() => download(wt, leechMagnet, onProgress(status, setStatus))}>START DOWNLOAD</button>
+        <button onClick={() => download(client, leechMagnet, onProgress(status, setStatus))}>START DOWNLOAD</button>
       </div>
     </div>
   );

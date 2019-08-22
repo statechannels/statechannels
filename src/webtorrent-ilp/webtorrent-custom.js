@@ -5,7 +5,8 @@ export default class WebTorrentIlp extends WebTorrent {
   constructor(opts) {
     super(opts)
     this.peerBalances = {}
-    this.peerWires = {}
+    this.peerWires = []
+    this.ilp_account = Math.trunc(Math.random() * 10000000000);
   }
 
   seed () {
@@ -20,36 +21,40 @@ export default class WebTorrentIlp extends WebTorrent {
     return torrent
   }
 
-  _checkUnchokeWire (wire) {
-    wire.wt_ilp.unchoke()
+  unchokeWire (peerWires) {
+    for (let i = 0; i < this.peerWires.length; i++) {
+      const wire = this.peerWires[i];
+      console.log('unchokeWire', wire, wire && wire.wt_ilp)
+      wire.wt_ilp.forceUnchoke()
+    }
+  }
+
+  chokeWire (wire) {
+    wire.wt_ilp.forceChoke()
   }
 
   _setupWire (torrent, wire) {
-    wire.use(wireExt({ account: Math.trunc(Math.random() * 10000000000) }))
-    
+    wire.setKeepAlive(true)
+    wire.use(wireExt({ ilp_account: this.ilp_account }))
+
     wire.wt_ilp.on('ilp_handshake', (handshake) => {
       console.log('Got extended handshake', handshake)
-      if (!this.peerWires[handshake.account]) {
-        this.peerWires[handshake.account] = []
-      }
-      this.peerWires[handshake.account].push(wire)
+      this.peerWires.push(wire);
+      wire.wt_ilp.forceChoke()
     })
 
     wire.on('download', (bytes) => {
-      console.log('downloaded ' + bytes + ' bytes (' + wire.wt_ilp.account + ')')
-      console.log("recordDelivery", {
-        account: wire.wt_ilp.account,
-        torrentHash: torrent.infoHash,
-        bytes: bytes,
-        timestamp: Date.now()
-      });
+      console.log('downloaded ' + bytes + ' bytes', wire)
     })
+    
+    // wire.wt_ilp.on('unchoke', () => {
+    //   console.log('unchokeunchokeunchokeunchokeunchokeunchoke')
+    // })
 
     wire.wt_ilp.on('warning', (err) => {
       console.log('Error', err)
     })
-
-    wire.wt_ilp.forceChoke()
+    
   }
 
   _setupTorrent (torrent) {
