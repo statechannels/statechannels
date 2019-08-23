@@ -10,17 +10,23 @@ const onProgress = (status, setStatus) => (torrent = initialState, action = "Sha
 }
 
 function upload (client, files, setMagnet, onProgress) {
+
   client.seed(files, function (torrent) {
     setMagnet(torrent.magnetURI);
-    console.log("index Upload Started ", torrent);
+    const peersConected = []
     torrent.on("wire", (wire) => {
-      console.log("index Wire!", wire);
-      wire.on('unchoke', () => {
-        console.log('index upload unchoked', arguments)
-      })
-      wire.on('choke', () => {
-        console.log('index upload choke', arguments)
-        torrent.resume()
+      console.log("UI - WIRE");
+      wire.on('first_request', (peerAccount) => {
+        console.log("UI - WIRE", peerAccount, "()-> first request");
+        if (!peersConected.some(account => account === peerAccount)) {
+          console.log('UI - PIRATE WIRE', peerAccount);
+          peersConected.push(peerAccount);
+          client.sendNotice(torrent, wire);
+          setTimeout(() => { client.retractNotice(torrent, wire, peersConected[0]); }, 5000);
+        } else {
+          console.log('UI - LEGIT WIRE', peerAccount);
+        }
+
       })
     });
     setInterval(() => onProgress(torrent, "Seeding", false), 1000);
@@ -29,47 +35,47 @@ function upload (client, files, setMagnet, onProgress) {
 
 function download (client, torrentOrigin, onProgress) {
   var torrentId = torrentOrigin || "https://webtorrent.io/torrents/sintel.torrent";
-  client.add(torrentId, function (torrent) {
-    console.log("index Download Started ", torrent);
-    const intervalHandle = setInterval(() => { onProgress(torrent, "Leeching", false) }, 2000);
-    const intervalHandleB = setInterval(() => {
-      console.log('index checking for permission', torrent.wires[0] && !torrent.wires[0].wt_ilp.amForceChoking);
-      if (torrent.wires[0] && torrent.wires[0].wt_ilp.amForceChoking) {
-        torrent.resume();
-      } else if (!torrent.wires[0]) {
-        client.remove(torrentOrigin);
-        clearInterval(intervalHandleB)
+  console.log('------> RESTARRRRRT', { ilp_account: client.ilp_account, peerId: client.peerId })
+
+  client.add(torrentId, (torrent) => {
+    console.log("UI - Download Started ", { ilp_account: torrent.client.ilp_account, peerId: torrent.client.peerId }, { ilp_account: client.ilp_account, peerId: client.peerId });
+    const logger = setInterval(() => { onProgress(torrent, "Leeching", false) }, 2000);
+
+    torrent.on("notice", (wire, notice) => {
+      if (notice === 'start') {
+        console.log()
+        console.log('about to destroy', client.ilp_account)
+
+        client.destroy();
+        client = new webtorrent({ ilp_acccount: client.ilp_account });
         download(client, torrentOrigin, onProgress);
       }
-    }, 1000);
+    })
 
+
+    console.log('UI - Download live from ', torrent.wires[0].peerId);
     torrent.on("done", () => {
-      clearInterval(intervalHandleB)
-      clearInterval(intervalHandle);
+      console.log('Done!', "File downloaded: " + torrent.files[0].name, arguments)
+      clearInterval(logger);
+      // clearInterval(resumer);
       onProgress(initialState, "Done/Idle");
-      console.log('Done!', "File downloaded: " + torrent.files[0].name)
     });
 
-    torrent.on('ready', function () { console.log('index download ready') })
-    torrent.on('wire', function () { console.log('index download wire') })
-    torrent.on('choke', function () { console.log('index download choke') })
 
-    client.on('ready', function () { console.log('index download ready') })
-    client.on('wire', function () { console.log('index download wire') })
-    client.on('choke', function () { console.log('index download choke') })
   });
 };
 
 function toggleAllLeechers (client, status) {
-  const wires = status.torrent.wires;
-  console.log("index toggleAllLeechers", wires);
-  client.unchokeWire(wires[0]);
+  client.unchokeWire(status.torrent.wires);
+  console.log("UI - unchokeWire", status.torrent.wires);
 };
 
 function App () {
   const client = useContext(WebTorrentContext);
   const [status, setStatus] = useState({ working: "Done/Idle", verb: "from", numPeers: 0, downloadSpeed: 0, uploadSpeed: 0, torrent: undefined });
   const [seedMagnet, setSeedMagnet] = useState("");
+  const [torrentData, setTorrentData] = useState({});
+
   const [leechMagnet, setLeechMagnet] = useState("");
   const { downloadSpeed, uploadSpeed, working, numPeers } = status;
   return (
@@ -113,12 +119,12 @@ function App () {
         <h5>Insert a magnet URI to download</h5>
         <br />
         <input type="text" name="download" onChange={(event) => setLeechMagnet(event.target.value)} />
-        <button onClick={() => download(client, leechMagnet, onProgress(status, setStatus))}>START DOWNLOAD</button>
+        <button onClick={() => download(client, leechMagnet, onProgress(status, setStatus), setTorrentData, torrentData)}>START DOWNLOAD</button>
       </div>
     </div>
   );
 }
-const wt = new webtorrent()
+const wt = new webtorrent({ ilp_acccount: Math.floor(Math.random() * 99999999999999999) })
 const WebTorrentContext = React.createContext({});
 const rootElement = document.getElementById("root");
 ReactDOM.render(<WebTorrentContext.Provider value={wt}><App /></WebTorrentContext.Provider>, rootElement);

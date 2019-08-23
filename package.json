@@ -5,11 +5,12 @@
   "keywords": [],
   "main": "src/index.js",
   "dependencies": {
+    "bencode": "^2.0.1",
+    "inherits": "^2.0.1",
     "react": "16.8.6",
     "react-dom": "16.8.6",
     "react-scripts": "3.0.1",
-    "webtorrent": "0.107.4",
-    "inherits": "^2.0.1"
+    "webtorrent": "0.107.4"
   },
   "devDependencies": {
     "typescript": "3.3.3"
