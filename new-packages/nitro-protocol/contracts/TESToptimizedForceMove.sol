@@ -1,6 +1,6 @@
 pragma solidity ^0.5.11;
 pragma experimental ABIEncoderV2;
-import './optimizedForceMove.sol';
+import './OptimizedForceMove.sol';
 
 contract TESTOptimizedForceMove is OptimizedForceMove {
     // Public wrappers for internal methods:

@@ -1,7 +1,7 @@
 import {ethers} from 'ethers';
 import {expectRevert} from 'magmo-devtools';
 // @ts-ignore
-import optimizedForceMoveArtifact from '../../build/contracts/TESTOptimizedForceMove.json';
+import OptimizedForceMoveArtifact from '../../build/contracts/TESTOptimizedForceMove.json';
 // @ts-ignore
 import countingAppArtifact from '../../build/contracts/CountingApp.json';
 import {keccak256, defaultAbiCoder, hexlify} from 'ethers/utils';
@@ -11,7 +11,7 @@ import {setupContracts, sign} from './test-helpers';
 const provider = new ethers.providers.JsonRpcProvider(
   `http://localhost:${process.env.DEV_GANACHE_PORT}`,
 );
-let optimizedForceMove: ethers.Contract;
+let OptimizedForceMove: ethers.Contract;
 let networkId;
 
 const chainId = 1234;
@@ -47,7 +47,7 @@ const ongoinghallengeHash = keccak256(
 let forceMoveEvent;
 
 beforeAll(async () => {
-  optimizedForceMove = await setupContracts(provider, optimizedForceMoveArtifact);
+  OptimizedForceMove = await setupContracts(provider, OptimizedForceMoveArtifact);
   networkId = (await provider.getNetwork()).chainId;
   appDefinition = countingAppArtifact.networks[networkId].address; // use a fixed appDefinition in all tests
 });
@@ -156,13 +156,13 @@ describe('forceMove', () => {
       const challengerSig = {v, r, s};
 
       // set current channelStorageHashes value
-      await (await optimizedForceMove.setChannelStorageHash(
+      await (await OptimizedForceMove.setChannelStorageHash(
         channelId,
         initialChannelStorageHash,
       )).wait();
 
       forceMoveEvent = new Promise((resolve, reject) => {
-        optimizedForceMove.on(
+        OptimizedForceMove.on(
           'ForceMove',
           (
             eventTurnNumRecord,
@@ -202,7 +202,7 @@ describe('forceMove', () => {
       if (reasonString) {
         expectRevert(
           () =>
-            optimizedForceMove.forceMove(
+            OptimizedForceMove.forceMove(
               turnNumRecord,
               fixedPart,
               largestTurnNum,
@@ -215,7 +215,7 @@ describe('forceMove', () => {
           'VM Exception while processing transaction: revert ' + reasonString,
         );
       } else {
-        const tx = await optimizedForceMove.forceMove(
+        const tx = await OptimizedForceMove.forceMove(
           turnNumRecord,
           fixedPart,
           largestTurnNum,
@@ -271,7 +271,7 @@ describe('forceMove', () => {
         );
 
         // check channelStorageHash against the expected value
-        expect(await optimizedForceMove.channelStorageHashes(channelId)).toEqual(
+        expect(await OptimizedForceMove.channelStorageHashes(channelId)).toEqual(
           expectedChannelStorageHash,
         );
       }

@@ -1,7 +1,7 @@
 import {ethers} from 'ethers';
 import {expectRevert} from 'magmo-devtools';
 // @ts-ignore
-import optimizedForceMoveArtifact from '../../build/contracts/TESTOptimizedForceMove.json';
+import OptimizedForceMoveArtifact from '../../build/contracts/TESTOptimizedForceMove.json';
 // @ts-ignore
 import countingAppArtifact from '../../build/contracts/CountingApp.json';
 import {keccak256, defaultAbiCoder} from 'ethers/utils';
@@ -11,7 +11,7 @@ import {HashZero, AddressZero} from 'ethers/constants';
 const provider = new ethers.providers.JsonRpcProvider(
   `http://localhost:${process.env.DEV_GANACHE_PORT}`,
 );
-let optimizedForceMove: ethers.Contract;
+let OptimizedForceMove: ethers.Contract;
 let networkId;
 const chainId = 1234;
 const participants = ['', '', ''];
@@ -29,7 +29,7 @@ for (let i = 0; i < 3; i++) {
 const nonParticipant = ethers.Wallet.createRandom();
 
 beforeAll(async () => {
-  optimizedForceMove = await setupContracts(provider, optimizedForceMoveArtifact);
+  OptimizedForceMove = await setupContracts(provider, OptimizedForceMoveArtifact);
   networkId = (await provider.getNetwork()).chainId;
   appDefinition = countingAppArtifact.networks[networkId].address; // use a fixed appDefinition in all tests
 });
@@ -153,9 +153,9 @@ describe('respond', () => {
       );
 
       // call public wrapper to set state (only works on test contract)
-      const tx = await optimizedForceMove.setChannelStorageHash(channelId, challengeExistsHash);
+      const tx = await OptimizedForceMove.setChannelStorageHash(channelId, challengeExistsHash);
       await tx.wait();
-      expect(await optimizedForceMove.channelStorageHashes(channelId)).toEqual(challengeExistsHash);
+      expect(await OptimizedForceMove.channelStorageHashes(channelId)).toEqual(challengeExistsHash);
 
       // sign the state
       const signature = await sign(responder, responseStateHash);
@@ -164,7 +164,7 @@ describe('respond', () => {
       if (reasonString) {
         expectRevert(
           () =>
-            optimizedForceMove.respond(
+            OptimizedForceMove.respond(
               declaredTurnNumRecord,
               expiryTime,
               challenger.address,
@@ -177,7 +177,7 @@ describe('respond', () => {
         );
       } else {
         // call respond
-        const tx2 = await optimizedForceMove.respond(
+        const tx2 = await OptimizedForceMove.respond(
           declaredTurnNumRecord,
           expiryTime,
           challenger.address,
@@ -203,7 +203,7 @@ describe('respond', () => {
             expectedChannelStorage,
           ),
         );
-        expect(await optimizedForceMove.channelStorageHashes(channelId)).toEqual(
+        expect(await OptimizedForceMove.channelStorageHashes(channelId)).toEqual(
           expectedChannelStorageHash,
         );
       }
