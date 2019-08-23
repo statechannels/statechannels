@@ -366,7 +366,7 @@ contract OptimizedForceMove {
         uint8 isFinalCount, // how many of the states are final
         Signature[] memory sigs,
         uint8[] memory whoSignedWhat,
-        bytes memory channelStorageLiteBytes
+        bytes memory channelStorageLiteBytes // This is to avoid a 'stack too deep' error by minimising the number of local variables
     ) public {
         // Calculate channelId from fixed part
         bytes32 channelId = keccak256(
