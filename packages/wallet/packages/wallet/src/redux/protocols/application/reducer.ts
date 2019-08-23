@@ -126,7 +126,7 @@ function challengeRequestedReducer(
   });
   return {
     protocolState: newProtocolState,
-    sharedData: { ...disputeState.sharedData, currentProcessId: APPLICATION_PROCESS_ID },
+    sharedData: { ...disputeState.sharedData },
   };
 }
 
@@ -149,7 +149,7 @@ function challengeDetectedReducer(
   });
   return {
     protocolState: newProtocolState,
-    sharedData: { ...disputeState.sharedData, currentProcessId: APPLICATION_PROCESS_ID },
+    sharedData: { ...disputeState.sharedData },
   };
 }
 
