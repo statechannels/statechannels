@@ -39,6 +39,9 @@ describe('when a NewProcessAction arrives', () => {
       [processId]: { protocolState: 'protocolState' },
     });
   });
+  it('stores the process in the priority queue', () => {
+    expect(updatedState.processQueue).toContain(expect.objectContaining({ processId }));
+  });
 });
 
 describe('when a ProcessAction arrives', () => {
@@ -103,7 +106,7 @@ describe('when a process state is terminal', () => {
   };
   const state = { ...initializedState, processStore: { [processId]: processState } };
   const action = strategyApproved({
-    processId: '0xprocessId',
+    processId,
     strategy: 'IndirectFundingStrategy',
   });
   const reducer = jest.fn(() => ({
@@ -116,7 +119,7 @@ describe('when a process state is terminal', () => {
 
   const result = walletReducer(state, action);
   it('removes the current process id', () => {
-    expect(result.currentProcessId).toBeUndefined();
+    expect(result.processQueue).not.toContain(expect.objectContaining({ processId }));
   });
   it('removes the process state', () => {
     expect(Object.keys((result as states.Initialized).processStore)).not.toContain(processId);
