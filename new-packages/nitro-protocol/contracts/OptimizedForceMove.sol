@@ -67,7 +67,7 @@ contract OptimizedForceMove {
         // Check that the proposed largestTurnNum is larger than or equal to the turnNumRecord that is being committed to
         require(largestTurnNum >= turnNumRecord, 'Stale challenge!');
 
-        // EITHER there is no inForceMoveAppion stored against channelId at all (OK)
+        // EITHER there is no information stored against channelId at all (OK)
         if (channelStorageHashes[channelId] != bytes32(0)) {
             // OR there is, in which case we must check the channel is still open and that the committed turnNumRecord is correct
             require(
@@ -81,43 +81,14 @@ contract OptimizedForceMove {
             );
         }
 
-        // TODO factor into separate function _validTransitionChain, which returns either false or the stateHashes array
-
         bytes32[] memory stateHashes = new bytes32[](variableParts.length);
-        for (uint256 i = 0; i < variableParts.length; i++) {
-            stateHashes[i] = keccak256(
-                abi.encode(
-                    State(
-                        largestTurnNum + i - variableParts.length + 1, // turnNum
-                        i > variableParts.length - isFinalCount, // isFinal
-                        channelId,
-                        keccak256(
-                            abi.encode(
-                                fixedPart.challengeDuration,
-                                fixedPart.appDefinition,
-                                variableParts[i].appData
-                            )
-                        ),
-                        keccak256(abi.encode(variableParts[i].outcome))
-                    )
-                )
-            );
-            if (i + 1 != variableParts.length) {
-                // no transition from final state
-                require(
-                    _validTransition(
-                        fixedPart.participants.length, // nParticipants
-                        [
-                            i > variableParts.length - isFinalCount,
-                            i + 1 > variableParts.length - isFinalCount
-                        ], // [a.isFinal, b.isFinal]
-                        [variableParts[i], variableParts[i + 1]], // [a,b]
-                        largestTurnNum + i - variableParts.length + 2, // b.turnNum
-                        fixedPart.appDefinition
-                    )
-                ); // reason string not necessary (called function will provide reason for reverting)
-            }
-        }
+        stateHashes = _validTransitionChain(
+            largestTurnNum,
+            variableParts,
+            isFinalCount,
+            channelId,
+            fixedPart
+        ); // if this function returns the array (and doesn't revert), this implies a validTransition chain
 
         // check the supplied states are supported by n signatures
         require(
@@ -381,6 +352,87 @@ contract OptimizedForceMove {
         channelStorageHashes[channelId] = keccak256(abi.encode(channelStorage));
     }
 
+    struct ChannelStorageLite {
+        uint256 finalizesAt;
+        bytes32 stateHash;
+        address challengerAddress;
+        bytes32 outcomeHash;
+    }
+
+    function respondWithAlternative(
+        FixedPart memory fixedPart,
+        uint256 largestTurnNum,
+        ForceMoveApp.VariablePart[] memory variableParts,
+        uint8 isFinalCount, // how many of the states are final
+        Signature[] memory sigs,
+        uint8[] memory whoSignedWhat,
+        bytes memory channelStorageLiteBytes // This is to avoid a 'stack too deep' error by minimising the number of local variables
+    ) public {
+        // Calculate channelId from fixed part
+        bytes32 channelId = keccak256(
+            abi.encode(fixedPart.chainId, fixedPart.participants, fixedPart.channelNonce)
+        );
+
+        // ------------
+        // REQUIREMENTS
+        // ------------
+
+        ChannelStorageLite memory channelStorageLite = abi.decode(
+            channelStorageLiteBytes,
+            (ChannelStorageLite)
+        );
+
+        // check challenge has not timed out
+        require(now < channelStorageLite.finalizesAt, 'Response too late!');
+
+        // check that the declared finalizesAt and turnNumRecord match storage
+        require(
+            keccak256(
+                    abi.encode(
+                        ChannelStorage(
+                            largestTurnNum - 1, // implicit check that we are only incrementing turnNumRecord by 1
+                            channelStorageLite.finalizesAt,
+                            channelStorageLite.stateHash,
+                            channelStorageLite.challengerAddress,
+                            channelStorageLite.outcomeHash
+                        )
+                    )
+                ) ==
+                channelStorageHashes[channelId],
+            'Challenge State does not match stored version'
+        );
+
+        bytes32[] memory stateHashes = new bytes32[](variableParts.length);
+        stateHashes = _validTransitionChain(
+            largestTurnNum,
+            variableParts,
+            isFinalCount,
+            channelId,
+            fixedPart
+        ); // if this function returns the array (and doesn't revert), this implies a validTransition chain
+        // check the supplied states are supported by n signatures
+        require(
+            _validSignatures(
+                largestTurnNum,
+                fixedPart.participants,
+                stateHashes,
+                sigs,
+                whoSignedWhat
+            ),
+            'Invalid signatures'
+        );
+
+        // ------------
+        // EFFECTS
+        // ------------
+
+        // clear the challenge:
+        channelStorageHashes[channelId] = keccak256(
+            abi.encode(ChannelStorage(largestTurnNum, 0, bytes32(0), address(0), bytes32(0)))
+        );
+
+    }
+
     // Internal methods:
 
     function _isAddressInArray(address suspect, address[] memory addresses)
@@ -454,6 +506,52 @@ contract OptimizedForceMove {
         bytes32 prefixedHash = keccak256(abi.encodePacked(prefix, _d));
         address a = ecrecover(prefixedHash, _v, _r, _s);
         return (a);
+    }
+
+    function _validTransitionChain(
+        // returns stateHashes array (implies true) else reverts
+        uint256 largestTurnNum,
+        ForceMoveApp.VariablePart[] memory variableParts,
+        uint8 isFinalCount,
+        bytes32 channelId,
+        FixedPart memory fixedPart
+    ) internal pure returns (bytes32[] memory) {
+        bytes32[] memory stateHashes = new bytes32[](variableParts.length);
+        for (uint256 i = 0; i < variableParts.length; i++) {
+            stateHashes[i] = keccak256(
+                abi.encode(
+                    State(
+                        largestTurnNum + i - variableParts.length + 1, // turnNum
+                        i > variableParts.length - isFinalCount, // isFinal
+                        channelId,
+                        keccak256(
+                            abi.encode(
+                                fixedPart.challengeDuration,
+                                fixedPart.appDefinition,
+                                variableParts[i].appData
+                            )
+                        ),
+                        keccak256(abi.encode(variableParts[i].outcome))
+                    )
+                )
+            );
+            if (i + 1 != variableParts.length) {
+                // no transition from final state
+                require(
+                    _validTransition(
+                        fixedPart.participants.length, // nParticipants
+                        [
+                            i > variableParts.length - isFinalCount,
+                            i + 1 > variableParts.length - isFinalCount
+                        ], // [a.isFinal, b.isFinal]
+                        [variableParts[i], variableParts[i + 1]], // [a,b]
+                        largestTurnNum + i - variableParts.length + 2, // b.turnNum
+                        fixedPart.appDefinition
+                    )
+                ); // reason string not necessary (called function will provide reason for reverting)
+            }
+        }
+        return stateHashes;
     }
 
     function _validTransition(

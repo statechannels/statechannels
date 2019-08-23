@@ -1,13 +1,13 @@
 import {ethers} from 'ethers';
 import {expectRevert} from 'magmo-devtools';
 // @ts-ignore
-import optimizedForceMoveArtifact from '../../build/contracts/TESTOptimizedForceMove.json';
+import OptimizedForceMoveArtifact from '../../build/contracts/TESTOptimizedForceMove.json';
 import {setupContracts} from './test-helpers';
 
 const provider = new ethers.providers.JsonRpcProvider(
   `http://localhost:${process.env.DEV_GANACHE_PORT}`,
 );
-let optimizedForceMove: ethers.Contract;
+let OptimizedForceMove: ethers.Contract;
 
 const participants = ['', '', ''];
 const wallets = new Array(3);
@@ -19,7 +19,7 @@ for (let i = 0; i < 3; i++) {
 }
 
 beforeAll(async () => {
-  optimizedForceMove = await setupContracts(provider, optimizedForceMoveArtifact);
+  OptimizedForceMove = await setupContracts(provider, OptimizedForceMoveArtifact);
 });
 
 describe('_acceptableWhoSignedWhat (expect a boolean)', () => {
@@ -36,7 +36,7 @@ describe('_acceptableWhoSignedWhat (expect a boolean)', () => {
     'returns $expectedResult for whoSignedWhat = $whoSignedWhat, largestTurnNum = $largestTurnNum, nParticipants = $nParticipants, nStates = $nStates',
     async ({whoSignedWhat, largestTurnNum, nParticipants, nStates, expectedResult}) => {
       expect(
-        await optimizedForceMove.acceptableWhoSignedWhat(
+        await OptimizedForceMove.acceptableWhoSignedWhat(
           whoSignedWhat,
           largestTurnNum,
           nParticipants,
@@ -56,7 +56,7 @@ describe('_acceptableWhoSignedWhat (expect revert)', () => {
     async ({whoSignedWhat, largestTurnNum, nParticipants, nStates, reasonString}) => {
       await expectRevert(
         () =>
-          optimizedForceMove.acceptableWhoSignedWhat(
+          OptimizedForceMove.acceptableWhoSignedWhat(
             whoSignedWhat,
             largestTurnNum,
             nParticipants,

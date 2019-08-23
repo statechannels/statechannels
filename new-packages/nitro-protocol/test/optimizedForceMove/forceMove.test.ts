@@ -1,17 +1,23 @@
 import {ethers} from 'ethers';
 import {expectRevert} from 'magmo-devtools';
 // @ts-ignore
-import optimizedForceMoveArtifact from '../../build/contracts/TESTOptimizedForceMove.json';
+import OptimizedForceMoveArtifact from '../../build/contracts/TESTOptimizedForceMove.json';
 // @ts-ignore
 import countingAppArtifact from '../../build/contracts/CountingApp.json';
 import {keccak256, defaultAbiCoder, hexlify} from 'ethers/utils';
 import {HashZero, AddressZero} from 'ethers/constants';
-import {setupContracts, sign} from './test-helpers';
+import {
+  setupContracts,
+  sign,
+  nonParticipant,
+  clearedChallengeHash,
+  ongoinghallengeHash,
+} from './test-helpers';
 
 const provider = new ethers.providers.JsonRpcProvider(
   `http://localhost:${process.env.DEV_GANACHE_PORT}`,
 );
-let optimizedForceMove: ethers.Contract;
+let OptimizedForceMove: ethers.Contract;
 let networkId;
 
 const chainId = 1234;
@@ -27,27 +33,11 @@ for (let i = 0; i < 3; i++) {
   wallets[i] = ethers.Wallet.createRandom();
   participants[i] = wallets[i].address;
 }
-
-const nonParticipant = ethers.Wallet.createRandom();
-const clearedChallengeHash = keccak256(
-  defaultAbiCoder.encode(
-    ['uint256', 'uint256', 'bytes32', 'address', 'bytes32'],
-    [5, 0, HashZero, AddressZero, HashZero], // turnNum = 5
-  ),
-);
-
-const ongoinghallengeHash = keccak256(
-  defaultAbiCoder.encode(
-    ['uint256', 'uint256', 'bytes32', 'address', 'bytes32'],
-    [5, 9999, HashZero, AddressZero, HashZero], // turnNum = 5, not yet finalized
-  ),
-);
-
 // set event listener
 let forceMoveEvent;
 
 beforeAll(async () => {
-  optimizedForceMove = await setupContracts(provider, optimizedForceMoveArtifact);
+  OptimizedForceMove = await setupContracts(provider, OptimizedForceMoveArtifact);
   networkId = (await provider.getNetwork()).chainId;
   appDefinition = countingAppArtifact.networks[networkId].address; // use a fixed appDefinition in all tests
 });
@@ -64,7 +54,7 @@ const description4 =
   'It reverts a forceMove for an open channel if the turnNum is too small (subsequent challenge, turnNumRecord would decrease)';
 const description5 = 'It reverts a forceMove when a challenge is underway / finalized';
 const description6 = 'It reverts a forceMove with an incorrect challengerSig';
-const description7 = 'It reverts a forceMove with the states do not form a validTransition chain';
+const description7 = 'It reverts a forceMove when the states do not form a validTransition chain';
 const description8 = 'It reverts when an unacceptable whoSignedWhat array is submitted';
 
 describe('forceMove', () => {
@@ -156,13 +146,13 @@ describe('forceMove', () => {
       const challengerSig = {v, r, s};
 
       // set current channelStorageHashes value
-      await (await optimizedForceMove.setChannelStorageHash(
+      await (await OptimizedForceMove.setChannelStorageHash(
         channelId,
         initialChannelStorageHash,
       )).wait();
 
       forceMoveEvent = new Promise((resolve, reject) => {
-        optimizedForceMove.on(
+        OptimizedForceMove.on(
           'ForceMove',
           (
             eventTurnNumRecord,
@@ -200,9 +190,12 @@ describe('forceMove', () => {
 
       // call forceMove in a slightly different way if expecting a revert
       if (reasonString) {
-        expectRevert(
+        const regex = new RegExp(
+          '^' + 'VM Exception while processing transaction: revert ' + reasonString + '$',
+        );
+        await expectRevert(
           () =>
-            optimizedForceMove.forceMove(
+            OptimizedForceMove.forceMove(
               turnNumRecord,
               fixedPart,
               largestTurnNum,
@@ -212,10 +205,10 @@ describe('forceMove', () => {
               whoSignedWhat,
               challengerSig,
             ),
-          'VM Exception while processing transaction: revert ' + reasonString,
+          regex,
         );
       } else {
-        const tx = await optimizedForceMove.forceMove(
+        const tx = await OptimizedForceMove.forceMove(
           turnNumRecord,
           fixedPart,
           largestTurnNum,
@@ -271,7 +264,7 @@ describe('forceMove', () => {
         );
 
         // check channelStorageHash against the expected value
-        expect(await optimizedForceMove.channelStorageHashes(channelId)).toEqual(
+        expect(await OptimizedForceMove.channelStorageHashes(channelId)).toEqual(
           expectedChannelStorageHash,
         );
       }
