@@ -381,14 +381,21 @@ contract OptimizedForceMove {
         channelStorageHashes[channelId] = keccak256(abi.encode(channelStorage));
     }
 
+    struct ChannelStorageLite {
+        uint256 finalizesAt;
+        bytes32 stateHash;
+        address challengerAddress;
+        bytes32 outcomeHash;
+    }
+
     function respondWithAlternative(
-        uint256 turnNumRecord,
         FixedPart memory fixedPart,
         uint256 largestTurnNum,
         ForceMoveApp.VariablePart[] memory variableParts,
         uint8 isFinalCount, // how many of the states are final
         Signature[] memory sigs,
-        uint8[] memory whoSignedWhat
+        uint8[] memory whoSignedWhat,
+        bytes memory channelStorageLiteBytes
     ) public {
         // Calculate channelId from fixed part
         bytes32 channelId = keccak256(
@@ -399,19 +406,32 @@ contract OptimizedForceMove {
         // REQUIREMENTS
         // ------------
 
-        // Check that the proposed largestTurnNum is larger than or equal to the turnNumRecord that is being committed to
-        require(largestTurnNum > turnNumRecord, 'The turnNum must increase');
+        ChannelStorageLite memory channelStorageLite = abi.decode(
+            channelStorageLiteBytes,
+            (ChannelStorageLite)
+        );
 
-        // IF there is no information stored against channelId at all, revert
-        require(channelStorageHashes[channelId] != bytes32(0), 'No challenge ongoing');
+        // check challenge ongoing
+        require(channelStorageLite.challengerAddress != address(0), 'No challenge ongoing!');
 
-        // IF there has been a challenge but it has since been cleared, revert
+        // check challenge has not timed out
+        require(now < channelStorageLite.finalizesAt, 'Response too late!');
+
+        // check that the declared finalizesAt and turnNumRecord match storage
         require(
             keccak256(
-                    abi.encode(ChannelStorage(turnNumRecord, 0, bytes32(0), address(0), bytes32(0)))
-                ) !=
+                    abi.encode(
+                        ChannelStorage(
+                            largestTurnNum - 1, // implicit check that we are only incrementing turnNumRecord by 1
+                            channelStorageLite.finalizesAt,
+                            channelStorageLite.stateHash,
+                            channelStorageLite.challengerAddress,
+                            channelStorageLite.outcomeHash
+                        )
+                    )
+                ) ==
                 channelStorageHashes[channelId],
-            'No challenge ongoing'
+            'Challenge State does not match stored version'
         );
 
         // TODO factor into separate function _validTransitionChain, which returns either false or the stateHashes array
@@ -469,14 +489,9 @@ contract OptimizedForceMove {
         // ------------
 
         // clear the challenge:
-        ChannelStorage memory channelStorage = ChannelStorage(
-            largestTurnNum,
-            0,
-            bytes32(0),
-            address(0),
-            bytes32(0)
+        channelStorageHashes[channelId] = keccak256(
+            abi.encode(ChannelStorage(largestTurnNum, 0, bytes32(0), address(0), bytes32(0)))
         );
-        channelStorageHashes[channelId] = keccak256(abi.encode(channelStorage));
 
     }
 
