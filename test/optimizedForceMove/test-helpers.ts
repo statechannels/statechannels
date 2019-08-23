@@ -31,3 +31,18 @@ export const ongoinghallengeHash = keccak256(
     [5, 9999, HashZero, AddressZero, HashZero], // turnNum = 5, not yet finalized
   ),
 );
+
+export const newChallengeClearedEvent = (contract: ethers.Contract, channelId: string) => {
+  return new Promise((resolve, reject) => {
+    contract.on('ChallengeCleared', (eventChannelId, eventTurnNumRecord, event) => {
+      if (eventChannelId === channelId) {
+        // match event for this channel only
+        // event.removeListener();
+        resolve([eventChannelId, eventTurnNumRecord]);
+      }
+    });
+    setTimeout(() => {
+      reject(new Error('timeout'));
+    }, 60000);
+  });
+};
