@@ -4,8 +4,8 @@ import {expectRevert} from 'magmo-devtools';
 import OptimizedForceMoveArtifact from '../../build/contracts/TESTOptimizedForceMove.json';
 // @ts-ignore
 import countingAppArtifact from '../../build/contracts/CountingApp.json';
-import {keccak256, defaultAbiCoder} from 'ethers/utils';
-import {setupContracts, sign} from './test-helpers';
+import {keccak256, defaultAbiCoder, hexlify} from 'ethers/utils';
+import {setupContracts, sign, newChallengeClearedEvent} from './test-helpers';
 import {HashZero, AddressZero} from 'ethers/constants';
 
 const provider = new ethers.providers.JsonRpcProvider(
@@ -161,6 +161,8 @@ describe('respond', () => {
       const signature = await sign(responder, responseStateHash);
       const sig = {v: signature.v, r: signature.r, s: signature.s};
 
+      const challengeClearedEvent: any = newChallengeClearedEvent(OptimizedForceMove, channelId);
+
       if (reasonString) {
         const regex = new RegExp(
           '^' + 'VM Exception while processing transaction: revert ' + reasonString + '$',
@@ -190,7 +192,12 @@ describe('respond', () => {
           sig,
         );
 
+        // wait for tx to be mined
         await tx2.wait();
+
+        // catch ChallengeCleared event
+        const [_, eventTurnNumRecord] = await challengeClearedEvent;
+        expect(eventTurnNumRecord._hex).toEqual(hexlify(declaredTurnNumRecord + 1));
 
         // compute and check new expected ChannelStorageHash
         const expectedChannelStorage = [

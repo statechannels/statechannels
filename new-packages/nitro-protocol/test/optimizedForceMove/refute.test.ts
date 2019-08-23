@@ -1,17 +1,17 @@
 import {ethers} from 'ethers';
 import {expectRevert} from 'magmo-devtools';
 // @ts-ignore
-import optimizedForceMoveArtifact from '../../build/contracts/TESTOptimizedForceMove.json';
+import OptimizedForceMoveArtifact from '../../build/contracts/TESTOptimizedForceMove.json';
 // @ts-ignore
 import countingAppArtifact from '../../build/contracts/CountingApp.json';
-import {keccak256, defaultAbiCoder} from 'ethers/utils';
-import {setupContracts, sign} from './test-helpers';
+import {keccak256, defaultAbiCoder, hexlify} from 'ethers/utils';
+import {setupContracts, sign, newChallengeClearedEvent} from './test-helpers';
 import {HashZero, AddressZero} from 'ethers/constants';
 
 const provider = new ethers.providers.JsonRpcProvider(
   `http://localhost:${process.env.DEV_GANACHE_PORT}`,
 );
-let optimizedForceMove: ethers.Contract;
+let OptimizedForceMove: ethers.Contract;
 let networkId;
 const chainId = 1234;
 const participants = ['', '', ''];
@@ -29,7 +29,7 @@ for (let i = 0; i < 3; i++) {
 const nonParticipant = ethers.Wallet.createRandom();
 
 beforeAll(async () => {
-  optimizedForceMove = await setupContracts(provider, optimizedForceMoveArtifact);
+  OptimizedForceMove = await setupContracts(provider, OptimizedForceMoveArtifact);
   networkId = (await provider.getNetwork()).chainId;
   appDefinition = countingAppArtifact.networks[networkId].address; // use a fixed appDefinition in all tests
 });
@@ -155,18 +155,20 @@ describe('respond', () => {
       );
 
       // call public wrapper to set state (only works on test contract)
-      const tx = await optimizedForceMove.setChannelStorageHash(channelId, challengeExistsHash);
+      const tx = await OptimizedForceMove.setChannelStorageHash(channelId, challengeExistsHash);
       await tx.wait();
-      expect(await optimizedForceMove.channelStorageHashes(channelId)).toEqual(challengeExistsHash);
+      expect(await OptimizedForceMove.channelStorageHashes(channelId)).toEqual(challengeExistsHash);
 
       // sign the state
       const signature = await sign(refutationStateSigner, refutationStateHash);
       const refutationStateSig = {v: signature.v, r: signature.r, s: signature.s};
 
+      const challengeClearedEvent: any = newChallengeClearedEvent(OptimizedForceMove, channelId);
+
       if (reasonString) {
         expectRevert(
           () =>
-            optimizedForceMove.refute(
+            OptimizedForceMove.refute(
               declaredTurnNumRecord,
               refutationTurnNum,
               finalizesAt,
@@ -180,7 +182,7 @@ describe('respond', () => {
         );
       } else {
         // call respond
-        const tx2 = await optimizedForceMove.refute(
+        const tx2 = await OptimizedForceMove.refute(
           declaredTurnNumRecord,
           refutationTurnNum,
           finalizesAt,
@@ -191,7 +193,12 @@ describe('respond', () => {
           refutationStateSig,
         );
 
+        // wait for tx to be mined
         await tx2.wait();
+
+        // catch ChallengeCleared event
+        const [_, eventTurnNumRecord] = await challengeClearedEvent;
+        expect(eventTurnNumRecord._hex).toEqual(hexlify(declaredTurnNumRecord));
 
         // compute and check new expected ChannelStorageHash
         const expectedChannelStorage = [declaredTurnNumRecord, 0, HashZero, AddressZero, HashZero];
@@ -201,7 +208,7 @@ describe('respond', () => {
             expectedChannelStorage,
           ),
         );
-        expect(await optimizedForceMove.channelStorageHashes(channelId)).toEqual(
+        expect(await OptimizedForceMove.channelStorageHashes(channelId)).toEqual(
           expectedChannelStorageHash,
         );
       }
