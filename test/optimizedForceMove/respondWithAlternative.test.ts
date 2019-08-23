@@ -38,21 +38,19 @@ const description1 = 'It accepts a valid respondWithAlternative tx and clears th
 const description2 =
   'It reverts a respondWithAlternative tx when largestTurnNum =/= setTurnNum + 1';
 const description3 = 'It reverts a respondWithAlternative tx for an expired challenge';
-const description4 = 'It reverts a respondWithAlternative tx for an open channel';
-const description5 =
+const description4 =
   'It reverts a respondWithAlternative tx when the states do not form a validTransition chain ';
-const description6 =
+const description5 =
   'It reverts a respondWithAlternative tx when an unacceptable whoSignedWhat array is submitted';
 
 describe('respondWithAlternative', () => {
   it.each`
-    description     | channelNonce | setTurnNumRecord | expired  | largestTurnNum | appDatas     | isFinalCount | whoSignedWhat | challenger                | reasonString
-    ${description1} | ${301}       | ${7}             | ${false} | ${8}           | ${[0, 1, 2]} | ${0}         | ${[0, 1, 2]}  | ${wallets[1]}             | ${undefined}
-    ${description2} | ${302}       | ${8}             | ${false} | ${8}           | ${[0, 1, 2]} | ${0}         | ${[0, 1, 2]}  | ${wallets[2]}             | ${'Challenge State does not match stored version'}
-    ${description3} | ${303}       | ${8}             | ${true}  | ${8}           | ${[0, 1, 2]} | ${0}         | ${[0, 1, 2]}  | ${wallets[2]}             | ${'Response too late!'}
-    ${description4} | ${304}       | ${7}             | ${false} | ${8}           | ${[0, 1, 2]} | ${0}         | ${[0, 1, 2]}  | ${{address: AddressZero}} | ${'No challenge ongoing!'}
-    ${description5} | ${301}       | ${7}             | ${false} | ${8}           | ${[0, 2, 1]} | ${0}         | ${[0, 1, 2]}  | ${wallets[1]}             | ${'CountingApp: Counter must be incremented'}
-    ${description6} | ${301}       | ${7}             | ${false} | ${8}           | ${[0, 1, 2]} | ${0}         | ${[0, 0, 2]}  | ${wallets[1]}             | ${'Unacceptable whoSignedWhat array'}
+    description     | channelNonce | setTurnNumRecord | expired  | largestTurnNum | appDatas     | isFinalCount | whoSignedWhat | challenger    | reasonString
+    ${description1} | ${301}       | ${7}             | ${false} | ${8}           | ${[0, 1, 2]} | ${0}         | ${[0, 1, 2]}  | ${wallets[1]} | ${undefined}
+    ${description2} | ${302}       | ${8}             | ${false} | ${8}           | ${[0, 1, 2]} | ${0}         | ${[0, 1, 2]}  | ${wallets[2]} | ${'Challenge State does not match stored version'}
+    ${description3} | ${303}       | ${8}             | ${true}  | ${8}           | ${[0, 1, 2]} | ${0}         | ${[0, 1, 2]}  | ${wallets[2]} | ${'Response too late!'}
+    ${description4} | ${304}       | ${7}             | ${false} | ${8}           | ${[0, 2, 1]} | ${0}         | ${[0, 1, 2]}  | ${wallets[1]} | ${'CountingApp: Counter must be incremented'}
+    ${description5} | ${305}       | ${7}             | ${false} | ${8}           | ${[0, 1, 2]} | ${0}         | ${[0, 0, 2]}  | ${wallets[1]} | ${'Unacceptable whoSignedWhat array'}
   `(
     '$description', // for the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce
     async ({

@@ -382,9 +382,6 @@ contract OptimizedForceMove {
             (ChannelStorageLite)
         );
 
-        // check challenge ongoing
-        require(channelStorageLite.challengerAddress != address(0), 'No challenge ongoing!');
-
         // check challenge has not timed out
         require(now < channelStorageLite.finalizesAt, 'Response too late!');
 
