@@ -6,7 +6,13 @@ import OptimizedForceMoveArtifact from '../../build/contracts/TESTOptimizedForce
 import countingAppArtifact from '../../build/contracts/CountingApp.json';
 import {keccak256, defaultAbiCoder, hexlify} from 'ethers/utils';
 import {HashZero, AddressZero} from 'ethers/constants';
-import {setupContracts, sign} from './test-helpers';
+import {
+  setupContracts,
+  sign,
+  nonParticipant,
+  clearedChallengeHash,
+  ongoinghallengeHash,
+} from './test-helpers';
 
 const provider = new ethers.providers.JsonRpcProvider(
   `http://localhost:${process.env.DEV_GANACHE_PORT}`,
@@ -27,22 +33,6 @@ for (let i = 0; i < 3; i++) {
   wallets[i] = ethers.Wallet.createRandom();
   participants[i] = wallets[i].address;
 }
-
-const nonParticipant = ethers.Wallet.createRandom();
-const clearedChallengeHash = keccak256(
-  defaultAbiCoder.encode(
-    ['uint256', 'uint256', 'bytes32', 'address', 'bytes32'],
-    [5, 0, HashZero, AddressZero, HashZero], // turnNum = 5
-  ),
-);
-
-const ongoinghallengeHash = keccak256(
-  defaultAbiCoder.encode(
-    ['uint256', 'uint256', 'bytes32', 'address', 'bytes32'],
-    [5, 9999, HashZero, AddressZero, HashZero], // turnNum = 5, not yet finalized
-  ),
-);
-
 // set event listener
 let forceMoveEvent;
 
@@ -64,7 +54,7 @@ const description4 =
   'It reverts a forceMove for an open channel if the turnNum is too small (subsequent challenge, turnNumRecord would decrease)';
 const description5 = 'It reverts a forceMove when a challenge is underway / finalized';
 const description6 = 'It reverts a forceMove with an incorrect challengerSig';
-const description7 = 'It reverts a forceMove with the states do not form a validTransition chain';
+const description7 = 'It reverts a forceMove when the states do not form a validTransition chain';
 const description8 = 'It reverts when an unacceptable whoSignedWhat array is submitted';
 
 describe('forceMove', () => {
