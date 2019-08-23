@@ -117,7 +117,10 @@ describe('respondWithAlternative', () => {
 
       // call forceMove in a slightly different way if expecting a revert
       if (reasonString) {
-        expectRevert(
+        const regex = new RegExp(
+          '^' + 'VM Exception while processing transaction: revert ' + reasonString + '$',
+        );
+        await expectRevert(
           () =>
             OptimizedForceMove.respondWithAlternative(
               turnNumRecord,
@@ -128,7 +131,7 @@ describe('respondWithAlternative', () => {
               sigs,
               whoSignedWhat,
             ),
-          'VM Exception while processing transaction: revert ' + reasonString,
+          regex,
         );
       } else {
         const tx = await OptimizedForceMove.respondWithAlternative(

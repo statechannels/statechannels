@@ -162,7 +162,10 @@ describe('respond', () => {
       const sig = {v: signature.v, r: signature.r, s: signature.s};
 
       if (reasonString) {
-        expectRevert(
+        const regex = new RegExp(
+          '^' + 'VM Exception while processing transaction: revert ' + reasonString + '$',
+        );
+        await expectRevert(
           () =>
             OptimizedForceMove.respond(
               declaredTurnNumRecord,
@@ -173,7 +176,7 @@ describe('respond', () => {
               [challengeVariablePart, responseVariablePart],
               sig,
             ),
-          'VM Exception while processing transaction: revert ' + reasonString,
+          regex,
         );
       } else {
         // call respond
