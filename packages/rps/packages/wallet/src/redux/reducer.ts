@@ -254,9 +254,9 @@ function endProcess(
 ): states.Initialized {
   const newState = _.cloneDeep({ ...state, ...sharedData });
   delete newState.processStore[processId];
-  newState.currentProcessId = undefined;
-  return newState;
+  return states.removeFromPriorityQueue(newState, processId);
 }
+
 function startProcess(
   state: states.Initialized,
   sharedData: states.SharedData,
@@ -270,10 +270,18 @@ function startProcess(
     ...newState.processStore,
     [processId]: { processId, protocolState, channelsToMonitor: [], protocol },
   };
-  // TODO: Right now any new processId get sets to the current process Id.
-  // We probably need a priority queue so some protocols can override another
-  // IE: Responding to a challenge is higher priority than funding.
-  newState.currentProcessId = processId;
 
-  return newState;
+  return states.addToPriorityQueue(newState, {
+    processId,
+    priority: getProtocolPriority(protocol),
+  });
+}
+
+function getProtocolPriority(protocol: ProcessProtocol): states.Priority {
+  switch (protocol) {
+    case ProcessProtocol.Application:
+      return states.Priority.Low;
+    default:
+      return states.Priority.Medium;
+  }
 }

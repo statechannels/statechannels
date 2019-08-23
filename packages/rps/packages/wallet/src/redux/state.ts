@@ -48,6 +48,7 @@ import {
   isConcludingState,
   isTerminalConcludingState,
 } from './protocols/concluding/states';
+import _ from 'lodash';
 
 export type WalletState = WaitForLogin | MetaMaskError | Initialized;
 
@@ -68,9 +69,21 @@ export interface SharedData {
   channelSubscriptions: ChannelSubscriptions;
   adjudicatorState: AdjudicatorState;
   fundingState: FundingState;
-  currentProcessId?: string;
+  processQueue: ProcessPriorityQueueEntry[];
 }
-
+export interface ProcessPriorityQueueEntry {
+  priority: Priority;
+  processId: string;
+}
+export enum Priority {
+  Low = 1,
+  Medium = 2,
+  High = 3,
+}
+export interface ProcessEntry {
+  priority: Priority;
+  processId: string;
+}
 export interface ChannelSubscriptions {
   [channelId: string]: ChannelSubscriber[];
 }
@@ -164,6 +177,7 @@ export const EMPTY_SHARED_DATA: SharedData = {
   channelSubscriptions: {},
   adjudicatorState: {},
   fundingState: {},
+  processQueue: [],
 };
 
 export function sharedData(params: SharedData): SharedData {
@@ -173,6 +187,7 @@ export function sharedData(params: SharedData): SharedData {
     adjudicatorState,
     fundingState,
     channelSubscriptions,
+    processQueue,
   } = params;
   return {
     outboxState,
@@ -180,6 +195,7 @@ export function sharedData(params: SharedData): SharedData {
     adjudicatorState,
     fundingState,
     channelSubscriptions,
+    processQueue,
   };
 }
 
@@ -201,6 +217,34 @@ export function initialized(params: Properties<Initialized>): Initialized {
 // -------------------
 // Getters and setters
 // -------------------
+
+export function addToPriorityQueue(
+  state: Initialized,
+  processEntry: ProcessPriorityQueueEntry,
+): Initialized {
+  // This is inefficient but since the amount of processes will be small and not stored
+  // it probably doesn't matter.
+  const newProcessQueue = _.cloneDeep(state.processQueue);
+  newProcessQueue.push(processEntry);
+  newProcessQueue.sort((a, b) => a.priority - b.priority);
+  return {
+    ...state,
+    processQueue: newProcessQueue,
+  };
+}
+
+export function removeFromPriorityQueue(state: Initialized, processId: string): Initialized {
+  const newProcessQueue = _.cloneDeep(state.processQueue.filter(p => p.processId === processId));
+  {
+    return { ...state, processQueue: newProcessQueue };
+  }
+}
+export function getNextProcessFromQueue(state: Initialized): string | undefined {
+  if (state.processQueue.length === 0) {
+    return undefined;
+  }
+  return state.processQueue[state.processQueue.length - 1].processId;
+}
 
 export function getChannelStatus(state: WalletState, channelId: string): ChannelState {
   return state.channelStore[channelId];
