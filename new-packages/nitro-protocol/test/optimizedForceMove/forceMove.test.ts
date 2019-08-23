@@ -200,7 +200,10 @@ describe('forceMove', () => {
 
       // call forceMove in a slightly different way if expecting a revert
       if (reasonString) {
-        expectRevert(
+        const regex = new RegExp(
+          '^' + 'VM Exception while processing transaction: revert ' + reasonString + '$',
+        );
+        await expectRevert(
           () =>
             OptimizedForceMove.forceMove(
               turnNumRecord,
@@ -212,7 +215,7 @@ describe('forceMove', () => {
               whoSignedWhat,
               challengerSig,
             ),
-          'VM Exception while processing transaction: revert ' + reasonString,
+          regex,
         );
       } else {
         const tx = await OptimizedForceMove.forceMove(
