@@ -67,7 +67,7 @@ contract OptimizedForceMove {
         // Check that the proposed largestTurnNum is larger than or equal to the turnNumRecord that is being committed to
         require(largestTurnNum >= turnNumRecord, 'Stale challenge!');
 
-        // EITHER there is no inForceMoveAppion stored against channelId at all (OK)
+        // EITHER there is no information stored against channelId at all (OK)
         if (channelStorageHashes[channelId] != bytes32(0)) {
             // OR there is, in which case we must check the channel is still open and that the committed turnNumRecord is correct
             require(
@@ -379,6 +379,105 @@ contract OptimizedForceMove {
             bytes32(0)
         );
         channelStorageHashes[channelId] = keccak256(abi.encode(channelStorage));
+    }
+
+    function respondWithAlternative(
+        uint256 turnNumRecord,
+        FixedPart memory fixedPart,
+        uint256 largestTurnNum,
+        ForceMoveApp.VariablePart[] memory variableParts,
+        uint8 isFinalCount, // how many of the states are final
+        Signature[] memory sigs,
+        uint8[] memory whoSignedWhat
+    ) public {
+        // Calculate channelId from fixed part
+        bytes32 channelId = keccak256(
+            abi.encode(fixedPart.chainId, fixedPart.participants, fixedPart.channelNonce)
+        );
+
+        // ------------
+        // REQUIREMENTS
+        // ------------
+
+        // Check that the proposed largestTurnNum is larger than or equal to the turnNumRecord that is being committed to
+        require(largestTurnNum > turnNumRecord, 'The turnNum must increase');
+
+        // IF there is no information stored against channelId at all, revert
+        require(channelStorageHashes[channelId] != bytes32(0), 'No challenge ongoing');
+
+        // IF there has been a challenge but it has since been cleared, revert
+        require(
+            keccak256(
+                    abi.encode(ChannelStorage(turnNumRecord, 0, bytes32(0), address(0), bytes32(0)))
+                ) !=
+                channelStorageHashes[channelId],
+            'No challenge ongoing'
+        );
+
+        // TODO factor into separate function _validTransitionChain, which returns either false or the stateHashes array
+
+        bytes32[] memory stateHashes = new bytes32[](variableParts.length);
+        for (uint256 i = 0; i < variableParts.length; i++) {
+            stateHashes[i] = keccak256(
+                abi.encode(
+                    State(
+                        largestTurnNum + i - variableParts.length + 1, // turnNum
+                        i > variableParts.length - isFinalCount, // isFinal
+                        channelId,
+                        keccak256(
+                            abi.encode(
+                                fixedPart.challengeDuration,
+                                fixedPart.appDefinition,
+                                variableParts[i].appData
+                            )
+                        ),
+                        keccak256(abi.encode(variableParts[i].outcome))
+                    )
+                )
+            );
+            if (i + 1 != variableParts.length) {
+                // no transition from final state
+                require(
+                    _validTransition(
+                        fixedPart.participants.length, // nParticipants
+                        [
+                            i > variableParts.length - isFinalCount,
+                            i + 1 > variableParts.length - isFinalCount
+                        ], // [a.isFinal, b.isFinal]
+                        [variableParts[i], variableParts[i + 1]], // [a,b]
+                        largestTurnNum + i - variableParts.length + 2, // b.turnNum
+                        fixedPart.appDefinition
+                    )
+                ); // reason string not necessary (called function will provide reason for reverting)
+            }
+        }
+
+        // check the supplied states are supported by n signatures
+        require(
+            _validSignatures(
+                largestTurnNum,
+                fixedPart.participants,
+                stateHashes,
+                sigs,
+                whoSignedWhat
+            ),
+            'Invalid signatures'
+        );
+
+        // ------------
+        // EFFECTS
+        // ------------
+
+        // clear the challenge:
+        ChannelStorage memory channelStorage = ChannelStorage(
+            largestTurnNum,
+            0,
+            bytes32(0),
+            address(0),
+            bytes32(0)
+        );
+        channelStorageHashes[channelId] = keccak256(abi.encode(channelStorage));
+
     }
 
     // Internal methods:
