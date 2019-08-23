@@ -236,16 +236,7 @@ contract OptimizedForceMove {
         );
 
         // effects
-
-        // clear the challenge:
-        ChannelStorage memory channelStorage = ChannelStorage(
-            turnNumRecord + 1,
-            0,
-            bytes32(0),
-            address(0),
-            bytes32(0)
-        );
-        channelStorageHashes[channelId] = keccak256(abi.encode(channelStorage));
+        _clearChallenge(channelId, turnNumRecord + 1);
     }
 
     function refute(
@@ -340,16 +331,7 @@ contract OptimizedForceMove {
         );
 
         // effects
-
-        // clear the challenge:
-        ChannelStorage memory channelStorage = ChannelStorage(
-            turnNumRecord,
-            0,
-            bytes32(0),
-            address(0),
-            bytes32(0)
-        );
-        channelStorageHashes[channelId] = keccak256(abi.encode(channelStorage));
+        _clearChallenge(channelId, turnNumRecord);
     }
 
     struct ChannelStorageLite {
@@ -422,14 +404,8 @@ contract OptimizedForceMove {
             'Invalid signatures'
         );
 
-        // ------------
-        // EFFECTS
-        // ------------
-
-        // clear the challenge:
-        channelStorageHashes[channelId] = keccak256(
-            abi.encode(ChannelStorage(largestTurnNum, 0, bytes32(0), address(0), bytes32(0)))
-        );
+        // effects
+        _clearChallenge(channelId, largestTurnNum);
 
     }
 
@@ -598,6 +574,13 @@ contract OptimizedForceMove {
         return true;
     }
 
+    function _clearChallenge(bytes32 channelId, uint256 newTurnNumRecord) internal {
+        channelStorageHashes[channelId] = keccak256(
+            abi.encode(ChannelStorage(newTurnNumRecord, 0, bytes32(0), address(0), bytes32(0)))
+        );
+        emit ChallengeCleared(channelId, newTurnNumRecord);
+    }
+
     // events
     event ForceMove(
         // everything needed to respond or refute
@@ -608,4 +591,6 @@ contract OptimizedForceMove {
         FixedPart fixedPart,
         ForceMoveApp.VariablePart[] variableParts
     );
+
+    event ChallengeCleared(bytes32 channelId, uint256 newTurnNumRecord);
 }
