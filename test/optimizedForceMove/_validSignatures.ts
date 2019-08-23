@@ -1,12 +1,12 @@
 import {ethers} from 'ethers';
 // @ts-ignore
-import optimizedForceMoveArtifact from '../../build/contracts/TESTOptimizedForceMove.json';
+import OptimizedForceMoveArtifact from '../../build/contracts/TESTOptimizedForceMove.json';
 import {setupContracts, sign} from './test-helpers';
 
 const provider = new ethers.providers.JsonRpcProvider(
   `http://localhost:${process.env.DEV_GANACHE_PORT}`,
 );
-let optimizedForceMove: ethers.Contract;
+let OptimizedForceMove: ethers.Contract;
 
 const participants = ['', '', ''];
 const wallets = new Array(3);
@@ -18,7 +18,7 @@ for (let i = 0; i < 3; i++) {
 }
 
 beforeAll(async () => {
-  optimizedForceMove = await setupContracts(provider, optimizedForceMoveArtifact);
+  OptimizedForceMove = await setupContracts(provider, OptimizedForceMoveArtifact);
 });
 
 // TODO use .each to improve readability and reduce boilerplate
@@ -48,11 +48,11 @@ describe('_validSignatures', () => {
       whoSignedWhat[i] = i;
     }
     expect(
-      await optimizedForceMove.validSignatures(8, addresses, stateHashes, sigs, whoSignedWhat),
+      await OptimizedForceMove.validSignatures(8, addresses, stateHashes, sigs, whoSignedWhat),
     ).toBe(true);
     const brokenSigs = sigs.reverse();
     expect(
-      await optimizedForceMove.validSignatures(
+      await OptimizedForceMove.validSignatures(
         8,
         addresses,
         stateHashes,
@@ -71,11 +71,11 @@ describe('_validSignatures', () => {
       whoSignedWhat[i] = 0;
     }
     expect(
-      await optimizedForceMove.validSignatures(8, addresses, [stateHash], sigs, whoSignedWhat),
+      await OptimizedForceMove.validSignatures(8, addresses, [stateHash], sigs, whoSignedWhat),
     ).toBe(true);
     const brokenSigs = sigs.reverse();
     expect(
-      await optimizedForceMove.validSignatures(
+      await OptimizedForceMove.validSignatures(
         8,
         addresses,
         [stateHash],

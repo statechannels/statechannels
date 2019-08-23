@@ -142,7 +142,7 @@ describe('respond', () => {
       // set expiry time in the future or in the past
       const blockNumber = await provider.getBlockNumber();
       const blockTimestamp = (await provider.getBlock(blockNumber)).timestamp;
-      const expiryTime = expired
+      const finalizesAt = expired
         ? blockTimestamp - challengeDuration
         : blockTimestamp + challengeDuration;
 
@@ -150,7 +150,7 @@ describe('respond', () => {
       const challengeExistsHash = keccak256(
         defaultAbiCoder.encode(
           ['uint256', 'uint256', 'bytes32', 'address', 'bytes32'],
-          [setTurnNumRecord, expiryTime, challengeStateHash, challenger.address, outcomeHash],
+          [setTurnNumRecord, finalizesAt, challengeStateHash, challenger.address, outcomeHash],
         ),
       );
 
@@ -169,7 +169,7 @@ describe('respond', () => {
             optimizedForceMove.refute(
               declaredTurnNumRecord,
               refutationTurnNum,
-              expiryTime,
+              finalizesAt,
               challenger.address,
               isFinalAB,
               fixedPart,
@@ -183,7 +183,7 @@ describe('respond', () => {
         const tx2 = await optimizedForceMove.refute(
           declaredTurnNumRecord,
           refutationTurnNum,
-          expiryTime,
+          finalizesAt,
           challenger.address,
           isFinalAB,
           fixedPart,
