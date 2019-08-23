@@ -5,7 +5,7 @@ import OptimizedForceMoveArtifact from '../../build/contracts/TESTOptimizedForce
 // @ts-ignore
 import countingAppArtifact from '../../build/contracts/CountingApp.json';
 import {keccak256, defaultAbiCoder} from 'ethers/utils';
-import {setupContracts, sign} from './test-helpers';
+import {setupContracts, sign, clearedChallengeHash} from './test-helpers';
 import {HashZero, AddressZero} from 'ethers/constants';
 
 const provider = new ethers.providers.JsonRpcProvider(
@@ -26,8 +26,6 @@ for (let i = 0; i < 3; i++) {
   wallets[i] = ethers.Wallet.createRandom();
   participants[i] = wallets[i].address;
 }
-const nonParticipant = ethers.Wallet.createRandom();
-
 beforeAll(async () => {
   OptimizedForceMove = await setupContracts(provider, OptimizedForceMoveArtifact);
   networkId = (await provider.getNetwork()).chainId;
@@ -36,18 +34,31 @@ beforeAll(async () => {
 
 // Scenarios are synonymous with channelNonce:
 
-const description1 = 'It reverts a respondWithAlternative tx for an open channel';
+const description1 = 'It accepts a valid respondWithAlternative tx and clears the challenge';
+const description2 =
+  'It reverts a respondWithAlternative tx when largestTurnNum =/= setTurnNum + 1';
+const description3 = 'It reverts a respondWithAlternative tx for an expired challenge';
+const description4 = 'It reverts a respondWithAlternative tx for an open channel';
+const description5 =
+  'It reverts a respondWithAlternative tx when the states do not form a validTransition chain ';
+const description6 =
+  'It reverts a respondWithAlternative tx when an unacceptable whoSignedWhat array is submitted';
 
 describe('respondWithAlternative', () => {
   it.each`
-    description     | channelNonce | initialChannelStorageHash | turnNumRecord | largestTurnNum | appDatas     | isFinalCount | whoSignedWhat | challenger    | reasonString
-    ${description1} | ${308}       | ${HashZero}               | ${0}          | ${8}           | ${[0, 1, 2]} | ${0}         | ${[0, 0, 2]}  | ${wallets[2]} | ${'No challenge ongoing'}
+    description     | channelNonce | setTurnNumRecord | expired  | largestTurnNum | appDatas     | isFinalCount | whoSignedWhat | challenger                | reasonString
+    ${description1} | ${301}       | ${7}             | ${false} | ${8}           | ${[0, 1, 2]} | ${0}         | ${[0, 1, 2]}  | ${wallets[1]}             | ${undefined}
+    ${description2} | ${302}       | ${8}             | ${false} | ${8}           | ${[0, 1, 2]} | ${0}         | ${[0, 1, 2]}  | ${wallets[2]}             | ${'Challenge State does not match stored version'}
+    ${description3} | ${303}       | ${8}             | ${true}  | ${8}           | ${[0, 1, 2]} | ${0}         | ${[0, 1, 2]}  | ${wallets[2]}             | ${'Response too late!'}
+    ${description4} | ${304}       | ${7}             | ${false} | ${8}           | ${[0, 1, 2]} | ${0}         | ${[0, 1, 2]}  | ${{address: AddressZero}} | ${'No challenge ongoing!'}
+    ${description5} | ${301}       | ${7}             | ${false} | ${8}           | ${[0, 2, 1]} | ${0}         | ${[0, 1, 2]}  | ${wallets[1]}             | ${'CountingApp: Counter must be incremented'}
+    ${description6} | ${301}       | ${7}             | ${false} | ${8}           | ${[0, 1, 2]} | ${0}         | ${[0, 0, 2]}  | ${wallets[1]}             | ${'Unacceptable whoSignedWhat array'}
   `(
     '$description', // for the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce
     async ({
       channelNonce,
-      initialChannelStorageHash,
-      turnNumRecord,
+      setTurnNumRecord,
+      expired,
       largestTurnNum,
       appDatas,
       isFinalCount,
@@ -70,6 +81,30 @@ describe('respondWithAlternative', () => {
         appDefinition,
         challengeDuration,
       };
+
+      const challengeAppPartHash = keccak256(
+        defaultAbiCoder.encode(
+          ['uint256', 'address', 'bytes'],
+          [challengeDuration, appDefinition, defaultAbiCoder.encode(['uint256'], [appDatas[0]])],
+        ),
+      );
+
+      const challengeState = {
+        turnNum: setTurnNumRecord,
+        isFinal: false, // TODO consider having this as a test parameter
+        channelId,
+        challengeAppPartHash,
+        outcomeHash,
+      };
+
+      const challengeStateHash = keccak256(
+        defaultAbiCoder.encode(
+          [
+            'tuple(uint256 turnNum, bool isFinal, bytes32 channelId, bytes32 challengeAppPartHash, bytes32 outcomeHash)',
+          ],
+          [challengeState],
+        ),
+      );
 
       // compute stateHashes
       const variableParts = new Array(appDatas.length);
@@ -102,18 +137,40 @@ describe('respondWithAlternative', () => {
         );
       }
 
+      // set expiry time in the future or in the past
+      const blockNumber = await provider.getBlockNumber();
+      const blockTimestamp = (await provider.getBlock(blockNumber)).timestamp;
+      const finalizesAt = expired
+        ? blockTimestamp - challengeDuration
+        : blockTimestamp + challengeDuration;
+
+      // compute expected ChannelStorageHash
+      const challengeExistsHash = keccak256(
+        defaultAbiCoder.encode(
+          ['uint256', 'uint256', 'bytes32', 'address', 'bytes32'],
+          [setTurnNumRecord, finalizesAt, challengeStateHash, challenger.address, outcomeHash],
+        ),
+      );
+
+      // pack arguemtns
+      const ChannelStorageLite =
+        'tuple(uint256 finalizesAt, bytes32 stateHash, address challengerAddress, bytes32 outcomeHash)';
+      const channelStorageLiteBytes = defaultAbiCoder.encode(
+        [ChannelStorageLite],
+        [[finalizesAt, challengeStateHash, challenger.address, outcomeHash]],
+      );
+
+      // call public wrapper to set state (only works on test contract)
+      const tx = await OptimizedForceMove.setChannelStorageHash(channelId, challengeExistsHash);
+      await tx.wait();
+      expect(await OptimizedForceMove.channelStorageHashes(channelId)).toEqual(challengeExistsHash);
+
       // sign the states
       const sigs = new Array(participants.length);
       for (let i = 0; i < participants.length; i++) {
         const sig = await sign(wallets[i], stateHashes[whoSignedWhat[i]]);
         sigs[i] = {v: sig.v, r: sig.r, s: sig.s};
       }
-
-      // set current channelStorageHashes value
-      await (await OptimizedForceMove.setChannelStorageHash(
-        channelId,
-        initialChannelStorageHash,
-      )).wait();
 
       // call forceMove in a slightly different way if expecting a revert
       if (reasonString) {
@@ -123,28 +180,28 @@ describe('respondWithAlternative', () => {
         await expectRevert(
           () =>
             OptimizedForceMove.respondWithAlternative(
-              turnNumRecord,
               fixedPart,
               largestTurnNum,
               variableParts,
               isFinalCount,
               sigs,
               whoSignedWhat,
+              channelStorageLiteBytes,
             ),
           regex,
         );
       } else {
-        const tx = await OptimizedForceMove.respondWithAlternative(
-          turnNumRecord,
+        const tx2 = await OptimizedForceMove.respondWithAlternative(
           fixedPart,
           largestTurnNum,
           variableParts,
           isFinalCount,
           sigs,
           whoSignedWhat,
+          channelStorageLiteBytes,
         );
         // wait for tx to be mined
-        await tx.wait();
+        await tx2.wait();
 
         // compute expected ChannelStorageHash
         const expectedChannelStorage = [largestTurnNum, 0, HashZero, AddressZero, HashZero];
