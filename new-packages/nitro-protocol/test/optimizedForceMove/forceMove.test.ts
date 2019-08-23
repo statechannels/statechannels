@@ -5,7 +5,7 @@ import OptimizedForceMoveArtifact from '../../build/contracts/TESTOptimizedForce
 // @ts-ignore
 import countingAppArtifact from '../../build/contracts/CountingApp.json';
 import {keccak256, defaultAbiCoder, hexlify} from 'ethers/utils';
-import {HashZero, AddressZero} from 'ethers/constants';
+import {HashZero} from 'ethers/constants';
 import {
   setupContracts,
   sign,
