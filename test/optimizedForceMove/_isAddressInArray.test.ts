@@ -1,12 +1,12 @@
 import {ethers} from 'ethers';
 // @ts-ignore
-import optimizedForceMoveArtifact from '../../build/contracts/TESTOptimizedForceMove.json';
+import OptimizedForceMoveArtifact from '../../build/contracts/TESTOptimizedForceMove.json';
 import {setupContracts} from './test-helpers';
 
 const provider = new ethers.providers.JsonRpcProvider(
   `http://localhost:${process.env.DEV_GANACHE_PORT}`,
 );
-let optimizedForceMove: ethers.Contract;
+let OptimizedForceMove: ethers.Contract;
 
 const participants = ['', '', ''];
 const wallets = new Array(3);
@@ -18,7 +18,7 @@ for (let i = 0; i < 3; i++) {
 }
 
 beforeAll(async () => {
-  optimizedForceMove = await setupContracts(provider, optimizedForceMoveArtifact);
+  OptimizedForceMove = await setupContracts(provider, OptimizedForceMoveArtifact);
 });
 
 describe('_isAddressInArray', () => {
@@ -35,10 +35,10 @@ describe('_isAddressInArray', () => {
   });
 
   it('verifies absence of suspect', async () => {
-    expect(await optimizedForceMove.isAddressInArray(suspect, addresses)).toBe(false);
+    expect(await OptimizedForceMove.isAddressInArray(suspect, addresses)).toBe(false);
   });
   it('finds an address hiding in an array', async () => {
     addresses[1] = suspect;
-    expect(await optimizedForceMove.isAddressInArray(suspect, addresses)).toBe(true);
+    expect(await OptimizedForceMove.isAddressInArray(suspect, addresses)).toBe(true);
   });
 });
