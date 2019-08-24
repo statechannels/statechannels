@@ -24,7 +24,6 @@ export default function (opts) {
     this.amForceChoking = false
     this.remainingRequests = [];
     this._wire.extendedHandshake.ilp_account = opts.ilp_account
-    console.log('Extended handshake to send:', this._wire, this._wire.extendedHandshake)
     this._interceptRequests()
   }
 
@@ -78,15 +77,13 @@ export default function (opts) {
         _this.emit('first_request', length)
       }
       _this.emit('request', length)
-
       // Call onRequest after the handlers triggered by this event have been called
       const _arguments = arguments
       setTimeout(function () {
         if (!_this.amForceChoking) {
-          console.log('wt_ilp responding to request')
           _onRequest.apply(_this._wire, _arguments)
         } else {
-          console.warn('force choking peer, dropping request')
+          console.warn('>> CHOKING - dropped request')
         }
       }, 0)
     }

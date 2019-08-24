@@ -5,79 +5,95 @@ import webtorrent from "./webtorrent-ilp/webtorrent-custom";
 
 const initialState = { working: "Done/Idle", verb: "from", numPeers: 0, downloadSpeed: 0, uploadSpeed: 0, torrent: null };
 
-const onProgress = (status, setStatus) => (torrent = initialState, action = "Sharing", done = true) => {
-  setStatus({ ...status, working: done ? "Done/Idle" : action, downloadSpeed: torrent.downloadSpeed, uploadSpeed: torrent.uploadSpeed, numPeers: torrent.numPeers, torrent })
+const progressLogger = (status, setStatus) => (torrent = initialState, action = "Idle", done = true, file) => {
+  if (!file) {
+    return setInterval(() =>
+      setStatus({
+        ...status,
+        working: done ? "Done/Idle" :
+          action,
+        downloadSpeed: torrent.downloadSpeed,
+        uploadSpeed: torrent.uploadSpeed,
+        numPeers: torrent.numPeers
+      })
+      , 1000)
+  } else {
+    file.getBlobURL((err, url) => {
+      if (err) console.error(err, url)
+      setStatus({ working: done ? "Done/Idle" : action, url, filename: file.name })
+    })
+  }
 }
 
-function upload (client, files, setMagnet, onProgress) {
-
+const upload = (client, files, setMagnet, progressLogger, allowedPeers, updateAllowedPeers) => {
   client.seed(files, function (torrent) {
     setMagnet(torrent.magnetURI);
-    const peersConected = []
     torrent.on("wire", (wire) => {
-      console.log("UI - WIRE");
       wire.on('first_request', (peerAccount) => {
-        console.log("UI - WIRE", peerAccount, "()-> first request");
-        if (!peersConected.some(account => account === peerAccount)) {
-          console.log('UI - PIRATE WIRE', peerAccount);
-          peersConected.push(peerAccount);
-          client.sendNotice(torrent, wire);
-          setTimeout(() => { client.retractNotice(torrent, wire, peersConected[0]); }, 5000);
+        console.log("UI - NEW WIRE FROM " + peerAccount, allowedPeers);
+        if ((peerAccount in allowedPeers) && !allowedPeers[peerAccount].allowed) {
+          console.log('UI - ALREADY BLOCKED WIRE FROM ' + peerAccount, allowedPeers);
+          client.sendNotice(wire, peerAccount);
         } else {
-          console.log('UI - LEGIT WIRE', peerAccount);
+          console.log('UI - SEEMS LEGIT WIRE ' + peerAccount, allowedPeers);
+          updateAllowedPeers({ id: peerAccount, allowed: true, wire });
         }
-
       })
     });
-    setInterval(() => onProgress(torrent, "Seeding", false), 1000);
+    progressLogger(torrent, "Seeding", false);
   });
 };
 
-function download (client, torrentOrigin, onProgress) {
+const download = (client, torrentOrigin, progressLogger) => {
   var torrentId = torrentOrigin || "https://webtorrent.io/torrents/sintel.torrent";
-  console.log('------> RESTARRRRRT', { ilp_account: client.ilp_account, peerId: client.peerId })
-
   client.add(torrentId, (torrent) => {
-    console.log("UI - Download Started ", { ilp_account: torrent.client.ilp_account, peerId: torrent.client.peerId }, { ilp_account: client.ilp_account, peerId: client.peerId });
-    const logger = setInterval(() => { onProgress(torrent, "Leeching", false) }, 2000);
-
+    console.log("UI - Download Started - MY account id is", client, torrent);
+    const logger = progressLogger(torrent, "Leeching", false)
     torrent.on("notice", (wire, notice) => {
       if (notice === 'start') {
-        console.log()
-        console.log('about to destroy', client.ilp_account)
-
+        clearInterval(logger);
         client.destroy();
         client = new webtorrent({ ilp_acccount: client.ilp_account });
-        download(client, torrentOrigin, onProgress);
+        download(client, torrentOrigin, progressLogger);
       }
     })
-
-
-    console.log('UI - Download live from ', torrent.wires[0].peerId);
     torrent.on("done", () => {
-      console.log('Done!', "File downloaded: " + torrent.files[0].name, arguments)
+      console.log('Done!', "File downloaded: " + torrent.files[0].name)
       clearInterval(logger);
-      // clearInterval(resumer);
-      onProgress(initialState, "Done/Idle");
+      progressLogger(initialState, "Done/Idle", true, torrent.files[0]);
     });
-
-
   });
 };
 
-function toggleAllLeechers (client, status) {
-  client.unchokeWire(status.torrent.wires);
-  console.log("UI - unchokeWire", status.torrent.wires);
+const togglePeer = (client, peerAccount, allowedPeers, updateAllowedPeers) => {
+  if (!allowedPeers.hasOwnProperty(peerAccount)) {
+    console.error("That peer account doesnt exist in the list");
+    return;
+  }
+  const { wire, allowed } = allowedPeers[peerAccount];
+  if (allowed) {
+    client.sendNotice(wire, peerAccount);
+  } else {
+    client.retractNotice(wire, peerAccount);
+  }
+  updateAllowedPeers({ id: peerAccount, allowed: !allowed, wire });
+};
+
+const updatePeers = (allowedPeers, setAllowedPeers) => (peer) => {
+  const newState = { ...allowedPeers, [peer.id]: peer };
+  setAllowedPeers(newState);
+  return newState;
 };
 
 function App () {
   const client = useContext(WebTorrentContext);
   const [status, setStatus] = useState({ working: "Done/Idle", verb: "from", numPeers: 0, downloadSpeed: 0, uploadSpeed: 0, torrent: undefined });
   const [seedMagnet, setSeedMagnet] = useState("");
-  const [torrentData, setTorrentData] = useState({});
+  const [allowedPeers, setAllowedPeers] = useState({});
 
   const [leechMagnet, setLeechMagnet] = useState("");
   const { downloadSpeed, uploadSpeed, working, numPeers } = status;
+  const updateAllowedPeers = updatePeers(allowedPeers, setAllowedPeers);
   return (
     <div className="App">
       <div className="hero" id="hero">
@@ -103,8 +119,21 @@ function App () {
         <h2>Seeder</h2>
         <h5>Select a file to seed</h5>
         <br />
-        <input type="file" name="upload" onChange={(event) => upload(client, event.target.files, setSeedMagnet, onProgress(status, setStatus))} />
-        <button onClick={() => { toggleAllLeechers(client, status) }}>TOGGLE</button>
+        <input type="file" name="upload"
+          onChange={(event) =>
+            upload(client, event.target.files, setSeedMagnet, progressLogger(status, setStatus), allowedPeers, updateAllowedPeers)
+          }
+        />
+        {status.working !== "Done/Idle" && status.numPeers ? (
+          Object.values(allowedPeers).map(({ id, allowed }) => {
+            return (
+              <React.Fragment key={id}>
+                <br />
+                <button onClick={() => { togglePeer(client, id, allowedPeers, updateAllowedPeers) }}>
+                  - {id} - allowed: {JSON.stringify(allowed)}
+                </button>
+              </React.Fragment>)
+          })) : false}
         {seedMagnet ? (
           <p>
             <h3>Share this to share the file</h3>
@@ -119,7 +148,8 @@ function App () {
         <h5>Insert a magnet URI to download</h5>
         <br />
         <input type="text" name="download" onChange={(event) => setLeechMagnet(event.target.value)} />
-        <button onClick={() => download(client, leechMagnet, onProgress(status, setStatus), setTorrentData, torrentData)}>START DOWNLOAD</button>
+        <button onClick={() => download(client, leechMagnet, progressLogger(status, setStatus), allowedPeers, setAllowedPeers)}>START DOWNLOAD</button>
+        <a href={status.url} download={status.filename}>Download {status.filename}</a>
       </div>
     </div>
   );

@@ -20,54 +20,40 @@ export default class WebTorrentIlp extends WebTorrent {
     return torrent
   }
 
-  sendNotice (torrent, wire) {
+  sendNotice (wire, peerAccount) {
     wire.wt_ilp.stop();
-    console.log('<sendNotice', wire.peerId)
+    console.log('> sendNotice', peerAccount)
 
-    // wire.choke()
-    // torrent.removePeer(wire.peerId);
   }
 
-  retractNotice (torrent, wire, peerId) {
+  retractNotice (wire, peerAccount) {
     wire.wt_ilp.start();
-    console.log('>retractNotice', wire.peerId)
-
-    // wire.unchoke()
-    // torrent.addPeer(peerId);
+    console.log('> retractNotice', peerAccount)
   }
 
   _setupWire (torrent, wire) {
     wire.use(wt_ilp({ ilp_account: this.ilp_account }))
     wire.setKeepAlive(true)
-
-    wire.on('download', (bytes) => { console.log('CUSTOM downloaded ' + bytes + ' bytes') })
-    wire.on('unchoke', () => { console.log('CUSTOM unchoke') })
+    wire.on('download', (bytes) => { console.log(`>> downloaded ${bytes} bytes`) })
     wire.wt_ilp.on('first_request', () => {
-      console.log('CUSTOM MMMMM', wire);
-      torrent.emit('first_request', wire);
-      wire.emit('first_request', wire.extendedHandshake.ilp_account);
+      console.log(`> first_request of ${wire.peerExtendedHandshake.ilp_account}`);
+      wire.emit('first_request', wire.peerExtendedHandshake.ilp_account);
     })
-
-    wire.wt_ilp.on('notice', (notice) => {
-      torrent.emit('notice', wire, notice);
-    })
-    wire.wt_ilp.on('ilp_choke', () => { console.log('CUSTOM wt_ilp choke') })
-    wire.wt_ilp.on('ilp_unchoke', () => { console.log('CUSTOM wt_ilp unchoke') })
+    wire.wt_ilp.on('notice', (notice) => { torrent.emit('notice', wire, notice); })
   }
 
   _setupTorrent (torrent) {
     if (torrent.__setupWithIlp) { return torrent }
     torrent.on('wire', this._setupWire.bind(this, torrent))
-    torrent.on('first_request', (wire) => { console.log('SETUP torrent first_request', wire) })
     torrent.on('notice', (wire, notice) => {
-      console.log('SETUP notice', wire, notice)
+      console.log(`> notice recieved from ${wire.peerExtendedHandshake.ilp_account}: ${notice}`)
       if (notice === 'stop') {
         wire.wt_ilp.ack();
-        console.log("<ack'ed")
+        console.log("< stop acknowledged")
       }
     })
-    torrent.on('done', () => { console.log('DONE') })
-    torrent.on('error', (err) => { console.log('torrent error:', err) })
+    torrent.on('done', () => { console.log('>DONE') })
+    torrent.on('error', (err) => { console.log('>torrent error:', err) })
 
     torrent.__setupWithIlp = true
   }
