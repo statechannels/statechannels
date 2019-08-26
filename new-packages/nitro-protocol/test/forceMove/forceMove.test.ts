@@ -1,7 +1,7 @@
 import {ethers} from 'ethers';
 import {expectRevert} from 'magmo-devtools';
 // @ts-ignore
-import OptimizedForceMoveArtifact from '../../build/contracts/TESTOptimizedForceMove.json';
+import ForceMoveArtifact from '../../build/contracts/TESTForceMove.json';
 // @ts-ignore
 import countingAppArtifact from '../../build/contracts/CountingApp.json';
 import {keccak256, defaultAbiCoder, hexlify} from 'ethers/utils';
@@ -18,7 +18,7 @@ import {
 const provider = new ethers.providers.JsonRpcProvider(
   `http://localhost:${process.env.DEV_GANACHE_PORT}`,
 );
-let OptimizedForceMove: ethers.Contract;
+let ForceMove: ethers.Contract;
 let networkId;
 
 const chainId = 1234;
@@ -38,7 +38,7 @@ for (let i = 0; i < 3; i++) {
 let forceMoveEvent;
 
 beforeAll(async () => {
-  OptimizedForceMove = await setupContracts(provider, OptimizedForceMoveArtifact);
+  ForceMove = await setupContracts(provider, ForceMoveArtifact);
   networkId = (await provider.getNetwork()).chainId;
   appDefinition = countingAppArtifact.networks[networkId].address; // use a fixed appDefinition in all tests
 });
@@ -147,10 +147,7 @@ describe('forceMove', () => {
       const challengerSig = {v, r, s};
 
       // set current channelStorageHashes value
-      await (await OptimizedForceMove.setChannelStorageHash(
-        channelId,
-        initialChannelStorageHash,
-      )).wait();
+      await (await ForceMove.setChannelStorageHash(channelId, initialChannelStorageHash)).wait();
 
       // call forceMove in a slightly different way if expecting a revert
       if (reasonString) {
@@ -159,7 +156,7 @@ describe('forceMove', () => {
         );
         await expectRevert(
           () =>
-            OptimizedForceMove.forceMove(
+            ForceMove.forceMove(
               turnNumRecord,
               fixedPart,
               largestTurnNum,
@@ -172,8 +169,8 @@ describe('forceMove', () => {
           regex,
         );
       } else {
-        forceMoveEvent = newForceMoveEvent(OptimizedForceMove, channelId);
-        const tx = await OptimizedForceMove.forceMove(
+        forceMoveEvent = newForceMoveEvent(ForceMove, channelId);
+        const tx = await ForceMove.forceMove(
           turnNumRecord,
           fixedPart,
           largestTurnNum,
@@ -230,9 +227,7 @@ describe('forceMove', () => {
         );
 
         // check channelStorageHash against the expected value
-        expect(await OptimizedForceMove.channelStorageHashes(channelId)).toEqual(
-          expectedChannelStorageHash,
-        );
+        expect(await ForceMove.channelStorageHashes(channelId)).toEqual(expectedChannelStorageHash);
       }
     },
   );
