@@ -8,7 +8,7 @@ import {keccak256, defaultAbiCoder, hexlify} from 'ethers/utils';
 import {
   setupContracts,
   sign,
-  newChallengeClearedEvent,
+  newConcludedEvent,
   clearedChallengeHash,
   ongoingChallengeHash,
   finalizedOutcomeHash,
@@ -135,6 +135,8 @@ describe('concludeFromOpen', () => {
         sigs[i] = {v: sig.v, r: sig.r, s: sig.s};
       }
 
+      const concludedEvent: any = newConcludedEvent(OptimizedForceMove, channelId);
+
       // call method in a slightly different way if expecting a revert
       if (reasonString) {
         const regex = new RegExp(
@@ -168,6 +170,10 @@ describe('concludeFromOpen', () => {
 
         // wait for tx to be mined
         await tx2.wait();
+
+        // catch Concluded event
+        const [eventChannelId] = await concludedEvent;
+        expect(eventChannelId).toBeDefined();
 
         // compute expected ChannelStorageHash
         const blockNumber = await provider.getBlockNumber();

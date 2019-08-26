@@ -60,3 +60,18 @@ export const newChallengeClearedEvent = (contract: ethers.Contract, channelId: s
     }, 60000);
   });
 };
+
+export const newConcludedEvent = (contract: ethers.Contract, channelId: string) => {
+  return new Promise((resolve, reject) => {
+    contract.on('Concluded', (eventChannelId, event) => {
+      if (eventChannelId === channelId) {
+        // match event for this channel only
+        // event.removeListener();
+        resolve([channelId]);
+      }
+    });
+    setTimeout(() => {
+      reject(new Error('timeout'));
+    }, 60000);
+  });
+};
