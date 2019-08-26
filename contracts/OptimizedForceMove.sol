@@ -441,37 +441,15 @@ contract OptimizedForceMove {
             );
         }
 
-        bytes32[] memory stateHashes = new bytes32[](numStates);
-        for (uint256 i = 0; i < numStates; i++) {
-            stateHashes[i] = keccak256(
-                abi.encode(
-                    State(
-                        largestTurnNum + i - numStates, // turnNum
-                        true, // isFinal
-                        channelId,
-                        appPartHash,
-                        outcomeHash
-                    )
-                )
-            );
-        }
-
-        // check the supplied states are supported by n signatures
-        require(
-            _validSignatures(
-                largestTurnNum,
-                fixedPart.participants,
-                stateHashes,
-                sigs,
-                whoSignedWhat
-            ),
-            'Invalid signatures'
-        );
-
-        // effects
-        // set channel storage
-        channelStorageHashes[channelId] = keccak256(
-            abi.encode(ChannelStorage(0, now, bytes32(0), address(0), outcomeHash))
+        _conclude(
+            largestTurnNum,
+            numStates,
+            fixedPart.participants,
+            channelId,
+            appPartHash,
+            outcomeHash,
+            sigs,
+            whoSignedWhat
         );
     }
     // Internal methods:
@@ -646,6 +624,48 @@ contract OptimizedForceMove {
         emit ChallengeCleared(channelId, newTurnNumRecord);
     }
 
+    function _conclude(
+        uint256 largestTurnNum,
+        uint8 numStates,
+        address[] memory participants,
+        bytes32 channelId,
+        bytes32 appPartHash,
+        bytes32 outcomeHash,
+        Signature[] memory sigs,
+        uint8[] memory whoSignedWhat
+    ) internal {
+        bytes32[] memory stateHashes = new bytes32[](numStates);
+        for (uint256 i = 0; i < numStates; i++) {
+            stateHashes[i] = keccak256(
+                abi.encode(
+                    State(
+                        largestTurnNum + i - numStates, // turnNum
+                        true, // isFinal
+                        channelId,
+                        appPartHash,
+                        outcomeHash
+                    )
+                )
+            );
+        }
+
+        // check the supplied states are supported by n signatures
+        require(
+            _validSignatures(largestTurnNum, participants, stateHashes, sigs, whoSignedWhat),
+            'Invalid signatures'
+        );
+
+        // effects
+
+        // set channel storage
+        channelStorageHashes[channelId] = keccak256(
+            abi.encode(ChannelStorage(0, now, bytes32(0), address(0), outcomeHash))
+        );
+
+        // emit event
+        emit Concluded(channelId);
+    }
+
     // events
     event ForceMove(
         // everything needed to respond or refute
@@ -658,4 +678,5 @@ contract OptimizedForceMove {
     );
 
     event ChallengeCleared(bytes32 channelId, uint256 newTurnNumRecord);
+    event Concluded(bytes32 channelId);
 }
