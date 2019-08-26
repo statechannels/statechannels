@@ -179,8 +179,6 @@ describe('concludeFromChallenge', () => {
         [[finalizesAt, challengeStateHash, challengerAddress, outcomeHash]],
       );
 
-      const concludedEvent: any = newConcludedEvent(OptimizedForceMove, channelId);
-
       // call method in a slightly different way if expecting a revert
       if (reasonString) {
         const regex = new RegExp(
@@ -202,6 +200,7 @@ describe('concludeFromChallenge', () => {
           regex,
         );
       } else {
+        const concludedEvent: any = newConcludedEvent(OptimizedForceMove, channelId);
         const tx2 = await OptimizedForceMove.concludeFromChallenge(
           declaredTurnNumRecord,
           largestTurnNum,
