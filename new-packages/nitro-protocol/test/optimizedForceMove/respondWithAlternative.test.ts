@@ -4,8 +4,8 @@ import {expectRevert} from 'magmo-devtools';
 import OptimizedForceMoveArtifact from '../../build/contracts/TESTOptimizedForceMove.json';
 // @ts-ignore
 import countingAppArtifact from '../../build/contracts/CountingApp.json';
-import {keccak256, defaultAbiCoder} from 'ethers/utils';
-import {setupContracts, sign, clearedChallengeHash} from './test-helpers';
+import {keccak256, defaultAbiCoder, hexlify} from 'ethers/utils';
+import {setupContracts, sign, newChallengeClearedEvent} from './test-helpers';
 import {HashZero, AddressZero} from 'ethers/constants';
 
 const provider = new ethers.providers.JsonRpcProvider(
@@ -170,6 +170,8 @@ describe('respondWithAlternative', () => {
         sigs[i] = {v: sig.v, r: sig.r, s: sig.s};
       }
 
+      const challengeClearedEvent: any = newChallengeClearedEvent(OptimizedForceMove, channelId);
+
       // call forceMove in a slightly different way if expecting a revert
       if (reasonString) {
         const regex = new RegExp(
@@ -198,8 +200,13 @@ describe('respondWithAlternative', () => {
           whoSignedWhat,
           channelStorageLiteBytes,
         );
+
         // wait for tx to be mined
         await tx2.wait();
+
+        // catch ChallengeCleared event
+        const [_, eventTurnNumRecord] = await challengeClearedEvent;
+        expect(eventTurnNumRecord._hex).toEqual(hexlify(largestTurnNum));
 
         // compute expected ChannelStorageHash
         const expectedChannelStorage = [largestTurnNum, 0, HashZero, AddressZero, HashZero];
