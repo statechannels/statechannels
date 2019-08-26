@@ -19,6 +19,9 @@
       "force-move/conclude": {
         "title": "Conclude"
       },
+      "force-move/consensus-game": {
+        "title": "The Consensus Game"
+      },
       "force-move/force-move": {
         "title": "ForceMove"
       },
@@ -47,6 +50,27 @@
         "title": "Introduction",
         "sidebar_label": "Introduction"
       },
+      "nitro/channel-storage": {
+        "title": "Channel Storage"
+      },
+      "nitro/claim": {
+        "title": "Claim"
+      },
+      "nitro/nitro-implementation-notes": {
+        "title": "Implementation Notes"
+      },
+      "nitro/outcomes": {
+        "title": "Outcomes"
+      },
+      "nitro/overview": {
+        "title": "Overview"
+      },
+      "nitro/payment-game": {
+        "title": "Single Asset Payment Game"
+      },
+      "nitro/transfer": {
+        "title": "Transfer"
+      },
       "redistribution-of-assets": {
         "title": "Redistribution of Assets",
         "sidebar_label": "Redistribution of Assets"
@@ -62,7 +86,8 @@
     },
     "categories": {
       "ForceMove": "ForceMove",
-      "Nitro Protocol": "Nitro Protocol"
+      "Nitro Protocol": "Nitro Protocol",
+      "Nitro Protocol (old)": "Nitro Protocol (old)"
     }
   },
   "pages-strings": {
