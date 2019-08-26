@@ -452,6 +452,57 @@ contract OptimizedForceMove {
             whoSignedWhat
         );
     }
+
+    function concludeFromChallenge(
+        uint256 turnNumRecord,
+        uint256 largestTurnNum,
+        FixedPart memory fixedPart, // don't need appDefinition
+        bytes32 appPartHash,
+        uint8 numStates,
+        uint8[] memory whoSignedWhat,
+        Signature[] memory sigs,
+        bytes32 challengeOutcomeHash,
+        bytes memory channelStorageLiteBytes // This is to avoid a 'stack too deep' error by minimising the number of local variables
+    ) public {
+        // Calculate channelId from fixed part
+        bytes32 channelId = keccak256(
+            abi.encode(fixedPart.chainId, fixedPart.participants, fixedPart.channelNonce)
+        );
+
+        ChannelStorageLite memory channelStorageLite = abi.decode(
+            channelStorageLiteBytes,
+            (ChannelStorageLite)
+        );
+
+        require(turnNumRecord > 0, 'TurnNumRecord must be nonzero');
+
+        require(
+            keccak256(
+                    abi.encode(
+                        ChannelStorage(
+                            turnNumRecord,
+                            channelStorageLite.finalizesAt,
+                            channelStorageLite.stateHash, // challengeStateHash
+                            channelStorageLite.challengerAddress,
+                            challengeOutcomeHash
+                        )
+                    )
+                ) ==
+                channelStorageHashes[channelId],
+            'Challenge State does not match stored version'
+        );
+
+        _conclude(
+            largestTurnNum,
+            numStates,
+            fixedPart.participants,
+            channelId,
+            appPartHash,
+            channelStorageLite.outcomeHash,
+            sigs,
+            whoSignedWhat
+        );
+    }
     // Internal methods:
 
     function _isAddressInArray(address suspect, address[] memory addresses)
