@@ -1,6 +1,5 @@
 import {ethers} from 'ethers';
-import {splitSignature, arrayify} from 'ethers/utils';
-import {keccak256, defaultAbiCoder} from 'ethers/utils';
+import {splitSignature, arrayify, keccak256, defaultAbiCoder} from 'ethers/utils';
 import {HashZero, AddressZero} from 'ethers/constants';
 
 export async function setupContracts(provider: ethers.providers.JsonRpcProvider, artifact) {
@@ -28,11 +27,21 @@ export const clearedChallengeHash = (turnNumRecord: number = 5) => {
   );
 };
 
-export const ongoinghallengeHash = (turnNumRecord: number = 5) => {
+export const ongoingChallengeHash = (turnNumRecord: number = 5) => {
   return keccak256(
     defaultAbiCoder.encode(
       ['uint256', 'uint256', 'bytes32', 'address', 'bytes32'],
       [turnNumRecord, 1e9, HashZero, AddressZero, HashZero], // turnNum = 5, not yet finalized
+    ),
+  );
+};
+
+export const finalizedOutcomeHash = (turnNumRecord: number = 5) => {
+  return keccak256(
+    defaultAbiCoder.encode(
+      ['uint256', 'uint256', 'bytes32', 'address', 'bytes32'],
+      [turnNumRecord, 1, HashZero, AddressZero, HashZero], // finalizes at 1, earliest possible
+      // the final two fields should also not be zero
     ),
   );
 };
