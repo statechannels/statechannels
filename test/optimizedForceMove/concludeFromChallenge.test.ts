@@ -5,7 +5,7 @@ import OptimizedForceMoveArtifact from '../../build/contracts/TESTOptimizedForce
 // @ts-ignore
 import countingAppArtifact from '../../build/contracts/CountingApp.json';
 import {keccak256, defaultAbiCoder} from 'ethers/utils';
-import {setupContracts, sign, clearedChallengeHash} from './test-helpers';
+import {setupContracts, sign, newConcludedEvent, clearedChallengeHash} from './test-helpers';
 import {HashZero, AddressZero} from 'ethers/constants';
 
 const provider = new ethers.providers.JsonRpcProvider(
@@ -179,6 +179,8 @@ describe('concludeFromChallenge', () => {
         [[finalizesAt, challengeStateHash, challengerAddress, outcomeHash]],
       );
 
+      const concludedEvent: any = newConcludedEvent(OptimizedForceMove, channelId);
+
       // call method in a slightly different way if expecting a revert
       if (reasonString) {
         const regex = new RegExp(
@@ -214,6 +216,10 @@ describe('concludeFromChallenge', () => {
 
         // wait for tx to be mined
         await tx2.wait();
+
+        // catch Concluded event
+        const [eventChannelId] = await concludedEvent;
+        expect(eventChannelId).toBeDefined();
 
         // compute expected ChannelStorageHash
         blockNumber = await provider.getBlockNumber();
