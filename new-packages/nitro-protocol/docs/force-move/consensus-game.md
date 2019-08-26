@@ -37,3 +37,5 @@ The allowed transitions are:
    - newState.proposedOutcome is empty
 5. Pass: `(0, w, -) -> (0, w, -)`
    - Covered by veto
+
+Note: either a transition is a veto, or you can switch on `furtherVotesRequired` to determine which of cases 1-3 it is.
