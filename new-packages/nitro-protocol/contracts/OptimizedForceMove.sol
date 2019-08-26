@@ -409,6 +409,70 @@ contract OptimizedForceMove {
 
     }
 
+    function concludeFromOpen(
+        uint256 turnNumRecord,
+        uint256 largestTurnNum,
+        FixedPart memory fixedPart, // don't need appDefinition
+        bytes32 appPartHash,
+        bytes32 outcomeHash,
+        uint8[] memory whoSignedWhat,
+        Signature[] memory sigs
+    ) public {
+        // Calculate channelId from fixed part
+        bytes32 channelId = keccak256(
+            abi.encode(fixedPart.chainId, fixedPart.participants, fixedPart.channelNonce)
+        );
+
+        if (turnNumRecord == 0) {
+            require(
+                channelStorageHashes[channelId] == bytes32(0),
+                'Channel is not open or turnNum does not match'
+            );
+        } else {
+            require(
+                keccak256(
+                        abi.encode(
+                            ChannelStorage(turnNumRecord, 0, bytes32(0), address(0), bytes32(0))
+                        )
+                    ) ==
+                    channelStorageHashes[channelId],
+                'Channel is not open or turnNum does not match'
+            );
+        }
+
+        bytes32[] memory stateHashes = new bytes32[](sigs.length);
+        for (uint256 i = 0; i < sigs.length; i++) {
+            stateHashes[i] = keccak256(
+                abi.encode(
+                    State(
+                        largestTurnNum - i, // turnNum
+                        true, // isFinal
+                        channelId,
+                        appPartHash,
+                        outcomeHash
+                    )
+                )
+            );
+        }
+
+        // check the supplied states are supported by n signatures
+        require(
+            _validSignatures(
+                largestTurnNum,
+                fixedPart.participants,
+                stateHashes,
+                sigs,
+                whoSignedWhat
+            ),
+            'Invalid signatures'
+        );
+
+        // effects
+        // set channel storage
+        channelStorageHashes[channelId] = keccak256(
+            abi.encode(ChannelStorage(0, now, bytes32(0), address(0), outcomeHash))
+        );
+    }
     // Internal methods:
 
     function _isAddressInArray(address suspect, address[] memory addresses)
