@@ -415,6 +415,7 @@ contract OptimizedForceMove {
         FixedPart memory fixedPart, // don't need appDefinition
         bytes32 appPartHash,
         bytes32 outcomeHash,
+        uint8 numStates,
         uint8[] memory whoSignedWhat,
         Signature[] memory sigs
     ) public {
@@ -440,12 +441,12 @@ contract OptimizedForceMove {
             );
         }
 
-        bytes32[] memory stateHashes = new bytes32[](sigs.length);
-        for (uint256 i = 0; i < sigs.length; i++) {
+        bytes32[] memory stateHashes = new bytes32[](numStates);
+        for (uint256 i = 0; i < numStates; i++) {
             stateHashes[i] = keccak256(
                 abi.encode(
                     State(
-                        largestTurnNum - i, // turnNum
+                        largestTurnNum + i - numStates, // turnNum
                         true, // isFinal
                         channelId,
                         appPartHash,

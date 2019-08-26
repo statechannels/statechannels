@@ -35,12 +35,15 @@ beforeAll(async () => {
 // Scenarios are synonymous with channelNonce:
 
 const description1 =
-  'It accepts a valid concludeFromOpen tx and sets the channel storage correctly';
+  'It accepts a valid concludeFromOpen tx (n states) and sets the channel storage correctly';
+const description2 =
+  'It accepts a valid concludeFromOpen tx (1 state) and sets the channel storage correctly';
 
 describe('respondWithAlternative', () => {
   it.each`
-    description     | channelNonce | declaredTurnNumRecord | initialChannelStorageHash | largestTurnNum | whoSignedWhat | reasonString
-    ${description1} | ${401}       | ${0}                  | ${HashZero}               | ${8}           | ${[0, 1, 2]}  | ${undefined}
+    description     | channelNonce | declaredTurnNumRecord | initialChannelStorageHash | largestTurnNum | numStates | whoSignedWhat | reasonString
+    ${description1} | ${401}       | ${0}                  | ${HashZero}               | ${8}           | ${3}      | ${[0, 1, 2]}  | ${undefined}
+    ${description2} | ${402}       | ${0}                  | ${HashZero}               | ${8}           | ${1}      | ${[0, 0, 0]}  | ${undefined}
   `(
     '$description', // for the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce
     async ({
@@ -48,6 +51,7 @@ describe('respondWithAlternative', () => {
       declaredTurnNumRecord,
       initialChannelStorageHash,
       largestTurnNum,
+      numStates,
       whoSignedWhat,
       reasonString,
     }) => {
@@ -75,11 +79,10 @@ describe('respondWithAlternative', () => {
       );
 
       // compute stateHashes
-      // const variableParts = new Array(wallets.length);
-      const stateHashes = new Array(wallets.length);
-      for (let i = 0; i < wallets.length; i++) {
+      const stateHashes = new Array(numStates);
+      for (let i = 0; i < numStates; i++) {
         const state = {
-          turnNum: largestTurnNum - i,
+          turnNum: largestTurnNum + i - numStates,
           isFinal: true,
           channelId,
           appPartHash,
@@ -125,6 +128,7 @@ describe('respondWithAlternative', () => {
               fixedPart,
               appPartHash,
               outcomeHash,
+              numStates,
               whoSignedWhat,
               sigs,
             ),
@@ -137,6 +141,7 @@ describe('respondWithAlternative', () => {
           fixedPart,
           appPartHash,
           outcomeHash,
+          numStates,
           whoSignedWhat,
           sigs,
         );
