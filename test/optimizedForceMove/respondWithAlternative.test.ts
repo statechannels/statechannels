@@ -172,7 +172,7 @@ describe('respondWithAlternative', () => {
 
       const challengeClearedEvent: any = newChallengeClearedEvent(OptimizedForceMove, channelId);
 
-      // call forceMove in a slightly different way if expecting a revert
+      // call method in a slightly different way if expecting a revert
       if (reasonString) {
         const regex = new RegExp(
           '^' + 'VM Exception while processing transaction: revert ' + reasonString + '$',
