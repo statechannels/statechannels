@@ -5,7 +5,14 @@ import OptimizedForceMoveArtifact from '../../build/contracts/TESTOptimizedForce
 // @ts-ignore
 import countingAppArtifact from '../../build/contracts/CountingApp.json';
 import {keccak256, defaultAbiCoder, hexlify} from 'ethers/utils';
-import {setupContracts, sign, newChallengeClearedEvent} from './test-helpers';
+import {
+  setupContracts,
+  sign,
+  newChallengeClearedEvent,
+  clearedChallengeHash,
+  ongoingChallengeHash,
+  finalizedOutcomeHash,
+} from './test-helpers';
 import {HashZero, AddressZero} from 'ethers/constants';
 
 const provider = new ethers.providers.JsonRpcProvider(
@@ -38,12 +45,25 @@ const description1 =
   'It accepts a valid concludeFromOpen tx (n states) and sets the channel storage correctly';
 const description2 =
   'It accepts a valid concludeFromOpen tx (1 state) and sets the channel storage correctly';
+const description3 =
+  'It accepts a valid concludeFromOpen tx (1 state, cleared challenge exists) and sets the channel storage correctly';
+const description4 =
+  'It reverts a concludeFromOpen tx when the declaredTurnNumRecord = 0 and incorrect';
+const description5 =
+  'It reverts a concludeFromOpen tx when the declaredTurnNumRecord > 0 and incorrect';
+const description6 = 'It reverts a concludeFromOpen tx when there is an ongoing challenge';
+const description7 = 'It reverts a concludeFromOpen tx when the outcome is already finalized';
 
 describe('respondWithAlternative', () => {
   it.each`
-    description     | channelNonce | declaredTurnNumRecord | initialChannelStorageHash | largestTurnNum | numStates | whoSignedWhat | reasonString
-    ${description1} | ${401}       | ${0}                  | ${HashZero}               | ${8}           | ${3}      | ${[0, 1, 2]}  | ${undefined}
-    ${description2} | ${402}       | ${0}                  | ${HashZero}               | ${8}           | ${1}      | ${[0, 0, 0]}  | ${undefined}
+    description     | channelNonce | declaredTurnNumRecord | initialChannelStorageHash  | largestTurnNum | numStates | whoSignedWhat | reasonString
+    ${description1} | ${401}       | ${0}                  | ${HashZero}                | ${8}           | ${3}      | ${[0, 1, 2]}  | ${undefined}
+    ${description2} | ${402}       | ${0}                  | ${HashZero}                | ${8}           | ${1}      | ${[0, 0, 0]}  | ${undefined}
+    ${description3} | ${403}       | ${5}                  | ${clearedChallengeHash(5)} | ${8}           | ${1}      | ${[0, 0, 0]}  | ${undefined}
+    ${description4} | ${404}       | ${0}                  | ${clearedChallengeHash(5)} | ${8}           | ${1}      | ${[0, 0, 0]}  | ${'Channel is not open or turnNum does not match'}
+    ${description5} | ${405}       | ${1}                  | ${clearedChallengeHash(5)} | ${8}           | ${1}      | ${[0, 0, 0]}  | ${'Channel is not open or turnNum does not match'}
+    ${description6} | ${406}       | ${5}                  | ${ongoingChallengeHash(5)} | ${8}           | ${1}      | ${[0, 0, 0]}  | ${'Channel is not open or turnNum does not match'}
+    ${description7} | ${407}       | ${5}                  | ${finalizedOutcomeHash(5)} | ${8}           | ${1}      | ${[0, 0, 0]}  | ${'Channel is not open or turnNum does not match'}
   `(
     '$description', // for the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce
     async ({
