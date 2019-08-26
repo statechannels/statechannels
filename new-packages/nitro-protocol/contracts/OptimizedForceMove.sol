@@ -475,6 +475,7 @@ contract OptimizedForceMove {
         );
 
         require(turnNumRecord > 0, 'TurnNumRecord must be nonzero');
+        require(now < channelStorageLite.finalizesAt, 'Channel already finalized!');
 
         require(
             keccak256(
