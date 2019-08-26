@@ -4,15 +4,8 @@ import {expectRevert} from 'magmo-devtools';
 import OptimizedForceMoveArtifact from '../../build/contracts/TESTOptimizedForceMove.json';
 // @ts-ignore
 import countingAppArtifact from '../../build/contracts/CountingApp.json';
-import {keccak256, defaultAbiCoder, hexlify} from 'ethers/utils';
-import {
-  setupContracts,
-  sign,
-  newChallengeClearedEvent,
-  clearedChallengeHash,
-  ongoingChallengeHash,
-  finalizedOutcomeHash,
-} from './test-helpers';
+import {keccak256, defaultAbiCoder} from 'ethers/utils';
+import {setupContracts, sign} from './test-helpers';
 import {HashZero, AddressZero} from 'ethers/constants';
 
 const provider = new ethers.providers.JsonRpcProvider(
@@ -20,6 +13,8 @@ const provider = new ethers.providers.JsonRpcProvider(
 );
 let OptimizedForceMove: ethers.Contract;
 let networkId;
+let blockNumber;
+let blockTimestamp;
 const chainId = 1234;
 const participants = ['', '', ''];
 const wallets = new Array(3);
@@ -42,34 +37,19 @@ beforeAll(async () => {
 // Scenarios are synonymous with channelNonce:
 
 const description1 =
-  'It accepts a valid concludeFromOpen tx (n states) and sets the channel storage correctly';
-const description2 =
-  'It accepts a valid concludeFromOpen tx (1 state) and sets the channel storage correctly';
-const description3 =
-  'It accepts a valid concludeFromOpen tx (1 state, cleared challenge exists) and sets the channel storage correctly';
-const description4 =
-  'It reverts a concludeFromOpen tx when the declaredTurnNumRecord = 0 and incorrect';
-const description5 =
-  'It reverts a concludeFromOpen tx when the declaredTurnNumRecord > 0 and incorrect';
-const description6 = 'It reverts a concludeFromOpen tx when there is an ongoing challenge';
-const description7 = 'It reverts a concludeFromOpen tx when the outcome is already finalized';
+  'It accepts a valid concludeFromChallenge tx (n states) and sets the channel storage correctly';
 
-describe('concludeFromOpen', () => {
+describe('concludeFromChallenge', () => {
   it.each`
-    description     | channelNonce | declaredTurnNumRecord | initialChannelStorageHash  | largestTurnNum | numStates | whoSignedWhat | reasonString
-    ${description1} | ${401}       | ${0}                  | ${HashZero}                | ${8}           | ${3}      | ${[0, 1, 2]}  | ${undefined}
-    ${description2} | ${402}       | ${0}                  | ${HashZero}                | ${8}           | ${1}      | ${[0, 0, 0]}  | ${undefined}
-    ${description3} | ${403}       | ${5}                  | ${clearedChallengeHash(5)} | ${8}           | ${1}      | ${[0, 0, 0]}  | ${undefined}
-    ${description4} | ${404}       | ${0}                  | ${clearedChallengeHash(5)} | ${8}           | ${1}      | ${[0, 0, 0]}  | ${'Channel is not open or turnNum does not match'}
-    ${description5} | ${405}       | ${1}                  | ${clearedChallengeHash(5)} | ${8}           | ${1}      | ${[0, 0, 0]}  | ${'Channel is not open or turnNum does not match'}
-    ${description6} | ${406}       | ${5}                  | ${ongoingChallengeHash(5)} | ${8}           | ${1}      | ${[0, 0, 0]}  | ${'Channel is not open or turnNum does not match'}
-    ${description7} | ${407}       | ${5}                  | ${finalizedOutcomeHash(5)} | ${8}           | ${1}      | ${[0, 0, 0]}  | ${'Channel is not open or turnNum does not match'}
+    description     | channelNonce | setTurnNumRecord | expired  | declaredTurnNumRecord | largestTurnNum | numStates | whoSignedWhat | reasonString
+    ${description1} | ${401}       | ${5}             | ${false} | ${5}                  | ${8}           | ${3}      | ${[0, 1, 2]}  | ${undefined}
   `(
     '$description', // for the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce
     async ({
       channelNonce,
+      setTurnNumRecord,
+      expired,
       declaredTurnNumRecord,
-      initialChannelStorageHash,
       largestTurnNum,
       numStates,
       whoSignedWhat,
@@ -98,6 +78,56 @@ describe('concludeFromOpen', () => {
         ),
       );
 
+      const challengeAppData = 0;
+      const challengeAppPartHash = keccak256(
+        defaultAbiCoder.encode(
+          ['uint256', 'address', 'bytes'],
+          [
+            challengeDuration,
+            appDefinition,
+            defaultAbiCoder.encode(['uint256'], [challengeAppData]),
+          ],
+        ),
+      );
+
+      const challengeState = {
+        turnNum: setTurnNumRecord,
+        isFinal: false, // TODO consider having this as a test parameter
+        channelId,
+        challengeAppPartHash,
+        outcomeHash,
+      };
+
+      const challengeStateHash = keccak256(
+        defaultAbiCoder.encode(
+          [
+            'tuple(uint256 turnNum, bool isFinal, bytes32 channelId, bytes32 challengeAppPartHash, bytes32 outcomeHash)',
+          ],
+          [challengeState],
+        ),
+      );
+
+      // set expiry time in the future or in the past
+      blockNumber = await provider.getBlockNumber();
+      blockTimestamp = (await provider.getBlock(blockNumber)).timestamp;
+      const finalizesAt = expired
+        ? blockTimestamp - challengeDuration
+        : blockTimestamp + challengeDuration;
+
+      // compute expected ChannelStorageHash
+      const challengerAddress = wallets[2].address;
+      const challengeExistsHash = keccak256(
+        defaultAbiCoder.encode(
+          ['uint256', 'uint256', 'bytes32', 'address', 'bytes32'],
+          [setTurnNumRecord, finalizesAt, challengeStateHash, challengerAddress, outcomeHash],
+        ),
+      );
+
+      // call public wrapper to set state (only works on test contract)
+      const tx = await OptimizedForceMove.setChannelStorageHash(channelId, challengeExistsHash);
+      await tx.wait();
+      expect(await OptimizedForceMove.channelStorageHashes(channelId)).toEqual(challengeExistsHash);
+
       // compute stateHashes
       const stateHashes = new Array(numStates);
       for (let i = 0; i < numStates; i++) {
@@ -118,22 +148,20 @@ describe('concludeFromOpen', () => {
         );
       }
 
-      // call public wrapper to set state (only works on test contract)
-      const tx = await OptimizedForceMove.setChannelStorageHash(
-        channelId,
-        initialChannelStorageHash,
-      );
-      await tx.wait();
-      expect(await OptimizedForceMove.channelStorageHashes(channelId)).toEqual(
-        initialChannelStorageHash,
-      );
-
       // sign the states
       const sigs = new Array(participants.length);
       for (let i = 0; i < participants.length; i++) {
         const sig = await sign(wallets[i], stateHashes[whoSignedWhat[i]]);
         sigs[i] = {v: sig.v, r: sig.r, s: sig.s};
       }
+
+      // pack arguemtns
+      const ChannelStorageLite =
+        'tuple(uint256 finalizesAt, bytes32 stateHash, address challengerAddress, bytes32 outcomeHash)';
+      const channelStorageLiteBytes = defaultAbiCoder.encode(
+        [ChannelStorageLite],
+        [[finalizesAt, challengeStateHash, challengerAddress, outcomeHash]],
+      );
 
       // call method in a slightly different way if expecting a revert
       if (reasonString) {
@@ -142,36 +170,38 @@ describe('concludeFromOpen', () => {
         );
         await expectRevert(
           () =>
-            OptimizedForceMove.concludeFromOpen(
+            OptimizedForceMove.concludeFromChallenge(
               declaredTurnNumRecord,
               largestTurnNum,
               fixedPart,
               appPartHash,
-              outcomeHash,
               numStates,
               whoSignedWhat,
               sigs,
+              outcomeHash, // challengeOutcomeHash
+              channelStorageLiteBytes,
             ),
           regex,
         );
       } else {
-        const tx2 = await OptimizedForceMove.concludeFromOpen(
+        const tx2 = await OptimizedForceMove.concludeFromChallenge(
           declaredTurnNumRecord,
           largestTurnNum,
           fixedPart,
           appPartHash,
-          outcomeHash,
           numStates,
           whoSignedWhat,
           sigs,
+          outcomeHash, // challengeOutcomeHash
+          channelStorageLiteBytes,
         );
 
         // wait for tx to be mined
         await tx2.wait();
 
         // compute expected ChannelStorageHash
-        const blockNumber = await provider.getBlockNumber();
-        const blockTimestamp = (await provider.getBlock(blockNumber)).timestamp;
+        blockNumber = await provider.getBlockNumber();
+        blockTimestamp = (await provider.getBlock(blockNumber)).timestamp;
         const expectedChannelStorage = [0, blockTimestamp, HashZero, AddressZero, outcomeHash];
         const expectedChannelStorageHash = keccak256(
           defaultAbiCoder.encode(
@@ -181,6 +211,7 @@ describe('concludeFromOpen', () => {
         );
 
         // check channelStorageHash against the expected value
+
         expect(await OptimizedForceMove.channelStorageHashes(channelId)).toEqual(
           expectedChannelStorageHash,
         );
