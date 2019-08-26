@@ -12,6 +12,7 @@ import {
   nonParticipant,
   clearedChallengeHash,
   ongoingChallengeHash,
+  newForceMoveEvent,
 } from './test-helpers';
 
 const provider = new ethers.providers.JsonRpcProvider(
@@ -151,43 +152,6 @@ describe('forceMove', () => {
         initialChannelStorageHash,
       )).wait();
 
-      forceMoveEvent = new Promise((resolve, reject) => {
-        OptimizedForceMove.on(
-          'ForceMove',
-          (
-            eventTurnNumRecord,
-            eventFinalizesAt,
-            eventChallenger,
-            eventIsFinal,
-            eventFixedPart,
-            eventChallengeVariablePart,
-            event,
-          ) => {
-            const eventChannelId = keccak256(
-              defaultAbiCoder.encode(
-                ['uint256', 'address[]', 'uint256'],
-                [eventFixedPart[0], eventFixedPart[1], eventFixedPart[2]],
-              ),
-            );
-            if (eventChannelId === channelId) {
-              // match event for this channel only
-              // event.removeListener();
-              resolve([
-                eventTurnNumRecord,
-                eventFinalizesAt,
-                eventChallenger,
-                eventIsFinal,
-                eventFixedPart,
-                eventChallengeVariablePart,
-              ]);
-            }
-          },
-        );
-        setTimeout(() => {
-          reject(new Error('timeout'));
-        }, 60000);
-      });
-
       // call forceMove in a slightly different way if expecting a revert
       if (reasonString) {
         const regex = new RegExp(
@@ -208,6 +172,7 @@ describe('forceMove', () => {
           regex,
         );
       } else {
+        forceMoveEvent = newForceMoveEvent(OptimizedForceMove, channelId);
         const tx = await OptimizedForceMove.forceMove(
           turnNumRecord,
           fixedPart,
@@ -218,12 +183,12 @@ describe('forceMove', () => {
           whoSignedWhat,
           challengerSig,
         );
-
         // wait for tx to be mined
         await tx.wait();
 
         // catch ForceMove event
         const [
+          eventChannelId,
           eventTurnNumRecord,
           eventFinalizesAt,
           eventChallenger,
@@ -233,6 +198,7 @@ describe('forceMove', () => {
         ] = await forceMoveEvent;
 
         // check this information is enough to respond
+        expect(eventChannelId).toEqual(channelId);
         expect(eventTurnNumRecord._hex).toEqual(hexlify(largestTurnNum));
         expect(eventChallenger).toEqual(challenger.address);
         expect(eventFixedPart[0]._hex).toEqual(hexlify(fixedPart.chainId));

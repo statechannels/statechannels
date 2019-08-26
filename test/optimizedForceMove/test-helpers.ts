@@ -2,6 +2,8 @@ import {ethers} from 'ethers';
 import {splitSignature, arrayify, keccak256, defaultAbiCoder} from 'ethers/utils';
 import {HashZero, AddressZero} from 'ethers/constants';
 
+const eventEmitterTimeout = 60000; // ms
+
 export async function setupContracts(provider: ethers.providers.JsonRpcProvider, artifact) {
   const networkId = (await provider.getNetwork()).chainId;
   const signer = provider.getSigner(0);
@@ -46,32 +48,63 @@ export const finalizedOutcomeHash = (turnNumRecord: number = 5) => {
   );
 };
 
-export const newChallengeClearedEvent = (contract: ethers.Contract, channelId: string) => {
+export const newForceMoveEvent = (contract: ethers.Contract, channelId: string) => {
+  const filter = contract.filters.ForceMove(channelId);
   return new Promise((resolve, reject) => {
-    contract.on('ChallengeCleared', (eventChannelId, eventTurnNumRecord, event) => {
-      if (eventChannelId === channelId) {
-        // match event for this channel only
-        // event.removeListener();
-        resolve([eventChannelId, eventTurnNumRecord]);
-      }
+    contract.on(
+      filter,
+      (
+        eventChannelIdArg,
+        eventTurnNumRecordArg,
+        eventFinalizesAtArg,
+        eventChallengerArg,
+        eventIsFinalArg,
+        eventFixedPartArg,
+        eventChallengeVariablePartArg,
+        event,
+      ) => {
+        contract.removeAllListeners(filter);
+        resolve([
+          eventChannelIdArg,
+          eventTurnNumRecordArg,
+          eventFinalizesAtArg,
+          eventChallengerArg,
+          eventIsFinalArg,
+          eventFixedPartArg,
+          eventChallengeVariablePartArg,
+        ]);
+      },
+    );
+    setTimeout(() => {
+      reject(new Error('timeout'));
+    }, eventEmitterTimeout);
+  });
+};
+
+export const newChallengeClearedEvent = (contract: ethers.Contract, channelId: string) => {
+  const filter = contract.filters.ChallengeCleared(channelId);
+  return new Promise((resolve, reject) => {
+    contract.on(filter, (eventChannelId, eventTurnNumRecord, event) => {
+      // match event for this channel only
+      contract.removeAllListeners(filter);
+      resolve([eventChannelId, eventTurnNumRecord]);
     });
     setTimeout(() => {
       reject(new Error('timeout'));
-    }, 60000);
+    }, eventEmitterTimeout);
   });
 };
 
 export const newConcludedEvent = (contract: ethers.Contract, channelId: string) => {
+  const filter = contract.filters.Concluded(channelId);
   return new Promise((resolve, reject) => {
-    contract.on('Concluded', (eventChannelId, event) => {
-      if (eventChannelId === channelId) {
-        // match event for this channel only
-        // event.removeListener();
-        resolve([channelId]);
-      }
+    contract.on(filter, (eventChannelId, event) => {
+      // match event for this channel only
+      contract.removeAllListeners(filter);
+      resolve([channelId]);
     });
     setTimeout(() => {
       reject(new Error('timeout'));
-    }, 60000);
+    }, eventEmitterTimeout);
   });
 };

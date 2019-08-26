@@ -161,8 +161,6 @@ describe('respond', () => {
       const signature = await sign(responder, responseStateHash);
       const sig = {v: signature.v, r: signature.r, s: signature.s};
 
-      const challengeClearedEvent: any = newChallengeClearedEvent(OptimizedForceMove, channelId);
-
       if (reasonString) {
         const regex = new RegExp(
           '^' + 'VM Exception while processing transaction: revert ' + reasonString + '$',
@@ -181,6 +179,7 @@ describe('respond', () => {
           regex,
         );
       } else {
+        const challengeClearedEvent: any = newChallengeClearedEvent(OptimizedForceMove, channelId);
         // call respond
         const tx2 = await OptimizedForceMove.respond(
           declaredTurnNumRecord,

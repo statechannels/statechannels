@@ -135,8 +135,6 @@ describe('concludeFromOpen', () => {
         sigs[i] = {v: sig.v, r: sig.r, s: sig.s};
       }
 
-      const concludedEvent: any = newConcludedEvent(OptimizedForceMove, channelId);
-
       // call method in a slightly different way if expecting a revert
       if (reasonString) {
         const regex = new RegExp(
@@ -157,6 +155,7 @@ describe('concludeFromOpen', () => {
           regex,
         );
       } else {
+        const concludedEvent: any = newConcludedEvent(OptimizedForceMove, channelId);
         const tx2 = await OptimizedForceMove.concludeFromOpen(
           declaredTurnNumRecord,
           largestTurnNum,
