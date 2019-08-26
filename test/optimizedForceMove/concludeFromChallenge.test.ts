@@ -5,7 +5,7 @@ import OptimizedForceMoveArtifact from '../../build/contracts/TESTOptimizedForce
 // @ts-ignore
 import countingAppArtifact from '../../build/contracts/CountingApp.json';
 import {keccak256, defaultAbiCoder} from 'ethers/utils';
-import {setupContracts, sign} from './test-helpers';
+import {setupContracts, sign, clearedChallengeHash} from './test-helpers';
 import {HashZero, AddressZero} from 'ethers/constants';
 
 const provider = new ethers.providers.JsonRpcProvider(
@@ -38,17 +38,28 @@ beforeAll(async () => {
 
 const description1 =
   'It accepts a valid concludeFromChallenge tx (n states) and sets the channel storage correctly';
+const description2 =
+  'It reverts a concludeFromChallenge tx when there is no challenge ongoing (turnNumRecord = 0)';
+const description3 =
+  'It reverts a concludeFromChallenge tx when there is no challenge ongoing (challenge cleared)';
+const description4 = 'It reverts a concludeFromChallenge tx when the outcome is already finalized';
+
+// Note: forceStorageHash will overrule the setTurnNumRecord and expired fields
 
 describe('concludeFromChallenge', () => {
   it.each`
-    description     | channelNonce | setTurnNumRecord | expired  | declaredTurnNumRecord | largestTurnNum | numStates | whoSignedWhat | reasonString
-    ${description1} | ${401}       | ${5}             | ${false} | ${5}                  | ${8}           | ${3}      | ${[0, 1, 2]}  | ${undefined}
+    description     | channelNonce | setTurnNumRecord | expired  | forceStorageHash           | declaredTurnNumRecord | largestTurnNum | numStates | whoSignedWhat | reasonString
+    ${description1} | ${501}       | ${5}             | ${false} | ${undefined}               | ${5}                  | ${8}           | ${3}      | ${[0, 1, 2]}  | ${undefined}
+    ${description2} | ${502}       | ${0}             | ${false} | ${undefined}               | ${0}                  | ${8}           | ${3}      | ${[0, 1, 2]}  | ${'TurnNumRecord must be nonzero'}
+    ${description3} | ${503}       | ${5}             | ${false} | ${clearedChallengeHash(5)} | ${5}                  | ${8}           | ${3}      | ${[0, 1, 2]}  | ${'Challenge State does not match stored version'}
+    ${description4} | ${504}       | ${5}             | ${true}  | ${undefined}               | ${5}                  | ${8}           | ${3}      | ${[0, 1, 2]}  | ${'Channel already finalized!'}
   `(
     '$description', // for the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce
     async ({
       channelNonce,
       setTurnNumRecord,
       expired,
+      forceStorageHash,
       declaredTurnNumRecord,
       largestTurnNum,
       numStates,
@@ -124,9 +135,14 @@ describe('concludeFromChallenge', () => {
       );
 
       // call public wrapper to set state (only works on test contract)
-      const tx = await OptimizedForceMove.setChannelStorageHash(channelId, challengeExistsHash);
+      const tx = await OptimizedForceMove.setChannelStorageHash(
+        channelId,
+        forceStorageHash ? forceStorageHash : challengeExistsHash,
+      );
       await tx.wait();
-      expect(await OptimizedForceMove.channelStorageHashes(channelId)).toEqual(challengeExistsHash);
+      expect(await OptimizedForceMove.channelStorageHashes(channelId)).toEqual(
+        forceStorageHash ? forceStorageHash : challengeExistsHash,
+      );
 
       // compute stateHashes
       const stateHashes = new Array(numStates);
