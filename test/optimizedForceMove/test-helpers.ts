@@ -18,19 +18,24 @@ export async function sign(wallet: ethers.Wallet, msgHash: string | Uint8Array) 
 }
 
 export const nonParticipant = ethers.Wallet.createRandom();
-export const clearedChallengeHash = keccak256(
-  defaultAbiCoder.encode(
-    ['uint256', 'uint256', 'bytes32', 'address', 'bytes32'],
-    [5, 0, HashZero, AddressZero, HashZero], // turnNum = 5
-  ),
-);
 
-export const ongoinghallengeHash = keccak256(
-  defaultAbiCoder.encode(
-    ['uint256', 'uint256', 'bytes32', 'address', 'bytes32'],
-    [5, 9999, HashZero, AddressZero, HashZero], // turnNum = 5, not yet finalized
-  ),
-);
+export const clearedChallengeHash = (turnNumRecord: number = 5) => {
+  return keccak256(
+    defaultAbiCoder.encode(
+      ['uint256', 'uint256', 'bytes32', 'address', 'bytes32'],
+      [turnNumRecord, 0, HashZero, AddressZero, HashZero], // turnNum = 5
+    ),
+  );
+};
+
+export const ongoinghallengeHash = (turnNumRecord: number = 5) => {
+  return keccak256(
+    defaultAbiCoder.encode(
+      ['uint256', 'uint256', 'bytes32', 'address', 'bytes32'],
+      [turnNumRecord, 1e9, HashZero, AddressZero, HashZero], // turnNum = 5, not yet finalized
+    ),
+  );
+};
 
 export const newChallengeClearedEvent = (contract: ethers.Contract, channelId: string) => {
   return new Promise((resolve, reject) => {
