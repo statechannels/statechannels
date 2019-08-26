@@ -1,5 +1,5 @@
-const OptimizedForceMove = artifacts.require('TESTOptimizedForceMove');
+const ForceMove = artifacts.require('TESTForceMove');
 
 module.exports = function(deployer) {
-  deployer.deploy(OptimizedForceMove);
+  deployer.deploy(ForceMove);
 };

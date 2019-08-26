@@ -1,12 +1,12 @@
 import {ethers} from 'ethers';
 // @ts-ignore
-import OptimizedForceMoveArtifact from '../../build/contracts/TESTOptimizedForceMove.json';
+import ForceMoveArtifact from '../../build/contracts/TESTForceMove.json';
 import {setupContracts} from './test-helpers';
 
 const provider = new ethers.providers.JsonRpcProvider(
   `http://localhost:${process.env.DEV_GANACHE_PORT}`,
 );
-let OptimizedForceMove: ethers.Contract;
+let ForceMove: ethers.Contract;
 
 const participants = ['', '', ''];
 const wallets = new Array(3);
@@ -18,7 +18,7 @@ for (let i = 0; i < 3; i++) {
 }
 
 beforeAll(async () => {
-  OptimizedForceMove = await setupContracts(provider, OptimizedForceMoveArtifact);
+  ForceMove = await setupContracts(provider, ForceMoveArtifact);
 });
 
 describe('_isAddressInArray', () => {
@@ -35,10 +35,10 @@ describe('_isAddressInArray', () => {
   });
 
   it('verifies absence of suspect', async () => {
-    expect(await OptimizedForceMove.isAddressInArray(suspect, addresses)).toBe(false);
+    expect(await ForceMove.isAddressInArray(suspect, addresses)).toBe(false);
   });
   it('finds an address hiding in an array', async () => {
     addresses[1] = suspect;
-    expect(await OptimizedForceMove.isAddressInArray(suspect, addresses)).toBe(true);
+    expect(await ForceMove.isAddressInArray(suspect, addresses)).toBe(true);
   });
 });
