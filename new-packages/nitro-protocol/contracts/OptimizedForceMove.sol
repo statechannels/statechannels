@@ -59,7 +59,6 @@ contract OptimizedForceMove {
         bytes32 channelId = keccak256(
             abi.encode(fixedPart.chainId, fixedPart.participants, fixedPart.channelNonce)
         );
-        ChannelStorage memory channelStorage;
         // ------------
         // REQUIREMENTS
         // ------------
@@ -125,15 +124,8 @@ contract OptimizedForceMove {
         // EFFECTS
         // ------------
 
-        channelStorage = ChannelStorage(
-            largestTurnNum,
-            now + fixedPart.challengeDuration,
-            stateHashes[variableParts.length - 1],
-            challenger,
-            keccak256(abi.encode(variableParts[variableParts.length - 1].outcome))
-        );
-
         emit ForceMove(
+            channelId,
             largestTurnNum,
             now + fixedPart.challengeDuration,
             challenger,
@@ -142,7 +134,17 @@ contract OptimizedForceMove {
             variableParts
         );
 
-        channelStorageHashes[channelId] = keccak256(abi.encode(channelStorage));
+        channelStorageHashes[channelId] = keccak256(
+            abi.encode(
+                ChannelStorage(
+                    largestTurnNum,
+                    now + fixedPart.challengeDuration,
+                    stateHashes[variableParts.length - 1],
+                    challenger,
+                    keccak256(abi.encode(variableParts[variableParts.length - 1].outcome))
+                )
+            )
+        );
 
     }
 
@@ -720,6 +722,7 @@ contract OptimizedForceMove {
 
     // events
     event ForceMove(
+        bytes32 indexed channelId,
         // everything needed to respond or refute
         uint256 turnNunmRecord,
         uint256 finalizesAt,
@@ -729,6 +732,6 @@ contract OptimizedForceMove {
         ForceMoveApp.VariablePart[] variableParts
     );
 
-    event ChallengeCleared(bytes32 channelId, uint256 newTurnNumRecord);
-    event Concluded(bytes32 channelId);
+    event ChallengeCleared(bytes32 indexed channelId, uint256 newTurnNumRecord);
+    event Concluded(bytes32 indexed channelId);
 }
