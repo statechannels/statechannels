@@ -5,7 +5,7 @@ title: Channel Storage
 
 ## On-chain state
 
-The contract will store the hash of the following struct (abi encoded) against each `channelId`.
+The contract will store the hash of the following struct:
 
 ```solidity
     struct ChannelStorage {
@@ -15,7 +15,11 @@ The contract will store the hash of the following struct (abi encoded) against e
         address challengerAddress;
         bytes32 outcomeHash;
     }
+```
 
+(abi encoded) in a mapping with `channelId` as the key:
+
+```solidity
     mapping(bytes32 => bytes32) public channelStorageHashes;
 ```
 
@@ -39,6 +43,18 @@ Note that a new validTransitionChain may be implied by a single, signed state th
   - implies that all other fields are not null
 - **Finalized** if `finalizesAt >= currentTime`
   - implies that all other fields are not null
+
+The implementatino of the null fields is as follows. For a cleared challenge:
+
+```solidity
+channelStorageHashes[channelId] = ChannelStorage(turnNumRecord, 0, bytes32(0), address(0), bytes32(0));
+```
+
+and for no challenges yet:
+
+```solidity
+channelStorageHashes[channelId] = bytes32(0);
+```
 
 ---
 
