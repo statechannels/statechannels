@@ -28,7 +28,7 @@ export default function usePaidStreamingExtension(opts = {}) {
 
   class PaidStreamingExtension extends EventEmitter {
     get name() {
-      return "wt_ilp";
+      return "paidStreamingExtension";
     }
 
     ilp_account = opts.pseAccount;
@@ -49,7 +49,7 @@ export default function usePaidStreamingExtension(opts = {}) {
       if (!handshake.m || !handshake.m[this.name]) {
         return this.emit(
           PaidStreamingExtensionEvents.WARNING,
-          new Error("Peer does not support wt_ilp")
+          new Error("Peer does not support paidStreamingExtension")
         );
       }
       if (handshake.ilp_account) {
@@ -63,20 +63,20 @@ export default function usePaidStreamingExtension(opts = {}) {
     stop() {
       this.amForceChoking = true;
       wire.choke();
-      wire.extended("wt_ilp", bencode.encode({ msg_type: 0, message: "stop" }));
+      wire.extended("paidStreamingExtension", bencode.encode({ msg_type: 0, message: "stop" }));
     }
 
     start() {
       this.amForceChoking = false;
       wire.unchoke();
       wire.extended(
-        "wt_ilp",
+        "paidStreamingExtension",
         bencode.encode({ msg_type: 0, message: "start" })
       );
     }
 
     ack() {
-      wire.extended("wt_ilp", bencode.encode({ msg_type: 0, message: "ack" }));
+      wire.extended("paidStreamingExtension", bencode.encode({ msg_type: 0, message: "ack" }));
     }
 
     onMessage(buf) {
