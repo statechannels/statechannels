@@ -11,7 +11,8 @@ import {
   sign,
   nonParticipant,
   clearedChallengeHash,
-  ongoinghallengeHash,
+  ongoingChallengeHash,
+  newForceMoveEvent,
 } from './test-helpers';
 
 const provider = new ethers.providers.JsonRpcProvider(
@@ -59,15 +60,15 @@ const description8 = 'It reverts when an unacceptable whoSignedWhat array is sub
 
 describe('forceMove', () => {
   it.each`
-    description     | channelNonce | initialChannelStorageHash | turnNumRecord | largestTurnNum | appDatas     | isFinalCount | whoSignedWhat | challenger        | reasonString
-    ${description1} | ${201}       | ${HashZero}               | ${0}          | ${8}           | ${[0, 1, 2]} | ${0}         | ${[0, 1, 2]}  | ${wallets[2]}     | ${undefined}
-    ${description2} | ${202}       | ${HashZero}               | ${0}          | ${8}           | ${[2]}       | ${0}         | ${[0, 0, 0]}  | ${wallets[2]}     | ${undefined}
-    ${description3} | ${203}       | ${clearedChallengeHash}   | ${5}          | ${8}           | ${[2]}       | ${0}         | ${[0, 0, 0]}  | ${wallets[2]}     | ${undefined}
-    ${description4} | ${204}       | ${clearedChallengeHash}   | ${5}          | ${2}           | ${[2]}       | ${0}         | ${[0, 0, 0]}  | ${wallets[2]}     | ${'Stale challenge!'}
-    ${description5} | ${205}       | ${ongoinghallengeHash}    | ${5}          | ${8}           | ${[2]}       | ${0}         | ${[0, 0, 0]}  | ${wallets[2]}     | ${'Channel is not open or turnNum does not match'}
-    ${description6} | ${206}       | ${HashZero}               | ${0}          | ${8}           | ${[0, 1, 2]} | ${0}         | ${[0, 1, 2]}  | ${nonParticipant} | ${'Challenger is not a participant'}
-    ${description7} | ${207}       | ${HashZero}               | ${0}          | ${8}           | ${[0, 1, 1]} | ${0}         | ${[0, 1, 2]}  | ${wallets[2]}     | ${'CountingApp: Counter must be incremented'}
-    ${description8} | ${208}       | ${HashZero}               | ${0}          | ${8}           | ${[0, 1, 2]} | ${0}         | ${[0, 0, 2]}  | ${wallets[2]}     | ${'Unacceptable whoSignedWhat array'}
+    description     | channelNonce | initialChannelStorageHash  | turnNumRecord | largestTurnNum | appDatas     | isFinalCount | whoSignedWhat | challenger        | reasonString
+    ${description1} | ${201}       | ${HashZero}                | ${0}          | ${8}           | ${[0, 1, 2]} | ${0}         | ${[0, 1, 2]}  | ${wallets[2]}     | ${undefined}
+    ${description2} | ${202}       | ${HashZero}                | ${0}          | ${8}           | ${[2]}       | ${0}         | ${[0, 0, 0]}  | ${wallets[2]}     | ${undefined}
+    ${description3} | ${203}       | ${clearedChallengeHash(5)} | ${5}          | ${8}           | ${[2]}       | ${0}         | ${[0, 0, 0]}  | ${wallets[2]}     | ${undefined}
+    ${description4} | ${204}       | ${clearedChallengeHash(5)} | ${5}          | ${2}           | ${[2]}       | ${0}         | ${[0, 0, 0]}  | ${wallets[2]}     | ${'Stale challenge!'}
+    ${description5} | ${205}       | ${ongoingChallengeHash(5)} | ${5}          | ${8}           | ${[2]}       | ${0}         | ${[0, 0, 0]}  | ${wallets[2]}     | ${'Channel is not open or turnNum does not match'}
+    ${description6} | ${206}       | ${HashZero}                | ${0}          | ${8}           | ${[0, 1, 2]} | ${0}         | ${[0, 1, 2]}  | ${nonParticipant} | ${'Challenger is not a participant'}
+    ${description7} | ${207}       | ${HashZero}                | ${0}          | ${8}           | ${[0, 1, 1]} | ${0}         | ${[0, 1, 2]}  | ${wallets[2]}     | ${'CountingApp: Counter must be incremented'}
+    ${description8} | ${208}       | ${HashZero}                | ${0}          | ${8}           | ${[0, 1, 2]} | ${0}         | ${[0, 0, 2]}  | ${wallets[2]}     | ${'Unacceptable whoSignedWhat array'}
   `(
     '$description', // for the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce
     async ({
@@ -151,43 +152,6 @@ describe('forceMove', () => {
         initialChannelStorageHash,
       )).wait();
 
-      forceMoveEvent = new Promise((resolve, reject) => {
-        OptimizedForceMove.on(
-          'ForceMove',
-          (
-            eventTurnNumRecord,
-            eventFinalizesAt,
-            eventChallenger,
-            eventIsFinal,
-            eventFixedPart,
-            eventChallengeVariablePart,
-            event,
-          ) => {
-            const eventChannelId = keccak256(
-              defaultAbiCoder.encode(
-                ['uint256', 'address[]', 'uint256'],
-                [eventFixedPart[0], eventFixedPart[1], eventFixedPart[2]],
-              ),
-            );
-            if (eventChannelId === channelId) {
-              // match event for this channel only
-              // event.removeListener();
-              resolve([
-                eventTurnNumRecord,
-                eventFinalizesAt,
-                eventChallenger,
-                eventIsFinal,
-                eventFixedPart,
-                eventChallengeVariablePart,
-              ]);
-            }
-          },
-        );
-        setTimeout(() => {
-          reject(new Error('timeout'));
-        }, 60000);
-      });
-
       // call forceMove in a slightly different way if expecting a revert
       if (reasonString) {
         const regex = new RegExp(
@@ -208,6 +172,7 @@ describe('forceMove', () => {
           regex,
         );
       } else {
+        forceMoveEvent = newForceMoveEvent(OptimizedForceMove, channelId);
         const tx = await OptimizedForceMove.forceMove(
           turnNumRecord,
           fixedPart,
@@ -218,12 +183,12 @@ describe('forceMove', () => {
           whoSignedWhat,
           challengerSig,
         );
-
         // wait for tx to be mined
         await tx.wait();
 
         // catch ForceMove event
         const [
+          eventChannelId,
           eventTurnNumRecord,
           eventFinalizesAt,
           eventChallenger,
@@ -233,6 +198,7 @@ describe('forceMove', () => {
         ] = await forceMoveEvent;
 
         // check this information is enough to respond
+        expect(eventChannelId).toEqual(channelId);
         expect(eventTurnNumRecord._hex).toEqual(hexlify(largestTurnNum));
         expect(eventChallenger).toEqual(challenger.address);
         expect(eventFixedPart[0]._hex).toEqual(hexlify(fixedPart.chainId));

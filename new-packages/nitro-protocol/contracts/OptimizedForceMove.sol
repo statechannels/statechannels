@@ -59,7 +59,6 @@ contract OptimizedForceMove {
         bytes32 channelId = keccak256(
             abi.encode(fixedPart.chainId, fixedPart.participants, fixedPart.channelNonce)
         );
-        ChannelStorage memory channelStorage;
         // ------------
         // REQUIREMENTS
         // ------------
@@ -125,15 +124,8 @@ contract OptimizedForceMove {
         // EFFECTS
         // ------------
 
-        channelStorage = ChannelStorage(
-            largestTurnNum,
-            now + fixedPart.challengeDuration,
-            stateHashes[variableParts.length - 1],
-            challenger,
-            keccak256(abi.encode(variableParts[variableParts.length - 1].outcome))
-        );
-
         emit ForceMove(
+            channelId,
             largestTurnNum,
             now + fixedPart.challengeDuration,
             challenger,
@@ -142,7 +134,17 @@ contract OptimizedForceMove {
             variableParts
         );
 
-        channelStorageHashes[channelId] = keccak256(abi.encode(channelStorage));
+        channelStorageHashes[channelId] = keccak256(
+            abi.encode(
+                ChannelStorage(
+                    largestTurnNum,
+                    now + fixedPart.challengeDuration,
+                    stateHashes[variableParts.length - 1],
+                    challenger,
+                    keccak256(abi.encode(variableParts[variableParts.length - 1].outcome))
+                )
+            )
+        );
 
     }
 
@@ -409,6 +411,98 @@ contract OptimizedForceMove {
 
     }
 
+    function concludeFromOpen(
+        uint256 turnNumRecord,
+        uint256 largestTurnNum,
+        FixedPart memory fixedPart, // don't need appDefinition
+        bytes32 appPartHash,
+        bytes32 outcomeHash,
+        uint8 numStates,
+        uint8[] memory whoSignedWhat,
+        Signature[] memory sigs
+    ) public {
+        // Calculate channelId from fixed part
+        bytes32 channelId = keccak256(
+            abi.encode(fixedPart.chainId, fixedPart.participants, fixedPart.channelNonce)
+        );
+
+        // EITHER there is no information stored against channelId at all (OK)
+        if (channelStorageHashes[channelId] != bytes32(0)) {
+            // OR there is, in which case we must check the channel is still open and that the committed turnNumRecord is correct
+            require(
+                keccak256(
+                        abi.encode(
+                            ChannelStorage(turnNumRecord, 0, bytes32(0), address(0), bytes32(0))
+                        )
+                    ) ==
+                    channelStorageHashes[channelId],
+                'Channel is not open or turnNum does not match'
+            );
+        }
+
+        _conclude(
+            largestTurnNum,
+            numStates,
+            fixedPart.participants,
+            channelId,
+            appPartHash,
+            outcomeHash,
+            sigs,
+            whoSignedWhat
+        );
+    }
+
+    function concludeFromChallenge(
+        uint256 turnNumRecord,
+        uint256 largestTurnNum,
+        FixedPart memory fixedPart, // don't need appDefinition
+        bytes32 appPartHash,
+        uint8 numStates,
+        uint8[] memory whoSignedWhat,
+        Signature[] memory sigs,
+        bytes32 challengeOutcomeHash,
+        bytes memory channelStorageLiteBytes // This is to avoid a 'stack too deep' error by minimising the number of local variables
+    ) public {
+        // Calculate channelId from fixed part
+        bytes32 channelId = keccak256(
+            abi.encode(fixedPart.chainId, fixedPart.participants, fixedPart.channelNonce)
+        );
+
+        ChannelStorageLite memory channelStorageLite = abi.decode(
+            channelStorageLiteBytes,
+            (ChannelStorageLite)
+        );
+
+        require(turnNumRecord > 0, 'TurnNumRecord must be nonzero');
+        require(now < channelStorageLite.finalizesAt, 'Channel already finalized!');
+
+        require(
+            keccak256(
+                    abi.encode(
+                        ChannelStorage(
+                            turnNumRecord,
+                            channelStorageLite.finalizesAt,
+                            channelStorageLite.stateHash, // challengeStateHash
+                            channelStorageLite.challengerAddress,
+                            challengeOutcomeHash
+                        )
+                    )
+                ) ==
+                channelStorageHashes[channelId],
+            'Challenge State does not match stored version'
+        );
+
+        _conclude(
+            largestTurnNum,
+            numStates,
+            fixedPart.participants,
+            channelId,
+            appPartHash,
+            channelStorageLite.outcomeHash,
+            sigs,
+            whoSignedWhat
+        );
+    }
     // Internal methods:
 
     function _isAddressInArray(address suspect, address[] memory addresses)
@@ -581,8 +675,51 @@ contract OptimizedForceMove {
         emit ChallengeCleared(channelId, newTurnNumRecord);
     }
 
+    function _conclude(
+        uint256 largestTurnNum,
+        uint8 numStates,
+        address[] memory participants,
+        bytes32 channelId,
+        bytes32 appPartHash,
+        bytes32 outcomeHash,
+        Signature[] memory sigs,
+        uint8[] memory whoSignedWhat
+    ) internal {
+        bytes32[] memory stateHashes = new bytes32[](numStates);
+        for (uint256 i = 0; i < numStates; i++) {
+            stateHashes[i] = keccak256(
+                abi.encode(
+                    State(
+                        largestTurnNum + i - numStates, // turnNum
+                        true, // isFinal
+                        channelId,
+                        appPartHash,
+                        outcomeHash
+                    )
+                )
+            );
+        }
+
+        // check the supplied states are supported by n signatures
+        require(
+            _validSignatures(largestTurnNum, participants, stateHashes, sigs, whoSignedWhat),
+            'Invalid signatures'
+        );
+
+        // effects
+
+        // set channel storage
+        channelStorageHashes[channelId] = keccak256(
+            abi.encode(ChannelStorage(0, now, bytes32(0), address(0), outcomeHash))
+        );
+
+        // emit event
+        emit Concluded(channelId);
+    }
+
     // events
     event ForceMove(
+        bytes32 indexed channelId,
         // everything needed to respond or refute
         uint256 turnNunmRecord,
         uint256 finalizesAt,
@@ -592,5 +729,6 @@ contract OptimizedForceMove {
         ForceMoveApp.VariablePart[] variableParts
     );
 
-    event ChallengeCleared(bytes32 channelId, uint256 newTurnNumRecord);
+    event ChallengeCleared(bytes32 indexed channelId, uint256 newTurnNumRecord);
+    event Concluded(bytes32 indexed channelId);
 }

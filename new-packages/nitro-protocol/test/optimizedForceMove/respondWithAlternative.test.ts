@@ -170,9 +170,7 @@ describe('respondWithAlternative', () => {
         sigs[i] = {v: sig.v, r: sig.r, s: sig.s};
       }
 
-      const challengeClearedEvent: any = newChallengeClearedEvent(OptimizedForceMove, channelId);
-
-      // call forceMove in a slightly different way if expecting a revert
+      // call method in a slightly different way if expecting a revert
       if (reasonString) {
         const regex = new RegExp(
           '^' + 'VM Exception while processing transaction: revert ' + reasonString + '$',
@@ -191,6 +189,7 @@ describe('respondWithAlternative', () => {
           regex,
         );
       } else {
+        const challengeClearedEvent: any = newChallengeClearedEvent(OptimizedForceMove, channelId);
         const tx2 = await OptimizedForceMove.respondWithAlternative(
           fixedPart,
           largestTurnNum,
