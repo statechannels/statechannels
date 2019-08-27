@@ -1,94 +1,120 @@
+// @ts-check
 
-import inherits from "inherits"
-import { EventEmitter } from "events"
-import bencode from "bencode"
+import bencode from "bencode";
+import { EventEmitter } from "events";
+
+export const PaidStreamingExtensionEvents = {
+  WARNING: "warning",
+  ILP_HANDSHAKE: "ilp_handshake",
+  NOTICE: "notice",
+  FIRST_REQUEST: "first_request",
+  REQUEST: "request"
+};
+
+export const PaidStreamingExtensionNotices = {
+  START: "start",
+  STOP: "stop",
+  ACK: "ack"
+};
+
 /**
  * Returns a bittorrent extension
- * @param {String} opts.ilp_account Random ID number
- * @return {BitTorrent Extension}
+ * @param {Object} opts
+ * @param {String} [opts.pseAccount] Random ID number
+ * @return {typeof PaidStreamingExtension}
  */
-export default function (opts) {
-  if (!opts) {
-    opts = {}
-  }
+export default function usePaidStreamingExtension(opts = {}) {
+  let wire = null;
 
-  inherits(wt_ilp, EventEmitter)
-
-  function wt_ilp (wire) {
-    EventEmitter.call(this)
-
-    this._wire = wire
-    this.ilp_account = opts.ilp_account
-    this.peerAccount = null
-
-    this.amForceChoking = false
-    this.remainingRequests = [];
-    this._wire.extendedHandshake.ilp_account = opts.ilp_account
-    this._interceptRequests()
-  }
-
-  wt_ilp.prototype.name = 'wt_ilp'
-
-  wt_ilp.prototype.onHandshake = function (infoHash, peerId, extensions) { }
-  wt_ilp.prototype.onExtendedHandshake = function (handshake) {
-    if (!handshake.m || !handshake.m.wt_ilp) {
-      return this.emit('warning', new Error('Peer does not support wt_ilp'))
+  class PaidStreamingExtension extends EventEmitter {
+    get name() {
+      return "wt_ilp";
     }
-    if (handshake.ilp_account) { this.peerAccount = handshake.ilp_account }
-    this.emit('ilp_handshake', { ilp_account: this.peerAccount })
-  }
 
-  wt_ilp.prototype.stop = function () {
-    this.amForceChoking = true
-    this._wire.choke()
-    this._wire.extended('wt_ilp', bencode.encode({ msg_type: 0, message: "stop" }))
-  }
+    ilp_account = opts.pseAccount;
+    peerAccount = null;
+    amForceChoking = false;
+    remainingRequests = [];
 
-  wt_ilp.prototype.start = function () {
-    this.amForceChoking = false;
-    this._wire.unchoke()
-    this._wire.extended('wt_ilp', bencode.encode({ msg_type: 0, message: "start" }))
-  }
-  wt_ilp.prototype.ack = function () {
-    this._wire.extended('wt_ilp', bencode.encode({ msg_type: 0, message: "ack" }))
-  }
-  
-  wt_ilp.prototype.onMessage = function (buf) {
-    let dict
-    let message;
-    try {
-      const str = buf.toString()
-      const trailerIndex = str.indexOf('ee') + 2
-      dict = bencode.decode(str.substring(0, trailerIndex))
-      message = new TextDecoder("utf-8").decode(dict.message)
-      this.emit("notice", message)
-    } catch (err) {
-      console.error("err", err)
-      // drop invalid messages
-      return
+    constructor(wireToUse) {
+      super();
+      wire = wireToUse;
+      wire.extendedHandshake.ilp_account = this.ilp_account;
+      this._interceptRequests();
     }
-  }
 
-  wt_ilp.prototype._interceptRequests = function () {
-    const _this = this
-    const _onRequest = this._wire._onRequest
-    this._wire._onRequest = function (index, offset, length) {
-      if (!index && !offset) {
-        _this.emit('first_request', length)
+    onHandshake(infoHash, peerId, extensions) {}
+
+    onExtendedHandshake(handshake) {
+      if (!handshake.m || !handshake.m[this.name]) {
+        return this.emit(
+          PaidStreamingExtensionEvents.WARNING,
+          new Error("Peer does not support wt_ilp")
+        );
       }
-      _this.emit('request', length)
-      // Call onRequest after the handlers triggered by this event have been called
-      const _arguments = arguments
-      setTimeout(function () {
-        if (!_this.amForceChoking) {
-          _onRequest.apply(_this._wire, _arguments)
-        } else {
-          console.warn('>> CHOKING - dropped request')
+      if (handshake.ilp_account) {
+        this.peerAccount = handshake.ilp_account;
+      }
+      this.emit(PaidStreamingExtensionEvents.ILP_HANDSHAKE, {
+        ilp_account: this.peerAccount
+      });
+    }
+
+    stop() {
+      this.amForceChoking = true;
+      wire.choke();
+      wire.extended("wt_ilp", bencode.encode({ msg_type: 0, message: "stop" }));
+    }
+
+    start() {
+      this.amForceChoking = false;
+      wire.unchoke();
+      wire.extended(
+        "wt_ilp",
+        bencode.encode({ msg_type: 0, message: "start" })
+      );
+    }
+
+    ack() {
+      wire.extended("wt_ilp", bencode.encode({ msg_type: 0, message: "ack" }));
+    }
+
+    onMessage(buf) {
+      let dict;
+      let message;
+      try {
+        const str = buf.toString();
+        const trailerIndex = str.indexOf("ee") + 2;
+        dict = bencode.decode(str.substring(0, trailerIndex));
+        message = new TextDecoder("utf-8").decode(dict.message);
+        this.emit(PaidStreamingExtensionEvents.NOTICE, message);
+      } catch (err) {
+        console.error("err", err);
+        // drop invalid messages
+        return;
+      }
+    }
+
+    _interceptRequests() {
+      const _this = this;
+      const _onRequest = wire._onRequest;
+      wire._onRequest = function(index, offset, length) {
+        if (!index && !offset) {
+          _this.emit(PaidStreamingExtensionEvents.FIRST_REQUEST, length);
         }
-      }, 0)
+        _this.emit("request", length);
+        // Call onRequest after the handlers triggered by this event have been called
+        const _arguments = arguments;
+        setTimeout(function() {
+          if (!_this.amForceChoking) {
+            _onRequest.apply(wire, _arguments);
+          } else {
+            console.warn(">> CHOKING - dropped request");
+          }
+        }, 0);
+      };
     }
   }
-  
 
-  return wt_ilp
+  return PaidStreamingExtension;
 }
