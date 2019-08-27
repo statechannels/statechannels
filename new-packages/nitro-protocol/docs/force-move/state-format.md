@@ -3,7 +3,7 @@ id: state-format
 title: State Format
 ---
 
-A specified format of state is vital, since it constitutes much of the interface between the on- and off- chain behaviour of the state channel network.
+A specified format of _state_ is vital, since it constitutes much of the interface between the on- and off- chain behaviour of the state channel network.
 
 In ForceMove, the following fields must be included in state:
 
@@ -78,3 +78,6 @@ which contains fields which are allowed to change. These structs, along with rem
 **Why not hash the `AppDefinition` together with the `ChannelId` into a `FixedPartHash`?** By doing this you perform one extra hash but you have to hash less data in the variable part. This tradeoff makes sense if you're hashing something like >3 variable parts for the same fixed part (based on the relative gas costs). We anticipate that most of the time channels will have 2 participants, so we optimize for this case.
 
 **Why not include `TurnNum` or `isFinal` in the `VariablePartHash`?** Having the `turnNum` and `isFinal` separate makes the `conclude` and `refute` methods more efficient, as they can pass in just the `VariablePartHash` and not the (potentially large) data within it.
+
+**What happened to the "commitment" terminology?**
+This has been deprecated in favor of "state".
