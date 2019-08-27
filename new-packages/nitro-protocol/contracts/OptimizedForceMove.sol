@@ -426,12 +426,9 @@ contract OptimizedForceMove {
             abi.encode(fixedPart.chainId, fixedPart.participants, fixedPart.channelNonce)
         );
 
-        if (turnNumRecord == 0) {
-            require(
-                channelStorageHashes[channelId] == bytes32(0),
-                'Channel is not open or turnNum does not match'
-            );
-        } else {
+        // EITHER there is no information stored against channelId at all (OK)
+        if (channelStorageHashes[channelId] != bytes32(0)) {
+            // OR there is, in which case we must check the channel is still open and that the committed turnNumRecord is correct
             require(
                 keccak256(
                         abi.encode(
