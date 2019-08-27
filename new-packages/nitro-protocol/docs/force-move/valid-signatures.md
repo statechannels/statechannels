@@ -18,7 +18,7 @@ The simplest way for this to accomplish this is to provide a sequence of `n` sta
 ForceMove also allows an optimization where a state can be supported by `n` signatures on a sequence of `m < n` states, provided again that each consecutive pair of those `m` states form a valid transition and further provided each participant has provided a signature on a state later or equal in the sequence than the state for which they were the mover.
 In the extreme, this allows a single state signed by all `n` parties to be accepted by the chain.
 
-### Valid Signatures
+## Valid Signatures
 
 Internal call
 
@@ -32,7 +32,17 @@ Internal call
     ) internal pure returns (bool)
 ```
 
-Requirements:
+Each signature is a struct:
+
+```solidity
+    struct Signature {
+        uint8 v;
+        bytes32 r;
+        bytes32 s;
+    }
+```
+
+### Requirements:
 
 - There is a signature for each participant:
   - either on the state for which they are a mover
@@ -41,7 +51,8 @@ Requirements:
 Some examples:
 
 In the following examples, we will let `n` be the number of participants in the channel.
-We format the signatures `sigs` as an array of arrays of signatures, where `sigs[i]` are signatures for states `states[i]`.
+We format the signatures `sigs` as an array of signatures, where `sigs[i]` are signatures for states `states[i]`.
+
 Use the notation that `si` represents a state with `turnNum = i` and `xi` is a signature of participant `i` on the corresponding state.
 
 Example 1: Suppose that `n = 3`, `states = [s4, s5]` and `sigs = [[x1], [x0, x2]]`.
