@@ -45,8 +45,8 @@ In `/contracts/OptimizedForceMove.sol`:
     ) internal pure returns (bool)
 ```
 
-A prior [check on the signatures](./valid-signatures) for the submitted states implies that the following fields are equal for a and b:
-`chainId`, `participants`, `channelNonce`, `appDefinition`, `challengeDuration`, and that `b.turnNum = a.turnNum + 1`. This means that the core `_validTransition` function need only perform the remaining checks. See the contract itself for the full implementation.
+A later [check on the signatures](./valid-signatures) for the submitted states implies (if it passes) that the following fields are equal for a and b:
+`chainId`, `participants`, `channelNonce`, `appDefinition`, `challengeDuration`, and that `b.turnNum = a.turnNum + 1`. This is because the `stateHashes` are computed on chain from a single `fixedPart` which is submitted (and implicitly copied across all states) as well as a single `largestTurnNum` (which is implicitly decremented as we step back through the submitted states). This means that the core `_validTransition` function need only perform the remaining checks. See the contract itself for the full implementation.
 
 ## Application-specific transition rules
 
