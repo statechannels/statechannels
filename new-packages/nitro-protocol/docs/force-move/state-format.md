@@ -7,69 +7,69 @@ A specified format of state is vital, since it constitutes much of the interface
 
 In ForceMove, the following fields must be included in state:
 
-| **Field**         | **Data type** | **Definition / Explanation**                                  |
-| :---------------- | :------------ | :------------------------------------------------------------ |
-| ChainID           | `int256`      | e.g. ropsten / mainnet                                        |
-| Participants      | `address[]`   | participant addresses                                         |
-| ChannelNonce      | `uint256`     | chosen by participants to make ChannelId unique               |
-| ChallengeDuration | `uint256`     | duration of challenge (in ms?)                                |
-| TurnNum           | `uint256`     | turn number                                                   |
-| CurrentOutcome    | `bytes`       | the _outcome_ if the channel were to finalize in this state   |
+| **Field**         | **Data type** | **Definition / Explanation**                                  | **Fixed / Variable** |
+| :---------------- | :------------ | :------------------------------------------------------------ | -------------------- |
+| chainId           | `uint256`     | e.g. 3 (ropsten) or 1 (mainnet)                               | Fixed                |
+| participants      | `address[]`   | participant addresses                                         | Fixed                |
+| channelNonce      | `uint256`     | chosen by participants to make ChannelId unique               | Fixed                |
+| challengeDuration | `uint256`     | duration of challenge (in seconds)                            | Fixed                |
+| turnNum           | `uint256`     | turn number                                                   | Variable             |
+| outcome           | `bytes`       | the _outcome_ if the channel were to finalize in this state   |
 | isFinal           | `boolean`     |                                                               |
-| AppDefinition     | `address`     | on-chain address of library defining custom application rules |
-| AppData           | `bytes`       | application-specific data                                     |
+| appDefinition     | `address`     | on-chain address of library defining custom application rules |
+| appData           | `bytes`       | application-specific data                                     |
 
-Since commitments must ultimately be interpreted by smart contracts, the encoding of these fields must be carefully considered. One could use a custom encoding into, e.g. a concatenated byte string: instead one should use the experimental ABIEncoderV2, which means the commitment format above can be a struct. Currently it looks like this \(approximate equivalence to the above fields is shown in the comments\):
-
-In `force-move-protocol/fmg-core/contracts/Commitment.sol`:
+Since commitments must ultimately be interpreted by smart contracts, the encoding of these fields must be carefully considered. The following encoding is designed around optimal gas consumption:
 
 ```solidity
-struct CommitmentStruct {
-    address channelType; // AppDefinition
-    uint32 nonce; // ChannelNonce
-    address[] participants;
-    uint8 commitmentType; // isFinal
-    uint32 turnNum;
-    uint32 commitmentCount;
-    address[] destination; // Outcomes[0,:]
-    uint256[] allocation; // Outcomes[1,:]
-    bytes appAttributes; // AppData
-}
+    struct State {
+        // participants sign the hash of this
+        uint256 turnNum;
+        bool isFinal;
+        bytes32 channelId; // keccack256(abi.encode(chainId,participants,channelNonce))
+        bytes32 appPartHash;
+        //     keccak256(abi.encode(
+        //         fixedPart.challengeDuration,
+        //         fixedPart.appDefinition,
+        //         variablePart.appData
+        //     )
+        // )
+        bytes32 outcomeHash; //  keccak256(abi.encode(outcome))
+    }
 ```
 
-## ChannelId
+The address of a channel is the hash of the abi encoded `chainId`, `participants` and `channelNonce`.
 
-The address of a channel is the hash of `Participants, AppDefinition` and `ChannelNonce:`
-
-In `force-move-protocol/packages/fmg-core/contracts/Commitment.sol`:
-
-```solidity
-channelId = keccak256(abi.encodePacked(_commitment.channelType, _commitment.nonce, _commitment.participants));
-```
-
-Since it takes the same format as a participant address, a channel address, may be allocated funds by another channel. However, a private key for a channel address is not known to anyone. This means that funds cannot be drawn directly from channel addresses. By choosing a new `ChannelNonce` each time the same participants execute the same application, they can avoid replay attacks.
+By choosing a new `channelNonce` each time the same participants execute a state channel supported by the same chain, they can avoid replay attacks.
 
 ---
 
-TODO: fixed parts vs non-fixed parts
+## Fixed and Variable Parts
 
-## Implementation
+It is convenient to define some other structs, each containing a subset of the above data:
 
-The data that the participants sign should be the hash of the following:
+```solidity
+  struct FixedPart {
+        uint256 chainId;
+        address[] participants;
+        uint256 channelNonce;
+        address appDefinition;
+        uint256 challengeDuration;
+    }
+```
 
-- TurnNum
-- isFinal
-- ChannelId
-  - ChainId
-  - Participants
-  - ChannelNonce
-- AppPartHash
-  - ChallengeDuration // only ever need this on a ForceMove
-  - AppDefinition
-  - AppData
-- OutcomeHash
+which contains information which must be identical in every state channel update, and
 
-Where an item has nested children this implies that item is the hash of the children.
+```solidity
+   struct VariablePart {
+        bytes outcome;
+        bytes appData;
+    }
+```
+
+which contains fields which are allowed to change. These structs, along with remaining fields, `turnNum` and `isFinal`, can be passed in to contract methods for more gas efficient execution.
+
+## Implementation FAQs
 
 **Why include the ChannelId separately?** We have to calculate the `channelId` for every single operation anyway. Given that we have it it's cheaper to hash in the hash, rather than the individual components again.
 
