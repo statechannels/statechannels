@@ -1,11 +1,11 @@
 import WebTorrent from "webtorrent";
 import paidStreamingExtension from "./wire-extension";
 
-export default class WebTorrentIlp extends WebTorrent {
+export default class WebTorrentPaidStreaming extends WebTorrent {
   constructor(opts) {
     super(opts);
     this.peerWires = [];
-    this.ilp_account = opts && opts.ilp_acccount;
+    this.pseAccount = opts && opts.pseAccount;
   }
 
   seed() {
@@ -31,16 +31,16 @@ export default class WebTorrentIlp extends WebTorrent {
   }
 
   _setupWire(torrent, wire) {
-    wire.use(paidStreamingExtension({ ilp_account: this.ilp_account }));
+    wire.use(paidStreamingExtension({ pseAccount: this.pseAccount }));
     wire.setKeepAlive(true);
     wire.on("download", bytes => {
       console.log(`>> downloaded ${bytes} bytes`);
     });
     wire.paidStreamingExtension.on("first_request", () => {
       console.log(
-        `> first_request of ${wire.peerExtendedHandshake.ilp_account}`
+        `> first_request of ${wire.peerExtendedHandshake.pseAccount}`
       );
-      wire.emit("first_request", wire.peerExtendedHandshake.ilp_account);
+      wire.emit("first_request", wire.peerExtendedHandshake.pseAccount);
     });
     wire.paidStreamingExtension.on("notice", notice => {
       torrent.emit("notice", wire, notice);
@@ -48,13 +48,13 @@ export default class WebTorrentIlp extends WebTorrent {
   }
 
   _setupTorrent(torrent) {
-    if (torrent.__setupWithIlp) {
+    if (torrent.usingPaidStreaming) {
       return torrent;
     }
     torrent.on("wire", this._setupWire.bind(this, torrent));
     torrent.on("notice", (wire, notice) => {
       console.log(
-        `> notice recieved from ${wire.peerExtendedHandshake.ilp_account}: ${notice}`
+        `> notice recieved from ${wire.peerExtendedHandshake.pseAccount}: ${notice}`
       );
       if (notice === "stop") {
         wire.paidStreamingExtension.ack();
@@ -68,6 +68,6 @@ export default class WebTorrentIlp extends WebTorrent {
       console.log(">torrent error:", err);
     });
 
-    torrent.__setupWithIlp = true;
+    torrent.usingPaidStreaming = true;
   }
 }

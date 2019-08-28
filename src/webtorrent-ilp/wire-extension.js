@@ -5,7 +5,7 @@ import { EventEmitter } from "events";
 
 export const PaidStreamingExtensionEvents = {
   WARNING: "warning",
-  ILP_HANDSHAKE: "ilp_handshake",
+  PSE_HANDSHAKE: "pse_handshake",
   NOTICE: "notice",
   FIRST_REQUEST: "first_request",
   REQUEST: "request"
@@ -32,14 +32,14 @@ export default function usePaidStreamingExtension(opts = {}) {
       return "paidStreamingExtension";
     }
 
-    ilp_account = opts.pseAccount;
+    pseAccount = opts.pseAccount;
     peerAccount = null;
     amForceChoking = false;
     remainingRequests = [];
 
     constructor(wireToUse) {
       wire = wireToUse;
-      wire.extendedHandshake.ilp_account = this.ilp_account;
+      wire.extendedHandshake.pseAccount = this.pseAccount;
       this._interceptRequests();
     }
 
@@ -56,11 +56,11 @@ export default function usePaidStreamingExtension(opts = {}) {
           new Error("Peer does not support paidStreamingExtension")
         );
       }
-      if (handshake.ilp_account) {
-        this.peerAccount = handshake.ilp_account;
+      if (handshake.pseAccount) {
+        this.peerAccount = handshake.pseAccount;
       }
-      messageBus.emit(PaidStreamingExtensionEvents.ILP_HANDSHAKE, {
-        ilp_account: this.peerAccount
+      messageBus.emit(PaidStreamingExtensionEvents.PSE_HANDSHAKE, {
+        pseAccount: this.peerAccount
       });
     }
 
