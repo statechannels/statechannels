@@ -77,7 +77,7 @@ export default function usePaidStreamingExtension(opts = {}) {
       messageBus.on(event, callback);
     }
 
-    onHandshake(infoHash, peerId, extensions) {}
+    onHandshake(/* infoHash, peerId, extensions */) {}
 
     onExtendedHandshake(handshake) {
       if (!handshake.m || !handshake.m[this.name]) {
