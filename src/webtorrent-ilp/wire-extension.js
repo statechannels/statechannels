@@ -34,7 +34,7 @@ export default function usePaidStreamingExtension(opts = {}) {
 
     pseAccount = opts.pseAccount;
     peerAccount = null;
-    amForceChoking = false;
+    isForceChoking = false;
     remainingRequests = [];
 
     constructor(wireToUse) {
@@ -65,7 +65,7 @@ export default function usePaidStreamingExtension(opts = {}) {
     }
 
     stop() {
-      this.amForceChoking = true;
+      this.isForceChoking = true;
       wire.choke();
       wire.extended(
         "paidStreamingExtension",
@@ -74,7 +74,7 @@ export default function usePaidStreamingExtension(opts = {}) {
     }
 
     start() {
-      this.amForceChoking = false;
+      this.isForceChoking = false;
       wire.unchoke();
       wire.extended(
         "paidStreamingExtension",
@@ -116,7 +116,7 @@ export default function usePaidStreamingExtension(opts = {}) {
         // Call onRequest after the handlers triggered by this event have been called
         const _arguments = arguments;
         setTimeout(function() {
-          if (!_this.amForceChoking) {
+          if (!_this.isForceChoking) {
             _onRequest.apply(wire, _arguments);
           } else {
             console.warn(">> CHOKING - dropped request");
