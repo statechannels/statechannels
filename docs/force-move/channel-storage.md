@@ -42,7 +42,22 @@ Note that a new validTransitionChain may be implied by a single, signed state th
 - **Challenge** if `finalizesAt < currentTime`
   - implies that all other fields are not null
 - **Finalized** if `finalizesAt >= currentTime`
+
   - implies that all other fields are not null
+
+These states can be represented in the following state machine:
+
+```mermaid
+graph LR
+linkStyle default interpolate basis
+NoInfo-->|forceMove| Challenge
+NoInfo-->|concludeFromOpen| Finalized
+Open-->|concludeFromOpen| Finalized
+Challenge-->|concludeFromChallenge| Finalized
+Challenge-->|refute| Open
+Challenge-->|respond| Open
+Challenge-->|timeout| Finalized
+```
 
 The implementatino of the null fields is as follows. For a cleared challenge:
 
