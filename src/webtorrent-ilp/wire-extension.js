@@ -96,19 +96,17 @@ export default function usePaidStreamingExtension(opts = {}) {
       );
     }
 
-    onMessage(buf) {
-      let dict;
-      let message;
+    onMessage(buffer) {
       try {
-        const str = buf.toString();
-        const trailerIndex = str.indexOf("ee") + 2;
-        dict = bencode.decode(str.substring(0, trailerIndex));
-        message = new TextDecoder("utf-8").decode(dict.message);
-        messageBus.emit(PaidStreamingExtensionEvents.NOTICE, message);
+        const stringBuffer = buffer.toString();
+        const trailerIndex = stringBuffer.indexOf("ee") + 2;
+        const jsonData = bencode.decode(
+          stringBuffer.substring(0, trailerIndex)
+        );
+        const notice = new TextDecoder("utf-8").decode(jsonData.message);
+        messageBus.emit(PaidStreamingExtensionEvents.NOTICE, notice);
       } catch (err) {
         console.error("err", err);
-        // drop invalid messages
-        return;
       }
     }
 
