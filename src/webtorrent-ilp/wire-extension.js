@@ -1,94 +1,141 @@
+// @ts-check
 
-import inherits from "inherits"
-import { EventEmitter } from "events"
-import bencode from "bencode"
+import bencode from "bencode";
+import { EventEmitter } from "events";
+
+export const PaidStreamingExtensionEvents = {
+  WARNING: "warning",
+  PSE_HANDSHAKE: "pse_handshake",
+  NOTICE: "notice",
+  FIRST_REQUEST: "first_request",
+  REQUEST: "request"
+};
+
+export const PaidStreamingExtensionNotices = {
+  START: "start",
+  STOP: "stop",
+  ACK: "ack"
+};
+
 /**
  * Returns a bittorrent extension
- * @param {String} opts.ilp_account Random ID number
- * @return {BitTorrent Extension}
+ * @param {Object} opts
+ * @param {String} [opts.pseAccount] Random ID number
+ * @return {typeof PaidStreamingExtension}
  */
-export default function (opts) {
-  if (!opts) {
-    opts = {}
+export default function usePaidStreamingExtension(opts = {}) {
+  let wire = null;
+  const messageBus = new EventEmitter();
+
+  function executeExtensionCommand(extension, wire, command) {
+    wire.extended(extension, bencode.encode({ msg_type: 0, message: command }));
   }
 
-  inherits(wt_ilp, EventEmitter)
+  function interceptRequests(extension) {
+    const undecoratedOnRequestFunction = wire._onRequest;
 
-  function wt_ilp (wire) {
-    EventEmitter.call(this)
-
-    this._wire = wire
-    this.ilp_account = opts.ilp_account
-    this.peerAccount = null
-
-    this.amForceChoking = false
-    this.remainingRequests = [];
-    this._wire.extendedHandshake.ilp_account = opts.ilp_account
-    this._interceptRequests()
-  }
-
-  wt_ilp.prototype.name = 'wt_ilp'
-
-  wt_ilp.prototype.onHandshake = function (infoHash, peerId, extensions) { }
-  wt_ilp.prototype.onExtendedHandshake = function (handshake) {
-    if (!handshake.m || !handshake.m.wt_ilp) {
-      return this.emit('warning', new Error('Peer does not support wt_ilp'))
-    }
-    if (handshake.ilp_account) { this.peerAccount = handshake.ilp_account }
-    this.emit('ilp_handshake', { ilp_account: this.peerAccount })
-  }
-
-  wt_ilp.prototype.stop = function () {
-    this.amForceChoking = true
-    this._wire.choke()
-    this._wire.extended('wt_ilp', bencode.encode({ msg_type: 0, message: "stop" }))
-  }
-
-  wt_ilp.prototype.start = function () {
-    this.amForceChoking = false;
-    this._wire.unchoke()
-    this._wire.extended('wt_ilp', bencode.encode({ msg_type: 0, message: "start" }))
-  }
-  wt_ilp.prototype.ack = function () {
-    this._wire.extended('wt_ilp', bencode.encode({ msg_type: 0, message: "ack" }))
-  }
-  
-  wt_ilp.prototype.onMessage = function (buf) {
-    let dict
-    let message;
-    try {
-      const str = buf.toString()
-      const trailerIndex = str.indexOf('ee') + 2
-      dict = bencode.decode(str.substring(0, trailerIndex))
-      message = new TextDecoder("utf-8").decode(dict.message)
-      this.emit("notice", message)
-    } catch (err) {
-      console.error("err", err)
-      // drop invalid messages
-      return
-    }
-  }
-
-  wt_ilp.prototype._interceptRequests = function () {
-    const _this = this
-    const _onRequest = this._wire._onRequest
-    this._wire._onRequest = function (index, offset, length) {
+    wire._onRequest = function(index, offset, length) {
       if (!index && !offset) {
-        _this.emit('first_request', length)
+        messageBus.emit(PaidStreamingExtensionEvents.FIRST_REQUEST, length);
       }
-      _this.emit('request', length)
+
+      messageBus.emit(PaidStreamingExtensionEvents.REQUEST, length);
+
       // Call onRequest after the handlers triggered by this event have been called
-      const _arguments = arguments
-      setTimeout(function () {
-        if (!_this.amForceChoking) {
-          _onRequest.apply(_this._wire, _arguments)
+      const undecoratedOnRequestFunctionArgs = arguments;
+
+      setTimeout(() => {
+        if (!extension.isForceChoking) {
+          undecoratedOnRequestFunction.apply(
+            wire,
+            undecoratedOnRequestFunctionArgs
+          );
         } else {
-          console.warn('>> CHOKING - dropped request')
+          console.warn(">> CHOKING - dropped request");
         }
-      }, 0)
+      }, 0);
+    };
+  }
+
+  class PaidStreamingExtension {
+    get name() {
+      return "paidStreamingExtension";
+    }
+
+    pseAccount = opts.pseAccount;
+    peerAccount = null;
+    isForceChoking = false;
+    remainingRequests = [];
+
+    constructor(wireToUse) {
+      wire = wireToUse;
+      wire.extendedHandshake.pseAccount = this.pseAccount;
+      interceptRequests(this);
+    }
+
+    on(event, callback) {
+      messageBus.on(event, callback);
+    }
+
+    onHandshake(/* infoHash, peerId, extensions */) {}
+
+    onExtendedHandshake(handshake) {
+      if (!handshake.m || !handshake.m[this.name]) {
+        return messageBus.emit(
+          PaidStreamingExtensionEvents.WARNING,
+          new Error("Peer does not support paidStreamingExtension")
+        );
+      }
+      if (handshake.pseAccount) {
+        this.peerAccount = handshake.pseAccount;
+      }
+      messageBus.emit(PaidStreamingExtensionEvents.PSE_HANDSHAKE, {
+        pseAccount: this.peerAccount
+      });
+    }
+
+    stop() {
+      this.isForceChoking = true;
+      wire.choke();
+      executeExtensionCommand(
+        this.name,
+        wire,
+        PaidStreamingExtensionNotices.STOP
+      );
+    }
+
+    start() {
+      this.isForceChoking = false;
+      wire.unchoke();
+      executeExtensionCommand(
+        this.name,
+        wire,
+        PaidStreamingExtensionNotices.START
+      );
+    }
+
+    ack() {
+      executeExtensionCommand(
+        this.name,
+        wire,
+        PaidStreamingExtensionNotices.ACK
+      );
+    }
+
+    onMessage(buffer) {
+      try {
+        const stringBuffer = buffer.toString();
+        const trailerIndex = stringBuffer.indexOf("ee") + 2;
+        const jsonData = bencode.decode(
+          stringBuffer.substring(0, trailerIndex)
+        );
+        const notice = new TextDecoder("utf-8").decode(jsonData.message);
+        messageBus.emit(PaidStreamingExtensionEvents.NOTICE, notice);
+      } catch (err) {
+        console.error("err", err);
+      }
     }
   }
-  
 
-  return wt_ilp
+  return PaidStreamingExtension;
 }
