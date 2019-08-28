@@ -5,7 +5,7 @@ import ForceMoveArtifact from '../../build/contracts/TESTForceMove.json';
 // @ts-ignore
 import countingAppArtifact from '../../build/contracts/CountingApp.json';
 import {keccak256, defaultAbiCoder, hexlify} from 'ethers/utils';
-import {setupContracts, sign, newChallengeClearedEvent} from './test-helpers';
+import {setupContracts, sign, newChallengeClearedEvent} from '../test-helpers';
 import {HashZero, AddressZero} from 'ethers/constants';
 
 const provider = new ethers.providers.JsonRpcProvider(

@@ -13,7 +13,7 @@ import {
   clearedChallengeHash,
   ongoingChallengeHash,
   newForceMoveEvent,
-} from './test-helpers';
+} from '../test-helpers';
 
 const provider = new ethers.providers.JsonRpcProvider(
   `http://localhost:${process.env.DEV_GANACHE_PORT}`,
