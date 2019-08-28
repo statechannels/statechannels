@@ -73,6 +73,7 @@ function forceMove(
   - `stateHashes[m-1]`
   - `challengerAddress`
   - `outcomeHash = hash(outcomes[m-1])`
+- Emit a ForceMove event
 
 :::note This is a test note
 The challenger needs to sign this data:
