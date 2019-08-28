@@ -2,7 +2,6 @@
   "docs": {
     "ForceMove": [
       "force-move/intro",
-      "force-move/overview",
       "force-move/state-format",
       "force-move/transition-rules",
       "force-move/valid-signatures",
