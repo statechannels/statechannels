@@ -54,6 +54,7 @@ function refute(
 - Check that `channelStorageHashes[channelId] == challengeStorageHash`
 - Calculate `refutationStateHash` from `refutationStateTurnNum, isFinalAB[1, channelId, fixedPart, variablePart[1]`
 - Check that `refutationTurnNum > turnNumRecord`
-- Check that `recoverSigner(refutationStateHash, refutationSig) == challengerAddress`- Set channelStorage:
+- Check that `recoverSigner(refutationStateHash, refutationSig) == challengerAddress`
+- Set channelStorage:
   - `turnNumRecord = turnNumRecord`
   - Other fields set to their null values (see [Channel Storage](./channel-storage)).- Set `stateStorageHashes[channelId] = hash(turnNumRecord, 0, 0, 0)`
