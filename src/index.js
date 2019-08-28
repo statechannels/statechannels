@@ -1,7 +1,10 @@
 import React, { useContext, useState } from "react";
 import ReactDOM from "react-dom";
 import "./styles.css";
-import webtorrent from "./webtorrent-ilp/webtorrent-custom";
+import WebTorrentPaidStreamingClient, {
+  ClientEvents
+} from "./webtorrent-ilp/webtorrent-custom";
+import { PaidStreamingExtensionNotices } from "./webtorrent-ilp/wire-extension";
 
 const initialState = {
   working: "Done/Idle",
@@ -42,69 +45,45 @@ const progressLogger = (status, setStatus) => (
   }
 };
 
-const upload = (
-  client,
-  files,
-  setMagnet,
-  progressLogger,
-  allowedPeers,
-  updateAllowedPeers
-) => {
-  client.seed(files, function(torrent) {
+/**
+ *
+ * @param {WebTorrentPaidStreamingClient} client
+ * @param {FileList} files
+ * @param {(magnet: string) => void} setMagnet
+ * @param {(torrent: any, status: string, done: boolean)} progressLogger
+ */
+const upload = (client, files, setMagnet, progressLogger) => {
+  client.seed(files, torrent => {
     setMagnet(torrent.magnetURI);
-    torrent.on("wire", wire => {
-      wire.on("first_request", peerAccount => {
-        console.log("UI - NEW WIRE FROM " + peerAccount, allowedPeers);
-        if (peerAccount in allowedPeers && !allowedPeers[peerAccount].allowed) {
-          console.log(
-            "UI - ALREADY BLOCKED WIRE FROM " + peerAccount,
-            allowedPeers
-          );
-          client.sendNotice(wire, peerAccount);
-        } else {
-          console.log("UI - SEEMS LEGIT WIRE " + peerAccount, allowedPeers);
-          updateAllowedPeers({ id: peerAccount, allowed: true, wire });
-        }
-      });
-    });
     progressLogger(torrent, "Seeding", false);
   });
 };
 
+/**
+ * @param {WebTorrentPaidStreamingClient} client
+ * @param {string} torrentOrigin
+ * @param {(torrent: any, status: string, done: boolean)} progressLogger
+ */
 const download = (client, torrentOrigin, progressLogger) => {
   var torrentId =
     torrentOrigin || "https://webtorrent.io/torrents/sintel.torrent";
+
   client.add(torrentId, torrent => {
     console.log("UI - Download Started - MY account id is", client, torrent);
     const logger = progressLogger(torrent, "Leeching", false);
-    torrent.on("notice", (wire, notice) => {
-      if (notice === "start") {
+
+    client.on(ClientEvents.TORRENT_NOTICE, (torrent, wire, notice) => {
+      if (notice === PaidStreamingExtensionNotices.START) {
         clearInterval(logger);
-        client.destroy();
-        client = new webtorrent({ pseAccount: client.pseAccount });
-        download(client, torrentOrigin, progressLogger);
       }
     });
-    torrent.on("done", () => {
+
+    client.once(ClientEvents.TORRENT_DONE, () => {
       console.log("Done!", "File downloaded: " + torrent.files[0].name);
       clearInterval(logger);
       progressLogger(initialState, "Done/Idle", true, torrent.files[0]);
     });
   });
-};
-
-const togglePeer = (client, peerAccount, allowedPeers, updateAllowedPeers) => {
-  if (!allowedPeers.hasOwnProperty(peerAccount)) {
-    console.error("That peer account doesnt exist in the list");
-    return;
-  }
-  const { wire, allowed } = allowedPeers[peerAccount];
-  if (allowed) {
-    client.sendNotice(wire, peerAccount);
-  } else {
-    client.retractNotice(wire, peerAccount);
-  }
-  updateAllowedPeers({ id: peerAccount, allowed: !allowed, wire });
 };
 
 const updatePeers = (allowedPeers, setAllowedPeers) => peer => {
@@ -124,11 +103,24 @@ function App() {
     torrent: undefined
   });
   const [seedMagnet, setSeedMagnet] = useState("");
-  const [allowedPeers, setAllowedPeers] = useState({});
-
   const [leechMagnet, setLeechMagnet] = useState("");
   const { downloadSpeed, uploadSpeed, working, numPeers } = status;
+
+  /**
+   * @todo The UI shouldn't need an `allowedPeers` list. It should
+   *       use the client's state.
+   */
+  const [allowedPeers, setAllowedPeers] = useState({});
   const updateAllowedPeers = updatePeers(allowedPeers, setAllowedPeers);
+
+  const peerStatusChanged = peer => updateAllowedPeers(peer);
+
+  /**
+   * @todo This should be done in a non-rendering context.
+   */
+  client.off(ClientEvents.PEER_STATUS_CHANGED, peerStatusChanged);
+  client.once(ClientEvents.PEER_STATUS_CHANGED, peerStatusChanged);
+
   return (
     <div className="App">
       <div className="hero" id="hero">
@@ -162,9 +154,7 @@ function App() {
               client,
               event.target.files,
               setSeedMagnet,
-              progressLogger(status, setStatus),
-              allowedPeers,
-              updateAllowedPeers
+              progressLogger(status, setStatus)
             )
           }
         />
@@ -175,7 +165,7 @@ function App() {
                   <br />
                   <button
                     onClick={() => {
-                      togglePeer(client, id, allowedPeers, updateAllowedPeers);
+                      client.togglePeer(id);
                     }}
                   >
                     - {id} - allowed: {JSON.stringify(allowed)}
@@ -205,13 +195,7 @@ function App() {
         />
         <button
           onClick={() =>
-            download(
-              client,
-              leechMagnet,
-              progressLogger(status, setStatus),
-              allowedPeers,
-              setAllowedPeers
-            )
+            download(client, leechMagnet, progressLogger(status, setStatus))
           }
         >
           START DOWNLOAD
@@ -223,11 +207,16 @@ function App() {
     </div>
   );
 }
-const wt = new webtorrent({
+
+let wt = new WebTorrentPaidStreamingClient({
   pseAccount: Math.floor(Math.random() * 99999999999999999)
 });
+
+wt.on(ClientEvents.CLIENT_RESET, newClient => (wt = newClient));
+
 const WebTorrentContext = React.createContext({});
 const rootElement = document.getElementById("root");
+
 ReactDOM.render(
   <WebTorrentContext.Provider value={wt}>
     <App />
