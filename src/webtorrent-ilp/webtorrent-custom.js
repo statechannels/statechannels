@@ -21,7 +21,8 @@ export const ClientEvents = {
   PEER_STATUS_CHANGED: "peer_status_changed",
   CLIENT_RESET: "client_reset",
   TORRENT_DONE: "torrent_done",
-  TORRENT_ERROR: "torrent_error"
+  TORRENT_ERROR: "torrent_error",
+  TORRENT_NOTICE: "torrent_notice"
 };
 
 /**
@@ -98,11 +99,14 @@ function setupTorrent(torrent) {
        * @todo This should use choking/unchoking.
        */
       this.destroy();
-      const newClient = new WebTorrentPaidStreamingClient({
+      const client = new WebTorrentPaidStreamingClient({
         pseAccount: this.pseAccount
       });
-      this.emit(ClientEvents.CLIENT_RESET, newClient);
+      client.add(torrent.magnetURI);
+      this.emit(ClientEvents.CLIENT_RESET, client);
     }
+
+    this.emit(ClientEvents.TORRENT_NOTICE, torrent, wire, notice);
   });
 
   torrent.on(TorrentEvents.DONE, () => {
