@@ -31,6 +31,32 @@ export default function usePaidStreamingExtension(opts = {}) {
     wire.extended(extension, bencode.encode({ msg_type: 0, message: command }));
   }
 
+  function interceptRequests(extension) {
+    const undecoratedOnRequestFunction = wire._onRequest;
+
+    wire._onRequest = function(index, offset, length) {
+      if (!index && !offset) {
+        messageBus.emit(PaidStreamingExtensionEvents.FIRST_REQUEST, length);
+      }
+
+      messageBus.emit(PaidStreamingExtensionEvents.REQUEST, length);
+
+      // Call onRequest after the handlers triggered by this event have been called
+      const undecoratedOnRequestFunctionArgs = arguments;
+
+      setTimeout(() => {
+        if (!extension.isForceChoking) {
+          undecoratedOnRequestFunction.apply(
+            wire,
+            undecoratedOnRequestFunctionArgs
+          );
+        } else {
+          console.warn(">> CHOKING - dropped request");
+        }
+      }, 0);
+    };
+  }
+
   class PaidStreamingExtension {
     get name() {
       return "paidStreamingExtension";
@@ -44,7 +70,7 @@ export default function usePaidStreamingExtension(opts = {}) {
     constructor(wireToUse) {
       wire = wireToUse;
       wire.extendedHandshake.pseAccount = this.pseAccount;
-      this._interceptRequests();
+      interceptRequests(this);
     }
 
     on(event, callback) {
@@ -108,26 +134,6 @@ export default function usePaidStreamingExtension(opts = {}) {
       } catch (err) {
         console.error("err", err);
       }
-    }
-
-    _interceptRequests() {
-      const _this = this;
-      const _onRequest = wire._onRequest;
-      wire._onRequest = function(index, offset, length) {
-        if (!index && !offset) {
-          messageBus.emit(PaidStreamingExtensionEvents.FIRST_REQUEST, length);
-        }
-        messageBus.emit(PaidStreamingExtensionEvents.REQUEST, length);
-        // Call onRequest after the handlers triggered by this event have been called
-        const _arguments = arguments;
-        setTimeout(function() {
-          if (!_this.isForceChoking) {
-            _onRequest.apply(wire, _arguments);
-          } else {
-            console.warn(">> CHOKING - dropped request");
-          }
-        }, 0);
-      };
     }
   }
 
