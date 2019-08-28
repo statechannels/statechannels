@@ -3,7 +3,7 @@ pragma experimental ABIEncoderV2;
 
 import './ForceMoveApp.sol';
 
-contract OptimizedForceMove {
+contract ForceMove {
     struct Signature {
         uint8 v;
         bytes32 r;
