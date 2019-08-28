@@ -1,6 +1,6 @@
 ---
-id: respond-from-alternative
-title: Respond From Alternative
+id: respond-with-alternative
+title: Respond With Alternative
 ---
 
 ## Spec

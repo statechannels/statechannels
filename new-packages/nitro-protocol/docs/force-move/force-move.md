@@ -5,9 +5,13 @@ title: ForceMove
 
 ### ForceMove
 
+The forceMove function allows anyone holding the appropriate off-chain state to register a challege on chain. It is designed to ensure that a state channel can progress or be finalized in the event of inactivity on behalf of a participant (e.g. the current mover).
+
+The off-chain state is submitted (in an optimized format), and once relevant checks have passed, an `outcome` is registered against the `channelId`, with a finalization time set at some delay after the transaction is processed. This delay allows the challenge to be cleared by a timely and well-formed [respond](./respond), [respondWithAlternative](./respond-with-alternative) or [refute](./refute) transaction. If no such transaction is forthcoming, the challenge will time out, allowing the `outcome` registered to be finalized. A finalized outcome can then be used to extract funds from the channel.
+
 Call:
 
-`forceMove(State[] states, Signatures[] signatures, challengerSig)`
+`forceMove(uint256 turnNumRecord State[] states, Signatures[] signatures, Signature challengerSig)`
 
 Notes:
 
@@ -30,40 +34,41 @@ Effects:
 
 ---
 
-## Implmentation
+## Implementation
 
-- Parameters
-  - uint256 turnNumRecord,
-  - FixedPart memory fixedPart,
-  - uint256 largestTurnNum,
-  - VariablePart[] memory variableParts, // latest state first
-  - uint8 isFinalCount, // how many of the states are final
-  - Signature[][] memory sigs,
-  - Signature memory challengerSig,
-  - uint8 challengerIndex,
+```solidity
+function forceMove(
+        uint256 turnNumRecord,
+        FixedPart memory fixedPart,
+        uint256 largestTurnNum,
+        ForceMoveApp.VariablePart[] memory variableParts,
+        uint8 isFinalCount, // how many of the states are final
+        Signature[] memory sigs,
+        uint8[] memory whoSignedWhat,
+        Signature memory challengerSig
+    ) public
+```
 
-* Calculate `channelId` from fixed part
-* If `turnNumRecord == 0`
-  - Check that `channelStorageHashes[channelId] = 0`
-* Else
+- Calculate `channelId` from fixed part
+- Check that the `largestTurnNum >= turnNumRecord`
+- If `channelStorageHashes[channelId] != 0`
   - Calculate `emptyStorageHash = hash(turnNumRecord, 0, 0, 0)`
   - Check that `channelStorageHashes[channelId] = emptyStorageHash`
-  - Check that the `largestTurnNum >= turnNumRecord`
-* Let `m = variableParts.length`
-* [Optional] assert `sigs.length == m` // signature algorithm should just break if this isn't the case
-* For `i` in `0 .. (m-1)`:
-  - Let `isFinal = i < isFinalCount`
-  - Let `turnNum = largestTurnNum - i`
-  - Calculate state hash from fixedPart, turnNum, variablePart[i], isFinal
-  - If i == 0
-    - Save outcomeHash for later
-  - Else // i > 0
-    - Ensure app.validTransition(turnNum, variablePart[i], variablePart[i-1])
+- Let `m = variableParts.length`
+- For `i` in `0 .. (m-1)`:
+  - Let `isFinal = i > m - isFinalCount`
+  - Let `turnNum = largestTurnNum + i - m + 1`
+  - Calculate `stateHash[i]` from `fixedPart, channelId, turnNum, variablePart[i], isFinal`
+  - If `i + 1 != m`
+    - Calculate `isFinalAB = [i > m - isFinalCount, i + 1 > m - isFinalCount]`
+    - Calculate `turnNumB = largestTurnNum + i - m + 2`
+    - Ensure `validTransition(nParticipants, isFinalAB, turnNumB, variablePart[i], variablePart[i+1], appDefinition)`
     - (Other checks are covered by construction)
-* Check that validSignatures(participants, moverIndex, stateHashes, sigs)
-* Recover challengerAddress from sig and check that `participants[challengerIndex] == challengerAddress`
-* Set channelStorage
-  - `finalizesAt` = now + challengeDuration
-  - outcomeHash, stateHash
-  - turnNumRecord = largestTurnNum
-  - challengerAddress
+- Check that `_validSignatures(largestTurnNum, participants, stateHashes, sigs, whoSignedwhat)`
+- Recover challengerAddress from sig and check that `_isAddressInArray(challengerAddress, participants)`
+- Set channelStorage as the hash of the abi encode of
+  - `turnNumRecord = largestTurnNum`
+  - `finalizesAt = now + challengeDuration`
+  - `stateHashes[m-1]`
+  - `challengerAddress`
+  - `outcomeHash = hash(outcomes[m-1])`
