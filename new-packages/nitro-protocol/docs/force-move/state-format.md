@@ -7,15 +7,15 @@ A specified format of _state_ is vital, since it constitutes much of the interfa
 
 In ForceMove, the following fields must be included in state:
 
-| **Field**         | **Data type** | **Definition / Explanation**                                  | **Fixed / Variable** |
-| :---------------- | :------------ | :------------------------------------------------------------ | -------------------- |
-| chainId           | `uint256`     | e.g. 3 (ropsten) or 1 (mainnet)                               | Fixed                |
-| participants      | `address[]`   | participant addresses                                         | Fixed                |
-| channelNonce      | `uint256`     | chosen by participants to make ChannelId unique               | Fixed                |
-| challengeDuration | `uint256`     | duration of challenge (in seconds)                            | Fixed                |
-| turnNum           | `uint256`     | turn number                                                   | Variable             |
+| **Field**         | **Data type** | **Definition / Explanation**                                  |
+| :---------------- | :------------ | :------------------------------------------------------------ |
+| chainId           | `uint256`     | e.g. 3 (ropsten) or 1 (mainnet)                               |
+| participants      | `address[]`   | participant addresses                                         |
+| channelNonce      | `uint256`     | chosen by participants to make ChannelId unique               |
+| challengeDuration | `uint256`     | duration of challenge (in seconds)                            |
+| turnNum           | `uint256`     | turn number                                                   |
 | outcome           | `bytes`       | the _outcome_ if the channel were to finalize in this state   |
-| isFinal           | `boolean`     |                                                               |
+| isFinal           | `boolean`     | is this state final?                                          |
 | appDefinition     | `address`     | on-chain address of library defining custom application rules |
 | appData           | `bytes`       | application-specific data                                     |
 
