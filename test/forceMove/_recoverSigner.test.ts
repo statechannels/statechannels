@@ -1,13 +1,13 @@
 import {ethers} from 'ethers';
 // @ts-ignore
-import OptimizedForceMoveArtifact from '../../build/contracts/TESTOptimizedForceMove.json';
+import ForceMoveArtifact from '../../build/contracts/TESTForceMove.json';
 import {arrayify} from 'ethers/utils';
 import {setupContracts, sign} from './test-helpers';
 
 const provider = new ethers.providers.JsonRpcProvider(
   `http://localhost:${process.env.DEV_GANACHE_PORT}`,
 );
-let OptimizedForceMove: ethers.Contract;
+let ForceMove: ethers.Contract;
 
 const participants = ['', '', ''];
 const wallets = new Array(3);
@@ -19,7 +19,7 @@ for (let i = 0; i < 3; i++) {
 }
 
 beforeAll(async () => {
-  OptimizedForceMove = await setupContracts(provider, OptimizedForceMoveArtifact);
+  ForceMove = await setupContracts(provider, ForceMoveArtifact);
 });
 
 describe('_recoverSigner', () => {
@@ -30,8 +30,6 @@ describe('_recoverSigner', () => {
     const msgHash = ethers.utils.id('Hello World');
     const msgHashBytes = arrayify(msgHash);
     const sig = await sign(wallet, msgHashBytes);
-    expect(await OptimizedForceMove.recoverSigner(msgHash, sig.v, sig.r, sig.s)).toEqual(
-      wallet.address,
-    );
+    expect(await ForceMove.recoverSigner(msgHash, sig.v, sig.r, sig.s)).toEqual(wallet.address);
   });
 });

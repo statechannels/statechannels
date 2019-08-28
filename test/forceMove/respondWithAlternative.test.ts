@@ -1,7 +1,7 @@
 import {ethers} from 'ethers';
 import {expectRevert} from 'magmo-devtools';
 // @ts-ignore
-import OptimizedForceMoveArtifact from '../../build/contracts/TESTOptimizedForceMove.json';
+import ForceMoveArtifact from '../../build/contracts/TESTForceMove.json';
 // @ts-ignore
 import countingAppArtifact from '../../build/contracts/CountingApp.json';
 import {keccak256, defaultAbiCoder, hexlify} from 'ethers/utils';
@@ -11,7 +11,7 @@ import {HashZero, AddressZero} from 'ethers/constants';
 const provider = new ethers.providers.JsonRpcProvider(
   `http://localhost:${process.env.DEV_GANACHE_PORT}`,
 );
-let OptimizedForceMove: ethers.Contract;
+let ForceMove: ethers.Contract;
 let networkId;
 const chainId = 1234;
 const participants = ['', '', ''];
@@ -27,7 +27,7 @@ for (let i = 0; i < 3; i++) {
   participants[i] = wallets[i].address;
 }
 beforeAll(async () => {
-  OptimizedForceMove = await setupContracts(provider, OptimizedForceMoveArtifact);
+  ForceMove = await setupContracts(provider, ForceMoveArtifact);
   networkId = (await provider.getNetwork()).chainId;
   appDefinition = countingAppArtifact.networks[networkId].address; // use a fixed appDefinition in all tests
 });
@@ -159,9 +159,9 @@ describe('respondWithAlternative', () => {
       );
 
       // call public wrapper to set state (only works on test contract)
-      const tx = await OptimizedForceMove.setChannelStorageHash(channelId, challengeExistsHash);
+      const tx = await ForceMove.setChannelStorageHash(channelId, challengeExistsHash);
       await tx.wait();
-      expect(await OptimizedForceMove.channelStorageHashes(channelId)).toEqual(challengeExistsHash);
+      expect(await ForceMove.channelStorageHashes(channelId)).toEqual(challengeExistsHash);
 
       // sign the states
       const sigs = new Array(participants.length);
@@ -170,14 +170,14 @@ describe('respondWithAlternative', () => {
         sigs[i] = {v: sig.v, r: sig.r, s: sig.s};
       }
 
-      // call method in a slightly different way if expecting a revert
+      // call forceMove in a slightly different way if expecting a revert
       if (reasonString) {
         const regex = new RegExp(
           '^' + 'VM Exception while processing transaction: revert ' + reasonString + '$',
         );
         await expectRevert(
           () =>
-            OptimizedForceMove.respondWithAlternative(
+            ForceMove.respondWithAlternative(
               fixedPart,
               largestTurnNum,
               variableParts,
@@ -189,8 +189,8 @@ describe('respondWithAlternative', () => {
           regex,
         );
       } else {
-        const challengeClearedEvent: any = newChallengeClearedEvent(OptimizedForceMove, channelId);
-        const tx2 = await OptimizedForceMove.respondWithAlternative(
+        const challengeClearedEvent: any = newChallengeClearedEvent(ForceMove, channelId);
+        const tx2 = await ForceMove.respondWithAlternative(
           fixedPart,
           largestTurnNum,
           variableParts,
@@ -217,9 +217,7 @@ describe('respondWithAlternative', () => {
         );
 
         // check channelStorageHash against the expected value
-        expect(await OptimizedForceMove.channelStorageHashes(channelId)).toEqual(
-          expectedChannelStorageHash,
-        );
+        expect(await ForceMove.channelStorageHashes(channelId)).toEqual(expectedChannelStorageHash);
       }
     },
   );

@@ -1,7 +1,7 @@
 import {ethers} from 'ethers';
 import {expectRevert} from 'magmo-devtools';
 // @ts-ignore
-import OptimizedForceMoveArtifact from '../../build/contracts/TESTOptimizedForceMove.json';
+import ForceMoveArtifact from '../../build/contracts/TESTForceMove.json';
 // @ts-ignore
 import countingAppArtifact from '../../build/contracts/CountingApp.json';
 import {keccak256, defaultAbiCoder} from 'ethers/utils';
@@ -11,7 +11,7 @@ import {HashZero, AddressZero} from 'ethers/constants';
 const provider = new ethers.providers.JsonRpcProvider(
   `http://localhost:${process.env.DEV_GANACHE_PORT}`,
 );
-let OptimizedForceMove: ethers.Contract;
+let ForceMove: ethers.Contract;
 let networkId;
 let blockNumber;
 let blockTimestamp;
@@ -29,7 +29,7 @@ for (let i = 0; i < 3; i++) {
   participants[i] = wallets[i].address;
 }
 beforeAll(async () => {
-  OptimizedForceMove = await setupContracts(provider, OptimizedForceMoveArtifact);
+  ForceMove = await setupContracts(provider, ForceMoveArtifact);
   networkId = (await provider.getNetwork()).chainId;
   appDefinition = countingAppArtifact.networks[networkId].address; // use a fixed appDefinition in all tests
 });
@@ -135,12 +135,12 @@ describe('concludeFromChallenge', () => {
       );
 
       // call public wrapper to set state (only works on test contract)
-      const tx = await OptimizedForceMove.setChannelStorageHash(
+      const tx = await ForceMove.setChannelStorageHash(
         channelId,
         forceStorageHash ? forceStorageHash : challengeExistsHash,
       );
       await tx.wait();
-      expect(await OptimizedForceMove.channelStorageHashes(channelId)).toEqual(
+      expect(await ForceMove.channelStorageHashes(channelId)).toEqual(
         forceStorageHash ? forceStorageHash : challengeExistsHash,
       );
 
@@ -186,7 +186,7 @@ describe('concludeFromChallenge', () => {
         );
         await expectRevert(
           () =>
-            OptimizedForceMove.concludeFromChallenge(
+            ForceMove.concludeFromChallenge(
               declaredTurnNumRecord,
               largestTurnNum,
               fixedPart,
@@ -200,8 +200,8 @@ describe('concludeFromChallenge', () => {
           regex,
         );
       } else {
-        const concludedEvent: any = newConcludedEvent(OptimizedForceMove, channelId);
-        const tx2 = await OptimizedForceMove.concludeFromChallenge(
+        const concludedEvent: any = newConcludedEvent(ForceMove, channelId);
+        const tx2 = await ForceMove.concludeFromChallenge(
           declaredTurnNumRecord,
           largestTurnNum,
           fixedPart,
@@ -233,9 +233,7 @@ describe('concludeFromChallenge', () => {
 
         // check channelStorageHash against the expected value
 
-        expect(await OptimizedForceMove.channelStorageHashes(channelId)).toEqual(
-          expectedChannelStorageHash,
-        );
+        expect(await ForceMove.channelStorageHashes(channelId)).toEqual(expectedChannelStorageHash);
       }
     },
   );
