@@ -31,8 +31,8 @@
       "force-move/refute": {
         "title": "Refute"
       },
-      "force-move/respond-from-alternative": {
-        "title": "Respond From Alternative"
+      "force-move/respond-with-alternative": {
+        "title": "Respond With Alternative"
       },
       "force-move/respond": {
         "title": "Respond"
