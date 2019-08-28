@@ -6,6 +6,18 @@ import 'openzeppelin-solidity/contracts/math/SafeMath.sol';
 contract AssetHolder {
     using SafeMath for uint256;
 
+    struct Authorization {
+        // Prevents replay attacks:
+        // It's required that the participant signs the message, meaning only
+        // the participant can authorize a withdrawal.
+        // Moreover, the participant should sign the address that they wish
+        // to send the transaction from, preventing any replay attack.
+        address participant; // the account used to sign commitment transitions
+        address destination; // either an account or a channel
+        uint256 amount;
+        address sender; // the account used to sign transactions
+    }
+
     address AdjudicatorAddress;
 
     mapping(address => uint256) public holdings;
@@ -172,24 +184,24 @@ contract AssetHolder {
     //     return finalizationTimes[channel] < now && finalizationTimes[channel] > 0;
     // }
 
-    //     function recoverSigner(bytes memory _d, uint8 _v, bytes32 _r, bytes32 _s)
-    //     internal
-    //     pure
-    //     returns (address)
-    // {
-    //     bytes memory prefix = "\x19Ethereum Signed Message:\n32";
-    //     bytes32 h = keccak256(_d);
+    function recoverSigner(bytes memory _d, uint8 _v, bytes32 _r, bytes32 _s)
+        internal
+        pure
+        returns (address)
+    {
+        bytes memory prefix = '\x19Ethereum Signed Message:\n32';
+        bytes32 h = keccak256(_d);
 
-    //     bytes32 prefixedHash = keccak256(abi.encodePacked(prefix, h));
+        bytes32 prefixedHash = keccak256(abi.encodePacked(prefix, h));
 
-    //     address a = ecrecover(prefixedHash, _v, _r, _s);
+        address a = ecrecover(prefixedHash, _v, _r, _s);
 
-    //     return (a);
-    // }
+        return (a);
+    }
 
-    // // ****************
-    // // Events
-    // // ****************
-    // event Deposited(address destination, uint256 amountDeposited, uint256 destinationHoldings);
+    // ****************
+    // Events
+    // ****************
+    event Deposited(address destination, uint256 amountDeposited, uint256 destinationHoldings);
 
 }
