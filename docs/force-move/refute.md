@@ -3,15 +3,19 @@ id: refute
 title: Refute
 ---
 
-## Spec
+Tje `refute` method allows anyone with a single sufficient off-chain state to clear a challenge stored against a `channelId`. The state in question must have a higher `turnNum` than the challenge state stored on chain, and must be signed by the `challengerAddress` also stored on chain.
+
+The off-chain state is submitted (in an optimized format), and once relevant checks have passed, the existing challenge is cleared and the `turnNumRecord` preserved.
+
+### Specification
 
 Call
 
-`refute(State refutationState, Signature sig)`
+`refute(uint256 turnNumRecord, State challengeState, State refutationState, Signature sig)`
 
 Notes:
 
-Determine the channel from the `refutationState` (the final state in the array).
+Determine the channel from the `refutationState`.
 
 Requirements:
 
@@ -29,24 +33,27 @@ Effects:
 
 ```
 function refute(
-    FixedPart memory fixedPart, // dont need appDefinition
-    bytes32 appPartHash,
-    bytes32 outcomeHash,
     uint256 turnNumRecord,
-    uint256 refutationTurnNum,
-    bool refutationIsFinal,
+    uint256 refutationStateTurnNum,
     uint256 finalizesAt,
-    address challengerAddress,
-    bytes32 challengeStateHash,
-    bytes32 challengeOutcomeHash,
-    Signature refutationSig,
+    address challenger,
+    bool[2] memory isFinalAB,
+    FixedPart memory fixedPart,
+    ForceMoveApp.VariablePart[2] memory variablePartAB,
+    // variablePartAB[0] = challengeVariablePart
+    // variablePartAB[1] = refutationVariablePart
+    Signature memory refutationStateSig
 )
 ```
 
+- Check `refutationStateTurnNum` > `turnNumRecord`
 - Calculate `channelId` from fixedPart
-- Calculate `stateStorageHash` as `hash(turnNumRecord, finalizesAt, challengeStateHash, challengeOutcomeHash, challengerAddress)`
-- Check that `stateStorageHashes[channelId] == stateStorageHash`
-- Calculate `refutationStateHash` as `hash(refutationTurnNum, refutationIsFinal, channelId, appPartHash)`
+- Calculate `challengeStateHash` from `turnNumRecord, isFinalAB[1], channelId, fixedPart, variablePart[0]`
+- Calculate `challengeStorageHash` from `turnNumRecord, finalizesAt, challengeStateHash, challengerAddress`
+- Check that `finalizesAt > now`
+- Check that `channelStorageHashes[channelId] == challengeStorageHash`
+- Calculate `refutationStateHash` from `refutationStateTurnNum, isFinalAB[1, channelId, fixedPart, variablePart[1]`
 - Check that `refutationTurnNum > turnNumRecord`
-- Check that `recoverSigner(refutationStateHash, refutationSig) == challengerAddress`
-- Set `stateStorageHashes[channelId] = hash(turnNumRecord, 0, 0, 0)`
+- Check that `recoverSigner(refutationStateHash, refutationSig) == challengerAddress`- Set channelStorage:
+  - `turnNumRecord = turnNumRecord`
+  - Other fields set to their null values (see [Channel Storage](./channel-storage)).- Set `stateStorageHashes[channelId] = hash(turnNumRecord, 0, 0, 0)`
