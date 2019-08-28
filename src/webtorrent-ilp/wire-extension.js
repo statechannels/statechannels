@@ -27,6 +27,10 @@ export default function usePaidStreamingExtension(opts = {}) {
   let wire = null;
   const messageBus = new EventEmitter();
 
+  function executeExtensionCommand(extension, wire, command) {
+    wire.extended(extension, bencode.encode({ msg_type: 0, message: command }));
+  }
+
   class PaidStreamingExtension {
     get name() {
       return "paidStreamingExtension";
@@ -67,25 +71,28 @@ export default function usePaidStreamingExtension(opts = {}) {
     stop() {
       this.isForceChoking = true;
       wire.choke();
-      wire.extended(
-        "paidStreamingExtension",
-        bencode.encode({ msg_type: 0, message: "stop" })
+      executeExtensionCommand(
+        this.name,
+        wire,
+        PaidStreamingExtensionNotices.STOP
       );
     }
 
     start() {
       this.isForceChoking = false;
       wire.unchoke();
-      wire.extended(
-        "paidStreamingExtension",
-        bencode.encode({ msg_type: 0, message: "start" })
+      executeExtensionCommand(
+        this.name,
+        wire,
+        PaidStreamingExtensionNotices.START
       );
     }
 
     ack() {
-      wire.extended(
-        "paidStreamingExtension",
-        bencode.encode({ msg_type: 0, message: "ack" })
+      executeExtensionCommand(
+        this.name,
+        wire,
+        PaidStreamingExtensionNotices.ACK
       );
     }
 
