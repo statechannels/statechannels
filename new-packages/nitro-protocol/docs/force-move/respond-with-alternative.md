@@ -3,11 +3,15 @@ id: respond-with-alternative
 title: Respond With Alternative
 ---
 
-## Spec
+The respondWithAlternative method allows anyone with sufficient off-chain state to establish a new and higher `turnNumRecord` to clear an existing challenge stored against a `channelId`. 'Alternative' here means the new `turnNumRecord` may be supported by an alternative history of states (and need not agree with any challenge state stored on chain).
+
+The off-chain state is submitted (in an optimized format), and once relevant checks have passed, the existing challenge is cleared and the `turnNumRecord` is incremented by one.
+
+### Specification
 
 Call:
 
-`respondFromAlternative(State[] states, Signatures[] signatures)`
+`respondWithAlternative(uint256 turnNumRecord, State[] states, Signatures[] signatures)`
 
 Notes:
 
@@ -31,33 +35,41 @@ Effects:
 
 Parameters:
 
-```
-function respondFromAlternative(
-    uint256 turnNumRecord, // can deduce largestTurnNum from this
-    FixedPart memory fixedPart,
-    uint8 isFinalCount, // how many of the states are final
-    VariablePart[] memory variableParts,
-    Signature[][] memory sigs,
-    uint256 finalizesAt,
-    address challengerAddress,
-    bytes32 challengeStateHash,
-    bytes32 challengeOutcomeHash,
-)
+```solidity
+   struct ChannelStorageLite {
+        uint256 finalizesAt;
+        bytes32 stateHash;
+        address challengerAddress;
+        bytes32 outcomeHash;
+    }
+
+    function respondWithAlternative(
+        FixedPart memory fixedPart,
+        uint256 largestTurnNum,
+        ForceMoveApp.VariablePart[] memory variableParts,
+        uint8 isFinalCount, // how many of the states are final
+        Signature[] memory sigs,
+        uint8[] memory whoSignedWhat,
+        bytes memory channelStorageLiteBytes // This is to avoid a 'stack too deep' error by minimising the number of local variables
+    )
 ```
 
+- Decode `channelStorageLiteBytes`
 - Calculate `channelId` from fixedPart
+- Check that `finalizesAt > now`
 - Calculate `storageHash` from `turnNumRecord`, `finalizesAt`, `challengerAddress`, `challengeStateHash`, `challengeOutcomeHash`
 - Check that `channelStorageHashes[channelId] == storageHash`
 - Let `m = variableParts.length`
-- Let `largestTurnNum = turnNumRecord + 1`
 - For `i` in `0 .. (m-1)`:
-  - Let `isFinal = i < isFinalCount`
-  - Let `turnNum = largestTurnNum - i`
-  - Calculate state hash from fixedPart, turnNum, variablePart[i], isFinal
-  - If i > 0
-    - Ensure app.validTransition(turnNum, variablePart[i], variablePart[i-1])
+  - Let `isFinal = i > m - isFinalCount`
+  - Let `turnNum = largestTurnNum + i - m + 1`
+  - Calculate `stateHash[i]` from `fixedPart, channelId, turnNum, variablePart[i], isFinal`
+  - If `i + 1 != m`
+    - Calculate `isFinalAB = [i > m - isFinalCount, i + 1 > m - isFinalCount]`
+    - Calculate `turnNumB = largestTurnNum + i - m + 2`
+    - Ensure `validTransition(nParticipants, isFinalAB, turnNumB, variablePart[i], variablePart[i+1], appDefinition)`
     - (Other checks are covered by construction)
-- Check that validSignatures(stateHashes, sigs)
+- Check that `_validSignatures(largestTurnNum, participants, stateHashes, sigs, whoSignedwhat)`
 - Set channelStorage:
-  - turnNumRecord += 1
-  - Everything else 0
+  - `turnNumRecord = largestTurnNum`
+  - Other fields set to their null values (see [Channel Storage](./channel-storage)).

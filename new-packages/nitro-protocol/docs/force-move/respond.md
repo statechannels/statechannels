@@ -31,7 +31,7 @@ Effects:
 ## Implementation
 
 ```solidity
-respond(
+function respond(
     uint256 turnNumRecord,
     uint256 finalizesAt,
     address challenger,
