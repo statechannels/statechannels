@@ -3,20 +3,24 @@ id: respond
 title: Respond
 ---
 
-## Spec
+The respond method allows anyone with the appropriate, single off-chain state (usually the current mover) to clear an existing challenge stored against a `channelId`.
+
+The off-chain state is submitted (in an optimized format), and once relevant checks have passed, the existing challenge is cleared and the `turnNumRecord` is incremented by one.
+
+### Specification
 
 Call:
 
-`respond(State challengeState, State nextState, Signature nextStateSig)`
+`respond(uint256 turnNumRecord, State challengeState, State responseState, Signature responseStateSig)`
 
 Notes:
 
-Determine the channel from the `nextState`.
+Determine the channel from the `responseState`.
 
 Requirements:
 
 - challengeState matches stateHash
-- challengeState to nextState is a valid transition
+- challengeState to responseState is a valid transition
 - channel is in Challenge mode
 
 Effects:
@@ -28,25 +32,28 @@ Effects:
 
 ```solidity
 respond(
-  uint256 turnNumRecord, // can deduce largestTurnNum from this
-  FixedPart memory fixedPart,
-  bool challengeStateIsFinal,
-  bool responseStateIsFinal,
-  VariablePart memory challengeVariablePart,
-  VariablePart memory responseVariablePart,
-  uint256 finalizesAt,
-  address challengerAddress,
-  Signature responderSig,
+    uint256 turnNumRecord,
+    uint256 finalizesAt,
+    address challenger,
+    bool[2] memory isFinalAB,
+    // isFinal[0] = challengeStateIsFinal
+    // isFinal[1] = responseStateIsFinal
+    FixedPart memory fixedPart,
+    ForceMoveApp.VariablePart[2] memory variablePartAB,
+    // variablePartAB[0] = challengeVariablePart
+    // variablePartAB[1] = responseVariablePart
+    Signature memory sig
 )
 ```
 
 - Calculate `channelId` from fixedPart
-- Calculate `challengeStateHash` and `challengeStateOutcome` from fixedPart, challengeVariablePart, turnNumRecord, challengStateIsFinal
+- Calculate `challengeStateHash` and `challengeStateOutcome` from `fixedPart, challengeVariablePart, turnNumRecord, challengStateIsFinal`
 - Calculate `storageHash = hash(turnNumRecord, finalizesAt, challengeStateHash, challengeStateOutcome)`
+- Check that `finalizesAt > now`
 - Check that `channelStorageHashes[channelId] == storageHash`
 - Calculate `responseStateHash`
-- Check that recoverSig(resonseStateHash, challengerAddress) gives the mover
-- Check app.validTransition(turnNumRecord + 1, challengeVariablePart, responseVariablePart)
+- Recover the signer from the `responseStateHash` and check that they are the mover for `turnNumRecord + 1`
+- Check `validTransition(nParticipants, isFinalAB, variablePartAB, appDefiintion)`
 - Set channelStorage:
-  - turnNumRecord += 1
-  - Everything else 0
+  - `turnNumRecord += 1`
+  - Other fields set to their null values (see [Channel Storage](./channel-storage)).
