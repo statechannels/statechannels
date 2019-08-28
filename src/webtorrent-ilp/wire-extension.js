@@ -25,8 +25,9 @@ export const PaidStreamingExtensionNotices = {
  */
 export default function usePaidStreamingExtension(opts = {}) {
   let wire = null;
+  const messageBus = new EventEmitter();
 
-  class PaidStreamingExtension extends EventEmitter {
+  class PaidStreamingExtension {
     get name() {
       return "paidStreamingExtension";
     }
@@ -37,17 +38,20 @@ export default function usePaidStreamingExtension(opts = {}) {
     remainingRequests = [];
 
     constructor(wireToUse) {
-      super();
       wire = wireToUse;
       wire.extendedHandshake.ilp_account = this.ilp_account;
       this._interceptRequests();
+    }
+
+    on(event, callback) {
+      messageBus.on(event, callback);
     }
 
     onHandshake(infoHash, peerId, extensions) {}
 
     onExtendedHandshake(handshake) {
       if (!handshake.m || !handshake.m[this.name]) {
-        return this.emit(
+        return messageBus.emit(
           PaidStreamingExtensionEvents.WARNING,
           new Error("Peer does not support paidStreamingExtension")
         );
@@ -55,7 +59,7 @@ export default function usePaidStreamingExtension(opts = {}) {
       if (handshake.ilp_account) {
         this.peerAccount = handshake.ilp_account;
       }
-      this.emit(PaidStreamingExtensionEvents.ILP_HANDSHAKE, {
+      messageBus.emit(PaidStreamingExtensionEvents.ILP_HANDSHAKE, {
         ilp_account: this.peerAccount
       });
     }
@@ -63,7 +67,10 @@ export default function usePaidStreamingExtension(opts = {}) {
     stop() {
       this.amForceChoking = true;
       wire.choke();
-      wire.extended("paidStreamingExtension", bencode.encode({ msg_type: 0, message: "stop" }));
+      wire.extended(
+        "paidStreamingExtension",
+        bencode.encode({ msg_type: 0, message: "stop" })
+      );
     }
 
     start() {
@@ -76,7 +83,10 @@ export default function usePaidStreamingExtension(opts = {}) {
     }
 
     ack() {
-      wire.extended("paidStreamingExtension", bencode.encode({ msg_type: 0, message: "ack" }));
+      wire.extended(
+        "paidStreamingExtension",
+        bencode.encode({ msg_type: 0, message: "ack" })
+      );
     }
 
     onMessage(buf) {
@@ -87,7 +97,7 @@ export default function usePaidStreamingExtension(opts = {}) {
         const trailerIndex = str.indexOf("ee") + 2;
         dict = bencode.decode(str.substring(0, trailerIndex));
         message = new TextDecoder("utf-8").decode(dict.message);
-        this.emit(PaidStreamingExtensionEvents.NOTICE, message);
+        messageBus.emit(PaidStreamingExtensionEvents.NOTICE, message);
       } catch (err) {
         console.error("err", err);
         // drop invalid messages
@@ -100,9 +110,9 @@ export default function usePaidStreamingExtension(opts = {}) {
       const _onRequest = wire._onRequest;
       wire._onRequest = function(index, offset, length) {
         if (!index && !offset) {
-          _this.emit(PaidStreamingExtensionEvents.FIRST_REQUEST, length);
+          messageBus.emit(PaidStreamingExtensionEvents.FIRST_REQUEST, length);
         }
-        _this.emit("request", length);
+        messageBus.emit(PaidStreamingExtensionEvents.REQUEST, length);
         // Call onRequest after the handlers triggered by this event have been called
         const _arguments = arguments;
         setTimeout(function() {
