@@ -2,7 +2,7 @@ import {ethers} from 'ethers';
 import {expectRevert} from 'magmo-devtools';
 // @ts-ignore
 import ForceMoveArtifact from '../../build/contracts/TESTForceMove.json';
-import {setupContracts} from './test-helpers';
+import {setupContracts} from '../test-helpers';
 
 const provider = new ethers.providers.JsonRpcProvider(
   `http://localhost:${process.env.DEV_GANACHE_PORT}`,

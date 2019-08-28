@@ -1,10 +1,10 @@
-import {ethers} from 'ethers';
-import {expectRevert} from 'magmo-devtools';
+import {ethers} from './node_modules/ethers';
+import {expectRevert} from './node_modules/magmo-devtools';
 // @ts-ignore
 import ForceMoveArtifact from '../../build/contracts/TESTForceMove.json';
 // @ts-ignore
 import countingAppArtifact from '../../build/contracts/CountingApp.json';
-import {keccak256, defaultAbiCoder, hexlify} from 'ethers/utils';
+import {keccak256, defaultAbiCoder, hexlify} from './node_modules/ethers/utils';
 import {
   setupContracts,
   sign,
@@ -12,8 +12,8 @@ import {
   clearedChallengeHash,
   ongoingChallengeHash,
   finalizedOutcomeHash,
-} from './test-helpers';
-import {HashZero, AddressZero} from 'ethers/constants';
+} from '../test-helpers';
+import {HashZero, AddressZero} from './node_modules/ethers/constants';
 
 const provider = new ethers.providers.JsonRpcProvider(
   `http://localhost:${process.env.DEV_GANACHE_PORT}`,
