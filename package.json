@@ -7,6 +7,7 @@
   "dependencies": {
     "bencode": "^2.0.1",
     "inherits": "^2.0.1",
+    "prettier-bytes": "^1.0.4",
     "react": "16.8.6",
     "react-dom": "16.8.6",
     "react-scripts": "3.0.1",

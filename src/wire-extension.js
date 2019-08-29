@@ -23,23 +23,19 @@ export const PaidStreamingExtensionNotices = {
  * @param {String} [opts.pseAccount] Random ID number
  * @return {typeof PaidStreamingExtension}
  */
-export default function usePaidStreamingExtension(opts = {}) {
+export default function usePaidStreamingExtension (opts = {}) {
   let wire = null;
   const messageBus = new EventEmitter();
 
-  function executeExtensionCommand(extension, wire, command) {
+  function executeExtensionCommand (extension, wire, command) {
     wire.extended(extension, bencode.encode({ msg_type: 0, message: command }));
   }
 
-  function interceptRequests(extension) {
+  function interceptRequests (extension) {
     const undecoratedOnRequestFunction = wire._onRequest;
 
-    wire._onRequest = function(index, offset, length) {
-      if (!index && !offset) {
-        messageBus.emit(PaidStreamingExtensionEvents.FIRST_REQUEST, length);
-      }
-
-      messageBus.emit(PaidStreamingExtensionEvents.REQUEST, length);
+    wire._onRequest = function () {
+      messageBus.emit(PaidStreamingExtensionEvents.REQUEST, wire.paidStreamingExtension && wire.paidStreamingExtension.peerAccount);
 
       // Call onRequest after the handlers triggered by this event have been called
       const undecoratedOnRequestFunctionArgs = arguments;
@@ -58,7 +54,7 @@ export default function usePaidStreamingExtension(opts = {}) {
   }
 
   class PaidStreamingExtension {
-    get name() {
+    get name () {
       return "paidStreamingExtension";
     }
 
@@ -73,13 +69,17 @@ export default function usePaidStreamingExtension(opts = {}) {
       interceptRequests(this);
     }
 
-    on(event, callback) {
+    on (event, callback) {
       messageBus.on(event, callback);
     }
+    
+    once (event, callback) {
+      messageBus.once(event, callback);
+    }
 
-    onHandshake(/* infoHash, peerId, extensions */) {}
+    onHandshake (/* infoHash, peerId, extensions */) { }
 
-    onExtendedHandshake(handshake) {
+    onExtendedHandshake (handshake) {
       if (!handshake.m || !handshake.m[this.name]) {
         return messageBus.emit(
           PaidStreamingExtensionEvents.WARNING,
@@ -94,7 +94,7 @@ export default function usePaidStreamingExtension(opts = {}) {
       });
     }
 
-    stop() {
+    stop () {
       this.isForceChoking = true;
       wire.choke();
       executeExtensionCommand(
@@ -104,7 +104,7 @@ export default function usePaidStreamingExtension(opts = {}) {
       );
     }
 
-    start() {
+    start () {
       this.isForceChoking = false;
       wire.unchoke();
       executeExtensionCommand(
@@ -114,7 +114,7 @@ export default function usePaidStreamingExtension(opts = {}) {
       );
     }
 
-    ack() {
+    ack () {
       executeExtensionCommand(
         this.name,
         wire,
@@ -122,7 +122,7 @@ export default function usePaidStreamingExtension(opts = {}) {
       );
     }
 
-    onMessage(buffer) {
+    onMessage (buffer) {
       try {
         const stringBuffer = buffer.toString();
         const trailerIndex = stringBuffer.indexOf("ee") + 2;
