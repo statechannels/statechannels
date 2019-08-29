@@ -1,10 +1,10 @@
 import {ethers} from 'ethers';
 import {expectRevert} from 'magmo-devtools';
 // @ts-ignore
-import ForceMoveArtifact from '../../build/contracts/TESTForceMove.json';
+import ForceMoveArtifact from '../../build/contracts/TESTNitroAdjudicator.json';
 // @ts-ignore
 import countingAppArtifact from '../../build/contracts/CountingApp.json';
-import {keccak256, defaultAbiCoder} from 'ethers/utils';
+import {keccak256, defaultAbiCoder, toUtf8Bytes} from 'ethers/utils';
 import {setupContracts, sign, newConcludedEvent, clearedChallengeHash} from '../test-helpers';
 import {HashZero, AddressZero} from 'ethers/constants';
 
@@ -19,7 +19,7 @@ const chainId = 1234;
 const participants = ['', '', ''];
 const wallets = new Array(3);
 const challengeDuration = 1000;
-const outcome = ethers.utils.id('some outcome data'); // use a fixed outcome for all state updates in all tests
+const outcome = toUtf8Bytes('some outcome data'); // use a fixed outcome for all state updates in all tests
 const outcomeHash = keccak256(defaultAbiCoder.encode(['bytes'], [outcome]));
 let appDefinition;
 

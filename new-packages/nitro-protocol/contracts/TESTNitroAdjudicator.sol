@@ -1,8 +1,8 @@
 pragma solidity ^0.5.11;
 pragma experimental ABIEncoderV2;
-import './ForceMove.sol';
+import './NitroAdjudicator.sol';
 
-contract TESTForceMove is ForceMove {
+contract TESTNitroAdjudicator is NitroAdjudicator {
     // Public wrappers for internal methods:
 
     function isAddressInArray(address suspect, address[] memory addresses)

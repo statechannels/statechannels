@@ -1,6 +1,6 @@
 import {ethers} from 'ethers';
 // @ts-ignore
-import ForceMoveArtifact from '../../build/contracts/TESTForceMove.json';
+import ForceMoveArtifact from '../../build/contracts/TESTNitroAdjudicator.json';
 import {arrayify} from 'ethers/utils';
 import {setupContracts, sign} from '../test-helpers';
 
