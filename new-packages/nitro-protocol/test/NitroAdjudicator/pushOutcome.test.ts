@@ -24,7 +24,7 @@ const finalizesAt = 1; // seconds after genesis block
 const chainId = 1234;
 const participants = ['', '', ''];
 const wallets = new Array(3);
-const outcome = toUtf8Bytes('some outcome data'); // use a fixed outcome for all state updates in all tests
+const outcome = ethers.utils.id('some outcome data'); // use a fixed outcome for all state updates in all tests
 const outcomeHash = keccak256(defaultAbiCoder.encode(['bytes'], [outcome]));
 const stateHash = keccak256(defaultAbiCoder.encode(['bytes'], [toUtf8Bytes('mocked state data')]));
 let appDefinition;
@@ -47,7 +47,7 @@ beforeAll(async () => {
 const description1 =
   'NitroAdjudicator accepts a pushOutcome tx for a finalized channel, and AssetHolder storage updated correctly';
 
-describe('forceMove', () => {
+describe('pushOutcome', () => {
   it.each`
     description     | channelNonce | declaredTurnNumRecord | initialChannelStorageHash                                                          | reasonString
     ${description1} | ${1101}      | ${5}                  | ${finalizedOutcomeHash(5, finalizesAt, stateHash, challengerAddress, outcomeHash)} | ${undefined}
