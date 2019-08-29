@@ -44,7 +44,7 @@ const description4 =
 const description5 =
   'It reverts a refute tx if the refutationTurnNum is not larger than declaredTurnNumRecord';
 
-describe('respond', () => {
+describe('refute', () => {
   it.each`
     description     | channelNonce | setTurnNumRecord | declaredTurnNumRecord | refutationTurnNum | expired  | isFinalAB         | appDatas  | challenger    | refutationStateSigner | reasonString
     ${description1} | ${1001}      | ${8}             | ${8}                  | ${14}             | ${false} | ${[false, false]} | ${[0, 1]} | ${wallets[2]} | ${wallets[2]}         | ${undefined}
