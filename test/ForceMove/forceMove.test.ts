@@ -25,7 +25,7 @@ const chainId = 1234;
 const participants = ['', '', ''];
 const wallets = new Array(3);
 const challengeDuration = 1;
-const outcome = toUtf8Bytes('some outcome data'); // use a fixed outcome for all state updates in all tests
+const outcome = ethers.utils.id('some outcome data'); // use a fixed outcome for all state updates in all tests
 const outcomeHash = keccak256(defaultAbiCoder.encode(['bytes'], [outcome]));
 let appDefinition;
 
