@@ -24,7 +24,7 @@
   "homepage": "https://github.com/magmo/force-move-games#readme",
   "scripts": {
     "prepare": "yarn build",
-    "test": "yarn prettier:check && yarn clearContracts && npx ganache-then-jest --runInBand -verbose",
+    "test": "yarn prettier:check && yarn clearContracts && npx ganache-then-jest --runInBand",
     "deploy": "yarn clearContracts && npx truffle migrate",
     "build:typescript": "tslint --project . && tsc",
     "build:truffle": "npx truffle compile",
