@@ -55,10 +55,10 @@ contract ETHAssetHolder is AssetHolder {
         bytes32 _r,
         bytes32 _s
     ) public payable {
-        require(holdings[addressToBytes32(participant)] >= amount, 'Withdraw: overdrawn');
+        require(holdings[_addressToBytes32(participant)] >= amount, 'Withdraw: overdrawn');
         Authorization memory authorization = Authorization(
             participant,
-            addressToBytes32(destination),
+            _addressToBytes32(destination),
             amount,
             msg.sender
         );
@@ -68,7 +68,7 @@ contract ETHAssetHolder is AssetHolder {
             'Withdraw: not authorized by participant'
         );
 
-        holdings[addressToBytes32(participant)] = holdings[addressToBytes32(participant)].sub(
+        holdings[_addressToBytes32(participant)] = holdings[_addressToBytes32(participant)].sub(
             amount
         );
         // Decrease holdings before calling to token contract (protect against reentrancy)
