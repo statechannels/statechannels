@@ -6,7 +6,8 @@ import paidStreamingExtension, {
 
 export const WireEvents = {
   DOWNLOAD: "download",
-  FIRST_REQUEST: "first_request"
+  FIRST_REQUEST: "first_request",
+  REQUEST: "request"
 };
 
 export const TorrentEvents = {
@@ -28,7 +29,7 @@ export const ClientEvents = {
 /**
  * @this {WebTorrentPaidStreamingClient}
  */
-function setupWire(torrent, wire) {
+function setupWire (torrent, wire) {
   wire.use(paidStreamingExtension({ pseAccount: this.pseAccount }));
   wire.setKeepAlive(true);
 
@@ -36,31 +37,30 @@ function setupWire(torrent, wire) {
     console.log(`>> downloaded ${bytes} bytes`);
   });
 
-  wire.on(WireEvents.FIRST_REQUEST, peerAccount => {
+  wire.once(WireEvents.REQUEST, () => {
+    const peerAccount = wire.paidStreamingExtension && wire.paidStreamingExtension.peerAccount;
     if (
       peerAccount in this.allowedPeers &&
       !this.allowedPeers[peerAccount].allowed
     ) {
       this.sendNotice(wire, peerAccount);
     } else {
-      const newAllowedPeer = {
-        id: peerAccount,
-        allowed: true,
-        wire
-      };
-      this.allowedPeers[peerAccount] = newAllowedPeer;
-      this.emit(ClientEvents.PEER_STATUS_CHANGED, newAllowedPeer);
+      if (!(peerAccount in this.allowedPeers)) {
+        this.allowedPeers[peerAccount] = { id: peerAccount, wire };
+        this.sendNotice(wire, peerAccount);
+        this.emit(ClientEvents.PEER_STATUS_CHANGED, { allowedPeers: this.allowedPeers, peerAccount });
+      } else {
+        this.allowedPeers[peerAccount] = { id: peerAccount, wire, allowed: true };
+      }
     }
   });
 
-  wire.paidStreamingExtension.on(
-    PaidStreamingExtensionEvents.FIRST_REQUEST,
+  wire.paidStreamingExtension.once(
+    PaidStreamingExtensionEvents.REQUEST,
     () => {
-      console.log(
-        `> first_request of ${wire.peerExtendedHandshake.pseAccount}`
-      );
+      console.log(`> first_request of ${wire.peerExtendedHandshake.peerAccount}`);
       wire.emit(
-        PaidStreamingExtensionEvents.FIRST_REQUEST,
+        PaidStreamingExtensionEvents.REQUEST,
         wire.peerExtendedHandshake.pseAccount
       );
     }
@@ -77,7 +77,7 @@ function setupWire(torrent, wire) {
 /**
  * @this {WebTorrentPaidStreamingClient}
  */
-function setupTorrent(torrent) {
+function setupTorrent (torrent) {
   if (torrent.usingPaidStreaming) {
     return torrent;
   }
@@ -85,9 +85,7 @@ function setupTorrent(torrent) {
   torrent.on(TorrentEvents.WIRE, wire => setupWire.call(this, torrent, wire));
 
   torrent.on(TorrentEvents.NOTICE, (wire, notice) => {
-    console.log(
-      `> notice recieved from ${wire.peerExtendedHandshake.pseAccount}: ${notice}`
-    );
+    console.log(`> notice recieved from ${wire.peerExtendedHandshake.pseAccount}: ${notice}`);
 
     if (notice === PaidStreamingExtensionNotices.STOP) {
       wire.paidStreamingExtension.ack();
@@ -102,17 +100,15 @@ function setupTorrent(torrent) {
       const client = new WebTorrentPaidStreamingClient({
         pseAccount: this.pseAccount
       });
-      client.add(torrent.magnetURI);
-      this.emit(ClientEvents.CLIENT_RESET, client);
+      client.add(torrent.magnetURI, torrent => {
+        this.emit(ClientEvents.CLIENT_RESET, client, torrent);
+      });
     }
 
     this.emit(ClientEvents.TORRENT_NOTICE, torrent, wire, notice);
   });
 
-  torrent.on(TorrentEvents.DONE, () => {
-    console.log(">DONE");
-    this.emit(ClientEvents.TORRENT_DONE, torrent);
-  });
+  torrent.on(TorrentEvents.DONE, () => this.emit(ClientEvents.TORRENT_DONE, torrent));
 
   torrent.on(TorrentEvents.ERROR, err => {
     console.log(">torrent error:", err);
@@ -127,38 +123,43 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     super(opts);
     this.allowedPeers = {};
     this.pseAccount = opts && opts.pseAccount;
+    console.log("> TAB PSE ACCOUNT ID: ", this.pseAccount);
   }
 
-  seed() {
+  seed () {
     const torrent = super.seed.apply(this, arguments);
     setupTorrent.call(this, torrent);
     return torrent;
   }
 
-  add() {
+  add () {
     const torrent = super.add.apply(this, arguments);
     setupTorrent.call(this, torrent);
     return torrent;
   }
 
-  sendNotice(wire, peerAccount) {
+  sendNotice (wire, peerAccount) {
+    this.allowedPeers[peerAccount].allowed = false;
     wire.paidStreamingExtension.stop();
+    this.emit(ClientEvents.PEER_STATUS_CHANGED, { allowedPeers: this.allowedPeers, peerAccount });
     console.log("> sendNotice", peerAccount);
   }
 
-  retractNotice(wire, peerAccount) {
+  retractNotice (wire, peerAccount) {
+    this.allowedPeers[peerAccount].allowed = true;
     wire.paidStreamingExtension.start();
+    this.emit(ClientEvents.PEER_STATUS_CHANGED, { allowedPeers: this.allowedPeers, peerAccount });
     console.log("> retractNotice", peerAccount);
   }
 
-  togglePeer(peerAccount) {
+  togglePeer (peerAccount) {
     const { wire, allowed } = this.allowedPeers[peerAccount];
+    console.log('> togglePeer', peerAccount, wire, allowed);
     if (allowed) {
       this.sendNotice(wire, peerAccount);
     } else {
       this.retractNotice(wire, peerAccount);
     }
-    this.allowedPeers[peerAccount].allowed = !allowed;
-    this.emit(ClientEvents.PEER_STATUS_CHANGED, this.allowedPeers[peerAccount]);
+    this.emit(ClientEvents.PEER_STATUS_CHANGED, { allowedPeers: this.allowedPeers, peerAccount });
   }
 }

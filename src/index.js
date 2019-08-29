@@ -1,10 +1,8 @@
-import React, { useContext, useState } from "react";
+import React, { useState } from "react";
 import ReactDOM from "react-dom";
 import "./styles.css";
-import WebTorrentPaidStreamingClient, {
-  ClientEvents
-} from "./webtorrent-ilp/webtorrent-custom";
-import { PaidStreamingExtensionNotices } from "./webtorrent-ilp/wire-extension";
+import WebTorrent, { ClientEvents } from "./webtorrent-custom";
+import prettierBytes from "prettier-bytes";
 
 const initialState = {
   working: "Done/Idle",
@@ -12,114 +10,59 @@ const initialState = {
   numPeers: 0,
   downloadSpeed: 0,
   uploadSpeed: 0,
-  torrent: null
+  torrent: null,
+  files: []
 };
+const initialClient = new WebTorrent({ pseAccount: Math.floor(Math.random() * 99999999999999999) })
 
-const progressLogger = (status, setStatus) => (
-  torrent = initialState,
-  action = "Idle",
-  done = true,
-  file
-) => {
-  if (!file) {
-    return setInterval(
-      () =>
-        setStatus({
-          ...status,
-          working: done ? "Done/Idle" : action,
-          downloadSpeed: torrent.downloadSpeed,
-          uploadSpeed: torrent.uploadSpeed,
-          numPeers: torrent.numPeers
-        }),
-      1000
-    );
-  } else {
-    file.getBlobURL((err, url) => {
-      if (err) console.error(err, url);
-      setStatus({
-        working: done ? "Done/Idle" : action,
-        url,
-        filename: file.name
+const progressLogger = (logger, status, setStatus) => (torrent = initialState, action = "Idle", torrentIsDone, torrrentFile) => {
+  clearInterval(logger);
+  logger = setInterval(() => {
+    torrentIsDone = torrent && torrent.done && !torrent.downloadSpeed && !torrent.uploadSpeed;
+    torrrentFile = torrent && torrent.files && torrent.files[0];
+
+    setStatus({
+      ...status,
+      working: torrentIsDone ? "Done/Idle" : action,
+      downloadSpeed: prettierBytes(torrent.downloadSpeed),
+      uploadSpeed: prettierBytes(torrent.uploadSpeed),
+      numPeers: torrent.numPeers
+    })
+
+    if (torrentIsDone && torrrentFile.done && !torrent.created) {
+      torrrentFile.getBlobURL((err, url) => {
+        setStatus(Object.assign(initialState, { url, filename: torrrentFile.name }));
       });
-    });
-  }
+    }
+  }, 500);
 };
 
-/**
- *
- * @param {WebTorrentPaidStreamingClient} client
- * @param {FileList} files
- * @param {(magnet: string) => void} setMagnet
- * @param {(torrent: any, status: string, done: boolean)} progressLogger
- */
-const upload = (client, files, setMagnet, progressLogger) => {
-  client.seed(files, torrent => {
+const upload = (client, files, setMagnet, progressLogger, setAllowedPeers) => {
+  client.on(ClientEvents.PEER_STATUS_CHANGED, ({ allowedPeers }) => setAllowedPeers(allowedPeers))
+  client.seed(files, (torrent) => {
     setMagnet(torrent.magnetURI);
-    progressLogger(torrent, "Seeding", false);
+    progressLogger(torrent, "Seeding");
   });
 };
 
-/**
- * @param {WebTorrentPaidStreamingClient} client
- * @param {string} torrentOrigin
- * @param {(torrent: any, status: string, done: boolean)} progressLogger
- */
-const download = (client, torrentOrigin, progressLogger) => {
-  var torrentId =
-    torrentOrigin || "https://webtorrent.io/torrents/sintel.torrent";
+const download = (client, torrentOrigin, progressLogger, setClient) => {
+  var torrentId = torrentOrigin || "https://webtorrent.io/torrents/sintel.torrent";
+  client.on(ClientEvents.CLIENT_RESET, (newClient, torrent) => {
+    setClient(newClient)
+    progressLogger(torrent, "Leeching");
+  })
 
-  client.add(torrentId, torrent => {
-    console.log("UI - Download Started - MY account id is", client, torrent);
-    const logger = progressLogger(torrent, "Leeching", false);
-
-    client.on(ClientEvents.TORRENT_NOTICE, (torrent, wire, notice) => {
-      if (notice === PaidStreamingExtensionNotices.START) {
-        clearInterval(logger);
-      }
-    });
-
-    client.once(ClientEvents.TORRENT_DONE, () => {
-      console.log("Done!", "File downloaded: " + torrent.files[0].name);
-      clearInterval(logger);
-      progressLogger(initialState, "Done/Idle", true, torrent.files[0]);
-    });
-  });
+  client.add(torrentId, torrent => progressLogger(torrent, "Leeching"));
 };
 
-const updatePeers = (allowedPeers, setAllowedPeers) => peer => {
-  const newState = { ...allowedPeers, [peer.id]: peer };
-  setAllowedPeers(newState);
-  return newState;
-};
 
-function App() {
-  const client = useContext(WebTorrentContext);
-  const [status, setStatus] = useState({
-    working: "Done/Idle",
-    verb: "from",
-    numPeers: 0,
-    downloadSpeed: 0,
-    uploadSpeed: 0,
-    torrent: undefined
-  });
+function App () {
+  let logger;
+  const [client, setClient] = useState(initialClient);
+  const [status, setStatus] = useState(initialState);
   const [seedMagnet, setSeedMagnet] = useState("");
-  const [leechMagnet, setLeechMagnet] = useState("");
-  const { downloadSpeed, uploadSpeed, working, numPeers } = status;
-
-  /**
-   * @todo The UI shouldn't need an `allowedPeers` list. It should
-   *       use the client's state.
-   */
   const [allowedPeers, setAllowedPeers] = useState({});
-  const updateAllowedPeers = updatePeers(allowedPeers, setAllowedPeers);
-
-  const peerStatusChanged = peer => updateAllowedPeers(peer);
-
-  /**
-   * @todo This should be done in a non-rendering context.
-   */
-  client.off(ClientEvents.PEER_STATUS_CHANGED, peerStatusChanged);
-  client.once(ClientEvents.PEER_STATUS_CHANGED, peerStatusChanged);
+  const [leechMagnet, setLeechMagnet] = useState("");
 
   return (
     <div className="App">
@@ -128,17 +71,17 @@ function App() {
         <div id="status">
           {status.working !== "Done/Idle" ? (
             <>
-              <span className="show-leech">{working} </span>
+              <span className="show-leech">{status.working} </span>
               <span className="show-leech"> with </span>
-              <code className="numPeers">{numPeers} peers</code>
+              <code className="numPeers">{status.numPeers} peers</code>
               <div>
-                <code id="downloadSpeed">{downloadSpeed} b/s</code>/ |{" "}
-                <code id="uploadSpeed">{uploadSpeed} b/s</code>
+                <code id="downloadSpeed">{status.downloadSpeed}/s</code> |{" "}
+                <code id="uploadSpeed">{status.uploadSpeed}/s</code>
               </div>
             </>
           ) : (
-            <span className="show-leech">Done/Idle </span>
-          )}
+              <span className="show-leech">Done/Idle </span>
+            )}
         </div>
       </div>
 
@@ -154,34 +97,31 @@ function App() {
               client,
               event.target.files,
               setSeedMagnet,
-              progressLogger(status, setStatus)
+              progressLogger(logger, status, setStatus),
+              setAllowedPeers
             )
           }
         />
-        {status.working !== "Done/Idle" && status.numPeers
-          ? Object.values(allowedPeers).map(({ id, allowed }) => {
-              return (
-                <React.Fragment key={id}>
-                  <br />
-                  <button
-                    onClick={() => {
-                      client.togglePeer(id);
-                    }}
-                  >
-                    - {id} - allowed: {JSON.stringify(allowed)}
-                  </button>
-                </React.Fragment>
-              );
-            })
-          : false}
+        {
+          Object.values(allowedPeers).map(({ id, allowed }) => {
+            return (
+              <React.Fragment key={id}>
+                <br />
+                <button onClick={() => client.togglePeer(id)}>
+                  {id} - {allowed ? "" : "NOT"} Allowed
+                </button>
+              </React.Fragment>
+            );
+          })
+        }
         {seedMagnet ? (
           <p>
             <h3>Share this to share the file</h3>
             <code>{seedMagnet}</code>
           </p>
         ) : (
-          false
-        )}
+            false
+          )}
       </div>
 
       <div className="hero" id="hero-leecher">
@@ -193,33 +133,29 @@ function App() {
           name="download"
           onChange={event => setLeechMagnet(event.target.value)}
         />
-        <button
-          onClick={() =>
-            download(client, leechMagnet, progressLogger(status, setStatus))
-          }
-        >
-          START DOWNLOAD
-        </button>
-        <a href={status.url} download={status.filename}>
-          Download {status.filename}
-        </a>
+        <br />
+
+        {!!status.url ?
+          <>
+            <br />
+            <a href={status.url} download={status.filename}>Download {status.filename}</a>
+          </>
+          : <button
+            onClick={() =>
+              download(
+                client,
+                leechMagnet,
+                progressLogger(logger, status, setStatus),
+                setClient
+              )
+            }
+          >
+            START DOWNLOAD
+        </button>}
+
       </div>
     </div>
   );
 }
 
-let wt = new WebTorrentPaidStreamingClient({
-  pseAccount: Math.floor(Math.random() * 99999999999999999)
-});
-
-wt.on(ClientEvents.CLIENT_RESET, newClient => (wt = newClient));
-
-const WebTorrentContext = React.createContext({});
-const rootElement = document.getElementById("root");
-
-ReactDOM.render(
-  <WebTorrentContext.Provider value={wt}>
-    <App />
-  </WebTorrentContext.Provider>,
-  rootElement
-);
+ReactDOM.render(<App />, document.getElementById("root"));
