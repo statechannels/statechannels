@@ -1,22 +1,22 @@
-const ForceMove = artifacts.require('ForceMove');
-const TrivialApp = artifacts.require('TrivialApp');
-const CountingApp = artifacts.require('CountingApp');
 const Token = artifacts.require('Token');
 const ETHAssetHolder = artifacts.require('ETHAssetHolder');
 const ERC20AssetHolder = artifacts.require('ERC20AssetHolder');
+const NitroAdjudicator = artifacts.require('NitroAdjudicator');
 
 module.exports = async function(deployer) {
   deployer.then(async () => {
-    await Promise.all([deployer.deploy(ForceMove), deployer.deploy(Token)]);
+    await Promise.all([deployer.deploy(NitroAdjudicator), deployer.deploy(Token)]);
 
-    const [ForceMoveInstance, TokenInstance] = await Promise.all([
-      ForceMove.deployed(),
+    const [NitroAdjudicatorInstance, TokenInstance] = await Promise.all([
+      NitroAdjudicator.deployed(),
       Token.deployed(),
     ]);
 
-    await deployer.deploy(ETHAssetHolder, ForceMoveInstance.address);
-    await deployer.deploy(ERC20AssetHolder, ForceMoveInstance.address, TokenInstance.address);
-    await deployer.deploy(TrivialApp);
-    await deployer.deploy(CountingApp);
+    await deployer.deploy(ETHAssetHolder, NitroAdjudicatorInstance.address);
+    await deployer.deploy(
+      ERC20AssetHolder,
+      NitroAdjudicatorInstance.address,
+      TokenInstance.address,
+    );
   });
 };
