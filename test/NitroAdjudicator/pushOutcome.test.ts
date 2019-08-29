@@ -3,12 +3,10 @@ import {ethers} from 'ethers';
 import NitroAdjudicatorArtifact from '../../build/contracts/TESTNitroAdjudicator.json';
 // @ts-ignore
 import ETHAssetHolderArtifact from '../../build/contracts/ETHAssetHolder.json';
-// @ts-ignore
-import countingAppArtifact from '../../build/contracts/CountingApp.json';
 
 import {keccak256, defaultAbiCoder, toUtf8Bytes} from 'ethers/utils';
 import {AddressZero} from 'ethers/constants';
-import {setupContracts, finalizedOutcomeHash} from '../test-helpers';
+import {setupContracts, finalizedOutcomeHash, ongoingChallengeHash} from '../test-helpers';
 import {expectRevert} from 'magmo-devtools';
 
 const provider = new ethers.providers.JsonRpcProvider(
@@ -20,14 +18,12 @@ let networkId;
 
 // constants for this test suite
 const challengerAddress = AddressZero;
-const finalizesAt = 1; // seconds after genesis block
 const chainId = 1234;
 const participants = ['', '', ''];
 const wallets = new Array(3);
 const outcome = ethers.utils.id('some outcome data'); // use a fixed outcome for all state updates in all tests
 const outcomeHash = keccak256(defaultAbiCoder.encode(['bytes'], [outcome]));
 const stateHash = keccak256(defaultAbiCoder.encode(['bytes'], [toUtf8Bytes('mocked state data')]));
-let appDefinition;
 
 // populate wallets and participants array
 for (let i = 0; i < 3; i++) {
@@ -39,21 +35,25 @@ beforeAll(async () => {
   NitroAdjudicator = await setupContracts(provider, NitroAdjudicatorArtifact);
   ETHAssetHolder = await setupContracts(provider, ETHAssetHolderArtifact);
   networkId = (await provider.getNetwork()).chainId;
-  appDefinition = countingAppArtifact.networks[networkId].address; // use a fixed appDefinition in all tests
 });
 
 // Scenarios are synonymous with channelNonce:
 
 const description1 =
   'NitroAdjudicator accepts a pushOutcome tx for a finalized channel, and AssetHolder storage updated correctly';
+const description2 = 'NitroAdjudicator rejects a pushOutcome tx for a not-finalized channel';
+const description3 =
+  'NitroAdjudicator rejects a pushOutcome tx when declaredTurnNumRecord is incorrect';
 
 describe('pushOutcome', () => {
   it.each`
-    description     | channelNonce | declaredTurnNumRecord | initialChannelStorageHash                                                          | reasonString
-    ${description1} | ${1101}      | ${5}                  | ${finalizedOutcomeHash(5, finalizesAt, stateHash, challengerAddress, outcomeHash)} | ${undefined}
+    description     | channelNonce | storedTurnNumRecord | declaredTurnNumRecord | finalized | reasonString
+    ${description1} | ${1101}      | ${5}                | ${5}                  | ${true}   | ${undefined}
+    ${description2} | ${1102}      | ${5}                | ${5}                  | ${false}  | ${'Outcome is not final'}
+    ${description3} | ${1102}      | ${4}                | ${5}                  | ${true}   | ${'Submitted data does not match storage'}
   `(
     '$description', // for the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce
-    async ({channelNonce, declaredTurnNumRecord, initialChannelStorageHash, reasonString}) => {
+    async ({channelNonce, storedTurnNumRecord, declaredTurnNumRecord, finalized, reasonString}) => {
       // compute channelId
       const channelId = keccak256(
         defaultAbiCoder.encode(
@@ -62,6 +62,15 @@ describe('pushOutcome', () => {
         ),
       );
 
+      const finalizesAt = finalized ? 1 : 1e12; // either 1 second after genesis block, or ~ 31000 years after
+
+      const initialChannelStorageHash = finalizedOutcomeHash(
+        storedTurnNumRecord,
+        finalizesAt,
+        stateHash,
+        challengerAddress,
+        outcomeHash,
+      );
       // call public wrapper to set state (only works on test contract)
       const tx = await NitroAdjudicator.setChannelStorageHash(channelId, initialChannelStorageHash);
       await tx.wait();
