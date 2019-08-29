@@ -41,11 +41,11 @@ contract AssetHolder {
         _setOutcome(channelId, outcome);
     }
 
-    function isExternalAddress(bytes32 destination) internal pure returns (bool) {
+    function _isExternalAddress(bytes32 destination) internal pure returns (bool) {
         return (destination == bytes32(bytes20(destination)));
     }
 
-    function addressToBytes32(address participant) internal pure returns (bytes32) {
+    function _addressToBytes32(address participant) internal pure returns (bytes32) {
         return bytes32(bytes20(participant));
     }
     // **************

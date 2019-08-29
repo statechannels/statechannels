@@ -1,6 +1,6 @@
 import {ethers} from 'ethers';
 // @ts-ignore
-import ETHAssetHolderArtifact from '../../build/contracts/ETHAssetHolder.json';
+import AssetHolderArtifact from '../../build/contracts/TESTAssetHolder.json';
 import {setupContracts} from '../test-helpers';
 
 const provider = new ethers.providers.JsonRpcProvider(
@@ -18,7 +18,7 @@ for (let i = 0; i < 3; i++) {
 }
 
 beforeAll(async () => {
-  AssetHolder = await setupContracts(provider, ETHAssetHolderArtifact);
+  AssetHolder = await setupContracts(provider, AssetHolderArtifact);
 });
 
 describe('isExternalAddress', () => {
