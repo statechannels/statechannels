@@ -33,7 +33,7 @@ export const ongoingChallengeHash = (turnNumRecord: number = 5) => {
   return keccak256(
     defaultAbiCoder.encode(
       ['uint256', 'uint256', 'bytes32', 'address', 'bytes32'],
-      [turnNumRecord, 1e12, HashZero, AddressZero, HashZero], // turnNum = 5, not yet finalized (31000years after genesis block)
+      [turnNumRecord, 1e12, HashZero, AddressZero, HashZero], // turnNum = 5, not yet finalized (31000 years after genesis block)
     ),
   );
 };
