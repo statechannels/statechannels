@@ -163,8 +163,6 @@ describe('respond', () => {
       const signature = await sign(refutationStateSigner, refutationStateHash);
       const refutationStateSig = {v: signature.v, r: signature.r, s: signature.s};
 
-      const challengeClearedEvent: any = newChallengeClearedEvent(ForceMove, channelId);
-
       if (reasonString) {
         expectRevert(
           () =>
@@ -181,6 +179,7 @@ describe('respond', () => {
           'VM Exception while processing transaction: revert ' + reasonString,
         );
       } else {
+        const challengeClearedEvent: any = newChallengeClearedEvent(ForceMove, channelId);
         // call respond
         const tx2 = await ForceMove.refute(
           declaredTurnNumRecord,
