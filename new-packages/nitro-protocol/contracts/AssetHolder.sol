@@ -22,7 +22,7 @@ contract AssetHolder {
 
     mapping(bytes32 => uint256) public holdings;
 
-    mapping(bytes32 => bytes) public outcomes;
+    mapping(bytes32 => bytes32) public outcomeHashes;
 
     // **************
     // Permissioned methods
@@ -33,12 +33,12 @@ contract AssetHolder {
         _;
     }
 
-    function _setOutcome(bytes32 channelId, bytes memory outcome) internal {
-        outcomes[channelId] = outcome;
+    function _setOutcome(bytes32 channelId, bytes32 outcomeHash) internal {
+        outcomeHashes[channelId] = outcomeHash;
     }
 
-    function setOutcome(bytes32 channelId, bytes calldata outcome) external AdjudicatorOnly {
-        _setOutcome(channelId, outcome);
+    function setOutcome(bytes32 channelId, bytes32 outcomeHash) external AdjudicatorOnly {
+        _setOutcome(channelId, outcomeHash);
     }
 
     function _isExternalAddress(bytes32 destination) internal pure returns (bool) {
