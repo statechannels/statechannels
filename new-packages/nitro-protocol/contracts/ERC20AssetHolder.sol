@@ -29,7 +29,7 @@ contract ERC20AssetHolder is AssetHolder {
     // Asset Management
     // **************
 
-    function deposit(address destination, uint256 expectedHeld, uint256 amount) public {
+    function deposit(bytes32 destination, uint256 expectedHeld, uint256 amount) public {
         require(_token.transferFrom(msg.sender, address(this), amount), 'Could not deposit ERC20s');
 
         uint256 amountDeposited;
@@ -68,10 +68,10 @@ contract ERC20AssetHolder is AssetHolder {
         bytes32 _r,
         bytes32 _s
     ) public payable {
-        require(holdings[participant] >= amount, 'Withdraw: overdrawn');
+        require(holdings[addressToBytes32(participant)] >= amount, 'Withdraw: overdrawn');
         Authorization memory authorization = Authorization(
             participant,
-            destination,
+            addressToBytes32(destination),
             amount,
             msg.sender
         );
@@ -81,7 +81,9 @@ contract ERC20AssetHolder is AssetHolder {
             'Withdraw: not authorized by participant'
         );
 
-        holdings[participant] = holdings[participant].sub(amount);
+        holdings[addressToBytes32(participant)] = holdings[addressToBytes32(participant)].sub(
+            amount
+        );
         // Decrease holdings before calling transfer (protect against reentrancy)
         _token.transfer(destination, amount);
     }

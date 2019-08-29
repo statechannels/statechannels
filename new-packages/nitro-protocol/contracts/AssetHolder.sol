@@ -13,16 +13,16 @@ contract AssetHolder {
         // Moreover, the participant should sign the address that they wish
         // to send the transaction from, preventing any replay attack.
         address participant; // the account used to sign commitment transitions
-        address destination; // either an account or a channel
+        bytes32 destination; // either an account or a channel
         uint256 amount;
         address sender; // the account used to sign transactions
     }
 
     address AdjudicatorAddress;
 
-    mapping(address => uint256) public holdings;
+    mapping(bytes32 => uint256) public holdings;
 
-    mapping(address => bytes) public outcomes;
+    mapping(bytes32 => bytes) public outcomes;
 
     // **************
     // Permissioned methods
@@ -33,18 +33,21 @@ contract AssetHolder {
         _;
     }
 
-    function _setOutcome(address channel, bytes memory outcome) internal {
-        outcomes[channel] = outcome;
+    function _setOutcome(bytes32 channelId, bytes memory outcome) internal {
+        outcomes[channelId] = outcome;
     }
 
-    function setOutcome(address channel, bytes memory outcome) public AdjudicatorOnly {
-        _setOutcome(channel, outcome);
+    function setOutcome(bytes32 channelId, bytes calldata outcome) external AdjudicatorOnly {
+        _setOutcome(channelId, outcome);
     }
 
-    function isExternalAddress(bytes32 destination) public pure returns (bool) {
+    function isExternalAddress(bytes32 destination) internal pure returns (bool) {
         return (destination == bytes32(bytes20(destination)));
     }
 
+    function addressToBytes32(address participant) internal pure returns (bytes32) {
+        return bytes32(bytes20(participant));
+    }
     // **************
     // ETH and Token Management
     // **************
@@ -202,6 +205,6 @@ contract AssetHolder {
     // ****************
     // Events
     // ****************
-    event Deposited(address destination, uint256 amountDeposited, uint256 destinationHoldings);
+    event Deposited(bytes32 destination, uint256 amountDeposited, uint256 destinationHoldings);
 
 }

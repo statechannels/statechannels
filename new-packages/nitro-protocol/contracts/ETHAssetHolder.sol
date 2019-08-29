@@ -18,7 +18,7 @@ contract ETHAssetHolder is AssetHolder {
     // ETH and Token Management
     // **************
 
-    function deposit(address destination, uint256 expectedHeld, uint256 amount) public payable {
+    function deposit(bytes32 destination, uint256 expectedHeld, uint256 amount) public payable {
         require(msg.value == amount, 'Insufficient ETH for ETH deposit');
         uint256 amountDeposited;
         // This protects against a directly funded channel being defunded due to chain re-orgs,
@@ -55,10 +55,10 @@ contract ETHAssetHolder is AssetHolder {
         bytes32 _r,
         bytes32 _s
     ) public payable {
-        require(holdings[participant] >= amount, 'Withdraw: overdrawn');
+        require(holdings[addressToBytes32(participant)] >= amount, 'Withdraw: overdrawn');
         Authorization memory authorization = Authorization(
             participant,
-            destination,
+            addressToBytes32(destination),
             amount,
             msg.sender
         );
@@ -68,7 +68,9 @@ contract ETHAssetHolder is AssetHolder {
             'Withdraw: not authorized by participant'
         );
 
-        holdings[participant] = holdings[participant].sub(amount);
+        holdings[addressToBytes32(participant)] = holdings[addressToBytes32(participant)].sub(
+            amount
+        );
         // Decrease holdings before calling to token contract (protect against reentrancy)
         destination.transfer(amount);
     }
