@@ -33,16 +33,22 @@ export const ongoingChallengeHash = (turnNumRecord: number = 5) => {
   return keccak256(
     defaultAbiCoder.encode(
       ['uint256', 'uint256', 'bytes32', 'address', 'bytes32'],
-      [turnNumRecord, 1e9, HashZero, AddressZero, HashZero], // turnNum = 5, not yet finalized
+      [turnNumRecord, 1e12, HashZero, AddressZero, HashZero], // turnNum = 5, not yet finalized (31000years after genesis block)
     ),
   );
 };
 
-export const finalizedOutcomeHash = (turnNumRecord: number = 5) => {
+export const finalizedOutcomeHash = (
+  turnNumRecord: number = 5,
+  finalizesAt: number = 1,
+  stateHash: string = HashZero,
+  challengerAddress: string = AddressZero,
+  outcomeHash: string = HashZero,
+) => {
   return keccak256(
     defaultAbiCoder.encode(
       ['uint256', 'uint256', 'bytes32', 'address', 'bytes32'],
-      [turnNumRecord, 1, HashZero, AddressZero, HashZero], // finalizes at 1, earliest possible
+      [turnNumRecord, finalizesAt, stateHash, AddressZero, outcomeHash], // finalizes at 1 second after genesis block (by default)
       // the final two fields should also not be zero
     ),
   );
