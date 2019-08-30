@@ -25,7 +25,7 @@ contract ETHAssetHolder is AssetHolder {
         // and allow a wallet implementation to ensure the safety of deposits.
         require(
             holdings[destination] >= expectedHeld,
-            'Deposit: holdings[destination] is less than expected'
+            'Deposit | holdings[destination] is less than expected'
         );
 
         // If I expect there to be 10 and deposit 2, my goal was to get the

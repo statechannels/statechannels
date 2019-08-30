@@ -9,30 +9,46 @@ const provider = new ethers.providers.JsonRpcProvider(
 );
 let ETHAssetHolder: ethers.Contract;
 
-const participants = ['', '', ''];
-const wallets = new Array(3);
-const EOAbytes32 = '0x' + 'eb89373c708B40fAeFA76e46cda92f801FAFa288'.padEnd(64, '0');
-const depositAmount = ethers.utils.parseEther('0.01');
-
-// populate wallets and participants array
-for (let i = 0; i < 3; i++) {
-  wallets[i] = ethers.Wallet.createRandom();
-  participants[i] = wallets[i].address;
-}
-
 beforeAll(async () => {
   ETHAssetHolder = await setupContracts(provider, ETHAssetHolderArtifact);
 });
 
 const description1 = 'Deposits ETH (msg.value = amount , expectedHeld = 0)';
+const description2 = 'Reverts deposit of ETH (msg.value = amount, expectedHeld > holdings)';
+const description3 = 'Deposits ETH (msg.value = amount, expectedHeld + amount < holdings)';
+const description4 =
+  'Deposits ETH (msg.value = amount,  amount < holdings < amount + expectedHeld)';
 
+// amounts are valueString represenationa of wei
 describe('deposit', () => {
   it.each`
-    description     | destination   | held | expectedHeld | amount           | msgValue         | reasonString
-    ${description1} | ${EOAbytes32} | ${0} | ${0}         | ${depositAmount} | ${depositAmount} | ${undefined}
+    description     | destinationType       | held   | expectedHeld | amount | msgValue | heldAfter | reasonString
+    ${description1} | ${'randomEOABytes32'} | ${'0'} | ${'0'}       | ${'1'} | ${'1'}   | ${'1'}    | ${undefined}
+    ${description2} | ${'randomEOABytes32'} | ${'0'} | ${'1'}       | ${'2'} | ${'2'}   | ${'0'}    | ${'Deposit | holdings[destination] is less than expected'}
+    ${description3} | ${'randomEOABytes32'} | ${'3'} | ${'1'}       | ${'1'} | ${'1'}   | ${'3'}    | ${undefined}
+    ${description4} | ${'randomEOABytes32'} | ${'3'} | ${'2'}       | ${'2'} | ${'2'}   | ${'4'}    | ${undefined}
   `(
     '$description', // for the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce
-    async ({destination, held, expectedHeld, amount, msgValue, reasonString}) => {
+    async ({destinationType, held, expectedHeld, amount, msgValue, reasonString, heldAfter}) => {
+      held = ethers.utils.parseUnits(held, 'wei');
+      expectedHeld = ethers.utils.parseUnits(expectedHeld, 'wei');
+      amount = ethers.utils.parseUnits(amount, 'wei');
+      msgValue = ethers.utils.parseUnits(msgValue, 'wei');
+      heldAfter = ethers.utils.parseUnits(heldAfter, 'wei');
+
+      let destination;
+      if (destinationType === 'randomEOABytes32') {
+        const randomAddress = ethers.Wallet.createRandom().address;
+        destination = randomAddress.padEnd(66, '0');
+      }
+
+      // set holdings by depositing in the 'safest' way
+      if (held > 0) {
+        await (await ETHAssetHolder.deposit(destination, 0, held, {
+          value: held,
+        })).wait();
+      }
+
       // call method in a slightly different way if expecting a revert
       if (reasonString) {
         const regex = new RegExp(
@@ -53,7 +69,9 @@ describe('deposit', () => {
         await tx.wait();
 
         const allocatedAmount = await ETHAssetHolder.holdings(destination);
-        await expect(allocatedAmount).toEqual(msgValue);
+        await expect(allocatedAmount).toEqual(heldAfter);
+
+        // TODO also catch events and partial refunds
       }
     },
   );
