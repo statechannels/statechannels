@@ -34,34 +34,4 @@ library Outcome {
         address[] destinations;
     }
 
-    // function getAssetOutcome(bytes memory assetOutcomeBytes)
-    //     public
-    //     pure
-    //     returns (AssetOutcome memory)
-    // {
-    //     return abi.decode(assetOutcomeBytes, (AssetOutcome));
-    // }
-
-    // function isAllocation(AssetOutcome memory assetOutcome) public pure returns (bool) {
-    //     return assetOutcome.outcomeType == uint8(OutcomeType.Allocation);
-    // }
-
-    // // should have determined that isAllocation before calling
-    // function getAllocation(bytes memory outcomeContent)
-    //     public
-    //     pure
-    //     returns (AllocationItem[] memory)
-    // {
-    //     return abi.decode(outcomeContent, (AllocationItem[]));
-    // }
-
-    // function isGuarantee(AssetOutcome memory assetOutcome) public pure returns (bool) {
-    //     return assetOutcome.outcomeType == uint8(OutcomeType.Guarantee);
-    // }
-
-    // // should have determined that isGuarantee before calling
-    // function getGuarantee(bytes memory outcomeContent) public pure returns (Guarantee memory) {
-    //     return abi.decode(outcomeContent, (Guarantee));
-    // }
-
 }

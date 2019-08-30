@@ -14,10 +14,6 @@ contract ETHAssetHolder is AssetHolder {
         _;
     }
 
-    // **************
-    // ETH and Token Management
-    // **************
-
     function deposit(bytes32 destination, uint256 expectedHeld, uint256 amount) public payable {
         require(msg.value == amount, 'Insufficient ETH for ETH deposit');
         uint256 amountDeposited;
@@ -74,18 +70,5 @@ contract ETHAssetHolder is AssetHolder {
         // Decrease holdings before calling to token contract (protect against reentrancy)
         destination.transfer(amount);
     }
-
-    // function transferAndWithdraw(
-    //     address channel,
-    //     address participant,
-    //     address payable destination,
-    //     uint256 amount,
-    //     uint8 _v,
-    //     bytes32 _r,
-    //     bytes32 _s
-    // ) public payable {
-    //     transfer(channel, participant, amount);
-    //     withdraw(participant, destination, amount, _v, _r, _s);
-    // }
 
 }
