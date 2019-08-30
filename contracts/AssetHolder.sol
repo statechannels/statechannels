@@ -67,6 +67,10 @@ contract AssetHolder {
     // ****************
     // Events
     // ****************
-    event Deposited(bytes32 destination, uint256 amountDeposited, uint256 destinationHoldings);
+    event Deposited(
+        bytes32 indexed destination,
+        uint256 amountDeposited,
+        uint256 destinationHoldings
+    );
 
 }

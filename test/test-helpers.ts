@@ -105,3 +105,14 @@ export const newConcludedEvent = (contract: ethers.Contract, channelId: string) 
     });
   });
 };
+
+export const newDepositedEvent = (contract: ethers.Contract, destination: string) => {
+  const filter = contract.filters.Deposited(destination);
+  return new Promise((resolve, reject) => {
+    contract.on(filter, (eventDestination, amountDeposited, amountHeld, event) => {
+      // match event for this destination only
+      contract.removeAllListeners(filter);
+      resolve([eventDestination, amountDeposited, amountHeld]);
+    });
+  });
+};

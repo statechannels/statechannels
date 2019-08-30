@@ -2,12 +2,14 @@ import {ethers} from 'ethers';
 import {expectRevert} from 'magmo-devtools';
 // @ts-ignore
 import ETHAssetHolderArtifact from '../../build/contracts/ETHAssetHolder.json';
-import {setupContracts} from '../test-helpers';
+import {setupContracts, newDepositedEvent} from '../test-helpers';
+import {getAddress} from 'ethers/utils';
 
 const provider = new ethers.providers.JsonRpcProvider(
   `http://localhost:${process.env.DEV_GANACHE_PORT}`,
 );
 let ETHAssetHolder: ethers.Contract;
+let depositedEvent;
 
 beforeAll(async () => {
   ETHAssetHolder = await setupContracts(provider, ETHAssetHolderArtifact);
@@ -47,6 +49,7 @@ describe('deposit', () => {
         await (await ETHAssetHolder.deposit(destination, 0, held, {
           value: held,
         })).wait();
+        expect(await ETHAssetHolder.holdings(destination)).toEqual(held);
       }
 
       // call method in a slightly different way if expecting a revert
@@ -62,11 +65,18 @@ describe('deposit', () => {
           regex,
         );
       } else {
+        depositedEvent = newDepositedEvent(ETHAssetHolder, destination);
         const tx = await ETHAssetHolder.deposit(destination, expectedHeld, amount, {
           value: msgValue,
         });
         // wait for tx to be mined
         await tx.wait();
+
+        // catch Deposited event
+        const [eventDestination, eventAmountDeposited, eventHoldings] = await depositedEvent;
+        expect(eventDestination.toUpperCase()).toMatch(destination.toUpperCase());
+        expect(eventAmountDeposited).toEqual(heldAfter.sub(held));
+        expect(eventHoldings).toEqual(heldAfter);
 
         const allocatedAmount = await ETHAssetHolder.holdings(destination);
         await expect(allocatedAmount).toEqual(heldAfter);
