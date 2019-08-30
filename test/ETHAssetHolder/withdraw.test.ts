@@ -18,14 +18,18 @@ beforeAll(async () => {
   signer0Address = await signer0.getAddress();
 });
 
-const description1 = 'Withdraws ETH (signer = participant, holdings[participant] = 2 * amount)';
+const description1 = 'Withdraws ETH (signer = participant, holdings[participant] =  amount)';
+const description2 = 'Reverts withdrawal (signer =/= participant, holdings[participant] = amount';
+const description3 = 'Reverts withdrawal (signer = participant, holdings[participant] < amount';
 
 // amounts are valueString represenationa of wei
 describe('deposit', () => {
   it.each`
-    description     | held   | signer     | amount | reasonString
-    ${description1} | ${'2'} | ${signer0} | ${'1'} | ${undefined}
-  `('$description', async ({destinationType, held, signer, amount, reasonString}) => {
+    description     | held   | signer     | amount | authorized | reasonString
+    ${description1} | ${'1'} | ${signer0} | ${'1'} | ${true}    | ${undefined}
+    ${description2} | ${'1'} | ${signer0} | ${'1'} | ${false}   | ${'Withdraw | not authorized by participant'}
+    ${description3} | ${'1'} | ${signer0} | ${'2'} | ${true}    | ${'Withdraw | overdrawn'}
+  `('$description', async ({destinationType, held, signer, amount, authorized, reasonString}) => {
     held = ethers.utils.parseUnits(held, 'wei');
     amount = ethers.utils.parseUnits(amount, 'wei');
     const participant = ethers.Wallet.createRandom();
@@ -45,7 +49,8 @@ describe('deposit', () => {
       signer0Address,
     ]);
 
-    const sig = await sign(participant, keccak256(authorization));
+    const authorizer = authorized ? participant : signer;
+    const sig = await sign(authorizer, keccak256(authorization));
 
     // call method in a slightly different way if expecting a revert
     if (reasonString) {
