@@ -3,11 +3,11 @@ import {expectRevert} from 'magmo-devtools';
 // @ts-ignore
 import ETHAssetHolderArtifact from '../../build/contracts/ETHAssetHolder.json';
 import {setupContracts, newDepositedEvent} from '../test-helpers';
-import {getAddress} from 'ethers/utils';
 
 const provider = new ethers.providers.JsonRpcProvider(
   `http://localhost:${process.env.DEV_GANACHE_PORT}`,
 );
+const signer = provider.getSigner(0);
 let ETHAssetHolder: ethers.Contract;
 let depositedEvent;
 
@@ -66,11 +66,12 @@ describe('deposit', () => {
         );
       } else {
         depositedEvent = newDepositedEvent(ETHAssetHolder, destination);
+        const balanceBefore = await signer.getBalance();
         const tx = await ETHAssetHolder.deposit(destination, expectedHeld, amount, {
           value: msgValue,
         });
         // wait for tx to be mined
-        await tx.wait();
+        const receipt = await tx.wait();
 
         // catch Deposited event
         const [eventDestination, eventAmountDeposited, eventHoldings] = await depositedEvent;
@@ -81,7 +82,11 @@ describe('deposit', () => {
         const allocatedAmount = await ETHAssetHolder.holdings(destination);
         await expect(allocatedAmount).toEqual(heldAfter);
 
-        // TODO also catch events and partial refunds
+        // check for any partial refund
+        const gasCost = await tx.gasPrice.mul(receipt.cumulativeGasUsed);
+        await expect(await signer.getBalance()).toEqual(
+          balanceBefore.sub(eventAmountDeposited).sub(gasCost),
+        );
       }
     },
   );
