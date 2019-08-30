@@ -45,5 +45,5 @@ One adjudicator pushing to multiple asset holders.
 | AllocationItem        | `(bytes32, uint256)`   | `(destination, amount)`                                                                                                                                       |
 | Guarantee             | `(bytes32, bytes32[])` | `(guaranteedChannelAddress, destinations)`                                                                                                                    |
 | ChannelAddress        | `bytes32`              | Equal to the ChannelId defined in ForceMove                                                                                                                   |
-| ExternalAddress       | `bytes32`              | An Ethereum address left padded with 12 bytes of zeros                                                                                                        |
+| ExternalAddress       | `bytes32`              | An Ethereum address right padded with 12 bytes of zeros                                                                                                       |
 | Destination           | `bytes32`              | Taken to be an ExternalAddress if starts with 12 bytes of leading zeros and a ChannelAddress otherwise                                                        |

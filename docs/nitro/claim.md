@@ -10,8 +10,8 @@ title: Claim
 
 `claimAll(bytes32 channelAddress, bytes32 guaranteedAddress, bytes32[] destinations, AllocationItem[] allocation)`
 
-- checks that `outcomes[channelAddress]` is equal to `hash(GUARANTEE, (guaranteedAddress, destinations))`
-- checks that `outcomes[guaranteedAddress]` is equal to `hash(ALLOCATION, allocation)`
+- checks that `outcomes[channelAddress]` is equal to `hash(1, (guaranteedAddress, destinations))`, where `1` signifies an outcome of type `GUARANTEE`
+- checks that `outcomes[guaranteedAddress]` is equal to `hash(0, allocation)`
 - `let balance = balances[channelAddress]`
 - k = 0
 - let payouts = []
