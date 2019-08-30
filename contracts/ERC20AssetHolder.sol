@@ -65,7 +65,7 @@ contract ERC20AssetHolder is AssetHolder {
         require(holdings[_addressToBytes32(participant)] >= amount, 'Withdraw: overdrawn');
         Authorization memory authorization = Authorization(
             participant,
-            _addressToBytes32(destination),
+            destination,
             amount,
             msg.sender
         );
