@@ -50,7 +50,7 @@ contract ETHAssetHolder is AssetHolder {
         bytes32 _r,
         bytes32 _s
     ) public payable {
-        require(holdings[_addressToBytes32(participant)] >= amount, 'Withdraw: overdrawn');
+        require(holdings[_addressToBytes32(participant)] >= amount, 'Withdraw | overdrawn');
         Authorization memory authorization = Authorization(
             participant,
             destination,
@@ -60,7 +60,7 @@ contract ETHAssetHolder is AssetHolder {
 
         require(
             recoverSigner(abi.encode(authorization), _v, _r, _s) == participant,
-            'Withdraw: not authorized by participant'
+            'Withdraw | not authorized by participant'
         );
 
         holdings[_addressToBytes32(participant)] = holdings[_addressToBytes32(participant)].sub(
