@@ -7,7 +7,7 @@ import {setupContracts, newDepositedEvent} from '../test-helpers';
 const provider = new ethers.providers.JsonRpcProvider(
   `http://localhost:${process.env.DEV_GANACHE_PORT}`,
 );
-const signer = provider.getSigner(0);
+const signer = provider.getSigner(0); // convention matches setupContracts function
 let ETHAssetHolder: ethers.Contract;
 let depositedEvent;
 
@@ -30,7 +30,7 @@ describe('deposit', () => {
     ${description3} | ${'randomEOABytes32'} | ${'3'} | ${'1'}       | ${'1'} | ${'1'}   | ${'3'}    | ${'Deposit | holdings[destination] already meets or exceeds expectedHeld + amount'}
     ${description4} | ${'randomEOABytes32'} | ${'3'} | ${'2'}       | ${'2'} | ${'2'}   | ${'4'}    | ${undefined}
   `(
-    '$description', // for the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce
+    '$description',
     async ({destinationType, held, expectedHeld, amount, msgValue, reasonString, heldAfter}) => {
       held = ethers.utils.parseUnits(held, 'wei');
       expectedHeld = ethers.utils.parseUnits(expectedHeld, 'wei');
