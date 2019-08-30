@@ -12,7 +12,7 @@ library Outcome {
     // Destination = ChannelAddress | ExternalAddress
 
     struct AssetOutcome {
-        address token;
+        address assetHolderAddress;
         bytes outcomeContent; // abi.encode(LabelledAllocationOrGuarantee)
     }
 
