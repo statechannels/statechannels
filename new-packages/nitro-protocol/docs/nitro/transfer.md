@@ -9,7 +9,7 @@ title: Transfer
 
 Algorithm:
 
-- checks that `outcomes[channelAddress]` is equal to `hash(ALLOCATION, allocation)`
+- checks that `outcomes[channelAddress]` is equal to `hash(0, allocation)`, where `0` signifies an outcome type of `ALLOCATION`
 - `let balance = balances[channelAddress]`
 - let payouts = []
 - let newAllocation = []
@@ -19,7 +19,7 @@ Algorithm:
   - if balance == 0
     - newAllocation[j] = (destination, amount)
     - j++
-  - elsif balance <= amount
+  - else if balance <= amount
     - payouts[i] = (destination, balance)
     - newAllocation[j] = (destination, amount - balance)
     - balance = 0
