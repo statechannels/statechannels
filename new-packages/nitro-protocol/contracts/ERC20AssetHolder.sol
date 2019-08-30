@@ -25,10 +25,6 @@ contract ERC20AssetHolder is AssetHolder {
 
     IERC20 _token = IERC20(TokenAddress);
 
-    // **************
-    // Asset Management
-    // **************
-
     function deposit(bytes32 destination, uint256 expectedHeld, uint256 amount) public {
         require(_token.transferFrom(msg.sender, address(this), amount), 'Could not deposit ERC20s');
 
@@ -87,18 +83,5 @@ contract ERC20AssetHolder is AssetHolder {
         // Decrease holdings before calling transfer (protect against reentrancy)
         _token.transfer(destination, amount);
     }
-
-    // function transferAndWithdraw(
-    //     address channel,
-    //     address participant,
-    //     address payable destination,
-    //     uint256 amount,
-    //     uint8 _v,
-    //     bytes32 _r,
-    //     bytes32 _s
-    // ) public payable {
-    //     transfer(channel, participant, amount);
-    //     withdraw(participant, destination, amount, _v, _r, _s);
-    // }
 
 }
