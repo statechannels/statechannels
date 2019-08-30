@@ -17,8 +17,11 @@ contract ETHAssetHolder is AssetHolder {
     function deposit(bytes32 destination, uint256 expectedHeld, uint256 amount) public payable {
         require(msg.value == amount, 'Insufficient ETH for ETH deposit');
         uint256 amountDeposited;
-        // This protects against a directly funded channel being defunded due to chain re-orgs,
-        // and allow a wallet implementation to ensure the safety of deposits.
+        // this allows participants to reduce the wait between deposits, while protecting them from losing funds by depositing too early. Specifically it protects against the scenario:
+        // 1. Participant A deposits
+        // 2. Participant B sees A's deposit, which means it is now safe for them to deposit
+        // 3. Participant B submits their deposit
+        // 4. The chain re-orgs, leaving B's deposit in the chain but not A's
         require(
             holdings[destination] >= expectedHeld,
             'Deposit | holdings[destination] is less than expected'
