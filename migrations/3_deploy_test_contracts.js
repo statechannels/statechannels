@@ -1,4 +1,5 @@
 const Token = artifacts.require('Token');
+const ForceMove = artifacts.require('TESTForceMove');
 const NitroAdjudicator = artifacts.require('TESTNitroAdjudicator');
 const AssetHolder = artifacts.require('TESTAssetHolder');
 const TrivialApp = artifacts.require('TrivialApp');
@@ -26,4 +27,5 @@ module.exports = function(deployer) {
   deployer.deploy(AssetHolder);
   deployer.deploy(TrivialApp);
   deployer.deploy(CountingApp);
+  deployer.deploy(ForceMove);
 };

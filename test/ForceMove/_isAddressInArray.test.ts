@@ -1,6 +1,6 @@
 import {ethers} from 'ethers';
 // @ts-ignore
-import ForceMoveArtifact from '../../build/contracts/TESTNitroAdjudicator.json';
+import ForceMoveArtifact from '../../build/contracts/TESTForceMove.json';
 import {setupContracts} from '../test-helpers';
 
 const provider = new ethers.providers.JsonRpcProvider(
