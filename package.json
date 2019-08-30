@@ -2,11 +2,17 @@
   "name": "webtorrent-cf-mvp",
   "version": "0.0.1",
   "description": "Webtorrent choking POC",
-  "keywords": [],
+  "keywords": [
+    "webtorrent",
+    "state-channels",
+    "webtorrent extension"
+  ],
+  "engines": {
+    "node": "10.16.0"
+  },  
   "main": "src/index.js",
   "dependencies": {
     "bencode": "^2.0.1",
-    "inherits": "^2.0.1",
     "prettier-bytes": "^1.0.4",
     "react": "16.8.6",
     "react-dom": "16.8.6",
@@ -17,6 +23,7 @@
     "typescript": "3.3.3"
   },
   "scripts": {
+    "start:alt": "PORT=3333 react-scripts start",
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
