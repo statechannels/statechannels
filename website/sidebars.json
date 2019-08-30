@@ -10,10 +10,21 @@
       "force-move/respond",
       "force-move/respond-with-alternative",
       "force-move/refute",
-      "force-move/conclude"
+      "force-move/conclude",
+      "force-move/consensus-game"
     ],
 
     "Nitro Protocol": [
+      "nitro/notes",
+      "nitro/overview",
+      "nitro/outcomes",
+      "nitro/channel-storage",
+      "nitro/transfer",
+      "nitro/claim",
+      "nitro/payment-game"
+    ],
+
+    "Nitro Protocol (old)": [
       "introduction",
       "commitment-format",
       "challenge-and-response",
