@@ -32,13 +32,14 @@ export const ClientEvents = {
 function setupWire (torrent, wire) {
   wire.use(paidStreamingExtension({ pseAccount: this.pseAccount }));
   wire.setKeepAlive(true);
+  wire.setTimeout(65000)
+  wire.on('keep-alive', () => wire._clearTimeout());
 
   wire.on(WireEvents.DOWNLOAD, bytes => {
     console.log(`>> downloaded ${bytes} bytes`);
   });
 
-  wire.once(WireEvents.REQUEST, () => {
-    const peerAccount = wire.paidStreamingExtension && wire.paidStreamingExtension.peerAccount;
+  wire.once(WireEvents.REQUEST, peerAccount => {
     if (
       peerAccount in this.allowedPeers &&
       !this.allowedPeers[peerAccount].allowed
@@ -55,22 +56,15 @@ function setupWire (torrent, wire) {
     }
   });
 
-  wire.paidStreamingExtension.once(
-    PaidStreamingExtensionEvents.REQUEST,
-    () => {
-      console.log(`> first_request of ${wire.peerExtendedHandshake.peerAccount}`);
-      wire.emit(
-        PaidStreamingExtensionEvents.REQUEST,
-        wire.peerExtendedHandshake.pseAccount
-      );
-    }
-  );
+  wire.paidStreamingExtension.once(PaidStreamingExtensionEvents.REQUEST, () => {
+    const peerAccount = wire.paidStreamingExtension && wire.paidStreamingExtension.peerAccount;
+    console.log(`> first_request of ${peerAccount}`);
+    wire.emit(PaidStreamingExtensionEvents.REQUEST, peerAccount);
+  });
 
   wire.paidStreamingExtension.on(
     PaidStreamingExtensionEvents.NOTICE,
-    notice => {
-      torrent.emit(PaidStreamingExtensionEvents.NOTICE, wire, notice);
-    }
+    notice => torrent.emit(PaidStreamingExtensionEvents.NOTICE, wire, notice)
   );
 }
 
