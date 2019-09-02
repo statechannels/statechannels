@@ -4,7 +4,7 @@ import {expectRevert} from 'magmo-devtools';
 import ForceMoveArtifact from '../../build/contracts/TESTForceMove.json';
 // @ts-ignore
 import countingAppArtifact from '../../build/contracts/CountingApp.json';
-import {keccak256, defaultAbiCoder, hexlify} from 'ethers/utils';
+import {keccak256, defaultAbiCoder, toUtf8Bytes} from 'ethers/utils';
 import {
   setupContracts,
   sign,
@@ -12,7 +12,7 @@ import {
   clearedChallengeHash,
   ongoingChallengeHash,
   finalizedOutcomeHash,
-} from './test-helpers';
+} from '../test-helpers';
 import {HashZero, AddressZero} from 'ethers/constants';
 
 const provider = new ethers.providers.JsonRpcProvider(

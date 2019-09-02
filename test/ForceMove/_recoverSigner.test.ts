@@ -2,7 +2,7 @@ import {ethers} from 'ethers';
 // @ts-ignore
 import ForceMoveArtifact from '../../build/contracts/TESTForceMove.json';
 import {arrayify} from 'ethers/utils';
-import {setupContracts, sign} from './test-helpers';
+import {setupContracts, sign} from '../test-helpers';
 
 const provider = new ethers.providers.JsonRpcProvider(
   `http://localhost:${process.env.DEV_GANACHE_PORT}`,
