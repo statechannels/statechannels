@@ -33,7 +33,9 @@ function setupWire (torrent, wire) {
   wire.use(paidStreamingExtension({ pseAccount: this.pseAccount }));
   wire.setKeepAlive(true);
   wire.setTimeout(65000)
-  wire.on('keep-alive', () => wire._clearTimeout());
+  wire.on('keep-alive', () => {
+    wire._clearTimeout()
+  });
 
   wire.on(WireEvents.DOWNLOAD, bytes => {
     console.log(`>> downloaded ${bytes} bytes`);
@@ -87,16 +89,10 @@ function setupTorrent (torrent) {
     }
 
     if (notice === PaidStreamingExtensionNotices.START) {
-      /**
-       * @todo This should use choking/unchoking.
-       */
-      this.destroy();
-      const client = new WebTorrentPaidStreamingClient({
-        pseAccount: this.pseAccount
-      });
-      client.add(torrent.magnetURI, torrent => {
-        this.emit(ClientEvents.CLIENT_RESET, client, torrent);
-      });
+      torrent.destroy(() => this.add(torrent.magnetURI, newTorrent => {
+        console.log('>torrent restarted', newTorrent)
+        this.emit(ClientEvents.CLIENT_RESET, newTorrent)
+      }))
     }
 
     this.emit(ClientEvents.TORRENT_NOTICE, torrent, wire, notice);
