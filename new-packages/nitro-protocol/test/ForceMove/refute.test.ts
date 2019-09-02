@@ -4,8 +4,8 @@ import {expectRevert} from 'magmo-devtools';
 import ForceMoveArtifact from '../../build/contracts/TESTForceMove.json';
 // @ts-ignore
 import countingAppArtifact from '../../build/contracts/CountingApp.json';
-import {keccak256, defaultAbiCoder, hexlify} from 'ethers/utils';
-import {setupContracts, sign, newChallengeClearedEvent} from './test-helpers';
+import {keccak256, defaultAbiCoder, hexlify, toUtf8Bytes} from 'ethers/utils';
+import {setupContracts, sign, newChallengeClearedEvent} from '../test-helpers';
 import {HashZero, AddressZero} from 'ethers/constants';
 
 const provider = new ethers.providers.JsonRpcProvider(
@@ -44,7 +44,7 @@ const description4 =
 const description5 =
   'It reverts a refute tx if the refutationTurnNum is not larger than declaredTurnNumRecord';
 
-describe('respond', () => {
+describe('refute', () => {
   it.each`
     description     | channelNonce | setTurnNumRecord | declaredTurnNumRecord | refutationTurnNum | expired  | isFinalAB         | appDatas  | challenger    | refutationStateSigner | reasonString
     ${description1} | ${1001}      | ${8}             | ${8}                  | ${14}             | ${false} | ${[false, false]} | ${[0, 1]} | ${wallets[2]} | ${wallets[2]}         | ${undefined}
