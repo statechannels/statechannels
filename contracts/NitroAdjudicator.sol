@@ -2,6 +2,7 @@ pragma solidity ^0.5.11;
 pragma experimental ABIEncoderV2;
 
 import './ForceMove.sol';
+import './Outcome.sol';
 
 contract AssetHolder {
     // abstraction of the parts of AssetHolder that we need
@@ -15,13 +16,13 @@ contract NitroAdjudicator is ForceMove {
         uint256 finalizesAt,
         bytes32 stateHash,
         address challengerAddress,
-        bytes memory outcome,
-        address assetHolder
+        bytes memory assetOutcomeBytes
     ) public {
         // requirements
         require(finalizesAt < now, 'Outcome is not final');
 
-        bytes32 outcomeHash = keccak256(abi.encode(outcome));
+        bytes32 outcomeHash = keccak256(assetOutcomeBytes);
+
         require(
             keccak256(
                     abi.encode(
@@ -39,6 +40,18 @@ contract NitroAdjudicator is ForceMove {
         );
 
         // effects
-        AssetHolder(assetHolder).setOutcome(channelId, outcomeHash);
+        bytes[] memory assetOutcomes = abi.decode(assetOutcomeBytes, (bytes[]));
+
+        for (uint256 i = 0; i < assetOutcomes.length; i++) {
+            Outcome.AssetOutcome memory assetOutcome = abi.decode(
+                assetOutcomes[i],
+                (Outcome.AssetOutcome)
+            );
+            AssetHolder(assetOutcome.assetHolderAddress).setOutcome(
+                channelId,
+                keccak256(assetOutcome.outcomeContent)
+            );
+        }
+
     }
 }
