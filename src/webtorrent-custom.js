@@ -30,10 +30,13 @@ export const ClientEvents = {
  * @this {WebTorrentPaidStreamingClient}
  */
 function setupWire (torrent, wire) {
+  console.log('>torrent setupWire', torrent)
+
   wire.use(paidStreamingExtension({ pseAccount: this.pseAccount }));
   wire.setKeepAlive(true);
   wire.setTimeout(65000)
   wire.on('keep-alive', () => {
+    console.log("Don't you dare die on me!")
     wire._clearTimeout()
   });
 
@@ -41,7 +44,9 @@ function setupWire (torrent, wire) {
     console.log(`>> downloaded ${bytes} bytes`);
   });
 
-  wire.once(WireEvents.REQUEST, peerAccount => {
+  wire.on(WireEvents.REQUEST, () => {
+    console.log('>request');
+    const peerAccount = wire.paidStreamingExtension && wire.paidStreamingExtension.peerAccount;
     if (
       peerAccount in this.allowedPeers &&
       !this.allowedPeers[peerAccount].allowed
@@ -79,20 +84,36 @@ function setupTorrent (torrent) {
   }
 
   torrent.on(TorrentEvents.WIRE, wire => setupWire.call(this, torrent, wire));
-
+  torrent.on('error', error => console.warn('>torrent error', error))
   torrent.on(TorrentEvents.NOTICE, (wire, notice) => {
     console.log(`> notice recieved from ${wire.peerExtendedHandshake.pseAccount}: ${notice}`);
 
     if (notice === PaidStreamingExtensionNotices.STOP) {
       wire.paidStreamingExtension.ack();
-      console.log("< stop acknowledged");
+      torrent.pause();
+      console.log("< stop acknowledged", torrent, torrent.discovery);
     }
 
     if (notice === PaidStreamingExtensionNotices.START) {
-      torrent.destroy(() => this.add(torrent.magnetURI, newTorrent => {
-        console.log('>torrent restarted', newTorrent)
-        this.emit(ClientEvents.CLIENT_RESET, newTorrent)
-      }))
+      wire.paidStreamingExtension.ack();
+      torrent.wires[0].unchoke()
+      torrent.rescanFiles((err) => {
+        console.log('rescan', err);
+        torrent._startDiscovery();
+        torrent.resume();
+        torrent.wires[0].unchoke()
+        const { length, offset, piece, cb } = torrent.wires[0].requests[0];
+        torrent.wires[0].request(piece, offset, length, cb)
+      })
+
+
+      console.log("< start acknowledged", torrent, torrent.discovery);
+
+      // torrent.destroy(() => this.add(torrent.infoHash, newTorrent => {
+      //   console.log('>torrent restarted', newTorrent)
+      //   // dht.lookup(parsed.infoHash)
+      //   this.emit(ClientEvents.CLIENT_RESET, newTorrent)
+      // }))
     }
 
     this.emit(ClientEvents.TORRENT_NOTICE, torrent, wire, notice);
@@ -104,7 +125,6 @@ function setupTorrent (torrent) {
     console.log(">torrent error:", err);
     this.emit(ClientEvents.TORRENT_ERROR, torrent, err);
   });
-
   torrent.usingPaidStreaming = true;
 }
 

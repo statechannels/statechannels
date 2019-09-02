@@ -29,7 +29,7 @@ const progressLogger = (logger, status, setStatus) => (torrent = initialState, a
       numPeers: torrent.numPeers
     })
 
-    if (torrentIsDone && torrrentFile.done && !torrent.created) {
+    if (torrentIsDone && !torrent.created && torrrentFile && torrrentFile.done) {
       torrrentFile.getBlobURL((err, url) => {
         setStatus(Object.assign(initialState, { url, filename: torrrentFile.name }));
       });
