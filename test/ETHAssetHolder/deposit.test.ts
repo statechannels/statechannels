@@ -25,7 +25,7 @@ describe('deposit', () => {
     description     | destinationType       | held   | expectedHeld | amount | msgValue | heldAfter | reasonString
     ${description1} | ${'randomEOABytes32'} | ${'0'} | ${'0'}       | ${'1'} | ${'1'}   | ${'1'}    | ${undefined}
     ${description2} | ${'randomEOABytes32'} | ${'0'} | ${'1'}       | ${'2'} | ${'2'}   | ${'0'}    | ${'Deposit | holdings[destination] is less than expected'}
-    ${description3} | ${'randomEOABytes32'} | ${'3'} | ${'1'}       | ${'1'} | ${'1'}   | ${'3'}    | ${undefined}
+    ${description3} | ${'randomEOABytes32'} | ${'3'} | ${'1'}       | ${'1'} | ${'1'}   | ${'3'}    | ${'Deposit | holdings[destination] already meets or exceeds expectedHeld + amount'}
     ${description4} | ${'randomEOABytes32'} | ${'3'} | ${'2'}       | ${'2'} | ${'2'}   | ${'4'}    | ${undefined}
   `(
     '$description', // for the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce

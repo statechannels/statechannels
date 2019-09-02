@@ -26,23 +26,19 @@ contract ETHAssetHolder is AssetHolder {
             holdings[destination] >= expectedHeld,
             'Deposit | holdings[destination] is less than expected'
         );
+        require(
+            holdings[destination] < expectedHeld.add(amount),
+            'Deposit | holdings[destination] already meets or exceeds expectedHeld + amount'
+        );
 
-        // If I expect there to be 10 and deposit 2, my goal was to get the
-        // balance to 12.
-        // In case some arbitrary person deposited 1 eth before I noticed, making the
-        // holdings 11, I should be refunded 1.
-        if (holdings[destination] == expectedHeld) {
-            amountDeposited = amount;
-        } else if (holdings[destination] < expectedHeld.add(amount)) {
-            amountDeposited = expectedHeld.add(amount).sub(holdings[destination]);
-        } else {
-            amountDeposited = 0;
-        }
+        // The depositor wishes to increase the holdings against channelId to amount + expectedHeld
+        // The depositor need only deposit (at most) amount + (expectedHeld - holdings) (the term in parentheses is non-positive)
+
+        amountDeposited = expectedHeld.add(amount).sub(holdings[destination]); // strictly positive
+        // require successful deposit before updating holdings (protect against reentrancy)
+        // refund whatever wasn't deposited.
+        msg.sender.transfer(amount.sub(amountDeposited));
         holdings[destination] = holdings[destination].add(amountDeposited);
-        if (amountDeposited < amount) {
-            // refund whatever wasn't deposited.
-            msg.sender.transfer(amount - amountDeposited); // TODO use safeMath here
-        }
         emit Deposited(destination, amountDeposited, holdings[destination]);
     }
 
