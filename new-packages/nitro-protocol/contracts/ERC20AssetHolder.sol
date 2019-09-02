@@ -26,8 +26,6 @@ contract ERC20AssetHolder is AssetHolder {
     IERC20 _token = IERC20(TokenAddress);
 
     function deposit(bytes32 destination, uint256 expectedHeld, uint256 amount) public {
-        require(_token.transferFrom(msg.sender, address(this), amount), 'Could not deposit ERC20s');
-
         uint256 amountDeposited;
         // this allows participants to reduce the wait between deposits, while protecting them from losing funds by depositing too early. Specifically it protects against the scenario:
         // 1. Participant A deposits
@@ -36,26 +34,23 @@ contract ERC20AssetHolder is AssetHolder {
         // 4. The chain re-orgs, leaving B's deposit in the chain but not A's
         require(
             holdings[destination] >= expectedHeld,
-            'Deposit: holdings[destination] is less than expected'
+            'Deposit | holdings[destination] is less than expected'
+        );
+        require(
+            holdings[destination] < expectedHeld.add(amount),
+            'Deposit | holdings[destination] already meets or exceeds expectedHeld + amount'
         );
 
-        // If I expect there to be 10 and deposit 2, my goal was to get the
-        // balance to 12.
-        // In case some arbitrary person deposited 1 eth before I noticed, making the
-        // holdings 11, I should be refunded 1.
-        if (holdings[destination] == expectedHeld) {
-            amountDeposited = amount;
-        } else if (holdings[destination] < expectedHeld.add(amount)) {
-            amountDeposited = expectedHeld.add(amount).sub(holdings[destination]);
-        } else {
-            amountDeposited = 0;
-        }
+        // The depositor wishes to increase the holdings against channelId to amount + expectedHeld
+        // The depositor need only deposit (at most) amount + (expectedHeld - holdings) (the term in parentheses is non-positive)
+
+        amountDeposited = expectedHeld.add(amount).sub(holdings[destination]); // strictly positive
+        // require successful deposit before updating holdings (protect against reentrancy)
+        require(
+            _token.transferFrom(msg.sender, address(this), amountDeposited),
+            'Could not deposit ERC20s'
+        );
         holdings[destination] = holdings[destination].add(amountDeposited);
-        if (amountDeposited < amount) {
-            // refund whatever wasn't deposited.
-            _token.transfer(msg.sender, amount - amountDeposited); // TODO use safeMath here
-            // TODO compute amountDeposited *before* calling into erc20 contract, so we only need 1 call not 2
-        }
         emit Deposited(destination, amountDeposited, holdings[destination]);
     }
 
