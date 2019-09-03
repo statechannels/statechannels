@@ -42,31 +42,7 @@ contract ETHAssetHolder is AssetHolder {
         emit Deposited(destination, amountDeposited, holdings[destination]);
     }
 
-    function withdraw(
-        address participant,
-        address payable destination,
-        uint256 amount,
-        uint8 _v,
-        bytes32 _r,
-        bytes32 _s
-    ) public payable {
-        require(holdings[_addressToBytes32(participant)] >= amount, 'Withdraw | overdrawn');
-        Authorization memory authorization = Authorization(
-            participant,
-            destination,
-            amount,
-            msg.sender
-        );
-
-        require(
-            recoverSigner(abi.encode(authorization), _v, _r, _s) == participant,
-            'Withdraw | not authorized by participant'
-        );
-
-        holdings[_addressToBytes32(participant)] = holdings[_addressToBytes32(participant)].sub(
-            amount
-        );
-        // Decrease holdings before calling to token contract (protect against reentrancy)
+    function _transferAsset(address payable destination, uint256 amount) internal {
         destination.transfer(amount);
     }
 
