@@ -11,19 +11,17 @@ contract IERC20 {
 
 contract ERC20AssetHolder is AssetHolder {
     address AdjudicatorAddress;
-    address TokenAddress;
+    IERC20 Token;
 
     constructor(address _AdjudicatorAddress, address _TokenAddress) public {
         AdjudicatorAddress = _AdjudicatorAddress;
-        TokenAddress = _TokenAddress;
+        Token = IERC20(_TokenAddress);
     }
 
     modifier AdjudicatorOnly {
         require(msg.sender == AdjudicatorAddress, 'Only the NitroAdjudicator is authorized');
         _;
     }
-
-    IERC20 _token = IERC20(TokenAddress);
 
     function deposit(bytes32 destination, uint256 expectedHeld, uint256 amount) public {
         uint256 amountDeposited;
@@ -47,7 +45,7 @@ contract ERC20AssetHolder is AssetHolder {
         amountDeposited = expectedHeld.add(amount).sub(holdings[destination]); // strictly positive
         // require successful deposit before updating holdings (protect against reentrancy)
         require(
-            _token.transferFrom(msg.sender, address(this), amountDeposited),
+            Token.transferFrom(msg.sender, address(this), amountDeposited),
             'Could not deposit ERC20s'
         );
         holdings[destination] = holdings[destination].add(amountDeposited);
@@ -65,7 +63,7 @@ contract ERC20AssetHolder is AssetHolder {
         require(holdings[_addressToBytes32(participant)] >= amount, 'Withdraw: overdrawn');
         Authorization memory authorization = Authorization(
             participant,
-            _addressToBytes32(destination),
+            destination,
             amount,
             msg.sender
         );
@@ -79,7 +77,7 @@ contract ERC20AssetHolder is AssetHolder {
             amount
         );
         // Decrease holdings before calling transfer (protect against reentrancy)
-        _token.transfer(destination, amount);
+        Token.transfer(destination, amount);
     }
 
 }

@@ -13,7 +13,7 @@ contract AssetHolder {
         // Moreover, the participant should sign the address that they wish
         // to send the transaction from, preventing any replay attack.
         address participant; // the account used to sign commitment transitions
-        bytes32 destination; // either an account or a channel
+        address destination; // either an account or a channel
         uint256 amount;
         address sender; // the account used to sign transactions
     }
@@ -67,6 +67,10 @@ contract AssetHolder {
     // ****************
     // Events
     // ****************
-    event Deposited(bytes32 destination, uint256 amountDeposited, uint256 destinationHoldings);
+    event Deposited(
+        bytes32 indexed destination,
+        uint256 amountDeposited,
+        uint256 destinationHoldings
+    );
 
 }
