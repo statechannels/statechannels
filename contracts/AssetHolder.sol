@@ -6,18 +6,6 @@ import 'openzeppelin-solidity/contracts/math/SafeMath.sol';
 contract AssetHolder {
     using SafeMath for uint256;
 
-    struct Authorization {
-        // Prevents replay attacks:
-        // It's required that the participant signs the message, meaning only
-        // the participant can authorize a withdrawal.
-        // Moreover, the participant should sign the address that they wish
-        // to send the transaction from, preventing any replay attack.
-        address participant; // the account used to sign commitment transitions
-        address destination; // either an account or a channel
-        uint256 amount;
-        address sender; // the account used to sign transactions
-    }
-
     address AdjudicatorAddress;
 
     mapping(bytes32 => uint256) public holdings;
