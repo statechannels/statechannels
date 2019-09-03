@@ -25,6 +25,10 @@ contract AssetHolder {
     mapping(bytes32 => bytes32) public outcomeHashes;
 
     // **************
+    // Public methods
+    // **************
+
+    // **************
     // Permissioned methods
     // **************
 
@@ -34,12 +38,22 @@ contract AssetHolder {
     }
 
     function _setOutcome(bytes32 channelId, bytes32 outcomeHash) internal {
+        require(outcomeHashes[channelId] == bytes32(0), 'Outcome hash already exists');
         outcomeHashes[channelId] = outcomeHash;
     }
 
-    function setOutcome(bytes32 channelId, bytes32 outcomeHash) external AdjudicatorOnly {
+    function setOutcome(bytes32 channelId, bytes32 outcomeHash)
+        external
+        AdjudicatorOnly
+        returns (bool success)
+    {
         _setOutcome(channelId, outcomeHash);
+        return true;
     }
+
+    // **************
+    // Internal methods
+    // **************
 
     function _isExternalAddress(bytes32 destination) internal pure returns (bool) {
         return (destination == bytes32(bytes20(destination)));

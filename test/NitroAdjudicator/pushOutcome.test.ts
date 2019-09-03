@@ -47,16 +47,25 @@ const description1 =
 const description2 = 'NitroAdjudicator rejects a pushOutcome tx for a not-finalized channel';
 const description3 =
   'NitroAdjudicator rejects a pushOutcome tx when declaredTurnNumRecord is incorrect';
+const description4 = 'AssetHolders reject a setOutcome when outcomeHash already exists';
 
 describe('pushOutcome', () => {
   it.each`
-    description     | channelNonce | storedTurnNumRecord | declaredTurnNumRecord | finalized | reasonString
-    ${description1} | ${1101}      | ${5}                | ${5}                  | ${true}   | ${undefined}
-    ${description2} | ${1102}      | ${5}                | ${5}                  | ${false}  | ${'Outcome is not final'}
-    ${description3} | ${1103}      | ${4}                | ${5}                  | ${true}   | ${'Submitted data does not match storage'}
+    description     | channelNonce | storedTurnNumRecord | declaredTurnNumRecord | finalized | outcomeHashExits | reasonString
+    ${description1} | ${1101}      | ${5}                | ${5}                  | ${true}   | ${false}         | ${undefined}
+    ${description2} | ${1102}      | ${5}                | ${5}                  | ${false}  | ${false}         | ${'Outcome is not final'}
+    ${description3} | ${1103}      | ${4}                | ${5}                  | ${true}   | ${false}         | ${'Submitted data does not match storage'}
+    ${description4} | ${1104}      | ${5}                | ${5}                  | ${true}   | ${true}          | ${'Outcome hash already exists'}
   `(
     '$description', // for the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce
-    async ({channelNonce, storedTurnNumRecord, declaredTurnNumRecord, finalized, reasonString}) => {
+    async ({
+      channelNonce,
+      storedTurnNumRecord,
+      declaredTurnNumRecord,
+      finalized,
+      outcomeHashExits,
+      reasonString,
+    }) => {
       // compute channelId
       const channelId = keccak256(
         defaultAbiCoder.encode(
@@ -92,6 +101,17 @@ describe('pushOutcome', () => {
         initialChannelStorageHash,
       );
 
+      if (outcomeHashExits) {
+        await (await NitroAdjudicator.pushOutcome(
+          channelId,
+          declaredTurnNumRecord,
+          finalizesAt,
+          stateHash,
+          challengerAddress,
+          outcome,
+        )).wait();
+      }
+
       // call method in a slightly different way if expecting a revert
       if (reasonString) {
         const regex = new RegExp(
@@ -120,7 +140,6 @@ describe('pushOutcome', () => {
         );
         // wait for tx to be mined
         await tx2.wait();
-
         // check 2x AssetHolder storage against the expected value
         expect(await ETHAssetHolder.outcomeHashes(channelId)).toEqual(keccak256(outcomeContent));
         expect(await ERC20AssetHolder.outcomeHashes(channelId)).toEqual(keccak256(outcomeContent));
