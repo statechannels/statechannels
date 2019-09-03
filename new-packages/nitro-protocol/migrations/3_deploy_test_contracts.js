@@ -5,7 +5,7 @@ const AssetHolder = artifacts.require('TESTAssetHolder');
 const TrivialApp = artifacts.require('TrivialApp');
 const CountingApp = artifacts.require('CountingApp');
 const TESTETHAssetHolder = artifacts.require('TESTETHAssetHolder');
-const ERC20AssetHolder = artifacts.require('ERC20AssetHolder');
+const TESTERC20AssetHolder = artifacts.require('TESTERC20AssetHolder');
 
 module.exports = function(deployer) {
   deployer.then(async () => {
@@ -18,7 +18,7 @@ module.exports = function(deployer) {
 
     await deployer.deploy(TESTETHAssetHolder, NitroAdjudicatorInstance.address);
     await deployer.deploy(
-      ERC20AssetHolder,
+      TESTERC20AssetHolder,
       NitroAdjudicatorInstance.address,
       TokenInstance.address,
     );
