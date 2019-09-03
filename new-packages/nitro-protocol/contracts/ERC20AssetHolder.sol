@@ -7,23 +7,23 @@ contract IERC20 {
     // Abstraction of the parts of the ERC20 Interface that we need
     function transfer(address to, uint256 tokens) public returns (bool success);
     function transferFrom(address from, address to, uint256 tokens) public returns (bool success);
+    function balanceOf(address account) public view returns (uint256);
+    function allowance(address owner, address spender) public view returns (uint256);
 }
 
 contract ERC20AssetHolder is AssetHolder {
     address AdjudicatorAddress;
-    address TokenAddress;
+    IERC20 Token;
 
     constructor(address _AdjudicatorAddress, address _TokenAddress) public {
         AdjudicatorAddress = _AdjudicatorAddress;
-        TokenAddress = _TokenAddress;
+        Token = IERC20(_TokenAddress);
     }
 
     modifier AdjudicatorOnly {
         require(msg.sender == AdjudicatorAddress, 'Only the NitroAdjudicator is authorized');
         _;
     }
-
-    IERC20 _token = IERC20(TokenAddress);
 
     function deposit(bytes32 destination, uint256 expectedHeld, uint256 amount) public {
         uint256 amountDeposited;
@@ -46,8 +46,10 @@ contract ERC20AssetHolder is AssetHolder {
 
         amountDeposited = expectedHeld.add(amount).sub(holdings[destination]); // strictly positive
         // require successful deposit before updating holdings (protect against reentrancy)
+        // require(Token.balanceOf(msg.sender) > 0, 'msg.sender has no balance');
+        // require(_token.allowance(msg.sender, address(this)) > 0, 'this has no allowance');
         require(
-            _token.transferFrom(msg.sender, address(this), amountDeposited),
+            Token.transferFrom(msg.sender, address(this), amountDeposited),
             'Could not deposit ERC20s'
         );
         holdings[destination] = holdings[destination].add(amountDeposited);
@@ -79,7 +81,7 @@ contract ERC20AssetHolder is AssetHolder {
             amount
         );
         // Decrease holdings before calling transfer (protect against reentrancy)
-        _token.transfer(destination, amount);
+        Token.transfer(destination, amount);
     }
 
 }
