@@ -47,10 +47,10 @@ contract AssetHolder {
                 // TODO this line causes out of gas error
                 payouts[i] = Outcome.AllocationItem(destination, amount);
                 if (balance <= amount) {
-                    newAllocation[j] = Outcome.AllocationItem(destination, amount - balance);
+                    newAllocation[j] = Outcome.AllocationItem(destination, amount.sub(balance));
                     balance = 0;
                 } else {
-                    balance -= amount;
+                    balance = balance.sub(amount);
                 }
             }
         }
