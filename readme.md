@@ -23,12 +23,6 @@ $ NODE_ENV=development yarn db:migrate
 $ NODE_ENV=development yarn db:seed
 $ yarn server:watch (will rebuild app on file change)
 
-// Opening a channel using data from `test_data.ts` and `rps_test_data.ts`
-
-$ curl -X POST -H "Content-Type: application/json" -H "Accept:application/json" -d "$(cat samples/open_channel.ledger.json)" http://localhost:3002/api/v1/ledger_channels
-
-$ curl -X POST -H "Content-Type: application/json" -H "Accept:application/json" -d "$(cat samples/open_channel.rps.json)" http://localhost:3002/api/v1/rps_channels
-$ curl -X POST -H "Content-Type: application/json" -H "Accept:application/json" -d "$(cat samples/update_channel.rps.json)" http://localhost:3002/api/v1/rps_channels
 ```
 
 ### Interacting with the server from a browser
@@ -40,7 +34,6 @@ To play against the server from the browser client, the server and the browser n
 - Point to the same contract addresses on Ganache. For now, run something like `cp ../wallet/build/contracts/* build/contracts/` after deploying the contracts from the wallet.
 - The server relies on transpiled wallet code. If there are transpile errors when building the server, try transpiling the wallet package by running `npx tsc` in `packages/wallet`.
   Another option is to leave `npx tsc --watch` running in `packages/wallet` to ensure that the transpiled project is always up to date.
-- Start the firebase relay: `yarn firebase-relay:start:dev`
 
 You will also need to make sure that the server's address has funds. You can find the server address in [constants.ts](https://github.com/magmo/node-bot/blob/master/src/constants.ts)
 
