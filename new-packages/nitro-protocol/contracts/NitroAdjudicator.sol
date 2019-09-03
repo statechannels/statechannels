@@ -6,7 +6,7 @@ import './Outcome.sol';
 
 contract AssetHolder {
     // abstraction of the parts of AssetHolder that we need
-    function setOutcome(bytes32 channel, bytes32 outcomeHash) external;
+    function setOutcome(bytes32 channel, bytes32 outcomeHash) external returns (bool success);
 }
 
 contract NitroAdjudicator is ForceMove {
@@ -47,9 +47,11 @@ contract NitroAdjudicator is ForceMove {
                 assetOutcomes[i],
                 (Outcome.AssetOutcome)
             );
-            AssetHolder(assetOutcome.assetHolderAddress).setOutcome(
-                channelId,
-                keccak256(assetOutcome.outcomeContent)
+            require(
+                AssetHolder(assetOutcome.assetHolderAddress).setOutcome(
+                    channelId,
+                    keccak256(assetOutcome.outcomeContent)
+                )
             );
         }
 
