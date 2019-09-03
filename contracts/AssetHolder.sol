@@ -83,6 +83,7 @@ contract AssetHolder {
             delete outcomeHashes[channelId];
         }
 
+        // holdings updated BEFORE asset transferred (prevent reentrancy)
         for (uint256 i = 0; i < payouts.length; i++) {
             if (_isExternalAddress(payouts[i].destination)) {
                 _transferAsset(_bytes32ToAddress(payouts[i].destination), payouts[i].amount);
