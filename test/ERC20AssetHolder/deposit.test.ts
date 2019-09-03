@@ -33,7 +33,6 @@ const description1 = 'Reverts deposit of Tokens (expectedHeld > holdings)';
 const description2 = 'Reverts deposit of Tokens (expectedHeld + amount < holdings)';
 const description3 = 'Deposits Tokens (amount < holdings < amount + expectedHeld)';
 
-// amounts are valueString represenationa of wei
 describe('deposit', () => {
   it.each`
     description     | destination        | held   | expectedHeld | amount | heldAfter | reasonString
@@ -66,7 +65,7 @@ describe('deposit', () => {
 
     // set holdings by depositing in the 'safest' way
 
-    if (held > 0 && !reasonString) {
+    if (held > 0) {
       depositedEvent = newDepositedEvent(ERC20AssetHolder, destination);
       transferEvent = newTransferEvent(Token, ERC20AssetHolder.address);
       await (await ERC20AssetHolder.deposit(destination, zero, held)).wait();

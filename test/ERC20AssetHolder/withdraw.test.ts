@@ -4,7 +4,7 @@ import {expectRevert} from 'magmo-devtools';
 import ERC20AssetHolderArtifact from '../../build/contracts/ERC20AssetHolder.json';
 // @ts-ignore
 import TokenArtifact from '../../build/contracts/Token.json';
-import {setupContracts, sign} from '../test-helpers';
+import {setupContracts, sign, newDepositedEvent, newTransferEvent} from '../test-helpers';
 import {keccak256, defaultAbiCoder} from 'ethers/utils';
 
 const provider = new ethers.providers.JsonRpcProvider(
@@ -14,6 +14,8 @@ const signer0 = provider.getSigner(0); // convention matches setupContracts func
 let signer0Address;
 let ERC20AssetHolder: ethers.Contract;
 let Token: ethers.Contract;
+let depositedEvent;
+let transferEvent;
 const AUTH_TYPES = ['address', 'address', 'uint256', 'address'];
 
 beforeAll(async () => {
@@ -28,7 +30,6 @@ const description2 =
 const description3 =
   'Reverts token withdrawal (signer = participant, holdings[participant] < amount';
 
-// amounts are valueString represenationa of wei
 describe('deposit', () => {
   it.each`
     description     | held   | signer     | amount | authorized | reasonString
@@ -36,8 +37,9 @@ describe('deposit', () => {
     ${description2} | ${'1'} | ${signer0} | ${'1'} | ${false}   | ${'Withdraw | not authorized by participant'}
     ${description3} | ${'1'} | ${signer0} | ${'2'} | ${true}    | ${'Withdraw | overdrawn'}
   `('$description', async ({held, signer, amount, authorized, reasonString}) => {
-    held = ethers.utils.parseUnits(held, 'wei');
-    amount = ethers.utils.parseUnits(amount, 'wei');
+    held = ethers.utils.bigNumberify(held);
+    amount = ethers.utils.bigNumberify(amount);
+    const zero = ethers.utils.bigNumberify('0');
     const participant = ethers.Wallet.createRandom();
 
     // check msg.sender has enough tokens
@@ -45,14 +47,29 @@ describe('deposit', () => {
     await expect(balance.gte(held.add(amount))).toBe(true);
 
     // Increase allowance by calling approve
-    await (await Token.approve(ERC20AssetHolder.address, held.add(amount))).wait(); // approve enough for setup and main test
+    await (await Token.increaseAllowance(ERC20AssetHolder.address, held.add(amount))).wait(); // approve enough for setup and main test
+
+    // check allowance updated
+    const allowance = await Token.allowance(signer0Address, ERC20AssetHolder.address);
+    expect(
+      allowance
+        .sub(amount)
+        .sub(held)
+        .gte(0),
+    ).toBe(true);
 
     // set holdings by depositing in the 'safest' way
     if (held > 0) {
-      await (await ERC20AssetHolder.deposit(participant.address.padEnd(66, '0'), 0, held, {
-        value: held,
-      })).wait();
+      depositedEvent = newDepositedEvent(ERC20AssetHolder, participant.address.padEnd(66, '0'));
+      transferEvent = newTransferEvent(Token, ERC20AssetHolder.address);
+      await (await ERC20AssetHolder.deposit(
+        participant.address.padEnd(66, '0'),
+        zero,
+        held,
+      )).wait();
       expect(await ERC20AssetHolder.holdings(participant.address.padEnd(66, '0'))).toEqual(held);
+      await depositedEvent;
+      expect(await transferEvent).toEqual(held);
     }
 
     // authorize withdraw
@@ -93,8 +110,10 @@ describe('deposit', () => {
         sig.r,
         sig.s,
       );
+
       // wait for tx to be mined
-      const receipt = await tx.wait();
+      await tx.wait();
+
       // check for token balance change
       await expect(await Token.balanceOf(signer0Address)).toEqual(balanceBefore.add(amount));
       // check for holdings decrease
