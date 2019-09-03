@@ -65,7 +65,7 @@ contract AssetHolder {
 
         // holdings updated BEFORE asset transferred (prevent reentrancy)
         for (uint256 k = 0; k < payouts.length; k++) {
-            if (_isExternalAddress(payouts[i].destination)) {
+            if (_isExternalAddress(payouts[k].destination)) {
                 _transferAsset(_bytes32ToAddress(payouts[k].destination), payouts[k].amount);
             } else {
                 holdings[payouts[k].destination] =
