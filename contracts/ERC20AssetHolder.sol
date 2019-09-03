@@ -44,8 +44,6 @@ contract ERC20AssetHolder is AssetHolder {
 
         amountDeposited = expectedHeld.add(amount).sub(holdings[destination]); // strictly positive
         // require successful deposit before updating holdings (protect against reentrancy)
-        // require(Token.balanceOf(msg.sender) > 0, 'msg.sender has no balance');
-        // require(_token.allowance(msg.sender, address(this)) > 0, 'this has no allowance');
         require(
             Token.transferFrom(msg.sender, address(this), amountDeposited),
             'Could not deposit ERC20s'
