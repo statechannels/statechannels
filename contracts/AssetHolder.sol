@@ -34,31 +34,23 @@ contract AssetHolder {
         uint256 balance = holdings[channelId];
         Outcome.AllocationItem[] memory payouts;
         Outcome.AllocationItem[] memory newAllocation;
+        bytes32 destination;
+        uint256 amount;
         uint256 j = 0;
         for (uint256 i = 0; i < allocation.length; i++) {
+            destination = allocation[i].destination;
+            amount = allocation[i].amount;
             if (balance == 0) {
-                newAllocation[i] = Outcome.AllocationItem(
-                    allocation[i].destination,
-                    allocation[i].amount
-                );
+                newAllocation[i] = Outcome.AllocationItem(destination, amount);
                 j++;
             } else {
-                payouts[i] = Outcome.AllocationItem(
-                    allocation[i].destination,
-                    allocation[i].amount
-                );
-                if (balance <= allocation[i].amount) {
-                    newAllocation[j] = Outcome.AllocationItem(
-                        allocation[i].destination,
-                        allocation[i].amount - balance
-                    );
+                // TODO this line causes out of gas error
+                payouts[i] = Outcome.AllocationItem(destination, amount);
+                if (balance <= amount) {
+                    newAllocation[j] = Outcome.AllocationItem(destination, amount - balance);
                     balance = 0;
                 } else {
-                    payouts[i] = Outcome.AllocationItem(
-                        allocation[i].destination,
-                        allocation[i].amount
-                    );
-                    balance -= allocation[i].amount;
+                    balance -= amount;
                 }
             }
         }
@@ -72,15 +64,16 @@ contract AssetHolder {
         }
 
         // holdings updated BEFORE asset transferred (prevent reentrancy)
-        for (uint256 i = 0; i < payouts.length; i++) {
+        for (uint256 k = 0; k < payouts.length; k++) {
             if (_isExternalAddress(payouts[i].destination)) {
-                _transferAsset(_bytes32ToAddress(payouts[i].destination), payouts[i].amount);
+                _transferAsset(_bytes32ToAddress(payouts[k].destination), payouts[k].amount);
             } else {
-                holdings[payouts[i].destination] =
-                    holdings[payouts[i].destination] +
-                    payouts[i].amount;
+                holdings[payouts[k].destination] =
+                    holdings[payouts[k].destination] +
+                    payouts[k].amount;
             }
         }
+
     }
 
     // **************
