@@ -2,8 +2,6 @@ import {ethers} from 'ethers';
 import {splitSignature, arrayify, keccak256, defaultAbiCoder} from 'ethers/utils';
 import {HashZero, AddressZero} from 'ethers/constants';
 
-const eventEmitterTimeout = 60000; // ms
-
 export async function setupContracts(provider: ethers.providers.JsonRpcProvider, artifact) {
   const networkId = (await provider.getNetwork()).chainId;
   const signer = provider.getSigner(0);
@@ -113,6 +111,17 @@ export const newDepositedEvent = (contract: ethers.Contract, destination: string
       // match event for this destination only
       contract.removeAllListeners(filter);
       resolve([eventDestination, amountDeposited, amountHeld]);
+    });
+  });
+};
+
+export const newTransferEvent = (contract: ethers.Contract, to: string) => {
+  const filter = contract.filters.Transfer(null, to);
+  return new Promise((resolve, reject) => {
+    contract.on(filter, (eventFrom, eventTo, amountTransferred, event) => {
+      // match event for this destination only
+      contract.removeAllListeners(filter);
+      resolve(amountTransferred);
     });
   });
 };
