@@ -7,8 +7,6 @@ contract IERC20 {
     // Abstraction of the parts of the ERC20 Interface that we need
     function transfer(address to, uint256 tokens) public returns (bool success);
     function transferFrom(address from, address to, uint256 tokens) public returns (bool success);
-    function balanceOf(address account) public view returns (uint256);
-    function allowance(address owner, address spender) public view returns (uint256);
 }
 
 contract ERC20AssetHolder is AssetHolder {
