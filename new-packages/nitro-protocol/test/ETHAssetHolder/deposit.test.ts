@@ -31,10 +31,10 @@ const description3 =
 describe('deposit', () => {
   it.each`
     description     | destination        | held   | expectedHeld | amount | msgValue | heldAfter | reasonString
+    ${description0} | ${destinations[0]} | ${'0'} | ${'0'}       | ${'1'} | ${'1'}   | ${'1'}    | ${undefined}
     ${description1} | ${destinations[1]} | ${'0'} | ${'1'}       | ${'2'} | ${'2'}   | ${'0'}    | ${'Deposit | holdings[destination] is less than expected'}
     ${description2} | ${destinations[2]} | ${'3'} | ${'1'}       | ${'1'} | ${'1'}   | ${'3'}    | ${'Deposit | holdings[destination] already meets or exceeds expectedHeld + amount'}
     ${description3} | ${destinations[3]} | ${'3'} | ${'2'}       | ${'2'} | ${'2'}   | ${'4'}    | ${undefined}
-    ${description0} | ${destinations[0]} | ${'0'} | ${'0'}       | ${'1'} | ${'1'}   | ${'1'}    | ${undefined}
   `(
     '$description',
     async ({destination, held, expectedHeld, amount, msgValue, reasonString, heldAfter}) => {
@@ -46,10 +46,12 @@ describe('deposit', () => {
 
       // set holdings by depositing in the 'safest' way
       if (held > 0) {
+        depositedEvent = newDepositedEvent(ETHAssetHolder, destination);
         await (await ETHAssetHolder.deposit(destination, 0, held, {
           value: held,
         })).wait();
         expect(await ETHAssetHolder.holdings(destination)).toEqual(held);
+        await depositedEvent;
       }
 
       // call method in a slightly different way if expecting a revert
