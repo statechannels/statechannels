@@ -1,7 +1,7 @@
 import {ethers} from 'ethers';
 import {expectRevert} from 'magmo-devtools';
 // @ts-ignore
-import ETHAssetHolderArtifact from '../../build/contracts/ETHAssetHolder.json';
+import ETHAssetHolderArtifact from '../../build/contracts/TESTETHAssetHolder.json';
 import {setupContracts, newDepositedEvent} from '../test-helpers';
 
 const provider = new ethers.providers.JsonRpcProvider(
