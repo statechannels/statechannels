@@ -77,10 +77,10 @@ describe('transferAll', () => {
       );
       await expectRevert(() => AssetHolder.transferAll(channelId, allocationBytes), regex);
     } else {
-      const balanceBefore = await signer0.getBalance();
+      // const balanceBefore = await signer0.getBalance();
       const tx = await AssetHolder.transferAll(channelId, allocationBytes);
       // wait for tx to be mined
-      const receipt = await tx.wait();
+      await tx.wait();
 
       // This is now a unit test and we will test the transferAsset separately. We could emit an event and test that here, though?
       // // check for EOA balance change
