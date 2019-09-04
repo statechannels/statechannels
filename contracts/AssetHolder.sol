@@ -16,7 +16,7 @@ contract AssetHolder {
     // Public methods
     // **************
 
-    function transferAll(bytes32 channelId, bytes memory allocationBytes, uint256 newAllocationLength) public {
+    function transferAll(bytes32 channelId, bytes memory allocationBytes) public {
         // requirements
         require(
             outcomeHashes[channelId] ==
@@ -33,70 +33,63 @@ contract AssetHolder {
 
         Outcome.AllocationItem[] memory allocation = abi.decode(allocationBytes, (Outcome.AllocationItem[]));
         uint256 balance = holdings[channelId];
-        Outcome.AllocationItem[] memory payouts = new Outcome.AllocationItem[](allocation.length); // we need to fix the length now; this is an upper bound so we may end up with empty slots
-        Outcome.AllocationItem[] memory newAllocation = new Outcome.AllocationItem[](allocation.length); // we need to fix the length now; this is an upper bound so we may end up with empty slots
-        bytes32 _destination;
+        uint256 numPayouts = 0;
+        uint256 numNewAllocationItems = allocation.length;
         uint256 _amount;
-        uint256 j = 0;
-        uint256 k = 0;
+        bool overlap;
+        uint256 finalPayoutAmount;
+        uint256 firstNewAllocationItemAmount;
 
         for (uint256 i = 0; i < allocation.length; i++) {
-            if (balance == 0) { // if funds are completely depleted, keep the allocationItem
-                newAllocation[j] = allocation[i];
-                j++;
+            if (balance == 0) { // if funds are completely depleted, keep the allocationItem and do not pay out
             } else {
                 _amount = allocation[i].amount;
                 if (balance < _amount) { // if funds still exist but are insufficient for this allocationItem, payout what's available and keep the allocationItem (but reduce the amount allocated)
                     // this block is never executed more than once
-                    _destination = allocation[i].destination;
-
-                    Outcome.AllocationItem memory payoutItem = Outcome.AllocationItem(_destination, balance);
-                    payouts[k] = payoutItem;  
-                    k++;
-
-                    Outcome.AllocationItem memory newAllocationItem = Outcome.AllocationItem(_destination, _amount.sub(balance));
-                    newAllocation[j] = newAllocationItem;
-                    j++; 
-
+                    numPayouts++;
+                    overlap = true;
+                    finalPayoutAmount = balance;
+                    firstNewAllocationItemAmount = _amount - balance;
                     balance = 0;
                 } else { // if ample funds still exist, pay them out and discard the allocationItem
-                    payouts[k] = allocation[i];
-                    k++;
-
+                    numPayouts++;
+                    numNewAllocationItems--;
                     balance = balance.sub(_amount);
                 }
             }
         }
 
-        // k tracks how many times we wrote to the payouts array (there are no gaps)
-        // j tracks how many times we wrote to the newAllocation array (there are no gaps)
-
         // effects
         holdings[channelId] = balance;
 
-        if (j > 0) {
+        if (numNewAllocationItems > 0) {
+            // construct newAllocation
+            Outcome.AllocationItem[] memory newAllocation = new Outcome.AllocationItem[](numNewAllocationItems);
+            for (uint256 k = 0; k < numNewAllocationItems; k++){
+                newAllocation[k] = allocation[allocation.length - numNewAllocationItems + k];
+                if (overlap && k == 0) {
+                    newAllocation[k].amount = firstNewAllocationItemAmount;
+                }
+            }
 
-            // trim newAllocation
-            Outcome.AllocationItem[] memory trimmedNewAllocation = new Outcome.AllocationItem[](newAllocationLength);
-
-            // for(uint256 n=0; n<j; n++){
-            //     trimmedNewAllocation[n] = newAllocation[n];
-            // }
-
-            // store hash of trimmed version
-            outcomeHashes[channelId] = keccak256(abi.encode(trimmedNewAllocation));
+            // store hash
+            outcomeHashes[channelId] = keccak256(abi.encode(newAllocation));
         } else {
             delete outcomeHashes[channelId];
         }
 
         // holdings updated BEFORE asset transferred (prevent reentrancy)
-        for (uint256 m = 0; m < k; k++) { // only iterate of actual payouts, not the empty slots
-            if (_isExternalAddress(payouts[k].destination)) {
-                _transferAsset(_bytes32ToAddress(payouts[k].destination), payouts[k].amount);
+        uint256 payoutAmount;
+        for (uint256 m = 0; m < numPayouts; m++) { 
+            if (overlap && m == numPayouts -1) {
+                payoutAmount = finalPayoutAmount;
             } else {
-                holdings[payouts[k].destination] =
-                    holdings[payouts[k].destination] +
-                    payouts[k].amount;
+                payoutAmount = allocation[m].amount;
+            }
+            if (_isExternalAddress(allocation[m].destination)) {
+                _transferAsset(_bytes32ToAddress(allocation[m].destination), payoutAmount);
+            } else {
+                holdings[allocation[m].destination] += payoutAmount;
             }
         }
 
