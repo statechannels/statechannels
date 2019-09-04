@@ -36,7 +36,7 @@ function setupWire (torrent, wire) {
   wire.setKeepAlive(true);
   wire.setTimeout(65000)
   wire.on('keep-alive', () => {
-    console.log(">Don't let it die!", torrent)
+    console.log(">Don't let it die!")
     wire._clearTimeout()
   });
 
@@ -73,22 +73,19 @@ function setupWire (torrent, wire) {
 }
 
 function jumpStart (torrent, wire, requestsToClear) {
-  console.log('>>> JumpStarting! - ', "torrent ready?" + torrent.ready, torrent)
-  console.log('>>> About to clear wire requests: ', requestsToClear, 'from', wire.requests, "length" + wire.requests.length)
+  console.log(`>>> JumpStarting! - Torrent: ${torrent.ready ? "READY" : "NOT READY"} - With ${wire.requests.length} wire requests`, torrent);
   if (!torrent.done && !torrent.paused) {
     wire.requests = [];
-    if (requestsToClear) {
-      const reservationsToCancel = requestsToClear.filter(pieceI => !!torrent.pieces[pieceI] && torrent.pieces[pieceI]._reservations);
-
-      const canceledReservations = reservationsToCancel.map(pieceI => {
-        torrent.pieces[pieceI]._reservations = 0;
-        return torrent.pieces[pieceI];
-      })
-      console.log('>>> Canceled Reservations', canceledReservations)
-
-    }
-    console.log('>>> Requests cleared:', wire.requests, torrent._selections, torrent.pieces)
-    torrent._updateWire(wire)
+    const canceledReservations = [];
+    torrent.pieces = torrent.pieces.map(piece => {
+      if (piece && !!piece._reservations) {
+        piece._reservations = 0;
+        canceledReservations.push(piece);
+      }
+      return piece;
+    })
+    console.log('>>> Requests cleared:', canceledReservations, ' current state:', wire.requests, torrent._selections, torrent.pieces);
+    torrent._updateWire(wire);
   } else {
     console.log('>>> Torrent is working fine or it finished', torrent, wire, requestsToClear);
   }
@@ -105,21 +102,20 @@ function setupTorrent (torrent) {
   torrent.on(TorrentEvents.WIRE, wire => setupWire.call(this, torrent, wire));
   torrent.on('error', error => console.warn('>torrent error', error))
   torrent.on(TorrentEvents.NOTICE, (wire, notice) => {
-    console.log(`> notice recieved from ${wire.peerExtendedHandshake.pseAccount}: ${notice.command}`);
     const { command, data } = notice
+
+    console.log(`> notice recieved from ${wire.peerExtendedHandshake.pseAccount}: ${command} with data:`, data);
     if (command === PaidStreamingExtensionNotices.STOP) {
-      console.log("< stop acknowledged", torrent, torrent.discovery, wire);
+      console.log("< stop acknowledged", torrent, wire);
       wire.paidStreamingExtension.ack();
       torrent.pause();
-    }
-
-    if (command === PaidStreamingExtensionNotices.START) {
-      console.log("< start acknowledged", torrent, torrent.discovery);
+    } else if (command === PaidStreamingExtensionNotices.START) {
+      console.log("< start acknowledged", torrent, wire);
       wire.paidStreamingExtension.ack();
       torrent._startDiscovery();
       torrent.resume();
       wire.unchoke();
-      jumpStart(torrent, wire, data && data.pendingRequests)
+      jumpStart(torrent, wire)
     }
 
     this.emit(ClientEvents.TORRENT_NOTICE, torrent, wire, command);
