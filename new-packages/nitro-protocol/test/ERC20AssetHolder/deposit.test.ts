@@ -1,10 +1,11 @@
 import {ethers} from 'ethers';
 import {expectRevert} from 'magmo-devtools';
 // @ts-ignore
-import ERC20AssetHolderArtifact from '../../build/contracts/TESTERC20AssetHolder.json';
+import ERC20AssetHolderArtifact from '../../build/contracts/ERC20AssetHolder.json';
 // @ts-ignore
 import TokenArtifact from '../../build/contracts/Token.json';
 import {setupContracts, newDepositedEvent, newTransferEvent} from '../test-helpers';
+import {defaultAbiCoder, keccak256} from 'ethers/utils';
 
 const provider = new ethers.providers.JsonRpcProvider(
   `http://localhost:${process.env.DEV_GANACHE_PORT}`,
@@ -15,11 +16,12 @@ let ERC20AssetHolder: ethers.Contract;
 let Token: ethers.Contract;
 let depositedEvent;
 let transferEvent;
-const destinations = [];
+const chainId = 1234;
+const participants = [];
 
 // populate destinations array
-for (let i = 0; i < 4; i++) {
-  destinations[i] = ethers.Wallet.createRandom().address.padEnd(66, '0');
+for (let i = 0; i < 3; i++) {
+  participants[i] = ethers.Wallet.createRandom().address;
 }
 
 beforeAll(async () => {
@@ -35,17 +37,25 @@ const description3 = 'Deposits Tokens (amount < holdings < amount + expectedHeld
 
 describe('deposit', () => {
   it.each`
-    description     | destination        | held   | expectedHeld | amount | heldAfter | reasonString
-    ${description0} | ${destinations[0]} | ${'0'} | ${'0'}       | ${'1'} | ${'1'}    | ${undefined}
-    ${description1} | ${destinations[1]} | ${'0'} | ${'1'}       | ${'2'} | ${'0'}    | ${'Deposit | holdings[destination] is less than expected'}
-    ${description2} | ${destinations[2]} | ${'3'} | ${'1'}       | ${'1'} | ${'3'}    | ${'Deposit | holdings[destination] already meets or exceeds expectedHeld + amount'}
-    ${description3} | ${destinations[3]} | ${'3'} | ${'2'}       | ${'2'} | ${'4'}    | ${undefined}
-  `('$description', async ({destination, held, expectedHeld, amount, reasonString, heldAfter}) => {
+    description     | channelNonce | held   | expectedHeld | amount | heldAfter | reasonString
+    ${description0} | ${0}         | ${'0'} | ${'0'}       | ${'1'} | ${'1'}    | ${undefined}
+    ${description1} | ${1}         | ${'0'} | ${'1'}       | ${'2'} | ${'0'}    | ${'Deposit | holdings[destination] is less than expected'}
+    ${description2} | ${2}         | ${'3'} | ${'1'}       | ${'1'} | ${'3'}    | ${'Deposit | holdings[destination] already meets or exceeds expectedHeld + amount'}
+    ${description3} | ${3}         | ${'3'} | ${'2'}       | ${'2'} | ${'4'}    | ${undefined}
+  `('$description', async ({channelNonce, held, expectedHeld, amount, reasonString, heldAfter}) => {
     held = ethers.utils.bigNumberify(held);
     expectedHeld = ethers.utils.bigNumberify(expectedHeld);
     amount = ethers.utils.bigNumberify(amount);
     heldAfter = ethers.utils.bigNumberify(heldAfter);
     const zero = ethers.utils.bigNumberify('0');
+
+    // compute destination as channelId
+    const destination = keccak256(
+      defaultAbiCoder.encode(
+        ['uint256', 'address[]', 'uint256'],
+        [chainId, participants, channelNonce],
+      ),
+    );
 
     // check msg.sender has enough tokens
     const balance = await Token.balanceOf(signer0Address);
