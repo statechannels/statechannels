@@ -16,7 +16,7 @@ contract AssetHolder {
     // Public methods
     // **************
 
-    function transferAll(bytes32 channelId, Outcome.AllocationItem[] memory allocation) public {
+    function transferAll(bytes32 channelId, bytes memory allocationBytes) public {
         // requirements
         require(
             outcomeHashes[channelId] ==
@@ -24,33 +24,40 @@ contract AssetHolder {
                     abi.encode(
                         Outcome.LabelledAllocationOrGuarantee(
                             uint8(Outcome.OutcomeType.Allocation),
-                            abi.encode(allocation)
+                            allocationBytes
                         )
                     )
                 ),
             'transferAll | submitted data does not match stored outcomeHash'
         );
 
+        Outcome.AllocationItem[] memory allocation = abi.decode(allocationBytes, (Outcome.AllocationItem[]));
         uint256 balance = holdings[channelId];
-        Outcome.AllocationItem[] memory payouts;
-        Outcome.AllocationItem[] memory newAllocation;
-        bytes32 destination;
-        uint256 amount;
+        Outcome.AllocationItem[] memory payouts = new Outcome.AllocationItem[](allocation.length); // we need to fix the length now; this is an upper bound so we may end up with empty slots
+        Outcome.AllocationItem[] memory newAllocation = new Outcome.AllocationItem[](allocation.length); // we need to fix the length now; this is an upper bound so we may end up with empty slots
+        bytes32 _destination;
+        uint256 _amount;
         uint256 j = 0;
+
         for (uint256 i = 0; i < allocation.length; i++) {
-            destination = allocation[i].destination;
-            amount = allocation[i].amount;
             if (balance == 0) {
-                newAllocation[i] = Outcome.AllocationItem(destination, amount);
+                newAllocation[j] = allocation[i];
                 j++;
             } else {
-                // TODO this line causes out of gas error
-                payouts[i] = Outcome.AllocationItem(destination, amount);
-                if (balance <= amount) {
-                    newAllocation[j] = Outcome.AllocationItem(destination, amount.sub(balance));
+                _amount = allocation[i].amount;
+                if (balance <= _amount) {
+                    _destination = allocation[i].destination;
+
+                    Outcome.AllocationItem memory payoutItem = Outcome.AllocationItem(_destination,balance);
+                    payouts[i] = payoutItem;  // TODO this line causes out of gas error
+
+                    Outcome.AllocationItem memory newAllocationItem = Outcome.AllocationItem(_destination, _amount.sub(balance));
+                    newAllocation[j] = newAllocationItem;
+
                     balance = 0;
                 } else {
-                    balance = balance.sub(amount);
+                    payouts[i] = allocation[i];
+                    balance = balance.sub(_amount);
                 }
             }
         }
