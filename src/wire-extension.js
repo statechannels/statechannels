@@ -27,14 +27,16 @@ export default function usePaidStreamingExtension (opts = {}) {
   let wire = null;
   const messageBus = new EventEmitter();
 
-  function executeExtensionCommand (extension, wire, command) {
-    wire.extended(extension, bencode.encode({ msg_type: 0, message: command }));
+  function executeExtensionCommand (extension, wire, command, data = {}) {
+    wire.extended(extension, bencode.encode({ msg_type: 0, command, data }));
   }
 
   function interceptRequests (extension) {
     const undecoratedOnRequestFunction = wire._onRequest;
 
     wire._onRequest = function () {
+      console.log(`!> Incoming request for piece ${arguments[0]}`);
+
       messageBus.emit(PaidStreamingExtensionEvents.REQUEST, wire.paidStreamingExtension && wire.paidStreamingExtension.peerAccount);
 
       // Call onRequest after the handlers triggered by this event have been called
@@ -42,12 +44,14 @@ export default function usePaidStreamingExtension (opts = {}) {
 
       setTimeout(() => {
         if (!extension.isForceChoking) {
+          extension.blockedRequests = []
           undecoratedOnRequestFunction.apply(
             wire,
             undecoratedOnRequestFunctionArgs
           );
         } else {
-          console.warn(">> CHOKING - dropped request");
+          extension.blockedRequests.push(undecoratedOnRequestFunctionArgs[0])
+          console.warn("!> CHOKING - dropped request", extension.blockedRequests);
         }
       }, 0);
     };
@@ -61,7 +65,7 @@ export default function usePaidStreamingExtension (opts = {}) {
     pseAccount = opts.pseAccount;
     peerAccount = null;
     isForceChoking = false;
-    remainingRequests = [];
+    blockedRequests = [];
 
     constructor(wireToUse) {
       wire = wireToUse;
@@ -72,7 +76,7 @@ export default function usePaidStreamingExtension (opts = {}) {
     on (event, callback) {
       messageBus.on(event, callback);
     }
-    
+
     once (event, callback) {
       messageBus.once(event, callback);
     }
@@ -83,7 +87,7 @@ export default function usePaidStreamingExtension (opts = {}) {
       if (!handshake.m || !handshake.m[this.name]) {
         return messageBus.emit(
           PaidStreamingExtensionEvents.WARNING,
-          new Error("Peer does not support paidStreamingExtension")
+          new Error("!>Peer does not support paidStreamingExtension")
         );
       }
       if (handshake.pseAccount) {
@@ -110,7 +114,8 @@ export default function usePaidStreamingExtension (opts = {}) {
       executeExtensionCommand(
         this.name,
         wire,
-        PaidStreamingExtensionNotices.START
+        PaidStreamingExtensionNotices.START,
+        { pendingRequests: this.blockedRequests }
       );
     }
 
@@ -122,17 +127,14 @@ export default function usePaidStreamingExtension (opts = {}) {
       );
     }
 
+
     onMessage (buffer) {
       try {
-        const stringBuffer = buffer.toString();
-        const trailerIndex = stringBuffer.indexOf("ee") + 2;
-        const jsonData = bencode.decode(
-          stringBuffer.substring(0, trailerIndex)
-        );
-        const notice = new TextDecoder("utf-8").decode(jsonData.message);
-        messageBus.emit(PaidStreamingExtensionEvents.NOTICE, notice);
+        const jsonData = bencode.decode(buffer, undefined, undefined, 'utf8')
+        messageBus.emit(PaidStreamingExtensionEvents.NOTICE, jsonData);
       } catch (err) {
-        console.error("err", err);
+        console.error("!> ERRROR on decoding", err);
+        return
       }
     }
   }

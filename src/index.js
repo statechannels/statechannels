@@ -29,7 +29,7 @@ const progressLogger = (logger, status, setStatus) => (torrent = initialState, a
       numPeers: torrent.numPeers
     })
 
-    if (torrentIsDone && torrrentFile.done && !torrent.created) {
+    if (torrentIsDone && !torrent.created && torrrentFile && torrrentFile.done) {
       torrrentFile.getBlobURL((err, url) => {
         setStatus(Object.assign(initialState, { url, filename: torrrentFile.name }));
       });
@@ -47,11 +47,7 @@ const upload = (client, files, setMagnet, progressLogger, setAllowedPeers) => {
 
 const download = (client, torrentOrigin, progressLogger, setClient) => {
   var torrentId = torrentOrigin || "https://webtorrent.io/torrents/sintel.torrent";
-  client.on(ClientEvents.CLIENT_RESET, (newClient, torrent) => {
-    setClient(newClient)
-    progressLogger(torrent, "Leeching");
-  })
-
+  client.on(ClientEvents.CLIENT_RESET, torrent => progressLogger(torrent, "Leeching"));
   client.add(torrentId, torrent => progressLogger(torrent, "Leeching"));
 };
 
