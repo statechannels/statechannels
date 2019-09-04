@@ -36,16 +36,13 @@ function setupWire (torrent, wire) {
   wire.setKeepAlive(true);
   wire.setTimeout(65000)
   wire.on('keep-alive', () => {
-    console.log("Don't you dare die on me!")
+    console.log(">Don't let it die!", torrent)
     wire._clearTimeout()
   });
 
-  wire.on(WireEvents.DOWNLOAD, bytes => {
-    console.log(`>> downloaded ${bytes} bytes`);
-  });
+  wire.on(WireEvents.DOWNLOAD, bytes => { });
 
-  wire.on(WireEvents.REQUEST, () => {
-    console.log('>request');
+  wire.on(WireEvents.REQUEST, (index, offset, length) => {
     const peerAccount = wire.paidStreamingExtension && wire.paidStreamingExtension.peerAccount;
     if (
       peerAccount in this.allowedPeers &&
@@ -75,6 +72,28 @@ function setupWire (torrent, wire) {
   );
 }
 
+function jumpStart (torrent, wire, requestsToClear) {
+  console.log('>>> JumpStarting! - ', "torrent ready?" + torrent.ready, torrent)
+  console.log('>>> About to clear wire requests: ', requestsToClear, 'from', wire.requests, "length" + wire.requests.length)
+  if (!torrent.done && !torrent.paused) {
+    wire.requests = [];
+    if (requestsToClear) {
+      const reservationsToCancel = requestsToClear.filter(pieceI => !!torrent.pieces[pieceI] && torrent.pieces[pieceI]._reservations);
+
+      const canceledReservations = reservationsToCancel.map(pieceI => {
+        torrent.pieces[pieceI]._reservations = 0;
+        return torrent.pieces[pieceI];
+      })
+      console.log('>>> Canceled Reservations', canceledReservations)
+
+    }
+    console.log('>>> Requests cleared:', wire.requests, torrent._selections, torrent.pieces)
+    torrent._updateWire(wire)
+  } else {
+    console.log('>>> Torrent is working fine or it finished', torrent, wire, requestsToClear);
+  }
+}
+
 /**
  * @this {WebTorrentPaidStreamingClient}
  */
@@ -86,38 +105,27 @@ function setupTorrent (torrent) {
   torrent.on(TorrentEvents.WIRE, wire => setupWire.call(this, torrent, wire));
   torrent.on('error', error => console.warn('>torrent error', error))
   torrent.on(TorrentEvents.NOTICE, (wire, notice) => {
-    console.log(`> notice recieved from ${wire.peerExtendedHandshake.pseAccount}: ${notice}`);
-
-    if (notice === PaidStreamingExtensionNotices.STOP) {
+    console.log(`> notice recieved from ${wire.peerExtendedHandshake.pseAccount}: ${notice.command}`);
+    const { command, data } = notice
+    if (command === PaidStreamingExtensionNotices.STOP) {
+      console.log("< stop acknowledged", torrent, torrent.discovery, wire);
       wire.paidStreamingExtension.ack();
       torrent.pause();
-      console.log("< stop acknowledged", torrent, torrent.discovery);
     }
 
-    if (notice === PaidStreamingExtensionNotices.START) {
-      wire.paidStreamingExtension.ack();
-      torrent.wires[0].unchoke()
-      torrent.rescanFiles((err) => {
-        console.log('rescan', err);
-        torrent._startDiscovery();
-        torrent.resume();
-        torrent.wires[0].unchoke()
-        const { length, offset, piece, cb } = torrent.wires[0].requests[0];
-        torrent.wires[0].request(piece, offset, length, cb)
-      })
-
-
+    if (command === PaidStreamingExtensionNotices.START) {
       console.log("< start acknowledged", torrent, torrent.discovery);
-
-      // torrent.destroy(() => this.add(torrent.infoHash, newTorrent => {
-      //   console.log('>torrent restarted', newTorrent)
-      //   // dht.lookup(parsed.infoHash)
-      //   this.emit(ClientEvents.CLIENT_RESET, newTorrent)
-      // }))
+      wire.paidStreamingExtension.ack();
+      torrent._startDiscovery();
+      torrent.resume();
+      wire.unchoke();
+      jumpStart(torrent, wire, data && data.pendingRequests)
     }
 
-    this.emit(ClientEvents.TORRENT_NOTICE, torrent, wire, notice);
+    this.emit(ClientEvents.TORRENT_NOTICE, torrent, wire, command);
   });
+
+
 
   torrent.on(TorrentEvents.DONE, () => this.emit(ClientEvents.TORRENT_DONE, torrent));
 
