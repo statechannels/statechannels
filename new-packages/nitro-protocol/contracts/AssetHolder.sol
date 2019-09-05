@@ -88,6 +88,7 @@ contract AssetHolder {
             }
             if (_isExternalAddress(allocation[m].destination)) {
                 _transferAsset(_bytes32ToAddress(allocation[m].destination), payoutAmount);
+                emit AssetTransferred(allocation[m].destination, payoutAmount);
             } else {
                 holdings[allocation[m].destination] += payoutAmount;
             }
@@ -158,6 +159,10 @@ contract AssetHolder {
         bytes32 indexed destination,
         uint256 amountDeposited,
         uint256 destinationHoldings
+    );
+    event AssetTransferred(
+        bytes32 indexed destination,
+        uint256 amount
     );
 
 }

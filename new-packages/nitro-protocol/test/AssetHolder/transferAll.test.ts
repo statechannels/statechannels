@@ -2,8 +2,9 @@ import {ethers} from 'ethers';
 import {expectRevert} from 'magmo-devtools';
 // @ts-ignore
 import AssetHolderArtifact from '../../build/contracts/TESTAssetHolder.json';
-import {setupContracts} from '../test-helpers';
+import {setupContracts, newAssetTransferredEvent} from '../test-helpers';
 import {defaultAbiCoder, keccak256} from 'ethers/utils';
+import {HashZero} from 'ethers/constants';
 
 const provider = new ethers.providers.JsonRpcProvider(
   `http://localhost:${process.env.DEV_GANACHE_PORT}`,
@@ -11,6 +12,7 @@ const provider = new ethers.providers.JsonRpcProvider(
 const signer0 = provider.getSigner(0); // convention matches setupContracts function
 let signer0Address;
 let AssetHolder: ethers.Contract;
+let assetTransferredEvent;
 const chainId = 1234;
 const participants = ['', '', ''];
 
@@ -21,7 +23,7 @@ beforeAll(async () => {
 
 const description0 = 'Reverts transferAll tx when outcomeHash does not match';
 const description1 =
-  'Pays ETH out when directly-funded channel affords sufficient ETH for external address';
+  'Pays ETH out when directly-funded channel affords sufficient ETH for a single external address';
 
 // amounts are valueString represenationa of wei
 describe('transferAll', () => {
@@ -32,6 +34,7 @@ describe('transferAll', () => {
   `('$description', async ({channelNonce, held, affords, amount, outcomeSet, reasonString}) => {
     held = ethers.utils.parseUnits(held, 'wei');
     amount = ethers.utils.parseUnits(amount, 'wei');
+    affords = ethers.utils.parseUnits(affords, 'wei');
 
     // populate participants array (every test run targets a unique channel)
     for (let i = 0; i < 3; i++) {
@@ -77,18 +80,22 @@ describe('transferAll', () => {
       );
       await expectRevert(() => AssetHolder.transferAll(channelId, allocationBytes), regex);
     } else {
-      // const balanceBefore = await signer0.getBalance();
+      // register for events
+      assetTransferredEvent = newAssetTransferredEvent(AssetHolder, signer0Address.padEnd(66, '0'));
+      // submit tx
       const tx = await AssetHolder.transferAll(channelId, allocationBytes);
       // wait for tx to be mined
       await tx.wait();
 
-      // This is now a unit test and we will test the transferAsset separately. We could emit an event and test that here, though?
-      // // check for EOA balance change
-      // const gasCost = await tx.gasPrice.mul(receipt.cumulativeGasUsed);
-      // await expect(await signer0.getBalance()).toEqual(balanceBefore.add(amount).sub(gasCost));
-      // // check for holdings decrease
-      // const newHoldings = await AssetHolder.holdings(channelId);
-      // expect(newHoldings).toEqual(held.sub(amount));
+      // catch event
+      expect(await assetTransferredEvent).toEqual(amount);
+
+      // check new holdings
+      expect(await AssetHolder.holdings(channelId)).toEqual(held.sub(affords));
+
+      // check new outcomeHash
+      const expectedOutcomeHash = HashZero;
+      expect(await AssetHolder.outcomeHashes(channelId)).toEqual(expectedOutcomeHash);
     }
   });
 });
