@@ -30,6 +30,10 @@ contract ConsensusApp is ForceMoveApp {
 
         return
             validPropose(oldCommitmentData, newCommitmentData, numParticipants) ||
+                validVote(oldCommitmentData, newCommitmentData) ||
+                validVeto(oldCommitmentData, newCommitmentData) ||
+                validPass(oldCommitmentData, newCommitmentData) ||
+                validFinalVote(oldCommitmentData, newCommitmentData) ||
                 invalidTransition();
     }
 
@@ -72,6 +76,67 @@ contract ConsensusApp is ForceMoveApp {
         }
     }
 
+    function validVote(
+        ConsensusCommitmentData memory oldCommitmentData,
+        ConsensusCommitmentData memory newCommitmentData
+    ) internal pure returns (bool) {
+        if (
+            oldCommitmentData.furtherVotesRequired > 1 &&
+            furtherVotesRequiredDecremented(oldCommitmentData, newCommitmentData)
+        ) {
+            validateBalancesUnchanged(oldCommitmentData, newCommitmentData);
+            validateProposalsUnchanged(oldCommitmentData, newCommitmentData);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    function validVeto(
+        ConsensusCommitmentData memory oldCommitmentData,
+        ConsensusCommitmentData memory newCommitmentData
+    ) internal pure returns (bool) {
+        if (
+            oldCommitmentData.furtherVotesRequired > 0 &&
+            newCommitmentData.furtherVotesRequired == 0 &&
+            balancesUnchanged(oldCommitmentData, newCommitmentData)
+        ) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    function validFinalVote(
+        ConsensusCommitmentData memory oldCommitmentData,
+        ConsensusCommitmentData memory newCommitmentData
+    ) internal pure returns (bool) {
+        if (
+            oldCommitmentData.furtherVotesRequired == 1 &&
+            newCommitmentData.furtherVotesRequired == 0 &&
+            balancesUpdated(oldCommitmentData, newCommitmentData)
+        ) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    function validPass(
+        ConsensusCommitmentData memory oldCommitmentData,
+        ConsensusCommitmentData memory newCommitmentData
+    ) internal pure returns (bool) {
+        if (
+            oldCommitmentData.furtherVotesRequired == 0 &&
+            newCommitmentData.furtherVotesRequired == 0
+        ) {
+            validateBalancesUnchanged(oldCommitmentData, newCommitmentData);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     // Helper validators
 
     function validateBalancesUnchanged(
@@ -85,6 +150,17 @@ contract ConsensusApp is ForceMoveApp {
         );
     }
 
+    function validateProposalsUnchanged(
+        ConsensusCommitmentData memory oldCommitmentData,
+        ConsensusCommitmentData memory newCommitmentData
+    ) private pure {
+        require(
+            encodeAndHashOutcome(oldCommitmentData.proposedOutcome) ==
+                encodeAndHashOutcome(newCommitmentData.proposedOutcome),
+            "ConsensusApp: 'proposedOutcome' must be the same between commitments."
+        );
+    }
+
     // Booleans
 
     function furtherVotesRequiredInitialized(
@@ -92,6 +168,31 @@ contract ConsensusApp is ForceMoveApp {
         uint256 numParticipants
     ) private pure returns (bool) {
         return (appData.furtherVotesRequired == numParticipants - 1);
+    }
+
+    function furtherVotesRequiredDecremented(
+        ConsensusCommitmentData memory oldCommitmentData,
+        ConsensusCommitmentData memory newCommitmentData
+    ) private pure returns (bool) {
+        return (newCommitmentData.furtherVotesRequired ==
+            oldCommitmentData.furtherVotesRequired - 1);
+    }
+
+    function balancesUnchanged(
+        ConsensusCommitmentData memory oldCommitmentData,
+        ConsensusCommitmentData memory newCommitmentData
+    ) private pure returns (bool) {
+        return
+            encodeAndHashOutcome(oldCommitmentData.currentOutcome) ==
+                encodeAndHashOutcome(newCommitmentData.currentOutcome);
+    }
+
+    function balancesUpdated(
+        ConsensusCommitmentData memory oldCommitmentData,
+        ConsensusCommitmentData memory newCommitmentData
+    ) private pure returns (bool) {
+        return (encodeAndHashOutcome(oldCommitmentData.proposedOutcome) ==
+            encodeAndHashOutcome(newCommitmentData.currentOutcome));
     }
 
     // Utilitiy helpers

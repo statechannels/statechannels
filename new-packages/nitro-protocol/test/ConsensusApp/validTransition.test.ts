@@ -29,17 +29,52 @@ describe('validTransition', () => {
   it('valid consensus -> propose', async () => {
     const variablePartOld = constructConsensusVariablePart(0);
     const variablePartNew = constructConsensusVariablePart(2);
-    expect(await consensusApp.validTransition(variablePartOld, variablePartNew, 1, 3)).toBe(true);
+    const isValid = await consensusApp.validTransition(variablePartOld, variablePartNew, 1, 3);
+    expect(isValid).toBe(true);
   });
 
   it('invalid consensus -> propose', async () => {
     const variablePartOld = constructConsensusVariablePart(0);
     const variablePartNew = constructConsensusVariablePart(1);
 
-    expectRevert(
+    await expectRevert(
       () => consensusApp.validTransition(variablePartOld, variablePartNew, 1, 3),
       noValidTransitionError,
     );
+  });
+
+  it('valid propose -> propose', async () => {
+    const variablePartOld = constructConsensusVariablePart(2);
+    const variablePartNew = constructConsensusVariablePart(1);
+    expect(await consensusApp.validTransition(variablePartOld, variablePartNew, 1, 3)).toBe(true);
+  });
+
+  it('invalid propose -> propose', async () => {
+    const variablePartOld = constructConsensusVariablePart(2);
+    const variablePartNew = constructConsensusVariablePart(2);
+
+    await expectRevert(
+      () => consensusApp.validTransition(variablePartOld, variablePartNew, 1, 4),
+      noValidTransitionError,
+    );
+  });
+
+  it('valid veto', async () => {
+    const variablePartOld = constructConsensusVariablePart(2);
+    const variablePartNew = constructConsensusVariablePart(0);
+    expect(await consensusApp.validTransition(variablePartOld, variablePartNew, 1, 3)).toBe(true);
+  });
+
+  it('valid pass', async () => {
+    const variablePartOld = constructConsensusVariablePart(0);
+    const variablePartNew = constructConsensusVariablePart(0);
+    expect(await consensusApp.validTransition(variablePartOld, variablePartNew, 1, 3)).toBe(true);
+  });
+
+  it('valid finalVote', async () => {
+    const variablePartOld = constructConsensusVariablePart(1);
+    const variablePartNew = constructConsensusVariablePart(0);
+    expect(await consensusApp.validTransition(variablePartOld, variablePartNew, 1, 3)).toBe(true);
   });
 });
 
