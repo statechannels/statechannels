@@ -24,3 +24,18 @@ It is this second type of payout that allows channels to fund one another in Nit
 - two types of outcomes
 - transfer
 - claim
+
+## Contract topology
+
+<div class="mermaid">
+graph LR
+linkStyle default interpolate basis
+EOA-->|pushOutcome|NitroAdjudicator
+EOA-->|approve|Token
+EOA-->|transferAll, deposit|ETHAssetHolder
+EOA-->|transferAll, deposit|ERC20AssetHolder
+NitroAdjudicator-->|setOutcome| ETHAssetHolder
+NitroAdjudicator-->|setOutcome| ERC20AssetHolder
+ERC20AssetHolder-->|transfer, transferFrom| Token
+
+</div>
