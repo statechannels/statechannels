@@ -41,7 +41,7 @@ The allowed transitions are:
 
 Note: either a transition is a veto, or you can switch on `furtherVotesRequired` to determine which of cases 1-3 it is.
 
-```mermaid
+<div class="mermaid">
 graph LR
 linkStyle default interpolate basis
    A("consensus <br /> (0, w, -)")-->|Propose| B("proposal <br /> (n-1, w, w')")
@@ -51,4 +51,4 @@ linkStyle default interpolate basis
    B-->|Veto| A
    C-->|Veto| A
    D-->|Veto| A
-```
+</div>

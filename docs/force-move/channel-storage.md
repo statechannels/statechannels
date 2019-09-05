@@ -47,7 +47,7 @@ Note that a new validTransitionChain may be implied by a single, signed state th
 
 These states can be represented in the following state machine:
 
-```mermaid
+<div class="mermaid">
 graph LR
 linkStyle default interpolate basis
 NoInfo-->|forceMove| Challenge
@@ -57,7 +57,7 @@ Challenge-->|concludeFromChallenge| Finalized
 Challenge-->|refute| Open
 Challenge-->|respond| Open
 Challenge-->|timeout| Finalized
-```
+</div>
 
 The implementatino of the null fields is as follows. For a cleared challenge:
 
