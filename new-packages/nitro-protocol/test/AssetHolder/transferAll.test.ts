@@ -16,6 +16,20 @@ let assetTransferredEvent;
 const chainId = 1234;
 const participants = ['', '', ''];
 
+function allocationToParams(allocation) {
+  const allocationBytes = defaultAbiCoder.encode(
+    ['tuple(bytes32 destination, uint256 amount)[]'],
+    [allocation],
+  );
+  const labelledAllocationOrGuarantee = [0, allocationBytes];
+  const outcomeContent = defaultAbiCoder.encode(
+    ['tuple(uint8, bytes)'],
+    [labelledAllocationOrGuarantee],
+  );
+  const outcomeHash = keccak256(outcomeContent);
+  return [allocationBytes, outcomeHash];
+}
+
 beforeAll(async () => {
   AssetHolder = await setupContracts(provider, AssetHolderArtifact);
   signer0Address = await signer0.getAddress();
@@ -23,18 +37,26 @@ beforeAll(async () => {
 
 const description0 = 'Reverts transferAll tx when outcomeHash does not match';
 const description1 =
-  'Pays ETH out when directly-funded channel affords sufficient ETH for a single external address';
+  'Pays out all holdings from directly-funded channel allocating to a single external address';
+const description2 =
+  'Pays out some of the holdings when directly-overfunded channel allocates  assets to a single external address';
+const description3 =
+  'Pays out all of the holdings when directly-underfunded channel allocates assets to a single external address';
 
 // amounts are valueString represenationa of wei
 describe('transferAll', () => {
   it.each`
-    description     | channelNonce | held   | affords | amount | outcomeSet | reasonString
-    ${description0} | ${0}         | ${'1'} | ${'0'}  | ${'1'} | ${false}   | ${'transferAll | submitted data does not match stored outcomeHash'}
-    ${description1} | ${1}         | ${'1'} | ${'1'}  | ${'1'} | ${true}    | ${undefined}
-  `('$description', async ({channelNonce, held, affords, amount, outcomeSet, reasonString}) => {
+    description     | channelNonce | held   | allocated | amount | outcomeSet | reasonString
+    ${description0} | ${0}         | ${'1'} | ${'0'}    | ${'1'} | ${false}   | ${'transferAll | submitted data does not match stored outcomeHash'}
+    ${description1} | ${1}         | ${'1'} | ${'1'}    | ${'1'} | ${true}    | ${undefined}
+    ${description2} | ${2}         | ${'2'} | ${'1'}    | ${'1'} | ${true}    | ${undefined}
+    ${description3} | ${3}         | ${'2'} | ${'3'}    | ${'2'} | ${true}    | ${undefined}
+  `('$description', async ({channelNonce, held, allocated, amount, outcomeSet, reasonString}) => {
     held = ethers.utils.parseUnits(held, 'wei');
     amount = ethers.utils.parseUnits(amount, 'wei');
-    affords = ethers.utils.parseUnits(affords, 'wei');
+    allocated = ethers.utils.parseUnits(allocated, 'wei');
+
+    const destination = signer0Address.padEnd(66, '0');
 
     // populate participants array (every test run targets a unique channel)
     for (let i = 0; i < 3; i++) {
@@ -55,17 +77,8 @@ describe('transferAll', () => {
     }
 
     // compute an appropriate allocation
-    const allocation = [{destination: signer0Address.padEnd(66, '0'), amount: affords}]; // sufficient
-    const allocationBytes = defaultAbiCoder.encode(
-      ['tuple(bytes32 destination, uint256 amount)[]'],
-      [allocation],
-    );
-    const labelledAllocationOrGuarantee = [0, allocationBytes];
-    const outcomeContent = defaultAbiCoder.encode(
-      ['tuple(uint8, bytes)'],
-      [labelledAllocationOrGuarantee],
-    );
-    const outcomeHash = keccak256(outcomeContent);
+    const allocation = [{destination, amount: allocated}]; // sufficient
+    const [allocationBytes, outcomeHash] = allocationToParams(allocation);
 
     // set outcomeHash
     if (outcomeSet) {
@@ -81,7 +94,7 @@ describe('transferAll', () => {
       await expectRevert(() => AssetHolder.transferAll(channelId, allocationBytes), regex);
     } else {
       // register for events
-      assetTransferredEvent = newAssetTransferredEvent(AssetHolder, signer0Address.padEnd(66, '0'));
+      assetTransferredEvent = newAssetTransferredEvent(AssetHolder, destination);
       // submit tx
       const tx = await AssetHolder.transferAll(channelId, allocationBytes);
       // wait for tx to be mined
@@ -91,10 +104,18 @@ describe('transferAll', () => {
       expect(await assetTransferredEvent).toEqual(amount);
 
       // check new holdings
-      expect(await AssetHolder.holdings(channelId)).toEqual(held.sub(affords));
+      expect(await AssetHolder.holdings(channelId)).toEqual(held.sub(amount));
 
       // check new outcomeHash
-      const expectedOutcomeHash = HashZero;
+      let expectedOutcomeHash;
+      let _;
+      if (allocated.sub(amount).eq(0)) {
+        expectedOutcomeHash = HashZero;
+      } else {
+        const newAllocation = [{destination, amount: allocated.sub(amount)}]; // sufficient
+        [_, expectedOutcomeHash] = allocationToParams(newAllocation);
+      }
+
       expect(await AssetHolder.outcomeHashes(channelId)).toEqual(expectedOutcomeHash);
     }
   });
