@@ -43,7 +43,11 @@ const description2 =
 const description3 =
   'Pays out all of the holdings when directly-underfunded channel allocates assets to a single external address';
 const description4 =
-  'Transfers holdings when directly-funded channel allocates assets to a single channel';
+  'Transfers all holdings from directly-funded channel allocating to a single channel';
+const description5 =
+  'Transfers all holdings from directly-overfunded channel allocating to a single channel';
+const description6 =
+  'Transfers all holdings from directly-underfunded channel allocating to a single channel';
 
 // amounts are valueString represenationa of wei
 describe('transferAll', () => {
@@ -53,7 +57,9 @@ describe('transferAll', () => {
     ${description1} | ${1}         | ${'1'} | ${'1'}    | ${true}             | ${'1'} | ${true}    | ${undefined}
     ${description2} | ${2}         | ${'2'} | ${'1'}    | ${true}             | ${'1'} | ${true}    | ${undefined}
     ${description3} | ${3}         | ${'2'} | ${'3'}    | ${true}             | ${'2'} | ${true}    | ${undefined}
-    ${description4} | ${4}         | ${'2'} | ${'3'}    | ${false}            | ${'2'} | ${true}    | ${undefined}
+    ${description4} | ${4}         | ${'1'} | ${'1'}    | ${false}            | ${'1'} | ${true}    | ${undefined}
+    ${description5} | ${5}         | ${'2'} | ${'1'}    | ${false}            | ${'1'} | ${true}    | ${undefined}
+    ${description6} | ${6}         | ${'2'} | ${'3'}    | ${false}            | ${'2'} | ${true}    | ${undefined}
   `(
     '$description',
     async ({
