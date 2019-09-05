@@ -73,7 +73,13 @@ contract AssetHolder {
             }
 
             // store hash
-            outcomeHashes[channelId] = keccak256(abi.encode(newAllocation));
+            outcomeHashes[channelId] = keccak256(abi.encode(
+                Outcome.LabelledAllocationOrGuarantee(
+                            uint8(Outcome.OutcomeType.Allocation),
+                            abi.encode(newAllocation)
+                        )
+                    )
+                );
         } else {
             delete outcomeHashes[channelId];
         }
