@@ -3,6 +3,7 @@ import {expectRevert} from 'magmo-devtools';
 // @ts-ignore
 import ETHAssetHolderArtifact from '../../build/contracts/ETHAssetHolder.json';
 import {setupContracts, newDepositedEvent} from '../test-helpers';
+import {defaultAbiCoder, keccak256} from 'ethers/utils';
 
 const provider = new ethers.providers.JsonRpcProvider(
   `http://localhost:${process.env.DEV_GANACHE_PORT}`,
@@ -10,11 +11,12 @@ const provider = new ethers.providers.JsonRpcProvider(
 const signer = provider.getSigner(0); // convention matches setupContracts function
 let ETHAssetHolder: ethers.Contract;
 let depositedEvent;
-const destinations = [];
+const chainId = 1234;
+const participants = [];
 
 // populate destinations array
-for (let i = 0; i < 4; i++) {
-  destinations[i] = ethers.Wallet.createRandom().address.padEnd(66, '0');
+for (let i = 0; i < 3; i++) {
+  participants[i] = ethers.Wallet.createRandom().address;
 }
 
 beforeAll(async () => {
@@ -30,19 +32,27 @@ const description3 =
 // amounts are valueString represenationa of wei
 describe('deposit', () => {
   it.each`
-    description     | destination        | held   | expectedHeld | amount | msgValue | heldAfter | reasonString
-    ${description0} | ${destinations[0]} | ${'0'} | ${'0'}       | ${'1'} | ${'1'}   | ${'1'}    | ${undefined}
-    ${description1} | ${destinations[1]} | ${'0'} | ${'1'}       | ${'2'} | ${'2'}   | ${'0'}    | ${'Deposit | holdings[destination] is less than expected'}
-    ${description2} | ${destinations[2]} | ${'3'} | ${'1'}       | ${'1'} | ${'1'}   | ${'3'}    | ${'Deposit | holdings[destination] already meets or exceeds expectedHeld + amount'}
-    ${description3} | ${destinations[3]} | ${'3'} | ${'2'}       | ${'2'} | ${'2'}   | ${'4'}    | ${undefined}
+    description     | channelNonce | held   | expectedHeld | amount | msgValue | heldAfter | reasonString
+    ${description0} | ${0}         | ${'0'} | ${'0'}       | ${'1'} | ${'1'}   | ${'1'}    | ${undefined}
+    ${description1} | ${1}         | ${'0'} | ${'1'}       | ${'2'} | ${'2'}   | ${'0'}    | ${'Deposit | holdings[destination] is less than expected'}
+    ${description2} | ${2}         | ${'3'} | ${'1'}       | ${'1'} | ${'1'}   | ${'3'}    | ${'Deposit | holdings[destination] already meets or exceeds expectedHeld + amount'}
+    ${description3} | ${3}         | ${'3'} | ${'2'}       | ${'2'} | ${'2'}   | ${'4'}    | ${undefined}
   `(
     '$description',
-    async ({destination, held, expectedHeld, amount, msgValue, reasonString, heldAfter}) => {
+    async ({channelNonce, held, expectedHeld, amount, msgValue, reasonString, heldAfter}) => {
       held = ethers.utils.parseUnits(held, 'wei');
       expectedHeld = ethers.utils.parseUnits(expectedHeld, 'wei');
       amount = ethers.utils.parseUnits(amount, 'wei');
       msgValue = ethers.utils.parseUnits(msgValue, 'wei');
       heldAfter = ethers.utils.parseUnits(heldAfter, 'wei');
+
+      // compute destination as channelId
+      const destination = keccak256(
+        defaultAbiCoder.encode(
+          ['uint256', 'address[]', 'uint256'],
+          [chainId, participants, channelNonce],
+        ),
+      );
 
       // set holdings by depositing in the 'safest' way
       if (held > 0) {
@@ -86,9 +96,9 @@ describe('deposit', () => {
 
         // check for any partial refund
         const gasCost = await tx.gasPrice.mul(receipt.cumulativeGasUsed);
-        await expect(await signer.getBalance()).toEqual(
-          balanceBefore.sub(eventAmountDeposited).sub(gasCost),
-        );
+        await expect(
+          (await signer.getBalance()).eq(balanceBefore.sub(eventAmountDeposited).sub(gasCost)),
+        ).toBe(true);
       }
     },
   );
