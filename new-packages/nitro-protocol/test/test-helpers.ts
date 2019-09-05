@@ -136,3 +136,16 @@ export const newAssetTransferredEvent = (contract: ethers.Contract, destination:
     });
   });
 };
+
+export function randomChannelId(channelNonce = 0) {
+  // populate participants array (every test run targets a unique channel)
+  const participants = [];
+  for (let i = 0; i < 3; i++) {
+    participants[i] = ethers.Wallet.createRandom().address;
+  }
+  // compute channelId
+  const channelId = keccak256(
+    defaultAbiCoder.encode(['uint256', 'address[]', 'uint256'], [1234, participants, channelNonce]),
+  );
+  return channelId;
+}
