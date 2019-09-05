@@ -2,7 +2,7 @@ import {ethers} from 'ethers';
 import {expectRevert} from 'magmo-devtools';
 // @ts-ignore
 import AssetHolderArtifact from '../../build/contracts/TESTAssetHolder.json';
-import {setupContracts, newAssetTransferredEvent} from '../test-helpers';
+import {setupContracts, newAssetTransferredEvent, randomChannelId} from '../test-helpers';
 import {defaultAbiCoder, keccak256} from 'ethers/utils';
 import {HashZero} from 'ethers/constants';
 
@@ -42,81 +42,104 @@ const description2 =
   'Pays out some of the holdings when directly-overfunded channel allocates  assets to a single external address';
 const description3 =
   'Pays out all of the holdings when directly-underfunded channel allocates assets to a single external address';
+const description4 =
+  'Transfers holdings when directly-funded channel allocates assets to a single channel';
 
 // amounts are valueString represenationa of wei
 describe('transferAll', () => {
   it.each`
-    description     | channelNonce | held   | allocated | amount | outcomeSet | reasonString
-    ${description0} | ${0}         | ${'1'} | ${'0'}    | ${'1'} | ${false}   | ${'transferAll | submitted data does not match stored outcomeHash'}
-    ${description1} | ${1}         | ${'1'} | ${'1'}    | ${'1'} | ${true}    | ${undefined}
-    ${description2} | ${2}         | ${'2'} | ${'1'}    | ${'1'} | ${true}    | ${undefined}
-    ${description3} | ${3}         | ${'2'} | ${'3'}    | ${'2'} | ${true}    | ${undefined}
-  `('$description', async ({channelNonce, held, allocated, amount, outcomeSet, reasonString}) => {
-    held = ethers.utils.parseUnits(held, 'wei');
-    amount = ethers.utils.parseUnits(amount, 'wei');
-    allocated = ethers.utils.parseUnits(allocated, 'wei');
+    description     | channelNonce | held   | allocated | beneficiaryExternal | amount | outcomeSet | reasonString
+    ${description0} | ${0}         | ${'1'} | ${'0'}    | ${true}             | ${'1'} | ${false}   | ${'transferAll | submitted data does not match stored outcomeHash'}
+    ${description1} | ${1}         | ${'1'} | ${'1'}    | ${true}             | ${'1'} | ${true}    | ${undefined}
+    ${description2} | ${2}         | ${'2'} | ${'1'}    | ${true}             | ${'1'} | ${true}    | ${undefined}
+    ${description3} | ${3}         | ${'2'} | ${'3'}    | ${true}             | ${'2'} | ${true}    | ${undefined}
+    ${description4} | ${4}         | ${'2'} | ${'3'}    | ${false}            | ${'2'} | ${true}    | ${undefined}
+  `(
+    '$description',
+    async ({
+      channelNonce,
+      held,
+      allocated,
+      beneficiaryExternal,
+      amount,
+      outcomeSet,
+      reasonString,
+    }) => {
+      held = ethers.utils.parseUnits(held, 'wei');
+      amount = ethers.utils.parseUnits(amount, 'wei');
+      allocated = ethers.utils.parseUnits(allocated, 'wei');
 
-    const destination = signer0Address.padEnd(66, '0');
-
-    // populate participants array (every test run targets a unique channel)
-    for (let i = 0; i < 3; i++) {
-      participants[i] = ethers.Wallet.createRandom().address;
-    }
-    // compute channelId
-    const channelId = keccak256(
-      defaultAbiCoder.encode(
-        ['uint256', 'address[]', 'uint256'],
-        [chainId, participants, channelNonce],
-      ),
-    );
-
-    // set holdings (only works on test contract)
-    if (held > 0) {
-      await (await AssetHolder.setHoldings(channelId, held)).wait();
-      expect(await AssetHolder.holdings(channelId)).toEqual(held);
-    }
-
-    // compute an appropriate allocation
-    const allocation = [{destination, amount: allocated}]; // sufficient
-    const [allocationBytes, outcomeHash] = allocationToParams(allocation);
-
-    // set outcomeHash
-    if (outcomeSet) {
-      await (await AssetHolder.setOutcomePermissionless(channelId, outcomeHash)).wait();
-      expect(await AssetHolder.outcomeHashes(channelId)).toBe(outcomeHash);
-    }
-
-    // call method in a slightly different way if expecting a revert
-    if (reasonString) {
-      const regex = new RegExp(
-        '^' + 'VM Exception while processing transaction: revert ' + reasonString + '$',
-      );
-      await expectRevert(() => AssetHolder.transferAll(channelId, allocationBytes), regex);
-    } else {
-      // register for events
-      assetTransferredEvent = newAssetTransferredEvent(AssetHolder, destination);
-      // submit tx
-      const tx = await AssetHolder.transferAll(channelId, allocationBytes);
-      // wait for tx to be mined
-      await tx.wait();
-
-      // catch event
-      expect(await assetTransferredEvent).toEqual(amount);
-
-      // check new holdings
-      expect(await AssetHolder.holdings(channelId)).toEqual(held.sub(amount));
-
-      // check new outcomeHash
-      let expectedOutcomeHash;
-      let _;
-      if (allocated.sub(amount).eq(0)) {
-        expectedOutcomeHash = HashZero;
+      let destination;
+      if (beneficiaryExternal) {
+        destination = signer0Address.padEnd(66, '0');
       } else {
-        const newAllocation = [{destination, amount: allocated.sub(amount)}]; // sufficient
-        [_, expectedOutcomeHash] = allocationToParams(newAllocation);
+        // populate participants array (every test run targets a unique channel)
+        for (let i = 0; i < 3; i++) {
+          participants[i] = ethers.Wallet.createRandom().address;
+        }
+        // compute channelId
+        destination = randomChannelId(channelNonce * 999);
       }
 
-      expect(await AssetHolder.outcomeHashes(channelId)).toEqual(expectedOutcomeHash);
-    }
-  });
+      // compute channelId
+      const channelId = randomChannelId(channelNonce);
+
+      // set holdings (only works on test contract)
+      if (held > 0) {
+        await (await AssetHolder.setHoldings(channelId, held)).wait();
+        expect(await AssetHolder.holdings(channelId)).toEqual(held);
+      }
+
+      // compute an appropriate allocation
+      const allocation = [{destination, amount: allocated}]; // sufficient
+      const [allocationBytes, outcomeHash] = allocationToParams(allocation);
+
+      // set outcomeHash
+      if (outcomeSet) {
+        await (await AssetHolder.setOutcomePermissionless(channelId, outcomeHash)).wait();
+        expect(await AssetHolder.outcomeHashes(channelId)).toBe(outcomeHash);
+      }
+
+      // call method in a slightly different way if expecting a revert
+      if (reasonString) {
+        const regex = new RegExp(
+          '^' + 'VM Exception while processing transaction: revert ' + reasonString + '$',
+        );
+        await expectRevert(() => AssetHolder.transferAll(channelId, allocationBytes), regex);
+      } else {
+        if (beneficiaryExternal) {
+          // register for events
+          assetTransferredEvent = newAssetTransferredEvent(AssetHolder, destination);
+        }
+
+        // submit tx
+        const tx = await AssetHolder.transferAll(channelId, allocationBytes);
+        // wait for tx to be mined
+        await tx.wait();
+
+        if (beneficiaryExternal) {
+          // catch event
+          expect(await assetTransferredEvent).toEqual(amount);
+        }
+
+        // check new holdings
+        expect(await AssetHolder.holdings(channelId)).toEqual(held.sub(amount));
+        if (!beneficiaryExternal) {
+          expect(await AssetHolder.holdings(destination)).toEqual(amount);
+        }
+
+        // check new outcomeHash
+        let expectedOutcomeHash;
+        let _;
+        if (allocated.sub(amount).eq(0)) {
+          expectedOutcomeHash = HashZero;
+        } else {
+          const newAllocation = [{destination, amount: allocated.sub(amount)}]; // sufficient
+          [_, expectedOutcomeHash] = allocationToParams(newAllocation);
+        }
+
+        expect(await AssetHolder.outcomeHashes(channelId)).toEqual(expectedOutcomeHash);
+      }
+    },
+  );
 });
