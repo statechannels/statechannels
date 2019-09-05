@@ -149,3 +149,15 @@ export function randomChannelId(channelNonce = 0) {
   );
   return channelId;
 }
+export const computeChannelId = (
+  chainId: number,
+  participants: string[],
+  channelNonce: number,
+): string => {
+  return keccak256(
+    defaultAbiCoder.encode(
+      ['uint256', 'address[]', 'uint256'],
+      [chainId, participants, channelNonce],
+    ),
+  );
+};
