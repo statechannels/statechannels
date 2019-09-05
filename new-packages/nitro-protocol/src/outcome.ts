@@ -1,6 +1,10 @@
-import {Address, Uint256} from './types';
-import {ADDRESS_ZERO} from '.';
 import {defaultAbiCoder, BigNumberish, bigNumberify} from 'ethers/utils';
+
+// TODO: These are declared in-line for now so this compiles
+// these should be updated once they are defined in the correct locations
+type Uint256 = string;
+type Address = string;
+const ADDRESS_ZERO = '0x' + '0'.repeat(40);
 
 const ALLOCATION = 0;
 const GUARANTEE = 1;
