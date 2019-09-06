@@ -163,7 +163,7 @@ contract AssetHolder {
             }
         }
 
-        // first increase payouts according to original allocation order
+        // next, increase payouts according to original allocation order
         for (uint256 j = 0; j < allocation.length; j++) { // for each destination in the guarantee
             if (balance == 0) {
                 break;
@@ -182,7 +182,9 @@ contract AssetHolder {
                 break;
             }
         }
-
+        
+        // effects
+        holdings[channelId] = balance;
 
         // at this point have payouts array of uint256s, each corresponding to original destinations
         // and allocations has some zero amounts which we want to prune
@@ -211,7 +213,7 @@ contract AssetHolder {
 
         if (newAllocationLength > 0) {
             // store hash
-            outcomeHashes[channelId] = keccak256(abi.encode(
+            outcomeHashes[guaranteedChannelId] = keccak256(abi.encode(
                 Outcome.LabelledAllocationOrGuarantee(
                             uint8(Outcome.OutcomeType.Allocation),
                             abi.encode(newAllocation)
