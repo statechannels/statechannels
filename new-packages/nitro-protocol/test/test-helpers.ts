@@ -149,3 +149,28 @@ export function randomChannelId(channelNonce = 0) {
   );
   return channelId;
 }
+
+export function allocationToParams(allocation) {
+  const allocationBytes = defaultAbiCoder.encode(
+    ['tuple(bytes32 destination, uint256 amount)[]'],
+    [allocation],
+  );
+  const labelledAllocationOrGuarantee = [0, allocationBytes];
+  const outcomeContent = defaultAbiCoder.encode(
+    ['tuple(uint8, bytes)'],
+    [labelledAllocationOrGuarantee],
+  );
+  const outcomeHash = keccak256(outcomeContent);
+  return [allocationBytes, outcomeHash];
+}
+
+export function guaranteeToParams(guarantee) {
+  const destinationsBytes = defaultAbiCoder.encode(['bytes32[]'], [guarantee]);
+  const labelledAllocationOrGuarantee = [1, destinationsBytes];
+  const outcomeContent = defaultAbiCoder.encode(
+    ['tuple(uint8, bytes)'],
+    [labelledAllocationOrGuarantee],
+  );
+  const outcomeHash = keccak256(outcomeContent);
+  return [destinationsBytes, outcomeHash];
+}
