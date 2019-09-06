@@ -16,7 +16,7 @@ contract AssetHolder {
     // Public methods
     // **************
 
-    function transferAll(bytes32 channelId, bytes memory allocationBytes) public {
+    function transferAll(bytes32 channelId, bytes calldata allocationBytes) external {
         // requirements
         require(
             outcomeHashes[channelId] ==
@@ -98,6 +98,130 @@ contract AssetHolder {
             } else {
                 holdings[allocation[m].destination] += payoutAmount;
             }
+        }
+
+    }
+
+    function claimAll(bytes32 channelId, bytes32 guaranteedChannelId, bytes calldata destinationsBytes, bytes calldata allocationBytes) external {
+        // requirements
+
+        require(
+            outcomeHashes[channelId] ==
+                keccak256(
+                    abi.encode(
+                        Outcome.LabelledAllocationOrGuarantee(
+                            uint8(Outcome.OutcomeType.Guarantee),
+                            destinationsBytes
+                        )
+                    )
+                ),
+            'claimAll | submitted data does not match outcomeHash stored against channelId'
+        );
+
+        require(
+            outcomeHashes[guaranteedChannelId] ==
+                keccak256(
+                    abi.encode(
+                        Outcome.LabelledAllocationOrGuarantee(
+                            uint8(Outcome.OutcomeType.Allocation),
+                            allocationBytes
+                        )
+                    )
+                ),
+            'claimAll | submitted data does not match outcomeHash stored against guaranteedChannelId'
+        );
+
+        uint256 balance = holdings[channelId];
+
+        Outcome.AllocationItem[] memory allocation = abi.decode(allocationBytes,(Outcome.AllocationItem[])); // this remains constant length
+        bytes32[] memory destinations = abi.decode(destinationsBytes,(bytes32[]));
+        uint256[] memory payouts = new uint256[](allocation.length);
+        uint256 newAllocationLength = allocation.length;
+
+        // first increase payouts according to guarantee
+        for (uint256 i = 0; i < destinations.length; i++) { // for each destination in the guarantee
+            bytes32 _destination = destinations[i];
+            if (balance == 0) {
+                break;
+            }
+            for (uint256 j = 0; j < allocation.length; j++) { 
+                if (_destination == allocation[j].destination) {  // find amount allocated to that destination (if it exists in channel alllocation)
+                    uint256 _amount = allocation[j].amount;
+                    if (balance >= _amount) {
+                        payouts[j] += _amount;
+                        allocation[j].amount = 0; // subtract _amount;
+                        newAllocationLength--; 
+                        balance -= _amount;
+                        break;
+                    } else { 
+                        payouts[j] += balance;
+                        allocation[j].amount = _amount - balance;
+                        balance = 0;
+                        break;
+                    }
+                }
+            }
+        }
+
+        // next, increase payouts according to original allocation order
+        for (uint256 j = 0; j < allocation.length; j++) { // for each destination in the guarantee
+            if (balance == 0) {
+                break;
+            }   
+            uint256 _amount = allocation[j].amount;
+            if (balance >= _amount) {
+                payouts[j] += _amount;
+                allocation[j].amount = 0; // subtract _amount;
+                newAllocationLength--;
+                balance -= _amount;
+                break;
+            } else { 
+                payouts[j] += balance;
+                allocation[j].amount = _amount - balance;
+                balance = 0;
+                break;
+            }
+        }
+        
+        // effects
+        holdings[channelId] = balance;
+
+        // at this point have payouts array of uint256s, each corresponding to original destinations
+        // and allocations has some zero amounts which we want to prune
+        Outcome.AllocationItem[] memory newAllocation;
+        if (newAllocationLength > 0) {
+            newAllocation = new Outcome.AllocationItem[](newAllocationLength);
+        }
+
+        uint256 k = 0;
+        for (uint256 j = 0; j < allocation.length; j++) { // for each destination in the guarantee
+            if (payouts[j] > 0) {
+                if (_isExternalAddress(allocation[j].destination)) {
+                    _transferAsset(_bytes32ToAddress(allocation[j].destination), payouts[j]);
+                    emit AssetTransferred(allocation[j].destination, payouts[j]);
+                } else {
+                    holdings[allocation[j].destination] += payouts[j];
+                }
+            }
+            if (allocation[j].amount > 0 && newAllocationLength > 0) {
+                newAllocation[k] = allocation[j];
+                k++;
+            }
+        }
+        assert(k == newAllocationLength);
+
+
+        if (newAllocationLength > 0) {
+            // store hash
+            outcomeHashes[guaranteedChannelId] = keccak256(abi.encode(
+                Outcome.LabelledAllocationOrGuarantee(
+                            uint8(Outcome.OutcomeType.Allocation),
+                            abi.encode(newAllocation)
+                        )
+                    )
+                );
+        } else {
+            delete outcomeHashes[channelId];
         }
 
     }
