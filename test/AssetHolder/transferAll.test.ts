@@ -13,76 +13,84 @@ import {HashZero} from 'ethers/constants';
 const provider = new ethers.providers.JsonRpcProvider(
   `http://localhost:${process.env.DEV_GANACHE_PORT}`,
 );
-const signer0 = provider.getSigner(0);
-const signer1 = provider.getSigner(1);
-let signer0Address;
-let signer1Address;
+
 let AssetHolder: ethers.Contract;
-let assetTransferredEvent;
-let assetTransferredEvent0;
-let assetTransferredEvent1;
-const participants = ['', '', ''];
+
+// channels
+const [C4, C5, C6, C7, C8, C9, X7, X8, X9] = Array(9)
+  .fill(undefined)
+  .map(randomChannelId);
+
+// externals
+const A = ethers.Wallet.createRandom().address.padEnd(66, '0');
+const B = ethers.Wallet.createRandom().address.padEnd(66, '0');
 
 beforeAll(async () => {
   AssetHolder = await setupContracts(provider, AssetHolderArtifact);
-  signer0Address = await signer0.getAddress();
-  signer1Address = await signer1.getAddress();
 });
 
-const description0 = 'Reverts transferAll tx when outcomeHash does not match';
+const description0 = '0. Reverts transferAll tx when outcomeHash does not match';
+const reason1 = 'transferAll | submitted data does not match stored outcomeHash';
 const description1 =
-  'Pays out all holdings from directly-funded channel allocating to a single external address';
+  '1. Pays out all holdings from directly-funded channel allocating to a single external address';
 const description2 =
-  'Pays out some of the holdings when directly-overfunded channel allocates assets to a single external address';
+  '2. Pays out some of the holdings when directly-overfunded channel allocates assets to a single external address';
 const description3 =
-  'Pays out all of the holdings when directly-underfunded channel allocates assets to a single external address';
+  '3. Pays out all of the holdings when directly-underfunded channel allocates assets to a single external address';
 const description4 =
-  'Transfers all holdings from directly-funded channel allocating to a single channel';
+  '4. Transfers all holdings from directly-funded channel allocating to a single channel';
 const description5 =
-  'Transfers all holdings from directly-overfunded channel allocating to a single channel';
+  '5. Transfers all holdings from directly-overfunded channel allocating to a single channel';
 const description6 =
-  'Transfers all holdings from directly-underfunded channel allocating to a single channel';
+  '6. Transfers all holdings from directly-underfunded channel allocating to a single channel';
+const description7 =
+  '7. Transfers all holdings from directly-funded channel allocating to two channels (full payout, full payout)';
+const description8 =
+  '8. Transfers all holdings from directly-funded channel allocating to two channels (full payout, no payout)';
+const description9 =
+  '9. Transfers all holdings from directly-funded channel allocating to two channels (full payout, partial payout)';
 
 // amounts are valueString represenationa of wei
-describe('transferAll (single beneficiary)', () => {
+describe('transferAll', () => {
   it.each`
-    description     | channelNonce | held   | allocated | beneficiaryExternal | amount | outcomeSet | reasonString
-    ${description0} | ${0}         | ${'1'} | ${'0'}    | ${true}             | ${'1'} | ${false}   | ${'transferAll | submitted data does not match stored outcomeHash'}
-    ${description1} | ${1}         | ${'1'} | ${'1'}    | ${true}             | ${'1'} | ${true}    | ${undefined}
-    ${description2} | ${2}         | ${'2'} | ${'1'}    | ${true}             | ${'1'} | ${true}    | ${undefined}
-    ${description3} | ${3}         | ${'2'} | ${'3'}    | ${true}             | ${'2'} | ${true}    | ${undefined}
-    ${description4} | ${4}         | ${'1'} | ${'1'}    | ${false}            | ${'1'} | ${true}    | ${undefined}
-    ${description5} | ${5}         | ${'2'} | ${'1'}    | ${false}            | ${'1'} | ${true}    | ${undefined}
-    ${description6} | ${6}         | ${'2'} | ${'3'}    | ${false}            | ${'2'} | ${true}    | ${undefined}
+    description     | nonce | outcomeSet | held   | destBefore  | amountsBefore | destAfter | amountsAfter | heldAfterId | heldAfterAmounts | payouts  | heldAfter | reasonString
+    ${description0} | ${0}  | ${false}   | ${'1'} | ${[A]}      | ${['1']}      | ${[]}     | ${[]}        | ${[]}       | ${[]}            | ${[]}    | ${'0'}    | ${reason1}
+    ${description1} | ${1}  | ${true}    | ${'1'} | ${[A]}      | ${['1']}      | ${[]}     | ${[]}        | ${[]}       | ${[]}            | ${[]}    | ${'0'}    | ${undefined}
+    ${description2} | ${2}  | ${true}    | ${'2'} | ${[A]}      | ${['1']}      | ${[]}     | ${[]}        | ${[]}       | ${[]}            | ${['1']} | ${'1'}    | ${undefined}
+    ${description3} | ${3}  | ${true}    | ${'1'} | ${[A]}      | ${['2']}      | ${[A]}    | ${['1']}     | ${[]}       | ${[]}            | ${['1']} | ${'0'}    | ${undefined}
+    ${description4} | ${4}  | ${true}    | ${'1'} | ${[C4]}     | ${['1']}      | ${[]}     | ${[]}        | ${[C4]}     | ${['1']}         | ${[]}    | ${'0'}    | ${undefined}
+    ${description5} | ${5}  | ${true}    | ${'2'} | ${[C5]}     | ${['1']}      | ${[]}     | ${[]}        | ${[C5]}     | ${['1']}         | ${[]}    | ${'1'}    | ${undefined}
+    ${description6} | ${6}  | ${true}    | ${'1'} | ${[C6]}     | ${['2']}      | ${[C6]}   | ${['1']}     | ${[C6]}     | ${['1']}         | ${[]}    | ${'0'}    | ${undefined}
+    ${description7} | ${7}  | ${true}    | ${'2'} | ${[C7, X7]} | ${['1', '1']} | ${[]}     | ${[]}        | ${[C7, X7]} | ${['1', '1']}    | ${[]}    | ${'0'}    | ${undefined}
+    ${description8} | ${8}  | ${true}    | ${'1'} | ${[C8, X8]} | ${['1', '1']} | ${[X8]}   | ${['1']}     | ${[C8]}     | ${['1']}         | ${[]}    | ${'0'}    | ${undefined}
+    ${description9} | ${9}  | ${true}    | ${'3'} | ${[C9, X9]} | ${['2', '2']} | ${[X9]}   | ${['1']}     | ${[C9, X9]} | ${['2', '1']}    | ${[]}    | ${'0'}    | ${undefined}
   `(
     '$description',
     async ({
-      channelNonce,
-      held,
-      allocated,
-      beneficiaryExternal,
-      amount,
+      nonce,
       outcomeSet,
+      held,
+      destBefore,
+      amountsBefore,
+      destAfter,
+      amountsAfter,
+      heldAfterId,
+      heldAfterAmounts,
+      payouts,
+      heldAfter,
       reasonString,
     }) => {
+      amountsBefore = amountsBefore.map(x => ethers.utils.parseUnits(x, 'wei'));
+      amountsAfter = amountsAfter.map(x => ethers.utils.parseUnits(x, 'wei'));
+      heldAfterAmounts = heldAfterAmounts.map(x => ethers.utils.parseUnits(x, 'wei'));
       held = ethers.utils.parseUnits(held, 'wei');
-      amount = ethers.utils.parseUnits(amount, 'wei');
-      allocated = ethers.utils.parseUnits(allocated, 'wei');
-
-      let destination;
-      if (beneficiaryExternal) {
-        destination = signer0Address.padEnd(66, '0');
-      } else {
-        // populate participants array (every test run targets a unique channel)
-        for (let i = 0; i < 3; i++) {
-          participants[i] = ethers.Wallet.createRandom().address;
-        }
-        // compute channelId
-        destination = randomChannelId(channelNonce * 999);
+      heldAfter = ethers.utils.parseUnits(heldAfter, 'wei');
+      if (payouts.length > 0) {
+        payouts = payouts.map(x => ethers.utils.parseUnits(x, 'wei'));
       }
 
       // compute channelId
-      const channelId = randomChannelId(channelNonce);
+      const channelId = randomChannelId(nonce);
 
       // set holdings (only works on test contract)
       if (held > 0) {
@@ -90,8 +98,19 @@ describe('transferAll (single beneficiary)', () => {
         expect(await AssetHolder.holdings(channelId)).toEqual(held);
       }
 
+      // also reset the holdings for any beneficiary contracts we expect to be updated
+      if (heldAfterId.length > 0) {
+        heldAfterId.forEach(async (x, index) => {
+          await (await AssetHolder.setHoldings(x, 0)).wait();
+          expect((await AssetHolder.holdings(x)).eq(0)).toBe(true);
+        });
+      }
+
       // compute an appropriate allocation
-      const allocation = [{destination, amount: allocated}]; // sufficient
+      const allocation = destBefore.map((x, index, array) => ({
+        destination: x,
+        amount: amountsBefore[index],
+      }));
       const [allocationBytes, outcomeHash] = allocationToParams(allocation);
 
       // set outcomeHash
@@ -107,167 +126,51 @@ describe('transferAll (single beneficiary)', () => {
         );
         await expectRevert(() => AssetHolder.transferAll(channelId, allocationBytes), regex);
       } else {
-        if (beneficiaryExternal) {
-          // register for events
-          assetTransferredEvent = newAssetTransferredEvent(AssetHolder, destination);
-        }
+        // register for events
+        const assetTransferredEvents = destBefore.map((x, index, array) => {
+          if (payouts[index] && payouts[index].gt(0)) {
+            return newAssetTransferredEvent(AssetHolder, x);
+          }
+        });
 
         // submit tx
         const tx = await AssetHolder.transferAll(channelId, allocationBytes);
         // wait for tx to be mined
         await tx.wait();
 
-        if (beneficiaryExternal) {
-          // catch event
-          expect(await assetTransferredEvent).toEqual(amount);
-        }
+        // catch events
+        const resolvedAassetTransferredEvents = await Promise.all(assetTransferredEvents);
+        resolvedAassetTransferredEvents.forEach(async (x, index, array) => {
+          if (payouts[index] && payouts[index].gt(0)) {
+            expect(x).toEqual(payouts[index]);
+          }
+        });
 
         // check new holdings
-        expect(await AssetHolder.holdings(channelId)).toEqual(held.sub(amount));
-        if (!beneficiaryExternal) {
-          expect(await AssetHolder.holdings(destination)).toEqual(amount);
+        expect(await AssetHolder.holdings(channelId)).toEqual(heldAfter);
+        if (heldAfterId.length > 0) {
+          heldAfterId.forEach(async (x, index, array) => {
+            expect(await AssetHolder.holdings(x)).toEqual(heldAfterAmounts[index]);
+          });
         }
 
         // check new outcomeHash
-        let expectedOutcomeHash;
+        let expectedNewOutcomeHash;
         let _;
-        if (allocated.sub(amount).eq(0)) {
-          expectedOutcomeHash = HashZero;
+
+        if (destAfter.length > 0) {
+          // compute an appropriate allocation
+          const allocationAfter = destAfter.map((x, index, array) => ({
+            destination: x,
+            amount: amountsAfter[index],
+          }));
+
+          [_, expectedNewOutcomeHash] = allocationToParams(allocationAfter);
         } else {
-          const newAllocation = [{destination, amount: allocated.sub(amount)}]; // sufficient
-          [_, expectedOutcomeHash] = allocationToParams(newAllocation);
+          expectedNewOutcomeHash = HashZero;
         }
 
-        expect(await AssetHolder.outcomeHashes(channelId)).toEqual(expectedOutcomeHash);
-      }
-    },
-  );
-});
-
-const description9 =
-  'Transfers all holdings from directly-funded channel allocating to two external addresses (full payout, full payout)';
-const description10 =
-  'Transfers all holdings from directly-funded channel allocating to two external addresses (full payout, no payout)';
-const description11 =
-  'Transfers all holdings from directly-funded channel allocating to two external addresses (full payout, partial payout)';
-
-describe('transferAll (two beneficiaries)', () => {
-  it.each`
-    description      | channelNonce | held   | allocated     | beneficiaryExternal | amount        | outcomeSet | reasonString
-    ${description9}  | ${9}         | ${'2'} | ${['1', '1']} | ${[true, true]}     | ${['1', '1']} | ${true}    | ${undefined}
-    ${description10} | ${10}        | ${'1'} | ${['1', '1']} | ${[true, true]}     | ${['1', '0']} | ${true}    | ${undefined}
-    ${description11} | ${11}        | ${'3'} | ${['2', '2']} | ${[true, true]}     | ${['2', '1']} | ${true}    | ${undefined}
-  `(
-    '$description',
-    async ({
-      channelNonce,
-      held,
-      allocated,
-      beneficiaryExternal,
-      amount,
-      outcomeSet,
-      reasonString,
-    }) => {
-      held = ethers.utils.parseUnits(held, 'wei');
-      amount[0] = ethers.utils.parseUnits(amount[0], 'wei');
-      amount[1] = ethers.utils.parseUnits(amount[1], 'wei');
-      allocated[0] = ethers.utils.parseUnits(allocated[0], 'wei');
-      allocated[1] = ethers.utils.parseUnits(allocated[1], 'wei');
-
-      const destination0 = beneficiaryExternal[0]
-        ? signer0Address.padEnd(66, '0')
-        : randomChannelId(channelNonce * 111);
-      const destination1 = beneficiaryExternal[1]
-        ? signer1Address.padEnd(66, '0')
-        : randomChannelId(channelNonce * 222);
-
-      // compute channelId
-      const channelId = randomChannelId(channelNonce);
-
-      // set holdings (only works on test contract)
-      if (held > 0) {
-        await (await AssetHolder.setHoldings(channelId, held)).wait();
-        expect(await AssetHolder.holdings(channelId)).toEqual(held);
-      }
-
-      // compute an appropriate allocation
-      const allocation = [
-        {destination: destination0, amount: allocated[0]},
-        {destination: destination1, amount: allocated[1]},
-      ];
-      const [allocationBytes, outcomeHash] = allocationToParams(allocation);
-
-      // set outcomeHash
-      if (outcomeSet) {
-        await (await AssetHolder.setOutcomePermissionless(channelId, outcomeHash)).wait();
-        expect(await AssetHolder.outcomeHashes(channelId)).toBe(outcomeHash);
-      }
-
-      // call method in a slightly different way if expecting a revert
-      if (reasonString) {
-        const regex = new RegExp(
-          '^' + 'VM Exception while processing transaction: revert ' + reasonString + '$',
-        );
-        await expectRevert(() => AssetHolder.transferAll(channelId, allocationBytes), regex);
-      } else {
-        if (beneficiaryExternal[0] && amount[0].gt(0)) {
-          // register for events
-          assetTransferredEvent0 = newAssetTransferredEvent(AssetHolder, destination0);
-        } else {
-          assetTransferredEvent0 = undefined;
-        }
-        if (beneficiaryExternal[1] && amount[1].gt(0)) {
-          // register for events
-          assetTransferredEvent1 = newAssetTransferredEvent(AssetHolder, destination1);
-        } else {
-          assetTransferredEvent1 = undefined;
-        }
-
-        // submit tx
-        const tx = await AssetHolder.transferAll(channelId, allocationBytes);
-
-        // wait for tx to be mined
-        await tx.wait();
-
-        // wait for all events to be caught
-        [assetTransferredEvent0, assetTransferredEvent1] = await Promise.all([
-          assetTransferredEvent0,
-          assetTransferredEvent1,
-        ]);
-
-        if (beneficiaryExternal[0] && amount[0].gt(0)) {
-          // catch event
-          expect(assetTransferredEvent0).toEqual(amount[0]);
-        } else {
-          expect(AssetHolder.holdings(destination0)).toEqual(amount[0]);
-        }
-        if (beneficiaryExternal[1] && amount[1].gt(0)) {
-          // catch event
-          expect(assetTransferredEvent1).toEqual(amount[1]);
-        } else {
-          expect(await AssetHolder.holdings(destination1)).toEqual(amount[1]);
-        }
-
-        // check new holdings
-        expect(await AssetHolder.holdings(channelId)).toEqual(held.sub(amount[0].add(amount[1])));
-
-        // check new outcomeHash
-        let expectedOutcomeHash;
-        let _;
-        if (allocated[0].eq(amount[0]) && allocated[1].eq(amount[1])) {
-          expectedOutcomeHash = HashZero;
-        } else {
-          const newAllocation = [];
-          if (allocated[0].sub(amount[0]).gt(0)) {
-            newAllocation.push({destination: destination0, amount: allocated[0].sub(amount[0])});
-          }
-          if (allocated[1].sub(amount[1]).gt(0)) {
-            newAllocation.push({destination: destination1, amount: allocated[1].sub(amount[1])});
-          }
-          [_, expectedOutcomeHash] = allocationToParams(newAllocation);
-        }
-
-        expect(await AssetHolder.outcomeHashes(channelId)).toEqual(expectedOutcomeHash);
+        expect(await AssetHolder.outcomeHashes(channelId)).toEqual(expectedNewOutcomeHash);
       }
     },
   );
