@@ -2,8 +2,12 @@ import {ethers} from 'ethers';
 import {expectRevert} from 'magmo-devtools';
 // @ts-ignore
 import AssetHolderArtifact from '../../build/contracts/TESTAssetHolder.json';
-import {setupContracts, newAssetTransferredEvent, randomChannelId} from '../test-helpers';
-import {defaultAbiCoder, keccak256} from 'ethers/utils';
+import {
+  setupContracts,
+  newAssetTransferredEvent,
+  randomChannelId,
+  allocationToParams,
+} from '../test-helpers';
 import {HashZero} from 'ethers/constants';
 
 const provider = new ethers.providers.JsonRpcProvider(
@@ -18,20 +22,6 @@ let assetTransferredEvent;
 let assetTransferredEvent0;
 let assetTransferredEvent1;
 const participants = ['', '', ''];
-
-function allocationToParams(allocation) {
-  const allocationBytes = defaultAbiCoder.encode(
-    ['tuple(bytes32 destination, uint256 amount)[]'],
-    [allocation],
-  );
-  const labelledAllocationOrGuarantee = [0, allocationBytes];
-  const outcomeContent = defaultAbiCoder.encode(
-    ['tuple(uint8, bytes)'],
-    [labelledAllocationOrGuarantee],
-  );
-  const outcomeHash = keccak256(outcomeContent);
-  return [allocationBytes, outcomeHash];
-}
 
 beforeAll(async () => {
   AssetHolder = await setupContracts(provider, AssetHolderArtifact);
