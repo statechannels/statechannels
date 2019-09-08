@@ -11,7 +11,7 @@ import {
 } from '../test-helpers';
 import {HashZero, AddressZero} from 'ethers/constants';
 import {BigNumber} from 'ethers/utils';
-import {Guarantee, GuaranteeOutcome, AllocationOutcome, Allocation} from '../../src/outcome.js';
+import {Allocation} from '../../src/outcome.js';
 
 const provider = new ethers.providers.JsonRpcProvider(
   `http://localhost:${process.env.DEV_GANACHE_PORT}`,
@@ -83,12 +83,8 @@ describe('claimAll', () => {
         destination: x,
         amount: cAmountsBefore[index],
       }));
-      const allocationOutcome: AllocationOutcome = {
-        allocation,
-        assetHolderAddress: AddressZero,
-      };
 
-      const [allocationBytes, outcomeHash] = allocationToParams(allocationOutcome);
+      const [allocationBytes, outcomeHash] = allocationToParams(allocation);
 
       // set outcomeHash
       if (outcomeSet[0]) {
@@ -100,11 +96,8 @@ describe('claimAll', () => {
         destinations: guaranteeDestinations,
         guaranteedChannelAddress: targetId,
       };
-      const guaranteeOutcome: GuaranteeOutcome = {
-        assetHolderAddress: AddressZero,
-        guarantee,
-      };
-      const [guaranteeBytes, gOutcomeContentHash] = guaranteeToParams(guaranteeOutcome);
+
+      const [guaranteeBytes, gOutcomeContentHash] = guaranteeToParams(guarantee);
 
       if (outcomeSet[1]) {
         await (await AssetHolder.setOutcomePermissionless(guarantorId, gOutcomeContentHash)).wait();
@@ -155,12 +148,7 @@ describe('claimAll', () => {
             amount: cAmountsAfter[index],
           }));
 
-          const allocationOutcomeAfter: AllocationOutcome = {
-            assetHolderAddress: AddressZero,
-            allocation: allocationAfter,
-          };
-
-          [_, expectedNewOutcomeHash] = allocationToParams(allocationOutcomeAfter);
+          [_, expectedNewOutcomeHash] = allocationToParams(allocationAfter);
         } else {
           expectedNewOutcomeHash = HashZero;
         }

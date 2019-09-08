@@ -2,9 +2,13 @@ import {ethers} from 'ethers';
 import {expectRevert} from 'magmo-devtools';
 // @ts-ignore
 import AssetHolderArtifact from '../../build/contracts/TESTAssetHolder.json';
-import {setupContracts, newAssetTransferredEvent, randomChannelId} from '../test-helpers';
-import {HashZero, AddressZero} from 'ethers/constants';
-import {encodeAllocation, hashOutcomeContent, AllocationOutcome} from '../../src/outcome';
+import {
+  setupContracts,
+  newAssetTransferredEvent,
+  randomChannelId,
+  allocationToParams,
+} from '../test-helpers';
+import {HashZero} from 'ethers/constants';
 
 const provider = new ethers.providers.JsonRpcProvider(
   `http://localhost:${process.env.DEV_GANACHE_PORT}`,
@@ -18,13 +22,6 @@ let assetTransferredEvent;
 let assetTransferredEvent0;
 let assetTransferredEvent1;
 const participants = ['', '', ''];
-
-function allocationToParams(allocationOutcome: AllocationOutcome) {
-  const allocationBytes = encodeAllocation(allocationOutcome.allocation);
-
-  const outcomeContentHash = hashOutcomeContent(allocationOutcome);
-  return [allocationBytes, outcomeContentHash];
-}
 
 beforeAll(async () => {
   AssetHolder = await setupContracts(provider, AssetHolderArtifact);
@@ -95,10 +92,7 @@ describe('transferAll (single beneficiary)', () => {
 
       // compute an appropriate allocation
       const allocation = [{destination, amount: allocated}]; // sufficient
-      const [allocationBytes, outcomeHash] = allocationToParams({
-        assetHolderAddress: AddressZero,
-        allocation,
-      });
+      const [allocationBytes, outcomeHash] = allocationToParams(allocation);
 
       // set outcomeHash
       if (outcomeSet) {
@@ -141,10 +135,7 @@ describe('transferAll (single beneficiary)', () => {
           expectedOutcomeHash = HashZero;
         } else {
           const newAllocation = [{destination, amount: allocated.sub(amount)}]; // sufficient
-          [_, expectedOutcomeHash] = allocationToParams({
-            assetHolderAddress: AddressZero,
-            allocation: newAllocation,
-          });
+          [_, expectedOutcomeHash] = allocationToParams(newAllocation);
         }
 
         expect(await AssetHolder.outcomeHashes(channelId)).toEqual(expectedOutcomeHash);
@@ -204,10 +195,7 @@ describe('transferAll (two beneficiaries)', () => {
         {destination: destination0, amount: allocated[0]},
         {destination: destination1, amount: allocated[1]},
       ];
-      const [allocationBytes, outcomeHash] = allocationToParams({
-        assetHolderAddress: AddressZero,
-        allocation,
-      });
+      const [allocationBytes, outcomeHash] = allocationToParams(allocation);
 
       // set outcomeHash
       if (outcomeSet) {
@@ -276,10 +264,7 @@ describe('transferAll (two beneficiaries)', () => {
           if (allocated[1].sub(amount[1]).gt(0)) {
             newAllocation.push({destination: destination1, amount: allocated[1].sub(amount[1])});
           }
-          [_, expectedOutcomeHash] = allocationToParams({
-            allocation: newAllocation,
-            assetHolderAddress: AddressZero,
-          });
+          [_, expectedOutcomeHash] = allocationToParams(newAllocation);
         }
 
         expect(await AssetHolder.outcomeHashes(channelId)).toEqual(expectedOutcomeHash);

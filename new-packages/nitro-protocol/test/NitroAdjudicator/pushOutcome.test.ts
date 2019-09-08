@@ -145,10 +145,10 @@ describe('pushOutcome', () => {
         await tx2.wait();
         // check 2x AssetHolder storage against the expected value
         expect(await ETHAssetHolder.outcomeHashes(channelId)).toEqual(
-          hashOutcomeContent(outcome[0]),
+          hashOutcomeContent(outcome[0].allocation),
         );
         expect(await ERC20AssetHolder.outcomeHashes(channelId)).toEqual(
-          hashOutcomeContent(outcome[1]),
+          hashOutcomeContent(outcome[1].allocation),
         );
       }
     },
