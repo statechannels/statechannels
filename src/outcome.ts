@@ -1,148 +1,96 @@
-import {defaultAbiCoder, BigNumberish, bigNumberify} from 'ethers/utils';
+import {defaultAbiCoder, keccak256} from 'ethers/utils';
+import {Bytes32, Address, Uint256} from './types';
 
-// TODO: These are declared in-line for now so this compiles
-// these should be updated once they are defined in the correct locations
-type Uint256 = string;
-type Address = string;
-const ADDRESS_ZERO = '0x' + '0'.repeat(40);
+const ALLOCATION_OUTCOME = 0;
+const GUARANTEE_OUTCOME = 1;
 
-const ALLOCATION = 0;
-const GUARANTEE = 1;
-
-export type Outcome = AllocationOutcome | GuaranteeOutcome;
-
-interface AllocationOutcome {
-  type: typeof ALLOCATION;
-  tokenAllocations: TokenAllocation[];
+// Guarantee Outcome and functions
+export interface GuaranteeOutcome {
+  assetHolderAddress: Address;
+  guarantee: Guarantee;
 }
 
-interface GuaranteeOutcome {
-  type: typeof GUARANTEE;
+export function isGuaranteeOutcome(assetOutcome: AssetOutcome): assetOutcome is GuaranteeOutcome {
+  return 'guarantee' in assetOutcome;
+}
+
+// This returns an encoded AssetOutcome
+export function encodeGuaranteeOutcome(guaranteeOutcome: GuaranteeOutcome): Bytes32 {
+  const guarantee = encodeGuarantee(guaranteeOutcome.guarantee);
+  return defaultAbiCoder.encode(
+    ['tuple(uint8 outcomeType, bytes allocationOrGuarantee)'],
+    [{outcomeType: GUARANTEE_OUTCOME, allocationOrGuarantee: guarantee}],
+  );
+}
+
+// Allocation outcome and functions
+export interface AllocationOutcome {
+  assetHolderAddress: Address;
+  allocation: AllocationItem[];
+}
+
+export function isAllocationOutcome(assetOutcome: AssetOutcome): assetOutcome is AllocationOutcome {
+  return 'allocation' in assetOutcome;
+}
+
+export function encodeAllocationOutcome(allocationOutcome: AllocationOutcome): Bytes32 {
+  const allocation = encodeAllocation(allocationOutcome.allocation);
+  return defaultAbiCoder.encode(
+    ['tuple(uint8 outcomeType, bytes allocationOrGuarantee)'],
+    [{outcomeType: ALLOCATION_OUTCOME, allocationOrGuarantee: allocation}],
+  );
+}
+export type AssetOutcome = AllocationOutcome | GuaranteeOutcome;
+
+export type Outcome = AssetOutcome[];
+
+export function hashOutcome(outcome: Outcome): Bytes32 {
+  const encodedOutcome = encodeOutcome(outcome);
+
+  return keccak256(defaultAbiCoder.encode(['bytes'], [encodedOutcome]));
+}
+
+export function hashOutcomeContent(assetOutcome: AssetOutcome): Bytes32 {
+  return keccak256(encodeOutcomeContent(assetOutcome));
+}
+function encodeOutcomeContent(assetOutcome: AssetOutcome): Bytes32 {
+  return isAllocationOutcome(assetOutcome)
+    ? encodeAllocationOutcome(assetOutcome)
+    : encodeGuaranteeOutcome(assetOutcome);
+}
+export function encodeOutcome(outcome: Outcome): Bytes32 {
+  const encodedAssetOutcomes = outcome.map(o => ({
+    assetHolderAddress: o.assetHolderAddress,
+    outcomeContent: encodeOutcomeContent(o),
+  }));
+
+  return defaultAbiCoder.encode(
+    ['tuple(address assetHolderAddress, bytes outcomeContent)[]'],
+    [encodedAssetOutcomes],
+  );
+}
+
+// Guarantee and functions
+export interface Guarantee {
   guaranteedChannelAddress: Address;
-  tokenGuarantees: TokenGuarantee[];
+  destinations: Bytes32[];
 }
 
-interface TokenAllocation {
-  token: Address;
-  proposedTransfers: Transfer[];
+export function encodeGuarantee(guarantee: Guarantee): Bytes32 {
+  return defaultAbiCoder.encode(
+    ['tuple(uint8 guaranteedChannelId, bytes32[] destinations)'],
+    [[guarantee.guaranteedChannelAddress, guarantee.destinations]],
+  );
 }
 
-interface Transfer {
-  destination: Address;
+// Allocation and functions
+export type Allocation = AllocationItem[];
+
+export interface AllocationItem {
+  destination: Bytes32;
   amount: Uint256;
 }
 
-interface TokenGuarantee {
-  token: Address;
-  prioritizedAddresses: Address[];
-}
-
-export const ETH = ADDRESS_ZERO;
-
-// -------
-// Helpers
-// -------
-
-export function isAllocation(outcome: Outcome): outcome is AllocationOutcome {
-  return outcome.type === ALLOCATION;
-}
-
-export function isGuarantee(outcome: Outcome): outcome is GuaranteeOutcome {
-  return outcome.type === GUARANTEE;
-}
-
-type TokenTransfer = [Address, BigNumberish, Address]; // destination, amount, token
-
-export function makeAllocation(transfers: TokenTransfer[]): AllocationOutcome {
-  // group by token
-  const allocationsByToken = transfers.reduce((grouped, transfer) => {
-    const [destination, amount, token] = transfer;
-    const tokenAllocation = grouped[token] || {token, proposedTransfers: []};
-    tokenAllocation.proposedTransfers = tokenAllocation.proposedTransfers.concat({
-      destination,
-      amount: bigNumberify(amount),
-    });
-    grouped[token] = tokenAllocation;
-    return grouped;
-  }, {});
-
-  return {
-    type: ALLOCATION,
-    tokenAllocations: Object.values(allocationsByToken),
-  };
-}
-
-const tokenOutcomeSolidity = 'tuple(address token, bytes typedOutcome)[]';
-const typedOutcomeSolidity = 'tuple(uint8 outcomeType, bytes data)';
-
-export function encodeAllocation(allocation: AllocationOutcome): string {
-  return defaultAbiCoder.encode(
-    [tokenOutcomeSolidity],
-    [
-      allocation.tokenAllocations.map(({token, proposedTransfers}) => {
-        return {
-          token,
-          typedOutcome: defaultAbiCoder.encode(
-            [typedOutcomeSolidity],
-            [[ALLOCATION, encodeTransfers(proposedTransfers)]],
-          ),
-        };
-      }),
-    ],
-  );
-}
-
-function encodeTransfers(transfers: Transfer[]): string {
-  const allocationDataSolidity = 'tuple(address destination, uint256 amount)[]';
-  return defaultAbiCoder.encode([allocationDataSolidity], [transfers]);
-}
-
-type TokenGuaranteeParam = [Address, Address[]]; // token address, priorities
-
-export function makeGuarantee(
-  guaranteedChannelAddress: Address,
-  guarantees: TokenGuaranteeParam[],
-): GuaranteeOutcome {
-  return {
-    type: GUARANTEE,
-    guaranteedChannelAddress,
-    tokenGuarantees: guarantees.map(([token, prioritizedAddresses]) => ({
-      token,
-      prioritizedAddresses,
-    })),
-  };
-}
-
-const guaranteeDataSolidity = 'tuple(address guaranteedChannelId, address[] destinations)';
-export function encodeGuarantee(guarantee: GuaranteeOutcome): string {
-  return defaultAbiCoder.encode(
-    [tokenOutcomeSolidity],
-    [
-      guarantee.tokenGuarantees.map(({token, prioritizedAddresses}) => {
-        return {
-          token,
-          typedOutcome: defaultAbiCoder.encode(
-            [typedOutcomeSolidity],
-            [
-              [
-                GUARANTEE,
-                encodePriorities(guarantee.guaranteedChannelAddress, prioritizedAddresses),
-              ],
-            ],
-          ),
-        };
-        //
-      }),
-    ],
-  );
-}
-
-function encodePriorities(
-  guaranteedChannelAddress: Address,
-  prioritizedAddresses: Address[],
-): string {
-  return defaultAbiCoder.encode(
-    [guaranteeDataSolidity],
-    [[guaranteedChannelAddress, prioritizedAddresses]],
-  );
+export function encodeAllocation(allocation: Allocation): Bytes32 {
+  return defaultAbiCoder.encode(['tuple(bytes32 destination, uint256 amount)[]'], [allocation]);
 }
