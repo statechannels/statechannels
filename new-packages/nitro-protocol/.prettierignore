@@ -1,1 +1,4 @@
 contracts/AssetHolder.sol
+# NitroAdjudicator fails to get parsed properly by prettier for some reason
+# Ignoring for now until it's fixed
+contracts/NitroAdjudicator.sol
