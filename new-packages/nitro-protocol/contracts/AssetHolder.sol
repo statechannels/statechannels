@@ -102,7 +102,7 @@ contract AssetHolder {
 
     }
 
-    function claimAll(bytes32 channelId, bytes32 guaranteedChannelId, bytes calldata destinationsBytes, bytes calldata allocationBytes) external {
+    function claimAll(bytes32 channelId, bytes32 guaranteedChannelId, bytes calldata guaranteeBytes, bytes calldata allocationBytes) external {
         // requirements
 
         require(
@@ -111,7 +111,7 @@ contract AssetHolder {
                     abi.encode(
                         Outcome.LabelledAllocationOrGuarantee(
                             uint8(Outcome.OutcomeType.Guarantee),
-                            destinationsBytes
+                            guaranteeBytes
                         )
                     )
                 ),
@@ -134,13 +134,13 @@ contract AssetHolder {
         uint256 balance = holdings[channelId];
 
         Outcome.AllocationItem[] memory allocation = abi.decode(allocationBytes,(Outcome.AllocationItem[])); // this remains constant length
-        bytes32[] memory destinations = abi.decode(destinationsBytes,(bytes32[]));
+        Outcome.Guarantee memory guarantee = abi.decode(guaranteeBytes,(Outcome.Guarantee));
         uint256[] memory payouts = new uint256[](allocation.length);
         uint256 newAllocationLength = allocation.length;
 
         // first increase payouts according to guarantee
-        for (uint256 i = 0; i < destinations.length; i++) { // for each destination in the guarantee
-            bytes32 _destination = destinations[i];
+        for (uint256 i = 0; i < guarantee.destinations.length; i++) { // for each destination in the guarantee
+            bytes32 _destination = guarantee.destinations[i];
             if (balance == 0) {
                 break;
             }
