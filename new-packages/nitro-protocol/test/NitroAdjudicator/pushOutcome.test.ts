@@ -6,10 +6,18 @@ import ETHAssetHolderArtifact from '../../build/contracts/ETHAssetHolder.json';
 // @ts-ignore
 import ERC20AssetHolderArtifact from '../../build/contracts/ERC20AssetHolder.json';
 
-import {keccak256, defaultAbiCoder, toUtf8Bytes} from 'ethers/utils';
 import {AddressZero} from 'ethers/constants';
 import {setupContracts, finalizedOutcomeHash} from '../test-helpers';
 import {expectRevert} from 'magmo-devtools';
+import {Channel, getChannelId} from '../../src/channel';
+import {
+  Outcome,
+  hashOutcome,
+  AllocationOutcome,
+  encodeOutcome,
+  hashOutcomeContent,
+} from '../../src/outcome';
+import {State, hashState} from '../../src/state';
 
 const provider = new ethers.providers.JsonRpcProvider(
   `http://localhost:${process.env.DEV_GANACHE_PORT}`,
@@ -20,13 +28,9 @@ let ERC20AssetHolder: ethers.Contract;
 
 // constants for this test suite
 const challengerAddress = AddressZero;
-const chainId = 1234;
+const chainId = '0x1234';
 const participants = ['', '', ''];
 const wallets = new Array(3);
-const outcomeContent = ethers.utils.id('some outcome data'); // just some bytes for now. To actually mean anything, must be properly encoded data
-let outcome;
-let outcomeHash;
-const stateHash = keccak256(defaultAbiCoder.encode(['bytes'], [toUtf8Bytes('mocked state data')]));
 
 // populate wallets and participants array
 for (let i = 0; i < 3; i++) {
@@ -66,33 +70,32 @@ describe('pushOutcome', () => {
       outcomeHashExits,
       reasonString,
     }) => {
-      // compute channelId
-      const channelId = keccak256(
-        defaultAbiCoder.encode(
-          ['uint256', 'address[]', 'uint256'],
-          [chainId, participants, channelNonce],
-        ),
-      );
-
+      const channel: Channel = {chainId, channelNonce, participants};
+      const channelId = getChannelId(channel);
       const finalizesAt = finalized ? 1 : 1e12; // either 1 second after genesis block, or ~ 31000 years after
 
-      const assetOutcomeBytes1 = defaultAbiCoder.encode(
-        ['tuple(address, bytes)'],
-        [[ETHAssetHolder.address, outcomeContent]],
-      );
-      const assetOutcomeBytes2 = defaultAbiCoder.encode(
-        ['tuple(address, bytes)'],
-        [[ERC20AssetHolder.address, outcomeContent]],
-      );
-      outcome = defaultAbiCoder.encode(['bytes[]'], [[assetOutcomeBytes1, assetOutcomeBytes2]]); // use a fixed outcome for all state updates in all tests
-      outcomeHash = keccak256(outcome);
+      const outcome = [
+        {assetHolderAddress: ETHAssetHolder.address, allocation: []},
+        {assetHolderAddress: ERC20AssetHolder.address, allocation: []},
+      ];
+
+      // We don't care about the actual values in the state
+      const state: State = {
+        turnNum: 0,
+        isFinal: false,
+        channel,
+        outcome,
+        appDefinition: AddressZero,
+        appData: '0x0',
+        challengeDuration: '0x1',
+      };
 
       const initialChannelStorageHash = finalizedOutcomeHash(
         storedTurnNumRecord,
         finalizesAt,
-        stateHash,
         challengerAddress,
-        outcomeHash,
+        state,
+        outcome,
       );
       // call public wrapper to set state (only works on test contract)
       const tx = await NitroAdjudicator.setChannelStorageHash(channelId, initialChannelStorageHash);
@@ -106,9 +109,9 @@ describe('pushOutcome', () => {
           channelId,
           declaredTurnNumRecord,
           finalizesAt,
-          stateHash,
+          hashState(state),
           challengerAddress,
-          outcome,
+          encodeOutcome(outcome),
         )).wait();
       }
 
@@ -123,9 +126,9 @@ describe('pushOutcome', () => {
               channelId,
               declaredTurnNumRecord,
               finalizesAt,
-              stateHash,
+              hashState(state),
               challengerAddress,
-              outcome,
+              encodeOutcome(outcome),
             ),
           regex,
         );
@@ -134,15 +137,19 @@ describe('pushOutcome', () => {
           channelId,
           declaredTurnNumRecord,
           finalizesAt,
-          stateHash,
+          hashState(state),
           challengerAddress,
-          outcome,
+          encodeOutcome(outcome),
         );
         // wait for tx to be mined
         await tx2.wait();
         // check 2x AssetHolder storage against the expected value
-        expect(await ETHAssetHolder.outcomeHashes(channelId)).toEqual(keccak256(outcomeContent));
-        expect(await ERC20AssetHolder.outcomeHashes(channelId)).toEqual(keccak256(outcomeContent));
+        expect(await ETHAssetHolder.outcomeHashes(channelId)).toEqual(
+          hashOutcomeContent(outcome[0].allocation),
+        );
+        expect(await ERC20AssetHolder.outcomeHashes(channelId)).toEqual(
+          hashOutcomeContent(outcome[1].allocation),
+        );
       }
     },
   );

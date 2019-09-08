@@ -6,6 +6,7 @@ import ERC20AssetHolderArtifact from '../../build/contracts/ERC20AssetHolder.jso
 import TokenArtifact from '../../build/contracts/Token.json';
 import {setupContracts, newDepositedEvent, newTransferEvent} from '../test-helpers';
 import {defaultAbiCoder, keccak256} from 'ethers/utils';
+import {Channel, getChannelId} from '../../src/channel';
 
 const provider = new ethers.providers.JsonRpcProvider(
   `http://localhost:${process.env.DEV_GANACHE_PORT}`,
@@ -16,7 +17,7 @@ let ERC20AssetHolder: ethers.Contract;
 let Token: ethers.Contract;
 let depositedEvent;
 let transferEvent;
-const chainId = 1234;
+const chainId = '0x1234';
 const participants = [];
 
 // populate destinations array
@@ -49,13 +50,8 @@ describe('deposit', () => {
     heldAfter = ethers.utils.bigNumberify(heldAfter);
     const zero = ethers.utils.bigNumberify('0');
 
-    // compute destination as channelId
-    const destination = keccak256(
-      defaultAbiCoder.encode(
-        ['uint256', 'address[]', 'uint256'],
-        [chainId, participants, channelNonce],
-      ),
-    );
+    const destinationChannel: Channel = {chainId, channelNonce, participants};
+    const destinationChannelId = getChannelId(destinationChannel);
 
     // check msg.sender has enough tokens
     const balance = await Token.balanceOf(signer0Address);
@@ -76,10 +72,10 @@ describe('deposit', () => {
     // set holdings by depositing in the 'safest' way
 
     if (held > 0) {
-      depositedEvent = newDepositedEvent(ERC20AssetHolder, destination);
+      depositedEvent = newDepositedEvent(ERC20AssetHolder, destinationChannelId);
       transferEvent = newTransferEvent(Token, ERC20AssetHolder.address);
-      await (await ERC20AssetHolder.deposit(destination, zero, held)).wait();
-      expect(await ERC20AssetHolder.holdings(destination)).toEqual(held);
+      await (await ERC20AssetHolder.deposit(destinationChannelId, zero, held)).wait();
+      expect(await ERC20AssetHolder.holdings(destinationChannelId)).toEqual(held);
       await depositedEvent;
       expect(await transferEvent).toEqual(held);
     }
@@ -89,25 +85,28 @@ describe('deposit', () => {
       const regex = new RegExp(
         '^' + 'VM Exception while processing transaction: revert ' + reasonString + '$',
       );
-      await expectRevert(() => ERC20AssetHolder.deposit(destination, expectedHeld, amount), regex);
+      await expectRevert(
+        () => ERC20AssetHolder.deposit(destinationChannelId, expectedHeld, amount),
+        regex,
+      );
     } else {
-      depositedEvent = newDepositedEvent(ERC20AssetHolder, destination);
+      depositedEvent = newDepositedEvent(ERC20AssetHolder, destinationChannelId);
       transferEvent = newTransferEvent(Token, ERC20AssetHolder.address);
       const balanceBefore = await Token.balanceOf(signer0Address);
-      const tx = await ERC20AssetHolder.deposit(destination, expectedHeld, amount);
+      const tx = await ERC20AssetHolder.deposit(destinationChannelId, expectedHeld, amount);
       // wait for tx to be mined
       await tx.wait();
 
       // catch Deposited event
       const [eventDestination, eventAmountDeposited, eventHoldings] = await depositedEvent;
-      expect(eventDestination.toUpperCase()).toMatch(destination.toUpperCase());
+      expect(eventDestination.toUpperCase()).toMatch(destinationChannelId.toUpperCase());
       expect(eventAmountDeposited).toEqual(heldAfter.sub(held));
       expect(eventHoldings).toEqual(heldAfter);
 
       // catch Transfer event
       expect(await transferEvent).toEqual(heldAfter.sub(held));
 
-      const allocatedAmount = await ERC20AssetHolder.holdings(destination);
+      const allocatedAmount = await ERC20AssetHolder.holdings(destinationChannelId);
       await expect(allocatedAmount).toEqual(heldAfter);
 
       // check for any partial refund of tokens
