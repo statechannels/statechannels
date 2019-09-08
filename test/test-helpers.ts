@@ -5,11 +5,11 @@ import {HashZero, AddressZero} from 'ethers/constants';
 import {hashChannelStorage} from '../src/channel-storage';
 import {
   Outcome,
-  AllocationOutcome,
   encodeAllocation,
   hashOutcomeContent,
-  GuaranteeOutcome,
   encodeGuarantee,
+  Guarantee,
+  Allocation,
 } from '../src/outcome';
 import {State} from '../src/state';
 
@@ -159,16 +159,16 @@ export function randomChannelId(channelNonce = 0) {
   return channelId;
 }
 
-export function allocationToParams(allocationOutcome: AllocationOutcome) {
-  const allocationBytes = encodeAllocation(allocationOutcome.allocation);
+export function allocationToParams(allocation: Allocation) {
+  const allocationBytes = encodeAllocation(allocation);
 
-  const outcomeContentHash = hashOutcomeContent(allocationOutcome);
+  const outcomeContentHash = hashOutcomeContent(allocation);
   return [allocationBytes, outcomeContentHash];
 }
 
-export function guaranteeToParams(guaranteeOutcome: GuaranteeOutcome) {
-  const guaranteeBytes = encodeGuarantee(guaranteeOutcome.guarantee);
+export function guaranteeToParams(guarantee: Guarantee) {
+  const guaranteeBytes = encodeGuarantee(guarantee);
 
-  const outcomeContentHash = hashOutcomeContent(guaranteeOutcome);
+  const outcomeContentHash = hashOutcomeContent(guarantee);
   return [guaranteeBytes, outcomeContentHash];
 }
