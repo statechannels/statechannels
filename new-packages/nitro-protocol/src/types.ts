@@ -1,7 +1,7 @@
 export type Address = string;
 
-export type Byte = string; // should be 4 long: 0x + val
-export type Bytes32 = string; // should be 64 long: 0x + val
+export type Byte = string; // 0x + val(length 4)
+export type Bytes32 = string; // 0x + val(length 64)
 export type Bytes = string;
 
 // ethersjs lets you pass, and returns a number, for solidity variables of
