@@ -4,7 +4,7 @@ import {expectRevert} from 'magmo-devtools';
 import ForceMoveArtifact from '../../build/contracts/TESTForceMove.json';
 // @ts-ignore
 import countingAppArtifact from '../../build/contracts/CountingApp.json';
-import {keccak256, defaultAbiCoder, toUtf8Bytes} from 'ethers/utils';
+import {keccak256, defaultAbiCoder} from 'ethers/utils';
 import {
   setupContracts,
   sign,
@@ -14,18 +14,22 @@ import {
   finalizedOutcomeHash,
 } from '../test-helpers';
 import {HashZero, AddressZero} from 'ethers/constants';
+import {Outcome, hashOutcome} from '../../src/outcome';
+import {Channel, getChannelId} from '../../src/channel';
+import {State, hashState, getFixedPart, hashAppPart} from '../../src/state';
+import {Bytes32} from '../../src/types';
 
 const provider = new ethers.providers.JsonRpcProvider(
   `http://localhost:${process.env.DEV_GANACHE_PORT}`,
 );
 let ForceMove: ethers.Contract;
 let networkId;
-const chainId = 1234;
+const chainId = '0x1234';
 const participants = ['', '', ''];
 const wallets = new Array(3);
-const challengeDuration = 1000;
-const outcome = ethers.utils.id('some outcome data'); // use a fixed outcome for all state updates in all tests
-const outcomeHash = keccak256(defaultAbiCoder.encode(['bytes'], [outcome]));
+const challengeDuration = '0x1000';
+const assetHolderAddress = ethers.Wallet.createRandom().address;
+const outcome: Outcome = [{assetHolderAddress, allocation: []}];
 let appDefinition;
 
 // populate wallets and participants array
@@ -75,47 +79,31 @@ describe('concludeFromOpen', () => {
       whoSignedWhat,
       reasonString,
     }) => {
-      // compute channelId
-      const channelId = keccak256(
-        defaultAbiCoder.encode(
-          ['uint256', 'address[]', 'uint256'],
-          [chainId, participants, channelNonce],
-        ),
-      );
-      // fixedPart
-      const fixedPart = {
-        chainId,
-        participants,
-        channelNonce,
+      const channel: Channel = {chainId, participants, channelNonce};
+      const channelId = getChannelId(channel);
+
+      const defaultState = {
+        turnNum: largestTurnNum,
+        isFinal: true,
+        channel,
+        outcome,
         appDefinition,
+        appData: '0x0',
         challengeDuration,
       };
 
-      const appPartHash = keccak256(
-        defaultAbiCoder.encode(
-          ['uint256', 'address'], // note lack of appData
-          [challengeDuration, appDefinition],
-        ),
-      );
+      const fixedPart = getFixedPart(defaultState);
+      const outcomeHash = hashOutcome(outcome);
+      const appPartHash = hashAppPart(defaultState);
 
-      // compute stateHashes
-      const stateHashes = new Array(numStates);
+      // get StateHashes
+      const stateHashes: Bytes32[] = [];
       for (let i = 0; i < numStates; i++) {
-        const state = {
+        const state: State = {
+          ...defaultState,
           turnNum: largestTurnNum + i - numStates,
-          isFinal: true,
-          channelId,
-          appPartHash,
-          outcomeHash,
         };
-        stateHashes[i] = keccak256(
-          defaultAbiCoder.encode(
-            [
-              'tuple(uint256 turnNum, bool isFinal, bytes32 channelId, bytes32 appPartHash, bytes32 outcomeHash)',
-            ],
-            [state],
-          ),
-        );
+        stateHashes.push(hashState(state));
       }
 
       // call public wrapper to set state (only works on test contract)

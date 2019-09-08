@@ -2,8 +2,9 @@ import {ethers} from 'ethers';
 // @ts-ignore
 import AssetHolderArtifact from '../../build/contracts/ETHAssetHolder.json';
 import {setupContracts} from '../test-helpers';
-import {keccak256, defaultAbiCoder} from 'ethers/utils';
+import {keccak256} from 'ethers/utils';
 import {expectRevert} from 'magmo-devtools';
+import {Channel, getChannelId} from '../../src/channel';
 
 const provider = new ethers.providers.JsonRpcProvider(
   `http://localhost:${process.env.DEV_GANACHE_PORT}`,
@@ -13,8 +14,8 @@ let channelId;
 
 const participants = ['', '', ''];
 const wallets = new Array(3);
-const chainId = 1234;
-const channelNonce = 9999;
+const chainId = '0x1234';
+const channelNonce = '0x9999';
 const outcomeContent = ethers.utils.id('some outcome data');
 
 // populate wallets and participants array
@@ -25,12 +26,8 @@ for (let i = 0; i < 3; i++) {
 
 beforeAll(async () => {
   AssetHolder = await setupContracts(provider, AssetHolderArtifact);
-  channelId = keccak256(
-    defaultAbiCoder.encode(
-      ['uint256', 'address[]', 'uint256'],
-      [chainId, participants, channelNonce],
-    ),
-  );
+  const channel: Channel = {chainId, participants, channelNonce};
+  channelId = getChannelId(channel);
 });
 
 describe('setOutcome', () => {

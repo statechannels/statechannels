@@ -1,6 +1,17 @@
 import {ethers} from 'ethers';
-import {splitSignature, arrayify, keccak256, defaultAbiCoder} from 'ethers/utils';
+import {splitSignature, arrayify, keccak256, defaultAbiCoder, bigNumberify} from 'ethers/utils';
 import {HashZero, AddressZero} from 'ethers/constants';
+
+import {hashChannelStorage} from '../src/channel-storage';
+import {
+  Outcome,
+  AllocationOutcome,
+  encodeAllocation,
+  hashOutcomeContent,
+  GuaranteeOutcome,
+  encodeGuarantee,
+} from '../src/outcome';
+import {State} from '../src/state';
 
 export async function setupContracts(provider: ethers.providers.JsonRpcProvider, artifact) {
   const networkId = (await provider.getNetwork()).chainId;
@@ -19,37 +30,35 @@ export async function sign(wallet: ethers.Wallet, msgHash: string | Uint8Array) 
 export const nonParticipant = ethers.Wallet.createRandom();
 
 export const clearedChallengeHash = (turnNumRecord: number = 5) => {
-  return keccak256(
-    defaultAbiCoder.encode(
-      ['uint256', 'uint256', 'bytes32', 'address', 'bytes32'],
-      [turnNumRecord, 0, HashZero, AddressZero, HashZero], // turnNum = 5
-    ),
-  );
+  return hashChannelStorage({
+    largestTurnNum: bigNumberify(turnNumRecord).toHexString(),
+    finalizesAt: '0x0',
+    challengerAddress: AddressZero,
+  });
 };
 
 export const ongoingChallengeHash = (turnNumRecord: number = 5) => {
-  return keccak256(
-    defaultAbiCoder.encode(
-      ['uint256', 'uint256', 'bytes32', 'address', 'bytes32'],
-      [turnNumRecord, 1e12, HashZero, AddressZero, HashZero], // turnNum = 5, not yet finalized (31000 years after genesis block)
-    ),
-  );
+  return hashChannelStorage({
+    largestTurnNum: bigNumberify(turnNumRecord).toHexString(),
+    finalizesAt: bigNumberify(1e12).toHexString(),
+    challengerAddress: AddressZero,
+  });
 };
 
 export const finalizedOutcomeHash = (
   turnNumRecord: number = 5,
   finalizesAt: number = 1,
-  stateHash: string = HashZero,
   challengerAddress: string = AddressZero,
-  outcomeHash: string = HashZero,
+  state?: State,
+  outcome?: Outcome,
 ) => {
-  return keccak256(
-    defaultAbiCoder.encode(
-      ['uint256', 'uint256', 'bytes32', 'address', 'bytes32'],
-      [turnNumRecord, finalizesAt, stateHash, AddressZero, outcomeHash], // finalizes at 1 second after genesis block (by default)
-      // the final two fields should also not be zero
-    ),
-  );
+  return hashChannelStorage({
+    largestTurnNum: bigNumberify(turnNumRecord).toHexString(),
+    finalizesAt: bigNumberify(finalizesAt).toHexString(),
+    state,
+    challengerAddress,
+    outcome,
+  });
 };
 
 export const newForceMoveEvent = (contract: ethers.Contract, channelId: string) => {
@@ -150,27 +159,16 @@ export function randomChannelId(channelNonce = 0) {
   return channelId;
 }
 
-export function allocationToParams(allocation) {
-  const allocationBytes = defaultAbiCoder.encode(
-    ['tuple(bytes32 destination, uint256 amount)[]'],
-    [allocation],
-  );
-  const labelledAllocationOrGuarantee = [0, allocationBytes];
-  const outcomeContent = defaultAbiCoder.encode(
-    ['tuple(uint8, bytes)'],
-    [labelledAllocationOrGuarantee],
-  );
-  const outcomeHash = keccak256(outcomeContent);
-  return [allocationBytes, outcomeHash];
+export function allocationToParams(allocationOutcome: AllocationOutcome) {
+  const allocationBytes = encodeAllocation(allocationOutcome.allocation);
+
+  const outcomeContentHash = hashOutcomeContent(allocationOutcome);
+  return [allocationBytes, outcomeContentHash];
 }
 
-export function guaranteeToParams(guarantee) {
-  const destinationsBytes = defaultAbiCoder.encode(['bytes32[]'], [guarantee]);
-  const labelledAllocationOrGuarantee = [1, destinationsBytes];
-  const outcomeContent = defaultAbiCoder.encode(
-    ['tuple(uint8, bytes)'],
-    [labelledAllocationOrGuarantee],
-  );
-  const outcomeHash = keccak256(outcomeContent);
-  return [destinationsBytes, outcomeHash];
+export function guaranteeToParams(guaranteeOutcome: GuaranteeOutcome) {
+  const guaranteeBytes = encodeGuarantee(guaranteeOutcome.guarantee);
+
+  const outcomeContentHash = hashOutcomeContent(guaranteeOutcome);
+  return [guaranteeBytes, outcomeContentHash];
 }
