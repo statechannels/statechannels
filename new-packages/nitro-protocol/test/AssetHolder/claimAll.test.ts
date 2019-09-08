@@ -70,13 +70,13 @@ describe('claimAll', () => {
       payouts = payouts.map(x => ethers.utils.parseUnits(x, 'wei')) as BigNumber[];
 
       // compute channelIds
-      const channelId = randomChannelId(cNonce);
-      const guaranteeId = randomChannelId(gNonce);
+      const targetId = randomChannelId(cNonce);
+      const guarantorId = randomChannelId(gNonce);
 
       // set holdings (only works on test contract)
       if (gHeldBefore.gt(0)) {
-        await (await AssetHolder.setHoldings(guaranteeId, gHeldBefore)).wait();
-        expect(await AssetHolder.holdings(guaranteeId)).toEqual(gHeldBefore);
+        await (await AssetHolder.setHoldings(guarantorId, gHeldBefore)).wait();
+        expect(await AssetHolder.holdings(guarantorId)).toEqual(gHeldBefore);
       }
 
       const allocation: Allocation = cDestBefore.map((x, index, array) => ({
@@ -92,13 +92,13 @@ describe('claimAll', () => {
 
       // set outcomeHash
       if (outcomeSet[0]) {
-        await (await AssetHolder.setOutcomePermissionless(channelId, outcomeHash)).wait();
-        expect(await AssetHolder.outcomeHashes(channelId)).toBe(outcomeHash);
+        await (await AssetHolder.setOutcomePermissionless(targetId, outcomeHash)).wait();
+        expect(await AssetHolder.outcomeHashes(targetId)).toBe(outcomeHash);
       }
 
       const guarantee = {
         destinations: guaranteeDestinations,
-        guaranteedChannelAddress: AddressZero,
+        guaranteedChannelAddress: targetId,
       };
       const guaranteeOutcome: GuaranteeOutcome = {
         assetHolderAddress: AddressZero,
@@ -107,8 +107,8 @@ describe('claimAll', () => {
       const [guaranteeBytes, gOutcomeContentHash] = guaranteeToParams(guaranteeOutcome);
 
       if (outcomeSet[1]) {
-        await (await AssetHolder.setOutcomePermissionless(guaranteeId, gOutcomeContentHash)).wait();
-        expect(await AssetHolder.outcomeHashes(guaranteeId)).toBe(gOutcomeContentHash);
+        await (await AssetHolder.setOutcomePermissionless(guarantorId, gOutcomeContentHash)).wait();
+        expect(await AssetHolder.outcomeHashes(guarantorId)).toBe(gOutcomeContentHash);
       }
 
       // call method in a slightly different way if expecting a revert
@@ -117,7 +117,7 @@ describe('claimAll', () => {
           '^' + 'VM Exception while processing transaction: revert ' + reasonString + '$',
         );
         await expectRevert(
-          () => AssetHolder.claimAll(guaranteeId, channelId, guaranteeBytes, allocationBytes),
+          () => AssetHolder.claimAll(guarantorId, guaranteeBytes, allocationBytes),
           regex,
         );
       } else {
@@ -129,12 +129,7 @@ describe('claimAll', () => {
         });
 
         // submit tx
-        const tx = await AssetHolder.claimAll(
-          guaranteeId,
-          channelId,
-          guaranteeBytes,
-          allocationBytes,
-        );
+        const tx = await AssetHolder.claimAll(guarantorId, guaranteeBytes, allocationBytes);
         // wait for tx to be mined
         await tx.wait();
 
@@ -147,7 +142,7 @@ describe('claimAll', () => {
         });
 
         // assume all beneficiaries are external so no holdings to update other than
-        expect(await AssetHolder.holdings(guaranteeId)).toEqual(gHeldAfter);
+        expect(await AssetHolder.holdings(guarantorId)).toEqual(gHeldAfter);
 
         // check new outcomeHash
         let expectedNewOutcomeHash;
@@ -170,7 +165,7 @@ describe('claimAll', () => {
           expectedNewOutcomeHash = HashZero;
         }
 
-        expect(await AssetHolder.outcomeHashes(channelId)).toEqual(expectedNewOutcomeHash);
+        expect(await AssetHolder.outcomeHashes(targetId)).toEqual(expectedNewOutcomeHash);
       }
     },
   );
