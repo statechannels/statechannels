@@ -9,8 +9,9 @@ import {
   allocationToParams,
   guaranteeToParams,
 } from '../test-helpers';
-import {HashZero} from 'ethers/constants';
+import {HashZero, AddressZero} from 'ethers/constants';
 import {BigNumber} from 'ethers/utils';
+import {Guarantee, GuaranteeOutcome, AllocationOutcome, Allocation} from '../../src/outcome.js';
 
 const provider = new ethers.providers.JsonRpcProvider(
   `http://localhost:${process.env.DEV_GANACHE_PORT}`,
@@ -56,7 +57,7 @@ describe('claimAll', () => {
       cDestAfter,
       cAmountsAfter,
       gNonce,
-      guarantee,
+      guarantee: guaranteeDestinations,
       gHeldBefore,
       gHeldAfter,
       outcomeSet,
@@ -78,13 +79,16 @@ describe('claimAll', () => {
         expect(await AssetHolder.holdings(guaranteeId)).toEqual(gHeldBefore);
       }
 
-      // compute an appropriate allocation
-      const allocation = cDestBefore.map((x, index, array) => ({
+      const allocation: Allocation = cDestBefore.map((x, index, array) => ({
         destination: x,
         amount: cAmountsBefore[index],
       }));
+      const allocationOutcome: AllocationOutcome = {
+        allocation,
+        assetHolderAddress: AddressZero,
+      };
 
-      const [allocationBytes, outcomeHash] = allocationToParams(allocation);
+      const [allocationBytes, outcomeHash] = allocationToParams(allocationOutcome);
 
       // set outcomeHash
       if (outcomeSet[0]) {
@@ -92,12 +96,19 @@ describe('claimAll', () => {
         expect(await AssetHolder.outcomeHashes(channelId)).toBe(outcomeHash);
       }
 
-      // compute a guarantee
-      const [destinationsBytes, gOutcomeHash] = guaranteeToParams(guarantee);
+      const guarantee = {
+        destinations: guaranteeDestinations,
+        guaranteedChannelAddress: AddressZero,
+      };
+      const guaranteeOutcome: GuaranteeOutcome = {
+        assetHolderAddress: AddressZero,
+        guarantee,
+      };
+      const [guaranteeBytes, gOutcomeContentHash] = guaranteeToParams(guaranteeOutcome);
 
       if (outcomeSet[1]) {
-        await (await AssetHolder.setOutcomePermissionless(guaranteeId, gOutcomeHash)).wait();
-        expect(await AssetHolder.outcomeHashes(guaranteeId)).toBe(gOutcomeHash);
+        await (await AssetHolder.setOutcomePermissionless(guaranteeId, gOutcomeContentHash)).wait();
+        expect(await AssetHolder.outcomeHashes(guaranteeId)).toBe(gOutcomeContentHash);
       }
 
       // call method in a slightly different way if expecting a revert
@@ -106,7 +117,7 @@ describe('claimAll', () => {
           '^' + 'VM Exception while processing transaction: revert ' + reasonString + '$',
         );
         await expectRevert(
-          () => AssetHolder.claimAll(guaranteeId, channelId, destinationsBytes, allocationBytes),
+          () => AssetHolder.claimAll(guaranteeId, channelId, guaranteeBytes, allocationBytes),
           regex,
         );
       } else {
@@ -121,7 +132,7 @@ describe('claimAll', () => {
         const tx = await AssetHolder.claimAll(
           guaranteeId,
           channelId,
-          destinationsBytes,
+          guaranteeBytes,
           allocationBytes,
         );
         // wait for tx to be mined
@@ -144,12 +155,17 @@ describe('claimAll', () => {
 
         if (cDestAfter.length > 0) {
           // compute an appropriate allocation
-          const allocationAfter = cDestAfter.map((x, index, array) => ({
+          const allocationAfter: Allocation = cDestAfter.map((x, index, array) => ({
             destination: x,
             amount: cAmountsAfter[index],
           }));
 
-          [_, expectedNewOutcomeHash] = allocationToParams(allocationAfter);
+          const allocationOutcomeAfter: AllocationOutcome = {
+            assetHolderAddress: AddressZero,
+            allocation: allocationAfter,
+          };
+
+          [_, expectedNewOutcomeHash] = allocationToParams(allocationOutcomeAfter);
         } else {
           expectedNewOutcomeHash = HashZero;
         }
