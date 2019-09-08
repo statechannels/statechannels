@@ -38,16 +38,16 @@ const description3 =
 const description4 = 'Reverts when allocation not on chain';
 const description5 = 'Reverts when guarantee not on chain';
 
-// amounts are valueString represenationa of wei
+// amounts are valueString representations of wei
 describe('claimAll', () => {
   it.each`
-    description     | cNonce | cDestBefore  | cAmountsBefore     | cDestAfter | cAmountsAfter | gNonce | guarantee    | gHeldBefore | gHeldAfter | outcomeSet       | payouts            | reasonString
-    ${description0} | ${0}   | ${[I, A, B]} | ${['5', '5', '5']} | ${[A, B]}  | ${['5', '5']} | ${100} | ${[I, A, B]} | ${'5'}      | ${'0'}     | ${[true, true]}  | ${['5', '0', '0']} | ${undefined}
-    ${description1} | ${1}   | ${[A, B]}    | ${['5', '5']}      | ${[A]}     | ${['5']}      | ${101} | ${[I, B, A]} | ${'5'}      | ${'0'}     | ${[true, true]}  | ${['0', '5']}      | ${undefined}
-    ${description2} | ${0}   | ${[I, A, B]} | ${['5', '5', '5']} | ${[A, B]}  | ${['5', '5']} | ${100} | ${[I, B, A]} | ${'5'}      | ${'0'}     | ${[true, true]}  | ${['5', '0', '0']} | ${undefined}
-    ${description3} | ${3}   | ${[A, B]}    | ${['5', '5']}      | ${[B]}     | ${['5']}      | ${103} | ${[I, A, B]} | ${'5'}      | ${'0'}     | ${[true, true]}  | ${['5', '0']}      | ${undefined}
-    ${description4} | ${3}   | ${[A, B]}    | ${['5', '5']}      | ${[B]}     | ${['5']}      | ${103} | ${[I, A, B]} | ${'5'}      | ${'0'}     | ${[false, true]} | ${['5', '0']}      | ${'claimAll | submitted data does not match outcomeHash stored against guaranteedChannelId'}
-    ${description5} | ${3}   | ${[A, B]}    | ${['5', '5']}      | ${[B]}     | ${['5']}      | ${103} | ${[I, A, B]} | ${'5'}      | ${'0'}     | ${[true, false]} | ${['5', '0']}      | ${'claimAll | submitted data does not match outcomeHash stored against channelId'}
+    description     | cNonce | cDestBefore  | cAmountsBefore     | cDestAfter | cAmountsAfter | gNonce | guaranteeDestinations | gHeldBefore | gHeldAfter | outcomeSet       | payouts            | reasonString
+    ${description0} | ${0}   | ${[I, A, B]} | ${['5', '5', '5']} | ${[A, B]}  | ${['5', '5']} | ${100} | ${[I, A, B]}          | ${'5'}      | ${'0'}     | ${[true, true]}  | ${['5', '0', '0']} | ${undefined}
+    ${description1} | ${1}   | ${[A, B]}    | ${['5', '5']}      | ${[A]}     | ${['5']}      | ${101} | ${[I, B, A]}          | ${'5'}      | ${'0'}     | ${[true, true]}  | ${['0', '5']}      | ${undefined}
+    ${description2} | ${0}   | ${[I, A, B]} | ${['5', '5', '5']} | ${[A, B]}  | ${['5', '5']} | ${100} | ${[I, B, A]}          | ${'5'}      | ${'0'}     | ${[true, true]}  | ${['5', '0', '0']} | ${undefined}
+    ${description3} | ${3}   | ${[A, B]}    | ${['5', '5']}      | ${[B]}     | ${['5']}      | ${103} | ${[I, A, B]}          | ${'5'}      | ${'0'}     | ${[true, true]}  | ${['5', '0']}      | ${undefined}
+    ${description4} | ${3}   | ${[A, B]}    | ${['5', '5']}      | ${[B]}     | ${['5']}      | ${103} | ${[I, A, B]}          | ${'5'}      | ${'0'}     | ${[false, true]} | ${['5', '0']}      | ${'claimAll | submitted data does not match outcomeHash stored against guaranteedChannelId'}
+    ${description5} | ${3}   | ${[A, B]}    | ${['5', '5']}      | ${[B]}     | ${['5']}      | ${103} | ${[I, A, B]}          | ${'5'}      | ${'0'}     | ${[true, false]} | ${['5', '0']}      | ${'claimAll | submitted data does not match outcomeHash stored against channelId'}
   `(
     '$description',
     async ({
@@ -57,7 +57,7 @@ describe('claimAll', () => {
       cDestAfter,
       cAmountsAfter,
       gNonce,
-      guarantee: guaranteeDestinations,
+      guaranteeDestinations,
       gHeldBefore,
       gHeldAfter,
       outcomeSet,
