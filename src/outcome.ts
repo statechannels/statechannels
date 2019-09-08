@@ -72,13 +72,13 @@ export function encodeOutcome(outcome: Outcome): Bytes32 {
 
 // Guarantee and functions
 export interface Guarantee {
-  guaranteedChannelAddress: Address;
+  guaranteedChannelAddress: Bytes32;
   destinations: Bytes32[];
 }
 
 export function encodeGuarantee(guarantee: Guarantee): Bytes32 {
   return defaultAbiCoder.encode(
-    ['tuple(uint8 guaranteedChannelId, bytes32[] destinations)'],
+    ['tuple(bytes32 guaranteedChannelId, bytes32[] destinations)'],
     [[guarantee.guaranteedChannelAddress, guarantee.destinations]],
   );
 }

@@ -30,7 +30,7 @@ library Outcome {
     }
 
     struct Guarantee {
-        address guaranteedChannelId;
+        bytes32 guaranteedChannelId;
         bytes32[] destinations;
     }
 

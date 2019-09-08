@@ -102,15 +102,15 @@ contract AssetHolder {
 
     }
 
-    function claimAll(bytes32 channelId, bytes32 guaranteedChannelId, bytes calldata guaranteeBytes, bytes calldata allocationBytes) external {
+    function claimAll(bytes32 channelId, bytes calldata guaranteeBytes, bytes calldata allocationBytes) external {
         // requirements
 
         require(
             outcomeHashes[channelId] ==
                 keccak256(
                     abi.encode(
-                        Outcome.LabelledAllocationOrGuarantee(
-                            uint8(Outcome.OutcomeType.Guarantee),
+                       Outcome.LabelledAllocationOrGuarantee(
+                           uint8(Outcome.OutcomeType.Guarantee),
                             guaranteeBytes
                         )
                     )
@@ -118,8 +118,11 @@ contract AssetHolder {
             'claimAll | submitted data does not match outcomeHash stored against channelId'
         );
 
+        Outcome.Guarantee memory guarantee = abi.decode(guaranteeBytes,(Outcome.Guarantee));
+        
+  
         require(
-            outcomeHashes[guaranteedChannelId] ==
+            outcomeHashes[guarantee.guaranteedChannelId] ==
                 keccak256(
                     abi.encode(
                         Outcome.LabelledAllocationOrGuarantee(
@@ -134,7 +137,7 @@ contract AssetHolder {
         uint256 balance = holdings[channelId];
 
         Outcome.AllocationItem[] memory allocation = abi.decode(allocationBytes,(Outcome.AllocationItem[])); // this remains constant length
-        Outcome.Guarantee memory guarantee = abi.decode(guaranteeBytes,(Outcome.Guarantee));
+
         uint256[] memory payouts = new uint256[](allocation.length);
         uint256 newAllocationLength = allocation.length;
 
@@ -213,7 +216,7 @@ contract AssetHolder {
 
         if (newAllocationLength > 0) {
             // store hash
-            outcomeHashes[guaranteedChannelId] = keccak256(abi.encode(
+            outcomeHashes[guarantee.guaranteedChannelId] = keccak256(abi.encode(
                 Outcome.LabelledAllocationOrGuarantee(
                             uint8(Outcome.OutcomeType.Allocation),
                             abi.encode(newAllocation)
