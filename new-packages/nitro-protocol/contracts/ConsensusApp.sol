@@ -27,6 +27,17 @@ contract ConsensusApp is ForceMoveApp {
         /** todo: we used to validate the length of allocations and destinations.
           * In order to do this validation, proposed outcome needs to be converted from bytes to struct with a shape.
           */
+        if (oldCommitmentData.furtherVotesRequired == 0) {
+            validateConsensusCommitment(oldCommitmentData);
+        } else {
+            validateProposeCommitment(oldCommitmentData);
+        }
+
+        if (newCommitmentData.furtherVotesRequired == 0) {
+            validateConsensusCommitment(newCommitmentData);
+        } else {
+            validateProposeCommitment(newCommitmentData);
+        }
 
         return
             validPropose(oldCommitmentData, newCommitmentData, numParticipants) ||
@@ -138,6 +149,34 @@ contract ConsensusApp is ForceMoveApp {
     }
 
     // Helper validators
+
+    function validateConsensusCommitment(ConsensusCommitmentData memory commitmentData)
+        internal
+        pure
+    {
+        require(
+            commitmentData.furtherVotesRequired == 0,
+            "ConsensusApp: 'furtherVotesRequired' must be 0 during consensus."
+        );
+        require(
+            commitmentData.proposedOutcome.length == 0,
+            "ConsensusApp: 'proposedOutcome' must be reset during consensus."
+        );
+    }
+
+    function validateProposeCommitment(ConsensusCommitmentData memory commitmentData)
+        internal
+        pure
+    {
+        require(
+            commitmentData.furtherVotesRequired != 0,
+            "ConsensusApp: 'furtherVotesRequired' must not be 0 during propose."
+        );
+        require(
+            commitmentData.proposedOutcome.length > 0,
+            "ConsensusApp: 'proposedOutcome' must not be reset during propose."
+        );
+    }
 
     function validateBalancesUnchanged(
         ConsensusCommitmentData memory oldCommitmentData,
