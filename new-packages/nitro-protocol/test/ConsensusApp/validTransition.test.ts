@@ -3,6 +3,7 @@ import {ethers} from 'ethers';
 import ConsensusAppArtifact from '../../build/contracts/ConsensusApp.json';
 
 import {defaultAbiCoder} from 'ethers/utils';
+import {TransactionRequest} from 'ethers/providers';
 import {setupContracts} from '../test-helpers';
 import {expectRevert} from 'magmo-devtools';
 
@@ -10,6 +11,7 @@ const provider = new ethers.providers.JsonRpcProvider(
   `http://localhost:${process.env.DEV_GANACHE_PORT}`,
 );
 let consensusApp: ethers.Contract;
+const ConsensusAppContractInterface = new ethers.utils.Interface(ConsensusAppArtifact.abi);
 interface ConsensusAppVariablePart {
   appData: string;
   outcome: string;
@@ -73,12 +75,21 @@ describe('validTransition', () => {
       outcome[1],
       proposedOutcome[1],
     );
+    const transactionRequest = {
+      data: ConsensusAppContractInterface.functions.validTransition.encode([
+        variablePartOld,
+        variablePartNew,
+        turnNumB,
+        numParticipants,
+      ]),
+    };
     if (reason) {
-      await expectRevert(
-        () => consensusApp.validTransition(variablePartOld, variablePartNew, turnNumB, 3),
-        noValidTransitionError,
-      );
+      await expectRevert(() => sendTransaction(consensusApp.address, transactionRequest));
     } else {
+      // send a transaction, so we can measure gas consumption
+      await sendTransaction(consensusApp.address, transactionRequest);
+
+      // just call the function, so we can check the return value easily
       const isValid = await consensusApp.validTransition(
         variablePartOld,
         variablePartNew,
@@ -89,3 +100,11 @@ describe('validTransition', () => {
     }
   });
 });
+
+async function sendTransaction(contractAddress: string, transaction: TransactionRequest) {
+  // TODO import from test-helpers instead (does not yet exist pending rebase or merge)
+  const signer = provider.getSigner();
+  const response = await signer.sendTransaction({to: contractAddress, ...transaction});
+  await response.wait();
+  return response;
+}
