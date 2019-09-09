@@ -13,6 +13,8 @@ import {HashZero} from 'ethers/constants';
 import {createTransferAllTransaction} from '../../src/transaction-creators/asset-holder';
 
 const AssetHolderInterface = new ethers.utils.Interface(AssetHolderArtifact.abi);
+import {keccak256} from 'ethers/utils/solidity';
+import {id, toUtf8Bytes, bigNumberify} from 'ethers/utils';
 
 const provider = new ethers.providers.JsonRpcProvider(
   `http://localhost:${process.env.DEV_GANACHE_PORT}`,
@@ -62,24 +64,24 @@ const description12 =
 // amounts are valueString represenationa of wei
 describe('transferAll', () => {
   it.each`
-    description      | nonce | outcomeSet | held   | destBefore | amountsBefore | destAfter | amountsAfter | heldAfterId | heldAfterAmounts | payouts       | heldAfter | reasonString
-    ${description0}  | ${0}  | ${false}   | ${'1'} | ${[A]}     | ${['1']}      | ${[]}     | ${[]}        | ${[]}       | ${[]}            | ${[]}         | ${'0'}    | ${reason1}
-    ${description1}  | ${1}  | ${true}    | ${'1'} | ${[A]}     | ${['1']}      | ${[]}     | ${[]}        | ${[]}       | ${[]}            | ${[]}         | ${'0'}    | ${undefined}
-    ${description2}  | ${2}  | ${true}    | ${'2'} | ${[A]}     | ${['1']}      | ${[]}     | ${[]}        | ${[]}       | ${[]}            | ${['1']}      | ${'1'}    | ${undefined}
-    ${description3}  | ${3}  | ${true}    | ${'1'} | ${[A]}     | ${['2']}      | ${[A]}    | ${['1']}     | ${[]}       | ${[]}            | ${['1']}      | ${'0'}    | ${undefined}
-    ${description4}  | ${4}  | ${true}    | ${'1'} | ${[C]}     | ${['1']}      | ${[]}     | ${[]}        | ${[C]}      | ${['1']}         | ${[]}         | ${'0'}    | ${undefined}
-    ${description5}  | ${5}  | ${true}    | ${'2'} | ${[C]}     | ${['1']}      | ${[]}     | ${[]}        | ${[C]}      | ${['1']}         | ${[]}         | ${'1'}    | ${undefined}
-    ${description6}  | ${6}  | ${true}    | ${'1'} | ${[C]}     | ${['2']}      | ${[C]}    | ${['1']}     | ${[C]}      | ${['1']}         | ${[]}         | ${'0'}    | ${undefined}
-    ${description7}  | ${7}  | ${true}    | ${'2'} | ${[A, B]}  | ${['1', '1']} | ${[]}     | ${[]}        | ${[]}       | ${[]}            | ${['1', '1']} | ${'0'}    | ${undefined}
-    ${description8}  | ${8}  | ${true}    | ${'1'} | ${[A, B]}  | ${['1', '1']} | ${[B]}    | ${['1']}     | ${[]}       | ${[]}            | ${['1']}      | ${'0'}    | ${undefined}
-    ${description9}  | ${9}  | ${true}    | ${'3'} | ${[A, B]}  | ${['2', '2']} | ${[B]}    | ${['1']}     | ${[]}       | ${[]}            | ${['2', '1']} | ${'0'}    | ${undefined}
-    ${description10} | ${10} | ${true}    | ${'2'} | ${[C, X]}  | ${['1', '1']} | ${[]}     | ${[]}        | ${[C, X]}   | ${['1', '1']}    | ${[]}         | ${'0'}    | ${undefined}
-    ${description11} | ${11} | ${true}    | ${'1'} | ${[C, X]}  | ${['1', '1']} | ${[X]}    | ${['1']}     | ${[C]}      | ${['1']}         | ${[]}         | ${'0'}    | ${undefined}
-    ${description12} | ${12} | ${true}    | ${'3'} | ${[C, X]}  | ${['2', '2']} | ${[X]}    | ${['1']}     | ${[C, X]}   | ${['2', '1']}    | ${[]}         | ${'0'}    | ${undefined}
+    description      | outcomeSet | held   | destBefore | amountsBefore | destAfter | amountsAfter | heldAfterId | heldAfterAmounts | payouts       | heldAfter | reasonString
+    ${description0}  | ${false}   | ${'1'} | ${[A]}     | ${['1']}      | ${[]}     | ${[]}        | ${[]}       | ${[]}            | ${[]}         | ${'0'}    | ${reason1}
+    ${description1}  | ${true}    | ${'1'} | ${[A]}     | ${['1']}      | ${[]}     | ${[]}        | ${[]}       | ${[]}            | ${[]}         | ${'0'}    | ${undefined}
+    ${description2}  | ${true}    | ${'2'} | ${[A]}     | ${['1']}      | ${[]}     | ${[]}        | ${[]}       | ${[]}            | ${['1']}      | ${'1'}    | ${undefined}
+    ${description3}  | ${true}    | ${'1'} | ${[A]}     | ${['2']}      | ${[A]}    | ${['1']}     | ${[]}       | ${[]}            | ${['1']}      | ${'0'}    | ${undefined}
+    ${description4}  | ${true}    | ${'1'} | ${[C]}     | ${['1']}      | ${[]}     | ${[]}        | ${[C]}      | ${['1']}         | ${[]}         | ${'0'}    | ${undefined}
+    ${description5}  | ${true}    | ${'2'} | ${[C]}     | ${['1']}      | ${[]}     | ${[]}        | ${[C]}      | ${['1']}         | ${[]}         | ${'1'}    | ${undefined}
+    ${description6}  | ${true}    | ${'1'} | ${[C]}     | ${['2']}      | ${[C]}    | ${['1']}     | ${[C]}      | ${['1']}         | ${[]}         | ${'0'}    | ${undefined}
+    ${description7}  | ${true}    | ${'2'} | ${[A, B]}  | ${['1', '1']} | ${[]}     | ${[]}        | ${[]}       | ${[]}            | ${['1', '1']} | ${'0'}    | ${undefined}
+    ${description8}  | ${true}    | ${'1'} | ${[A, B]}  | ${['1', '1']} | ${[B]}    | ${['1']}     | ${[]}       | ${[]}            | ${['1']}      | ${'0'}    | ${undefined}
+    ${description9}  | ${true}    | ${'3'} | ${[A, B]}  | ${['2', '2']} | ${[B]}    | ${['1']}     | ${[]}       | ${[]}            | ${['2', '1']} | ${'0'}    | ${undefined}
+    ${description10} | ${true}    | ${'2'} | ${[C, X]}  | ${['1', '1']} | ${[]}     | ${[]}        | ${[C, X]}   | ${['1', '1']}    | ${[]}         | ${'0'}    | ${undefined}
+    ${description11} | ${true}    | ${'1'} | ${[C, X]}  | ${['1', '1']} | ${[X]}    | ${['1']}     | ${[C]}      | ${['1']}         | ${[]}         | ${'0'}    | ${undefined}
+    ${description12} | ${true}    | ${'3'} | ${[C, X]}  | ${['2', '2']} | ${[X]}    | ${['1']}     | ${[C, X]}   | ${['2', '1']}    | ${[]}         | ${'0'}    | ${undefined}
   `(
     '$description',
     async ({
-      nonce,
+      description,
       outcomeSet,
       held,
       destBefore,
@@ -102,6 +104,9 @@ describe('transferAll', () => {
       }
 
       // compute channelId
+      const nonce = bigNumberify(id(description))
+        .maskn(30)
+        .toNumber();
       const channelId = randomChannelId(nonce);
 
       // set holdings (only works on test contract)
