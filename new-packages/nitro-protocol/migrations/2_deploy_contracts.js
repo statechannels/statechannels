@@ -2,6 +2,7 @@ const Token = artifacts.require('Token');
 const ETHAssetHolder = artifacts.require('ETHAssetHolder');
 const ERC20AssetHolder = artifacts.require('ERC20AssetHolder');
 const NitroAdjudicator = artifacts.require('NitroAdjudicator');
+const ConsensusApp = artifacts.require('ConsensusApp');
 
 module.exports = async function(deployer) {
   deployer.then(async () => {
@@ -18,5 +19,6 @@ module.exports = async function(deployer) {
       NitroAdjudicatorInstance.address,
       TokenInstance.address,
     );
+    await deployer.deploy(ConsensusApp);
   });
 };
