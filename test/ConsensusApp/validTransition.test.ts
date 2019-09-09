@@ -87,6 +87,15 @@ describe('validTransition', () => {
     );
   });
 
+  it('invalid veto: proposedOutcome not empty', async () => {
+    const variablePartOld = constructConsensusVariablePart(2, defaultOutcome1, defaultOutcome2);
+    const variablePartNew = constructConsensusVariablePart(0, defaultOutcome1, defaultOutcome2);
+    await expectRevert(
+      () => consensusApp.validTransition(variablePartOld, variablePartNew, defaultTurn, 3),
+      noValidTransitionError,
+    );
+  });
+
   it('valid pass', async () => {
     const variablePartOld = constructConsensusVariablePart(0, defaultOutcome1, emptyOutcome);
     const variablePartNew = constructConsensusVariablePart(0, defaultOutcome1, emptyOutcome);
@@ -115,6 +124,15 @@ describe('validTransition', () => {
   it('invalid finalVote: proposedOutcome1 ≠ currentOutcome2', async () => {
     const variablePartOld = constructConsensusVariablePart(1, defaultOutcome1, defaultOutcome2);
     const variablePartNew = constructConsensusVariablePart(0, defaultOutcome3, emptyOutcome);
+    await expectRevert(
+      () => consensusApp.validTransition(variablePartOld, variablePartNew, defaultTurn, 3),
+      noValidTransitionError,
+    );
+  });
+
+  it('invalid finalVote: proposedOutcome not empty', async () => {
+    const variablePartOld = constructConsensusVariablePart(1, defaultOutcome1, defaultOutcome2);
+    const variablePartNew = constructConsensusVariablePart(0, defaultOutcome2, defaultOutcome2);
     await expectRevert(
       () => consensusApp.validTransition(variablePartOld, variablePartNew, defaultTurn, 3),
       noValidTransitionError,
