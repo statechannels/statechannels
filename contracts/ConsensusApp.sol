@@ -4,237 +4,56 @@ pragma experimental ABIEncoderV2;
 import './ForceMoveApp.sol';
 
 contract ConsensusApp is ForceMoveApp {
-    struct ConsensusAppAttributes {
+    struct ConsensusAppData {
         uint32 furtherVotesRequired;
         bytes proposedOutcome;
     }
 
-    struct ConsensusCommitmentData {
-        uint32 furtherVotesRequired;
-        bytes currentOutcome;
-        bytes proposedOutcome;
+    function appData(bytes memory appDataBytes) internal pure returns (ConsensusAppData memory) {
+        return abi.decode(appDataBytes, (ConsensusAppData));
     }
 
     function validTransition(
-        VariablePart memory oldVariablePart,
-        VariablePart memory newVariablePart,
-        uint256 turnNumB,
+        VariablePart memory a,
+        VariablePart memory b,
+        uint256 turnNumB, // unused
         uint256 numParticipants
     ) public pure returns (bool) {
-        ConsensusCommitmentData memory oldCommitmentData = fromVariablePart(oldVariablePart);
-        ConsensusCommitmentData memory newCommitmentData = fromVariablePart(newVariablePart);
 
-        if (oldCommitmentData.furtherVotesRequired == 0) {
-            validateConsensusCommitment(oldCommitmentData);
-        } else {
-            validateProposeCommitment(oldCommitmentData);
-        }
+        ConsensusAppData memory appDataA = appData(a.appData);
+        ConsensusAppData memory appDataB = appData(b.appData);
 
-        if (newCommitmentData.furtherVotesRequired == 0) {
-            validateConsensusCommitment(newCommitmentData);
-        } else {
-            validateProposeCommitment(newCommitmentData);
-        }
-
-        return
-            validPropose(oldCommitmentData, newCommitmentData, numParticipants) ||
-                validVote(oldCommitmentData, newCommitmentData) ||
-                validVeto(oldCommitmentData, newCommitmentData) ||
-                validPass(oldCommitmentData, newCommitmentData) ||
-                validFinalVote(oldCommitmentData, newCommitmentData) ||
-                invalidTransition();
-    }
-
-    // Helper converters
-
-    function fromVariablePart(VariablePart memory variablePart)
-        public
-        pure
-        returns (ConsensusCommitmentData memory)
-    {
-        ConsensusAppAttributes memory appAttributes = abi.decode(
-            variablePart.appData,
-            (ConsensusAppAttributes)
-        );
-
-        return
-            ConsensusCommitmentData(
-                appAttributes.furtherVotesRequired,
-                variablePart.outcome,
-                appAttributes.proposedOutcome
-            );
-    }
-
-    function invalidTransition() internal pure returns (bool) {
-        revert('ConsensusApp: No valid transition found for commitments');
-    }
-
-    // Transition validators
-
-    function validPropose(
-        ConsensusCommitmentData memory oldCommitmentData,
-        ConsensusCommitmentData memory newCommitmentData,
-        uint256 numParticipants
-    ) internal pure returns (bool) {
-        if (furtherVotesRequiredInitialized(newCommitmentData, numParticipants)) {
-            validateBalancesUnchanged(oldCommitmentData, newCommitmentData);
+        if (identical(a.outcome, b.outcome)) {
+            if (appDataB.furtherVotesRequired == numParticipants - 1) {
+                // propose
+                require(appDataA.furtherVotesRequired == 0, 'ConsensusApp: invalid propose, furtherVotesRequired must be transition from zero');
+                return true;
+            } else if (appDataB.furtherVotesRequired == 0) {
+                // veto or pass
+                require(appDataB.proposedOutcome.length == 0, 'ConsensusApp: invalid veto or invalid pass, proposedOutcome must transition to empty');
+                return true;
+            } else if (appDataB.furtherVotesRequired == appDataA.furtherVotesRequired - 1) {
+                // vote
+                require(appDataA.furtherVotesRequired > 1,'ConsensusApp: invalid vote, furtherVotesRequired must transition from at least 2');
+                require(identical(appDataA.proposedOutcome, appDataB.proposedOutcome), 'ConsensusApp: invalid vote, proposedOutcome must not change');
+                return true;
+            }
+        } else { 
+            // final vote
+            require(identical(appDataA.proposedOutcome, b.outcome), 'ConsensusApp: invalid final vote, outcome must equal previous proposedOutcome');
+            require(appDataA.furtherVotesRequired == 1,'ConsensusApp: invalid final vote, furtherVotesRequired must transition from 1');
+            require(appDataB.furtherVotesRequired == 0,'ConsensusApp: invalid final vote, furtherVotesRequired must transition to 0');
+            require(appDataB.proposedOutcome.length == 0,'ConsensusApp: invalid final vote, proposedOutcome must transition to empty');
             return true;
-        } else {
-            return false;
         }
-    }
+        revert('ConsensusApp: outcome must either be preserved or transition to previous proposedOutcome');
 
-    function validVote(
-        ConsensusCommitmentData memory oldCommitmentData,
-        ConsensusCommitmentData memory newCommitmentData
-    ) internal pure returns (bool) {
-        if (
-            oldCommitmentData.furtherVotesRequired > 1 &&
-            furtherVotesRequiredDecremented(oldCommitmentData, newCommitmentData)
-        ) {
-            validateBalancesUnchanged(oldCommitmentData, newCommitmentData);
-            validateProposalsUnchanged(oldCommitmentData, newCommitmentData);
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    function validVeto(
-        ConsensusCommitmentData memory oldCommitmentData,
-        ConsensusCommitmentData memory newCommitmentData
-    ) internal pure returns (bool) {
-        if (
-            oldCommitmentData.furtherVotesRequired > 0 &&
-            newCommitmentData.furtherVotesRequired == 0 &&
-            balancesUnchanged(oldCommitmentData, newCommitmentData)
-        ) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    function validFinalVote(
-        ConsensusCommitmentData memory oldCommitmentData,
-        ConsensusCommitmentData memory newCommitmentData
-    ) internal pure returns (bool) {
-        if (
-            oldCommitmentData.furtherVotesRequired == 1 &&
-            newCommitmentData.furtherVotesRequired == 0 &&
-            balancesUpdated(oldCommitmentData, newCommitmentData)
-        ) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    function validPass(
-        ConsensusCommitmentData memory oldCommitmentData,
-        ConsensusCommitmentData memory newCommitmentData
-    ) internal pure returns (bool) {
-        if (
-            oldCommitmentData.furtherVotesRequired == 0 &&
-            newCommitmentData.furtherVotesRequired == 0
-        ) {
-            validateBalancesUnchanged(oldCommitmentData, newCommitmentData);
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    // Helper validators
-
-    function validateConsensusCommitment(ConsensusCommitmentData memory commitmentData)
-        internal
-        pure
-    {
-        require(
-            commitmentData.furtherVotesRequired == 0,
-            "ConsensusApp: 'furtherVotesRequired' must be 0 during consensus."
-        );
-        require(
-            commitmentData.proposedOutcome.length == 0,
-            "ConsensusApp: 'proposedOutcome' must be reset during consensus."
-        );
-    }
-
-    function validateProposeCommitment(ConsensusCommitmentData memory commitmentData)
-        internal
-        pure
-    {
-        require(
-            commitmentData.furtherVotesRequired != 0,
-            "ConsensusApp: 'furtherVotesRequired' must not be 0 during propose."
-        );
-        require(
-            commitmentData.proposedOutcome.length > 0,
-            "ConsensusApp: 'proposedOutcome' must not be reset during propose."
-        );
-    }
-
-    function validateBalancesUnchanged(
-        ConsensusCommitmentData memory oldCommitmentData,
-        ConsensusCommitmentData memory newCommitmentData
-    ) private pure {
-        require(
-            encodeAndHashOutcome(oldCommitmentData.currentOutcome) ==
-                encodeAndHashOutcome(newCommitmentData.currentOutcome),
-            "ConsensusApp: 'outcome' must be the same between commitments."
-        );
-    }
-
-    function validateProposalsUnchanged(
-        ConsensusCommitmentData memory oldCommitmentData,
-        ConsensusCommitmentData memory newCommitmentData
-    ) private pure {
-        require(
-            encodeAndHashOutcome(oldCommitmentData.proposedOutcome) ==
-                encodeAndHashOutcome(newCommitmentData.proposedOutcome),
-            "ConsensusApp: 'proposedOutcome' must be the same between commitments."
-        );
-    }
-
-    // Booleans
-
-    function furtherVotesRequiredInitialized(
-        ConsensusCommitmentData memory appData,
-        uint256 numParticipants
-    ) private pure returns (bool) {
-        return (appData.furtherVotesRequired == numParticipants - 1);
-    }
-
-    function furtherVotesRequiredDecremented(
-        ConsensusCommitmentData memory oldCommitmentData,
-        ConsensusCommitmentData memory newCommitmentData
-    ) private pure returns (bool) {
-        return (newCommitmentData.furtherVotesRequired ==
-            oldCommitmentData.furtherVotesRequired - 1);
-    }
-
-    function balancesUnchanged(
-        ConsensusCommitmentData memory oldCommitmentData,
-        ConsensusCommitmentData memory newCommitmentData
-    ) private pure returns (bool) {
-        return
-            encodeAndHashOutcome(oldCommitmentData.currentOutcome) ==
-                encodeAndHashOutcome(newCommitmentData.currentOutcome);
-    }
-
-    function balancesUpdated(
-        ConsensusCommitmentData memory oldCommitmentData,
-        ConsensusCommitmentData memory newCommitmentData
-    ) private pure returns (bool) {
-        return (encodeAndHashOutcome(oldCommitmentData.proposedOutcome) ==
-            encodeAndHashOutcome(newCommitmentData.currentOutcome));
     }
 
     // Utilitiy helpers
 
-    function encodeAndHashOutcome(bytes memory outcome) internal pure returns (bytes32) {
-        return keccak256(abi.encode(outcome));
+    function identical(bytes memory a, bytes memory b) internal pure returns (bool) {
+        return (keccak256(abi.encode(a)) == keccak256(abi.encode(b)));
     }
 
 }
