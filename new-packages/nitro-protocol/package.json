@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/magmo/force-move-games.git"
+    "url": "git@github.com:statechannels/nitro-protocol.git"
   },
   "keywords": [
     "state",
@@ -19,9 +19,9 @@
   "author": "George Knee",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/magmo/force-move-games/issues"
+    "url": "https://github.com/statechannels/nitro-protocol/"
   },
-  "homepage": "https://github.com/magmo/force-move-games#readme",
+  "homepage": "https://github.com/statechannels/nitro-protocol/",
   "scripts": {
     "prepare": "yarn build",
     "test": "yarn prettier:check && yarn clearContracts && npx ganache-then-jest --runInBand",
