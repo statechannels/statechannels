@@ -16,12 +16,12 @@ contract NitroAdjudicator is ForceMove {
         uint256 finalizesAt,
         bytes32 stateHash,
         address challengerAddress,
-        bytes memory assetOutcomeBytes
+        bytes memory outcome
     ) public {
         // requirements
         require(finalizesAt < now, 'Outcome is not final');
 
-        bytes32 outcomeHash = keccak256(assetOutcomeBytes);
+        bytes32 outcomeHash = keccak256(abi.encode(outcome));
 
         require(
             keccak256(
@@ -39,18 +39,16 @@ contract NitroAdjudicator is ForceMove {
             'Submitted data does not match storage'
         );
 
-        // effects
-        bytes[] memory assetOutcomes = abi.decode(assetOutcomeBytes, (bytes[]));
+         Outcome.AssetOutcome[] memory assetOutcomes = abi.decode(
+            outcome,
+            (Outcome.AssetOutcome[])
+        );
 
         for (uint256 i = 0; i < assetOutcomes.length; i++) {
-            Outcome.AssetOutcome memory assetOutcome = abi.decode(
-                assetOutcomes[i],
-                (Outcome.AssetOutcome)
-            );
             require(
-                AssetHolder(assetOutcome.assetHolderAddress).setOutcome(
+                AssetHolder(assetOutcomes[i].assetHolderAddress).setOutcome(
                     channelId,
-                    keccak256(assetOutcome.outcomeContent)
+                    keccak256(assetOutcomes[i].outcomeContent)
                 )
             );
         }

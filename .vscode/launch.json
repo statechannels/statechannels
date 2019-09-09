@@ -21,7 +21,8 @@
       "internalConsoleOptions": "neverOpen",
       "env": {
         "NODE_ENV": "test"
-      }
+      },
+      "skipFiles": ["${workspaceFolder}/node_modules/**/*.js", "<node_internals>/**/*.js"]
     }
   ]
 }

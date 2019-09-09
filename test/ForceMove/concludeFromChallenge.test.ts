@@ -4,9 +4,25 @@ import {expectRevert} from 'magmo-devtools';
 import ForceMoveArtifact from '../../build/contracts/TESTForceMove.json';
 // @ts-ignore
 import countingAppArtifact from '../../build/contracts/CountingApp.json';
-import {keccak256, defaultAbiCoder, toUtf8Bytes} from 'ethers/utils';
-import {setupContracts, sign, newConcludedEvent, clearedChallengeHash} from '../test-helpers';
+import {keccak256, defaultAbiCoder, bigNumberify} from 'ethers/utils';
+import {
+  setupContracts,
+  sign,
+  newConcludedEvent,
+  clearedChallengeHash,
+  signStates,
+  sendTransaction,
+} from '../test-helpers';
 import {HashZero, AddressZero} from 'ethers/constants';
+import {Channel, getChannelId} from '../../src/channel';
+import {State, hashState, hashAppPart, getFixedPart} from '../../src/state';
+import {Outcome, hashOutcome} from '../../src/outcome';
+import {
+  ChannelStorage,
+  hashChannelStorage,
+  encodeChannelStorageLite,
+} from '../../src/channel-storage';
+import {createConcludeFromChallengeTransaction} from '../../src/force-move';
 
 const provider = new ethers.providers.JsonRpcProvider(
   `http://localhost:${process.env.DEV_GANACHE_PORT}`,
@@ -15,12 +31,12 @@ let ForceMove: ethers.Contract;
 let networkId;
 let blockNumber;
 let blockTimestamp;
-const chainId = 1234;
+const chainId = '0x1234';
 const participants = ['', '', ''];
 const wallets = new Array(3);
-const challengeDuration = 1000;
-const outcome = ethers.utils.id('some outcome data'); // use a fixed outcome for all state updates in all tests
-const outcomeHash = keccak256(defaultAbiCoder.encode(['bytes'], [outcome]));
+const challengeDuration = '0x1000';
+const assetHolderAddress = ethers.Wallet.createRandom().address;
+const outcome: Outcome = [{assetHolderAddress, allocation: []}];
 let appDefinition;
 
 // populate wallets and participants array
@@ -67,66 +83,32 @@ describe('concludeFromChallenge', () => {
       reasonString,
     }) => {
       // compute channelId
-      const channelId = keccak256(
-        defaultAbiCoder.encode(
-          ['uint256', 'address[]', 'uint256'],
-          [chainId, participants, channelNonce],
-        ),
-      );
-      // fixedPart
-      const fixedPart = {
-        chainId,
-        participants,
-        channelNonce,
-        appDefinition,
+      const channel: Channel = {chainId, participants, channelNonce};
+      const challengeState: State = {
+        channel,
         challengeDuration,
-      };
-
-      const appPartHash = keccak256(
-        defaultAbiCoder.encode(
-          ['uint256', 'address'], // note lack of appData
-          [challengeDuration, appDefinition],
-        ),
-      );
-
-      const challengeAppData = 0;
-      const challengeAppPartHash = keccak256(
-        defaultAbiCoder.encode(
-          ['uint256', 'address', 'bytes'],
-          [
-            challengeDuration,
-            appDefinition,
-            defaultAbiCoder.encode(['uint256'], [challengeAppData]),
-          ],
-        ),
-      );
-
-      const challengeState = {
         turnNum: setTurnNumRecord,
-        isFinal: false, // TODO consider having this as a test parameter
-        channelId,
-        challengeAppPartHash,
-        outcomeHash,
+        appDefinition,
+        appData: '0x0',
+        isFinal: false,
+        outcome,
       };
 
-      const challengeStateHash = keccak256(
-        defaultAbiCoder.encode(
-          [
-            'tuple(uint256 turnNum, bool isFinal, bytes32 channelId, bytes32 challengeAppPartHash, bytes32 outcomeHash)',
-          ],
-          [challengeState],
-        ),
-      );
+      const channelId = getChannelId(channel);
 
       // set expiry time in the future or in the past
       blockNumber = await provider.getBlockNumber();
       blockTimestamp = (await provider.getBlock(blockNumber)).timestamp;
       const finalizesAt = expired
-        ? blockTimestamp - challengeDuration
-        : blockTimestamp + challengeDuration;
+        ? blockTimestamp - bigNumberify(challengeDuration).toNumber()
+        : blockTimestamp + bigNumberify(challengeDuration).toNumber();
 
       // compute expected ChannelStorageHash
       const challengerAddress = wallets[2].address;
+
+      const challengeStateHash = hashState(challengeState);
+      const outcomeHash = hashOutcome(outcome);
+
       const challengeExistsHash = keccak256(
         defaultAbiCoder.encode(
           ['uint256', 'uint256', 'bytes32', 'address', 'bytes32'],
@@ -144,77 +126,41 @@ describe('concludeFromChallenge', () => {
         forceStorageHash ? forceStorageHash : challengeExistsHash,
       );
 
-      // compute stateHashes
-      const stateHashes = new Array(numStates);
-      for (let i = 0; i < numStates; i++) {
-        const state = {
+      // Create states
+      const states: State[] = [];
+      for (let i = 1; i <= numStates; i++) {
+        states.push({
           turnNum: largestTurnNum + i - numStates,
           isFinal: true,
-          channelId,
-          appPartHash,
-          outcomeHash,
-        };
-        stateHashes[i] = keccak256(
-          defaultAbiCoder.encode(
-            [
-              'tuple(uint256 turnNum, bool isFinal, bytes32 channelId, bytes32 appPartHash, bytes32 outcomeHash)',
-            ],
-            [state],
-          ),
-        );
+          channel,
+          appDefinition,
+          appData: '0x0',
+          challengeDuration,
+          outcome,
+        });
       }
 
-      // sign the states
-      const sigs = new Array(participants.length);
-      for (let i = 0; i < participants.length; i++) {
-        const sig = await sign(wallets[i], stateHashes[whoSignedWhat[i]]);
-        sigs[i] = {v: sig.v, r: sig.r, s: sig.s};
-      }
-
-      // pack arguemtns
-      const ChannelStorageLite =
-        'tuple(uint256 finalizesAt, bytes32 stateHash, address challengerAddress, bytes32 outcomeHash)';
-      const channelStorageLiteBytes = defaultAbiCoder.encode(
-        [ChannelStorageLite],
-        [[finalizesAt, challengeStateHash, challengerAddress, outcomeHash]],
+      const sigs = await signStates(states, wallets, whoSignedWhat);
+      const transactionRequest = createConcludeFromChallengeTransaction(
+        declaredTurnNumRecord,
+        challengeState,
+        finalizesAt,
+        states,
+        sigs,
+        whoSignedWhat,
       );
-
       // call method in a slightly different way if expecting a revert
       if (reasonString) {
         const regex = new RegExp(
           '^' + 'VM Exception while processing transaction: revert ' + reasonString + '$',
         );
         await expectRevert(
-          () =>
-            ForceMove.concludeFromChallenge(
-              declaredTurnNumRecord,
-              largestTurnNum,
-              fixedPart,
-              appPartHash,
-              numStates,
-              whoSignedWhat,
-              sigs,
-              outcomeHash, // challengeOutcomeHash
-              channelStorageLiteBytes,
-            ),
+          () => sendTransaction(provider, ForceMove.address, transactionRequest),
           regex,
         );
       } else {
         const concludedEvent: any = newConcludedEvent(ForceMove, channelId);
-        const tx2 = await ForceMove.concludeFromChallenge(
-          declaredTurnNumRecord,
-          largestTurnNum,
-          fixedPart,
-          appPartHash,
-          numStates,
-          whoSignedWhat,
-          sigs,
-          outcomeHash, // challengeOutcomeHash
-          channelStorageLiteBytes,
-        );
-
-        // wait for tx to be mined
-        await tx2.wait();
+        await sendTransaction(provider, ForceMove.address, transactionRequest);
 
         // catch Concluded event
         const [eventChannelId] = await concludedEvent;
@@ -223,13 +169,13 @@ describe('concludeFromChallenge', () => {
         // compute expected ChannelStorageHash
         blockNumber = await provider.getBlockNumber();
         blockTimestamp = (await provider.getBlock(blockNumber)).timestamp;
-        const expectedChannelStorage = [0, blockTimestamp, HashZero, AddressZero, outcomeHash];
-        const expectedChannelStorageHash = keccak256(
-          defaultAbiCoder.encode(
-            ['uint256', 'uint256', 'bytes32', 'address', 'bytes32'],
-            expectedChannelStorage,
-          ),
-        );
+        const expectedChannelStorage: ChannelStorage = {
+          largestTurnNum: '0x0',
+          finalizesAt: blockTimestamp,
+          challengerAddress: AddressZero,
+          outcome,
+        };
+        const expectedChannelStorageHash = hashChannelStorage(expectedChannelStorage);
 
         // check channelStorageHash against the expected value
 

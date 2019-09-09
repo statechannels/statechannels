@@ -1,6 +1,25 @@
-import {ethers} from 'ethers';
-import {splitSignature, arrayify, keccak256, defaultAbiCoder} from 'ethers/utils';
-import {HashZero, AddressZero} from 'ethers/constants';
+import {ethers, Wallet} from 'ethers';
+import {
+  splitSignature,
+  arrayify,
+  keccak256,
+  defaultAbiCoder,
+  bigNumberify,
+  Signature,
+} from 'ethers/utils';
+import {AddressZero} from 'ethers/constants';
+
+import {hashChannelStorage} from '../src/channel-storage';
+import {
+  Outcome,
+  encodeAllocation,
+  hashOutcomeContent,
+  encodeGuarantee,
+  Guarantee,
+  Allocation,
+} from '../src/outcome';
+import {State, hashState} from '../src/state';
+import {TransactionRequest} from 'ethers/providers';
 
 export async function setupContracts(provider: ethers.providers.JsonRpcProvider, artifact) {
   const networkId = (await provider.getNetwork()).chainId;
@@ -19,37 +38,35 @@ export async function sign(wallet: ethers.Wallet, msgHash: string | Uint8Array) 
 export const nonParticipant = ethers.Wallet.createRandom();
 
 export const clearedChallengeHash = (turnNumRecord: number = 5) => {
-  return keccak256(
-    defaultAbiCoder.encode(
-      ['uint256', 'uint256', 'bytes32', 'address', 'bytes32'],
-      [turnNumRecord, 0, HashZero, AddressZero, HashZero], // turnNum = 5
-    ),
-  );
+  return hashChannelStorage({
+    largestTurnNum: bigNumberify(turnNumRecord).toHexString(),
+    finalizesAt: '0x0',
+    challengerAddress: AddressZero,
+  });
 };
 
 export const ongoingChallengeHash = (turnNumRecord: number = 5) => {
-  return keccak256(
-    defaultAbiCoder.encode(
-      ['uint256', 'uint256', 'bytes32', 'address', 'bytes32'],
-      [turnNumRecord, 1e12, HashZero, AddressZero, HashZero], // turnNum = 5, not yet finalized (31000 years after genesis block)
-    ),
-  );
+  return hashChannelStorage({
+    largestTurnNum: bigNumberify(turnNumRecord).toHexString(),
+    finalizesAt: bigNumberify(1e12).toHexString(),
+    challengerAddress: AddressZero,
+  });
 };
 
 export const finalizedOutcomeHash = (
   turnNumRecord: number = 5,
   finalizesAt: number = 1,
-  stateHash: string = HashZero,
   challengerAddress: string = AddressZero,
-  outcomeHash: string = HashZero,
+  state?: State,
+  outcome?: Outcome,
 ) => {
-  return keccak256(
-    defaultAbiCoder.encode(
-      ['uint256', 'uint256', 'bytes32', 'address', 'bytes32'],
-      [turnNumRecord, finalizesAt, stateHash, AddressZero, outcomeHash], // finalizes at 1 second after genesis block (by default)
-      // the final two fields should also not be zero
-    ),
-  );
+  return hashChannelStorage({
+    largestTurnNum: bigNumberify(turnNumRecord).toHexString(),
+    finalizesAt: bigNumberify(finalizesAt).toHexString(),
+    state,
+    challengerAddress,
+    outcome,
+  });
 };
 
 export const newForceMoveEvent = (contract: ethers.Contract, channelId: string) => {
@@ -148,4 +165,38 @@ export function randomChannelId(channelNonce = 0) {
     defaultAbiCoder.encode(['uint256', 'address[]', 'uint256'], [1234, participants, channelNonce]),
   );
   return channelId;
+}
+
+export async function sendTransaction(
+  provider: ethers.providers.JsonRpcProvider,
+  contractAddress: string,
+  transaction: TransactionRequest,
+) {
+  const signer = provider.getSigner();
+  const response = await signer.sendTransaction({to: contractAddress, ...transaction});
+  await response.wait();
+}
+
+export function allocationToParams(allocation: Allocation) {
+  const allocationBytes = encodeAllocation(allocation);
+
+  const outcomeContentHash = hashOutcomeContent(allocation);
+  return [allocationBytes, outcomeContentHash];
+}
+
+export function guaranteeToParams(guarantee: Guarantee) {
+  const guaranteeBytes = encodeGuarantee(guarantee);
+
+  const outcomeContentHash = hashOutcomeContent(guarantee);
+  return [guaranteeBytes, outcomeContentHash];
+}
+
+export async function signStates(
+  states: State[],
+  wallets: Wallet[],
+  whoSignedWhat: number[],
+): Promise<Signature[]> {
+  const stateHashes = states.map(s => hashState(s));
+  const promises = wallets.map(async (w, i) => await sign(w, stateHashes[whoSignedWhat[i]]));
+  return Promise.all(promises);
 }

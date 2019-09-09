@@ -3,7 +3,7 @@ import {expectRevert} from 'magmo-devtools';
 // @ts-ignore
 import ETHAssetHolderArtifact from '../../build/contracts/ETHAssetHolder.json';
 import {setupContracts, newDepositedEvent} from '../test-helpers';
-import {defaultAbiCoder, keccak256} from 'ethers/utils';
+import {Channel, getChannelId} from '../../src/channel';
 
 const provider = new ethers.providers.JsonRpcProvider(
   `http://localhost:${process.env.DEV_GANACHE_PORT}`,
@@ -11,7 +11,7 @@ const provider = new ethers.providers.JsonRpcProvider(
 const signer = provider.getSigner(0); // convention matches setupContracts function
 let ETHAssetHolder: ethers.Contract;
 let depositedEvent;
-const chainId = 1234;
+const chainId = '0x1234';
 const participants = [];
 
 // populate destinations array
@@ -46,21 +46,16 @@ describe('deposit', () => {
       msgValue = ethers.utils.parseUnits(msgValue, 'wei');
       heldAfter = ethers.utils.parseUnits(heldAfter, 'wei');
 
-      // compute destination as channelId
-      const destination = keccak256(
-        defaultAbiCoder.encode(
-          ['uint256', 'address[]', 'uint256'],
-          [chainId, participants, channelNonce],
-        ),
-      );
+      const destinationChannel: Channel = {chainId, channelNonce, participants};
+      const destinationChannelId = getChannelId(destinationChannel);
 
       // set holdings by depositing in the 'safest' way
       if (held > 0) {
-        depositedEvent = newDepositedEvent(ETHAssetHolder, destination);
-        await (await ETHAssetHolder.deposit(destination, 0, held, {
+        depositedEvent = newDepositedEvent(ETHAssetHolder, destinationChannelId);
+        await (await ETHAssetHolder.deposit(destinationChannelId, 0, held, {
           value: held,
         })).wait();
-        expect(await ETHAssetHolder.holdings(destination)).toEqual(held);
+        expect(await ETHAssetHolder.holdings(destinationChannelId)).toEqual(held);
         await depositedEvent;
       }
 
@@ -71,15 +66,15 @@ describe('deposit', () => {
         );
         await expectRevert(
           () =>
-            ETHAssetHolder.deposit(destination, expectedHeld, amount, {
+            ETHAssetHolder.deposit(destinationChannelId, expectedHeld, amount, {
               value: msgValue,
             }),
           regex,
         );
       } else {
-        depositedEvent = newDepositedEvent(ETHAssetHolder, destination);
+        depositedEvent = newDepositedEvent(ETHAssetHolder, destinationChannelId);
         const balanceBefore = await signer.getBalance();
-        const tx = await ETHAssetHolder.deposit(destination, expectedHeld, amount, {
+        const tx = await ETHAssetHolder.deposit(destinationChannelId, expectedHeld, amount, {
           value: msgValue,
         });
         // wait for tx to be mined
@@ -87,11 +82,11 @@ describe('deposit', () => {
 
         // catch Deposited event
         const [eventDestination, eventAmountDeposited, eventHoldings] = await depositedEvent;
-        expect(eventDestination.toUpperCase()).toMatch(destination.toUpperCase());
+        expect(eventDestination.toUpperCase()).toMatch(destinationChannelId.toUpperCase());
         expect(eventAmountDeposited).toEqual(heldAfter.sub(held));
         expect(eventHoldings).toEqual(heldAfter);
 
-        const allocatedAmount = await ETHAssetHolder.holdings(destination);
+        const allocatedAmount = await ETHAssetHolder.holdings(destinationChannelId);
         await expect(allocatedAmount).toEqual(heldAfter);
 
         // check for any partial refund

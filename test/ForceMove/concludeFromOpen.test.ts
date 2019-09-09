@@ -4,7 +4,7 @@ import {expectRevert} from 'magmo-devtools';
 import ForceMoveArtifact from '../../build/contracts/TESTForceMove.json';
 // @ts-ignore
 import countingAppArtifact from '../../build/contracts/CountingApp.json';
-import {keccak256, defaultAbiCoder, toUtf8Bytes} from 'ethers/utils';
+import {keccak256, defaultAbiCoder} from 'ethers/utils';
 import {
   setupContracts,
   sign,
@@ -12,20 +12,27 @@ import {
   clearedChallengeHash,
   ongoingChallengeHash,
   finalizedOutcomeHash,
+  signStates,
+  sendTransaction,
 } from '../test-helpers';
 import {HashZero, AddressZero} from 'ethers/constants';
+import {Outcome, hashOutcome} from '../../src/outcome';
+import {Channel, getChannelId} from '../../src/channel';
+import {State, hashState, getFixedPart, hashAppPart} from '../../src/state';
+import {Bytes32} from '../../src/types';
+import {createConcludeFromOpenTransaction} from '../../src/force-move';
 
 const provider = new ethers.providers.JsonRpcProvider(
   `http://localhost:${process.env.DEV_GANACHE_PORT}`,
 );
 let ForceMove: ethers.Contract;
 let networkId;
-const chainId = 1234;
+const chainId = '0x1234';
 const participants = ['', '', ''];
 const wallets = new Array(3);
-const challengeDuration = 1000;
-const outcome = ethers.utils.id('some outcome data'); // use a fixed outcome for all state updates in all tests
-const outcomeHash = keccak256(defaultAbiCoder.encode(['bytes'], [outcome]));
+const challengeDuration = '0x1000';
+const assetHolderAddress = ethers.Wallet.createRandom().address;
+const outcome: Outcome = [{assetHolderAddress, allocation: []}];
 let appDefinition;
 
 // populate wallets and participants array
@@ -75,95 +82,47 @@ describe('concludeFromOpen', () => {
       whoSignedWhat,
       reasonString,
     }) => {
-      // compute channelId
-      const channelId = keccak256(
-        defaultAbiCoder.encode(
-          ['uint256', 'address[]', 'uint256'],
-          [chainId, participants, channelNonce],
-        ),
-      );
-      // fixedPart
-      const fixedPart = {
-        chainId,
-        participants,
-        channelNonce,
-        appDefinition,
-        challengeDuration,
-      };
+      const channel: Channel = {chainId, participants, channelNonce};
+      const channelId = getChannelId(channel);
 
-      const appPartHash = keccak256(
-        defaultAbiCoder.encode(
-          ['uint256', 'address'], // note lack of appData
-          [challengeDuration, appDefinition],
-        ),
-      );
-
-      // compute stateHashes
-      const stateHashes = new Array(numStates);
-      for (let i = 0; i < numStates; i++) {
-        const state = {
-          turnNum: largestTurnNum + i - numStates,
+      const states: State[] = [];
+      for (let i = 1; i <= numStates; i++) {
+        states.push({
           isFinal: true,
-          channelId,
-          appPartHash,
-          outcomeHash,
-        };
-        stateHashes[i] = keccak256(
-          defaultAbiCoder.encode(
-            [
-              'tuple(uint256 turnNum, bool isFinal, bytes32 channelId, bytes32 appPartHash, bytes32 outcomeHash)',
-            ],
-            [state],
-          ),
-        );
+          channel,
+          outcome,
+          appDefinition,
+          appData: '0x0',
+          challengeDuration,
+          turnNum: largestTurnNum + i - numStates,
+        });
       }
-
       // call public wrapper to set state (only works on test contract)
       const tx = await ForceMove.setChannelStorageHash(channelId, initialChannelStorageHash);
       await tx.wait();
       expect(await ForceMove.channelStorageHashes(channelId)).toEqual(initialChannelStorageHash);
 
       // sign the states
-      const sigs = new Array(participants.length);
-      for (let i = 0; i < participants.length; i++) {
-        const sig = await sign(wallets[i], stateHashes[whoSignedWhat[i]]);
-        sigs[i] = {v: sig.v, r: sig.r, s: sig.s};
-      }
+      const sigs = await signStates(states, wallets, whoSignedWhat);
 
+      const transactionRequest = createConcludeFromOpenTransaction(
+        declaredTurnNumRecord,
+        states,
+        sigs,
+        whoSignedWhat,
+      );
       // call method in a slightly different way if expecting a revert
       if (reasonString) {
         const regex = new RegExp(
           '^' + 'VM Exception while processing transaction: revert ' + reasonString + '$',
         );
         await expectRevert(
-          () =>
-            ForceMove.concludeFromOpen(
-              declaredTurnNumRecord,
-              largestTurnNum,
-              fixedPart,
-              appPartHash,
-              outcomeHash,
-              numStates,
-              whoSignedWhat,
-              sigs,
-            ),
+          () => sendTransaction(provider, ForceMove.address, transactionRequest),
           regex,
         );
       } else {
         const concludedEvent: any = newConcludedEvent(ForceMove, channelId);
-        const tx2 = await ForceMove.concludeFromOpen(
-          declaredTurnNumRecord,
-          largestTurnNum,
-          fixedPart,
-          appPartHash,
-          outcomeHash,
-          numStates,
-          whoSignedWhat,
-          sigs,
-        );
-
-        // wait for tx to be mined
-        await tx2.wait();
+        await sendTransaction(provider, ForceMove.address, transactionRequest);
 
         // catch Concluded event
         const [eventChannelId] = await concludedEvent;
@@ -172,6 +131,7 @@ describe('concludeFromOpen', () => {
         // compute expected ChannelStorageHash
         const blockNumber = await provider.getBlockNumber();
         const blockTimestamp = (await provider.getBlock(blockNumber)).timestamp;
+        const outcomeHash = hashOutcome(outcome);
         const expectedChannelStorage = [0, blockTimestamp, HashZero, AddressZero, outcomeHash];
         const expectedChannelStorageHash = keccak256(
           defaultAbiCoder.encode(
