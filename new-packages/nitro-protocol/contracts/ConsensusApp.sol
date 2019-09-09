@@ -24,9 +24,6 @@ contract ConsensusApp is ForceMoveApp {
         ConsensusCommitmentData memory oldCommitmentData = fromVariablePart(oldVariablePart);
         ConsensusCommitmentData memory newCommitmentData = fromVariablePart(newVariablePart);
 
-        /** todo: we used to validate the length of allocations and destinations.
-          * In order to do this validation, proposed outcome needs to be converted from bytes to struct with a shape.
-          */
         if (oldCommitmentData.furtherVotesRequired == 0) {
             validateConsensusCommitment(oldCommitmentData);
         } else {
