@@ -690,7 +690,7 @@ contract ForceMove {
             stateHashes[i] = keccak256(
                 abi.encode(
                     State(
-                        largestTurnNum + i - numStates, // turnNum
+                        largestTurnNum + (i + 1) - numStates, // turnNum
                         true, // isFinal
                         channelId,
                         appPartHash,

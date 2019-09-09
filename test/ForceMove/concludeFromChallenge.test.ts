@@ -5,17 +5,24 @@ import ForceMoveArtifact from '../../build/contracts/TESTForceMove.json';
 // @ts-ignore
 import countingAppArtifact from '../../build/contracts/CountingApp.json';
 import {keccak256, defaultAbiCoder, bigNumberify} from 'ethers/utils';
-import {setupContracts, sign, newConcludedEvent, clearedChallengeHash} from '../test-helpers';
+import {
+  setupContracts,
+  sign,
+  newConcludedEvent,
+  clearedChallengeHash,
+  signStates,
+  sendTransaction,
+} from '../test-helpers';
 import {HashZero, AddressZero} from 'ethers/constants';
 import {Channel, getChannelId} from '../../src/channel';
 import {State, hashState, hashAppPart, getFixedPart} from '../../src/state';
 import {Outcome, hashOutcome} from '../../src/outcome';
-import {Bytes32} from '../../src/types.js';
 import {
-  encodeChannelStorageLite,
   ChannelStorage,
   hashChannelStorage,
+  encodeChannelStorageLite,
 } from '../../src/channel-storage';
+import {createConcludeFromChallengeTransaction} from '../../src/force-move';
 
 const provider = new ethers.providers.JsonRpcProvider(
   `http://localhost:${process.env.DEV_GANACHE_PORT}`,
@@ -119,10 +126,10 @@ describe('concludeFromChallenge', () => {
         forceStorageHash ? forceStorageHash : challengeExistsHash,
       );
 
-      // compute stateHashes
-      const stateHashes: Bytes32[] = [];
-      for (let i = 0; i < numStates; i++) {
-        const state: State = {
+      // Create states
+      const states: State[] = [];
+      for (let i = 1; i <= numStates; i++) {
+        states.push({
           turnNum: largestTurnNum + i - numStates,
           isFinal: true,
           channel,
@@ -130,63 +137,30 @@ describe('concludeFromChallenge', () => {
           appData: '0x0',
           challengeDuration,
           outcome,
-        };
-        stateHashes.push(hashState(state));
+        });
       }
 
-      // sign the states
-      const sigs = new Array(participants.length);
-      for (let i = 0; i < participants.length; i++) {
-        const sig = await sign(wallets[i], stateHashes[whoSignedWhat[i]]);
-        sigs[i] = {v: sig.v, r: sig.r, s: sig.s};
-      }
-
-      const channelStorageLiteBytes = encodeChannelStorageLite({
-        state: challengeState,
-        outcome,
+      const sigs = await signStates(states, wallets, whoSignedWhat);
+      const transactionRequest = createConcludeFromChallengeTransaction(
+        declaredTurnNumRecord,
+        challengeState,
         finalizesAt,
-        challengerAddress,
-      });
-
-      const fixedPart = getFixedPart(challengeState);
-      const appPartHash = hashAppPart(challengeState);
-
+        states,
+        sigs,
+        whoSignedWhat,
+      );
       // call method in a slightly different way if expecting a revert
       if (reasonString) {
         const regex = new RegExp(
           '^' + 'VM Exception while processing transaction: revert ' + reasonString + '$',
         );
         await expectRevert(
-          () =>
-            ForceMove.concludeFromChallenge(
-              declaredTurnNumRecord,
-              largestTurnNum,
-              fixedPart,
-              appPartHash,
-              numStates,
-              whoSignedWhat,
-              sigs,
-              outcomeHash, // challengeOutcomeHash
-              channelStorageLiteBytes,
-            ),
+          () => sendTransaction(provider, ForceMove.address, transactionRequest),
           regex,
         );
       } else {
         const concludedEvent: any = newConcludedEvent(ForceMove, channelId);
-        const tx2 = await ForceMove.concludeFromChallenge(
-          declaredTurnNumRecord,
-          largestTurnNum,
-          fixedPart,
-          appPartHash,
-          numStates,
-          whoSignedWhat,
-          sigs,
-          outcomeHash, // challengeOutcomeHash
-          channelStorageLiteBytes,
-        );
-
-        // wait for tx to be mined
-        await tx2.wait();
+        await sendTransaction(provider, ForceMove.address, transactionRequest);
 
         // catch Concluded event
         const [eventChannelId] = await concludedEvent;
