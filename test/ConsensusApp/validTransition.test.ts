@@ -65,20 +65,20 @@ describe('validTransition', () => {
     ${description09} | ${[1, 0]}            | ${['0x1', '0x3']} | ${['0x2', '0x']}  | ${noValidTransitionError}
     ${description10} | ${[1, 0]}            | ${['0x1', '0x2']} | ${['0x2', '0x2']} | ${noValidTransitionError}
   `('$description', async ({furtherVotesRequired, outcome, proposedOutcome, reason}) => {
-    const variablePartOld = constructConsensusVariablePart(
+    const variablePartA = constructConsensusVariablePart(
       furtherVotesRequired[0],
       outcome[0],
       proposedOutcome[0],
     );
-    const variablePartNew = constructConsensusVariablePart(
+    const variablePartB = constructConsensusVariablePart(
       furtherVotesRequired[1],
       outcome[1],
       proposedOutcome[1],
     );
     const transactionRequest = {
       data: ConsensusAppContractInterface.functions.validTransition.encode([
-        variablePartOld,
-        variablePartNew,
+        variablePartA,
+        variablePartB,
         turnNumB,
         numParticipants,
       ]),
@@ -91,8 +91,8 @@ describe('validTransition', () => {
 
       // just call the function, so we can check the return value easily
       const isValid = await consensusApp.validTransition(
-        variablePartOld,
-        variablePartNew,
+        variablePartA,
+        variablePartB,
         turnNumB,
         numParticipants,
       );
