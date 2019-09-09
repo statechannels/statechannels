@@ -32,14 +32,14 @@ contract ConsensusApp is ForceMoveApp {
                 return true;
             }
             if (appDataB.furtherVotesRequired == 0) {
-                if // validVeto & validPass
+                if // veto or pass
                     (
                         appDataB.proposedOutcome.length == 0
                     )
                 return true;
             }
             if (appDataB.furtherVotesRequired == appDataA.furtherVotesRequired - 1) {
-                if // validVote
+                if // vote
                     (
                         appDataA.furtherVotesRequired > 1 &&
                         identical(appDataA.proposedOutcome, appDataB.proposedOutcome)
@@ -47,7 +47,7 @@ contract ConsensusApp is ForceMoveApp {
                 return true;
             }
         } else {
-            if // validFinalVote
+            if // final vote
                 (
                     identical(appDataA.proposedOutcome, b.outcome) &&
                     appDataA.furtherVotesRequired == 1 &&
