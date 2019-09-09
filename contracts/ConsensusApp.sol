@@ -30,7 +30,7 @@ contract ConsensusApp is ForceMoveApp {
                 return true;
             } else if (appDataB.furtherVotesRequired == 0) {
                 // veto or pass
-                require(appDataB.proposedOutcome.length == 0, 'ConsensusApp: invalid veto or invalid pass, proposeOutcome must transition to null');
+                require(appDataB.proposedOutcome.length == 0, 'ConsensusApp: invalid veto or invalid pass, proposedOutcome must transition to empty');
                 return true;
             } else if (appDataB.furtherVotesRequired == appDataA.furtherVotesRequired - 1) {
                 // vote
@@ -40,10 +40,10 @@ contract ConsensusApp is ForceMoveApp {
             }
         } else { 
             // final vote
-            require(identical(appDataA.proposedOutcome, b.outcome), 'ConsensusApp: invalid final vote, outcome must reflect previous proposedOutcome');
+            require(identical(appDataA.proposedOutcome, b.outcome), 'ConsensusApp: invalid final vote, outcome must equal previous proposedOutcome');
             require(appDataA.furtherVotesRequired == 1,'ConsensusApp: invalid final vote, furtherVotesRequired must transition from 1');
             require(appDataB.furtherVotesRequired == 0,'ConsensusApp: invalid final vote, furtherVotesRequired must transition to 0');
-            require(appDataB.proposedOutcome.length == 0,'ConsensusApp: invalid final vote, proposedOutcome must transition to null');
+            require(appDataB.proposedOutcome.length == 0,'ConsensusApp: invalid final vote, proposedOutcome must transition to empty');
             return true;
         }
         revert('ConsensusApp: outcome must either be preserved or transition to previous proposedOutcome');
