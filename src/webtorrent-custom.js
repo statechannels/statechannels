@@ -1,30 +1,16 @@
 import WebTorrent from "webtorrent";
-import paidStreamingExtension, {
+import {
+  InitialState,
+  WireEvents,
+  TorrentEvents,
+  ClientEvents,
   PaidStreamingExtensionEvents,
   PaidStreamingExtensionNotices
-} from "./wire-extension";
+} from "./constants";
+import paidStreamingExtension from "./wire-extension";
 
-export const WireEvents = {
-  DOWNLOAD: "download",
-  FIRST_REQUEST: "first_request",
-  REQUEST: "request"
-};
+export { InitialState, WireEvents, TorrentEvents, ClientEvents }
 
-export const TorrentEvents = {
-  WIRE: "wire",
-  NOTICE: "notice",
-  STOP: "stop",
-  DONE: "done",
-  ERROR: "error"
-};
-
-export const ClientEvents = {
-  PEER_STATUS_CHANGED: "peer_status_changed",
-  CLIENT_RESET: "client_reset",
-  TORRENT_DONE: "torrent_done",
-  TORRENT_ERROR: "torrent_error",
-  TORRENT_NOTICE: "torrent_notice"
-};
 
 /**
  * @this {WebTorrentPaidStreamingClient}
@@ -136,7 +122,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
   constructor(opts) {
     super(opts);
     this.allowedPeers = {};
-    this.pseAccount = opts && opts.pseAccount;
+    this.pseAccount = (opts && opts.pseAccount) || Math.floor(Math.random() * 99999999999999999);
     console.log("> TAB PSE ACCOUNT ID: ", this.pseAccount);
   }
 

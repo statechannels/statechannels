@@ -2,20 +2,7 @@
 
 import bencode from "bencode";
 import { EventEmitter } from "events";
-
-export const PaidStreamingExtensionEvents = {
-  WARNING: "warning",
-  PSE_HANDSHAKE: "pse_handshake",
-  NOTICE: "notice",
-  FIRST_REQUEST: "first_request",
-  REQUEST: "request"
-};
-
-export const PaidStreamingExtensionNotices = {
-  START: "start",
-  STOP: "stop",
-  ACK: "ack"
-};
+import { PaidStreamingExtensionEvents, PaidStreamingExtensionNotices } from "./constants";
 
 /**
  * Returns a bittorrent extension
