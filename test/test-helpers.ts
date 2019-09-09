@@ -1,6 +1,13 @@
-import {ethers} from 'ethers';
-import {splitSignature, arrayify, keccak256, defaultAbiCoder, bigNumberify} from 'ethers/utils';
-import {HashZero, AddressZero} from 'ethers/constants';
+import {ethers, Wallet} from 'ethers';
+import {
+  splitSignature,
+  arrayify,
+  keccak256,
+  defaultAbiCoder,
+  bigNumberify,
+  Signature,
+} from 'ethers/utils';
+import {AddressZero} from 'ethers/constants';
 
 import {hashChannelStorage} from '../src/channel-storage';
 import {
@@ -11,7 +18,8 @@ import {
   Guarantee,
   Allocation,
 } from '../src/outcome';
-import {State} from '../src/state';
+import {State, hashState} from '../src/state';
+import {TransactionRequest} from 'ethers/providers';
 
 export async function setupContracts(provider: ethers.providers.JsonRpcProvider, artifact) {
   const networkId = (await provider.getNetwork()).chainId;
@@ -159,6 +167,16 @@ export function randomChannelId(channelNonce = 0) {
   return channelId;
 }
 
+export async function sendTransaction(
+  provider: ethers.providers.JsonRpcProvider,
+  contractAddress: string,
+  transaction: TransactionRequest,
+) {
+  const signer = provider.getSigner();
+  const response = await signer.sendTransaction({to: contractAddress, ...transaction});
+  await response.wait();
+}
+
 export function allocationToParams(allocation: Allocation) {
   const allocationBytes = encodeAllocation(allocation);
 
@@ -171,4 +189,14 @@ export function guaranteeToParams(guarantee: Guarantee) {
 
   const outcomeContentHash = hashOutcomeContent(guarantee);
   return [guaranteeBytes, outcomeContentHash];
+}
+
+export async function signStates(
+  states: State[],
+  wallets: Wallet[],
+  whoSignedWhat: number[],
+): Promise<Signature[]> {
+  const stateHashes = states.map(s => hashState(s));
+  const promises = wallets.map(async (w, i) => await sign(w, stateHashes[whoSignedWhat[i]]));
+  return Promise.all(promises);
 }

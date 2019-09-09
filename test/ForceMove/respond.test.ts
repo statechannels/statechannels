@@ -5,12 +5,13 @@ import ForceMoveArtifact from '../../build/contracts/TESTForceMove.json';
 // @ts-ignore
 import countingAppArtifact from '../../build/contracts/CountingApp.json';
 import {keccak256, defaultAbiCoder, hexlify, toUtf8Bytes, bigNumberify} from 'ethers/utils';
-import {setupContracts, sign, newChallengeClearedEvent} from '../test-helpers';
+import {setupContracts, sign, newChallengeClearedEvent, sendTransaction} from '../test-helpers';
 import {HashZero, AddressZero} from 'ethers/constants';
 import {Outcome, hashOutcome} from '../../src/outcome';
 import {Channel, getChannelId} from '../../src/channel';
 import {State, hashState, getVariablePart, getFixedPart} from '../../src/state';
 import {hashChannelStorage} from '../../src/channel-storage';
+import {createRespondTransaction} from '../../src/force-move';
 
 const provider = new ethers.providers.JsonRpcProvider(
   `http://localhost:${process.env.DEV_GANACHE_PORT}`,
@@ -126,40 +127,27 @@ describe('respond', () => {
 
       // sign the state
       const signature = await sign(responder, responseStateHash);
-      const sig = {v: signature.v, r: signature.r, s: signature.s};
+
+      const transactionRequest = createRespondTransaction(
+        declaredTurnNumRecord,
+        finalizesAt,
+        challengeState,
+        responseState,
+        signature,
+      );
 
       if (reasonString) {
         const regex = new RegExp(
           '^' + 'VM Exception while processing transaction: revert ' + reasonString + '$',
         );
         await expectRevert(
-          () =>
-            ForceMove.respond(
-              declaredTurnNumRecord,
-              finalizesAt,
-              challenger.address,
-              isFinalAB,
-              fixedPart,
-              [challengeVariablePart, responseVariablePart],
-              sig,
-            ),
+          () => sendTransaction(provider, ForceMove.address, transactionRequest),
           regex,
         );
       } else {
         const challengeClearedEvent: any = newChallengeClearedEvent(ForceMove, channelId);
-        // call respond
-        const tx2 = await ForceMove.respond(
-          declaredTurnNumRecord,
-          finalizesAt,
-          challenger.address,
-          isFinalAB,
-          fixedPart,
-          [challengeVariablePart, responseVariablePart],
-          sig,
-        );
 
-        // wait for tx to be mined
-        await tx2.wait();
+        await sendTransaction(provider, ForceMove.address, transactionRequest);
 
         // catch ChallengeCleared event
         const [_, eventTurnNumRecord] = await challengeClearedEvent;
