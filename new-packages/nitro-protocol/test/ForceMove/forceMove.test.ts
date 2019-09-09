@@ -13,12 +13,14 @@ import {
   clearedChallengeHash,
   ongoingChallengeHash,
   newForceMoveEvent,
+  sendTransaction,
+  signStates,
 } from '../test-helpers';
-import {hashOutcome} from '../../src/outcome';
 import {Channel, getChannelId} from '../../src/channel';
-import {State, hashState, getVariablePart, getFixedPart} from '../../src/state';
+import {State, getVariablePart, getFixedPart} from '../../src/state';
 import {hashChallengeMessage} from '../../src/challenge';
 import {hashChannelStorage, ChannelStorage} from '../../src/channel-storage';
+import {createForceMoveTransaction} from '../../src/force-move';
 
 const provider = new ethers.providers.JsonRpcProvider(
   `http://localhost:${process.env.DEV_GANACHE_PORT}`,
@@ -107,58 +109,41 @@ describe('forceMove', () => {
         });
       }
 
-      const stateHashes = states.map(s => hashState(s));
       const variableParts = states.map(s => getVariablePart(s));
       const fixedPart = getFixedPart(states[0]);
 
       // sign the states
-      const sigs = new Array(participants.length);
-      for (let i = 0; i < participants.length; i++) {
-        const sig = await sign(wallets[i], stateHashes[whoSignedWhat[i]]);
-        sigs[i] = {v: sig.v, r: sig.r, s: sig.s};
-      }
-
+      // sign the states
+      const sigs = await signStates(states, wallets, whoSignedWhat);
       // compute challengerSig
       const msgHash = hashChallengeMessage({largestTurnNum, channelId});
+
       const {v, r, s} = await sign(challenger, msgHash);
       const challengerSig = {v, r, s};
 
       // set current channelStorageHashes value
       await (await ForceMove.setChannelStorageHash(channelId, initialChannelStorageHash)).wait();
 
+      const transactionRequest = createForceMoveTransaction(
+        turnNumRecord,
+        states,
+        sigs,
+        whoSignedWhat,
+        challengerSig,
+      );
       // call forceMove in a slightly different way if expecting a revert
       if (reasonString) {
         const regex = new RegExp(
           '^' + 'VM Exception while processing transaction: revert ' + reasonString + '$',
         );
-        await expectRevert(
-          () =>
-            ForceMove.forceMove(
-              turnNumRecord,
-              fixedPart,
-              largestTurnNum,
-              variableParts,
-              isFinalCount,
-              sigs,
-              whoSignedWhat,
-              challengerSig,
-            ),
-          regex,
-        );
+
+        await expectRevert(() => {
+          return sendTransaction(provider, ForceMove.address, transactionRequest);
+        }, regex);
       } else {
         forceMoveEvent = newForceMoveEvent(ForceMove, channelId);
-        const tx = await ForceMove.forceMove(
-          turnNumRecord,
-          fixedPart,
-          largestTurnNum,
-          variableParts,
-          isFinalCount,
-          sigs,
-          whoSignedWhat,
-          challengerSig,
-        );
-        // wait for tx to be mined
-        await tx.wait();
+
+        await sendTransaction(provider, ForceMove.address, transactionRequest);
 
         // catch ForceMove event
         const [

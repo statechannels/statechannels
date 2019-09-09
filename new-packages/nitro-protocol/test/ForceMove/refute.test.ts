@@ -5,12 +5,13 @@ import ForceMoveArtifact from '../../build/contracts/TESTForceMove.json';
 // @ts-ignore
 import countingAppArtifact from '../../build/contracts/CountingApp.json';
 import {keccak256, defaultAbiCoder, hexlify, toUtf8Bytes, bigNumberify} from 'ethers/utils';
-import {setupContracts, sign, newChallengeClearedEvent} from '../test-helpers';
+import {setupContracts, sign, newChallengeClearedEvent, sendTransaction} from '../test-helpers';
 import {HashZero, AddressZero} from 'ethers/constants';
 import {Channel, getChannelId} from '../../src/channel';
 import {State, hashState, getFixedPart, getVariablePart} from '../../src/state';
 import {Outcome, hashOutcome} from '../../src/outcome';
 import {hashChannelStorage, ChannelStorage} from '../../src/channel-storage';
+import {createRefuteTransaction} from '../../src/force-move';
 
 const provider = new ethers.providers.JsonRpcProvider(
   `http://localhost:${process.env.DEV_GANACHE_PORT}`,
@@ -125,38 +126,21 @@ describe('refute', () => {
       // sign the state
       const signature = await sign(refutationStateSigner, hashState(refutationState));
       const refutationStateSig = {v: signature.v, r: signature.r, s: signature.s};
-
+      const transactionRequest = createRefuteTransaction(
+        declaredTurnNumRecord,
+        finalizesAt,
+        challengeState,
+        refutationState,
+        refutationStateSig,
+      );
       if (reasonString) {
-        expectRevert(
-          () =>
-            ForceMove.refute(
-              declaredTurnNumRecord,
-              refutationTurnNum,
-              finalizesAt,
-              challenger.address,
-              isFinalAB,
-              fixedPart,
-              [challengeVariablePart, refutationVariablePart],
-              refutationStateSig,
-            ),
-          'VM Exception while processing transaction: revert ' + reasonString,
-        );
+        expectRevert(() => {
+          return sendTransaction(provider, ForceMove.address, transactionRequest);
+        }, 'VM Exception while processing transaction: revert ' + reasonString);
       } else {
         const challengeClearedEvent: any = newChallengeClearedEvent(ForceMove, channelId);
-        // call respond
-        const tx2 = await ForceMove.refute(
-          declaredTurnNumRecord,
-          refutationTurnNum,
-          finalizesAt,
-          challenger.address,
-          isFinalAB,
-          fixedPart,
-          [challengeVariablePart, refutationVariablePart],
-          refutationStateSig,
-        );
 
-        // wait for tx to be mined
-        await tx2.wait();
+        await sendTransaction(provider, ForceMove.address, transactionRequest);
 
         // catch ChallengeCleared event
         const [_, eventTurnNumRecord] = await challengeClearedEvent;
