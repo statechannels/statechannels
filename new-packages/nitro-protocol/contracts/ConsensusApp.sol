@@ -23,38 +23,41 @@ contract ConsensusApp is ForceMoveApp {
         ConsensusAppData memory appDataA = appData(a.appData);
         ConsensusAppData memory appDataB = appData(b.appData);
 
-        bool validPropose =
+        if // propose
         (
             identical(a.outcome, b.outcome) &&
             appDataA.furtherVotesRequired == 0 &&
             appDataB.furtherVotesRequired == numParticipants - 1
-        );
+        )
+        {return true;}
         
-        bool validVote =
+        if // validVote 
         (
             identical(a.outcome, b.outcome) &&
             appDataA.furtherVotesRequired > 1 &&
             appDataB.furtherVotesRequired == appDataA.furtherVotesRequired - 1 &&
             identical(appDataA.proposedOutcome, appDataB.proposedOutcome)
-        );
+        )
+        {return true;}
 
-        bool validFinalVote =
+        if // validFinalVote =
         (
             appDataA.furtherVotesRequired == 1 &&
             appDataB.furtherVotesRequired == 0 &&
             identical(appDataA.proposedOutcome, b.outcome) &&
             appDataB.proposedOutcome.length == 0
-        );
+        )
+        {return true;}
 
-        bool validVeto = // also covers validPass
+        if // validVeto & validPass
         (
             identical(a.outcome, b.outcome) &&
             appDataB.furtherVotesRequired == 0 &&
             appDataB.proposedOutcome.length == 0
-        );
+        )
+        {return true;}
 
-        require((validPropose || validVote || validFinalVote || validVeto), 'ConsensusApp: No valid transition found');
-        return true;
+        revert('ConsensusApp: No valid transition found');
     }
 
     // Utilitiy helpers
