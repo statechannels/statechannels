@@ -23,39 +23,39 @@ contract ConsensusApp is ForceMoveApp {
         ConsensusAppData memory appDataA = appData(a.appData);
         ConsensusAppData memory appDataB = appData(b.appData);
 
-        if // propose
-        (
-            identical(a.outcome, b.outcome) &&
-            appDataA.furtherVotesRequired == 0 &&
-            appDataB.furtherVotesRequired == numParticipants - 1
-        )
-        {return true;}
-        
-        if // validVote 
-        (
-            identical(a.outcome, b.outcome) &&
-            appDataA.furtherVotesRequired > 1 &&
-            appDataB.furtherVotesRequired == appDataA.furtherVotesRequired - 1 &&
-            identical(appDataA.proposedOutcome, appDataB.proposedOutcome)
-        )
-        {return true;}
-
-        if // validFinalVote =
-        (
-            appDataA.furtherVotesRequired == 1 &&
-            appDataB.furtherVotesRequired == 0 &&
-            identical(appDataA.proposedOutcome, b.outcome) &&
-            appDataB.proposedOutcome.length == 0
-        )
-        {return true;}
-
-        if // validVeto & validPass
-        (
-            identical(a.outcome, b.outcome) &&
-            appDataB.furtherVotesRequired == 0 &&
-            appDataB.proposedOutcome.length == 0
-        )
-        {return true;}
+        if (identical(a.outcome, b.outcome)) {
+            if (appDataB.furtherVotesRequired == numParticipants - 1) {
+                if // propose
+                    (
+                        appDataA.furtherVotesRequired == 0
+                    )
+                return true;
+            }
+            if (appDataB.furtherVotesRequired == 0) {
+                if // validVeto & validPass
+                    (
+                        appDataB.proposedOutcome.length == 0
+                    )
+                return true;
+            }
+            if (appDataB.furtherVotesRequired == appDataA.furtherVotesRequired - 1) {
+                if // validVote
+                    (
+                        appDataA.furtherVotesRequired > 1 &&
+                        identical(appDataA.proposedOutcome, appDataB.proposedOutcome)
+                    )
+                return true;
+            }
+        } else {
+            if // validFinalVote
+                (
+                    identical(appDataA.proposedOutcome, b.outcome) &&
+                    appDataA.furtherVotesRequired == 1 &&
+                    appDataB.furtherVotesRequired == 0 &&
+                    appDataB.proposedOutcome.length == 0
+                )
+            return true;
+        }
 
         revert('ConsensusApp: No valid transition found');
     }
