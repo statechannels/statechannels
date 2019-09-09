@@ -30,7 +30,7 @@ The allowed transitions are:
 3. FinalVote: `(1, w, w') -> (0, w', -)`
    - oldState.furtherVotesRequired == 1
    - newState.furtherVotesRequired == 0
-   - newState.currentOutcome == oldState.currentOutcome
+   - newState.currentOutcome == oldState.proposedOutcome
    - newState.proposedOutcome is empty
 4. Veto: `(i, w, w') -> (0, w, -)`
    - newState.furtherVotesRequired == 0
