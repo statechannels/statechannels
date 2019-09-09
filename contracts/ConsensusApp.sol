@@ -25,39 +25,29 @@ contract ConsensusApp is ForceMoveApp {
 
         if (identical(a.outcome, b.outcome)) {
             if (appDataB.furtherVotesRequired == numParticipants - 1) {
-                if // propose
-                    (
-                        appDataA.furtherVotesRequired == 0
-                    )
+                // propose
+                require(appDataA.furtherVotesRequired == 0);
+                return true;
+            } else if (appDataB.furtherVotesRequired == 0) {
+                // veto or pass
+                require(appDataB.proposedOutcome.length == 0);
+                return true;
+            } else if (appDataB.furtherVotesRequired == appDataA.furtherVotesRequired - 1) {
+                // vote
+                require(appDataA.furtherVotesRequired > 1);
+                require(identical(appDataA.proposedOutcome, appDataB.proposedOutcome));
                 return true;
             }
-            if (appDataB.furtherVotesRequired == 0) {
-                if // veto or pass
-                    (
-                        appDataB.proposedOutcome.length == 0
-                    )
-                return true;
-            }
-            if (appDataB.furtherVotesRequired == appDataA.furtherVotesRequired - 1) {
-                if // vote
-                    (
-                        appDataA.furtherVotesRequired > 1 &&
-                        identical(appDataA.proposedOutcome, appDataB.proposedOutcome)
-                    )
-                return true;
-            }
-        } else {
-            if // final vote
-                (
-                    identical(appDataA.proposedOutcome, b.outcome) &&
-                    appDataA.furtherVotesRequired == 1 &&
-                    appDataB.furtherVotesRequired == 0 &&
-                    appDataB.proposedOutcome.length == 0
-                )
+        } else { 
+            // final vote
+            require(identical(appDataA.proposedOutcome, b.outcome));
+            require(appDataA.furtherVotesRequired == 1);
+            require(appDataB.furtherVotesRequired == 0);
+            require(appDataB.proposedOutcome.length == 0);
             return true;
         }
-
         revert('ConsensusApp: No valid transition found');
+
     }
 
     // Utilitiy helpers
