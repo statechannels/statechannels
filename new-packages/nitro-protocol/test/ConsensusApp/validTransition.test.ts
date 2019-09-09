@@ -106,5 +106,4 @@ async function sendTransaction(contractAddress: string, transaction: Transaction
   const signer = provider.getSigner();
   const response = await signer.sendTransaction({to: contractAddress, ...transaction});
   await response.wait();
-  return response;
 }

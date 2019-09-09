@@ -20,34 +20,37 @@ contract ConsensusApp is ForceMoveApp {
         uint256 numParticipants
     ) public pure returns (bool) {
 
+        ConsensusAppData memory appDataA = appData(a.appData);
+        ConsensusAppData memory appDataB = appData(b.appData);
+
         bool validPropose =
         (
             identical(a.outcome, b.outcome) &&
-            appData(a.appData).furtherVotesRequired == 0 &&
-            appData(b.appData).furtherVotesRequired == numParticipants - 1
+            appDataA.furtherVotesRequired == 0 &&
+            appDataB.furtherVotesRequired == numParticipants - 1
         );
         
         bool validVote =
         (
             identical(a.outcome, b.outcome) &&
-            appData(a.appData).furtherVotesRequired > 1 &&
-            appData(b.appData).furtherVotesRequired == appData(a.appData).furtherVotesRequired - 1 &&
-            identical(appData(a.appData).proposedOutcome, appData(b.appData).proposedOutcome)
+            appDataA.furtherVotesRequired > 1 &&
+            appDataB.furtherVotesRequired == appDataA.furtherVotesRequired - 1 &&
+            identical(appDataA.proposedOutcome, appDataB.proposedOutcome)
         );
 
         bool validFinalVote =
         (
-            appData(a.appData).furtherVotesRequired == 1 &&
-            appData(b.appData).furtherVotesRequired == 0 &&
-            identical(appData(a.appData).proposedOutcome, b.outcome) &&
-            appData(b.appData).proposedOutcome.length == 0
+            appDataA.furtherVotesRequired == 1 &&
+            appDataB.furtherVotesRequired == 0 &&
+            identical(appDataA.proposedOutcome, b.outcome) &&
+            appDataB.proposedOutcome.length == 0
         );
 
         bool validVeto = // also covers validPass
         (
             identical(a.outcome, b.outcome) &&
-            appData(b.appData).furtherVotesRequired == 0 &&
-            appData(b.appData).proposedOutcome.length == 0
+            appDataB.furtherVotesRequired == 0 &&
+            appDataB.proposedOutcome.length == 0
         );
 
         require((validPropose || validVote || validFinalVote || validVeto), 'ConsensusApp: No valid transition found');
