@@ -25,7 +25,6 @@ const I = ethers.Wallet.createRandom().address.padEnd(66, '0');
 const A = ethers.Wallet.createRandom().address.padEnd(66, '0');
 const B = ethers.Wallet.createRandom().address.padEnd(66, '0');
 let AssetHolder: ethers.Contract;
-let assetTransferredEvents;
 
 beforeAll(async () => {
   AssetHolder = await setupContracts(provider, AssetHolderArtifact);
@@ -126,7 +125,7 @@ describe('claimAll', () => {
         );
       } else {
         // register for events
-        assetTransferredEvents = cDestBefore.map((x, index, array) => {
+        const assetTransferredEvents = cDestBefore.map((x, index, array) => {
           if (payouts[index].gt(0)) {
             return newAssetTransferredEvent(AssetHolder, x);
           }
