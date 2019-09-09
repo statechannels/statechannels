@@ -8,10 +8,14 @@ import {
   randomChannelId,
   allocationToParams,
   guaranteeToParams,
+  sendTransaction,
 } from '../test-helpers';
-import {HashZero, AddressZero} from 'ethers/constants';
+import {HashZero} from 'ethers/constants';
 import {BigNumber} from 'ethers/utils';
-import {Allocation} from '../../src/outcome.js';
+import {Allocation} from '../../src/outcome';
+import {createClaimAllTransaction} from '../../src/transaction-creators/asset-holder';
+
+const AssetHolderInterface = new ethers.utils.Interface(AssetHolderArtifact.abi);
 
 const provider = new ethers.providers.JsonRpcProvider(
   `http://localhost:${process.env.DEV_GANACHE_PORT}`,
@@ -104,13 +108,20 @@ describe('claimAll', () => {
         expect(await AssetHolder.outcomeHashes(guarantorId)).toBe(gOutcomeContentHash);
       }
 
+      const transactionRequest = createClaimAllTransaction(
+        AssetHolderInterface,
+        guarantorId,
+        guarantee,
+        allocation,
+      );
+
       // call method in a slightly different way if expecting a revert
       if (reasonString) {
         const regex = new RegExp(
           '^' + 'VM Exception while processing transaction: revert ' + reasonString + '$',
         );
         await expectRevert(
-          () => AssetHolder.claimAll(guarantorId, guaranteeBytes, allocationBytes),
+          () => sendTransaction(provider, AssetHolder.address, transactionRequest),
           regex,
         );
       } else {
@@ -121,10 +132,7 @@ describe('claimAll', () => {
           }
         });
 
-        // submit tx
-        const tx = await AssetHolder.claimAll(guarantorId, guaranteeBytes, allocationBytes);
-        // wait for tx to be mined
-        await tx.wait();
+        await sendTransaction(provider, AssetHolder.address, transactionRequest);
 
         // catch events
         const resolvedAassetTransferredEvents = await Promise.all(assetTransferredEvents);
