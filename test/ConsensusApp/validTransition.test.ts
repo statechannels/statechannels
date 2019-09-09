@@ -23,8 +23,7 @@ const defaultOutcome3 = '0x3';
 
 const defaultTurn = 1;
 
-const noValidTransitionError = 'ConsensusApp: No valid transition found for commitments';
-const outcomeMustBeSameError = "ConsensusApp: 'outcome' must be the same between commitments.";
+const noValidTransitionError = 'ConsensusApp: No valid transition found';
 
 beforeAll(async () => {
   consensusApp = await setupContracts(provider, ConsensusAppArtifact);
@@ -101,7 +100,7 @@ describe('validTransition', () => {
     const variablePartNew = constructConsensusVariablePart(0, defaultOutcome2, emptyOutcome);
     await expectRevert(
       () => consensusApp.validTransition(variablePartOld, variablePartNew, defaultTurn, 3),
-      outcomeMustBeSameError,
+      noValidTransitionError,
     );
   });
 
