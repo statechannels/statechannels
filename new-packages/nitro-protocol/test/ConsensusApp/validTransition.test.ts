@@ -75,7 +75,7 @@ describe('validTransition', () => {
     );
     if (reason) {
       await expectRevert(
-        () => consensusApp.validTransition(variablePartOld, variablePartNew, defaultTurn, 3),
+        () => consensusApp.validTransition(variablePartOld, variablePartNew, turnNumB, 3),
         noValidTransitionError,
       );
     } else {
