@@ -2,10 +2,29 @@ html {
   height: 100vh;
   background-color: #2a3749;
   color: white;
+  width: 100vw;
 }
 .App {
   font-family: sans-serif;
   text-align: center;
+}
+.magnetLink {
+  font-size: 10px;
+
+}
+.peerStatus-true {
+  background-color: green;
+  border: 1px greenyellow solid;
+  color: #fafafa;
+  display: block;
+  margin: 5px auto !important;
+}
+.peerStatus-false {
+  background-color: indianred;
+  border: 1px red solid;
+  color: #fafafa;
+  display: block;
+  margin: 5px auto !important;
 }
 
 #output video {
@@ -29,13 +48,13 @@ h2 {
 .show-seed {
   display: none;
 }
-#status code {
+/* #status code {
   font-size: 90%;
   font-weight: 700;
   margin-left: 3px;
   margin-right: 3px;
   border-bottom: 1px dashed rgba(255, 255, 255, 0.3);
-}
+} */
 
 .is-seed #hero {
   background-color: #154820;
