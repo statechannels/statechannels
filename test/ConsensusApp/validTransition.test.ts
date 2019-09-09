@@ -21,6 +21,8 @@ const defaultOutcome1 = '0x1';
 const defaultOutcome2 = '0x2';
 const defaultOutcome3 = '0x3';
 
+const defaultTurn = 1;
+
 const noValidTransitionError = 'ConsensusApp: No valid transition found for commitments';
 const outcomeMustBeSameError = "ConsensusApp: 'outcome' must be the same between commitments.";
 
@@ -32,7 +34,12 @@ describe('validTransition', () => {
   it('valid consensus -> propose', async () => {
     const variablePartOld = constructConsensusVariablePart(0, defaultOutcome1, emptyOutcome);
     const variablePartNew = constructConsensusVariablePart(2);
-    const isValid = await consensusApp.validTransition(variablePartOld, variablePartNew, 1, 3);
+    const isValid = await consensusApp.validTransition(
+      variablePartOld,
+      variablePartNew,
+      defaultTurn,
+      3,
+    );
     expect(isValid).toBe(true);
   });
 
@@ -41,7 +48,7 @@ describe('validTransition', () => {
     const variablePartNew = constructConsensusVariablePart(1, defaultOutcome1, defaultOutcome1);
 
     await expectRevert(
-      () => consensusApp.validTransition(variablePartOld, variablePartNew, 1, 3),
+      () => consensusApp.validTransition(variablePartOld, variablePartNew, defaultTurn, 3),
       noValidTransitionError,
     );
   });
@@ -49,7 +56,9 @@ describe('validTransition', () => {
   it('valid vote', async () => {
     const variablePartOld = constructConsensusVariablePart(2);
     const variablePartNew = constructConsensusVariablePart(1);
-    expect(await consensusApp.validTransition(variablePartOld, variablePartNew, 1, 3)).toBe(true);
+    expect(
+      await consensusApp.validTransition(variablePartOld, variablePartNew, defaultTurn, 3),
+    ).toBe(true);
   });
 
   it('invalid vote: furtherVotesRequired not decreased', async () => {
@@ -57,7 +66,7 @@ describe('validTransition', () => {
     const variablePartNew = constructConsensusVariablePart(2);
 
     await expectRevert(
-      () => consensusApp.validTransition(variablePartOld, variablePartNew, 1, 4),
+      () => consensusApp.validTransition(variablePartOld, variablePartNew, defaultTurn, 4),
       noValidTransitionError,
     );
   });
@@ -65,14 +74,16 @@ describe('validTransition', () => {
   it('valid veto', async () => {
     const variablePartOld = constructConsensusVariablePart(2, defaultOutcome1, defaultOutcome2);
     const variablePartNew = constructConsensusVariablePart(0, defaultOutcome1, emptyOutcome);
-    expect(await consensusApp.validTransition(variablePartOld, variablePartNew, 1, 3)).toBe(true);
+    expect(
+      await consensusApp.validTransition(variablePartOld, variablePartNew, defaultTurn, 3),
+    ).toBe(true);
   });
 
   it('invalid veto: currentOutcome1 ≠ currentOutcome2', async () => {
     const variablePartOld = constructConsensusVariablePart(2, defaultOutcome1, defaultOutcome2);
     const variablePartNew = constructConsensusVariablePart(0, defaultOutcome2, emptyOutcome);
     await expectRevert(
-      () => consensusApp.validTransition(variablePartOld, variablePartNew, 1, 3),
+      () => consensusApp.validTransition(variablePartOld, variablePartNew, defaultTurn, 3),
       noValidTransitionError,
     );
   });
@@ -80,14 +91,16 @@ describe('validTransition', () => {
   it('valid pass', async () => {
     const variablePartOld = constructConsensusVariablePart(0, defaultOutcome1, emptyOutcome);
     const variablePartNew = constructConsensusVariablePart(0, defaultOutcome1, emptyOutcome);
-    expect(await consensusApp.validTransition(variablePartOld, variablePartNew, 1, 3)).toBe(true);
+    expect(
+      await consensusApp.validTransition(variablePartOld, variablePartNew, defaultTurn, 3),
+    ).toBe(true);
   });
 
   it('invalid pass: currentOutcome1 ≠ currentOutcome2', async () => {
     const variablePartOld = constructConsensusVariablePart(0, defaultOutcome1, emptyOutcome);
     const variablePartNew = constructConsensusVariablePart(0, defaultOutcome2, emptyOutcome);
     await expectRevert(
-      () => consensusApp.validTransition(variablePartOld, variablePartNew, 1, 3),
+      () => consensusApp.validTransition(variablePartOld, variablePartNew, defaultTurn, 3),
       outcomeMustBeSameError,
     );
   });
@@ -95,14 +108,16 @@ describe('validTransition', () => {
   it('valid finalVote', async () => {
     const variablePartOld = constructConsensusVariablePart(1, defaultOutcome1, defaultOutcome2);
     const variablePartNew = constructConsensusVariablePart(0, defaultOutcome2, emptyOutcome);
-    expect(await consensusApp.validTransition(variablePartOld, variablePartNew, 1, 3)).toBe(true);
+    expect(
+      await consensusApp.validTransition(variablePartOld, variablePartNew, defaultTurn, 3),
+    ).toBe(true);
   });
 
   it('invalid finalVote: proposedOutcome1 ≠ currentOutcome2', async () => {
     const variablePartOld = constructConsensusVariablePart(1, defaultOutcome1, defaultOutcome2);
     const variablePartNew = constructConsensusVariablePart(0, defaultOutcome3, emptyOutcome);
     await expectRevert(
-      () => consensusApp.validTransition(variablePartOld, variablePartNew, 1, 3),
+      () => consensusApp.validTransition(variablePartOld, variablePartNew, defaultTurn, 3),
       noValidTransitionError,
     );
   });
