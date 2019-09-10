@@ -1,6 +1,5 @@
 import WebTorrent from "webtorrent";
 import {
-  InitialState,
   WireEvents,
   TorrentEvents,
   ClientEvents,
@@ -9,8 +8,7 @@ import {
 } from "./constants";
 import paidStreamingExtension from "./wire-extension";
 
-export { InitialState, WireEvents, TorrentEvents, ClientEvents }
-
+export { WireEvents, TorrentEvents, ClientEvents }
 
 /**
  * @this {WebTorrentPaidStreamingClient}
@@ -26,23 +24,18 @@ function setupWire (torrent, wire) {
     wire._clearTimeout()
   });
 
-  wire.on(WireEvents.DOWNLOAD, bytes => { });
-
-  wire.on(WireEvents.REQUEST, (index, offset, length) => {
+  wire.on(WireEvents.REQUEST, () => {
     const peerAccount = wire.paidStreamingExtension && wire.paidStreamingExtension.peerAccount;
-    if (
-      peerAccount in this.allowedPeers &&
-      !this.allowedPeers[peerAccount].allowed
-    ) {
-      this.sendNotice(wire, peerAccount);
+    const knownPeerAccount = peerAccount in this.allowedPeers[torrent.infoHash];
+
+    if (knownPeerAccount && !this.allowedPeers[torrent.infoHash][peerAccount].allowed) {
+      this.sendNotice(torrent.infoHash, wire, peerAccount);
+    } else if (!knownPeerAccount) {
+      this.allowedPeers[torrent.infoHash][peerAccount] = { id: peerAccount, wire };
+      this.sendNotice(torrent.infoHash, wire, peerAccount);
+      this.emit(ClientEvents.PEER_STATUS_CHANGED, { allowedPeers: this.allowedPeers[torrent.infoHash], affectedId: torrent.infoHash, peerAccount });
     } else {
-      if (!(peerAccount in this.allowedPeers)) {
-        this.allowedPeers[peerAccount] = { id: peerAccount, wire };
-        this.sendNotice(wire, peerAccount);
-        this.emit(ClientEvents.PEER_STATUS_CHANGED, { allowedPeers: this.allowedPeers, peerAccount });
-      } else {
-        this.allowedPeers[peerAccount] = { id: peerAccount, wire, allowed: true };
-      }
+      this.allowedPeers[torrent.infoHash][peerAccount] = { id: peerAccount, wire, allowed: true };
     }
   });
 
@@ -84,7 +77,9 @@ function setupTorrent (torrent) {
   if (torrent.usingPaidStreaming) {
     return torrent;
   }
-
+  torrent.on('infoHash', () => {
+    this.allowedPeers = { ...this.allowedPeers, [torrent.infoHash]: {} }
+  })
   torrent.on(TorrentEvents.WIRE, wire => setupWire.call(this, torrent, wire));
   torrent.on('error', error => console.warn('>torrent error', error))
   torrent.on(TorrentEvents.NOTICE, (wire, notice) => {
@@ -138,28 +133,28 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     return torrent;
   }
 
-  sendNotice (wire, peerAccount) {
-    this.allowedPeers[peerAccount].allowed = false;
+  sendNotice (affectedTorrent, wire, peerAccount) {
+    this.allowedPeers[affectedTorrent][peerAccount].allowed = false;
     wire.paidStreamingExtension.stop();
-    this.emit(ClientEvents.PEER_STATUS_CHANGED, { allowedPeers: this.allowedPeers, peerAccount });
+    this.emit(ClientEvents.PEER_STATUS_CHANGED, { allowedPeers: this.allowedPeers[affectedTorrent], affectedTorrent, peerAccount });
     console.log("> sendNotice", peerAccount);
   }
 
-  retractNotice (wire, peerAccount) {
-    this.allowedPeers[peerAccount].allowed = true;
+  retractNotice (affectedTorrent, wire, peerAccount) {
+    this.allowedPeers[affectedTorrent][peerAccount].allowed = true;
     wire.paidStreamingExtension.start();
-    this.emit(ClientEvents.PEER_STATUS_CHANGED, { allowedPeers: this.allowedPeers, peerAccount });
+    this.emit(ClientEvents.PEER_STATUS_CHANGED, { allowedPeers: this.allowedPeers[affectedTorrent], affectedTorrent, peerAccount });
     console.log("> retractNotice", peerAccount);
   }
 
-  togglePeer (peerAccount) {
-    const { wire, allowed } = this.allowedPeers[peerAccount];
+  togglePeer (affectedTorrent, peerAccount) {
+    const { wire, allowed } = this.allowedPeers[affectedTorrent][peerAccount];
     console.log('> togglePeer', peerAccount, wire, allowed);
     if (allowed) {
-      this.sendNotice(wire, peerAccount);
+      this.sendNotice(affectedTorrent, wire, peerAccount);
     } else {
-      this.retractNotice(wire, peerAccount);
+      this.retractNotice(affectedTorrent, wire, peerAccount);
     }
-    this.emit(ClientEvents.PEER_STATUS_CHANGED, { allowedPeers: this.allowedPeers, peerAccount });
+    this.emit(ClientEvents.PEER_STATUS_CHANGED, { allowedPeers: this.allowedPeers[affectedTorrent], affectedTorrent, peerAccount });
   }
 }

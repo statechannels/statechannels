@@ -67,11 +67,9 @@ h2 {
 
 #hero-seeder {
   background-color: rgb(6, 77, 77);
+  min-height: 400px;
 }
 
-#hero-leecher {
-  background-color: rgb(0, 66, 22);
-}
 .hero > * {
   margin: 5px;
 }

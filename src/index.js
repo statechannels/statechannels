@@ -1,9 +1,19 @@
 import React, { useState } from "react";
 import ReactDOM from "react-dom";
 import "./styles.css";
-import WebTorrent, { ClientEvents, InitialState } from "./webtorrent-custom";
+import WebTorrent from "./webtorrent-custom";
 import prettierBytes from "prettier-bytes";
 const client = new WebTorrent()
+
+export const InitialState = {
+  working: "Done/Idle",
+  verb: "from",
+  numPeers: 0,
+  downloadSpeed: 0,
+  uploadSpeed: 0,
+  torrent: null,
+  files: []
+};
 
 const progressLogger = (logger, status, setStatus, setMagnet) => (torrent = InitialState) => {
   clearInterval(logger);
@@ -14,6 +24,7 @@ const progressLogger = (logger, status, setStatus, setMagnet) => (torrent = Init
 
     setStatus({
       ...status,
+      torrent, // assuming there's only ONE torrent at play
       working: torrentIsDone ? "Done/Idle" : isSeeder ? "Seeding" : "Leeching",
       downloadSpeed: prettierBytes(torrent.downloadSpeed),
       uploadSpeed: prettierBytes(torrent.uploadSpeed),
@@ -23,7 +34,7 @@ const progressLogger = (logger, status, setStatus, setMagnet) => (torrent = Init
     if (torrentIsDone) {
       isSeeder ?
         setMagnet(torrent.magnetURI) :
-        torrent.files[0].getBlobURL((err, url) => {
+        torrent.files[0].getBlobURL((err, url) => { // assuming that the torrent has only ONE file
           setStatus(Object.assign(InitialState, { url, filename: torrent.files[0].name }));
           clearInterval(logger);
         });
@@ -31,19 +42,12 @@ const progressLogger = (logger, status, setStatus, setMagnet) => (torrent = Init
   }, 500);
 };
 
-const upload = (files, log, setAllowedPeers) => {
-  client.on(ClientEvents.PEER_STATUS_CHANGED, ({ allowedPeers }) => setAllowedPeers(allowedPeers))
-  client.seed(files, (torrent) => log(torrent));
-};
-
 function App () {
   let loggerId;
   const [status, setStatus] = useState(InitialState);
   const [seedMagnet, setSeedMagnet] = useState("");
-  const [allowedPeers, setAllowedPeers] = useState({});
   const [leechMagnet, setLeechMagnet] = useState("");
   const log = progressLogger(loggerId, status, setStatus, setSeedMagnet);
-
   return (
     <div className="App">
       <div className="hero" id="hero">
@@ -67,16 +71,27 @@ function App () {
 
       <div className="hero" id="hero-seeder">
         <h2>Seeder</h2>
-        <h5>Select a file to seed</h5>
+        <h4>Select a file</h4>
         <br />
-        <input
-          type="file"
-          name="upload"
-          onChange={event => upload(event.target.files, log, setAllowedPeers)}
-        />
-        {Object.values(allowedPeers).map(({ id, allowed }) =>
-          <button className={"peerStatus-" + allowed} key={id} onClick={() => client.togglePeer(id)}>{id}</button>
-        )}
+        <input type="file" onChange={event => client.seed(event.target.files, torrent => log(torrent))} />
+        {
+          Object.entries(client.allowedPeers).map(([infoHash, allowedPeers]) => {
+            return (
+              <div key={infoHash}>
+                <h5>Torrent {infoHash} Clients</h5>
+                {
+                  Object.values(allowedPeers).map(({ id, allowed }) =>
+                    <button key={id}
+                      className={"peerStatus-" + allowed}
+                      onClick={() => client.togglePeer(infoHash, id)}>
+                      {allowed ? "Allowed" : "Choking"}: {id}
+                    </button>
+                  )
+                }
+              </div>)
+          })
+        }
+        <br />
         {!seedMagnet ?
           false :
           <div className="magnetLink" title="Copy and share this so that others can download the file" >{seedMagnet}</div>
