@@ -94,7 +94,10 @@ function App () {
         <br />
         {!seedMagnet ?
           false :
-          <div className="magnetLink" title="Copy and share this so that others can download the file" >{seedMagnet}</div>
+          <div className="magnetLink" title="Copy and share this so that others can download the file" >
+            <h5>Magnet Link</h5>
+            {seedMagnet}
+          </div>
         }
       </div>
 
@@ -106,9 +109,9 @@ function App () {
         {!!status.url ?
           <a href={status.url} download={status.filename}> Download {status.filename}</a> :
           <div>
-            <button onClick={() => client.add(leechMagnet || "https://webtorrent.io/torrents/sintel.torrent", torrent => log(torrent))}>
+            <button onClick={() => client.add(leechMagnet, torrent => log(torrent))}>
               START DOWNLOAD
-          </button>
+            </button>
           </div>
         }
       </div>
