@@ -1,13 +1,3 @@
-export const InitialState = {
-  working: "Done/Idle",
-  verb: "from",
-  numPeers: 0,
-  downloadSpeed: 0,
-  uploadSpeed: 0,
-  torrent: null,
-  files: []
-};
-
 export const ClientEvents = {
   PEER_STATUS_CHANGED: "peer_status_changed",
   CLIENT_RESET: "client_reset",
