@@ -31,10 +31,10 @@ function setupWire (torrent, wire) {
     const knownPeerAccount = peerAccount in this.allowedPeers[torrent.infoHash];
 
     if (knownPeerAccount && !this.allowedPeers[torrent.infoHash][peerAccount].allowed) {
-      this.sendNotice(torrent.infoHash, wire, peerAccount);
+      this.blockPeer(torrent.infoHash, wire, peerAccount);
     } else if (!knownPeerAccount) {
       this.allowedPeers[torrent.infoHash][peerAccount] = { id: peerAccount, wire };
-      this.sendNotice(torrent.infoHash, wire, peerAccount);
+      this.blockPeer(torrent.infoHash, wire, peerAccount);
       this.emit(ClientEvents.PEER_STATUS_CHANGED, { allowedPeers: this.allowedPeers[torrent.infoHash], affectedId: torrent.infoHash, peerAccount });
     } else {
       this.allowedPeers[torrent.infoHash][peerAccount] = { id: peerAccount, wire, allowed: true };
@@ -136,26 +136,26 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     return torrent;
   }
 
-  sendNotice (affectedTorrent, wire, peerAccount) {
+  blockPeer (affectedTorrent, wire, peerAccount) {
     this.allowedPeers[affectedTorrent][peerAccount].allowed = false;
     wire.paidStreamingExtension.stop();
     this.emit(ClientEvents.PEER_STATUS_CHANGED, { allowedPeers: this.allowedPeers[affectedTorrent], affectedTorrent, peerAccount });
-    console.log("> sendNotice", peerAccount, this.allowedPeers);
+    console.log("> blockPeer", peerAccount, this.allowedPeers);
   }
 
-  retractNotice (affectedTorrent, wire, peerAccount) {
+  unblockPeer (affectedTorrent, wire, peerAccount) {
     this.allowedPeers[affectedTorrent][peerAccount].allowed = true;
     wire.paidStreamingExtension.start();
     this.emit(ClientEvents.PEER_STATUS_CHANGED, { allowedPeers: this.allowedPeers[affectedTorrent], affectedTorrent, peerAccount });
-    console.log("> retractNotice", peerAccount, this.allowedPeers);
+    console.log("> unblockPeer", peerAccount, this.allowedPeers);
   }
 
   togglePeer (affectedTorrent, peerAccount) {
     const { wire, allowed } = this.allowedPeers[affectedTorrent][peerAccount];
     if (allowed) {
-      this.sendNotice(affectedTorrent, wire, peerAccount);
+      this.blockPeer(affectedTorrent, wire, peerAccount);
     } else {
-      this.retractNotice(affectedTorrent, wire, peerAccount);
+      this.unblockPeer(affectedTorrent, wire, peerAccount);
     }
     console.log('> togglePeer', peerAccount, '->', this.allowedPeers);
     this.emit(ClientEvents.PEER_STATUS_CHANGED, { allowedPeers: this.allowedPeers[affectedTorrent], affectedTorrent, peerAccount });
