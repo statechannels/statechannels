@@ -62,7 +62,6 @@ const description11 =
 const description12 =
   '12. Transfers all holdings from directly-funded channel allocating to two channels (full payout, partial payout)';
 
-// ${description1}  | ${true}    | ${1} | ${[A]}     | ${['1']}      | ${[]}     | ${[]}        | ${[]}       | ${[]}            | ${[]}         | ${'0'}    | ${undefined}
 // ${description2}  | ${true}    | ${2} | ${[A]}     | ${['1']}      | ${[]}     | ${[]}        | ${[]}       | ${[]}            | ${['1']}      | ${'1'}    | ${undefined}
 // ${description3}  | ${true}    | ${1} | ${[A]}     | ${['2']}      | ${[A]}    | ${['1']}     | ${[]}       | ${[]}            | ${['1']}      | ${'0'}    | ${undefined}
 // ${description4}  | ${true}    | ${1} | ${[C]}     | ${['1']}      | ${[]}     | ${[]}        | ${[C]}      | ${['1']}         | ${[]}         | ${'0'}    | ${undefined}
@@ -79,8 +78,9 @@ const description12 =
 // c is the channel we are transferring from. TODO work out how to track it below
 describe('transferAll', () => {
   it.each`
-    name                                  | heldBefore | setOutcome | newOutcome | heldAfter | payouts   | reason
-    ${'1. Finalized, funded, single EOA'} | ${{c: 1}}  | ${{A: 1}}  | ${{}}      | ${{}}     | ${{A: 1}} | ${undefined}
+    name                                      | heldBefore | setOutcome | newOutcome | heldAfter | payouts   | reason
+    ${'1. Finalized, funded, single EOA'}     | ${{c: 1}}  | ${{A: 1}}  | ${{}}      | ${{}}     | ${{A: 1}} | ${undefined}
+    ${'2. Finalized, overfunded, single EOA'} | ${{c: 2}}  | ${{A: 1}}  | ${{}}      | ${{c: 1}} | ${{A: 1}} | ${undefined}
   `(
     `$name: heldBefore: $heldBefore, setOutcome: $setOutcome, newOutcome: $newOutcome, heldAfter: $heldAfter, payouts: $payouts`,
     async ({name, heldBefore, setOutcome, newOutcome, heldAfter, payouts, reason}) => {
@@ -97,17 +97,11 @@ describe('transferAll', () => {
       heldAfter = transformInputData(heldAfter, addresses);
       payouts = transformInputData(payouts, addresses);
 
-      // reset the holdings for any beneficiary channels we expect to be updated
-      Object.keys(heldAfter).forEach(async key => {
-        await (await AssetHolder.setHoldings(key, 0)).wait();
-        expect((await AssetHolder.holdings(key)).eq(0)).toBe(true);
+      // reset the holdings (only works on test contract)
+      Object.keys(heldBefore).forEach(async key => {
+        await (await AssetHolder.setHoldings(key, heldBefore[key])).wait();
+        expect((await AssetHolder.holdings(key)).eq(heldBefore[key])).toBe(true);
       });
-
-      // set holdings for channelId (only works on test contract)
-      if (heldBefore[channelId] > 0) {
-        await (await AssetHolder.setHoldings(channelId, heldBefore[channelId])).wait();
-        expect(await AssetHolder.holdings(channelId)).toEqual(heldBefore[channelId]);
-      }
 
       // compute an appropriate allocation.
       const allocation = [];
@@ -156,7 +150,7 @@ describe('transferAll', () => {
 
         // check new holdings
         Object.keys(heldAfter).forEach(async key =>
-          expect(await AssetHolder.holdings(key).toEqual(heldAfter[key])),
+          expect(await AssetHolder.holdings(key)).toEqual(heldAfter[key]),
         );
 
         // check new outcomeHash
