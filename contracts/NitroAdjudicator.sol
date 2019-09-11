@@ -39,10 +39,7 @@ contract NitroAdjudicator is ForceMove {
             'Submitted data does not match storage'
         );
 
-         Outcome.AssetOutcome[] memory assetOutcomes = abi.decode(
-            outcome,
-            (Outcome.AssetOutcome[])
-        );
+        Outcome.AssetOutcome[] memory assetOutcomes = abi.decode(outcome, (Outcome.AssetOutcome[]));
 
         for (uint256 i = 0; i < assetOutcomes.length; i++) {
             require(
