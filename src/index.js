@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import ReactDOM from "react-dom";
 import "./styles.css";
-import WebTorrent from "./webtorrent-custom";
+import WebTorrent from "./web3torrent-lib";
 import prettierBytes from "prettier-bytes";
 const webClient = new WebTorrent()
 
