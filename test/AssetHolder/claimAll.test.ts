@@ -35,21 +35,25 @@ beforeAll(async () => {
   AssetHolder = await setupContracts(provider, AssetHolderArtifact);
 });
 
-const reason4 =
+const reason5 =
   'claimAll | submitted data does not match outcomeHash stored against guaranteedChannelId';
-const reason5 = 'claimAll | submitted data does not match outcomeHash stored against channelId';
+const reason6 = 'claimAll | submitted data does not match outcomeHash stored against channelId';
 
-// ${'(swap guarantee, 2 destinations)'}             | ${[A, B]}    | ${['5', '5']}         | ${[A]}                | ${['5']}        | ${101}    | ${[I, B, A]} | ${'5'}       | ${'0'} | ${[true, true]}  | ${['0', '5']}      | ${undefined}
-// ${'(swap guarantee, 3 destinations)'}             | ${[I, A, B]} | ${['5', '5', '5']}    | ${[A, B]}             | ${['5', '5']}   | ${100}    | ${[I, B, A]} | ${'5'}       | ${'0'} | ${[true, true]}  | ${['5', '0', '0']} | ${undefined}
-// ${'(straight-through guarantee, 2 destinations)'} | ${[A, B]}    | ${['5', '5']}         | ${[B]}                | ${['5']}        | ${103}    | ${[I, A, B]} | ${'5'}       | ${'0'} | ${[true, true]}  | ${['5', '0']}      | ${undefined}
-// ${'allocation not on chain'}                      | ${[A, B]}    | ${['5', '5']}         | ${[B]}                | ${['5']}        | ${103}    | ${[I, A, B]} | ${'5'}       | ${'0'} | ${[false, true]} | ${['5', '0']}      | ${reason4}
-// ${'guarantee not on chain'}                       | ${[A, B]}    | ${['5', '5']}         | ${[B]}                | ${['5']}        | ${103}    | ${[I, A, B]} | ${'5'}       | ${'0'} | ${[true, false]} | ${['5', '0']}      | ${reason5}
+// 1. claim G1 (step 1 of figure 23 of nitro paper)
+// 2. claim G2 (step 2 of figure 23 of nitro paper)
+// 3. claim G1 (step 1 of alternative in figure 23 of nitro paper)
+// 4. claim G2 (step 2 of alternative of figure 23 of nitro paper)
 
 // amounts are valueString representations of wei
 describe('claimAll', () => {
   it.each`
-    name                                            | heldBefore | guaranteeDestinations | cOutcomeBefore        | cOutcomeAfter   | heldAfter | payouts   | reason
-    ${'straight-through guarantee, 3 destinations'} | ${{g: 5}}  | ${['I', 'A', 'B']}    | ${{I: 5, A: 5, B: 5}} | ${{A: 5, B: 5}} | ${{g: 0}} | ${{I: 5}} | ${undefined}
+    name                                               | heldBefore | guaranteeDestinations | cOutcomeBefore        | cOutcomeAfter   | heldAfter | payouts   | reason
+    ${'1. straight-through guarantee, 3 destinations'} | ${{g: 5}}  | ${['I', 'A', 'B']}    | ${{I: 5, A: 5, B: 5}} | ${{A: 5, B: 5}} | ${{g: 0}} | ${{I: 5}} | ${undefined}
+    ${'2. swap guarantee,             2 destinations'} | ${{g: 5}}  | ${['B', 'A']}         | ${{A: 5, B: 5}}       | ${{A: 5}}       | ${{g: 0}} | ${{B: 5}} | ${undefined}
+    ${'3. swap guarantee,             3 destinations'} | ${{g: 5}}  | ${['I', 'B', 'A']}    | ${{I: 5, A: 5, B: 5}} | ${{A: 5, B: 5}} | ${{g: 0}} | ${{I: 5}} | ${undefined}
+    ${'4. straight-through guarantee, 2 destinations'} | ${{g: 5}}  | ${['A', 'B']}         | ${{A: 5, B: 5}}       | ${{B: 5}}       | ${{g: 0}} | ${{A: 5}} | ${undefined}
+    ${'5. allocation not on chain'}                    | ${{g: 5}}  | ${['B', 'A']}         | ${{}}                 | ${{A: 5}}       | ${{g: 0}} | ${{B: 5}} | ${reason5}
+    ${'6. guarantee not on chain'}                     | ${{g: 5}}  | ${[]}                 | ${{A: 5, B: 5}}       | ${{A: 5}}       | ${{g: 0}} | ${{B: 5}} | ${reason6}
   `(
     '$name',
     async ({
@@ -102,15 +106,19 @@ describe('claimAll', () => {
       expect(await AssetHolder.outcomeHashes(targetId)).toBe(outcomeHash);
 
       // compute an appropriate guarantee
+
       const guarantee = {
         destinations: guaranteeDestinations,
         guaranteedChannelAddress: targetId,
       };
-      const [__, gOutcomeContentHash] = guaranteeToParams(guarantee);
 
-      // set outcomeHash for guarantor
-      await (await AssetHolder.setOutcomePermissionless(guarantorId, gOutcomeContentHash)).wait();
-      expect(await AssetHolder.outcomeHashes(guarantorId)).toBe(gOutcomeContentHash);
+      if (guaranteeDestinations.length > 0) {
+        const [__, gOutcomeContentHash] = guaranteeToParams(guarantee);
+
+        // set outcomeHash for guarantor
+        await (await AssetHolder.setOutcomePermissionless(guarantorId, gOutcomeContentHash)).wait();
+        expect(await AssetHolder.outcomeHashes(guarantorId)).toBe(gOutcomeContentHash);
+      }
 
       const transactionRequest = createClaimAllTransaction(
         AssetHolderInterface,
