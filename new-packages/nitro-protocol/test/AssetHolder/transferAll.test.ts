@@ -8,7 +8,7 @@ import {
   randomChannelId,
   allocationToParams,
   sendTransaction,
-  transformInputData,
+  replaceAddresses,
 } from '../test-helpers';
 import {createTransferAllTransaction} from '../../src/transaction-creators/asset-holder';
 const AssetHolderInterface = new ethers.utils.Interface(AssetHolderArtifact.abi);
@@ -64,11 +64,11 @@ describe('transferAll', () => {
       addresses.c = channelId;
 
       // transform input data (unpack addresses and BigNumberify amounts)
-      heldBefore = transformInputData(heldBefore, addresses);
-      setOutcome = transformInputData(setOutcome, addresses);
-      newOutcome = transformInputData(newOutcome, addresses);
-      heldAfter = transformInputData(heldAfter, addresses);
-      payouts = transformInputData(payouts, addresses);
+      heldBefore = replaceAddresses(heldBefore, addresses);
+      setOutcome = replaceAddresses(setOutcome, addresses);
+      newOutcome = replaceAddresses(newOutcome, addresses);
+      heldAfter = replaceAddresses(heldAfter, addresses);
+      payouts = replaceAddresses(payouts, addresses);
 
       // reset the holdings (only works on test contract)
       Object.keys(heldBefore).forEach(async key => {
