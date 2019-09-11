@@ -2,8 +2,9 @@ import {ethers} from 'ethers';
 import {expectRevert} from 'magmo-devtools';
 // @ts-ignore
 import ETHAssetHolderArtifact from '../../build/contracts/ETHAssetHolder.json';
-import {setupContracts, newDepositedEvent} from '../test-helpers';
+import {setupContracts, newDepositedEvent, sendTransaction} from '../test-helpers';
 import {Channel, getChannelId} from '../../src/channel';
+import {createDepositTransaction} from '../../src/transaction-creators/eth-asset-holder';
 
 const provider = new ethers.providers.JsonRpcProvider(
   `http://localhost:${process.env.DEV_GANACHE_PORT}`,
@@ -52,32 +53,36 @@ describe('deposit', () => {
       // set holdings by depositing in the 'safest' way
       if (held > 0) {
         depositedEvent = newDepositedEvent(ETHAssetHolder, destinationChannelId);
-        await (await ETHAssetHolder.deposit(destinationChannelId, 0, held, {
+        await sendTransaction(provider, ETHAssetHolder.address, {
           value: held,
-        })).wait();
+          ...createDepositTransaction(destinationChannelId, '0x0', held),
+        });
+
         expect(await ETHAssetHolder.holdings(destinationChannelId)).toEqual(held);
         await depositedEvent;
       }
 
+      const transactionRequest = {
+        ...createDepositTransaction(destinationChannelId, expectedHeld, amount),
+        value: msgValue,
+      };
       // call method in a slightly different way if expecting a revert
       if (reasonString) {
         const regex = new RegExp(
           '^' + 'VM Exception while processing transaction: revert ' + reasonString + '$',
         );
         await expectRevert(
-          () =>
-            ETHAssetHolder.deposit(destinationChannelId, expectedHeld, amount, {
-              value: msgValue,
-            }),
+          () => sendTransaction(provider, ETHAssetHolder.address, transactionRequest),
           regex,
         );
       } else {
         depositedEvent = newDepositedEvent(ETHAssetHolder, destinationChannelId);
         const balanceBefore = await signer.getBalance();
-        const tx = await ETHAssetHolder.deposit(destinationChannelId, expectedHeld, amount, {
-          value: msgValue,
+
+        const tx = await signer.sendTransaction({
+          to: ETHAssetHolder.address,
+          ...transactionRequest,
         });
-        // wait for tx to be mined
         const receipt = await tx.wait();
 
         // catch Deposited event
