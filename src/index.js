@@ -3,7 +3,7 @@ import ReactDOM from "react-dom";
 import "./styles.css";
 import WebTorrent from "./webtorrent-custom";
 import prettierBytes from "prettier-bytes";
-const client = new WebTorrent()
+const webClient = new WebTorrent()
 
 export const InitialState = {
   working: "Done/Idle",
@@ -47,7 +47,6 @@ function App () {
   const [seedMagnet, setSeedMagnet] = useState("");
   const [leechMagnet, setLeechMagnet] = useState("");
   const log = progressLogger(loggerId, status, setStatus, setSeedMagnet, seedMagnet);
-  const webClient = client;
   return (
     <div className="App">
       <div className="hero" id="hero">
