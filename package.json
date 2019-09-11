@@ -1,6 +1,6 @@
 {
   "name": "jest-gas-reporter",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "A jest reporter that reports the gas used by various calls to ethereum contracts.",
   "main": "lib/index.js",
   "repository": "https://github.com/magmo/jest-gas-reporter.git",
@@ -20,7 +20,7 @@
     "ethers": "4.0.27",
     "magmo-devtools": "git+https://github.com/magmo/devtools.git#v0.1.11",
     "path": "0.12.7",
-    "solc": "0.5.7",
+    "solc": "^0.5.11",
     "typescript": "3.3.4000"
   }
 }
