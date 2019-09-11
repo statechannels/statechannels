@@ -7,8 +7,12 @@ import {
   newAssetTransferredEvent,
   randomChannelId,
   allocationToParams,
+  sendTransaction,
 } from '../test-helpers';
 import {HashZero} from 'ethers/constants';
+import {createTransferAllTransaction} from '../../src/transaction-creators/asset-holder';
+
+const AssetHolderInterface = new ethers.utils.Interface(AssetHolderArtifact.abi);
 
 const provider = new ethers.providers.JsonRpcProvider(
   `http://localhost:${process.env.DEV_GANACHE_PORT}`,
@@ -126,13 +130,19 @@ describe('transferAll', () => {
         await (await AssetHolder.setOutcomePermissionless(channelId, outcomeHash)).wait();
         expect(await AssetHolder.outcomeHashes(channelId)).toBe(outcomeHash);
       }
-
+      const transactionRequest = createTransferAllTransaction(
+        AssetHolderInterface,
+        channelId,
+        allocation,
+      );
       // call method in a slightly different way if expecting a revert
       if (reasonString) {
         const regex = new RegExp(
           '^' + 'VM Exception while processing transaction: revert ' + reasonString + '$',
         );
-        await expectRevert(() => AssetHolder.transferAll(channelId, allocationBytes), regex);
+        await expectRevert(() =>
+          sendTransaction(provider, AssetHolder.address, transactionRequest),
+        );
       } else {
         // register for events
         const assetTransferredEvents = destBefore.map((x, index, array) => {
@@ -141,10 +151,7 @@ describe('transferAll', () => {
           }
         });
 
-        // submit tx
-        const tx = await AssetHolder.transferAll(channelId, allocationBytes);
-        // wait for tx to be mined
-        await tx.wait();
+        await sendTransaction(provider, AssetHolder.address, transactionRequest);
 
         // catch events
         const resolvedAassetTransferredEvents = await Promise.all(assetTransferredEvents);

@@ -1,11 +1,11 @@
 // @ts-ignore
-import ForceMoveArtifact from '../build/contracts/ForceMove.json';
+import ForceMoveArtifact from '../../build/contracts/ForceMove.json';
 import * as ethers from 'ethers';
 import {TransactionRequest} from 'ethers/providers';
-import {State, hashState, getVariablePart, getFixedPart, hashAppPart} from './state';
+import {State, hashState, getVariablePart, getFixedPart, hashAppPart} from '../state';
 import {Signature} from 'ethers/utils';
-import {hashOutcome} from './outcome';
-import {encodeChannelStorageLite} from './channel-storage';
+import {hashOutcome} from '../outcome';
+import {encodeChannelStorageLite} from '../channel-storage';
 
 // TODO: Currently we are setting some arbitrary gas limit
 // to avoid issues with Ganache sendTransaction and parsing BN.js
