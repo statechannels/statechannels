@@ -205,7 +205,7 @@ export async function signStates(
   return Promise.all(promises);
 }
 
-export function transformInputData(object, addresses) {
+export function replaceAddresses(object, addresses) {
   const newObject = {};
   Object.keys(object).forEach(key => {
     newObject[addresses[key]] = bigNumberify(object[key]);
