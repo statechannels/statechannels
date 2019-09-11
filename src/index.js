@@ -53,19 +53,19 @@ function App () {
       <div className="hero" id="hero">
         <h2>Status</h2>
         <div id="status">
-          {status.working !== "Done/Idle" ? (
-            <>
-              <span className="show-leech">{status.working} </span>
-              <span className="show-leech"> with </span>
-              <code className="numPeers">{status.numPeers} peers</code>
-              <div>
-                <code id="downloadSpeed">{status.downloadSpeed}/s</code> |{" "}
-                <code id="uploadSpeed">{status.uploadSpeed}/s</code>
-              </div>
-            </>
-          ) : (
+          {
+            status.working !== "Done/Idle" ?
+              <>
+                <span className="show-leech">{status.working} </span>
+                <span className="show-leech"> with </span>
+                <code className="numPeers">{status.numPeers} peers</code>
+                <div>
+                  <code id="downloadSpeed">{status.downloadSpeed}/s</code> |{" "}
+                  <code id="uploadSpeed">{status.uploadSpeed}/s</code>
+                </div>
+              </> :
               <span className="show-leech">Done/Idle </span>
-            )}
+          }
         </div>
       </div>
 
@@ -75,29 +75,29 @@ function App () {
         <br />
         <input type="file" onChange={event => client.seed(event.target.files, torrent => log(torrent))} />
         {
-          Object.entries(client.allowedPeers).map(([infoHash, allowedPeers]) => {
-            return (
-              <div key={infoHash}>
-                <h5>Torrent {infoHash} Clients</h5>
-                {
-                  Object.values(allowedPeers).map(({ id, allowed }) =>
-                    <button key={id}
-                      className={"peerStatus-" + allowed}
-                      onClick={() => client.togglePeer(infoHash, id)}>
-                      {allowed ? "Allowed" : "Choking"}: {id}
-                    </button>
-                  )
-                }
-              </div>)
-          })
+          Object.entries(client.allowedPeers).map(([infoHash, allowedPeers]) =>
+            <div key={infoHash}>
+              <h5>Torrent {infoHash} Clients</h5>
+              {
+                Object.values(allowedPeers).map(({ id, allowed }) =>
+                  <button key={id}
+                    className={"peerStatus-" + allowed}
+                    onClick={() => client.togglePeer(infoHash, id)}>
+                    {allowed ? "Allowed" : "Choking"}: {id}
+                  </button>
+                )
+              }
+            </div>
+          )
         }
         <br />
-        {!seedMagnet ?
-          false :
-          <div className="magnetLink" title="Copy and share this so that others can download the file" >
-            <h5>Magnet Link</h5>
-            {seedMagnet}
-          </div>
+        {
+          !seedMagnet ?
+            false :
+            <div className="magnetLink" title="Copy and share this so that others can download the file" >
+              <h5>Magnet Link</h5>
+              {seedMagnet}
+            </div>
         }
       </div>
 
@@ -106,13 +106,14 @@ function App () {
         <h5>Insert a magnet URI to download</h5>
         <input type="text" name="download" onChange={event => setLeechMagnet(event.target.value)} />
         <br />
-        {!!status.url ?
-          <a href={status.url} download={status.filename}> Download {status.filename}</a> :
-          <div>
-            <button onClick={() => client.add(leechMagnet, torrent => log(torrent))}>
-              START DOWNLOAD
+        {
+          !!status.url ?
+            <a href={status.url} download={status.filename}> Download {status.filename}</a> :
+            <div>
+              <button onClick={() => client.add(leechMagnet, torrent => log(torrent))}>
+                START DOWNLOAD
             </button>
-          </div>
+            </div>
         }
       </div>
     </div>
