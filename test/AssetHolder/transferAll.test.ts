@@ -10,7 +10,6 @@ import {
   sendTransaction,
   transformInputData,
 } from '../test-helpers';
-import {HashZero} from 'ethers/constants';
 import {createTransferAllTransaction} from '../../src/transaction-creators/asset-holder';
 const AssetHolderInterface = new ethers.utils.Interface(AssetHolderArtifact.abi);
 import {id, bigNumberify} from 'ethers/utils';
@@ -35,52 +34,25 @@ beforeAll(async () => {
   AssetHolder = await setupContracts(provider, AssetHolderArtifact);
 });
 
-const description0 = ' 0. Reverts transferAll tx when outcomeHash does not match';
-const reason1 = 'transferAll | submitted data does not match stored outcomeHash';
-const description1 =
-  ' 1. Pays out all holdings from directly-funded channel allocating to a single external address';
-const description2 =
-  ' 2. Pays out some of the holdings when directly-overfunded channel allocates assets to a single external address';
-const description3 =
-  ' 3. Pays out all of the holdings when directly-underfunded channel allocates assets to a single external address';
-const description4 =
-  ' 4. Transfers all holdings from directly-funded channel allocating to a single channel';
-const description5 =
-  ' 5. Transfers all holdings from directly-overfunded channel allocating to a single channel';
-const description6 =
-  ' 6. Transfers all holdings from directly-underfunded channel allocating to a single channel';
-const description7 =
-  ' 7. Transfers all holdings from directly-funded channel allocating to two external addresses (full payout, full payout)';
-const description8 =
-  ' 8. Transfers all holdings from directly-funded channel allocating to two external addresses (full payout, no payout)';
-const description9 =
-  ' 9. Transfers all holdings from directly-funded channel allocating to two external addresses (full payout, partial payout)';
-const description10 =
-  '10. Transfers all holdings from directly-funded channel allocating to two channels (full payout, full payout)';
-const description11 =
-  '11. Transfers all holdings from directly-funded channel allocating to two channels (full payout, no payout)';
-const description12 =
-  '12. Transfers all holdings from directly-funded channel allocating to two channels (full payout, partial payout)';
+const reason = 'transferAll | submitted data does not match stored outcomeHash';
 
-// ${description2}  | ${true}    | ${2} | ${[A]}     | ${['1']}      | ${[]}     | ${[]}        | ${[]}       | ${[]}            | ${['1']}      | ${'1'}    | ${undefined}
-// ${description3}  | ${true}    | ${1} | ${[A]}     | ${['2']}      | ${[A]}    | ${['1']}     | ${[]}       | ${[]}            | ${['1']}      | ${'0'}    | ${undefined}
-// ${description4}  | ${true}    | ${1} | ${[C]}     | ${['1']}      | ${[]}     | ${[]}        | ${[C]}      | ${['1']}         | ${[]}         | ${'0'}    | ${undefined}
-// ${description5}  | ${true}    | ${2} | ${[C]}     | ${['1']}      | ${[]}     | ${[]}        | ${[C]}      | ${['1']}         | ${[]}         | ${'1'}    | ${undefined}
-// ${description6}  | ${true}    | ${1} | ${[C]}     | ${['2']}      | ${[C]}    | ${['1']}     | ${[C]}      | ${['1']}         | ${[]}         | ${'0'}    | ${undefined}
-// ${description7}  | ${true}    | ${2} | ${[A, B]}  | ${['1', '1']} | ${[]}     | ${[]}        | ${[]}       | ${[]}            | ${['1', '1']} | ${'0'}    | ${undefined}
-// ${description8}  | ${true}    | ${1} | ${[A, B]}  | ${['1', '1']} | ${[B]}    | ${['1']}     | ${[]}       | ${[]}            | ${['1']}      | ${'0'}    | ${undefined}
-// ${description9}  | ${true}    | ${3} | ${[A, B]}  | ${['2', '2']} | ${[B]}    | ${['1']}     | ${[]}       | ${[]}            | ${['2', '1']} | ${'0'}    | ${undefined}
-// ${description10} | ${true}    | ${2} | ${[C, X]}  | ${['1', '1']} | ${[]}     | ${[]}        | ${[C, X]}   | ${['1', '1']}    | ${[]}         | ${'0'}    | ${undefined}
-// ${description11} | ${true}    | ${1} | ${[C, X]}  | ${['1', '1']} | ${[X]}    | ${['1']}     | ${[C]}      | ${['1']}         | ${[]}         | ${'0'}    | ${undefined}
-// ${description12} | ${true}    | ${3} | ${[C, X]}  | ${['2', '2']} | ${[X]}    | ${['1']}     | ${[C, X]}   | ${['2', '1']}    | ${[]}         | ${'0'}    | ${undefined}
-
-// amounts are valueString represenationa of wei
-// c is the channel we are transferring from. TODO work out how to track it below
+// c is the channel we are transferring from.
 describe('transferAll', () => {
   it.each`
-    name                                      | heldBefore | setOutcome | newOutcome | heldAfter | payouts   | reason
-    ${'1. Finalized, funded, single EOA'}     | ${{c: 1}}  | ${{A: 1}}  | ${{}}      | ${{}}     | ${{A: 1}} | ${undefined}
-    ${'2. Finalized, overfunded, single EOA'} | ${{c: 2}}  | ${{A: 1}}  | ${{}}      | ${{c: 1}} | ${{A: 1}} | ${undefined}
+    name                              | heldBefore            | setOutcome      | newOutcome | heldAfter             | payouts         | reason
+    ${' 0. outcome not set         '} | ${{c: 1}}             | ${{}}           | ${{}}      | ${{}}                 | ${{A: 1}}       | ${reason}
+    ${' 1. funded          -> 1 EOA'} | ${{c: 1}}             | ${{A: 1}}       | ${{}}      | ${{}}                 | ${{A: 1}}       | ${undefined}
+    ${' 2. overfunded      -> 1 EOA'} | ${{c: 2}}             | ${{A: 1}}       | ${{}}      | ${{c: 1}}             | ${{A: 1}}       | ${undefined}
+    ${' 3. underfunded     -> 1 EOA'} | ${{c: 1}}             | ${{A: 2}}       | ${{A: 1}}  | ${{}}                 | ${{A: 1}}       | ${undefined}
+    ${' 4. funded      -> 1 channel'} | ${{c: 1, C: 0}}       | ${{C: 1}}       | ${{}}      | ${{c: 0, C: 1}}       | ${{}}           | ${undefined}
+    ${' 5. overfunded  -> 1 channel'} | ${{c: 2, C: 0}}       | ${{C: 1}}       | ${{}}      | ${{c: 1, C: 1}}       | ${{}}           | ${undefined}
+    ${' 6. underfunded -> 1 channel'} | ${{c: 1, C: 0}}       | ${{C: 2}}       | ${{C: 1}}  | ${{c: 0, C: 1}}       | ${{}}           | ${undefined}
+    ${' 7. -> 2 EOA       full/full'} | ${{c: 2}}             | ${{A: 1, B: 1}} | ${{}}      | ${{c: 0}}             | ${{A: 1, B: 1}} | ${undefined}
+    ${' 8. -> 2 EOA         full/no'} | ${{c: 1}}             | ${{A: 1, B: 1}} | ${{B: 1}}  | ${{c: 0}}             | ${{A: 1}}       | ${undefined}
+    ${' 9. -> 2 EOA    full/partial'} | ${{c: 3}}             | ${{A: 2, B: 2}} | ${{B: 1}}  | ${{c: 0}}             | ${{A: 2, B: 1}} | ${undefined}
+    ${'10. -> 2 chan      full/full'} | ${{c: 2, C: 0, X: 0}} | ${{C: 1, X: 1}} | ${{}}      | ${{c: 0, C: 1, X: 1}} | ${{}}           | ${undefined}
+    ${'11. -> 2 chan        full/no'} | ${{c: 1, C: 0, X: 0}} | ${{C: 1, X: 1}} | ${{X: 1}}  | ${{c: 0, C: 1, X: 0}} | ${{}}           | ${undefined}
+    ${'12. -> 2 chan   full/partial'} | ${{c: 3, C: 0, X: 0}} | ${{C: 2, X: 2}} | ${{X: 1}}  | ${{c: 0, C: 2, X: 1}} | ${{}}           | ${undefined}
   `(
     `$name: heldBefore: $heldBefore, setOutcome: $setOutcome, newOutcome: $newOutcome, heldAfter: $heldAfter, payouts: $payouts`,
     async ({name, heldBefore, setOutcome, newOutcome, heldAfter, payouts, reason}) => {
@@ -91,9 +63,10 @@ describe('transferAll', () => {
       const channelId = randomChannelId(nonce);
       addresses.c = channelId;
 
-      // prepare input data
-      setOutcome = transformInputData(setOutcome, addresses);
+      // transform input data (unpack addresses and BigNumberify amounts)
       heldBefore = transformInputData(heldBefore, addresses);
+      setOutcome = transformInputData(setOutcome, addresses);
+      newOutcome = transformInputData(newOutcome, addresses);
       heldAfter = transformInputData(heldAfter, addresses);
       payouts = transformInputData(payouts, addresses);
 
@@ -154,18 +127,11 @@ describe('transferAll', () => {
         );
 
         // check new outcomeHash
-        let expectedNewOutcomeHash;
-        let __;
-
         const allocationAfter = [];
         Object.keys(newOutcome).forEach(key => {
           allocationAfter.push({destination: key, amount: newOutcome[key]});
         });
-        if (allocationAfter.length > 0) {
-          [__, expectedNewOutcomeHash] = allocationToParams(allocationAfter);
-        } else {
-          expectedNewOutcomeHash = HashZero;
-        }
+        const [__, expectedNewOutcomeHash] = allocationToParams(allocationAfter);
         expect(await AssetHolder.outcomeHashes(channelId)).toEqual(expectedNewOutcomeHash);
       }
     },
