@@ -201,3 +201,11 @@ export async function signStates(
   const promises = wallets.map(async (w, i) => await sign(w, stateHashes[whoSignedWhat[i]]));
   return Promise.all(promises);
 }
+
+export function transformInputData(object, addresses) {
+  const newObject = {};
+  Object.keys(object).forEach(key => {
+    newObject[addresses[key]] = bigNumberify(object[key]);
+  });
+  return newObject;
+}
