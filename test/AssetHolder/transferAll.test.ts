@@ -71,9 +71,10 @@ describe('transferAll', () => {
       payouts = replaceAddresses(payouts, addresses);
 
       // reset the holdings (only works on test contract)
-      Object.keys(heldBefore).forEach(async key => {
-        await (await AssetHolder.setHoldings(key, heldBefore[key])).wait();
-        expect((await AssetHolder.holdings(key)).eq(heldBefore[key])).toBe(true);
+      Object.keys(heldAfter).forEach(async key => {
+        const amount = heldBefore[key] ? heldBefore[key] : 0;
+        await (await AssetHolder.setHoldings(key, amount)).wait();
+        expect((await AssetHolder.holdings(key)).eq(amount)).toBe(true);
       });
 
       // compute an appropriate allocation.
