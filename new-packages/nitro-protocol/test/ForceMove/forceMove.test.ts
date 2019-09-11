@@ -20,8 +20,7 @@ import {Channel, getChannelId} from '../../src/channel';
 import {State, getVariablePart, getFixedPart} from '../../src/state';
 import {hashChallengeMessage} from '../../src/challenge';
 import {hashChannelStorage, ChannelStorage} from '../../src/channel-storage';
-import {createForceMoveTransaction} from '../../src/force-move';
-
+import {createForceMoveTransaction} from '../../src/transaction-creators/force-move';
 const provider = new ethers.providers.JsonRpcProvider(
   `http://localhost:${process.env.DEV_GANACHE_PORT}`,
 );
@@ -63,7 +62,6 @@ const description4 =
 const description5 = 'It reverts a forceMove when a challenge is underway / finalized';
 const description6 = 'It reverts a forceMove with an incorrect challengerSig';
 const description7 = 'It reverts a forceMove when the states do not form a validTransition chain';
-const description8 = 'It reverts when an unacceptable whoSignedWhat array is submitted';
 
 describe('forceMove', () => {
   it.each`
@@ -75,7 +73,6 @@ describe('forceMove', () => {
     ${description5} | ${205}       | ${ongoingChallengeHash(5)} | ${5}          | ${8}           | ${[2]}       | ${0}         | ${[0, 0, 0]}  | ${wallets[2]}     | ${'Channel is not open or turnNum does not match'}
     ${description6} | ${206}       | ${HashZero}                | ${0}          | ${8}           | ${[0, 1, 2]} | ${0}         | ${[0, 1, 2]}  | ${nonParticipant} | ${'Challenger is not a participant'}
     ${description7} | ${207}       | ${HashZero}                | ${0}          | ${8}           | ${[0, 1, 1]} | ${0}         | ${[0, 1, 2]}  | ${wallets[2]}     | ${'CountingApp: Counter must be incremented'}
-    ${description8} | ${208}       | ${HashZero}                | ${0}          | ${8}           | ${[0, 1, 2]} | ${0}         | ${[0, 0, 2]}  | ${wallets[2]}     | ${'Unacceptable whoSignedWhat array'}
   `(
     '$description', // for the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce
     async ({

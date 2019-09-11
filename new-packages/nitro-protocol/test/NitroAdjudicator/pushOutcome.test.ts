@@ -7,17 +7,13 @@ import ETHAssetHolderArtifact from '../../build/contracts/ETHAssetHolder.json';
 import ERC20AssetHolderArtifact from '../../build/contracts/ERC20AssetHolder.json';
 
 import {AddressZero} from 'ethers/constants';
-import {setupContracts, finalizedOutcomeHash} from '../test-helpers';
+import {setupContracts, finalizedOutcomeHash, sendTransaction} from '../test-helpers';
 import {expectRevert} from 'magmo-devtools';
 import {Channel, getChannelId} from '../../src/channel';
-import {
-  Outcome,
-  hashOutcome,
-  AllocationOutcome,
-  encodeOutcome,
-  hashOutcomeContent,
-} from '../../src/outcome';
-import {State, hashState} from '../../src/state';
+import {hashOutcomeContent} from '../../src/outcome';
+import {State} from '../../src/state';
+import {createPushOutcomeTransaction} from '../../src/transaction-creators/nitro-adjudicator';
+import {toHex} from '../../src/hex-utils';
 
 const provider = new ethers.providers.JsonRpcProvider(
   `http://localhost:${process.env.DEV_GANACHE_PORT}`,
@@ -27,7 +23,7 @@ let ETHAssetHolder: ethers.Contract;
 let ERC20AssetHolder: ethers.Contract;
 
 // constants for this test suite
-const challengerAddress = AddressZero;
+
 const chainId = '0x1234';
 const participants = ['', '', ''];
 const wallets = new Array(3);
@@ -37,6 +33,7 @@ for (let i = 0; i < 3; i++) {
   wallets[i] = ethers.Wallet.createRandom();
   participants[i] = wallets[i].address;
 }
+const challengerAddress = participants[0];
 
 beforeAll(async () => {
   NitroAdjudicator = await setupContracts(provider, NitroAdjudicatorArtifact);
@@ -72,7 +69,7 @@ describe('pushOutcome', () => {
     }) => {
       const channel: Channel = {chainId, channelNonce, participants};
       const channelId = getChannelId(channel);
-      const finalizesAt = finalized ? 1 : 1e12; // either 1 second after genesis block, or ~ 31000 years after
+      const finalizesAt = finalized ? toHex(1) : toHex(1e12); // either 1 second after genesis block, or ~ 31000 years after
 
       const outcome = [
         {assetHolderAddress: ETHAssetHolder.address, allocation: []},
@@ -103,16 +100,15 @@ describe('pushOutcome', () => {
       expect(await NitroAdjudicator.channelStorageHashes(channelId)).toEqual(
         initialChannelStorageHash,
       );
+      const transactionRequest = createPushOutcomeTransaction(
+        declaredTurnNumRecord,
+        finalizesAt,
+        state,
+        outcome,
+      );
 
       if (outcomeHashExits) {
-        await (await NitroAdjudicator.pushOutcome(
-          channelId,
-          declaredTurnNumRecord,
-          finalizesAt,
-          hashState(state),
-          challengerAddress,
-          encodeOutcome(outcome),
-        )).wait();
+        await sendTransaction(provider, NitroAdjudicator.address, transactionRequest);
       }
 
       // call method in a slightly different way if expecting a revert
@@ -121,28 +117,11 @@ describe('pushOutcome', () => {
           '^' + 'VM Exception while processing transaction: revert ' + reasonString + '$',
         );
         await expectRevert(
-          () =>
-            NitroAdjudicator.pushOutcome(
-              channelId,
-              declaredTurnNumRecord,
-              finalizesAt,
-              hashState(state),
-              challengerAddress,
-              encodeOutcome(outcome),
-            ),
+          () => sendTransaction(provider, NitroAdjudicator.address, transactionRequest),
           regex,
         );
       } else {
-        const tx2 = await NitroAdjudicator.pushOutcome(
-          channelId,
-          declaredTurnNumRecord,
-          finalizesAt,
-          hashState(state),
-          challengerAddress,
-          encodeOutcome(outcome),
-        );
-        // wait for tx to be mined
-        await tx2.wait();
+        await sendTransaction(provider, NitroAdjudicator.address, transactionRequest);
         // check 2x AssetHolder storage against the expected value
         expect(await ETHAssetHolder.outcomeHashes(channelId)).toEqual(
           hashOutcomeContent(outcome[0].allocation),
