@@ -24,7 +24,7 @@ contract ConsensusApp is ForceMoveApp {
         ConsensusAppData memory appDataB = appData(b.appData);
 
         if(appDataB.furtherVotesRequired == numParticipants - 1) { // propose/veto/pass
-            require(identical(a.outcome, b.outcome), 'ConsensusApp: when proposing/vetoing outcome must not change');
+            require(identical(a.outcome, b.outcome), 'ConsensusApp: when proposing/vetoing/passing outcome must not change');
         } else if (appDataB.furtherVotesRequired == 0 ) { // final vote
             require(appDataA.furtherVotesRequired == 1,'ConsensusApp: invalid final vote, furtherVotesRequired must transition from 1');
             require(identical(appDataA.proposedOutcome, b.outcome), 'ConsensusApp: invalid final vote, outcome must equal previous proposedOutcome');
