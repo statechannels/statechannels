@@ -7,8 +7,7 @@ import {
   bigNumberify,
   Signature,
 } from 'ethers/utils';
-import {AddressZero} from 'ethers/constants';
-
+import {AddressZero, HashZero} from 'ethers/constants';
 import {hashChannelStorage} from '../src/channel-storage';
 import {
   Outcome,
@@ -180,8 +179,12 @@ export async function sendTransaction(
 
 export function allocationToParams(allocation: Allocation) {
   const allocationBytes = encodeAllocation(allocation);
-
-  const outcomeContentHash = hashOutcomeContent(allocation);
+  let outcomeContentHash;
+  if (allocation.length == 0) {
+    outcomeContentHash = HashZero;
+  } else {
+    outcomeContentHash = hashOutcomeContent(allocation);
+  }
   return [allocationBytes, outcomeContentHash];
 }
 
@@ -200,4 +203,12 @@ export async function signStates(
   const stateHashes = states.map(s => hashState(s));
   const promises = wallets.map(async (w, i) => await sign(w, stateHashes[whoSignedWhat[i]]));
   return Promise.all(promises);
+}
+
+export function replaceAddresses(object, addresses) {
+  const newObject = {};
+  Object.keys(object).forEach(key => {
+    newObject[addresses[key]] = bigNumberify(object[key]);
+  });
+  return newObject;
 }
