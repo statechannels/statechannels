@@ -20,7 +20,7 @@ function setupWire (torrent, wire) {
   wire.setKeepAlive(true);
   wire.setTimeout(65000)
   wire.on('keep-alive', () => {
-    if (!torrent.done && torrent.paused) {
+    if (!torrent.done && wire.choked) {
       console.log(">Don't let it die!")
       wire._clearTimeout()
     }
@@ -55,10 +55,10 @@ function setupWire (torrent, wire) {
 
 function jumpStart (torrent, wire, requestsToClear) {
   console.log(`>>> JumpStarting! - Torrent: ${torrent.ready ? "READY" : "NOT READY"} - With ${wire.requests.length} wire requests`, torrent);
+  wire.unchoke();
   torrent._startDiscovery();
   torrent.resume();
-  wire.unchoke();
-  if (!torrent.done && !torrent.paused) {
+  if (!torrent.done) {
     wire.requests = [];
     const canceledReservations = [];
     torrent.pieces = torrent.pieces.map(piece => {
@@ -92,7 +92,7 @@ function setupTorrent (torrent) {
     switch (command) {
       case PaidStreamingExtensionNotices.STOP:
         wire.paidStreamingExtension.ack();
-        torrent.pause();
+        wire.choke();
         break;
       case PaidStreamingExtensionNotices.START:
         wire.paidStreamingExtension.ack();
@@ -140,14 +140,14 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     this.allowedPeers[affectedTorrent][peerAccount].allowed = false;
     wire.paidStreamingExtension.stop();
     this.emit(ClientEvents.PEER_STATUS_CHANGED, { allowedPeers: this.allowedPeers[affectedTorrent], affectedTorrent, peerAccount });
-    console.log("> sendNotice", peerAccount);
+    console.log("> sendNotice", peerAccount, this.allowedPeers);
   }
 
   retractNotice (affectedTorrent, wire, peerAccount) {
     this.allowedPeers[affectedTorrent][peerAccount].allowed = true;
     wire.paidStreamingExtension.start();
     this.emit(ClientEvents.PEER_STATUS_CHANGED, { allowedPeers: this.allowedPeers[affectedTorrent], affectedTorrent, peerAccount });
-    console.log("> retractNotice", peerAccount);
+    console.log("> retractNotice", peerAccount, this.allowedPeers);
   }
 
   togglePeer (affectedTorrent, peerAccount) {

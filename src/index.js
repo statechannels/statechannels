@@ -15,29 +15,28 @@ export const InitialState = {
   files: []
 };
 
-const progressLogger = (logger, status, setStatus, setMagnet) => (torrent = InitialState) => {
+// The UI assumes that there's only ONE torrent at play and that torrent only has ONE file.
+const progressLogger = (logger, status, setStatus, setMagnet, seedMagnet) => (torrent = InitialState) => {
   clearInterval(logger);
-  let torrentIsDone, isSeeder
   logger = setInterval(() => {
-    torrentIsDone = torrent.done && !torrent.downloadSpeed && !torrent.uploadSpeed;
-    isSeeder = torrent.created;
 
     setStatus({
       ...status,
-      torrent, // assuming there's only ONE torrent at play
-      working: torrentIsDone ? "Done/Idle" : isSeeder ? "Seeding" : "Leeching",
+      torrent,
+      numPeers: torrent.numPeers,
+      working: torrent.done || (!torrent.downloadSpeed && !torrent.uploadSpeed) ? "Done/Idle" : "Leeching/Seeding",
       downloadSpeed: prettierBytes(torrent.downloadSpeed),
-      uploadSpeed: prettierBytes(torrent.uploadSpeed),
-      numPeers: torrent.numPeers
+      uploadSpeed: prettierBytes(torrent.uploadSpeed)
     })
 
-    if (torrentIsDone) {
-      isSeeder ?
-        setMagnet(torrent.magnetURI) :
-        torrent.files[0].getBlobURL((err, url) => { // assuming that the torrent has only ONE file
+    if (torrent.done) {
+      if (torrent.created && !seedMagnet) {
+        setMagnet(torrent.magnetURI)
+      } else if (!status.filename) {
+        torrent.files[0].getBlobURL((err, url) => {
           setStatus(Object.assign(InitialState, { url, filename: torrent.files[0].name }));
-          clearInterval(logger);
         });
+      }
     }
   }, 500);
 };
@@ -47,7 +46,8 @@ function App () {
   const [status, setStatus] = useState(InitialState);
   const [seedMagnet, setSeedMagnet] = useState("");
   const [leechMagnet, setLeechMagnet] = useState("");
-  const log = progressLogger(loggerId, status, setStatus, setSeedMagnet);
+  const log = progressLogger(loggerId, status, setStatus, setSeedMagnet, seedMagnet);
+  const webClient = client;
   return (
     <div className="App">
       <div className="hero" id="hero">
@@ -73,16 +73,16 @@ function App () {
         <h2>Seeder</h2>
         <h4>Select a file</h4>
         <br />
-        <input type="file" onChange={event => client.seed(event.target.files, torrent => log(torrent))} />
+        <input type="file" onChange={event => webClient.seed(event.target.files, torrent => log(torrent))} />
         {
-          Object.entries(client.allowedPeers).map(([infoHash, allowedPeers]) =>
+          Object.entries(webClient.allowedPeers).map(([infoHash, allowedPeers]) =>
             <div key={infoHash}>
               <h5>Torrent {infoHash} Clients</h5>
               {
                 Object.values(allowedPeers).map(({ id, allowed }) =>
                   <button key={id}
                     className={"peerStatus-" + allowed}
-                    onClick={() => client.togglePeer(infoHash, id)}>
+                    onClick={() => webClient.togglePeer(infoHash, id)}>
                     {allowed ? "Allowed" : "Choking"}: {id}
                   </button>
                 )
@@ -110,7 +110,7 @@ function App () {
           !!status.url ?
             <a href={status.url} download={status.filename}> Download {status.filename}</a> :
             <div>
-              <button onClick={() => client.add(leechMagnet, torrent => log(torrent))}>
+              <button onClick={() => webClient.add(leechMagnet, torrent => log(torrent))}>
                 START DOWNLOAD
             </button>
             </div>
