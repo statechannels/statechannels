@@ -12,7 +12,7 @@ import {
   nonParticipant,
   clearedChallengeHash,
   ongoingChallengeHash,
-  newForceMoveEvent,
+  newChallengeRegisteredEvent,
   sendTransaction,
   signStates,
 } from '../test-helpers';
@@ -138,7 +138,7 @@ describe('forceMove', () => {
           return sendTransaction(provider, ForceMove.address, transactionRequest);
         }, regex);
       } else {
-        forceMoveEvent = newForceMoveEvent(ForceMove, channelId);
+        forceMoveEvent = newChallengeRegisteredEvent(ForceMove, channelId);
 
         await sendTransaction(provider, ForceMove.address, transactionRequest);
 

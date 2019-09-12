@@ -69,8 +69,8 @@ export const finalizedOutcomeHash = (
   });
 };
 
-export const newForceMoveEvent = (contract: ethers.Contract, channelId: string) => {
-  const filter = contract.filters.ForceMove(channelId);
+export const newChallengeRegisteredEvent = (contract: ethers.Contract, channelId: string) => {
+  const filter = contract.filters.ChallengeRegistered(channelId);
   return new Promise((resolve, reject) => {
     contract.on(
       filter,
