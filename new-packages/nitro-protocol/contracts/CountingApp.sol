@@ -15,8 +15,8 @@ contract CountingApp is ForceMoveApp {
     function validTransition(
         VariablePart memory a,
         VariablePart memory b,
-        uint256 turnNumB,
-        uint256 nParticipants
+        uint256, // turnNumB
+        uint256 // nParticipants
     ) public pure returns (bool) {
         require(
             appData(b.appData).counter == appData(a.appData).counter + 1,

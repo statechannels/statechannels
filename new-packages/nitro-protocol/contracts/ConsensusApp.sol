@@ -16,7 +16,7 @@ contract ConsensusApp is ForceMoveApp {
     function validTransition(
         VariablePart memory a,
         VariablePart memory b,
-        uint256 turnNumB, // unused
+        uint256, // turnNumB
         uint256 numParticipants
     ) public pure returns (bool) {
         ConsensusAppData memory appDataA = appData(a.appData);
