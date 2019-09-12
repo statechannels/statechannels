@@ -25,3 +25,7 @@ export function eqHexArray(a: string[], b: string[]): boolean {
 export function toHex(a: number): string {
   return bigNumberify(a).toHexString();
 }
+
+export function fromHex(a: string): number {
+  return bigNumberify(a).toNumber();
+}

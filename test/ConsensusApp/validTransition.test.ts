@@ -2,34 +2,20 @@ import {ethers} from 'ethers';
 // @ts-ignore
 import ConsensusAppArtifact from '../../build/contracts/ConsensusApp.json';
 
-import {defaultAbiCoder} from 'ethers/utils';
 import {TransactionRequest} from 'ethers/providers';
 import {setupContracts} from '../test-helpers';
 import {expectRevert} from 'magmo-devtools';
+import {ConsensusData} from '../../src/contract/consensus-data';
+import {Outcome} from '../../src/contract/outcome';
+import {AddressZero, HashZero} from 'ethers/constants';
+import {createValidTransitionTransaction} from '../../src/contract/transaction-creators/consensus-app';
+import {validTransition} from '../../src/contract/consensus-app';
 
 const provider = new ethers.providers.JsonRpcProvider(
   `http://localhost:${process.env.DEV_GANACHE_PORT}`,
 );
 let consensusApp: ethers.Contract;
-const ConsensusAppContractInterface = new ethers.utils.Interface(ConsensusAppArtifact.abi);
-interface ConsensusAppVariablePart {
-  appData: string;
-  outcome: string;
-}
 
-function constructConsensusVariablePart(
-  votesReqd: number,
-  currentOutcome,
-  proposedOutcome,
-): ConsensusAppVariablePart {
-  const appData: string = defaultAbiCoder.encode(
-    ['tuple(uint32, bytes)'],
-    [[votesReqd, proposedOutcome]],
-  );
-  return {appData, outcome: currentOutcome};
-}
-
-const turnNumB = 1; // not checked by contract
 const numParticipants = 3;
 
 beforeAll(async () => {
@@ -47,41 +33,58 @@ describe('validTransition', () => {
     ${true}  | ${[2, 2]} | ${['0x1', '0x1']} | ${['0x2', '0x2']} | ${'valid pass'}
     ${true}  | ${[1, 0]} | ${['0x1', '0x2']} | ${['0x2', '0x']}  | ${'valid finalVote'}
     ${false} | ${[1, 0]} | ${['0x1', '0x3']} | ${['0x2', '0x']}  | ${'invalid finalVote: proposedOutcome1 ≠ currentOutcome2'}
-  `('$description', async ({isValid, outcomes, proposedOutcomes, votesReqd}) => {
-    const variablePartA = constructConsensusVariablePart(
-      votesReqd[0],
-      outcomes[0],
-      proposedOutcomes[0],
-    );
-    const variablePartB = constructConsensusVariablePart(
-      votesReqd[1],
-      outcomes[1],
-      proposedOutcomes[1],
-    );
-    const transactionRequest = {
-      data: ConsensusAppContractInterface.functions.validTransition.encode([
-        variablePartA,
-        variablePartB,
-        turnNumB,
-        numParticipants,
-      ]),
-    };
-    if (isValid) {
-      // send a transaction, so we can measure gas consumption
-      await sendTransaction(consensusApp.address, transactionRequest);
+  `(
+    '$description',
+    async ({
+      isValid,
+      outcomes,
+      proposedOutcomes,
+      votesReqd,
+    }: {
+      isValid: boolean;
+      outcomes: string[];
+      proposedOutcomes: string[];
+      votesReqd: number[];
+    }) => {
+      const fromConsensusData: ConsensusData = {
+        furtherVotesRequired: votesReqd[0],
+        proposedOutcome: createOutcome(proposedOutcomes[0]),
+      };
+      const fromOutcome = createOutcome(outcomes[0]);
 
-      // just call the function, so we can check the return value easily
-      const isValidFromCall = await consensusApp.validTransition(
-        variablePartA,
-        variablePartB,
-        turnNumB,
+      const toConsensusData: ConsensusData = {
+        furtherVotesRequired: votesReqd[1],
+        proposedOutcome: createOutcome(proposedOutcomes[1]),
+      };
+      const toOutcome = createOutcome(outcomes[1]);
+
+      const transactionRequest = createValidTransitionTransaction(
+        fromConsensusData,
+        fromOutcome,
+        toConsensusData,
+        toOutcome,
         numParticipants,
       );
-      expect(isValidFromCall).toBe(true);
-    } else {
-      await expectRevert(() => sendTransaction(consensusApp.address, transactionRequest));
-    }
-  });
+      if (isValid) {
+        // send a transaction, so we can measure gas consumption
+        await sendTransaction(consensusApp.address, transactionRequest);
+
+        // just call the function, so we can check the return value easily
+        const isValidFromCall = await validTransition(
+          fromConsensusData,
+          fromOutcome,
+          toConsensusData,
+          toOutcome,
+          numParticipants,
+          provider,
+          consensusApp.address,
+        );
+        expect(isValidFromCall).toBe(true);
+      } else {
+        await expectRevert(() => sendTransaction(consensusApp.address, transactionRequest));
+      }
+    },
+  );
 });
 
 async function sendTransaction(contractAddress: string, transaction: TransactionRequest) {
@@ -89,4 +92,13 @@ async function sendTransaction(contractAddress: string, transaction: Transaction
   const signer = provider.getSigner();
   const response = await signer.sendTransaction({to: contractAddress, ...transaction});
   await response.wait();
+}
+
+function createOutcome(amount: string): Outcome {
+  return [
+    {
+      assetHolderAddress: AddressZero,
+      allocation: [{destination: HashZero, amount}],
+    },
+  ];
 }
