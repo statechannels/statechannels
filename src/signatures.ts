@@ -1,7 +1,7 @@
 import {Signature, arrayify, splitSignature} from 'ethers/utils';
 import {State, hashState} from './contract/state';
 import {ethers} from 'ethers';
-import {SignedState} from './transactions';
+import {SignedState} from '.';
 import {getChannelId} from './contract/channel';
 import {hashChallengeMessage} from './contract/challenge';
 import {toHex} from './hex-utils';

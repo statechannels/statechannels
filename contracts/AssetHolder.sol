@@ -31,7 +31,10 @@ contract AssetHolder {
             'transferAll | submitted data does not match stored outcomeHash'
         );
 
-        Outcome.AllocationItem[] memory allocation = abi.decode(allocationBytes, (Outcome.AllocationItem[]));
+        Outcome.AllocationItem[] memory allocation = abi.decode(
+            allocationBytes,
+            (Outcome.AllocationItem[])
+        );
         uint256 balance = holdings[channelId];
         uint256 numPayouts = 0;
         uint256 numNewAllocationItems = allocation.length;
@@ -41,17 +44,20 @@ contract AssetHolder {
         uint256 firstNewAllocationItemAmount;
 
         for (uint256 i = 0; i < allocation.length; i++) {
-            if (balance == 0) { // if funds are completely depleted, keep the allocationItem and do not pay out
+            if (balance == 0) {
+                // if funds are completely depleted, keep the allocationItem and do not pay out
             } else {
                 _amount = allocation[i].amount;
-                if (balance < _amount) { // if funds still exist but are insufficient for this allocationItem, payout what's available and keep the allocationItem (but reduce the amount allocated)
+                if (balance < _amount) {
+                    // if funds still exist but are insufficient for this allocationItem, payout what's available and keep the allocationItem (but reduce the amount allocated)
                     // this block is never executed more than once
                     numPayouts++;
                     overlap = true;
                     finalPayoutAmount = balance;
                     firstNewAllocationItemAmount = _amount - balance;
                     balance = 0;
-                } else { // if ample funds still exist, pay them out and discard the allocationItem
+                } else {
+                    // if ample funds still exist, pay them out and discard the allocationItem
                     numPayouts++;
                     numNewAllocationItems--;
                     balance = balance.sub(_amount);
@@ -64,8 +70,10 @@ contract AssetHolder {
 
         if (numNewAllocationItems > 0) {
             // construct newAllocation
-            Outcome.AllocationItem[] memory newAllocation = new Outcome.AllocationItem[](numNewAllocationItems);
-            for (uint256 k = 0; k < numNewAllocationItems; k++){
+            Outcome.AllocationItem[] memory newAllocation = new Outcome.AllocationItem[](
+                numNewAllocationItems
+            );
+            for (uint256 k = 0; k < numNewAllocationItems; k++) {
                 newAllocation[k] = allocation[allocation.length - numNewAllocationItems + k];
                 if (overlap && k == 0) {
                     newAllocation[k].amount = firstNewAllocationItemAmount;
@@ -73,21 +81,22 @@ contract AssetHolder {
             }
 
             // store hash
-            outcomeHashes[channelId] = keccak256(abi.encode(
-                Outcome.LabelledAllocationOrGuarantee(
-                            uint8(Outcome.OutcomeType.Allocation),
-                            abi.encode(newAllocation)
-                        )
+            outcomeHashes[channelId] = keccak256(
+                abi.encode(
+                    Outcome.LabelledAllocationOrGuarantee(
+                        uint8(Outcome.OutcomeType.Allocation),
+                        abi.encode(newAllocation)
                     )
-                );
+                )
+            );
         } else {
             delete outcomeHashes[channelId];
         }
 
         // holdings updated BEFORE asset transferred (prevent reentrancy)
         uint256 payoutAmount;
-        for (uint256 m = 0; m < numPayouts; m++) { 
-            if (overlap && m == numPayouts -1) {
+        for (uint256 m = 0; m < numPayouts; m++) {
+            if (overlap && m == numPayouts - 1) {
                 payoutAmount = finalPayoutAmount;
             } else {
                 payoutAmount = allocation[m].amount;
@@ -102,15 +111,19 @@ contract AssetHolder {
 
     }
 
-    function claimAll(bytes32 channelId, bytes calldata guaranteeBytes, bytes calldata allocationBytes) external {
+    function claimAll(
+        bytes32 channelId,
+        bytes calldata guaranteeBytes,
+        bytes calldata allocationBytes
+    ) external {
         // requirements
 
         require(
             outcomeHashes[channelId] ==
                 keccak256(
                     abi.encode(
-                       Outcome.LabelledAllocationOrGuarantee(
-                           uint8(Outcome.OutcomeType.Guarantee),
+                        Outcome.LabelledAllocationOrGuarantee(
+                            uint8(Outcome.OutcomeType.Guarantee),
                             guaranteeBytes
                         )
                     )
@@ -118,9 +131,8 @@ contract AssetHolder {
             'claimAll | submitted data does not match outcomeHash stored against channelId'
         );
 
-        Outcome.Guarantee memory guarantee = abi.decode(guaranteeBytes,(Outcome.Guarantee));
-        
-  
+        Outcome.Guarantee memory guarantee = abi.decode(guaranteeBytes, (Outcome.Guarantee));
+
         require(
             outcomeHashes[guarantee.guaranteedChannelId] ==
                 keccak256(
@@ -136,27 +148,32 @@ contract AssetHolder {
 
         uint256 balance = holdings[channelId];
 
-        Outcome.AllocationItem[] memory allocation = abi.decode(allocationBytes,(Outcome.AllocationItem[])); // this remains constant length
+        Outcome.AllocationItem[] memory allocation = abi.decode(
+            allocationBytes,
+            (Outcome.AllocationItem[])
+        ); // this remains constant length
 
         uint256[] memory payouts = new uint256[](allocation.length);
         uint256 newAllocationLength = allocation.length;
 
         // first increase payouts according to guarantee
-        for (uint256 i = 0; i < guarantee.destinations.length; i++) { // for each destination in the guarantee
+        for (uint256 i = 0; i < guarantee.destinations.length; i++) {
+            // for each destination in the guarantee
             bytes32 _destination = guarantee.destinations[i];
             if (balance == 0) {
                 break;
             }
-            for (uint256 j = 0; j < allocation.length; j++) { 
-                if (_destination == allocation[j].destination) {  // find amount allocated to that destination (if it exists in channel alllocation)
+            for (uint256 j = 0; j < allocation.length; j++) {
+                if (_destination == allocation[j].destination) {
+                    // find amount allocated to that destination (if it exists in channel alllocation)
                     uint256 _amount = allocation[j].amount;
                     if (balance >= _amount) {
                         payouts[j] += _amount;
                         allocation[j].amount = 0; // subtract _amount;
-                        newAllocationLength--; 
+                        newAllocationLength--;
                         balance -= _amount;
                         break;
-                    } else { 
+                    } else {
                         payouts[j] += balance;
                         allocation[j].amount = _amount - balance;
                         balance = 0;
@@ -167,10 +184,11 @@ contract AssetHolder {
         }
 
         // next, increase payouts according to original allocation order
-        for (uint256 j = 0; j < allocation.length; j++) { // for each destination in the guarantee
+        for (uint256 j = 0; j < allocation.length; j++) {
+            // for each destination in the guarantee
             if (balance == 0) {
                 break;
-            }   
+            }
             uint256 _amount = allocation[j].amount;
             if (balance >= _amount) {
                 payouts[j] += _amount;
@@ -178,14 +196,14 @@ contract AssetHolder {
                 newAllocationLength--;
                 balance -= _amount;
                 break;
-            } else { 
+            } else {
                 payouts[j] += balance;
                 allocation[j].amount = _amount - balance;
                 balance = 0;
                 break;
             }
         }
-        
+
         // effects
         holdings[channelId] = balance;
 
@@ -197,7 +215,8 @@ contract AssetHolder {
         }
 
         uint256 k = 0;
-        for (uint256 j = 0; j < allocation.length; j++) { // for each destination in the guarantee
+        for (uint256 j = 0; j < allocation.length; j++) {
+            // for each destination in the guarantee
             if (payouts[j] > 0) {
                 if (_isExternalAddress(allocation[j].destination)) {
                     _transferAsset(_bytes32ToAddress(allocation[j].destination), payouts[j]);
@@ -213,16 +232,16 @@ contract AssetHolder {
         }
         assert(k == newAllocationLength);
 
-
         if (newAllocationLength > 0) {
             // store hash
-            outcomeHashes[guarantee.guaranteedChannelId] = keccak256(abi.encode(
-                Outcome.LabelledAllocationOrGuarantee(
-                            uint8(Outcome.OutcomeType.Allocation),
-                            abi.encode(newAllocation)
-                        )
+            outcomeHashes[guarantee.guaranteedChannelId] = keccak256(
+                abi.encode(
+                    Outcome.LabelledAllocationOrGuarantee(
+                        uint8(Outcome.OutcomeType.Allocation),
+                        abi.encode(newAllocation)
                     )
-                );
+                )
+            );
         } else {
             delete outcomeHashes[channelId];
         }
@@ -293,9 +312,6 @@ contract AssetHolder {
         uint256 amountDeposited,
         uint256 destinationHoldings
     );
-    event AssetTransferred(
-        bytes32 indexed destination,
-        uint256 amount
-    );
+    event AssetTransferred(bytes32 indexed destination, uint256 amount);
 
 }

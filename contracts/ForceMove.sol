@@ -124,7 +124,7 @@ contract ForceMove {
         // EFFECTS
         // ------------
 
-        emit ForceMove(
+        emit ChallengeRegistered(
             channelId,
             largestTurnNum,
             now + fixedPart.challengeDuration,
@@ -718,7 +718,7 @@ contract ForceMove {
     }
 
     // events
-    event ForceMove(
+    event ChallengeRegistered(
         bytes32 indexed channelId,
         // everything needed to respond or refute
         uint256 turnNunmRecord,
