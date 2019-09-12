@@ -41,7 +41,7 @@ for (let i = 0; i < 3; i++) {
   participants[i] = wallets[i].address;
 }
 // set event listener
-let forceMoveEvent;
+let challengeRegisteredEvent;
 
 beforeAll(async () => {
   ForceMove = await setupContracts(provider, ForceMoveArtifact);
@@ -138,7 +138,7 @@ describe('forceMove', () => {
           return sendTransaction(provider, ForceMove.address, transactionRequest);
         }, regex);
       } else {
-        forceMoveEvent = newChallengeRegisteredEvent(ForceMove, channelId);
+        challengeRegisteredEvent = newChallengeRegisteredEvent(ForceMove, channelId);
 
         await sendTransaction(provider, ForceMove.address, transactionRequest);
 
@@ -151,7 +151,7 @@ describe('forceMove', () => {
           eventIsFinal,
           eventFixedPart,
           eventVariableParts,
-        ] = await forceMoveEvent;
+        ] = await challengeRegisteredEvent;
 
         // check this information is enough to respond
         expect(eventChannelId).toEqual(channelId);
