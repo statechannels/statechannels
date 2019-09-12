@@ -1,5 +1,5 @@
 // @ts-ignore
-import Erc20AssetHolderArtifact from '../../build/contracts/ERC20AssetHolder.json';
+import Erc20AssetHolderArtifact from '../../../build/contracts/ERC20AssetHolder.json';
 import {ethers} from 'ethers';
 import {Allocation, Guarantee, Outcome} from '../outcome';
 import {TransactionRequest} from 'ethers/providers';

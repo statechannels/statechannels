@@ -7,11 +7,11 @@ import countingAppArtifact from '../../build/contracts/CountingApp.json';
 import {keccak256, defaultAbiCoder, hexlify, toUtf8Bytes, bigNumberify} from 'ethers/utils';
 import {setupContracts, sign, newChallengeClearedEvent, sendTransaction} from '../test-helpers';
 import {HashZero, AddressZero} from 'ethers/constants';
-import {Outcome, hashOutcome} from '../../src/outcome';
-import {Channel, getChannelId} from '../../src/channel';
-import {State, hashState, getVariablePart, getFixedPart} from '../../src/state';
-import {hashChannelStorage} from '../../src/channel-storage';
-import {createRespondTransaction} from '../../src/transaction-creators/force-move';
+import {Outcome, hashOutcome} from '../../src/contract/outcome';
+import {Channel, getChannelId} from '../../src/contract/channel';
+import {State, hashState, getVariablePart, getFixedPart} from '../../src/contract/state';
+import {hashChannelStorage} from '../../src/contract/channel-storage';
+import {createRespondTransaction} from '../../src/contract/transaction-creators/force-move';
 
 const provider = new ethers.providers.JsonRpcProvider(
   `http://localhost:${process.env.DEV_GANACHE_PORT}`,

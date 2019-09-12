@@ -12,8 +12,8 @@ import {
 } from '../test-helpers';
 import {HashZero} from 'ethers/constants';
 import {BigNumber} from 'ethers/utils';
-import {Allocation} from '../../src/outcome';
-import {createClaimAllTransaction} from '../../src/transaction-creators/asset-holder';
+import {Allocation} from '../../src/contract/outcome';
+import {createClaimAllTransaction} from '../../src/contract/transaction-creators/asset-holder';
 
 const AssetHolderInterface = new ethers.utils.Interface(AssetHolderArtifact.abi);
 
