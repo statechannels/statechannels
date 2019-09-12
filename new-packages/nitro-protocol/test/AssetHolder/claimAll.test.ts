@@ -9,11 +9,10 @@ import {
   allocationToParams,
   guaranteeToParams,
   sendTransaction,
+  replaceAddresses,
 } from '../test-helpers';
-import {HashZero} from 'ethers/constants';
-import {BigNumber} from 'ethers/utils';
-import {Allocation} from '../../src/outcome';
 import {createClaimAllTransaction} from '../../src/transaction-creators/asset-holder';
+import {id, bigNumberify} from 'ethers/utils';
 
 const AssetHolderInterface = new ethers.utils.Interface(AssetHolderArtifact.abi);
 
@@ -21,88 +20,102 @@ const provider = new ethers.providers.JsonRpcProvider(
   `http://localhost:${process.env.DEV_GANACHE_PORT}`,
 );
 
-const I = ethers.Wallet.createRandom().address.padEnd(66, '0');
-const A = ethers.Wallet.createRandom().address.padEnd(66, '0');
-const B = ethers.Wallet.createRandom().address.padEnd(66, '0');
+const addresses = {
+  // channels
+  c: undefined, // target
+  g: undefined, // guarantor
+  // externals
+  I: ethers.Wallet.createRandom().address.padEnd(66, '0'),
+  A: ethers.Wallet.createRandom().address.padEnd(66, '0'),
+  B: ethers.Wallet.createRandom().address.padEnd(66, '0'),
+};
 let AssetHolder: ethers.Contract;
 
 beforeAll(async () => {
   AssetHolder = await setupContracts(provider, AssetHolderArtifact);
 });
 
-const description0 =
-  'Pays out and updates holdings, outcomeHashes correctly (straight-through guarantee, 3 destinations)'; // claim G1 (step 1 of figure 23 of nitro paper)
-const description1 =
-  'Pays out and updates holdings, outcomeHashes correctly (swap guarantee, 2 destinations)'; // claim G2 (step 2 of figure 23 of nitro paper)
-const description2 =
-  'Pays out and updates holdings, outcomeHashes out correctly (swap guarantee, 3 destinations)'; // claim G1 (step 1 of alternative in figure 23 of nitro paper)
-const description3 =
-  'Pays out and updates holdings, outcomeHashes correctly (straight-through guarantee, 2 destinations)'; // claim G2 (step 2 of alternative of figure 23 of nitro paper)
-const description4 = 'Reverts when allocation not on chain';
-const description5 = 'Reverts when guarantee not on chain';
+const reason5 =
+  'claimAll | submitted data does not match outcomeHash stored against guaranteedChannelId';
+const reason6 = 'claimAll | submitted data does not match outcomeHash stored against channelId';
+
+// 1. claim G1 (step 1 of figure 23 of nitro paper)
+// 2. claim G2 (step 2 of figure 23 of nitro paper)
+// 3. claim G1 (step 1 of alternative in figure 23 of nitro paper)
+// 4. claim G2 (step 2 of alternative of figure 23 of nitro paper)
 
 // amounts are valueString representations of wei
 describe('claimAll', () => {
   it.each`
-    description     | cNonce | cDestBefore  | cAmountsBefore     | cDestAfter | cAmountsAfter | gNonce | guaranteeDestinations | gHeldBefore | gHeldAfter | outcomeSet       | payouts            | reasonString
-    ${description0} | ${0}   | ${[I, A, B]} | ${['5', '5', '5']} | ${[A, B]}  | ${['5', '5']} | ${100} | ${[I, A, B]}          | ${'5'}      | ${'0'}     | ${[true, true]}  | ${['5', '0', '0']} | ${undefined}
-    ${description1} | ${1}   | ${[A, B]}    | ${['5', '5']}      | ${[A]}     | ${['5']}      | ${101} | ${[I, B, A]}          | ${'5'}      | ${'0'}     | ${[true, true]}  | ${['0', '5']}      | ${undefined}
-    ${description2} | ${0}   | ${[I, A, B]} | ${['5', '5', '5']} | ${[A, B]}  | ${['5', '5']} | ${100} | ${[I, B, A]}          | ${'5'}      | ${'0'}     | ${[true, true]}  | ${['5', '0', '0']} | ${undefined}
-    ${description3} | ${3}   | ${[A, B]}    | ${['5', '5']}      | ${[B]}     | ${['5']}      | ${103} | ${[I, A, B]}          | ${'5'}      | ${'0'}     | ${[true, true]}  | ${['5', '0']}      | ${undefined}
-    ${description4} | ${3}   | ${[A, B]}    | ${['5', '5']}      | ${[B]}     | ${['5']}      | ${103} | ${[I, A, B]}          | ${'5'}      | ${'0'}     | ${[false, true]} | ${['5', '0']}      | ${'claimAll | submitted data does not match outcomeHash stored against guaranteedChannelId'}
-    ${description5} | ${3}   | ${[A, B]}    | ${['5', '5']}      | ${[B]}     | ${['5']}      | ${103} | ${[I, A, B]}          | ${'5'}      | ${'0'}     | ${[true, false]} | ${['5', '0']}      | ${'claimAll | submitted data does not match outcomeHash stored against channelId'}
+    name                                               | heldBefore | guaranteeDestinations | cOutcomeBefore        | cOutcomeAfter   | heldAfter | payouts   | reason
+    ${'1. straight-through guarantee, 3 destinations'} | ${{g: 5}}  | ${['I', 'A', 'B']}    | ${{I: 5, A: 5, B: 5}} | ${{A: 5, B: 5}} | ${{g: 0}} | ${{I: 5}} | ${undefined}
+    ${'2. swap guarantee,             2 destinations'} | ${{g: 5}}  | ${['B', 'A']}         | ${{A: 5, B: 5}}       | ${{A: 5}}       | ${{g: 0}} | ${{B: 5}} | ${undefined}
+    ${'3. swap guarantee,             3 destinations'} | ${{g: 5}}  | ${['I', 'B', 'A']}    | ${{I: 5, A: 5, B: 5}} | ${{A: 5, B: 5}} | ${{g: 0}} | ${{I: 5}} | ${undefined}
+    ${'4. straight-through guarantee, 2 destinations'} | ${{g: 5}}  | ${['A', 'B']}         | ${{A: 5, B: 5}}       | ${{B: 5}}       | ${{g: 0}} | ${{A: 5}} | ${undefined}
+    ${'5. allocation not on chain'}                    | ${{g: 5}}  | ${['B', 'A']}         | ${{}}                 | ${{A: 5}}       | ${{g: 0}} | ${{B: 5}} | ${reason5}
+    ${'6. guarantee not on chain'}                     | ${{g: 5}}  | ${[]}                 | ${{A: 5, B: 5}}       | ${{A: 5}}       | ${{g: 0}} | ${{B: 5}} | ${reason6}
   `(
-    '$description',
+    '$name',
     async ({
-      cNonce,
-      cDestBefore,
-      cAmountsBefore,
-      cDestAfter,
-      cAmountsAfter,
-      gNonce,
+      name,
+      heldBefore,
       guaranteeDestinations,
-      gHeldBefore,
-      gHeldAfter,
-      outcomeSet,
+      cOutcomeBefore,
+      cOutcomeAfter,
+      heldAfter,
       payouts,
-      reasonString,
+      reason,
     }) => {
-      cAmountsBefore = cAmountsBefore.map(x => ethers.utils.parseUnits(x, 'wei'));
-      gHeldBefore = ethers.utils.parseUnits(gHeldBefore, 'wei');
-      gHeldAfter = ethers.utils.parseUnits(gHeldAfter, 'wei');
-      payouts = payouts.map(x => ethers.utils.parseUnits(x, 'wei')) as BigNumber[];
-
       // compute channelIds
+      const cNonce = bigNumberify(id(name))
+        .maskn(30)
+        .toNumber();
+      const gNonce = bigNumberify(id(name + 'g'))
+        .maskn(30)
+        .toNumber();
       const targetId = randomChannelId(cNonce);
       const guarantorId = randomChannelId(gNonce);
+      addresses.c = targetId;
+      addresses.g = guarantorId;
+
+      // transform input data (unpack addresses and BigNumberify amounts)
+      heldBefore = replaceAddresses(heldBefore, addresses);
+      cOutcomeBefore = replaceAddresses(cOutcomeBefore, addresses);
+      cOutcomeAfter = replaceAddresses(cOutcomeAfter, addresses);
+      heldAfter = replaceAddresses(heldAfter, addresses);
+      payouts = replaceAddresses(payouts, addresses);
+      guaranteeDestinations = guaranteeDestinations.map(x => addresses[x]);
 
       // set holdings (only works on test contract)
-      if (gHeldBefore.gt(0)) {
-        await (await AssetHolder.setHoldings(guarantorId, gHeldBefore)).wait();
-        expect(await AssetHolder.holdings(guarantorId)).toEqual(gHeldBefore);
-      }
+      new Set([...Object.keys(heldAfter), ...Object.keys(heldBefore)]).forEach(async key => {
+        // key must be either in heldBefore or heldAfter or both
+        const amount = heldBefore[key] ? heldBefore[key] : bigNumberify(0);
+        await (await AssetHolder.setHoldings(key, amount)).wait();
+        expect((await AssetHolder.holdings(key)).eq(amount)).toBe(true);
+      });
 
-      const allocation: Allocation = cDestBefore.map((x, index, array) => ({
-        destination: x,
-        amount: cAmountsBefore[index],
-      }));
+      // compute an appropriate allocation.
+      const allocation = [];
+      Object.keys(cOutcomeBefore).forEach(key =>
+        allocation.push({destination: key, amount: cOutcomeBefore[key]}),
+      );
+      const [_, outcomeHash] = allocationToParams(allocation);
 
-      const [allocationBytes, outcomeHash] = allocationToParams(allocation);
+      // set outcomeHash for target
+      await (await AssetHolder.setOutcomePermissionless(targetId, outcomeHash)).wait();
+      expect(await AssetHolder.outcomeHashes(targetId)).toBe(outcomeHash);
 
-      // set outcomeHash
-      if (outcomeSet[0]) {
-        await (await AssetHolder.setOutcomePermissionless(targetId, outcomeHash)).wait();
-        expect(await AssetHolder.outcomeHashes(targetId)).toBe(outcomeHash);
-      }
+      // compute an appropriate guarantee
 
       const guarantee = {
         destinations: guaranteeDestinations,
         guaranteedChannelAddress: targetId,
       };
 
-      const [guaranteeBytes, gOutcomeContentHash] = guaranteeToParams(guarantee);
+      if (guaranteeDestinations.length > 0) {
+        const [__, gOutcomeContentHash] = guaranteeToParams(guarantee);
 
-      if (outcomeSet[1]) {
+        // set outcomeHash for guarantor
         await (await AssetHolder.setOutcomePermissionless(guarantorId, gOutcomeContentHash)).wait();
         expect(await AssetHolder.outcomeHashes(guarantorId)).toBe(gOutcomeContentHash);
       }
@@ -115,9 +128,9 @@ describe('claimAll', () => {
       );
 
       // call method in a slightly different way if expecting a revert
-      if (reasonString) {
+      if (reason) {
         const regex = new RegExp(
-          '^' + 'VM Exception while processing transaction: revert ' + reasonString + '$',
+          '^' + 'VM Exception while processing transaction: revert ' + reason + '$',
         );
         await expectRevert(
           () => sendTransaction(provider, AssetHolder.address, transactionRequest),
@@ -125,9 +138,10 @@ describe('claimAll', () => {
         );
       } else {
         // register for events
-        const assetTransferredEvents = cDestBefore.map((x, index, array) => {
-          if (payouts[index].gt(0)) {
-            return newAssetTransferredEvent(AssetHolder, x);
+        const assetTransferredEvents = [];
+        Object.keys(payouts).forEach(key => {
+          if (payouts[key].gt(0)) {
+            assetTransferredEvents.push(newAssetTransferredEvent(AssetHolder, key));
           }
         });
 
@@ -136,30 +150,22 @@ describe('claimAll', () => {
         // catch events
         const resolvedAassetTransferredEvents = await Promise.all(assetTransferredEvents);
         resolvedAassetTransferredEvents.forEach(async (x, index, array) => {
-          if (payouts[index].gt(0)) {
+          if (payouts[index] && payouts[index].gt(0)) {
             expect(x).toEqual(payouts[index]);
           }
         });
 
-        // assume all beneficiaries are external so no holdings to update other than
-        expect(await AssetHolder.holdings(guarantorId)).toEqual(gHeldAfter);
+        // check new holdings
+        Object.keys(heldAfter).forEach(async key =>
+          expect(await AssetHolder.holdings(key)).toEqual(heldAfter[key]),
+        );
 
         // check new outcomeHash
-        let expectedNewOutcomeHash;
-        let _;
-
-        if (cDestAfter.length > 0) {
-          // compute an appropriate allocation
-          const allocationAfter: Allocation = cDestAfter.map((x, index, array) => ({
-            destination: x,
-            amount: cAmountsAfter[index],
-          }));
-
-          [_, expectedNewOutcomeHash] = allocationToParams(allocationAfter);
-        } else {
-          expectedNewOutcomeHash = HashZero;
-        }
-
+        const allocationAfter = [];
+        Object.keys(cOutcomeAfter).forEach(key => {
+          allocationAfter.push({destination: key, amount: cOutcomeAfter[key]});
+        });
+        const [___, expectedNewOutcomeHash] = allocationToParams(allocationAfter);
         expect(await AssetHolder.outcomeHashes(targetId)).toEqual(expectedNewOutcomeHash);
       }
     },
