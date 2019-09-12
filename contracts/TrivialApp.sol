@@ -5,10 +5,10 @@ import './ForceMoveApp.sol';
 
 contract TrivialApp is ForceMoveApp {
     function validTransition(
-        VariablePart memory a,
-        VariablePart memory b,
-        uint256 turnNumB,
-        uint256 nParticipants
+        VariablePart memory, // a
+        VariablePart memory, // b
+        uint256, // turnNumB
+        uint256 // nParticipants
     ) public pure returns (bool) {
         return true;
     }
