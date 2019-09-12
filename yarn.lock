@@ -3552,7 +3552,7 @@ es-to-primitive@^1.2.0:
     is-date-object "^1.0.1"
     is-symbol "^1.0.2"
 
-escape-html@~1.0.3:
+escape-html@^1.0.3, escape-html@~1.0.3:
   version "1.0.3"
   resolved "https://registry.yarnpkg.com/escape-html/-/escape-html-1.0.3.tgz#0258eae4d3d0c0974de1c169188ef0051d1d1988"
   integrity sha1-Aljq5NPQwJdN4cFpGI7wBR0dGYg=
@@ -10212,10 +10212,10 @@ websocket-extensions@>=0.1.1:
   resolved "https://registry.yarnpkg.com/websocket-extensions/-/websocket-extensions-0.1.3.tgz#5d2ff22977003ec687a4b87073dfbbac146ccf29"
   integrity sha512-nqHUnMXmBzT0w570r2JpJxfiSD1IzoI+HGVdd3aZ0yNi3ngvQ4jv1dtHt5VGxfI2yj5yqImPhOK4vmIh2xMbGg==
 
-webtorrent@0.107.4:
-  version "0.107.4"
-  resolved "https://registry.yarnpkg.com/webtorrent/-/webtorrent-0.107.4.tgz#06cb0eb9cadbfd042bbe7db7e8111ee579f54b5c"
-  integrity sha512-d7XY2MPAyOUPceYvdOyxyIQ+Koss/c/y6yQG6FFwpi1lHb7ni1crTc0f20xBQzuiKMH61TFrnyV6DfT1lvOtIg==
+webtorrent@0.107.6:
+  version "0.107.6"
+  resolved "https://registry.yarnpkg.com/webtorrent/-/webtorrent-0.107.6.tgz#5c05c6ccc7c1d8c3ef3983521a6f2abcdee048a1"
+  integrity sha512-EMiqSPSNgzfUbxHXCwzrcwWWvdV4t3BWRHFDpoxamxB2ZSqy9ogF42NeptjXKTfmCrMdQxAAnXakYZQyZB5BrA==
   dependencies:
     addr-to-ip-port "^1.4.2"
     bitfield "^3.0.0"
@@ -10226,6 +10226,7 @@ webtorrent@0.107.4:
     create-torrent "^4.0.0"
     debug "^4.1.0"
     end-of-stream "^1.1.0"
+    escape-html "^1.0.3"
     fs-chunk-store "^2.0.0"
     http-node "github:feross/http-node#cddd2872f0020ecf5016f326cf5e58c965eef52a"
     immediate-chunk-store "^2.0.0"
