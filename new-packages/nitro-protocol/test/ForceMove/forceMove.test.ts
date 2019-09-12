@@ -16,11 +16,11 @@ import {
   sendTransaction,
   signStates,
 } from '../test-helpers';
-import {Channel, getChannelId} from '../../src/channel';
-import {State, getVariablePart, getFixedPart} from '../../src/state';
-import {hashChallengeMessage} from '../../src/challenge';
-import {hashChannelStorage, ChannelStorage} from '../../src/channel-storage';
-import {createForceMoveTransaction} from '../../src/transaction-creators/force-move';
+import {Channel, getChannelId} from '../../src/contract/channel';
+import {State, getVariablePart, getFixedPart} from '../../src/contract/state';
+import {hashChallengeMessage} from '../../src/contract/challenge';
+import {hashChannelStorage, ChannelStorage} from '../../src/contract/channel-storage';
+import {createForceMoveTransaction} from '../../src/contract/transaction-creators/force-move';
 const provider = new ethers.providers.JsonRpcProvider(
   `http://localhost:${process.env.DEV_GANACHE_PORT}`,
 );

@@ -3,8 +3,8 @@ import {expectRevert} from 'magmo-devtools';
 // @ts-ignore
 import ETHAssetHolderArtifact from '../../build/contracts/ETHAssetHolder.json';
 import {setupContracts, newDepositedEvent, sendTransaction} from '../test-helpers';
-import {Channel, getChannelId} from '../../src/channel';
-import {createDepositTransaction} from '../../src/transaction-creators/eth-asset-holder';
+import {Channel, getChannelId} from '../../src/contract/channel';
+import {createDepositTransaction} from '../../src/contract/transaction-creators/eth-asset-holder';
 
 const provider = new ethers.providers.JsonRpcProvider(
   `http://localhost:${process.env.DEV_GANACHE_PORT}`,
