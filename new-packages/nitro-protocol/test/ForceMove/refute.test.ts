@@ -4,12 +4,12 @@ import {expectRevert} from 'magmo-devtools';
 import ForceMoveArtifact from '../../build/contracts/TESTForceMove.json';
 // @ts-ignore
 import countingAppArtifact from '../../build/contracts/CountingApp.json';
-import {keccak256, defaultAbiCoder, hexlify, toUtf8Bytes, bigNumberify} from 'ethers/utils';
+import {defaultAbiCoder, hexlify, bigNumberify} from 'ethers/utils';
 import {setupContracts, sign, newChallengeClearedEvent, sendTransaction} from '../test-helpers';
-import {HashZero, AddressZero} from 'ethers/constants';
+import {AddressZero} from 'ethers/constants';
 import {Channel, getChannelId} from '../../src/contract/channel';
-import {State, hashState, getFixedPart, getVariablePart} from '../../src/contract/state';
-import {Outcome, hashOutcome} from '../../src/contract/outcome';
+import {State, hashState} from '../../src/contract/state';
+import {Outcome} from '../../src/contract/outcome';
 import {hashChannelStorage, ChannelStorage} from '../../src/contract/channel-storage';
 import {createRefuteTransaction} from '../../src/contract/transaction-creators/force-move';
 
@@ -93,10 +93,6 @@ describe('refute', () => {
         challengeDuration,
       };
 
-      const fixedPart = getFixedPart(challengeState);
-      const challengeVariablePart = getVariablePart(challengeState);
-      const refutationVariablePart = getVariablePart(refutationState);
-
       // set expiry time in the future or in the past
       const blockNumber = await provider.getBlockNumber();
       const blockTimestamp = (await provider.getBlock(blockNumber)).timestamp;
@@ -143,7 +139,7 @@ describe('refute', () => {
         await sendTransaction(provider, ForceMove.address, transactionRequest);
 
         // catch ChallengeCleared event
-        const [_, eventTurnNumRecord] = await challengeClearedEvent;
+        const [, eventTurnNumRecord] = await challengeClearedEvent;
         expect(eventTurnNumRecord._hex).toEqual(hexlify(declaredTurnNumRecord));
 
         // check new expected ChannelStorageHash

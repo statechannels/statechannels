@@ -1,6 +1,6 @@
 import * as forceMoveTrans from './contract/transaction-creators/force-move';
 import {TransactionRequest} from 'ethers/providers';
-import {State, hashState} from './contract/state';
+import {State} from './contract/state';
 import {Signature} from 'ethers/utils';
 import {getStateSignerAddress} from './signatures';
 import {ChannelStorage, SignedState} from '.';
