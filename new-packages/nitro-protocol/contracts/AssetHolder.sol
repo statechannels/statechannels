@@ -112,14 +112,14 @@ contract AssetHolder {
     }
 
     function claimAll(
-        bytes32 channelId,
+        bytes32 guarantorChannelId,
         bytes calldata guaranteeBytes,
         bytes calldata allocationBytes
     ) external {
         // requirements
 
         require(
-            outcomeHashes[channelId] ==
+            outcomeHashes[guarantorChannelId] ==
                 keccak256(
                     abi.encode(
                         Outcome.LabelledAllocationOrGuarantee(
@@ -128,13 +128,13 @@ contract AssetHolder {
                         )
                     )
                 ),
-            'claimAll | submitted data does not match outcomeHash stored against channelId'
+            'claimAll | submitted data does not match outcomeHash stored against guarantorChannellId'
         );
 
         Outcome.Guarantee memory guarantee = abi.decode(guaranteeBytes, (Outcome.Guarantee));
 
         require(
-            outcomeHashes[guarantee.guaranteedChannelId] ==
+            outcomeHashes[guarantee.targetChannelId] ==
                 keccak256(
                     abi.encode(
                         Outcome.LabelledAllocationOrGuarantee(
@@ -143,10 +143,10 @@ contract AssetHolder {
                         )
                     )
                 ),
-            'claimAll | submitted data does not match outcomeHash stored against guaranteedChannelId'
+            'claimAll | submitted data does not match outcomeHash stored against targetChannelId'
         );
 
-        uint256 balance = holdings[channelId];
+        uint256 balance = holdings[guarantorChannelId];
 
         Outcome.AllocationItem[] memory allocation = abi.decode(
             allocationBytes,
@@ -208,7 +208,7 @@ contract AssetHolder {
         }
 
         // effects
-        holdings[channelId] = balance;
+        holdings[guarantorChannelId] = balance;
 
         // at this point have payouts array of uint256s, each corresponding to original destinations
         // and allocations has some zero amounts which we want to prune
@@ -238,7 +238,7 @@ contract AssetHolder {
 
         if (newAllocationLength > 0) {
             // store hash
-            outcomeHashes[guarantee.guaranteedChannelId] = keccak256(
+            outcomeHashes[guarantee.targetChannelId] = keccak256(
                 abi.encode(
                     Outcome.LabelledAllocationOrGuarantee(
                         uint8(Outcome.OutcomeType.Allocation),
@@ -247,7 +247,7 @@ contract AssetHolder {
                 )
             );
         } else {
-            delete outcomeHashes[guarantee.guaranteedChannelId];
+            delete outcomeHashes[guarantee.targetChannelId];
         }
 
     }
