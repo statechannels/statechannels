@@ -168,14 +168,14 @@ contract AssetHolder {
                     // find amount allocated to that destination (if it exists in channel alllocation)
                     uint256 _amount = allocation[j].amount;
                     if (balance >= _amount) {
-                        payouts[j] += _amount;
+                        balance -= _amount;
                         allocation[j].amount = 0; // subtract _amount;
                         newAllocationLength--;
-                        balance -= _amount;
+                        payouts[j] += _amount;
                         break;
                     } else {
-                        payouts[j] += balance;
                         allocation[j].amount = _amount - balance;
+                        payouts[j] += balance;
                         balance = 0;
                         break;
                     }
@@ -192,11 +192,9 @@ contract AssetHolder {
             if (balance == 0) {
                 break;
             }
-            uint256 _amount = allocation[j].amount;
-            if (balance >= _amount) {
-       
-                payouts[j] += _amount;
-                balance -= _amount;
+            if (balance >= allocation[j].amount) {
+                balance -= allocation[j].amount;
+                payouts[j] += allocation[j].amount;
             } else {
                 payouts[j] += balance;
                 balance = 0;
@@ -215,7 +213,11 @@ contract AssetHolder {
 
         uint256 k = 0;
         for (uint256 j = 0; j < allocation.length; j++) {
-            // for each destination in the guarantee
+            // for each destination in the target channel's allocation
+            if (allocation[j].amount > 0) {
+                newAllocation[k] = allocation[j];
+                k++;
+            }
             if (payouts[j] > 0) {
                 if (_isExternalAddress(allocation[j].destination)) {
                     _transferAsset(_bytes32ToAddress(allocation[j].destination), payouts[j]);
@@ -224,10 +226,7 @@ contract AssetHolder {
                     holdings[allocation[j].destination] += payouts[j];
                 }
             }
-            if (allocation[j].amount > 0) {
-                newAllocation[k] = allocation[j];
-                k++;
-            }
+
         }
         assert(k == newAllocationLength);
 
