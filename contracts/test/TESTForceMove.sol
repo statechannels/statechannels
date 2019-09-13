@@ -1,6 +1,6 @@
 pragma solidity ^0.5.11;
 pragma experimental ABIEncoderV2;
-import './NitroAdjudicator.sol';
+import '../NitroAdjudicator.sol';
 
 contract TESTForceMove is ForceMove {
     // Public wrappers for internal methods:
