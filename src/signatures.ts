@@ -29,12 +29,10 @@ export async function signChallengeMessage(
   signedStates: SignedState[],
   privateKey: string,
 ): Promise<Signature> {
-  const largestTurnNum = toHex(
-    signedStates.reduce(
-      (s1, s2) => (s1.state.turnNum >= s2.state.turnNum ? s1 : s2),
-      signedStates[0],
-    ).state.turnNum,
-  );
+  if (signedStates.length === 0) {
+    throw new Error('At least one signed state must be provided');
+  }
+  const largestTurnNum = toHex(Math.max(...signedStates.map(s => s.state.turnNum)));
   const channelId = getChannelId(signedStates[0].state.channel);
   const challengeHash = hashChallengeMessage({largestTurnNum, channelId});
   const wallet = new ethers.Wallet(privateKey);
