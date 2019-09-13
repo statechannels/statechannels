@@ -1,19 +1,19 @@
 import {ethers} from 'ethers';
 // @ts-ignore
-import NitroAdjudicatorArtifact from '../../build/contracts/TESTNitroAdjudicator.json';
+import NitroAdjudicatorArtifact from '../../../build/contracts/TESTNitroAdjudicator.json';
 // @ts-ignore
-import ETHAssetHolderArtifact from '../../build/contracts/ETHAssetHolder.json';
+import ETHAssetHolderArtifact from '../../../build/contracts/ETHAssetHolder.json';
 // @ts-ignore
-import ERC20AssetHolderArtifact from '../../build/contracts/ERC20AssetHolder.json';
+import ERC20AssetHolderArtifact from '../../../build/contracts/ERC20AssetHolder.json';
 
 import {AddressZero} from 'ethers/constants';
-import {setupContracts, finalizedOutcomeHash, sendTransaction} from '../test-helpers';
+import {setupContracts, finalizedOutcomeHash, sendTransaction} from '../../test-helpers';
 import {expectRevert} from 'magmo-devtools';
-import {Channel, getChannelId} from '../../src/contract/channel';
-import {hashOutcomeContent} from '../../src/contract/outcome';
-import {State} from '../../src/contract/state';
-import {createPushOutcomeTransaction} from '../../src/contract/transaction-creators/nitro-adjudicator';
-import {toHex} from '../../src/hex-utils';
+import {Channel, getChannelId} from '../../../src/contract/channel';
+import {hashOutcomeContent} from '../../../src/contract/outcome';
+import {State} from '../../../src/contract/state';
+import {createPushOutcomeTransaction} from '../../../src/contract/transaction-creators/nitro-adjudicator';
+import {toHex} from '../../../src/hex-utils';
 
 const provider = new ethers.providers.JsonRpcProvider(
   `http://localhost:${process.env.DEV_GANACHE_PORT}`,

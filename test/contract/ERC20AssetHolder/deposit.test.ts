@@ -1,17 +1,17 @@
 import {ethers} from 'ethers';
 import {expectRevert} from 'magmo-devtools';
 // @ts-ignore
-import ERC20AssetHolderArtifact from '../../build/contracts/ERC20AssetHolder.json';
+import ERC20AssetHolderArtifact from '../../../build/contracts/ERC20AssetHolder.json';
 // @ts-ignore
-import TokenArtifact from '../../build/contracts/Token.json';
+import TokenArtifact from '../../../build/contracts/Token.json';
 import {
   setupContracts,
   newDepositedEvent,
   newTransferEvent,
   sendTransaction,
-} from '../test-helpers';
-import {Channel, getChannelId} from '../../src/contract/channel';
-import {createDepositTransaction} from '../../src/contract/transaction-creators/erc20-asset-holder';
+} from '../../test-helpers';
+import {Channel, getChannelId} from '../../../src/contract/channel';
+import {createDepositTransaction} from '../../../src/contract/transaction-creators/erc20-asset-holder';
 
 const provider = new ethers.providers.JsonRpcProvider(
   `http://localhost:${process.env.DEV_GANACHE_PORT}`,

@@ -1,10 +1,10 @@
 import {ethers} from 'ethers';
 // @ts-ignore
-import AssetHolderArtifact from '../../build/contracts/ETHAssetHolder.json';
-import {setupContracts} from '../test-helpers';
+import AssetHolderArtifact from '../../../build/contracts/ETHAssetHolder.json';
+import {setupContracts} from '../../test-helpers';
 import {keccak256} from 'ethers/utils';
 import {expectRevert} from 'magmo-devtools';
-import {Channel, getChannelId} from '../../src/contract/channel';
+import {Channel, getChannelId} from '../../../src/contract/channel';
 
 const provider = new ethers.providers.JsonRpcProvider(
   `http://localhost:${process.env.DEV_GANACHE_PORT}`,
