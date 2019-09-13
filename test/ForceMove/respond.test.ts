@@ -4,12 +4,12 @@ import {expectRevert} from 'magmo-devtools';
 import ForceMoveArtifact from '../../build/contracts/TESTForceMove.json';
 // @ts-ignore
 import countingAppArtifact from '../../build/contracts/CountingApp.json';
-import {keccak256, defaultAbiCoder, hexlify, toUtf8Bytes, bigNumberify} from 'ethers/utils';
+import {defaultAbiCoder, hexlify, bigNumberify} from 'ethers/utils';
 import {setupContracts, sign, newChallengeClearedEvent, sendTransaction} from '../test-helpers';
-import {HashZero, AddressZero} from 'ethers/constants';
-import {Outcome, hashOutcome} from '../../src/contract/outcome';
+import {AddressZero} from 'ethers/constants';
+import {Outcome} from '../../src/contract/outcome';
 import {Channel, getChannelId} from '../../src/contract/channel';
-import {State, hashState, getVariablePart, getFixedPart} from '../../src/contract/state';
+import {State, hashState} from '../../src/contract/state';
 import {hashChannelStorage} from '../../src/contract/channel-storage';
 import {createRespondTransaction} from '../../src/contract/transaction-creators/force-move';
 
@@ -94,9 +94,6 @@ describe('respond', () => {
 
       const responseStateHash = hashState(responseState);
 
-      const challengeVariablePart = getVariablePart(challengeState);
-      const responseVariablePart = getVariablePart(responseState);
-
       // set expiry time in the future or in the past
       const blockNumber = await provider.getBlockNumber();
       const blockTimestamp = (await provider.getBlock(blockNumber)).timestamp;
@@ -108,8 +105,6 @@ describe('respond', () => {
             .add(challengeDuration)
             .toHexString();
 
-      const outcomeHash = hashOutcome(outcome);
-
       const challengeExistsHash = hashChannelStorage({
         largestTurnNum: setTurnNumRecord,
         finalizesAt,
@@ -117,8 +112,6 @@ describe('respond', () => {
         challengerAddress: challenger.address,
         outcome,
       });
-
-      const fixedPart = getFixedPart(responseState);
 
       // call public wrapper to set state (only works on test contract)
       const tx = await ForceMove.setChannelStorageHash(channelId, challengeExistsHash);
@@ -150,7 +143,7 @@ describe('respond', () => {
         await sendTransaction(provider, ForceMove.address, transactionRequest);
 
         // catch ChallengeCleared event
-        const [_, eventTurnNumRecord] = await challengeClearedEvent;
+        const [, eventTurnNumRecord] = await challengeClearedEvent;
         expect(eventTurnNumRecord._hex).toEqual(hexlify(declaredTurnNumRecord + 1));
 
         // compute and check new expected ChannelStorageHash
