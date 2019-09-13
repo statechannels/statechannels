@@ -180,7 +180,7 @@ export async function sendTransaction(
 export function allocationToParams(allocation: Allocation) {
   const allocationBytes = encodeAllocation(allocation);
   let outcomeContentHash;
-  if (allocation.length == 0) {
+  if (allocation.length === 0) {
     outcomeContentHash = HashZero;
   } else {
     outcomeContentHash = hashOutcomeContent(allocation);
