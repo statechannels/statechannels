@@ -10,7 +10,7 @@ import {
   sendTransaction,
   replaceAddresses,
 } from '../test-helpers';
-import {createTransferAllTransaction} from '../../src/transaction-creators/asset-holder';
+import {createTransferAllTransaction} from '../../src/contract/transaction-creators/asset-holder';
 const AssetHolderInterface = new ethers.utils.Interface(AssetHolderArtifact.abi);
 import {id, bigNumberify} from 'ethers/utils';
 

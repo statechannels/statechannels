@@ -8,7 +8,7 @@ import {
   Signature,
 } from 'ethers/utils';
 import {AddressZero, HashZero} from 'ethers/constants';
-import {hashChannelStorage} from '../src/channel-storage';
+import {hashChannelStorage} from '../src/contract/channel-storage';
 import {
   Outcome,
   encodeAllocation,
@@ -16,8 +16,8 @@ import {
   encodeGuarantee,
   Guarantee,
   Allocation,
-} from '../src/outcome';
-import {State, hashState} from '../src/state';
+} from '../src/contract/outcome';
+import {State, hashState} from '../src/contract/state';
 import {TransactionRequest, TransactionReceipt} from 'ethers/providers';
 import {toHex} from '../src/hex-utils';
 
