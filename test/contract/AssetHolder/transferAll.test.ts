@@ -83,7 +83,7 @@ describe('transferAll', () => {
       Object.keys(setOutcome).forEach(key =>
         allocation.push({destination: key, amount: setOutcome[key]}),
       );
-      const [_, outcomeHash] = allocationToParams(allocation);
+      const [, outcomeHash] = allocationToParams(allocation);
 
       // set outcomeHash
       await (await AssetHolder.setOutcomePermissionless(channelId, outcomeHash)).wait();
@@ -117,7 +117,7 @@ describe('transferAll', () => {
 
         // catch events
         const resolvedAassetTransferredEvents = await Promise.all(assetTransferredEvents);
-        resolvedAassetTransferredEvents.forEach(async (x, index, array) => {
+        resolvedAassetTransferredEvents.forEach(async (x, index) => {
           if (payouts[index] && payouts[index].gt(0)) {
             expect(x).toEqual(payouts[index]);
           }
@@ -133,7 +133,7 @@ describe('transferAll', () => {
         Object.keys(newOutcome).forEach(key => {
           allocationAfter.push({destination: key, amount: newOutcome[key]});
         });
-        const [__, expectedNewOutcomeHash] = allocationToParams(allocationAfter);
+        const [, expectedNewOutcomeHash] = allocationToParams(allocationAfter);
         expect(await AssetHolder.outcomeHashes(channelId)).toEqual(expectedNewOutcomeHash);
       }
     },

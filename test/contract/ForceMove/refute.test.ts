@@ -8,7 +8,7 @@ import {defaultAbiCoder, hexlify, bigNumberify} from 'ethers/utils';
 import {setupContracts, sign, newChallengeClearedEvent, sendTransaction} from '../../test-helpers';
 import {AddressZero} from 'ethers/constants';
 import {Channel, getChannelId} from '../../../src/contract/channel';
-import {State, hashState, getFixedPart, getVariablePart} from '../../../src/contract/state';
+import {State, hashState} from '../../../src/contract/state';
 import {Outcome} from '../../../src/contract/outcome';
 import {hashChannelStorage, ChannelStorage} from '../../../src/contract/channel-storage';
 import {createRefuteTransaction} from '../../../src/contract/transaction-creators/force-move';

@@ -102,7 +102,7 @@ describe('claimAll', () => {
       Object.keys(tOutcomeBefore).forEach(key =>
         allocation.push({destination: key, amount: tOutcomeBefore[key]}),
       );
-      const [_, outcomeHash] = allocationToParams(allocation);
+      const [, outcomeHash] = allocationToParams(allocation);
 
       // set outcomeHash for target
       await (await AssetHolder.setOutcomePermissionless(targetId, outcomeHash)).wait();
@@ -116,7 +116,7 @@ describe('claimAll', () => {
       };
 
       if (guaranteeDestinations.length > 0) {
-        const [__, gOutcomeContentHash] = guaranteeToParams(guarantee);
+        const [, gOutcomeContentHash] = guaranteeToParams(guarantee);
 
         // set outcomeHash for guarantor
         await (await AssetHolder.setOutcomePermissionless(guarantorId, gOutcomeContentHash)).wait();
@@ -152,7 +152,7 @@ describe('claimAll', () => {
 
         // catch events
         const resolvedAassetTransferredEvents = await Promise.all(assetTransferredEvents);
-        resolvedAassetTransferredEvents.forEach(async (x, index, array) => {
+        resolvedAassetTransferredEvents.forEach(async (x, index) => {
           if (payouts[index] && payouts[index].gt(0)) {
             expect(x).toEqual(payouts[index]);
           }
@@ -168,7 +168,7 @@ describe('claimAll', () => {
         Object.keys(tOutcomeAfter).forEach(key => {
           allocationAfter.push({destination: key, amount: tOutcomeAfter[key]});
         });
-        const [___, expectedNewOutcomeHash] = allocationToParams(allocationAfter);
+        const [, expectedNewOutcomeHash] = allocationToParams(allocationAfter);
         expect(await AssetHolder.outcomeHashes(targetId)).toEqual(expectedNewOutcomeHash);
       }
     },
