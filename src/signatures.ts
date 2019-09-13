@@ -1,5 +1,5 @@
 import {Signature, arrayify, splitSignature} from 'ethers/utils';
-import {State, hashState} from './contract/state';
+import {hashState} from './contract/state';
 import {ethers} from 'ethers';
 import {SignedState} from '.';
 import {getChannelId} from './contract/channel';

@@ -1,7 +1,6 @@
 import {Channel, getChannelId} from './channel';
 import {Outcome, encodeOutcome, hashOutcome} from './outcome';
-import {Uint256, Address, Bytes, Bytes32} from './types';
-import abi from 'web3-eth-abi';
+import {Uint256, Address, Bytes32} from './types';
 import {keccak256, defaultAbiCoder} from 'ethers/utils';
 
 export interface State {

@@ -4,10 +4,9 @@ import {expectRevert} from 'magmo-devtools';
 import ForceMoveArtifact from '../../build/contracts/TESTForceMove.json';
 // @ts-ignore
 import countingAppArtifact from '../../build/contracts/CountingApp.json';
-import {keccak256, defaultAbiCoder, hexlify, bigNumberify} from 'ethers/utils';
+import {defaultAbiCoder, hexlify, bigNumberify} from 'ethers/utils';
 import {
   setupContracts,
-  sign,
   newChallengeClearedEvent,
   signStates,
   sendTransaction,
@@ -151,7 +150,7 @@ describe('respondWithAlternative', () => {
         await sendTransaction(provider, ForceMove.address, transactionsRequest);
 
         // catch ChallengeCleared event
-        const [_, eventTurnNumRecord] = await challengeClearedEvent;
+        const [, eventTurnNumRecord] = await challengeClearedEvent;
         expect(eventTurnNumRecord._hex).toEqual(hexlify(largestTurnNum));
 
         const expectedChannelStorageHash = hashChannelStorage({
