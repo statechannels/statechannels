@@ -13,5 +13,5 @@
     "resolveJsonModule": true,
     "noUnusedLocals": true
   },
-  "exclude": ["lib", "node_modules"]
+  "exclude": ["**/*.test.(j|t)s", "**/test/*", "test/*", "lib", "node_modules"]
 }
