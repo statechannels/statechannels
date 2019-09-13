@@ -32,7 +32,9 @@
     "clearLib": "rm -rf lib",
     "build": "run-s clearContracts clearLib build:truffle build:typescript",
     "prettier:check": "npx prettier --check '{contracts,src,test}/**/*.{ts,tsx,sol}'",
-    "prettier:write": "npx prettier --write '{contracts,src,test}/**/*.{ts,tsx,sol}'"
+    "prettier:write": "npx prettier --write '{contracts,src,test}/**/*.{ts,tsx,sol}'",
+    "lint:check": "tslint --project .",
+    "lint:write": "tslint --project . --fix"
   },
   "dependencies": {
     "@openzeppelin/contracts": "^2.3.0",
