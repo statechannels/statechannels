@@ -76,7 +76,7 @@ describe('validTransition', () => {
           toConsensusData,
           toOutcome,
           numParticipants,
-          provider,
+          provider.getSigner(0),
           consensusApp.address,
         );
         expect(isValidFromCall).toBe(true);
