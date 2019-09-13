@@ -71,10 +71,10 @@ function createSignatureArguments(
 ): {states: State[]; signatures: Signature[]; whoSignedWhat: number[]} {
   const {participants} = signedStates[0].state.channel;
 
-  // Get a list of all unique states, if there are duplicate states that means multiple
-  // participants have signed it and who be handled by whoSignedWhat
+  // Get a list of all unique states.
   const states = signedStates.filter((s, i, a) => a.indexOf(s) === i).map(s => s.state);
   const signatures = signedStates.map(s => s.signature);
+  // Generate whoSignedWhat based on the original list of states (which may contain the same state signed by multiple participants)
   const whoSignedWhat = signedStates.map(s => participants.indexOf(getStateSignerAddress(s)));
 
   return {states, signatures, whoSignedWhat};
