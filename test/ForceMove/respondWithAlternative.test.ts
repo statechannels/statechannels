@@ -13,11 +13,11 @@ import {
   sendTransaction,
 } from '../test-helpers';
 import {AddressZero} from 'ethers/constants';
-import {Outcome} from '../../src/outcome';
-import {Channel, getChannelId} from '../../src/channel';
-import {State} from '../../src/state';
-import {hashChannelStorage} from '../../src/channel-storage';
-import {createRespondWithAlternativeTransaction} from '../../src/transaction-creators/force-move';
+import {Outcome} from '../../src/contract/outcome';
+import {Channel, getChannelId} from '../../src/contract/channel';
+import {State} from '../../src/contract/state';
+import {hashChannelStorage} from '../../src/contract/channel-storage';
+import {createRespondWithAlternativeTransaction} from '../../src/contract/transaction-creators/force-move';
 
 const provider = new ethers.providers.JsonRpcProvider(
   `http://localhost:${process.env.DEV_GANACHE_PORT}`,

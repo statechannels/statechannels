@@ -1,5 +1,5 @@
 // @ts-ignore
-import NitroAdjudicatorArtifact from '../../build/contracts/NitroAdjudicator.json';
+import NitroAdjudicatorArtifact from '../../../build/contracts/NitroAdjudicator.json';
 import {ethers} from 'ethers';
 import {TransactionRequest} from 'ethers/providers';
 import {State, hashState} from '../state';

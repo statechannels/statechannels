@@ -11,7 +11,7 @@ import {
   sendTransaction,
   replaceAddresses,
 } from '../test-helpers';
-import {createClaimAllTransaction} from '../../src/transaction-creators/asset-holder';
+import {createClaimAllTransaction} from '../../src/contract/transaction-creators/asset-holder';
 import {id, bigNumberify} from 'ethers/utils';
 
 const AssetHolderInterface = new ethers.utils.Interface(AssetHolderArtifact.abi);

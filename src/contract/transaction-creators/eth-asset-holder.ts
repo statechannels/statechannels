@@ -1,5 +1,5 @@
 // @ts-ignore
-import EthAssetHolderArtifact from '../../build/contracts/ETHAssetHolder.json';
+import EthAssetHolderArtifact from '../../../build/contracts/ETHAssetHolder.json';
 import {ethers} from 'ethers';
 import {Allocation, Guarantee, Outcome} from '../outcome';
 import {TransactionRequest} from 'ethers/providers';

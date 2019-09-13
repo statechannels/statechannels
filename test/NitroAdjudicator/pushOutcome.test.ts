@@ -9,10 +9,10 @@ import ERC20AssetHolderArtifact from '../../build/contracts/ERC20AssetHolder.jso
 import {AddressZero} from 'ethers/constants';
 import {setupContracts, finalizedOutcomeHash, sendTransaction} from '../test-helpers';
 import {expectRevert} from 'magmo-devtools';
-import {Channel, getChannelId} from '../../src/channel';
-import {hashOutcomeContent} from '../../src/outcome';
-import {State} from '../../src/state';
-import {createPushOutcomeTransaction} from '../../src/transaction-creators/nitro-adjudicator';
+import {Channel, getChannelId} from '../../src/contract/channel';
+import {hashOutcomeContent} from '../../src/contract/outcome';
+import {State} from '../../src/contract/state';
+import {createPushOutcomeTransaction} from '../../src/contract/transaction-creators/nitro-adjudicator';
 import {toHex} from '../../src/hex-utils';
 
 const provider = new ethers.providers.JsonRpcProvider(
