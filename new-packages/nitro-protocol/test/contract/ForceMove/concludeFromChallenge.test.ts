@@ -12,7 +12,7 @@ import {
   signStates,
   sendTransaction,
 } from '../../test-helpers';
-import {AddressZero, HashZero} from 'ethers/constants';
+import {AddressZero} from 'ethers/constants';
 import {Channel, getChannelId} from '../../../src/contract/channel';
 import {State, hashState} from '../../../src/contract/state';
 import {Outcome, hashOutcome} from '../../../src/contract/outcome';
