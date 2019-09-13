@@ -2,7 +2,7 @@
 import ForceMoveArtifact from '../../../build/contracts/ForceMove.json';
 import * as ethers from 'ethers';
 import {TransactionRequest} from 'ethers/providers';
-import {State, hashState, getVariablePart, getFixedPart, hashAppPart} from '../state';
+import {State, getVariablePart, getFixedPart, hashAppPart} from '../state';
 import {Signature} from 'ethers/utils';
 import {hashOutcome} from '../outcome';
 import {encodeChannelStorageLite} from '../channel-storage';
@@ -207,7 +207,6 @@ export function createForceMoveTransaction(
     );
   }
 
-  const stateHashes = states.map(s => hashState(s));
   const variableParts = states.map(s => getVariablePart(s));
   const fixedPart = getFixedPart(states[0]);
 
