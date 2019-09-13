@@ -106,7 +106,7 @@ describe('forceMove', () => {
         });
       }
 
-      const variableParts = states.map(st => getVariablePart(st));
+      const variableParts = states.map(state => getVariablePart(state));
       const fixedPart = getFixedPart(states[0]);
 
       // sign the states
