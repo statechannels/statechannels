@@ -28,7 +28,12 @@ export function getFixedPart(
   return {chainId, participants, channelNonce, appDefinition, challengeDuration};
 }
 
-export function getVariablePart(state: State): {outcome: Bytes32; appData: Bytes32} {
+export interface VariablePart {
+  outcome: Bytes32;
+  appData: Bytes32;
+}
+
+export function getVariablePart(state: State): VariablePart {
   return {outcome: encodeOutcome(state.outcome), appData: state.appData};
 }
 
