@@ -160,44 +160,50 @@ contract AssetHolder {
         for (uint256 i = 0; i < guarantee.destinations.length; i++) {
             // for each destination in the guarantee
             bytes32 _destination = guarantee.destinations[i];
-            if (balance == 0) {
-                break;
-            }
             for (uint256 j = 0; j < allocation.length; j++) {
+                if (balance == 0) {
+                    break;
+                }
                 if (_destination == allocation[j].destination) {
                     // find amount allocated to that destination (if it exists in channel alllocation)
                     uint256 _amount = allocation[j].amount;
-                    if (balance >= _amount) {
-                        balance -= _amount;
-                        allocation[j].amount = 0; // subtract _amount;
-                        newAllocationLength--;
-                        payouts[j] += _amount;
-                        break;
-                    } else {
-                        allocation[j].amount = _amount - balance;
-                        payouts[j] += balance;
-                        balance = 0;
-                        break;
+                    if (_amount > 0) {
+                        if (balance >= _amount) {
+                            balance -= _amount;
+                            allocation[j].amount = 0; // subtract _amount;
+                            newAllocationLength--;
+                            payouts[j] += _amount;
+                            break;
+                        } else {
+                            allocation[j].amount = _amount - balance;
+                            payouts[j] += balance;
+                            balance = 0;
+                            break;
+                        }
                     }
                 }
             }
         }
 
         // next, increase payouts according to original allocation order
-        // this block only has an effect if 
-        //  - all allocations in the target have been been paid out (in some order) => newAllocationLength == 0
-        //  - balance > 0
-        for (uint256 j = 0; j < allocation.length; j++) {
+        // this block only has an effect if balance > 0
+        for (uint256 j= 0; j < allocation.length; j++) {
             // for each entry in the target channel's outcome
             if (balance == 0) {
                 break;
             }
-            if (balance >= allocation[j].amount) {
-                balance -= allocation[j].amount;
-                payouts[j] += allocation[j].amount;
-            } else {
-                payouts[j] += balance;
-                balance = 0;
+            uint256 _amount = allocation[j].amount;
+            if (_amount > 0) {
+                if (balance >= _amount) {
+                    balance -= _amount;
+                    allocation[j].amount = 0; // subtract _amount;
+                    newAllocationLength--;
+                    payouts[j] += _amount;
+                } else {
+                    allocation[j].amount = _amount - balance;
+                    payouts[j] += balance;
+                    balance = 0;
+                }
             }
         }
 
