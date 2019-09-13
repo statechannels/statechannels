@@ -184,23 +184,22 @@ contract AssetHolder {
         }
 
         // next, increase payouts according to original allocation order
+        // this block only has an effect if 
+        //  - all allocations in the target have been been paid out (in some order) => newAllocationLength == 0
+        //  - balance > 0
         for (uint256 j = 0; j < allocation.length; j++) {
-            // for each destination in the guarantee
+            // for each entry in the target channel's outcome
             if (balance == 0) {
                 break;
             }
             uint256 _amount = allocation[j].amount;
             if (balance >= _amount) {
-                payouts[j] += _amount;
-                allocation[j].amount = 0; // subtract _amount;
-                newAllocationLength--;
+       
+         payouts[j] += _amount;
                 balance -= _amount;
-                break;
             } else {
                 payouts[j] += balance;
-                allocation[j].amount = _amount - balance;
                 balance = 0;
-                break;
             }
         }
 
@@ -225,7 +224,7 @@ contract AssetHolder {
                     holdings[allocation[j].destination] += payouts[j];
                 }
             }
-            if (allocation[j].amount > 0 && newAllocationLength > 0) {
+            if (allocation[j].amount > 0) {
                 newAllocation[k] = allocation[j];
                 k++;
             }
@@ -243,7 +242,7 @@ contract AssetHolder {
                 )
             );
         } else {
-            delete outcomeHashes[channelId];
+            delete outcomeHashes[guarantee.guaranteedChannelId];
         }
 
     }
