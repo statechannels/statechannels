@@ -63,8 +63,8 @@ describe('claimAll', () => {
       name,
       heldBefore,
       guaranteeDestinations,
-      cOutcomeBefore,
-      cOutcomeAfter,
+      tOutcomeBefore,
+      tOutcomeAfter,
       heldAfter,
       payouts,
       reason,
@@ -83,8 +83,8 @@ describe('claimAll', () => {
 
       // transform input data (unpack addresses and BigNumberify amounts)
       heldBefore = replaceAddresses(heldBefore, addresses);
-      cOutcomeBefore = replaceAddresses(cOutcomeBefore, addresses);
-      cOutcomeAfter = replaceAddresses(cOutcomeAfter, addresses);
+      tOutcomeBefore = replaceAddresses(tOutcomeBefore, addresses);
+      tOutcomeAfter = replaceAddresses(tOutcomeAfter, addresses);
       heldAfter = replaceAddresses(heldAfter, addresses);
       payouts = replaceAddresses(payouts, addresses);
       guaranteeDestinations = guaranteeDestinations.map(x => addresses[x]);
@@ -99,8 +99,8 @@ describe('claimAll', () => {
 
       // compute an appropriate allocation.
       const allocation = [];
-      Object.keys(cOutcomeBefore).forEach(key =>
-        allocation.push({destination: key, amount: cOutcomeBefore[key]}),
+      Object.keys(tOutcomeBefore).forEach(key =>
+        allocation.push({destination: key, amount: tOutcomeBefore[key]}),
       );
       const [_, outcomeHash] = allocationToParams(allocation);
 
@@ -165,8 +165,8 @@ describe('claimAll', () => {
 
         // check new outcomeHash
         const allocationAfter = [];
-        Object.keys(cOutcomeAfter).forEach(key => {
-          allocationAfter.push({destination: key, amount: cOutcomeAfter[key]});
+        Object.keys(tOutcomeAfter).forEach(key => {
+          allocationAfter.push({destination: key, amount: tOutcomeAfter[key]});
         });
         const [___, expectedNewOutcomeHash] = allocationToParams(allocationAfter);
         expect(await AssetHolder.outcomeHashes(targetId)).toEqual(expectedNewOutcomeHash);
