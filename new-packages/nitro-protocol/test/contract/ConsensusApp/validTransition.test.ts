@@ -1,15 +1,15 @@
 import {ethers} from 'ethers';
 // @ts-ignore
-import ConsensusAppArtifact from '../../build/contracts/ConsensusApp.json';
+import ConsensusAppArtifact from '../../../build/contracts/ConsensusApp.json';
 
 import {TransactionRequest} from 'ethers/providers';
-import {setupContracts} from '../test-helpers';
+import {setupContracts} from '../../test-helpers';
 import {expectRevert} from 'magmo-devtools';
-import {ConsensusData} from '../../src/contract/consensus-data';
-import {Outcome} from '../../src/contract/outcome';
+import {ConsensusData} from '../../../src/contract/consensus-data';
+import {Outcome} from '../../../src/contract/outcome';
 import {AddressZero, HashZero} from 'ethers/constants';
-import {createValidTransitionTransaction} from '../../src/contract/transaction-creators/consensus-app';
-import {validTransition} from '../../src/contract/consensus-app';
+import {createValidTransitionTransaction} from '../../../src/contract/transaction-creators/consensus-app';
+import {validTransition} from '../../../src/contract/consensus-app';
 
 const provider = new ethers.providers.JsonRpcProvider(
   `http://localhost:${process.env.DEV_GANACHE_PORT}`,
