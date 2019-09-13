@@ -22,7 +22,7 @@ const provider = new ethers.providers.JsonRpcProvider(
 
 const addresses = {
   // channels
-  c: undefined, // target
+  t: undefined, // target
   g: undefined, // guarantor
   // externals
   I: ethers.Wallet.createRandom().address.padEnd(66, '0'),
@@ -36,8 +36,9 @@ beforeAll(async () => {
 });
 
 const reason5 =
-  'claimAll | submitted data does not match outcomeHash stored against guaranteedChannelId';
-const reason6 = 'claimAll | submitted data does not match outcomeHash stored against channelId';
+  'claimAll | submitted data does not match outcomeHash stored against targetChannelId';
+const reason6 =
+  'claimAll | submitted data does not match outcomeHash stored against guarantorChannelId';
 
 // 1. claim G1 (step 1 of figure 23 of nitro paper)
 // 2. claim G2 (step 2 of figure 23 of nitro paper)
@@ -47,7 +48,7 @@ const reason6 = 'claimAll | submitted data does not match outcomeHash stored aga
 // amounts are valueString representations of wei
 describe('claimAll', () => {
   it.each`
-    name                                               | heldBefore | guaranteeDestinations | cOutcomeBefore        | cOutcomeAfter   | heldAfter | payouts         | reason
+    name                                               | heldBefore | guaranteeDestinations | tOutcomeBefore        | tOutcomeAfter   | heldAfter | payouts         | reason
     ${'1. straight-through guarantee, 3 destinations'} | ${{g: 5}}  | ${['I', 'A', 'B']}    | ${{I: 5, A: 5, B: 5}} | ${{A: 5, B: 5}} | ${{g: 0}} | ${{I: 5}}       | ${undefined}
     ${'2. swap guarantee,             2 destinations'} | ${{g: 5}}  | ${['B', 'A']}         | ${{A: 5, B: 5}}       | ${{A: 5}}       | ${{g: 0}} | ${{B: 5}}       | ${undefined}
     ${'3. swap guarantee,             3 destinations'} | ${{g: 5}}  | ${['I', 'B', 'A']}    | ${{I: 5, A: 5, B: 5}} | ${{A: 5, B: 5}} | ${{g: 0}} | ${{I: 5}}       | ${undefined}
@@ -69,15 +70,15 @@ describe('claimAll', () => {
       reason,
     }) => {
       // compute channelIds
-      const cNonce = bigNumberify(id(name))
+      const tNonce = bigNumberify(id(name))
         .maskn(30)
         .toNumber();
       const gNonce = bigNumberify(id(name + 'g'))
         .maskn(30)
         .toNumber();
-      const targetId = randomChannelId(cNonce);
+      const targetId = randomChannelId(tNonce);
       const guarantorId = randomChannelId(gNonce);
-      addresses.c = targetId;
+      addresses.t = targetId;
       addresses.g = guarantorId;
 
       // transform input data (unpack addresses and BigNumberify amounts)
@@ -111,7 +112,7 @@ describe('claimAll', () => {
 
       const guarantee = {
         destinations: guaranteeDestinations,
-        guaranteedChannelAddress: targetId,
+        targetChannelId: targetId,
       };
 
       if (guaranteeDestinations.length > 0) {
