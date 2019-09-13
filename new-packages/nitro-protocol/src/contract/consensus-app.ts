@@ -19,13 +19,13 @@ export async function validTransition(
   toConsensusData: ConsensusData,
   toOutcome: Outcome,
   numberOfParticipants: number,
-  provider: ethers.providers.JsonRpcProvider,
+  signer: ethers.Signer,
   contractAddress: string,
 ): Promise<boolean> {
   const fromVariablePart = getVariablePart(fromConsensusData, fromOutcome);
   const toVariablePart = getVariablePart(toConsensusData, toOutcome);
   const turnNumB = 0; // This isn't actually used by the contract so any value works
-  const signer = provider.getSigner(0);
+
   const contract = new ethers.Contract(contractAddress, ConsensusAppContractInterface.abi, signer);
   return await contract.functions.validTransition(
     fromVariablePart,
