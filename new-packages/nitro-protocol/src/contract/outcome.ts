@@ -8,14 +8,14 @@ export enum OutcomeType {
 
 // Guarantee and functions
 export interface Guarantee {
-  guaranteedChannelAddress: Bytes32;
+  targetChannelId: Bytes32;
   destinations: Bytes32[];
 }
 
 export function encodeGuarantee(guarantee: Guarantee): Bytes32 {
   return defaultAbiCoder.encode(
-    ['tuple(bytes32 guaranteedChannelId, bytes32[] destinations)'],
-    [[guarantee.guaranteedChannelAddress, guarantee.destinations]],
+    ['tuple(bytes32 targetChannelId, bytes32[] destinations)'],
+    [[guarantee.targetChannelId, guarantee.destinations]],
   );
 }
 export function isGuarantee(
