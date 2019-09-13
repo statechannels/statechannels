@@ -23,6 +23,7 @@
       "allow-pascal-case",
       "allow-leading-underscore"
     ],
-    "semicolon": [true, "always"]
+    "semicolon": [true, "always"],
+    "no-unused-variable": true
   }
 }
