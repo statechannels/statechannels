@@ -43,7 +43,7 @@ One adjudicator pushing to multiple asset holders.
 | AllocationOrGuarantee | `(uint8, bytes)`       | `(type, data)`, where `type` is 0 for allocations and 1 for guarantees, and `data` field is the abi-encoded form of the Allocation or Guarantee               |
 | Allocation            | `(bytes32, uint256)[]` | An list of AllocationItems, in payout priority order (highest priority first)                                                                                 |
 | AllocationItem        | `(bytes32, uint256)`   | `(destination, amount)`                                                                                                                                       |
-| Guarantee             | `(bytes32, bytes32[])` | `(guaranteedChannelAddress, destinations)`                                                                                                                    |
+| Guarantee             | `(bytes32, bytes32[])` | `(targetChannelId, destinations)`                                                                                                                             |
 | ChannelAddress        | `bytes32`              | Equal to the ChannelId defined in ForceMove                                                                                                                   |
 | ExternalAddress       | `bytes32`              | An Ethereum address right padded with 12 bytes of zeros                                                                                                       |
 | Destination           | `bytes32`              | Taken to be an ExternalAddress if starts with 12 bytes of leading zeros and a ChannelAddress otherwise                                                        |
