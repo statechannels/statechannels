@@ -195,7 +195,7 @@ contract AssetHolder {
             uint256 _amount = allocation[j].amount;
             if (balance >= _amount) {
        
-         payouts[j] += _amount;
+                payouts[j] += _amount;
                 balance -= _amount;
             } else {
                 payouts[j] += balance;
