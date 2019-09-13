@@ -5,14 +5,14 @@ title: Claim
 
 ### ClaimAll
 
-- First pays out according to the allocation of the `guaranteedAddress` but with priorities set by the guarantee.
+- First pays out according to the allocation of the `targetChannelId` but with priorities set by the guarantee.
 - Pays any remaining funds out according to the default priorities.
 
-`claimAll(bytes32 channelAddress, bytes32 guaranteedAddress, bytes32[] destinations, AllocationItem[] allocation)`
+`claimAll(bytes32 guarantorChannelId, bytes32 targetChannelId, bytes32[] destinations, AllocationItem[] allocation)`
 
-- checks that `outcomes[channelAddress]` is equal to `hash(1, (guaranteedAddress, destinations))`, where `1` signifies an outcome of type `GUARANTEE`
-- checks that `outcomes[guaranteedAddress]` is equal to `hash(0, allocation)`
-- `let balance = balances[channelAddress]`
+- checks that `outcomes[guarantorChannelId]` is equal to `hash(1, (targetChannelId, destinations))`, where `1` signifies an outcome of type `GUARANTEE`
+- checks that `outcomes[targetChannelId]` is equal to `hash(0, allocation)`
+- `let balance = balances[guarantorChannelId]`
 - k = 0
 - let payouts = []
 - for 0 <= i < destinations.length
@@ -51,9 +51,9 @@ title: Claim
     - payouts[k] = (destination, amount)
     - k++
     - balance -= amount
-- sets `balances[channelAddress] = balance`
+- sets `balances[guarantorChannelId] = balance`
   - note: must do this before calling any external contracts to prevent re-entrancy bugs
-- sets `outcomes[channelAddress] = hash(newAllocation)` or clears if `newAllocation = []`
+- sets `outcomes[guarantorChannelId] = hash(newAllocation)` or clears if `newAllocation = []`
 - for each payout
   - if payout is an external address
     - do an external transfer to the address
