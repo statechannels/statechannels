@@ -36,8 +36,15 @@ export function createRespondTransaction(
 export function createRespondWithAlternativeTransaction(
   channelStorage: ChannelStorage,
   signedStates: SignedState[],
-) {
+): TransactionRequest {
   const {states, signatures, whoSignedWhat} = createSignatureArguments(signedStates);
+  return forceMoveTrans.createRespondWithAlternativeTransaction(
+    channelStorage.challengeState,
+    channelStorage.finalizesAt,
+    states,
+    signatures,
+    whoSignedWhat,
+  );
 }
 
 export function createConcludeTransaction(
