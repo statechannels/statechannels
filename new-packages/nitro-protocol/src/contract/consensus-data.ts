@@ -21,41 +21,48 @@ export function decodeConsensusData(appData: string): ConsensusData {
   )[0];
   return {furtherVotesRequired, proposedOutcome: decodeOutcome(proposedOutcome)};
 }
-
-export function veto(
-  previousConsensusData: ConsensusData,
-  numberOfParticipants: number,
-): ConsensusData {
-  return propose(previousConsensusData, numberOfParticipants);
-}
-
-export function propose(consensusData: ConsensusData, numberOfParticipants: number): ConsensusData {
+export function propose(proposedOutcome: Outcome, numberOfParticipants: number): ConsensusData {
   return {
-    proposedOutcome: consensusData.proposedOutcome,
+    proposedOutcome,
     furtherVotesRequired: numberOfParticipants - 1,
   };
 }
-
-export function vote(consensusData: ConsensusData): ConsensusData {
-  return {
-    proposedOutcome: consensusData.proposedOutcome,
-    furtherVotesRequired: consensusData.furtherVotesRequired - 1,
-  };
+export function veto(numberOfParticipants: number): ConsensusData {
+  return propose([], numberOfParticipants);
 }
 
-export function finalVote(consensusData: ConsensusData): ConsensusData {
-  if (consensusData.furtherVotesRequired !== 0) {
+export interface ConsensusDataWithOutcome {
+  consensusData: ConsensusData;
+  currentOutcome: Outcome;
+}
+
+export function vote(
+  incomingConsensusData: ConsensusData,
+  numberOfParticipants: number,
+  currentOutcome: Outcome,
+): ConsensusDataWithOutcome {
+  if (incomingConsensusData.furtherVotesRequired === 1) {
+    return {
+      consensusData: {furtherVotesRequired: numberOfParticipants - 1, proposedOutcome: []},
+      currentOutcome: incomingConsensusData.proposedOutcome,
+    };
+  } else if (incomingConsensusData.furtherVotesRequired > 1) {
+    return {
+      consensusData: {
+        furtherVotesRequired: incomingConsensusData.furtherVotesRequired - 1,
+        proposedOutcome: incomingConsensusData.proposedOutcome,
+      },
+      currentOutcome,
+    };
+  } else {
     throw new Error(
-      `Expected furtherVotesRequired to be 1, received ${consensusData.furtherVotesRequired} instead.`,
+      `Expected furtherVotesRequired to be greater than 0, received ${incomingConsensusData.furtherVotesRequired} instead`,
     );
   }
-  // TODO: if it's the final vote we return zeroed out consensusData
-  return {furtherVotesRequired: 0, proposedOutcome: []};
 }
 
 export const voting = {
-  veto,
   propose,
   vote,
-  finalVote,
+  veto,
 };
