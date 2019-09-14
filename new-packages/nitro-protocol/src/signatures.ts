@@ -1,5 +1,5 @@
 import {Signature, arrayify, splitSignature} from 'ethers/utils';
-import {hashState} from './contract/state';
+import {hashState, State} from './contract/state';
 import {ethers} from 'ethers';
 import {SignedState} from '.';
 import {getChannelId} from './contract/channel';
@@ -25,6 +25,16 @@ export function getStateSignerAddress(signedState: SignedState): string {
   return recoveredAddress;
 }
 
+export async function signState(state: State, privateKey: string): Promise<SignedState> {
+  const wallet = new ethers.Wallet(privateKey);
+  if (state.channel.participants.indexOf(wallet.address) < 0) {
+    throw new Error("The state must be signed with a participant's private key");
+  }
+  const hashedState = hashState(state);
+  const signature = splitSignature(await wallet.signMessage(arrayify(hashedState)));
+  return {state, signature};
+}
+
 export async function signChallengeMessage(
   signedStates: SignedState[],
   privateKey: string,
@@ -32,10 +42,14 @@ export async function signChallengeMessage(
   if (signedStates.length === 0) {
     throw new Error('At least one signed state must be provided');
   }
+  const wallet = new ethers.Wallet(privateKey);
+  if (signedStates[0].state.channel.participants.indexOf(wallet.address) < 0) {
+    throw new Error("The state must be signed with a participant's private key");
+  }
   const largestTurnNum = toHex(Math.max(...signedStates.map(s => s.state.turnNum)));
   const channelId = getChannelId(signedStates[0].state.channel);
   const challengeHash = hashChallengeMessage({largestTurnNum, channelId});
-  const wallet = new ethers.Wallet(privateKey);
+
   const signature = await wallet.signMessage(arrayify(challengeHash));
   return splitSignature(signature);
 }
