@@ -42,13 +42,15 @@ describe('consensus-data', () => {
     const description3 = 'veto works';
 
     it.each`
-      description     | fromArgs                                                                              | voteFunction | expectedResult
-      ${description0} | ${[proposedOutcome, numberOfParticipants]}                                            | ${propose}   | ${{proposedOutcome, furtherVotesRequired: numberOfParticipants - 1}}
-      ${description1} | ${[{proposedOutcome, furtherVotesRequired: 2}, numberOfParticipants, currentOutcome]} | ${vote}      | ${{consensusData: {proposedOutcome, furtherVotesRequired: 1}, currentOutcome}}
-      ${description2} | ${[{proposedOutcome, furtherVotesRequired: 1}, numberOfParticipants, currentOutcome]} | ${vote}      | ${{consensusData: {proposedOutcome: [], furtherVotesRequired: 2}, currentOutcome: proposedOutcome}}
-      ${description3} | ${[numberOfParticipants]}                                                             | ${veto}      | ${{proposedOutcome: [], furtherVotesRequired: 2}}
-    `('$description', ({fromArgs, voteFunction, expectedResult}) => {
-      expect(voteFunction(...fromArgs)).toEqual(expectedResult);
+      description     | fromArgs                                                                              | voteFunction | expectedConsensusData                                                | expectedCurrentOutcome
+      ${description0} | ${[proposedOutcome, currentOutcome, numberOfParticipants]}                            | ${propose}   | ${{proposedOutcome, furtherVotesRequired: numberOfParticipants - 1}} | ${currentOutcome}
+      ${description1} | ${[{proposedOutcome, furtherVotesRequired: 2}, numberOfParticipants, currentOutcome]} | ${vote}      | ${{proposedOutcome, furtherVotesRequired: 1}}                        | ${currentOutcome}
+      ${description2} | ${[{proposedOutcome, furtherVotesRequired: 1}, numberOfParticipants, currentOutcome]} | ${vote}      | ${{proposedOutcome: [], furtherVotesRequired: 2}}                    | ${proposedOutcome}
+      ${description3} | ${[currentOutcome, numberOfParticipants]}                                             | ${veto}      | ${{proposedOutcome: [], furtherVotesRequired: 2}}                    | ${currentOutcome}
+    `('$description', ({fromArgs, voteFunction, expectedConsensusData, expectedCurrentOutcome}) => {
+      const voteResults = voteFunction(...fromArgs);
+      expect(voteResults.consensusData).toEqual(expectedConsensusData);
+      expect(voteResults.currentOutcome).toEqual(expectedCurrentOutcome);
     });
   });
 

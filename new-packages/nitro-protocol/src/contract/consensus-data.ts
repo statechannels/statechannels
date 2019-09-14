@@ -21,14 +21,24 @@ export function decodeConsensusData(appData: string): ConsensusData {
   )[0];
   return {furtherVotesRequired, proposedOutcome: decodeOutcome(proposedOutcome)};
 }
-export function propose(proposedOutcome: Outcome, numberOfParticipants: number): ConsensusData {
+export function propose(
+  proposedOutcome: Outcome,
+  currentOutcome: Outcome,
+  numberOfParticipants: number,
+): ConsensusDataWithOutcome {
   return {
-    proposedOutcome,
-    furtherVotesRequired: numberOfParticipants - 1,
+    consensusData: {
+      proposedOutcome,
+      furtherVotesRequired: numberOfParticipants - 1,
+    },
+    currentOutcome,
   };
 }
-export function veto(numberOfParticipants: number): ConsensusData {
-  return propose([], numberOfParticipants);
+export function veto(
+  currentOutcome: Outcome,
+  numberOfParticipants: number,
+): ConsensusDataWithOutcome {
+  return propose([], currentOutcome, numberOfParticipants);
 }
 
 export interface ConsensusDataWithOutcome {
