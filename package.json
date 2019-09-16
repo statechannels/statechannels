@@ -9,24 +9,30 @@
   ],
   "engines": {
     "node": "^10.16.0"
-  },  
+  },
   "main": "src/index.js",
   "dependencies": {
     "bencode": "^2.0.1",
     "prettier-bytes": "^1.0.4",
-    "react": "16.8.6",
-    "react-dom": "16.8.6",
-    "react-scripts": "3.0.1",
-    "webtorrent": "0.107.4"
+    "react": "16.9.0",
+    "react-dom": "16.9.0",
+    "react-scripts": "3.1.1",
+    "webtorrent": "0.107.16"
   },
   "devDependencies": {
-    "typescript": "3.3.3"
+    "@babel/core": "^7.6.0",
+    "@babel/plugin-proposal-class-properties": "^7.5.5",
+    "@babel/preset-env": "^7.6.0",
+    "airtap": "^2.0.4",
+    "babel-jest": "^24.9.0",
+    "jest-junit": "^8.0.0",
+    "webtorrent-fixtures": "^1.7.3"
   },
   "scripts": {
     "start:alt": "PORT=3333 react-scripts start",
     "start": "react-scripts start",
     "build": "react-scripts build",
-    "test": "react-scripts test --env=jsdom",
+    "test": "jest",
     "eject": "react-scripts eject"
   },
   "browserslist": [

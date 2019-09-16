@@ -20,8 +20,8 @@ function setupWire (torrent, wire) {
   wire.setKeepAlive(true);
   wire.setTimeout(65000)
   wire.on('keep-alive', () => {
-    if (!torrent.done && wire.choked) {
-      console.log(">Don't let it die!")
+    console.log('Shall I Save this wire sir? :', !torrent.done && wire.amChoking)
+    if (!torrent.done && wire.amChoking) {
       wire._clearTimeout()
     }
   });
