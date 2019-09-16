@@ -24,6 +24,9 @@ export function createRespondTransaction(
   channelStorage: ChannelStorage,
   response: SignedState,
 ): TransactionRequest {
+  if (!channelStorage.challengeState) {
+    throw new Error('No active challenge in challenge state');
+  }
   return forceMoveTrans.createRespondTransaction(
     channelStorage.turnNumRecord,
     channelStorage.finalizesAt,
@@ -37,6 +40,9 @@ export function createRespondWithAlternativeTransaction(
   channelStorage: ChannelStorage,
   signedStates: SignedState[],
 ): TransactionRequest {
+  if (!channelStorage.challengeState) {
+    throw new Error('No active challenge in challenge state');
+  }
   const {states, signatures, whoSignedWhat} = createSignatureArguments(signedStates);
   return forceMoveTrans.createRespondWithAlternativeTransaction(
     channelStorage.challengeState,
