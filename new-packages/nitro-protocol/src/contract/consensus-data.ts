@@ -22,28 +22,25 @@ export function decodeConsensusData(appData: string): ConsensusData {
   return {furtherVotesRequired, proposedOutcome: decodeOutcome(proposedOutcome)};
 }
 
-export function veto(
-  previousConsensusData: ConsensusData,
-  numberOfParticipants: number,
-): ConsensusData {
+function veto(previousConsensusData: ConsensusData, numberOfParticipants: number): ConsensusData {
   return propose(previousConsensusData, numberOfParticipants);
 }
 
-export function propose(consensusData: ConsensusData, numberOfParticipants: number): ConsensusData {
+function propose(consensusData: ConsensusData, numberOfParticipants: number): ConsensusData {
   return {
     proposedOutcome: consensusData.proposedOutcome,
     furtherVotesRequired: numberOfParticipants - 1,
   };
 }
 
-export function vote(consensusData: ConsensusData): ConsensusData {
+function vote(consensusData: ConsensusData): ConsensusData {
   return {
     proposedOutcome: consensusData.proposedOutcome,
     furtherVotesRequired: consensusData.furtherVotesRequired - 1,
   };
 }
 
-export function finalVote(consensusData: ConsensusData): ConsensusData {
+function finalVote(consensusData: ConsensusData): ConsensusData {
   if (consensusData.furtherVotesRequired !== 0) {
     throw new Error(
       `Expected furtherVotesRequired to be 1, received ${consensusData.furtherVotesRequired} instead.`,
