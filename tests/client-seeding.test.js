@@ -1,4 +1,6 @@
+import MemoryChunkStore from 'memory-chunk-store';
 import fixtures from 'webtorrent-fixtures';
+import { PaidStreamingExtensionNotices } from '../src/constants';
 import WebTorrent, { ClientEvents } from './../src/web3torrent-lib';
 
 describe('Seeding and Leeching', () => {
@@ -24,7 +26,7 @@ describe('Seeding and Leeching', () => {
     });
   });
 
-  it('Seed and remove a Torrent', done => {
+  it('should seed and remove a Torrent', done => {
     expect(seeder.pseAccount).toBe(1);
     seeder.seed(
       new Blob([fixtures.leaves.content]),
@@ -41,12 +43,12 @@ describe('Seeding and Leeching', () => {
     );
   });
 
-  it('Seed and Leech', done => {
+  it('should perform the extended handshake between seeder and leecher', done => {
     seeder.seed(
       new Blob([fixtures.leaves.content]),
       { name: 'Leaves of Grass by Walt Whitman.epub', announce: [process.env.TRACKER_URL] },
       seededTorrent => {
-        leecher.add(seededTorrent.magnetURI, () => {
+        leecher.add(seededTorrent.magnetURI, { store: MemoryChunkStore }, () => {
           expect(leecher.torrents.length).toEqual(1);
           expect(seeder.torrents[0].wires.length).toEqual(1);
           expect(leecher.torrents[0].wires.length).toEqual(1);
@@ -54,6 +56,51 @@ describe('Seeding and Leeching', () => {
           expect(leecher.torrents[0].wires[0].paidStreamingExtension.pseAccount).toEqual(leecher.pseAccount);
           done();
         });
+      }
+    );
+  }, 10000);
+
+  it('should reach a ready-for-leeching, choked state', done => {
+    seeder.seed(
+      new Blob([fixtures.leaves.content]),
+      { name: 'Leaves of Grass by Walt Whitman.epub', announce: [process.env.TRACKER_URL], store: MemoryChunkStore },
+      seededTorrent => {
+        seeder.once(ClientEvents.PEER_STATUS_CHANGED, ({ allowedPeers }) => {
+          expect(allowedPeers[`${leecher.pseAccount}`].allowed).toEqual(false);
+
+          done();
+        });
+
+        leecher.add(seededTorrent.magnetURI, { store: MemoryChunkStore });
+      }
+    );
+  }, 10000);
+
+  it('should be able to unchoke and finish a download', done => {
+    seeder.seed(
+      new Blob([fixtures.leaves.content]),
+      { name: 'Leaves of Grass by Walt Whitman.epub', announce: [process.env.TRACKER_URL], store: MemoryChunkStore },
+      seededTorrent => {
+        seeder.once(ClientEvents.PEER_STATUS_CHANGED, ({ peerAccount }) => {
+          seeder.togglePeer(seededTorrent.infoHash, peerAccount);
+
+          seeder.once(ClientEvents.PEER_STATUS_CHANGED, ({ allowedPeers }) => {
+            expect(allowedPeers[`${leecher.pseAccount}`].allowed).toEqual(true);
+          });
+
+          seeder.once(ClientEvents.TORRENT_NOTICE, (_, __, command, ___) => {
+            expect(command).toEqual(PaidStreamingExtensionNotices.ACK);
+
+            leecher.once(ClientEvents.TORRENT_DONE, leechedTorrent => {
+              expect(seededTorrent.files[0].done).toEqual(leechedTorrent.files[0].done);
+              expect(seededTorrent.files[0].length).toEqual(leechedTorrent.files[0].length);
+              expect(seededTorrent.files[0].name).toEqual(leechedTorrent.files[0].name);
+              done();
+            });
+          });
+        });
+
+        leecher.add(seededTorrent.magnetURI, { store: MemoryChunkStore });
       }
     );
   }, 10000);
