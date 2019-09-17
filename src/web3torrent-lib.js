@@ -14,7 +14,7 @@ export { WireEvents, TorrentEvents, ClientEvents };
  * @this {WebTorrentPaidStreamingClient}
  */
 function setupWire(torrent, wire) {
-  console.log('>torrent setupWire', torrent);
+  console.log('>torrent setupWire');
 
   wire.use(paidStreamingExtension({ pseAccount: this.pseAccount }));
   wire.setKeepAlive(true);
@@ -144,12 +144,14 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
   seed() {
     const torrent = super.seed.apply(this, arguments);
     setupTorrent.call(this, torrent);
+    console.log('torrent has been setup from the seeder');
     return torrent;
   }
 
   add() {
     const torrent = super.add.apply(this, arguments);
     setupTorrent.call(this, torrent);
+    console.log('torrent has been setup from the leecher');
     return torrent;
   }
 
@@ -183,10 +185,5 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
       this.unblockPeer(affectedTorrent, wire, peerAccount);
     }
     console.log('> togglePeer', peerAccount, '->', this.allowedPeers);
-    this.emit(ClientEvents.PEER_STATUS_CHANGED, {
-      allowedPeers: this.allowedPeers[affectedTorrent],
-      affectedTorrent,
-      peerAccount
-    });
   }
 }
