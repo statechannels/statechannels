@@ -2,7 +2,10 @@
   "name": "nitro-protocol",
   "version": "0.0.1",
   "description": "A protocol for state channel networks",
-  "main": "truffle-config.js",
+  "main": "lib/src/index.js",
+  "files": [
+    "lib/*"
+  ],
   "directories": {
     "test": "test"
   },
