@@ -5,9 +5,9 @@ import {
   propose,
   vote,
   veto,
-} from '../../src/contract/consensus-data';
+} from '../../../src/contract/consensus-data';
 import {AddressZero} from 'ethers/constants';
-import {Outcome} from '../../src/contract/outcome';
+import {Outcome} from '../../../src/contract/outcome';
 import {ethers} from 'ethers';
 
 describe('consensus-data', () => {

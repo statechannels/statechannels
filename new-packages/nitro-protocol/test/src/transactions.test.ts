@@ -6,12 +6,12 @@ import {
   createConcludeTransaction,
   createRespondTransaction,
   createRespondWithAlternativeTransaction,
-} from '../src/transactions';
-import {ChannelStorage} from '../src';
+} from '../../src/transactions';
+import {ChannelStorage} from '../../src';
 import {AddressZero} from 'ethers/constants';
-import {signChallengeMessage, signState} from '../src/signatures';
-import {Channel} from '../src/contract/channel';
-import {SignedState} from '../src';
+import {signChallengeMessage, signState} from '../../src/signatures';
+import {Channel} from '../../src/contract/channel';
+import {SignedState} from '../../src';
 import {Signature} from 'ethers/utils';
 
 const wallet = ethers.Wallet.createRandom();
