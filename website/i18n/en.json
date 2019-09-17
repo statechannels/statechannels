@@ -5,79 +5,70 @@
     "previous": "Previous",
     "tagline": "A smart-contract protocol for state channel networks",
     "docs": {
+      "adjudicator/channel-storage": {
+        "title": "ChannelStorage"
+      },
+      "adjudicator/conclude": {
+        "title": "conclude"
+      },
+      "adjudicator/consensus-game": {
+        "title": "The Consensus Game"
+      },
+      "adjudicator/force-move-intro": {
+        "title": "Introduction to ForceMove"
+      },
+      "adjudicator/force-move": {
+        "title": "forceMove"
+      },
+      "adjudicator/push-outcome": {
+        "title": "pushOutcome"
+      },
+      "adjudicator/refute": {
+        "title": "refute"
+      },
+      "adjudicator/respond-with-alternative": {
+        "title": "respondWithAlternative"
+      },
+      "adjudicator/respond": {
+        "title": "respond"
+      },
+      "adjudicator/state-format": {
+        "title": "State Format"
+      },
+      "adjudicator/transition-rules": {
+        "title": "Transition Rules"
+      },
+      "adjudicator/valid-signatures": {
+        "title": "validSignatures"
+      },
+      "asset-holder/claim": {
+        "title": "claimAll"
+      },
+      "asset-holder/deposit": {
+        "title": "deposit",
+        "sidebar_label": "deposit"
+      },
+      "asset-holder/outcomes": {
+        "title": "Outcomes"
+      },
+      "asset-holder/set-outcome": {
+        "title": "setOutcome"
+      },
+      "asset-holder/transfer": {
+        "title": "transferAll"
+      },
       "auxiliary-protocols": {
         "title": "Auxiliary Protocols",
         "sidebar_label": "Auxiliary Protocols"
       },
-      "challenge-and-response": {
-        "title": "Challenge & Response",
-        "sidebar_label": "Challenge & Response"
+      "nitro-intro": {
+        "title": "Introduction to Nitro"
       },
-      "force-move/channel-storage": {
-        "title": "Channel Storage"
-      },
-      "force-move/conclude": {
-        "title": "Conclude"
-      },
-      "force-move/consensus-game": {
-        "title": "The Consensus Game"
-      },
-      "force-move/force-move": {
-        "title": "ForceMove"
-      },
-      "force-move/intro": {
-        "title": "Introduction"
-      },
-      "force-move/refute": {
-        "title": "Refute"
-      },
-      "force-move/respond-with-alternative": {
-        "title": "Respond With Alternative"
-      },
-      "force-move/respond": {
-        "title": "Respond"
-      },
-      "force-move/state-format": {
-        "title": "State Format"
-      },
-      "force-move/transition-rules": {
-        "title": "Transition Rules"
-      },
-      "force-move/valid-signatures": {
-        "title": "Valid Signatures"
-      },
-      "introduction": {
-        "title": "Introduction",
-        "sidebar_label": "Introduction"
-      },
-      "nitro/channel-storage": {
-        "title": "Channel Storage"
-      },
-      "nitro/claim": {
-        "title": "Claim"
-      },
-      "nitro/nitro-implementation-notes": {
-        "title": "Implementation Notes"
-      },
-      "nitro/outcomes": {
-        "title": "Outcomes"
-      },
-      "nitro/overview": {
-        "title": "Overview"
-      },
-      "nitro/payment-game": {
+      "payment-game": {
         "title": "Single Asset Payment Game"
       },
-      "nitro/transfer": {
-        "title": "Transfer"
-      },
-      "redistribution-of-assets": {
-        "title": "Redistribution of Assets",
-        "sidebar_label": "Redistribution of Assets"
-      },
-      "value-calculations": {
-        "title": "Value Calculations",
-        "sidebar_label": "Value Calculations"
+      "quick-start": {
+        "title": "Quick Start"
       }
     },
     "links": {
@@ -85,9 +76,11 @@
       "Help": "Help"
     },
     "categories": {
-      "ForceMove": "ForceMove",
       "Nitro Protocol": "Nitro Protocol",
-      "Nitro Protocol (old)": "Nitro Protocol (old)"
+      "Adjudicator": "Adjudicator",
+      "Asset Holder(s)": "Asset Holder(s)",
+      "Advanced": "Advanced",
+      "Examples": "Examples"
     }
   },
   "pages-strings": {
