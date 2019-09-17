@@ -1,9 +1,9 @@
 import {ethers} from 'ethers';
 import {expectRevert} from 'magmo-devtools';
 // @ts-ignore
-import ForceMoveArtifact from '../../build/contracts/TESTForceMove.json';
+import ForceMoveArtifact from '../../../build/contracts/TESTForceMove.json';
 // @ts-ignore
-import countingAppArtifact from '../../build/contracts/CountingApp.json';
+import countingAppArtifact from '../../../build/contracts/CountingApp.json';
 import {keccak256, defaultAbiCoder} from 'ethers/utils';
 import {
   setupContracts,
@@ -13,12 +13,12 @@ import {
   finalizedOutcomeHash,
   signStates,
   sendTransaction,
-} from '../test-helpers';
+} from '../../test-helpers';
 import {HashZero, AddressZero} from 'ethers/constants';
-import {Outcome, hashOutcome} from '../../src/contract/outcome';
-import {Channel, getChannelId} from '../../src/contract/channel';
-import {State} from '../../src/contract/state';
-import {createConcludeFromOpenTransaction} from '../../src/contract/transaction-creators/force-move';
+import {Outcome, hashOutcome} from '../../../src/contract/outcome';
+import {Channel, getChannelId} from '../../../src/contract/channel';
+import {State} from '../../../src/contract/state';
+import {createConcludeFromOpenTransaction} from '../../../src/contract/transaction-creators/force-move';
 
 const provider = new ethers.providers.JsonRpcProvider(
   `http://localhost:${process.env.DEV_GANACHE_PORT}`,

@@ -1,7 +1,7 @@
 import {ethers} from 'ethers';
 import {expectRevert} from 'magmo-devtools';
 // @ts-ignore
-import AssetHolderArtifact from '../../build/contracts/TESTAssetHolder.json';
+import AssetHolderArtifact from '../../../build/contracts/TESTAssetHolder.json';
 import {
   setupContracts,
   newAssetTransferredEvent,
@@ -10,8 +10,8 @@ import {
   guaranteeToParams,
   sendTransaction,
   replaceAddresses,
-} from '../test-helpers';
-import {createClaimAllTransaction} from '../../src/contract/transaction-creators/asset-holder';
+} from '../../test-helpers';
+import {createClaimAllTransaction} from '../../../src/contract/transaction-creators/asset-holder';
 import {id, bigNumberify} from 'ethers/utils';
 
 const AssetHolderInterface = new ethers.utils.Interface(AssetHolderArtifact.abi);
@@ -152,7 +152,7 @@ describe('claimAll', () => {
 
         // catch events
         const resolvedAassetTransferredEvents = await Promise.all(assetTransferredEvents);
-        resolvedAassetTransferredEvents.forEach(async (x, index, array) => {
+        resolvedAassetTransferredEvents.forEach(async (x, index) => {
           if (payouts[index] && payouts[index].gt(0)) {
             expect(x).toEqual(payouts[index]);
           }
