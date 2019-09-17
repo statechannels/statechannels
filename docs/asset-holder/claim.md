@@ -35,8 +35,8 @@ function claimAll(
             outcomeHashes[guarantorChannelId] ==
                 keccak256(
                     abi.encode(
-                        Outcome.LabelledAllocationOrGuarantee(
-                            uint8(Outcome.OutcomeType.Guarantee),
+                        Outcome.AssetOutcome(
+                            uint8(Outcome.AssetOutcomeType.Guarantee),
                             guaranteeBytes
                         )
                     )
@@ -50,8 +50,8 @@ function claimAll(
             outcomeHashes[guarantee.targetChannelId] ==
                 keccak256(
                     abi.encode(
-                        Outcome.LabelledAllocationOrGuarantee(
-                            uint8(Outcome.OutcomeType.Allocation),
+                        Outcome.AssetOutcome(
+                            uint8(Outcome.AssetOutcomeType.Allocation),
                             allocationBytes
                         )
                     )
@@ -153,8 +153,8 @@ function claimAll(
             // store hash
             outcomeHashes[guarantee.targetChannelId] = keccak256(
                 abi.encode(
-                    Outcome.LabelledAllocationOrGuarantee(
-                        uint8(Outcome.OutcomeType.Allocation),
+                    Outcome.AssetOutcome(
+                        uint8(Outcome.AssetOutcomeType.Allocation),
                         abi.encode(newAllocation)
                     )
                 )

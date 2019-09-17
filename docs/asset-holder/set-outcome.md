@@ -1,9 +1,9 @@
 ---
 id: set-outcome
-title: setOutcome
+title: setAssetOutcomeHash
 ---
 
-The setOutcome method allows an outcome (more strictly, an outcomeHash) to be registered against a channel. It may only be called by the Nitro Adjudicator.
+The `setAssetOutcomeHash` method allows an outcome (more strictly, an outcomeHash) to be registered against a channel. It may only be called by the Nitro Adjudicator.
 
 Signature:
 

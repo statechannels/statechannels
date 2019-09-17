@@ -57,10 +57,6 @@ library Outcome {
 }
 ```
 
-:::warning
-TODO migrate codebase to Outcome2.sol
-:::
-
 ## Example of an outcome data structure
 
 | >                                                                                               | 0xETHAssetHolder                                 | 0                                                  | 0xAlice | 5   | 0xBob | 2   | 0xDAIAssetHolder | ... |

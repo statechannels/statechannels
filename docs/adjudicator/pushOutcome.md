@@ -3,11 +3,7 @@ id: push-outcome
 title: pushOutcome
 ---
 
-The Nitro Adjudicator contract extends (inherits from) ForceMove, and had an additional method `pushOutcome`. The `pushOutcome` method allows one or more asset outcomes to be registered against a channel in a number of AssetHolder contracts (specified by the `outcome` stored in this contract).
-
-:::important
-The names of these objects needs a review.
-:::
+The Nitro Adjudicator contract extends (inherits from) ForceMove, and had an additional method `pushOutcome`. The `pushOutcome` method allows one or more `assetOutcomes` to be registered against a channel in a number of AssetHolder contracts (specified by the `outcome` stored in this contract).
 
 Signature:
 

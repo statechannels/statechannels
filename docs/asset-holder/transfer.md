@@ -20,8 +20,8 @@ This algorithm works by counting the number of `AllocationItems` that are to be 
             outcomeHashes[channelId] ==
                 keccak256(
                     abi.encode(
-                        Outcome.LabelledAllocationOrGuarantee(
-                            uint8(Outcome.OutcomeType.Allocation),
+                        Outcome.AssetOutcome(
+                            uint8(Outcome.AssetOutcomeType.Allocation),
                             allocationBytes
                         )
                     )
@@ -81,8 +81,8 @@ This algorithm works by counting the number of `AllocationItems` that are to be 
             // store hash
             outcomeHashes[channelId] = keccak256(
                 abi.encode(
-                    Outcome.LabelledAllocationOrGuarantee(
-                        uint8(Outcome.OutcomeType.Allocation),
+                    Outcome.AssetOutcome(
+                        uint8(Outcome.AssetOutcomeType.Allocation),
                         abi.encode(newAllocation)
                     )
                 )
