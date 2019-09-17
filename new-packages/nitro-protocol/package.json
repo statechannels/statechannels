@@ -3,6 +3,9 @@
   "version": "0.0.1",
   "description": "A protocol for state channel networks",
   "main": "lib/src/index.js",
+  "files": [
+    "lib/*"
+  ],
   "directories": {
     "test": "test"
   },
