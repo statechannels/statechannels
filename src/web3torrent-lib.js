@@ -1,28 +1,28 @@
-import WebTorrent from "webtorrent";
+import WebTorrent from 'webtorrent';
 import {
-  WireEvents,
-  TorrentEvents,
   ClientEvents,
   PaidStreamingExtensionEvents,
-  PaidStreamingExtensionNotices
-} from "./constants";
-import paidStreamingExtension from "./wire-extension";
+  PaidStreamingExtensionNotices,
+  TorrentEvents,
+  WireEvents
+} from './constants';
+import paidStreamingExtension from './wire-extension';
 
-export { WireEvents, TorrentEvents, ClientEvents }
+export { WireEvents, TorrentEvents, ClientEvents };
 
 /**
  * @this {WebTorrentPaidStreamingClient}
  */
-function setupWire (torrent, wire) {
-  console.log('>torrent setupWire', torrent)
+function setupWire(torrent, wire) {
+  console.log('>torrent setupWire', torrent);
 
   wire.use(paidStreamingExtension({ pseAccount: this.pseAccount }));
   wire.setKeepAlive(true);
-  wire.setTimeout(65000)
+  wire.setTimeout(65000);
   wire.on('keep-alive', () => {
-    console.log('Shall I Save this wire sir? :', !torrent.done && wire.amChoking)
+    console.log('Shall I Save this wire sir? :', !torrent.done && wire.amChoking);
     if (!torrent.done && wire.amChoking) {
-      wire._clearTimeout()
+      wire._clearTimeout();
     }
   });
 
@@ -35,7 +35,11 @@ function setupWire (torrent, wire) {
     } else if (!knownPeerAccount) {
       this.allowedPeers[torrent.infoHash][peerAccount] = { id: peerAccount, wire };
       this.blockPeer(torrent.infoHash, wire, peerAccount);
-      this.emit(ClientEvents.PEER_STATUS_CHANGED, { allowedPeers: this.allowedPeers[torrent.infoHash], affectedId: torrent.infoHash, peerAccount });
+      this.emit(ClientEvents.PEER_STATUS_CHANGED, {
+        allowedPeers: this.allowedPeers[torrent.infoHash],
+        affectedId: torrent.infoHash,
+        peerAccount
+      });
     } else {
       this.allowedPeers[torrent.infoHash][peerAccount] = { id: peerAccount, wire, allowed: true };
     }
@@ -47,14 +51,18 @@ function setupWire (torrent, wire) {
     wire.emit(PaidStreamingExtensionEvents.REQUEST, peerAccount);
   });
 
-  wire.paidStreamingExtension.on(
-    PaidStreamingExtensionEvents.NOTICE,
-    notice => torrent.emit(PaidStreamingExtensionEvents.NOTICE, wire, notice)
+  wire.paidStreamingExtension.on(PaidStreamingExtensionEvents.NOTICE, notice =>
+    torrent.emit(PaidStreamingExtensionEvents.NOTICE, wire, notice)
   );
 }
 
-function jumpStart (torrent, wire, requestsToClear) {
-  console.log(`>>> JumpStarting! - Torrent: ${torrent.ready ? "READY" : "NOT READY"} - With ${wire.requests.length} wire requests`, torrent);
+function jumpStart(torrent, wire, requestsToClear) {
+  console.log(
+    `>>> JumpStarting! - Torrent: ${torrent.ready ? 'READY' : 'NOT READY'} - With ${
+      wire.requests.length
+    } wire requests`,
+    torrent
+  );
   wire.unchoke();
   torrent._startDiscovery();
   torrent.resume();
@@ -67,8 +75,15 @@ function jumpStart (torrent, wire, requestsToClear) {
         canceledReservations.push(piece);
       }
       return piece;
-    })
-    console.log('>>> Requests cleared:', canceledReservations, ' current state:', wire.requests, torrent._selections, torrent.pieces);
+    });
+    console.log(
+      '>>> Requests cleared:',
+      canceledReservations,
+      ' current state:',
+      wire.requests,
+      torrent._selections,
+      torrent.pieces
+    );
     torrent._updateWire(wire);
   } else {
     console.log('>>> Torrent is working fine or it finished', torrent, wire, requestsToClear);
@@ -78,15 +93,19 @@ function jumpStart (torrent, wire, requestsToClear) {
 /**
  * @this {WebTorrentPaidStreamingClient}
  */
-function setupTorrent (torrent) {
+function setupTorrent(torrent) {
   if (torrent.usingPaidStreaming) {
     return torrent;
   }
   torrent.on('infoHash', () => {
-    this.allowedPeers = { ...this.allowedPeers, [torrent.infoHash]: {} }
-  })
-  torrent.on(TorrentEvents.WIRE, wire => { setupWire.call(this, torrent, wire) });
-  torrent.on('error', error => { console.warn('>torrent error', error) });
+    this.allowedPeers = { ...this.allowedPeers, [torrent.infoHash]: {} };
+  });
+  torrent.on(TorrentEvents.WIRE, wire => {
+    setupWire.call(this, torrent, wire);
+  });
+  torrent.on('error', error => {
+    console.warn('>torrent error', error);
+  });
 
   torrent.on(TorrentEvents.NOTICE, (wire, { command, data }) => {
     switch (command) {
@@ -96,7 +115,7 @@ function setupTorrent (torrent) {
         break;
       case PaidStreamingExtensionNotices.START:
         wire.paidStreamingExtension.ack();
-        jumpStart(torrent, wire)
+        jumpStart(torrent, wire);
         break;
       default:
         console.log(`< ${command} received from ${wire.peerExtendedHandshake.pseAccount}`, data);
@@ -105,12 +124,10 @@ function setupTorrent (torrent) {
     this.emit(ClientEvents.TORRENT_NOTICE, torrent, wire, command, data);
   });
 
-
-
   torrent.on(TorrentEvents.DONE, () => this.emit(ClientEvents.TORRENT_DONE, torrent));
 
   torrent.on(TorrentEvents.ERROR, err => {
-    console.log(">torrent error:", err);
+    console.log('>torrent error:', err);
     this.emit(ClientEvents.TORRENT_ERROR, torrent, err);
   });
   torrent.usingPaidStreaming = true;
@@ -121,36 +138,44 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     super(opts);
     this.allowedPeers = {};
     this.pseAccount = (opts && opts.pseAccount) || Math.floor(Math.random() * 99999999999999999);
-    console.log("> TAB PSE ACCOUNT ID: ", this.pseAccount);
+    console.log('> TAB PSE ACCOUNT ID: ', this.pseAccount);
   }
 
-  seed () {
+  seed() {
     const torrent = super.seed.apply(this, arguments);
     setupTorrent.call(this, torrent);
     return torrent;
   }
 
-  add () {
+  add() {
     const torrent = super.add.apply(this, arguments);
     setupTorrent.call(this, torrent);
     return torrent;
   }
 
-  blockPeer (affectedTorrent, wire, peerAccount) {
+  blockPeer(affectedTorrent, wire, peerAccount) {
     this.allowedPeers[affectedTorrent][peerAccount].allowed = false;
     wire.paidStreamingExtension.stop();
-    this.emit(ClientEvents.PEER_STATUS_CHANGED, { allowedPeers: this.allowedPeers[affectedTorrent], affectedTorrent, peerAccount });
-    console.log("> blockPeer", peerAccount, this.allowedPeers);
+    this.emit(ClientEvents.PEER_STATUS_CHANGED, {
+      allowedPeers: this.allowedPeers[affectedTorrent],
+      affectedTorrent,
+      peerAccount
+    });
+    console.log('> blockPeer', peerAccount, this.allowedPeers);
   }
 
-  unblockPeer (affectedTorrent, wire, peerAccount) {
+  unblockPeer(affectedTorrent, wire, peerAccount) {
     this.allowedPeers[affectedTorrent][peerAccount].allowed = true;
     wire.paidStreamingExtension.start();
-    this.emit(ClientEvents.PEER_STATUS_CHANGED, { allowedPeers: this.allowedPeers[affectedTorrent], affectedTorrent, peerAccount });
-    console.log("> unblockPeer", peerAccount, this.allowedPeers);
+    this.emit(ClientEvents.PEER_STATUS_CHANGED, {
+      allowedPeers: this.allowedPeers[affectedTorrent],
+      affectedTorrent,
+      peerAccount
+    });
+    console.log('> unblockPeer', peerAccount, this.allowedPeers);
   }
 
-  togglePeer (affectedTorrent, peerAccount) {
+  togglePeer(affectedTorrent, peerAccount) {
     const { wire, allowed } = this.allowedPeers[affectedTorrent][peerAccount];
     if (allowed) {
       this.blockPeer(affectedTorrent, wire, peerAccount);
@@ -158,6 +183,10 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
       this.unblockPeer(affectedTorrent, wire, peerAccount);
     }
     console.log('> togglePeer', peerAccount, '->', this.allowedPeers);
-    this.emit(ClientEvents.PEER_STATUS_CHANGED, { allowedPeers: this.allowedPeers[affectedTorrent], affectedTorrent, peerAccount });
+    this.emit(ClientEvents.PEER_STATUS_CHANGED, {
+      allowedPeers: this.allowedPeers[affectedTorrent],
+      affectedTorrent,
+      peerAccount
+    });
   }
 }
