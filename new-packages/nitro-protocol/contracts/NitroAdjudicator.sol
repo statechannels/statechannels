@@ -6,7 +6,7 @@ import './Outcome.sol';
 
 contract AssetHolder {
     // abstraction of the parts of AssetHolder that we need
-    function setOutcome(bytes32 channel, bytes32 outcomeHash) external returns (bool success);
+    function setAssetOutcomeHash(bytes32 channel, bytes32 outcomeHash) external returns (bool success);
 }
 
 contract NitroAdjudicator is ForceMove {
@@ -16,12 +16,12 @@ contract NitroAdjudicator is ForceMove {
         uint256 finalizesAt,
         bytes32 stateHash,
         address challengerAddress,
-        bytes memory outcome
+        bytes memory outcomeBytes
     ) public {
         // requirements
         require(finalizesAt < now, 'Outcome is not final');
 
-        bytes32 outcomeHash = keccak256(abi.encode(outcome));
+        bytes32 outcomeHash = keccak256(outcomeBytes);
 
         require(
             keccak256(
@@ -39,13 +39,13 @@ contract NitroAdjudicator is ForceMove {
             'Submitted data does not match storage'
         );
 
-        Outcome.AssetOutcome[] memory assetOutcomes = abi.decode(outcome, (Outcome.AssetOutcome[]));
+        Outcome.OutcomeItem[] memory outcome = abi.decode(outcomeBytes, (Outcome.OutcomeItem[]));
 
-        for (uint256 i = 0; i < assetOutcomes.length; i++) {
+        for (uint256 i = 0; i < outcome.length; i++) {
             require(
-                AssetHolder(assetOutcomes[i].assetHolderAddress).setOutcome(
+                AssetHolder(outcome[i].assetHolderAddress).setAssetOutcomeHash(
                     channelId,
-                    keccak256(assetOutcomes[i].outcomeContent)
+                    keccak256(outcome[i].assetOutcomeBytes)
                 )
             );
         }

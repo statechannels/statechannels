@@ -9,11 +9,11 @@ contract TESTAssetHolder is AssetHolder {
         holdings[channelId] = amount;
     }
 
-    function setOutcomePermissionless(bytes32 channelId, bytes32 outcomeHash)
+    function setAssetOutcomeHashPermissionless(bytes32 channelId, bytes32 outcomeHash)
         external
         returns (bool success)
     {
-        _setOutcome(channelId, outcomeHash);
+        _setAssetOutcomeHash(channelId, outcomeHash);
         return true;
     }
 
