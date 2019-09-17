@@ -41,6 +41,13 @@ contract ForceMove {
         bytes32 outcomeHash;
     }
 
+    struct ChannelStorageLite {
+        uint256 finalizesAt;
+        bytes32 stateHash;
+        address challengerAddress;
+        bytes32 outcomeHash;
+    }
+
     mapping(bytes32 => bytes32) public channelStorageHashes;
 
     // Public methods:
@@ -334,13 +341,6 @@ contract ForceMove {
 
         // effects
         _clearChallenge(channelId, turnNumRecord);
-    }
-
-    struct ChannelStorageLite {
-        uint256 finalizesAt;
-        bytes32 stateHash;
-        address challengerAddress;
-        bytes32 outcomeHash;
     }
 
     function checkpoint(
