@@ -69,7 +69,7 @@ describe('transactions', async () => {
 
     expect(transactionRequest.data).toBeDefined();
   });
-  // TODO: Should we mock and make sure
+
   it('creates a conclude from open transaction', async () => {
     const transactionRequest: TransactionRequest = createConcludeTransaction(channelStorage, [
       signedState,
