@@ -1,8 +1,8 @@
 import {ethers} from 'ethers';
-import {hashState, State} from '../src/contract/state';
+import {hashState, State} from '../../src/contract/state';
 import {AddressZero} from 'ethers/constants';
 import {arrayify, splitSignature} from 'ethers/utils';
-import {getStateSignerAddress, signChallengeMessage, signState} from '../src/signatures';
+import {getStateSignerAddress, signChallengeMessage, signState} from '../../src/signatures';
 
 describe('signatures', () => {
   describe('signState', () => {

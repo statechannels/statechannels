@@ -7,7 +7,7 @@ import {
   Allocation,
   encodeOutcome,
   decodeOutcome,
-} from '../../src/contract/outcome';
+} from '../../../src/contract/outcome';
 import {ethers} from 'ethers';
 
 const destination = ethers.utils.id('d');
