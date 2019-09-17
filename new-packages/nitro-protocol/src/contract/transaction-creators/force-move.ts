@@ -14,7 +14,7 @@ const GAS_LIMIT = 3000000;
 
 const ForceMoveContractInterface = new ethers.utils.Interface(ForceMoveArtifact.abi);
 
-export function createRespondWithAlternativeTransaction(
+export function createCheckpointTransaction(
   challengeState: State,
   finalizesAt: string,
   states: State[],
@@ -36,7 +36,7 @@ export function createRespondWithAlternativeTransaction(
     state: challengeState,
   });
 
-  const data = ForceMoveContractInterface.functions.respondWithAlternative.encode([
+  const data = ForceMoveContractInterface.functions.checkpoint.encode([
     fixedPart,
     largestTurnNum,
     variableParts,

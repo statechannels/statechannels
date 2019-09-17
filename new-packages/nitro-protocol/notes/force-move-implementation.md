@@ -35,7 +35,7 @@ For example, as ForceMove only works if the channel is open, which implies that 
 - Response
   - Can deduce `turnNumRecord` (as the response turnNum must be exactly one more)
   - Needs to read complete `state` and `finalizesAt`
-- RespondFromAlternative
+- checkpoint
   - Can deduce `turnNumRecord`
   - Needs to read `finalizesAt`
 - Refute
@@ -65,7 +65,7 @@ From this we get the following properties that we want for the `channelStorageHa
   - Needs n distinct signatures
 - Respond
   - Needs one full state
-- RespondFromAlternative
+- checkpoint
   - Needs to be passed a sequence of n full states
 - Refute
   - Needs a proof of signature of higher state
