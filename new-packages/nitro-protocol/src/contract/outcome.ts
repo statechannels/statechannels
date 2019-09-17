@@ -1,5 +1,5 @@
 import {defaultAbiCoder, keccak256} from 'ethers/utils';
-import {Bytes32, Address, Uint256} from './types';
+import {Bytes32, Address, Uint256, Bytes} from './types';
 
 export enum OutcomeType {
   AllocationOutcomeType = 0,
@@ -18,6 +18,16 @@ export function encodeGuarantee(guarantee: Guarantee): Bytes32 {
     [[guarantee.targetChannelId, guarantee.destinations]],
   );
 }
+
+export function decodeGuarantee(encodedGuarantee: Bytes): Guarantee {
+  const {targetChannelId, destinations} = defaultAbiCoder.decode(
+    ['tuple(bytes32 targetChannelId, bytes32[] destinations)'],
+    encodedGuarantee,
+  )[0];
+
+  return {targetChannelId, destinations};
+}
+
 export function isGuarantee(
   allocationOrGuarantee: Allocation | Guarantee,
 ): allocationOrGuarantee is Guarantee {
@@ -34,6 +44,18 @@ export interface AllocationItem {
 export function encodeAllocation(allocation: Allocation): Bytes32 {
   return defaultAbiCoder.encode(['tuple(bytes32 destination, uint256 amount)[]'], [allocation]);
 }
+
+export function decodeAllocation(encodedAllocation: Bytes): Allocation {
+  const allocationItems = defaultAbiCoder.decode(
+    ['tuple(bytes32 destination, uint256 amount)[]'],
+    encodedAllocation,
+  )[0];
+
+  return allocationItems.map(a => {
+    return {destination: a.destination, amount: a.amount.toHexString()};
+  });
+}
+
 export function isAllocation(
   allocationOrGuarantee: Allocation | Guarantee,
 ): allocationOrGuarantee is Allocation {
@@ -59,12 +81,34 @@ export function isAllocationOutcome(assetOutcome: AssetOutcome): assetOutcome is
 }
 
 // Labelled outcome functions
-export function encodeLabelledOutcome(outcomeType: OutcomeType, encodedData: Bytes32): Bytes32 {
+export function encodeLabelledOutcome(
+  outcomeType: OutcomeType,
+  encodedAllocationOrGuarantee: Bytes32,
+): Bytes32 {
   return defaultAbiCoder.encode(
     ['tuple(uint8 outcomeType, bytes allocationOrGuarantee)'],
-    [{outcomeType, allocationOrGuarantee: encodedData}],
+    [{outcomeType, allocationOrGuarantee: encodedAllocationOrGuarantee}],
   );
 }
+
+export function decodeAssetOutcome(
+  encodedLabeledOutcome: Bytes,
+  assetHolderAddress: string,
+): AssetOutcome {
+  const {outcomeType, allocationOrGuarantee} = defaultAbiCoder.decode(
+    ['tuple(uint8 outcomeType, bytes allocationOrGuarantee)'],
+    encodedLabeledOutcome,
+  )[0];
+  switch (outcomeType) {
+    case OutcomeType.AllocationOutcomeType:
+      return {assetHolderAddress, allocation: decodeAllocation(allocationOrGuarantee)};
+    case OutcomeType.GuaranteeOutcomeType:
+      return {assetHolderAddress, guarantee: decodeGuarantee(allocationOrGuarantee)};
+    default:
+      throw new Error(`Received invalid outcome type ${outcomeType}`);
+  }
+}
+
 // Outcome content functions
 export function hashOutcomeContent(allocationOrGuarantee: Allocation | Guarantee): Bytes32 {
   return keccak256(encodeOutcomeContent(allocationOrGuarantee));
@@ -89,6 +133,14 @@ export type Outcome = AssetOutcome[];
 export function hashOutcome(outcome: Outcome): Bytes32 {
   const encodedOutcome = encodeOutcome(outcome);
   return keccak256(defaultAbiCoder.encode(['bytes'], [encodedOutcome]));
+}
+
+export function decodeOutcome(encodedOutcome: Bytes): Outcome {
+  const assetOutcomes = defaultAbiCoder.decode(
+    ['tuple(address assetHolderAddress, bytes outcomeContent)[]'],
+    encodedOutcome,
+  )[0];
+  return assetOutcomes.map(a => decodeAssetOutcome(a.outcomeContent, a.assetHolderAddress));
 }
 
 export function encodeOutcome(outcome: Outcome): Bytes32 {
