@@ -21,7 +21,7 @@ contract NitroAdjudicator is ForceMove {
         // requirements
         require(finalizesAt < now, 'Outcome is not final');
 
-        bytes32 outcomeHash = keccak256(outcomeBytes);
+        bytes32 outcomeHash = keccak256(abi.encode(outcomeBytes));
 
         require(
             keccak256(
