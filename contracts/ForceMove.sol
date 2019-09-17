@@ -343,7 +343,7 @@ contract ForceMove {
         bytes32 outcomeHash;
     }
 
-    function respondWithAlternative(
+    function checkpoint(
         FixedPart memory fixedPart,
         uint256 largestTurnNum,
         ForceMoveApp.VariablePart[] memory variableParts,

@@ -16,7 +16,7 @@ import {Outcome} from '../../../src/contract/outcome';
 import {Channel, getChannelId} from '../../../src/contract/channel';
 import {State} from '../../../src/contract/state';
 import {hashChannelStorage} from '../../../src/contract/channel-storage';
-import {createRespondWithAlternativeTransaction} from '../../../src/contract/transaction-creators/force-move';
+import {createCheckpointTransaction} from '../../../src/contract/transaction-creators/force-move';
 
 const provider = new ethers.providers.JsonRpcProvider(
   `http://localhost:${process.env.DEV_GANACHE_PORT}`,
@@ -44,23 +44,24 @@ beforeAll(async () => {
 
 // Scenarios are synonymous with channelNonce:
 
-const description1 = 'It accepts a valid respondWithAlternative tx and clears the challenge';
-const description2 =
-  'It reverts a respondWithAlternative tx when largestTurnNum =/= setTurnNum + 1';
-const description3 = 'It reverts a respondWithAlternative tx for an expired challenge';
-const description4 =
-  'It reverts a respondWithAlternative tx when the states do not form a validTransition chain ';
-const description5 =
-  'It reverts a respondWithAlternative tx when an unacceptable whoSignedWhat array is submitted';
+const description1 = 'It accepts when the input is valid, and clears the challenge';
+const description2 = 'It reverts when largestTurnNum =/= setTurnNum + 1';
+const description3 = 'It reverts when the challenge has expired';
+const description4 = 'It reverts when the states do not form a validTransition chain ';
+const description5 = 'It reverts when an unacceptable whoSignedWhat array is submitted';
+const description6 = 'It reverts when the turnNumRecord is not increased';
 
-describe('respondWithAlternative', () => {
+describe('checkpoint', () => {
+  let cn = 300;
   it.each`
     description     | channelNonce | setTurnNumRecord | expired  | largestTurnNum | appDatas     | isFinalCount | whoSignedWhat | challenger    | reasonString
-    ${description1} | ${301}       | ${7}             | ${false} | ${8}           | ${[0, 1, 2]} | ${0}         | ${[0, 1, 2]}  | ${wallets[1]} | ${undefined}
-    ${description2} | ${302}       | ${8}             | ${false} | ${8}           | ${[0, 1, 2]} | ${0}         | ${[0, 1, 2]}  | ${wallets[2]} | ${'Challenge State does not match stored version'}
-    ${description3} | ${303}       | ${8}             | ${true}  | ${8}           | ${[0, 1, 2]} | ${0}         | ${[0, 1, 2]}  | ${wallets[2]} | ${'Response too late!'}
-    ${description4} | ${304}       | ${7}             | ${false} | ${8}           | ${[0, 2, 1]} | ${0}         | ${[0, 1, 2]}  | ${wallets[1]} | ${'CountingApp: Counter must be incremented'}
-    ${description5} | ${305}       | ${7}             | ${false} | ${8}           | ${[0, 1, 2]} | ${0}         | ${[0, 0, 2]}  | ${wallets[1]} | ${'Unacceptable whoSignedWhat array'}
+    ${description1} | ${(cn += 1)} | ${7}             | ${false} | ${8}           | ${[0, 1, 2]} | ${0}         | ${[0, 1, 2]}  | ${wallets[1]} | ${undefined}
+    ${description1} | ${(cn += 1)} | ${7}             | ${false} | ${11}          | ${[0, 1, 2]} | ${0}         | ${[0, 1, 2]}  | ${wallets[1]} | ${undefined}
+    ${description2} | ${(cn += 1)} | ${8}             | ${false} | ${8}           | ${[0, 1, 2]} | ${0}         | ${[0, 1, 2]}  | ${wallets[2]} | ${'Challenge State does not match stored version'}
+    ${description3} | ${(cn += 1)} | ${8}             | ${true}  | ${8}           | ${[0, 1, 2]} | ${0}         | ${[0, 1, 2]}  | ${wallets[2]} | ${'Response too late!'}
+    ${description4} | ${(cn += 1)} | ${7}             | ${false} | ${8}           | ${[0, 2, 1]} | ${0}         | ${[0, 1, 2]}  | ${wallets[1]} | ${'CountingApp: Counter must be incremented'}
+    ${description5} | ${(cn += 1)} | ${7}             | ${false} | ${8}           | ${[0, 1, 2]} | ${0}         | ${[0, 0, 2]}  | ${wallets[1]} | ${'Unacceptable whoSignedWhat array'}
+    ${description6} | ${(cn += 1)} | ${7}             | ${false} | ${8}           | ${[0, 1, 2]} | ${0}         | ${[0, 1, 2]}  | ${wallets[1]} | ${'turnNumRecord not increased'}
   `(
     '$description', // for the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce
     async ({
@@ -129,12 +130,13 @@ describe('respondWithAlternative', () => {
       // sign the states
       const sigs = await signStates(states, wallets, whoSignedWhat);
 
-      const transactionsRequest = createRespondWithAlternativeTransaction(
+      const transactionsRequest = createCheckpointTransaction(
         challengeState,
         finalizesAt,
         states,
         sigs,
         whoSignedWhat,
+        setTurnNumRecord,
       );
       if (reasonString) {
         const regex = new RegExp(
