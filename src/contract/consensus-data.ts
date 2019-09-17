@@ -49,7 +49,7 @@ export function finalVote(consensusData: ConsensusData): ConsensusData {
       `Expected furtherVotesRequired to be 1, received ${consensusData.furtherVotesRequired} instead.`,
     );
   }
-  // TODO: if it's the final vote we return zeroed out consensusData
+  // If it's the final vote we return zeroed out consensusData
   return {furtherVotesRequired: 0, proposedOutcome: []};
 }
 
