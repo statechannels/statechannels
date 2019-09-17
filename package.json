@@ -13,9 +13,6 @@
   "license": "MIT",
   "main": "src/index.js",
   "dependencies": {
-    "@types/jest": "^24.0.18",
-    "@types/react": "^16.9.2",
-    "@types/react-dom": "^16.9.0",
     "bencode": "^2.0.1",
     "eventemitter3": "^4.0.0",
     "prettier-bytes": "^1.0.4",
@@ -29,8 +26,10 @@
     "@babel/plugin-proposal-class-properties": "^7.5.5",
     "@babel/preset-env": "^7.6.0",
     "@types/bencode": "^2.0.0",
-    "airtap": "^2.0.4",
-    "babel-jest": "^24.9.0",
+    "@types/jest": "^24.0.18",
+    "@types/react": "^16.9.2",
+    "@types/react-dom": "^16.9.0",
+    "jest": "^24.9.0",
     "jest-junit": "^8.0.0",
     "webtorrent-fixtures": "^1.7.3"
   },
