@@ -12,7 +12,7 @@ module.exports = {
   },
   solc: {
     optimizer: {
-      enabled: process.env.ENABLE_SOLC_OPTIMIZER === 'TRUE',
+      enabled: true, // Always want optimization enabled to prevent StackTooDeep error
       runs: 200,
     },
   },
