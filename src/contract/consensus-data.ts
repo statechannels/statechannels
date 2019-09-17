@@ -53,7 +53,7 @@ export function vote(
 ): ConsensusDataWithOutcome {
   if (incomingConsensusData.furtherVotesRequired === 1) {
     return {
-      consensusData: {furtherVotesRequired: numberOfParticipants - 1, proposedOutcome: []},
+      consensusData: {furtherVotesRequired: 0, proposedOutcome: []},
       currentOutcome: incomingConsensusData.proposedOutcome,
     };
   } else if (incomingConsensusData.furtherVotesRequired > 1) {
