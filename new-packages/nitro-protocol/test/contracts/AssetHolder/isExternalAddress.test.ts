@@ -1,7 +1,7 @@
 import {ethers} from 'ethers';
 // @ts-ignore
-import AssetHolderArtifact from '../../build/contracts/TESTAssetHolder.json';
-import {setupContracts} from '../test-helpers';
+import AssetHolderArtifact from '../../../build/contracts/TESTAssetHolder.json';
+import {setupContracts} from '../../test-helpers';
 
 const provider = new ethers.providers.JsonRpcProvider(
   `http://localhost:${process.env.DEV_GANACHE_PORT}`,
