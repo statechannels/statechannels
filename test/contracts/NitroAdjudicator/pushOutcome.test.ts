@@ -10,7 +10,7 @@ import {AddressZero} from 'ethers/constants';
 import {setupContracts, finalizedOutcomeHash, sendTransaction} from '../../test-helpers';
 import {expectRevert} from 'magmo-devtools';
 import {Channel, getChannelId} from '../../../src/contract/channel';
-import {hashOutcomeContent} from '../../../src/contract/outcome';
+import {hashAssetOutcome} from '../../../src/contract/outcome';
 import {State} from '../../../src/contract/state';
 import {createPushOutcomeTransaction} from '../../../src/contract/transaction-creators/nitro-adjudicator';
 import {toHex} from '../../../src/hex-utils';
@@ -124,10 +124,10 @@ describe('pushOutcome', () => {
         await sendTransaction(provider, NitroAdjudicator.address, transactionRequest);
         // check 2x AssetHolder storage against the expected value
         expect(await ETHAssetHolder.outcomeHashes(channelId)).toEqual(
-          hashOutcomeContent(outcome[0].allocation),
+          hashAssetOutcome(outcome[0].allocation),
         );
         expect(await ERC20AssetHolder.outcomeHashes(channelId)).toEqual(
-          hashOutcomeContent(outcome[1].allocation),
+          hashAssetOutcome(outcome[1].allocation),
         );
       }
     },
