@@ -24,7 +24,7 @@
   "homepage": "https://github.com/statechannels/nitro-protocol/",
   "scripts": {
     "prepare": "yarn build",
-    "test:typescript": "yarn jest --testPathIgnorePatterns='test/contract-tests' --reporters='default'",
+    "test:typescript": "npx jest --testPathIgnorePatterns='test/contract-tests' --reporters='default'",
     "test": "yarn prettier:check && yarn clearContracts && npx ganache-then-jest --runInBand",
     "deploy": "yarn clearContracts && npx truffle migrate",
     "build:typescript": "tslint --project . && tsc",
