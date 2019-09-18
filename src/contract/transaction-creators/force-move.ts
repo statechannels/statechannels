@@ -6,8 +6,7 @@ import {State, getVariablePart, getFixedPart, hashAppPart} from '../state';
 import {Signature} from 'ethers/utils';
 import {hashOutcome} from '../outcome';
 import {encodeChannelStorageLite, encodeChannelStorage} from '../channel-storage';
-import {AddressZero, Zero} from 'ethers/constants';
-import {eqHex} from '../../hex-utils';
+import {Zero} from 'ethers/constants';
 
 // TODO: Currently we are setting some arbitrary gas limit
 // to avoid issues with Ganache sendTransaction and parsing BN.js
@@ -32,20 +31,20 @@ export function createCheckpointTransaction({
   whoSignedWhat,
   turnNumRecord,
 }: CheckpointData): TransactionRequest {
-  const isOpen = eqHex(finalizesAt, Zero.toHexString());
+  const isOpen = Zero.eq(finalizesAt);
   if (isOpen && challengeState) {
     throw new Error('Invalid open storage');
   }
 
   const largestTurnNum = Math.max(...states.map(s => s.turnNum));
-  const fixedPart = getFixedPart(challengeState);
+  const fixedPart = getFixedPart(states[0]);
   const variableParts = states.map(s => getVariablePart(s));
   const isFinalCount = states.filter(s => s.isFinal).length;
-  const {outcome, channel} = challengeState;
-  const {participants} = channel;
+  const {participants} = states[0].channel;
 
+  const outcome = isOpen ? undefined : challengeState.outcome;
   const challengerAddress = isOpen
-    ? AddressZero
+    ? undefined
     : participants[challengeState.turnNum % participants.length];
 
   const challengeStorageBytes = encodeChannelStorage({
