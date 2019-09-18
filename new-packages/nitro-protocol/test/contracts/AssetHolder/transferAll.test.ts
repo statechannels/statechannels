@@ -86,7 +86,7 @@ describe('transferAll', () => {
       const [, outcomeHash] = allocationToParams(allocation);
 
       // set outcomeHash
-      await (await AssetHolder.setOutcomePermissionless(channelId, outcomeHash)).wait();
+      await (await AssetHolder.setAssetOutcomeHashPermissionless(channelId, outcomeHash)).wait();
       expect(await AssetHolder.outcomeHashes(channelId)).toBe(outcomeHash);
 
       const transactionRequest = createTransferAllTransaction(
