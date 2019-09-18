@@ -6,7 +6,6 @@ import ForceMoveArtifact from '../../../build/contracts/TESTForceMove.json';
 import countingAppArtifact from '../../../build/contracts/CountingApp.json';
 import {defaultAbiCoder, hexlify, bigNumberify} from 'ethers/utils';
 import {setupContracts, sign, newChallengeClearedEvent, sendTransaction} from '../../test-helpers';
-import {AddressZero} from 'ethers/constants';
 import {Channel, getChannelId} from '../../../src/contract/channel';
 import {State, hashState} from '../../../src/contract/state';
 import {Outcome} from '../../../src/contract/outcome';
@@ -146,7 +145,6 @@ describe('refute', () => {
         const expectedChannelStorage: ChannelStorage = {
           largestTurnNum: declaredTurnNumRecord,
           finalizesAt: '0x0',
-          challengerAddress: AddressZero,
         };
         const expectedChannelStorageHash = hashChannelStorage(expectedChannelStorage);
         expect(await ForceMove.channelStorageHashes(channelId)).toEqual(expectedChannelStorageHash);
