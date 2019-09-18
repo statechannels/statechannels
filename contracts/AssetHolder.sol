@@ -22,8 +22,8 @@ contract AssetHolder {
             outcomeHashes[channelId] ==
                 keccak256(
                     abi.encode(
-                        Outcome.LabelledAllocationOrGuarantee(
-                            uint8(Outcome.OutcomeType.Allocation),
+                        Outcome.AssetOutcome(
+                            uint8(Outcome.AssetOutcomeType.Allocation),
                             allocationBytes
                         )
                     )
@@ -83,8 +83,8 @@ contract AssetHolder {
             // store hash
             outcomeHashes[channelId] = keccak256(
                 abi.encode(
-                    Outcome.LabelledAllocationOrGuarantee(
-                        uint8(Outcome.OutcomeType.Allocation),
+                    Outcome.AssetOutcome(
+                        uint8(Outcome.AssetOutcomeType.Allocation),
                         abi.encode(newAllocation)
                     )
                 )
@@ -122,8 +122,8 @@ contract AssetHolder {
             outcomeHashes[guarantorChannelId] ==
                 keccak256(
                     abi.encode(
-                        Outcome.LabelledAllocationOrGuarantee(
-                            uint8(Outcome.OutcomeType.Guarantee),
+                        Outcome.AssetOutcome(
+                            uint8(Outcome.AssetOutcomeType.Guarantee),
                             guaranteeBytes
                         )
                     )
@@ -137,8 +137,8 @@ contract AssetHolder {
             outcomeHashes[guarantee.targetChannelId] ==
                 keccak256(
                     abi.encode(
-                        Outcome.LabelledAllocationOrGuarantee(
-                            uint8(Outcome.OutcomeType.Allocation),
+                        Outcome.AssetOutcome(
+                            uint8(Outcome.AssetOutcomeType.Allocation),
                             allocationBytes
                         )
                     )
@@ -240,8 +240,8 @@ contract AssetHolder {
             // store hash
             outcomeHashes[guarantee.targetChannelId] = keccak256(
                 abi.encode(
-                    Outcome.LabelledAllocationOrGuarantee(
-                        uint8(Outcome.OutcomeType.Allocation),
+                    Outcome.AssetOutcome(
+                        uint8(Outcome.AssetOutcomeType.Allocation),
                         abi.encode(newAllocation)
                     )
                 )
@@ -261,17 +261,17 @@ contract AssetHolder {
         _;
     }
 
-    function _setOutcome(bytes32 channelId, bytes32 outcomeHash) internal {
+    function _setAssetOutcomeHash(bytes32 channelId, bytes32 outcomeHash) internal {
         require(outcomeHashes[channelId] == bytes32(0), 'Outcome hash already exists');
         outcomeHashes[channelId] = outcomeHash;
     }
 
-    function setOutcome(bytes32 channelId, bytes32 outcomeHash)
+    function setAssetOutcomeHash(bytes32 channelId, bytes32 outcomeHash)
         external
         AdjudicatorOnly
         returns (bool success)
     {
-        _setOutcome(channelId, outcomeHash);
+        _setAssetOutcomeHash(channelId, outcomeHash);
         return true;
     }
 

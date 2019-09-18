@@ -1,39 +1,15 @@
 ---
 id: respond-with-alternative
-title: Respond With Alternative
+title: respondWithAlternative
 ---
 
-The respondWithAlternative method allows anyone with sufficient off-chain state to establish a new and higher `turnNumRecord` to clear an existing challenge stored against a `channelId`. 'Alternative' here means the new `turnNumRecord` may be supported by an alternative history of states which need not agree with the challenge state stored on chain.
+The `respondWithAlternative` method allows anyone with sufficient off-chain state to establish a new and higher `turnNumRecord` to clear an existing challenge stored against a `channelId`. 'Alternative' here means the new `turnNumRecord` may be supported by an alternative history of states which need not agree with the challenge state stored on chain.
 
-The off-chain state is submitted (in an optimized format), and once relevant checks have passed, the existing challenge is cleared and the `turnNumRecord` is incremented by one.
+The off-chain state is submitted (in an optimized format), and once relevant checks have passed, the existing challenge is cleared and the `turnNumRecord` is updated.
 
-### Specification
+## Specification
 
-Call:
-
-`respondWithAlternative(uint256 turnNumRecord, State[] states, Signatures[] signatures)`
-
-Notes:
-
-Determine the channel from the `responseState` (the final state in the array).
-
-Requirements:
-
-- States form a chain of valid transitions
-- Channel is in the Challenge mode
-- Signatures are valid for the states
-- The responseState turnNum > turnNumRecord
-
-Effects:
-
-- Clears challenge (by clearing finalizesAt, stateHash and challengerAddress)
-- Sets turnNumRecord to the turnNum of the responseState
-
----
-
-## Implementation
-
-Parameters:
+Signature:
 
 ```solidity
    struct ChannelStorageLite {
@@ -50,9 +26,27 @@ Parameters:
         uint8 isFinalCount, // how many of the states are final
         Signature[] memory sigs,
         uint8[] memory whoSignedWhat,
-        bytes memory channelStorageLiteBytes // This is to avoid a 'stack too deep' error by minimising the number of local variables
+        bytes memory channelStorageLiteBytes // This is to avoid a 'stack too deep' error by minimizing the number of local variables
     )
 ```
+
+Requirements:
+
+- States form a chain of valid transitions
+- Channel is in the Challenge mode
+- Signatures are valid for the states
+- The `largestTurnNum` > `turnNumRecord`
+
+Effects:
+
+- Clears challenge,
+- Increases `turnNumRecord`.
+
+---
+
+## Implementation
+
+Parameters:
 
 - Decode `channelStorageLiteBytes`
 - Calculate `channelId` from fixedPart
