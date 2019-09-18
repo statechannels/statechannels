@@ -78,7 +78,7 @@ contract ForceMove {
         //   - the channel is still open; and
         //   - the committed turnNumRecord is correct
         require(
-            channelStorageHashes[channelId] != bytes32(0) ||
+            channelStorageHashes[channelId] == bytes32(0) ||
                 keccak256(
                     abi.encode(ChannelStorage(turnNumRecord, 0, bytes32(0), address(0), bytes32(0)))
                 ) ==
