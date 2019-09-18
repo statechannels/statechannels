@@ -9,8 +9,8 @@
     "noImplicitReturns": true,
     "noLib": false,
     "removeComments": true,
-    "declaration": true,
-    "declarationMap": true,
+    "declaration": false,
+    "declarationMap": false,
     "forceConsistentCasingInFileNames": true,
     "moduleResolution": "node",
     "resolveJsonModule": true,
@@ -22,6 +22,9 @@
     "sourceMap": true,
     "strict": true,
     "jsx": "preserve",
-    "preserveConstEnums": true
-  }
+    "skipLibCheck": true,
+    "isolatedModules": true,
+    "noEmit": true
+  },
+  "include": ["src"]
 }

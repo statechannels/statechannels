@@ -3,7 +3,7 @@ import { Instance as ParseTorrent } from 'parse-torrent';
 import WebTorrent from 'webtorrent';
 import { PaidStreamingExtension } from './paid-streaming-extension';
 
-export const enum ClientEvents {
+export enum ClientEvents {
   PEER_STATUS_CHANGED = 'peer_status_changed',
   CLIENT_RESET = 'client_reset',
   TORRENT_DONE = 'torrent_done',
@@ -11,7 +11,7 @@ export const enum ClientEvents {
   TORRENT_NOTICE = 'torrent_notice'
 }
 
-export const enum TorrentEvents {
+export enum TorrentEvents {
   WIRE = 'wire',
   NOTICE = 'notice',
   STOP = 'stop',
@@ -19,13 +19,13 @@ export const enum TorrentEvents {
   ERROR = 'error'
 }
 
-export const enum WireEvents {
+export enum WireEvents {
   DOWNLOAD = 'download',
   FIRST_REQUEST = 'first_request',
   REQUEST = 'request'
 }
 
-export const enum PaidStreamingExtensionEvents {
+export enum PaidStreamingExtensionEvents {
   WARNING = 'warning',
   PSE_HANDSHAKE = 'pse_handshake',
   NOTICE = 'notice',
@@ -33,7 +33,7 @@ export const enum PaidStreamingExtensionEvents {
   REQUEST = 'request'
 }
 
-export const enum PaidStreamingExtensionNotices {
+export enum PaidStreamingExtensionNotices {
   START = 'start',
   STOP = 'stop',
   ACK = 'ack'
