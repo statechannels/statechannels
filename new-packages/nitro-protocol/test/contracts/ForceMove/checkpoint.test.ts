@@ -28,7 +28,7 @@ const participants = ['', '', ''];
 const wallets = new Array(3);
 const challengeDuration = '0x1000';
 const assetHolderAddress = ethers.Wallet.createRandom().address;
-const outcome: Outcome = [{assetHolderAddress, allocation: []}];
+const defaultOutcome: Outcome = [{assetHolderAddress, allocation: []}];
 let appDefinition;
 
 // populate wallets and participants array
@@ -104,30 +104,6 @@ describe('checkpoint', () => {
       const channel: Channel = {chainId, channelNonce, participants};
       const channelId = getChannelId(channel);
 
-      const challengeState: State = {
-        turnNum: setTurnNumRecord,
-        isFinal: false,
-        channel,
-        outcome,
-        appData: defaultAbiCoder.encode(['uint256'], [appDatas[0]]),
-        appDefinition,
-        challengeDuration,
-      };
-
-      const states: State[] = [];
-
-      for (let i = 0; i < appDatas.length; i++) {
-        states.push({
-          turnNum: largestTurnNum - appDatas.length + 1 + i,
-          isFinal: false,
-          channel,
-          challengeDuration,
-          outcome,
-          appData: defaultAbiCoder.encode(['uint256'], [appDatas[i]]),
-          appDefinition,
-        });
-      }
-
       // compute finalizedAt
       const blockNumber = await provider.getBlockNumber();
       const blockTimestamp = (await provider.getBlock(blockNumber)).timestamp;
@@ -137,13 +113,42 @@ describe('checkpoint', () => {
           .add(challengeDuration)
           .toHexString();
 
+      const states: State[] = [];
+
+      for (let i = 0; i < appDatas.length; i++) {
+        states.push({
+          turnNum: largestTurnNum - appDatas.length + 1 + i,
+          isFinal: false,
+          channel,
+          challengeDuration,
+          outcome: defaultOutcome,
+          appData: defaultAbiCoder.encode(['uint256'], [appDatas[i]]),
+          appDefinition,
+        });
+      }
+
+      const isOpen = Zero.eq(finalizesAt);
+      const outcome = isOpen ? undefined : defaultOutcome;
+      const challengerAddress = isOpen ? undefined : challenger.address;
+      const challengeState: State = isOpen
+        ? undefined
+        : {
+            turnNum: setTurnNumRecord,
+            isFinal: false,
+            channel,
+            outcome,
+            appData: defaultAbiCoder.encode(['uint256'], [appDatas[0]]),
+            appDefinition,
+            challengeDuration,
+          };
+
       channelStorage =
         channelStorage ||
         hashChannelStorage({
           largestTurnNum: setTurnNumRecord,
           finalizesAt,
           state: challengeState,
-          challengerAddress: challenger.address,
+          challengerAddress,
           outcome,
         });
 
