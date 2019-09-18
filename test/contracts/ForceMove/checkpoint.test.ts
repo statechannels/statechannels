@@ -11,7 +11,7 @@ import {
   signStates,
   sendTransaction,
 } from '../../test-helpers';
-import {AddressZero} from 'ethers/constants';
+import {AddressZero, HashZero} from 'ethers/constants';
 import {Outcome} from '../../../src/contract/outcome';
 import {Channel, getChannelId} from '../../../src/contract/channel';
 import {State} from '../../../src/contract/state';
@@ -44,36 +44,46 @@ beforeAll(async () => {
 
 // Scenarios are synonymous with channelNonce:
 
-const description1 = 'It accepts when the input is valid, and clears the challenge';
-const description2 = 'It reverts when largestTurnNum =/= setTurnNum + 1';
-const description3 = 'It reverts when the challenge has expired';
-const description4 = 'It reverts when the states do not form a validTransition chain ';
-const description5 = 'It reverts when an unacceptable whoSignedWhat array is submitted';
-const description6 = 'It reverts when the turnNumRecord is not increased';
+const description1 = "It reverts when the channel storage doesn't match";
+const reason1 = 'Challenge State does not match stored version';
+const hashShouldNotMatch = reason => reason === reason1;
+
+const description2 = 'It reverts when the challenge has expired';
+const reason2 = 'Challenge timed out';
+const expired = reason => reason === reason2;
+
+const description3 = 'It reverts when the states do not form a validTransition chain ';
+const reason3 = 'CountingApp: Counter must be incremented';
+
+const description4 = 'It reverts when an unacceptable whoSignedWhat array is submitted';
+const reason4 = 'Unacceptable whoSignedWhat array';
+
+const description5 = 'It reverts when the turnNumRecord is not increased';
+const reason5 = 'turnNumRecord not increased';
+
+const description6 = 'It accepts when the input is valid, and clears the challenge';
 
 describe('checkpoint', () => {
   let cn = 300;
   it.each`
-    description     | channelNonce | setTurnNumRecord | expired  | largestTurnNum | appDatas     | isFinalCount | whoSignedWhat | challenger    | reasonString
-    ${description1} | ${(cn += 1)} | ${7}             | ${false} | ${8}           | ${[0, 1, 2]} | ${0}         | ${[0, 1, 2]}  | ${wallets[1]} | ${undefined}
-    ${description1} | ${(cn += 1)} | ${7}             | ${false} | ${11}          | ${[0, 1, 2]} | ${0}         | ${[0, 1, 2]}  | ${wallets[1]} | ${undefined}
-    ${description2} | ${(cn += 1)} | ${8}             | ${false} | ${8}           | ${[0, 1, 2]} | ${0}         | ${[0, 1, 2]}  | ${wallets[2]} | ${'Challenge State does not match stored version'}
-    ${description3} | ${(cn += 1)} | ${8}             | ${true}  | ${8}           | ${[0, 1, 2]} | ${0}         | ${[0, 1, 2]}  | ${wallets[2]} | ${'Response too late!'}
-    ${description4} | ${(cn += 1)} | ${7}             | ${false} | ${8}           | ${[0, 2, 1]} | ${0}         | ${[0, 1, 2]}  | ${wallets[1]} | ${'CountingApp: Counter must be incremented'}
-    ${description5} | ${(cn += 1)} | ${7}             | ${false} | ${8}           | ${[0, 1, 2]} | ${0}         | ${[0, 0, 2]}  | ${wallets[1]} | ${'Unacceptable whoSignedWhat array'}
-    ${description6} | ${(cn += 1)} | ${7}             | ${false} | ${8}           | ${[0, 1, 2]} | ${0}         | ${[0, 1, 2]}  | ${wallets[1]} | ${'turnNumRecord not increased'}
+    description     | channelNonce | setTurnNumRecord | largestTurnNum | appDatas     | whoSignedWhat | challenger    | reason
+    ${description1} | ${(cn += 1)} | ${8}             | ${9}           | ${[0, 1, 2]} | ${[0, 1, 2]}  | ${wallets[2]} | ${reason1}
+    ${description2} | ${(cn += 1)} | ${8}             | ${8}           | ${[0, 1, 2]} | ${[0, 1, 2]}  | ${wallets[2]} | ${reason2}
+    ${description3} | ${(cn += 1)} | ${7}             | ${8}           | ${[0, 2, 1]} | ${[0, 1, 2]}  | ${wallets[1]} | ${reason3}
+    ${description4} | ${(cn += 1)} | ${7}             | ${8}           | ${[0, 1, 2]} | ${[0, 0, 2]}  | ${wallets[1]} | ${reason4}
+    ${description5} | ${(cn += 1)} | ${10}            | ${8}           | ${[0, 1, 2]} | ${[0, 1, 2]}  | ${wallets[1]} | ${reason5}
+    ${description6} | ${(cn += 1)} | ${7}             | ${8}           | ${[0, 1, 2]} | ${[0, 1, 2]}  | ${wallets[1]} | ${undefined}
+    ${description6} | ${(cn += 1)} | ${7}             | ${11}          | ${[0, 1, 2]} | ${[0, 1, 2]}  | ${wallets[1]} | ${undefined}
   `(
     '$description', // for the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce
     async ({
       channelNonce,
       setTurnNumRecord,
-      expired,
       largestTurnNum,
       appDatas,
-      isFinalCount,
       whoSignedWhat,
       challenger,
-      reasonString,
+      reason,
     }) => {
       // compute channelId
       const channel: Channel = {chainId, channelNonce, participants};
@@ -94,7 +104,7 @@ describe('checkpoint', () => {
       for (let i = 0; i < appDatas.length; i++) {
         states.push({
           turnNum: largestTurnNum - appDatas.length + 1 + i,
-          isFinal: i > appDatas.length - isFinalCount,
+          isFinal: false,
           channel,
           challengeDuration,
           outcome,
@@ -106,21 +116,21 @@ describe('checkpoint', () => {
       // set expiry time in the future or in the past
       const blockNumber = await provider.getBlockNumber();
       const blockTimestamp = (await provider.getBlock(blockNumber)).timestamp;
-      const finalizesAt = expired
-        ? bigNumberify(blockTimestamp)
-            .sub(challengeDuration)
-            .toHexString()
+      const finalizesAt = expired(reason)
+        ? bigNumberify(1).toHexString()
         : bigNumberify(blockTimestamp)
             .add(challengeDuration)
             .toHexString();
 
-      const challengeExistsHash = hashChannelStorage({
-        largestTurnNum: setTurnNumRecord,
-        finalizesAt,
-        state: challengeState,
-        challengerAddress: challenger.address,
-        outcome,
-      });
+      const challengeExistsHash = hashShouldNotMatch(reason)
+        ? HashZero
+        : hashChannelStorage({
+            largestTurnNum: setTurnNumRecord,
+            finalizesAt,
+            state: challengeState,
+            challengerAddress: challenger.address,
+            outcome,
+          });
 
       // call public wrapper to set state (only works on test contract)
       const tx = await ForceMove.setChannelStorageHash(channelId, challengeExistsHash);
@@ -138,9 +148,9 @@ describe('checkpoint', () => {
         whoSignedWhat,
         setTurnNumRecord,
       );
-      if (reasonString) {
+      if (reason) {
         const regex = new RegExp(
-          '^' + 'VM Exception while processing transaction: revert ' + reasonString + '$',
+          '^' + 'VM Exception while processing transaction: revert ' + reason + '$',
         );
         await expectRevert(
           () => sendTransaction(provider, ForceMove.address, transactionsRequest),
