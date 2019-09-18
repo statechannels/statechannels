@@ -11,7 +11,7 @@ import {
   signStates,
   sendTransaction,
 } from '../../test-helpers';
-import {AddressZero, HashZero} from 'ethers/constants';
+import {HashZero, Zero, One} from 'ethers/constants';
 import {Outcome} from '../../../src/contract/outcome';
 import {Channel, getChannelId} from '../../../src/contract/channel';
 import {State} from '../../../src/contract/state';
@@ -47,13 +47,11 @@ beforeAll(async () => {
 const hashMisMatch = {
   description: "It reverts when the channel storage doesn't match",
   reason: 'Challenge State does not match stored version',
-  channelStorageBytesHash: HashZero,
 };
 
 const challengeExpired = {
   description: 'It reverts when the challenge has expired',
   reason: 'Challenge timed out',
-  finalizesAt: 1,
 };
 const invalidSupport = {
   description: 'It reverts when the states do not form a validTransition chain ',
@@ -67,22 +65,28 @@ const staleState = {
   description: 'It reverts when the turnNumRecord is not increased',
   reason: 'turnNumRecord not increased',
 };
-const succeeds = {
-  description: 'It accepts when the input is valid, and clears the challenge',
+const succeedsDuringChallenge = {
+  description:
+    'It accepts when the input is valid and there is a challenge, and clears the challenge',
+};
+
+const succeedsWhenChannelOpen = {
+  description: 'It accepts when the input is valid and the channel is open',
 };
 
 describe('checkpoint', () => {
   // for the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce
   let cn = 300;
   it.each`
-    test                | channelNonce | setTurnNumRecord | largestTurnNum | appDatas     | whoSignedWhat | challenger
-    ${succeeds}         | ${(cn += 1)} | ${7}             | ${8}           | ${[0, 1, 2]} | ${[0, 1, 2]}  | ${wallets[1]}
-    ${succeeds}         | ${(cn += 1)} | ${7}             | ${11}          | ${[0, 1, 2]} | ${[0, 1, 2]}  | ${wallets[1]}
-    ${hashMisMatch}     | ${(cn += 1)} | ${7}             | ${11}          | ${[0, 1, 2]} | ${[0, 1, 2]}  | ${wallets[2]}
-    ${challengeExpired} | ${(cn += 1)} | ${7}             | ${11}          | ${[0, 1, 2]} | ${[0, 1, 2]}  | ${wallets[2]}
-    ${invalidSupport}   | ${(cn += 1)} | ${7}             | ${8}           | ${[0, 2, 1]} | ${[0, 1, 2]}  | ${wallets[1]}
-    ${stateUnsupported} | ${(cn += 1)} | ${7}             | ${8}           | ${[0, 1, 2]} | ${[0, 0, 2]}  | ${wallets[1]}
-    ${staleState}       | ${(cn += 1)} | ${10}            | ${8}           | ${[0, 1, 2]} | ${[0, 1, 2]}  | ${wallets[1]}
+    test                       | channelNonce | setTurnNumRecord | largestTurnNum | appDatas     | whoSignedWhat | challenger    | channelStorage | finalizesAt
+    ${succeedsDuringChallenge} | ${(cn += 1)} | ${7}             | ${8}           | ${[0, 1, 2]} | ${[0, 1, 2]}  | ${wallets[1]} | ${undefined}   | ${undefined}
+    ${succeedsDuringChallenge} | ${(cn += 1)} | ${7}             | ${11}          | ${[0, 1, 2]} | ${[0, 1, 2]}  | ${wallets[1]} | ${undefined}   | ${undefined}
+    ${succeedsWhenChannelOpen} | ${(cn += 1)} | ${7}             | ${11}          | ${[0, 1, 2]} | ${[0, 1, 2]}  | ${wallets[1]} | ${undefined}   | ${Zero.toHexString()}
+    ${hashMisMatch}            | ${(cn += 1)} | ${7}             | ${11}          | ${[0, 1, 2]} | ${[0, 1, 2]}  | ${wallets[2]} | ${HashZero}    | ${undefined}
+    ${challengeExpired}        | ${(cn += 1)} | ${7}             | ${11}          | ${[0, 1, 2]} | ${[0, 1, 2]}  | ${wallets[2]} | ${undefined}   | ${One.toHexString()}
+    ${invalidSupport}          | ${(cn += 1)} | ${7}             | ${8}           | ${[0, 2, 1]} | ${[0, 1, 2]}  | ${wallets[1]} | ${undefined}   | ${undefined}
+    ${stateUnsupported}        | ${(cn += 1)} | ${7}             | ${8}           | ${[0, 1, 2]} | ${[0, 0, 2]}  | ${wallets[1]} | ${undefined}   | ${undefined}
+    ${staleState}              | ${(cn += 1)} | ${10}            | ${8}           | ${[0, 1, 2]} | ${[0, 1, 2]}  | ${wallets[1]} | ${undefined}   | ${undefined}
   `(
     '$test.description',
     async ({
@@ -92,6 +96,8 @@ describe('checkpoint', () => {
       appDatas,
       whoSignedWhat,
       challenger,
+      channelStorage,
+      finalizesAt,
       test,
     }) => {
       // compute channelId
@@ -125,14 +131,14 @@ describe('checkpoint', () => {
       // compute finalizedAt
       const blockNumber = await provider.getBlockNumber();
       const blockTimestamp = (await provider.getBlock(blockNumber)).timestamp;
-      const finalizesAt =
-        test.finalizesAt ||
+      finalizesAt =
+        finalizesAt ||
         bigNumberify(blockTimestamp)
           .add(challengeDuration)
           .toHexString();
 
-      const challengeExistsHash =
-        test.channelStorageBytesHash ||
+      channelStorage =
+        channelStorage ||
         hashChannelStorage({
           largestTurnNum: setTurnNumRecord,
           finalizesAt,
@@ -142,9 +148,9 @@ describe('checkpoint', () => {
         });
 
       // call public wrapper to set state (only works on test contract)
-      const tx = await ForceMove.setChannelStorageHash(channelId, challengeExistsHash);
+      const tx = await ForceMove.setChannelStorageHash(channelId, channelStorage);
       await tx.wait();
-      expect(await ForceMove.channelStorageHashes(channelId)).toEqual(challengeExistsHash);
+      expect(await ForceMove.channelStorageHashes(channelId)).toEqual(channelStorage);
 
       const signatures = await signStates(states, wallets, whoSignedWhat);
 
@@ -176,7 +182,6 @@ describe('checkpoint', () => {
         const expectedChannelStorageHash = hashChannelStorage({
           largestTurnNum,
           finalizesAt: '0x0',
-          challengerAddress: AddressZero,
         });
 
         // check channelStorageHash against the expected value
