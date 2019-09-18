@@ -2,6 +2,7 @@ import prettierBytes from 'prettier-bytes';
 import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
 import './styles.css';
+import { PaidStreamingTorrent } from './types';
 import WebTorrent from './web3torrent-lib';
 const webClient = new WebTorrent();
 
@@ -12,11 +13,15 @@ export const InitialState = {
   downloadSpeed: 0,
   uploadSpeed: 0,
   torrent: null,
-  files: []
+  files: [],
+  url: '',
+  filename: ''
 };
 
 // The UI assumes that there's only ONE torrent at play and that torrent only has ONE file.
-const progressLogger = (logger, status, setStatus, setMagnet, seedMagnet) => (torrent = InitialState) => {
+const progressLogger = (logger, status, setStatus, setMagnet, seedMagnet) => (
+  torrent: Partial<PaidStreamingTorrent> = InitialState
+) => {
   clearInterval(logger);
   logger = setInterval(() => {
     setStatus({
@@ -31,9 +36,16 @@ const progressLogger = (logger, status, setStatus, setMagnet, seedMagnet) => (to
     if (torrent.done) {
       if (torrent.created && !seedMagnet) {
         setMagnet(torrent.magnetURI);
-      } else if (!status.filename) {
+      } else if (!status.filename && torrent.files) {
         torrent.files[0].getBlobURL((err, url) => {
-          setStatus(Object.assign(InitialState, { url, filename: torrent.files[0].name }));
+          if (err) {
+            console.error(err);
+            return;
+          }
+
+          if (torrent.files) {
+            setStatus(Object.assign(InitialState, { url, filename: torrent.files[0].name }));
+          }
         });
       }
     }
@@ -71,7 +83,12 @@ function App() {
         <h2>Seeder</h2>
         <h4>Select a file</h4>
         <br />
-        <input type="file" onChange={event => webClient.seed(event.target.files, torrent => log(torrent))} />
+        <input
+          type="file"
+          onChange={event =>
+            webClient.seed(event.target.files as FileList, torrent => log(torrent as PaidStreamingTorrent))
+          }
+        />
         {Object.entries(webClient.allowedPeers).map(([infoHash, allowedPeers]) => (
           <div key={infoHash}>
             <h5>Torrent {infoHash} Clients</h5>
@@ -105,7 +122,9 @@ function App() {
           </a>
         ) : (
           <div>
-            <button onClick={() => webClient.add(leechMagnet, torrent => log(torrent))}>START DOWNLOAD</button>
+            <button onClick={() => webClient.add(leechMagnet, torrent => log(torrent as PaidStreamingTorrent))}>
+              START DOWNLOAD
+            </button>
           </div>
         )}
       </div>
