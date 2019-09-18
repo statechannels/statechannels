@@ -6,6 +6,8 @@ import {State, getVariablePart, getFixedPart, hashAppPart} from '../state';
 import {Signature} from 'ethers/utils';
 import {hashOutcome} from '../outcome';
 import {encodeChannelStorageLite, encodeChannelStorage} from '../channel-storage';
+import {AddressZero, Zero} from 'ethers/constants';
+import {eqHex} from '../../hex-utils';
 
 // TODO: Currently we are setting some arbitrary gas limit
 // to avoid issues with Ganache sendTransaction and parsing BN.js
@@ -15,12 +17,12 @@ const GAS_LIMIT = 3000000;
 const ForceMoveContractInterface = new ethers.utils.Interface(ForceMoveArtifact.abi);
 
 interface CheckpointData {
-  challengeState: State;
+  challengeState?: State;
   finalizesAt: string;
+  turnNumRecord: string;
   states: State[];
   signatures: Signature[];
   whoSignedWhat: number[];
-  turnNumRecord: string;
 }
 export function createCheckpointTransaction({
   challengeState,
@@ -30,13 +32,22 @@ export function createCheckpointTransaction({
   whoSignedWhat,
   turnNumRecord,
 }: CheckpointData): TransactionRequest {
+  const isOpen = eqHex(finalizesAt, Zero.toHexString());
+  if (isOpen && challengeState) {
+    throw new Error('Invalid open storage');
+  }
+
   const largestTurnNum = Math.max(...states.map(s => s.turnNum));
   const fixedPart = getFixedPart(challengeState);
   const variableParts = states.map(s => getVariablePart(s));
   const isFinalCount = states.filter(s => s.isFinal).length;
   const {outcome, channel} = challengeState;
   const {participants} = channel;
-  const challengerAddress = participants[challengeState.turnNum % participants.length];
+
+  const challengerAddress = isOpen
+    ? AddressZero
+    : participants[challengeState.turnNum % participants.length];
+
   const challengeStorageBytes = encodeChannelStorage({
     outcome,
     finalizesAt,
