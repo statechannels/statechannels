@@ -43,6 +43,15 @@ contract TESTForceMove is ForceMove {
     // public setter for channelStorage
 
     function setChannelStorage(bytes32 channelId, ChannelStorage memory channelStorage) public {
+        if (channelStorage.finalizesAt == 0) {
+            require(
+                channelStorage.stateHash == bytes32(0) &&
+                    channelStorage.challengerAddress == address(0) &&
+                    channelStorage.outcomeHash == bytes32(0),
+                'Invalid open channel'
+            );
+        }
+
         channelStorageHashes[channelId] = keccak256(abi.encode(channelStorage));
     }
 
