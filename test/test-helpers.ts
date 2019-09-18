@@ -41,7 +41,6 @@ export const clearedChallengeHash = (turnNumRecord: number = 5) => {
   return hashChannelStorage({
     largestTurnNum: bigNumberify(turnNumRecord).toHexString(),
     finalizesAt: '0x0',
-    challengerAddress: AddressZero,
   });
 };
 
