@@ -1,16 +1,7 @@
 ---
 id: valid-signatures
-title: Valid Signatures
+title: validSignatures
 ---
-
-Every state has an associated 'mover' - the participant who had the unique ability to progress the channel at the point the state was created.
-The mover can be calculated from the `turnNum` and the `particiants` as follows:
-
-```solidity
-moverAddress = partipants[turnNum % participants.length]
-```
-
-The implication of this formula is that participants take it in turn to update the state of the channel.
 
 As we will see in the method definitions later, in order for the chain to accept a channel state, `s`, that channel state must be _supported_ by `n` signatures (where `n = participants.length`).
 The simplest way for this to accomplish this is to provide a sequence of `n` states terminating is state `s`, where each state is signed by its mover and each consecutive pair of states form a valid transition.
@@ -73,19 +64,19 @@ Check the following
 
 ### 1. is `whoSignedWhat` acceptable?
 
-- Let m be the number of states passed in
-- Let n be the number of participants
-- Require `whoSignedWhat.length == n` (Is there precisely one signature for every participant?)
+- Let `m` be the number of states passed in
+- Let `n` be the number of participants
+- Require `whoSignedWhat.length == n` (Namely, there must be precisely one signature for each participant).
 - For each `participant[i]`:
   - Calculate `offset = (largestTurnNum - i) % n`
   - If `offset >= m - 1` then they can sign any state
-  - Else you should have signed state `m - 1 - offset` or higher
+  - Else they should have signed state `m - 1 - offset` or higher
 
 Example of whether `whoSignedWhat` is acceptable:
 
 - Suppose: `m = 2`, `n = 3`, `largestTurnNum = 5`.
-- offset = [2, 1, 0]
-- so participant `[0,1,2]` should have signed `[{0, 1}, {0, 1}, {1}]` respectively.
+- `offset = [2, 1, 0]`
+- so participant `[0, 1 ,2]` should have signed `[{0, 1}, {0, 1}, {1}]` respectively.
 - so valid `whoSignedWhat`s are all combinations:
 
 ```

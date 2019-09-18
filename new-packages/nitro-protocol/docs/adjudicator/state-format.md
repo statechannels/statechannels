@@ -3,9 +3,9 @@ id: state-format
 title: State Format
 ---
 
-A specified format of _state_ is vital, since it constitutes much of the interface between the on- and off- chain behaviour of the state channel network.
+A specified format of _state_ is vital, since it constitutes much of the interface between the on- and off- chain behavior of the state channel network.
 
-In ForceMove, the following fields must be included in state:
+In ForceMove, the following fields must be included in state updates:
 
 | **Field**         | **Data type** | **Definition / Explanation**                                  |
 | :---------------- | :------------ | :------------------------------------------------------------ |
@@ -19,14 +19,14 @@ In ForceMove, the following fields must be included in state:
 | appDefinition     | `address`     | on-chain address of library defining custom application rules |
 | appData           | `bytes`       | application-specific data                                     |
 
-Since commitments must ultimately be interpreted by smart contracts, the encoding of these fields must be carefully considered. The following encoding is designed around optimal gas consumption:
+Since updates must ultimately be interpreted by smart contracts, the encoding of these fields must be carefully considered. The following encoding is designed around optimal gas consumption:
 
 ```solidity
     struct State {
         // participants sign the hash of this
         uint256 turnNum;
         bool isFinal;
-        bytes32 channelId; // keccack256(abi.encode(chainId,participants,channelNonce))
+        bytes32 channelId; // keccack256(abi.encode(chainId, participants, channelNonce))
         bytes32 appPartHash;
         //     keccak256(abi.encode(
         //         fixedPart.challengeDuration,
@@ -37,6 +37,8 @@ Since commitments must ultimately be interpreted by smart contracts, the encodin
         bytes32 outcomeHash; //  keccak256(abi.encode(outcome))
     }
 ```
+
+## ChannelId
 
 The address of a channel is the hash of the abi encoded `chainId`, `participants` and `channelNonce`.
 
@@ -73,7 +75,7 @@ which contains fields which are allowed to change. These structs, along with rem
 
 **Why include the ChannelId separately?** We have to calculate the `channelId` for every single operation anyway. Given that we have it it's cheaper to hash in the hash, rather than the individual components again.
 
-**Why not include the `AppDefinition` in the `ChannelId`?** The `AppDefinition` is fixed as part of the transition rules, so it seems like it would make sense to include it in the `ChannelId`. This would rule out participants being able to collaboratively upgrade the app without refunding the channel through.
+**Why not include the `AppDefinition` in the `ChannelId`?** The `AppDefinition` is fixed as part of the transition rules, so it seems like it would make sense to include it in the `ChannelId`. However, this would rule out participants being able to collaboratively upgrade the app without refunding the channel.
 
 **Why not hash the `AppDefinition` together with the `ChannelId` into a `FixedPartHash`?** By doing this you perform one extra hash but you have to hash less data in the variable part. This tradeoff makes sense if you're hashing something like >3 variable parts for the same fixed part (based on the relative gas costs). We anticipate that most of the time channels will have 2 participants, so we optimize for this case.
 

@@ -36,6 +36,9 @@ describe('setOutcome', () => {
     const regex = new RegExp(
       '^' + 'VM Exception while processing transaction: revert ' + reasonString + '$',
     );
-    await expectRevert(() => AssetHolder.setOutcome(channelId, keccak256(outcomeContent)), regex);
+    await expectRevert(
+      () => AssetHolder.setAssetOutcomeHash(channelId, keccak256(outcomeContent)),
+      regex,
+    );
   });
 });
