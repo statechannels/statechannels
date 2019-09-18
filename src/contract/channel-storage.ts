@@ -11,6 +11,8 @@ export interface ChannelStorage {
   challengerAddress: Address;
   outcome?: Outcome;
 }
+const CHANNEL_STORAGE_TYPE =
+  'tuple(uint256 turnNumRecord, uint256 finalizesAt, bytes32 stateHash, address challengerAddress, bytes32 outcomeHash)';
 
 export interface ChannelStorageLite {
   finalizesAt: Uint256;
@@ -18,6 +20,8 @@ export interface ChannelStorageLite {
   challengerAddress: Address;
   outcome: Outcome;
 }
+const CHANNEL_STORAGE_LITE_TYPE =
+  'tuple(uint256 finalizesAt, bytes32 stateHash, address challengerAddress, bytes32 outcomeHash)';
 
 export function hashChannelStorage(channelStorage: ChannelStorage): Bytes32 {
   const outcomeHash = channelStorage.outcome ? hashOutcome(channelStorage.outcome) : HashZero;
@@ -40,9 +44,7 @@ export function encodeChannelStorageLite(channelStorageLite: ChannelStorageLite)
   const {finalizesAt, challengerAddress} = channelStorageLite;
 
   return defaultAbiCoder.encode(
-    [
-      'tuple(uint256 finalizesAt, bytes32 stateHash, address challengerAddress, bytes32 outcomeHash)',
-    ],
+    [CHANNEL_STORAGE_LITE_TYPE],
     [[finalizesAt, stateHash, challengerAddress, outcomeHash]],
   );
 }
