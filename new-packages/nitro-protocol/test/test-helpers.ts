@@ -10,12 +10,12 @@ import {
 import {AddressZero, HashZero} from 'ethers/constants';
 import {hashChannelStorage} from '../src/contract/channel-storage';
 import {
-  Outcome,
   encodeAllocation,
   hashAssetOutcome,
   encodeGuarantee,
   Guarantee,
   Allocation,
+  Outcome,
 } from '../src/contract/outcome';
 import {State, hashState} from '../src/contract/state';
 import {TransactionRequest, TransactionReceipt} from 'ethers/providers';
@@ -49,21 +49,19 @@ export const ongoingChallengeHash = (turnNumRecord: number = 5) => {
     largestTurnNum: bigNumberify(turnNumRecord).toHexString(),
     finalizesAt: bigNumberify(1e12).toHexString(),
     challengerAddress: AddressZero,
+    outcome: [],
+    state: undefined,
   });
 };
 
 export const finalizedOutcomeHash = (
   turnNumRecord: number = 5,
   finalizesAt: string = toHex(1),
-  challengerAddress: string = AddressZero,
-  state?: State,
-  outcome?: Outcome,
+  outcome: Outcome = [],
 ) => {
   return hashChannelStorage({
     largestTurnNum: bigNumberify(turnNumRecord).toHexString(),
     finalizesAt,
-    state,
-    challengerAddress,
     outcome,
   });
 };
