@@ -17,7 +17,7 @@
       "jest-junit"
     ],
     "testMatch": [
-      "<rootDir>/tests/?(*.)+(test).js"
+      "<rootDir>/tests/?(*.)+(test).ts"
     ],
     "globalSetup": "./tests/setup.js",
     "globalTeardown": "./tests/teardown.js",
@@ -26,8 +26,7 @@
       "<rootDir>/tests"
     ],
     "transform": {
-      "^.+\\.tsx?$": "ts-jest",
-      "^.+\\.jsx?$": "babel-jest"
+      "^.+\\.tsx?$": "ts-jest"
     }
   },
   "main": "src/index.js",
@@ -41,15 +40,11 @@
     "webtorrent": "0.107.16"
   },
   "devDependencies": {
-    "@babel/core": "^7.6.0",
-    "@babel/plugin-proposal-class-properties": "^7.5.5",
-    "@babel/preset-env": "^7.6.0",
     "@types/bencode": "^2.0.0",
     "@types/jest": "^24.0.18",
     "@types/react": "^16.9.2",
     "@types/react-dom": "^16.9.0",
     "@types/webtorrent": "^0.107.0",
-    "babel-jest": "^24.9.0",
     "bittorrent-tracker": "^9.14.4",
     "jest-junit": "^8.0.0",
     "memory-chunk-store": "^1.3.0",
