@@ -35,16 +35,24 @@ export function encodeChannelStorage({
   largestTurnNum,
   outcome,
 }: ChannelStorage): Bytes {
+  /*
+  When the channel is not open, it is still possible for the state and
+  challengerAddress to be missing. They should either both be present, or
+  both be missing, the latter indicating that the channel is finalized.
+  It is currently up to the caller to ensure this.
+  */
   const isOpen = eqHex(finalizesAt, HashZero);
+  const isFinalized = !isOpen && !state;
+
   if (isOpen && (outcome || state || challengerAddress)) {
     throw new Error(
       `Invalid open channel storage: ${JSON.stringify(outcome || state || challengerAddress)}`,
     );
   }
 
+  const stateHash = isOpen || !state ? HashZero : hashState(state);
   const outcomeHash = isOpen ? HashZero : hashOutcome(outcome);
-  const stateHash = isOpen ? HashZero : hashState(state);
-  challengerAddress = isOpen ? AddressZero : challengerAddress;
+  challengerAddress = isOpen || isFinalized ? AddressZero : challengerAddress;
 
   return defaultAbiCoder.encode(
     [CHANNEL_STORAGE_TYPE],
