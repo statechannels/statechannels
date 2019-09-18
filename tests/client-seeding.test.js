@@ -1,7 +1,6 @@
 import MemoryChunkStore from 'memory-chunk-store';
 import fixtures from 'webtorrent-fixtures';
-import { PaidStreamingExtensionNotices } from '../src/constants';
-import WebTorrent, { ClientEvents } from './../src/web3torrent-lib';
+import WebTorrent, { ClientEvents, PaidStreamingExtensionNotices } from './../src/web3torrent-lib';
 
 describe('Seeding and Leeching', () => {
   let seeder, leecher;
