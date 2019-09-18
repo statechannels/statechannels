@@ -2,13 +2,14 @@ import {Uint256, Bytes32, Address, Bytes} from './types';
 import {defaultAbiCoder, keccak256} from 'ethers/utils';
 import {Outcome, hashOutcome} from './outcome';
 import {State, hashState} from './state';
-import {HashZero} from 'ethers/constants';
+import {HashZero, AddressZero} from 'ethers/constants';
+import {eqHex} from '../hex-utils';
 
 export interface ChannelStorage {
   largestTurnNum: Uint256;
   finalizesAt: Uint256;
   state?: State;
-  challengerAddress: Address;
+  challengerAddress?: Address;
   outcome?: Outcome;
 }
 const CHANNEL_STORAGE_TYPE =
@@ -24,22 +25,26 @@ const CHANNEL_STORAGE_LITE_TYPE =
   'tuple(uint256 finalizesAt, bytes32 stateHash, address challengerAddress, bytes32 outcomeHash)';
 
 export function hashChannelStorage(channelStorage: ChannelStorage): Bytes32 {
-  const outcomeHash = channelStorage.outcome ? hashOutcome(channelStorage.outcome) : HashZero;
-  const stateHash = channelStorage.state ? hashState(channelStorage.state) : HashZero;
-  const {largestTurnNum, finalizesAt, challengerAddress} = channelStorage;
-
-  return keccak256(
-    defaultAbiCoder.encode(
-      ['uint256', 'uint256', 'bytes32', 'address', 'bytes32'],
-      [largestTurnNum, finalizesAt, stateHash, challengerAddress, outcomeHash],
-    ),
-  );
+  return keccak256(encodeChannelStorage(channelStorage));
 }
 
-export function encodeChannelStorage(channelStorage: ChannelStorage): Bytes {
-  const outcomeHash = channelStorage.outcome ? hashOutcome(channelStorage.outcome) : HashZero;
-  const stateHash = channelStorage.state ? hashState(channelStorage.state) : HashZero;
-  const {finalizesAt, challengerAddress, largestTurnNum} = channelStorage;
+export function encodeChannelStorage({
+  finalizesAt,
+  state,
+  challengerAddress,
+  largestTurnNum,
+  outcome,
+}: ChannelStorage): Bytes {
+  const isOpen = eqHex(finalizesAt, HashZero);
+  if (isOpen && (outcome || state || challengerAddress)) {
+    throw new Error(
+      `Invalid open channel storage: ${JSON.stringify(outcome || state || challengerAddress)}`,
+    );
+  }
+
+  const outcomeHash = isOpen ? HashZero : hashOutcome(outcome);
+  const stateHash = isOpen ? HashZero : hashState(state);
+  challengerAddress = isOpen ? AddressZero : challengerAddress;
 
   return defaultAbiCoder.encode(
     [CHANNEL_STORAGE_TYPE],
