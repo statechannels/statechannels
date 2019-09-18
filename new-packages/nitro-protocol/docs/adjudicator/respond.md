@@ -1,34 +1,15 @@
 ---
 id: respond
-title: Respond
+title: respond
 ---
 
 The respond method allows anyone with the appropriate, single off-chain state (usually the current mover) to clear an existing challenge stored against a `channelId`.
 
 The off-chain state is submitted (in an optimized format), and once relevant checks have passed, the existing challenge is cleared and the `turnNumRecord` is incremented by one.
 
-### Specification
+## Specification
 
-Call:
-
-`respond(uint256 turnNumRecord, State challengeState, State responseState, Signature responseStateSig)`
-
-Notes:
-
-Determine the channel from the `responseState`.
-
-Requirements:
-
-- challengeState matches stateHash
-- challengeState to responseState is a valid transition
-- channel is in Challenge mode
-
-Effects:
-
-- Clears challenge (by clearing finalizesAt, stateHash and challengerAddress)
-- Increases the turnNumRecord by 1
-
-## Implementation
+Signature:
 
 ```solidity
 function respond(
@@ -45,6 +26,19 @@ function respond(
     Signature memory sig
 )
 ```
+
+Requirements:
+
+- `challengeState` matches `stateHash`,
+- `challengeState` to `responseState` is a valid transition,
+- channel is in Challenge mode.
+
+Effects:
+
+- Clears challenge,
+- Increments `turnNumRecord`.
+
+## Implementation
 
 - Calculate `channelId` from fixedPart
 - Calculate `challengeStateHash` and `challengeStateOutcome` from `fixedPart, challengeVariablePart, turnNumRecord, challengStateIsFinal`

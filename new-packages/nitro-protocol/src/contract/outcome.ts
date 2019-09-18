@@ -1,7 +1,7 @@
 import {defaultAbiCoder, keccak256} from 'ethers/utils';
 import {Bytes32, Address, Uint256, Bytes} from './types';
 
-export enum OutcomeType {
+export enum AssetOutcomeType {
   AllocationOutcomeType = 0,
   GuaranteeOutcomeType = 1,
 }
@@ -63,72 +63,78 @@ export function isAllocation(
 }
 
 // Guarantee Outcome and functions
-export interface GuaranteeOutcome {
+export interface GuaranteeAssetOutcome {
   assetHolderAddress: Address;
   guarantee: Guarantee;
 }
-export function isGuaranteeOutcome(assetOutcome: AssetOutcome): assetOutcome is GuaranteeOutcome {
+export function isGuaranteeOutcome(
+  assetOutcome: AssetOutcome,
+): assetOutcome is GuaranteeAssetOutcome {
   return 'guarantee' in assetOutcome;
 }
 
 // Allocation outcome and functions
-export interface AllocationOutcome {
+export interface AllocationAssetOutcome {
   assetHolderAddress: Address;
   allocation: AllocationItem[];
 }
-export function isAllocationOutcome(assetOutcome: AssetOutcome): assetOutcome is AllocationOutcome {
+export function isAllocationOutcome(
+  assetOutcome: AssetOutcome,
+): assetOutcome is AllocationAssetOutcome {
   return 'allocation' in assetOutcome;
 }
 
-// Labelled outcome functions
-export function encodeLabelledOutcome(
-  outcomeType: OutcomeType,
-  encodedAllocationOrGuarantee: Bytes32,
+// Asset outcome functions
+export function encodeAssetOutcomeFromBytes(
+  assetOutcomeType: AssetOutcomeType,
+  encodedAllocationOrGuarantee: Bytes,
 ): Bytes32 {
   return defaultAbiCoder.encode(
-    ['tuple(uint8 outcomeType, bytes allocationOrGuarantee)'],
-    [{outcomeType, allocationOrGuarantee: encodedAllocationOrGuarantee}],
+    ['tuple(uint8 assetOutcomeType, bytes allocationOrGuarantee)'],
+    [{assetOutcomeType, allocationOrGuarantee: encodedAllocationOrGuarantee}],
   );
 }
 
-export function decodeAssetOutcome(
-  encodedLabeledOutcome: Bytes,
+export function decodeOutcomeItem(
+  encodedAssetOutcome: Bytes,
   assetHolderAddress: string,
 ): AssetOutcome {
   const {outcomeType, allocationOrGuarantee} = defaultAbiCoder.decode(
     ['tuple(uint8 outcomeType, bytes allocationOrGuarantee)'],
-    encodedLabeledOutcome,
+    encodedAssetOutcome,
   )[0];
   switch (outcomeType) {
-    case OutcomeType.AllocationOutcomeType:
+    case AssetOutcomeType.AllocationOutcomeType:
       return {assetHolderAddress, allocation: decodeAllocation(allocationOrGuarantee)};
-    case OutcomeType.GuaranteeOutcomeType:
+    case AssetOutcomeType.GuaranteeOutcomeType:
       return {assetHolderAddress, guarantee: decodeGuarantee(allocationOrGuarantee)};
     default:
       throw new Error(`Received invalid outcome type ${outcomeType}`);
   }
 }
 
-// Outcome content functions
-export function hashOutcomeContent(allocationOrGuarantee: Allocation | Guarantee): Bytes32 {
-  return keccak256(encodeOutcomeContent(allocationOrGuarantee));
+// Asset outcome functions
+export function hashAssetOutcome(allocationOrGuarantee: Allocation | Guarantee): Bytes32 {
+  return keccak256(encodeAssetOutcome(allocationOrGuarantee));
 }
-export function encodeOutcomeContent(allocationOrGuarantee: Allocation | Guarantee): Bytes32 {
+export function encodeAssetOutcome(allocationOrGuarantee: Allocation | Guarantee): Bytes32 {
   let encodedData;
   let outcomeType;
   if (isAllocation(allocationOrGuarantee)) {
     encodedData = encodeAllocation(allocationOrGuarantee);
-    outcomeType = OutcomeType.AllocationOutcomeType;
+    outcomeType = AssetOutcomeType.AllocationOutcomeType;
   } else {
     encodedData = encodeGuarantee(allocationOrGuarantee);
-    outcomeType = OutcomeType.GuaranteeOutcomeType;
+    outcomeType = AssetOutcomeType.GuaranteeOutcomeType;
   }
-  return encodeLabelledOutcome(outcomeType, encodedData);
+  return encodeAssetOutcomeFromBytes(outcomeType, encodedData);
 }
 
 // Outcome and functions
-export type AssetOutcome = AllocationOutcome | GuaranteeOutcome;
+export type AssetOutcome = AllocationAssetOutcome | GuaranteeAssetOutcome;
 export type Outcome = AssetOutcome[];
+// ^ Note this is not the same structure
+// as the Outcome struct defined in Outcome.sol
 
 export function hashOutcome(outcome: Outcome): Bytes32 {
   const encodedOutcome = encodeOutcome(outcome);
@@ -140,24 +146,24 @@ export function decodeOutcome(encodedOutcome: Bytes): Outcome {
     ['tuple(address assetHolderAddress, bytes outcomeContent)[]'],
     encodedOutcome,
   )[0];
-  return assetOutcomes.map(a => decodeAssetOutcome(a.outcomeContent, a.assetHolderAddress));
+  return assetOutcomes.map(a => decodeOutcomeItem(a.outcomeContent, a.assetHolderAddress));
 }
 
 export function encodeOutcome(outcome: Outcome): Bytes32 {
-  const encodedAssetOutcomes = outcome.map(o => {
+  const encodedAssetOutcomes = outcome.map((o: AssetOutcome) => {
     let encodedData;
     let outcomeType;
     if (isAllocationOutcome(o)) {
       encodedData = encodeAllocation(o.allocation);
-      outcomeType = OutcomeType.AllocationOutcomeType;
+      outcomeType = AssetOutcomeType.AllocationOutcomeType;
     } else {
       encodedData = encodeGuarantee(o.guarantee);
-      outcomeType = OutcomeType.GuaranteeOutcomeType;
+      outcomeType = AssetOutcomeType.GuaranteeOutcomeType;
     }
 
     return {
       assetHolderAddress: o.assetHolderAddress,
-      outcomeContent: encodeLabelledOutcome(outcomeType, encodedData),
+      outcomeContent: encodeAssetOutcomeFromBytes(outcomeType, encodedData),
     };
   });
 

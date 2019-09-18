@@ -2,25 +2,25 @@ pragma solidity ^0.5.11;
 pragma experimental ABIEncoderV2;
 
 library Outcome {
-    //An outcome is a set of asset outcomes.
-    // Outcome = AssetOutcome[]
-    // AssetOutome = (AssetID, AllocationOrGuarantee)
-    // AllocationOrGuarantee = Allocation | Guarantee
+    //An outcome is an array of OutcomeItems
+    // Outcome = OutcomeItem[]
+    // OutcomeItem = (AssetHolderAddress, AssetOutcome)
+    // AssetOutcome = (AssetOutcomeType, Allocation | Guarantee)
     // Allocation = AllocationItem[]
     // AllocationItem = (Destination, Amount)
     // Guarantee = (ChannelAddress, Destination[])
     // Destination = ChannelAddress | ExternalAddress
 
-    struct AssetOutcome {
+    struct OutcomeItem {
         address assetHolderAddress;
-        bytes outcomeContent; // abi.encode(LabelledAllocationOrGuarantee)
+        bytes assetOutcomeBytes; // abi.encode(AssetOutcome)
     }
 
-    enum OutcomeType {Allocation, Guarantee}
+    enum AssetOutcomeType {Allocation, Guarantee}
 
-    struct LabelledAllocationOrGuarantee {
-        uint8 outcomeType; // OutcomeType.Allocation or OutcomeType.Guarantee
-        bytes allocationOrGuarantee; // abi.encode(AllocationItem[])  or abi.encode(Guarantee), depending on OutcomeType
+    struct AssetOutcome {
+        uint8 assetOutcomeType; // AssetOutcomeType.Allocation or AssetOutcomeType.Guarantee
+        bytes allocationOrGuaranteeBytes; // abi.encode(AllocationItem[]) or abi.encode(Guarantee), depending on OutcomeType
     }
 
     // reserve Allocation to refer to AllocationItem[]

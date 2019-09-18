@@ -105,7 +105,7 @@ describe('claimAll', () => {
       const [, outcomeHash] = allocationToParams(allocation);
 
       // set outcomeHash for target
-      await (await AssetHolder.setOutcomePermissionless(targetId, outcomeHash)).wait();
+      await (await AssetHolder.setAssetOutcomeHashPermissionless(targetId, outcomeHash)).wait();
       expect(await AssetHolder.outcomeHashes(targetId)).toBe(outcomeHash);
 
       // compute an appropriate guarantee
@@ -119,7 +119,10 @@ describe('claimAll', () => {
         const [, gOutcomeContentHash] = guaranteeToParams(guarantee);
 
         // set outcomeHash for guarantor
-        await (await AssetHolder.setOutcomePermissionless(guarantorId, gOutcomeContentHash)).wait();
+        await (await AssetHolder.setAssetOutcomeHashPermissionless(
+          guarantorId,
+          gOutcomeContentHash,
+        )).wait();
         expect(await AssetHolder.outcomeHashes(guarantorId)).toBe(gOutcomeContentHash);
       }
 
