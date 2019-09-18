@@ -44,38 +44,47 @@ beforeAll(async () => {
 
 // Scenarios are synonymous with channelNonce:
 
-const description1 = "It reverts when the channel storage doesn't match";
-const reason1 = 'Challenge State does not match stored version';
-const hashShouldNotMatch = reason => reason === reason1;
+const hashMisMatch = {
+  description: "It reverts when the channel storage doesn't match",
+  reason: 'Challenge State does not match stored version',
+  channelStorageBytesHash: HashZero,
+};
 
-const description2 = 'It reverts when the challenge has expired';
-const reason2 = 'Challenge timed out';
-const expired = reason => reason === reason2;
-
-const description3 = 'It reverts when the states do not form a validTransition chain ';
-const reason3 = 'CountingApp: Counter must be incremented';
-
-const description4 = 'It reverts when an unacceptable whoSignedWhat array is submitted';
-const reason4 = 'Unacceptable whoSignedWhat array';
-
-const description5 = 'It reverts when the turnNumRecord is not increased';
-const reason5 = 'turnNumRecord not increased';
-
-const description6 = 'It accepts when the input is valid, and clears the challenge';
+const challengeExpired = {
+  description: 'It reverts when the challenge has expired',
+  reason: 'Challenge timed out',
+  finalizesAt: 1,
+};
+const invalidSupport = {
+  description: 'It reverts when the states do not form a validTransition chain ',
+  reason: 'CountingApp: Counter must be incremented',
+};
+const stateUnsupported = {
+  description: 'It reverts when an unacceptable whoSignedWhat array is submitted',
+  reason: 'Unacceptable whoSignedWhat array',
+};
+const staleState = {
+  description: 'It reverts when the turnNumRecord is not increased',
+  reason: 'turnNumRecord not increased',
+};
+const succeeds = {
+  description: 'It accepts when the input is valid, and clears the challenge',
+};
 
 describe('checkpoint', () => {
+  // for the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce
   let cn = 300;
   it.each`
-    description     | channelNonce | setTurnNumRecord | largestTurnNum | appDatas     | whoSignedWhat | challenger    | reason
-    ${description1} | ${(cn += 1)} | ${8}             | ${9}           | ${[0, 1, 2]} | ${[0, 1, 2]}  | ${wallets[2]} | ${reason1}
-    ${description2} | ${(cn += 1)} | ${8}             | ${8}           | ${[0, 1, 2]} | ${[0, 1, 2]}  | ${wallets[2]} | ${reason2}
-    ${description3} | ${(cn += 1)} | ${7}             | ${8}           | ${[0, 2, 1]} | ${[0, 1, 2]}  | ${wallets[1]} | ${reason3}
-    ${description4} | ${(cn += 1)} | ${7}             | ${8}           | ${[0, 1, 2]} | ${[0, 0, 2]}  | ${wallets[1]} | ${reason4}
-    ${description5} | ${(cn += 1)} | ${10}            | ${8}           | ${[0, 1, 2]} | ${[0, 1, 2]}  | ${wallets[1]} | ${reason5}
-    ${description6} | ${(cn += 1)} | ${7}             | ${8}           | ${[0, 1, 2]} | ${[0, 1, 2]}  | ${wallets[1]} | ${undefined}
-    ${description6} | ${(cn += 1)} | ${7}             | ${11}          | ${[0, 1, 2]} | ${[0, 1, 2]}  | ${wallets[1]} | ${undefined}
+    test                | channelNonce | setTurnNumRecord | largestTurnNum | appDatas     | whoSignedWhat | challenger
+    ${succeeds}         | ${(cn += 1)} | ${7}             | ${8}           | ${[0, 1, 2]} | ${[0, 1, 2]}  | ${wallets[1]}
+    ${succeeds}         | ${(cn += 1)} | ${7}             | ${11}          | ${[0, 1, 2]} | ${[0, 1, 2]}  | ${wallets[1]}
+    ${hashMisMatch}     | ${(cn += 1)} | ${7}             | ${11}          | ${[0, 1, 2]} | ${[0, 1, 2]}  | ${wallets[2]}
+    ${challengeExpired} | ${(cn += 1)} | ${7}             | ${11}          | ${[0, 1, 2]} | ${[0, 1, 2]}  | ${wallets[2]}
+    ${invalidSupport}   | ${(cn += 1)} | ${7}             | ${8}           | ${[0, 2, 1]} | ${[0, 1, 2]}  | ${wallets[1]}
+    ${stateUnsupported} | ${(cn += 1)} | ${7}             | ${8}           | ${[0, 1, 2]} | ${[0, 0, 2]}  | ${wallets[1]}
+    ${staleState}       | ${(cn += 1)} | ${10}            | ${8}           | ${[0, 1, 2]} | ${[0, 1, 2]}  | ${wallets[1]}
   `(
-    '$description', // for the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce
+    '$test.description',
     async ({
       channelNonce,
       setTurnNumRecord,
@@ -83,7 +92,7 @@ describe('checkpoint', () => {
       appDatas,
       whoSignedWhat,
       challenger,
-      reason,
+      test,
     }) => {
       // compute channelId
       const channel: Channel = {chainId, channelNonce, participants};
@@ -116,21 +125,21 @@ describe('checkpoint', () => {
       // set expiry time in the future or in the past
       const blockNumber = await provider.getBlockNumber();
       const blockTimestamp = (await provider.getBlock(blockNumber)).timestamp;
-      const finalizesAt = expired(reason)
-        ? bigNumberify(1).toHexString()
-        : bigNumberify(blockTimestamp)
-            .add(challengeDuration)
-            .toHexString();
+      const finalizesAt =
+        test.finalizesAt ||
+        bigNumberify(blockTimestamp)
+          .add(challengeDuration)
+          .toHexString();
 
-      const challengeExistsHash = hashShouldNotMatch(reason)
-        ? HashZero
-        : hashChannelStorage({
-            largestTurnNum: setTurnNumRecord,
-            finalizesAt,
-            state: challengeState,
-            challengerAddress: challenger.address,
-            outcome,
-          });
+      const challengeExistsHash =
+        test.channelStorageBytesHash ||
+        hashChannelStorage({
+          largestTurnNum: setTurnNumRecord,
+          finalizesAt,
+          state: challengeState,
+          challengerAddress: challenger.address,
+          outcome,
+        });
 
       // call public wrapper to set state (only works on test contract)
       const tx = await ForceMove.setChannelStorageHash(channelId, challengeExistsHash);
@@ -148,9 +157,9 @@ describe('checkpoint', () => {
         whoSignedWhat,
         setTurnNumRecord,
       );
-      if (reason) {
+      if (test.reason) {
         const regex = new RegExp(
-          '^' + 'VM Exception while processing transaction: revert ' + reason + '$',
+          '^' + 'VM Exception while processing transaction: revert ' + test.reason + '$',
         );
         await expectRevert(
           () => sendTransaction(provider, ForceMove.address, transactionsRequest),
