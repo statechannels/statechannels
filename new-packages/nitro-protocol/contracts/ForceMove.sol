@@ -109,7 +109,7 @@ contract ForceMove {
 
         // check that the forceMove is signed by a participant and store their address
 
-        address challenger = _recoverSigner(
+        address challenger = _recoverSigner( // TODO: what if someone nabs this signature off of a transaction and uses it in a front-ran tx?
             keccak256(
                 abi.encode(
                     largestTurnNum,
@@ -362,7 +362,10 @@ contract ForceMove {
 
         ChannelStorage memory channelStorage = abi.decode(channelStorageBytes, (ChannelStorage));
 
-        require(now < channelStorage.finalizesAt, 'Challenge timed out');
+        require(
+            channelStorage.finalizesAt == 0 || now < channelStorage.finalizesAt,
+            'Challenge timed out'
+        );
         require(channelStorage.turnNumRecord < largestTurnNum, 'turnNumRecord not increased');
         require(
             keccak256(channelStorageBytes) == channelStorageHashes[channelId],
