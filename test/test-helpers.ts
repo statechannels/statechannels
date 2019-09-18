@@ -50,7 +50,6 @@ export const ongoingChallengeHash = (turnNumRecord: number = 5) => {
     finalizesAt: bigNumberify(1e12).toHexString(),
     challengerAddress: AddressZero,
     outcome: [],
-    state: undefined,
   });
 };
 
@@ -58,11 +57,15 @@ export const finalizedOutcomeHash = (
   turnNumRecord: number = 5,
   finalizesAt: string = toHex(1),
   outcome: Outcome = [],
+  state = undefined,
+  challengerAddress = undefined,
 ) => {
   return hashChannelStorage({
     largestTurnNum: bigNumberify(turnNumRecord).toHexString(),
     finalizesAt,
     outcome,
+    state,
+    challengerAddress,
   });
 };
 
