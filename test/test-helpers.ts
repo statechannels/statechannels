@@ -12,7 +12,7 @@ import {hashChannelStorage} from '../src/contract/channel-storage';
 import {
   Outcome,
   encodeAllocation,
-  hashOutcomeContent,
+  hashAssetOutcome,
   encodeGuarantee,
   Guarantee,
   Allocation,
@@ -179,20 +179,20 @@ export async function sendTransaction(
 
 export function allocationToParams(allocation: Allocation) {
   const allocationBytes = encodeAllocation(allocation);
-  let outcomeContentHash;
+  let assetOutcomeHash;
   if (allocation.length === 0) {
-    outcomeContentHash = HashZero;
+    assetOutcomeHash = HashZero;
   } else {
-    outcomeContentHash = hashOutcomeContent(allocation);
+    assetOutcomeHash = hashAssetOutcome(allocation);
   }
-  return [allocationBytes, outcomeContentHash];
+  return [allocationBytes, assetOutcomeHash];
 }
 
 export function guaranteeToParams(guarantee: Guarantee) {
   const guaranteeBytes = encodeGuarantee(guarantee);
 
-  const outcomeContentHash = hashOutcomeContent(guarantee);
-  return [guaranteeBytes, outcomeContentHash];
+  const assetOutcomeHash = hashAssetOutcome(guarantee);
+  return [guaranteeBytes, assetOutcomeHash];
 }
 
 export async function signStates(
