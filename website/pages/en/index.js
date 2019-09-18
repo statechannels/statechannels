@@ -15,8 +15,8 @@ const GridBlock = CompLibrary.GridBlock;
 
 class HomeSplash extends React.Component {
   render() {
-    const { siteConfig, language = '' } = this.props;
-    const { baseUrl, docsUrl } = siteConfig;
+    const {siteConfig, language = ''} = this.props;
+    const {baseUrl, docsUrl} = siteConfig;
     const docsPart = `${docsUrl ? `${docsUrl}/` : ''}`;
     const langPart = `${language ? `${language}/` : ''}`;
     const docUrl = doc => `${baseUrl}${docsPart}${langPart}${doc}`;
@@ -59,24 +59,27 @@ class HomeSplash extends React.Component {
     );
 
     return (
-      <SplashContainer>
-        <div className="inner">
-          <ProjectTitle siteConfig={siteConfig} />
-          <PromoSection>
-            <Button href={docUrl('force-move/intro')}>Show me the docs</Button>
-            {/* <Button href={docUrl('doc1.html')}>Example Link</Button>
-            <Button href={docUrl('doc2.html')}>Example Link 2</Button> */}
-          </PromoSection>
-        </div>
-      </SplashContainer>
+      <div>
+        <SplashContainer>
+          <div className="inner">
+            <ProjectTitle siteConfig={siteConfig} />
+          </div>
+        </SplashContainer>
+        <PromoSection>
+          <Button href={docUrl('nitro-intro')}>Documentation</Button>
+          <Button href={siteConfig.repoUrl}>Code</Button>
+          {/* <Button href={docUrl('doc1.html')}>Example Link</Button>
+                <Button href={docUrl('doc2.html')}>Example Link 2</Button> */}
+        </PromoSection>
+      </div>
     );
   }
 }
 
 class Index extends React.Component {
   render() {
-    const { config: siteConfig, language = '' } = this.props;
-    const { baseUrl } = siteConfig;
+    const {config: siteConfig, language = ''} = this.props;
+    const {baseUrl} = siteConfig;
 
     const Block = props => (
       <Container padding={['bottom', 'top']} id={props.id} background={props.background}>
@@ -85,7 +88,7 @@ class Index extends React.Component {
     );
 
     const FeatureCallout = () => (
-      <div className="productShowcaseSection paddingBottom" style={{ textAlign: 'center' }}>
+      <div className="productShowcaseSection paddingBottom" style={{textAlign: 'center'}}>
         <h2>Feature Callout</h2>
         <MarkdownBlock>These are features of this project</MarkdownBlock>
       </div>
@@ -134,19 +137,25 @@ class Index extends React.Component {
     );
 
     const Features = () => (
-      <Block layout="fourColumn">
+      <Block layout="threeColumn">
         {[
           {
-            content: 'This is the content of my feature',
-            image: `${baseUrl}img/undraw_react.svg`,
+            content: 'Bootstraps from the Ethereum blockchain',
+            image: `${baseUrl}img/ethereum-logo.svg`,
             imageAlign: 'top',
-            title: 'Feature One',
+            title: 'Secure',
           },
           {
-            content: 'The content of my second feature',
-            image: `${baseUrl}img/undraw_operating_system.svg`,
+            content: 'Allows for ultra-low latency apps',
+            image: `${baseUrl}img/motorcycle.svg`,
             imageAlign: 'top',
-            title: 'Feature Two',
+            title: 'Fast',
+          },
+          {
+            content: 'Optimized for low cost',
+            image: `${baseUrl}img/gas.svg`,
+            imageAlign: 'top',
+            title: 'Cheap',
           },
         ]}
       </Block>
@@ -184,14 +193,14 @@ class Index extends React.Component {
     return (
       <div>
         <HomeSplash siteConfig={siteConfig} language={language} />
-        <div className="mainContainer">
-          {/* <Features /> */}
-          {/* <FeatureCallout /> */}
-          {/* <LearnHow /> */}
-          {/* <TryOut /> */}
-          {/* <Description /> */}
-          {/* <Showcase /> */}
-        </div>
+        {/* <div className="mainContainer"> */}
+        <Features />
+        {/* <FeatureCallout /> */}
+        {/* <LearnHow /> */}
+        {/* <TryOut /> */}
+        {/* <Description /> */}
+        {/* <Showcase /> */}
+        {/* </div> */}
       </div>
     );
   }
