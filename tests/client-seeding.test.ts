@@ -1,60 +1,66 @@
 import MemoryChunkStore from 'memory-chunk-store';
-
-import { defaultFile, defaultTorrentHash, defaultFileMagnetURI, defaultSeedingOptions } from './utils';
-import { PaidStreamingExtensionNotices } from '../src/constants';
-import WebTorrent, { ClientEvents } from './../src/web3torrent-lib';
+import WebTorrentPaidStreamingClient, {
+  ClientEvents,
+  PaidStreamingExtensionNotices,
+  PaidStreamingTorrent
+} from './../src/web3torrent-lib';
+import { defaultFile, defaultFileMagnetURI, defaultSeedingOptions, defaultTorrentHash } from './utils';
 
 describe('Seeding and Leeching', () => {
-  let seeder, leecher;
+  let seeder: WebTorrentPaidStreamingClient;
+  let leecher: WebTorrentPaidStreamingClient;
 
   beforeEach(() => {
-    seeder = new WebTorrent({ pseAccount: 1, dht: false });
+    seeder = new WebTorrentPaidStreamingClient({ pseAccount: '1', dht: false });
     seeder.on('error', err => fail(err));
     seeder.on('warning', err => fail(err));
 
-    leecher = new WebTorrent({ pseAccount: 2, dht: false });
+    leecher = new WebTorrentPaidStreamingClient({ pseAccount: '2', dht: false });
     leecher.on('error', err => fail(err));
     leecher.on('warning', err => fail(err));
   });
 
   it('should seed and remove a Torrent', done => {
-    expect(seeder.pseAccount).toBe(1);
-    seeder.seed(defaultFile, defaultSeedingOptions(false), seededTorrent => {
+    expect(seeder.pseAccount).toBe('1');
+    seeder.seed(defaultFile as File, defaultSeedingOptions(false), seededTorrent => {
       expect(seeder.torrents.length).toEqual(1);
       expect(seededTorrent.infoHash).toEqual(defaultTorrentHash);
       expect(seededTorrent.magnetURI).toEqual(defaultFileMagnetURI);
-      expect(seededTorrent.usingPaidStreaming).toBe(true);
+      expect((seededTorrent as PaidStreamingTorrent).usingPaidStreaming).toBe(true);
       done();
     });
   });
 
   it('should perform the extended handshake between seeder and leecher', done => {
-    seeder.seed(defaultFile, defaultSeedingOptions(), seededTorrent => {
+    seeder.seed(defaultFile as File, defaultSeedingOptions(), seededTorrent => {
       leecher.add(seededTorrent.magnetURI, { store: MemoryChunkStore }, () => {
         expect(leecher.torrents.length).toEqual(1);
         expect(seeder.torrents[0].wires.length).toEqual(1);
         expect(leecher.torrents[0].wires.length).toEqual(1);
-        expect(leecher.torrents[0].wires.some(wire =>
-          wire.paidStreamingExtension.peerAccount === seeder.pseAccount &&
-          wire.paidStreamingExtension.pseAccount === leecher.pseAccount)).toBe(true)
+        expect(
+          leecher.torrents[0].wires.some(
+            wire =>
+              wire.paidStreamingExtension.peerAccount === seeder.pseAccount &&
+              wire.paidStreamingExtension.pseAccount === leecher.pseAccount
+          )
+        ).toBe(true);
         done();
       });
     });
   }, 10000);
 
   it('should reach a ready-for-leeching, choked state', done => {
-    seeder.seed(defaultFile, defaultSeedingOptions(), seededTorrent => {
+    seeder.seed(defaultFile as File, defaultSeedingOptions(), seededTorrent => {
       seeder.once(ClientEvents.PEER_STATUS_CHANGED, ({ allowedPeers }) => {
         expect(allowedPeers[`${leecher.pseAccount}`].allowed).toEqual(false);
         done();
       });
       leecher.add(seededTorrent.magnetURI, { store: MemoryChunkStore });
-    }
-    );
+    });
   }, 10000);
 
   it('should be able to unchoke and finish a download', done => {
-    seeder.seed(defaultFile, defaultSeedingOptions(), seededTorrent => {
+    seeder.seed(defaultFile as File, defaultSeedingOptions(), seededTorrent => {
       seeder.once(ClientEvents.PEER_STATUS_CHANGED, ({ peerAccount }) => {
         seeder.togglePeer(seededTorrent.infoHash, peerAccount);
 
@@ -75,8 +81,7 @@ describe('Seeding and Leeching', () => {
       });
 
       leecher.add(seededTorrent.magnetURI, { store: MemoryChunkStore });
-    }
-    );
+    });
   }, 10000);
 
   afterEach(() => {
