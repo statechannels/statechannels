@@ -1,4 +1,4 @@
-import {Uint256, Bytes32, Address} from './types';
+import {Uint256, Bytes32, Address, Bytes} from './types';
 import {defaultAbiCoder, keccak256} from 'ethers/utils';
 import {Outcome, hashOutcome} from './outcome';
 import {State, hashState} from './state';
@@ -36,7 +36,18 @@ export function hashChannelStorage(channelStorage: ChannelStorage): Bytes32 {
   );
 }
 
-export function encodeChannelStorageLite(channelStorageLite: ChannelStorageLite): Bytes32 {
+export function encodeChannelStorage(channelStorage: ChannelStorage): Bytes {
+  const outcomeHash = channelStorage.outcome ? hashOutcome(channelStorage.outcome) : HashZero;
+  const stateHash = channelStorage.state ? hashState(channelStorage.state) : HashZero;
+  const {finalizesAt, challengerAddress, largestTurnNum} = channelStorage;
+
+  return defaultAbiCoder.encode(
+    [CHANNEL_STORAGE_TYPE],
+    [[largestTurnNum, finalizesAt, stateHash, challengerAddress, outcomeHash]],
+  );
+}
+
+export function encodeChannelStorageLite(channelStorageLite: ChannelStorageLite): Bytes {
   const outcomeHash = channelStorageLite.outcome
     ? hashOutcome(channelStorageLite.outcome)
     : HashZero;
