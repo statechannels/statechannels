@@ -42,7 +42,6 @@ export function encodeChannelStorage({
   It is currently up to the caller to ensure this.
   */
   const isOpen = eqHex(finalizesAt, HashZero);
-  const isFinalized = !isOpen && !state;
 
   if (isOpen && (outcome || state || challengerAddress)) {
     throw new Error(
@@ -52,7 +51,7 @@ export function encodeChannelStorage({
 
   const stateHash = isOpen || !state ? HashZero : hashState(state);
   const outcomeHash = isOpen ? HashZero : hashOutcome(outcome);
-  challengerAddress = isOpen || isFinalized ? AddressZero : challengerAddress;
+  challengerAddress = challengerAddress || AddressZero;
 
   return defaultAbiCoder.encode(
     [CHANNEL_STORAGE_TYPE],
