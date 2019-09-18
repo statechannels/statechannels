@@ -88,6 +88,7 @@ export type ExtendedTorrentPiece = WebTorrent.TorrentPiece & {
 export type ExtendedTorrent = Omit<WebTorrent.Torrent, OverridenTorrentProperties> & {
   pieces: Array<ExtendedTorrentPiece | null>;
   requests: Request[];
+  wires: PaidStreamingWire[];
 
   _startDiscovery(): void;
   _selections: unknown;
@@ -120,3 +121,13 @@ export type PeersByTorrent = {
     [key: string /* PeerAccount */]: PeerByTorrent;
   };
 };
+
+declare module 'webtorrent' {
+  export interface Instance {
+    on(event: 'warning', callback: (err: Error | string) => void): this;
+  }
+
+  export interface TorrentFile {
+    done: boolean;
+  }
+}

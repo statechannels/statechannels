@@ -57,7 +57,7 @@ export abstract class PaidStreamingExtension implements Extension {
     }
 
     if (handshake.pseAccount) {
-      this.peerAccount = handshake.pseAccount;
+      this.peerAccount = handshake.pseAccount.toString();
     }
 
     this.messageBus.emit(PaidStreamingExtensionEvents.PSE_HANDSHAKE, {

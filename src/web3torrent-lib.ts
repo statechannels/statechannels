@@ -23,6 +23,7 @@ export * from './types';
 export default class WebTorrentPaidStreamingClient extends WebTorrent {
   allowedPeers: PeersByTorrent;
   pseAccount: string;
+  torrents: PaidStreamingTorrent[] = [];
 
   constructor(opts: WebTorrentPaidStreamingClientOptions = {}) {
     super(opts);
