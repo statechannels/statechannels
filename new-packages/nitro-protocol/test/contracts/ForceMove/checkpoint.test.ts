@@ -122,7 +122,7 @@ describe('checkpoint', () => {
         });
       }
 
-      // set expiry time in the future or in the past
+      // compute finalizedAt
       const blockNumber = await provider.getBlockNumber();
       const blockTimestamp = (await provider.getBlock(blockNumber)).timestamp;
       const finalizesAt =
@@ -146,17 +146,16 @@ describe('checkpoint', () => {
       await tx.wait();
       expect(await ForceMove.channelStorageHashes(channelId)).toEqual(challengeExistsHash);
 
-      // sign the states
-      const sigs = await signStates(states, wallets, whoSignedWhat);
+      const signatures = await signStates(states, wallets, whoSignedWhat);
 
-      const transactionsRequest = createCheckpointTransaction(
+      const transactionsRequest = createCheckpointTransaction({
         challengeState,
         finalizesAt,
         states,
-        sigs,
+        signatures,
         whoSignedWhat,
-        setTurnNumRecord,
-      );
+        turnNumRecord: setTurnNumRecord,
+      });
       if (test.reason) {
         const regex = new RegExp(
           '^' + 'VM Exception while processing transaction: revert ' + test.reason + '$',

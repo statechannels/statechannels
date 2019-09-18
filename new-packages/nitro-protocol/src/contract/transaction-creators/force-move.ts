@@ -14,14 +14,22 @@ const GAS_LIMIT = 3000000;
 
 const ForceMoveContractInterface = new ethers.utils.Interface(ForceMoveArtifact.abi);
 
-export function createCheckpointTransaction(
-  challengeState: State,
-  finalizesAt: string,
-  states: State[],
-  signatures: Signature[],
-  whoSignedWhat: number[],
-  turnNumRecord: string,
-): TransactionRequest {
+interface CheckpointData {
+  challengeState: State;
+  finalizesAt: string;
+  states: State[];
+  signatures: Signature[];
+  whoSignedWhat: number[];
+  turnNumRecord: string;
+}
+export function createCheckpointTransaction({
+  challengeState,
+  finalizesAt,
+  states,
+  signatures,
+  whoSignedWhat,
+  turnNumRecord,
+}: CheckpointData): TransactionRequest {
   const largestTurnNum = Math.max(...states.map(s => s.turnNum));
   const fixedPart = getFixedPart(challengeState);
   const variableParts = states.map(s => getVariablePart(s));
