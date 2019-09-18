@@ -59,10 +59,11 @@ library Outcome {
 
 ## Example of an outcome data structure
 
-| >                                                                                               | 0xETHAssetHolder                                 | 0                                                  | 0xAlice | 5   | 0xBob | 2   | 0xDAIAssetHolder | ... |
-| ----------------------------------------------------------------------------------------------- | ------------------------------------------------ | -------------------------------------------------- | ------- | --- | ----- | --- | ---------------- | --- |
-|                                                                                                 |                                                  | <td colspan="4" align="center">AllocationItem</td> |         |     |
-|                                                                                                 | <td colspan="5" align="center">AssetOutcome</td> |                                                    |         |
+| >                                                                                               | 0xETHAssetHolder                                 | 0                                                                                                     | 0xAlice | 5   | 0xBob | 2   | 0xDAIAssetHolder | ... |
+| ----------------------------------------------------------------------------------------------- | ------------------------------------------------ | ----------------------------------------------------------------------------------------------------- | ------- | --- | ----- | --- | ---------------- | --- |
+|                                                                                                 |                                                  | <td colspan="2" align="center">AllocationItem</td> <td colspan="2" align="center">AllocationItem</td> |
+|                                                                                                 |                                                  | <td colspan="4" align="center">Allocation</td>                                                        |         |     |
+|                                                                                                 | <td colspan="5" align="center">AssetOutcome</td> |                                                                                                       |         |
 | <td colspan="6" align="center">OutcomeItem</td> <td colspan="6" align="center">OutcomeItem</td> |
 | <td colspan="8" align="center">Outcome</td>                                                     |
 

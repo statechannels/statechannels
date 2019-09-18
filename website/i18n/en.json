@@ -52,7 +52,7 @@
         "title": "Outcomes"
       },
       "asset-holder/set-outcome": {
-        "title": "setOutcome"
+        "title": "setAssetOutcomeHash"
       },
       "asset-holder/transfer": {
         "title": "transferAll"
