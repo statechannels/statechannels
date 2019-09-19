@@ -33,10 +33,8 @@ export function signState(state: State, privateKey: string): SignedState {
   }
 
   const hashedState = hashState(state);
-  // We use `web3.eth.accounts` to sign as all ethers.js signing methods are async
-  const flatSignature = new Web3EthAccounts('').sign(hashedState, privateKey);
 
-  const signature = splitSignature(flatSignature);
+  const signature = signData(hashedState, privateKey);
   return {state, signature};
 }
 
@@ -52,9 +50,11 @@ export function signChallengeMessage(signedStates: SignedState[], privateKey: st
   const channelId = getChannelId(signedStates[0].state.channel);
   const challengeHash = hashChallengeMessage({largestTurnNum, channelId});
 
-  // We use `web3.eth.accounts` to sign as all ethers.js signing methods are async
-  const flatSignature = new Web3EthAccounts('').sign(challengeHash, privateKey);
+  return signData(challengeHash, privateKey);
+}
 
-  const signature = splitSignature(flatSignature);
-  return splitSignature(signature);
+function signData(hashedData: string, privateKey: string): Signature {
+  // We use `web3.eth.accounts` to sign as all ethers.js signing methods are async
+  const flatSignature = new Web3EthAccounts('').sign(hashedData, privateKey);
+  return splitSignature(flatSignature);
 }
