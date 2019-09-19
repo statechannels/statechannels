@@ -25,7 +25,15 @@ const CHANNEL_STORAGE_LITE_TYPE =
   'tuple(uint256 finalizesAt, bytes32 stateHash, address challengerAddress, bytes32 outcomeHash)';
 
 export function hashChannelStorage(channelStorage: ChannelStorage): Bytes32 {
-  return keccak256(encodeChannelStorage(channelStorage));
+  const {largestTurnNum, finalizesAt} = channelStorage;
+  const hash = keccak256(encodeChannelStorage(channelStorage));
+  const fingerprint = hash.slice(26);
+  const storage =
+    ethers.utils.hexZeroPad(ethers.utils.hexlify(largestTurnNum), 6) +
+    ethers.utils.hexZeroPad(ethers.utils.hexlify(finalizesAt), 6).slice(2) +
+    +fingerprint.slice(2);
+
+  return storage;
 }
 
 export function encodeChannelStorage({
