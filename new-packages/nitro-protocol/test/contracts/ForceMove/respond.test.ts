@@ -5,8 +5,9 @@ import ForceMoveArtifact from '../../../build/contracts/TESTForceMove.json';
 // @ts-ignore
 import countingAppArtifact from '../../../build/contracts/CountingApp.json';
 import {defaultAbiCoder, hexlify, bigNumberify} from 'ethers/utils';
-import {setupContracts, sign, newChallengeClearedEvent, sendTransaction} from '../../test-helpers';
-import {Outcome} from '../../../src/contract/outcome';
+import {setupContracts, newChallengeClearedEvent, sign, sendTransaction} from '../../test-helpers';
+import {One, HashZero} from 'ethers/constants';
+import {Outcome, hashOutcome} from '../../../src/contract/outcome';
 import {Channel, getChannelId} from '../../../src/contract/channel';
 import {State, hashState} from '../../../src/contract/state';
 import {hashChannelStorage} from '../../../src/contract/channel-storage';
@@ -97,19 +98,17 @@ describe('respond', () => {
       const blockNumber = await provider.getBlockNumber();
       const blockTimestamp = (await provider.getBlock(blockNumber)).timestamp;
       const finalizesAt = expired
-        ? bigNumberify(blockTimestamp)
-            .sub(challengeDuration)
-            .toHexString()
+        ? One.toHexString()
         : bigNumberify(blockTimestamp)
             .add(challengeDuration)
             .toHexString();
 
-      const challengeExistsHash = hashChannelStorage({
-        largestTurnNum: setTurnNumRecord,
+      const challengeExistsHash = await ForceMove.getHash({
+        turnNumRecord: setTurnNumRecord,
         finalizesAt,
-        state: challengeState,
+        stateHash: challenger ? hashState(challengeState) : HashZero,
         challengerAddress: challenger.address,
-        outcome,
+        outcomeHash: outcome ? hashOutcome(outcome) : HashZero,
       });
 
       // call public wrapper to set state (only works on test contract)
