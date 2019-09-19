@@ -8,6 +8,9 @@
       "adjudicator/channel-storage": {
         "title": "ChannelStorage"
       },
+      "adjudicator/checkpoint": {
+        "title": "checkpoint"
+      },
       "adjudicator/conclude": {
         "title": "conclude"
       },
@@ -25,9 +28,6 @@
       },
       "adjudicator/refute": {
         "title": "refute"
-      },
-      "adjudicator/respond-with-alternative": {
-        "title": "respondWithAlternative"
       },
       "adjudicator/respond": {
         "title": "respond"
