@@ -84,7 +84,7 @@ contract ForceMove {
         // EITHER there is no information stored against channelId at all (OK)
         // OR there is, in which case we must check the channel is still open and that the committed turnNumRecord is correct
         require(
-            __slotEmptyOrMatchesHash(
+            _slotEmptyOrMatchesHash(
                 ChannelStorage(turnNumRecord, 0, bytes32(0), address(0), bytes32(0)),
                 channelStorageHashes[channelId]
             ),
@@ -409,7 +409,7 @@ contract ForceMove {
         // EITHER there is no information stored against channelId at all (OK)
         // OR there is, in which case we must check the channel is still open and that the committed turnNumRecord is correct
         require(
-            __slotEmptyOrMatchesHash(
+            _slotEmptyOrMatchesHash(
                 ChannelStorage(turnNumRecord, 0, bytes32(0), address(0), bytes32(0)),
                 channelStorageHashes[channelId]
             ),
@@ -730,12 +730,12 @@ contract ForceMove {
         return _getHash(cs) == h;
     }
 
-    function __slotEmptyOrMatchesHash(ChannelStorage memory cs, bytes32 h)
+    function _slotEmptyOrMatchesHash(ChannelStorage memory cs, bytes32 h)
         internal
         pure
         returns (bool)
     {
-        return _getHash(cs) == h || _getHash(ChannelStorage(0, 0, 0, address(0), 0)) == h;
+        return _getHash(cs) == h || h == bytes32(0);
     }
 
     // events

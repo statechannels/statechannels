@@ -69,4 +69,12 @@ contract TESTForceMove is ForceMove {
         return _matchesHash(cs, h);
     }
 
+    function slotEmptyOrMatchesHash(ChannelStorage memory cs, bytes32 h)
+        public
+        pure
+        returns (bool)
+    {
+        return _slotEmptyOrMatchesHash(cs, h);
+    }
+
 }
