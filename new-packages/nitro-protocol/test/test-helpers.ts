@@ -19,7 +19,6 @@ import {
 } from '../src/contract/outcome';
 import {State, hashState} from '../src/contract/state';
 import {TransactionRequest, TransactionReceipt} from 'ethers/providers';
-import {toHex} from '../src/hex-utils';
 
 export async function setupContracts(provider: ethers.providers.JsonRpcProvider, artifact) {
   const networkId = (await provider.getNetwork()).chainId;
@@ -39,15 +38,15 @@ export const nonParticipant = ethers.Wallet.createRandom();
 
 export const clearedChallengeHash = (turnNumRecord: number = 5) => {
   return hashChannelStorage({
-    largestTurnNum: bigNumberify(turnNumRecord).toHexString(),
-    finalizesAt: '0x0',
+    largestTurnNum: turnNumRecord,
+    finalizesAt: 0,
   });
 };
 
 export const ongoingChallengeHash = (turnNumRecord: number = 5) => {
   return hashChannelStorage({
-    largestTurnNum: bigNumberify(turnNumRecord).toHexString(),
-    finalizesAt: bigNumberify(1e12).toHexString(),
+    largestTurnNum: turnNumRecord,
+    finalizesAt: 1e12,
     challengerAddress: AddressZero,
     outcome: [],
   });
@@ -55,13 +54,13 @@ export const ongoingChallengeHash = (turnNumRecord: number = 5) => {
 
 export const finalizedOutcomeHash = (
   turnNumRecord: number = 5,
-  finalizesAt: string = toHex(1),
+  finalizesAt: number = 1,
   outcome: Outcome = [],
   state = undefined,
   challengerAddress = undefined,
 ) => {
   return hashChannelStorage({
-    largestTurnNum: bigNumberify(turnNumRecord).toHexString(),
+    largestTurnNum: turnNumRecord,
     finalizesAt,
     outcome,
     state,

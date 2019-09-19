@@ -26,7 +26,7 @@ let networkId;
 const chainId = '0x1234';
 const participants = ['', '', ''];
 const wallets = new Array(3);
-const challengeDuration = '0x1000';
+const challengeDuration = 0x1000;
 const assetHolderAddress = ethers.Wallet.createRandom().address;
 const defaultOutcome: Outcome = [{assetHolderAddress, allocation: []}];
 let appDefinition;
@@ -186,7 +186,7 @@ describe('checkpoint', () => {
 
         const expectedChannelStorageHash = hashChannelStorage({
           largestTurnNum,
-          finalizesAt: '0x0',
+          finalizesAt: 0x0,
         });
 
         // check channelStorageHash against the expected value

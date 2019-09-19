@@ -15,7 +15,7 @@ const NitroAdjudicatorContractInterface = new ethers.utils.Interface(NitroAdjudi
 
 export function createPushOutcomeTransaction(
   turnNumRecord: number,
-  finalizesAt: string,
+  finalizesAt: number,
   state: State,
   outcome: Outcome,
 ): TransactionRequest {

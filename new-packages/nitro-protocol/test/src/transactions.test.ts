@@ -22,12 +22,12 @@ const channel: Channel = {
 };
 const channelStorage: ChannelStorage = {
   turnNumRecord: 0,
-  finalizesAt: '0x0',
+  finalizesAt: 0x0,
   challengerAddress: AddressZero,
 };
 const challengeChannelStorage: ChannelStorage = {
   turnNumRecord: 5,
-  finalizesAt: '0x9',
+  finalizesAt: 0x9,
   challengerAddress: ethers.Wallet.createRandom().address,
   challengeState: {
     turnNum: 0,
@@ -36,7 +36,7 @@ const challengeChannelStorage: ChannelStorage = {
     appData: '0x0',
     outcome: [],
     channel,
-    challengeDuration: '0x0',
+    challengeDuration: 0x0,
   },
 };
 
@@ -52,7 +52,7 @@ beforeAll(async () => {
       appData: '0x0',
       outcome: [],
       channel,
-      challengeDuration: '0x0',
+      challengeDuration: 0x0,
     },
     wallet.privateKey,
   );

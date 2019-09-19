@@ -1,13 +1,13 @@
-import {Uint256, Bytes32, Address, Bytes} from './types';
+import {Uint48, Bytes32, Address, Bytes} from './types';
 import {defaultAbiCoder, keccak256} from 'ethers/utils';
 import {Outcome, hashOutcome} from './outcome';
 import {State, hashState} from './state';
 import {HashZero, AddressZero} from 'ethers/constants';
-import {eqHex} from '../hex-utils';
+import {ethers} from 'ethers';
 
 export interface ChannelStorage {
-  largestTurnNum: Uint256;
-  finalizesAt: Uint256;
+  largestTurnNum: Uint48;
+  finalizesAt: Uint48;
   state?: State;
   challengerAddress?: Address;
   outcome?: Outcome;
@@ -16,7 +16,7 @@ const CHANNEL_STORAGE_TYPE =
   'tuple(uint256 turnNumRecord, uint256 finalizesAt, bytes32 stateHash, address challengerAddress, bytes32 outcomeHash)';
 
 export interface ChannelStorageLite {
-  finalizesAt: Uint256;
+  finalizesAt: Uint48;
   state: State;
   challengerAddress: Address;
   outcome: Outcome;
@@ -41,7 +41,7 @@ export function encodeChannelStorage({
   both be missing, the latter indicating that the channel is finalized.
   It is currently up to the caller to ensure this.
   */
-  const isOpen = eqHex(finalizesAt, HashZero);
+  const isOpen = finalizesAt == 0;
 
   if (isOpen && (outcome || state || challengerAddress)) {
     throw new Error(

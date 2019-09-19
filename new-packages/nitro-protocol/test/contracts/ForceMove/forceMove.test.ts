@@ -30,7 +30,7 @@ let networkId;
 const chainId = '0x1234';
 const participants = ['', '', ''];
 const wallets = new Array(3);
-const challengeDuration = '0x1';
+const challengeDuration = 0x1;
 const outcome = [{allocation: [], assetHolderAddress: ethers.Wallet.createRandom().address}];
 
 let appDefinition;

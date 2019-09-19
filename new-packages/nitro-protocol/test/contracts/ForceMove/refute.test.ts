@@ -4,7 +4,7 @@ import {expectRevert} from 'magmo-devtools';
 import ForceMoveArtifact from '../../../build/contracts/TESTForceMove.json';
 // @ts-ignore
 import countingAppArtifact from '../../../build/contracts/CountingApp.json';
-import {defaultAbiCoder, hexlify, bigNumberify} from 'ethers/utils';
+import {defaultAbiCoder, hexlify} from 'ethers/utils';
 import {setupContracts, sign, newChallengeClearedEvent, sendTransaction} from '../../test-helpers';
 import {Channel, getChannelId} from '../../../src/contract/channel';
 import {State, hashState} from '../../../src/contract/state';
@@ -20,7 +20,7 @@ let networkId;
 const chainId = '0x1234';
 const participants = ['', '', ''];
 const wallets = new Array(3);
-const challengeDuration = '0x1000';
+const challengeDuration = 0x1000;
 const assetHolderAddress = ethers.Wallet.createRandom().address;
 const outcome: Outcome = [{assetHolderAddress, allocation: []}];
 let appDefinition;
@@ -96,12 +96,8 @@ describe('refute', () => {
       const blockNumber = await provider.getBlockNumber();
       const blockTimestamp = (await provider.getBlock(blockNumber)).timestamp;
       const finalizesAt = expired
-        ? bigNumberify(blockTimestamp)
-            .sub(challengeDuration)
-            .toHexString()
-        : bigNumberify(blockTimestamp)
-            .add(challengeDuration)
-            .toHexString();
+        ? blockTimestamp - challengeDuration
+        : blockTimestamp + challengeDuration;
 
       // compute expected ChannelStorageHash
 
@@ -144,7 +140,7 @@ describe('refute', () => {
         // check new expected ChannelStorageHash
         const expectedChannelStorage: ChannelStorage = {
           largestTurnNum: declaredTurnNumRecord,
-          finalizesAt: '0x0',
+          finalizesAt: 0,
         };
         const expectedChannelStorageHash = hashChannelStorage(expectedChannelStorage);
         expect(await ForceMove.channelStorageHashes(channelId)).toEqual(expectedChannelStorageHash);

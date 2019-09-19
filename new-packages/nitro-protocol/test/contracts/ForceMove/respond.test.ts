@@ -4,9 +4,9 @@ import {expectRevert} from 'magmo-devtools';
 import ForceMoveArtifact from '../../../build/contracts/TESTForceMove.json';
 // @ts-ignore
 import countingAppArtifact from '../../../build/contracts/CountingApp.json';
-import {defaultAbiCoder, hexlify, bigNumberify} from 'ethers/utils';
+import {defaultAbiCoder, hexlify} from 'ethers/utils';
 import {setupContracts, newChallengeClearedEvent, sign, sendTransaction} from '../../test-helpers';
-import {One, HashZero} from 'ethers/constants';
+import {HashZero} from 'ethers/constants';
 import {Outcome, hashOutcome} from '../../../src/contract/outcome';
 import {Channel, getChannelId} from '../../../src/contract/channel';
 import {State, hashState} from '../../../src/contract/state';
@@ -21,7 +21,7 @@ let networkId;
 const chainId = '0x1234';
 const participants = ['', '', ''];
 const wallets = new Array(3);
-const challengeDuration = '0x1000';
+const challengeDuration = 0x1000;
 const assetHolderAddress = ethers.Wallet.createRandom().address;
 const outcome: Outcome = [{assetHolderAddress, allocation: []}];
 let appDefinition;
@@ -97,11 +97,7 @@ describe('respond', () => {
       // set expiry time in the future or in the past
       const blockNumber = await provider.getBlockNumber();
       const blockTimestamp = (await provider.getBlock(blockNumber)).timestamp;
-      const finalizesAt = expired
-        ? One.toHexString()
-        : bigNumberify(blockTimestamp)
-            .add(challengeDuration)
-            .toHexString();
+      const finalizesAt = expired ? 1 : blockTimestamp + challengeDuration;
 
       const challengeExistsHash = await ForceMove.getHash({
         turnNumRecord: setTurnNumRecord,
@@ -148,7 +144,7 @@ describe('respond', () => {
 
         const expectedChannelStorageHash = hashChannelStorage({
           largestTurnNum: declaredTurnNumRecord + 1,
-          finalizesAt: '0x0',
+          finalizesAt: 0,
         });
         expect(await ForceMove.channelStorageHashes(channelId)).toEqual(expectedChannelStorageHash);
       }
