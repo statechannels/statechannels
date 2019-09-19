@@ -1,10 +1,11 @@
-import {Signature, arrayify, splitSignature} from 'ethers/utils';
+import {Signature, splitSignature} from 'ethers/utils';
 import {hashState, State} from './contract/state';
 import {ethers} from 'ethers';
 import {SignedState} from '.';
 import {getChannelId} from './contract/channel';
 import {hashChallengeMessage} from './contract/challenge';
 import {toHex} from './hex-utils';
+import Web3EthAccounts from 'web3-eth-accounts';
 
 export function getStateSignerAddress(signedState: SignedState): string {
   const stateHash = hashState(signedState.state);
@@ -25,20 +26,21 @@ export function getStateSignerAddress(signedState: SignedState): string {
   return recoveredAddress;
 }
 
-export async function signState(state: State, privateKey: string): Promise<SignedState> {
+export function signState(state: State, privateKey: string): SignedState {
   const wallet = new ethers.Wallet(privateKey);
   if (state.channel.participants.indexOf(wallet.address) < 0) {
     throw new Error("The state must be signed with a participant's private key");
   }
+
   const hashedState = hashState(state);
-  const signature = splitSignature(await wallet.signMessage(arrayify(hashedState)));
+  // We use `web3.eth.accounts` to sign as all ethers.js signing methods are async
+  const flatSignature = new Web3EthAccounts('').sign(hashedState, privateKey);
+
+  const signature = splitSignature(flatSignature);
   return {state, signature};
 }
 
-export async function signChallengeMessage(
-  signedStates: SignedState[],
-  privateKey: string,
-): Promise<Signature> {
+export function signChallengeMessage(signedStates: SignedState[], privateKey: string): Signature {
   if (signedStates.length === 0) {
     throw new Error('At least one signed state must be provided');
   }
@@ -50,6 +52,9 @@ export async function signChallengeMessage(
   const channelId = getChannelId(signedStates[0].state.channel);
   const challengeHash = hashChallengeMessage({largestTurnNum, channelId});
 
-  const signature = await wallet.signMessage(arrayify(challengeHash));
+  // We use `web3.eth.accounts` to sign as all ethers.js signing methods are async
+  const flatSignature = new Web3EthAccounts('').sign(challengeHash, privateKey);
+
+  const signature = splitSignature(flatSignature);
   return splitSignature(signature);
 }
