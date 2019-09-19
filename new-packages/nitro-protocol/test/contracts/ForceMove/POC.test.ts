@@ -3,38 +3,37 @@ import {ethers} from 'ethers';
 import POCArtifact from '../../../build/contracts/POC.json';
 // @ts-ignore
 import {setupContracts} from '../../test-helpers';
-import {AddressZero, HashZero} from 'ethers/constants';
-import {hashChannelStorage} from '../../../src/contract/channel-storage';
+import {HashZero, AddressZero} from 'ethers/constants';
+import {hashChannelStorage, parseChannelStorageHash} from '../../../src/contract/channel-storage';
 
 const provider = new ethers.providers.JsonRpcProvider(
   `http://localhost:${process.env.DEV_GANACHE_PORT}`,
 );
 let POC: ethers.Contract;
-
 beforeAll(async () => {
   POC = await setupContracts(provider, POCArtifact);
 });
 
-const description1 = 'It works';
-
+const zeroData = {stateHash: HashZero, outcomeHash: HashZero, challengerAddress: AddressZero};
 describe('forceMove', () => {
   it.each`
-    description     | turnNumRecord | finalizesAt | stateHash   | challengerAddress | outcomeHash
-    ${description1} | ${0}          | ${0}        | ${HashZero} | ${AddressZero}    | ${HashZero}
-    ${description1} | ${42}         | ${9001}     | ${HashZero} | ${AddressZero}    | ${HashZero}
-    ${description1} | ${123456}     | ${789}      | ${HashZero} | ${AddressZero}    | ${HashZero}
-  `('$description', async storage => {
-    const {challengerAddress, turnNumRecord} = storage;
-    const hash = await POC.getHash(storage);
-    const {turnNumRecord: currentTurnNumRecord, finalizesAt, fingerprint} = await POC.getData(hash);
+    turnNumRecord | finalizesAt
+    ${0x42}       | ${0x9001}
+    ${0x123456}   | ${0x789}
+    ${123456}     | ${789}
+  `('$Hashing and data retrieval', async storage => {
+    const blockchainStorage = {...storage, ...zeroData};
+    const blockchainHash = await POC.getHashedStorage(blockchainStorage);
+    const clientHash = hashChannelStorage(storage);
 
-    const hashedStorage = hashChannelStorage({
-      challengerAddress,
-      finalizesAt,
-      largestTurnNum: currentTurnNumRecord,
-    });
-    expect(storage).toMatchObject({turnNumRecord, finalizesAt});
-    expect(fingerprint._hex).toEqual(hashedStorage.slice(0, 26));
-    expect(await POC.matchesHash(storage, hash)).toBe(true);
+    const expected = {...storage, fingerprint: '0x' + clientHash.slice(2 + 24)};
+
+    expect(clientHash).toEqual(blockchainHash);
+    expect(await POC.matchesHash(blockchainStorage, blockchainHash)).toBe(true);
+    expect(await POC.matchesHash(blockchainStorage, clientHash)).toBe(true);
+
+    const {turnNumRecord, finalizesAt, fingerprint} = await POC.getData(blockchainHash);
+    expect({turnNumRecord, finalizesAt, fingerprint: fingerprint._hex}).toMatchObject(expected);
+    expect(parseChannelStorageHash(clientHash)).toMatchObject(expected);
   });
 });
