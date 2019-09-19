@@ -14,7 +14,7 @@ export async function validTransition(
   const numberOfParticipants = toState.channel.participants.length;
   const fromVariablePart = getVariablePart(fromState);
   const toVariablePart = getVariablePart(toState);
-  const turnNumB = 0; // This isn't actually used by the contract so any value works
+  const turnNumB = toState.turnNum;
 
   const contract = new ethers.Contract(
     forceMoveAppAddress,
