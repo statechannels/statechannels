@@ -52,7 +52,7 @@ contract TESTForceMove is ForceMove {
             );
         }
 
-        channelStorageHashes[channelId] = keccak256(abi.encode(channelStorage));
+        channelStorageHashes[channelId] = getHash(channelStorage);
     }
 
     // public setter for channelStorage
@@ -60,4 +60,21 @@ contract TESTForceMove is ForceMove {
     function setChannelStorageHash(bytes32 channelId, bytes32 h) public {
         channelStorageHashes[channelId] = h;
     }
+
+    function getData(uint256 storageHash) public pure returns (uint160, uint48, uint48) {
+        uint160 fingerprint = uint160(storageHash);
+        uint48 turnNumRecord = uint48(storageHash >> 160);
+        uint48 finalizesAt = uint48(storageHash >> 208);
+
+        return (fingerprint, turnNumRecord, finalizesAt);
+    }
+
+    function getHash(ChannelStorage memory channelStorage) public pure returns (bytes32 newHash) {
+        return _getHash(channelStorage);
+    }
+
+    function matchesHash(ChannelStorage memory cs, bytes32 h) public pure returns (bool) {
+        return _matchesHash(cs, h);
+    }
+
 }

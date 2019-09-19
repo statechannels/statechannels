@@ -73,16 +73,13 @@ contract ForceMove {
         // Check that the proposed largestTurnNum is larger than or equal to the turnNumRecord that is being committed to
         require(largestTurnNum >= turnNumRecord, 'Stale challenge!');
 
-        // EITHER there is no information stored against channelId at all
-        // OR there is, and we must check that
-        //   - the channel is still open; and
-        //   - the committed turnNumRecord is correct
+        // EITHER there is no information stored against channelId at all (OK)
+        // OR there is, in which case we must check the channel is still open and that the committed turnNumRecord is correct
         require(
-            channelStorageHashes[channelId] == bytes32(0) ||
-                keccak256(
-                    abi.encode(ChannelStorage(turnNumRecord, 0, bytes32(0), address(0), bytes32(0)))
-                ) ==
-                channelStorageHashes[channelId],
+            __slotEmptyOrMatchesHash(
+                ChannelStorage(turnNumRecord, 0, bytes32(0), address(0), bytes32(0)),
+                channelStorageHashes[channelId]
+            ),
             'Channel is not open or turnNum does not match'
         );
 
@@ -140,15 +137,13 @@ contract ForceMove {
             variableParts
         );
 
-        channelStorageHashes[channelId] = keccak256(
-            abi.encode(
-                ChannelStorage(
-                    largestTurnNum,
-                    now + fixedPart.challengeDuration,
-                    stateHashes[variableParts.length - 1],
-                    challenger,
-                    keccak256(abi.encode(variableParts[variableParts.length - 1].outcome))
-                )
+        channelStorageHashes[channelId] = _getHash(
+            ChannelStorage(
+                largestTurnNum,
+                now + fixedPart.challengeDuration,
+                stateHashes[variableParts.length - 1],
+                challenger,
+                keccak256(abi.encode(variableParts[variableParts.length - 1].outcome))
             )
         );
 
@@ -212,18 +207,16 @@ contract ForceMove {
         require(now < finalizesAt, 'Response too late!');
 
         require(
-            keccak256(
-                    abi.encode(
-                        ChannelStorage(
-                            turnNumRecord,
-                            finalizesAt,
-                            challengeStateHash,
-                            challenger,
-                            challengeOutcomeHash
-                        )
-                    )
-                ) ==
-                channelStorageHashes[channelId],
+            _matchesHash(
+                ChannelStorage(
+                    turnNumRecord,
+                    finalizesAt,
+                    challengeStateHash,
+                    challenger,
+                    challengeOutcomeHash
+                ),
+                channelStorageHashes[channelId]
+            ),
             'Challenge State does not match stored version'
         );
 
@@ -312,18 +305,16 @@ contract ForceMove {
         require(now < finalizesAt, 'Refute too late!');
 
         require(
-            keccak256(
-                    abi.encode(
-                        ChannelStorage(
-                            turnNumRecord,
-                            finalizesAt,
-                            challengeStateHash,
-                            challenger, // this is a check that the asserted challenger is in fact the challenger
-                            challengeOutcomeHash
-                        )
-                    )
-                ) ==
-                channelStorageHashes[channelId],
+            _matchesHash(
+                ChannelStorage(
+                    turnNumRecord,
+                    finalizesAt,
+                    challengeStateHash,
+                    challenger, // this is a check that the asserted challenger is in fact the challenger
+                    challengeOutcomeHash
+                ),
+                channelStorageHashes[channelId]
+            ),
             'Challenge State does not match stored version'
         );
 
@@ -363,12 +354,7 @@ contract ForceMove {
         ChannelStorage memory channelStorage = abi.decode(channelStorageBytes, (ChannelStorage));
 
         require(
-            channelStorage.finalizesAt == 0 || now < channelStorage.finalizesAt,
-            'Challenge timed out'
-        );
-        require(channelStorage.turnNumRecord < largestTurnNum, 'turnNumRecord not increased');
-        require(
-            keccak256(channelStorageBytes) == channelStorageHashes[channelId],
+            _matchesHash(channelStorage, channelStorageHashes[channelId]),
             'Challenge State does not match stored version'
         );
 
@@ -413,18 +399,14 @@ contract ForceMove {
         );
 
         // EITHER there is no information stored against channelId at all (OK)
-        if (channelStorageHashes[channelId] != bytes32(0)) {
-            // OR there is, in which case we must check the channel is still open and that the committed turnNumRecord is correct
-            require(
-                keccak256(
-                        abi.encode(
-                            ChannelStorage(turnNumRecord, 0, bytes32(0), address(0), bytes32(0))
-                        )
-                    ) ==
-                    channelStorageHashes[channelId],
-                'Channel is not open or turnNum does not match'
-            );
-        }
+        // OR there is, in which case we must check the channel is still open and that the committed turnNumRecord is correct
+        require(
+            __slotEmptyOrMatchesHash(
+                ChannelStorage(turnNumRecord, 0, bytes32(0), address(0), bytes32(0)),
+                channelStorageHashes[channelId]
+            ),
+            'Channel is not open or turnNum does not match'
+        );
 
         _conclude(
             largestTurnNum,
@@ -463,18 +445,16 @@ contract ForceMove {
         require(now < channelStorageLite.finalizesAt, 'Channel already finalized!');
 
         require(
-            keccak256(
-                    abi.encode(
-                        ChannelStorage(
-                            turnNumRecord,
-                            channelStorageLite.finalizesAt,
-                            channelStorageLite.stateHash, // challengeStateHash
-                            channelStorageLite.challengerAddress,
-                            challengeOutcomeHash
-                        )
-                    )
-                ) ==
-                channelStorageHashes[channelId],
+            _matchesHash(
+                ChannelStorage(
+                    turnNumRecord,
+                    channelStorageLite.finalizesAt,
+                    channelStorageLite.stateHash, // challengeStateHash
+                    channelStorageLite.challengerAddress,
+                    challengeOutcomeHash
+                ),
+                channelStorageHashes[channelId]
+            ),
             'Challenge State does not match stored version'
         );
 
@@ -655,8 +635,8 @@ contract ForceMove {
     }
 
     function _clearChallenge(bytes32 channelId, uint256 newTurnNumRecord) internal {
-        channelStorageHashes[channelId] = keccak256(
-            abi.encode(ChannelStorage(newTurnNumRecord, 0, bytes32(0), address(0), bytes32(0)))
+        channelStorageHashes[channelId] = _getHash(
+            ChannelStorage(newTurnNumRecord, 0, bytes32(0), address(0), bytes32(0))
         );
         emit ChallengeCleared(channelId, newTurnNumRecord);
     }
@@ -695,12 +675,35 @@ contract ForceMove {
         // effects
 
         // set channel storage
-        channelStorageHashes[channelId] = keccak256(
-            abi.encode(ChannelStorage(0, now, bytes32(0), address(0), outcomeHash))
+        channelStorageHashes[channelId] = _getHash(
+            ChannelStorage(0, now, bytes32(0), address(0), outcomeHash)
         );
 
         // emit event
         emit Concluded(channelId);
+    }
+
+    function _getHash(ChannelStorage memory channelStorage)
+        internal
+        pure
+        returns (bytes32 newHash)
+    {
+        uint256 i = uint256(keccak256(abi.encode(channelStorage))) >> 160;
+        i |= channelStorage.turnNumRecord << 160;
+        i |= channelStorage.finalizesAt << 208;
+        return bytes32(i);
+    }
+
+    function _matchesHash(ChannelStorage memory cs, bytes32 h) internal pure returns (bool) {
+        return _getHash(cs) == h;
+    }
+
+    function __slotEmptyOrMatchesHash(ChannelStorage memory cs, bytes32 h)
+        internal
+        pure
+        returns (bool)
+    {
+        return _getHash(cs) == h || _getHash(ChannelStorage(0, 0, 0, address(0), 0)) == h;
     }
 
     // events

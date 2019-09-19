@@ -24,18 +24,16 @@ contract NitroAdjudicator is ForceMove {
         bytes32 outcomeHash = keccak256(abi.encode(outcomeBytes));
 
         require(
-            keccak256(
-                    abi.encode(
-                        ChannelStorage(
-                            turnNumRecord,
-                            finalizesAt,
-                            stateHash,
-                            challengerAddress,
-                            outcomeHash
-                        )
-                    )
-                ) ==
-                channelStorageHashes[channelId],
+            _matchesHash(
+                ChannelStorage(
+                    turnNumRecord,
+                    finalizesAt,
+                    stateHash,
+                    challengerAddress,
+                    outcomeHash
+                ),
+                channelStorageHashes[channelId]
+            ),
             'Submitted data does not match storage'
         );
 
