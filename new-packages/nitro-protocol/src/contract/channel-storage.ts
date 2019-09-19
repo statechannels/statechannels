@@ -38,6 +38,25 @@ export function hashChannelStorage(channelStorage: ChannelStorage): Bytes32 {
   return storage;
 }
 
+export function parseChannelStorageHash(
+  channelStorageHashed: Bytes32,
+): {turnNumRecord: number; finalizesAt: number; fingerprint: Bytes} {
+  validateHexString(channelStorageHashed);
+
+  //
+  let cursor = 2;
+  const finalizesAt = '0x' + channelStorageHashed.slice(cursor, (cursor += 12));
+  const turnNumRecord = '0x' + channelStorageHashed.slice(cursor, (cursor += 12));
+  const fingerprint = '0x' + channelStorageHashed.slice(cursor);
+
+  return {
+    turnNumRecord: asNumber(turnNumRecord),
+    finalizesAt: asNumber(finalizesAt),
+    fingerprint,
+  };
+}
+const asNumber: (s: string) => number = s => ethers.utils.bigNumberify(s).toNumber();
+
 export function encodeChannelStorage({
   finalizesAt,
   state,
@@ -80,4 +99,13 @@ export function encodeChannelStorageLite(channelStorageLite: ChannelStorageLite)
     [CHANNEL_STORAGE_LITE_TYPE],
     [[finalizesAt, stateHash, challengerAddress, outcomeHash]],
   );
+}
+
+function validateHexString(hexString) {
+  if (!ethers.utils.isHexString(hexString)) {
+    throw new Error(`Not a hex string: ${hexString}`);
+  }
+  if (hexString.length !== 66) {
+    throw new Error(`Incorrect length: ${hexString.length}`);
+  }
 }
