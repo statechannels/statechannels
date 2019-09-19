@@ -165,7 +165,7 @@ describe('concludeFromChallenge', () => {
         blockNumber = await provider.getBlockNumber();
         blockTimestamp = (await provider.getBlock(blockNumber)).timestamp;
         const expectedChannelStorage: ChannelStorage = {
-          largestTurnNum: 0x0,
+          turnNumRecord: 0x0,
           finalizesAt: blockTimestamp,
           challengerAddress: AddressZero,
           outcome,

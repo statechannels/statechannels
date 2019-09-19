@@ -145,7 +145,7 @@ describe('checkpoint', () => {
       channelStorage =
         channelStorage ||
         hashChannelStorage({
-          largestTurnNum: setTurnNumRecord,
+          turnNumRecord: setTurnNumRecord,
           finalizesAt,
           state: challengeState,
           challengerAddress,
@@ -185,7 +185,7 @@ describe('checkpoint', () => {
         expect(eventTurnNumRecord._hex).toEqual(hexlify(largestTurnNum));
 
         const expectedChannelStorageHash = hashChannelStorage({
-          largestTurnNum,
+          turnNumRecord: largestTurnNum,
           finalizesAt: 0x0,
         });
 

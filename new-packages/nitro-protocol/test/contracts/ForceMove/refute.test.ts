@@ -102,7 +102,7 @@ describe('refute', () => {
       // compute expected ChannelStorageHash
 
       const challengeExistsHash = hashChannelStorage({
-        largestTurnNum: setTurnNumRecord,
+        turnNumRecord: setTurnNumRecord,
         finalizesAt,
         state: challengeState,
         challengerAddress: challenger.address,
@@ -139,7 +139,7 @@ describe('refute', () => {
 
         // check new expected ChannelStorageHash
         const expectedChannelStorage: ChannelStorage = {
-          largestTurnNum: declaredTurnNumRecord,
+          turnNumRecord: declaredTurnNumRecord,
           finalizesAt: 0,
         };
         const expectedChannelStorageHash = hashChannelStorage(expectedChannelStorage);

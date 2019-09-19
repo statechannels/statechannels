@@ -143,7 +143,7 @@ describe('respond', () => {
         // compute and check new expected ChannelStorageHash
 
         const expectedChannelStorageHash = hashChannelStorage({
-          largestTurnNum: declaredTurnNumRecord + 1,
+          turnNumRecord: declaredTurnNumRecord + 1,
           finalizesAt: 0,
         });
         expect(await ForceMove.channelStorageHashes(channelId)).toEqual(expectedChannelStorageHash);

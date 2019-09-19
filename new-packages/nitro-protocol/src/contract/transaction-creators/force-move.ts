@@ -52,7 +52,7 @@ export function createCheckpointTransaction({
     finalizesAt,
     challengerAddress,
     state: challengeState,
-    largestTurnNum: turnNumRecord,
+    turnNumRecord,
   });
 
   const data = ForceMoveContractInterface.functions.checkpoint.encode([

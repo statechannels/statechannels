@@ -38,14 +38,14 @@ export const nonParticipant = ethers.Wallet.createRandom();
 
 export const clearedChallengeHash = (turnNumRecord: number = 5) => {
   return hashChannelStorage({
-    largestTurnNum: turnNumRecord,
+    turnNumRecord,
     finalizesAt: 0,
   });
 };
 
 export const ongoingChallengeHash = (turnNumRecord: number = 5) => {
   return hashChannelStorage({
-    largestTurnNum: turnNumRecord,
+    turnNumRecord,
     finalizesAt: 1e12,
     challengerAddress: AddressZero,
     outcome: [],
@@ -60,7 +60,7 @@ export const finalizedOutcomeHash = (
   challengerAddress = undefined,
 ) => {
   return hashChannelStorage({
-    largestTurnNum: turnNumRecord,
+    turnNumRecord,
     finalizesAt,
     outcome,
     state,

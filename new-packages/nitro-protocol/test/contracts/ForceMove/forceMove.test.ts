@@ -171,7 +171,7 @@ describe('forceMove', () => {
         );
 
         const expectedChannelStorage: ChannelStorage = {
-          largestTurnNum,
+          turnNumRecord: largestTurnNum,
           finalizesAt: eventFinalizesAt,
           state: states[states.length - 1],
           challengerAddress: challenger.address,
