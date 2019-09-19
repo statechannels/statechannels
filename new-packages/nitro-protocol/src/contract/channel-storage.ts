@@ -6,7 +6,7 @@ import {HashZero, AddressZero} from 'ethers/constants';
 import {ethers} from 'ethers';
 
 export interface ChannelStorage {
-  largestTurnNum: Uint48;
+  turnNumRecord: Uint48;
   finalizesAt: Uint48;
   state?: State;
   challengerAddress?: Address;
@@ -25,13 +25,15 @@ const CHANNEL_STORAGE_LITE_TYPE =
   'tuple(uint256 finalizesAt, bytes32 stateHash, address challengerAddress, bytes32 outcomeHash)';
 
 export function hashChannelStorage(channelStorage: ChannelStorage): Bytes32 {
-  const {largestTurnNum, finalizesAt} = channelStorage;
+  const {turnNumRecord, finalizesAt} = channelStorage;
   const hash = keccak256(encodeChannelStorage(channelStorage));
-  const fingerprint = hash.slice(26);
+  const fingerprint = ethers.utils.hexDataSlice(hash, 12);
+
   const storage =
-    ethers.utils.hexZeroPad(ethers.utils.hexlify(largestTurnNum), 6) +
+    '0x' +
     ethers.utils.hexZeroPad(ethers.utils.hexlify(finalizesAt), 6).slice(2) +
-    +fingerprint.slice(2);
+    ethers.utils.hexZeroPad(ethers.utils.hexlify(turnNumRecord), 6).slice(2) +
+    fingerprint.slice(2);
 
   return storage;
 }
@@ -40,7 +42,7 @@ export function encodeChannelStorage({
   finalizesAt,
   state,
   challengerAddress,
-  largestTurnNum,
+  turnNumRecord,
   outcome,
 }: ChannelStorage): Bytes {
   /*
@@ -49,7 +51,7 @@ export function encodeChannelStorage({
   both be missing, the latter indicating that the channel is finalized.
   It is currently up to the caller to ensure this.
   */
-  const isOpen = finalizesAt == 0;
+  const isOpen = finalizesAt === 0;
 
   if (isOpen && (outcome || state || challengerAddress)) {
     throw new Error(
@@ -58,12 +60,12 @@ export function encodeChannelStorage({
   }
 
   const stateHash = isOpen || !state ? HashZero : hashState(state);
-  const outcomeHash = isOpen ? HashZero : hashOutcome(outcome);
+  const outcomeHash = isOpen || !outcome ? HashZero : hashOutcome(outcome);
   challengerAddress = challengerAddress || AddressZero;
 
   return defaultAbiCoder.encode(
     [CHANNEL_STORAGE_TYPE],
-    [[largestTurnNum, finalizesAt, stateHash, challengerAddress, outcomeHash]],
+    [[turnNumRecord, finalizesAt, stateHash, challengerAddress, outcomeHash]],
   );
 }
 
