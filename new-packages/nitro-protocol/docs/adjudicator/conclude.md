@@ -3,11 +3,17 @@ id: conclude
 title: conclude
 ---
 
-The conclude methods allow anyone with sufficient on-chain state to immediately finalize an outcome for a channel wihout having to wait for a challenge to expire.
+If a participant signs a state with `isFinal = true`, then in a cooperative channel-closing procedure the other players can countersign that state and broadcast it. Once a full set of `n` such signatures exists \(this set is known as a **finalization proof**\) anyone in possession may use it to finalize the channel on-chain. They would do this by calling `conclude` on the adjudicator.
+
+:::tip
+In Nitro, the existence of this possibility can be relied on \(counterfactually\) to [close a channel off-chain](../auxiliary-protocols#closing-off-chain).
+:::
+
+The conclude methods allow anyone with sufficient off-chain state to immediately finalize an outcome for a channel without having to wait for a challenge to expire.
 
 The off-chain state is submitted (in an optimized format), and once relevant checks have passed, an expired challenge is stored against the `channelId`.
 
-There is a seperate method to call, depending on whether a challenge is ongoing or whether the channel is open.
+There is a separate method to call, depending on whether a challenge is ongoing or whether the channel is open.
 
 ## Specification
 

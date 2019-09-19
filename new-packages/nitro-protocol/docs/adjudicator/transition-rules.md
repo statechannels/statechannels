@@ -105,14 +105,19 @@ contract CountingApp is ForceMoveApp {
 
 but other examples exist: such as a[ payment channel](https://github.com/magmo/force-move-protocol/blob/master/packages/fmg-payments/contracts/PaymentApp.sol), or games of [Rock Paper Scissors](https://github.com/magmo/apps/blob/master/packages/rps/contracts/RockPaperScissorsGame.sol) and [Tic Tac Toe](https://github.com/magmo/apps/blob/master/packages/tictactoe/contracts/TicTacToeGame.sol).
 
-**Channel setup**  
-Participants must
+## Chains of validTransitions
 
-- exchange some initial states
-- ensure the channel is funded
-- begin execution of the application by exchanging further states
+The definition above applies to a pair of `States`. It is often necessary to verify that a list of `States` has the property that the second `State` in each consecutive pair is a `validTransition`from the first.
 
-**Cooperative channel closing**  
-If a participant signs a state with `isFinal = true`, then in a cooperative channel-closing procedure the other players can countersign that state \(with turnNum still changing appropriately\). Once a full set of `n` such states exists \(this set is known as a **finalization proof**\) anyone in posession may use it to finalize the channel on-chain. They would do this by calling [`conclude`](./conclude) on the adjudicator.
+### Implementation
 
-In Nitro, the existence of this possibility is relied on \(counterfactually\) to close a channel off-chain.
+```solidity
+    function _validTransitionChain(
+        // returns stateHashes array (implies true) else reverts
+        uint256 largestTurnNum,
+        ForceMoveApp.VariablePart[] memory variableParts,
+        uint8 isFinalCount,
+        bytes32 channelId,
+        FixedPart memory fixedPart
+    ) internal pure returns (bytes32[] memory)
+```
