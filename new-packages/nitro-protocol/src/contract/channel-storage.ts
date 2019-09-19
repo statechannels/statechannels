@@ -31,8 +31,8 @@ export function hashChannelStorage(channelStorage: ChannelStorage): Bytes32 {
 
   const storage =
     '0x' +
-    ethers.utils.hexZeroPad(ethers.utils.hexlify(finalizesAt), 6).slice(2) +
     ethers.utils.hexZeroPad(ethers.utils.hexlify(turnNumRecord), 6).slice(2) +
+    ethers.utils.hexZeroPad(ethers.utils.hexlify(finalizesAt), 6).slice(2) +
     fingerprint.slice(2);
 
   return storage;
@@ -45,8 +45,8 @@ export function parseChannelStorageHash(
 
   //
   let cursor = 2;
-  const finalizesAt = '0x' + channelStorageHashed.slice(cursor, (cursor += 12));
   const turnNumRecord = '0x' + channelStorageHashed.slice(cursor, (cursor += 12));
+  const finalizesAt = '0x' + channelStorageHashed.slice(cursor, (cursor += 12));
   const fingerprint = '0x' + channelStorageHashed.slice(cursor);
 
   return {

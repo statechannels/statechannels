@@ -57,7 +57,7 @@ contract ForceMove {
         view
         returns (uint48 finalizesAt, uint48 turnNumRecord, uint160 fingerprint)
     {
-        (finalizesAt, turnNumRecord, fingerprint) = _getData(channelStorageHashes[channelId]);
+        (turnNumRecord, finalizesAt, fingerprint) = _getData(channelStorageHashes[channelId]);
     }
 
     function forceMove(
@@ -698,15 +698,17 @@ contract ForceMove {
     {
         // The hash is constructed from left to right.
         uint256 result;
+        uint256 cursor = 256;
 
-        // Shift finalizesAt 256 - 48 = 208 bits left to fill the first 48 bits
-        result = uint256(channelStorage.finalizesAt) << 208;
+        // Shift turnNumRecord 208 bits left to fill the first 48 bits
+        result = uint256(channelStorage.turnNumRecord) << (cursor -= 48);
 
-        // logical or with turnNumRecord padded with 160 zeros to get the next 48 bits
-        result = result | (channelStorage.turnNumRecord << 160);
+        // logical or with finalizesAt padded with 160 zeros to get the next 48 bits
+        result |= (channelStorage.finalizesAt << (cursor -= 48));
 
         // logical or with the last 160 bits of the hash of the encoded storage
-        result = result | uint256(uint160(uint256(keccak256(abi.encode(channelStorage)))));
+        require(cursor == 160, 'Cursor off');
+        result |= uint256(uint160(uint256(keccak256(abi.encode(channelStorage)))));
 
         newHash = bytes32(result);
     }
@@ -714,10 +716,13 @@ contract ForceMove {
     function _getData(bytes32 storageHash)
         public
         pure
-        returns (uint48 finalizesAt, uint48 turnNumRecord, uint160 fingerprint)
+        returns (uint48 turnNumRecord, uint48 finalizesAt, uint160 fingerprint)
     {
-        finalizesAt = uint48(uint256(storageHash) >> (160 + 48));
-        turnNumRecord = uint48(uint256(storageHash) >> 160);
+        uint256 cursor = 256;
+        turnNumRecord = uint48(uint256(storageHash) >> (cursor -= 48));
+        finalizesAt = uint48(uint256(storageHash) >> (cursor -= 48));
+
+        require(cursor == 160, 'Cursor off');
         fingerprint = uint160(uint256(storageHash));
     }
 
