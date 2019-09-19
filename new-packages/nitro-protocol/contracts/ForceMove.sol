@@ -52,6 +52,14 @@ contract ForceMove {
 
     // Public methods:
 
+    function getData(bytes32 channelId)
+        public
+        view
+        returns (uint48 finalizesAt, uint48 turnNumRecord, uint160 fingerprint)
+    {
+        (finalizesAt, turnNumRecord, fingerprint) = _getData(channelStorageHashes[channelId]);
+    }
+
     function forceMove(
         uint256 turnNumRecord,
         FixedPart memory fixedPart,
@@ -688,10 +696,29 @@ contract ForceMove {
         pure
         returns (bytes32 newHash)
     {
-        uint256 i = uint256(keccak256(abi.encode(channelStorage))) >> 160;
-        i |= channelStorage.turnNumRecord << 160;
-        i |= channelStorage.finalizesAt << 208;
-        return bytes32(i);
+        // The hash is constructed from left to right.
+        uint256 result;
+
+        // Shift finalizesAt 256 - 48 = 208 bits left to fill the first 48 bits
+        result = uint256(channelStorage.finalizesAt) << 208;
+
+        // logical or with turnNumRecord padded with 160 zeros to get the next 48 bits
+        result = result | (channelStorage.turnNumRecord << 160);
+
+        // logical or with the last 160 bits of the hash of the encoded storage
+        result = result | uint256(uint160(uint256(keccak256(abi.encode(channelStorage)))));
+
+        newHash = bytes32(result);
+    }
+
+    function _getData(bytes32 storageHash)
+        public
+        pure
+        returns (uint48 finalizesAt, uint48 turnNumRecord, uint160 fingerprint)
+    {
+        finalizesAt = uint48(uint256(storageHash) >> (160 + 48));
+        turnNumRecord = uint48(uint256(storageHash) >> 160);
+        fingerprint = uint160(uint256(storageHash));
     }
 
     function _matchesHash(ChannelStorage memory cs, bytes32 h) internal pure returns (bool) {

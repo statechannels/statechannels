@@ -61,14 +61,6 @@ contract TESTForceMove is ForceMove {
         channelStorageHashes[channelId] = h;
     }
 
-    function getData(uint256 storageHash) public pure returns (uint160, uint48, uint48) {
-        uint160 fingerprint = uint160(storageHash);
-        uint48 turnNumRecord = uint48(storageHash >> 160);
-        uint48 finalizesAt = uint48(storageHash >> 208);
-
-        return (fingerprint, turnNumRecord, finalizesAt);
-    }
-
     function getHash(ChannelStorage memory channelStorage) public pure returns (bytes32 newHash) {
         return _getHash(channelStorage);
     }
