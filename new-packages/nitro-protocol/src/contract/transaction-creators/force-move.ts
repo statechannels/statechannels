@@ -5,7 +5,8 @@ import {TransactionRequest} from 'ethers/providers';
 import {State, getVariablePart, getFixedPart, hashAppPart} from '../state';
 import {Signature} from 'ethers/utils';
 import {hashOutcome} from '../outcome';
-import {encodeChannelStorageLite} from '../channel-storage';
+import {encodeChannelStorageLite, encodeChannelStorage} from '../channel-storage';
+import {Zero} from 'ethers/constants';
 
 // TODO: Currently we are setting some arbitrary gas limit
 // to avoid issues with Ganache sendTransaction and parsing BN.js
@@ -14,36 +15,54 @@ const GAS_LIMIT = 3000000;
 
 const ForceMoveContractInterface = new ethers.utils.Interface(ForceMoveArtifact.abi);
 
-export function createRespondWithAlternativeTransaction(
-  challengeState: State,
-  finalizesAt: string,
-  states: State[],
-  signatures: Signature[],
-  whoSignedWhat: number[],
-): TransactionRequest {
-  const largestTurnNum = states.reduce((s1, s2) => (s1.turnNum >= s2.turnNum ? s1 : s2), states[0])
-    .turnNum;
-  const fixedPart = getFixedPart(challengeState);
+interface CheckpointData {
+  challengeState?: State;
+  finalizesAt: string;
+  turnNumRecord: string;
+  states: State[];
+  signatures: Signature[];
+  whoSignedWhat: number[];
+}
+export function createCheckpointTransaction({
+  challengeState,
+  finalizesAt,
+  states,
+  signatures,
+  whoSignedWhat,
+  turnNumRecord,
+}: CheckpointData): TransactionRequest {
+  const isOpen = Zero.eq(finalizesAt);
+  if (isOpen && challengeState) {
+    throw new Error('Invalid open storage');
+  }
+
+  const largestTurnNum = Math.max(...states.map(s => s.turnNum));
+  const fixedPart = getFixedPart(states[0]);
   const variableParts = states.map(s => getVariablePart(s));
   const isFinalCount = states.filter(s => s.isFinal).length;
-  const {outcome, channel} = challengeState;
-  const {participants} = channel;
-  const challengerAddress = participants[challengeState.turnNum % participants.length];
-  const challengeStorageLiteBytes = encodeChannelStorageLite({
+  const {participants} = states[0].channel;
+
+  const outcome = isOpen ? undefined : challengeState.outcome;
+  const challengerAddress = isOpen
+    ? undefined
+    : participants[challengeState.turnNum % participants.length];
+
+  const challengeStorageBytes = encodeChannelStorage({
     outcome,
     finalizesAt,
     challengerAddress,
     state: challengeState,
+    largestTurnNum: turnNumRecord,
   });
 
-  const data = ForceMoveContractInterface.functions.respondWithAlternative.encode([
+  const data = ForceMoveContractInterface.functions.checkpoint.encode([
     fixedPart,
     largestTurnNum,
     variableParts,
     isFinalCount,
     signatures,
     whoSignedWhat,
-    challengeStorageLiteBytes,
+    challengeStorageBytes,
   ]);
 
   return {data, gasLimit: GAS_LIMIT};
