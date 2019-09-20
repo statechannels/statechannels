@@ -39,6 +39,7 @@ const progressLogger = (logger, status, setStatus, setMagnet, seedMagnet) => (
       } else if (!status.filename && torrent.files) {
         torrent.files[0].getBlobURL((err, url) => {
           if (err) {
+            // tslint:disable-next-line: no-console
             console.error(err);
             return;
           }

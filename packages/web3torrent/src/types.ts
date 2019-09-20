@@ -95,6 +95,7 @@ export type ExtendedTorrent = Omit<WebTorrent.Torrent, OverridenTorrentPropertie
   _updateWire(wire: PaidStreamingWire): void;
 };
 
+// tslint:disable-next-line: ban-types
 export type ArgumentTypes<F extends Function> = F extends (...args: infer A) => any ? A : never;
 
 export type WebTorrentSeedInput =
