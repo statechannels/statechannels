@@ -1,6 +1,6 @@
 {
   "extends": ["config:base"],
   "schedule": ["every weekend"],
-  "baseBranches": ["next"],
+  "baseBranches": ["master"],
   "automerge": true
 }
