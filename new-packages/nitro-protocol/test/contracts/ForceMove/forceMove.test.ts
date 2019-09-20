@@ -15,6 +15,7 @@ import {
   newChallengeRegisteredEvent,
   sendTransaction,
   signStates,
+  finalizedOutcomeHash,
 } from '../../test-helpers';
 import {Channel, getChannelId} from '../../../src/contract/channel';
 import {State, getVariablePart, getFixedPart} from '../../../src/contract/state';
@@ -71,31 +72,35 @@ const reverts4 = 'It reverts when a challenge is present if the turnNumRecord do
 const reverts5 = 'It reverts when the channel is finalized';
 
 describe('forceMove', () => {
+  const threeStates = {appDatas: [0, 1, 2], whoSignedWhat: [0, 1, 2]};
+  const oneState = {appDatas: [2], whoSignedWhat: [0, 0, 0]};
+  const invalid = {appDatas: [0, 2, 1], whoSignedWhat: [0, 1, 2]};
+  const largestTurnNum = 8;
+  const isFinalCount = 0;
+
+  let channelNonce = 200;
+  beforeEach(() => (channelNonce += 1));
   it.each`
-    description     | channelNonce | initialChannelStorageHash  | largestTurnNum | appDatas     | isFinalCount | whoSignedWhat | challenger        | reasonString
-    ${description1} | ${201}       | ${HashZero}                | ${8}           | ${[0, 1, 2]} | ${0}         | ${[0, 1, 2]}  | ${wallets[2]}     | ${undefined}
-    ${description2} | ${202}       | ${HashZero}                | ${8}           | ${[2]}       | ${0}         | ${[0, 0, 0]}  | ${wallets[2]}     | ${undefined}
-    ${description3} | ${203}       | ${clearedChallengeHash(5)} | ${8}           | ${[2]}       | ${0}         | ${[0, 0, 0]}  | ${wallets[2]}     | ${undefined}
-    ${description4} | ${204}       | ${clearedChallengeHash(5)} | ${2}           | ${[2]}       | ${0}         | ${[0, 0, 0]}  | ${wallets[2]}     | ${'Stale challenge!'}
-    ${description5} | ${205}       | ${ongoingChallengeHash(5)} | ${8}           | ${[2]}       | ${0}         | ${[0, 0, 0]}  | ${wallets[2]}     | ${'Channel not open.'}
-    ${description6} | ${206}       | ${HashZero}                | ${8}           | ${[0, 1, 2]} | ${0}         | ${[0, 1, 2]}  | ${nonParticipant} | ${'Challenger is not a participant'}
-    ${description7} | ${207}       | ${HashZero}                | ${8}           | ${[0, 1, 1]} | ${0}         | ${[0, 1, 2]}  | ${wallets[2]}     | ${'CountingApp: Counter must be incremented'}
+    description | initialChannelStorageHash   | stateData      | challenger        | reasonString
+    ${accepts1} | ${HashZero}                 | ${oneState}    | ${wallets[2]}     | ${undefined}
+    ${accepts2} | ${HashZero}                 | ${threeStates} | ${wallets[2]}     | ${undefined}
+    ${accepts3} | ${clearedChallengeHash(5)}  | ${oneState}    | ${wallets[2]}     | ${undefined}
+    ${accepts4} | ${clearedChallengeHash(5)}  | ${threeStates} | ${wallets[2]}     | ${undefined}
+    ${accepts5} | ${ongoingChallengeHash(5)}  | ${oneState}    | ${wallets[2]}     | ${undefined}
+    ${accepts6} | ${ongoingChallengeHash(5)}  | ${threeStates} | ${wallets[2]}     | ${undefined}
+    ${reverts1} | ${clearedChallengeHash(20)} | ${oneState}    | ${wallets[2]}     | ${'generic'}
+    ${reverts2} | ${HashZero}                 | ${oneState}    | ${nonParticipant} | ${'generic'}
+    ${reverts3} | ${HashZero}                 | ${invalid}     | ${wallets[2]}     | ${'generic'}
+    ${reverts4} | ${ongoingChallengeHash(20)} | ${oneState}    | ${wallets[2]}     | ${'generic'}
+    ${reverts5} | ${finalizedOutcomeHash(5)}  | ${oneState}    | ${wallets[2]}     | ${'generic'}
   `(
     '$description', // for the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce
-    async ({
-      channelNonce,
-      initialChannelStorageHash,
-      largestTurnNum,
-      appDatas,
-      isFinalCount,
-      whoSignedWhat,
-      challenger,
-      reasonString,
-    }) => {
+    async ({initialChannelStorageHash, stateData, challenger, reasonString}) => {
+      const {appDatas, whoSignedWhat} = stateData;
       const channel: Channel = {
         chainId,
         participants,
-        channelNonce,
+        channelNonce: hexlify(channelNonce),
       };
       const channelId = getChannelId(channel);
 
@@ -119,7 +124,7 @@ describe('forceMove', () => {
       // sign the states
       const sigs = await signStates(states, wallets, whoSignedWhat);
       // compute challengerSig
-      const msgHash = hashChallengeMessage({largestTurnNum, channelId});
+      const msgHash = hashChallengeMessage({largestTurnNum: hexlify(largestTurnNum), channelId});
 
       const {v, r, s} = await sign(challenger, msgHash);
       const challengerSig = {v, r, s};
