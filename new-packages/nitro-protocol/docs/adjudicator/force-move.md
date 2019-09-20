@@ -50,23 +50,13 @@ Effects:
 - If `channelStorageHashes[channelId] != 0`
   - Calculate `emptyStorageHash = hash(turnNumRecord, 0, 0, 0)`
   - Check that `channelStorageHashes[channelId] = emptyStorageHash`
-- Let `m = variableParts.length`
-- For `i` in `0 .. (m-1)`:
-  - Let `isFinal = i > m - isFinalCount`
-  - Let `turnNum = largestTurnNum + i - m + 1`
-  - Calculate `stateHash[i]` from `fixedPart, channelId, turnNum, variablePart[i], isFinal`
-  - If `i + 1 != m`
-    - Calculate `isFinalAB = [i > m - isFinalCount, i + 1 > m - isFinalCount]`
-    - Calculate `turnNumB = largestTurnNum + i - m + 2`
-    - Ensure `validTransition(nParticipants, isFinalAB, turnNumB, variablePart[i], variablePart[i+1], appDefinition)`
-    - (Other checks are covered by construction)
-- Check that `_validSignatures(largestTurnNum, participants, stateHashes, sigs, whoSignedwhat)`
+- Calculate `supportedStateHash` the hash of the state supported by the input data (if there is none, revert).
 - Calculate `msgHash` as `keccak256(abi.encode(largestTurnNum, channelId, 'forceMove'))`
 - Recover challengerAddress from `msgHash` and `challengerSig` and check that `_isAddressInArray(challengerAddress, participants)`
 - Set channelStorage as the hash of the abi encode of
   - `turnNumRecord = largestTurnNum`
   - `finalizesAt = now + challengeDuration`
-  - `stateHashes[m-1]`
+  - `supportedStateHash`
   - `challengerAddress`
   - `outcomeHash = hash(outcomes[m-1])`
 - Emit a `ChallengeRegistered` event

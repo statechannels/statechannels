@@ -30,8 +30,10 @@ const chainId = '0x1234';
 const participants = ['', '', ''];
 const wallets = new Array(3);
 const challengeDuration = 0x1000;
-const assetHolderAddress = ethers.Wallet.createRandom().address;
-const outcome: Outcome = [{assetHolderAddress, allocation: []}];
+const assetHolderAddress1 = ethers.Wallet.createRandom().address;
+const assetHolderAddress2 = ethers.Wallet.createRandom().address;
+const challengeStateOutcome: Outcome = [{assetHolderAddress: assetHolderAddress1, allocation: []}];
+const newOutcome: Outcome = [{assetHolderAddress: assetHolderAddress2, allocation: []}];
 let appDefinition;
 
 // populate wallets and participants array
@@ -49,7 +51,8 @@ beforeAll(async () => {
 
 const description1 =
   'It accepts a valid concludeFromChallenge tx (n states) and sets the channel storage correctly';
-const description2 = 'It reverts a concludeFromChallenge tx when there is no ongoing challenge';
+const description2 =
+  'It accepts a valid concludeFromChallenge tx (n states) and sets the channel storage correctly (turnNumRecord = 0)';
 const description3 =
   'It reverts a concludeFromChallenge tx when there is no challenge ongoing (challenge cleared)';
 const description4 = 'It reverts a concludeFromChallenge tx when the outcome is already finalized';
@@ -59,12 +62,11 @@ const defaultRecord = 5;
 
 describe('concludeFromChallenge', () => {
   it.each`
-    description     | channelNonce | finalizesAt  | channelStorageHash         | turnNumRecord        | largestTurnNum | numStates | whoSignedWhat | reasonString
-    ${description1} | ${501}       | ${undefined} | ${undefined}               | ${undefined}         | ${8}           | ${3}      | ${[0, 1, 2]}  | ${undefined}
-    ${description3} | ${503}       | ${undefined} | ${clearedChallengeHash(5)} | ${undefined}         | ${8}           | ${3}      | ${[0, 1, 2]}  | ${'Channel storage does not match stored version.'}
-    ${description2} | ${502}       | ${1}         | ${undefined}               | ${undefined}         | ${8}           | ${3}      | ${[0, 1, 2]}  | ${'Challenge expired or not present.'}
-    ${description4} | ${504}       | ${'0x0'}     | ${undefined}               | ${undefined}         | ${8}           | ${3}      | ${[0, 1, 2]}  | ${'Challenge expired or not present.'}
-    ${description5} | ${504}       | ${undefined} | ${ongoingChallengeHash(5)} | ${defaultRecord + 1} | ${8}           | ${3}      | ${[0, 1, 2]}  | ${'Channel storage does not match stored version.'}
+    description     | channelNonce | setTurnNumRecord | expired  | forceStorageHash           | declaredTurnNumRecord | largestTurnNum | numStates | whoSignedWhat | reasonString
+    ${description1} | ${501}       | ${5}             | ${false} | ${undefined}               | ${5}                  | ${8}           | ${3}      | ${[0, 1, 2]}  | ${undefined}
+    ${description2} | ${502}       | ${0}             | ${false} | ${undefined}               | ${0}                  | ${8}           | ${3}      | ${[0, 1, 2]}  | ${undefined}
+    ${description3} | ${503}       | ${5}             | ${false} | ${clearedChallengeHash(5)} | ${5}                  | ${8}           | ${3}      | ${[0, 1, 2]}  | ${'Channel storage does not match stored version.'}
+    ${description4} | ${504}       | ${5}             | ${true}  | ${undefined}               | ${5}                  | ${8}           | ${3}      | ${[0, 1, 2]}  | ${'Challenge expired or not present.'}
   `(
     '$description', // for the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce
     async ({
@@ -90,13 +92,13 @@ describe('concludeFromChallenge', () => {
         appDefinition,
         appData: '0x0',
         isFinal: false,
-        outcome,
+        outcome: challengeStateOutcome,
       };
 
       // set expiry time in the future or in the past
 
       // compute expected ChannelStorageHash
-      const challengerAddress = wallets[2].address;
+      const challengerAddress = participants[challengeState.turnNum % participants.length];
 
       channelStorageHash =
         channelStorageHash ||
@@ -105,7 +107,7 @@ describe('concludeFromChallenge', () => {
           finalizesAt,
           state: challengeState,
           challengerAddress,
-          outcome,
+          outcome: challengeState.outcome,
         });
 
       // call public wrapper to set state (only works on test contract)
@@ -123,7 +125,7 @@ describe('concludeFromChallenge', () => {
           appDefinition,
           appData: '0x0',
           challengeDuration,
-          outcome,
+          outcome: newOutcome,
         });
       }
 
@@ -160,7 +162,7 @@ describe('concludeFromChallenge', () => {
           turnNumRecord: 0x0,
           finalizesAt: blockTimestamp,
           challengerAddress: AddressZero,
-          outcome,
+          outcome: newOutcome,
         };
         const expectedChannelStorageHash = hashChannelStorage(expectedChannelStorage);
 

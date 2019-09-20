@@ -83,25 +83,14 @@ contract ForceMove {
 
         _requireChannelOpen(turnNumRecord, channelId);
 
-        bytes32[] memory stateHashes = new bytes32[](variableParts.length);
-        stateHashes = _validTransitionChain(
+        bytes32 supportedStateHash = _stateSupportedBy(
             largestTurnNum,
             variableParts,
             isFinalCount,
             channelId,
-            fixedPart
-        ); // if this function returns the array (and doesn't revert), this implies a validTransition chain
-
-        // check the supplied states are supported by n signatures
-        require(
-            _validSignatures(
-                largestTurnNum,
-                fixedPart.participants,
-                stateHashes,
-                sigs,
-                whoSignedWhat
-            ),
-            'Invalid signatures'
+            fixedPart,
+            sigs,
+            whoSignedWhat
         );
 
         // check that the forceMove is signed by a participant and store their address
@@ -141,7 +130,7 @@ contract ForceMove {
             ChannelStorage(
                 largestTurnNum,
                 now + fixedPart.challengeDuration,
-                stateHashes[variableParts.length - 1],
+                supportedStateHash,
                 challenger,
                 keccak256(abi.encode(variableParts[variableParts.length - 1].outcome))
             )
@@ -344,25 +333,15 @@ contract ForceMove {
         _requireChannelNotFinalized(channelStorage, channelId);
         _requireIncreasedTurnNumber(channelStorage, channelId, largestTurnNum);
 
-        bytes32[] memory stateHashes = new bytes32[](variableParts.length);
-        stateHashes = _validTransitionChain(
+        _stateSupportedBy(
             largestTurnNum,
             variableParts,
             isFinalCount,
             channelId,
-            fixedPart
-        ); // if this function returns the array (and doesn't revert), this implies a validTransition chain
-        // check the supplied states are supported by n signatures
-        require(
-            _validSignatures(
-                largestTurnNum,
-                fixedPart.participants,
-                stateHashes,
-                sigs,
-                whoSignedWhat
-            ),
-            'Invalid signatures'
-        );
+            fixedPart,
+            sigs,
+            whoSignedWhat
+        ); // reverts if no state supported by input data
 
         // effects
         _clearChallenge(channelId, largestTurnNum);
@@ -405,6 +384,7 @@ contract ForceMove {
         uint8 numStates,
         uint8[] memory whoSignedWhat,
         Signature[] memory sigs,
+        bytes32 newOutcomeHash,
         ChannelStorage memory channelStorage
     ) public {
         // Calculate channelId from fixed part
@@ -420,7 +400,7 @@ contract ForceMove {
             fixedPart.participants,
             channelId,
             appPartHash,
-            channelStorage.outcomeHash,
+            newOutcomeHash,
             sigs,
             whoSignedWhat
         );
@@ -498,6 +478,37 @@ contract ForceMove {
         bytes32 prefixedHash = keccak256(abi.encodePacked(prefix, _d));
         address a = ecrecover(prefixedHash, _v, _r, _s);
         return (a);
+    }
+
+    function _stateSupportedBy(
+        uint256 largestTurnNum,
+        ForceMoveApp.VariablePart[] memory variableParts,
+        uint8 isFinalCount,
+        bytes32 channelId,
+        FixedPart memory fixedPart,
+        Signature[] memory sigs,
+        uint8[] memory whoSignedWhat // whoSignedWhat[i] is the index of the state in stateHashes that was signed by participants[i]
+    ) internal pure returns (bytes32) {
+        bytes32[] memory stateHashes = _validTransitionChain(
+            largestTurnNum,
+            variableParts,
+            isFinalCount,
+            channelId,
+            fixedPart
+        ); // if this function returns the array (and doesn't revert), this implies a validTransition chain
+
+        require(
+            _validSignatures(
+                largestTurnNum,
+                fixedPart.participants,
+                stateHashes,
+                sigs,
+                whoSignedWhat
+            ),
+            'Invalid signatures'
+        );
+
+        return stateHashes[stateHashes.length - 1];
     }
 
     function _validTransitionChain(

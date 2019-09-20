@@ -125,6 +125,8 @@ export function createConcludeFromChallengeTransaction(
     turnNumRecord,
   });
 
+  const newOutcomeHash = hashOutcome(lastState.outcome);
+
   const data = ForceMoveContractInterface.functions.concludeFromChallenge.encode([
     largestTurnNum,
     fixedPart,
@@ -132,6 +134,7 @@ export function createConcludeFromChallengeTransaction(
     numStates,
     whoSignedWhat,
     signatures,
+    newOutcomeHash,
     channelStorage,
   ]);
   return {data, gasLimit: GAS_LIMIT};
