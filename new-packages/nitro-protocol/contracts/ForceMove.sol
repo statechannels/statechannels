@@ -61,7 +61,7 @@ contract ForceMove {
     }
 
     function forceMove(
-        uint256 turnNumRecord,
+        uint48 turnNumRecord,
         FixedPart memory fixedPart,
         uint256 largestTurnNum,
         ForceMoveApp.VariablePart[] memory variableParts,
@@ -81,15 +81,7 @@ contract ForceMove {
         // Check that the proposed largestTurnNum is larger than or equal to the turnNumRecord that is being committed to
         require(largestTurnNum >= turnNumRecord, 'Stale challenge!');
 
-        // EITHER there is no information stored against channelId at all (OK)
-        // OR there is, in which case we must check the channel is still open and that the committed turnNumRecord is correct
-        require(
-            _slotEmptyOrMatchesHash(
-                ChannelStorage(turnNumRecord, 0, bytes32(0), address(0), bytes32(0)),
-                channelStorageHashes[channelId]
-            ),
-            'Channel is not open or turnNum does not match'
-        );
+        _requireChannelOpen(turnNumRecord, channelId);
 
         bytes32[] memory stateHashes = new bytes32[](variableParts.length);
         stateHashes = _validTransitionChain(
@@ -212,20 +204,15 @@ contract ForceMove {
 
         // requirements
 
-        require(now < finalizesAt, 'Response too late!');
-
-        require(
-            _matchesHash(
-                ChannelStorage(
-                    turnNumRecord,
-                    finalizesAt,
-                    challengeStateHash,
-                    challenger,
-                    challengeOutcomeHash
-                ),
-                channelStorageHashes[channelId]
+        _requireOngoingChallenge(
+            ChannelStorage(
+                turnNumRecord,
+                finalizesAt,
+                challengeStateHash,
+                challenger,
+                challengeOutcomeHash
             ),
-            'Challenge State does not match stored version'
+            channelId
         );
 
         require(
@@ -310,20 +297,15 @@ contract ForceMove {
 
         // requirements
 
-        require(now < finalizesAt, 'Refute too late!');
-
-        require(
-            _matchesHash(
-                ChannelStorage(
-                    turnNumRecord,
-                    finalizesAt,
-                    challengeStateHash,
-                    challenger, // this is a check that the asserted challenger is in fact the challenger
-                    challengeOutcomeHash
-                ),
-                channelStorageHashes[channelId]
+        _requireOngoingChallenge(
+            ChannelStorage(
+                turnNumRecord,
+                finalizesAt,
+                challengeStateHash,
+                challenger, // this is a check that the asserted challenger is in fact the challenger
+                challengeOutcomeHash
             ),
-            'Challenge State does not match stored version'
+            channelId
         );
 
         require(
@@ -343,7 +325,7 @@ contract ForceMove {
 
     function checkpoint(
         FixedPart memory fixedPart,
-        uint256 largestTurnNum,
+        uint48 largestTurnNum,
         ForceMoveApp.VariablePart[] memory variableParts,
         uint8 isFinalCount, // how many of the states are final
         Signature[] memory sigs,
@@ -361,10 +343,7 @@ contract ForceMove {
 
         ChannelStorage memory channelStorage = abi.decode(channelStorageBytes, (ChannelStorage));
 
-        require(
-            _matchesHash(channelStorage, channelStorageHashes[channelId]),
-            'Challenge State does not match stored version'
-        );
+        _requireIncreasedTurnNumber(channelStorage, channelId, largestTurnNum);
 
         bytes32[] memory stateHashes = new bytes32[](variableParts.length);
         stateHashes = _validTransitionChain(
@@ -392,7 +371,7 @@ contract ForceMove {
     }
 
     function concludeFromOpen(
-        uint256 turnNumRecord,
+        uint48 turnNumRecord,
         uint256 largestTurnNum,
         FixedPart memory fixedPart, // don't need appDefinition
         bytes32 appPartHash,
@@ -406,15 +385,7 @@ contract ForceMove {
             abi.encode(fixedPart.chainId, fixedPart.participants, fixedPart.channelNonce)
         );
 
-        // EITHER there is no information stored against channelId at all (OK)
-        // OR there is, in which case we must check the channel is still open and that the committed turnNumRecord is correct
-        require(
-            _slotEmptyOrMatchesHash(
-                ChannelStorage(turnNumRecord, 0, bytes32(0), address(0), bytes32(0)),
-                channelStorageHashes[channelId]
-            ),
-            'Channel is not open or turnNum does not match'
-        );
+        _requireChannelOpen(turnNumRecord, channelStorageHashes[channelId]);
 
         _conclude(
             largestTurnNum,
@@ -429,42 +400,22 @@ contract ForceMove {
     }
 
     function concludeFromChallenge(
-        uint256 turnNumRecord,
-        uint256 largestTurnNum,
+        uint48 largestTurnNum,
         FixedPart memory fixedPart, // don't need appDefinition
         bytes32 appPartHash,
         uint8 numStates,
         uint8[] memory whoSignedWhat,
         Signature[] memory sigs,
-        bytes32 challengeOutcomeHash,
-        bytes memory channelStorageLiteBytes // This is to avoid a 'stack too deep' error by minimising the number of local variables
+        bytes memory channelStorageBytes
     ) public {
         // Calculate channelId from fixed part
         bytes32 channelId = keccak256(
             abi.encode(fixedPart.chainId, fixedPart.participants, fixedPart.channelNonce)
         );
 
-        ChannelStorageLite memory channelStorageLite = abi.decode(
-            channelStorageLiteBytes,
-            (ChannelStorageLite)
-        );
+        ChannelStorage memory channelStorage = abi.decode(channelStorageBytes, (ChannelStorage));
 
-        require(turnNumRecord > 0, 'TurnNumRecord must be nonzero');
-        require(now < channelStorageLite.finalizesAt, 'Channel already finalized!');
-
-        require(
-            _matchesHash(
-                ChannelStorage(
-                    turnNumRecord,
-                    channelStorageLite.finalizesAt,
-                    channelStorageLite.stateHash, // challengeStateHash
-                    channelStorageLite.challengerAddress,
-                    challengeOutcomeHash
-                ),
-                channelStorageHashes[channelId]
-            ),
-            'Challenge State does not match stored version'
-        );
+        _requireOngoingChallenge(channelStorage, channelStorageHashes[channelId]);
 
         _conclude(
             largestTurnNum,
@@ -472,7 +423,7 @@ contract ForceMove {
             fixedPart.participants,
             channelId,
             appPartHash,
-            channelStorageLite.outcomeHash,
+            channelStorage.outcomeHash,
             sigs,
             whoSignedWhat
         );
@@ -691,6 +642,54 @@ contract ForceMove {
         emit Concluded(channelId);
     }
 
+    function _requireChannelOpen(uint48 turnNumRecord, bytes32 channelId)
+        internal
+        view
+        returns (bool)
+    {
+        // EITHER there is no information stored against channelId at all (OK)
+        // OR there is, in which case we must check the channel is still open
+        // and that the committed turnNumRecord is correct
+        require(
+            channelStorageHashes[channelId] == bytes32(0) ||
+                channelStorageHashes[channelId] ==
+                _getHash(ChannelStorage(turnNumRecord, 0, 0, address(0), 0)),
+            'Channel not open.'
+        );
+    }
+
+    function _requireMatchingStorage(ChannelStorage memory cs, bytes32 channelId) internal view {
+        require(
+            _matchesHash(cs, channelStorageHashes[channelId]),
+            'Channel storage does not match stored version.'
+        );
+    }
+
+    function _requireIncreasedTurnNumber(
+        ChannelStorage memory cs,
+        bytes32 channelId,
+        uint48 newTurnNumRecord
+    ) internal view {
+        _requireMatchingStorage(cs, channelId);
+        require(newTurnNumRecord > cs.turnNumRecord, 'turnNumRecord not increased.');
+    }
+
+    function _requireChallengePresent(ChannelStorage memory cs, bytes32 channelId) internal view {
+        _requireMatchingStorage(cs, channelId);
+        require(cs.finalizesAt > 0, 'Challenge not present.');
+    }
+
+    function _requireOngoingChallenge(ChannelStorage memory cs, bytes32 channelId) internal view {
+        _requireMatchingStorage(cs, channelId);
+        require(cs.finalizesAt > now, 'Challenge expired or not present.');
+
+    }
+
+    function _requireChannelFinalized(ChannelStorage memory cs, bytes32 channelId) internal view {
+        _requireMatchingStorage(cs, channelId);
+        require(cs.finalizesAt > 0 && cs.finalizesAt <= now, 'Channel not finalized.');
+    }
+
     function _getHash(ChannelStorage memory channelStorage)
         internal
         pure
@@ -728,14 +727,6 @@ contract ForceMove {
 
     function _matchesHash(ChannelStorage memory cs, bytes32 h) internal pure returns (bool) {
         return _getHash(cs) == h;
-    }
-
-    function _slotEmptyOrMatchesHash(ChannelStorage memory cs, bytes32 h)
-        internal
-        pure
-        returns (bool)
-    {
-        return _getHash(cs) == h || h == bytes32(0);
     }
 
     // events

@@ -5,7 +5,7 @@ import {TransactionRequest} from 'ethers/providers';
 import {State, getVariablePart, getFixedPart, hashAppPart} from '../state';
 import {Signature} from 'ethers/utils';
 import {hashOutcome} from '../outcome';
-import {encodeChannelStorageLite, encodeChannelStorage} from '../channel-storage';
+import {encodeChannelStorage} from '../channel-storage';
 import {Zero} from 'ethers/constants';
 
 // TODO: Currently we are setting some arbitrary gas limit
@@ -117,26 +117,24 @@ export function createConcludeFromChallengeTransaction(
   const numStates = states.length;
 
   const {outcome} = challengeState;
-  const challengeOutcomeHash = hashOutcome(outcome);
 
   const challengerAddress = participants[challengeState.turnNum % participants.length];
-  const channelStorageLiteBytes = encodeChannelStorageLite({
+  const channelStorageBytes = encodeChannelStorage({
     outcome,
     finalizesAt,
     state: challengeState,
     challengerAddress,
+    turnNumRecord,
   });
 
   const data = ForceMoveContractInterface.functions.concludeFromChallenge.encode([
-    turnNumRecord,
     largestTurnNum,
     fixedPart,
     appPartHash,
     numStates,
     whoSignedWhat,
     signatures,
-    challengeOutcomeHash,
-    channelStorageLiteBytes,
+    channelStorageBytes,
   ]);
   return {data, gasLimit: GAS_LIMIT};
 }

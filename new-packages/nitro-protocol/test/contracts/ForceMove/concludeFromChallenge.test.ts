@@ -49,27 +49,25 @@ beforeAll(async () => {
 
 const description1 =
   'It accepts a valid concludeFromChallenge tx (n states) and sets the channel storage correctly';
-const description2 =
-  'It reverts a concludeFromChallenge tx when there is no challenge ongoing (turnNumRecord = 0)';
+const description2 = 'It reverts a concludeFromChallenge tx when there is no ongoing challenge';
 const description3 =
   'It reverts a concludeFromChallenge tx when there is no challenge ongoing (challenge cleared)';
 const description4 = 'It reverts a concludeFromChallenge tx when the outcome is already finalized';
 
-// Note: forceStorageHash will overrule the setTurnNumRecord and expired fields
+const turnNumRecord = 5;
 
 describe('concludeFromChallenge', () => {
   it.each`
-    description     | channelNonce | setTurnNumRecord | expired  | forceStorageHash           | declaredTurnNumRecord | largestTurnNum | numStates | whoSignedWhat | reasonString
-    ${description1} | ${501}       | ${5}             | ${false} | ${undefined}               | ${5}                  | ${8}           | ${3}      | ${[0, 1, 2]}  | ${undefined}
-    ${description2} | ${502}       | ${0}             | ${false} | ${undefined}               | ${0}                  | ${8}           | ${3}      | ${[0, 1, 2]}  | ${'TurnNumRecord must be nonzero'}
-    ${description3} | ${503}       | ${5}             | ${false} | ${clearedChallengeHash(5)} | ${5}                  | ${8}           | ${3}      | ${[0, 1, 2]}  | ${'Challenge State does not match stored version'}
-    ${description4} | ${504}       | ${5}             | ${true}  | ${undefined}               | ${5}                  | ${8}           | ${3}      | ${[0, 1, 2]}  | ${'Channel already finalized!'}
+    description     | channelNonce | finalizesAt  | forceStorageHash           | declaredTurnNumRecord | largestTurnNum | numStates | whoSignedWhat | reasonString
+    ${description1} | ${501}       | ${undefined} | ${undefined}               | ${5}                  | ${8}           | ${3}      | ${[0, 1, 2]}  | ${undefined}
+    ${description3} | ${503}       | ${undefined} | ${clearedChallengeHash(5)} | ${5}                  | ${8}           | ${3}      | ${[0, 1, 2]}  | ${'Channel storage does not match stored version.'}
+    ${description2} | ${502}       | ${1}         | ${undefined}               | ${4}                  | ${8}           | ${3}      | ${[0, 1, 2]}  | ${'Challenge expired or not present.'}
+    ${description4} | ${504}       | ${0}         | ${undefined}               | ${5}                  | ${8}           | ${3}      | ${[0, 1, 2]}  | ${'Challenge expired or not present.'}
   `(
     '$description', // for the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce
     async ({
       channelNonce,
-      setTurnNumRecord,
-      expired,
+      finalizesAt,
       forceStorageHash,
       declaredTurnNumRecord,
       largestTurnNum,
@@ -82,7 +80,7 @@ describe('concludeFromChallenge', () => {
       const challengeState: State = {
         channel,
         challengeDuration,
-        turnNum: setTurnNumRecord,
+        turnNum: turnNumRecord,
         appDefinition,
         appData: '0x0',
         isFinal: false,
@@ -94,9 +92,7 @@ describe('concludeFromChallenge', () => {
       // set expiry time in the future or in the past
       blockNumber = await provider.getBlockNumber();
       blockTimestamp = (await provider.getBlock(blockNumber)).timestamp;
-      const finalizesAt = expired
-        ? blockTimestamp - bigNumberify(challengeDuration).toNumber()
-        : blockTimestamp + bigNumberify(challengeDuration).toNumber();
+      finalizesAt = finalizesAt || blockTimestamp + bigNumberify(challengeDuration).toNumber();
 
       // compute expected ChannelStorageHash
       const challengerAddress = wallets[2].address;
@@ -107,7 +103,7 @@ describe('concludeFromChallenge', () => {
       const challengeExistsHash = keccak256(
         defaultAbiCoder.encode(
           ['uint256', 'uint256', 'bytes32', 'address', 'bytes32'],
-          [setTurnNumRecord, finalizesAt, challengeStateHash, challengerAddress, outcomeHash],
+          [turnNumRecord, finalizesAt, challengeStateHash, challengerAddress, outcomeHash],
         ),
       );
 

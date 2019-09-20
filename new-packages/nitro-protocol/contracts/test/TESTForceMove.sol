@@ -69,12 +69,12 @@ contract TESTForceMove is ForceMove {
         return _matchesHash(cs, h);
     }
 
-    function slotEmptyOrMatchesHash(ChannelStorage memory cs, bytes32 h)
+    function requireChannelOpen(uint48 turnNumRecord, bytes32 channelId)
         public
-        pure
+        view
         returns (bool)
     {
-        return _slotEmptyOrMatchesHash(cs, h);
+        _requireChannelOpen(turnNumRecord, channelId);
     }
 
 }
