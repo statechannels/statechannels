@@ -6,6 +6,7 @@ const TrivialApp = artifacts.require('TrivialApp');
 const CountingApp = artifacts.require('CountingApp');
 const ETHAssetHolder = artifacts.require('ETHAssetHolder');
 const ERC20AssetHolder = artifacts.require('ERC20AssetHolder');
+const SingleAssetPayments = artifacts.require('SingleAssetPayments');
 
 module.exports = function(deployer) {
   deployer.then(async () => {
@@ -27,5 +28,6 @@ module.exports = function(deployer) {
   deployer.deploy(AssetHolder);
   deployer.deploy(TrivialApp);
   deployer.deploy(CountingApp);
+  deployer.deploy(SingleAssetPayments);
   deployer.deploy(ForceMove);
 };
