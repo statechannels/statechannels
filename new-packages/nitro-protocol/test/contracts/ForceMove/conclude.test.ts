@@ -17,8 +17,10 @@ import {HashZero} from 'ethers/constants';
 import {Outcome} from '../../../src/contract/outcome';
 import {Channel, getChannelId} from '../../../src/contract/channel';
 import {State} from '../../../src/contract/state';
-import {createConcludeFromOpenTransaction} from '../../../src/contract/transaction-creators/force-move';
+import {createConcludeTransaction} from '../../../src/contract/transaction-creators/force-move';
 import {hashChannelStorage} from '../../../src/contract/channel-storage';
+import {hexlify} from 'ethers/utils';
+import {CHANNEL_NOT_OPEN} from '../../../src/contract/transaction-creators/revert-reasons.js';
 
 const provider = new ethers.providers.JsonRpcProvider(
   `http://localhost:${process.env.DEV_GANACHE_PORT}`,
@@ -44,38 +46,42 @@ beforeAll(async () => {
   appDefinition = countingAppArtifact.networks[networkId].address; // use a fixed appDefinition in all tests
 });
 
-// Scenarios are synonymous with channelNonce:
+const acceptsWhenOpenIf =
+  'It accepts when the channel is open, and sets the channel storage correctly, if';
+const description1 = acceptsWhenOpenIf + 'passed n states, and the slot is empty';
+const description2 = acceptsWhenOpenIf + 'passed one state, and the slot is empty';
+const description3 = acceptsWhenOpenIf + 'passed one state, and there is a turnNumRecord stored';
 
-const description1 =
-  'It accepts a valid concludeFromOpen tx (n states) and sets the channel storage correctly';
-const description2 =
-  'It accepts a valid concludeFromOpen tx (1 state) and sets the channel storage correctly';
-const description3 =
-  'It accepts a valid concludeFromOpen tx (1 state, cleared challenge exists) and sets the channel storage correctly';
+const revertsWhenOpenBut = 'It reverts when the channel is open, but';
+const description4 = revertsWhenOpenBut + 'the declaredTurnNumRecord = 0 and incorrect';
+const description5 = revertsWhenOpenBut + 'the declaredTurnNumRecord > 0 and incorrect';
 
-const description4 =
-  'It reverts a concludeFromOpen tx when the declaredTurnNumRecord = 0 and incorrect';
-const description5 =
-  'It reverts a concludeFromOpen tx when the declaredTurnNumRecord > 0 and incorrect';
-const description6 = 'It reverts a concludeFromOpen tx when there is an ongoing challenge';
-const description7 = 'It reverts a concludeFromOpen tx when the outcome is already finalized';
+const description6 = 'It reverts when there is an ongoing challenge';
+const description7 = 'It reverts when the outcome is already finalized';
 
 const largestTurnNum = 8;
 describe('concludeFromOpen', () => {
+  const whoSignedWhatLookup = {
+    1: [0, 0, 0],
+    3: [0, 1, 2],
+  };
+  let channelNonce = 400;
+  beforeEach(() => (channelNonce += 1));
   it.each`
-    description     | channelNonce | initialChannelStorageHash  | numStates | whoSignedWhat | reasonString
-    ${description1} | ${401}       | ${HashZero}                | ${3}      | ${[0, 1, 2]}  | ${undefined}
-    ${description2} | ${402}       | ${HashZero}                | ${1}      | ${[0, 0, 0]}  | ${undefined}
-    ${description3} | ${403}       | ${clearedChallengeHash(5)} | ${1}      | ${[0, 0, 0]}  | ${undefined}
-    ${description4} | ${404}       | ${clearedChallengeHash(5)} | ${1}      | ${[0, 0, 0]}  | ${'Channel not open.'}
-    ${description5} | ${405}       | ${clearedChallengeHash(5)} | ${1}      | ${[0, 0, 0]}  | ${'Channel not open.'}
-    ${description6} | ${406}       | ${ongoingChallengeHash(5)} | ${1}      | ${[0, 0, 0]}  | ${'Channel not open.'}
-    ${description7} | ${407}       | ${finalizedOutcomeHash(5)} | ${1}      | ${[0, 0, 0]}  | ${'Channel not open.'}
+    description     | initialChannelStorageHash  | numStates | reasonString
+    ${description1} | ${HashZero}                | ${3}      | ${undefined}
+    ${description2} | ${HashZero}                | ${1}      | ${undefined}
+    ${description3} | ${clearedChallengeHash(5)} | ${1}      | ${undefined}
+    ${description4} | ${clearedChallengeHash(5)} | ${1}      | ${'generic'}
+    ${description5} | ${clearedChallengeHash(5)} | ${1}      | ${'generic'}
+    ${description6} | ${ongoingChallengeHash(5)} | ${1}      | ${CHANNEL_NOT_OPEN}
+    ${description7} | ${finalizedOutcomeHash(5)} | ${1}      | ${CHANNEL_NOT_OPEN}
   `(
     '$description', // for the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce
-    async ({channelNonce, initialChannelStorageHash, numStates, whoSignedWhat, reasonString}) => {
-      const channel: Channel = {chainId, participants, channelNonce};
+    async ({initialChannelStorageHash, numStates, reasonString}) => {
+      const channel: Channel = {chainId, participants, channelNonce: hexlify(channelNonce)};
       const channelId = getChannelId(channel);
+      const whoSignedWhat = whoSignedWhatLookup[numStates];
 
       const states: State[] = [];
       for (let i = 1; i <= numStates; i++) {
@@ -97,7 +103,7 @@ describe('concludeFromOpen', () => {
       // sign the states
       const sigs = await signStates(states, wallets, whoSignedWhat);
 
-      const transactionRequest = createConcludeFromOpenTransaction(states, sigs, whoSignedWhat);
+      const transactionRequest = createConcludeTransaction(states, sigs, whoSignedWhat);
       // call method in a slightly different way if expecting a revert
       if (reasonString) {
         const regex = new RegExp(

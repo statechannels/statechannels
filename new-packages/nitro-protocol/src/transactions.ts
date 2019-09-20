@@ -43,7 +43,7 @@ export function createCheckpointTransaction(signedStates: SignedState[]): Transa
 
 export function createConcludeTransaction(conclusionProof: SignedState[]): TransactionRequest {
   const {states, signatures, whoSignedWhat} = createSignatureArguments(conclusionProof);
-  return forceMoveTrans.createConcludeFromChallengeTransaction(states, signatures, whoSignedWhat);
+  return forceMoveTrans.createConcludeTransaction(states, signatures, whoSignedWhat);
 }
 
 // Currently we assume each signedState is a unique combination of state/signature

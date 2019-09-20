@@ -124,7 +124,7 @@ export function createCheckpointTransaction({
   return {data, gasLimit: GAS_LIMIT};
 }
 
-export function createConcludeFromOpenTransaction(
+export function createConcludeTransaction(
   states: State[],
   signatures: Signature[],
   whoSignedWhat: number[],
@@ -149,7 +149,7 @@ export function createConcludeFromOpenTransaction(
 
   const numStates = states.length;
 
-  const data = ForceMoveContractInterface.functions.concludeFromOpen.encode([
+  const data = ForceMoveContractInterface.functions.conclude.encode([
     largestTurnNum,
     fixedPart,
     appPartHash,
@@ -157,41 +157,6 @@ export function createConcludeFromOpenTransaction(
     numStates,
     whoSignedWhat,
     signatures,
-  ]);
-  return {data, gasLimit: GAS_LIMIT};
-}
-
-export function createConcludeFromChallengeTransaction(
-  states: State[],
-  signatures: Signature[],
-  whoSignedWhat: number[],
-): TransactionRequest {
-  if (states.length === 0) {
-    throw new Error('No states provided');
-  }
-  const {participants} = states[0].channel;
-  if (participants.length !== signatures.length) {
-    throw new Error(
-      `Participants (length:${participants.length}) and signatures (length:${signatures.length}) need to be the same length`,
-    );
-  }
-  const lastState = states.reduce((s1, s2) => (s1.turnNum >= s2.turnNum ? s1 : s2), states[0]);
-
-  const largestTurnNum = lastState.turnNum;
-  const fixedPart = getFixedPart(lastState);
-  const appPartHash = hashAppPart(lastState);
-  const numStates = states.length;
-
-  const newOutcomeHash = hashOutcome(lastState.outcome);
-
-  const data = ForceMoveContractInterface.functions.concludeFromChallenge.encode([
-    largestTurnNum,
-    fixedPart,
-    appPartHash,
-    numStates,
-    whoSignedWhat,
-    signatures,
-    newOutcomeHash,
   ]);
   return {data, gasLimit: GAS_LIMIT};
 }
