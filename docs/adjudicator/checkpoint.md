@@ -52,17 +52,7 @@ Parameters:
 - Check that `finalizesAt > now || finalizesAt == 0`
 - Calculate `storageHash` from `turnNumRecord`, `finalizesAt`, `challengerAddress`, `challengeStateHash`, `challengeOutcomeHash`
 - Check that `channelStorageHashes[channelId] == storageHash`
-- Let `m = variableParts.length`
-- For `i` in `0 .. (m-1)`:
-  - Let `isFinal = i > m - isFinalCount`
-  - Let `turnNum = largestTurnNum + i - m + 1`
-  - Calculate `stateHash[i]` from `fixedPart, channelId, turnNum, variablePart[i], isFinal`
-  - If `i + 1 != m`
-    - Calculate `isFinalAB = [i > m - isFinalCount, i + 1 > m - isFinalCount]`
-    - Calculate `turnNumB = largestTurnNum + i - m + 2`
-    - Ensure `validTransition(nParticipants, isFinalAB, turnNumB, variablePart[i], variablePart[i+1], appDefinition)`
-    - (Other checks are covered by construction)
-- Check that `_validSignatures(largestTurnNum, participants, stateHashes, sigs, whoSignedwhat)`
+- Check that a state with `turnNum = largestTurnNum` is supported by the input data (if there is none, revert). Do this by calling the `_stateSupportedBy` method.
 - Set channelStorage:
   - `turnNumRecord = largestTurnNum`
   - Other fields set to their null values (see [Channel Storage](./channel-storage)).

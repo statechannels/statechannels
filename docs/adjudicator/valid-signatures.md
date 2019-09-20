@@ -1,15 +1,13 @@
 ---
 id: valid-signatures
-title: validSignatures
+title: _validSignatures
 ---
 
-As we will see in the method definitions later, in order for the chain to accept a channel state, `s`, that channel state must be _supported_ by `n` signatures (where `n = participants.length`).
-The simplest way for this to accomplish this is to provide a sequence of `n` states terminating is state `s`, where each state is signed by its mover and each consecutive pair of states form a valid transition.
+Given an array of state hashes, checks the validity of the supplied signatures.
 
-ForceMove also allows an optimization where a state can be supported by `n` signatures on a sequence of `m < n` states, provided again that each consecutive pair of those `m` states form a valid transition and further provided each participant has provided a signature on a state later or equal in the sequence than the state for which they were the mover.
-In the extreme, this allows a single state signed by all `n` parties to be accepted by the chain.
-
-## Valid Signatures
+:::warning
+Does not check the states to see if they form a chain of valid transitions.
+:::
 
 Internal call
 
@@ -36,8 +34,8 @@ Each signature is a struct:
 ### Requirements:
 
 - There is a signature for each participant:
-  - either on the state for which they are a mover
-  - or on a state that appears after that state in the array
+  - either on the hash of the state for which they are a mover
+  - or on the hash of a state that appears after that state in the array
 
 Some examples:
 
