@@ -340,8 +340,8 @@ contract ForceMove {
 
     }
 
-    function concludeFromOpen(
-        uint256 largestTurnNum,
+    function conclude(
+        uint48 largestTurnNum,
         FixedPart memory fixedPart, // don't need appDefinition
         bytes32 appPartHash,
         bytes32 outcomeHash,
@@ -349,52 +349,51 @@ contract ForceMove {
         uint8[] memory whoSignedWhat,
         Signature[] memory sigs
     ) public {
-        // Calculate channelId from fixed part
         bytes32 channelId = keccak256(
             abi.encode(fixedPart.chainId, fixedPart.participants, fixedPart.channelNonce)
         );
 
-        _requireChannelOpen(channelId);
+        _requireChannelNotFinalized(channelId);
+        _requireIncreasedTurnNumber(channelId, largestTurnNum - 1); // In this case, it's acceptable if the turn number is not increased
 
-        _conclude(
-            largestTurnNum,
-            numStates,
-            fixedPart.participants,
-            channelId,
-            appPartHash,
-            outcomeHash,
-            sigs,
-            whoSignedWhat
+        bytes32[] memory stateHashes = new bytes32[](numStates);
+        for (uint256 i = 0; i < numStates; i++) {
+            stateHashes[i] = keccak256(
+                abi.encode(
+                    State(
+                        largestTurnNum + (i + 1) - numStates, // turnNum
+                        true, // isFinal
+                        channelId,
+                        appPartHash,
+                        outcomeHash
+                    )
+                )
+            );
+        }
+
+        // check the supplied states are supported by n signatures
+        require(
+            _validSignatures(
+                largestTurnNum,
+                fixedPart.participants,
+                stateHashes,
+                sigs,
+                whoSignedWhat
+            ),
+            'Invalid signatures'
         );
+
+        // effects
+
+        // set channel storage
+        channelStorageHashes[channelId] = _getHash(
+            ChannelStorage(0, now, bytes32(0), address(0), outcomeHash)
+        );
+
+        // emit event
+        emit Concluded(channelId);
     }
 
-    function concludeFromChallenge(
-        uint48 largestTurnNum,
-        FixedPart memory fixedPart, // don't need appDefinition
-        bytes32 appPartHash,
-        uint8 numStates,
-        uint8[] memory whoSignedWhat,
-        Signature[] memory sigs,
-        bytes32 newOutcomeHash
-    ) public {
-        // Calculate channelId from fixed part
-        bytes32 channelId = keccak256(
-            abi.encode(fixedPart.chainId, fixedPart.participants, fixedPart.channelNonce)
-        );
-
-        _requireOngoingChallenge(channelId);
-
-        _conclude(
-            largestTurnNum,
-            numStates,
-            fixedPart.participants,
-            channelId,
-            appPartHash,
-            newOutcomeHash,
-            sigs,
-            whoSignedWhat
-        );
-    }
     // Internal methods:
 
     function _isAddressInArray(address suspect, address[] memory addresses)
@@ -596,48 +595,6 @@ contract ForceMove {
             ChannelStorage(newTurnNumRecord, 0, bytes32(0), address(0), bytes32(0))
         );
         emit ChallengeCleared(channelId, newTurnNumRecord);
-    }
-
-    function _conclude(
-        uint256 largestTurnNum,
-        uint8 numStates,
-        address[] memory participants,
-        bytes32 channelId,
-        bytes32 appPartHash,
-        bytes32 outcomeHash,
-        Signature[] memory sigs,
-        uint8[] memory whoSignedWhat
-    ) internal {
-        bytes32[] memory stateHashes = new bytes32[](numStates);
-        for (uint256 i = 0; i < numStates; i++) {
-            stateHashes[i] = keccak256(
-                abi.encode(
-                    State(
-                        largestTurnNum + (i + 1) - numStates, // turnNum
-                        true, // isFinal
-                        channelId,
-                        appPartHash,
-                        outcomeHash
-                    )
-                )
-            );
-        }
-
-        // check the supplied states are supported by n signatures
-        require(
-            _validSignatures(largestTurnNum, participants, stateHashes, sigs, whoSignedWhat),
-            'Invalid signatures'
-        );
-
-        // effects
-
-        // set channel storage
-        channelStorageHashes[channelId] = _getHash(
-            ChannelStorage(0, now, bytes32(0), address(0), outcomeHash)
-        );
-
-        // emit event
-        emit Concluded(channelId);
     }
 
     function _requireChannelOpen(bytes32 channelId) internal view {
