@@ -20,7 +20,11 @@ import {State} from '../../../src/contract/state';
 import {createConcludeTransaction} from '../../../src/contract/transaction-creators/force-move';
 import {hashChannelStorage} from '../../../src/contract/channel-storage';
 import {hexlify} from 'ethers/utils';
-import {CHANNEL_NOT_OPEN} from '../../../src/contract/transaction-creators/revert-reasons.js';
+import {
+  CHANNEL_FINALIZED,
+  TURN_NUM_RECORD_NOT_INCREASED,
+  UNACCEPTABLE_WHO_SIGNED_WHAT,
+} from '../../../src/contract/transaction-creators/revert-reasons';
 
 const provider = new ethers.providers.JsonRpcProvider(
   `http://localhost:${process.env.DEV_GANACHE_PORT}`,
@@ -48,40 +52,75 @@ beforeAll(async () => {
 
 const acceptsWhenOpenIf =
   'It accepts when the channel is open, and sets the channel storage correctly, if';
-const description1 = acceptsWhenOpenIf + 'passed n states, and the slot is empty';
-const description2 = acceptsWhenOpenIf + 'passed one state, and the slot is empty';
-const description3 = acceptsWhenOpenIf + 'passed one state, and there is a turnNumRecord stored';
+const accepts1 = acceptsWhenOpenIf + 'passed n states, and the slot is empty';
+const accepts2 = acceptsWhenOpenIf + 'passed one state, and the slot is empty';
+const accepts3 = acceptsWhenOpenIf + 'passed one state, and there is a turnNumRecord stored';
+
+const acceptsWhenChallengeOngoingIf =
+  'It accepts when there is an ongoing challenge, and sets the channel storage correctly, if';
+const accepts4 = acceptsWhenChallengeOngoingIf + 'passed n states';
+const accepts5 = acceptsWhenChallengeOngoingIf + 'passed one state';
 
 const revertsWhenOpenBut = 'It reverts when the channel is open, but';
-const description4 = revertsWhenOpenBut + 'the declaredTurnNumRecord = 0 and incorrect';
-const description5 = revertsWhenOpenBut + 'the declaredTurnNumRecord > 0 and incorrect';
+const reverts1 = revertsWhenOpenBut + 'the largest turn number is not large enough';
+const reverts2 = revertsWhenOpenBut + 'the final state is not supported';
+const reverts3 = revertsWhenOpenBut + 'there is an invalid transition';
 
-const description6 = 'It reverts when there is an ongoing challenge';
-const description7 = 'It reverts when the outcome is already finalized';
+const revertsWhenChallengeOngoingBut = 'It reverts when there is an ongoing challenge, but';
+const reverts4 = revertsWhenChallengeOngoingBut + 'the largest turn number is not large enough';
+const reverts5 = revertsWhenChallengeOngoingBut + 'the final state is not supported';
+const reverts6 = revertsWhenChallengeOngoingBut + 'there is an invalid transition';
 
-const largestTurnNum = 8;
+const reverts7 = 'It reverts when the outcome is already finalized';
+
+const threeStates = {
+  numStates: 3,
+  whoSignedWhat: [0, 1, 2],
+  appData: [0, 1, 2],
+};
+const oneState = {
+  numStates: 1,
+  whoSignedWhat: [0, 0, 0],
+  appData: [0],
+};
+const invalidTransition = {
+  numStates: 3,
+  whoSignedWhat: [0, 1, 2],
+  appData: [0, 2, 1],
+};
+const unsupported = {
+  numStates: 2,
+  whoSignedWhat: [0, 0],
+  appData: [0, 1],
+};
+const turnNumRecord = 5;
+const channelOpen = clearedChallengeHash(turnNumRecord);
+const challengeOngoing = ongoingChallengeHash(turnNumRecord);
+const finalized = finalizedOutcomeHash(turnNumRecord);
+let channelNonce = 400;
 describe('concludeFromOpen', () => {
-  const whoSignedWhatLookup = {
-    1: [0, 0, 0],
-    3: [0, 1, 2],
-  };
-  let channelNonce = 400;
   beforeEach(() => (channelNonce += 1));
   it.each`
-    description     | initialChannelStorageHash  | numStates | reasonString
-    ${description1} | ${HashZero}                | ${3}      | ${undefined}
-    ${description2} | ${HashZero}                | ${1}      | ${undefined}
-    ${description3} | ${clearedChallengeHash(5)} | ${1}      | ${undefined}
-    ${description4} | ${clearedChallengeHash(5)} | ${1}      | ${'generic'}
-    ${description5} | ${clearedChallengeHash(5)} | ${1}      | ${'generic'}
-    ${description6} | ${ongoingChallengeHash(5)} | ${1}      | ${CHANNEL_NOT_OPEN}
-    ${description7} | ${finalizedOutcomeHash(5)} | ${1}      | ${CHANNEL_NOT_OPEN}
+    description | initialChannelStorageHash | largestTurnNum       | support              | reasonString
+    ${accepts1} | ${HashZero}               | ${turnNumRecord}     | ${threeStates}       | ${undefined}
+    ${accepts2} | ${HashZero}               | ${turnNumRecord}     | ${oneState}          | ${undefined}
+    ${accepts2} | ${HashZero}               | ${turnNumRecord + 2} | ${oneState}          | ${undefined}
+    ${accepts3} | ${channelOpen}            | ${turnNumRecord}     | ${oneState}          | ${undefined}
+    ${accepts4} | ${challengeOngoing}       | ${turnNumRecord}     | ${oneState}          | ${undefined}
+    ${accepts5} | ${challengeOngoing}       | ${turnNumRecord + 1} | ${oneState}          | ${undefined}
+    ${reverts1} | ${channelOpen}            | ${turnNumRecord - 1} | ${oneState}          | ${TURN_NUM_RECORD_NOT_INCREASED}
+    ${reverts2} | ${channelOpen}            | ${turnNumRecord}     | ${unsupported}       | ${UNACCEPTABLE_WHO_SIGNED_WHAT}
+    ${reverts3} | ${channelOpen}            | ${turnNumRecord}     | ${invalidTransition} | ${'Counting app'}
+    ${reverts4} | ${challengeOngoing}       | ${turnNumRecord - 1} | ${oneState}          | ${TURN_NUM_RECORD_NOT_INCREASED}
+    ${reverts5} | ${challengeOngoing}       | ${turnNumRecord}     | ${unsupported}       | ${UNACCEPTABLE_WHO_SIGNED_WHAT}
+    ${reverts6} | ${challengeOngoing}       | ${turnNumRecord}     | ${invalidTransition} | ${'Counting app'}
+    ${reverts7} | ${finalized}              | ${turnNumRecord}     | ${oneState}          | ${CHANNEL_FINALIZED}
   `(
     '$description', // for the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce
-    async ({initialChannelStorageHash, numStates, reasonString}) => {
+    async ({initialChannelStorageHash, largestTurnNum, support, reasonString}) => {
       const channel: Channel = {chainId, participants, channelNonce: hexlify(channelNonce)};
       const channelId = getChannelId(channel);
-      const whoSignedWhat = whoSignedWhatLookup[numStates];
+      const {numStates, appData, whoSignedWhat} = support;
 
       const states: State[] = [];
       for (let i = 1; i <= numStates; i++) {
@@ -90,7 +129,7 @@ describe('concludeFromOpen', () => {
           channel,
           outcome,
           appDefinition,
-          appData: '0x0',
+          appData,
           challengeDuration,
           turnNum: largestTurnNum + i - numStates,
         });
