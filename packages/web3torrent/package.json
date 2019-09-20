@@ -1,5 +1,5 @@
 {
-  "name": "web3torrent-pse",
+  "name": "@statechannels/web3torrent",
   "version": "0.0.1",
   "description": "A paid streaming extension implementation using state channels for the WebTorrent protocol.",
   "keywords": [
