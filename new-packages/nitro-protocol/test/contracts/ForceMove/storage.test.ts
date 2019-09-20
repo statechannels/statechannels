@@ -47,28 +47,23 @@ describe('_requireChannelOpen', () => {
     channelId = randomChannelId();
   });
 
-  it.each`
-    turnNumRecord
-    ${0x42}
-    ${1}
-  `('works when the slot is empty', async ({turnNumRecord}) => {
+  it('works when the slot is empty', async () => {
     expect(await ForceMove.channelStorageHashes(channelId)).toEqual(HashZero);
-    await ForceMove.requireChannelOpen(turnNumRecord, channelId);
+    await ForceMove.requireChannelOpen(channelId);
   });
 
   const challengeDuration = 0x1000;
   it.each`
-    result       | turnNumRecord | claimedTurnNumRecord | finalizesAt
-    ${'reverts'} | ${42}         | ${42}                | ${0x9001}
-    ${'reverts'} | ${123}        | ${12}                | ${undefined}
-    ${'reverts'} | ${123}        | ${1234}              | ${undefined}
-    ${'reverts'} | ${123}        | ${12}                | ${'0x00'}
-    ${'works'}   | ${0xabc}      | ${0xabc}             | ${'0x00'}
-    ${'works'}   | ${1}          | ${1}                 | ${'0x00'}
-    ${'works'}   | ${0}          | ${0}                 | ${'0x00'}
+    result       | turnNumRecord | finalizesAt
+    ${'reverts'} | ${42}         | ${1e12}
+    ${'reverts'} | ${42}         | ${0x9001}
+    ${'works'}   | ${123}        | ${'0x00'}
+    ${'works'}   | ${0xabc}      | ${'0x00'}
+    ${'works'}   | ${1}          | ${'0x00'}
+    ${'works'}   | ${0}          | ${'0x00'}
   `(
     '$result with turnNumRecord: $turnNumRecord, finalizesAt: $finalizesAt',
-    async ({turnNumRecord, finalizesAt, result, claimedTurnNumRecord}) => {
+    async ({turnNumRecord, finalizesAt, result}) => {
       // compute finalizedAt
       const blockNumber = await provider.getBlockNumber();
       const blockTimestamp = (await provider.getBlock(blockNumber)).timestamp;
@@ -81,7 +76,7 @@ describe('_requireChannelOpen', () => {
         hashChannelStorage(blockchainStorage),
       );
 
-      const tx = ForceMove.requireChannelOpen(claimedTurnNumRecord, channelId);
+      const tx = ForceMove.requireChannelOpen(channelId);
       result === 'reverts' ? await expectRevert(() => tx, 'Channel not open.') : await tx;
     },
   );
