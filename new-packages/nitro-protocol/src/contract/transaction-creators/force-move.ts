@@ -15,8 +15,6 @@ const ForceMoveContractInterface = new ethers.utils.Interface(ForceMoveArtifact.
 
 interface CheckpointData {
   challengeState?: State;
-  finalizesAt?: number;
-  turnNumRecord?: number;
   states: State[];
   signatures: Signature[];
   whoSignedWhat: number[];
