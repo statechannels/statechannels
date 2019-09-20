@@ -425,7 +425,7 @@ contract ForceMove {
         uint8 numStates,
         uint8[] memory whoSignedWhat,
         Signature[] memory sigs,
-        bytes32 challengeOutcomeHash,
+        bytes32 newOutcomeHash,
         bytes memory channelStorageLiteBytes // This is to avoid a 'stack too deep' error by minimising the number of local variables
     ) public {
         // Calculate channelId from fixed part
@@ -438,7 +438,6 @@ contract ForceMove {
             (ChannelStorageLite)
         );
 
-        require(turnNumRecord > 0, 'TurnNumRecord must be nonzero');
         require(now < channelStorageLite.finalizesAt, 'Channel already finalized!');
 
         require(
@@ -449,7 +448,7 @@ contract ForceMove {
                             channelStorageLite.finalizesAt,
                             channelStorageLite.stateHash, // challengeStateHash
                             channelStorageLite.challengerAddress,
-                            challengeOutcomeHash
+                            channelStorageLite.outcomeHash
                         )
                     )
                 ) ==
@@ -463,7 +462,7 @@ contract ForceMove {
             fixedPart.participants,
             channelId,
             appPartHash,
-            channelStorageLite.outcomeHash,
+            newOutcomeHash,
             sigs,
             whoSignedWhat
         );
