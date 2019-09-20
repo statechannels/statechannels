@@ -22,6 +22,11 @@ import {State, getVariablePart, getFixedPart} from '../../../src/contract/state'
 import {hashChallengeMessage} from '../../../src/contract/challenge';
 import {hashChannelStorage, ChannelStorage} from '../../../src/contract/channel-storage';
 import {createForceMoveTransaction} from '../../../src/contract/transaction-creators/force-move';
+import {
+  TURN_NUM_RECORD_NOT_INCREASED,
+  CHALLENGER_NON_PARTICIPANT,
+  CHANNEL_FINALIZED,
+} from '../../../src/contract/transaction-creators/revert-reasons';
 const provider = new ethers.providers.JsonRpcProvider(
   `http://localhost:${process.env.DEV_GANACHE_PORT}`,
 );
@@ -88,13 +93,14 @@ describe('forceMove', () => {
     ${accepts4} | ${clearedChallengeHash(5)}  | ${threeStates} | ${wallets[2]}     | ${undefined}
     ${accepts5} | ${ongoingChallengeHash(5)}  | ${oneState}    | ${wallets[2]}     | ${undefined}
     ${accepts6} | ${ongoingChallengeHash(5)}  | ${threeStates} | ${wallets[2]}     | ${undefined}
-    ${reverts1} | ${clearedChallengeHash(20)} | ${oneState}    | ${wallets[2]}     | ${'generic'}
-    ${reverts2} | ${HashZero}                 | ${oneState}    | ${nonParticipant} | ${'generic'}
-    ${reverts3} | ${HashZero}                 | ${invalid}     | ${wallets[2]}     | ${'generic'}
-    ${reverts4} | ${ongoingChallengeHash(20)} | ${oneState}    | ${wallets[2]}     | ${'generic'}
-    ${reverts5} | ${finalizedOutcomeHash(5)}  | ${oneState}    | ${wallets[2]}     | ${'generic'}
+    ${reverts1} | ${clearedChallengeHash(20)} | ${oneState}    | ${wallets[2]}     | ${TURN_NUM_RECORD_NOT_INCREASED}
+    ${reverts2} | ${HashZero}                 | ${oneState}    | ${nonParticipant} | ${CHALLENGER_NON_PARTICIPANT}
+    ${reverts3} | ${HashZero}                 | ${invalid}     | ${wallets[2]}     | ${'CountingApp: Counter must be incremented'}
+    ${reverts4} | ${ongoingChallengeHash(20)} | ${oneState}    | ${wallets[2]}     | ${TURN_NUM_RECORD_NOT_INCREASED}
+    ${reverts5} | ${finalizedOutcomeHash(5)}  | ${oneState}    | ${wallets[2]}     | ${CHANNEL_FINALIZED}
   `(
     '$description', // for the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce
+
     async ({initialChannelStorageHash, stateData, challenger, reasonString}) => {
       const {appDatas, whoSignedWhat} = stateData;
       const channel: Channel = {
