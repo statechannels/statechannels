@@ -61,7 +61,6 @@ contract ForceMove {
     }
 
     function forceMove(
-        uint48 turnNumRecord,
         FixedPart memory fixedPart,
         uint48 largestTurnNum,
         ForceMoveApp.VariablePart[] memory variableParts,
@@ -137,8 +136,6 @@ contract ForceMove {
     }
 
     function respond(
-        uint256 turnNumRecord,
-        uint256 finalizesAt,
         address challenger,
         bool[2] memory isFinalAB,
         FixedPart memory fixedPart,
@@ -151,6 +148,7 @@ contract ForceMove {
         bytes32 channelId = keccak256(
             abi.encode(fixedPart.chainId, fixedPart.participants, fixedPart.channelNonce)
         );
+        (uint48 turnNumRecord, uint48 finalizesAt, ) = _getData(channelId);
 
         bytes32 challengeOutcomeHash = keccak256(abi.encode(variablePartAB[0].outcome));
         bytes32 responseOutcomeHash = keccak256(abi.encode(variablePartAB[1].outcome));
@@ -223,9 +221,7 @@ contract ForceMove {
     }
 
     function refute(
-        uint256 turnNumRecord,
         uint48 refutationStateTurnNum,
-        uint256 finalizesAt,
         address challenger,
         bool[2] memory isFinalAB,
         FixedPart memory fixedPart,
@@ -240,6 +236,7 @@ contract ForceMove {
         bytes32 channelId = keccak256(
             abi.encode(fixedPart.chainId, fixedPart.participants, fixedPart.channelNonce)
         );
+        (uint48 turnNumRecord, uint48 finalizesAt, ) = _getData(channelId);
 
         _requireIncreasedTurnNumber(channelId, refutationStateTurnNum);
 
@@ -314,8 +311,7 @@ contract ForceMove {
         ForceMoveApp.VariablePart[] memory variableParts,
         uint8 isFinalCount, // how many of the states are final
         Signature[] memory sigs,
-        uint8[] memory whoSignedWhat,
-        ChannelStorage memory channelStorage
+        uint8[] memory whoSignedWhat
     ) public {
         // Calculate channelId from fixed part
         bytes32 channelId = keccak256(
@@ -345,7 +341,6 @@ contract ForceMove {
     }
 
     function concludeFromOpen(
-        uint48 turnNumRecord,
         uint256 largestTurnNum,
         FixedPart memory fixedPart, // don't need appDefinition
         bytes32 appPartHash,
@@ -380,8 +375,7 @@ contract ForceMove {
         uint8 numStates,
         uint8[] memory whoSignedWhat,
         Signature[] memory sigs,
-        bytes32 newOutcomeHash,
-        ChannelStorage memory channelStorage
+        bytes32 newOutcomeHash
     ) public {
         // Calculate channelId from fixed part
         bytes32 channelId = keccak256(
