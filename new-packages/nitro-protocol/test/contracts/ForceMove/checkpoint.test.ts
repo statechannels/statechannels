@@ -50,7 +50,7 @@ const hashMisMatch = {
 };
 const challengeExpired = {
   description: 'It reverts when the challenge has expired',
-  reason: 'Challenge timed out',
+  reason: 'Challenge expired',
 };
 const invalidTransition = {
   description: 'It reverts when the states do not form a validTransition chain ',

@@ -341,6 +341,7 @@ contract ForceMove {
         // REQUIREMENTS
         // ------------
 
+        _requireChannelNotFinalized(channelStorage, channelId);
         _requireIncreasedTurnNumber(channelStorage, channelId, largestTurnNum);
 
         bytes32[] memory stateHashes = new bytes32[](variableParts.length);
@@ -679,9 +680,12 @@ contract ForceMove {
 
     }
 
-    function _requireChannelFinalized(ChannelStorage memory cs, bytes32 channelId) internal view {
+    function _requireChannelNotFinalized(ChannelStorage memory cs, bytes32 channelId)
+        internal
+        view
+    {
+        require(cs.finalizesAt == 0 || cs.finalizesAt > now, 'Challenge expired');
         _requireMatchingStorage(cs, channelId);
-        require(cs.finalizesAt > 0 && cs.finalizesAt <= now, 'Channel not finalized.');
     }
 
     function _getHash(ChannelStorage memory channelStorage)
