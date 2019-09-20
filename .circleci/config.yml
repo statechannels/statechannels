@@ -3,7 +3,7 @@ version: 2.1
 defaults: &defaults
   working_directory: /home/circleci/project
   docker:
-    - image: counterfactual/circleci-environment:latest
+    - image: circleci/node:10.16.3
 
 save_code: &save_code
   save_cache:
