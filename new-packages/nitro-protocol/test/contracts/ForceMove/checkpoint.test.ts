@@ -4,14 +4,14 @@ import {expectRevert} from 'magmo-devtools';
 import ForceMoveArtifact from '../../../build/contracts/TESTForceMove.json';
 // @ts-ignore
 import countingAppArtifact from '../../../build/contracts/CountingApp.json';
-import {defaultAbiCoder, hexlify, bigNumberify} from 'ethers/utils';
+import {defaultAbiCoder, hexlify} from 'ethers/utils';
 import {
   setupContracts,
   newChallengeClearedEvent,
   signStates,
   sendTransaction,
 } from '../../test-helpers';
-import {HashZero, Zero, One} from 'ethers/constants';
+import {HashZero, Zero} from 'ethers/constants';
 import {Outcome} from '../../../src/contract/outcome';
 import {Channel, getChannelId} from '../../../src/contract/channel';
 import {State} from '../../../src/contract/state';
@@ -48,12 +48,11 @@ const hashMisMatch = {
   description: "It reverts when the channel storage doesn't match",
   reason: 'Channel storage does not match stored version.',
 };
-
 const challengeExpired = {
   description: 'It reverts when the challenge has expired',
   reason: 'Challenge timed out',
 };
-const invalidSupport = {
+const invalidTransition = {
   description: 'It reverts when the states do not form a validTransition chain ',
   reason: 'CountingApp: Counter must be incremented',
 };
@@ -69,7 +68,6 @@ const succeedsDuringChallenge = {
   description:
     'It accepts when the input is valid and there is a challenge, and clears the challenge',
 };
-
 const succeedsWhenChannelOpen = {
   description: 'It accepts when the input is valid and the channel is open',
 };
@@ -78,20 +76,20 @@ describe('checkpoint', () => {
   // for the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce
   let cn = 300;
   it.each`
-    test                       | channelNonce | setTurnNumRecord | largestTurnNum | appDatas     | whoSignedWhat | challenger    | channelStorage | finalizesAt
-    ${succeedsDuringChallenge} | ${(cn += 1)} | ${7}             | ${8}           | ${[0, 1, 2]} | ${[0, 1, 2]}  | ${wallets[1]} | ${undefined}   | ${undefined}
-    ${succeedsDuringChallenge} | ${(cn += 1)} | ${7}             | ${11}          | ${[0, 1, 2]} | ${[0, 1, 2]}  | ${wallets[1]} | ${undefined}   | ${undefined}
-    ${succeedsWhenChannelOpen} | ${(cn += 1)} | ${7}             | ${11}          | ${[0, 1, 2]} | ${[0, 1, 2]}  | ${wallets[1]} | ${undefined}   | ${Zero.toHexString()}
-    ${hashMisMatch}            | ${(cn += 1)} | ${7}             | ${11}          | ${[0, 1, 2]} | ${[0, 1, 2]}  | ${wallets[2]} | ${HashZero}    | ${undefined}
-    ${challengeExpired}        | ${(cn += 1)} | ${7}             | ${11}          | ${[0, 1, 2]} | ${[0, 1, 2]}  | ${wallets[2]} | ${undefined}   | ${One.toHexString()}
-    ${invalidSupport}          | ${(cn += 1)} | ${7}             | ${8}           | ${[0, 2, 1]} | ${[0, 1, 2]}  | ${wallets[1]} | ${undefined}   | ${undefined}
-    ${stateUnsupported}        | ${(cn += 1)} | ${7}             | ${8}           | ${[0, 1, 2]} | ${[0, 0, 2]}  | ${wallets[1]} | ${undefined}   | ${undefined}
-    ${staleState}              | ${(cn += 1)} | ${10}            | ${8}           | ${[0, 1, 2]} | ${[0, 1, 2]}  | ${wallets[1]} | ${undefined}   | ${undefined}
+    test                       | channelNonce | turnNumRecord | largestTurnNum | appDatas     | whoSignedWhat | challenger    | channelStorage | finalizesAt
+    ${succeedsDuringChallenge} | ${(cn += 1)} | ${7}          | ${8}           | ${[0, 1, 2]} | ${[0, 1, 2]}  | ${wallets[1]} | ${undefined}   | ${undefined}
+    ${succeedsDuringChallenge} | ${(cn += 1)} | ${7}          | ${11}          | ${[0, 1, 2]} | ${[0, 1, 2]}  | ${wallets[1]} | ${undefined}   | ${undefined}
+    ${succeedsWhenChannelOpen} | ${(cn += 1)} | ${7}          | ${11}          | ${[0, 1, 2]} | ${[0, 1, 2]}  | ${wallets[1]} | ${undefined}   | ${'0x00'}
+    ${hashMisMatch}            | ${(cn += 1)} | ${7}          | ${11}          | ${[0, 1, 2]} | ${[0, 1, 2]}  | ${wallets[2]} | ${HashZero}    | ${undefined}
+    ${challengeExpired}        | ${(cn += 1)} | ${7}          | ${11}          | ${[0, 1, 2]} | ${[0, 1, 2]}  | ${wallets[2]} | ${undefined}   | ${1}
+    ${invalidTransition}       | ${(cn += 1)} | ${7}          | ${8}           | ${[0, 2, 1]} | ${[0, 1, 2]}  | ${wallets[1]} | ${undefined}   | ${undefined}
+    ${stateUnsupported}        | ${(cn += 1)} | ${7}          | ${8}           | ${[0, 1, 2]} | ${[0, 0, 2]}  | ${wallets[1]} | ${undefined}   | ${undefined}
+    ${staleState}              | ${(cn += 1)} | ${10}         | ${8}           | ${[0, 1, 2]} | ${[0, 1, 2]}  | ${wallets[1]} | ${undefined}   | ${undefined}
   `(
     '$test.description',
     async ({
       channelNonce,
-      setTurnNumRecord,
+      turnNumRecord,
       largestTurnNum,
       appDatas,
       whoSignedWhat,
@@ -104,28 +102,17 @@ describe('checkpoint', () => {
       const channel: Channel = {chainId, channelNonce, participants};
       const channelId = getChannelId(channel);
 
-      // compute finalizedAt
-      const blockNumber = await provider.getBlockNumber();
-      const blockTimestamp = (await provider.getBlock(blockNumber)).timestamp;
-      finalizesAt =
-        finalizesAt ||
-        bigNumberify(blockTimestamp)
-          .add(challengeDuration)
-          .toHexString();
+      finalizesAt = finalizesAt || 1e12;
 
-      const states: State[] = [];
-
-      for (let i = 0; i < appDatas.length; i++) {
-        states.push({
-          turnNum: largestTurnNum - appDatas.length + 1 + i,
-          isFinal: false,
-          channel,
-          challengeDuration,
-          outcome: defaultOutcome,
-          appData: defaultAbiCoder.encode(['uint256'], [appDatas[i]]),
-          appDefinition,
-        });
-      }
+      const states = appDatas.map((data, idx) => ({
+        turnNum: largestTurnNum - appDatas.length + 1 + idx,
+        isFinal: false,
+        channel,
+        challengeDuration,
+        outcome: defaultOutcome,
+        appData: defaultAbiCoder.encode(['uint256'], [data]),
+        appDefinition,
+      }));
 
       const isOpen = Zero.eq(finalizesAt);
       const outcome = isOpen ? undefined : defaultOutcome;
@@ -133,7 +120,7 @@ describe('checkpoint', () => {
       const challengeState: State = isOpen
         ? undefined
         : {
-            turnNum: setTurnNumRecord,
+            turnNum: turnNumRecord,
             isFinal: false,
             channel,
             outcome,
@@ -145,7 +132,7 @@ describe('checkpoint', () => {
       channelStorage =
         channelStorage ||
         hashChannelStorage({
-          turnNumRecord: setTurnNumRecord,
+          turnNumRecord,
           finalizesAt,
           state: challengeState,
           challengerAddress,
@@ -165,7 +152,7 @@ describe('checkpoint', () => {
         states,
         signatures,
         whoSignedWhat,
-        turnNumRecord: setTurnNumRecord,
+        turnNumRecord,
       });
       if (test.reason) {
         const regex = new RegExp(
