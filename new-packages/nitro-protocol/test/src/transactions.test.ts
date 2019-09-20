@@ -60,7 +60,6 @@ beforeAll(async () => {
 describe('transactions', async () => {
   it('creates a force move transaction', async () => {
     const transactionRequest: TransactionRequest = createForceMoveTransaction(
-      openChannelStorage,
       [signedState],
       challengeSignature,
     );
@@ -69,18 +68,13 @@ describe('transactions', async () => {
   });
 
   it('creates a conclude from open transaction', async () => {
-    const transactionRequest: TransactionRequest = createConcludeTransaction(openChannelStorage, [
-      signedState,
-    ]);
+    const transactionRequest: TransactionRequest = createConcludeTransaction([signedState]);
 
     expect(transactionRequest.data).toBeDefined();
   });
 
   it('creates a conclude from challenged transaction', async () => {
-    const transactionRequest: TransactionRequest = createConcludeTransaction(
-      challengeChannelStorage,
-      [signedState],
-    );
+    const transactionRequest: TransactionRequest = createConcludeTransaction([signedState]);
 
     expect(transactionRequest.data).toBeDefined();
   });
@@ -104,19 +98,13 @@ describe('transactions', async () => {
 
   describe('respond with checkpoint transactions', () => {
     it('creates a transaction when there is a challenge state', async () => {
-      const transactionRequest: TransactionRequest = createCheckpointTransaction(
-        challengeChannelStorage,
-        [signedState],
-      );
+      const transactionRequest: TransactionRequest = createCheckpointTransaction([signedState]);
 
       expect(transactionRequest.data).toBeDefined();
     });
 
     it('creates a transaction when the chabbnel is open', async () => {
-      const transactionRequest: TransactionRequest = createCheckpointTransaction(
-        openChannelStorage,
-        [signedState],
-      );
+      const transactionRequest: TransactionRequest = createCheckpointTransaction([signedState]);
 
       expect(transactionRequest.data).toBeDefined();
     });

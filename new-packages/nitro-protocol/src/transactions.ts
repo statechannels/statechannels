@@ -6,14 +6,12 @@ import {getStateSignerAddress} from './signatures';
 import {ChannelStorage, SignedState} from '.';
 
 export function createForceMoveTransaction(
-  channelStorage: ChannelStorage,
   signedStates: SignedState[],
   challengeSignature: Signature,
 ): TransactionRequest {
   const {states, signatures, whoSignedWhat} = createSignatureArguments(signedStates);
 
   return forceMoveTrans.createForceMoveTransaction(
-    channelStorage.turnNumRecord,
     states,
     signatures,
     whoSignedWhat,
@@ -28,49 +26,24 @@ export function createRespondTransaction(
     throw new Error('No active challenge in challenge state');
   }
   return forceMoveTrans.createRespondTransaction(
-    channelStorage.turnNumRecord,
-    channelStorage.finalizesAt,
     channelStorage.challengeState,
     response.state,
     response.signature,
   );
 }
 
-export function createCheckpointTransaction(
-  channelStorage: ChannelStorage,
-  signedStates: SignedState[],
-): TransactionRequest {
+export function createCheckpointTransaction(signedStates: SignedState[]): TransactionRequest {
   const {states, signatures, whoSignedWhat} = createSignatureArguments(signedStates);
   return forceMoveTrans.createCheckpointTransaction({
-    ...channelStorage,
     states,
     signatures,
     whoSignedWhat,
   });
 }
 
-export function createConcludeTransaction(
-  channelStorage: ChannelStorage,
-  conclusionProof: SignedState[],
-): TransactionRequest {
+export function createConcludeTransaction(conclusionProof: SignedState[]): TransactionRequest {
   const {states, signatures, whoSignedWhat} = createSignatureArguments(conclusionProof);
-  if (!channelStorage.challengeState) {
-    return forceMoveTrans.createConcludeFromOpenTransaction(
-      channelStorage.turnNumRecord,
-      states,
-      signatures,
-      whoSignedWhat,
-    );
-  } else {
-    return forceMoveTrans.createConcludeFromChallengeTransaction(
-      channelStorage.turnNumRecord,
-      channelStorage.challengeState,
-      channelStorage.finalizesAt,
-      states,
-      signatures,
-      whoSignedWhat,
-    );
-  }
+  return forceMoveTrans.createConcludeFromChallengeTransaction(states, signatures, whoSignedWhat);
 }
 
 // Currently we assume each signedState is a unique combination of state/signature

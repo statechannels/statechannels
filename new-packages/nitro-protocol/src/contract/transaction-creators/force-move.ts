@@ -5,8 +5,6 @@ import {TransactionRequest} from 'ethers/providers';
 import {State, getVariablePart, getFixedPart, hashAppPart} from '../state';
 import {Signature} from 'ethers/utils';
 import {hashOutcome} from '../outcome';
-import {channelStorageStruct} from '../channel-storage';
-import {Zero} from 'ethers/constants';
 
 // TODO: Currently we are setting some arbitrary gas limit
 // to avoid issues with Ganache sendTransaction and parsing BN.js
@@ -18,14 +16,13 @@ const ForceMoveContractInterface = new ethers.utils.Interface(ForceMoveArtifact.
 interface CheckpointData {
   challengeState?: State;
   finalizesAt?: number;
-  turnNumRecord: number;
+  turnNumRecord?: number;
   states: State[];
   signatures: Signature[];
   whoSignedWhat: number[];
 }
 
 export function createForceMoveTransaction(
-  turnNumRecord: number,
   states: State[],
   signatures: Signature[],
   whoSignedWhat: number[],
@@ -50,7 +47,6 @@ export function createForceMoveTransaction(
   const isFinalCount = states.filter(s => s.isFinal === true).length;
 
   const data = ForceMoveContractInterface.functions.forceMove.encode([
-    turnNumRecord,
     fixedPart,
     largestTurnNum,
     variableParts,
@@ -63,8 +59,6 @@ export function createForceMoveTransaction(
 }
 
 export function createRespondTransaction(
-  turnNumRecord: number,
-  finalizesAt: number,
   challengeState: State,
   responseState: State,
   responseSignature: Signature,
@@ -75,8 +69,6 @@ export function createRespondTransaction(
   const fixedPart = getFixedPart(responseState);
   const variablePartAB = [getVariablePart(challengeState), getVariablePart(responseState)];
   const data = ForceMoveContractInterface.functions.respond.encode([
-    turnNumRecord,
-    finalizesAt,
     challengerAddress,
     isFinalAB,
     fixedPart,
@@ -87,8 +79,6 @@ export function createRespondTransaction(
 }
 
 export function createRefuteTransaction(
-  turnNumRecord: number,
-  finalizesAt: number,
   challengeState: State,
   refuteState: State,
   refutationStateSignature: Signature,
@@ -102,9 +92,7 @@ export function createRefuteTransaction(
   const refutationStateTurnNum = refuteState.turnNum;
 
   const data = ForceMoveContractInterface.functions.refute.encode([
-    turnNumRecord,
     refutationStateTurnNum,
-    finalizesAt,
     challengerAddress,
     isFinalAB,
     fixedPart,
@@ -115,28 +103,14 @@ export function createRefuteTransaction(
 }
 
 export function createCheckpointTransaction({
-  challengeState,
-  finalizesAt = 0,
   states,
   signatures,
   whoSignedWhat,
-  turnNumRecord,
 }: CheckpointData): TransactionRequest {
-  const isOpen = Zero.eq(finalizesAt);
-  if (isOpen && challengeState) {
-    throw new Error('Invalid open storage');
-  }
-
   const largestTurnNum = Math.max(...states.map(s => s.turnNum));
   const fixedPart = getFixedPart(states[0]);
   const variableParts = states.map(s => getVariablePart(s));
   const isFinalCount = states.filter(s => s.isFinal).length;
-  const {participants} = states[0].channel;
-
-  const outcome = isOpen ? undefined : challengeState.outcome;
-  const challengerAddress = isOpen
-    ? undefined
-    : participants[challengeState.turnNum % participants.length];
 
   const data = ForceMoveContractInterface.functions.checkpoint.encode([
     fixedPart,
@@ -145,20 +119,12 @@ export function createCheckpointTransaction({
     isFinalCount,
     signatures,
     whoSignedWhat,
-    channelStorageStruct({
-      outcome,
-      finalizesAt,
-      challengerAddress,
-      state: challengeState,
-      turnNumRecord,
-    }),
   ]);
 
   return {data, gasLimit: GAS_LIMIT};
 }
 
 export function createConcludeFromOpenTransaction(
-  turnNumRecord: number,
   states: State[],
   signatures: Signature[],
   whoSignedWhat: number[],
@@ -184,7 +150,6 @@ export function createConcludeFromOpenTransaction(
   const numStates = states.length;
 
   const data = ForceMoveContractInterface.functions.concludeFromOpen.encode([
-    turnNumRecord,
     largestTurnNum,
     fixedPart,
     appPartHash,
@@ -197,9 +162,6 @@ export function createConcludeFromOpenTransaction(
 }
 
 export function createConcludeFromChallengeTransaction(
-  turnNumRecord: number,
-  challengeState: State,
-  finalizesAt: number,
   states: State[],
   signatures: Signature[],
   whoSignedWhat: number[],
@@ -220,17 +182,6 @@ export function createConcludeFromChallengeTransaction(
   const appPartHash = hashAppPart(lastState);
   const numStates = states.length;
 
-  const {outcome} = challengeState;
-
-  const challengerAddress = participants[challengeState.turnNum % participants.length];
-  const channelStorage = channelStorageStruct({
-    outcome,
-    finalizesAt,
-    state: challengeState,
-    challengerAddress,
-    turnNumRecord,
-  });
-
   const newOutcomeHash = hashOutcome(lastState.outcome);
 
   const data = ForceMoveContractInterface.functions.concludeFromChallenge.encode([
@@ -241,7 +192,6 @@ export function createConcludeFromChallengeTransaction(
     whoSignedWhat,
     signatures,
     newOutcomeHash,
-    channelStorage,
   ]);
   return {data, gasLimit: GAS_LIMIT};
 }
