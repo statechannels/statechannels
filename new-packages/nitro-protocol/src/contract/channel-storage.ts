@@ -12,8 +12,13 @@ export interface ChannelStorage {
   challengerAddress?: Address;
   outcome?: Outcome;
 }
-const CHANNEL_STORAGE_TYPE =
-  'tuple(uint256 turnNumRecord, uint256 finalizesAt, bytes32 stateHash, address challengerAddress, bytes32 outcomeHash)';
+const CHANNEL_STORAGE_TYPE = `tuple(
+    uint256 turnNumRecord,
+    uint256 finalizesAt,
+    bytes32 stateHash,
+    address challengerAddress,
+    bytes32 outcomeHash
+  )`;
 
 export interface ChannelStorageLite {
   finalizesAt: Uint48;
@@ -21,8 +26,12 @@ export interface ChannelStorageLite {
   challengerAddress: Address;
   outcome: Outcome;
 }
-const CHANNEL_STORAGE_LITE_TYPE =
-  'tuple(uint256 finalizesAt, bytes32 stateHash, address challengerAddress, bytes32 outcomeHash)';
+const CHANNEL_STORAGE_LITE_TYPE = `tuple(
+    uint256 finalizesAt,
+    bytes32 stateHash,
+    address challengerAddress,
+    bytes32 outcomeHash
+  )`;
 
 export function hashChannelStorage(channelStorage: ChannelStorage): Bytes32 {
   const {turnNumRecord, finalizesAt} = channelStorage;
@@ -57,13 +66,13 @@ export function parseChannelStorageHash(
 }
 const asNumber: (s: string) => number = s => ethers.utils.bigNumberify(s).toNumber();
 
-export function encodeChannelStorage({
+export function channelStorageStruct({
   finalizesAt,
   state,
   challengerAddress,
   turnNumRecord,
   outcome,
-}: ChannelStorage): Bytes {
+}: ChannelStorage) {
   /*
   When the channel is not open, it is still possible for the state and
   challengerAddress to be missing. They should either both be present, or
@@ -82,10 +91,11 @@ export function encodeChannelStorage({
   const outcomeHash = isOpen || !outcome ? HashZero : hashOutcome(outcome);
   challengerAddress = challengerAddress || AddressZero;
 
-  return defaultAbiCoder.encode(
-    [CHANNEL_STORAGE_TYPE],
-    [[turnNumRecord, finalizesAt, stateHash, challengerAddress, outcomeHash]],
-  );
+  return [turnNumRecord, finalizesAt, stateHash, challengerAddress, outcomeHash];
+}
+
+export function encodeChannelStorage(storage: ChannelStorage): Bytes {
+  return defaultAbiCoder.encode([CHANNEL_STORAGE_TYPE], [channelStorageStruct(storage)]);
 }
 
 export function encodeChannelStorageLite(channelStorageLite: ChannelStorageLite): Bytes {

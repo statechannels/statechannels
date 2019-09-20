@@ -330,7 +330,7 @@ contract ForceMove {
         uint8 isFinalCount, // how many of the states are final
         Signature[] memory sigs,
         uint8[] memory whoSignedWhat,
-        bytes memory channelStorageBytes // This is to avoid a 'stack too deep' error by minimising the number of local variables
+        ChannelStorage memory channelStorage
     ) public {
         // Calculate channelId from fixed part
         bytes32 channelId = keccak256(
@@ -340,8 +340,6 @@ contract ForceMove {
         // ------------
         // REQUIREMENTS
         // ------------
-
-        ChannelStorage memory channelStorage = abi.decode(channelStorageBytes, (ChannelStorage));
 
         _requireIncreasedTurnNumber(channelStorage, channelId, largestTurnNum);
 

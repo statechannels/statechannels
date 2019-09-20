@@ -5,7 +5,7 @@ import {TransactionRequest} from 'ethers/providers';
 import {State, getVariablePart, getFixedPart, hashAppPart} from '../state';
 import {Signature} from 'ethers/utils';
 import {hashOutcome} from '../outcome';
-import {encodeChannelStorage} from '../channel-storage';
+import {encodeChannelStorage, channelStorageStruct} from '../channel-storage';
 import {Zero} from 'ethers/constants';
 
 // TODO: Currently we are setting some arbitrary gas limit
@@ -47,14 +47,6 @@ export function createCheckpointTransaction({
     ? undefined
     : participants[challengeState.turnNum % participants.length];
 
-  const challengeStorageBytes = encodeChannelStorage({
-    outcome,
-    finalizesAt,
-    challengerAddress,
-    state: challengeState,
-    turnNumRecord,
-  });
-
   const data = ForceMoveContractInterface.functions.checkpoint.encode([
     fixedPart,
     largestTurnNum,
@@ -62,7 +54,13 @@ export function createCheckpointTransaction({
     isFinalCount,
     signatures,
     whoSignedWhat,
-    challengeStorageBytes,
+    channelStorageStruct({
+      outcome,
+      finalizesAt,
+      challengerAddress,
+      state: challengeState,
+      turnNumRecord,
+    }),
   ]);
 
   return {data, gasLimit: GAS_LIMIT};
