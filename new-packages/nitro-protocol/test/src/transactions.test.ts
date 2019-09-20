@@ -20,9 +20,13 @@ const channel: Channel = {
   channelNonce: '0x1',
   participants: [wallet.address],
 };
-const channelStorage: ChannelStorage = {
+const openChannelStorage: ChannelStorage = {
   turnNumRecord: 0,
   finalizesAt: 0x0,
+};
+const challengeChannelStorage: ChannelStorage = {
+  turnNumRecord: 0,
+  finalizesAt: 1e12,
   challengeState: {
     turnNum: 0,
     isFinal: false,
@@ -56,7 +60,7 @@ beforeAll(async () => {
 describe('transactions', async () => {
   it('creates a force move transaction', async () => {
     const transactionRequest: TransactionRequest = createForceMoveTransaction(
-      channelStorage,
+      openChannelStorage,
       [signedState],
       challengeSignature,
     );
@@ -65,7 +69,7 @@ describe('transactions', async () => {
   });
 
   it('creates a conclude from open transaction', async () => {
-    const transactionRequest: TransactionRequest = createConcludeTransaction(channelStorage, [
+    const transactionRequest: TransactionRequest = createConcludeTransaction(openChannelStorage, [
       signedState,
     ]);
 
@@ -73,9 +77,10 @@ describe('transactions', async () => {
   });
 
   it('creates a conclude from challenged transaction', async () => {
-    const transactionRequest: TransactionRequest = createConcludeTransaction(channelStorage, [
-      signedState,
-    ]);
+    const transactionRequest: TransactionRequest = createConcludeTransaction(
+      challengeChannelStorage,
+      [signedState],
+    );
 
     expect(transactionRequest.data).toBeDefined();
   });
@@ -83,23 +88,26 @@ describe('transactions', async () => {
   describe('respond transactions', () => {
     it('creates a transaction', async () => {
       const transactionRequest: TransactionRequest = createRespondTransaction(
-        channelStorage,
+        challengeChannelStorage,
         signedState,
       );
 
       expect(transactionRequest.data).toBeDefined();
     });
+
     it('throws an error when there is no challenge state', async () => {
       expect(() => {
-        createRespondTransaction(channelStorage, signedState);
+        createRespondTransaction(openChannelStorage, signedState);
       }).toThrowError();
     });
   });
+
   describe('respond with checkpoint transactions', () => {
-    it('creates a transaction', async () => {
-      const transactionRequest: TransactionRequest = createCheckpointTransaction(channelStorage, [
-        signedState,
-      ]);
+    it('creates a transaction when there is a challenge state', async () => {
+      const transactionRequest: TransactionRequest = createCheckpointTransaction(
+        openChannelStorage,
+        [signedState],
+      );
 
       expect(transactionRequest.data).toBeDefined();
     });
