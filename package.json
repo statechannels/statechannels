@@ -1,0 +1,34 @@
+{
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "engines": {
+    "yarn": "^1.17.3",
+    "node": "^10.16.3"
+  },
+  "scripts": {
+    "build": "lerna run build",
+    "clean": "git clean -Xdf --exclude=\"!.env\"",
+    "clean:dry": "git clean -Xdn --exclude=\"!.env\"",
+    "test": "lerna run --stream --concurrency 1 test",
+    "lint": "lerna run lint --parallel --no-bail",
+    "lint:fix": "lerna run lint:fix --parallel --no-bail",
+    "publish": "lerna publish --yes from-package patch",
+    "postinstall": "patch-package"
+  },
+  "keywords": [
+    "ethereum",
+    "state channels"
+  ],
+  "devDependencies": {
+    "lerna": "3.16.4",
+    "patch-package": "6.2.0",
+    "postinstall-postinstall": "2.0.0",
+    "prettier": "1.18.2",
+    "tslint": "5.20.0",
+    "tslint-config-prettier": "1.18.0",
+    "tslint-plugin-prettier": "2.0.1",
+    "typescript": "3.6.3"
+  }
+}
