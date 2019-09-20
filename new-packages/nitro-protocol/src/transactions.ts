@@ -4,6 +4,7 @@ import {State} from './contract/state';
 import {Signature} from 'ethers/utils';
 import {getStateSignerAddress} from './signatures';
 import {ChannelStorage, SignedState} from '.';
+import {toHex} from './hex-utils';
 
 export function createForceMoveTransaction(
   channelStorage: ChannelStorage,
@@ -36,7 +37,7 @@ export function createRespondTransaction(
   );
 }
 
-export function createRespondWithAlternativeTransaction(
+export function createCheckpointTransaction(
   channelStorage: ChannelStorage,
   signedStates: SignedState[],
 ): TransactionRequest {
@@ -44,13 +45,14 @@ export function createRespondWithAlternativeTransaction(
     throw new Error('No active challenge in challenge state');
   }
   const {states, signatures, whoSignedWhat} = createSignatureArguments(signedStates);
-  return forceMoveTrans.createRespondWithAlternativeTransaction(
-    channelStorage.challengeState,
-    channelStorage.finalizesAt,
+  return forceMoveTrans.createCheckpointTransaction({
+    challengeState: channelStorage.challengeState,
+    turnNumRecord: toHex(channelStorage.turnNumRecord),
+    finalizesAt: channelStorage.finalizesAt,
     states,
     signatures,
     whoSignedWhat,
-  );
+  });
 }
 
 export function createConcludeTransaction(

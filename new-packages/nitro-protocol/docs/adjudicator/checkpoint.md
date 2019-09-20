@@ -1,11 +1,11 @@
 ---
-id: respond-with-alternative
-title: respondWithAlternative
+id: checkpoint
+title: checkpoint
 ---
 
-The `respondWithAlternative` method allows anyone with sufficient off-chain state to establish a new and higher `turnNumRecord` to clear an existing challenge stored against a `channelId`. 'Alternative' here means the new `turnNumRecord` may be supported by an alternative history of states which need not agree with the challenge state stored on chain.
+The `checkpoint` method allows anyone with a supported off-chain state to establish a new and higher `turnNumRecord` and clear an existing challenge stored against a `channelId`.
 
-The off-chain state is submitted (in an optimized format), and once relevant checks have passed, the existing challenge is cleared and the `turnNumRecord` is updated.
+The off-chain state is submitted (in an optimized format), and once relevant checks have passed, the `turnNumRecord` is updated and the challenge, if exists is cleared.
 
 ## Specification
 
@@ -19,7 +19,7 @@ Signature:
         bytes32 outcomeHash;
     }
 
-    function respondWithAlternative(
+    function checkpoint(
         FixedPart memory fixedPart,
         uint256 largestTurnNum,
         ForceMoveApp.VariablePart[] memory variableParts,
@@ -33,14 +33,13 @@ Signature:
 Requirements:
 
 - States form a chain of valid transitions
-- Channel is in the Challenge mode
 - Signatures are valid for the states
 - The `largestTurnNum` > `turnNumRecord`
 
 Effects:
 
-- Clears challenge,
 - Increases `turnNumRecord`.
+- Clears challenge, when exists.
 
 ---
 
@@ -50,7 +49,7 @@ Parameters:
 
 - Decode `channelStorageLiteBytes`
 - Calculate `channelId` from fixedPart
-- Check that `finalizesAt > now`
+- Check that `finalizesAt > now || finalizesAt == 0`
 - Calculate `storageHash` from `turnNumRecord`, `finalizesAt`, `challengerAddress`, `challengeStateHash`, `challengeOutcomeHash`
 - Check that `channelStorageHashes[channelId] == storageHash`
 - Let `m = variableParts.length`
