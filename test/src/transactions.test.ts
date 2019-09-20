@@ -5,7 +5,7 @@ import {
   createForceMoveTransaction,
   createConcludeTransaction,
   createRespondTransaction,
-  createRespondWithAlternativeTransaction,
+  createCheckpointTransaction,
 } from '../../src/transactions';
 import {ChannelStorage} from '../../src';
 import {AddressZero} from 'ethers/constants';
@@ -23,12 +23,10 @@ const channel: Channel = {
 const channelStorage: ChannelStorage = {
   turnNumRecord: 0,
   finalizesAt: '0x0',
-  challengerAddress: AddressZero,
 };
 const challengeChannelStorage: ChannelStorage = {
   turnNumRecord: 5,
   finalizesAt: '0x9',
-  challengerAddress: ethers.Wallet.createRandom().address,
   challengeState: {
     turnNum: 0,
     isFinal: false,
@@ -101,9 +99,9 @@ describe('transactions', async () => {
       }).toThrowError();
     });
   });
-  describe('respond with alternative transactions', () => {
+  describe('respond with checkpoint transactions', () => {
     it('creates a transaction', async () => {
-      const transactionRequest: TransactionRequest = createRespondWithAlternativeTransaction(
+      const transactionRequest: TransactionRequest = createCheckpointTransaction(
         challengeChannelStorage,
         [signedState],
       );
@@ -112,7 +110,7 @@ describe('transactions', async () => {
     });
     it('throws an error when there is no challenge state', async () => {
       expect(() => {
-        createRespondWithAlternativeTransaction(channelStorage, [signedState]);
+        createCheckpointTransaction(channelStorage, [signedState]);
       }).toThrowError();
     });
   });

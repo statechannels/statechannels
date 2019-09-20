@@ -33,8 +33,6 @@ for (let i = 0; i < 3; i++) {
   wallets[i] = ethers.Wallet.createRandom();
   participants[i] = wallets[i].address;
 }
-const challengerAddress = participants[0];
-
 beforeAll(async () => {
   NitroAdjudicator = await setupContracts(provider, NitroAdjudicatorArtifact);
   ETHAssetHolder = await setupContracts(provider, ETHAssetHolderArtifact);
@@ -87,13 +85,16 @@ describe('pushOutcome', () => {
         challengeDuration: '0x1',
       };
 
+      const challengerAddress = participants[state.turnNum % participants.length];
+
       const initialChannelStorageHash = finalizedOutcomeHash(
         storedTurnNumRecord,
         finalizesAt,
-        challengerAddress,
-        state,
         outcome,
+        state,
+        challengerAddress,
       );
+
       // call public wrapper to set state (only works on test contract)
       const tx = await NitroAdjudicator.setChannelStorageHash(channelId, initialChannelStorageHash);
       await tx.wait();
