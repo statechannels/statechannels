@@ -17,7 +17,7 @@ const ForceMoveContractInterface = new ethers.utils.Interface(ForceMoveArtifact.
 
 interface CheckpointData {
   challengeState?: State;
-  finalizesAt: number;
+  finalizesAt?: number;
   turnNumRecord: number;
   states: State[];
   signatures: Signature[];
@@ -25,7 +25,7 @@ interface CheckpointData {
 }
 export function createCheckpointTransaction({
   challengeState,
-  finalizesAt,
+  finalizesAt = 0,
   states,
   signatures,
   whoSignedWhat,
