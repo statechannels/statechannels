@@ -667,12 +667,12 @@ contract ForceMove {
 
     function _requireOngoingChallenge(bytes32 channelId) internal view {
         (, uint48 finalizesAt, ) = _getData(channelId);
-        require(finalizesAt > now, 'Challenge expired or not present.');
+        require(finalizesAt > now, 'No ongoing challenge.');
     }
 
     function _requireChannelNotFinalized(bytes32 channelId) internal view {
         (, uint48 finalizesAt, ) = _getData(channelId);
-        require(finalizesAt == 0 || finalizesAt > now, 'Challenge expired');
+        require(finalizesAt == 0 || finalizesAt > now, 'Channel Finalized.');
     }
 
     function _getHash(ChannelStorage memory channelStorage)
