@@ -5,7 +5,7 @@ import {TransactionRequest} from 'ethers/providers';
 import {State, getVariablePart, getFixedPart, hashAppPart} from '../state';
 import {Signature} from 'ethers/utils';
 import {hashOutcome} from '../outcome';
-import {encodeChannelStorage, channelStorageStruct} from '../channel-storage';
+import {channelStorageStruct} from '../channel-storage';
 import {Zero} from 'ethers/constants';
 
 // TODO: Currently we are setting some arbitrary gas limit
@@ -117,7 +117,7 @@ export function createConcludeFromChallengeTransaction(
   const {outcome} = challengeState;
 
   const challengerAddress = participants[challengeState.turnNum % participants.length];
-  const channelStorageBytes = encodeChannelStorage({
+  const channelStorage = channelStorageStruct({
     outcome,
     finalizesAt,
     state: challengeState,
@@ -132,7 +132,7 @@ export function createConcludeFromChallengeTransaction(
     numStates,
     whoSignedWhat,
     signatures,
-    channelStorageBytes,
+    channelStorage,
   ]);
   return {data, gasLimit: GAS_LIMIT};
 }

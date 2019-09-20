@@ -405,14 +405,12 @@ contract ForceMove {
         uint8 numStates,
         uint8[] memory whoSignedWhat,
         Signature[] memory sigs,
-        bytes memory channelStorageBytes
+        ChannelStorage memory channelStorage
     ) public {
         // Calculate channelId from fixed part
         bytes32 channelId = keccak256(
             abi.encode(fixedPart.chainId, fixedPart.participants, fixedPart.channelNonce)
         );
-
-        ChannelStorage memory channelStorage = abi.decode(channelStorageBytes, (ChannelStorage));
 
         _requireOngoingChallenge(channelStorage, channelId);
 

@@ -5,7 +5,6 @@ import ForceMoveArtifact from '../../../build/contracts/TESTForceMove.json';
 // @ts-ignore
 import {setupContracts, randomChannelId} from '../../test-helpers';
 import {HashZero, AddressZero} from 'ethers/constants';
-// import {hashChannelStorage, parseChannelStorageHash} from '../../../src/contract/channel-storage';
 import {hashChannelStorage, parseChannelStorageHash} from '../../../src/contract/channel-storage';
 
 const provider = new ethers.providers.JsonRpcProvider(
