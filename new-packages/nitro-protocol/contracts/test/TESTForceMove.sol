@@ -69,8 +69,8 @@ contract TESTForceMove is ForceMove {
         return _matchesHash(cs, h);
     }
 
-    function requireChannelOpen(uint48 turnNumRecord, bytes32 channelId) public view {
-        _requireChannelOpen(turnNumRecord, channelId);
+    function requireChannelOpen(bytes32 channelId) public view {
+        _requireChannelOpen(channelId);
     }
 
 }
