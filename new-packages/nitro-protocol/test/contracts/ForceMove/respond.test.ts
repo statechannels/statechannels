@@ -6,8 +6,7 @@ import ForceMoveArtifact from '../../../build/contracts/TESTForceMove.json';
 import countingAppArtifact from '../../../build/contracts/CountingApp.json';
 import {defaultAbiCoder, hexlify} from 'ethers/utils';
 import {setupContracts, newChallengeClearedEvent, sign, sendTransaction} from '../../test-helpers';
-import {HashZero} from 'ethers/constants';
-import {Outcome, hashOutcome} from '../../../src/contract/outcome';
+import {Outcome} from '../../../src/contract/outcome';
 import {Channel, getChannelId} from '../../../src/contract/channel';
 import {State, hashState} from '../../../src/contract/state';
 import {hashChannelStorage} from '../../../src/contract/channel-storage';
@@ -49,18 +48,18 @@ const description5 =
   'It reverts a respond tx if the response state is not a validTransition from the challenge state';
 
 describe('respond', () => {
+  const turnNumRecord = 8;
   it.each`
-    description     | channelNonce | setTurnNumRecord | declaredTurnNumRecord | expired  | isFinalAB         | appDatas  | challenger    | responder         | reasonString
-    ${description1} | ${1001}      | ${8}             | ${8}                  | ${false} | ${[false, false]} | ${[0, 1]} | ${wallets[2]} | ${wallets[0]}     | ${undefined}
-    ${description2} | ${1002}      | ${8}             | ${8}                  | ${true}  | ${[false, false]} | ${[0, 1]} | ${wallets[2]} | ${wallets[0]}     | ${'Challenge expired or not present.'}
-    ${description3} | ${1003}      | ${8}             | ${7}                  | ${false} | ${[false, false]} | ${[0, 1]} | ${wallets[2]} | ${wallets[0]}     | ${'Channel storage does not match stored version.'}
-    ${description4} | ${1004}      | ${8}             | ${8}                  | ${false} | ${[false, false]} | ${[0, 1]} | ${wallets[2]} | ${nonParticipant} | ${'Response not signed by authorized mover'}
-    ${description5} | ${1005}      | ${8}             | ${8}                  | ${false} | ${[false, false]} | ${[0, 0]} | ${wallets[2]} | ${wallets[0]}     | ${'CountingApp: Counter must be incremented'}
+    description     | channelNonce | declaredTurnNumRecord | expired  | isFinalAB         | appDatas  | challenger    | responder         | reasonString
+    ${description1} | ${1001}      | ${turnNumRecord}      | ${false} | ${[false, false]} | ${[0, 1]} | ${wallets[2]} | ${wallets[0]}     | ${undefined}
+    ${description2} | ${1002}      | ${turnNumRecord}      | ${true}  | ${[false, false]} | ${[0, 1]} | ${wallets[2]} | ${wallets[0]}     | ${'Challenge expired or not present.'}
+    ${description3} | ${1003}      | ${turnNumRecord - 1}  | ${false} | ${[false, false]} | ${[0, 1]} | ${wallets[2]} | ${wallets[0]}     | ${'Channel storage does not match stored version.'}
+    ${description4} | ${1004}      | ${turnNumRecord}      | ${false} | ${[false, false]} | ${[0, 1]} | ${wallets[2]} | ${nonParticipant} | ${'Response not signed by authorized mover'}
+    ${description5} | ${1005}      | ${turnNumRecord}      | ${false} | ${[false, false]} | ${[0, 0]} | ${wallets[2]} | ${wallets[0]}     | ${'CountingApp: Counter must be incremented'}
   `(
     '$description', // for the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce
     async ({
       channelNonce,
-      setTurnNumRecord,
       declaredTurnNumRecord,
       expired,
       isFinalAB,
@@ -73,7 +72,7 @@ describe('respond', () => {
       const channelId = getChannelId(channel);
 
       const challengeState: State = {
-        turnNum: setTurnNumRecord,
+        turnNum: turnNumRecord,
         isFinal: isFinalAB[0],
         channel,
         outcome,
@@ -83,7 +82,7 @@ describe('respond', () => {
       };
 
       const responseState: State = {
-        turnNum: setTurnNumRecord + 1,
+        turnNum: turnNumRecord + 1,
         isFinal: isFinalAB[1],
         channel,
         outcome,
@@ -91,20 +90,15 @@ describe('respond', () => {
         appDefinition,
         challengeDuration,
       };
-
       const responseStateHash = hashState(responseState);
 
-      // set expiry time in the future or in the past
-      const blockNumber = await provider.getBlockNumber();
-      const blockTimestamp = (await provider.getBlock(blockNumber)).timestamp;
-      const finalizesAt = expired ? 1 : blockTimestamp + challengeDuration;
-
-      const challengeExistsHash = await ForceMove.getHash({
-        turnNumRecord: setTurnNumRecord,
+      const finalizesAt = expired ? 1 : 1e12;
+      const challengeExistsHash = hashChannelStorage({
+        turnNumRecord,
         finalizesAt,
-        stateHash: challenger ? hashState(challengeState) : HashZero,
+        state: challenger ? challengeState : undefined,
         challengerAddress: challenger.address,
-        outcomeHash: outcome ? hashOutcome(outcome) : HashZero,
+        outcome,
       });
 
       // call public wrapper to set state (only works on test contract)
