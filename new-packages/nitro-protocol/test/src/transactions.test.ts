@@ -83,7 +83,7 @@ describe('transactions', async () => {
   describe('respond transactions', () => {
     it('creates a transaction', async () => {
       const transactionRequest: TransactionRequest = createRespondTransaction(
-        challengeChannelStorage,
+        channelStorage,
         signedState,
       );
 
@@ -97,10 +97,9 @@ describe('transactions', async () => {
   });
   describe('respond with checkpoint transactions', () => {
     it('creates a transaction', async () => {
-      const transactionRequest: TransactionRequest = createCheckpointTransaction(
-        challengeChannelStorage,
-        [signedState],
-      );
+      const transactionRequest: TransactionRequest = createCheckpointTransaction(channelStorage, [
+        signedState,
+      ]);
 
       expect(transactionRequest.data).toBeDefined();
     });

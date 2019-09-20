@@ -44,8 +44,11 @@ export function createCheckpointTransaction(
     throw new Error('No active challenge in challenge state');
   }
   const {states, signatures, whoSignedWhat} = createSignatureArguments(signedStates);
+  const {turnNumRecord, finalizesAt, challengeState} = channelStorage;
   return forceMoveTrans.createCheckpointTransaction({
-    ...channelStorage,
+    challengeState,
+    turnNumRecord,
+    finalizesAt: finalizesAt || 0,
     states,
     signatures,
     whoSignedWhat,

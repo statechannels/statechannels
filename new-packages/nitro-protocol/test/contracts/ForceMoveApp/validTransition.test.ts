@@ -27,7 +27,7 @@ describe('ForceMoveApp', () => {
         outcome: [],
         turnNum: 1,
         isFinal: false,
-        challengeDuration: '0x0',
+        challengeDuration: 0x0,
         appDefinition: forceMoveApp.address,
         appData: '0x0',
       };
