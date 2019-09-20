@@ -4,13 +4,7 @@ import {expectRevert} from 'magmo-devtools';
 import ForceMoveArtifact from '../../../build/contracts/TESTForceMove.json';
 // @ts-ignore
 import countingAppArtifact from '../../../build/contracts/CountingApp.json';
-import {
-  setupContracts,
-  newConcludedEvent,
-  clearedChallengeHash,
-  signStates,
-  sendTransaction,
-} from '../../test-helpers';
+import {setupContracts, newConcludedEvent, signStates, sendTransaction} from '../../test-helpers';
 import {AddressZero} from 'ethers/constants';
 import {Channel, getChannelId} from '../../../src/contract/channel';
 import {State} from '../../../src/contract/state';
@@ -60,11 +54,11 @@ const defaultRecord = 5;
 
 describe('concludeFromChallenge', () => {
   it.each`
-    description     | channelNonce | setTurnNumRecord | expired  | forceStorageHash           | declaredTurnNumRecord | largestTurnNum | numStates | whoSignedWhat | reasonString
-    ${description1} | ${501}       | ${5}             | ${false} | ${undefined}               | ${5}                  | ${8}           | ${3}      | ${[0, 1, 2]}  | ${undefined}
-    ${description2} | ${502}       | ${0}             | ${false} | ${undefined}               | ${0}                  | ${8}           | ${3}      | ${[0, 1, 2]}  | ${undefined}
-    ${description3} | ${503}       | ${5}             | ${false} | ${clearedChallengeHash(5)} | ${5}                  | ${8}           | ${3}      | ${[0, 1, 2]}  | ${'Channel storage does not match stored version.'}
-    ${description4} | ${504}       | ${5}             | ${true}  | ${undefined}               | ${5}                  | ${8}           | ${3}      | ${[0, 1, 2]}  | ${'Challenge expired or not present.'}
+    description     | channelNonce | turnNumRecord | finalizesAt  | declaredTurnNumRecord | largestTurnNum | numStates | whoSignedWhat | reasonString
+    ${description1} | ${501}       | ${5}          | ${undefined} | ${5}                  | ${8}           | ${3}      | ${[0, 1, 2]}  | ${undefined}
+    ${description2} | ${502}       | ${0}          | ${undefined} | ${0}                  | ${8}           | ${3}      | ${[0, 1, 2]}  | ${undefined}
+    ${description3} | ${503}       | ${5}          | ${'0x00'}    | ${5}                  | ${8}           | ${3}      | ${[0, 1, 2]}  | ${'Challenge expired or not present.'}
+    ${description4} | ${504}       | ${5}          | ${1}         | ${5}                  | ${8}           | ${3}      | ${[0, 1, 2]}  | ${'Challenge expired or not present.'}
   `(
     '$description', // for the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce
     async ({
@@ -136,6 +130,7 @@ describe('concludeFromChallenge', () => {
         sigs,
         whoSignedWhat,
       );
+
       // call method in a slightly different way if expecting a revert
       if (reasonString) {
         const regex = new RegExp(
