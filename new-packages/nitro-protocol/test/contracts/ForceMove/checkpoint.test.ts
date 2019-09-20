@@ -46,7 +46,7 @@ beforeAll(async () => {
 
 const hashMisMatch = {
   description: "It reverts when the channel storage doesn't match",
-  reason: 'Challenge State does not match stored version',
+  reason: 'Channel storage does not match stored version.',
 };
 
 const challengeExpired = {
@@ -62,8 +62,8 @@ const stateUnsupported = {
   reason: 'Unacceptable whoSignedWhat array',
 };
 const staleState = {
-  description: 'It reverts when the turnNumRecord is not increased',
-  reason: 'turnNumRecord not increased',
+  description: 'It reverts when the turnNumRecord is not increasted.',
+  reason: 'turnNumRecord not increased.',
 };
 const succeedsDuringChallenge = {
   description:

@@ -4,7 +4,6 @@ import {expectRevert} from 'magmo-devtools';
 import ForceMoveArtifact from '../../../build/contracts/TESTForceMove.json';
 // @ts-ignore
 import countingAppArtifact from '../../../build/contracts/CountingApp.json';
-import {keccak256, defaultAbiCoder} from 'ethers/utils';
 import {
   setupContracts,
   newConcludedEvent,
@@ -14,11 +13,12 @@ import {
   signStates,
   sendTransaction,
 } from '../../test-helpers';
-import {HashZero, AddressZero} from 'ethers/constants';
-import {Outcome, hashOutcome} from '../../../src/contract/outcome';
+import {HashZero} from 'ethers/constants';
+import {Outcome} from '../../../src/contract/outcome';
 import {Channel, getChannelId} from '../../../src/contract/channel';
 import {State} from '../../../src/contract/state';
 import {createConcludeFromOpenTransaction} from '../../../src/contract/transaction-creators/force-move';
+import {hashChannelStorage} from '../../../src/contract/channel-storage';
 
 const provider = new ethers.providers.JsonRpcProvider(
   `http://localhost:${process.env.DEV_GANACHE_PORT}`,
@@ -129,14 +129,11 @@ describe('concludeFromOpen', () => {
         // compute expected ChannelStorageHash
         const blockNumber = await provider.getBlockNumber();
         const blockTimestamp = (await provider.getBlock(blockNumber)).timestamp;
-        const outcomeHash = hashOutcome(outcome);
-        const expectedChannelStorage = [0, blockTimestamp, HashZero, AddressZero, outcomeHash];
-        const expectedChannelStorageHash = keccak256(
-          defaultAbiCoder.encode(
-            ['uint256', 'uint256', 'bytes32', 'address', 'bytes32'],
-            expectedChannelStorage,
-          ),
-        );
+        const expectedChannelStorageHash = hashChannelStorage({
+          turnNumRecord: 0,
+          finalizesAt: blockTimestamp,
+          outcome,
+        });
 
         // check channelStorageHash against the expected value
         expect(await ForceMove.channelStorageHashes(channelId)).toEqual(expectedChannelStorageHash);
