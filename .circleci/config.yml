@@ -39,7 +39,7 @@ jobs:
           name: "yarn --frozen-lockfile"
           command: yarn --frozen-lockfile
 
-      - run: yarn build
+      - run: yarn build:ci
 
       - <<: *save_dep
 
@@ -117,7 +117,7 @@ jobs:
           command: yarn run publish
 
 workflows:
-  counterfactual:
+  statechannels:
     jobs:
       - build
 

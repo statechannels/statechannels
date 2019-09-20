@@ -58,6 +58,7 @@
     "start": "react-scripts start",
     "start:alt": "PORT=3333 react-scripts start",
     "build": "react-scripts build",
+    "build:ci": "echo 'No build necessary.'",
     "eject": "react-scripts eject",
     "test": "TRACKER_URL=http://localhost:4242/announce jest",
     "lint": "tslint -c tslint.json -p .",
