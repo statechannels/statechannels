@@ -117,7 +117,6 @@ export function createConcludeFromChallengeTransaction(
   const numStates = states.length;
 
   const {outcome} = challengeState;
-  const challengeOutcomeHash = hashOutcome(outcome);
 
   const challengerAddress = participants[challengeState.turnNum % participants.length];
   const channelStorageLiteBytes = encodeChannelStorageLite({
@@ -127,6 +126,8 @@ export function createConcludeFromChallengeTransaction(
     challengerAddress,
   });
 
+  const newOutcomeHash = hashOutcome(lastState.outcome);
+
   const data = ForceMoveContractInterface.functions.concludeFromChallenge.encode([
     turnNumRecord,
     largestTurnNum,
@@ -135,7 +136,7 @@ export function createConcludeFromChallengeTransaction(
     numStates,
     whoSignedWhat,
     signatures,
-    challengeOutcomeHash,
+    newOutcomeHash,
     channelStorageLiteBytes,
   ]);
   return {data, gasLimit: GAS_LIMIT};
