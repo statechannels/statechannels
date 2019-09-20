@@ -82,7 +82,7 @@ export function channelStorageStruct({
   const isOpen = finalizesAt === 0;
 
   if (isOpen && (outcome || state || challengerAddress)) {
-    throw new Error(
+    console.warn(
       `Invalid open channel storage: ${JSON.stringify(outcome || state || challengerAddress)}`,
     );
   }
