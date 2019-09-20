@@ -642,11 +642,7 @@ contract ForceMove {
         emit Concluded(channelId);
     }
 
-    function _requireChannelOpen(uint48 turnNumRecord, bytes32 channelId)
-        internal
-        view
-        returns (bool)
-    {
+    function _requireChannelOpen(uint48 turnNumRecord, bytes32 channelId) internal view {
         // EITHER there is no information stored against channelId at all (OK)
         // OR there is, in which case we must check the channel is still open
         // and that the committed turnNumRecord is correct
