@@ -23,29 +23,24 @@ Signature
     function conclude(States states, Signatures sigs)
 ```
 
-Notes:
+Checks:
 
-Determine the channel from the `concludeState` (the first state in the array).
-
-Requirements:
-
-- Channel is in the Open mode or the Challenge mode
-- First state isFinal
-- States form a chain of valid transitions
-- Signatures are valid for states
+- Channel is either in the Open mode or the Challenge mode
+- A finalization proof has been provided
 
 Effects:
 
-- Sets finalizesAt to current time
-- Sets challengeHash to the hash of the concludeState
-- [Optionally] Clears turnNumRecord
-- [Optionally] Clears challengerAddress
+- Sets `finalizesAt` to current time
+- Sets `outcomeHash` to be consistent with finalization proof
+- Clears `stateHash`
+- Clears `turnNumRecord`
+- Clears `challengerAddress`
 
 ---
 
 ## Implementation
 
-### ConcludeFromOpen
+### concludeFromOpen
 
 ```solidity
 function concludeFromOpen(
@@ -66,21 +61,7 @@ function concludeFromOpen(
   - Check that `channelStorageHashes[channelId] = emptyStorageHash`
 - call internal `_conclude` function
 
-* Let m = sigs.length
-* For i = 0 up to (m-1):
-  - let turnNum = largestTurnNum - i
-  - let isFinal=true
-  - calculate the stateHash
-  - _by construction, these states are all validTransitions_
-* Check \_validSignatures(stateHashes, sigs)
-* Set channelStorage
-  - finalizesAt = time.now
-  - turnNumRecord - doesn't matter (unchanged / 0 / removed)
-  - challengerAddess - empty
-  - outcomeHash - need to pass this in and check it matches state sig
-  - stateHash - empty
-
-## ConcludeFromChallenge
+### concludeFromChallenge
 
 ```solidity
 struct ChannelStorageLite {
@@ -98,21 +79,20 @@ function concludeFromChallenge(
     uint8 numStates,
     uint8[] memory whoSignedWhat,
     Signature[] memory sigs,
-    bytes32 challengeOutcomeHash,
-    bytes memory channelStorageLiteBytes // This is to avoid a 'stack too deep' error by minimising the number of local variables
+    bytes32 newOutcomeHash,
+    bytes memory channelStorageLiteBytes // This is to avoid a 'stack too deep' error by minimizing the number of local variables
 )
 ```
 
 - Calculate `channelId` from fixedPart
 - Decode `channelStorageLiteBytes`
-- Check that `turnNumRecord > 0`
 - Check that `finalizesAt > now`
 
-- Calculate `storageHash` from `turnNumRecord`, `finalizesAt`, `challengerAddress`, `challengeStateHash`, `challengeOutcomeHash`
+- Calculate `storageHash` from `turnNumRecord`, `ChannelStorageLite.finalizesAt`, `challengerAddress`, `ChannelStorageLite.stateHash`, `ChannelStorageLite.outcomeHash`
 - Check that `channelStorageHashes[channelId] == storageHash`
-- call internal `_conclude` function
+- call internal `_conclude` function with `newOutcomeHash`
 
-## \_conclude
+### \_conclude
 
 ```solidity
     function _conclude(
@@ -127,8 +107,7 @@ function concludeFromChallenge(
     )
 ```
 
-- Let `m = variableParts.length`
-- For `i` in `0 .. (m-1)`:
+- For `i` in `0 .. (numStates - 1)`:
 
   - let `turnNum = largestTurnNum + i - numStates`
   - let `isFinal = true`
@@ -139,7 +118,7 @@ function concludeFromChallenge(
 - Set channelStorage
   - `finalizesAt = now`
   - `turnNumRecord = 0`
-  - `challengerAddess = address(0)`
+  - `challengerAddress = address(0)`
   - `outcomeHash = outcomeHash`
   - `stateHash = bytes32(0)`
 - Emit a Concluded Event
