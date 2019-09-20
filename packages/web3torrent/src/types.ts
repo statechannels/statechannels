@@ -1,56 +1,56 @@
-import { Request, Wire } from 'bittorrent-protocol';
-import { Instance as ParseTorrent } from 'parse-torrent';
-import WebTorrent from 'webtorrent';
-import { PaidStreamingExtension } from './paid-streaming-extension';
+import { Request, Wire } from "bittorrent-protocol";
+import { Instance as ParseTorrent } from "parse-torrent";
+import WebTorrent from "webtorrent";
+import { PaidStreamingExtension } from "./paid-streaming-extension";
 
 export enum ClientEvents {
-  PEER_STATUS_CHANGED = 'peer_status_changed',
-  CLIENT_RESET = 'client_reset',
-  TORRENT_DONE = 'torrent_done',
-  TORRENT_ERROR = 'torrent_error',
-  TORRENT_NOTICE = 'torrent_notice'
+  PEER_STATUS_CHANGED = "peer_status_changed",
+  CLIENT_RESET = "client_reset",
+  TORRENT_DONE = "torrent_done",
+  TORRENT_ERROR = "torrent_error",
+  TORRENT_NOTICE = "torrent_notice"
 }
 
 export enum TorrentEvents {
-  WIRE = 'wire',
-  NOTICE = 'notice',
-  STOP = 'stop',
-  DONE = 'done',
-  ERROR = 'error'
+  WIRE = "wire",
+  NOTICE = "notice",
+  STOP = "stop",
+  DONE = "done",
+  ERROR = "error"
 }
 
 export enum WireEvents {
-  DOWNLOAD = 'download',
-  FIRST_REQUEST = 'first_request',
-  REQUEST = 'request'
+  DOWNLOAD = "download",
+  FIRST_REQUEST = "first_request",
+  REQUEST = "request"
 }
 
 export enum PaidStreamingExtensionEvents {
-  WARNING = 'warning',
-  PSE_HANDSHAKE = 'pse_handshake',
-  NOTICE = 'notice',
-  FIRST_REQUEST = 'first_request',
-  REQUEST = 'request'
+  WARNING = "warning",
+  PSE_HANDSHAKE = "pse_handshake",
+  NOTICE = "notice",
+  FIRST_REQUEST = "first_request",
+  REQUEST = "request"
 }
 
 export enum PaidStreamingExtensionNotices {
-  START = 'start',
-  STOP = 'stop',
-  ACK = 'ack'
+  START = "start",
+  STOP = "stop",
+  ACK = "ack"
 }
 
 export type PaidStreamingExtendedHandshake = {
   pseAccount: string;
 };
 
-export type PaidStreamingWire = Omit<Wire, 'requests'> &
+export type PaidStreamingWire = Omit<Wire, "requests"> &
   {
-    -readonly [P in keyof Pick<Wire, 'requests'>]: Wire[P];
+    -readonly [P in keyof Pick<Wire, "requests">]: Wire[P];
   } & {
     paidStreamingExtension: PaidStreamingExtension;
     peerExtendedHandshake: PaidStreamingExtendedHandshake;
     extendedHandshake: PaidStreamingExtendedHandshake;
-    extended: (name: 'paidStreamingExtension', data: Buffer) => void;
+    extended: (name: "paidStreamingExtension", data: Buffer) => void;
 
     // TODO: Remove after merging https://github.com/DefinitelyTyped/DefinitelyTyped/pull/38469.
     setTimeout(ms: number, unref?: boolean): void;
@@ -79,7 +79,7 @@ export type PaidStreamingTorrent = ExtendedTorrent & {
   ): void;
 };
 
-export type OverridenTorrentProperties = 'pieces';
+export type OverridenTorrentProperties = "pieces";
 
 export type ExtendedTorrentPiece = WebTorrent.TorrentPiece & {
   _reservations: number;
@@ -122,9 +122,9 @@ export type PeersByTorrent = {
   };
 };
 
-declare module 'webtorrent' {
+declare module "webtorrent" {
   export interface Instance {
-    on(event: 'warning', callback: (err: Error | string) => void): this;
+    on(event: "warning", callback: (err: Error | string) => void): this;
   }
 
   export interface TorrentFile {

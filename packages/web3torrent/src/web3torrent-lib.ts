@@ -1,5 +1,6 @@
-import WebTorrent, { Torrent, TorrentOptions } from 'webtorrent';
-import paidStreamingExtension, { PaidStreamingExtensionOptions } from './pse-middleware';
+import debug from "debug";
+import WebTorrent, { Torrent, TorrentOptions } from "webtorrent";
+import paidStreamingExtension, { PaidStreamingExtensionOptions } from "./pse-middleware";
 import {
   ClientEvents,
   ExtendedTorrent,
@@ -13,12 +14,13 @@ import {
   WebTorrentAddInput,
   WebTorrentSeedInput,
   WireEvents
-} from './types';
+} from "./types";
+const log = debug("web3torrent:library");
 
 export type WebTorrentPaidStreamingClientOptions = WebTorrent.Options & Partial<PaidStreamingExtensionOptions>;
 export type TorrentCallback = (torrent: Torrent) => any;
 
-export * from './types';
+export * from "./types";
 
 export default class WebTorrentPaidStreamingClient extends WebTorrent {
   allowedPeers: PeersByTorrent;
@@ -29,7 +31,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     super(opts);
     this.allowedPeers = {};
     this.pseAccount = opts.pseAccount || Math.floor(Math.random() * 99999999999999999).toString();
-    console.log('> TAB PSE ACCOUNT ID: ', this.pseAccount);
+    log("ACCOUNT ID: ", this.pseAccount);
   }
 
   seed(
@@ -39,14 +41,14 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
   ): PaidStreamingTorrent {
     let torrent: PaidStreamingTorrent;
 
-    if (typeof optionsOrCallback === 'function') {
+    if (typeof optionsOrCallback === "function") {
       torrent = super.seed(input, optionsOrCallback) as PaidStreamingTorrent;
     } else {
       torrent = super.seed(input, optionsOrCallback, callback) as PaidStreamingTorrent;
     }
 
     this.setupTorrent(torrent);
-    console.log('torrent has been setup from the seeder');
+    log("torrent seed created");
     return torrent;
   }
 
@@ -57,14 +59,14 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
   ): PaidStreamingTorrent {
     let torrent: PaidStreamingTorrent;
 
-    if (typeof optionsOrCallback === 'function') {
+    if (typeof optionsOrCallback === "function") {
       torrent = super.add(input, optionsOrCallback) as PaidStreamingTorrent;
     } else {
       torrent = super.add(input, optionsOrCallback, callback) as PaidStreamingTorrent;
     }
 
     this.setupTorrent(torrent);
-    console.log('torrent has been setup from the leecher');
+    log("torrent added");
     return torrent;
   }
 
@@ -76,7 +78,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
       affectedTorrent: torrentInfoHash,
       peerAccount
     });
-    console.log('> blockPeer', peerAccount, this.allowedPeers);
+    log("SEEDER: > blockedPeer", peerAccount, Object.keys(this.allowedPeers));
   }
 
   unblockPeer(torrentInfoHash: string, wire: PaidStreamingWire, peerAccount: string) {
@@ -87,7 +89,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
       torrentInfoHash,
       peerAccount
     });
-    console.log('> unblockPeer', peerAccount, this.allowedPeers);
+    log("SEEDER: > unblockedPeer", peerAccount, "from", Object.keys(this.allowedPeers));
   }
 
   togglePeer(torrentInfoHash, peerAccount: string) {
@@ -97,17 +99,17 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     } else {
       this.unblockPeer(torrentInfoHash, wire, peerAccount);
     }
-    console.log('> togglePeer', peerAccount, '->', this.allowedPeers);
+    log("SEEDER: > togglePeer", peerAccount);
   }
 
   protected setupWire(torrent: Torrent, wire: PaidStreamingWire) {
-    console.log('>torrent setupWire');
+    log("> Wire Setup");
 
     wire.use(paidStreamingExtension({ pseAccount: this.pseAccount }));
     wire.setKeepAlive(true);
     wire.setTimeout(65000);
-    wire.on('keep-alive', () => {
-      console.log('Shall I Save this wire sir? :', !torrent.done && wire.amChoking);
+    wire.on("keep-alive", () => {
+      log("> wire keep-alive :", !torrent.done && wire.amChoking ? "Clearing Timeout" : "");
       if (!torrent.done && wire.amChoking) {
         wire._clearTimeout();
       }
@@ -134,7 +136,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
 
     wire.paidStreamingExtension.once(PaidStreamingExtensionEvents.REQUEST, () => {
       const peerAccount = wire.paidStreamingExtension && wire.paidStreamingExtension.peerAccount;
-      console.log(`> first_request of ${peerAccount}`);
+      log(`SEEDER > wire first_request of ${peerAccount}`);
       wire.emit(PaidStreamingExtensionEvents.REQUEST, peerAccount);
     });
 
@@ -147,17 +149,15 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     if (torrent.usingPaidStreaming) {
       return torrent;
     }
-    torrent.on('infoHash', () => {
+    torrent.on("infoHash", () => {
       this.allowedPeers = { ...this.allowedPeers, [torrent.infoHash]: {} };
     });
     torrent.on(TorrentEvents.WIRE, (wire: PaidStreamingWire) => {
       this.setupWire(torrent, wire);
     });
-    torrent.on('error', error => {
-      console.warn('>torrent error', error);
-    });
 
     torrent.on(TorrentEvents.NOTICE, (wire, { command, data }) => {
+      log(`< ${command} received from ${wire.peerExtendedHandshake.pseAccount}`, data);
       switch (command) {
         case PaidStreamingExtensionNotices.STOP:
           wire.paidStreamingExtension.ack();
@@ -168,7 +168,6 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
           this.jumpStart(torrent, wire);
           break;
         default:
-          console.log(`< ${command} received from ${wire.peerExtendedHandshake.pseAccount}`, data);
           break;
       }
       this.emit(ClientEvents.TORRENT_NOTICE, torrent, wire, command, data);
@@ -177,7 +176,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     torrent.on(TorrentEvents.DONE, () => this.emit(ClientEvents.TORRENT_DONE, torrent));
 
     torrent.on(TorrentEvents.ERROR, err => {
-      console.log('>torrent error:', err);
+      log("ERROR: > ", err);
       this.emit(ClientEvents.TORRENT_ERROR, torrent, err);
     });
     torrent.usingPaidStreaming = true;
@@ -186,12 +185,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
   }
 
   protected jumpStart(torrent: ExtendedTorrent, wire: PaidStreamingWire) {
-    console.log(
-      `>>> JumpStarting! - Torrent: ${torrent.ready ? 'READY' : 'NOT READY'} - With ${
-        wire.requests.length
-      } wire requests`,
-      torrent
-    );
+    log(`LEECHER: > JumpStarting! - With ${wire.requests.length} pending wire requests`);
     wire.unchoke();
     torrent._startDiscovery();
     torrent.resume();
@@ -205,17 +199,10 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
         }
         return piece;
       });
-      console.log(
-        '>>> Requests cleared:',
-        canceledReservations,
-        ' current state:',
-        wire.requests,
-        torrent._selections,
-        torrent.pieces
-      );
+      log("LEECHER: > Requests cleared!");
       torrent._updateWire(wire);
     } else {
-      console.log('>>> Torrent is working fine or it finished', torrent, wire);
+      log("LEECHER: > Torrent its working fine or it finished", torrent, wire);
     }
   }
 }

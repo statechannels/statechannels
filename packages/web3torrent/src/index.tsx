@@ -1,21 +1,21 @@
-import prettierBytes from 'prettier-bytes';
-import React, { useState } from 'react';
-import ReactDOM from 'react-dom';
-import './styles.css';
-import { PaidStreamingTorrent } from './types';
-import WebTorrent from './web3torrent-lib';
+import prettierBytes from "prettier-bytes";
+import React, { useState } from "react";
+import ReactDOM from "react-dom";
+import "./styles.css";
+import { PaidStreamingTorrent } from "./types";
+import WebTorrent from "./web3torrent-lib";
 const webClient = new WebTorrent();
 
 export const InitialState = {
-  working: 'Done/Idle',
-  verb: 'from',
+  working: "Done/Idle",
+  verb: "from",
   numPeers: 0,
   downloadSpeed: 0,
   uploadSpeed: 0,
   torrent: null,
   files: [],
-  url: '',
-  filename: ''
+  url: "",
+  filename: ""
 };
 
 // The UI assumes that there's only ONE torrent at play and that torrent only has ONE file.
@@ -28,7 +28,7 @@ const progressLogger = (logger, status, setStatus, setMagnet, seedMagnet) => (
       ...status,
       torrent,
       numPeers: torrent.numPeers,
-      working: torrent.done || (!torrent.downloadSpeed && !torrent.uploadSpeed) ? 'Done/Idle' : 'Leeching/Seeding',
+      working: torrent.done || (!torrent.downloadSpeed && !torrent.uploadSpeed) ? "Done/Idle" : "Leeching/Seeding",
       downloadSpeed: prettierBytes(torrent.downloadSpeed),
       uploadSpeed: prettierBytes(torrent.uploadSpeed)
     });
@@ -53,23 +53,26 @@ const progressLogger = (logger, status, setStatus, setMagnet, seedMagnet) => (
 };
 
 function App() {
-  let loggerId;
+  if (process.env.REACT_APP_DEBUG) {
+    localStorage.debug = "web3torrent:*";
+  }
+  const loggerId = undefined;
   const [status, setStatus] = useState(InitialState);
-  const [seedMagnet, setSeedMagnet] = useState('');
-  const [leechMagnet, setLeechMagnet] = useState('');
+  const [seedMagnet, setSeedMagnet] = useState("");
+  const [leechMagnet, setLeechMagnet] = useState("");
   const log = progressLogger(loggerId, status, setStatus, setSeedMagnet, seedMagnet);
   return (
     <div className="App">
       <div className="hero" id="hero">
         <h2>Status</h2>
         <div id="status">
-          {status.working !== 'Done/Idle' ? (
+          {status.working !== "Done/Idle" ? (
             <>
               <span className="show-leech">{status.working} </span>
               <span className="show-leech"> with </span>
               <code className="numPeers">{status.numPeers} peers</code>
               <div>
-                <code id="downloadSpeed">{status.downloadSpeed}/s</code> |{' '}
+                <code id="downloadSpeed">{status.downloadSpeed}/s</code> |{" "}
                 <code id="uploadSpeed">{status.uploadSpeed}/s</code>
               </div>
             </>
@@ -93,8 +96,8 @@ function App() {
           <div key={infoHash}>
             <h5>Torrent {infoHash} Clients</h5>
             {Object.values(allowedPeers).map(({ id, allowed }) => (
-              <button key={id} className={'peerStatus-' + allowed} onClick={() => webClient.togglePeer(infoHash, id)}>
-                {allowed ? 'Allowed' : 'Choking'}: {id}
+              <button key={id} className={"peerStatus-" + allowed} onClick={() => webClient.togglePeer(infoHash, id)}>
+                {allowed ? "Allowed" : "Choking"}: {id}
               </button>
             ))}
           </div>
@@ -117,7 +120,7 @@ function App() {
         <br />
         {!!status.url ? (
           <a href={status.url} download={status.filename}>
-            {' '}
+            {" "}
             Download {status.filename}
           </a>
         ) : (
@@ -132,4 +135,4 @@ function App() {
   );
 }
 
-ReactDOM.render(<App />, document.getElementById('root'));
+ReactDOM.render(<App />, document.getElementById("root"));
