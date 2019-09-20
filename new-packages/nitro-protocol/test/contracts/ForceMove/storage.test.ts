@@ -1,9 +1,11 @@
 import {ethers} from 'ethers';
+import {expectRevert} from 'magmo-devtools';
 // @ts-ignore
 import ForceMoveArtifact from '../../../build/contracts/TESTForceMove.json';
 // @ts-ignore
-import {setupContracts} from '../../test-helpers';
+import {setupContracts, randomChannelId} from '../../test-helpers';
 import {HashZero, AddressZero} from 'ethers/constants';
+// import {hashChannelStorage, parseChannelStorageHash} from '../../../src/contract/channel-storage';
 import {hashChannelStorage, parseChannelStorageHash} from '../../../src/contract/channel-storage';
 
 const provider = new ethers.providers.JsonRpcProvider(
@@ -19,7 +21,6 @@ describe('storage', () => {
   it.each`
     turnNumRecord | finalizesAt
     ${0x42}       | ${0x9001}
-    ${0x123456}   | ${0x789}
     ${123456}     | ${789}
   `('Hashing and data retrieval', async storage => {
     const blockchainStorage = {...storage, ...zeroData};
@@ -41,14 +42,55 @@ describe('storage', () => {
   });
 });
 
-describe('__slotEmptyOrMatchesHash', () => {
-  it.each`
-    turnNumRecord | finalizesAt
-    ${0x42}       | ${0x9001}
-    ${0x123456}   | ${0x789}
-    ${123456}     | ${789}
-  `('works when the slot is empty', async storage => {
-    const blockchainStorage = {...storage, ...zeroData};
-    expect(await ForceMove.slotEmptyOrMatchesHash(blockchainStorage, HashZero)).toBe(true);
+describe('_requireChannelOpen', () => {
+  let channelId;
+  beforeEach(() => {
+    channelId = randomChannelId();
   });
+
+  it.each`
+    turnNumRecord
+    ${0x42}
+    ${1}
+  `('works when the slot is empty', async ({turnNumRecord}) => {
+    expect(await ForceMove.channelStorageHashes(channelId)).toEqual(HashZero);
+    await ForceMove.requireChannelOpen(turnNumRecord, channelId);
+  });
+
+  const challengeDuration = 0x1000;
+  it.each`
+    result       | turnNumRecord | claimedTurnNumRecord | finalizesAt
+    ${'reverts'} | ${42}         | ${42}                | ${0x9001}
+    ${'reverts'} | ${123}        | ${12}                | ${undefined}
+    ${'reverts'} | ${123}        | ${1234}              | ${undefined}
+    ${'reverts'} | ${123}        | ${12}                | ${'0x00'}
+    ${'works'}   | ${0xabc}      | ${0xabc}             | ${'0x00'}
+    ${'works'}   | ${1}          | ${1}                 | ${'0x00'}
+    ${'works'}   | ${0}          | ${0}                 | ${'0x00'}
+  `(
+    '$result with turnNumRecord: $turnNumRecord, finalizesAt: $finalizesAt',
+    async ({turnNumRecord, finalizesAt, result, claimedTurnNumRecord}) => {
+      // compute finalizedAt
+      const blockNumber = await provider.getBlockNumber();
+      const blockTimestamp = (await provider.getBlock(blockNumber)).timestamp;
+      finalizesAt = finalizesAt || blockTimestamp + challengeDuration;
+
+      const blockchainStorage = {turnNumRecord, finalizesAt, ...zeroData};
+      const tx = await ForceMove.setChannelStorage(channelId, blockchainStorage);
+      await tx.wait();
+      expect(await ForceMove.channelStorageHashes(channelId)).toEqual(
+        hashChannelStorage(blockchainStorage),
+      );
+
+      await (await ForceMove.setChannelStorage(channelId, blockchainStorage)).wait();
+      const require = ForceMove.requireChannelOpen(claimedTurnNumRecord, channelId);
+      if (result === 'reverts') {
+        await expectRevert(() => {
+          return require;
+        }, 'Channel not open.');
+      } else {
+        await require;
+      }
+    },
+  );
 });
