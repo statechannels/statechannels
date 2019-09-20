@@ -385,7 +385,7 @@ contract ForceMove {
             abi.encode(fixedPart.chainId, fixedPart.participants, fixedPart.channelNonce)
         );
 
-        _requireChannelOpen(turnNumRecord, channelStorageHashes[channelId]);
+        _requireChannelOpen(turnNumRecord, channelId);
 
         _conclude(
             largestTurnNum,
