@@ -23,12 +23,6 @@ const channel: Channel = {
 const channelStorage: ChannelStorage = {
   turnNumRecord: 0,
   finalizesAt: 0x0,
-  challengerAddress: AddressZero,
-};
-const challengeChannelStorage: ChannelStorage = {
-  turnNumRecord: 5,
-  finalizesAt: 0x9,
-  challengerAddress: ethers.Wallet.createRandom().address,
   challengeState: {
     turnNum: 0,
     isFinal: false,
