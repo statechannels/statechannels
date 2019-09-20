@@ -415,7 +415,7 @@ contract ForceMove {
 
         ChannelStorage memory channelStorage = abi.decode(channelStorageBytes, (ChannelStorage));
 
-        _requireOngoingChallenge(channelStorage, channelStorageHashes[channelId]);
+        _requireOngoingChallenge(channelStorage, channelId);
 
         _conclude(
             largestTurnNum,

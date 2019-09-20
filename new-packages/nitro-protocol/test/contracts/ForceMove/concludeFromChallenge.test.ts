@@ -4,18 +4,18 @@ import {expectRevert} from 'magmo-devtools';
 import ForceMoveArtifact from '../../../build/contracts/TESTForceMove.json';
 // @ts-ignore
 import countingAppArtifact from '../../../build/contracts/CountingApp.json';
-import {keccak256, defaultAbiCoder, bigNumberify} from 'ethers/utils';
 import {
   setupContracts,
   newConcludedEvent,
   clearedChallengeHash,
   signStates,
   sendTransaction,
+  ongoingChallengeHash,
 } from '../../test-helpers';
 import {AddressZero} from 'ethers/constants';
 import {Channel, getChannelId} from '../../../src/contract/channel';
-import {State, hashState} from '../../../src/contract/state';
-import {Outcome, hashOutcome} from '../../../src/contract/outcome';
+import {State} from '../../../src/contract/state';
+import {Outcome} from '../../../src/contract/outcome';
 import {ChannelStorage, hashChannelStorage} from '../../../src/contract/channel-storage';
 import {createConcludeFromChallengeTransaction} from '../../../src/contract/transaction-creators/force-move';
 
@@ -53,30 +53,36 @@ const description2 = 'It reverts a concludeFromChallenge tx when there is no ong
 const description3 =
   'It reverts a concludeFromChallenge tx when there is no challenge ongoing (challenge cleared)';
 const description4 = 'It reverts a concludeFromChallenge tx when the outcome is already finalized';
+const description5 = 'It reverts a concludeFromChallenge tx when the channel storage hash is wrong';
 
-const turnNumRecord = 5;
+const defaultRecord = 5;
 
 describe('concludeFromChallenge', () => {
   it.each`
-    description     | channelNonce | finalizesAt  | forceStorageHash           | declaredTurnNumRecord | largestTurnNum | numStates | whoSignedWhat | reasonString
-    ${description1} | ${501}       | ${undefined} | ${undefined}               | ${5}                  | ${8}           | ${3}      | ${[0, 1, 2]}  | ${undefined}
-    ${description3} | ${503}       | ${undefined} | ${clearedChallengeHash(5)} | ${5}                  | ${8}           | ${3}      | ${[0, 1, 2]}  | ${'Channel storage does not match stored version.'}
-    ${description2} | ${502}       | ${1}         | ${undefined}               | ${4}                  | ${8}           | ${3}      | ${[0, 1, 2]}  | ${'Challenge expired or not present.'}
-    ${description4} | ${504}       | ${0}         | ${undefined}               | ${5}                  | ${8}           | ${3}      | ${[0, 1, 2]}  | ${'Challenge expired or not present.'}
+    description     | channelNonce | finalizesAt  | channelStorageHash         | turnNumRecord        | largestTurnNum | numStates | whoSignedWhat | reasonString
+    ${description1} | ${501}       | ${undefined} | ${undefined}               | ${undefined}         | ${8}           | ${3}      | ${[0, 1, 2]}  | ${undefined}
+    ${description3} | ${503}       | ${undefined} | ${clearedChallengeHash(5)} | ${undefined}         | ${8}           | ${3}      | ${[0, 1, 2]}  | ${'Channel storage does not match stored version.'}
+    ${description2} | ${502}       | ${1}         | ${undefined}               | ${undefined}         | ${8}           | ${3}      | ${[0, 1, 2]}  | ${'Challenge expired or not present.'}
+    ${description4} | ${504}       | ${'0x0'}     | ${undefined}               | ${undefined}         | ${8}           | ${3}      | ${[0, 1, 2]}  | ${'Challenge expired or not present.'}
+    ${description5} | ${504}       | ${undefined} | ${ongoingChallengeHash(5)} | ${defaultRecord + 1} | ${8}           | ${3}      | ${[0, 1, 2]}  | ${'Channel storage does not match stored version.'}
   `(
     '$description', // for the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce
     async ({
       channelNonce,
       finalizesAt,
-      forceStorageHash,
-      declaredTurnNumRecord,
+      channelStorageHash,
+      turnNumRecord,
       largestTurnNum,
       numStates,
       whoSignedWhat,
       reasonString,
     }) => {
       // compute channelId
+      turnNumRecord = turnNumRecord || defaultRecord;
+      finalizesAt = finalizesAt || 1e12;
+
       const channel: Channel = {chainId, participants, channelNonce};
+      const channelId = getChannelId(channel);
       const challengeState: State = {
         channel,
         challengeDuration,
@@ -87,35 +93,25 @@ describe('concludeFromChallenge', () => {
         outcome,
       };
 
-      const channelId = getChannelId(channel);
-
       // set expiry time in the future or in the past
-      blockNumber = await provider.getBlockNumber();
-      blockTimestamp = (await provider.getBlock(blockNumber)).timestamp;
-      finalizesAt = finalizesAt || blockTimestamp + bigNumberify(challengeDuration).toNumber();
 
       // compute expected ChannelStorageHash
       const challengerAddress = wallets[2].address;
 
-      const challengeStateHash = hashState(challengeState);
-      const outcomeHash = hashOutcome(outcome);
-
-      const challengeExistsHash = keccak256(
-        defaultAbiCoder.encode(
-          ['uint256', 'uint256', 'bytes32', 'address', 'bytes32'],
-          [turnNumRecord, finalizesAt, challengeStateHash, challengerAddress, outcomeHash],
-        ),
-      );
+      channelStorageHash =
+        channelStorageHash ||
+        hashChannelStorage({
+          turnNumRecord,
+          finalizesAt,
+          state: challengeState,
+          challengerAddress,
+          outcome,
+        });
 
       // call public wrapper to set state (only works on test contract)
-      const tx = await ForceMove.setChannelStorageHash(
-        channelId,
-        forceStorageHash ? forceStorageHash : challengeExistsHash,
-      );
+      const tx = await ForceMove.setChannelStorageHash(channelId, channelStorageHash);
       await tx.wait();
-      expect(await ForceMove.channelStorageHashes(channelId)).toEqual(
-        forceStorageHash ? forceStorageHash : challengeExistsHash,
-      );
+      expect(await ForceMove.channelStorageHashes(channelId)).toEqual(channelStorageHash);
 
       // Create states
       const states: State[] = [];
@@ -133,7 +129,7 @@ describe('concludeFromChallenge', () => {
 
       const sigs = await signStates(states, wallets, whoSignedWhat);
       const transactionRequest = createConcludeFromChallengeTransaction(
-        declaredTurnNumRecord,
+        turnNumRecord,
         challengeState,
         finalizesAt,
         states,
