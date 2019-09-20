@@ -63,24 +63,17 @@ const description7 = 'It reverts a concludeFromOpen tx when the outcome is alrea
 const largestTurnNum = 8;
 describe('concludeFromOpen', () => {
   it.each`
-    description     | channelNonce | declaredTurnNumRecord | initialChannelStorageHash  | numStates | whoSignedWhat | reasonString
-    ${description1} | ${401}       | ${0}                  | ${HashZero}                | ${3}      | ${[0, 1, 2]}  | ${undefined}
-    ${description2} | ${402}       | ${0}                  | ${HashZero}                | ${1}      | ${[0, 0, 0]}  | ${undefined}
-    ${description3} | ${403}       | ${5}                  | ${clearedChallengeHash(5)} | ${1}      | ${[0, 0, 0]}  | ${undefined}
-    ${description4} | ${404}       | ${0}                  | ${clearedChallengeHash(5)} | ${1}      | ${[0, 0, 0]}  | ${'Channel not open.'}
-    ${description5} | ${405}       | ${1}                  | ${clearedChallengeHash(5)} | ${1}      | ${[0, 0, 0]}  | ${'Channel not open.'}
-    ${description6} | ${406}       | ${5}                  | ${ongoingChallengeHash(5)} | ${1}      | ${[0, 0, 0]}  | ${'Channel not open.'}
-    ${description7} | ${407}       | ${5}                  | ${finalizedOutcomeHash(5)} | ${1}      | ${[0, 0, 0]}  | ${'Channel not open.'}
+    description     | channelNonce | initialChannelStorageHash  | numStates | whoSignedWhat | reasonString
+    ${description1} | ${401}       | ${HashZero}                | ${3}      | ${[0, 1, 2]}  | ${undefined}
+    ${description2} | ${402}       | ${HashZero}                | ${1}      | ${[0, 0, 0]}  | ${undefined}
+    ${description3} | ${403}       | ${clearedChallengeHash(5)} | ${1}      | ${[0, 0, 0]}  | ${undefined}
+    ${description4} | ${404}       | ${clearedChallengeHash(5)} | ${1}      | ${[0, 0, 0]}  | ${'Channel not open.'}
+    ${description5} | ${405}       | ${clearedChallengeHash(5)} | ${1}      | ${[0, 0, 0]}  | ${'Channel not open.'}
+    ${description6} | ${406}       | ${ongoingChallengeHash(5)} | ${1}      | ${[0, 0, 0]}  | ${'Channel not open.'}
+    ${description7} | ${407}       | ${finalizedOutcomeHash(5)} | ${1}      | ${[0, 0, 0]}  | ${'Channel not open.'}
   `(
     '$description', // for the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce
-    async ({
-      channelNonce,
-      declaredTurnNumRecord,
-      initialChannelStorageHash,
-      numStates,
-      whoSignedWhat,
-      reasonString,
-    }) => {
+    async ({channelNonce, initialChannelStorageHash, numStates, whoSignedWhat, reasonString}) => {
       const channel: Channel = {chainId, participants, channelNonce};
       const channelId = getChannelId(channel);
 
@@ -104,12 +97,7 @@ describe('concludeFromOpen', () => {
       // sign the states
       const sigs = await signStates(states, wallets, whoSignedWhat);
 
-      const transactionRequest = createConcludeFromOpenTransaction(
-        declaredTurnNumRecord,
-        states,
-        sigs,
-        whoSignedWhat,
-      );
+      const transactionRequest = createConcludeFromOpenTransaction(states, sigs, whoSignedWhat);
       // call method in a slightly different way if expecting a revert
       if (reasonString) {
         const regex = new RegExp(

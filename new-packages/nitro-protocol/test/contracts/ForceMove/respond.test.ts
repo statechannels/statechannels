@@ -50,24 +50,15 @@ const description5 =
 describe('respond', () => {
   const turnNumRecord = 8;
   it.each`
-    description     | channelNonce | declaredTurnNumRecord | expired  | isFinalAB         | appDatas  | challenger    | responder         | reasonString
-    ${description1} | ${1001}      | ${turnNumRecord}      | ${false} | ${[false, false]} | ${[0, 1]} | ${wallets[2]} | ${wallets[0]}     | ${undefined}
-    ${description2} | ${1002}      | ${turnNumRecord}      | ${true}  | ${[false, false]} | ${[0, 1]} | ${wallets[2]} | ${wallets[0]}     | ${'Challenge expired or not present.'}
-    ${description3} | ${1003}      | ${turnNumRecord - 1}  | ${false} | ${[false, false]} | ${[0, 1]} | ${wallets[2]} | ${wallets[0]}     | ${'Channel storage does not match stored version.'}
-    ${description4} | ${1004}      | ${turnNumRecord}      | ${false} | ${[false, false]} | ${[0, 1]} | ${wallets[2]} | ${nonParticipant} | ${'Response not signed by authorized mover'}
-    ${description5} | ${1005}      | ${turnNumRecord}      | ${false} | ${[false, false]} | ${[0, 0]} | ${wallets[2]} | ${wallets[0]}     | ${'CountingApp: Counter must be incremented'}
+    description     | channelNonce | expired  | isFinalAB         | appDatas  | challenger    | responder         | reasonString
+    ${description1} | ${1001}      | ${false} | ${[false, false]} | ${[0, 1]} | ${wallets[2]} | ${wallets[0]}     | ${undefined}
+    ${description2} | ${1002}      | ${true}  | ${[false, false]} | ${[0, 1]} | ${wallets[2]} | ${wallets[0]}     | ${'Challenge expired or not present.'}
+    ${description3} | ${1003}      | ${false} | ${[false, false]} | ${[0, 1]} | ${wallets[2]} | ${wallets[0]}     | ${'Channel storage does not match stored version.'}
+    ${description4} | ${1004}      | ${false} | ${[false, false]} | ${[0, 1]} | ${wallets[2]} | ${nonParticipant} | ${'Response not signed by authorized mover'}
+    ${description5} | ${1005}      | ${false} | ${[false, false]} | ${[0, 0]} | ${wallets[2]} | ${wallets[0]}     | ${'CountingApp: Counter must be incremented'}
   `(
     '$description', // for the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce
-    async ({
-      channelNonce,
-      declaredTurnNumRecord,
-      expired,
-      isFinalAB,
-      appDatas,
-      challenger,
-      responder,
-      reasonString,
-    }) => {
+    async ({channelNonce, expired, isFinalAB, appDatas, challenger, responder, reasonString}) => {
       const channel: Channel = {chainId, channelNonce, participants};
       const channelId = getChannelId(channel);
 
@@ -109,13 +100,7 @@ describe('respond', () => {
       // sign the state
       const signature = await sign(responder, responseStateHash);
 
-      const transactionRequest = createRespondTransaction(
-        declaredTurnNumRecord,
-        finalizesAt,
-        challengeState,
-        responseState,
-        signature,
-      );
+      const transactionRequest = createRespondTransaction(challengeState, responseState, signature);
 
       if (reasonString) {
         const regex = new RegExp(
@@ -132,12 +117,12 @@ describe('respond', () => {
 
         // catch ChallengeCleared event
         const [, eventTurnNumRecord] = await challengeClearedEvent;
-        expect(eventTurnNumRecord._hex).toEqual(hexlify(declaredTurnNumRecord + 1));
+        expect(eventTurnNumRecord._hex).toEqual(hexlify(turnNumRecord + 1));
 
         // compute and check new expected ChannelStorageHash
 
         const expectedChannelStorageHash = hashChannelStorage({
-          turnNumRecord: declaredTurnNumRecord + 1,
+          turnNumRecord: turnNumRecord + 1,
           finalizesAt: 0,
         });
         expect(await ForceMove.channelStorageHashes(channelId)).toEqual(expectedChannelStorageHash);

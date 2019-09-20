@@ -65,20 +65,19 @@ const description7 = 'It reverts a forceMove when the states do not form a valid
 
 describe('forceMove', () => {
   it.each`
-    description     | channelNonce | initialChannelStorageHash  | turnNumRecord | largestTurnNum | appDatas     | isFinalCount | whoSignedWhat | challenger        | reasonString
-    ${description1} | ${201}       | ${HashZero}                | ${0}          | ${8}           | ${[0, 1, 2]} | ${0}         | ${[0, 1, 2]}  | ${wallets[2]}     | ${undefined}
-    ${description2} | ${202}       | ${HashZero}                | ${0}          | ${8}           | ${[2]}       | ${0}         | ${[0, 0, 0]}  | ${wallets[2]}     | ${undefined}
-    ${description3} | ${203}       | ${clearedChallengeHash(5)} | ${5}          | ${8}           | ${[2]}       | ${0}         | ${[0, 0, 0]}  | ${wallets[2]}     | ${undefined}
-    ${description4} | ${204}       | ${clearedChallengeHash(5)} | ${5}          | ${2}           | ${[2]}       | ${0}         | ${[0, 0, 0]}  | ${wallets[2]}     | ${'Stale challenge!'}
-    ${description5} | ${205}       | ${ongoingChallengeHash(5)} | ${5}          | ${8}           | ${[2]}       | ${0}         | ${[0, 0, 0]}  | ${wallets[2]}     | ${'Channel not open.'}
-    ${description6} | ${206}       | ${HashZero}                | ${0}          | ${8}           | ${[0, 1, 2]} | ${0}         | ${[0, 1, 2]}  | ${nonParticipant} | ${'Challenger is not a participant'}
-    ${description7} | ${207}       | ${HashZero}                | ${0}          | ${8}           | ${[0, 1, 1]} | ${0}         | ${[0, 1, 2]}  | ${wallets[2]}     | ${'CountingApp: Counter must be incremented'}
+    description     | channelNonce | initialChannelStorageHash  | largestTurnNum | appDatas     | isFinalCount | whoSignedWhat | challenger        | reasonString
+    ${description1} | ${201}       | ${HashZero}                | ${8}           | ${[0, 1, 2]} | ${0}         | ${[0, 1, 2]}  | ${wallets[2]}     | ${undefined}
+    ${description2} | ${202}       | ${HashZero}                | ${8}           | ${[2]}       | ${0}         | ${[0, 0, 0]}  | ${wallets[2]}     | ${undefined}
+    ${description3} | ${203}       | ${clearedChallengeHash(5)} | ${8}           | ${[2]}       | ${0}         | ${[0, 0, 0]}  | ${wallets[2]}     | ${undefined}
+    ${description4} | ${204}       | ${clearedChallengeHash(5)} | ${2}           | ${[2]}       | ${0}         | ${[0, 0, 0]}  | ${wallets[2]}     | ${'Stale challenge!'}
+    ${description5} | ${205}       | ${ongoingChallengeHash(5)} | ${8}           | ${[2]}       | ${0}         | ${[0, 0, 0]}  | ${wallets[2]}     | ${'Channel not open.'}
+    ${description6} | ${206}       | ${HashZero}                | ${8}           | ${[0, 1, 2]} | ${0}         | ${[0, 1, 2]}  | ${nonParticipant} | ${'Challenger is not a participant'}
+    ${description7} | ${207}       | ${HashZero}                | ${8}           | ${[0, 1, 1]} | ${0}         | ${[0, 1, 2]}  | ${wallets[2]}     | ${'CountingApp: Counter must be incremented'}
   `(
     '$description', // for the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce
     async ({
       channelNonce,
       initialChannelStorageHash,
-      turnNumRecord,
       largestTurnNum,
       appDatas,
       isFinalCount,
@@ -122,7 +121,6 @@ describe('forceMove', () => {
       await (await ForceMove.setChannelStorageHash(channelId, initialChannelStorageHash)).wait();
 
       const transactionRequest = createForceMoveTransaction(
-        turnNumRecord,
         states,
         sigs,
         whoSignedWhat,

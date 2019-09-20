@@ -123,9 +123,6 @@ describe('concludeFromChallenge', () => {
 
       const sigs = await signStates(states, wallets, whoSignedWhat);
       const transactionRequest = createConcludeFromChallengeTransaction(
-        turnNumRecord,
-        challengeState,
-        finalizesAt,
         states,
         sigs,
         whoSignedWhat,

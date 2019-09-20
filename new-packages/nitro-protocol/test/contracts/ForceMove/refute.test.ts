@@ -118,8 +118,6 @@ describe('refute', () => {
       const signature = await sign(refutationStateSigner, hashState(refutationState));
       const refutationStateSig = {v: signature.v, r: signature.r, s: signature.s};
       const transactionRequest = createRefuteTransaction(
-        declaredTurnNumRecord,
-        finalizesAt,
         challengeState,
         refutationState,
         refutationStateSig,
