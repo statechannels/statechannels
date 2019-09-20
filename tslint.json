@@ -1,7 +1,12 @@
 {
   "defaultSeverity": "error",
-  "extends": ["tslint:recommended"],
+  "extends": [
+    "tslint:recommended",
+    "tslint-plugin-prettier",
+    "tslint-config-prettier"
+  ],
   "rules": {
+    "prettier": true,
     "newline-per-chained-call": false,
     "member-ordering": false,
     "member-access": false,
@@ -9,8 +14,7 @@
     "object-literal-sort-keys": false,
     "arrow-parens": false,
     "trailing-comma": false,
-    "no-console": false,
-    "prettier": true
+    "interface-name": false
   },
   "rulesDirectory": ["tslint-plugin-prettier"]
 }
