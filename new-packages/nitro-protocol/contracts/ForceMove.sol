@@ -489,12 +489,12 @@ contract ForceMove {
         return true;
     }
 
+    bytes constant prefix = '\x19Ethereum Signed Message:\n32';
     function _recoverSigner(bytes32 _d, uint8 _v, bytes32 _r, bytes32 _s)
         internal
         pure
         returns (address)
     {
-        bytes memory prefix = '\x19Ethereum Signed Message:\n32';
         bytes32 prefixedHash = keccak256(abi.encodePacked(prefix, _d));
         address a = ecrecover(prefixedHash, _v, _r, _s);
         return (a);
@@ -693,7 +693,7 @@ contract ForceMove {
     {
         // The hash is constructed from left to right.
         uint256 result;
-        uint256 cursor = 256;
+        uint16 cursor = 256;
 
         // Shift turnNumRecord 208 bits left to fill the first 48 bits
         result = uint256(channelStorage.turnNumRecord) << (cursor -= 48);
@@ -702,7 +702,6 @@ contract ForceMove {
         result |= (channelStorage.finalizesAt << (cursor -= 48));
 
         // logical or with the last 160 bits of the hash of the encoded storage
-        require(cursor == 160, 'Cursor off');
         result |= uint256(uint160(uint256(keccak256(abi.encode(channelStorage)))));
 
         newHash = bytes32(result);
@@ -713,11 +712,9 @@ contract ForceMove {
         pure
         returns (uint48 turnNumRecord, uint48 finalizesAt, uint160 fingerprint)
     {
-        uint256 cursor = 256;
+        uint16 cursor = 256;
         turnNumRecord = uint48(uint256(storageHash) >> (cursor -= 48));
         finalizesAt = uint48(uint256(storageHash) >> (cursor -= 48));
-
-        require(cursor == 160, 'Cursor off');
         fingerprint = uint160(uint256(storageHash));
     }
 
