@@ -51,17 +51,24 @@ beforeAll(async () => {
 
 // Scenarios are synonymous with channelNonce:
 
-const description1 =
-  'It accepts a forceMove for an open channel (first challenge, n states submitted), and updates storage correctly';
-const description2 =
-  'It accepts a forceMove for an open channel (first challenge, 1 state submitted), and updates storage correctly';
-const description3 =
-  'It accepts a forceMove for an open channel (subsequent challenge, higher turnNum), and updates storage correctly';
-const description4 =
-  'It reverts a forceMove for an open channel if the turnNum is too small (subsequent challenge, turnNumRecord would decrease)';
-const description5 = 'It reverts a forceMove when a challenge is underway / finalized';
-const description6 = 'It reverts a forceMove with an incorrect challengerSig';
-const description7 = 'It reverts a forceMove when the states do not form a validTransition chain';
+const acceptsWhenOpen = 'It accepts for an open channel, and updates storage correctly, ';
+const accepts1 = acceptsWhenOpen + 'when the slot is empty, n states submitted';
+const accepts2 = acceptsWhenOpen + 'when the slot is empty, 1 state submitted';
+const accepts3 = acceptsWhenOpen + 'when the slot is not empty, n states submitted';
+const accepts4 = acceptsWhenOpen + 'when the slot is not empty, 1 state submitted';
+
+const acceptsWhenChallengePresent =
+  'It accepts when a challenge is present, and updates storage correctly, ';
+const accepts5 = acceptsWhenChallengePresent + 'when the turnNumRecord increases, 1 state';
+const accepts6 = acceptsWhenChallengePresent + 'when the turnNumRecord increases, n states';
+
+const revertsWhenOpenIf = 'It reverts for an open channel if ';
+const reverts1 = revertsWhenOpenIf + 'the turnNumRecord does not increase';
+const reverts2 = revertsWhenOpenIf + 'the challengerSig is incorrect';
+const reverts3 = revertsWhenOpenIf + 'the states do not form a validTransition chain';
+
+const reverts4 = 'It reverts when a challenge is present if the turnNumRecord does not increase';
+const reverts5 = 'It reverts when the channel is finalized';
 
 describe('forceMove', () => {
   it.each`
