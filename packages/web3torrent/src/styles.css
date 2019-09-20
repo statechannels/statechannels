@@ -1,0 +1,85 @@
+html {
+  height: 100vh;
+  background-color: #2a3749;
+  color: white;
+  width: 100vw;
+}
+.App {
+  font-family: sans-serif;
+  text-align: center;
+}
+.magnetLink {
+  font-size: 10px;
+}
+.peerStatus-true {
+  background-color: green;
+  border: 1px greenyellow solid;
+  color: #fafafa;
+  display: block;
+  margin: 5px auto !important;
+}
+.peerStatus-false {
+  background-color: indianred;
+  border: 1px red solid;
+  color: #fafafa;
+  display: block;
+  margin: 5px auto !important;
+}
+
+#output video {
+  width: 100%;
+}
+#progressBar {
+  height: 5px;
+  width: 0%;
+  background-color: #35b44f;
+  transition: width 0.4s ease-in-out;
+}
+body.is-seed .show-seed {
+  display: inline;
+}
+body.is-seed .show-leech {
+  display: none;
+}
+h2 {
+  color: white;
+}
+.show-seed {
+  display: none;
+}
+/* #status code {
+  font-size: 90%;
+  font-weight: 700;
+  margin-left: 3px;
+  margin-right: 3px;
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.3);
+} */
+
+.is-seed #hero {
+  background-color: #154820;
+  transition: 0.5s 0.5s background-color ease-in-out;
+}
+.hero {
+  padding: 20px;
+  color: white;
+}
+
+#hero-seeder {
+  background-color: rgb(6, 77, 77);
+  min-height: 400px;
+}
+
+.hero > * {
+  margin: 5px;
+}
+
+#status {
+  color: #fff;
+  font-size: 17px;
+  padding: 5px;
+}
+a:link,
+a:visited {
+  color: #30a247;
+  text-decoration: none;
+}

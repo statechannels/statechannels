@@ -41,3 +41,6 @@ packages/**/LICENSE
 
 # circleci artifacts
 .dependencies_checksum
+
+# testing artifacts
+junit.xml
