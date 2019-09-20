@@ -76,21 +76,14 @@ describe('_requireChannelOpen', () => {
       finalizesAt = finalizesAt || blockTimestamp + challengeDuration;
 
       const blockchainStorage = {turnNumRecord, finalizesAt, ...zeroData};
-      const tx = await ForceMove.setChannelStorage(channelId, blockchainStorage);
-      await tx.wait();
+
+      await (await ForceMove.setChannelStorage(channelId, blockchainStorage)).wait();
       expect(await ForceMove.channelStorageHashes(channelId)).toEqual(
         hashChannelStorage(blockchainStorage),
       );
 
-      await (await ForceMove.setChannelStorage(channelId, blockchainStorage)).wait();
-      const require = ForceMove.requireChannelOpen(claimedTurnNumRecord, channelId);
-      if (result === 'reverts') {
-        await expectRevert(() => {
-          return require;
-        }, 'Channel not open.');
-      } else {
-        await require;
-      }
+      const tx = ForceMove.requireChannelOpen(claimedTurnNumRecord, channelId);
+      result === 'reverts' ? await expectRevert(() => tx, 'Channel not open.') : await tx;
     },
   );
 });
