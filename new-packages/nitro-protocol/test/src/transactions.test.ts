@@ -105,16 +105,20 @@ describe('transactions', async () => {
   describe('respond with checkpoint transactions', () => {
     it('creates a transaction when there is a challenge state', async () => {
       const transactionRequest: TransactionRequest = createCheckpointTransaction(
-        openChannelStorage,
+        challengeChannelStorage,
         [signedState],
       );
 
       expect(transactionRequest.data).toBeDefined();
     });
-    it('throws an error when there is no challenge state', async () => {
-      expect(() => {
-        createCheckpointTransaction(channelStorage, [signedState]);
-      }).toThrowError();
+
+    it('creates a transaction when the chabbnel is open', async () => {
+      const transactionRequest: TransactionRequest = createCheckpointTransaction(
+        openChannelStorage,
+        [signedState],
+      );
+
+      expect(transactionRequest.data).toBeDefined();
     });
   });
 });
