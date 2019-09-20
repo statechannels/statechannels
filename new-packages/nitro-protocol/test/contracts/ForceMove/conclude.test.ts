@@ -51,22 +51,23 @@ beforeAll(async () => {
 });
 
 const acceptsWhenOpenIf =
-  'It accepts when the channel is open, and sets the channel storage correctly, if';
+  'It accepts when the channel is open, and sets the channel storage correctly, if ';
 const accepts1 = acceptsWhenOpenIf + 'passed n states, and the slot is empty';
 const accepts2 = acceptsWhenOpenIf + 'passed one state, and the slot is empty';
-const accepts3 = acceptsWhenOpenIf + 'passed one state, and there is a turnNumRecord stored';
+const accepts3 =
+  acceptsWhenOpenIf + 'the turnNumRecord is 5, and the largestTurnNum is $largestTurnNum';
 
 const acceptsWhenChallengeOngoingIf =
-  'It accepts when there is an ongoing challenge, and sets the channel storage correctly, if';
+  'It accepts when there is an ongoing challenge, and sets the channel storage correctly, if ';
 const accepts4 = acceptsWhenChallengeOngoingIf + 'passed n states';
 const accepts5 = acceptsWhenChallengeOngoingIf + 'passed one state';
 
-const revertsWhenOpenBut = 'It reverts when the channel is open, but';
+const revertsWhenOpenBut = 'It reverts when the channel is open, but ';
 const reverts1 = revertsWhenOpenBut + 'the largest turn number is not large enough';
 const reverts2 = revertsWhenOpenBut + 'the final state is not supported';
 const reverts3 = revertsWhenOpenBut + 'there is an invalid transition';
 
-const revertsWhenChallengeOngoingBut = 'It reverts when there is an ongoing challenge, but';
+const revertsWhenChallengeOngoingBut = 'It reverts when there is an ongoing challenge, but ';
 const reverts4 = revertsWhenChallengeOngoingBut + 'the largest turn number is not large enough';
 const reverts5 = revertsWhenChallengeOngoingBut + 'the final state is not supported';
 const reverts6 = revertsWhenChallengeOngoingBut + 'there is an invalid transition';
@@ -98,7 +99,7 @@ const channelOpen = clearedChallengeHash(turnNumRecord);
 const challengeOngoing = ongoingChallengeHash(turnNumRecord);
 const finalized = finalizedOutcomeHash(turnNumRecord);
 let channelNonce = 400;
-describe('concludeFromOpen', () => {
+describe('conclude', () => {
   beforeEach(() => (channelNonce += 1));
   it.each`
     description | initialChannelStorageHash | largestTurnNum       | support              | reasonString
@@ -110,7 +111,7 @@ describe('concludeFromOpen', () => {
     ${accepts5} | ${challengeOngoing}       | ${turnNumRecord + 1} | ${oneState}          | ${undefined}
     ${reverts1} | ${channelOpen}            | ${turnNumRecord - 1} | ${oneState}          | ${TURN_NUM_RECORD_NOT_INCREASED}
     ${reverts2} | ${channelOpen}            | ${turnNumRecord}     | ${unsupported}       | ${UNACCEPTABLE_WHO_SIGNED_WHAT}
-    ${reverts3} | ${channelOpen}            | ${turnNumRecord}     | ${invalidTransition} | ${'Counting app'}
+    ${reverts3} | ${channelOpen}            | ${turnNumRecord}     | ${invalidTransition} | ${'Counting-app'}
     ${reverts4} | ${challengeOngoing}       | ${turnNumRecord - 1} | ${oneState}          | ${TURN_NUM_RECORD_NOT_INCREASED}
     ${reverts5} | ${challengeOngoing}       | ${turnNumRecord}     | ${unsupported}       | ${UNACCEPTABLE_WHO_SIGNED_WHAT}
     ${reverts6} | ${challengeOngoing}       | ${turnNumRecord}     | ${invalidTransition} | ${'Counting app'}
