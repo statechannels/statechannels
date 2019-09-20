@@ -11,6 +11,12 @@ import {State, hashState} from '../../../src/contract/state';
 import {Outcome} from '../../../src/contract/outcome';
 import {hashChannelStorage, ChannelStorage} from '../../../src/contract/channel-storage';
 import {createRefuteTransaction} from '../../../src/contract/transaction-creators/force-move';
+import {
+  NO_ONGOING_CHALLENGE,
+  WRONG_CHANNEL_STORAGE,
+  TURN_NUM_RECORD_NOT_INCREASED,
+  WRONG_REFUTATION_SIGNATURE,
+} from '../../../src/contract/transaction-creators/revert-reasons';
 
 const provider = new ethers.providers.JsonRpcProvider(
   `http://localhost:${process.env.DEV_GANACHE_PORT}`,
@@ -40,40 +46,45 @@ beforeAll(async () => {
 
 // Scenarios are synonymous with channelNonce:
 
-const description1 = 'It accepts a refute tx for an ongoing challenge';
-const description2 = 'It reverts a refute tx if the challenge has expired';
-const description3 = 'It reverts a refute tx if the declaredTurnNumRecord is incorrect';
-const description4 =
-  'It reverts a refute tx if the refutation state is not signed by the challenger';
-const description5 =
-  'It reverts a refute tx if the refutationTurnNum is not larger than declaredTurnNumRecord';
+const description1 = 'It accepts if there is an ongoing challenge';
+const description2 = 'It reverts if the challenge has expired';
+const description3 = 'It reverts if the declaredTurnNumRecord is incorrect';
+const description4 = 'It reverts if the refutation state is not signed by the challenger';
+const description5 = 'It reverts if the refutationTurnNum is not larger than declaredTurnNumRecord';
+const description6 = 'It reverts if the channel is open';
 
 describe('refute', () => {
+  const turnNumRecord = 8;
+  const future = 1e12;
+  const past = 1;
+  const never = '0x00';
+  const isFinalAB = [false, false];
+  const appDatas = [0, 1];
+  const challenger = wallets[2];
+
+  let channelNonce = 1000;
+  beforeEach(() => (channelNonce += 1));
   it.each`
-    description     | channelNonce | setTurnNumRecord | declaredTurnNumRecord | refutationTurnNum | expired  | isFinalAB         | appDatas  | challenger    | refutationStateSigner | reasonString
-    ${description1} | ${1001}      | ${8}             | ${8}                  | ${14}             | ${false} | ${[false, false]} | ${[0, 1]} | ${wallets[2]} | ${wallets[2]}         | ${undefined}
-    ${description2} | ${1002}      | ${8}             | ${8}                  | ${14}             | ${true}  | ${[false, false]} | ${[0, 1]} | ${wallets[2]} | ${wallets[2]}         | ${'Challenge expired or not present.'}
-    ${description3} | ${1003}      | ${8}             | ${7}                  | ${14}             | ${false} | ${[false, false]} | ${[0, 1]} | ${wallets[2]} | ${wallets[2]}         | ${'Channel storage does not match stored version.'}
-    ${description4} | ${1004}      | ${8}             | ${8}                  | ${14}             | ${false} | ${[false, false]} | ${[0, 1]} | ${wallets[2]} | ${nonParticipant}     | ${'Refutation state not signed by challenger'}
-    ${description5} | ${1001}      | ${8}             | ${8}                  | ${5}              | ${false} | ${[false, false]} | ${[0, 1]} | ${wallets[2]} | ${wallets[2]}         | ${'Refutation state must have a higher turn number'}
+    description     | declaredTurnNumRecord | refutationTurnNum    | finalizesAt | refutationStateSigner | reasonString
+    ${description1} | ${turnNumRecord}      | ${turnNumRecord + 6} | ${future}   | ${challenger}         | ${undefined}
+    ${description2} | ${turnNumRecord}      | ${turnNumRecord + 6} | ${past}     | ${challenger}         | ${NO_ONGOING_CHALLENGE}
+    ${description3} | ${turnNumRecord + 1}  | ${turnNumRecord + 6} | ${future}   | ${challenger}         | ${WRONG_CHANNEL_STORAGE}
+    ${description4} | ${turnNumRecord}      | ${turnNumRecord + 6} | ${future}   | ${nonParticipant}     | ${WRONG_REFUTATION_SIGNATURE}
+    ${description5} | ${turnNumRecord}      | ${turnNumRecord - 4} | ${future}   | ${challenger}         | ${TURN_NUM_RECORD_NOT_INCREASED}
+    ${description6} | ${turnNumRecord}      | ${turnNumRecord + 6} | ${never}    | ${challenger}         | ${NO_ONGOING_CHALLENGE}
   `(
     '$description', // for the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce
     async ({
-      channelNonce,
-      setTurnNumRecord,
       declaredTurnNumRecord,
       refutationTurnNum,
-      expired,
-      isFinalAB,
-      appDatas,
-      challenger,
+      finalizesAt,
       refutationStateSigner,
       reasonString,
     }) => {
-      const channel: Channel = {chainId, channelNonce, participants};
+      const channel: Channel = {chainId, channelNonce: hexlify(channelNonce), participants};
       const channelId = getChannelId(channel);
       const challengeState: State = {
-        turnNum: setTurnNumRecord,
+        turnNum: turnNumRecord,
         isFinal: isFinalAB[0],
         appData: defaultAbiCoder.encode(['uint256'], [appDatas[0]]),
         outcome,
@@ -92,17 +103,10 @@ describe('refute', () => {
         challengeDuration,
       };
 
-      // set expiry time in the future or in the past
-      const blockNumber = await provider.getBlockNumber();
-      const blockTimestamp = (await provider.getBlock(blockNumber)).timestamp;
-      const finalizesAt = expired
-        ? blockTimestamp - challengeDuration
-        : blockTimestamp + challengeDuration;
-
       // compute expected ChannelStorageHash
 
       const challengeExistsHash = hashChannelStorage({
-        turnNumRecord: setTurnNumRecord,
+        turnNumRecord,
         finalizesAt,
         state: challengeState,
         challengerAddress: challenger.address,
