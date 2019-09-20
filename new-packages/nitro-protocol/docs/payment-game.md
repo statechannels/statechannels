@@ -1,18 +1,27 @@
 ---
 id: payment-game
-title: Single Asset Payment Game
+title: Single Asset Payments
 ---
 
-How would a payment game work with this setup? Idea: we can restrict it to single asset.
+Although Nitro supports a mixture of ETH and ERC20 tokens to be escrowed into a channel, a simple payment application would most likely be restricted to a single asset type. There is no `appData` for such an application, as the state machine is encoded only by conditions on the default outcome of each state update. In short, when it is your move you may unilaterally transfer some of the assets that are currently allocated to you, to another participant. You may not decrease any other participants allocation.
 
-- Throws if more than one asset
-- Throws unless the assetoutcome is an allocation
-- Throws unless that allocation has exactly n outcomes
-- Interprets the nth outcome as belonging to participant n
-- Checks that the sum of assets hasn't changed
-- And that for all non-movers
-  - the balance hasn't decreased
-  - the destination hasn't changed
-- For the mover:
-  - [optional] the destination hasn't changed
-  - [redundant] the balance hasn't increased (covered by the sum + other balances not decreasing)
+## Implementation
+
+In [`examples/SingleAssetPayments.sol`](https://github.com/statechannels/nitro-protocol/blob/f0f487eb632ea3c1118a878f3c03d75c1f98837f/contracts/examples/SingleAssetPayments.sol):
+
+- Decode the information
+- Revert if (on either state):
+  - There is more than one asset encoded
+  - The `assetOutcome` is not an allocation
+  - The `allocation` has exactly `nParticipants` outcomes
+- Checks that the sum of assets has not changed
+- For all non-movers, check:
+  - The allocation amount has not decreased
+  - The destination has not changed
+- For the mover, checK:
+  - [optional / not implemented] the destination has not changed
+  - [redundant] the balance has not increased (covered by the sum + other balances not decreasing)
+
+:::warning
+This implementation assumes that the participant in position `k := turnNumB % nParticipants` has the right to decrease the balance of `allocation[k].destination`. When opening the channel, each client should check they are happy with this before proceeding with channel funding. In most applications one would have `allocation[k].destination = participants[k]`.
+:::
