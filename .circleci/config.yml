@@ -50,6 +50,7 @@ jobs:
             - packages/*/build
 
   run-tests:
+    <<: *defaults
     steps:
       - <<: *restore_code
       - checkout
