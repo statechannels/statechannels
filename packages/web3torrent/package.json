@@ -55,11 +55,13 @@
     "webtorrent-fixtures": "^1.7.3"
   },
   "scripts": {
-    "start:alt": "PORT=3333 react-scripts start",
     "start": "react-scripts start",
+    "start:alt": "PORT=3333 react-scripts start",
     "build": "react-scripts build",
+    "eject": "react-scripts eject",
     "test": "TRACKER_URL=http://localhost:4242/announce jest",
-    "eject": "react-scripts eject"
+    "lint": "tslint -c tslint.json -p .",
+    "lint:fix": "tslint -c tslint.json -p . --fix"
   },
   "browserslist": [
     ">0.2%",
