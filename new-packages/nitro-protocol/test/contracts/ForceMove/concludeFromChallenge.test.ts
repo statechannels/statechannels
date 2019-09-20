@@ -10,7 +10,6 @@ import {
   clearedChallengeHash,
   signStates,
   sendTransaction,
-  ongoingChallengeHash,
 } from '../../test-helpers';
 import {AddressZero} from 'ethers/constants';
 import {Channel, getChannelId} from '../../../src/contract/channel';
@@ -56,7 +55,6 @@ const description2 =
 const description3 =
   'It reverts a concludeFromChallenge tx when there is no challenge ongoing (challenge cleared)';
 const description4 = 'It reverts a concludeFromChallenge tx when the outcome is already finalized';
-const description5 = 'It reverts a concludeFromChallenge tx when the channel storage hash is wrong';
 
 const defaultRecord = 5;
 
