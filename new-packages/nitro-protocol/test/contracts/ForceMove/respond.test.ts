@@ -11,6 +11,12 @@ import {Channel, getChannelId} from '../../../src/contract/channel';
 import {State, hashState} from '../../../src/contract/state';
 import {hashChannelStorage} from '../../../src/contract/channel-storage';
 import {createRespondTransaction} from '../../../src/contract/transaction-creators/force-move';
+import {
+  NO_ONGOING_CHALLENGE,
+  WRONG_CHANNEL_STORAGE,
+  RESPONSE_UNAUTHORIZED,
+} from '../../../src/contract/transaction-creators/revert-reasons';
+import {HashZero} from 'ethers/constants';
 
 const provider = new ethers.providers.JsonRpcProvider(
   `http://localhost:${process.env.DEV_GANACHE_PORT}`,
@@ -42,24 +48,28 @@ beforeAll(async () => {
 
 const description1 = 'It accepts a respond tx for an ongoing challenge';
 const description2 = 'It reverts a respond tx if the challenge has expired';
-const description3 = 'It reverts a respond tx if the declaredTurnNumRecord is incorrect';
+const description3 = 'It reverts a respond tx if the channel storage does not match';
 const description4 = 'It reverts a respond tx if it is not signed by the correct participant';
 const description5 =
   'It reverts a respond tx if the response state is not a validTransition from the challenge state';
 
 describe('respond', () => {
   const turnNumRecord = 8;
+  let channelNonce = 1000;
+  const future = 1e12;
+  const past = 1;
+  beforeEach(() => (channelNonce += 1));
   it.each`
-    description     | channelNonce | expired  | isFinalAB         | appDatas  | challenger    | responder         | reasonString
-    ${description1} | ${1001}      | ${false} | ${[false, false]} | ${[0, 1]} | ${wallets[2]} | ${wallets[0]}     | ${undefined}
-    ${description2} | ${1002}      | ${true}  | ${[false, false]} | ${[0, 1]} | ${wallets[2]} | ${wallets[0]}     | ${'Challenge expired or not present.'}
-    ${description3} | ${1003}      | ${false} | ${[false, false]} | ${[0, 1]} | ${wallets[2]} | ${wallets[0]}     | ${'Channel storage does not match stored version.'}
-    ${description4} | ${1004}      | ${false} | ${[false, false]} | ${[0, 1]} | ${wallets[2]} | ${nonParticipant} | ${'Response not signed by authorized mover'}
-    ${description5} | ${1005}      | ${false} | ${[false, false]} | ${[0, 0]} | ${wallets[2]} | ${wallets[0]}     | ${'CountingApp: Counter must be incremented'}
+    description     | finalizesAt | slotEmpty | isFinalAB         | appDatas  | challenger    | responder         | reasonString
+    ${description1} | ${future}   | ${false}  | ${[false, false]} | ${[0, 1]} | ${wallets[2]} | ${wallets[0]}     | ${undefined}
+    ${description2} | ${past}     | ${false}  | ${[false, false]} | ${[0, 1]} | ${wallets[2]} | ${wallets[0]}     | ${NO_ONGOING_CHALLENGE}
+    ${description3} | ${future}   | ${true}   | ${[false, false]} | ${[0, 1]} | ${wallets[2]} | ${wallets[0]}     | ${WRONG_CHANNEL_STORAGE}
+    ${description4} | ${future}   | ${false}  | ${[false, false]} | ${[0, 1]} | ${wallets[2]} | ${nonParticipant} | ${RESPONSE_UNAUTHORIZED}
+    ${description5} | ${future}   | ${false}  | ${[false, false]} | ${[0, 0]} | ${wallets[2]} | ${wallets[0]}     | ${'CountingApp: Counter must be incremented'}
   `(
     '$description', // for the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce
-    async ({channelNonce, expired, isFinalAB, appDatas, challenger, responder, reasonString}) => {
-      const channel: Channel = {chainId, channelNonce, participants};
+    async ({isFinalAB, appDatas, challenger, responder, finalizesAt, slotEmpty, reasonString}) => {
+      const channel: Channel = {chainId, channelNonce: hexlify(channelNonce), participants};
       const channelId = getChannelId(channel);
 
       const challengeState: State = {
@@ -83,14 +93,15 @@ describe('respond', () => {
       };
       const responseStateHash = hashState(responseState);
 
-      const finalizesAt = expired ? 1 : 1e12;
-      const challengeExistsHash = hashChannelStorage({
-        turnNumRecord,
-        finalizesAt,
-        state: challenger ? challengeState : undefined,
-        challengerAddress: challenger.address,
-        outcome,
-      });
+      const challengeExistsHash = slotEmpty
+        ? HashZero
+        : hashChannelStorage({
+            turnNumRecord,
+            finalizesAt,
+            state: challenger ? challengeState : undefined,
+            challengerAddress: challenger.address,
+            outcome,
+          });
 
       // call public wrapper to set state (only works on test contract)
       const tx = await ForceMove.setChannelStorageHash(channelId, challengeExistsHash);
