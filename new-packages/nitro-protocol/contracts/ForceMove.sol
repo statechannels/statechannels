@@ -78,7 +78,7 @@ contract ForceMove {
         // ------------
 
         _requireIncreasedTurnNumber(channelId, largestTurnNum);
-        _requireChannelOpen(channelId);
+        _requireChannelNotFinalized(channelId);
 
         bytes32 supportedStateHash = _stateSupportedBy(
             largestTurnNum,
