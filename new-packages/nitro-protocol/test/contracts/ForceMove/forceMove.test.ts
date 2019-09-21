@@ -8,7 +8,6 @@ import {defaultAbiCoder, hexlify} from 'ethers/utils';
 import {HashZero} from 'ethers/constants';
 import {
   setupContracts,
-  sign,
   nonParticipant,
   clearedChallengeHash,
   ongoingChallengeHash,
@@ -19,7 +18,6 @@ import {
 } from '../../test-helpers';
 import {Channel, getChannelId} from '../../../src/contract/channel';
 import {State, getVariablePart, getFixedPart} from '../../../src/contract/state';
-import {hashChallengeMessage} from '../../../src/contract/challenge';
 import {hashChannelStorage, ChannelStorage} from '../../../src/contract/channel-storage';
 import {createForceMoveTransaction} from '../../../src/contract/transaction-creators/force-move';
 import {
@@ -110,30 +108,21 @@ describe('forceMove', () => {
       };
       const channelId = getChannelId(channel);
 
-      const states: State[] = [];
-      for (let i = 0; i < appDatas.length; i++) {
-        states.push({
-          turnNum: largestTurnNum - appDatas.length + 1 + i,
-          isFinal: i > appDatas.length - isFinalCount,
-          channel,
-          challengeDuration,
-          outcome,
-          appDefinition,
-          appData: defaultAbiCoder.encode(['uint256'], [appDatas[i]]),
-        });
-      }
-
+      const states: State[] = appDatas.map((data, idx) => ({
+        turnNum: largestTurnNum - appDatas.length + 1 + idx,
+        isFinal: idx > appDatas.length - isFinalCount,
+        channel,
+        challengeDuration,
+        outcome,
+        appDefinition,
+        appData: defaultAbiCoder.encode(['uint256'], [data]),
+      }));
       const variableParts = states.map(state => getVariablePart(state));
       const fixedPart = getFixedPart(states[0]);
 
       // sign the states
       // sign the states
       const sigs = await signStates(states, wallets, whoSignedWhat);
-      // compute challengerSig
-      const msgHash = hashChallengeMessage({largestTurnNum: hexlify(largestTurnNum), channelId});
-
-      const {v, r, s} = await sign(challenger, msgHash);
-      const challengerSig = {v, r, s};
 
       // set current channelStorageHashes value
       await (await ForceMove.setChannelStorageHash(channelId, initialChannelStorageHash)).wait();
@@ -142,7 +131,7 @@ describe('forceMove', () => {
         states,
         sigs,
         whoSignedWhat,
-        challengerSig,
+        challenger.privateKey,
       );
       // call forceMove in a slightly different way if expecting a revert
       if (reasonString) {

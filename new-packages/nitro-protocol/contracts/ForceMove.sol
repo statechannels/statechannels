@@ -82,7 +82,6 @@ contract ForceMove {
         // check that the forceMove is signed by a participant and store their address
 
         address challenger = _requireThatChallengerIsParticipant(
-            largestTurnNum,
             supportedStateHash,
             fixedPart.participants,
             challengerSig
@@ -115,13 +114,12 @@ contract ForceMove {
     }
 
     function _requireThatChallengerIsParticipant(
-        uint48 largestTurnNum,
         bytes32 supportedStateHash,
         address[] memory participants,
         Signature memory challengerSignature
     ) internal pure returns (address challenger) {
         challenger = _recoverSigner(
-            keccak256(abi.encode(largestTurnNum, supportedStateHash, 'forceMove')),
+            keccak256(abi.encode(supportedStateHash, 'forceMove')),
             challengerSignature
         );
         require(_isAddressInArray(challenger, participants), 'Challenger is not a participant');

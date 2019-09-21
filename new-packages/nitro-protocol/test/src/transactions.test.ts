@@ -9,10 +9,9 @@ import {
 } from '../../src/transactions';
 import {ChannelStorage} from '../../src';
 import {AddressZero} from 'ethers/constants';
-import {signChallengeMessage, signState} from '../../src/signatures';
+import {signState} from '../../src/signatures';
 import {Channel} from '../../src/contract/channel';
 import {SignedState} from '../../src';
-import {Signature} from 'ethers/utils';
 
 const wallet = ethers.Wallet.createRandom();
 const channel: Channel = {
@@ -38,7 +37,6 @@ const challengeChannelStorage: ChannelStorage = {
   },
 };
 
-let challengeSignature: Signature;
 let signedState: SignedState;
 
 beforeAll(async () => {
@@ -54,14 +52,12 @@ beforeAll(async () => {
     },
     wallet.privateKey,
   );
-
-  challengeSignature = await signChallengeMessage([signedState], wallet.privateKey);
 });
 describe('transactions', async () => {
   it('creates a force move transaction', async () => {
     const transactionRequest: TransactionRequest = createForceMoveTransaction(
       [signedState],
-      challengeSignature,
+      wallet.privateKey,
     );
 
     expect(transactionRequest.data).toBeDefined();

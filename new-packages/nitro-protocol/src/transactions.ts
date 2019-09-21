@@ -7,7 +7,7 @@ import {ChannelStorage, SignedState} from '.';
 
 export function createForceMoveTransaction(
   signedStates: SignedState[],
-  challengeSignature: Signature,
+  challengePrivateKey: string,
 ): TransactionRequest {
   const {states, signatures, whoSignedWhat} = createSignatureArguments(signedStates);
 
@@ -15,7 +15,7 @@ export function createForceMoveTransaction(
     states,
     signatures,
     whoSignedWhat,
-    challengeSignature,
+    challengePrivateKey,
   );
 }
 export function createRespondTransaction(

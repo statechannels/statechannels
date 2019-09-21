@@ -5,6 +5,7 @@ import {TransactionRequest} from 'ethers/providers';
 import {State, getVariablePart, getFixedPart, hashAppPart} from '../state';
 import {Signature} from 'ethers/utils';
 import {hashOutcome} from '../outcome';
+import {signChallengeMessage} from '../../signatures';
 
 // TODO: Currently we are setting some arbitrary gas limit
 // to avoid issues with Ganache sendTransaction and parsing BN.js
@@ -24,7 +25,7 @@ export function createForceMoveTransaction(
   states: State[],
   signatures: Signature[],
   whoSignedWhat: number[],
-  challengerSignature: Signature,
+  challengerPrivateKey: string,
 ): TransactionRequest {
   // Sanity checks on expected lengths
   if (states.length === 0) {
@@ -43,6 +44,10 @@ export function createForceMoveTransaction(
   // Get the largest turn number from the states
   const largestTurnNum = Math.max(...states.map(s => s.turnNum));
   const isFinalCount = states.filter(s => s.isFinal === true).length;
+  // TODO: Is there a reason why createForceMoveTransaction accepts a State[] and a Signature[]
+  // argument rather than a SignedState[] argument?
+  const signedStates = states.map(s => ({state: s, signature: {v: 0, r: '', s: ''}}));
+  const challengerSignature = signChallengeMessage(signedStates, challengerPrivateKey);
 
   const data = ForceMoveContractInterface.functions.forceMove.encode([
     fixedPart,
