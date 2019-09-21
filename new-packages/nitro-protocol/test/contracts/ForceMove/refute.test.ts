@@ -5,7 +5,13 @@ import ForceMoveArtifact from '../../../build/contracts/TESTForceMove.json';
 // @ts-ignore
 import countingAppArtifact from '../../../build/contracts/CountingApp.json';
 import {defaultAbiCoder, hexlify} from 'ethers/utils';
-import {setupContracts, sign, newChallengeClearedEvent, sendTransaction} from '../../test-helpers';
+import {
+  setupContracts,
+  sign,
+  newChallengeClearedEvent,
+  sendTransaction,
+  nonParticipant,
+} from '../../test-helpers';
 import {Channel, getChannelId} from '../../../src/contract/channel';
 import {State, hashState} from '../../../src/contract/state';
 import {Outcome} from '../../../src/contract/outcome';
@@ -36,7 +42,6 @@ for (let i = 0; i < 3; i++) {
   wallets[i] = ethers.Wallet.createRandom();
   participants[i] = wallets[i].address;
 }
-const nonParticipant = ethers.Wallet.createRandom();
 
 beforeAll(async () => {
   ForceMove = await setupContracts(provider, ForceMoveArtifact);
@@ -68,12 +73,13 @@ describe('refute', () => {
     description     | declaredTurnNumRecord | refutationTurnNum    | finalizesAt | refutationStateSigner | reasonString
     ${description1} | ${turnNumRecord}      | ${turnNumRecord + 6} | ${future}   | ${challenger}         | ${undefined}
     ${description2} | ${turnNumRecord}      | ${turnNumRecord + 6} | ${past}     | ${challenger}         | ${NO_ONGOING_CHALLENGE}
-    ${description3} | ${turnNumRecord + 1}  | ${turnNumRecord + 6} | ${future}   | ${challenger}         | ${WRONG_CHANNEL_STORAGE}
     ${description4} | ${turnNumRecord}      | ${turnNumRecord + 6} | ${future}   | ${nonParticipant}     | ${WRONG_REFUTATION_SIGNATURE}
     ${description5} | ${turnNumRecord}      | ${turnNumRecord - 4} | ${future}   | ${challenger}         | ${TURN_NUM_RECORD_NOT_INCREASED}
     ${description6} | ${turnNumRecord}      | ${turnNumRecord + 6} | ${never}    | ${challenger}         | ${NO_ONGOING_CHALLENGE}
+    ${description3} | ${turnNumRecord + 1}  | ${turnNumRecord + 6} | ${future}   | ${challenger}         | ${WRONG_CHANNEL_STORAGE}
   `(
-    '$description', // for the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce
+    // TODO: Whatever test follows description3 always fails. Thus, it has to go last. WHY IS THIS?
+    '$description',
     async ({
       declaredTurnNumRecord,
       refutationTurnNum,
@@ -102,8 +108,6 @@ describe('refute', () => {
         appDefinition,
         challengeDuration,
       };
-
-      // compute expected ChannelStorageHash
 
       const challengeExistsHash = hashChannelStorage({
         turnNumRecord,
