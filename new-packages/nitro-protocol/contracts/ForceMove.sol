@@ -67,7 +67,7 @@ contract ForceMove {
         // REQUIREMENTS
         // ------------
 
-        _requireIncreasedTurnNumber(channelId, largestTurnNum);
+        _requireNonDecreasedTurnNumber(channelId, largestTurnNum);
         _requireChannelNotFinalized(channelId);
         bytes32 supportedStateHash = _requireStateSupportedBy(
             largestTurnNum,
@@ -288,7 +288,7 @@ contract ForceMove {
     ) public {
         bytes32 channelId = _getChannelId(fixedPart);
         _requireChannelNotFinalized(channelId);
-        _requireIncreasedTurnNumber(channelId, largestTurnNum + 1); // In this case, it's acceptable if the turn number is not increased
+        _requireNonDecreasedTurnNumber(channelId, largestTurnNum);
 
         bytes32[] memory stateHashes = new bytes32[](numStates);
         for (uint256 i = 0; i < numStates; i++) {
@@ -535,6 +535,14 @@ contract ForceMove {
     function _requireIncreasedTurnNumber(bytes32 channelId, uint48 newTurnNumRecord) internal view {
         (uint48 turnNumRecord, , ) = _getData(channelId);
         require(newTurnNumRecord > turnNumRecord, 'turnNumRecord not increased.');
+    }
+
+    function _requireNonDecreasedTurnNumber(bytes32 channelId, uint48 newTurnNumRecord)
+        internal
+        view
+    {
+        (uint48 turnNumRecord, , ) = _getData(channelId);
+        require(newTurnNumRecord >= turnNumRecord, 'turnNumRecord decreased.');
     }
 
     function _requireSpecificChallenge(ChannelStorage memory cs, bytes32 channelId) internal view {
