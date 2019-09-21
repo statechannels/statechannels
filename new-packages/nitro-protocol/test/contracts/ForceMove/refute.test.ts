@@ -46,10 +46,8 @@ for (let i = 0; i < 3; i++) {
 beforeAll(async () => {
   ForceMove = await setupContracts(provider, ForceMoveArtifact);
   networkId = (await provider.getNetwork()).chainId;
-  appDefinition = countingAppArtifact.networks[networkId].address; // use a fixed appDefinition in all tests
+  appDefinition = countingAppArtifact.networks[networkId].address;
 });
-
-// Scenarios are synonymous with channelNonce:
 
 const description1 = 'It accepts if there is an ongoing challenge';
 const description2 = 'It reverts if the challenge has expired';
@@ -59,7 +57,7 @@ const description5 = 'It reverts if the refutationTurnNum is not larger than dec
 const description6 = 'It reverts if the channel is open';
 
 describe('refute', () => {
-  const turnNumRecord = 8;
+  const claimedRecord = 8;
   const future = 1e12;
   const past = 1;
   const never = '0x00';
@@ -70,17 +68,17 @@ describe('refute', () => {
   let channelNonce = 1000;
   beforeEach(() => (channelNonce += 1));
   it.each`
-    description     | declaredTurnNumRecord | refutationTurnNum    | finalizesAt | refutationStateSigner | reasonString
-    ${description1} | ${turnNumRecord}      | ${turnNumRecord + 6} | ${future}   | ${challenger}         | ${undefined}
-    ${description2} | ${turnNumRecord}      | ${turnNumRecord + 6} | ${past}     | ${challenger}         | ${NO_ONGOING_CHALLENGE}
-    ${description4} | ${turnNumRecord}      | ${turnNumRecord + 6} | ${future}   | ${nonParticipant}     | ${WRONG_REFUTATION_SIGNATURE}
-    ${description5} | ${turnNumRecord}      | ${turnNumRecord - 4} | ${future}   | ${challenger}         | ${TURN_NUM_RECORD_NOT_INCREASED}
-    ${description6} | ${turnNumRecord}      | ${turnNumRecord + 6} | ${never}    | ${challenger}         | ${NO_ONGOING_CHALLENGE}
-    ${description3} | ${turnNumRecord + 1}  | ${turnNumRecord + 6} | ${future}   | ${challenger}         | ${WRONG_CHANNEL_STORAGE}
+    description     | turnNumRecord        | refutationTurnNum    | finalizesAt | refutationStateSigner | reasonString
+    ${description1} | ${claimedRecord}     | ${claimedRecord + 6} | ${future}   | ${challenger}         | ${undefined}
+    ${description2} | ${claimedRecord}     | ${claimedRecord + 6} | ${past}     | ${challenger}         | ${NO_ONGOING_CHALLENGE}
+    ${description4} | ${claimedRecord}     | ${claimedRecord + 6} | ${future}   | ${nonParticipant}     | ${WRONG_REFUTATION_SIGNATURE}
+    ${description5} | ${claimedRecord}     | ${claimedRecord - 4} | ${future}   | ${challenger}         | ${TURN_NUM_RECORD_NOT_INCREASED}
+    ${description6} | ${claimedRecord}     | ${claimedRecord + 6} | ${never}    | ${challenger}         | ${NO_ONGOING_CHALLENGE}
+    ${description3} | ${claimedRecord + 1} | ${claimedRecord + 6} | ${future}   | ${challenger}         | ${WRONG_CHANNEL_STORAGE}
   `(
     '$description',
     async ({
-      declaredTurnNumRecord,
+      turnNumRecord,
       refutationTurnNum,
       finalizesAt,
       refutationStateSigner,
@@ -89,7 +87,7 @@ describe('refute', () => {
       const channel: Channel = {chainId, channelNonce: hexlify(channelNonce), participants};
       const channelId = getChannelId(channel);
       const challengeState: State = {
-        turnNum: turnNumRecord,
+        turnNum: claimedRecord,
         isFinal: isFinalAB[0],
         appData: defaultAbiCoder.encode(['uint256'], [appDatas[0]]),
         outcome,
@@ -140,11 +138,11 @@ describe('refute', () => {
 
         // catch ChallengeCleared event
         const [, eventTurnNumRecord] = await challengeClearedEvent;
-        expect(eventTurnNumRecord._hex).toEqual(hexlify(declaredTurnNumRecord));
+        expect(eventTurnNumRecord._hex).toEqual(hexlify(claimedRecord));
 
         // check new expected ChannelStorageHash
         const expectedChannelStorage: ChannelStorage = {
-          turnNumRecord: declaredTurnNumRecord,
+          turnNumRecord: claimedRecord,
           finalizesAt: 0,
         };
         const expectedChannelStorageHash = hashChannelStorage(expectedChannelStorage);
