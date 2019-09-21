@@ -79,8 +79,7 @@ contract ForceMove {
 
         _requireIncreasedTurnNumber(channelId, largestTurnNum);
         _requireChannelNotFinalized(channelId);
-
-        bytes32 supportedStateHash = _stateSupportedBy(
+        bytes32 supportedStateHash = _requireStateSupportedBy(
             largestTurnNum,
             variableParts,
             isFinalCount,
@@ -92,21 +91,11 @@ contract ForceMove {
 
         // check that the forceMove is signed by a participant and store their address
 
-        address challenger = _recoverSigner( // TODO: what if someone nabs this signature off of a transaction and uses it in a front-ran tx?
-            keccak256(
-                abi.encode(
-                    largestTurnNum,
-                    channelId,
-                    'forceMove' // Express statement of intent to forceMove this channel to this turnNum
-                )
-            ),
-            challengerSig.v,
-            challengerSig.r,
-            challengerSig.s
-        );
-        require(
-            _isAddressInArray(challenger, fixedPart.participants),
-            'Challenger is not a participant'
+        address challenger = _requireThatChallengerIsParticipant(
+            largestTurnNum,
+            supportedStateHash,
+            fixedPart.participants,
+            challengerSig
         );
 
         // ------------
@@ -133,6 +122,19 @@ contract ForceMove {
             )
         );
 
+    }
+
+    function _requireThatChallengerIsParticipant(
+        uint48 largestTurnNum,
+        bytes32 supportedStateHash,
+        address[] memory participants,
+        Signature memory challengerSignature
+    ) internal pure returns (address challenger) {
+        challenger = _recoverSigner(
+            keccak256(abi.encode(largestTurnNum, supportedStateHash, 'forceMove')),
+            challengerSignature
+        );
+        require(_isAddressInArray(challenger, participants), 'Challenger is not a participant');
     }
 
     function respond(
@@ -201,7 +203,7 @@ contract ForceMove {
         );
 
         require(
-            _recoverSigner(responseStateHash, sig.v, sig.r, sig.s) ==
+            _recoverSigner(responseStateHash, sig) ==
                 fixedPart.participants[(turnNumRecord + 1) % fixedPart.participants.length],
             'Response not signed by authorized mover'
         );
@@ -291,13 +293,7 @@ contract ForceMove {
         );
 
         require(
-            _recoverSigner(
-                    refutationStateHash,
-                    refutationStateSig.v,
-                    refutationStateSig.r,
-                    refutationStateSig.s
-                ) ==
-                challenger,
+            _recoverSigner(refutationStateHash, refutationStateSig) == challenger,
             'Refutation state not signed by challenger'
         );
 
@@ -324,8 +320,7 @@ contract ForceMove {
 
         _requireChannelNotFinalized(channelId);
         _requireIncreasedTurnNumber(channelId, largestTurnNum);
-
-        _stateSupportedBy(
+        _requireStateSupportedBy(
             largestTurnNum,
             variableParts,
             isFinalCount,
@@ -424,12 +419,7 @@ contract ForceMove {
             'Unacceptable whoSignedWhat array'
         );
         for (uint256 i = 0; i < nParticipants; i++) {
-            address signer = _recoverSigner(
-                stateHashes[whoSignedWhat[i]],
-                sigs[i].v,
-                sigs[i].r,
-                sigs[i].s
-            );
+            address signer = _recoverSigner(stateHashes[whoSignedWhat[i]], sigs[i]);
             if (signer != participants[i]) {
                 return false;
             }
@@ -459,17 +449,13 @@ contract ForceMove {
     }
 
     bytes constant prefix = '\x19Ethereum Signed Message:\n32';
-    function _recoverSigner(bytes32 _d, uint8 _v, bytes32 _r, bytes32 _s)
-        internal
-        pure
-        returns (address)
-    {
+    function _recoverSigner(bytes32 _d, Signature memory sig) internal pure returns (address) {
         bytes32 prefixedHash = keccak256(abi.encodePacked(prefix, _d));
-        address a = ecrecover(prefixedHash, _v, _r, _s);
+        address a = ecrecover(prefixedHash, sig.v, sig.r, sig.s);
         return (a);
     }
 
-    function _stateSupportedBy(
+    function _requireStateSupportedBy(
         uint256 largestTurnNum,
         ForceMoveApp.VariablePart[] memory variableParts,
         uint8 isFinalCount,
