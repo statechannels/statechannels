@@ -354,7 +354,7 @@ contract ForceMove {
         );
 
         _requireChannelNotFinalized(channelId);
-        _requireIncreasedTurnNumber(channelId, largestTurnNum - 1); // In this case, it's acceptable if the turn number is not increased
+        _requireIncreasedTurnNumber(channelId, largestTurnNum + 1); // In this case, it's acceptable if the turn number is not increased
 
         bytes32[] memory stateHashes = new bytes32[](numStates);
         for (uint256 i = 0; i < numStates; i++) {
