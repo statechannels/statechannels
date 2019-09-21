@@ -22,8 +22,8 @@ import {hashChannelStorage} from '../../../src/contract/channel-storage';
 import {hexlify} from 'ethers/utils';
 import {
   CHANNEL_FINALIZED,
-  TURN_NUM_RECORD_NOT_INCREASED,
   UNACCEPTABLE_WHO_SIGNED_WHAT,
+  TURN_NUM_RECORD_DECREASED,
 } from '../../../src/contract/transaction-creators/revert-reasons';
 
 const provider = new ethers.providers.JsonRpcProvider(
@@ -99,9 +99,9 @@ describe('conclude', () => {
     ${accepts3} | ${channelOpen}            | ${turnNumRecord + 2}             | ${oneState}    | ${undefined}
     ${accepts4} | ${challengeOngoing}       | ${turnNumRecord + 3}             | ${oneState}    | ${undefined}
     ${accepts5} | ${challengeOngoing}       | ${turnNumRecord + 4}             | ${oneState}    | ${undefined}
-    ${reverts1} | ${channelOpen}            | ${turnNumRecord - 1}             | ${oneState}    | ${TURN_NUM_RECORD_NOT_INCREASED}
+    ${reverts1} | ${channelOpen}            | ${turnNumRecord - 1}             | ${oneState}    | ${TURN_NUM_RECORD_DECREASED}
     ${reverts2} | ${channelOpen}            | ${turnNumRecord + nParticipants} | ${unsupported} | ${UNACCEPTABLE_WHO_SIGNED_WHAT}
-    ${reverts3} | ${challengeOngoing}       | ${turnNumRecord - 1}             | ${oneState}    | ${TURN_NUM_RECORD_NOT_INCREASED}
+    ${reverts3} | ${challengeOngoing}       | ${turnNumRecord - 1}             | ${oneState}    | ${TURN_NUM_RECORD_DECREASED}
     ${reverts4} | ${challengeOngoing}       | ${turnNumRecord + nParticipants} | ${unsupported} | ${UNACCEPTABLE_WHO_SIGNED_WHAT}
     ${reverts5} | ${finalized}              | ${turnNumRecord + 1}             | ${oneState}    | ${CHANNEL_FINALIZED}
   `(

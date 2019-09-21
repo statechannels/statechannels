@@ -18,9 +18,9 @@ import {Channel, getChannelId} from '../../../src/contract/channel';
 import {State, getVariablePart, getFixedPart} from '../../../src/contract/state';
 import {hashChannelStorage, ChannelStorage} from '../../../src/contract/channel-storage';
 import {
-  TURN_NUM_RECORD_NOT_INCREASED,
   CHALLENGER_NON_PARTICIPANT,
   CHANNEL_FINALIZED,
+  TURN_NUM_RECORD_DECREASED,
 } from '../../../src/contract/transaction-creators/revert-reasons';
 import {signChallengeMessage} from '../../../src/signatures';
 import {SignedState} from '../../../src/index.js';
@@ -82,21 +82,30 @@ describe('forceMove', () => {
   const challenger = wallets[2];
   const wrongSig = {v: 1, s: HashZero, r: HashZero};
 
+  const empty = HashZero; // equivalent to openAtZero
+  const openAtFive = clearedChallengeHash(5);
+  const openAtLargestTurnNum = clearedChallengeHash(largestTurnNum);
+  const openAtTwenty = clearedChallengeHash(20);
+  const challengeAtFive = ongoingChallengeHash(5);
+  const challengeAtTwenty = ongoingChallengeHash(20);
+  const finalizedAtFive = finalizedOutcomeHash(5);
+
   let channelNonce = 200;
   beforeEach(() => (channelNonce += 1));
   it.each`
-    description | initialChannelStorageHash   | stateData      | challengeSignature | reasonString
-    ${accepts1} | ${HashZero}                 | ${oneState}    | ${undefined}       | ${undefined}
-    ${accepts2} | ${HashZero}                 | ${threeStates} | ${undefined}       | ${undefined}
-    ${accepts3} | ${clearedChallengeHash(5)}  | ${oneState}    | ${undefined}       | ${undefined}
-    ${accepts4} | ${clearedChallengeHash(5)}  | ${threeStates} | ${undefined}       | ${undefined}
-    ${accepts5} | ${ongoingChallengeHash(5)}  | ${oneState}    | ${undefined}       | ${undefined}
-    ${accepts6} | ${ongoingChallengeHash(5)}  | ${threeStates} | ${undefined}       | ${undefined}
-    ${reverts1} | ${clearedChallengeHash(20)} | ${oneState}    | ${undefined}       | ${TURN_NUM_RECORD_NOT_INCREASED}
-    ${reverts2} | ${HashZero}                 | ${oneState}    | ${wrongSig}        | ${CHALLENGER_NON_PARTICIPANT}
-    ${reverts3} | ${HashZero}                 | ${invalid}     | ${undefined}       | ${'CountingApp: Counter must be incremented'}
-    ${reverts4} | ${ongoingChallengeHash(20)} | ${oneState}    | ${undefined}       | ${TURN_NUM_RECORD_NOT_INCREASED}
-    ${reverts5} | ${finalizedOutcomeHash(5)}  | ${oneState}    | ${undefined}       | ${CHANNEL_FINALIZED}
+    description | initialChannelStorageHash | stateData      | challengeSignature | reasonString
+    ${accepts1} | ${empty}                  | ${oneState}    | ${undefined}       | ${undefined}
+    ${accepts2} | ${empty}                  | ${threeStates} | ${undefined}       | ${undefined}
+    ${accepts3} | ${openAtFive}             | ${oneState}    | ${undefined}       | ${undefined}
+    ${accepts3} | ${openAtLargestTurnNum}   | ${oneState}    | ${undefined}       | ${undefined}
+    ${accepts4} | ${openAtFive}             | ${threeStates} | ${undefined}       | ${undefined}
+    ${accepts5} | ${challengeAtFive}        | ${oneState}    | ${undefined}       | ${undefined}
+    ${accepts6} | ${challengeAtFive}        | ${threeStates} | ${undefined}       | ${undefined}
+    ${reverts1} | ${openAtTwenty}           | ${oneState}    | ${undefined}       | ${TURN_NUM_RECORD_DECREASED}
+    ${reverts2} | ${empty}                  | ${oneState}    | ${wrongSig}        | ${CHALLENGER_NON_PARTICIPANT}
+    ${reverts3} | ${empty}                  | ${invalid}     | ${undefined}       | ${'CountingApp: Counter must be incremented'}
+    ${reverts4} | ${challengeAtTwenty}      | ${oneState}    | ${undefined}       | ${TURN_NUM_RECORD_DECREASED}
+    ${reverts5} | ${finalizedAtFive}        | ${oneState}    | ${undefined}       | ${CHANNEL_FINALIZED}
   `(
     '$description', // for the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce
 
