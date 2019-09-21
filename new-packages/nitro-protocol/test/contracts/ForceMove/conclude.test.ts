@@ -94,24 +94,25 @@ const turnNumRecord = 5;
 const channelOpen = clearedChallengeHash(turnNumRecord);
 const challengeOngoing = ongoingChallengeHash(turnNumRecord);
 const finalized = finalizedOutcomeHash(turnNumRecord);
+const nParticipants = participants.length;
 let channelNonce = 400;
 describe('conclude', () => {
   beforeEach(() => (channelNonce += 1));
   it.each`
-    description | initialChannelStorageHash | largestTurnNum       | support              | reasonString
-    ${accepts1} | ${HashZero}               | ${turnNumRecord - 1} | ${threeStates}       | ${undefined}
-    ${accepts2} | ${HashZero}               | ${turnNumRecord - 2} | ${oneState}          | ${undefined}
-    ${accepts2} | ${HashZero}               | ${turnNumRecord + 2} | ${oneState}          | ${undefined}
-    ${accepts3} | ${channelOpen}            | ${turnNumRecord + 1} | ${oneState}          | ${undefined}
-    ${accepts4} | ${challengeOngoing}       | ${turnNumRecord + 4} | ${oneState}          | ${undefined}
-    ${accepts5} | ${challengeOngoing}       | ${turnNumRecord + 1} | ${oneState}          | ${undefined}
-    ${reverts1} | ${channelOpen}            | ${turnNumRecord - 1} | ${oneState}          | ${TURN_NUM_RECORD_NOT_INCREASED}
-    ${reverts2} | ${channelOpen}            | ${turnNumRecord + 2} | ${unsupported}       | ${UNACCEPTABLE_WHO_SIGNED_WHAT}
-    ${reverts3} | ${channelOpen}            | ${turnNumRecord + 1} | ${invalidTransition} | ${COUNTING_APP_INVALID_TRANSITION}
-    ${reverts4} | ${challengeOngoing}       | ${turnNumRecord - 2} | ${oneState}          | ${TURN_NUM_RECORD_NOT_INCREASED}
-    ${reverts5} | ${challengeOngoing}       | ${turnNumRecord + 5} | ${unsupported}       | ${UNACCEPTABLE_WHO_SIGNED_WHAT}
-    ${reverts6} | ${challengeOngoing}       | ${turnNumRecord + 1} | ${invalidTransition} | ${COUNTING_APP_INVALID_TRANSITION}
-    ${reverts7} | ${finalized}              | ${turnNumRecord + 3} | ${oneState}          | ${CHANNEL_FINALIZED}
+    description | initialChannelStorageHash | largestTurnNum                   | support              | reasonString
+    ${accepts1} | ${HashZero}               | ${turnNumRecord - nParticipants} | ${threeStates}       | ${undefined}
+    ${accepts2} | ${HashZero}               | ${turnNumRecord - 1}             | ${oneState}          | ${undefined}
+    ${accepts2} | ${HashZero}               | ${turnNumRecord + 1}             | ${oneState}          | ${undefined}
+    ${accepts3} | ${channelOpen}            | ${turnNumRecord + 2}             | ${oneState}          | ${undefined}
+    ${accepts4} | ${challengeOngoing}       | ${turnNumRecord + 3}             | ${oneState}          | ${undefined}
+    ${accepts5} | ${challengeOngoing}       | ${turnNumRecord + 4}             | ${oneState}          | ${undefined}
+    ${reverts1} | ${channelOpen}            | ${turnNumRecord - 1}             | ${oneState}          | ${TURN_NUM_RECORD_NOT_INCREASED}
+    ${reverts2} | ${channelOpen}            | ${turnNumRecord + nParticipants} | ${unsupported}       | ${UNACCEPTABLE_WHO_SIGNED_WHAT}
+    ${reverts3} | ${channelOpen}            | ${turnNumRecord + nParticipants} | ${invalidTransition} | ${COUNTING_APP_INVALID_TRANSITION}
+    ${reverts4} | ${challengeOngoing}       | ${turnNumRecord - 1}             | ${oneState}          | ${TURN_NUM_RECORD_NOT_INCREASED}
+    ${reverts5} | ${challengeOngoing}       | ${turnNumRecord + nParticipants} | ${unsupported}       | ${UNACCEPTABLE_WHO_SIGNED_WHAT}
+    ${reverts6} | ${challengeOngoing}       | ${turnNumRecord + nParticipants} | ${invalidTransition} | ${COUNTING_APP_INVALID_TRANSITION}
+    ${reverts7} | ${finalized}              | ${turnNumRecord + 1}             | ${oneState}          | ${CHANNEL_FINALIZED}
   `(
     '$description', // for the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce
     async ({initialChannelStorageHash, largestTurnNum, support, reasonString}) => {
