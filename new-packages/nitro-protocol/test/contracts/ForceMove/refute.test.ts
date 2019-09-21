@@ -78,7 +78,6 @@ describe('refute', () => {
     ${description6} | ${turnNumRecord}      | ${turnNumRecord + 6} | ${never}    | ${challenger}         | ${NO_ONGOING_CHALLENGE}
     ${description3} | ${turnNumRecord + 1}  | ${turnNumRecord + 6} | ${future}   | ${challenger}         | ${WRONG_CHANNEL_STORAGE}
   `(
-    // TODO: Whatever test follows description3 always fails. Thus, it has to go last. WHY IS THIS?
     '$description',
     async ({
       declaredTurnNumRecord,
@@ -131,7 +130,7 @@ describe('refute', () => {
         refutationStateSig,
       );
       if (reasonString) {
-        expectRevert(() => {
+        await expectRevert(() => {
           return sendTransaction(provider, ForceMove.address, transactionRequest);
         }, 'VM Exception while processing transaction: revert ' + reasonString);
       } else {
