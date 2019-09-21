@@ -30,6 +30,6 @@ describe('_recoverSigner', () => {
     const msgHash = ethers.utils.id('Hello World');
     const msgHashBytes = arrayify(msgHash);
     const sig = await sign(wallet, msgHashBytes);
-    expect(await ForceMove.recoverSigner(msgHash, sig.v, sig.r, sig.s)).toEqual(wallet.address);
+    expect(await ForceMove.recoverSigner(msgHash, sig)).toEqual(wallet.address);
   });
 });

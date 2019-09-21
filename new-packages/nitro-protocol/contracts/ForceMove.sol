@@ -397,6 +397,8 @@ contract ForceMove {
     }
 
     function _requireStateSupportedBy(
+        // returns hash of latest state, if supported
+        // else, reverts
         uint256 largestTurnNum,
         ForceMoveApp.VariablePart[] memory variableParts,
         uint8 isFinalCount,
@@ -411,7 +413,7 @@ contract ForceMove {
             isFinalCount,
             channelId,
             fixedPart
-        ); // if this function returns the array (and doesn't revert), this implies a validTransition chain
+        );
 
         require(
             _validSignatures(
@@ -428,7 +430,8 @@ contract ForceMove {
     }
 
     function _requireValidTransition(
-        // returns stateHashes array (implies true) else reverts
+        // returns stateHashes array if valid
+        // else, reverts
         uint256 largestTurnNum,
         ForceMoveApp.VariablePart[] memory variableParts,
         uint8 isFinalCount,
@@ -475,7 +478,7 @@ contract ForceMove {
         // and that the b.turnNum = a.turnNum + 1
         if (isFinalAB[1]) {
             require(
-                keccak256(ab[1].outcome) == keccak256(ab[0].outcome),
+                _bytesEqual(ab[1].outcome, ab[0].outcome),
                 'InvalidTransitionError: Cannot move to a final state with a different default outcome'
             );
         } else {
@@ -485,7 +488,7 @@ contract ForceMove {
             );
             if (turnNumB <= 2 * nParticipants) {
                 require(
-                    keccak256(ab[1].outcome) == keccak256(ab[0].outcome),
+                    _bytesEqual(ab[1].outcome, ab[0].outcome),
                     'InvalidTransitionError: Cannot change the default outcome during setup phase'
                 );
                 require(
@@ -505,6 +508,10 @@ contract ForceMove {
             }
         }
         return true;
+    }
+
+    function _bytesEqual(bytes memory left, bytes memory right) internal pure returns (bool) {
+        return keccak256(left) == keccak256(right);
     }
 
     function _clearChallenge(bytes32 channelId, uint256 newTurnNumRecord) internal {
