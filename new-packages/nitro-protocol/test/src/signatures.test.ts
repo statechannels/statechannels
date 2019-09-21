@@ -3,6 +3,7 @@ import {hashState, State} from '../../src/contract/state';
 import {AddressZero} from 'ethers/constants';
 import {arrayify, splitSignature} from 'ethers/utils';
 import {getStateSignerAddress, signChallengeMessage, signState} from '../../src/signatures';
+import {hashChallengeMessage} from '../../src/contract/challenge';
 
 describe('signatures', () => {
   describe('signState', () => {
@@ -66,11 +67,15 @@ describe('signatures', () => {
       };
 
       const signature = signChallengeMessage(
-        [{state, signature: {v: 0, r: '', s: ''}}],
+        [signState(state, wallet.privateKey)],
         wallet.privateKey,
       );
 
-      expect(getStateSignerAddress({state, signature})).toEqual(wallet.address);
+      const challenger = ethers.utils.verifyMessage(
+        arrayify(hashChallengeMessage(state)),
+        signature,
+      );
+      expect(challenger).toEqual(wallet.address);
     });
 
     it('throws an exception if signing with non-participant private key', async () => {
