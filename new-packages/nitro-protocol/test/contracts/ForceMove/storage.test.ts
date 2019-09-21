@@ -23,7 +23,7 @@ describe('storage', () => {
     ${123456}     | ${789}
   `('Hashing and data retrieval', async storage => {
     const blockchainStorage = {...storage, ...zeroData};
-    const blockchainHash = await ForceMove.getHash(blockchainStorage);
+    const blockchainHash = await ForceMove.hashChannelStorage(blockchainStorage);
     const clientHash = hashChannelStorage(storage);
 
     const expected = {...storage, fingerprint: '0x' + clientHash.slice(2 + 24)};

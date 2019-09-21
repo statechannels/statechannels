@@ -39,7 +39,7 @@ contract TESTNitroAdjudicator is NitroAdjudicator {
     // public setter for channelStorage
 
     function setChannelStorage(bytes32 channelId, ChannelStorage memory channelStorage) public {
-        channelStorageHashes[channelId] = _getHash(channelStorage);
+        channelStorageHashes[channelId] = _hashChannelStorage(channelStorage);
     }
 
     // public setter for channelStorage

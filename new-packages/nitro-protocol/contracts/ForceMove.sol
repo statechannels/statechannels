@@ -41,13 +41,6 @@ contract ForceMove {
         bytes32 outcomeHash;
     }
 
-    struct ChannelStorageLite {
-        uint256 finalizesAt;
-        bytes32 stateHash;
-        address challengerAddress;
-        bytes32 outcomeHash;
-    }
-
     mapping(bytes32 => bytes32) public channelStorageHashes;
 
     // Public methods:
@@ -69,10 +62,7 @@ contract ForceMove {
         uint8[] memory whoSignedWhat,
         Signature memory challengerSig
     ) public {
-        // Calculate channelId from fixed part
-        bytes32 channelId = keccak256(
-            abi.encode(fixedPart.chainId, fixedPart.participants, fixedPart.channelNonce)
-        );
+        bytes32 channelId = _getChannelId(fixedPart);
         // ------------
         // REQUIREMENTS
         // ------------
@@ -112,7 +102,7 @@ contract ForceMove {
             variableParts
         );
 
-        channelStorageHashes[channelId] = _getHash(
+        channelStorageHashes[channelId] = _hashChannelStorage(
             ChannelStorage(
                 largestTurnNum,
                 now + fixedPart.challengeDuration,
@@ -146,47 +136,27 @@ contract ForceMove {
         // variablePartAB[1] = responseVariablePart
         Signature memory sig
     ) public {
-        // Calculate channelId from fixed part
-        bytes32 channelId = keccak256(
-            abi.encode(fixedPart.chainId, fixedPart.participants, fixedPart.channelNonce)
-        );
+        bytes32 channelId = _getChannelId(fixedPart);
         (uint48 turnNumRecord, uint48 finalizesAt, ) = _getData(channelId);
 
-        bytes32 challengeOutcomeHash = keccak256(abi.encode(variablePartAB[0].outcome));
-        bytes32 responseOutcomeHash = keccak256(abi.encode(variablePartAB[1].outcome));
-        bytes32 challengeStateHash = keccak256(
-            abi.encode(
-                State(
-                    turnNumRecord,
-                    isFinalAB[0],
-                    channelId,
-                    keccak256(
-                        abi.encode(
-                            fixedPart.challengeDuration,
-                            fixedPart.appDefinition,
-                            variablePartAB[0].appData
-                        )
-                    ),
-                    challengeOutcomeHash
-                )
-            )
+        bytes32 challengeOutcomeHash = _hashOutcome(variablePartAB[0].outcome);
+        bytes32 responseOutcomeHash = _hashOutcome(variablePartAB[1].outcome);
+        bytes32 challengeStateHash = _hashState(
+            turnNumRecord,
+            isFinalAB[0],
+            channelId,
+            fixedPart,
+            variablePartAB[0].appData,
+            challengeOutcomeHash
         );
-        bytes32 responseStateHash = keccak256(
-            abi.encode(
-                State(
-                    turnNumRecord + 1,
-                    isFinalAB[1],
-                    channelId,
-                    keccak256(
-                        abi.encode(
-                            fixedPart.challengeDuration,
-                            fixedPart.appDefinition,
-                            variablePartAB[1].appData
-                        )
-                    ),
-                    responseOutcomeHash
-                )
-            )
+
+        bytes32 responseStateHash = _hashState(
+            turnNumRecord + 1,
+            isFinalAB[1],
+            channelId,
+            fixedPart,
+            variablePartAB[1].appData,
+            responseOutcomeHash
         );
 
         // requirements
@@ -232,49 +202,28 @@ contract ForceMove {
     ) public {
         // requirements
 
-        // Calculate channelId from fixed part
-        bytes32 channelId = keccak256(
-            abi.encode(fixedPart.chainId, fixedPart.participants, fixedPart.channelNonce)
-        );
+        bytes32 channelId = _getChannelId(fixedPart);
         (uint48 turnNumRecord, uint48 finalizesAt, ) = _getData(channelId);
 
         _requireIncreasedTurnNumber(channelId, refutationStateTurnNum);
 
         bytes32 challengeOutcomeHash = keccak256(abi.encode(variablePartAB[0].outcome));
         bytes32 refutationOutcomeHash = keccak256(abi.encode(variablePartAB[1].outcome));
-        bytes32 challengeStateHash = keccak256(
-            abi.encode(
-                State(
-                    turnNumRecord,
-                    isFinalAB[0],
-                    channelId,
-                    keccak256(
-                        abi.encode(
-                            fixedPart.challengeDuration,
-                            fixedPart.appDefinition,
-                            variablePartAB[0].appData
-                        )
-                    ),
-                    challengeOutcomeHash
-                )
-            )
+        bytes32 challengeStateHash = _hashState(
+            turnNumRecord,
+            isFinalAB[0],
+            channelId,
+            fixedPart,
+            variablePartAB[0].appData,
+            challengeOutcomeHash
         );
-        bytes32 refutationStateHash = keccak256(
-            abi.encode(
-                State(
-                    refutationStateTurnNum,
-                    isFinalAB[1],
-                    channelId,
-                    keccak256(
-                        abi.encode(
-                            fixedPart.challengeDuration,
-                            fixedPart.appDefinition,
-                            variablePartAB[1].appData
-                        )
-                    ),
-                    refutationOutcomeHash
-                )
-            )
+        bytes32 refutationStateHash = _hashState(
+            refutationStateTurnNum,
+            isFinalAB[1],
+            channelId,
+            fixedPart,
+            variablePartAB[1].appData,
+            refutationOutcomeHash
         );
 
         // requirements
@@ -307,10 +256,7 @@ contract ForceMove {
         Signature[] memory sigs,
         uint8[] memory whoSignedWhat
     ) public {
-        // Calculate channelId from fixed part
-        bytes32 channelId = keccak256(
-            abi.encode(fixedPart.chainId, fixedPart.participants, fixedPart.channelNonce)
-        );
+        bytes32 channelId = _getChannelId(fixedPart);
 
         // ------------
         // REQUIREMENTS
@@ -342,10 +288,7 @@ contract ForceMove {
         uint8[] memory whoSignedWhat,
         Signature[] memory sigs
     ) public {
-        bytes32 channelId = keccak256(
-            abi.encode(fixedPart.chainId, fixedPart.participants, fixedPart.channelNonce)
-        );
-
+        bytes32 channelId = _getChannelId(fixedPart);
         _requireChannelNotFinalized(channelId);
         _requireIncreasedTurnNumber(channelId, largestTurnNum + 1); // In this case, it's acceptable if the turn number is not increased
 
@@ -379,7 +322,7 @@ contract ForceMove {
         // effects
 
         // set channel storage
-        channelStorageHashes[channelId] = _getHash(
+        channelStorageHashes[channelId] = _hashChannelStorage(
             ChannelStorage(0, now, bytes32(0), address(0), outcomeHash)
         );
 
@@ -494,22 +437,13 @@ contract ForceMove {
     ) internal pure returns (bytes32[] memory) {
         bytes32[] memory stateHashes = new bytes32[](variableParts.length);
         for (uint256 i = 0; i < variableParts.length; i++) {
-            stateHashes[i] = keccak256(
-                abi.encode(
-                    State(
-                        largestTurnNum + i - variableParts.length + 1, // turnNum
-                        i > variableParts.length - isFinalCount, // isFinal
-                        channelId,
-                        keccak256(
-                            abi.encode(
-                                fixedPart.challengeDuration,
-                                fixedPart.appDefinition,
-                                variableParts[i].appData
-                            )
-                        ),
-                        keccak256(abi.encode(variableParts[i].outcome))
-                    )
-                )
+            stateHashes[i] = _hashState(
+                largestTurnNum + i - variableParts.length + 1, // turnNum
+                i > variableParts.length - isFinalCount, // isFinal
+                channelId,
+                fixedPart,
+                variableParts[i].appData,
+                _hashOutcome(variableParts[i].outcome)
             );
             bool isFinal = i + 1 == variableParts.length;
             if (!isFinal) {
@@ -574,7 +508,7 @@ contract ForceMove {
     }
 
     function _clearChallenge(bytes32 channelId, uint256 newTurnNumRecord) internal {
-        channelStorageHashes[channelId] = _getHash(
+        channelStorageHashes[channelId] = _hashChannelStorage(
             ChannelStorage(newTurnNumRecord, 0, bytes32(0), address(0), bytes32(0))
         );
         emit ChallengeCleared(channelId, newTurnNumRecord);
@@ -613,7 +547,7 @@ contract ForceMove {
         require(finalizesAt == 0 || finalizesAt > now, 'Channel Finalized.');
     }
 
-    function _getHash(ChannelStorage memory channelStorage)
+    function _hashChannelStorage(ChannelStorage memory channelStorage)
         internal
         pure
         returns (bytes32 newHash)
@@ -647,7 +581,45 @@ contract ForceMove {
     }
 
     function _matchesHash(ChannelStorage memory cs, bytes32 h) internal pure returns (bool) {
-        return _getHash(cs) == h;
+        return _hashChannelStorage(cs) == h;
+    }
+
+    function _hashState(
+        uint256 turnNumRecord,
+        bool isFinal,
+        bytes32 channelId,
+        FixedPart memory fixedPart,
+        bytes memory appData,
+        bytes32 outcomeHash
+    ) internal pure returns (bytes32) {
+        return
+            keccak256(
+                abi.encode(
+                    State(
+                        turnNumRecord,
+                        isFinal,
+                        channelId,
+                        keccak256(
+                            abi.encode(
+                                fixedPart.challengeDuration,
+                                fixedPart.appDefinition,
+                                appData
+                            )
+                        ),
+                        outcomeHash
+                    )
+                )
+            );
+    }
+
+    function _hashOutcome(bytes memory outcome) internal pure returns (bytes32) {
+        return keccak256(abi.encode(outcome));
+    }
+
+    function _getChannelId(FixedPart memory fixedPart) internal pure returns (bytes32 channelId) {
+        channelId = keccak256(
+            abi.encode(fixedPart.chainId, fixedPart.participants, fixedPart.channelNonce)
+        );
     }
 
     // events

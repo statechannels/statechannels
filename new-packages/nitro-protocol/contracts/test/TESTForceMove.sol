@@ -48,7 +48,7 @@ contract TESTForceMove is ForceMove {
             );
         }
 
-        channelStorageHashes[channelId] = getHash(channelStorage);
+        channelStorageHashes[channelId] = hashChannelStorage(channelStorage);
     }
 
     // public setter for channelStorage
@@ -57,8 +57,12 @@ contract TESTForceMove is ForceMove {
         channelStorageHashes[channelId] = h;
     }
 
-    function getHash(ChannelStorage memory channelStorage) public pure returns (bytes32 newHash) {
-        return _getHash(channelStorage);
+    function hashChannelStorage(ChannelStorage memory channelStorage)
+        public
+        pure
+        returns (bytes32 newHash)
+    {
+        return _hashChannelStorage(channelStorage);
     }
 
     function matchesHash(ChannelStorage memory cs, bytes32 h) public pure returns (bool) {
