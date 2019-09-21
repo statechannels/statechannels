@@ -111,18 +111,6 @@ contract ForceMove {
 
     }
 
-    function _requireThatChallengerIsParticipant(
-        bytes32 supportedStateHash,
-        address[] memory participants,
-        Signature memory challengerSignature
-    ) internal pure returns (address challenger) {
-        challenger = _recoverSigner(
-            keccak256(abi.encode(supportedStateHash, 'forceMove')),
-            challengerSignature
-        );
-        require(_isAddressInArray(challenger, participants), 'Challenger is not a participant');
-    }
-
     function respond(
         address challenger,
         bool[2] memory isFinalAB,
@@ -326,6 +314,18 @@ contract ForceMove {
     }
 
     // Internal methods:
+
+    function _requireThatChallengerIsParticipant(
+        bytes32 supportedStateHash,
+        address[] memory participants,
+        Signature memory challengerSignature
+    ) internal pure returns (address challenger) {
+        challenger = _recoverSigner(
+            keccak256(abi.encode(supportedStateHash, 'forceMove')),
+            challengerSignature
+        );
+        require(_isAddressInArray(challenger, participants), 'Challenger is not a participant');
+    }
 
     function _isAddressInArray(address suspect, address[] memory addresses)
         internal
