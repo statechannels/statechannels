@@ -79,8 +79,6 @@ contract ForceMove {
             whoSignedWhat
         );
 
-        // check that the forceMove is signed by a participant and store their address
-
         address challenger = _requireThatChallengerIsParticipant(
             supportedStateHash,
             fixedPart.participants,
@@ -182,7 +180,7 @@ contract ForceMove {
             variablePartAB,
             turnNumRecord + 1,
             fixedPart.appDefinition
-        ); // reason string is not required (_validTransition never returns false, only reverts with its own reason)
+        );
 
         // effects
         _clearChallenge(channelId, turnNumRecord + 1);
@@ -223,8 +221,6 @@ contract ForceMove {
             variablePartAB[1].appData,
             refutationOutcomeHash
         );
-
-        // requirements
 
         _requireSpecificChallenge(
             ChannelStorage(
@@ -270,7 +266,7 @@ contract ForceMove {
             fixedPart,
             sigs,
             whoSignedWhat
-        ); // reverts if no state supported by input data
+        );
 
         // effects
         _clearChallenge(channelId, largestTurnNum);
@@ -306,6 +302,7 @@ contract ForceMove {
         }
 
         // check the supplied states are supported by n signatures
+        // (The transition is valid by construction)
         require(
             _validSignatures(
                 largestTurnNum,
@@ -449,6 +446,7 @@ contract ForceMove {
             bool isFinal = i + 1 == variableParts.length;
             if (!isFinal) {
                 // no transition from final state
+
                 _requireValidTransition(
                     fixedPart.participants.length, // nParticipants
                     [
@@ -520,7 +518,8 @@ contract ForceMove {
     }
 
     function _requireChannelOpen(bytes32 channelId) internal view {
-        // Note that _getData returns (0,0,0) when the slot is empty.
+        // Note that _getData(someRandomChannelId) returns (0,0,0), which is
+        // correct when nobody has written to storage yet.
         (, uint48 finalizesAt, ) = _getData(channelId);
         require(finalizesAt == 0, 'Channel not open.');
     }
