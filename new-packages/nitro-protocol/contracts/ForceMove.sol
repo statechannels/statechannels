@@ -208,15 +208,13 @@ contract ForceMove {
             'Response not signed by authorized mover'
         );
 
-        require(
-            _validTransition(
-                fixedPart.participants.length,
-                isFinalAB,
-                variablePartAB,
-                turnNumRecord + 1,
-                fixedPart.appDefinition
-            ) // reason string is not required (_validTransition never returns false, only reverts with its own reason)
-        );
+        _requireValidTransition(
+            fixedPart.participants.length,
+            isFinalAB,
+            variablePartAB,
+            turnNumRecord + 1,
+            fixedPart.appDefinition
+        ); // reason string is not required (_validTransition never returns false, only reverts with its own reason)
 
         // effects
         _clearChallenge(channelId, turnNumRecord + 1);
@@ -464,7 +462,7 @@ contract ForceMove {
         Signature[] memory sigs,
         uint8[] memory whoSignedWhat // whoSignedWhat[i] is the index of the state in stateHashes that was signed by participants[i]
     ) internal pure returns (bytes32) {
-        bytes32[] memory stateHashes = _validTransitionChain(
+        bytes32[] memory stateHashes = _requireValidTransition(
             largestTurnNum,
             variableParts,
             isFinalCount,
@@ -486,7 +484,7 @@ contract ForceMove {
         return stateHashes[stateHashes.length - 1];
     }
 
-    function _validTransitionChain(
+    function _requireValidTransition(
         // returns stateHashes array (implies true) else reverts
         uint256 largestTurnNum,
         ForceMoveApp.VariablePart[] memory variableParts,
@@ -513,26 +511,25 @@ contract ForceMove {
                     )
                 )
             );
-            if (i + 1 != variableParts.length) {
+            bool isFinal = i + 1 == variableParts.length;
+            if (!isFinal) {
                 // no transition from final state
-                require(
-                    _validTransition(
-                        fixedPart.participants.length, // nParticipants
-                        [
-                            i > variableParts.length - isFinalCount,
-                            i + 1 > variableParts.length - isFinalCount
-                        ], // [a.isFinal, b.isFinal]
-                        [variableParts[i], variableParts[i + 1]], // [a,b]
-                        largestTurnNum + i - variableParts.length + 2, // b.turnNum
-                        fixedPart.appDefinition
-                    )
-                ); // reason string not necessary (called function will provide reason for reverting)
+                _requireValidTransition(
+                    fixedPart.participants.length, // nParticipants
+                    [
+                        i > variableParts.length - isFinalCount,
+                        i + 1 > variableParts.length - isFinalCount
+                    ], // [a.isFinal, b.isFinal]
+                    [variableParts[i], variableParts[i + 1]], // [a,b]
+                    largestTurnNum + i - variableParts.length + 2, // b.turnNum
+                    fixedPart.appDefinition
+                );
             }
         }
         return stateHashes;
     }
 
-    function _validTransition(
+    function _requireValidTransition(
         uint256 nParticipants,
         bool[2] memory isFinalAB, // [a.isFinal, b.isFinal]
         ForceMoveApp.VariablePart[2] memory ab, // [a,b]
