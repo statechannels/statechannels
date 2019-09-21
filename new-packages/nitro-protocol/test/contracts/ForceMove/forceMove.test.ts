@@ -8,23 +8,22 @@ import {defaultAbiCoder, hexlify} from 'ethers/utils';
 import {HashZero} from 'ethers/constants';
 import {
   setupContracts,
-  nonParticipant,
   clearedChallengeHash,
   ongoingChallengeHash,
   newChallengeRegisteredEvent,
-  sendTransaction,
   signStates,
   finalizedOutcomeHash,
 } from '../../test-helpers';
 import {Channel, getChannelId} from '../../../src/contract/channel';
 import {State, getVariablePart, getFixedPart} from '../../../src/contract/state';
 import {hashChannelStorage, ChannelStorage} from '../../../src/contract/channel-storage';
-import {createForceMoveTransaction} from '../../../src/contract/transaction-creators/force-move';
 import {
   TURN_NUM_RECORD_NOT_INCREASED,
   CHALLENGER_NON_PARTICIPANT,
   CHANNEL_FINALIZED,
 } from '../../../src/contract/transaction-creators/revert-reasons';
+import {signChallengeMessage} from '../../../src/signatures';
+import {SignedState} from '../../../src/index.js';
 const provider = new ethers.providers.JsonRpcProvider(
   `http://localhost:${process.env.DEV_GANACHE_PORT}`,
 );
@@ -80,26 +79,28 @@ describe('forceMove', () => {
   const invalid = {appDatas: [0, 2, 1], whoSignedWhat: [0, 1, 2]};
   const largestTurnNum = 8;
   const isFinalCount = 0;
+  const challenger = wallets[2];
+  const wrongSig = {v: 1, s: HashZero, r: HashZero};
 
   let channelNonce = 200;
   beforeEach(() => (channelNonce += 1));
   it.each`
-    description | initialChannelStorageHash   | stateData      | challenger        | reasonString
-    ${accepts1} | ${HashZero}                 | ${oneState}    | ${wallets[2]}     | ${undefined}
-    ${accepts2} | ${HashZero}                 | ${threeStates} | ${wallets[2]}     | ${undefined}
-    ${accepts3} | ${clearedChallengeHash(5)}  | ${oneState}    | ${wallets[2]}     | ${undefined}
-    ${accepts4} | ${clearedChallengeHash(5)}  | ${threeStates} | ${wallets[2]}     | ${undefined}
-    ${accepts5} | ${ongoingChallengeHash(5)}  | ${oneState}    | ${wallets[2]}     | ${undefined}
-    ${accepts6} | ${ongoingChallengeHash(5)}  | ${threeStates} | ${wallets[2]}     | ${undefined}
-    ${reverts1} | ${clearedChallengeHash(20)} | ${oneState}    | ${wallets[2]}     | ${TURN_NUM_RECORD_NOT_INCREASED}
-    ${reverts2} | ${HashZero}                 | ${oneState}    | ${nonParticipant} | ${CHALLENGER_NON_PARTICIPANT}
-    ${reverts3} | ${HashZero}                 | ${invalid}     | ${wallets[2]}     | ${'CountingApp: Counter must be incremented'}
-    ${reverts4} | ${ongoingChallengeHash(20)} | ${oneState}    | ${wallets[2]}     | ${TURN_NUM_RECORD_NOT_INCREASED}
-    ${reverts5} | ${finalizedOutcomeHash(5)}  | ${oneState}    | ${wallets[2]}     | ${CHANNEL_FINALIZED}
+    description | initialChannelStorageHash   | stateData      | challengeSignature | reasonString
+    ${accepts1} | ${HashZero}                 | ${oneState}    | ${undefined}       | ${undefined}
+    ${accepts2} | ${HashZero}                 | ${threeStates} | ${undefined}       | ${undefined}
+    ${accepts3} | ${clearedChallengeHash(5)}  | ${oneState}    | ${undefined}       | ${undefined}
+    ${accepts4} | ${clearedChallengeHash(5)}  | ${threeStates} | ${undefined}       | ${undefined}
+    ${accepts5} | ${ongoingChallengeHash(5)}  | ${oneState}    | ${undefined}       | ${undefined}
+    ${accepts6} | ${ongoingChallengeHash(5)}  | ${threeStates} | ${undefined}       | ${undefined}
+    ${reverts1} | ${clearedChallengeHash(20)} | ${oneState}    | ${undefined}       | ${TURN_NUM_RECORD_NOT_INCREASED}
+    ${reverts2} | ${HashZero}                 | ${oneState}    | ${wrongSig}        | ${CHALLENGER_NON_PARTICIPANT}
+    ${reverts3} | ${HashZero}                 | ${invalid}     | ${undefined}       | ${'CountingApp: Counter must be incremented'}
+    ${reverts4} | ${ongoingChallengeHash(20)} | ${oneState}    | ${undefined}       | ${TURN_NUM_RECORD_NOT_INCREASED}
+    ${reverts5} | ${finalizedOutcomeHash(5)}  | ${oneState}    | ${undefined}       | ${CHANNEL_FINALIZED}
   `(
     '$description', // for the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce
 
-    async ({initialChannelStorageHash, stateData, challenger, reasonString}) => {
+    async ({initialChannelStorageHash, stateData, challengeSignature, reasonString}) => {
       const {appDatas, whoSignedWhat} = stateData;
       const channel: Channel = {
         chainId,
@@ -122,30 +123,32 @@ describe('forceMove', () => {
 
       // sign the states
       // sign the states
-      const sigs = await signStates(states, wallets, whoSignedWhat);
+      const signatures = await signStates(states, wallets, whoSignedWhat);
+      const challengeState: SignedState = {
+        state: states[states.length - 1],
+        signature: {v: 0, r: '', s: ''},
+      };
+      challengeSignature =
+        challengeSignature || signChallengeMessage([challengeState], challenger.privateKey);
 
       // set current channelStorageHashes value
       await (await ForceMove.setChannelStorageHash(channelId, initialChannelStorageHash)).wait();
 
-      const transactionRequest = createForceMoveTransaction(
-        states,
-        sigs,
+      const tx = ForceMove.forceMove(
+        fixedPart,
+        largestTurnNum,
+        variableParts,
+        isFinalCount,
+        signatures,
         whoSignedWhat,
-        challenger.privateKey,
+        challengeSignature,
       );
-      // call forceMove in a slightly different way if expecting a revert
       if (reasonString) {
-        const regex = new RegExp(
-          '^' + 'VM Exception while processing transaction: revert ' + reasonString + '$',
-        );
-
-        await expectRevert(() => {
-          return sendTransaction(provider, ForceMove.address, transactionRequest);
-        }, regex);
+        await expectRevert(() => tx, reasonString);
       } else {
         challengeRegisteredEvent = newChallengeRegisteredEvent(ForceMove, channelId);
 
-        await sendTransaction(provider, ForceMove.address, transactionRequest);
+        await tx;
 
         // catch ForceMove event
         const [
