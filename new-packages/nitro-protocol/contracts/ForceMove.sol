@@ -598,9 +598,7 @@ contract ForceMove {
     }
 
     function _requireChannelOpen(bytes32 channelId) internal view {
-        // EITHER there is no information stored against channelId at all (OK)
-        // OR there is, in which case we must check the channel is still open
-        // and that the committed turnNumRecord is correct
+        // Note that _getData returns (0,0,0) when the slot is empty.
         (, uint48 finalizesAt, ) = _getData(channelId);
         require(finalizesAt == 0, 'Channel not open.');
     }
