@@ -13,7 +13,6 @@ Signature:
 
 ```solidity
     function forceMove(
-        uint256 turnNumRecord,
         FixedPart memory fixedPart,
         uint256 largestTurnNum,
         ForceMoveApp.VariablePart[] memory variableParts,
@@ -26,11 +25,10 @@ Signature:
 
 Check:
 
-- States form a chain of valid transitions
-- Channel is in the Open mode
-- Signatures are valid for the states
-- `challengerSig` is valid
-- `largestTurnNum` is greater than turnNumRecord
+- `largestTurnNum` is greater than or equal to turnNumRecord
+- Channel is not finalized
+- States and signatures support the challenge state (the maximal state)
+- `challengerSig` proves that some participant signed the challenge state.
 
 Effects:
 
@@ -41,32 +39,12 @@ Effects:
   - `challengerAddress`
 - Emit a `ChallengeRegistered` event
 
----
-
-## Implementation
-
-- Calculate `channelId` from fixed part
-- Check that the `largestTurnNum >= turnNumRecord`
-- If `channelStorageHashes[channelId] != 0`
-  - Calculate `emptyStorageHash = hash(turnNumRecord, 0, 0, 0)`
-  - Check that `channelStorageHashes[channelId] = emptyStorageHash`
-- Calculate `supportedStateHash` the hash of the state supported by the input data (if there is none, revert).
-- Calculate `msgHash` as `keccak256(abi.encode(largestTurnNum, channelId, 'forceMove'))`
-- Recover challengerAddress from `msgHash` and `challengerSig` and check that `_isAddressInArray(challengerAddress, participants)`
-- Set channelStorage as the hash of the abi encode of
-  - `turnNumRecord = largestTurnNum`
-  - `finalizesAt = now + challengeDuration`
-  - `supportedStateHash`
-  - `challengerAddress`
-  - `outcomeHash = hash(outcomes[m-1])`
-- Emit a `ChallengeRegistered` event
-
 :::note
 The challenger needs to sign this data:
 
 ```
-keccak256(abi.encode(largestTurnNum, channelId, 'forceMove'))
+keccak256(abi.encode(challengeStateHash, 'forceMove'))
 ```
 
-in order to form `challengerSig`. This signals their intent to forceMove this channel to this largestTurnNum. This mechanism allows the forceMove to be authorized only by a channel participant: this means the challenge may be refuted, if a refuter can prove that the challenger has signed a later state.
+in order to form `challengerSig`. This signals their intent to forceMove this channel with this particular state. This mechanism allows the forceMove to be authorized only by a channel participant: this means the challenge may be refuted, if a refuter can prove that the challenger has signed a later state.
 :::

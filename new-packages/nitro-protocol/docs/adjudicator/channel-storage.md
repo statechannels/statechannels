@@ -19,14 +19,17 @@ The `fingerprint` uniquely identifies the channel's current state, up to hash co
 
 ## Turn number record
 
-`turNumRecord` is the highest turn number that is known to the chain to be supported by a full set of signatures. For example, the `turnNumRecord` might be increased by a submitted transaction including
+`turNumRecord` is the highest turn number that is known to the chain to be supported by a full set of signatures.
+The exception to this rule is that it is set to `0` when the channel is concluded via a `conclude` call.
+
+For example, the `turnNumRecord` might be increased by a submitted transaction including
 
 - a `validTransition` m-chain (i.e. an ordered list of `m <= n` states such that each state in the list is a valid transition from its predecessor), and
 - `n` signatures such that each participant has signed the state in the m-chain for which they are a mover (or a later one)
 
 One example of this is a transaction including a single state signed by all `n` participants.
 
-Note that a new `validTransition` `m`-chain may be implied by a single, signed state that is a validTransition from the final state of a previously established n-chain: and hence the `turnNumRecord` can be incremented by a `respond` transaction.
+Note that a new `validTransition` `m`-chain may be implied by a single, signed state that is a validTransition from a state already supported on-chain: and hence the `turnNumRecord` can be incremented by a `respond` transaction.
 
 ## Channel Modes
 

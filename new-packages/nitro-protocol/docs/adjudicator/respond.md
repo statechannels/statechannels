@@ -13,16 +13,10 @@ Signature:
 
 ```solidity
 function respond(
-    uint256 turnNumRecord,
-    uint256 finalizesAt,
     address challenger,
-    bool[2] memory isFinalAB,
-    // isFinal[0] = challengeStateIsFinal
-    // isFinal[1] = responseStateIsFinal
+    bool[2] memory isFinalAB, // [challengeStateIsFinal, responseStateIsFinal]
     FixedPart memory fixedPart,
-    ForceMoveApp.VariablePart[2] memory variablePartAB,
-    // variablePartAB[0] = challengeVariablePart
-    // variablePartAB[1] = responseVariablePart
+    ForceMoveApp.VariablePart[2] memory variablePartAB, // [challengeState, responseState]
     Signature memory sig
 )
 ```
@@ -31,7 +25,7 @@ Requirements:
 
 - `challengeState` matches `stateHash`,
 - `challengeState` to `responseState` is a valid transition,
-- channel is in Challenge mode.
+- Channel is in Challenge mode.
 
 Effects:
 
