@@ -55,21 +55,18 @@ const acceptsWhenOpenIf =
 const accepts1 = acceptsWhenOpenIf + 'passed n states, and the slot is empty';
 const accepts2 = acceptsWhenOpenIf + 'passed one state, and the slot is empty';
 const accepts3 = acceptsWhenOpenIf + 'the largestTurnNum is large enough';
+const accepts6 = acceptsWhenOpenIf + 'the largest turn number is not large enough';
+const accepts7 = acceptsWhenOpenIf + 'the largest turn number is not large enough';
 
 const acceptsWhenChallengeOngoingIf =
   'It accepts when there is an ongoing challenge, and sets the channel storage correctly, if ';
 const accepts4 = acceptsWhenChallengeOngoingIf + 'passed n states';
 const accepts5 = acceptsWhenChallengeOngoingIf + 'passed one state';
 
-const revertsWhenOpenBut = 'It reverts when the channel is open, but ';
-const reverts1 = revertsWhenOpenBut + 'the largest turn number is not large enough';
-const reverts2 = revertsWhenOpenBut + 'the final state is not supported';
-
-const revertsWhenChallengeOngoingBut = 'It reverts when there is an ongoing challenge, but ';
-const reverts3 = revertsWhenChallengeOngoingBut + 'the largest turn number is not large enough';
-const reverts4 = revertsWhenChallengeOngoingBut + 'the final state is not supported';
-
-const reverts5 = 'It reverts when the outcome is already finalized';
+const reverts1 = 'It reverts when the channel is open, but the final state is not supported';
+const reverts2 =
+  'It reverts when there is an ongoing challenge, but the final state is not supported';
+const reverts3 = 'It reverts when the outcome is already finalized';
 
 const threeStates = {
   whoSignedWhat: [0, 1, 2],
@@ -99,11 +96,11 @@ describe('conclude', () => {
     ${accepts3} | ${channelOpen}            | ${turnNumRecord + 2}             | ${oneState}    | ${undefined}
     ${accepts4} | ${challengeOngoing}       | ${turnNumRecord + 3}             | ${oneState}    | ${undefined}
     ${accepts5} | ${challengeOngoing}       | ${turnNumRecord + 4}             | ${oneState}    | ${undefined}
-    ${reverts1} | ${channelOpen}            | ${turnNumRecord - 1}             | ${oneState}    | ${TURN_NUM_RECORD_DECREASED}
-    ${reverts2} | ${channelOpen}            | ${turnNumRecord + nParticipants} | ${unsupported} | ${UNACCEPTABLE_WHO_SIGNED_WHAT}
-    ${reverts3} | ${challengeOngoing}       | ${turnNumRecord - 1}             | ${oneState}    | ${TURN_NUM_RECORD_DECREASED}
-    ${reverts4} | ${challengeOngoing}       | ${turnNumRecord + nParticipants} | ${unsupported} | ${UNACCEPTABLE_WHO_SIGNED_WHAT}
-    ${reverts5} | ${finalized}              | ${turnNumRecord + 1}             | ${oneState}    | ${CHANNEL_FINALIZED}
+    ${accepts6} | ${channelOpen}            | ${turnNumRecord - 1}             | ${oneState}    | ${undefined}
+    ${accepts7} | ${challengeOngoing}       | ${turnNumRecord - 1}             | ${oneState}    | ${undefined}
+    ${reverts1} | ${channelOpen}            | ${turnNumRecord + nParticipants} | ${unsupported} | ${UNACCEPTABLE_WHO_SIGNED_WHAT}
+    ${reverts2} | ${challengeOngoing}       | ${turnNumRecord + nParticipants} | ${unsupported} | ${UNACCEPTABLE_WHO_SIGNED_WHAT}
+    ${reverts3} | ${finalized}              | ${turnNumRecord + 1}             | ${oneState}    | ${CHANNEL_FINALIZED}
   `(
     '$description', // for the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce
     async ({initialChannelStorageHash, largestTurnNum, support, reasonString}) => {

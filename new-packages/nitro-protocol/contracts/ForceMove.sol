@@ -263,7 +263,7 @@ contract ForceMove {
 
     function conclude(
         uint48 largestTurnNum,
-        FixedPart memory fixedPart, // don't need appDefinition
+        FixedPart memory fixedPart,
         bytes32 appPartHash,
         bytes32 outcomeHash,
         uint8 numStates,
@@ -272,8 +272,8 @@ contract ForceMove {
     ) public {
         bytes32 channelId = _getChannelId(fixedPart);
         _requireChannelNotFinalized(channelId);
-        _requireNonDecreasedTurnNumber(channelId, largestTurnNum);
 
+        // By construction, the following states form a valid transition
         bytes32[] memory stateHashes = new bytes32[](numStates);
         for (uint256 i = 0; i < numStates; i++) {
             stateHashes[i] = keccak256(
@@ -290,7 +290,6 @@ contract ForceMove {
         }
 
         // check the supplied states are supported by n signatures
-        // (The transition is valid by construction)
         require(
             _validSignatures(
                 largestTurnNum,
