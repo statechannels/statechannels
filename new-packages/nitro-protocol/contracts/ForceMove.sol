@@ -41,6 +41,8 @@ contract ForceMove {
         bytes32 outcomeHash;
     }
 
+    enum ChannelMode {Open, Challenge, Finalized}
+
     mapping(bytes32 => bytes32) public channelStorageHashes;
 
     // Public methods:
@@ -516,20 +518,6 @@ contract ForceMove {
         emit ChallengeCleared(channelId, newTurnNumRecord);
     }
 
-    function _requireChannelOpen(bytes32 channelId) internal view {
-        // Note that _getData(someRandomChannelId) returns (0,0,0), which is
-        // correct when nobody has written to storage yet.
-        (, uint48 finalizesAt, ) = _getData(channelId);
-        require(finalizesAt == 0, 'Channel not open.');
-    }
-
-    function _requireMatchingStorage(ChannelStorage memory cs, bytes32 channelId) internal view {
-        require(
-            _matchesHash(cs, channelStorageHashes[channelId]),
-            'Channel storage does not match stored version.'
-        );
-    }
-
     function _requireIncreasedTurnNumber(bytes32 channelId, uint48 newTurnNumRecord) internal view {
         (uint48 turnNumRecord, , ) = _getData(channelId);
         require(newTurnNumRecord > turnNumRecord, 'turnNumRecord not increased.');
@@ -549,13 +537,40 @@ contract ForceMove {
     }
 
     function _requireOngoingChallenge(bytes32 channelId) internal view {
-        (, uint48 finalizesAt, ) = _getData(channelId);
-        require(finalizesAt > now, 'No ongoing challenge.');
+        require(_mode(channelId) == ChannelMode.Challenge, 'No ongoing challenge.');
     }
 
     function _requireChannelNotFinalized(bytes32 channelId) internal view {
+        require(_mode(channelId) != ChannelMode.Finalized, 'Channel finalized.');
+    }
+
+    function _requireChannelFinalized(bytes32 channelId) internal view {
+        require(_mode(channelId) == ChannelMode.Finalized, 'Channel not finalized.');
+    }
+
+    function _requireChannelOpen(bytes32 channelId) internal view {
+        require(_mode(channelId) == ChannelMode.Open, 'Channel not open.');
+    }
+
+    function _requireMatchingStorage(ChannelStorage memory cs, bytes32 channelId) internal view {
+        require(
+            _matchesHash(cs, channelStorageHashes[channelId]),
+            'Channel storage does not match stored version.'
+        );
+    }
+
+    function _mode(bytes32 channelId) internal view returns (ChannelMode) {
+        // Note that _getData(someRandomChannelId) returns (0,0,0), which is
+        // correct when nobody has written to storage yet.
+
         (, uint48 finalizesAt, ) = _getData(channelId);
-        require(finalizesAt == 0 || finalizesAt > now, 'Channel Finalized.');
+        if (finalizesAt == 0) {
+            return ChannelMode.Open;
+        } else if (finalizesAt <= now) {
+            return ChannelMode.Finalized;
+        } else {
+            return ChannelMode.Challenge;
+        }
     }
 
     function _hashChannelStorage(ChannelStorage memory channelStorage)
