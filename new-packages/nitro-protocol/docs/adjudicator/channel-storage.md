@@ -3,23 +3,19 @@ id: channel-storage
 title: ChannelStorage
 ---
 
-The adjudicator contract stores the hash of the following struct:
+The adjudicator contract stores
 
-```solidity
-    struct ChannelStorage {
-        uint256 turnNumRecord;
-        uint256 finalizesAt;
-        bytes32 stateHash; // keccak256(abi.encode(State))
-        address challengerAddress;
-        bytes32 outcomeHash;
-    }
-```
+- `uint48 turnNumRecord`
+- `uint48 finalizesAt`
+- `uint160 fingerprint`
 
-(abi encoded) in a mapping with `channelId` as the key:
+inside the following mapping, with `channelId` as the key:
 
 ```solidity
     mapping(bytes32 => bytes32) public channelStorageHashes;
 ```
+
+The `fingerprint` uniquely identifies the channel's current state, up to hash collisions.
 
 ## Turn number record
 
@@ -34,14 +30,11 @@ Note that a new `validTransition` `m`-chain may be implied by a single, signed s
 
 ## Channel Modes
 
-- **NoInfo** if and only if there is no information about the channel on chain.
 - **Open** if and only if `finalizesAt` is null
   - implies that `stateHash` and `challengerAddress` are also null
-  - `turnNumRecord` could be null but might not be
 - **Challenge** if and only if `finalizesAt < currentTime`
   - implies that all other fields are not null
 - **Finalized** if and only if `finalizesAt >= currentTime`
-
   - implies that all other fields are not null
 
 These states can be represented in the following state machine:
@@ -49,27 +42,16 @@ These states can be represented in the following state machine:
 <div class="mermaid">
 graph LR
 linkStyle default interpolate basis
-NoInfo-->|forceMove| Challenge
-NoInfo-->|concludeFromOpen| Finalized
-Open-->|concludeFromOpen| Finalized
-Open-->|forceMove| Challenge
-Challenge-->|concludeFromChallenge| Finalized
+Open -->|forceMove| Challenge
+Open -->|checkpoint| Open
+Open-->|conclude| Finalized
+Challenge-->|forceMove| Challenge
 Challenge-->|refute| Open
 Challenge-->|respond| Open
+Challenge-->|checkpoint| Open
+Challenge-->|conclude| Finalized
 Challenge-->|timeout| Finalized
 </div>
-
-The convention for **Open**:
-
-```solidity
-channelStorageHashes[channelId] = ChannelStorage(turnNumRecord, 0, bytes32(0), address(0), bytes32(0));
-```
-
-and for **NoInfo**:
-
-```solidity
-channelStorageHashes[channelId] = bytes32(0);
-```
 
 ---
 
@@ -79,8 +61,28 @@ Storage costs on-chain are high and tend to dwarf other gas fees. The implementa
 
 ForceMove requires certain data to be available on-chain.
 
-**The key idea here is to store a hash of this data, instead of storing the data itself.** The actual data can then be provided as required to each method, as part of the `calldata`. The chain will then check that the hydrated data hashes to the image that has been stored.
+The value of `channelStorageHashes[someChannelId]` is obtained by:
+
+- setting the first 48 bits to the `turnNumRecord`
+- setting the next 48 bits to `finalizesAt`
+- setting the last 160 bits to the `fingerprint`
+
+The `fingerprint` is `keccak(abi.encode(channelStorage))`, where `channelStorage` is a struct of type
+
+```solidity
+    struct ChannelStorage {
+        uint256 turnNumRecord;
+        uint256 finalizesAt;
+        bytes32 stateHash; // keccak256(abi.encode(State))
+        address challengerAddress;
+        bytes32 outcomeHash // keccak256(abi.encode(Outcome));
+    }
+```
+
+When the adjudicator needs to verify the exact state or outcome, the data is provided in the function arguments, as part of the `calldata`. The chain will then check that the hydrated data hashes to the image that has been stored.
 
 ## FAQs
 
-**Why include the `outcomeHash`?** Although the `outcome` is included in the `state`, we include the `outcomeHash` at the top level of the `channelStorageHash` to make it easier for the [`pushOutcome`](./push-outcome) method to prove what the outcome of the channel was. The tradeoff here is that the methods need to make sure they have the data to calculate it - which adds at most a `bytes32` to their `calldata`.
+### **Why include the `outcomeHash`?**
+
+Although the `outcome` is included in the `state`, we include the `outcomeHash` at the top level of the `channelStorageHash` to make it easier for the [`pushOutcome`](./push-outcome) method to prove what the outcome of the channel was. The tradeoff here is that the methods need to make sure they have the data to calculate it - which adds at most a `bytes32` to their `calldata`.
