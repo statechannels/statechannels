@@ -435,27 +435,25 @@ contract ForceMove {
         FixedPart memory fixedPart
     ) internal pure returns (bytes32[] memory) {
         bytes32[] memory stateHashes = new bytes32[](variableParts.length);
+        uint256 firstFinalTurnNum = largestTurnNum - isFinalCount + 1;
+        uint256 turnNum;
+
         for (uint256 i = 0; i < variableParts.length; i++) {
+            turnNum = largestTurnNum - variableParts.length + 1 + i;
             stateHashes[i] = _hashState(
-                largestTurnNum + i - variableParts.length + 1, // turnNum
-                i > variableParts.length - isFinalCount, // isFinal
+                turnNum,
+                turnNum >= firstFinalTurnNum,
                 channelId,
                 fixedPart,
                 variableParts[i].appData,
                 _hashOutcome(variableParts[i].outcome)
             );
-            bool isFinal = i + 1 == variableParts.length;
-            if (!isFinal) {
-                // no transition from final state
-
+            if (turnNum < largestTurnNum) {
                 _requireValidTransition(
-                    fixedPart.participants.length, // nParticipants
-                    [
-                        i > variableParts.length - isFinalCount,
-                        i + 1 > variableParts.length - isFinalCount
-                    ], // [a.isFinal, b.isFinal]
-                    [variableParts[i], variableParts[i + 1]], // [a,b]
-                    largestTurnNum + i - variableParts.length + 2, // b.turnNum
+                    fixedPart.participants.length,
+                    [turnNum >= firstFinalTurnNum, turnNum + 1 >= firstFinalTurnNum],
+                    [variableParts[i], variableParts[i + 1]],
+                    turnNum + 1,
                     fixedPart.appDefinition
                 );
             }
