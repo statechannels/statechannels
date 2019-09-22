@@ -23,7 +23,6 @@ import {hexlify} from 'ethers/utils';
 import {
   CHANNEL_FINALIZED,
   UNACCEPTABLE_WHO_SIGNED_WHAT,
-  TURN_NUM_RECORD_DECREASED,
 } from '../../../src/contract/transaction-creators/revert-reasons';
 
 const provider = new ethers.providers.JsonRpcProvider(
