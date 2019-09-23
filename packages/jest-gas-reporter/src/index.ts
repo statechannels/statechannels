@@ -1,4 +1,4 @@
-import { getGanacheProvider } from "magmo-devtools";
+import { getGanacheProvider } from "@statechannels/magmo-devtools";
 import { ethers } from "ethers";
 import fs from "fs";
 import path from "path";

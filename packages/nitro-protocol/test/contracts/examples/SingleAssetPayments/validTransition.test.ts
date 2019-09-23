@@ -2,7 +2,7 @@ import {ethers} from 'ethers';
 // @ts-ignore
 import SingleAssetPaymentsArtifact from '../../../../build/contracts/SingleAssetPayments.json';
 import {setupContracts, replaceAddresses} from '../../../test-helpers';
-import {expectRevert} from 'magmo-devtools';
+import {expectRevert} from '@statechannels/magmo-devtools';
 import {Allocation, encodeOutcome} from '../../../../src/contract/outcome';
 import {AddressZero, HashZero} from 'ethers/constants';
 import {VariablePart} from '../../../../src/contract/state.js';

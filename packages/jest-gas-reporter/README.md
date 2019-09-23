@@ -19,18 +19,20 @@ TestContract          withdraw                    5      30800    74499    42586
 
 ## Configuration
 
-Just add jest-gas-reporter to reporters in your jest config. By default `jest-gas-reporter` assume that contract json files are located in `./build/contracts`
+Just add jest-gas-reporter to reporters in your jest config. By default `@statechannels/jest-gas-reporter` assume that contract json files are located in `./build/contracts`
 
 ```
- "reporters": ["default","jest-gas-reporter"]
+ "reporters": ["default","@statechannels/jest-gas-reporter"]
 ```
 
-If you want specify a folder where the contracts are located. `jest-gas-reporter` accepts a `contractArtifactFolder` option.
+If you want specify a folder where the contracts are located. `@statechannels/jest-gas-reporter` accepts a `contractArtifactFolder` option.
 
-```
-"reporters": ["default",
-      ["jest-gas-reporter",
-        { "contractArtifactFolder":"output/contract" }
-      ]
-    ]
+```js
+"reporters": [
+  "default",
+  [
+    "@statechannels/jest-gas-reporter",
+    { "contractArtifactFolder":"output/contract" }
+  ]
+]
 ```

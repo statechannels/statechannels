@@ -8,7 +8,7 @@ import ERC20AssetHolderArtifact from '../../../build/contracts/ERC20AssetHolder.
 
 import {AddressZero} from 'ethers/constants';
 import {setupContracts, finalizedOutcomeHash, sendTransaction} from '../../test-helpers';
-import {expectRevert} from 'magmo-devtools';
+import {expectRevert} from '@statechannels/magmo-devtools';
 import {Channel, getChannelId} from '../../../src/contract/channel';
 import {hashAssetOutcome} from '../../../src/contract/outcome';
 import {State} from '../../../src/contract/state';

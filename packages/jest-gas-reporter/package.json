@@ -1,5 +1,5 @@
 {
-  "name": "jest-gas-reporter",
+  "name": "@statechannels/jest-gas-reporter",
   "version": "0.0.2",
   "description": "A jest reporter that reports the gas used by various calls to ethereum contracts.",
   "main": "lib/index.js",
@@ -7,20 +7,20 @@
   "author": "Alex Gap <alex@magmo.com>",
   "license": "MIT",
   "scripts": {
-    "build": "tslint --project . && tsc"
+    "build": "tslint --project . && tsc -b"
   },
   "devDependencies": {
     "@types/easy-table": "0.0.32",
     "@types/jest": "24.0.11",
-    "tslint": "5.14.0",
+    "tslint": "5.20.0",
     "tslint-config-prettier": "1.18.0"
   },
   "dependencies": {
+    "@statechannels/magmo-devtools": "0.1.21",
     "easy-table": "1.1.1",
-    "ethers": "4.0.27",
-    "magmo-devtools": "git+https://github.com/magmo/devtools.git#v0.1.11",
+    "ethers": "4.0.37",
     "path": "0.12.7",
     "solc": "^0.5.11",
-    "typescript": "3.3.4000"
+    "typescript": "3.6.3"
   }
 }

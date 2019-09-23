@@ -1,5 +1,5 @@
 import {ethers} from 'ethers';
-import {expectRevert} from 'magmo-devtools';
+import {expectRevert} from '@statechannels/magmo-devtools';
 // @ts-ignore
 import ERC20AssetHolderArtifact from '../../../build/contracts/ERC20AssetHolder.json';
 // @ts-ignore

@@ -3,7 +3,7 @@ import {ethers} from 'ethers';
 import AssetHolderArtifact from '../../../build/contracts/ETHAssetHolder.json';
 import {setupContracts} from '../../test-helpers';
 import {keccak256} from 'ethers/utils';
-import {expectRevert} from 'magmo-devtools';
+import {expectRevert} from '@statechannels/magmo-devtools';
 import {Channel, getChannelId} from '../../../src/contract/channel';
 
 const provider = new ethers.providers.JsonRpcProvider(

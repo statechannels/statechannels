@@ -4,7 +4,7 @@ import ConsensusAppArtifact from '../../../build/contracts/ConsensusApp.json';
 
 import {TransactionRequest} from 'ethers/providers';
 import {setupContracts} from '../../test-helpers';
-import {expectRevert} from 'magmo-devtools';
+import {expectRevert} from '@statechannels/magmo-devtools';
 import {ConsensusData} from '../../../src/contract/consensus-data';
 import {Outcome} from '../../../src/contract/outcome';
 import {AddressZero, HashZero} from 'ethers/constants';
