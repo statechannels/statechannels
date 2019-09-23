@@ -18,7 +18,7 @@ describe('signatures', () => {
         isFinal: false,
         appData: '0x0',
         appDefinition: AddressZero,
-        challengeDuration: '0x5',
+        challengeDuration: 0x5,
       };
 
       const signedState = signState(state, wallet.privateKey);
@@ -46,7 +46,7 @@ describe('signatures', () => {
         isFinal: false,
         appData: '0x0',
         appDefinition: AddressZero,
-        challengeDuration: '0x5',
+        challengeDuration: 0x5,
       };
 
       expect(() => {
@@ -65,7 +65,7 @@ describe('signatures', () => {
         isFinal: false,
         appData: '0x0',
         appDefinition: AddressZero,
-        challengeDuration: '0x5',
+        challengeDuration: 0x5,
       };
       const hashedState = hashState(state);
       const stateSignature = splitSignature(await wallet.signMessage(arrayify(hashedState)));
@@ -94,7 +94,7 @@ describe('signatures', () => {
         isFinal: false,
         appData: '0x0',
         appDefinition: AddressZero,
-        challengeDuration: '0x5',
+        challengeDuration: 0x5,
       };
       const hashedState = hashState(state);
       const signature = splitSignature(await wallet.signMessage(arrayify(hashedState)));
@@ -113,7 +113,7 @@ describe('signatures', () => {
         isFinal: false,
         appData: '0x0',
         appDefinition: AddressZero,
-        challengeDuration: '0x5',
+        challengeDuration: 0x5,
       };
       const hashedState = hashState(state);
       const signature = splitSignature(await wallet.signMessage(arrayify(hashedState)));
@@ -134,7 +134,7 @@ describe('signatures', () => {
         isFinal: false,
         appData: '0x0',
         appDefinition: AddressZero,
-        challengeDuration: '0x5',
+        challengeDuration: 0x5,
       };
       const hashedState = hashState(state);
       const signature = splitSignature(await wallet.signMessage(arrayify(hashedState)));

@@ -4,7 +4,7 @@ import {expectRevert} from 'magmo-devtools';
 import ForceMoveArtifact from '../../../build/contracts/TESTForceMove.json';
 // @ts-ignore
 import countingAppArtifact from '../../../build/contracts/CountingApp.json';
-import {defaultAbiCoder, hexlify, bigNumberify} from 'ethers/utils';
+import {defaultAbiCoder, hexlify} from 'ethers/utils';
 import {setupContracts, sign, newChallengeClearedEvent, sendTransaction} from '../../test-helpers';
 import {Channel, getChannelId} from '../../../src/contract/channel';
 import {State, hashState} from '../../../src/contract/state';
@@ -20,7 +20,7 @@ let networkId;
 const chainId = '0x1234';
 const participants = ['', '', ''];
 const wallets = new Array(3);
-const challengeDuration = '0x1000';
+const challengeDuration = 0x1000;
 const assetHolderAddress = ethers.Wallet.createRandom().address;
 const outcome: Outcome = [{assetHolderAddress, allocation: []}];
 let appDefinition;
@@ -52,8 +52,8 @@ describe('refute', () => {
   it.each`
     description     | channelNonce | setTurnNumRecord | declaredTurnNumRecord | refutationTurnNum | expired  | isFinalAB         | appDatas  | challenger    | refutationStateSigner | reasonString
     ${description1} | ${1001}      | ${8}             | ${8}                  | ${14}             | ${false} | ${[false, false]} | ${[0, 1]} | ${wallets[2]} | ${wallets[2]}         | ${undefined}
-    ${description2} | ${1002}      | ${8}             | ${8}                  | ${14}             | ${true}  | ${[false, false]} | ${[0, 1]} | ${wallets[2]} | ${wallets[2]}         | ${'Refute too late!'}
-    ${description3} | ${1003}      | ${8}             | ${7}                  | ${14}             | ${false} | ${[false, false]} | ${[0, 1]} | ${wallets[2]} | ${wallets[2]}         | ${'Challenge State does not match stored version'}
+    ${description2} | ${1002}      | ${8}             | ${8}                  | ${14}             | ${true}  | ${[false, false]} | ${[0, 1]} | ${wallets[2]} | ${wallets[2]}         | ${'Challenge expired or not present.'}
+    ${description3} | ${1003}      | ${8}             | ${7}                  | ${14}             | ${false} | ${[false, false]} | ${[0, 1]} | ${wallets[2]} | ${wallets[2]}         | ${'Channel storage does not match stored version.'}
     ${description4} | ${1004}      | ${8}             | ${8}                  | ${14}             | ${false} | ${[false, false]} | ${[0, 1]} | ${wallets[2]} | ${nonParticipant}     | ${'Refutation state not signed by challenger'}
     ${description5} | ${1001}      | ${8}             | ${8}                  | ${5}              | ${false} | ${[false, false]} | ${[0, 1]} | ${wallets[2]} | ${wallets[2]}         | ${'Refutation state must have a higher turn number'}
   `(
@@ -96,17 +96,13 @@ describe('refute', () => {
       const blockNumber = await provider.getBlockNumber();
       const blockTimestamp = (await provider.getBlock(blockNumber)).timestamp;
       const finalizesAt = expired
-        ? bigNumberify(blockTimestamp)
-            .sub(challengeDuration)
-            .toHexString()
-        : bigNumberify(blockTimestamp)
-            .add(challengeDuration)
-            .toHexString();
+        ? blockTimestamp - challengeDuration
+        : blockTimestamp + challengeDuration;
 
       // compute expected ChannelStorageHash
 
       const challengeExistsHash = hashChannelStorage({
-        largestTurnNum: setTurnNumRecord,
+        turnNumRecord: setTurnNumRecord,
         finalizesAt,
         state: challengeState,
         challengerAddress: challenger.address,
@@ -143,8 +139,8 @@ describe('refute', () => {
 
         // check new expected ChannelStorageHash
         const expectedChannelStorage: ChannelStorage = {
-          largestTurnNum: declaredTurnNumRecord,
-          finalizesAt: '0x0',
+          turnNumRecord: declaredTurnNumRecord,
+          finalizesAt: 0,
         };
         const expectedChannelStorageHash = hashChannelStorage(expectedChannelStorage);
         expect(await ForceMove.channelStorageHashes(channelId)).toEqual(expectedChannelStorageHash);

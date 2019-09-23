@@ -43,7 +43,7 @@ contract TESTNitroAdjudicator is NitroAdjudicator {
     // public setter for channelStorage
 
     function setChannelStorage(bytes32 channelId, ChannelStorage memory channelStorage) public {
-        channelStorageHashes[channelId] = keccak256(abi.encode(channelStorage));
+        channelStorageHashes[channelId] = _getHash(channelStorage);
     }
 
     // public setter for channelStorage

@@ -1,13 +1,13 @@
 import {Channel, getChannelId} from './channel';
 import {Outcome, encodeOutcome, hashOutcome} from './outcome';
-import {Uint256, Address, Bytes32} from './types';
+import {Uint256, Address, Bytes32, Uint48} from './types';
 import {keccak256, defaultAbiCoder} from 'ethers/utils';
 
 export interface State {
   turnNum: number;
   isFinal: boolean;
   channel: Channel;
-  challengeDuration: string;
+  challengeDuration: number;
   outcome: Outcome;
   appDefinition: string;
   appData: string;
@@ -20,7 +20,7 @@ export function getFixedPart(
   participants: Address[];
   channelNonce: Uint256;
   appDefinition: Address;
-  challengeDuration: Uint256;
+  challengeDuration: Uint48;
 } {
   const {appDefinition, challengeDuration, channel} = state;
   const {chainId, participants, channelNonce} = channel;

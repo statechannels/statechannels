@@ -4,7 +4,6 @@ import {expectRevert} from 'magmo-devtools';
 import ForceMoveArtifact from '../../../build/contracts/TESTForceMove.json';
 // @ts-ignore
 import countingAppArtifact from '../../../build/contracts/CountingApp.json';
-import {keccak256, defaultAbiCoder} from 'ethers/utils';
 import {
   setupContracts,
   newConcludedEvent,
@@ -14,11 +13,12 @@ import {
   signStates,
   sendTransaction,
 } from '../../test-helpers';
-import {HashZero, AddressZero} from 'ethers/constants';
-import {Outcome, hashOutcome} from '../../../src/contract/outcome';
+import {HashZero} from 'ethers/constants';
+import {Outcome} from '../../../src/contract/outcome';
 import {Channel, getChannelId} from '../../../src/contract/channel';
 import {State} from '../../../src/contract/state';
 import {createConcludeFromOpenTransaction} from '../../../src/contract/transaction-creators/force-move';
+import {hashChannelStorage} from '../../../src/contract/channel-storage';
 
 const provider = new ethers.providers.JsonRpcProvider(
   `http://localhost:${process.env.DEV_GANACHE_PORT}`,
@@ -28,7 +28,7 @@ let networkId;
 const chainId = '0x1234';
 const participants = ['', '', ''];
 const wallets = new Array(3);
-const challengeDuration = '0x1000';
+const challengeDuration = 0x1000;
 const assetHolderAddress = ethers.Wallet.createRandom().address;
 const outcome: Outcome = [{assetHolderAddress, allocation: []}];
 let appDefinition;
@@ -52,6 +52,7 @@ const description2 =
   'It accepts a valid concludeFromOpen tx (1 state) and sets the channel storage correctly';
 const description3 =
   'It accepts a valid concludeFromOpen tx (1 state, cleared challenge exists) and sets the channel storage correctly';
+
 const description4 =
   'It reverts a concludeFromOpen tx when the declaredTurnNumRecord = 0 and incorrect';
 const description5 =
@@ -59,23 +60,23 @@ const description5 =
 const description6 = 'It reverts a concludeFromOpen tx when there is an ongoing challenge';
 const description7 = 'It reverts a concludeFromOpen tx when the outcome is already finalized';
 
+const largestTurnNum = 8;
 describe('concludeFromOpen', () => {
   it.each`
-    description     | channelNonce | declaredTurnNumRecord | initialChannelStorageHash  | largestTurnNum | numStates | whoSignedWhat | reasonString
-    ${description1} | ${401}       | ${0}                  | ${HashZero}                | ${8}           | ${3}      | ${[0, 1, 2]}  | ${undefined}
-    ${description2} | ${402}       | ${0}                  | ${HashZero}                | ${8}           | ${1}      | ${[0, 0, 0]}  | ${undefined}
-    ${description3} | ${403}       | ${5}                  | ${clearedChallengeHash(5)} | ${8}           | ${1}      | ${[0, 0, 0]}  | ${undefined}
-    ${description4} | ${404}       | ${0}                  | ${clearedChallengeHash(5)} | ${8}           | ${1}      | ${[0, 0, 0]}  | ${'Channel is not open or turnNum does not match'}
-    ${description5} | ${405}       | ${1}                  | ${clearedChallengeHash(5)} | ${8}           | ${1}      | ${[0, 0, 0]}  | ${'Channel is not open or turnNum does not match'}
-    ${description6} | ${406}       | ${5}                  | ${ongoingChallengeHash(5)} | ${8}           | ${1}      | ${[0, 0, 0]}  | ${'Channel is not open or turnNum does not match'}
-    ${description7} | ${407}       | ${5}                  | ${finalizedOutcomeHash(5)} | ${8}           | ${1}      | ${[0, 0, 0]}  | ${'Channel is not open or turnNum does not match'}
+    description     | channelNonce | declaredTurnNumRecord | initialChannelStorageHash  | numStates | whoSignedWhat | reasonString
+    ${description1} | ${401}       | ${0}                  | ${HashZero}                | ${3}      | ${[0, 1, 2]}  | ${undefined}
+    ${description2} | ${402}       | ${0}                  | ${HashZero}                | ${1}      | ${[0, 0, 0]}  | ${undefined}
+    ${description3} | ${403}       | ${5}                  | ${clearedChallengeHash(5)} | ${1}      | ${[0, 0, 0]}  | ${undefined}
+    ${description4} | ${404}       | ${0}                  | ${clearedChallengeHash(5)} | ${1}      | ${[0, 0, 0]}  | ${'Channel not open.'}
+    ${description5} | ${405}       | ${1}                  | ${clearedChallengeHash(5)} | ${1}      | ${[0, 0, 0]}  | ${'Channel not open.'}
+    ${description6} | ${406}       | ${5}                  | ${ongoingChallengeHash(5)} | ${1}      | ${[0, 0, 0]}  | ${'Channel not open.'}
+    ${description7} | ${407}       | ${5}                  | ${finalizedOutcomeHash(5)} | ${1}      | ${[0, 0, 0]}  | ${'Channel not open.'}
   `(
     '$description', // for the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce
     async ({
       channelNonce,
       declaredTurnNumRecord,
       initialChannelStorageHash,
-      largestTurnNum,
       numStates,
       whoSignedWhat,
       reasonString,
@@ -129,14 +130,11 @@ describe('concludeFromOpen', () => {
         // compute expected ChannelStorageHash
         const blockNumber = await provider.getBlockNumber();
         const blockTimestamp = (await provider.getBlock(blockNumber)).timestamp;
-        const outcomeHash = hashOutcome(outcome);
-        const expectedChannelStorage = [0, blockTimestamp, HashZero, AddressZero, outcomeHash];
-        const expectedChannelStorageHash = keccak256(
-          defaultAbiCoder.encode(
-            ['uint256', 'uint256', 'bytes32', 'address', 'bytes32'],
-            expectedChannelStorage,
-          ),
-        );
+        const expectedChannelStorageHash = hashChannelStorage({
+          turnNumRecord: 0,
+          finalizesAt: blockTimestamp,
+          outcome,
+        });
 
         // check channelStorageHash against the expected value
         expect(await ForceMove.channelStorageHashes(channelId)).toEqual(expectedChannelStorageHash);

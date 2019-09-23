@@ -13,6 +13,6 @@ export interface SignedState {
 
 export interface ChannelStorage {
   challengeState?: State;
-  finalizesAt?: string;
+  finalizesAt?: number;
   turnNumRecord: number;
 }
