@@ -1,0 +1,32 @@
+{
+  "docs": {
+    "Nitro Protocol": ["nitro-intro", "quick-start"],
+
+    "Adjudicator": [
+      "adjudicator/force-move-intro",
+      "adjudicator/state-format",
+      "adjudicator/transition-rules",
+      "adjudicator/state-supported-by",
+      "adjudicator/valid-signatures",
+      "adjudicator/channel-storage",
+      "adjudicator/force-move",
+      "adjudicator/respond",
+      "adjudicator/respond-with-alternative",
+      "adjudicator/refute",
+      "adjudicator/conclude",
+      "adjudicator/push-outcome",
+      "adjudicator/consensus-game"
+    ],
+
+    "Asset Holder(s)": [
+      "asset-holder/outcomes",
+      "asset-holder/deposit",
+      "asset-holder/set-outcome",
+      "asset-holder/transfer",
+      "asset-holder/claim"
+    ],
+
+    "Advanced": ["auxiliary-protocols"],
+    "Examples": ["payment-game"]
+  }
+}

@@ -1,0 +1,73 @@
+{
+  "name": "nitro-protocol",
+  "version": "0.0.1",
+  "description": "A protocol for state channel networks",
+  "main": "lib/src/index.js",
+  "files": [
+    "lib/*"
+  ],
+  "directories": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:statechannels/nitro-protocol.git"
+  },
+  "keywords": [
+    "state",
+    "channel",
+    "ethereum",
+    "network"
+  ],
+  "author": "George Knee",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/statechannels/nitro-protocol/"
+  },
+  "homepage": "https://github.com/statechannels/nitro-protocol/",
+  "scripts": {
+    "prepare": "yarn build",
+    "test:typescript": "npx jest --testPathIgnorePatterns='test/contracts' --reporters='default'",
+    "test": "yarn prettier:check && yarn clearContracts && npx ganache-then-jest --runInBand",
+    "deploy": "yarn clearContracts && npx truffle migrate",
+    "build:typescript": "tslint --project . && tsc",
+    "build:truffle": "npx truffle compile",
+    "clearContracts": "rm -rf build/contracts",
+    "clearLib": "rm -rf lib",
+    "build": "run-s clearContracts clearLib build:truffle build:typescript",
+    "prettier:check": "npx prettier --check '{contracts,src,test}/**/*.{ts,tsx,sol}'",
+    "prettier:write": "npx prettier --write '{contracts,src,test}/**/*.{ts,tsx,sol}'",
+    "lint:check": "tslint --project .",
+    "lint:write": "tslint --project . --fix"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^2.3.0",
+    "ethers": "^4.0.26",
+    "openzeppelin-solidity": "2.1.3",
+    "web3-eth-accounts": "1.2.1"
+  },
+  "devDependencies": {
+    "@types/jest": "^23.3.10",
+    "@types/node": "^10.12.10",
+    "@types/web3": "^1.0.12",
+    "dotenv": "^6.1.0",
+    "ganache-cli": "6.6.0",
+    "jest": "^23.6.0",
+    "jest-gas-reporter": "0.0.1",
+    "magmo-devtools": "git+https://github.com/magmo/devtools.git#v0.1.14",
+    "npm-run-all": "^4.1.5",
+    "prettier": "^1.18.2",
+    "prettier-plugin-solidity": "^1.0.0-alpha.32",
+    "solc": "^0.5.11",
+    "truffle": "^5.0.0-beta.2",
+    "ts-jest": "^23.10.5",
+    "tslint": "^5.11.0",
+    "tslint-config-prettier": "^1.17.0",
+    "typescript": "^3.2.1"
+  },
+  "prettier": {
+    "printWidth": 100,
+    "singleQuote": true,
+    "trailingComma": "all"
+  }
+}
