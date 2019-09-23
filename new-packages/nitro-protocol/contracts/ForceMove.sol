@@ -164,7 +164,7 @@ contract ForceMove {
             'Response not signed by authorized mover'
         );
 
-        _requireValidTransition(
+        _requireValidTransitionChain(
             fixedPart.participants.length,
             isFinalAB,
             variablePartAB,
@@ -403,7 +403,7 @@ contract ForceMove {
         Signature[] memory sigs,
         uint8[] memory whoSignedWhat // whoSignedWhat[i] is the index of the state in stateHashes that was signed by participants[i]
     ) internal pure returns (bytes32) {
-        bytes32[] memory stateHashes = _requireValidTransition(
+        bytes32[] memory stateHashes = _requireValidTransitionChain(
             largestTurnNum,
             variableParts,
             isFinalCount,
@@ -425,7 +425,7 @@ contract ForceMove {
         return stateHashes[stateHashes.length - 1];
     }
 
-    function _requireValidTransition(
+    function _requireValidTransitionChain(
         // returns stateHashes array if valid
         // else, reverts
         uint256 largestTurnNum,
