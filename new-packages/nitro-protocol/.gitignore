@@ -10,6 +10,7 @@ shippable
 node_modules
 
 # Generated files
+website/i18n
 config/development/contracts.json
 config/development/*.sol.js
 config/test/contracts.json
