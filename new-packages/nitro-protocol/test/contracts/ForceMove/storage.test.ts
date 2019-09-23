@@ -52,7 +52,6 @@ describe('_requireChannelOpen', () => {
     await ForceMove.requireChannelOpen(channelId);
   });
 
-  const challengeDuration = 0x1000;
   it.each`
     result       | turnNumRecord | finalizesAt
     ${'reverts'} | ${42}         | ${1e12}
@@ -64,11 +63,6 @@ describe('_requireChannelOpen', () => {
   `(
     '$result with turnNumRecord: $turnNumRecord, finalizesAt: $finalizesAt',
     async ({turnNumRecord, finalizesAt, result}) => {
-      // compute finalizedAt
-      const blockNumber = await provider.getBlockNumber();
-      const blockTimestamp = (await provider.getBlock(blockNumber)).timestamp;
-      finalizesAt = finalizesAt || blockTimestamp + challengeDuration;
-
       const blockchainStorage = {turnNumRecord, finalizesAt, ...zeroData};
 
       await (await ForceMove.setChannelStorage(channelId, blockchainStorage)).wait();
