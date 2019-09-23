@@ -1,6 +1,8 @@
 import { Commitment as C, CommitmentType as CT } from 'fmg-core';
 import { validCommitmentSignature, signCommitment as signCommitmentUtil } from '../signing-utils';
 import { channelID } from 'fmg-core/lib/channel';
+import { convertCommitmentToSignedState } from '../../utils/nitro-converter';
+import { SignedState } from 'nitro-protocol';
 
 export type Commitment = C;
 export const CommitmentType = CT;
@@ -9,6 +11,8 @@ export type CommitmentType = CT;
 export interface SignedCommitment {
   commitment: Commitment;
   signature: string;
+  // TODO: Eventually SignedCommitment will be replaced with SignedState
+  signedState: SignedState;
 }
 
 // -------
@@ -17,7 +21,8 @@ export interface SignedCommitment {
 
 // temporary name while we remove the old signCommitment method
 export function signCommitment2(commitment: Commitment, privateKey: string): SignedCommitment {
-  return { commitment, signature: signCommitmentUtil(commitment, privateKey) };
+  const signedState = convertCommitmentToSignedState(commitment, privateKey);
+  return { commitment, signature: signCommitmentUtil(commitment, privateKey), signedState };
 }
 
 export function hasValidSignature(signedCommitment: SignedCommitment): boolean {

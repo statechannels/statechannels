@@ -84,13 +84,11 @@ export async function createChallenge(
     commitmentCount: 0,
   };
 
-  const fromSig = signCommitment(fromCommitment, participantB.privateKey);
-  const toSig = signCommitment(toCommitment, participantA.privateKey);
   const challengeTransaction = createForceMoveTransaction(
     fromCommitment,
     toCommitment,
-    fromSig,
-    toSig,
+    participantA.privateKey,
+    participantB.privateKey,
   );
   const transactionReceipt = await sendTransaction(provider, challengeTransaction);
   await transactionReceipt.wait();

@@ -9,6 +9,7 @@ import {
   ConcludeInstigated,
   commitmentsReceived,
 } from './actions';
+import { convertCommitmentToSignedState } from '../utils/nitro-converter';
 export * from './actions';
 
 // These protocols are precisely those that run at the top-level
@@ -58,11 +59,16 @@ export const sendCommitmentReceived = (
   processId: string,
   commitment: Commitment,
   signature: string,
+  privateKey: string,
   protocolLocator: ProtocolLocator = [],
 ) => {
   const payload = commitmentReceived({
     processId,
-    signedCommitment: { commitment, signature },
+    signedCommitment: {
+      commitment,
+      signature,
+      signedState: convertCommitmentToSignedState(commitment, privateKey),
+    },
     protocolLocator,
   });
   return messageRelayRequested(to, payload);

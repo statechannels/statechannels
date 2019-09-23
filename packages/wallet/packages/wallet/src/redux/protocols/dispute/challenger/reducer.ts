@@ -13,7 +13,7 @@ import {
   successClosed,
 } from './states';
 import { unreachable } from '../../../../utils/reducer-utils';
-import { SharedData, registerChannelToMonitor, checkAndStore } from '../../../state';
+import { SharedData, registerChannelToMonitor, checkAndStore, getPrivatekey } from '../../../state';
 import * as actions from './actions';
 import { TransactionAction } from '../../transaction-submission/actions';
 import { isTransactionAction, ProtocolAction } from '../../../actions';
@@ -33,6 +33,8 @@ import {
   sendConcludeSuccess,
 } from '../../reducer-helpers';
 import { Commitment, SignedCommitment } from '../../../../domain';
+import { convertCommitmentToSignedState } from '../../../../utils/nitro-converter';
+import { channelID } from 'fmg-core';
 
 const CHALLENGE_TIMEOUT = 5 * 60000;
 
@@ -250,10 +252,12 @@ function challengeResponseReceived(
 
   state = acknowledgeResponse(state);
   sharedData = sendChallengeCommitmentReceived(sharedData, challengeCommitment);
-
+  const channelId = channelID(challengeCommitment.channel);
+  const privateKey = getPrivatekey(sharedData, channelId);
   const signedCommitment: SignedCommitment = {
     commitment: challengeCommitment,
     signature: challengeSignature,
+    signedState: convertCommitmentToSignedState(challengeCommitment, privateKey),
   };
   const checkResult = checkAndStore(sharedData, signedCommitment);
   if (checkResult.isSuccess) {

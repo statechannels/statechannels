@@ -2,6 +2,7 @@ import * as walletStates from '../state';
 import * as selectors from '../selectors';
 import { ChannelState } from '../channel-store';
 import { Commitment } from '../../domain';
+import { SignedState } from 'nitro-protocol';
 
 describe('getAdjudicatorWatcherProcessesForChannel', () => {
   const createWatcherState = (
@@ -72,8 +73,8 @@ describe('getNextNonce', () => {
     address: 'address',
     privateKey: 'privateKey',
     commitments: [
-      { commitment: {} as Commitment, signature: 'signature' },
-      { commitment: {} as Commitment, signature: 'signature' },
+      { commitment: {} as Commitment, signature: 'signature', signedState: {} as SignedState },
+      { commitment: {} as Commitment, signature: 'signature', signedState: {} as SignedState },
     ],
     turnNum: 0,
   };

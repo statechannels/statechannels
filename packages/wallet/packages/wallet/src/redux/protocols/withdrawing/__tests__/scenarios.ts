@@ -8,6 +8,7 @@ import { Wallet } from 'ethers';
 import { EMPTY_SHARED_DATA, SharedData } from '../../../state';
 import * as web3Utils from 'web3-utils';
 import * as testScenarios from '../../../../domain/commitments/__tests__';
+import { convertCommitmentToSignedState } from '../../../../utils/nitro-converter';
 
 // ---------
 // Test data
@@ -38,8 +39,16 @@ const channelStatus: ChannelState = {
   turnNum: concludeCommitment2.turnNum,
   funded: true,
   commitments: [
-    { commitment: concludeCommitment1, signature: '0x0' },
-    { commitment: concludeCommitment2, signature: '0x0' },
+    {
+      commitment: concludeCommitment1,
+      signature: '0x0',
+      signedState: convertCommitmentToSignedState(concludeCommitment1, privateKey),
+    },
+    {
+      commitment: concludeCommitment2,
+      signature: '0x0',
+      signedState: convertCommitmentToSignedState(concludeCommitment2, privateKey),
+    },
   ],
 };
 
@@ -50,8 +59,16 @@ const channelStore: ChannelStore = {
 const notClosedChannelStatus: ChannelState = {
   ...channelStatus,
   commitments: [
-    { commitment: gameCommitment1, signature: '0x0' },
-    { commitment: gameCommitment2, signature: '0x0' },
+    {
+      commitment: gameCommitment1,
+      signature: '0x0',
+      signedState: convertCommitmentToSignedState(gameCommitment1, privateKey),
+    },
+    {
+      commitment: gameCommitment2,
+      signature: '0x0',
+      signedState: convertCommitmentToSignedState(gameCommitment2, privateKey),
+    },
   ],
   turnNum: gameCommitment2.turnNum,
 };

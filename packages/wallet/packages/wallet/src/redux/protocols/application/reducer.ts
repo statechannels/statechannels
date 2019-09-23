@@ -19,6 +19,7 @@ import { Commitment } from '../../../domain';
 import { ProtocolAction } from '../../actions';
 import * as dispute from '../dispute';
 import { disputeReducer } from '../dispute/reducer';
+import { convertCommitmentToSignedState } from '../../../utils/nitro-converter';
 
 // TODO: Right now we're using a fixed application ID
 // since we're not too concerned with handling multiple running app channels.
@@ -192,9 +193,23 @@ const validateAndUpdate = (
   sharedData: SharedData,
 ) => {
   if (state.type === 'Application.WaitForFirstCommitment') {
-    return checkAndInitialize(sharedData.channelStore, { commitment, signature }, state.privateKey);
+    return checkAndInitialize(
+      sharedData.channelStore,
+      {
+        commitment,
+        signature,
+        signedState: convertCommitmentToSignedState(commitment, state.privateKey),
+      },
+      state.privateKey,
+    );
+  } else if (state.type === 'Application.Ongoing') {
+    return checkAndStore(sharedData.channelStore, {
+      commitment,
+      signature,
+      signedState: convertCommitmentToSignedState(commitment, state.privateKey),
+    });
   } else {
-    return checkAndStore(sharedData.channelStore, { commitment, signature });
+    return { isSuccess: false, store: sharedData.channelStore };
   }
 };
 

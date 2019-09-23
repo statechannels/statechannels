@@ -2,8 +2,10 @@ import {
   getAdjudicatorContractAddress,
   getConsensusContractAddress,
   getNetworkId,
+  getEThAssetHolderAddress,
 } from './utils/contract-utils';
 
+export const ETH_ASSET_HOLDER_ADDRESS = getEThAssetHolderAddress();
 export const ADJUDICATOR_ADDRESS = getAdjudicatorContractAddress();
 export const CONSENSUS_LIBRARY_ADDRESS = getConsensusContractAddress();
 export const NETWORK_ID = getNetworkId();

@@ -2,6 +2,7 @@ import { ethers } from 'ethers';
 
 import NitroAdjudicatorArtifact from '../../build/contracts/NitroAdjudicator.json';
 import ConsensusAppArtifact from '../../build/contracts/ConsensusApp.json';
+import EthAssetHolderArtifact from '../../build/contracts/ETHAssetHolder.json';
 import { asEthersObject, Commitment } from 'fmg-core';
 
 export async function getProvider(): Promise<ethers.providers.Web3Provider> {
@@ -18,7 +19,9 @@ export async function getAdjudicatorContract(provider) {
 export function getAdjudicatorInterface(): ethers.utils.Interface {
   return new ethers.utils.Interface(NitroAdjudicatorArtifact.abi);
 }
-
+export function getEThAssetHolderAddress(): string {
+  return EthAssetHolderArtifact.networks[getNetworkId()].address;
+}
 export function getAdjudicatorContractAddress(): string {
   return NitroAdjudicatorArtifact.networks[getNetworkId()].address;
 }

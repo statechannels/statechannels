@@ -12,6 +12,8 @@ import {
 import { pushCommitment, ChannelState, initializeChannel } from './channel-state/states';
 import { validTransition } from './channel-state';
 import * as channelActions from './actions';
+import { convertCommitmentToSignedState } from '../../utils/nitro-converter';
+import { channelID } from 'fmg-core';
 
 export const channelStoreReducer: ReducerWithSideEffects<ChannelStore> = (
   state: ChannelStore,
@@ -20,7 +22,13 @@ export const channelStoreReducer: ReducerWithSideEffects<ChannelStore> = (
   switch (action.type) {
     case channelActions.OPPONENT_COMMITMENT_RECEIVED:
       const { commitment, signature } = action;
-      const checkResult = checkAndStore(state, { commitment, signature });
+      const channelId = channelID(commitment.channel);
+      const { privateKey } = state[channelId];
+      const checkResult = checkAndStore(state, {
+        commitment,
+        signature,
+        signedState: convertCommitmentToSignedState(commitment, privateKey),
+      });
       // TODO Handle failure cases
       if (checkResult.isSuccess) {
         return { state: checkResult.store };

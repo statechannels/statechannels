@@ -8,6 +8,7 @@ import { ChannelState, ChannelStore } from '../../../../channel-store';
 import * as transactionActions from '../../../transaction-submission/actions';
 import { challengeExpiredEvent } from '../../../../actions';
 import * as testScenarios from '../../../../../domain/commitments/__tests__';
+import { convertCommitmentToSignedState } from '../../../../../utils/nitro-converter';
 // ---------
 // Test data
 // ---------
@@ -34,8 +35,16 @@ const channelStatus: ChannelState = {
   channelNonce,
   funded: true,
   commitments: [
-    { commitment: gameCommitment1, signature: '0x0' },
-    { commitment: gameCommitment2, signature: '0x0' },
+    {
+      commitment: gameCommitment1,
+      signature: '0x0',
+      signedState: convertCommitmentToSignedState(gameCommitment1, privateKey),
+    },
+    {
+      commitment: gameCommitment2,
+      signature: '0x0',
+      signedState: convertCommitmentToSignedState(gameCommitment2, privateKey),
+    },
   ],
   turnNum: gameCommitment2.turnNum,
 };
@@ -47,8 +56,16 @@ const channelStore: ChannelStore = {
 const refuteChannelStatus: ChannelState = {
   ...channelStatus,
   commitments: [
-    { commitment: gameCommitment2, signature: '0x0' },
-    { commitment: gameCommitment3, signature: '0x0' },
+    {
+      commitment: gameCommitment2,
+      signature: '0x0',
+      signedState: convertCommitmentToSignedState(gameCommitment2, privateKey),
+    },
+    {
+      commitment: gameCommitment3,
+      signature: '0x0',
+      signedState: convertCommitmentToSignedState(gameCommitment3, privateKey),
+    },
   ],
   turnNum: gameCommitment2.turnNum,
 };
