@@ -16,7 +16,8 @@ import { SignedCommitment, updateLedgerChannel } from '../../wallet/services';
 import { asConsensusCommitment } from '../../wallet/services/ledger-commitment';
 
 import { MessageRelayRequested } from 'magmo-wallet-client';
-import { HUB_ADDRESS } from '../../constants';
+import { SignedState } from 'nitro-protocol';
+import { HUB_ADDRESS, HUB_SIGNER_PRIVATE_KEY } from '../../constants';
 import { updateRPSChannel } from '../services/rpsChannelManager';
 
 export async function handleOngoingProcessAction(
@@ -70,6 +71,7 @@ async function handleCommitmentReceived(action: CommitmentReceived) {
           processId,
           ourCommitment,
           (ourSignature as unknown) as string,
+          HUB_SIGNER_PRIVATE_KEY,
         ),
       ];
     }
@@ -85,6 +87,7 @@ async function handleCommitmentReceived(action: CommitmentReceived) {
         processId,
         commitment,
         (signature as unknown) as string,
+        HUB_SIGNER_PRIVATE_KEY,
       ),
     ];
   }
@@ -125,6 +128,7 @@ async function handleCommitmentsReceived(action: CommitmentsReceived) {
           processId,
           ourCommitment,
           (ourSignature as unknown) as string,
+          HUB_SIGNER_PRIVATE_KEY,
         ),
       ];
     }
@@ -144,7 +148,14 @@ async function handleCommitmentsReceived(action: CommitmentsReceived) {
         communication.sendCommitmentsReceived(
           p,
           processId,
-          [...incomingCommitments, { commitment, signature: (signature as unknown) as string }],
+          [
+            ...incomingCommitments,
+            {
+              commitment,
+              signature: (signature as unknown) as string,
+              signedState: {} as SignedState, // TODO: Actually set this
+            },
+          ],
           action.protocolLocator,
         ),
       );
