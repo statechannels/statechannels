@@ -54,7 +54,7 @@ const acceptsWhenOpenIf =
 const accepts1 = acceptsWhenOpenIf + 'passed n states, and the slot is empty';
 const accepts2 = acceptsWhenOpenIf + 'passed one state, and the slot is empty';
 const accepts3 = acceptsWhenOpenIf + 'the largestTurnNum is large enough';
-const accepts6 = acceptsWhenOpenIf + 'the largest turn number is not large enough';
+const accepts6 = acceptsWhenOpenIf + 'despite the largest turn number being less than turnNumRecord';
 const accepts7 = acceptsWhenOpenIf + 'the largest turn number is not large enough';
 
 const acceptsWhenChallengeOngoingIf =

@@ -25,7 +25,7 @@ Signature:
 
 Check:
 
-- `largestTurnNum` is greater than or equal to turnNumRecord
+- `largestTurnNum` is greater than or equal to the stored value of `turnNumRecord`
 - Channel is not finalized
 - States and signatures support the challenge state (the maximal state)
 - `challengerSig` proves that some participant signed the challenge state.

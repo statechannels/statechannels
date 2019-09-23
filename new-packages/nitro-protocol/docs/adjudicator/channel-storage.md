@@ -70,7 +70,7 @@ The value of `channelStorageHashes[someChannelId]` is obtained by:
 - setting the next 48 bits to `finalizesAt`
 - setting the last 160 bits to the `fingerprint`
 
-The `fingerprint` is `keccak(abi.encode(channelStorage))`, where `channelStorage` is a struct of type
+The `fingerprint` is the 160 least significant bits of `keccak256(abi.encode(channelStorage))`, where `channelStorage` is a struct of type
 
 ```solidity
     struct ChannelStorage {

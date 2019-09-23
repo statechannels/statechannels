@@ -132,7 +132,6 @@ describe('forceMove', () => {
       const fixedPart = getFixedPart(states[0]);
 
       // sign the states
-      // sign the states
       const signatures = await signStates(states, wallets, whoSignedWhat);
       const challengeState: SignedState = {
         state: states[states.length - 1],
