@@ -9,6 +9,9 @@
   "directories": {
     "test": "test"
   },
+  "engines": {
+    "node": "10.16.3"
+  },
   "repository": {
     "type": "git",
     "url": "git@github.com:statechannels/nitro-protocol.git"
