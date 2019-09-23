@@ -1,5 +1,5 @@
 // Generic messages
-export const CHANNEL_FINALIZED = 'Channel Finalized.';
+export const CHANNEL_FINALIZED = 'Channel finalized.';
 export const NO_ONGOING_CHALLENGE = 'No ongoing challenge.';
 export const TURN_NUM_RECORD_NOT_INCREASED = 'turnNumRecord not increased.';
 export const TURN_NUM_RECORD_DECREASED = 'turnNumRecord decreased.';
