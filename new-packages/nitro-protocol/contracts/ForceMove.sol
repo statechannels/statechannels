@@ -164,7 +164,7 @@ contract ForceMove {
             'Response not signed by authorized mover'
         );
 
-        _requireValidTransitionChain(
+        _requireValidTransition(
             fixedPart.participants.length,
             isFinalAB,
             variablePartAB,
