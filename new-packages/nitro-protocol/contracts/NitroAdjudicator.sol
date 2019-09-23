@@ -19,22 +19,19 @@ contract NitroAdjudicator is ForceMove {
         bytes memory outcomeBytes
     ) public {
         // requirements
-        require(finalizesAt < now, 'Outcome is not final');
+        _requireChannelFinalized(channelId);
 
         bytes32 outcomeHash = keccak256(abi.encode(outcomeBytes));
 
-        require(
-            _matchesHash(
-                ChannelStorage(
-                    turnNumRecord,
-                    finalizesAt,
-                    stateHash,
-                    challengerAddress,
-                    outcomeHash
-                ),
-                channelStorageHashes[channelId]
+        _requireMatchingStorage(
+            ChannelStorage(
+                turnNumRecord,
+                finalizesAt,
+                stateHash,
+                challengerAddress,
+                outcomeHash
             ),
-            'Submitted data does not match storage'
+            channelId
         );
 
         Outcome.OutcomeItem[] memory outcome = abi.decode(outcomeBytes, (Outcome.OutcomeItem[]));

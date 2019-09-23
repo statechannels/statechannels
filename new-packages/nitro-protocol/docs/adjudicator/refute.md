@@ -13,15 +13,11 @@ Signature:
 
 ```
 function refute(
-    uint256 turnNumRecord,
     uint256 refutationStateTurnNum,
-    uint256 finalizesAt,
     address challenger,
     bool[2] memory isFinalAB,
     FixedPart memory fixedPart,
-    ForceMoveApp.VariablePart[2] memory variablePartAB,
-    // variablePartAB[0] = challengeVariablePart
-    // variablePartAB[1] = refutationVariablePart
+    ForceMoveApp.VariablePart[2] memory variablePartAB, // [challengeState, refutationState]
     Signature memory refutationStateSig
 )
 ```
