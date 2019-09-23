@@ -66,9 +66,9 @@ ForceMove requires certain data to be available on-chain.
 
 The value of `channelStorageHashes[someChannelId]` is obtained by:
 
-- setting the first 48 bits to the `turnNumRecord`
-- setting the next 48 bits to `finalizesAt`
-- setting the last 160 bits to the `fingerprint`
+- setting the most significant 48 bits to the `turnNumRecord`
+- setting the next most significant 48 bits to `finalizesAt`
+- setting the next most significant 160 bits to the `fingerprint`
 
 The `fingerprint` is the 160 least significant bits of `keccak256(abi.encode(channelStorage))`, where `channelStorage` is a struct of type
 
