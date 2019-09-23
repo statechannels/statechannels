@@ -2930,14 +2930,6 @@
     "@types/connect" "*"
     "@types/node" "*"
 
-"@types/bytebuffer@^5.0.40":
-  version "5.0.40"
-  resolved "https://registry.yarnpkg.com/@types/bytebuffer/-/bytebuffer-5.0.40.tgz#d6faac40dcfb09cd856cdc4c01d3690ba536d3ee"
-  integrity sha512-h48dyzZrPMz25K6Q4+NCwWaxwXany2FhQg/ErOcdZS1ZpsaDnDMZg8JYLMTGz7uvXKrcKGJUZJlZObyfgdaN9g==
-  dependencies:
-    "@types/long" "*"
-    "@types/node" "*"
-
 "@types/config@^0.0.34":
   version "0.0.34"
   resolved "https://registry.yarnpkg.com/@types/config/-/config-0.0.34.tgz#123f91bdb5afdd702294b9de9ca04d9ea11137b0"
@@ -3100,7 +3092,7 @@
   resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.14.129.tgz#9aaca391db126802482655c48dd79a814488202f"
   integrity sha512-oYaV0eSlnOacOr7i4X1FFdH8ttSlb57gu3I9MuStIv2CYkISEY84dNHYsC3bF6sNH7qYcu1BtVrCtQ8Q4KPTfQ==
 
-"@types/long@*", "@types/long@^4.0.0":
+"@types/long@^4.0.0":
   version "4.0.0"
   resolved "https://registry.yarnpkg.com/@types/long/-/long-4.0.0.tgz#719551d2352d301ac8b81db732acb6bdc28dbdef"
   integrity sha512-1w52Nyx4Gq47uuu0EVcsHBxZFJgurQ+rTKS3qMHxR1GY2T8c2AJYd6vZoZ9q1rupaDjU0yT+Jc2XTyXkjeMA+Q==
@@ -10294,18 +10286,6 @@ grpc@1.20.3:
     node-pre-gyp "^0.13.0"
     protobufjs "^5.0.3"
 
-grpc@^1.16.1:
-  version "1.23.3"
-  resolved "https://registry.yarnpkg.com/grpc/-/grpc-1.23.3.tgz#30a013ca2cd7e350b0ffc0034be5380ddef3ae7f"
-  integrity sha512-7vdzxPw9s5UYch4aUn4hyM5tMaouaxUUkwkgJlwbR4AXMxiYZJOv19N2ps2eKiuUbJovo5fnGF9hg/X91gWYjw==
-  dependencies:
-    "@types/bytebuffer" "^5.0.40"
-    lodash.camelcase "^4.3.0"
-    lodash.clone "^4.5.0"
-    nan "^2.13.2"
-    node-pre-gyp "^0.13.0"
-    protobufjs "^5.0.3"
-
 gzip-size@5.0.0:
   version "5.0.0"
   resolved "https://registry.yarnpkg.com/gzip-size/-/gzip-size-5.0.0.tgz#a55ecd99222f4c48fd8c01c625ce3b349d0a0e80"
@@ -14203,9 +14183,9 @@ nice-try@^1.0.4:
   resolved "https://registry.yarnpkg.com/nice-try/-/nice-try-1.0.5.tgz#a3378a7696ce7d223e88fc9b764bd7ef1089e366"
   integrity sha512-1nh45deeb5olNY7eX82BkPO7SSxR5SSYJiPTrTdFUVYwAl8CKMA5N9PjTYkHiRjisVcxcQ1HXdLhx2qxxJzLNQ==
 
-"nitro-protocol@https://github.com/statechannels/nitro-protocol#ag-include-contracts":
+"nitro-protocol@https://github.com/statechannels/nitro-protocol.git#ag-include-contracts":
   version "0.0.1"
-  resolved "https://github.com/statechannels/nitro-protocol#436f7bb68ad6f391bf53873fd5e7f42eec69b2b6"
+  resolved "https://github.com/statechannels/nitro-protocol.git#436f7bb68ad6f391bf53873fd5e7f42eec69b2b6"
   dependencies:
     "@openzeppelin/contracts" "^2.3.0"
     ethers "^4.0.26"
