@@ -3,7 +3,7 @@ version: 2.1
 defaults: &defaults
   working_directory: /home/circleci/project
   docker:
-    - image: circleci/node:10.16.3
+    - image: counterfactual/statechannels:latest
 
 save_code: &save_code
   save_cache:
@@ -34,12 +34,11 @@ jobs:
       - <<: *save_code
 
       - <<: *restore_dep
-      - run: npm i -g yarn@1.17.3 # because docker image uses 1.13.0
       - run:
           name: "yarn --frozen-lockfile"
           command: yarn --frozen-lockfile
 
-      - run: yarn build
+      - run: yarn build:ci
 
       - <<: *save_dep
 
@@ -55,8 +54,6 @@ jobs:
       - <<: *restore_code
       - checkout
       - <<: *restore_dep
-
-      - run: sudo npm i -g yarn@1.17.3 # because docker image uses 1.13.0
 
       - run: yarn --frozen-lockfile # symlink packages' node_modules
 
@@ -77,8 +74,6 @@ jobs:
       - attach_workspace:
           at: /home/circleci/project
 
-      - run: npm i -g yarn@1.17.3 # because docker image uses 1.13.0
-
       - run: yarn lint
 
   ensure-updated-lockfiles:
@@ -93,8 +88,6 @@ jobs:
 
       - run: apt-get install -y jq # using this to mutate package.json
 
-      - run: npm i -g yarn@1.17.3 # because docker image uses 1.13.0
-
       - run:
           name: Check root yarn.lock
           command: yarn --frozen-lockfile
@@ -107,7 +100,6 @@ jobs:
       - <<: *restore_dep
       - attach_workspace:
           at: /home/circleci/project
-      - run: npm i -g yarn@1.17.3 # because docker image uses 1.13.0
       - run: yarn --frozen-lockfile # symlink packages' node_modules
       - run:
           name: Add NPM_TOKEN auth
@@ -117,7 +109,7 @@ jobs:
           command: yarn run publish
 
 workflows:
-  counterfactual:
+  statechannels:
     jobs:
       - build
 
