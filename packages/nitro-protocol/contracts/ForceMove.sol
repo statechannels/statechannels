@@ -202,16 +202,16 @@ contract ForceMove {
 
         require(
             keccak256(
-                    abi.encode(
-                        ChannelStorage(
-                            turnNumRecord,
-                            finalizesAt,
-                            challengeStateHash,
-                            challenger,
-                            challengeOutcomeHash
-                        )
+                abi.encode(
+                    ChannelStorage(
+                        turnNumRecord,
+                        finalizesAt,
+                        challengeStateHash,
+                        challenger,
+                        challengeOutcomeHash
                     )
-                ) ==
+                )
+            ) ==
                 channelStorageHashes[channelId],
             'Challenge State does not match stored version'
         );
@@ -302,27 +302,27 @@ contract ForceMove {
 
         require(
             keccak256(
-                    abi.encode(
-                        ChannelStorage(
-                            turnNumRecord,
-                            finalizesAt,
-                            challengeStateHash,
-                            challenger, // this is a check that the asserted challenger is in fact the challenger
-                            challengeOutcomeHash
-                        )
+                abi.encode(
+                    ChannelStorage(
+                        turnNumRecord,
+                        finalizesAt,
+                        challengeStateHash,
+                        challenger, // this is a check that the asserted challenger is in fact the challenger
+                        challengeOutcomeHash
                     )
-                ) ==
+                )
+            ) ==
                 channelStorageHashes[channelId],
             'Challenge State does not match stored version'
         );
 
         require(
             _recoverSigner(
-                    refutationStateHash,
-                    refutationStateSig.v,
-                    refutationStateSig.r,
-                    refutationStateSig.s
-                ) ==
+                refutationStateHash,
+                refutationStateSig.v,
+                refutationStateSig.r,
+                refutationStateSig.s
+            ) ==
                 challenger,
             'Refutation state not signed by challenger'
         );
@@ -396,10 +396,8 @@ contract ForceMove {
             // OR there is, in which case we must check the channel is still open and that the committed turnNumRecord is correct
             require(
                 keccak256(
-                        abi.encode(
-                            ChannelStorage(turnNumRecord, 0, bytes32(0), address(0), bytes32(0))
-                        )
-                    ) ==
+                    abi.encode(ChannelStorage(turnNumRecord, 0, bytes32(0), address(0), bytes32(0)))
+                ) ==
                     channelStorageHashes[channelId],
                 'Channel is not open or turnNum does not match'
             );
@@ -442,16 +440,16 @@ contract ForceMove {
 
         require(
             keccak256(
-                    abi.encode(
-                        ChannelStorage(
-                            turnNumRecord,
-                            channelStorageLite.finalizesAt,
-                            channelStorageLite.stateHash, // challengeStateHash
-                            channelStorageLite.challengerAddress,
-                            channelStorageLite.outcomeHash
-                        )
+                abi.encode(
+                    ChannelStorage(
+                        turnNumRecord,
+                        channelStorageLite.finalizesAt,
+                        channelStorageLite.stateHash, // challengeStateHash
+                        channelStorageLite.challengerAddress,
+                        channelStorageLite.outcomeHash
                     )
-                ) ==
+                )
+            ) ==
                 channelStorageHashes[channelId],
             'Challenge State does not match stored version'
         );
