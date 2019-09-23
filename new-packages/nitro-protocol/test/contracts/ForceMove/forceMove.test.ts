@@ -23,7 +23,8 @@ import {
   TURN_NUM_RECORD_DECREASED,
 } from '../../../src/contract/transaction-creators/revert-reasons';
 import {signChallengeMessage} from '../../../src/signatures';
-import {SignedState} from '../../../src/index.js';
+import {SignedState} from '../../../src/index';
+import {COUNTING_APP_INVALID_TRANSITION} from '../../revert-reasons';
 const provider = new ethers.providers.JsonRpcProvider(
   `http://localhost:${process.env.DEV_GANACHE_PORT}`,
 );
@@ -103,7 +104,7 @@ describe('forceMove', () => {
     ${accepts6} | ${challengeAtFive}        | ${threeStates} | ${undefined}       | ${undefined}
     ${reverts1} | ${openAtTwenty}           | ${oneState}    | ${undefined}       | ${TURN_NUM_RECORD_DECREASED}
     ${reverts2} | ${empty}                  | ${oneState}    | ${wrongSig}        | ${CHALLENGER_NON_PARTICIPANT}
-    ${reverts3} | ${empty}                  | ${invalid}     | ${undefined}       | ${'CountingApp: Counter must be incremented'}
+    ${reverts3} | ${empty}                  | ${invalid}     | ${undefined}       | ${COUNTING_APP_INVALID_TRANSITION}
     ${reverts4} | ${challengeAtTwenty}      | ${oneState}    | ${undefined}       | ${TURN_NUM_RECORD_DECREASED}
     ${reverts5} | ${finalizedAtFive}        | ${oneState}    | ${undefined}       | ${CHANNEL_FINALIZED}
   `(
