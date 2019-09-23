@@ -8,7 +8,7 @@ import { bigNumberify } from 'ethers/utils';
 import { Outcome, AllocationItem } from 'nitro-protocol/lib/src/contract/outcome';
 import { Channel as NitroChannel } from 'nitro-protocol/lib/src/contract/channel';
 import { signState } from 'nitro-protocol/lib/src/signatures';
-import { asAddress } from '../communication/__tests__/commitments';
+
 const CHALLENGE_DURATION = 0x12c; // 5 minutes
 
 export function getChannelStorage(latestCommitment: Commitment): ChannelStorage {
@@ -64,10 +64,10 @@ function convertToNitroChannel(channel: Channel): NitroChannel {
 }
 
 function convertAddressToBytes32(address: string): string {
-  const normalizedAddress = bigNumberify(asAddress).toHexString();
-  // if (normalizedAddress.length != 22) {
-  //   throw new Error('Address value is not right length.');
-  // }
+  const normalizedAddress = bigNumberify(address).toHexString();
+  if (normalizedAddress.length !== 22) {
+    throw new Error('Address value is not right length.');
+  }
   // We pad to 66 = (32*2) + 2('0x')
   return normalizedAddress.padEnd(66, '0');
 }
