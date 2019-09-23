@@ -26,7 +26,7 @@ $ npx start-ganache
 It also exports functions that can be executed, eg
 
 ```
-$ node -e "require('magmo-devtools').startGanache()"
+$ node -e "require('@statechannels/devtools').startGanache()"
 ```
 
 ## Dependencies
