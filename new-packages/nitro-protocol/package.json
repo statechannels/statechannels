@@ -5,8 +5,7 @@
   "main": "lib/src/index.js",
   "files": [
     "lib/*",
-    "contracts/*",
-    "build/*"
+    "contracts/*"
   ],
   "directories": {
     "test": "test"
