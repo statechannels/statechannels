@@ -4,7 +4,6 @@ import {ethers} from 'ethers';
 import {SignedState} from '.';
 import {getChannelId} from './contract/channel';
 import {hashChallengeMessage} from './contract/challenge';
-import {toHex} from './hex-utils';
 import Web3EthAccounts from 'web3-eth-accounts';
 
 export function getStateSignerAddress(signedState: SignedState): string {
@@ -46,9 +45,8 @@ export function signChallengeMessage(signedStates: SignedState[], privateKey: st
   if (signedStates[0].state.channel.participants.indexOf(wallet.address) < 0) {
     throw new Error("The state must be signed with a participant's private key");
   }
-  const largestTurnNum = toHex(Math.max(...signedStates.map(s => s.state.turnNum)));
-  const channelId = getChannelId(signedStates[0].state.channel);
-  const challengeHash = hashChallengeMessage({largestTurnNum, channelId});
+  const challengeState = signedStates[signedStates.length - 1].state;
+  const challengeHash = hashChallengeMessage(challengeState);
 
   return signData(challengeHash, privateKey);
 }
