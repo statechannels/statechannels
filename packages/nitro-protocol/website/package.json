@@ -9,10 +9,10 @@
     "rename-version": "docusaurus-rename-version"
   },
   "devDependencies": {
-    "docusaurus": "^1.11.1"
+    "docusaurus": "1.12.0"
   },
   "dependencies": {
     "highlightjs-solidity": "https://github.com/highlightjs/highlightjs-solidity",
-    "remarkable-admonitions": "^0.2.1"
+    "remarkable-admonitions": "0.2.1"
   }
 }

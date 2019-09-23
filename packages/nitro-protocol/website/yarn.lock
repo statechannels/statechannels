@@ -2103,7 +2103,7 @@ dir-glob@2.0.0:
     arrify "^1.0.1"
     path-type "^3.0.0"
 
-docusaurus@^1.11.1:
+docusaurus@1.12.0:
   version "1.12.0"
   resolved "https://registry.yarnpkg.com/docusaurus/-/docusaurus-1.12.0.tgz#c2b626b95e8b8e5a39b597801c260746ca32fb16"
   integrity sha512-C8HUDctWn72JOxqwnP6/+fUUQFADIjNw9Tvgw9CBlXLVN6CUhuTrk3YShM5EjZILjIrcmReoHcy6lCDkCa2X8Q==
@@ -5506,7 +5506,7 @@ regjsparser@^0.6.0:
   dependencies:
     jsesc "~0.5.0"
 
-remarkable-admonitions@^0.2.1:
+remarkable-admonitions@0.2.1:
   version "0.2.1"
   resolved "https://registry.yarnpkg.com/remarkable-admonitions/-/remarkable-admonitions-0.2.1.tgz#425ceb34e01a1f169048d9687a5c8e16675da26c"
   integrity sha512-Uqeye087AIuo+BMUwteuG7e3GhoPqeT8aFjD8DaIqjUk2rn+7T7A6xank7fVlU+GHgbjT49DDC13nHLWwdBxRw==
