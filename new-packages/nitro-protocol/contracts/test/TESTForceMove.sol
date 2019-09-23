@@ -32,12 +32,8 @@ contract TESTForceMove is ForceMove {
         return _acceptableWhoSignedWhat(whoSignedWhat, largestTurnNum, nParticipants, nStates);
     }
 
-    function recoverSigner(bytes32 _d, uint8 _v, bytes32 _r, bytes32 _s)
-        public
-        pure
-        returns (address)
-    {
-        return _recoverSigner(_d, _v, _r, _s);
+    function recoverSigner(bytes32 _d, Signature memory sig) public pure returns (address) {
+        return _recoverSigner(_d, sig);
     }
 
     // public setter for channelStorage
@@ -52,7 +48,7 @@ contract TESTForceMove is ForceMove {
             );
         }
 
-        channelStorageHashes[channelId] = getHash(channelStorage);
+        channelStorageHashes[channelId] = hashChannelStorage(channelStorage);
     }
 
     // public setter for channelStorage
@@ -61,16 +57,20 @@ contract TESTForceMove is ForceMove {
         channelStorageHashes[channelId] = h;
     }
 
-    function getHash(ChannelStorage memory channelStorage) public pure returns (bytes32 newHash) {
-        return _getHash(channelStorage);
+    function hashChannelStorage(ChannelStorage memory channelStorage)
+        public
+        pure
+        returns (bytes32 newHash)
+    {
+        return _hashChannelStorage(channelStorage);
     }
 
     function matchesHash(ChannelStorage memory cs, bytes32 h) public pure returns (bool) {
         return _matchesHash(cs, h);
     }
 
-    function requireChannelOpen(uint48 turnNumRecord, bytes32 channelId) public view {
-        _requireChannelOpen(turnNumRecord, channelId);
+    function requireChannelOpen(bytes32 channelId) public view {
+        _requireChannelOpen(channelId);
     }
 
 }

@@ -1,15 +1,9 @@
-import {Bytes32, Uint256} from './types';
+import {Bytes32} from './types';
 import {keccak256, defaultAbiCoder} from 'ethers/utils';
+import {State, hashState} from './state';
 
-export function hashChallengeMessage(challengeMessage: {
-  largestTurnNum: Uint256;
-  channelId: Bytes32;
-}): Bytes32 {
-  const {largestTurnNum, channelId} = challengeMessage;
+export function hashChallengeMessage(challengeState: State): Bytes32 {
   return keccak256(
-    defaultAbiCoder.encode(
-      ['uint256', 'uint256', 'string'],
-      [largestTurnNum, channelId, 'forceMove'],
-    ),
+    defaultAbiCoder.encode(['bytes32', 'string'], [hashState(challengeState), 'forceMove']),
   );
 }

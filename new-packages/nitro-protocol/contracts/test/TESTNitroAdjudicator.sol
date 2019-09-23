@@ -32,18 +32,14 @@ contract TESTNitroAdjudicator is NitroAdjudicator {
         return _acceptableWhoSignedWhat(whoSignedWhat, largestTurnNum, nParticipants, nStates);
     }
 
-    function recoverSigner(bytes32 _d, uint8 _v, bytes32 _r, bytes32 _s)
-        public
-        pure
-        returns (address)
-    {
-        return _recoverSigner(_d, _v, _r, _s);
+    function recoverSigner(bytes32 _d, Signature memory sig) public pure returns (address) {
+        return _recoverSigner(_d, sig);
     }
 
     // public setter for channelStorage
 
     function setChannelStorage(bytes32 channelId, ChannelStorage memory channelStorage) public {
-        channelStorageHashes[channelId] = _getHash(channelStorage);
+        channelStorageHashes[channelId] = _hashChannelStorage(channelStorage);
     }
 
     // public setter for channelStorage
