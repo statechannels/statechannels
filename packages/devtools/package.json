@@ -1,0 +1,31 @@
+{
+  "name": "magmo-devtools",
+  "private": true,
+  "version": "0.1.21",
+  "description": "Scripts used for Magmo development processes",
+  "main": "index.js",
+  "bin": {
+    "ganache-then-jest": "bin/ganache-then-jest.js",
+    "deploy-contracts": "bin/deploy-contracts.js",
+    "run-jest": "bin/run-jest.js",
+    "start-ganache": "bin/start-ganache.js"
+  },
+  "author": "Andrew Stewart",
+  "license": "MIT",
+  "repository": "https://github.com/magmo/devtools",
+  "dependencies": {
+    "chai": "^4.2.0",
+    "detect-port": "^1.3.0",
+    "dotenv": "^6.1.0",
+    "dotenv-expand": "^5.1.0",
+    "ethers": "^4.0.15",
+    "fs-extra": "^8.0.1",
+    "jest": "^24.0.6",
+    "solc": "^0.5.11",
+    "yargs": "^12.0.5"
+  },
+  "devDependencies": {
+    "ganache-cli": "^6.1.8",
+    "truffle": "^5.0.0-beta.2"
+  }
+}
