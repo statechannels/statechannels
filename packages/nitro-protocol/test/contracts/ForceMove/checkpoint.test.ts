@@ -1,5 +1,5 @@
 import {ethers} from 'ethers';
-import {expectRevert} from 'magmo-devtools';
+import {expectRevert} from '@statechannels/devtools';
 // @ts-ignore
 import ForceMoveArtifact from '../../../build/contracts/TESTForceMove.json';
 // @ts-ignore

@@ -7,7 +7,7 @@
     "camelcase": 1,
     "deprecated-suicide": 1,
     "imports-on-top": 1,
-    "indentation": ["error", 2],
+    "indentation": ["error", 4],
     "lbrace": 0,
     "max-len": ["error", 80],
     "mixedcase": 0,

@@ -1,6 +1,5 @@
 import {ethers} from 'ethers';
-import {expectRevert} from 'magmo-devtools';
-// @ts-ignore
+import {expectRevert} from '@statechannels/devtools';
 import AssetHolderArtifact from '../../../build/contracts/TESTAssetHolder.json';
 import {
   setupContracts,
@@ -11,6 +10,7 @@ import {
   replaceAddresses,
 } from '../../test-helpers';
 import {createTransferAllTransaction} from '../../../src/contract/transaction-creators/asset-holder';
+// @ts-ignore (ethers mis-interpreting Truffle artifact's abi paramter)
 const AssetHolderInterface = new ethers.utils.Interface(AssetHolderArtifact.abi);
 import {id, bigNumberify} from 'ethers/utils';
 

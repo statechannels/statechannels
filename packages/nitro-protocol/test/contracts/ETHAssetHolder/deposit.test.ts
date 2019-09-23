@@ -1,5 +1,5 @@
 import {ethers} from 'ethers';
-import {expectRevert} from 'magmo-devtools';
+import {expectRevert} from '@statechannels/devtools';
 // @ts-ignore
 import ETHAssetHolderArtifact from '../../../build/contracts/ETHAssetHolder.json';
 import {setupContracts, newDepositedEvent, sendTransaction} from '../../test-helpers';
