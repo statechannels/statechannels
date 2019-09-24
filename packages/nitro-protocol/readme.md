@@ -47,8 +47,9 @@ SOLC_VERSION=0.5.2
 
 ## Documentation website
 
-1. Run `cd website`
-2. Run `yarn install`
-3. Run `yarn start`
+1. Run `yarn docgen` to auto-generate markdown files from Solidity source code (using [`solidity-docgen`](https://github.com/OpenZeppelin/solidity-docgen))
+2. Run `cd website`
+3. Run `yarn install`
+4. Run `yarn start`
 
 See https://docusaurus.io/docs/en/installation for more information.

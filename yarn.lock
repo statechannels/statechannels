@@ -12948,6 +12948,25 @@ solc@0.5.11:
     tmp "0.0.33"
     yargs "^13.2.0"
 
+solidity-docgen@^0.3.1:
+  version "0.3.1"
+  resolved "https://registry.yarnpkg.com/solidity-docgen/-/solidity-docgen-0.3.1.tgz#304e5da9603eca5a35f3bb1373b50bc944c81f31"
+  integrity sha512-ois/51sRLSKfCvYYVdH3AJFwJINNNcOLzDNBtg7USLzItnHirEwXWfx0EiJej0Wrs9zf4E5YbzFnd2cp7Blz3Q==
+  dependencies:
+    "@oclif/command" "^1.5.17"
+    "@oclif/config" "^1.13.2"
+    "@oclif/errors" "^1.2.2"
+    "@oclif/plugin-help" "^2.2.0"
+    execall "^2.0.0"
+    fs-extra "^8.1.0"
+    globby "^9.2.0"
+    handlebars "^4.1.2"
+    lodash "^4.17.14"
+    minimatch "^3.0.4"
+    semver "^6.2.0"
+    solc "^0.5.10"
+    typescript "^3.5.3"
+
 solidity-parser-antlr@^0.4.11:
   version "0.4.11"
   resolved "https://registry.yarnpkg.com/solidity-parser-antlr/-/solidity-parser-antlr-0.4.11.tgz#af43e1f13b3b88309a875455f5d6e565b05ee5f1"
@@ -13988,6 +14007,11 @@ uglify-js@3.4.x:
     commander "~2.19.0"
     source-map "~0.6.1"
 
+typescript@^3.5.3:
+  version "3.6.3"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-3.6.3.tgz#fea942fabb20f7e1ca7164ff626f1a9f3f70b4da"
+  integrity sha512-N7bceJL1CtRQ2RiG0AQME13ksR7DiuQh/QehubYcghzv20tnh+MQnQIuJddTmsbqYj+dztchykemz0zFzlvdQw==
+
 uglify-js@^3.1.4:
   version "3.6.0"
   resolved "https://registry.yarnpkg.com/uglify-js/-/uglify-js-3.6.0.tgz#704681345c53a8b2079fb6cec294b05ead242ff5"
@@ -14141,6 +14165,11 @@ unquote@~1.1.1:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/unquote/-/unquote-1.1.1.tgz#8fded7324ec6e88a0ff8b905e7c098cdc086d544"
   integrity sha1-j97XMk7G6IoP+LkF58CYzcCG1UQ=
+
+universalify@^0.1.0:
+  version "0.1.2"
+  resolved "https://registry.yarnpkg.com/universalify/-/universalify-0.1.2.tgz#b646f69be3942dabcecc9d6639c80dc105efaa66"
+  integrity sha512-rBJeI5CXAlmy1pV+617WB9J63U6XcazHHF2f2dbJix4XzpUF0RS3Zbj0FGIOCAva5P/d/GBOYaACQ1w+0azUkg==
 
 unset-value@^1.0.0:
   version "1.0.0"
@@ -15047,6 +15076,15 @@ wrap-ansi@^2.0.0:
   dependencies:
     string-width "^1.0.1"
     strip-ansi "^3.0.1"
+
+wrap-ansi@^4.0.0:
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/wrap-ansi/-/wrap-ansi-4.0.0.tgz#b3570d7c70156159a2d42be5cc942e957f7b1131"
+  integrity sha512-uMTsj9rDb0/7kk1PbcbCcwvHUxp60fGDB/NNXpVa0Q+ic/e7y5+BwTxKfQ33VYgDppSwi/FBzpetYzo8s6tfbg==
+  dependencies:
+    ansi-styles "^3.2.0"
+    string-width "^2.1.1"
+    strip-ansi "^4.0.0"
 
 wrap-ansi@^5.1.0:
   version "5.1.0"

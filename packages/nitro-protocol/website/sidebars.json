@@ -27,6 +27,7 @@
     ],
 
     "Advanced": ["auxiliary-protocols"],
-    "Examples": ["payment-game"]
+    "Examples": ["payment-game"],
+    "Implementation": ["implementation/ForceMove", "implementation/ForceMoveApp"]
   }
 }

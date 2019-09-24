@@ -1,7 +1,7 @@
 pragma solidity ^0.5.11;
 pragma experimental ABIEncoderV2;
 
-import './ForceMove.sol';
+import './ForceMove/ForceMove.sol';
 import './Outcome.sol';
 
 contract AssetHolder {

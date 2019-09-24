@@ -1,7 +1,7 @@
 pragma solidity ^0.5.11;
 pragma experimental ABIEncoderV2;
 
-import './ForceMoveApp.sol';
+import './ForceMove/ForceMoveApp.sol';
 
 contract ConsensusApp is ForceMoveApp {
     struct ConsensusAppData {
