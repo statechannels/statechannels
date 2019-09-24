@@ -65,8 +65,12 @@ function convertToNitroChannel(channel: Channel): NitroChannel {
 
 function convertAddressToBytes32(address: string): string {
   const normalizedAddress = bigNumberify(address).toHexString();
-  if (normalizedAddress.length !== 22) {
-    throw new Error('Address value is not right length.');
+  if (normalizedAddress.length !== 42) {
+    throw new Error(
+      `Address value is not right length. Expected length of 42 received length ${
+        normalizedAddress.length
+      } instead.`,
+    );
   }
   // We pad to 66 = (32*2) + 2('0x')
   return normalizedAddress.padEnd(66, '0');
