@@ -14,5 +14,8 @@
     "noUnusedLocals": true,
     "types": ["node", "jest"]
   },
+  "references": [
+    { "path": "../jest-gas-reporter" }
+  ],
   "exclude": ["lib", "node_modules"]
 }
