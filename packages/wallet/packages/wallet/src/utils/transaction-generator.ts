@@ -1,28 +1,21 @@
 import { TransactionRequest } from 'ethers/providers';
 import { getAdjudicatorInterface } from './contract-utils';
 import { splitSignature } from 'ethers/utils';
-import { Commitment } from '../domain';
+import { Commitment, SignedCommitment } from '../domain';
 import { asEthersObject } from 'fmg-core';
+import { Transactions as nitroTrans } from 'nitro-protocol';
+import { getChannelStorage } from './nitro-converter';
+import { signChallengeMessage } from 'nitro-protocol/lib/src/signatures';
 
 export function createForceMoveTransaction(
-  fromState: Commitment,
-  toState: Commitment,
-  fromSignature: string,
-  toSignature: string,
+  fromCommitment: SignedCommitment,
+  toCommitment: SignedCommitment,
+  privateKey: string,
 ): TransactionRequest {
-  const adjudicatorInterface = getAdjudicatorInterface();
-
-  const splitFromSignature = splitSignature(fromSignature);
-  const splitToSignature = splitSignature(toSignature);
-
-  const data = adjudicatorInterface.functions.forceMove.encode([
-    asEthersObject(fromState),
-    asEthersObject(toState),
-    [splitFromSignature, splitToSignature],
-  ]);
-  return {
-    data,
-  };
+  const channelStorage = getChannelStorage(toCommitment.commitment);
+  const signedStates = [fromCommitment.signedState, toCommitment.signedState];
+  const challengeSignature = signChallengeMessage(signedStates, privateKey);
+  return nitroTrans.createForceMoveTransaction(channelStorage, signedStates, challengeSignature);
 }
 
 export function createRespondWithMoveTransaction(

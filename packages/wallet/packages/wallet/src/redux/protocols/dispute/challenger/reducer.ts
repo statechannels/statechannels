@@ -200,13 +200,11 @@ function challengeApproved(state: NonTerminalCState, sharedData: SharedData): Re
   // else if we don't have the last two states
   // make challenge transaction
   const [penultimateCommitment, lastCommitment] = channelState.commitments;
-  const { commitment: fromPosition, signature: fromSignature } = penultimateCommitment;
-  const { commitment: toPosition, signature: toSignature } = lastCommitment;
+  const privateKey = getPrivatekey(sharedData, state.channelId);
   const transactionRequest = createForceMoveTransaction(
-    fromPosition,
-    toPosition,
-    fromSignature,
-    toSignature,
+    penultimateCommitment,
+    lastCommitment,
+    privateKey,
   );
   // initialize transaction state machine
   const returnVal = initializeTransaction(

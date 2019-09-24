@@ -5,7 +5,7 @@ import { getGanacheProvider } from 'magmo-devtools';
 
 import { transactionConfirmed, transactionSent, transactionSubmitted } from '../redux/actions';
 import { transactionSender } from '../redux/sagas/transaction-sender';
-import { signCommitment, signVerificationData } from '../domain';
+import { signCommitment, signVerificationData, signCommitment2 } from '../domain';
 import { getLibraryAddress, createChallenge, concludeGame } from './test-utils';
 import {
   createForceMoveTransaction,
@@ -100,14 +100,11 @@ describe('transactions', () => {
       appAttributes: '0x0',
       commitmentCount: 1,
     };
-    const fromSig = signCommitment(fromCommitment, participantB.privateKey);
-    const toSig = signCommitment(toCommitment, participantA.privateKey);
 
     const forceMoveTransaction = createForceMoveTransaction(
-      fromCommitment,
-      toCommitment,
-      fromSig,
-      toSig,
+      signCommitment2(fromCommitment, participantA.privateKey),
+      signCommitment2(toCommitment, participantB.privateKey),
+      participantA.privateKey,
     );
     await testTransactionSender(forceMoveTransaction);
   });

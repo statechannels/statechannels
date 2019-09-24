@@ -10,7 +10,10 @@ import { Channel as NitroChannel } from 'nitro-protocol/lib/src/contract/channel
 import { signState } from 'nitro-protocol/lib/src/signatures';
 
 const CHALLENGE_DURATION = 0x12c; // 5 minutes
+// This temporarily handles converting fmg-core entities to nitro-protocol entities
+// Eventually once nitro-protocol is more properly embedded in the wallet this will go away
 
+// TODO: Properly set challenge if one exists
 export function getChannelStorage(latestCommitment: Commitment): ChannelStorage {
   return {
     turnNumRecord: latestCommitment.turnNum,

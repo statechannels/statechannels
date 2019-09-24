@@ -1,5 +1,5 @@
 import { ethers } from 'ethers';
-import { CommitmentType, Commitment } from '../domain';
+import { CommitmentType, Commitment, signCommitment2 } from '../domain';
 import {
   createDepositTransaction,
   createForceMoveTransaction,
@@ -85,10 +85,9 @@ export async function createChallenge(
   };
 
   const challengeTransaction = createForceMoveTransaction(
-    fromCommitment,
-    toCommitment,
+    signCommitment2(fromCommitment, participantA.privateKey),
+    signCommitment2(toCommitment, participantB.privateKey),
     participantA.privateKey,
-    participantB.privateKey,
   );
   const transactionReceipt = await sendTransaction(provider, challengeTransaction);
   await transactionReceipt.wait();
