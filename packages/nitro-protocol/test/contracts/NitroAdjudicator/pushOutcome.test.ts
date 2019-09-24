@@ -13,7 +13,10 @@ import {Channel, getChannelId} from '../../../src/contract/channel';
 import {hashAssetOutcome} from '../../../src/contract/outcome';
 import {State} from '../../../src/contract/state';
 import {createPushOutcomeTransaction} from '../../../src/contract/transaction-creators/nitro-adjudicator';
-import {toHex} from '../../../src/hex-utils';
+import {
+  CHANNEL_NOT_FINALIZED,
+  WRONG_CHANNEL_STORAGE,
+} from '../../../src/contract/transaction-creators/revert-reasons';
 
 const provider = new ethers.providers.JsonRpcProvider(
   `http://localhost:${process.env.DEV_GANACHE_PORT}`,
@@ -52,8 +55,8 @@ describe('pushOutcome', () => {
   it.each`
     description     | channelNonce | storedTurnNumRecord | declaredTurnNumRecord | finalized | outcomeHashExits | reasonString
     ${description1} | ${1101}      | ${5}                | ${5}                  | ${true}   | ${false}         | ${undefined}
-    ${description2} | ${1102}      | ${5}                | ${5}                  | ${false}  | ${false}         | ${'Outcome is not final'}
-    ${description3} | ${1103}      | ${4}                | ${5}                  | ${true}   | ${false}         | ${'Submitted data does not match storage'}
+    ${description2} | ${1102}      | ${5}                | ${5}                  | ${false}  | ${false}         | ${CHANNEL_NOT_FINALIZED}
+    ${description3} | ${1103}      | ${4}                | ${5}                  | ${true}   | ${false}         | ${WRONG_CHANNEL_STORAGE}
     ${description4} | ${1104}      | ${5}                | ${5}                  | ${true}   | ${true}          | ${'Outcome hash already exists'}
   `(
     '$description', // for the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce
@@ -67,7 +70,7 @@ describe('pushOutcome', () => {
     }) => {
       const channel: Channel = {chainId, channelNonce, participants};
       const channelId = getChannelId(channel);
-      const finalizesAt = finalized ? toHex(1) : toHex(1e12); // either 1 second after genesis block, or ~ 31000 years after
+      const finalizesAt = finalized ? 1 : 1e12; // either 1 second after genesis block, or ~ 31000 years after
 
       const outcome = [
         {assetHolderAddress: ETHAssetHolder.address, allocation: []},
@@ -82,7 +85,7 @@ describe('pushOutcome', () => {
         outcome,
         appDefinition: AddressZero,
         appData: '0x0',
-        challengeDuration: '0x1',
+        challengeDuration: 0x1,
       };
 
       const challengerAddress = participants[state.turnNum % participants.length];

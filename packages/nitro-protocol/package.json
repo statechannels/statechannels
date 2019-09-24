@@ -4,13 +4,14 @@
   "description": "A protocol for state channel networks",
   "main": "lib/src/index.js",
   "files": [
-    "lib/*"
+    "lib/*",
+    "contracts/*"
   ],
-  "directories": {
-    "test": "test"
-  },
   "engines": {
     "node": "10.16.3"
+  },
+  "directories": {
+    "test": "test"
   },
   "repository": {
     "type": "git",

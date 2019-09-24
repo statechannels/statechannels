@@ -4,19 +4,25 @@ import {expectRevert} from '@statechannels/devtools';
 import ForceMoveArtifact from '../../../build/contracts/TESTForceMove.json';
 // @ts-ignore
 import countingAppArtifact from '../../../build/contracts/CountingApp.json';
-import {defaultAbiCoder, hexlify, bigNumberify} from 'ethers/utils';
+import {defaultAbiCoder, hexlify} from 'ethers/utils';
 import {
   setupContracts,
   newChallengeClearedEvent,
   signStates,
   sendTransaction,
 } from '../../test-helpers';
-import {HashZero, Zero, One} from 'ethers/constants';
+import {HashZero} from 'ethers/constants';
 import {Outcome} from '../../../src/contract/outcome';
 import {Channel, getChannelId} from '../../../src/contract/channel';
 import {State} from '../../../src/contract/state';
 import {hashChannelStorage} from '../../../src/contract/channel-storage';
 import {createCheckpointTransaction} from '../../../src/contract/transaction-creators/force-move';
+import {
+  CHANNEL_FINALIZED,
+  TURN_NUM_RECORD_NOT_INCREASED,
+  UNACCEPTABLE_WHO_SIGNED_WHAT,
+} from '../../../src/contract/transaction-creators/revert-reasons';
+import {COUNTING_APP_INVALID_TRANSITION} from '../../revert-reasons';
 
 const provider = new ethers.providers.JsonRpcProvider(
   `http://localhost:${process.env.DEV_GANACHE_PORT}`,
@@ -26,7 +32,7 @@ let networkId;
 const chainId = '0x1234';
 const participants = ['', '', ''];
 const wallets = new Array(3);
-const challengeDuration = '0x1000';
+const challengeDuration = 0x1000;
 const assetHolderAddress = ethers.Wallet.createRandom().address;
 const defaultOutcome: Outcome = [{assetHolderAddress, allocation: []}];
 let appDefinition;
@@ -42,156 +48,135 @@ beforeAll(async () => {
   appDefinition = countingAppArtifact.networks[networkId].address; // use a fixed appDefinition in all tests
 });
 
-// Scenarios are synonymous with channelNonce:
-
-const hashMisMatch = {
-  description: "It reverts when the channel storage doesn't match",
-  reason: 'Challenge State does not match stored version',
+const valid = {
+  whoSignedWhat: [0, 0, 0],
+  appDatas: [0],
+};
+const invalidTransition = {
+  whoSignedWhat: [0, 1, 2],
+  appDatas: [0, 2, 1],
+};
+const unsupported = {
+  whoSignedWhat: [0, 0, 0],
+  appDatas: [0, 1, 2],
 };
 
-const challengeExpired = {
-  description: 'It reverts when the challenge has expired',
-  reason: 'Challenge timed out',
-};
-const invalidSupport = {
-  description: 'It reverts when the states do not form a validTransition chain ',
-  reason: 'CountingApp: Counter must be incremented',
-};
-const stateUnsupported = {
-  description: 'It reverts when an unacceptable whoSignedWhat array is submitted',
-  reason: 'Unacceptable whoSignedWhat array',
-};
-const staleState = {
-  description: 'It reverts when the turnNumRecord is not increased',
-  reason: 'turnNumRecord not increased',
-};
-const succeedsDuringChallenge = {
-  description:
-    'It accepts when the input is valid and there is a challenge, and clears the challenge',
-};
+const itOpensTheChannelIf = 'It accepts valid input, and clears any existing challenge, if';
+const accepts1 = itOpensTheChannelIf + 'the slot is empty';
+const accepts2 =
+  itOpensTheChannelIf + 'there is a challenge and the existing turnNumRecord is increased';
+const accepts3 =
+  itOpensTheChannelIf + 'there is no challenge and the existing turnNumRecord is increased';
 
-const succeedsWhenChannelOpen = {
-  description: 'It accepts when the input is valid and the channel is open',
-};
+const itRevertsWhenOpenBut = 'It reverts when the channel is open, but ';
+const reverts1 = itRevertsWhenOpenBut + 'the turnNumRecord is not increased.';
+const reverts2 = itRevertsWhenOpenBut + 'there is an invalid transition';
+const reverts3 = itRevertsWhenOpenBut + 'the final state is not supported';
+
+const itRevertsWithChallengeBut = 'It reverts when there is an ongoing challenge, but ';
+const reverts4 = itRevertsWithChallengeBut + 'the turnNumRecord is not increased.';
+const reverts5 = itRevertsWithChallengeBut + 'there is an invalid transition';
+const reverts6 = itRevertsWithChallengeBut + 'the final state is not supported';
+
+const reverts7 = 'It reverts when a challenge has expired';
+
+const future = 1e12;
+const past = 1;
+const never = '0x00';
+const turnNumRecord = 7;
 
 describe('checkpoint', () => {
-  // for the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce
-  let cn = 300;
+  let channelNonce = 300;
+  beforeEach(() => (channelNonce += 1));
   it.each`
-    test                       | channelNonce | setTurnNumRecord | largestTurnNum | appDatas     | whoSignedWhat | challenger    | channelStorage | finalizesAt
-    ${succeedsDuringChallenge} | ${(cn += 1)} | ${7}             | ${8}           | ${[0, 1, 2]} | ${[0, 1, 2]}  | ${wallets[1]} | ${undefined}   | ${undefined}
-    ${succeedsDuringChallenge} | ${(cn += 1)} | ${7}             | ${11}          | ${[0, 1, 2]} | ${[0, 1, 2]}  | ${wallets[1]} | ${undefined}   | ${undefined}
-    ${succeedsWhenChannelOpen} | ${(cn += 1)} | ${7}             | ${11}          | ${[0, 1, 2]} | ${[0, 1, 2]}  | ${wallets[1]} | ${undefined}   | ${Zero.toHexString()}
-    ${hashMisMatch}            | ${(cn += 1)} | ${7}             | ${11}          | ${[0, 1, 2]} | ${[0, 1, 2]}  | ${wallets[2]} | ${HashZero}    | ${undefined}
-    ${challengeExpired}        | ${(cn += 1)} | ${7}             | ${11}          | ${[0, 1, 2]} | ${[0, 1, 2]}  | ${wallets[2]} | ${undefined}   | ${One.toHexString()}
-    ${invalidSupport}          | ${(cn += 1)} | ${7}             | ${8}           | ${[0, 2, 1]} | ${[0, 1, 2]}  | ${wallets[1]} | ${undefined}   | ${undefined}
-    ${stateUnsupported}        | ${(cn += 1)} | ${7}             | ${8}           | ${[0, 1, 2]} | ${[0, 0, 2]}  | ${wallets[1]} | ${undefined}   | ${undefined}
-    ${staleState}              | ${(cn += 1)} | ${10}            | ${8}           | ${[0, 1, 2]} | ${[0, 1, 2]}  | ${wallets[1]} | ${undefined}   | ${undefined}
-  `(
-    '$test.description',
-    async ({
-      channelNonce,
-      setTurnNumRecord,
-      largestTurnNum,
-      appDatas,
-      whoSignedWhat,
-      challenger,
-      channelStorage,
-      finalizesAt,
-      test,
-    }) => {
-      // compute channelId
-      const channel: Channel = {chainId, channelNonce, participants};
-      const channelId = getChannelId(channel);
+    description | largestTurnNum       | support              | challenger    | finalizesAt  | reason
+    ${accepts1} | ${turnNumRecord + 1} | ${valid}             | ${wallets[1]} | ${undefined} | ${undefined}
+    ${accepts2} | ${turnNumRecord + 3} | ${valid}             | ${wallets[1]} | ${never}     | ${undefined}
+    ${accepts3} | ${turnNumRecord + 4} | ${valid}             | ${wallets[1]} | ${future}    | ${undefined}
+    ${reverts1} | ${turnNumRecord}     | ${valid}             | ${wallets[1]} | ${never}     | ${TURN_NUM_RECORD_NOT_INCREASED}
+    ${reverts2} | ${turnNumRecord + 1} | ${invalidTransition} | ${wallets[1]} | ${never}     | ${COUNTING_APP_INVALID_TRANSITION}
+    ${reverts3} | ${turnNumRecord + 1} | ${unsupported}       | ${wallets[1]} | ${never}     | ${UNACCEPTABLE_WHO_SIGNED_WHAT}
+    ${reverts4} | ${turnNumRecord}     | ${valid}             | ${wallets[1]} | ${future}    | ${TURN_NUM_RECORD_NOT_INCREASED}
+    ${reverts5} | ${turnNumRecord + 1} | ${invalidTransition} | ${wallets[1]} | ${future}    | ${COUNTING_APP_INVALID_TRANSITION}
+    ${reverts6} | ${turnNumRecord + 1} | ${unsupported}       | ${wallets[1]} | ${future}    | ${UNACCEPTABLE_WHO_SIGNED_WHAT}
+    ${reverts7} | ${turnNumRecord + 1} | ${valid}             | ${wallets[1]} | ${past}      | ${CHANNEL_FINALIZED}
+  `('$description', async ({largestTurnNum, support, challenger, finalizesAt, reason}) => {
+    const {appDatas, whoSignedWhat} = support;
+    const channel: Channel = {chainId, channelNonce: hexlify(channelNonce), participants};
+    const channelId = getChannelId(channel);
 
-      // compute finalizedAt
-      const blockNumber = await provider.getBlockNumber();
-      const blockTimestamp = (await provider.getBlock(blockNumber)).timestamp;
-      finalizesAt =
-        finalizesAt ||
-        bigNumberify(blockTimestamp)
-          .add(challengeDuration)
-          .toHexString();
+    const states = appDatas.map((data, idx) => ({
+      turnNum: largestTurnNum - appDatas.length + 1 + idx,
+      isFinal: false,
+      channel,
+      challengeDuration,
+      outcome: defaultOutcome,
+      appData: defaultAbiCoder.encode(['uint256'], [data]),
+      appDefinition,
+    }));
 
-      const states: State[] = [];
-
-      for (let i = 0; i < appDatas.length; i++) {
-        states.push({
-          turnNum: largestTurnNum - appDatas.length + 1 + i,
+    const isOpen = !!finalizesAt;
+    const outcome = isOpen ? undefined : defaultOutcome;
+    const challengerAddress = isOpen ? undefined : challenger.address;
+    const challengeState: State = isOpen
+      ? undefined
+      : {
+          turnNum: turnNumRecord,
           isFinal: false,
           channel,
-          challengeDuration,
-          outcome: defaultOutcome,
-          appData: defaultAbiCoder.encode(['uint256'], [appDatas[i]]),
+          outcome,
+          appData: defaultAbiCoder.encode(['uint256'], [appDatas[0]]),
           appDefinition,
-        });
-      }
+          challengeDuration,
+        };
 
-      const isOpen = Zero.eq(finalizesAt);
-      const outcome = isOpen ? undefined : defaultOutcome;
-      const challengerAddress = isOpen ? undefined : challenger.address;
-      const challengeState: State = isOpen
-        ? undefined
-        : {
-            turnNum: setTurnNumRecord,
-            isFinal: false,
-            channel,
-            outcome,
-            appData: defaultAbiCoder.encode(['uint256'], [appDatas[0]]),
-            appDefinition,
-            challengeDuration,
-          };
-
-      channelStorage =
-        channelStorage ||
-        hashChannelStorage({
-          largestTurnNum: setTurnNumRecord,
+    const channelStorage = finalizesAt
+      ? hashChannelStorage({
+          turnNumRecord,
           finalizesAt,
           state: challengeState,
           challengerAddress,
           outcome,
-        });
+        })
+      : HashZero;
 
-      // call public wrapper to set state (only works on test contract)
-      const tx = await ForceMove.setChannelStorageHash(channelId, channelStorage);
-      await tx.wait();
-      expect(await ForceMove.channelStorageHashes(channelId)).toEqual(channelStorage);
+    // call public wrapper to set state (only works on test contract)
+    const tx = await ForceMove.setChannelStorageHash(channelId, channelStorage);
+    await tx.wait();
+    expect(await ForceMove.channelStorageHashes(channelId)).toEqual(channelStorage);
 
-      const signatures = await signStates(states, wallets, whoSignedWhat);
+    const signatures = await signStates(states, wallets, whoSignedWhat);
 
-      const transactionsRequest = createCheckpointTransaction({
-        challengeState,
-        finalizesAt,
-        states,
-        signatures,
-        whoSignedWhat,
-        turnNumRecord: setTurnNumRecord,
+    const transactionsRequest = createCheckpointTransaction({
+      challengeState,
+      states,
+      signatures,
+      whoSignedWhat,
+    });
+    if (reason) {
+      const regex = new RegExp(
+        '^' + 'VM Exception while processing transaction: revert ' + reason + '$',
+      );
+      await expectRevert(
+        () => sendTransaction(provider, ForceMove.address, transactionsRequest),
+        regex,
+      );
+    } else {
+      const challengeClearedEvent: any = newChallengeClearedEvent(ForceMove, channelId);
+
+      await sendTransaction(provider, ForceMove.address, transactionsRequest);
+
+      // catch ChallengeCleared event
+      const [, eventTurnNumRecord] = await challengeClearedEvent;
+      expect(eventTurnNumRecord._hex).toEqual(hexlify(largestTurnNum));
+
+      const expectedChannelStorageHash = hashChannelStorage({
+        turnNumRecord: largestTurnNum,
+        finalizesAt: 0x0,
       });
-      if (test.reason) {
-        const regex = new RegExp(
-          '^' + 'VM Exception while processing transaction: revert ' + test.reason + '$',
-        );
-        await expectRevert(
-          () => sendTransaction(provider, ForceMove.address, transactionsRequest),
-          regex,
-        );
-      } else {
-        const challengeClearedEvent: any = newChallengeClearedEvent(ForceMove, channelId);
 
-        await sendTransaction(provider, ForceMove.address, transactionsRequest);
-
-        // catch ChallengeCleared event
-        const [, eventTurnNumRecord] = await challengeClearedEvent;
-        expect(eventTurnNumRecord._hex).toEqual(hexlify(largestTurnNum));
-
-        const expectedChannelStorageHash = hashChannelStorage({
-          largestTurnNum,
-          finalizesAt: '0x0',
-        });
-
-        // check channelStorageHash against the expected value
-        expect(await ForceMove.channelStorageHashes(channelId)).toEqual(expectedChannelStorageHash);
-      }
-    },
-  );
+      // check channelStorageHash against the expected value
+      expect(await ForceMove.channelStorageHashes(channelId)).toEqual(expectedChannelStorageHash);
+    }
+  });
 });

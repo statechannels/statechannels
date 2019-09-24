@@ -4,21 +4,18 @@ import {State} from './contract/state';
 import {Signature} from 'ethers/utils';
 import {getStateSignerAddress} from './signatures';
 import {ChannelStorage, SignedState} from '.';
-import {toHex} from './hex-utils';
 
 export function createForceMoveTransaction(
-  channelStorage: ChannelStorage,
   signedStates: SignedState[],
-  challengeSignature: Signature,
+  challengePrivateKey: string,
 ): TransactionRequest {
   const {states, signatures, whoSignedWhat} = createSignatureArguments(signedStates);
 
   return forceMoveTrans.createForceMoveTransaction(
-    channelStorage.turnNumRecord,
     states,
     signatures,
     whoSignedWhat,
-    challengeSignature,
+    challengePrivateKey,
   );
 }
 export function createRespondTransaction(
@@ -29,54 +26,24 @@ export function createRespondTransaction(
     throw new Error('No active challenge in challenge state');
   }
   return forceMoveTrans.createRespondTransaction(
-    channelStorage.turnNumRecord,
-    channelStorage.finalizesAt,
     channelStorage.challengeState,
     response.state,
     response.signature,
   );
 }
 
-export function createCheckpointTransaction(
-  channelStorage: ChannelStorage,
-  signedStates: SignedState[],
-): TransactionRequest {
-  if (!channelStorage.challengeState) {
-    throw new Error('No active challenge in challenge state');
-  }
+export function createCheckpointTransaction(signedStates: SignedState[]): TransactionRequest {
   const {states, signatures, whoSignedWhat} = createSignatureArguments(signedStates);
   return forceMoveTrans.createCheckpointTransaction({
-    challengeState: channelStorage.challengeState,
-    turnNumRecord: toHex(channelStorage.turnNumRecord),
-    finalizesAt: channelStorage.finalizesAt,
     states,
     signatures,
     whoSignedWhat,
   });
 }
 
-export function createConcludeTransaction(
-  channelStorage: ChannelStorage,
-  conclusionProof: SignedState[],
-): TransactionRequest {
+export function createConcludeTransaction(conclusionProof: SignedState[]): TransactionRequest {
   const {states, signatures, whoSignedWhat} = createSignatureArguments(conclusionProof);
-  if (!channelStorage.challengeState) {
-    return forceMoveTrans.createConcludeFromOpenTransaction(
-      channelStorage.turnNumRecord,
-      states,
-      signatures,
-      whoSignedWhat,
-    );
-  } else {
-    return forceMoveTrans.createConcludeFromChallengeTransaction(
-      channelStorage.turnNumRecord,
-      channelStorage.challengeState,
-      channelStorage.finalizesAt,
-      states,
-      signatures,
-      whoSignedWhat,
-    );
-  }
+  return forceMoveTrans.createConcludeTransaction(states, signatures, whoSignedWhat);
 }
 
 // Currently we assume each signedState is a unique combination of state/signature

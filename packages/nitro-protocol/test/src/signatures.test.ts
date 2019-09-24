@@ -3,8 +3,6 @@ import {hashState, State} from '../../src/contract/state';
 import {AddressZero} from 'ethers/constants';
 import {arrayify, splitSignature} from 'ethers/utils';
 import {getStateSignerAddress, signChallengeMessage, signState} from '../../src/signatures';
-import {toHex} from '../../src/hex-utils';
-import {getChannelId} from '../../src/contract/channel';
 import {hashChallengeMessage} from '../../src/contract/challenge';
 
 describe('signatures', () => {
@@ -18,7 +16,7 @@ describe('signatures', () => {
         isFinal: false,
         appData: '0x0',
         appDefinition: AddressZero,
-        challengeDuration: '0x5',
+        challengeDuration: 0x5,
       };
 
       const signedState = signState(state, wallet.privateKey);
@@ -46,7 +44,7 @@ describe('signatures', () => {
         isFinal: false,
         appData: '0x0',
         appDefinition: AddressZero,
-        challengeDuration: '0x5',
+        challengeDuration: 0x5,
       };
 
       expect(() => {
@@ -65,20 +63,19 @@ describe('signatures', () => {
         isFinal: false,
         appData: '0x0',
         appDefinition: AddressZero,
-        challengeDuration: '0x5',
+        challengeDuration: 0x5,
       };
-      const hashedState = hashState(state);
-      const stateSignature = splitSignature(await wallet.signMessage(arrayify(hashedState)));
-      const largestTurnNum = toHex(1);
-      const channelId = getChannelId(channel);
-      const challengeHash = hashChallengeMessage({largestTurnNum, channelId});
-      const challengeMessageSignature = splitSignature(
-        await wallet.signMessage(arrayify(challengeHash)),
+
+      const signature = signChallengeMessage(
+        [signState(state, wallet.privateKey)],
+        wallet.privateKey,
       );
 
-      expect(signChallengeMessage([{state, signature: stateSignature}], wallet.privateKey)).toEqual(
-        challengeMessageSignature,
+      const challenger = ethers.utils.verifyMessage(
+        arrayify(hashChallengeMessage(state)),
+        signature,
       );
+      expect(challenger).toEqual(wallet.address);
     });
 
     it('throws an exception if signing with non-participant private key', async () => {
@@ -94,7 +91,7 @@ describe('signatures', () => {
         isFinal: false,
         appData: '0x0',
         appDefinition: AddressZero,
-        challengeDuration: '0x5',
+        challengeDuration: 0x5,
       };
       const hashedState = hashState(state);
       const signature = splitSignature(await wallet.signMessage(arrayify(hashedState)));
@@ -113,7 +110,7 @@ describe('signatures', () => {
         isFinal: false,
         appData: '0x0',
         appDefinition: AddressZero,
-        challengeDuration: '0x5',
+        challengeDuration: 0x5,
       };
       const hashedState = hashState(state);
       const signature = splitSignature(await wallet.signMessage(arrayify(hashedState)));
@@ -134,7 +131,7 @@ describe('signatures', () => {
         isFinal: false,
         appData: '0x0',
         appDefinition: AddressZero,
-        challengeDuration: '0x5',
+        challengeDuration: 0x5,
       };
       const hashedState = hashState(state);
       const signature = splitSignature(await wallet.signMessage(arrayify(hashedState)));
