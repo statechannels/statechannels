@@ -1,15 +1,15 @@
 import * as forceMoveTrans from './contract/transaction-creators/force-move';
-import {TransactionRequest} from 'ethers/providers';
-import {State} from './contract/state';
-import {Signature} from 'ethers/utils';
-import {getStateSignerAddress} from './signatures';
-import {ChannelStorage, SignedState} from '.';
+import { TransactionRequest } from 'ethers/providers';
+import { State } from './contract/state';
+import { Signature } from 'ethers/utils';
+import { getStateSignerAddress } from './signatures';
+import { ChannelStorage, SignedState } from '.';
 
 export function createForceMoveTransaction(
   signedStates: SignedState[],
   challengePrivateKey: string,
 ): TransactionRequest {
-  const {states, signatures, whoSignedWhat} = createSignatureArguments(signedStates);
+  const { states, signatures, whoSignedWhat } = createSignatureArguments(signedStates);
 
   return forceMoveTrans.createForceMoveTransaction(
     states,
@@ -32,8 +32,20 @@ export function createRespondTransaction(
   );
 }
 
+export function createRefuteTransaction(channelStorage: ChannelStorage, refute: SignedState) {
+  if (!channelStorage.challengeState) {
+    throw new Error('No active challenge in challenge state');
+  }
+
+  return forceMoveTrans.createRefuteTransaction(
+    channelStorage.challengeState,
+    refute.state,
+    refute.signature,
+  );
+}
+
 export function createCheckpointTransaction(signedStates: SignedState[]): TransactionRequest {
-  const {states, signatures, whoSignedWhat} = createSignatureArguments(signedStates);
+  const { states, signatures, whoSignedWhat } = createSignatureArguments(signedStates);
   return forceMoveTrans.createCheckpointTransaction({
     states,
     signatures,
@@ -42,7 +54,7 @@ export function createCheckpointTransaction(signedStates: SignedState[]): Transa
 }
 
 export function createConcludeTransaction(conclusionProof: SignedState[]): TransactionRequest {
-  const {states, signatures, whoSignedWhat} = createSignatureArguments(conclusionProof);
+  const { states, signatures, whoSignedWhat } = createSignatureArguments(conclusionProof);
   return forceMoveTrans.createConcludeTransaction(states, signatures, whoSignedWhat);
 }
 
@@ -50,8 +62,8 @@ export function createConcludeTransaction(conclusionProof: SignedState[]): Trans
 // So if multiple participants sign a state we expect a SignedState for each participant
 function createSignatureArguments(
   signedStates: SignedState[],
-): {states: State[]; signatures: Signature[]; whoSignedWhat: number[]} {
-  const {participants} = signedStates[0].state.channel;
+): { states: State[]; signatures: Signature[]; whoSignedWhat: number[] } {
+  const { participants } = signedStates[0].state.channel;
 
   // Get a list of all unique states.
   const states = signedStates.filter((s, i, a) => a.indexOf(s) === i).map(s => s.state);
@@ -59,5 +71,5 @@ function createSignatureArguments(
   // Generate whoSignedWhat based on the original list of states (which may contain the same state signed by multiple participants)
   const whoSignedWhat = signedStates.map(s => participants.indexOf(getStateSignerAddress(s)));
 
-  return {states, signatures, whoSignedWhat};
+  return { states, signatures, whoSignedWhat };
 }
