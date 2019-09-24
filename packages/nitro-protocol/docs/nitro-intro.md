@@ -28,7 +28,6 @@ A["Adjudicator"]
 EOA["EOA"]
 EOA-->|forceMove|A
 EOA-->|respond|A
-EOA-->|refute|A
 EOA-->|conclude|A
 EOA-->|pushOutcome|A
 EOA-->|deposit|ETHAssetHolder

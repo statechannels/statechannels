@@ -176,62 +176,6 @@ contract ForceMove {
         _clearChallenge(channelId, turnNumRecord + 1);
     }
 
-    function refute(
-        uint48 refutationStateTurnNum,
-        address challenger,
-        bool[2] memory isFinalAB,
-        FixedPart memory fixedPart,
-        ForceMoveApp.VariablePart[2] memory variablePartAB,
-        // variablePartAB[0] = challengeVariablePart
-        // variablePartAB[1] = refutationVariablePart
-        Signature memory refutationStateSig
-    ) public {
-        // requirements
-
-        bytes32 channelId = _getChannelId(fixedPart);
-        (uint48 turnNumRecord, uint48 finalizesAt, ) = _getData(channelId);
-
-        _requireIncreasedTurnNumber(channelId, refutationStateTurnNum);
-
-        bytes32 challengeOutcomeHash = keccak256(abi.encode(variablePartAB[0].outcome));
-        bytes32 refutationOutcomeHash = keccak256(abi.encode(variablePartAB[1].outcome));
-        bytes32 challengeStateHash = _hashState(
-            turnNumRecord,
-            isFinalAB[0],
-            channelId,
-            fixedPart,
-            variablePartAB[0].appData,
-            challengeOutcomeHash
-        );
-        bytes32 refutationStateHash = _hashState(
-            refutationStateTurnNum,
-            isFinalAB[1],
-            channelId,
-            fixedPart,
-            variablePartAB[1].appData,
-            refutationOutcomeHash
-        );
-
-        _requireSpecificChallenge(
-            ChannelStorage(
-                turnNumRecord,
-                finalizesAt,
-                challengeStateHash,
-                challenger, // this is a check that the asserted challenger is in fact the challenger
-                challengeOutcomeHash
-            ),
-            channelId
-        );
-
-        require(
-            _recoverSigner(refutationStateHash, refutationStateSig) == challenger,
-            'Refutation state not signed by challenger'
-        );
-
-        // effects
-        _clearChallenge(channelId, turnNumRecord);
-    }
-
     function checkpoint(
         FixedPart memory fixedPart,
         uint48 largestTurnNum,
@@ -649,7 +593,7 @@ contract ForceMove {
     // events
     event ChallengeRegistered(
         bytes32 indexed channelId,
-        // everything needed to respond or refute
+        // everything needed to respond or checkpoint
         uint256 turnNunmRecord,
         uint256 finalizesAt,
         address challenger,
