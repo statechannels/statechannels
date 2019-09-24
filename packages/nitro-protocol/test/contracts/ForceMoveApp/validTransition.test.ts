@@ -6,7 +6,7 @@ import {setupContracts} from '../../test-helpers';
 import {validTransition} from '../../../src/contract/force-move-app';
 
 const provider = new ethers.providers.JsonRpcProvider(
-  `http://localhost:${process.env.DEV_GANACHE_PORT}`,
+  `http://localhost:${process.env.GANACHE_PORT}`,
 );
 let forceMoveApp: Contract;
 

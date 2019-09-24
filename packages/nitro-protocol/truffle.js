@@ -3,8 +3,8 @@ require('dotenv').config();
 module.exports = {
   networks: {
     development: {
-      host: process.env.DEV_GANACHE_HOST,
-      port: process.env.DEV_GANACHE_PORT,
+      host: process.env.GANACHE_HOST,
+      port: process.env.GANACHE_PORT,
       network_id: '*', // match any network
       gas: process.env.DEFAULT_GAS,
       gasPrice: process.env.DEFAULT_GAS_PRICE,
@@ -22,3 +22,11 @@ module.exports = {
     },
   },
 };
+
+console.log({
+  host: process.env.GANACHE_HOST,
+  port: process.env.GANACHE_PORT,
+  network_id: '*', // match any network
+  gas: process.env.DEFAULT_GAS,
+  gasPrice: process.env.DEFAULT_GAS_PRICE,
+});

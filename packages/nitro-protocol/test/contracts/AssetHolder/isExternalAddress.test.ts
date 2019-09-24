@@ -4,7 +4,7 @@ import AssetHolderArtifact from '../../../build/contracts/TESTAssetHolder.json';
 import {setupContracts} from '../../test-helpers';
 
 const provider = new ethers.providers.JsonRpcProvider(
-  `http://localhost:${process.env.DEV_GANACHE_PORT}`,
+  `http://localhost:${process.env.GANACHE_PORT}`,
 );
 let AssetHolder: ethers.Contract;
 

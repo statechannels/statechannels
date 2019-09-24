@@ -8,7 +8,7 @@ import {HashZero, AddressZero} from 'ethers/constants';
 import {hashChannelStorage, parseChannelStorageHash} from '../../../src/contract/channel-storage';
 
 const provider = new ethers.providers.JsonRpcProvider(
-  `http://localhost:${process.env.DEV_GANACHE_PORT}`,
+  `http://localhost:${process.env.GANACHE_PORT}`,
 );
 let ForceMove: ethers.Contract;
 beforeAll(async () => {

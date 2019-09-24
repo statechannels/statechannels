@@ -12,7 +12,7 @@ import {createValidTransitionTransaction} from '../../../src/contract/transactio
 import {validTransition} from '../../../src/contract/consensus-app';
 
 const provider = new ethers.providers.JsonRpcProvider(
-  `http://localhost:${process.env.DEV_GANACHE_PORT}`,
+  `http://localhost:${process.env.GANACHE_PORT}`,
 );
 let consensusApp: ethers.Contract;
 
