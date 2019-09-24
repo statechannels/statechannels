@@ -10,8 +10,8 @@ import {getVariablePart} from '../consensus-app';
 // If we don't set a gas limit some transactions will fail
 const GAS_LIMIT = 3000000;
 
-// @ts-ignore (ethers mis-interpreting Truffle artifact's abi paramter)
-const ConsensusAppContractInterface = new ethers.utils.Interface(ConsensusAppArtifact.abi);
+// ethers mis-interprets the Truffle artifact's abi paramter so we cast to any
+const ConsensusAppContractInterface = new ethers.utils.Interface(ConsensusAppArtifact.abi as any);
 
 export function createValidTransitionTransaction(
   fromConsensusData: ConsensusData,
