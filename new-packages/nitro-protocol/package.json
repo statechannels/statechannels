@@ -4,7 +4,8 @@
   "description": "A protocol for state channel networks",
   "main": "lib/src/index.js",
   "files": [
-    "lib/*"
+    "lib/*",
+    "contracts/*"
   ],
   "directories": {
     "test": "test"
