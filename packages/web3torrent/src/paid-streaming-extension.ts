@@ -1,5 +1,5 @@
 import bencode from "bencode";
-import { Extension } from "bittorrent-protocol";
+import {Extension} from "bittorrent-protocol";
 import debug from "debug";
 import EventEmitter from "eventemitter3";
 import {
@@ -96,14 +96,14 @@ export abstract class PaidStreamingExtension implements Extension {
   }
 
   protected executeExtensionCommand(command: PaidStreamingExtensionNotices, data = {}) {
-    this.wire.extended(this.name, bencode.encode({ msg_type: 0, command, data }));
+    this.wire.extended(this.name, bencode.encode({msg_type: 0, command, data}));
   }
 
   protected interceptRequests() {
     // tslint:disable-next-line: no-string-literal
     const undecoratedOnRequestFunction = this.wire._onRequest;
     const extension = this;
-    const { messageBus } = extension;
+    const {messageBus} = extension;
     const wire = this.wire as PaidStreamingWire;
 
     // tslint:disable-next-line: only-arrow-functions no-string-literal

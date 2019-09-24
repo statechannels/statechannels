@@ -22,11 +22,3 @@ module.exports = {
     },
   },
 };
-
-console.log({
-  host: process.env.GANACHE_HOST,
-  port: process.env.GANACHE_PORT,
-  network_id: '*', // match any network
-  gas: process.env.DEFAULT_GAS,
-  gasPrice: process.env.DEFAULT_GAS_PRICE,
-});

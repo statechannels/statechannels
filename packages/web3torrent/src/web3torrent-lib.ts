@@ -1,6 +1,6 @@
 import debug from "debug";
-import WebTorrent, { Torrent, TorrentOptions } from "webtorrent";
-import paidStreamingExtension, { PaidStreamingExtensionOptions } from "./pse-middleware";
+import WebTorrent, {Torrent, TorrentOptions} from "webtorrent";
+import paidStreamingExtension, {PaidStreamingExtensionOptions} from "./pse-middleware";
 import {
   ClientEvents,
   ExtendedTorrent,
@@ -93,7 +93,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
   }
 
   togglePeer(torrentInfoHash, peerAccount: string) {
-    const { wire, allowed } = this.allowedPeers[torrentInfoHash][peerAccount];
+    const {wire, allowed} = this.allowedPeers[torrentInfoHash][peerAccount];
     if (allowed) {
       this.blockPeer(torrentInfoHash, wire, peerAccount);
     } else {
@@ -105,7 +105,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
   protected setupWire(torrent: Torrent, wire: PaidStreamingWire) {
     log("> Wire Setup");
 
-    wire.use(paidStreamingExtension({ pseAccount: this.pseAccount }));
+    wire.use(paidStreamingExtension({pseAccount: this.pseAccount}));
     wire.setKeepAlive(true);
     wire.setTimeout(65000);
     wire.on("keep-alive", () => {
@@ -122,7 +122,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
       if (knownPeerAccount && !this.allowedPeers[torrent.infoHash][peerAccount].allowed) {
         this.blockPeer(torrent.infoHash, wire, peerAccount);
       } else if (!knownPeerAccount) {
-        this.allowedPeers[torrent.infoHash][peerAccount] = { id: peerAccount, wire, allowed: false };
+        this.allowedPeers[torrent.infoHash][peerAccount] = {id: peerAccount, wire, allowed: false};
         this.blockPeer(torrent.infoHash, wire, peerAccount);
         this.emit(ClientEvents.PEER_STATUS_CHANGED, {
           allowedPeers: this.allowedPeers[torrent.infoHash],
@@ -130,7 +130,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
           peerAccount
         });
       } else {
-        this.allowedPeers[torrent.infoHash][peerAccount] = { id: peerAccount, wire, allowed: true };
+        this.allowedPeers[torrent.infoHash][peerAccount] = {id: peerAccount, wire, allowed: true};
       }
     });
 
@@ -150,13 +150,13 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
       return torrent;
     }
     torrent.on("infoHash", () => {
-      this.allowedPeers = { ...this.allowedPeers, [torrent.infoHash]: {} };
+      this.allowedPeers = {...this.allowedPeers, [torrent.infoHash]: {}};
     });
     torrent.on(TorrentEvents.WIRE, (wire: PaidStreamingWire) => {
       this.setupWire(torrent, wire);
     });
 
-    torrent.on(TorrentEvents.NOTICE, (wire, { command, data }) => {
+    torrent.on(TorrentEvents.NOTICE, (wire, {command, data}) => {
       log(`< ${command} received from ${wire.peerExtendedHandshake.pseAccount}`, data);
       switch (command) {
         case PaidStreamingExtensionNotices.STOP:
