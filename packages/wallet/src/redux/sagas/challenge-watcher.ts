@@ -1,10 +1,10 @@
-import * as actions from '../actions';
-import * as selectors from '../selectors';
-import { take, select, put } from 'redux-saga/effects';
-import { AdjudicatorState, getAdjudicatorChannelState } from '../adjudicator-state/state';
-import { getProvider } from '../../utils/contract-utils';
-import { eventChannel } from 'redux-saga';
-import { ChannelSubscriber } from '../state';
+import * as actions from "../actions";
+import * as selectors from "../selectors";
+import {take, select, put} from "redux-saga/effects";
+import {AdjudicatorState, getAdjudicatorChannelState} from "../adjudicator-state/state";
+import {getProvider} from "../../utils/contract-utils";
+import {eventChannel} from "redux-saga";
+import {ChannelSubscriber} from "../state";
 
 export function* challengeWatcher() {
   const provider = yield getProvider();
@@ -18,17 +18,17 @@ export function* challengeWatcher() {
       if (challengeIsExpired(adjudicatorState, channelId, block.timestamp)) {
         const subscribers: ChannelSubscriber[] = yield select(
           selectors.getAdjudicatorWatcherSubscribersForChannel,
-          channelId,
+          channelId
         );
         for (const subscriber of subscribers) {
-          const { processId, protocolLocator } = subscriber;
+          const {processId, protocolLocator} = subscriber;
           yield put(
             actions.challengeExpiredEvent({
               processId,
               protocolLocator,
               channelId,
-              timestamp: block.timestamp,
-            }),
+              timestamp: block.timestamp
+            })
           );
         }
       }
@@ -38,12 +38,12 @@ export function* challengeWatcher() {
 
 function* createBlockMinedEventChannel(provider) {
   return eventChannel(emit => {
-    provider.on('block', blockNumber => {
+    provider.on("block", blockNumber => {
       emit(blockNumber);
     });
 
     return () => {
-      provider.removeAllListeners('block');
+      provider.removeAllListeners("block");
     };
   });
 }

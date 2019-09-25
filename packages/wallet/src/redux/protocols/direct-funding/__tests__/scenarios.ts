@@ -1,13 +1,13 @@
-import { addHex } from '../../../../utils/hex-utils';
-import * as globalActions from '../../../actions';
+import {addHex} from "../../../../utils/hex-utils";
+import * as globalActions from "../../../actions";
 
-import * as scenarios from '../../../../domain/commitments/__tests__';
-import * as transactionSubmissionScenarios from '../../transaction-submission/__tests__';
-import * as advanceChannelScenarios from '../../advance-channel/__tests__';
-import * as states from '../states';
-import { SharedData } from '../../../state';
+import * as scenarios from "../../../../domain/commitments/__tests__";
+import * as transactionSubmissionScenarios from "../../transaction-submission/__tests__";
+import * as advanceChannelScenarios from "../../advance-channel/__tests__";
+import * as states from "../states";
+import {SharedData} from "../../../state";
 
-const { threeWayLedgerId: channelId, twoThree } = scenarios;
+const {threeWayLedgerId: channelId, twoThree} = scenarios;
 
 export const YOUR_DEPOSIT_A = twoThree[0].wei;
 export const YOUR_DEPOSIT_B = twoThree[1].wei;
@@ -23,17 +23,17 @@ const defaultsForA = {
   requiredDeposit: YOUR_DEPOSIT_A,
   channelId,
   ourIndex: 0,
-  safeToDepositLevel: '0x',
-  type: 'DirectFunding.NotSafeToDeposit',
+  safeToDepositLevel: "0x",
+  type: "DirectFunding.NotSafeToDeposit",
   protocolLocator: [],
-  funded: false,
+  funded: false
 };
 
 const defaultsForB = {
   ...defaultsForA,
   requiredDeposit: YOUR_DEPOSIT_B,
   ourIndex: 1,
-  safeToDepositLevel: YOUR_DEPOSIT_A,
+  safeToDepositLevel: YOUR_DEPOSIT_A
 };
 
 // actions
@@ -43,108 +43,108 @@ const aFundingReceivedEvent = globalActions.fundingReceivedEvent({
   channelId,
   amount: YOUR_DEPOSIT_A,
   totalForDestination: YOUR_DEPOSIT_A,
-  protocolLocator: [],
+  protocolLocator: []
 });
 const bFundingReceivedEvent = globalActions.fundingReceivedEvent({
   processId,
   channelId,
   amount: YOUR_DEPOSIT_B,
   totalForDestination: TOTAL_REQUIRED,
-  protocolLocator: [],
+  protocolLocator: []
 });
 
-const sharedData = () => ({ ...advanceChannelScenarios.preSuccess.sharedData });
+const sharedData = () => ({...advanceChannelScenarios.preSuccess.sharedData});
 
 const adjudicatorStateSharedData: SharedData = {
   ...sharedData(),
-  adjudicatorState: { [channelId]: { channelId, balance: '0x5', finalized: false } },
+  adjudicatorState: {[channelId]: {channelId, balance: "0x5", finalized: false}}
 };
 export const aHappyPath = {
-  initialize: { ...defaultsForA, sharedData: sharedData() },
+  initialize: {...defaultsForA, sharedData: sharedData()},
   waitForDepositTransaction: {
     state: states.waitForDepositTransaction({
       ...defaultsForA,
-      transactionSubmissionState: transactionSubmissionScenarios.preSuccessState,
+      transactionSubmissionState: transactionSubmissionScenarios.preSuccessState
     }),
     sharedData: sharedData(),
-    action: transactionSubmissionScenarios.successTrigger,
+    action: transactionSubmissionScenarios.successTrigger
   },
 
   waitForFunding: {
     state: states.waitForFunding(defaultsForA),
     sharedData: sharedData(),
-    action: bFundingReceivedEvent,
-  },
+    action: bFundingReceivedEvent
+  }
 };
 
 export const bHappyPath = {
-  initialize: { ...defaultsForB, sharedData: sharedData() },
+  initialize: {...defaultsForB, sharedData: sharedData()},
   notSafeToDeposit: {
     state: states.notSafeToDeposit(defaultsForB),
     action: aFundingReceivedEvent,
-    sharedData: sharedData(),
+    sharedData: sharedData()
   },
   waitForDepositTransaction: {
     state: states.waitForDepositTransaction({
       ...defaultsForB,
-      transactionSubmissionState: transactionSubmissionScenarios.preSuccessState,
+      transactionSubmissionState: transactionSubmissionScenarios.preSuccessState
     }),
     sharedData: sharedData(),
-    action: transactionSubmissionScenarios.successTrigger,
+    action: transactionSubmissionScenarios.successTrigger
   },
   waitForFunding: {
     state: states.waitForFunding(defaultsForB),
     sharedData: sharedData(),
-    action: bFundingReceivedEvent,
-  },
+    action: bFundingReceivedEvent
+  }
 };
 
 export const depositNotRequired = {
-  initialize: { ...defaultsForA, requiredDeposit: '0x0', sharedData: sharedData() },
+  initialize: {...defaultsForA, requiredDeposit: "0x0", sharedData: sharedData()}
 };
 export const existingOnChainDeposit = {
   initialize: {
     ...defaultsForA,
-    requiredDeposit: '0x05',
-    sharedData: adjudicatorStateSharedData,
-  },
+    requiredDeposit: "0x05",
+    sharedData: adjudicatorStateSharedData
+  }
 };
 
 export const transactionFails = {
   waitForDepositTransaction: {
     state: states.waitForDepositTransaction({
       ...defaultsForA,
-      transactionSubmissionState: transactionSubmissionScenarios.preFailureState,
+      transactionSubmissionState: transactionSubmissionScenarios.preFailureState
     }),
     sharedData: sharedData(),
 
-    action: transactionSubmissionScenarios.failureTrigger,
-  },
+    action: transactionSubmissionScenarios.failureTrigger
+  }
 };
 
 export const fundsReceivedArrivesEarly = {
-  initialize: { ...defaultsForA, sharedData: sharedData() },
+  initialize: {...defaultsForA, sharedData: sharedData()},
   waitForDepositTransaction: {
     state: states.waitForDepositTransaction({
       ...defaultsForA,
-      transactionSubmissionState: transactionSubmissionScenarios.preSuccessState,
+      transactionSubmissionState: transactionSubmissionScenarios.preSuccessState
     }),
     sharedData: sharedData(),
-    action: aFundingReceivedEvent,
+    action: aFundingReceivedEvent
   },
   waitForDepositTransactionFunded: {
     state: states.waitForDepositTransaction({
       ...defaultsForB,
       funded: true,
-      transactionSubmissionState: transactionSubmissionScenarios.preSuccessState,
+      transactionSubmissionState: transactionSubmissionScenarios.preSuccessState
     }),
     sharedData: sharedData(),
-    action: transactionSubmissionScenarios.successTrigger,
+    action: transactionSubmissionScenarios.successTrigger
   },
 
   waitForFunding: {
     state: states.waitForFunding(defaultsForA),
     sharedData: sharedData(),
-    action: bFundingReceivedEvent,
-  },
+    action: bFundingReceivedEvent
+  }
 };

@@ -1,12 +1,12 @@
-import * as states from './states';
-import { PureComponent } from 'react';
-import React from 'react';
+import * as states from "./states";
+import {PureComponent} from "react";
+import React from "react";
 
-import { connect } from 'react-redux';
-import { LedgerFunding } from '../ledger-funding/container';
-import { ConsensusUpdate } from '../consensus-update/container';
-import { AdvanceChannel } from '../advance-channel/container';
-import { unreachable } from '../../../utils/reducer-utils';
+import {connect} from "react-redux";
+import {LedgerFunding} from "../ledger-funding/container";
+import {ConsensusUpdate} from "../consensus-update/container";
+import {AdvanceChannel} from "../advance-channel/container";
+import {unreachable} from "../../../utils/reducer-utils";
 
 interface Props {
   state: states.NonTerminalVirtualFundingState;
@@ -14,15 +14,15 @@ interface Props {
 
 class VirtualFundingContainer extends PureComponent<Props> {
   render() {
-    const { state } = this.props;
+    const {state} = this.props;
     switch (state.type) {
-      case 'VirtualFunding.WaitForGuarantorFunding':
+      case "VirtualFunding.WaitForGuarantorFunding":
         return <LedgerFunding state={state.indirectGuarantorFunding} />;
-      case 'VirtualFunding.WaitForApplicationFunding':
+      case "VirtualFunding.WaitForApplicationFunding":
         return <ConsensusUpdate state={state.indirectApplicationFunding} />;
-      case 'VirtualFunding.WaitForGuarantorChannel':
+      case "VirtualFunding.WaitForGuarantorChannel":
         return <AdvanceChannel state={state.guarantorChannel} />;
-      case 'VirtualFunding.WaitForJointChannel':
+      case "VirtualFunding.WaitForJointChannel":
         return <AdvanceChannel state={state.jointChannel} />;
       default:
         return unreachable(state);

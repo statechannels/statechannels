@@ -1,22 +1,22 @@
-import { select, take, fork, actionChannel, cancel } from 'redux-saga/effects';
+import {select, take, fork, actionChannel, cancel} from "redux-saga/effects";
 
-import { messageListener } from './message-listener';
-import { messageSender } from './message-sender';
-import { transactionSender } from './transaction-sender';
-import { adjudicatorWatcher } from './adjudicator-watcher';
-import { challengeWatcher } from './challenge-watcher';
+import {messageListener} from "./message-listener";
+import {messageSender} from "./message-sender";
+import {transactionSender} from "./transaction-sender";
+import {adjudicatorWatcher} from "./adjudicator-watcher";
+import {challengeWatcher} from "./challenge-watcher";
 
-import { WalletState } from '../state';
-import { getProvider, isDevelopmentNetwork } from '../../utils/contract-utils';
+import {WalletState} from "../state";
+import {getProvider, isDevelopmentNetwork} from "../../utils/contract-utils";
 
-import { displaySender } from './display-sender';
-import { ganacheMiner } from './ganache-miner';
-import { WALLET_INITIALIZED } from '../state';
-import { challengeResponseInitiator } from './challenge-response-initiator';
-import { multipleActionDispatcher } from './multiple-action-dispatcher';
+import {displaySender} from "./display-sender";
+import {ganacheMiner} from "./ganache-miner";
+import {WALLET_INITIALIZED} from "../state";
+import {challengeResponseInitiator} from "./challenge-response-initiator";
+import {multipleActionDispatcher} from "./multiple-action-dispatcher";
 
-import { adjudicatorStateUpdater } from './adjudicator-state-updater';
-import { isLoadAction } from '../actions';
+import {adjudicatorStateUpdater} from "./adjudicator-state-updater";
+import {isLoadAction} from "../actions";
 
 export function* sagaManager(): IterableIterator<any> {
   let adjudicatorWatcherProcess;
@@ -30,7 +30,7 @@ export function* sagaManager(): IterableIterator<any> {
   yield fork(messageListener);
 
   // todo: restrict just to wallet actions
-  const channel = yield actionChannel('*');
+  const channel = yield actionChannel("*");
 
   while (true) {
     const action = yield take(channel);
@@ -75,7 +75,7 @@ export function* sagaManager(): IterableIterator<any> {
       }
     }
 
-    const { outboxState } = state;
+    const {outboxState} = state;
     if (outboxState.messageOutbox.length) {
       const messageToSend = outboxState.messageOutbox[0];
       yield messageSender(messageToSend);

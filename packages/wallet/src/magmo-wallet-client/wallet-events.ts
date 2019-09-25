@@ -1,4 +1,4 @@
-import { Commitment } from 'fmg-core';
+import {Commitment} from "fmg-core";
 
 // TODO: We should limit WalletEvent/WalletEventTypes to the bare minimum of events we expect the app to handle. Some of these can be pruned.
 // Events that we handle for the user (HideWallet,ShowWallet, ValidateSuccess, etc..) should be removed from WalletEvent/WalletEventTypes
@@ -9,12 +9,12 @@ import { Commitment } from 'fmg-core';
 /**
  * The event type when funding succeeds.
  */
-export const FUNDING_SUCCESS = 'WALLET.FUNDING.SUCCESS';
+export const FUNDING_SUCCESS = "WALLET.FUNDING.SUCCESS";
 
 /**
  * The event type when funding fails.
  */
-export const FUNDING_FAILURE = 'WALLET.FUNDING.FAILURE';
+export const FUNDING_FAILURE = "WALLET.FUNDING.FAILURE";
 
 /**
  * @ignore
@@ -22,21 +22,17 @@ export const FUNDING_FAILURE = 'WALLET.FUNDING.FAILURE';
 export const fundingSuccess = (channelId, commitment: Commitment) => ({
   type: FUNDING_SUCCESS as typeof FUNDING_SUCCESS,
   channelId,
-  commitment,
+  commitment
 });
 
 /**
  * @ignore
  */
-export const fundingFailure = (
-  channelId: any,
-  reason: 'FundingDeclined' | 'Other',
-  error?: string,
-) => ({
+export const fundingFailure = (channelId: any, reason: "FundingDeclined" | "Other", error?: string) => ({
   type: FUNDING_FAILURE as typeof FUNDING_FAILURE,
   channelId,
   reason,
-  error,
+  error
 });
 
 /**
@@ -59,27 +55,24 @@ export type FundingResponse = FundingSuccess | FundingFailure;
 /**
  * @ignore
  */
-export const VALIDATION_SUCCESS = 'WALLET.VALIDATION.SUCCESS';
+export const VALIDATION_SUCCESS = "WALLET.VALIDATION.SUCCESS";
 /**
  * @ignore
  */
-export const VALIDATION_FAILURE = 'WALLET.VALIDATION.FAILURE';
+export const VALIDATION_FAILURE = "WALLET.VALIDATION.FAILURE";
 /**
  * @ignore
  */
 export const validationSuccess = () => ({
-  type: VALIDATION_SUCCESS as typeof VALIDATION_SUCCESS,
+  type: VALIDATION_SUCCESS as typeof VALIDATION_SUCCESS
 });
 /**
  * @ignore
  */
-export const validationFailure = (
-  reason: 'WalletBusy' | 'InvalidSignature' | 'Other',
-  error?: string,
-) => ({
+export const validationFailure = (reason: "WalletBusy" | "InvalidSignature" | "Other", error?: string) => ({
   type: VALIDATION_FAILURE as typeof VALIDATION_FAILURE,
   reason,
-  error,
+  error
 });
 /**
  * @ignore
@@ -99,25 +92,25 @@ export type ValidationResponse = ValidationSuccess | ValidationFailure;
 /**
  * @ignore
  */
-export const SIGNATURE_SUCCESS = 'WALLET.SIGNATURE.SUCCESS';
+export const SIGNATURE_SUCCESS = "WALLET.SIGNATURE.SUCCESS";
 /**
  * @ignore
  */
-export const SIGNATURE_FAILURE = 'WALLET.SIGNATURE.FAILURE';
+export const SIGNATURE_FAILURE = "WALLET.SIGNATURE.FAILURE";
 /**
  * @ignore
  */
 export const signatureSuccess = (signature: string) => ({
   type: SIGNATURE_SUCCESS as typeof SIGNATURE_SUCCESS,
-  signature,
+  signature
 });
 /**
  * @ignore
  */
-export const signatureFailure = (reason: 'WalletBusy' | 'Other', error?: string) => ({
+export const signatureFailure = (reason: "WalletBusy" | "Other", error?: string) => ({
   type: SIGNATURE_FAILURE as typeof SIGNATURE_FAILURE,
   reason,
-  error,
+  error
 });
 /**
  * @ignore
@@ -137,25 +130,25 @@ export type SignatureResponse = SignatureSuccess | SignatureFailure;
 /**
  * @ignore
  */
-export const INITIALIZATION_SUCCESS = 'WALLET.INITIALIZATION.SUCCESS';
+export const INITIALIZATION_SUCCESS = "WALLET.INITIALIZATION.SUCCESS";
 /**
  * @ignore
  */
-export const INITIALIZATION_FAILURE = 'WALLET.INITIALIZATION.FAILURE';
+export const INITIALIZATION_FAILURE = "WALLET.INITIALIZATION.FAILURE";
 
 /**
  * @ignore
  */
 export const initializationSuccess = (address: string) => ({
   type: INITIALIZATION_SUCCESS as typeof INITIALIZATION_SUCCESS,
-  address,
+  address
 });
 /**
  * @ignore
  */
 export const initializationFailure = (message: string) => ({
   type: INITIALIZATION_FAILURE as typeof INITIALIZATION_FAILURE,
-  message,
+  message
 });
 /**
  * @ignore
@@ -168,13 +161,13 @@ export type InitializationSuccess = ReturnType<typeof initializationSuccess>;
 /**
  * The event type when the opponent concludes the game.
  */
-export const OPPONENT_CONCLUDED = 'WALLET.CONCLUDE.OPPONENT';
+export const OPPONENT_CONCLUDED = "WALLET.CONCLUDE.OPPONENT";
 
 /**
  * @ignore
  */
 export const opponentConcluded = () => ({
-  type: OPPONENT_CONCLUDED as typeof OPPONENT_CONCLUDED,
+  type: OPPONENT_CONCLUDED as typeof OPPONENT_CONCLUDED
 });
 
 /**
@@ -185,24 +178,24 @@ export type OpponentConcluded = ReturnType<typeof opponentConcluded>;
 /**
  * The event type when the game successfully concludes.
  */
-export const CONCLUDE_SUCCESS = 'WALLET.CONCLUDE.SUCCESS';
+export const CONCLUDE_SUCCESS = "WALLET.CONCLUDE.SUCCESS";
 /**
  * The event type when the game conclusion fails.
  */
-export const CONCLUDE_FAILURE = 'WALLET.CONCLUDE.FAILURE';
+export const CONCLUDE_FAILURE = "WALLET.CONCLUDE.FAILURE";
 /**
  * @ignore
  */
 export const concludeSuccess = () => ({
-  type: CONCLUDE_SUCCESS as typeof CONCLUDE_SUCCESS,
+  type: CONCLUDE_SUCCESS as typeof CONCLUDE_SUCCESS
 });
 /**
  * @ignore
  */
-export const concludeFailure = (reason: 'UserDeclined' | 'Other', error?: string) => ({
+export const concludeFailure = (reason: "UserDeclined" | "Other", error?: string) => ({
   type: CONCLUDE_FAILURE as typeof CONCLUDE_FAILURE,
   reason,
-  error,
+  error
 });
 /**
  * The event emitted when a conclude succeeds.
@@ -217,12 +210,12 @@ export type ConcludeFailure = ReturnType<typeof concludeFailure>;
 /**
  * @ignore
  */
-export const SHOW_WALLET = 'WALLET.DISPLAY.SHOW_WALLET';
+export const SHOW_WALLET = "WALLET.DISPLAY.SHOW_WALLET";
 /**
  * @ignore
  */
 export const showWallet = () => ({
-  type: SHOW_WALLET as typeof SHOW_WALLET,
+  type: SHOW_WALLET as typeof SHOW_WALLET
 });
 /**
  * @ignore
@@ -232,12 +225,12 @@ export type ShowWallet = ReturnType<typeof showWallet>;
 /**
  * @ignore
  */
-export const HIDE_WALLET = 'WALLET.DISPLAY.HIDE_WALLET';
+export const HIDE_WALLET = "WALLET.DISPLAY.HIDE_WALLET";
 /**
  * @ignore
  */
 export const hideWallet = () => ({
-  type: HIDE_WALLET as typeof HIDE_WALLET,
+  type: HIDE_WALLET as typeof HIDE_WALLET
 });
 /**
  * @ignore
@@ -249,14 +242,14 @@ export type HideWallet = ReturnType<typeof hideWallet>;
 /**
  * The type of event when a message relay to the opponent's wallet is requested.
  */
-export const MESSAGE_RELAY_REQUESTED = 'WALLET.MESSAGING.MESSAGE_RELAY_REQUESTED';
+export const MESSAGE_RELAY_REQUESTED = "WALLET.MESSAGING.MESSAGE_RELAY_REQUESTED";
 /**
  * @ignore
  */
 export const messageRelayRequested = (to: string, messagePayload: any) => ({
   type: MESSAGE_RELAY_REQUESTED as typeof MESSAGE_RELAY_REQUESTED,
   to,
-  messagePayload,
+  messagePayload
 });
 
 /**
@@ -267,13 +260,13 @@ export type MessageRelayRequested = ReturnType<typeof messageRelayRequested>;
 /**
  * The type for events where a challenge position is received from the wallet.
  */
-export const CHALLENGE_COMMITMENT_RECEIVED = 'WALLET.MESSAGING.CHALLENGE_COMMITMENT_RECEIVED';
+export const CHALLENGE_COMMITMENT_RECEIVED = "WALLET.MESSAGING.CHALLENGE_COMMITMENT_RECEIVED";
 /**
  * @ignore
  */
 export const challengeCommitmentReceived = (commitment: Commitment) => ({
   type: CHALLENGE_COMMITMENT_RECEIVED as typeof CHALLENGE_COMMITMENT_RECEIVED,
-  commitment,
+  commitment
 });
 /**
  * The event emitted when the wallet has received a challenge position.
@@ -283,13 +276,13 @@ export type ChallengeCommitmentReceived = ReturnType<typeof challengeCommitmentR
 /**
  * The event type when a user rejects a challenge.
  */
-export const CHALLENGE_REJECTED = 'WALLET.CHALLENGING.CHALLENGE_REJECTED';
+export const CHALLENGE_REJECTED = "WALLET.CHALLENGING.CHALLENGE_REJECTED";
 /**
  * @ignore
  */
 export const challengeRejected = reason => ({
   type: CHALLENGE_REJECTED as typeof CHALLENGE_REJECTED,
-  reason,
+  reason
 });
 /**
  * The event emitted when a user rejects a challenge.
@@ -298,13 +291,13 @@ export type ChallengeRejected = ReturnType<typeof challengeRejected>;
 /**
  * The event type when a challenge response is requested from the application.
  */
-export const CHALLENGE_RESPONSE_REQUESTED = 'WALLET.CHALLENGING.CHALLENGE_RESPONSE_REQUESTED';
+export const CHALLENGE_RESPONSE_REQUESTED = "WALLET.CHALLENGING.CHALLENGE_RESPONSE_REQUESTED";
 /**
  * @ignore
  */
 export const challengeResponseRequested = (channelId: string) => ({
   type: CHALLENGE_RESPONSE_REQUESTED as typeof CHALLENGE_RESPONSE_REQUESTED,
-  channelId,
+  channelId
 });
 /**
  * The event emitted when a response to a challenge is requested from the application.
@@ -313,12 +306,12 @@ export type ChallengeResponseRequested = ReturnType<typeof challengeResponseRequ
 /**
  * The event type when a challenge is over.
  */
-export const CHALLENGE_COMPLETE = 'WALLET.CHALLENGING.CHALLENGE_COMPLETE';
+export const CHALLENGE_COMPLETE = "WALLET.CHALLENGING.CHALLENGE_COMPLETE";
 /**
  * @ignore
  */
 export const challengeComplete = () => ({
-  type: CHALLENGE_COMPLETE as typeof CHALLENGE_COMPLETE,
+  type: CHALLENGE_COMPLETE as typeof CHALLENGE_COMPLETE
 });
 /**
  * The event emitted when the challenge is over.

@@ -1,12 +1,12 @@
-import { storiesOf } from '@storybook/react';
-import React from 'react';
-import { Provider } from 'react-redux';
-import '../index.scss';
-import { dummyWaitForLogin, dummyWaitForMetaMask } from './dummy-wallet-states';
-import WalletContainer from '../containers/wallet';
-import { ProtocolState } from '../redux/protocols';
-import Modal from 'react-modal';
-import StatusBarLayout from '../components/status-bar-layout';
+import {storiesOf} from "@storybook/react";
+import React from "react";
+import {Provider} from "react-redux";
+import "../index.scss";
+import {dummyWaitForLogin, dummyWaitForMetaMask} from "./dummy-wallet-states";
+import WalletContainer from "../containers/wallet";
+import {ProtocolState} from "../redux/protocols";
+import Modal from "react-modal";
+import StatusBarLayout from "../components/status-bar-layout";
 
 const walletStateRender = state => () => {
   console.log(state);
@@ -23,8 +23,8 @@ const protocolStateRender = (protocolState: ProtocolState, Container) => () => {
     <Provider store={fakeStore(protocolState)}>
       <Modal
         isOpen={true}
-        className={'wallet-content-center'}
-        overlayClassName={'wallet-overlay-center'}
+        className={"wallet-content-center"}
+        overlayClassName={"wallet-overlay-center"}
         ariaHideApp={false}
       >
         <StatusBarLayout>
@@ -45,23 +45,23 @@ export function addStoriesFromScenario(scenario, chapter, container) {
 
 const WalletScreensNotInitialized = {
   WaitForLogIn: dummyWaitForLogin,
-  WaitForMetaMask: dummyWaitForMetaMask,
+  WaitForMetaMask: dummyWaitForMetaMask
 };
 
-addStoriesFromCollection(WalletScreensNotInitialized, 'Not Initialized ');
+addStoriesFromCollection(WalletScreensNotInitialized, "Not Initialized ");
 
 const NetworkStatuses = {
   // TODO the UI currently inspects an environment variable (not the redux state) to infer networkId
-  Mainnet: { ...dummyWaitForLogin, networkId: 1 },
-  Kovan: { ...dummyWaitForLogin, networkId: 42 },
-  Ropsten: { ...dummyWaitForLogin, networkId: 3 },
-  Rinkeby: { ...dummyWaitForLogin, networkId: 4 },
-  Ganache: { ...dummyWaitForLogin, networkId: 5777 },
+  Mainnet: {...dummyWaitForLogin, networkId: 1},
+  Kovan: {...dummyWaitForLogin, networkId: 42},
+  Ropsten: {...dummyWaitForLogin, networkId: 3},
+  Rinkeby: {...dummyWaitForLogin, networkId: 4},
+  Ganache: {...dummyWaitForLogin, networkId: 5777}
 };
 
-addStoriesFromCollection(NetworkStatuses, 'Network Statuses');
+addStoriesFromCollection(NetworkStatuses, "Network Statuses");
 
-storiesOf('Landing Page', module).add('Landing Page', walletStateRender({}));
+storiesOf("Landing Page", module).add("Landing Page", walletStateRender({}));
 
 export const fakeStore = state => ({
   dispatch: action => {
@@ -74,7 +74,7 @@ export const fakeStore = state => ({
   },
   replaceReducer: () => {
     /* empty */
-  },
+  }
 });
 
 export function addStoriesFromCollection(collection, chapter, renderer = walletStateRender) {

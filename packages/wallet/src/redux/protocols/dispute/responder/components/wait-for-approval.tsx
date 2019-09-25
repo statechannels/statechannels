@@ -1,5 +1,5 @@
-import React, { Fragment } from 'react';
-import Button from 'reactstrap/lib/Button';
+import React, {Fragment} from "react";
+import Button from "reactstrap/lib/Button";
 
 interface Props {
   approve: () => void;
@@ -7,10 +7,8 @@ interface Props {
 }
 export default class WaitForApproval extends React.PureComponent<Props> {
   render() {
-    const { approve } = this.props;
-    const expiryDate = new Date(this.props.expirationTime)
-      .toLocaleTimeString()
-      .replace(/:\d\d /, ' ');
+    const {approve} = this.props;
+    const expiryDate = new Date(this.props.expirationTime).toLocaleTimeString().replace(/:\d\d /, " ");
     return (
       <Fragment>
         <h2>Challenge Detected</h2>

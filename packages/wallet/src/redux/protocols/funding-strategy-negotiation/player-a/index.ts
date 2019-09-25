@@ -1,1 +1,1 @@
-export { FundingStrategyNegotiation } from './container';
+export {FundingStrategyNegotiation} from "./container";

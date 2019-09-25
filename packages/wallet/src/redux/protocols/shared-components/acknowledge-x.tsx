@@ -1,6 +1,6 @@
-import React from 'react';
-import { Button } from 'reactstrap';
-import { StyleSheet, css } from 'aphrodite';
+import React from "react";
+import {Button} from "reactstrap";
+import {StyleSheet, css} from "aphrodite";
 
 interface Props {
   title: string;
@@ -11,7 +11,7 @@ interface Props {
 
 export default class AcknowledgeX extends React.PureComponent<Props> {
   render() {
-    const { title, action, actionTitle, description } = this.props;
+    const {title, action, actionTitle, description} = this.props;
     return (
       <div>
         <h2>{title}</h2>
@@ -30,10 +30,10 @@ export default class AcknowledgeX extends React.PureComponent<Props> {
 
 const styles = StyleSheet.create({
   buttonContainer: {
-    display: 'flex',
-    padding: '5px',
+    display: "flex",
+    padding: "5px"
   },
   button: {
-    margin: '8px',
-  },
+    margin: "8px"
+  }
 });

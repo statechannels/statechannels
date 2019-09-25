@@ -1,14 +1,14 @@
-import * as states from '../states';
-import * as actions from '../actions';
+import * as states from "../states";
+import * as actions from "../actions";
 
-import * as transactionScenarios from '../../../transaction-submission/__tests__';
-import { EMPTY_SHARED_DATA, SharedData } from '../../../../state';
+import * as transactionScenarios from "../../../transaction-submission/__tests__";
+import {EMPTY_SHARED_DATA, SharedData} from "../../../../state";
 
-import { ChannelState, ChannelStore } from '../../../../channel-store';
-import * as transactionActions from '../../../transaction-submission/actions';
-import { challengeExpiredEvent } from '../../../../actions';
-import * as testScenarios from '../../../../../domain/commitments/__tests__';
-import { convertCommitmentToSignedState } from '../../../../../utils/nitro-converter';
+import {ChannelState, ChannelStore} from "../../../../channel-store";
+import * as transactionActions from "../../../transaction-submission/actions";
+import {challengeExpiredEvent} from "../../../../actions";
+import * as testScenarios from "../../../../../domain/commitments/__tests__";
+import {convertCommitmentToSignedState} from "../../../../../utils/nitro-converter";
 // ---------
 // Test data
 // ---------
@@ -19,11 +19,11 @@ const {
   channelId,
   libraryAddress,
   participants,
-  channelNonce,
+  channelNonce
 } = testScenarios;
-const gameCommitment1 = testScenarios.appCommitment({ turnNum: 19 }).commitment;
-const gameCommitment2 = testScenarios.appCommitment({ turnNum: 20 }).commitment;
-const gameCommitment3 = testScenarios.appCommitment({ turnNum: 21 }).commitment;
+const gameCommitment1 = testScenarios.appCommitment({turnNum: 19}).commitment;
+const gameCommitment2 = testScenarios.appCommitment({turnNum: 20}).commitment;
+const gameCommitment3 = testScenarios.appCommitment({turnNum: 21}).commitment;
 
 const channelStatus: ChannelState = {
   address,
@@ -37,20 +37,20 @@ const channelStatus: ChannelState = {
   commitments: [
     {
       commitment: gameCommitment1,
-      signature: '0x0',
-      signedState: convertCommitmentToSignedState(gameCommitment1, privateKey),
+      signature: "0x0",
+      signedState: convertCommitmentToSignedState(gameCommitment1, privateKey)
     },
     {
       commitment: gameCommitment2,
-      signature: '0x0',
-      signedState: convertCommitmentToSignedState(gameCommitment2, privateKey),
-    },
+      signature: "0x0",
+      signedState: convertCommitmentToSignedState(gameCommitment2, privateKey)
+    }
   ],
-  turnNum: gameCommitment2.turnNum,
+  turnNum: gameCommitment2.turnNum
 };
 
 const channelStore: ChannelStore = {
-  [channelId]: channelStatus,
+  [channelId]: channelStatus
 };
 
 const refuteChannelStatus: ChannelState = {
@@ -58,64 +58,64 @@ const refuteChannelStatus: ChannelState = {
   commitments: [
     {
       commitment: gameCommitment2,
-      signature: '0x0',
-      signedState: convertCommitmentToSignedState(gameCommitment2, privateKey),
+      signature: "0x0",
+      signedState: convertCommitmentToSignedState(gameCommitment2, privateKey)
     },
     {
       commitment: gameCommitment3,
-      signature: '0x0',
-      signedState: convertCommitmentToSignedState(gameCommitment3, privateKey),
-    },
+      signature: "0x0",
+      signedState: convertCommitmentToSignedState(gameCommitment3, privateKey)
+    }
   ],
-  turnNum: gameCommitment2.turnNum,
+  turnNum: gameCommitment2.turnNum
 };
 const refuteChannelState = {
-  [channelId]: refuteChannelStatus,
+  [channelId]: refuteChannelStatus
 };
 const transactionSubmissionState = transactionScenarios.preSuccessState;
-const processId = 'process-id.123';
-const sharedData: SharedData = { ...EMPTY_SHARED_DATA, channelStore };
-const defaults = { processId, transactionSubmissionState, sharedData, channelId, expiryTime: 0 };
+const processId = "process-id.123";
+const sharedData: SharedData = {...EMPTY_SHARED_DATA, channelStore};
+const defaults = {processId, transactionSubmissionState, sharedData, channelId, expiryTime: 0};
 
 // ------
 // States
 // ------
 const waitForApprovalRefute = states.waitForApproval({
   ...defaults,
-  challengeCommitment: gameCommitment1,
+  challengeCommitment: gameCommitment1
 });
 const waitForApprovalRespond = states.waitForApproval({
   ...defaults,
-  challengeCommitment: gameCommitment1,
+  challengeCommitment: gameCommitment1
 });
 const waitForApprovalRequiresResponse = states.waitForApproval({
   ...defaults,
-  challengeCommitment: gameCommitment3,
+  challengeCommitment: gameCommitment3
 });
 const waitForTransaction = states.waitForTransaction(defaults);
 const waitForAcknowledgement = states.waitForAcknowledgement(defaults);
 const waitForResponse = states.waitForResponse(defaults);
 const transactionFailedFailure = states.failure({
-  reason: states.FailureReason.TransactionFailure,
+  reason: states.FailureReason.TransactionFailure
 });
-const transactionConfirmed = transactionActions.transactionConfirmed({ processId });
-const transactionFailed = transactionActions.transactionFailed({ processId });
+const transactionConfirmed = transactionActions.transactionConfirmed({processId});
+const transactionFailed = transactionActions.transactionFailed({processId});
 const acknowledgeTimeout = states.acknowledgeTimeout(defaults);
 
 // ------
 // Actions
 // ------
-const approve = actions.respondApproved({ processId });
+const approve = actions.respondApproved({processId});
 const responseProvided = actions.responseProvided({
   processId,
-  commitment: gameCommitment3,
+  commitment: gameCommitment3
 });
-const acknowledged = actions.acknowledged({ processId });
+const acknowledged = actions.acknowledged({processId});
 const challengeTimedOut = challengeExpiredEvent({
   processId,
   protocolLocator: [],
   channelId,
-  timestamp: 1000,
+  timestamp: 1000
 });
 
 // ---------
@@ -127,35 +127,35 @@ export const respondWithExistingCommitmentHappyPath = {
   waitForApproval: {
     state: waitForApprovalRespond,
     action: approve,
-    responseCommitment: gameCommitment2,
+    responseCommitment: gameCommitment2
   },
   waitForTransaction: {
     state: waitForTransaction,
-    action: transactionConfirmed,
+    action: transactionConfirmed
   },
   waitForAcknowledgement: {
     state: waitForAcknowledgement,
-    action: acknowledged,
-  },
+    action: acknowledged
+  }
 };
 
 export const refuteHappyPath = {
   ...defaults,
-  sharedData: { ...defaults.sharedData, channelStore: refuteChannelState },
+  sharedData: {...defaults.sharedData, channelStore: refuteChannelState},
   challengeCommitment: gameCommitment1,
   waitForApproval: {
     state: waitForApprovalRefute,
     action: approve,
-    refuteCommitment: gameCommitment3,
+    refuteCommitment: gameCommitment3
   },
   waitForTransaction: {
     state: waitForTransaction,
-    action: transactionConfirmed,
+    action: transactionConfirmed
   },
   waitForAcknowledgement: {
     state: waitForAcknowledgement,
-    action: acknowledged,
-  },
+    action: acknowledged
+  }
 };
 
 export const requireResponseHappyPath = {
@@ -163,68 +163,68 @@ export const requireResponseHappyPath = {
   challengeCommitment: gameCommitment2,
   waitForApprovalRequiresResponse: {
     state: waitForApprovalRequiresResponse,
-    action: approve,
+    action: approve
   },
   waitForResponse: {
     state: waitForResponse,
     action: responseProvided,
-    responseCommitment: gameCommitment3,
+    responseCommitment: gameCommitment3
   },
   waitForTransaction: {
     state: waitForTransaction,
-    action: transactionConfirmed,
+    action: transactionConfirmed
   },
   waitForAcknowledgement: {
     state: waitForAcknowledgement,
-    action: acknowledged,
-  },
+    action: acknowledged
+  }
 };
 
 export const transactionFails = {
   ...defaults,
   waitForApproval: {
     state: waitForApprovalRespond,
-    action: approve,
+    action: approve
   },
   waitForTransaction: {
     state: waitForTransaction,
-    action: transactionFailed,
+    action: transactionFailed
   },
-  failure: transactionFailedFailure,
+  failure: transactionFailedFailure
 };
 
 export const challengeExpires = {
   ...defaults,
   waitForResponse: {
     state: waitForResponse,
-    action: challengeTimedOut,
+    action: challengeTimedOut
   },
   acknowledgeTimeout: {
     state: acknowledgeTimeout,
-    action: acknowledged,
-  },
+    action: acknowledged
+  }
 };
 
 export const challengeExpiresAndDefund = {
   ...defaults,
   defund: {
     state: acknowledgeTimeout,
-    action: actions.exitChallenge({ ...defaults }),
-  },
+    action: actions.exitChallenge({...defaults})
+  }
 };
 
 export const challengeExpiresDuringWaitForTransaction = {
   ...defaults,
   waitForTransaction: {
     state: waitForTransaction,
-    action: challengeTimedOut,
-  },
+    action: challengeTimedOut
+  }
 };
 
 export const challengeExpiresDuringWaitForApproval = {
   ...defaults,
   waitForApprovalRespond: {
     state: waitForApprovalRespond,
-    action: challengeTimedOut,
-  },
+    action: challengeTimedOut
+  }
 };

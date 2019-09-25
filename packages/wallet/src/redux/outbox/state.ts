@@ -1,9 +1,9 @@
-import { TransactionRequest } from 'ethers/providers';
-import { WalletEvent, DisplayAction } from '../../magmo-wallet-client';
-import { accumulateSideEffects } from '.';
+import {TransactionRequest} from "ethers/providers";
+import {WalletEvent, DisplayAction} from "../../magmo-wallet-client";
+import {accumulateSideEffects} from ".";
 
 export function emptyDisplayOutboxState(): OutboxState {
-  return { displayOutbox: [], messageOutbox: [], transactionOutbox: [] };
+  return {displayOutbox: [], messageOutbox: [], transactionOutbox: []};
 }
 
 export interface QueuedTransaction {
@@ -21,7 +21,7 @@ export interface OutboxState {
 }
 
 export type SideEffects = {
-  [Outbox in keyof OutboxState]?: OutboxState[Outbox] | OutboxState[Outbox][0]
+  [Outbox in keyof OutboxState]?: OutboxState[Outbox] | OutboxState[Outbox][0];
 };
 
 // -------------------
@@ -29,16 +29,12 @@ export type SideEffects = {
 // -------------------
 
 export function queueMessage(state: OutboxState, message: WalletEvent): OutboxState {
-  return accumulateSideEffects(state, { messageOutbox: [message] });
+  return accumulateSideEffects(state, {messageOutbox: [message]});
 }
 
-export function queueTransaction(
-  state: OutboxState,
-  transaction: TransactionRequest,
-  processId: string,
-): OutboxState {
+export function queueTransaction(state: OutboxState, transaction: TransactionRequest, processId: string): OutboxState {
   return accumulateSideEffects(state, {
-    transactionOutbox: { transactionRequest: transaction, processId },
+    transactionOutbox: {transactionRequest: transaction, processId}
   });
 }
 

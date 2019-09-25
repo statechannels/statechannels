@@ -1,7 +1,7 @@
-import { faCircle } from '@fortawesome/free-regular-svg-icons';
-import { faCheckCircle, faSpinner } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import React from 'react';
+import {faCircle} from "@fortawesome/free-regular-svg-icons";
+import {faCheckCircle, faSpinner} from "@fortawesome/free-solid-svg-icons";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import React from "react";
 
 const completeIcon = (
   <span className="fa-li">
@@ -35,12 +35,8 @@ export interface MessagesForStep {
   postStep: string;
 }
 
-export const messagesForStep = (
-  preStep: string,
-  step: string,
-  postStep: string,
-): MessagesForStep => {
-  return { preStep, step, postStep };
+export const messagesForStep = (preStep: string, step: string, postStep: string): MessagesForStep => {
+  return {preStep, step, postStep};
 };
 
 export const message = (messageForStep: MessagesForStep, iconStep: number, currentStep: number) => {

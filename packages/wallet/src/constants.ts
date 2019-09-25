@@ -2,13 +2,13 @@ import {
   getAdjudicatorContractAddress,
   getConsensusContractAddress,
   getNetworkId,
-  getEThAssetHolderAddress,
-} from './utils/contract-utils';
+  getEThAssetHolderAddress
+} from "./utils/contract-utils";
 
 export const ETH_ASSET_HOLDER_ADDRESS = getEThAssetHolderAddress();
 export const ADJUDICATOR_ADDRESS = getAdjudicatorContractAddress();
 export const CONSENSUS_LIBRARY_ADDRESS = getConsensusContractAddress();
 export const NETWORK_ID = getNetworkId();
-export const USE_STORAGE = process.env.USE_STORAGE === 'TRUE';
+export const USE_STORAGE = process.env.USE_STORAGE === "TRUE";
 // TODO: Move top ENV variable
-export const HUB_ADDRESS = '0x100063c326b27f78b2cBb7cd036B8ddE4d4FCa7C';
+export const HUB_ADDRESS = "0x100063c326b27f78b2cBb7cd036B8ddE4d4FCa7C";

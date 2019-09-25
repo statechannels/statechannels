@@ -1,4 +1,4 @@
-import { happyPath, ledgerFundingFails, successState as scenarioSuccessState } from './scenarios';
+import {happyPath, ledgerFundingFails, successState as scenarioSuccessState} from "./scenarios";
 
 export const initialState = happyPath.waitForPreFundL1.state;
 

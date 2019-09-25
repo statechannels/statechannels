@@ -1,6 +1,6 @@
-import { indirectStrategyChosen, virtualStrategyChosen } from './scenarios';
+import {indirectStrategyChosen, virtualStrategyChosen} from "./scenarios";
 
 export const indirectPreSuccess = indirectStrategyChosen.waitForStrategyApproval;
 export const virtualPreSuccess = virtualStrategyChosen.waitForStrategyApproval;
 
-export { virtualSuccess, indirectSuccess } from './scenarios';
+export {virtualSuccess, indirectSuccess} from "./scenarios";

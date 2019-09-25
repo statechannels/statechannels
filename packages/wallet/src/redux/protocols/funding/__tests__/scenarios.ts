@@ -1,29 +1,23 @@
-import * as states from '../states';
-import * as actions from '../actions';
+import * as states from "../states";
+import * as actions from "../actions";
 
-import { EMPTY_SHARED_DATA, setChannels } from '../../../state';
-import {
-  channelId,
-  bsAddress,
-  asAddress,
-  appCommitment,
-  asPrivateKey,
-} from '../../../../domain/commitments/__tests__';
-import { preSuccess as ledgerFundingPreSuccess } from '../../ledger-funding/__tests__';
-import { preSuccess as virtualFundingPreSuccess } from '../../virtual-funding/__tests__';
-import { preSuccess as advanceChannelPreSuccess } from '../../advance-channel/__tests__';
-import { bigNumberify } from 'ethers/utils';
-import { channelFromCommitments } from '../../../channel-store/channel-state/__tests__';
-import { prependToLocator } from '../..';
-import { EmbeddedProtocol } from '../../../../communication';
+import {EMPTY_SHARED_DATA, setChannels} from "../../../state";
+import {channelId, bsAddress, asAddress, appCommitment, asPrivateKey} from "../../../../domain/commitments/__tests__";
+import {preSuccess as ledgerFundingPreSuccess} from "../../ledger-funding/__tests__";
+import {preSuccess as virtualFundingPreSuccess} from "../../virtual-funding/__tests__";
+import {preSuccess as advanceChannelPreSuccess} from "../../advance-channel/__tests__";
+import {bigNumberify} from "ethers/utils";
+import {channelFromCommitments} from "../../../channel-store/channel-state/__tests__";
+import {prependToLocator} from "../..";
+import {EmbeddedProtocol} from "../../../../communication";
 import {
   indirectPreSuccess as indirectNegotiationPreSuccess,
-  virtualPreSuccess as virtualNegotiationPreSuccess,
-} from '../../funding-strategy-negotiation/player-a/__tests__';
+  virtualPreSuccess as virtualNegotiationPreSuccess
+} from "../../funding-strategy-negotiation/player-a/__tests__";
 // ---------
 // Test data
 // ---------
-const processId = 'process-id.123';
+const processId = "process-id.123";
 const targetChannelId = channelId;
 const opponentAddress = bsAddress;
 const ourAddress = asAddress;
@@ -32,19 +26,19 @@ const props = {
   processId,
   targetChannelId,
   opponentAddress,
-  ourAddress,
+  ourAddress
 };
 const oneThree = [
-  { address: asAddress, wei: bigNumberify(1).toHexString() },
-  { address: bsAddress, wei: bigNumberify(3).toHexString() },
+  {address: asAddress, wei: bigNumberify(1).toHexString()},
+  {address: bsAddress, wei: bigNumberify(3).toHexString()}
 ];
-const app0 = appCommitment({ turnNum: 0, balances: oneThree });
-const app1 = appCommitment({ turnNum: 1, balances: oneThree });
-const app2 = appCommitment({ turnNum: 2, balances: oneThree });
-const app3 = appCommitment({ turnNum: 3, balances: oneThree });
+const app0 = appCommitment({turnNum: 0, balances: oneThree});
+const app1 = appCommitment({turnNum: 1, balances: oneThree});
+const app2 = appCommitment({turnNum: 2, balances: oneThree});
+const app3 = appCommitment({turnNum: 3, balances: oneThree});
 const appChannelWaitingForFunding = channelFromCommitments([app0, app1], asAddress, asPrivateKey);
 const successSharedData = setChannels(EMPTY_SHARED_DATA, [
-  channelFromCommitments([app2, app3], asAddress, asPrivateKey),
+  channelFromCommitments([app2, app3], asAddress, asPrivateKey)
 ]);
 // ----
 // States
@@ -52,25 +46,25 @@ const successSharedData = setChannels(EMPTY_SHARED_DATA, [
 
 const waitForIndirectStrategyNegotiation = states.waitForStrategyNegotiation({
   ...props,
-  fundingStrategyNegotiationState: indirectNegotiationPreSuccess.state,
+  fundingStrategyNegotiationState: indirectNegotiationPreSuccess.state
 });
 const waitForVirtualStrategyNegotiation = states.waitForStrategyNegotiation({
   ...props,
-  fundingStrategyNegotiationState: virtualNegotiationPreSuccess.state,
+  fundingStrategyNegotiationState: virtualNegotiationPreSuccess.state
 });
 const waitForLedgerFunding = states.waitForLedgerFunding({
   ...props,
   fundingState: ledgerFundingPreSuccess.state,
-  postFundSetupState: advanceChannelPreSuccess.state,
+  postFundSetupState: advanceChannelPreSuccess.state
 });
 const waitForVirtualFunding = states.waitForVirtualFunding({
   ...props,
   fundingState: virtualFundingPreSuccess.state,
-  postFundSetupState: advanceChannelPreSuccess.state,
+  postFundSetupState: advanceChannelPreSuccess.state
 });
 const waitForPostFundSetup = states.waitForPostFundSetup({
   ...props,
-  postFundSetupState: advanceChannelPreSuccess.state,
+  postFundSetupState: advanceChannelPreSuccess.state
 });
 const waitForSuccessConfirmation = states.waitForSuccessConfirmation(props);
 
@@ -78,11 +72,8 @@ const waitForSuccessConfirmation = states.waitForSuccessConfirmation(props);
 // Actions
 // -------
 
-const successConfirmed = actions.fundingSuccessAcknowledged({ processId });
-const ledgerFundingSuccess = prependToLocator(
-  ledgerFundingPreSuccess.action,
-  EmbeddedProtocol.LedgerFunding,
-);
+const successConfirmed = actions.fundingSuccessAcknowledged({processId});
+const ledgerFundingSuccess = prependToLocator(ledgerFundingPreSuccess.action, EmbeddedProtocol.LedgerFunding);
 
 // ---------
 // Scenarios
@@ -93,23 +84,23 @@ export const ledgerFunding = {
   waitForStrategyNegotiation: {
     state: waitForIndirectStrategyNegotiation,
     sharedData: setChannels(ledgerFundingPreSuccess.sharedData, [appChannelWaitingForFunding]),
-    action: indirectNegotiationPreSuccess.action,
+    action: indirectNegotiationPreSuccess.action
   },
   waitForLedgerFunding: {
     state: waitForLedgerFunding,
     sharedData: ledgerFundingPreSuccess.sharedData,
-    action: ledgerFundingSuccess,
+    action: ledgerFundingSuccess
   },
   waitForPostFundSetup: {
     state: waitForPostFundSetup,
     sharedData: advanceChannelPreSuccess.sharedData,
-    action: advanceChannelPreSuccess.trigger,
+    action: advanceChannelPreSuccess.trigger
   },
   waitForSuccessConfirmation: {
     state: waitForSuccessConfirmation,
     sharedData: successSharedData,
-    action: successConfirmed,
-  },
+    action: successConfirmed
+  }
 };
 
 export const virtualFunding = {
@@ -117,16 +108,16 @@ export const virtualFunding = {
   waitForStrategyNegotiation: {
     state: waitForVirtualStrategyNegotiation,
     sharedData: setChannels(virtualFundingPreSuccess.sharedData, [
-      channelFromCommitments([app2, app3], asAddress, asPrivateKey),
+      channelFromCommitments([app2, app3], asAddress, asPrivateKey)
     ]),
-    action: virtualNegotiationPreSuccess.action,
+    action: virtualNegotiationPreSuccess.action
   },
 
   waitForVirtualFunding: {
     state: waitForVirtualFunding,
     sharedData: setChannels(virtualFundingPreSuccess.sharedData, [
-      channelFromCommitments([app2, app3], asAddress, asPrivateKey),
+      channelFromCommitments([app2, app3], asAddress, asPrivateKey)
     ]),
-    action: virtualFundingPreSuccess.action,
-  },
+    action: virtualFundingPreSuccess.action
+  }
 };

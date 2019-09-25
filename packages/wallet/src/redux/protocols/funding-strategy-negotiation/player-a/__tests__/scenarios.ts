@@ -1,18 +1,18 @@
-import * as states from '../states';
-import * as actions from '../actions';
-import { TwoPartyPlayerIndex } from '../../../../types';
+import * as states from "../states";
+import * as actions from "../actions";
+import {TwoPartyPlayerIndex} from "../../../../types";
 
-import { EMPTY_SHARED_DATA } from '../../../../state';
-import { channelId, bsAddress, asAddress } from '../../../../../domain/commitments/__tests__';
+import {EMPTY_SHARED_DATA} from "../../../../state";
+import {channelId, bsAddress, asAddress} from "../../../../../domain/commitments/__tests__";
 
-import { FundingStrategy } from '../../../../../communication';
+import {FundingStrategy} from "../../../../../communication";
 
 // ---------
 // Test data
 // ---------
-const processId = 'process-id.123';
-const indirectStrategy: FundingStrategy = 'IndirectFundingStrategy';
-const virtualStrategy: FundingStrategy = 'VirtualFundingStrategy';
+const processId = "process-id.123";
+const indirectStrategy: FundingStrategy = "IndirectFundingStrategy";
+const virtualStrategy: FundingStrategy = "VirtualFundingStrategy";
 const targetChannelId = channelId;
 const opponentAddress = bsAddress;
 const ourAddress = asAddress;
@@ -22,7 +22,7 @@ const props = {
   targetChannelId,
   opponentAddress,
   ourAddress,
-  protocolLocator: [],
+  protocolLocator: []
 };
 
 // ----
@@ -31,29 +31,29 @@ const props = {
 const waitForStrategyChoice = states.waitForStrategyChoice(props);
 const waitForIndirectStrategyResponse = states.waitForStrategyResponse({
   ...props,
-  strategy: indirectStrategy,
+  strategy: indirectStrategy
 });
 const waitForVirtualStrategyResponse = states.waitForStrategyResponse({
   ...props,
-  strategy: virtualStrategy,
+  strategy: virtualStrategy
 });
 
 export const indirectSuccess = states.success({
-  selectedFundingStrategy: 'IndirectFundingStrategy',
+  selectedFundingStrategy: "IndirectFundingStrategy"
 });
-export const virtualSuccess = states.success({ selectedFundingStrategy: 'VirtualFundingStrategy' });
+export const virtualSuccess = states.success({selectedFundingStrategy: "VirtualFundingStrategy"});
 
 // -------
 // Actions
 // -------
-const chooseIndirectStrategy = actions.strategyChosen({ processId, strategy: indirectStrategy });
-const chooseVirtualStrategy = actions.strategyChosen({ processId, strategy: virtualStrategy });
-const approveIndirectStrategy = actions.strategyApproved({ processId, strategy: indirectStrategy });
-const approveVirtualStrategy = actions.strategyApproved({ processId, strategy: virtualStrategy });
+const chooseIndirectStrategy = actions.strategyChosen({processId, strategy: indirectStrategy});
+const chooseVirtualStrategy = actions.strategyChosen({processId, strategy: virtualStrategy});
+const approveIndirectStrategy = actions.strategyApproved({processId, strategy: indirectStrategy});
+const approveVirtualStrategy = actions.strategyApproved({processId, strategy: virtualStrategy});
 
-const strategyRejected = actions.strategyRejected({ processId });
-const cancelledByA = actions.cancelled({ processId, by: TwoPartyPlayerIndex.A });
-const cancelledByB = actions.cancelled({ processId, by: TwoPartyPlayerIndex.B });
+const strategyRejected = actions.strategyRejected({processId});
+const cancelledByA = actions.cancelled({processId, by: TwoPartyPlayerIndex.A});
+const cancelledByB = actions.cancelled({processId, by: TwoPartyPlayerIndex.B});
 
 // ---------
 // Scenarios
@@ -63,13 +63,13 @@ export const indirectStrategyChosen = {
   waitForStrategyChoice: {
     state: waitForStrategyChoice,
     sharedData: EMPTY_SHARED_DATA,
-    action: chooseIndirectStrategy,
+    action: chooseIndirectStrategy
   },
   waitForStrategyResponse: {
     state: waitForIndirectStrategyResponse,
     sharedData: EMPTY_SHARED_DATA,
-    action: approveIndirectStrategy,
-  },
+    action: approveIndirectStrategy
+  }
 };
 
 export const virtualStrategyChosen = {
@@ -77,13 +77,13 @@ export const virtualStrategyChosen = {
   waitForStrategyChoice: {
     state: waitForStrategyChoice,
     sharedData: EMPTY_SHARED_DATA,
-    action: chooseVirtualStrategy,
+    action: chooseVirtualStrategy
   },
   waitForStrategyResponse: {
     state: waitForVirtualStrategyResponse,
     sharedData: EMPTY_SHARED_DATA,
-    action: approveVirtualStrategy,
-  },
+    action: approveVirtualStrategy
+  }
 };
 
 export const rejectedStrategy = {
@@ -92,8 +92,8 @@ export const rejectedStrategy = {
   waitForStrategyResponse: {
     state: waitForIndirectStrategyResponse,
     sharedData: EMPTY_SHARED_DATA,
-    action: strategyRejected,
-  },
+    action: strategyRejected
+  }
 };
 
 export const cancelledByUser = {
@@ -101,13 +101,13 @@ export const cancelledByUser = {
   waitForStrategyChoice: {
     state: waitForStrategyChoice,
     sharedData: EMPTY_SHARED_DATA,
-    action: cancelledByA,
+    action: cancelledByA
   },
   waitForStrategyResponse: {
     state: waitForIndirectStrategyResponse,
     sharedData: EMPTY_SHARED_DATA,
-    action: cancelledByA,
-  },
+    action: cancelledByA
+  }
 };
 
 export const cancelledByOpponent = {
@@ -115,11 +115,11 @@ export const cancelledByOpponent = {
   waitForStrategyChoice: {
     state: waitForStrategyChoice,
     sharedData: EMPTY_SHARED_DATA,
-    action: cancelledByB,
+    action: cancelledByB
   },
   waitForStrategyResponse: {
     state: waitForIndirectStrategyResponse,
     sharedData: EMPTY_SHARED_DATA,
-    action: cancelledByB,
-  },
+    action: cancelledByB
+  }
 };

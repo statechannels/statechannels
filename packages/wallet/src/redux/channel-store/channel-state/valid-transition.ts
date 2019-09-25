@@ -1,5 +1,5 @@
-import { ChannelState, Commitments } from './states';
-import { Commitment, getChannelId, validCommitmentSignature } from '../../../domain';
+import {ChannelState, Commitments} from "./states";
+import {Commitment, getChannelId, validCommitmentSignature} from "../../../domain";
 
 export function validTransition(state: ChannelState, commitment: Commitment): boolean {
   return (

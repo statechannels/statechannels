@@ -1,14 +1,14 @@
-import * as states from '../states';
-import * as actions from '../actions';
-import * as transactionActions from '../../transaction-submission/actions';
-import * as transactionScenarios from '../../transaction-submission/__tests__';
-import { ChannelState, ChannelStore } from '../../../channel-store';
+import * as states from "../states";
+import * as actions from "../actions";
+import * as transactionActions from "../../transaction-submission/actions";
+import * as transactionScenarios from "../../transaction-submission/__tests__";
+import {ChannelState, ChannelStore} from "../../../channel-store";
 
-import { Wallet } from 'ethers';
-import { EMPTY_SHARED_DATA, SharedData } from '../../../state';
-import * as web3Utils from 'web3-utils';
-import * as testScenarios from '../../../../domain/commitments/__tests__';
-import { convertCommitmentToSignedState } from '../../../../utils/nitro-converter';
+import {Wallet} from "ethers";
+import {EMPTY_SHARED_DATA, SharedData} from "../../../state";
+import * as web3Utils from "web3-utils";
+import * as testScenarios from "../../../../domain/commitments/__tests__";
+import {convertCommitmentToSignedState} from "../../../../utils/nitro-converter";
 
 // ---------
 // Test data
@@ -20,13 +20,13 @@ const {
   channelId,
   libraryAddress,
   participants,
-  channelNonce,
+  channelNonce
 } = testScenarios;
 
-const gameCommitment1 = testScenarios.appCommitment({ turnNum: 19 }).commitment;
-const gameCommitment2 = testScenarios.appCommitment({ turnNum: 20 }).commitment;
-const concludeCommitment1 = testScenarios.appCommitment({ turnNum: 51, isFinal: true }).commitment;
-const concludeCommitment2 = testScenarios.appCommitment({ turnNum: 52, isFinal: true }).commitment;
+const gameCommitment1 = testScenarios.appCommitment({turnNum: 19}).commitment;
+const gameCommitment2 = testScenarios.appCommitment({turnNum: 20}).commitment;
+const concludeCommitment1 = testScenarios.appCommitment({turnNum: 51, isFinal: true}).commitment;
+const concludeCommitment2 = testScenarios.appCommitment({turnNum: 52, isFinal: true}).commitment;
 
 const channelStatus: ChannelState = {
   address,
@@ -41,19 +41,19 @@ const channelStatus: ChannelState = {
   commitments: [
     {
       commitment: concludeCommitment1,
-      signature: '0x0',
-      signedState: convertCommitmentToSignedState(concludeCommitment1, privateKey),
+      signature: "0x0",
+      signedState: convertCommitmentToSignedState(concludeCommitment1, privateKey)
     },
     {
       commitment: concludeCommitment2,
-      signature: '0x0',
-      signedState: convertCommitmentToSignedState(concludeCommitment2, privateKey),
-    },
-  ],
+      signature: "0x0",
+      signedState: convertCommitmentToSignedState(concludeCommitment2, privateKey)
+    }
+  ]
 };
 
 const channelStore: ChannelStore = {
-  [channelId]: channelStatus,
+  [channelId]: channelStatus
 };
 
 const notClosedChannelStatus: ChannelState = {
@@ -61,27 +61,27 @@ const notClosedChannelStatus: ChannelState = {
   commitments: [
     {
       commitment: gameCommitment1,
-      signature: '0x0',
-      signedState: convertCommitmentToSignedState(gameCommitment1, privateKey),
+      signature: "0x0",
+      signedState: convertCommitmentToSignedState(gameCommitment1, privateKey)
     },
     {
       commitment: gameCommitment2,
-      signature: '0x0',
-      signedState: convertCommitmentToSignedState(gameCommitment2, privateKey),
-    },
+      signature: "0x0",
+      signedState: convertCommitmentToSignedState(gameCommitment2, privateKey)
+    }
   ],
-  turnNum: gameCommitment2.turnNum,
+  turnNum: gameCommitment2.turnNum
 };
 
 const notClosedChannelState = {
-  [channelId]: notClosedChannelStatus,
+  [channelId]: notClosedChannelStatus
 };
 
 const transaction = {};
 const withdrawalAddress = Wallet.createRandom().address;
-const processId = 'process-id.123';
-const sharedData: SharedData = { ...EMPTY_SHARED_DATA, channelStore };
-const withdrawalAmount = web3Utils.toWei('5');
+const processId = "process-id.123";
+const sharedData: SharedData = {...EMPTY_SHARED_DATA, channelStore};
+const withdrawalAmount = web3Utils.toWei("5");
 const transactionSubmissionState = transactionScenarios.preSuccessState;
 const props = {
   transaction,
@@ -90,7 +90,7 @@ const props = {
   withdrawalAmount,
   transactionSubmissionState,
   channelId,
-  withdrawalAddress,
+  withdrawalAddress
 };
 
 // ------
@@ -100,19 +100,19 @@ const waitForApproval = states.waitForApproval(props);
 const waitForTransaction = states.waitForTransaction(props);
 const waitForAcknowledgement = states.waitForAcknowledgement(props);
 const success = states.success({});
-const transactionFailure = states.failure({ reason: states.FailureReason.TransactionFailure });
-const userRejectedFailure = states.failure({ reason: states.FailureReason.UserRejected });
-const channelNotClosedFailure = states.failure({ reason: states.FailureReason.ChannelNotClosed });
+const transactionFailure = states.failure({reason: states.FailureReason.TransactionFailure});
+const userRejectedFailure = states.failure({reason: states.FailureReason.UserRejected});
+const channelNotClosedFailure = states.failure({reason: states.FailureReason.ChannelNotClosed});
 
 // -------
 // Actions
 // -------
 
-const approved = actions.withdrawalApproved({ processId, withdrawalAddress });
-const rejected = actions.withdrawalRejected({ processId });
-const successAcknowledged = actions.withdrawalSuccessAcknowledged({ processId });
-const transactionConfirmed = transactionActions.transactionConfirmed({ processId });
-const transactionFailed = transactionActions.transactionFailed({ processId });
+const approved = actions.withdrawalApproved({processId, withdrawalAddress});
+const rejected = actions.withdrawalRejected({processId});
+const successAcknowledged = actions.withdrawalSuccessAcknowledged({processId});
+const transactionConfirmed = transactionActions.transactionConfirmed({processId});
+const transactionFailed = transactionActions.transactionFailed({processId});
 
 // ---------
 // Scenarios
@@ -121,43 +121,43 @@ export const happyPath = {
   ...props,
   waitForApproval: {
     state: waitForApproval,
-    action: approved,
+    action: approved
   },
   waitForTransaction: {
     state: waitForTransaction,
-    action: transactionConfirmed,
+    action: transactionConfirmed
   },
   waitForAcknowledgement: {
     state: waitForAcknowledgement,
-    action: successAcknowledged,
+    action: successAcknowledged
   },
-  success,
+  success
 };
 
 export const withdrawalRejected = {
   ...props,
   waitForApproval: {
     state: waitForApproval,
-    action: rejected,
+    action: rejected
   },
-  failure: userRejectedFailure,
+  failure: userRejectedFailure
 };
 
 export const failedTransaction = {
   ...props,
   waitForApproval: {
     state: waitForApproval,
-    action: approved,
+    action: approved
   },
   waitForTransaction: {
     state: waitForTransaction,
-    action: transactionFailed,
+    action: transactionFailed
   },
-  failure: transactionFailure,
+  failure: transactionFailure
 };
 
 export const channelNotClosed = {
   ...props,
-  sharedData: { ...EMPTY_SHARED_DATA, channelStore: notClosedChannelState },
-  failure: channelNotClosedFailure,
+  sharedData: {...EMPTY_SHARED_DATA, channelStore: notClosedChannelState},
+  failure: channelNotClosedFailure
 };

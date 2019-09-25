@@ -1,7 +1,7 @@
-import { WalletAction } from '../../actions';
-import { isCommonAction, EmbeddedProtocol, routerFactory } from '../../../communication';
-import { isDirectFundingAction, DirectFundingAction } from '../direct-funding/actions';
-import { AdvanceChannelAction, isAdvanceChannelAction } from '../advance-channel';
+import {WalletAction} from "../../actions";
+import {isCommonAction, EmbeddedProtocol, routerFactory} from "../../../communication";
+import {isDirectFundingAction, DirectFundingAction} from "../direct-funding/actions";
+import {AdvanceChannelAction, isAdvanceChannelAction} from "../advance-channel";
 
 // -------
 // Actions
@@ -24,7 +24,4 @@ export function isNewLedgerChannelAction(action: WalletAction): action is NewLed
   );
 }
 
-export const routesToNewLedgerChannel = routerFactory(
-  isNewLedgerChannelAction,
-  EmbeddedProtocol.NewLedgerChannel,
-);
+export const routesToNewLedgerChannel = routerFactory(isNewLedgerChannelAction, EmbeddedProtocol.NewLedgerChannel);

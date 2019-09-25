@@ -1,15 +1,15 @@
-import { StateConstructor } from '../../utils';
-import { LedgerDefundingState } from '../ledger-defunding/states';
-import { ProtocolState } from '..';
-import { NonTerminalVirtualDefundingState } from '../virtual-defunding/states';
-import { ProtocolLocator } from '../../../communication';
+import {StateConstructor} from "../../utils";
+import {LedgerDefundingState} from "../ledger-defunding/states";
+import {ProtocolState} from "..";
+import {NonTerminalVirtualDefundingState} from "../virtual-defunding/states";
+import {ProtocolLocator} from "../../../communication";
 
 // -------
 // States
 // -------
 
 export interface WaitForLedgerDefunding {
-  type: 'Defunding.WaitForLedgerDefunding';
+  type: "Defunding.WaitForLedgerDefunding";
   processId: string;
   ledgerDefundingState: LedgerDefundingState;
   channelId;
@@ -18,7 +18,7 @@ export interface WaitForLedgerDefunding {
 }
 
 export interface WaitForVirtualDefunding {
-  type: 'Defunding.WaitForVirtualDefunding';
+  type: "Defunding.WaitForVirtualDefunding";
   processId: string;
   virtualDefunding: NonTerminalVirtualDefundingState;
   channelId: string;
@@ -27,16 +27,16 @@ export interface WaitForVirtualDefunding {
 }
 
 export interface Failure {
-  type: 'Defunding.Failure';
+  type: "Defunding.Failure";
   reason:
-    | 'Virtual Defunding Failure'
-    | 'Ledger Defunding Failure'
-    | 'Channel Not Closed'
-    | 'Cannot Defund Directly Funded Channel';
+    | "Virtual Defunding Failure"
+    | "Ledger Defunding Failure"
+    | "Channel Not Closed"
+    | "Cannot Defund Directly Funded Channel";
 }
 
 export interface Success {
-  type: 'Defunding.Success';
+  type: "Defunding.Success";
 }
 
 // -------
@@ -44,18 +44,18 @@ export interface Success {
 // -------
 
 export const waitForLedgerDefunding: StateConstructor<WaitForLedgerDefunding> = p => {
-  return { ...p, type: 'Defunding.WaitForLedgerDefunding' };
+  return {...p, type: "Defunding.WaitForLedgerDefunding"};
 };
 
 export const waitForVirtualDefunding: StateConstructor<WaitForVirtualDefunding> = p => {
-  return { ...p, type: 'Defunding.WaitForVirtualDefunding' };
+  return {...p, type: "Defunding.WaitForVirtualDefunding"};
 };
 export const success: StateConstructor<Success> = p => {
-  return { ...p, type: 'Defunding.Success' };
+  return {...p, type: "Defunding.Success"};
 };
 
 export const failure: StateConstructor<Failure> = p => {
-  return { ...p, type: 'Defunding.Failure' };
+  return {...p, type: "Defunding.Failure"};
 };
 
 // -------
@@ -66,25 +66,25 @@ export type NonTerminalDefundingState = WaitForLedgerDefunding | WaitForVirtualD
 export type TerminalDefundingState = Failure | Success;
 export type DefundingState = NonTerminalDefundingState | TerminalDefundingState;
 
-export type DefundingStateType = DefundingState['type'];
+export type DefundingStateType = DefundingState["type"];
 
 export function isTerminalDefundingState(state: DefundingState): state is Failure | Success {
-  return state.type === 'Defunding.Failure' || state.type === 'Defunding.Success';
+  return state.type === "Defunding.Failure" || state.type === "Defunding.Success";
 }
 
 export function isDefundingState(state: ProtocolState): state is DefundingState {
   return (
-    state.type === 'Defunding.WaitForLedgerDefunding' ||
-    state.type === 'Defunding.WaitForVirtualDefunding' ||
-    state.type === 'Defunding.Failure' ||
-    state.type === 'Defunding.Success'
+    state.type === "Defunding.WaitForLedgerDefunding" ||
+    state.type === "Defunding.WaitForVirtualDefunding" ||
+    state.type === "Defunding.Failure" ||
+    state.type === "Defunding.Success"
   );
 }
 
 export function isSuccess(state: DefundingState): state is Success {
-  return state.type === 'Defunding.Success';
+  return state.type === "Defunding.Success";
 }
 
 export function isFailure(state: DefundingState): state is Failure {
-  return state.type === 'Defunding.Failure';
+  return state.type === "Defunding.Failure";
 }

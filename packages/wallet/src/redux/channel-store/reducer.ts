@@ -1,48 +1,42 @@
-import { ChannelStore, getChannel, setChannel } from './state';
+import {ChannelStore, getChannel, setChannel} from "./state";
 
-import { ReducerWithSideEffects } from '../../utils/reducer-utils';
-import { StateWithSideEffects } from '../utils';
-import {
-  SignedCommitment,
-  Commitment,
-  signCommitment2,
-  getChannelId,
-  hasValidSignature,
-} from '../../domain';
-import { pushCommitment, ChannelState, initializeChannel } from './channel-state/states';
-import { validTransition } from './channel-state';
-import * as channelActions from './actions';
-import { convertCommitmentToSignedState } from '../../utils/nitro-converter';
-import { channelID } from 'fmg-core';
+import {ReducerWithSideEffects} from "../../utils/reducer-utils";
+import {StateWithSideEffects} from "../utils";
+import {SignedCommitment, Commitment, signCommitment2, getChannelId, hasValidSignature} from "../../domain";
+import {pushCommitment, ChannelState, initializeChannel} from "./channel-state/states";
+import {validTransition} from "./channel-state";
+import * as channelActions from "./actions";
+import {convertCommitmentToSignedState} from "../../utils/nitro-converter";
+import {channelID} from "fmg-core";
 
 export const channelStoreReducer: ReducerWithSideEffects<ChannelStore> = (
   state: ChannelStore,
-  action: channelActions.ChannelAction,
+  action: channelActions.ChannelAction
 ): StateWithSideEffects<ChannelStore> => {
   switch (action.type) {
     case channelActions.OPPONENT_COMMITMENT_RECEIVED:
-      const { commitment, signature } = action;
+      const {commitment, signature} = action;
       const channelId = channelID(commitment.channel);
-      const { privateKey } = state[channelId];
+      const {privateKey} = state[channelId];
       const checkResult = checkAndStore(state, {
         commitment,
         signature,
-        signedState: convertCommitmentToSignedState(commitment, privateKey),
+        signedState: convertCommitmentToSignedState(commitment, privateKey)
       });
       // TODO Handle failure cases
       if (checkResult.isSuccess) {
-        return { state: checkResult.store };
+        return {state: checkResult.store};
       }
       break;
     case channelActions.OWN_COMMITMENT_RECEIVED:
       const signResult = signAndStore(state, action.commitment);
       // TODO Handle failure cases
       if (signResult.isSuccess) {
-        return { state: signResult.store };
+        return {state: signResult.store};
       }
       break;
   }
-  return { state };
+  return {state};
 };
 
 // -----------------
@@ -60,44 +54,40 @@ interface SignFailure {
   reason: SignFailureReason;
 }
 
-export type SignFailureReason = 'ChannelDoesntExist' | 'TransitionUnsafe' | 'NotOurTurn';
+export type SignFailureReason = "ChannelDoesntExist" | "TransitionUnsafe" | "NotOurTurn";
 type SignResult = SignSuccess | SignFailure;
 // TODO: These methods could probably be part of signAndStore/checkAndStore but that means
 // that the address/privateKey would be required when calling them.
 // That would make them difficult to use from other protocols.
-export function signAndInitialize(
-  store: ChannelStore,
-  commitment: Commitment,
-  privateKey: string,
-): SignResult {
+export function signAndInitialize(store: ChannelStore, commitment: Commitment, privateKey: string): SignResult {
   const signedCommitment = signCommitment2(commitment, privateKey);
   if (!hasValidSignature(signedCommitment)) {
-    return { isSuccess: false, reason: 'NotOurTurn' };
+    return {isSuccess: false, reason: "NotOurTurn"};
   }
   if (signedCommitment.commitment.turnNum !== 0) {
-    return { isSuccess: false, reason: 'ChannelDoesntExist' };
+    return {isSuccess: false, reason: "ChannelDoesntExist"};
   }
   const channel = initializeChannel(signedCommitment, privateKey);
   store = setChannel(store, channel);
 
-  return { isSuccess: true, signedCommitment, store };
+  return {isSuccess: true, signedCommitment, store};
 }
 
 export function checkAndInitialize(
   store: ChannelStore,
   signedCommitment: SignedCommitment,
-  privateKey: string,
+  privateKey: string
 ): CheckResult {
   if (signedCommitment.commitment.turnNum !== 0) {
-    return { isSuccess: false };
+    return {isSuccess: false};
   }
   if (!hasValidSignature(signedCommitment)) {
-    return { isSuccess: false };
+    return {isSuccess: false};
   }
   const channel = initializeChannel(signedCommitment, privateKey);
   store = setChannel(store, channel);
 
-  return { isSuccess: true, store };
+  return {isSuccess: true, store};
 }
 
 // Signs and stores a commitment from our own app or wallet.
@@ -110,17 +100,17 @@ export function signAndStore(store: ChannelStore, commitment: Commitment): SignR
   // this next check is weird. It'll check whether it was our turn.
   // Maybe this should be done as part of signCommitment2
   if (!hasValidSignature(signedCommitment)) {
-    return { isSuccess: false, reason: 'NotOurTurn' };
+    return {isSuccess: false, reason: "NotOurTurn"};
   }
 
   if (!isSafeTransition(channel, commitment)) {
-    return { isSuccess: false, reason: 'TransitionUnsafe' };
+    return {isSuccess: false, reason: "TransitionUnsafe"};
   }
 
   channel = pushCommitment(channel, signedCommitment);
   store = setChannel(store, channel);
 
-  return { isSuccess: true, signedCommitment, store };
+  return {isSuccess: true, signedCommitment, store};
 }
 
 interface CheckSuccess {
@@ -135,27 +125,24 @@ interface CheckFailure {
 type CheckResult = CheckSuccess | CheckFailure;
 
 // For use with a signed commitment received from an opponent.
-export function checkAndStore(
-  store: ChannelStore,
-  signedCommitment: SignedCommitment,
-): CheckResult {
+export function checkAndStore(store: ChannelStore, signedCommitment: SignedCommitment): CheckResult {
   if (!hasValidSignature(signedCommitment)) {
-    console.log('Failed to validate commitment signature');
-    return { isSuccess: false };
+    console.log("Failed to validate commitment signature");
+    return {isSuccess: false};
   }
   const commitment = signedCommitment.commitment;
   const channelId = getChannelId(commitment);
   let channel = getChannel(store, channelId);
 
   if (!isSafeTransition(channel, commitment)) {
-    console.log('Failed to verify a safe transition');
-    return { isSuccess: false };
+    console.log("Failed to verify a safe transition");
+    return {isSuccess: false};
   }
 
   channel = pushCommitment(channel, signedCommitment);
   store = setChannel(store, channel);
 
-  return { isSuccess: true, store };
+  return {isSuccess: true, store};
 }
 
 // Currently just checks for validTransition

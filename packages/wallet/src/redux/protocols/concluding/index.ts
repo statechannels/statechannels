@@ -1,7 +1,7 @@
-export { initialize, concludingReducer } from './reducer';
+export {initialize, concludingReducer} from "./reducer";
 
-export { ConcludingState, NonTerminalConcludingState } from './states';
+export {ConcludingState, NonTerminalConcludingState} from "./states";
 
-export { ConcludingAction, isConcludingAction } from './actions';
+export {ConcludingAction, isConcludingAction} from "./actions";
 
-export { Concluding } from './container';
+export {Concluding} from "./container";

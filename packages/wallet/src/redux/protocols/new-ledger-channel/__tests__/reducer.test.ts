@@ -1,56 +1,56 @@
-import * as scenarios from './scenarios';
-import { NewLedgerChannelReducer, initialize } from '../reducer';
-import { ProtocolStateWithSharedData } from '../..';
-import { NewLedgerChannelState } from '../states';
+import * as scenarios from "./scenarios";
+import {NewLedgerChannelReducer, initialize} from "../reducer";
+import {ProtocolStateWithSharedData} from "../..";
+import {NewLedgerChannelState} from "../states";
 
-import { describeScenarioStep, itSendsAMessage } from '../../../__tests__/helpers';
-import * as selectors from '../../../selectors';
+import {describeScenarioStep, itSendsAMessage} from "../../../__tests__/helpers";
+import * as selectors from "../../../selectors";
 
 // Mocks
 const getNextNonceMock = jest.fn().mockReturnValue(0);
-Object.defineProperty(selectors, 'getNextNonce', {
-  value: getNextNonceMock,
+Object.defineProperty(selectors, "getNextNonce", {
+  value: getNextNonceMock
 });
 
-describe('happy-path scenario', () => {
+describe("happy-path scenario", () => {
   const scenario = scenarios.happyPath;
-  describe('when initializing', () => {
+  describe("when initializing", () => {
     const initialState = initialize(scenario.initialParams);
 
-    itTransitionsTo(initialState, 'NewLedgerChannel.WaitForPreFundSetup');
+    itTransitionsTo(initialState, "NewLedgerChannel.WaitForPreFundSetup");
     itSendsAMessage(initialState);
   });
 
   describeScenarioStep(scenario.waitForPreFundL1, () => {
-    const { state, action, sharedData } = scenario.waitForPreFundL1;
+    const {state, action, sharedData} = scenario.waitForPreFundL1;
     const updatedState = NewLedgerChannelReducer(state, sharedData, action);
 
-    itTransitionsTo(updatedState, 'NewLedgerChannel.WaitForDirectFunding');
+    itTransitionsTo(updatedState, "NewLedgerChannel.WaitForDirectFunding");
   });
 
   describeScenarioStep(scenario.waitForDirectFunding, () => {
-    const { state, action, sharedData } = scenario.waitForDirectFunding;
+    const {state, action, sharedData} = scenario.waitForDirectFunding;
     const updatedState = NewLedgerChannelReducer(state, sharedData, action);
 
-    itTransitionsTo(updatedState, 'NewLedgerChannel.WaitForPostFundSetup');
+    itTransitionsTo(updatedState, "NewLedgerChannel.WaitForPostFundSetup");
   });
 
   describeScenarioStep(scenario.waitForPostFund1, () => {
-    const { state, action, sharedData } = scenario.waitForPostFund1;
+    const {state, action, sharedData} = scenario.waitForPostFund1;
     const updatedState = NewLedgerChannelReducer(state, sharedData, action);
 
-    itTransitionsTo(updatedState, 'NewLedgerChannel.Success');
+    itTransitionsTo(updatedState, "NewLedgerChannel.Success");
   });
 });
 
-describe('ledger-funding-fails scenario', () => {
+describe("ledger-funding-fails scenario", () => {
   const scenario = scenarios.ledgerFundingFails;
 
   describeScenarioStep(scenario.waitForDirectFunding, () => {
-    const { state, action, sharedData } = scenario.waitForDirectFunding;
+    const {state, action, sharedData} = scenario.waitForDirectFunding;
     const updatedState = NewLedgerChannelReducer(state, sharedData, action);
 
-    itTransitionsTo(updatedState, 'NewLedgerChannel.Failure');
+    itTransitionsTo(updatedState, "NewLedgerChannel.Failure");
   });
 });
 
@@ -59,7 +59,7 @@ describe('ledger-funding-fails scenario', () => {
 // -------
 type ReturnVal = ProtocolStateWithSharedData<NewLedgerChannelState>;
 
-function itTransitionsTo(state: ReturnVal, type: NewLedgerChannelState['type']) {
+function itTransitionsTo(state: ReturnVal, type: NewLedgerChannelState["type"]) {
   it(`transitions protocol state to ${type}`, () => {
     expect(state.protocolState.type).toEqual(type);
   });

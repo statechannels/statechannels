@@ -1,19 +1,19 @@
-import { getAdjudicatorContract } from '../../utils/contract-utils';
-import { call, take, put, select } from 'redux-saga/effects';
-import { eventChannel } from 'redux-saga';
-import * as actions from '../actions';
-import { ethers } from 'ethers';
-import { fromParameters } from 'fmg-core/lib/commitment';
-import { getAdjudicatorWatcherSubscribersForChannel } from '../selectors';
-import { ChannelSubscriber } from '../state';
-import { ProtocolLocator } from '../../communication';
+import {getAdjudicatorContract} from "../../utils/contract-utils";
+import {call, take, put, select} from "redux-saga/effects";
+import {eventChannel} from "redux-saga";
+import * as actions from "../actions";
+import {ethers} from "ethers";
+import {fromParameters} from "fmg-core/lib/commitment";
+import {getAdjudicatorWatcherSubscribersForChannel} from "../selectors";
+import {ChannelSubscriber} from "../state";
+import {ProtocolLocator} from "../../communication";
 
 enum AdjudicatorEventType {
   ChallengeCreated,
   Concluded,
   Refuted,
   RespondWithMove,
-  Deposited,
+  Deposited
 }
 
 interface AdjudicatorEvent {
@@ -29,7 +29,7 @@ export function* adjudicatorWatcher(provider) {
 
     const channelSubscribers: ChannelSubscriber[] = yield select(
       getAdjudicatorWatcherSubscribersForChannel,
-      event.channelId,
+      event.channelId
     );
 
     yield dispatchEventAction(event);
@@ -42,40 +42,36 @@ export function* adjudicatorWatcher(provider) {
 function* dispatchEventAction(event: AdjudicatorEvent) {
   switch (event.eventType) {
     case AdjudicatorEventType.ChallengeCreated:
-      const { channelId } = event;
-      const { commitment, finalizedAt } = event.eventArgs;
+      const {channelId} = event;
+      const {commitment, finalizedAt} = event.eventArgs;
       const altFinalizedAt = finalizedAt * 1000;
       yield put(
         actions.challengeCreatedEvent({
           channelId,
           commitment: fromParameters(commitment),
-          finalizedAt: altFinalizedAt,
-        }),
+          finalizedAt: altFinalizedAt
+        })
       );
       break;
   }
 }
 
-function* dispatchProcessEventAction(
-  event: AdjudicatorEvent,
-  processId: string,
-  protocolLocator: ProtocolLocator,
-) {
-  const { channelId } = event;
+function* dispatchProcessEventAction(event: AdjudicatorEvent, processId: string, protocolLocator: ProtocolLocator) {
+  const {channelId} = event;
   switch (event.eventType) {
     case AdjudicatorEventType.ChallengeCreated:
-      const { finalizedAt } = event.eventArgs;
+      const {finalizedAt} = event.eventArgs;
       yield put(
         actions.challengeExpirySetEvent({
           processId,
           protocolLocator,
           channelId,
-          expiryTime: finalizedAt * 1000,
-        }),
+          expiryTime: finalizedAt * 1000
+        })
       );
       break;
     case AdjudicatorEventType.Concluded:
-      yield put(actions.concludedEvent({ channelId }));
+      yield put(actions.concludedEvent({channelId}));
       break;
     case AdjudicatorEventType.Refuted:
       yield put(
@@ -83,16 +79,16 @@ function* dispatchProcessEventAction(
           processId,
           protocolLocator,
           channelId,
-          refuteCommitment: fromParameters(event.eventArgs.refutation),
-        }),
+          refuteCommitment: fromParameters(event.eventArgs.refutation)
+        })
       );
       break;
     case AdjudicatorEventType.RespondWithMove:
-      const { v, r, s } = event.eventArgs;
+      const {v, r, s} = event.eventArgs;
       const signature = ethers.utils.joinSignature({
         v,
         r,
-        s,
+        s
       });
 
       yield put(
@@ -101,8 +97,8 @@ function* dispatchProcessEventAction(
           protocolLocator,
           channelId,
           responseCommitment: fromParameters(event.eventArgs.response),
-          responseSignature: signature,
-        }),
+          responseSignature: signature
+        })
       );
       break;
     case AdjudicatorEventType.Deposited:
@@ -112,8 +108,8 @@ function* dispatchProcessEventAction(
           protocolLocator,
           channelId,
           amount: event.eventArgs.amountDeposited.toHexString(),
-          totalForDestination: event.eventArgs.destinationHoldings.toHexString(),
-        }),
+          totalForDestination: event.eventArgs.destinationHoldings.toHexString()
+        })
       );
       break;
   }
@@ -133,27 +129,27 @@ function* createAdjudicatorEventChannel(provider) {
       emitter({
         eventType: AdjudicatorEventType.ChallengeCreated,
         channelId,
-        eventArgs: { commitment, finalizedAt },
+        eventArgs: {commitment, finalizedAt}
       });
     });
     adjudicator.on(gameConcludedFilter, channelId => {
-      emitter({ eventType: AdjudicatorEventType.Concluded, channelId });
+      emitter({eventType: AdjudicatorEventType.Concluded, channelId});
     });
     adjudicator.on(refutedFilter, (channelId, refutation) => {
-      emitter({ eventType: AdjudicatorEventType.Refuted, eventArgs: { refutation }, channelId });
+      emitter({eventType: AdjudicatorEventType.Refuted, eventArgs: {refutation}, channelId});
     });
     adjudicator.on(respondWithMoveFilter, (channelId, response, v, r, s) => {
       emitter({
         eventType: AdjudicatorEventType.RespondWithMove,
-        eventArgs: { response, v, r, s },
-        channelId,
+        eventArgs: {response, v, r, s},
+        channelId
       });
     });
     adjudicator.on(depositedFilter, (channelId, amountDeposited, destinationHoldings) => {
       emitter({
         eventType: AdjudicatorEventType.Deposited,
-        eventArgs: { amountDeposited, destinationHoldings },
-        channelId,
+        eventArgs: {amountDeposited, destinationHoldings},
+        channelId
       });
     });
     return () => {

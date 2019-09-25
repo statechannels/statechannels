@@ -1,6 +1,6 @@
-import React, { Fragment } from 'react';
-import { Button } from 'reactstrap';
-import { StyleSheet, css } from 'aphrodite';
+import React, {Fragment} from "react";
+import {Button} from "reactstrap";
+import {StyleSheet, css} from "aphrodite";
 
 export interface Props {
   yesMessage: string;
@@ -11,7 +11,7 @@ export interface Props {
 
 export default class YesOrNo extends React.Component<Props> {
   render() {
-    const { yesMessage, noMessage, yesAction, noAction } = this.props;
+    const {yesMessage, noMessage, yesAction, noAction} = this.props;
     return (
       <Fragment>
         <div className={css(styles.buttonContainer)}>
@@ -31,11 +31,11 @@ export default class YesOrNo extends React.Component<Props> {
 
 const styles = StyleSheet.create({
   buttonContainer: {
-    display: 'flex',
-    justifyContent: 'center',
-    padding: '5px',
+    display: "flex",
+    justifyContent: "center",
+    padding: "5px"
   },
   button: {
-    margin: '8px',
-  },
+    margin: "8px"
+  }
 });

@@ -1,20 +1,20 @@
-import * as scenarios from './scenarios';
-import { LedgerDefundingState, LedgerDefundingStateType } from '../states';
-import { ProtocolStateWithSharedData } from '../..';
-import { initialize, ledgerDefundingReducer } from '../reducer';
+import * as scenarios from "./scenarios";
+import {LedgerDefundingState, LedgerDefundingStateType} from "../states";
+import {ProtocolStateWithSharedData} from "../..";
+import {initialize, ledgerDefundingReducer} from "../reducer";
 
-describe('Cleared To Send happy path', () => {
+describe("Cleared To Send happy path", () => {
   const scenario = scenarios.clearedToSendHappyPath;
 
-  describe('when initializing', () => {
+  describe("when initializing", () => {
     const result = initialize(scenario.initialParams);
-    itTransitionsTo(result, 'LedgerDefunding.WaitForLedgerUpdate');
+    itTransitionsTo(result, "LedgerDefunding.WaitForLedgerUpdate");
   });
 
-  describe('when in WaitForLedgerUpdate', () => {
-    const { state, action, sharedData } = scenario.waitForLedgerUpdate;
+  describe("when in WaitForLedgerUpdate", () => {
+    const {state, action, sharedData} = scenario.waitForLedgerUpdate;
     const updatedState = ledgerDefundingReducer(state, sharedData, action);
-    itTransitionsTo(updatedState, 'LedgerDefunding.Success');
+    itTransitionsTo(updatedState, "LedgerDefunding.Success");
   });
 });
 

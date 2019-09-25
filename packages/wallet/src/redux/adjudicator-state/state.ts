@@ -1,4 +1,4 @@
-import { Commitment } from '../../domain';
+import {Commitment} from "../../domain";
 
 export interface AdjudicatorState {
   [channelId: string]: AdjudicatorChannelState;
@@ -16,65 +16,52 @@ export interface Challenge {
 
 function getOrCreateAdjudicatorChannelState(
   adjudicatorState: AdjudicatorState,
-  channelId: string,
+  channelId: string
 ): AdjudicatorChannelState {
   let channelState = getAdjudicatorChannelState(adjudicatorState, channelId);
   if (!channelState) {
-    channelState = { channelId, balance: '0x0', finalized: false };
+    channelState = {channelId, balance: "0x0", finalized: false};
   }
   return channelState;
 }
 export function getAdjudicatorChannelState(
   adjudicatorState: AdjudicatorState,
-  channelId: string,
+  channelId: string
 ): AdjudicatorChannelState | undefined {
   return adjudicatorState[channelId];
 }
-function setAdjudicatorChannelState(
-  adjudicatorState: AdjudicatorState,
-  channelState: AdjudicatorChannelState,
-) {
+function setAdjudicatorChannelState(adjudicatorState: AdjudicatorState, channelState: AdjudicatorChannelState) {
   return {
     ...adjudicatorState,
-    [channelState.channelId]: channelState,
+    [channelState.channelId]: channelState
   };
 }
 
-export function clearChallenge(
-  adjudicatorState: AdjudicatorState,
-  channelId: string,
-): AdjudicatorState {
+export function clearChallenge(adjudicatorState: AdjudicatorState, channelId: string): AdjudicatorState {
   const channelState = getOrCreateAdjudicatorChannelState(adjudicatorState, channelId);
-  const newChannelState = { ...channelState, challenge: undefined };
+  const newChannelState = {...channelState, challenge: undefined};
   return setAdjudicatorChannelState(adjudicatorState, newChannelState);
 }
 
 export function setChallenge(
   adjudicatorState: AdjudicatorState,
   channelId: string,
-  challenge: Challenge,
+  challenge: Challenge
 ): AdjudicatorState {
   const channelState = getOrCreateAdjudicatorChannelState(adjudicatorState, channelId);
-  const newChannelState = { ...channelState, challenge };
+  const newChannelState = {...channelState, challenge};
   return setAdjudicatorChannelState(adjudicatorState, newChannelState);
 }
 
-export function markAsFinalized(
-  adjudicatorState: AdjudicatorState,
-  channelId: string,
-): AdjudicatorState {
+export function markAsFinalized(adjudicatorState: AdjudicatorState, channelId: string): AdjudicatorState {
   const channelState = getOrCreateAdjudicatorChannelState(adjudicatorState, channelId);
-  const newChannelState = { ...channelState, finalized: true };
+  const newChannelState = {...channelState, finalized: true};
   return setAdjudicatorChannelState(adjudicatorState, newChannelState);
 }
 
-export function setBalance(
-  adjudicatorState: AdjudicatorState,
-  channelId: string,
-  balance: string,
-): AdjudicatorState {
+export function setBalance(adjudicatorState: AdjudicatorState, channelId: string, balance: string): AdjudicatorState {
   const channelState = getOrCreateAdjudicatorChannelState(adjudicatorState, channelId);
 
-  const newChannelState = { ...channelState, balance };
+  const newChannelState = {...channelState, balance};
   return setAdjudicatorChannelState(adjudicatorState, newChannelState);
 }

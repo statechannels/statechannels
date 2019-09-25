@@ -1,72 +1,53 @@
-import * as states from './states';
-import * as helpers from '../reducer-helpers';
+import * as states from "./states";
+import * as helpers from "../reducer-helpers";
 
-import { SharedData, queueMessage } from '../../state';
-import { ProtocolStateWithSharedData, makeLocator, EMPTY_LOCATOR } from '..';
-import { unreachable } from '../../../utils/reducer-utils';
+import {SharedData, queueMessage} from "../../state";
+import {ProtocolStateWithSharedData, makeLocator, EMPTY_LOCATOR} from "..";
+import {unreachable} from "../../../utils/reducer-utils";
 
-import {
-  showWallet,
-  hideWallet,
-  sendFundingComplete,
-  getLatestCommitment,
-} from '../reducer-helpers';
-import { fundingFailure } from '../../../magmo-wallet-client';
-import { EmbeddedProtocol } from '../../../communication';
+import {showWallet, hideWallet, sendFundingComplete, getLatestCommitment} from "../reducer-helpers";
+import {fundingFailure} from "../../../magmo-wallet-client";
+import {EmbeddedProtocol} from "../../../communication";
 
-import * as ledgerFundingStates from '../ledger-funding/states';
-import {
-  ledgerFundingReducer,
-  initializeLedgerFunding,
-  LedgerFundingAction,
-} from '../ledger-funding';
-import * as virtualFunding from '../virtual-funding';
-import {
-  AdvanceChannelAction,
-  advanceChannelReducer,
-  initializeAdvanceChannel,
-} from '../advance-channel';
-import * as advanceChannelStates from '../advance-channel/states';
-import { clearedToSend, routesToAdvanceChannel } from '../advance-channel/actions';
-import { CommitmentType } from '../../../domain';
-import { ADVANCE_CHANNEL_PROTOCOL_LOCATOR } from '../advance-channel/reducer';
-import { routesToLedgerFunding } from '../ledger-funding/actions';
-import { routesToVirtualFunding } from '../virtual-funding/actions';
+import * as ledgerFundingStates from "../ledger-funding/states";
+import {ledgerFundingReducer, initializeLedgerFunding, LedgerFundingAction} from "../ledger-funding";
+import * as virtualFunding from "../virtual-funding";
+import {AdvanceChannelAction, advanceChannelReducer, initializeAdvanceChannel} from "../advance-channel";
+import * as advanceChannelStates from "../advance-channel/states";
+import {clearedToSend, routesToAdvanceChannel} from "../advance-channel/actions";
+import {CommitmentType} from "../../../domain";
+import {ADVANCE_CHANNEL_PROTOCOL_LOCATOR} from "../advance-channel/reducer";
+import {routesToLedgerFunding} from "../ledger-funding/actions";
+import {routesToVirtualFunding} from "../virtual-funding/actions";
 import {
   FundingStrategyNegotiationState,
-  TerminalFundingStrategyNegotiationState,
-} from '../funding-strategy-negotiation/states';
-import {
-  initializeFundingStrategyNegotiation,
-  fundingStrategyNegotiationReducer,
-} from '../funding-strategy-negotiation';
-import { FUNDING_STRATEGY_NEGOTIATION_PROTOCOL_LOCATOR } from '../../../communication/protocol-locator';
+  TerminalFundingStrategyNegotiationState
+} from "../funding-strategy-negotiation/states";
+import {initializeFundingStrategyNegotiation, fundingStrategyNegotiationReducer} from "../funding-strategy-negotiation";
+import {FUNDING_STRATEGY_NEGOTIATION_PROTOCOL_LOCATOR} from "../../../communication/protocol-locator";
 import {
   routesToFundingStrategyNegotiation,
-  FundingStrategyNegotiationAction,
-} from '../funding-strategy-negotiation/actions';
-import * as fundingStrategyNegotiationStates from '../funding-strategy-negotiation/states';
-import { ProtocolAction } from '../../actions';
+  FundingStrategyNegotiationAction
+} from "../funding-strategy-negotiation/actions";
+import * as fundingStrategyNegotiationStates from "../funding-strategy-negotiation/states";
+import {ProtocolAction} from "../../actions";
 
 export function initialize(
   sharedData: SharedData,
   processId: string,
-  channelId: string,
+  channelId: string
 ): ProtocolStateWithSharedData<states.FundingState> {
   const opponentAddress = helpers.getOpponentAddress(channelId, sharedData);
   const ourAddress = helpers.getOurAddress(channelId, sharedData);
 
   let fundingStrategyNegotiationState: FundingStrategyNegotiationState;
-  ({
-    sharedData,
-    protocolState: fundingStrategyNegotiationState,
-  } = initializeFundingStrategyNegotiation({
+  ({sharedData, protocolState: fundingStrategyNegotiationState} = initializeFundingStrategyNegotiation({
     sharedData,
     channelId,
     processId,
     opponentAddress,
     ourAddress,
-    protocolLocator: makeLocator(FUNDING_STRATEGY_NEGOTIATION_PROTOCOL_LOCATOR),
+    protocolLocator: makeLocator(FUNDING_STRATEGY_NEGOTIATION_PROTOCOL_LOCATOR)
   }));
 
   if (fundingStrategyNegotiationStates.isTerminal(fundingStrategyNegotiationState)) {
@@ -76,7 +57,7 @@ export function initialize(
       processId,
       targetChannelId: channelId,
       ourAddress,
-      opponentAddress,
+      opponentAddress
     });
   }
 
@@ -86,16 +67,16 @@ export function initialize(
       targetChannelId: channelId,
       opponentAddress,
       ourAddress,
-      fundingStrategyNegotiationState,
+      fundingStrategyNegotiationState
     }),
-    sharedData: showWallet(sharedData),
+    sharedData: showWallet(sharedData)
   };
 }
 
 export function fundingReducer(
   state: states.FundingState,
   sharedData: SharedData,
-  action: ProtocolAction,
+  action: ProtocolAction
 ): ProtocolStateWithSharedData<states.FundingState> {
   if (routesToAdvanceChannel(action, EMPTY_LOCATOR)) {
     return handleAdvanceChannelAction(state, sharedData, action);
@@ -112,39 +93,34 @@ export function fundingReducer(
 function handleFundingStrategyNegotiation(
   protocolState: states.FundingState,
   sharedData: SharedData,
-  action: FundingStrategyNegotiationAction,
+  action: FundingStrategyNegotiationAction
 ): ProtocolStateWithSharedData<states.FundingState> {
-  if (protocolState.type !== 'Funding.WaitForStrategyNegotiation') {
+  if (protocolState.type !== "Funding.WaitForStrategyNegotiation") {
     console.warn(
-      `Funding reducer received funding strategy negotiation action ${
-        action.type
-      } but is currently in state ${protocolState.type}`,
+      `Funding reducer received funding strategy negotiation action ${action.type} but is currently in state ${protocolState.type}`
     );
-    return { protocolState, sharedData };
+    return {protocolState, sharedData};
   }
 
   let fundingStrategyNegotiationState: FundingStrategyNegotiationState;
-  ({
-    sharedData,
-    protocolState: fundingStrategyNegotiationState,
-  } = fundingStrategyNegotiationReducer(
+  ({sharedData, protocolState: fundingStrategyNegotiationState} = fundingStrategyNegotiationReducer(
     protocolState.fundingStrategyNegotiationState,
     sharedData,
-    action,
+    action
   ));
   if (!fundingStrategyNegotiationStates.isTerminal(fundingStrategyNegotiationState)) {
     return {
       protocolState: states.waitForStrategyNegotiation({
         ...protocolState,
-        fundingStrategyNegotiationState,
+        fundingStrategyNegotiationState
       }),
-      sharedData,
+      sharedData
     };
   } else {
     return handleFundingStrategyNegotiationComplete({
       ...protocolState,
       fundingStrategyNegotiationState,
-      sharedData,
+      sharedData
     });
   }
 }
@@ -155,7 +131,7 @@ function handleFundingStrategyNegotiationComplete({
   ourAddress,
   opponentAddress,
   fundingStrategyNegotiationState,
-  sharedData,
+  sharedData
 }: {
   processId: string;
   targetChannelId: string;
@@ -165,40 +141,40 @@ function handleFundingStrategyNegotiationComplete({
   sharedData: SharedData;
 }) {
   if (fundingStrategyNegotiationStates.isFailure(fundingStrategyNegotiationState)) {
-    const message = fundingFailure(targetChannelId, 'FundingDeclined');
+    const message = fundingFailure(targetChannelId, "FundingDeclined");
 
     return {
-      protocolState: states.failure({ reason: 'FundingStrategyNegotiationFailure' }),
-      sharedData: queueMessage(sharedData, message),
+      protocolState: states.failure({reason: "FundingStrategyNegotiationFailure"}),
+      sharedData: queueMessage(sharedData, message)
     };
   } else {
     let advanceChannelState: advanceChannelStates.AdvanceChannelState;
-    ({ protocolState: advanceChannelState, sharedData } = initializeAdvanceChannel(sharedData, {
+    ({protocolState: advanceChannelState, sharedData} = initializeAdvanceChannel(sharedData, {
       channelId: targetChannelId,
       ourIndex: helpers.getTwoPlayerIndex(targetChannelId, sharedData),
       processId,
       commitmentType: CommitmentType.PostFundSetup,
       clearedToSend: false,
-      protocolLocator: ADVANCE_CHANNEL_PROTOCOL_LOCATOR,
+      protocolLocator: ADVANCE_CHANNEL_PROTOCOL_LOCATOR
     }));
 
     switch (fundingStrategyNegotiationState.selectedFundingStrategy) {
-      case 'IndirectFundingStrategy': {
+      case "IndirectFundingStrategy": {
         const latestCommitment = getLatestCommitment(targetChannelId, sharedData);
         let fundingState: ledgerFundingStates.LedgerFundingState;
-        ({ protocolState: fundingState, sharedData } = initializeLedgerFunding({
+        ({protocolState: fundingState, sharedData} = initializeLedgerFunding({
           processId,
           channelId: targetChannelId,
           startingAllocation: latestCommitment.allocation,
           startingDestination: latestCommitment.destination,
           participants: latestCommitment.channel.participants,
           sharedData,
-          protocolLocator: makeLocator(EmbeddedProtocol.LedgerFunding),
+          protocolLocator: makeLocator(EmbeddedProtocol.LedgerFunding)
         }));
-        if (fundingState.type === 'LedgerFunding.Failure') {
+        if (fundingState.type === "LedgerFunding.Failure") {
           return {
             protocolState: states.failure(fundingState),
-            sharedData,
+            sharedData
           };
         }
         return {
@@ -208,34 +184,30 @@ function handleFundingStrategyNegotiationComplete({
             ourAddress,
             fundingState,
             opponentAddress,
-            postFundSetupState: advanceChannelState,
+            postFundSetupState: advanceChannelState
           }),
-          sharedData,
+          sharedData
         };
       }
-      case 'VirtualFundingStrategy': {
-        const {
-          allocation: startingAllocation,
-          destination: startingDestination,
-          channel,
-        } = helpers.getLatestCommitment(targetChannelId, sharedData);
+      case "VirtualFundingStrategy": {
+        const {allocation: startingAllocation, destination: startingDestination, channel} = helpers.getLatestCommitment(
+          targetChannelId,
+          sharedData
+        );
 
         const ourIndex = channel.participants.indexOf(ourAddress);
 
         let fundingState: virtualFunding.VirtualFundingState;
-        ({ protocolState: fundingState, sharedData } = virtualFunding.initializeVirtualFunding(
-          sharedData,
-          {
-            processId,
-            targetChannelId,
-            ourIndex,
-            // TODO: This should be an env variable
-            hubAddress: '0x100063c326b27f78b2cBb7cd036B8ddE4d4FCa7C',
-            startingAllocation,
-            startingDestination,
-            protocolLocator: makeLocator(EmbeddedProtocol.VirtualFunding),
-          },
-        ));
+        ({protocolState: fundingState, sharedData} = virtualFunding.initializeVirtualFunding(sharedData, {
+          processId,
+          targetChannelId,
+          ourIndex,
+          // TODO: This should be an env variable
+          hubAddress: "0x100063c326b27f78b2cBb7cd036B8ddE4d4FCa7C",
+          startingAllocation,
+          startingDestination,
+          protocolLocator: makeLocator(EmbeddedProtocol.VirtualFunding)
+        }));
 
         return {
           protocolState: states.waitForVirtualFunding({
@@ -244,9 +216,9 @@ function handleFundingStrategyNegotiationComplete({
             ourAddress,
             fundingState,
             opponentAddress,
-            postFundSetupState: advanceChannelState,
+            postFundSetupState: advanceChannelState
           }),
-          sharedData,
+          sharedData
         };
       }
       default:
@@ -257,34 +229,29 @@ function handleFundingStrategyNegotiationComplete({
 function handleAdvanceChannelAction(
   protocolState: states.FundingState,
   sharedData: SharedData,
-  action: AdvanceChannelAction,
+  action: AdvanceChannelAction
 ): ProtocolStateWithSharedData<states.FundingState> {
-  if (
-    protocolState.type !== 'Funding.WaitForPostFundSetup' &&
-    protocolState.type !== 'Funding.WaitForLedgerFunding'
-  ) {
+  if (protocolState.type !== "Funding.WaitForPostFundSetup" && protocolState.type !== "Funding.WaitForLedgerFunding") {
     console.warn(
-      `Funding reducer received advance channel action ${action.type} but is currently in state ${
-        protocolState.type
-      }`,
+      `Funding reducer received advance channel action ${action.type} but is currently in state ${protocolState.type}`
     );
-    return { protocolState, sharedData };
+    return {protocolState, sharedData};
   }
   const result = advanceChannelReducer(protocolState.postFundSetupState, sharedData, action);
   if (!advanceChannelStates.isTerminal(result.protocolState)) {
     return {
-      protocolState: { ...protocolState, postFundSetupState: result.protocolState },
-      sharedData: result.sharedData,
+      protocolState: {...protocolState, postFundSetupState: result.protocolState},
+      sharedData: result.sharedData
     };
-  } else if (result.protocolState.type === 'AdvanceChannel.Failure') {
+  } else if (result.protocolState.type === "AdvanceChannel.Failure") {
     return {
-      protocolState: states.failure({ reason: 'AdvanceChannelFailure' }),
-      sharedData: result.sharedData,
+      protocolState: states.failure({reason: "AdvanceChannelFailure"}),
+      sharedData: result.sharedData
     };
   } else {
     return {
       protocolState: states.waitForSuccessConfirmation(protocolState),
-      sharedData: result.sharedData,
+      sharedData: result.sharedData
     };
   }
 }
@@ -292,29 +259,28 @@ function handleAdvanceChannelAction(
 function handleIndirectFundingAction(
   protocolState: states.FundingState,
   sharedData: SharedData,
-  action: LedgerFundingAction,
+  action: LedgerFundingAction
 ): ProtocolStateWithSharedData<states.FundingState> {
-  if (protocolState.type !== 'Funding.WaitForLedgerFunding') {
+  if (protocolState.type !== "Funding.WaitForLedgerFunding") {
     console.warn(
-      `Funding reducer received indirect funding action ${action.type} but is currently in state ${
-        protocolState.type
-      }`,
+      `Funding reducer received indirect funding action ${action.type} but is currently in state ${protocolState.type}`
     );
-    return { protocolState, sharedData };
+    return {protocolState, sharedData};
   }
 
-  const {
-    protocolState: updatedFundingState,
-    sharedData: updatedSharedData,
-  } = ledgerFundingReducer(protocolState.fundingState, sharedData, action);
+  const {protocolState: updatedFundingState, sharedData: updatedSharedData} = ledgerFundingReducer(
+    protocolState.fundingState,
+    sharedData,
+    action
+  );
 
   if (!ledgerFundingStates.isTerminal(updatedFundingState)) {
     return {
       protocolState: states.waitForLedgerFunding({
         ...protocolState,
-        fundingState: updatedFundingState,
+        fundingState: updatedFundingState
       }),
-      sharedData: updatedSharedData,
+      sharedData: updatedSharedData
     };
   } else {
     return handleFundingComplete(protocolState, updatedFundingState, updatedSharedData);
@@ -324,29 +290,28 @@ function handleIndirectFundingAction(
 function handleVirtualFundingAction(
   protocolState: states.FundingState,
   sharedData: SharedData,
-  action: virtualFunding.VirtualFundingAction,
+  action: virtualFunding.VirtualFundingAction
 ): ProtocolStateWithSharedData<states.FundingState> {
-  if (protocolState.type !== 'Funding.WaitForVirtualFunding') {
+  if (protocolState.type !== "Funding.WaitForVirtualFunding") {
     console.warn(
-      `Funding reducer received indirect funding action ${action.type} but is currently in state ${
-        protocolState.type
-      }`,
+      `Funding reducer received indirect funding action ${action.type} but is currently in state ${protocolState.type}`
     );
-    return { protocolState, sharedData };
+    return {protocolState, sharedData};
   }
 
-  const {
-    protocolState: updatedFundingState,
-    sharedData: updatedSharedData,
-  } = virtualFunding.virtualFundingReducer(protocolState.fundingState, sharedData, action);
+  const {protocolState: updatedFundingState, sharedData: updatedSharedData} = virtualFunding.virtualFundingReducer(
+    protocolState.fundingState,
+    sharedData,
+    action
+  );
 
   if (!virtualFunding.isTerminal(updatedFundingState)) {
     return {
       protocolState: states.waitForVirtualFunding({
         ...protocolState,
-        fundingState: updatedFundingState,
+        fundingState: updatedFundingState
       }),
-      sharedData: updatedSharedData,
+      sharedData: updatedSharedData
     };
   } else {
     return handleFundingComplete(protocolState, updatedFundingState, updatedSharedData);
@@ -354,44 +319,44 @@ function handleVirtualFundingAction(
 }
 
 function fundingSuccessAcknowledged(state: states.FundingState, sharedData: SharedData) {
-  if (state.type !== 'Funding.WaitForSuccessConfirmation') {
-    return { protocolState: state, sharedData };
+  if (state.type !== "Funding.WaitForSuccessConfirmation") {
+    return {protocolState: state, sharedData};
   }
   const updatedSharedData = sendFundingComplete(sharedData, state.targetChannelId);
-  return { protocolState: states.success({}), sharedData: hideWallet(updatedSharedData) };
+  return {protocolState: states.success({}), sharedData: hideWallet(updatedSharedData)};
 }
 
 function handleFundingComplete(
   protocolState: states.WaitForLedgerFunding | states.WaitForVirtualFunding,
   fundingState: ledgerFundingStates.LedgerFundingState | virtualFunding.VirtualFundingState,
-  sharedData: SharedData,
+  sharedData: SharedData
 ) {
   switch (fundingState.type) {
-    case 'LedgerFunding.Success':
-    case 'VirtualFunding.Success': {
+    case "LedgerFunding.Success":
+    case "VirtualFunding.Success": {
       // When funding is complete we alert the advance channel protocol that we are now cleared to exchange post fund setups
       let postFundSetupState: advanceChannelStates.AdvanceChannelState;
-      ({ protocolState: postFundSetupState, sharedData } = advanceChannelReducer(
+      ({protocolState: postFundSetupState, sharedData} = advanceChannelReducer(
         protocolState.postFundSetupState,
         sharedData,
         clearedToSend({
           processId: protocolState.processId,
-          protocolLocator: ADVANCE_CHANNEL_PROTOCOL_LOCATOR,
-        }),
+          protocolLocator: ADVANCE_CHANNEL_PROTOCOL_LOCATOR
+        })
       ));
       return {
         protocolState: states.waitForPostFundSetup({
           ...protocolState,
-          postFundSetupState,
+          postFundSetupState
         }),
-        sharedData,
+        sharedData
       };
     }
     default:
       // TODO: Indirect/Virtual funding should return a proper error to pass to our failure state
       return {
-        protocolState: states.failure({ reason: 'Indirect Funding Failure' }),
-        sharedData,
+        protocolState: states.failure({reason: "Indirect Funding Failure"}),
+        sharedData
       };
   }
 }

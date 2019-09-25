@@ -6,8 +6,8 @@ import {
   SignatureResponse,
   VALIDATION_SUCCESS,
   VALIDATION_FAILURE,
-  ValidationResponse,
-} from './wallet-events';
+  ValidationResponse
+} from "./wallet-events";
 import {
   concludeChannelRequest,
   initializeRequest,
@@ -16,9 +16,9 @@ import {
   validateCommitmentRequest,
   receiveMessage,
   createChallenge,
-  respondToChallenge,
-} from './wallet-instructions';
-import { Commitment } from 'fmg-core';
+  respondToChallenge
+} from "./wallet-instructions";
+import {Commitment} from "fmg-core";
 
 /**
  * Creates an iframe element for the wallet to be embedded in the page. The wallet iframe will hide itself and only show when interaction with the wallet is necessary.
@@ -27,21 +27,21 @@ import { Commitment } from 'fmg-core';
  * @returns {HTMLIFrameElement} The iframe element for the wallet that should be embedded in the page.
  */
 export function createWalletIFrame(iframeId: string, walletUrl?: string): HTMLIFrameElement {
-  walletUrl = walletUrl || 'https://wallet.magmo.com';
-  const iFrame = document.createElement('iframe');
+  walletUrl = walletUrl || "https://wallet.magmo.com";
+  const iFrame = document.createElement("iframe");
   iFrame.src = walletUrl;
   iFrame.id = iframeId;
-  iFrame.style.display = 'none';
-  iFrame.style.position = 'absolute';
-  iFrame.style.left = '0px';
-  iFrame.style.right = '0px';
-  iFrame.style.bottom = '0px';
-  iFrame.style.top = '0px';
-  iFrame.width = '0';
-  iFrame.height = '0';
-  iFrame.style.zIndex = '9999';
+  iFrame.style.display = "none";
+  iFrame.style.position = "absolute";
+  iFrame.style.left = "0px";
+  iFrame.style.right = "0px";
+  iFrame.style.bottom = "0px";
+  iFrame.style.top = "0px";
+  iFrame.width = "0";
+  iFrame.height = "0";
+  iFrame.style.zIndex = "9999";
 
-  iFrame.setAttribute('allowtransparency', 'true');
+  iFrame.setAttribute("allowtransparency", "true");
 
   return iFrame;
 }
@@ -58,13 +58,13 @@ export async function initializeWallet(iFrameId: string, userId: string): Promis
   const message = initializeRequest(userId);
 
   const initPromise = new Promise<string>((resolve, reject) => {
-    window.addEventListener('message', function eventListener(event: MessageEvent) {
+    window.addEventListener("message", function eventListener(event: MessageEvent) {
       if (
         event.data &&
         event.data.type &&
         (event.data.type === INITIALIZATION_SUCCESS || event.data.type === INITIALIZATION_FAILURE)
       ) {
-        window.removeEventListener('message', eventListener);
+        window.removeEventListener("message", eventListener);
         if (event.data.type === INITIALIZATION_SUCCESS) {
           resolve(event.data.address);
         } else {
@@ -74,7 +74,7 @@ export async function initializeWallet(iFrameId: string, userId: string): Promis
     });
   });
 
-  (iFrame as any).contentWindow.postMessage(message, '*');
+  (iFrame as any).contentWindow.postMessage(message, "*");
   return initPromise;
 }
 
@@ -88,31 +88,31 @@ export async function initializeWallet(iFrameId: string, userId: string): Promis
 export async function validateCommitmentSignature(
   iFrameId: string,
   commitment: Commitment,
-  signature: string,
+  signature: string
 ): Promise<boolean> {
   const iFrame = document.getElementById(iFrameId) as HTMLIFrameElement;
   const message = validateCommitmentRequest(commitment, signature);
 
   const validatePromise = new Promise<boolean>((resolve, reject) => {
-    window.addEventListener('message', function eventListener(event: MessageEvent) {
+    window.addEventListener("message", function eventListener(event: MessageEvent) {
       if (
         event.data &&
         event.data.type &&
         (event.data.type === VALIDATION_SUCCESS || event.data.type === VALIDATION_FAILURE)
       ) {
         const receivedMessage = event.data as ValidationResponse;
-        window.removeEventListener('message', eventListener);
+        window.removeEventListener("message", eventListener);
         if (receivedMessage.type === VALIDATION_SUCCESS) {
           resolve(true);
         } else {
-          const { error, reason } = receivedMessage;
-          reject({ error, reason });
+          const {error, reason} = receivedMessage;
+          reject({error, reason});
         }
       }
     });
   });
 
-  (iFrame as any).contentWindow.postMessage(message, '*');
+  (iFrame as any).contentWindow.postMessage(message, "*");
   return validatePromise;
 }
 
@@ -127,26 +127,26 @@ export async function signCommitment(iFrameId: string, commitment: Commitment): 
   const message = signCommitmentRequest(commitment);
 
   const signPromise = new Promise<string>((resolve, reject) => {
-    window.addEventListener('message', function eventListener(event: MessageEvent) {
+    window.addEventListener("message", function eventListener(event: MessageEvent) {
       if (
         event.data &&
         event.data.type &&
         (event.data.type === SIGNATURE_SUCCESS || event.data.type === SIGNATURE_FAILURE)
       ) {
         const receivedMessage = event.data as SignatureResponse;
-        window.removeEventListener('message', eventListener);
+        window.removeEventListener("message", eventListener);
         if (receivedMessage.type === SIGNATURE_SUCCESS) {
-          const { signature } = receivedMessage;
+          const {signature} = receivedMessage;
           resolve(signature);
         } else {
-          const { error, reason } = receivedMessage;
-          reject({ error, reason });
+          const {error, reason} = receivedMessage;
+          reject({error, reason});
         }
       }
     });
   });
 
-  (iFrame as any).contentWindow.postMessage(message, '*');
+  (iFrame as any).contentWindow.postMessage(message, "*");
   return signPromise;
 }
 
@@ -158,7 +158,7 @@ export async function signCommitment(iFrameId: string, commitment: Commitment): 
 export function relayMessage(iFrameId: string, messagePayload: any) {
   const iFrame = document.getElementById(iFrameId) as HTMLIFrameElement;
   const message = receiveMessage(messagePayload);
-  (iFrame as any).contentWindow.postMessage(message, '*');
+  (iFrame as any).contentWindow.postMessage(message, "*");
 }
 
 /**
@@ -169,7 +169,7 @@ export function relayMessage(iFrameId: string, messagePayload: any) {
 export function startConcludingGame(iFrameId: string, channelId: string): void {
   const iFrame = document.getElementById(iFrameId) as HTMLIFrameElement;
   const message = concludeChannelRequest(channelId);
-  (iFrame as any).contentWindow.postMessage(message, '*');
+  (iFrame as any).contentWindow.postMessage(message, "*");
 }
 
 /**
@@ -190,18 +190,11 @@ export function startFunding(
   opponentAddress: string,
   myBalance: string,
   opponentBalance: string,
-  playerIndex: number,
+  playerIndex: number
 ): void {
   const iFrame = document.getElementById(iFrameId) as HTMLIFrameElement;
-  const message = fundingRequest(
-    channelId,
-    myAddress,
-    opponentAddress,
-    myBalance,
-    opponentBalance,
-    playerIndex,
-  );
-  (iFrame as any).contentWindow.postMessage(message, '*');
+  const message = fundingRequest(channelId, myAddress, opponentAddress, myBalance, opponentBalance, playerIndex);
+  (iFrame as any).contentWindow.postMessage(message, "*");
 }
 
 /**
@@ -212,7 +205,7 @@ export function startFunding(
 export function startChallenge(iFrameId: string, channelId: string) {
   const iFrame = document.getElementById(iFrameId) as HTMLIFrameElement;
   const message = createChallenge(channelId);
-  (iFrame as any).contentWindow.postMessage(message, '*');
+  (iFrame as any).contentWindow.postMessage(message, "*");
 }
 
 /**
@@ -223,5 +216,5 @@ export function startChallenge(iFrameId: string, channelId: string) {
 export function respondToOngoingChallenge(iFrameId: string, responseCommitment: Commitment) {
   const iFrame = document.getElementById(iFrameId) as HTMLIFrameElement;
   const message = respondToChallenge(responseCommitment);
-  (iFrame as any).contentWindow.postMessage(message, '*');
+  (iFrame as any).contentWindow.postMessage(message, "*");
 }

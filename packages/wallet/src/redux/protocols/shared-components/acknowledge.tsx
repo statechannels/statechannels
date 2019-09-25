@@ -1,5 +1,5 @@
-import React, { Fragment } from 'react';
-import { Button } from 'reactstrap';
+import React, {Fragment} from "react";
+import {Button} from "reactstrap";
 
 interface Props {
   title: string;
@@ -9,7 +9,7 @@ interface Props {
 
 export default class Acknowledge extends React.PureComponent<Props> {
   render() {
-    const { acknowledge, title, description } = this.props;
+    const {acknowledge, title, description} = this.props;
     return (
       <Fragment>
         <h2>{title}</h2>

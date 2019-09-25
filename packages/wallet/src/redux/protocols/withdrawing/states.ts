@@ -1,20 +1,20 @@
-import { StateConstructor } from '../../utils';
-import { NonTerminalTransactionSubmissionState as NonTerminalTSState } from '../transaction-submission/states';
-import { ProtocolState } from '..';
+import {StateConstructor} from "../../utils";
+import {NonTerminalTransactionSubmissionState as NonTerminalTSState} from "../transaction-submission/states";
+import {ProtocolState} from "..";
 
 // -------
 // States
 // -------
 
 export interface WaitForApproval {
-  type: 'Withdrawing.WaitforApproval';
+  type: "Withdrawing.WaitforApproval";
   processId: string;
   channelId: string;
   withdrawalAmount: string;
 }
 
 export interface WaitForTransaction {
-  type: 'Withdrawing.WaitForTransaction';
+  type: "Withdrawing.WaitForTransaction";
   processId: string;
   channelId: string;
   transactionSubmissionState: NonTerminalTSState;
@@ -22,23 +22,23 @@ export interface WaitForTransaction {
 }
 
 export interface WaitForAcknowledgement {
-  type: 'Withdrawing.WaitForAcknowledgement';
+  type: "Withdrawing.WaitForAcknowledgement";
   processId: string;
   channelId: string;
 }
 
 export const enum FailureReason {
-  TransactionFailure = 'Transaction failed',
-  ChannelNotClosed = 'Channel not closed',
-  UserRejected = 'User rejected',
+  TransactionFailure = "Transaction failed",
+  ChannelNotClosed = "Channel not closed",
+  UserRejected = "User rejected"
 }
 export interface Failure {
-  type: 'Withdrawing.Failure';
+  type: "Withdrawing.Failure";
   reason: string;
 }
 
 export interface Success {
-  type: 'Withdrawing.Success';
+  type: "Withdrawing.Success";
 }
 
 // ------------
@@ -46,48 +46,45 @@ export interface Success {
 // ------------
 
 export const waitForApproval: StateConstructor<WaitForApproval> = p => {
-  return { ...p, type: 'Withdrawing.WaitforApproval' };
+  return {...p, type: "Withdrawing.WaitforApproval"};
 };
 
 export const waitForTransaction: StateConstructor<WaitForTransaction> = p => {
-  return { ...p, type: 'Withdrawing.WaitForTransaction' };
+  return {...p, type: "Withdrawing.WaitForTransaction"};
 };
 
 export const waitForAcknowledgement: StateConstructor<WaitForAcknowledgement> = p => {
-  return { ...p, type: 'Withdrawing.WaitForAcknowledgement' };
+  return {...p, type: "Withdrawing.WaitForAcknowledgement"};
 };
 
 export const success: StateConstructor<Success> = p => {
-  return { ...p, type: 'Withdrawing.Success' };
+  return {...p, type: "Withdrawing.Success"};
 };
 
 export const failure: StateConstructor<Failure> = p => {
-  return { ...p, type: 'Withdrawing.Failure' };
+  return {...p, type: "Withdrawing.Failure"};
 };
 
 // -------
 // Unions and Guards
 // -------
 
-export type NonTerminalWithdrawalState =
-  | WaitForApproval
-  | WaitForTransaction
-  | WaitForAcknowledgement;
+export type NonTerminalWithdrawalState = WaitForApproval | WaitForTransaction | WaitForAcknowledgement;
 
 export type WithdrawalState = NonTerminalWithdrawalState | Failure | Success;
 
-export type WithdrawalStateType = WithdrawalState['type'];
+export type WithdrawalStateType = WithdrawalState["type"];
 
 export function isTerminal(state: WithdrawalState): state is Failure | Success {
-  return state.type === 'Withdrawing.Failure' || state.type === 'Withdrawing.Success';
+  return state.type === "Withdrawing.Failure" || state.type === "Withdrawing.Success";
 }
 
 export function isWithdrawalState(state: ProtocolState): state is WithdrawalState {
   return (
-    state.type === 'Withdrawing.Failure' ||
-    state.type === 'Withdrawing.Success' ||
-    state.type === 'Withdrawing.WaitForAcknowledgement' ||
-    state.type === 'Withdrawing.WaitforApproval' ||
-    state.type === 'Withdrawing.WaitForTransaction'
+    state.type === "Withdrawing.Failure" ||
+    state.type === "Withdrawing.Success" ||
+    state.type === "Withdrawing.WaitForAcknowledgement" ||
+    state.type === "Withdrawing.WaitforApproval" ||
+    state.type === "Withdrawing.WaitForTransaction"
   );
 }

@@ -1,24 +1,21 @@
-import * as states from './states';
-import { ProtocolStateWithSharedData, makeLocator, ProtocolReducer } from '..';
-import { SharedData } from '../../state';
-import { ProtocolLocator } from '../../../communication';
-import { ConsensusUpdateState, initializeConsensusUpdate } from '../consensus-update';
-import {
-  CONSENSUS_UPDATE_PROTOCOL_LOCATOR,
-  consensusUpdateReducer,
-} from '../consensus-update/reducer';
-import { getChannelFundingState } from '../../selectors';
-import { getLatestCommitment, getTwoPlayerIndex, getFundingChannelId } from '../reducer-helpers';
-import { addHex } from '../../../utils/hex-utils';
-import { VirtualDefundingAction } from './actions';
-import { routesToConsensusUpdate } from '../consensus-update/actions';
-import { HUB_ADDRESS } from '../../../constants';
+import * as states from "./states";
+import {ProtocolStateWithSharedData, makeLocator, ProtocolReducer} from "..";
+import {SharedData} from "../../state";
+import {ProtocolLocator} from "../../../communication";
+import {ConsensusUpdateState, initializeConsensusUpdate} from "../consensus-update";
+import {CONSENSUS_UPDATE_PROTOCOL_LOCATOR, consensusUpdateReducer} from "../consensus-update/reducer";
+import {getChannelFundingState} from "../../selectors";
+import {getLatestCommitment, getTwoPlayerIndex, getFundingChannelId} from "../reducer-helpers";
+import {addHex} from "../../../utils/hex-utils";
+import {VirtualDefundingAction} from "./actions";
+import {routesToConsensusUpdate} from "../consensus-update/actions";
+import {HUB_ADDRESS} from "../../../constants";
 
 export function initialize({
   processId,
   targetChannelId,
   protocolLocator,
-  sharedData,
+  sharedData
 }: {
   processId: string;
   targetChannelId: string;
@@ -34,19 +31,16 @@ export function initialize({
   const ourIndex = getTwoPlayerIndex(targetChannelId, sharedData);
   const hubAddress = HUB_ADDRESS;
   const proposedDestination = [...latestAppCommitment.destination, hubAddress];
-  const proposedAllocation = [
-    ...latestAppCommitment.allocation,
-    latestAppCommitment.allocation.reduce(addHex),
-  ];
+  const proposedAllocation = [...latestAppCommitment.allocation, latestAppCommitment.allocation.reduce(addHex)];
   let jointChannel: ConsensusUpdateState;
-  ({ protocolState: jointChannel, sharedData } = initializeConsensusUpdate({
+  ({protocolState: jointChannel, sharedData} = initializeConsensusUpdate({
     processId,
     protocolLocator: makeLocator(protocolLocator, CONSENSUS_UPDATE_PROTOCOL_LOCATOR),
     clearedToSend: true,
     channelId: jointChannelId,
     proposedAllocation,
     proposedDestination,
-    sharedData,
+    sharedData
   }));
   const ledgerChannelId = getFundingChannelId(targetChannelId, sharedData);
   return {
@@ -58,110 +52,101 @@ export function initialize({
       jointChannelId,
       targetChannelId,
       ledgerChannelId,
-      protocolLocator,
+      protocolLocator
     }),
-    sharedData,
+    sharedData
   };
 }
 
 export const reducer: ProtocolReducer<states.VirtualDefundingState> = (
   protocolState: states.NonTerminalVirtualDefundingState,
   sharedData: SharedData,
-  action: VirtualDefundingAction,
+  action: VirtualDefundingAction
 ) => {
   switch (protocolState.type) {
-    case 'VirtualDefunding.WaitForJointChannelUpdate':
+    case "VirtualDefunding.WaitForJointChannelUpdate":
       return waitForJointChannelUpdateReducer(protocolState, sharedData, action);
-    case 'VirtualDefunding.WaitForLedgerChannelUpdate':
+    case "VirtualDefunding.WaitForLedgerChannelUpdate":
       return waitForLedgerChannelUpdateReducer(protocolState, sharedData, action);
     default:
-      return { protocolState, sharedData };
+      return {protocolState, sharedData};
   }
 };
 
 function waitForJointChannelUpdateReducer(
   protocolState: states.WaitForJointChannelUpdate,
   sharedData: SharedData,
-  action: VirtualDefundingAction,
+  action: VirtualDefundingAction
 ): ProtocolStateWithSharedData<states.VirtualDefundingState> {
   if (routesToConsensusUpdate(action, protocolState.protocolLocator)) {
     let jointChannel: ConsensusUpdateState;
-    ({ protocolState: jointChannel, sharedData } = consensusUpdateReducer(
+    ({protocolState: jointChannel, sharedData} = consensusUpdateReducer(
       protocolState.jointChannel,
       sharedData,
-      action,
+      action
     ));
     switch (jointChannel.type) {
-      case 'ConsensusUpdate.Failure':
-        return { protocolState: states.failure({}), sharedData };
-      case 'ConsensusUpdate.Success':
-        const {
-          hubAddress,
-          ledgerChannelId,
-          targetChannelId: appChannelId,
-          ourIndex,
-          processId,
-        } = protocolState;
+      case "ConsensusUpdate.Failure":
+        return {protocolState: states.failure({}), sharedData};
+      case "ConsensusUpdate.Success":
+        const {hubAddress, ledgerChannelId, targetChannelId: appChannelId, ourIndex, processId} = protocolState;
         // TODO: We probably need to start this earlier to deal with commitments coming in early
 
         const latestAppCommitment = getLatestCommitment(appChannelId, sharedData);
 
         const proposedAllocation = [
           latestAppCommitment.allocation[ourIndex],
-          latestAppCommitment.allocation[1 - ourIndex],
+          latestAppCommitment.allocation[1 - ourIndex]
         ];
         const proposedDestination = [latestAppCommitment.destination[ourIndex], hubAddress];
         let ledgerChannel: ConsensusUpdateState;
-        ({ protocolState: ledgerChannel, sharedData } = initializeConsensusUpdate({
+        ({protocolState: ledgerChannel, sharedData} = initializeConsensusUpdate({
           processId,
-          protocolLocator: makeLocator(
-            protocolState.protocolLocator,
-            CONSENSUS_UPDATE_PROTOCOL_LOCATOR,
-          ),
+          protocolLocator: makeLocator(protocolState.protocolLocator, CONSENSUS_UPDATE_PROTOCOL_LOCATOR),
           channelId: ledgerChannelId,
           proposedAllocation,
           proposedDestination,
           clearedToSend: true,
-          sharedData,
+          sharedData
         }));
 
         return {
-          protocolState: states.waitForLedgerChannelUpdate({ ...protocolState, ledgerChannel }),
-          sharedData,
+          protocolState: states.waitForLedgerChannelUpdate({...protocolState, ledgerChannel}),
+          sharedData
         };
       default:
         return {
-          protocolState: { ...protocolState, jointChannel },
-          sharedData,
+          protocolState: {...protocolState, jointChannel},
+          sharedData
         };
     }
   }
-  return { protocolState, sharedData };
+  return {protocolState, sharedData};
 }
 
 function waitForLedgerChannelUpdateReducer(
   protocolState: states.WaitForLedgerChannelUpdate,
   sharedData: SharedData,
-  action: VirtualDefundingAction,
+  action: VirtualDefundingAction
 ): ProtocolStateWithSharedData<states.VirtualDefundingState> {
   if (routesToConsensusUpdate(action, protocolState.protocolLocator)) {
     let ledgerChannel: ConsensusUpdateState;
-    ({ protocolState: ledgerChannel, sharedData } = consensusUpdateReducer(
+    ({protocolState: ledgerChannel, sharedData} = consensusUpdateReducer(
       protocolState.ledgerChannel,
       sharedData,
-      action,
+      action
     ));
     switch (ledgerChannel.type) {
-      case 'ConsensusUpdate.Failure':
-        return { protocolState: states.failure({}), sharedData };
-      case 'ConsensusUpdate.Success':
-        return { protocolState: states.success({}), sharedData };
+      case "ConsensusUpdate.Failure":
+        return {protocolState: states.failure({}), sharedData};
+      case "ConsensusUpdate.Success":
+        return {protocolState: states.success({}), sharedData};
       default:
         return {
-          protocolState: { ...protocolState, ledgerChannel },
-          sharedData,
+          protocolState: {...protocolState, ledgerChannel},
+          sharedData
         };
     }
   }
-  return { protocolState, sharedData };
+  return {protocolState, sharedData};
 }

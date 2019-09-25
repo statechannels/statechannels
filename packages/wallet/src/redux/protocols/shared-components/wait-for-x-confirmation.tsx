@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 
 interface Props {
   name: string;
@@ -23,15 +23,15 @@ export default class WaitForXConfirmation extends React.PureComponent<Props> {
     }
   }
   render() {
-    const { name } = this.props;
+    const {name} = this.props;
     return (
       <div>
         <h2>Waiting for your {name} to be mined!</h2>
         <p>
-          Hold tight! Visit{' '}
+          Hold tight! Visit{" "}
           <a target="_blank" href={this.buildEtherscanLink()}>
             this link
-          </a>{' '}
+          </a>{" "}
           to check on its status.
         </p>
       </div>

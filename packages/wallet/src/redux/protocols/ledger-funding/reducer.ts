@@ -1,22 +1,22 @@
-import { SharedData, getPrivatekey } from '../../state';
-import { ProtocolStateWithSharedData, makeLocator } from '..';
-import * as selectors from '../../selectors';
-import { getLastCommitment, ChannelState } from '../../channel-store/channel-state';
-import { CommitmentType } from 'fmg-core';
-import { isExistingLedgerFundingAction } from '../existing-ledger-funding';
+import {SharedData, getPrivatekey} from "../../state";
+import {ProtocolStateWithSharedData, makeLocator} from "..";
+import * as selectors from "../../selectors";
+import {getLastCommitment, ChannelState} from "../../channel-store/channel-state";
+import {CommitmentType} from "fmg-core";
+import {isExistingLedgerFundingAction} from "../existing-ledger-funding";
 // TODO: Why does importing the reducer from the index result in test failures in grand parent protocols?
 import {
   initialize as initializeExistingLedgerFunding,
-  existingLedgerFundingReducer,
-} from '../existing-ledger-funding/reducer';
-import * as states from './states';
-import { isNewLedgerChannelAction, NewLedgerChannelReducer } from '../new-ledger-channel';
-import { unreachable } from '../../../utils/reducer-utils';
-import { WalletAction } from '../../actions';
-import { ProtocolLocator, EmbeddedProtocol } from '../../../communication';
-import * as newLedgerChannel from '../new-ledger-channel';
-import { EXISTING_LEDGER_FUNDING_PROTOCOL_LOCATOR } from '../existing-ledger-funding/reducer';
-import { getTwoPlayerIndex } from '../reducer-helpers';
+  existingLedgerFundingReducer
+} from "../existing-ledger-funding/reducer";
+import * as states from "./states";
+import {isNewLedgerChannelAction, NewLedgerChannelReducer} from "../new-ledger-channel";
+import {unreachable} from "../../../utils/reducer-utils";
+import {WalletAction} from "../../actions";
+import {ProtocolLocator, EmbeddedProtocol} from "../../../communication";
+import * as newLedgerChannel from "../new-ledger-channel";
+import {EXISTING_LEDGER_FUNDING_PROTOCOL_LOCATOR} from "../existing-ledger-funding/reducer";
+import {getTwoPlayerIndex} from "../reducer-helpers";
 
 export const LEDGER_FUNDING_PROTOCOL_LOCATOR = makeLocator(EmbeddedProtocol.LedgerFunding);
 
@@ -27,7 +27,7 @@ export function initialize({
   startingDestination,
   participants,
   sharedData,
-  protocolLocator,
+  protocolLocator
 }: {
   processId: string;
   channelId: string;
@@ -41,7 +41,7 @@ export function initialize({
   const existingLedgerChannel = selectors.getFundedLedgerChannelForParticipants(
     sharedData,
     participants[0],
-    participants[1],
+    participants[1]
   );
 
   if (ledgerChannelIsReady(existingLedgerChannel)) {
@@ -52,14 +52,14 @@ export function initialize({
       startingDestination,
       protocolLocator,
       sharedData,
-      existingLedgerChannel,
+      existingLedgerChannel
     });
   } else {
     const ourIndex = getTwoPlayerIndex(channelId, sharedData);
     const privateKey = getPrivatekey(sharedData, channelId);
     const {
       protocolState: newLedgerChannelState,
-      sharedData: newSharedData,
+      sharedData: newSharedData
     } = newLedgerChannel.initializeNewLedgerChannel({
       processId,
       privateKey,
@@ -68,13 +68,13 @@ export function initialize({
       participants,
       ourIndex,
       sharedData,
-      protocolLocator: makeLocator(protocolLocator, EmbeddedProtocol.NewLedgerChannel),
+      protocolLocator: makeLocator(protocolLocator, EmbeddedProtocol.NewLedgerChannel)
     });
 
-    if (newLedgerChannelState.type === 'NewLedgerChannel.Failure') {
+    if (newLedgerChannelState.type === "NewLedgerChannel.Failure") {
       return {
-        protocolState: states.failure({ reason: 'NewLedgerChannel Failure' }),
-        sharedData: newSharedData,
+        protocolState: states.failure({reason: "NewLedgerChannel Failure"}),
+        sharedData: newSharedData
       };
     }
 
@@ -85,9 +85,9 @@ export function initialize({
         newLedgerChannel: newLedgerChannelState,
         startingAllocation,
         startingDestination,
-        protocolLocator,
+        protocolLocator
       }),
-      sharedData: newSharedData,
+      sharedData: newSharedData
     };
   }
 }
@@ -95,12 +95,12 @@ export function initialize({
 export function ledgerFundingReducer(
   protocolState: states.NonTerminalLedgerFundingState,
   sharedData: SharedData,
-  action: WalletAction,
+  action: WalletAction
 ): ProtocolStateWithSharedData<states.LedgerFundingState> {
   switch (protocolState.type) {
-    case 'LedgerFunding.WaitForNewLedgerChannel':
+    case "LedgerFunding.WaitForNewLedgerChannel":
       return waitForNewLedgerChannelReducer(protocolState, action, sharedData);
-    case 'LedgerFunding.WaitForExistingLedgerFunding':
+    case "LedgerFunding.WaitForExistingLedgerFunding":
       return waitForExistingLedgerFundingReducer(protocolState, action, sharedData);
 
     default:
@@ -111,41 +111,42 @@ export function ledgerFundingReducer(
 function waitForNewLedgerChannelReducer(
   protocolState: states.WaitForNewLedgerChannel,
   action: WalletAction,
-  sharedData: SharedData,
+  sharedData: SharedData
 ): ProtocolStateWithSharedData<states.LedgerFundingState> {
   if (!isNewLedgerChannelAction(action)) {
     console.warn(`Received ${action} but currently in ${protocolState.type}`);
-    return { protocolState, sharedData };
+    return {protocolState, sharedData};
   }
 
-  const {
-    protocolState: newLedgerChannelState,
-    sharedData: newSharedData,
-  } = NewLedgerChannelReducer(protocolState.newLedgerChannel, sharedData, action);
+  const {protocolState: newLedgerChannelState, sharedData: newSharedData} = NewLedgerChannelReducer(
+    protocolState.newLedgerChannel,
+    sharedData,
+    action
+  );
   switch (newLedgerChannelState.type) {
-    case 'NewLedgerChannel.Failure':
+    case "NewLedgerChannel.Failure":
       return {
-        protocolState: states.failure({ reason: 'NewLedgerChannel Failure' }),
-        sharedData: newSharedData,
+        protocolState: states.failure({reason: "NewLedgerChannel Failure"}),
+        sharedData: newSharedData
       };
-    case 'NewLedgerChannel.Success':
-      const { ledgerId } = newLedgerChannelState;
-      const { channelId, protocolLocator } = protocolState;
+    case "NewLedgerChannel.Success":
+      const {ledgerId} = newLedgerChannelState;
+      const {channelId, protocolLocator} = protocolState;
       const existingLedgerChannel = selectors.getChannelState(newSharedData, ledgerId);
       return fundWithExistingLedgerChannel({
         ...protocolState,
         channelId,
         sharedData: newSharedData,
         existingLedgerChannel,
-        protocolLocator,
+        protocolLocator
       });
     default:
       return {
         protocolState: states.waitForNewLedgerChannel({
           ...protocolState,
-          newLedgerChannel: newLedgerChannelState,
+          newLedgerChannel: newLedgerChannelState
         }),
-        sharedData: newSharedData,
+        sharedData: newSharedData
       };
   }
 }
@@ -153,33 +154,34 @@ function waitForNewLedgerChannelReducer(
 function waitForExistingLedgerFundingReducer(
   protocolState: states.WaitForExistingLedgerFunding,
   action: WalletAction,
-  sharedData: SharedData,
+  sharedData: SharedData
 ) {
   if (!isExistingLedgerFundingAction(action)) {
     console.warn(`Received ${action} but currently in ${protocolState.type}`);
-    return { protocolState, sharedData };
+    return {protocolState, sharedData};
   }
 
-  const {
-    protocolState: existingLedgerFundingState,
-    sharedData: newSharedData,
-  } = existingLedgerFundingReducer(protocolState.existingLedgerFundingState, sharedData, action);
-  if (existingLedgerFundingState.type === 'ExistingLedgerFunding.Success') {
-    return { protocolState: states.success({}), sharedData: newSharedData };
-  } else if (existingLedgerFundingState.type === 'ExistingLedgerFunding.Failure') {
+  const {protocolState: existingLedgerFundingState, sharedData: newSharedData} = existingLedgerFundingReducer(
+    protocolState.existingLedgerFundingState,
+    sharedData,
+    action
+  );
+  if (existingLedgerFundingState.type === "ExistingLedgerFunding.Success") {
+    return {protocolState: states.success({}), sharedData: newSharedData};
+  } else if (existingLedgerFundingState.type === "ExistingLedgerFunding.Failure") {
     return {
       protocolState: states.failure({
-        reason: 'ExistingLedgerFunding Failure',
+        reason: "ExistingLedgerFunding Failure"
       }),
-      sharedData: newSharedData,
+      sharedData: newSharedData
     };
   } else {
     return {
       protocolState: states.waitForExistingLedgerFunding({
         ...protocolState,
-        existingLedgerFundingState,
+        existingLedgerFundingState
       }),
-      sharedData: newSharedData,
+      sharedData: newSharedData
     };
   }
 }
@@ -191,7 +193,7 @@ function fundWithExistingLedgerChannel({
   startingDestination,
   sharedData,
   existingLedgerChannel,
-  protocolLocator,
+  protocolLocator
 }: {
   processId: string;
   channelId: string;
@@ -202,27 +204,24 @@ function fundWithExistingLedgerChannel({
   protocolLocator: ProtocolLocator;
 }): ProtocolStateWithSharedData<states.NonTerminalLedgerFundingState | states.Failure> {
   const ledgerId = existingLedgerChannel.channelId;
-  const {
-    protocolState: existingLedgerFundingState,
-    sharedData: newSharedData,
-  } = initializeExistingLedgerFunding({
+  const {protocolState: existingLedgerFundingState, sharedData: newSharedData} = initializeExistingLedgerFunding({
     processId,
     channelId,
     ledgerId,
     startingAllocation,
     startingDestination,
     protocolLocator: makeLocator(protocolLocator, EXISTING_LEDGER_FUNDING_PROTOCOL_LOCATOR),
-    sharedData,
+    sharedData
   });
 
   switch (existingLedgerFundingState.type) {
-    case 'ExistingLedgerFunding.Failure':
+    case "ExistingLedgerFunding.Failure":
       return {
         protocolState: states.failure(existingLedgerFundingState),
-        sharedData: newSharedData,
+        sharedData: newSharedData
       };
-    case 'ExistingLedgerFunding.WaitForLedgerTopUp':
-    case 'ExistingLedgerFunding.WaitForLedgerUpdate':
+    case "ExistingLedgerFunding.WaitForLedgerTopUp":
+    case "ExistingLedgerFunding.WaitForLedgerUpdate":
       return {
         protocolState: states.waitForExistingLedgerFunding({
           processId,
@@ -231,18 +230,16 @@ function fundWithExistingLedgerChannel({
           existingLedgerFundingState,
           startingAllocation,
           startingDestination,
-          protocolLocator,
+          protocolLocator
         }),
-        sharedData: newSharedData,
+        sharedData: newSharedData
       };
     default:
       return unreachable(existingLedgerFundingState);
   }
 }
 
-function ledgerChannelIsReady(
-  existingLedgerChannel: ChannelState | undefined,
-): existingLedgerChannel is ChannelState {
+function ledgerChannelIsReady(existingLedgerChannel: ChannelState | undefined): existingLedgerChannel is ChannelState {
   return (
     !!existingLedgerChannel &&
     (getLastCommitment(existingLedgerChannel).commitmentType === CommitmentType.App ||

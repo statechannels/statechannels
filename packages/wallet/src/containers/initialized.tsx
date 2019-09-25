@@ -1,9 +1,9 @@
-import * as states from '../redux/state';
-import React, { PureComponent } from 'react';
-import LandingPage from '../components/landing-page';
-import { connect } from 'react-redux';
-import * as selectors from '../redux/selectors';
-import { Protocol } from '../redux/protocols/container';
+import * as states from "../redux/state";
+import React, {PureComponent} from "react";
+import LandingPage from "../components/landing-page";
+import {connect} from "react-redux";
+import * as selectors from "../redux/selectors";
+import {Protocol} from "../redux/protocols/container";
 
 interface Props {
   state: states.Initialized;
@@ -11,7 +11,7 @@ interface Props {
 
 class WalletInitializedContainer extends PureComponent<Props> {
   render() {
-    const { state } = this.props;
+    const {state} = this.props;
     if (!state.currentProcessId) {
       return <LandingPage />;
     } else {

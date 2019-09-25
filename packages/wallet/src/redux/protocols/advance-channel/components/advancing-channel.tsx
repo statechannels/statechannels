@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 
 export default class AdvancingChannel extends React.PureComponent<{}> {
   render() {
@@ -6,8 +6,8 @@ export default class AdvancingChannel extends React.PureComponent<{}> {
       <div>
         <h2>Advancing Channel</h2>
         <div>
-          We're currently exchanging messages with the other participants to advance the channel.
-          Hang tight and we'll let you know when it's done!
+          We're currently exchanging messages with the other participants to advance the channel. Hang tight and we'll
+          let you know when it's done!
         </div>
       </div>
     );

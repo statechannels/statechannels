@@ -1,16 +1,16 @@
-import React from 'react';
-import { PureComponent } from 'react';
-import { connect } from 'react-redux';
-import { NonTerminalChallengerState, FailureReason } from './states';
-import { unreachable } from '../../../../utils/reducer-utils';
-import * as actions from './actions';
-import { TransactionSubmission } from '../../transaction-submission';
-import Acknowledge from '../../shared-components/acknowledge';
-import WaitForResponseOrTimeout from './components/wait-for-response-or-timeout';
-import { ActionDispatcher } from '../../../utils';
-import { closeLedgerChannel } from '../../actions';
-import { multipleWalletActions } from '../../../../redux/actions';
-import ApproveX from '../../shared-components/approve-x';
+import React from "react";
+import {PureComponent} from "react";
+import {connect} from "react-redux";
+import {NonTerminalChallengerState, FailureReason} from "./states";
+import {unreachable} from "../../../../utils/reducer-utils";
+import * as actions from "./actions";
+import {TransactionSubmission} from "../../transaction-submission";
+import Acknowledge from "../../shared-components/acknowledge";
+import WaitForResponseOrTimeout from "./components/wait-for-response-or-timeout";
+import {ActionDispatcher} from "../../../utils";
+import {closeLedgerChannel} from "../../actions";
+import {multipleWalletActions} from "../../../../redux/actions";
+import ApproveX from "../../shared-components/approve-x";
 
 interface Props {
   state: NonTerminalChallengerState;
@@ -22,41 +22,39 @@ interface Props {
 
 class ChallengerContainer extends PureComponent<Props> {
   render() {
-    const { state, deny, approve, acknowledged, defund } = this.props;
+    const {state, deny, approve, acknowledged, defund} = this.props;
     const processId = state.processId;
     switch (state.type) {
-      case 'Challenging.ApproveChallenge':
+      case "Challenging.ApproveChallenge":
         return (
           <ApproveX
-            title={'Approve challenge'}
+            title={"Approve challenge"}
             description={
-              'Did you want to launch a challenge on the blockchain? Launching a challenge will take time and cost a small amount but will allow you to reclaim your funds if there is no response from your opponent.'
+              "Did you want to launch a challenge on the blockchain? Launching a challenge will take time and cost a small amount but will allow you to reclaim your funds if there is no response from your opponent."
             }
-            noMessage={'Deny'}
-            rejectionAction={() => deny({ processId })}
-            yesMessage={'Approve'}
-            approvalAction={() => approve({ processId })}
+            noMessage={"Deny"}
+            rejectionAction={() => deny({processId})}
+            yesMessage={"Approve"}
+            approvalAction={() => approve({processId})}
           />
         );
-      case 'Challenging.WaitForTransaction':
-        return (
-          <TransactionSubmission transactionName="challenge" state={state.transactionSubmission} />
-        );
-      case 'Challenging.WaitForResponseOrTimeout':
+      case "Challenging.WaitForTransaction":
+        return <TransactionSubmission transactionName="challenge" state={state.transactionSubmission} />;
+      case "Challenging.WaitForResponseOrTimeout":
         // todo: get expiration time
         return <WaitForResponseOrTimeout expirationTime={state.expiryTime} />;
-      case 'Challenging.AcknowledgeResponse':
+      case "Challenging.AcknowledgeResponse":
         return (
           <Acknowledge
             title="Opponent responded!"
             description="Your opponent responded to your challenge. You can now continue with your application."
-            acknowledge={() => acknowledged({ processId })}
+            acknowledge={() => acknowledged({processId})}
           />
         );
-      case 'Challenging.AcknowledgeTimeout':
+      case "Challenging.AcknowledgeTimeout":
         return (
           <ApproveX
-            title={'Challenge timed out!'}
+            title={"Challenge timed out!"}
             children={
               <div>
                 The challenge timed out. Channel
@@ -64,21 +62,21 @@ class ChallengerContainer extends PureComponent<Props> {
                 is now finalized -- would you like to defund it?
               </div>
             }
-            description={''}
-            yesMessage={'Defund'}
+            description={""}
+            yesMessage={"Defund"}
             approvalAction={() => defund(processId, state.channelId)}
-            noMessage={'No'}
-            rejectionAction={() => acknowledged({ processId })}
+            noMessage={"No"}
+            rejectionAction={() => acknowledged({processId})}
           />
         );
-      case 'Challenging.AcknowledgeFailure':
+      case "Challenging.AcknowledgeFailure":
         const description = describeFailure(state.reason);
 
         return (
           <Acknowledge
             title="Challenge not possible"
             description={description}
-            acknowledge={() => acknowledged({ processId })}
+            acknowledge={() => acknowledged({processId})}
           />
         );
       default:
@@ -89,18 +87,18 @@ class ChallengerContainer extends PureComponent<Props> {
 
 function describeFailure(reason: FailureReason): string {
   switch (reason) {
-    case 'AlreadyHaveLatest':
-      return 'Your opponent has already sent you their latest state.';
-    case 'ChannelDoesntExist':
+    case "AlreadyHaveLatest":
+      return "Your opponent has already sent you their latest state.";
+    case "ChannelDoesntExist":
       return "The channel doesn't exist.";
-    case 'DeclinedByUser':
-      return 'The challenge failed because you cancelled it.';
-    case 'LatestWhileApproving':
+    case "DeclinedByUser":
+      return "The challenge failed because you cancelled it.";
+    case "LatestWhileApproving":
       return "Your opponent's move arrived while you were approving the challenge, so there's no need to challenge anymore";
-    case 'NotFullyOpen':
+    case "NotFullyOpen":
       return "The channel that you're launching the challenge on isn't fully open.";
-    case 'TransactionFailed':
-      return 'The blockchain transaction failed.';
+    case "TransactionFailed":
+      return "The blockchain transaction failed.";
     default:
       return unreachable(reason);
   }
@@ -108,7 +106,7 @@ function describeFailure(reason: FailureReason): string {
 
 function closeLedgerChannelAndExitChallenge(processId, channelId) {
   return multipleWalletActions({
-    actions: [closeLedgerChannel({ channelId }), actions.exitChallenge({ processId })],
+    actions: [closeLedgerChannel({channelId}), actions.exitChallenge({processId})]
   });
 }
 
@@ -116,10 +114,10 @@ const mapDispatchToProps = {
   approve: actions.challengeApproved,
   deny: actions.challengeDenied,
   acknowledged: actions.acknowledged,
-  defund: closeLedgerChannelAndExitChallenge,
+  defund: closeLedgerChannelAndExitChallenge
 };
 
 export const Challenger = connect(
   () => ({}),
-  mapDispatchToProps,
+  mapDispatchToProps
 )(ChallengerContainer);

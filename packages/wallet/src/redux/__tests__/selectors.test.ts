@@ -1,13 +1,13 @@
-import * as walletStates from '../state';
-import * as selectors from '../selectors';
-import { ChannelState } from '../channel-store';
-import { Commitment } from '../../domain';
-import { SignedState } from 'nitro-protocol';
+import * as walletStates from "../state";
+import * as selectors from "../selectors";
+import {ChannelState} from "../channel-store";
+import {Commitment} from "../../domain";
+import {SignedState} from "nitro-protocol";
 
-describe('getAdjudicatorWatcherProcessesForChannel', () => {
+describe("getAdjudicatorWatcherProcessesForChannel", () => {
   const createWatcherState = (
     channelId: string,
-    subscribers: walletStates.ChannelSubscriber[],
+    subscribers: walletStates.ChannelSubscriber[]
   ): walletStates.Initialized => {
     const channelSubscriptions: walletStates.ChannelSubscriptions = {};
 
@@ -15,99 +15,93 @@ describe('getAdjudicatorWatcherProcessesForChannel', () => {
 
     return walletStates.initialized({
       ...walletStates.EMPTY_SHARED_DATA,
-      uid: '',
+      uid: "",
       processStore: {},
       channelSubscriptions,
-      address: 'address',
-      privateKey: 'privateKey',
+      address: "address",
+      privateKey: "privateKey"
     });
   };
 
-  it('should return an empty array when channelSubscriptions is empty', () => {
+  it("should return an empty array when channelSubscriptions is empty", () => {
     const state = walletStates.initialized({
       ...walletStates.EMPTY_SHARED_DATA,
-      uid: '',
+      uid: "",
       processStore: {},
       channelSubscriptions: {},
-      address: 'address',
-      privateKey: 'privateKey',
+      address: "address",
+      privateKey: "privateKey"
     });
-    expect(selectors.getAdjudicatorWatcherSubscribersForChannel(state, '0x0')).toEqual([]);
+    expect(selectors.getAdjudicatorWatcherSubscribersForChannel(state, "0x0")).toEqual([]);
   });
 
-  it('should return an array of channel subscribes that are registered for a channel', () => {
-    const subscribers = [
-      { processId: 'p1', protocolLocator: [] },
-      { processId: 'p2', protocolLocator: [] },
-    ];
-    const channelId = '0x0';
+  it("should return an array of channel subscribes that are registered for a channel", () => {
+    const subscribers = [{processId: "p1", protocolLocator: []}, {processId: "p2", protocolLocator: []}];
+    const channelId = "0x0";
     const state = createWatcherState(channelId, subscribers);
-    expect(selectors.getAdjudicatorWatcherSubscribersForChannel(state, '0x0')).toEqual(subscribers);
+    expect(selectors.getAdjudicatorWatcherSubscribersForChannel(state, "0x0")).toEqual(subscribers);
   });
 
-  it('should return an empty array when no processes are registered for the channel', () => {
-    const subscribers = [
-      { processId: 'p1', protocolLocator: [] },
-      { processId: 'p2', protocolLocator: [] },
-    ];
-    const channelId = '0x0';
+  it("should return an empty array when no processes are registered for the channel", () => {
+    const subscribers = [{processId: "p1", protocolLocator: []}, {processId: "p2", protocolLocator: []}];
+    const channelId = "0x0";
     const state = createWatcherState(channelId, subscribers);
-    expect(selectors.getAdjudicatorWatcherSubscribersForChannel(state, '0x1')).toEqual([]);
+    expect(selectors.getAdjudicatorWatcherSubscribersForChannel(state, "0x1")).toEqual([]);
   });
 
-  it('should return an empty array when the process store is empty', () => {
-    const channelId = '0x1';
+  it("should return an empty array when the process store is empty", () => {
+    const channelId = "0x1";
     const state = createWatcherState(channelId, []);
-    expect(selectors.getAdjudicatorWatcherSubscribersForChannel(state, '0x1')).toEqual([]);
+    expect(selectors.getAdjudicatorWatcherSubscribersForChannel(state, "0x1")).toEqual([]);
   });
 });
 
-describe('getNextNonce', () => {
+describe("getNextNonce", () => {
   const defaultChannelState: ChannelState = {
-    channelId: '0x0',
-    libraryAddress: '0x0',
+    channelId: "0x0",
+    libraryAddress: "0x0",
     ourIndex: 0,
-    participants: ['0x0', '0x0'],
+    participants: ["0x0", "0x0"],
     channelNonce: 0,
     funded: false,
-    address: 'address',
-    privateKey: 'privateKey',
+    address: "address",
+    privateKey: "privateKey",
     commitments: [
-      { commitment: {} as Commitment, signature: 'signature', signedState: {} as SignedState },
-      { commitment: {} as Commitment, signature: 'signature', signedState: {} as SignedState },
+      {commitment: {} as Commitment, signature: "signature", signedState: {} as SignedState},
+      {commitment: {} as Commitment, signature: "signature", signedState: {} as SignedState}
     ],
-    turnNum: 0,
+    turnNum: 0
   };
   const state = {
     ...walletStates.EMPTY_SHARED_DATA,
     channelStore: {
-      ['0x1']: {
+      ["0x1"]: {
         ...defaultChannelState,
-        libraryAddress: '0x1',
-        channelNonce: 0,
+        libraryAddress: "0x1",
+        channelNonce: 0
       },
-      ['0x2']: {
+      ["0x2"]: {
         ...defaultChannelState,
-        libraryAddress: '0x1',
-        channelNonce: 1,
+        libraryAddress: "0x1",
+        channelNonce: 1
       },
-      ['0x3']: {
+      ["0x3"]: {
         ...defaultChannelState,
-        libraryAddress: '0x2',
-        channelNonce: 2,
-      },
-    },
+        libraryAddress: "0x2",
+        channelNonce: 2
+      }
+    }
   };
 
-  it('gets the next nonce when multiple matching channels exist', () => {
-    expect(selectors.getNextNonce(state, '0x1')).toEqual(2);
+  it("gets the next nonce when multiple matching channels exist", () => {
+    expect(selectors.getNextNonce(state, "0x1")).toEqual(2);
   });
 
-  it('returns 0 when no matching channels exist', () => {
-    expect(selectors.getNextNonce(state, '0x3')).toEqual(0);
+  it("returns 0 when no matching channels exist", () => {
+    expect(selectors.getNextNonce(state, "0x3")).toEqual(0);
   });
 
-  it('returns the next nonce when one matching channel exists', () => {
-    expect(selectors.getNextNonce(state, '0x2')).toEqual(3);
+  it("returns the next nonce when one matching channel exists", () => {
+    expect(selectors.getNextNonce(state, "0x2")).toEqual(3);
   });
 });

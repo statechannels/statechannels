@@ -1,9 +1,9 @@
-import * as states from './states';
-import { PureComponent } from 'react';
+import * as states from "./states";
+import {PureComponent} from "react";
 
-import React from 'react';
-import { connect } from 'react-redux';
-import AdvancingChannel from './components/advancing-channel';
+import React from "react";
+import {connect} from "react-redux";
+import AdvancingChannel from "./components/advancing-channel";
 
 interface Props {
   state: states.AdvanceChannelState;
@@ -17,5 +17,5 @@ class AdvanceChannelContainer extends PureComponent<Props> {
 
 export const AdvanceChannel = connect(
   () => ({}),
-  () => ({}),
+  () => ({})
 )(AdvanceChannelContainer);

@@ -1,9 +1,9 @@
-import { OpenChannelState, ChannelState, isFullyOpen, getLastCommitment } from './channel-store';
-import * as walletStates from './state';
-import { SharedData, FundingState } from './state';
-import { ProcessProtocol } from '../communication';
-import { CONSENSUS_LIBRARY_ADDRESS } from '../constants';
-import { Commitment } from '../domain';
+import {OpenChannelState, ChannelState, isFullyOpen, getLastCommitment} from "./channel-store";
+import * as walletStates from "./state";
+import {SharedData, FundingState} from "./state";
+import {ProcessProtocol} from "../communication";
+import {CONSENSUS_LIBRARY_ADDRESS} from "../constants";
+import {Commitment} from "../domain";
 
 export const getOpenedChannelState = (state: SharedData, channelId: string): OpenChannelState => {
   const channelStatus = getChannelState(state, channelId);
@@ -14,10 +14,7 @@ export const getOpenedChannelState = (state: SharedData, channelId: string): Ope
 };
 
 export const doesACommitmentExistForChannel = (state: SharedData, channelId: string): boolean => {
-  return (
-    state.channelStore[channelId] !== undefined &&
-    state.channelStore[channelId].commitments.length > 0
-  );
+  return state.channelStore[channelId] !== undefined && state.channelStore[channelId].commitments.length > 0;
 };
 
 export const getChannelState = (state: SharedData, channelId: string): ChannelState => {
@@ -36,7 +33,7 @@ export const getLastCommitmentForChannel = (state: SharedData, channelId: string
 export const getFundedLedgerChannelForParticipants = (
   state: SharedData,
   playerA: string,
-  playerB: string,
+  playerB: string
 ): ChannelState | undefined => {
   // Finds a directly funded, two-party channel between players A and B
   return Object.values(state.channelStore).find(channel => {
@@ -45,15 +42,14 @@ export const getFundedLedgerChannelForParticipants = (
     return (
       channel.libraryAddress === CONSENSUS_LIBRARY_ADDRESS &&
       // We call concat() on participants in order to not sort it in place
-      JSON.stringify(channel.participants.concat().sort()) ===
-        JSON.stringify([playerA, playerB].sort()) &&
+      JSON.stringify(channel.participants.concat().sort()) === JSON.stringify([playerA, playerB].sort()) &&
       directlyFunded
     );
   });
 };
 export const getAdjudicatorWatcherSubscribersForChannel = (
   state: walletStates.Initialized,
-  channelId: string,
+  channelId: string
 ): walletStates.ChannelSubscriber[] => {
   if (state.channelSubscriptions[channelId]) {
     return state.channelSubscriptions[channelId];
@@ -73,7 +69,7 @@ export const getAdjudicatorChannelState = (state: SharedData, channelId: string)
 export const getAdjudicatorChannelBalance = (state: SharedData, channelId: string): string => {
   const adjudicatorChannelState = getAdjudicatorChannelState(state, channelId);
   if (!adjudicatorChannelState) {
-    return '0x0';
+    return "0x0";
   } else {
     return adjudicatorChannelState.balance;
   }
@@ -85,15 +81,12 @@ export const getFundingState = (state: SharedData): FundingState => {
 
 export const getChannelFundingState = (
   state: SharedData,
-  channelId: string,
+  channelId: string
 ): walletStates.ChannelFundingState | undefined => {
   return getFundingState(state)[channelId];
 };
 
-export const getProtocolForProcessId = (
-  state: walletStates.Initialized,
-  processId: string,
-): ProcessProtocol => {
+export const getProtocolForProcessId = (state: walletStates.Initialized, processId: string): ProcessProtocol => {
   if (state.processStore[processId]) {
     throw new Error(`No process state for process Id`);
   } else {
@@ -108,7 +101,7 @@ export const getProtocolState = (state: walletStates.Initialized, processId: str
 export const getNextNonce = (
   state: SharedData,
 
-  libraryAddress: string,
+  libraryAddress: string
 ): number => {
   let highestNonce = -1;
   for (const channelId of Object.keys(state.channelStore)) {

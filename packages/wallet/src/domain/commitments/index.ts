@@ -1,8 +1,8 @@
-import { Commitment as C, CommitmentType as CT } from 'fmg-core';
-import { validCommitmentSignature, signCommitment as signCommitmentUtil } from '../signing-utils';
-import { channelID } from 'fmg-core/lib/channel';
-import { convertCommitmentToSignedState } from '../../utils/nitro-converter';
-import { SignedState } from 'nitro-protocol';
+import {Commitment as C, CommitmentType as CT} from "fmg-core";
+import {validCommitmentSignature, signCommitment as signCommitmentUtil} from "../signing-utils";
+import {channelID} from "fmg-core/lib/channel";
+import {convertCommitmentToSignedState} from "../../utils/nitro-converter";
+import {SignedState} from "nitro-protocol";
 
 export type Commitment = C;
 export const CommitmentType = CT;
@@ -22,11 +22,11 @@ export interface SignedCommitment {
 // temporary name while we remove the old signCommitment method
 export function signCommitment2(commitment: Commitment, privateKey: string): SignedCommitment {
   const signedState = convertCommitmentToSignedState(commitment, privateKey);
-  return { commitment, signature: signCommitmentUtil(commitment, privateKey), signedState };
+  return {commitment, signature: signCommitmentUtil(commitment, privateKey), signedState};
 }
 
 export function hasValidSignature(signedCommitment: SignedCommitment): boolean {
-  const { commitment, signature } = signedCommitment;
+  const {commitment, signature} = signedCommitment;
   return validCommitmentSignature(commitment, signature);
 }
 
@@ -35,14 +35,14 @@ export function getChannelId(commitment: Commitment): string {
 }
 
 function incrementTurnNum(commitment: Commitment): Commitment {
-  return { ...commitment, turnNum: commitment.turnNum + 1 };
+  return {...commitment, turnNum: commitment.turnNum + 1};
 }
 
 export function constructConclude(commitment: Commitment): Commitment {
-  return { ...incrementTurnNum(commitment), commitmentType: CommitmentType.Conclude };
+  return {...incrementTurnNum(commitment), commitmentType: CommitmentType.Conclude};
 }
 
-export function nextSetupCommitment(commitment: Commitment): Commitment | 'NotASetupCommitment' {
+export function nextSetupCommitment(commitment: Commitment): Commitment | "NotASetupCommitment" {
   const turnNum = commitment.turnNum + 1;
   const numParticipants = commitment.channel.participants.length;
   let commitmentType;
@@ -54,8 +54,8 @@ export function nextSetupCommitment(commitment: Commitment): Commitment | 'NotAS
     commitmentType = CommitmentType.PostFundSetup;
     commitmentCount = turnNum - numParticipants;
   } else {
-    return 'NotASetupCommitment';
+    return "NotASetupCommitment";
   }
 
-  return { ...commitment, turnNum, commitmentType, commitmentCount };
+  return {...commitment, turnNum, commitmentType, commitmentCount};
 }

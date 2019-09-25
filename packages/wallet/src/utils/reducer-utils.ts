@@ -1,27 +1,27 @@
-import { accumulateSideEffects } from '../redux/outbox';
-import { SideEffects } from '../redux/outbox/state';
-import { WalletAction } from '../redux/actions';
-import { StateWithSideEffects } from '../redux/utils';
+import {accumulateSideEffects} from "../redux/outbox";
+import {SideEffects} from "../redux/outbox/state";
+import {WalletAction} from "../redux/actions";
+import {StateWithSideEffects} from "../redux/utils";
 
 export function unreachable(x: never) {
   return x;
 }
 
 export type ReducersMapObject<Tree = any, A extends WalletAction = WalletAction> = {
-  [Branch in keyof Tree]: ReducerWithSideEffects<Tree[Branch], A>
+  [Branch in keyof Tree]: ReducerWithSideEffects<Tree[Branch], A>;
 };
 
 export type ReducerWithSideEffects<T, A extends WalletAction = WalletAction> = (
   state: T,
   action: A,
-  data?: any,
+  data?: any
 ) => StateWithSideEffects<T>;
 
 export function combineReducersWithSideEffects<Tree, A extends WalletAction>(
-  reducers: ReducersMapObject<Tree, A>,
+  reducers: ReducersMapObject<Tree, A>
 ): ReducerWithSideEffects<Tree> {
-  return (state: Tree, action: A, data?: { [Branch in keyof Tree]?: any }) => {
-    const nextState = { ...state };
+  return (state: Tree, action: A, data?: {[Branch in keyof Tree]?: any}) => {
+    const nextState = {...state};
     let sideEffects: SideEffects = {};
 
     Object.keys(reducers).map(branch => {
@@ -32,10 +32,10 @@ export function combineReducersWithSideEffects<Tree, A extends WalletAction>(
       } else {
         result = reducer(state[branch], action);
       }
-      const { state: updatedState, sideEffects: nextSideEffects } = result;
+      const {state: updatedState, sideEffects: nextSideEffects} = result;
       nextState[branch] = updatedState;
       sideEffects = accumulateSideEffects(sideEffects, nextSideEffects);
     });
-    return { state: { ...nextState }, sideEffects };
+    return {state: {...nextState}, sideEffects};
   };
 }

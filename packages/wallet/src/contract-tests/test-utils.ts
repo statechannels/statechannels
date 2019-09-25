@@ -1,31 +1,25 @@
-import { ethers } from 'ethers';
-import { CommitmentType, Commitment, signCommitment2 } from '../domain';
+import {ethers} from "ethers";
+import {CommitmentType, Commitment, signCommitment2} from "../domain";
 import {
   createDepositTransaction,
   createForceMoveTransaction,
   createConcludeTransaction,
   createRefuteTransaction,
-  createRespondWithMoveTransaction,
-} from '../utils/transaction-generator';
-import { signCommitment } from '../domain';
+  createRespondWithMoveTransaction
+} from "../utils/transaction-generator";
+import {signCommitment} from "../domain";
 // import testGameArtifact from '../../build/contracts/TestGame.json';
-import { bigNumberify } from 'ethers/utils';
-import { channelID, Channel } from 'fmg-core/lib/channel';
-import { ADJUDICATOR_ADDRESS } from '../constants';
-import { ADDRESS_ZERO } from 'fmg-core';
+import {bigNumberify} from "ethers/utils";
+import {channelID, Channel} from "fmg-core/lib/channel";
+import {ADJUDICATOR_ADDRESS} from "../constants";
+import {ADDRESS_ZERO} from "fmg-core";
 export function getLibraryAddress(networkId) {
   return ethers.Wallet.createRandom().address;
   // TODO: Import Trivial App from Nitro Protocol and use that
   // return testGameArtifact.networks[networkId].address;
 }
-export const fiveFive = [bigNumberify(5).toHexString(), bigNumberify(5).toHexString()] as [
-  string,
-  string
-];
-export const fourSix = [bigNumberify(4).toHexString(), bigNumberify(6).toHexString()] as [
-  string,
-  string
-];
+export const fiveFive = [bigNumberify(5).toHexString(), bigNumberify(5).toHexString()] as [string, string];
+export const fourSix = [bigNumberify(4).toHexString(), bigNumberify(6).toHexString()] as [string, string];
 
 export const defaultDepositAmount = fiveFive[0];
 
@@ -36,16 +30,16 @@ export async function getChannelId(provider, channelNonce, participantA, partici
   return channelID({
     channelType: libraryAddress,
     nonce: channelNonce,
-    participants: [participantA.address, participantB.address],
+    participants: [participantA.address, participantB.address]
   });
 }
 
 export async function depositContract(
   provider: ethers.providers.JsonRpcProvider,
   participant: string,
-  amount = defaultDepositAmount,
+  amount = defaultDepositAmount
 ) {
-  const deployTransaction = createDepositTransaction(participant, amount, '0x0');
+  const deployTransaction = createDepositTransaction(participant, amount, "0x0");
   const transactionReceipt = await sendTransaction(provider, deployTransaction);
   await transactionReceipt.wait();
 }
@@ -54,7 +48,7 @@ export async function createChallenge(
   provider: ethers.providers.JsonRpcProvider,
   channelNonce,
   participantA,
-  participantB,
+  participantB
 ) {
   const network = await provider.getNetwork();
   const networkId = network.chainId;
@@ -63,7 +57,7 @@ export async function createChallenge(
     channelType: libraryAddress,
     nonce: channelNonce,
     participants: [participantA.address, participantB.address],
-    guaranteedChannel: ADDRESS_ZERO,
+    guaranteedChannel: ADDRESS_ZERO
   };
 
   const fromCommitment: Commitment = {
@@ -72,8 +66,8 @@ export async function createChallenge(
     destination: [participantA.address, participantB.address],
     turnNum: 5,
     commitmentType: CommitmentType.App,
-    appAttributes: '0x00',
-    commitmentCount: 0,
+    appAttributes: "0x00",
+    commitmentCount: 0
   };
 
   const toCommitment: Commitment = {
@@ -82,14 +76,14 @@ export async function createChallenge(
     destination: [participantA.address, participantB.address],
     turnNum: 6,
     commitmentType: CommitmentType.App,
-    appAttributes: '0x00',
-    commitmentCount: 0,
+    appAttributes: "0x00",
+    commitmentCount: 0
   };
 
   const challengeTransaction = createForceMoveTransaction(
     signCommitment2(fromCommitment, participantA.privateKey),
     signCommitment2(toCommitment, participantB.privateKey),
-    participantA.privateKey,
+    participantA.privateKey
   );
   const transactionReceipt = await sendTransaction(provider, challengeTransaction);
   await transactionReceipt.wait();
@@ -100,7 +94,7 @@ export async function concludeGame(
   provider: ethers.providers.JsonRpcProvider,
   channelNonce,
   participantA,
-  participantB,
+  participantB
 ) {
   const network = await provider.getNetwork();
   const networkId = network.chainId;
@@ -109,7 +103,7 @@ export async function concludeGame(
     channelType: libraryAddress,
     nonce: channelNonce,
     participants: [participantA.address, participantB.address],
-    guaranteedChannel: ADDRESS_ZERO,
+    guaranteedChannel: ADDRESS_ZERO
   };
 
   const fromCommitment: Commitment = {
@@ -118,8 +112,8 @@ export async function concludeGame(
     destination: [participantA.address, participantB.address],
     turnNum: 5,
     commitmentType: CommitmentType.Conclude,
-    appAttributes: '0x00',
-    commitmentCount: 0,
+    appAttributes: "0x00",
+    commitmentCount: 0
   };
 
   const toCommitment: Commitment = {
@@ -128,8 +122,8 @@ export async function concludeGame(
     destination: [participantA.address, participantB.address],
     turnNum: 6,
     commitmentType: CommitmentType.Conclude,
-    appAttributes: '0x00',
-    commitmentCount: 0,
+    appAttributes: "0x00",
+    commitmentCount: 0
   };
 
   const signedFromCommitment = signCommitment2(fromCommitment, participantA.privateKey);
@@ -144,7 +138,7 @@ export async function respondWithMove(
   provider: ethers.providers.JsonRpcProvider,
   channelNonce,
   participantA,
-  participantB,
+  participantB
 ) {
   const network = await provider.getNetwork();
   const networkId = network.chainId;
@@ -153,7 +147,7 @@ export async function respondWithMove(
     channelType: libraryAddress,
     nonce: channelNonce,
     participants: [participantA.address, participantB.address],
-    guaranteedChannel: ADDRESS_ZERO,
+    guaranteedChannel: ADDRESS_ZERO
   };
 
   const toCommitment: Commitment = {
@@ -162,26 +156,23 @@ export async function respondWithMove(
     destination: [participantA.address, participantB.address],
     turnNum: 7,
     commitmentType: CommitmentType.App,
-    appAttributes: '0x00',
-    commitmentCount: 1,
+    appAttributes: "0x00",
+    commitmentCount: 1
   };
 
   const toSig = signCommitment(toCommitment, participantB.privateKey);
 
-  const respondWithMoveTransaction = createRespondWithMoveTransaction(
-    toCommitment,
-    participantB.privateKey,
-  );
+  const respondWithMoveTransaction = createRespondWithMoveTransaction(toCommitment, participantB.privateKey);
   const transactionReceipt = await sendTransaction(provider, respondWithMoveTransaction);
   await transactionReceipt.wait();
-  return { toCommitment, toSig };
+  return {toCommitment, toSig};
 }
 
 export async function refuteChallenge(
   provider: ethers.providers.JsonRpcProvider,
   channelNonce,
   participantA,
-  participantB,
+  participantB
 ) {
   const network = await provider.getNetwork();
   const networkId = network.chainId;
@@ -190,7 +181,7 @@ export async function refuteChallenge(
     channelType: libraryAddress,
     nonce: channelNonce,
     participants: [participantA.address, participantB.address],
-    guaranteedChannel: ADDRESS_ZERO,
+    guaranteedChannel: ADDRESS_ZERO
   };
 
   const toCommitment: Commitment = {
@@ -199,8 +190,8 @@ export async function refuteChallenge(
     destination: [participantA.address, participantB.address],
     turnNum: 8,
     commitmentType: CommitmentType.App,
-    appAttributes: '0x00',
-    commitmentCount: 1,
+    appAttributes: "0x00",
+    commitmentCount: 1
   };
 
   const toSig = signCommitment(toCommitment, participantA.privateKey);
@@ -212,5 +203,5 @@ export async function refuteChallenge(
 
 async function sendTransaction(provider, tx) {
   const signer = provider.getSigner();
-  return await signer.sendTransaction({ ...tx, to: ADJUDICATOR_ADDRESS });
+  return await signer.sendTransaction({...tx, to: ADJUDICATOR_ADDRESS});
 }

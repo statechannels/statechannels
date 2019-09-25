@@ -1,12 +1,12 @@
-import React from 'react';
-import { PureComponent } from 'react';
-import { connect } from 'react-redux';
-import { NonTerminalConcludingState } from '.';
-import WaitForOtherPlayer from '../shared-components/wait-for-other-player';
-import { unreachable } from '../../../utils/reducer-utils';
-import ApproveX from '../shared-components/approve-x';
-import * as actions from './actions';
-import { CloseLedgerChannel } from '../close-ledger-channel/container';
+import React from "react";
+import {PureComponent} from "react";
+import {connect} from "react-redux";
+import {NonTerminalConcludingState} from ".";
+import WaitForOtherPlayer from "../shared-components/wait-for-other-player";
+import {unreachable} from "../../../utils/reducer-utils";
+import ApproveX from "../shared-components/approve-x";
+import * as actions from "./actions";
+import {CloseLedgerChannel} from "../close-ledger-channel/container";
 interface Props {
   state: NonTerminalConcludingState;
   keepOpenSelected: typeof actions.keepOpenSelected;
@@ -15,24 +15,24 @@ interface Props {
 
 class ConcludingContainer extends PureComponent<Props> {
   render() {
-    const { state, keepOpenSelected, closeSelected } = this.props;
+    const {state, keepOpenSelected, closeSelected} = this.props;
     switch (state.type) {
-      case 'Concluding.WaitForConclude':
-        return <WaitForOtherPlayer actionDescriptor={'conclude'} channelId={state.channelId} />;
-      case 'Concluding.WaitForDefund':
-        return <WaitForOtherPlayer actionDescriptor={'defund'} channelId={state.channelId} />;
-      case 'Concluding.WaitForLedgerClose':
+      case "Concluding.WaitForConclude":
+        return <WaitForOtherPlayer actionDescriptor={"conclude"} channelId={state.channelId} />;
+      case "Concluding.WaitForDefund":
+        return <WaitForOtherPlayer actionDescriptor={"defund"} channelId={state.channelId} />;
+      case "Concluding.WaitForLedgerClose":
         return <CloseLedgerChannel state={state.ledgerClosing} />;
-      case 'Concluding.DecideClosing':
-        const { processId } = state;
+      case "Concluding.DecideClosing":
+        const {processId} = state;
         return (
           <ApproveX
             title="Close Channel with Hub?"
             yesMessage="Close Channel"
             noMessage="Keep Open"
             description="Do you want to close your channel with the hub?"
-            approvalAction={() => closeSelected({ processId })}
-            rejectionAction={() => keepOpenSelected({ processId })}
+            approvalAction={() => closeSelected({processId})}
+            rejectionAction={() => keepOpenSelected({processId})}
           />
         );
       default:
@@ -43,9 +43,9 @@ class ConcludingContainer extends PureComponent<Props> {
 
 const mapDispatchToProps = {
   closeSelected: actions.closeSelected,
-  keepOpenSelected: actions.keepOpenSelected,
+  keepOpenSelected: actions.keepOpenSelected
 };
 export const Concluding = connect(
   () => ({}),
-  mapDispatchToProps,
+  mapDispatchToProps
 )(ConcludingContainer);

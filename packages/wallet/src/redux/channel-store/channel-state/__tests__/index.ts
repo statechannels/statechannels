@@ -1,14 +1,14 @@
-import { SignedCommitment, getChannelId } from '../../../../domain';
-import { ChannelState } from '../states';
+import {SignedCommitment, getChannelId} from "../../../../domain";
+import {ChannelState} from "../states";
 
 export function channelFromCommitments(
   commitments: SignedCommitment[],
   ourAddress: string,
-  ourPrivateKey: string,
+  ourPrivateKey: string
 ): ChannelState {
   const numCommitments = commitments.length;
   const lastCommitment = commitments[numCommitments - 1];
-  const { turnNum, channel } = lastCommitment.commitment;
+  const {turnNum, channel} = lastCommitment.commitment;
   const libraryAddress = channel.channelType;
   const participants: [string, string] = channel.participants as [string, string];
   let funded = true;
@@ -17,7 +17,7 @@ export function channelFromCommitments(
   }
   const ourIndex = participants.indexOf(ourAddress);
   if (ourIndex === -1) {
-    throw new Error('Address provided is not a participant according to the lastCommitment.');
+    throw new Error("Address provided is not a participant according to the lastCommitment.");
   }
 
   return {
@@ -30,6 +30,6 @@ export function channelFromCommitments(
     privateKey: ourPrivateKey,
     ourIndex,
     turnNum,
-    commitments,
+    commitments
   };
 }

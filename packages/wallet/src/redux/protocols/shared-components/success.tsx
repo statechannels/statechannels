@@ -1,4 +1,4 @@
-import React, { Fragment } from 'react';
+import React, {Fragment} from "react";
 
 interface Props {
   name: string;
@@ -8,7 +8,7 @@ interface Props {
 // as the parent protocol should take control in the case of success.
 export default class Success extends React.PureComponent<Props> {
   render() {
-    const { name } = this.props;
+    const {name} = this.props;
     return (
       <Fragment>
         <h2>Success!</h2>

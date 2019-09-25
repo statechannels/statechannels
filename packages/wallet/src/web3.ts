@@ -1,4 +1,4 @@
-import Web3 from 'web3';
+import Web3 from "web3";
 /*
 As of November 2, 2018, metamask will introduce a breaking change where it will
 no longer inject a connected web3 instance to the browser.
@@ -17,7 +17,7 @@ export function connectWeb3() {
     ethereum.enable();
     currentProvider = ethereum.currentProvider;
   } else {
-    throw new Error('No provider injected by metamask.');
+    throw new Error("No provider injected by metamask.");
   }
 
   const connectedWeb3 = new Web3(currentProvider);

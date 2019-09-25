@@ -1,26 +1,26 @@
-import { SIGNATURE_SUCCESS, VALIDATION_SUCCESS, fundingSuccess } from '../../magmo-wallet-client';
-import * as actions from '../actions';
-import { channelStoreReducer } from '../channel-store/reducer';
-import { accumulateSideEffects } from '../outbox';
-import { SideEffects } from '../outbox/state';
-import { SharedData, queueMessage, getExistingChannel, checkAndStore } from '../state';
-import * as selectors from '../selectors';
-import { TwoPartyPlayerIndex, ThreePartyPlayerIndex } from '../types';
-import { CommitmentType } from 'fmg-core/lib/commitment';
-import * as magmoWalletClient from '../../magmo-wallet-client';
-import { getLastCommitment, nextParticipant, Commitments } from '../channel-store';
-import { Commitment } from '../../domain';
-import { sendCommitmentsReceived, ProtocolLocator } from '../../communication';
-import * as comms from '../../communication';
-import { ourTurn as ourTurnOnChannel } from '../channel-store';
-import _ from 'lodash';
-import { bigNumberify } from 'ethers/utils';
+import {SIGNATURE_SUCCESS, VALIDATION_SUCCESS, fundingSuccess} from "../../magmo-wallet-client";
+import * as actions from "../actions";
+import {channelStoreReducer} from "../channel-store/reducer";
+import {accumulateSideEffects} from "../outbox";
+import {SideEffects} from "../outbox/state";
+import {SharedData, queueMessage, getExistingChannel, checkAndStore} from "../state";
+import * as selectors from "../selectors";
+import {TwoPartyPlayerIndex, ThreePartyPlayerIndex} from "../types";
+import {CommitmentType} from "fmg-core/lib/commitment";
+import * as magmoWalletClient from "../../magmo-wallet-client";
+import {getLastCommitment, nextParticipant, Commitments} from "../channel-store";
+import {Commitment} from "../../domain";
+import {sendCommitmentsReceived, ProtocolLocator} from "../../communication";
+import * as comms from "../../communication";
+import {ourTurn as ourTurnOnChannel} from "../channel-store";
+import _ from "lodash";
+import {bigNumberify} from "ethers/utils";
 
 export const updateChannelState = (
   sharedData: SharedData,
-  channelAction: actions.channel.ChannelAction,
+  channelAction: actions.channel.ChannelAction
 ): SharedData => {
-  const newSharedData = { ...sharedData };
+  const newSharedData = {...sharedData};
   const updatedChannelState = channelStoreReducer(newSharedData.channelStore, channelAction);
   newSharedData.channelStore = updatedChannelState.state;
   // TODO: Currently we need to filter out signature/validation messages that are meant to the app
@@ -37,12 +37,11 @@ export const filterOutSignatureMessages = (sideEffects?: SideEffects): SideEffec
       ? sideEffects.messageOutbox
       : [sideEffects.messageOutbox];
     messageArray = messageArray.filter(
-      walletEvent =>
-        walletEvent.type !== VALIDATION_SUCCESS && walletEvent.type !== SIGNATURE_SUCCESS,
+      walletEvent => walletEvent.type !== VALIDATION_SUCCESS && walletEvent.type !== SIGNATURE_SUCCESS
     );
     return {
       ...sideEffects,
-      messageOutbox: messageArray,
+      messageOutbox: messageArray
     };
   }
   return sideEffects;
@@ -52,33 +51,31 @@ export function sendFundingComplete(sharedData: SharedData, appChannelId: string
   const channelState = selectors.getOpenedChannelState(sharedData, appChannelId);
   const c = getLastCommitment(channelState);
   if (c.commitmentType !== CommitmentType.PostFundSetup || c.turnNum !== 3) {
-    throw new Error(
-      `Expected a post fund setup B commitment. Instead received ${JSON.stringify(c)}.`,
-    );
+    throw new Error(`Expected a post fund setup B commitment. Instead received ${JSON.stringify(c)}.`);
   }
   return queueMessage(sharedData, fundingSuccess(appChannelId, c));
 }
 
 export function showWallet(sharedData: SharedData): SharedData {
-  const newSharedData = { ...sharedData };
+  const newSharedData = {...sharedData};
   newSharedData.outboxState = accumulateSideEffects(newSharedData.outboxState, {
-    displayOutbox: magmoWalletClient.showWallet(),
+    displayOutbox: magmoWalletClient.showWallet()
   });
   return newSharedData;
 }
 
 export function hideWallet(sharedData: SharedData): SharedData {
-  const newSharedData = { ...sharedData };
+  const newSharedData = {...sharedData};
   newSharedData.outboxState = accumulateSideEffects(newSharedData.outboxState, {
-    displayOutbox: magmoWalletClient.hideWallet(),
+    displayOutbox: magmoWalletClient.hideWallet()
   });
   return newSharedData;
 }
 
 export function sendConcludeSuccess(sharedData: SharedData): SharedData {
-  const newSharedData = { ...sharedData };
+  const newSharedData = {...sharedData};
   newSharedData.outboxState = accumulateSideEffects(newSharedData.outboxState, {
-    messageOutbox: magmoWalletClient.concludeSuccess(),
+    messageOutbox: magmoWalletClient.concludeSuccess()
     // TODO could rename this helper function, as it covers both ways of finalizing a channel
   });
   return newSharedData;
@@ -86,18 +83,15 @@ export function sendConcludeSuccess(sharedData: SharedData): SharedData {
 
 export function sendConcludeInstigated(sharedData: SharedData, channelId: string): SharedData {
   const channel = getExistingChannel(sharedData, channelId);
-  const { participants, ourIndex } = channel;
-  const messageRelay = comms.sendConcludeInstigated(
-    nextParticipant(participants, ourIndex),
-    channelId,
-  );
+  const {participants, ourIndex} = channel;
+  const messageRelay = comms.sendConcludeInstigated(nextParticipant(participants, ourIndex), channelId);
   return queueMessage(sharedData, messageRelay);
 }
 
 export function sendOpponentConcluded(sharedData: SharedData): SharedData {
-  const newSharedData = { ...sharedData };
+  const newSharedData = {...sharedData};
   newSharedData.outboxState = accumulateSideEffects(newSharedData.outboxState, {
-    messageOutbox: magmoWalletClient.opponentConcluded(),
+    messageOutbox: magmoWalletClient.opponentConcluded()
     // TODO could rename this helper function, as it covers both ways of finalizing a channel
   });
   return newSharedData;
@@ -107,24 +101,20 @@ export function sendCommitments(
   sharedData: SharedData,
   processId: string,
   channelId: string,
-  protocolLocator: ProtocolLocator,
+  protocolLocator: ProtocolLocator
 ): SharedData {
   const channel = getExistingChannel(sharedData, channelId);
-  const { participants, ourIndex } = channel;
+  const {participants, ourIndex} = channel;
   const messageRelay = sendCommitmentsReceived(
     nextParticipant(participants, ourIndex),
     processId,
     channel.commitments,
-    protocolLocator,
+    protocolLocator
   );
   return queueMessage(sharedData, messageRelay);
 }
 
-export function checkCommitments(
-  sharedData: SharedData,
-  turnNum: number,
-  commitments: Commitments,
-): SharedData {
+export function checkCommitments(sharedData: SharedData, turnNum: number, commitments: Commitments): SharedData {
   // We don't bother checking "stale" commitments -- those whose turnNum does not
   // exceed the current turnNum.
 
@@ -135,64 +125,53 @@ export function checkCommitments(
       if (result.isSuccess) {
         sharedData = result.store;
       } else {
-        throw new Error('Unable to validate commitment');
+        throw new Error("Unable to validate commitment");
       }
     });
 
   return sharedData;
 }
 
-export function sendChallengeResponseRequested(
-  sharedData: SharedData,
-  channelId: string,
-): SharedData {
-  const newSharedData = { ...sharedData };
+export function sendChallengeResponseRequested(sharedData: SharedData, channelId: string): SharedData {
+  const newSharedData = {...sharedData};
   newSharedData.outboxState = accumulateSideEffects(newSharedData.outboxState, {
-    messageOutbox: magmoWalletClient.challengeResponseRequested(channelId),
+    messageOutbox: magmoWalletClient.challengeResponseRequested(channelId)
   });
   return newSharedData;
 }
 
 export function sendChallengeCommitmentReceived(sharedData: SharedData, commitment: Commitment) {
-  const newSharedData = { ...sharedData };
+  const newSharedData = {...sharedData};
   newSharedData.outboxState = accumulateSideEffects(newSharedData.outboxState, {
-    messageOutbox: magmoWalletClient.challengeCommitmentReceived(commitment),
+    messageOutbox: magmoWalletClient.challengeCommitmentReceived(commitment)
   });
   return newSharedData;
 }
 
 // TODO 'Complete' here means the challenge was successfully responded to
 export function sendChallengeComplete(sharedData: SharedData) {
-  const newSharedData = { ...sharedData };
+  const newSharedData = {...sharedData};
   newSharedData.outboxState = accumulateSideEffects(newSharedData.outboxState, {
-    messageOutbox: magmoWalletClient.challengeComplete(),
+    messageOutbox: magmoWalletClient.challengeComplete()
   });
   return newSharedData;
 }
 
-export function sendConcludeFailure(
-  sharedData: SharedData,
-  reason: 'Other' | 'UserDeclined',
-): SharedData {
-  const newSharedData = { ...sharedData };
+export function sendConcludeFailure(sharedData: SharedData, reason: "Other" | "UserDeclined"): SharedData {
+  const newSharedData = {...sharedData};
   newSharedData.outboxState = accumulateSideEffects(newSharedData.outboxState, {
-    messageOutbox: magmoWalletClient.concludeFailure(reason),
+    messageOutbox: magmoWalletClient.concludeFailure(reason)
   });
   return newSharedData;
 }
 
 export const channelIsClosed = (channelId: string, sharedData: SharedData): boolean => {
-  return (
-    channelHasConclusionProof(channelId, sharedData) ||
-    channelFinalizedOnChain(channelId, sharedData)
-  );
+  return channelHasConclusionProof(channelId, sharedData) || channelFinalizedOnChain(channelId, sharedData);
 };
 
 export const channelFundsAnotherChannel = (channelId: string, sharedData: SharedData): boolean => {
   const latestCommitment = getLatestCommitment(channelId, sharedData);
-  return (
-    _.intersection(selectors.getChannelIds(sharedData), latestCommitment.destination).length > 0
-  );
+  return _.intersection(selectors.getChannelIds(sharedData), latestCommitment.destination).length > 0;
 };
 
 export const channelHasConclusionProof = (channelId: string, sharedData: SharedData): boolean => {
@@ -212,7 +191,7 @@ export const channelFinalizedOnChain = (channelId: string, sharedData: SharedDat
 export enum FundingType {
   Virtual,
   Ledger,
-  Direct,
+  Direct
 }
 export const getChannelFundingType = (channelId: string, sharedData: SharedData): FundingType => {
   const channelFundingState = selectors.getChannelFundingState(sharedData, channelId);
@@ -229,10 +208,7 @@ export const getChannelFundingType = (channelId: string, sharedData: SharedData)
   return channelState.participants.length === 3 ? FundingType.Virtual : FundingType.Ledger;
 };
 
-export const getTwoPlayerIndex = (
-  channelId: string,
-  sharedData: SharedData,
-): TwoPartyPlayerIndex => {
+export const getTwoPlayerIndex = (channelId: string, sharedData: SharedData): TwoPartyPlayerIndex => {
   const channelState = selectors.getChannelState(sharedData, channelId);
   return channelState.participants.indexOf(channelState.address);
 };
@@ -250,7 +226,7 @@ export function isSafeToSend({
   sharedData,
   channelId,
   ourIndex,
-  clearedToSend,
+  clearedToSend
 }: {
   sharedData: SharedData;
   ourIndex: TwoPartyPlayerIndex | ThreePartyPlayerIndex;
@@ -279,7 +255,7 @@ export function isSafeToSend({
 export function getOpponentAddress(channelId: string, sharedData: SharedData) {
   const channel = getExistingChannel(sharedData, channelId);
 
-  const { participants } = channel;
+  const {participants} = channel;
   const opponentAddress = participants[(channel.ourIndex + 1) % participants.length];
   return opponentAddress;
 }
@@ -316,7 +292,7 @@ export function getFundingChannelId(channelId: string, sharedData: SharedData): 
       : fundingState.guarantorChannel;
     if (!channelIdToCheck) {
       throw new Error(
-        `Funding state for ${channelId} is not directly funded so it must have aq funding or guarantor channel`,
+        `Funding state for ${channelId} is not directly funded so it must have aq funding or guarantor channel`
       );
     }
 
@@ -326,8 +302,8 @@ export function getFundingChannelId(channelId: string, sharedData: SharedData): 
 
 export function removeZeroFundsFromBalance(
   incomingAllocation: string[],
-  incomingDestination: string[],
-): { allocation: string[]; destination: string[] } {
+  incomingDestination: string[]
+): {allocation: string[]; destination: string[]} {
   const allocation: string[] = [];
   const destination: string[] = [];
   incomingAllocation.map((a, i) => {
@@ -336,5 +312,5 @@ export function removeZeroFundsFromBalance(
       destination.push(incomingDestination[i]);
     }
   });
-  return { allocation, destination };
+  return {allocation, destination};
 }

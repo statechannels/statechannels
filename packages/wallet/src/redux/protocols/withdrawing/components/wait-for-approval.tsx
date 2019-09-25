@@ -1,6 +1,6 @@
-import React, { Fragment } from 'react';
-import { Button } from 'reactstrap';
-import { ethers } from 'ethers';
+import React, {Fragment} from "react";
+import {Button} from "reactstrap";
+import {ethers} from "ethers";
 
 interface Props {
   approve: (address: string) => void;
@@ -16,19 +16,19 @@ export default class WaitForApproval extends React.PureComponent<Props, State> {
   constructor(props) {
     super(props);
     const currentAddress = web3.eth.defaultAccount;
-    this.state = { withdrawAddress: currentAddress };
+    this.state = {withdrawAddress: currentAddress};
 
     this.handleApprove = this.handleApprove.bind(this);
   }
   componentDidMount() {
-    if (typeof ethereum !== 'undefined') {
-      ethereum.on('accountsChanged', accounts => {
-        this.setState({ withdrawAddress: accounts[0] });
+    if (typeof ethereum !== "undefined") {
+      ethereum.on("accountsChanged", accounts => {
+        this.setState({withdrawAddress: accounts[0]});
       });
     } else {
       this.interval = setInterval(() => {
         if (web3.eth.defaultAccount !== this.state.withdrawAddress) {
-          this.setState({ withdrawAddress: web3.eth.defaultAccount });
+          this.setState({withdrawAddress: web3.eth.defaultAccount});
         }
       }, 100);
     }
@@ -44,7 +44,7 @@ export default class WaitForApproval extends React.PureComponent<Props, State> {
   }
 
   render() {
-    const { deny, withdrawalAmount } = this.props;
+    const {deny, withdrawalAmount} = this.props;
     const formattedAmount = `${ethers.utils.formatEther(withdrawalAmount)} ETH`;
     return (
       <Fragment>
@@ -54,7 +54,7 @@ export default class WaitForApproval extends React.PureComponent<Props, State> {
           <p>{formattedAmount} will be sent to your current metamask account:</p>
           <input
             disabled={true}
-            style={{ width: '95%' }}
+            style={{width: "95%"}}
             type="text"
             readOnly={true}
             defaultValue={this.state.withdrawAddress}

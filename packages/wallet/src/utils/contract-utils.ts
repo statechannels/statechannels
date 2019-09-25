@@ -1,9 +1,9 @@
-import { ethers } from 'ethers';
+import {ethers} from "ethers";
 
-import NitroAdjudicatorArtifact from '../../build/contracts/NitroAdjudicator.json';
-import ConsensusAppArtifact from '../../build/contracts/ConsensusApp.json';
-import EthAssetHolderArtifact from '../../build/contracts/ETHAssetHolder.json';
-import { asEthersObject, Commitment } from 'fmg-core';
+import NitroAdjudicatorArtifact from "../../build/contracts/NitroAdjudicator.json";
+import ConsensusAppArtifact from "../../build/contracts/ConsensusApp.json";
+import EthAssetHolderArtifact from "../../build/contracts/ETHAssetHolder.json";
+import {asEthersObject, Commitment} from "fmg-core";
 
 export async function getProvider(): Promise<ethers.providers.Web3Provider> {
   return await new ethers.providers.Web3Provider(web3.currentProvider);
@@ -34,7 +34,7 @@ export function getNetworkId(): number {
   if (!!process.env.CHAIN_NETWORK_ID) {
     return parseInt(process.env.CHAIN_NETWORK_ID, 10);
   } else {
-    throw new Error('There is no target network ID specified.');
+    throw new Error("There is no target network ID specified.");
   }
 }
 
@@ -67,20 +67,17 @@ export async function getAdjudicatorOutcome(provider, channelId) {
   return outcomeForChannel;
 }
 
-export async function validateTransition(
-  fromCommitment: Commitment,
-  toCommitment: Commitment,
-): Promise<boolean> {
+export async function validateTransition(fromCommitment: Commitment, toCommitment: Commitment): Promise<boolean> {
   const provider = await getProvider();
   const contract = await getAdjudicatorContract(provider);
   try {
     return await contract.validTransition(
       asEthersObject(fromCommitment),
       asEthersObject(toCommitment),
-      [], // unused argument -- see nitro contract
+      [] // unused argument -- see nitro contract
     );
   } catch (error) {
-    if (error.message === 'Internal JSON-RPC error.') {
+    if (error.message === "Internal JSON-RPC error.") {
       // Require statements cause a generic JSON-RPC error, so we just catch anything and return false
       return Promise.resolve(false);
     } else {

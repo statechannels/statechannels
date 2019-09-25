@@ -1,1 +1,1 @@
-export { DirectFundingAction } from './actions';
+export {DirectFundingAction} from "./actions";

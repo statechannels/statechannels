@@ -1,4 +1,4 @@
-import React, { Fragment } from 'react';
+import React, {Fragment} from "react";
 
 interface Props {
   name: string;
@@ -9,7 +9,7 @@ interface Props {
 // as the parent protocol should take control in the case of failure.
 export default class Failure extends React.PureComponent<Props> {
   render() {
-    const { name, reason } = this.props;
+    const {name, reason} = this.props;
     return (
       <Fragment>
         <h2>The {name} process failed</h2>

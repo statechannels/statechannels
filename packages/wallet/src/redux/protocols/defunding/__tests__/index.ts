@@ -1,3 +1,3 @@
-import { indirectlyFundingChannelHappyPath } from './scenarios';
+import {indirectlyFundingChannelHappyPath} from "./scenarios";
 
 export const preSuccess = indirectlyFundingChannelHappyPath.waitForLedgerDefunding;

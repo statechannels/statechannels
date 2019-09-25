@@ -1,12 +1,12 @@
-import { ethers } from 'ethers';
+import {ethers} from "ethers";
 
-import { put } from 'redux-saga/effects';
-import { getGanacheProvider } from 'magmo-devtools';
+import {put} from "redux-saga/effects";
+import {getGanacheProvider} from "magmo-devtools";
 
-import { transactionConfirmed, transactionSent, transactionSubmitted } from '../redux/actions';
-import { transactionSender } from '../redux/sagas/transaction-sender';
-import { signCommitment, signVerificationData, signCommitment2 } from '../domain';
-import { getLibraryAddress, createChallenge, concludeGame } from './test-utils';
+import {transactionConfirmed, transactionSent, transactionSubmitted} from "../redux/actions";
+import {transactionSender} from "../redux/sagas/transaction-sender";
+import {signCommitment, signVerificationData, signCommitment2} from "../domain";
+import {getLibraryAddress, createChallenge, concludeGame} from "./test-utils";
 import {
   createForceMoveTransaction,
   createDepositTransaction,
@@ -16,17 +16,17 @@ import {
   createWithdrawTransaction,
   ConcludeAndWithdrawArgs,
   createConcludeAndWithdrawTransaction,
-  createTransferAndWithdrawTransaction,
-} from '../utils/transaction-generator';
+  createTransferAndWithdrawTransaction
+} from "../utils/transaction-generator";
 
-import { depositContract } from './test-utils';
-import { Channel, Commitment, CommitmentType } from 'fmg-core';
-import { channelID } from 'fmg-core/lib/channel';
-import { ADJUDICATOR_ADDRESS } from '../constants';
+import {depositContract} from "./test-utils";
+import {Channel, Commitment, CommitmentType} from "fmg-core";
+import {channelID} from "fmg-core/lib/channel";
+import {ADJUDICATOR_ADDRESS} from "../constants";
 
 jest.setTimeout(90000);
 // TODO: Re-enable/fix tests
-describe('transactions', () => {
+describe("transactions", () => {
   let networkId;
   let libraryAddress;
   let nonce = 5;
@@ -41,25 +41,23 @@ describe('transactions', () => {
   }
 
   async function testTransactionSender(transactionToSend) {
-    const processId = 'processId';
-    const queuedTransaction = { transactionRequest: transactionToSend, processId };
+    const processId = "processId";
+    const queuedTransaction = {transactionRequest: transactionToSend, processId};
     const saga = transactionSender(queuedTransaction);
     saga.next();
-    expect(saga.next(provider).value).toEqual(put(transactionSent({ processId })));
+    expect(saga.next(provider).value).toEqual(put(transactionSent({processId})));
     saga.next();
     const signer = provider.getSigner();
-    transactionToSend = { ...transactionToSend, to: ADJUDICATOR_ADDRESS };
+    transactionToSend = {...transactionToSend, to: ADJUDICATOR_ADDRESS};
     const transactionReceipt = await signer.sendTransaction(transactionToSend);
 
     expect(saga.next(transactionReceipt).value).toEqual(
-      put(transactionSubmitted({ processId, transactionHash: transactionReceipt.hash || '' })),
+      put(transactionSubmitted({processId, transactionHash: transactionReceipt.hash || ""}))
     );
     const confirmedTransaction = await transactionReceipt.wait();
     saga.next();
     expect(saga.next(confirmedTransaction).value).toEqual(
-      put(
-        transactionConfirmed({ processId, contractAddress: confirmedTransaction.contractAddress }),
-      ),
+      put(transactionConfirmed({processId, contractAddress: confirmedTransaction.contractAddress}))
     );
 
     expect(saga.next().done).toBe(true);
@@ -71,81 +69,78 @@ describe('transactions', () => {
     libraryAddress = getLibraryAddress(networkId);
   });
 
-  it.skip('should deposit into the contract', async () => {
-    const depositTransaction = createDepositTransaction(participantA.address, '0x5', '0x0');
+  it.skip("should deposit into the contract", async () => {
+    const depositTransaction = createDepositTransaction(participantA.address, "0x5", "0x0");
     await testTransactionSender(depositTransaction);
   });
 
-  it.skip('should send a forceMove transaction', async () => {
-    const channel: Channel = { channelType: libraryAddress, nonce: getNextNonce(), participants };
+  it.skip("should send a forceMove transaction", async () => {
+    const channel: Channel = {channelType: libraryAddress, nonce: getNextNonce(), participants};
     await depositContract(provider, participantA.address);
     await depositContract(provider, participantB.address);
 
     const fromCommitment: Commitment = {
       channel,
-      allocation: ['0x05', '0x05'],
+      allocation: ["0x05", "0x05"],
       destination: [participantA.address, participantB.address],
       turnNum: 5,
       commitmentType: CommitmentType.App,
-      appAttributes: '0x0',
-      commitmentCount: 0,
+      appAttributes: "0x0",
+      commitmentCount: 0
     };
 
     const toCommitment: Commitment = {
       channel,
-      allocation: ['0x05', '0x05'],
+      allocation: ["0x05", "0x05"],
       destination: [participantA.address, participantB.address],
       turnNum: 6,
       commitmentType: CommitmentType.App,
-      appAttributes: '0x0',
-      commitmentCount: 1,
+      appAttributes: "0x0",
+      commitmentCount: 1
     };
 
     const forceMoveTransaction = createForceMoveTransaction(
       signCommitment2(fromCommitment, participantA.privateKey),
       signCommitment2(toCommitment, participantB.privateKey),
-      participantA.privateKey,
+      participantA.privateKey
     );
     await testTransactionSender(forceMoveTransaction);
   });
 
-  it.skip('should send a respondWithMove transaction', async () => {
-    const channel: Channel = { channelType: libraryAddress, nonce: getNextNonce(), participants };
-    const { nonce: channelNonce } = channel;
+  it.skip("should send a respondWithMove transaction", async () => {
+    const channel: Channel = {channelType: libraryAddress, nonce: getNextNonce(), participants};
+    const {nonce: channelNonce} = channel;
     await depositContract(provider, participantA.address);
     await depositContract(provider, participantB.address);
     await createChallenge(provider, channelNonce, participantA, participantB);
     const toCommitment: Commitment = {
       channel,
-      allocation: ['0x05', '0x05'],
+      allocation: ["0x05", "0x05"],
       destination: [participantA.address, participantB.address],
       turnNum: 7,
       commitmentType: CommitmentType.App,
-      appAttributes: '0x0',
-      commitmentCount: 1,
+      appAttributes: "0x0",
+      commitmentCount: 1
     };
 
-    const respondWithMoveTransaction = createRespondWithMoveTransaction(
-      toCommitment,
-      participantB.privateKey,
-    );
+    const respondWithMoveTransaction = createRespondWithMoveTransaction(toCommitment, participantB.privateKey);
     await testTransactionSender(respondWithMoveTransaction);
   });
 
-  it.skip('should send a refute transaction', async () => {
-    const channel: Channel = { channelType: libraryAddress, nonce: getNextNonce(), participants };
-    const { nonce: channelNonce } = channel;
+  it.skip("should send a refute transaction", async () => {
+    const channel: Channel = {channelType: libraryAddress, nonce: getNextNonce(), participants};
+    const {nonce: channelNonce} = channel;
     await depositContract(provider, participantA.address);
     await depositContract(provider, participantB.address);
     await createChallenge(provider, channelNonce, participantA, participantB);
     const toCommitment: Commitment = {
       channel,
-      allocation: ['0x05', '0x05'],
+      allocation: ["0x05", "0x05"],
       destination: [participantA.address, participantB.address],
       turnNum: 8,
       commitmentType: CommitmentType.App,
-      appAttributes: '0x0',
-      commitmentCount: 1,
+      appAttributes: "0x0",
+      commitmentCount: 1
     };
 
     const toSig = signCommitment(toCommitment, participantA.privateKey);
@@ -154,28 +149,28 @@ describe('transactions', () => {
     await testTransactionSender(refuteTransaction);
   });
 
-  it.skip('should send a conclude transaction', async () => {
-    const channel: Channel = { channelType: libraryAddress, nonce: getNextNonce(), participants };
+  it.skip("should send a conclude transaction", async () => {
+    const channel: Channel = {channelType: libraryAddress, nonce: getNextNonce(), participants};
     await depositContract(provider, participantA.address);
     await depositContract(provider, participantB.address);
     const fromCommitment: Commitment = {
       channel,
-      allocation: ['0x05', '0x05'],
+      allocation: ["0x05", "0x05"],
       destination: [participantA.address, participantB.address],
       turnNum: 5,
       commitmentType: CommitmentType.Conclude,
-      appAttributes: '0x0',
-      commitmentCount: 0,
+      appAttributes: "0x0",
+      commitmentCount: 0
     };
 
     const toCommitment: Commitment = {
       channel,
-      allocation: ['0x05', '0x05'],
+      allocation: ["0x05", "0x05"],
       destination: [participantA.address, participantB.address],
       turnNum: 6,
       commitmentType: CommitmentType.Conclude,
-      appAttributes: '0x0',
-      commitmentCount: 1,
+      appAttributes: "0x0",
+      commitmentCount: 1
     };
     const signedFromCommitment = signCommitment2(fromCommitment, participantA.privateKey);
     const signedToCommitment = signCommitment2(toCommitment, participantB.privateKey);
@@ -184,8 +179,8 @@ describe('transactions', () => {
     await testTransactionSender(concludeTransaction);
   });
 
-  it.skip('should send a transferAndWithdraw transaction', async () => {
-    const channel: Channel = { channelType: libraryAddress, nonce: getNextNonce(), participants };
+  it.skip("should send a transferAndWithdraw transaction", async () => {
+    const channel: Channel = {channelType: libraryAddress, nonce: getNextNonce(), participants};
     const channelId = channelID(channel);
     await depositContract(provider, channelId);
     await depositContract(provider, channelId);
@@ -194,69 +189,69 @@ describe('transactions', () => {
     const verificationSignature = signVerificationData(
       participantA.address,
       participantA.address,
-      '0x01',
+      "0x01",
       senderAddress,
-      participantA.privateKey,
+      participantA.privateKey
     );
     const transferAndWithdraw = createTransferAndWithdrawTransaction(
       channelId,
       participantA.address,
       participantA.address,
-      '0x01',
-      verificationSignature,
+      "0x01",
+      verificationSignature
     );
     await testTransactionSender(transferAndWithdraw);
   });
 
-  it.skip('should send a withdraw transaction', async () => {
+  it.skip("should send a withdraw transaction", async () => {
     await depositContract(provider, participantA.address);
     const senderAddress = await provider.getSigner().getAddress();
     const verificationSignature = signVerificationData(
       participantA.address,
       participantA.address,
-      '0x01',
+      "0x01",
       senderAddress,
-      participantA.privateKey,
+      participantA.privateKey
     );
     const withdrawTransaction = createWithdrawTransaction(
-      '0x01',
+      "0x01",
       participantA.address,
       participantA.address,
-      verificationSignature,
+      verificationSignature
     );
     await testTransactionSender(withdrawTransaction);
   });
 
-  it.skip('should send a conclude and withdraw transaction', async () => {
-    const channel: Channel = { channelType: libraryAddress, nonce: getNextNonce(), participants };
+  it.skip("should send a conclude and withdraw transaction", async () => {
+    const channel: Channel = {channelType: libraryAddress, nonce: getNextNonce(), participants};
     const channelId = channelID(channel);
     await depositContract(provider, channelId);
     const senderAddress = await provider.getSigner().getAddress();
     const verificationSignature = signVerificationData(
       participantA.address,
       participantA.address,
-      '0x05',
+      "0x05",
       senderAddress,
-      participantA.privateKey,
+      participantA.privateKey
     );
     const fromCommitment: Commitment = {
       channel,
-      allocation: ['0x05', '0x05'],
+      allocation: ["0x05", "0x05"],
       destination: [participantA.address, participantB.address],
       turnNum: 5,
       commitmentType: CommitmentType.Conclude,
-      appAttributes: '0x0',
-      commitmentCount: 0,
+      appAttributes: "0x0",
+      commitmentCount: 0
     };
 
     const toCommitment: Commitment = {
       channel,
-      allocation: ['0x05', '0x05'],
+      allocation: ["0x05", "0x05"],
       destination: [participantA.address, participantB.address],
       turnNum: 6,
       commitmentType: CommitmentType.Conclude,
-      appAttributes: '0x0',
-      commitmentCount: 1,
+      appAttributes: "0x0",
+      commitmentCount: 1
     };
     const fromSignature = signCommitment(fromCommitment, participantA.privateKey);
     const toSignature = signCommitment(toCommitment, participantB.privateKey);
@@ -269,7 +264,7 @@ describe('transactions', () => {
       verificationSignature,
       participant: participantA.address,
       destination: participantA.address,
-      amount: '0x05',
+      amount: "0x05"
     };
     const concludeAndWithdrawTransaction = createConcludeAndWithdrawTransaction(args);
     await testTransactionSender(concludeAndWithdrawTransaction);

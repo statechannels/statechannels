@@ -1,4 +1,4 @@
-import { happyPath, transactionFailed } from './scenarios';
+import {happyPath, transactionFailed} from "./scenarios";
 
 export const initialState = happyPath.waitForSend;
 

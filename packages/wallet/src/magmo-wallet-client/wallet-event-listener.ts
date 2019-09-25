@@ -1,5 +1,5 @@
-import { EventEmitter2 } from 'eventemitter2';
-import { WalletEventType, WalletEvent } from './wallet-events';
+import {EventEmitter2} from "eventemitter2";
+import {WalletEventType, WalletEvent} from "./wallet-events";
 
 /**
  * A wallet event listener that can be used to listen to the various [[WalletEvent]] that occur in the wallet.
@@ -9,9 +9,9 @@ export class WalletEventListener {
 
   constructor() {
     this.eventEmitter = new EventEmitter2();
-    window.addEventListener('message', (event: MessageEvent) => {
+    window.addEventListener("message", (event: MessageEvent) => {
       // TODO: Check where the message came from
-      if (event.data && event.data.type && event.data.type.startsWith('WALLET.')) {
+      if (event.data && event.data.type && event.data.type.startsWith("WALLET.")) {
         this.eventEmitter.emit(event.data.type, event.data);
       }
     });

@@ -1,14 +1,14 @@
-import React from 'react';
-import { PureComponent } from 'react';
-import { connect } from 'react-redux';
+import React from "react";
+import {PureComponent} from "react";
+import {connect} from "react-redux";
 
-import * as actions from './actions';
-import * as states from './states';
-import { unreachable } from '../../../../utils/reducer-utils';
-import { TwoPartyPlayerIndex } from '../../../types';
-import WaitForOtherPlayer from '../../shared-components/wait-for-other-player';
-import { ActionDispatcher } from '../../../utils';
-import ApproveX from '../../shared-components/approve-x';
+import * as actions from "./actions";
+import * as states from "./states";
+import {unreachable} from "../../../../utils/reducer-utils";
+import {TwoPartyPlayerIndex} from "../../../types";
+import WaitForOtherPlayer from "../../shared-components/wait-for-other-player";
+import {ActionDispatcher} from "../../../utils";
+import ApproveX from "../../shared-components/approve-x";
 interface Props {
   state: states.OngoingFundingStrategyNegotiationState;
   strategyApproved: ActionDispatcher<actions.StrategyApproved>;
@@ -18,28 +18,21 @@ interface Props {
 
 class FundingStrategyNegotiationContainer extends PureComponent<Props> {
   render() {
-    const { state, strategyApproved, cancelled } = this.props;
-    const { processId } = state;
+    const {state, strategyApproved, cancelled} = this.props;
+    const {processId} = state;
 
     switch (state.type) {
-      case 'FundingStrategyNegotiation.PlayerB.WaitForStrategyProposal':
-        return (
-          <WaitForOtherPlayer
-            actionDescriptor={'strategy choice'}
-            channelId={state.targetChannelId}
-          />
-        );
-      case 'FundingStrategyNegotiation.PlayerB.WaitForStrategyApproval':
+      case "FundingStrategyNegotiation.PlayerB.WaitForStrategyProposal":
+        return <WaitForOtherPlayer actionDescriptor={"strategy choice"} channelId={state.targetChannelId} />;
+      case "FundingStrategyNegotiation.PlayerB.WaitForStrategyApproval":
         return (
           <ApproveX
             title="Funding channel"
             description="Do you want to fund this state channel with a re-usable ledger channel?"
             yesMessage="Fund Channel"
             noMessage="Cancel"
-            approvalAction={() =>
-              strategyApproved({ processId, strategy: 'VirtualFundingStrategy' })
-            }
-            rejectionAction={() => cancelled({ processId, by: TwoPartyPlayerIndex.B })}
+            approvalAction={() => strategyApproved({processId, strategy: "VirtualFundingStrategy"})}
+            rejectionAction={() => cancelled({processId, by: TwoPartyPlayerIndex.B})}
           >
             <React.Fragment>
               This site wants you to open a new state channel.
@@ -70,10 +63,10 @@ const mapDispatchToProps = {
   strategyChosen: actions.strategyProposed,
   strategyApproved: actions.strategyApproved,
   strategyRejected: actions.strategyRejected,
-  cancelled: actions.cancelled,
+  cancelled: actions.cancelled
 };
 
 export const FundingStrategyNegotiation = connect(
   () => ({}),
-  mapDispatchToProps,
+  mapDispatchToProps
 )(FundingStrategyNegotiationContainer);

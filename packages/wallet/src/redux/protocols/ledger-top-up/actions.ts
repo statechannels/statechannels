@@ -1,7 +1,7 @@
-import { CommitmentReceived, WalletAction } from '../../actions';
-import { DirectFundingAction } from '../direct-funding';
-import { isDirectFundingAction } from '../direct-funding/actions';
-import { isCommonAction, EmbeddedProtocol, routerFactory } from '../../../communication';
+import {CommitmentReceived, WalletAction} from "../../actions";
+import {DirectFundingAction} from "../direct-funding";
+import {isDirectFundingAction} from "../direct-funding/actions";
+import {isCommonAction, EmbeddedProtocol, routerFactory} from "../../../communication";
 
 export type LedgerTopUpAction = CommitmentReceived | DirectFundingAction;
 

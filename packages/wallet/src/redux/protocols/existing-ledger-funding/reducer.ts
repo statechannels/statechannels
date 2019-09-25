@@ -1,38 +1,27 @@
-import { SharedData, ChannelFundingState, setFundingState } from '../../state';
-import * as states from './states';
-import { ProtocolStateWithSharedData, makeLocator } from '..';
-import { ExistingLedgerFundingAction } from './actions';
-import * as selectors from '../../selectors';
-import { getLastCommitment } from '../../channel-store';
-import { Commitment } from '../../../domain';
-import { bigNumberify } from 'ethers/utils';
-import { ProtocolLocator } from '../../../communication';
-import { CommitmentType } from 'fmg-core';
+import {SharedData, ChannelFundingState, setFundingState} from "../../state";
+import * as states from "./states";
+import {ProtocolStateWithSharedData, makeLocator} from "..";
+import {ExistingLedgerFundingAction} from "./actions";
+import * as selectors from "../../selectors";
+import {getLastCommitment} from "../../channel-store";
+import {Commitment} from "../../../domain";
+import {bigNumberify} from "ethers/utils";
+import {ProtocolLocator} from "../../../communication";
+import {CommitmentType} from "fmg-core";
 import {
   initialize as initializeLedgerTopUp,
   ledgerTopUpReducer,
-  LEDGER_TOP_UP_PROTOCOL_LOCATOR,
-} from '../ledger-top-up/reducer';
-import { routesToLedgerTopUp } from '../ledger-top-up/actions';
-import { addHex } from '../../../utils/hex-utils';
-import { initializeConsensusUpdate } from '../consensus-update';
-import {
-  CONSENSUS_UPDATE_PROTOCOL_LOCATOR,
-  consensusUpdateReducer,
-} from '../consensus-update/reducer';
-import {
-  clearedToSend,
-  routesToConsensusUpdate,
-  isConsensusUpdateAction,
-} from '../consensus-update/actions';
-import {
-  TerminalConsensusUpdateState,
-  isTerminal,
-  ConsensusUpdateState,
-} from '../consensus-update/states';
-import { LedgerTopUpState } from '../ledger-top-up/states';
-import { getLatestCommitment, removeZeroFundsFromBalance } from '../reducer-helpers';
-export { EXISTING_LEDGER_FUNDING_PROTOCOL_LOCATOR } from '../../../communication/protocol-locator';
+  LEDGER_TOP_UP_PROTOCOL_LOCATOR
+} from "../ledger-top-up/reducer";
+import {routesToLedgerTopUp} from "../ledger-top-up/actions";
+import {addHex} from "../../../utils/hex-utils";
+import {initializeConsensusUpdate} from "../consensus-update";
+import {CONSENSUS_UPDATE_PROTOCOL_LOCATOR, consensusUpdateReducer} from "../consensus-update/reducer";
+import {clearedToSend, routesToConsensusUpdate, isConsensusUpdateAction} from "../consensus-update/actions";
+import {TerminalConsensusUpdateState, isTerminal, ConsensusUpdateState} from "../consensus-update/states";
+import {LedgerTopUpState} from "../ledger-top-up/states";
+import {getLatestCommitment, removeZeroFundsFromBalance} from "../reducer-helpers";
+export {EXISTING_LEDGER_FUNDING_PROTOCOL_LOCATOR} from "../../../communication/protocol-locator";
 
 export const initialize = ({
   processId,
@@ -41,7 +30,7 @@ export const initialize = ({
   startingAllocation,
   startingDestination,
   protocolLocator,
-  sharedData,
+  sharedData
 }: {
   processId: string;
   channelId: string;
@@ -54,27 +43,21 @@ export const initialize = ({
   const ledgerChannel = selectors.getChannelState(sharedData, ledgerId);
   const theirCommitment = getLastCommitment(ledgerChannel);
 
-  const appFunding = craftAppFunding(
-    channelId,
-    ledgerId,
-    startingAllocation,
-    startingDestination,
-    sharedData,
-  );
+  const appFunding = craftAppFunding(channelId, ledgerId, startingAllocation, startingDestination, sharedData);
   let consensusUpdateState: ConsensusUpdateState;
-  ({ sharedData, protocolState: consensusUpdateState } = initializeConsensusUpdate({
+  ({sharedData, protocolState: consensusUpdateState} = initializeConsensusUpdate({
     processId,
     channelId: ledgerId,
     clearedToSend: false,
     proposedAllocation: appFunding.proposedAllocation,
     proposedDestination: appFunding.proposedDestination,
     protocolLocator: makeLocator(protocolLocator, CONSENSUS_UPDATE_PROTOCOL_LOCATOR),
-    sharedData,
+    sharedData
   }));
 
   if (ledgerChannelNeedsTopUp(theirCommitment, startingAllocation, startingDestination)) {
     let ledgerTopUpState: LedgerTopUpState;
-    ({ protocolState: ledgerTopUpState, sharedData } = initializeLedgerTopUp({
+    ({protocolState: ledgerTopUpState, sharedData} = initializeLedgerTopUp({
       processId,
       channelId,
       ledgerId,
@@ -82,7 +65,7 @@ export const initialize = ({
       proposedDestination: startingDestination,
       originalAllocation: theirCommitment.allocation,
       protocolLocator: makeLocator(protocolLocator, LEDGER_TOP_UP_PROTOCOL_LOCATOR),
-      sharedData,
+      sharedData
     }));
 
     return {
@@ -94,19 +77,19 @@ export const initialize = ({
         startingAllocation,
         startingDestination,
         protocolLocator,
-        consensusUpdateState,
+        consensusUpdateState
       }),
-      sharedData,
+      sharedData
     };
   }
   // If the ledger channel does not need a top up we can start exchanging consensus commitments
-  ({ sharedData, protocolState: consensusUpdateState } = consensusUpdateReducer(
+  ({sharedData, protocolState: consensusUpdateState} = consensusUpdateReducer(
     consensusUpdateState,
     sharedData,
     clearedToSend({
       protocolLocator: makeLocator(protocolLocator, CONSENSUS_UPDATE_PROTOCOL_LOCATOR),
-      processId,
-    }),
+      processId
+    })
   ));
   return {
     protocolState: states.waitForLedgerUpdate({
@@ -116,68 +99,68 @@ export const initialize = ({
       startingAllocation,
       startingDestination,
       consensusUpdateState,
-      protocolLocator,
+      protocolLocator
     }),
-    sharedData,
+    sharedData
   };
 };
 
 export const existingLedgerFundingReducer = (
   protocolState: states.ExistingLedgerFundingState,
   sharedData: SharedData,
-  action: ExistingLedgerFundingAction,
+  action: ExistingLedgerFundingAction
 ): ProtocolStateWithSharedData<states.ExistingLedgerFundingState> => {
   switch (protocolState.type) {
-    case 'ExistingLedgerFunding.WaitForLedgerUpdate':
+    case "ExistingLedgerFunding.WaitForLedgerUpdate":
       return waitForLedgerUpdateReducer(protocolState, sharedData, action);
-    case 'ExistingLedgerFunding.WaitForLedgerTopUp':
+    case "ExistingLedgerFunding.WaitForLedgerTopUp":
       return waitForLedgerTopUpReducer(protocolState, sharedData, action);
   }
-  return { protocolState, sharedData };
+  return {protocolState, sharedData};
 };
 
 const waitForLedgerTopUpReducer = (
   protocolState: states.WaitForLedgerTopUp,
   sharedData: SharedData,
-  action: ExistingLedgerFundingAction,
+  action: ExistingLedgerFundingAction
 ): ProtocolStateWithSharedData<states.ExistingLedgerFundingState> => {
   if (routesToConsensusUpdate(action, protocolState.protocolLocator)) {
     let consensusUpdateState: ConsensusUpdateState;
-    ({ protocolState: consensusUpdateState, sharedData } = consensusUpdateReducer(
+    ({protocolState: consensusUpdateState, sharedData} = consensusUpdateReducer(
       protocolState.consensusUpdateState,
       sharedData,
-      action,
+      action
     ));
     return {
       protocolState: {
         ...protocolState,
-        consensusUpdateState,
+        consensusUpdateState
       },
-      sharedData,
+      sharedData
     };
   } else if (routesToLedgerTopUp(action, protocolState.protocolLocator)) {
-    const { protocolState: ledgerTopUpState, sharedData: newSharedData } = ledgerTopUpReducer(
+    const {protocolState: ledgerTopUpState, sharedData: newSharedData} = ledgerTopUpReducer(
       protocolState.ledgerTopUpState,
       sharedData,
-      action,
+      action
     );
     sharedData = newSharedData;
 
-    if (ledgerTopUpState.type === 'LedgerTopUp.Failure') {
+    if (ledgerTopUpState.type === "LedgerTopUp.Failure") {
       return {
-        protocolState: states.failure({ reason: 'LedgerTopUpFailure' }),
-        sharedData,
+        protocolState: states.failure({reason: "LedgerTopUpFailure"}),
+        sharedData
       };
-    } else if (ledgerTopUpState.type === 'LedgerTopUp.Success') {
-      const { protocolLocator, processId } = protocolState;
+    } else if (ledgerTopUpState.type === "LedgerTopUp.Success") {
+      const {protocolLocator, processId} = protocolState;
       let consensusUpdateState: ConsensusUpdateState;
-      ({ protocolState: consensusUpdateState, sharedData } = consensusUpdateReducer(
+      ({protocolState: consensusUpdateState, sharedData} = consensusUpdateReducer(
         protocolState.consensusUpdateState,
         sharedData,
         clearedToSend({
           protocolLocator: makeLocator(protocolLocator, CONSENSUS_UPDATE_PROTOCOL_LOCATOR),
-          processId,
-        }),
+          processId
+        })
       ));
 
       if (isTerminal(consensusUpdateState)) {
@@ -185,27 +168,27 @@ const waitForLedgerTopUpReducer = (
           protocolState.channelId,
           protocolState.ledgerId,
           consensusUpdateState,
-          sharedData,
+          sharedData
         );
       } else {
         return {
           protocolState: states.waitForLedgerUpdate({
             ...protocolState,
-            consensusUpdateState,
+            consensusUpdateState
           }),
-          sharedData,
+          sharedData
         };
       }
     } else {
       return {
-        protocolState: states.waitForLedgerTopUp({ ...protocolState, ledgerTopUpState }),
-        sharedData,
+        protocolState: states.waitForLedgerTopUp({...protocolState, ledgerTopUpState}),
+        sharedData
       };
     }
   } else {
     return {
       protocolState,
-      sharedData,
+      sharedData
     };
   }
 };
@@ -213,17 +196,17 @@ const waitForLedgerTopUpReducer = (
 const waitForLedgerUpdateReducer = (
   protocolState: states.WaitForLedgerUpdate,
   sharedData: SharedData,
-  action: ExistingLedgerFundingAction,
+  action: ExistingLedgerFundingAction
 ) => {
   if (!isConsensusUpdateAction(action)) {
     console.warn(`Expected Consensus Update action received ${action.type} instead`);
-    return { protocolState, sharedData };
+    return {protocolState, sharedData};
   }
   let consensusUpdateState: ConsensusUpdateState;
-  ({ sharedData, protocolState: consensusUpdateState } = consensusUpdateReducer(
+  ({sharedData, protocolState: consensusUpdateState} = consensusUpdateReducer(
     protocolState.consensusUpdateState,
     sharedData,
-    action,
+    action
   ));
 
   if (isTerminal(consensusUpdateState)) {
@@ -231,15 +214,15 @@ const waitForLedgerUpdateReducer = (
       protocolState.channelId,
       protocolState.ledgerId,
       consensusUpdateState,
-      sharedData,
+      sharedData
     );
   } else {
     return {
       protocolState: {
         ...protocolState,
-        consensusUpdateState,
+        consensusUpdateState
       },
-      sharedData,
+      sharedData
     };
   }
 };
@@ -247,23 +230,20 @@ const waitForLedgerUpdateReducer = (
 function ledgerChannelNeedsTopUp(
   latestCommitment: Commitment,
   proposedAllocation: string[],
-  proposedDestination: string[],
+  proposedDestination: string[]
 ) {
   if (
     latestCommitment.commitmentType !== CommitmentType.App &&
     latestCommitment.commitmentType !== CommitmentType.PostFundSetup
   ) {
-    throw new Error('Ledger channel is already closed.');
+    throw new Error("Ledger channel is already closed.");
   }
   // We assume that destination/allocation are the same length and destination contains the same addresses
   // Otherwise we shouldn't be in this protocol at all
   for (let i = 0; i < proposedDestination.length; i++) {
     const address = proposedDestination[i];
     const existingIndex = latestCommitment.destination.indexOf(address);
-    if (
-      existingIndex > -1 &&
-      bigNumberify(latestCommitment.allocation[existingIndex]).lt(proposedAllocation[i])
-    ) {
+    if (existingIndex > -1 && bigNumberify(latestCommitment.allocation[existingIndex]).lt(proposedAllocation[i])) {
       return true;
     }
   }
@@ -275,11 +255,11 @@ function craftAppFunding(
   ledgerChannelId: string,
   startingAllocation: string[],
   startingDestination: string[],
-  sharedData: SharedData,
-): { proposedAllocation: string[]; proposedDestination: string[] } {
-  const { allocation: ledgerAllocation, destination: ledgerDestination } = getLatestCommitment(
+  sharedData: SharedData
+): {proposedAllocation: string[]; proposedDestination: string[]} {
+  const {allocation: ledgerAllocation, destination: ledgerDestination} = getLatestCommitment(
     ledgerChannelId,
-    sharedData,
+    sharedData
   );
 
   const appTotal = startingAllocation.reduce(addHex);
@@ -289,22 +269,18 @@ function craftAppFunding(
   const updatedLedgerAllocation = ledgerAllocation.map((a, i) => {
     const address = ledgerDestination[i];
     const startingIndex = startingDestination.indexOf(address);
-    const difference =
-      startingIndex < 0 ? bigNumberify(0) : bigNumberify(a).sub(startingAllocation[startingIndex]);
+    const difference = startingIndex < 0 ? bigNumberify(0) : bigNumberify(a).sub(startingAllocation[startingIndex]);
     return difference.gt(0) ? difference.toHexString() : bigNumberify(0).toHexString();
   });
 
-  const {
-    allocation: proposedAllocation,
-    destination: proposedDestination,
-  } = removeZeroFundsFromBalance(
+  const {allocation: proposedAllocation, destination: proposedDestination} = removeZeroFundsFromBalance(
     [appTotal, ...updatedLedgerAllocation],
-    [appChannelId, ...ledgerDestination],
+    [appChannelId, ...ledgerDestination]
   );
 
   return {
     proposedAllocation,
-    proposedDestination,
+    proposedDestination
   };
 }
 
@@ -312,23 +288,23 @@ function handleTerminalConsensusUpdate(
   channelId: string,
   ledgerId: string,
   consensusUpdateState: TerminalConsensusUpdateState,
-  sharedData: SharedData,
+  sharedData: SharedData
 ) {
-  if (consensusUpdateState.type === 'ConsensusUpdate.Failure') {
+  if (consensusUpdateState.type === "ConsensusUpdate.Failure") {
     return {
-      protocolState: states.failure({ reason: 'LedgerTopUpFailure' }),
-      sharedData,
+      protocolState: states.failure({reason: "LedgerTopUpFailure"}),
+      sharedData
     };
   } else {
     const fundingState: ChannelFundingState = {
       directlyFunded: false,
-      fundingChannel: ledgerId,
+      fundingChannel: ledgerId
     };
 
     sharedData = setFundingState(sharedData, channelId, fundingState);
     return {
       protocolState: states.success({}),
-      sharedData,
+      sharedData
     };
   }
 }

@@ -1,5 +1,5 @@
-import { SideEffects, OutboxState } from './state';
-export { QueuedTransaction } from './state';
+import {SideEffects, OutboxState} from "./state";
+export {QueuedTransaction} from "./state";
 
 /**
  *
@@ -10,13 +10,13 @@ export { QueuedTransaction } from './state';
  */
 export function accumulateSideEffects<T = SideEffects | OutboxState>(
   state: T,
-  sideEffects: SideEffects | undefined,
+  sideEffects: SideEffects | undefined
 ): T {
   if (!sideEffects) {
     return state;
   }
   // Defensively copy object as to not modify existing state
-  const newState = { ...state };
+  const newState = {...state};
   // TODO: We need to think about whether we really want to overwrite
   // existing outbox items
   Object.keys(sideEffects).map(k => {

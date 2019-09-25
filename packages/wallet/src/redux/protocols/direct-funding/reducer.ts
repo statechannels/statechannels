@@ -1,19 +1,16 @@
-import { bigNumberify } from 'ethers/utils';
-import { unreachable } from '../../../utils/reducer-utils';
-import { createDepositTransaction } from '../../../utils/transaction-generator';
-import * as actions from '../../actions';
-import { ProtocolReducer, ProtocolStateWithSharedData } from '../../protocols';
-import { SharedData, registerChannelToMonitor } from '../../state';
-import { isTransactionAction } from '../transaction-submission/actions';
-import {
-  initialize as initTransactionState,
-  transactionReducer,
-} from '../transaction-submission/reducer';
-import { isTerminal, isSuccess } from '../transaction-submission/states';
-import * as states from './states';
-import * as selectors from '../../selectors';
-import { TwoPartyPlayerIndex } from '../../types';
-import { ProtocolLocator } from '../../../communication';
+import {bigNumberify} from "ethers/utils";
+import {unreachable} from "../../../utils/reducer-utils";
+import {createDepositTransaction} from "../../../utils/transaction-generator";
+import * as actions from "../../actions";
+import {ProtocolReducer, ProtocolStateWithSharedData} from "../../protocols";
+import {SharedData, registerChannelToMonitor} from "../../state";
+import {isTransactionAction} from "../transaction-submission/actions";
+import {initialize as initTransactionState, transactionReducer} from "../transaction-submission/reducer";
+import {isTerminal, isSuccess} from "../transaction-submission/states";
+import * as states from "./states";
+import * as selectors from "../../selectors";
+import {TwoPartyPlayerIndex} from "../../types";
+import {ProtocolLocator} from "../../../communication";
 
 type DFReducer = ProtocolReducer<states.DirectFundingState>;
 
@@ -25,7 +22,7 @@ export function initialize({
   ourIndex,
   processId,
   protocolLocator,
-  sharedData,
+  sharedData
 }: {
   sharedData: SharedData;
   safeToDepositLevel: string;
@@ -39,8 +36,8 @@ export function initialize({
   sharedData = registerChannelToMonitor(sharedData, channelId, processId, protocolLocator);
   const existingChannelFunding = selectors.getAdjudicatorChannelBalance(sharedData, channelId);
   const alreadySafeToDeposit = bigNumberify(existingChannelFunding).gte(safeToDepositLevel);
-  const alreadyFunded = bigNumberify(totalFundingRequired).eq('0x');
-  const depositNotRequired = bigNumberify(requiredDeposit).eq('0x');
+  const alreadyFunded = bigNumberify(totalFundingRequired).eq("0x");
+  const depositNotRequired = bigNumberify(requiredDeposit).eq("0x");
 
   if (alreadyFunded) {
     return {
@@ -51,9 +48,9 @@ export function initialize({
         channelId,
         ourIndex,
         safeToDepositLevel,
-        protocolLocator,
+        protocolLocator
       }),
-      sharedData,
+      sharedData
     };
   }
   if (depositNotRequired) {
@@ -65,23 +62,19 @@ export function initialize({
         channelId,
         ourIndex,
         safeToDepositLevel,
-        protocolLocator,
+        protocolLocator
       }),
-      sharedData,
+      sharedData
     };
   }
 
   if (alreadySafeToDeposit) {
-    const depositTransaction = createDepositTransaction(
-      channelId,
-      requiredDeposit,
-      existingChannelFunding,
-    );
-    const { storage: newStorage, state: transactionSubmissionState } = initTransactionState(
+    const depositTransaction = createDepositTransaction(channelId, requiredDeposit, existingChannelFunding);
+    const {storage: newStorage, state: transactionSubmissionState} = initTransactionState(
       depositTransaction,
       processId,
       channelId,
-      sharedData,
+      sharedData
     );
 
     return {
@@ -94,9 +87,9 @@ export function initialize({
         safeToDepositLevel,
         transactionSubmissionState,
         protocolLocator,
-        funded: false,
+        funded: false
       }),
-      sharedData: newStorage,
+      sharedData: newStorage
     };
   }
 
@@ -108,38 +101,35 @@ export function initialize({
       channelId,
       ourIndex,
       safeToDepositLevel,
-      protocolLocator,
+      protocolLocator
     }),
-    sharedData,
+    sharedData
   };
 }
 
 export const directFundingStateReducer: DFReducer = (
   state: states.DirectFundingState,
   sharedData: SharedData,
-  action: actions.WalletAction,
+  action: actions.WalletAction
 ): ProtocolStateWithSharedData<states.DirectFundingState> => {
-  if (
-    action.type === 'WALLET.ADJUDICATOR.FUNDING_RECEIVED_EVENT' &&
-    action.channelId === state.channelId
-  ) {
+  if (action.type === "WALLET.ADJUDICATOR.FUNDING_RECEIVED_EVENT" && action.channelId === state.channelId) {
     if (bigNumberify(action.totalForDestination).gte(state.totalFundingRequired)) {
       return fundingConfirmedReducer(state, sharedData, action);
     }
   }
 
   switch (state.type) {
-    case 'DirectFunding.NotSafeToDeposit':
+    case "DirectFunding.NotSafeToDeposit":
       return notSafeToDepositReducer(state, sharedData, action);
-    case 'DirectFunding.WaitForDepositTransaction':
+    case "DirectFunding.WaitForDepositTransaction":
       return waitForDepositTransactionReducer(state, sharedData, action);
-    case 'DirectFunding.WaitForFunding':
+    case "DirectFunding.WaitForFunding":
       return waitForFundingReducer(state, sharedData, action);
-    case 'DirectFunding.FundingSuccess':
+    case "DirectFunding.FundingSuccess":
       return channelFundedReducer(state, sharedData, action);
-    case 'DirectFunding.FundingFailure':
+    case "DirectFunding.FundingFailure":
       // todo: restrict the reducer to only accept non-terminal states
-      return { protocolState: state, sharedData };
+      return {protocolState: state, sharedData};
     default:
       return unreachable(state);
   }
@@ -148,13 +138,13 @@ export const directFundingStateReducer: DFReducer = (
 // Action reducers
 const fundingConfirmedReducer: DFReducer = (
   protocolState: states.DirectFundingState,
-  sharedData: SharedData,
+  sharedData: SharedData
 ): ProtocolStateWithSharedData<states.DirectFundingState> => {
   // TODO[Channel state side effect]: update funding level for the channel.
 
   return {
     protocolState: states.fundingSuccess(protocolState),
-    sharedData,
+    sharedData
   };
 };
 
@@ -162,97 +152,97 @@ const fundingConfirmedReducer: DFReducer = (
 const notSafeToDepositReducer: DFReducer = (
   state: states.NotSafeToDeposit,
   sharedData: SharedData,
-  action: actions.WalletAction,
+  action: actions.WalletAction
 ): ProtocolStateWithSharedData<states.DirectFundingState> => {
   switch (action.type) {
-    case 'WALLET.ADJUDICATOR.FUNDING_RECEIVED_EVENT':
+    case "WALLET.ADJUDICATOR.FUNDING_RECEIVED_EVENT":
       if (
         action.channelId === state.channelId &&
         bigNumberify(action.totalForDestination).gte(state.safeToDepositLevel)
       ) {
-        const existingChannelFunding = selectors.getAdjudicatorChannelBalance(
-          sharedData,
-          state.channelId,
-        );
+        const existingChannelFunding = selectors.getAdjudicatorChannelBalance(sharedData, state.channelId);
         const depositTransaction = createDepositTransaction(
           state.channelId,
           state.requiredDeposit,
-          existingChannelFunding,
+          existingChannelFunding
         );
 
-        const {
-          storage: sharedDataWithTransactionState,
-          state: transactionSubmissionState,
-        } = initTransactionState(depositTransaction, state.processId, state.channelId, sharedData);
+        const {storage: sharedDataWithTransactionState, state: transactionSubmissionState} = initTransactionState(
+          depositTransaction,
+          state.processId,
+          state.channelId,
+          sharedData
+        );
         return {
           protocolState: states.waitForDepositTransaction({
             ...state,
             transactionSubmissionState,
-            funded: false,
+            funded: false
           }),
-          sharedData: sharedDataWithTransactionState,
+          sharedData: sharedDataWithTransactionState
         };
       } else {
-        return { protocolState: state, sharedData };
+        return {protocolState: state, sharedData};
       }
     default:
-      return { protocolState: state, sharedData };
+      return {protocolState: state, sharedData};
   }
 };
 
 const waitForDepositTransactionReducer: DFReducer = (
   protocolState: states.WaitForDepositTransaction,
   sharedData: SharedData,
-  action: actions.WalletAction,
+  action: actions.WalletAction
 ): ProtocolStateWithSharedData<states.DirectFundingState> => {
-  if (action.type === 'WALLET.ADJUDICATOR.FUNDING_RECEIVED_EVENT') {
-    return { protocolState: { ...protocolState, funded: true }, sharedData };
+  if (action.type === "WALLET.ADJUDICATOR.FUNDING_RECEIVED_EVENT") {
+    return {protocolState: {...protocolState, funded: true}, sharedData};
   }
   if (!isTransactionAction(action)) {
     console.warn(`Expected Transaction action or funding received, received ${action.type}`);
-    return { protocolState, sharedData };
+    return {protocolState, sharedData};
   }
-  const {
-    storage: sharedDataWithTransactionUpdate,
-    state: newTransactionState,
-  } = transactionReducer(protocolState.transactionSubmissionState, sharedData, action);
+  const {storage: sharedDataWithTransactionUpdate, state: newTransactionState} = transactionReducer(
+    protocolState.transactionSubmissionState,
+    sharedData,
+    action
+  );
   if (!isTerminal(newTransactionState)) {
     return {
       sharedData: sharedDataWithTransactionUpdate,
-      protocolState: { ...protocolState, transactionSubmissionState: newTransactionState },
+      protocolState: {...protocolState, transactionSubmissionState: newTransactionState}
     };
   } else {
     if (isSuccess(newTransactionState)) {
       if (protocolState.funded) {
-        return { protocolState: states.fundingSuccess({ ...protocolState }), sharedData };
+        return {protocolState: states.fundingSuccess({...protocolState}), sharedData};
       }
       return {
         protocolState: states.waitForFunding(protocolState),
-        sharedData,
+        sharedData
       };
     } else {
-      return { protocolState: states.fundingFailure(protocolState), sharedData };
+      return {protocolState: states.fundingFailure(protocolState), sharedData};
     }
   }
 };
 
 const waitForFundingReducer: DFReducer = (
   protocolState: states.WaitForFunding,
-  sharedData: SharedData,
+  sharedData: SharedData
 ): ProtocolStateWithSharedData<states.DirectFundingState> => {
-  return { protocolState, sharedData };
+  return {protocolState, sharedData};
 };
 
 const channelFundedReducer: DFReducer = (
   state: states.FundingSuccess,
   sharedData: SharedData,
-  action: actions.WalletAction,
+  action: actions.WalletAction
 ): ProtocolStateWithSharedData<states.DirectFundingState> => {
-  if (action.type === 'WALLET.ADJUDICATOR.FUNDING_RECEIVED_EVENT') {
+  if (action.type === "WALLET.ADJUDICATOR.FUNDING_RECEIVED_EVENT") {
     if (bigNumberify(action.totalForDestination).lt(state.totalFundingRequired)) {
       // TODO: Deal with chain re-orgs that de-fund the channel here
-      return { protocolState: state, sharedData };
+      return {protocolState: state, sharedData};
     }
   }
-  return { protocolState: state, sharedData };
+  return {protocolState: state, sharedData};
 };

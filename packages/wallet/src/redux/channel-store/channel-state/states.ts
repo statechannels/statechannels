@@ -1,6 +1,6 @@
-import { SignedCommitment, getChannelId, Commitment } from '../../../domain';
-import { ethers } from 'ethers';
-import { addHex } from '../../../utils/hex-utils';
+import {SignedCommitment, getChannelId, Commitment} from "../../../domain";
+import {ethers} from "ethers";
+import {addHex} from "../../../utils/hex-utils";
 
 export type Commitments = SignedCommitment[];
 
@@ -31,12 +31,9 @@ export function getPenultimateCommitment(state: ChannelState): Commitment {
 // Helpers
 // -------
 
-export function initializeChannel(
-  signedCommitment: SignedCommitment,
-  privateKey: string,
-): ChannelState {
-  const { commitment } = signedCommitment;
-  const { turnNum, channel } = commitment;
+export function initializeChannel(signedCommitment: SignedCommitment, privateKey: string): ChannelState {
+  const {commitment} = signedCommitment;
+  const {turnNum, channel} = commitment;
   const address = new ethers.Wallet(privateKey).address;
   const ourIndex = commitment.channel.participants.indexOf(address);
   const channelId = getChannelId(commitment);
@@ -50,15 +47,12 @@ export function initializeChannel(
     channelNonce: channel.nonce,
     channelId,
     funded: false,
-    commitments: [signedCommitment],
+    commitments: [signedCommitment]
   };
 }
 
 // Pushes a commitment onto the state, updating penultimate/last commitments and the turn number
-export function pushCommitment(
-  state: ChannelState,
-  signedCommitment: SignedCommitment,
-): ChannelState {
+export function pushCommitment(state: ChannelState, signedCommitment: SignedCommitment): ChannelState {
   const commitments = [...state.commitments];
   const numParticipants = state.participants.length;
   if (commitments.length === numParticipants) {
@@ -68,22 +62,19 @@ export function pushCommitment(
 
   if (commitments.length > 0) {
     const lastStoredCommitment = commitments[commitments.length - 1];
-    const previousAllocationTotal = lastStoredCommitment.commitment.allocation.reduce(
-      addHex,
-      '0x0',
-    );
-    const currentAllocationTotal = signedCommitment.commitment.allocation.reduce(addHex, '0x0');
+    const previousAllocationTotal = lastStoredCommitment.commitment.allocation.reduce(addHex, "0x0");
+    const currentAllocationTotal = signedCommitment.commitment.allocation.reduce(addHex, "0x0");
     if (previousAllocationTotal !== currentAllocationTotal) {
       throw new Error(`The allocation total cannot change between commitments`);
     }
   }
   commitments.push(signedCommitment);
   const turnNum = signedCommitment.commitment.turnNum;
-  return { ...state, commitments, turnNum };
+  return {...state, commitments, turnNum};
 }
 
 export function ourTurn(state: ChannelState) {
-  const { turnNum, participants, ourIndex } = state;
+  const {turnNum, participants, ourIndex} = state;
   const numParticipants = participants.length;
 
   return (turnNum + 1) % numParticipants === ourIndex;
@@ -94,7 +85,7 @@ export function isFullyOpen(state: ChannelState): state is OpenChannelState {
 }
 
 export function theirAddress(state: ChannelState): string {
-  const { participants, ourIndex } = state;
+  const {participants, ourIndex} = state;
   const theirIndex = 1 - ourIndex; // todo: only two player channels
   return participants[theirIndex];
 }

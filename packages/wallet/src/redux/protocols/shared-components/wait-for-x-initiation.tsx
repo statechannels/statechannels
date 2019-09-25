@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 
 interface Props {
   name: string;
@@ -6,7 +6,7 @@ interface Props {
 
 export default class WaitForXInitiation extends React.PureComponent<Props> {
   render() {
-    const { name } = this.props;
+    const {name} = this.props;
 
     return (
       <div>

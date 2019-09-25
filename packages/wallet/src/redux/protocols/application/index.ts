@@ -1,1 +1,1 @@
-export { initialize, applicationReducer as reducer } from './reducer';
+export {initialize, applicationReducer as reducer} from "./reducer";
