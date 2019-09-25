@@ -88,7 +88,6 @@
     "redux-storage-decorator-filter": "1.1.8",
     "redux-storage-engine-indexed-db": "1.0.0",
     "resolve": "1.6.0",
-    "sha3": "^1.2.2",
     "web3": "1.0.0-beta.37",
     "web3-detect-network": "^0.0.17",
     "webpack": "4.28.1",
