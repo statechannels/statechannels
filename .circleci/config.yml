@@ -87,8 +87,6 @@ jobs:
       - attach_workspace:
           at: /home/circleci/project
 
-      - run: apt-get install -y jq # using this to mutate package.json
-
       - run:
           name: Check root yarn.lock
           command: yarn --frozen-lockfile
