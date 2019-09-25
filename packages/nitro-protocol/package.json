@@ -33,10 +33,10 @@
   "scripts": {
     "prepare": "yarn build",
     "build:ci": "yarn build",
-    "test:ci": "yarn startGanache && yarn contract:compile && yarn test",
     "test:typescript": "npx jest --testPathIgnorePatterns='test/contracts' --reporters='default'",
-    "deploy": "npx etherlime deploy --compile=false",
     "test": "yarn lint:check && yarn deploy:test && npx jest",
+    "test:ci": "yarn startGanache && yarn contract:compile && yarn test",
+    "deploy": "npx etherlime deploy --compile=false",
     "deploy:test": "yarn deploy && npx etherlime deploy --compile=false --file=./deployment/deploy-test.js",
     "startGanache": "npx etherlime ganache --verbose > ganache.log &",
     "build:typescript": "tslint --project . && tsc -b",
