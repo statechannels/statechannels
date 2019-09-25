@@ -1,9 +1,12 @@
 import debug from "debug";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { JsonRPCRequest } from "web3/providers";
 import { TestMessage } from "../message-handlers/TestMessage";
 
 type JsonRpcComponentProps = { request: JsonRPCRequest };
+export type RequestReceivedCallback = (request: JsonRPCRequest) => void;
+
+type MessageListenerProps = { onRequestReceived?: RequestReceivedCallback };
 
 const components = {
   chan_test: TestMessage
@@ -11,23 +14,32 @@ const components = {
 
 const log = debug("wallet:message-listener");
 
-const MessageListener: React.FC = () => {
-  const [request, setRequest]: [JsonRPCRequest, (data: JsonRPCRequest) => void] = useState({} as JsonRPCRequest);
+const MessageListener: React.FC<MessageListenerProps> = ({ onRequestReceived }) => {
+  const emptyElement = React.createElement<JsonRpcComponentProps>(React.Fragment);
 
-  window.addEventListener("message", (event: MessageEvent) => {
-    const message = event.data as JsonRPCRequest;
+  const [request, setRequest] = useState({} as JsonRPCRequest);
+  const [handler, setHandler] = useState(emptyElement);
 
-    if (!message.jsonrpc) {
-      return;
-    }
+  useEffect(() => {
+    window.addEventListener("message", (event: MessageEvent) => {
+      const receivedRequest = event.data as JsonRPCRequest;
 
-    log("Message received: %o", message);
-    setRequest(message);
+      if (!receivedRequest.jsonrpc) {
+        return;
+      }
+
+      log("Request received: %o", receivedRequest);
+      setRequest(receivedRequest);
+
+      if (onRequestReceived) {
+        onRequestReceived(receivedRequest);
+      }
+
+      setHandler(components[request.method] ? components[request.method]({ request: receivedRequest }) : emptyElement);
+    });
   });
 
-  const factory = React.createFactory<JsonRpcComponentProps>(components[request.method] || "div");
-
-  return <div>{factory({ request }) || "foo"}</div>;
+  return <main data-test-selector="message-listener">{handler}</main>;
 };
 
 export { MessageListener };

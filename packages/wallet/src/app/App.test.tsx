@@ -1,9 +1,18 @@
+import Enzyme, { mount, ReactWrapper } from "enzyme";
+import Adapter from "enzyme-adapter-react-16";
 import React from "react";
-import ReactDOM from "react-dom";
 import App from "./App";
 
-it("renders without crashing", () => {
-  const div = document.createElement("div");
-  ReactDOM.render(<App />, div);
-  ReactDOM.unmountComponentAtNode(div);
+Enzyme.configure({ adapter: new Adapter() });
+
+describe("App", () => {
+  let component: ReactWrapper;
+
+  beforeEach(() => {
+    component = mount(<App />);
+  });
+
+  it("should include a MessageListener instance", () => {
+    expect(component.find("[data-test-selector='message-listener']").exists()).toEqual(true);
+  });
 });

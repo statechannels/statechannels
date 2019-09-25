@@ -12,9 +12,9 @@ const closeWallet = () => {
 const TestMessage: React.FC = () => {
   log("Rendered handler");
   return (
-    <div>
+    <section data-test-selector="test-message">
       Test Message<button onClick={closeWallet}>Close</button>
-    </div>
+    </section>
   );
 };
 
