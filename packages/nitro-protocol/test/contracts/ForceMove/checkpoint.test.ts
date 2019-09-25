@@ -18,6 +18,7 @@ import {
 } from '../../../src/contract/transaction-creators/revert-reasons';
 import {COUNTING_APP_INVALID_TRANSITION} from '../../revert-reasons';
 import {checkpointArgs} from '../../../src/contract/transaction-creators/force-move';
+import * as networkMap from '../../../deployment/network-map.json';
 
 const provider = getTestProvider();
 let ForceMove: ethers.Contract;
@@ -38,7 +39,7 @@ for (let i = 0; i < 3; i++) {
 beforeAll(async () => {
   ForceMove = await setupContracts(provider, ForceMoveArtifact);
   networkId = (await provider.getNetwork()).chainId;
-  appDefinition = countingAppArtifact.networks[networkId].address; // use a fixed appDefinition in all tests
+  appDefinition = networkMap[networkId][countingAppArtifact.contractName]; // use a fixed appDefinition in all tests
 });
 
 const valid = {

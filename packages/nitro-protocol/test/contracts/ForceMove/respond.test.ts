@@ -17,6 +17,7 @@ import {
 } from '../../../src/contract/transaction-creators/revert-reasons';
 import {HashZero} from 'ethers/constants';
 import {respondArgs} from '../../../src/contract/transaction-creators/force-move';
+import * as networkMap from '../../../deployment/network-map.json';
 
 const provider = getTestProvider();
 let ForceMove: ethers.Contract;
@@ -39,7 +40,7 @@ const nonParticipant = ethers.Wallet.createRandom();
 beforeAll(async () => {
   ForceMove = await setupContracts(provider, ForceMoveArtifact);
   networkId = (await provider.getNetwork()).chainId;
-  appDefinition = countingAppArtifact.networks[networkId].address; // use a fixed appDefinition in all tests
+  appDefinition = networkMap[networkId][countingAppArtifact.contractName]; // use a fixed appDefinition in all tests
 });
 
 // Scenarios are synonymous with channelNonce:
