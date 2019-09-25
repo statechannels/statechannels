@@ -11,7 +11,7 @@ import StatusBarLayout from "../components/status-bar-layout";
 const walletStateRender = state => () => {
   console.log(state);
   return (
-    <Provider store={fakeStore(state)}>
+    <Provider store={fakeStore(state) as any}>
       <WalletContainer position="center" />
     </Provider>
   );
@@ -20,7 +20,7 @@ const walletStateRender = state => () => {
 const protocolStateRender = (protocolState: ProtocolState, Container) => () => {
   // TODO type Container
   return (
-    <Provider store={fakeStore(protocolState)}>
+    <Provider store={fakeStore(protocolState) as any}>
       <Modal
         isOpen={true}
         className={"wallet-content-center"}

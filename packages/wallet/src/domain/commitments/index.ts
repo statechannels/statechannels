@@ -2,7 +2,7 @@ import {Commitment as C, CommitmentType as CT} from "fmg-core";
 import {validCommitmentSignature, signCommitment as signCommitmentUtil} from "../signing-utils";
 import {channelID} from "fmg-core/lib/channel";
 import {convertCommitmentToSignedState} from "../../utils/nitro-converter";
-import {SignedState} from "nitro-protocol";
+import {SignedState} from "@statechannels/nitro-protocol";
 
 export type Commitment = C;
 export const CommitmentType = CT;

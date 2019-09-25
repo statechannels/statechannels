@@ -12,7 +12,7 @@ import {
   defaultDepositAmount
 } from "./test-utils";
 import * as walletStates from "../redux/state";
-import {getGanacheProvider} from "magmo-devtools";
+import {getGanacheProvider} from "@statechannels/devtools";
 jest.setTimeout(60000);
 
 const createWatcherState = (processId: string, ...channelIds: string[]): walletStates.Initialized => {

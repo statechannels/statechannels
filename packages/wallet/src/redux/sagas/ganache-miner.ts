@@ -1,5 +1,5 @@
-import {delay} from "redux-saga";
 import {ethers} from "ethers";
+import {delay} from "redux-saga/effects";
 
 export function* ganacheMiner() {
   const provider: ethers.providers.JsonRpcProvider = new ethers.providers.JsonRpcProvider(

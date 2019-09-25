@@ -3,21 +3,18 @@ import {getAdjudicatorInterface} from "./contract-utils";
 import {splitSignature} from "ethers/utils";
 import {Commitment, SignedCommitment, signCommitment2} from "../domain";
 import {asEthersObject} from "fmg-core";
-import {Transactions as nitroTrans, SignedState} from "nitro-protocol";
+import {Transactions as nitroTrans, SignedState} from "@statechannels/nitro-protocol";
 import {getChannelStorage, convertAddressToBytes32} from "./nitro-converter";
-import {signChallengeMessage} from "nitro-protocol/lib/src/signatures";
 // TODO: This should be exported by `nitro-protocol`
-import {createDepositTransaction as createNitroDepositTransaction} from "nitro-protocol/lib/src/contract/transaction-creators/eth-asset-holder";
+import {createDepositTransaction as createNitroDepositTransaction} from "@statechannels/nitro-protocol/src/contract/transaction-creators/eth-asset-holder";
 
 export function createForceMoveTransaction(
   fromCommitment: SignedCommitment,
   toCommitment: SignedCommitment,
   privateKey: string
 ): TransactionRequest {
-  const channelStorage = getChannelStorage(toCommitment.commitment);
   const signedStates = [fromCommitment.signedState, toCommitment.signedState];
-  const challengeSignature = signChallengeMessage(signedStates, privateKey);
-  return nitroTrans.createForceMoveTransaction(channelStorage, signedStates, challengeSignature);
+  return nitroTrans.createForceMoveTransaction(signedStates, privateKey);
 }
 
 export function createRespondWithMoveTransaction(nextState: Commitment, privateKey: string): TransactionRequest {
@@ -78,8 +75,7 @@ export function createConcludeTransaction(
   signedToCommitment: SignedCommitment
 ): TransactionRequest {
   const signedStates: SignedState[] = [signedFromCommitment.signedState, signedToCommitment.signedState];
-  const channelStorage = getChannelStorage(signedToCommitment.commitment);
-  return nitroTrans.createConcludeTransaction(channelStorage, signedStates);
+  return nitroTrans.createConcludeTransaction(signedStates);
 }
 
 export function createWithdrawTransaction(

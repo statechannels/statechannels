@@ -2,7 +2,7 @@ import * as walletStates from "../state";
 import * as selectors from "../selectors";
 import {ChannelState} from "../channel-store";
 import {Commitment} from "../../domain";
-import {SignedState} from "nitro-protocol";
+import {SignedState} from "@statechannels/nitro-protocol";
 
 describe("getAdjudicatorWatcherProcessesForChannel", () => {
   const createWatcherState = (

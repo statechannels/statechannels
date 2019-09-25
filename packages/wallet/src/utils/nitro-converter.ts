@@ -1,13 +1,13 @@
 import {Commitment, CommitmentType, Channel} from "fmg-core";
-import {ChannelStorage, SignedState} from "nitro-protocol";
-import {State} from "nitro-protocol/lib/src/contract/state";
+import {ChannelStorage, SignedState} from "@statechannels/nitro-protocol";
+import {State} from "@statechannels/nitro-protocol/src/contract/state";
 import {CONSENSUS_LIBRARY_ADDRESS, NETWORK_ID, ETH_ASSET_HOLDER_ADDRESS} from "../constants";
 import {appAttributesFromBytes} from "fmg-nitro-adjudicator/lib/consensus-app";
-import {encodeConsensusData} from "nitro-protocol/lib/src/contract/consensus-data";
+import {encodeConsensusData} from "@statechannels/nitro-protocol/src/contract/consensus-data";
 import {bigNumberify} from "ethers/utils";
-import {Outcome, AllocationItem} from "nitro-protocol/lib/src/contract/outcome";
-import {Channel as NitroChannel} from "nitro-protocol/lib/src/contract/channel";
-import {signState} from "nitro-protocol/lib/src/signatures";
+import {Outcome, AllocationItem} from "@statechannels/nitro-protocol/src/contract/outcome";
+import {Channel as NitroChannel} from "@statechannels/nitro-protocol/src/contract/channel";
+import {signState} from "@statechannels/nitro-protocol/src/signatures";
 
 const CHALLENGE_DURATION = 0x12c; // 5 minutes
 // This temporarily handles converting fmg-core entities to nitro-protocol entities

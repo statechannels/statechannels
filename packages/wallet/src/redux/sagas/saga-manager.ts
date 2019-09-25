@@ -39,6 +39,7 @@ export function* sagaManager(): IterableIterator<any> {
       yield fork(adjudicatorStateUpdater);
     }
 
+    // @ts-ignore TODO: Why is redux-saga select think its returning undefined?
     const state: WalletState = yield select((walletState: WalletState) => walletState);
 
     if (state.type === WALLET_INITIALIZED) {
