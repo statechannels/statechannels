@@ -3,8 +3,12 @@ import { getAdjudicatorInterface } from './contract-utils';
 import { splitSignature } from 'ethers/utils';
 import { Commitment, SignedCommitment, signCommitment2 } from '../domain';
 import { asEthersObject } from 'fmg-core';
-import { Transactions as nitroTrans } from 'nitro-protocol';
-import { getChannelStorage, convertAddressToBytes32 } from './nitro-converter';
+import { Transactions as nitroTrans, SignedState } from 'nitro-protocol';
+import {
+  getChannelStorage,
+  convertAddressToBytes32,
+  convertCommitmentToState,
+} from './nitro-converter';
 import { signChallengeMessage } from 'nitro-protocol/lib/src/signatures';
 // TODO: This should be exported by `nitro-protocol`
 import { createDepositTransaction as createNitroDepositTransaction } from 'nitro-protocol/lib/src/contract/transaction-creators/eth-asset-holder';
@@ -85,25 +89,28 @@ export function createConcludeAndWithdrawTransaction(
 }
 
 export function createConcludeTransaction(
-  fromState: Commitment,
-  toState: Commitment,
+  fromCommitment: Commitment,
+  toCommitment: Commitment,
   fromSignature: string,
   toSignature: string,
 ): TransactionRequest {
-  const adjudicatorInterface = getAdjudicatorInterface();
   const splitFromSignature = splitSignature(fromSignature);
   const splitToSignature = splitSignature(toSignature);
-  const conclusionProof = {
-    penultimateCommitment: asEthersObject(fromState),
-    ultimateCommitment: asEthersObject(toState),
-    penultimateSignature: splitFromSignature,
-    ultimateSignature: splitToSignature,
-  };
-  const data = adjudicatorInterface.functions.conclude.encode([conclusionProof]);
+  const fromState = convertCommitmentToState(fromCommitment);
+  const toState = convertCommitmentToState(toCommitment);
 
-  return {
-    data,
-  };
+  const signedStates: SignedState[] = [];
+  signedStates.push({
+    state: fromState,
+    signature: splitFromSignature,
+  } as SignedState);
+
+  signedStates.push({
+    state: toState,
+    signature: splitToSignature,
+  } as SignedState);
+
+  return nitroTrans.createConcludeTransaction(signedStates);
 }
 
 export function createWithdrawTransaction(
