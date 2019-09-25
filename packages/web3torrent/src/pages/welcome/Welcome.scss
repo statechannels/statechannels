@@ -1,0 +1,25 @@
+@import "../../styles/variables";
+section.fill {
+  display: flex;
+  align-items: center;
+  padding: 0;
+  margin-bottom:100px;
+}
+.jumbotron {
+  background-image: url("/assets/jumbotron.jpeg");
+  background-size: contain;
+  background-repeat: no-repeat;
+  height: auto;
+  width: 100%;
+  padding-top: 52.55%;
+}
+
+.subtitle {
+  margin: $rhythm*1 auto;
+  width: 75%;
+  line-height: 2.8rem;
+  font-weight: 400;
+  font-size: 1.1rem;
+  color: $c-darkergrey;
+  text-align: center;
+}

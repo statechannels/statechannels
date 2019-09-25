@@ -1,0 +1,10 @@
+@import "../../styles/variables";
+
+table.share-list {
+  width: 100%;
+  border-collapse: collapse;
+  tbody > tr:last-child {
+    border-bottom: 0px;
+  }
+  margin-bottom:20px;
+}
