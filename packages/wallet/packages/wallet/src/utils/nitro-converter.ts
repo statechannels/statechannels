@@ -66,7 +66,7 @@ function convertToNitroChannel(channel: Channel): NitroChannel {
   };
 }
 
-function convertAddressToBytes32(address: string): string {
+export function convertAddressToBytes32(address: string): string {
   const normalizedAddress = bigNumberify(address).toHexString();
   if (normalizedAddress.length !== 42) {
     throw new Error(

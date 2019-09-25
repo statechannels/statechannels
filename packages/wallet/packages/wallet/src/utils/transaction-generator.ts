@@ -4,8 +4,10 @@ import { splitSignature } from 'ethers/utils';
 import { Commitment, SignedCommitment } from '../domain';
 import { asEthersObject } from 'fmg-core';
 import { Transactions as nitroTrans } from 'nitro-protocol';
-import { getChannelStorage } from './nitro-converter';
+import { getChannelStorage, convertAddressToBytes32 } from './nitro-converter';
 import { signChallengeMessage } from 'nitro-protocol/lib/src/signatures';
+// TODO: This should be exported by `nitro-protocol`
+import { createDepositTransaction as createNitroDepositTransaction } from 'nitro-protocol/lib/src/contract/transaction-creators/eth-asset-holder';
 
 export function createForceMoveTransaction(
   fromCommitment: SignedCommitment,
@@ -161,10 +163,9 @@ export function createDepositTransaction(
   depositAmount: string,
   expectedHeld: string,
 ) {
-  const adjudicatorInterface = getAdjudicatorInterface();
-  const data = adjudicatorInterface.functions.deposit.encode([destination, expectedHeld]);
-  return {
-    value: depositAmount,
-    data,
-  };
+  return createNitroDepositTransaction(
+    convertAddressToBytes32(destination),
+    expectedHeld,
+    depositAmount,
+  );
 }
