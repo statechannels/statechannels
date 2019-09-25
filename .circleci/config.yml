@@ -49,7 +49,7 @@ jobs:
             - packages/*/build
             - packages/*/lib
 
-  run-tests:
+  a-run-tests:
     <<: *defaults
     steps:
       - <<: *restore_code
@@ -65,7 +65,7 @@ jobs:
           name: Run State Channels tests
           command: yarn test
 
-  run-tslint:
+  b-run-tslint:
     <<: *defaults
     steps:
       - <<: *restore_code
@@ -77,7 +77,7 @@ jobs:
 
       - run: yarn lint
 
-  ensure-updated-lockfiles:
+  c-ensure-updated-lockfiles:
     <<: *defaults
     steps:
       - <<: *restore_code
@@ -112,15 +112,15 @@ workflows:
     jobs:
       - build
 
-      - run-tests:
+      - a-run-tests:
           requires:
             - build
 
-      - run-tslint:
+      - b-run-tslint:
           requires:
             - build
 
-      - ensure-updated-lockfiles:
+      - c-ensure-updated-lockfiles:
           requires:
             - build
       # - publish-to-npm:
