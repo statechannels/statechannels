@@ -53,7 +53,7 @@ beforeAll(async () => {
     wallet.privateKey,
   );
 });
-describe('transactions', async () => {
+describe('transactions', () => {
   it('creates a force move transaction', async () => {
     const transactionRequest: TransactionRequest = createForceMoveTransaction(
       [signedState],

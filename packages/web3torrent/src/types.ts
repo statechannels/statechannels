@@ -1,7 +1,7 @@
-import { Request, Wire } from "bittorrent-protocol";
-import { Instance as ParseTorrent } from "parse-torrent";
+import {Request, Wire} from "bittorrent-protocol";
+import {Instance as ParseTorrent} from "parse-torrent";
 import WebTorrent from "webtorrent";
-import { PaidStreamingExtension } from "./paid-streaming-extension";
+import {PaidStreamingExtension} from "./paid-streaming-extension";
 
 export enum ClientEvents {
   PEER_STATUS_CHANGED = "peer_status_changed",

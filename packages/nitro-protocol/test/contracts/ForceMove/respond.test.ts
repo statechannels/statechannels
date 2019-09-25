@@ -19,7 +19,7 @@ import {
 import {HashZero} from 'ethers/constants';
 
 const provider = new ethers.providers.JsonRpcProvider(
-  `http://localhost:${process.env.DEV_GANACHE_PORT}`,
+  `http://localhost:${process.env.GANACHE_PORT}`,
 );
 let ForceMove: ethers.Contract;
 let networkId;

@@ -14,7 +14,7 @@ import {Channel, getChannelId} from '../../../src/contract/channel';
 import {createDepositTransaction} from '../../../src/contract/transaction-creators/erc20-asset-holder';
 
 const provider = new ethers.providers.JsonRpcProvider(
-  `http://localhost:${process.env.DEV_GANACHE_PORT}`,
+  `http://localhost:${process.env.GANACHE_PORT}`,
 );
 const signer0 = provider.getSigner(0); // convention matches setupContracts function
 let signer0Address;

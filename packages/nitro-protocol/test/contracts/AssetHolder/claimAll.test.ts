@@ -17,7 +17,7 @@ import {id, bigNumberify} from 'ethers/utils';
 const AssetHolderInterface = new ethers.utils.Interface(AssetHolderArtifact.abi);
 
 const provider = new ethers.providers.JsonRpcProvider(
-  `http://localhost:${process.env.DEV_GANACHE_PORT}`,
+  `http://localhost:${process.env.GANACHE_PORT}`,
 );
 
 const addresses = {

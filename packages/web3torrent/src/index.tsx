@@ -1,8 +1,8 @@
 import prettierBytes from "prettier-bytes";
-import React, { useState } from "react";
+import React, {useState} from "react";
 import ReactDOM from "react-dom";
 import "./styles.css";
-import { PaidStreamingTorrent } from "./types";
+import {PaidStreamingTorrent} from "./types";
 import WebTorrent from "./web3torrent-lib";
 const webClient = new WebTorrent();
 
@@ -45,7 +45,7 @@ const progressLogger = (logger, status, setStatus, setMagnet, seedMagnet) => (
           }
 
           if (torrent.files) {
-            setStatus(Object.assign(InitialState, { url, filename: torrent.files[0].name }));
+            setStatus(Object.assign(InitialState, {url, filename: torrent.files[0].name}));
           }
         });
       }
@@ -96,7 +96,7 @@ function App() {
         {Object.entries(webClient.allowedPeers).map(([infoHash, allowedPeers]) => (
           <div key={infoHash}>
             <h5>Torrent {infoHash} Clients</h5>
-            {Object.values(allowedPeers).map(({ id, allowed }) => (
+            {Object.values(allowedPeers).map(({id, allowed}) => (
               <button key={id} className={"peerStatus-" + allowed} onClick={() => webClient.togglePeer(infoHash, id)}>
                 {allowed ? "Allowed" : "Choking"}: {id}
               </button>

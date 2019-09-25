@@ -7,7 +7,7 @@ import {expectRevert} from '@statechannels/devtools';
 import {Channel, getChannelId} from '../../../src/contract/channel';
 
 const provider = new ethers.providers.JsonRpcProvider(
-  `http://localhost:${process.env.DEV_GANACHE_PORT}`,
+  `http://localhost:${process.env.GANACHE_PORT}`,
 );
 let AssetHolder: ethers.Contract;
 let channelId;
