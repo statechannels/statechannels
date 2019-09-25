@@ -1,4 +1,5 @@
 {
+  "contractName": "ForceMoveApp",
   "abi": [
     {
       "constant": true,
@@ -6,91 +7,52 @@
         {
           "components": [
             {
-              "name": "channelType",
-              "type": "address"
+              "internalType": "bytes",
+              "name": "outcome",
+              "type": "bytes"
             },
             {
-              "name": "channelNonce",
-              "type": "uint32"
-            },
-            {
-              "name": "participants",
-              "type": "address[]"
-            },
-            {
-              "name": "commitmentType",
-              "type": "uint8"
-            },
-            {
-              "name": "turnNum",
-              "type": "uint32"
-            },
-            {
-              "name": "commitmentCount",
-              "type": "uint32"
-            },
-            {
-              "name": "destination",
-              "type": "address[]"
-            },
-            {
-              "name": "allocation",
-              "type": "uint256[]"
-            },
-            {
-              "name": "appAttributes",
+              "internalType": "bytes",
+              "name": "appData",
               "type": "bytes"
             }
           ],
-          "name": "oldCommitment",
+          "internalType": "struct ForceMoveApp.VariablePart",
+          "name": "a",
           "type": "tuple"
         },
         {
           "components": [
             {
-              "name": "channelType",
-              "type": "address"
+              "internalType": "bytes",
+              "name": "outcome",
+              "type": "bytes"
             },
             {
-              "name": "channelNonce",
-              "type": "uint32"
-            },
-            {
-              "name": "participants",
-              "type": "address[]"
-            },
-            {
-              "name": "commitmentType",
-              "type": "uint8"
-            },
-            {
-              "name": "turnNum",
-              "type": "uint32"
-            },
-            {
-              "name": "commitmentCount",
-              "type": "uint32"
-            },
-            {
-              "name": "destination",
-              "type": "address[]"
-            },
-            {
-              "name": "allocation",
-              "type": "uint256[]"
-            },
-            {
-              "name": "appAttributes",
+              "internalType": "bytes",
+              "name": "appData",
               "type": "bytes"
             }
           ],
-          "name": "newCommitment",
+          "internalType": "struct ForceMoveApp.VariablePart",
+          "name": "b",
           "type": "tuple"
+        },
+        {
+          "internalType": "uint256",
+          "name": "turnNumB",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "nParticipants",
+          "type": "uint256"
         }
       ],
       "name": "validTransition",
       "outputs": [
         {
+          "internalType": "bool",
           "name": "",
           "type": "bool"
         }
@@ -100,7 +62,576 @@
       "type": "function"
     }
   ],
+  "metadata": "{\"compiler\":{\"version\":\"0.5.11+commit.c082d0b4\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"constant\":true,\"inputs\":[{\"components\":[{\"internalType\":\"bytes\",\"name\":\"outcome\",\"type\":\"bytes\"},{\"internalType\":\"bytes\",\"name\":\"appData\",\"type\":\"bytes\"}],\"internalType\":\"struct ForceMoveApp.VariablePart\",\"name\":\"a\",\"type\":\"tuple\"},{\"components\":[{\"internalType\":\"bytes\",\"name\":\"outcome\",\"type\":\"bytes\"},{\"internalType\":\"bytes\",\"name\":\"appData\",\"type\":\"bytes\"}],\"internalType\":\"struct ForceMoveApp.VariablePart\",\"name\":\"b\",\"type\":\"tuple\"},{\"internalType\":\"uint256\",\"name\":\"turnNumB\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"nParticipants\",\"type\":\"uint256\"}],\"name\":\"validTransition\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"pure\",\"type\":\"function\"}],\"devdoc\":{\"methods\":{}},\"userdoc\":{\"methods\":{}}},\"settings\":{\"compilationTarget\":{\"nitro-protocol/contracts/ForceMoveApp.sol\":\"ForceMoveApp\"},\"evmVersion\":\"petersburg\",\"libraries\":{},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[]},\"sources\":{\"nitro-protocol/contracts/ForceMoveApp.sol\":{\"keccak256\":\"0x2d5b34086f65ef8c19edc5512eab3d9dcc241554237c8199a38ff7a37a087df1\",\"urls\":[\"bzz-raw://733095cf0d52ddefba1f4fb4e5d4526c26ffbcef052235d16721115190f4bfdf\",\"dweb:/ipfs/QmWkXQicwzCjsyz3Sn9Y7vLoWWDomJaZfawyidgzq56GWf\"]}},\"version\":1}",
   "bytecode": "0x",
-  "contractName": "ForceMoveApp",
-  "networks": {}
+  "deployedBytecode": "0x",
+  "sourceMap": "",
+  "deployedSourceMap": "",
+  "source": "pragma solidity ^0.5.11;\npragma experimental ABIEncoderV2;\n\ninterface ForceMoveApp {\n    struct VariablePart {\n        bytes outcome;\n        bytes appData;\n    }\n\n    function validTransition(\n        VariablePart calldata a,\n        VariablePart calldata b,\n        uint256 turnNumB,\n        uint256 nParticipants\n    ) external pure returns (bool);\n}\n",
+  "sourcePath": "nitro-protocol/contracts/ForceMoveApp.sol",
+  "ast": {
+    "absolutePath": "nitro-protocol/contracts/ForceMoveApp.sol",
+    "exportedSymbols": {
+      "ForceMoveApp": [
+        2978
+      ]
+    },
+    "id": 2979,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 2958,
+        "literals": [
+          "solidity",
+          "^",
+          "0.5",
+          ".11"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "0:24:7"
+      },
+      {
+        "id": 2959,
+        "literals": [
+          "experimental",
+          "ABIEncoderV2"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "25:33:7"
+      },
+      {
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "interface",
+        "documentation": null,
+        "fullyImplemented": false,
+        "id": 2978,
+        "linearizedBaseContracts": [
+          2978
+        ],
+        "name": "ForceMoveApp",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "canonicalName": "ForceMoveApp.VariablePart",
+            "id": 2964,
+            "members": [
+              {
+                "constant": false,
+                "id": 2961,
+                "name": "outcome",
+                "nodeType": "VariableDeclaration",
+                "scope": 2964,
+                "src": "119:13:7",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_bytes_storage_ptr",
+                  "typeString": "bytes"
+                },
+                "typeName": {
+                  "id": 2960,
+                  "name": "bytes",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "119:5:7",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes_storage_ptr",
+                    "typeString": "bytes"
+                  }
+                },
+                "value": null,
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 2963,
+                "name": "appData",
+                "nodeType": "VariableDeclaration",
+                "scope": 2964,
+                "src": "142:13:7",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_bytes_storage_ptr",
+                  "typeString": "bytes"
+                },
+                "typeName": {
+                  "id": 2962,
+                  "name": "bytes",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "142:5:7",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes_storage_ptr",
+                    "typeString": "bytes"
+                  }
+                },
+                "value": null,
+                "visibility": "internal"
+              }
+            ],
+            "name": "VariablePart",
+            "nodeType": "StructDefinition",
+            "scope": 2978,
+            "src": "89:73:7",
+            "visibility": "public"
+          },
+          {
+            "body": null,
+            "documentation": null,
+            "id": 2977,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "validTransition",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 2973,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 2966,
+                  "name": "a",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 2977,
+                  "src": "202:23:7",
+                  "stateVariable": false,
+                  "storageLocation": "calldata",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_struct$_VariablePart_$2964_calldata_ptr",
+                    "typeString": "struct ForceMoveApp.VariablePart"
+                  },
+                  "typeName": {
+                    "contractScope": null,
+                    "id": 2965,
+                    "name": "VariablePart",
+                    "nodeType": "UserDefinedTypeName",
+                    "referencedDeclaration": 2964,
+                    "src": "202:12:7",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_struct$_VariablePart_$2964_storage_ptr",
+                      "typeString": "struct ForceMoveApp.VariablePart"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 2968,
+                  "name": "b",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 2977,
+                  "src": "235:23:7",
+                  "stateVariable": false,
+                  "storageLocation": "calldata",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_struct$_VariablePart_$2964_calldata_ptr",
+                    "typeString": "struct ForceMoveApp.VariablePart"
+                  },
+                  "typeName": {
+                    "contractScope": null,
+                    "id": 2967,
+                    "name": "VariablePart",
+                    "nodeType": "UserDefinedTypeName",
+                    "referencedDeclaration": 2964,
+                    "src": "235:12:7",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_struct$_VariablePart_$2964_storage_ptr",
+                      "typeString": "struct ForceMoveApp.VariablePart"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 2970,
+                  "name": "turnNumB",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 2977,
+                  "src": "268:16:7",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 2969,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "268:7:7",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 2972,
+                  "name": "nParticipants",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 2977,
+                  "src": "294:21:7",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 2971,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "294:7:7",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "192:129:7"
+            },
+            "returnParameters": {
+              "id": 2976,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 2975,
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 2977,
+                  "src": "345:4:7",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bool",
+                    "typeString": "bool"
+                  },
+                  "typeName": {
+                    "id": 2974,
+                    "name": "bool",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "345:4:7",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "344:6:7"
+            },
+            "scope": 2978,
+            "src": "168:183:7",
+            "stateMutability": "pure",
+            "superFunction": null,
+            "visibility": "external"
+          }
+        ],
+        "scope": 2979,
+        "src": "60:293:7"
+      }
+    ],
+    "src": "0:354:7"
+  },
+  "legacyAST": {
+    "absolutePath": "nitro-protocol/contracts/ForceMoveApp.sol",
+    "exportedSymbols": {
+      "ForceMoveApp": [
+        2978
+      ]
+    },
+    "id": 2979,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 2958,
+        "literals": [
+          "solidity",
+          "^",
+          "0.5",
+          ".11"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "0:24:7"
+      },
+      {
+        "id": 2959,
+        "literals": [
+          "experimental",
+          "ABIEncoderV2"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "25:33:7"
+      },
+      {
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "interface",
+        "documentation": null,
+        "fullyImplemented": false,
+        "id": 2978,
+        "linearizedBaseContracts": [
+          2978
+        ],
+        "name": "ForceMoveApp",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "canonicalName": "ForceMoveApp.VariablePart",
+            "id": 2964,
+            "members": [
+              {
+                "constant": false,
+                "id": 2961,
+                "name": "outcome",
+                "nodeType": "VariableDeclaration",
+                "scope": 2964,
+                "src": "119:13:7",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_bytes_storage_ptr",
+                  "typeString": "bytes"
+                },
+                "typeName": {
+                  "id": 2960,
+                  "name": "bytes",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "119:5:7",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes_storage_ptr",
+                    "typeString": "bytes"
+                  }
+                },
+                "value": null,
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 2963,
+                "name": "appData",
+                "nodeType": "VariableDeclaration",
+                "scope": 2964,
+                "src": "142:13:7",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_bytes_storage_ptr",
+                  "typeString": "bytes"
+                },
+                "typeName": {
+                  "id": 2962,
+                  "name": "bytes",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "142:5:7",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes_storage_ptr",
+                    "typeString": "bytes"
+                  }
+                },
+                "value": null,
+                "visibility": "internal"
+              }
+            ],
+            "name": "VariablePart",
+            "nodeType": "StructDefinition",
+            "scope": 2978,
+            "src": "89:73:7",
+            "visibility": "public"
+          },
+          {
+            "body": null,
+            "documentation": null,
+            "id": 2977,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "validTransition",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 2973,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 2966,
+                  "name": "a",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 2977,
+                  "src": "202:23:7",
+                  "stateVariable": false,
+                  "storageLocation": "calldata",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_struct$_VariablePart_$2964_calldata_ptr",
+                    "typeString": "struct ForceMoveApp.VariablePart"
+                  },
+                  "typeName": {
+                    "contractScope": null,
+                    "id": 2965,
+                    "name": "VariablePart",
+                    "nodeType": "UserDefinedTypeName",
+                    "referencedDeclaration": 2964,
+                    "src": "202:12:7",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_struct$_VariablePart_$2964_storage_ptr",
+                      "typeString": "struct ForceMoveApp.VariablePart"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 2968,
+                  "name": "b",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 2977,
+                  "src": "235:23:7",
+                  "stateVariable": false,
+                  "storageLocation": "calldata",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_struct$_VariablePart_$2964_calldata_ptr",
+                    "typeString": "struct ForceMoveApp.VariablePart"
+                  },
+                  "typeName": {
+                    "contractScope": null,
+                    "id": 2967,
+                    "name": "VariablePart",
+                    "nodeType": "UserDefinedTypeName",
+                    "referencedDeclaration": 2964,
+                    "src": "235:12:7",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_struct$_VariablePart_$2964_storage_ptr",
+                      "typeString": "struct ForceMoveApp.VariablePart"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 2970,
+                  "name": "turnNumB",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 2977,
+                  "src": "268:16:7",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 2969,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "268:7:7",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 2972,
+                  "name": "nParticipants",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 2977,
+                  "src": "294:21:7",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 2971,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "294:7:7",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "192:129:7"
+            },
+            "returnParameters": {
+              "id": 2976,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 2975,
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 2977,
+                  "src": "345:4:7",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bool",
+                    "typeString": "bool"
+                  },
+                  "typeName": {
+                    "id": 2974,
+                    "name": "bool",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "345:4:7",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "344:6:7"
+            },
+            "scope": 2978,
+            "src": "168:183:7",
+            "stateMutability": "pure",
+            "superFunction": null,
+            "visibility": "external"
+          }
+        ],
+        "scope": 2979,
+        "src": "60:293:7"
+      }
+    ],
+    "src": "0:354:7"
+  },
+  "compiler": {
+    "name": "solc",
+    "version": "0.5.11+commit.c082d0b4.Emscripten.clang"
+  },
+  "networks": {},
+  "schemaVersion": "3.0.16",
+  "updatedAt": "2019-09-25T00:22:28.133Z",
+  "devdoc": {
+    "methods": {}
+  },
+  "userdoc": {
+    "methods": {}
+  }
 }
