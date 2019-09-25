@@ -69,8 +69,14 @@ contract ForceMove {
         // REQUIREMENTS
         // ------------
 
-        _requireNonDecreasedTurnNumber(channelId, largestTurnNum);
-        _requireChannelNotFinalized(channelId);
+        if (_mode(channelId) == ChannelMode.Open) {
+            _requireNonDecreasedTurnNumber(channelId, largestTurnNum);
+        } else if (_mode(channelId) == ChannelMode.Challenge) {
+            _requireIncreasedTurnNumber(channelId, largestTurnNum);
+        } else {
+            // This should revert.
+            _requireChannelNotFinalized(channelId);
+        }
         bytes32 supportedStateHash = _requireStateSupportedBy(
             largestTurnNum,
             variableParts,
