@@ -1,8 +1,6 @@
-import {ExtensionConstructor, Wire} from "bittorrent-protocol";
-import {PaidStreamingExtension} from "./paid-streaming-extension";
-import {PaidStreamingWire} from "./types";
-
-type Wireish = Wire & PaidStreamingWire;
+import { ExtensionConstructor, Wire } from "bittorrent-protocol";
+import { PaidStreamingExtension } from "./paid-streaming-extension";
+import { Wireish } from "./types";
 
 /**
  * Returns a bittorrent extension

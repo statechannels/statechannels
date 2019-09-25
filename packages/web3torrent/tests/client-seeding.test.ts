@@ -3,7 +3,7 @@ import WebTorrentPaidStreamingClient, {
   ClientEvents,
   PaidStreamingExtensionNotices,
   PaidStreamingTorrent
-} from './../src/web3torrent-lib';
+} from './../src/library/web3torrent-lib';
 import { defaultFile, defaultFileMagnetURI, defaultSeedingOptions, defaultTorrentHash } from './utils';
 
 describe('Seeding and Leeching', () => {
