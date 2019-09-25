@@ -1,8 +1,8 @@
 const ethers = require('ethers');
 const etherlime = require('etherlime-lib');
-const networkMap = require('./network-map.json');
 const path = require('path');
 const writeJsonFile = require('write-json-file');
+const loadJsonFile = require('load-json-file');
 
 const testForceMoveArtifact = require('../build/contracts/TESTForceMove.json');
 const testNitroAdjudicatorArtifact = require('../build/contracts/TESTNitroAdjudicator.json');
@@ -27,6 +27,16 @@ async function deployArtifact(deployer, artifact, constructorArgs = []) {
 }
 
 const deploy = async (network, secret, etherscanApiKey) => {
+  let networkMap;
+  try {
+    networkMap = await loadJsonFile(path.join(__dirname, '/network-map.json'));
+  } catch (err) {
+    if (!!err.message.match('ENOENT: no such file or directory')) {
+      networkMap = {};
+    } else {
+      throw err;
+    }
+  }
   const deployer = new etherlime.EtherlimeGanacheDeployer();
   const provider = new ethers.providers.JsonRpcProvider(deployer.nodeUrl);
   const networkId = (await provider.getNetwork()).chainId;

@@ -21,3 +21,7 @@ dist
 
 # environment
 .env
+
+# 
+deployment/network-map.json
+.etherlime-store/
