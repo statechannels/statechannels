@@ -1,7 +1,7 @@
 import * as scenarios from './scenarios';
 import { describeScenarioStep, itSendsThisDisplayEventType } from '../../../__tests__/helpers';
 import { closeLedgerChannelReducer, initialize } from '../reducer';
-import { HIDE_WALLET } from 'magmo-wallet-client';
+import { HIDE_WALLET } from '../../../../magmo-wallet-client';
 import * as states from '../states';
 
 const itTransitionsTo = (

@@ -7,7 +7,7 @@ import {
   itSendsThisDisplayEventType,
   describeScenarioStep,
 } from '../../../__tests__/helpers';
-import { FUNDING_SUCCESS, HIDE_WALLET } from 'magmo-wallet-client';
+import { FUNDING_SUCCESS, HIDE_WALLET } from '../../../../magmo-wallet-client';
 
 describe('ledger funding', () => {
   const scenario = scenarios.ledgerFunding;

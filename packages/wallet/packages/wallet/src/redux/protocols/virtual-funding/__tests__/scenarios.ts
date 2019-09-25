@@ -12,7 +12,7 @@ import {
 import { channelFromCommitments } from '../../../channel-store/channel-state/__tests__';
 import { appCommitment, twoThree } from '../../../../domain/commitments/__tests__';
 import { CONSENSUS_LIBRARY_ADDRESS } from '../../../../constants';
-import { PlayerIndex } from 'magmo-wallet-client/lib/wallet-instructions';
+import { PlayerIndex } from '../../../../magmo-wallet-client/wallet-instructions';
 import { prependToLocator } from '../..';
 import { EmbeddedProtocol } from '../../../../communication';
 import { ADVANCE_CHANNEL_PROTOCOL_LOCATOR } from '../../advance-channel/reducer';

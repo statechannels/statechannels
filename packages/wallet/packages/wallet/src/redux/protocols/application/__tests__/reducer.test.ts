@@ -8,7 +8,7 @@ import {
   SIGNATURE_SUCCESS,
   VALIDATION_FAILURE,
   SIGNATURE_FAILURE,
-} from 'magmo-wallet-client';
+} from '../../../../magmo-wallet-client';
 
 function whenIn(state) {
   return `when in ${state}`;

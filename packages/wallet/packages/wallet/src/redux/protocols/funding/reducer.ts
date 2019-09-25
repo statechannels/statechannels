@@ -11,7 +11,7 @@ import {
   sendFundingComplete,
   getLatestCommitment,
 } from '../reducer-helpers';
-import { fundingFailure } from 'magmo-wallet-client';
+import { fundingFailure } from '../../../magmo-wallet-client';
 import { EmbeddedProtocol } from '../../../communication';
 
 import * as ledgerFundingStates from '../ledger-funding/states';

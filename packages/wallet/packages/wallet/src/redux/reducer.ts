@@ -1,4 +1,4 @@
-import { initializationSuccess } from 'magmo-wallet-client/lib/wallet-events';
+import { initializationSuccess } from '../magmo-wallet-client/wallet-events';
 import { unreachable } from '../utils/reducer-utils';
 import * as actions from './actions';
 import { accumulateSideEffects } from './outbox';

@@ -1,5 +1,5 @@
 import { take, put, select } from 'redux-saga/effects';
-import * as incoming from 'magmo-wallet-client/lib/wallet-instructions';
+import * as incoming from '../../magmo-wallet-client/wallet-instructions';
 
 import * as actions from '../actions';
 import { eventChannel, buffers } from 'redux-saga';

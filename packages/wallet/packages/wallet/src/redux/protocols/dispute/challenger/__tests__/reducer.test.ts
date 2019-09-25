@@ -16,7 +16,7 @@ import {
   CHALLENGE_COMPLETE,
   CHALLENGE_COMMITMENT_RECEIVED,
   SHOW_WALLET,
-} from 'magmo-wallet-client';
+} from '../../../../../magmo-wallet-client';
 
 describe('OPPONENT RESPONDS', () => {
   const scenario = scenarios.opponentResponds;

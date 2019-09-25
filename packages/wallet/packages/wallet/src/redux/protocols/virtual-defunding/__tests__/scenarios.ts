@@ -1,7 +1,7 @@
 import { appCommitment } from '../../../../domain/commitments/__tests__';
 import { channelFromCommitments } from '../../../channel-store/channel-state/__tests__';
 import * as scenarios from '../../../../domain/commitments/__tests__';
-import { PlayerIndex } from 'magmo-wallet-client/lib/wallet-instructions';
+import { PlayerIndex } from '../../../../magmo-wallet-client/wallet-instructions';
 import * as states from '../states';
 import { setChannel, EMPTY_SHARED_DATA, setFundingState } from '../../../state';
 import _ from 'lodash';

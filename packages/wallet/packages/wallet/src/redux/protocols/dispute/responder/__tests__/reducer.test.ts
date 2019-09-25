@@ -4,7 +4,7 @@ import { initialize, responderReducer } from '../reducer';
 import * as states from '../states';
 import { Commitment } from '../../../../../domain';
 import * as TransactionGenerator from '../../../../../utils/transaction-generator';
-import { SHOW_WALLET, HIDE_WALLET, CHALLENGE_COMPLETE } from 'magmo-wallet-client';
+import { SHOW_WALLET, HIDE_WALLET, CHALLENGE_COMPLETE } from '../../../../../magmo-wallet-client';
 import { itSendsThisDisplayEventType, itSendsThisMessage } from '../../../../__tests__/helpers';
 import { describeScenarioStep } from '../../../../__tests__/helpers';
 

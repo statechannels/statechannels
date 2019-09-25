@@ -1,5 +1,5 @@
 import { TransactionRequest } from 'ethers/providers';
-import { WalletEvent, DisplayAction } from 'magmo-wallet-client';
+import { WalletEvent, DisplayAction } from '../../magmo-wallet-client';
 import { accumulateSideEffects } from '.';
 
 export function emptyDisplayOutboxState(): OutboxState {

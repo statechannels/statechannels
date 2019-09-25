@@ -1,7 +1,7 @@
 import { clearOutbox } from '../reducer';
 
 import * as actions from '../../actions';
-import * as outgoing from 'magmo-wallet-client/lib/wallet-events';
+import * as outgoing from '../../../magmo-wallet-client/wallet-events';
 import { OutboxState } from '../state';
 import { sendStrategyApproved, sendStrategyProposed } from '../../../communication';
 

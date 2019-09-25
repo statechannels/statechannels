@@ -8,7 +8,7 @@ import {
 } from '../../../__tests__/helpers';
 import { concludingReducer } from '../reducer';
 import { concludeInstigated } from '../../../../communication';
-import { SHOW_WALLET, HIDE_WALLET } from 'magmo-wallet-client';
+import { SHOW_WALLET, HIDE_WALLET } from '../../../../magmo-wallet-client';
 
 describe('Opponent Concluded Happy Path', () => {
   const scenario = scenarios.opponentConcludedHappyPath;

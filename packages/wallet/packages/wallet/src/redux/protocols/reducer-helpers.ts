@@ -1,4 +1,4 @@
-import { SIGNATURE_SUCCESS, VALIDATION_SUCCESS, fundingSuccess } from 'magmo-wallet-client';
+import { SIGNATURE_SUCCESS, VALIDATION_SUCCESS, fundingSuccess } from '../../magmo-wallet-client';
 import * as actions from '../actions';
 import { channelStoreReducer } from '../channel-store/reducer';
 import { accumulateSideEffects } from '../outbox';
@@ -7,7 +7,7 @@ import { SharedData, queueMessage, getExistingChannel, checkAndStore } from '../
 import * as selectors from '../selectors';
 import { TwoPartyPlayerIndex, ThreePartyPlayerIndex } from '../types';
 import { CommitmentType } from 'fmg-core/lib/commitment';
-import * as magmoWalletClient from 'magmo-wallet-client';
+import * as magmoWalletClient from '../../magmo-wallet-client';
 import { getLastCommitment, nextParticipant, Commitments } from '../channel-store';
 import { Commitment } from '../../domain';
 import { sendCommitmentsReceived, ProtocolLocator } from '../../communication';

@@ -8,7 +8,7 @@ import {
   signatureSuccess,
   signatureFailure,
   validationFailure,
-} from 'magmo-wallet-client';
+} from '../../../magmo-wallet-client';
 import {
   checkAndStore,
   checkAndInitialize,

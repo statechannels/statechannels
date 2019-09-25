@@ -17,7 +17,7 @@ import {
   ConsensusUpdateState,
 } from '../consensus-update';
 import { bigNumberify } from 'ethers/utils';
-import { PlayerIndex } from 'magmo-wallet-client/lib/wallet-instructions';
+import { PlayerIndex } from '../../../magmo-wallet-client/wallet-instructions';
 import { ProtocolLocator, EmbeddedProtocol } from '../../../communication';
 import { CONSENSUS_UPDATE_PROTOCOL_LOCATOR } from '../consensus-update/reducer';
 import { DirectFundingState } from '../direct-funding/states';

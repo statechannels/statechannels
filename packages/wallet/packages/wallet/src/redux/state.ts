@@ -22,7 +22,7 @@ import {
 import { Properties } from './utils';
 import * as NewLedgerChannel from './protocols/new-ledger-channel/states';
 import { accumulateSideEffects } from './outbox';
-import { WalletEvent } from 'magmo-wallet-client';
+import { WalletEvent } from '../magmo-wallet-client';
 import { TransactionRequest } from 'ethers/providers';
 import { AdjudicatorState } from './adjudicator-state/state';
 import { SignedCommitment, Commitment } from '../domain';

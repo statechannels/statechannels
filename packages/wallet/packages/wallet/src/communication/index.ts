@@ -1,5 +1,5 @@
 import { Commitment, SignedCommitment } from '../domain';
-import { messageRelayRequested } from 'magmo-wallet-client';
+import { messageRelayRequested } from '../magmo-wallet-client';
 import {
   RelayableAction,
   strategyProposed,
