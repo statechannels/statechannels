@@ -112,11 +112,11 @@ workflows:
     jobs:
       - build
 
-      - run-tslint:
+      - run-tests:
           requires:
             - build
 
-      - run-tests:
+      - run-tslint:
           requires:
             - build
 
