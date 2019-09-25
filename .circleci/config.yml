@@ -3,7 +3,7 @@ version: 2.1
 defaults: &defaults
   working_directory: /home/circleci/project
   docker:
-    - image: counterfactual/statechannels:latest
+    - image: circleci/node:10.16.3
 
 save_code: &save_code
   save_cache:
@@ -125,7 +125,6 @@ workflows:
       - ensure-updated-lockfiles:
           requires:
             - build
-
       # - publish-to-npm:
       #     requires:
       #       - build
