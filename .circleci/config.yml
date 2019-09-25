@@ -92,21 +92,21 @@ jobs:
           name: Check root yarn.lock
           command: yarn --frozen-lockfile
 
-  publish-to-npm:
-    <<: *defaults
-    steps:
-      - <<: *restore_code
-      - checkout
-      - <<: *restore_dep
-      - attach_workspace:
-          at: /home/circleci/project
-      - run: yarn --frozen-lockfile # symlink packages' node_modules
-      - run:
-          name: Add NPM_TOKEN auth
-          command: echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc
-      - run:
-          name: Publish any updated packages to npm
-          command: yarn run publish
+  # publish-to-npm:
+  #   <<: *defaults
+  #   steps:
+  #     - <<: *restore_code
+  #     - checkout
+  #     - <<: *restore_dep
+  #     - attach_workspace:
+  #         at: /home/circleci/project
+  #     - run: yarn --frozen-lockfile # symlink packages' node_modules
+  #     - run:
+  #         name: Add NPM_TOKEN auth
+  #         command: echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc
+  #     - run:
+  #         name: Publish any updated packages to npm
+  #         command: yarn run publish
 
 workflows:
   statechannels:
@@ -125,12 +125,12 @@ workflows:
           requires:
             - build
 
-      - publish-to-npm:
-          requires:
-            - build
-            - ensure-updated-lockfiles
-            - run-tests
-            - run-tslint
-          filters:
-            branches:
-              only: master
+      # - publish-to-npm:
+      #     requires:
+      #       - build
+      #       - ensure-updated-lockfiles
+      #       - run-tests
+      #       - run-tslint
+      #     filters:
+      #       branches:
+      #         only: master
