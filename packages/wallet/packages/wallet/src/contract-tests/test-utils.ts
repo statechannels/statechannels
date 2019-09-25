@@ -8,13 +8,15 @@ import {
   createRespondWithMoveTransaction,
 } from '../utils/transaction-generator';
 import { signCommitment } from '../domain';
-import testGameArtifact from '../../build/contracts/TestGame.json';
+// import testGameArtifact from '../../build/contracts/TestGame.json';
 import { bigNumberify } from 'ethers/utils';
 import { channelID, Channel } from 'fmg-core/lib/channel';
 import { ADJUDICATOR_ADDRESS } from '../constants';
 import { ADDRESS_ZERO } from 'fmg-core';
 export function getLibraryAddress(networkId) {
-  return testGameArtifact.networks[networkId].address;
+  return ethers.Wallet.createRandom().address;
+  // TODO: Import Trivial App from Nitro Protocol and use that
+  // return testGameArtifact.networks[networkId].address;
 }
 export const fiveFive = [bigNumberify(5).toHexString(), bigNumberify(5).toHexString()] as [
   string,
