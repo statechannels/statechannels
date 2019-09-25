@@ -173,7 +173,10 @@ export async function respondWithMove(
 
   const toSig = signCommitment(toCommitment, participantB.privateKey);
 
-  const respondWithMoveTransaction = createRespondWithMoveTransaction(toCommitment, toSig);
+  const respondWithMoveTransaction = createRespondWithMoveTransaction(
+    toCommitment,
+    participantB.privateKey,
+  );
   const transactionReceipt = await sendTransaction(provider, respondWithMoveTransaction);
   await transactionReceipt.wait();
   return { toCommitment, toSig };

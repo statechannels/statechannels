@@ -1,7 +1,7 @@
 import { TransactionRequest } from 'ethers/providers';
 import { getAdjudicatorInterface } from './contract-utils';
 import { splitSignature } from 'ethers/utils';
-import { Commitment, SignedCommitment } from '../domain';
+import { Commitment, SignedCommitment, signCommitment2 } from '../domain';
 import { asEthersObject } from 'fmg-core';
 import { Transactions as nitroTrans } from 'nitro-protocol';
 import { getChannelStorage, convertAddressToBytes32 } from './nitro-converter';
@@ -22,16 +22,12 @@ export function createForceMoveTransaction(
 
 export function createRespondWithMoveTransaction(
   nextState: Commitment,
-  signature: string,
+  privateKey: string,
 ): TransactionRequest {
-  const adjudicatorInterface = getAdjudicatorInterface();
-  const data = adjudicatorInterface.functions.respondWithMove.encode([
-    asEthersObject(nextState),
-    splitSignature(signature),
-  ]);
-  return {
-    data,
-  };
+  const channelStorage = getChannelStorage(nextState);
+  // Why should `signCommitment2` be used instead of `signCommitment`?
+  const signedState = signCommitment2(nextState, privateKey).signedState;
+  return nitroTrans.createRespondTransaction(channelStorage, signedState);
 }
 
 export function createRefuteTransaction(

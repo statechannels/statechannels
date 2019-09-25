@@ -1,4 +1,4 @@
-import { Commitment } from '../../../../domain';
+import { Commitment, getChannelId } from '../../../../domain';
 import { ProtocolStateWithSharedData } from '../..';
 import * as states from './states';
 import * as actions from './actions';
@@ -11,7 +11,7 @@ import {
   initialize as initTransactionState,
   transactionReducer,
 } from '../../transaction-submission/reducer';
-import { SharedData, signAndStore, registerChannelToMonitor } from '../../../state';
+import { SharedData, signAndStore, registerChannelToMonitor, getPrivatekey } from '../../../state';
 import { isTransactionAction } from '../../transaction-submission/actions';
 import {
   isTerminal,
@@ -109,6 +109,7 @@ const waitForTransactionReducer = (
     return handleTransactionSubmissionComplete(protocolState, newTransactionState, newSharedData);
   }
 };
+
 const waitForResponseReducer = (
   protocolState: states.WaitForResponse,
   sharedData: SharedData,
@@ -121,9 +122,10 @@ const waitForResponseReducer = (
       if (!signResult.isSuccess) {
         throw new Error(`Could not sign response commitment due to ${signResult.reason}`);
       }
+      const privateKey = getPrivatekey(sharedData, protocolState.channelId);
       const transaction = TransactionGenerator.createRespondWithMoveTransaction(
         signResult.signedCommitment.commitment,
-        signResult.signedCommitment.signature,
+        privateKey,
       );
       return transitionToWaitForTransaction(transaction, protocolState, signResult.store);
     case 'WALLET.ADJUDICATOR.CHALLENGE_EXPIRED':
@@ -262,6 +264,9 @@ const craftResponseTransactionWithExistingCommitment = (
     penultimateSignature,
   } = getStoredCommitments(challengeCommitment, sharedData);
 
+  const channelId = getChannelId(challengeCommitment);
+  const privateKey = getPrivatekey(sharedData, channelId);
+
   if (canRefute(challengeCommitment, sharedData)) {
     if (canRefuteWithCommitment(lastCommitment, challengeCommitment)) {
       return TransactionGenerator.createRefuteTransaction(lastCommitment, lastSignature);
@@ -272,7 +277,7 @@ const craftResponseTransactionWithExistingCommitment = (
       );
     }
   } else if (canRespondWithExistingCommitment(challengeCommitment, sharedData)) {
-    return TransactionGenerator.createRespondWithMoveTransaction(lastCommitment, lastSignature);
+    return TransactionGenerator.createRespondWithMoveTransaction(lastCommitment, privateKey);
   } else {
     // TODO: We should never actually hit this, currently a sanity check to help out debugging
     throw new Error('Cannot refute or respond with existing commitment.');

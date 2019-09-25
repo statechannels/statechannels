@@ -125,9 +125,10 @@ describe('transactions', () => {
       commitmentCount: 1,
     };
 
-    const toSig = signCommitment(toCommitment, participantB.privateKey);
-
-    const respondWithMoveTransaction = createRespondWithMoveTransaction(toCommitment, toSig);
+    const respondWithMoveTransaction = createRespondWithMoveTransaction(
+      toCommitment,
+      participantB.privateKey,
+    );
     await testTransactionSender(respondWithMoveTransaction);
   });
 
