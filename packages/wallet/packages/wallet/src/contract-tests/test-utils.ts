@@ -132,15 +132,10 @@ export async function concludeGame(
     commitmentCount: 0,
   };
 
-  const fromSignature = signCommitment(fromCommitment, participantA.privateKey);
-  const toSignature = signCommitment(toCommitment, participantB.privateKey);
+  const signedFromCommitment = signCommitment2(fromCommitment, participantA.privateKey);
+  const signedToCommitment = signCommitment2(toCommitment, participantB.privateKey);
 
-  const concludeTransaction = createConcludeTransaction(
-    fromCommitment,
-    toCommitment,
-    fromSignature,
-    toSignature,
-  );
+  const concludeTransaction = createConcludeTransaction(signedFromCommitment, signedToCommitment);
   const transactionReceipt = await sendTransaction(provider, concludeTransaction);
   await transactionReceipt.wait();
 }

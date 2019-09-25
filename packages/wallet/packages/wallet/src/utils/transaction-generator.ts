@@ -4,11 +4,7 @@ import { splitSignature } from 'ethers/utils';
 import { Commitment, SignedCommitment, signCommitment2 } from '../domain';
 import { asEthersObject } from 'fmg-core';
 import { Transactions as nitroTrans, SignedState } from 'nitro-protocol';
-import {
-  getChannelStorage,
-  convertAddressToBytes32,
-  convertCommitmentToState,
-} from './nitro-converter';
+import { getChannelStorage, convertAddressToBytes32 } from './nitro-converter';
 import { signChallengeMessage } from 'nitro-protocol/lib/src/signatures';
 // TODO: This should be exported by `nitro-protocol`
 import { createDepositTransaction as createNitroDepositTransaction } from 'nitro-protocol/lib/src/contract/transaction-creators/eth-asset-holder';
@@ -89,28 +85,15 @@ export function createConcludeAndWithdrawTransaction(
 }
 
 export function createConcludeTransaction(
-  fromCommitment: Commitment,
-  toCommitment: Commitment,
-  fromSignature: string,
-  toSignature: string,
+  signedFromCommitment: SignedCommitment,
+  signedToCommitment: SignedCommitment,
 ): TransactionRequest {
-  const splitFromSignature = splitSignature(fromSignature);
-  const splitToSignature = splitSignature(toSignature);
-  const fromState = convertCommitmentToState(fromCommitment);
-  const toState = convertCommitmentToState(toCommitment);
-
-  const signedStates: SignedState[] = [];
-  signedStates.push({
-    state: fromState,
-    signature: splitFromSignature,
-  } as SignedState);
-
-  signedStates.push({
-    state: toState,
-    signature: splitToSignature,
-  } as SignedState);
-
-  return nitroTrans.createConcludeTransaction(signedStates);
+  const signedStates: SignedState[] = [
+    signedFromCommitment.signedState,
+    signedToCommitment.signedState,
+  ];
+  const channelStorage = getChannelStorage(signedToCommitment.commitment);
+  return nitroTrans.createConcludeTransaction(channelStorage, signedStates);
 }
 
 export function createWithdrawTransaction(

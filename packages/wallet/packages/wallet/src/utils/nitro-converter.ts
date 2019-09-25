@@ -105,7 +105,7 @@ function convertGuaranteeToOutcome({
   destination: string[];
 }): Outcome {
   const guarantee = {
-    targetChannelId: guaranteedChannel,
+    targetChannelId: convertAddressToBytes32(guaranteedChannel),
     destinations: destination.map(convertAddressToBytes32),
   };
   return [{ assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS, guarantee }];
