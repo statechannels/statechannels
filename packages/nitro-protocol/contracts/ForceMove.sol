@@ -3,6 +3,9 @@ pragma experimental ABIEncoderV2;
 
 import './ForceMoveApp.sol';
 
+/**
+  * @dev The ForceMove contract allows state channels to be adjudicated and finalized.
+*/
 contract ForceMove {
     struct Signature {
         uint8 v;
@@ -47,6 +50,14 @@ contract ForceMove {
 
     // Public methods:
 
+    /**
+    * @notice Retrieves data stored against a channelId, parses it into `finalizesAt`, `turnNumRecord` and `fingerprint`.
+    * @dev Retrieves data stored against a channelId, parses it into `finalizesAt`, `turnNumRecord` and `fingerprint`. Calls internal method _getData.
+    * @param channelId Unique identifier for a state channel
+    * @return finalizesAt The unix timestamp when this channel will finalize
+    * @return fingerprint The rightmost 160 bits of keccak256 of abi.encoded ChannelStorage struct
+    * @return turnNumRecord A turnNum that (the adjudicator knows) is supported by a signature from each participant.
+    */
     function getData(bytes32 channelId)
         public
         view
@@ -55,6 +66,17 @@ contract ForceMove {
         (turnNumRecord, finalizesAt, fingerprint) = _getData(channelId);
     }
 
+    /**
+    * @notice Registers a challenge against a state channel. A challenge will either prompt another participant into clearing the challenge (via one of the other methods), or cause the channel to finalize at a specific time.
+    * @dev Registers a challenge against a state channel. A challenge will either prompt another participant into clearing the challenge (via one of the other methods), or cause the channel to finalize at a specific time.
+    * @param fixedPart Data describing properties of the state channel that do not change with state updates.
+    * @param largestTurnNum The largest turn number of the submitted states; will overwrite the stored value of `turnNumRecord`.
+    * @param variableParts An ordered array of structs, each decribing the properties of the state channel that may change with each state update.
+    * @param isFinalCount Describes how many of the submitted states have the `isFinal` property set to `true`. It is implied that the rightmost `isFinalCount` states are final, and the rest are not final.
+    * @param sigs An array of signatures that support the state with the `largestTurnNum`.
+    * @param whoSignedWhat An array denoting which participant has signed which state: `participant[i]` signed the state with index `whoSignedWhat[i]`.
+    * @param challengerSig The signature of a participant on the keccak256 of the abi.encode of (supportedStateHash, 'forceMove').
+    */
     function forceMove(
         FixedPart memory fixedPart,
         uint48 largestTurnNum,
@@ -113,6 +135,15 @@ contract ForceMove {
 
     }
 
+    /**
+    * @notice Repsonds to an ongoing challenge registered against a state channel.
+    * @dev Repsonds to an ongoing challenge registered against a state channel.
+    * @param challenger The address of the participant whom registered the challenge.
+    * @param isFinalAB An pair of booleans describing if the challenge state and/or the response state have the `isFinal` property set to `true`.
+    * @param fixedPart Data describing properties of the state channel that do not change with state updates.
+    * @param variablePartAB An pair of structs, each decribing the properties of the state channel that may change with each state update (for the challenge state and for the response state).
+    * @param sig The responder's signature on the `responseStateHash`.
+    */
     function respond(
         address challenger,
         bool[2] memory isFinalAB,
@@ -176,6 +207,16 @@ contract ForceMove {
         _clearChallenge(channelId, turnNumRecord + 1);
     }
 
+    /**
+    * @notice Clears an ongoing challenge by proving the challenger signed a later state.
+    * @dev Clears an ongoing challenge by proving the challenger signed a later state (henceforth refutation state).
+    * @param refutationStateTurnNum The turn number of the refutation state.
+    * @param challenger The address of the participant whom registered the challenge.
+    * @param isFinalAB An pair of booleans describing if the challenge state and/or the response state have the `isFinal` property set to `true`.
+    * @param fixedPart Data describing properties of the state channel that do not change with state updates.
+    * @param variablePartAB An pair of structs, each decribing the properties of the state channel that may change with each state update (for the challenge state and for the refutation state).
+    * @param refutationStateSig The refuter's signature on the `responseStateHash`.
+    */
     function refute(
         uint48 refutationStateTurnNum,
         address challenger,
@@ -232,6 +273,16 @@ contract ForceMove {
         _clearChallenge(channelId, turnNumRecord);
     }
 
+    /**
+    * @notice Overwrites the `turnNumRecord` stored against a channel by providing a state with higher turn number, supported by a signature from each participant.
+    * @dev Overwrites the `turnNumRecord` stored against a channel by providing a state with higher turn number, supported by a signature from each participant.
+    * @param fixedPart Data describing properties of the state channel that do not change with state updates.
+    * @param largestTurnNum The largest turn number of the submitted states; will overwrite the stored value of `turnNumRecord`.
+    * @param variableParts An ordered array of structs, each decribing the properties of the state channel that may change with each state update.
+    * @param isFinalCount Describes how many of the submitted states have the `isFinal` property set to `true`. It is implied that the rightmost `isFinalCount` states are final, and the rest are not final.
+    * @param sigs An array of signatures that support the state with the `largestTurnNum`.
+    * @param whoSignedWhat An array denoting which participant has signed which state: `participant[i]` signed the state with index `whoSignedWhat[i]`.
+    */
     function checkpoint(
         FixedPart memory fixedPart,
         uint48 largestTurnNum,
@@ -263,6 +314,16 @@ contract ForceMove {
 
     }
 
+    /**
+    * @notice Finalizes a channel by providing a finalization proof.
+    * @dev Overwrites the `turnNumRecord` stored against a channel by providing a state with higher turn number, supported by a signature from each participant.
+    * @param largestTurnNum The largest turn number of the submitted states; will overwrite the stored value of `turnNumRecord`.
+    * @param fixedPart Data describing properties of the state channel that do not change with state updates.
+    * @param appPartHash The keccak256 of the abi.encode of `(challengeDuration, appDefinition, appData)`. Applies to all states in the finalization proof.
+    * @param outcomeHash The keccak256 of the abi.encode of the `outcome`. Applies to all stats in the finalization proof.
+    * @param whoSignedWhat An array denoting which participant has signed which state: `participant[i]` signed the state with index `whoSignedWhat[i]`.
+    * @param sigs An array of signatures that support the state with the `largestTurnNum`.
+    */
     function conclude(
         uint48 largestTurnNum,
         FixedPart memory fixedPart,
@@ -647,10 +708,21 @@ contract ForceMove {
     }
 
     // events
+
+    /**
+    * @dev Indicates that a challenge has been registered against `channelId`.
+    * @param channelId Unique identifier for a state channel.
+    * @param turnNumRecord A turnNum that (the adjudicator knows) is supported by a signature from each participant.
+    * @param finalizesAt The unix timestamp when `channelId` will finalize.
+    * @param challenger The address of the participant whom registered the challenge.
+    * @param isFinal Boolean denoting whether the challenge state is final.
+    * @param fixedPart Data describing properties of the state channel that do not change with state updates.
+    * @param variableParts An ordered array of structs, each decribing the properties of the state channel that may change with each state update.
+    */
     event ChallengeRegistered(
         bytes32 indexed channelId,
         // everything needed to respond or refute
-        uint256 turnNunmRecord,
+        uint256 turnNumRecord,
         uint256 finalizesAt,
         address challenger,
         bool isFinal,
@@ -658,6 +730,16 @@ contract ForceMove {
         ForceMoveApp.VariablePart[] variableParts
     );
 
+    /**
+    * @dev Indicates that a challenge, previously registered against `channelId`, has been cleared.
+    * @param channelId Unique identifier for a state channel.
+    * @param newTurnNumRecord A turnNum that (the adjudicator knows) is supported by a signature from each participant.
+    */
     event ChallengeCleared(bytes32 indexed channelId, uint256 newTurnNumRecord);
+
+    /**
+    * @dev Indicates that a challenge has been registered against `channelId`.
+    * @param channelId Unique identifier for a state channel.
+    */
     event Concluded(bytes32 indexed channelId);
 }

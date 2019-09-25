@@ -19,17 +19,19 @@ The ForceMove contract allows state channels to be adjudicated and finalized.
 - [`_acceptableWhoSignedWhat`](#_acceptableWhoSignedWhat)
 - [`_recoverSigner`](#_recoverSigner)
 - [`_requireStateSupportedBy`](#_requireStateSupportedBy)
-- [`_requireValidTransition`](#_requireValidTransition)
+- [`_requireValidTransitionChain`](#_requireValidTransitionChain)
 - [`_requireValidTransition`](#_requireValidTransition)
 - [`_bytesEqual`](#_bytesEqual)
 - [`_clearChallenge`](#_clearChallenge)
-- [`_requireChannelOpen`](#_requireChannelOpen)
-- [`_requireMatchingStorage`](#_requireMatchingStorage)
 - [`_requireIncreasedTurnNumber`](#_requireIncreasedTurnNumber)
 - [`_requireNonDecreasedTurnNumber`](#_requireNonDecreasedTurnNumber)
 - [`_requireSpecificChallenge`](#_requireSpecificChallenge)
 - [`_requireOngoingChallenge`](#_requireOngoingChallenge)
 - [`_requireChannelNotFinalized`](#_requireChannelNotFinalized)
+- [`_requireChannelFinalized`](#_requireChannelFinalized)
+- [`_requireChannelOpen`](#_requireChannelOpen)
+- [`_requireMatchingStorage`](#_requireMatchingStorage)
+- [`_mode`](#_mode)
 - [`_hashChannelStorage`](#_hashChannelStorage)
 - [`_getData`](#_getData)
 - [`_matchesHash`](#_matchesHash)
@@ -198,8 +200,8 @@ No description
 #### Returns:
 - `bytes32`
 
-<a id=_requireValidTransition />
-## `_requireValidTransition`
+<a id=_requireValidTransitionChain />
+## `_requireValidTransitionChain`
 
 No description
 
@@ -227,20 +229,6 @@ No description
 
 <a id=_clearChallenge />
 ## `_clearChallenge`
-
-No description
-
-
-
-<a id=_requireChannelOpen />
-## `_requireChannelOpen`
-
-No description
-
-
-
-<a id=_requireMatchingStorage />
-## `_requireMatchingStorage`
 
 No description
 
@@ -280,6 +268,36 @@ No description
 No description
 
 
+
+<a id=_requireChannelFinalized />
+## `_requireChannelFinalized`
+
+No description
+
+
+
+<a id=_requireChannelOpen />
+## `_requireChannelOpen`
+
+No description
+
+
+
+<a id=_requireMatchingStorage />
+## `_requireMatchingStorage`
+
+No description
+
+
+
+<a id=_mode />
+## `_mode`
+
+No description
+
+
+#### Returns:
+- `enum ForceMove.ChannelMode`
 
 <a id=_hashChannelStorage />
 ## `_hashChannelStorage`

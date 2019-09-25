@@ -1,7 +1,7 @@
 pragma solidity ^0.5.11;
 pragma experimental ABIEncoderV2;
 import './Outcome.sol';
-import 'openzeppelin-solidity/contracts/math/SafeMath.sol';
+import './openzeppelin/math/SafeMath.sol';
 
 contract AssetHolder {
     using SafeMath for uint256;
