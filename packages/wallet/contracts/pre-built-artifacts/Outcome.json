@@ -1,0 +1,692 @@
+{
+  "contractName": "Outcome",
+  "abi": [],
+  "metadata": "{\"compiler\":{\"version\":\"0.5.11+commit.c082d0b4\"},\"language\":\"Solidity\",\"output\":{\"abi\":[],\"devdoc\":{\"methods\":{}},\"userdoc\":{\"methods\":{}}},\"settings\":{\"compilationTarget\":{\"nitro-protocol/contracts/Outcome.sol\":\"Outcome\"},\"evmVersion\":\"petersburg\",\"libraries\":{},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[]},\"sources\":{\"nitro-protocol/contracts/Outcome.sol\":{\"keccak256\":\"0x1e93b4776f0a13be87d59c497432530dcaf572127ece17a034274389c18076f2\",\"urls\":[\"bzz-raw://c43555db0390c471134438c5612857659bd550ee099c19a628c3b822f15d94a5\",\"dweb:/ipfs/QmevLWLgRjVePs1JsQfbBQpU62ytErZtBZE3Uq46p4iiWP\"]}},\"version\":1}",
+  "bytecode": "0x60636023600b82828239805160001a607314601657fe5b30600052607381538281f3fe73000000000000000000000000000000000000000030146080604052600080fdfea365627a7a72315820283d51c2f03146a4a76467ce0ff2b19d242918f047a8848f9c79c73b9d2d17646c6578706572696d656e74616cf564736f6c634300050b0040",
+  "deployedBytecode": "0x73000000000000000000000000000000000000000030146080604052600080fdfea365627a7a72315820283d51c2f03146a4a76467ce0ff2b19d242918f047a8848f9c79c73b9d2d17646c6578706572696d656e74616cf564736f6c634300050b0040",
+  "sourceMap": "60:1074:9:-;;132:2:-1;166:7;155:9;146:7;137:37;255:7;249:14;246:1;241:23;235:4;232:33;222:2;;269:9;222:2;293:9;290:1;283:20;323:4;314:7;306:22;347:7;338;331:24",
+  "deployedSourceMap": "60:1074:9:-;;;;;;;;",
+  "source": "pragma solidity ^0.5.11;\npragma experimental ABIEncoderV2;\n\nlibrary Outcome {\n    //An outcome is an array of OutcomeItems\n    // Outcome = OutcomeItem[]\n    // OutcomeItem = (AssetHolderAddress, AssetOutcome)\n    // AssetOutcome = (AssetOutcomeType, Allocation | Guarantee)\n    // Allocation = AllocationItem[]\n    // AllocationItem = (Destination, Amount)\n    // Guarantee = (ChannelAddress, Destination[])\n    // Destination = ChannelAddress | ExternalAddress\n\n    struct OutcomeItem {\n        address assetHolderAddress;\n        bytes assetOutcomeBytes; // abi.encode(AssetOutcome)\n    }\n\n    enum AssetOutcomeType {Allocation, Guarantee}\n\n    struct AssetOutcome {\n        uint8 assetOutcomeType; // AssetOutcomeType.Allocation or AssetOutcomeType.Guarantee\n        bytes allocationOrGuaranteeBytes; // abi.encode(AllocationItem[]) or abi.encode(Guarantee), depending on OutcomeType\n    }\n\n    // reserve Allocation to refer to AllocationItem[]\n    struct AllocationItem {\n        bytes32 destination;\n        uint256 amount;\n    }\n\n    struct Guarantee {\n        bytes32 targetChannelId;\n        bytes32[] destinations;\n    }\n\n}\n",
+  "sourcePath": "nitro-protocol/contracts/Outcome.sol",
+  "ast": {
+    "absolutePath": "nitro-protocol/contracts/Outcome.sol",
+    "exportedSymbols": {
+      "Outcome": [
+        3117
+      ]
+    },
+    "id": 3118,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 3091,
+        "literals": [
+          "solidity",
+          "^",
+          "0.5",
+          ".11"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "0:24:9"
+      },
+      {
+        "id": 3092,
+        "literals": [
+          "experimental",
+          "ABIEncoderV2"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "25:33:9"
+      },
+      {
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "library",
+        "documentation": null,
+        "fullyImplemented": true,
+        "id": 3117,
+        "linearizedBaseContracts": [
+          3117
+        ],
+        "name": "Outcome",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "canonicalName": "Outcome.OutcomeItem",
+            "id": 3097,
+            "members": [
+              {
+                "constant": false,
+                "id": 3094,
+                "name": "assetHolderAddress",
+                "nodeType": "VariableDeclaration",
+                "scope": 3097,
+                "src": "497:26:9",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_address",
+                  "typeString": "address"
+                },
+                "typeName": {
+                  "id": 3093,
+                  "name": "address",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "497:7:9",
+                  "stateMutability": "nonpayable",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  }
+                },
+                "value": null,
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 3096,
+                "name": "assetOutcomeBytes",
+                "nodeType": "VariableDeclaration",
+                "scope": 3097,
+                "src": "533:23:9",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_bytes_storage_ptr",
+                  "typeString": "bytes"
+                },
+                "typeName": {
+                  "id": 3095,
+                  "name": "bytes",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "533:5:9",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes_storage_ptr",
+                    "typeString": "bytes"
+                  }
+                },
+                "value": null,
+                "visibility": "internal"
+              }
+            ],
+            "name": "OutcomeItem",
+            "nodeType": "StructDefinition",
+            "scope": 3117,
+            "src": "468:123:9",
+            "visibility": "public"
+          },
+          {
+            "canonicalName": "Outcome.AssetOutcomeType",
+            "id": 3100,
+            "members": [
+              {
+                "id": 3098,
+                "name": "Allocation",
+                "nodeType": "EnumValue",
+                "src": "620:10:9"
+              },
+              {
+                "id": 3099,
+                "name": "Guarantee",
+                "nodeType": "EnumValue",
+                "src": "632:9:9"
+              }
+            ],
+            "name": "AssetOutcomeType",
+            "nodeType": "EnumDefinition",
+            "src": "597:45:9"
+          },
+          {
+            "canonicalName": "Outcome.AssetOutcome",
+            "id": 3105,
+            "members": [
+              {
+                "constant": false,
+                "id": 3102,
+                "name": "assetOutcomeType",
+                "nodeType": "VariableDeclaration",
+                "scope": 3105,
+                "src": "678:22:9",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_uint8",
+                  "typeString": "uint8"
+                },
+                "typeName": {
+                  "id": 3101,
+                  "name": "uint8",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "678:5:9",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint8",
+                    "typeString": "uint8"
+                  }
+                },
+                "value": null,
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 3104,
+                "name": "allocationOrGuaranteeBytes",
+                "nodeType": "VariableDeclaration",
+                "scope": 3105,
+                "src": "771:32:9",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_bytes_storage_ptr",
+                  "typeString": "bytes"
+                },
+                "typeName": {
+                  "id": 3103,
+                  "name": "bytes",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "771:5:9",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes_storage_ptr",
+                    "typeString": "bytes"
+                  }
+                },
+                "value": null,
+                "visibility": "internal"
+              }
+            ],
+            "name": "AssetOutcome",
+            "nodeType": "StructDefinition",
+            "scope": 3117,
+            "src": "648:245:9",
+            "visibility": "public"
+          },
+          {
+            "canonicalName": "Outcome.AllocationItem",
+            "id": 3110,
+            "members": [
+              {
+                "constant": false,
+                "id": 3107,
+                "name": "destination",
+                "nodeType": "VariableDeclaration",
+                "scope": 3110,
+                "src": "986:19:9",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_bytes32",
+                  "typeString": "bytes32"
+                },
+                "typeName": {
+                  "id": 3106,
+                  "name": "bytes32",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "986:7:9",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes32",
+                    "typeString": "bytes32"
+                  }
+                },
+                "value": null,
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 3109,
+                "name": "amount",
+                "nodeType": "VariableDeclaration",
+                "scope": 3110,
+                "src": "1015:14:9",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_uint256",
+                  "typeString": "uint256"
+                },
+                "typeName": {
+                  "id": 3108,
+                  "name": "uint256",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "1015:7:9",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  }
+                },
+                "value": null,
+                "visibility": "internal"
+              }
+            ],
+            "name": "AllocationItem",
+            "nodeType": "StructDefinition",
+            "scope": 3117,
+            "src": "954:82:9",
+            "visibility": "public"
+          },
+          {
+            "canonicalName": "Outcome.Guarantee",
+            "id": 3116,
+            "members": [
+              {
+                "constant": false,
+                "id": 3112,
+                "name": "targetChannelId",
+                "nodeType": "VariableDeclaration",
+                "scope": 3116,
+                "src": "1069:23:9",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_bytes32",
+                  "typeString": "bytes32"
+                },
+                "typeName": {
+                  "id": 3111,
+                  "name": "bytes32",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "1069:7:9",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes32",
+                    "typeString": "bytes32"
+                  }
+                },
+                "value": null,
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 3115,
+                "name": "destinations",
+                "nodeType": "VariableDeclaration",
+                "scope": 3116,
+                "src": "1102:22:9",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_array$_t_bytes32_$dyn_storage_ptr",
+                  "typeString": "bytes32[]"
+                },
+                "typeName": {
+                  "baseType": {
+                    "id": 3113,
+                    "name": "bytes32",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1102:7:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes32",
+                      "typeString": "bytes32"
+                    }
+                  },
+                  "id": 3114,
+                  "length": null,
+                  "nodeType": "ArrayTypeName",
+                  "src": "1102:9:9",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_array$_t_bytes32_$dyn_storage_ptr",
+                    "typeString": "bytes32[]"
+                  }
+                },
+                "value": null,
+                "visibility": "internal"
+              }
+            ],
+            "name": "Guarantee",
+            "nodeType": "StructDefinition",
+            "scope": 3117,
+            "src": "1042:89:9",
+            "visibility": "public"
+          }
+        ],
+        "scope": 3118,
+        "src": "60:1074:9"
+      }
+    ],
+    "src": "0:1135:9"
+  },
+  "legacyAST": {
+    "absolutePath": "nitro-protocol/contracts/Outcome.sol",
+    "exportedSymbols": {
+      "Outcome": [
+        3117
+      ]
+    },
+    "id": 3118,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 3091,
+        "literals": [
+          "solidity",
+          "^",
+          "0.5",
+          ".11"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "0:24:9"
+      },
+      {
+        "id": 3092,
+        "literals": [
+          "experimental",
+          "ABIEncoderV2"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "25:33:9"
+      },
+      {
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "library",
+        "documentation": null,
+        "fullyImplemented": true,
+        "id": 3117,
+        "linearizedBaseContracts": [
+          3117
+        ],
+        "name": "Outcome",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "canonicalName": "Outcome.OutcomeItem",
+            "id": 3097,
+            "members": [
+              {
+                "constant": false,
+                "id": 3094,
+                "name": "assetHolderAddress",
+                "nodeType": "VariableDeclaration",
+                "scope": 3097,
+                "src": "497:26:9",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_address",
+                  "typeString": "address"
+                },
+                "typeName": {
+                  "id": 3093,
+                  "name": "address",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "497:7:9",
+                  "stateMutability": "nonpayable",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  }
+                },
+                "value": null,
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 3096,
+                "name": "assetOutcomeBytes",
+                "nodeType": "VariableDeclaration",
+                "scope": 3097,
+                "src": "533:23:9",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_bytes_storage_ptr",
+                  "typeString": "bytes"
+                },
+                "typeName": {
+                  "id": 3095,
+                  "name": "bytes",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "533:5:9",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes_storage_ptr",
+                    "typeString": "bytes"
+                  }
+                },
+                "value": null,
+                "visibility": "internal"
+              }
+            ],
+            "name": "OutcomeItem",
+            "nodeType": "StructDefinition",
+            "scope": 3117,
+            "src": "468:123:9",
+            "visibility": "public"
+          },
+          {
+            "canonicalName": "Outcome.AssetOutcomeType",
+            "id": 3100,
+            "members": [
+              {
+                "id": 3098,
+                "name": "Allocation",
+                "nodeType": "EnumValue",
+                "src": "620:10:9"
+              },
+              {
+                "id": 3099,
+                "name": "Guarantee",
+                "nodeType": "EnumValue",
+                "src": "632:9:9"
+              }
+            ],
+            "name": "AssetOutcomeType",
+            "nodeType": "EnumDefinition",
+            "src": "597:45:9"
+          },
+          {
+            "canonicalName": "Outcome.AssetOutcome",
+            "id": 3105,
+            "members": [
+              {
+                "constant": false,
+                "id": 3102,
+                "name": "assetOutcomeType",
+                "nodeType": "VariableDeclaration",
+                "scope": 3105,
+                "src": "678:22:9",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_uint8",
+                  "typeString": "uint8"
+                },
+                "typeName": {
+                  "id": 3101,
+                  "name": "uint8",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "678:5:9",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint8",
+                    "typeString": "uint8"
+                  }
+                },
+                "value": null,
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 3104,
+                "name": "allocationOrGuaranteeBytes",
+                "nodeType": "VariableDeclaration",
+                "scope": 3105,
+                "src": "771:32:9",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_bytes_storage_ptr",
+                  "typeString": "bytes"
+                },
+                "typeName": {
+                  "id": 3103,
+                  "name": "bytes",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "771:5:9",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes_storage_ptr",
+                    "typeString": "bytes"
+                  }
+                },
+                "value": null,
+                "visibility": "internal"
+              }
+            ],
+            "name": "AssetOutcome",
+            "nodeType": "StructDefinition",
+            "scope": 3117,
+            "src": "648:245:9",
+            "visibility": "public"
+          },
+          {
+            "canonicalName": "Outcome.AllocationItem",
+            "id": 3110,
+            "members": [
+              {
+                "constant": false,
+                "id": 3107,
+                "name": "destination",
+                "nodeType": "VariableDeclaration",
+                "scope": 3110,
+                "src": "986:19:9",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_bytes32",
+                  "typeString": "bytes32"
+                },
+                "typeName": {
+                  "id": 3106,
+                  "name": "bytes32",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "986:7:9",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes32",
+                    "typeString": "bytes32"
+                  }
+                },
+                "value": null,
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 3109,
+                "name": "amount",
+                "nodeType": "VariableDeclaration",
+                "scope": 3110,
+                "src": "1015:14:9",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_uint256",
+                  "typeString": "uint256"
+                },
+                "typeName": {
+                  "id": 3108,
+                  "name": "uint256",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "1015:7:9",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  }
+                },
+                "value": null,
+                "visibility": "internal"
+              }
+            ],
+            "name": "AllocationItem",
+            "nodeType": "StructDefinition",
+            "scope": 3117,
+            "src": "954:82:9",
+            "visibility": "public"
+          },
+          {
+            "canonicalName": "Outcome.Guarantee",
+            "id": 3116,
+            "members": [
+              {
+                "constant": false,
+                "id": 3112,
+                "name": "targetChannelId",
+                "nodeType": "VariableDeclaration",
+                "scope": 3116,
+                "src": "1069:23:9",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_bytes32",
+                  "typeString": "bytes32"
+                },
+                "typeName": {
+                  "id": 3111,
+                  "name": "bytes32",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "1069:7:9",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes32",
+                    "typeString": "bytes32"
+                  }
+                },
+                "value": null,
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 3115,
+                "name": "destinations",
+                "nodeType": "VariableDeclaration",
+                "scope": 3116,
+                "src": "1102:22:9",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_array$_t_bytes32_$dyn_storage_ptr",
+                  "typeString": "bytes32[]"
+                },
+                "typeName": {
+                  "baseType": {
+                    "id": 3113,
+                    "name": "bytes32",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1102:7:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes32",
+                      "typeString": "bytes32"
+                    }
+                  },
+                  "id": 3114,
+                  "length": null,
+                  "nodeType": "ArrayTypeName",
+                  "src": "1102:9:9",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_array$_t_bytes32_$dyn_storage_ptr",
+                    "typeString": "bytes32[]"
+                  }
+                },
+                "value": null,
+                "visibility": "internal"
+              }
+            ],
+            "name": "Guarantee",
+            "nodeType": "StructDefinition",
+            "scope": 3117,
+            "src": "1042:89:9",
+            "visibility": "public"
+          }
+        ],
+        "scope": 3118,
+        "src": "60:1074:9"
+      }
+    ],
+    "src": "0:1135:9"
+  },
+  "compiler": {
+    "name": "solc",
+    "version": "0.5.11+commit.c082d0b4.Emscripten.clang"
+  },
+  "networks": {},
+  "schemaVersion": "3.0.16",
+  "updatedAt": "2019-09-25T00:22:28.135Z",
+  "devdoc": {
+    "methods": {}
+  },
+  "userdoc": {
+    "methods": {}
+  }
+}
