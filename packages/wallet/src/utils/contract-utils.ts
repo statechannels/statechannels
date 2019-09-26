@@ -1,8 +1,5 @@
 import {ethers} from "ethers";
 
-import NitroAdjudicatorArtifact from "../../contracts/pre-built-artifacts/NitroAdjudicator.json";
-import ConsensusAppArtifact from "../../contracts/pre-built-artifacts/ConsensusApp.json";
-import EthAssetHolderArtifact from "../../contracts/pre-built-artifacts/ETHAssetHolder.json";
 import {asEthersObject, Commitment} from "fmg-core";
 import {AddressZero} from "ethers/constants";
 
@@ -11,6 +8,7 @@ export async function getProvider(): Promise<ethers.providers.Web3Provider> {
 }
 
 export async function getAdjudicatorContract(provider) {
+  const NitroAdjudicatorArtifact = require("../../build/contracts/NitroAdjudicator.json");
   await provider.ready;
   const networkId = (await provider.getNetwork()).chainId;
   const contractAddress = NitroAdjudicatorArtifact.networks[networkId].address;
@@ -18,19 +16,24 @@ export async function getAdjudicatorContract(provider) {
 }
 
 export function getAdjudicatorInterface(): ethers.utils.Interface {
+  const NitroAdjudicatorArtifact = require("../../contracts/pre-built-artifacts/NitroAdjudicator.json");
   return new ethers.utils.Interface(NitroAdjudicatorArtifact.abi);
 }
 
 export function getEThAssetHolderAddress(): string {
+  const EthAssetHolderArtifact = require("../../build/contracts/ETHAssetHolder.json");
   const artifact = EthAssetHolderArtifact.networks[getNetworkId()];
   return artifact ? artifact.address : AddressZero;
 }
+
 export function getAdjudicatorContractAddress(): string {
+  const NitroAdjudicatorArtifact = require("../../build/contracts/NitroAdjudicator.json");
   const artifact = NitroAdjudicatorArtifact.networks[getNetworkId()];
   return artifact ? artifact.address : AddressZero;
 }
 
 export function getConsensusContractAddress(): string {
+  const ConsensusAppArtifact = require("../../build/contracts/ConsensusApp.json");
   const artifact = ConsensusAppArtifact.networks[getNetworkId()];
   return artifact ? artifact.address : AddressZero;
 }
