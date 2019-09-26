@@ -1,6 +1,7 @@
 import debug from "debug";
 import React from "react";
 import { JsonRpcComponentProps } from "../json-rpc-router";
+import { Dialog } from "../ui/dialog/Dialog";
 
 const log = debug("wallet:handler:test-message");
 
@@ -13,9 +14,13 @@ const closeWallet = () => {
 const TestMessage: React.FC<JsonRpcComponentProps> = () => {
   log("Rendered handler");
   return (
-    <section data-test-selector="test-message">
-      Test Message<button onClick={closeWallet}>Close</button>
-    </section>
+    <Dialog
+      title="Embedded Wallet has received a test message."
+      buttons={{ primary: { label: "Neat!", onClick: closeWallet } }}
+      onClose={closeWallet}
+    >
+      This is what the UI would look like.
+    </Dialog>
   );
 };
 

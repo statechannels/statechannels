@@ -1,0 +1,13 @@
+@keyframes enter-dialog {
+  0% {
+    opacity: 0;
+    width: 0%;
+    top: 40%;
+  }
+
+  100% {
+    opacity: 1;
+    width: 560px;
+    top: 50%;
+  }
+}
