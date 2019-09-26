@@ -7,6 +7,12 @@ import './interfaces/IAssetHolder.sol';
 contract AssetHolder is IAssetHolder {
     using SafeMath for uint256;
 
+    address AdjudicatorAddress;
+
+    mapping(bytes32 => uint256) public holdings;
+
+    mapping(bytes32 => bytes32) public outcomeHashes;
+
     // **************
     // Public methods
     // **************
@@ -302,15 +308,4 @@ contract AssetHolder is IAssetHolder {
 
         return (a);
     }
-
-    // ****************
-    // Events
-    // ****************
-    event Deposited(
-        bytes32 indexed destination,
-        uint256 amountDeposited,
-        uint256 destinationHoldings
-    );
-    event AssetTransferred(bytes32 indexed destination, uint256 amount);
-
 }

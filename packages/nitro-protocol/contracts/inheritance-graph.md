@@ -19,8 +19,8 @@ classDef Contract fill:#ffffff;
 classDef Abstract fill:#afe523;
 classDef Interface fill:#bfa129;
 classDef TestContract fill:#fafe4f;
-class IForceMove,IAssetHolder Abstract;
-class Adjudicator Interface;
+class IForceMove Abstract;
+class Adjudicator,IAssetHolder Interface;
 class NitroAdjudicator,ForceMove,AssetHolder,ETHAssetHolder,ERC20AssetHolder Contract;
 class TESTForceMove,TESTNitroAdjudicator,TESTAssetHOlder TestContract;
 ```

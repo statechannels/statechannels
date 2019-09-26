@@ -1,13 +1,10 @@
 pragma solidity ^0.5.11;
 pragma experimental ABIEncoderV2;
 
-contract IAssetHolder {
-    address AdjudicatorAddress;
-
-    mapping(bytes32 => uint256) public holdings;
-
-    mapping(bytes32 => bytes32) public outcomeHashes;
-
+/**
+  * @dev An AssetHolder contract escrows eth or tokens against state channels. It allows assets to be deposited, and ultimately transferred from one channel to other channel and/or external addresses.
+*/
+interface IAssetHolder {
     /**
     * @notice Transfers the funds escrowed against `channelId` to the beneficiaries of that channel.
     * @dev Transfers the funds escrowed against `channelId` and transfers them to the beneficiaries of that channel.
