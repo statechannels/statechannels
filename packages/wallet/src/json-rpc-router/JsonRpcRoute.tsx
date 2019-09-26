@@ -25,7 +25,7 @@ const JsonRpcRoute: React.FC<JsonRpcRouteProps> = ({ method, component }: JsonRp
       {({ request }) => {
         if (request && request.method === method) {
           const handler = createFactory(component as React.ComponentClass<JsonRpcComponentProps>)({ request });
-          return <main data-test-selector={`message-handler:${method}`}>{handler}</main>;
+          return <main data-test-selector={`handler:${method}`}>{handler}</main>;
         }
 
         return [];
