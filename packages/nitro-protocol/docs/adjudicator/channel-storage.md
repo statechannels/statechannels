@@ -49,7 +49,6 @@ Open -->|forceMove| Challenge
 Open -->|checkpoint| Open
 Open-->|conclude| Finalized
 Challenge-->|forceMove| Challenge
-Challenge-->|refute| Open
 Challenge-->|respond| Open
 Challenge-->|checkpoint| Open
 Challenge-->|conclude| Finalized

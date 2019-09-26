@@ -81,30 +81,6 @@ export function createRespondTransaction(
   return {data, gasLimit: GAS_LIMIT};
 }
 
-export function createRefuteTransaction(
-  challengeState: State,
-  refuteState: State,
-  refutationStateSignature: Signature,
-): TransactionRequest {
-  const {participants} = challengeState.channel;
-  const variablePartAB = [getVariablePart(challengeState), getVariablePart(refuteState)];
-  const fixedPart = getFixedPart(refuteState);
-  const isFinalAB = [challengeState.isFinal, refuteState.isFinal];
-
-  const challengerAddress = participants[challengeState.turnNum % participants.length];
-  const refutationStateTurnNum = refuteState.turnNum;
-
-  const data = ForceMoveContractInterface.functions.refute.encode([
-    refutationStateTurnNum,
-    challengerAddress,
-    isFinalAB,
-    fixedPart,
-    variablePartAB,
-    refutationStateSignature,
-  ]);
-  return {data, gasLimit: GAS_LIMIT};
-}
-
 export function createCheckpointTransaction({
   states,
   signatures,

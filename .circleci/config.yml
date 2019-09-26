@@ -3,7 +3,7 @@ version: 2.1
 defaults: &defaults
   working_directory: /home/circleci/project
   docker:
-    - image: counterfactual/statechannels:latest
+    - image: circleci/node:10.16.3
 
 save_code: &save_code
   save_cache:
@@ -32,8 +32,8 @@ jobs:
       - <<: *restore_code
       - checkout
       - <<: *save_code
-
       - <<: *restore_dep
+
       - run:
           name: "yarn --frozen-lockfile"
           command: yarn --frozen-lockfile
@@ -48,90 +48,38 @@ jobs:
             - packages/*/dist
             - packages/*/build
             - packages/*/lib
+            - packages/*/node_modules
 
-  run-tests:
+  lint:
     <<: *defaults
     steps:
       - <<: *restore_code
       - checkout
       - <<: *restore_dep
-
-      - run: yarn --frozen-lockfile # symlink packages' node_modules
-
       - attach_workspace:
           at: /home/circleci/project
-
-      - run:
-          name: Run State Channels tests
-          command: yarn test
-
-  run-tslint:
-    <<: *defaults
-    steps:
-      - <<: *restore_code
-      - checkout
-      - <<: *restore_dep
-
-      - attach_workspace:
-          at: /home/circleci/project
-
       - run: yarn lint
 
-  ensure-updated-lockfiles:
+  test:
     <<: *defaults
     steps:
       - <<: *restore_code
       - checkout
       - <<: *restore_dep
-
       - attach_workspace:
           at: /home/circleci/project
-
-      - run: apt-get install -y jq # using this to mutate package.json
-
-      - run:
-          name: Check root yarn.lock
-          command: yarn --frozen-lockfile
-
-  # publish-to-npm:
-  #   <<: *defaults
-  #   steps:
-  #     - <<: *restore_code
-  #     - checkout
-  #     - <<: *restore_dep
-  #     - attach_workspace:
-  #         at: /home/circleci/project
-  #     - run: yarn --frozen-lockfile # symlink packages' node_modules
-  #     - run:
-  #         name: Add NPM_TOKEN auth
-  #         command: echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc
-  #     - run:
-  #         name: Publish any updated packages to npm
-  #         command: yarn run publish
+      - run: yarn test --since origin/master
 
 workflows:
   statechannels:
     jobs:
       - build
 
-      - run-tslint:
+      - lint:
           requires:
             - build
 
-      - run-tests:
+      - test:
           requires:
             - build
 
-      - ensure-updated-lockfiles:
-          requires:
-            - build
-
-      # - publish-to-npm:
-      #     requires:
-      #       - build
-      #       - ensure-updated-lockfiles
-      #       - run-tests
-      #       - run-tslint
-      #     filters:
-      #       branches:
-      #         only: master

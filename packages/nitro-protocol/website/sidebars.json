@@ -12,7 +12,6 @@
       "adjudicator/force-move",
       "adjudicator/respond",
       "adjudicator/respond-with-alternative",
-      "adjudicator/refute",
       "adjudicator/conclude",
       "adjudicator/push-outcome",
       "adjudicator/consensus-game"
