@@ -5,12 +5,50 @@ import './interfaces/IForceMove.sol';
 import './interfaces/ForceMoveApp.sol';
 
 contract ForceMove is IForceMove {
+    struct Signature {
+        uint8 v;
+        bytes32 r;
+        bytes32 s;
+    }
+
+    struct FixedPart {
+        uint256 chainId;
+        address[] participants;
+        uint256 channelNonce;
+        address appDefinition;
+        uint256 challengeDuration;
+    }
+
+    struct State {
+        // participants sign the hash of this
+        uint256 turnNum;
+        bool isFinal;
+        bytes32 channelId; // keccack(chainId,participants,channelNonce)
+        bytes32 appPartHash;
+        //     keccak256(abi.encode(
+        //         fixedPart.challengeDuration,
+        //         fixedPart.appDefinition,
+        //         variablePart.appData
+        //     )
+        // )
+        bytes32 outcomeHash;
+    }
+
+    struct ChannelStorage {
+        uint256 turnNumRecord;
+        uint256 finalizesAt;
+        bytes32 stateHash; // keccak256(abi.encode(State))
+        address challengerAddress;
+        bytes32 outcomeHash;
+    }
+
+    enum ChannelMode {Open, Challenge, Finalized}
     mapping(bytes32 => bytes32) public channelStorageHashes;
 
     // Public methods:
 
     function getData(bytes32 channelId)
-        public
+        external
         view
         returns (uint48 finalizesAt, uint48 turnNumRecord, uint160 fingerprint)
     {
@@ -18,14 +56,20 @@ contract ForceMove is IForceMove {
     }
 
     function forceMove(
-        FixedPart memory fixedPart,
+        bytes calldata fixedPartBytes,
         uint48 largestTurnNum,
-        ForceMoveApp.VariablePart[] memory variableParts,
+        bytes calldata variablePartsBytes,
         uint8 isFinalCount, // how many of the states are final
-        Signature[] memory sigs,
-        uint8[] memory whoSignedWhat,
-        Signature memory challengerSig
-    ) public {
+        bytes calldata sigsBytes,
+        uint8[] calldata whoSignedWhat,
+        bytes calldata challengerSigBytes
+    ) external {
+        // decode arguments
+        FixedPart memory fixedPart = abi.decode(fixedPartBytes, (FixedPart));
+        ForceMoveApp.VariablePart[] memory variableParts = abi.decode(variablePartsBytes, (ForceMoveApp.VariablePart[]));
+        Signature[] memory sigs = abi.decode(sigsBytes,(Signature[]));
+        Signature memory challengerSig = abi.decode(challengerSigBytes,(Signature));
+
         bytes32 channelId = _getChannelId(fixedPart);
 
         if (_mode(channelId) == ChannelMode.Open) {
@@ -77,13 +121,18 @@ contract ForceMove is IForceMove {
 
     function respond(
         address challenger,
-        bool[2] memory isFinalAB,
-        FixedPart memory fixedPart,
-        ForceMoveApp.VariablePart[2] memory variablePartAB,
+        bool[2] calldata isFinalAB,
+        bytes calldata fixedPartBytes,
+        bytes calldata variablePartABBytes,
         // variablePartAB[0] = challengeVariablePart
         // variablePartAB[1] = responseVariablePart
-        Signature memory sig
-    ) public {
+        bytes calldata sigBytes
+    ) external {
+        // decode arguments
+        FixedPart memory fixedPart = abi.decode(fixedPartBytes, (FixedPart));
+        ForceMoveApp.VariablePart[2] memory variablePartAB = abi.decode(variablePartABBytes, (ForceMoveApp.VariablePart[2]));
+        Signature memory sig = abi.decode(sigBytes,(Signature));
+
         bytes32 channelId = _getChannelId(fixedPart);
         (uint48 turnNumRecord, uint48 finalizesAt, ) = _getData(channelId);
 
@@ -139,13 +188,18 @@ contract ForceMove is IForceMove {
     }
 
     function checkpoint(
-        FixedPart memory fixedPart,
+        bytes calldata fixedPartBytes,
         uint48 largestTurnNum,
-        ForceMoveApp.VariablePart[] memory variableParts,
+        bytes calldata variablePartsBytes,
         uint8 isFinalCount, // how many of the states are final
-        Signature[] memory sigs,
-        uint8[] memory whoSignedWhat
-    ) public {
+        bytes calldata sigsBytes,
+        uint8[] calldata whoSignedWhat
+    ) external {
+        // decode arguments
+        FixedPart memory fixedPart = abi.decode(fixedPartBytes, (FixedPart));
+        ForceMoveApp.VariablePart[] memory variableParts = abi.decode(variablePartsBytes, (ForceMoveApp.VariablePart[]));
+        Signature[] memory sigs = abi.decode(sigsBytes,(Signature[]));
+
         bytes32 channelId = _getChannelId(fixedPart);
 
         // checks
@@ -168,13 +222,17 @@ contract ForceMove is IForceMove {
 
     function conclude(
         uint48 largestTurnNum,
-        FixedPart memory fixedPart,
+        bytes calldata fixedPartBytes,
         bytes32 appPartHash,
         bytes32 outcomeHash,
         uint8 numStates,
-        uint8[] memory whoSignedWhat,
-        Signature[] memory sigs
-    ) public {
+        uint8[] calldata whoSignedWhat,
+        bytes calldata sigsBytes
+    ) external {
+        // decode arguments
+        FixedPart memory fixedPart = abi.decode(fixedPartBytes, (FixedPart));
+        Signature[] memory sigs = abi.decode(sigsBytes,(Signature[]));
+
         bytes32 channelId = _getChannelId(fixedPart);
         _requireChannelNotFinalized(channelId);
 
