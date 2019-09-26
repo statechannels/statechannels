@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "description": "A protocol for state channel networks",
   "main": "lib/src/index.js",
+  "types": "lib/src/index.d.ts",
   "files": [
     "lib/*",
     "contracts/*"
