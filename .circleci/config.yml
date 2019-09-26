@@ -26,21 +26,19 @@ restore_dep: &restore_dep
     key: dependency-cache-{{ checksum "yarn.lock" }}
 
 jobs:
-  test:
+  build:
     <<: *defaults
     steps:
       - <<: *restore_code
       - checkout
       - <<: *save_code
-
       - <<: *restore_dep
+
       - run:
           name: "yarn --frozen-lockfile"
           command: yarn --frozen-lockfile
 
-      - run: yarn lint
       - run: yarn build:ci
-      - run: yarn test --since origin/master
 
       - <<: *save_dep
 
@@ -51,7 +49,32 @@ jobs:
             - packages/*/build
             - packages/*/lib
 
+  lint:
+    <<: *defaults
+    steps:
+      - <<: *restore_code
+      - checkout
+      - <<: *restore_dep
+      - run: yarn lint
+
+  test:
+    <<: *defaults
+    steps:
+      - <<: *restore_code
+      - checkout
+      - <<: *restore_dep
+      - run: yarn test --since origin/master
+
 workflows:
   statechannels:
     jobs:
-      - test
+      - build
+
+      - lint:
+          requires:
+            - build
+
+      - test:
+          requires:
+            - build
+
