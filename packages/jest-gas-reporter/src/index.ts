@@ -1,9 +1,10 @@
-import { getGanacheProvider } from "@statechannels/devtools";
-import { ethers } from "ethers";
+import {getGanacheProvider} from "@statechannels/devtools";
+import {ethers} from "ethers";
 import fs from "fs";
 import path from "path";
 import easyTable from "easy-table";
 import linker from "solc/linker";
+import {rejects} from "assert";
 interface MethodCalls {
   [methodName: string]: {
     gasData: number[];
@@ -44,26 +45,41 @@ export class GasReporter implements jest.Reporter {
 
   onRunStart(results: jest.AggregatedResult, options: jest.ReporterOnStartOptions): void {
     if (!this.options.contractArtifactFolder) {
-      console.log("The contractArtifactFolder was not set in options, assuming a default folder of '/build/contracts/'");
+      console.log(
+        "The contractArtifactFolder was not set in options, assuming a default folder of '/build/contracts/'",
+      );
       this.options.contractArtifactFolder = "build/contracts";
     }
-    this.provider.getBlockNumber().then(blockNum => {
-      // We know that the next block could contain relevant transactions
-      this.startBlockNum = blockNum + 1;
-    });
+    this.provider
+      .getBlockNumber()
+      .then(blockNum => {
+        // We know that the next block could contain relevant transactions
+        this.startBlockNum = blockNum + 1;
+      })
+      .catch(e => {
+        throw e;
+      });
   }
 
   onRunComplete(contexts: jest.Set<jest.Context>, results: jest.AggregatedResult): Promise<void> {
     return new Promise((resolve, reject) => {
-      this.generateFinalResults().then(() => {
-        resolve();
-      });
+      this.generateFinalResults()
+        .then(() => {
+          resolve();
+        })
+        .catch(e => {
+          reject(e);
+        });
     });
   }
 
   async generateFinalResults() {
     const endBlockNum = await this.provider.getBlockNumber();
-    const contractCalls = await this.parseContractCalls(this.startBlockNum, endBlockNum, this.options.contractArtifactFolder);
+    const contractCalls = await this.parseContractCalls(
+      this.startBlockNum,
+      endBlockNum,
+      this.options.contractArtifactFolder,
+    );
     this.outputGasInfo(contractCalls);
   }
 
@@ -185,7 +201,7 @@ export class GasReporter implements jest.Reporter {
 
         for (const contractName of Object.keys(contractCalls)) {
           const contractCall = contractCalls[contractName];
-          if (contractCall.code.localeCompare(code, undefined, { sensitivity: "base" }) === 0) {
+          if (contractCall.code.localeCompare(code, undefined, {sensitivity: "base"}) === 0) {
             const details = contractCall.interface.parseTransaction(transaction);
 
             if (details != null) {
@@ -205,9 +221,9 @@ export class GasReporter implements jest.Reporter {
 
         for (const contractName of Object.keys(contractCalls)) {
           const contractCall = contractCalls[contractName];
-          if (contractCall.code.localeCompare(code, undefined, { sensitivity: "base" }) === 0) {
+          if (contractCall.code.localeCompare(code, undefined, {sensitivity: "base"}) === 0) {
             if (!contractCall.deploy) {
-              contractCall.deploy = { calls: 0, gasData: [] };
+              contractCall.deploy = {calls: 0, gasData: []};
             }
             contractCall.deploy.calls++;
             contractCall.deploy.gasData.push(transactionReceipt.gasUsed.toNumber());
