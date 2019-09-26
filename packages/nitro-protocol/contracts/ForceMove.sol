@@ -1,48 +1,10 @@
 pragma solidity ^0.5.11;
 pragma experimental ABIEncoderV2;
 
-import './ForceMoveApp.sol';
+import './interfaces/IForceMove.sol';
+import './interfaces/ForceMoveApp.sol';
 
-contract ForceMove {
-    struct Signature {
-        uint8 v;
-        bytes32 r;
-        bytes32 s;
-    }
-
-    struct FixedPart {
-        uint256 chainId;
-        address[] participants;
-        uint256 channelNonce;
-        address appDefinition;
-        uint256 challengeDuration;
-    }
-
-    struct State {
-        // participants sign the hash of this
-        uint256 turnNum;
-        bool isFinal;
-        bytes32 channelId; // keccack(chainId,participants,channelNonce)
-        bytes32 appPartHash;
-        //     keccak256(abi.encode(
-        //         fixedPart.challengeDuration,
-        //         fixedPart.appDefinition,
-        //         variablePart.appData
-        //     )
-        // )
-        bytes32 outcomeHash;
-    }
-
-    struct ChannelStorage {
-        uint256 turnNumRecord;
-        uint256 finalizesAt;
-        bytes32 stateHash; // keccak256(abi.encode(State))
-        address challengerAddress;
-        bytes32 outcomeHash;
-    }
-
-    enum ChannelMode {Open, Challenge, Finalized}
-
+contract ForceMove is IForceMove {
     mapping(bytes32 => bytes32) public channelStorageHashes;
 
     // Public methods:
@@ -65,9 +27,6 @@ contract ForceMove {
         Signature memory challengerSig
     ) public {
         bytes32 channelId = _getChannelId(fixedPart);
-        // ------------
-        // REQUIREMENTS
-        // ------------
 
         if (_mode(channelId) == ChannelMode.Open) {
             _requireNonDecreasedTurnNumber(channelId, largestTurnNum);
@@ -93,10 +52,7 @@ contract ForceMove {
             challengerSig
         );
 
-        // ------------
-        // EFFECTS
-        // ------------
-
+        // effects
         emit ChallengeRegistered(
             channelId,
             largestTurnNum,
@@ -151,7 +107,7 @@ contract ForceMove {
             responseOutcomeHash
         );
 
-        // requirements
+        // checks
 
         _requireSpecificChallenge(
             ChannelStorage(
@@ -192,10 +148,7 @@ contract ForceMove {
     ) public {
         bytes32 channelId = _getChannelId(fixedPart);
 
-        // ------------
-        // REQUIREMENTS
-        // ------------
-
+        // checks
         _requireChannelNotFinalized(channelId);
         _requireIncreasedTurnNumber(channelId, largestTurnNum);
         _requireStateSupportedBy(
@@ -241,7 +194,7 @@ contract ForceMove {
             );
         }
 
-        // check the supplied states are supported by n signatures
+        // checks
         require(
             _validSignatures(
                 largestTurnNum,
@@ -254,13 +207,9 @@ contract ForceMove {
         );
 
         // effects
-
-        // set channel storage
         channelStorageHashes[channelId] = _hashChannelStorage(
             ChannelStorage(0, now, bytes32(0), address(0), outcomeHash)
         );
-
-        // emit event
         emit Concluded(channelId);
     }
 
