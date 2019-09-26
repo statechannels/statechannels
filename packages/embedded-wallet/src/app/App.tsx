@@ -2,7 +2,6 @@ import React from "react";
 import { JsonRpcRoute as Route, JsonRpcRouter as Router } from "../json-rpc-router";
 import { TestMessage } from "../message-handlers/TestMessage";
 import { UnicornMessage } from "../message-handlers/UnicornMessage";
-import "./App.css";
 
 const App: React.FC = () => {
   return (
