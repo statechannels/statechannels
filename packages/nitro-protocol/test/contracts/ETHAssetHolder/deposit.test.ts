@@ -48,56 +48,48 @@ describe('deposit', () => {
       heldAfter = ethers.utils.parseUnits(heldAfter, 'wei');
 
       const destinationChannel: Channel = {chainId, channelNonce, participants};
-      const destinationChannelId = getChannelId(destinationChannel);
+      const destination = getChannelId(destinationChannel);
 
       // set holdings by depositing in the 'safest' way
       if (held > 0) {
-        depositedEvent = newDepositedEvent(ETHAssetHolder, destinationChannelId);
+        depositedEvent = newDepositedEvent(ETHAssetHolder, destination);
         await sendTransaction(provider, ETHAssetHolder.address, {
           value: held,
-          ...createDepositTransaction(destinationChannelId, '0x0', held),
+          ...createDepositTransaction(destination, '0x0', held),
         });
 
-        expect(await ETHAssetHolder.holdings(destinationChannelId)).toEqual(held);
+        expect(await ETHAssetHolder.holdings(destination)).toEqual(held);
         await depositedEvent;
       }
 
-      const transactionRequest = {
-        ...createDepositTransaction(destinationChannelId, expectedHeld, amount),
+      const tx = ETHAssetHolder.deposit(destination, expectedHeld, amount, {
         value: msgValue,
-      };
+      });
+
       // call method in a slightly different way if expecting a revert
       if (reasonString) {
-        const regex = new RegExp(
-          '^' + 'VM Exception while processing transaction: revert ' + reasonString + '$',
-        );
-        await expectRevert(
-          () => sendTransaction(provider, ETHAssetHolder.address, transactionRequest),
-          regex,
-        );
+        await expectRevert(() => tx, reasonString);
       } else {
-        depositedEvent = newDepositedEvent(ETHAssetHolder, destinationChannelId);
+        depositedEvent = newDepositedEvent(ETHAssetHolder, destination);
         const balanceBefore = await signer.getBalance();
 
-        const tx = await signer.sendTransaction({
-          to: ETHAssetHolder.address,
-          ...transactionRequest,
-        });
-        const receipt = await tx.wait();
+        const receipt = await (await tx).wait();
 
         // catch Deposited event
-        const [eventDestination, eventAmountDeposited, eventHoldings] = await depositedEvent;
-        expect(eventDestination.toUpperCase()).toMatch(destinationChannelId.toUpperCase());
-        expect(eventAmountDeposited).toEqual(heldAfter.sub(held));
-        expect(eventHoldings).toEqual(heldAfter);
+        const event = receipt.events.pop().args;
+        expect(event).toMatchObject({
+          destination,
+          amountDeposited: heldAfter.sub(held),
+          destinationHoldings: heldAfter,
+        });
 
-        const allocatedAmount = await ETHAssetHolder.holdings(destinationChannelId);
+        const allocatedAmount = await ETHAssetHolder.holdings(destination);
         await expect(allocatedAmount).toEqual(heldAfter);
 
         // check for any partial refund
         const gasCost = await tx.gasPrice.mul(receipt.cumulativeGasUsed);
         await expect(
-          (await signer.getBalance()).eq(balanceBefore.sub(eventAmountDeposited).sub(gasCost)),
+          (await signer.getBalance()).eq(balanceBefore.sub(event.amountDeposited).sub(gasCost)),
         ).toBe(true);
       }
     },
