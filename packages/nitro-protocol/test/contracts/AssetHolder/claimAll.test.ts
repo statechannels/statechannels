@@ -4,30 +4,31 @@ import {expectRevert} from '@statechannels/devtools';
 import AssetHolderArtifact from '../../../build/contracts/TESTAssetHolder.json';
 import {
   setupContracts,
-  newAssetTransferredEvent,
   randomChannelId,
   allocationToParams,
   guaranteeToParams,
-  sendTransaction,
   replaceAddresses,
+  newAssetTransferredEvent,
 } from '../../test-helpers';
-import {createClaimAllTransaction} from '../../../src/contract/transaction-creators/asset-holder';
+import {claimAllArgs} from '../../../src/contract/transaction-creators/asset-holder';
 import {id, bigNumberify} from 'ethers/utils';
-
-const AssetHolderInterface = new ethers.utils.Interface(AssetHolderArtifact.abi);
 
 const provider = new ethers.providers.JsonRpcProvider(
   `http://localhost:${process.env.GANACHE_PORT}`,
 );
 
+const newAddress = () =>
+  ethers.Wallet.createRandom()
+    .address.padEnd(66, '0')
+    .toLowerCase();
 const addresses = {
   // channels
   t: undefined, // target
   g: undefined, // guarantor
   // externals
-  I: ethers.Wallet.createRandom().address.padEnd(66, '0'),
-  A: ethers.Wallet.createRandom().address.padEnd(66, '0'),
-  B: ethers.Wallet.createRandom().address.padEnd(66, '0'),
+  I: newAddress(),
+  A: newAddress(),
+  B: newAddress(),
 };
 let AssetHolder: ethers.Contract;
 
@@ -126,40 +127,25 @@ describe('claimAll', () => {
         expect(await AssetHolder.outcomeHashes(guarantorId)).toBe(gOutcomeContentHash);
       }
 
-      const transactionRequest = createClaimAllTransaction(
-        AssetHolderInterface,
-        guarantorId,
-        guarantee,
-        allocation,
-      );
+      const tx = AssetHolder.claimAll(...claimAllArgs(guarantorId, guarantee, allocation));
 
       // call method in a slightly different way if expecting a revert
       if (reason) {
-        const regex = new RegExp(
-          '^' + 'VM Exception while processing transaction: revert ' + reason + '$',
-        );
-        await expectRevert(
-          () => sendTransaction(provider, AssetHolder.address, transactionRequest),
-          regex,
-        );
+        await expectRevert(() => tx, reason);
       } else {
-        // register for events
-        const assetTransferredEvents = [];
-        Object.keys(payouts).forEach(key => {
-          if (payouts[key].gt(0)) {
-            assetTransferredEvents.push(newAssetTransferredEvent(AssetHolder, key));
+        const {events}: {events: any[]} = await (await tx).wait();
+        const given = {};
+        events.map(({topics, args}) => (given[topics[1]] = args));
+
+        const expected = {};
+        Object.keys(payouts).map(destination => {
+          const payout = payouts[destination];
+          if (payout.gt(0)) {
+            expected[destination] = newAssetTransferredEvent(destination, payout);
           }
         });
 
-        await sendTransaction(provider, AssetHolder.address, transactionRequest);
-
-        // catch events
-        const resolvedAassetTransferredEvents = await Promise.all(assetTransferredEvents);
-        resolvedAassetTransferredEvents.forEach(async (x, index) => {
-          if (payouts[index] && payouts[index].gt(0)) {
-            expect(x).toEqual(payouts[index]);
-          }
-        });
+        expect(given).toMatchObject(expected);
 
         // check new holdings
         Object.keys(heldAfter).forEach(async key =>

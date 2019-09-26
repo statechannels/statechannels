@@ -142,15 +142,8 @@ export const newTransferEvent = (contract: ethers.Contract, to: string) => {
   });
 };
 
-export const newAssetTransferredEvent = (contract: ethers.Contract, destination: string) => {
-  const filter = contract.filters.AssetTransferred(destination);
-  return new Promise((resolve, reject) => {
-    contract.on(filter, (eventDestination, amountTransferred, event) => {
-      // match event for this destination only
-      contract.removeAllListeners(filter);
-      resolve(amountTransferred);
-    });
-  });
+export const newAssetTransferredEvent = (destination: string, payout: number) => {
+  return {destination: destination.toLowerCase(), amount: payout};
 };
 
 export function randomChannelId(channelNonce = 0) {
