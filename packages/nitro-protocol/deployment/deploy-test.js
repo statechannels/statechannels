@@ -13,7 +13,7 @@ const singleAssetPaymentsArtifact = require('../build/contracts/SingleAssetPayme
 
 const erc20AssetHolderArtifact = require('../build/contracts/ERC20AssetHolder.json');
 const ethAssetHolderArtifact = require('../build/contracts/ETHAssetHolder.json');
-const tokenArtifact = require('../build/contracts/token.json');
+const tokenArtifact = require('../build/contracts/Token.json');
 
 let contractsToAddresses = {};
 
