@@ -1,0 +1,12 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "declaration": false,
+    "declarationMap": false,
+    "strict": true,
+    "jsx": "preserve",
+    "isolatedModules": true,
+    "noEmit": true
+  },
+  "include": ["src"]
+}
