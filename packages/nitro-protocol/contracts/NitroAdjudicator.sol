@@ -1,7 +1,7 @@
 pragma solidity ^0.5.11;
 pragma experimental ABIEncoderV2;
 
-import './interfaces/INitroAdjudicator.sol';
+import './interfaces/Adjudicator.sol';
 import './ForceMove.sol';
 import './Outcome.sol';
 
@@ -10,7 +10,7 @@ contract AssetHolder {
     function setAssetOutcomeHash(bytes32 channel, bytes32 outcomeHash) external returns (bool success);
 }
 
-contract NitroAdjudicator is INitroAdjudicator, ForceMove {
+contract NitroAdjudicator is Adjudicator, ForceMove {
     function pushOutcome(
         bytes32 channelId,
         uint256 turnNumRecord,

@@ -3,7 +3,7 @@ pragma experimental ABIEncoderV2;
 
 import './IForceMove.sol';
 
-contract INitroAdjudicator is IForceMove {
+interface Adjudicator {
     /**
     * @notice Allows a finalized channel's outcome to be decoded and one or more AssetOutcomes registered in external Asset Holder contracts.
     * @dev Allows a finalized channel's outcome to be decoded and one or more AssetOutcomes registered in external Asset Holder contracts.
@@ -20,6 +20,6 @@ contract INitroAdjudicator is IForceMove {
         uint256 finalizesAt,
         bytes32 stateHash,
         address challengerAddress,
-        bytes memory outcomeBytes
-    ) public;
+        bytes calldata outcomeBytes
+    ) external;
 }
