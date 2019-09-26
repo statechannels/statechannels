@@ -1,9 +1,9 @@
 import React from "react";
 import { RouteComponentProps } from "react-router-dom";
 import { FormButton } from "../../components/form";
+import { ShareList } from "../../components/share-list/ShareList";
 import { RoutePath } from "../../routes";
 import "./Welcome.scss";
-import { ShareList } from "../../components/share-list/ShareList";
 
 const mockFiles = [
   { filename: "Sample_1.dat", size: 350, seeders: 27, peers: 350, cost: 0.5 },

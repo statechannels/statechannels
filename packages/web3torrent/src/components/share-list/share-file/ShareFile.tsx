@@ -1,6 +1,6 @@
 import React from "react";
-import "./ShareFile.scss";
 import { FormButton } from "../../form";
+import "./ShareFile.scss";
 
 export type ShareFileProps = { file: any };
 
