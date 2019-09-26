@@ -62,6 +62,7 @@ jobs:
 
   test:
     <<: *defaults
+    resource_class: large
     steps:
       - <<: *restore_code
       - checkout
@@ -82,4 +83,3 @@ workflows:
       - test:
           requires:
             - build
-
