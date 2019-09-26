@@ -55,6 +55,8 @@ jobs:
       - <<: *restore_code
       - checkout
       - <<: *restore_dep
+      - attach_workspace:
+          at: /home/circleci/project
       - run: yarn lint
 
   test:
@@ -63,6 +65,8 @@ jobs:
       - <<: *restore_code
       - checkout
       - <<: *restore_dep
+      - attach_workspace:
+          at: /home/circleci/project
       - run: yarn test --since origin/master
 
 workflows:
