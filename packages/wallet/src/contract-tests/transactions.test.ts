@@ -47,6 +47,8 @@ describe("transactions", () => {
       ...queuedTransaction.transactionRequest,
       to: ADJUDICATOR_ADDRESS
     };
+    // TODO: Currently we're actually attempting to send the transactions
+    // but we could probably do that in nitro-protocol package instead
     const transactionResult = await signer.sendTransaction(transactionPayload);
     const confirmedTransaction = await transactionResult.wait();
 
@@ -61,14 +63,14 @@ describe("transactions", () => {
         to: ADJUDICATOR_ADDRESS
       })
       .next(transactionResult)
-      .put(transactionSubmitted({processId, transactionHash: ""}))
+      .put(transactionSubmitted({processId, transactionHash: transactionResult.hash || ""}))
       .next(transactionResult)
       .call([transactionResult, transactionResult.wait])
       .next(confirmedTransaction)
       .put(
         transactionConfirmed({
           processId,
-          contractAddress: ""
+          contractAddress: confirmedTransaction.contractAddress
         })
       )
       .next()
