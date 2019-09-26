@@ -10,10 +10,12 @@
   "scripts": {
     "build": "lerna run build",
     "build:ci": "lerna run build:ci",
+    "run:w3t": "lerna run start --parallel --scope=**/web3torrent ",
     "clean": "git clean -Xdf --exclude=\"!.env\"",
     "clean:dry": "git clean -Xdn --exclude=\"!.env\"",
     "test:ci": "lerna run --stream --concurrency 1 test:ci",
     "test": "lerna run --stream --concurrency 1 test",
+    "test:w3t": "lerna run test --concurrency 1 --scope=**/web3torrent ",
     "lint": "lerna run lint --parallel --no-bail",
     "lint:fix": "lerna run lint:fix --parallel --no-bail",
     "publish": "lerna publish --yes from-package patch",

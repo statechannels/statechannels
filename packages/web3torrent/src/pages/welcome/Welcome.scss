@@ -1,0 +1,28 @@
+@import "../../styles/variables";
+section.fill {
+  display: flex;
+  align-items: center;
+  padding: 0;
+  margin-bottom: 100px;
+}
+.jumbotron {
+  background-image: url("/assets/jumbotron.jpeg");
+  background-size: contain;
+  background-repeat: no-repeat;
+  height: auto;
+  width: 100%;
+  padding-top: 52.55%;
+}
+
+@media only screen and (max-width: 650px) {
+  .jumbotron {
+    padding-top: 49, 910447761%;
+  }
+}
+
+.subtitle {
+  font-size: 18px;
+  line-height: 32px;
+  text-align: center;
+  margin: 43px auto 20px;
+}
