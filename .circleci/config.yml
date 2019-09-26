@@ -48,6 +48,7 @@ jobs:
             - packages/*/dist
             - packages/*/build
             - packages/*/lib
+            - packages/*/node_modules
 
   lint:
     <<: *defaults
