@@ -40,9 +40,7 @@ jobs:
 
       - run: yarn lint
       - run: yarn build:ci
-      - run:
-          name: Run State Channels tests
-          command: yarn test
+      - run: yarn test
 
       - <<: *save_dep
 
