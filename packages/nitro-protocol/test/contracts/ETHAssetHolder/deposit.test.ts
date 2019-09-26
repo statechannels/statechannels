@@ -87,10 +87,10 @@ describe('deposit', () => {
         await expect(allocatedAmount).toEqual(heldAfter);
 
         // check for any partial refund
-        const gasCost = await tx.gasPrice.mul(receipt.cumulativeGasUsed);
-        await expect(
-          (await signer.getBalance()).eq(balanceBefore.sub(event.amountDeposited).sub(gasCost)),
-        ).toBe(true);
+        const gasCost = (await provider.getGasPrice()).mul(receipt.cumulativeGasUsed);
+        await expect(await signer.getBalance()).toEqual(
+          balanceBefore.sub(event.amountDeposited).sub(gasCost),
+        );
       }
     },
   );
