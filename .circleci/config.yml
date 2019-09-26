@@ -16,6 +16,7 @@ save_dep: &save_dep
     key: dependency-cache-{{ checksum "yarn.lock" }}
     paths:
       - node_modules
+      - packages/*/node_modules
 
 restore_code: &restore_code
   restore_cache:
@@ -68,7 +69,7 @@ jobs:
       - <<: *restore_dep
       - attach_workspace:
           at: /home/circleci/project
-      - run: yarn test --since origin/master
+      - run: yarn test:ci --since origin/master
 
 workflows:
   statechannels:
@@ -82,4 +83,3 @@ workflows:
       - test:
           requires:
             - build
-

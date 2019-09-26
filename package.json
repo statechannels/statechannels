@@ -12,6 +12,7 @@
     "build:ci": "lerna run build:ci",
     "clean": "git clean -Xdf --exclude=\"!.env\"",
     "clean:dry": "git clean -Xdn --exclude=\"!.env\"",
+    "test:ci": "lerna run --stream --concurrency 1 test:ci",
     "test": "lerna run --stream --concurrency 1 test",
     "lint": "lerna run lint --parallel --no-bail",
     "lint:fix": "lerna run lint:fix --parallel --no-bail",

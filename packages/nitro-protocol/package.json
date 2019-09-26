@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "description": "A protocol for state channel networks",
   "main": "lib/src/index.js",
+  "types": "lib/src/index.d.ts",
   "files": [
     "lib/*",
     "contracts/*"
@@ -31,6 +32,8 @@
   "homepage": "https://github.com/statechannels/nitro-protocol/",
   "scripts": {
     "prepare": "yarn build",
+    "build:ci": "yarn build",
+    "test:ci": "yarn test",
     "test:typescript": "npx jest --testPathIgnorePatterns='test/contracts' --reporters='default'",
     "test": "yarn prettier:check && yarn clearContracts && npx ganache-then-jest --runInBand",
     "deploy": "yarn clearContracts && npx truffle migrate",
