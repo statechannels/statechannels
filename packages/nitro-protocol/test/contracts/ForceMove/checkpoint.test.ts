@@ -4,25 +4,20 @@ import {expectRevert} from '@statechannels/devtools';
 import ForceMoveArtifact from '../../../build/contracts/TESTForceMove.json';
 // @ts-ignore
 import countingAppArtifact from '../../../build/contracts/CountingApp.json';
-import {defaultAbiCoder, hexlify} from 'ethers/utils';
-import {
-  setupContracts,
-  newChallengeClearedEvent,
-  signStates,
-  sendTransaction,
-} from '../../test-helpers';
+import {defaultAbiCoder, hexlify, bigNumberify} from 'ethers/utils';
+import {setupContracts, signStates} from '../../test-helpers';
 import {HashZero} from 'ethers/constants';
 import {Outcome} from '../../../src/contract/outcome';
 import {Channel, getChannelId} from '../../../src/contract/channel';
 import {State} from '../../../src/contract/state';
 import {hashChannelStorage} from '../../../src/contract/channel-storage';
-import {createCheckpointTransaction} from '../../../src/contract/transaction-creators/force-move';
 import {
   CHANNEL_FINALIZED,
   TURN_NUM_RECORD_NOT_INCREASED,
   UNACCEPTABLE_WHO_SIGNED_WHAT,
 } from '../../../src/contract/transaction-creators/revert-reasons';
 import {COUNTING_APP_INVALID_TRANSITION} from '../../revert-reasons';
+import {checkpointArgs} from '../../../src/contract/transaction-creators/force-move';
 
 const provider = new ethers.providers.JsonRpcProvider(
   `http://localhost:${process.env.GANACHE_PORT}`,
@@ -141,34 +136,18 @@ describe('checkpoint', () => {
       : HashZero;
 
     // call public wrapper to set state (only works on test contract)
-    const tx = await ForceMove.setChannelStorageHash(channelId, channelStorage);
-    await tx.wait();
+    await (await ForceMove.setChannelStorageHash(channelId, channelStorage)).wait();
     expect(await ForceMove.channelStorageHashes(channelId)).toEqual(channelStorage);
 
     const signatures = await signStates(states, wallets, whoSignedWhat);
 
-    const transactionsRequest = createCheckpointTransaction({
-      challengeState,
-      states,
-      signatures,
-      whoSignedWhat,
-    });
+    const tx = ForceMove.checkpoint(...checkpointArgs({states, signatures, whoSignedWhat}));
     if (reason) {
-      const regex = new RegExp(
-        '^' + 'VM Exception while processing transaction: revert ' + reason + '$',
-      );
-      await expectRevert(
-        () => sendTransaction(provider, ForceMove.address, transactionsRequest),
-        regex,
-      );
+      await expectRevert(() => tx, reason);
     } else {
-      const challengeClearedEvent: any = newChallengeClearedEvent(ForceMove, channelId);
-
-      await sendTransaction(provider, ForceMove.address, transactionsRequest);
-
-      // catch ChallengeCleared event
-      const [, eventTurnNumRecord] = await challengeClearedEvent;
-      expect(eventTurnNumRecord._hex).toEqual(hexlify(largestTurnNum));
+      const receipt = await (await tx).wait();
+      const event = receipt.events.pop();
+      expect(event.args).toMatchObject({channelId, newTurnNumRecord: bigNumberify(largestTurnNum)});
 
       const expectedChannelStorageHash = hashChannelStorage({
         turnNumRecord: largestTurnNum,

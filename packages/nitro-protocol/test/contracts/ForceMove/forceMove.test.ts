@@ -10,7 +10,6 @@ import {
   setupContracts,
   clearedChallengeHash,
   ongoingChallengeHash,
-  newChallengeRegisteredEvent,
   signStates,
   finalizedOutcomeHash,
 } from '../../test-helpers';
@@ -45,8 +44,6 @@ for (let i = 0; i < 3; i++) {
   wallets[i] = ethers.Wallet.createRandom();
   participants[i] = wallets[i].address;
 }
-// set event listener
-let challengeRegisteredEvent;
 
 beforeAll(async () => {
   ForceMove = await setupContracts(provider, ForceMoveArtifact);
@@ -158,20 +155,19 @@ describe('forceMove', () => {
       if (reasonString) {
         await expectRevert(() => tx, reasonString);
       } else {
-        challengeRegisteredEvent = newChallengeRegisteredEvent(ForceMove, channelId);
-
-        await tx;
+        const receipt = await (await tx).wait();
+        const event = receipt.events.pop();
 
         // catch ForceMove event
-        const [
-          eventChannelId,
-          eventTurnNumRecord,
-          eventFinalizesAt,
-          eventChallenger,
-          eventIsFinal,
-          eventFixedPart,
-          eventVariableParts,
-        ] = await challengeRegisteredEvent;
+        const {
+          channelId: eventChannelId,
+          turnNumRecord: eventTurnNumRecord,
+          finalizesAt: eventFinalizesAt,
+          challenger: eventChallenger,
+          isFinal: eventIsFinal,
+          fixedPart: eventFixedPart,
+          variableParts: eventVariableParts,
+        } = event.args;
 
         // check this information is enough to respond
         expect(eventChannelId).toEqual(channelId);

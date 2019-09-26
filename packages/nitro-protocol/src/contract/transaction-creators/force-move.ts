@@ -61,23 +61,26 @@ export function createForceMoveTransaction(
   return {data, gasLimit: GAS_LIMIT};
 }
 
-export function createRespondTransaction(
-  challengeState: State,
-  responseState: State,
-  responseSignature: Signature,
-): TransactionRequest {
+interface RespondArgs {
+  challengeState: State;
+  responseState: State;
+  responseSignature: Signature;
+}
+export function respondArgs({
+  challengeState,
+  responseState,
+  responseSignature,
+}: RespondArgs): any[] {
   const {participants} = challengeState.channel;
   const challengerAddress = participants[challengeState.turnNum % participants.length];
   const isFinalAB = [challengeState.isFinal, responseState.isFinal];
   const fixedPart = getFixedPart(responseState);
   const variablePartAB = [getVariablePart(challengeState), getVariablePart(responseState)];
-  const data = ForceMoveContractInterface.functions.respond.encode([
-    challengerAddress,
-    isFinalAB,
-    fixedPart,
-    variablePartAB,
-    responseSignature,
-  ]);
+  return [challengerAddress, isFinalAB, fixedPart, variablePartAB, responseSignature];
+}
+
+export function createRespondTransaction(args: RespondArgs): TransactionRequest {
+  const data = ForceMoveContractInterface.functions.respond.encode(respondArgs(args));
   return {data, gasLimit: GAS_LIMIT};
 }
 
@@ -86,21 +89,20 @@ export function createCheckpointTransaction({
   signatures,
   whoSignedWhat,
 }: CheckpointData): TransactionRequest {
+  const data = ForceMoveContractInterface.functions.checkpoint.encode(
+    checkpointArgs({states, signatures, whoSignedWhat}),
+  );
+
+  return {data, gasLimit: GAS_LIMIT};
+}
+
+export function checkpointArgs({states, signatures, whoSignedWhat}: CheckpointData): any[] {
   const largestTurnNum = Math.max(...states.map(s => s.turnNum));
   const fixedPart = getFixedPart(states[0]);
   const variableParts = states.map(s => getVariablePart(s));
   const isFinalCount = states.filter(s => s.isFinal).length;
 
-  const data = ForceMoveContractInterface.functions.checkpoint.encode([
-    fixedPart,
-    largestTurnNum,
-    variableParts,
-    isFinalCount,
-    signatures,
-    whoSignedWhat,
-  ]);
-
-  return {data, gasLimit: GAS_LIMIT};
+  return [fixedPart, largestTurnNum, variableParts, isFinalCount, signatures, whoSignedWhat];
 }
 
 export function createConcludeTransaction(
@@ -108,6 +110,17 @@ export function createConcludeTransaction(
   signatures: Signature[],
   whoSignedWhat: number[],
 ): TransactionRequest {
+  const data = ForceMoveContractInterface.functions.conclude.encode(
+    concludeArgs(states, signatures, whoSignedWhat),
+  );
+  return {data, gasLimit: GAS_LIMIT};
+}
+
+export function concludeArgs(
+  states: State[],
+  signatures: Signature[],
+  whoSignedWhat: number[],
+): any[] {
   // Sanity checks on expected lengths
   if (states.length === 0) {
     throw new Error('No states provided');
@@ -128,7 +141,7 @@ export function createConcludeTransaction(
 
   const numStates = states.length;
 
-  const data = ForceMoveContractInterface.functions.conclude.encode([
+  return [
     largestTurnNum,
     fixedPart,
     appPartHash,
@@ -136,6 +149,5 @@ export function createConcludeTransaction(
     numStates,
     whoSignedWhat,
     signatures,
-  ]);
-  return {data, gasLimit: GAS_LIMIT};
+  ];
 }
