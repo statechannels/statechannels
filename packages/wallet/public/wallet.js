@@ -1,5 +1,27 @@
 const log = window["debug"]("wallet:bridge");
 
+const relayMessage = (contentWindow, message) => {
+  log("Relaying message: %o", message);
+  contentWindow.postMessage(message, "http://localhost:3000");
+  log("Relayed message: %o", message);
+};
+
+const getWalletFrame = () => {
+  return new Promise(resolve => {
+    let walletIframe = document.querySelector("iframe#wallet");
+    if (!walletIframe) {
+      walletIframe = document.createElement("iframe");
+      walletIframe.id = "wallet";
+      walletIframe.src = "http://localhost:3000";
+      document.body.appendChild(walletIframe);
+
+      walletIframe.addEventListener("load", () => resolve(walletIframe.contentWindow));
+    } else {
+      resolve(walletIframe.contentWindow);
+    }
+  });
+};
+
 window.addEventListener("message", event => {
   const message = event.data;
 
@@ -14,18 +36,7 @@ window.addEventListener("message", event => {
     return;
   }
 
-  const iframe = document.createElement("iframe");
-  iframe.setAttribute("src", "http://localhost:3000");
-
-  iframe.addEventListener("load", () => {
-    const wallet = iframe.contentWindow;
-    log("Relaying message: %o", message);
-    wallet.postMessage(message, "http://localhost:3000");
-    log("Relayed message: %o", message);
-  });
-
-  document.body.appendChild(iframe);
-  log("Instantiated iframe");
+  getWalletFrame().then(contentWindow => relayMessage(contentWindow, message));
 });
 
 log("Ready");

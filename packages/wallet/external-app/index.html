@@ -6,12 +6,17 @@
   </head>
 
   <button onclick="callTestMessage()">Do something</button>
+  <button onclick="callUnicornMessage()">Do something else</button>
 
   <script src="http://localhost:3000/wallet.js"></script>
 
   <script>
     function callTestMessage() {
       window.postMessage({ jsonrpc: "2.0", method: "chan_test" });
+    }
+
+    function callUnicornMessage() {
+      window.postMessage({ jsonrpc: "2.0", method: "chan_unicorn" });
     }
   </script>
 </html>

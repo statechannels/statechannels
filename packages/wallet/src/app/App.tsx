@@ -1,12 +1,15 @@
 import React from "react";
-import { MessageListener } from "../message-listener/MessageListener";
+import { JsonRpcRoute as Route, JsonRpcRouter as Router } from "../json-rpc-router";
+import { TestMessage } from "../message-handlers/TestMessage";
+import { UnicornMessage } from "../message-handlers/UnicornMessage";
 import "./App.css";
 
 const App: React.FC = () => {
   return (
-    <div>
-      <MessageListener />
-    </div>
+    <Router>
+      <Route method="chan_test" component={TestMessage} />
+      <Route method="chan_unicorn" component={UnicornMessage} />
+    </Router>
   );
 };
 
