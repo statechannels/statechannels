@@ -56,19 +56,26 @@ contract ForceMove is IForceMove {
     }
 
     function forceMove(
-        bytes calldata fixedPartBytes,
         uint48 largestTurnNum,
-        bytes calldata variablePartsBytes,
-        uint8 isFinalCount, // how many of the states are final
-        bytes calldata sigsBytes,
-        uint8[] calldata whoSignedWhat,
-        bytes calldata challengerSigBytes
+        bytes calldata supportingData_,
+        bytes calldata challengerSig_
     ) external {
-        // decode arguments
-        FixedPart memory fixedPart = abi.decode(fixedPartBytes, (FixedPart));
-        ForceMoveApp.VariablePart[] memory variableParts = abi.decode(variablePartsBytes, (ForceMoveApp.VariablePart[]));
-        Signature[] memory sigs = abi.decode(sigsBytes,(Signature[]));
-        Signature memory challengerSig = abi.decode(challengerSigBytes,(Signature));
+        // decode supportingData_
+        (
+            uint8 isFinalCount,
+            uint8[] memory whoSignedWhat, 
+            FixedPart memory fixedPart, 
+            ForceMoveApp.VariablePart[] memory variableParts, 
+            Signature[] memory sigs
+        ) = abi.decode(supportingData_,
+        (
+            uint8, 
+            uint8[], 
+            FixedPart, 
+            ForceMoveApp.VariablePart[], 
+            Signature[])
+        );
+        Signature memory challengerSig = abi.decode(challengerSig_, (Signature));
 
         bytes32 channelId = _getChannelId(fixedPart);
 
@@ -121,17 +128,23 @@ contract ForceMove is IForceMove {
 
     function respond(
         address challenger,
-        bool[2] calldata isFinalAB,
-        bytes calldata fixedPartBytes,
-        bytes calldata variablePartABBytes,
+        bytes calldata supportingData_
+    ) external {
+        // decode supportingData_
+        (
+            bool[2] memory isFinalAB,
+            FixedPart memory fixedPart, 
+            ForceMoveApp.VariablePart[2] memory variablePartAB, 
+            Signature memory sig
+        ) = abi.decode(supportingData_,
+        (
+            bool[2], 
+            FixedPart, 
+            ForceMoveApp.VariablePart[2], 
+            Signature)
+        );
         // variablePartAB[0] = challengeVariablePart
         // variablePartAB[1] = responseVariablePart
-        bytes calldata sigBytes
-    ) external {
-        // decode arguments
-        FixedPart memory fixedPart = abi.decode(fixedPartBytes, (FixedPart));
-        ForceMoveApp.VariablePart[2] memory variablePartAB = abi.decode(variablePartABBytes, (ForceMoveApp.VariablePart[2]));
-        Signature memory sig = abi.decode(sigBytes,(Signature));
 
         bytes32 channelId = _getChannelId(fixedPart);
         (uint48 turnNumRecord, uint48 finalizesAt, ) = _getData(channelId);
@@ -188,17 +201,24 @@ contract ForceMove is IForceMove {
     }
 
     function checkpoint(
-        bytes calldata fixedPartBytes,
         uint48 largestTurnNum,
-        bytes calldata variablePartsBytes,
-        uint8 isFinalCount, // how many of the states are final
-        bytes calldata sigsBytes,
-        uint8[] calldata whoSignedWhat
+        bytes calldata supportingData_
     ) external {
-        // decode arguments
-        FixedPart memory fixedPart = abi.decode(fixedPartBytes, (FixedPart));
-        ForceMoveApp.VariablePart[] memory variableParts = abi.decode(variablePartsBytes, (ForceMoveApp.VariablePart[]));
-        Signature[] memory sigs = abi.decode(sigsBytes,(Signature[]));
+        // decode supportingData_
+        (
+            uint8 isFinalCount,
+            uint8[] memory whoSignedWhat, 
+            FixedPart memory fixedPart, 
+            ForceMoveApp.VariablePart[] memory variableParts, 
+            Signature[] memory sigs
+        ) = abi.decode(supportingData_,
+        (
+            uint8, 
+            uint8[], 
+            FixedPart, 
+            ForceMoveApp.VariablePart[], 
+            Signature[])
+        );
 
         bytes32 channelId = _getChannelId(fixedPart);
 
@@ -222,16 +242,25 @@ contract ForceMove is IForceMove {
 
     function conclude(
         uint48 largestTurnNum,
-        bytes calldata fixedPartBytes,
-        bytes32 appPartHash,
-        bytes32 outcomeHash,
-        uint8 numStates,
-        uint8[] calldata whoSignedWhat,
-        bytes calldata sigsBytes
+        bytes calldata supportingData_
     ) external {
-        // decode arguments
-        FixedPart memory fixedPart = abi.decode(fixedPartBytes, (FixedPart));
-        Signature[] memory sigs = abi.decode(sigsBytes,(Signature[]));
+        // decode supportingData_
+        (
+            uint8 numStates,
+            bytes32 appPartHash,
+            bytes32 outcomeHash, 
+            uint8[] memory whoSignedWhat,
+            FixedPart memory fixedPart, 
+            Signature[] memory sigs
+        ) = abi.decode(supportingData_,
+        (
+            uint8, 
+            bytes32,
+            bytes32, 
+            uint8[],
+            FixedPart, 
+            Signature[])
+        );
 
         bytes32 channelId = _getChannelId(fixedPart);
         _requireChannelNotFinalized(channelId);
