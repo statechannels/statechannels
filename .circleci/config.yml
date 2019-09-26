@@ -16,6 +16,7 @@ save_dep: &save_dep
     key: dependency-cache-{{ checksum "yarn.lock" }}
     paths:
       - node_modules
+      - packages/*/node_modules
 
 restore_code: &restore_code
   restore_cache:
