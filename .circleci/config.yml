@@ -26,7 +26,7 @@ restore_dep: &restore_dep
     key: dependency-cache-{{ checksum "yarn.lock" }}
 
 jobs:
-  build:
+  test:
     <<: *defaults
     steps:
       - <<: *restore_code
@@ -38,7 +38,9 @@ jobs:
           name: "yarn --frozen-lockfile"
           command: yarn --frozen-lockfile
 
+      - run: yarn lint
       - run: yarn build:ci
+      - run: yarn test
 
       - <<: *save_dep
 
@@ -49,86 +51,7 @@ jobs:
             - packages/*/build
             - packages/*/lib
 
-  run-tests:
-    <<: *defaults
-    steps:
-      - <<: *restore_code
-      - checkout
-      - <<: *restore_dep
-
-      - run: yarn --frozen-lockfile # symlink packages' node_modules
-
-      - attach_workspace:
-          at: /home/circleci/project
-
-      - run:
-          name: Run State Channels tests
-          command: yarn test
-
-  run-tslint:
-    <<: *defaults
-    steps:
-      - <<: *restore_code
-      - checkout
-      - <<: *restore_dep
-
-      - attach_workspace:
-          at: /home/circleci/project
-
-      - run: yarn lint
-
-  ensure-updated-lockfiles:
-    <<: *defaults
-    steps:
-      - <<: *restore_code
-      - checkout
-      - <<: *restore_dep
-
-      - attach_workspace:
-          at: /home/circleci/project
-
-      - run:
-          name: Check root yarn.lock
-          command: yarn --frozen-lockfile
-
-  # publish-to-npm:
-  #   <<: *defaults
-  #   steps:
-  #     - <<: *restore_code
-  #     - checkout
-  #     - <<: *restore_dep
-  #     - attach_workspace:
-  #         at: /home/circleci/project
-  #     - run: yarn --frozen-lockfile # symlink packages' node_modules
-  #     - run:
-  #         name: Add NPM_TOKEN auth
-  #         command: echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc
-  #     - run:
-  #         name: Publish any updated packages to npm
-  #         command: yarn run publish
-
 workflows:
   statechannels:
     jobs:
-      - build
-
-      - run-tests:
-          requires:
-            - build
-
-      - run-tslint:
-          requires:
-            - build
-
-      - ensure-updated-lockfiles:
-          requires:
-            - build
-      # - publish-to-npm:
-      #     requires:
-      #       - build
-      #       - ensure-updated-lockfiles
-      #       - run-tests
-      #       - run-tslint
-      #     filters:
-      #       branches:
-      #         only: master
+      - test
