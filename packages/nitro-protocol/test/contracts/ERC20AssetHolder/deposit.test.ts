@@ -82,7 +82,7 @@ describe('deposit', () => {
       const {events} = await (await tx).wait();
 
       const depositedEvent = getDepositedEvent(events);
-      expect(depositedEvent.args).toMatchObject({
+      expect(depositedEvent).toMatchObject({
         destination,
         amountDeposited: heldAfter.sub(held),
         destinationHoldings: heldAfter,
@@ -96,12 +96,12 @@ describe('deposit', () => {
 
       // check for any partial refund of tokens
       await expect(await Token.balanceOf(signer0Address)).toEqual(
-        balanceBefore.sub(depositedEvent.args.amountDeposited),
+        balanceBefore.sub(depositedEvent.amountDeposited),
       );
     }
   });
 });
 
-const getDepositedEvent = events => events.find(({event}) => event === 'Deposited');
+const getDepositedEvent = events => events.find(({event}) => event === 'Deposited').args;
 const getTransferEvent = events =>
   events.find(({topics}) => topics[0] === Token.filters.Transfer(AddressZero).topics[0]);
