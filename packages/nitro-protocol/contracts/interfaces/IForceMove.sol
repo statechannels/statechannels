@@ -46,8 +46,6 @@ contract IForceMove {
 
     enum ChannelMode {Open, Challenge, Finalized}
 
-    // Public methods:
-
     /**
     * @notice Registers a challenge against a state channel. A challenge will either prompt another participant into clearing the challenge (via one of the other methods), or cause the channel to finalize at a specific time.
     * @dev Registers a challenge against a state channel. A challenge will either prompt another participant into clearing the challenge (via one of the other methods), or cause the channel to finalize at a specific time.
@@ -128,6 +126,17 @@ contract IForceMove {
     ) public;
 
     // events
+
+    /**
+    * @dev Indicates that a challenge has been registered against `channelId`.
+    * @param channelId Unique identifier for a state channel.
+    * @param turnNumRecord A turnNum that (the adjudicator knows) is supported by a signature from each participant.
+    * @param finalizesAt The unix timestamp when `channelId` will finalize.
+    * @param challenger The address of the participant whom registered the challenge.
+    * @param isFinal Boolean denoting whether the challenge state is final.
+    * @param fixedPart Data describing properties of the state channel that do not change with state updates.
+    * @param variableParts An ordered array of structs, each decribing the properties of the state channel that may change with each state update.
+    */
     event ChallengeRegistered(
         bytes32 indexed channelId,
         // everything needed to respond or checkpoint
@@ -139,6 +148,16 @@ contract IForceMove {
         ForceMoveApp.VariablePart[] variableParts
     );
 
+    /**
+    * @dev Indicates that a challenge, previously registered against `channelId`, has been cleared.
+    * @param channelId Unique identifier for a state channel.
+    * @param newTurnNumRecord A turnNum that (the adjudicator knows) is supported by a signature from each participant.
+    */
     event ChallengeCleared(bytes32 indexed channelId, uint256 newTurnNumRecord);
+
+    /**
+    * @dev Indicates that a challenge has been registered against `channelId`.
+    * @param channelId Unique identifier for a state channel.
+    */
     event Concluded(bytes32 indexed channelId);
 }
