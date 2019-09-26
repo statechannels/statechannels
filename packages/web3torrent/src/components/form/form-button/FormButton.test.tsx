@@ -47,7 +47,10 @@ describe("<FormButton />", () => {
   it("renders elements inside a button", () => {
     const content = (
       <label>
-        <span>❓</span> Help
+        <span role="img" aria-label="Question mark">
+          ❓
+        </span>
+        Help
       </label>
     );
     render(<FormButton>{content}</FormButton>);

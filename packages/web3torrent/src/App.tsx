@@ -13,14 +13,14 @@ const App: React.FC = () => {
     <Router history={history}>
       <main className="wrapper__content">
         <Switch>
-          <Route exact path={`(${RoutePath.Root})`} component={LayoutHeader} />
+          <Route exact path={RoutePath.Root} component={LayoutHeader} />
         </Switch>
         <Switch>
           <Route exact path={RoutePath.Root} component={Welcome} />
         </Switch>
       </main>
       <Switch>
-        <Route exact path={`(${RoutePath.Root})`} component={LayoutFooter} />
+        <Route exact path={RoutePath.Root} component={LayoutFooter} />
       </Switch>
     </Router>
   );

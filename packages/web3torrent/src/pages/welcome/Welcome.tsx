@@ -22,7 +22,7 @@ const Welcome: React.FC<RouteComponentProps> = ({ history }) => {
       </div>
       <h2>Download a sample file</h2>
       <ShareList files={mockFiles} />
-      <h2> Or share a file</h2>
+      <h2>Or share a file</h2>
       <FormButton name="setup" block={true} onClick={() => history.push(RoutePath.Root)}>
         Upload
       </FormButton>
