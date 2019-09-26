@@ -600,7 +600,7 @@ contract ForceMove {
     event ChallengeRegistered(
         bytes32 indexed channelId,
         // everything needed to respond or checkpoint
-        uint256 turnNunmRecord,
+        uint256 turnNumRecord,
         uint256 finalizesAt,
         address challenger,
         bool isFinal,
