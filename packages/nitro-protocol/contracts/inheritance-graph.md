@@ -4,6 +4,7 @@ The following diagram shows how the contracts inherit from one another.
 graph LR
 linkStyle default interpolate basis
 IForceMove--> ForceMove
+IForceMove--> INitroAdjudicator
 INitroAdjudicator--> NitroAdjudicator
 ForceMove--> NitroAdjudicator
 IAssetHolder--> AssetHolder
