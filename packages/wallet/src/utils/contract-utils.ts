@@ -20,7 +20,7 @@ export function getAdjudicatorInterface(): ethers.utils.Interface {
   return new ethers.utils.Interface(NitroAdjudicatorArtifact.abi);
 }
 
-export function getEThAssetHolderAddress(): string {
+export function getETHAssetHolderAddress(): string {
   const EthAssetHolderArtifact = require("../../build/contracts/ETHAssetHolder.json");
   const artifact = EthAssetHolderArtifact.networks[getNetworkId()];
   return artifact ? artifact.address : AddressZero;
