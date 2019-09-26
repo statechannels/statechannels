@@ -63,6 +63,7 @@
     "build": "react-scripts build",
     "build:ci": "react-scripts build",
     "eject": "react-scripts eject",
+    "test:ci": "yarn test",
     "test": "TRACKER_URL=http://localhost:4242/announce jest",
     "lint": "tslint -c tslint.json -p .",
     "lint:fix": "tslint -c tslint.json -p . --fix"

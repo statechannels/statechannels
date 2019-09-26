@@ -33,6 +33,7 @@
   "scripts": {
     "prepare": "yarn build",
     "build:ci": "yarn build",
+    "test:ci": "yarn test",
     "test:typescript": "npx jest --testPathIgnorePatterns='test/contracts' --reporters='default'",
     "test": "yarn prettier:check && yarn clearContracts && npx ganache-then-jest --runInBand",
     "deploy": "yarn clearContracts && npx truffle migrate",
