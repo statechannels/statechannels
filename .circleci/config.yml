@@ -40,7 +40,7 @@ jobs:
 
       - run: yarn lint
       - run: yarn build:ci
-      - run: yarn test
+      - run: yarn test --since origin/master
 
       - <<: *save_dep
 
