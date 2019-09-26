@@ -18,15 +18,20 @@ import {depositContract} from "./test-utils";
 import {Channel, Commitment, CommitmentType} from "fmg-core";
 import {channelID} from "fmg-core/lib/channel";
 import {getGanacheProvider} from "@statechannels/devtools";
+import {transactionSender} from "../redux/sagas/transaction-sender";
+import {testSaga} from "redux-saga-test-plan";
+import {getProvider} from "../utils/contract-utils";
+import {transactionSent, transactionSubmitted, transactionConfirmed} from "../redux/actions";
+import {ADJUDICATOR_ADDRESS} from "../constants";
 
 jest.setTimeout(90000);
-// TODO: Re-enable/fix tests
+
 describe("transactions", () => {
   let networkId;
   let libraryAddress;
   let nonce = 5;
   const provider: ethers.providers.JsonRpcProvider = getGanacheProvider();
-
+  const signer = provider.getSigner();
   const participantA = ethers.Wallet.createRandom();
   const participantB = ethers.Wallet.createRandom();
   const participants = [participantA.address, participantB.address] as [string, string];
@@ -36,25 +41,38 @@ describe("transactions", () => {
   }
 
   async function testTransactionSender(transactionToSend) {
-    // TODO: Get this working
-    // const processId = "processId";
-    // const queuedTransaction = {transactionRequest: transactionToSend, processId};
-    // const saga = transactionSender(queuedTransaction);
-    // saga.next();
-    // expect(saga.next(provider).value).toEqual(put(transactionSent({processId})));
-    // saga.next();
-    // const signer = provider.getSigner();
-    // transactionToSend = {...transactionToSend, to: ADJUDICATOR_ADDRESS};
-    // const transactionReceipt = await signer.sendTransaction(transactionToSend);
-    // expect(saga.next(transactionReceipt).value).toEqual(
-    //   put(transactionSubmitted({processId, transactionHash: transactionReceipt.hash || ""}))
-    // );
-    // const confirmedTransaction = await transactionReceipt.wait();
-    // saga.next();
-    // expect(saga.next(confirmedTransaction).value).toEqual(
-    //   put(transactionConfirmed({processId, contractAddress: confirmedTransaction.contractAddress}))
-    // );
-    // expect(saga.next().done).toBe(true);
+    const processId = "processId";
+    const queuedTransaction = {transactionRequest: transactionToSend, processId};
+    const transactionPayload = {
+      ...queuedTransaction.transactionRequest,
+      to: ADJUDICATOR_ADDRESS
+    };
+    const transactionResult = await signer.sendTransaction(transactionPayload);
+    const confirmedTransaction = await transactionResult.wait();
+
+    testSaga(transactionSender, queuedTransaction)
+      .next()
+      .call(getProvider)
+      .next(provider)
+      .put(transactionSent({processId}))
+      .next()
+      .call([signer, signer.sendTransaction], {
+        ...queuedTransaction.transactionRequest,
+        to: ADJUDICATOR_ADDRESS
+      })
+      .next(transactionResult)
+      .put(transactionSubmitted({processId, transactionHash: ""}))
+      .next(transactionResult)
+      .call([transactionResult, transactionResult.wait])
+      .next(confirmedTransaction)
+      .put(
+        transactionConfirmed({
+          processId,
+          contractAddress: ""
+        })
+      )
+      .next()
+      .isDone();
   }
 
   beforeAll(async () => {
@@ -68,7 +86,7 @@ describe("transactions", () => {
     await testTransactionSender(depositTransaction);
   });
 
-  it.skip("should send a forceMove transaction", async () => {
+  it("should send a forceMove transaction", async () => {
     const channel: Channel = {channelType: libraryAddress, nonce: getNextNonce(), participants};
     await depositContract(provider, participantA.address);
     await depositContract(provider, participantB.address);
