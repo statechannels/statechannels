@@ -42,6 +42,31 @@ contract ForceMove is IForceMove {
         bytes32 outcomeHash;
     }
 
+    struct SupportingData {
+        uint8 isFinalCount;
+        uint8[] whoSignedWhat;
+        FixedPart fixedPart;
+        ForceMoveApp.VariablePart[] variableParts;
+        Signature[] sigs;
+    }
+
+    struct RespondData {
+        bool[2] isFinalAB;
+        uint8[] whoSignedWhat;
+        FixedPart fixedPart;
+        ForceMoveApp.VariablePart[2] variablePartAB;
+        Signature sig;
+    }
+
+    struct ConcludeData {
+        FixedPart fixedPart;
+        uint8 numStates;
+        uint8[] whoSignedWhat;
+        Signature[] sigs;
+        bytes32 appPartHash;
+        bytes32 outcomeHash;
+    }
+
     enum ChannelMode {Open, Challenge, Finalized}
     mapping(bytes32 => bytes32) public channelStorageHashes;
 
@@ -61,23 +86,9 @@ contract ForceMove is IForceMove {
         bytes calldata challengerSig_
     ) external {
         // decode supportingData_
-        (
-            uint8 isFinalCount,
-            uint8[] memory whoSignedWhat, 
-            FixedPart memory fixedPart, 
-            ForceMoveApp.VariablePart[] memory variableParts, 
-            Signature[] memory sigs
-        ) = abi.decode(supportingData_,
-        (
-            uint8, 
-            uint8[], 
-            FixedPart, 
-            ForceMoveApp.VariablePart[], 
-            Signature[])
-        );
-        Signature memory challengerSig = abi.decode(challengerSig_, (Signature));
+        SupportingData memory supportingData = abi.decode(supportingData_, (SupportingData));
 
-        bytes32 channelId = _getChannelId(fixedPart);
+        bytes32 channelId = _getChannelId(supportingData.fixedPart);
 
         if (_mode(channelId) == ChannelMode.Open) {
             _requireNonDecreasedTurnNumber(channelId, largestTurnNum);
@@ -89,83 +100,68 @@ contract ForceMove is IForceMove {
         }
         bytes32 supportedStateHash = _requireStateSupportedBy(
             largestTurnNum,
-            variableParts,
-            isFinalCount,
             channelId,
-            fixedPart,
-            sigs,
-            whoSignedWhat
+            supportingData
         );
 
         address challenger = _requireThatChallengerIsParticipant(
             supportedStateHash,
-            fixedPart.participants,
-            challengerSig
+            supportingData.fixedPart.participants,
+            abi.decode(challengerSig_, (Signature))
         );
 
         // effects
         emit ChallengeRegistered(
             channelId,
             largestTurnNum,
-            now + fixedPart.challengeDuration,
+            now + supportingData.fixedPart.challengeDuration,
             challenger,
-            isFinalCount > 0,
-            fixedPart,
-            variableParts
+            supportingData.isFinalCount > 0,
+            supportingData.fixedPart,
+            supportingData.variableParts
         );
 
         channelStorageHashes[channelId] = _hashChannelStorage(
             ChannelStorage(
                 largestTurnNum,
-                now + fixedPart.challengeDuration,
+                now + supportingData.fixedPart.challengeDuration,
                 supportedStateHash,
                 challenger,
-                keccak256(abi.encode(variableParts[variableParts.length - 1].outcome))
+                keccak256(
+                    abi.encode(
+                        supportingData.variableParts[supportingData.variableParts.length - 1]
+                            .outcome
+                    )
+                )
             )
         );
 
     }
 
-    function respond(
-        address challenger,
-        bytes calldata supportingData_
-    ) external {
-        // decode supportingData_
-        (
-            bool[2] memory isFinalAB,
-            FixedPart memory fixedPart, 
-            ForceMoveApp.VariablePart[2] memory variablePartAB, 
-            Signature memory sig
-        ) = abi.decode(supportingData_,
-        (
-            bool[2], 
-            FixedPart, 
-            ForceMoveApp.VariablePart[2], 
-            Signature)
-        );
-        // variablePartAB[0] = challengeVariablePart
-        // variablePartAB[1] = responseVariablePart
+    function respond(address challenger, bytes calldata respondData_) external {
+        // decode respondData_
+        RespondData memory respondData = abi.decode(respondData_, (RespondData));
 
-        bytes32 channelId = _getChannelId(fixedPart);
+        bytes32 channelId = _getChannelId(respondData.fixedPart);
         (uint48 turnNumRecord, uint48 finalizesAt, ) = _getData(channelId);
 
-        bytes32 challengeOutcomeHash = _hashOutcome(variablePartAB[0].outcome);
-        bytes32 responseOutcomeHash = _hashOutcome(variablePartAB[1].outcome);
+        bytes32 challengeOutcomeHash = _hashOutcome(respondData.variablePartAB[0].outcome);
+        bytes32 responseOutcomeHash = _hashOutcome(respondData.variablePartAB[1].outcome);
         bytes32 challengeStateHash = _hashState(
             turnNumRecord,
-            isFinalAB[0],
+            respondData.isFinalAB[0],
             channelId,
-            fixedPart,
-            variablePartAB[0].appData,
+            respondData.fixedPart,
+            respondData.variablePartAB[0].appData,
             challengeOutcomeHash
         );
 
         bytes32 responseStateHash = _hashState(
             turnNumRecord + 1,
-            isFinalAB[1],
+            respondData.isFinalAB[1],
             channelId,
-            fixedPart,
-            variablePartAB[1].appData,
+            respondData.fixedPart,
+            respondData.variablePartAB[1].appData,
             responseOutcomeHash
         );
 
@@ -183,99 +179,58 @@ contract ForceMove is IForceMove {
         );
 
         require(
-            _recoverSigner(responseStateHash, sig) ==
-                fixedPart.participants[(turnNumRecord + 1) % fixedPart.participants.length],
+            _recoverSigner(responseStateHash, respondData.sig) ==
+                respondData.fixedPart.participants[(turnNumRecord + 1) %
+                    respondData.fixedPart.participants.length],
             'Response not signed by authorized mover'
         );
 
         _requireValidTransition(
-            fixedPart.participants.length,
-            isFinalAB,
-            variablePartAB,
+            respondData.fixedPart.participants.length,
+            respondData.isFinalAB,
+            respondData.variablePartAB,
             turnNumRecord + 1,
-            fixedPart.appDefinition
+            respondData.fixedPart.appDefinition
         );
 
         // effects
         _clearChallenge(channelId, turnNumRecord + 1);
     }
 
-    function checkpoint(
-        uint48 largestTurnNum,
-        bytes calldata supportingData_
-    ) external {
+    function checkpoint(uint48 largestTurnNum, bytes calldata supportingData_) external {
         // decode supportingData_
-        (
-            uint8 isFinalCount,
-            uint8[] memory whoSignedWhat, 
-            FixedPart memory fixedPart, 
-            ForceMoveApp.VariablePart[] memory variableParts, 
-            Signature[] memory sigs
-        ) = abi.decode(supportingData_,
-        (
-            uint8, 
-            uint8[], 
-            FixedPart, 
-            ForceMoveApp.VariablePart[], 
-            Signature[])
-        );
+        SupportingData memory supportingData = abi.decode(supportingData_, (SupportingData));
 
-        bytes32 channelId = _getChannelId(fixedPart);
+        bytes32 channelId = _getChannelId(supportingData.fixedPart);
 
         // checks
         _requireChannelNotFinalized(channelId);
         _requireIncreasedTurnNumber(channelId, largestTurnNum);
-        _requireStateSupportedBy(
-            largestTurnNum,
-            variableParts,
-            isFinalCount,
-            channelId,
-            fixedPart,
-            sigs,
-            whoSignedWhat
-        );
+        _requireStateSupportedBy(largestTurnNum, channelId, supportingData);
 
         // effects
         _clearChallenge(channelId, largestTurnNum);
 
     }
 
-    function conclude(
-        uint48 largestTurnNum,
-        bytes calldata supportingData_
-    ) external {
+    function conclude(uint48 largestTurnNum, bytes calldata concludeData_) external {
         // decode supportingData_
-        (
-            uint8 numStates,
-            bytes32 appPartHash,
-            bytes32 outcomeHash, 
-            uint8[] memory whoSignedWhat,
-            FixedPart memory fixedPart, 
-            Signature[] memory sigs
-        ) = abi.decode(supportingData_,
-        (
-            uint8, 
-            bytes32,
-            bytes32, 
-            uint8[],
-            FixedPart, 
-            Signature[])
-        );
+        ConcludeData memory concludeData = abi.decode(concludeData_, (ConcludeData));
 
-        bytes32 channelId = _getChannelId(fixedPart);
+        bytes32 channelId = _getChannelId(concludeData.fixedPart);
         _requireChannelNotFinalized(channelId);
 
         // By construction, the following states form a valid transition
-        bytes32[] memory stateHashes = new bytes32[](numStates);
-        for (uint256 i = 0; i < numStates; i++) {
+        bytes32[] memory stateHashes = new bytes32[](concludeData.numStates);
+        for (uint256 i = 0; i < concludeData.numStates; i++) {
             stateHashes[i] = keccak256(
                 abi.encode(
                     State(
-                        largestTurnNum + (i + 1) - numStates, // turnNum
+                        largestTurnNum + (i + 1) - concludeData.numStates, // turnNum
                         true, // isFinal
                         channelId,
-                        appPartHash,
-                        outcomeHash
+                        concludeData.appPartHash,
+                        concludeData.outcomeHash
                     )
                 )
             );
@@ -285,17 +240,17 @@ contract ForceMove is IForceMove {
         require(
             _validSignatures(
                 largestTurnNum,
-                fixedPart.participants,
+                concludeData.fixedPart.participants,
                 stateHashes,
-                sigs,
-                whoSignedWhat
+                concludeData.sigs,
+                concludeData.whoSignedWhat
             ),
             'Invalid signatures'
         );
 
         // effects
         channelStorageHashes[channelId] = _hashChannelStorage(
-            ChannelStorage(0, now, bytes32(0), address(0), outcomeHash)
+            ChannelStorage(0, now, bytes32(0), address(0), concludeData.outcomeHash)
         );
         emit Concluded(channelId);
     }
@@ -382,28 +337,24 @@ contract ForceMove is IForceMove {
         // returns hash of latest state, if supported
         // else, reverts
         uint256 largestTurnNum,
-        ForceMoveApp.VariablePart[] memory variableParts,
-        uint8 isFinalCount,
         bytes32 channelId,
-        FixedPart memory fixedPart,
-        Signature[] memory sigs,
-        uint8[] memory whoSignedWhat // whoSignedWhat[i] is the index of the state in stateHashes that was signed by participants[i]
+        SupportingData memory supportingData
     ) internal pure returns (bytes32) {
         bytes32[] memory stateHashes = _requireValidTransitionChain(
             largestTurnNum,
-            variableParts,
-            isFinalCount,
+            supportingData.variableParts,
+            supportingData.isFinalCount,
             channelId,
-            fixedPart
+            supportingData.fixedPart
         );
 
         require(
             _validSignatures(
                 largestTurnNum,
-                fixedPart.participants,
+                supportingData.fixedPart.participants,
                 stateHashes,
-                sigs,
-                whoSignedWhat
+                supportingData.sigs,
+                supportingData.whoSignedWhat
             ),
             'Invalid signatures'
         );

@@ -24,9 +24,9 @@ interface IForceMove {
     * @notice Repsonds to an ongoing challenge registered against a state channel.
     * @dev Repsonds to an ongoing challenge registered against a state channel.
     * @param challenger The address of the participant whom registered the challenge.
-    * @param supportingData_ Encoded data, which when combined with a state stored on chain with turn number t, is sufficient to imply the support of a state with turn number t+1.
+    * @param respondData_ Encoded data, which when combined with a state stored on chain with turn number t, is sufficient to imply the support of a state with turn number t+1.
     */
-    function respond(address challenger, bytes calldata supportingData_) external;
+    function respond(address challenger, bytes calldata respondData_) external;
 
     /**
     * @notice Overwrites the `turnNumRecord` stored against a channel by providing a state with higher turn number, supported by a signature from each participant.
@@ -40,9 +40,9 @@ interface IForceMove {
     * @notice Finalizes a channel by providing a finalization proof.
     * @dev Overwrites the `turnNumRecord` stored against a channel by providing a state with higher turn number, supported by a signature from each participant.
     * @param largestTurnNum The largest turn number of the submitted states; will overwrite the stored value of `turnNumRecord`.
-    * @param supportingData_ Encoded data sufficient to support a state with `largestTurnNum`.
+    * @param concludeData_ Encoded data sufficient to support a final state with `largestTurnNum`.
     */
-    function conclude(uint48 largestTurnNum, bytes calldata supportingData_) external;
+    function conclude(uint48 largestTurnNum, bytes calldata concludeData_) external;
 
     // events
 
