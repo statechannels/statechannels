@@ -1,13 +1,17 @@
 import {Commitment, CommitmentType, Channel} from "fmg-core";
-import {ChannelStorage, SignedState} from "@statechannels/nitro-protocol";
-import {State} from "@statechannels/nitro-protocol/src/contract/state";
 import {CONSENSUS_LIBRARY_ADDRESS, NETWORK_ID, ETH_ASSET_HOLDER_ADDRESS} from "../constants";
 import {appAttributesFromBytes} from "fmg-nitro-adjudicator/lib/consensus-app";
-import {encodeConsensusData} from "@statechannels/nitro-protocol/src/contract/consensus-data";
 import {bigNumberify} from "ethers/utils";
-import {Outcome, AllocationItem} from "@statechannels/nitro-protocol/src/contract/outcome";
-import {Channel as NitroChannel} from "@statechannels/nitro-protocol/src/contract/channel";
-import {signState} from "@statechannels/nitro-protocol/src/signatures";
+import {
+  ChannelStorage,
+  SignedState,
+  State,
+  encodeConsensusData,
+  Channel as NitroChannel,
+  Signatures,
+  AllocationItem,
+  Outcome
+} from "@statechannels/nitro-protocol";
 
 const CHALLENGE_DURATION = 0x12c; // 5 minutes
 // This temporarily handles converting fmg-core entities to nitro-protocol entities
@@ -21,7 +25,7 @@ export function getChannelStorage(latestCommitment: Commitment): ChannelStorage 
 }
 export function convertCommitmentToSignedState(commitment: Commitment, privateKey: string): SignedState {
   const state = convertCommitmentToState(commitment);
-  return signState(state, privateKey);
+  return Signatures.signState(state, privateKey);
 }
 export function convertCommitmentToState(commitment: Commitment): State {
   const {turnNum, commitmentType, channel, destination, allocation, appAttributes} = commitment;

@@ -6,7 +6,7 @@ import {asEthersObject} from "fmg-core";
 import {Transactions as nitroTrans, SignedState} from "@statechannels/nitro-protocol";
 import {getChannelStorage, convertAddressToBytes32} from "./nitro-converter";
 // TODO: This should be exported by `nitro-protocol`
-import {createDepositTransaction as createNitroDepositTransaction} from "@statechannels/nitro-protocol/src/contract/transaction-creators/eth-asset-holder";
+import {createDepositTransaction as createNitroDepositTransaction} from "@statechannels/nitro-protocol";
 
 export function createForceMoveTransaction(
   fromCommitment: SignedCommitment,
