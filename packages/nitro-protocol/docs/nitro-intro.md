@@ -9,7 +9,7 @@ Welcome to the **Nitro** state channel protocol specification. This documentatio
 State channels are a technique for increasing throughput for Decentralized Applications (DApps) supported by a blockchain. For an introduction to state channels, see this [blog post](https://education.district0x.io/general-topics/understanding-ethereum/basics-state-channels/).
 :::
 
-State channels are defined by both on-chain and off-chain behavior. In the case of Nitro, on-chain behavior is instantiated by a number of smart contracts written in [solidity](https://github.com/ethereum/solidity), and off-chain behavior by cryptographically signed messages exchanged by channel participants. **This documentation site aims to explain and specify the format to which these behaviors should adhere**.
+State channels are defined by both on-chain and off-chain behavior. In the case of Nitro, on-chain behavior is instantiated by a number of smart contracts written in [Solidity](https://github.com/ethereum/solidity), and off-chain behavior by cryptographically signed messages exchanged by channel participants. **This documentation site aims to explain and specify the format to which these behaviors should adhere**.
 
 Nitro protocol combines a state-channel adjudication protocol (known as ForceMove) with a state channel network protocol. Each of these components is implemented with a separate smart contract, designed to be deployed to the Ethereum blockchain. Participants interface with the adjudicator contract in order to resolve disputes and arrive at a final outcome for a single state channel, and interface with the asset-holder contract(s) to deposit into and withdraw ETH and/or tokens from that state channel or from a network of inter-funded channels.
 
