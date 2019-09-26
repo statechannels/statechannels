@@ -3,9 +3,8 @@
 .share-file {
   border-bottom: 1px solid $c-mediumgrey;
   padding: 10px auto;
-  font-size: 1.1rem;
   button {
-    margin:10px 0px 10px auto;
+    margin: 10px 0px 10px auto;
   }
   td:last-child {
     text-align: right;
@@ -15,6 +14,6 @@
   }
   td.other-cell {
     min-width: 50px;
-    width: 10%;
+    width: 12%;
   }
 }

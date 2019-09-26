@@ -7,7 +7,7 @@ export type ShareFileProps = { file: any };
 const ShareFile: React.FC<ShareFileProps> = ({ file }: ShareFileProps) => {
   return (
     <tr className={"share-file"}>
-      <td>{file.filename}</td>
+      <td className="name-cell">{file.filename}</td>
       <td className="other-cell">{file.size}Mb</td>
       <td className="other-cell">{file.seeders}S</td>
       <td className="other-cell">{file.peers}P</td>

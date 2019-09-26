@@ -1,8 +1,25 @@
 @import "../../../styles/variables";
 footer {
-  width: 100%;
+  width: 670px;
   margin: 0 auto;
-  text-align: center;
-  font-size: 11px;
+  text-align: left;
+  font-size: 10px;
+  line-height: 14px;
   height: 11px;
+  #footer-logo {
+    height: 15px;
+    width: auto;
+    margin-bottom: -2px;
+  }
+}
+
+@media only screen and (max-width: 670px) {
+  footer {
+    min-width: 300px;
+    width: 95vw;
+    max-width: 900px;
+    display: flex;
+    flex-direction: column;
+    margin: 0 auto;
+  }
 }

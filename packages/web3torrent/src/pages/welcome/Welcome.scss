@@ -3,7 +3,7 @@ section.fill {
   display: flex;
   align-items: center;
   padding: 0;
-  margin-bottom:100px;
+  margin-bottom: 100px;
 }
 .jumbotron {
   background-image: url("/assets/jumbotron.jpeg");
@@ -14,12 +14,15 @@ section.fill {
   padding-top: 52.55%;
 }
 
+@media only screen and (max-width: 650px) {
+  .jumbotron {
+    padding-top: 49, 910447761%;
+  }
+}
+
 .subtitle {
-  margin: $rhythm*1 auto;
-  width: 75%;
-  line-height: 2.8rem;
-  font-weight: 400;
-  font-size: 1.1rem;
-  color: $c-darkergrey;
+  font-size: 18px;
+  line-height: 32px;
   text-align: center;
+  margin: 43px auto 20px;
 }

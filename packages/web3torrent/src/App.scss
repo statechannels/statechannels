@@ -4,7 +4,7 @@
 @import "./styles/layout";
 @import "./styles/typography";
 @import "./styles/responsive";
-
+@import url("https://fonts.googleapis.com/css?family=Nunito+Sans&display=swap");
 /*
   Global App CSS
   ----------------------
@@ -16,24 +16,12 @@
 */
 @import url("https://rsms.me/inter/inter.css");
 
-html,
-.button,
-.btn {
-  font-family: "Inter", sans-serif;
-}
-@supports (font-variation-settings: normal) {
-  html,
-  .button,
-  .btn {
-    font-family: "Inter var", sans-serif;
-  }
-}
-
 html {
-  font-size: 15px;
+  font-family: "Nunito Sans", sans-serif;
+  font-size: 18px;
   box-sizing: border-box;
   -webkit-font-smoothing: antialiased;
-  color: #252525;
+  color: $c-black;
 }
 
 body {
@@ -58,15 +46,13 @@ body {
 }
 
 .wrapper__content {
-  min-width: 550px;
-  width: 40vw;
-  max-width: 900px;
+  width: 670px;
   display: flex;
   flex-direction: column;
   margin: 0 auto;
 }
 
-@media only screen and (max-width: 550px) {
+@media only screen and (max-width: 670px) {
   .wrapper__content {
     min-width: 300px;
     width: 95vw;
