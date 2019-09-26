@@ -3,13 +3,11 @@ import {expectRevert} from '@statechannels/devtools';
 // @ts-ignore
 import ForceMoveArtifact from '../../../build/contracts/TESTForceMove.json';
 // @ts-ignore
-import {setupContracts, randomChannelId} from '../../test-helpers';
+import {setupContracts, randomChannelId, getTestProvider} from '../../test-helpers';
 import {HashZero, AddressZero} from 'ethers/constants';
 import {hashChannelStorage, parseChannelStorageHash} from '../../../src/contract/channel-storage';
 
-const provider = new ethers.providers.JsonRpcProvider(
-  `http://localhost:${process.env.GANACHE_PORT}`,
-);
+const provider = getTestProvider();
 let ForceMove: ethers.Contract;
 beforeAll(async () => {
   ForceMove = await setupContracts(provider, ForceMoveArtifact);

@@ -3,7 +3,7 @@ import {ethers} from 'ethers';
 import ConsensusAppArtifact from '../../../build/contracts/ConsensusApp.json';
 
 import {TransactionRequest} from 'ethers/providers';
-import {setupContracts} from '../../test-helpers';
+import {setupContracts, getTestProvider} from '../../test-helpers';
 import {expectRevert} from '@statechannels/devtools';
 import {ConsensusData} from '../../../src/contract/consensus-data';
 import {Outcome} from '../../../src/contract/outcome';
@@ -11,9 +11,7 @@ import {AddressZero, HashZero} from 'ethers/constants';
 import {createValidTransitionTransaction} from '../../../src/contract/transaction-creators/consensus-app';
 import {validTransition} from '../../../src/contract/consensus-app';
 
-const provider = new ethers.providers.JsonRpcProvider(
-  `http://localhost:${process.env.GANACHE_PORT}`,
-);
+const provider = getTestProvider();
 let consensusApp: ethers.Contract;
 
 const numParticipants = 3;

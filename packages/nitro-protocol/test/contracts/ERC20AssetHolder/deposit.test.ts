@@ -4,13 +4,11 @@ import {expectRevert} from '@statechannels/devtools';
 import ERC20AssetHolderArtifact from '../../../build/contracts/ERC20AssetHolder.json';
 // @ts-ignore
 import TokenArtifact from '../../../build/contracts/Token.json';
-import {setupContracts} from '../../test-helpers';
+import {setupContracts, getTestProvider} from '../../test-helpers';
 import {Channel, getChannelId} from '../../../src/contract/channel';
 import {AddressZero} from 'ethers/constants';
 
-const provider = new ethers.providers.JsonRpcProvider(
-  `http://localhost:${process.env.GANACHE_PORT}`,
-);
+const provider = getTestProvider();
 const signer0 = provider.getSigner(0); // convention matches setupContracts function
 let signer0Address;
 let ERC20AssetHolder: ethers.Contract;

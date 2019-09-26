@@ -12,6 +12,7 @@ import {
   ongoingChallengeHash,
   signStates,
   finalizedOutcomeHash,
+  getTestProvider,
 } from '../../test-helpers';
 import {Channel, getChannelId} from '../../../src/contract/channel';
 import {State, getVariablePart, getFixedPart} from '../../../src/contract/state';
@@ -25,9 +26,7 @@ import {
 import {signChallengeMessage} from '../../../src/signatures';
 import {SignedState} from '../../../src/index';
 import {COUNTING_APP_INVALID_TRANSITION} from '../../revert-reasons';
-const provider = new ethers.providers.JsonRpcProvider(
-  `http://localhost:${process.env.GANACHE_PORT}`,
-);
+const provider = getTestProvider();
 let ForceMove: ethers.Contract;
 let networkId;
 

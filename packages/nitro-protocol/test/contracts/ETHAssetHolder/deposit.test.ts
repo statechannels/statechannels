@@ -2,13 +2,11 @@ import {ethers} from 'ethers';
 import {expectRevert} from '@statechannels/devtools';
 // @ts-ignore
 import ETHAssetHolderArtifact from '../../../build/contracts/ETHAssetHolder.json';
-import {setupContracts} from '../../test-helpers';
+import {setupContracts, getTestProvider} from '../../test-helpers';
 import {Channel, getChannelId} from '../../../src/contract/channel';
 import {bigNumberify} from 'ethers/utils';
 
-const provider = new ethers.providers.JsonRpcProvider(
-  `http://localhost:${process.env.GANACHE_PORT}`,
-);
+const provider = getTestProvider();
 const signer = provider.getSigner(0); // convention matches setupContracts function
 let ETHAssetHolder: ethers.Contract;
 const chainId = '0x1234';

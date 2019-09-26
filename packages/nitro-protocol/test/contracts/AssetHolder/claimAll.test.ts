@@ -9,13 +9,12 @@ import {
   guaranteeToParams,
   replaceAddresses,
   newAssetTransferredEvent,
+  getTestProvider,
 } from '../../test-helpers';
 import {claimAllArgs} from '../../../src/contract/transaction-creators/asset-holder';
 import {id, bigNumberify} from 'ethers/utils';
 
-const provider = new ethers.providers.JsonRpcProvider(
-  `http://localhost:${process.env.GANACHE_PORT}`,
-);
+const provider = getTestProvider();
 
 const newAddress = () =>
   ethers.Wallet.createRandom()

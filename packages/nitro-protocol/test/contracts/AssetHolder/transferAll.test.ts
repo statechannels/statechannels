@@ -7,6 +7,7 @@ import {
   randomChannelId,
   allocationToParams,
   replaceAddresses,
+  getTestProvider,
 } from '../../test-helpers';
 
 // @ts-ignore (ethers mis-interpreting Truffle artifact's abi paramter)
@@ -14,9 +15,7 @@ const AssetHolderInterface = new ethers.utils.Interface(AssetHolderArtifact.abi)
 import {id, bigNumberify} from 'ethers/utils';
 import {encodeAllocation} from '../../../src/contract/outcome';
 
-const provider = new ethers.providers.JsonRpcProvider(
-  `http://localhost:${process.env.GANACHE_PORT}`,
-);
+const provider = getTestProvider();
 
 let AssetHolder: ethers.Contract;
 

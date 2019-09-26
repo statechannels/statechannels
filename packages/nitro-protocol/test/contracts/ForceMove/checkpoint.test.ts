@@ -5,7 +5,7 @@ import ForceMoveArtifact from '../../../build/contracts/TESTForceMove.json';
 // @ts-ignore
 import countingAppArtifact from '../../../build/contracts/CountingApp.json';
 import {defaultAbiCoder, hexlify, bigNumberify} from 'ethers/utils';
-import {setupContracts, signStates} from '../../test-helpers';
+import {setupContracts, signStates, getTestProvider} from '../../test-helpers';
 import {HashZero} from 'ethers/constants';
 import {Outcome} from '../../../src/contract/outcome';
 import {Channel, getChannelId} from '../../../src/contract/channel';
@@ -19,9 +19,7 @@ import {
 import {COUNTING_APP_INVALID_TRANSITION} from '../../revert-reasons';
 import {checkpointArgs} from '../../../src/contract/transaction-creators/force-move';
 
-const provider = new ethers.providers.JsonRpcProvider(
-  `http://localhost:${process.env.GANACHE_PORT}`,
-);
+const provider = getTestProvider();
 let ForceMove: ethers.Contract;
 let networkId;
 const chainId = '0x1234';

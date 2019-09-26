@@ -10,6 +10,7 @@ import {
   ongoingChallengeHash,
   finalizedOutcomeHash,
   signStates,
+  getTestProvider,
 } from '../../test-helpers';
 import {HashZero} from 'ethers/constants';
 import {Outcome} from '../../../src/contract/outcome';
@@ -23,9 +24,7 @@ import {
   UNACCEPTABLE_WHO_SIGNED_WHAT,
 } from '../../../src/contract/transaction-creators/revert-reasons';
 
-const provider = new ethers.providers.JsonRpcProvider(
-  `http://localhost:${process.env.GANACHE_PORT}`,
-);
+const provider = getTestProvider();
 let ForceMove: ethers.Contract;
 let networkId;
 const chainId = '0x1234';

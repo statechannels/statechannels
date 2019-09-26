@@ -20,6 +20,9 @@ import {
 import {State, hashState} from '../src/contract/state';
 import {TransactionRequest, TransactionReceipt} from 'ethers/providers';
 
+export const getTestProvider = () =>
+  new ethers.providers.JsonRpcProvider(`http://localhost:${process.env.GANACHE_PORT || 8545}`);
+
 export async function setupContracts(provider: ethers.providers.JsonRpcProvider, artifact) {
   const networkId = (await provider.getNetwork()).chainId;
   const signer = provider.getSigner(0);

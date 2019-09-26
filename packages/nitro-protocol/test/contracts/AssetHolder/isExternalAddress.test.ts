@@ -1,11 +1,9 @@
 import {ethers} from 'ethers';
 // @ts-ignore
 import AssetHolderArtifact from '../../../build/contracts/TESTAssetHolder.json';
-import {setupContracts} from '../../test-helpers';
+import {setupContracts, getTestProvider} from '../../test-helpers';
 
-const provider = new ethers.providers.JsonRpcProvider(
-  `http://localhost:${process.env.GANACHE_PORT || 8545}`,
-);
+const provider = getTestProvider();
 
 let AssetHolder: ethers.Contract;
 
