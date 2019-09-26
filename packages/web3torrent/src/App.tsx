@@ -12,12 +12,16 @@ const App: React.FC = () => {
   return (
     <Router history={history}>
       <main className="wrapper__content">
-        <LayoutHeader />
+        <Switch>
+          <Route exact path={`(${RoutePath.Root})`} component={LayoutHeader} />
+        </Switch>
         <Switch>
           <Route exact path={RoutePath.Root} component={Welcome} />
         </Switch>
       </main>
-      <LayoutFooter />
+      <Switch>
+        <Route exact path={`(${RoutePath.Root})`} component={LayoutFooter} />
+      </Switch>
     </Router>
   );
 };

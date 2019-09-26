@@ -6,13 +6,13 @@ import { RoutePath } from "../../../routes";
 
 import "./LayoutHeader.scss";
 
-const LayoutHeader: React.FC<RouteComponentProps> = history => {
+const LayoutHeader: React.FC<RouteComponentProps> = props => {
   return (
     <header className="header">
       <nav className="header-content">
         <div className="header-logo"></div>
         <div className="actions-container">
-          <FormButton name="setup" onClick={() => history.push(RoutePath.Root)}>
+          <FormButton name="setup" onClick={() => props.history.push(RoutePath.Root)}>
             Upload
           </FormButton>{" "}
         </div>
