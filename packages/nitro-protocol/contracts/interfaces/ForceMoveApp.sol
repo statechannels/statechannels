@@ -7,6 +7,15 @@ interface ForceMoveApp {
         bytes appData;
     }
 
+    /**
+    * @notice Encodes application-specific rules for a particular ForceMove-compliant state channel.
+    * @dev Encodes application-specific rules for a particular ForceMove-compliant state channel.
+    * @param a State being transitioned from.
+    * @param b State being transitioned to.
+    * @param turnNumB Turn number being transitioned to.
+    * @param nParticipants Number of participants in this state channel.
+    * @return does this transition conform to the rules?
+    */
     function validTransition(
         VariablePart calldata a,
         VariablePart calldata b,
