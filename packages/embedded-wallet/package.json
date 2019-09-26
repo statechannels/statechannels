@@ -1,5 +1,5 @@
 {
-  "name": "@statechannels/wallet",
+  "name": "@statechannels/embedded-wallet",
   "version": "0.0.1",
   "dependencies": {
     "debug": "^4.1.1",
