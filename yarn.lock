@@ -6814,7 +6814,7 @@ cipher-base@^1.0.0, cipher-base@^1.0.1, cipher-base@^1.0.3:
     inherits "^2.0.1"
     safe-buffer "^5.0.1"
 
-circom@LimeChain/circom, "circom@github:LimeChain/circom":
+circom@LimeChain/circom:
   version "0.0.24"
   resolved "https://codeload.github.com/LimeChain/circom/tar.gz/4ae2447b97d558820a7c7817d602185478ad0b92"
   dependencies:
@@ -16336,7 +16336,7 @@ path-type@^3.0.0:
   dependencies:
     pify "^3.0.0"
 
-path@0.12.7:
+path@0.12.7, path@^0.12.7:
   version "0.12.7"
   resolved "https://registry.yarnpkg.com/path/-/path-0.12.7.tgz#d4dc2a506c4ce2197eb481ebfcd5b36c0140b10f"
   integrity sha1-1NwqUGxM4hl+tIHr/NWzbAFAsQ8=
@@ -20276,7 +20276,7 @@ snapsvg@0.5.1:
   dependencies:
     eve "~0.5.1"
 
-snarkjs@LimeChain/snarkjs, "snarkjs@github:LimeChain/snarkjs":
+snarkjs@LimeChain/snarkjs:
   version "0.1.11"
   resolved "https://codeload.github.com/LimeChain/snarkjs/tar.gz/f7036ebe9bfa3f3817077f050780c8ec1542e249"
   dependencies:
