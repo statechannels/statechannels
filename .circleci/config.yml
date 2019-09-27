@@ -90,6 +90,7 @@ jobs:
             - packages/*/build
             - packages/*/lib
             - packages/*/node_modules
+            - node_modules
       - upload_logs:
           file: build-stats
 
@@ -98,7 +99,6 @@ jobs:
     steps:
       - <<: *restore_code
       - checkout
-      - <<: *restore_dep
       - attach_workspace:
           at: /home/circleci/project
       - run: yarn lint:check
@@ -111,7 +111,6 @@ jobs:
       - checkout
       - log_stats:
           file: test-stats
-      - <<: *restore_dep
       - attach_workspace:
           at: /home/circleci/project
       - run: yarn test:ci --since $(git merge-base $CIRCLE_BRANCH origin/master)
