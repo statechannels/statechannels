@@ -115,6 +115,8 @@
     "detect-port": "1.3.0",
     "enzyme": "^3.3.0",
     "enzyme-adapter-react-16": "^1.1.1",
+    "etherlime": "^2.2.3",
+    "etherlime-lib": "^1.1.5",
     "extract-text-webpack-plugin": "4.0.0-beta.0",
     "file-loader": "^2.0.0",
     "fmg-nitro-adjudicator": "0.1.5",
