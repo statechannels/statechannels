@@ -3,10 +3,12 @@ import {getAdjudicatorInterface} from "./contract-utils";
 import {splitSignature} from "ethers/utils";
 import {Commitment, SignedCommitment, signCommitment2} from "../domain";
 import {asEthersObject} from "fmg-core";
-import {Transactions as nitroTrans, SignedState} from "@statechannels/nitro-protocol";
+import {
+  createDepositTransaction as createNitroDepositTransaction,
+  Transactions as nitroTrans,
+  SignedState
+} from "@statechannels/nitro-protocol";
 import {getChannelStorage, convertAddressToBytes32} from "./nitro-converter";
-// TODO: This should be exported by `nitro-protocol`
-import {createDepositTransaction as createNitroDepositTransaction} from "@statechannels/nitro-protocol";
 
 export function createForceMoveTransaction(
   fromCommitment: SignedCommitment,
