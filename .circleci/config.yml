@@ -59,7 +59,7 @@ jobs:
       - <<: *restore_dep
       - attach_workspace:
           at: /home/circleci/project
-      - run: yarn lint
+      - run: yarn lint:check
 
   test:
     <<: *defaults
