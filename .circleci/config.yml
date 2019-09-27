@@ -114,7 +114,7 @@ jobs:
       - <<: *restore_dep
       - attach_workspace:
           at: /home/circleci/project
-      - run: yarn test:ci --since origin/master
+      - run: yarn test:ci --since $(git merge-base $CIRCLE_BRANCH origin/master)
       - upload_logs:
           file: test-stats
 
