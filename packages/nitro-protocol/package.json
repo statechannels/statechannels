@@ -36,7 +36,7 @@
     "test:typescript": "npx jest --testPathIgnorePatterns='test/contracts' --reporters='default'",
     "test:prepare": "yarn lint:check && yarn deploy:test",
     "test": "yarn test:prepare && npx jest",
-    "test:ci": "yarn contract:compile && yarn test:prepare && npx jest --ci --bail",
+    "test:ci": "yarn contract:compile && yarn test:prepare && npx jest --ci --bail --runInBand",
     "deploy": "npx etherlime deploy --compile=false",
     "deploy:test": "yarn deploy && npx etherlime deploy --compile=false --file=./deployment/deploy-test.js",
     "startGanache": "npx etherlime ganache --verbose > ganache.log",
