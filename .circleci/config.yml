@@ -40,11 +40,16 @@ commands:
             USAGE=/sys/fs/cgroup/memory/memory.usage_in_bytes
             MAX_USAGE=/sys/fs/cgroup/memory/memory.max_usage_in_bytes
             COUNTER=0
-            touch $FILE
+            echo "System $(grep MemTotal /proc/meminfo )" >> $FILE
             while true; do
-              echo "${COUNTER} ----------" >> $FILE;
+              echo "${COUNTER} seconds ----------" >> $FILE;
               echo "Current Memory: $(($(cat $USAGE) / 1000000)) mB" >> $FILE
               echo "Max Memory:     $(($(cat $MAX_USAGE) / 1000000)) mB" >> $FILE
+              # The %mem field in the output of `ps afu` is incorrect, as it divides by the memory
+              # avaiable to the whole system.
+              # It seems like containers have about 70 gB of memory, so 1% usage corresponds to ~700 mB.
+              # You can validate this assumption on line 1 of $FILE.
+              ps afu >> $FILE 
               sleep 1;
               COUNTER=$((COUNTER + 1));
             done 
@@ -109,6 +114,9 @@ jobs:
       - <<: *restore_dep
       - attach_workspace:
           at: /home/circleci/project
+      - run:
+          command: yarn startGanache
+          background: true
       - run: yarn test:ci --since origin/master
       - upload_logs:
           file: test-stats

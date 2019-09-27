@@ -40,7 +40,7 @@ export class GasReporter implements jest.Reporter {
   constructor(globalConfig: any, options: any) {
     this.globalConfig = globalConfig;
     this.options = options;
-    this.provider = getGanacheProvider();
+    this.provider = new ethers.providers.JsonRpcProvider(`http://localhost:${process.env.GANACHE_PORT || 8545}`);
   }
 
   onRunStart(results: jest.AggregatedResult, options: jest.ReporterOnStartOptions): void {
