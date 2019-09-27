@@ -22,7 +22,7 @@ import {transactionSender} from "../redux/sagas/transaction-sender";
 import {testSaga} from "redux-saga-test-plan";
 import {getProvider} from "../utils/contract-utils";
 import {transactionSent, transactionSubmitted, transactionConfirmed} from "../redux/actions";
-import {ADJUDICATOR_ADDRESS} from "../constants";
+import {ADJUDICATOR_ADDRESS, ETH_ASSET_HOLDER_ADDRESS} from "../constants";
 
 jest.setTimeout(90000);
 
@@ -44,9 +44,10 @@ describe("transactions", () => {
     const processId = "processId";
     const queuedTransaction = {transactionRequest: transactionToSend, processId};
     const transactionPayload = {
-      ...queuedTransaction.transactionRequest,
-      to: ADJUDICATOR_ADDRESS
+      to: ADJUDICATOR_ADDRESS,
+      ...queuedTransaction.transactionRequest
     };
+
     // TODO: Currently we're actually attempting to send the transactions
     // but we could probably do that in nitro-protocol package instead
     const transactionResult = await signer.sendTransaction(transactionPayload);
@@ -56,12 +57,11 @@ describe("transactions", () => {
       .next()
       .call(getProvider)
       .next(provider)
+      .call([provider, provider.getSigner])
+      .next(signer)
       .put(transactionSent({processId}))
       .next()
-      .call([signer, signer.sendTransaction], {
-        ...queuedTransaction.transactionRequest,
-        to: ADJUDICATOR_ADDRESS
-      })
+      .call([signer, signer.sendTransaction], transactionPayload)
       .next(transactionResult)
       .put(transactionSubmitted({processId, transactionHash: transactionResult.hash || ""}))
       .next(transactionResult)
@@ -83,12 +83,16 @@ describe("transactions", () => {
     libraryAddress = getLibraryAddress(networkId);
   });
 
-  it.skip("should deposit into the contract", async () => {
-    const depositTransaction = createDepositTransaction(participantA.address, "0x5", "0x0");
-    await testTransactionSender(depositTransaction);
+  it("should deposit into the contract", async () => {
+    const depositTransactionData = createDepositTransaction(participantA.address, "0x5", "0x0");
+    await testTransactionSender({
+      ...depositTransactionData,
+      to: ETH_ASSET_HOLDER_ADDRESS,
+      value: 5
+    });
   });
 
-  it("should send a forceMove transaction", async () => {
+  it.skip("should send a forceMove transaction", async () => {
     const channel: Channel = {channelType: libraryAddress, nonce: getNextNonce(), participants};
     await depositContract(provider, participantA.address);
     await depositContract(provider, participantB.address);
@@ -118,6 +122,7 @@ describe("transactions", () => {
       signCommitment2(toCommitment, participantB.privateKey),
       participantA.privateKey
     );
+
     await testTransactionSender(forceMoveTransaction);
   });
 

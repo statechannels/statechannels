@@ -3,7 +3,7 @@ import {Signature} from 'ethers/utils';
 import * as Signatures from './signatures';
 import * as Transactions from './transactions';
 import {encodeConsensusData} from './contract/consensus-data';
-import {createDepositTransaction} from './contract/transaction-creators/erc20-asset-holder';
+import {createDepositTransaction} from './contract/transaction-creators/eth-asset-holder';
 import {Outcome, AllocationItem} from './contract/outcome';
 import {Channel} from './contract/channel';
 
