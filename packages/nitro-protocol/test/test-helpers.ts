@@ -27,7 +27,7 @@ export const getTestProvider = () =>
 
 export const getNetworkMap = async () => {
   try {
-    return await loadJsonFile(path.join(__dirname, '/network-map.json'));
+    return await loadJsonFile(path.join(__dirname, '../deployment/network-map.json'));
   } catch (err) {
     if (!!err.message.match('ENOENT: no such file or directory')) {
       return {};
