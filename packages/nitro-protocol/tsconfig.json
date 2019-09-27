@@ -2,6 +2,7 @@
   "compilerOptions": {
     /* Basic Options */
     "lib": ["es5", "es6"],
+    "composite": true,
     "allowJs": false /* Allow javascript files to be compiled. */,
     "outDir": "lib" /* Redirect output structure to the directory. */,
     "module": "commonjs" /* Specify module code generation: 'none', 'commonjs', 'amd', 'system', 'umd', 'es2015', or 'ESNext'. */,
@@ -15,8 +16,12 @@
     "noUnusedLocals": true,
     "types": ["node", "jest"]
   },
+  "include": [
+    "src/**/*",
+    "test/**/*",
+    "build/contracts/*.json"
+  ],
   "references": [
     { "path": "../jest-gas-reporter" }
-  ],
-  "exclude": ["lib", "node_modules"]
+  ]
 }
