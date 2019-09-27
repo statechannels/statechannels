@@ -39,7 +39,7 @@ commands:
             COUNTER=0
             touch $FILE
             while true; do
-              echo $COUNTER "$(grep MemFree /proc/meminfo)" >> $FILE;
+              ps -u circleci eo pid,%cpu,%mem,args,uname --sort=-%mem >> $FILE;
               echo "----------" >> $FILE;
               sleep 1;
               COUNTER=$((COUNTER+1))
