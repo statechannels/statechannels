@@ -77,9 +77,10 @@ export function convertCommitmentToState(commitment: Commitment): State {
   }
   const isFinal = commitmentType === CommitmentType.Conclude;
   const { guaranteedChannel } = channel;
-  const outcome = guaranteedChannel
-    ? convertGuaranteeToOutcome({ guaranteedChannel, destination })
-    : convertAllocationToOutcome({ allocation, destination });
+  const outcome =
+    guaranteedChannel && !bigNumberify(guaranteedChannel).eq(0)
+      ? convertGuaranteeToOutcome({ guaranteedChannel, destination })
+      : convertAllocationToOutcome({ allocation, destination });
 
   return {
     turnNum,
@@ -122,7 +123,7 @@ function convertAllocationToOutcome({ allocation, destination }: { allocation: s
   }
   const nitroAllocation: AllocationItem[] = allocation.map((a, i) => {
     return {
-      destination: convertAddressToBytes32(destination[i]),
+      destination: convertAddressToBytes32(destination[i]).toLowerCase(),
       amount: allocation[i],
     };
   });
@@ -132,7 +133,7 @@ function convertAllocationToOutcome({ allocation, destination }: { allocation: s
 function convertGuaranteeToOutcome({ guaranteedChannel, destination }: { guaranteedChannel: string; destination: string[] }): Outcome {
   const guarantee = {
     targetChannelId: convertAddressToBytes32(guaranteedChannel),
-    destinations: destination.map(convertAddressToBytes32),
+    destinations: destination.map(convertAddressToBytes32).map(d => d.toLowerCase()),
   };
   return [{ assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS, guarantee }];
 }
@@ -149,11 +150,11 @@ function convertOutcomeToAllocation(outcome: Outcome): { allocation: string[]; d
   if (isAllocationOutcome(assetOutcome)) {
     assetOutcome.allocation.forEach(a => {
       allocation.push(a.amount);
-      destination.push(convertBytes32ToAddress(a.destination));
+      destination.push(convertBytes32ToAddress(a.destination).toLowerCase());
     });
   } else {
     const { guarantee } = assetOutcome;
-    destination = destination.concat(guarantee.destinations.map(convertBytes32ToAddress));
+    destination = destination.concat(guarantee.destinations.map(convertBytes32ToAddress).map(d => d.toLowerCase()));
     guaranteedChannel = convertBytes32ToAddress(guarantee.targetChannelId);
   }
 

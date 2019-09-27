@@ -14,6 +14,7 @@ import {
 import * as walletStates from "../redux/state";
 import { getGanacheProvider } from "@statechannels/devtools";
 import { convertCommitmentToState } from "../utils/nitro-converter";
+// import { convertCommitmentToState } from "../utils/nitro-converter";
 jest.setTimeout(60000);
 
 const createWatcherState = (processId: string, ...channelIds: string[]): walletStates.Initialized => {
@@ -119,7 +120,7 @@ describe("adjudicator listener", () => {
     expect(action.expiryTime).toBeGreaterThan(startTimestamp);
   });
 
-  it.skip("should handle a challengeCreated event", async () => {
+  it("should handle a challengeCreated event", async () => {
     const startTimestamp = Date.now();
     const channelNonce = getNextNonce();
 
@@ -135,7 +136,7 @@ describe("adjudicator listener", () => {
     const action: actions.ChallengeCreatedEvent = sagaTester.getLatestCalledAction();
 
     expect(action.finalizedAt).toBeGreaterThan(startTimestamp);
-    expect(action.challengeStates).toContain(challengeState);
+    expect(action.challengeStates[1]).toMatchObject(challengeState);
   });
 
   it.skip("should handle a concluded event when registered for that channel", async () => {

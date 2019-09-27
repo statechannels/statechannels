@@ -121,12 +121,19 @@ function* createAdjudicatorEventChannel(provider) {
   return eventChannel(emitter => {
     const challengeRegisteredFilter = adjudicator.filters.ChallengeRegistered();
     const gameConcludedFilter = adjudicator.filters.Concluded();
-
-    adjudicator.on(challengeRegisteredFilter, (channelId, ...args) => {
+    //  bytes32 indexed channelId,
+    // // everything needed to respond or checkpoint
+    // uint256 turnNumRecord,
+    // uint256 finalizesAt,
+    // address challenger,
+    // bool isFinal,
+    // FixedPart fixedPart,
+    // ForceMoveApp.VariablePart[] variableParts
+    adjudicator.on(challengeRegisteredFilter, (...eventArgs) => {
       emitter({
         eventType: AdjudicatorEventType.ChallengeRegistered,
-        channelId,
-        eventArgs: args,
+        channelId: eventArgs[0],
+        eventArgs,
       });
     });
     adjudicator.on(gameConcludedFilter, channelId => {
