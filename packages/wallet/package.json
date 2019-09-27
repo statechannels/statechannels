@@ -12,9 +12,9 @@
   "scripts": {
     "start": "npm run clearContracts && node scripts/start.js",
     "build": "run-s clearContracts build:typescript build:webpack",
-    "build:typescript": "npx tsc",
+    "build:typescript": "npx tsc -b",
     "build:webpack": "CI=false node scripts/build.js",
-    "prepare": "npx tsc",
+    "prepare": "yarn build:typescript",
     "test": "run-s lint:check 'test:app --all'",
     "test:ci": "GANACHE_PORT=8503 yarn run lint:check && yarn run test:ci:contracts && yarn run test:ci:app && yarn build",
     "test:ci:contracts": "yarn test:contracts --all --ci",
