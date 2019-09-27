@@ -5,6 +5,7 @@
   flex: 1;
   margin-right: 10px;
   transition: box-shadow 150ms, background-color 150ms;
+  font: bold 18px "Karla", sans-serif;
 }
 
 .button:focus {
