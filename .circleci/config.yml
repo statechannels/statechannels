@@ -2,6 +2,7 @@ version: 2.1
 
 defaults: &defaults
   working_directory: /home/circleci/project
+  resource_class: large
   docker:
     - image: circleci/node:10.16.3
 
