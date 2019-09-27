@@ -96,6 +96,9 @@ jobs:
           file: test-stats
       - attach_workspace:
           at: /home/circleci/project
+      - run:
+          command: yarn startGanache
+          background: true
       - run: yarn test:ci --since $(git merge-base $CIRCLE_BRANCH origin/master)
       - upload_logs:
           file: test-stats

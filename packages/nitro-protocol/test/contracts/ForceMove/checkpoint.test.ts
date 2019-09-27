@@ -5,7 +5,7 @@ import ForceMoveArtifact from '../../../build/contracts/TESTForceMove.json';
 // @ts-ignore
 import countingAppArtifact from '../../../build/contracts/CountingApp.json';
 import {defaultAbiCoder, hexlify, bigNumberify} from 'ethers/utils';
-import {setupContracts, signStates, getTestProvider} from '../../test-helpers';
+import {setupContracts, signStates, getTestProvider, getNetworkMap} from '../../test-helpers';
 import {HashZero} from 'ethers/constants';
 import {Outcome} from '../../../src/contract/outcome';
 import {Channel, getChannelId} from '../../../src/contract/channel';
@@ -22,6 +22,7 @@ import {checkpointArgs} from '../../../src/contract/transaction-creators/force-m
 const provider = getTestProvider();
 let ForceMove: ethers.Contract;
 let networkId;
+let networkMap;
 const chainId = '0x1234';
 const participants = ['', '', ''];
 const wallets = new Array(3);
@@ -36,9 +37,10 @@ for (let i = 0; i < 3; i++) {
   participants[i] = wallets[i].address;
 }
 beforeAll(async () => {
+  networkMap = await getNetworkMap();
   ForceMove = await setupContracts(provider, ForceMoveArtifact);
   networkId = (await provider.getNetwork()).chainId;
-  appDefinition = countingAppArtifact.networks[networkId].address; // use a fixed appDefinition in all tests
+  appDefinition = networkMap[networkId][countingAppArtifact.contractName]; // use a fixed appDefinition in all tests
 });
 
 const valid = {

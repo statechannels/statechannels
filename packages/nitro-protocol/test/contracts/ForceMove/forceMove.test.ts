@@ -13,6 +13,7 @@ import {
   signStates,
   finalizedOutcomeHash,
   getTestProvider,
+  getNetworkMap,
 } from '../../test-helpers';
 import {Channel, getChannelId} from '../../../src/contract/channel';
 import {State, getVariablePart, getFixedPart} from '../../../src/contract/state';
@@ -26,9 +27,12 @@ import {
 import {signChallengeMessage} from '../../../src/signatures';
 import {SignedState} from '../../../src/index';
 import {COUNTING_APP_INVALID_TRANSITION} from '../../revert-reasons';
+
 const provider = getTestProvider();
+
 let ForceMove: ethers.Contract;
 let networkId;
+let networkMap;
 
 const chainId = '0x1234';
 const participants = ['', '', ''];
@@ -45,9 +49,10 @@ for (let i = 0; i < 3; i++) {
 }
 
 beforeAll(async () => {
+  networkMap = await getNetworkMap();
   ForceMove = await setupContracts(provider, ForceMoveArtifact);
   networkId = (await provider.getNetwork()).chainId;
-  appDefinition = countingAppArtifact.networks[networkId].address; // use a fixed appDefinition in all tests
+  appDefinition = networkMap[networkId][countingAppArtifact.contractName]; // use a fixed appDefinition in all tests
 });
 
 // Scenarios are synonymous with channelNonce:
