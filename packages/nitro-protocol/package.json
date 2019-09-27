@@ -41,7 +41,7 @@
     "deploy:test": "yarn deploy && npx etherlime deploy --compile=false --file=./deployment/deploy-test.js",
     "startGanache": "npx etherlime ganache --verbose > ganache.log",
     "build:typescript": "tslint --project . && tsc -b",
-    "contract:compile": "npx etherlime compile --runs=1 --buildDirectory=./build/contracts",
+    "contract:compile": "npx etherlime compile --buildDirectory=./build/contracts",
     "clearContracts": "rm -rf build/contracts",
     "clearLib": "rm -rf lib",
     "build": "run-s clearContracts clearLib contract:compile build:typescript",
