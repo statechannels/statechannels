@@ -84,7 +84,11 @@ describe("transactions", () => {
   });
 
   it("should deposit into the contract", async () => {
-    const depositTransactionData = createDepositTransaction(participantA.address, "0x5", "0x0");
+    // TODO: Better way of managing the same addresses across tests, since the following test
+    // from this one uses participantA and participantB, we would need to update the
+    // expectedHeld value when making a deposit per-test. For now I just make a new participant.
+    const randomParticipant = ethers.Wallet.createRandom();
+    const depositTransactionData = createDepositTransaction(randomParticipant.address, "0x5", "0x0");
     await testTransactionSender({
       ...depositTransactionData,
       to: ETH_ASSET_HOLDER_ADDRESS,
@@ -92,7 +96,7 @@ describe("transactions", () => {
     });
   });
 
-  it.skip("should send a forceMove transaction", async () => {
+  it("should send a forceMove transaction", async () => {
     const channel: Channel = {channelType: libraryAddress, nonce: getNextNonce(), participants};
     await depositContract(provider, participantA.address);
     await depositContract(provider, participantB.address);
@@ -101,7 +105,7 @@ describe("transactions", () => {
       channel,
       allocation: ["0x05", "0x05"],
       destination: [participantA.address, participantB.address],
-      turnNum: 5,
+      turnNum: 4,
       commitmentType: CommitmentType.App,
       appAttributes: "0x0",
       commitmentCount: 0
@@ -111,7 +115,7 @@ describe("transactions", () => {
       channel,
       allocation: ["0x05", "0x05"],
       destination: [participantA.address, participantB.address],
-      turnNum: 6,
+      turnNum: 5,
       commitmentType: CommitmentType.App,
       appAttributes: "0x0",
       commitmentCount: 1
