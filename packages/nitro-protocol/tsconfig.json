@@ -6,6 +6,7 @@
     "outDir": "lib" /* Redirect output structure to the directory. */,
     "module": "commonjs" /* Specify module code generation: 'none', 'commonjs', 'amd', 'system', 'umd', 'es2015', or 'ESNext'. */,
     "declaration": true,
+    "declarationMap": true,
     "target": "es5",
     "moduleResolution": "node" /* Specify module resolution strategy: 'node' (Node.js) or 'classic' (TypeScript pre-1.6). */,
     "strict": false /* Enable all strict type-checking options. */,
