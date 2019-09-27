@@ -27,22 +27,27 @@ restore_dep: &restore_dep
     key: dependency-cache-{{ checksum "yarn.lock" }}
 
 commands:
-  log_memory:
-    description: "Log memory "
+  log_stats:
+    description: "Log stats "
     parameters:
       file:
         type: string
-        default: memory-usage
+        default: stats
     steps:
       - run:
           command: |
             FILE=/home/circleci/<<parameters.file>>.txt
+            USAGE=/sys/fs/cgroup/memory/memory.usage_in_bytes
+            MAX_USAGE=/sys/fs/cgroup/memory/memory.max_usage_in_bytes
+            COUNTER=0
             touch $FILE
             while true; do
-              ps -u circleci eo pid,%cpu,%mem,args,uname --sort=-%mem >> $FILE;
-              echo "----------" >> $FILE;
+              echo "${COUNTER} ----------" >> $FILE;
+              echo "Current Memory: $(($(cat $USAGE) / 1000000)) mB" >> $FILE
+              echo "Max Memory:     $(($(cat $MAX_USAGE) / 1000000)) mB" >> $FILE
               sleep 1;
-            done
+              COUNTER=$((COUNTER + 1));
+            done 
           background: true
   upload_logs:
     description: "Upload logs "
@@ -61,8 +66,8 @@ jobs:
     steps:
       - <<: *restore_code
       - checkout
-      - log_memory:
-          file: build-memory
+      - log_stats:
+          file: build-stats
       - <<: *save_code
       - <<: *restore_dep
       - run:
@@ -81,7 +86,7 @@ jobs:
             - packages/*/lib
             - packages/*/node_modules
       - upload_logs:
-          file: build-memory
+          file: build-stats
 
   lint:
     <<: *defaults
@@ -99,14 +104,14 @@ jobs:
     steps:
       - <<: *restore_code
       - checkout
-      - log_memory:
-          file: test-memory
+      - log_stats:
+          file: test-stats
       - <<: *restore_dep
       - attach_workspace:
           at: /home/circleci/project
       - run: yarn test:ci --since origin/master
       - upload_logs:
-          file: test-memory
+          file: test-stats
 
 workflows:
   statechannels:
