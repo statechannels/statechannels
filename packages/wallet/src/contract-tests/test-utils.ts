@@ -8,6 +8,8 @@ import {
   createRespondWithMoveTransaction
 } from "../utils/transaction-generator";
 import {signCommitment} from "../domain";
+// TODO: Make sure this import works in the scenario where build/contracts is empty
+// so that the webpack and tsc build for  @statechannels/wallet still passes
 import TrivialAppArtifact from '../../build/contracts/TrivialApp.json';
 import {bigNumberify} from "ethers/utils";
 import {channelID, Channel} from "fmg-core/lib/channel";
