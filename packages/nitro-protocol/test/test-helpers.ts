@@ -20,6 +20,9 @@ import {
 import {State, hashState} from '../src/contract/state';
 import {TransactionRequest, TransactionReceipt} from 'ethers/providers';
 
+export const getTestProvider = () =>
+  new ethers.providers.JsonRpcProvider(`http://localhost:${process.env.GANACHE_PORT || 8545}`);
+
 export async function setupContracts(provider: ethers.providers.JsonRpcProvider, artifact) {
   const networkId = (await provider.getNetwork()).chainId;
   const signer = provider.getSigner(0);
@@ -142,15 +145,8 @@ export const newTransferEvent = (contract: ethers.Contract, to: string) => {
   });
 };
 
-export const newAssetTransferredEvent = (contract: ethers.Contract, destination: string) => {
-  const filter = contract.filters.AssetTransferred(destination);
-  return new Promise((resolve, reject) => {
-    contract.on(filter, (eventDestination, amountTransferred, event) => {
-      // match event for this destination only
-      contract.removeAllListeners(filter);
-      resolve(amountTransferred);
-    });
-  });
+export const newAssetTransferredEvent = (destination: string, payout: number) => {
+  return {destination: destination.toLowerCase(), amount: payout};
 };
 
 export function randomChannelId(channelNonce = 0) {

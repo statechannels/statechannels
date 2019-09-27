@@ -1,11 +1,10 @@
 import {ethers} from 'ethers';
 // @ts-ignore
 import AssetHolderArtifact from '../../../build/contracts/TESTAssetHolder.json';
-import {setupContracts} from '../../test-helpers';
+import {setupContracts, getTestProvider} from '../../test-helpers';
 
-const provider = new ethers.providers.JsonRpcProvider(
-  `http://localhost:${process.env.GANACHE_PORT}`,
-);
+const provider = getTestProvider();
+
 let AssetHolder: ethers.Contract;
 
 const participants = ['', '', ''];
@@ -22,14 +21,14 @@ beforeAll(async () => {
 });
 
 describe('isExternalAddress', () => {
-  const zerosPaddedExternalAddress =
-    '0x' + 'eb89373c708B40fAeFA76e46cda92f801FAFa288'.padEnd(64, '0');
-  const onesPaddedExternalAddress =
-    '0x' + 'eb89373c708B40fAeFA76e46cda92f801FAFa288'.padEnd(64, '1');
   it('verifies an external address', async () => {
+    const zerosPaddedExternalAddress =
+      '0x' + 'eb89373c708B40fAeFA76e46cda92f801FAFa288'.padEnd(64, '0');
     expect(await AssetHolder.isExternalAddress(zerosPaddedExternalAddress)).toBe(true);
   });
   it('rejects a non-external-address', async () => {
+    const onesPaddedExternalAddress =
+      '0x' + 'eb89373c708B40fAeFA76e46cda92f801FAFa288'.padEnd(64, '1');
     expect(await AssetHolder.isExternalAddress(onesPaddedExternalAddress)).toBe(false);
   });
 });

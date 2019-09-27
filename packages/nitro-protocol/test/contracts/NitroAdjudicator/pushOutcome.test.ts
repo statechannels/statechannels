@@ -7,7 +7,12 @@ import ETHAssetHolderArtifact from '../../../build/contracts/ETHAssetHolder.json
 import ERC20AssetHolderArtifact from '../../../build/contracts/ERC20AssetHolder.json';
 
 import {AddressZero} from 'ethers/constants';
-import {setupContracts, finalizedOutcomeHash, sendTransaction} from '../../test-helpers';
+import {
+  setupContracts,
+  finalizedOutcomeHash,
+  sendTransaction,
+  getTestProvider,
+} from '../../test-helpers';
 import {expectRevert} from '@statechannels/devtools';
 import {Channel, getChannelId} from '../../../src/contract/channel';
 import {hashAssetOutcome} from '../../../src/contract/outcome';
@@ -18,9 +23,7 @@ import {
   WRONG_CHANNEL_STORAGE,
 } from '../../../src/contract/transaction-creators/revert-reasons';
 
-const provider = new ethers.providers.JsonRpcProvider(
-  `http://localhost:${process.env.GANACHE_PORT}`,
-);
+const provider = getTestProvider();
 let NitroAdjudicator: ethers.Contract;
 let ETHAssetHolder: ethers.Contract;
 let ERC20AssetHolder: ethers.Contract;

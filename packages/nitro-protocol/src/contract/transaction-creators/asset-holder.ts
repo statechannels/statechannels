@@ -26,17 +26,23 @@ export function createTransferAllTransaction(
   return {data, gasLimit: GAS_LIMIT};
 }
 
+export function claimAllArgs(
+  channelId: string,
+  guarantee: Guarantee,
+  allocation: Allocation,
+): any[] {
+  return [channelId, encodeGuarantee(guarantee), encodeAllocation(allocation)];
+}
+
 export function createClaimAllTransaction(
   assetHolderContractInterface: ethers.utils.Interface,
   channelId: string,
   guarantee: Guarantee,
   allocation: Allocation,
 ): TransactionRequest {
-  const data = assetHolderContractInterface.functions.claimAll.encode([
-    channelId,
-    encodeGuarantee(guarantee),
-    encodeAllocation(allocation),
-  ]);
+  const data = assetHolderContractInterface.functions.claimAll.encode(
+    claimAllArgs(channelId, guarantee, allocation),
+  );
   return {data, gasLimit: GAS_LIMIT};
 }
 

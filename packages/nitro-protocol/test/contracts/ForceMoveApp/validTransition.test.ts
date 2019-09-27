@@ -2,12 +2,10 @@ import TrivialAppArtifact from '../../../build/contracts/TrivialApp.json';
 import {Channel} from '../../../src/contract/channel';
 import {ethers, Contract} from 'ethers';
 import {State} from '../../../src/contract/state';
-import {setupContracts} from '../../test-helpers';
+import {setupContracts, getTestProvider} from '../../test-helpers';
 import {validTransition} from '../../../src/contract/force-move-app';
 
-const provider = new ethers.providers.JsonRpcProvider(
-  `http://localhost:${process.env.GANACHE_PORT}`,
-);
+const provider = getTestProvider();
 let forceMoveApp: Contract;
 
 beforeAll(async () => {

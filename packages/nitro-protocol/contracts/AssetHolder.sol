@@ -128,7 +128,7 @@ contract AssetHolder {
                         )
                     )
                 ),
-            'claimAll | submitted data does not match outcomeHash stored against guarantorChannellId'
+            'claimAll | submitted data does not match outcomeHash stored against guarantorChannelId'
         );
 
         Outcome.Guarantee memory guarantee = abi.decode(guaranteeBytes, (Outcome.Guarantee));

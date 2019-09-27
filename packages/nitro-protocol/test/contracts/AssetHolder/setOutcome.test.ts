@@ -1,14 +1,12 @@
 import {ethers} from 'ethers';
 // @ts-ignore
 import AssetHolderArtifact from '../../../build/contracts/ETHAssetHolder.json';
-import {setupContracts} from '../../test-helpers';
+import {setupContracts, getTestProvider} from '../../test-helpers';
 import {keccak256} from 'ethers/utils';
 import {expectRevert} from '@statechannels/devtools';
 import {Channel, getChannelId} from '../../../src/contract/channel';
 
-const provider = new ethers.providers.JsonRpcProvider(
-  `http://localhost:${process.env.GANACHE_PORT}`,
-);
+const provider = getTestProvider();
 let AssetHolder: ethers.Contract;
 let channelId;
 

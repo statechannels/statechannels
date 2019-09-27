@@ -26,15 +26,45 @@ restore_dep: &restore_dep
   restore_cache:
     key: dependency-cache-{{ checksum "yarn.lock" }}
 
+commands:
+  log_memory:
+    description: "Log memory "
+    parameters:
+      file:
+        type: string
+        default: memory-usage
+    steps:
+      - run:
+          command: |
+            FILE=/home/circleci/<<parameters.file>>.txt
+            touch $FILE
+            while true; do
+              ps -u circleci eo pid,%cpu,%mem,args,uname --sort=-%mem >> $FILE;
+              echo "----------" >> $FILE;
+              sleep 1;
+            done
+          background: true
+  upload_logs:
+    description: "Upload logs "
+    parameters:
+      file:
+        type: string
+        default: memory-usage.txt
+    steps:
+      - store_artifacts:
+          path: /home/circleci/<< parameters.file >>.txt
+          destination: << parameters.file >>
+
 jobs:
   build:
     <<: *defaults
     steps:
       - <<: *restore_code
       - checkout
+      - log_memory:
+          file: build-memory
       - <<: *save_code
       - <<: *restore_dep
-
       - run:
           name: "yarn --frozen-lockfile"
           command: yarn --frozen-lockfile
@@ -50,6 +80,8 @@ jobs:
             - packages/*/build
             - packages/*/lib
             - packages/*/node_modules
+      - upload_logs:
+          file: build-memory
 
   lint:
     <<: *defaults
@@ -63,13 +95,18 @@ jobs:
 
   test:
     <<: *defaults
+
     steps:
       - <<: *restore_code
       - checkout
+      - log_memory:
+          file: test-memory
       - <<: *restore_dep
       - attach_workspace:
           at: /home/circleci/project
       - run: yarn test:ci --since origin/master
+      - upload_logs:
+          file: test-memory
 
 workflows:
   statechannels:
