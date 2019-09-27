@@ -1,7 +1,7 @@
 module.exports = {
   setupFilesAfterEnv: ['./jest.setup.js'],
   collectCoverageFrom: ['src/**/*.{js,jsx,ts,tsx}'],
-  reporters: ['default'],
+  reporters: ['default', '@statechannels/jest-gas-reporter'],
   testMatch: ['<rootDir>/test/**/?(*.)(spec|test).(t)s?(x)'],
   testPathIgnorePatterns: ['/node_modules/'],
   testEnvironment: 'node',
