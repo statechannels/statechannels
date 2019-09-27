@@ -1,0 +1,25 @@
+@import "../../../styles/variables";
+
+.header {
+  background-color: $c-white;
+  width: 100%;
+}
+
+.header-logo {
+  background: url("/assets/logo.jpeg") no-repeat;
+  background-size: 100%;
+  width: 200px;
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  height: 100%;
+
+  padding: 50px 0px 10px;
+  border-bottom: 1px solid $c-orange;
+}
+
+.logo-container {
+  width: auto;
+}

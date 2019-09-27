@@ -1,4 +1,4 @@
-import WebTorrentPaidStreamingClient from './../src/web3torrent-lib';
+import WebTorrentPaidStreamingClient from './../src/library/web3torrent-lib';
 import { defaultFile, defaultFileMagnetURI, defaultSeedingOptions, defaultTorrentHash } from './utils';
 
 describe('Base Seeding', () => {
