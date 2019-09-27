@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "description": "A protocol for state channel networks",
   "main": "lib/src/index.js",
+  "types": "lib/src/index.d.ts",
   "files": [
     "lib/*",
     "contracts/*"
@@ -31,8 +32,10 @@
   "homepage": "https://github.com/statechannels/nitro-protocol/",
   "scripts": {
     "prepare": "yarn build",
+    "build:ci": "yarn build",
+    "test:ci": "yarn test",
     "test:typescript": "npx jest --testPathIgnorePatterns='test/contracts' --reporters='default'",
-    "test": "yarn prettier:check && yarn clearContracts && npx ganache-then-jest",
+    "test": "yarn lint:check && yarn clearContracts && npx ganache-then-jest",
     "deploy": "yarn clearContracts && npx truffle migrate",
     "build:typescript": "tslint --project . && tsc -b",
     "build:truffle": "npx truffle compile",
@@ -41,8 +44,8 @@
     "build": "run-s clearContracts clearLib build:truffle build:typescript",
     "prettier:check": "npx prettier --check '{contracts,src,test}/**/*.{ts,tsx,sol}'",
     "prettier:write": "npx prettier --write '{contracts,src,test}/**/*.{ts,tsx,sol}'",
-    "lint:check": "tslint --project .",
-    "lint:write": "tslint --project . --fix"
+    "lint:check": "npx tslint --config tslint.json --project .",
+    "lint:write": "npx tslint --config tslint.json --project . --fix"
   },
   "dependencies": {
     "@openzeppelin/contracts": "2.3.0",
