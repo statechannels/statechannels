@@ -18,15 +18,20 @@ import {depositContract} from "./test-utils";
 import {Channel, Commitment, CommitmentType} from "fmg-core";
 import {channelID} from "fmg-core/lib/channel";
 import {getGanacheProvider} from "@statechannels/devtools";
+import {transactionSender} from "../redux/sagas/transaction-sender";
+import {testSaga} from "redux-saga-test-plan";
+import {getProvider} from "../utils/contract-utils";
+import {transactionSent, transactionSubmitted, transactionConfirmed} from "../redux/actions";
+import {ADJUDICATOR_ADDRESS, ETH_ASSET_HOLDER_ADDRESS} from "../constants";
 
 jest.setTimeout(90000);
-// TODO: Re-enable/fix tests
+
 describe("transactions", () => {
   let networkId;
   let libraryAddress;
   let nonce = 5;
   const provider: ethers.providers.JsonRpcProvider = getGanacheProvider();
-
+  const signer = provider.getSigner();
   const participantA = ethers.Wallet.createRandom();
   const participantB = ethers.Wallet.createRandom();
   const participants = [participantA.address, participantB.address] as [string, string];
@@ -36,25 +41,40 @@ describe("transactions", () => {
   }
 
   async function testTransactionSender(transactionToSend) {
-    // TODO: Get this working
-    // const processId = "processId";
-    // const queuedTransaction = {transactionRequest: transactionToSend, processId};
-    // const saga = transactionSender(queuedTransaction);
-    // saga.next();
-    // expect(saga.next(provider).value).toEqual(put(transactionSent({processId})));
-    // saga.next();
-    // const signer = provider.getSigner();
-    // transactionToSend = {...transactionToSend, to: ADJUDICATOR_ADDRESS};
-    // const transactionReceipt = await signer.sendTransaction(transactionToSend);
-    // expect(saga.next(transactionReceipt).value).toEqual(
-    //   put(transactionSubmitted({processId, transactionHash: transactionReceipt.hash || ""}))
-    // );
-    // const confirmedTransaction = await transactionReceipt.wait();
-    // saga.next();
-    // expect(saga.next(confirmedTransaction).value).toEqual(
-    //   put(transactionConfirmed({processId, contractAddress: confirmedTransaction.contractAddress}))
-    // );
-    // expect(saga.next().done).toBe(true);
+    const processId = "processId";
+    const queuedTransaction = {transactionRequest: transactionToSend, processId};
+    const transactionPayload = {
+      to: ADJUDICATOR_ADDRESS,
+      ...queuedTransaction.transactionRequest
+    };
+
+    // TODO: Currently we're actually attempting to send the transactions
+    // but we could probably do that in nitro-protocol package instead
+    const transactionResult = await signer.sendTransaction(transactionPayload);
+    const confirmedTransaction = await transactionResult.wait();
+
+    testSaga(transactionSender, queuedTransaction)
+      .next()
+      .call(getProvider)
+      .next(provider)
+      .call([provider, provider.getSigner])
+      .next(signer)
+      .put(transactionSent({processId}))
+      .next()
+      .call([signer, signer.sendTransaction], transactionPayload)
+      .next(transactionResult)
+      .put(transactionSubmitted({processId, transactionHash: transactionResult.hash || ""}))
+      .next(transactionResult)
+      .call([transactionResult, transactionResult.wait])
+      .next(confirmedTransaction)
+      .put(
+        transactionConfirmed({
+          processId,
+          contractAddress: confirmedTransaction.contractAddress
+        })
+      )
+      .next()
+      .isDone();
   }
 
   beforeAll(async () => {
@@ -63,12 +83,20 @@ describe("transactions", () => {
     libraryAddress = getLibraryAddress(networkId);
   });
 
-  it.skip("should deposit into the contract", async () => {
-    const depositTransaction = createDepositTransaction(participantA.address, "0x5", "0x0");
-    await testTransactionSender(depositTransaction);
+  it("should deposit into the contract", async () => {
+    // TODO: Better way of managing the same addresses across tests, since the following test
+    // from this one uses participantA and participantB, we would need to update the
+    // expectedHeld value when making a deposit per-test. For now I just make a new participant.
+    const randomParticipant = ethers.Wallet.createRandom();
+    const depositTransactionData = createDepositTransaction(randomParticipant.address, "0x5", "0x0");
+    await testTransactionSender({
+      ...depositTransactionData,
+      to: ETH_ASSET_HOLDER_ADDRESS,
+      value: 5
+    });
   });
 
-  it.skip("should send a forceMove transaction", async () => {
+  it("should send a forceMove transaction", async () => {
     const channel: Channel = {channelType: libraryAddress, nonce: getNextNonce(), participants};
     await depositContract(provider, participantA.address);
     await depositContract(provider, participantB.address);
@@ -77,7 +105,7 @@ describe("transactions", () => {
       channel,
       allocation: ["0x05", "0x05"],
       destination: [participantA.address, participantB.address],
-      turnNum: 5,
+      turnNum: 4,
       commitmentType: CommitmentType.App,
       appAttributes: "0x0",
       commitmentCount: 0
@@ -87,7 +115,7 @@ describe("transactions", () => {
       channel,
       allocation: ["0x05", "0x05"],
       destination: [participantA.address, participantB.address],
-      turnNum: 6,
+      turnNum: 5,
       commitmentType: CommitmentType.App,
       appAttributes: "0x0",
       commitmentCount: 1
@@ -98,6 +126,7 @@ describe("transactions", () => {
       signCommitment2(toCommitment, participantB.privateKey),
       participantA.privateKey
     );
+
     await testTransactionSender(forceMoveTransaction);
   });
 
