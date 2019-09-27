@@ -5,18 +5,13 @@
     <script src="https://unpkg.com/debug@4.0.1/dist/debug.js"></script>
   </head>
 
-  <button onclick="callTestMessage()">Do something</button>
-  <button onclick="callUnicornMessage()">Do something else</button>
+  <button onclick="callBudgetAllocation()">Allocate budget</button>
 
   <script src="http://localhost:3000/wallet.js"></script>
 
   <script>
-    function callTestMessage() {
-      window.postMessage({ jsonrpc: "2.0", method: "chan_test" });
-    }
-
-    function callUnicornMessage() {
-      window.postMessage({ jsonrpc: "2.0", method: "chan_unicorn" });
+    function callBudgetAllocation() {
+      window.postMessage({ jsonrpc: "2.0", method: "chan_allocate" });
     }
   </script>
 </html>
