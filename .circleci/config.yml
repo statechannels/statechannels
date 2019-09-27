@@ -104,6 +104,9 @@ jobs:
       - <<: *restore_dep
       - attach_workspace:
           at: /home/circleci/project
+      - run:
+          command: yarn startGanache
+          background: true
       - run: yarn test:ci --since origin/master
       - upload_logs:
           file: test-memory
