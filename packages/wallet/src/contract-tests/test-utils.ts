@@ -7,6 +7,8 @@ import {
   createRefuteTransaction,
   createRespondWithMoveTransaction
 } from "../utils/transaction-generator";
+import loadJsonFile from 'load-json-file';
+import path from 'path';
 import {signCommitment} from "../domain";
 // TODO: Make sure this import works in the scenario where build/contracts is empty
 // so that the webpack and tsc build for  @statechannels/wallet still passes
@@ -16,18 +18,38 @@ import {channelID, Channel} from "fmg-core/lib/channel";
 import {ADJUDICATOR_ADDRESS, ETH_ASSET_HOLDER_ADDRESS} from "../constants";
 import {ADDRESS_ZERO} from "fmg-core";
 import { JsonRpcProvider, TransactionRequest } from "ethers/providers";
-export function getLibraryAddress(networkId) {
-  return TrivialAppArtifact.networks[networkId].address;
+
+let networkMap;
+export async function getLibraryAddress(networkId) {
+  networkMap = networkMap || await getNetworkMap();
+  if (networkMap[networkId] && networkMap[networkId][TrivialAppArtifact.contractName]) {
+    return networkMap[networkId][TrivialAppArtifact.contractName]
+  }
+  console.error(networkId, networkMap);
+  
+  throw new Error("Library missing")
 }
 export const fiveFive = [bigNumberify(5).toHexString(), bigNumberify(5).toHexString()] as [string, string];
 export const fourSix = [bigNumberify(4).toHexString(), bigNumberify(6).toHexString()] as [string, string];
 
 export const defaultDepositAmount = fiveFive[0];
 
+export const getNetworkMap = async () => {
+  try {
+    return await loadJsonFile(path.join(__dirname, '../../deployment/network-map.json'));
+  } catch (err) {
+    if (!!err.message.match('ENOENT: no such file or directory')) {
+      return {};
+    } else {
+      throw err;
+    }
+  }
+};
+
 export async function getChannelId(provider, channelNonce, participantA, participantB) {
   const network = await provider.getNetwork();
   const networkId = network.chainId;
-  const libraryAddress = getLibraryAddress(networkId);
+  const libraryAddress = await getLibraryAddress(networkId);
   return channelID({
     channelType: libraryAddress,
     nonce: channelNonce,
@@ -57,7 +79,7 @@ export async function createChallenge(
 ) {
   const network = await provider.getNetwork();
   const networkId = network.chainId;
-  const libraryAddress = getLibraryAddress(networkId);
+  const libraryAddress = await getLibraryAddress(networkId);
   const channel: Channel = {
     channelType: libraryAddress,
     nonce: channelNonce,
@@ -103,7 +125,7 @@ export async function concludeGame(
 ) {
   const network = await provider.getNetwork();
   const networkId = network.chainId;
-  const libraryAddress = getLibraryAddress(networkId);
+  const libraryAddress = await getLibraryAddress(networkId);
   const channel: Channel = {
     channelType: libraryAddress,
     nonce: channelNonce,
@@ -147,7 +169,7 @@ export async function respondWithMove(
 ) {
   const network = await provider.getNetwork();
   const networkId = network.chainId;
-  const libraryAddress = getLibraryAddress(networkId);
+  const libraryAddress = await getLibraryAddress(networkId);
   const channel: Channel = {
     channelType: libraryAddress,
     nonce: channelNonce,
@@ -181,7 +203,7 @@ export async function refuteChallenge(
 ) {
   const network = await provider.getNetwork();
   const networkId = network.chainId;
-  const libraryAddress = getLibraryAddress(networkId);
+  const libraryAddress = await getLibraryAddress(networkId);
   const channel: Channel = {
     channelType: libraryAddress,
     nonce: channelNonce,

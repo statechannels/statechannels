@@ -80,7 +80,8 @@ describe("transactions", () => {
   beforeAll(async () => {
     const network = await provider.getNetwork();
     networkId = network.chainId;
-    libraryAddress = getLibraryAddress(networkId);
+    libraryAddress = await getLibraryAddress(networkId);
+    
   });
 
   it("should deposit into the contract", async () => {
