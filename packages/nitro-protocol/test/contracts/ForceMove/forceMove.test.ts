@@ -26,6 +26,7 @@ import {
 import {signChallengeMessage} from '../../../src/signatures';
 import {SignedState} from '../../../src/index';
 import {COUNTING_APP_INVALID_TRANSITION} from '../../revert-reasons';
+import {SupportingDataStruct} from '../../../src/contract/transaction-creators/force-move';
 const provider = new ethers.providers.JsonRpcProvider(
   `http://localhost:${process.env.GANACHE_PORT}`,
 );
@@ -143,18 +144,18 @@ describe('forceMove', () => {
       challengeSignature =
         challengeSignature || signChallengeMessage([challengeState], challenger.privateKey);
 
+      challengeSignature = defaultAbiCoder.encode(
+        ['tuple(uint8 v, bytes32 r, bytes32 s)'],
+        [challengeSignature],
+      );
+
+      const supportingData = defaultAbiCoder.encode(SupportingDataStruct, [
+        {isFinalCount, whoSignedWhat, fixedPart, variableParts, sigs: signatures},
+      ]);
       // set current channelStorageHashes value
       await (await ForceMove.setChannelStorageHash(channelId, initialChannelStorageHash)).wait();
 
-      const tx = ForceMove.forceMove(
-        fixedPart,
-        largestTurnNum,
-        variableParts,
-        isFinalCount,
-        signatures,
-        whoSignedWhat,
-        challengeSignature,
-      );
+      const tx = ForceMove.forceMove(largestTurnNum, supportingData, challengeSignature);
       if (reasonString) {
         await expectRevert(() => tx, reasonString);
       } else {

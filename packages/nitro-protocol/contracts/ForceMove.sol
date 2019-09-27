@@ -52,7 +52,6 @@ contract ForceMove is IForceMove {
 
     struct RespondData {
         bool[2] isFinalAB;
-        uint8[] whoSignedWhat;
         FixedPart fixedPart;
         ForceMoveApp.VariablePart[2] variablePartAB;
         Signature sig;
@@ -214,7 +213,7 @@ contract ForceMove is IForceMove {
     }
 
     function conclude(uint48 largestTurnNum, bytes calldata concludeData_) external {
-        // decode supportingData_
+        // decode concludeData_
         ConcludeData memory concludeData = abi.decode(concludeData_, (ConcludeData));
 
         bytes32 channelId = _getChannelId(concludeData.fixedPart);

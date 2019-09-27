@@ -3,7 +3,7 @@ import ForceMoveArtifact from '../../../build/contracts/ForceMove.json';
 import * as ethers from 'ethers';
 import {TransactionRequest} from 'ethers/providers';
 import {State, getVariablePart, getFixedPart, hashAppPart} from '../state';
-import {Signature} from 'ethers/utils';
+import {Signature, defaultAbiCoder} from 'ethers/utils';
 import {hashOutcome} from '../outcome';
 import {signChallengeMessage} from '../../signatures';
 
@@ -20,6 +20,10 @@ interface CheckpointData {
   signatures: Signature[];
   whoSignedWhat: number[];
 }
+
+export const SupportingDataStruct = [
+  'tuple(uint8 isFinalCount, uint8[] whoSignedWhat, tuple(uint256 chainId, address[] participants, uint256 channelNonce, address appDefinition, uint256 challengeDuration) fixedPart, tuple(bytes outcome, bytes appData)[] variableParts, tuple(uint8 v, bytes32 r, bytes32 s)[] sigs)',
+];
 
 export function createForceMoveTransaction(
   states: State[],
@@ -49,17 +53,25 @@ export function createForceMoveTransaction(
   const signedStates = states.map(s => ({state: s, signature: {v: 0, r: '', s: ''}}));
   const challengerSignature = signChallengeMessage(signedStates, challengerPrivateKey);
 
+  const supportingData = defaultAbiCoder.encode(SupportingDataStruct, [
+    {isFinalCount, whoSignedWhat, fixedPart, variableParts, sigs: signatures},
+  ]);
+  const challengerSignatureEncoded = defaultAbiCoder.encode(
+    ['tuple(uint8 v, bytes32 r, bytes32 s)'],
+    [challengerSignature],
+  );
+
   const data = ForceMoveContractInterface.functions.forceMove.encode([
-    fixedPart,
     largestTurnNum,
-    variableParts,
-    isFinalCount,
-    signatures,
-    whoSignedWhat,
-    challengerSignature,
+    supportingData,
+    challengerSignatureEncoded,
   ]);
   return {data, gasLimit: GAS_LIMIT};
 }
+
+export const RespondDataStruct = [
+  'tuple(bool[2] isFinalAB, tuple(uint256 chainId, address[] participants, uint256 channelNonce, address appDefinition, uint256 challengeDuration) fixedPart, tuple(bytes outcome, bytes appData)[2] variablePartAB, tuple(uint8 v, bytes32 r, bytes32 s) sig)',
+];
 
 export function createRespondTransaction(
   challengeState: State,
@@ -71,12 +83,12 @@ export function createRespondTransaction(
   const isFinalAB = [challengeState.isFinal, responseState.isFinal];
   const fixedPart = getFixedPart(responseState);
   const variablePartAB = [getVariablePart(challengeState), getVariablePart(responseState)];
+  const respondData = defaultAbiCoder.encode(RespondDataStruct, [
+    {isFinalAB, fixedPart, variablePartAB, sig: responseSignature},
+  ]);
   const data = ForceMoveContractInterface.functions.respond.encode([
     challengerAddress,
-    isFinalAB,
-    fixedPart,
-    variablePartAB,
-    responseSignature,
+    respondData,
   ]);
   return {data, gasLimit: GAS_LIMIT};
 }
@@ -91,17 +103,21 @@ export function createCheckpointTransaction({
   const variableParts = states.map(s => getVariablePart(s));
   const isFinalCount = states.filter(s => s.isFinal).length;
 
+  const supportingData = defaultAbiCoder.encode(SupportingDataStruct, [
+    {isFinalCount, whoSignedWhat, fixedPart, variableParts, sigs: signatures},
+  ]);
+
   const data = ForceMoveContractInterface.functions.checkpoint.encode([
-    fixedPart,
     largestTurnNum,
-    variableParts,
-    isFinalCount,
-    signatures,
-    whoSignedWhat,
+    supportingData,
   ]);
 
   return {data, gasLimit: GAS_LIMIT};
 }
+
+const ConcludeDataStruct = [
+  'tuple(tuple(uint256 chainId, address[] participants, uint256 channelNonce, address appDefinition, uint256 challengeDuration) fixedPart, uint8 numStates,  uint8[] whoSignedWhat, tuple(uint8 v, bytes32 r, bytes32 s)[] sigs, bytes32 appPartHash, bytes32 outcomeHash)',
+];
 
 export function createConcludeTransaction(
   states: State[],
@@ -128,14 +144,10 @@ export function createConcludeTransaction(
 
   const numStates = states.length;
 
-  const data = ForceMoveContractInterface.functions.conclude.encode([
-    largestTurnNum,
-    fixedPart,
-    appPartHash,
-    outcomeHash,
-    numStates,
-    whoSignedWhat,
-    signatures,
+  const concludeData = defaultAbiCoder.encode(ConcludeDataStruct, [
+    {fixedPart, numStates, whoSignedWhat, sigs: signatures, appPartHash, outcomeHash},
   ]);
+
+  const data = ForceMoveContractInterface.functions.conclude.encode([largestTurnNum, concludeData]);
   return {data, gasLimit: GAS_LIMIT};
 }
