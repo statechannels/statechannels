@@ -36,13 +36,11 @@ commands:
       - run:
           command: |
             FILE=/home/circleci/<<parameters.file>>.txt
-            COUNTER=0
             touch $FILE
             while true; do
               ps -u circleci eo pid,%cpu,%mem,args,uname --sort=-%mem >> $FILE;
               echo "----------" >> $FILE;
               sleep 1;
-              COUNTER=$((COUNTER+1))
             done
           background: true
   upload_logs:
