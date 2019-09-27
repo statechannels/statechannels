@@ -53,8 +53,7 @@ classDef Interface fill:#bfa129;
 classDef TestContract fill:#fafe4f;
 classDef Library fill:#bbbb;
 class Outcome,SafeMath Library;
-class IForceMove Abstract;
-class Adjudicator,IAssetHolder,ForceMoveApp,IERC20 Interface;
+class Adjudicator,IAssetHolder,ForceMoveApp,IERC20,IForceMove Interface;
 class NitroAdjudicator,ForceMove,AssetHolder,ETHAssetHolder,ERC20AssetHolder,SingleAssetPayments,TrivialApp,CountingApp,ERC20,Token,ConsensusApp Contract;
 class TESTForceMove,TESTNitroAdjudicator,TESTAssetHolder TestContract;
 ```
@@ -64,7 +63,6 @@ key:
 ```mermaid
 graph LR
 linkStyle default interpolate basis
-Abstraction-->|Inherited by| Contract
 Contract-->|Inherited by| TestContract
 Interface-->|Inherited by| Contract
 Library
