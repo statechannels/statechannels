@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "baseUrl": ".",
+    "composite": true,
     "outDir": "lib",
     "module": "commonjs",
     "target": "es2015",
@@ -9,6 +10,7 @@
     "jsx": "react",
     "moduleResolution": "node",
     "declaration": true,
+    "declarationMap": true,
     "forceConsistentCasingInFileNames": true,
     "noImplicitReturns": true,
     "noImplicitThis": true,
@@ -19,17 +21,15 @@
     "resolveJsonModule": true,
     "esModuleInterop": true
   },
+  "include": [
+    "src/**/*",
+    "types/globals.d.ts",
+    "contracts/**/*.json"
+  ],
+  "references": [
+    { "path": "../nitro-protocol"}
+  ],
   "exclude": [
-    "node_modules",
-    "build",
-    "lib",
-    "scripts",
-    "acceptance-tests",
-    "webpack",
-    "jest",
-    "src/setupTests.ts",
-    "truffle.ts",
-    "migrations/*",
-    "test/**/*"
+    "src/setupTests.ts"
   ]
 }
