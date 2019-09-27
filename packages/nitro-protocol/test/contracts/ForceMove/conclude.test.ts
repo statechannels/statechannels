@@ -134,8 +134,7 @@ describe('conclude', () => {
         expect(event.args).toMatchObject({channelId});
 
         // compute expected ChannelStorageHash
-        const blockNumber = await provider.getBlockNumber();
-        const blockTimestamp = (await provider.getBlock(blockNumber)).timestamp;
+        const blockTimestamp = (await provider.getBlock(receipt.blockNumber)).timestamp;
         const expectedChannelStorageHash = hashChannelStorage({
           turnNumRecord: 0,
           finalizesAt: blockTimestamp,
