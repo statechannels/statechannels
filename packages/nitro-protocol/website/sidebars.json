@@ -26,6 +26,12 @@
     ],
 
     "Advanced": ["auxiliary-protocols"],
-    "Examples": ["payment-game"]
+    "Examples": ["payment-game"],
+    "Interfaces": [
+      "interfaces/IForceMove",
+      "interfaces/Adjudicator",
+      "interfaces/IAssetHolder",
+      "interfaces/ForceMoveApp"
+    ]
   }
 }
