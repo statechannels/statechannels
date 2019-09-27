@@ -12,16 +12,14 @@ export interface State {
   appDefinition: string;
   appData: string;
 }
-
-export function getFixedPart(
-  state: State,
-): {
+export interface FixedPart {
   chainId: Uint256;
   participants: Address[];
   channelNonce: Uint256;
   appDefinition: Address;
   challengeDuration: Uint48;
-} {
+}
+export function getFixedPart(state: State): FixedPart {
   const {appDefinition, challengeDuration, channel} = state;
   const {chainId, participants, channelNonce} = channel;
   return {chainId, participants, channelNonce, appDefinition, challengeDuration};
