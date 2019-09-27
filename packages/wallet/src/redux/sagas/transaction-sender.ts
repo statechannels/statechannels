@@ -8,14 +8,14 @@ import {ADJUDICATOR_ADDRESS} from "../../constants";
 
 export function* transactionSender(transaction: QueuedTransaction) {
   const provider: ethers.providers.JsonRpcProvider = yield call(getProvider);
-  const signer = provider.getSigner();
+  const signer = yield call([provider, provider.getSigner]);
   const {processId} = transaction;
   yield put(actions.transactionSent({processId}));
   let transactionResult: TransactionResponse;
   try {
     transactionResult = yield call([signer, signer.sendTransaction], {
-      ...transaction.transactionRequest,
-      to: ADJUDICATOR_ADDRESS
+      to: ADJUDICATOR_ADDRESS,
+      ...transaction.transactionRequest
     });
   } catch (error) {
     yield put(actions.transactionSubmissionFailed({processId, error}));

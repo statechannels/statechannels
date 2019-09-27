@@ -20,22 +20,33 @@ export function getAdjudicatorInterface(): ethers.utils.Interface {
   return new ethers.utils.Interface(NitroAdjudicatorArtifact.abi);
 }
 
+// FIXME: The tests ought to be able to run even without contracts having been built which
+// is why this try {} catch {} logic is here, but returning AddressZero is only a way of
+// avoiding errors being thrown. The situation is that all tests which actually interact
+// with the blockchain are currently skipped, and so the AddressZero value is never used.
+
 export function getETHAssetHolderAddress(): string {
-  const EthAssetHolderArtifact = require("../../build/contracts/ETHAssetHolder.json");
-  const artifact = EthAssetHolderArtifact.networks[getNetworkId()];
-  return artifact ? artifact.address : AddressZero;
+  try {
+    return require("../../build/contracts/ETHAssetHolder.json").networks[getNetworkId()].address;
+  } catch (e) {
+    return AddressZero;
+  }
 }
 
 export function getAdjudicatorContractAddress(): string {
-  const NitroAdjudicatorArtifact = require("../../build/contracts/NitroAdjudicator.json");
-  const artifact = NitroAdjudicatorArtifact.networks[getNetworkId()];
-  return artifact ? artifact.address : AddressZero;
+  try {
+    return require("../../build/contracts/NitroAdjudicator.json").networks[getNetworkId()].address;
+  } catch (e) {
+    return AddressZero;
+  }
 }
 
 export function getConsensusContractAddress(): string {
-  const ConsensusAppArtifact = require("../../build/contracts/ConsensusApp.json");
-  const artifact = ConsensusAppArtifact.networks[getNetworkId()];
-  return artifact ? artifact.address : AddressZero;
+  try {
+    return require("../../build/contracts/ConsensusApp.json").networks[getNetworkId()].address;
+  } catch (e) {
+    return AddressZero;
+  }
 }
 
 export function getNetworkId(): number {

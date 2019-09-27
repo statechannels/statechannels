@@ -8,15 +8,16 @@ import {
   createRespondWithMoveTransaction
 } from "../utils/transaction-generator";
 import {signCommitment} from "../domain";
-// import testGameArtifact from '../../build/contracts/TestGame.json';
+// TODO: Make sure this import works in the scenario where build/contracts is empty
+// so that the webpack and tsc build for  @statechannels/wallet still passes
+import TrivialAppArtifact from '../../build/contracts/TrivialApp.json';
 import {bigNumberify} from "ethers/utils";
 import {channelID, Channel} from "fmg-core/lib/channel";
-import {ADJUDICATOR_ADDRESS} from "../constants";
+import {ADJUDICATOR_ADDRESS, ETH_ASSET_HOLDER_ADDRESS} from "../constants";
 import {ADDRESS_ZERO} from "fmg-core";
+import { JsonRpcProvider, TransactionRequest } from "ethers/providers";
 export function getLibraryAddress(networkId) {
-  return ethers.Wallet.createRandom().address;
-  // TODO: Import Trivial App from Nitro Protocol and use that
-  // return testGameArtifact.networks[networkId].address;
+  return TrivialAppArtifact.networks[networkId].address;
 }
 export const fiveFive = [bigNumberify(5).toHexString(), bigNumberify(5).toHexString()] as [string, string];
 export const fourSix = [bigNumberify(4).toHexString(), bigNumberify(6).toHexString()] as [string, string];
@@ -39,8 +40,12 @@ export async function depositContract(
   participant: string,
   amount = defaultDepositAmount
 ) {
-  const deployTransaction = createDepositTransaction(participant, amount, "0x0");
-  const transactionReceipt = await sendTransaction(provider, deployTransaction);
+  const depositTransactionData = createDepositTransaction(participant, amount, "0x0");
+  const transactionReceipt = await sendTransaction(provider, {
+    ...depositTransactionData,
+    to: ETH_ASSET_HOLDER_ADDRESS,
+    value: amount,
+  });
   await transactionReceipt.wait();
 }
 
@@ -201,7 +206,7 @@ export async function refuteChallenge(
   return toCommitment;
 }
 
-async function sendTransaction(provider, tx) {
-  const signer = provider.getSigner();
-  return await signer.sendTransaction({...tx, to: ADJUDICATOR_ADDRESS});
+async function sendTransaction(provider: JsonRpcProvider, tx: TransactionRequest) {
+  const signer = await provider.getSigner();
+  return await signer.sendTransaction({to: ADJUDICATOR_ADDRESS, ...tx});
 }
