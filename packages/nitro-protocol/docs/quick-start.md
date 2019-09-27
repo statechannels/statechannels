@@ -14,9 +14,12 @@ How do I write a DApp (or convert an existing DApp) to run in a Nitro state chan
 4. Deposits (ETH and/or Tokens) are then made against the `channelId`, by interfacing with the relevant AssetHolder contracts.
 5. Participants exchange state updates and the default outcome is updated.
 6. In the case of inactivity, participants may call `forceMove` on the adjudicator
-7. Either the dispute will be resolved and the channel continues (goto 5) or the channel is finalized. Otherwise if all participants agree to close the channel, it can be finalized more cheaply.
-8. The outcome is pushed from the Adjudicator to the AssetHolders by calling `pushOutcome`.
-9. Funds are released from the AssetHolders.
+   - Either the dispute will be resolved and the channel continues (goto 5) or
+   - The challenge times out (goto 8).
+7. If all participants agree to close the channel, they may each sign an `isFinal = true` state and submit this via the `conclude` method.
+8. The channel is finalized.
+9. The outcome is pushed from the Adjudicator to the AssetHolders by calling `pushOutcome`.
+10. Funds are released from the AssetHolders.
 
 In this example, assets are held on chain **directly** against the state channel. The state channel is said to be directly funded, a situation we represent thus:
 
