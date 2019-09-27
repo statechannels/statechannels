@@ -42,9 +42,10 @@ commands:
             COUNTER=0
             touch $FILE
             while true; do
-              echo "${COUNTER} ----------" >> $FILE;
+              echo "${COUNTER} seconds ----------" >> $FILE;
               echo "Current Memory: $(($(cat $USAGE) / 1000000)) mB" >> $FILE
               echo "Max Memory:     $(($(cat $MAX_USAGE) / 1000000)) mB" >> $FILE
+              ps -u circleci eo %cpu,%mem,args,pid --sort=-%mem >> $FILE
               sleep 1;
               COUNTER=$((COUNTER + 1));
             done 
