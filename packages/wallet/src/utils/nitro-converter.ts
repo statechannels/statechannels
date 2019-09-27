@@ -67,6 +67,9 @@ function convertToNitroChannel(channel: Channel): NitroChannel {
   };
 }
 
+// e.g.,
+// 0x9546E319878D2ca7a21b481F873681DF344E0Df8 becomes
+// 0x0000000000000000000000009546E319878D2ca7a21b481F873681DF344E0Df8
 export function convertAddressToBytes32(address: string): string {
   const normalizedAddress = bigNumberify(address).toHexString();
   if (normalizedAddress.length !== 42) {
@@ -75,7 +78,7 @@ export function convertAddressToBytes32(address: string): string {
     );
   }
   // We pad to 66 = (32*2) + 2('0x')
-  return normalizedAddress.padEnd(66, "0");
+  return `0x${normalizedAddress.substr(2).padStart(64, "0")}`;
 }
 function convertAllocationToOutcome({allocation, destination}: {allocation: string[]; destination: string[]}): Outcome {
   if (allocation.length !== destination.length) {
