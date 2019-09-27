@@ -7,7 +7,6 @@ import {Channel, getChannelId} from '../../../src/contract/channel';
 import {bigNumberify} from 'ethers/utils';
 
 const provider = getTestProvider();
-// const signer = provider.getSigner(0); // convention matches setupContracts function
 let ETHAssetHolder: ethers.Contract;
 const chainId = '0x1234';
 const participants = [];
@@ -69,8 +68,6 @@ describe('deposit', () => {
       if (reasonString) {
         await expectRevert(() => tx, reasonString);
       } else {
-        // const balanceBefore = await signer.getBalance();
-
         const {events} = await (await tx).wait();
         const event = getDepositedEvent(events);
         expect(event).toMatchObject({
@@ -81,12 +78,6 @@ describe('deposit', () => {
 
         const allocatedAmount = await ETHAssetHolder.holdings(destination);
         await expect(allocatedAmount).toEqual(heldAfter);
-
-        // check for any partial refund
-        // const gasCost = (await provider.getGasPrice()).mul(cumulativeGasUsed);
-        // await expect(await signer.getBalance()).toEqual(
-        //   balanceBefore.sub(event.amountDeposited).sub(gasCost),
-        // );
       }
     },
   );
