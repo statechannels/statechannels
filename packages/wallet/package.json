@@ -16,7 +16,7 @@
     "build:webpack": "CI=false node scripts/build.js",
     "prepare": "yarn build:typescript",
     "test": "run-s lint:check 'test:app --all'",
-    "test:ci": "GANACHE_PORT=8503 yarn run lint:check && yarn run test:ci:contracts && yarn run test:ci:app && yarn build",
+    "test:ci": "yarn run lint:check && GANACHE_PORT=8503 yarn run test:ci:contracts && yarn run test:ci:app && yarn build",
     "test:ci:contracts": "yarn test:contracts --all --ci",
     "test:ci:app": "yarn test:app --all --ci --runInBand",
     "test:app": "npx run-jest -c ./config/jest/jest.config.js",
