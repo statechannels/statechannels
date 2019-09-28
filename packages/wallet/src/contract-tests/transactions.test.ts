@@ -1,7 +1,7 @@
 import { ethers } from "ethers";
 
 import { signCommitment, signVerificationData, signCommitment2 } from "../domain";
-import { getLibraryAddress, createChallenge, concludeGame } from "./test-utils";
+import { createChallenge, concludeGame } from "./test-utils";
 import {
   createForceMoveTransaction,
   createDepositTransaction,
@@ -20,7 +20,7 @@ import { channelID } from "fmg-core/lib/channel";
 import { getGanacheProvider } from "@statechannels/devtools";
 import { transactionSender } from "../redux/sagas/transaction-sender";
 import { testSaga } from "redux-saga-test-plan";
-import { getProvider } from "../utils/contract-utils";
+import { getProvider, getLibraryAddress } from "../utils/contract-utils";
 import { transactionSent, transactionSubmitted, transactionConfirmed } from "../redux/actions";
 import { ADJUDICATOR_ADDRESS, ETH_ASSET_HOLDER_ADDRESS } from "../constants";
 
