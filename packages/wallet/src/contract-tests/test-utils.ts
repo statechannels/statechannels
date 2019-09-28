@@ -10,7 +10,7 @@ import {
 import { signCommitment } from "../domain";
 import loadJsonFile from "load-json-file";
 import path from "path";
-import { signCommitment } from "../domain";
+
 // TODO: Make sure this import works in the scenario where build/contracts is empty
 // so that the webpack and tsc build for  @statechannels/wallet still passes
 import TrivialAppArtifact from "../../build/contracts/TrivialApp.json";
