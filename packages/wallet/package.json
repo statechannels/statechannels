@@ -79,7 +79,7 @@
     "prop-types": "^15.6.2",
     "raf": "3.4.0",
     "react": "^16.3.2",
-    "react-burger-menu": "2.5.4",
+    "react-burger-menu": "2.6.11",
     "react-dev-utils": "7.0.1",
     "react-dom": "^16.3.2",
     "react-loader-spinner": "^2.0.6",
