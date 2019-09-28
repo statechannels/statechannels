@@ -19,17 +19,10 @@
     "noUnusedLocals": true,
     "allowSyntheticDefaultImports": true,
     "resolveJsonModule": true,
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "types": ["node", "jest"]
   },
-  "include": [
-    "src/**/*",
-    "types/globals.d.ts",
-    "contracts/**/*.json"
-  ],
-  "references": [
-    { "path": "../nitro-protocol"}
-  ],
-  "exclude": [
-    "src/setupTests.ts"
-  ]
+  "include": ["src/**/*", "types/globals.d.ts", "contracts/**/*.json"],
+  "references": [{ "path": "../nitro-protocol" }],
+  "exclude": ["src/setupTests.ts"]
 }
