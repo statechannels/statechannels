@@ -1,13 +1,18 @@
 import React from "react";
-import { ShareFile } from "./share-file/ShareFile";
 import "./ShareList.scss";
+import { RoutePath } from "../../routes";
+import { ShareFile } from "./share-file/ShareFile";
 
-export type ShareListProps = { files: any[] };
+export type ShareListProps = { files: any[]; history: any };
 
-const ShareList: React.FC<ShareListProps> = ({ files }: ShareListProps) => {
+const ShareList: React.FC<ShareListProps> = ({ files, history }) => {
   return (
     <table className="share-list">
-      <tbody>{files.length ? files.map(file => <ShareFile file={file} />) : false}</tbody>
+      <tbody>
+        {files.length
+          ? files.map(file => <ShareFile file={file} goTo={route => history.push(`${RoutePath.Download}/${route}`)} />)
+          : false}
+      </tbody>
     </table>
   );
 };

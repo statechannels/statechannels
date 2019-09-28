@@ -1,0 +1,21 @@
+@import "../../styles/variables";
+
+.fileInfo {
+  padding: 10px auto;
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  .fileName {
+    min-width: 350px;
+    width: 50%;
+  }
+  .fileSize {
+    min-width: 150px;
+    width: 25%;
+  }
+  .fileCost {
+    min-width: 100px;
+    width: 25%;
+    text-align: right;
+  }
+}

@@ -11,6 +11,7 @@ const mockFiles = [
   { filename: "Sample_3.dat", size: 50, seeders: 2, peers: 360, cost: 0.5 }
 ];
 const Welcome: React.FC<RouteComponentProps> = ({ history }) => {
+  console.log(history);
   return (
     <section className="section fill">
       <div className="jumbotron"></div>
@@ -21,9 +22,9 @@ const Welcome: React.FC<RouteComponentProps> = ({ history }) => {
         </p>
       </div>
       <h2>Download a sample file</h2>
-      <ShareList files={mockFiles} />
+      <ShareList files={mockFiles} history={history} />
       <h2>Or share a file</h2>
-      <FormButton name="setup" block={true} onClick={() => history.push(RoutePath.Root)}>
+      <FormButton name="upload" block={true} onClick={() => history.push(RoutePath.Upload)}>
         Upload
       </FormButton>
     </section>

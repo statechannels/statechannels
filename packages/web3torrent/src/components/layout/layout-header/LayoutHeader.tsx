@@ -10,9 +10,9 @@ const LayoutHeader: React.FC<RouteComponentProps> = props => {
   return (
     <header className="header">
       <nav className="header-content">
-        <div className="header-logo"></div>
+        <a className="header-logo" href={RoutePath.Root}></a>
         <div className="actions-container">
-          <FormButton name="setup" onClick={() => props.history.push(RoutePath.Root)}>
+          <FormButton name="setup" onClick={() => props.history.push(RoutePath.Upload)}>
             Upload
           </FormButton>{" "}
         </div>

@@ -2,9 +2,9 @@ import React from "react";
 import { FormButton } from "../../form";
 import "./ShareFile.scss";
 
-export type ShareFileProps = { file: any };
+export type ShareFileProps = { file: any; goTo: (name: string) => void };
 
-const ShareFile: React.FC<ShareFileProps> = ({ file }: ShareFileProps) => {
+const ShareFile: React.FC<ShareFileProps> = ({ file, goTo }: ShareFileProps) => {
   return (
     <tr className={"share-file"}>
       <td className="name-cell">{file.filename}</td>
@@ -13,7 +13,7 @@ const ShareFile: React.FC<ShareFileProps> = ({ file }: ShareFileProps) => {
       <td className="other-cell">{file.peers}P</td>
       <td className="other-cell">${file.cost}</td>
       <td className="button-cell">
-        <FormButton name="download" onClick={() => null}>
+        <FormButton name="download" onClick={() => goTo(file.filename)}>
           Download
         </FormButton>
       </td>
