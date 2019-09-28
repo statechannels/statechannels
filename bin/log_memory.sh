@@ -1,5 +1,6 @@
 #!/bin/bash
 
+FILE=/home/circleci/$1.txt
 USAGE=/sys/fs/cgroup/memory/memory.usage_in_bytes
 MAX_USAGE=/sys/fs/cgroup/memory/memory.max_usage_in_bytes
 COUNTER=0
