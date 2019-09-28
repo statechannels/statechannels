@@ -104,7 +104,7 @@ jobs:
       - run:
           command: yarn startGanache
           background: true
-      - run: yarn test:ci --since $(git merge-base $CIRCLE_BRANCH origin/master)
+      - run: yarn test:ci
       - upload_logs:
           file: test-stats
 
