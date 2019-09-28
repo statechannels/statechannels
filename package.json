@@ -37,5 +37,8 @@
     "tslint-config-prettier": "1.18.0",
     "tslint-plugin-prettier": "2.0.1",
     "typescript": "3.6.3"
+  },
+  "resolutions": {
+    "@types/react": "16.9.3"
   }
 }
