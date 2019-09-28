@@ -2,6 +2,7 @@ version: 2.1
 
 defaults: &defaults
   working_directory: /home/circleci/project
+  resource_class: large
   docker:
     - image: circleci/node:10.16.3
 
@@ -35,24 +36,7 @@ commands:
         default: stats
     steps:
       - run:
-          command: |
-            FILE=/home/circleci/<<parameters.file>>.txt
-            USAGE=/sys/fs/cgroup/memory/memory.usage_in_bytes
-            MAX_USAGE=/sys/fs/cgroup/memory/memory.max_usage_in_bytes
-            COUNTER=0
-            echo "System $(grep MemTotal /proc/meminfo )" >> $FILE
-            while true; do
-              echo "${COUNTER} seconds ----------" >> $FILE;
-              echo "Current Memory: $(($(cat $USAGE) / 1000000)) mB" >> $FILE
-              echo "Max Memory:     $(($(cat $MAX_USAGE) / 1000000)) mB" >> $FILE
-              # The %mem field in the output of `ps afu` is incorrect, as it divides by the memory
-              # avaiable to the whole system.
-              # It seems like containers have about 70 gB of memory, so 1% usage corresponds to ~700 mB.
-              # You can validate this assumption on line 1 of $FILE.
-              ps afu >> $FILE 
-              sleep 1;
-              COUNTER=$((COUNTER + 1));
-            done 
+          command: bash bin/log_memory.sh <<parameters.file>>
           background: true
   upload_logs:
     description: "Upload logs "
@@ -90,6 +74,7 @@ jobs:
             - packages/*/build
             - packages/*/lib
             - packages/*/node_modules
+            - node_modules
       - upload_logs:
           file: build-stats
 
@@ -98,7 +83,6 @@ jobs:
     steps:
       - <<: *restore_code
       - checkout
-      - <<: *restore_dep
       - attach_workspace:
           at: /home/circleci/project
       - run: yarn lint:check
@@ -111,13 +95,12 @@ jobs:
       - checkout
       - log_stats:
           file: test-stats
-      - <<: *restore_dep
       - attach_workspace:
           at: /home/circleci/project
       - run:
           command: yarn startGanache
           background: true
-      - run: yarn test:ci --since origin/master
+      - run: yarn test:ci --since $(git merge-base $CIRCLE_BRANCH origin/master)
       - upload_logs:
           file: test-stats
 
