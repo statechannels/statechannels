@@ -3,6 +3,7 @@
   color: #fff;
   padding: 10px 20px;
   flex: 1;
+  display: flex;
   margin-right: 10px;
   transition: box-shadow 150ms, background-color 150ms;
   font: bold 18px "Karla", sans-serif;
@@ -36,4 +37,16 @@
 
 .secondary:hover {
   background-color: var(--alt-secondary-color);
+}
+
+.withIconToTheRight {
+  flex-direction: row-reverse;
+}
+
+.withIconToTheRight {
+  flex-direction: row;
+}
+
+.icon {
+  position: absolute;
 }
