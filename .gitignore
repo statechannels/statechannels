@@ -24,10 +24,7 @@ package-lock.json
 *.iml
 *.sw[op]
 
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-lerna-debug.log*
+**/*.log
 
 jest-cache/
 e2e.log
