@@ -26,7 +26,7 @@
     "prettier:check": "npx prettier --check 'src/**/*.{ts,tsx}'",
     "prettier:write": "npx prettier --write 'src/**/*.{ts,tsx}'",
     "start": "npm run clearContracts && node scripts/start.js",
-    "startGanache": "npx etherlime ganache --port=8546 > ganache.log",
+    "startGanache": "node bin/start-ganache.js",
     "storybook": "start-storybook -p 9001 -c .storybook",
     "test:app": "npx run-jest -c ./config/jest/jest.config.js",
     "test:ci:app": "yarn test:app --all --ci --runInBand",
