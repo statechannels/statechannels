@@ -13,6 +13,7 @@ async function getNetworkMap() {
     return await loadJsonFile(path.join(__dirname, 'network-map.json'));
   } catch (err) {
     if (!!err.message.match('ENOENT: no such file or directory')) {
+      console.warn('network-map.json not found');
       return {};
     } else {
       throw err;
