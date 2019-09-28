@@ -29,7 +29,6 @@
     "lint:write": "npx tslint --config tslint.json --project . --fix",
     "prettier:check": "npx prettier --check 'src/**/*.{ts,tsx}'",
     "prettier:write": "npx prettier --write 'src/**/*.{ts,tsx}'",
-    "deployContracts": "NODE_ENV=development npx deploy-contracts",
     "startGanache": "npx etherlime ganache",
     "postinstall": "rm -f node_modules/web3/index.d.ts",
     "storybook": "start-storybook -p 9001 -c .storybook",
