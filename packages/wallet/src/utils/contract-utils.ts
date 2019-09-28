@@ -1,22 +1,46 @@
-import {ethers} from "ethers";
+import { ethers } from "ethers";
 
-import {asEthersObject, Commitment} from "fmg-core";
-import {AddressZero} from "ethers/constants";
+import { asEthersObject, Commitment } from "fmg-core";
+import { AddressZero } from "ethers/constants";
+import loadJsonFile = require("load-json-file");
+import path from "path";
+let networkMap;
+
+export function getLibraryAddress(networkId, contractName) {
+  networkMap = networkMap || getNetworkMap();
+  if (networkMap[networkId] && networkMap[networkId][contractName]) {
+    return networkMap[networkId][contractName];
+  }
+  console.error(contractName, networkId, networkMap);
+
+  throw new Error(`Could not find ${contractName} in network map with network id ${networkId}`);
+}
+
+export const getNetworkMap = () => {
+  try {
+    return loadJsonFile.sync(path.join(__dirname, "../../deployment/network-map.json"));
+  } catch (err) {
+    if (!!err.message.match("ENOENT: no such file or directory")) {
+      return {};
+    } else {
+      throw err;
+    }
+  }
+};
 
 export async function getProvider(): Promise<ethers.providers.Web3Provider> {
   return await new ethers.providers.Web3Provider(web3.currentProvider);
 }
 
 export async function getAdjudicatorContract(provider) {
-  const NitroAdjudicatorArtifact = require("../../build/contracts/NitroAdjudicator.json");
   await provider.ready;
-  const networkId = (await provider.getNetwork()).chainId;
-  const contractAddress = NitroAdjudicatorArtifact.networks[networkId].address;
+
+  const contractAddress = getLibraryAddress(getNetworkId(), "NitroAdjudicator");
   return new ethers.Contract(contractAddress, getAdjudicatorInterface(), provider);
 }
 
 export function getAdjudicatorInterface(): ethers.utils.Interface {
-  const NitroAdjudicatorArtifact = require("../../contracts/pre-built-artifacts/NitroAdjudicator.json");
+  const NitroAdjudicatorArtifact = require("../../build/contracts/NitroAdjudicator.json");
   return new ethers.utils.Interface(NitroAdjudicatorArtifact.abi);
 }
 
@@ -27,7 +51,7 @@ export function getAdjudicatorInterface(): ethers.utils.Interface {
 
 export function getETHAssetHolderAddress(): string {
   try {
-    return require("../../build/contracts/ETHAssetHolder.json").networks[getNetworkId()].address;
+    return getLibraryAddress(getNetworkId(), "ETHAssetHolder");
   } catch (e) {
     return AddressZero;
   }
@@ -35,7 +59,7 @@ export function getETHAssetHolderAddress(): string {
 
 export function getAdjudicatorContractAddress(): string {
   try {
-    return require("../../build/contracts/NitroAdjudicator.json").networks[getNetworkId()].address;
+    return getLibraryAddress(getNetworkId(), "NitroAdjudicator");
   } catch (e) {
     return AddressZero;
   }
@@ -43,7 +67,7 @@ export function getAdjudicatorContractAddress(): string {
 
 export function getConsensusContractAddress(): string {
   try {
-    return require("../../build/contracts/ConsensusApp.json").networks[getNetworkId()].address;
+    return getLibraryAddress(getNetworkId(), "ConsensusApp");
   } catch (e) {
     return AddressZero;
   }
