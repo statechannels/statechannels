@@ -20,6 +20,13 @@
   width: 196px;
   height: 29px;
 }
+.header-logo-hidden{
+  height: 1px;
+  width: 1px;
+  position: absolute;
+  overflow: hidden;
+  top: -10px;
+}
 .actions-container button {
   margin-top: 0px;
   margin-bottom: 20px;
