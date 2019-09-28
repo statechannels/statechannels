@@ -48,7 +48,7 @@
     "test:ci": "yarn contract:compile && yarn test:prepare && npx jest --ci --bail --runInBand",
     "test:prepare": "yarn lint:check && yarn deploy:test",
     "test:typescript": "npx jest --testPathIgnorePatterns='test/contracts' --reporters='default'",
-    "test": "yarn test:prepare && npx jest",
+    "test": "yarn test:prepare && npx jest"
   },
   "dependencies": {
     "@openzeppelin/contracts": "2.3.0",
