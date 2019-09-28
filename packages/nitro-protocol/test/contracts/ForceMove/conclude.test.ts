@@ -11,6 +11,7 @@ import {
   finalizedOutcomeHash,
   signStates,
   getTestProvider,
+  getNetworkMap,
 } from '../../test-helpers';
 import {HashZero} from 'ethers/constants';
 import {Outcome} from '../../../src/contract/outcome';
@@ -26,6 +27,7 @@ import {
 
 const provider = getTestProvider();
 let ForceMove: ethers.Contract;
+let networkMap;
 let networkId;
 const chainId = '0x1234';
 const participants = ['', '', ''];
@@ -41,9 +43,10 @@ for (let i = 0; i < 3; i++) {
   participants[i] = wallets[i].address;
 }
 beforeAll(async () => {
+  networkMap = await getNetworkMap();
   ForceMove = await setupContracts(provider, ForceMoveArtifact);
   networkId = (await provider.getNetwork()).chainId;
-  appDefinition = countingAppArtifact.networks[networkId].address; // use a fixed appDefinition in all tests
+  appDefinition = networkMap[networkId][countingAppArtifact.contractName]; // use a fixed appDefinition in all tests
 });
 
 const acceptsWhenOpenIf =

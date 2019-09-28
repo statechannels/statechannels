@@ -5,7 +5,7 @@ import ForceMoveArtifact from '../../../build/contracts/TESTForceMove.json';
 // @ts-ignore
 import countingAppArtifact from '../../../build/contracts/CountingApp.json';
 import {defaultAbiCoder, hexlify, bigNumberify} from 'ethers/utils';
-import {setupContracts, sign, getTestProvider} from '../../test-helpers';
+import {setupContracts, sign, getTestProvider, getNetworkMap} from '../../test-helpers';
 import {Outcome} from '../../../src/contract/outcome';
 import {Channel, getChannelId} from '../../../src/contract/channel';
 import {State, hashState} from '../../../src/contract/state';
@@ -21,6 +21,7 @@ import {respondArgs} from '../../../src/contract/transaction-creators/force-move
 const provider = getTestProvider();
 let ForceMove: ethers.Contract;
 let networkId;
+let networkMap;
 const chainId = '0x1234';
 const participants = ['', '', ''];
 const wallets = new Array(3);
@@ -37,9 +38,10 @@ for (let i = 0; i < 3; i++) {
 const nonParticipant = ethers.Wallet.createRandom();
 
 beforeAll(async () => {
+  networkMap = await getNetworkMap();
   ForceMove = await setupContracts(provider, ForceMoveArtifact);
   networkId = (await provider.getNetwork()).chainId;
-  appDefinition = countingAppArtifact.networks[networkId].address; // use a fixed appDefinition in all tests
+  appDefinition = networkMap[networkId][countingAppArtifact.contractName]; // use a fixed appDefinition in all tests
 });
 
 // Scenarios are synonymous with channelNonce:
