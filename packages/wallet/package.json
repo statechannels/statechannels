@@ -32,7 +32,7 @@
     "clearContracts": "rm -rf ./build/contracts"
   },
   "dependencies": {
-    "@firebase/app-types": "^0.3.2",
+    "@firebase/app-types": "^0.4.0",
     "@fortawesome/fontawesome-svg-core": "^1.2.4",
     "@fortawesome/free-regular-svg-icons": "^5.7.1",
     "@fortawesome/free-solid-svg-icons": "^5.3.1",
