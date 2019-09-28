@@ -41,7 +41,7 @@
     "deploy": "npx etherlime deploy --compile=false",
     "lint:check": "npx tslint --config tslint.json --project .",
     "lint:write": "npx tslint --config tslint.json --project . --fix",
-    "prepare": "yarn build",
+    "prepare": "yarn build:typescript",
     "prettier:check": "npx prettier --check '{contracts,src,test}/**/*.{ts,tsx,sol}'",
     "prettier:write": "npx prettier --write '{contracts,src,test}/**/*.{ts,tsx,sol}'",
     "startGanache": "node bin/start-ganache.js",

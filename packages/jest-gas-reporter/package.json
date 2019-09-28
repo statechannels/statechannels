@@ -8,6 +8,7 @@
   "author": "Alex Gap <alex@magmo.com>",
   "license": "MIT",
   "scripts": {
+    "prepare": "yarn build",
     "build": "tslint --project . && tsc -b",
     "build:ci": "yarn build"
   },
