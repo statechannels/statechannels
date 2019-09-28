@@ -11,7 +11,6 @@ const mockFiles = [
   { filename: "Sample_3.dat", size: 50, seeders: 2, peers: 360, cost: 0.5 }
 ];
 const Welcome: React.FC<RouteComponentProps> = ({ history }) => {
-  console.log(history);
   return (
     <section className="section fill">
       <div className="jumbotron"></div>

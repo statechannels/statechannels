@@ -1,7 +1,7 @@
 import React from "react";
-import "./ShareList.scss";
 import { RoutePath } from "../../routes";
 import { ShareFile } from "./share-file/ShareFile";
+import "./ShareList.scss";
 
 export type ShareListProps = { files: any[]; history: any };
 
