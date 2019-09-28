@@ -104,7 +104,7 @@
     "@storybook/react": "4.1.18",
     "@types/jest": "^24",
     "@types/redux-storage": "4.1.0",
-    "@types/storybook__react": "4.0.0",
+    "@types/storybook__react": "4.0.2",
     "awesome-typescript-loader": "5.2.1",
     "babel-jest": "^23.4.2",
     "babel-loader": "^7.1.5",
