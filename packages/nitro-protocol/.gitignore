@@ -18,6 +18,3 @@ build
 built
 lib
 dist
-
-# environment
-.env
