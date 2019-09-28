@@ -36,7 +36,9 @@ commands:
         default: stats
     steps:
       - run:
-          command: bash bin/log_memory.sh
+          command: |
+            FILE="/home/circleci/<<parameters.file>>.txt"
+            bash bin/log_memory.sh
           background: true
   upload_logs:
     description: "Upload logs "
