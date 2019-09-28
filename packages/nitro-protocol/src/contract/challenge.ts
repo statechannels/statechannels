@@ -16,20 +16,22 @@ export interface ChallengeRegisteredEvent {
   challengeStates: State[];
 }
 export function getChallengeRegisteredEvent(eventArgs): ChallengeRegisteredEvent {
-  // TODO: There must be a better way of parsing out the event
-  const turnNumRecord = bigNumberify(eventArgs[1]).toNumber();
-  const finalizesAt = bigNumberify(eventArgs[2]).toHexString();
-  const challenger = eventArgs[3];
-  const isFinal = eventArgs[4];
-  const chainId = bigNumberify(eventArgs[5][0]).toHexString();
-  const participants = eventArgs[5][1].map(p => bigNumberify(p).toHexString());
-  const channelNonce = bigNumberify(eventArgs[5][2]).toHexString();
-  const appDefinition = eventArgs[5][3];
-  const challengeDuration = bigNumberify(eventArgs[5][4]).toNumber();
+  const [event] = eventArgs.slice(-1);
 
-  const variableParts: VariablePart[] = eventArgs[6].map((e, i) => {
-    const outcome = eventArgs[6][i][0];
-    const appData = eventArgs[6][i][1];
+  const turnNumRecord = bigNumberify(event.args.turnNumRecord).toNumber();
+  const finalizesAt = bigNumberify(event.args.finalizesAt).toHexString();
+  const challenger = event.args.challenger;
+  const isFinal = event.args.isFinal;
+  // Fixed part
+  const chainId = bigNumberify(event.args.fixedPart[0]).toHexString();
+  const participants = event.args.fixedPart[1].map(p => bigNumberify(p).toHexString());
+  const channelNonce = bigNumberify(event.args.fixedPart[2]).toHexString();
+  const appDefinition = event.args.fixedPart[3];
+  const challengeDuration = bigNumberify(event.args.fixedPart[4]).toNumber();
+  // Variable part
+  const variableParts: VariablePart[] = event.args.variableParts.map(v => {
+    const outcome = v[0];
+    const appData = v[1];
     return {outcome, appData};
   });
 

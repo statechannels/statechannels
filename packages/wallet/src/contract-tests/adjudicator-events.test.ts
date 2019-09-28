@@ -34,7 +34,7 @@ const createWatcherState = (processId: string, ...channelIds: string[]): walletS
   });
 };
 // TODO: Get these tests working
-describe.skip("adjudicator listener", () => {
+describe("adjudicator listener", () => {
   const provider: ethers.providers.JsonRpcProvider = getGanacheProvider();
 
   const participantA = ethers.Wallet.createRandom();
