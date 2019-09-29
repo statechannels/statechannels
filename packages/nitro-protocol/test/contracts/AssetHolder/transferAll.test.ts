@@ -10,8 +10,6 @@ import {
   getTestProvider,
 } from '../../test-helpers';
 
-// @ts-ignore (ethers mis-interpreting Truffle artifact's abi paramter)
-const AssetHolderInterface = new ethers.utils.Interface(AssetHolderArtifact.abi);
 import {id, bigNumberify} from 'ethers/utils';
 import {encodeAllocation} from '../../../src/contract/outcome';
 

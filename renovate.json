@@ -1,6 +1,7 @@
 {
-  "extends": ["config:base"],
+  "extends": ["config:base", "group:allNonMajor"],
   "schedule": ["every weekend"],
   "baseBranches": ["master"],
+  "ignoreDeps": ["yarn"],
   "automerge": true
 }

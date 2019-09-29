@@ -26,24 +26,13 @@ The nitro-adjudicator supports an arbitrary number of state channels, and introd
 
 ### Development
 
-We use [truffle](http://truffleframework.com/) for smart contract development.
+We use [etherlime](https://etherlime.gitbook.io/) for smart contract development.
 
 To get started:
 
 1. Download the repo and `cd` into the directory.
-2. Make a `.env` file from the `.env.example`, like this:
-
-```
-DEFAULT_GAS=6721975
-DEFAULT_GAS_PRICE=20000000000
-GANACHE_HOST=0.0.0.0
-GANACHE_PORT=8545
-ENABLE_SOLC_OPTIMIZER=TRUE
-SOLC_VERSION=0.5.11
-USE_NATIVE_SOLC=false
-```
-
-3. Run `yarn install`.
+2. Run `yarn install`.
+3. Run `yarn startGanache`.
 4. Run `yarn test`.
 
 ## Documentation website

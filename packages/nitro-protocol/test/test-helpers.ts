@@ -22,8 +22,12 @@ import {
 import {State, hashState} from '../src/contract/state';
 import {TransactionRequest, TransactionReceipt} from 'ethers/providers';
 
-export const getTestProvider = () =>
-  new ethers.providers.JsonRpcProvider(`http://localhost:${process.env.GANACHE_PORT || 8545}`);
+export const getTestProvider = () => {
+  if (!process.env.GANACHE_PORT) {
+    throw new Error('Missing environment variable GANACHE_PORT required');
+  }
+  return new ethers.providers.JsonRpcProvider(`http://localhost:${process.env.GANACHE_PORT}`);
+};
 
 export const getNetworkMap = async () => {
   try {
