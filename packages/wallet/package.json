@@ -105,7 +105,7 @@
   "devDependencies": {
     "@babel/runtime": "^7.0.0-beta.53",
     "@statechannels/devtools": "0.1.21",
-    "@storybook/react": "4.1.18",
+    "@storybook/react": "5.2.1",
     "@types/jest": "^24",
     "@types/redux-storage": "4.1.0",
     "@types/storybook__react": "4.0.0",
