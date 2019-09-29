@@ -16,6 +16,7 @@ export interface ChallengeRegisteredEvent {
   challengeStates: State[];
 }
 export function getChallengeRegisteredEvent(eventResult): ChallengeRegisteredEvent {
+  const [event] = eventResult.slice(-1);
   const {
     turnNumRecord,
     finalizesAt,
@@ -23,7 +24,7 @@ export function getChallengeRegisteredEvent(eventResult): ChallengeRegisteredEve
     isFinal,
     fixedPart,
     variablePart: variablePartUnstructured,
-  } = [...eventResult.args].pop();
+  } = event.args;
 
   // Fixed part
   const chainId = bigNumberify(fixedPart[0]).toHexString();
