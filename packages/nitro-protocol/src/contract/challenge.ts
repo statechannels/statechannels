@@ -23,7 +23,7 @@ export function getChallengeRegisteredEvent(eventResult): ChallengeRegisteredEve
     challenger,
     isFinal,
     fixedPart,
-    variablePart: variablePartUnstructured,
+    variableParts: variablePartsUnstructured,
   } = event.args;
 
   // Fixed part
@@ -34,7 +34,7 @@ export function getChallengeRegisteredEvent(eventResult): ChallengeRegisteredEve
   const challengeDuration = bigNumberify(fixedPart[4]).toNumber();
 
   // Variable part
-  const variableParts: VariablePart[] = variablePartUnstructured.map(v => {
+  const variableParts: VariablePart[] = variablePartsUnstructured.map(v => {
     const outcome = v[0];
     const appData = v[1];
     return {outcome, appData};
