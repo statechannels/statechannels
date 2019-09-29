@@ -66,7 +66,7 @@
     "enum": "^2.5.0",
     "ethers": "^4.0.12",
     "eventemitter2": "5.0.1",
-    "firebase": "^5.0.4",
+    "firebase": "^7.0.0",
     "fmg-core": "0.5.9",
     "fs-extra": "8.1.0",
     "key-mirror": "^1.0.1",
