@@ -2,6 +2,11 @@
   "extends": ["config:base", "group:allNonMajor"],
   "schedule": ["every weekend"],
   "baseBranches": ["master"],
-  "ignoreDeps": ["yarn"],
-  "automerge": true
+  "automerge": true,
+  "ignoreDeps": [
+    "yarn",
+    "babel-loader",
+    "webpack",
+    "webpack-dev-server"
+  ]
 }
