@@ -25,6 +25,11 @@
     "yargs": "14.0.0"
   },
   "devDependencies": {
+    "@types/chai": "4.2.3",
+    "@types/detect-port": "1.1.0",
+    "@types/dotenv": "6.1.1",
+    "@types/fs-extra": "8.0.0",
+    "@types/yargs": "13.0.3",
     "ganache-cli": "6.6.0",
     "truffle": "5.0.37"
   }

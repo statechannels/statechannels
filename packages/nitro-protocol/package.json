@@ -59,9 +59,10 @@
   "devDependencies": {
     "@statechannels/devtools": "0.1.21",
     "@statechannels/jest-gas-reporter": "0.0.2",
+    "@types/dotenv": "6.1.1",
     "@types/jest": "24.0.18",
-    "@types/node": "12.7.5",
-    "@types/web3": "1.0.19",
+    "@types/node": "12.7.8",
+    "@types/prettier": "1.18.2",
     "dotenv": "8.1.0",
     "etherlime": "2.2.3",
     "etherlime-lib": "1.1.5",
