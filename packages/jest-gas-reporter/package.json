@@ -9,8 +9,7 @@
   "license": "MIT",
   "scripts": {
     "prepare": "yarn build",
-    "build": "tslint --project . && tsc -b",
-    "build:ci": "yarn build"
+    "build": "tslint --project . && tsc -b"
   },
   "devDependencies": {
     "@types/easy-table": "0.0.32",
