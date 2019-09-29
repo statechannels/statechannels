@@ -148,7 +148,7 @@
     "truffle": "5.0.37",
     "truffle-hdwallet-provider": "^1.0.0-web3one.0",
     "ts-jest": "24.1.0",
-    "ts-loader": "5.3.3",
+    "ts-loader": "6.1.2",
     "ts-node": "^7.0.1",
     "tsconfig-paths-webpack-plugin": "^2.0.0",
     "tslint": "^5.7.0",
