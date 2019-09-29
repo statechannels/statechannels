@@ -32,7 +32,6 @@
   "homepage": "https://github.com/statechannels/nitro-protocol/",
   "scripts": {
     "build": "run-s clearContracts clearLib contract:compile build:typescript",
-    "build:ci": "yarn build",
     "build:typescript": "tslint --project . && tsc -b",
     "clearContracts": "rm -rf build/contracts",
     "clearLib": "rm -rf lib",

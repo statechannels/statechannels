@@ -50,21 +50,17 @@ commands:
           destination: << parameters.file >>
 
 jobs:
-  build:
+  prepare:
     <<: *defaults
     steps:
       - <<: *restore_code
       - checkout
       - log_stats:
-          file: build-stats
+          file: prepare-stats
       - <<: *save_code
       - <<: *restore_dep
-      - run:
-          name: "yarn --frozen-lockfile"
-          command: yarn --frozen-lockfile
-
-      - run: yarn build:ci
-
+      - run: yarn --frozen-lockfile
+      - run: yarn prepare
       - <<: *save_dep
 
       - persist_to_workspace:
@@ -76,7 +72,16 @@ jobs:
             - packages/*/node_modules
             - node_modules
       - upload_logs:
-          file: build-stats
+          file: prepare-stats
+
+  build:
+    <<: *defaults
+    steps:
+      - <<: *restore_code
+      - checkout
+      - attach_workspace:
+          at: /home/circleci/project
+      - run: yarn build:ci
 
   lint:
     <<: *defaults
@@ -89,7 +94,6 @@ jobs:
 
   test:
     <<: *defaults
-
     steps:
       - <<: *restore_code
       - checkout
@@ -100,19 +104,23 @@ jobs:
       - run:
           command: yarn startGanache
           background: true
-      - run: yarn test:ci --since $(git merge-base $CIRCLE_BRANCH origin/master)
+      - run: yarn test:ci
       - upload_logs:
           file: test-stats
 
 workflows:
   statechannels:
     jobs:
-      - build
+      - prepare
+
+      - build:
+          requires:
+            - prepare
 
       - lint:
           requires:
-            - build
+            - prepare
 
       - test:
           requires:
-            - build
+            - prepare
