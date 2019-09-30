@@ -2,9 +2,7 @@ import debug from "debug";
 import React, { useEffect, useState } from "react";
 import { JsonRpcComponentProps } from "../../json-rpc-router";
 import { closeWallet } from "../../message-dispatchers";
-import { Dialog } from "../../ui";
-import { FlowProcess } from "../../ui/flow-process/FlowProcess";
-import { FlowStep, FlowStepProps, FlowStepStatus } from "../../ui/flow-process/FlowStep";
+import { Dialog, FlowProcess, FlowStep, FlowStepProps, FlowStepStatus } from "../../ui";
 
 const log = debug("wallet:connect-to-hub");
 
