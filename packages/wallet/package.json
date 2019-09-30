@@ -31,9 +31,9 @@
     "test:app": "npx run-jest -c ./config/jest/jest.config.js",
     "test:ci:app": "yarn test:app --all --ci --runInBand",
     "test:ci:contracts": "yarn contracts:compile && yarn test:contracts --all --ci --runInBand --bail",
-    "test:ci": "yarn run lint:check && yarn run test:ci:contracts && yarn run test:ci:app",
+    "test:ci": "yarn run test:ci:contracts && yarn run test:ci:app",
     "test:contracts": "yarn contracts:deploy:test && npx jest -c ./config/jest/jest.contracts.config.js",
-    "test": "run-s lint:check 'test:app --all'"
+    "test": "yarn run test:app --all"
   },
   "dependencies": {
     "@firebase/app-types": "^0.3.2",
