@@ -6,12 +6,17 @@
   </head>
 
   <button onclick="callBudgetAllocation()">Allocate budget</button>
+  <button onclick="callNoHub()">Show No Hub</button>
 
   <script src="http://localhost:3000/wallet.js"></script>
 
   <script>
     function callBudgetAllocation() {
       window.postMessage({ jsonrpc: "2.0", method: "chan_allocate" });
+    }
+
+    function callNoHub() {
+      window.postMessage({ jsonrpc: "2.0", method: "chan_noHub" });
     }
   </script>
 </html>

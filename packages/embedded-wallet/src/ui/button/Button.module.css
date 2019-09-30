@@ -1,11 +1,24 @@
 .button {
   border: none;
-  color: #fff;
   padding: 10px 20px;
   flex: 1;
+  display: flex;
   margin-right: 10px;
   transition: box-shadow 150ms, background-color 150ms;
+  align-items: center;
+}
+
+.buttonLabel {
   font: bold 18px "Karla", sans-serif;
+  color: #fff;
+  display: block;
+  flex: 1;
+}
+
+.button span[role="img"] {
+  position: absolute;
+  display: block;
+  justify-self: flex-end;
 }
 
 .button:focus {
@@ -36,4 +49,16 @@
 
 .secondary:hover {
   background-color: var(--alt-secondary-color);
+}
+
+.rightIcon {
+  flex-direction: row-reverse;
+}
+
+.leftIcon {
+  flex-direction: row;
+}
+
+.icon {
+  position: absolute;
 }

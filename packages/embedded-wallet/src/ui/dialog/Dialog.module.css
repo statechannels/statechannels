@@ -77,17 +77,25 @@
   height: 50px;
 }
 
-.title {
+.titleContainer {
   margin: 86px 0px 0px 0px;
-  color: var(--primary-color);
-  font: 22px "Karla";
   width: 100%;
   padding: 0;
   padding-bottom: 22px;
-  border-bottom: 1px solid rgba(151, 151, 151, 0.14);
+  display: flex;
+}
+
+.title {
+  color: var(--primary-color);
+  font: 22px/32px "Karla";
+}
+
+span[role="img"] + .title {
+  margin-left: 16px;
 }
 
 .content {
+  border-top: 1px solid rgba(151, 151, 151, 0.14);
   padding: 20px 40px;
 }
 
