@@ -15,11 +15,15 @@ export interface SignedState {
   signature: Signature;
 }
 
-export interface ChannelStorage {
-  challengeState?: State;
-  finalizesAt?: number;
-  turnNumRecord: number;
-}
+// TODO: Find a use case for this or remove.
+// @nsario I don't think we need this here -- it should be in the adjudicator state of the wallet
+// export interface ChannelStorage {
+//   turnNumRecord: BigNumberish;
+//   finalizesAt: BigNumberish;
+//   stateHash: string;
+//   challengerAddress: string;
+//   outcomeHash: string;
+// }
 
 // TODO: Export this with more thought to what is exposed by @statchannels/nitro-protocol
 export {createDepositTransaction, State, encodeConsensusData, Outcome, AllocationItem, Channel};
