@@ -30,10 +30,11 @@ describe("transactions", () => {
   let networkId;
   let libraryAddress;
   let nonce = 5;
+  let participantA = ethers.Wallet.createRandom();
+  let participantB = ethers.Wallet.createRandom();
+
   const provider: ethers.providers.JsonRpcProvider = getGanacheProvider();
   const signer = provider.getSigner();
-  const participantA = ethers.Wallet.createRandom();
-  const participantB = ethers.Wallet.createRandom();
   const participants = [participantA.address, participantB.address] as [string, string];
 
   function getNextNonce() {
@@ -83,12 +84,13 @@ describe("transactions", () => {
     libraryAddress = await getLibraryAddress(networkId, "TrivialApp");
   });
 
+  beforeEach(() => {
+    participantA = ethers.Wallet.createRandom();
+    participantB = ethers.Wallet.createRandom();
+  })
+
   it("should deposit into the contract", async () => {
-    // TODO: Better way of managing the same addresses across tests, since the following test
-    // from this one uses participantA and participantB, we would need to update the
-    // expectedHeld value when making a deposit per-test. For now I just make a new participant.
-    const randomParticipant = ethers.Wallet.createRandom();
-    const depositTransactionData = createDepositTransaction(randomParticipant.address, "0x5", "0x0");
+    const depositTransactionData = createDepositTransaction(participantA.address, "0x5", "0x0");
     await testTransactionSender({
       ...depositTransactionData,
       to: ETH_ASSET_HOLDER_ADDRESS,
@@ -97,7 +99,12 @@ describe("transactions", () => {
   });
 
   it("should send a forceMove transaction", async () => {
-    const channel: Channel = { channelType: libraryAddress, nonce: getNextNonce(), participants };
+    const channel: Channel = {
+      channelType: libraryAddress,
+      nonce: getNextNonce(),
+      participants: [participantA.address, participantB.address]
+    };
+
     await depositContract(provider, participantA.address);
     await depositContract(provider, participantB.address);
 
@@ -124,29 +131,52 @@ describe("transactions", () => {
     const forceMoveTransaction = createForceMoveTransaction(
       signCommitment2(fromCommitment, participantA.privateKey),
       signCommitment2(toCommitment, participantB.privateKey),
-      participantA.privateKey
+      participantB.privateKey
     );
 
     await testTransactionSender(forceMoveTransaction);
   });
 
-  it.skip("should send a respondWithMove transaction", async () => {
-    const channel: Channel = { channelType: libraryAddress, nonce: getNextNonce(), participants };
+  it("should send a respondWithMove transaction", async () => {
+    const channel: Channel = {
+      channelType: libraryAddress,
+      nonce: getNextNonce(),
+      participants: [participantA.address, participantB.address]
+    };
     const { nonce: channelNonce } = channel;
+
     await depositContract(provider, participantA.address);
     await depositContract(provider, participantB.address);
+    
     await createChallenge(provider, channelNonce, participantA, participantB);
-    const toCommitment: Commitment = {
+
+    // NOTE: Copied from createChallenge
+    const fromCommitment: Commitment = {
       channel,
       allocation: ["0x05", "0x05"],
       destination: [participantA.address, participantB.address],
-      turnNum: 7,
+      turnNum: 5,
       commitmentType: CommitmentType.App,
       appAttributes: "0x0",
       commitmentCount: 1,
     };
 
-    const respondWithMoveTransaction = createRespondWithMoveTransaction(toCommitment, participantB.privateKey);
+    const toCommitment: Commitment = {
+      channel,
+      allocation: ["0x05", "0x05"],
+      destination: [participantA.address, participantB.address],
+      turnNum: 6,
+      commitmentType: CommitmentType.App,
+      appAttributes: "0x0",
+      commitmentCount: 2,
+    };
+
+    const respondWithMoveTransaction = createRespondWithMoveTransaction(
+      fromCommitment,
+      toCommitment,
+      participantA.privateKey
+    );
+
     await testTransactionSender(respondWithMoveTransaction);
   });
 
