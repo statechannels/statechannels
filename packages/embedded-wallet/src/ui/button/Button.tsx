@@ -15,10 +15,10 @@ const Button: React.FC<ButtonProps> = ({ type, label, onClick, icon, iconPositio
     <button
       autoFocus={type === "primary"}
       onClick={onClick}
-      className={`${css.button} ${css[type]} ${icon ? css[`withIconToThe${iconPosition}`] : ""}`}
+      className={`${css.button} ${css[type]} ${icon ? css[`${iconPosition}Icon`] : ""}`}
     >
-      {label}
-      {icon ? <Icon name={icon} color="inverse" /> : {}}
+      <span className={css.buttonLabel}>{label}</span>
+      {icon ? <Icon name={icon} /> : []}
     </button>
   );
 };
