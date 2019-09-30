@@ -31,6 +31,7 @@
   },
   "homepage": "https://github.com/statechannels/nitro-protocol/",
   "scripts": {
+    "precommit": "lint-staged",
     "build": "run-s clearContracts clearLib contract:compile build:typescript",
     "build:typescript": "tslint --project . && tsc -b",
     "clearContracts": "rm -rf build/contracts",
@@ -66,6 +67,7 @@
     "etherlime-lib": "1.1.5",
     "ganache-cli": "6.6.0",
     "jest": "24.9.0",
+    "lint-staged": "9.4.0",
     "load-json-file": "6.2.0",
     "npm-run-all": "4.1.5",
     "prettier": "1.18.2",
@@ -76,6 +78,9 @@
     "tslint-config-prettier": "1.18.0",
     "typescript": "3.6.3",
     "write-json-file": "4.2.0"
+  },
+  "lint-staged": {
+    "{src,test}/**/*.tsx?": "yarn lint:check"
   },
   "prettier": {
     "printWidth": 100,

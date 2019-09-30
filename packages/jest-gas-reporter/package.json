@@ -8,12 +8,17 @@
   "author": "Alex Gap <alex@magmo.com>",
   "license": "MIT",
   "scripts": {
+    "precommit": "lint-staged",
     "prepare": "yarn build",
     "build": "tslint --project . && tsc -b"
+  },
+  "lint-staged": {
+    "src/*.ts": "yarn lint:check"
   },
   "devDependencies": {
     "@types/easy-table": "0.0.32",
     "@types/jest": "24.0.18",
+    "lint-staged": "9.4.0",
     "tslint": "5.20.0",
     "tslint-config-prettier": "1.18.0"
   },

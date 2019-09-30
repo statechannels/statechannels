@@ -73,7 +73,6 @@ describe.skip("adjudicator listener", () => {
     const channelIdToIgnore = await getChannelId(provider, getNextNonce(), participantA, participantB);
     const processId = ethers.Wallet.createRandom().address;
     const sagaTester = new SagaTester({initialState: createWatcherState(processId, channelId)});
-
     sagaTester.start(adjudicatorWatcher, provider);
 
     await depositContract(provider, channelIdToIgnore);
