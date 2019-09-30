@@ -43,9 +43,9 @@ const Dialog: React.FC<DialogProps> = ({ title, icon, children, buttons, onClose
         <header className={css.header}>
           <span className={css.icon}></span>
           {title ? (
-            <h1 className={css.title}>
-              {icon ? <Icon name={icon} color="primary" /> : {}}
-              {title}
+            <h1 className={css.titleContainer}>
+              {icon ? <Icon name={icon} decorative={true} /> : []}
+              <span className={css.title}>{title}</span>
             </h1>
           ) : (
             {}
