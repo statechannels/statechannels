@@ -187,31 +187,7 @@ describe("adjudicator listener", () => {
 
     await sagaTester.waitFor("WALLET.ADJUDICATOR.REFUTED_EVENT");
 
-<<<<<<< HEAD
-    const action: actions.RefutedEvent = sagaTester.getLatestCalledAction();
+    const action = sagaTester.getLatestCalledAction();
     expect(action).toEqual(actions.refutedEvent({processId, protocolLocator: [], channelId, refuteCommitment}));
-||||||| merged common ancestors
-    const action: actions.RespondWithMoveEvent = sagaTester.getLatestCalledAction();
-    expect(action).toEqual(
-      actions.respondWithMoveEvent({
-        processId,
-        protocolLocator: [],
-        channelId,
-        responseCommitment: response.toCommitment,
-        responseSignature: response.toSig
-      })
-    );
-=======
-    const action = sagaTester.getLatestCalledAction() as actions.RespondWithMoveEvent;
-    expect(action).toEqual(
-      actions.respondWithMoveEvent({
-        processId,
-        protocolLocator: [],
-        channelId,
-        responseCommitment: response.toCommitment,
-        responseSignature: response.toSig
-      })
-    );
->>>>>>> Use typecasting to avoid type error
   });
 });
