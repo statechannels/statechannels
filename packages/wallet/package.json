@@ -10,7 +10,7 @@
     "node": "10.16.3"
   },
   "scripts": {
-    "precommit": "lint-staged",
+    "precommit": "lint-staged --quiet",
     "build:ci": "yarn build",
     "build:typescript": "npx tsc -b",
     "build:webpack": "CI=false node scripts/build.js",

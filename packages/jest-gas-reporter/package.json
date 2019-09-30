@@ -8,7 +8,7 @@
   "author": "Alex Gap <alex@magmo.com>",
   "license": "MIT",
   "scripts": {
-    "precommit": "lint-staged",
+    "precommit": "lint-staged --quiet",
     "prepare": "yarn build",
     "build": "tslint --project . && tsc -b"
   },

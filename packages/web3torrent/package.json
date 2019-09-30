@@ -65,7 +65,7 @@
     "webtorrent-fixtures": "1.7.3"
   },
   "scripts": {
-    "precommit": "lint-staged",
+    "precommit": "lint-staged --quiet",
     "start": "react-scripts start",
     "start:alt": "PORT=3333 react-scripts start",
     "build": "react-scripts build",

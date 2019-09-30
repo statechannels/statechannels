@@ -31,7 +31,7 @@
   },
   "homepage": "https://github.com/statechannels/nitro-protocol/",
   "scripts": {
-    "precommit": "lint-staged",
+    "precommit": "lint-staged --quiet",
     "build": "run-s clearContracts clearLib contract:compile build:typescript",
     "build:typescript": "tslint --project . && tsc -b",
     "clearContracts": "rm -rf build/contracts",
