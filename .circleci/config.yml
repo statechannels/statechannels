@@ -2,6 +2,7 @@ version: 2.1
 
 defaults: &defaults
   working_directory: /home/circleci/project
+  resource_class: large
   docker:
     - image: circleci/node:10.16.3
 
@@ -26,21 +27,40 @@ restore_dep: &restore_dep
   restore_cache:
     key: dependency-cache-{{ checksum "yarn.lock" }}
 
+commands:
+  log_stats:
+    description: "Log stats "
+    parameters:
+      file:
+        type: string
+        default: stats
+    steps:
+      - run:
+          command: bash bin/log_memory.sh <<parameters.file>>
+          background: true
+  upload_logs:
+    description: "Upload logs "
+    parameters:
+      file:
+        type: string
+        default: memory-usage.txt
+    steps:
+      - store_artifacts:
+          path: /home/circleci/<< parameters.file >>.txt
+          destination: << parameters.file >>
+
 jobs:
-  build:
+  prepare:
     <<: *defaults
     steps:
       - <<: *restore_code
       - checkout
+      - log_stats:
+          file: prepare-stats
       - <<: *save_code
       - <<: *restore_dep
-
-      - run:
-          name: "yarn --frozen-lockfile"
-          command: yarn --frozen-lockfile
-
-      - run: yarn build:ci
-
+      - run: yarn --frozen-lockfile
+      - run: yarn prepare
       - <<: *save_dep
 
       - persist_to_workspace:
@@ -50,13 +70,24 @@ jobs:
             - packages/*/build
             - packages/*/lib
             - packages/*/node_modules
+            - node_modules
+      - upload_logs:
+          file: prepare-stats
+
+  build:
+    <<: *defaults
+    steps:
+      - <<: *restore_code
+      - checkout
+      - attach_workspace:
+          at: /home/circleci/project
+      - run: yarn build:ci
 
   lint:
     <<: *defaults
     steps:
       - <<: *restore_code
       - checkout
-      - <<: *restore_dep
       - attach_workspace:
           at: /home/circleci/project
       - run: yarn lint:check
@@ -66,20 +97,30 @@ jobs:
     steps:
       - <<: *restore_code
       - checkout
-      - <<: *restore_dep
+      - log_stats:
+          file: test-stats
       - attach_workspace:
           at: /home/circleci/project
-      - run: yarn test:ci --since origin/master
+      - run:
+          command: yarn startGanache
+          background: true
+      - run: yarn test:ci
+      - upload_logs:
+          file: test-stats
 
 workflows:
   statechannels:
     jobs:
-      - build
+      - prepare
+
+      - build:
+          requires:
+            - prepare
 
       - lint:
           requires:
-            - build
+            - prepare
 
       - test:
           requires:
-            - build
+            - prepare

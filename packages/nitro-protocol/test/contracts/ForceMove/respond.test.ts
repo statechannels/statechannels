@@ -4,25 +4,24 @@ import {expectRevert} from '@statechannels/devtools';
 import ForceMoveArtifact from '../../../build/contracts/TESTForceMove.json';
 // @ts-ignore
 import countingAppArtifact from '../../../build/contracts/CountingApp.json';
-import {defaultAbiCoder, hexlify} from 'ethers/utils';
-import {setupContracts, newChallengeClearedEvent, sign, sendTransaction} from '../../test-helpers';
+import {defaultAbiCoder, hexlify, bigNumberify} from 'ethers/utils';
+import {setupContracts, sign, getTestProvider, getNetworkMap} from '../../test-helpers';
 import {Outcome} from '../../../src/contract/outcome';
 import {Channel, getChannelId} from '../../../src/contract/channel';
 import {State, hashState} from '../../../src/contract/state';
 import {hashChannelStorage} from '../../../src/contract/channel-storage';
-import {createRespondTransaction} from '../../../src/contract/transaction-creators/force-move';
 import {
   NO_ONGOING_CHALLENGE,
   WRONG_CHANNEL_STORAGE,
   RESPONSE_UNAUTHORIZED,
 } from '../../../src/contract/transaction-creators/revert-reasons';
 import {HashZero} from 'ethers/constants';
+import {respondArgs} from '../../../src/contract/transaction-creators/force-move';
 
-const provider = new ethers.providers.JsonRpcProvider(
-  `http://localhost:${process.env.GANACHE_PORT}`,
-);
+const provider = getTestProvider();
 let ForceMove: ethers.Contract;
 let networkId;
+let networkMap;
 const chainId = '0x1234';
 const participants = ['', '', ''];
 const wallets = new Array(3);
@@ -39,9 +38,10 @@ for (let i = 0; i < 3; i++) {
 const nonParticipant = ethers.Wallet.createRandom();
 
 beforeAll(async () => {
+  networkMap = await getNetworkMap();
   ForceMove = await setupContracts(provider, ForceMoveArtifact);
   networkId = (await provider.getNetwork()).chainId;
-  appDefinition = countingAppArtifact.networks[networkId].address; // use a fixed appDefinition in all tests
+  appDefinition = networkMap[networkId][countingAppArtifact.contractName]; // use a fixed appDefinition in all tests
 });
 
 // Scenarios are synonymous with channelNonce:
@@ -104,31 +104,26 @@ describe('respond', () => {
           });
 
       // call public wrapper to set state (only works on test contract)
-      const tx = await ForceMove.setChannelStorageHash(channelId, challengeExistsHash);
-      await tx.wait();
+      await (await ForceMove.setChannelStorageHash(channelId, challengeExistsHash)).wait();
       expect(await ForceMove.channelStorageHashes(channelId)).toEqual(challengeExistsHash);
 
       // sign the state
-      const signature = await sign(responder, responseStateHash);
+      const responseSignature = await sign(responder, responseStateHash);
 
-      const transactionRequest = createRespondTransaction(challengeState, responseState, signature);
+      const tx = ForceMove.respond(
+        ...respondArgs({challengeState, responseSignature, responseState}),
+      );
 
       if (reasonString) {
-        const regex = new RegExp(
-          '^' + 'VM Exception while processing transaction: revert ' + reasonString + '$',
-        );
-        await expectRevert(
-          () => sendTransaction(provider, ForceMove.address, transactionRequest),
-          regex,
-        );
+        await expectRevert(() => tx, reasonString);
       } else {
-        const challengeClearedEvent: any = newChallengeClearedEvent(ForceMove, channelId);
+        const receipt = await (await tx).wait();
+        const event = receipt.events.pop();
 
-        await sendTransaction(provider, ForceMove.address, transactionRequest);
-
-        // catch ChallengeCleared event
-        const [, eventTurnNumRecord] = await challengeClearedEvent;
-        expect(eventTurnNumRecord._hex).toEqual(hexlify(turnNumRecord + 1));
+        expect(event.args).toMatchObject({
+          channelId,
+          newTurnNumRecord: bigNumberify(turnNumRecord + 1),
+        });
 
         // compute and check new expected ChannelStorageHash
 

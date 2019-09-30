@@ -1,5 +1,6 @@
 const { resolve } = require('path');
 const root = resolve(__dirname, '../../');
+
 module.exports = {
   rootDir: root,
   collectCoverageFrom: ['src/**/*.{js,jsx,ts,tsx}'],

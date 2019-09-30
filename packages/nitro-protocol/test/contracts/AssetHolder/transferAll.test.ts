@@ -4,21 +4,16 @@ import {expectRevert} from '@statechannels/devtools';
 import AssetHolderArtifact from '../../../build/contracts/TESTAssetHolder.json';
 import {
   setupContracts,
-  newAssetTransferredEvent,
   randomChannelId,
   allocationToParams,
-  sendTransaction,
   replaceAddresses,
+  getTestProvider,
 } from '../../test-helpers';
-import {createTransferAllTransaction} from '../../../src/contract/transaction-creators/asset-holder';
 
-// @ts-ignore (ethers mis-interpreting Truffle artifact's abi paramter)
-const AssetHolderInterface = new ethers.utils.Interface(AssetHolderArtifact.abi);
 import {id, bigNumberify} from 'ethers/utils';
+import {encodeAllocation} from '../../../src/contract/outcome';
 
-const provider = new ethers.providers.JsonRpcProvider(
-  `http://localhost:${process.env.GANACHE_PORT}`,
-);
+const provider = getTestProvider();
 
 let AssetHolder: ethers.Contract;
 
@@ -91,37 +86,19 @@ describe('transferAll', () => {
       await (await AssetHolder.setAssetOutcomeHashPermissionless(channelId, outcomeHash)).wait();
       expect(await AssetHolder.outcomeHashes(channelId)).toBe(outcomeHash);
 
-      const transactionRequest = createTransferAllTransaction(
-        AssetHolderInterface,
-        channelId,
-        allocation,
-      );
+      const tx = AssetHolder.transferAll(channelId, encodeAllocation(allocation));
 
       // call method in a slightly different way if expecting a revert
       if (reason) {
-        const regex = new RegExp(
-          '^' + 'VM Exception while processing transaction: revert ' + reason + '$',
-        );
-        await expectRevert(
-          () => sendTransaction(provider, AssetHolder.address, transactionRequest),
-          regex,
-        );
+        await expectRevert(() => tx, reason);
       } else {
-        // register for events
-        const assetTransferredEvents = [];
-        Object.keys(payouts).forEach(key => {
-          if (payouts[key].gt(0)) {
-            assetTransferredEvents.push(newAssetTransferredEvent(AssetHolder, key));
-          }
-        });
+        const {events} = await (await tx).wait();
 
-        await sendTransaction(provider, AssetHolder.address, transactionRequest);
-
-        // catch events
-        const resolvedAassetTransferredEvents = await Promise.all(assetTransferredEvents);
-        resolvedAassetTransferredEvents.forEach(async (x, index) => {
-          if (payouts[index] && payouts[index].gt(0)) {
-            expect(x).toEqual(payouts[index]);
+        events.forEach(async ({event, args}) => {
+          const {destination} = args;
+          expect(event).toEqual('AssetTransferred');
+          if (payouts[destination] && payouts[destination].gt(0)) {
+            expect(args).toMatchObject({destination, amount: payouts[destination]});
           }
         });
 

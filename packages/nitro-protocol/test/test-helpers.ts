@@ -7,6 +7,8 @@ import {
   bigNumberify,
   Signature,
 } from 'ethers/utils';
+import loadJsonFile from 'load-json-file';
+import path from 'path';
 import {AddressZero, HashZero} from 'ethers/constants';
 import {hashChannelStorage} from '../src/contract/channel-storage';
 import {
@@ -20,10 +22,32 @@ import {
 import {State, hashState} from '../src/contract/state';
 import {TransactionRequest, TransactionReceipt} from 'ethers/providers';
 
+export const getTestProvider = () => {
+  if (!process.env.GANACHE_PORT) {
+    throw new Error('Missing environment variable GANACHE_PORT required');
+  }
+  return new ethers.providers.JsonRpcProvider(`http://localhost:${process.env.GANACHE_PORT}`);
+};
+
+export const getNetworkMap = async () => {
+  try {
+    return await loadJsonFile(path.join(__dirname, '../deployment/network-map.json'));
+  } catch (err) {
+    if (!!err.message.match('ENOENT: no such file or directory')) {
+      return {};
+    } else {
+      throw err;
+    }
+  }
+};
+
 export async function setupContracts(provider: ethers.providers.JsonRpcProvider, artifact) {
-  const networkId = (await provider.getNetwork()).chainId;
   const signer = provider.getSigner(0);
-  const contractAddress = artifact.networks[networkId].address;
+  const networkId = (await provider.getNetwork()).chainId;
+  const networkMap = await getNetworkMap();
+
+  const contractName = artifact.contractName;
+  const contractAddress = networkMap[networkId][contractName];
   const contract = new ethers.Contract(contractAddress, artifact.abi, signer);
   return contract;
 }
@@ -142,15 +166,8 @@ export const newTransferEvent = (contract: ethers.Contract, to: string) => {
   });
 };
 
-export const newAssetTransferredEvent = (contract: ethers.Contract, destination: string) => {
-  const filter = contract.filters.AssetTransferred(destination);
-  return new Promise((resolve, reject) => {
-    contract.on(filter, (eventDestination, amountTransferred, event) => {
-      // match event for this destination only
-      contract.removeAllListeners(filter);
-      resolve(amountTransferred);
-    });
-  });
+export const newAssetTransferredEvent = (destination: string, payout: number) => {
+  return {destination: destination.toLowerCase(), amount: payout};
 };
 
 export function randomChannelId(channelNonce = 0) {

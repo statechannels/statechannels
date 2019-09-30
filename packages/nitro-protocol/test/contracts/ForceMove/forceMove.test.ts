@@ -10,9 +10,10 @@ import {
   setupContracts,
   clearedChallengeHash,
   ongoingChallengeHash,
-  newChallengeRegisteredEvent,
   signStates,
   finalizedOutcomeHash,
+  getTestProvider,
+  getNetworkMap,
 } from '../../test-helpers';
 import {Channel, getChannelId} from '../../../src/contract/channel';
 import {State, getVariablePart, getFixedPart} from '../../../src/contract/state';
@@ -26,11 +27,12 @@ import {
 import {signChallengeMessage} from '../../../src/signatures';
 import {SignedState} from '../../../src/index';
 import {COUNTING_APP_INVALID_TRANSITION} from '../../revert-reasons';
-const provider = new ethers.providers.JsonRpcProvider(
-  `http://localhost:${process.env.GANACHE_PORT}`,
-);
+
+const provider = getTestProvider();
+
 let ForceMove: ethers.Contract;
 let networkId;
+let networkMap;
 
 const chainId = '0x1234';
 const participants = ['', '', ''];
@@ -45,13 +47,12 @@ for (let i = 0; i < 3; i++) {
   wallets[i] = ethers.Wallet.createRandom();
   participants[i] = wallets[i].address;
 }
-// set event listener
-let challengeRegisteredEvent;
 
 beforeAll(async () => {
+  networkMap = await getNetworkMap();
   ForceMove = await setupContracts(provider, ForceMoveArtifact);
   networkId = (await provider.getNetwork()).chainId;
-  appDefinition = countingAppArtifact.networks[networkId].address; // use a fixed appDefinition in all tests
+  appDefinition = networkMap[networkId][countingAppArtifact.contractName]; // use a fixed appDefinition in all tests
 });
 
 // Scenarios are synonymous with channelNonce:
@@ -158,20 +159,19 @@ describe('forceMove', () => {
       if (reasonString) {
         await expectRevert(() => tx, reasonString);
       } else {
-        challengeRegisteredEvent = newChallengeRegisteredEvent(ForceMove, channelId);
-
-        await tx;
+        const receipt = await (await tx).wait();
+        const event = receipt.events.pop();
 
         // catch ForceMove event
-        const [
-          eventChannelId,
-          eventTurnNumRecord,
-          eventFinalizesAt,
-          eventChallenger,
-          eventIsFinal,
-          eventFixedPart,
-          eventVariableParts,
-        ] = await challengeRegisteredEvent;
+        const {
+          channelId: eventChannelId,
+          turnNumRecord: eventTurnNumRecord,
+          finalizesAt: eventFinalizesAt,
+          challenger: eventChallenger,
+          isFinal: eventIsFinal,
+          fixedPart: eventFixedPart,
+          variableParts: eventVariableParts,
+        } = event.args;
 
         // check this information is enough to respond
         expect(eventChannelId).toEqual(channelId);

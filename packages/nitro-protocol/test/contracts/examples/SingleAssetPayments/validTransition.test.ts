@@ -1,15 +1,13 @@
 import {ethers} from 'ethers';
 // @ts-ignore
 import SingleAssetPaymentsArtifact from '../../../../build/contracts/SingleAssetPayments.json';
-import {setupContracts, replaceAddresses} from '../../../test-helpers';
+import {setupContracts, replaceAddresses, getTestProvider} from '../../../test-helpers';
 import {expectRevert} from '@statechannels/devtools';
 import {Allocation, encodeOutcome} from '../../../../src/contract/outcome';
 import {AddressZero, HashZero} from 'ethers/constants';
 import {VariablePart} from '../../../../src/contract/state.js';
 
-const provider = new ethers.providers.JsonRpcProvider(
-  `http://localhost:${process.env.GANACHE_PORT}`,
-);
+const provider = getTestProvider();
 let singleAssetPayments: ethers.Contract;
 
 const numParticipants = 3;

@@ -18,6 +18,4 @@ build
 built
 lib
 dist
-
-# environment
-.env
+.outputParameter

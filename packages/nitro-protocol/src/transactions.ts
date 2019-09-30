@@ -25,11 +25,11 @@ export function createRespondTransaction(
   if (!channelStorage.challengeState) {
     throw new Error('No active challenge in challenge state');
   }
-  return forceMoveTrans.createRespondTransaction(
-    channelStorage.challengeState,
-    response.state,
-    response.signature,
-  );
+  return forceMoveTrans.createRespondTransaction({
+    challengeState: channelStorage.challengeState,
+    responseState: response.state,
+    responseSignature: response.signature,
+  });
 }
 
 export function createCheckpointTransaction(signedStates: SignedState[]): TransactionRequest {

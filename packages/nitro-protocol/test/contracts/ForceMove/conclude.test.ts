@@ -6,18 +6,18 @@ import ForceMoveArtifact from '../../../build/contracts/TESTForceMove.json';
 import countingAppArtifact from '../../../build/contracts/CountingApp.json';
 import {
   setupContracts,
-  newConcludedEvent,
   clearedChallengeHash,
   ongoingChallengeHash,
   finalizedOutcomeHash,
   signStates,
-  sendTransaction,
+  getTestProvider,
+  getNetworkMap,
 } from '../../test-helpers';
 import {HashZero} from 'ethers/constants';
 import {Outcome} from '../../../src/contract/outcome';
 import {Channel, getChannelId} from '../../../src/contract/channel';
 import {State} from '../../../src/contract/state';
-import {createConcludeTransaction} from '../../../src/contract/transaction-creators/force-move';
+import {concludeArgs} from '../../../src/contract/transaction-creators/force-move';
 import {hashChannelStorage} from '../../../src/contract/channel-storage';
 import {hexlify} from 'ethers/utils';
 import {
@@ -25,10 +25,9 @@ import {
   UNACCEPTABLE_WHO_SIGNED_WHAT,
 } from '../../../src/contract/transaction-creators/revert-reasons';
 
-const provider = new ethers.providers.JsonRpcProvider(
-  `http://localhost:${process.env.GANACHE_PORT}`,
-);
+const provider = getTestProvider();
 let ForceMove: ethers.Contract;
+let networkMap;
 let networkId;
 const chainId = '0x1234';
 const participants = ['', '', ''];
@@ -44,9 +43,10 @@ for (let i = 0; i < 3; i++) {
   participants[i] = wallets[i].address;
 }
 beforeAll(async () => {
+  networkMap = await getNetworkMap();
   ForceMove = await setupContracts(provider, ForceMoveArtifact);
   networkId = (await provider.getNetwork()).chainId;
-  appDefinition = countingAppArtifact.networks[networkId].address; // use a fixed appDefinition in all tests
+  appDefinition = networkMap[networkId][countingAppArtifact.contractName]; // use a fixed appDefinition in all tests
 });
 
 const acceptsWhenOpenIf =
@@ -122,34 +122,22 @@ describe('conclude', () => {
         });
       }
       // call public wrapper to set state (only works on test contract)
-      const tx = await ForceMove.setChannelStorageHash(channelId, initialChannelStorageHash);
-      await tx.wait();
+      await (await ForceMove.setChannelStorageHash(channelId, initialChannelStorageHash)).wait();
       expect(await ForceMove.channelStorageHashes(channelId)).toEqual(initialChannelStorageHash);
 
       // sign the states
       const sigs = await signStates(states, wallets, whoSignedWhat);
 
-      const transactionRequest = createConcludeTransaction(states, sigs, whoSignedWhat);
-      // call method in a slightly different way if expecting a revert
+      const tx = ForceMove.conclude(...concludeArgs(states, sigs, whoSignedWhat));
       if (reasonString) {
-        const regex = new RegExp(
-          '^' + 'VM Exception while processing transaction: revert ' + reasonString + '$',
-        );
-        await expectRevert(
-          () => sendTransaction(provider, ForceMove.address, transactionRequest),
-          regex,
-        );
+        await expectRevert(() => tx, reasonString);
       } else {
-        const concludedEvent: any = newConcludedEvent(ForceMove, channelId);
-        await sendTransaction(provider, ForceMove.address, transactionRequest);
-
-        // catch Concluded event
-        const [eventChannelId] = await concludedEvent;
-        expect(eventChannelId).toBeDefined();
+        const receipt = await (await tx).wait();
+        const event = receipt.events.pop();
+        expect(event.args).toMatchObject({channelId});
 
         // compute expected ChannelStorageHash
-        const blockNumber = await provider.getBlockNumber();
-        const blockTimestamp = (await provider.getBlock(blockNumber)).timestamp;
+        const blockTimestamp = (await provider.getBlock(receipt.blockNumber)).timestamp;
         const expectedChannelStorageHash = hashChannelStorage({
           turnNumRecord: 0,
           finalizesAt: blockTimestamp,

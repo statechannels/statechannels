@@ -1,11 +1,9 @@
 import {ethers} from 'ethers';
 // @ts-ignore
 import ForceMoveArtifact from '../../../build/contracts/TESTForceMove.json';
-import {setupContracts} from '../../test-helpers';
+import {setupContracts, getTestProvider} from '../../test-helpers';
 
-const provider = new ethers.providers.JsonRpcProvider(
-  `http://localhost:${process.env.GANACHE_PORT}`,
-);
+const provider = getTestProvider();
 let ForceMove: ethers.Contract;
 
 const participants = ['', '', ''];
