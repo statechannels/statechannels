@@ -65,7 +65,7 @@ const Dialog: React.FC<DialogProps> = ({ title, icon, children, buttons, onClose
             <Button {...buttons.primary} type="primary" />
           </footer>
         ) : (
-          {}
+          []
         )}
       </dialog>
     </div>
