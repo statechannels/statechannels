@@ -13,12 +13,12 @@ const connectToHub = () => {
 const NoHub: React.FC<JsonRpcComponentProps> = () => {
   return (
     <Dialog
-      icon={Icons.Hourglass}
+      icon={Icons.Link}
       title="You aren't connected to any hubs, so connect to one."
       onClose={closeWallet}
       buttons={{
         primary: {
-          icon: Icons.OpenExternalSite,
+          icon: Icons.ExternalLink,
           label: "Connect to Hub",
           iconPosition: "right",
           onClick: connectToHub
