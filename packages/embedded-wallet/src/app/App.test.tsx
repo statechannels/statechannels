@@ -14,20 +14,12 @@ describe("App", () => {
     component = mount(<App />);
   });
 
-  it("should render UI for TestMessage", async () => {
+  it("should render UI for BudgetAllocation", async () => {
     await act(async () => {
-      await simulateMessage(component, { jsonrpc: "2.0", method: "chan_test" });
+      await simulateMessage(component, { jsonrpc: "2.0", method: "chan_allocate" });
     });
 
-    expect(component.find("[data-test-selector='handler:chan_test']").exists()).toEqual(true);
-  });
-
-  it("should render UI for UnicornMessage", async () => {
-    await act(async () => {
-      await simulateMessage(component, { jsonrpc: "2.0", method: "chan_unicorn" });
-    });
-
-    expect(component.find("[data-test-selector='handler:chan_unicorn']").exists()).toEqual(true);
+    expect(component.find("[data-test-selector='handler:chan_allocate']").exists()).toEqual(true);
   });
 
   afterEach(() => {
