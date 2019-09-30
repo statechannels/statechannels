@@ -587,7 +587,7 @@ contract ForceMove {
     }
 
     function _hashOutcome(bytes memory outcome) internal pure returns (bytes32) {
-        return keccak256(abi.encode(outcome));
+        return keccak256(outcome);
     }
 
     function _getChannelId(FixedPart memory fixedPart) internal pure returns (bytes32 channelId) {

@@ -34,7 +34,7 @@ Since updates must ultimately be interpreted by smart contracts, the encoding of
         //         variablePart.appData
         //     )
         // )
-        bytes32 outcomeHash; //  keccak256(abi.encode(outcome))
+        bytes32 outcomeHash; //  keccak256(outcome)
     }
 ```
 

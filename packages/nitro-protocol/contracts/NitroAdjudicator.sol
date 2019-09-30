@@ -21,7 +21,7 @@ contract NitroAdjudicator is ForceMove {
         // requirements
         _requireChannelFinalized(channelId);
 
-        bytes32 outcomeHash = keccak256(abi.encode(outcomeBytes));
+        bytes32 outcomeHash = keccak256(outcomeBytes);
 
         _requireMatchingStorage(
             ChannelStorage(
