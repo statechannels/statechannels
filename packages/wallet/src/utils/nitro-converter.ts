@@ -1,4 +1,4 @@
-import {Commitment, CommitmentType, Channel, mover} from "fmg-core";
+import {Commitment, CommitmentType, Channel} from "fmg-core";
 import {CONSENSUS_LIBRARY_ADDRESS, NETWORK_ID, ETH_ASSET_HOLDER_ADDRESS} from "../constants";
 import {appAttributesFromBytes} from "fmg-nitro-adjudicator/lib/consensus-app";
 import {bigNumberify} from "ethers/utils";
