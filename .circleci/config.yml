@@ -81,16 +81,8 @@ jobs:
       - checkout
       - attach_workspace:
           at: /home/circleci/project
-      - run: yarn build:ci
-
-  lint:
-    <<: *defaults
-    steps:
-      - <<: *restore_code
-      - checkout
-      - attach_workspace:
-          at: /home/circleci/project
       - run: yarn lint:check
+      - run: yarn build:ci
 
   test:
     <<: *defaults
@@ -114,10 +106,6 @@ workflows:
       - prepare
 
       - build:
-          requires:
-            - prepare
-
-      - lint:
           requires:
             - prepare
 

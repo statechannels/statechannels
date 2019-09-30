@@ -4,7 +4,7 @@
     "packages/*"
   ],
   "engines": {
-    "yarn": "1.17.3",
+    "yarn": "^1.17.3",
     "node": "10.16.3"
   },
   "scripts": {
@@ -20,7 +20,6 @@
     "test:w3t": "lerna run test --concurrency 1 --scope=**/web3torrent ",
     "lint:check": "lerna run lint:check --parallel --no-bail",
     "lint:write": "lerna run lint:write --parallel --no-bail",
-    "lint": "lerna run lint --parallel --no-bail",
     "publish": "lerna publish --yes from-package patch",
     "postinstall": "patch-package"
   },
@@ -29,6 +28,7 @@
     "state channels"
   ],
   "devDependencies": {
+    "husky": "3.0.7",
     "lerna": "3.16.4",
     "patch-package": "6.2.0",
     "postinstall-postinstall": "2.0.0",
@@ -37,5 +37,10 @@
     "tslint-config-prettier": "1.18.0",
     "tslint-plugin-prettier": "2.0.1",
     "typescript": "3.6.3"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lerna run --concurrency 1 --stream precommit --since HEAD"
+    }
   }
 }

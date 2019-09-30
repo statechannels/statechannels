@@ -55,6 +55,7 @@
     "enzyme": "3.10.0",
     "enzyme-adapter-react-16": "1.14.0",
     "jest-junit": "8.0.0",
+    "lint-staged": "9.4.0",
     "memory-chunk-store": "1.3.0",
     "supports-color": "7.0.0",
     "ts-jest": "24.1.0",
@@ -64,6 +65,7 @@
     "webtorrent-fixtures": "1.7.3"
   },
   "scripts": {
+    "precommit": "lint-staged --quiet",
     "start": "react-scripts start",
     "start:alt": "PORT=3333 react-scripts start",
     "build": "react-scripts build",
@@ -73,6 +75,9 @@
     "test": "TRACKER_URL=http://localhost:4242/announce jest",
     "lint:check": "tslint -c tslint.json -p .",
     "lint:write": "tslint -c tslint.json -p . --fix"
+  },
+  "lint-staged": {
+    "{src,tests}/**/*.tsx?": "yarn lint:check"
   },
   "browserslist": [
     ">0.2%",
