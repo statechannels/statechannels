@@ -1,7 +1,7 @@
-import React from "react";
-import { RouteComponentProps } from "react-router-dom";
-import { FormButton } from "../../components/form";
-import "./Upload.scss";
+import React from 'react';
+import {RouteComponentProps} from 'react-router-dom';
+import {FormButton} from '../../components/form';
+import './Upload.scss';
 
 const Upload: React.FC<RouteComponentProps> = () => {
   return (
@@ -16,8 +16,8 @@ const Upload: React.FC<RouteComponentProps> = () => {
       </div>
       <div className="subtitle">
         <p>
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore
-          magna aliqua.
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt
+          ut labore et dolore magna aliqua.
         </p>
       </div>
     </section>

@@ -1,13 +1,13 @@
-import { createBrowserHistory } from "history";
-import React from "react";
-import { Route, Router, Switch } from "react-router-dom";
-import "./App.scss";
-import { LayoutFooter, LayoutHeader } from "./components/layout";
-import Welcome from "./pages/welcome/Welcome";
+import {createBrowserHistory} from 'history';
+import React from 'react';
+import {Route, Router, Switch} from 'react-router-dom';
+import './App.scss';
+import {LayoutFooter, LayoutHeader} from './components/layout';
+import Welcome from './pages/welcome/Welcome';
 
-import Download from "./pages/download/Download";
-import Upload from "./pages/upload/Upload";
-import { RoutePath } from "./routes";
+import Download from './pages/download/Download';
+import Upload from './pages/upload/Upload';
+import {RoutePath} from './routes';
 
 const App: React.FC = () => {
   const history = createBrowserHistory();

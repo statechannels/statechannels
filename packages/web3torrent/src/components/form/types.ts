@@ -17,7 +17,7 @@ export type FormInputProps = {
   step?: number;
   error?: string;
   type?: string;
-  units?: Array<{ name: string; shortName: string }>;
+  units?: Array<{name: string; shortName: string}>;
   required?: boolean;
   disabled?: boolean;
   value?: string | number;
@@ -40,18 +40,18 @@ export type FormButtonProps = {
   disabled?: boolean;
   block?: boolean;
   onClick?: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
-  type?: "submit" | "button";
+  type?: 'submit' | 'button';
 };
 
 export const errorStatus = (type?: string) => ({
-  valid: { message: null },
-  valueMissing: { message: "Please fill out this field." },
-  typeMismatch: { message: `Please fill in a valid ${type}` },
-  tooShort: { message: "Please lengthen this text." },
-  tooLong: { message: "Please shorten this text." },
-  badInput: { message: "Please enter a number." },
-  stepMismatch: { message: "Please select a valid value." },
-  rangeOverflow: { message: "Please select a smaller value." },
-  rangeUnderflow: { message: "Please select a larger value." },
-  patternMismatch: { message: "Please match the requested format." }
+  valid: {message: null},
+  valueMissing: {message: 'Please fill out this field.'},
+  typeMismatch: {message: `Please fill in a valid ${type}`},
+  tooShort: {message: 'Please lengthen this text.'},
+  tooLong: {message: 'Please shorten this text.'},
+  badInput: {message: 'Please enter a number.'},
+  stepMismatch: {message: 'Please select a valid value.'},
+  rangeOverflow: {message: 'Please select a smaller value.'},
+  rangeUnderflow: {message: 'Please select a larger value.'},
+  patternMismatch: {message: 'Please match the requested format.'}
 });

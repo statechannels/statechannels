@@ -1,5 +1,5 @@
 export enum RoutePath {
-  Root = "/",
-  Download = "/download",
-  Upload = "/upload"
+  Root = '/',
+  Download = '/download',
+  Upload = '/upload'
 }

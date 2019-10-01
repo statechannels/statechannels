@@ -1,15 +1,15 @@
-import React from "react";
-import { FormButton } from "../form";
-import "./TorrentInfo.scss";
-import { ProgressBar } from "./progress-bar/ProgressBar";
-import { Torrent } from "../../types";
+import React from 'react';
+import {Torrent} from '../../types';
+import {FormButton} from '../form';
+import {ProgressBar} from './progress-bar/ProgressBar';
+import './TorrentInfo.scss';
 
-export type TorrentInfoProps = { torrent: Torrent };
+export type TorrentInfoProps = {torrent: Torrent};
 
-const TorrentInfo: React.FC<TorrentInfoProps> = ({ torrent }: TorrentInfoProps) => {
+const TorrentInfo: React.FC<TorrentInfoProps> = ({torrent}: TorrentInfoProps) => {
   return (
     <>
-      <section className={`torrentInfo ${torrent.magnetURI ? " with-link" : ""}`}>
+      <section className={`torrentInfo ${torrent.magnetURI ? ' with-link' : ''}`}>
         <span className="fileName">{torrent.name}</span>
         <span className="fileSize">{torrent.length}Mb</span>
         {torrent.status ? <span className="fileStatus">{torrent.status}</span> : false}
@@ -29,7 +29,7 @@ const TorrentInfo: React.FC<TorrentInfoProps> = ({ torrent }: TorrentInfoProps) 
           <ProgressBar
             downloaded={torrent.downloaded || 0}
             size={torrent.length || 0}
-            status={torrent.downloaded !== torrent.length ? "Downloading" : "Completed"}
+            status={torrent.downloaded !== torrent.length ? 'Downloading' : 'Completed'}
           />
           <p>
             ETA 1m30s. 500Kbits/s down, 500Kbits/s up <br />
@@ -59,4 +59,4 @@ const TorrentInfo: React.FC<TorrentInfoProps> = ({ torrent }: TorrentInfoProps) 
   );
 };
 
-export { TorrentInfo };
+export {TorrentInfo};

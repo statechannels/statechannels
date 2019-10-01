@@ -1,7 +1,7 @@
-import React from "react";
-import { Spinner } from "../spinner/Spinner";
-import { FormButtonProps } from "../types";
-import "./FormButton.scss";
+import React from 'react';
+import {Spinner} from '../spinner/Spinner';
+import {FormButtonProps} from '../types';
+import './FormButton.scss';
 
 const FormButton: React.FC<FormButtonProps> = ({
   children,
@@ -10,15 +10,15 @@ const FormButton: React.FC<FormButtonProps> = ({
   disabled = false,
   spinner = false,
   block = false,
-  className = "button",
-  type = "button"
+  className = 'button',
+  type = 'button'
 }: FormButtonProps) => {
   return (
     <button
       data-test-selector={`${name || className}-button`}
       disabled={disabled}
       onClick={onClick}
-      className={className + (block ? " block" : "")}
+      className={className + (block ? ' block' : '')}
       type={type}
     >
       {spinner ? <Spinner visible={spinner} color="white" /> : false}
@@ -27,4 +27,4 @@ const FormButton: React.FC<FormButtonProps> = ({
   );
 };
 
-export { FormButton };
+export {FormButton};
