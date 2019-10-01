@@ -1,4 +1,4 @@
-import { State } from "@statechannels/nitro-protocol";
+import {State} from "@statechannels/nitro-protocol";
 
 export interface AdjudicatorState {
   [channelId: string]: AdjudicatorChannelState;
@@ -14,44 +14,54 @@ export interface Challenge {
   challengeStates: State[];
 }
 
-function getOrCreateAdjudicatorChannelState(adjudicatorState: AdjudicatorState, channelId: string): AdjudicatorChannelState {
+function getOrCreateAdjudicatorChannelState(
+  adjudicatorState: AdjudicatorState,
+  channelId: string
+): AdjudicatorChannelState {
   let channelState = getAdjudicatorChannelState(adjudicatorState, channelId);
   if (!channelState) {
-    channelState = { channelId, balance: "0x0", finalized: false };
+    channelState = {channelId, balance: "0x0", finalized: false};
   }
   return channelState;
 }
-export function getAdjudicatorChannelState(adjudicatorState: AdjudicatorState, channelId: string): AdjudicatorChannelState | undefined {
+export function getAdjudicatorChannelState(
+  adjudicatorState: AdjudicatorState,
+  channelId: string
+): AdjudicatorChannelState | undefined {
   return adjudicatorState[channelId];
 }
 function setAdjudicatorChannelState(adjudicatorState: AdjudicatorState, channelState: AdjudicatorChannelState) {
   return {
     ...adjudicatorState,
-    [channelState.channelId]: channelState,
+    [channelState.channelId]: channelState
   };
 }
 
 export function clearChallenge(adjudicatorState: AdjudicatorState, channelId: string): AdjudicatorState {
   const channelState = getOrCreateAdjudicatorChannelState(adjudicatorState, channelId);
-  const newChannelState = { ...channelState, challenge: undefined };
+  const newChannelState = {...channelState, challenge: undefined};
   return setAdjudicatorChannelState(adjudicatorState, newChannelState);
 }
 
-export function setChallenge(adjudicatorState: AdjudicatorState, channelId: string, challenge: Challenge): AdjudicatorState {
+export function setChallenge(
+  adjudicatorState: AdjudicatorState,
+  channelId: string,
+  challenge: Challenge
+): AdjudicatorState {
   const channelState = getOrCreateAdjudicatorChannelState(adjudicatorState, channelId);
-  const newChannelState = { ...channelState, challenge };
+  const newChannelState = {...channelState, challenge};
   return setAdjudicatorChannelState(adjudicatorState, newChannelState);
 }
 
 export function markAsFinalized(adjudicatorState: AdjudicatorState, channelId: string): AdjudicatorState {
   const channelState = getOrCreateAdjudicatorChannelState(adjudicatorState, channelId);
-  const newChannelState = { ...channelState, finalized: true };
+  const newChannelState = {...channelState, finalized: true};
   return setAdjudicatorChannelState(adjudicatorState, newChannelState);
 }
 
 export function setBalance(adjudicatorState: AdjudicatorState, channelId: string, balance: string): AdjudicatorState {
   const channelState = getOrCreateAdjudicatorChannelState(adjudicatorState, channelId);
 
-  const newChannelState = { ...channelState, balance };
+  const newChannelState = {...channelState, balance};
   return setAdjudicatorChannelState(adjudicatorState, newChannelState);
 }

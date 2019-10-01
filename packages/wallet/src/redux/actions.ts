@@ -4,23 +4,23 @@ import * as NewLedgerChannel from "./protocols/new-ledger-channel/actions";
 import * as application from "./protocols/application/actions";
 import * as protocol from "./protocols/actions";
 import * as advanceChannel from "./protocols/advance-channel";
-import { FundingAction, isFundingAction } from "./protocols/funding/actions";
-import { CommitmentReceived, commitmentReceived, RelayableAction, ProtocolLocator } from "../communication";
-import { TransactionAction as TA, isTransactionAction as isTA } from "./protocols/transaction-submission/actions";
+import {FundingAction, isFundingAction} from "./protocols/funding/actions";
+import {CommitmentReceived, commitmentReceived, RelayableAction, ProtocolLocator} from "../communication";
+import {TransactionAction as TA, isTransactionAction as isTA} from "./protocols/transaction-submission/actions";
 
-import { ConcludingAction, isConcludingAction } from "./protocols/concluding";
-import { ApplicationAction } from "./protocols/application/actions";
-import { ActionConstructor } from "./utils";
-import { Commitment } from "../domain";
-import { isDefundingAction, DefundingAction } from "./protocols/defunding/actions";
-import { AdvanceChannelAction } from "./protocols/advance-channel/actions";
-import { FundingStrategyNegotiationAction } from "./protocols/funding-strategy-negotiation/actions";
-import { LedgerFundingAction } from "./protocols/ledger-funding";
+import {ConcludingAction, isConcludingAction} from "./protocols/concluding";
+import {ApplicationAction} from "./protocols/application/actions";
+import {ActionConstructor} from "./utils";
+import {Commitment} from "../domain";
+import {isDefundingAction, DefundingAction} from "./protocols/defunding/actions";
+import {AdvanceChannelAction} from "./protocols/advance-channel/actions";
+import {FundingStrategyNegotiationAction} from "./protocols/funding-strategy-negotiation/actions";
+import {LedgerFundingAction} from "./protocols/ledger-funding";
 
-import { LOAD as LOAD_FROM_STORAGE } from "redux-storage";
-import { State } from "@statechannels/nitro-protocol";
+import {LOAD as LOAD_FROM_STORAGE} from "redux-storage";
+import {State} from "@statechannels/nitro-protocol";
 export * from "./protocols/transaction-submission/actions";
-export { CommitmentReceived, commitmentReceived };
+export {CommitmentReceived, commitmentReceived};
 
 export type TransactionAction = TA;
 export const isTransactionAction = isTA;
@@ -54,7 +54,7 @@ export interface DisplayMessageSent {
 
 export interface BlockMined {
   type: "BLOCK_MINED";
-  block: { timestamp: number; number: number };
+  block: {timestamp: number; number: number};
 }
 
 export interface MetamaskLoadError {
@@ -130,68 +130,68 @@ export interface ChannelUpdate {
 
 export const multipleWalletActions: ActionConstructor<MultipleWalletActions> = p => ({
   ...p,
-  type: "WALLET.MULTIPLE_ACTIONS",
+  type: "WALLET.MULTIPLE_ACTIONS"
 });
 
-export const loggedIn: ActionConstructor<LoggedIn> = p => ({ ...p, type: "WALLET.LOGGED_IN" });
+export const loggedIn: ActionConstructor<LoggedIn> = p => ({...p, type: "WALLET.LOGGED_IN"});
 
 export const adjudicatorKnown: ActionConstructor<AdjudicatorKnown> = p => ({
   ...p,
-  type: "WALLET.ADJUDICATOR_KNOWN",
+  type: "WALLET.ADJUDICATOR_KNOWN"
 });
 
 export const messageSent: ActionConstructor<MessageSent> = p => ({
   ...p,
-  type: "WALLET.MESSAGE_SENT",
+  type: "WALLET.MESSAGE_SENT"
 });
 
 export const displayMessageSent: ActionConstructor<DisplayMessageSent> = p => ({
   ...p,
-  type: "WALLET.DISPLAY_MESSAGE_SENT",
+  type: "WALLET.DISPLAY_MESSAGE_SENT"
 });
 
-export const blockMined: ActionConstructor<BlockMined> = p => ({ ...p, type: "BLOCK_MINED" });
+export const blockMined: ActionConstructor<BlockMined> = p => ({...p, type: "BLOCK_MINED"});
 
 export const metamaskLoadError: ActionConstructor<MetamaskLoadError> = p => ({
   ...p,
-  type: "METAMASK_LOAD_ERROR",
+  type: "METAMASK_LOAD_ERROR"
 });
 
 export const challengeExpirySetEvent: ActionConstructor<ChallengeExpirySetEvent> = p => ({
   ...p,
-  type: "WALLET.ADJUDICATOR.CHALLENGE_EXPIRY_TIME_SET",
+  type: "WALLET.ADJUDICATOR.CHALLENGE_EXPIRY_TIME_SET"
 });
 
 export const challengeCreatedEvent: ActionConstructor<ChallengeCreatedEvent> = p => ({
   ...p,
-  type: "WALLET.ADJUDICATOR.CHALLENGE_CREATED_EVENT",
+  type: "WALLET.ADJUDICATOR.CHALLENGE_CREATED_EVENT"
 });
 
 export const concludedEvent: ActionConstructor<ConcludedEvent> = p => ({
   ...p,
-  type: "WALLET.ADJUDICATOR.CONCLUDED_EVENT",
+  type: "WALLET.ADJUDICATOR.CONCLUDED_EVENT"
 });
 
 export const refutedEvent: ActionConstructor<RefutedEvent> = p => ({
   ...p,
-  type: "WALLET.ADJUDICATOR.REFUTED_EVENT",
+  type: "WALLET.ADJUDICATOR.REFUTED_EVENT"
 });
 
 export const respondWithMoveEvent: ActionConstructor<RespondWithMoveEvent> = p => ({
   ...p,
-  type: "WALLET.ADJUDICATOR.RESPOND_WITH_MOVE_EVENT",
+  type: "WALLET.ADJUDICATOR.RESPOND_WITH_MOVE_EVENT"
 });
 export const fundingReceivedEvent: ActionConstructor<FundingReceivedEvent> = p => ({
   ...p,
-  type: "WALLET.ADJUDICATOR.FUNDING_RECEIVED_EVENT",
+  type: "WALLET.ADJUDICATOR.FUNDING_RECEIVED_EVENT"
 });
 export const challengeExpiredEvent: ActionConstructor<ChallengeExpiredEvent> = p => ({
   ...p,
-  type: "WALLET.ADJUDICATOR.CHALLENGE_EXPIRED",
+  type: "WALLET.ADJUDICATOR.CHALLENGE_EXPIRED"
 });
 export const channelUpdate: ActionConstructor<ChannelUpdate> = p => ({
   ...p,
-  type: "WALLET.ADJUDICATOR.CHANNEL_UPDATE",
+  type: "WALLET.ADJUDICATOR.CHANNEL_UPDATE"
 });
 
 // -------
@@ -213,7 +213,12 @@ export type ProtocolAction =
   FundingAction | DefundingAction | ApplicationAction | ConcludingAction;
 
 export function isProtocolAction(action: WalletAction): action is ProtocolAction {
-  return isFundingAction(action) || application.isApplicationAction(action) || isConcludingAction(action) || isDefundingAction(action);
+  return (
+    isFundingAction(action) ||
+    application.isApplicationAction(action) ||
+    isConcludingAction(action) ||
+    isDefundingAction(action)
+  );
 }
 
 export type WalletAction =
@@ -233,7 +238,7 @@ export type WalletAction =
   | FundingAction
   | LedgerFundingAction;
 
-export { channel, directFunding as funding, NewLedgerChannel, protocol, application, advanceChannel };
+export {channel, directFunding as funding, NewLedgerChannel, protocol, application, advanceChannel};
 
 // These are any actions that update shared data directly without any protocol
 export type SharedDataUpdateAction = AdjudicatorEventAction;
