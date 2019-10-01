@@ -1,5 +1,6 @@
 import debug from 'debug';
-import React, {useEffect, useState} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
+import {OnboardingFlowContext} from '../../flows';
 import {JsonRpcComponentProps} from '../../json-rpc-router';
 import {closeWallet} from '../../message-dispatchers';
 import {Dialog, FlowProcess, FlowStep, FlowStepProps, FlowStepStatus} from '../../ui';
@@ -25,6 +26,12 @@ const ConnectToHub: React.FC<JsonRpcComponentProps> = () => {
       status: FlowStepStatus.Pending
     }
   ]);
+
+  const onboardingFlowContext = useContext(OnboardingFlowContext);
+
+  useEffect(() => {
+    log('Initiated flow step with request %o', onboardingFlowContext.request);
+  }, [onboardingFlowContext.request]);
 
   useEffect(() => {
     if (steps[steps.length - 1].status !== FlowStepStatus.Done) {
