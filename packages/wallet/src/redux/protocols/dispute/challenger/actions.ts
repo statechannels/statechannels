@@ -3,7 +3,8 @@ import {
   RefutedEvent,
   RespondWithMoveEvent,
   ChallengeExpirySetEvent,
-  WalletAction
+  WalletAction,
+  WalletActionType
 } from "../../../actions";
 import {isTransactionAction, TransactionAction} from "../../transaction-submission/actions";
 import {ActionConstructor} from "../../../utils";
@@ -79,7 +80,7 @@ export function isChallengerAction(action: WalletAction): action is ChallengerAc
     action.type === "WALLET.ADJUDICATOR.CHALLENGE_EXPIRED" ||
     action.type === "WALLET.ADJUDICATOR.RESPOND_WITH_MOVE_EVENT" ||
     action.type === "WALLET.ADJUDICATOR.REFUTED_EVENT" ||
-    action.type === "WALLET.ADJUDICATOR.CHALLENGE_EXPIRY_TIME_SET" ||
+    action.type === WalletActionType.WALLET_ADJUDICATOR_CHALLENGE_EXPIRY_TIME_SET ||
     action.type === "WALLET.DISPUTE.CHALLENGER.ACKNOWLEDGED" ||
     action.type === "WALLET.DISPUTE.CHALLENGER.EXIT_CHALLENGE"
   );

@@ -1,4 +1,4 @@
-import {ChallengeCreatedEvent} from "../actions";
+import {ChallengeCreatedEvent, WalletActionType} from "../actions";
 import {take, select, put} from "redux-saga/effects";
 import * as selectors from "../selectors";
 import {challengeDetected} from "../protocols/application/actions";
@@ -9,7 +9,7 @@ import {APPLICATION_PROCESS_ID} from "../protocols/application/reducer";
  */
 export function* challengeResponseInitiator() {
   while (true) {
-    const action: ChallengeCreatedEvent = yield take("WALLET.ADJUDICATOR.CHALLENGE_CREATED_EVENT");
+    const action: ChallengeCreatedEvent = yield take(WalletActionType.WALLET_ADJUDICATOR_CHALLENGE_CREATED_EVENT);
     const {commitment, channelId, finalizedAt: expiresAt} = action;
 
     const channelState = yield select(selectors.getOpenedChannelState, channelId);

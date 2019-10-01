@@ -2,6 +2,8 @@ import {AdjudicatorState, clearChallenge, markAsFinalized, setBalance, setChalle
 import * as actions from "../actions";
 import {unreachable} from "../../utils/reducer-utils";
 
+const Action = actions.WalletActionType;
+
 export const adjudicatorStateReducer = (
   state: AdjudicatorState,
   action: actions.AdjudicatorEventAction | actions.ChallengeCreatedEvent
@@ -16,11 +18,11 @@ export const adjudicatorStateReducer = (
     case "WALLET.ADJUDICATOR.REFUTED_EVENT":
     case "WALLET.ADJUDICATOR.RESPOND_WITH_MOVE_EVENT":
       return challengeRespondedReducer(state, action);
-    case "WALLET.ADJUDICATOR.CHALLENGE_CREATED_EVENT":
+    case Action.WALLET_ADJUDICATOR_CHALLENGE_CREATED_EVENT:
       return challengeCreatedEventReducer(state, action);
     case "WALLET.ADJUDICATOR.CHANNEL_UPDATE":
       return channelUpdateReducer(state, action);
-    case "WALLET.ADJUDICATOR.CHALLENGE_EXPIRY_TIME_SET":
+    case Action.WALLET_ADJUDICATOR_CHALLENGE_EXPIRY_TIME_SET:
       // We already handle this in the challenge created event
       return state;
     default:

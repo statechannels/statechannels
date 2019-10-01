@@ -17,7 +17,7 @@ import {ethers} from "ethers";
 import * as closeLedgerChannelProtocol from "./protocols/close-ledger-channel";
 import _ from "lodash";
 const initialState = states.waitForLogin();
-const Action = actions.Action;
+const Action = actions.WalletActionType;
 
 export const walletReducer = (
   state: states.WalletState = initialState,

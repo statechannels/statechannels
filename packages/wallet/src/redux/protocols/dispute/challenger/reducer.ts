@@ -14,7 +14,8 @@ import {
 } from "./states";
 import {unreachable} from "../../../../utils/reducer-utils";
 import {SharedData, registerChannelToMonitor, checkAndStore, getPrivatekey} from "../../../state";
-import * as actions from "./actions";
+import {isChallengerAction} from "./actions";
+import {WalletActionType} from "../../../actions";
 import {TransactionAction} from "../../transaction-submission/actions";
 import {isTransactionAction, ProtocolAction} from "../../../actions";
 import {transactionReducer, initialize as initializeTransaction} from "../../transaction-submission";
@@ -41,7 +42,7 @@ export interface ReturnVal {
 }
 
 export function challengerReducer(state: NonTerminalCState, sharedData: SharedData, action: ProtocolAction): ReturnVal {
-  if (!actions.isChallengerAction(action)) {
+  if (!isChallengerAction(action)) {
     console.warn(`Challenging reducer received non-challenging action ${action.type}.`);
     return {state, sharedData};
   }
@@ -64,7 +65,7 @@ export function challengerReducer(state: NonTerminalCState, sharedData: SharedDa
       return refuteReceived(state, sharedData);
     case "WALLET.ADJUDICATOR.CHALLENGE_EXPIRED":
       return challengeTimedOut(state, sharedData);
-    case "WALLET.ADJUDICATOR.CHALLENGE_EXPIRY_TIME_SET":
+    case WalletActionType.WALLET_ADJUDICATOR_CHALLENGE_EXPIRY_TIME_SET:
       return handleChallengeCreatedEvent(state, sharedData, action.expiryTime);
     case "WALLET.DISPUTE.CHALLENGER.ACKNOWLEDGED":
       switch (state.type) {

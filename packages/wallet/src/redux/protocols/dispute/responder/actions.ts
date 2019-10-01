@@ -1,3 +1,4 @@
+import {WalletActionType} from "../../../actions";
 import {BaseProcessAction} from "../../actions";
 import {Commitment} from "../../../../domain";
 import {TransactionAction} from "../../transaction-submission/actions";
@@ -70,7 +71,7 @@ export function isResponderAction(action: WalletAction): action is ResponderActi
     isTransactionAction(action) ||
     action.type === "WALLET.DISPUTE.RESPONDER.RESPOND_APPROVED" ||
     action.type === "WALLET.DISPUTE.RESPONDER.RESPONSE_PROVIDED" ||
-    action.type === "WALLET.ADJUDICATOR.CHALLENGE_EXPIRY_TIME_SET" ||
+    action.type === WalletActionType.WALLET_ADJUDICATOR_CHALLENGE_EXPIRY_TIME_SET ||
     action.type === "WALLET.ADJUDICATOR.CHALLENGE_EXPIRED" ||
     action.type === "WALLET.DISPUTE.RESPONDER.ACKNOWLEDGED" ||
     action.type === "WALLET.DISPUTE.CHALLENGER.EXIT_CHALLENGE"

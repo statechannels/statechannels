@@ -24,8 +24,11 @@ export {CommitmentReceived, commitmentReceived};
 export type TransactionAction = TA;
 export const isTransactionAction = isTA;
 
-export enum Action {
+export enum WalletActionType {
   BLOCK_MINED = "BLOCK_MINED",
+  METAMASK_LOAD_ERROR = "METAMASK_LOAD_ERROR",
+  WALLET_ADJUDICATOR_CHALLENGE_EXPIRY_TIME_SET = "WALLET.ADJUDICATOR.CHALLENGE_EXPIRY_TIME_SET",
+  WALLET_ADJUDICATOR_CHALLENGE_CREATED_EVENT = "WALLET.ADJUDICATOR.CHALLENGE_CREATED_EVENT",
   WALLET_MULTIPLE_ACTIONS = "WALLET.MULTIPLE_ACTIONS",
   WALLET_LOGGED_IN = "WALLET.LOGGED_IN",
   WALLET_ADJUDICATOR_KNOWN = "WALLET.ADJUDICATOR_KNOWN",
@@ -38,41 +41,41 @@ export enum Action {
 // -------
 
 export interface MultipleWalletActions {
-  type: Action.WALLET_MULTIPLE_ACTIONS;
+  type: WalletActionType.WALLET_MULTIPLE_ACTIONS;
   actions: WalletAction[];
 }
 export interface LoggedIn {
-  type: Action.WALLET_LOGGED_IN;
+  type: WalletActionType.WALLET_LOGGED_IN;
   uid: string;
 }
 
 export interface AdjudicatorKnown {
-  type: Action.WALLET_ADJUDICATOR_KNOWN;
+  type: WalletActionType.WALLET_ADJUDICATOR_KNOWN;
   networkId: string;
   adjudicator: string;
 }
 
 export interface MessageSent {
-  type: Action.WALLET_MESSAGE_SENT;
+  type: WalletActionType.WALLET_MESSAGE_SENT;
 }
 
 export interface DisplayMessageSent {
-  type: Action.WALLET_DISPLAY_MESSAGE_SENT;
+  type: WalletActionType.WALLET_DISPLAY_MESSAGE_SENT;
 }
 
 export interface BlockMined {
-  type: Action.BLOCK_MINED;
+  type: WalletActionType.BLOCK_MINED;
   block: {timestamp: number; number: number};
 }
 
 export interface MetamaskLoadError {
-  type: "METAMASK_LOAD_ERROR";
+  type: WalletActionType.METAMASK_LOAD_ERROR;
 }
 
 export type Message = "FundingDeclined";
 
 export interface ChallengeExpirySetEvent {
-  type: "WALLET.ADJUDICATOR.CHALLENGE_EXPIRY_TIME_SET";
+  type: WalletActionType.WALLET_ADJUDICATOR_CHALLENGE_EXPIRY_TIME_SET;
   processId: string;
   protocolLocator: ProtocolLocator;
   channelId: string;
@@ -80,7 +83,7 @@ export interface ChallengeExpirySetEvent {
 }
 
 export interface ChallengeCreatedEvent {
-  type: "WALLET.ADJUDICATOR.CHALLENGE_CREATED_EVENT";
+  type: WalletActionType.WALLET_ADJUDICATOR_CHALLENGE_CREATED_EVENT;
   channelId: string;
   commitment: Commitment;
   finalizedAt: number;
@@ -137,41 +140,41 @@ export interface ChannelUpdate {
 
 export const multipleWalletActions: ActionConstructor<MultipleWalletActions> = p => ({
   ...p,
-  type: Action.WALLET_MULTIPLE_ACTIONS
+  type: WalletActionType.WALLET_MULTIPLE_ACTIONS
 });
 
-export const loggedIn: ActionConstructor<LoggedIn> = p => ({...p, type: Action.WALLET_LOGGED_IN});
+export const loggedIn: ActionConstructor<LoggedIn> = p => ({...p, type: WalletActionType.WALLET_LOGGED_IN});
 
 export const adjudicatorKnown: ActionConstructor<AdjudicatorKnown> = p => ({
   ...p,
-  type: Action.WALLET_ADJUDICATOR_KNOWN
+  type: WalletActionType.WALLET_ADJUDICATOR_KNOWN
 });
 
 export const messageSent: ActionConstructor<MessageSent> = p => ({
   ...p,
-  type: Action.WALLET_MESSAGE_SENT
+  type: WalletActionType.WALLET_MESSAGE_SENT
 });
 
 export const displayMessageSent: ActionConstructor<DisplayMessageSent> = p => ({
   ...p,
-  type: Action.WALLET_DISPLAY_MESSAGE_SENT
+  type: WalletActionType.WALLET_DISPLAY_MESSAGE_SENT
 });
 
-export const blockMined: ActionConstructor<BlockMined> = p => ({...p, type: Action.BLOCK_MINED});
+export const blockMined: ActionConstructor<BlockMined> = p => ({...p, type: WalletActionType.BLOCK_MINED});
 
 export const metamaskLoadError: ActionConstructor<MetamaskLoadError> = p => ({
   ...p,
-  type: "METAMASK_LOAD_ERROR"
+  type: WalletActionType.METAMASK_LOAD_ERROR
 });
 
 export const challengeExpirySetEvent: ActionConstructor<ChallengeExpirySetEvent> = p => ({
   ...p,
-  type: "WALLET.ADJUDICATOR.CHALLENGE_EXPIRY_TIME_SET"
+  type: WalletActionType.WALLET_ADJUDICATOR_CHALLENGE_EXPIRY_TIME_SET
 });
 
 export const challengeCreatedEvent: ActionConstructor<ChallengeCreatedEvent> = p => ({
   ...p,
-  type: "WALLET.ADJUDICATOR.CHALLENGE_CREATED_EVENT"
+  type: WalletActionType.WALLET_ADJUDICATOR_CHALLENGE_CREATED_EVENT
 });
 
 export const concludedEvent: ActionConstructor<ConcludedEvent> = p => ({
@@ -261,8 +264,8 @@ export function isAdjudicatorEventAction(action: WalletAction): action is Adjudi
     action.type === "WALLET.ADJUDICATOR.RESPOND_WITH_MOVE_EVENT" ||
     action.type === "WALLET.ADJUDICATOR.FUNDING_RECEIVED_EVENT" ||
     action.type === "WALLET.ADJUDICATOR.CHALLENGE_EXPIRED" ||
-    action.type === "WALLET.ADJUDICATOR.CHALLENGE_CREATED_EVENT" ||
-    action.type === "WALLET.ADJUDICATOR.CHALLENGE_EXPIRY_TIME_SET" ||
+    action.type === WalletActionType.WALLET_ADJUDICATOR_CHALLENGE_CREATED_EVENT ||
+    action.type === WalletActionType.WALLET_ADJUDICATOR_CHALLENGE_EXPIRY_TIME_SET ||
     action.type === "WALLET.ADJUDICATOR.CHANNEL_UPDATE"
   );
 }
