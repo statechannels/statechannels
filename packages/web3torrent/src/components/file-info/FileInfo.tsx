@@ -48,7 +48,7 @@ const FileInfo: React.FC<FileInfoProps> = ({ file }: FileInfoProps) => {
       ) : (
         <section className="uploadingInfo">
           <p>
-            Total Recieved: <strong>$1.34</strong>
+            Total Received: <strong>$1.34</strong>
             <br />
             <strong>{file.peersConnected}</strong> Peers connected
           </p>
