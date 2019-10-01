@@ -1,4 +1,4 @@
-import {Commitment, getChannelId} from "../../../../domain";
+import {Commitment, getChannelId, SignedCommitment} from "../../../../domain";
 import {ProtocolStateWithSharedData} from "../..";
 import * as states from "./states";
 import * as actions from "./actions";
@@ -255,20 +255,23 @@ const craftResponseTransactionWithExistingCommitment = (
   challengeCommitment: Commitment,
   sharedData: SharedData
 ): TransactionRequest => {
-  const {penultimateCommitment, lastCommitment, lastSignature, penultimateSignature} = getStoredCommitments(
+  const {penultimateSignedCommitment, lastSignedCommitment} = getStoredCommitments(
     challengeCommitment,
     sharedData
   );
 
+  const {commitment: lastCommitment} = lastSignedCommitment;
+
   const channelId = getChannelId(challengeCommitment);
   const privateKey = getPrivatekey(sharedData, channelId);
 
+  // TODO: Check to see if we need to pass in an array of n-states e.g., if the thing to refute
+  // involves a "respond with alternative" basically
   if (canRefute(challengeCommitment, sharedData)) {
-    if (canRefuteWithCommitment(lastCommitment, challengeCommitment)) {
-      return TransactionGenerator.createRefuteTransaction(lastCommitment, lastSignature);
-    } else {
-      return TransactionGenerator.createRefuteTransaction(penultimateCommitment, penultimateSignature);
-    }
+    return TransactionGenerator.createRefuteTransaction([
+      penultimateSignedCommitment.signedState,
+      lastSignedCommitment.signedState
+    ]);
   } else if (canRespondWithExistingCommitment(challengeCommitment, sharedData)) {
     return TransactionGenerator.createRespondWithMoveTransaction(
       challengeCommitment,
@@ -285,29 +288,30 @@ const getStoredCommitments = (
   challengeCommitment: Commitment,
   sharedData: SharedData
 ): {
-  lastCommitment: Commitment;
-  penultimateCommitment: Commitment;
-  lastSignature: string;
-  penultimateSignature: string;
+  lastSignedCommitment: SignedCommitment;
+  penultimateSignedCommitment: SignedCommitment;
 } => {
   const channelId = channelID(challengeCommitment.channel);
   const channelState = selectors.getOpenedChannelState(sharedData, channelId);
+  // NOTE: Assumes 2-party
   const [penultimateSignedCommitment, lastSignedCommitment] = channelState.commitments;
-  const {signature: lastSignature, commitment: lastCommitment} = lastSignedCommitment;
-  const {signature: penultimateSignature, commitment: penultimateCommitment} = penultimateSignedCommitment;
-  return {lastCommitment, penultimateCommitment, lastSignature, penultimateSignature};
+  return {lastSignedCommitment, penultimateSignedCommitment};
 };
 
 const canRespondWithExistingCommitment = (challengeCommitment: Commitment, sharedData: SharedData) => {
   return canRespondWithExistingMove(challengeCommitment, sharedData) || canRefute(challengeCommitment, sharedData);
 };
 const canRespondWithExistingMove = (challengeCommitment: Commitment, sharedData: SharedData): boolean => {
-  const {penultimateCommitment, lastCommitment} = getStoredCommitments(challengeCommitment, sharedData);
+  const {penultimateSignedCommitment, lastSignedCommitment} = getStoredCommitments(challengeCommitment, sharedData);
+  const {commitment: lastCommitment} = lastSignedCommitment;
+  const {commitment: penultimateCommitment} = penultimateSignedCommitment;
   return _.isEqual(penultimateCommitment, challengeCommitment) && mover(lastCommitment) !== mover(challengeCommitment);
 };
 
 const canRefute = (challengeCommitment: Commitment, sharedData: SharedData) => {
-  const {penultimateCommitment, lastCommitment} = getStoredCommitments(challengeCommitment, sharedData);
+  const {penultimateSignedCommitment, lastSignedCommitment} = getStoredCommitments(challengeCommitment, sharedData);
+  const {commitment: lastCommitment} = lastSignedCommitment;
+  const {commitment: penultimateCommitment} = penultimateSignedCommitment;
   return (
     canRefuteWithCommitment(lastCommitment, challengeCommitment) ||
     canRefuteWithCommitment(penultimateCommitment, challengeCommitment)

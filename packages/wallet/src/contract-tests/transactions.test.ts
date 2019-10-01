@@ -180,25 +180,46 @@ describe("transactions", () => {
     await testTransactionSender(respondWithMoveTransaction);
   });
 
-  it.skip("should send a refute transaction", async () => {
-    const channel: Channel = { channelType: libraryAddress, nonce: getNextNonce(), participants };
+  it("should send a refute transaction", async () => {
+    const channel: Channel = {
+      channelType: libraryAddress,
+      nonce: getNextNonce(),
+      participants: [participantA.address, participantB.address]
+    };
     const { nonce: channelNonce } = channel;
     await depositContract(provider, participantA.address);
     await depositContract(provider, participantB.address);
+
     await createChallenge(provider, channelNonce, participantA, participantB);
+
+    const fromCommitment: Commitment = {
+      channel,
+      allocation: ["0x05", "0x05"],
+      destination: [participantA.address, participantB.address],
+      turnNum: 6,
+      commitmentType: CommitmentType.App,
+      appAttributes: "0x00",
+      commitmentCount: 3,
+    };
+
     const toCommitment: Commitment = {
       channel,
       allocation: ["0x05", "0x05"],
       destination: [participantA.address, participantB.address],
-      turnNum: 8,
+      turnNum: 7,
       commitmentType: CommitmentType.App,
       appAttributes: "0x0",
-      commitmentCount: 1,
+      commitmentCount: 4,
     };
 
-    const toSig = signCommitment(toCommitment, participantA.privateKey);
+    const fromSignedState = signCommitment2(fromCommitment, participantA.privateKey);
+    const toSignedState = signCommitment2(toCommitment, participantB.privateKey);
 
-    const refuteTransaction = createRefuteTransaction(toCommitment, toSig);
+    const refuteTransaction = createRefuteTransaction([
+      fromSignedState.signedState,
+      toSignedState.signedState
+    ]);
+
     await testTransactionSender(refuteTransaction);
   });
 
