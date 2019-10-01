@@ -25,7 +25,7 @@ export function createRespondWithMoveTransaction(
   privateKey: string
 ): TransactionRequest {
   const signedState = signCommitment2(responseCommitment, privateKey).signedState;
-  return nitroTrans.createRespondTransaction(convertCommitmentToState(challengeCommitment), signedState);
+  return nitroTrans.createRespondWithMoveTransaction(convertCommitmentToState(challengeCommitment), signedState);
 }
 
 export function createRefuteTransaction(refuteState: Commitment, signature: string): TransactionRequest {

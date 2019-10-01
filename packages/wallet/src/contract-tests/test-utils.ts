@@ -123,7 +123,7 @@ export async function concludeGame(provider: ethers.providers.JsonRpcProvider, c
   await transactionReceipt.wait();
 }
 
-export async function respondWithMove(provider: ethers.providers.JsonRpcProvider, channelNonce, participantA, participantB) {
+export async function respond(provider: ethers.providers.JsonRpcProvider, channelNonce, participantA, participantB, challenge: Commitment) {
   const network = await provider.getNetwork();
   const networkId = network.chainId;
   const libraryAddress = await getLibraryAddress(networkId, "TrivialApp");
@@ -134,33 +134,23 @@ export async function respondWithMove(provider: ethers.providers.JsonRpcProvider
     guaranteedChannel: ADDRESS_ZERO,
   };
 
-  // NOTE: Copied from createChallenge
-  const fromCommitment: Commitment = {
-    channel,
-    allocation: fiveFive,
-    destination: [participantA.address, participantB.address],
-    turnNum: 6,
-    commitmentType: CommitmentType.App,
-    appAttributes: "0x00",
-    commitmentCount: 0,
-  };
-
+  // TODO: refactor to DRY challenge handling
   const toCommitment: Commitment = {
     channel,
     allocation: fiveFive,
     destination: [participantA.address, participantB.address],
-    turnNum: 7,
+    turnNum: 8,
     commitmentType: CommitmentType.App,
     appAttributes: "0x00",
-    commitmentCount: 1,
+    commitmentCount: 2,
   };
 
   const toSig = signCommitment(toCommitment, participantB.privateKey);
 
   const respondWithMoveTransaction = createRespondWithMoveTransaction(
-    fromCommitment,
+    challenge,
     toCommitment,
-    participantB.privateKey
+    participantA.privateKey
   );
 
   const transactionReceipt = await sendTransaction(provider, respondWithMoveTransaction);

@@ -36,9 +36,9 @@ export function* adjudicatorWatcher(provider) {
 }
 
 function* dispatchEventAction(event: AdjudicatorEvent) {
+  const { channelId } = event;
   switch (event.eventType) {
     case AdjudicatorEventType.ChallengeRegistered:
-      const { channelId } = event;
       const challengeRegisteredEvent = getChallengeRegisteredEvent(event.eventArgs);
       // Solidity timestamps are in seconds while JS are ms, so we convert to a JS timestamp
       const finalizedAtInMs = bigNumberify(challengeRegisteredEvent.finalizesAt)
@@ -49,6 +49,15 @@ function* dispatchEventAction(event: AdjudicatorEvent) {
           channelId,
           finalizedAt: finalizedAtInMs,
           challengeStates: challengeRegisteredEvent.challengeStates,
+        })
+      );
+      break;
+    case AdjudicatorEventType.ChallengeCleared:
+      const newTurnNumRecord = event.eventArgs[1].toNumber();
+      yield put(
+        actions.challengeClearedEvent({
+          channelId,
+          newTurnNumRecord
         })
       );
       break;
@@ -66,6 +75,15 @@ function* dispatchProcessEventAction(event: AdjudicatorEvent, processId: string,
           protocolLocator,
           channelId,
           expiryTime: finalizedAt * 1000,
+        })
+      );
+      break;
+    case AdjudicatorEventType.ChallengeCleared:
+      const newTurnNumRecord = event.eventArgs[1].toNumber();
+      yield put(
+        actions.challengeClearedEvent({
+          channelId,
+          newTurnNumRecord
         })
       );
       break;
@@ -120,6 +138,7 @@ function* createAdjudicatorEventChannel(provider) {
 
   return eventChannel(emitter => {
     const challengeRegisteredFilter = adjudicator.filters.ChallengeRegistered();
+    const challengeClearedFilter = adjudicator.filters.ChallengeCleared();
     const gameConcludedFilter = adjudicator.filters.Concluded();
     //  bytes32 indexed channelId,
     // // everything needed to respond or checkpoint
@@ -136,6 +155,12 @@ function* createAdjudicatorEventChannel(provider) {
         eventArgs,
       });
     });
+    adjudicator.on(challengeClearedFilter, (...eventArgs) => {
+      emitter({ eventType: AdjudicatorEventType.ChallengeCleared,
+        channelId: eventArgs[0],
+        eventArgs
+      });
+    });
     adjudicator.on(gameConcludedFilter, channelId => {
       emitter({ eventType: AdjudicatorEventType.Concluded, channelId });
     });
@@ -143,6 +168,7 @@ function* createAdjudicatorEventChannel(provider) {
     return () => {
       // This function is called when the channel gets closed
       adjudicator.removeAllListeners(challengeRegisteredFilter);
+      adjudicator.removeAllListeners(challengeClearedFilter);
       adjudicator.removeAllListeners(gameConcludedFilter);
     };
   });

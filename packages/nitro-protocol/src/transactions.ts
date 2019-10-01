@@ -19,14 +19,14 @@ export function createForceMoveTransaction(
   );
 }
 
-export function createRespondTransaction(
+export function createRespondWithMoveTransaction(
   challengeState: State,
   response: SignedState,
 ): TransactionRequest {
   if (!challengeState) {
     throw new Error('No active challenge in challenge state');
   }
-  return forceMoveTrans.createRespondTransaction({
+  return forceMoveTrans.createRespondWithMoveTransaction({
     challengeState,
     responseState: response.state,
     responseSignature: response.signature,

@@ -116,7 +116,7 @@ const waitForResponseReducer = (
         throw new Error(`Could not sign response commitment due to ${signResult.reason}`);
       }
       const privateKey = getPrivatekey(sharedData, protocolState.channelId);
-      
+
       // TODO: There has got to be a better way of finding "the commitment I am responding to"
       const { commitments } = sharedData.channelStore[getChannelId(commitment)];
       const { commitment: challengeCommitment } = commitments.find(
