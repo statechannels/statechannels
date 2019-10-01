@@ -202,29 +202,36 @@ describe("transactions", () => {
     await testTransactionSender(refuteTransaction);
   });
 
-  it.skip("should send a conclude transaction", async () => {
-    const channel: Channel = { channelType: libraryAddress, nonce: getNextNonce(), participants };
+  it("should send a conclude transaction", async () => {
+    const channel: Channel = {
+      channelType: libraryAddress,
+      nonce: getNextNonce(),
+      participants: [participantA.address, participantB.address]
+    };
+
     await depositContract(provider, participantA.address);
     await depositContract(provider, participantB.address);
+
     const fromCommitment: Commitment = {
+      channel,
+      allocation: ["0x05", "0x05"],
+      destination: [participantA.address, participantB.address],
+      turnNum: 4,
+      commitmentType: CommitmentType.Conclude,
+      appAttributes: "0x0",
+      commitmentCount: 0,
+    };
+  
+    const toCommitment: Commitment = {
       channel,
       allocation: ["0x05", "0x05"],
       destination: [participantA.address, participantB.address],
       turnNum: 5,
       commitmentType: CommitmentType.Conclude,
       appAttributes: "0x0",
-      commitmentCount: 0,
-    };
-
-    const toCommitment: Commitment = {
-      channel,
-      allocation: ["0x05", "0x05"],
-      destination: [participantA.address, participantB.address],
-      turnNum: 6,
-      commitmentType: CommitmentType.Conclude,
-      appAttributes: "0x0",
       commitmentCount: 1,
     };
+  
     const signedFromCommitment = signCommitment2(fromCommitment, participantA.privateKey);
     const signedToCommitment = signCommitment2(toCommitment, participantB.privateKey);
 

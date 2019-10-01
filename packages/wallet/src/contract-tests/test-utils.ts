@@ -97,22 +97,22 @@ export async function concludeGame(provider: ethers.providers.JsonRpcProvider, c
 
   const fromCommitment: Commitment = {
     channel,
-    allocation: fiveFive,
+    allocation: ["0x05", "0x05"],
     destination: [participantA.address, participantB.address],
-    turnNum: 5,
+    turnNum: 4,
     commitmentType: CommitmentType.Conclude,
-    appAttributes: "0x00",
+    appAttributes: "0x0",
     commitmentCount: 0,
   };
 
   const toCommitment: Commitment = {
     channel,
-    allocation: fiveFive,
+    allocation: ["0x05", "0x05"],
     destination: [participantA.address, participantB.address],
-    turnNum: 6,
+    turnNum: 5,
     commitmentType: CommitmentType.Conclude,
-    appAttributes: "0x00",
-    commitmentCount: 0,
+    appAttributes: "0x0",
+    commitmentCount: 1,
   };
 
   const signedFromCommitment = signCommitment2(fromCommitment, participantA.privateKey);
