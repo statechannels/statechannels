@@ -1,3 +1,19 @@
 {
-  "extends": ["../../tslint.json"]
+  "extends": "../../tslint.json",
+  "rules": {
+    "arrow-parens": false,
+    "interface-name": false,
+    "member-access": false,
+    "member-ordering": false,
+    "newline-per-chained-call": false,
+    "trailing-comma": false,
+    "prettier": [
+      true,
+      {
+        "printWidth": 120,
+        "tabWidth": 2,
+        "bracketSpacing": true
+      }
+    ]
+  }
 }

@@ -81,18 +81,5 @@
   },
   "lint-staged": {
     "{src,test}/**/*.tsx?": "yarn lint:check"
-  },
-  "prettier": {
-    "printWidth": 100,
-    "singleQuote": true,
-    "trailingComma": "all",
-    "overrides": [
-      {
-        "files": "*.sol",
-        "options": {
-          "tabWidth": 4
-        }
-      }
-    ]
   }
 }
