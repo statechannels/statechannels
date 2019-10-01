@@ -1,12 +1,19 @@
 import React from "react";
 import { RouteComponentProps } from "react-router-dom";
 import "./Upload.scss";
+import { FormButton } from "../../components/form";
 
 const Upload: React.FC<RouteComponentProps> = () => {
   return (
     <section className="section fill">
       <div className="jumbotron-upload"></div>
-      {/* TODO: Add File Selector and Start Button */}
+      <div className="upload-action-bar">
+        <label htmlFor="file">Select file to upload</label>
+        <input type="file" name="file" id="file" className="inputfile"></input>
+        <FormButton name="start" onClick={() => null}>
+          Start
+        </FormButton>
+      </div>
       <div className="subtitle">
         <p>
           Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore

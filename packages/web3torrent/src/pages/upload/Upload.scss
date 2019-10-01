@@ -4,7 +4,29 @@ section.fill {
   align-items: center;
   padding: 0;
   margin-bottom: 100px;
-  padding-top: 30px;
+}
+
+.upload-action-bar {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  width: 100%;
+  label,
+  input,
+  button {
+    margin: 30px auto 0px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+  }
+  label {
+    margin-left: 0px;
+  }
+  button {
+    margin-right: 0px;
+  }
+  .inputfile {
+    color: $c-lessdarkgrey;
+  }
 }
 
 button,
