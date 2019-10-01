@@ -8,8 +8,6 @@
   "rulesDirectory": [ "tslint-plugin-prettier" ],
   "rules": {
     "arrow-parens": false,
-    // FIXME: web3torrent uses CapName for .tsx files
-    // "file-name-casing": [true, "kebab-case"],
     "interface-name": false,
     "interface-over-type-literal": false,
     "jsx-no-lambda": false,
