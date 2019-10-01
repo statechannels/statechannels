@@ -3,17 +3,16 @@ import {call, take, put, select} from "redux-saga/effects";
 import {eventChannel} from "redux-saga";
 import * as actions from "../actions";
 import {ethers} from "ethers";
-import {fromParameters} from "fmg-core/lib/commitment";
 import {getAdjudicatorWatcherSubscribersForChannel} from "../selectors";
 import {ChannelSubscriber} from "../state";
 import {ProtocolLocator} from "../../communication";
+import {getChallengeRegisteredEvent} from "@statechannels/nitro-protocol";
+import {bigNumberify} from "ethers/utils";
 
 enum AdjudicatorEventType {
-  ChallengeCreated,
-  Concluded,
-  Refuted,
-  RespondWithMove,
-  Deposited
+  ChallengeRegistered,
+  ChallengeCleared,
+  Concluded
 }
 
 interface AdjudicatorEvent {
@@ -41,15 +40,18 @@ export function* adjudicatorWatcher(provider) {
 
 function* dispatchEventAction(event: AdjudicatorEvent) {
   switch (event.eventType) {
-    case AdjudicatorEventType.ChallengeCreated:
+    case AdjudicatorEventType.ChallengeRegistered:
       const {channelId} = event;
-      const {commitment, finalizedAt} = event.eventArgs;
-      const altFinalizedAt = finalizedAt * 1000;
+      const challengeRegisteredEvent = getChallengeRegisteredEvent(event.eventArgs);
+      // Solidity timestamps are in seconds while JS are ms, so we convert to a JS timestamp
+      const finalizedAtInMs = bigNumberify(challengeRegisteredEvent.finalizesAt)
+        .mul(1000)
+        .toNumber();
       yield put(
         actions.challengeCreatedEvent({
           channelId,
-          commitment: fromParameters(commitment),
-          finalizedAt: altFinalizedAt
+          finalizedAt: finalizedAtInMs,
+          challengeStates: challengeRegisteredEvent.challengeStates
         })
       );
       break;
@@ -59,7 +61,7 @@ function* dispatchEventAction(event: AdjudicatorEvent) {
 function* dispatchProcessEventAction(event: AdjudicatorEvent, processId: string, protocolLocator: ProtocolLocator) {
   const {channelId} = event;
   switch (event.eventType) {
-    case AdjudicatorEventType.ChallengeCreated:
+    case AdjudicatorEventType.ChallengeRegistered:
       const {finalizedAt} = event.eventArgs;
       yield put(
         actions.challengeExpirySetEvent({
@@ -73,45 +75,46 @@ function* dispatchProcessEventAction(event: AdjudicatorEvent, processId: string,
     case AdjudicatorEventType.Concluded:
       yield put(actions.concludedEvent({channelId}));
       break;
-    case AdjudicatorEventType.Refuted:
-      yield put(
-        actions.refutedEvent({
-          processId,
-          protocolLocator,
-          channelId,
-          refuteCommitment: fromParameters(event.eventArgs.refutation)
-        })
-      );
-      break;
-    case AdjudicatorEventType.RespondWithMove:
-      const {v, r, s} = event.eventArgs;
-      const signature = ethers.utils.joinSignature({
-        v,
-        r,
-        s
-      });
+    // TODO: These are obsolete, we neeed to remove the actions
+    // case AdjudicatorEventType.Refuted:
+    //   yield put(
+    //     actions.refutedEvent({
+    //       processId,
+    //       protocolLocator,
+    //       channelId,
+    //       refuteCommitment: fromParameters(event.eventArgs.refutation),
+    //     })
+    //   );
+    //   break;
+    // case AdjudicatorEventType.RespondWithMove:
+    //   const { v, r, s } = event.eventArgs;
+    //   const signature = ethers.utils.joinSignature({
+    //     v,
+    //     r,
+    //     s,
+    //   });
 
-      yield put(
-        actions.respondWithMoveEvent({
-          processId,
-          protocolLocator,
-          channelId,
-          responseCommitment: fromParameters(event.eventArgs.response),
-          responseSignature: signature
-        })
-      );
-      break;
-    case AdjudicatorEventType.Deposited:
-      yield put(
-        actions.fundingReceivedEvent({
-          processId,
-          protocolLocator,
-          channelId,
-          amount: event.eventArgs.amountDeposited.toHexString(),
-          totalForDestination: event.eventArgs.destinationHoldings.toHexString()
-        })
-      );
-      break;
+    //   yield put(
+    //     actions.respondWithMoveEvent({
+    //       processId,
+    //       protocolLocator,
+    //       channelId,
+    //       responseCommitment: fromParameters(event.eventArgs.response),
+    //       responseSignature: signature,
+    //     })
+    //   );
+    //   break;
+    // case AdjudicatorEventType.Deposited:
+    //   yield put(
+    //     actions.fundingReceivedEvent({
+    //       processId,
+    //       protocolLocator,
+    //       channelId,
+    //       amount: event.eventArgs.amountDeposited.toHexString(),
+    //       totalForDestination: event.eventArgs.destinationHoldings.toHexString(),
+    //     })
+    //   );
+    // break;
   }
 }
 
@@ -119,45 +122,31 @@ function* createAdjudicatorEventChannel(provider) {
   const adjudicator: ethers.Contract = yield call(getAdjudicatorContract, provider);
 
   return eventChannel(emitter => {
-    const challengeCreatedFilter = adjudicator.filters.ChallengeCreated();
+    const challengeRegisteredFilter = adjudicator.filters.ChallengeRegistered();
     const gameConcludedFilter = adjudicator.filters.Concluded();
-    const refutedFilter = adjudicator.filters.Refuted();
-    const respondWithMoveFilter = adjudicator.filters.RespondedWithMove();
-    const depositedFilter = adjudicator.filters.Deposited();
-
-    adjudicator.on(challengeCreatedFilter, (channelId, commitment, finalizedAt) => {
+    //  bytes32 indexed channelId,
+    // // everything needed to respond or checkpoint
+    // uint256 turnNumRecord,
+    // uint256 finalizesAt,
+    // address challenger,
+    // bool isFinal,
+    // FixedPart fixedPart,
+    // ForceMoveApp.VariablePart[] variableParts
+    adjudicator.on(challengeRegisteredFilter, (...eventArgs) => {
       emitter({
-        eventType: AdjudicatorEventType.ChallengeCreated,
-        channelId,
-        eventArgs: {commitment, finalizedAt}
+        eventType: AdjudicatorEventType.ChallengeRegistered,
+        channelId: eventArgs[0],
+        eventArgs
       });
     });
     adjudicator.on(gameConcludedFilter, channelId => {
       emitter({eventType: AdjudicatorEventType.Concluded, channelId});
     });
-    adjudicator.on(refutedFilter, (channelId, refutation) => {
-      emitter({eventType: AdjudicatorEventType.Refuted, eventArgs: {refutation}, channelId});
-    });
-    adjudicator.on(respondWithMoveFilter, (channelId, response, v, r, s) => {
-      emitter({
-        eventType: AdjudicatorEventType.RespondWithMove,
-        eventArgs: {response, v, r, s},
-        channelId
-      });
-    });
-    adjudicator.on(depositedFilter, (channelId, amountDeposited, destinationHoldings) => {
-      emitter({
-        eventType: AdjudicatorEventType.Deposited,
-        eventArgs: {amountDeposited, destinationHoldings},
-        channelId
-      });
-    });
+
     return () => {
       // This function is called when the channel gets closed
-      adjudicator.removeAllListeners(challengeCreatedFilter);
+      adjudicator.removeAllListeners(challengeRegisteredFilter);
       adjudicator.removeAllListeners(gameConcludedFilter);
-      adjudicator.removeAllListeners(refutedFilter);
-      adjudicator.removeAllListeners(respondWithMoveFilter);
     };
   });
 }

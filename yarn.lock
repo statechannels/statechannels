@@ -5605,7 +5605,7 @@ babel-register@6.26.0, babel-register@^6.26.0:
     mkdirp "^0.5.1"
     source-map-support "^0.4.15"
 
-babel-runtime@^6.18.0, babel-runtime@^6.22.0, babel-runtime@^6.23.0, babel-runtime@^6.26.0:
+babel-runtime@^6.11.6, babel-runtime@^6.18.0, babel-runtime@^6.22.0, babel-runtime@^6.23.0, babel-runtime@^6.26.0:
   version "6.26.0"
   resolved "https://registry.yarnpkg.com/babel-runtime/-/babel-runtime-6.26.0.tgz#965c7058668e82b55d7bfe04ff2337bc8b5647fe"
   integrity sha1-llxwWGaOgrVde/4E/yM3vItWR/4=
@@ -13934,7 +13934,7 @@ linked-list@0.1.0:
   resolved "https://registry.yarnpkg.com/linked-list/-/linked-list-0.1.0.tgz#798b0ff97d1b92a4fd08480f55aea4e9d49d37bf"
   integrity sha1-eYsP+X0bkqT9CEgPVa6k6dSdN78=
 
-lint-staged@9.4.0, lint-staged@^9.4.0:
+lint-staged@9.4.0:
   version "9.4.0"
   resolved "https://registry.yarnpkg.com/lint-staged/-/lint-staged-9.4.0.tgz#dd4abcc9a82539fd290aed1584e3241b8f8af687"
   integrity sha512-jTu1KoGiGTSffM539wK+3igVqDGVsby3KwDBaXL471YndahkjnavLX+R5Nsk49JwklyMo0ZAXay1BaoyA6d2Jw==
@@ -18951,10 +18951,12 @@ redux-saga-test-plan@4.0.0-rc.3:
     object-assign "^4.1.0"
     util-inspect "^0.1.8"
 
-redux-saga-tester@1.0.381:
-  version "1.0.381"
-  resolved "https://registry.yarnpkg.com/redux-saga-tester/-/redux-saga-tester-1.0.381.tgz#9ea1348bb887aa67cbe40f33ba67f28b08177a83"
-  integrity sha512-F9jBiRXadEjV8h54656f2Iz8AoSDhdMQjJwEiJ3rVbx97TQxX5CPJRMdVSHUUT5rcZGyLplags9XPmS7iIhECA==
+redux-saga-tester@1.0.565:
+  version "1.0.565"
+  resolved "https://registry.yarnpkg.com/redux-saga-tester/-/redux-saga-tester-1.0.565.tgz#2784d48046481d893284e1c8cf6b53ffd01a97f9"
+  integrity sha512-Vhm86HXqk5dPXl3eyhDbsYKqiBqN5vkxdRBdFcUnbJGIgwTc9MV2r73EP3IdEpQwspREuPTeNl81/8NByCqosA==
+  dependencies:
+    babel-runtime "^6.11.6"
 
 redux-saga@1.0.0:
   version "1.0.0"

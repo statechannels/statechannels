@@ -2,15 +2,31 @@ import * as actions from "../../actions";
 import * as testScenarios from "../../../domain/commitments/__tests__";
 const {channelId} = testScenarios;
 import {adjudicatorStateReducer} from "../reducer";
-// tslint:disable: no-shadowed-variable
+import {State} from "@statechannels/nitro-protocol/src";
+import {ethers} from "ethers";
+
+const challengeState: State = {
+  turnNum: 15,
+  isFinal: false,
+  channel: {
+    chainId: "0x01",
+    channelNonce: "0x01",
+    participants: []
+  },
+  appDefinition: ethers.Wallet.createRandom().address,
+  appData: "0x0",
+  challengeDuration: 5,
+  outcome: []
+};
 const gameCommitment1 = testScenarios.appCommitment({turnNum: 19}).commitment;
+// tslint:disable-next-line: no-shadowed-variable
 const createChallengeState = (channelId: string, expiryTime) => {
   return {
     channelId,
     balance: "0x0",
     finalized: false,
     challenge: {
-      challengeCommitment: gameCommitment1,
+      challengeStates: [challengeState],
       expiresAt: expiryTime
     }
   };
@@ -22,13 +38,13 @@ describe("adjudicator state reducer", () => {
     const expiryTime = 1234;
     const action = actions.challengeCreatedEvent({
       channelId,
-      commitment: gameCommitment1,
+      challengeStates: [challengeState],
       finalizedAt: expiryTime
     });
     const updatedState = adjudicatorStateReducer(state, action);
     it("sets a challenge", () => {
       expect(updatedState[channelId].challenge).toEqual({
-        challengeCommitment: gameCommitment1,
+        challengeStates: [challengeState],
         expiresAt: expiryTime
       });
     });
@@ -53,6 +69,7 @@ describe("adjudicator state reducer", () => {
   });
 
   describe("when a challenge expired event is received", () => {
+    // tslint:disable-next-line: no-shadowed-variable
     const state = {
       [channelId]: createChallengeState(channelId, 123)
     };
@@ -74,6 +91,7 @@ describe("adjudicator state reducer", () => {
   });
 
   describe("when a refute event arrives", () => {
+    // tslint:disable-next-line: no-shadowed-variable
     const state = {
       [channelId]: createChallengeState(channelId, 123)
     };
@@ -91,6 +109,7 @@ describe("adjudicator state reducer", () => {
   });
 
   describe("when a respond with move event arrives", () => {
+    // tslint:disable-next-line: no-shadowed-variable
     const state = {
       [channelId]: createChallengeState(channelId, 123)
     };
@@ -109,6 +128,7 @@ describe("adjudicator state reducer", () => {
   });
 
   describe("when a concluded event arrives", () => {
+    // tslint:disable-next-line: no-shadowed-variable
     const state = {};
     const action = actions.concludedEvent({channelId});
     const updatedState = adjudicatorStateReducer(state, action);

@@ -57,9 +57,9 @@ export async function createChallenge(provider: ethers.providers.JsonRpcProvider
     channel,
     allocation: ["0x05", "0x05"],
     destination: [participantA.address, participantB.address],
-    turnNum: 4,
+    turnNum: 6,
     commitmentType: CommitmentType.App,
-    appAttributes: "0x0",
+    appAttributes: "0x00",
     commitmentCount: 0,
   };
 
@@ -67,9 +67,9 @@ export async function createChallenge(provider: ethers.providers.JsonRpcProvider
     channel,
     allocation: ["0x05", "0x05"],
     destination: [participantA.address, participantB.address],
-    turnNum: 5,
+    turnNum: 7,
     commitmentType: CommitmentType.App,
-    appAttributes: "0x0",
+    appAttributes: "0x00",
     commitmentCount: 1,
   };
 
@@ -78,7 +78,7 @@ export async function createChallenge(provider: ethers.providers.JsonRpcProvider
     signCommitment2(toCommitment, participantB.privateKey),
     participantB.privateKey
   );
-  
+
   const transactionReceipt = await sendTransaction(provider, challengeTransaction);
   await transactionReceipt.wait();
   return toCommitment;

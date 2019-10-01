@@ -147,7 +147,7 @@ describe("transactions", () => {
 
     await depositContract(provider, participantA.address);
     await depositContract(provider, participantB.address);
-    
+
     await createChallenge(provider, channelNonce, participantA, participantB);
 
     // NOTE: Copied from createChallenge
@@ -155,7 +155,7 @@ describe("transactions", () => {
       channel,
       allocation: ["0x05", "0x05"],
       destination: [participantA.address, participantB.address],
-      turnNum: 5,
+      turnNum: 7,
       commitmentType: CommitmentType.App,
       appAttributes: "0x0",
       commitmentCount: 1,
@@ -165,7 +165,7 @@ describe("transactions", () => {
       channel,
       allocation: ["0x05", "0x05"],
       destination: [participantA.address, participantB.address],
-      turnNum: 6,
+      turnNum: 8,
       commitmentType: CommitmentType.App,
       appAttributes: "0x0",
       commitmentCount: 2,
