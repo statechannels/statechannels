@@ -1,7 +1,7 @@
 import React from "react";
 import { RouteComponentProps } from "react-router-dom";
-import "./Upload.scss";
 import { FormButton } from "../../components/form";
+import "./Upload.scss";
 
 const Upload: React.FC<RouteComponentProps> = () => {
   return (

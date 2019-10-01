@@ -1,7 +1,7 @@
 import React from "react";
+import { FormButton } from "../form";
 import "./FileInfo.scss";
 import { ProgressBar } from "./progress-bar/ProgressBar";
-import { FormButton } from "../form";
 
 export type FileInfoProps = { file: any };
 
