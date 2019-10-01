@@ -111,7 +111,6 @@ describe('pushOutcome', () => {
         declaredTurnNumRecord,
         finalizesAt,
         state,
-        outcome,
       );
 
       if (outcomeHashExits) {

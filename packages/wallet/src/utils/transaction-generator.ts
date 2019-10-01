@@ -1,12 +1,13 @@
 import {TransactionRequest} from "ethers/providers";
 import {getAdjudicatorInterface} from "./contract-utils";
-import {splitSignature} from "ethers/utils";
+import {splitSignature, BigNumberish} from "ethers/utils";
 import {Commitment, SignedCommitment, signCommitment2} from "../domain";
 import {asEthersObject} from "fmg-core";
 import {
   createDepositTransaction as createNitroDepositTransaction,
   Transactions as nitroTrans,
-  SignedState
+  SignedState,
+  createPushOutcomeTransaction
 } from "@statechannels/nitro-protocol";
 import {convertAddressToBytes32, convertCommitmentToState} from "./nitro-converter";
 
@@ -82,46 +83,65 @@ export function createConcludeTransaction(
   return nitroTrans.createConcludeTransaction(signedStates);
 }
 
-export function createWithdrawTransaction(
-  amount: string,
-  participant: string,
-  destination: string,
-  verificationSignature: string
-) {
-  const adjudicatorInterface = getAdjudicatorInterface();
-  const {v, r, s} = splitSignature(verificationSignature);
-  const data = adjudicatorInterface.functions.withdraw.encode([participant, destination, amount, v, r, s]);
 
-  return {
-    data,
-    gasLimit: 3000000
-  };
+
+export function pushOutcomeTransaction(
+  finalCommitment: Commitment,
+  finalizesAt: BigNumberish
+): TransactionRequest {
+  const state = convertCommitmentToState(finalCommitment);
+  return createPushOutcomeTransaction(
+    finalCommitment.turnNum,
+    finalizesAt,
+    state
+  )
 }
 
-export function createTransferAndWithdrawTransaction(
-  channelId: string,
-  participant: string,
-  destination: string,
-  amount: string,
-  verificationSignature: string
-) {
-  const adjudicatorInterface = getAdjudicatorInterface();
-  const {v, r, s} = splitSignature(verificationSignature);
-  const data = adjudicatorInterface.functions.transferAndWithdraw.encode([
-    channelId,
-    participant,
-    destination,
-    amount,
-    v,
-    r,
-    s
-  ]);
 
-  return {
-    data,
-    gasLimit: 3000000
-  };
-}
+
+// FIXME: This function no longer exists
+// export function createWithdrawTransaction(
+//   amount: string,
+//   participant: string,
+//   destination: string,
+//   verificationSignature: string
+// ) {
+//   const adjudicatorInterface = getAdjudicatorInterface();
+//   const {v, r, s} = splitSignature(verificationSignature);
+//   const data = adjudicatorInterface.functions.withdraw.encode([participant, destination, amount, v, r, s]);
+
+//   return {
+//     data,
+//     gasLimit: 3000000
+//   };
+// }
+
+// FIXME: This function no longer exists
+// export function createTransferAndWithdrawTransaction(
+//   channelId: string,
+//   participant: string,
+//   destination: string,
+//   amount: string,
+//   verificationSignature: string
+// ) {
+//   const adjudicatorInterface = getAdjudicatorInterface();
+//   const {v, r, s} = splitSignature(verificationSignature);
+//   const encodedAllocationBytes = encodeAllocation([{destination, amount}]);
+//   const data = adjudicatorInterface.functions.transferAll.encode([
+//     channelId,
+//     participant,
+//     destination,
+//     amount,
+//     v,
+//     r,
+//     s
+//   ]);
+
+//   return {
+//     data,
+//     gasLimit: 3000000
+//   };
+// }
 
 export function createDepositTransaction(destination: string, depositAmount: string, expectedHeld: string) {
   return createNitroDepositTransaction(convertAddressToBytes32(destination), expectedHeld, depositAmount);

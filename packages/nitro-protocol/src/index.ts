@@ -6,6 +6,7 @@ import {encodeConsensusData} from './contract/consensus-data';
 import {createDepositTransaction} from './contract/transaction-creators/eth-asset-holder';
 import {Outcome, AllocationItem} from './contract/outcome';
 import {Channel} from './contract/channel';
+import { createPushOutcomeTransaction } from './contract/transaction-creators/nitro-adjudicator';
 
 export {Signatures, Transactions};
 
@@ -25,5 +26,6 @@ export interface SignedState {
 //   outcomeHash: string;
 // }
 
+
 // TODO: Export this with more thought to what is exposed by @statchannels/nitro-protocol
-export {createDepositTransaction, State, encodeConsensusData, Outcome, AllocationItem, Channel};
+export {createDepositTransaction, State, encodeConsensusData, Outcome, AllocationItem, Channel, createPushOutcomeTransaction};

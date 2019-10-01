@@ -121,6 +121,7 @@ export async function concludeGame(provider: ethers.providers.JsonRpcProvider, c
   const concludeTransaction = createConcludeTransaction(signedFromCommitment, signedToCommitment);
   const transactionReceipt = await sendTransaction(provider, concludeTransaction);
   await transactionReceipt.wait();
+  return transactionReceipt;
 }
 
 export async function respondWithMove(provider: ethers.providers.JsonRpcProvider, channelNonce, participantA, participantB) {

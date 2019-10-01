@@ -8,10 +8,9 @@ import {
   createRespondWithMoveTransaction,
   createRefuteTransaction,
   createConcludeTransaction,
-  createWithdrawTransaction,
   ConcludeAndWithdrawArgs,
   createConcludeAndWithdrawTransaction,
-  createTransferAndWithdrawTransaction,
+  pushOutcomeTransaction,
 } from "../utils/transaction-generator";
 
 import { depositContract } from "./test-utils";
@@ -239,43 +238,50 @@ describe("transactions", () => {
     await testTransactionSender(concludeTransaction);
   });
 
-  it.skip("should send a transferAndWithdraw transaction", async () => {
-    const channel: Channel = { channelType: libraryAddress, nonce: getNextNonce(), participants };
+  it("should send a pushOutcome transaction", async () => {
+    const channel: Channel = {
+      channelType: libraryAddress,
+      nonce: getNextNonce(),
+      participants: [participantA.address, participantB.address]
+    };
     const channelId = channelID(channel);
+
     await depositContract(provider, channelId);
-    await depositContract(provider, channelId);
-    await concludeGame(provider, channel.nonce, participantA, participantB);
-    const senderAddress = await provider.getSigner().getAddress();
-    const verificationSignature = signVerificationData(
-      participantA.address,
-      participantA.address,
-      "0x01",
-      senderAddress,
-      participantA.privateKey
-    );
-    const transferAndWithdraw = createTransferAndWithdrawTransaction(
-      channelId,
-      participantA.address,
-      participantA.address,
-      "0x01",
-      verificationSignature
-    );
-    await testTransactionSender(transferAndWithdraw);
+
+    const receipt = await concludeGame(provider, channel.nonce, participantA, participantB);
+
+    const blockTimestamp = (await provider.getBlock(receipt.blockNumber!)).timestamp;
+
+    // NOTE: Copied from concludeGame
+    const toCommitment: Commitment = {
+      channel,
+      allocation: ["0x05", "0x05"],
+      destination: [participantA.address, participantB.address],
+      turnNum: 5,
+      commitmentType: CommitmentType.Conclude,
+      appAttributes: "0x0",
+      commitmentCount: 1,
+    };
+
+    const pushOutcome = pushOutcomeTransaction(toCommitment, blockTimestamp)
+
+    await testTransactionSender(pushOutcome);
   });
 
-  it.skip("should send a withdraw transaction", async () => {
-    await depositContract(provider, participantA.address);
-    const senderAddress = await provider.getSigner().getAddress();
-    const verificationSignature = signVerificationData(
-      participantA.address,
-      participantA.address,
-      "0x01",
-      senderAddress,
-      participantA.privateKey
-    );
-    const withdrawTransaction = createWithdrawTransaction("0x01", participantA.address, participantA.address, verificationSignature);
-    await testTransactionSender(withdrawTransaction);
-  });
+  // FIXME: This no longer exists
+  // it.skip("should send a withdraw transaction", async () => {
+  //   await depositContract(provider, participantA.address);
+  //   const senderAddress = await provider.getSigner().getAddress();
+  //   const verificationSignature = signVerificationData(
+  //     participantA.address,
+  //     participantA.address,
+  //     "0x01",
+  //     senderAddress,
+  //     participantA.privateKey
+  //   );
+  //   const withdrawTransaction = createWithdrawTransaction("0x01", participantA.address, participantA.address, verificationSignature);
+  //   await testTransactionSender(withdrawTransaction);
+  // });
 
   it.skip("should send a conclude and withdraw transaction", async () => {
     const channel: Channel = { channelType: libraryAddress, nonce: getNextNonce(), participants };

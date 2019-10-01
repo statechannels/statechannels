@@ -46,6 +46,7 @@ export function createClaimAllTransaction(
   return {data, gasLimit: GAS_LIMIT};
 }
 
+// FIXME: This function no longer exists
 export function createSetOutcomeTransaction(
   assetHolderContractInterface: ethers.utils.Interface,
   channelId: string,
