@@ -5,23 +5,18 @@
     <script src="https://unpkg.com/debug@4.0.1/dist/debug.js"></script>
   </head>
 
-  <button role="progressbar" onclick="callBudgetAllocation()">Allocate budget</button>
-  <button onclick="callNoHub()">Show No Hub</button>
-  <button onclick="callConnectToHub()">Connect to Hub</button>
+  <button onclick="callBudgetAllocation()">Allocate budget</button>
 
   <script src="http://localhost:3000/wallet.js"></script>
 
   <script>
     function callBudgetAllocation() {
-      window.postMessage({ jsonrpc: "2.0", method: "chan_allocate" });
-    }
-
-    function callNoHub() {
-      window.postMessage({ jsonrpc: "2.0", method: "chan_noHub" });
-    }
-
-    function callConnectToHub() {
-      window.postMessage({ jsonrpc: "2.0", method: "chan_connect" });
+      window.postMessage({
+        jsonrpc: '2.0',
+        method: 'chan_allocate',
+        id: 123,
+        params: ['foo', 'bar', 3, false]
+      });
     }
   </script>
 </html>

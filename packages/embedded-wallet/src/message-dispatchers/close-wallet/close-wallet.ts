@@ -1,5 +1,5 @@
 const closeWallet = () => {
-  window.parent.postMessage("ui:wallet:close", "*");
+  window.parent.postMessage('ui:wallet:close', '*');
 };
 
-export { closeWallet };
+export {closeWallet};

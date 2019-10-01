@@ -18,6 +18,8 @@ export const adjudicatorStateReducer = (
       return challengeRespondedReducer(state, action);
     case "WALLET.ADJUDICATOR.CHALLENGE_CREATED_EVENT":
       return challengeCreatedEventReducer(state, action);
+    case "WALLET.ADJUDICATOR.CHALLENGE_CLEARED_EVENT":
+      return challengeClearedEventReducer(state, action);
     case "WALLET.ADJUDICATOR.CHANNEL_UPDATE":
       return channelUpdateReducer(state, action);
     case "WALLET.ADJUDICATOR.CHALLENGE_EXPIRY_TIME_SET":
@@ -29,10 +31,16 @@ export const adjudicatorStateReducer = (
 };
 
 const challengeCreatedEventReducer = (state: AdjudicatorState, action: actions.ChallengeCreatedEvent) => {
-  const challenge = {expiresAt: action.finalizedAt, challengeCommitment: action.commitment};
+  const challenge = {expiresAt: action.finalizedAt, challengeStates: action.challengeStates};
   return setChallenge(state, action.channelId, challenge);
 };
 
+const challengeClearedEventReducer = (state: AdjudicatorState, action: actions.ChallengeClearedEvent) => {
+  const {channelId} = action;
+  return clearChallenge(state, channelId);
+};
+
+// TODO: remove this responder reducer
 const challengeRespondedReducer = (
   state: AdjudicatorState,
   action: actions.RefutedEvent | actions.RespondWithMoveEvent

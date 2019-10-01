@@ -7,12 +7,14 @@ import {
   createChallenge,
   concludeGame,
   refuteChallenge,
-  respondWithMove,
+  respond,
   getChannelId,
   defaultDepositAmount
 } from "./test-utils";
 import * as walletStates from "../redux/state";
 import {getGanacheProvider} from "@statechannels/devtools";
+import {convertCommitmentToState} from "../utils/nitro-converter";
+// import { convertCommitmentToState } from "../utils/nitro-converter";
 jest.setTimeout(60000);
 
 const createWatcherState = (processId: string, ...channelIds: string[]): walletStates.Initialized => {
@@ -32,7 +34,7 @@ const createWatcherState = (processId: string, ...channelIds: string[]): walletS
   });
 };
 // TODO: Get these tests working
-describe.skip("adjudicator listener", () => {
+describe("adjudicator listener", () => {
   const provider: ethers.providers.JsonRpcProvider = getGanacheProvider();
 
   const participantA = ethers.Wallet.createRandom();
@@ -73,6 +75,7 @@ describe.skip("adjudicator listener", () => {
     const channelIdToIgnore = await getChannelId(provider, getNextNonce(), participantA, participantB);
     const processId = ethers.Wallet.createRandom().address;
     const sagaTester = new SagaTester({initialState: createWatcherState(processId, channelId)});
+
     sagaTester.start(adjudicatorWatcher, provider);
 
     await depositContract(provider, channelIdToIgnore);
@@ -117,7 +120,7 @@ describe.skip("adjudicator listener", () => {
     expect(action.expiryTime).toBeGreaterThan(startTimestamp);
   });
 
-  it.skip("should handle a challengeCreated event", async () => {
+  it("should handle a challengeCreated event", async () => {
     const startTimestamp = Date.now();
     const channelNonce = getNextNonce();
 
@@ -126,14 +129,34 @@ describe.skip("adjudicator listener", () => {
     const sagaTester = new SagaTester({initialState: createWatcherState(processId)});
     sagaTester.start(adjudicatorWatcher, provider);
 
-    const challengeState = await createChallenge(provider, channelNonce, participantA, participantB);
+    const challengeState = convertCommitmentToState(
+      await createChallenge(provider, channelNonce, participantA, participantB)
+    );
 
     await sagaTester.waitFor("WALLET.ADJUDICATOR.CHALLENGE_CREATED_EVENT");
 
     const action: actions.ChallengeCreatedEvent = sagaTester.getLatestCalledAction();
 
     expect(action.finalizedAt).toBeGreaterThan(startTimestamp);
-    expect(action.commitment).toEqual(challengeState);
+    expect(action.challengeStates[1]).toMatchObject(challengeState);
+  });
+
+  it("should handle a ChallengeCleared event when registered for that channel", async () => {
+    const channelNonce = getNextNonce();
+    const channelId = await getChannelId(provider, channelNonce, participantA, participantB);
+    const processId = ethers.Wallet.createRandom().address;
+
+    const challenge = await createChallenge(provider, channelNonce, participantA, participantB);
+
+    const sagaTester = new SagaTester({initialState: createWatcherState(processId, channelId)});
+    sagaTester.start(adjudicatorWatcher, provider);
+
+    const response = await respond(provider, channelNonce, participantA, participantB, challenge);
+
+    await sagaTester.waitFor("WALLET.ADJUDICATOR.CHALLENGE_CLEARED_EVENT");
+
+    const action: actions.ChallengeClearedEvent = sagaTester.getLatestCalledAction();
+    expect(action.newTurnNumRecord).toEqual(response.toCommitment.turnNum);
   });
 
   it.skip("should handle a concluded event when registered for that channel", async () => {
@@ -166,31 +189,5 @@ describe.skip("adjudicator listener", () => {
 
     const action: actions.RefutedEvent = sagaTester.getLatestCalledAction();
     expect(action).toEqual(actions.refutedEvent({processId, protocolLocator: [], channelId, refuteCommitment}));
-  });
-
-  it.skip("should handle a respondWithMove event when registered for that channel", async () => {
-    const channelNonce = getNextNonce();
-    const channelId = await getChannelId(provider, channelNonce, participantA, participantB);
-    const processId = ethers.Wallet.createRandom().address;
-
-    await createChallenge(provider, channelNonce, participantA, participantB);
-
-    const sagaTester = new SagaTester({initialState: createWatcherState(processId, channelId)});
-    sagaTester.start(adjudicatorWatcher, provider);
-
-    const response = await respondWithMove(provider, channelNonce, participantA, participantB);
-
-    await sagaTester.waitFor("WALLET.ADJUDICATOR.RESPOND_WITH_MOVE_EVENT");
-
-    const action: actions.RespondWithMoveEvent = sagaTester.getLatestCalledAction();
-    expect(action).toEqual(
-      actions.respondWithMoveEvent({
-        processId,
-        protocolLocator: [],
-        channelId,
-        responseCommitment: response.toCommitment,
-        responseSignature: response.toSig
-      })
-    );
   });
 });

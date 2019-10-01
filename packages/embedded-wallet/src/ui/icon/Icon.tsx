@@ -1,11 +1,11 @@
-import React from "react";
-import css from "./Icon.module.css";
+import React from 'react';
+import css from './Icon.module.css';
 
 export enum Icons {
-  Check = "check",
-  ExternalLink = "externalLink",
-  Hourglass = "hourglass",
-  Link = "link"
+  Check = 'check',
+  ExternalLink = 'externalLink',
+  Hourglass = 'hourglass',
+  Link = 'link'
 }
 
 export type IconProps = {
@@ -13,14 +13,15 @@ export type IconProps = {
   decorative?: boolean;
 };
 
-const iconDescriptions: { [key in Icons]: string } = {
-  [Icons.ExternalLink]: "Icon of an arrow exiting a browser window, about to open a new page",
-  [Icons.Hourglass]: "Icon of an hourglass with sand falling top-down, indicating a wait for something to happen",
-  [Icons.Check]: "Icon of a checkmark, indicating all is well",
-  [Icons.Link]: "Icon of a chain binding, indicating a connection between things"
+const iconDescriptions: {[key in Icons]: string} = {
+  [Icons.ExternalLink]: 'Icon of an arrow exiting a browser window, about to open a new page',
+  [Icons.Hourglass]:
+    'Icon of an hourglass with sand falling top-down, indicating a wait for something to happen',
+  [Icons.Check]: 'Icon of a checkmark, indicating all is well',
+  [Icons.Link]: 'Icon of a chain binding, indicating a connection between things'
 };
 
-const Icon: React.FC<IconProps> = ({ name, decorative }) => (
+const Icon: React.FC<IconProps> = ({name, decorative}) => (
   <span
     aria-hidden={decorative}
     aria-label={iconDescriptions[name]}
@@ -29,4 +30,4 @@ const Icon: React.FC<IconProps> = ({ name, decorative }) => (
   ></span>
 );
 
-export { Icon };
+export {Icon};

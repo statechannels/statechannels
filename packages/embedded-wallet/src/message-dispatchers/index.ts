@@ -1,1 +1,1 @@
-export * from "./close-wallet/close-wallet";
+export * from './close-wallet/close-wallet';

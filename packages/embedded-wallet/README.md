@@ -1,44 +1,50 @@
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+# 💼 Embedded Wallet
 
-## Available Scripts
+This package allows you to use a State Channels-enabled dapp with wallets that do not yet support the protocol.
 
-In the project directory, you can run:
+## Usage
 
-### `npm start`
+For now, it's available for local/development use only.
 
-Runs the app in the development mode.<br>
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+1. Include the following script in your dapp's web front-end:
 
-The page will reload if you make edits.<br>
-You will also see any lint errors in the console.
+```html
+<script src="http://localhost:3000/wallet.js"></script>
+```
 
-### `npm test`
+2. Add a `postMessage` call anywhere your dapp needs to talk to the wallet. You should be good to go with simply
+   requesting `chan_allocate`:
 
-Launches the test runner in the interactive watch mode.<br>
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+```js
+window.postMessage({
+  jsonrpc: "2.0",
+  method: "chan_allocate",
+  params: {
+    /*...*/
+  },
+  id: someUniqueNumericId()
+});
+```
 
-### `npm run build`
+3. Run your dapp.
 
-Builds the app for production to the `build` folder.<br>
-It correctly bundles React in production mode and optimizes the build for the best performance.
+4. Run the `embedded-wallet` package using `yarn start` on this directory or `yarn run:ewt` on the monorepo's root.
+   Make sure the `embedded-wallet` runs on the same address as seen in the `script` include above. If not, adjust
+   accordingly.
 
-The build is minified and the filenames include the hashes.<br>
-Your app is ready to be deployed!
+## Available commands
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+> ⚠ These commands are _not_ final and will very much likely change in future versions.
+> ⚠ For now, `params` and `id` are not important, you can pretty much skip them and the request will work.
 
-### `npm run eject`
+### `chan_allocate`
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+Opens the Budget Allocation dialog.
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+### `chan_noHub`
 
-Instead, it will copy all the configuration files and the transitive dependencies (Webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+Forcibly shows the "Not Connected to a Hub" screen.
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+### `chan_connect`
 
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
+Forcibly shows the "Connect to Hub" screen.

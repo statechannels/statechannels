@@ -1,6 +1,6 @@
-import React from "react";
+import React from 'react';
 
-const FlowProcess: React.FC = ({ children }) => {
+const FlowProcess: React.FC = ({children}) => {
   return (
     <ol aria-atomic role="progressbar">
       {children}
@@ -8,4 +8,4 @@ const FlowProcess: React.FC = ({ children }) => {
   );
 };
 
-export { FlowProcess };
+export {FlowProcess};

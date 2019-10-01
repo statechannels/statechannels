@@ -1,4 +1,4 @@
-import debug from "debug";
+import debug from 'debug';
 import React, {
   ChangeEvent,
   Dispatch,
@@ -9,11 +9,11 @@ import React, {
   useEffect,
   useRef,
   useState
-} from "react";
-import { DialogContext, DialogContextProps } from "../dialog/Dialog";
-import css from "./Slider.module.css";
+} from 'react';
+import {DialogContext, DialogContextProps} from '../dialog/Dialog';
+import css from './Slider.module.css';
 
-const log = debug("ui:slider");
+const log = debug('ui:slider');
 
 export type SliderProps = {
   min: number;
@@ -24,9 +24,10 @@ export type SliderProps = {
   onChange?: (value: number) => void;
 };
 
-const onRangeChange = (setValue: Dispatch<SetStateAction<number>>, onChange?: (value: number) => void) => (
-  event: ChangeEvent<HTMLInputElement>
-) => {
+const onRangeChange = (
+  setValue: Dispatch<SetStateAction<number>>,
+  onChange?: (value: number) => void
+) => (event: ChangeEvent<HTMLInputElement>) => {
   const value = parseFloat(event.target.value);
 
   setValue(value);
@@ -44,13 +45,13 @@ const onRangeKeyDown = (
   setValue: Dispatch<SetStateAction<number>>,
   onChange?: (value: number) => void
 ) => (event: KeyboardEvent<HTMLInputElement>) => {
-  if (event.key === "ArrowUp" || event.key === "ArrowRight") {
+  if (event.key === 'ArrowUp' || event.key === 'ArrowRight') {
     value += step;
-  } else if (event.key === "ArrowDown" || event.key === "ArrowLeft") {
+  } else if (event.key === 'ArrowDown' || event.key === 'ArrowLeft') {
     value -= step;
-  } else if (event.key === "PageUp") {
+  } else if (event.key === 'PageUp') {
     value += step * 10;
-  } else if (event.key === "PageDown") {
+  } else if (event.key === 'PageDown') {
     value -= step * 10;
   }
 
@@ -86,7 +87,7 @@ const calculateOffsetX = (
   const left = Math.max(((value - min) / (max - min)) * containerWidth - valueLabelWidth / 2, -4);
 
   log(
-    "containerWidth: %o | valueLabelWidth: %o | left: %o",
+    'containerWidth: %o | valueLabelWidth: %o | left: %o',
     container.style.animationPlayState,
     containerWidth,
     valueLabelWidth,
@@ -96,7 +97,7 @@ const calculateOffsetX = (
   return left;
 };
 
-const Slider: React.FC<SliderProps> = ({ min, max, step, unit, onChange, initialValue = 0 }) => {
+const Slider: React.FC<SliderProps> = ({min, max, step, unit, onChange, initialValue = 0}) => {
   const [value, setValue] = useState<number>(initialValue);
   const context = useContext(DialogContext);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -132,11 +133,11 @@ const Slider: React.FC<SliderProps> = ({ min, max, step, unit, onChange, initial
         {max}
         {unit}
       </label>
-      <label aria-hidden="true" className={css.value} ref={valueLabelRef} style={{ left: offsetX }}>
+      <label aria-hidden="true" className={css.value} ref={valueLabelRef} style={{left: offsetX}}>
         {value}
       </label>
     </div>
   );
 };
 
-export { Slider };
+export {Slider};
