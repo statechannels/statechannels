@@ -15,21 +15,26 @@ export interface ChallengeRegisteredEvent {
   finalizesAt: string;
   challengeStates: State[];
 }
-export function getChallengeRegisteredEvent(eventArgs): ChallengeRegisteredEvent {
-  const [event] = eventArgs.slice(-1);
+export function getChallengeRegisteredEvent(eventResult): ChallengeRegisteredEvent {
+  const [event] = eventResult.slice(-1);
+  const {
+    turnNumRecord,
+    finalizesAt,
+    challenger,
+    isFinal,
+    fixedPart,
+    variableParts: variablePartsUnstructured,
+  } = event.args;
 
-  const turnNumRecord = bigNumberify(event.args.turnNumRecord).toNumber();
-  const finalizesAt = bigNumberify(event.args.finalizesAt).toHexString();
-  const challenger = event.args.challenger;
-  const isFinal = event.args.isFinal;
   // Fixed part
-  const chainId = bigNumberify(event.args.fixedPart[0]).toHexString();
-  const participants = event.args.fixedPart[1].map(p => bigNumberify(p).toHexString());
-  const channelNonce = bigNumberify(event.args.fixedPart[2]).toHexString();
-  const appDefinition = event.args.fixedPart[3];
-  const challengeDuration = bigNumberify(event.args.fixedPart[4]).toNumber();
+  const chainId = bigNumberify(fixedPart[0]).toHexString();
+  const participants = fixedPart[1].map(p => bigNumberify(p).toHexString());
+  const channelNonce = bigNumberify(fixedPart[2]).toHexString();
+  const appDefinition = fixedPart[3];
+  const challengeDuration = bigNumberify(fixedPart[4]).toNumber();
+
   // Variable part
-  const variableParts: VariablePart[] = event.args.variableParts.map(v => {
+  const variableParts: VariablePart[] = variablePartsUnstructured.map(v => {
     const outcome = v[0];
     const appData = v[1];
     return {outcome, appData};
