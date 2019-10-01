@@ -17,6 +17,7 @@ import {ethers} from "ethers";
 import * as closeLedgerChannelProtocol from "./protocols/close-ledger-channel";
 import _ from "lodash";
 const initialState = states.waitForLogin();
+const Action = actions.Action;
 
 export const walletReducer = (
   state: states.WalletState = initialState,
@@ -191,7 +192,7 @@ function routeToNewProcessInitializer(state: states.Initialized, action: NewProc
 
 const waitForLoginReducer = (state: states.WaitForLogin, action: actions.WalletAction): states.WalletState => {
   switch (action.type) {
-    case "WALLET.LOGGED_IN":
+    case Action.WALLET_LOGGED_IN:
       let {address, privateKey} = state;
       if (!address || !privateKey) {
         ({privateKey, address} = ethers.Wallet.createRandom());

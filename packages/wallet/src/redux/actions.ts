@@ -24,16 +24,21 @@ export {CommitmentReceived, commitmentReceived};
 export type TransactionAction = TA;
 export const isTransactionAction = isTA;
 
+export enum Action {
+  WALLET_MULTIPLE_ACTIONS = "WALLET.MULTIPLE_ACTIONS",
+  WALLET_LOGGED_IN = "WALLET.LOGGED_IN"
+}
+
 // -------
 // Actions
 // -------
 
 export interface MultipleWalletActions {
-  type: "WALLET.MULTIPLE_ACTIONS";
+  type: Action.WALLET_MULTIPLE_ACTIONS;
   actions: WalletAction[];
 }
 export interface LoggedIn {
-  type: "WALLET.LOGGED_IN";
+  type: Action.WALLET_LOGGED_IN;
   uid: string;
 }
 
@@ -128,10 +133,10 @@ export interface ChannelUpdate {
 
 export const multipleWalletActions: ActionConstructor<MultipleWalletActions> = p => ({
   ...p,
-  type: "WALLET.MULTIPLE_ACTIONS"
+  type: Action.WALLET_MULTIPLE_ACTIONS
 });
 
-export const loggedIn: ActionConstructor<LoggedIn> = p => ({...p, type: "WALLET.LOGGED_IN"});
+export const loggedIn: ActionConstructor<LoggedIn> = p => ({...p, type: Action.WALLET_LOGGED_IN});
 
 export const adjudicatorKnown: ActionConstructor<AdjudicatorKnown> = p => ({
   ...p,
