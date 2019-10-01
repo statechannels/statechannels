@@ -20,7 +20,7 @@ export const adjudicatorStateReducer = (
       return challengeRespondedReducer(state, action);
     case WalletActionType.WALLET_ADJUDICATOR_CHALLENGE_CREATED_EVENT:
       return challengeCreatedEventReducer(state, action);
-    case "WALLET.ADJUDICATOR.CHANNEL_UPDATE":
+    case WalletActionType.WALLET_ADJUDICATOR_CHANNEL_UPDATE:
       return channelUpdateReducer(state, action);
     case WalletActionType.WALLET_ADJUDICATOR_CHALLENGE_EXPIRY_TIME_SET:
       // We already handle this in the challenge created event

@@ -30,6 +30,7 @@ export enum WalletActionType {
   WALLET_ADJUDICATOR_CHALLENGE_EXPIRED = "WALLET.ADJUDICATOR.CHALLENGE_EXPIRED",
   WALLET_ADJUDICATOR_CHALLENGE_EXPIRY_TIME_SET = "WALLET.ADJUDICATOR.CHALLENGE_EXPIRY_TIME_SET",
   WALLET_ADJUDICATOR_CHALLENGE_CREATED_EVENT = "WALLET.ADJUDICATOR.CHALLENGE_CREATED_EVENT",
+  WALLET_ADJUDICATOR_CHANNEL_UPDATE = "WALLET.ADJUDICATOR.CHANNEL_UPDATE",
   WALLET_ADJUDICATOR_CONCLUDED_EVENT = "WALLET.ADJUDICATOR.CONCLUDED_EVENT",
   WALLET_ADJUDICATOR_FUNDING_RECEIVED_EVENT = "WALLET.ADJUDICATOR.FUNDING_RECEIVED_EVENT",
   WALLET_ADJUDICATOR_REFUTED_EVENT = "WALLET.ADJUDICATOR.REFUTED_EVENT",
@@ -134,7 +135,7 @@ export interface ChallengeExpiredEvent {
 }
 
 export interface ChannelUpdate {
-  type: "WALLET.ADJUDICATOR.CHANNEL_UPDATE";
+  type: WalletActionType.WALLET_ADJUDICATOR_CHANNEL_UPDATE;
   channelId: string;
   isFinalized: boolean;
   balance: string;
@@ -206,7 +207,7 @@ export const challengeExpiredEvent: ActionConstructor<ChallengeExpiredEvent> = p
 });
 export const channelUpdate: ActionConstructor<ChannelUpdate> = p => ({
   ...p,
-  type: "WALLET.ADJUDICATOR.CHANNEL_UPDATE"
+  type: WalletActionType.WALLET_ADJUDICATOR_CHANNEL_UPDATE
 });
 
 // -------
@@ -271,7 +272,7 @@ export function isAdjudicatorEventAction(action: WalletAction): action is Adjudi
     action.type === WalletActionType.WALLET_ADJUDICATOR_CHALLENGE_EXPIRED ||
     action.type === WalletActionType.WALLET_ADJUDICATOR_CHALLENGE_CREATED_EVENT ||
     action.type === WalletActionType.WALLET_ADJUDICATOR_CHALLENGE_EXPIRY_TIME_SET ||
-    action.type === "WALLET.ADJUDICATOR.CHANNEL_UPDATE"
+    action.type === WalletActionType.WALLET_ADJUDICATOR_CHANNEL_UPDATE
   );
 }
 
