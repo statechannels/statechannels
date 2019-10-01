@@ -3,7 +3,7 @@ import {TransactionRequest} from 'ethers/providers';
 import {State} from './contract/state';
 import {Signature} from 'ethers/utils';
 import {getStateSignerAddress} from './signatures';
-import {ChannelStorage, SignedState} from '.';
+import {SignedState} from '.';
 
 export function createForceMoveTransaction(
   signedStates: SignedState[],
@@ -18,15 +18,16 @@ export function createForceMoveTransaction(
     challengePrivateKey,
   );
 }
+
 export function createRespondTransaction(
-  channelStorage: ChannelStorage,
+  challengeState: State,
   response: SignedState,
 ): TransactionRequest {
-  if (!channelStorage.challengeState) {
+  if (!challengeState) {
     throw new Error('No active challenge in challenge state');
   }
   return forceMoveTrans.createRespondTransaction({
-    challengeState: channelStorage.challengeState,
+    challengeState,
     responseState: response.state,
     responseSignature: response.signature,
   });

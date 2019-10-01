@@ -1,0 +1,21 @@
+.step {
+  display: flex;
+  align-items: center;
+  margin-bottom: 24px;
+  height: 32px;
+}
+
+.stepStatus {
+  width: 32px;
+  display: flex;
+  justify-content: center;
+  margin-right: 18px;
+}
+
+.stepTitle {
+  font: 18px/28px "Karla", sans-serif;
+}
+
+.inProgress .stepTitle {
+  color: var(--primary-color);
+}

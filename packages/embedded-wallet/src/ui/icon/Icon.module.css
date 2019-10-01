@@ -1,0 +1,23 @@
+.icon {
+  display: inline-block;
+  width: 32px;
+  height: 32px;
+  background-repeat: no-repeat;
+  background-position: center center;
+}
+
+.externalLink {
+  background-image: url(./svg/external-link.svg);
+}
+
+.hourglass {
+  background-image: url(./svg/hourglass.svg);
+}
+
+.check {
+  background-image: url(./svg/check.svg);
+}
+
+.link {
+  background-image: url(./svg/link.svg);
+}

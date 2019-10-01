@@ -46,16 +46,16 @@ export async function createChallenge(provider: ethers.providers.JsonRpcProvider
   const network = await provider.getNetwork();
   const networkId = network.chainId;
   const libraryAddress = await getLibraryAddress(networkId, "TrivialApp");
+
   const channel: Channel = {
     channelType: libraryAddress,
     nonce: channelNonce,
-    participants: [participantA.address, participantB.address],
-    guaranteedChannel: ADDRESS_ZERO,
+    participants: [participantA.address, participantB.address]
   };
 
   const fromCommitment: Commitment = {
     channel,
-    allocation: fiveFive,
+    allocation: ["0x05", "0x05"],
     destination: [participantA.address, participantB.address],
     turnNum: 6,
     commitmentType: CommitmentType.App,
@@ -65,19 +65,20 @@ export async function createChallenge(provider: ethers.providers.JsonRpcProvider
 
   const toCommitment: Commitment = {
     channel,
-    allocation: fiveFive,
+    allocation: ["0x05", "0x05"],
     destination: [participantA.address, participantB.address],
     turnNum: 7,
     commitmentType: CommitmentType.App,
     appAttributes: "0x00",
-    commitmentCount: 0,
+    commitmentCount: 1,
   };
 
   const challengeTransaction = createForceMoveTransaction(
     signCommitment2(fromCommitment, participantA.privateKey),
     signCommitment2(toCommitment, participantB.privateKey),
-    participantA.privateKey
+    participantB.privateKey
   );
+
   const transactionReceipt = await sendTransaction(provider, challengeTransaction);
   await transactionReceipt.wait();
   return toCommitment;
@@ -133,6 +134,17 @@ export async function respondWithMove(provider: ethers.providers.JsonRpcProvider
     guaranteedChannel: ADDRESS_ZERO,
   };
 
+  // NOTE: Copied from createChallenge
+  const fromCommitment: Commitment = {
+    channel,
+    allocation: fiveFive,
+    destination: [participantA.address, participantB.address],
+    turnNum: 6,
+    commitmentType: CommitmentType.App,
+    appAttributes: "0x00",
+    commitmentCount: 0,
+  };
+
   const toCommitment: Commitment = {
     channel,
     allocation: fiveFive,
@@ -145,7 +157,12 @@ export async function respondWithMove(provider: ethers.providers.JsonRpcProvider
 
   const toSig = signCommitment(toCommitment, participantB.privateKey);
 
-  const respondWithMoveTransaction = createRespondWithMoveTransaction(toCommitment, participantB.privateKey);
+  const respondWithMoveTransaction = createRespondWithMoveTransaction(
+    fromCommitment,
+    toCommitment,
+    participantB.privateKey
+  );
+
   const transactionReceipt = await sendTransaction(provider, respondWithMoveTransaction);
   await transactionReceipt.wait();
   return { toCommitment, toSig };

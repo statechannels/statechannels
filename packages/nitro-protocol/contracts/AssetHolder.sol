@@ -2,8 +2,9 @@ pragma solidity ^0.5.11;
 pragma experimental ABIEncoderV2;
 import './Outcome.sol';
 import 'openzeppelin-solidity/contracts/math/SafeMath.sol';
+import './interfaces/IAssetHolder.sol';
 
-contract AssetHolder {
+contract AssetHolder is IAssetHolder {
     using SafeMath for uint256;
 
     address AdjudicatorAddress;
@@ -17,7 +18,7 @@ contract AssetHolder {
     // **************
 
     function transferAll(bytes32 channelId, bytes calldata allocationBytes) external {
-        // requirements
+        // checks
         require(
             outcomeHashes[channelId] ==
                 keccak256(
@@ -116,7 +117,7 @@ contract AssetHolder {
         bytes calldata guaranteeBytes,
         bytes calldata allocationBytes
     ) external {
-        // requirements
+        // checks
 
         require(
             outcomeHashes[guarantorChannelId] ==
@@ -307,15 +308,4 @@ contract AssetHolder {
 
         return (a);
     }
-
-    // ****************
-    // Events
-    // ****************
-    event Deposited(
-        bytes32 indexed destination,
-        uint256 amountDeposited,
-        uint256 destinationHoldings
-    );
-    event AssetTransferred(bytes32 indexed destination, uint256 amount);
-
 }

@@ -31,12 +31,12 @@
   },
   "homepage": "https://github.com/statechannels/nitro-protocol/",
   "scripts": {
+    "precommit": "lint-staged --quiet",
     "build": "run-s clearContracts clearLib contract:compile build:typescript",
-    "build:ci": "yarn build",
     "build:typescript": "tslint --project . && tsc -b",
+    "contract:compile": "./compile.sh",
     "clearContracts": "rm -rf build/contracts",
     "clearLib": "rm -rf lib",
-    "contract:compile": "npx etherlime compile --buildDirectory=./build/contracts",
     "deploy:test": "npx etherlime deploy --compile=false --file=./deployment/deploy-test.js",
     "deploy": "npx etherlime deploy --compile=false",
     "lint:check": "npx tslint --config tslint.json --project .",
@@ -46,7 +46,7 @@
     "prettier:write": "npx prettier --write '{contracts,src,test}/**/*.{ts,tsx,sol}'",
     "startGanache": "node bin/start-ganache.js",
     "test:ci": "yarn contract:compile && yarn test:prepare && npx jest --ci --bail --runInBand",
-    "test:prepare": "yarn lint:check && yarn deploy:test",
+    "test:prepare": "yarn deploy:test",
     "test:typescript": "npx jest --testPathIgnorePatterns='test/contracts' --reporters='default'",
     "test": "yarn test:prepare && npx jest"
   },
@@ -63,11 +63,12 @@
     "@types/node": "12.7.5",
     "@types/web3": "1.0.19",
     "dotenv": "8.1.0",
-    "etherlime": "^2.2.3",
-    "etherlime-lib": "^1.1.5",
+    "etherlime": "2.2.3",
+    "etherlime-lib": "1.1.5",
     "ganache-cli": "6.6.0",
     "jest": "24.9.0",
-    "load-json-file": "^6.2.0",
+    "lint-staged": "9.4.0",
+    "load-json-file": "6.2.0",
     "npm-run-all": "4.1.5",
     "prettier": "1.18.2",
     "prettier-plugin-solidity": "1.0.0-alpha.34",
@@ -76,7 +77,10 @@
     "tslint": "5.20.0",
     "tslint-config-prettier": "1.18.0",
     "typescript": "3.6.3",
-    "write-json-file": "^4.2.0"
+    "write-json-file": "4.2.0"
+  },
+  "lint-staged": {
+    "{src,test}/**/*.tsx?": "yarn lint:check"
   },
   "prettier": {
     "printWidth": 100,
