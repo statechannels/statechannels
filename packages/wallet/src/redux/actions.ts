@@ -29,6 +29,8 @@ export enum WalletActionType {
   METAMASK_LOAD_ERROR = "METAMASK_LOAD_ERROR",
   WALLET_ADJUDICATOR_CHALLENGE_EXPIRY_TIME_SET = "WALLET.ADJUDICATOR.CHALLENGE_EXPIRY_TIME_SET",
   WALLET_ADJUDICATOR_CHALLENGE_CREATED_EVENT = "WALLET.ADJUDICATOR.CHALLENGE_CREATED_EVENT",
+  WALLET_ADJUDICATOR_CONCLUDED_EVENT = "WALLET.ADJUDICATOR.CONCLUDED_EVENT",
+  WALLET_ADJUDICATOR_REFUTED_EVENT = "WALLET.ADJUDICATOR.REFUTED_EVENT",
   WALLET_MULTIPLE_ACTIONS = "WALLET.MULTIPLE_ACTIONS",
   WALLET_LOGGED_IN = "WALLET.LOGGED_IN",
   WALLET_ADJUDICATOR_KNOWN = "WALLET.ADJUDICATOR_KNOWN",
@@ -91,11 +93,11 @@ export interface ChallengeCreatedEvent {
 
 export interface ConcludedEvent {
   channelId: string;
-  type: "WALLET.ADJUDICATOR.CONCLUDED_EVENT";
+  type: WalletActionType.WALLET_ADJUDICATOR_CONCLUDED_EVENT;
 }
 
 export interface RefutedEvent {
-  type: "WALLET.ADJUDICATOR.REFUTED_EVENT";
+  type: WalletActionType.WALLET_ADJUDICATOR_REFUTED_EVENT;
   processId: string;
   protocolLocator: ProtocolLocator;
   channelId: string;
@@ -179,12 +181,12 @@ export const challengeCreatedEvent: ActionConstructor<ChallengeCreatedEvent> = p
 
 export const concludedEvent: ActionConstructor<ConcludedEvent> = p => ({
   ...p,
-  type: "WALLET.ADJUDICATOR.CONCLUDED_EVENT"
+  type: WalletActionType.WALLET_ADJUDICATOR_CONCLUDED_EVENT
 });
 
 export const refutedEvent: ActionConstructor<RefutedEvent> = p => ({
   ...p,
-  type: "WALLET.ADJUDICATOR.REFUTED_EVENT"
+  type: WalletActionType.WALLET_ADJUDICATOR_REFUTED_EVENT
 });
 
 export const respondWithMoveEvent: ActionConstructor<RespondWithMoveEvent> = p => ({
@@ -259,8 +261,8 @@ export function isSharedDataUpdateAction(action: WalletAction): action is Shared
 
 export function isAdjudicatorEventAction(action: WalletAction): action is AdjudicatorEventAction {
   return (
-    action.type === "WALLET.ADJUDICATOR.CONCLUDED_EVENT" ||
-    action.type === "WALLET.ADJUDICATOR.REFUTED_EVENT" ||
+    action.type === WalletActionType.WALLET_ADJUDICATOR_CONCLUDED_EVENT ||
+    action.type === WalletActionType.WALLET_ADJUDICATOR_REFUTED_EVENT ||
     action.type === "WALLET.ADJUDICATOR.RESPOND_WITH_MOVE_EVENT" ||
     action.type === "WALLET.ADJUDICATOR.FUNDING_RECEIVED_EVENT" ||
     action.type === "WALLET.ADJUDICATOR.CHALLENGE_EXPIRED" ||

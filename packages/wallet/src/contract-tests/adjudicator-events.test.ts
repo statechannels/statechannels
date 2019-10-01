@@ -15,7 +15,7 @@ import * as walletStates from "../redux/state";
 import {getGanacheProvider} from "@statechannels/devtools";
 jest.setTimeout(60000);
 
-const Action = actions.WalletActionType;
+const WalletActionType = actions.WalletActionType;
 
 const createWatcherState = (processId: string, ...channelIds: string[]): walletStates.Initialized => {
   const channelSubscriptions: walletStates.ChannelSubscriptions = {};
@@ -113,7 +113,7 @@ describe.skip("adjudicator listener", () => {
     const sagaTester = new SagaTester({initialState: createWatcherState(processId, channelId)});
     sagaTester.start(adjudicatorWatcher, provider);
     await createChallenge(provider, channelNonce, participantA, participantB);
-    await sagaTester.waitFor(Action.WALLET_ADJUDICATOR_CHALLENGE_EXPIRY_TIME_SET);
+    await sagaTester.waitFor(WalletActionType.WALLET_ADJUDICATOR_CHALLENGE_EXPIRY_TIME_SET);
 
     const action: actions.ChallengeExpirySetEvent = sagaTester.getLatestCalledAction();
     expect(action.expiryTime).toBeGreaterThan(startTimestamp);
@@ -130,7 +130,7 @@ describe.skip("adjudicator listener", () => {
 
     const challengeState = await createChallenge(provider, channelNonce, participantA, participantB);
 
-    await sagaTester.waitFor(Action.WALLET_ADJUDICATOR_CHALLENGE_CREATED_EVENT);
+    await sagaTester.waitFor(WalletActionType.WALLET_ADJUDICATOR_CHALLENGE_CREATED_EVENT);
 
     const action: actions.ChallengeCreatedEvent = sagaTester.getLatestCalledAction();
 
@@ -147,7 +147,7 @@ describe.skip("adjudicator listener", () => {
 
     await concludeGame(provider, channelNonce, participantA, participantB);
 
-    await sagaTester.waitFor("WALLET.ADJUDICATOR.CONCLUDED_EVENT");
+    await sagaTester.waitFor(WalletActionType.WALLET_ADJUDICATOR_CONCLUDED_EVENT);
     const action: actions.ConcludedEvent = sagaTester.getLatestCalledAction();
 
     expect(action).toEqual(actions.concludedEvent({channelId}));
@@ -164,7 +164,7 @@ describe.skip("adjudicator listener", () => {
 
     const refuteCommitment = await refuteChallenge(provider, channelNonce, participantA, participantB);
 
-    await sagaTester.waitFor("WALLET.ADJUDICATOR.REFUTED_EVENT");
+    await sagaTester.waitFor(WalletActionType.WALLET_ADJUDICATOR_REFUTED_EVENT);
 
     const action: actions.RefutedEvent = sagaTester.getLatestCalledAction();
     expect(action).toEqual(actions.refutedEvent({processId, protocolLocator: [], channelId, refuteCommitment}));

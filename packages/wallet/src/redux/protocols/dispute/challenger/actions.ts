@@ -79,7 +79,7 @@ export function isChallengerAction(action: WalletAction): action is ChallengerAc
     action.type === "WALLET.DISPUTE.CHALLENGER.CHALLENGE_DENIED" ||
     action.type === "WALLET.ADJUDICATOR.CHALLENGE_EXPIRED" ||
     action.type === "WALLET.ADJUDICATOR.RESPOND_WITH_MOVE_EVENT" ||
-    action.type === "WALLET.ADJUDICATOR.REFUTED_EVENT" ||
+    action.type === WalletActionType.WALLET_ADJUDICATOR_REFUTED_EVENT ||
     action.type === WalletActionType.WALLET_ADJUDICATOR_CHALLENGE_EXPIRY_TIME_SET ||
     action.type === "WALLET.DISPUTE.CHALLENGER.ACKNOWLEDGED" ||
     action.type === "WALLET.DISPUTE.CHALLENGER.EXIT_CHALLENGE"
