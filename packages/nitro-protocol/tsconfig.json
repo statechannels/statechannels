@@ -2,6 +2,7 @@
   "compilerOptions": {
     /* Basic Options */
     "lib": ["es5", "es6"],
+    "sourceMap": true,
     "composite": true,
     "allowJs": false /* Allow javascript files to be compiled. */,
     "outDir": "lib" /* Redirect output structure to the directory. */,

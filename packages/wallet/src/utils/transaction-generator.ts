@@ -8,7 +8,7 @@ import {
   Transactions as nitroTrans,
   SignedState
 } from "@statechannels/nitro-protocol";
-import {getChannelStorage, convertAddressToBytes32} from "./nitro-converter";
+import {convertAddressToBytes32, convertCommitmentToState} from "./nitro-converter";
 
 export function createForceMoveTransaction(
   fromCommitment: SignedCommitment,
@@ -19,11 +19,13 @@ export function createForceMoveTransaction(
   return nitroTrans.createForceMoveTransaction(signedStates, privateKey);
 }
 
-export function createRespondWithMoveTransaction(nextState: Commitment, privateKey: string): TransactionRequest {
-  const channelStorage = getChannelStorage(nextState);
-  // Why should `signCommitment2` be used instead of `signCommitment`?
-  const signedState = signCommitment2(nextState, privateKey).signedState;
-  return nitroTrans.createRespondTransaction(channelStorage, signedState);
+export function createRespondWithMoveTransaction(
+  challengeCommitment: Commitment,
+  responseCommitment: Commitment,
+  privateKey: string
+): TransactionRequest {
+  const signedState = signCommitment2(responseCommitment, privateKey).signedState;
+  return nitroTrans.createRespondTransaction(convertCommitmentToState(challengeCommitment), signedState);
 }
 
 export function createRefuteTransaction(refuteState: Commitment, signature: string): TransactionRequest {

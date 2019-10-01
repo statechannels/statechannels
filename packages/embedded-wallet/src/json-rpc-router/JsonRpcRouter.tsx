@@ -35,7 +35,7 @@ const JsonRpcRouter: React.FC = ({ children }) => {
       log("Request received: %o", receivedRequest);
       setState({ request: receivedRequest });
 
-      window.postMessage("ui:wallet:ack", "*");
+      window.parent.postMessage("ui:wallet:ack", "*");
     });
   }, []);
 
