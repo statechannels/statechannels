@@ -1,33 +1,35 @@
 import React, { useState } from "react";
 import { RouteComponentProps } from "react-router-dom";
-import { FileInfo } from "../../components/file-info/FileInfo";
 import { FormButton } from "../../components/form";
 import "./Download.scss";
+import { Torrent } from "../../types";
+import { TorrentInfo } from "../../components/torrent-info/TorrentInfo";
 
-const mockDownload = (file, setFile) => {
-  for (let i = 0; i * 20 <= file.size + 19; i++) {
+const mockDownload = (torrent: Torrent, setTorrent) => {
+  for (let i = 0; i * 20 <= torrent.length + 19; i++) {
     setTimeout(() => {
-      setFile({ ...file, downloaded: i * 20 > file.size ? file.size : i * 20 });
+      setTorrent({ ...torrent, downloaded: i * 20 > torrent.length ? torrent.length : i * 20 });
     }, i * 800);
   }
 };
 
 const Download: React.FC<RouteComponentProps> = () => {
-  const [file, setFile] = useState({
-    filename: "Sample_1.dat",
-    size: 350,
-    seeders: 27,
-    peers: 350,
+  const [torrent, setTorrent] = useState({
+    name: "Sample_1.dat",
+    length: 350,
+    numSeeds: 27,
+    numPeers: 350,
     cost: 0.5,
-    downloaded: 0
-  });
+    downloaded: 0,
+    files: []
+  } as Torrent);
 
   return (
     <section className="section fill download">
-      <FileInfo file={file} />
-      {!file.downloaded ? (
+      <TorrentInfo torrent={torrent} />
+      {!torrent.downloaded ? (
         <>
-          <FormButton name="download" onClick={() => mockDownload(file, setFile)}>
+          <FormButton name="download" onClick={() => mockDownload(torrent, setTorrent)}>
             Start Download
           </FormButton>
           <div className="subtitle">

@@ -1,19 +1,20 @@
 import React from "react";
 import { FormButton } from "../../form";
 import "./ShareFile.scss";
+import { Torrent } from "../../../types";
 
-export type ShareFileProps = { file: any; goTo: (name: string) => void };
+export type ShareFileProps = { file: Torrent; goTo: (name: string) => void };
 
 const ShareFile: React.FC<ShareFileProps> = ({ file, goTo }: ShareFileProps) => {
   return (
     <tr className={"share-file"}>
-      <td className="name-cell">{file.filename}</td>
-      <td className="other-cell">{file.size}Mb</td>
-      <td className="other-cell">{file.seeders}S</td>
-      <td className="other-cell">{file.peers}P</td>
+      <td className="name-cell">{file.name}</td>
+      <td className="other-cell">{file.length}Mb</td>
+      <td className="other-cell">{file.numPeers}S</td>
+      <td className="other-cell">{file.numPeers}P</td>
       <td className="other-cell">${file.cost}</td>
       <td className="button-cell">
-        <FormButton name="download" onClick={() => goTo(file.filename)}>
+        <FormButton name="download" onClick={() => goTo(file.magnetURI || "")}>
           Download
         </FormButton>
       </td>

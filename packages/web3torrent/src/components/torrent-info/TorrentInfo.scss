@@ -4,7 +4,7 @@ section {
   width: 100%;
 }
 
-.fileInfo {
+.torrentInfo {
   padding: 10px auto;
   margin-bottom: 10px;
   display: flex;
@@ -71,8 +71,8 @@ section {
   margin-top: 40px;
 }
 @media only screen and (max-width: 370px) {
-  .fileInfo,
-  .fileInfo.with-link {
+  .torrentInfo,
+  .torrentInfo.with-link {
     flex-direction: column;
     * {
       width: 100% !important;

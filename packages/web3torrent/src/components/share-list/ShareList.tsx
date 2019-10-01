@@ -2,20 +2,18 @@ import React from "react";
 import { RoutePath } from "../../routes";
 import { ShareFile } from "./share-file/ShareFile";
 import "./ShareList.scss";
+import { History } from "history";
+import { Torrent } from "../../types";
 
-export type ShareListProps = { files: any[]; history: any };
+export type ShareListProps = { torrents: Torrent[]; history: History };
 
-const ShareList: React.FC<ShareListProps> = ({ files, history }) => {
+const ShareList: React.FC<ShareListProps> = ({ torrents, history }) => {
   return (
     <table className="share-list">
       <tbody>
-        {files.length
-          ? files.map(file => (
-              <ShareFile
-                file={file}
-                key={file.filename}
-                goTo={route => history.push(`${RoutePath.Download}/${route}`)}
-              />
+        {torrents.length
+          ? torrents.map(file => (
+              <ShareFile file={file} key={file.name} goTo={route => history.push(`${RoutePath.Download}/${route}`)} />
             ))
           : false}
       </tbody>

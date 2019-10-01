@@ -21,7 +21,10 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({
       </span>
       <span className="bar-status">{status}</span>
       <button type="button" className="bar-cancelButton">
-        X
+        <svg>
+          <path d="M0,20,20,0" />
+          <path d="M0,0,20,20" />
+        </svg>
       </button>
     </div>
   );
