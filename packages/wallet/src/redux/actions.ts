@@ -83,7 +83,7 @@ export interface ChallengeClearedEvent {
   type: "WALLET.ADJUDICATOR.CHALLENGE_CLEARED_EVENT";
   channelId: string;
 
-   newTurnNumRecord: number;
+  newTurnNumRecord: number;
 }
 
 export interface ConcludedEvent {
