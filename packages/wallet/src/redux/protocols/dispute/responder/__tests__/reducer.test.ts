@@ -30,7 +30,11 @@ const itTransitionsToFailure = (result: {protocolState: states.ResponderState}, 
 // TODO: Also check that is submits the previous commitment too
 const itCallsRespondWithMoveWith = (responseCommitment: Commitment) => {
   it("calls respond with move with the correct commitment", () => {
-    expect(createRespondWithMoveMock).toHaveBeenCalledWith(jasmine.any(Object), responseCommitment, jasmine.any(String));
+    expect(createRespondWithMoveMock).toHaveBeenCalledWith(
+      jasmine.any(Object),
+      responseCommitment,
+      jasmine.any(String)
+    );
   });
 };
 

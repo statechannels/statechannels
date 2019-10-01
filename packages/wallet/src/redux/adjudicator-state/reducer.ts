@@ -1,6 +1,6 @@
-import { AdjudicatorState, clearChallenge, markAsFinalized, setBalance, setChallenge } from "./state";
+import {AdjudicatorState, clearChallenge, markAsFinalized, setBalance, setChallenge} from "./state";
 import * as actions from "../actions";
-import { unreachable } from "../../utils/reducer-utils";
+import {unreachable} from "../../utils/reducer-utils";
 
 export const adjudicatorStateReducer = (
   state: AdjudicatorState,
@@ -31,31 +31,34 @@ export const adjudicatorStateReducer = (
 };
 
 const challengeCreatedEventReducer = (state: AdjudicatorState, action: actions.ChallengeCreatedEvent) => {
-  const challenge = { expiresAt: action.finalizedAt, challengeStates: action.challengeStates };
+  const challenge = {expiresAt: action.finalizedAt, challengeStates: action.challengeStates};
   return setChallenge(state, action.channelId, challenge);
 };
 
 const challengeClearedEventReducer = (state: AdjudicatorState, action: actions.ChallengeClearedEvent) => {
-  const { channelId } = action;
+  const {channelId} = action;
   return clearChallenge(state, channelId);
 };
 
 // TODO: remove this responder reducer
-const challengeRespondedReducer = (state: AdjudicatorState, action: actions.RefutedEvent | actions.RespondWithMoveEvent) => {
-  const { channelId } = action;
+const challengeRespondedReducer = (
+  state: AdjudicatorState,
+  action: actions.RefutedEvent | actions.RespondWithMoveEvent
+) => {
+  const {channelId} = action;
   return clearChallenge(state, channelId);
 };
 
 const concludedEventReducer = (state: AdjudicatorState, action: actions.ConcludedEvent) => {
-  const { channelId } = action;
+  const {channelId} = action;
   return markAsFinalized(state, channelId);
 };
 const fundingReceivedEventReducer = (state: AdjudicatorState, action: actions.FundingReceivedEvent) => {
-  const { channelId } = action;
+  const {channelId} = action;
   return setBalance(state, channelId, action.totalForDestination);
 };
 const channelUpdateReducer = (state: AdjudicatorState, action: actions.ChannelUpdate) => {
-  const { channelId } = action;
+  const {channelId} = action;
   let updatedState = setBalance(state, channelId, action.balance);
   if (action.isFinalized) {
     updatedState = markAsFinalized(updatedState, channelId);
@@ -64,8 +67,8 @@ const channelUpdateReducer = (state: AdjudicatorState, action: actions.ChannelUp
 };
 
 const challengeExpiredReducer = (state: AdjudicatorState, action: actions.ChallengeExpiredEvent) => {
-  let newState = { ...state };
-  const { channelId } = action;
+  let newState = {...state};
+  const {channelId} = action;
   newState = clearChallenge(newState, channelId);
   newState = markAsFinalized(newState, channelId);
 

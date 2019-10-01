@@ -118,8 +118,8 @@ const waitForResponseReducer = (
       const privateKey = getPrivatekey(sharedData, protocolState.channelId);
 
       // TODO: There has got to be a better way of finding "the commitment I am responding to"
-      const { commitments } = sharedData.channelStore[getChannelId(commitment)];
-      const { commitment: challengeCommitment } = commitments.find(
+      const {commitments} = sharedData.channelStore[getChannelId(commitment)];
+      const {commitment: challengeCommitment} = commitments.find(
         c => c.commitment.turnNum === signResult.signedCommitment.commitment.turnNum - 1
       )!;
 
@@ -270,11 +270,7 @@ const craftResponseTransactionWithExistingCommitment = (
       return TransactionGenerator.createRefuteTransaction(penultimateCommitment, penultimateSignature);
     }
   } else if (canRespondWithExistingCommitment(challengeCommitment, sharedData)) {
-    return TransactionGenerator.createRespondTransaction(
-      challengeCommitment,
-      lastCommitment,
-      privateKey
-    );
+    return TransactionGenerator.createRespondTransaction(challengeCommitment, lastCommitment, privateKey);
   } else {
     // TODO: We should never actually hit this, currently a sanity check to help out debugging
     throw new Error("Cannot refute or respond with existing commitment.");

@@ -27,9 +27,6 @@
   "lint-staged": {
     "src/**/*.tsx?": "yarn lint:check"
   },
-  "eslintConfig": {
-    "extends": "react-app"
-  },
   "browserslist": {
     "production": [
       ">0.2%",

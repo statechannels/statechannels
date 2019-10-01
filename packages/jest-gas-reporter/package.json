@@ -10,7 +10,9 @@
   "scripts": {
     "precommit": "lint-staged --quiet",
     "prepare": "yarn build",
-    "build": "tslint --project . && tsc -b"
+    "build": "tslint --project . && tsc -b",
+    "lint:check": "npx tslint --config tslint.json --project .",
+    "lint:write": "npx tslint --config tslint.json --project . --fix"
   },
   "lint-staged": {
     "src/*.ts": "yarn lint:check"

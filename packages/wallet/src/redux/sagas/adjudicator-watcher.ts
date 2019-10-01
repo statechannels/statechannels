@@ -1,18 +1,18 @@
-import { getAdjudicatorContract } from "../../utils/contract-utils";
-import { call, take, put, select } from "redux-saga/effects";
-import { eventChannel } from "redux-saga";
+import {getAdjudicatorContract} from "../../utils/contract-utils";
+import {call, take, put, select} from "redux-saga/effects";
+import {eventChannel} from "redux-saga";
 import * as actions from "../actions";
-import { ethers } from "ethers";
-import { getAdjudicatorWatcherSubscribersForChannel } from "../selectors";
-import { ChannelSubscriber } from "../state";
-import { ProtocolLocator } from "../../communication";
-import { getChallengeRegisteredEvent } from "@statechannels/nitro-protocol";
-import { bigNumberify } from "ethers/utils";
+import {ethers} from "ethers";
+import {getAdjudicatorWatcherSubscribersForChannel} from "../selectors";
+import {ChannelSubscriber} from "../state";
+import {ProtocolLocator} from "../../communication";
+import {getChallengeRegisteredEvent} from "@statechannels/nitro-protocol";
+import {bigNumberify} from "ethers/utils";
 
 enum AdjudicatorEventType {
   ChallengeRegistered,
   ChallengeCleared,
-  Concluded,
+  Concluded
 }
 
 interface AdjudicatorEvent {
@@ -26,7 +26,10 @@ export function* adjudicatorWatcher(provider) {
   while (true) {
     const event: AdjudicatorEvent = yield take(adjudicatorEventChannel);
 
-    const channelSubscribers: ChannelSubscriber[] = yield select(getAdjudicatorWatcherSubscribersForChannel, event.channelId);
+    const channelSubscribers: ChannelSubscriber[] = yield select(
+      getAdjudicatorWatcherSubscribersForChannel,
+      event.channelId
+    );
 
     yield dispatchEventAction(event);
     for (const subscriber of channelSubscribers) {
@@ -36,7 +39,7 @@ export function* adjudicatorWatcher(provider) {
 }
 
 function* dispatchEventAction(event: AdjudicatorEvent) {
-  const { channelId } = event;
+  const {channelId} = event;
   switch (event.eventType) {
     case AdjudicatorEventType.ChallengeRegistered:
       const challengeRegisteredEvent = getChallengeRegisteredEvent(event.eventArgs);
@@ -48,7 +51,7 @@ function* dispatchEventAction(event: AdjudicatorEvent) {
         actions.challengeCreatedEvent({
           channelId,
           finalizedAt: finalizedAtInMs,
-          challengeStates: challengeRegisteredEvent.challengeStates,
+          challengeStates: challengeRegisteredEvent.challengeStates
         })
       );
       break;
@@ -65,16 +68,16 @@ function* dispatchEventAction(event: AdjudicatorEvent) {
 }
 
 function* dispatchProcessEventAction(event: AdjudicatorEvent, processId: string, protocolLocator: ProtocolLocator) {
-  const { channelId } = event;
+  const {channelId} = event;
   switch (event.eventType) {
     case AdjudicatorEventType.ChallengeRegistered:
-      const { finalizedAt } = event.eventArgs;
+      const {finalizedAt} = event.eventArgs;
       yield put(
         actions.challengeExpirySetEvent({
           processId,
           protocolLocator,
           channelId,
-          expiryTime: finalizedAt * 1000,
+          expiryTime: finalizedAt * 1000
         })
       );
       break;
@@ -88,7 +91,7 @@ function* dispatchProcessEventAction(event: AdjudicatorEvent, processId: string,
       );
       break;
     case AdjudicatorEventType.Concluded:
-      yield put(actions.concludedEvent({ channelId }));
+      yield put(actions.concludedEvent({channelId}));
       break;
     // TODO: These are obsolete, we neeed to remove the actions
     // case AdjudicatorEventType.Refuted:
@@ -152,17 +155,14 @@ function* createAdjudicatorEventChannel(provider) {
       emitter({
         eventType: AdjudicatorEventType.ChallengeRegistered,
         channelId: eventArgs[0],
-        eventArgs,
-      });
-    });
-    adjudicator.on(challengeClearedFilter, (...eventArgs) => {
-      emitter({ eventType: AdjudicatorEventType.ChallengeCleared,
-        channelId: eventArgs[0],
         eventArgs
       });
     });
+    adjudicator.on(challengeClearedFilter, (...eventArgs) => {
+      emitter({eventType: AdjudicatorEventType.ChallengeCleared, channelId: eventArgs[0], eventArgs});
+    });
     adjudicator.on(gameConcludedFilter, channelId => {
-      emitter({ eventType: AdjudicatorEventType.Concluded, channelId });
+      emitter({eventType: AdjudicatorEventType.Concluded, channelId});
     });
 
     return () => {

@@ -19480,10 +19480,10 @@ redux-saga-test-plan@4.0.0-rc.3:
     object-assign "^4.1.0"
     util-inspect "^0.1.8"
 
-redux-saga-tester@1.0.562:
-  version "1.0.562"
-  resolved "https://registry.yarnpkg.com/redux-saga-tester/-/redux-saga-tester-1.0.562.tgz#62035e58430926ea21e06b2f075945946721289c"
-  integrity sha512-A9hu4LY5dDZow7YVIrkEZvKIddGx1+SdDQMjBa5f5HlSYOrGSBl9bS83eudRA8RTDGWLV3oePrbZBY3IwSTRVg==
+redux-saga-tester@1.0.565:
+  version "1.0.565"
+  resolved "https://registry.yarnpkg.com/redux-saga-tester/-/redux-saga-tester-1.0.565.tgz#2784d48046481d893284e1c8cf6b53ffd01a97f9"
+  integrity sha512-Vhm86HXqk5dPXl3eyhDbsYKqiBqN5vkxdRBdFcUnbJGIgwTc9MV2r73EP3IdEpQwspREuPTeNl81/8NByCqosA==
   dependencies:
     babel-runtime "^6.11.6"
 
