@@ -10,7 +10,13 @@ const ShareList: React.FC<ShareListProps> = ({ files, history }) => {
     <table className="share-list">
       <tbody>
         {files.length
-          ? files.map(file => <ShareFile file={file} goTo={route => history.push(`${RoutePath.Download}/${route}`)} />)
+          ? files.map(file => (
+              <ShareFile
+                file={file}
+                key={file.filename}
+                goTo={route => history.push(`${RoutePath.Download}/${route}`)}
+              />
+            ))
           : false}
       </tbody>
     </table>
