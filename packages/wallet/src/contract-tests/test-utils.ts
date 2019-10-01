@@ -55,7 +55,7 @@ export async function createChallenge(provider: ethers.providers.JsonRpcProvider
 
   const fromCommitment: Commitment = {
     channel,
-    allocation: ["0x05", "0x05"],
+    allocation: fiveFive,
     destination: [participantA.address, participantB.address],
     turnNum: 4,
     commitmentType: CommitmentType.App,
@@ -65,7 +65,7 @@ export async function createChallenge(provider: ethers.providers.JsonRpcProvider
 
   const toCommitment: Commitment = {
     channel,
-    allocation: ["0x05", "0x05"],
+    allocation: fiveFive,
     destination: [participantA.address, participantB.address],
     turnNum: 5,
     commitmentType: CommitmentType.App,
@@ -97,7 +97,7 @@ export async function concludeGame(provider: ethers.providers.JsonRpcProvider, c
 
   const fromCommitment: Commitment = {
     channel,
-    allocation: ["0x05", "0x05"],
+    allocation: fiveFive,
     destination: [participantA.address, participantB.address],
     turnNum: 4,
     commitmentType: CommitmentType.Conclude,
@@ -107,7 +107,7 @@ export async function concludeGame(provider: ethers.providers.JsonRpcProvider, c
 
   const toCommitment: Commitment = {
     channel,
-    allocation: ["0x05", "0x05"],
+    allocation: fiveFive,
     destination: [participantA.address, participantB.address],
     turnNum: 5,
     commitmentType: CommitmentType.Conclude,

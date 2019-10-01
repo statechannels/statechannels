@@ -1,7 +1,7 @@
 import { ethers } from "ethers";
 
 import { signCommitment, signVerificationData, signCommitment2 } from "../domain";
-import { createChallenge, concludeGame } from "./test-utils";
+import { createChallenge, concludeGame, fiveFive } from "./test-utils";
 import {
   createForceMoveTransaction,
   createDepositTransaction,
@@ -110,7 +110,7 @@ describe("transactions", () => {
 
     const fromCommitment: Commitment = {
       channel,
-      allocation: ["0x05", "0x05"],
+      allocation: fiveFive,
       destination: [participantA.address, participantB.address],
       turnNum: 4,
       commitmentType: CommitmentType.App,
@@ -120,7 +120,7 @@ describe("transactions", () => {
 
     const toCommitment: Commitment = {
       channel,
-      allocation: ["0x05", "0x05"],
+      allocation: fiveFive,
       destination: [participantA.address, participantB.address],
       turnNum: 5,
       commitmentType: CommitmentType.App,
@@ -153,7 +153,7 @@ describe("transactions", () => {
     // NOTE: Copied from createChallenge
     const fromCommitment: Commitment = {
       channel,
-      allocation: ["0x05", "0x05"],
+      allocation: fiveFive,
       destination: [participantA.address, participantB.address],
       turnNum: 5,
       commitmentType: CommitmentType.App,
@@ -163,7 +163,7 @@ describe("transactions", () => {
 
     const toCommitment: Commitment = {
       channel,
-      allocation: ["0x05", "0x05"],
+      allocation: fiveFive,
       destination: [participantA.address, participantB.address],
       turnNum: 6,
       commitmentType: CommitmentType.App,
@@ -188,7 +188,7 @@ describe("transactions", () => {
     await createChallenge(provider, channelNonce, participantA, participantB);
     const toCommitment: Commitment = {
       channel,
-      allocation: ["0x05", "0x05"],
+      allocation: fiveFive,
       destination: [participantA.address, participantB.address],
       turnNum: 8,
       commitmentType: CommitmentType.App,
@@ -214,7 +214,7 @@ describe("transactions", () => {
 
     const fromCommitment: Commitment = {
       channel,
-      allocation: ["0x05", "0x05"],
+      allocation: fiveFive,
       destination: [participantA.address, participantB.address],
       turnNum: 4,
       commitmentType: CommitmentType.Conclude,
@@ -224,7 +224,7 @@ describe("transactions", () => {
   
     const toCommitment: Commitment = {
       channel,
-      allocation: ["0x05", "0x05"],
+      allocation: fiveFive,
       destination: [participantA.address, participantB.address],
       turnNum: 5,
       commitmentType: CommitmentType.Conclude,
@@ -291,7 +291,7 @@ describe("transactions", () => {
     );
     const fromCommitment: Commitment = {
       channel,
-      allocation: ["0x05", "0x05"],
+      allocation: fiveFive,
       destination: [participantA.address, participantB.address],
       turnNum: 5,
       commitmentType: CommitmentType.Conclude,
@@ -301,7 +301,7 @@ describe("transactions", () => {
 
     const toCommitment: Commitment = {
       channel,
-      allocation: ["0x05", "0x05"],
+      allocation: fiveFive,
       destination: [participantA.address, participantB.address],
       turnNum: 6,
       commitmentType: CommitmentType.Conclude,
