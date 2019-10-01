@@ -11,7 +11,7 @@ const LayoutHeader: React.FC<RouteComponentProps> = props => {
     <header className="header">
       <nav className="header-content">
         <a className="header-logo" href={RoutePath.Root}>
-          <span className="header-logo-hidden">Web3Torrent Logo - Go to Home </span>
+          <span className="header-logo-hidden">Web3Torrent Logo - Go to Home</span>
         </a>
         <div className="actions-container">
           <FormButton name="setup" onClick={() => props.history.push(RoutePath.Upload)}>
