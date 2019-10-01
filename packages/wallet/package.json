@@ -142,7 +142,7 @@
     "prettier": "1.18.2",
     "redux-mock-store": "1.5.3",
     "redux-saga-test-plan": "4.0.0-rc.3",
-    "redux-saga-tester": "1.0.381",
+    "redux-saga-tester": "1.0.565",
     "sass-loader": "7.3.1",
     "source-map-loader": "0.2.4",
     "style-loader": "1.0.0",
