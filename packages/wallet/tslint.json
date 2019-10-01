@@ -1,8 +1,7 @@
 {
   "extends": "../../tslint.json",
   "rules": {
-    "ordered-imports": false,
-    "file-name-casing": [true, "kebab-case"]
+    "ordered-imports": false
   },
   "linterOptions": {
     "exclude": [

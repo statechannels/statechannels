@@ -31,7 +31,7 @@ export const adjudicatorStateReducer = (
 };
 
 const challengeCreatedEventReducer = (state: AdjudicatorState, action: actions.ChallengeCreatedEvent) => {
-  const challenge = {expiresAt: action.finalizedAt, challengeCommitment: action.commitment};
+  const challenge = {expiresAt: action.finalizedAt, challengeStates: action.challengeStates};
   return setChallenge(state, action.channelId, challenge);
 };
 

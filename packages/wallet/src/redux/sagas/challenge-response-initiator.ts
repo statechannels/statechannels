@@ -3,6 +3,7 @@ import {take, select, put} from "redux-saga/effects";
 import * as selectors from "../selectors";
 import {challengeDetected} from "../protocols/application/actions";
 import {APPLICATION_PROCESS_ID} from "../protocols/application/reducer";
+import {convertStateToCommitment} from "../../utils/nitro-converter";
 
 /**
  * A simple saga that determines if a challenge created event requires the wallet to initialize a respond protocol
@@ -10,14 +11,14 @@ import {APPLICATION_PROCESS_ID} from "../protocols/application/reducer";
 export function* challengeResponseInitiator() {
   while (true) {
     const action: ChallengeCreatedEvent = yield take(WalletActionType.WALLET_ADJUDICATOR_CHALLENGE_CREATED_EVENT);
-    const {commitment, channelId, finalizedAt: expiresAt} = action;
+    const {challengeStates, channelId, finalizedAt: expiresAt} = action;
 
     const channelState = yield select(selectors.getOpenedChannelState, channelId);
-
-    const numParticipants = commitment.channel.participants.length;
-    const ourCommitment = commitment.turnNum % numParticipants !== channelState.ourIndex;
-
-    if (ourCommitment) {
+    const [latestState] = challengeStates.slice(-1);
+    const numParticipants = latestState.channel.participants.length;
+    const ourStateIsLast = latestState.turnNum % numParticipants !== channelState.ourIndex;
+    const commitment = convertStateToCommitment(latestState);
+    if (ourStateIsLast) {
       yield put(
         challengeDetected({
           commitment,

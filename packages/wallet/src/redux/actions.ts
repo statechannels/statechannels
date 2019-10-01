@@ -18,6 +18,7 @@ import {FundingStrategyNegotiationAction} from "./protocols/funding-strategy-neg
 import {LedgerFundingAction} from "./protocols/ledger-funding";
 
 import {LOAD as LOAD_FROM_STORAGE} from "redux-storage";
+import {State} from "@statechannels/nitro-protocol";
 export * from "./protocols/transaction-submission/actions";
 export {CommitmentReceived, commitmentReceived};
 
@@ -91,8 +92,9 @@ export interface ChallengeExpirySetEvent {
 export interface ChallengeCreatedEvent {
   type: WalletActionType.WALLET_ADJUDICATOR_CHALLENGE_CREATED_EVENT;
   channelId: string;
-  commitment: Commitment;
+
   finalizedAt: number;
+  challengeStates: State[];
 }
 
 export interface ConcludedEvent {
