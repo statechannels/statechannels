@@ -1,4 +1,4 @@
-@import "../../../styles/variables";
+@import '../../../styles/variables';
 
 .progress-bar {
   height: 50px;
@@ -49,7 +49,7 @@
   }
   svg > path {
     stroke: $c-orange;
-    stroke-width: 2px
+    stroke-width: 2px;
   }
 
   svg:hover > path {
