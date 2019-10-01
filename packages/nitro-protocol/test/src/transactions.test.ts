@@ -4,7 +4,7 @@ import {ethers} from 'ethers';
 import {
   createForceMoveTransaction,
   createConcludeTransaction,
-  createRespondWithMoveTransaction,
+  createRespondTransaction,
   createCheckpointTransaction,
 } from '../../src/transactions';
 import {AddressZero} from 'ethers/constants';
@@ -77,7 +77,7 @@ describe('transaction-generators', () => {
 
   describe('respond transactions', () => {
     it('creates a transaction', async () => {
-      const transactionRequest: TransactionRequest = createRespondWithMoveTransaction(
+      const transactionRequest: TransactionRequest = createRespondTransaction(
         challengeState,
         signedState,
       );
@@ -88,7 +88,7 @@ describe('transaction-generators', () => {
     // TODO: @snario replace this test as it makes no sense
     it.skip('throws an error when there is no challenge state', async () => {
       expect(() => {
-        createRespondWithMoveTransaction(challengeState, signedState);
+        createRespondTransaction(challengeState, signedState);
       }).toThrowError();
     });
   });

@@ -5,7 +5,7 @@ import {
   createForceMoveTransaction,
   createConcludeTransaction,
   createRefuteTransaction,
-  createRespondWithMoveTransaction,
+  createRespondTransaction,
 } from "../utils/transaction-generator";
 import { signCommitment } from "../domain";
 
@@ -147,7 +147,7 @@ export async function respond(provider: ethers.providers.JsonRpcProvider, channe
 
   const toSig = signCommitment(toCommitment, participantB.privateKey);
 
-  const respondWithMoveTransaction = createRespondWithMoveTransaction(
+  const respondWithMoveTransaction = createRespondTransaction(
     challenge,
     toCommitment,
     participantA.privateKey

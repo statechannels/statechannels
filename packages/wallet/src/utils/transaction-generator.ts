@@ -19,13 +19,13 @@ export function createForceMoveTransaction(
   return nitroTrans.createForceMoveTransaction(signedStates, privateKey);
 }
 
-export function createRespondWithMoveTransaction(
+export function createRespondTransaction(
   challengeCommitment: Commitment,
   responseCommitment: Commitment,
   privateKey: string
 ): TransactionRequest {
   const signedState = signCommitment2(responseCommitment, privateKey).signedState;
-  return nitroTrans.createRespondWithMoveTransaction(convertCommitmentToState(challengeCommitment), signedState);
+  return nitroTrans.createRespondTransaction(convertCommitmentToState(challengeCommitment), signedState);
 }
 
 export function createRefuteTransaction(refuteState: Commitment, signature: string): TransactionRequest {

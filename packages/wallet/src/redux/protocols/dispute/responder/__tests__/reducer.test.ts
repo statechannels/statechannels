@@ -12,7 +12,7 @@ import {describeScenarioStep} from "../../../../__tests__/helpers";
 const mockTransaction = {to: "0xabc"};
 const createRespondWithMoveMock = jest.fn().mockReturnValue(mockTransaction);
 const refuteMock = jest.fn().mockReturnValue(mockTransaction);
-Object.defineProperty(TransactionGenerator, "createRespondWithMoveTransaction", {
+Object.defineProperty(TransactionGenerator, "createRespondTransaction", {
   value: createRespondWithMoveMock
 });
 Object.defineProperty(TransactionGenerator, "createRefuteTransaction", {

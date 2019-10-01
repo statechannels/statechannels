@@ -79,7 +79,7 @@ export function respondArgs({
   return [challengerAddress, isFinalAB, fixedPart, variablePartAB, responseSignature];
 }
 
-export function createRespondWithMoveTransaction(args: RespondArgs): TransactionRequest {
+export function createRespondTransaction(args: RespondArgs): TransactionRequest {
   const data = ForceMoveContractInterface.functions.respond.encode(respondArgs(args));
   return {data, gasLimit: GAS_LIMIT};
 }

@@ -123,7 +123,7 @@ const waitForResponseReducer = (
         c => c.commitment.turnNum === signResult.signedCommitment.commitment.turnNum - 1
       )!;
 
-      const transaction = TransactionGenerator.createRespondWithMoveTransaction(
+      const transaction = TransactionGenerator.createRespondTransaction(
         challengeCommitment,
         signResult.signedCommitment.commitment,
         privateKey
@@ -270,7 +270,7 @@ const craftResponseTransactionWithExistingCommitment = (
       return TransactionGenerator.createRefuteTransaction(penultimateCommitment, penultimateSignature);
     }
   } else if (canRespondWithExistingCommitment(challengeCommitment, sharedData)) {
-    return TransactionGenerator.createRespondWithMoveTransaction(
+    return TransactionGenerator.createRespondTransaction(
       challengeCommitment,
       lastCommitment,
       privateKey
