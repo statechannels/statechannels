@@ -1,37 +1,16 @@
 {
-  "extends": ["tslint:recommended", "tslint-react", "tslint-config-prettier"],
+  "extends": "../../tslint.json",
+  "rules": {
+    "ordered-imports": false,
+    "file-name-casing": [true, "kebab-case"]
+  },
   "linterOptions": {
     "exclude": [
-      "config/**/*.js",
-      "node_modules/**/*.ts",
-      "truffle.ts",
-      "migrations/*",
-      "/**/*.json"
+      "src/utils/contract-utils.ts",
+      "src/utils/nitro-converter.ts",
+      "src/contract-tests/transactions.test.ts",
+      "src/contract-tests/test-utils.ts",
+      "**/*.json"
     ]
-  },
-  "jsRules": {
-    "object-literal-sort-keys": false,
-    "no-console": false,
-    "no-string-throw": false,
-    "ordered-imports": false
-  },
-  "rules": {
-    "no-console": [true, "warning"],
-    "object-literal-sort-keys": false,
-    "member-access": false,
-    "ordered-imports": false,
-    "jsx-no-lambda": false,
-    "interface-name": false,
-    "prefer-for-of": false,
-    "max-classes-per-file": false,
-    "variable-name": [
-      true,
-      "ban-keywords",
-      "check-format",
-      "allow-pascal-case",
-      "allow-leading-underscore"
-    ],
-    "no-switch-case-fall-through": true,
-    "file-name-casing": [true, "kebab-case"]
   }
 }
