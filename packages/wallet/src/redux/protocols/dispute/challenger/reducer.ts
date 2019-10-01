@@ -63,7 +63,7 @@ export function challengerReducer(state: NonTerminalCState, sharedData: SharedDa
       return challengeResponseReceived(state, sharedData, action.responseCommitment, action.responseSignature);
     case WalletActionType.WALLET_ADJUDICATOR_REFUTED_EVENT:
       return refuteReceived(state, sharedData);
-    case "WALLET.ADJUDICATOR.CHALLENGE_EXPIRED":
+    case WalletActionType.WALLET_ADJUDICATOR_CHALLENGE_EXPIRED:
       return challengeTimedOut(state, sharedData);
     case WalletActionType.WALLET_ADJUDICATOR_CHALLENGE_EXPIRY_TIME_SET:
       return handleChallengeCreatedEvent(state, sharedData, action.expiryTime);

@@ -19,7 +19,7 @@ import {
   sendChallengeComplete,
   sendOpponentConcluded
 } from "../../reducer-helpers";
-import {ProtocolAction} from "../../../actions";
+import {ProtocolAction, WalletActionType} from "../../../actions";
 import * as _ from "lodash";
 export const initialize = (
   processId: string,
@@ -79,7 +79,7 @@ const waitForTransactionReducer = (
   sharedData: SharedData,
   action: actions.ResponderAction
 ): ProtocolStateWithSharedData<states.ResponderState> => {
-  if (action.type === "WALLET.ADJUDICATOR.CHALLENGE_EXPIRED") {
+  if (action.type === WalletActionType.WALLET_ADJUDICATOR_CHALLENGE_EXPIRED) {
     return {
       protocolState: states.acknowledgeTimeout({...protocolState}),
       sharedData: sendOpponentConcluded(sharedData)
@@ -130,7 +130,7 @@ const waitForResponseReducer = (
       );
 
       return transitionToWaitForTransaction(transaction, protocolState, signResult.store);
-    case "WALLET.ADJUDICATOR.CHALLENGE_EXPIRED":
+    case WalletActionType.WALLET_ADJUDICATOR_CHALLENGE_EXPIRED:
       return {
         protocolState: states.acknowledgeTimeout({...protocolState}),
         sharedData: showWallet(sendOpponentConcluded(sharedData))
@@ -175,7 +175,7 @@ const waitForApprovalReducer = (
 
         return transitionToWaitForTransaction(transaction, protocolState, sharedData);
       }
-    case "WALLET.ADJUDICATOR.CHALLENGE_EXPIRED":
+    case WalletActionType.WALLET_ADJUDICATOR_CHALLENGE_EXPIRED:
       return {
         protocolState: states.acknowledgeTimeout({...protocolState}),
         sharedData: sendOpponentConcluded(sharedData)

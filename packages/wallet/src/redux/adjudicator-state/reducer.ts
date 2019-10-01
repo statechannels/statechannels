@@ -9,7 +9,7 @@ export const adjudicatorStateReducer = (
   action: actions.AdjudicatorEventAction | actions.ChallengeCreatedEvent
 ): AdjudicatorState => {
   switch (action.type) {
-    case "WALLET.ADJUDICATOR.CHALLENGE_EXPIRED":
+    case WalletActionType.WALLET_ADJUDICATOR_CHALLENGE_EXPIRED:
       return challengeExpiredReducer(state, action);
     case WalletActionType.WALLET_ADJUDICATOR_FUNDING_RECEIVED_EVENT:
       return fundingReceivedEventReducer(state, action);

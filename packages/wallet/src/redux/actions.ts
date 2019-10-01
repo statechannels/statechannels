@@ -27,6 +27,7 @@ export const isTransactionAction = isTA;
 export enum WalletActionType {
   BLOCK_MINED = "BLOCK_MINED",
   METAMASK_LOAD_ERROR = "METAMASK_LOAD_ERROR",
+  WALLET_ADJUDICATOR_CHALLENGE_EXPIRED = "WALLET.ADJUDICATOR.CHALLENGE_EXPIRED",
   WALLET_ADJUDICATOR_CHALLENGE_EXPIRY_TIME_SET = "WALLET.ADJUDICATOR.CHALLENGE_EXPIRY_TIME_SET",
   WALLET_ADJUDICATOR_CHALLENGE_CREATED_EVENT = "WALLET.ADJUDICATOR.CHALLENGE_CREATED_EVENT",
   WALLET_ADJUDICATOR_CONCLUDED_EVENT = "WALLET.ADJUDICATOR.CONCLUDED_EVENT",
@@ -125,7 +126,7 @@ export interface FundingReceivedEvent {
 }
 
 export interface ChallengeExpiredEvent {
-  type: "WALLET.ADJUDICATOR.CHALLENGE_EXPIRED";
+  type: WalletActionType.WALLET_ADJUDICATOR_CHALLENGE_EXPIRED;
   processId: string;
   protocolLocator: ProtocolLocator;
   channelId: string;
@@ -201,7 +202,7 @@ export const fundingReceivedEvent: ActionConstructor<FundingReceivedEvent> = p =
 });
 export const challengeExpiredEvent: ActionConstructor<ChallengeExpiredEvent> = p => ({
   ...p,
-  type: "WALLET.ADJUDICATOR.CHALLENGE_EXPIRED"
+  type: WalletActionType.WALLET_ADJUDICATOR_CHALLENGE_EXPIRED
 });
 export const channelUpdate: ActionConstructor<ChannelUpdate> = p => ({
   ...p,
@@ -267,7 +268,7 @@ export function isAdjudicatorEventAction(action: WalletAction): action is Adjudi
     action.type === WalletActionType.WALLET_ADJUDICATOR_REFUTED_EVENT ||
     action.type === WalletActionType.WALLET_ADJUDICATOR_RESPOND_WITH_MOVE_EVENT ||
     action.type === WalletActionType.WALLET_ADJUDICATOR_FUNDING_RECEIVED_EVENT ||
-    action.type === "WALLET.ADJUDICATOR.CHALLENGE_EXPIRED" ||
+    action.type === WalletActionType.WALLET_ADJUDICATOR_CHALLENGE_EXPIRED ||
     action.type === WalletActionType.WALLET_ADJUDICATOR_CHALLENGE_CREATED_EVENT ||
     action.type === WalletActionType.WALLET_ADJUDICATOR_CHALLENGE_EXPIRY_TIME_SET ||
     action.type === "WALLET.ADJUDICATOR.CHANNEL_UPDATE"

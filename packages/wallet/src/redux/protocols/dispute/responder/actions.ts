@@ -72,7 +72,7 @@ export function isResponderAction(action: WalletAction): action is ResponderActi
     action.type === "WALLET.DISPUTE.RESPONDER.RESPOND_APPROVED" ||
     action.type === "WALLET.DISPUTE.RESPONDER.RESPONSE_PROVIDED" ||
     action.type === WalletActionType.WALLET_ADJUDICATOR_CHALLENGE_EXPIRY_TIME_SET ||
-    action.type === "WALLET.ADJUDICATOR.CHALLENGE_EXPIRED" ||
+    action.type === WalletActionType.WALLET_ADJUDICATOR_CHALLENGE_EXPIRED ||
     action.type === "WALLET.DISPUTE.RESPONDER.ACKNOWLEDGED" ||
     action.type === "WALLET.DISPUTE.CHALLENGER.EXIT_CHALLENGE"
   );
