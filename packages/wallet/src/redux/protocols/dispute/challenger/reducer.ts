@@ -59,7 +59,7 @@ export function challengerReducer(state: NonTerminalCState, sharedData: SharedDa
       return challengeApproved(state, sharedData);
     case "WALLET.DISPUTE.CHALLENGER.CHALLENGE_DENIED":
       return challengeDenied(state, sharedData);
-    case "WALLET.ADJUDICATOR.RESPOND_WITH_MOVE_EVENT":
+    case WalletActionType.WALLET_ADJUDICATOR_RESPOND_WITH_MOVE_EVENT:
       return challengeResponseReceived(state, sharedData, action.responseCommitment, action.responseSignature);
     case WalletActionType.WALLET_ADJUDICATOR_REFUTED_EVENT:
       return refuteReceived(state, sharedData);

@@ -16,7 +16,7 @@ export const adjudicatorStateReducer = (
     case WalletActionType.WALLET_ADJUDICATOR_CONCLUDED_EVENT:
       return concludedEventReducer(state, action);
     case WalletActionType.WALLET_ADJUDICATOR_REFUTED_EVENT:
-    case "WALLET.ADJUDICATOR.RESPOND_WITH_MOVE_EVENT":
+    case WalletActionType.WALLET_ADJUDICATOR_RESPOND_WITH_MOVE_EVENT:
       return challengeRespondedReducer(state, action);
     case WalletActionType.WALLET_ADJUDICATOR_CHALLENGE_CREATED_EVENT:
       return challengeCreatedEventReducer(state, action);

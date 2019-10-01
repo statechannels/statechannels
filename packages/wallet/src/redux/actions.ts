@@ -31,6 +31,7 @@ export enum WalletActionType {
   WALLET_ADJUDICATOR_CHALLENGE_CREATED_EVENT = "WALLET.ADJUDICATOR.CHALLENGE_CREATED_EVENT",
   WALLET_ADJUDICATOR_CONCLUDED_EVENT = "WALLET.ADJUDICATOR.CONCLUDED_EVENT",
   WALLET_ADJUDICATOR_REFUTED_EVENT = "WALLET.ADJUDICATOR.REFUTED_EVENT",
+  WALLET_ADJUDICATOR_RESPOND_WITH_MOVE_EVENT = "WALLET.ADJUDICATOR.RESPOND_WITH_MOVE_EVENT",
   WALLET_MULTIPLE_ACTIONS = "WALLET.MULTIPLE_ACTIONS",
   WALLET_LOGGED_IN = "WALLET.LOGGED_IN",
   WALLET_ADJUDICATOR_KNOWN = "WALLET.ADJUDICATOR_KNOWN",
@@ -110,7 +111,7 @@ export interface RespondWithMoveEvent {
   channelId: string;
   responseCommitment: Commitment;
   responseSignature: string;
-  type: "WALLET.ADJUDICATOR.RESPOND_WITH_MOVE_EVENT";
+  type: WalletActionType.WALLET_ADJUDICATOR_RESPOND_WITH_MOVE_EVENT;
 }
 
 export interface FundingReceivedEvent {
@@ -191,7 +192,7 @@ export const refutedEvent: ActionConstructor<RefutedEvent> = p => ({
 
 export const respondWithMoveEvent: ActionConstructor<RespondWithMoveEvent> = p => ({
   ...p,
-  type: "WALLET.ADJUDICATOR.RESPOND_WITH_MOVE_EVENT"
+  type: WalletActionType.WALLET_ADJUDICATOR_RESPOND_WITH_MOVE_EVENT
 });
 export const fundingReceivedEvent: ActionConstructor<FundingReceivedEvent> = p => ({
   ...p,
@@ -263,7 +264,7 @@ export function isAdjudicatorEventAction(action: WalletAction): action is Adjudi
   return (
     action.type === WalletActionType.WALLET_ADJUDICATOR_CONCLUDED_EVENT ||
     action.type === WalletActionType.WALLET_ADJUDICATOR_REFUTED_EVENT ||
-    action.type === "WALLET.ADJUDICATOR.RESPOND_WITH_MOVE_EVENT" ||
+    action.type === WalletActionType.WALLET_ADJUDICATOR_RESPOND_WITH_MOVE_EVENT ||
     action.type === "WALLET.ADJUDICATOR.FUNDING_RECEIVED_EVENT" ||
     action.type === "WALLET.ADJUDICATOR.CHALLENGE_EXPIRED" ||
     action.type === WalletActionType.WALLET_ADJUDICATOR_CHALLENGE_CREATED_EVENT ||

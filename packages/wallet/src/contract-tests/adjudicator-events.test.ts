@@ -182,7 +182,7 @@ describe.skip("adjudicator listener", () => {
 
     const response = await respondWithMove(provider, channelNonce, participantA, participantB);
 
-    await sagaTester.waitFor("WALLET.ADJUDICATOR.RESPOND_WITH_MOVE_EVENT");
+    await sagaTester.waitFor(WalletActionType.WALLET_ADJUDICATOR_RESPOND_WITH_MOVE_EVENT);
 
     const action: actions.RespondWithMoveEvent = sagaTester.getLatestCalledAction();
     expect(action).toEqual(
