@@ -7,13 +7,6 @@
     "member-ordering": false,
     "newline-per-chained-call": false,
     "trailing-comma": false,
-    "prettier": [
-      true,
-      {
-        "printWidth": 120,
-        "tabWidth": 2,
-        "bracketSpacing": true
-      }
-    ]
+    "prettier": [true, ".prettierrc.js"]
   }
 }

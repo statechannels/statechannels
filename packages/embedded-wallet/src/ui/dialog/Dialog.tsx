@@ -1,9 +1,9 @@
-import React, { Dispatch, KeyboardEvent, SetStateAction, useState } from "react";
-import { Button, ButtonProps } from "../button/Button";
-import { Icon, Icons } from "../icon/Icon";
-import css from "./Dialog.module.css";
+import React, {Dispatch, KeyboardEvent, SetStateAction, useState} from 'react';
+import {Button, ButtonProps} from '../button/Button';
+import {Icon, Icons} from '../icon/Icon';
+import css from './Dialog.module.css';
 
-export type DialogButtonProps = Omit<ButtonProps, "type">;
+export type DialogButtonProps = Omit<ButtonProps, 'type'>;
 
 export type DialogProps = {
   title?: string;
@@ -17,19 +17,26 @@ export type DialogProps = {
 };
 
 const onDialogKeyDown = (onClose?: () => void) => (event: KeyboardEvent<HTMLDialogElement>) => {
-  if (event.key === "Escape" && onClose) {
+  if (event.key === 'Escape' && onClose) {
     onClose();
   }
 };
 
-export type DialogContextProps = { ready?: boolean };
+export type DialogContextProps = {ready?: boolean};
 
 const DialogContext = React.createContext<DialogContextProps>({});
 
 const onDialogAnimationEnd = (setAnimationFinished: Dispatch<SetStateAction<boolean>>) => () =>
   setAnimationFinished(true);
 
-const Dialog: React.FC<DialogProps> = ({ title, icon, children, buttons, onClose, closable = true }) => {
+const Dialog: React.FC<DialogProps> = ({
+  title,
+  icon,
+  children,
+  buttons,
+  onClose,
+  closable = true
+}) => {
   const [animationFinished, setAnimationFinished] = useState<boolean>(false);
 
   return (
@@ -54,7 +61,9 @@ const Dialog: React.FC<DialogProps> = ({ title, icon, children, buttons, onClose
         </header>
         {children ? (
           <section className={css.content}>
-            <DialogContext.Provider value={{ ready: animationFinished }}>{children}</DialogContext.Provider>
+            <DialogContext.Provider value={{ready: animationFinished}}>
+              {children}
+            </DialogContext.Provider>
           </section>
         ) : (
           []
@@ -72,4 +81,4 @@ const Dialog: React.FC<DialogProps> = ({ title, icon, children, buttons, onClose
   );
 };
 
-export { Dialog, DialogContext };
+export {Dialog, DialogContext};
