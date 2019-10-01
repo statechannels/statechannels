@@ -11,7 +11,12 @@
 
   <script>
     function callBudgetAllocation() {
-      window.postMessage({jsonrpc: '2.0', method: 'chan_allocate'});
+      window.postMessage({
+        jsonrpc: '2.0',
+        method: 'chan_allocate',
+        id: 123,
+        params: ['foo', 'bar', 3, false]
+      });
     }
   </script>
 </html>
