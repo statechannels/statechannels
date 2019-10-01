@@ -6,7 +6,6 @@
     "member-access": false,
     "member-ordering": false,
     "newline-per-chained-call": false,
-    "trailing-comma": false,
-    "prettier": [true, ".prettierrc.js"]
+    "trailing-comma": false
   }
 }
