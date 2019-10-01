@@ -1,8 +1,7 @@
 import debug from 'debug';
-import React, {Dispatch, SetStateAction, useState} from 'react';
+import React, {Dispatch, SetStateAction, useContext, useEffect, useState} from 'react';
 import {Redirect, RouteComponentProps} from 'react-router';
-import {OnboardingFlowPaths} from '../../flows';
-import {JsonRpcComponentProps} from '../../json-rpc-router';
+import {OnboardingFlowContext, OnboardingFlowPaths} from '../../flows';
 import {closeWallet} from '../../message-dispatchers';
 import {Dialog, Slider} from '../../ui';
 const log = debug('wallet:budget-allocation');
@@ -17,9 +16,14 @@ const reject = () => {
   log('`Reject` clicked: You shall not pass.');
 };
 
-const BudgetAllocation: React.FC<JsonRpcComponentProps & RouteComponentProps> = () => {
+const BudgetAllocation: React.FC<RouteComponentProps> = () => {
   const [amountToAllocate, setAmountToAllocate] = useState<number>(0.2);
   const [redirect, useRedirect] = useState<boolean>(false);
+  const onboardingFlowContext = useContext(OnboardingFlowContext);
+
+  useEffect(() => {
+    log('Initiated flow step with request %o', onboardingFlowContext.request);
+  }, [onboardingFlowContext.request]);
 
   return (
     <Dialog

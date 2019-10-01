@@ -1,7 +1,7 @@
 import debug from 'debug';
-import React, {Dispatch, SetStateAction, useState} from 'react';
+import React, {Dispatch, SetStateAction, useContext, useEffect, useState} from 'react';
 import {Redirect} from 'react-router';
-import {OnboardingFlowPaths} from '../../flows';
+import {OnboardingFlowContext, OnboardingFlowPaths} from '../../flows';
 import {JsonRpcComponentProps} from '../../json-rpc-router';
 import {closeWallet} from '../../message-dispatchers';
 import {Dialog, Icons} from '../../ui';
@@ -16,6 +16,12 @@ const connectToHub = (useRedirect: Dispatch<SetStateAction<boolean>>) => () => {
 
 const NoHub: React.FC<JsonRpcComponentProps> = () => {
   const [redirect, useRedirect] = useState<boolean>(false);
+
+  const onboardingFlowContext = useContext(OnboardingFlowContext);
+
+  useEffect(() => {
+    log('Initiated flow step with request %o', onboardingFlowContext.request);
+  }, [onboardingFlowContext.request]);
 
   return (
     <Dialog

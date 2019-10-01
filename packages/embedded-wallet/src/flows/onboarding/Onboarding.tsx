@@ -1,21 +1,31 @@
 import React from 'react';
-import {BrowserRouter as Router, Route} from 'react-router-dom';
+import {Route} from 'react-router-dom';
 import {BudgetAllocation, ConnectToHub, NoHub} from '../../dialogs';
+import {FlowRouter} from '../../flow-router/FlowRouter';
+import {JsonRpcComponentProps} from '../../json-rpc-router';
 
 export enum OnboardingFlowPaths {
-  BudgetAllocation = '/',
-  NoHub = '/no-hub',
-  ConnectToHub = '/connect'
+  BudgetAllocation = '/onboarding/allocate',
+  NoHub = '/onboarding/no-hub',
+  ConnectToHub = '/onboarding/connect'
 }
 
-const OnboardingFlow: React.FC = () => {
+const initialPath = OnboardingFlowPaths.BudgetAllocation;
+
+const OnboardingFlowContext = React.createContext<JsonRpcComponentProps>(
+  {} as JsonRpcComponentProps
+);
+
+const OnboardingFlow: React.FC<JsonRpcComponentProps> = ({request}) => {
   return (
-    <Router>
-      <Route exact path={OnboardingFlowPaths.BudgetAllocation} component={BudgetAllocation} />
-      <Route path={OnboardingFlowPaths.NoHub} component={NoHub} />
-      <Route path={OnboardingFlowPaths.ConnectToHub} component={ConnectToHub} />
-    </Router>
+    <FlowRouter initialPath={initialPath}>
+      <OnboardingFlowContext.Provider value={{request}}>
+        <Route path={OnboardingFlowPaths.BudgetAllocation} component={BudgetAllocation} />
+        <Route path={OnboardingFlowPaths.NoHub} component={NoHub} />
+        <Route path={OnboardingFlowPaths.ConnectToHub} component={ConnectToHub} />
+      </OnboardingFlowContext.Provider>
+    </FlowRouter>
   );
 };
 
-export {OnboardingFlow};
+export {OnboardingFlow, OnboardingFlowContext};
