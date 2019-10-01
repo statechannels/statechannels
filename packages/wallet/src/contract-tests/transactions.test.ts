@@ -5,7 +5,7 @@ import { createChallenge, concludeGame } from "./test-utils";
 import {
   createForceMoveTransaction,
   createDepositTransaction,
-  createRespondWithMoveTransaction,
+  createRespondTransaction,
   createRefuteTransaction,
   createConcludeTransaction,
   createWithdrawTransaction,
@@ -171,7 +171,7 @@ describe("transactions", () => {
       commitmentCount: 2,
     };
 
-    const respondWithMoveTransaction = createRespondWithMoveTransaction(
+    const respondWithMoveTransaction = createRespondTransaction(
       fromCommitment,
       toCommitment,
       participantA.privateKey

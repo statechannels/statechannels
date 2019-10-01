@@ -79,6 +79,13 @@ export interface ChallengeCreatedEvent {
   challengeStates: State[];
 }
 
+export interface ChallengeClearedEvent {
+  type: "WALLET.ADJUDICATOR.CHALLENGE_CLEARED_EVENT";
+  channelId: string;
+
+  newTurnNumRecord: number;
+}
+
 export interface ConcludedEvent {
   channelId: string;
   type: "WALLET.ADJUDICATOR.CONCLUDED_EVENT";
@@ -167,6 +174,11 @@ export const challengeCreatedEvent: ActionConstructor<ChallengeCreatedEvent> = p
   type: "WALLET.ADJUDICATOR.CHALLENGE_CREATED_EVENT"
 });
 
+export const challengeClearedEvent: ActionConstructor<ChallengeClearedEvent> = p => ({
+  ...p,
+  type: "WALLET.ADJUDICATOR.CHALLENGE_CLEARED_EVENT"
+});
+
 export const concludedEvent: ActionConstructor<ConcludedEvent> = p => ({
   ...p,
   type: "WALLET.ADJUDICATOR.CONCLUDED_EVENT"
@@ -205,6 +217,7 @@ export type AdjudicatorEventAction =
   | FundingReceivedEvent
   | ChallengeExpiredEvent
   | ChallengeCreatedEvent
+  | ChallengeClearedEvent
   | ChallengeExpirySetEvent
   | ChannelUpdate;
 
@@ -255,6 +268,7 @@ export function isAdjudicatorEventAction(action: WalletAction): action is Adjudi
     action.type === "WALLET.ADJUDICATOR.FUNDING_RECEIVED_EVENT" ||
     action.type === "WALLET.ADJUDICATOR.CHALLENGE_EXPIRED" ||
     action.type === "WALLET.ADJUDICATOR.CHALLENGE_CREATED_EVENT" ||
+    action.type === "WALLET.ADJUDICATOR.CHALLENGE_CLEARED_EVENT" ||
     action.type === "WALLET.ADJUDICATOR.CHALLENGE_EXPIRY_TIME_SET" ||
     action.type === "WALLET.ADJUDICATOR.CHANNEL_UPDATE"
   );

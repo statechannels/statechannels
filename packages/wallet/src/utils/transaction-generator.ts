@@ -19,7 +19,7 @@ export function createForceMoveTransaction(
   return nitroTrans.createForceMoveTransaction(signedStates, privateKey);
 }
 
-export function createRespondWithMoveTransaction(
+export function createRespondTransaction(
   challengeCommitment: Commitment,
   responseCommitment: Commitment,
   privateKey: string
