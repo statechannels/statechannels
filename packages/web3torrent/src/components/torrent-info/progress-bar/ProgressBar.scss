@@ -1,0 +1,58 @@
+@import '../../../styles/variables';
+
+.progress-bar {
+  height: 50px;
+  width: 100%;
+  background: $c-lightgrey;
+  position: relative;
+  display: flex;
+  flex-basis: 0px;
+  flex-wrap: wrap;
+  flex-direction: row;
+}
+
+.filler {
+  background: $c-orange;
+  transition: width 0.2s ease-in;
+}
+
+.bar-progress {
+  position: absolute;
+  top: 13px;
+  width: 100%;
+  text-align: center;
+}
+
+.bar-status {
+  position: absolute;
+  top: 13px;
+  width: 85%;
+  text-align: right;
+}
+
+.bar-cancelButton {
+  position: absolute;
+  top: 10px;
+  width: 30px;
+  right: 10px;
+  text-align: right;
+  margin-top: 0px;
+  font-size: 26px;
+  font-weight: 100;
+  color: $c-orange;
+  background: none;
+  border: none;
+  svg {
+    cursor: pointer;
+    height: 20px;
+    width: 30px;
+  }
+  svg > path {
+    stroke: $c-orange;
+    stroke-width: 2px;
+  }
+
+  svg:hover > path {
+    stroke: red;
+  }
+}

@@ -5,19 +5,31 @@
   width: 100%;
 }
 
+.header-content {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  height: 100%;
+  padding: 50px 0px 10px;
+  border-bottom: 1px solid $c-orange;
+}
+
 .header-logo {
   background: url("/assets/logo.jpeg") no-repeat;
   background-size: 100%;
-  width: 200px;
+  width: 196px;
+  height: 29px;
 }
-
-.header-content {
-  display: flex;
-  justify-content: space-between;
-  height: 100%;
-
-  padding: 50px 0px 10px;
-  border-bottom: 1px solid $c-orange;
+.header-logo-hidden{
+  height: 1px;
+  width: 1px;
+  position: absolute;
+  overflow: hidden;
+  top: -10px;
+}
+.actions-container button {
+  margin-top: 0px;
+  margin-bottom: 20px;
 }
 
 .logo-container {
