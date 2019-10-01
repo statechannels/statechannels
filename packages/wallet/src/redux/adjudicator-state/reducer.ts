@@ -11,7 +11,7 @@ export const adjudicatorStateReducer = (
   switch (action.type) {
     case "WALLET.ADJUDICATOR.CHALLENGE_EXPIRED":
       return challengeExpiredReducer(state, action);
-    case "WALLET.ADJUDICATOR.FUNDING_RECEIVED_EVENT":
+    case WalletActionType.WALLET_ADJUDICATOR_FUNDING_RECEIVED_EVENT:
       return fundingReceivedEventReducer(state, action);
     case WalletActionType.WALLET_ADJUDICATOR_CONCLUDED_EVENT:
       return concludedEventReducer(state, action);

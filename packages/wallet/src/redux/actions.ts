@@ -30,6 +30,7 @@ export enum WalletActionType {
   WALLET_ADJUDICATOR_CHALLENGE_EXPIRY_TIME_SET = "WALLET.ADJUDICATOR.CHALLENGE_EXPIRY_TIME_SET",
   WALLET_ADJUDICATOR_CHALLENGE_CREATED_EVENT = "WALLET.ADJUDICATOR.CHALLENGE_CREATED_EVENT",
   WALLET_ADJUDICATOR_CONCLUDED_EVENT = "WALLET.ADJUDICATOR.CONCLUDED_EVENT",
+  WALLET_ADJUDICATOR_FUNDING_RECEIVED_EVENT = "WALLET.ADJUDICATOR.FUNDING_RECEIVED_EVENT",
   WALLET_ADJUDICATOR_REFUTED_EVENT = "WALLET.ADJUDICATOR.REFUTED_EVENT",
   WALLET_ADJUDICATOR_RESPOND_WITH_MOVE_EVENT = "WALLET.ADJUDICATOR.RESPOND_WITH_MOVE_EVENT",
   WALLET_MULTIPLE_ACTIONS = "WALLET.MULTIPLE_ACTIONS",
@@ -115,7 +116,7 @@ export interface RespondWithMoveEvent {
 }
 
 export interface FundingReceivedEvent {
-  type: "WALLET.ADJUDICATOR.FUNDING_RECEIVED_EVENT";
+  type: WalletActionType.WALLET_ADJUDICATOR_FUNDING_RECEIVED_EVENT;
   processId: string;
   protocolLocator: ProtocolLocator;
   channelId: string;
@@ -196,7 +197,7 @@ export const respondWithMoveEvent: ActionConstructor<RespondWithMoveEvent> = p =
 });
 export const fundingReceivedEvent: ActionConstructor<FundingReceivedEvent> = p => ({
   ...p,
-  type: "WALLET.ADJUDICATOR.FUNDING_RECEIVED_EVENT"
+  type: WalletActionType.WALLET_ADJUDICATOR_FUNDING_RECEIVED_EVENT
 });
 export const challengeExpiredEvent: ActionConstructor<ChallengeExpiredEvent> = p => ({
   ...p,
@@ -265,7 +266,7 @@ export function isAdjudicatorEventAction(action: WalletAction): action is Adjudi
     action.type === WalletActionType.WALLET_ADJUDICATOR_CONCLUDED_EVENT ||
     action.type === WalletActionType.WALLET_ADJUDICATOR_REFUTED_EVENT ||
     action.type === WalletActionType.WALLET_ADJUDICATOR_RESPOND_WITH_MOVE_EVENT ||
-    action.type === "WALLET.ADJUDICATOR.FUNDING_RECEIVED_EVENT" ||
+    action.type === WalletActionType.WALLET_ADJUDICATOR_FUNDING_RECEIVED_EVENT ||
     action.type === "WALLET.ADJUDICATOR.CHALLENGE_EXPIRED" ||
     action.type === WalletActionType.WALLET_ADJUDICATOR_CHALLENGE_CREATED_EVENT ||
     action.type === WalletActionType.WALLET_ADJUDICATOR_CHALLENGE_EXPIRY_TIME_SET ||

@@ -22,7 +22,7 @@ function isEmbeddedAction(action: actions.WalletAction): action is EmbeddedActio
 
 export function isDirectFundingAction(action: actions.WalletAction): action is DirectFundingAction {
   return (
-    action.type === "WALLET.ADJUDICATOR.FUNDING_RECEIVED_EVENT" ||
+    action.type === actions.WalletActionType.WALLET_ADJUDICATOR_FUNDING_RECEIVED_EVENT ||
     isCommonAction(action, EmbeddedProtocol.DirectFunding) ||
     isEmbeddedAction(action)
   );

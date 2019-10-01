@@ -67,7 +67,7 @@ describe.skip("adjudicator listener", () => {
     sagaTester.start(adjudicatorWatcher, provider);
     await depositContract(provider, channelId);
 
-    expect(sagaTester.numCalled("WALLET.ADJUDICATOR.FUNDING_RECEIVED_EVENT")).toEqual(0);
+    expect(sagaTester.numCalled(WalletActionType.WALLET_ADJUDICATOR_FUNDING_RECEIVED_EVENT)).toEqual(0);
   });
 
   it.skip("should ignore events for other channels", async () => {
@@ -78,7 +78,7 @@ describe.skip("adjudicator listener", () => {
     sagaTester.start(adjudicatorWatcher, provider);
 
     await depositContract(provider, channelIdToIgnore);
-    expect(sagaTester.numCalled("WALLET.ADJUDICATOR.FUNDING_RECEIVED_EVENT")).toEqual(0);
+    expect(sagaTester.numCalled(WalletActionType.WALLET_ADJUDICATOR_FUNDING_RECEIVED_EVENT)).toEqual(0);
   });
 
   it.skip("should handle a funds received event when registered for that channel", async () => {
@@ -90,7 +90,7 @@ describe.skip("adjudicator listener", () => {
     sagaTester.start(adjudicatorWatcher, provider);
 
     await depositContract(provider, channelId);
-    await sagaTester.waitFor("WALLET.ADJUDICATOR.FUNDING_RECEIVED_EVENT");
+    await sagaTester.waitFor(WalletActionType.WALLET_ADJUDICATOR_FUNDING_RECEIVED_EVENT);
 
     const action: actions.FundingReceivedEvent = sagaTester.getLatestCalledAction();
     expect(action).toEqual(
