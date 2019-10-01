@@ -25,8 +25,12 @@ export type TransactionAction = TA;
 export const isTransactionAction = isTA;
 
 export enum Action {
+  BLOCK_MINED = "BLOCK_MINED",
   WALLET_MULTIPLE_ACTIONS = "WALLET.MULTIPLE_ACTIONS",
-  WALLET_LOGGED_IN = "WALLET.LOGGED_IN"
+  WALLET_LOGGED_IN = "WALLET.LOGGED_IN",
+  WALLET_ADJUDICATOR_KNOWN = "WALLET.ADJUDICATOR_KNOWN",
+  WALLET_MESSAGE_SENT = "WALLET.MESSAGE_SENT",
+  WALLET_DISPLAY_MESSAGE_SENT = "WALLET.DISPLAY_MESSAGE_SENT"
 }
 
 // -------
@@ -43,21 +47,21 @@ export interface LoggedIn {
 }
 
 export interface AdjudicatorKnown {
-  type: "WALLET.ADJUDICATOR_KNOWN";
+  type: Action.WALLET_ADJUDICATOR_KNOWN;
   networkId: string;
   adjudicator: string;
 }
 
 export interface MessageSent {
-  type: "WALLET.MESSAGE_SENT";
+  type: Action.WALLET_MESSAGE_SENT;
 }
 
 export interface DisplayMessageSent {
-  type: "WALLET.DISPLAY_MESSAGE_SENT";
+  type: Action.WALLET_DISPLAY_MESSAGE_SENT;
 }
 
 export interface BlockMined {
-  type: "BLOCK_MINED";
+  type: Action.BLOCK_MINED;
   block: {timestamp: number; number: number};
 }
 
@@ -140,20 +144,20 @@ export const loggedIn: ActionConstructor<LoggedIn> = p => ({...p, type: Action.W
 
 export const adjudicatorKnown: ActionConstructor<AdjudicatorKnown> = p => ({
   ...p,
-  type: "WALLET.ADJUDICATOR_KNOWN"
+  type: Action.WALLET_ADJUDICATOR_KNOWN
 });
 
 export const messageSent: ActionConstructor<MessageSent> = p => ({
   ...p,
-  type: "WALLET.MESSAGE_SENT"
+  type: Action.WALLET_MESSAGE_SENT
 });
 
 export const displayMessageSent: ActionConstructor<DisplayMessageSent> = p => ({
   ...p,
-  type: "WALLET.DISPLAY_MESSAGE_SENT"
+  type: Action.WALLET_DISPLAY_MESSAGE_SENT
 });
 
-export const blockMined: ActionConstructor<BlockMined> = p => ({...p, type: "BLOCK_MINED"});
+export const blockMined: ActionConstructor<BlockMined> = p => ({...p, type: Action.BLOCK_MINED});
 
 export const metamaskLoadError: ActionConstructor<MetamaskLoadError> = p => ({
   ...p,
