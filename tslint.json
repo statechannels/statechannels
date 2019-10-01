@@ -5,16 +5,45 @@
     "tslint-plugin-prettier",
     "tslint-config-prettier"
   ],
+  "rulesDirectory": [ "tslint-plugin-prettier" ],
   "rules": {
-    "prettier": true,
-    "newline-per-chained-call": false,
-    "member-ordering": false,
-    "member-access": false,
-    "interface-over-type-literal": false,
-    "object-literal-sort-keys": false,
     "arrow-parens": false,
-    "trailing-comma": false,
-    "interface-name": false
+    // FIXME: web3torrent uses CapName for .tsx files
+    // "file-name-casing": [true, "kebab-case"],
+    "interface-name": false,
+    "interface-over-type-literal": false,
+    "jsx-no-lambda": false,
+    "max-classes-per-file": false,
+    "member-access": false,
+    "member-ordering": false,
+    "newline-per-chained-call": false,
+    "no-console": [ true, "warning" ],
+    "no-switch-case-fall-through": true,
+    "object-literal-sort-keys": false,
+    "ordered-imports": true,
+    "prefer-for-of": false,
+    "prettier": [ true, ".prettierrc.js" ],
+    "variable-name": [
+      true,
+      "ban-keywords",
+      "check-format",
+      "allow-pascal-case",
+      "allow-leading-underscore"
+    ]
   },
-  "rulesDirectory": ["tslint-plugin-prettier"]
+  "linterOptions": {
+    "exclude": [
+      "config/**/*.js",
+      "node_modules/**/*.ts",
+      "truffle.ts",
+      "migrations/*",
+      "/**/*.json"
+    ]
+  },
+  "jsRules": {
+    "no-console": false,
+    "no-string-throw": false,
+    "object-literal-sort-keys": false,
+    "ordered-imports": false
+  }
 }

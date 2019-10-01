@@ -1,10 +1,10 @@
 import {getGanacheProvider} from "@statechannels/devtools";
+import {rejects} from "assert";
+import easyTable from "easy-table";
 import {ethers} from "ethers";
 import fs from "fs";
 import path from "path";
-import easyTable from "easy-table";
 import linker from "solc/linker";
-import {rejects} from "assert";
 interface MethodCalls {
   [methodName: string]: {
     gasData: number[];
@@ -46,7 +46,7 @@ export class GasReporter implements jest.Reporter {
   onRunStart(results: jest.AggregatedResult, options: jest.ReporterOnStartOptions): void {
     if (!this.options.contractArtifactFolder) {
       console.log(
-        "The contractArtifactFolder was not set in options, assuming a default folder of '/build/contracts/'",
+        "The contractArtifactFolder was not set in options, assuming a default folder of '/build/contracts/'"
       );
       this.options.contractArtifactFolder = "build/contracts";
     }
@@ -78,7 +78,7 @@ export class GasReporter implements jest.Reporter {
     const contractCalls = await this.parseContractCalls(
       this.startBlockNum,
       endBlockNum,
-      this.options.contractArtifactFolder,
+      this.options.contractArtifactFolder
     );
     this.outputGasInfo(contractCalls);
   }

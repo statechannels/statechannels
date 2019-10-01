@@ -165,8 +165,5 @@
   },
   "lint-staged": {
     "{src,test}/**/*.ts": "yarn lint:check"
-  },
-  "eslintConfig": {
-    "extends": "react-app"
   }
 }
