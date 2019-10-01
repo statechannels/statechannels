@@ -1,21 +1,21 @@
-import React from "react";
-import { Icon, Icons } from "../icon/Icon";
-import css from "./Button.module.css";
+import React from 'react';
+import {Icon, Icons} from '../icon/Icon';
+import css from './Button.module.css';
 
 export type ButtonProps = {
   icon?: Icons;
-  iconPosition?: "left" | "right";
-  type: "primary" | "secondary";
+  iconPosition?: 'left' | 'right';
+  type: 'primary' | 'secondary';
   label: string;
   onClick: () => void;
 };
 
-const Button: React.FC<ButtonProps> = ({ type, label, onClick, icon, iconPosition = "right" }) => {
+const Button: React.FC<ButtonProps> = ({type, label, onClick, icon, iconPosition = 'right'}) => {
   return (
     <button
-      autoFocus={type === "primary"}
+      autoFocus={type === 'primary'}
       onClick={onClick}
-      className={`${css.button} ${css[type]} ${icon ? css[`${iconPosition}Icon`] : ""}`}
+      className={`${css.button} ${css[type]} ${icon ? css[`${iconPosition}Icon`] : ''}`}
     >
       <span className={css.buttonLabel}>{label}</span>
       {icon ? <Icon name={icon} /> : []}
@@ -23,4 +23,4 @@ const Button: React.FC<ButtonProps> = ({ type, label, onClick, icon, iconPositio
   );
 };
 
-export { Button };
+export {Button};

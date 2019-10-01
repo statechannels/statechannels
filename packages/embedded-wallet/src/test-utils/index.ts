@@ -1,1 +1,1 @@
-export * from "./simulate-message";
+export * from './simulate-message';

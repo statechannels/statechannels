@@ -6,14 +6,6 @@
     "member-access": false,
     "member-ordering": false,
     "newline-per-chained-call": false,
-    "trailing-comma": false,
-    "prettier": [
-      true,
-      {
-        "printWidth": 120,
-        "tabWidth": 2,
-        "bracketSpacing": true
-      }
-    ]
+    "trailing-comma": false
   }
 }
