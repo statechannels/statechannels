@@ -4,7 +4,6 @@ import {
   createDepositTransaction,
   createForceMoveTransaction,
   createConcludeTransaction,
-  createRefuteTransaction,
   createRespondTransaction,
 } from "../utils/transaction-generator";
 import { signCommitment } from "../domain";
@@ -156,51 +155,6 @@ export async function respond(provider: ethers.providers.JsonRpcProvider, channe
   const transactionReceipt = await sendTransaction(provider, respondWithMoveTransaction);
   await transactionReceipt.wait();
   return { toCommitment, toSig };
-}
-
-export async function refuteChallenge(provider: ethers.providers.JsonRpcProvider, channelNonce, participantA, participantB) {
-  const network = await provider.getNetwork();
-  const networkId = network.chainId;
-  const libraryAddress = await getLibraryAddress(networkId, "TrivialApp");
-  const channel: Channel = {
-    channelType: libraryAddress,
-    nonce: channelNonce,
-    participants: [participantA.address, participantB.address],
-    guaranteedChannel: ADDRESS_ZERO,
-  };
-
-  // NOTE: Copied from createChallenge
-  const fromCommitment: Commitment = {
-    channel,
-    allocation: fiveFive,
-    destination: [participantA.address, participantB.address],
-    turnNum: 6,
-    commitmentType: CommitmentType.App,
-    appAttributes: "0x00",
-    commitmentCount: 0,
-  };
-
-  const toCommitment: Commitment = {
-    channel,
-    allocation: fiveFive,
-    destination: [participantA.address, participantB.address],
-    turnNum: 7,
-    commitmentType: CommitmentType.App,
-    appAttributes: "0x00",
-    commitmentCount: 1,
-  };
-
-  const { signedState: challengeSignedState } = signCommitment2(fromCommitment, participantA.privateKey);
-  const { signedState: refuteSignedState } = signCommitment2(toCommitment, participantB.privateKey);
-
-  const refuteTransaction = createRefuteTransaction([
-    challengeSignedState,
-    refuteSignedState
-  ]);
-
-  const transactionReceipt = await sendTransaction(provider, refuteTransaction);
-  await transactionReceipt.wait();
-  return toCommitment;
 }
 
 async function sendTransaction(provider: JsonRpcProvider, tx: TransactionRequest) {

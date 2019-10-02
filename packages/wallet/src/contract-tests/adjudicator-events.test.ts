@@ -3,15 +3,7 @@ import {adjudicatorWatcher} from "../redux/sagas/adjudicator-watcher";
 import {ethers} from "ethers";
 import SagaTester from "redux-saga-tester";
 import * as actions from "../redux/actions";
-import {
-  depositContract,
-  createChallenge,
-  concludeGame,
-  refuteChallenge,
-  respond,
-  getChannelId,
-  defaultDepositAmount
-} from "./test-utils";
+import {depositContract, createChallenge, concludeGame, respond, getChannelId} from "./test-utils";
 import * as walletStates from "../redux/state";
 import {getGanacheProvider} from "@statechannels/devtools";
 import {convertCommitmentToState} from "../utils/nitro-converter";
@@ -33,7 +25,7 @@ const createWatcherState = (processId: string, ...channelIds: string[]): walletS
     privateKey: ""
   });
 };
-// TODO: Get these tests working
+
 describe("adjudicator listener", () => {
   const provider: ethers.providers.JsonRpcProvider = getGanacheProvider();
 
@@ -52,7 +44,7 @@ describe("adjudicator listener", () => {
     await depositContract(provider, channelId);
   });
 
-  it.skip("should not handle an event when no process has registered", async () => {
+  it("should not handle an event when no process has registered", async () => {
     const channelId = await getChannelId(provider, getNextNonce(), participantA, participantB);
     const initialState = walletStates.initialized({
       ...walletStates.EMPTY_SHARED_DATA,
@@ -67,10 +59,10 @@ describe("adjudicator listener", () => {
     sagaTester.start(adjudicatorWatcher, provider);
     await depositContract(provider, channelId);
 
-    expect(sagaTester.numCalled("WALLET.ADJUDICATOR.FUNDING_RECEIVED_EVENT")).toEqual(0);
+    expect(sagaTester.numCalled("WALLET.ADJUDICATOR.CHALLENGE_CREATED_EVENT")).toEqual(0);
   });
 
-  it.skip("should ignore events for other channels", async () => {
+  it("should ignore events for other channels", async () => {
     const channelId = await getChannelId(provider, getNextNonce(), participantA, participantB);
     const channelIdToIgnore = await getChannelId(provider, getNextNonce(), participantA, participantB);
     const processId = ethers.Wallet.createRandom().address;
@@ -79,45 +71,7 @@ describe("adjudicator listener", () => {
     sagaTester.start(adjudicatorWatcher, provider);
 
     await depositContract(provider, channelIdToIgnore);
-    expect(sagaTester.numCalled("WALLET.ADJUDICATOR.FUNDING_RECEIVED_EVENT")).toEqual(0);
-  });
-
-  it.skip("should handle a funds received event when registered for that channel", async () => {
-    const channelId = await getChannelId(provider, getNextNonce(), participantA, participantB);
-    const processId = ethers.Wallet.createRandom().address;
-    const sagaTester = new SagaTester({
-      initialState: createWatcherState(processId, channelId)
-    });
-    sagaTester.start(adjudicatorWatcher, provider);
-
-    await depositContract(provider, channelId);
-    await sagaTester.waitFor("WALLET.ADJUDICATOR.FUNDING_RECEIVED_EVENT");
-
-    const action: actions.FundingReceivedEvent = sagaTester.getLatestCalledAction();
-    expect(action).toEqual(
-      actions.fundingReceivedEvent({
-        processId,
-        protocolLocator: [],
-        channelId,
-        amount: defaultDepositAmount,
-        totalForDestination: defaultDepositAmount
-      })
-    );
-  });
-
-  it.skip("should handle a challengeCreated event when registered for that channel", async () => {
-    const startTimestamp = Date.now();
-    const channelNonce = getNextNonce();
-    const channelId = await getChannelId(provider, channelNonce, participantA, participantB);
-    const processId = ethers.Wallet.createRandom().address;
-
-    const sagaTester = new SagaTester({initialState: createWatcherState(processId, channelId)});
-    sagaTester.start(adjudicatorWatcher, provider);
-    await createChallenge(provider, channelNonce, participantA, participantB);
-    await sagaTester.waitFor("WALLET.ADJUDICATOR.CHALLENGE_EXPIRY_TIME_SET");
-
-    const action: actions.ChallengeExpirySetEvent = sagaTester.getLatestCalledAction();
-    expect(action.expiryTime).toBeGreaterThan(startTimestamp);
+    expect(sagaTester.numCalled("WALLET.ADJUDICATOR.CHALLENGE_CREATED_EVENT")).toEqual(0);
   });
 
   it("should handle a challengeCreated event", async () => {
@@ -143,7 +97,7 @@ describe("adjudicator listener", () => {
 
   it("should handle a ChallengeCleared event when registered for that channel", async () => {
     const channelNonce = getNextNonce();
-    const channelId = await nitroGetChannelId({
+    const channelId = nitroGetChannelId({
       chainId: (await provider.getNetwork()).chainId.toString(),
       channelNonce: channelNonce.toString(),
       participants: [participantA.address, participantB.address]
@@ -166,7 +120,7 @@ describe("adjudicator listener", () => {
 
   it("should handle a concluded event when registered for that channel", async () => {
     const channelNonce = getNextNonce();
-    const channelId = await nitroGetChannelId({
+    const channelId = nitroGetChannelId({
       chainId: (await provider.getNetwork()).chainId.toString(),
       channelNonce: channelNonce.toString(),
       participants: [participantA.address, participantB.address]
@@ -181,22 +135,5 @@ describe("adjudicator listener", () => {
     const action: actions.ConcludedEvent = sagaTester.getLatestCalledAction();
 
     expect(action.channelId).toEqual(channelId);
-  });
-
-  it.skip("should handle a refute event when registered for that channel", async () => {
-    const channelNonce = getNextNonce();
-    const channelId = await getChannelId(provider, channelNonce, participantA, participantB);
-    const processId = ethers.Wallet.createRandom().address;
-    await createChallenge(provider, channelNonce, participantA, participantB);
-
-    const sagaTester = new SagaTester({initialState: createWatcherState(processId, channelId)});
-    sagaTester.start(adjudicatorWatcher, provider);
-
-    const refuteCommitment = await refuteChallenge(provider, channelNonce, participantA, participantB);
-
-    await sagaTester.waitFor("WALLET.ADJUDICATOR.REFUTED_EVENT");
-
-    const action: actions.RefutedEvent = sagaTester.getLatestCalledAction();
-    expect(action).toEqual(actions.refutedEvent({processId, protocolLocator: [], channelId, refuteCommitment}));
   });
 });
