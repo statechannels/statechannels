@@ -1,4 +1,4 @@
-import { JsonRPCRequest, JsonRPCResponse } from "web3/providers";
+import {JsonRPCRequest, JsonRPCResponse} from 'web3/providers';
 
 export type Torrent = {
   name?: string;

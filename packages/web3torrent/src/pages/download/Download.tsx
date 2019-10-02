@@ -36,7 +36,7 @@ const Download: React.FC<RouteComponentProps> = () => {
     downloaded: 0,
     files: []
   } as Torrent);
-  
+
   return (
     <section className="section fill download">
       <TorrentInfo torrent={torrent} />
