@@ -22,8 +22,8 @@ const TorrentInfo: React.FC<TorrentInfoProps> = ({torrent}: TorrentInfoProps) =>
           false
         )}
       </section>
-      {!torrent.downloaded ? false : <DownloadInfo torrent={torrent} />}
-      {!torrent.uploaded ? false : <UploadInfo torrent={torrent} />}
+      {torrent.downloaded ? <DownloadInfo torrent={torrent} /> : false}
+      {torrent.uploaded ? <UploadInfo torrent={torrent} /> : false}
     </>
   );
 };
