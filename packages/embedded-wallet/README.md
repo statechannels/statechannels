@@ -9,20 +9,22 @@ For now, it's available for local/development use only.
 1. Include the following script in your dapp's web front-end:
 
 ```html
-<script src="http://localhost:3000/wallet.js"></script>
+<script src="http://localhost:1701/wallet.js"></script>
 ```
 
-2. Add a `postMessage` call anywhere your dapp needs to talk to the wallet. You should be good to go with simply
+2. Add a `request` call anywhere your dapp needs to talk to the wallet. You should be good to go with simply
    requesting `chan_allocate`:
 
 ```js
-window.postMessage({
+EmbeddedWallet.request({
   jsonrpc: "2.0",
   method: "chan_allocate",
   params: {
     /*...*/
   },
   id: someUniqueNumericId()
+}).then(response => {
+  // Do something with the response.
 });
 ```
 
@@ -35,16 +37,7 @@ window.postMessage({
 ## Available commands
 
 > ⚠ These commands are _not_ final and will very much likely change in future versions.
-> ⚠ For now, `params` and `id` are not important, you can pretty much skip them and the request will work.
 
 ### `chan_allocate`
 
-Opens the Budget Allocation dialog.
-
-### `chan_noHub`
-
-Forcibly shows the "Not Connected to a Hub" screen.
-
-### `chan_connect`
-
-Forcibly shows the "Connect to Hub" screen.
+Opens the Onboarding flow.
