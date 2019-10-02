@@ -5,7 +5,7 @@ import * as Transactions from './transactions';
 import {encodeConsensusData} from './contract/consensus-data';
 import {createDepositTransaction} from './contract/transaction-creators/eth-asset-holder';
 import {Outcome, AllocationItem} from './contract/outcome';
-import {Channel} from './contract/channel';
+import {Channel, getChannelId} from './contract/channel';
 import {getChallengeRegisteredEvent} from './contract/challenge';
 import {isAllocationOutcome, isGuaranteeOutcome} from './contract/outcome';
 export {Signatures, Transactions};
@@ -33,6 +33,7 @@ export {
   encodeConsensusData,
   Outcome,
   AllocationItem,
+  getChannelId,
   Channel,
   getChallengeRegisteredEvent,
   isAllocationOutcome,
