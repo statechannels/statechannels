@@ -45,3 +45,4 @@ junit.xml
 # generated files
 **/deployment/network-map.json
 **/.etherlime-store/
+**/.outputParameter
