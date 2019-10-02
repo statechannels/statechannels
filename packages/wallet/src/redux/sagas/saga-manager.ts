@@ -17,9 +17,11 @@ import {multipleActionDispatcher} from "./multiple-action-dispatcher";
 
 import {adjudicatorStateUpdater} from "./adjudicator-state-updater";
 import {isLoadAction} from "../actions";
+import {ETHAssetHolderWatcher} from "./eth-asset-holder-watcher";
 
 export function* sagaManager(): IterableIterator<any> {
   let adjudicatorWatcherProcess;
+  let ETHAssetHolderWatcherProcess;
   let challengeWatcherProcess;
   let ganacheMinerProcess;
   let challengeResponseInitiatorProcess;
@@ -42,10 +44,13 @@ export function* sagaManager(): IterableIterator<any> {
     // @ts-ignore TODO: Why is redux-saga select think its returning undefined?
     const state: WalletState = yield select((walletState: WalletState) => walletState);
 
+    const provider = yield getProvider();
     if (state.type === WALLET_INITIALIZED) {
       if (!adjudicatorWatcherProcess) {
-        const provider = yield getProvider();
         adjudicatorWatcherProcess = yield fork(adjudicatorWatcher, provider);
+      }
+      if (!ETHAssetHolderWatcherProcess) {
+        ETHAssetHolderWatcherProcess = yield fork(ETHAssetHolderWatcher, provider);
       }
       // TODO: To cut down on block mined spam we could require processes to register/unregister when they want to listen for these events
       if (!challengeWatcherProcess) {
@@ -69,6 +74,10 @@ export function* sagaManager(): IterableIterator<any> {
       if (adjudicatorWatcherProcess) {
         yield cancel(adjudicatorWatcherProcess);
         adjudicatorWatcherProcess = undefined;
+      }
+      if (ETHAssetHolderWatcherProcess) {
+        yield cancel(ETHAssetHolderWatcherProcess);
+        ETHAssetHolderWatcherProcess = undefined;
       }
       if (challengeResponseInitiatorProcess) {
         yield cancel(challengeResponseInitiatorProcess);

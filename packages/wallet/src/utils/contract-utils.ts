@@ -39,9 +39,21 @@ export async function getAdjudicatorContract(provider) {
   return new ethers.Contract(contractAddress, getAdjudicatorInterface(), provider);
 }
 
+export async function getETHAssetHolderContract(provider) {
+  await provider.ready;
+
+  const contractAddress = getLibraryAddress(getNetworkId(), "ETHAssetHolder");
+  return new ethers.Contract(contractAddress, getETHAssetHolderInterface(), provider);
+}
+
 export function getAdjudicatorInterface(): ethers.utils.Interface {
   const NitroAdjudicatorArtifact = require("../../build/contracts/NitroAdjudicator.json");
   return new ethers.utils.Interface(NitroAdjudicatorArtifact.abi);
+}
+
+export function getETHAssetHolderInterface(): ethers.utils.Interface {
+  const ETHAssetHolderArtifact = require("../../build/contracts/ETHAssetHolder.json");
+  return new ethers.utils.Interface(ETHAssetHolderArtifact.abi);
 }
 
 // FIXME: The tests ought to be able to run even without contracts having been built which
