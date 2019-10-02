@@ -37,10 +37,7 @@ const channelStatus: ChannelState = {
   participants,
   channelNonce,
   funded: true,
-  commitments: [
-    gameSignedCommitment1,
-    gameSignedCommitment2
-  ],
+  commitments: [gameSignedCommitment1, gameSignedCommitment2],
   turnNum: gameCommitment2.turnNum
 };
 
@@ -50,10 +47,7 @@ const channelStore: ChannelStore = {
 
 const refuteChannelStatus: ChannelState = {
   ...channelStatus,
-  commitments: [
-    gameSignedCommitment2,
-    gameSignedCommitment3
-  ],
+  commitments: [gameSignedCommitment2, gameSignedCommitment3],
   turnNum: gameCommitment2.turnNum
 };
 const refuteChannelState = {
