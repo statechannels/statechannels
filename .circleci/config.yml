@@ -60,7 +60,6 @@ jobs:
       - <<: *save_code
       - <<: *restore_dep
       - run: yarn --frozen-lockfile
-      - run: yarn prepare
       - <<: *save_dep
 
       - persist_to_workspace:
