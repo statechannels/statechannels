@@ -10,6 +10,10 @@ For now, it's available for local/development use only.
 
 ```html
 <script src="http://localhost:1701/wallet.js"></script>
+<script>
+   // Enables the EW. This allows to intercept messages sent via postMessage.
+   EmbeddedWallet.enable();
+</script>
 ```
 
 2. Add a `request` call anywhere your dapp needs to talk to the wallet. You should be good to go with simply
