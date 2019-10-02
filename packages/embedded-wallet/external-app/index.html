@@ -7,15 +7,19 @@
 
   <button onclick="callBudgetAllocation()">Allocate budget</button>
 
-  <script src="http://localhost:3000/wallet.js"></script>
+  <script src="http://localhost:1701/wallet.js"></script>
 
   <script>
+    EmbeddedWallet.enable();
+
     function callBudgetAllocation() {
-      window.postMessage({
+      EmbeddedWallet.request({
         jsonrpc: '2.0',
         method: 'chan_allocate',
         id: 123,
         params: ['foo', 'bar', 3, false]
+      }).then(result => {
+        console.log('Callback has data!', result);
       });
     }
   </script>
