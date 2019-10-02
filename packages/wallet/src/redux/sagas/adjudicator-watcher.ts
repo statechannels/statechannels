@@ -67,6 +67,8 @@ function* dispatchEventAction(event: AdjudicatorEvent) {
     case AdjudicatorEventType.Concluded:
       yield put(actions.concludedEvent({channelId}));
       break;
+    default:
+      throw new Error(`Event is not a known adjudicator event. Cannot dispatch event action: ${JSON.stringify(event)}`);
   }
 }
 
@@ -96,6 +98,10 @@ function* dispatchProcessEventAction(event: AdjudicatorEvent, processId: string,
     case AdjudicatorEventType.Concluded:
       yield put(actions.concludedEvent({channelId}));
       break;
+    default:
+      throw new Error(
+        `Event is not a known adjudicator event. Cannot dispatch process event action: ${JSON.stringify(event)}`
+      );
   }
 }
 
