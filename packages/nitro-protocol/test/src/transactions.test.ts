@@ -85,10 +85,9 @@ describe('transaction-generators', () => {
       expect(transactionRequest.data).toBeDefined();
     });
 
-    // TODO: @snario replace this test as it makes no sense
-    it.skip('throws an error when there is no challenge state', async () => {
+    it('throws an error when there is no challenge state', async () => {
       expect(() => {
-        createRespondTransaction(challengeState, signedState);
+        createRespondTransaction(null, signedState);
       }).toThrowError();
     });
   });
