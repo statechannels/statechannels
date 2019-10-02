@@ -28,9 +28,7 @@ export function createRespondTransaction(
   return nitroTrans.createRespondTransaction(convertCommitmentToState(challengeCommitment), signedState);
 }
 
-export function createRefuteTransaction(
-  seriesOfSupportiveStates: SignedState[]
-): TransactionRequest {
+export function createRefuteTransaction(seriesOfSupportiveStates: SignedState[]): TransactionRequest {
   return nitroTrans.createCheckpointTransaction(seriesOfSupportiveStates);
 }
 

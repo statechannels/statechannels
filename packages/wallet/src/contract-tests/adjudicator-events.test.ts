@@ -1,3 +1,4 @@
+import {getChannelId as nitroGetChannelId} from "@statechannels/nitro-protocol";
 import {adjudicatorWatcher} from "../redux/sagas/adjudicator-watcher";
 import {ethers} from "ethers";
 import SagaTester from "redux-saga-tester";
@@ -13,8 +14,7 @@ import {
 } from "./test-utils";
 import * as walletStates from "../redux/state";
 import {getGanacheProvider} from "@statechannels/devtools";
-import {convertCommitmentToState, convertBytes32ToAddress} from "../utils/nitro-converter";
-// import { convertCommitmentToState } from "../utils/nitro-converter";
+import {convertCommitmentToState} from "../utils/nitro-converter";
 jest.setTimeout(60000);
 
 const createWatcherState = (processId: string, ...channelIds: string[]): walletStates.Initialized => {
@@ -143,7 +143,11 @@ describe("adjudicator listener", () => {
 
   it("should handle a ChallengeCleared event when registered for that channel", async () => {
     const channelNonce = getNextNonce();
-    const channelId = await getChannelId(provider, channelNonce, participantA, participantB);
+    const channelId = await nitroGetChannelId({
+      chainId: (await provider.getNetwork()).chainId.toString(),
+      channelNonce: channelNonce.toString(),
+      participants: [participantA.address, participantB.address]
+    });
     const processId = ethers.Wallet.createRandom().address;
 
     const challenge = await createChallenge(provider, channelNonce, participantA, participantB);
@@ -156,12 +160,17 @@ describe("adjudicator listener", () => {
     await sagaTester.waitFor("WALLET.ADJUDICATOR.CHALLENGE_CLEARED_EVENT");
 
     const action: actions.ChallengeClearedEvent = sagaTester.getLatestCalledAction();
+    expect(action.channelId).toEqual(channelId);
     expect(action.newTurnNumRecord).toEqual(response.toCommitment.turnNum);
   });
 
   it("should handle a concluded event when registered for that channel", async () => {
     const channelNonce = getNextNonce();
-    const channelId = await getChannelId(provider, channelNonce, participantA, participantB);
+    const channelId = await nitroGetChannelId({
+      chainId: (await provider.getNetwork()).chainId.toString(),
+      channelNonce: channelNonce.toString(),
+      participants: [participantA.address, participantB.address]
+    });
     const processId = ethers.Wallet.createRandom().address;
     const sagaTester = new SagaTester({initialState: createWatcherState(processId, channelId)});
     sagaTester.start(adjudicatorWatcher, provider);
@@ -171,7 +180,7 @@ describe("adjudicator listener", () => {
     await sagaTester.waitFor("WALLET.ADJUDICATOR.CONCLUDED_EVENT");
     const action: actions.ConcludedEvent = sagaTester.getLatestCalledAction();
 
-    expect(convertBytes32ToAddress(action.channelId)).toEqual(channelId);
+    expect(action.channelId).toEqual(channelId);
   });
 
   it.skip("should handle a refute event when registered for that channel", async () => {
