@@ -64,6 +64,9 @@ function* dispatchEventAction(event: AdjudicatorEvent) {
         })
       );
       break;
+    case AdjudicatorEventType.Concluded:
+      yield put(actions.concludedEvent({channelId}));
+      break;
   }
 }
 
@@ -93,46 +96,6 @@ function* dispatchProcessEventAction(event: AdjudicatorEvent, processId: string,
     case AdjudicatorEventType.Concluded:
       yield put(actions.concludedEvent({channelId}));
       break;
-    // TODO: These are obsolete, we neeed to remove the actions
-    // case AdjudicatorEventType.Refuted:
-    //   yield put(
-    //     actions.refutedEvent({
-    //       processId,
-    //       protocolLocator,
-    //       channelId,
-    //       refuteCommitment: fromParameters(event.eventArgs.refutation),
-    //     })
-    //   );
-    //   break;
-    // case AdjudicatorEventType.RespondWithMove:
-    //   const { v, r, s } = event.eventArgs;
-    //   const signature = ethers.utils.joinSignature({
-    //     v,
-    //     r,
-    //     s,
-    //   });
-
-    //   yield put(
-    //     actions.respondWithMoveEvent({
-    //       processId,
-    //       protocolLocator,
-    //       channelId,
-    //       responseCommitment: fromParameters(event.eventArgs.response),
-    //       responseSignature: signature,
-    //     })
-    //   );
-    //   break;
-    // case AdjudicatorEventType.Deposited:
-    //   yield put(
-    //     actions.fundingReceivedEvent({
-    //       processId,
-    //       protocolLocator,
-    //       channelId,
-    //       amount: event.eventArgs.amountDeposited.toHexString(),
-    //       totalForDestination: event.eventArgs.destinationHoldings.toHexString(),
-    //     })
-    //   );
-    // break;
   }
 }
 

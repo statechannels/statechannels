@@ -13,7 +13,7 @@ import {
 } from "./test-utils";
 import * as walletStates from "../redux/state";
 import {getGanacheProvider} from "@statechannels/devtools";
-import {convertCommitmentToState} from "../utils/nitro-converter";
+import {convertCommitmentToState, convertBytes32ToAddress} from "../utils/nitro-converter";
 // import { convertCommitmentToState } from "../utils/nitro-converter";
 jest.setTimeout(60000);
 
@@ -159,7 +159,7 @@ describe("adjudicator listener", () => {
     expect(action.newTurnNumRecord).toEqual(response.toCommitment.turnNum);
   });
 
-  it.skip("should handle a concluded event when registered for that channel", async () => {
+  it("should handle a concluded event when registered for that channel", async () => {
     const channelNonce = getNextNonce();
     const channelId = await getChannelId(provider, channelNonce, participantA, participantB);
     const processId = ethers.Wallet.createRandom().address;
@@ -171,7 +171,7 @@ describe("adjudicator listener", () => {
     await sagaTester.waitFor("WALLET.ADJUDICATOR.CONCLUDED_EVENT");
     const action: actions.ConcludedEvent = sagaTester.getLatestCalledAction();
 
-    expect(action).toEqual(actions.concludedEvent({channelId}));
+    expect(convertBytes32ToAddress(action.channelId)).toEqual(channelId);
   });
 
   it.skip("should handle a refute event when registered for that channel", async () => {
