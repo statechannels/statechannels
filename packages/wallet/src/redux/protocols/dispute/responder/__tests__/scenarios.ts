@@ -8,7 +8,7 @@ import {ChannelState, ChannelStore} from "../../../../channel-store";
 import * as transactionActions from "../../../transaction-submission/actions";
 import {challengeExpiredEvent} from "../../../../actions";
 import * as testScenarios from "../../../../../domain/commitments/__tests__";
-import {convertCommitmentToSignedState} from "../../../../../utils/nitro-converter";
+
 // ---------
 // Test data
 // ---------
@@ -21,9 +21,12 @@ const {
   participants,
   channelNonce
 } = testScenarios;
-const gameCommitment1 = testScenarios.appCommitment({turnNum: 19}).commitment;
-const gameCommitment2 = testScenarios.appCommitment({turnNum: 20}).commitment;
-const gameCommitment3 = testScenarios.appCommitment({turnNum: 21}).commitment;
+const gameSignedCommitment1 = testScenarios.appCommitment({turnNum: 19});
+const gameSignedCommitment2 = testScenarios.appCommitment({turnNum: 20});
+const gameSignedCommitment3 = testScenarios.appCommitment({turnNum: 21});
+const gameCommitment1 = gameSignedCommitment1.commitment;
+const gameCommitment2 = gameSignedCommitment2.commitment;
+const gameCommitment3 = gameSignedCommitment3.commitment;
 
 const channelStatus: ChannelState = {
   address,
@@ -35,16 +38,8 @@ const channelStatus: ChannelState = {
   channelNonce,
   funded: true,
   commitments: [
-    {
-      commitment: gameCommitment1,
-      signature: "0x0",
-      signedState: convertCommitmentToSignedState(gameCommitment1, privateKey)
-    },
-    {
-      commitment: gameCommitment2,
-      signature: "0x0",
-      signedState: convertCommitmentToSignedState(gameCommitment2, privateKey)
-    }
+    gameSignedCommitment1,
+    gameSignedCommitment2
   ],
   turnNum: gameCommitment2.turnNum
 };
@@ -56,16 +51,8 @@ const channelStore: ChannelStore = {
 const refuteChannelStatus: ChannelState = {
   ...channelStatus,
   commitments: [
-    {
-      commitment: gameCommitment2,
-      signature: "0x0",
-      signedState: convertCommitmentToSignedState(gameCommitment2, privateKey)
-    },
-    {
-      commitment: gameCommitment3,
-      signature: "0x0",
-      signedState: convertCommitmentToSignedState(gameCommitment3, privateKey)
-    }
+    gameSignedCommitment2,
+    gameSignedCommitment3
   ],
   turnNum: gameCommitment2.turnNum
 };
