@@ -1,5 +1,4 @@
 import {TransactionRequest} from 'ethers/providers';
-import {ethers} from 'ethers';
 
 import {
   createForceMoveTransaction,
@@ -11,8 +10,9 @@ import {AddressZero} from 'ethers/constants';
 import {signState} from '../../src/signatures';
 import {Channel} from '../../src/contract/channel';
 import {SignedState} from '../../src';
+import {Wallet} from 'ethers';
 
-const wallet = ethers.Wallet.createRandom();
+const wallet = Wallet.createRandom();
 const channel: Channel = {
   chainId: '0x1',
   channelNonce: '0x1',

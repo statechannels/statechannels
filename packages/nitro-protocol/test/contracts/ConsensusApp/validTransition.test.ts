@@ -1,4 +1,3 @@
-import {ethers} from 'ethers';
 // @ts-ignore
 import ConsensusAppArtifact from '../../../build/contracts/ConsensusApp.json';
 
@@ -10,9 +9,10 @@ import {Outcome} from '../../../src/contract/outcome';
 import {AddressZero, HashZero} from 'ethers/constants';
 import {createValidTransitionTransaction} from '../../../src/contract/transaction-creators/consensus-app';
 import {validTransition} from '../../../src/contract/consensus-app';
+import {Contract} from 'ethers';
 
 const provider = getTestProvider();
-let consensusApp: ethers.Contract;
+let consensusApp: Contract;
 
 const numParticipants = 3;
 

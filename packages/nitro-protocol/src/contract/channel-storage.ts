@@ -1,9 +1,16 @@
 import {Uint48, Bytes32, Address, Bytes} from './types';
-import {defaultAbiCoder, keccak256} from 'ethers/utils';
+import {
+  defaultAbiCoder,
+  keccak256,
+  hexDataSlice,
+  hexlify,
+  hexZeroPad,
+  isHexString,
+  bigNumberify,
+} from 'ethers/utils';
 import {Outcome, hashOutcome} from './outcome';
 import {State, hashState} from './state';
 import {HashZero, AddressZero} from 'ethers/constants';
-import {ethers} from 'ethers';
 
 export interface ChannelStorage {
   turnNumRecord: Uint48;
@@ -36,12 +43,12 @@ const CHANNEL_STORAGE_LITE_TYPE = `tuple(
 export function hashChannelStorage(channelStorage: ChannelStorage): Bytes32 {
   const {turnNumRecord, finalizesAt} = channelStorage;
   const hash = keccak256(encodeChannelStorage(channelStorage));
-  const fingerprint = ethers.utils.hexDataSlice(hash, 12);
+  const fingerprint = hexDataSlice(hash, 12);
 
   const storage =
     '0x' +
-    ethers.utils.hexZeroPad(ethers.utils.hexlify(turnNumRecord), 6).slice(2) +
-    ethers.utils.hexZeroPad(ethers.utils.hexlify(finalizesAt), 6).slice(2) +
+    hexZeroPad(hexlify(turnNumRecord), 6).slice(2) +
+    hexZeroPad(hexlify(finalizesAt), 6).slice(2) +
     fingerprint.slice(2);
 
   return storage;
@@ -64,7 +71,7 @@ export function parseChannelStorageHash(
     fingerprint,
   };
 }
-const asNumber: (s: string) => number = s => ethers.utils.bigNumberify(s).toNumber();
+const asNumber: (s: string) => number = s => bigNumberify(s).toNumber();
 
 export function channelStorageStruct({
   finalizesAt,
@@ -112,7 +119,7 @@ export function encodeChannelStorageLite(channelStorageLite: ChannelStorageLite)
 }
 
 function validateHexString(hexString) {
-  if (!ethers.utils.isHexString(hexString)) {
+  if (!isHexString(hexString)) {
     throw new Error(`Not a hex string: ${hexString}`);
   }
   if (hexString.length !== 66) {

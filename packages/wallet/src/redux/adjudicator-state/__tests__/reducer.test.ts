@@ -3,7 +3,7 @@ import * as testScenarios from "../../../domain/commitments/__tests__";
 const {channelId} = testScenarios;
 import {adjudicatorStateReducer} from "../reducer";
 import {State} from "@statechannels/nitro-protocol/src";
-import {ethers} from "ethers";
+import {Wallet} from "ethers";
 
 const challengeState: State = {
   turnNum: 15,
@@ -13,7 +13,7 @@ const challengeState: State = {
     channelNonce: "0x01",
     participants: []
   },
-  appDefinition: ethers.Wallet.createRandom().address,
+  appDefinition: Wallet.createRandom().address,
   appData: "0x0",
   challengeDuration: 5,
   outcome: []

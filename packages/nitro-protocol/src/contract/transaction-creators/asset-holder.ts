@@ -1,4 +1,3 @@
-import {ethers} from 'ethers';
 import {
   Allocation,
   encodeAllocation,
@@ -8,6 +7,7 @@ import {
   hashOutcome,
 } from '../outcome';
 import {TransactionRequest} from 'ethers/providers';
+import {Interface} from 'ethers/utils';
 
 // TODO: Currently we are setting some arbitrary gas limit
 // to avoid issues with Ganache sendTransaction and parsing BN.js
@@ -15,7 +15,7 @@ import {TransactionRequest} from 'ethers/providers';
 const GAS_LIMIT = 3000000;
 
 export function createTransferAllTransaction(
-  assetHolderContractInterface: ethers.utils.Interface,
+  assetHolderContractInterface: Interface,
   channelId: string,
   allocation: Allocation,
 ): TransactionRequest {
@@ -35,7 +35,7 @@ export function claimAllArgs(
 }
 
 export function createClaimAllTransaction(
-  assetHolderContractInterface: ethers.utils.Interface,
+  assetHolderContractInterface: Interface,
   channelId: string,
   guarantee: Guarantee,
   allocation: Allocation,
@@ -47,7 +47,7 @@ export function createClaimAllTransaction(
 }
 
 export function createSetOutcomeTransaction(
-  assetHolderContractInterface: ethers.utils.Interface,
+  assetHolderContractInterface: Interface,
   channelId: string,
   outcome: Outcome,
 ): TransactionRequest {

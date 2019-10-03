@@ -2,12 +2,12 @@ import {getAdjudicatorContract} from "../../utils/contract-utils";
 import {call, take, put, select} from "redux-saga/effects";
 import {eventChannel} from "redux-saga";
 import * as actions from "../actions";
-import {ethers} from "ethers";
 import {getAdjudicatorWatcherSubscribersForChannel} from "../selectors";
 import {ChannelSubscriber} from "../state";
 import {ProtocolLocator} from "../../communication";
 import {getChallengeRegisteredEvent} from "@statechannels/nitro-protocol";
 import {bigNumberify} from "ethers/utils";
+import {Contract} from "ethers";
 
 enum AdjudicatorEventType {
   ChallengeRegistered,
@@ -106,7 +106,7 @@ function* dispatchProcessEventAction(event: AdjudicatorEvent, processId: string,
 }
 
 function* createAdjudicatorEventChannel(provider) {
-  const adjudicator: ethers.Contract = yield call(getAdjudicatorContract, provider);
+  const adjudicator: Contract = yield call(getAdjudicatorContract, provider);
 
   return eventChannel(emitter => {
     const challengeRegisteredFilter = adjudicator.filters.ChallengeRegistered();

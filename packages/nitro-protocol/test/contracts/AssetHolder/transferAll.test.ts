@@ -1,4 +1,3 @@
-import {ethers} from 'ethers';
 import {expectRevert} from '@statechannels/devtools';
 // @ts-ignore
 import AssetHolderArtifact from '../../../build/contracts/TESTAssetHolder.json';
@@ -12,10 +11,11 @@ import {
 
 import {id, bigNumberify} from 'ethers/utils';
 import {encodeAllocation} from '../../../src/contract/outcome';
+import {Contract, Wallet} from 'ethers';
 
 const provider = getTestProvider();
 
-let AssetHolder: ethers.Contract;
+let AssetHolder: Contract;
 
 const addresses = {
   // channels
@@ -23,8 +23,8 @@ const addresses = {
   C: randomChannelId(),
   X: randomChannelId(),
   // externals
-  A: ethers.Wallet.createRandom().address.padEnd(66, '0'),
-  B: ethers.Wallet.createRandom().address.padEnd(66, '0'),
+  A: Wallet.createRandom().address.padEnd(66, '0'),
+  B: Wallet.createRandom().address.padEnd(66, '0'),
 };
 
 beforeAll(async () => {

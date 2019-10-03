@@ -13,9 +13,9 @@ import {APPLICATION_PROCESS_ID} from "./protocols/application/reducer";
 import {adjudicatorStateReducer} from "./adjudicator-state/reducer";
 import {isStartProcessAction, ProcessProtocol} from "../communication";
 import * as communication from "../communication";
-import {ethers} from "ethers";
 import * as closeLedgerChannelProtocol from "./protocols/close-ledger-channel";
 import _ from "lodash";
+import {Wallet} from "ethers";
 const initialState = states.waitForLogin();
 
 export const walletReducer = (
@@ -194,7 +194,7 @@ const waitForLoginReducer = (state: states.WaitForLogin, action: actions.WalletA
     case "WALLET.LOGGED_IN":
       let {address, privateKey} = state;
       if (!address || !privateKey) {
-        ({privateKey, address} = ethers.Wallet.createRandom());
+        ({privateKey, address} = Wallet.createRandom());
       }
       return states.initialized({
         ...state,

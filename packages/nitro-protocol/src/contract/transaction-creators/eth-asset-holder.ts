@@ -1,16 +1,16 @@
 // @ts-ignore
 import EthAssetHolderArtifact from '../../../build/contracts/ETHAssetHolder.json';
-import {ethers} from 'ethers';
 import {Allocation, Guarantee, Outcome} from '../outcome';
 import {TransactionRequest} from 'ethers/providers';
 import * as assetHolderTransactionCreator from './asset-holder';
+import {Interface} from 'ethers/utils';
 
 // TODO: Currently we are setting some arbitrary gas limit
 // to avoid issues with Ganache sendTransaction and parsing BN.js
 // If we don't set a gas limit some transactions will fail
 const GAS_LIMIT = 3000000;
 
-const EthAssetHolderContractInterface = new ethers.utils.Interface(EthAssetHolderArtifact.abi);
+const EthAssetHolderContractInterface = new Interface(EthAssetHolderArtifact.abi);
 
 export function createTransferAllTransaction(
   channelId: string,
