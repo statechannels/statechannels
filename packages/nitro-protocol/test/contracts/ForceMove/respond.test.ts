@@ -1,4 +1,3 @@
-import {ethers} from 'ethers';
 import {expectRevert} from '@statechannels/devtools';
 // @ts-ignore
 import ForceMoveArtifact from '../../../build/contracts/TESTForceMove.json';
@@ -17,25 +16,26 @@ import {
 } from '../../../src/contract/transaction-creators/revert-reasons';
 import {HashZero} from 'ethers/constants';
 import {respondArgs} from '../../../src/contract/transaction-creators/force-move';
+import {Contract, Wallet} from 'ethers';
 
 const provider = getTestProvider();
-let ForceMove: ethers.Contract;
+let ForceMove: Contract;
 let networkId;
 let networkMap;
 const chainId = '0x1234';
 const participants = ['', '', ''];
 const wallets = new Array(3);
 const challengeDuration = 0x1000;
-const assetHolderAddress = ethers.Wallet.createRandom().address;
+const assetHolderAddress = Wallet.createRandom().address;
 const outcome: Outcome = [{assetHolderAddress, allocation: []}];
 let appDefinition;
 
 // populate wallets and participants array
 for (let i = 0; i < 3; i++) {
-  wallets[i] = ethers.Wallet.createRandom();
+  wallets[i] = Wallet.createRandom();
   participants[i] = wallets[i].address;
 }
-const nonParticipant = ethers.Wallet.createRandom();
+const nonParticipant = Wallet.createRandom();
 
 beforeAll(async () => {
   networkMap = await getNetworkMap();

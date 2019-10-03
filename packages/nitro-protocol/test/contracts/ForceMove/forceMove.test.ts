@@ -1,4 +1,3 @@
-import {ethers} from 'ethers';
 import {expectRevert} from '@statechannels/devtools';
 // @ts-ignore
 import ForceMoveArtifact from '../../../build/contracts/TESTForceMove.json';
@@ -27,10 +26,11 @@ import {
 import {signChallengeMessage} from '../../../src/signatures';
 import {SignedState} from '../../../src/index';
 import {COUNTING_APP_INVALID_TRANSITION} from '../../revert-reasons';
+import {Contract, Wallet} from 'ethers';
 
 const provider = getTestProvider();
 
-let ForceMove: ethers.Contract;
+let ForceMove: Contract;
 let networkId;
 let networkMap;
 
@@ -38,13 +38,13 @@ const chainId = '0x1234';
 const participants = ['', '', ''];
 const wallets = new Array(3);
 const challengeDuration = 0x1;
-const outcome = [{allocation: [], assetHolderAddress: ethers.Wallet.createRandom().address}];
+const outcome = [{allocation: [], assetHolderAddress: Wallet.createRandom().address}];
 
 let appDefinition;
 
 // populate wallets and participants array
 for (let i = 0; i < 3; i++) {
-  wallets[i] = ethers.Wallet.createRandom();
+  wallets[i] = Wallet.createRandom();
   participants[i] = wallets[i].address;
 }
 

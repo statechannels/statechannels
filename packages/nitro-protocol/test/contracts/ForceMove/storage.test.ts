@@ -1,4 +1,3 @@
-import {ethers} from 'ethers';
 import {expectRevert} from '@statechannels/devtools';
 // @ts-ignore
 import ForceMoveArtifact from '../../../build/contracts/TESTForceMove.json';
@@ -6,9 +5,10 @@ import ForceMoveArtifact from '../../../build/contracts/TESTForceMove.json';
 import {setupContracts, randomChannelId, getTestProvider} from '../../test-helpers';
 import {HashZero, AddressZero} from 'ethers/constants';
 import {hashChannelStorage, parseChannelStorageHash} from '../../../src/contract/channel-storage';
+import {Contract} from 'ethers';
 
 const provider = getTestProvider();
-let ForceMove: ethers.Contract;
+let ForceMove: Contract;
 beforeAll(async () => {
   ForceMove = await setupContracts(provider, ForceMoveArtifact);
 });

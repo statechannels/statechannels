@@ -1,24 +1,24 @@
-import {ethers} from 'ethers';
 // @ts-ignore
 import AssetHolderArtifact from '../../../build/contracts/ETHAssetHolder.json';
 import {setupContracts, getTestProvider} from '../../test-helpers';
-import {keccak256} from 'ethers/utils';
+import {keccak256, id} from 'ethers/utils';
 import {expectRevert} from '@statechannels/devtools';
 import {Channel, getChannelId} from '../../../src/contract/channel';
+import {Contract, Wallet} from 'ethers';
 
 const provider = getTestProvider();
-let AssetHolder: ethers.Contract;
+let AssetHolder: Contract;
 let channelId;
 
 const participants = ['', '', ''];
 const wallets = new Array(3);
 const chainId = '0x1234';
 const channelNonce = '0x9999';
-const outcomeContent = ethers.utils.id('some outcome data');
+const outcomeContent = id('some outcome data');
 
 // populate wallets and participants array
 for (let i = 0; i < 3; i++) {
-  wallets[i] = ethers.Wallet.createRandom();
+  wallets[i] = Wallet.createRandom();
   participants[i] = wallets[i].address;
 }
 

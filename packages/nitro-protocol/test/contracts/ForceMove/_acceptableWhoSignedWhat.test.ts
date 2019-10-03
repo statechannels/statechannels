@@ -1,18 +1,18 @@
-import {ethers} from 'ethers';
 import {expectRevert} from '@statechannels/devtools';
 // @ts-ignore
 import ForceMoveArtifact from '../../../build/contracts/TESTForceMove.json';
 import {setupContracts, getTestProvider} from '../../test-helpers';
+import {Contract, Wallet} from 'ethers';
 
 const provider = getTestProvider();
-let ForceMove: ethers.Contract;
+let ForceMove: Contract;
 
 const participants = ['', '', ''];
 const wallets = new Array(3);
 
 // populate wallets and participants array
 for (let i = 0; i < 3; i++) {
-  wallets[i] = ethers.Wallet.createRandom();
+  wallets[i] = Wallet.createRandom();
   participants[i] = wallets[i].address;
 }
 

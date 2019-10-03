@@ -1,4 +1,3 @@
-import {ethers} from 'ethers';
 // @ts-ignore
 import SingleAssetPaymentsArtifact from '../../../../build/contracts/SingleAssetPayments.json';
 import {setupContracts, replaceAddresses, getTestProvider} from '../../../test-helpers';
@@ -6,16 +5,17 @@ import {expectRevert} from '@statechannels/devtools';
 import {Allocation, encodeOutcome} from '../../../../src/contract/outcome';
 import {AddressZero, HashZero} from 'ethers/constants';
 import {VariablePart} from '../../../../src/contract/state.js';
+import {Contract, Wallet} from 'ethers';
 
 const provider = getTestProvider();
-let singleAssetPayments: ethers.Contract;
+let singleAssetPayments: Contract;
 
 const numParticipants = 3;
 const addresses = {
   // participants
-  A: ethers.Wallet.createRandom().address.padEnd(66, '0'),
-  B: ethers.Wallet.createRandom().address.padEnd(66, '0'),
-  C: ethers.Wallet.createRandom().address.padEnd(66, '0'),
+  A: Wallet.createRandom().address.padEnd(66, '0'),
+  B: Wallet.createRandom().address.padEnd(66, '0'),
+  C: Wallet.createRandom().address.padEnd(66, '0'),
 };
 const guarantee = {
   targetChannelId: HashZero,
