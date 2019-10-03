@@ -1,7 +1,9 @@
 import {eventChannel} from "redux-saga";
-import {call, take, select} from "redux-saga/effects";
+import {call, put, select, take} from "redux-saga/effects";
 import {ethers} from "ethers";
+import {getDepositedEvent} from "@statechannels/nitro-protocol";
 
+import * as actions from "../actions";
 import {getETHAssetHolderContract} from "src/utils/contract-utils";
 import {ChannelSubscriber} from "../state";
 import {getETHAssetHolderWatcherSubscribersForChannel} from "../selectors";
@@ -41,7 +43,14 @@ function* dispatchEventAction(event: ETHAssetHolderEvent) {
       // TODO:
       break;
     case ETHAssetHolderEventType.Deposited:
-      // TODO:
+      const depositedEvent = getDepositedEvent(event);
+      yield put(
+        actions.depositedEvent({
+          destination: depositedEvent.destination,
+          amountDeposited: depositedEvent.amountDeposited,
+          destinationHoldings: depositedEvent.destinationHoldings
+        })
+      );
       break;
     default:
       throw new Error(
@@ -56,11 +65,18 @@ function* dispatchProcessEventAction(event: ETHAssetHolderEvent, processId: stri
       // TODO:
       break;
     case ETHAssetHolderEventType.Deposited:
-      // TODO:
+      const depositedEvent = getDepositedEvent(event);
+      yield put(
+        actions.depositedEvent({
+          destination: depositedEvent.destination,
+          amountDeposited: depositedEvent.amountDeposited,
+          destinationHoldings: depositedEvent.destinationHoldings
+        })
+      );
       break;
     default:
       throw new Error(
-        `Event is not a known ETHAssetHolderEvent. Cannot dispatch event action: ${JSON.stringify(event)}`
+        `Event is not a known ETHAssetHolderEvent. Cannot dispatch process event action: ${JSON.stringify(event)}`
       );
   }
 }
