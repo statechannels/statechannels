@@ -51,6 +51,7 @@
     "test": "yarn test:prepare && npx jest"
   },
   "dependencies": {
+    "@counterfactual/cf-adjudicator-contracts": "^0.0.8",
     "@openzeppelin/contracts": "2.3.0",
     "ethers": "4.0.37",
     "openzeppelin-solidity": "2.3.0",
