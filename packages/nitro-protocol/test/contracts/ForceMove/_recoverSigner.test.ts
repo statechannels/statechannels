@@ -1,8 +1,8 @@
 // @ts-ignore
-import ForceMoveArtifact from '../../../build/contracts/TESTForceMove.json';
+import {Contract, Wallet} from 'ethers';
 import {arrayify, id} from 'ethers/utils';
-import {setupContracts, sign, getTestProvider} from '../../test-helpers';
-import {Wallet, Contract} from 'ethers';
+import ForceMoveArtifact from '../../../build/contracts/TESTForceMove.json';
+import {getTestProvider, setupContracts, sign} from '../../test-helpers';
 
 const provider = getTestProvider();
 let ForceMove: Contract;

@@ -1,5 +1,5 @@
 import {defaultAbiCoder, keccak256} from 'ethers/utils';
-import {Bytes32, Address, Uint256, Bytes} from './types';
+import {Address, Bytes, Bytes32, Uint256} from './types';
 
 export enum AssetOutcomeType {
   AllocationOutcomeType = 0,
@@ -15,21 +15,21 @@ export interface Guarantee {
 export function encodeGuarantee(guarantee: Guarantee): Bytes32 {
   return defaultAbiCoder.encode(
     ['tuple(bytes32 targetChannelId, bytes32[] destinations)'],
-    [[guarantee.targetChannelId, guarantee.destinations]],
+    [[guarantee.targetChannelId, guarantee.destinations]]
   );
 }
 
 export function decodeGuarantee(encodedGuarantee: Bytes): Guarantee {
   const {targetChannelId, destinations} = defaultAbiCoder.decode(
     ['tuple(bytes32 targetChannelId, bytes32[] destinations)'],
-    encodedGuarantee,
+    encodedGuarantee
   )[0];
 
   return {targetChannelId, destinations};
 }
 
 export function isGuarantee(
-  allocationOrGuarantee: Allocation | Guarantee,
+  allocationOrGuarantee: Allocation | Guarantee
 ): allocationOrGuarantee is Guarantee {
   return !isAllocation(allocationOrGuarantee);
 }
@@ -48,7 +48,7 @@ export function encodeAllocation(allocation: Allocation): Bytes32 {
 export function decodeAllocation(encodedAllocation: Bytes): Allocation {
   const allocationItems = defaultAbiCoder.decode(
     ['tuple(bytes32 destination, uint256 amount)[]'],
-    encodedAllocation,
+    encodedAllocation
   )[0];
 
   return allocationItems.map(a => {
@@ -57,7 +57,7 @@ export function decodeAllocation(encodedAllocation: Bytes): Allocation {
 }
 
 export function isAllocation(
-  allocationOrGuarantee: Allocation | Guarantee,
+  allocationOrGuarantee: Allocation | Guarantee
 ): allocationOrGuarantee is Allocation {
   return Array.isArray(allocationOrGuarantee);
 }
@@ -68,7 +68,7 @@ export interface GuaranteeAssetOutcome {
   guarantee: Guarantee;
 }
 export function isGuaranteeOutcome(
-  assetOutcome: AssetOutcome,
+  assetOutcome: AssetOutcome
 ): assetOutcome is GuaranteeAssetOutcome {
   return 'guarantee' in assetOutcome;
 }
@@ -79,7 +79,7 @@ export interface AllocationAssetOutcome {
   allocation: AllocationItem[];
 }
 export function isAllocationOutcome(
-  assetOutcome: AssetOutcome,
+  assetOutcome: AssetOutcome
 ): assetOutcome is AllocationAssetOutcome {
   return 'allocation' in assetOutcome;
 }
@@ -87,21 +87,21 @@ export function isAllocationOutcome(
 // Asset outcome functions
 export function encodeAssetOutcomeFromBytes(
   assetOutcomeType: AssetOutcomeType,
-  encodedAllocationOrGuarantee: Bytes,
+  encodedAllocationOrGuarantee: Bytes
 ): Bytes32 {
   return defaultAbiCoder.encode(
     ['tuple(uint8 assetOutcomeType, bytes allocationOrGuarantee)'],
-    [{assetOutcomeType, allocationOrGuarantee: encodedAllocationOrGuarantee}],
+    [{assetOutcomeType, allocationOrGuarantee: encodedAllocationOrGuarantee}]
   );
 }
 
 export function decodeOutcomeItem(
   encodedAssetOutcome: Bytes,
-  assetHolderAddress: string,
+  assetHolderAddress: string
 ): AssetOutcome {
   const {outcomeType, allocationOrGuarantee} = defaultAbiCoder.decode(
     ['tuple(uint8 outcomeType, bytes allocationOrGuarantee)'],
-    encodedAssetOutcome,
+    encodedAssetOutcome
   )[0];
   switch (outcomeType) {
     case AssetOutcomeType.AllocationOutcomeType:
@@ -144,7 +144,7 @@ export function hashOutcome(outcome: Outcome): Bytes32 {
 export function decodeOutcome(encodedOutcome: Bytes): Outcome {
   const assetOutcomes = defaultAbiCoder.decode(
     ['tuple(address assetHolderAddress, bytes outcomeContent)[]'],
-    encodedOutcome,
+    encodedOutcome
   )[0];
   return assetOutcomes.map(a => decodeOutcomeItem(a.outcomeContent, a.assetHolderAddress));
 }
@@ -169,6 +169,6 @@ export function encodeOutcome(outcome: Outcome): Bytes32 {
 
   return defaultAbiCoder.encode(
     ['tuple(address assetHolderAddress, bytes outcomeContent)[]'],
-    [encodedAssetOutcomes],
+    [encodedAssetOutcomes]
   );
 }

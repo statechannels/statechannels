@@ -1,18 +1,18 @@
 import {expectRevert} from '@statechannels/devtools';
+import {Contract, Wallet} from 'ethers';
+import {bigNumberify, id} from 'ethers/utils';
 // @ts-ignore
 import AssetHolderArtifact from '../../../build/contracts/TESTAssetHolder.json';
-import {
-  setupContracts,
-  randomChannelId,
-  allocationToParams,
-  guaranteeToParams,
-  replaceAddresses,
-  newAssetTransferredEvent,
-  getTestProvider,
-} from '../../test-helpers';
 import {claimAllArgs} from '../../../src/contract/transaction-creators/asset-holder';
-import {id, bigNumberify} from 'ethers/utils';
-import {Wallet, Contract} from 'ethers';
+import {
+  allocationToParams,
+  getTestProvider,
+  guaranteeToParams,
+  newAssetTransferredEvent,
+  randomChannelId,
+  replaceAddresses,
+  setupContracts,
+} from '../../test-helpers';
 
 const provider = getTestProvider();
 
@@ -100,7 +100,7 @@ describe('claimAll', () => {
       // compute an appropriate allocation.
       const allocation = [];
       Object.keys(tOutcomeBefore).forEach(key =>
-        allocation.push({destination: key, amount: tOutcomeBefore[key]}),
+        allocation.push({destination: key, amount: tOutcomeBefore[key]})
       );
       const [, outcomeHash] = allocationToParams(allocation);
 
@@ -121,7 +121,7 @@ describe('claimAll', () => {
         // set outcomeHash for guarantor
         await (await AssetHolder.setAssetOutcomeHashPermissionless(
           guarantorId,
-          gOutcomeContentHash,
+          gOutcomeContentHash
         )).wait();
         expect(await AssetHolder.outcomeHashes(guarantorId)).toBe(gOutcomeContentHash);
       }
@@ -148,7 +148,7 @@ describe('claimAll', () => {
 
         // check new holdings
         Object.keys(heldAfter).forEach(async key =>
-          expect(await AssetHolder.holdings(key)).toEqual(heldAfter[key]),
+          expect(await AssetHolder.holdings(key)).toEqual(heldAfter[key])
         );
 
         // check new outcomeHash
@@ -159,6 +159,6 @@ describe('claimAll', () => {
         const [, expectedNewOutcomeHash] = allocationToParams(allocationAfter);
         expect(await AssetHolder.outcomeHashes(targetId)).toEqual(expectedNewOutcomeHash);
       }
-    },
+    }
   );
 });

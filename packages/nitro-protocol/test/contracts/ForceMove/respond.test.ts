@@ -1,22 +1,22 @@
 import {expectRevert} from '@statechannels/devtools';
-// @ts-ignore
-import ForceMoveArtifact from '../../../build/contracts/TESTForceMove.json';
+import {Contract, Wallet} from 'ethers';
+import {HashZero} from 'ethers/constants';
+import {bigNumberify, defaultAbiCoder, hexlify} from 'ethers/utils';
 // @ts-ignore
 import countingAppArtifact from '../../../build/contracts/CountingApp.json';
-import {defaultAbiCoder, hexlify, bigNumberify} from 'ethers/utils';
-import {setupContracts, sign, getTestProvider, getNetworkMap} from '../../test-helpers';
-import {Outcome} from '../../../src/contract/outcome';
+// @ts-ignore
+import ForceMoveArtifact from '../../../build/contracts/TESTForceMove.json';
 import {Channel, getChannelId} from '../../../src/contract/channel';
-import {State, hashState} from '../../../src/contract/state';
 import {hashChannelStorage} from '../../../src/contract/channel-storage';
+import {Outcome} from '../../../src/contract/outcome';
+import {hashState, State} from '../../../src/contract/state';
+import {respondArgs} from '../../../src/contract/transaction-creators/force-move';
 import {
   NO_ONGOING_CHALLENGE,
-  WRONG_CHANNEL_STORAGE,
   RESPONSE_UNAUTHORIZED,
+  WRONG_CHANNEL_STORAGE,
 } from '../../../src/contract/transaction-creators/revert-reasons';
-import {HashZero} from 'ethers/constants';
-import {respondArgs} from '../../../src/contract/transaction-creators/force-move';
-import {Contract, Wallet} from 'ethers';
+import {getNetworkMap, getTestProvider, setupContracts, sign} from '../../test-helpers';
 
 const provider = getTestProvider();
 let ForceMove: Contract;
@@ -111,7 +111,7 @@ describe('respond', () => {
       const responseSignature = await sign(responder, responseStateHash);
 
       const tx = ForceMove.respond(
-        ...respondArgs({challengeState, responseSignature, responseState}),
+        ...respondArgs({challengeState, responseSignature, responseState})
       );
 
       if (reasonString) {
@@ -133,6 +133,6 @@ describe('respond', () => {
         });
         expect(await ForceMove.channelStorageHashes(channelId)).toEqual(expectedChannelStorageHash);
       }
-    },
+    }
   );
 });

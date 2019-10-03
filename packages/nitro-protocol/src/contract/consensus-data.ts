@@ -1,5 +1,5 @@
-import {Outcome, encodeOutcome, decodeOutcome} from './outcome';
 import {defaultAbiCoder} from 'ethers/utils';
+import {decodeOutcome, encodeOutcome, Outcome} from './outcome';
 
 export interface ConsensusData {
   furtherVotesRequired: number;
@@ -10,21 +10,21 @@ export function encodeConsensusData(consensusData: ConsensusData): string {
   const proposedOutcome = encodeOutcome(consensusData.proposedOutcome);
   return defaultAbiCoder.encode(
     ['tuple(uint32 furtherVotesRequired, bytes proposedOutcome)'],
-    [[consensusData.furtherVotesRequired, proposedOutcome]],
+    [[consensusData.furtherVotesRequired, proposedOutcome]]
   );
 }
 
 export function decodeConsensusData(appData: string): ConsensusData {
   const {furtherVotesRequired, proposedOutcome} = defaultAbiCoder.decode(
     ['tuple(uint32 furtherVotesRequired, bytes proposedOutcome)'],
-    appData,
+    appData
   )[0];
   return {furtherVotesRequired, proposedOutcome: decodeOutcome(proposedOutcome)};
 }
 export function propose(
   proposedOutcome: Outcome,
   currentOutcome: Outcome,
-  numberOfParticipants: number,
+  numberOfParticipants: number
 ): ConsensusDataWithOutcome {
   return {
     consensusData: {
@@ -36,7 +36,7 @@ export function propose(
 }
 export function veto(
   currentOutcome: Outcome,
-  numberOfParticipants: number,
+  numberOfParticipants: number
 ): ConsensusDataWithOutcome {
   return propose([], currentOutcome, numberOfParticipants);
 }
@@ -49,7 +49,7 @@ export interface ConsensusDataWithOutcome {
 export function vote(
   incomingConsensusData: ConsensusData,
   numberOfParticipants: number,
-  currentOutcome: Outcome,
+  currentOutcome: Outcome
 ): ConsensusDataWithOutcome {
   if (incomingConsensusData.furtherVotesRequired === 1) {
     return {
@@ -66,7 +66,7 @@ export function vote(
     };
   } else {
     throw new Error(
-      `Expected furtherVotesRequired to be greater than 0, received ${incomingConsensusData.furtherVotesRequired} instead`,
+      `Expected furtherVotesRequired to be greater than 0, received ${incomingConsensusData.furtherVotesRequired} instead`
     );
   }
 }

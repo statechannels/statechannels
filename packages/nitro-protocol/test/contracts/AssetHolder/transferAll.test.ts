@@ -1,17 +1,18 @@
 import {expectRevert} from '@statechannels/devtools';
+import {ethers} from 'ethers';
 // @ts-ignore
 import AssetHolderArtifact from '../../../build/contracts/TESTAssetHolder.json';
 import {
-  setupContracts,
-  randomChannelId,
   allocationToParams,
-  replaceAddresses,
   getTestProvider,
+  randomChannelId,
+  replaceAddresses,
+  setupContracts,
 } from '../../test-helpers';
 
-import {id, bigNumberify} from 'ethers/utils';
-import {encodeAllocation} from '../../../src/contract/outcome';
 import {Contract, Wallet} from 'ethers';
+import {bigNumberify, id} from 'ethers/utils';
+import {encodeAllocation} from '../../../src/contract/outcome';
 
 const provider = getTestProvider();
 
@@ -78,7 +79,7 @@ describe('transferAll', () => {
       // compute an appropriate allocation.
       const allocation = [];
       Object.keys(setOutcome).forEach(key =>
-        allocation.push({destination: key, amount: setOutcome[key]}),
+        allocation.push({destination: key, amount: setOutcome[key]})
       );
       const [, outcomeHash] = allocationToParams(allocation);
 
@@ -104,7 +105,7 @@ describe('transferAll', () => {
 
         // check new holdings
         Object.keys(heldAfter).forEach(async key =>
-          expect(await AssetHolder.holdings(key)).toEqual(heldAfter[key]),
+          expect(await AssetHolder.holdings(key)).toEqual(heldAfter[key])
         );
 
         // check new outcomeHash
@@ -115,6 +116,6 @@ describe('transferAll', () => {
         const [, expectedNewOutcomeHash] = allocationToParams(allocationAfter);
         expect(await AssetHolder.outcomeHashes(channelId)).toEqual(expectedNewOutcomeHash);
       }
-    },
+    }
   );
 });

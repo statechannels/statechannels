@@ -1,18 +1,13 @@
 // @ts-ignore
-import NitroAdjudicatorArtifact from '../../../build/contracts/TESTNitroAdjudicator.json';
-// @ts-ignore
-import ETHAssetHolderArtifact from '../../../build/contracts/ETHAssetHolder.json';
 // @ts-ignore
 import ERC20AssetHolderArtifact from '../../../build/contracts/ERC20AssetHolder.json';
+// @ts-ignore
+import ETHAssetHolderArtifact from '../../../build/contracts/ETHAssetHolder.json';
+import NitroAdjudicatorArtifact from '../../../build/contracts/TESTNitroAdjudicator.json';
 
-import {AddressZero} from 'ethers/constants';
-import {
-  setupContracts,
-  finalizedOutcomeHash,
-  sendTransaction,
-  getTestProvider,
-} from '../../test-helpers';
 import {expectRevert} from '@statechannels/devtools';
+import {Contract, Wallet} from 'ethers';
+import {AddressZero} from 'ethers/constants';
 import {Channel, getChannelId} from '../../../src/contract/channel';
 import {hashAssetOutcome} from '../../../src/contract/outcome';
 import {State} from '../../../src/contract/state';
@@ -21,7 +16,12 @@ import {
   CHANNEL_NOT_FINALIZED,
   WRONG_CHANNEL_STORAGE,
 } from '../../../src/contract/transaction-creators/revert-reasons';
-import {Contract, Wallet} from 'ethers';
+import {
+  finalizedOutcomeHash,
+  getTestProvider,
+  sendTransaction,
+  setupContracts,
+} from '../../test-helpers';
 
 const provider = getTestProvider();
 let NitroAdjudicator: Contract;
@@ -98,20 +98,20 @@ describe('pushOutcome', () => {
         finalizesAt,
         outcome,
         state,
-        challengerAddress,
+        challengerAddress
       );
 
       // call public wrapper to set state (only works on test contract)
       const tx = await NitroAdjudicator.setChannelStorageHash(channelId, initialChannelStorageHash);
       await tx.wait();
       expect(await NitroAdjudicator.channelStorageHashes(channelId)).toEqual(
-        initialChannelStorageHash,
+        initialChannelStorageHash
       );
       const transactionRequest = createPushOutcomeTransaction(
         declaredTurnNumRecord,
         finalizesAt,
         state,
-        outcome,
+        outcome
       );
 
       if (outcomeHashExits) {
@@ -121,22 +121,22 @@ describe('pushOutcome', () => {
       // call method in a slightly different way if expecting a revert
       if (reasonString) {
         const regex = new RegExp(
-          '^' + 'VM Exception while processing transaction: revert ' + reasonString + '$',
+          '^' + 'VM Exception while processing transaction: revert ' + reasonString + '$'
         );
         await expectRevert(
           () => sendTransaction(provider, NitroAdjudicator.address, transactionRequest),
-          regex,
+          regex
         );
       } else {
         await sendTransaction(provider, NitroAdjudicator.address, transactionRequest);
         // check 2x AssetHolder storage against the expected value
         expect(await ETHAssetHolder.outcomeHashes(channelId)).toEqual(
-          hashAssetOutcome(outcome[0].allocation),
+          hashAssetOutcome(outcome[0].allocation)
         );
         expect(await ERC20AssetHolder.outcomeHashes(channelId)).toEqual(
-          hashAssetOutcome(outcome[1].allocation),
+          hashAssetOutcome(outcome[1].allocation)
         );
       }
-    },
+    }
   );
 });

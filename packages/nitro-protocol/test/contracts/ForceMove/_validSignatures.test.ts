@@ -1,8 +1,8 @@
 // @ts-ignore
-import ForceMoveArtifact from '../../../build/contracts/TESTForceMove.json';
-import {setupContracts, sign, getTestProvider} from '../../test-helpers';
 import {Contract, Wallet} from 'ethers';
 import {id} from 'ethers/utils';
+import ForceMoveArtifact from '../../../build/contracts/TESTForceMove.json';
+import {getTestProvider, setupContracts, sign} from '../../test-helpers';
 
 const provider = getTestProvider();
 let ForceMove: Contract;
@@ -47,11 +47,11 @@ describe('_validSignatures', () => {
       whoSignedWhat[i] = i;
     }
     expect(await ForceMove.validSignatures(8, addresses, stateHashes, sigs, whoSignedWhat)).toBe(
-      true,
+      true
     );
     const brokenSigs = sigs.reverse();
     expect(
-      await ForceMove.validSignatures(8, addresses, stateHashes, brokenSigs, whoSignedWhat),
+      await ForceMove.validSignatures(8, addresses, stateHashes, brokenSigs, whoSignedWhat)
     ).toBe(false);
   });
   it('returns true (false) for a correct (incorrect) set of signatures on 1 state', async () => {
@@ -64,11 +64,11 @@ describe('_validSignatures', () => {
       whoSignedWhat[i] = 0;
     }
     expect(await ForceMove.validSignatures(8, addresses, [stateHash], sigs, whoSignedWhat)).toBe(
-      true,
+      true
     );
     const brokenSigs = sigs.reverse();
     expect(
-      await ForceMove.validSignatures(8, addresses, [stateHash], brokenSigs, whoSignedWhat),
+      await ForceMove.validSignatures(8, addresses, [stateHash], brokenSigs, whoSignedWhat)
     ).toBe(false);
   });
 });

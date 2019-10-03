@@ -1,12 +1,12 @@
-import {Bytes32} from './types';
-import {keccak256, defaultAbiCoder, bigNumberify} from 'ethers/utils';
-import {hashState, VariablePart, State} from './state';
+import {bigNumberify, defaultAbiCoder, keccak256} from 'ethers/utils';
 import {Channel} from '..';
 import {decodeOutcome} from './outcome';
+import {hashState, State, VariablePart} from './state';
+import {Bytes32} from './types';
 
 export function hashChallengeMessage(challengeState: State): Bytes32 {
   return keccak256(
-    defaultAbiCoder.encode(['bytes32', 'string'], [hashState(challengeState), 'forceMove']),
+    defaultAbiCoder.encode(['bytes32', 'string'], [hashState(challengeState), 'forceMove'])
   );
 }
 

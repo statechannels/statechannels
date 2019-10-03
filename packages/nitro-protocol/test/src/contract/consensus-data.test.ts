@@ -1,15 +1,15 @@
+import {Wallet} from 'ethers';
+import {AddressZero} from 'ethers/constants';
+import {id} from 'ethers/utils';
 import {
   ConsensusData,
-  encodeConsensusData,
   decodeConsensusData,
+  encodeConsensusData,
   propose,
-  vote,
   veto,
+  vote,
 } from '../../../src/contract/consensus-data';
-import {AddressZero} from 'ethers/constants';
 import {Outcome} from '../../../src/contract/outcome';
-import {Wallet} from 'ethers';
-import {id} from 'ethers/utils';
 
 describe('consensus-data', () => {
   describe('voting', () => {

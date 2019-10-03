@@ -1,10 +1,10 @@
 // @ts-ignore
-import NitroAdjudicatorArtifact from '../../../build/contracts/NitroAdjudicator.json';
 import {TransactionRequest} from 'ethers/providers';
-import {State, hashState} from '../state';
-import {Outcome, encodeOutcome} from '../outcome';
-import {getChannelId} from '../channel';
 import {Interface} from 'ethers/utils';
+import NitroAdjudicatorArtifact from '../../../build/contracts/NitroAdjudicator.json';
+import {getChannelId} from '../channel';
+import {encodeOutcome, Outcome} from '../outcome';
+import {hashState, State} from '../state';
 
 // TODO: Currently we are setting some arbitrary gas limit
 // to avoid issues with Ganache sendTransaction and parsing BN.js
@@ -17,7 +17,7 @@ export function createPushOutcomeTransaction(
   turnNumRecord: number,
   finalizesAt: number,
   state: State,
-  outcome: Outcome,
+  outcome: Outcome
 ): TransactionRequest {
   const channelId = getChannelId(state.channel);
   const stateHash = hashState(state);

@@ -1,7 +1,7 @@
+import {defaultAbiCoder, keccak256} from 'ethers/utils';
 import {Channel, getChannelId} from './channel';
-import {Outcome, encodeOutcome, hashOutcome} from './outcome';
-import {Uint256, Address, Bytes32, Uint48} from './types';
-import {keccak256, defaultAbiCoder} from 'ethers/utils';
+import {encodeOutcome, hashOutcome, Outcome} from './outcome';
+import {Address, Bytes32, Uint256, Uint48} from './types';
 
 export interface State {
   turnNum: number;
@@ -39,8 +39,8 @@ export function hashAppPart(state: State): Bytes32 {
   return keccak256(
     defaultAbiCoder.encode(
       ['uint256', 'address', 'bytes'],
-      [challengeDuration, appDefinition, appData],
-    ),
+      [challengeDuration, appDefinition, appData]
+    )
   );
 }
 
@@ -55,7 +55,7 @@ export function hashState(state: State): Bytes32 {
       [
         'tuple(uint256 turnNum, bool isFinal, bytes32 channelId, bytes32 appPartHash, bytes32 outcomeHash)',
       ],
-      [{turnNum, isFinal, channelId, appPartHash, outcomeHash}],
-    ),
+      [{turnNum, isFinal, channelId, appPartHash, outcomeHash}]
+    )
   );
 }

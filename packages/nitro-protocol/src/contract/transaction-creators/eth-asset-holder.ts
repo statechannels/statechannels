@@ -1,9 +1,9 @@
 // @ts-ignore
+import {TransactionRequest} from 'ethers/providers';
+import {Interface} from 'ethers/utils';
 import EthAssetHolderArtifact from '../../../build/contracts/ETHAssetHolder.json';
 import {Allocation, Guarantee, Outcome} from '../outcome';
-import {TransactionRequest} from 'ethers/providers';
 import * as assetHolderTransactionCreator from './asset-holder';
-import {Interface} from 'ethers/utils';
 
 // TODO: Currently we are setting some arbitrary gas limit
 // to avoid issues with Ganache sendTransaction and parsing BN.js
@@ -14,42 +14,42 @@ const EthAssetHolderContractInterface = new Interface(EthAssetHolderArtifact.abi
 
 export function createTransferAllTransaction(
   channelId: string,
-  allocation: Allocation,
+  allocation: Allocation
 ): TransactionRequest {
   return assetHolderTransactionCreator.createTransferAllTransaction(
     EthAssetHolderContractInterface,
     channelId,
-    allocation,
+    allocation
   );
 }
 
 export function createClaimAllTransaction(
   channelId: string,
   guarantee: Guarantee,
-  allocation: Allocation,
+  allocation: Allocation
 ): TransactionRequest {
   return assetHolderTransactionCreator.createClaimAllTransaction(
     EthAssetHolderContractInterface,
     channelId,
     guarantee,
-    allocation,
+    allocation
   );
 }
 export function createSetOutcomeTransaction(
   channelId: string,
-  outcome: Outcome,
+  outcome: Outcome
 ): TransactionRequest {
   return assetHolderTransactionCreator.createSetOutcomeTransaction(
     EthAssetHolderContractInterface,
     channelId,
-    outcome,
+    outcome
   );
 }
 
 export function createDepositTransaction(
   destination: string,
   expectedHeld: string,
-  amount: string,
+  amount: string
 ): TransactionRequest {
   const data = EthAssetHolderContractInterface.functions.deposit.encode([
     destination,

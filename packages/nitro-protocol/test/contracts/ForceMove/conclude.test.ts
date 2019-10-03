@@ -1,29 +1,29 @@
 import {expectRevert} from '@statechannels/devtools';
-// @ts-ignore
-import ForceMoveArtifact from '../../../build/contracts/TESTForceMove.json';
+import {Contract, Wallet} from 'ethers';
+import {HashZero} from 'ethers/constants';
+import {hexlify} from 'ethers/utils';
 // @ts-ignore
 import countingAppArtifact from '../../../build/contracts/CountingApp.json';
-import {
-  setupContracts,
-  clearedChallengeHash,
-  ongoingChallengeHash,
-  finalizedOutcomeHash,
-  signStates,
-  getTestProvider,
-  getNetworkMap,
-} from '../../test-helpers';
-import {HashZero} from 'ethers/constants';
-import {Outcome} from '../../../src/contract/outcome';
+// @ts-ignore
+import ForceMoveArtifact from '../../../build/contracts/TESTForceMove.json';
 import {Channel, getChannelId} from '../../../src/contract/channel';
+import {hashChannelStorage} from '../../../src/contract/channel-storage';
+import {Outcome} from '../../../src/contract/outcome';
 import {State} from '../../../src/contract/state';
 import {concludeArgs} from '../../../src/contract/transaction-creators/force-move';
-import {hashChannelStorage} from '../../../src/contract/channel-storage';
-import {hexlify} from 'ethers/utils';
 import {
   CHANNEL_FINALIZED,
   UNACCEPTABLE_WHO_SIGNED_WHAT,
 } from '../../../src/contract/transaction-creators/revert-reasons';
-import {Contract, Wallet} from 'ethers';
+import {
+  clearedChallengeHash,
+  finalizedOutcomeHash,
+  getNetworkMap,
+  getTestProvider,
+  ongoingChallengeHash,
+  setupContracts,
+  signStates,
+} from '../../test-helpers';
 
 const provider = getTestProvider();
 let ForceMove: Contract;
@@ -147,6 +147,6 @@ describe('conclude', () => {
         // check channelStorageHash against the expected value
         expect(await ForceMove.channelStorageHashes(channelId)).toEqual(expectedChannelStorageHash);
       }
-    },
+    }
   );
 });

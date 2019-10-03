@@ -1,16 +1,16 @@
-import {Uint48, Bytes32, Address, Bytes} from './types';
+import {AddressZero, HashZero} from 'ethers/constants';
 import {
+  bigNumberify,
   defaultAbiCoder,
-  keccak256,
   hexDataSlice,
   hexlify,
   hexZeroPad,
   isHexString,
-  bigNumberify,
+  keccak256,
 } from 'ethers/utils';
-import {Outcome, hashOutcome} from './outcome';
-import {State, hashState} from './state';
-import {HashZero, AddressZero} from 'ethers/constants';
+import {hashOutcome, Outcome} from './outcome';
+import {hashState, State} from './state';
+import {Address, Bytes, Bytes32, Uint48} from './types';
 
 export interface ChannelStorage {
   turnNumRecord: Uint48;
@@ -55,7 +55,7 @@ export function hashChannelStorage(channelStorage: ChannelStorage): Bytes32 {
 }
 
 export function parseChannelStorageHash(
-  channelStorageHashed: Bytes32,
+  channelStorageHashed: Bytes32
 ): {turnNumRecord: number; finalizesAt: number; fingerprint: Bytes} {
   validateHexString(channelStorageHashed);
 
@@ -90,7 +90,7 @@ export function channelStorageStruct({
 
   if (isOpen && (outcome || state || challengerAddress)) {
     console.warn(
-      `Invalid open channel storage: ${JSON.stringify(outcome || state || challengerAddress)}`,
+      `Invalid open channel storage: ${JSON.stringify(outcome || state || challengerAddress)}`
     );
   }
 
@@ -114,7 +114,7 @@ export function encodeChannelStorageLite(channelStorageLite: ChannelStorageLite)
 
   return defaultAbiCoder.encode(
     [CHANNEL_STORAGE_LITE_TYPE],
-    [[finalizesAt, stateHash, challengerAddress, outcomeHash]],
+    [[finalizesAt, stateHash, challengerAddress, outcomeHash]]
   );
 }
 

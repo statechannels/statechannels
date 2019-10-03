@@ -1,9 +1,9 @@
+import {Contract, ethers} from 'ethers';
 import TrivialAppArtifact from '../../../build/contracts/TrivialApp.json';
 import {Channel} from '../../../src/contract/channel';
-import {ethers, Contract} from 'ethers';
-import {State} from '../../../src/contract/state';
-import {setupContracts, getTestProvider} from '../../test-helpers';
 import {validTransition} from '../../../src/contract/force-move-app';
+import {State} from '../../../src/contract/state';
+import {getTestProvider, setupContracts} from '../../test-helpers';
 
 const provider = getTestProvider();
 let forceMoveApp: Contract;
@@ -32,7 +32,7 @@ describe('ForceMoveApp', () => {
       const toState: State = {...fromState, turnNum: 2};
 
       expect(
-        await validTransition(fromState, toState, forceMoveApp.address, provider.getSigner(0)),
+        await validTransition(fromState, toState, forceMoveApp.address, provider.getSigner(0))
       ).toBe(true);
     });
   });
