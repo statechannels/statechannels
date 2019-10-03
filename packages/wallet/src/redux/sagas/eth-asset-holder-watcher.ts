@@ -4,7 +4,7 @@ import {ethers} from "ethers";
 import {getDepositedEvent} from "@statechannels/nitro-protocol";
 
 import * as actions from "../actions";
-import {getETHAssetHolderContract} from "src/utils/contract-utils";
+import {getETHAssetHolderContract} from "../../utils/contract-utils";
 import {ChannelSubscriber} from "../state";
 import {getETHAssetHolderWatcherSubscribersForChannel} from "../selectors";
 import {ProtocolLocator} from "src/communication";

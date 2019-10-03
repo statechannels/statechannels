@@ -3,28 +3,11 @@ import {adjudicatorWatcher} from "../redux/sagas/adjudicator-watcher";
 import {ethers} from "ethers";
 import SagaTester from "redux-saga-tester";
 import * as actions from "../redux/actions";
-import {depositContract, createChallenge, concludeGame, respond, getChannelId} from "./test-utils";
+import {depositContract, createChallenge, createWatcherState, concludeGame, respond, getChannelId} from "./test-utils";
 import * as walletStates from "../redux/state";
 import {getGanacheProvider} from "@statechannels/devtools";
 import {convertCommitmentToState} from "../utils/nitro-converter";
 jest.setTimeout(60000);
-
-const createWatcherState = (processId: string, ...channelIds: string[]): walletStates.Initialized => {
-  const channelSubscriptions: walletStates.ChannelSubscriptions = {};
-  for (const channelId of channelIds) {
-    channelSubscriptions[channelId] = channelSubscriptions[channelId] || [];
-    channelSubscriptions[channelId].push({processId, protocolLocator: []});
-  }
-
-  return walletStates.initialized({
-    ...walletStates.EMPTY_SHARED_DATA,
-    uid: "",
-    processStore: {},
-    channelSubscriptions,
-    address: "",
-    privateKey: ""
-  });
-};
 
 describe("adjudicator listener", () => {
   const provider: ethers.providers.JsonRpcProvider = getGanacheProvider();

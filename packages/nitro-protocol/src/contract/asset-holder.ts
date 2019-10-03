@@ -6,8 +6,10 @@ export interface DepositedEvent {
   destinationHoldings: BigNumber;
 }
 export function getDepositedEvent(eventResult): DepositedEvent {
-  const [event] = eventResult.slice(-1);
-  const {destination, amountDeposited, destinationHoldings} = event.args;
+  const args = eventResult.eventArgs;
+  const destination = args[0];
+  const amountDeposited = args[1];
+  const destinationHoldings = args[2];
 
   return {
     destination,
