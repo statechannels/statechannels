@@ -1,10 +1,9 @@
-import {getGanacheProvider} from "@statechannels/devtools";
-import {ethers} from "ethers";
-import fs from "fs";
-import path from "path";
-import easyTable from "easy-table";
-import linker from "solc/linker";
-import {rejects} from "assert";
+import easyTable from 'easy-table';
+import {JsonRpcProvider} from 'ethers/providers';
+import {Interface} from 'ethers/utils';
+import fs from 'fs';
+import path from 'path';
+import linker from 'solc/linker';
 interface MethodCalls {
   [methodName: string]: {
     gasData: number[];
@@ -14,7 +13,7 @@ interface MethodCalls {
 
 interface ContractCalls {
   [contractName: string]: {
-    interface: ethers.utils.Interface;
+    interface: Interface;
     address?: string;
     code: string;
     methodCalls: MethodCalls;
@@ -32,7 +31,7 @@ interface ContractCalls {
 
 export class GasReporter implements jest.Reporter {
   options: any;
-  provider: ethers.providers.JsonRpcProvider;
+  provider: JsonRpcProvider;
   globalConfig: any;
   startBlockNum: number;
   contractArtifactDirectory: string;
@@ -40,15 +39,15 @@ export class GasReporter implements jest.Reporter {
   constructor(globalConfig: any, options: any) {
     this.globalConfig = globalConfig;
     this.options = options;
-    this.provider = new ethers.providers.JsonRpcProvider(`http://localhost:${process.env.GANACHE_PORT || 8545}`);
+    this.provider = new JsonRpcProvider(`http://localhost:${process.env.GANACHE_PORT || 8545}`);
   }
 
   onRunStart(results: jest.AggregatedResult, options: jest.ReporterOnStartOptions): void {
     if (!this.options.contractArtifactFolder) {
       console.log(
-        "The contractArtifactFolder was not set in options, assuming a default folder of '/build/contracts/'",
+        "The contractArtifactFolder was not set in options, assuming a default folder of '/build/contracts/'"
       );
-      this.options.contractArtifactFolder = "build/contracts";
+      this.options.contractArtifactFolder = 'build/contracts';
     }
     this.provider
       .getBlockNumber()
@@ -78,12 +77,16 @@ export class GasReporter implements jest.Reporter {
     const contractCalls = await this.parseContractCalls(
       this.startBlockNum,
       endBlockNum,
-      this.options.contractArtifactFolder,
+      this.options.contractArtifactFolder
     );
     this.outputGasInfo(contractCalls);
   }
 
-  async parseContractCalls(startBlockNum: number, endBlockNum: number, contractFolder: string): Promise<ContractCalls> {
+  async parseContractCalls(
+    startBlockNum: number,
+    endBlockNum: number,
+    contractFolder: string
+  ): Promise<ContractCalls> {
     const networkId = (await this.provider.getNetwork()).chainId;
     const contractCalls = await this.parseContractArtifactFolder(contractFolder, networkId);
     for (let i = startBlockNum; i <= endBlockNum; i++) {
@@ -98,14 +101,14 @@ export class GasReporter implements jest.Reporter {
 
     contractArtifacts.forEach((artifact: string) => {
       const fileLocation = path.join(contractFolder, artifact);
-      const fileContent = fs.readFileSync(fileLocation, "utf8");
+      const fileContent = fs.readFileSync(fileLocation, 'utf8');
       const parsedArtifact = JSON.parse(fileContent);
       this.parseInterfaceAndAddress(parsedArtifact, networkId, contractCalls);
     });
 
     contractArtifacts.forEach((artifact: string) => {
       const fileLocation = path.join(contractFolder, artifact);
-      const fileContent = fs.readFileSync(fileLocation, "utf8");
+      const fileContent = fs.readFileSync(fileLocation, 'utf8');
       const parsedArtifact = JSON.parse(fileContent);
       this.parseCode(parsedArtifact, contractCalls);
     });
@@ -130,25 +133,26 @@ export class GasReporter implements jest.Reporter {
   parseInterfaceAndAddress(parsedArtifact: any, networkId: number, contractCalls: ContractCalls) {
     // Only attempt to parse as a contract if we have a defined ABI and contractName
     if (parsedArtifact.abi && parsedArtifact.contractName) {
-      const contractInterface = new ethers.utils.Interface(parsedArtifact.abi);
+      const contractInterface = new Interface(parsedArtifact.abi);
 
       contractCalls[parsedArtifact.contractName] = {
         methodCalls: {},
-        code: "",
+        code: '',
         interface: contractInterface,
       };
 
       if (parsedArtifact.networks[networkId]) {
-        contractCalls[parsedArtifact.contractName].address = parsedArtifact.networks[networkId].address;
+        contractCalls[parsedArtifact.contractName].address =
+          parsedArtifact.networks[networkId].address;
       }
     }
   }
 
   outputGasInfo(contractCalls: ContractCalls) {
     console.log();
-    console.log("Gas Info:");
+    console.log('Gas Info:');
     console.log();
-    console.log("Function Calls:");
+    console.log('Function Calls:');
     const methodTable = new easyTable();
     for (const contractName of Object.keys(contractCalls)) {
       const methodCalls = contractCalls[contractName].methodCalls;
@@ -158,17 +162,17 @@ export class GasReporter implements jest.Reporter {
         const average = Math.round(total / method.gasData.length);
         const min = Math.min(...method.gasData);
         const max = Math.max(...method.gasData);
-        methodTable.cell("Contract Name", contractName);
-        methodTable.cell("Method Name", methodName);
-        methodTable.cell("Calls", method.calls);
-        methodTable.cell("Min Gas", min);
-        methodTable.cell("Max Gas", max);
-        methodTable.cell("Average Gas", average);
+        methodTable.cell('Contract Name', contractName);
+        methodTable.cell('Method Name', methodName);
+        methodTable.cell('Calls', method.calls);
+        methodTable.cell('Min Gas', min);
+        methodTable.cell('Max Gas', max);
+        methodTable.cell('Average Gas', average);
         methodTable.newRow();
       });
     }
     console.log(methodTable.toString());
-    console.log("Deployments:");
+    console.log('Deployments:');
     const deployTable = new easyTable();
     for (const contractName of Object.keys(contractCalls)) {
       if (contractCalls[contractName].deploy) {
@@ -179,11 +183,11 @@ export class GasReporter implements jest.Reporter {
         const min = Math.min(...deploy.gasData);
         const max = Math.max(...deploy.gasData);
 
-        deployTable.cell("Contract Name", contractName);
-        deployTable.cell("Deployments", deploy.calls);
-        deployTable.cell("Min Gas", min);
-        deployTable.cell("Max Gas", max);
-        deployTable.cell("Average Gas", average);
+        deployTable.cell('Contract Name', contractName);
+        deployTable.cell('Deployments', deploy.calls);
+        deployTable.cell('Min Gas', min);
+        deployTable.cell('Max Gas', max);
+        deployTable.cell('Average Gas', average);
         deployTable.newRow();
       }
     }
@@ -201,7 +205,7 @@ export class GasReporter implements jest.Reporter {
 
         for (const contractName of Object.keys(contractCalls)) {
           const contractCall = contractCalls[contractName];
-          if (contractCall.code.localeCompare(code, undefined, {sensitivity: "base"}) === 0) {
+          if (contractCall.code.localeCompare(code, undefined, {sensitivity: 'base'}) === 0) {
             const details = contractCall.interface.parseTransaction(transaction);
 
             if (details != null) {
@@ -211,7 +215,9 @@ export class GasReporter implements jest.Reporter {
                   calls: 0,
                 };
               }
-              contractCall.methodCalls[details.name].gasData.push(transactionReceipt.gasUsed.toNumber());
+              contractCall.methodCalls[details.name].gasData.push(
+                transactionReceipt.gasUsed.toNumber()
+              );
               contractCall.methodCalls[details.name].calls++;
             }
           }
@@ -221,7 +227,7 @@ export class GasReporter implements jest.Reporter {
 
         for (const contractName of Object.keys(contractCalls)) {
           const contractCall = contractCalls[contractName];
-          if (contractCall.code.localeCompare(code, undefined, {sensitivity: "base"}) === 0) {
+          if (contractCall.code.localeCompare(code, undefined, {sensitivity: 'base'}) === 0) {
             if (!contractCall.deploy) {
               contractCall.deploy = {calls: 0, gasData: []};
             }

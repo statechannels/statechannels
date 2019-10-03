@@ -1,0 +1,50 @@
+@import "../../styles/variables";
+section.fill {
+  display: flex;
+  align-items: center;
+  padding: 0;
+  margin-bottom: 100px;
+}
+
+.upload-action-bar {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  width: 100%;
+  label,
+  input,
+  button {
+    margin: 30px auto 0px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+  }
+  label {
+    margin-left: 0px;
+  }
+  button {
+    margin-right: 0px;
+  }
+  .inputfile {
+    color: $c-lessdarkgrey;
+  }
+}
+
+button,
+.subtitle {
+  margin-top: 30px;
+}
+.jumbotron-upload {
+  background-image: url("/assets/jumbotron-upload.png");
+  background-size: contain;
+  background-repeat: no-repeat;
+  height: auto;
+  width: 100%;
+  padding-top: 22.08%;
+}
+
+.subtitle {
+  font-size: 18px;
+  line-height: 32px;
+  text-align: center;
+  margin: 30px auto 20px;
+}

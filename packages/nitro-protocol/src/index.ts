@@ -5,8 +5,9 @@ import * as Transactions from './transactions';
 import {encodeConsensusData} from './contract/consensus-data';
 import {createDepositTransaction} from './contract/transaction-creators/eth-asset-holder';
 import {Outcome, AllocationItem} from './contract/outcome';
-import {Channel} from './contract/channel';
-
+import {Channel, getChannelId} from './contract/channel';
+import {getChallengeRegisteredEvent} from './contract/challenge';
+import {isAllocationOutcome, isGuaranteeOutcome} from './contract/outcome';
 export {Signatures, Transactions};
 
 // TODO: Move these to their own interface files once they've stabilized
@@ -26,4 +27,15 @@ export interface SignedState {
 // }
 
 // TODO: Export this with more thought to what is exposed by @statchannels/nitro-protocol
-export {createDepositTransaction, State, encodeConsensusData, Outcome, AllocationItem, Channel};
+export {
+  createDepositTransaction,
+  State,
+  encodeConsensusData,
+  Outcome,
+  AllocationItem,
+  getChannelId,
+  Channel,
+  getChallengeRegisteredEvent,
+  isAllocationOutcome,
+  isGuaranteeOutcome,
+};

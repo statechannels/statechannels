@@ -1,22 +1,22 @@
-import bencode from "bencode";
-import { Extension } from "bittorrent-protocol";
-import debug from "debug";
-import EventEmitter from "eventemitter3";
+import bencode from 'bencode';
+import {Extension} from 'bittorrent-protocol';
+import debug from 'debug';
+import EventEmitter from 'eventemitter3';
 import {
   ExtendedHandshake,
   PaidStreamingExtensionEvents,
   PaidStreamingExtensionNotices,
   PaidStreamingWire
-} from "./types";
-const log = debug("web3torrent:extension");
+} from './types';
+const log = debug('web3torrent:extension');
 
 export abstract class PaidStreamingExtension implements Extension {
   protected wire: PaidStreamingWire;
   protected messageBus: EventEmitter;
-  protected pseId: string = "";
+  protected pseId: string = '';
 
-  get name(): "paidStreamingExtension" {
-    return "paidStreamingExtension";
+  get name(): 'paidStreamingExtension' {
+    return 'paidStreamingExtension';
   }
 
   peerAccount?: string;
@@ -51,10 +51,10 @@ export abstract class PaidStreamingExtension implements Extension {
 
   onExtendedHandshake(handshake: ExtendedHandshake) {
     if (!handshake.m || !handshake.m[this.name]) {
-      log("WARNING: Peer does not support Web3Torrent");
+      log('WARNING: Peer does not support Web3Torrent');
       return this.messageBus.emit(
         PaidStreamingExtensionEvents.WARNING,
-        new Error("!>Peer does not support Web3Torrent")
+        new Error('!>Peer does not support Web3Torrent')
       );
     }
 
@@ -87,23 +87,23 @@ export abstract class PaidStreamingExtension implements Extension {
 
   onMessage(buffer: Buffer) {
     try {
-      const jsonData = bencode.decode(buffer, undefined, undefined, "utf8");
+      const jsonData = bencode.decode(buffer, undefined, undefined, 'utf8');
       this.messageBus.emit(PaidStreamingExtensionEvents.NOTICE, jsonData);
     } catch (err) {
-      log("ERROR: decoding", err);
+      log('ERROR: decoding', err);
       return;
     }
   }
 
   protected executeExtensionCommand(command: PaidStreamingExtensionNotices, data = {}) {
-    this.wire.extended(this.name, bencode.encode({ msg_type: 0, command, data }));
+    this.wire.extended(this.name, bencode.encode({msg_type: 0, command, data}));
   }
 
   protected interceptRequests() {
     // tslint:disable-next-line: no-string-literal
     const undecoratedOnRequestFunction = this.wire._onRequest;
     const extension = this;
-    const { messageBus } = extension;
+    const {messageBus} = extension;
     const wire = this.wire as PaidStreamingWire;
 
     // tslint:disable-next-line: only-arrow-functions no-string-literal
@@ -121,7 +121,7 @@ export abstract class PaidStreamingExtension implements Extension {
         if (!extension.isForceChoking) {
           undecoratedOnRequestFunction.apply(wire, [index, offset, length]);
         } else {
-          log("!> dropped request - index: " + index);
+          log('!> dropped request - index: ' + index);
         }
       }, 0);
     };

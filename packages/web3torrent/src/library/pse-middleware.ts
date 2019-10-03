@@ -1,6 +1,6 @@
-import { ExtensionConstructor, Wire } from "bittorrent-protocol";
-import { PaidStreamingExtension } from "./paid-streaming-extension";
-import { Wireish } from "./types";
+import {ExtensionConstructor, Wire} from 'bittorrent-protocol';
+import {PaidStreamingExtension} from './paid-streaming-extension';
+import {Wireish} from './types';
 
 /**
  * Returns a bittorrent extension
@@ -8,7 +8,9 @@ import { Wireish } from "./types";
  * @param {String} [opts.pseAccount] Random ID number
  * @return {typeof PaidStreamingExtension}
  */
-export default function usePaidStreamingExtension(options: PaidStreamingExtensionOptions): ExtensionConstructor {
+export default function usePaidStreamingExtension(
+  options: PaidStreamingExtensionOptions
+): ExtensionConstructor {
   return class PSE extends PaidStreamingExtension {
     constructor(wireToUse: Wire) {
       super(wireToUse as Wireish);

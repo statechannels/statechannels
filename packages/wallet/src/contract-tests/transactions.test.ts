@@ -5,7 +5,7 @@ import { createChallenge, concludeGame, fiveFive } from "./test-utils";
 import {
   createForceMoveTransaction,
   createDepositTransaction,
-  createRespondWithMoveTransaction,
+  createRespondTransaction,
   createRefuteTransaction,
   createConcludeTransaction,
   createWithdrawTransaction,
@@ -147,7 +147,7 @@ describe("transactions", () => {
 
     await depositContract(provider, participantA.address);
     await depositContract(provider, participantB.address);
-    
+
     await createChallenge(provider, channelNonce, participantA, participantB);
 
     // NOTE: Copied from createChallenge
@@ -155,7 +155,7 @@ describe("transactions", () => {
       channel,
       allocation: fiveFive,
       destination: [participantA.address, participantB.address],
-      turnNum: 5,
+      turnNum: 7,
       commitmentType: CommitmentType.App,
       appAttributes: "0x0",
       commitmentCount: 1,
@@ -165,13 +165,13 @@ describe("transactions", () => {
       channel,
       allocation: fiveFive,
       destination: [participantA.address, participantB.address],
-      turnNum: 6,
+      turnNum: 8,
       commitmentType: CommitmentType.App,
       appAttributes: "0x0",
       commitmentCount: 2,
     };
 
-    const respondWithMoveTransaction = createRespondWithMoveTransaction(
+    const respondWithMoveTransaction = createRespondTransaction(
       fromCommitment,
       toCommitment,
       participantA.privateKey
@@ -180,25 +180,46 @@ describe("transactions", () => {
     await testTransactionSender(respondWithMoveTransaction);
   });
 
-  it.skip("should send a refute transaction", async () => {
-    const channel: Channel = { channelType: libraryAddress, nonce: getNextNonce(), participants };
+  it("should send a refute transaction", async () => {
+    const channel: Channel = {
+      channelType: libraryAddress,
+      nonce: getNextNonce(),
+      participants: [participantA.address, participantB.address]
+    };
     const { nonce: channelNonce } = channel;
     await depositContract(provider, participantA.address);
     await depositContract(provider, participantB.address);
+
     await createChallenge(provider, channelNonce, participantA, participantB);
-    const toCommitment: Commitment = {
+
+    const fromCommitment: Commitment = {
       channel,
       allocation: fiveFive,
       destination: [participantA.address, participantB.address],
       turnNum: 8,
       commitmentType: CommitmentType.App,
-      appAttributes: "0x0",
-      commitmentCount: 1,
+      appAttributes: "0x00",
+      commitmentCount: 3,
     };
 
-    const toSig = signCommitment(toCommitment, participantA.privateKey);
+    const toCommitment: Commitment = {
+      channel,
+      allocation: ["0x05", "0x05"],
+      destination: [participantA.address, participantB.address],
+      turnNum: 9,
+      commitmentType: CommitmentType.App,
+      appAttributes: "0x0",
+      commitmentCount: 4,
+    };
 
-    const refuteTransaction = createRefuteTransaction(toCommitment, toSig);
+    const fromSignedState = signCommitment2(fromCommitment, participantA.privateKey);
+    const toSignedState = signCommitment2(toCommitment, participantB.privateKey);
+
+    const refuteTransaction = createRefuteTransaction([
+      fromSignedState.signedState,
+      toSignedState.signedState
+    ]);
+
     await testTransactionSender(refuteTransaction);
   });
 

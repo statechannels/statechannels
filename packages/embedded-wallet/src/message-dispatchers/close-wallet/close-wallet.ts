@@ -1,5 +1,10 @@
+import debug from 'debug';
+
+const log = debug('wallet:dispatch');
+
 const closeWallet = () => {
-  window.parent.postMessage("ui:wallet:close", "*");
+  log('Sending: %o', 'ui:wallet:close');
+  window.parent.postMessage('ui:wallet:close', '*');
 };
 
-export { closeWallet };
+export {closeWallet};

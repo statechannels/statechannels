@@ -1,0 +1,67 @@
+@import "../../styles/variables";
+
+section {
+  width: 100%;
+}
+
+.torrentInfo {
+  padding-top: 30px;
+  margin-bottom: 10px;
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  * {
+    text-align: center;
+  }
+  .fileName {
+    text-align: left;
+
+    min-width: 250px;
+    width: 50%;
+  }
+  .fileSize {
+    min-width: 50px;
+    width: 15%;
+  }
+  .fileCost {
+    min-width: 70px;
+    width: 35%;
+    text-align: right;
+  }
+  &.with-link {
+    .fileName {
+      min-width: 140px;
+      width: 30%;
+    }
+    .fileSize {
+      min-width: 50px;
+      width: 10%;
+    }
+    .fileStatus {
+      min-width: 50px;
+      width: 17%;
+    }
+    .fileCost {
+      min-width: 70px;
+      width: 20%;
+      text-align: right;
+    }
+    .fileLink {
+      min-width: 70px;
+      width: 23%;
+      text-align: right;
+    }
+  }
+}
+
+@media only screen and (max-width: 370px) {
+  .torrentInfo,
+  .torrentInfo.with-link {
+    flex-direction: column;
+    * {
+      width: 100% !important;
+      text-align: center !important;
+      margin-top: 5px;
+    }
+  }
+}

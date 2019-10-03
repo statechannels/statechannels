@@ -4,8 +4,7 @@ import {
   createDepositTransaction,
   createForceMoveTransaction,
   createConcludeTransaction,
-  createRefuteTransaction,
-  createRespondWithMoveTransaction,
+  createRespondTransaction,
 } from "../utils/transaction-generator";
 import { signCommitment } from "../domain";
 
@@ -57,9 +56,9 @@ export async function createChallenge(provider: ethers.providers.JsonRpcProvider
     channel,
     allocation: fiveFive,
     destination: [participantA.address, participantB.address],
-    turnNum: 4,
+    turnNum: 6,
     commitmentType: CommitmentType.App,
-    appAttributes: "0x0",
+    appAttributes: "0x00",
     commitmentCount: 0,
   };
 
@@ -67,9 +66,9 @@ export async function createChallenge(provider: ethers.providers.JsonRpcProvider
     channel,
     allocation: fiveFive,
     destination: [participantA.address, participantB.address],
-    turnNum: 5,
+    turnNum: 7,
     commitmentType: CommitmentType.App,
-    appAttributes: "0x0",
+    appAttributes: "0x00",
     commitmentCount: 1,
   };
 
@@ -78,7 +77,7 @@ export async function createChallenge(provider: ethers.providers.JsonRpcProvider
     signCommitment2(toCommitment, participantB.privateKey),
     participantB.privateKey
   );
-  
+
   const transactionReceipt = await sendTransaction(provider, challengeTransaction);
   await transactionReceipt.wait();
   return toCommitment;
@@ -99,7 +98,7 @@ export async function concludeGame(provider: ethers.providers.JsonRpcProvider, c
     channel,
     allocation: fiveFive,
     destination: [participantA.address, participantB.address],
-    turnNum: 4,
+    turnNum: 6,
     commitmentType: CommitmentType.Conclude,
     appAttributes: "0x0",
     commitmentCount: 0,
@@ -109,7 +108,7 @@ export async function concludeGame(provider: ethers.providers.JsonRpcProvider, c
     channel,
     allocation: fiveFive,
     destination: [participantA.address, participantB.address],
-    turnNum: 5,
+    turnNum: 7,
     commitmentType: CommitmentType.Conclude,
     appAttributes: "0x0",
     commitmentCount: 1,
@@ -123,7 +122,7 @@ export async function concludeGame(provider: ethers.providers.JsonRpcProvider, c
   await transactionReceipt.wait();
 }
 
-export async function respondWithMove(provider: ethers.providers.JsonRpcProvider, channelNonce, participantA, participantB) {
+export async function respond(provider: ethers.providers.JsonRpcProvider, channelNonce, participantA, participantB, challenge: Commitment) {
   const network = await provider.getNetwork();
   const networkId = network.chainId;
   const libraryAddress = await getLibraryAddress(networkId, "TrivialApp");
@@ -134,51 +133,7 @@ export async function respondWithMove(provider: ethers.providers.JsonRpcProvider
     guaranteedChannel: ADDRESS_ZERO,
   };
 
-  // NOTE: Copied from createChallenge
-  const fromCommitment: Commitment = {
-    channel,
-    allocation: fiveFive,
-    destination: [participantA.address, participantB.address],
-    turnNum: 6,
-    commitmentType: CommitmentType.App,
-    appAttributes: "0x00",
-    commitmentCount: 0,
-  };
-
-  const toCommitment: Commitment = {
-    channel,
-    allocation: fiveFive,
-    destination: [participantA.address, participantB.address],
-    turnNum: 7,
-    commitmentType: CommitmentType.App,
-    appAttributes: "0x00",
-    commitmentCount: 1,
-  };
-
-  const toSig = signCommitment(toCommitment, participantB.privateKey);
-
-  const respondWithMoveTransaction = createRespondWithMoveTransaction(
-    fromCommitment,
-    toCommitment,
-    participantB.privateKey
-  );
-
-  const transactionReceipt = await sendTransaction(provider, respondWithMoveTransaction);
-  await transactionReceipt.wait();
-  return { toCommitment, toSig };
-}
-
-export async function refuteChallenge(provider: ethers.providers.JsonRpcProvider, channelNonce, participantA, participantB) {
-  const network = await provider.getNetwork();
-  const networkId = network.chainId;
-  const libraryAddress = await getLibraryAddress(networkId, "TrivialApp");
-  const channel: Channel = {
-    channelType: libraryAddress,
-    nonce: channelNonce,
-    participants: [participantA.address, participantB.address],
-    guaranteedChannel: ADDRESS_ZERO,
-  };
-
+  // TODO: refactor to DRY challenge handling
   const toCommitment: Commitment = {
     channel,
     allocation: fiveFive,
@@ -186,14 +141,20 @@ export async function refuteChallenge(provider: ethers.providers.JsonRpcProvider
     turnNum: 8,
     commitmentType: CommitmentType.App,
     appAttributes: "0x00",
-    commitmentCount: 1,
+    commitmentCount: 2,
   };
 
-  const toSig = signCommitment(toCommitment, participantA.privateKey);
-  const refuteTransaction = createRefuteTransaction(toCommitment, toSig);
-  const transactionReceipt = await sendTransaction(provider, refuteTransaction);
+  const toSig = signCommitment(toCommitment, participantB.privateKey);
+
+  const respondWithMoveTransaction = createRespondTransaction(
+    challenge,
+    toCommitment,
+    participantA.privateKey
+  );
+
+  const transactionReceipt = await sendTransaction(provider, respondWithMoveTransaction);
   await transactionReceipt.wait();
-  return toCommitment;
+  return { toCommitment, toSig };
 }
 
 async function sendTransaction(provider: JsonRpcProvider, tx: TransactionRequest) {

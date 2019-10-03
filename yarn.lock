@@ -1087,6 +1087,11 @@
     exec-sh "^0.3.2"
     minimist "^1.2.0"
 
+"@counterfactual/cf-adjudicator-contracts@^0.0.8":
+  version "0.0.8"
+  resolved "https://registry.yarnpkg.com/@counterfactual/cf-adjudicator-contracts/-/cf-adjudicator-contracts-0.0.8.tgz#1ea120701ff16e1c4dd3bb64be205a4b42e820f1"
+  integrity sha512-j2w2/oSc/03pbAQE3ECJZYN/rQwyWPhugaUaSlBVRmMicP6uTLjQ+CizTOrH8WkVEd5D7Zh1ZNLjWUqQLq3djA==
+
 "@csstools/convert-colors@^1.4.0":
   version "1.4.0"
   resolved "https://registry.yarnpkg.com/@csstools/convert-colors/-/convert-colors-1.4.0.tgz#ad495dc41b12e75d588c6db8b9834f08fa131eb7"
@@ -5605,7 +5610,7 @@ babel-register@6.26.0, babel-register@^6.26.0:
     mkdirp "^0.5.1"
     source-map-support "^0.4.15"
 
-babel-runtime@^6.18.0, babel-runtime@^6.22.0, babel-runtime@^6.23.0, babel-runtime@^6.26.0:
+babel-runtime@^6.11.6, babel-runtime@^6.18.0, babel-runtime@^6.22.0, babel-runtime@^6.23.0, babel-runtime@^6.26.0:
   version "6.26.0"
   resolved "https://registry.yarnpkg.com/babel-runtime/-/babel-runtime-6.26.0.tgz#965c7058668e82b55d7bfe04ff2337bc8b5647fe"
   integrity sha1-llxwWGaOgrVde/4E/yM3vItWR/4=
@@ -13934,10 +13939,30 @@ linked-list@0.1.0:
   resolved "https://registry.yarnpkg.com/linked-list/-/linked-list-0.1.0.tgz#798b0ff97d1b92a4fd08480f55aea4e9d49d37bf"
   integrity sha1-eYsP+X0bkqT9CEgPVa6k6dSdN78=
 
-lint-staged@9.4.0, lint-staged@^9.4.0:
+lint-staged@9.4.0:
   version "9.4.0"
   resolved "https://registry.yarnpkg.com/lint-staged/-/lint-staged-9.4.0.tgz#dd4abcc9a82539fd290aed1584e3241b8f8af687"
   integrity sha512-jTu1KoGiGTSffM539wK+3igVqDGVsby3KwDBaXL471YndahkjnavLX+R5Nsk49JwklyMo0ZAXay1BaoyA6d2Jw==
+  dependencies:
+    chalk "^2.4.2"
+    commander "^2.20.0"
+    cosmiconfig "^5.2.1"
+    debug "^4.1.1"
+    dedent "^0.7.0"
+    del "^5.0.0"
+    execa "^2.0.3"
+    listr "^0.14.3"
+    log-symbols "^3.0.0"
+    micromatch "^4.0.2"
+    normalize-path "^3.0.0"
+    please-upgrade-node "^3.1.1"
+    string-argv "^0.3.0"
+    stringify-object "^3.3.0"
+
+lint-staged@^9.4.0:
+  version "9.4.1"
+  resolved "https://registry.yarnpkg.com/lint-staged/-/lint-staged-9.4.1.tgz#60c0f85745bd398e6460aa7f5adb3cad3a2b862c"
+  integrity sha512-zFRbo1bAJEVf1m33paTTjDVfy2v3lICCqHfmQSgNoI+lWpi7HPG5y/R2Y7Whdce+FKxlZYs/U1sDSx8+nmQdDA==
   dependencies:
     chalk "^2.4.2"
     commander "^2.20.0"
@@ -15413,7 +15438,7 @@ node-pre-gyp@^0.12.0:
 
 node-pre-gyp@^0.13.0:
   version "0.13.0"
-  resolved "https://registry.yarnpkg.com/node-pre-gyp/-/node-pre-gyp-0.13.0.tgz#df9ab7b68dd6498137717838e4f92a33fc9daa42"
+  resolved "https://registry.npmjs.org/node-pre-gyp/-/node-pre-gyp-0.13.0.tgz#df9ab7b68dd6498137717838e4f92a33fc9daa42"
   integrity sha512-Md1D3xnEne8b/HGVQkZZwV27WUi1ZRuZBij24TNaZwUPU3ZAFtvT6xxJGaUVillfmMKnn5oD1HoGsp2Ftik7SQ==
   dependencies:
     detect-libc "^1.0.2"
@@ -18951,10 +18976,12 @@ redux-saga-test-plan@4.0.0-rc.3:
     object-assign "^4.1.0"
     util-inspect "^0.1.8"
 
-redux-saga-tester@1.0.381:
-  version "1.0.381"
-  resolved "https://registry.yarnpkg.com/redux-saga-tester/-/redux-saga-tester-1.0.381.tgz#9ea1348bb887aa67cbe40f33ba67f28b08177a83"
-  integrity sha512-F9jBiRXadEjV8h54656f2Iz8AoSDhdMQjJwEiJ3rVbx97TQxX5CPJRMdVSHUUT5rcZGyLplags9XPmS7iIhECA==
+redux-saga-tester@1.0.565:
+  version "1.0.565"
+  resolved "https://registry.yarnpkg.com/redux-saga-tester/-/redux-saga-tester-1.0.565.tgz#2784d48046481d893284e1c8cf6b53ffd01a97f9"
+  integrity sha512-Vhm86HXqk5dPXl3eyhDbsYKqiBqN5vkxdRBdFcUnbJGIgwTc9MV2r73EP3IdEpQwspREuPTeNl81/8NByCqosA==
+  dependencies:
+    babel-runtime "^6.11.6"
 
 redux-saga@1.0.0:
   version "1.0.0"

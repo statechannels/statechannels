@@ -1,4 +1,3 @@
-import {ethers} from 'ethers';
 // @ts-ignore
 import NitroAdjudicatorArtifact from '../../../build/contracts/TESTNitroAdjudicator.json';
 // @ts-ignore
@@ -22,11 +21,12 @@ import {
   CHANNEL_NOT_FINALIZED,
   WRONG_CHANNEL_STORAGE,
 } from '../../../src/contract/transaction-creators/revert-reasons';
+import {Contract, Wallet} from 'ethers';
 
 const provider = getTestProvider();
-let NitroAdjudicator: ethers.Contract;
-let ETHAssetHolder: ethers.Contract;
-let ERC20AssetHolder: ethers.Contract;
+let NitroAdjudicator: Contract;
+let ETHAssetHolder: Contract;
+let ERC20AssetHolder: Contract;
 
 // constants for this test suite
 
@@ -36,7 +36,7 @@ const wallets = new Array(3);
 
 // populate wallets and participants array
 for (let i = 0; i < 3; i++) {
-  wallets[i] = ethers.Wallet.createRandom();
+  wallets[i] = Wallet.createRandom();
   participants[i] = wallets[i].address;
 }
 beforeAll(async () => {

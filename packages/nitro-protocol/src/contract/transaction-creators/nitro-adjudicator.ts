@@ -1,17 +1,17 @@
 // @ts-ignore
 import NitroAdjudicatorArtifact from '../../../build/contracts/NitroAdjudicator.json';
-import {ethers} from 'ethers';
 import {TransactionRequest} from 'ethers/providers';
 import {State, hashState} from '../state';
 import {Outcome, encodeOutcome} from '../outcome';
 import {getChannelId} from '../channel';
+import {Interface} from 'ethers/utils';
 
 // TODO: Currently we are setting some arbitrary gas limit
 // to avoid issues with Ganache sendTransaction and parsing BN.js
 // If we don't set a gas limit some transactions will fail
 const GAS_LIMIT = 3000000;
 
-const NitroAdjudicatorContractInterface = new ethers.utils.Interface(NitroAdjudicatorArtifact.abi);
+const NitroAdjudicatorContractInterface = new Interface(NitroAdjudicatorArtifact.abi);
 
 export function createPushOutcomeTransaction(
   turnNumRecord: number,

@@ -2,7 +2,7 @@ import * as scenarios from "./scenarios";
 import {initialize, responderReducer} from "../reducer";
 
 import * as states from "../states";
-import {Commitment} from "../../../../../domain";
+import {Commitment, SignedCommitment} from "../../../../../domain";
 import * as TransactionGenerator from "../../../../../utils/transaction-generator";
 import {SHOW_WALLET, HIDE_WALLET, CHALLENGE_COMPLETE} from "../../../../../magmo-wallet-client";
 import {itSendsThisDisplayEventType, itSendsThisMessage} from "../../../../__tests__/helpers";
@@ -12,7 +12,7 @@ import {describeScenarioStep} from "../../../../__tests__/helpers";
 const mockTransaction = {to: "0xabc"};
 const createRespondWithMoveMock = jest.fn().mockReturnValue(mockTransaction);
 const refuteMock = jest.fn().mockReturnValue(mockTransaction);
-Object.defineProperty(TransactionGenerator, "createRespondWithMoveTransaction", {
+Object.defineProperty(TransactionGenerator, "createRespondTransaction", {
   value: createRespondWithMoveMock
 });
 Object.defineProperty(TransactionGenerator, "createRefuteTransaction", {
@@ -30,13 +30,17 @@ const itTransitionsToFailure = (result: {protocolState: states.ResponderState}, 
 // TODO: Also check that is submits the previous commitment too
 const itCallsRespondWithMoveWith = (responseCommitment: Commitment) => {
   it("calls respond with move with the correct commitment", () => {
-    expect(createRespondWithMoveMock).toHaveBeenCalledWith(jasmine.any(Object), responseCommitment, jasmine.any(String));
+    expect(createRespondWithMoveMock).toHaveBeenCalledWith(
+      jasmine.any(Object),
+      responseCommitment,
+      jasmine.any(String)
+    );
   });
 };
 
-const itCallsRefuteWith = (refuteCommitment: Commitment) => {
+const itCallsRefuteWith = (refuteCommitments: SignedCommitment[]) => {
   it("calls refute with the correct commitment", () => {
-    expect(refuteMock).toHaveBeenCalledWith(refuteCommitment, jasmine.any(String));
+    expect(refuteMock).toHaveBeenCalledWith(refuteCommitments.map(x => x.signedState));
   });
 };
 
@@ -101,12 +105,14 @@ describe("REFUTE HAPPY-PATH ", () => {
   });
 
   describeScenarioStep(scenario.waitForApproval, () => {
-    const {state, action, refuteCommitment} = scenario.waitForApproval;
+    const {state, action} = scenario.waitForApproval;
+
+    const signedCommitments = sharedData.channelStore[state.channelId]!.commitments;
 
     const result = responderReducer(state, sharedData, action);
 
     itTransitionsTo(result, "Responding.WaitForTransaction");
-    itCallsRefuteWith(refuteCommitment);
+    itCallsRefuteWith(signedCommitments);
   });
 
   describeScenarioStep(scenario.waitForTransaction, () => {

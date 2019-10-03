@@ -19,7 +19,7 @@ export function createForceMoveTransaction(
   return nitroTrans.createForceMoveTransaction(signedStates, privateKey);
 }
 
-export function createRespondWithMoveTransaction(
+export function createRespondTransaction(
   challengeCommitment: Commitment,
   responseCommitment: Commitment,
   privateKey: string
@@ -28,12 +28,8 @@ export function createRespondWithMoveTransaction(
   return nitroTrans.createRespondTransaction(convertCommitmentToState(challengeCommitment), signedState);
 }
 
-export function createRefuteTransaction(refuteState: Commitment, signature: string): TransactionRequest {
-  const adjudicatorInterface = getAdjudicatorInterface();
-  const data = adjudicatorInterface.functions.refute.encode([asEthersObject(refuteState), splitSignature(signature)]);
-  return {
-    data
-  };
+export function createRefuteTransaction(seriesOfSupportiveStates: SignedState[]): TransactionRequest {
+  return nitroTrans.createCheckpointTransaction(seriesOfSupportiveStates);
 }
 
 export interface ConcludeAndWithdrawArgs {

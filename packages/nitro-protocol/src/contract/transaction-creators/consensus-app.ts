@@ -1,9 +1,9 @@
 import {TransactionRequest} from 'ethers/providers';
 import ConsensusAppArtifact from '../../../build/contracts/ConsensusApp.json';
-import {ethers} from 'ethers';
 import {ConsensusData} from '../consensus-data';
 import {Outcome} from '../outcome';
 import {getVariablePart} from '../consensus-app';
+import {Interface} from 'ethers/utils';
 
 // TODO: Currently we are setting some arbitrary gas limit
 // to avoid issues with Ganache sendTransaction and parsing BN.js
@@ -11,7 +11,7 @@ import {getVariablePart} from '../consensus-app';
 const GAS_LIMIT = 3000000;
 
 // ethers mis-interprets the artifact's abi paramter so we cast to any
-const ConsensusAppContractInterface = new ethers.utils.Interface(ConsensusAppArtifact.abi as any);
+const ConsensusAppContractInterface = new Interface(ConsensusAppArtifact.abi as any);
 
 export function createValidTransitionTransaction(
   fromConsensusData: ConsensusData,

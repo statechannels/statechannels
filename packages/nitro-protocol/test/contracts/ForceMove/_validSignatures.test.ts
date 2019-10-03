@@ -1,17 +1,18 @@
-import {ethers} from 'ethers';
 // @ts-ignore
 import ForceMoveArtifact from '../../../build/contracts/TESTForceMove.json';
 import {setupContracts, sign, getTestProvider} from '../../test-helpers';
+import {Contract, Wallet} from 'ethers';
+import {id} from 'ethers/utils';
 
 const provider = getTestProvider();
-let ForceMove: ethers.Contract;
+let ForceMove: Contract;
 
 const participants = ['', '', ''];
 const wallets = new Array(3);
 
 // populate wallets and participants array
 for (let i = 0; i < 3; i++) {
-  wallets[i] = ethers.Wallet.createRandom();
+  wallets[i] = Wallet.createRandom();
   participants[i] = wallets[i].address;
 }
 
@@ -37,9 +38,9 @@ describe('_validSignatures', () => {
 
   it('returns true (false) for a correct (incorrect) set of signatures on n states', async () => {
     for (let i = 0; i < 3; i++) {
-      wallet = ethers.Wallet.createRandom();
+      wallet = Wallet.createRandom();
       addresses[i] = wallet.address;
-      stateHash = ethers.utils.id('Commitment' + i);
+      stateHash = id('Commitment' + i);
       stateHashes[i] = stateHash;
       sig = await sign(wallet, stateHash);
       sigs[i] = {v: sig.v, r: sig.r, s: sig.s};
@@ -54,9 +55,9 @@ describe('_validSignatures', () => {
     ).toBe(false);
   });
   it('returns true (false) for a correct (incorrect) set of signatures on 1 state', async () => {
-    stateHash = ethers.utils.id('Commitment' + 8);
+    stateHash = id('Commitment' + 8);
     for (let i = 0; i < 3; i++) {
-      wallet = ethers.Wallet.createRandom();
+      wallet = Wallet.createRandom();
       addresses[i] = wallet.address;
       sig = await sign(wallet, stateHash);
       sigs[i] = {v: sig.v, r: sig.r, s: sig.s};

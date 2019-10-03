@@ -5,23 +5,22 @@
     <script src="https://unpkg.com/debug@4.0.1/dist/debug.js"></script>
   </head>
 
-  <button role="progressbar" onclick="callBudgetAllocation()">Allocate budget</button>
-  <button onclick="callNoHub()">Show No Hub</button>
-  <button onclick="callConnectToHub()">Connect to Hub</button>
+  <button onclick="callBudgetAllocation()">Allocate budget</button>
 
-  <script src="http://localhost:3000/wallet.js"></script>
+  <script src="http://localhost:1701/wallet.js"></script>
 
   <script>
+    EmbeddedWallet.enable();
+
     function callBudgetAllocation() {
-      window.postMessage({ jsonrpc: "2.0", method: "chan_allocate" });
-    }
-
-    function callNoHub() {
-      window.postMessage({ jsonrpc: "2.0", method: "chan_noHub" });
-    }
-
-    function callConnectToHub() {
-      window.postMessage({ jsonrpc: "2.0", method: "chan_connect" });
+      EmbeddedWallet.request({
+        jsonrpc: '2.0',
+        method: 'chan_allocate',
+        id: 123,
+        params: ['foo', 'bar', 3, false]
+      }).then(result => {
+        console.log('Callback has data!', result);
+      });
     }
   </script>
 </html>
