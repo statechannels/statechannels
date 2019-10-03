@@ -4,7 +4,10 @@ import * as Signatures from './signatures';
 import * as Transactions from './transactions';
 import {getAssetTransferredEvent, getDepositedEvent} from './contract/asset-holder';
 import {encodeConsensusData} from './contract/consensus-data';
-import {createDepositTransaction} from './contract/transaction-creators/eth-asset-holder';
+import {
+  createDepositTransaction,
+  createTransferAllTransaction,
+} from './contract/transaction-creators/eth-asset-holder';
 import {Outcome, AllocationItem} from './contract/outcome';
 import {Channel, getChannelId} from './contract/channel';
 import {getChallengeRegisteredEvent} from './contract/challenge';
@@ -30,6 +33,7 @@ export interface SignedState {
 // TODO: Export this with more thought to what is exposed by @statchannels/nitro-protocol
 export {
   createDepositTransaction,
+  createTransferAllTransaction,
   State,
   encodeConsensusData,
   Outcome,

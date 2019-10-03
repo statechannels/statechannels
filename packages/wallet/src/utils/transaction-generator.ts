@@ -5,10 +5,12 @@ import {Commitment, SignedCommitment, signCommitment2} from "../domain";
 import {asEthersObject} from "fmg-core";
 import {
   createDepositTransaction as createNitroDepositTransaction,
+  createTransferAllTransaction as createNitroTransferAllTransaction,
   Transactions as nitroTrans,
   SignedState
 } from "@statechannels/nitro-protocol";
 import {convertAddressToBytes32, convertCommitmentToState} from "./nitro-converter";
+import {Allocation, AllocationItem} from "@statechannels/nitro-protocol/src/contract/outcome";
 
 export function createForceMoveTransaction(
   fromCommitment: SignedCommitment,
@@ -120,10 +122,24 @@ export function createTransferAndWithdrawTransaction(
 }
 
 export function createDepositTransaction(destination: string, depositAmount: string, expectedHeld: string) {
-  let normalizedDestinationAddress = destination;
+  return createNitroDepositTransaction(normalizeDestinationAddress(destination), expectedHeld, depositAmount);
+}
+
+export function createTransferAllTransaction(source: string, destination: string, amount: string) {
+  const allocation: Allocation = [
+    {
+      destination: normalizeDestinationAddress(destination),
+      amount
+    } as AllocationItem
+  ];
+  return createNitroTransferAllTransaction(source, allocation);
+}
+
+function normalizeDestinationAddress(address: string): string {
+  let normalizedDestinationAddress = address;
   // If the address is not already left-padded to be of type byte32
   if (normalizedDestinationAddress.length !== 66) {
-    normalizedDestinationAddress = convertAddressToBytes32(destination);
+    normalizedDestinationAddress = convertAddressToBytes32(address);
   }
-  return createNitroDepositTransaction(normalizedDestinationAddress, expectedHeld, depositAmount);
+  return normalizedDestinationAddress;
 }
