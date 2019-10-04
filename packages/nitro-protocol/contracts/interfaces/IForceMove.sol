@@ -136,6 +136,8 @@ contract IForceMove {
     * @param isFinal Boolean denoting whether the challenge state is final.
     * @param fixedPart Data describing properties of the state channel that do not change with state updates.
     * @param variableParts An ordered array of structs, each decribing the properties of the state channel that may change with each state update.
+    * @param sigs A list of Signatures that supported the challenge
+    * @param whoSignedWhat Indexing information to identify which signature was by which participant
     */
     event ChallengeRegistered(
         bytes32 indexed channelId,
@@ -145,7 +147,9 @@ contract IForceMove {
         address challenger,
         bool isFinal,
         FixedPart fixedPart,
-        ForceMoveApp.VariablePart[] variableParts
+        ForceMoveApp.VariablePart[] variableParts,
+        Signature[] sigs,
+        uint8[] whoSignedWhat
     );
 
     /**

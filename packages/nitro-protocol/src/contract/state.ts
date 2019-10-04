@@ -4,7 +4,7 @@ import {encodeOutcome, hashOutcome, Outcome} from './outcome';
 import {Address, Bytes32, Uint256, Uint48} from './types';
 
 export interface State {
-  turnNum: number;
+  turnNum: number; // TODO: This should maybe be a string b/c it is uint256 in solidity
   isFinal: boolean;
   channel: Channel;
   challengeDuration: number;

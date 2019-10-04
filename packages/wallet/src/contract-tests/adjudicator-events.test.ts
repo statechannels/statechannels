@@ -76,7 +76,7 @@ describe("adjudicator listener", () => {
     const action: actions.ChallengeCreatedEvent = sagaTester.getLatestCalledAction();
 
     expect(action.finalizedAt).toBeGreaterThan(startTimestamp);
-    expect(action.challengeStates[1]).toMatchObject(challengeState);
+    expect(action.challengeStates[1].state).toMatchObject(challengeState);
   });
 
   it("should handle a ChallengeCleared event when registered for that channel", async () => {
