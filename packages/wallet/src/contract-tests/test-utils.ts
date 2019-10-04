@@ -73,7 +73,7 @@ export async function createChallenge(provider: ethers.providers.JsonRpcProvider
 
   const fromCommitment: Commitment = {
     channel,
-    allocation: ["0x05", "0x05"],
+    allocation: fiveFive,
     destination: [participantA.address, participantB.address],
     turnNum: 6,
     commitmentType: CommitmentType.App,
@@ -83,7 +83,7 @@ export async function createChallenge(provider: ethers.providers.JsonRpcProvider
 
   const toCommitment: Commitment = {
     channel,
-    allocation: ["0x05", "0x05"],
+    allocation: fiveFive,
     destination: [participantA.address, participantB.address],
     turnNum: 7,
     commitmentType: CommitmentType.App,
@@ -119,7 +119,7 @@ export async function concludeGame(provider: ethers.providers.JsonRpcProvider, c
     destination: [participantA.address, participantB.address],
     turnNum: 6,
     commitmentType: CommitmentType.Conclude,
-    appAttributes: "0x00",
+    appAttributes: "0x0",
     commitmentCount: 0,
   };
 
@@ -129,8 +129,8 @@ export async function concludeGame(provider: ethers.providers.JsonRpcProvider, c
     destination: [participantA.address, participantB.address],
     turnNum: 7,
     commitmentType: CommitmentType.Conclude,
-    appAttributes: "0x00",
-    commitmentCount: 0,
+    appAttributes: "0x0",
+    commitmentCount: 1,
   };
 
   const signedFromCommitment = signCommitment2(fromCommitment, participantA.privateKey);

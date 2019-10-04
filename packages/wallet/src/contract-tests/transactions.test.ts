@@ -1,7 +1,7 @@
 import { ethers } from "ethers";
 
 import { signCommitment, signVerificationData, signCommitment2 } from "../domain";
-import { createChallenge, concludeGame } from "./test-utils";
+import { createChallenge, concludeGame, fiveFive } from "./test-utils";
 import {
   createForceMoveTransaction,
   createDepositTransaction,
@@ -110,7 +110,7 @@ describe("transactions", () => {
 
     const fromCommitment: Commitment = {
       channel,
-      allocation: ["0x05", "0x05"],
+      allocation: fiveFive,
       destination: [participantA.address, participantB.address],
       turnNum: 4,
       commitmentType: CommitmentType.App,
@@ -120,7 +120,7 @@ describe("transactions", () => {
 
     const toCommitment: Commitment = {
       channel,
-      allocation: ["0x05", "0x05"],
+      allocation: fiveFive,
       destination: [participantA.address, participantB.address],
       turnNum: 5,
       commitmentType: CommitmentType.App,
@@ -153,7 +153,7 @@ describe("transactions", () => {
     // NOTE: Copied from createChallenge
     const fromCommitment: Commitment = {
       channel,
-      allocation: ["0x05", "0x05"],
+      allocation: fiveFive,
       destination: [participantA.address, participantB.address],
       turnNum: 7,
       commitmentType: CommitmentType.App,
@@ -163,7 +163,7 @@ describe("transactions", () => {
 
     const toCommitment: Commitment = {
       channel,
-      allocation: ["0x05", "0x05"],
+      allocation: fiveFive,
       destination: [participantA.address, participantB.address],
       turnNum: 8,
       commitmentType: CommitmentType.App,
@@ -194,7 +194,7 @@ describe("transactions", () => {
 
     const fromCommitment: Commitment = {
       channel,
-      allocation: ["0x05", "0x05"],
+      allocation: fiveFive,
       destination: [participantA.address, participantB.address],
       turnNum: 8,
       commitmentType: CommitmentType.App,
@@ -223,29 +223,36 @@ describe("transactions", () => {
     await testTransactionSender(refuteTransaction);
   });
 
-  it.skip("should send a conclude transaction", async () => {
-    const channel: Channel = { channelType: libraryAddress, nonce: getNextNonce(), participants };
+  it("should send a conclude transaction", async () => {
+    const channel: Channel = {
+      channelType: libraryAddress,
+      nonce: getNextNonce(),
+      participants: [participantA.address, participantB.address]
+    };
+
     await depositContract(provider, participantA.address);
     await depositContract(provider, participantB.address);
+
     const fromCommitment: Commitment = {
       channel,
-      allocation: ["0x05", "0x05"],
+      allocation: fiveFive,
       destination: [participantA.address, participantB.address],
-      turnNum: 5,
+      turnNum: 4,
       commitmentType: CommitmentType.Conclude,
       appAttributes: "0x0",
       commitmentCount: 0,
     };
-
+  
     const toCommitment: Commitment = {
       channel,
-      allocation: ["0x05", "0x05"],
+      allocation: fiveFive,
       destination: [participantA.address, participantB.address],
-      turnNum: 6,
+      turnNum: 5,
       commitmentType: CommitmentType.Conclude,
       appAttributes: "0x0",
       commitmentCount: 1,
     };
+  
     const signedFromCommitment = signCommitment2(fromCommitment, participantA.privateKey);
     const signedToCommitment = signCommitment2(toCommitment, participantB.privateKey);
 
@@ -305,7 +312,7 @@ describe("transactions", () => {
     );
     const fromCommitment: Commitment = {
       channel,
-      allocation: ["0x05", "0x05"],
+      allocation: fiveFive,
       destination: [participantA.address, participantB.address],
       turnNum: 5,
       commitmentType: CommitmentType.Conclude,
@@ -315,7 +322,7 @@ describe("transactions", () => {
 
     const toCommitment: Commitment = {
       channel,
-      allocation: ["0x05", "0x05"],
+      allocation: fiveFive,
       destination: [participantA.address, participantB.address],
       turnNum: 6,
       commitmentType: CommitmentType.Conclude,
