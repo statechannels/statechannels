@@ -1,11 +1,11 @@
 // @ts-ignore
-import ForceMoveArtifact from '../../../build/contracts/ForceMove.json';
 import * as ethers from 'ethers';
 import {TransactionRequest} from 'ethers/providers';
-import {State, getVariablePart, getFixedPart, hashAppPart} from '../state';
 import {Signature} from 'ethers/utils';
-import {hashOutcome} from '../outcome';
+import ForceMoveArtifact from '../../../build/contracts/ForceMove.json';
 import {signChallengeMessage} from '../../signatures';
+import {hashOutcome} from '../outcome';
+import {getFixedPart, getVariablePart, hashAppPart, State} from '../state';
 
 // TODO: Currently we are setting some arbitrary gas limit
 // to avoid issues with Ganache sendTransaction and parsing BN.js
@@ -25,7 +25,7 @@ export function createForceMoveTransaction(
   states: State[],
   signatures: Signature[],
   whoSignedWhat: number[],
-  challengerPrivateKey: string,
+  challengerPrivateKey: string
 ): TransactionRequest {
   // Sanity checks on expected lengths
   if (states.length === 0) {
@@ -34,7 +34,7 @@ export function createForceMoveTransaction(
   const {participants} = states[0].channel;
   if (participants.length !== signatures.length) {
     throw new Error(
-      `Participants (length:${participants.length}) and signatures (length:${signatures.length}) need to be the same length`,
+      `Participants (length:${participants.length}) and signatures (length:${signatures.length}) need to be the same length`
     );
   }
 
@@ -90,7 +90,7 @@ export function createCheckpointTransaction({
   whoSignedWhat,
 }: CheckpointData): TransactionRequest {
   const data = ForceMoveContractInterface.functions.checkpoint.encode(
-    checkpointArgs({states, signatures, whoSignedWhat}),
+    checkpointArgs({states, signatures, whoSignedWhat})
   );
 
   return {data, gasLimit: GAS_LIMIT};
@@ -108,10 +108,10 @@ export function checkpointArgs({states, signatures, whoSignedWhat}: CheckpointDa
 export function createConcludeTransaction(
   states: State[],
   signatures: Signature[],
-  whoSignedWhat: number[],
+  whoSignedWhat: number[]
 ): TransactionRequest {
   const data = ForceMoveContractInterface.functions.conclude.encode(
-    concludeArgs(states, signatures, whoSignedWhat),
+    concludeArgs(states, signatures, whoSignedWhat)
   );
   return {data, gasLimit: GAS_LIMIT};
 }
@@ -119,7 +119,7 @@ export function createConcludeTransaction(
 export function concludeArgs(
   states: State[],
   signatures: Signature[],
-  whoSignedWhat: number[],
+  whoSignedWhat: number[]
 ): any[] {
   // Sanity checks on expected lengths
   if (states.length === 0) {
@@ -128,7 +128,7 @@ export function concludeArgs(
   const {participants} = states[0].channel;
   if (participants.length !== signatures.length) {
     throw new Error(
-      `Participants (length:${participants.length}) and signatures (length:${signatures.length}) need to be the same length`,
+      `Participants (length:${participants.length}) and signatures (length:${signatures.length}) need to be the same length`
     );
   }
 

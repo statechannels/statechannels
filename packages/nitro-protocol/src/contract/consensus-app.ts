@@ -1,9 +1,9 @@
-import {encodeConsensusData, ConsensusData} from './consensus-data';
-import {encodeOutcome, Outcome} from './outcome';
-import ConsensusAppArtifact from '../../build/contracts/ConsensusApp.json';
-import {VariablePart} from './state';
+import {Contract, Signer} from 'ethers';
 import {Interface} from 'ethers/utils';
-import {Signer, Contract} from 'ethers';
+import ConsensusAppArtifact from '../../build/contracts/ConsensusApp.json';
+import {ConsensusData, encodeConsensusData} from './consensus-data';
+import {encodeOutcome, Outcome} from './outcome';
+import {VariablePart} from './state';
 
 const ConsensusAppContractInterface = new Interface(ConsensusAppArtifact.abi);
 
@@ -21,7 +21,7 @@ export async function validTransition(
   toOutcome: Outcome,
   numberOfParticipants: number,
   signer: Signer,
-  contractAddress: string,
+  contractAddress: string
 ): Promise<boolean> {
   const fromVariablePart = getVariablePart(fromConsensusData, fromOutcome);
   const toVariablePart = getVariablePart(toConsensusData, toOutcome);
@@ -32,6 +32,6 @@ export async function validTransition(
     fromVariablePart,
     toVariablePart,
     turnNumB,
-    numberOfParticipants,
+    numberOfParticipants
   );
 }

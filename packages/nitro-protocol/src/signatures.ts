@@ -1,10 +1,10 @@
-import {Signature, splitSignature, arrayify, verifyMessage} from 'ethers/utils';
-import {hashState, State} from './contract/state';
-import {SignedState} from '.';
-import {getChannelId} from './contract/channel';
-import {hashChallengeMessage} from './contract/challenge';
-import Web3EthAccounts from 'web3-eth-accounts';
 import {Wallet} from 'ethers';
+import {arrayify, Signature, splitSignature, verifyMessage} from 'ethers/utils';
+import Web3EthAccounts from 'web3-eth-accounts';
+import {SignedState} from '.';
+import {hashChallengeMessage} from './contract/challenge';
+import {getChannelId} from './contract/channel';
+import {hashState, State} from './contract/state';
 
 export function getStateSignerAddress(signedState: SignedState): string {
   const stateHash = hashState(signedState.state);
@@ -15,8 +15,8 @@ export function getStateSignerAddress(signedState: SignedState): string {
   if (participants.indexOf(recoveredAddress) < 0) {
     throw new Error(
       `Recovered address ${recoveredAddress} is not a participant in channel ${getChannelId(
-        channel,
-      )}`,
+        channel
+      )}`
     );
   }
   return recoveredAddress;

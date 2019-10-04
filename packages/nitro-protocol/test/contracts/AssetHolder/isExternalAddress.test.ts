@@ -1,7 +1,7 @@
 // @ts-ignore
-import AssetHolderArtifact from '../../../build/contracts/TESTAssetHolder.json';
-import {setupContracts, getTestProvider} from '../../test-helpers';
 import {Contract, Wallet} from 'ethers';
+import AssetHolderArtifact from '../../../build/contracts/TESTAssetHolder.json';
+import {getTestProvider, setupContracts} from '../../test-helpers';
 
 const provider = getTestProvider();
 

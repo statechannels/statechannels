@@ -1,13 +1,13 @@
 import {expectRevert} from '@statechannels/devtools';
+import {Contract, Wallet} from 'ethers';
+import {AddressZero} from 'ethers/constants';
+import {bigNumberify} from 'ethers/utils';
 // @ts-ignore
 import ERC20AssetHolderArtifact from '../../../build/contracts/ERC20AssetHolder.json';
 // @ts-ignore
 import TokenArtifact from '../../../build/contracts/Token.json';
-import {setupContracts, getTestProvider} from '../../test-helpers';
 import {Channel, getChannelId} from '../../../src/contract/channel';
-import {AddressZero} from 'ethers/constants';
-import {Wallet, Contract} from 'ethers';
-import {bigNumberify} from 'ethers/utils';
+import {getTestProvider, setupContracts} from '../../test-helpers';
 
 const provider = getTestProvider();
 const signer0 = provider.getSigner(0); // convention matches setupContracts function
@@ -62,7 +62,7 @@ describe('deposit', () => {
       allowance
         .sub(amount)
         .sub(held)
-        .gte(0),
+        .gte(0)
     ).toBe(true);
 
     if (held > 0) {
@@ -95,7 +95,7 @@ describe('deposit', () => {
 
       // check for any partial refund of tokens
       await expect(await Token.balanceOf(signer0Address)).toEqual(
-        balanceBefore.sub(depositedEvent.amountDeposited),
+        balanceBefore.sub(depositedEvent.amountDeposited)
       );
     }
   });

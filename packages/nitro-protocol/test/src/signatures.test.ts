@@ -1,9 +1,9 @@
-import {hashState, State} from '../../src/contract/state';
+import {Wallet} from 'ethers';
 import {AddressZero} from 'ethers/constants';
 import {arrayify, splitSignature, verifyMessage} from 'ethers/utils';
-import {getStateSignerAddress, signChallengeMessage, signState} from '../../src/signatures';
 import {hashChallengeMessage} from '../../src/contract/challenge';
-import {Wallet} from 'ethers';
+import {hashState, State} from '../../src/contract/state';
+import {getStateSignerAddress, signChallengeMessage, signState} from '../../src/signatures';
 
 describe('signatures', () => {
   describe('signState', () => {
@@ -68,7 +68,7 @@ describe('signatures', () => {
 
       const signature = signChallengeMessage(
         [signState(state, wallet.privateKey)],
-        wallet.privateKey,
+        wallet.privateKey
       );
 
       const challenger = verifyMessage(arrayify(hashChallengeMessage(state)), signature);

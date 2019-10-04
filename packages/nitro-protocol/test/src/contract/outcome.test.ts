@@ -1,15 +1,15 @@
-import {
-  Guarantee,
-  encodeGuarantee,
-  decodeGuarantee,
-  encodeAllocation,
-  decodeAllocation,
-  Allocation,
-  encodeOutcome,
-  decodeOutcome,
-} from '../../../src/contract/outcome';
-import {id} from 'ethers/utils';
 import {Wallet} from 'ethers';
+import {id} from 'ethers/utils';
+import {
+  Allocation,
+  decodeAllocation,
+  decodeGuarantee,
+  decodeOutcome,
+  encodeAllocation,
+  encodeGuarantee,
+  encodeOutcome,
+  Guarantee,
+} from '../../../src/contract/outcome';
 
 const destination = id('d');
 const targetChannelId = id('t');

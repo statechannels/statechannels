@@ -1,8 +1,8 @@
 import {expectRevert} from '@statechannels/devtools';
+import {Contract, Wallet} from 'ethers';
 // @ts-ignore
 import ForceMoveArtifact from '../../../build/contracts/TESTForceMove.json';
-import {setupContracts, getTestProvider} from '../../test-helpers';
-import {Contract, Wallet} from 'ethers';
+import {getTestProvider, setupContracts} from '../../test-helpers';
 
 const provider = getTestProvider();
 let ForceMove: Contract;
@@ -38,10 +38,10 @@ describe('_acceptableWhoSignedWhat (expect a boolean)', () => {
           whoSignedWhat,
           largestTurnNum,
           nParticipants,
-          nStates,
-        ),
+          nStates
+        )
       ).toBe(expectedResult);
-    },
+    }
   );
 });
 
@@ -55,8 +55,8 @@ describe('_acceptableWhoSignedWhat (expect revert)', () => {
       await expectRevert(
         () =>
           ForceMove.acceptableWhoSignedWhat(whoSignedWhat, largestTurnNum, nParticipants, nStates),
-        reasonString,
+        reasonString
       );
-    },
+    }
   );
 });

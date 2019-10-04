@@ -1,16 +1,16 @@
 import {TransactionRequest} from 'ethers/providers';
 
-import {
-  createForceMoveTransaction,
-  createConcludeTransaction,
-  createRespondTransaction,
-  createCheckpointTransaction,
-} from '../../src/transactions';
-import {AddressZero} from 'ethers/constants';
-import {signState} from '../../src/signatures';
-import {Channel} from '../../src/contract/channel';
-import {SignedState} from '../../src';
 import {Wallet} from 'ethers';
+import {AddressZero} from 'ethers/constants';
+import {SignedState} from '../../src';
+import {Channel} from '../../src/contract/channel';
+import {signState} from '../../src/signatures';
+import {
+  createCheckpointTransaction,
+  createConcludeTransaction,
+  createForceMoveTransaction,
+  createRespondTransaction,
+} from '../../src/transactions';
 
 const wallet = Wallet.createRandom();
 const channel: Channel = {
@@ -49,7 +49,7 @@ beforeAll(async () => {
       channel,
       challengeDuration: 0x0,
     },
-    wallet.privateKey,
+    wallet.privateKey
   );
 });
 
@@ -57,7 +57,7 @@ describe('transaction-generators', () => {
   it('creates a force move transaction', async () => {
     const transactionRequest: TransactionRequest = createForceMoveTransaction(
       [signedState],
-      wallet.privateKey,
+      wallet.privateKey
     );
 
     expect(transactionRequest.data).toBeDefined();
@@ -79,7 +79,7 @@ describe('transaction-generators', () => {
     it('creates a transaction', async () => {
       const transactionRequest: TransactionRequest = createRespondTransaction(
         challengeState,
-        signedState,
+        signedState
       );
 
       expect(transactionRequest.data).toBeDefined();

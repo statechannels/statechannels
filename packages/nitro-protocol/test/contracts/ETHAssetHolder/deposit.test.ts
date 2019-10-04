@@ -1,10 +1,10 @@
 import {expectRevert} from '@statechannels/devtools';
+import {Contract, Wallet} from 'ethers';
+import {bigNumberify, parseUnits} from 'ethers/utils';
 // @ts-ignore
 import ETHAssetHolderArtifact from '../../../build/contracts/ETHAssetHolder.json';
-import {setupContracts, getTestProvider} from '../../test-helpers';
 import {Channel, getChannelId} from '../../../src/contract/channel';
-import {bigNumberify, parseUnits} from 'ethers/utils';
-import {Contract, Wallet} from 'ethers';
+import {getTestProvider, setupContracts} from '../../test-helpers';
 
 const provider = getTestProvider();
 let ETHAssetHolder: Contract;
@@ -79,7 +79,7 @@ describe('deposit', () => {
         const allocatedAmount = await ETHAssetHolder.holdings(destination);
         await expect(allocatedAmount).toEqual(heldAfter);
       }
-    },
+    }
   );
 });
 

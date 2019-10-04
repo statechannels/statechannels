@@ -1,9 +1,6 @@
 module.exports = {
   ...require('../../.prettierrc.js'),
-  "bracketSpacing": false,
-  "printWidth": 100,
-  "singleQuote": true,
-  "trailingComma": "all",
+  "trailingComma": "es5",
   "overrides": [
     {
       "files": "*.sol",
