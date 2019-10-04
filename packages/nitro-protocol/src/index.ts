@@ -1,4 +1,5 @@
 import {Signature} from 'ethers/utils';
+import {getDepositedEvent} from './contract/asset-holder';
 import {getChallengeRegisteredEvent} from './contract/challenge';
 import {Channel, getChannelId} from './contract/channel';
 import {encodeConsensusData} from './contract/consensus-data';
@@ -8,6 +9,7 @@ import {State} from './contract/state';
 import {createDepositTransaction} from './contract/transaction-creators/eth-asset-holder';
 import * as Signatures from './signatures';
 import * as Transactions from './transactions';
+
 export {Signatures, Transactions};
 
 // TODO: Move these to their own interface files once they've stabilized
@@ -36,6 +38,7 @@ export {
   getChannelId,
   Channel,
   getChallengeRegisteredEvent,
+  getDepositedEvent,
   isAllocationOutcome,
   isGuaranteeOutcome,
 };

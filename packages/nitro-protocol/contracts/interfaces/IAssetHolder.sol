@@ -39,7 +39,7 @@ interface IAssetHolder {
     );
 
     /**
-    * @dev Indicates that `amount` assets have been transferred to the external adress denoted by `destination`.
+    * @dev Indicates that `amount` assets have been transferred to the external address denoted by `destination`.
     * @param destination An external address, right-padded with zeros.
     * @param amount Number of assets transferred (wei or tokens).
     */

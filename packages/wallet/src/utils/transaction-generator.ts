@@ -120,5 +120,10 @@ export function createTransferAndWithdrawTransaction(
 }
 
 export function createDepositTransaction(destination: string, depositAmount: string, expectedHeld: string) {
-  return createNitroDepositTransaction(convertAddressToBytes32(destination), expectedHeld, depositAmount);
+  let normalizedDestinationAddress = destination;
+  // If the address is not already left-padded to be of type byte32
+  if (normalizedDestinationAddress.length !== 66) {
+    normalizedDestinationAddress = convertAddressToBytes32(destination);
+  }
+  return createNitroDepositTransaction(normalizedDestinationAddress, expectedHeld, depositAmount);
 }

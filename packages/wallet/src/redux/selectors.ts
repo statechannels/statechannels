@@ -75,6 +75,17 @@ export const getAdjudicatorChannelBalance = (state: SharedData, channelId: strin
   }
 };
 
+export const getETHAssetHolderWatcherSubscribersForChannel = (
+  state: walletStates.Initialized,
+  channelId: string
+): walletStates.ChannelSubscriber[] => {
+  if (state.channelSubscriptions[channelId]) {
+    return state.channelSubscriptions[channelId];
+  } else {
+    return [];
+  }
+};
+
 export const getFundingState = (state: SharedData): FundingState => {
   return state.fundingState;
 };
