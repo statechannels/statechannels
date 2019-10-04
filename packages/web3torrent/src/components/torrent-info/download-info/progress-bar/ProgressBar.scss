@@ -1,0 +1,90 @@
+@import '../../../../styles/variables';
+
+.progress-bar {
+  height: 50px;
+  width: 100%;
+}
+.bar-progress {
+  position: absolute;
+  top: 13px;
+  left: 300px;
+  text-align: center;
+}
+
+.bar-status {
+  position: absolute;
+  top: 13px;
+  left: 450px;
+  text-align: right;
+}
+
+.bar-cancelButton {
+  position: absolute;
+  top: 10px;
+  width: 30px;
+  left: 630px;
+  right: 10px;
+  text-align: right;
+  margin-top: 0px;
+  font-size: 26px;
+  font-weight: 100;
+  color: $c-orange;
+  background: none;
+  border: none;
+  svg {
+    cursor: pointer;
+    height: 20px;
+    width: 30px;
+  }
+  svg > path {
+    stroke: $c-orange;
+    stroke-width: 2px;
+  }
+
+  svg:hover > path {
+    stroke: red;
+  }
+}
+.positive {
+  background: $c-orange;
+  transition: width 0.2s ease-in;
+  position: relative;
+  height: 100%;
+  z-index: 1;
+  overflow: hidden;
+  .bar-cancelButton svg path,
+  .bar-status,
+  .bar-progress {
+    color: white;
+    stroke: white;
+  }
+  &.complete {
+    .bar-cancelButton {
+      display: none;
+    }
+    .bar-progress {
+      left: 40%;
+    }
+    .bar-status {
+      left: 80%;
+    }
+  }
+}
+
+.negative {
+  background: $c-lightgrey;
+  transition: width 0.2s ease-in;
+  position: relative;
+  z-index: 0;
+  height: 100%;
+  width: 100%;
+  margin-top: -50px;
+  .bar-cancelButton,
+  .bar-status,
+  .bar-progress {
+    color: $c-black;
+  }
+  .bar-status {
+    color: $c-darkgrey;
+  }
+}

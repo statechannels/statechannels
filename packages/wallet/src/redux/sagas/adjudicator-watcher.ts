@@ -2,12 +2,12 @@ import {getAdjudicatorContract} from "../../utils/contract-utils";
 import {call, take, put, select} from "redux-saga/effects";
 import {eventChannel} from "redux-saga";
 import * as actions from "../actions";
-import {ethers} from "ethers";
 import {getAdjudicatorWatcherSubscribersForChannel} from "../selectors";
 import {ChannelSubscriber} from "../state";
 import {ProtocolLocator} from "../../communication";
 import {getChallengeRegisteredEvent} from "@statechannels/nitro-protocol";
 import {bigNumberify} from "ethers/utils";
+import {Contract} from "ethers";
 
 enum AdjudicatorEventType {
   ChallengeRegistered,
@@ -64,6 +64,11 @@ function* dispatchEventAction(event: AdjudicatorEvent) {
         })
       );
       break;
+    case AdjudicatorEventType.Concluded:
+      yield put(actions.concludedEvent({channelId}));
+      break;
+    default:
+      throw new Error(`Event is not a known adjudicator event. Cannot dispatch event action: ${JSON.stringify(event)}`);
   }
 }
 
@@ -93,51 +98,15 @@ function* dispatchProcessEventAction(event: AdjudicatorEvent, processId: string,
     case AdjudicatorEventType.Concluded:
       yield put(actions.concludedEvent({channelId}));
       break;
-    // TODO: These are obsolete, we neeed to remove the actions
-    // case AdjudicatorEventType.Refuted:
-    //   yield put(
-    //     actions.refutedEvent({
-    //       processId,
-    //       protocolLocator,
-    //       channelId,
-    //       refuteCommitment: fromParameters(event.eventArgs.refutation),
-    //     })
-    //   );
-    //   break;
-    // case AdjudicatorEventType.RespondWithMove:
-    //   const { v, r, s } = event.eventArgs;
-    //   const signature = ethers.utils.joinSignature({
-    //     v,
-    //     r,
-    //     s,
-    //   });
-
-    //   yield put(
-    //     actions.respondWithMoveEvent({
-    //       processId,
-    //       protocolLocator,
-    //       channelId,
-    //       responseCommitment: fromParameters(event.eventArgs.response),
-    //       responseSignature: signature,
-    //     })
-    //   );
-    //   break;
-    // case AdjudicatorEventType.Deposited:
-    //   yield put(
-    //     actions.fundingReceivedEvent({
-    //       processId,
-    //       protocolLocator,
-    //       channelId,
-    //       amount: event.eventArgs.amountDeposited.toHexString(),
-    //       totalForDestination: event.eventArgs.destinationHoldings.toHexString(),
-    //     })
-    //   );
-    // break;
+    default:
+      throw new Error(
+        `Event is not a known adjudicator event. Cannot dispatch process event action: ${JSON.stringify(event)}`
+      );
   }
 }
 
 function* createAdjudicatorEventChannel(provider) {
-  const adjudicator: ethers.Contract = yield call(getAdjudicatorContract, provider);
+  const adjudicator: Contract = yield call(getAdjudicatorContract, provider);
 
   return eventChannel(emitter => {
     const challengeRegisteredFilter = adjudicator.filters.ChallengeRegistered();

@@ -27,14 +27,13 @@
     "prettier:check": "npx prettier --check 'src/**/*.{ts,tsx}'",
     "prettier:write": "npx prettier --write 'src/**/*.{ts,tsx}'",
     "start": "npm run clearContracts && node scripts/start.js",
-    "startGanache": "node bin/start-ganache.js",
     "storybook": "start-storybook -p 9001 -c .storybook",
-    "test:app": "npx run-jest -c ./config/jest/jest.config.js",
+    "test:app": "npx jest -c ./config/jest/jest.config.js",
     "test:ci:app": "yarn test:app --all --ci --runInBand",
-    "test:ci:contracts": "yarn contracts:compile && yarn test:contracts --all --ci --runInBand --bail",
-    "test:ci": "yarn run test:ci:contracts && yarn run test:ci:app",
-    "test:contracts": "yarn contracts:deploy:test && npx jest -c ./config/jest/jest.contracts.config.js",
-    "test": "yarn run test:app --all"
+    "test:ci:contracts": "yarn contracts:compile && yarn test:contracts --all --ci --runInBand --detectOpenHandles --bail",
+    "test:ci": "yarn test:ci:contracts && yarn test:ci:app",
+    "test:contracts": "npx jest -c ./config/jest/jest.contracts.config.js",
+    "test": "run-s 'test:app --all' 'test:contracts --all'"
   },
   "dependencies": {
     "@firebase/app-types": "0.4.4",

@@ -19,6 +19,7 @@ import {LedgerFundingAction} from "./protocols/ledger-funding";
 
 import {LOAD as LOAD_FROM_STORAGE} from "redux-storage";
 import {State} from "@statechannels/nitro-protocol";
+import {BigNumber} from "ethers/utils";
 export * from "./protocols/transaction-submission/actions";
 export {CommitmentReceived, commitmentReceived};
 
@@ -50,6 +51,16 @@ export interface MessageSent {
 
 export interface DisplayMessageSent {
   type: "WALLET.DISPLAY_MESSAGE_SENT";
+}
+
+export interface DepositedEvent {
+  type: "WALLET.ASSET_HOLDER.DEPOSITED";
+
+  // This is either the `channelId` (bytes32) or (the left-padded bytes20)
+  // recipient address
+  destination: string;
+  amountDeposited: BigNumber;
+  destinationHoldings: BigNumber;
 }
 
 export interface BlockMined {
@@ -157,6 +168,11 @@ export const displayMessageSent: ActionConstructor<DisplayMessageSent> = p => ({
   type: "WALLET.DISPLAY_MESSAGE_SENT"
 });
 
+export const depositedEvent: ActionConstructor<DepositedEvent> = p => ({
+  ...p,
+  type: "WALLET.ASSET_HOLDER.DEPOSITED"
+});
+
 export const blockMined: ActionConstructor<BlockMined> = p => ({...p, type: "BLOCK_MINED"});
 
 export const metamaskLoadError: ActionConstructor<MetamaskLoadError> = p => ({
@@ -221,6 +237,8 @@ export type AdjudicatorEventAction =
   | ChallengeExpirySetEvent
   | ChannelUpdate;
 
+export type AssetHolderEventAction = DepositedEvent;
+
 export type ProtocolAction =
   // only list top level protocol actions
   FundingAction | DefundingAction | ApplicationAction | ConcludingAction;
@@ -238,6 +256,7 @@ export type WalletAction =
   | AdvanceChannelAction
   | AdjudicatorKnown
   | AdjudicatorEventAction
+  | AssetHolderEventAction
   | BlockMined
   | DisplayMessageSent
   | LoggedIn
@@ -254,10 +273,10 @@ export type WalletAction =
 export {channel, directFunding as funding, NewLedgerChannel, protocol, application, advanceChannel};
 
 // These are any actions that update shared data directly without any protocol
-export type SharedDataUpdateAction = AdjudicatorEventAction;
+export type SharedDataUpdateAction = AdjudicatorEventAction | AssetHolderEventAction;
 
 export function isSharedDataUpdateAction(action: WalletAction): action is SharedDataUpdateAction {
-  return isAdjudicatorEventAction(action);
+  return isAdjudicatorEventAction(action) || isAssetHolderEventAction(action);
 }
 
 export function isAdjudicatorEventAction(action: WalletAction): action is AdjudicatorEventAction {
@@ -272,6 +291,10 @@ export function isAdjudicatorEventAction(action: WalletAction): action is Adjudi
     action.type === "WALLET.ADJUDICATOR.CHALLENGE_EXPIRY_TIME_SET" ||
     action.type === "WALLET.ADJUDICATOR.CHANNEL_UPDATE"
   );
+}
+
+export function isAssetHolderEventAction(action: WalletAction): action is AssetHolderEventAction {
+  return action.type === "WALLET.ASSET_HOLDER.DEPOSITED";
 }
 
 // These are actions related to storage

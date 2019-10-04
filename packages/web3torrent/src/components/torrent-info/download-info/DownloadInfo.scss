@@ -1,0 +1,13 @@
+@import '../../../styles/variables';
+
+.downloadingInfo {
+  margin-top: 20px;
+  margin-bottom: 10px;
+  p {
+    color: $c-black;
+    text-align: center;
+    font-size: 18px;
+    line-height: 32px;
+    margin-top: 40px;
+  }
+}

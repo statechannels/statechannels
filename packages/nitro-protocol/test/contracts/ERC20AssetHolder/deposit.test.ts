@@ -1,4 +1,3 @@
-import {ethers} from 'ethers';
 import {expectRevert} from '@statechannels/devtools';
 // @ts-ignore
 import ERC20AssetHolderArtifact from '../../../build/contracts/ERC20AssetHolder.json';
@@ -7,18 +6,20 @@ import TokenArtifact from '../../../build/contracts/Token.json';
 import {setupContracts, getTestProvider} from '../../test-helpers';
 import {Channel, getChannelId} from '../../../src/contract/channel';
 import {AddressZero} from 'ethers/constants';
+import {Wallet, Contract} from 'ethers';
+import {bigNumberify} from 'ethers/utils';
 
 const provider = getTestProvider();
 const signer0 = provider.getSigner(0); // convention matches setupContracts function
 let signer0Address;
-let ERC20AssetHolder: ethers.Contract;
-let Token: ethers.Contract;
+let ERC20AssetHolder: Contract;
+let Token: Contract;
 const chainId = '0x1234';
 const participants = [];
 
 // populate destinations array
 for (let i = 0; i < 3; i++) {
-  participants[i] = ethers.Wallet.createRandom().address;
+  participants[i] = Wallet.createRandom().address;
 }
 
 beforeAll(async () => {
@@ -40,10 +41,10 @@ describe('deposit', () => {
     ${description2} | ${2}         | ${'3'} | ${'1'}       | ${'1'} | ${'3'}    | ${'Deposit | holdings[destination] already meets or exceeds expectedHeld + amount'}
     ${description3} | ${3}         | ${'3'} | ${'2'}       | ${'2'} | ${'4'}    | ${undefined}
   `('$description', async ({channelNonce, held, expectedHeld, amount, reasonString, heldAfter}) => {
-    held = ethers.utils.bigNumberify(held);
-    expectedHeld = ethers.utils.bigNumberify(expectedHeld);
-    amount = ethers.utils.bigNumberify(amount);
-    heldAfter = ethers.utils.bigNumberify(heldAfter);
+    held = bigNumberify(held);
+    expectedHeld = bigNumberify(expectedHeld);
+    amount = bigNumberify(amount);
+    heldAfter = bigNumberify(heldAfter);
 
     const destinationChannel: Channel = {chainId, channelNonce, participants};
     const destination = getChannelId(destinationChannel);

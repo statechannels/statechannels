@@ -1,17 +1,17 @@
-import {ethers} from 'ethers';
 // @ts-ignore
 import ForceMoveArtifact from '../../../build/contracts/TESTForceMove.json';
 import {setupContracts, getTestProvider} from '../../test-helpers';
+import {Contract, Wallet} from 'ethers';
 
 const provider = getTestProvider();
-let ForceMove: ethers.Contract;
+let ForceMove: Contract;
 
 const participants = ['', '', ''];
 const wallets = new Array(3);
 
 // populate wallets and participants array
 for (let i = 0; i < 3; i++) {
-  wallets[i] = ethers.Wallet.createRandom();
+  wallets[i] = Wallet.createRandom();
   participants[i] = wallets[i].address;
 }
 
@@ -24,11 +24,11 @@ describe('_isAddressInArray', () => {
   let addresses;
 
   beforeAll(() => {
-    suspect = ethers.Wallet.createRandom().address;
+    suspect = Wallet.createRandom().address;
     addresses = [
-      ethers.Wallet.createRandom().address,
-      ethers.Wallet.createRandom().address,
-      ethers.Wallet.createRandom().address,
+      Wallet.createRandom().address,
+      Wallet.createRandom().address,
+      Wallet.createRandom().address,
     ];
   });
 

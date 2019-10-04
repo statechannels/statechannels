@@ -255,10 +255,7 @@ const craftResponseTransactionWithExistingCommitment = (
   challengeCommitment: Commitment,
   sharedData: SharedData
 ): TransactionRequest => {
-  const {penultimateSignedCommitment, lastSignedCommitment} = getStoredCommitments(
-    challengeCommitment,
-    sharedData
-  );
+  const {penultimateSignedCommitment, lastSignedCommitment} = getStoredCommitments(challengeCommitment, sharedData);
 
   const {commitment: lastCommitment} = lastSignedCommitment;
 

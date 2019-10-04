@@ -2,7 +2,7 @@ import debug from 'debug';
 import React, {useContext, useEffect, useState} from 'react';
 import {OnboardingFlowContext} from '../../flows';
 import {JsonRpcComponentProps} from '../../json-rpc-router';
-import {closeWallet} from '../../message-dispatchers';
+import {allocate, closeWallet} from '../../message-dispatchers';
 import {Dialog, FlowProcess, FlowStep, FlowStepProps, FlowStepStatus} from '../../ui';
 
 const log = debug('wallet:connect-to-hub');
@@ -43,12 +43,17 @@ const ConnectToHub: React.FC<JsonRpcComponentProps> = () => {
         if (newSteps[finishedStep + 1]) {
           newSteps[finishedStep + 1].status = FlowStepStatus.InProgress;
         } else {
-          setTimeout(() => closeWallet(), 1000);
+          setTimeout(() => {
+            allocate(onboardingFlowContext.request.id, {
+              done: true
+            });
+            closeWallet();
+          }, 1000);
         }
         setSteps(newSteps);
       }, 1000);
     }
-  }, [steps]);
+  }, [steps, onboardingFlowContext.request.id]);
 
   return (
     <Dialog title="Connect to Hub" onClose={closeWallet}>
