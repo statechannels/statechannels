@@ -12,13 +12,19 @@ import {signChallengeMessage} from '../../signatures';
 // If we don't set a gas limit some transactions will fail
 const GAS_LIMIT = 3000000;
 
-const ForceMoveContractInterface = new ethers.utils.Interface(ForceMoveArtifact.abi);
+export const ForceMoveContractInterface = new ethers.utils.Interface(ForceMoveArtifact.abi);
 
 interface CheckpointData {
   challengeState?: State;
   states: State[];
   signatures: Signature[];
   whoSignedWhat: number[];
+}
+
+export function createGetDataTransaction(channelId: string): TransactionRequest {
+  return {
+    gasLimit: GAS_LIMIT,
+  };
 }
 
 export function createForceMoveTransaction(

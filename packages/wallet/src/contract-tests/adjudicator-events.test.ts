@@ -9,7 +9,7 @@ import {getGanacheProvider} from "@statechannels/devtools";
 import {convertCommitmentToState} from "../utils/nitro-converter";
 jest.setTimeout(60000);
 
-describe("adjudicator listener", () => {
+describe.skip("adjudicator listener", () => {
   const provider: ethers.providers.JsonRpcProvider = getGanacheProvider();
 
   const participantA = ethers.Wallet.createRandom();

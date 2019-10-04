@@ -13,7 +13,7 @@ import { bigNumberify } from "ethers/utils";
 import { channelID, Channel } from "fmg-core/lib/channel";
 import { ADJUDICATOR_ADDRESS, ETH_ASSET_HOLDER_ADDRESS } from "../constants";
 import { ADDRESS_ZERO } from "fmg-core";
-import { JsonRpcProvider, TransactionRequest } from "ethers/providers";
+import { JsonRpcProvider, TransactionRequest, TransactionResponse } from "ethers/providers";
 import { getLibraryAddress } from "../utils/contract-utils";
 
 export const fiveFive = [bigNumberify(5).toHexString(), bigNumberify(5).toHexString()] as [string, string];
@@ -176,7 +176,7 @@ export async function respond(provider: ethers.providers.JsonRpcProvider, channe
   return { toCommitment, toSig };
 }
 
-async function sendTransaction(provider: JsonRpcProvider, tx: TransactionRequest) {
+async function sendTransaction(provider: JsonRpcProvider, tx: TransactionRequest): Promise<TransactionResponse> {
   const signer = await provider.getSigner();
   return await signer.sendTransaction({ to: ADJUDICATOR_ADDRESS, ...tx });
 }

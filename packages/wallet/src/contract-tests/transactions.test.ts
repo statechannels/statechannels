@@ -26,7 +26,7 @@ import { ADJUDICATOR_ADDRESS, ETH_ASSET_HOLDER_ADDRESS } from "../constants";
 
 jest.setTimeout(90000);
 
-describe("transactions", () => {
+describe.skip("transactions", () => {
   let networkId;
   let libraryAddress;
   let nonce = 5;

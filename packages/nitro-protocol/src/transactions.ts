@@ -4,6 +4,16 @@ import {State} from './contract/state';
 import {Signature} from 'ethers/utils';
 import {getStateSignerAddress} from './signatures';
 import {SignedState} from '.';
+import {Contract} from 'ethers';
+
+export async function getData(provider, contractAddress: string, channelId: string) {
+  const forceMove = new Contract(
+    contractAddress,
+    forceMoveTrans.ForceMoveContractInterface,
+    provider,
+  );
+  return await forceMove.getData(channelId);
+}
 
 export function createForceMoveTransaction(
   signedStates: SignedState[],
