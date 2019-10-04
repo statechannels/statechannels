@@ -1,5 +1,4 @@
 import {expectRevert} from '@statechannels/devtools';
-import {ethers} from 'ethers';
 // @ts-ignore
 import AssetHolderArtifact from '../../../build/contracts/TESTAssetHolder.json';
 import {
