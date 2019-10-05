@@ -119,7 +119,7 @@
     "@types/reactstrap": "^6.0.3",
     "@types/web3": "^1.0.2",
     "awesome-typescript-loader": "5.2.1",
-    "babel-jest": "23.6.0",
+    "babel-jest": "24.9.0",
     "babel-loader": "7.1.5",
     "babel-polyfill": "6.26.0",
     "babel-register": "6.26.0",
