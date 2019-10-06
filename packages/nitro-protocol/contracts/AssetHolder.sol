@@ -283,15 +283,15 @@ contract AssetHolder is IAssetHolder {
     function _transferAsset(address payable destination, uint256 amount) internal {}
 
     function _isExternalAddress(bytes32 destination) internal pure returns (bool) {
-        return (destination == bytes32(bytes20(destination)));
+        return uint96(bytes12(destination)) == 0;
     }
 
     function _addressToBytes32(address participant) internal pure returns (bytes32) {
-        return bytes32(bytes20(participant));
+        return bytes32(uint256(participant));
     }
 
     function _bytes32ToAddress(bytes32 destination) internal pure returns (address payable) {
-        return address(bytes20(destination));
+        return address(uint160(uint256(destination)));
     }
 
     function recoverSigner(bytes memory _d, uint8 _v, bytes32 _r, bytes32 _s)

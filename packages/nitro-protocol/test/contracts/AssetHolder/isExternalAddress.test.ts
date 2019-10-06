@@ -23,12 +23,12 @@ beforeAll(async () => {
 describe('isExternalAddress', () => {
   it('verifies an external address', async () => {
     const zerosPaddedExternalAddress =
-      '0x' + 'eb89373c708B40fAeFA76e46cda92f801FAFa288'.padEnd(64, '0');
+      '0x' + 'eb89373c708B40fAeFA76e46cda92f801FAFa288'.padStart(64, '0');
     expect(await AssetHolder.isExternalAddress(zerosPaddedExternalAddress)).toBe(true);
   });
   it('rejects a non-external-address', async () => {
     const onesPaddedExternalAddress =
-      '0x' + 'eb89373c708B40fAeFA76e46cda92f801FAFa288'.padEnd(64, '1');
+      '0x' + 'eb89373c708B40fAeFA76e46cda92f801FAFa288'.padStart(64, '1');
     expect(await AssetHolder.isExternalAddress(onesPaddedExternalAddress)).toBe(false);
   });
 });
