@@ -160,7 +160,7 @@
     "ts-jest": "24.1.0",
     "ts-loader": "6.1.2",
     "ts-node": "7.0.1",
-    "tsconfig-paths-webpack-plugin": "2.0.0",
+    "tsconfig-paths-webpack-plugin": "3.2.0",
     "tslint": "5.20.0",
     "tslint-config-prettier": "1.18.0",
     "tslint-react": "3.6.0",
