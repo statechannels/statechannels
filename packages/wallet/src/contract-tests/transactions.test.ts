@@ -90,7 +90,8 @@ describe("transactions", () => {
   })
 
   it("should deposit into the contract", async () => {
-    const depositTransactionData = createDepositTransaction(participantA.address, "0x5", "0x0");
+    const someChannelId = ethers.utils.hexlify(ethers.utils.randomBytes(32));
+    const depositTransactionData = createDepositTransaction(someChannelId, "0x5", "0x0");
     await testTransactionSender({
       ...depositTransactionData,
       to: ETH_ASSET_HOLDER_ADDRESS,
@@ -104,9 +105,6 @@ describe("transactions", () => {
       nonce: getNextNonce(),
       participants: [participantA.address, participantB.address]
     };
-
-    await depositContract(provider, participantA.address);
-    await depositContract(provider, participantB.address);
 
     const fromCommitment: Commitment = {
       channel,
@@ -144,9 +142,6 @@ describe("transactions", () => {
       participants: [participantA.address, participantB.address]
     };
     const { nonce: channelNonce } = channel;
-
-    await depositContract(provider, participantA.address);
-    await depositContract(provider, participantB.address);
 
     await createChallenge(provider, channelNonce, participantA, participantB);
 
@@ -187,8 +182,6 @@ describe("transactions", () => {
       participants: [participantA.address, participantB.address]
     };
     const { nonce: channelNonce } = channel;
-    await depositContract(provider, participantA.address);
-    await depositContract(provider, participantB.address);
 
     await createChallenge(provider, channelNonce, participantA, participantB);
 
@@ -229,9 +222,6 @@ describe("transactions", () => {
       nonce: getNextNonce(),
       participants: [participantA.address, participantB.address]
     };
-
-    await depositContract(provider, participantA.address);
-    await depositContract(provider, participantB.address);
 
     const fromCommitment: Commitment = {
       channel,
