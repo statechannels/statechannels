@@ -60,7 +60,9 @@ contract ForceMove is IForceMove {
             challenger,
             isFinalCount > 0,
             fixedPart,
-            variableParts
+            variableParts,
+            sigs,
+            whoSignedWhat
         );
 
         channelStorageHashes[channelId] = _hashChannelStorage(
@@ -554,7 +556,9 @@ contract ForceMove is IForceMove {
         address challenger,
         bool isFinal,
         FixedPart fixedPart,
-        ForceMoveApp.VariablePart[] variableParts
+        ForceMoveApp.VariablePart[] variableParts,
+        Signature[] sigs,
+        uint8[] whoSignedWhat
     );
 
     event ChallengeCleared(bytes32 indexed channelId, uint256 newTurnNumRecord);

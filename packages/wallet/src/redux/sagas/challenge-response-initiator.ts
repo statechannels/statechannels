@@ -14,7 +14,7 @@ export function* challengeResponseInitiator() {
     const {challengeStates, channelId, finalizedAt: expiresAt} = action;
 
     const channelState = yield select(selectors.getOpenedChannelState, channelId);
-    const [latestState] = challengeStates.slice(-1);
+    const [{state: latestState}] = challengeStates.slice(-1);
     const numParticipants = latestState.channel.participants.length;
     const ourStateIsLast = latestState.turnNum % numParticipants !== channelState.ourIndex;
     const commitment = convertStateToCommitment(latestState);
