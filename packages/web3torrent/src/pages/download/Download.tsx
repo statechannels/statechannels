@@ -5,12 +5,25 @@ import {TorrentInfo} from '../../components/torrent-info/TorrentInfo';
 import {Torrent} from '../../types';
 import './Download.scss';
 
+const wallet = window.EmbeddedWallet;
+
 const mockDownload = (torrent: Torrent, setTorrent) => {
-  for (let i = 0; i * 20 <= torrent.length + 19; i++) {
-    setTimeout(() => {
-      setTorrent({...torrent, downloaded: i * 20 > torrent.length ? torrent.length : i * 20});
-    }, i * 800);
-  }
+  wallet.enable();
+  wallet
+    .request({
+      jsonrpc: '2.0',
+      method: 'chan_allocate',
+      id: 123,
+      params: ['foo', 'bar', 3, false]
+    })
+    .then(result => {
+      console.log('Callback has data!', result);
+      for (let i = 0; i * 20 <= torrent.length + 19; i++) {
+        setTimeout(() => {
+          setTorrent({...torrent, downloaded: i * 20 > torrent.length ? torrent.length : i * 20});
+        }, i * 800);
+      }
+    });
 };
 
 const Download: React.FC<RouteComponentProps> = () => {

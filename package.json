@@ -11,7 +11,7 @@
     "prepare": "lerna run --concurrency 1 --stream prepare",
     "build": "lerna run build",
     "build:ci": "lerna run --since $(git merge-base $CIRCLE_BRANCH origin/master) build:ci",
-    "run:w3t": "lerna run start --parallel --scope=**/web3torrent ",
+    "run:w3t": "lerna run start --parallel --scope=**/web3torrent --scope=**/embedded-wallet ",
     "run:ewt": "lerna run start --parallel --scope=**/embedded-wallet",
     "clean": "git clean -Xdf --exclude=\"!.env\"",
     "clean:dry": "git clean -Xdn --exclude=\"!.env\"",
