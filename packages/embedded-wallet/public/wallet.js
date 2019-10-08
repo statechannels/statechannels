@@ -1,4 +1,4 @@
-const log = window['debug']('wallet:bridge');
+const log = window['debug'] ? window['debug']('wallet:bridge') : console.log;
 
 let timeoutListener = null;
 let attempts = 0;
@@ -36,7 +36,7 @@ class EmbeddedWallet {
     });
   }
 
-  static async request(message, callback) {
+  static async request (message, callback) {
     if (!message.id) {
       message.id = Date.now();
     }
@@ -148,4 +148,12 @@ class EmbeddedWallet {
       }
     });
   }
+}
+
+if (window) {
+  window.EmbeddedWallet = EmbeddedWallet;
+} else if (global) {
+  global.EmbeddedWallet = EmbeddedWallet;
+} else if (module) {
+  module.exports = EmbeddedWallet;
 }

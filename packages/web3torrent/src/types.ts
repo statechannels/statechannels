@@ -1,3 +1,5 @@
+import {JsonRPCRequest, JsonRPCResponse} from 'web3/providers';
+
 export type Torrent = {
   name?: string;
   filename?: string;
@@ -25,3 +27,12 @@ export type TorrentFile = {
   progress?: number; // from 0 to 1
   getBlobURL?: (err, url) => void;
 };
+
+declare global {
+  interface Window {
+    EmbeddedWallet: {
+      request: (data: JsonRPCRequest) => Promise<JsonRPCResponse>;
+      enable: () => void;
+    };
+  }
+}
