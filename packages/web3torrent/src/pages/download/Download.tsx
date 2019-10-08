@@ -22,7 +22,6 @@ import {download} from '../../clients/web3torrent-client';
 //     }
 //   });
 // };
-
 const downloadFile = async (torrent: Torrent, setTorrent) => {
   const createdTorrent = await download(torrent.magnetURI);
   console.log('Torrent', createdTorrent);
@@ -32,6 +31,7 @@ const downloadFile = async (torrent: Torrent, setTorrent) => {
   setTorrent({...torrent, ...createdTorrent});
   //   }, i * 800);
   // }
+};
 
 const Download: React.FC<RouteComponentProps> = () => {
   const [torrent, setTorrent] = useState({

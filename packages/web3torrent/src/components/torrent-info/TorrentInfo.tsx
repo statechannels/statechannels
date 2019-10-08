@@ -1,9 +1,10 @@
+import prettier from 'prettier-bytes';
 import React from 'react';
+import {Link} from 'react-router-dom';
 import {Torrent} from '../../types';
 import {DownloadInfo} from './download-info/DownloadInfo';
 import './TorrentInfo.scss';
 import {UploadInfo} from './upload-info/UploadInfo';
-import {Link} from 'react-router-dom';
 
 export type TorrentInfoProps = {torrent: Torrent};
 
@@ -12,7 +13,7 @@ const TorrentInfo: React.FC<TorrentInfoProps> = ({torrent}: TorrentInfoProps) =>
     <>
       <section className={`torrentInfo ${torrent.magnetURI ? ' with-link' : ''}`}>
         <span className="fileName">{torrent.name}</span>
-        <span className="fileSize">{torrent.length}Mb</span>
+        <span className="fileSize">{prettier(torrent.length)}</span>
         {torrent.status ? <span className="fileStatus">{torrent.status}</span> : false}
         <span className="fileCost">Est. cost ${Number(torrent.cost).toFixed(2)}</span>
         {torrent.magnetURI ? (
