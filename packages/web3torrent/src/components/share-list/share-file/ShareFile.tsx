@@ -3,7 +3,7 @@ import {Torrent} from '../../../types';
 import {FormButton} from '../../form';
 import './ShareFile.scss';
 
-export type ShareFileProps = {file: Torrent; goTo: (name: string) => void};
+export type ShareFileProps = {file: Partial<Torrent>; goTo: (name: string) => void};
 
 const ShareFile: React.FC<ShareFileProps> = ({file, goTo}: ShareFileProps) => {
   return (
@@ -14,7 +14,7 @@ const ShareFile: React.FC<ShareFileProps> = ({file, goTo}: ShareFileProps) => {
       <td className="other-cell">{file.numPeers}P</td>
       <td className="other-cell">${file.cost}</td>
       <td className="button-cell">
-        <FormButton name="download" onClick={() => goTo(file.magnetURI || '')}>
+        <FormButton name="download" onClick={() => goTo(file.magnetURI || file.name || '')}>
           Download
         </FormButton>
       </td>
