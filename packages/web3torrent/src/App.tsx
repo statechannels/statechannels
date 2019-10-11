@@ -17,7 +17,7 @@ const App: React.FC = () => {
         <Route path={RoutePath.Root} component={LayoutHeader} />
         <Switch>
           <Route exact path={RoutePath.Root} component={Welcome} />
-          <Route path={RoutePath.Download} component={Download} />
+          <Route path={`${RoutePath.Download}:method`} component={Download} />
           <Route path={RoutePath.Upload} component={Upload} />
         </Switch>
       </main>
