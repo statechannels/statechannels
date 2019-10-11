@@ -42,10 +42,13 @@ const Upload: React.FC<RouteComponentProps> = () => {
     numSeeds: 27,
     numPeers: 4,
     cost: 0.5,
-    downloaded: 0,
     files: [],
     status: 'Seeding',
-    magnetURI: '#'
+    magnetURI: '#',
+    infoHash: '',
+    downloaded: 0,
+    downloadSpeed: 0,
+    uploadSpeed: 0
   } as Torrent);
   return (
     <>
