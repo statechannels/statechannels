@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 
 import App from './App';
-import {WebTorrentContext, web3torrent} from './clients/web3torrent-client';
+import {web3torrent, WebTorrentContext} from './clients/web3torrent-client';
 
 ReactDOM.render(
   <WebTorrentContext.Provider value={web3torrent}>
