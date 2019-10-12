@@ -1,5 +1,5 @@
 import bencode from 'bencode';
-import { Extension } from 'bittorrent-protocol';
+import {Extension} from 'bittorrent-protocol';
 import debug from 'debug';
 import EventEmitter from 'eventemitter3';
 import {
@@ -47,7 +47,7 @@ export abstract class PaidStreamingExtension implements Extension {
   }
 
   // tslint:disable-next-line: no-empty
-  onHandshake(/* infoHash, peerId, extensions */) { }
+  onHandshake(/* infoHash, peerId, extensions */) {}
 
   onExtendedHandshake(handshake: ExtendedHandshake) {
     if (!handshake.m || !handshake.m[this.name]) {
@@ -105,7 +105,7 @@ export abstract class PaidStreamingExtension implements Extension {
         new Error('!>Peer does not support Web3Torrent')
       );
     } else {
-      this.wire.extended(this.name, bencode.encode({ msg_type: 0, command, data }));
+      this.wire.extended(this.name, bencode.encode({msg_type: 0, command, data}));
     }
   }
 
@@ -113,7 +113,7 @@ export abstract class PaidStreamingExtension implements Extension {
     // tslint:disable-next-line: no-string-literal
     const undecoratedOnRequestFunction = this.wire._onRequest;
     const extension = this;
-    const { messageBus } = extension;
+    const {messageBus} = extension;
     const wire = this.wire as PaidStreamingWire;
 
     // tslint:disable-next-line: only-arrow-functions no-string-literal
