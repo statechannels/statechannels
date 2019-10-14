@@ -46,19 +46,18 @@ const getFormattedETA = (torrent: Torrent) => {
   const {done, timeRemaining} = torrent;
   if (done) {
     return 'Done';
-  } else {
-    const remaining = timeRemaining || 0;
-    const days = Math.floor(remaining / (1000 * 60 * 60 * 24));
-    const hours = Math.floor((remaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-    const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
-    const seconds = Math.floor((remaining % (1000 * 60)) / 1000);
-
-    return timeRemaining === Infinity
-      ? 'ETA Unknown'
-      : `ETA ${(days && days + 'd ') || ''}${(hours && hours + 'h ') || ''}${(minutes &&
-          minutes + 'm ') ||
-          ''}${seconds && seconds + 's'}`;
   }
+  const remaining = timeRemaining || 0;
+  const days = Math.floor(remaining / (1000 * 60 * 60 * 24));
+  const hours = Math.floor((remaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
+  const seconds = Math.floor((remaining % (1000 * 60)) / 1000);
+
+  return timeRemaining === Infinity
+    ? 'ETA Unknown'
+    : `ETA ${(days && days + 'd ') || ''}${(hours && hours + 'h ') || ''}${(minutes &&
+        minutes + 'm ') ||
+        ''}${seconds && seconds + 's'}`;
 };
 
 export const getLiveTorrentData = (previousData: Torrent, infoHash): Torrent => {
