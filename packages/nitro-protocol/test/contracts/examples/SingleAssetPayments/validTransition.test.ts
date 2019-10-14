@@ -1,11 +1,16 @@
 // @ts-ignore
 import {expectRevert} from '@statechannels/devtools';
-import {Contract, Wallet} from 'ethers';
+import {Contract} from 'ethers';
 import {AddressZero, HashZero} from 'ethers/constants';
 import SingleAssetPaymentsArtifact from '../../../../build/contracts/SingleAssetPayments.json';
 import {Allocation, encodeOutcome} from '../../../../src/contract/outcome';
 import {VariablePart} from '../../../../src/contract/state.js';
-import {getTestProvider, replaceAddresses, setupContracts} from '../../../test-helpers';
+import {
+  getTestProvider,
+  randomExternalAddress,
+  replaceAddresses,
+  setupContracts,
+} from '../../../test-helpers';
 
 const provider = getTestProvider();
 let singleAssetPayments: Contract;
@@ -13,9 +18,9 @@ let singleAssetPayments: Contract;
 const numParticipants = 3;
 const addresses = {
   // participants
-  A: Wallet.createRandom().address.padEnd(66, '0'),
-  B: Wallet.createRandom().address.padEnd(66, '0'),
-  C: Wallet.createRandom().address.padEnd(66, '0'),
+  A: randomExternalAddress(),
+  B: randomExternalAddress(),
+  C: randomExternalAddress(),
 };
 const guarantee = {
   targetChannelId: HashZero,

@@ -183,6 +183,13 @@ export function randomChannelId(channelNonce = 0) {
   return channelId;
 }
 
+export const randomExternalAddress = () =>
+  '0x' +
+  ethers.Wallet.createRandom()
+    .address.slice(2, 42)
+    .padStart(64, '0')
+    .toLowerCase();
+
 export async function sendTransaction(
   provider: ethers.providers.JsonRpcProvider,
   contractAddress: string,
