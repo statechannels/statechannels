@@ -34,7 +34,7 @@ const TorrentInfo: React.FC<{torrent: Torrent}> = ({torrent}) => {
         <span className="fileSize">{!torrent.length ? '? Mb' : prettier(torrent.length)}</span>
         {torrent.status ? <span className="fileStatus">{torrent.status}</span> : false}
         <span className="fileCost">
-          Est. cost ${!torrent.cost ? '?' : Number(torrent.cost).toFixed(2)}
+          Est. cost {!torrent.cost ? 'Unknown' : `$${Number(torrent.cost).toFixed(2)}`}
         </span>
         {torrent.magnetURI ? <MagnetLinkButton magnetURI={torrent.magnetURI} /> : false}
       </section>

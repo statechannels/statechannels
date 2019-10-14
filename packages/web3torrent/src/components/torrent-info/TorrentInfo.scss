@@ -12,6 +12,7 @@ section {
   width: 100%;
   * {
     text-align: center;
+    line-height: 24px
   }
   .fileName {
     text-align: left;
@@ -56,6 +57,7 @@ section {
       font-size: 18px;
       position: relative;
       outline:0;
+      max-height: 26px;
 
       .tooltiptext {
         font-family: "Nunito Sans", sans-serif;
