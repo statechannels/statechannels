@@ -29,7 +29,7 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({downloaded, length, sta
           {prettier(downloaded)}/{prettier(length)}
         </span>
         <span className="bar-status">{status}</span>
-        <button type="button" className="bar-cancelButton" onClick={() => remove(infoHash || '')}>
+        <button type="button" className="bar-cancelButton" onClick={() => remove(infoHash)}>
           <svg>
             <path d="M0,20,20,0" />
             <path d="M0,0,20,20" />
