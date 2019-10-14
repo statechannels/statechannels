@@ -10,10 +10,10 @@ export type DownloadInfoProps = {torrent: Torrent};
 const DownloadInfo: React.FC<DownloadInfoProps> = ({torrent}: DownloadInfoProps) => {
   const [fileURL, setURL] = useState('');
   useEffect(() => {
-    if (torrent && torrent.done && torrent.files[0] && torrent.files[0].getBlobURL) {
+    if (torrent.done && torrent.files[0] && torrent.files[0].getBlobURL) {
       torrent.files[0].getBlobURL((_, url) => setURL(url));
     }
-  }, [torrent, torrent.done, torrent.files]);
+  }, [torrent.done, torrent.files]);
 
   return (
     <section className="downloadingInfo">
