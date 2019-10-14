@@ -1,7 +1,32 @@
 import {JsonRPCRequest, JsonRPCResponse} from 'web3/providers';
 
+export enum Status {
+  Downloading = 'Downloading',
+  Seeding = 'Seeding',
+  Completed = 'Completed',
+  Idle = 'Idle',
+  Connecting = 'Connecting',
+  Stopped = 'Stopped'
+}
+
+export const EmptyTorrent = {
+  name: 'unknown',
+  magnetURI: '',
+  infoHash: '',
+  length: 0,
+  done: false,
+  ready: false,
+  downloadSpeed: 0,
+  uploadSpeed: 0,
+  cost: 0,
+  status: Status.Idle,
+  downloaded: 0,
+  files: []
+} as Torrent;
+
 export type Torrent = {
   name?: string;
+  createdBy?: string;
   filename?: string;
   infoHash: string;
   magnetURI: string;
@@ -19,7 +44,7 @@ export type Torrent = {
   files: TorrentFile[];
   length: number; // Sum of the files length (in bytes).
   cost?: number;
-  status?: 'Downloading' | 'Seeding' | 'Completed' | 'Idle' | 'Connecting' | 'Stopped';
+  status: Status;
   ready?: boolean;
   destroyed?: boolean;
 };
