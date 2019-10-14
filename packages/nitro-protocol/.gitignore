@@ -19,3 +19,4 @@ built
 lib
 dist
 .outputParameter
+docs/interfaces/*.md
