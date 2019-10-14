@@ -1,17 +1,21 @@
 import React from 'react';
-import WebTorrentPaidStreamingClient from '../library/web3torrent-lib';
-import {Torrent} from '../types';
+import WebTorrentPaidStreamingClient, {ExtendedTorrent} from '../library/web3torrent-lib';
+import {EmptyTorrent, Status, Torrent} from '../types';
 
 export const web3torrent = new WebTorrentPaidStreamingClient();
 export const WebTorrentContext = React.createContext(web3torrent);
 
 export const download: (torrent: any) => Promise<Torrent> = torrentData =>
   new Promise(resolve =>
-    web3torrent.add(torrentData, torrent => resolve({...torrent, status: 'Connecting'}))
+    web3torrent.add(torrentData, torrent => resolve({...torrent, status: Status.Connecting}))
   );
 
-export const upload = files =>
-  new Promise(resolve => web3torrent.seed(files as FileList, torrent => resolve(torrent)));
+export const upload: (files: any) => Promise<Torrent> = files =>
+  new Promise(resolve =>
+    web3torrent.seed(files as FileList, torrent => resolve({...torrent, status: Status.Seeding}))
+  );
+
+export const getTorrentPeers = infoHash => web3torrent.allowedPeers[infoHash];
 
 export const remove = (id: string = '') => {
   return new Promise((resolve, reject) =>
@@ -25,24 +29,21 @@ export const remove = (id: string = '') => {
   );
 };
 
-const getStatus = (torrent: Torrent) => {
+const getStatus = (torrent: ExtendedTorrent, previousStatus: Status): Status => {
   const {uploadSpeed, downloadSpeed} = torrent;
-  if (torrent.downloaded && torrent.downloaded === torrent.length && torrent.done) {
-    return 'Completed';
+  if (previousStatus === Status.Seeding) {
+    return Status.Seeding;
   }
-  if (torrent.destroyed) {
-    return 'Stopped';
+  if (torrent.progress && torrent.done) {
+    return Status.Completed;
   }
   if (uploadSpeed - downloadSpeed === 0) {
-    return 'Connecting';
+    return Status.Connecting;
   }
-  if (uploadSpeed - downloadSpeed > 0) {
-    return 'Seeding';
-  }
-  return 'Downloading';
+  return Status.Downloading;
 };
 
-const getFormattedETA = (torrent: Torrent) => {
+const getFormattedETA = (torrent: ExtendedTorrent) => {
   const {done, timeRemaining} = torrent;
   if (done) {
     return 'Done';
@@ -64,21 +65,18 @@ export const getLiveTorrentData = (previousData: Torrent, infoHash): Torrent => 
   const baseData: Torrent = {
     ...previousData,
     name: previousData.name || 'unknown',
-    status: 'Connecting',
-    done: false,
-    ready: false,
-    downloaded: 0
+    status: Status.Connecting
   };
 
   if (!infoHash) {
     // torrent in magnet form
-    return {...baseData, status: 'Idle'};
+    return {...baseData, status: Status.Idle};
   }
 
-  const live = web3torrent.get(infoHash) as Torrent;
+  const live = web3torrent.get(infoHash) as ExtendedTorrent;
   if (!live) {
     // torrent after being destroyed
-    return {...baseData, destroyed: true, status: 'Idle'};
+    return {...baseData, destroyed: true, status: Status.Idle};
   }
 
   return {
@@ -89,7 +87,7 @@ export const getLiveTorrentData = (previousData: Torrent, infoHash): Torrent => 
       name: live.name || baseData.name,
       length: live.length || baseData.length,
       downloaded: (live && live.downloaded) || 0,
-      status: getStatus(live),
+      status: getStatus(live, previousData.status),
       uploadSpeed: live.uploadSpeed,
       downloadSpeed: live.downloadSpeed,
       numPeers: live.numPeers,
@@ -100,18 +98,7 @@ export const getLiveTorrentData = (previousData: Torrent, infoHash): Torrent => 
 };
 
 export const parseMagnetURL: (rawMagnetURL: string) => Torrent = (rawMagnetURL = '') => {
-  const emptyTorrentData = {
-    name: 'unknown',
-    magnetURI: rawMagnetURL || '',
-    infoHash: '',
-    length: 0,
-    downloadSpeed: 0,
-    uploadSpeed: 0,
-    cost: 0,
-    status: 'Idle',
-    downloaded: 0,
-    files: []
-  } as Torrent;
+  const emptyTorrentData = {...EmptyTorrent, magnetURI: rawMagnetURL} as Torrent;
   if (!rawMagnetURL.trim()) {
     return emptyTorrentData;
   }
