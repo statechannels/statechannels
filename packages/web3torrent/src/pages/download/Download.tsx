@@ -3,7 +3,7 @@ import {RouteComponentProps, useLocation} from 'react-router-dom';
 import {download, getLiveTorrentData, parseMagnetURL} from '../../clients/web3torrent-client';
 import {FormButton} from '../../components/form';
 import {TorrentInfo} from '../../components/torrent-info/TorrentInfo';
-import {Torrent} from '../../types';
+import {Status, Torrent} from '../../types';
 import {useInterval} from '../../utils/useInterval';
 import './Download.scss';
 
@@ -34,13 +34,13 @@ const Download: React.FC<RouteComponentProps> = () => {
 
   useInterval(
     () => setTorrent(getLiveTorrentData(torrent, torrent.infoHash)),
-    torrent.status !== 'Idle' && !torrent.done && !torrent.destroyed ? 1000 : undefined
+    torrent.status !== Status.Idle && !torrent.done && !torrent.destroyed ? 1000 : undefined
   );
 
   return (
     <section className="section fill download">
       <TorrentInfo torrent={torrent} />
-      {torrent.status === 'Idle' ? (
+      {torrent.status === Status.Idle ? (
         <DownloadStarter torrent={torrent} setTorrent={setTorrent} />
       ) : (
         false

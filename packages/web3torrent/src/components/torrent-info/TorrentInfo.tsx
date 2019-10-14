@@ -1,6 +1,7 @@
 import prettier from 'prettier-bytes';
 import React, {useState} from 'react';
-import {Torrent} from '../../types';
+import {TorrentPeers} from '../../library/types';
+import {Status, Torrent} from '../../types';
 import {clipboardCopy} from '../../utils/copy-to-clipboard';
 import {DownloadInfo} from './download-info/DownloadInfo';
 import './TorrentInfo.scss';
@@ -26,7 +27,7 @@ const MagnetLinkButton: React.FC<{magnetURI: string}> = ({magnetURI}) => {
   );
 };
 
-const TorrentInfo: React.FC<{torrent: Torrent}> = ({torrent}) => {
+const TorrentInfo: React.FC<{torrent: Torrent; peers?: TorrentPeers}> = ({torrent, peers}) => {
   return (
     <>
       <section className={`torrentInfo ${torrent.magnetURI ? ' with-link' : ''}`}>
@@ -38,12 +39,13 @@ const TorrentInfo: React.FC<{torrent: Torrent}> = ({torrent}) => {
         </span>
         {torrent.magnetURI ? <MagnetLinkButton magnetURI={torrent.magnetURI} /> : false}
       </section>
-      {(torrent.downloaded || torrent.status === 'Connecting') && torrent.ready ? (
+      {torrent.status !== Status.Idle && torrent.status !== Status.Seeding && torrent.ready ? (
         <DownloadInfo torrent={torrent} />
+      ) : torrent.createdBy ? (
+        <UploadInfo torrent={torrent} peers={peers} />
       ) : (
         false
       )}
-      {torrent.uploaded ? <UploadInfo torrent={torrent} /> : false}
     </>
   );
 };
