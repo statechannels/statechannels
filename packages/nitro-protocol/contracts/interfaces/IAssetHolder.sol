@@ -2,7 +2,7 @@ pragma solidity ^0.5.11;
 pragma experimental ABIEncoderV2;
 
 /**
-  * @dev An AssetHolder contract escrows eth or tokens against state channels. It allows assets to be deposited, and ultimately transferred from one channel to other channel and/or external addresses.
+  * @dev An AssetHolder contract escrows eth or tokens against state channels. It allows assets to be deposited, and ultimately transferred from one channel to other channel and/or external destinations.
 */
 interface IAssetHolder {
     /**
@@ -39,8 +39,8 @@ interface IAssetHolder {
     );
 
     /**
-    * @dev Indicates that `amount` assets have been transferred to the external address denoted by `destination`.
-    * @param destination An external address, right-padded with zeros.
+    * @dev Indicates that `amount` assets have been transferred to the external destination denoted by `destination`.
+    * @param destination An external destination, right-padded with zeros.
     * @param amount Number of assets transferred (wei or tokens).
     */
     event AssetTransferred(bytes32 indexed destination, uint256 amount);

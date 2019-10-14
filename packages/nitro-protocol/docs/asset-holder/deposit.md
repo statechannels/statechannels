@@ -14,7 +14,7 @@ function deposit(bytes32 destination, uint256 expectedHeld, uint256 amount) publ
 
 ## Checks:
 
-- `destination` must be an external address
+- `destination` must be an [external destination](./outcomes#destinations).
 - The holdings for `destination` must be greater than or equal to `expectedHeld`.
 - The holdings for `destination` must be less than the sum of the amount expected to be held and the amount declared in the deposit.
 
@@ -35,7 +35,7 @@ Increase holdings for `destination` to the sum of the amount expected to be held
 Emit a `Deposited` event with `indexed` parameter `destination`.
 
 :::warning
-You may only deposit to a channel address. This is currently enforced at the contract level, but this may change in future. Do not attempt to deposit into external addresses.
+You may only deposit to a channel address. This is currently enforced at the contract level, but this may change in future. Do not attempt to deposit into external destinations.
 :::
 
 :::caution

@@ -102,7 +102,7 @@ contract AssetHolder is IAssetHolder {
             } else {
                 payoutAmount = allocation[m].amount;
             }
-            if (_isExternalAddress(allocation[m].destination)) {
+            if (_isExternalDestination(allocation[m].destination)) {
                 _transferAsset(_bytes32ToAddress(allocation[m].destination), payoutAmount);
                 emit AssetTransferred(allocation[m].destination, payoutAmount);
             } else {
@@ -226,7 +226,7 @@ contract AssetHolder is IAssetHolder {
                 k++;
             }
             if (payouts[j] > 0) {
-                if (_isExternalAddress(allocation[j].destination)) {
+                if (_isExternalDestination(allocation[j].destination)) {
                     _transferAsset(_bytes32ToAddress(allocation[j].destination), payouts[j]);
                     emit AssetTransferred(allocation[j].destination, payouts[j]);
                 } else {
@@ -282,7 +282,7 @@ contract AssetHolder is IAssetHolder {
 
     function _transferAsset(address payable destination, uint256 amount) internal {}
 
-    function _isExternalAddress(bytes32 destination) internal pure returns (bool) {
+    function _isExternalDestination(bytes32 destination) internal pure returns (bool) {
         return uint96(bytes12(destination)) == 0;
     }
 

@@ -15,21 +15,21 @@ The adjudicator stores (the hash of) an encoded `outcome` for each finalized cha
 
 ## Implementation
 
-In `Outcome2.sol`:
+In `Outcome.sol`:
 
 ```solidity
 pragma solidity ^0.5.11;
 pragma experimental ABIEncoderV2;
 
 library Outcome {
-  //An outcome is an array of OutcomeItems
+  // An outcome is an array of OutcomeItems
   // Outcome = OutcomeItem[]
   // OutcomeItem = (AssetHolderAddress, AssetOutcome)
   // AssetOutcome = (AssetOutcomeType, Allocation | Guarantee)
   // Allocation = AllocationItem[]
   // AllocationItem = (Destination, Amount)
-  // Guarantee = (ChannelAddress, Destination[])
-  // Destination = ChannelAddress | ExternalAddress
+  // Guarantee = (ChannelId, Destination[])
+  // Destination = ChannelId | ExternalDestination
 
   struct OutcomeItem {
     address assetHolderAddress;
@@ -59,13 +59,29 @@ library Outcome {
 
 ## Example of an outcome data structure
 
-| >                                                                                               | 0xETHAssetHolder                                 | 0                                                                                                     | 0xAlice | 5   | 0xBob | 2   | 0xDAIAssetHolder | ... |
+| >                                                                                               | 0xETHAssetHolder                                 | 0                                                                                                     | 0xDestA | 5   | 0xDestB | 2   | 0xDAIAssetHolder | ... |
 | ----------------------------------------------------------------------------------------------- | ------------------------------------------------ | ----------------------------------------------------------------------------------------------------- | ------- | --- | ----- | --- | ---------------- | --- |
-|                                                                                                 |                                                  | <td colspan="2" align="center">AllocationItem</td> <td colspan="2" align="center">AllocationItem</td> |
+|                                                                                                 |                                                  | | Destination  | Amount | Destination | Amount | | | 
+|                                                                                                 |                                                  | <td colspan="2" align="center">AllocationItem</td> <td colspan="2" align="center">AllocationItem</td> | | | 
 |                                                                                                 |                                                  | <td colspan="4" align="center">Allocation</td>                                                        |         |     |
 |                                                                                                 | <td colspan="5" align="center">AssetOutcome</td> |                                                                                                       |         |
 | <td colspan="6" align="center">OutcomeItem</td> <td colspan="6" align="center">OutcomeItem</td> |
 | <td colspan="8" align="center">Outcome</td>                                                     |
+
+## Destinations
+
+A `Destination` is a `bytes32` and either:
+
+1. A `ChannelId` (see the article on [state format](../adjudicator/state-format#channelid)), or
+2. An `ExternalDestination`, which is an ethereum address left-padded with zeros.
+
+
+:::tip
+In JavaScript, the `ExternalDestination` corresponding to `address` may be computed as
+```
+'0x' + address.padStart(64, '0')
+```
+:::
 
 ## Storage
 

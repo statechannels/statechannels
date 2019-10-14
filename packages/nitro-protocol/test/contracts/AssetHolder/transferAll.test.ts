@@ -5,7 +5,7 @@ import {
   allocationToParams,
   getTestProvider,
   randomChannelId,
-  randomExternalAddress,
+  randomExternalDestination,
   replaceAddresses,
   setupContracts,
 } from '../../test-helpers';
@@ -24,8 +24,8 @@ const addresses = {
   C: randomChannelId(),
   X: randomChannelId(),
   // externals
-  A: randomExternalAddress(),
-  B: randomExternalAddress(),
+  A: randomExternalDestination(),
+  B: randomExternalDestination(),
 };
 
 beforeAll(async () => {

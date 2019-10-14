@@ -40,7 +40,7 @@ Since updates must ultimately be interpreted by smart contracts, the encoding of
 
 ## ChannelId
 
-The address of a channel is the hash of the abi encoded `chainId`, `participants` and `channelNonce`.
+The id of a channel is the hash of the abi encoded `chainId`, `participants` and `channelNonce`.
 
 By choosing a new `channelNonce` each time the same participants execute a state channel supported by the same chain, they can avoid replay attacks.
 

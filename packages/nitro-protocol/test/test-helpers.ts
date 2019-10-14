@@ -183,7 +183,7 @@ export function randomChannelId(channelNonce = 0) {
   return channelId;
 }
 
-export const randomExternalAddress = () =>
+export const randomExternalDestination = () =>
   '0x' +
   ethers.Wallet.createRandom()
     .address.slice(2, 42)
