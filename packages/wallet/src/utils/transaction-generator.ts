@@ -8,7 +8,7 @@ import {
   Transactions as nitroTrans,
   SignedState
 } from "@statechannels/nitro-protocol";
-import {convertAddressToBytes32, convertCommitmentToState} from "./nitro-converter";
+import {convertCommitmentToState} from "./nitro-converter";
 
 export function createForceMoveTransaction(
   fromCommitment: SignedCommitment,
@@ -120,10 +120,9 @@ export function createTransferAndWithdrawTransaction(
 }
 
 export function createDepositTransaction(destination: string, depositAmount: string, expectedHeld: string) {
-  let normalizedDestinationAddress = destination;
-  // If the address is not already left-padded to be of type byte32
-  if (normalizedDestinationAddress.length !== 66) {
-    normalizedDestinationAddress = convertAddressToBytes32(destination);
+  // If a legacy fmg-core channelId
+  if (destination.length === 42) {
+    destination = `0x${destination.substr(2).padStart(64, "1")}`; // note we do not pad with zeros, since that would imply an external destination (which we may not deposit to)
   }
-  return createNitroDepositTransaction(normalizedDestinationAddress, expectedHeld, depositAmount);
+  return createNitroDepositTransaction(destination, expectedHeld, depositAmount);
 }
