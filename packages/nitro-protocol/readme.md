@@ -3,7 +3,9 @@
 Nitro Protocol
 </h1>
 This repository contains the smart contracts that define a state channel framework capable of running 3rd-party
-'applications' that conform to a simple state-machine interface, and allow for large-scale state-channel networks. There is also a documentation website and helper functions written in TypeScript.
+'applications' that conform to a simple state-machine interface, and allow for large-scale state-channel networks. This repository also includes helper functions written in TypeScript, to allow clients to more easily interact with the contracts.
+
+There is an accompanying documentation [website](https://quirky-panini-27752c.netlify.com).
 
 # ForceMove
 
@@ -16,7 +18,7 @@ is determined through an oracle feed.
 
 A full description of the framework and it's capabilities can be found in the [whitepaper](https://magmo.com/force-move-games.pdf).
 
-# Nitro and the nitro-adjudicator
+# Nitro
 
 Nitro protocol subsumes and extends ForceMove by allowing for ledger channels (which can allocate funds to other state channels) and virtual channels (which allow intermediaries to help other state-channel-network users open and close channels off-chain).
 
@@ -24,7 +26,7 @@ A full description of the framework and it's capabilities can be found in a seco
 
 The nitro-adjudicator supports an arbitrary number of state channels, and introduces new on-chain functions to manage state channel networks.
 
-### Development
+## Development
 
 We use [etherlime](https://etherlime.gitbook.io/) for smart contract development.
 
