@@ -1,7 +1,6 @@
 import React from 'react';
 import WebTorrentPaidStreamingClient, {ExtendedTorrent} from '../library/web3torrent-lib';
-import {EmptyTorrent, Status, Torrent} from '../types';
-
+import {defaultTrackers, EmptyTorrent, Status, Torrent} from '../types';
 export const web3torrent = new WebTorrentPaidStreamingClient();
 export const WebTorrentContext = React.createContext(web3torrent);
 
@@ -102,23 +101,28 @@ export const parseMagnetURL: (rawMagnetURL: string) => Torrent = (rawMagnetURL =
   if (!rawMagnetURL.trim()) {
     return emptyTorrentData;
   }
-  const magnetURI = rawMagnetURL.trim().substring(1);
-  const magnetAsArray = magnetURI.split('&');
+  const magnetParams = new URLSearchParams(rawMagnetURL.trim().replace(/#magnet:/g, ''));
 
-  const magnetName = magnetAsArray.find(h => h.includes('dn=') || h.includes('name='));
-  const name = magnetName && magnetName.replace(/(dn=)|(name=)/g, '').replace(/\+/g, ' ');
-
-  const magnetLength = magnetAsArray.find(h => h.includes('xl='));
-  const length: number = Number(magnetLength && magnetLength.replace(/(xl=)/g, ''));
-
-  const magnetCost = magnetAsArray.find(h => h.includes('cost='));
-  const cost: number = Number(magnetCost && magnetCost.replace(/(cost=)/g, ''));
+  if (!magnetParams.has('tr')) {
+    defaultTrackers.map(tr => magnetParams.append('tr', tr));
+  }
 
   return {
     ...emptyTorrentData,
-    name,
-    magnetURI,
-    length: isNaN(length) ? 0 : length,
-    cost: isNaN(cost) ? 0 : cost
+    name: magnetParams.get('name') || magnetParams.get('dn') || 'unknown',
+    magnetURI: `magnet:?${magnetParams.toString()}`,
+    length: Number(magnetParams.get('xl')) || 0,
+    cost: Number(magnetParams.get('cost')) || 0
   };
+};
+
+export const generateMagnetURL = (torrent: Torrent) => {
+  if (!torrent.magnetURI) {
+    return '';
+  }
+  const magnetParams = new URLSearchParams(torrent.magnetURI.replace(/magnet:/g, ''));
+  magnetParams.delete('tr');
+  magnetParams.append('xl', String(torrent.length));
+  magnetParams.append('cost', String(torrent.cost));
+  return `${window.location.origin}/download/magnet#magnet:?${magnetParams.toString()}`;
 };
