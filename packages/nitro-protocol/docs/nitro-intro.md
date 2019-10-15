@@ -28,6 +28,7 @@ A["Adjudicator"]
 EOA["EOA"]
 EOA-->|forceMove|A
 EOA-->|respond|A
+EOA-->|checkpoint|A
 EOA-->|conclude|A
 EOA-->|pushOutcome|A
 EOA-->|deposit|ETHAssetHolder
@@ -44,10 +45,10 @@ ERC20AssetHolder-->|transfer| Token
 ERC20AssetHolder-->|transferFrom| Token
 classDef Contract fill:#ffffff;
 class A,ERC20AssetHolder,ETHAssetHolder,Token Contract;
-click A "https://github.com/statechannels/nitro-protocol/blob/master/contracts/NitroAdjudicator.sol"
-click ETHAssetHolder "https://github.com/statechannels/nitro-protocol/blob/master/contracts/ETHAssetHolder.sol"
-click ERC20AssetHolder "https://github.com/statechannels/nitro-protocol/blob/master/contracts/ERC20AssetHolder.sol"
-click Token "https://github.com/statechannels/nitro-protocol/blob/master/contracts/Token.sol"
+click A "https://github.com/statechannels/monorepo/tree/master/packages/nitro-protocol/contracts/NitroAdjudicator.sol"
+click ETHAssetHolder "https://github.com/statechannels/monorepo/tree/master/packages/nitro-protocol/contracts/ETHAssetHolder.sol"
+click ERC20AssetHolder "https://github.com/statechannels/monorepo/tree/master/packages/nitro-protocol/contracts/ERC20AssetHolder.sol"
+click Token "https://github.com/statechannels/monorepo/tree/master/packages/nitro-protocol/contracts/Token.sol"
 </div>
 
 A typical execution of a Nitro state channel is for participants to :
