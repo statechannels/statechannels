@@ -5,11 +5,12 @@ import {
   allocationToParams,
   getTestProvider,
   randomChannelId,
+  randomExternalDestination,
   replaceAddresses,
   setupContracts,
 } from '../../test-helpers';
 
-import {Contract, Wallet} from 'ethers';
+import {Contract} from 'ethers';
 import {bigNumberify, id} from 'ethers/utils';
 import {encodeAllocation} from '../../../src/contract/outcome';
 
@@ -23,8 +24,8 @@ const addresses = {
   C: randomChannelId(),
   X: randomChannelId(),
   // externals
-  A: Wallet.createRandom().address.padEnd(66, '0'),
-  B: Wallet.createRandom().address.padEnd(66, '0'),
+  A: randomExternalDestination(),
+  B: randomExternalDestination(),
 };
 
 beforeAll(async () => {

@@ -1,5 +1,5 @@
 import {expectRevert} from '@statechannels/devtools';
-import {Contract, Wallet} from 'ethers';
+import {Contract} from 'ethers';
 import {bigNumberify, id} from 'ethers/utils';
 // @ts-ignore
 import AssetHolderArtifact from '../../../build/contracts/TESTAssetHolder.json';
@@ -10,24 +10,20 @@ import {
   guaranteeToParams,
   newAssetTransferredEvent,
   randomChannelId,
+  randomExternalDestination,
   replaceAddresses,
   setupContracts,
 } from '../../test-helpers';
 
 const provider = getTestProvider();
-
-const newAddress = () =>
-  Wallet.createRandom()
-    .address.padEnd(66, '0')
-    .toLowerCase();
 const addresses = {
   // channels
   t: undefined, // target
   g: undefined, // guarantor
   // externals
-  I: newAddress(),
-  A: newAddress(),
-  B: newAddress(),
+  I: randomExternalDestination(),
+  A: randomExternalDestination(),
+  B: randomExternalDestination(),
 };
 let AssetHolder: Contract;
 
