@@ -19,13 +19,7 @@ const mockSlider = (props?: Partial<SliderProps>): MockSlider => {
     <Slider min={0} max={100} step={1} unit="ETH" {...props} />
   );
 
-  return {
-    sliderWrapper,
-    minLabelElement: sliderWrapper.find(`label.${css.min}`),
-    sliderElement: sliderWrapper.find("input[type='range']"),
-    maxLabelElement: sliderWrapper.find(`label.${css.max}`),
-    valueLabelElement: sliderWrapper.find(`label.${css.value}`)
-  };
+  return refreshSliderFrom({sliderWrapper} as MockSlider);
 };
 
 const refreshSliderFrom = (slider: MockSlider) => {
