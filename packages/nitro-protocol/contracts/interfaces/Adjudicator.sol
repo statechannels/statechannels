@@ -2,7 +2,9 @@ pragma solidity ^0.5.11;
 pragma experimental ABIEncoderV2;
 
 import './IForceMove.sol';
-
+/**
+  * @dev An Adjudicator contract extends IForceMove and hence inherits all ForceMove methods. It furthermore allows a finalized outcome to be pushed to an asset holder.
+*/
 interface Adjudicator {
     /**
     * @notice Allows a finalized channel's outcome to be decoded and one or more AssetOutcomes registered in external Asset Holder contracts.

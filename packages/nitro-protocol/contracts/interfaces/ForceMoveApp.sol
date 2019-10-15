@@ -1,6 +1,9 @@
 pragma solidity ^0.5.11;
 pragma experimental ABIEncoderV2;
 
+/**
+  * @dev A ForceMoveApp describes the application-specific state machine of a ForceMove state channel DApp, by specifying whether one state is a valid transition from another.
+*/
 interface ForceMoveApp {
     struct VariablePart {
         bytes outcome;
