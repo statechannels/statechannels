@@ -107,7 +107,7 @@ contract IForceMove {
 
     /**
     * @notice Finalizes a channel by providing a finalization proof.
-    * @dev Overwrites the `turnNumRecord` stored against a channel by providing a state with higher turn number, supported by a signature from each participant.
+    * @dev Finalizes a channel by providing a finalization proof.
     * @param largestTurnNum The largest turn number of the submitted states; will overwrite the stored value of `turnNumRecord`.
     * @param fixedPart Data describing properties of the state channel that do not change with state updates.
     * @param appPartHash The keccak256 of the abi.encode of `(challengeDuration, appDefinition, appData)`. Applies to all states in the finalization proof.
