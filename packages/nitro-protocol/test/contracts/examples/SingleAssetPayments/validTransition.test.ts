@@ -7,7 +7,7 @@ import {Allocation, encodeOutcome} from '../../../../src/contract/outcome';
 import {VariablePart} from '../../../../src/contract/state.js';
 import {
   getTestProvider,
-  randomExternalAddress,
+  randomExternalDestination,
   replaceAddresses,
   setupContracts,
 } from '../../../test-helpers';
@@ -18,9 +18,9 @@ let singleAssetPayments: Contract;
 const numParticipants = 3;
 const addresses = {
   // participants
-  A: randomExternalAddress(),
-  B: randomExternalAddress(),
-  C: randomExternalAddress(),
+  A: randomExternalDestination(),
+  B: randomExternalDestination(),
+  C: randomExternalDestination(),
 };
 const guarantee = {
   targetChannelId: HashZero,

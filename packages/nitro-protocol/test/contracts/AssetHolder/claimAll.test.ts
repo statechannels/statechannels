@@ -10,7 +10,7 @@ import {
   guaranteeToParams,
   newAssetTransferredEvent,
   randomChannelId,
-  randomExternalAddress,
+  randomExternalDestination,
   replaceAddresses,
   setupContracts,
 } from '../../test-helpers';
@@ -21,9 +21,9 @@ const addresses = {
   t: undefined, // target
   g: undefined, // guarantor
   // externals
-  I: randomExternalAddress(),
-  A: randomExternalAddress(),
-  B: randomExternalAddress(),
+  I: randomExternalDestination(),
+  A: randomExternalDestination(),
+  B: randomExternalDestination(),
 };
 let AssetHolder: Contract;
 

@@ -17,8 +17,8 @@ contract TESTAssetHolder is AssetHolder {
         return true;
     }
 
-    function isExternalAddress(bytes32 destination) public pure returns (bool) {
-        return _isExternalAddress(destination);
+    function isExternalDestination(bytes32 destination) public pure returns (bool) {
+        return _isExternalDestination(destination);
     }
 
     function addressToBytes32(address participant) public pure returns (bytes32) {
