@@ -55,9 +55,9 @@ const Dialog: React.FC<DialogProps> = ({
               <span className={css.title}>{title}</span>
             </h1>
           ) : (
-            {}
+            []
           )}
-          {closable ? <button onClick={onClose} className={css.close}></button> : {}}
+          {closable ? <button onClick={onClose} className={css.close}></button> : []}
         </header>
         {children ? (
           <section className={css.content}>
