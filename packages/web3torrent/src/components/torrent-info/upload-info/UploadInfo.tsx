@@ -1,19 +1,12 @@
+import prettier from 'prettier-bytes';
 import React from 'react';
 
-import {PeerByTorrent} from '../../../library/types';
+import {TorrentPeers} from '../../../library/types';
 import {Torrent} from '../../../types';
 import './UploadInfo.scss';
 
-export type UploadInfoProps = {torrent: Torrent};
-
-const mockedLeechers: Array<Partial<PeerByTorrent> & {downloaded: number; paid: number}> = [
-  {id: '12312312', allowed: true, downloaded: 11, paid: 0.09},
-  {id: '45674131', allowed: true, downloaded: 58, paid: 0.25},
-  {id: '56843137', allowed: true, downloaded: 120, paid: 0.5},
-  {id: '31897432', allowed: true, downloaded: 120, paid: 0.5}
-];
-
-const UploadInfo: React.FC<UploadInfoProps> = ({torrent}: UploadInfoProps) => {
+const UploadInfo: React.FC<{torrent: Torrent; peers?: TorrentPeers}> = ({torrent, peers}) => {
+  const peersArray = Object.values(peers || {});
   return (
     <>
       <section className="uploadingInfo">
@@ -24,12 +17,16 @@ const UploadInfo: React.FC<UploadInfoProps> = ({torrent}: UploadInfoProps) => {
         </p>
       </section>
       <section className="leechersInfo">
-        {mockedLeechers.length
-          ? mockedLeechers.map(leecher => (
+        {peersArray.length
+          ? peersArray.map(leecher => (
               <div className="leecherInfo" key={leecher.id}>
                 <span className="leecher-id">#{leecher.id}</span>
-                <span className="leecher-downloaded">{leecher.downloaded}Mb</span>
-                <span className="leecher-paid">${leecher.paid.toFixed(2)}</span>
+                <span className="leecher-downloaded">
+                  {leecher.wire && prettier(leecher.wire.uploaded)}
+                </span>
+                <span className="leecher-paid">
+                  ${leecher.wire && (leecher.wire.uploaded * 0.000005).toFixed(2)}
+                </span>
               </div>
             ))
           : false}

@@ -5,7 +5,7 @@ import {Torrent} from '../../types';
 import {ShareFile} from './share-file/ShareFile';
 import './ShareList.scss';
 
-export type ShareListProps = {torrents: Torrent[]; history: History};
+export type ShareListProps = {torrents: Array<Partial<Torrent>>; history: History};
 
 const ShareList: React.FC<ShareListProps> = ({torrents, history}) => {
   return (
@@ -16,7 +16,7 @@ const ShareList: React.FC<ShareListProps> = ({torrents, history}) => {
               <ShareFile
                 file={file}
                 key={file.name}
-                goTo={route => history.push(`${RoutePath.Download}/${route}`)}
+                goTo={hash => history.push(`${RoutePath.Download}${hash}`)}
               />
             ))
           : false}

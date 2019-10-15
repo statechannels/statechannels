@@ -52,6 +52,8 @@ export type PaidStreamingWire = Omit<Wire, 'requests'> &
     extendedHandshake: PaidStreamingExtendedHandshake;
     extended: (name: 'paidStreamingExtension', data: Buffer) => void;
 
+    uploaded: number;
+
     // TODO: Remove after merging https://github.com/DefinitelyTyped/DefinitelyTyped/pull/38469.
     setTimeout(ms: number, unref?: boolean): void;
 
@@ -118,10 +120,12 @@ export type PeerByTorrent = {
   allowed: boolean;
 };
 
+export type TorrentPeers = {
+  [key: string /* PeerAccount */]: PeerByTorrent;
+};
+
 export type PeersByTorrent = {
-  [key: string /* InfoHash */]: {
-    [key: string /* PeerAccount */]: PeerByTorrent;
-  };
+  [key: string /* InfoHash */]: TorrentPeers;
 };
 
 declare module 'webtorrent' {

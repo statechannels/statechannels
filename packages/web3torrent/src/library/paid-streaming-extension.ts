@@ -96,7 +96,17 @@ export abstract class PaidStreamingExtension implements Extension {
   }
 
   protected executeExtensionCommand(command: PaidStreamingExtensionNotices, data = {}) {
-    this.wire.extended(this.name, bencode.encode({msg_type: 0, command, data}));
+    if (!this.peerAccount) {
+      log(
+        'WARNING: Peer does not support Web3Torrent - This client will block all non-web3torrent leechers.'
+      );
+      this.messageBus.emit(
+        PaidStreamingExtensionEvents.WARNING,
+        new Error('!>Peer does not support Web3Torrent')
+      );
+    } else {
+      this.wire.extended(this.name, bencode.encode({msg_type: 0, command, data}));
+    }
   }
 
   protected interceptRequests() {

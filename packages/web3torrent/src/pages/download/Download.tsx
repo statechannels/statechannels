@@ -1,57 +1,47 @@
 import React, {useState} from 'react';
-import {RouteComponentProps} from 'react-router-dom';
+import {RouteComponentProps, useLocation} from 'react-router-dom';
+import {download, getLiveTorrentData, parseMagnetURL} from '../../clients/web3torrent-client';
 import {FormButton} from '../../components/form';
 import {TorrentInfo} from '../../components/torrent-info/TorrentInfo';
-import {Torrent} from '../../types';
+import {Status, Torrent} from '../../types';
+import {useInterval} from '../../utils/useInterval';
 import './Download.scss';
 
-const wallet = window.EmbeddedWallet;
-
-const mockDownload = (torrent: Torrent, setTorrent) => {
-  wallet.enable();
-  wallet
-    .request({
-      jsonrpc: '2.0',
-      method: 'chan_allocate',
-      id: 123,
-      params: ['foo', 'bar', 3, false]
-    })
-    .then(result => {
-      console.log('Callback has data!', result);
-      for (let i = 0; i * 20 <= torrent.length + 19; i++) {
-        setTimeout(() => {
-          setTorrent({...torrent, downloaded: i * 20 > torrent.length ? torrent.length : i * 20});
-        }, i * 800);
-      }
-    });
+const DownloadStarter: React.FC<{torrent: Torrent; setTorrent: React.Dispatch<Torrent>}> = ({
+  torrent,
+  setTorrent
+}) => {
+  return (
+    <>
+      <FormButton
+        name="download"
+        onClick={async () => setTorrent({...torrent, ...(await download(torrent.magnetURI))})}
+      >
+        Start Download
+      </FormButton>
+      <div className="subtitle">
+        <p>
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt
+          ut labore et dolore magna aliqua.
+        </p>
+      </div>
+    </>
+  );
 };
 
 const Download: React.FC<RouteComponentProps> = () => {
-  const [torrent, setTorrent] = useState({
-    name: 'Sample_1.dat',
-    length: 350,
-    numSeeds: 27,
-    numPeers: 350,
-    cost: 0.5,
-    downloaded: 0,
-    files: []
-  } as Torrent);
+  const [torrent, setTorrent] = useState(parseMagnetURL(decodeURIComponent(useLocation().hash)));
+
+  useInterval(
+    () => setTorrent(getLiveTorrentData(torrent, torrent.infoHash)),
+    torrent.status !== Status.Idle && !torrent.done && !torrent.destroyed ? 1000 : undefined
+  );
 
   return (
     <section className="section fill download">
       <TorrentInfo torrent={torrent} />
-      {!torrent.downloaded ? (
-        <>
-          <FormButton name="download" onClick={() => mockDownload(torrent, setTorrent)}>
-            Start Download
-          </FormButton>
-          <div className="subtitle">
-            <p>
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
-              incididunt ut labore et dolore magna aliqua.
-            </p>
-          </div>
-        </>
+      {torrent.status === Status.Idle ? (
+        <DownloadStarter torrent={torrent} setTorrent={setTorrent} />
       ) : (
         false
       )}
