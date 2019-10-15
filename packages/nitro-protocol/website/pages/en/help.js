@@ -14,19 +14,19 @@ const GridBlock = CompLibrary.GridBlock;
 
 function Help(props) {
   const {config: siteConfig, language = ''} = props;
-  const {baseUrl, docsUrl} = siteConfig;
+  const {baseUrl, docsUrl, packageUrl} = siteConfig;
   const docsPart = `${docsUrl ? `${docsUrl}/` : ''}`;
   const langPart = `${language ? `${language}/` : ''}`;
   const docUrl = doc => `${baseUrl}${docsPart}${langPart}${doc}`;
 
   const supportLinks = [
     {
-      content: `Learn more using the [documentation on this site.](${docUrl('introduction.html')})`,
+      content: `Learn more using the [documentation on this site.](${docUrl('nitro-intro')})`,
       title: 'Browse Docs',
     },
     {
       content:
-        'Contribute to the code and to the documentation [on github](https://github.com/statechannels/nitro-protocol/)',
+        `Contribute to the code and to the documentation [on github](${packageUrl})`,
       title: 'Join the community',
     },
   ];
