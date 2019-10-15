@@ -9,6 +9,7 @@
     "contracts/*"
   ],
   "engines": {
+    "yarn": "^1.17.3",
     "node": "10.16.3"
   },
   "directories": {
