@@ -49,25 +49,20 @@ describe('UI - Slider', () => {
   });
 
   it('can be instantiated', () => {
-    const {
-      minLabelElement,
-      valueLabelElement,
-      maxLabelElement,
-      sliderElement
-    } = component;
-    
+    const {minLabelElement, valueLabelElement, maxLabelElement, sliderElement} = component;
+
     expect(minLabelElement.exists()).toEqual(true);
     expect(minLabelElement.text()).toEqual('0');
     expect(minLabelElement.prop('aria-hidden')).toEqual('true');
-    
+
     expect(valueLabelElement.exists()).toEqual(true);
     expect(valueLabelElement.text()).toEqual('0');
     expect(valueLabelElement.prop('aria-hidden')).toEqual('true');
-    
+
     expect(maxLabelElement.exists()).toEqual(true);
     expect(maxLabelElement.text()).toEqual('100ETH');
     expect(maxLabelElement.prop('aria-hidden')).toEqual('true');
-    
+
     expect(sliderElement.exists()).toEqual(true);
     expect(sliderElement.hasClass(css.slider)).toEqual(true);
     expect(sliderElement.prop('min')).toEqual(0);
@@ -99,14 +94,15 @@ describe('UI - Slider', () => {
     });
 
     it.each(keyboardCases)('%s it by %i when pressing %s', (_, key, numberChange) => {
-      const {
-        sliderElement,
-        valueLabelElement
-      } = triggerKeyOn(component, 'sliderElement', key as string);
-      
+      const {sliderElement, valueLabelElement} = triggerKeyOn(
+        component,
+        'sliderElement',
+        key as string
+      );
+
       const value = sliderElement.prop('value');
       const ariaLabel = `Current allocation: ${value} ETH`;
-      
+
       expect(value).toEqual(50 + (numberChange as number));
       expect(valueLabelElement.text()).toEqual(`${value}`);
       expect(sliderElement.prop('aria-label')).toEqual(ariaLabel);

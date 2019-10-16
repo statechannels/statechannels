@@ -93,35 +93,35 @@ describe('UI - Dialog', () => {
 
   it('can be instantiated', () => {
     const {dialogElement, backdropElement, header, contentElement, footer} = component;
-    
+
     expect(dialogElement.exists()).toEqual(true);
     expect(backdropElement.exists()).toEqual(true);
-    
+
     const {element: headerElement, brandElement, closeButtonElement, title} = header;
-    
+
     expect(headerElement.exists()).toEqual(true);
     expect(brandElement.exists()).toEqual(true);
     expect(closeButtonElement.exists()).toEqual(true);
     expect(title.element.exists()).toEqual(true);
     expect(title.iconElement.exists()).toEqual(true);
     expect(title.textElement.exists()).toEqual(true);
-    
+
     expect(contentElement.exists()).toEqual(true);
-    
+
     const {element: footerElement, primaryButtonElement, secondaryButtonElement} = footer;
-    
+
     expect(footerElement.exists()).toEqual(true);
     expect(primaryButtonElement.exists()).toEqual(true);
     expect(secondaryButtonElement.exists()).toEqual(true);
 
     const {textElement: titleTextElement, iconElement: titleIconElement} = title;
-    
+
     expect(titleTextElement.text()).toEqual(defaultConfiguration.title);
     expect(titleIconElement.prop('name')).toEqual(defaultConfiguration.icon);
     expect(titleIconElement.prop('decorative')).toEqual(true);
-    
+
     const {buttons} = defaultConfiguration;
-    
+
     expect(primaryButtonElement.text()).toEqual(buttons.primary.label);
     expect(secondaryButtonElement.text()).toEqual(buttons.secondary.label);
   });

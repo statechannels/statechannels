@@ -59,20 +59,16 @@ describe('UI - FlowStep', () => {
   });
 
   it('can show a Spinner when the status is In Progress', () => {
-    const {
-      statusIconElement,
-      statusSpinnerElement,
-      stepElement
-    } = mockFlowStep({status: FlowStepStatus.InProgress});
+    const {statusIconElement, statusSpinnerElement, stepElement} = mockFlowStep({
+      status: FlowStepStatus.InProgress
+    });
     expect(statusIconElement.exists()).toEqual(false);
     expect(statusSpinnerElement.exists()).toEqual(true);
     expect(stepElement.hasClass(css.inProgress)).toEqual(true);
   });
 
   it('can show a Check icon when status is Done', () => {
-    const {
-      statusIconElement, statusSpinnerElement
-    } = mockFlowStep({status: FlowStepStatus.Done});
+    const {statusIconElement, statusSpinnerElement} = mockFlowStep({status: FlowStepStatus.Done});
     expect(statusIconElement.prop('name')).toEqual(Icons.Check);
     expect(statusIconElement.exists()).toEqual(true);
     expect(statusSpinnerElement.exists()).toEqual(false);
