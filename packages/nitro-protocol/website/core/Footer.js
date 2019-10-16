@@ -38,7 +38,7 @@ class Footer extends React.Component {
           <div>
             <h5>Docs</h5>
             <a href={this.docUrl('adjudicator/force-move-intro', this.props.language)}>ForceMove</a>
-            <a href={this.docUrl('nitro-intro', this.props.language)}>Nitro</a>
+            <a href={this.docUrl('overview', this.props.language)}>Nitro</a>
           </div>
           {/* <div>
             <h5>Community</h5>

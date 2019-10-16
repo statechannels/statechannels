@@ -24,7 +24,7 @@ const users = [
 const siteConfig = {
   title: 'Nitro protocol', // Title for your website.
   tagline: 'A smart-contract protocol for state channel networks',
-  url: 'https://quirky-panini-27752c.netlify.com/', // Your website URL
+  url: 'https://angry-villani-ad8c15.netlify.com/', // Your website URL
   baseUrl: '/', // Base URL for your project */
   // For github.io type URLs, you would set the url and baseUrl like:
   //   url: 'https://facebook.github.io',
@@ -38,7 +38,7 @@ const siteConfig = {
   //   organizationName: 'JoelMarcey'
 
   // For no header links in the top nav bar -> headerLinks: [],
-  headerLinks: [{doc: 'nitro-intro', label: 'Docs'}, {page: 'help', label: 'Help'}],
+  headerLinks: [{doc: 'overview', label: 'Docs'}, {page: 'help', label: 'Help'}],
 
   // If you have users set above, you add it here:
   users,

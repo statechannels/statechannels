@@ -1,6 +1,6 @@
 ---
-id: nitro-intro
-title: Introduction to Nitro
+id: our-solution
+title: Our solution
 ---
 
 Welcome to the **Nitro** state channel protocol specification. This documentation site outlines the technical specifications required by developers who wish to implement or build on top of Nitro. It is intended to complement the Nitro [white-paper](https://eprint.iacr.org/2019/219).

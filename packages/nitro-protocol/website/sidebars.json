@@ -1,7 +1,10 @@
 {
   "docs": {
-    "Nitro Protocol": ["nitro-intro", "quick-start"],
-
+    "State Channels": [
+      "overview",
+      "our-solution",
+      "quick-start"
+    ],
     "Adjudicator": [
       "adjudicator/force-move-intro",
       "adjudicator/state-format",
@@ -16,7 +19,6 @@
       "adjudicator/push-outcome",
       "adjudicator/consensus-game"
     ],
-
     "Asset Holder(s)": [
       "asset-holder/outcomes",
       "asset-holder/deposit",
@@ -24,9 +26,12 @@
       "asset-holder/transfer",
       "asset-holder/claim"
     ],
-
-    "Advanced": ["auxiliary-protocols"],
-    "Examples": ["payment-game"],
+    "Advanced": [
+      "auxiliary-protocols"
+    ],
+    "Examples": [
+      "payment-game"
+    ],
     "Interfaces": [
       "interfaces/IForceMove",
       "interfaces/Adjudicator",
