@@ -45,6 +45,8 @@ const onRangeKeyDown = (
   setValue: Dispatch<SetStateAction<number>>,
   onChange?: (value: number) => void
 ) => (event: KeyboardEvent<HTMLInputElement>) => {
+  const originalValue = value;
+
   if (event.key === 'ArrowUp' || event.key === 'ArrowRight') {
     value += step;
   } else if (event.key === 'ArrowDown' || event.key === 'ArrowLeft') {
@@ -61,7 +63,11 @@ const onRangeKeyDown = (
     value = min;
   }
 
-  onRangeChange(setValue, onChange);
+  setValue(value);
+
+  if (onChange && originalValue !== value) {
+    onChange(value);
+  }
 };
 
 const calculateOffsetX = (
