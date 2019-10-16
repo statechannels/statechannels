@@ -11,6 +11,7 @@ graph LR
 linkStyle default interpolate basis
 A["Adjudicator"]
 EOA["EOA"]
+ForceMoveApp
 EOA-->|forceMove|A
 EOA-->|respond|A
 EOA-->|checkpoint|A
@@ -20,10 +21,12 @@ EOA-->|deposit|AssetHolder
 EOA-->|claimAll|AssetHolder
 EOA-->|transferAll|AssetHolder
 A-->|setOutcome|AssetHolder
+A-->|validTransition|ForceMoveApp
 classDef Contract fill:#ffffff;
-class A,AssetHolder Contract;
+class A,AssetHolder,ForceMoveApp Contract;
 click A "../interfaces/Adjudicator"
 click AssetHolder "../interfaces/IAssetHolder"
+click ForceMoveApp "../interfaces/ForceMoveApp"
 </div>
 
 A typical execution of a Nitro state channel is for participants to:

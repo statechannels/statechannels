@@ -10,6 +10,7 @@ graph LR
 linkStyle default interpolate basis
 A["Adjudicator"]
 EOA["EOA"]
+ConsensusApp
 EOA-->|forceMove|A
 EOA-->|respond|A
 EOA-->|checkpoint|A
@@ -23,16 +24,18 @@ EOA-->|claimAll|ERC20AssetHolder
 EOA-->|transferAll|ERC20AssetHolder
 A-->|setOutcome| ETHAssetHolder
 A-->|setOutcome| ERC20AssetHolder
+A-->|validTransition|ConsensusApp
 Token
 EOA-->|approve|Token
 ERC20AssetHolder-->|transfer| Token
 ERC20AssetHolder-->|transferFrom| Token
 classDef Contract fill:#ffffff;
-class A,ERC20AssetHolder,ETHAssetHolder,Token Contract;
-click A "https://github.com/statechannels/monorepo/tree/master/packages/nitro-protocol/contracts/NitroAdjudicator.sol"
-click ETHAssetHolder "https://github.com/statechannels/monorepo/tree/master/packages/nitro-protocol/contracts/ETHAssetHolder.sol"
-click ERC20AssetHolder "https://github.com/statechannels/monorepo/tree/master/packages/nitro-protocol/contracts/ERC20AssetHolder.sol"
+class A,ERC20AssetHolder,ETHAssetHolder,Token,ConsensusApp Contract;
+click A "./nitro-adjudicator"
+click ETHAssetHolder "./asset-holder"
+click ERC20AssetHolder "./asset-holder"
 click Token "https://github.com/statechannels/monorepo/tree/master/packages/nitro-protocol/contracts/Token.sol"
+click ConsensusApp "./consensus-app"
 </div>
 
 A typical execution of a Nitro state channel is for participants to:
