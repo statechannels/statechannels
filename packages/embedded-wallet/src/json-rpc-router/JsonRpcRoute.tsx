@@ -32,7 +32,7 @@ const JsonRpcRoute: React.FC<JsonRpcRouteProps> = ({method, component}: JsonRpcR
           return <main data-test-selector={`handler:${method}`}>{handler}</main>;
         }
 
-        return [];
+        return null;
       }}
     </JsonRpcRouterConsumer>
   );

@@ -1,5 +1,6 @@
 import prettier from 'prettier-bytes';
 import React, {useState} from 'react';
+import {generateMagnetURL} from '../../clients/web3torrent-client';
 import {TorrentPeers} from '../../library/types';
 import {Status, Torrent} from '../../types';
 import {clipboardCopy} from '../../utils/copy-to-clipboard';
@@ -7,8 +8,11 @@ import {DownloadInfo} from './download-info/DownloadInfo';
 import './TorrentInfo.scss';
 import {UploadInfo} from './upload-info/UploadInfo';
 
-const MagnetLinkButton: React.FC<{magnetURI: string}> = ({magnetURI}) => {
-  const [magnetInfo, setMagnetInfo] = useState({copied: false, magnet: magnetURI});
+const MagnetLinkButton: React.FC<{torrent: Torrent}> = ({torrent}) => {
+  const [magnetInfo, setMagnetInfo] = useState({
+    copied: false,
+    magnet: generateMagnetURL(torrent)
+  });
   return (
     <button
       className="fileLink"
@@ -37,7 +41,7 @@ const TorrentInfo: React.FC<{torrent: Torrent; peers?: TorrentPeers}> = ({torren
         <span className="fileCost">
           Est. cost {!torrent.cost ? 'Unknown' : `$${Number(torrent.cost).toFixed(2)}`}
         </span>
-        {torrent.magnetURI ? <MagnetLinkButton magnetURI={torrent.magnetURI} /> : false}
+        {torrent.magnetURI ? <MagnetLinkButton torrent={torrent} /> : false}
       </section>
       {torrent.status !== Status.Idle && torrent.status !== Status.Seeding && torrent.ready ? (
         <DownloadInfo torrent={torrent} />

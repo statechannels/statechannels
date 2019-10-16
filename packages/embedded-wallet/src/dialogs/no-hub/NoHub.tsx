@@ -36,7 +36,7 @@ const NoHub: React.FC<RouteComponentProps> = () => {
         }
       }}
     >
-      {redirect ? <Redirect to={OnboardingFlowPaths.ConnectToHub} /> : []}
+      {redirect ? <Redirect to={OnboardingFlowPaths.ConnectToHub} /> : null}
     </Dialog>
   );
 };
