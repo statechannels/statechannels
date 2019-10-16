@@ -28,15 +28,16 @@ describe('UI - Icon', () => {
   });
 
   it('can be instantiated', () => {
-    expect(component.iconElement.exists()).toEqual(true);
-    expect(component.iconElement.hasClass(css.check)).toEqual(true);
-    expect(component.iconElement.prop('role')).toEqual('img');
-    expect(component.iconElement.prop('aria-label')).toEqual(iconDescriptions[Icons.Check]);
-    expect(component.iconElement.prop('aria-hidden')).toBeUndefined();
+    const {iconElement} = component;
+    expect(iconElement.exists()).toEqual(true);
+    expect(iconElement.hasClass(css.check)).toEqual(true);
+    expect(iconElement.prop('role')).toEqual('img');
+    expect(iconElement.prop('aria-label')).toEqual(iconDescriptions[Icons.Check]);
+    expect(iconElement.prop('aria-hidden')).toBeUndefined();
   });
 
   it('can be rendered as a presentational, non-ARIA-visible component', () => {
-    component = mockIcon({decorative: true});
-    expect(component.iconElement.prop('aria-hidden')).toEqual(true);
+    const {iconElement} = mockIcon({decorative: true});
+    expect(iconElement.prop('aria-hidden')).toEqual(true);
   });
 });
