@@ -28,7 +28,7 @@ const refreshSliderFrom = (slider: MockSlider) => {
   sliderWrapper.update();
 
   return {
-    sliderWrapper: slider.sliderWrapper,
+    sliderWrapper,
     minLabelElement: sliderWrapper.find(`label.${css.min}`),
     sliderElement: sliderWrapper.find("input[type='range']"),
     maxLabelElement: sliderWrapper.find(`label.${css.max}`),
@@ -49,29 +49,39 @@ describe('UI - Slider', () => {
   });
 
   it('can be instantiated', () => {
-    expect(component.minLabelElement.exists()).toEqual(true);
-    expect(component.minLabelElement.text()).toEqual('0');
-    expect(component.minLabelElement.prop('aria-hidden')).toEqual('true');
-    expect(component.valueLabelElement.exists()).toEqual(true);
-    expect(component.valueLabelElement.text()).toEqual('0');
-    expect(component.valueLabelElement.prop('aria-hidden')).toEqual('true');
-    expect(component.maxLabelElement.exists()).toEqual(true);
-    expect(component.maxLabelElement.text()).toEqual('100ETH');
-    expect(component.maxLabelElement.prop('aria-hidden')).toEqual('true');
-    expect(component.sliderElement.exists()).toEqual(true);
-    expect(component.sliderElement.hasClass(css.slider)).toEqual(true);
-    expect(component.sliderElement.prop('min')).toEqual(0);
-    expect(component.sliderElement.prop('max')).toEqual(100);
-    expect(component.sliderElement.prop('value')).toEqual(0);
-    expect(component.sliderElement.prop('step')).toEqual(1);
-    expect(component.sliderElement.prop('aria-atomic')).toEqual(true);
-    expect(component.sliderElement.prop('aria-valuemin')).toEqual(0);
-    expect(component.sliderElement.prop('aria-valuemax')).toEqual(100);
-    expect(component.sliderElement.prop('aria-valuenow')).toEqual(0);
-    expect(component.sliderElement.prop('aria-label')).toEqual('Current allocation: 0 ETH');
-    expect(component.sliderElement.prop('type')).toEqual('range');
-    expect(component.sliderElement.prop('onChange')).toBeInstanceOf(Function);
-    expect(component.sliderElement.prop('onKeyDown')).toBeInstanceOf(Function);
+    const {
+      minLabelElement,
+      valueLabelElement,
+      maxLabelElement,
+      sliderElement
+    } = component;
+    
+    expect(minLabelElement.exists()).toEqual(true);
+    expect(minLabelElement.text()).toEqual('0');
+    expect(minLabelElement.prop('aria-hidden')).toEqual('true');
+    
+    expect(valueLabelElement.exists()).toEqual(true);
+    expect(valueLabelElement.text()).toEqual('0');
+    expect(valueLabelElement.prop('aria-hidden')).toEqual('true');
+    
+    expect(maxLabelElement.exists()).toEqual(true);
+    expect(maxLabelElement.text()).toEqual('100ETH');
+    expect(maxLabelElement.prop('aria-hidden')).toEqual('true');
+    
+    expect(sliderElement.exists()).toEqual(true);
+    expect(sliderElement.hasClass(css.slider)).toEqual(true);
+    expect(sliderElement.prop('min')).toEqual(0);
+    expect(sliderElement.prop('max')).toEqual(100);
+    expect(sliderElement.prop('value')).toEqual(0);
+    expect(sliderElement.prop('step')).toEqual(1);
+    expect(sliderElement.prop('aria-atomic')).toEqual(true);
+    expect(sliderElement.prop('aria-valuemin')).toEqual(0);
+    expect(sliderElement.prop('aria-valuemax')).toEqual(100);
+    expect(sliderElement.prop('aria-valuenow')).toEqual(0);
+    expect(sliderElement.prop('aria-label')).toEqual('Current allocation: 0 ETH');
+    expect(sliderElement.prop('type')).toEqual('range');
+    expect(sliderElement.prop('onChange')).toBeInstanceOf(Function);
+    expect(sliderElement.prop('onKeyDown')).toBeInstanceOf(Function);
   });
 
   describe('can change its value with the keyboard', () => {
@@ -89,14 +99,17 @@ describe('UI - Slider', () => {
     });
 
     it.each(keyboardCases)('%s it by %i when pressing %s', (_, key, numberChange) => {
-      component = triggerKeyOn(component, 'sliderElement', key as string);
-      const value = component.sliderElement.prop('value');
-
+      const {
+        sliderElement,
+        valueLabelElement
+      } = triggerKeyOn(component, 'sliderElement', key as string);
+      
+      const value = sliderElement.prop('value');
+      const ariaLabel = `Current allocation: ${value} ETH`;
+      
       expect(value).toEqual(50 + (numberChange as number));
-      expect(component.valueLabelElement.text()).toEqual(`${value}`);
-      expect(component.sliderElement.prop('aria-label')).toEqual(
-        `Current allocation: ${value} ETH`
-      );
+      expect(valueLabelElement.text()).toEqual(`${value}`);
+      expect(sliderElement.prop('aria-label')).toEqual(ariaLabel);
     });
   });
 
