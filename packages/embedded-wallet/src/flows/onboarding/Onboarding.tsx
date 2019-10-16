@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useContext} from 'react';
 import {Route} from 'react-router-dom';
 import {BudgetAllocation, ConnectToHub, NoHub} from '../../dialogs';
 import {FlowRouter} from '../../flow-router/FlowRouter';
@@ -16,6 +16,8 @@ const OnboardingFlowContext = React.createContext<JsonRpcComponentProps>(
   {} as JsonRpcComponentProps
 );
 
+const useOnboardingFlowContext = () => useContext(OnboardingFlowContext);
+
 const OnboardingFlow: React.FC<JsonRpcComponentProps> = ({request}) => {
   return (
     <FlowRouter initialPath={initialPath}>
@@ -28,4 +30,4 @@ const OnboardingFlow: React.FC<JsonRpcComponentProps> = ({request}) => {
   );
 };
 
-export {OnboardingFlow, OnboardingFlowContext};
+export {OnboardingFlow, OnboardingFlowContext, useOnboardingFlowContext};
