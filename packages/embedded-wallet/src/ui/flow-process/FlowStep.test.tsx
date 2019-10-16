@@ -40,11 +40,18 @@ describe('UI - FlowStep', () => {
   });
 
   it('can be instantiated', () => {
-    expect(component.stepElement.exists()).toEqual(true);
-    expect(component.titleElement.exists()).toEqual(true);
-    expect(component.statusWrapper.exists()).toEqual(true);
-    expect(component.statusIconElement.exists()).toEqual(true);
-    expect(component.statusSpinnerElement.exists()).toEqual(false);
+    const {
+      stepElement,
+      titleElement,
+      statusWrapper,
+      statusIconElement,
+      statusSpinnerElement
+    } = component;
+    expect(stepElement.exists()).toEqual(true);
+    expect(titleElement.exists()).toEqual(true);
+    expect(statusWrapper.exists()).toEqual(true);
+    expect(statusIconElement.exists()).toEqual(true);
+    expect(statusSpinnerElement.exists()).toEqual(false);
   });
 
   it('can show an Hourglass icon when the status is Pending', () => {
@@ -52,16 +59,22 @@ describe('UI - FlowStep', () => {
   });
 
   it('can show a Spinner when the status is In Progress', () => {
-    component = mockFlowStep({status: FlowStepStatus.InProgress});
-    expect(component.statusIconElement.exists()).toEqual(false);
-    expect(component.statusSpinnerElement.exists()).toEqual(true);
-    expect(component.stepElement.hasClass(css.inProgress)).toEqual(true);
+    const {
+      statusIconElement,
+      statusSpinnerElement,
+      stepElement
+    } = mockFlowStep({status: FlowStepStatus.InProgress});
+    expect(statusIconElement.exists()).toEqual(false);
+    expect(statusSpinnerElement.exists()).toEqual(true);
+    expect(stepElement.hasClass(css.inProgress)).toEqual(true);
   });
 
   it('can show a Check icon when status is Done', () => {
-    component = mockFlowStep({status: FlowStepStatus.Done});
-    expect(component.statusIconElement.prop('name')).toEqual(Icons.Check);
-    expect(component.statusIconElement.exists()).toEqual(true);
-    expect(component.statusSpinnerElement.exists()).toEqual(false);
+    const {
+      statusIconElement, statusSpinnerElement
+    } = mockFlowStep({status: FlowStepStatus.Done});
+    expect(statusIconElement.prop('name')).toEqual(Icons.Check);
+    expect(statusIconElement.exists()).toEqual(true);
+    expect(statusSpinnerElement.exists()).toEqual(false);
   });
 });
