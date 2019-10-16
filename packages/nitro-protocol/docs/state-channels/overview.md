@@ -2,6 +2,9 @@
 id: overview
 title: Overview
 ---
+Welcome to the nitro-protocol state channels documentation site. In this introductory pages, you will find a high level description of state channels; their use-cases and the challenges they represent; our solution to those challenges. You will also find a quick start guide to help you nitro-charge / channelize your DApp using our framework.
+
+Elsewhere on the site you will find interfaces for the smart contracts that support a nitro state channel network, as well as documentation for a reference implementation that is gas optimized and well tested.
 
 ## What is a State Channel?
 

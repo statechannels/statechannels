@@ -21,7 +21,7 @@ function Help(props) {
 
   const supportLinks = [
     {
-      content: `Learn more using the [documentation on this site.](${docUrl('overview')})`,
+      content: `Learn more using the [documentation on this site.](${docUrl('state-channels/overview')})`,
       title: 'Browse Docs',
     },
     {
