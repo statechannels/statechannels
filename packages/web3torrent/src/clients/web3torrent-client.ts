@@ -1,4 +1,5 @@
 import React from 'react';
+import {ClientEvents} from '../library/types';
 import WebTorrentPaidStreamingClient, {ExtendedTorrent} from '../library/web3torrent-lib';
 import {defaultTrackers, EmptyTorrent, Status, Torrent} from '../types';
 export const web3torrent = new WebTorrentPaidStreamingClient();
@@ -9,10 +10,24 @@ export const download: (torrent: any) => Promise<Torrent> = torrentData =>
     web3torrent.add(torrentData, torrent => resolve({...torrent, status: Status.Connecting}))
   );
 
-export const upload: (files: any) => Promise<Torrent> = files =>
-  new Promise(resolve =>
-    web3torrent.seed(files as FileList, torrent => resolve({...torrent, status: Status.Seeding}))
+export const upload: (files: any) => Promise<Torrent> = files => {
+  // TODO: When a protocol is defined, this should be removed. FROM HERE
+  web3torrent.on(
+    ClientEvents.PEER_STATUS_CHANGED,
+    ({torrentPeers, torrentInfoHash, peerAccount}) => {
+      if (!torrentPeers[peerAccount].allowed) {
+        web3torrent.togglePeer(torrentInfoHash, peerAccount);
+      }
+    }
   );
+  // TO HERE
+
+  return new Promise(resolve =>
+    web3torrent.seed(files as FileList, torrent => {
+      resolve({...torrent, status: Status.Seeding});
+    })
+  );
+};
 
 export const getTorrentPeers = infoHash => web3torrent.allowedPeers[infoHash];
 

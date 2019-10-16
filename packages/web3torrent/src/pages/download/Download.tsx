@@ -7,16 +7,26 @@ import {Status, Torrent} from '../../types';
 import {useInterval} from '../../utils/useInterval';
 import './Download.scss';
 
+const askForFunds = async (torrent: Torrent, setTorrent) => {
+  window.EmbeddedWallet.enable();
+  window.EmbeddedWallet.request({
+    jsonrpc: '2.0',
+    method: 'chan_allocate',
+    id: 123,
+    params: ['foo', 'bar', 3, false]
+  }).then(async result => {
+    console.log('result', result);
+    setTorrent({...torrent, ...(await download(torrent.magnetURI))});
+  });
+};
+
 const DownloadStarter: React.FC<{torrent: Torrent; setTorrent: React.Dispatch<Torrent>}> = ({
   torrent,
   setTorrent
 }) => {
   return (
     <>
-      <FormButton
-        name="download"
-        onClick={async () => setTorrent({...torrent, ...(await download(torrent.magnetURI))})}
-      >
+      <FormButton name="download" onClick={() => askForFunds(torrent, setTorrent)}>
         Start Download
       </FormButton>
       <div className="subtitle">
