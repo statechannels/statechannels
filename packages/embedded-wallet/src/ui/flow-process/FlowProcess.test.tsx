@@ -27,8 +27,9 @@ describe('UI - FlowProcess', () => {
   });
 
   it('can be instantiated', () => {
-    expect(component.flowProcessElement.exists()).toEqual(true);
-    expect(component.flowProcessElement.prop('role')).toEqual('progressbar');
-    expect(component.flowProcessElement.prop('aria-atomic')).toEqual(true);
+    const {flowProcessElement} = component;
+    expect(flowProcessElement.exists()).toEqual(true);
+    expect(flowProcessElement.prop('role')).toEqual('progressbar');
+    expect(flowProcessElement.prop('aria-atomic')).toEqual(true);
   });
 });
