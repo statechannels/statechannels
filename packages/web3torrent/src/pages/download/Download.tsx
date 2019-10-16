@@ -30,7 +30,7 @@ const DownloadStarter: React.FC<{torrent: Torrent; setTorrent: React.Dispatch<To
 };
 
 const Download: React.FC<RouteComponentProps> = () => {
-  const [torrent, setTorrent] = useState(parseMagnetURL(decodeURIComponent(useLocation().hash)));
+  const [torrent, setTorrent] = useState(parseMagnetURL(useLocation().hash));
 
   useInterval(
     () => setTorrent(getLiveTorrentData(torrent, torrent.infoHash)),
