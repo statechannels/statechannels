@@ -37,7 +37,7 @@ const NoHub: React.FC<JsonRpcComponentProps> = () => {
         }
       }}
     >
-      {redirect ? <Redirect to={OnboardingFlowPaths.ConnectToHub} /> : []}
+      {redirect ? <Redirect to={OnboardingFlowPaths.ConnectToHub} /> : null}
     </Dialog>
   );
 };
