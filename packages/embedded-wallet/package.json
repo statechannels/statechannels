@@ -15,6 +15,7 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "test:ci": "react-scripts test",
+    "test:coverage": "react-scripts test --coverage --watchAll=false",
     "eject": "react-scripts eject",
     "lint:check": "tslint -c tslint.json -p .",
     "lint:write": "tslint -c tslint.json -p . --fix"
@@ -22,6 +23,8 @@
   "jest": {
     "collectCoverageFrom": [
       "./src/**/*.ts*",
+      "!./src/**/index.ts*",
+      "!./src/**/*.d.ts",
       "!./src/test-utils/**"
     ],
     "moduleNameMapper": {
