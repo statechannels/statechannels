@@ -2,6 +2,9 @@
 <div><img src="website/static/img/favicon.ico"> </div>
 Nitro Protocol
 </h1>
+
+[![Netlify Status](https://api.netlify.com/api/v1/badges/8472e36f-72ee-4b18-8d1a-c2dfbc27667b/deploy-status)](https://app.netlify.com/sites/angry-villani-ad8c15/deploys)
+
 This repository contains the smart contracts that define a state channel framework capable of running 3rd-party
 'applications' that conform to a simple state-machine interface, and allow for large-scale state-channel networks. This repository also includes helper functions written in TypeScript, to allow clients to more easily interact with the contracts.
 
