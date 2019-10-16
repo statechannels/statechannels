@@ -232,3 +232,18 @@ As with `transferAll`, a transfer to another channel results in explicit escrow 
 In comparison to `transferAll`, in `claimAll` it is more difficult to track the unknown number of payouts and new `AllocationItems`. An array of payouts is initialized with the same length as the target channel's allocation. While the balance is positive, and for each destination in the guarantee, find the first occurrence of that destination in the target channel's allocation. If there is sufficient balance remaining, increase the payout and decrease the number of new allocation items. If there is insufficient balance remaining, assign all of it to a payout (and the balance becomes zero), decrease the amount in the allocation item, and do not decrease the number of new allocation items. With the remaining balance (if any) continue thus: While the balance remains positive, and for each item in the target channel's allocation, if there is sufficient balance remaining, increase the payout and decrease the number of new allocation items. If there is insufficient balance remaining, assign all of it to a payout (and the balance becomes zero), decrease the amount in the allocation item, and do not decrease the number of new allocation items.
 
 Finally, update the holdings, compute the new allocation and update the storage, and execute the payouts.
+
+---
+
+## `_transferAsset`
+
+This internal method executes transfers of assets external to the Nitro network. 
+```solidity
+function _transferAsset(address payable destination, uint256 amount) internal {}
+```
+The behavior is slightly different depending on the asset that has been escrowed: 
+### `ETHAssetHolder` transfer
+Executes an ethereum `transfer` of `amount` to `destination`.
+
+### `ERC20AssetHolder` transfer
+Calls `transfer(destination,amount)` on the specified Token contract.
