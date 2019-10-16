@@ -1,4 +1,5 @@
 import {JsonRPCRequest, JsonRPCResponse} from 'web3/providers';
+import {PaidStreamingWire} from './library/types';
 
 export enum Status {
   Downloading = 'Downloading',
@@ -32,7 +33,8 @@ export const EmptyTorrent = {
   cost: '0',
   status: Status.Idle,
   downloaded: 0,
-  files: []
+  files: [],
+  wires: []
 } as Torrent;
 
 export type Torrent = {
@@ -58,6 +60,7 @@ export type Torrent = {
   status: Status;
   ready?: boolean;
   destroyed?: boolean;
+  wires?: PaidStreamingWire[];
 };
 
 export type TorrentFile = {
