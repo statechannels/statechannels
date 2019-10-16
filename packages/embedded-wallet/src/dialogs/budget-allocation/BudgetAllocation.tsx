@@ -14,6 +14,7 @@ const allow = (amountToAllocate: number, useRedirect: Dispatch<SetStateAction<bo
 
 const reject = () => {
   log('`Reject` clicked: You shall not pass.');
+  closeWallet();
 };
 
 const BudgetAllocation: React.FC<RouteComponentProps> = () => {
