@@ -40,9 +40,10 @@ describe('UI - Button', () => {
   });
 
   it('can be instantiated', () => {
-    expect(component.buttonWrapper.text()).toEqual('Click me');
-    expect(component.buttonElement.hasClass(css.primary)).toEqual(true);
-    expect(component.iconElement.exists()).toEqual(false);
+    const {buttonWrapper, buttonElement, iconElement} = component;
+    expect(buttonWrapper.text()).toEqual('Click me');
+    expect(buttonElement.hasClass(css.primary)).toEqual(true);
+    expect(iconElement.exists()).toEqual(false);
   });
 
   it('can be clicked', () => {
