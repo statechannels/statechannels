@@ -1,13 +1,13 @@
 import debug from 'debug';
-import React, {useContext, useEffect, useState} from 'react';
-import {OnboardingFlowContext} from '../../flows';
-import {JsonRpcComponentProps} from '../../json-rpc-router';
+import React, {useEffect, useState} from 'react';
+import {RouteComponentProps} from 'react-router';
+import {useOnboardingFlowContext} from '../../flows';
 import {allocate, closeWallet} from '../../message-dispatchers';
 import {Dialog, FlowProcess, FlowStep, FlowStepProps, FlowStepStatus} from '../../ui';
 
 const log = debug('wallet:connect-to-hub');
 
-const ConnectToHub: React.FC<JsonRpcComponentProps> = () => {
+const ConnectToHub: React.FC<RouteComponentProps> = () => {
   const [steps, setSteps] = useState<FlowStepProps[]>([
     {
       title: 'Deposit 5 ETH',
@@ -27,7 +27,7 @@ const ConnectToHub: React.FC<JsonRpcComponentProps> = () => {
     }
   ]);
 
-  const onboardingFlowContext = useContext(OnboardingFlowContext);
+  const onboardingFlowContext = useOnboardingFlowContext();
 
   useEffect(() => {
     log('Initiated flow step with request %o', onboardingFlowContext.request);
