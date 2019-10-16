@@ -28,7 +28,8 @@ describe('UI - Spinner', () => {
   });
 
   it('can be instantiated', () => {
-    expect(component.spinnerElement.exists()).toEqual(true);
-    expect(component.spinnerElement.hasClass(css.spinner)).toEqual(true);
+    const {spinnerElement} = component;
+    expect(spinnerElement.exists()).toEqual(true);
+    expect(spinnerElement.hasClass(css.spinner)).toEqual(true);
   });
 });
