@@ -34,7 +34,7 @@ const BudgetAllocation: React.FC<RouteComponentProps> = () => {
         secondary: {label: 'Reject', onClick: reject}
       }}
     >
-      {redirect ? <Redirect to={OnboardingFlowPaths.NoHub} /> : []}
+      {redirect ? <Redirect to={OnboardingFlowPaths.NoHub} /> : null}
       <div>
         Recommended amount: <strong>0.2 ETH</strong> of your send.
       </div>

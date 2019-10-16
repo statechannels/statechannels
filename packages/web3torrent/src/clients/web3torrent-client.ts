@@ -126,5 +126,6 @@ export const generateMagnetURL = (torrent: Torrent) => {
   if (torrent.cost) {
     magnetParams.append('cost', torrent.cost);
   }
+
   return `${window.location.origin}/download/magnet#magnet:?${magnetParams.toString()}`;
 };
