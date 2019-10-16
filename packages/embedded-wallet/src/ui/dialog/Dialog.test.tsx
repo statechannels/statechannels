@@ -92,28 +92,38 @@ describe('UI - Dialog', () => {
   });
 
   it('can be instantiated', () => {
-    expect(component.dialogElement.exists()).toEqual(true);
-    expect(component.backdropElement.exists()).toEqual(true);
-    expect(component.header.element.exists()).toEqual(true);
-    expect(component.header.brandElement.exists()).toEqual(true);
-    expect(component.header.closeButtonElement.exists()).toEqual(true);
-    expect(component.header.title.element.exists()).toEqual(true);
-    expect(component.header.title.iconElement.exists()).toEqual(true);
-    expect(component.header.title.textElement.exists()).toEqual(true);
-    expect(component.contentElement.exists()).toEqual(true);
-    expect(component.footer.element.exists()).toEqual(true);
-    expect(component.footer.primaryButtonElement.exists()).toEqual(true);
-    expect(component.footer.secondaryButtonElement.exists()).toEqual(true);
+    const {dialogElement, backdropElement, header, contentElement, footer} = component;
+    
+    expect(dialogElement.exists()).toEqual(true);
+    expect(backdropElement.exists()).toEqual(true);
+    
+    const {element: headerElement, brandElement, closeButtonElement, title} = header;
+    
+    expect(headerElement.exists()).toEqual(true);
+    expect(brandElement.exists()).toEqual(true);
+    expect(closeButtonElement.exists()).toEqual(true);
+    expect(title.element.exists()).toEqual(true);
+    expect(title.iconElement.exists()).toEqual(true);
+    expect(title.textElement.exists()).toEqual(true);
+    
+    expect(contentElement.exists()).toEqual(true);
+    
+    const {element: footerElement, primaryButtonElement, secondaryButtonElement} = footer;
+    
+    expect(footerElement.exists()).toEqual(true);
+    expect(primaryButtonElement.exists()).toEqual(true);
+    expect(secondaryButtonElement.exists()).toEqual(true);
 
-    expect(component.header.title.textElement.text()).toEqual(defaultConfiguration.title);
-    expect(component.header.title.iconElement.prop('name')).toEqual(defaultConfiguration.icon);
-    expect(component.header.title.iconElement.prop('decorative')).toEqual(true);
-    expect(component.footer.primaryButtonElement.text()).toEqual(
-      defaultConfiguration.buttons.primary.label
-    );
-    expect(component.footer.secondaryButtonElement.text()).toEqual(
-      defaultConfiguration.buttons.secondary.label
-    );
+    const {textElement: titleTextElement, iconElement: titleIconElement} = title;
+    
+    expect(titleTextElement.text()).toEqual(defaultConfiguration.title);
+    expect(titleIconElement.prop('name')).toEqual(defaultConfiguration.icon);
+    expect(titleIconElement.prop('decorative')).toEqual(true);
+    
+    const {buttons} = defaultConfiguration;
+    
+    expect(primaryButtonElement.text()).toEqual(buttons.primary.label);
+    expect(secondaryButtonElement.text()).toEqual(buttons.secondary.label);
   });
 
   describe('can be closed', () => {
@@ -143,7 +153,7 @@ describe('UI - Dialog', () => {
   });
 
   it('can render with just a primary button', () => {
-    component = mockDialog({
+    const {footer} = mockDialog({
       title: 'Hello, user',
       closable: true,
       icon: Icons.Check,
@@ -155,35 +165,35 @@ describe('UI - Dialog', () => {
       },
       onClose: closed
     });
-    expect(component.footer.secondaryButtonElement.exists()).toEqual(false);
+    expect(footer.secondaryButtonElement.exists()).toEqual(false);
   });
 
   it('can hide the Close button', () => {
-    component = mockDialog({...defaultConfiguration, closable: false});
-    expect(component.header.closeButtonElement.exists()).toEqual(false);
+    const {header} = mockDialog({...defaultConfiguration, closable: false});
+    expect(header.closeButtonElement.exists()).toEqual(false);
   });
 
   it('can avoid rendering the title container when there is no title', () => {
-    component = mockDialog({
+    const {header} = mockDialog({
       closable: true,
       icon: Icons.Check,
       onClose: closed
     });
-    expect(component.header.title.element.exists()).toEqual(false);
+    expect(header.title.element.exists()).toEqual(false);
   });
 
   it('can avoid rendering the footer when there are no buttons', () => {
-    component = mockDialog({
+    const {footer} = mockDialog({
       title: 'Hello, user',
       closable: true,
       icon: Icons.Check,
       onClose: closed
     });
-    expect(component.footer.element.exists()).toEqual(false);
+    expect(footer.element.exists()).toEqual(false);
   });
 
   it('can avoid rendering the content section when there are no children', () => {
-    component = mockDialog(
+    const {contentElement} = mockDialog(
       {
         title: 'Hello, user',
         closable: true,
@@ -192,6 +202,6 @@ describe('UI - Dialog', () => {
       },
       true
     );
-    expect(component.contentElement.exists()).toEqual(false);
+    expect(contentElement.exists()).toEqual(false);
   });
 });
