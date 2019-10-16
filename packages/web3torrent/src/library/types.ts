@@ -131,6 +131,40 @@ export type PeersByTorrent = {
 declare module 'webtorrent' {
   export interface Instance {
     on(event: 'warning', callback: (err: Error | string) => void): this;
+    on(
+      event: ClientEvents.PEER_STATUS_CHANGED,
+      callback: ({
+        torrentPeers,
+        torrentInfoHash,
+        peerAccount
+      }: {
+        torrentPeers: TorrentPeers;
+        torrentInfoHash: string;
+        peerAccount: string;
+      }) => void
+    ): this;
+
+    on(event: ClientEvents.TORRENT_DONE, torrent: PaidStreamingTorrent): this;
+
+    on(
+      event: ClientEvents.TORRENT_ERROR,
+      callback: ({torrent, error}: {torrent: PaidStreamingTorrent; error: string | Error}) => void
+    ): this;
+
+    on(
+      event: ClientEvents.TORRENT_NOTICE,
+      callback: ({
+        torrent,
+        wire,
+        command,
+        data
+      }: {
+        torrent: PaidStreamingTorrent;
+        wire: PaidStreamingWire;
+        command: PaidStreamingExtensionNotices;
+        data: any;
+      }) => void
+    ): this;
   }
 
   export interface TorrentFile {
