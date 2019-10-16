@@ -7,25 +7,27 @@ import {Dialog, FlowProcess, FlowStep, FlowStepProps, FlowStepStatus} from '../.
 
 const log = debug('wallet:connect-to-hub');
 
+export const FlowSteps = [
+  {
+    title: 'Deposit 5 ETH',
+    status: FlowStepStatus.InProgress
+  },
+  {
+    title: 'Wait for TX to mine',
+    status: FlowStepStatus.Pending
+  },
+  {
+    title: 'Wait for hub.com',
+    status: FlowStepStatus.Pending
+  },
+  {
+    title: 'Done!',
+    status: FlowStepStatus.Pending
+  }
+];
+
 const ConnectToHub: React.FC<RouteComponentProps> = () => {
-  const [steps, setSteps] = useState<FlowStepProps[]>([
-    {
-      title: 'Deposit 5 ETH',
-      status: FlowStepStatus.InProgress
-    },
-    {
-      title: 'Wait for TX to mine',
-      status: FlowStepStatus.Pending
-    },
-    {
-      title: 'Wait for hub.com',
-      status: FlowStepStatus.Pending
-    },
-    {
-      title: 'Done!',
-      status: FlowStepStatus.Pending
-    }
-  ]);
+  const [steps, setSteps] = useState<FlowStepProps[]>(FlowSteps);
 
   const onboardingFlowContext = useOnboardingFlowContext();
 
