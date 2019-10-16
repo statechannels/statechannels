@@ -29,7 +29,7 @@ export const EmptyTorrent = {
   ready: false,
   downloadSpeed: 0,
   uploadSpeed: 0,
-  cost: 0,
+  cost: '0',
   status: Status.Idle,
   downloaded: 0,
   files: []
@@ -54,7 +54,7 @@ export type Torrent = {
   done?: boolean;
   files: TorrentFile[];
   length: number; // Sum of the files length (in bytes).
-  cost?: number;
+  cost?: string;
   status: Status;
   ready?: boolean;
   destroyed?: boolean;

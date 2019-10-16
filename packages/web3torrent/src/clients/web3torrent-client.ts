@@ -110,9 +110,9 @@ export const parseMagnetURL: (rawMagnetURL: string) => Torrent = (rawMagnetURL =
   return {
     ...emptyTorrentData,
     name: magnetParams.get('name') || magnetParams.get('dn') || 'unknown',
-    magnetURI: `magnet:?${magnetParams.toString()}`,
+    magnetURI: decodeURIComponent(`magnet:?${magnetParams.toString()}`),
     length: Number(magnetParams.get('xl')) || 0,
-    cost: Number(magnetParams.get('cost')) || 0
+    cost: magnetParams.get('cost') || '0'
   };
 };
 
@@ -123,6 +123,9 @@ export const generateMagnetURL = (torrent: Torrent) => {
   const magnetParams = new URLSearchParams(torrent.magnetURI.replace(/magnet:/g, ''));
   magnetParams.delete('tr');
   magnetParams.append('xl', String(torrent.length));
-  magnetParams.append('cost', String(torrent.cost));
+  if (torrent.cost) {
+    magnetParams.append('cost', torrent.cost);
+  }
+
   return `${window.location.origin}/download/magnet#magnet:?${magnetParams.toString()}`;
 };
