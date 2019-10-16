@@ -43,8 +43,8 @@ const mockRouteProps = (): MockRouteProps => {
   const match = {
     isExact: true,
     params: {},
-    path: OnboardingFlowPaths.NoHub,
-    url: `http://localhost/${OnboardingFlowPaths.NoHub}`
+    path: OnboardingFlowPaths.ConnectToHub,
+    url: `http://localhost/${OnboardingFlowPaths.ConnectToHub}`
   };
 
   return {history, location, match};
