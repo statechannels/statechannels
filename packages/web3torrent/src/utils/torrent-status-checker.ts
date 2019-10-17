@@ -3,11 +3,11 @@ import {ExtendedTorrent} from '../library/types';
 import {Status, Torrent} from '../types';
 
 const getStatus = (torrent: ExtendedTorrent, previousStatus: Status): Status => {
-  const {uploadSpeed, downloadSpeed} = torrent;
+  const {uploadSpeed, downloadSpeed, progress, done} = torrent;
   if (previousStatus === Status.Seeding) {
     return Status.Seeding;
   }
-  if (torrent.progress && torrent.done) {
+  if (progress && done) {
     return Status.Completed;
   }
   if (uploadSpeed - downloadSpeed === 0) {
@@ -35,30 +35,24 @@ const getFormattedETA = (torrent: ExtendedTorrent) => {
 };
 
 export default (previousData: Torrent, infoHash): Torrent => {
-  const baseData: Torrent = {
-    ...previousData,
-    name: previousData.name || 'unknown',
-    status: Status.Connecting
-  };
-
   if (!infoHash) {
     // torrent in magnet form
-    return {...baseData, status: Status.Idle};
+    return {...previousData, status: Status.Idle};
   }
 
   const live = web3torrent.get(infoHash) as ExtendedTorrent;
   if (!live) {
     // torrent after being destroyed
-    return {...baseData, destroyed: true, status: Status.Idle};
+    return {...previousData, destroyed: true, status: Status.Idle};
   }
 
   return {
     // active torrent
-    ...baseData,
+    ...previousData,
     ...live,
     ...{
-      name: live.name || baseData.name,
-      length: live.length || baseData.length,
+      name: live.name || previousData.name,
+      length: live.length || previousData.length,
       downloaded: (live && live.downloaded) || 0,
       status: getStatus(live, previousData.status),
       uploadSpeed: live.uploadSpeed,
