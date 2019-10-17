@@ -43,7 +43,7 @@
     "lint:check": "npx tslint --config tslint.json --project .",
     "lint:write": "npx tslint --config tslint.json --project . --fix",
     "prepare": "yarn build",
-    "docgen": "npx solidoc ./ ./docs/natspec true",
+    "docgen": "node ./node_modules/solidoc/cli.js",
     "prettier:check": "npx prettier --check '{contracts,src,test}/**/*.{ts,tsx,sol}'",
     "prettier:write": "npx prettier --write '{contracts,src,test}/**/*.{ts,tsx,sol}'",
     "startGanache": "node bin/start-ganache.js",

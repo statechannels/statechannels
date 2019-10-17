@@ -1,0 +1,8 @@
+{
+    "pathToRoot": "./",
+    "pathToRepo": "https://github.com/statechannels/monorepo/tree/master/packages/nitro-protocol/",
+    "outputPath": "./docs/natspec",
+    "noCompilation": true,
+    "compiler": "etherlime compile",
+    "language": "en"
+}
