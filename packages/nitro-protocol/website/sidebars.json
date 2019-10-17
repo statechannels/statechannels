@@ -4,13 +4,6 @@
       "state-channels/overview",
       "state-channels/quick-start"
     ],
-    "Protocol Specification": [
-      "protocol-specification/account-topology",
-      "interfaces/IForceMove",
-      "interfaces/Adjudicator",
-      "interfaces/IAssetHolder",
-      "interfaces/ForceMoveApp"
-    ],
     "Reference Implementation": [
       "reference-implementation/contract-inheritance",
       "reference-implementation/account-topology",
@@ -22,6 +15,32 @@
     ],
     "Client specification": [
       "client-specification/auxiliary-protocols"
+    ]
+  },
+  "API": {
+    "Contract Interfaces": [
+      "natspec/Adjudicator",
+      "natspec/ForceMoveApp",
+      "natspec/IAssetHolder",
+      "natspec/IForceMove"
+    ],
+    "Deployed Contracts": [
+      "natspec/NitroAdjudicator",
+      "natspec/ConsensusApp",
+      "natspec/ERC20AssetHolder",
+      "natspec/ETHAssetHolder"
+    ],
+    "ForceMove Apps": [
+      "natspec/CounterfactualAdapterApp",
+      "natspec/CountingApp",
+      "natspec/SingleAssetPayments",
+      "natspec/TrivialApp"
+    ],
+    "Test Contracts": [
+      "natspec/TESTAssetHolder",
+      "natspec/TESTForceMove",
+      "natspec/TESTNitroAdjudicator",
+      "natspec/Token"
     ]
   }
 }
