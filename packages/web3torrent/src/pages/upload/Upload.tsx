@@ -1,9 +1,11 @@
 import React, {useState} from 'react';
 import {RouteComponentProps} from 'react-router-dom';
-import {getLiveTorrentData, getTorrentPeers, upload} from '../../clients/web3torrent-client';
+import {getTorrentPeers, upload} from '../../clients/web3torrent-client';
 import {FormButton} from '../../components/form';
 import {TorrentInfo} from '../../components/torrent-info/TorrentInfo';
-import {EmptyTorrent, Torrent} from '../../types';
+import {EmptyTorrent} from '../../constants';
+import {Torrent} from '../../types';
+import torrentStatusChecker from '../../utils/torrent-status-checker';
 import {useInterval} from '../../utils/useInterval';
 import './Upload.scss';
 
@@ -50,7 +52,7 @@ const Upload: React.FC<RouteComponentProps> = () => {
   const [peers, setPeers] = useState({});
   useInterval(
     () => {
-      setTorrent(getLiveTorrentData(torrent, torrent.infoHash));
+      setTorrent(torrentStatusChecker(torrent, torrent.infoHash));
       setPeers(getTorrentPeers(torrent.infoHash));
     },
     torrent.status !== 'Idle' && !torrent.destroyed ? 1000 : undefined

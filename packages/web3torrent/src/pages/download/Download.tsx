@@ -1,9 +1,11 @@
 import React, {useState} from 'react';
 import {RouteComponentProps, useLocation} from 'react-router-dom';
-import {download, getLiveTorrentData, parseMagnetURL} from '../../clients/web3torrent-client';
+import {download} from '../../clients/web3torrent-client';
 import {FormButton} from '../../components/form';
 import {TorrentInfo} from '../../components/torrent-info/TorrentInfo';
 import {Status, Torrent} from '../../types';
+import {parseMagnetURL} from '../../utils/magnet';
+import torrentStatusChecker from '../../utils/torrent-status-checker';
 import {useInterval} from '../../utils/useInterval';
 import './Download.scss';
 
@@ -43,7 +45,7 @@ const Download: React.FC<RouteComponentProps> = () => {
   const [torrent, setTorrent] = useState(parseMagnetURL(useLocation().hash));
 
   useInterval(
-    () => setTorrent(getLiveTorrentData(torrent, torrent.infoHash)),
+    () => setTorrent(torrentStatusChecker(torrent, torrent.infoHash)),
     torrent.status !== Status.Idle && !torrent.done && !torrent.destroyed ? 1000 : undefined
   );
 
