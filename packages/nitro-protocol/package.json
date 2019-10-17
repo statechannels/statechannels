@@ -33,7 +33,7 @@
   "homepage": "https://github.com/statechannels/nitro-protocol/",
   "scripts": {
     "precommit": "lint-staged --quiet",
-    "build": "run-s docgen clearContracts clearLib contract:compile build:typescript",
+    "build": "run-s clearContracts clearLib contract:compile build:typescript docgen",
     "build:typescript": "tslint --project . && tsc -b",
     "contract:compile": "./compile.sh",
     "clearContracts": "rm -rf build/contracts",
@@ -43,7 +43,7 @@
     "lint:check": "npx tslint --config tslint.json --project .",
     "lint:write": "npx tslint --config tslint.json --project . --fix",
     "prepare": "yarn build",
-    "docgen": "node ./node_modules/solidoc/cli.js",
+    "docgen": "npx solidoc",
     "prettier:check": "npx prettier --check '{contracts,src,test}/**/*.{ts,tsx,sol}'",
     "prettier:write": "npx prettier --write '{contracts,src,test}/**/*.{ts,tsx,sol}'",
     "startGanache": "node bin/start-ganache.js",
