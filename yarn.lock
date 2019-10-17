@@ -20021,10 +20021,9 @@ solidity-parser-antlr@^0.4.11, solidity-parser-antlr@^0.4.2:
   resolved "https://registry.yarnpkg.com/solidity-parser-antlr/-/solidity-parser-antlr-0.4.11.tgz#af43e1f13b3b88309a875455f5d6e565b05ee5f1"
   integrity sha512-4jtxasNGmyC0midtjH/lTFPZYvTTUMy6agYcF+HoMnzW8+cqo3piFrINb4ZCzpPW+7tTVFCGa5ubP34zOzeuMg==
 
-solidoc@^1.0.5:
-  version "1.0.5"
-  resolved "https://registry.yarnpkg.com/solidoc/-/solidoc-1.0.5.tgz#8cbd022ae0887c4fb4876b43cccc88f1883f70ae"
-  integrity sha512-6UUP66JhtnTbLBjDt/eJgIzwYLTKEwaw0ocA5073jXtpkKk49PDGjJbtVgRJQID0cHHsRLXg6b8ROdk8sOSTnw==
+"solidoc@https://github.com/statechannels/solidoc.git":
+  version "1.0.4"
+  resolved "https://github.com/statechannels/solidoc.git#055c87e8499bed0271054bda5037f5fd81dbc4a4"
   dependencies:
     fs-extra "^7.0.0"
     glob "^7.1.3"

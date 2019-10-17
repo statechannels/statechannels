@@ -75,7 +75,7 @@
     "prettier": "1.18.2",
     "prettier-plugin-solidity": "1.0.0-alpha.34",
     "solc": "0.5.11",
-    "solidoc": "^1.0.5",
+    "solidoc": "https://github.com/statechannels/solidoc.git",
     "truffle": "5.0.37",
     "ts-jest": "24.1.0",
     "tslint": "5.20.0",
