@@ -38,8 +38,13 @@ class Footer extends React.Component {
           <div>
             <h5>Docs</h5>
             <a href={this.docUrl('state-channels/overview')}>Overview</a>
-            <a href={this.docUrl('state-channels/quick-start')}>Quick Start</a>
-            <a href={this.docUrl('reference-implementation/account-topology')}>Reference Implementation</a>
+            <a href={this.docUrl('reference-implementation/account-topology')}>Account Topology</a>
+          </div>
+          <div>
+            <h5>API</h5>
+            <a href={this.docUrl('api/contract-inheritance')}>Contract inheritance</a>
+            <a href={this.docUrl('natspec/ForceMove')}>ForceMove</a>
+            <a href={this.docUrl('natspec/AssetHolder')}>AssetHolder</a>
           </div>
           {/* <div>
             <h5>Community</h5>
