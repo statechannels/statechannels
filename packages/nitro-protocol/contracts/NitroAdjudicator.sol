@@ -4,11 +4,7 @@ pragma experimental ABIEncoderV2;
 import './interfaces/Adjudicator.sol';
 import './ForceMove.sol';
 import './Outcome.sol';
-
-contract AssetHolder {
-    // abstraction of the parts of AssetHolder that we need
-    function setAssetOutcomeHash(bytes32 channel, bytes32 outcomeHash) external returns (bool success);
-}
+import './AssetHolder.sol';
 
 contract NitroAdjudicator is Adjudicator, ForceMove {
     function pushOutcome(

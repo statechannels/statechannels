@@ -1,6 +1,6 @@
 pragma solidity ^0.5.11;
 pragma experimental ABIEncoderV2;
-import './Outcome.sol';
+
 import './AssetHolder.sol';
 contract ETHAssetHolder is AssetHolder {
     address AdjudicatorAddress;

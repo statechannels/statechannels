@@ -1,13 +1,8 @@
 pragma solidity ^0.5.11;
 pragma experimental ABIEncoderV2;
-import './Outcome.sol';
 import './AssetHolder.sol';
+import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
 
-contract IERC20 {
-    // Abstraction of the parts of the ERC20 Interface that we need
-    function transfer(address to, uint256 tokens) public returns (bool success);
-    function transferFrom(address from, address to, uint256 tokens) public returns (bool success);
-}
 
 contract ERC20AssetHolder is AssetHolder {
     address AdjudicatorAddress;
