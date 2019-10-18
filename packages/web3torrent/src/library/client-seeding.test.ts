@@ -1,15 +1,15 @@
 import MemoryChunkStore from 'memory-chunk-store';
-import WebTorrentPaidStreamingClient, {
-  ClientEvents,
-  PaidStreamingExtensionNotices,
-  PaidStreamingTorrent
-} from './web3torrent-lib';
 import {
   defaultFile,
   defaultFileMagnetURI,
   defaultSeedingOptions,
   defaultTorrentHash
 } from './testing/test-utils';
+import WebTorrentPaidStreamingClient, {
+  ClientEvents,
+  PaidStreamingExtensionNotices,
+  PaidStreamingTorrent
+} from './web3torrent-lib';
 
 describe('Seeding and Leeching', () => {
   let seeder: WebTorrentPaidStreamingClient;
