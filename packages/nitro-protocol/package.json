@@ -65,7 +65,7 @@
     "@types/node": "12.7.5",
     "@types/web3": "1.0.19",
     "dotenv": "8.1.0",
-    "etherlime": "2.2.3",
+    "etherlime": "2.2.4",
     "etherlime-lib": "1.1.5",
     "ganache-cli": "6.6.0",
     "jest": "24.9.0",
