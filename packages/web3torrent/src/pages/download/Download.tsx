@@ -10,7 +10,7 @@ import {useInterval} from '../../utils/useInterval';
 import './Download.scss';
 
 const askForFunds = async (torrent: Torrent, setTorrent) => {
-  window.EmbeddedWallet.enable();
+  window.EmbeddedWallet.enable(process.env.REACT_APP_EMBEDDED_WALLET_URL);
   window.EmbeddedWallet.request({
     jsonrpc: '2.0',
     method: 'chan_allocate',
