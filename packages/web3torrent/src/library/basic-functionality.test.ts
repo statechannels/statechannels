@@ -1,10 +1,10 @@
-import WebTorrentPaidStreamingClient from './../src/library/web3torrent-lib';
+import WebTorrentPaidStreamingClient from './web3torrent-lib';
 import {
   defaultFile,
   defaultFileMagnetURI,
   defaultSeedingOptions,
   defaultTorrentHash
-} from './utils';
+} from './testing/test-utils';
 
 describe('Base Seeding', () => {
   it('Seed and remove a Torrent', done => {

@@ -1,7 +1,7 @@
-import WebTorrentPaidStreamingClient, {ClientEvents} from '../../src/library/web3torrent-lib';
-import {defaultFile, defaultLeechingOptions, defaultSeedingOptions} from '../utils';
+import WebTorrentPaidStreamingClient, {ClientEvents} from '../web3torrent-lib';
+import {defaultFile, defaultLeechingOptions, defaultSeedingOptions} from '../testing/test-utils';
 
-describe('Seeding and Leeching - 5sec', () => {
+describe('Seeding and Leeching - 125sec', () => {
   let seeder: WebTorrentPaidStreamingClient;
   let leecher: WebTorrentPaidStreamingClient;
 
@@ -15,10 +15,10 @@ describe('Seeding and Leeching - 5sec', () => {
     leecher.on('warning', (err: any) => fail(err));
   });
 
-  it('should be able to unchoke and finish a download after 5 seconds', done => {
+  it('should be able to unchoke and finish a download after 125 seconds', done => {
     seeder.seed(defaultFile as File, defaultSeedingOptions(), seededTorrent => {
       seeder.once(ClientEvents.PEER_STATUS_CHANGED, ({peerAccount}) => {
-        setTimeout(() => seeder.togglePeer(seededTorrent.infoHash, peerAccount), 5000);
+        setTimeout(() => seeder.togglePeer(seededTorrent.infoHash, peerAccount), 125000);
         leecher.once(ClientEvents.TORRENT_DONE, leechedTorrent => {
           expect(seededTorrent.files[0].done).toEqual(leechedTorrent.files[0].done);
           done();
@@ -26,7 +26,7 @@ describe('Seeding and Leeching - 5sec', () => {
       });
       leecher.add(seededTorrent.magnetURI, defaultLeechingOptions);
     });
-  }, 15000);
+  }, 150000);
 
   afterEach(() => {
     seeder.destroy();
