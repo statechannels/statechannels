@@ -1,10 +1,6 @@
 import MemoryChunkStore from 'memory-chunk-store';
 import fixtures from 'webtorrent-fixtures';
 
-export function testSelector(name: string): string {
-  return `[data-test-selector='${name}']`;
-}
-
 export const defaultFile = new Blob([fixtures.leaves.content]);
 export const defaultTorrentHash = fixtures.leaves.parsedTorrent.infoHash;
 export const defaultFileMagnetURI = `${fixtures.leaves.magnetURI}&tr=${encodeURIComponent(process
