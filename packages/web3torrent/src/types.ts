@@ -22,7 +22,7 @@ declare global {
   interface Window {
     EmbeddedWallet: {
       request: (data: JsonRPCRequest) => Promise<JsonRPCResponse>;
-      enable: () => void;
+      enable: (url?: string) => void;
     };
   }
 }
