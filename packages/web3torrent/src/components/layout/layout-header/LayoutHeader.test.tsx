@@ -2,9 +2,7 @@ import Enzyme, {mount} from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 import {createMemoryHistory} from 'history';
 import React from 'react';
-import {Provider} from 'react-redux';
 import {MemoryRouter as Router, RouteComponentProps} from 'react-router-dom';
-import store from './../../../store/store';
 import {LayoutHeader} from './LayoutHeader';
 
 function setup() {
@@ -21,11 +19,9 @@ function setup() {
     }
   };
   const component = mount(
-    <Provider store={store}>
-      <Router>
-        <LayoutHeader {...props} />
-      </Router>
-    </Provider>
+    <Router>
+      <LayoutHeader {...props} />
+    </Router>
   );
 
   return {props, component};
