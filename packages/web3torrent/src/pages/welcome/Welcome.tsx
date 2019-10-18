@@ -3,14 +3,10 @@ import {RouteComponentProps} from 'react-router-dom';
 import {FormButton} from '../../components/form';
 import {ShareList} from '../../components/share-list/ShareList';
 import {RoutePath} from '../../routes';
-import {Torrent} from '../../types';
 import './Welcome.scss';
+import { mockTorrents } from '../../constants';
 
-const mockTorrents: Array<Partial<Torrent>> = [
-  {name: 'Sample_1.dat', length: 350, numSeeds: 27, numPeers: 350, cost: '0.5', files: []},
-  {name: 'Sample_2.dat', length: 250, numSeeds: 35, numPeers: 400, cost: '0.5', files: []},
-  {name: 'Sample_3.dat', length: 50, numSeeds: 2, numPeers: 360, cost: '0.5', files: []}
-];
+
 const Welcome: React.FC<RouteComponentProps> = ({history}) => {
   return (
     <section className="section fill">
