@@ -3,9 +3,9 @@ import Adapter from 'enzyme-adapter-react-16';
 import {createMemoryHistory} from 'history';
 import React from 'react';
 import {MemoryRouter as Router, RouteComponentProps} from 'react-router-dom';
+import {RoutePath} from '../../routes';
+import {testSelector} from '../../utils/test-utils';
 import Welcome from './Welcome';
-import { testSelector } from '../../utils/test-utils';
-import { RoutePath } from '../../routes';
 
 Enzyme.configure({adapter: new Adapter()});
 

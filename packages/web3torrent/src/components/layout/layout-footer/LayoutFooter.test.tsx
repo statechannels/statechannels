@@ -5,7 +5,6 @@ import React from 'react';
 import {MemoryRouter as Router, RouteComponentProps} from 'react-router-dom';
 import {LayoutFooter} from './LayoutFooter';
 
-
 function setup() {
   Enzyme.configure({adapter: new Adapter()});
   const history = createMemoryHistory();
@@ -40,5 +39,4 @@ describe('<LayoutFooter />', () => {
     expect(component.find('footer')).not.toBeNull();
     expect(component.find('footer-logo')).not.toBeNull();
   });
-
 });

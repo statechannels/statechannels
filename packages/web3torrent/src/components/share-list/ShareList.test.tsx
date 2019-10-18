@@ -3,9 +3,9 @@ import Adapter from 'enzyme-adapter-react-16';
 import {createMemoryHistory} from 'history';
 import React from 'react';
 import {MemoryRouter as Router} from 'react-router-dom';
-import {ShareList, ShareListProps} from './ShareList';
-import {RoutePath} from '../../routes';
 import {mockTorrents} from '../../constants';
+import {RoutePath} from '../../routes';
+import {ShareList, ShareListProps} from './ShareList';
 
 function setup(withNoTorrents = false) {
   Enzyme.configure({adapter: new Adapter()});

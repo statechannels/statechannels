@@ -2,10 +2,9 @@ import React from 'react';
 import {RouteComponentProps} from 'react-router-dom';
 import {FormButton} from '../../components/form';
 import {ShareList} from '../../components/share-list/ShareList';
+import {mockTorrents} from '../../constants';
 import {RoutePath} from '../../routes';
 import './Welcome.scss';
-import { mockTorrents } from '../../constants';
-
 
 const Welcome: React.FC<RouteComponentProps> = ({history}) => {
   return (
