@@ -1,10 +1,15 @@
-import WebTorrentPaidStreamingClient from './../src/library/web3torrent-lib';
-import { defaultFile, defaultFileMagnetURI, defaultSeedingOptions, defaultTorrentHash } from './utils';
+import {
+  defaultFile,
+  defaultFileMagnetURI,
+  defaultSeedingOptions,
+  defaultTorrentHash
+} from './testing/test-utils';
+import WebTorrentPaidStreamingClient from './web3torrent-lib';
 
 describe('Base Seeding', () => {
   it('Seed and remove a Torrent', done => {
     expect.assertions(7);
-    const client = new WebTorrentPaidStreamingClient({ dht: false });
+    const client = new WebTorrentPaidStreamingClient({dht: false});
     expect(client.pseAccount).not.toBeNaN();
 
     client.on('error', err => fail(err));
@@ -18,8 +23,8 @@ describe('Base Seeding', () => {
       client.remove(torrent, err => {
         expect(err).toBeFalsy();
         expect(client.torrents.length).toEqual(0);
-        client.destroy(err => {
-          expect(err).toBeFalsy();
+        client.destroy(err2 => {
+          expect(err2).toBeFalsy();
           done();
         });
       });

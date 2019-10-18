@@ -4,9 +4,9 @@
     "declaration": false,
     "declarationMap": false,
     "strict": true,
-    "jsx": "preserve",
+    "jsx": "react",
     "isolatedModules": true,
     "noEmit": true
   },
-  "include": ["src"]
+  "include": ["**/*.ts", "**/*.tsx"]
 }
