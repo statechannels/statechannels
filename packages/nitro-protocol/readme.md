@@ -42,7 +42,7 @@ To get started:
 
 ## Documentation website
 
-1. Run `yarn docgen` to auto-generate markdown files from Solidity source code (using [`solidity-docgen`](https://github.com/OpenZeppelin/solidity-docgen))
+1. Run `yarn docgen` to auto-generate markdown files from compiled Solidity code (using our fork of [`solidoc`](https://github.com/statechannels/solidoc)). If you change the source code you will need to recompile the contracts and re-run `solidoc` using `yarn contract:compile && yarn docgen`.
 2. Run `cd website`
 3. Run `yarn install`
 4. Run `yarn start`
