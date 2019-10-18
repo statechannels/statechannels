@@ -1,5 +1,5 @@
-import WebTorrentPaidStreamingClient, {ClientEvents} from '../web3torrent-lib';
 import {defaultFile, defaultLeechingOptions, defaultSeedingOptions} from '../testing/test-utils';
+import WebTorrentPaidStreamingClient, {ClientEvents} from '../web3torrent-lib';
 
 describe('Seeding and Leeching - 125sec', () => {
   let seeder: WebTorrentPaidStreamingClient;

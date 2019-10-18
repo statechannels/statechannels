@@ -10,12 +10,6 @@ import WebTorrentPaidStreamingClient, {
   PaidStreamingExtensionNotices,
   PaidStreamingTorrent
 } from './web3torrent-lib';
-import {
-  defaultFile,
-  defaultFileMagnetURI,
-  defaultSeedingOptions,
-  defaultTorrentHash
-} from './testing/test-utils';
 
 describe('Seeding and Leeching', () => {
   let seeder: WebTorrentPaidStreamingClient;
