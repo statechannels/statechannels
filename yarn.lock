@@ -6745,7 +6745,7 @@ cipher-base@^1.0.0, cipher-base@^1.0.1, cipher-base@^1.0.3:
     inherits "^2.0.1"
     safe-buffer "^5.0.1"
 
-circom@LimeChain/circom:
+"circom@github:LimeChain/circom":
   version "0.0.24"
   resolved "https://codeload.github.com/LimeChain/circom/tar.gz/4ae2447b97d558820a7c7817d602185478ad0b92"
   dependencies:
@@ -9760,10 +9760,10 @@ etherlime-utils@^1.1.3:
   dependencies:
     chalk "2.4.1"
 
-etherlime@2.2.3:
-  version "2.2.3"
-  resolved "https://registry.yarnpkg.com/etherlime/-/etherlime-2.2.3.tgz#369c9441dd51d870ed114d342c1aa4fdefe797b0"
-  integrity sha512-xkgthvku1a5mTg0Qz+B3k9axc3QzLWMommBNJikOEFC/h/IMqGOv3c81MEM7jEOTxjYbzoFxU08qpCtAx2Z77Q==
+etherlime@2.2.4:
+  version "2.2.4"
+  resolved "https://registry.yarnpkg.com/etherlime/-/etherlime-2.2.4.tgz#3781a33111037bbacdff6ec728ade7bff77df76d"
+  integrity sha512-+2ZYnOsYY6z6MVgA7VWLgZwc/pn3CFdmy+BrF6qSPWldi02wD0lAsU/PAttWgKmG51PmYekqh8ZsPyRPH7fBng==
   dependencies:
     "@0x/sol-coverage" "3.0.12"
     axios "^0.18.0"
@@ -19925,7 +19925,7 @@ snapsvg@0.5.1:
   dependencies:
     eve "~0.5.1"
 
-snarkjs@LimeChain/snarkjs:
+"snarkjs@github:LimeChain/snarkjs":
   version "0.1.11"
   resolved "https://codeload.github.com/LimeChain/snarkjs/tar.gz/f7036ebe9bfa3f3817077f050780c8ec1542e249"
   dependencies:
