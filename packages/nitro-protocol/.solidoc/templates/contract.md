@@ -10,6 +10,7 @@ title: {{ContractTitle}}
 
 {{ContractDescription}}
 
+---
 
 {{ConstructorHeading}}
 
@@ -52,5 +53,6 @@ title: {{ContractTitle}}
 
 {{FunctionList}}
 
+---
 
 {{AllFunctions}}

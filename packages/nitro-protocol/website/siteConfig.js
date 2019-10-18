@@ -78,7 +78,7 @@ const siteConfig = {
 
   highlight: {
     // Highlight.js theme to use for syntax highlighting in code blocks.
-    theme: 'solarized-dark',
+    theme: 'foundation',
 
     hljs: function(hljs) {
       return hljsDefineSolidity(hljs);
