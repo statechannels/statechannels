@@ -3,17 +3,20 @@ pragma experimental ABIEncoderV2;
 
 import '@counterfactual/cf-adjudicator-contracts/contracts/interfaces/CounterfactualApp.sol';
 
-import './interfaces/ForceMoveApp.sol';
+import './ForceMoveApp.sol';
 
-contract CounterfactualAdapterApp is ForceMoveApp {
+contract CounterfactualAdapterApp is ForceMoveApp, CounterfactualApp {
 
     struct CounterfactualAdapterAppData {
-        address cfAppDefinition;
         bytes cfAppData;
         bytes cfActionTaken;
     }
 
-    function appData(bytes memory appDataBytes) internal pure returns (CounterfactualAdapterAppData memory) {
+    function appData(bytes memory appDataBytes)
+        internal
+        pure
+        returns (CounterfactualAdapterAppData memory)
+    {
         return abi.decode(appDataBytes, (CounterfactualAdapterAppData));
     }
 
@@ -25,21 +28,22 @@ contract CounterfactualAdapterApp is ForceMoveApp {
     ) public pure returns (bool) {
         CounterfactualAdapterAppData memory prevState = appData(a.appData);
         CounterfactualAdapterAppData memory nextState = appData(b.appData);
-        require(
-            prevState.cfAppDefinition == nextState.cfAppDefinition,
-            'CounterfactualAdapterApp: CounterfactualApp appDefinition must be the same'
-        );
+
         require(
             keccak256(
-                CounterfactualApp(
-                    prevState.cfAppDefinition
-                ).applyAction(
+                applyAction(
                     prevState.cfAppData,
                     nextState.cfActionTaken
                 )
             ) == keccak256(nextState.cfAppData),
             'CounterfactualAdapterApp: applyAction must compute same state being proposed'
         );
+
+        require(
+            keccak256(computeOutcome(nextState.cfAppData)) == keccak256(b.outcome),
+            'CounterfactualAdapterApp: outcome must be computed from computeOutcome'
+        );
+
         return true;
     }
 }
