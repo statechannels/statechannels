@@ -51,8 +51,8 @@ describe('Seeding and Leeching', () => {
 
   it('should reach a ready-for-leeching, choked state', done => {
     seeder.seed(defaultFile as File, defaultSeedingOptions(), seededTorrent => {
-      seeder.once(ClientEvents.PEER_STATUS_CHANGED, ({ allowedPeers }) => {
-        expect(allowedPeers[`${leecher.pseAccount}`].allowed).toEqual(false);
+      seeder.once(ClientEvents.PEER_STATUS_CHANGED, ({ torrentPeers }) => {
+        expect(torrentPeers[`${leecher.pseAccount}`].allowed).toEqual(false);
         done();
       });
       leecher.add(seededTorrent.magnetURI, { store: MemoryChunkStore });
@@ -64,14 +64,14 @@ describe('Seeding and Leeching', () => {
       seeder.once(ClientEvents.PEER_STATUS_CHANGED, ({ peerAccount }) => {
         seeder.togglePeer(seededTorrent.infoHash, peerAccount);
 
-        seeder.once(ClientEvents.PEER_STATUS_CHANGED, ({ allowedPeers }) => {
-          expect(allowedPeers[`${leecher.pseAccount}`].allowed).toEqual(true);
+        seeder.once(ClientEvents.PEER_STATUS_CHANGED, ({ torrentPeers }) => {
+          expect(torrentPeers[`${leecher.pseAccount}`].allowed).toEqual(true);
         });
 
-        seeder.once(ClientEvents.TORRENT_NOTICE, (_, __, command, ___) => {
+        seeder.once(ClientEvents.TORRENT_NOTICE, ({ command }) => {
           expect(command).toEqual(PaidStreamingExtensionNotices.ACK);
 
-          leecher.once(ClientEvents.TORRENT_DONE, leechedTorrent => {
+          leecher.once(ClientEvents.TORRENT_DONE, ({ torrent: leechedTorrent }) => {
             expect(seededTorrent.files[0].done).toEqual(leechedTorrent.files[0].done);
             expect(seededTorrent.files[0].length).toEqual(leechedTorrent.files[0].length);
             expect(seededTorrent.files[0].name).toEqual(leechedTorrent.files[0].name);

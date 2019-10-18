@@ -1,9 +1,9 @@
 import prettier from 'prettier-bytes';
 import React, {useState} from 'react';
-import {generateMagnetURL} from '../../clients/web3torrent-client';
 import {TorrentPeers} from '../../library/types';
 import {Status, Torrent} from '../../types';
 import {clipboardCopy} from '../../utils/copy-to-clipboard';
+import {generateMagnetURL} from '../../utils/magnet';
 import {DownloadInfo} from './download-info/DownloadInfo';
 import './TorrentInfo.scss';
 import {UploadInfo} from './upload-info/UploadInfo';

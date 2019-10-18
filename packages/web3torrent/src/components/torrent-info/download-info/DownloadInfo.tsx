@@ -11,7 +11,7 @@ const DownloadInfo: React.FC<DownloadInfoProps> = ({torrent}: DownloadInfoProps)
   const [fileURL, setURL] = useState('');
   useEffect(() => {
     if (torrent.done && torrent.files[0] && torrent.files[0].getBlobURL) {
-      torrent.files[0].getBlobURL((_, url) => setURL(url));
+      torrent.files[0].getBlobURL((_, url) => setURL(url as string));
     }
   }, [torrent.done, torrent.files]);
 

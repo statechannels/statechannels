@@ -75,8 +75,8 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     this.allowedPeers[torrentInfoHash][peerAccount].allowed = false;
     wire.paidStreamingExtension.stop();
     this.emit(ClientEvents.PEER_STATUS_CHANGED, {
-      allowedPeers: this.allowedPeers[torrentInfoHash],
-      affectedTorrent: torrentInfoHash,
+      torrentPeers: this.allowedPeers[torrentInfoHash],
+      torrentInfoHash,
       peerAccount
     });
     log('SEEDER: > blockedPeer', peerAccount, Object.keys(this.allowedPeers));
@@ -86,7 +86,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     this.allowedPeers[torrentInfoHash][peerAccount].allowed = true;
     wire.paidStreamingExtension.start();
     this.emit(ClientEvents.PEER_STATUS_CHANGED, {
-      allowedPeers: this.allowedPeers[torrentInfoHash],
+      torrentPeers: this.allowedPeers[torrentInfoHash],
       torrentInfoHash,
       peerAccount
     });
@@ -126,8 +126,8 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
         this.allowedPeers[torrent.infoHash][peerAccount] = {id: peerAccount, wire, allowed: false};
         this.blockPeer(torrent.infoHash, wire, peerAccount);
         this.emit(ClientEvents.PEER_STATUS_CHANGED, {
-          allowedPeers: this.allowedPeers[torrent.infoHash],
-          affectedId: torrent.infoHash,
+          torrentPeers: this.allowedPeers[torrent.infoHash],
+          torrentInfoHash: torrent.infoHash,
           peerAccount
         });
       } else {
@@ -171,14 +171,14 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
         default:
           break;
       }
-      this.emit(ClientEvents.TORRENT_NOTICE, torrent, wire, command, data);
+      this.emit(ClientEvents.TORRENT_NOTICE, {torrent, wire, command, data});
     });
 
-    torrent.on(TorrentEvents.DONE, () => this.emit(ClientEvents.TORRENT_DONE, torrent));
+    torrent.on(TorrentEvents.DONE, () => this.emit(ClientEvents.TORRENT_DONE, {torrent}));
 
     torrent.on(TorrentEvents.ERROR, err => {
       log('ERROR: > ', err);
-      this.emit(ClientEvents.TORRENT_ERROR, torrent, err);
+      this.emit(ClientEvents.TORRENT_ERROR, {torrent, err});
     });
     torrent.usingPaidStreaming = true;
 
