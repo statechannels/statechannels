@@ -17,14 +17,12 @@ const Spinner: React.FC<SpinnerProps> = ({
   if (type === 'circle') {
     return (
       <div
-        className={`spinner spinner--circle ${
+        className={`spinner spinner--circle spinner--color-${color} ${
           !visible ? 'spinner--hidden' : ''
-        } spinner--color-${color}`}
+        }`}
       />
     );
-  }
-
-  if (type === 'dots') {
+  } else {
     return (
       <div className={`spinner spinner--loading ${!visible ? 'spinner--hidden' : ''}`}>
         <div className="spinner-loading">
@@ -36,7 +34,5 @@ const Spinner: React.FC<SpinnerProps> = ({
       </div>
     );
   }
-
-  return null;
 };
 export {Spinner};

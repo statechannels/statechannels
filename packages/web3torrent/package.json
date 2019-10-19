@@ -14,10 +14,13 @@
   "jest": {
     "collectCoverageFrom": [
       "./src/**/*.ts*",
-      "!./src/index.ts*",
+      "!./src/**/index.ts*",
+      "!./src/routes.ts*",
       "!./src/library/testing/*.ts*",
       "!./src/library/time-based-leeching/*.ts*",
       "!./src/utils/copy-to-clipboard.ts",
+      "!./src/utils/test-utils.ts",
+      "!./src/components/form/form-input/**",
       "!./src/utils/useInterval.ts",
       "!./src/**/react-app-env.d.ts",
       "!./src/**/types.ts",
