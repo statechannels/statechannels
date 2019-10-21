@@ -20,7 +20,7 @@ export async function makeWalletRequest() {
     console.log('Error while making request to wallet', error.name);
     return Promise.reject();
   }
-};
+}
 
 export async function askForFunds() {
   connectToWallet();

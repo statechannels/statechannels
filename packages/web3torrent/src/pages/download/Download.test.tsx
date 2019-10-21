@@ -2,17 +2,17 @@ import Enzyme, {mount} from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 import {createMemoryHistory} from 'history';
 import React from 'react';
+import {act} from 'react-dom/test-utils';
 import {MemoryRouter as Router, RouteComponentProps} from 'react-router-dom';
 import {JsonRPCResponse} from 'web3/providers';
-import {testSelector} from '../../utils/test-utils';
-import * as EmbeddedWalletClient from './../../clients/embedded-wallet-client';
-import Download from './Download';
-import * as TorrentStatus from '../../utils/torrent-status-checker';
-import * as Web3TorrentClient from './../../clients/web3torrent-client';
 import {EmptyTorrent} from '../../constants';
-import {Torrent, Status} from '../../types';
 import {WebTorrentAddInput} from '../../library/types';
-import {act} from 'react-dom/test-utils';
+import {Status, Torrent} from '../../types';
+import {testSelector} from '../../utils/test-utils';
+import * as TorrentStatus from '../../utils/torrent-status-checker';
+import * as EmbeddedWalletClient from './../../clients/embedded-wallet-client';
+import * as Web3TorrentClient from './../../clients/web3torrent-client';
+import Download from './Download';
 
 const mockDownloadURL =
   '/download/magnet#magnet:?xt=urn%3Abtih%3A148c62a7f7845c91e7d16ca9be85de6fbaed3a1f&dn=test.zip&xl=1398978&cost=0';

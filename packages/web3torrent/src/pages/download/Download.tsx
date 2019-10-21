@@ -1,5 +1,6 @@
 import React, {useState} from 'react';
 import {RouteComponentProps, useLocation} from 'react-router-dom';
+import {askForFunds} from '../../clients/embedded-wallet-client';
 import {download} from '../../clients/web3torrent-client';
 import {FormButton} from '../../components/form';
 import {TorrentInfo} from '../../components/torrent-info/TorrentInfo';
@@ -8,7 +9,6 @@ import {parseMagnetURL} from '../../utils/magnet';
 import torrentStatusChecker from '../../utils/torrent-status-checker';
 import {useInterval} from '../../utils/useInterval';
 import './Download.scss';
-import {askForFunds} from '../../clients/embedded-wallet-client';
 
 const Download: React.FC<RouteComponentProps> = () => {
   const [torrent, setTorrent] = useState(parseMagnetURL(useLocation().hash));
