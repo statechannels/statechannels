@@ -1,10 +1,10 @@
-import React, {useEffect, useState} from 'react';
-
 import prettier from 'prettier-bytes';
+import React, {useEffect, useState} from 'react';
 import {Torrent} from '../../../types';
 import {FormButton} from '../../form';
 import './DownloadInfo.scss';
 import {ProgressBar} from './progress-bar/ProgressBar';
+
 export type DownloadInfoProps = {torrent: Torrent};
 
 const DownloadInfo: React.FC<DownloadInfoProps> = ({torrent}: DownloadInfoProps) => {
@@ -33,6 +33,10 @@ const DownloadInfo: React.FC<DownloadInfoProps> = ({torrent}: DownloadInfoProps)
       {torrent.downloaded !== torrent.length ? (
         false
       ) : (
+        /**
+         * @todo This should be a link with the button's styles,
+         * using FormButton seems a bit of an overkill
+         */
         <a href={fileURL} download={torrent.name}>
           <FormButton name="save-download" onClick={() => null}>
             Save Download
