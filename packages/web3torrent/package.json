@@ -82,8 +82,8 @@
     "build": "react-scripts build",
     "build:ci": "react-scripts build",
     "eject": "react-scripts eject",
-    "test": "CI=true TRACKER_URL=http://localhost:4242/announce react-scripts test",
-    "test:ci": "yarn test",
+    "test": "TRACKER_URL=http://localhost:4242/announce react-scripts test",
+    "test:ci": "CI=true yarn test",
     "test:coverage": "yarn test --coverage",
     "lint:check": "tslint -c tslint.json -p .",
     "lint:write": "tslint -c tslint.json -p . --fix"
