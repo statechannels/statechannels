@@ -16,7 +16,7 @@ const getStatus = (torrent: ExtendedTorrent, previousStatus: Status): Status => 
   return Status.Downloading;
 };
 
-const getFormattedETA = (torrent: ExtendedTorrent) => {
+export const getFormattedETA = (torrent: ExtendedTorrent) => {
   const {done, timeRemaining} = torrent;
   if (done) {
     return 'Done';
