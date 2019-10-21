@@ -96,9 +96,9 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
   togglePeer(torrentInfoHash, peerAccount: string) {
     const {wire, allowed} = this.allowedPeers[torrentInfoHash][peerAccount];
     if (allowed) {
-      this.blockPeer(torrentInfoHash, wire, peerAccount);
+      this.blockPeer(torrentInfoHash, wire as PaidStreamingWire, peerAccount);
     } else {
-      this.unblockPeer(torrentInfoHash, wire, peerAccount);
+      this.unblockPeer(torrentInfoHash, wire as PaidStreamingWire, peerAccount);
     }
     log('SEEDER: > togglePeer', peerAccount);
   }

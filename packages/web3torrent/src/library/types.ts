@@ -118,7 +118,7 @@ export type PeerWire = Pick<PaidStreamingWire, 'uploaded'>;
 
 export type PeerByTorrent = {
   id: string;
-  wire: PeerWire;
+  wire: PaidStreamingWire | PeerWire;
   allowed: boolean;
 };
 
