@@ -38,7 +38,7 @@ class Footer extends React.Component {
           <div>
             <h5>Docs</h5>
             <a href={this.docUrl('state-channels/overview')}>Overview</a>
-            <a href={this.docUrl('reference-implementation/account-topology')}>Account Topology</a>
+            <a href={this.docUrl('forcemove-and-nitro/account-topology')}>Account Topology</a>
           </div>
           <div>
             <h5>API</h5>
