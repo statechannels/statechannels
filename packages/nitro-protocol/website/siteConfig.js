@@ -88,7 +88,7 @@ const siteConfig = {
   // Add custom scripts here that would be placed in <script> tags.
   scripts: [
     'https://buttons.github.io/buttons.js',
-    'https://unpkg.com/mermaid@8.2.6/dist/mermaid.min.js',
+    'https://unpkg.com/mermaid@8.4.0/dist/mermaid.min.js',
   ],
 
   // On page navigation for the current documentation page.
