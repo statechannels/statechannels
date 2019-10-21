@@ -4,7 +4,7 @@ pragma experimental ABIEncoderV2;
 import './ForceMoveApp.sol';
 
 /**
-  * @dev The ForceMove contract allows state channels to be adjudicated and finalized.
+  * @dev The IForceMove contract abstraction defines the interface that an implementation of ForceMove should implement. ForceMove protocol allows state channels to be adjudicated and finalized.
 */
 contract IForceMove {
     struct Signature {
@@ -112,6 +112,7 @@ contract IForceMove {
     * @param fixedPart Data describing properties of the state channel that do not change with state updates.
     * @param appPartHash The keccak256 of the abi.encode of `(challengeDuration, appDefinition, appData)`. Applies to all states in the finalization proof.
     * @param outcomeHash The keccak256 of the abi.encode of the `outcome`. Applies to all stats in the finalization proof.
+    * @param numStates The number of states in the finalization proof.
     * @param whoSignedWhat An array denoting which participant has signed which state: `participant[i]` signed the state with index `whoSignedWhat[i]`.
     * @param sigs An array of signatures that support the state with the `largestTurnNum`.
     */

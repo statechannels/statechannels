@@ -21,11 +21,11 @@
       "api/contract-inheritance"
     ],
     "Base Contracts": [
+      "natspec/IForceMove",
+      "natspec/ForceMove",
       "natspec/Adjudicator",
       "natspec/ForceMoveApp",
       "natspec/IAssetHolder",
-      "natspec/IForceMove",
-      "natspec/ForceMove",
       "natspec/AssetHolder"
     ],
     "Deployed Contracts": [

@@ -1,10 +1,18 @@
 pragma solidity ^0.5.11;
 pragma experimental ABIEncoderV2;
-
 import './AssetHolder.sol';
+
+/**
+  * @dev Ther ETHAssetHolder contract extends the AssetHolder contract, and adds the following functionality: it allows ETH to be escrowed against a state channelId and to be transferred to external destinations.
+*/
 contract ETHAssetHolder is AssetHolder {
     address AdjudicatorAddress;
 
+    /**
+    * @notice Constructor function storing the AdjudicatorAddress.
+    * @dev Constructor function storing the AdjudicatorAddress.
+    * @param _AdjudicatorAddress Address of an Adjudicator  contract, supplied at deploy-time.
+    */
     constructor(address _AdjudicatorAddress) public {
         AdjudicatorAddress = _AdjudicatorAddress;
     }
@@ -14,6 +22,13 @@ contract ETHAssetHolder is AssetHolder {
         _;
     }
 
+    /**
+    * @notice Deposit ETH against a given destination.
+    * @dev Deposit ETH against a given destination.
+    * @param destination ChannelId to be credited.
+    * @param expectedHeld The number of wei the depositor believes are _already_ escrowed against the channelId.
+    * @param amount The intended number of wei to be deposited.
+    */
     function deposit(bytes32 destination, uint256 expectedHeld, uint256 amount) public payable {
         require(!_isExternalDestination(destination), 'Cannot deposit to external destination');
         require(msg.value == amount, 'Insufficient ETH for ETH deposit');
@@ -43,6 +58,12 @@ contract ETHAssetHolder is AssetHolder {
         emit Deposited(destination, amountDeposited, holdings[destination]);
     }
 
+    /**
+    * @notice Transfers the given number of wei to a supplied ethereum address.
+    * @dev Transfers the given number of wei to a supplied ethereum address.
+    * @param destination Ethereum address to be credited.
+    * @param amount Quantity of wei to be transferred.
+    */
     function _transferAsset(address payable destination, uint256 amount) internal {
         destination.transfer(amount);
     }

@@ -4,6 +4,9 @@ import './Outcome.sol';
 import '@openzeppelin/contracts/math/SafeMath.sol';
 import './interfaces/IAssetHolder.sol';
 
+/**
+  * @dev An implementation of the IAssetHolder interface. The AssetHolder contract escrows ETH or tokens against state channels. It allows assets to be deposited, and ultimately transferred from one channel to other channel and/or external destinations, as well as for guarantees to be claimed.
+*/
 contract AssetHolder is IAssetHolder {
     using SafeMath for uint256;
 
@@ -17,6 +20,12 @@ contract AssetHolder is IAssetHolder {
     // Public methods
     // **************
 
+    /**
+    * @notice Transfers the funds escrowed against `channelId` to the beneficiaries of that channel.
+    * @dev Transfers the funds escrowed against `channelId` and transfers them to the beneficiaries of that channel.
+    * @param channelId Unique identifier for a state channel.
+    * @param allocationBytes The abi.encode of AssetOutcome.Allocation
+    */
     function transferAll(bytes32 channelId, bytes calldata allocationBytes) external {
         // checks
         require(
@@ -112,6 +121,13 @@ contract AssetHolder is IAssetHolder {
 
     }
 
+    /**
+    * @notice Transfers the funds escrowed against `guarantorChannelId` to the beneficiaries of the __target__ of that channel.
+    * @dev Transfers the funds escrowed against `guarantorChannelId` to the beneficiaries of the __target__ of that channel.
+    * @param guarantorChannelId Unique identifier for a guarantor state channel.
+    * @param guaranteeBytes The abi.encode of Outcome.Guarantee
+    * @param allocationBytes The abi.encode of AssetOutcome.Allocation for the __target__
+    */
     function claimAll(
         bytes32 guarantorChannelId,
         bytes calldata guaranteeBytes,
@@ -262,11 +278,23 @@ contract AssetHolder is IAssetHolder {
         _;
     }
 
+    /**
+    * @notice Sets the given outcomeHash for the given channelId in the outcomeHashes storage mapping
+    * @dev Sets the given outcomeHash for the given channelId in the outcomeHashes storage mapping
+    * @param channelId Unique identifier for a state channel.
+    * @param outcomeHash The keccak256 of the abi.encode of the Outcome.
+    */
     function _setAssetOutcomeHash(bytes32 channelId, bytes32 outcomeHash) internal {
         require(outcomeHashes[channelId] == bytes32(0), 'Outcome hash already exists');
         outcomeHashes[channelId] = outcomeHash;
     }
 
+    /**
+    * @notice Sets the given outcomeHash for the given channelId in the outcomeHashes storage mapping.
+    * @dev Sets the given outcomeHash for the given channelId in the outcomeHashes storage mapping.
+    * @param channelId Unique identifier for a state channel.
+    * @param outcomeHash The keccak256 of the abi.encode of the Outcome.
+    */
     function setAssetOutcomeHash(bytes32 channelId, bytes32 outcomeHash)
         external
         AdjudicatorOnly
@@ -280,16 +308,40 @@ contract AssetHolder is IAssetHolder {
     // Internal methods
     // **************
 
+    /**
+    * @notice Transfers the given amount of this AssetHolders's asset type to a supplied ethereum address.
+    * @dev Transfers the given amount of this AssetHolders's asset type to a supplied ethereum address.
+    * @param destination ethereum address to be credited.
+    * @param amount Quantity of assets to be transferred.
+    */
     function _transferAsset(address payable destination, uint256 amount) internal {}
 
+    /**
+    * @notice Checks if a given destination is external (and can therefore have assets transferred to it) or not.
+    * @dev Checks if a given destination is external (and can therefore have assets transferred to it) or not.
+    * @param destination Destination to be checked.
+    * @return True if the destination is external, false otherwise.
+    */
     function _isExternalDestination(bytes32 destination) internal pure returns (bool) {
         return uint96(bytes12(destination)) == 0;
     }
 
+    /**
+    * @notice Converts an ethereum address to a nitro external destination.
+    * @dev Converts an ethereum address to a nitro external destination.
+    * @param participant The address to be converted.
+    * @return The input address left-padded with zeros.
+    */
     function _addressToBytes32(address participant) internal pure returns (bytes32) {
         return bytes32(uint256(participant));
     }
 
+    /**
+    * @notice Converts a nitro destination to an ethereum address.
+    * @dev Converts a nitro destination to an ethereum address.
+    * @param destination The destination to be converted.
+    * @return The rightmost 160 bits of the input string.
+    */
     function _bytes32ToAddress(bytes32 destination) internal pure returns (address payable) {
         return address(uint160(uint256(destination)));
     }
