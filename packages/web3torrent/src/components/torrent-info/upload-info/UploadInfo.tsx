@@ -1,11 +1,12 @@
 import prettier from 'prettier-bytes';
 import React from 'react';
-
 import {TorrentPeers} from '../../../library/types';
 import {Torrent} from '../../../types';
 import './UploadInfo.scss';
 
-const UploadInfo: React.FC<{torrent: Torrent; peers?: TorrentPeers}> = ({torrent, peers}) => {
+export type UploadInfoProps = {torrent: Torrent; peers?: TorrentPeers};
+
+const UploadInfo: React.FC<UploadInfoProps> = ({torrent, peers}) => {
   const peersArray = Object.values(peers || {});
   return (
     <>
