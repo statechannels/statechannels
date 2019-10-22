@@ -16,30 +16,14 @@ contract AssetHolder is IAssetHolder {
 
     mapping(bytes32 => bytes32) public outcomeHashes;
 
-    // **************
-    // Public methods
-    // **************
 
     /**
-    * @notice Transfers the funds escrowed against `channelId` to the beneficiaries of that channel.
-    * @dev Transfers the funds escrowed against `channelId` and transfers them to the beneficiaries of that channel.
+    * @notice Transfers the funds escrowed against `channelId` to the beneficiaries of that channel. No checks performed.
+    * @dev Transfers the funds escrowed against `channelId` and transfers them to the beneficiaries of that channel. No checks performed.
     * @param channelId Unique identifier for a state channel.
     * @param allocationBytes The abi.encode of AssetOutcome.Allocation
     */
-    function transferAll(bytes32 channelId, bytes calldata allocationBytes) external {
-        // checks
-        require(
-            outcomeHashes[channelId] ==
-                keccak256(
-                    abi.encode(
-                        Outcome.AssetOutcome(
-                            uint8(Outcome.AssetOutcomeType.Allocation),
-                            allocationBytes
-                        )
-                    )
-                ),
-            'transferAll | submitted data does not match stored outcomeHash'
-        );
+    function _transferAll(bytes32 channelId, bytes memory allocationBytes) internal {
 
         Outcome.AllocationItem[] memory allocation = abi.decode(
             allocationBytes,
@@ -120,6 +104,42 @@ contract AssetHolder is IAssetHolder {
         }
 
     }
+    // **************
+    // Public methods
+    // **************
+
+    /**
+    * @notice Transfers the funds escrowed against `channelId` to the beneficiaries of that channel. Checks against the storage in this contract.
+    * @dev Transfers the funds escrowed against `channelId` and transfers them to the beneficiaries of that channel. Checks against the storage in this contract.
+    * @param channelId Unique identifier for a state channel.
+    * @param allocationBytes The abi.encode of AssetOutcome.Allocation
+    */
+    function transferAll(bytes32 channelId, bytes memory allocationBytes) public {
+        // checks
+        require(
+            outcomeHashes[channelId] ==
+                keccak256(
+                    abi.encode(
+                        Outcome.AssetOutcome(
+                            uint8(Outcome.AssetOutcomeType.Allocation),
+                            allocationBytes
+                        )
+                    )
+                ),
+            'transferAll | submitted data does not match stored outcomeHash'
+        );
+        _transferAll(channelId, allocationBytes);
+    }
+
+    /**
+    * @notice Transfers the funds escrowed against `channelId` to the beneficiaries of that channel. No checks performed against storage in this contract. Permissioned.
+    * @dev Transfers the funds escrowed against `channelId` and transfers them to the beneficiaries of that channel. No checks performed against storage in this contract. Permissioned.
+    * @param channelId Unique identifier for a state channel.
+    * @param allocationBytes The abi.encode of AssetOutcome.Allocation
+    */
+    function transferAllAdjudicatorOnly(bytes32 channelId, bytes memory allocationBytes) public AdjudicatorOnly {
+        _transferAll(channelId, allocationBytes);
+    }
 
     /**
     * @notice Transfers the funds escrowed against `guarantorChannelId` to the beneficiaries of the __target__ of that channel.
@@ -130,9 +150,9 @@ contract AssetHolder is IAssetHolder {
     */
     function claimAll(
         bytes32 guarantorChannelId,
-        bytes calldata guaranteeBytes,
-        bytes calldata allocationBytes
-    ) external {
+        bytes memory guaranteeBytes,
+        bytes memory allocationBytes
+    ) public {
         // checks
 
         require(
@@ -267,6 +287,40 @@ contract AssetHolder is IAssetHolder {
             delete outcomeHashes[guarantee.targetChannelId];
         }
 
+    }
+
+    struct FunctionCall {
+        bool isClaimAll; // otherwise transferAll implied
+        bytes args; // abi.encode of either transferAllArgs or claimAllArgs
+    }
+
+    struct TransferAllArgs {
+        bytes32 channelId;
+        bytes allocationBytes;
+    }
+
+    struct ClaimAllArgs {
+        bytes32 guarantorChannelId;
+        bytes guaranteeBytes;
+        bytes allocationBytes;
+    }
+
+    /**
+    * @notice Executes a batch of function calls in order.
+    * @dev Executes a batch of function calls in order.
+    * @param functionCalls Array of abi.encoded FunctionCall structs.
+    */
+    function batch(bytes[] memory functionCalls) public {
+        for (uint256 j = 0; j < functionCalls.length; j++) {
+            FunctionCall memory functionCall = abi.decode(functionCalls[j],(FunctionCall));
+            if (functionCall.isClaimAll) {
+                ClaimAllArgs memory claimAllArgs = abi.decode(functionCall.args,(ClaimAllArgs));
+                claimAll(claimAllArgs.guarantorChannelId, claimAllArgs.guaranteeBytes, claimAllArgs.allocationBytes);
+            } else {
+                TransferAllArgs memory transferAllArgs = abi.decode(functionCall.args,(TransferAllArgs));
+                transferAll(transferAllArgs.channelId, transferAllArgs.allocationBytes);
+            }
+        }
     }
 
     // **************
