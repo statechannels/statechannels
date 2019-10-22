@@ -2,7 +2,11 @@ import {web3torrent} from '../clients/web3torrent-client';
 import {ExtendedTorrent} from '../library/types';
 import {Status, Torrent} from '../types';
 
-const getStatus = (torrent: ExtendedTorrent, previousStatus: Status): Status => {
+export const getStatus = (torrent: ExtendedTorrent, previousStatus: Status): Status => {
+  /**
+   * @todo Maybe `previousStatus` could be marked as optional, since it's
+   * only used to check for the Seeding status.
+   */
   const {uploadSpeed, downloadSpeed, progress, done} = torrent;
   if (previousStatus === Status.Seeding) {
     return Status.Seeding;
@@ -27,6 +31,13 @@ export const getFormattedETA = (torrent: ExtendedTorrent) => {
   const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
   const seconds = Math.floor((remaining % (1000 * 60)) / 1000);
 
+  /**
+   * @todo This returns `ETA 0` if `timeRemaining` is 0 or undefined.
+   * It should return `ETA 0s`.
+   *
+   * @todo The check for Infinity could be done before doing any other math
+   * to save some time.
+   */
   return timeRemaining === Infinity
     ? 'ETA Unknown'
     : `ETA ${(days && days + 'd ') || ''}${(hours && hours + 'h ') || ''}${(minutes &&
