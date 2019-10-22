@@ -363,24 +363,26 @@ Note that a new `validTransition` `m`-chain may be implied by a single, signed s
 
 - **Open** if and only if `finalizesAt` is null
   - implies that `stateHash` and `challengerAddress` are also null
-- **Challenge** if and only if `finalizesAt < currentTime`
+- **Challenge** if and only if `finalizesAt > currentTime`
   - implies that all other fields are not null
-- **Finalized** if and only if `finalizesAt >= currentTime`
+- **Finalized** if and only if `finalizesAt <= currentTime`
   - implies that all other fields are not null
 
 These states can be represented in the following state machine:
 
 <div class="mermaid">
-graph LR
-linkStyle default interpolate basis
-Open -->|forceMove| Challenge
-Open -->|checkpoint| Open
-Open-->|conclude| Finalized
-Challenge-->|forceMove| Challenge
-Challenge-->|respond| Open
-Challenge-->|checkpoint| Open
-Challenge-->|conclude| Finalized
-Challenge-->|timeout| Finalized
+stateDiagram
+    Open: finalizesAt = 0
+    Challenge: finalizesAt > currentTime
+    Finalized: finalizesAt <= currentTime
+    [*] --> Open
+    Open --> Challenge: forceMove
+    Open --> Finalized: conclude
+    Open --> Open: checkpoint
+    Challenge --> Finalized: conclude / timeout
+    Challenge --> Challenge: forceMove
+    Challenge --> Open: respond / checkpoint
+    Finalized --> [*]
 </div>
 
 Storage costs on-chain are high and tend to dwarf other gas fees. The implementation therefore minimizes on-chain storage as much as possible.
