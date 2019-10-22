@@ -26,7 +26,7 @@ import { ADJUDICATOR_ADDRESS, ETH_ASSET_HOLDER_ADDRESS } from "../constants";
 
 jest.setTimeout(90000);
 
-describe.skip("transactions", () => {
+describe("transactions", () => {
   let networkId;
   let libraryAddress;
   let nonce = 5;
@@ -232,7 +232,7 @@ describe.skip("transactions", () => {
       appAttributes: "0x0",
       commitmentCount: 0,
     };
-  
+
     const toCommitment: Commitment = {
       channel,
       allocation: fiveFive,
@@ -242,7 +242,7 @@ describe.skip("transactions", () => {
       appAttributes: "0x0",
       commitmentCount: 1,
     };
-  
+
     const signedFromCommitment = signCommitment2(fromCommitment, participantA.privateKey);
     const signedToCommitment = signCommitment2(toCommitment, participantB.privateKey);
 

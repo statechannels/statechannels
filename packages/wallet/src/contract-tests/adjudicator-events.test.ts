@@ -10,7 +10,7 @@ import {JsonRpcProvider} from "ethers/providers";
 import {Wallet} from "ethers";
 jest.setTimeout(60000);
 
-describe.skip("adjudicator listener", () => {
+describe("adjudicator listener", () => {
   const provider: JsonRpcProvider = getGanacheProvider();
 
   const participantA = Wallet.createRandom();

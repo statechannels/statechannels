@@ -20,7 +20,7 @@ import {
 import {JsonRpcProvider} from "ethers/providers";
 jest.setTimeout(60000);
 
-describe.only("ETHAssetHolder listener", () => {
+describe("ETHAssetHolder listener", () => {
   const provider: ethers.providers.JsonRpcProvider = getGanacheProvider();
 
   const participantA = ethers.Wallet.createRandom();
@@ -31,7 +31,7 @@ describe.only("ETHAssetHolder listener", () => {
     return ++nonce;
   }
 
-  it.skip("should handle a Deposited event", async () => {
+  it("should handle a Deposited event", async () => {
     const channelId = nitroGetChannelId({
       chainId: (await provider.getNetwork()).chainId.toString(),
       channelNonce: getNextNonce().toString(),
@@ -111,7 +111,7 @@ describe.only("ETHAssetHolder listener", () => {
 
     await transferAll(channelId, encodeAllocation(allocation), provider);
 
-    // await sagaTester.waitFor("WALLET.ASSET_HOLDER.ASSET_TRANSFERRED");
+    await sagaTester.waitFor("WALLET.ASSET_HOLDER.ASSET_TRANSFERRED");
   });
 });
 
