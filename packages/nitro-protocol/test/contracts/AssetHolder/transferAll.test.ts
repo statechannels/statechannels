@@ -1,21 +1,22 @@
-import {ethers} from 'ethers';
 import {expectRevert} from '@statechannels/devtools';
 // @ts-ignore
 import AssetHolderArtifact from '../../../build/contracts/TESTAssetHolder.json';
 import {
-  setupContracts,
-  randomChannelId,
   allocationToParams,
-  replaceAddresses,
   getTestProvider,
+  randomChannelId,
+  randomExternalDestination,
+  replaceAddresses,
+  setupContracts,
 } from '../../test-helpers';
 
-import {id, bigNumberify} from 'ethers/utils';
+import {Contract} from 'ethers';
+import {bigNumberify, id} from 'ethers/utils';
 import {encodeAllocation} from '../../../src/contract/outcome';
 
 const provider = getTestProvider();
 
-let AssetHolder: ethers.Contract;
+let AssetHolder: Contract;
 
 const addresses = {
   // channels
@@ -23,8 +24,8 @@ const addresses = {
   C: randomChannelId(),
   X: randomChannelId(),
   // externals
-  A: ethers.Wallet.createRandom().address.padEnd(66, '0'),
-  B: ethers.Wallet.createRandom().address.padEnd(66, '0'),
+  A: randomExternalDestination(),
+  B: randomExternalDestination(),
 };
 
 beforeAll(async () => {
@@ -78,7 +79,7 @@ describe('transferAll', () => {
       // compute an appropriate allocation.
       const allocation = [];
       Object.keys(setOutcome).forEach(key =>
-        allocation.push({destination: key, amount: setOutcome[key]}),
+        allocation.push({destination: key, amount: setOutcome[key]})
       );
       const [, outcomeHash] = allocationToParams(allocation);
 
@@ -104,7 +105,7 @@ describe('transferAll', () => {
 
         // check new holdings
         Object.keys(heldAfter).forEach(async key =>
-          expect(await AssetHolder.holdings(key)).toEqual(heldAfter[key]),
+          expect(await AssetHolder.holdings(key)).toEqual(heldAfter[key])
         );
 
         // check new outcomeHash
@@ -115,6 +116,6 @@ describe('transferAll', () => {
         const [, expectedNewOutcomeHash] = allocationToParams(allocationAfter);
         expect(await AssetHolder.outcomeHashes(channelId)).toEqual(expectedNewOutcomeHash);
       }
-    },
+    }
   );
 });

@@ -132,7 +132,11 @@ export function createTransferAndWithdrawTransaction(
 }
 
 export function createDepositTransaction(destination: string, depositAmount: string, expectedHeld: string) {
-  return createNitroDepositTransaction(normalizeDestinationAddress(destination), expectedHeld, depositAmount);
+  // If a legacy fmg-core channelId
+  if (destination.length === 42) {
+    destination = `0x${destination.substr(2).padStart(64, "1")}`; // note we do not pad with zeros, since that would imply an external destination (which we may not deposit to)
+  }
+  return createNitroDepositTransaction(destination, expectedHeld, depositAmount);
 }
 
 export function createTransferAllTransaction(source: string, destination: string, amount: string) {

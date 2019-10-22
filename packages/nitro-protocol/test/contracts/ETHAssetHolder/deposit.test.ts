@@ -1,19 +1,19 @@
-import {ethers} from 'ethers';
 import {expectRevert} from '@statechannels/devtools';
+import {Contract, Wallet} from 'ethers';
+import {bigNumberify, parseUnits} from 'ethers/utils';
 // @ts-ignore
 import ETHAssetHolderArtifact from '../../../build/contracts/ETHAssetHolder.json';
-import {setupContracts, getTestProvider} from '../../test-helpers';
 import {Channel, getChannelId} from '../../../src/contract/channel';
-import {bigNumberify} from 'ethers/utils';
+import {getTestProvider, setupContracts} from '../../test-helpers';
 
 const provider = getTestProvider();
-let ETHAssetHolder: ethers.Contract;
+let ETHAssetHolder: Contract;
 const chainId = '0x1234';
 const participants = [];
 
 // populate destinations array
 for (let i = 0; i < 3; i++) {
-  participants[i] = ethers.Wallet.createRandom().address;
+  participants[i] = Wallet.createRandom().address;
 }
 
 beforeAll(async () => {
@@ -37,11 +37,11 @@ describe('deposit', () => {
   `(
     '$description',
     async ({channelNonce, held, expectedHeld, amount, msgValue, reasonString, heldAfterString}) => {
-      held = ethers.utils.parseUnits(held, 'wei');
-      expectedHeld = ethers.utils.parseUnits(expectedHeld, 'wei');
-      amount = ethers.utils.parseUnits(amount, 'wei');
-      msgValue = ethers.utils.parseUnits(msgValue, 'wei');
-      const heldAfter = ethers.utils.parseUnits(heldAfterString, 'wei');
+      held = parseUnits(held, 'wei');
+      expectedHeld = parseUnits(expectedHeld, 'wei');
+      amount = parseUnits(amount, 'wei');
+      msgValue = parseUnits(msgValue, 'wei');
+      const heldAfter = parseUnits(heldAfterString, 'wei');
 
       const destinationChannel: Channel = {chainId, channelNonce, participants};
       const destination = getChannelId(destinationChannel);
@@ -79,7 +79,7 @@ describe('deposit', () => {
         const allocatedAmount = await ETHAssetHolder.holdings(destination);
         await expect(allocatedAmount).toEqual(heldAfter);
       }
-    },
+    }
   );
 });
 

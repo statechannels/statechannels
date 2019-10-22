@@ -1,18 +1,18 @@
-import {ethers} from 'ethers';
 // @ts-ignore
 import ConsensusAppArtifact from '../../../build/contracts/ConsensusApp.json';
 
-import {TransactionRequest} from 'ethers/providers';
-import {setupContracts, getTestProvider} from '../../test-helpers';
 import {expectRevert} from '@statechannels/devtools';
+import {Contract} from 'ethers';
+import {AddressZero, HashZero} from 'ethers/constants';
+import {TransactionRequest} from 'ethers/providers';
+import {validTransition} from '../../../src/contract/consensus-app';
 import {ConsensusData} from '../../../src/contract/consensus-data';
 import {Outcome} from '../../../src/contract/outcome';
-import {AddressZero, HashZero} from 'ethers/constants';
 import {createValidTransitionTransaction} from '../../../src/contract/transaction-creators/consensus-app';
-import {validTransition} from '../../../src/contract/consensus-app';
+import {getTestProvider, setupContracts} from '../../test-helpers';
 
 const provider = getTestProvider();
-let consensusApp: ethers.Contract;
+let consensusApp: Contract;
 
 const numParticipants = 3;
 
@@ -61,7 +61,7 @@ describe('validTransition', () => {
         fromOutcome,
         toConsensusData,
         toOutcome,
-        numParticipants,
+        numParticipants
       );
       if (isValid) {
         // send a transaction, so we can measure gas consumption
@@ -75,13 +75,13 @@ describe('validTransition', () => {
           toOutcome,
           numParticipants,
           provider.getSigner(0),
-          consensusApp.address,
+          consensusApp.address
         );
         expect(isValidFromCall).toBe(true);
       } else {
         await expectRevert(() => sendTransaction(consensusApp.address, transactionRequest));
       }
-    },
+    }
   );
 });
 

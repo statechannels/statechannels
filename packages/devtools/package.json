@@ -3,12 +3,13 @@
   "private": true,
   "version": "0.1.21",
   "description": "Scripts used for Magmo development processes",
-  "main": "index.js",
-  "bin": {
-    "ganache-then-jest": "bin/ganache-then-jest.js",
-    "deploy-contracts": "bin/deploy-contracts.js",
-    "run-jest": "bin/run-jest.js",
-    "start-ganache": "bin/start-ganache.js"
+  "main": "lib/src/index.js",
+  "scripts": {
+    "prepare": "yarn build:typescript",
+    "build:typescript": "npx tsc",
+    "lint:check": "yarn run tslint --config tslint.json --project .",
+    "lint:write": "yarn lint:check --fix",
+    "precommit": "lint-staged --quiet"
   },
   "author": "Andrew Stewart",
   "license": "MIT",
@@ -26,6 +27,14 @@
   },
   "devDependencies": {
     "ganache-cli": "6.6.0",
-    "truffle": "5.0.37"
+    "lint-staged": "9.4.1",
+    "tcp-port-used": "1.0.1",
+    "tree-kill": "1.2.1",
+    "truffle": "5.0.37",
+    "tslint": "5.20.0",
+    "typescript": "3.6.3"
+  },
+  "lint-staged": {
+    "{src,test}/**/*.ts": "yarn lint:check"
   }
 }

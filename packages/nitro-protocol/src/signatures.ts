@@ -1,32 +1,29 @@
-import {Signature, splitSignature} from 'ethers/utils';
-import {hashState, State} from './contract/state';
-import {ethers} from 'ethers';
-import {SignedState} from '.';
-import {getChannelId} from './contract/channel';
-import {hashChallengeMessage} from './contract/challenge';
+import {Wallet} from 'ethers';
+import {arrayify, Signature, splitSignature, verifyMessage} from 'ethers/utils';
 import Web3EthAccounts from 'web3-eth-accounts';
+import {SignedState} from '.';
+import {hashChallengeMessage} from './contract/challenge';
+import {getChannelId} from './contract/channel';
+import {hashState, State} from './contract/state';
 
 export function getStateSignerAddress(signedState: SignedState): string {
   const stateHash = hashState(signedState.state);
-  const recoveredAddress = ethers.utils.verifyMessage(
-    ethers.utils.arrayify(stateHash),
-    signedState.signature,
-  );
+  const recoveredAddress = verifyMessage(arrayify(stateHash), signedState.signature);
   const {channel} = signedState.state;
   const {participants} = channel;
 
   if (participants.indexOf(recoveredAddress) < 0) {
     throw new Error(
       `Recovered address ${recoveredAddress} is not a participant in channel ${getChannelId(
-        channel,
-      )}`,
+        channel
+      )}`
     );
   }
   return recoveredAddress;
 }
 
 export function signState(state: State, privateKey: string): SignedState {
-  const wallet = new ethers.Wallet(privateKey);
+  const wallet = new Wallet(privateKey);
   if (state.channel.participants.indexOf(wallet.address) < 0) {
     throw new Error("The state must be signed with a participant's private key");
   }
@@ -41,7 +38,7 @@ export function signChallengeMessage(signedStates: SignedState[], privateKey: st
   if (signedStates.length === 0) {
     throw new Error('At least one signed state must be provided');
   }
-  const wallet = new ethers.Wallet(privateKey);
+  const wallet = new Wallet(privateKey);
   if (signedStates[0].state.channel.participants.indexOf(wallet.address) < 0) {
     throw new Error("The state must be signed with a participant's private key");
   }

@@ -1,45 +1,45 @@
-import {ethers} from 'ethers';
 import {expectRevert} from '@statechannels/devtools';
-// @ts-ignore
-import ForceMoveArtifact from '../../../build/contracts/TESTForceMove.json';
+import {Contract, Wallet} from 'ethers';
+import {HashZero} from 'ethers/constants';
+import {hexlify} from 'ethers/utils';
 // @ts-ignore
 import countingAppArtifact from '../../../build/contracts/CountingApp.json';
-import {
-  setupContracts,
-  clearedChallengeHash,
-  ongoingChallengeHash,
-  finalizedOutcomeHash,
-  signStates,
-  getTestProvider,
-  getNetworkMap,
-} from '../../test-helpers';
-import {HashZero} from 'ethers/constants';
-import {Outcome} from '../../../src/contract/outcome';
+// @ts-ignore
+import ForceMoveArtifact from '../../../build/contracts/TESTForceMove.json';
 import {Channel, getChannelId} from '../../../src/contract/channel';
+import {hashChannelStorage} from '../../../src/contract/channel-storage';
+import {Outcome} from '../../../src/contract/outcome';
 import {State} from '../../../src/contract/state';
 import {concludeArgs} from '../../../src/contract/transaction-creators/force-move';
-import {hashChannelStorage} from '../../../src/contract/channel-storage';
-import {hexlify} from 'ethers/utils';
 import {
   CHANNEL_FINALIZED,
   UNACCEPTABLE_WHO_SIGNED_WHAT,
 } from '../../../src/contract/transaction-creators/revert-reasons';
+import {
+  clearedChallengeHash,
+  finalizedOutcomeHash,
+  getNetworkMap,
+  getTestProvider,
+  ongoingChallengeHash,
+  setupContracts,
+  signStates,
+} from '../../test-helpers';
 
 const provider = getTestProvider();
-let ForceMove: ethers.Contract;
+let ForceMove: Contract;
 let networkMap;
 let networkId;
 const chainId = '0x1234';
 const participants = ['', '', ''];
 const wallets = new Array(3);
 const challengeDuration = 0x1000;
-const assetHolderAddress = ethers.Wallet.createRandom().address;
+const assetHolderAddress = Wallet.createRandom().address;
 const outcome: Outcome = [{assetHolderAddress, allocation: []}];
 let appDefinition;
 
 // populate wallets and participants array
 for (let i = 0; i < 3; i++) {
-  wallets[i] = ethers.Wallet.createRandom();
+  wallets[i] = Wallet.createRandom();
   participants[i] = wallets[i].address;
 }
 beforeAll(async () => {
@@ -147,6 +147,6 @@ describe('conclude', () => {
         // check channelStorageHash against the expected value
         expect(await ForceMove.channelStorageHashes(channelId)).toEqual(expectedChannelStorageHash);
       }
-    },
+    }
   );
 });

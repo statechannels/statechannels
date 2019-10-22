@@ -1,4 +1,4 @@
-import {State} from "@statechannels/nitro-protocol";
+import {SignedState} from "@statechannels/nitro-protocol";
 
 export interface AdjudicatorState {
   [channelId: string]: AdjudicatorChannelState;
@@ -11,7 +11,7 @@ export interface AdjudicatorChannelState {
 }
 export interface Challenge {
   expiresAt: number;
-  challengeStates: State[];
+  challengeStates: SignedState[];
 }
 
 function getOrCreateAdjudicatorChannelState(

@@ -1,6 +1,6 @@
 import {SignedCommitment, getChannelId, Commitment} from "../../../domain";
-import {ethers} from "ethers";
 import {addHex} from "../../../utils/hex-utils";
+import {Wallet} from "ethers";
 
 export type Commitments = SignedCommitment[];
 
@@ -34,7 +34,7 @@ export function getPenultimateCommitment(state: ChannelState): Commitment {
 export function initializeChannel(signedCommitment: SignedCommitment, privateKey: string): ChannelState {
   const {commitment} = signedCommitment;
   const {turnNum, channel} = commitment;
-  const address = new ethers.Wallet(privateKey).address;
+  const address = new Wallet(privateKey).address;
   const ourIndex = commitment.channel.participants.indexOf(address);
   const channelId = getChannelId(commitment);
   return {

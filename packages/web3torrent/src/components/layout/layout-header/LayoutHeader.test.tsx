@@ -2,9 +2,9 @@ import Enzyme, {mount} from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 import {createMemoryHistory} from 'history';
 import React from 'react';
-import {Provider} from 'react-redux';
 import {MemoryRouter as Router, RouteComponentProps} from 'react-router-dom';
-import store from './../../../store/store';
+import {RoutePath} from '../../../routes';
+import {testSelector} from '../../../utils/test-utils';
 import {LayoutHeader} from './LayoutHeader';
 
 function setup() {
@@ -21,11 +21,9 @@ function setup() {
     }
   };
   const component = mount(
-    <Provider store={store}>
-      <Router>
-        <LayoutHeader {...props} />
-      </Router>
-    </Provider>
+    <Router>
+      <LayoutHeader {...props} />
+    </Router>
   );
 
   return {props, component};
@@ -33,14 +31,22 @@ function setup() {
 
 describe('<LayoutHeader />', () => {
   let component: Enzyme.ReactWrapper;
+  let props: RouteComponentProps;
 
   beforeEach(() => {
     const mock = setup();
     component = mock.component;
+    props = mock.props;
   });
 
-  it('renders the header with the logo and the account context', () => {
+  it('renders the header with the logo and the upload button', () => {
     expect(component.find('.logo-container > .logo')).not.toBeNull();
-    expect(component.find('.context-container > .account-context')).not.toBeNull();
+    expect(component.find('.header-content > .actions-container')).not.toBeNull();
+    expect(component.find('.header-content > .actions-container .button')).not.toBeNull();
+  });
+
+  it('should re-route to Upload screen upon Upload Button click', () => {
+    component.find(testSelector('upload-button')).simulate('click');
+    expect(props.history.location.pathname).toBe(RoutePath.Upload);
   });
 });

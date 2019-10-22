@@ -1,17 +1,18 @@
-import {State} from './contract/state';
 import {Signature} from 'ethers/utils';
-import * as Signatures from './signatures';
-import * as Transactions from './transactions';
 import {getAssetTransferredEvent, getDepositedEvent} from './contract/asset-holder';
+import {getChallengeRegisteredEvent} from './contract/challenge';
+import {Channel, getChannelId} from './contract/channel';
 import {encodeConsensusData} from './contract/consensus-data';
+import {AllocationItem, Outcome} from './contract/outcome';
+import {isAllocationOutcome, isGuaranteeOutcome} from './contract/outcome';
+import {State} from './contract/state';
 import {
   createDepositTransaction,
   createTransferAllTransaction,
 } from './contract/transaction-creators/eth-asset-holder';
-import {Outcome, AllocationItem} from './contract/outcome';
-import {Channel, getChannelId} from './contract/channel';
-import {getChallengeRegisteredEvent} from './contract/challenge';
-import {isAllocationOutcome, isGuaranteeOutcome} from './contract/outcome';
+import * as Signatures from './signatures';
+import * as Transactions from './transactions';
+
 export {Signatures, Transactions};
 
 // TODO: Move these to their own interface files once they've stabilized

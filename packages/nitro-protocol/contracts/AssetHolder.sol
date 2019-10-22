@@ -110,7 +110,7 @@ contract AssetHolder is IAssetHolder {
             } else {
                 payoutAmount = allocation[m].amount;
             }
-            if (_isExternalAddress(allocation[m].destination)) {
+            if (_isExternalDestination(allocation[m].destination)) {
                 _transferAsset(_bytes32ToAddress(allocation[m].destination), payoutAmount);
                 emit AssetTransferred(allocation[m].destination, payoutAmount);
             } else {
@@ -236,7 +236,7 @@ contract AssetHolder is IAssetHolder {
                 k++;
             }
             if (payouts[j] > 0) {
-                if (_isExternalAddress(allocation[j].destination)) {
+                if (_isExternalDestination(allocation[j].destination)) {
                     _transferAsset(_bytes32ToAddress(allocation[j].destination), payouts[j]);
                     emit AssetTransferred(allocation[j].destination, payouts[j]);
                 } else {
@@ -292,30 +292,15 @@ contract AssetHolder is IAssetHolder {
 
     function _transferAsset(address payable destination, uint256 amount) internal {}
 
-    function _isExternalAddress(bytes32 destination) internal pure returns (bool) {
-        return (destination == bytes32(bytes20(destination)));
+    function _isExternalDestination(bytes32 destination) internal pure returns (bool) {
+        return uint96(bytes12(destination)) == 0;
     }
 
     function _addressToBytes32(address participant) internal pure returns (bytes32) {
-        return bytes32(bytes20(participant));
+        return bytes32(uint256(participant));
     }
 
     function _bytes32ToAddress(bytes32 destination) internal pure returns (address payable) {
-        return address(bytes20(destination));
-    }
-
-    function recoverSigner(bytes memory _d, uint8 _v, bytes32 _r, bytes32 _s)
-        internal
-        pure
-        returns (address)
-    {
-        bytes memory prefix = '\x19Ethereum Signed Message:\n32';
-        bytes32 h = keccak256(_d);
-
-        bytes32 prefixedHash = keccak256(abi.encodePacked(prefix, h));
-
-        address a = ecrecover(prefixedHash, _v, _r, _s);
-
-        return (a);
+        return address(uint160(uint256(destination)));
     }
 }

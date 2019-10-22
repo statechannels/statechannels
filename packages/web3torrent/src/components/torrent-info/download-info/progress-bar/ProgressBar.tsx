@@ -1,26 +1,20 @@
+import prettier from 'prettier-bytes';
 import React from 'react';
+import {remove} from '../../../../clients/web3torrent-client';
+import {Torrent} from '../../../../types';
 import './ProgressBar.scss';
 
-export type ProgressBarProps = {
-  downloaded: number;
-  size: number;
-  status: 'Completed' | 'Downloading';
-  stopAction?: () => void;
-};
+export type ProgressBarProps = Pick<Torrent, 'downloaded' | 'length' | 'status' | 'infoHash'>;
 
-export const ProgressBar: React.FC<ProgressBarProps> = ({
-  downloaded,
-  size,
-  status = 'Downloading'
-}: ProgressBarProps) => {
+export const ProgressBar: React.FC<ProgressBarProps> = ({downloaded, length, status, infoHash}) => {
   return (
     <div className="progress-bar">
       <div
-        className={`positive ${downloaded === size ? ' complete' : ''}`}
-        style={{width: `${(downloaded / size) * 100}%`}}
+        className={`positive ${downloaded === length ? ' complete' : ''}`}
+        style={{width: `${(downloaded / length) * 100}%`}}
       >
         <span className="bar-progress">
-          {downloaded}Mb/{size}Mb
+          {prettier(downloaded)}/{prettier(length)}
         </span>
         <span className="bar-status">{status}</span>
         <button type="button" className="bar-cancelButton">
@@ -32,10 +26,10 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({
       </div>
       <div className="negative">
         <span className="bar-progress">
-          {downloaded}Mb/{size}Mb
+          {prettier(downloaded)}/{prettier(length)}
         </span>
         <span className="bar-status">{status}</span>
-        <button type="button" className="bar-cancelButton">
+        <button type="button" className="bar-cancelButton" onClick={() => remove(infoHash)}>
           <svg>
             <path d="M0,20,20,0" />
             <path d="M0,0,20,20" />

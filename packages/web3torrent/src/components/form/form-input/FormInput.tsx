@@ -37,7 +37,7 @@ class FormInput extends React.Component<FormInputProps, ExtendedFormInputProps> 
 
   getError(validity: ValidityState, type?: string, disabled?: boolean): string | undefined {
     if (disabled || type === 'file') {
-      return;
+      return '';
     }
     for (const errorType in validity) {
       if (validity[errorType]) {

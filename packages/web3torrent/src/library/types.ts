@@ -52,6 +52,8 @@ export type PaidStreamingWire = Omit<Wire, 'requests'> &
     extendedHandshake: PaidStreamingExtendedHandshake;
     extended: (name: 'paidStreamingExtension', data: Buffer) => void;
 
+    uploaded: number;
+
     // TODO: Remove after merging https://github.com/DefinitelyTyped/DefinitelyTyped/pull/38469.
     setTimeout(ms: number, unref?: boolean): void;
 
@@ -112,21 +114,59 @@ export type WebTorrentSeedInput =
 
 export type WebTorrentAddInput = string | Buffer | ParseTorrent;
 
+export type PeerWire = Pick<PaidStreamingWire, 'uploaded'>;
+
 export type PeerByTorrent = {
   id: string;
-  wire: PaidStreamingWire;
+  wire: PaidStreamingWire | PeerWire;
   allowed: boolean;
 };
 
+export type TorrentPeers = {
+  [key: string /* PeerAccount */]: PeerByTorrent;
+};
+
 export type PeersByTorrent = {
-  [key: string /* InfoHash */]: {
-    [key: string /* PeerAccount */]: PeerByTorrent;
-  };
+  [key: string /* InfoHash */]: TorrentPeers;
 };
 
 declare module 'webtorrent' {
   export interface Instance {
     on(event: 'warning', callback: (err: Error | string) => void): this;
+    on(
+      event: ClientEvents.PEER_STATUS_CHANGED,
+      callback: ({
+        torrentPeers,
+        torrentInfoHash,
+        peerAccount
+      }: {
+        torrentPeers: TorrentPeers;
+        torrentInfoHash: string;
+        peerAccount: string;
+      }) => void
+    ): this;
+
+    on(event: ClientEvents.TORRENT_DONE, torrent: PaidStreamingTorrent): this;
+
+    on(
+      event: ClientEvents.TORRENT_ERROR,
+      callback: ({torrent, error}: {torrent: PaidStreamingTorrent; error: string | Error}) => void
+    ): this;
+
+    on(
+      event: ClientEvents.TORRENT_NOTICE,
+      callback: ({
+        torrent,
+        wire,
+        command,
+        data
+      }: {
+        torrent: PaidStreamingTorrent;
+        wire: PaidStreamingWire;
+        command: PaidStreamingExtensionNotices;
+        data: any;
+      }) => void
+    ): this;
   }
 
   export interface TorrentFile {

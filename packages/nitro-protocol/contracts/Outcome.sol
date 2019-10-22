@@ -9,7 +9,7 @@ library Outcome {
     // Allocation = AllocationItem[]
     // AllocationItem = (Destination, Amount)
     // Guarantee = (ChannelAddress, Destination[])
-    // Destination = ChannelAddress | ExternalAddress
+    // Destination = ChannelAddress | ExternalDestination
 
     struct OutcomeItem {
         address assetHolderAddress;

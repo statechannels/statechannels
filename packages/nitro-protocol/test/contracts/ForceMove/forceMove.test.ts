@@ -1,36 +1,36 @@
-import {ethers} from 'ethers';
 import {expectRevert} from '@statechannels/devtools';
-// @ts-ignore
-import ForceMoveArtifact from '../../../build/contracts/TESTForceMove.json';
+import {Contract, Wallet} from 'ethers';
+import {HashZero} from 'ethers/constants';
+import {defaultAbiCoder, hexlify} from 'ethers/utils';
 // @ts-ignore
 import countingAppArtifact from '../../../build/contracts/CountingApp.json';
-import {defaultAbiCoder, hexlify} from 'ethers/utils';
-import {HashZero} from 'ethers/constants';
-import {
-  setupContracts,
-  clearedChallengeHash,
-  ongoingChallengeHash,
-  signStates,
-  finalizedOutcomeHash,
-  getTestProvider,
-  getNetworkMap,
-} from '../../test-helpers';
+// @ts-ignore
+import ForceMoveArtifact from '../../../build/contracts/TESTForceMove.json';
 import {Channel, getChannelId} from '../../../src/contract/channel';
-import {State, getVariablePart, getFixedPart} from '../../../src/contract/state';
-import {hashChannelStorage, ChannelStorage} from '../../../src/contract/channel-storage';
+import {ChannelStorage, hashChannelStorage} from '../../../src/contract/channel-storage';
+import {getFixedPart, getVariablePart, State} from '../../../src/contract/state';
 import {
   CHALLENGER_NON_PARTICIPANT,
   CHANNEL_FINALIZED,
   TURN_NUM_RECORD_DECREASED,
   TURN_NUM_RECORD_NOT_INCREASED,
 } from '../../../src/contract/transaction-creators/revert-reasons';
-import {signChallengeMessage} from '../../../src/signatures';
 import {SignedState} from '../../../src/index';
+import {signChallengeMessage} from '../../../src/signatures';
 import {COUNTING_APP_INVALID_TRANSITION} from '../../revert-reasons';
+import {
+  clearedChallengeHash,
+  finalizedOutcomeHash,
+  getNetworkMap,
+  getTestProvider,
+  ongoingChallengeHash,
+  setupContracts,
+  signStates,
+} from '../../test-helpers';
 
 const provider = getTestProvider();
 
-let ForceMove: ethers.Contract;
+let ForceMove: Contract;
 let networkId;
 let networkMap;
 
@@ -38,13 +38,13 @@ const chainId = '0x1234';
 const participants = ['', '', ''];
 const wallets = new Array(3);
 const challengeDuration = 0x1;
-const outcome = [{allocation: [], assetHolderAddress: ethers.Wallet.createRandom().address}];
+const outcome = [{allocation: [], assetHolderAddress: Wallet.createRandom().address}];
 
 let appDefinition;
 
 // populate wallets and participants array
 for (let i = 0; i < 3; i++) {
-  wallets[i] = ethers.Wallet.createRandom();
+  wallets[i] = Wallet.createRandom();
   participants[i] = wallets[i].address;
 }
 
@@ -154,7 +154,7 @@ describe('forceMove', () => {
         isFinalCount,
         signatures,
         whoSignedWhat,
-        challengeSignature,
+        challengeSignature
       );
       if (reasonString) {
         await expectRevert(() => tx, reasonString);
@@ -184,10 +184,10 @@ describe('forceMove', () => {
         expect(eventFixedPart[4]._hex).toEqual(hexlify(fixedPart.challengeDuration));
         expect(eventIsFinal).toEqual(isFinalCount > 0);
         expect(eventVariableParts[eventVariableParts.length - 1][0]).toEqual(
-          variableParts[variableParts.length - 1].outcome,
+          variableParts[variableParts.length - 1].outcome
         );
         expect(eventVariableParts[eventVariableParts.length - 1][1]).toEqual(
-          variableParts[variableParts.length - 1].appData,
+          variableParts[variableParts.length - 1].appData
         );
 
         const expectedChannelStorage: ChannelStorage = {
@@ -202,6 +202,6 @@ describe('forceMove', () => {
         // check channelStorageHash against the expected value
         expect(await ForceMove.channelStorageHashes(channelId)).toEqual(expectedChannelStorageHash);
       }
-    },
+    }
   );
 });

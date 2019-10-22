@@ -1,0 +1,59 @@
+---
+id: {{name}}
+title: {{name}}
+---
+
+{{{natspec.devdoc}}}
+
+***
+{{#if ownFunctions}}
+## Functions:
+{{#ownFunctions}}
+- [`{{name}}`](#{{name}})
+{{/ownFunctions}}
+{{/if}}
+***
+{{#ownFunctions}}
+<a id={{name}} />
+## `{{name}}`
+
+{{!-- ```solidity
+function {{name}}{{#if outputs}} → ({{outputs}}){{else}}{{/if}}
+``` --}}
+{{#if natspec.devdoc}}{{natspec.devdoc}}{{else}}No description
+{{/if}}
+
+{{#if natspec.params}}
+#### Parameters:
+{{#natspec.params}}
+- `{{param}}`: {{description}}
+{{/natspec.params}}
+{{/if}}
+
+{{#if outputs}}
+#### Returns:
+- `{{outputs}}`
+{{/if}}
+
+{{/ownFunctions}}
+
+***
+{{#if ownEvents}}
+## Events:
+{{#ownEvents}}
+- [`{{name}}`](#{{name}})
+{{/ownEvents}}
+{{/if}}
+***
+{{#ownEvents}}
+<a id={{name}} />
+## `{{name}}`
+{{#if natspec.devdoc}}{{natspec.devdoc}}{{else}}No description{{/if}}
+{{#if natspec.params}}
+#### Parameters:
+{{#natspec.params}}
+- `{{param}}`: {{description}}
+{{/natspec.params}}
+{{/if}}
+
+{{/ownEvents}}

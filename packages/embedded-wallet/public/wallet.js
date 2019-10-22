@@ -1,13 +1,14 @@
-const log = window['debug']('wallet:bridge');
+const log = window['debug'] ? window['debug']('wallet:bridge') : console.log;
 
 let timeoutListener = null;
 let attempts = 0;
 const timeoutMs = 50;
 const maxRetries = 5;
-const url = 'http://localhost:1701';
 
 class EmbeddedWallet {
-  static enable() {
+  url = 'http://localhost:1701';
+
+  static enable(url = undefined) {
     window.addEventListener('message', event => {
       const message = event.data;
 
@@ -34,6 +35,10 @@ class EmbeddedWallet {
         EmbeddedWallet.relayMessage(contentWindow, message)
       );
     });
+
+    if (url) {
+      EmbeddedWallet.url = url;
+    }
   }
 
   static async request(message, callback) {
@@ -84,7 +89,7 @@ class EmbeddedWallet {
     attempts += 1;
 
     log('Relaying message: %o (attempt %o)', message, attempts);
-    contentWindow.postMessage(message, url);
+    contentWindow.postMessage(message, EmbeddedWallet.url);
     log('Relayed message: %o', message);
 
     timeoutListener = setTimeout(() => {
@@ -134,7 +139,7 @@ class EmbeddedWallet {
         walletContainer.id = 'walletContainer';
         walletIframe = document.createElement('iframe');
         walletIframe.id = 'wallet';
-        walletIframe.src = url;
+        walletIframe.src = EmbeddedWallet.url;
         document.body.appendChild(walletIframe);
         document.body.appendChild(walletContainer);
 
@@ -148,4 +153,12 @@ class EmbeddedWallet {
       }
     });
   }
+}
+
+if (window) {
+  window.EmbeddedWallet = EmbeddedWallet;
+} else if (global) {
+  global.EmbeddedWallet = EmbeddedWallet;
+} else if (module) {
+  module.exports = EmbeddedWallet;
 }

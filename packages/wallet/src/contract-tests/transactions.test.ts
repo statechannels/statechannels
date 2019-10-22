@@ -1,7 +1,7 @@
 import { ethers } from "ethers";
 
 import { signCommitment, signVerificationData, signCommitment2 } from "../domain";
-import { createChallenge, concludeGame } from "./test-utils";
+import { createChallenge, concludeGame, fiveFive } from "./test-utils";
 import {
   createForceMoveTransaction,
   createDepositTransaction,
@@ -90,7 +90,8 @@ describe.skip("transactions", () => {
   })
 
   it("should deposit into the contract", async () => {
-    const depositTransactionData = createDepositTransaction(participantA.address, "0x5", "0x0");
+    const someChannelId = ethers.utils.hexlify(ethers.utils.randomBytes(32));
+    const depositTransactionData = createDepositTransaction(someChannelId, "0x5", "0x0");
     await testTransactionSender({
       ...depositTransactionData,
       to: ETH_ASSET_HOLDER_ADDRESS,
@@ -105,12 +106,9 @@ describe.skip("transactions", () => {
       participants: [participantA.address, participantB.address]
     };
 
-    await depositContract(provider, participantA.address);
-    await depositContract(provider, participantB.address);
-
     const fromCommitment: Commitment = {
       channel,
-      allocation: ["0x05", "0x05"],
+      allocation: fiveFive,
       destination: [participantA.address, participantB.address],
       turnNum: 4,
       commitmentType: CommitmentType.App,
@@ -120,7 +118,7 @@ describe.skip("transactions", () => {
 
     const toCommitment: Commitment = {
       channel,
-      allocation: ["0x05", "0x05"],
+      allocation: fiveFive,
       destination: [participantA.address, participantB.address],
       turnNum: 5,
       commitmentType: CommitmentType.App,
@@ -145,15 +143,12 @@ describe.skip("transactions", () => {
     };
     const { nonce: channelNonce } = channel;
 
-    await depositContract(provider, participantA.address);
-    await depositContract(provider, participantB.address);
-
     await createChallenge(provider, channelNonce, participantA, participantB);
 
     // NOTE: Copied from createChallenge
     const fromCommitment: Commitment = {
       channel,
-      allocation: ["0x05", "0x05"],
+      allocation: fiveFive,
       destination: [participantA.address, participantB.address],
       turnNum: 7,
       commitmentType: CommitmentType.App,
@@ -163,7 +158,7 @@ describe.skip("transactions", () => {
 
     const toCommitment: Commitment = {
       channel,
-      allocation: ["0x05", "0x05"],
+      allocation: fiveFive,
       destination: [participantA.address, participantB.address],
       turnNum: 8,
       commitmentType: CommitmentType.App,
@@ -187,14 +182,12 @@ describe.skip("transactions", () => {
       participants: [participantA.address, participantB.address]
     };
     const { nonce: channelNonce } = channel;
-    await depositContract(provider, participantA.address);
-    await depositContract(provider, participantB.address);
 
     await createChallenge(provider, channelNonce, participantA, participantB);
 
     const fromCommitment: Commitment = {
       channel,
-      allocation: ["0x05", "0x05"],
+      allocation: fiveFive,
       destination: [participantA.address, participantB.address],
       turnNum: 8,
       commitmentType: CommitmentType.App,
@@ -223,29 +216,33 @@ describe.skip("transactions", () => {
     await testTransactionSender(refuteTransaction);
   });
 
-  it.skip("should send a conclude transaction", async () => {
-    const channel: Channel = { channelType: libraryAddress, nonce: getNextNonce(), participants };
-    await depositContract(provider, participantA.address);
-    await depositContract(provider, participantB.address);
+  it("should send a conclude transaction", async () => {
+    const channel: Channel = {
+      channelType: libraryAddress,
+      nonce: getNextNonce(),
+      participants: [participantA.address, participantB.address]
+    };
+
     const fromCommitment: Commitment = {
       channel,
-      allocation: ["0x05", "0x05"],
+      allocation: fiveFive,
       destination: [participantA.address, participantB.address],
-      turnNum: 5,
+      turnNum: 4,
       commitmentType: CommitmentType.Conclude,
       appAttributes: "0x0",
       commitmentCount: 0,
     };
-
+  
     const toCommitment: Commitment = {
       channel,
-      allocation: ["0x05", "0x05"],
+      allocation: fiveFive,
       destination: [participantA.address, participantB.address],
-      turnNum: 6,
+      turnNum: 5,
       commitmentType: CommitmentType.Conclude,
       appAttributes: "0x0",
       commitmentCount: 1,
     };
+  
     const signedFromCommitment = signCommitment2(fromCommitment, participantA.privateKey);
     const signedToCommitment = signCommitment2(toCommitment, participantB.privateKey);
 
@@ -305,7 +302,7 @@ describe.skip("transactions", () => {
     );
     const fromCommitment: Commitment = {
       channel,
-      allocation: ["0x05", "0x05"],
+      allocation: fiveFive,
       destination: [participantA.address, participantB.address],
       turnNum: 5,
       commitmentType: CommitmentType.Conclude,
@@ -315,7 +312,7 @@ describe.skip("transactions", () => {
 
     const toCommitment: Commitment = {
       channel,
-      allocation: ["0x05", "0x05"],
+      allocation: fiveFive,
       destination: [participantA.address, participantB.address],
       turnNum: 6,
       commitmentType: CommitmentType.Conclude,

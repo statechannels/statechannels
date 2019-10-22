@@ -1,18 +1,18 @@
-import {ethers} from 'ethers';
 import {expectRevert} from '@statechannels/devtools';
+import {Contract, Wallet} from 'ethers';
 // @ts-ignore
 import ForceMoveArtifact from '../../../build/contracts/TESTForceMove.json';
-import {setupContracts, getTestProvider} from '../../test-helpers';
+import {getTestProvider, setupContracts} from '../../test-helpers';
 
 const provider = getTestProvider();
-let ForceMove: ethers.Contract;
+let ForceMove: Contract;
 
 const participants = ['', '', ''];
 const wallets = new Array(3);
 
 // populate wallets and participants array
 for (let i = 0; i < 3; i++) {
-  wallets[i] = ethers.Wallet.createRandom();
+  wallets[i] = Wallet.createRandom();
   participants[i] = wallets[i].address;
 }
 
@@ -38,10 +38,10 @@ describe('_acceptableWhoSignedWhat (expect a boolean)', () => {
           whoSignedWhat,
           largestTurnNum,
           nParticipants,
-          nStates,
-        ),
+          nStates
+        )
       ).toBe(expectedResult);
-    },
+    }
   );
 });
 
@@ -55,8 +55,8 @@ describe('_acceptableWhoSignedWhat (expect revert)', () => {
       await expectRevert(
         () =>
           ForceMove.acceptableWhoSignedWhat(whoSignedWhat, largestTurnNum, nParticipants, nStates),
-        reasonString,
+        reasonString
       );
-    },
+    }
   );
 });

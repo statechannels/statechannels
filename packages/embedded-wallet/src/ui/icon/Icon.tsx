@@ -13,7 +13,7 @@ export type IconProps = {
   decorative?: boolean;
 };
 
-const iconDescriptions: {[key in Icons]: string} = {
+export const iconDescriptions: {[key in Icons]: string} = {
   [Icons.ExternalLink]: 'Icon of an arrow exiting a browser window, about to open a new page',
   [Icons.Hourglass]:
     'Icon of an hourglass with sand falling top-down, indicating a wait for something to happen',

@@ -2,21 +2,24 @@ import * as actions from "../../actions";
 import * as testScenarios from "../../../domain/commitments/__tests__";
 const {channelId} = testScenarios;
 import {adjudicatorStateReducer} from "../reducer";
-import {State} from "@statechannels/nitro-protocol/src";
-import {ethers} from "ethers";
+import {SignedState} from "@statechannels/nitro-protocol/src";
+import {Wallet} from "ethers";
 
-const challengeState: State = {
-  turnNum: 15,
-  isFinal: false,
-  channel: {
-    chainId: "0x01",
-    channelNonce: "0x01",
-    participants: []
+const challengeState: SignedState = {
+  state: {
+    turnNum: 15,
+    isFinal: false,
+    channel: {
+      chainId: "0x01",
+      channelNonce: "0x01",
+      participants: []
+    },
+    appDefinition: Wallet.createRandom().address,
+    appData: "0x0",
+    challengeDuration: 5,
+    outcome: []
   },
-  appDefinition: ethers.Wallet.createRandom().address,
-  appData: "0x0",
-  challengeDuration: 5,
-  outcome: []
+  signature: {v: 0, r: "", s: ""}
 };
 const gameCommitment1 = testScenarios.appCommitment({turnNum: 19}).commitment;
 // tslint:disable-next-line: no-shadowed-variable

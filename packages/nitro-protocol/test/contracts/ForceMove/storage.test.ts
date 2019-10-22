@@ -1,14 +1,14 @@
-import {ethers} from 'ethers';
 import {expectRevert} from '@statechannels/devtools';
+import {Contract} from 'ethers';
+import {AddressZero, HashZero} from 'ethers/constants';
 // @ts-ignore
 import ForceMoveArtifact from '../../../build/contracts/TESTForceMove.json';
-// @ts-ignore
-import {setupContracts, randomChannelId, getTestProvider} from '../../test-helpers';
-import {HashZero, AddressZero} from 'ethers/constants';
 import {hashChannelStorage, parseChannelStorageHash} from '../../../src/contract/channel-storage';
+// @ts-ignore
+import {getTestProvider, randomChannelId, setupContracts} from '../../test-helpers';
 
 const provider = getTestProvider();
-let ForceMove: ethers.Contract;
+let ForceMove: Contract;
 beforeAll(async () => {
   ForceMove = await setupContracts(provider, ForceMoveArtifact);
 });
@@ -65,11 +65,11 @@ describe('_requireChannelOpen', () => {
 
       await (await ForceMove.setChannelStorage(channelId, blockchainStorage)).wait();
       expect(await ForceMove.channelStorageHashes(channelId)).toEqual(
-        hashChannelStorage(blockchainStorage),
+        hashChannelStorage(blockchainStorage)
       );
 
       const tx = ForceMove.requireChannelOpen(channelId);
       result === 'reverts' ? await expectRevert(() => tx, 'Channel not open.') : await tx;
-    },
+    }
   );
 });

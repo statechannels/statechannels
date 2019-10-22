@@ -1,19 +1,20 @@
+import {Wallet} from 'ethers';
+import {id} from 'ethers/utils';
 import {
-  Guarantee,
-  encodeGuarantee,
-  decodeGuarantee,
-  encodeAllocation,
-  decodeAllocation,
   Allocation,
-  encodeOutcome,
+  decodeAllocation,
+  decodeGuarantee,
   decodeOutcome,
+  encodeAllocation,
+  encodeGuarantee,
+  encodeOutcome,
+  Guarantee,
 } from '../../../src/contract/outcome';
-import {ethers} from 'ethers';
 
-const destination = ethers.utils.id('d');
-const targetChannelId = ethers.utils.id('t');
+const destination = id('d');
+const targetChannelId = id('t');
 const destinations = [destination];
-const assetHolderAddress = ethers.Wallet.createRandom().address;
+const assetHolderAddress = Wallet.createRandom().address;
 
 const guarantee: Guarantee = {
   targetChannelId,

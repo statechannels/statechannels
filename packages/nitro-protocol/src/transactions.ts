@@ -1,23 +1,23 @@
-import * as forceMoveTrans from './contract/transaction-creators/force-move';
-import {TransactionRequest} from 'ethers/providers';
-import {State} from './contract/state';
-import {Signature} from 'ethers/utils';
-import {getStateSignerAddress} from './signatures';
-import {SignedState} from '.';
 import {Contract} from 'ethers';
+import {TransactionRequest} from 'ethers/providers';
+import {Signature} from 'ethers/utils';
+import {SignedState} from '.';
+import {State} from './contract/state';
+import * as forceMoveTrans from './contract/transaction-creators/force-move';
+import {getStateSignerAddress} from './signatures';
 
 export async function getData(provider, contractAddress: string, channelId: string) {
   const forceMove = new Contract(
     contractAddress,
     forceMoveTrans.ForceMoveContractInterface,
-    provider,
+    provider
   );
   return await forceMove.getData(channelId);
 }
 
 export function createForceMoveTransaction(
   signedStates: SignedState[],
-  challengePrivateKey: string,
+  challengePrivateKey: string
 ): TransactionRequest {
   const {states, signatures, whoSignedWhat} = createSignatureArguments(signedStates);
 
@@ -25,13 +25,13 @@ export function createForceMoveTransaction(
     states,
     signatures,
     whoSignedWhat,
-    challengePrivateKey,
+    challengePrivateKey
   );
 }
 
 export function createRespondTransaction(
   challengeState: State,
-  response: SignedState,
+  response: SignedState
 ): TransactionRequest {
   if (!challengeState) {
     throw new Error('No active challenge in challenge state');
@@ -60,7 +60,7 @@ export function createConcludeTransaction(conclusionProof: SignedState[]): Trans
 // Currently we assume each signedState is a unique combination of state/signature
 // So if multiple participants sign a state we expect a SignedState for each participant
 function createSignatureArguments(
-  signedStates: SignedState[],
+  signedStates: SignedState[]
 ): {states: State[]; signatures: Signature[]; whoSignedWhat: number[]} {
   const {participants} = signedStates[0].state.channel;
 

@@ -51,13 +51,11 @@ const Dialog: React.FC<DialogProps> = ({
           <span className={css.icon}></span>
           {title ? (
             <h1 className={css.titleContainer}>
-              {icon ? <Icon name={icon} decorative={true} /> : []}
+              {icon ? <Icon name={icon} decorative={true} /> : null}
               <span className={css.title}>{title}</span>
             </h1>
-          ) : (
-            {}
-          )}
-          {closable ? <button onClick={onClose} className={css.close}></button> : {}}
+          ) : null}
+          {closable ? <button onClick={onClose} className={css.close}></button> : null}
         </header>
         {children ? (
           <section className={css.content}>
@@ -65,17 +63,13 @@ const Dialog: React.FC<DialogProps> = ({
               {children}
             </DialogContext.Provider>
           </section>
-        ) : (
-          []
-        )}
+        ) : null}
         {buttons ? (
           <footer className={css.footer}>
-            {buttons.secondary ? <Button {...buttons.secondary} type="secondary" /> : []}
+            {buttons.secondary ? <Button {...buttons.secondary} type="secondary" /> : null}
             <Button {...buttons.primary} type="primary" />
           </footer>
-        ) : (
-          []
-        )}
+        ) : null}
       </dialog>
     </div>
   );

@@ -1,21 +1,26 @@
-import {ethers} from 'ethers';
 // @ts-ignore
-import SingleAssetPaymentsArtifact from '../../../../build/contracts/SingleAssetPayments.json';
-import {setupContracts, replaceAddresses, getTestProvider} from '../../../test-helpers';
 import {expectRevert} from '@statechannels/devtools';
-import {Allocation, encodeOutcome} from '../../../../src/contract/outcome';
+import {Contract} from 'ethers';
 import {AddressZero, HashZero} from 'ethers/constants';
+import SingleAssetPaymentsArtifact from '../../../../build/contracts/SingleAssetPayments.json';
+import {Allocation, encodeOutcome} from '../../../../src/contract/outcome';
 import {VariablePart} from '../../../../src/contract/state.js';
+import {
+  getTestProvider,
+  randomExternalDestination,
+  replaceAddresses,
+  setupContracts,
+} from '../../../test-helpers';
 
 const provider = getTestProvider();
-let singleAssetPayments: ethers.Contract;
+let singleAssetPayments: Contract;
 
 const numParticipants = 3;
 const addresses = {
   // participants
-  A: ethers.Wallet.createRandom().address.padEnd(66, '0'),
-  B: ethers.Wallet.createRandom().address.padEnd(66, '0'),
-  C: ethers.Wallet.createRandom().address.padEnd(66, '0'),
+  A: randomExternalDestination(),
+  B: randomExternalDestination(),
+  C: randomExternalDestination(),
 };
 const guarantee = {
   targetChannelId: HashZero,
@@ -57,7 +62,7 @@ describe('validTransition', () => {
       balancesA = replaceAddresses(balancesA, addresses);
       const allocationA: Allocation = [];
       Object.keys(balancesA).forEach(key =>
-        allocationA.push({destination: key, amount: balancesA[key]}),
+        allocationA.push({destination: key, amount: balancesA[key]})
       );
       let outcomeA;
       if (isAllocation[0]) {
@@ -83,7 +88,7 @@ describe('validTransition', () => {
       const allocationB: Allocation = [];
 
       Object.keys(balancesB).forEach(key =>
-        allocationB.push({destination: key, amount: balancesB[key]}),
+        allocationB.push({destination: key, amount: balancesB[key]})
       );
 
       let outcomeB;
@@ -105,7 +110,7 @@ describe('validTransition', () => {
           variablePartA,
           variablePartB,
           turnNumB,
-          numParticipants,
+          numParticipants
         );
         expect(isValidFromCall).toBe(true);
       } else {
@@ -114,10 +119,10 @@ describe('validTransition', () => {
             variablePartA,
             variablePartB,
             turnNumB,
-            numParticipants,
-          ),
+            numParticipants
+          )
         );
       }
-    },
+    }
   );
 });

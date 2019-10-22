@@ -1,6 +1,6 @@
 import React, {Fragment} from "react";
 import {Button} from "reactstrap";
-import {ethers} from "ethers";
+import {formatEther} from "ethers/utils";
 
 interface Props {
   approve: (address: string) => void;
@@ -45,7 +45,7 @@ export default class WaitForApproval extends React.PureComponent<Props, State> {
 
   render() {
     const {deny, withdrawalAmount} = this.props;
-    const formattedAmount = `${ethers.utils.formatEther(withdrawalAmount)} ETH`;
+    const formattedAmount = `${formatEther(withdrawalAmount)} ETH`;
     return (
       <Fragment>
         <h2>Withdrawal Requested</h2>

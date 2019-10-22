@@ -1,22 +1,23 @@
+import {Wallet} from 'ethers';
+import {AddressZero} from 'ethers/constants';
+import {id} from 'ethers/utils';
 import {
   ConsensusData,
-  encodeConsensusData,
   decodeConsensusData,
+  encodeConsensusData,
   propose,
-  vote,
   veto,
+  vote,
 } from '../../../src/contract/consensus-data';
-import {AddressZero} from 'ethers/constants';
 import {Outcome} from '../../../src/contract/outcome';
-import {ethers} from 'ethers';
 
 describe('consensus-data', () => {
   describe('voting', () => {
-    const assetHolderAddress = ethers.Wallet.createRandom().address;
+    const assetHolderAddress = Wallet.createRandom().address;
 
     const numberOfParticipants = 3;
 
-    const destinations = [ethers.utils.id('a'), ethers.utils.id('b'), ethers.utils.id('c')];
+    const destinations = [id('a'), id('b'), id('c')];
 
     const proposedOutcome: Outcome = [
       {

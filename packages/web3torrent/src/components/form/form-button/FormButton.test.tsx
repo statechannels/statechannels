@@ -1,6 +1,5 @@
 import React, {ReactElement} from 'react';
 import ReactDOM from 'react-dom';
-
 import {FormButton} from './FormButton';
 
 describe('<FormButton />', () => {

@@ -1,39 +1,39 @@
-import {ethers} from 'ethers';
 import {expectRevert} from '@statechannels/devtools';
-// @ts-ignore
-import ForceMoveArtifact from '../../../build/contracts/TESTForceMove.json';
+import {Contract, Wallet} from 'ethers';
+import {HashZero} from 'ethers/constants';
+import {bigNumberify, defaultAbiCoder, hexlify} from 'ethers/utils';
 // @ts-ignore
 import countingAppArtifact from '../../../build/contracts/CountingApp.json';
-import {defaultAbiCoder, hexlify, bigNumberify} from 'ethers/utils';
-import {setupContracts, signStates, getTestProvider, getNetworkMap} from '../../test-helpers';
-import {HashZero} from 'ethers/constants';
-import {Outcome} from '../../../src/contract/outcome';
+// @ts-ignore
+import ForceMoveArtifact from '../../../build/contracts/TESTForceMove.json';
 import {Channel, getChannelId} from '../../../src/contract/channel';
-import {State} from '../../../src/contract/state';
 import {hashChannelStorage} from '../../../src/contract/channel-storage';
+import {Outcome} from '../../../src/contract/outcome';
+import {State} from '../../../src/contract/state';
+import {checkpointArgs} from '../../../src/contract/transaction-creators/force-move';
 import {
   CHANNEL_FINALIZED,
   TURN_NUM_RECORD_NOT_INCREASED,
   UNACCEPTABLE_WHO_SIGNED_WHAT,
 } from '../../../src/contract/transaction-creators/revert-reasons';
 import {COUNTING_APP_INVALID_TRANSITION} from '../../revert-reasons';
-import {checkpointArgs} from '../../../src/contract/transaction-creators/force-move';
+import {getNetworkMap, getTestProvider, setupContracts, signStates} from '../../test-helpers';
 
 const provider = getTestProvider();
-let ForceMove: ethers.Contract;
+let ForceMove: Contract;
 let networkId;
 let networkMap;
 const chainId = '0x1234';
 const participants = ['', '', ''];
 const wallets = new Array(3);
 const challengeDuration = 0x1000;
-const assetHolderAddress = ethers.Wallet.createRandom().address;
+const assetHolderAddress = Wallet.createRandom().address;
 const defaultOutcome: Outcome = [{assetHolderAddress, allocation: []}];
 let appDefinition;
 
 // populate wallets and participants array
 for (let i = 0; i < 3; i++) {
-  wallets[i] = ethers.Wallet.createRandom();
+  wallets[i] = Wallet.createRandom();
   participants[i] = wallets[i].address;
 }
 beforeAll(async () => {

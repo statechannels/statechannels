@@ -1,35 +1,35 @@
 import React, {useState} from 'react';
-import {RouteComponentProps} from 'react-router-dom';
+import {RouteComponentProps, useLocation} from 'react-router-dom';
+import {askForFunds} from '../../clients/embedded-wallet-client';
+import {download} from '../../clients/web3torrent-client';
 import {FormButton} from '../../components/form';
 import {TorrentInfo} from '../../components/torrent-info/TorrentInfo';
-import {Torrent} from '../../types';
+import {Status} from '../../types';
+import {parseMagnetURL} from '../../utils/magnet';
+import torrentStatusChecker from '../../utils/torrent-status-checker';
+import {useInterval} from '../../utils/useInterval';
 import './Download.scss';
 
-const mockDownload = (torrent: Torrent, setTorrent) => {
-  for (let i = 0; i * 20 <= torrent.length + 19; i++) {
-    setTimeout(() => {
-      setTorrent({...torrent, downloaded: i * 20 > torrent.length ? torrent.length : i * 20});
-    }, i * 800);
-  }
-};
-
 const Download: React.FC<RouteComponentProps> = () => {
-  const [torrent, setTorrent] = useState({
-    name: 'Sample_1.dat',
-    length: 350,
-    numSeeds: 27,
-    numPeers: 350,
-    cost: 0.5,
-    downloaded: 0,
-    files: []
-  } as Torrent);
+  const [torrent, setTorrent] = useState(parseMagnetURL(useLocation().hash));
+
+  useInterval(
+    () => setTorrent(torrentStatusChecker(torrent, torrent.infoHash)),
+    torrent.status !== Status.Idle && !torrent.done && !torrent.destroyed ? 1000 : undefined
+  );
 
   return (
     <section className="section fill download">
       <TorrentInfo torrent={torrent} />
-      {!torrent.downloaded ? (
+      {torrent.status === Status.Idle ? (
         <>
-          <FormButton name="download" onClick={() => mockDownload(torrent, setTorrent)}>
+          <FormButton
+            name="download"
+            onClick={async () => {
+              await askForFunds();
+              setTorrent({...torrent, ...(await download(torrent.magnetURI))});
+            }}
+          >
             Start Download
           </FormButton>
           <div className="subtitle">

@@ -1,26 +1,26 @@
 import {ethers, Wallet} from 'ethers';
+import {AddressZero, HashZero} from 'ethers/constants';
+import {TransactionReceipt, TransactionRequest} from 'ethers/providers';
 import {
-  splitSignature,
   arrayify,
-  keccak256,
-  defaultAbiCoder,
   bigNumberify,
+  defaultAbiCoder,
+  keccak256,
   Signature,
+  splitSignature,
 } from 'ethers/utils';
 import loadJsonFile from 'load-json-file';
 import path from 'path';
-import {AddressZero, HashZero} from 'ethers/constants';
 import {hashChannelStorage} from '../src/contract/channel-storage';
 import {
+  Allocation,
   encodeAllocation,
-  hashAssetOutcome,
   encodeGuarantee,
   Guarantee,
-  Allocation,
+  hashAssetOutcome,
   Outcome,
 } from '../src/contract/outcome';
-import {State, hashState} from '../src/contract/state';
-import {TransactionRequest, TransactionReceipt} from 'ethers/providers';
+import {hashState, State} from '../src/contract/state';
 
 export const getTestProvider = () => {
   if (!process.env.GANACHE_PORT) {
@@ -81,7 +81,7 @@ export const finalizedOutcomeHash = (
   finalizesAt: number = 1,
   outcome: Outcome = [],
   state = undefined,
-  challengerAddress = undefined,
+  challengerAddress = undefined
 ) => {
   return hashChannelStorage({
     turnNumRecord,
@@ -105,7 +105,7 @@ export const newChallengeRegisteredEvent = (contract: ethers.Contract, channelId
         eventIsFinalArg,
         eventFixedPartArg,
         eventChallengeVariablePartArg,
-        event,
+        event
       ) => {
         contract.removeAllListeners(filter);
         resolve([
@@ -117,7 +117,7 @@ export const newChallengeRegisteredEvent = (contract: ethers.Contract, channelId
           eventFixedPartArg,
           eventChallengeVariablePartArg,
         ]);
-      },
+      }
     );
   });
 };
@@ -178,15 +178,22 @@ export function randomChannelId(channelNonce = 0) {
   }
   // compute channelId
   const channelId = keccak256(
-    defaultAbiCoder.encode(['uint256', 'address[]', 'uint256'], [1234, participants, channelNonce]),
+    defaultAbiCoder.encode(['uint256', 'address[]', 'uint256'], [1234, participants, channelNonce])
   );
   return channelId;
 }
 
+export const randomExternalDestination = () =>
+  '0x' +
+  ethers.Wallet.createRandom()
+    .address.slice(2, 42)
+    .padStart(64, '0')
+    .toLowerCase();
+
 export async function sendTransaction(
   provider: ethers.providers.JsonRpcProvider,
   contractAddress: string,
-  transaction: TransactionRequest,
+  transaction: TransactionRequest
 ): Promise<TransactionReceipt> {
   const signer = provider.getSigner();
   const response = await signer.sendTransaction({to: contractAddress, ...transaction});
@@ -214,7 +221,7 @@ export function guaranteeToParams(guarantee: Guarantee) {
 export async function signStates(
   states: State[],
   wallets: Wallet[],
-  whoSignedWhat: number[],
+  whoSignedWhat: number[]
 ): Promise<Signature[]> {
   const stateHashes = states.map(s => hashState(s));
   const promises = wallets.map(async (w, i) => await sign(w, stateHashes[whoSignedWhat[i]]));

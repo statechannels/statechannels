@@ -166,10 +166,5 @@ async function transferAll(channelId: string, allocation: string, provider: Json
   const assetHolderAddress = getETHAssetHolderAddress();
   const assetHolder = new Contract(assetHolderAddress, assetHolderInterface, await provider.getSigner());
 
-  const tx = assetHolder.functions.transferAll(channelId, allocation);
-  const {events} = await (await tx).wait();
-
-  events.forEach(async ({event, args}) => {
-    console.log(JSON.stringify(args, undefined, 4));
-  });
+  assetHolder.functions.transferAll(channelId, allocation);
 }

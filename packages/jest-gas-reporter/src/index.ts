@@ -1,7 +1,6 @@
-import {getGanacheProvider} from '@statechannels/devtools';
-import {rejects} from 'assert';
 import easyTable from 'easy-table';
-import {ethers} from 'ethers';
+import {JsonRpcProvider} from 'ethers/providers';
+import {Interface} from 'ethers/utils';
 import fs from 'fs';
 import path from 'path';
 import linker from 'solc/linker';
@@ -14,7 +13,7 @@ interface MethodCalls {
 
 interface ContractCalls {
   [contractName: string]: {
-    interface: ethers.utils.Interface;
+    interface: Interface;
     address?: string;
     code: string;
     methodCalls: MethodCalls;
@@ -32,7 +31,7 @@ interface ContractCalls {
 
 export class GasReporter implements jest.Reporter {
   options: any;
-  provider: ethers.providers.JsonRpcProvider;
+  provider: JsonRpcProvider;
   globalConfig: any;
   startBlockNum: number;
   contractArtifactDirectory: string;
@@ -40,9 +39,7 @@ export class GasReporter implements jest.Reporter {
   constructor(globalConfig: any, options: any) {
     this.globalConfig = globalConfig;
     this.options = options;
-    this.provider = new ethers.providers.JsonRpcProvider(
-      `http://localhost:${process.env.GANACHE_PORT || 8545}`
-    );
+    this.provider = new JsonRpcProvider(`http://localhost:${process.env.GANACHE_PORT || 8545}`);
   }
 
   onRunStart(results: jest.AggregatedResult, options: jest.ReporterOnStartOptions): void {
@@ -136,7 +133,7 @@ export class GasReporter implements jest.Reporter {
   parseInterfaceAndAddress(parsedArtifact: any, networkId: number, contractCalls: ContractCalls) {
     // Only attempt to parse as a contract if we have a defined ABI and contractName
     if (parsedArtifact.abi && parsedArtifact.contractName) {
-      const contractInterface = new ethers.utils.Interface(parsedArtifact.abi);
+      const contractInterface = new Interface(parsedArtifact.abi);
 
       contractCalls[parsedArtifact.contractName] = {
         methodCalls: {},

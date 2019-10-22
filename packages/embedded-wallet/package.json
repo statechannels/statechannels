@@ -14,6 +14,8 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
+    "test:ci": "react-scripts test",
+    "test:coverage": "react-scripts test --coverage --watchAll=false",
     "eject": "react-scripts eject",
     "lint:check": "tslint -c tslint.json -p .",
     "lint:write": "tslint -c tslint.json -p . --fix"
@@ -21,8 +23,13 @@
   "jest": {
     "collectCoverageFrom": [
       "./src/**/*.ts*",
+      "!./src/**/index.ts*",
+      "!./src/**/*.d.ts",
       "!./src/test-utils/**"
-    ]
+    ],
+    "moduleNameMapper": {
+      "\\.css$": "identity-obj-proxy"
+    }
   },
   "lint-staged": {
     "src/**/*.tsx?": "yarn lint:check"
@@ -47,8 +54,9 @@
     "@types/react": "16.9.3",
     "@types/react-dom": "16.9.1",
     "@types/react-router-dom": "5.1.0",
-    "enzyme": "3.10.0",
-    "enzyme-adapter-react-16": "1.14.0",
+    "enzyme": "^3.10.0",
+    "enzyme-adapter-react-16": "^1.15.1",
+    "identity-obj-proxy": "^3.0.0",
     "lint-staged": "9.4.0",
     "typescript": "3.6.3"
   }

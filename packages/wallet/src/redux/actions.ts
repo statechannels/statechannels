@@ -18,7 +18,7 @@ import {FundingStrategyNegotiationAction} from "./protocols/funding-strategy-neg
 import {LedgerFundingAction} from "./protocols/ledger-funding";
 
 import {LOAD as LOAD_FROM_STORAGE} from "redux-storage";
-import {State} from "@statechannels/nitro-protocol";
+import {SignedState} from "@statechannels/nitro-protocol";
 import {BigNumber} from "ethers/utils";
 export * from "./protocols/transaction-submission/actions";
 export {CommitmentReceived, commitmentReceived};
@@ -96,7 +96,7 @@ export interface ChallengeCreatedEvent {
   channelId: string;
 
   finalizedAt: number;
-  challengeStates: State[];
+  challengeStates: SignedState[];
 }
 
 export interface ChallengeClearedEvent {

@@ -10,7 +10,6 @@ import {CONSENSUS_LIBRARY_ADDRESS} from "../../../constants";
 import {advanceChannelReducer} from "../advance-channel";
 import * as consensusUpdate from "../consensus-update";
 import * as ledgerFunding from "../ledger-funding";
-import {ethers} from "ethers";
 import {addHex} from "../../../utils/hex-utils";
 import {ADVANCE_CHANNEL_PROTOCOL_LOCATOR} from "../advance-channel/reducer";
 import {routesToAdvanceChannel} from "../advance-channel/actions";
@@ -21,6 +20,7 @@ import {EmbeddedProtocol} from "../../../communication";
 export const VIRTUAL_FUNDING_PROTOCOL_LOCATOR = "VirtualFunding";
 import {CONSENSUS_UPDATE_PROTOCOL_LOCATOR} from "../consensus-update/reducer";
 import {TwoPartyPlayerIndex} from "../../types";
+import {Wallet} from "ethers";
 
 export function initialize(
   sharedData: SharedData,
@@ -126,7 +126,7 @@ function waitForJointChannelReducer(
         case CommitmentType.PostFundSetup:
           const {targetChannelId} = protocolState;
           const privateKey = getPrivatekey(sharedData, targetChannelId);
-          const ourAddress = new ethers.Wallet(privateKey).address;
+          const ourAddress = new Wallet(privateKey).address;
           const channelType = CONSENSUS_LIBRARY_ADDRESS;
           const destination = [targetChannelId, ourAddress, hubAddress];
           const guarantorChannelResult = advanceChannel.initializeAdvanceChannel(result.sharedData, {

@@ -1,7 +1,6 @@
 {
   "extends": "../../tslint.json",
   "rules": {
-    "ordered-imports": false,
     "trailing-comma": [true, {"multiline": {"objects": "always"}}]
   },
   "linterOptions": {
