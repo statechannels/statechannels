@@ -43,14 +43,26 @@ The allowed transitions are:
 
 Note: either a transition is a veto, or you can switch on `furtherVotesRequired` to determine which of cases 1-3 it is.
 
-<div class="mermaid">
-graph LR
-linkStyle default interpolate basis
-   A("consensus <br /> (0, w, -)")-->|Propose| B("proposal <br /> (n-1, w, w')")
-   B-->|Vote| C("proposal <br /> (n-2, w, w')")
-   C-->|...| D("proposal <br /> (1, w, w')")
-   D-->|FinalVote| E("consensus <br /> (0, w', -)")
-   B-->|Veto| B
-   C-->|Veto| B
-   D-->|Veto| B
+<div class="mermaid" align="center">
+stateDiagram
+  [*] --> Consensus
+  Consensus
+  Proposal
+  Consensus --> Proposal: Propose
+  Proposal --> Proposal: Vote
+  Proposal --> Consensus: FinalVote
+</div>
+
+An example state progression: 
+<div class="mermaid" align="center">
+stateDiagram
+  s0  --> s1 : propose
+  s1  --> s2 : vote
+  s2  --> sm : ... vote ...
+  sm  --> sn : finalVote
+  s0 : consensus (0,w,-)
+  s1 : proposal (n-1,w,w')
+  s2 : proposal (n-2,w,w')
+  sm : proposal (1,w,w')
+  sn : consensus (0,w',-)
 </div>
