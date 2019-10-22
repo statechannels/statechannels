@@ -14,7 +14,7 @@ const UploadInfo: React.FC<UploadInfoProps> = ({torrent, peers}) => {
         <p>
           Total Received: <strong>$1.34</strong>
           <br />
-          <strong>{torrent.numPeers}</strong> Peers connected
+          <strong data-test-selector="numPeers">{torrent.numPeers}</strong> Peers connected
         </p>
       </section>
       <section className="leechersInfo">
