@@ -2,14 +2,14 @@ import {JsonRPCRequest, JsonRPCResponse} from 'web3/providers';
 import {askForFunds, connectToWallet, makeWalletRequest} from './embedded-wallet-client';
 
 describe('Embedded Wallet Client', () => {
-  let request: jest.Mock;
+  let send: jest.Mock;
   let enable: jest.Mock;
 
   beforeEach(() => {
-    request = jest.fn();
+    send = jest.fn();
     enable = jest.fn();
 
-    window.channelProvider = {request, enable};
+    window.channelProvider = {send, enable};
   });
 
   describe('connectToWallet()', () => {
@@ -50,13 +50,11 @@ describe('Embedded Wallet Client', () => {
         result: {foo: true}
       };
 
-      window.channelProvider.request = jest.fn(async () => mockResponse);
+      window.channelProvider.send = jest.fn(async () => mockResponse.result);
 
       try {
-        const result = await makeWalletRequest(mockRequest);
-        expect(result.id).toEqual(mockRequest.id);
-        expect(result.error).toBeUndefined();
-        expect(result.result).toEqual({foo: true});
+        const result = await makeWalletRequest(mockRequest.method, mockRequest.params);
+        expect(result).toEqual({foo: true});
       } catch {
         fail('This request should not fail');
       }
@@ -74,12 +72,12 @@ describe('Embedded Wallet Client', () => {
         params: ['bar', 'foo', false, 5]
       };
 
-      window.channelProvider.request = jest.fn(async () => {
+      window.channelProvider.send = jest.fn(async () => {
         throw error;
       });
 
       try {
-        await makeWalletRequest(mockRequest);
+        await makeWalletRequest(mockRequest.method, mockRequest.params);
         fail('This request should not pass');
       } catch (err) {
         expect(err).toEqual(error);
@@ -89,22 +87,20 @@ describe('Embedded Wallet Client', () => {
 
   describe('askForFunds()', () => {
     it('should enable the wallet and send a request', async () => {
-      window.channelProvider.request = jest.fn(async () => ({
-        jsonrpc: '2.0',
-        id: 123,
-        result: {done: true}
+      window.channelProvider.send = jest.fn(async () => ({
+        done: true
       }));
 
       const response = await askForFunds();
 
       expect(enable).toHaveBeenCalled();
-      expect(window.channelProvider.request).toHaveBeenCalled();
-      expect(response.result).toEqual({done: true});
+      expect(window.channelProvider.send).toHaveBeenCalled();
+      expect(response).toEqual({done: true});
     });
   });
 
   afterEach(() => {
-    request.mockReset();
+    send.mockReset();
     enable.mockReset();
   });
 });

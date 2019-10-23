@@ -1,4 +1,3 @@
-import {JsonRPCRequest, JsonRPCResponse} from 'web3/providers';
 import {ExtendedTorrent} from './library/types';
 
 export enum Status {
@@ -21,7 +20,7 @@ export type Torrent = ExtendedTorrent & {
 declare global {
   interface Window {
     channelProvider: {
-      request: (data: JsonRPCRequest) => Promise<JsonRPCResponse>;
+      send: (method: string, params: Array<string | number | boolean>) => Promise<any>;
       enable: (url?: string) => void;
     };
   }

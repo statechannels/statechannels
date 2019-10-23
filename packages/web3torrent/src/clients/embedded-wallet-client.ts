@@ -1,5 +1,3 @@
-import {JsonRPCRequest} from 'web3/providers';
-
 export const connectToWallet = () => {
   const wallet = window.channelProvider;
 
@@ -12,17 +10,13 @@ export const connectToWallet = () => {
 };
 
 export async function makeWalletRequest(
-  request: JsonRPCRequest = {
-    jsonrpc: '2.0',
-    method: 'chan_allocate',
-    id: 123,
-    params: ['foo', 'bar', 3, false]
-  }
+  method: string = 'chan_allocate',
+  params: Array<string | number | boolean> = ['foo', 'bar', 3, false]
 ) {
   const wallet = window.channelProvider;
 
   try {
-    return wallet.request(request);
+    return wallet.send(method, params);
   } catch (error) {
     console.log('Error while making request to wallet');
     console.log(error.stack);
