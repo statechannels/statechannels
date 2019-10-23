@@ -16,21 +16,23 @@ const MagnetLinkButton: React.FC<MagnetLinkButtonProps> = ({torrent}) => {
     magnet: generateMagnetURL(torrent)
   });
   return (
-    <button
+    <a
+      href={magnetInfo.magnet}
+      target="blank"
       className="fileLink"
       type="button"
-      onClick={() => {
+      onClick={event => {
+        event.preventDefault();
         clipboardCopy(magnetInfo.magnet);
         setMagnetInfo({...magnetInfo, copied: true});
         setTimeout(() => setMagnetInfo({...magnetInfo, copied: false}), 3000);
       }}
     >
-      {/* @todo: This shouldn't be called "myTooltip" by ID */}
-      <span className={'tooltiptext ' + magnetInfo.copied} id="myTooltip">
+      <span className={'tooltiptext ' + magnetInfo.copied}>
         {magnetInfo.copied ? 'Great! Copied to your clipboard' : 'Copy to clipboard'}
       </span>
       Share Link
-    </button>
+    </a>
   );
 };
 
