@@ -13,14 +13,6 @@ contract AssetHolder is IAssetHolder {
 
     mapping(bytes32 => bytes32) public outcomeHashes;
 
-    function getHoldings(bytes32 channelId)
-        public
-        view
-        returns (uint256 balance)
-    {
-        return holdings[channelId];
-    }
-
     // **************
     // Public methods
     // **************
@@ -115,8 +107,6 @@ contract AssetHolder is IAssetHolder {
                 emit AssetTransferred(allocation[m].destination, payoutAmount);
             } else {
                 holdings[allocation[m].destination] += payoutAmount;
-                // TODO: Remove this as it's just for debugging purposes
-                emit AssetTransferred(allocation[m].destination, payoutAmount);
             }
         }
 
