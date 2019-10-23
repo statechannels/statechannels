@@ -18,7 +18,6 @@ const MagnetLinkButton: React.FC<MagnetLinkButtonProps> = ({torrent}) => {
   return (
     <a
       href={magnetInfo.magnet}
-      target="blank"
       className="fileLink"
       type="button"
       onClick={event => {
