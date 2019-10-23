@@ -20,7 +20,7 @@ export type Torrent = ExtendedTorrent & {
 
 declare global {
   interface Window {
-    EmbeddedWallet: {
+    channelProvider: {
       request: (data: JsonRPCRequest) => Promise<JsonRPCResponse>;
       enable: (url?: string) => void;
     };

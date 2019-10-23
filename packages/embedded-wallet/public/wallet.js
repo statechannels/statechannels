@@ -5,7 +5,7 @@ let attempts = 0;
 const timeoutMs = 50;
 const maxRetries = 5;
 
-class EmbeddedWallet {
+class ChannelProvider {
   url = 'http://localhost:1701';
 
   static enable(url = undefined) {
@@ -31,13 +31,13 @@ class EmbeddedWallet {
         return;
       }
 
-      EmbeddedWallet.getWalletFrame().then(contentWindow =>
-        EmbeddedWallet.relayMessage(contentWindow, message)
+      ChannelProvider.getWalletFrame().then(contentWindow =>
+        ChannelProvider.relayMessage(contentWindow, message)
       );
     });
 
     if (url) {
-      EmbeddedWallet.url = url;
+      ChannelProvider.url = url;
     }
   }
 
@@ -79,8 +79,8 @@ class EmbeddedWallet {
       window.addEventListener('message', listener);
       log('Requesting: %o', message);
 
-      EmbeddedWallet.getWalletFrame().then(contentWindow =>
-        EmbeddedWallet.relayMessage(contentWindow, message)
+      ChannelProvider.getWalletFrame().then(contentWindow =>
+        ChannelProvider.relayMessage(contentWindow, message)
       );
     });
   }
@@ -89,13 +89,13 @@ class EmbeddedWallet {
     attempts += 1;
 
     log('Relaying message: %o (attempt %o)', message, attempts);
-    contentWindow.postMessage(message, EmbeddedWallet.url);
+    contentWindow.postMessage(message, ChannelProvider.url);
     log('Relayed message: %o', message);
 
     timeoutListener = setTimeout(() => {
       if (attempts < maxRetries) {
         log('Request %o timed out after %o ms, retrying', message, timeoutMs);
-        EmbeddedWallet.relayMessage(contentWindow, message);
+        ChannelProvider.relayMessage(contentWindow, message);
       } else {
         log('Request %o timed out after %o attempts; is wallet unreachable?', message, attempts);
       }
@@ -139,7 +139,7 @@ class EmbeddedWallet {
         walletContainer.id = 'walletContainer';
         walletIframe = document.createElement('iframe');
         walletIframe.id = 'wallet';
-        walletIframe.src = EmbeddedWallet.url;
+        walletIframe.src = ChannelProvider.url;
         document.body.appendChild(walletIframe);
         document.body.appendChild(walletContainer);
 
@@ -156,9 +156,9 @@ class EmbeddedWallet {
 }
 
 if (window) {
-  window.EmbeddedWallet = EmbeddedWallet;
+  window.channelProvider = ChannelProvider;
 } else if (global) {
-  global.EmbeddedWallet = EmbeddedWallet;
+  global.channelProvider = ChannelProvider;
 } else if (module) {
-  module.exports = EmbeddedWallet;
+  module.exports = ChannelProvider;
 }

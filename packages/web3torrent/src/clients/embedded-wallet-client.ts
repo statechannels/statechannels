@@ -1,7 +1,7 @@
 import {JsonRPCRequest} from 'web3/providers';
 
 export const connectToWallet = () => {
-  const wallet = window.EmbeddedWallet;
+  const wallet = window.channelProvider;
 
   try {
     wallet.enable(process.env.REACT_APP_EMBEDDED_WALLET_URL);
@@ -19,7 +19,7 @@ export async function makeWalletRequest(
     params: ['foo', 'bar', 3, false]
   }
 ) {
-  const wallet = window.EmbeddedWallet;
+  const wallet = window.channelProvider;
 
   try {
     return wallet.request(request);
