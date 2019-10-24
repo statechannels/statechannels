@@ -1,66 +1,37 @@
 import prettier from 'prettier-bytes';
-import React, {useState} from 'react';
+import React from 'react';
 import {TorrentPeers} from '../../library/types';
 import {Status, Torrent} from '../../types';
-import {clipboardCopy} from '../../utils/copy-to-clipboard';
-import {generateMagnetURL} from '../../utils/magnet';
 import {DownloadInfo} from './download-info/DownloadInfo';
+import {DownloadLink} from './download-link/DownloadLink';
+import {MagnetLinkButton} from './magnet-link-button/MagnetLinkButton';
 import './TorrentInfo.scss';
 import {UploadInfo} from './upload-info/UploadInfo';
 
-export type MagnetLinkButtonProps = {torrent: Torrent};
-
-const MagnetLinkButton: React.FC<MagnetLinkButtonProps> = ({torrent}) => {
-  const [magnetInfo, setMagnetInfo] = useState({
-    copied: false,
-    magnet: generateMagnetURL(torrent)
-  });
-  return (
-    <button
-      className="fileLink"
-      type="button"
-      onClick={() => {
-        clipboardCopy(magnetInfo.magnet);
-        setMagnetInfo({...magnetInfo, copied: true});
-        setTimeout(() => setMagnetInfo({...magnetInfo, copied: false}), 3000);
-      }}
-    >
-      {/* @todo: This shouldn't be called "myTooltip" by ID */}
-      <span className={'tooltiptext ' + magnetInfo.copied} id="myTooltip">
-        {magnetInfo.copied ? 'Great! Copied to your clipboard' : 'Copy to clipboard'}
-      </span>
-      Share Link
-    </button>
-  );
-};
-
 export type TorrentInfoProps = {torrent: Torrent; peers?: TorrentPeers};
+const DownloadingStatuses = [Status.Connecting, Status.Downloading, Status.Completed];
+const UploadingStatuses = [Status.Seeding];
 
 const TorrentInfo: React.FC<TorrentInfoProps> = ({torrent, peers}) => {
   return (
     <>
       <section className={`torrentInfo ${torrent.magnetURI ? ' with-link' : ''}`}>
         <span className="fileName">{torrent.name}</span>
-        {/* @todo Check if webtorrent allows for torrent.length to be undefined */}
-        <span className="fileSize">{!torrent.length ? '? Mb' : prettier(torrent.length)}</span>
-        {torrent.status ? <span className="fileStatus">{torrent.status}</span> : false}
+        <span className="fileSize">{torrent.length === 0 ? '? Mb' : prettier(torrent.length)}</span>
+        {torrent.status && <span className="fileStatus">{torrent.status}</span>}
         <span className="fileCost">
           Est. cost {!torrent.cost ? 'Unknown' : `$${Number(torrent.cost).toFixed(2)}`}
         </span>
-        {torrent.magnetURI ? <MagnetLinkButton torrent={torrent} /> : false}
+        {torrent.magnetURI && <MagnetLinkButton torrent={torrent} />}
       </section>
-      {/* @todo Shouldn't we use Status.Download only? */}
-      {torrent.status !== Status.Idle && torrent.status !== Status.Seeding && torrent.ready ? (
+      {DownloadingStatuses.includes(torrent.status) ? (
         <DownloadInfo torrent={torrent} />
-      ) : /* @todo Why torrent.ready must be set to false for this to happen? */
-      torrent.createdBy ? (
-        <UploadInfo torrent={torrent} peers={peers} />
       ) : (
-        /* @todo Why would there be a condition where nothing should be shown? */
-        false
+        UploadingStatuses.includes(torrent.status) && <UploadInfo torrent={torrent} peers={peers} />
       )}
+      {!torrent.createdBy && <DownloadLink torrent={torrent} />}
     </>
   );
 };
 
-export {TorrentInfo, MagnetLinkButton};
+export {TorrentInfo};
