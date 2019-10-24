@@ -5,7 +5,7 @@ import '@openzeppelin/contracts/math/SafeMath.sol';
 import './interfaces/IAssetHolder.sol';
 
 /**
-  * @dev An implementation of the IAssetHolder interface. The AssetHolder contract escrows ETH or tokens against state channels. It allows assets to be deposited, and ultimately transferred from one channel to other channel and/or external destinations, as well as for guarantees to be claimed.
+  * @dev An implementation of the IAssetHolder interface. The AssetHolder contract escrows ETH or tokens against state channels. It allows assets to be internally accounted for, and ultimately prepared for transfer from one channel to other channel and/or external destinations, as well as for guarantees to be claimed. Note there is no deposit function and the _transferAsset function is unimplemented; inheriting contracts should implement these functions in a manner appropriate to the asset type (e.g. ETH or ERC20 tokens).
 */
 contract AssetHolder is IAssetHolder {
     using SafeMath for uint256;
@@ -14,7 +14,7 @@ contract AssetHolder is IAssetHolder {
 
     mapping(bytes32 => uint256) public holdings;
 
-    mapping(bytes32 => bytes32) public outcomeHashes;
+    mapping(bytes32 => bytes32) public assetOutcomeHashes;
 
 
     /**
@@ -75,7 +75,7 @@ contract AssetHolder is IAssetHolder {
             }
 
             // store hash
-            outcomeHashes[channelId] = keccak256(
+            assetOutcomeHashes[channelId] = keccak256(
                 abi.encode(
                     Outcome.AssetOutcome(
                         uint8(Outcome.AssetOutcomeType.Allocation),
@@ -84,9 +84,8 @@ contract AssetHolder is IAssetHolder {
                 )
             );
         } else {
-            delete outcomeHashes[channelId];
+            delete assetOutcomeHashes[channelId];
         }
-
         // holdings updated BEFORE asset transferred (prevent reentrancy)
         uint256 payoutAmount;
         for (uint256 m = 0; m < numPayouts; m++) {
@@ -117,7 +116,7 @@ contract AssetHolder is IAssetHolder {
     function transferAll(bytes32 channelId, bytes memory allocationBytes) public {
         // checks
         require(
-            outcomeHashes[channelId] ==
+            assetOutcomeHashes[channelId] ==
                 keccak256(
                     abi.encode(
                         Outcome.AssetOutcome(
@@ -126,7 +125,7 @@ contract AssetHolder is IAssetHolder {
                         )
                     )
                 ),
-            'transferAll | submitted data does not match stored outcomeHash'
+            'transferAll | submitted data does not match stored assetOutcomeHash'
         );
         _transferAll(channelId, allocationBytes);
     }
@@ -137,7 +136,7 @@ contract AssetHolder is IAssetHolder {
     * @param channelId Unique identifier for a state channel.
     * @param allocationBytes The abi.encode of AssetOutcome.Allocation
     */
-    function transferAllAdjudicatorOnly(bytes32 channelId, bytes memory allocationBytes) public AdjudicatorOnly {
+    function transferAllAdjudicatorOnly(bytes32 channelId, bytes calldata allocationBytes) external AdjudicatorOnly {
         _transferAll(channelId, allocationBytes);
     }
 
@@ -156,7 +155,7 @@ contract AssetHolder is IAssetHolder {
         // checks
 
         require(
-            outcomeHashes[guarantorChannelId] ==
+            assetOutcomeHashes[guarantorChannelId] ==
                 keccak256(
                     abi.encode(
                         Outcome.AssetOutcome(
@@ -165,13 +164,13 @@ contract AssetHolder is IAssetHolder {
                         )
                     )
                 ),
-            'claimAll | submitted data does not match outcomeHash stored against guarantorChannelId'
+            'claimAll | submitted data does not match assetOutcomeHash stored against guarantorChannelId'
         );
 
         Outcome.Guarantee memory guarantee = abi.decode(guaranteeBytes, (Outcome.Guarantee));
 
         require(
-            outcomeHashes[guarantee.targetChannelId] ==
+            assetOutcomeHashes[guarantee.targetChannelId] ==
                 keccak256(
                     abi.encode(
                         Outcome.AssetOutcome(
@@ -180,7 +179,7 @@ contract AssetHolder is IAssetHolder {
                         )
                     )
                 ),
-            'claimAll | submitted data does not match outcomeHash stored against targetChannelId'
+            'claimAll | submitted data does not match assetOutcomeHash stored against targetChannelId'
         );
 
         uint256 balance = holdings[guarantorChannelId];
@@ -275,7 +274,7 @@ contract AssetHolder is IAssetHolder {
 
         if (newAllocationLength > 0) {
             // store hash
-            outcomeHashes[guarantee.targetChannelId] = keccak256(
+            assetOutcomeHashes[guarantee.targetChannelId] = keccak256(
                 abi.encode(
                     Outcome.AssetOutcome(
                         uint8(Outcome.AssetOutcomeType.Allocation),
@@ -284,7 +283,7 @@ contract AssetHolder is IAssetHolder {
                 )
             );
         } else {
-            delete outcomeHashes[guarantee.targetChannelId];
+            delete assetOutcomeHashes[guarantee.targetChannelId];
         }
 
     }
@@ -333,28 +332,28 @@ contract AssetHolder is IAssetHolder {
     }
 
     /**
-    * @notice Sets the given outcomeHash for the given channelId in the outcomeHashes storage mapping
-    * @dev Sets the given outcomeHash for the given channelId in the outcomeHashes storage mapping
+    * @notice Sets the given assetOutcomeHash for the given channelId in the assetOutcomeHashes storage mapping
+    * @dev Sets the given assetOutcomeHash for the given channelId in the assetOutcomeHashes storage mapping
     * @param channelId Unique identifier for a state channel.
-    * @param outcomeHash The keccak256 of the abi.encode of the Outcome.
+    * @param assetOutcomeHash The keccak256 of the abi.encode of the Outcome.
     */
-    function _setAssetOutcomeHash(bytes32 channelId, bytes32 outcomeHash) internal {
-        require(outcomeHashes[channelId] == bytes32(0), 'Outcome hash already exists');
-        outcomeHashes[channelId] = outcomeHash;
+    function _setAssetOutcomeHash(bytes32 channelId, bytes32 assetOutcomeHash) internal {
+        require(assetOutcomeHashes[channelId] == bytes32(0), 'Outcome hash already exists');
+        assetOutcomeHashes[channelId] = assetOutcomeHash;
     }
 
     /**
-    * @notice Sets the given outcomeHash for the given channelId in the outcomeHashes storage mapping.
-    * @dev Sets the given outcomeHash for the given channelId in the outcomeHashes storage mapping.
+    * @notice Sets the given assetOutcomeHash for the given channelId in the assetOutcomeHashes storage mapping.
+    * @dev Sets the given assetOutcomeHash for the given channelId in the assetOutcomeHashes storage mapping.
     * @param channelId Unique identifier for a state channel.
-    * @param outcomeHash The keccak256 of the abi.encode of the Outcome.
+    * @param assetOutcomeHash The keccak256 of the abi.encode of the Outcome.
     */
-    function setAssetOutcomeHash(bytes32 channelId, bytes32 outcomeHash)
+    function setAssetOutcomeHash(bytes32 channelId, bytes32 assetOutcomeHash)
         external
         AdjudicatorOnly
         returns (bool success)
     {
-        _setAssetOutcomeHash(channelId, outcomeHash);
+        _setAssetOutcomeHash(channelId, assetOutcomeHash);
         return true;
     }
 

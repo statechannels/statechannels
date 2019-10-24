@@ -32,9 +32,9 @@ beforeAll(async () => {
 });
 
 const reason5 =
-  'claimAll | submitted data does not match outcomeHash stored against targetChannelId';
+  'claimAll | submitted data does not match assetOutcomeHash stored against targetChannelId';
 const reason6 =
-  'claimAll | submitted data does not match outcomeHash stored against guarantorChannelId';
+  'claimAll | submitted data does not match assetOutcomeHash stored against guarantorChannelId';
 
 // 1. claim G1 (step 1 of figure 23 of nitro paper)
 // 2. claim G2 (step 2 of figure 23 of nitro paper)
@@ -102,7 +102,7 @@ describe('claimAll', () => {
 
       // set outcomeHash for target
       await (await AssetHolder.setAssetOutcomeHashPermissionless(targetId, outcomeHash)).wait();
-      expect(await AssetHolder.outcomeHashes(targetId)).toBe(outcomeHash);
+      expect(await AssetHolder.assetOutcomeHashes(targetId)).toBe(outcomeHash);
 
       // compute an appropriate guarantee
 
@@ -119,7 +119,7 @@ describe('claimAll', () => {
           guarantorId,
           gOutcomeContentHash
         )).wait();
-        expect(await AssetHolder.outcomeHashes(guarantorId)).toBe(gOutcomeContentHash);
+        expect(await AssetHolder.assetOutcomeHashes(guarantorId)).toBe(gOutcomeContentHash);
       }
 
       const tx = AssetHolder.claimAll(...claimAllArgs(guarantorId, guarantee, allocation));
@@ -153,7 +153,7 @@ describe('claimAll', () => {
           allocationAfter.push({destination: key, amount: tOutcomeAfter[key]});
         });
         const [, expectedNewOutcomeHash] = allocationToParams(allocationAfter);
-        expect(await AssetHolder.outcomeHashes(targetId)).toEqual(expectedNewOutcomeHash);
+        expect(await AssetHolder.assetOutcomeHashes(targetId)).toEqual(expectedNewOutcomeHash);
       }
     }
   );

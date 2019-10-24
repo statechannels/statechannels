@@ -18,16 +18,26 @@ contract TESTAssetHolder is AssetHolder {
     }
 
     /**
-    * @dev Sets the given outcomeHash for the given channelId in the outcomeHashes storage mapping, but circumvents the AdjudicatorOnly modifier (thereby allowing externally owned accounts to call the method).
+    * @dev Sets the given assetOutcomeHash for the given channelId in the assetOutcomeHashes storage mapping, but circumvents the AdjudicatorOnly modifier (thereby allowing externally owned accounts to call the method).
     * @param channelId Unique identifier for a state channel.
-    * @param outcomeHash The keccak256 of the abi.encode of the Outcome.
+    * @param assetOutcomeHash The keccak256 of the abi.encode of the Outcome.
     */
-    function setAssetOutcomeHashPermissionless(bytes32 channelId, bytes32 outcomeHash)
+    function setAssetOutcomeHashPermissionless(bytes32 channelId, bytes32 assetOutcomeHash)
         external
         returns (bool success)
     {
-        _setAssetOutcomeHash(channelId, outcomeHash);
+        _setAssetOutcomeHash(channelId, assetOutcomeHash);
         return true;
+    }
+
+    /**
+    * @notice Transfers the funds escrowed against `channelId` to the beneficiaries of that channel. No checks performed against storage in this contract. Permissions have been bypassed for testing purposes.
+    * @dev Transfers the funds escrowed against `channelId` and transfers them to the beneficiaries of that channel. No checks performed against storage in this contract. Permissions have been bypassed for testing purposes.
+    * @param channelId Unique identifier for a state channel.
+    * @param allocationBytes The abi.encode of AssetOutcome.Allocation
+    */
+    function transferAllAdjudicatorOnly(bytes32 channelId, bytes calldata allocationBytes) external {
+        _transferAll(channelId, allocationBytes);
     }
 
     /**
