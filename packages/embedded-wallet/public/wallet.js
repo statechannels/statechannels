@@ -5,8 +5,23 @@ let attempts = 0;
 const timeoutMs = 50;
 const maxRetries = 5;
 
+const preloadAssets = async (url = '') => {
+  if (url.includes('localhost')) {
+    return;
+  }
+
+  console.log(url);
+
+  const manifestResponse = await fetch(`${url}/asset-manifest.json`);
+  const manifest = await manifestResponse.json();
+
+  Object.values(manifest.files).forEach(file => {
+    fetch(`${url}${file}`);
+  });
+};
+
 class EmbeddedWallet {
-  url = 'http://localhost:1701';
+  static url = 'http://localhost:1701';
 
   static enable(url = undefined) {
     window.addEventListener('message', event => {
@@ -38,6 +53,12 @@ class EmbeddedWallet {
 
     if (url) {
       EmbeddedWallet.url = url;
+    }
+
+    try {
+      preloadAssets(EmbeddedWallet.url);
+    } catch {
+      log('Unable to preload wallet assets, things might be a bit slower');
     }
   }
 
