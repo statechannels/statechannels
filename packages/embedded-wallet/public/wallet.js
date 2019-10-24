@@ -6,7 +6,7 @@ const timeoutMs = 50;
 const maxRetries = 5;
 
 class EmbeddedWallet {
-  url = 'http://localhost:1701';
+  static url = 'http://localhost:1701';
 
   static enable(url = undefined) {
     window.addEventListener('message', event => {
