@@ -10,15 +10,10 @@
   <script src="http://localhost:1701/wallet.js"></script>
 
   <script>
-    EmbeddedWallet.enable();
+    window.channelProvider.enable();
 
     function callBudgetAllocation() {
-      EmbeddedWallet.request({
-        jsonrpc: '2.0',
-        method: 'chan_allocate',
-        id: 123,
-        params: ['foo', 'bar', 3, false]
-      }).then(result => {
+      window.channelProvider.send('chan_allocate', ['foo', 'bar', 3, false]).then(result => {
         console.log('Callback has data!', result);
       });
     }
