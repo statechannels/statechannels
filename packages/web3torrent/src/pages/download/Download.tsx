@@ -12,6 +12,8 @@ import './Download.scss';
 
 const Download: React.FC<RouteComponentProps> = () => {
   const [torrent, setTorrent] = useState(parseMagnetURL(useLocation().hash));
+  const [loading, setLoading] = useState(false);
+  const [buttonLabel, setButtonLabel] = useState('Start Download');
 
   useInterval(
     () => setTorrent(torrentStatusChecker(torrent, torrent.infoHash)),
@@ -25,12 +27,15 @@ const Download: React.FC<RouteComponentProps> = () => {
         <>
           <FormButton
             name="download"
+            spinner={loading}
             onClick={async () => {
+              setLoading(true);
+              setButtonLabel('Preparing Download...');
               await askForFunds();
               setTorrent({...torrent, ...(await download(torrent.magnetURI))});
             }}
           >
-            Start Download
+            {buttonLabel}
           </FormButton>
           <div className="subtitle">
             <p>

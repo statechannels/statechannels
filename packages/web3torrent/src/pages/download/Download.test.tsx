@@ -68,6 +68,22 @@ describe('<Download />', () => {
     expect(component.find(testSelector('download-button')).text()).toBe('Start Download');
   });
 
+  it("should change the label to 'Preparing download' and show a spinner when clicked", async () => {
+    const downloadButton = component.find(testSelector('download-button'));
+
+    await act(async () => {
+      await downloadButton.simulate('click');
+    });
+
+    expect(downloadButton.text()).toEqual('Preparing Download...');
+
+    /**
+     * @todo This should be done with `downloadButton.find(Spinner)`, but for some
+     * reason it is not working.
+     */
+    expect(downloadButton.html().includes('class="spinner')).toEqual(true);
+  });
+
   it('should run askForFunds functions when the Download Button is clicked', async () => {
     await act(async () => {
       await component.find(testSelector('download-button')).simulate('click');
