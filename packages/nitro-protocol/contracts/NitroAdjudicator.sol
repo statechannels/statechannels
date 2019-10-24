@@ -56,7 +56,8 @@ contract NitroAdjudicator is Adjudicator, ForceMove {
         }
 
     }
-/**
+
+    /**
     * @notice Allows a finalized channel's outcome to be decoded and transferAll to be triggered in external Asset Holder contracts.
     * @dev Allows a finalized channel's outcome to be decoded and one or more AssetOutcomes registered in external Asset Holder contracts.
     * @param channelId Unique identifier for a state channel
@@ -89,6 +90,80 @@ contract NitroAdjudicator is Adjudicator, ForceMove {
             ),
             channelId
         );
+
+        Outcome.OutcomeItem[] memory outcome = abi.decode(outcomeBytes, (Outcome.OutcomeItem[]));
+
+        for (uint256 i = 0; i < outcome.length; i++) {
+            Outcome.AssetOutcome memory assetOutcome = abi.decode(outcome[i].assetOutcomeBytes,(Outcome.AssetOutcome));
+            if (assetOutcome.assetOutcomeType == uint8(Outcome.AssetOutcomeType.Allocation)) {
+                AssetHolder(outcome[i].assetHolderAddress).transferAllAdjudicatorOnly(channelId,assetOutcome.allocationOrGuaranteeBytes);
+            } else {
+                revert();
+            }
+
+        }
+
+    }
+
+    /**
+    * @notice Finalizes a channel by providing a finalization proof, allows a finalized channel's outcome to be decoded and transferAll to be triggered in external Asset Holder contracts.
+    * @dev Finalizes a channel by providing a finalization proof, allows a finalized channel's outcome to be decoded and transferAll to be triggered in external Asset Holder contracts.
+    * @param largestTurnNum The largest turn number of the submitted states; will overwrite the stored value of `turnNumRecord`.
+    * @param fixedPart Data describing properties of the state channel that do not change with state updates.
+    * @param appPartHash The keccak256 of the abi.encode of `(challengeDuration, appDefinition, appData)`. Applies to all states in the finalization proof.
+    * @param outcomeHash The keccak256 of the abi.encode of the `outcome`. Applies to all stats in the finalization proof.
+    * @param numStates The number of states in the finalization proof.
+    * @param whoSignedWhat An array denoting which participant has signed which state: `participant[i]` signed the state with index `whoSignedWhat[i]`.
+    * @param sigs An array of signatures that support the state with the `largestTurnNum`.
+    */
+    function concludePushOutcomeAndTransferAll(
+        uint48 largestTurnNum,
+        FixedPart memory fixedPart,
+        bytes32 appPartHash,
+        bytes outcomeBytes,
+        uint8 numStates,
+        uint8[] memory whoSignedWhat,
+        Signature[] memory sigs
+    ) public {
+        // requirements
+        bytes32 channelId = _getChannelId(fixedPart);
+        _requireChannelFinalized(channelId);
+
+        // By construction, the following states form a valid transition
+        bytes32[] memory stateHashes = new bytes32[](numStates);
+        for (uint256 i = 0; i < numStates; i++) {
+            stateHashes[i] = keccak256(
+                abi.encode(
+                    State(
+                        largestTurnNum + (i + 1) - numStates, // turnNum
+                        true, // isFinal
+                        channelId,
+                        appPartHash,
+                        outcomeHash
+                    )
+                )
+            );
+        }
+
+        require(
+            _validSignatures(
+                largestTurnNum,
+                fixedPart.participants,
+                stateHashes,
+                sigs,
+                whoSignedWhat
+            ),
+            'Invalid signatures'
+        );
+
+
+
+        // effects
+        bytes32 outcomeHash = keccak256(abi.encode(outcomeBytes));
+        channelStorageHashes[channelId] = _hashChannelStorage(
+            ChannelStorage(0, now, bytes32(0), address(0), outcomeHash)
+        );
+        emit Concluded(channelId);
 
         Outcome.OutcomeItem[] memory outcome = abi.decode(outcomeBytes, (Outcome.OutcomeItem[]));
 
