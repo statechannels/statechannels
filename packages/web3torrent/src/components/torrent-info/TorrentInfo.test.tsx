@@ -78,7 +78,7 @@ describe('<TorrentInfo />', () => {
     expect(sectionElement.hasClass('with-link')).toEqual(true);
     expect(fileNameElement.text()).toEqual(torrent.name);
     expect(fileSizeElement.text()).toEqual(prettier(torrent.length));
-    expect(fileCostElement.text()).toEqual(`Est. cost $1.34`);
+    expect(fileCostElement.text()).toEqual(`Cost $1.34`);
   });
 
   it('can hide the MagnetLinkButton and the with-link class when no magnet is provided', () => {
@@ -99,7 +99,7 @@ describe('<TorrentInfo />', () => {
 
   it('can show `Unknown` when the torrent cost is not available', () => {
     const {fileCostElement} = mockTorrentInfo({cost: undefined});
-    expect(fileCostElement.text()).toEqual('Est. cost Unknown');
+    expect(fileCostElement.text()).toEqual('Cost Unknown');
   });
 
   it('can show the DownloadInfo component when the status allows it', () => {
