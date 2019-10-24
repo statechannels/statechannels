@@ -1,8 +1,8 @@
-export const connectToWallet = () => {
+export const connectToWallet = async () => {
   const wallet = window.channelProvider;
 
   try {
-    wallet.enable(process.env.REACT_APP_EMBEDDED_WALLET_URL);
+    await wallet.enable(process.env.REACT_APP_EMBEDDED_WALLET_URL);
   } catch (error) {
     console.log('Error while connecting to wallet');
     console.log(error.stack);
@@ -25,6 +25,6 @@ export async function makeWalletRequest(
 }
 
 export async function askForFunds() {
-  connectToWallet();
+  await connectToWallet();
   return makeWalletRequest();
 }

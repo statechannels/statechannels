@@ -13,23 +13,23 @@ describe('Embedded Wallet Client', () => {
   });
 
   describe('connectToWallet()', () => {
-    it('should enable the wallet', () => {
-      connectToWallet();
+    it('should enable the wallet', async () => {
+      await connectToWallet();
 
       expect(enable).toHaveBeenCalledWith(process.env.REACT_APP_EMBEDDED_WALLET_URL);
     });
 
-    it('should log an error if something goes wrong', () => {
+    it('should log an error if something goes wrong', async () => {
       const error = new Error(
         'If you are seeing this error in a test, do not worry; we are testing that the wallet client can report that something went wrong'
       );
-      window.channelProvider.enable = jest.fn(() => {
+      window.channelProvider.enable = jest.fn(async () => {
         throw error;
       });
 
       const logSpy = jest.spyOn(console, 'log');
 
-      connectToWallet();
+      await connectToWallet();
       expect(logSpy).toHaveBeenNthCalledWith(1, 'Error while connecting to wallet');
       expect(logSpy).toHaveBeenNthCalledWith(2, error.stack);
     });

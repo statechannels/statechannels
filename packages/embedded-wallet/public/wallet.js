@@ -143,12 +143,14 @@ const onMessage = event => {
 class ChannelProvider {
   url = 'http://localhost:1701';
 
-  static enable(url = undefined) {
+  static async enable(url = undefined) {
     window.addEventListener('message', onMessage);
 
     if (url) {
       ChannelProvider.url = url;
     }
+
+    events.emit("connect");
   }
 
   static async send(method, params = []) {

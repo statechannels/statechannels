@@ -21,7 +21,7 @@ declare global {
   interface Window {
     channelProvider: {
       send: (method: string, params: Array<string | number | boolean>) => Promise<any>;
-      enable: (url?: string) => void;
+      enable: (url?: string) => Promise<void>;
     };
   }
 }
