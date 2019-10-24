@@ -3,7 +3,8 @@
   "license": "MIT",
   "version": "0.0.1",
   "dependencies": {
-    "debug": "4.1.1",
+    "debug": "^4.1.1",
+    "eventemitter3": "^4.0.0",
     "react": "16.9.0",
     "react-dom": "16.9.0",
     "react-router-dom": "5.1.0",
@@ -13,6 +14,7 @@
     "precommit": "lint-staged --quiet",
     "start": "react-scripts start",
     "build": "react-scripts build",
+    "build:loader": "tsc ./loaders/wallet -b --outFile wallet.js --outDir ./loaders/wallet",
     "test": "react-scripts test",
     "test:ci": "react-scripts test",
     "test:coverage": "react-scripts test --coverage --watchAll=false",

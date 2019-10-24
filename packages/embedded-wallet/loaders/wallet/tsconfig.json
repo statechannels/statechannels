@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "isolatedModules": false,
+    "outFile": "wallet.js",
+    "module": "amd",
+    "target": "es5",
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "moduleResolution": "node",
+    "types": ["node", "eventemitter3"]
+  },
+  "include": ["src"]
+}
