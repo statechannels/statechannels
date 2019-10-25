@@ -3,6 +3,7 @@ import css from './Icon.module.css';
 
 export enum Icons {
   Check = 'check',
+  CheckAnimated = 'checkAnimated',
   ExternalLink = 'externalLink',
   Hourglass = 'hourglass',
   Link = 'link'
@@ -18,6 +19,7 @@ export const iconDescriptions: {[key in Icons]: string} = {
   [Icons.Hourglass]:
     'Icon of an hourglass with sand falling top-down, indicating a wait for something to happen',
   [Icons.Check]: 'Icon of a checkmark, indicating all is well',
+  [Icons.CheckAnimated]: 'Icon of a checkmark, indicating all is well',
   [Icons.Link]: 'Icon of a chain binding, indicating a connection between things'
 };
 

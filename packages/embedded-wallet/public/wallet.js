@@ -140,8 +140,23 @@ const onMessage = event => {
   getWalletFrame().then(contentWindow => relayMessage(contentWindow, message, ChannelProvider.url));
 };
 
+const preloadAssets = async (url = '') => {
+  if (url.includes('localhost')) {
+    return;
+  }
+
+  console.log(url);
+
+  const manifestResponse = await fetch(`${url}/asset-manifest.json`);
+  const manifest = await manifestResponse.json();
+
+  Object.values(manifest.files).forEach(file => {
+    fetch(`${url}${file}`);
+  });
+};
+
 class ChannelProvider {
-  url = 'http://localhost:1701';
+  static url = 'http://localhost:1701';
 
   static async enable(url = undefined) {
     window.addEventListener('message', onMessage);
@@ -150,6 +165,12 @@ class ChannelProvider {
       ChannelProvider.url = url;
     }
 
+    try {
+      preloadAssets(EmbeddedWallet.url);
+    } catch {
+      log('Unable to preload wallet assets, things might be a bit slower');
+    }
+    
     events.emit("connect");
   }
 

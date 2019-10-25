@@ -5,8 +5,7 @@ export enum Status {
   Seeding = 'Seeding',
   Completed = 'Completed',
   Idle = 'Idle',
-  Connecting = 'Connecting',
-  Stopped = 'Stopped'
+  Connecting = 'Connecting'
 }
 
 export type Torrent = ExtendedTorrent & {

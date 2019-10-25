@@ -70,8 +70,8 @@ describe('Torrent Status Checker', () => {
       });
 
       // TODO: Correct behaviour should be ETA 0s.
-      it("should return 'ETA 0' if timeRemaining is empty", () => {
-        expect(getFormattedETA({done: false} as ExtendedTorrent)).toEqual('ETA 0');
+      it("should return 'ETA 0s' if timeRemaining is empty", () => {
+        expect(getFormattedETA({done: false} as ExtendedTorrent)).toEqual('ETA 0s');
       });
 
       it("should return 'ETA Unknown' if timeRemaining is Infinity", () => {
@@ -92,15 +92,15 @@ describe('Torrent Status Checker', () => {
         );
       });
 
-      it('should return time in hours, minutes and seconds', () => {
+      it('should return time in hours and minutes', () => {
         expect(getFormattedETA({done: false, timeRemaining: 25923813} as ExtendedTorrent)).toEqual(
-          'ETA 7h 12m 3s'
+          'ETA 7h 12m'
         );
       });
 
-      it('should return time in days, hours, minutes and seconds', () => {
+      it('should return time in days, hours and minutes', () => {
         expect(getFormattedETA({done: false, timeRemaining: 482949274} as ExtendedTorrent)).toEqual(
-          'ETA 5d 14h 9m 9s'
+          'ETA 5d 14h 9m'
         );
       });
     });
