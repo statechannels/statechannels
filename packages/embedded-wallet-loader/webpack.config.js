@@ -38,24 +38,4 @@ const cdnDebugConfig = {
   }
 };
 
-const nodeConfig = {
-  ...typescript,
-  target: 'node',
-  output: {
-    filename: 'wallet.node.js',
-    path: path.resolve(__dirname, 'dist')
-  }
-};
-
-const nodeDebugConfig = {
-  ...typescript,
-  ...nodeConfig,
-  mode: 'development',
-  devtool: 'inline-source-map',
-  output: {
-    ...cdnConfig.output,
-    filename: 'wallet.node.debug.js'
-  }
-};
-
-module.exports = [nodeConfig, nodeDebugConfig, cdnConfig, cdnDebugConfig];
+module.exports = [cdnConfig, cdnDebugConfig];
