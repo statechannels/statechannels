@@ -6,7 +6,7 @@ import {
   getTestProvider,
   randomChannelId,
   randomExternalDestination,
-  replaceAddresses,
+  replaceAddressesAndBigNumberify,
   setupContracts,
 } from '../../test-helpers';
 
@@ -62,11 +62,11 @@ describe('transferAll', () => {
       addresses.c = channelId;
 
       // transform input data (unpack addresses and BigNumberify amounts)
-      heldBefore = replaceAddresses(heldBefore, addresses);
-      setOutcome = replaceAddresses(setOutcome, addresses);
-      newOutcome = replaceAddresses(newOutcome, addresses);
-      heldAfter = replaceAddresses(heldAfter, addresses);
-      payouts = replaceAddresses(payouts, addresses);
+      heldBefore = replaceAddressesAndBigNumberify(heldBefore, addresses);
+      setOutcome = replaceAddressesAndBigNumberify(setOutcome, addresses);
+      newOutcome = replaceAddressesAndBigNumberify(newOutcome, addresses);
+      heldAfter = replaceAddressesAndBigNumberify(heldAfter, addresses);
+      payouts = replaceAddressesAndBigNumberify(payouts, addresses);
 
       // reset the holdings (only works on test contract)
       new Set([...Object.keys(heldAfter), ...Object.keys(heldBefore)]).forEach(async key => {

@@ -11,7 +11,7 @@ import {
   newAssetTransferredEvent,
   randomChannelId,
   randomExternalDestination,
-  replaceAddresses,
+  replaceAddressesAndBigNumberify,
   setupContracts,
 } from '../../test-helpers';
 
@@ -78,11 +78,11 @@ describe('claimAll', () => {
       addresses.g = guarantorId;
 
       // transform input data (unpack addresses and BigNumberify amounts)
-      heldBefore = replaceAddresses(heldBefore, addresses);
-      tOutcomeBefore = replaceAddresses(tOutcomeBefore, addresses);
-      tOutcomeAfter = replaceAddresses(tOutcomeAfter, addresses);
-      heldAfter = replaceAddresses(heldAfter, addresses);
-      payouts = replaceAddresses(payouts, addresses);
+      heldBefore = replaceAddressesAndBigNumberify(heldBefore, addresses);
+      tOutcomeBefore = replaceAddressesAndBigNumberify(tOutcomeBefore, addresses);
+      tOutcomeAfter = replaceAddressesAndBigNumberify(tOutcomeAfter, addresses);
+      heldAfter = replaceAddressesAndBigNumberify(heldAfter, addresses);
+      payouts = replaceAddressesAndBigNumberify(payouts, addresses);
       guaranteeDestinations = guaranteeDestinations.map(x => addresses[x]);
 
       // set holdings (only works on test contract)

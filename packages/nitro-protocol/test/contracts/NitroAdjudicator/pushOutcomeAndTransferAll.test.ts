@@ -17,7 +17,7 @@ import {
   allocationToParams,
   randomChannelId,
   randomExternalDestination,
-  replaceAddresses,
+  replaceAddressesAndBigNumberify,
 } from '../../test-helpers';
 import {finalizedOutcomeHash, getTestProvider, setupContracts} from '../../test-helpers';
 
@@ -175,7 +175,10 @@ describe('pushOutcomeAndTransferAll', () => {
         // build up event expectations
         const expectedEvents = [];
         Object.keys(payouts).forEach(assetHolder => {
-          const singleAssetPayouts = replaceAddresses(payouts[assetHolder], addresses);
+          const singleAssetPayouts = replaceAddressesAndBigNumberify(
+            payouts[assetHolder],
+            addresses
+          );
           Object.keys(singleAssetPayouts).forEach(destination => {
             if (singleAssetPayouts[destination] && singleAssetPayouts[destination].gt(0)) {
               expectedEvents.push({
@@ -191,7 +194,10 @@ describe('pushOutcomeAndTransferAll', () => {
 
         // check new holdings on each AssetHolder
         Object.keys(heldAfter).forEach(assetHolder => {
-          const heldAfterSingleAsset = replaceAddresses(heldAfter[assetHolder], addresses);
+          const heldAfterSingleAsset = replaceAddressesAndBigNumberify(
+            heldAfter[assetHolder],
+            addresses
+          );
           Object.keys(heldAfterSingleAsset).forEach(async destination => {
             const amount = bigNumberify(heldAfterSingleAsset[destination]);
             if (assetHolder === 'ETH') {
@@ -205,7 +211,10 @@ describe('pushOutcomeAndTransferAll', () => {
 
         // check new assetOutcomeHash on each AssetHolder
         Object.keys(newOutcome).forEach(async assetHolder => {
-          const newOutcomeSingleAsset = replaceAddresses(newOutcome[assetHolder], addresses);
+          const newOutcomeSingleAsset = replaceAddressesAndBigNumberify(
+            newOutcome[assetHolder],
+            addresses
+          );
           const allocationAfter = [];
           Object.keys(newOutcomeSingleAsset).forEach(destination => {
             const amount = bigNumberify(newOutcomeSingleAsset[destination]);

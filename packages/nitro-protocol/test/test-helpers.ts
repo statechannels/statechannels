@@ -228,10 +228,18 @@ export async function signStates(
   return Promise.all(promises);
 }
 
-export function replaceAddresses(object, addresses) {
+// recursively replaces any key with the value of that key in the addresses object
+// bigNumberify all numbers
+export function replaceAddressesAndBigNumberify(object, addresses) {
   const newObject = {};
   Object.keys(object).forEach(key => {
-    newObject[addresses[key]] = bigNumberify(object[key]);
+    if (typeof object[key] === 'object') {
+      // recurse
+      newObject[addresses[key]] = replaceAddressesAndBigNumberify(object[key], addresses);
+    }
+    if (typeof object[key] === 'number') {
+      newObject[addresses[key]] = bigNumberify(object[key]);
+    }
   });
   return newObject;
 }
