@@ -21,7 +21,7 @@ const cdnConfig = {
   target: 'web',
   mode: 'production',
   output: {
-    filename: 'wallet.min.js',
+    filename: 'channel-provider.min.js',
     libraryTarget: 'window',
     path: path.resolve(__dirname, 'dist')
   }
@@ -34,7 +34,7 @@ const cdnDebugConfig = {
   devtool: 'inline-source-map',
   output: {
     ...cdnConfig.output,
-    filename: 'wallet.debug.js'
+    filename: 'channel-provider.js'
   }
 };
 

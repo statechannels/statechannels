@@ -5,6 +5,10 @@ const events = new EventEmitter();
 const channelProvider = {
   on(event: string, callback: ListenerFn) {
     events.on(event, callback);
+  },
+
+  enable() {
+    events.emit('connect', {success: true});
   }
 };
 

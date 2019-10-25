@@ -1,19 +1,29 @@
 {
-  "name": "@statechannels/embedded-wallet-loader",
+  "name": "@statechannels/channel-provider",
   "license": "MIT",
   "version": "0.0.1",
-  "main": "dist/index.js",
+  "main": "dist/channel-provider.min.js",
   "dependencies": {
     "debug": "4.1.1",
     "eventemitter3": "4.0.0"
   },
   "scripts": {
     "build": "webpack",
+    "test": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "test:ci": "CI=true jest",
     "precommit": "lint-staged --quiet",
     "lint:check": "tslint -c tslint.json -p .",
     "lint:write": "tslint -c tslint.json -p . --fix"
   },
   "jest": {
+    "roots": [
+      "./src",
+      "./tests"
+    ],
+    "transform": {
+      "^.+\\.ts$": "ts-jest"
+    },
     "collectCoverageFrom": [
       "./src/**/*.ts",
       "!./src/**/index.ts",
