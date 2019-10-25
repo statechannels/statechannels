@@ -17,6 +17,7 @@ import {State} from '../../../src/contract/state';
 import {concludePushOutcomeAndTransferAllArgs} from '../../../src/contract/transaction-creators/force-move';
 import {CHANNEL_FINALIZED} from '../../../src/contract/transaction-creators/revert-reasons';
 import {
+  allocationToParams,
   finalizedOutcomeHash,
   getNetworkMap,
   getTestProvider,
@@ -91,9 +92,9 @@ let channelNonce = 400;
 describe('concludePushOutcomeAndTransferAll', () => {
   beforeEach(() => (channelNonce += 1));
   it.each`
-    description | outcomeShortHand              | initialChannelStorageHash | largestTurnNum                   | support        | heldBefore                    | payouts                       | reasonString
-    ${accepts1} | ${{ETH: {A: 1}, TOK: {A: 2}}} | ${HashZero}               | ${turnNumRecord - nParticipants} | ${threeStates} | ${{ETH: {c: 1}, TOK: {c: 2}}} | ${{ETH: {A: 1}, TOK: {A: 2}}} | ${undefined}
-    ${reverts1} | ${{ETH: {A: 1}, TOK: {A: 2}}} | ${finalized}              | ${turnNumRecord + 1}             | ${oneState}    | ${{ETH: {c: 1}, TOK: {c: 2}}} | ${{ETH: {A: 1}, TOK: {A: 2}}} | ${CHANNEL_FINALIZED}
+    description | outcomeShortHand              | initialChannelStorageHash | largestTurnNum                   | support        | heldBefore                    | heldAfter                     | newOutcome | payouts                       | reasonString
+    ${accepts1} | ${{ETH: {A: 1}, TOK: {A: 2}}} | ${HashZero}               | ${turnNumRecord - nParticipants} | ${threeStates} | ${{ETH: {c: 1}, TOK: {c: 2}}} | ${{ETH: {c: 0}, TOK: {c: 0}}} | ${{}}      | ${{ETH: {A: 1}, TOK: {A: 2}}} | ${undefined}
+    ${reverts1} | ${{ETH: {A: 1}, TOK: {A: 2}}} | ${finalized}              | ${turnNumRecord + 1}             | ${oneState}    | ${{ETH: {c: 1}, TOK: {c: 2}}} | ${{ETH: {c: 0}, TOK: {c: 0}}} | ${{}}      | ${{ETH: {A: 1}, TOK: {A: 2}}} | ${CHANNEL_FINALIZED}
   `(
     '$description', // for the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce
     async ({
@@ -102,6 +103,8 @@ describe('concludePushOutcomeAndTransferAll', () => {
       largestTurnNum,
       support,
       heldBefore,
+      heldAfter,
+      newOutcome,
       payouts,
       reasonString,
     }) => {
@@ -233,6 +236,41 @@ describe('concludePushOutcomeAndTransferAll', () => {
         });
         // check that each expectedEvent is contained as a subset of the properies of each *corresponding* event: i.e. the order matters!
         expect(events).toMatchObject(expectedEvents);
+
+        // check new holdings on each AssetHolder
+        Object.keys(heldAfter).forEach(assetHolder => {
+          const heldAfterSingleAsset = replaceAddresses(heldAfter[assetHolder], addresses);
+          Object.keys(heldAfterSingleAsset).forEach(async destination => {
+            const amount = bigNumberify(heldAfterSingleAsset[destination]);
+            if (assetHolder === 'ETH') {
+              expect(await AssetHolder1.holdings(destination)).toEqual(amount);
+            }
+            if (assetHolder === 'TOK') {
+              expect(await AssetHolder2.holdings(destination)).toEqual(amount);
+            }
+          });
+        });
+
+        // check new assetOutcomeHash on each AssetHolder
+        Object.keys(newOutcome).forEach(async assetHolder => {
+          const newOutcomeSingleAsset = replaceAddresses(newOutcome[assetHolder], addresses);
+          const allocationAfter = [];
+          Object.keys(newOutcomeSingleAsset).forEach(destination => {
+            const amount = bigNumberify(newOutcomeSingleAsset[destination]);
+            allocationAfter.push({destination, amount});
+          });
+          const [, expectedNewOutcomeHash] = allocationToParams(allocationAfter);
+          if (assetHolder === 'ETH') {
+            expect(await AssetHolder1.assetOutcomeHashes(channelId)).toEqual(
+              expectedNewOutcomeHash
+            );
+          }
+          if (assetHolder === 'TOK') {
+            expect(await AssetHolder2.assetOutcomeHashes(channelId)).toEqual(
+              expectedNewOutcomeHash
+            );
+          }
+        });
       }
     }
   );

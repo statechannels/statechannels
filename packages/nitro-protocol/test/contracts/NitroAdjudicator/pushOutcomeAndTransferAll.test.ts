@@ -13,7 +13,12 @@ import NitroAdjudicatorArtifact from '../../../build/contracts/TESTNitroAdjudica
 import {Channel, getChannelId} from '../../../src/contract/channel';
 import {Allocation, AllocationAssetOutcome, encodeOutcome} from '../../../src/contract/outcome';
 import {hashState, State} from '../../../src/contract/state';
-import {randomChannelId, randomExternalDestination, replaceAddresses} from '../../test-helpers';
+import {
+  allocationToParams,
+  randomChannelId,
+  randomExternalDestination,
+  replaceAddresses,
+} from '../../test-helpers';
 import {finalizedOutcomeHash, getTestProvider, setupContracts} from '../../test-helpers';
 
 const provider = getTestProvider();
@@ -65,11 +70,11 @@ const finalized = true;
 
 describe('pushOutcomeAndTransferAll', () => {
   it.each`
-    description     | setOutcome                    | heldBefore                    | payouts                       | reasonString
-    ${description2} | ${{ETH: {A: 1}, TOK: {A: 2}}} | ${{ETH: {c: 1}, TOK: {c: 2}}} | ${{ETH: {A: 1}, TOK: {A: 2}}} | ${undefined}
+    description     | setOutcome                    | heldBefore                    | newOutcome | heldAfter                     | payouts                       | reasonString
+    ${description2} | ${{ETH: {A: 1}, TOK: {A: 2}}} | ${{ETH: {c: 1}, TOK: {c: 2}}} | ${{}}      | ${{ETH: {c: 0}, TOK: {c: 0}}} | ${{ETH: {A: 1}, TOK: {A: 2}}} | ${undefined}
   `(
     '$description', // for the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce
-    async ({setOutcome, heldBefore, payouts, reasonString}) => {
+    async ({setOutcome, heldBefore, newOutcome, heldAfter, payouts, reasonString}) => {
       const channel: Channel = {chainId, channelNonce, participants};
       const channelId = getChannelId(channel);
       addresses.c = channelId;
@@ -163,7 +168,7 @@ describe('pushOutcomeAndTransferAll', () => {
         const {logs} = await (await tx1).wait();
         const AssetHolderInterface = AssetHolder1.interface;
         const events = [];
-        // since the event was emitted by contract other than the 'to" of the transaction, we have to work a little harder to extract the event information:
+        // since the event was emitted by contract other than the 'to' of the transaction, we have to work a little harder to extract the event information:
         logs.forEach(log =>
           events.push({...AssetHolderInterface.parseLog(log), contract: log.address})
         );
@@ -183,7 +188,44 @@ describe('pushOutcomeAndTransferAll', () => {
         });
         // check that each expectedEvent is contained as a subset of the properies of each *corresponding* event: i.e. the order matters!
         expect(events).toMatchObject(expectedEvents);
+
+        // check new holdings on each AssetHolder
+        Object.keys(heldAfter).forEach(assetHolder => {
+          const heldAfterSingleAsset = replaceAddresses(heldAfter[assetHolder], addresses);
+          Object.keys(heldAfterSingleAsset).forEach(async destination => {
+            const amount = bigNumberify(heldAfterSingleAsset[destination]);
+            if (assetHolder === 'ETH') {
+              expect(await AssetHolder1.holdings(destination)).toEqual(amount);
+            }
+            if (assetHolder === 'TOK') {
+              expect(await AssetHolder2.holdings(destination)).toEqual(amount);
+            }
+          });
+        });
+
+        // check new assetOutcomeHash on each AssetHolder
+        Object.keys(newOutcome).forEach(async assetHolder => {
+          const newOutcomeSingleAsset = replaceAddresses(newOutcome[assetHolder], addresses);
+          const allocationAfter = [];
+          Object.keys(newOutcomeSingleAsset).forEach(destination => {
+            const amount = bigNumberify(newOutcomeSingleAsset[destination]);
+            allocationAfter.push({destination, amount});
+          });
+          const [, expectedNewOutcomeHash] = allocationToParams(allocationAfter);
+          if (assetHolder === 'ETH') {
+            expect(await AssetHolder1.assetOutcomeHashes(channelId)).toEqual(
+              expectedNewOutcomeHash
+            );
+          }
+          if (assetHolder === 'TOK') {
+            expect(await AssetHolder2.assetOutcomeHashes(channelId)).toEqual(
+              expectedNewOutcomeHash
+            );
+          }
+        });
       }
     }
   );
 });
+
+// TODO also check for updates to the asset holders' holdings storage mapping
