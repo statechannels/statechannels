@@ -67,9 +67,9 @@ describe('UI - FlowStep', () => {
     expect(stepElement.hasClass(css.inProgress)).toEqual(true);
   });
 
-  it('can show a Check icon when status is Done', () => {
+  it('can show a CheckAnimated icon when status is Done', () => {
     const {statusIconElement, statusSpinnerElement} = mockFlowStep({status: FlowStepStatus.Done});
-    expect(statusIconElement.prop('name')).toEqual(Icons.Check);
+    expect(statusIconElement.prop('name')).toEqual(Icons.CheckAnimated);
     expect(statusIconElement.exists()).toEqual(true);
     expect(statusSpinnerElement.exists()).toEqual(false);
   });
