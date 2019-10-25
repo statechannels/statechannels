@@ -1,5 +1,5 @@
-import {replaceAddressesAndBigNumberify} from './test-helpers';
 import {bigNumberify} from 'ethers/utils';
+import {replaceAddressesAndBigNumberify} from './test-helpers';
 
 const addresses = {
   // channels
