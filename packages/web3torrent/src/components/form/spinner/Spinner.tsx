@@ -4,7 +4,7 @@ import './Spinner.scss';
 export type SpinnerProps = {
   visible?: boolean;
   type?: 'circle' | 'dots';
-  color?: 'black' | 'white';
+  color?: 'black' | 'white' | 'orange';
   content?: React.ReactNode;
 };
 

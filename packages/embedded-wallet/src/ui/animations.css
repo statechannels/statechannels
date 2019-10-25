@@ -21,3 +21,20 @@
     transform: rotate(359deg);
   }
 }
+
+@keyframes checkmark-fade {
+  0% {
+    filter: grayscale(0);
+    opacity: 1;
+  }
+
+  90% {
+    filter: grayscale(0);
+    opacity: 0.3;
+  }
+
+  100% {
+    filter: grayscale(100%);
+    opacity: 0.3;
+  }
+}
