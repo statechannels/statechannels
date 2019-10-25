@@ -4,7 +4,7 @@ import {TransactionRequest} from 'ethers/providers';
 import {Signature} from 'ethers/utils';
 import ForceMoveArtifact from '../../../build/contracts/ForceMove.json';
 import {signChallengeMessage} from '../../signatures';
-import {hashOutcome} from '../outcome';
+import {encodeOutcome, hashOutcome} from '../outcome';
 import {getFixedPart, getVariablePart, hashAppPart, State} from '../state';
 
 // TODO: Currently we are setting some arbitrary gas limit
@@ -146,6 +146,42 @@ export function concludeArgs(
     fixedPart,
     appPartHash,
     outcomeHash,
+    numStates,
+    whoSignedWhat,
+    signatures,
+  ];
+}
+
+export function concludePushOutcomeAndTransferAllArgs(
+  states: State[],
+  signatures: Signature[],
+  whoSignedWhat: number[]
+): any[] {
+  // Sanity checks on expected lengths
+  if (states.length === 0) {
+    throw new Error('No states provided');
+  }
+  const {participants} = states[0].channel;
+  if (participants.length !== signatures.length) {
+    throw new Error(
+      `Participants (length:${participants.length}) and signatures (length:${signatures.length}) need to be the same length`
+    );
+  }
+
+  const lastState = states.reduce((s1, s2) => (s1.turnNum >= s2.turnNum ? s1 : s2), states[0]);
+  const largestTurnNum = lastState.turnNum;
+  const fixedPart = getFixedPart(lastState);
+  const appPartHash = hashAppPart(lastState);
+
+  const outcomeBytes = encodeOutcome(lastState.outcome);
+
+  const numStates = states.length;
+
+  return [
+    largestTurnNum,
+    fixedPart,
+    appPartHash,
+    outcomeBytes,
     numStates,
     whoSignedWhat,
     signatures,
