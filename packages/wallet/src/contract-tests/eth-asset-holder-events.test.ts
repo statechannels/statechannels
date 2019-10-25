@@ -1,5 +1,5 @@
 import {ethers, Contract} from "ethers";
-import {getChannelId as nitroGetChannelId} from "@statechannels/nitro-protocol";
+import {encodeAllocation, encodeOutcome, getChannelId as nitroGetChannelId} from "@statechannels/nitro-protocol";
 import SagaTester from "redux-saga-tester";
 import {DepositedEvent} from "../redux/actions";
 import {adjudicatorWatcher} from "../redux/sagas/adjudicator-watcher";
@@ -10,7 +10,6 @@ import {bigNumberify} from "ethers/utils";
 import {nitroGetData} from "../utils/transaction-generator";
 import {convertAllocationToOutcome, convertAddressToBytes32} from "../utils/nitro-converter";
 import {HashZero, AddressZero} from "ethers/constants";
-import {encodeOutcome, encodeAllocation} from "@statechannels/nitro-protocol/src/contract/outcome";
 import {
   getAdjudicatorInterface,
   getAdjudicatorContractAddress,
