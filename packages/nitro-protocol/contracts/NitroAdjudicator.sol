@@ -91,17 +91,7 @@ contract NitroAdjudicator is Adjudicator, ForceMove {
             channelId
         );
 
-        Outcome.OutcomeItem[] memory outcome = abi.decode(outcomeBytes, (Outcome.OutcomeItem[]));
-
-        for (uint256 i = 0; i < outcome.length; i++) {
-            Outcome.AssetOutcome memory assetOutcome = abi.decode(outcome[i].assetOutcomeBytes,(Outcome.AssetOutcome));
-            if (assetOutcome.assetOutcomeType == uint8(Outcome.AssetOutcomeType.Allocation)) {
-                AssetHolder(outcome[i].assetHolderAddress).transferAllAdjudicatorOnly(channelId,assetOutcome.allocationOrGuaranteeBytes);
-            } else {
-                revert();
-            }
-
-        }
+        _transferAllFromAllAssetHolders(channelId,outcomeBytes);
 
     }
 
@@ -111,7 +101,7 @@ contract NitroAdjudicator is Adjudicator, ForceMove {
     * @param largestTurnNum The largest turn number of the submitted states; will overwrite the stored value of `turnNumRecord`.
     * @param fixedPart Data describing properties of the state channel that do not change with state updates.
     * @param appPartHash The keccak256 of the abi.encode of `(challengeDuration, appDefinition, appData)`. Applies to all states in the finalization proof.
-    * @param outcomeHash The keccak256 of the abi.encode of the `outcome`. Applies to all stats in the finalization proof.
+    * @param outcomeBytes abi.encode of an array of Outcome.OutcomeItem structs.
     * @param numStates The number of states in the finalization proof.
     * @param whoSignedWhat An array denoting which participant has signed which state: `participant[i]` signed the state with index `whoSignedWhat[i]`.
     * @param sigs An array of signatures that support the state with the `largestTurnNum`.
@@ -120,17 +110,20 @@ contract NitroAdjudicator is Adjudicator, ForceMove {
         uint48 largestTurnNum,
         FixedPart memory fixedPart,
         bytes32 appPartHash,
-        bytes outcomeBytes,
+        bytes memory outcomeBytes,
         uint8 numStates,
         uint8[] memory whoSignedWhat,
         Signature[] memory sigs
     ) public {
         // requirements
         bytes32 channelId = _getChannelId(fixedPart);
-        _requireChannelFinalized(channelId);
+
+        _requireChannelNotFinalized(channelId);
 
         // By construction, the following states form a valid transition
         bytes32[] memory stateHashes = new bytes32[](numStates);
+
+        bytes32 outcomeHash = keccak256(abi.encode(outcomeBytes));
         for (uint256 i = 0; i < numStates; i++) {
             stateHashes[i] = keccak256(
                 abi.encode(
@@ -156,14 +149,28 @@ contract NitroAdjudicator is Adjudicator, ForceMove {
             'Invalid signatures'
         );
 
-
-
         // effects
-        bytes32 outcomeHash = keccak256(abi.encode(outcomeBytes));
+        
+
         channelStorageHashes[channelId] = _hashChannelStorage(
             ChannelStorage(0, now, bytes32(0), address(0), outcomeHash)
         );
         emit Concluded(channelId);
+
+        _transferAllFromAllAssetHolders(channelId, outcomeBytes);
+    }
+
+
+    /**
+    * @notice Triggers transferAll in all external Asset Holder contracts specified in a given outcome for a given channelId.
+    * @dev Triggers transferAll in  all external Asset Holder contracts specified in a given outcome for a given channelId.
+    * @param channelId Unique identifier for a state channel
+    * @param outcomeBytes abi.encode of an array of Outcome.OutcomeItem structs.
+    */
+    function _transferAllFromAllAssetHolders(
+        bytes32 channelId,
+        bytes memory outcomeBytes
+    ) internal {
 
         Outcome.OutcomeItem[] memory outcome = abi.decode(outcomeBytes, (Outcome.OutcomeItem[]));
 
@@ -176,6 +183,9 @@ contract NitroAdjudicator is Adjudicator, ForceMove {
             }
 
         }
-
     }
 }
+
+
+
+
