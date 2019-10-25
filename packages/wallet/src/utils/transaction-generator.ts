@@ -1,6 +1,6 @@
 import {TransactionRequest} from "ethers/providers";
-import {getAdjudicatorInterface, getAdjudicatorContractAddress} from "./contract-utils";
-import {splitSignature, BigNumber} from "ethers/utils";
+import {getAdjudicatorInterface} from "./contract-utils";
+import {splitSignature} from "ethers/utils";
 import {Commitment, SignedCommitment, signCommitment2} from "../domain";
 import {asEthersObject} from "fmg-core";
 import {
