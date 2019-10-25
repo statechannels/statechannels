@@ -1,7 +1,7 @@
 import {expectRevert} from '@statechannels/devtools';
 import {Contract, Wallet} from 'ethers';
 import {HashZero} from 'ethers/constants';
-import {bigNumberify, hexlify} from 'ethers/utils';
+import {hexlify} from 'ethers/utils';
 // @ts-ignore
 import countingAppArtifact from '../../../build/contracts/CountingApp.json';
 // @ts-ignore
@@ -114,18 +114,27 @@ describe('concludePushOutcomeAndTransferAll', () => {
       const {appData, whoSignedWhat} = support;
       const numStates = appData.length;
 
+      // transform input data (unpack addresses and BigNumberify amounts)
+      [heldBefore, outcomeShortHand, newOutcome, heldAfter, payouts] = [
+        heldBefore,
+        outcomeShortHand,
+        newOutcome,
+        heldAfter,
+        payouts,
+      ].map(object => replaceAddressesAndBigNumberify(object, addresses));
+
       // reset the holdings (only works on test contracts)
       Object.keys(heldBefore).forEach(assetHolder => {
         const holdings = heldBefore[assetHolder];
         Object.keys(holdings).forEach(async destination => {
-          const amount = bigNumberify(holdings[destination]);
-          if (assetHolder === 'ETH') {
-            await (await AssetHolder1.setHoldings(addresses[destination], amount)).wait();
-            expect((await AssetHolder1.holdings(addresses[destination])).eq(amount)).toBe(true);
+          const amount = holdings[destination];
+          if (assetHolder === AssetHolder1.address) {
+            await (await AssetHolder1.setHoldings(destination, amount)).wait();
+            expect((await AssetHolder1.holdings(destination)).eq(amount)).toBe(true);
           }
-          if (assetHolder === 'TOK') {
-            await (await AssetHolder2.setHoldings(addresses[destination], amount)).wait();
-            expect((await AssetHolder2.holdings(addresses[destination])).eq(amount)).toBe(true);
+          if (assetHolder === AssetHolder2.address) {
+            await (await AssetHolder2.setHoldings(destination, amount)).wait();
+            expect((await AssetHolder2.holdings(destination)).eq(amount)).toBe(true);
           }
         });
       });
@@ -137,12 +146,12 @@ describe('concludePushOutcomeAndTransferAll', () => {
         const allocation: Allocation = [];
         Object.keys(outcomeShortHand[assetHolder]).forEach(destination =>
           allocation.push({
-            destination: addresses[destination],
+            destination,
             amount: outcomeShortHand[assetHolder][destination],
           })
         );
         const assetOutcome: AllocationAssetOutcome = {
-          assetHolderAddress: addresses[assetHolder],
+          assetHolderAddress: assetHolder,
           allocation,
         }; // TODO handle gurantee outcomes
         outcome.push(assetOutcome);
@@ -223,14 +232,11 @@ describe('concludePushOutcomeAndTransferAll', () => {
 
         // add AssetTransferred events to expectations
         Object.keys(payouts).forEach(assetHolder => {
-          const singleAssetPayouts = replaceAddressesAndBigNumberify(
-            payouts[assetHolder],
-            addresses
-          );
+          const singleAssetPayouts = payouts[assetHolder];
           Object.keys(singleAssetPayouts).forEach(destination => {
             if (singleAssetPayouts[destination] && singleAssetPayouts[destination].gt(0)) {
               expectedEvents.push({
-                contract: addresses[assetHolder],
+                contract: assetHolder,
                 name: 'AssetTransferred',
                 values: {destination, amount: singleAssetPayouts[destination]},
               });
@@ -242,12 +248,9 @@ describe('concludePushOutcomeAndTransferAll', () => {
 
         // check new holdings on each AssetHolder
         Object.keys(heldAfter).forEach(assetHolder => {
-          const heldAfterSingleAsset = replaceAddressesAndBigNumberify(
-            heldAfter[assetHolder],
-            addresses
-          );
+          const heldAfterSingleAsset = heldAfter[assetHolder];
           Object.keys(heldAfterSingleAsset).forEach(async destination => {
-            const amount = bigNumberify(heldAfterSingleAsset[destination]);
+            const amount = heldAfterSingleAsset[destination];
             if (assetHolder === 'ETH') {
               expect(await AssetHolder1.holdings(destination)).toEqual(amount);
             }
@@ -259,13 +262,10 @@ describe('concludePushOutcomeAndTransferAll', () => {
 
         // check new assetOutcomeHash on each AssetHolder
         Object.keys(newOutcome).forEach(async assetHolder => {
-          const newOutcomeSingleAsset = replaceAddressesAndBigNumberify(
-            newOutcome[assetHolder],
-            addresses
-          );
+          const newOutcomeSingleAsset = newOutcome[assetHolder];
           const allocationAfter = [];
           Object.keys(newOutcomeSingleAsset).forEach(destination => {
-            const amount = bigNumberify(newOutcomeSingleAsset[destination]);
+            const amount = newOutcomeSingleAsset[destination];
             allocationAfter.push({destination, amount});
           });
           const [, expectedNewOutcomeHash] = allocationToParams(allocationAfter);
