@@ -1,5 +1,10 @@
 import {ethers, Contract} from "ethers";
-import {encodeAllocation, encodeOutcome, getChannelId as nitroGetChannelId} from "@statechannels/nitro-protocol";
+import {
+  encodeAllocation,
+  encodeOutcome,
+  getChannelId as nitroGetChannelId,
+  Transactions as nitroTrans
+} from "@statechannels/nitro-protocol";
 import SagaTester from "redux-saga-tester";
 import {DepositedEvent} from "../redux/actions";
 import {adjudicatorWatcher} from "../redux/sagas/adjudicator-watcher";
@@ -7,7 +12,6 @@ import {ETHAssetHolderWatcher} from "../redux/sagas/eth-asset-holder-watcher";
 import {depositContract, createWatcherState, concludeGame, fiveFive} from "./test-utils";
 import {getGanacheProvider} from "@statechannels/devtools";
 import {bigNumberify} from "ethers/utils";
-import {nitroGetData} from "../utils/transaction-generator";
 import {convertAllocationToOutcome, convertAddressToBytes32} from "../utils/nitro-converter";
 import {HashZero, AddressZero} from "ethers/constants";
 import {
@@ -133,7 +137,7 @@ async function getOnChainChannelStorage(
   provider,
   channelId: string
 ): Promise<{turnNumRecord: number; finalizesAt: number}> {
-  const {turnNumRecord, finalizesAt} = await nitroGetData(provider, channelId);
+  const {turnNumRecord, finalizesAt} = await nitroTrans.getData(provider, getAdjudicatorContractAddress(), channelId);
   return {turnNumRecord, finalizesAt};
 }
 

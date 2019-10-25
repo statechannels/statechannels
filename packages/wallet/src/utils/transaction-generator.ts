@@ -12,16 +12,6 @@ import {
 import {convertAddressToBytes32, convertCommitmentToState} from "./nitro-converter";
 import {Allocation, AllocationItem} from "@statechannels/nitro-protocol/src/contract/outcome";
 
-interface GetDataResult {
-  turnNumRecord: number;
-  finalizesAt: number;
-  fingerprint: BigNumber;
-}
-
-export function nitroGetData(provider, channelId: string): Promise<GetDataResult> {
-  return nitroTrans.getData(provider, getAdjudicatorContractAddress(), channelId);
-}
-
 export function createForceMoveTransaction(
   fromCommitment: SignedCommitment,
   toCommitment: SignedCommitment,
@@ -142,18 +132,13 @@ export function createDepositTransaction(destination: string, depositAmount: str
 export function createTransferAllTransaction(source: string, destination: string, amount: string) {
   const allocation: Allocation = [
     {
-      destination: normalizeDestinationAddress(destination),
+      destination: externalizeAddress(destination),
       amount
     } as AllocationItem
   ];
   return createNitroTransferAllTransaction(source, allocation);
 }
 
-function normalizeDestinationAddress(address: string): string {
-  let normalizedDestinationAddress = address;
-  // If the address is not already left-padded to be of type byte32
-  if (normalizedDestinationAddress.length !== 66) {
-    normalizedDestinationAddress = convertAddressToBytes32(address);
-  }
-  return normalizedDestinationAddress;
+function externalizeAddress(address: string): string {
+  return address.length !== 66 ? convertAddressToBytes32(address) : address;
 }

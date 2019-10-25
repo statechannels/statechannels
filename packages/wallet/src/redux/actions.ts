@@ -56,7 +56,7 @@ export interface DisplayMessageSent {
 export interface AssetTransferredEvent {
   type: "WALLET.ASSET_HOLDER.ASSET_TRANSFERRED";
 
-  // This is either the `channelId` (bytes32) or (the left-padded bytes20)
+  // This is either the `channelId` (bytes32) or (the external address)
   // recipient address
   destination: string;
   amount: BigNumber;
@@ -65,7 +65,7 @@ export interface AssetTransferredEvent {
 export interface DepositedEvent {
   type: "WALLET.ASSET_HOLDER.DEPOSITED";
 
-  // This is either the `channelId` (bytes32) or (the left-padded bytes20)
+  // This is either the `channelId` (bytes32) or (the external address)
   // recipient address
   destination: string;
   amountDeposited: BigNumber;
