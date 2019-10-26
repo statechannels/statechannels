@@ -19,7 +19,6 @@ const Upload: React.FC<RouteComponentProps> = ({history}) => {
             if (event.target.files && event.target.files[0]) {
               const file = event.target.files[0];
               const seedingTorrent = await upload(file);
-              console.log('seedingTorrent', seedingTorrent.infoHash);
               history.push(generateMagnetURL(seedingTorrent));
             }
           }}
@@ -36,5 +35,3 @@ const Upload: React.FC<RouteComponentProps> = ({history}) => {
 };
 
 export default Upload;
-// "f589b494bd2e2f45de823e4d21a88a01ffd4f0de"
-// "f589b494bd2e2f45de823e4d21a88a01ffd4f0de"
