@@ -1,4 +1,4 @@
-import { MutableRefObject, useEffect, useRef } from 'react';
+import {MutableRefObject, useEffect, useRef} from 'react';
 
 export function useInterval(callback, delay: number | boolean = 0) {
   const savedCallback: MutableRefObject<any> = useRef();

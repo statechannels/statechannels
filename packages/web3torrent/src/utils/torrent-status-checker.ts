@@ -2,9 +2,9 @@ import {web3torrent} from '../clients/web3torrent-client';
 import {ExtendedTorrent} from '../library/types';
 import {Status, Torrent} from '../types';
 
-export const getStatus = (torrent: ExtendedTorrent, previousStatus?: Status): Status => {
-  const {uploadSpeed, downloadSpeed, progress, done} = torrent;
-  if (previousStatus === Status.Seeding) {
+export const getStatus = (torrent: ExtendedTorrent): Status => {
+  const {uploadSpeed, downloadSpeed, progress, done, createdBy} = torrent;
+  if (createdBy) {
     return Status.Seeding;
   }
   if (progress && done) {
@@ -49,7 +49,7 @@ export default (previousData: Torrent, infoHash): Torrent => {
   const live = web3torrent.get(infoHash) as ExtendedTorrent;
   if (!live) {
     // torrent after being destroyed
-    return {...previousData, destroyed: true, status: Status.Idle};
+    return {...previousData, downloaded: 0, status: Status.Idle};
   }
 
   return {
@@ -60,7 +60,7 @@ export default (previousData: Torrent, infoHash): Torrent => {
       name: live.name || previousData.name,
       length: live.length || previousData.length,
       downloaded: (live && live.downloaded) || 0,
-      status: getStatus(live, previousData.status),
+      status: getStatus(live),
       uploadSpeed: live.uploadSpeed,
       downloadSpeed: live.downloadSpeed,
       numPeers: live.numPeers,
