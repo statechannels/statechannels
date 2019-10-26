@@ -17,8 +17,8 @@ const App: React.FC = () => {
         <Route path={RoutePath.Root} component={LayoutHeader} />
         <Switch>
           <Route exact path={RoutePath.Root} component={Welcome} />
-          <Route path={RoutePath.File} component={File} />
-          <Route path={RoutePath.Upload} component={Upload} />
+          <Route exact path={RoutePath.File} component={File} />
+          <Route exact path={RoutePath.Upload} component={Upload} />
         </Switch>
       </main>
       <Route path={RoutePath.Root} component={LayoutFooter} />
