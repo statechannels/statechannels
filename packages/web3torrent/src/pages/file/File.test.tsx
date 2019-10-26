@@ -15,7 +15,7 @@ import * as Web3TorrentClient from './../../clients/web3torrent-client';
 import File from './File';
 
 const mockFileURL =
-  '/file/magnet#magnet:?xt=urn%3Abtih%3A148c62a7f7845c91e7d16ca9be85de6fbaed3a1f&dn=test.zip&xl=1398978&cost=0';
+  '/file/#magnet:?xt=urn%3Abtih%3A148c62a7f7845c91e7d16ca9be85de6fbaed3a1f&dn=test.zip&xl=1398978&cost=0';
 
 const mockResponse: JsonRPCResponse = {jsonrpc: '2.0', id: 123};
 
@@ -64,18 +64,18 @@ describe('<File />', () => {
     jest.useFakeTimers();
   });
 
-  it('should render an File button', () => {
-    expect(component.find(testSelector('file-button')).text()).toBe('Start File');
+  it('should render an download button', () => {
+    expect(component.find(testSelector('download-button')).text()).toBe('Start Download');
   });
 
   it("should change the label to 'Preparing file' and show a spinner when clicked", async () => {
-    const fileButton = component.find(testSelector('file-button'));
+    const fileButton = component.find(testSelector('download-button'));
 
     await act(async () => {
       await fileButton.simulate('click');
     });
 
-    expect(fileButton.text()).toEqual('Preparing File...');
+    expect(fileButton.text()).toEqual('Preparing Download...');
 
     /**
      * @todo This should be done with `fileButton.find(Spinner)`, but for some
@@ -86,7 +86,7 @@ describe('<File />', () => {
 
   it('should run askForFunds functions when the File Button is clicked', async () => {
     await act(async () => {
-      await component.find(testSelector('file-button')).simulate('click');
+      await component.find(testSelector('download-button')).simulate('click');
     });
     expect(askForFunds).toHaveBeenCalled();
     expect(torrentFile).toHaveBeenCalled();
@@ -98,7 +98,7 @@ describe('<File />', () => {
       .mockImplementation((_pD: Torrent, _iH: any) => EmptyTorrent);
 
     await act(async () => {
-      await component.find(testSelector('file-button')).simulate('click');
+      await component.find(testSelector('download-button')).simulate('click');
     });
 
     act(() => {

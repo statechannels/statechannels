@@ -52,29 +52,17 @@ describe('<Upload />', () => {
   });
 
   it('should render an Upload button', () => {
-    expect(component.find(testSelector('start-button')).text()).toBe('Start');
+    expect(component.find('input.inputfile').exists()).toBe(true);
   });
 
   it('should run askForFunds functions when the Upload Button is clicked', async () => {
     await act(async () => {
-      await component.find(testSelector('start-button')).simulate('click');
+      await component.find('input.inputfile').simulate('change', {
+        target: {
+          files: ['dummyValue.something']
+        }
+      });
     });
     expect(torrentUpload).toHaveBeenCalled();
-  });
-
-  it('should run checker function if the Upload Button is clicked', async () => {
-    const torrentStatusChecker = jest
-      .spyOn(TorrentStatus, 'default')
-      .mockImplementation((_pD: Torrent, _iH: any) => EmptyTorrent);
-
-    await act(async () => {
-      await component.find(testSelector('start-button')).simulate('click');
-    });
-
-    act(() => {
-      jest.runOnlyPendingTimers();
-    });
-
-    expect(torrentStatusChecker).toHaveBeenCalled();
   });
 });

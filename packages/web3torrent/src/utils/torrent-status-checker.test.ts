@@ -107,6 +107,7 @@ describe('Torrent Status Checker', () => {
         expect(
           getStatus({
             uploadSpeed: 1000,
+            createdBy: 'user',
             downloadSpeed: 0,
             progress: 50,
             done: false
