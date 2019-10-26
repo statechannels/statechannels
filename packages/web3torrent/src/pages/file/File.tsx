@@ -53,6 +53,8 @@ const File: React.FC<RouteComponentProps> = () => {
               setButtonLabel('Preparing Download...');
               await askForFunds();
               setTorrent({...torrent, ...(await download(torrent.magnetURI))});
+              setLoading(false);
+              setButtonLabel('Start Download');
             }}
           >
             {buttonLabel}
