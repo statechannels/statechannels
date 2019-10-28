@@ -8,6 +8,7 @@ import {
   keccak256,
   Signature,
   splitSignature,
+  BigNumberish,
 } from 'ethers/utils';
 import loadJsonFile from 'load-json-file';
 import path from 'path';
@@ -23,6 +24,19 @@ import {
 } from '../src/contract/outcome';
 import {hashState, State} from '../src/contract/state';
 
+// interfaces
+
+// e.g. {ALICE:2, BOB:3}
+export interface AssetOutcomeShortHand {
+  [destination: string]: BigNumberish;
+}
+
+// e.g. {ETH: {ALICE:2, BOB:3}, DAI: {ALICE:1, BOB:4}}
+export interface OutcomeShortHand {
+  [assetHolder: string]: AssetOutcomeShortHand;
+}
+
+// functions
 export const getTestProvider = () => {
   if (!process.env.GANACHE_PORT) {
     throw new Error('Missing environment variable GANACHE_PORT required');
@@ -246,7 +260,10 @@ export function replaceAddressesAndBigNumberify(object, addresses) {
 }
 
 // Sets the holdings defined in the multipleHoldings object. Requires an array of the relevant contracts to be passed in.
-export function resetMultipleHoldings(multipleHoldings: object, contractsArray: Contract[]) {
+export function resetMultipleHoldings(
+  multipleHoldings: OutcomeShortHand,
+  contractsArray: Contract[]
+) {
   Object.keys(multipleHoldings).forEach(assetHolder => {
     const holdings = multipleHoldings[assetHolder];
     Object.keys(holdings).forEach(async destination => {
@@ -262,7 +279,10 @@ export function resetMultipleHoldings(multipleHoldings: object, contractsArray: 
 }
 
 // Check the holdings defined in the multipleHoldings object. Requires an array of the relevant contracts to be passed in.
-export function checkMultipleHoldings(multipleHoldings: object, contractsArray: Contract[]) {
+export function checkMultipleHoldings(
+  multipleHoldings: OutcomeShortHand,
+  contractsArray: Contract[]
+) {
   Object.keys(multipleHoldings).forEach(assetHolder => {
     const holdings = multipleHoldings[assetHolder];
     Object.keys(holdings).forEach(async destination => {
@@ -279,7 +299,7 @@ export function checkMultipleHoldings(multipleHoldings: object, contractsArray: 
 // Check the assetOutcomeHash on multiple asset Hoders defined in the multipleHoldings object. Requires an array of the relevant contracts to be passed in.
 export function checkMultipleAssetOutcomeHashes(
   channelId: string,
-  outcome: object,
+  outcome: OutcomeShortHand,
   contractsArray: Contract[]
 ) {
   Object.keys(outcome).forEach(assetHolder => {
@@ -299,14 +319,14 @@ export function checkMultipleAssetOutcomeHashes(
 }
 
 // computes an outcome from a shorthand description
-export function computeOutcome(outcomeShortHand: object): AllocationAssetOutcome[] {
+export function computeOutcome(outcomeShortHand: OutcomeShortHand): AllocationAssetOutcome[] {
   const outcome: AllocationAssetOutcome[] = [];
   Object.keys(outcomeShortHand).forEach(assetHolder => {
     const allocation: Allocation = [];
     Object.keys(outcomeShortHand[assetHolder]).forEach(destination =>
       allocation.push({
         destination,
-        amount: outcomeShortHand[assetHolder][destination],
+        amount: bigNumberify(outcomeShortHand[assetHolder][destination]).toHexString(),
       })
     );
     const assetOutcome: AllocationAssetOutcome = {
@@ -318,10 +338,13 @@ export function computeOutcome(outcomeShortHand: object): AllocationAssetOutcome
   return outcome;
 }
 
-export function assetTransferredEventsFromPayouts(singleAssetPayouts: object, assetHolder: string) {
+export function assetTransferredEventsFromPayouts(
+  singleAssetPayouts: AssetOutcomeShortHand,
+  assetHolder: string
+) {
   const assetTransferredEvents = [];
   Object.keys(singleAssetPayouts).forEach(destination => {
-    if (singleAssetPayouts[destination] && singleAssetPayouts[destination].gt(0)) {
+    if (singleAssetPayouts[destination] && bigNumberify(singleAssetPayouts[destination]).gt(0)) {
       assetTransferredEvents.push({
         contract: assetHolder,
         name: 'AssetTransferred',
@@ -332,7 +355,7 @@ export function assetTransferredEventsFromPayouts(singleAssetPayouts: object, as
   return assetTransferredEvents;
 }
 
-export function compileEventsFromLogs(logs, contractsArray: Contract[]) {
+export function compileEventsFromLogs(logs: any[], contractsArray: Contract[]) {
   const events = [];
   logs.forEach(log => {
     contractsArray.forEach(contract => {

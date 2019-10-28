@@ -21,6 +21,7 @@ import {
   compileEventsFromLogs,
   checkMultipleHoldings,
   checkMultipleAssetOutcomeHashes,
+  OutcomeShortHand,
 } from '../../test-helpers';
 import {finalizedOutcomeHash, getTestProvider, setupContracts} from '../../test-helpers';
 
@@ -77,7 +78,21 @@ describe('pushOutcomeAndTransferAll', () => {
     ${description2} | ${{ETH: {A: 1}, TOK: {A: 2}}} | ${{ETH: {c: 1}, TOK: {c: 2}}} | ${{}}      | ${{ETH: {c: 0}, TOK: {c: 0}}} | ${{ETH: {A: 1}, TOK: {A: 2}}} | ${undefined}
   `(
     '$description', // for the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce
-    async ({setOutcome, heldBefore, newOutcome, heldAfter, payouts, reasonString}) => {
+    async ({
+      setOutcome,
+      heldBefore,
+      newOutcome,
+      heldAfter,
+      payouts,
+      reasonString,
+    }: {
+      setOutcome: OutcomeShortHand;
+      heldBefore: OutcomeShortHand;
+      newOutcome: OutcomeShortHand;
+      heldAfter: OutcomeShortHand;
+      payouts: OutcomeShortHand;
+      reasonString: string;
+    }) => {
       const channel: Channel = {chainId, channelNonce, participants};
       const channelId = getChannelId(channel);
       addresses.c = channelId;

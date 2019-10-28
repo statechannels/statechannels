@@ -31,6 +31,7 @@ import {
   compileEventsFromLogs,
   checkMultipleHoldings,
   checkMultipleAssetOutcomeHashes,
+  OutcomeShortHand,
 } from '../../test-helpers';
 
 const provider = getTestProvider();
@@ -112,6 +113,16 @@ describe('concludePushOutcomeAndTransferAll', () => {
       newOutcome,
       payouts,
       reasonString,
+    }: {
+      outcomeShortHand: OutcomeShortHand;
+      initialChannelStorageHash;
+      largestTurnNum: number;
+      support;
+      heldBefore: OutcomeShortHand;
+      heldAfter: OutcomeShortHand;
+      newOutcome: OutcomeShortHand;
+      payouts: OutcomeShortHand;
+      reasonString;
     }) => {
       const channel: Channel = {chainId, participants, channelNonce: hexlify(channelNonce)};
       const channelId = getChannelId(channel);
