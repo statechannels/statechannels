@@ -15,14 +15,12 @@ import {hashChannelStorage} from '../../../src/contract/channel-storage';
 import {AllocationAssetOutcome} from '../../../src/contract/outcome';
 import {State} from '../../../src/contract/state';
 import {concludePushOutcomeAndTransferAllArgs} from '../../../src/contract/transaction-creators/force-move';
-import {CHANNEL_FINALIZED} from '../../../src/contract/transaction-creators/revert-reasons';
 import {
   assetTransferredEventsFromPayouts,
   checkMultipleAssetOutcomeHashes,
   checkMultipleHoldings,
   compileEventsFromLogs,
   computeOutcome,
-  finalizedOutcomeHash,
   getNetworkMap,
   getTestProvider,
   OutcomeShortHand,
@@ -75,39 +73,25 @@ beforeAll(async () => {
   appDefinition = networkMap[networkId][countingAppArtifact.contractName]; // use a fixed appDefinition in all tests
 });
 
-const acceptsWhenOpenIf = 'It accepts when the channel is open, if ';
-const accepts1 =
-  acceptsWhenOpenIf +
-  'passed n states, and the slot is empty;' +
-  ' it then pays out and updates holdings as expected';
+const accepts1 = '1 Asset Types';
+const accepts2 = '2 Asset Types';
 
-const reverts1 = 'It reverts when the outcome is already finalized';
-
-const threeStates = {
-  whoSignedWhat: [0, 1, 2],
-  appData: [0, 1, 2],
-};
 const oneState = {
   whoSignedWhat: [0, 0, 0],
-  appData: [0],
+  appData: [HashZero],
 };
 const turnNumRecord = 5;
-const finalized = finalizedOutcomeHash(turnNumRecord);
-const nParticipants = participants.length;
 let channelNonce = 400;
 describe('concludePushOutcomeAndTransferAll', () => {
   beforeEach(() => (channelNonce += 1));
   it.each`
-    description | outcomeShortHand              | initialChannelStorageHash | largestTurnNum                   | support        | heldBefore                    | heldAfter                     | newOutcome | payouts                       | reasonString
-    ${accepts1} | ${{ETH: {A: 1}, TOK: {A: 2}}} | ${HashZero}               | ${turnNumRecord - nParticipants} | ${threeStates} | ${{ETH: {c: 1}, TOK: {c: 2}}} | ${{ETH: {c: 0}, TOK: {c: 0}}} | ${{}}      | ${{ETH: {A: 1}, TOK: {A: 2}}} | ${undefined}
-    ${reverts1} | ${{ETH: {A: 1}, TOK: {A: 2}}} | ${finalized}              | ${turnNumRecord + 1}             | ${oneState}    | ${{ETH: {c: 1}, TOK: {c: 2}}} | ${{ETH: {c: 0}, TOK: {c: 0}}} | ${{}}      | ${{ETH: {A: 1}, TOK: {A: 2}}} | ${CHANNEL_FINALIZED}
+    description | outcomeShortHand              | heldBefore                    | heldAfter                     | newOutcome | payouts                       | reasonString
+    ${accepts1} | ${{ETH: {A: 1}}}              | ${{ETH: {c: 1}}}              | ${{ETH: {c: 0}}}              | ${{}}      | ${{ETH: {A: 1}}}              | ${undefined}
+    ${accepts2} | ${{ETH: {A: 1}, TOK: {A: 2}}} | ${{ETH: {c: 1}, TOK: {c: 2}}} | ${{ETH: {c: 0}, TOK: {c: 0}}} | ${{}}      | ${{ETH: {A: 1}, TOK: {A: 2}}} | ${undefined}
   `(
     '$description', // for the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce
     async ({
       outcomeShortHand,
-      initialChannelStorageHash,
-      largestTurnNum,
-      support,
       heldBefore,
       heldAfter,
       newOutcome,
@@ -116,8 +100,6 @@ describe('concludePushOutcomeAndTransferAll', () => {
     }: {
       outcomeShortHand: OutcomeShortHand;
       initialChannelStorageHash;
-      largestTurnNum: number;
-      support;
       heldBefore: OutcomeShortHand;
       heldAfter: OutcomeShortHand;
       newOutcome: OutcomeShortHand;
@@ -127,8 +109,11 @@ describe('concludePushOutcomeAndTransferAll', () => {
       const channel: Channel = {chainId, participants, channelNonce: hexlify(channelNonce)};
       const channelId = getChannelId(channel);
       addresses.c = channelId;
+      const support = oneState;
       const {appData, whoSignedWhat} = support;
       const numStates = appData.length;
+      const largestTurnNum = turnNumRecord + 1;
+      const initialChannelStorageHash = HashZero;
 
       // transform input data (unpack addresses and BigNumberify amounts)
       [heldBefore, outcomeShortHand, newOutcome, heldAfter, payouts] = [
@@ -153,7 +138,7 @@ describe('concludePushOutcomeAndTransferAll', () => {
           channel,
           outcome,
           appDefinition,
-          appData,
+          appData: appData[i - 1],
           challengeDuration,
           turnNum: largestTurnNum + i - numStates,
         });
