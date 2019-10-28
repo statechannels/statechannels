@@ -31,7 +31,10 @@ const BudgetAllocation: React.FC<RouteComponentProps> = () => {
       title="statechannels.com want to allocate"
       onClose={closeWallet}
       buttons={{
-        primary: {label: 'Allow', onClick: allow(amountToAllocate, useRedirect)},
+        primary: {
+          label: `Allow ${amountToAllocate} ETH`,
+          onClick: allow(amountToAllocate, useRedirect)
+        },
         secondary: {label: 'Reject', onClick: reject}
       }}
     >
