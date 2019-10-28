@@ -1,26 +1,26 @@
-import {ethers, Wallet, Contract} from 'ethers';
+import {Contract, ethers, Wallet} from 'ethers';
 import {AddressZero, HashZero} from 'ethers/constants';
 import {TransactionReceipt, TransactionRequest} from 'ethers/providers';
 import {
   arrayify,
   bigNumberify,
+  BigNumberish,
   defaultAbiCoder,
   keccak256,
   Signature,
   splitSignature,
-  BigNumberish,
 } from 'ethers/utils';
 import loadJsonFile from 'load-json-file';
 import path from 'path';
 import {hashChannelStorage} from '../src/contract/channel-storage';
 import {
   Allocation,
+  AllocationAssetOutcome,
   encodeAllocation,
   encodeGuarantee,
   Guarantee,
   hashAssetOutcome,
   Outcome,
-  AllocationAssetOutcome,
 } from '../src/contract/outcome';
 import {hashState, State} from '../src/contract/state';
 

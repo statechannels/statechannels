@@ -12,16 +12,16 @@ import {Channel, getChannelId} from '../../../src/contract/channel';
 import {AllocationAssetOutcome, encodeOutcome} from '../../../src/contract/outcome';
 import {hashState, State} from '../../../src/contract/state';
 import {
+  assetTransferredEventsFromPayouts,
+  checkMultipleAssetOutcomeHashes,
+  checkMultipleHoldings,
+  compileEventsFromLogs,
+  computeOutcome,
+  OutcomeShortHand,
   randomChannelId,
   randomExternalDestination,
   replaceAddressesAndBigNumberify,
   resetMultipleHoldings,
-  computeOutcome,
-  assetTransferredEventsFromPayouts,
-  compileEventsFromLogs,
-  checkMultipleHoldings,
-  checkMultipleAssetOutcomeHashes,
-  OutcomeShortHand,
 } from '../../test-helpers';
 import {finalizedOutcomeHash, getTestProvider, setupContracts} from '../../test-helpers';
 

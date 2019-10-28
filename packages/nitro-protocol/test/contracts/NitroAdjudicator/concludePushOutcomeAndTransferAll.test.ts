@@ -17,21 +17,21 @@ import {State} from '../../../src/contract/state';
 import {concludePushOutcomeAndTransferAllArgs} from '../../../src/contract/transaction-creators/force-move';
 import {CHANNEL_FINALIZED} from '../../../src/contract/transaction-creators/revert-reasons';
 import {
+  assetTransferredEventsFromPayouts,
+  checkMultipleAssetOutcomeHashes,
+  checkMultipleHoldings,
+  compileEventsFromLogs,
+  computeOutcome,
   finalizedOutcomeHash,
   getNetworkMap,
   getTestProvider,
+  OutcomeShortHand,
   randomChannelId,
   randomExternalDestination,
   replaceAddressesAndBigNumberify,
+  resetMultipleHoldings,
   setupContracts,
   signStates,
-  resetMultipleHoldings,
-  computeOutcome,
-  assetTransferredEventsFromPayouts,
-  compileEventsFromLogs,
-  checkMultipleHoldings,
-  checkMultipleAssetOutcomeHashes,
-  OutcomeShortHand,
 } from '../../test-helpers';
 
 const provider = getTestProvider();
