@@ -5,6 +5,7 @@ import {ProcessProtocol} from ".";
 import {ActionConstructor} from "../redux/utils";
 import {Commitments} from "../redux/channel-store";
 import {CloseLedgerChannel} from "../redux/protocols/actions";
+import {SignedState} from "@statechannels/nitro-protocol/src";
 
 export interface MultipleRelayableActions {
   type: "WALLET.MULTIPLE_RELAYABLE_ACTIONS";
@@ -82,6 +83,7 @@ export interface CommitmentsReceived extends BaseProcessAction {
   type: "WALLET.COMMON.COMMITMENTS_RECEIVED";
   protocolLocator: ProtocolLocator;
   signedCommitments: Commitments;
+  signedStates: SignedState[];
 }
 
 // -------
@@ -93,8 +95,13 @@ export const commitmentReceived: ActionConstructor<CommitmentReceived> = p => ({
   type: "WALLET.COMMON.COMMITMENT_RECEIVED"
 });
 
-export const commitmentsReceived: ActionConstructor<CommitmentsReceived> = p => ({
+export const commitmentsReceived = (p: {
+  protocolLocator: ProtocolLocator;
+  signedCommitments: Commitments;
+  processId: string;
+}): CommitmentsReceived => ({
   ...p,
+  signedStates: p.signedCommitments.map(sc => sc.signedState),
   type: "WALLET.COMMON.COMMITMENTS_RECEIVED"
 });
 
