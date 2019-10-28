@@ -1,4 +1,3 @@
-import {JsonRPCRequest, JsonRPCResponse} from 'web3/providers';
 import {ExtendedTorrent} from './library/types';
 
 export enum Status {
@@ -19,9 +18,9 @@ export type Torrent = ExtendedTorrent & {
 
 declare global {
   interface Window {
-    EmbeddedWallet: {
-      request: (data: JsonRPCRequest) => Promise<JsonRPCResponse>;
-      enable: (url?: string) => void;
+    channelProvider: {
+      send: (method: string, params: Array<string | number | boolean>) => Promise<any>;
+      enable: (url?: string) => Promise<void>;
     };
   }
 }

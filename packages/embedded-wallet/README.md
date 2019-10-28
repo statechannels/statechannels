@@ -4,30 +4,23 @@ This package allows you to use a State Channels-enabled dapp with wallets that d
 
 ## Usage
 
-For now, it's available for local/development use only.
-
 1. Include the following script in your dapp's web front-end:
 
 ```html
-<script src="http://localhost:1701/wallet.js"></script>
+<script src="https://sc-embedded-wallet.netlify.com/wallet.js"></script>
 <script>
-   // Enables the EW. This allows to intercept messages sent via postMessage.
-   EmbeddedWallet.enable();
+  // Enables the Channel Provider. This allows to intercept messages sent via postMessage.
+  window.channelProvider.enable().then(() => {
+    // ...
+  });
 </script>
 ```
 
-2. Add a `request` call anywhere your dapp needs to talk to the wallet. You should be good to go with simply
+2. Add a `send` call anywhere your dapp needs to talk to the wallet. You should be good to go with simply
    requesting `chan_allocate`:
 
 ```js
-EmbeddedWallet.request({
-  jsonrpc: "2.0",
-  method: "chan_allocate",
-  params: {
-    /*...*/
-  },
-  id: someUniqueNumericId()
-}).then(response => {
+window.channelProvider.send('chan_allocate', [params]).then(response => {
   // Do something with the response.
 });
 ```
