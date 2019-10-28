@@ -1,6 +1,6 @@
 const path = require('path');
 
-const typescript = {
+const baseConfig = {
   entry: './src/index.ts',
   module: {
     rules: [
@@ -12,12 +12,13 @@ const typescript = {
     ]
   },
   resolve: {
-    extensions: ['.ts']
+    extensions: ['.ts'],
+    mainFields: ['unpkg', 'browser', 'module', 'main']
   }
 };
 
 const cdnConfig = {
-  ...typescript,
+  ...baseConfig,
   target: 'web',
   mode: 'production',
   output: {
@@ -28,7 +29,7 @@ const cdnConfig = {
 };
 
 const cdnDebugConfig = {
-  ...typescript,
+  ...baseConfig,
   ...cdnConfig,
   mode: 'development',
   devtool: 'inline-source-map',
