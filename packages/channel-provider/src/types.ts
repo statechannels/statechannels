@@ -1,5 +1,17 @@
 import {ListenerFn} from 'eventemitter3';
-import {JsonRPCRequest} from 'web3/providers';
+
+export type JsonRpcRequest = {
+  id?: number;
+  jsonrpc: '2.0';
+  method: string;
+  params: any[];
+};
+
+export type JsonRpcResponse<ResultType = any> = {
+  id: number;
+  jsonrpc: '2.0';
+  result: ResultType;
+};
 
 export interface IChannelProvider {
   enable(url?: string): Promise<void>;
@@ -14,8 +26,6 @@ export enum ChannelProviderUIMessage {
   Close = 'ui:wallet:close',
   Acknowledge = 'ui:wallet:ack'
 }
-
-export type Message = Omit<JsonRPCRequest, 'id'> & {id?: number};
 
 export type JsonRpcSubscribeResult = {subscription: string};
 export type JsonRpcUnsubscribeResult = {success: boolean};

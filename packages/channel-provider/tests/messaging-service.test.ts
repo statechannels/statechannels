@@ -1,5 +1,5 @@
-import {JsonRPCRequest, JsonRPCResponse} from 'web3/providers';
 import {MessagingService} from '../src/messaging-service';
+import {JsonRpcRequest, JsonRpcResponse} from '../src/types';
 import {UIService} from '../src/ui-service';
 
 type MessageResponse = {isFooBar: boolean};
@@ -14,13 +14,13 @@ describe('MessagingService', () => {
     id: 123,
     method: 'foo',
     params: ['bar', 1, true]
-  } as JsonRPCRequest;
+  } as JsonRpcRequest;
 
   const response = {
     jsonrpc: '2.0',
     id: 123,
     result: {isFooBar: true}
-  } as JsonRPCResponse;
+  } as JsonRpcResponse;
 
   beforeEach(async () => {
     messagingService = new MessagingService();
@@ -34,7 +34,7 @@ describe('MessagingService', () => {
 
   it('should send a message', done => {
     target.addEventListener('message', (event: MessageEvent) => {
-      const receivedMessage = event.data as JsonRPCRequest;
+      const receivedMessage = event.data as JsonRpcRequest;
       expect(receivedMessage).toEqual(request);
       done();
     });
@@ -58,7 +58,7 @@ describe('MessagingService', () => {
     jest.useRealTimers();
 
     target.addEventListener('message', (event: MessageEvent) => {
-      const receivedMessage = event.data as JsonRPCRequest;
+      const receivedMessage = event.data as JsonRpcRequest;
       expect(receivedMessage).toEqual(request);
       done();
     });
@@ -83,7 +83,7 @@ describe('MessagingService', () => {
 
   it('should request and respond', async () => {
     target.onmessage = (event: MessageEvent) => {
-      const receivedRequest = event.data as JsonRPCRequest | JsonRPCResponse;
+      const receivedRequest = event.data as JsonRpcRequest;
       expect(receivedRequest).toEqual(request);
       target.parent.postMessage(response, '*');
     };

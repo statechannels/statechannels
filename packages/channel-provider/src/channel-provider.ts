@@ -1,10 +1,10 @@
 import debug from 'debug';
 import EventEmitter from 'eventemitter3';
-import {JsonRPCRequest} from 'web3/providers';
 import {MessagingService} from './messaging-service';
 import {
   ChannelProviderUIMessage,
   IChannelProvider,
+  JsonRpcRequest,
   JsonRpcSubscribeResult,
   JsonRpcUnsubscribeResult
 } from './types';
@@ -77,7 +77,7 @@ class ChannelProvider implements IChannelProvider {
   }
 
   protected async onMessage(event: MessageEvent) {
-    const message = event.data as ChannelProviderUIMessage | JsonRPCRequest;
+    const message = event.data as ChannelProviderUIMessage | JsonRpcRequest;
 
     if (message === ChannelProviderUIMessage.Close) {
       log('Close signal received: %o', message);

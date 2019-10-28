@@ -1,6 +1,5 @@
 import debug from 'debug';
-import {JsonRPCRequest} from 'web3/providers';
-import {Message} from './types';
+import {JsonRpcRequest} from './types';
 
 const log = debug('channel-provider:messaging');
 
@@ -26,7 +25,7 @@ export class MessagingService {
     this.url = url;
   }
 
-  send(target: Window, message: JsonRPCRequest, corsUrl: string) {
+  send(target: Window, message: JsonRpcRequest, corsUrl: string) {
     this.attempts += 1;
 
     log('Sending message: %o (attempt #%o)', message, this.attempts);
@@ -50,7 +49,7 @@ export class MessagingService {
 
   async request<ResultType = any>(
     target: Window,
-    message: Message,
+    message: JsonRpcRequest,
     callback?: (result: ResultType) => void
   ): Promise<ResultType> {
     if (!message.id) {
@@ -65,7 +64,7 @@ export class MessagingService {
 
       log('Requesting: %o', message);
 
-      this.send(target, message as JsonRPCRequest, this.url);
+      this.send(target, message as JsonRpcRequest, this.url);
     });
   }
 
@@ -80,7 +79,7 @@ export class MessagingService {
   }
 
   protected createListenerForMessage<ResultType = any>(
-    message: Message,
+    message: JsonRpcRequest,
     resolve: (value?: ResultType) => void,
     reject: (reason?: any) => void,
     callback?: (result: ResultType) => void
