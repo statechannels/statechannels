@@ -1,0 +1,58 @@
+{
+  "name": "@statechannels/channel-provider",
+  "license": "MIT",
+  "version": "0.0.1",
+  "main": "dist/channel-provider.min.js",
+  "dependencies": {
+    "debug": "4.1.1",
+    "eventemitter3": "4.0.0"
+  },
+  "scripts": {
+    "build": "webpack",
+    "test": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "test:ci": "CI=true jest",
+    "precommit": "lint-staged --quiet",
+    "lint:check": "tslint -c tslint.json -p .",
+    "lint:write": "tslint -c tslint.json -p . --fix"
+  },
+  "jest": {
+    "roots": [
+      "./src",
+      "./tests"
+    ],
+    "transform": {
+      "^.+\\.ts$": "ts-jest"
+    },
+    "collectCoverageFrom": [
+      "./src/**/*.ts",
+      "!./src/**/index.ts",
+      "!./src/**/*.d.ts"
+    ]
+  },
+  "lint-staged": {
+    "src/**/*.ts": "yarn lint:check"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "@types/jest": "24.0.18",
+    "@types/node": "12.7.7",
+    "jest": "24.9.0",
+    "lint-staged": "9.4.0",
+    "ts-jest": "24.1.0",
+    "ts-loader": "^6.2.1",
+    "typescript": "3.6.3",
+    "webpack-cli": "^3.3.9"
+  }
+}
