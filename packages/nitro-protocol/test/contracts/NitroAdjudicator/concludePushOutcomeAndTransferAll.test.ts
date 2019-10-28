@@ -29,6 +29,7 @@ import {
   resetMultipleHoldings,
   computeOutcome,
   assetTransferredEventsFromPayouts,
+  compileEventsFromLogs,
 } from '../../test-helpers';
 
 const provider = getTestProvider();
@@ -185,25 +186,8 @@ describe('concludePushOutcomeAndTransferAll', () => {
         // extract logs
         const {logs} = await (await tx).wait();
 
-        // TODO replace with compileEventsFromLogs(logs, [AssetHolder1, AssetHolder2, NitroAdjudicator])
         // compile events from logs
-        const events = [];
-
-        let Interface;
-        logs.forEach(log => {
-          switch (log.address) {
-            case AssetHolder1.address:
-              Interface = AssetHolder1.interface;
-              break;
-            case AssetHolder2.address:
-              Interface = AssetHolder2.interface;
-              break;
-            case NitroAdjudicator.address:
-              Interface = NitroAdjudicator.interface;
-              break;
-          }
-          events.push({...Interface.parseLog(log), contract: log.address});
-        });
+        const events = compileEventsFromLogs(logs, [AssetHolder1, AssetHolder2, NitroAdjudicator]);
 
         // compile event expectations
         let expectedEvents = [];

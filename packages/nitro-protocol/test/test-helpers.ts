@@ -294,3 +294,15 @@ export function assetTransferredEventsFromPayouts(singleAssetPayouts: object, as
   });
   return assetTransferredEvents;
 }
+
+export function compileEventsFromLogs(logs, contractsArray: Contract[]) {
+  const events = [];
+  logs.forEach(log => {
+    contractsArray.forEach(contract => {
+      if (log.address === contract.address) {
+        events.push({...contract.interface.parseLog(log), contract: log.address});
+      }
+    });
+  });
+  return events;
+}

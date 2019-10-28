@@ -19,6 +19,7 @@ import {
   resetMultipleHoldings,
   computeOutcome,
   assetTransferredEventsFromPayouts,
+  compileEventsFromLogs,
 } from '../../test-helpers';
 import {finalizedOutcomeHash, getTestProvider, setupContracts} from '../../test-helpers';
 
@@ -148,12 +149,9 @@ describe('pushOutcomeAndTransferAll', () => {
         await expectRevert(() => tx1, regex);
       } else {
         const {logs} = await (await tx1).wait();
-        const AssetHolderInterface = AssetHolder1.interface;
-        const events = [];
-        // since the event was emitted by contract other than the 'to' of the transaction, we have to work a little harder to extract the event information:
-        logs.forEach(log =>
-          events.push({...AssetHolderInterface.parseLog(log), contract: log.address})
-        );
+
+        // compile events from logs
+        const events = compileEventsFromLogs(logs, [AssetHolder1, AssetHolder2, NitroAdjudicator]);
 
         // build up event expectations
         let expectedEvents = [];
