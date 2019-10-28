@@ -16,6 +16,7 @@ import {
   randomChannelId,
   randomExternalDestination,
   replaceAddressesAndBigNumberify,
+  resetMultipleHoldings,
 } from '../../test-helpers';
 import {finalizedOutcomeHash, getTestProvider, setupContracts} from '../../test-helpers';
 
@@ -87,21 +88,8 @@ describe('pushOutcomeAndTransferAll', () => {
         payouts,
       ].map(object => replaceAddressesAndBigNumberify(object, addresses));
 
-      // reset the holdings (only works on test contracts)
-      Object.keys(heldBefore).forEach(assetHolder => {
-        const holdings = heldBefore[assetHolder];
-        Object.keys(holdings).forEach(async destination => {
-          const amount = holdings[destination];
-          if (assetHolder === AssetHolder1.address) {
-            await (await AssetHolder1.setHoldings(destination, amount)).wait();
-            expect((await AssetHolder1.holdings(destination)).eq(amount)).toBe(true);
-          }
-          if (assetHolder === AssetHolder2.address) {
-            await (await AssetHolder2.setHoldings(destination, amount)).wait();
-            expect((await AssetHolder2.holdings(destination)).eq(amount)).toBe(true);
-          }
-        });
-      });
+      // set holdings on multiple asset holders
+      resetMultipleHoldings(heldBefore, [AssetHolder1, AssetHolder2]);
 
       // compute the outcome.
       const outcome: AllocationAssetOutcome[] = [];

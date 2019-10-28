@@ -26,6 +26,7 @@ import {
   replaceAddressesAndBigNumberify,
   setupContracts,
   signStates,
+  resetMultipleHoldings,
 } from '../../test-helpers';
 
 const provider = getTestProvider();
@@ -123,24 +124,11 @@ describe('concludePushOutcomeAndTransferAll', () => {
         payouts,
       ].map(object => replaceAddressesAndBigNumberify(object, addresses));
 
-      // reset the holdings (only works on test contracts)
-      Object.keys(heldBefore).forEach(assetHolder => {
-        const holdings = heldBefore[assetHolder];
-        Object.keys(holdings).forEach(async destination => {
-          const amount = holdings[destination];
-          if (assetHolder === AssetHolder1.address) {
-            await (await AssetHolder1.setHoldings(destination, amount)).wait();
-            expect((await AssetHolder1.holdings(destination)).eq(amount)).toBe(true);
-          }
-          if (assetHolder === AssetHolder2.address) {
-            await (await AssetHolder2.setHoldings(destination, amount)).wait();
-            expect((await AssetHolder2.holdings(destination)).eq(amount)).toBe(true);
-          }
-        });
-      });
+      // set holdings on multiple asset holders
+      resetMultipleHoldings(heldBefore, [AssetHolder1, AssetHolder2]);
 
+      // TODO replace with computeOutcome(outcomeShortHand)
       // compute the outcome. // TODO factor this into a helper function
-
       const outcome: AllocationAssetOutcome[] = [];
       Object.keys(outcomeShortHand).forEach(assetHolder => {
         const allocation: Allocation = [];
@@ -157,6 +145,7 @@ describe('concludePushOutcomeAndTransferAll', () => {
         outcome.push(assetOutcome);
       });
 
+      // construct states
       const states: State[] = [];
       for (let i = 1; i <= numStates; i++) {
         states.push({
@@ -169,6 +158,7 @@ describe('concludePushOutcomeAndTransferAll', () => {
           turnNum: largestTurnNum + i - numStates,
         });
       }
+
       // call public wrapper to set state (only works on test contract)
       await (await NitroAdjudicator.setChannelStorageHash(
         channelId,
@@ -181,9 +171,12 @@ describe('concludePushOutcomeAndTransferAll', () => {
       // sign the states
       const sigs = await signStates(states, wallets, whoSignedWhat);
 
+      // form transaction
       const tx = NitroAdjudicator.concludePushOutcomeAndTransferAll(
         ...concludePushOutcomeAndTransferAllArgs(states, sigs, whoSignedWhat)
       );
+
+      // switch on overall test expectation
       if (reasonString) {
         await expectRevert(() => tx, reasonString);
       } else {
@@ -202,9 +195,13 @@ describe('concludePushOutcomeAndTransferAll', () => {
           expectedChannelStorageHash
         );
 
+        // extract logs
         const {logs} = await (await tx).wait();
+
+        // TODO replace with compileEventsFromLogs(logs, [AssetHolder1, AssetHolder2, NitroAdjudicator])
+        // compile events from logs
         const events = [];
-        // since the event was emitted by contract other than the 'to" of the transaction, we have to work a little harder to extract the event information:
+
         let Interface;
         logs.forEach(log => {
           switch (log.address) {
@@ -221,8 +218,9 @@ describe('concludePushOutcomeAndTransferAll', () => {
           events.push({...Interface.parseLog(log), contract: log.address});
         });
 
-        // build up event expectations
+        // compile event expectations
         const expectedEvents = [];
+
         // add Conclude event to expectations
         expectedEvents.push({
           contract: NitroAdjudicator.address,
@@ -230,6 +228,7 @@ describe('concludePushOutcomeAndTransferAll', () => {
           values: {channelId},
         });
 
+        // TODO replace with assetTransferredEventsFromPayouts.each(event => expectedEvents.push(event));
         // add AssetTransferred events to expectations
         Object.keys(payouts).forEach(assetHolder => {
           const singleAssetPayouts = payouts[assetHolder];
@@ -243,6 +242,7 @@ describe('concludePushOutcomeAndTransferAll', () => {
             }
           });
         });
+
         // check that each expectedEvent is contained as a subset of the properies of each *corresponding* event: i.e. the order matters!
         expect(events).toMatchObject(expectedEvents);
 

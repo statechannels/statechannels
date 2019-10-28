@@ -1,4 +1,4 @@
-import {ethers, Wallet} from 'ethers';
+import {ethers, Wallet, Contract} from 'ethers';
 import {AddressZero, HashZero} from 'ethers/constants';
 import {TransactionReceipt, TransactionRequest} from 'ethers/providers';
 import {
@@ -242,4 +242,20 @@ export function replaceAddressesAndBigNumberify(object, addresses) {
     }
   });
   return newObject;
+}
+
+// Sets the holdings defined in the multipleHoldings object. Requires an array of the relevant contracts to be passed in.
+export function resetMultipleHoldings(multipleHoldings: object, contractsArray: Contract[]) {
+  Object.keys(multipleHoldings).forEach(assetHolder => {
+    const holdings = multipleHoldings[assetHolder];
+    Object.keys(holdings).forEach(async destination => {
+      const amount = holdings[destination];
+      contractsArray.forEach(async contract => {
+        if (contract.address === assetHolder) {
+          await (await contract.setHoldings(destination, amount)).wait();
+          expect((await contract.holdings(destination)).eq(amount)).toBe(true);
+        }
+      });
+    });
+  });
 }
