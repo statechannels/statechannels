@@ -1,6 +1,6 @@
 import {MutableRefObject, useEffect, useRef} from 'react';
 
-export function useInterval(callback, delay = 0) {
+export function useInterval(callback, delay: number | boolean = 0) {
   const savedCallback: MutableRefObject<any> = useRef();
 
   // Remember the latest function.
@@ -13,7 +13,7 @@ export function useInterval(callback, delay = 0) {
     function tick() {
       savedCallback.current();
     }
-    if (delay && !Number.isNaN(delay)) {
+    if (delay && typeof delay === 'number' && !Number.isNaN(delay)) {
       const id = setInterval(tick, delay);
       return () => clearInterval(id);
     }

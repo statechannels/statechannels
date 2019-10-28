@@ -8,12 +8,15 @@ export enum Status {
   Connecting = 'Connecting'
 }
 
+export const DownloadingStatuses = [Status.Connecting, Status.Downloading, Status.Completed];
+export const UploadingStatuses = [Status.Seeding];
+export const IdleStatuses = [Status.Idle, Status.Completed];
+
 export type Torrent = ExtendedTorrent & {
   parsedTimeRemaining?: string;
   cost?: string;
   numSeeds?: number;
   status: Status;
-  destroyed?: boolean;
 };
 
 declare global {

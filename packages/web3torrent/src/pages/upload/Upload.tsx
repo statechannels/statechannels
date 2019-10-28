@@ -1,58 +1,36 @@
-import React, {useState} from 'react';
+import React from 'react';
 import {RouteComponentProps} from 'react-router-dom';
-import {getTorrentPeers, upload} from '../../clients/web3torrent-client';
-import {FormButton} from '../../components/form';
-import {TorrentInfo} from '../../components/torrent-info/TorrentInfo';
-import {EmptyTorrent} from '../../constants';
-import torrentStatusChecker from '../../utils/torrent-status-checker';
-import {useInterval} from '../../utils/useInterval';
+import {upload} from '../../clients/web3torrent-client';
+import {generateMagnetURL} from '../../utils/magnet';
 import './Upload.scss';
 
-const Upload: React.FC<RouteComponentProps> = () => {
-  const [torrent, setTorrent] = useState(EmptyTorrent);
-  const [peers, setPeers] = useState({});
-  const [file, setFile] = useState();
-
-  useInterval(
-    () => {
-      setTorrent(torrentStatusChecker(torrent, torrent.infoHash));
-      setPeers(getTorrentPeers(torrent.infoHash));
-    },
-    torrent.status !== 'Idle' && !torrent.destroyed ? 1000 : undefined
-  );
-
+const Upload: React.FC<RouteComponentProps> = ({history}) => {
   return (
-    <>
-      {!torrent.length ? (
-        <section className="section fill">
-          <div className="jumbotron-upload"></div>
-          <div className="upload-action-bar">
-            <label htmlFor="file">Select file to upload</label>
-            <input
-              type="file"
-              name="file"
-              id="file"
-              className="inputfile"
-              onChange={event => setFile(event.target.files && event.target.files[0])}
-            ></input>
-            <FormButton
-              name="start"
-              onClick={async () => setTorrent({...torrent, ...(await upload(file))})}
-            >
-              Start
-            </FormButton>
-          </div>
-          <div className="subtitle">
-            <p>
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
-              incididunt ut labore et dolore magna aliqua.
-            </p>
-          </div>
-        </section>
-      ) : (
-        <TorrentInfo torrent={torrent} peers={peers} />
-      )}
-    </>
+    <section className="section fill">
+      <div className="jumbotron-upload"></div>
+      <div className="upload-action-bar">
+        <label htmlFor="file">Select file to upload</label>
+        <input
+          type="file"
+          name="file"
+          id="file"
+          className="inputfile"
+          onChange={async event => {
+            if (event.target.files && event.target.files[0]) {
+              const file = event.target.files[0];
+              const seedingTorrent = await upload(file);
+              history.push(generateMagnetURL(seedingTorrent));
+            }
+          }}
+        ></input>
+      </div>
+      <div className="subtitle">
+        <p>
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt
+          ut labore et dolore magna aliqua.
+        </p>
+      </div>
+    </section>
   );
 };
 

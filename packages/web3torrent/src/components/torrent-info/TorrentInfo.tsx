@@ -1,7 +1,7 @@
 import prettier from 'prettier-bytes';
 import React from 'react';
 import {TorrentPeers} from '../../library/types';
-import {Status, Torrent} from '../../types';
+import {DownloadingStatuses, Torrent, UploadingStatuses} from '../../types';
 import {DownloadInfo} from './download-info/DownloadInfo';
 import {DownloadLink} from './download-link/DownloadLink';
 import {MagnetLinkButton} from './magnet-link-button/MagnetLinkButton';
@@ -9,8 +9,6 @@ import './TorrentInfo.scss';
 import {UploadInfo} from './upload-info/UploadInfo';
 
 export type TorrentInfoProps = {torrent: Torrent; peers?: TorrentPeers};
-const DownloadingStatuses = [Status.Connecting, Status.Downloading, Status.Completed];
-const UploadingStatuses = [Status.Seeding];
 
 const TorrentInfo: React.FC<TorrentInfoProps> = ({torrent, peers}) => {
   return (
@@ -22,7 +20,7 @@ const TorrentInfo: React.FC<TorrentInfoProps> = ({torrent, peers}) => {
         <span className="fileCost">
           Cost {!torrent.cost ? 'Unknown' : `$${Number(torrent.cost).toFixed(2)}`}
         </span>
-        {torrent.magnetURI && <MagnetLinkButton torrent={torrent} />}
+        {torrent.magnetURI && <MagnetLinkButton />}
       </section>
       {DownloadingStatuses.includes(torrent.status) ? (
         <DownloadInfo torrent={torrent} />

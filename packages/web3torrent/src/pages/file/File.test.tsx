@@ -12,17 +12,17 @@ import {testSelector} from '../../utils/test-utils';
 import * as TorrentStatus from '../../utils/torrent-status-checker';
 import * as EmbeddedWalletClient from './../../clients/embedded-wallet-client';
 import * as Web3TorrentClient from './../../clients/web3torrent-client';
-import Download from './Download';
+import File from './File';
 
-const mockDownloadURL =
-  '/download/magnet#magnet:?xt=urn%3Abtih%3A148c62a7f7845c91e7d16ca9be85de6fbaed3a1f&dn=test.zip&xl=1398978&cost=0';
+const mockFileURL =
+  '/file/#magnet:?xt=urn%3Abtih%3A148c62a7f7845c91e7d16ca9be85de6fbaed3a1f&dn=test.zip&xl=1398978&cost=0';
 
 const mockResponse: JsonRPCResponse = {jsonrpc: '2.0', id: 123};
 
 Enzyme.configure({adapter: new Adapter()});
 
 function setup() {
-  const history = createMemoryHistory({initialEntries: [mockDownloadURL]});
+  const history = createMemoryHistory({initialEntries: [mockFileURL]});
   const props: RouteComponentProps = {
     history,
     location: history.location,
@@ -38,61 +38,61 @@ function setup() {
     .spyOn(EmbeddedWalletClient, 'askForFunds')
     .mockImplementation(() => Promise.resolve(mockResponse));
 
-  const torrentDownload = jest
+  const torrentFile = jest
     .spyOn(Web3TorrentClient, 'download')
     .mockImplementation(_pD => Promise.resolve({...EmptyTorrent, status: Status.Connecting}));
 
   const component = mount(
     <Router>
-      <Download {...props} />
+      <File {...props} />
     </Router>
   );
 
-  return {props, component, askForFunds, torrentDownload};
+  return {props, component, askForFunds, torrentFile};
 }
 
-describe('<Download />', () => {
+describe('<File />', () => {
   let component: Enzyme.ReactWrapper;
   let askForFunds: jest.SpyInstance<Promise<JsonRPCResponse>, []>;
-  let torrentDownload: jest.SpyInstance<Promise<Torrent>, [WebTorrentAddInput]>;
+  let torrentFile: jest.SpyInstance<Promise<Torrent>, [WebTorrentAddInput]>;
 
   beforeEach(() => {
     const mock = setup();
     component = mock.component;
     askForFunds = mock.askForFunds;
-    torrentDownload = mock.torrentDownload;
+    torrentFile = mock.torrentFile;
     jest.useFakeTimers();
   });
 
-  it('should render an Download button', () => {
+  it('should render an download button', () => {
     expect(component.find(testSelector('download-button')).text()).toBe('Start Download');
   });
 
-  it("should change the label to 'Preparing download' and show a spinner when clicked", async () => {
-    const downloadButton = component.find(testSelector('download-button'));
+  it("should change the label to 'Preparing file' and show a spinner when clicked", async () => {
+    const fileButton = component.find(testSelector('download-button'));
 
     await act(async () => {
-      await downloadButton.simulate('click');
+      await fileButton.simulate('click');
     });
 
-    expect(downloadButton.text()).toEqual('Preparing Download...');
+    expect(fileButton.text()).toEqual('Preparing Download...');
 
     /**
-     * @todo This should be done with `downloadButton.find(Spinner)`, but for some
+     * @todo This should be done with `fileButton.find(Spinner)`, but for some
      * reason it is not working.
      */
-    expect(downloadButton.html().includes('class="spinner')).toEqual(true);
+    expect(fileButton.html().includes('class="spinner')).toEqual(true);
   });
 
-  it('should run askForFunds functions when the Download Button is clicked', async () => {
+  it('should run askForFunds functions when the File Button is clicked', async () => {
     await act(async () => {
       await component.find(testSelector('download-button')).simulate('click');
     });
     expect(askForFunds).toHaveBeenCalled();
-    expect(torrentDownload).toHaveBeenCalled();
+    expect(torrentFile).toHaveBeenCalled();
   });
 
-  it('should run checker function if the Download Button is clicked', async () => {
+  it('should run checker function if the File Button is clicked', async () => {
     const torrentStatusChecker = jest
       .spyOn(TorrentStatus, 'default')
       .mockImplementation((_pD: Torrent, _iH: any) => EmptyTorrent);

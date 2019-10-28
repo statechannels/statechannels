@@ -5,7 +5,7 @@ import './App.scss';
 import {LayoutFooter, LayoutHeader} from './components/layout';
 import Welcome from './pages/welcome/Welcome';
 
-import Download from './pages/download/Download';
+import File from './pages/file/File';
 import Upload from './pages/upload/Upload';
 import {RoutePath} from './routes';
 
@@ -17,8 +17,8 @@ const App: React.FC = () => {
         <Route path={RoutePath.Root} component={LayoutHeader} />
         <Switch>
           <Route exact path={RoutePath.Root} component={Welcome} />
-          <Route path={`${RoutePath.Download}:method`} component={Download} />
-          <Route path={RoutePath.Upload} component={Upload} />
+          <Route exact path={RoutePath.File} component={File} />
+          <Route exact path={RoutePath.Upload} component={Upload} />
         </Switch>
       </main>
       <Route path={RoutePath.Root} component={LayoutFooter} />
