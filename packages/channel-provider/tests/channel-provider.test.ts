@@ -1,9 +1,11 @@
 import {channelProvider} from '../src/channel-provider';
 
 describe('ChannelProvider', () => {
-  it('can register events', done => {
-    channelProvider.on('connect', ({success}) => {
-      expect(success).toEqual(true);
+  it('can be enabled', done => {
+    const onMessageSpy = jest.spyOn(window, 'addEventListener');
+
+    channelProvider.on('connect', () => {
+      expect(onMessageSpy).toHaveBeenCalled();
       done();
     });
 
