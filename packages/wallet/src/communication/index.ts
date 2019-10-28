@@ -1,15 +1,13 @@
-import {Commitment, SignedCommitment} from "../domain";
+import {SignedCommitment} from "../domain";
 import {messageRelayRequested} from "../magmo-wallet-client";
 import {
   RelayableAction,
   strategyProposed,
   strategyApproved,
-  commitmentReceived,
   concludeInstigated,
   ConcludeInstigated,
   commitmentsReceived
 } from "./actions";
-import {convertCommitmentToSignedState} from "../utils/nitro-converter";
 export * from "./actions";
 
 // These protocols are precisely those that run at the top-level
@@ -53,26 +51,6 @@ export function sendStrategyApproved(to: string, processId: string, strategy: Fu
 export function sendConcludeInstigated(to: string, channelId) {
   return sendMessage(to, concludeInstigated({channelId}));
 }
-
-export const sendCommitmentReceived = (
-  to: string,
-  processId: string,
-  commitment: Commitment,
-  signature: string,
-  privateKey: string,
-  protocolLocator: ProtocolLocator = []
-) => {
-  const payload = commitmentReceived({
-    processId,
-    signedCommitment: {
-      commitment,
-      signature,
-      signedState: convertCommitmentToSignedState(commitment, privateKey)
-    },
-    protocolLocator
-  });
-  return messageRelayRequested(to, payload);
-};
 
 export const sendCommitmentsReceived = (
   to: string,

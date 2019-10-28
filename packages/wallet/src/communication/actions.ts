@@ -1,4 +1,4 @@
-import {SignedCommitment, signCommitment2} from "../domain";
+import {signCommitment2} from "../domain";
 import {WalletAction} from "../redux/actions";
 import {FundingStrategy, ProtocolLocator, EmbeddedProtocol} from "./index";
 import {ProcessProtocol} from ".";
@@ -70,16 +70,6 @@ export const concludeInstigated: ActionConstructor<ConcludeInstigated> = p => ({
 // Actions
 // -------
 
-// Protocols should switch to CommitmentsReceived, as we will in general
-// need to support n-party channels, and that is easiest to manage by
-// sending a full round of commitments when possible ie. when not in PreFundSetup
-
-export interface CommitmentReceived extends BaseProcessAction {
-  type: "WALLET.COMMON.COMMITMENT_RECEIVED";
-  signedCommitment: SignedCommitment;
-  protocolLocator: ProtocolLocator;
-}
-
 export interface CommitmentsReceived extends BaseProcessAction {
   type: "WALLET.COMMON.COMMITMENTS_RECEIVED";
   protocolLocator: ProtocolLocator;
@@ -90,11 +80,6 @@ export interface CommitmentsReceived extends BaseProcessAction {
 // -------
 // Constructors
 // -------
-
-export const commitmentReceived: ActionConstructor<CommitmentReceived> = p => ({
-  ...p,
-  type: "WALLET.COMMON.COMMITMENT_RECEIVED"
-});
 
 // TODO: This should be deleted once all protocols are updated to use SignedStates
 export const commitmentsReceived = (p: {
@@ -125,7 +110,6 @@ export type RelayableAction =
   | StrategyProposed
   | StrategyApproved
   | ConcludeInstigated
-  | CommitmentReceived
   | CommitmentsReceived
   | CloseLedgerChannel
   | MultipleRelayableActions
@@ -136,17 +120,16 @@ export function isRelayableAction(action: WalletAction): action is RelayableActi
     action.type === "WALLET.FUNDING_STRATEGY_NEGOTIATION.STRATEGY_PROPOSED" ||
     action.type === "WALLET.FUNDING_STRATEGY_NEGOTIATION.STRATEGY_APPROVED" ||
     action.type === "WALLET.NEW_PROCESS.CONCLUDE_INSTIGATED" ||
-    action.type === "WALLET.COMMON.COMMITMENT_RECEIVED" ||
     action.type === "WALLET.NEW_PROCESS.CLOSE_LEDGER_CHANNEL" ||
     action.type === "WALLET.COMMON.COMMITMENTS_RECEIVED" ||
     action.type === "WALLET.MULTIPLE_RELAYABLE_ACTIONS"
   );
 }
 
-export type CommonAction = CommitmentReceived | CommitmentsReceived;
+export type CommonAction = CommitmentsReceived;
 export function isCommonAction(action: WalletAction, protocol?: EmbeddedProtocol): action is CommonAction {
   return (
-    (action.type === "WALLET.COMMON.COMMITMENTS_RECEIVED" || action.type === "WALLET.COMMON.COMMITMENT_RECEIVED") &&
+    action.type === "WALLET.COMMON.COMMITMENTS_RECEIVED" &&
     // When passed a protocol, check that it's got the protocol in the protocol locator
     (!protocol || (action.protocolLocator && action.protocolLocator.indexOf(protocol) >= 0))
   );
