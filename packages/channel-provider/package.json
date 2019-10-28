@@ -1,13 +1,14 @@
 {
   "name": "@statechannels/channel-provider",
   "license": "MIT",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "main": "dist/channel-provider.min.js",
   "dependencies": {
     "debug": "4.1.1",
     "eventemitter3": "4.0.0"
   },
   "scripts": {
+    "prepublishOnly": "webpack",
     "build": "webpack",
     "test": "jest --watch",
     "test:coverage": "jest --coverage",
